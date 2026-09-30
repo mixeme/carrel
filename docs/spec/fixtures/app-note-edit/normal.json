@@ -7,7 +7,8 @@
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026readat=1786370760",
         "id": "record.save",
         "label": "Save",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       },
       {
         "enabled": true,
@@ -77,6 +78,7 @@
         "hint": "",
         "kind": "date",
         "label": "Date",
+        "mono": true,
         "name": "start.date",
         "options": [],
         "readOnly": false,
@@ -89,6 +91,7 @@
         "hint": "",
         "kind": "time",
         "label": "Time",
+        "mono": true,
         "name": "start.time",
         "options": [],
         "readOnly": false,

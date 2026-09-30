@@ -124,6 +124,7 @@ func TestFolderRenameSheetIsTheFrame(t *testing.T) {
 	page := decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess)))
 	sheet := decode[view.CollectionRenameSheet](t, f.h.do(get(menuHref(t, connectionRow(t, page, id, docs).Menu, "collection.rename"), f.sess)))
 	sameCaret(t, "s-profile-18", "folder rename", sheet.Form)
+	sameActionMarks(t, "s-profile-18", "folder rename", sheet.Actions, nil)
 	if sheet.Stamp != "vps · Docs" {
 		t.Errorf("head = %q, the frame %q (the storage · the folder)", sheet.Stamp, subject)
 	}
@@ -231,6 +232,7 @@ func TestNewFolderSheetIsTheFrame(t *testing.T) {
 		}
 	}
 	sameCaret(t, "s-profile-20", "new folder", sheet.Form)
+	sameActionMarks(t, "s-profile-20", "new folder", sheet.Actions, nil)
 	if !equalStrings(got, []string{"On which server", "Name"}) {
 		t.Errorf("fields = %q", got)
 	}
@@ -263,6 +265,7 @@ func TestNewCollectionWhenNoServerAnswers(t *testing.T) {
 	if c := actionByID(sheet.Actions, "collection.create"); c == nil || c.Enabled || string(c.Reason) != want {
 		t.Errorf("Create = %+v", c)
 	}
+	sameActionMarks(t, "s-profile-21", "no server", sheet.Actions, nil)
 }
 
 // attachments-4: Browse of the attachment folder — the frame's title and
@@ -287,6 +290,7 @@ func TestAttachmentsBrowseIsTheFrame(t *testing.T) {
 	if c := actionByID(sheet.Actions, "files.picker.choose"); c == nil || c.Enabled || string(c.Reason) != reason {
 		t.Errorf("Choose this folder = %+v, want off with %q", c, reason)
 	}
+	sameActionMarks(t, "attachments-4", "browse", sheet.Actions, nil)
 }
 
 // s-profile-1: the line under the title counts the DAV servers — cards, the

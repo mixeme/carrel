@@ -5,7 +5,8 @@
       "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
       "id": "collection.save",
       "label": "Save",
-      "method": "POST"
+      "method": "POST",
+      "primary": true
     }
   ],
   "address": "https://nextcloud.example/dav.php/alice/contacts/kontakty/",

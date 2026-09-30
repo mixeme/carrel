@@ -5,7 +5,8 @@
       "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit",
       "id": "record.edit",
       "label": "Edit",
-      "method": "GET"
+      "method": "GET",
+      "primary": true
     },
     {
       "arrow": [

@@ -5,7 +5,8 @@
       "href": "/admin/dav?op=test",
       "id": "admin.dav.test",
       "label": "Test discovery",
-      "method": "POST"
+      "method": "POST",
+      "primary": true
     }
   ],
   "details": null,
@@ -40,7 +41,8 @@
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": ""
+            "value": "",
+            "mono": true
           },
           {
             "error": "",
@@ -76,7 +78,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "",
+            "mono": true
           }
         ]
       }

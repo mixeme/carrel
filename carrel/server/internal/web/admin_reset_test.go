@@ -140,6 +140,7 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 		got.Copy.Label != "Copy" || got.Done.Label != "Done" || got.Done.Href != "/admin/" || !got.Done.Enabled {
 		t.Errorf("issued = %+v, want (s-admin-14) %q, %q, Copy and Done", got, wantMsg, frameText(frameFootDim.FindStringSubmatch(answer)[1]))
 	}
+	sameActionMarks(t, "s-admin-14", "issued", []view.Action{done.Issued.Copy, done.Issued.Done}, nil)
 	if len(done.Form.Sets) != 0 || done.Warning != "" || len(done.Actions) != 0 {
 		t.Errorf("the answer still carries the form %+v, the warning %q, the actions %+v", done.Form.Sets, done.Warning, done.Actions)
 	}

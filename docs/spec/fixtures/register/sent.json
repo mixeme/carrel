@@ -6,7 +6,18 @@
     "method": "",
     "sets": []
   },
-  "lede": "The letter went to v@example.org. The account cannot be used until you open the link in it.\n\nSending again with the same login and address, while the account is unconfirmed, simply replaces the letter and the password.",
+  "lede": [
+    {
+      "text": "The letter went to "
+    },
+    {
+      "mark": "mono",
+      "text": "v@example.org"
+    },
+    {
+      "text": ". The account cannot be used until you open the link in it.\n\nSending again with the same login and address, while the account is unconfirmed, simply replaces the letter and the password."
+    }
+  ],
   "notices": [],
   "sent": true,
   "signIn": {

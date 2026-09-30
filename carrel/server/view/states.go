@@ -224,3 +224,14 @@ const (
 	AlignCenter CellAlign = "center"
 	AlignRight  CellAlign = "right"
 )
+
+// RunMark — выделение куска фразы сервера (Run). Пусто — обычный текст.
+// Слова те же, что у Field.Mono и BlockStrong: моноширинным кадр пишет то,
+// что набирают и копируют как есть (логин, адрес), жирным — имя в фразе.
+type RunMark string
+
+const (
+	RunPlain  RunMark = ""
+	RunMono   RunMark = "mono"   // tc-mono: логин, адрес, путь
+	RunStrong RunMark = "strong" // <b>: имя в фразе
+)

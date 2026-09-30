@@ -85,8 +85,8 @@ func (s *Server) tokenNotFound(w http.ResponseWriter, r *http.Request, start tim
 	s.writePage(w, r, http.StatusNotFound, view.DeadLinkPage{
 		Plain: view.Plain{
 			Title: "This link does not work",
-			Lede:  "It may have expired, been used already, or been withdrawn. Ask whoever sent it for a new one.",
+			Lede:  line("It may have expired, been used already, or been withdrawn. Ask whoever sent it for a new one."),
 		},
-		SignIn: view.Action{ID: "deadlink.login", Label: "Sign in", Href: s.route("/login"), Method: "GET", Enabled: true},
+		SignIn: view.Action{ID: "deadlink.login", Label: "Sign in", Href: s.route("/login"), Method: "GET", Primary: true, Enabled: true},
 	})
 }

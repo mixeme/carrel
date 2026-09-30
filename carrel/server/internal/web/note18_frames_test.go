@@ -63,6 +63,7 @@ func TestFileCopyAndOtherStorageAreTheFrames(t *testing.T) {
 	if string(cp.Warning) != cpMsg || cp.Actions[0].Label != view.Text(cpConfirm) {
 		t.Errorf("copy: message %q, confirm %+v\nthe frame %q, %q", cp.Warning, cp.Actions[0], cpMsg, cpConfirm)
 	}
+	sameActionMarks(t, "s-files-11", "copy", cp.Actions, nil)
 	mv := opSheet(t, f, op("move"), url.Values{"to": {farRoot}})
 	if want := strings.Replace(moveTitle, n[1]+" items", "1 item", 1); string(mv.Title) != want {
 		t.Errorf("move title = %q, want %q", mv.Title, want)
@@ -70,6 +71,7 @@ func TestFileCopyAndOtherStorageAreTheFrames(t *testing.T) {
 	if string(mv.Warning) != farMsg {
 		t.Errorf("move to another storage: %q\nthe frame %q", mv.Warning, farMsg)
 	}
+	sameActionMarks(t, "s-files-4", "move", mv.Actions, nil)
 }
 
 // s-files-13: New folder asks the name in a line over the tree — the field,
@@ -171,6 +173,7 @@ func TestBackToDefaultsIsOffAsTheFrameDraws(t *testing.T) {
 	if string(reset.Label) != m[2] || reset.Enabled || string(reset.Reason) != m[1] {
 		t.Errorf("Back to defaults = %+v, the frame %q off with %q", reset, m[2], m[1])
 	}
+	sameActionMarks(t, "s-dup-7", "weights", f.page(t).Threshold.WeightActions, nil)
 }
 
 // s-contacts-18: a day that is not there is refused under the field in the
@@ -203,6 +206,7 @@ func TestRecordCopySheetIsTheFrame(t *testing.T) {
 	if string(cp.Title) != title || string(cp.Warning) != msg || confirmOf(t, cp).Label != view.Text(confirm) {
 		t.Errorf("copy = %q, %q, %+v\nthe frame %q, %q, %q", cp.Title, cp.Warning, confirmOf(t, cp), title, msg, confirm)
 	}
+	sameActionMarks(t, "s-contacts-17", "copy", cp.Actions, nil)
 }
 
 // s-publish-16: the public page of one event gives its own file.
@@ -250,6 +254,7 @@ func TestFromFilesSheetIsTheFrame(t *testing.T) {
 	if a := actionByID(sheet.Actions, "files.picker.attach"); a == nil || a.Enabled || string(a.Reason) != reason {
 		t.Errorf("Attach = %+v, the frame off with %q", a, reason)
 	}
+	sameActionMarks(t, "s-files-16", "from files", sheet.Actions, nil)
 	if sheet.Tree.New != nil || sheet.Tree.Name != nil {
 		t.Errorf("the tree makes folders: %+v", sheet.Tree.New)
 	}
@@ -513,6 +518,7 @@ func TestRewriteOfOneRecordIsTheFrame(t *testing.T) {
 	if c := rewriteAction(t, sheet.Actions, "contact.rewrite.confirm"); string(c.Label) != fr.confirm || !c.Enabled {
 		t.Errorf("confirm = %+v, the frame %q", c, fr.confirm)
 	}
+	sameActionMarks(t, "s-contacts-19", "rewrite", sheet.Actions, nil)
 }
 
 // s-contacts-20: every record that names the old address is read-only or

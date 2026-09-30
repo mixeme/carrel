@@ -5,7 +5,8 @@
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/rewrite?plan=r-plan",
       "id": "contact.rewrite.confirm",
       "label": "Rewrite 1 record",
-      "method": "POST"
+      "method": "POST",
+      "primary": true
     },
     {
       "enabled": true,

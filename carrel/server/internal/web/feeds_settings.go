@@ -40,7 +40,7 @@ func (s *Server) feedForm(sess *session.Session, f feedForm) *view.Form {
 		}
 		return s.postQuery("/app/settings/connections", v)
 	}
-	address := view.FormRow{Name: "url", Label: "Feed address", Kind: view.InputURL, Value: text(f.URL), Error: f.URLErr, Required: true,
+	address := view.FormRow{Name: "url", Label: "Feed address", Kind: view.InputURL, Value: text(f.URL), Error: f.URLErr, Required: true, Mono: true,
 		Hint: "https://, webcal:// and a secret link from another Carrel are all understood. The feed is fetched by the Carrel server, not by your browser."}
 	if f.Folder {
 		address.Label = "Folder address"
@@ -62,7 +62,7 @@ func (s *Server) feedForm(sess *session.Session, f feedForm) *view.Form {
 	form = focused(form, "url")
 	form.Actions = []view.Action{
 		{ID: "feed.check", Label: "Check the address", Href: q("feed.check"), Method: "POST", Enabled: true},
-		{ID: "feed.subscribe", Label: "Subscribe", Href: q("feed.subscribe"), Method: "POST", Enabled: true},
+		{ID: "feed.subscribe", Label: "Subscribe", Href: q("feed.subscribe"), Method: "POST", Primary: true, Enabled: true},
 	}
 	return &form
 }

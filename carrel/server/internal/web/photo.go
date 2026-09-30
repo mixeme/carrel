@@ -438,7 +438,7 @@ func (s *Server) photoPreviewPage(c *collectionCtx, uid string, d photoDraft, no
 		})
 	}
 	page.Actions = append(page.Actions,
-		view.Action{ID: "photo.save", Label: "Save photo", Href: s.postQuery(here, url.Values{"op": {"save"}}), Method: "POST", Enabled: true},
+		view.Action{ID: "photo.save", Label: "Save photo", Href: s.postQuery(here, url.Values{"op": {"save"}}), Method: "POST", Primary: true, Enabled: true},
 		view.Action{ID: "photo.cancel", Label: "Cancel", Href: s.postQuery(here, url.Values{"op": {"cancel"}}), Method: "POST", Enabled: true},
 	)
 	if d.HadPhoto {

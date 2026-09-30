@@ -17,6 +17,74 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.79 — 2026-09-30
+
+What the client stopped on (plan/client.md, «Что блокирует»), decided by
+the lead: a sentence of the server with marked pieces, the monospaced
+field, the primary button, and the invitation by letter as the fixture of
+its frame.
+
+### Changed
+
+- **`Plain.lede` is runs** (C-6.2 `Runs`, `Run{text, mark}`, C-8
+  `RunMark`: `""`, `mono`, `strong`) on every page outside the shell and
+  every public page. A sentence with nothing marked is one run, an empty
+  one none. Marked now: the address the letter went to, monospaced
+  (s-auth-3); the login, bold (s-auth-6, s-auth-10) and monospaced
+  (s-auth-11).
+
+### Added
+
+- **`Action.primary`** (C-6.2, omitted when false) where the frame draws
+  the button `is-primary`: the submit of the forms outside the shell,
+  password, unlock, deposit, backup job, connection and its edit, Create
+  user; Sign in of rest-1 and rest-2; the first card of s-auth-6; «New …»
+  of the lists and the empty lists; Edit in a card's head and a note's bar
+  (not in the details panel or a row's «⋯»); Save of the record forms and
+  the quick sheets, Save of instance settings and of duplicate weights;
+  the confirms of sheets — Move here, Copy here (records, collections,
+  files), Create, Save, Create link, Rewrite N records, Write this
+  combination, Save photo, Send; Test discovery, Run the check, Create
+  link and Add user of the administration; Connect account and Subscribe;
+  Create password of a device; Apply of Columns; Attach and Choose this
+  folder of the file pickers, Upload here of the upload picker; Create of
+  a new folder's line; Copy and Done of a password handed over.
+- **`FormRow.mono`** (C-6.8, omitted when false) where the frame draws the
+  field `is-mono`: Login at the first start (s-auth-4); dates, times,
+  Every, Until and Advanced RRULE of events, tasks, notes and the quick
+  sheets; Birthday, the phone numbers (and their template) and Postcode;
+  Percent complete; the ranges of the agenda and the timeline and of a
+  calendar's publication; Server URL and Certificate fingerprint of a
+  connection and of the DAV check; Feed address; a new collection's
+  Address; Folder, Keep copies and the days of a backup job; Folder in it
+  of attachments; the numbers, Host, Port and Public address of the
+  instance settings; temporary passwords (Add user, Reset, escrow
+  recovery); the device's password, Address and User name (s-davloom-3).
+- **`invite/link.json`** — the invitation by link, no address field. State
+  `link` (C-14.3); no frame of its own (the caption of s-auth-12), so no
+  `STATE_FRAME` row.
+- **check.py 9** — every fixture against its frame: an action whose words
+  the frame draws as a button is primary exactly when drawn `is-primary`, a
+  row whose label the frame draws as a field is `mono` exactly when drawn
+  `is-mono`.
+
+### Fixed
+
+- **`invite/normal.json` is the frame's case** (s-auth-12): an invitation
+  by letter to anna@example.org — Email shown and switched off, the line
+  under the title the letter's.
+
+### For consumers
+
+- Write `lede` run by run: `mono` in the monospaced face, `strong` bold, the
+  rest plain. Do not cut or join the server's words beyond laying the runs
+  side by side.
+- Draw the button with `primary` as the primary one; the order of
+  `actions` does not make one primary. Draw the field with `mono`
+  monospaced.
+- `invite/normal.json` now carries the Email row; the link case is
+  `invite/link.json`.
+
 ## v0.2.78 — 2026-09-30
 
 The mockup of Typecase `f86a3f0` (frames of chapters 8–12 renamed, owner's

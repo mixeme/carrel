@@ -24,7 +24,7 @@ func Screen(p *view.DeadLinkPage) w.Page {
 					Items: []w.DialogPart{
 						w.DialogLogo{Logo: w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63", Size: w.Logo48}, Wide: true},
 						w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap6},
-						w.Prose{Parts: []w.Inline{w.Text(p.Lede)}, Variant: w.ProseMuted},
+						w.Prose{Parts: lede(p.Lede), Variant: w.ProseMuted},
 						w.FormFoot{Items: []w.FormFootPart{w.Button{Label: string(p.SignIn.Label), Kind: w.ButtonPrimary, Href: p.SignIn.Href}}, Variant: w.FormFootFlush},
 					},
 					Variant: w.DialogNarrow,
@@ -32,4 +32,21 @@ func Screen(p *view.DeadLinkPage) w.Page {
 			},
 		},
 	}
+}
+
+// lede is the line under the title in the pieces the model sends it in, each
+// in its face: a login or an address monospaced, a name bold (C-6.2 Runs).
+func lede(r view.Runs) []w.Inline {
+	out := make([]w.Inline, 0, len(r))
+	for _, p := range r {
+		switch p.Mark {
+		case view.RunMono:
+			out = append(out, w.Mono{Text: string(p.Text)})
+		case view.RunStrong:
+			out = append(out, w.Strong(p.Text))
+		default:
+			out = append(out, w.Text(p.Text))
+		}
+	}
+	return out
 }

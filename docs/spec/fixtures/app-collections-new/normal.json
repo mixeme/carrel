@@ -5,7 +5,8 @@
       "href": "/app/collections/new?kind=event",
       "id": "collection.create",
       "label": "Create",
-      "method": "POST"
+      "method": "POST",
+      "primary": true
     }
   ],
   "failure": null,
@@ -147,7 +148,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "",
+            "mono": true
           }
         ]
       }

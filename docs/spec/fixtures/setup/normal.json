@@ -7,7 +7,8 @@
         "href": "/setup",
         "id": "setup.submit",
         "label": "Create administrator",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       }
     ],
     "errors": [],
@@ -40,7 +41,8 @@
             "required": true,
             "value": "",
             "placeholder": "a-z 0-9 . _ -",
-            "focus": true
+            "focus": true,
+            "mono": true
           },
           {
             "error": "",
@@ -84,7 +86,11 @@
       }
     ]
   },
-  "lede": "The account you create here is the first one, and it can manage everyone else.",
+  "lede": [
+    {
+      "text": "The account you create here is the first one, and it can manage everyone else."
+    }
+  ],
   "notices": [
     {
       "actions": [],

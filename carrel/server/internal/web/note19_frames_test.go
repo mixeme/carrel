@@ -139,7 +139,7 @@ func TestInvitePageIsTheFrame(t *testing.T) {
 	}
 	check := func(what string, p view.InvitePage, wantLede string, want []row) {
 		t.Helper()
-		if string(p.Title) != title || string(p.Lede) != wantLede || len(p.Notices) != 1 ||
+		if string(p.Title) != title || saidRuns(p.Lede) != wantLede || len(p.Notices) != 1 ||
 			p.Notices[0].Role != view.NoticeAlert || string(p.Notices[0].Body) != warning || p.Notices[0].Title != "" {
 			t.Errorf("%s: head %q, %q, %+v; want %q, %q and the warning %q", what, p.Title, p.Lede, p.Notices, title, wantLede, warning)
 		}
@@ -441,6 +441,15 @@ func TestUploadSheetNewFolderRefusalIsTheFrame(t *testing.T) {
 	if string(sheet.Purpose) != purpose || sheet.Failure != nil {
 		t.Errorf("purpose %q, failure %+v; want the frame's %q and none", sheet.Purpose, sheet.Failure, purpose)
 	}
+	// The primary button of the sheet is the upload — «Upload 2 files», its
+	// count the client's —; Choose this folder, which the frame does not
+	// draw, is not (s-notes-11, s-files-19).
+	if !regexp.MustCompile(`<button class="tc-btn is-primary" type="button">Upload \d+ files</button>`).MatchString(mockupFrame(t, "s-notes-11")) {
+		t.Fatal("s-notes-11 draws no primary upload: read it again")
+	}
+	if up, ch := actionByID(sheet.Actions, "files.picker.upload"), actionByID(sheet.Actions, "files.picker.choose"); up == nil || !up.Primary || ch == nil || ch.Primary {
+		t.Errorf("upload %+v, choose %+v: want the upload primary, as s-notes-11 draws it", up, ch)
+	}
 	taken := decode[view.FilePickerSheet](t, f.h.do(postForm(sheet.Tree.Name.Action, f.sess, url.Values{"name": {typed}})))
 	if taken.Failure == nil || taken.Failure.Role != view.NoticeAlert || taken.Failure.Title != "" || string(taken.Failure.Body) != refusal {
 		t.Errorf("refusal = %+v, want (s-files-19) %q", taken.Failure, refusal)
@@ -477,7 +486,7 @@ func TestPublicRecordHeadIsTheFrame(t *testing.T) {
 	}
 	f := publishFixture(t)
 	page := publicPage(t, f, publishLink(t, f, f.publishHref("calendar", searchWork, "e1"), false))
-	if page.Lede != "Monday, 10 August 2026, 09:00 · Room 4" || !page.ReadOnly {
+	if saidRuns(page.Lede) != "Monday, 10 August 2026, 09:00 · Room 4" || !page.ReadOnly {
 		t.Errorf("lede = %q, read-only %v; want «Monday, 10 August 2026, 09:00 · Room 4» as the frame writes it", page.Lede, page.ReadOnly)
 	}
 }

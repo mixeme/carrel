@@ -8,7 +8,8 @@
         "href": "/forgot",
         "id": "forgot.submit",
         "label": "Continue",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       }
     ],
     "errors": [],
@@ -47,7 +48,11 @@
     ]
   },
   "hasMail": false,
-  "lede": "Enter the login or the confirmed email of the account. There is no way to set a new password and keep the data stored here: the encryption key is derived from the password, and the server never has that key.",
+  "lede": [
+    {
+      "text": "Enter the login or the confirmed email of the account. There is no way to set a new password and keep the data stored here: the encryption key is derived from the password, and the server never has that key."
+    }
+  ],
   "notices": [],
   "options": [],
   "sent": false,

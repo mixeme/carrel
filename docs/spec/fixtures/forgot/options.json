@@ -15,7 +15,18 @@
     "sets": []
   },
   "hasMail": true,
-  "lede": "Account mix has a confirmed email. A silent password reset does not exist: a new password would be a new key, and everything stored under the old one would be lost anyway.",
+  "lede": [
+    {
+      "text": "Account "
+    },
+    {
+      "mark": "strong",
+      "text": "mix"
+    },
+    {
+      "text": " has a confirmed email. A silent password reset does not exist: a new password would be a new key, and everything stored under the old one would be lost anyway."
+    }
+  ],
   "notices": [],
   "options": [
     {
@@ -28,7 +39,8 @@
             "href": "/forgot",
             "id": "forgot.wipe",
             "label": "Send a confirmation letter",
-            "method": "POST"
+            "method": "POST",
+            "primary": true
           }
         ],
         "errors": [],

@@ -62,6 +62,7 @@
       "id": "mail.send",
       "label": "Send",
       "method": "POST",
+      "primary": true,
       "reason": "Add a recipient."
     },
     {

@@ -741,7 +741,7 @@ func (s *Server) newFolder(tree *view.FileTree, dest *fileCtx, address string, q
 	tree.Name = &view.Form{Action: a.Href, Method: "POST",
 		Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(dest.sess),
 			{Name: "name", Label: "Name of the new folder", Kind: view.InputText, Required: true}}}},
-		Actions: []view.Action{{ID: "files.tree.new.create", Label: "Create", Href: a.Href, Method: "POST", Enabled: true}, back}}
+		Actions: []view.Action{{ID: "files.tree.new.create", Label: "Create", Href: a.Href, Method: "POST", Primary: true, Enabled: true}, back}}
 	*tree.Name = focused(*tree.Name, "name")
 }
 
@@ -772,7 +772,9 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		sheet.Items = append(sheet.Items, text(e.Name))
 	}
 	run := url.Values{"op": {string(op)}, "item": names, "go": {"1"}}
-	confirm := view.Action{ID: "file." + string(op) + ".confirm", Method: "POST", Enabled: true}
+	// Move here and Copy here are the sheet's primary button (s-files-4,
+	// s-files-11); the deletion's is destructive.
+	confirm := view.Action{ID: "file." + string(op) + ".confirm", Method: "POST", Primary: op == view.FileMove || op == view.FileCopy, Enabled: true}
 	switch op {
 	case view.FileRename:
 		// The new name is the form's field "name".

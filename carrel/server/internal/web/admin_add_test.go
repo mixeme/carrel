@@ -320,6 +320,7 @@ func TestTemporaryPasswordMakesTheAccount(t *testing.T) {
 		issued.Done.Label != "Done" || issued.Done.Href != "/admin/invites" || !issued.Done.Enabled {
 		t.Errorf("issued = %+v, want (s-admin-17) %q with Done", issued, msg)
 	}
+	sameActionMarks(t, "s-admin-17", "created", []view.Action{issued.Copy, issued.Done}, nil)
 	if next := rowValue(page.Temporary.Form, "password"); next == temp || next == "" {
 		t.Errorf("the form offers %q again for the next person", next)
 	}

@@ -6,7 +6,8 @@
         "href": "/app/calendar/a-nc-home/dni-rozhdeniya/new?pick=1",
         "id": "record.new",
         "label": "New event",
-        "method": "GET"
+        "method": "GET",
+        "primary": true
       },
       {
         "enabled": true,
@@ -76,6 +77,7 @@
                 "hint": "",
                 "kind": "date",
                 "label": "From",
+                "mono": true,
                 "name": "from",
                 "options": [],
                 "readOnly": false,
@@ -88,6 +90,7 @@
                 "hint": "Both days are in the list.",
                 "kind": "date",
                 "label": "To",
+                "mono": true,
                 "name": "to",
                 "options": [],
                 "readOnly": false,

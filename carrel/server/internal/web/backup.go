@@ -523,7 +523,7 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 	if job.ID != "" {
 		action += "&job=" + url.QueryEscape(job.ID)
 	}
-	return focused(withSubmit(s.plainForm(action, "POST",
+	return focused(withPrimary(s.plainForm(action, "POST",
 		csrfField(sess),
 		view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(job.Name), Required: true, Error: errs["name"]},
 		view.FormRow{Name: "on", Label: "Job is on", Kind: view.InputCheck, Value: text(on),
@@ -532,15 +532,15 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 			Hint: "A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them."},
 		view.FormRow{Name: "mode", Label: "Where to", Kind: view.InputRadio, Options: modes},
 		view.FormRow{Name: "dest", Label: "Collection", Kind: view.InputSelect, Options: destOpts, Error: errs["dest"]},
-		view.FormRow{Name: "folder", Label: "Folder", Kind: view.InputText, Value: text(strings.Join(job.DestFolder, "/")), Error: errs["folder"],
+		view.FormRow{Name: "folder", Label: "Folder", Kind: view.InputText, Value: text(strings.Join(job.DestFolder, "/")), Error: errs["folder"], Mono: true,
 			Hint: "Created on first use."},
-		view.FormRow{Name: "keep", Label: "Keep copies", Kind: view.InputNumber, Value: text(strconv.Itoa(job.Keep)), Error: errs["keep"],
+		view.FormRow{Name: "keep", Label: "Keep copies", Kind: view.InputNumber, Value: text(strconv.Itoa(job.Keep)), Error: errs["keep"], Mono: true,
 			Hint: "Copies past this number are deleted after the new one has been read back and checked, not before. An archive is dated and never overwritten."},
 		view.FormRow{Name: "encrypted", Label: "Encrypt the archive", Kind: view.InputCheck, Value: text(encrypted),
 			Options: []view.Option{{Value: "1", Label: "Encrypt the archive", Selected: job.Encrypted}},
 			Hint:    "On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it, without Carrel and without a password."},
 		view.FormRow{Name: "password", Label: "Archive password", Kind: view.InputPassword, Error: errs["password"], Hint: passwordHint},
-		view.FormRow{Name: "signin", Label: "On sign-in, if the last copy is older than (days)", Kind: view.InputNumber,
+		view.FormRow{Name: "signin", Label: "On sign-in, if the last copy is older than (days)", Kind: view.InputNumber, Mono: true,
 			Value: text(strconv.Itoa(job.OnSignInDays)), Hint: "0 is never. Carrel keeps no clock of its own."},
 	), "backup.save", "Save"), "name")
 }

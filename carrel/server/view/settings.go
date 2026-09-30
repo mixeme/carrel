@@ -45,6 +45,11 @@ type FormRow struct {
 	// Login у входа (s-auth-1), New password (account-3), Server URL
 	// (s-profile-2)… — полный список в C-6; у прочих false
 	Focus bool `json:"focus,omitempty"`
+	// Моноширинное поле, как его рисует кадр (is-mono): то, что набирают и
+	// копируют знак в знак, — логин у первого запуска (s-auth-4), адрес
+	// сервера, номер телефона, дата и время, UID, временный пароль; у прочих
+	// false
+	Mono bool `json:"mono,omitempty"`
 }
 type Option struct {
 	Value     string `json:"value"`

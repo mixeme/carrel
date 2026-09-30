@@ -674,7 +674,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		rows[len(rows)-1].Hint = "A folder's name is its address: there is nothing else to ask."
 		sheet.Form = focused(s.plainForm(action, "POST", rows...), "name")
 		sheet.Form.Action = s.route(action)
-		create := view.Action{ID: "collection.create", Label: "Create", Href: s.route(action), Method: "POST", Enabled: chosen.ID != ""}
+		create := view.Action{ID: "collection.create", Label: "Create", Href: s.route(action), Method: "POST", Primary: true, Enabled: chosen.ID != ""}
 		if !create.Enabled {
 			create.Reason = sheet.Note
 		}
@@ -695,7 +695,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		}
 		rows = append(rows, parts)
 	}
-	address := view.FormRow{Name: "address", Label: "Address", Kind: view.InputText, Value: text(f.address), Error: errs["address"],
+	address := view.FormRow{Name: "address", Label: "Address", Kind: view.InputText, Value: text(f.address), Error: errs["address"], Mono: true,
 		Hint: text("Taken from the name when left empty; yours to change. Other clients and restore by path go by the address, and it does not change later; the name they only show.")}
 	if home := homeFor(chosen, f.kind); home != "" {
 		address.Hint = text(serverOrigin(chosen.Server) + strings.TrimSuffix(home, "/") + "/…/ — " + string(address.Hint))
@@ -703,7 +703,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	rows = append(rows, address)
 	sheet.Form = focused(s.plainForm(action, "POST", rows...), "name")
 
-	create := view.Action{ID: "collection.create", Label: "Create", Href: s.route(action), Method: "POST", Enabled: chosen.ID != ""}
+	create := view.Action{ID: "collection.create", Label: "Create", Href: s.route(action), Method: "POST", Primary: true, Enabled: chosen.ID != ""}
 	if !create.Enabled {
 		create.Reason = sheet.Note
 	}
@@ -817,7 +817,7 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 			Form:    focused(s.plainForm(action, "POST", rows...), "name"),
 			Address: text(conn.Server),
 			Note:    "The name is yours: it stays in Carrel and is never sent to the feed.",
-			Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Enabled: true}},
+			Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Primary: true, Enabled: true}},
 		}
 	}
 	note := "Renaming is not moving: the address stays as it is, so devices, published links and backup jobs pointing here go on working. " +
@@ -829,7 +829,7 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 		Address: text(serverOrigin(conn.Server) + col.Path),
 		Note:    text(note),
 		Failure: failure,
-		Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Enabled: true}},
+		Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Primary: true, Enabled: true}},
 	}
 	if col.Has(view.KindFile) {
 		// A folder's name is its address (S-12.1): renaming it moves it, and

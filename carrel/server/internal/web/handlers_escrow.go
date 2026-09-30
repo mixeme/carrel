@@ -150,7 +150,7 @@ func (s *Server) depositSheet(sess *session.Session, errText view.Text) view.Unl
 	sheet := view.UnlockSheet{
 		Purpose: "Deposit my key",
 		Warning: "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account.",
-		Form: focused(withSubmit(s.plainForm("/app/settings/escrow", "POST",
+		Form: focused(withPrimary(s.plainForm("/app/settings/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: "deposit"},
 			view.FormRow{Name: "password", Label: "Your Carrel password", Kind: view.InputPassword, Required: true, Error: errText,
@@ -359,7 +359,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("recover")},
 			view.FormRow{Name: "login", Label: "Account", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "master", Label: "Master password", Kind: view.InputPassword, Required: true},
-			view.FormRow{Name: "temp", Label: "Temporary password for the user", Kind: view.InputText, Required: true,
+			view.FormRow{Name: "temp", Label: "Temporary password for the user", Kind: view.InputText, Required: true, Mono: true,
 				Value: text(s.users.SuggestPassword()),
 				Hint:  "Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user is mailed about it — always, not at the administrator’s discretion."},
 		), "escrow.recover", "Recover")

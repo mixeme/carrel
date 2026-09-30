@@ -222,7 +222,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "/carrel/attachments"
+            "value": "/carrel/attachments",
+            "mono": true
           },
           {
             "error": "",

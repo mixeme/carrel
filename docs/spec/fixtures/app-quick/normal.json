@@ -6,7 +6,8 @@
       "id": "record.new",
       "label": "New note",
       "method": "GET",
-      "reason": "Choose the collection the new note goes to."
+      "reason": "Choose the collection the new note goes to.",
+      "primary": true
     }
   ],
   "form": {

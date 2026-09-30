@@ -78,7 +78,7 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 		Add: []view.Action{
 			// s-admin-2: «Add user» leads to the three ways of s-admin-1;
 			// «Reset a password» opens the sheet of s-admin-13.
-			{ID: "admin.invite", Label: "Add user", Icon: "i-plus", Href: s.route("/admin/invites"), Method: "GET", Enabled: true},
+			{ID: "admin.invite", Label: "Add user", Icon: "i-plus", Href: s.route("/admin/invites"), Method: "GET", Primary: true, Enabled: true},
 			{ID: "admin.reset", Label: "Reset a password", Href: s.route("/admin/reset"), Method: "GET", Enabled: true},
 		},
 	}
@@ -210,10 +210,10 @@ func (s *Server) postAdminReset(w http.ResponseWriter, r *http.Request) {
 		Issued: &view.IssuedPassword{
 			Login:    text(u.Login),
 			Password: text(temp),
-			Copy:     view.Action{ID: "admin.reset.copy", Label: "Copy", Method: "GET", Enabled: true},
+			Copy:     view.Action{ID: "admin.reset.copy", Label: "Copy", Method: "GET", Primary: true, Enabled: true},
 			Message:  text("The password of " + u.Login + " is reset."),
 			Note:     "Hand it over yourself; they choose their own at the next sign-in.",
-			Done:     view.Action{ID: "admin.reset.done", Label: "Done", Href: s.route("/admin/"), Method: "GET", Enabled: true},
+			Done:     view.Action{ID: "admin.reset.done", Label: "Done", Href: s.route("/admin/"), Method: "GET", Primary: true, Enabled: true},
 		},
 		Actions: []view.Action{},
 	})
@@ -253,7 +253,7 @@ func (s *Server) resetSheet(sess *session.Session, target, temp string, errs map
 	form := s.plainForm("/admin/reset", "POST",
 		csrfField(sess),
 		view.FormRow{Name: "target", Label: "Whose", Kind: view.InputSelect, Options: people, Required: true, Error: errs["target"]},
-		view.FormRow{Name: "password", Label: "Temporary password", Kind: view.InputText, Required: true, Value: text(temp),
+		view.FormRow{Name: "password", Label: "Temporary password", Kind: view.InputText, Required: true, Value: text(temp), Mono: true,
 			Hint: resetHint, Error: errs["password"]},
 		view.FormRow{Name: "confirm", Label: "Type the login to confirm", Kind: view.InputText, Required: true,
 			Error: errs["confirm"]},
@@ -368,7 +368,7 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 		flash.issued = &view.IssuedPassword{
 			Login:    text(login),
 			Password: text(password),
-			Copy:     view.Action{ID: "admin.user.password.copy", Label: "Copy", Method: "GET", Enabled: true},
+			Copy:     view.Action{ID: "admin.user.password.copy", Label: "Copy", Method: "GET", Primary: true, Enabled: true},
 			Message:  text("The user " + login + " is created. Hand this over; until they change it, you can sign in as them."),
 			Done:     view.Action{ID: "admin.user.password.done", Label: "Done", Href: s.route("/admin/invites"), Method: "GET", Enabled: true},
 		}
@@ -466,7 +466,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 			Placeholder: "anna@example.org", Error: flash.inviteErr},
 	)
 	invite.Actions = []view.Action{
-		{ID: "admin.invite.create", Label: "Create link", Method: "POST", Enabled: true,
+		{ID: "admin.invite.create", Label: "Create link", Method: "POST", Primary: true, Enabled: true,
 			Href: s.postQuery("/admin/invites", url.Values{"action": {"link"}})},
 		send,
 	}
@@ -482,7 +482,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 	}
 
 	// Temporary password: handed over in person, and said so.
-	temp := view.FormRow{Name: "password", Label: "Temporary password", Kind: view.InputText, Required: true,
+	temp := view.FormRow{Name: "password", Label: "Temporary password", Kind: view.InputText, Required: true, Mono: true,
 		Value: text(s.users.SuggestPassword())}
 	rows := []view.FormRow{
 		csrfField(sess),
@@ -502,7 +502,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 		Badge: &view.Badge{Label: "hand to hand", Role: view.BadgeAlert},
 		Warning: &view.Notice{Role: view.NoticeAlert,
 			Body: "Until the user changes this password, you can sign in as them."},
-		Form:   withSubmit(s.plainForm("/admin/invites", "POST", rows...), "admin.user.create", "Create user"),
+		Form:   withPrimary(s.plainForm("/admin/invites", "POST", rows...), "admin.user.create", "Create user"),
 		Issued: flash.issued,
 	}
 

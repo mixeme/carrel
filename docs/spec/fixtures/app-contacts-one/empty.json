@@ -6,7 +6,8 @@
         "href": "/app/contacts/a-rad-vps/rassylki/new",
         "id": "record.new",
         "label": "New contact",
-        "method": "GET"
+        "method": "GET",
+        "primary": true
       },
       {
         "enabled": true,
@@ -34,7 +35,8 @@
             "href": "/app/contacts/a-rad-vps/rassylki/columns",
             "id": "columns.apply",
             "label": "Apply",
-            "method": "POST"
+            "method": "POST",
+            "primary": true
           },
           {
             "enabled": true,

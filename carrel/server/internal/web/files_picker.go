@@ -94,7 +94,7 @@ func (s *Server) getAttachPicker(w http.ResponseWriter, r *http.Request, sess *s
 	if obj, err := c.find(r.Context(), uid); err == nil {
 		sheet.Subject = text("to «" + recordTitle(c.spec.kind, obj) + "»")
 	}
-	attach := view.Action{ID: "files.picker.attach", Label: "Attach", Icon: "i-up", Method: "POST"}
+	attach := view.Action{ID: "files.picker.attach", Label: "Attach", Icon: "i-up", Method: "POST", Primary: true}
 	if name == "" {
 		attach.Reason = "Choose a file in the tree."
 	} else {
@@ -127,7 +127,7 @@ func (s *Server) attachmentsPicker(r *http.Request, sess *session.Session) view.
 		Purpose: "Where large attachments go: a folder of a file collection you can write to. Carrel makes it on first use.",
 		Tree:    *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen),
 	}
-	choose := view.Action{ID: "files.picker.choose", Label: "Choose this folder", Method: "GET"}
+	choose := view.Action{ID: "files.picker.choose", Label: "Choose this folder", Method: "GET", Primary: true}
 	switch {
 	case chosen == nil:
 		choose.Reason = "Choose a folder in the tree." // attachments-4
@@ -209,7 +209,7 @@ func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fi
 	sheet := view.FilePickerSheet{Title: "Upload files", Purpose: purpose, Tree: *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen), Failure: failure}
 	choose := view.Action{ID: "files.picker.choose", Label: "Choose this folder", Method: "POST", Enabled: true,
 		Href: s.postQuery("/app/files/picker", url.Values{"for": {"upload"}})}
-	upload := view.Action{ID: "files.picker.upload", Label: "Upload here", Method: "POST"}
+	upload := view.Action{ID: "files.picker.upload", Label: "Upload here", Method: "POST", Primary: true}
 	switch {
 	case chosen == nil:
 		upload.Reason = "Choose a folder in the tree first."

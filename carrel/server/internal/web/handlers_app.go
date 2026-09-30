@@ -77,7 +77,7 @@ func (s *Server) passwordPage(sess *session.Session, mustChange bool, err error)
 		Shell: s.withRail(s.buildShell(sess, "Change password"), s.settingsRail(sess, "/app/settings/account")),
 		// The caret is in New password, not in the field before it
 		// (account-3).
-		Form: focused(withSubmit(s.plainForm("/app/password", "POST", csrfField(sess),
+		Form: focused(withPrimary(s.plainForm("/app/password", "POST", csrfField(sess),
 			view.FormRow{Name: "current", Label: "Current password", Kind: view.InputPassword, Required: true, Error: currentErr},
 			view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword, Required: true, Error: passErr},
 			view.FormRow{Name: "password2", Label: "Repeat new password", Kind: view.InputPassword, Required: true, Error: pass2Err},
@@ -158,7 +158,7 @@ func (s *Server) unlockSheet(sess *session.Session, errText view.Text) view.Unlo
 		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, issue a davloom device password, change key escrow, or delete your account."),
 		Warning: text("Everything revealed in this window is written to the audit log."),
 		// The person's own password, not the server's (s-plan-3, s-profile-3).
-		Form: focused(withSubmit(s.plainForm("/app/settings/unlock", "POST",
+		Form: focused(withPrimary(s.plainForm("/app/settings/unlock", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "password", Label: "Your Carrel password", Kind: view.InputPassword, Required: true, Error: errText},
 		), "unlock.submit", "Show"), "password"),

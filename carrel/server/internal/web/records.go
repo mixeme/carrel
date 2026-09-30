@@ -593,7 +593,7 @@ func (s *Server) writeFailure(c *collectionCtx, method, path string, err error) 
 func (s *Server) newRecordAction(c *collectionCtx) view.Action {
 	a := view.Action{
 		ID: "record.new", Label: text("New " + c.spec.noun),
-		Href: s.route(c.listPath() + "/new"), Method: "GET", Enabled: !c.col.ReadOnly,
+		Href: s.route(c.listPath() + "/new"), Method: "GET", Primary: true, Enabled: !c.col.ReadOnly,
 	}
 	if c.col.ReadOnly {
 		a.Reason = "This collection is read-only."
@@ -1016,8 +1016,8 @@ func (s *Server) agendaRange(sess *session.Session, tf timeFmt, base, tag, kind 
 	form := s.plainForm(base, "GET",
 		csrfField(sess),
 		view.FormRow{Name: "view", Kind: view.InputHidden, Value: agendaRange},
-		view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Value: text(from.Format("2006-01-02"))},
-		view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(to.AddDate(0, 0, -1).Format("2006-01-02")),
+		view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Value: text(from.Format("2006-01-02")), Mono: true},
+		view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(to.AddDate(0, 0, -1).Format("2006-01-02")), Mono: true,
 			Hint: "Both days are in the list."},
 	)
 	form.Actions = []view.Action{{ID: "range.show", Label: "Show", Href: s.route(base), Method: "GET", Enabled: true}}

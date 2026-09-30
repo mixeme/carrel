@@ -7,7 +7,8 @@
         "href": "/register",
         "id": "register.submit",
         "label": "Create account",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       }
     ],
     "errors": [],
@@ -81,7 +82,11 @@
       }
     ]
   },
-  "lede": "A confirmation link will be sent to the address you give; the account cannot be used until you open it.",
+  "lede": [
+    {
+      "text": "A confirmation link will be sent to the address you give; the account cannot be used until you open it."
+    }
+  ],
   "notices": [
     {
       "actions": [],

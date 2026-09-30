@@ -1,0 +1,89 @@
+{
+  "form": {
+    "action": "/invite/invite-token",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/invite/invite-token",
+        "id": "invite.submit",
+        "label": "Create account",
+        "method": "POST",
+        "primary": true
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "focus": true,
+            "hint": "",
+            "kind": "text",
+            "label": "Login",
+            "name": "login",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Repeat password",
+            "name": "password2",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "lede": [
+    {
+      "text": "mix invited you. Choose a login and a password."
+    }
+  ],
+  "notices": [
+    {
+      "actions": [],
+      "body": "Your password is the only key to your own data. Nobody — including this server — can recover it for you.",
+      "details": null,
+      "role": "alert",
+      "title": ""
+    }
+  ],
+  "title": "Join carrel.example",
+  "valid": true
+}

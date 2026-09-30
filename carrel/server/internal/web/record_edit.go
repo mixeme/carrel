@@ -88,6 +88,10 @@ type editField struct {
 	// «allday», standing before the first of them (s-tasks-3).
 	taskDay bool
 	typed   bool // fieldMulti: each row has its label, the TYPE parameter
+	// mono: the frames draw the field's input monospaced (is-mono, C-6.8
+	// FormRow.Mono) — a phone number (s-contacts-3, s-notes-8); dates,
+	// times, a birthday and a percent are so by their kind.
+	mono bool
 	// optional fields a record leaves empty go into a set of their own on
 	// its full form, "Show N empty fields"; the client folds it.
 	optional bool
@@ -559,7 +563,7 @@ func repeatSet(f editField, vals []string, errText view.Text) view.FieldSet {
 	}
 	set := view.FieldSet{Legend: text(f.label), Rows: []view.FormRow{
 		{Name: f.name + ".freq", Label: "Frequency", Kind: view.InputSelect, Value: text(v[repFreq]), Options: freqs, Error: errText},
-		{Name: f.name + ".interval", Label: "Every", Kind: view.InputNumber, Value: text(v[repInterval])},
+		{Name: f.name + ".interval", Label: "Every", Kind: view.InputNumber, Value: text(v[repInterval]), Mono: true},
 	}}
 	// On is one row of the days, MO to SU, as the frame draws it: each day
 	// ticked goes as a value of repeat.on.
@@ -572,9 +576,9 @@ func repeatSet(f editField, vals []string, errText view.Text) view.FieldSet {
 		days.Options = append(days.Options, view.Option{Value: d.code, Label: text(d.code), Selected: on[d.code]})
 	}
 	set.Rows = append(set.Rows, days,
-		view.FormRow{Name: f.name + ".until", Label: "Until", Kind: view.InputDate, Value: text(v[repUntil])},
+		view.FormRow{Name: f.name + ".until", Label: "Until", Kind: view.InputDate, Value: text(v[repUntil]), Mono: true},
 		view.FormRow{Name: f.name + ".count", Label: "Count", Kind: view.InputNumber, Value: text(v[repCount]), Hint: "Until or Count, not both."},
-		view.FormRow{Name: f.name + ".rule", Label: "Advanced RRULE", Kind: view.InputText, Value: text(v[repRule]),
+		view.FormRow{Name: f.name + ".rule", Label: "Advanced RRULE", Kind: view.InputText, Value: text(v[repRule]), Mono: true,
 			Hint: "Changed here, the rule is written as typed and wins over the fields above. Exceptions and moved instances are not edited: the series is edited as a whole."},
 	)
 	return set
@@ -629,7 +633,7 @@ var editFields = map[view.Kind][]editField{
 		{name: "title", label: "Title", prop: "TITLE", typ: fieldText, optional: true},
 		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday,
 			hint: "Type it: 14.03.1987, or 14.03 without the year."},
-		{name: "tel", label: "Number", prop: "TEL", typ: fieldMulti, typed: true, set: "Phone numbers", add: "Add phone", quick: "Phone", quickSample: "+7 …"},
+		{name: "tel", label: "Number", prop: "TEL", typ: fieldMulti, typed: true, mono: true, set: "Phone numbers", add: "Add phone", quick: "Phone", quickSample: "+7 …"},
 		{name: "email", label: "Address", prop: "EMAIL", typ: fieldMulti, typed: true, set: "Email addresses", add: "Add email", quick: "Email", quickSample: "name@example.org"},
 		// Addresses after the e-mail (s-contacts-3), folded away with their
 		// button when the card has none.
@@ -733,8 +737,11 @@ var rowLabels = map[string][]fieldOption{
 
 // addressParts are the inputs of an address row: ADR components 2 to 6
 // (RFC 6350 §6.3.1).
-var addressParts = []struct{ name, label string }{
-	{"street", "Street"}, {"city", "City"}, {"region", "Region"}, {"code", "Postcode"}, {"country", "Country"},
+var addressParts = []struct {
+	name, label string
+	mono        bool // drawn monospaced (s-contacts-3)
+}{
+	{"street", "Street", false}, {"city", "City", false}, {"region", "Region", false}, {"code", "Postcode", true}, {"country", "Country", false},
 }
 
 // addressRow is the five shown parts of an ADR value, one string for
@@ -2016,7 +2023,7 @@ func (s *Server) noteEditPage(c *collectionCtx, st editState, sh view.Shell, for
 		Mode: view.NoteEditing, Title: text(first(st.values["summary"])), Body: text(body),
 		Rendered: cal.RenderMarkdown(body), ReadOnly: c.col.ReadOnly,
 		Bar: []view.Action{
-			{ID: "record.save", Label: "Save", Href: s.postQuery(s.editAction(c, st), url.Values{"etag": {st.etag}, "readat": {strconv.FormatInt(st.readAt.Unix(), 10)}}), Method: "POST", Enabled: true},
+			{ID: "record.save", Label: "Save", Href: s.postQuery(s.editAction(c, st), url.Values{"etag": {st.etag}, "readat": {strconv.FormatInt(st.readAt.Unix(), 10)}}), Method: "POST", Primary: true, Enabled: true},
 			s.cancelAction(c, st),
 		},
 	}
@@ -2219,7 +2226,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			// Typed, not picked (s-contacts-3): a date input cannot hold a
 			// day without a year, and the day is quicker typed than found.
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)),
-				Placeholder: "DD.MM.YYYY", Hint: text(f.hint), Error: errText})
+				Placeholder: "DD.MM.YYYY", Hint: text(f.hint), Error: errText, Mono: true})
 		case fieldName:
 			row := pair(vals)
 			set.Rows = append(set.Rows,
@@ -2241,7 +2248,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 					set.Rows = append(set.Rows, removedRows(f, name)...)
 					continue
 				}
-				row := view.FormRow{Name: name, Label: text(f.label), Kind: kind, Value: text(v)}
+				row := view.FormRow{Name: name, Label: text(f.label), Kind: kind, Value: text(v), Mono: f.mono}
 				if !full {
 					row.Label, row.Placeholder = text(f.quick), text(f.quickSample)
 				} else if f.typed {
@@ -2257,7 +2264,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				}
 			}
 			if full {
-				tpl := view.FormRow{Name: f.name + ".{n}", Label: text(f.label), Kind: kind}
+				tpl := view.FormRow{Name: f.name + ".{n}", Label: text(f.label), Kind: kind, Mono: f.mono}
 				add := addButton(f, tpl, removeButton(f.name+".{n}"))
 				if f.typed {
 					add.Template = []view.FormRow{labelRow(f, f.name+".{n}", ""), tpl, removeButton(f.name + ".{n}")}
@@ -2301,8 +2308,8 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			if f.taskDay && full && !slices.ContainsFunc(set.Rows, func(r view.FormRow) bool { return r.Name == taskDayBox }) {
 				set.Rows = append(set.Rows, view.FormRow{Name: taskDayBox, Label: "All day", Kind: view.InputCheck, Value: text(first(st.values[taskDayBox]))})
 			}
-			date := view.FormRow{Name: f.name + ".date", Label: text(f.label), Kind: view.InputDate, Value: text(row[0]), Error: errText, Required: f.required}
-			clock := view.FormRow{Name: f.name + ".time", Label: text(timeLabel(f)), Kind: view.InputTime, Value: text(row[1])}
+			date := view.FormRow{Name: f.name + ".date", Label: text(f.label), Kind: view.InputDate, Value: text(row[0]), Error: errText, Required: f.required, Mono: true}
+			clock := view.FormRow{Name: f.name + ".time", Label: text(timeLabel(f)), Kind: view.InputTime, Value: text(row[1]), Mono: true}
 			switch {
 			case full:
 				set.Rows = append(set.Rows, date, clock)
@@ -2329,7 +2336,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		case fieldDone:
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck, Value: text(first(vals))})
 		case fieldPercent:
-			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputNumber, Value: text(first(vals)), Error: errText})
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputNumber, Value: text(first(vals)), Error: errText, Mono: true})
 		case fieldReminders:
 			// The first reminder, then the others, then the button that adds
 			// one (s-agenda-3: First, Add reminder). The quick sheet has one
@@ -2376,7 +2383,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 	}
 	form := view.Form{
 		Action: s.route(s.editAction(c, st)), Method: "POST", Sets: sets,
-		Actions: []view.Action{{ID: "record.save", Label: "Save", Method: "POST", Enabled: !c.col.ReadOnly}, s.cancelAction(c, st)},
+		Actions: []view.Action{{ID: "record.save", Label: "Save", Method: "POST", Primary: true, Enabled: !c.col.ReadOnly}, s.cancelAction(c, st)},
 	}
 	names := make([]string, 0, len(st.errors))
 	for name := range st.errors {
@@ -2493,7 +2500,7 @@ func removeRow(kind view.Kind, values formValues, name string) {
 func addressRows(prefix string) []view.FormRow {
 	rows := make([]view.FormRow, 0, len(addressParts))
 	for _, p := range addressParts {
-		rows = append(rows, view.FormRow{Name: prefix + "." + p.name, Label: text(p.label), Kind: view.InputText})
+		rows = append(rows, view.FormRow{Name: prefix + "." + p.name, Label: text(p.label), Kind: view.InputText, Mono: p.mono})
 	}
 	return rows
 }
@@ -2977,7 +2984,7 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 	// record. The sheet says so by having no target, and offers the way out
 	// instead of an empty choice (U-6.16).
 	sheet := view.NewSheet{Kind: spec.kind, Actions: []view.Action{
-		{ID: "connection.add", Label: "Connect account", Href: s.connectHref(), Method: "GET", Enabled: true},
+		{ID: "connection.add", Label: "Connect account", Href: s.connectHref(), Method: "GET", Primary: true, Enabled: true},
 		{ID: "record.cancel", Label: "Cancel", Href: s.route("/app/" + kind), Method: "GET", Enabled: true},
 	}}
 	if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
@@ -3094,7 +3101,7 @@ func (s *Server) quickSheet(c *collectionCtx, st editState) view.NewSheet {
 	form.Action = s.route(quick)
 	form.Method = "POST"
 	form.Actions = []view.Action{
-		{ID: "record.save", Label: text("Save " + c.spec.noun), Method: "POST", Enabled: !c.col.ReadOnly},
+		{ID: "record.save", Label: text("Save " + c.spec.noun), Method: "POST", Primary: true, Enabled: !c.col.ReadOnly},
 		{ID: "record.open", Label: "Open the card", Href: s.route(quick + "?op=open"), Method: "POST", Enabled: true},
 		s.cancelAction(c, st),
 	}
@@ -3128,7 +3135,7 @@ func (s *Server) newSheet(c *collectionCtx, pick bool) view.NewSheet {
 			sheet.Target.Options = append(sheet.Target.Options, opt)
 		}
 	}
-	next := view.Action{ID: "record.new", Label: text("New " + c.spec.noun), Href: own, Method: "GET", Enabled: true}
+	next := view.Action{ID: "record.new", Label: text("New " + c.spec.noun), Href: own, Method: "GET", Primary: true, Enabled: true}
 	if pick {
 		next.Enabled, next.Reason = false, text("Choose the collection the new "+c.spec.noun+" goes to.")
 	} else {

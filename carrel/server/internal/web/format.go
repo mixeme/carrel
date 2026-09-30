@@ -13,6 +13,31 @@ import (
 
 func text(s string) view.Text { return view.Text(s) }
 
+// line is a sentence of the server with nothing marked in it: one run, none
+// when it is empty (C-6.2 Runs).
+func line(s string) view.Runs {
+	if s == "" {
+		return nil
+	}
+	return view.Runs{{Text: view.Text(s)}}
+}
+
+// runs is a sentence in pieces, the marked ones among them (C-6.2 Runs):
+// the pieces are written in order, an empty one left out.
+func runs(parts ...view.Run) view.Runs {
+	var out view.Runs
+	for _, p := range parts {
+		if p.Text != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+func plainRun(s string) view.Run  { return view.Run{Text: view.Text(s)} }
+func monoRun(s string) view.Run   { return view.Run{Text: view.Text(s), Mark: view.RunMono} }
+func strongRun(s string) view.Run { return view.Run{Text: view.Text(s), Mark: view.RunStrong} }
+
 func formatSize(n int64) view.Size {
 	if n <= 0 {
 		return "0 B"

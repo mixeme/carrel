@@ -239,7 +239,7 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 	folder := view.FieldSet{Legend: "Folder", Rows: []view.FormRow{
 		csrfField(sess),
 		collection,
-		{Name: "folder", Label: "Folder in it", Kind: view.InputText, Value: text(shown), Error: text(f.errors["folder"]), Extra: &browse,
+		{Name: "folder", Label: "Folder in it", Kind: view.InputText, Value: text(shown), Error: text(f.errors["folder"]), Extra: &browse, Mono: true,
 			Hint: "Created on first use. It stays an ordinary folder: openable in Files, mountable as a network drive, readable without Carrel."},
 		{Name: "monthly", Label: "A subfolder per month", Kind: view.InputCheck, Value: text(boolStr(f.monthly)),
 			Hint: text(thisMonth.AddDate(0, -1, 0).Format("2006-01") + ", " + thisMonth.Format("2006-01") +

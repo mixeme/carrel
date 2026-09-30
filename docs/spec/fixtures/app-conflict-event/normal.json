@@ -5,7 +5,8 @@
       "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e19\u0026op=combine",
       "id": "conflict.combine",
       "label": "Write this combination",
-      "method": "POST"
+      "method": "POST",
+      "primary": true
     },
     {
       "enabled": true,

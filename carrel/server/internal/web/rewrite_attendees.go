@@ -485,7 +485,7 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 	action := s.rewriteAddress(c, p.UID, p.Token, "")
 	sheet.Form = s.plainForm(action, "POST", csrfField(c.sess))
 	confirm := view.Action{ID: "contact.rewrite.confirm", Label: text("Rewrite " + plural(p.writable(), "record")),
-		Href: s.route(action), Method: "POST", Enabled: true}
+		Href: s.route(action), Method: "POST", Primary: true, Enabled: true}
 	if p.writable() == 0 {
 		confirm.Enabled, confirm.Href = false, ""
 		confirm.Reason = "Nothing here can be rewritten: every record that names the old address is read-only or could not be read."

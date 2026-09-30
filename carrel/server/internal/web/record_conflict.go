@@ -181,7 +181,7 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 	}
 	writable := len(page.Rows) > 0 || moving
 	page.Actions = []view.Action{
-		{ID: "conflict.combine", Label: "Write this combination", Href: op("combine"), Method: "POST", Enabled: writable},
+		{ID: "conflict.combine", Label: "Write this combination", Href: op("combine"), Method: "POST", Primary: true, Enabled: writable},
 		{ID: "conflict.mine", Label: "Use only my edit", Href: op("mine"), Method: "POST", Enabled: writable},
 		{ID: "conflict.theirs", Label: "Use only the server version", Href: op("theirs"), Method: "POST", Enabled: true},
 		cancel,

@@ -139,7 +139,7 @@ func (s *Server) postAdminInstall(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) installPage(sess *session.Session, publicURL string, rows []view.InstallRow, note string) view.AdminInstallPage {
 	page := view.AdminInstallPage{Shell: s.withRail(s.buildShell(sess, "Installation check"), s.adminRail(sess, "/admin/install")), PublicURL: text(publicURL), Rows: rows,
-		Actions: []view.Action{{ID: "admin.install.run", Label: "Run the check", Href: s.route("/admin/install"), Method: "POST", Enabled: true}}}
+		Actions: []view.Action{{ID: "admin.install.run", Label: "Run the check", Href: s.route("/admin/install"), Method: "POST", Primary: true, Enabled: true}}}
 	if note != "" {
 		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeAlert, Title: text(note)})
 	}

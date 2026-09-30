@@ -548,7 +548,7 @@ func signIn(spoil func(*w.Page)) screens.Screen {
 			page := w.Page{Items: []w.PagePart{w.Auth{Dialog: w.Dialog{
 				Items: []w.DialogPart{
 					w.DialogLogo{Logo: w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63", Size: w.Logo60}},
-					w.Tagline{Lead: string(p.Lede), Text: string(p.Title), Centered: true},
+					w.Tagline{Lead: runsText(p.Lede), Text: string(p.Title), Centered: true},
 					w.AuthStack{
 						Items: []w.AuthStackPart{
 							w.Form{Items: fields, Variant: w.FormColumnFlush},
@@ -565,6 +565,15 @@ func signIn(spoil func(*w.Page)) screens.Screen {
 			return page
 		},
 	}
+}
+
+// runsText is a sentence of the model, its pieces one after another.
+func runsText(r view.Runs) string {
+	var s string
+	for _, p := range r {
+		s += string(p.Text)
+	}
+	return s
 }
 
 // The spoiled samples.

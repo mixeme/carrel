@@ -1,12 +1,17 @@
 {
-  "lede": "It may have expired, been used already, or been withdrawn. Ask whoever sent it for a new one.",
+  "lede": [
+    {
+      "text": "It may have expired, been used already, or been withdrawn. Ask whoever sent it for a new one."
+    }
+  ],
   "notices": [],
   "signIn": {
     "enabled": true,
     "href": "/login",
     "id": "deadlink.login",
     "label": "Sign in",
-    "method": "GET"
+    "method": "GET",
+    "primary": true
   },
   "title": "This link does not work"
 }

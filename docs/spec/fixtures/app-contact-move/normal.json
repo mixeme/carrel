@@ -5,6 +5,7 @@
       "id": "record.move.confirm",
       "label": "Move here",
       "method": "POST",
+      "primary": true,
       "reason": "Choose a collection."
     },
     {

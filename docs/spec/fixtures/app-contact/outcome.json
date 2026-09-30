@@ -5,7 +5,8 @@
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit",
       "id": "record.edit",
       "label": "Edit",
-      "method": "GET"
+      "method": "GET",
+      "primary": true
     },
     {
       "danger": true,

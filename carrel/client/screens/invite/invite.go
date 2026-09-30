@@ -26,7 +26,7 @@ const formID = "invite"
 func Screen(p *view.InvitePage) w.Page {
 	items := []w.DialogPart{
 		w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap4},
-		w.DialogSub{Parts: []w.Inline{w.Text(p.Lede)}},
+		w.DialogSub{Parts: lede(p.Lede)},
 	}
 	for _, n := range p.Notices {
 		items = append(items, w.Msg{
@@ -100,4 +100,21 @@ func tone(r view.NoticeRole) w.MsgTone {
 		return w.MsgAccent
 	}
 	return w.MsgPlain
+}
+
+// lede is the line under the title in the pieces the model sends it in, each
+// in its face: a login or an address monospaced, a name bold (C-6.2 Runs).
+func lede(r view.Runs) []w.Inline {
+	out := make([]w.Inline, 0, len(r))
+	for _, p := range r {
+		switch p.Mark {
+		case view.RunMono:
+			out = append(out, w.Mono{Text: string(p.Text)})
+		case view.RunStrong:
+			out = append(out, w.Strong(p.Text))
+		default:
+			out = append(out, w.Text(p.Text))
+		}
+	}
+	return out
 }

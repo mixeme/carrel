@@ -452,7 +452,7 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 		reset.Href, reset.Reason = "", "Every weight is the default already."
 	}
 	page.Threshold.WeightActions = []view.Action{
-		{ID: "duplicates.weights.save", Label: "Save", Href: s.postQuery("/app/duplicates/decide", url.Values{"do": {"weights"}}), Method: "POST", Enabled: true},
+		{ID: "duplicates.weights.save", Label: "Save", Href: s.postQuery("/app/duplicates/decide", url.Values{"do": {"weights"}}), Method: "POST", Primary: true, Enabled: true},
 		reset,
 	}
 	if st.blob.Duplicates.Threshold > 0 {

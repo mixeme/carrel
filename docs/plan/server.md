@@ -65,6 +65,48 @@
 - [ ] **Мёртвые поля контракта:** `InvitePage.Valid` и `ConfirmEmailPage.OK`
       с `v0.2.76` всегда истинны — мёртвая ссылка отвечает своей страницей.
       Убрать из C-6 и фикстур.
+- [ ] **Выделенные куски в других фразах сервера** (`v0.2.79`: `Plain.Lede`
+      — `Runs`, страницы вне оболочки переведены). Кадры выделяют куски ещё
+      здесь, а сервер шлёт `Text`:
+      - строки состояния рейла настроек и администрирования — «Last response
+        ‹mono›», «Last backup ‹mono› · verified», «Last sent / Last check
+        ‹mono›» (account-*, s-profile-*, s-plan-*, s-davloom-*, s-backup-*,
+        s-mail-9, appearance-1, attachments-1, s-publish-1, s-admin-1…7);
+      - строки под заголовком: зона `Europe/Moscow` (s-agenda-1), день
+        заметки (s-notes-1…3), «Signed in as **mix**» (s-profile-1, -10),
+        «destination **WebDAV and download**» (s-backup-3), путь архива
+        (s-backup-8), имя файла импорта (s-io-5…8), строка файла публикации
+        целиком моноширинная (s-publish-8…11);
+      - сообщения: жирная первая фраза итога (s-contacts-16, -21, s-dup-2,
+        -4…6, s-files-17), `MOVE` (s-contacts-2, s-files-4), числа и «new»
+        листов удаления и переноса коллекции и папки (s-profile-8, -9, -19,
+        дата архива моноширинно), **Lock now** (s-profile-4, s-plan-5),
+        **Check** (s-profile-10), **not** (s-davloom-1), логин
+        (s-admin-14, -17), **Published links** и подпись (s-mail-1), `X-`
+        (s-io-4), куски сообщений копии (s-backup-2…6, -8), строки брошенного
+        файла (s-io-1, -2);
+      - подсказки полей: `Reply-To` (account-1, -8…-10, s-mail-9),
+        `.well-known` (s-profile-2, -14, -16), четыре подсказки листа новой
+        коллекции (s-profile-5), `https://`, `webcal://` (s-profile-10),
+        три подсказки вложений (attachments-1), конверт `noreply@…`
+        (s-admin-3), **after** (s-backup-2), расширения (s-io-3, -4).
+- [ ] **`Primary` и `Mono` там, где их не видит ни фикстура, ни проверка
+      кадра** (`v0.2.79` закрыл все фикстуры — проверка 9 check.py — и
+      формы и листы тестов кадров). Основная кнопка: «Upload» в шапке
+      файлов (s-files-1, -2, -4, -15), «Download» публичного файла
+      (s-publish-9, -11), «Send by letter» (s-publish-13), «Done» устройства
+      (s-davloom-3), «Open the kept record» (s-dup-5), шаги импорта —
+      «Preview file/folder», «Import N …», «Back to list» (s-io-3, -4,
+      -6…-9), копия — «Copy the line/script», «Restore», «Open the
+      manifest», «Restore 3 collections» (s-backup-2, -3, -6…-8; у сервера
+      «Restore into new collections»), «Back to the form» (s-profile-6).
+      Моноширинное поле: «Related to» — строка набора UID (s-tasks-11),
+      «Match threshold» и веса (s-dup-1, -3, -7), поля окна открытых паролей
+      (s-profile-4) и пароли устройства (s-plan-2), «Link» (s-publish-13),
+      строка ссылки (s-publish-7), «Saved as» (s-contacts-5), поля без
+      подписи s-admin-4, -7, s-backup-4, -5, «Address for the client»
+      (s-davloom-1). Подпись «Upload here» листа загрузки — в кадре «Upload
+      2 files» (s-notes-11).
 - Наблюдать, не чинить вслепую:
   - поиск по книге Google просеивается у нас (SV-26) — станет дорого,
     помнить пустой отчёт за подключением;
@@ -118,6 +160,7 @@
 | Записки 23 (выбор столбцов — целиком, решение владельца) и 24 (Typecase `86e42e6`, `b64895e`, `eb0822f`). Меню Columns списка контактов — форма (`ListBar.columns`, `Columns`, `ColumnItem`; components-21, -42): отмеченные столбцы уходят `col` в своём порядке на `…/columns`, `col=default` — сброс, ответ — список с его запросом; выбор помнит кука этого браузера на раздел (`carrel_cols_contacts`, S-9.6), строка несёт все столбцы (`ContactRow.birthday`, `.tags`, `.changed`; s-contacts-23, -24). Одна страница на мёртвую ссылку-секрет (`DeadLinkPage`, rest-1, 404, одинаковые код, заголовки, тело и задержка), письмо, которое не ушло, — тревогой на своём кадре (s-auth-6, s-auth-3), «local» у листа публикации (`PublishSheet.local`), слова очистки по s-auth-10; чужая подпись выбрана на своей строке — проверка читает это из кадров. Столбцы остальных списков — задача 45 | `v0.2.76` |
 | Макет Typecase `784599e` (задачи 46, 47). Вход с отказом по кадру `s-auth-13`: та же страница, логин набран, пароль пуст, причина у поля, одна на неизвестный логин и неверный пароль (S-9.5); курсор — `FormRow.focus`: Login у пустого входа, Password после отказа; состояние фикстуры `refused` (C-14.3, `login/refused.json`, проверка 8 рисует его в `s-auth-13`). Проверка столбцов читает неотмеченную галку `components-42` с `is-off` и останавливается, если прочла пунктов меньше, чем нарисовано | `v0.2.77` |
 | Макет Typecase `f86a3f0` (кадры глав 8–12 без `m-`, решение владельца). Курсор `FormRow.focus` там, где его рисуют кадры, в каждой форме сервера, когда она показана: поле с причиной, иначе поле кадра (s-auth-2, -4, -5, -11, -12, account-2, -3, s-plan-3, s-profile-2, -5, -7, -9, -10, -18 … -20, s-davloom-2, s-backup-2, s-admin-13, s-files-13, первое поле записи и быстрого листа); сверка — `caret_frames_test.go` читает `is-focus` кадра. Поле листа подтверждения — «Your Carrel password». Фикстуры шагов вне оболочки по `data-part` кадра: `register/sent`, `forgot/options`, `no-mail`, `wipe-sent`, `asked`, `forgot-token/password`, и `confirm-email/normal` (rest-2); строки `STATE_FRAME` | `v0.2.78` |
+| Остановки клиента (решения ведущего): строка под заголовком кусками — `Plain.Lede` типа `Runs` (`Run{text, mark}`, C-8 `RunMark`: `mono`, `strong`; s-auth-3, -6, -10, -11); `Action.primary` там, где кадр рисует `is-primary` (кнопки форм, подтверждения листов, «New …», Edit в шапке карточки, первая карточка s-auth-6, Sign in у rest-1 и rest-2; порядок кнопок основной не назначает); `FormRow.mono` там, где кадр рисует `is-mono` (логин первого запуска, даты и время, телефон, индекс, адреса серверов, временные пароли, числа настроек); `invite/normal` — приглашение письмом (s-auth-12), ссылкой — `invite/link` (состояние `link`, своего кадра нет); проверка 9 `check.py` — основная кнопка и моноширинное поле каждой фикстуры по её кадру | `v0.2.79` |
 
 S-30.4 (чужие клиенты, прокси у себя, вид письма у получателя, архив месячной
 давности) машиной не закрывается — перечислено в README сервера как ручное.

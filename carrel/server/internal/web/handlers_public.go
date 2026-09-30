@@ -96,7 +96,7 @@ func (s *Server) getHealthz(w http.ResponseWriter, r *http.Request) {
 // of the shell one was on (U-6.14).
 func (s *Server) getAbout(w http.ResponseWriter, r *http.Request) {
 	page := view.AboutPage{
-		Plain:   view.Plain{Title: "Carrel", Lede: taglineLead},
+		Plain:   view.Plain{Title: "Carrel", Lede: line(taglineLead)},
 		Tagline: taglineText,
 		Version: text(s.version),
 		Commit:  text(s.commit),
@@ -153,9 +153,9 @@ func (s *Server) getLogin(w http.ResponseWriter, r *http.Request) {
 // password?». Every link goes through the base path.
 func (s *Server) loginPage(w http.ResponseWriter, r *http.Request, login string, errText view.Text) view.LoginPage {
 	page := view.LoginPage{
-		Plain:   view.Plain{Title: text(s.signInTitle()), Lede: taglineLead},
+		Plain:   view.Plain{Title: text(s.signInTitle()), Lede: line(taglineLead)},
 		Tagline: taglineText,
-		Form: withSubmit(s.anonPlainForm(w, r, "/login", "POST",
+		Form: withPrimary(s.anonPlainForm(w, r, "/login", "POST",
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true, Focus: errText == ""},
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: errText, Focus: errText != ""},
 		), "login.submit", "Sign in"),
@@ -233,7 +233,7 @@ func (s *Server) getSetup(w http.ResponseWriter, r *http.Request) {
 // (optional), the password twice. A refusal is said at its field.
 func (s *Server) setupPage(w http.ResponseWriter, r *http.Request, login, email string, loginErr, passErr error) view.SetupPage {
 	rows := []view.FormRow{
-		{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true, Placeholder: "a-z 0-9 . _ -"},
+		{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true, Placeholder: "a-z 0-9 . _ -", Mono: true},
 		{Name: "email", Label: "Email", LabelAside: "(optional)", Kind: view.InputEmail, Value: text(email), Placeholder: "—"},
 		{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
 		{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
@@ -245,10 +245,10 @@ func (s *Server) setupPage(w http.ResponseWriter, r *http.Request, login, email 
 	return view.SetupPage{
 		Plain: view.Plain{
 			Title:   "Set up Carrel",
-			Lede:    "The account you create here is the first one, and it can manage everyone else.",
+			Lede:    line("The account you create here is the first one, and it can manage everyone else."),
 			Notices: passwordNotice(),
 		},
-		Form: focused(withSubmit(s.anonPlainForm(w, r, "/setup", "POST", rows...), "setup.submit", "Create administrator"), "login"),
+		Form: focused(withPrimary(s.anonPlainForm(w, r, "/setup", "POST", rows...), "setup.submit", "Create administrator"), "login"),
 	}
 }
 
@@ -309,10 +309,10 @@ func (s *Server) registerPage(w http.ResponseWriter, r *http.Request, login, ema
 	return view.RegisterPage{
 		Plain: view.Plain{
 			Title:   "Create an account",
-			Lede:    "A confirmation link will be sent to the address you give; the account cannot be used until you open it.",
+			Lede:    line("A confirmation link will be sent to the address you give; the account cannot be used until you open it."),
 			Notices: passwordNotice(),
 		},
-		Form:   focused(withSubmit(s.anonPlainForm(w, r, "/register", "POST", rows...), "register.submit", "Create account"), "login"),
+		Form:   focused(withPrimary(s.anonPlainForm(w, r, "/register", "POST", rows...), "register.submit", "Create account"), "login"),
 		SignIn: view.Action{ID: "register.login", Label: "Already have an account? Sign in", Href: s.route("/login"), Method: "GET", Enabled: true},
 	}
 }
@@ -352,8 +352,8 @@ func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
 	}
 	if mailSent {
 		page.Title = "Check your email"
-		page.Lede = text("The letter went to " + email + ". The account cannot be used until you open the link in it.\n\n" +
-			"Sending again with the same login and address, while the account is unconfirmed, simply replaces the letter and the password.")
+		page.Lede = runs(plainRun("The letter went to "), monoRun(email), plainRun(". The account cannot be used until you open the link in it.\n\n"+
+			"Sending again with the same login and address, while the account is unconfirmed, simply replaces the letter and the password."))
 		page.Sent = true
 	} else {
 		// The letter did not go: the page of the letter (s-auth-3) says so in
@@ -415,11 +415,11 @@ func (s *Server) invitePage(w http.ResponseWriter, r *http.Request, token string
 	return view.InvitePage{
 		Plain: view.Plain{
 			Title:   text("Join " + s.users.Settings().InstanceName()),
-			Lede:    text(lede),
+			Lede:    line(lede),
 			Notices: passwordNotice(),
 		},
 		Valid: true,
-		Form:  focused(withSubmit(s.anonPlainForm(w, r, "/invite/"+token, "POST", rows...), "invite.submit", "Create account"), "login"),
+		Form:  focused(withPrimary(s.anonPlainForm(w, r, "/invite/"+token, "POST", rows...), "invite.submit", "Create account"), "login"),
 	}
 }
 
@@ -469,9 +469,9 @@ func (s *Server) getConfirmEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	page := view.ConfirmEmailPage{
-		Plain: view.Plain{Title: "Email address", Lede: "Address confirmed. You can sign in now."},
+		Plain: view.Plain{Title: "Email address", Lede: line("Address confirmed. You can sign in now.")},
 		OK:    true,
-		Next:  view.Action{ID: "confirm.login", Label: "Sign in", Href: s.route("/login"), Method: "GET", Enabled: true},
+		Next:  view.Action{ID: "confirm.login", Label: "Sign in", Href: s.route("/login"), Method: "GET", Primary: true, Enabled: true},
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
@@ -487,10 +487,10 @@ func (s *Server) getForgot(w http.ResponseWriter, r *http.Request) {
 	page := view.ForgotPage{
 		Plain: view.Plain{
 			Title: "Forgotten your password?",
-			Lede: "Enter the login or the confirmed email of the account. There is no way to set a new password and keep the data stored here: " +
-				"the encryption key is derived from the password, and the server never has that key.",
+			Lede: line("Enter the login or the confirmed email of the account. There is no way to set a new password and keep the data stored here: " +
+				"the encryption key is derived from the password, and the server never has that key."),
 		},
-		Form: focused(withSubmit(s.anonPlainForm(w, r, "/forgot", "POST",
+		Form: focused(withPrimary(s.anonPlainForm(w, r, "/forgot", "POST",
 			view.FormRow{Name: "login", Label: "Login or email", Kind: view.InputText, Required: true},
 		), "forgot.submit", "Continue"), "login"),
 		Back: s.backToSignIn("forgot.back"),
@@ -531,7 +531,7 @@ func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 	}
 	typed := strings.TrimSpace(r.FormValue("login"))
 	page := view.ForgotPage{
-		Plain: view.Plain{Title: "We cannot help from here", Lede: forgotNone},
+		Plain: view.Plain{Title: "We cannot help from here", Lede: line(forgotNone)},
 		Back:  s.backToSignIn("forgot.back"),
 	}
 	switch r.FormValue("op") {
@@ -547,7 +547,7 @@ func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case token == "":
 		case s.sendForgotWipeMail(r, typed, token):
-			page.Title, page.Lede, page.Sent, page.HasMail = "Check your inbox", forgotSent, true, true
+			page.Title, page.Lede, page.Sent, page.HasMail = "Check your inbox", line(forgotSent), true, true
 		default:
 			// The letter did not go: the options again (s-auth-6), to try
 			// once more or to ask, the server's line over them as an alert
@@ -562,7 +562,7 @@ func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 			slog.Error("forgot: recording the request failed", "error", err)
 		}
 		if asked {
-			page.Title, page.Lede, page.Asked, page.HasMail = "The administrator has been asked", forgotAsked, true, true
+			page.Title, page.Lede, page.Asked, page.HasMail = "The administrator has been asked", line(forgotAsked), true, true
 		}
 	default:
 		s.forgotOptions(w, r, &page, typed)
@@ -580,10 +580,13 @@ func (s *Server) forgotOptions(w http.ResponseWriter, r *http.Request, page *vie
 		return
 	}
 	page.Title = "What we can do"
-	page.Lede = text("Account " + typed + " has a confirmed email. A silent password reset does not exist: " +
-		"a new password would be a new key, and everything stored under the old one would be lost anyway.")
+	page.Lede = runs(plainRun("Account "), strongRun(typed), plainRun(" has a confirmed email. A silent password reset does not exist: "+
+		"a new password would be a new key, and everything stored under the old one would be lost anyway."))
 	page.HasMail = true
-	page.Options = []view.ForgotOption{s.forgotOption(w, r, typed, "wipe", "Wipe the account", forgotWipeBody, "Send a confirmation letter")}
+	// The wipe's button is the primary one, the request's is not (s-auth-6).
+	wipe := s.forgotOption(w, r, typed, "wipe", "Wipe the account", forgotWipeBody, "Send a confirmation letter")
+	wipe.Form.Actions[0].Primary = true
+	page.Options = []view.ForgotOption{wipe}
 	if canAsk {
 		page.Options = append(page.Options, s.forgotOption(w, r, typed, "ask", "Ask the administrator", forgotAskBody, "Ask the administrator"))
 	}
@@ -670,22 +673,22 @@ func (s *Server) forgotWipePage(w http.ResponseWriter, r *http.Request, token, l
 	case string(view.WipeConfirm):
 		page.Step = view.WipeConfirm
 		page.Title = "Erase everything and start again?"
-		page.Lede = text("This is not a password recovery. The key to your data comes from the password you forgot, " +
-			"so nothing stored under it can be read again — by you, by us, by anyone.\n\n" +
-			"Confirming erases what Carrel keeps encrypted for " + login + ": saved connections and their passwords, subscriptions, " +
-			"published links, devices, external backup triggers and the deposited copy of the key. " +
-			"Address books, calendars, tasks and notes on the servers are not touched — you connect to them again afterwards.\n\n" +
-			"The account itself stays: same login, role and confirmed address, the same first day of the week and clock. " +
-			"Only the password is new, and you set it on the next screen.")
+		page.Lede = runs(plainRun("This is not a password recovery. The key to your data comes from the password you forgot, "+
+			"so nothing stored under it can be read again — by you, by us, by anyone.\n\n"+
+			"Confirming erases what Carrel keeps encrypted for "), strongRun(login), plainRun(": saved connections and their passwords, subscriptions, "+
+			"published links, devices, external backup triggers and the deposited copy of the key. "+
+			"Address books, calendars, tasks and notes on the servers are not touched — you connect to them again afterwards.\n\n"+
+			"The account itself stays: same login, role and confirmed address, the same first day of the week and clock. "+
+			"Only the password is new, and you set it on the next screen."))
 		page.Form = withSubmit(s.anonPlainForm(w, r, "/forgot/"+token, "POST"), "wipe.confirm", "Erase and set a new password")
 		page.Form.Actions[0].Danger = true
 		page.Cancel = &view.Action{ID: "wipe.cancel", Label: "Cancel", Href: s.route("/login"), Method: "GET", Enabled: true}
 	case string(view.WipePassword):
 		page.Step = view.WipePassword
 		page.Title = "Set a new password"
-		page.Lede = text("The account " + login + " is empty. Nothing was kept.")
+		page.Lede = runs(plainRun("The account "), monoRun(login), plainRun(" is empty. Nothing was kept."))
 		page.Notices = passwordNotice()
-		page.Form = focused(withSubmit(s.anonPlainForm(w, r, "/forgot/"+token, "POST",
+		page.Form = focused(withPrimary(s.anonPlainForm(w, r, "/forgot/"+token, "POST",
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
 			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 		), "wipe.password", "Set the password and sign in"), "password")

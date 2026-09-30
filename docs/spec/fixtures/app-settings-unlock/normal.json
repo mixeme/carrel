@@ -7,7 +7,8 @@
         "href": "/app/settings/unlock",
         "id": "unlock.submit",
         "label": "Show",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       }
     ],
     "errors": [],

@@ -98,7 +98,7 @@ func (s *Server) columnsMenu(r *http.Request, csrf view.FormRow, segment, listPa
 	}
 	form := s.plainForm(action, http.MethodPost, csrf)
 	form.Actions = []view.Action{
-		{ID: "columns.apply", Label: "Apply", Href: form.Action, Method: http.MethodPost, Enabled: true},
+		{ID: "columns.apply", Label: "Apply", Href: form.Action, Method: http.MethodPost, Primary: true, Enabled: true},
 		{ID: "columns.default", Label: "Reset to defaults", Href: form.Action, Method: http.MethodPost, Enabled: true},
 	}
 	item := func(c listColumn, on bool) view.ColumnItem {

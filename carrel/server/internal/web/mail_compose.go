@@ -290,7 +290,7 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 		sheet.Actions = append(sheet.Actions, view.Action{ID: "mail.attach." + k.What, Label: text(k.Label), Method: "POST", Enabled: true,
 			Href: s.postQuery("/app/mail/compose", url.Values{"op": {"attach"}, "what": {k.What}})})
 	}
-	send := view.Action{ID: "mail.send", Label: "Send", Method: "POST", Enabled: true,
+	send := view.Action{ID: "mail.send", Label: "Send", Method: "POST", Primary: true, Enabled: true,
 		Href: s.postQuery("/app/mail/compose", url.Values{"op": {"send"}})}
 	switch {
 	case len(d.To) == 0:

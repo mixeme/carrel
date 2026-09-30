@@ -158,7 +158,7 @@ func inside(c *fileCtx, base []string, rel string, dir bool) (string, []string, 
 func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link user.OpenLink) {
 	token := r.PathValue("token")
 	page := view.PublishedPage{
-		Plain:    view.Plain{Title: text(link.Target.Title), Lede: "Read-only. Published from Carrel."},
+		Plain:    view.Plain{Title: text(link.Target.Title), Lede: line("Read-only. Published from Carrel.")},
 		Kind:     view.KindFile,
 		ReadOnly: true,
 	}

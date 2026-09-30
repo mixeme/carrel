@@ -33,7 +33,18 @@
       }
     ]
   },
-  "lede": "This is not a password recovery. The key to your data comes from the password you forgot, so nothing stored under it can be read again — by you, by us, by anyone.\n\nConfirming erases what Carrel keeps encrypted for vera: saved connections and their passwords, subscriptions, published links, devices, external backup triggers and the deposited copy of the key. Address books, calendars, tasks and notes on the servers are not touched — you connect to them again afterwards.\n\nThe account itself stays: same login, role and confirmed address, the same first day of the week and clock. Only the password is new, and you set it on the next screen.",
+  "lede": [
+    {
+      "text": "This is not a password recovery. The key to your data comes from the password you forgot, so nothing stored under it can be read again — by you, by us, by anyone.\n\nConfirming erases what Carrel keeps encrypted for "
+    },
+    {
+      "mark": "strong",
+      "text": "vera"
+    },
+    {
+      "text": ": saved connections and their passwords, subscriptions, published links, devices, external backup triggers and the deposited copy of the key. Address books, calendars, tasks and notes on the servers are not touched — you connect to them again afterwards.\n\nThe account itself stays: same login, role and confirmed address, the same first day of the week and clock. Only the password is new, and you set it on the next screen."
+    }
+  ],
   "login": "vera",
   "notices": [],
   "step": "confirm",

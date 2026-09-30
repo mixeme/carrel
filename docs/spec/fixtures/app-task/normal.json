@@ -5,7 +5,8 @@
       "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit",
       "id": "record.edit",
       "label": "Edit",
-      "method": "GET"
+      "method": "GET",
+      "primary": true
     },
     {
       "enabled": true,

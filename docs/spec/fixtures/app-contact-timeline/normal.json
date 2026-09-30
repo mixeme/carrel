@@ -5,7 +5,8 @@
       "href": "/app/notes/quick?related=4f2b-9c31-a0e7",
       "id": "timeline.note",
       "label": "Write a note",
-      "method": "GET"
+      "method": "GET",
+      "primary": true
     },
     {
       "enabled": true,
@@ -624,7 +625,8 @@
               "options": [],
               "readOnly": false,
               "required": false,
-              "value": "2025-08-10"
+              "value": "2025-08-10",
+              "mono": true
             },
             {
               "error": "",
@@ -636,7 +638,8 @@
               "options": [],
               "readOnly": false,
               "required": false,
-              "value": "2026-11-10"
+              "value": "2026-11-10",
+              "mono": true
             }
           ]
         }

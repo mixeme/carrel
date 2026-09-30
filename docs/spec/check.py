@@ -126,7 +126,7 @@ check("6b. названные правила введены заголовком
 
 # 7. Фикстуры разбираются и лежат по правилам имён
 states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","unavailable","outcome","refused",
-          "sent","options","no-mail","wipe-sent","asked","password"}
+          "sent","options","no-mail","wipe-sent","asked","password","link"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -399,6 +399,106 @@ for d in drift:
 check("8. фикстура рисуется в свой кадр", red)
 for k in sorted(set(known)):
     print("         " + k)
+
+# 9. Основная кнопка и моноширинное поле — как в кадре.
+# Кадр рисует основное действие классом is-primary у tc-btn, поле, куда
+# набирают логин, адрес, код или UID, — is-mono у tc-in. Модель говорит то
+# же: Action.Primary и FormRow.Mono (C-6). Сверяется по подписи: действие
+# фикстуры, чью подпись кадр рисует кнопкой, основное ровно тогда, когда
+# кадр рисует её is-primary; строка формы, чью подпись кадр рисует полем, —
+# моноширинная ровно тогда, когда поле is-mono. Подпись, которую кадр рисует
+# и так и так, не сверяется: по ней не понять, о какой кнопке речь.
+def tag_text(s):
+    s = re.sub(r'<svg.*?</svg>', '', s, flags=re.S)
+    s = re.sub(r'<[^>]+>', ' ', s)
+    return " ".join(html_unescape(s).split())
+
+def html_unescape(s):
+    import html
+    return html.unescape(s)
+
+def frame_buttons(frame):
+    """Подпись кнопки -> множество «основная ли» по всем её местам в кадре."""
+    out = {}
+    for m in re.finditer(r'<(button|a) class="(tc-btn(?: [^"]*)?)"[^>]*>(.*?)</\1>', frame, re.S):
+        lab = tag_text(m.group(3))
+        if lab:
+            out.setdefault(lab, set()).add("is-primary" in m.group(2).split())
+    return out
+
+def frame_inputs(frame):
+    """Подпись поля -> множество «моноширинное ли»."""
+    out = {}
+    for m in re.finditer(r'<(input|textarea)\s[^>]*>', frame):
+        tag = m.group(0)
+        c = re.search(r'class="([^"]*)"', tag)
+        if not c or "tc-in" not in c.group(1).split():
+            continue
+        lab = None
+        before = frame[:m.start()]
+        i = before.rfind('<div class="tc-field')
+        if i >= 0:
+            seg = before[i:]
+            if seg.count("<div") > seg.count("</div>"):
+                l = re.search(r'<label>(.*?)</label>', seg, re.S)
+                if l:
+                    lab = tag_text(re.sub(r'<span class="tc-dim">.*?</span>', '', l.group(1), flags=re.S))
+        if not lab:
+            a = re.search(r'aria-label="([^"]*)"', tag)
+            lab = html_unescape(a.group(1)) if a else None
+        if lab:
+            out.setdefault(lab, set()).add("is-mono" in c.group(1).split())
+    return out
+
+def walk(x, acts, rows):
+    if isinstance(x, dict):
+        if "label" in x and "method" in x and "id" in x and "enabled" in x:
+            acts.append(x)
+        if "name" in x and "kind" in x and "label" in x and x.get("kind") != "hidden":
+            rows.append(x)
+        for v in x.values():
+            walk(v, acts, rows)
+    elif isinstance(x, list):
+        for v in x:
+            walk(v, acts, rows)
+
+marks = []
+for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
+    d = os.path.basename(os.path.dirname(p))
+    state = os.path.splitext(os.path.basename(p))[0]
+    key = "%s/%s" % (d, state)
+    if d not in FIXTURE_SCREEN:
+        continue                      # об этом уже сказала проверка 8
+    frame = frame_by_id(STATE_FRAME[key]) if key in STATE_FRAME else canon_frame(FIXTURE_SCREEN[d])
+    if frame is None:
+        continue
+    frame = frame.split("<figcaption")[0]
+    try:
+        data = json.load(io.open(p, encoding="utf-8"))
+    except Exception:
+        continue
+    acts, rows = [], []
+    walk(data, acts, rows)
+    fb, fi = frame_buttons(frame), frame_inputs(frame)
+    for a in acts:
+        lab = " ".join(str(a.get("label") or "").split())
+        drawn = fb.get(lab)
+        if drawn is None or len(drawn) != 1:
+            continue
+        want = next(iter(drawn))
+        if bool(a.get("primary")) != want:
+            marks.append("%s: «%s» (%s) — кадр рисует %s" % (key, lab, a.get("id"),
+                         "основной" if want else "не основной"))
+    for r in rows:
+        lab = " ".join(str(r.get("label") or "").split())
+        drawn = fi.get(lab)
+        if drawn is None or len(drawn) != 1:
+            continue
+        want = next(iter(drawn))
+        if bool(r.get("mono")) != want:
+            marks.append("%s: поле «%s» (%s) — кадр рисует %s" % (key, lab, r.get("name"),
+                         "моноширинным" if want else "обычным"))
+check("9. основная кнопка и моноширинное поле — как в кадре", sorted(set(marks)))
 
 print()
 print("ИТОГ: %d красных проверок" % len(fails))

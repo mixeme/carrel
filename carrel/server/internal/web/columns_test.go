@@ -232,6 +232,7 @@ func TestColumnsAreTheFrames(t *testing.T) {
 	if cols == nil {
 		t.Fatal("the contacts list has no Columns")
 	}
+	sameMarks(t, "components-42", "columns", cols.Form)
 	def := shownColumns(cols)
 	for i := range def {
 		def[i].ID = ""

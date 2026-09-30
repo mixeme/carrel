@@ -10,17 +10,30 @@ type (
 	Stamp  string // откуда запись: подпись подключения и имя коллекции, «nextcloud · Личный»
 )
 
+// Runs — фраза сервера, в которой кадр выделяет куски: адрес, куда ушло
+// письмо, логин учётной записи (s-auth-3, s-auth-6, s-auth-10, s-auth-11).
+// Клиент выводит куски подряд, каждый в своём выделении, и не режет и не
+// склеивает их сам. Фраза без выделений — один кусок; пустая — ни одного.
+type Runs []Run
+type Run struct {
+	Text Text    `json:"text"`
+	Mark RunMark `json:"mark,omitempty"` // C-8; пусто — обычный текст
+}
+
 // Action — кнопка, пункт меню и строка панели — одно и то же.
 type Action struct {
-	ID      string `json:"id"` // устойчивое имя действия, C-7
-	Label   Text   `json:"label"`
-	Icon    string `json:"icon,omitempty"`   // имя из набора U-4; пусто — без значка
-	Href    string `json:"href,omitempty"`   // пусто, если действие отправляет форму
-	Method  string `json:"method"`           // "GET" | "POST"
-	Danger  bool   `json:"danger,omitempty"` // разрушающее: удаление, сброс, объединение
-	Enabled bool   `json:"enabled"`
-	On      bool   `json:"on,omitempty"`     // включённый переключатель: флажок ленты, сегмент «сейчас показано»
-	Reason  Text   `json:"reason,omitempty"` // почему выключено; пусто, если включено
+	ID     string `json:"id"` // устойчивое имя действия, C-7
+	Label  Text   `json:"label"`
+	Icon   string `json:"icon,omitempty"`   // имя из набора U-4; пусто — без значка
+	Href   string `json:"href,omitempty"`   // пусто, если действие отправляет форму
+	Method string `json:"method"`           // "GET" | "POST"
+	Danger bool   `json:"danger,omitempty"` // разрушающее: удаление, сброс, объединение
+	// Primary — основное действие, как его рисует кадр (is-primary): кнопка
+	// формы, подтверждение листа, «New contact» в шапке списка
+	Primary bool `json:"primary,omitempty"`
+	Enabled bool `json:"enabled"`
+	On      bool `json:"on,omitempty"`     // включённый переключатель: флажок ленты, сегмент «сейчас показано»
+	Reason  Text `json:"reason,omitempty"` // почему выключено; пусто, если включено
 	// Arrow — стрелка кнопки (.m-split): пункты её меню; сама кнопка — то,
 	// что делается без стрелки. Пусто — кнопка без стрелки
 	Arrow []MenuItem `json:"arrow,omitempty"`

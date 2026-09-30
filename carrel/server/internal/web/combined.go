@@ -404,7 +404,7 @@ func (s *Server) combinedIOActions(blob sealed.Blob, spec kindSpec) []view.Actio
 }
 
 func (s *Server) combinedNewAction(blob sealed.Blob, spec kindSpec) view.Action {
-	a := view.Action{ID: "record.new", Label: text("New " + spec.noun), Method: "GET"}
+	a := view.Action{ID: "record.new", Label: text("New " + spec.noun), Method: "GET", Primary: true}
 	for _, col := range blob.Collections {
 		conn, ok := blob.Connection(col.AccountID)
 		if !ok || col.Gone || col.ReadOnly || !col.Has(spec.kind) {

@@ -5,7 +5,8 @@
       "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/conflict?etag=e19\u0026op=combine",
       "id": "conflict.combine",
       "label": "Write this combination",
-      "method": "POST"
+      "method": "POST",
+      "primary": true
     },
     {
       "enabled": true,

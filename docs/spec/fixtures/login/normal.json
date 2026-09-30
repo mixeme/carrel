@@ -14,7 +14,8 @@
         "href": "/login",
         "id": "login.submit",
         "label": "Sign in",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       }
     ],
     "errors": [],
@@ -64,7 +65,11 @@
       }
     ]
   },
-  "lede": "One desk. Every server.",
+  "lede": [
+    {
+      "text": "One desk. Every server."
+    }
+  ],
   "notices": [],
   "title": "Sign in to carrel.example",
   "register": null,

@@ -1,11 +1,16 @@
 {
-  "lede": "Address confirmed. You can sign in now.",
+  "lede": [
+    {
+      "text": "Address confirmed. You can sign in now."
+    }
+  ],
   "next": {
     "enabled": true,
     "href": "/login",
     "id": "confirm.login",
     "label": "Sign in",
-    "method": "GET"
+    "method": "GET",
+    "primary": true
   },
   "notices": [],
   "ok": true,

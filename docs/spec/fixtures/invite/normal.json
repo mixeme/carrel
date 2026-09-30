@@ -7,7 +7,8 @@
         "href": "/invite/invite-token",
         "id": "invite.submit",
         "label": "Create account",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       }
     ],
     "errors": [],
@@ -45,6 +46,18 @@
             "error": "",
             "extra": null,
             "hint": "",
+            "kind": "email",
+            "label": "Email",
+            "name": "email",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "anna@example.org"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
             "kind": "password",
             "label": "Password",
             "name": "password",
@@ -69,7 +82,11 @@
       }
     ]
   },
-  "lede": "mix invited you. Choose a login and a password.",
+  "lede": [
+    {
+      "text": "mix invited you. Choose a login and a password; the address is the one the invitation went to."
+    }
+  ],
   "notices": [
     {
       "actions": [],

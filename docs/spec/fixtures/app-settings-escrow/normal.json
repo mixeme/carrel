@@ -8,7 +8,8 @@
           "href": "/app/settings/escrow",
           "id": "escrow.deposit",
           "label": "Deposit my key",
-          "method": "POST"
+          "method": "POST",
+          "primary": true
         },
         {
           "enabled": true,

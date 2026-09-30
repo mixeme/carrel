@@ -6,7 +6,8 @@
       "icon": "i-plus",
       "id": "admin.invite",
       "label": "Add user",
-      "method": "GET"
+      "method": "GET",
+      "primary": true
     },
     {
       "enabled": true,

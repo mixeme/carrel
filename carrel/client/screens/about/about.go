@@ -23,7 +23,7 @@ func Screen(p *view.AboutPage) w.Page {
 						w.DialogLogo{Logo: w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63", Size: w.Logo42}, Wide: true},
 						w.DialogTitle{Text: string(p.Title)},
 						w.DialogSub{Parts: []w.Inline{w.Mono{Text: string(p.Version) + " · " + string(p.Commit)}}},
-						w.Tagline{Lead: string(p.Lede), Text: string(p.Tagline)},
+						w.Tagline{Lead: lead(p.Lede), Text: string(p.Tagline)},
 						w.Prose{
 							Parts:   []w.Inline{w.Text(p.Licence)},
 							Variant: w.ProseMuted,
@@ -42,4 +42,14 @@ func Screen(p *view.AboutPage) w.Page {
 			},
 		},
 	}
+}
+
+// lead is the first line of the tagline, the pieces of Lede one after
+// another: the tagline marks none of them (C-6.2 Runs).
+func lead(r view.Runs) string {
+	var s string
+	for _, p := range r {
+		s += string(p.Text)
+	}
+	return s
 }

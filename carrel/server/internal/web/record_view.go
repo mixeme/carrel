@@ -149,6 +149,19 @@ func noteWhen(obj *model.Object, tf timeFmt) string {
 	return ""
 }
 
+// primary is the button drawn as the primary one where it stands (C-6.2
+// Action.Primary): Edit in the head of a card (s-contacts-6, s-agenda-4,
+// s-tasks-4) and in the bar of a note (s-notes-2), not in the details panel
+// or a row's «⋯», where the same Edit is plain. nil stays nil.
+func primary(a *view.Action) *view.Action {
+	if a == nil {
+		return nil
+	}
+	p := *a
+	p.Primary = true
+	return &p
+}
+
 // shown is the buttons that exist, in their order.
 func shown(actions ...*view.Action) []view.Action {
 	out := []view.Action{}
@@ -388,7 +401,7 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	}
 	// Edit and Send stand in the head, the deletion at the foot; the rest is
 	// the «⋯» (s-contacts-6, s-contacts-10). Print is the client's.
-	page.Actions, page.Menu = shown(ops.edit, send, ops.del), ops.menu
+	page.Actions, page.Menu = shown(primary(ops.edit), send, ops.del), ops.menu
 	return page
 }
 
@@ -488,7 +501,7 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	}
 	// Edit and New task in the head, Attach in its block, the deletion at the
 	// foot; the rest is the «⋯» (s-agenda-2, s-agenda-5).
-	page.Actions, page.Menu = shown(ops.edit, s.attachOf(c, uid, obj.ETag), task, ops.del), ops.menu
+	page.Actions, page.Menu = shown(primary(ops.edit), s.attachOf(c, uid, obj.ETag), task, ops.del), ops.menu
 	return page
 }
 
@@ -531,7 +544,7 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 	}
 	// Edit and Mark done in the head, Attach in its block, the deletion at
 	// the foot; the rest is the «⋯» (s-tasks-2, s-tasks-6).
-	page.Actions, page.Menu = shown(ops.edit, done, s.attachOf(c, uid, obj.ETag), ops.del), ops.menu
+	page.Actions, page.Menu = shown(primary(ops.edit), done, s.attachOf(c, uid, obj.ETag), ops.del), ops.menu
 	return page
 }
 
@@ -553,7 +566,7 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	// «⋯» (s-notes-2, s-notes-14). Print and Source are the client's: the
 	// source is Doc.Body.
 	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
-	page.Doc.Bar = shown(ops.edit, &view.Action{ID: "note.export", Label: "Export Markdown", Icon: "i-down", Method: "GET", Enabled: true,
+	page.Doc.Bar = shown(primary(ops.edit), &view.Action{ID: "note.export", Label: "Export Markdown", Icon: "i-down", Method: "GET", Enabled: true,
 		Href: s.postQuery(c.listPath()+"/export", url.Values{"uid": {uid}})})
 	page.Meta.Actions = shown(s.attachOf(c, uid, obj.ETag), ops.del)
 	page.Meta.Menu = menuWithout(ops.menu, "record.export")

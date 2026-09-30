@@ -7,6 +7,7 @@
         "id": "record.new",
         "label": "New contact",
         "method": "GET",
+        "primary": true,
         "reason": "This collection is read-only."
       },
       {
@@ -27,7 +28,8 @@
             "href": "/app/contacts/a-rad-vps/komanda/columns",
             "id": "columns.apply",
             "label": "Apply",
-            "method": "POST"
+            "method": "POST",
+            "primary": true
           },
           {
             "enabled": true,

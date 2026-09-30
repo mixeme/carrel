@@ -111,7 +111,7 @@ func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, titl
 // off unless ticked (s-publish-2).
 func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title string, where view.Stamp, q url.Values, cancel, how string) view.PublishSheet {
 	tf := s.timeFor(sess)
-	create := view.Action{ID: "publish.create", Label: "Create link", Href: s.postQuery("/app/publish", q), Method: "POST", Enabled: true}
+	create := view.Action{ID: "publish.create", Label: "Create link", Href: s.postQuery("/app/publish", q), Method: "POST", Primary: true, Enabled: true}
 	back := view.Action{ID: "publish.cancel", Label: "Cancel", Href: s.route(cancel), Method: "GET", Enabled: true}
 	sheet := view.PublishSheet{
 		Kind:    kind,
@@ -131,8 +131,8 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 		if how == "range" {
 			today := dayOf(tf.now, tf.tz)
 			rows = append(rows,
-				view.FormRow{Name: "from", Label: "From", Kind: view.InputDate},
-				view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Hint: text("Both days are in it. " + tf.date(today) + " is today.")})
+				view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Mono: true},
+				view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Mono: true, Hint: text("Both days are in it. " + tf.date(today) + " is today.")})
 		}
 	}
 	rows = append(rows, view.FormRow{Name: "lives", Label: "Link lives for", Kind: view.InputSelect, Value: "30", Options: []view.Option{
@@ -474,7 +474,7 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 	}
 	token := r.PathValue("token")
 	page := view.PublishedPage{
-		Plain:    view.Plain{Title: text(link.Target.Title), Lede: "Read-only. Published from Carrel."},
+		Plain:    view.Plain{Title: text(link.Target.Title), Lede: line("Read-only. Published from Carrel.")},
 		Kind:     c.spec.kind,
 		ReadOnly: true,
 		// The button names the file it gives (s-publish-6, -7, -8): a note
@@ -512,7 +512,7 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 // says what the page is.
 func (s *Server) publicRecord(c *collectionCtx, obj *model.Object, page *view.PublishedPage) {
 	tf := c.tf
-	page.Title, page.Lede = text(recordTitle(c.spec.kind, obj)), ""
+	page.Title, page.Lede = text(recordTitle(c.spec.kind, obj)), nil
 	switch c.spec.kind {
 	case view.KindContact:
 		for _, f := range contactFieldsOf(obj) {
@@ -527,7 +527,7 @@ func (s *Server) publicRecord(c *collectionCtx, obj *model.Object, page *view.Pu
 		if where := strings.TrimSpace(cal.Text(obj, "LOCATION")); where != "" {
 			head = append(head, where)
 		}
-		page.Lede = text(strings.Join(head, " · "))
+		page.Lede = line(strings.Join(head, " · "))
 		page.Fields = append(page.Fields, calendarFields(obj)...)
 		page.Body = text(cal.Description(obj))
 	case view.KindTask:

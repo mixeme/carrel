@@ -168,8 +168,8 @@ func (s *Server) about(w http.ResponseWriter, r *http.Request) {
 		open = view.Action{ID: "davloom.open", Label: "Open Carrel", Href: strings.TrimSuffix(s.cfg.PublicURL, "/") + "/", Method: "GET", Enabled: true}
 	}
 	page := view.AboutPage{
-		Plain: view.Plain{Title: "davloom", Lede: view.Text("davloom is the DAV proxy of Carrel at " + host + ", not its web interface. " +
-			"Give this address to a CalDAV, CardDAV or WebDAV client: the user name is your Carrel login, the password is the one Carrel issued for that device.")},
+		Plain: view.Plain{Title: "davloom", Lede: view.Runs{{Text: view.Text("davloom is the DAV proxy of Carrel at " + host + ", not its web interface. " +
+			"Give this address to a CalDAV, CardDAV or WebDAV client: the user name is your Carrel login, the password is the one Carrel issued for that device.")}}},
 		Version: view.Text(s.version), Commit: view.Text(s.commit),
 		Source: view.Action{ID: "about.source", Label: "Source code", Href: "https://carrel.dev", Method: "GET", Enabled: true},
 		Third:  open,

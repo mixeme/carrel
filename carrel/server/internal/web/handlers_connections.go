@@ -434,7 +434,7 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 			page.Subtitle = text(fmt.Sprintf("Signed in as %s · %s · %s · %s", sess.Login(),
 				plural(len(blob.Connections), "server"), plural(cols, "collection"), plural(len(blob.Subscriptions), "subscription")))
 			page.Actions = append(page.Actions,
-				view.Action{ID: "connection.add", Label: "Connect account", Icon: "i-plus", Href: s.connectHref(), Method: "GET", Enabled: true},
+				view.Action{ID: "connection.add", Label: "Connect account", Icon: "i-plus", Href: s.connectHref(), Method: "GET", Primary: true, Enabled: true},
 				view.Action{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link",
 					Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}}), Method: "GET", Enabled: true})
 			if n, ok := goneNotice(blob); ok {
@@ -469,25 +469,25 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 	form := s.plainForm(action, "POST",
 		csrfField(sess),
 		view.FormRow{Name: "label", Label: "Label", Kind: view.InputText, Value: text(f.Label), Error: f.LabelErr, Placeholder: "optional"},
-		view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(f.Server), Error: f.ServerErr, Required: true,
+		view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(f.Server), Error: f.ServerErr, Required: true, Mono: true,
 			Hint: ".well-known is tried first, then the URL exactly as typed."},
 		view.FormRow{Name: "login", Label: "Username", Kind: view.InputText, Value: text(f.Login)},
 		password,
 		view.FormRow{Name: "noPassword", Label: "The server asks no password", Kind: view.InputCheck, Value: text(boolStr(f.NoPassword)),
 			Disables: "password"},
-		view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint", LabelAside: "SHA-256 · optional", Kind: view.InputText, Value: text(f.CertFingerprint),
+		view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint", LabelAside: "SHA-256 · optional", Kind: view.InputText, Value: text(f.CertFingerprint), Mono: true,
 			Placeholder: "only for a certificate the system does not trust"},
 	)
 	// The caret is in Server URL: Label is optional (s-profile-2).
 	form = focused(form, "server")
 	if f.Editing != "" {
 		form.Action = action
-		return withSubmit(form, id, label,
+		return withPrimary(form, id, label,
 			view.Action{ID: "connection.edit.cancel", Label: "Cancel", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true})
 	}
 	// The dialog is the content of main, not a sheet over the screen: the
 	// client has nothing to close it with, so its Cancel is here (C-7.2).
-	return withSubmit(form, id, label,
+	return withPrimary(form, id, label,
 		view.Action{ID: "connection.test", Label: "Test only", Href: s.route("/app/settings/connections/test"), Method: "POST", Enabled: true},
 		view.Action{ID: "connection.add.cancel", Label: "Cancel", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true})
 }

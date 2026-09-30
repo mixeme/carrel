@@ -193,7 +193,8 @@
           "href": "/admin/invites?action=link",
           "id": "admin.invite.create",
           "label": "Create link",
-          "method": "POST"
+          "method": "POST",
+          "primary": true
         },
         {
           "enabled": false,
@@ -352,7 +353,8 @@
           "href": "/admin/invites",
           "id": "admin.user.create",
           "label": "Create user",
-          "method": "POST"
+          "method": "POST",
+          "primary": true
         }
       ],
       "errors": [],
@@ -444,7 +446,8 @@
               "options": [],
               "readOnly": false,
               "required": true,
-              "value": "temp-password"
+              "value": "temp-password",
+              "mono": true
             }
           ]
         }

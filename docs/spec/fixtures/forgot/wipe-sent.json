@@ -15,7 +15,11 @@
     "sets": []
   },
   "hasMail": true,
-  "lede": "If that account has a confirmed email, a letter is on its way. The link erases everything stored here after you confirm it, and then asks for a new password. It cannot bring your data back.",
+  "lede": [
+    {
+      "text": "If that account has a confirmed email, a letter is on its way. The link erases everything stored here after you confirm it, and then asks for a new password. It cannot bring your data back."
+    }
+  ],
   "notices": [],
   "options": [],
   "sent": true,

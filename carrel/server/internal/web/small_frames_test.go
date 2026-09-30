@@ -115,6 +115,7 @@ func TestWeightButtonsAreTheFrame(t *testing.T) {
 	if !equalStrings(got, want) {
 		t.Fatalf("buttons = %v, the frame %v", got, want)
 	}
+	sameActionMarks(t, "s-dup-3", "weights", p.Threshold.WeightActions, nil)
 	save, reset := p.Threshold.WeightActions[0], p.Threshold.WeightActions[1]
 	if !save.Enabled || save.Method != "POST" || reset.Enabled || reset.Reason == "" {
 		t.Errorf("before any choice: save %+v, back to defaults %+v", save, reset)

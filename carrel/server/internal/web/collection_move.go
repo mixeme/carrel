@@ -139,7 +139,7 @@ func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, c
 	sheet := view.CollectionMoveSheet{Kind: col.Kinds[0], Copy: copying, Subject: text(here + " · " + label)}
 	sheet.Target.Options, _ = s.collectionMoveTargets(blob, conn, col, copying)
 	dest, known := blob.Connection(to)
-	confirm := view.Action{ID: "collection.move.confirm", Label: "Move here", Method: "POST", Enabled: true}
+	confirm := view.Action{ID: "collection.move.confirm", Label: "Move here", Method: "POST", Primary: true, Enabled: true}
 	if copying {
 		confirm.ID, confirm.Label = "collection.copy.confirm", "Copy here"
 	}

@@ -1395,12 +1395,22 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		})
 	}
 	t.Run("invite", func(t *testing.T) {
-		// The invitation of s-admin-1: no login, the person chooses it.
-		secret, err := app.h.users.Invite(app.sess.AccountID(), "", store.RoleUser)
+		// The invitation of s-auth-12: sent by letter to anna@example.org —
+		// the address shown and switched off —, the login the person's to
+		// choose.
+		letter, err := app.h.users.Invite(app.sess.AccountID(), "anna@example.org", store.RoleUser)
 		if err != nil {
 			t.Fatal(err)
 		}
-		app.compare(t, "invite/normal.json", app.h.do(get("/invite/"+secret, nil)))
+		app.compare(t, "invite/normal.json", app.h.do(get("/invite/"+letter, nil)))
+		// An invitation by link (s-admin-1) has no address and no field of
+		// it; its line under the title is the caption's of s-auth-12, which
+		// draws no frame of its own.
+		link, err := app.h.users.Invite(app.sess.AccountID(), "", store.RoleUser)
+		if err != nil {
+			t.Fatal(err)
+		}
+		app.compare(t, "invite/link.json", app.h.do(get("/invite/"+link, nil)))
 	})
 }
 

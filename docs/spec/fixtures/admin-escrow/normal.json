@@ -313,7 +313,8 @@
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": "temp-password"
+            "value": "temp-password",
+            "mono": true
           }
         ]
       }

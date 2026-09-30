@@ -199,11 +199,11 @@ func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.
 			}
 		}
 		form.Sets = []view.FieldSet{{Legend: text(legend), Rows: []view.FormRow{
-			{Name: "password", Label: "Device password", Kind: view.InputText, Value: text(issued.Password), ReadOnly: true,
+			{Name: "password", Label: "Device password", Kind: view.InputText, Value: text(issued.Password), ReadOnly: true, Mono: true,
 				Hint:  "Shown once and stored nowhere. Close this page and you will not see it again; lose it and you revoke this device and make another.",
 				Extra: &view.Action{ID: "davloom.copy", Label: "Copy", Method: "GET", Enabled: true}},
-			{Name: "address", Label: "Address", Kind: view.InputText, Value: text(s.davloomAddress()), ReadOnly: true},
-			{Name: "login", Label: "User name", Kind: view.InputText, Value: text(sess.Login()), ReadOnly: true,
+			{Name: "address", Label: "Address", Kind: view.InputText, Value: text(s.davloomAddress()), ReadOnly: true, Mono: true},
+			{Name: "login", Label: "User name", Kind: view.InputText, Value: text(sess.Login()), ReadOnly: true, Mono: true,
 				Hint: "Your Carrel login; the password is the device's, not yours."},
 		}}}
 		form.Actions = []view.Action{{ID: "davloom.done", Label: "Done", Href: s.route("/app/settings/davloom"), Method: "GET", Enabled: true}}
@@ -282,9 +282,9 @@ func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.
 	case sess.UnlockUntil(time.Now()) == nil:
 		// The fourth place of the one unlock sheet (S-10.7): a password that
 		// opens the data key is handed out only after the person's own.
-		form.Actions = []view.Action{{ID: "davloom.issue", Label: "Create password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}}
+		form.Actions = []view.Action{{ID: "davloom.issue", Label: "Create password", Href: s.route("/app/settings/unlock"), Method: "GET", Primary: true, Enabled: true}}
 	default:
-		form.Actions = []view.Action{{ID: "davloom.issue", Label: "Create password", Method: "POST", Enabled: true}}
+		form.Actions = []view.Action{{ID: "davloom.issue", Label: "Create password", Method: "POST", Primary: true, Enabled: true}}
 	}
 	return form
 }

@@ -15,7 +15,11 @@
     "sets": []
   },
   "hasMail": true,
-  "lede": "A recovery request is recorded for this account. The administrator still has to use the instance master password. Until then, the sign-in screen will not accept a new password.",
+  "lede": [
+    {
+      "text": "A recovery request is recorded for this account. The administrator still has to use the instance master password. Until then, the sign-in screen will not accept a new password."
+    }
+  ],
   "notices": [],
   "options": [],
   "sent": false,

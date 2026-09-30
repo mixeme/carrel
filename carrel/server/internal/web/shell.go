@@ -232,3 +232,13 @@ func withSubmit(f view.Form, id, label string, more ...view.Action) view.Form {
 	f.Actions = append([]view.Action{{ID: id, Label: text(label), Href: f.Action, Method: f.Method, Enabled: true}}, more...)
 	return f
 }
+
+// withPrimary is withSubmit for a form whose frame draws its button as the
+// primary one (is-primary, C-6.2 Action.Primary): Sign in, Create account,
+// Save. A button drawn plain or destructive is withSubmit's: the order of
+// the buttons does not make one primary.
+func withPrimary(f view.Form, id, label string, more ...view.Action) view.Form {
+	f = withSubmit(f, id, label, more...)
+	f.Actions[0].Primary = true
+	return f
+}

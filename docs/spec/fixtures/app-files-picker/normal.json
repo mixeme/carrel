@@ -5,7 +5,8 @@
       "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/",
       "id": "files.picker.upload",
       "label": "Upload here",
-      "method": "POST"
+      "method": "POST",
+      "primary": true
     },
     {
       "enabled": true,
@@ -94,7 +95,8 @@
           "href": "/app/files/picker?for=upload&mkcol=1&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
           "id": "files.tree.new.create",
           "label": "Create",
-          "method": "POST"
+          "method": "POST",
+          "primary": true
         },
         {
           "enabled": true,

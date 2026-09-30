@@ -93,14 +93,14 @@ func (s *Server) adminDavPage(sess *session.Session, r *http.Request, trace *vie
 	page.Rail = s.adminRail(sess, "/admin/dav")
 	rows := []view.FormRow{
 		csrfField(sess),
-		{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(strings.TrimSpace(r.FormValue("server"))), Required: true},
+		{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(strings.TrimSpace(r.FormValue("server"))), Required: true, Mono: true},
 		{Name: "login", Label: "Username", Kind: view.InputText, Value: text(strings.TrimSpace(r.FormValue("login")))},
 		{Name: "password", Label: "Password", Kind: view.InputPassword,
 			Hint: "Asked each time: nothing of this page is kept."},
-		{Name: "certFingerprint", Label: "Certificate fingerprint", Kind: view.InputText, Value: text(strings.TrimSpace(r.FormValue("certFingerprint"))),
+		{Name: "certFingerprint", Label: "Certificate fingerprint", Kind: view.InputText, Value: text(strings.TrimSpace(r.FormValue("certFingerprint"))), Mono: true,
 			Hint: "Only for a server whose certificate is not trusted: its SHA-256, as the trace shows it."},
 	}
-	page.Actions = []view.Action{{ID: "admin.dav.test", Label: "Test discovery", Method: "POST", Enabled: true,
+	page.Actions = []view.Action{{ID: "admin.dav.test", Label: "Test discovery", Method: "POST", Primary: true, Enabled: true,
 		Href: s.postQuery("/admin/dav", url.Values{"op": {"test"}})}}
 	if trace != nil && trace.OK {
 		rows = append(rows, view.FormRow{Name: "agree", Label: "Create test objects, read them back and delete them", Kind: view.InputCheck,

@@ -235,7 +235,8 @@
         "href": "/app/duplicates/decide?do=weights",
         "id": "duplicates.weights.save",
         "label": "Save",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       },
       {
         "enabled": false,

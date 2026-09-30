@@ -515,8 +515,8 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 	// days of the window and Show. «Widen the range» in the note is
 	// answered with it — there is no button of that name.
 	form := s.plainForm(card+"/timeline", "GET",
-		view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Value: text(from.Format("2006-01-02"))},
-		view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(last.Format("2006-01-02")),
+		view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Value: text(from.Format("2006-01-02")), Mono: true},
+		view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(last.Format("2006-01-02")), Mono: true,
 			Hint: "Both days are in the timeline."},
 	)
 	form.Actions = []view.Action{{ID: "range.show", Label: "Show", Href: s.route(card + "/timeline"), Method: "GET", Enabled: true}}
@@ -524,7 +524,7 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 	page.Note = text("Nothing was looked for before " + tf.date(from) + ". Widen the range if you need it.")
 	q := url.Values{"related": {person.uid}}
 	page.Actions = []view.Action{
-		{ID: "timeline.note", Label: "Write a note", Href: s.postQuery("/app/notes/quick", q), Method: "GET", Enabled: true},
+		{ID: "timeline.note", Label: "Write a note", Href: s.postQuery("/app/notes/quick", q), Method: "GET", Primary: true, Enabled: true},
 		{ID: "timeline.event", Label: "New event", Href: s.postQuery("/app/calendar/quick", url.Values{"attendee": {person.first}}), Method: "GET", Enabled: person.first != ""},
 		{ID: "timeline.task", Label: "New task", Href: s.postQuery("/app/tasks/quick", q), Method: "GET", Enabled: true},
 	}

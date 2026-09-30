@@ -5,7 +5,8 @@
       "href": "/admin/install",
       "id": "admin.install.run",
       "label": "Run the check",
-      "method": "POST"
+      "method": "POST",
+      "primary": true
     }
   ],
   "details": null,

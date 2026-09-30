@@ -528,7 +528,8 @@
         "label": "New contact",
         "href": "/app/contacts/a-nc-home/arhiv/new?pick=1",
         "method": "GET",
-        "enabled": true
+        "enabled": true,
+        "primary": true
       },
       {
         "id": "collection.import",
@@ -556,7 +557,8 @@
             "href": "/app/contacts/columns?task=t-task",
             "id": "columns.apply",
             "label": "Apply",
-            "method": "POST"
+            "method": "POST",
+            "primary": true
           },
           {
             "enabled": true,

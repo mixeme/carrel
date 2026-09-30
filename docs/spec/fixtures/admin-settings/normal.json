@@ -7,7 +7,8 @@
         "enabled": true,
         "id": "admin.settings.instance",
         "label": "Save",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       }
     ],
     "errors": [],
@@ -50,7 +51,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "24"
+            "value": "24",
+            "mono": true
           },
           {
             "error": "",
@@ -62,7 +64,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "2"
+            "value": "2",
+            "mono": true
           },
           {
             "error": "",
@@ -74,7 +77,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "7"
+            "value": "7",
+            "mono": true
           },
           {
             "error": "",
@@ -98,7 +102,8 @@
             "options": [],
             "readOnly": true,
             "required": false,
-            "value": "the address each request comes to"
+            "value": "the address each request comes to",
+            "mono": true
           }
         ]
       }
@@ -111,7 +116,8 @@
         "enabled": true,
         "id": "admin.settings.limits",
         "label": "Save",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       }
     ],
     "errors": [],
@@ -166,7 +172,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "10"
+            "value": "10",
+            "mono": true
           },
           {
             "error": "",
@@ -178,7 +185,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "25"
+            "value": "25",
+            "mono": true
           },
           {
             "error": "",
@@ -190,7 +198,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "20"
+            "value": "20",
+            "mono": true
           },
           {
             "error": "",
@@ -202,7 +211,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "50"
+            "value": "50",
+            "mono": true
           }
         ]
       }
@@ -349,7 +359,8 @@
         "enabled": true,
         "id": "admin.settings.save",
         "label": "Save",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       }
     ],
     "errors": [],
@@ -380,7 +391,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "",
+            "mono": true
           },
           {
             "error": "",
@@ -392,7 +404,8 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "587"
+            "value": "587",
+            "mono": true
           },
           {
             "error": "",

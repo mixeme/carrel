@@ -168,18 +168,18 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		Sets: []view.FieldSet{{Legend: "Global", Rows: []view.FormRow{
 			csrfField(sess),
 			{Name: "op", Kind: view.InputHidden, Value: "instance"},
-			{Name: "inviteTTL", Label: "Invite lifetime, h", Kind: view.InputNumber, Value: orDefault(set.InviteHours, int(conf.InviteTTL.Hours())),
+			{Name: "inviteTTL", Label: "Invite lifetime, h", Kind: view.InputNumber, Mono: true, Value: orDefault(set.InviteHours, int(conf.InviteTTL.Hours())),
 				Hint: "From 1 to 720. A new invitation, and one extended, live this long."},
-			{Name: "idle", Label: "Idle timeout, h", Kind: view.InputNumber, Value: orDefault(set.IdleHours, int(conf.SessionIdleTimeout.Hours())),
+			{Name: "idle", Label: "Idle timeout, h", Kind: view.InputNumber, Mono: true, Value: orDefault(set.IdleHours, int(conf.SessionIdleTimeout.Hours())),
 				Hint: "From 1 to 168. Applies to sessions already open."},
-			{Name: "session", Label: "Session life, d", Kind: view.InputNumber, Value: orDefault(set.SessionDays, int(conf.SessionAbsoluteTimeout.Hours()/24)),
+			{Name: "session", Label: "Session life, d", Kind: view.InputNumber, Mono: true, Value: orDefault(set.SessionDays, int(conf.SessionAbsoluteTimeout.Hours()/24)),
 				Hint: "From 1 to 365. Applies to sessions started from now on."},
 			{Name: "name", Label: "Instance name", Kind: view.InputText, Value: text(set.InstanceName()),
 				Hint: "On the sign-in screen and in the letters this instance sends."},
-			{Name: "publicURL", Label: "Public address", Kind: view.InputText, Value: text(origin), ReadOnly: true,
+			{Name: "publicURL", Label: "Public address", Kind: view.InputText, Mono: true, Value: text(origin), ReadOnly: true,
 				Hint: "Links in letters start with it. Set with CARREL_PUBLIC_URL."},
 		}}},
-		Actions: []view.Action{{ID: "admin.settings.instance", Label: "Save", Method: "POST", Enabled: true}},
+		Actions: []view.Action{{ID: "admin.settings.instance", Label: "Save", Method: "POST", Primary: true, Enabled: true}},
 	}
 
 	port := ""
@@ -207,9 +207,9 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		Action: s.route("/admin/settings"), Method: "POST",
 		Sets: []view.FieldSet{{Legend: legend, Rows: []view.FormRow{
 			csrfField(sess),
-			{Name: "host", Label: "Host", Kind: view.InputText, Value: text(shown.Host),
+			{Name: "host", Label: "Host", Kind: view.InputText, Mono: true, Value: text(shown.Host),
 				Hint: "Empty turns mail off: invitations and links are then handed over in person."},
-			{Name: "port", Label: "Port", Kind: view.InputNumber, Value: text(port)},
+			{Name: "port", Label: "Port", Kind: view.InputNumber, Value: text(port), Mono: true},
 			// The list of s-admin-9: None under a line, what it is for in the
 			// hint.
 			{Name: "security", Label: "Encryption", Kind: view.InputSelect, Options: []view.Option{
@@ -223,7 +223,7 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 			{Name: "sender", Label: "Sender address", Kind: view.InputRadio, Options: senderOptions(shown),
 				Hint: "Of people's letters. Your relay decides which of the two it will let out. The envelope sender stays the From address either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here. Replies go to the person's confirmed address in both cases."},
 		}}},
-		Actions: []view.Action{{ID: "admin.settings.save", Label: "Save", Method: "POST", Enabled: true}},
+		Actions: []view.Action{{ID: "admin.settings.save", Label: "Save", Method: "POST", Primary: true, Enabled: true}},
 	}
 	for i := range page.SMTP.Sets[0].Rows {
 		if flash.errText != "" && page.SMTP.Sets[0].Rows[i].Name == flash.errField {
@@ -260,16 +260,16 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 			{Name: "op", Kind: view.InputHidden, Value: "limits"},
 			{Name: "people", Label: "Let users send letters and links from Carrel", Kind: view.InputCheck, Value: text(boolStr(people)),
 				Hint: "Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form."},
-			{Name: "attach", Label: "Attachment, MB", Kind: view.InputNumber, Value: mb(set.MailMaxAttachMB, s.cfg.MailMaxAttachBytes),
+			{Name: "attach", Label: "Attachment, MB", Kind: view.InputNumber, Mono: true, Value: mb(set.MailMaxAttachMB, s.cfg.MailMaxAttachBytes),
 				Hint: "From 1 to 100. A larger file goes as a published link, shown as such before sending."},
-			{Name: "letter", Label: "Letter, MB", Kind: view.InputNumber, Value: mb(set.MailMaxMessageMB, s.cfg.MailMaxMessageBytes),
+			{Name: "letter", Label: "Letter, MB", Kind: view.InputNumber, Mono: true, Value: mb(set.MailMaxMessageMB, s.cfg.MailMaxMessageBytes),
 				Hint: "From 1 to 100, and not less than an attachment."},
-			{Name: "recipients", Label: "Recipients", Kind: view.InputNumber, Value: orDefault(set.MailMaxRecipients, s.cfg.MailMaxRecipients),
+			{Name: "recipients", Label: "Recipients", Kind: view.InputNumber, Mono: true, Value: orDefault(set.MailMaxRecipients, s.cfg.MailMaxRecipients),
 				Hint: "From 1 to 100."},
-			{Name: "perDay", Label: "Letters a day", Kind: view.InputNumber, Value: orDefault(set.MailMaxPerDay, s.cfg.MailMaxPerDay),
+			{Name: "perDay", Label: "Letters a day", Kind: view.InputNumber, Mono: true, Value: orDefault(set.MailMaxPerDay, s.cfg.MailMaxPerDay),
 				Hint: "From 1 to 1000, per person, per UTC day."},
 		}}},
-		Actions: []view.Action{{ID: "admin.settings.limits", Label: "Save", Method: "POST", Enabled: true}},
+		Actions: []view.Action{{ID: "admin.settings.limits", Label: "Save", Method: "POST", Primary: true, Enabled: true}},
 	}
 	for _, f := range []*view.Form{&page.Instance, &page.Limits} {
 		for i := range f.Sets[0].Rows {

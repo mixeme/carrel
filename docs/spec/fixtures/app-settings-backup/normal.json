@@ -7,7 +7,8 @@
         "href": "/app/settings/backup?op=save",
         "id": "backup.save",
         "label": "Save",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       }
     ],
     "errors": [],
@@ -216,6 +217,7 @@
             "hint": "Created on first use.",
             "kind": "text",
             "label": "Folder",
+            "mono": true,
             "name": "folder",
             "options": [],
             "readOnly": false,
@@ -228,6 +230,7 @@
             "hint": "Copies past this number are deleted after the new one has been read back and checked, not before. An archive is dated and never overwritten.",
             "kind": "number",
             "label": "Keep copies",
+            "mono": true,
             "name": "keep",
             "options": [],
             "readOnly": false,
@@ -270,6 +273,7 @@
             "hint": "0 is never. Carrel keeps no clock of its own.",
             "kind": "number",
             "label": "On sign-in, if the last copy is older than (days)",
+            "mono": true,
             "name": "signin",
             "options": [],
             "readOnly": false,

@@ -7,7 +7,8 @@
         "enabled": true,
         "id": "record.save",
         "label": "Save",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       },
       {
         "enabled": true,
@@ -138,6 +139,7 @@
             "hint": "Type it: 14.03.1987, or 14.03 without the year.",
             "kind": "text",
             "label": "Birthday",
+            "mono": true,
             "name": "bday",
             "options": [],
             "placeholder": "DD.MM.YYYY",
@@ -210,6 +212,7 @@
                 "hint": "",
                 "kind": "text",
                 "label": "Number",
+                "mono": true,
                 "name": "tel.{n}",
                 "options": [],
                 "readOnly": false,
@@ -388,6 +391,7 @@
                 "hint": "",
                 "kind": "text",
                 "label": "Postcode",
+                "mono": true,
                 "name": "adr.{n}.code",
                 "options": [],
                 "readOnly": false,

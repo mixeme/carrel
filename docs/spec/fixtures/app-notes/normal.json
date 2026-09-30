@@ -6,7 +6,8 @@
         "href": "/app/notes/a-nc-home/zapisi/new",
         "id": "record.new",
         "label": "New note",
-        "method": "GET"
+        "method": "GET",
+        "primary": true
       },
       {
         "enabled": true,

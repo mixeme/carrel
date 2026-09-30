@@ -65,9 +65,12 @@ func frameCaret(t *testing.T, id string) (string, bool) {
 }
 
 // sameCaret holds the caret of a form against the frame's: one field, the
-// frame's, with a reason where the frame draws one.
+// frame's, with a reason where the frame draws one — and, the form being
+// read off the frame anyway, its primary button and its monospaced fields
+// (sameMarks).
 func sameCaret(t *testing.T, id, what string, f view.Form) {
 	t.Helper()
+	sameMarks(t, id, what, f)
 	want, reason := frameCaret(t, id)
 	var got []string
 	var row view.FormRow

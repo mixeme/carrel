@@ -6,7 +6,8 @@
         "href": "/app/tasks/a-nc-home/dela/new",
         "id": "record.new",
         "label": "New task",
-        "method": "GET"
+        "method": "GET",
+        "primary": true
       },
       {
         "enabled": true,

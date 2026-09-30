@@ -61,7 +61,14 @@ func authFrame(t *testing.T, id string) authPage {
 		}
 		return ""
 	}
-	p.Title, p.Sub, p.Prose, p.Alert, p.Hint = one(authTitle), one(authSub), one(authProse), one(authAlert), one(authHint)
+	marked := func(re *regexp.Regexp) string {
+		if m := re.FindStringSubmatch(frame); m != nil {
+			return authMarked(m[1])
+		}
+		return ""
+	}
+	p.Title, p.Alert, p.Hint = one(authTitle), one(authAlert), one(authHint)
+	p.Sub, p.Prose = marked(authSub), marked(authProse)
 	if m := authTagline.FindStringSubmatch(frame); m != nil {
 		p.Lead, p.Tagline = frameText(m[1]), frameText(m[2])
 	}
@@ -91,6 +98,36 @@ func authText(s string) string {
 }
 
 var authStop = regexp.MustCompile(` ([.,:;])`)
+
+// The pieces of a sentence a frame marks (C-6.2 Runs): a login or an
+// address in monospace, a name in bold.
+var (
+	authMono   = regexp.MustCompile(`(?s)<span class="tc-mono">(.*?)</span>`)
+	authStrong = regexp.MustCompile(`(?s)<b>(.*?)</b>`)
+)
+
+// authMarked is authText of the line under a title — a lede — with its
+// marked pieces kept: «⟨mono:v@example.org⟩», «⟨strong:mix⟩». A frame that
+// marks a piece the model sends plain, or the other way round, differs.
+func authMarked(s string) string {
+	s = authMono.ReplaceAllString(s, "⟨mono:$1⟩")
+	s = authStrong.ReplaceAllString(s, "⟨strong:$1⟩")
+	return authText(s)
+}
+
+// saidRuns is a sentence of the server in pieces written the way
+// authMarked writes a frame's.
+func saidRuns(r view.Runs) string {
+	var b strings.Builder
+	for _, p := range r {
+		if p.Mark == view.RunPlain {
+			b.WriteString(string(p.Text))
+			continue
+		}
+		b.WriteString("⟨" + string(p.Mark) + ":" + string(p.Text) + "⟩")
+	}
+	return said(view.Text(b.String()))
+}
 
 // said is a text of the server written the way frameText writes one:
 // paragraphs and spaces as single spaces.
@@ -164,7 +201,7 @@ func TestLoginPageIsTheFrame(t *testing.T) {
 		if p.Register != nil {
 			links = append(links, string(p.Register.Label))
 		}
-		return authPage{Lead: said(p.Lede), Tagline: said(p.Tagline), Fields: shownFields(p.Form),
+		return authPage{Lead: saidRuns(p.Lede), Tagline: said(p.Tagline), Fields: shownFields(p.Form),
 			Buttons: labels(p.Form.Actions), Links: append(links, string(p.Forgot.Label))}
 	}
 	want := authFrame(t, "s-auth-1")
@@ -184,6 +221,7 @@ func TestLoginPageIsTheFrame(t *testing.T) {
 	openRegistration(t, h)
 	open := decode[view.LoginPage](t, h.do(get("/login", nil)))
 	sameAuth(t, "sign-in, registration open", "s-auth-1", page(open))
+	sameMarks(t, "s-auth-1", "sign-in", open.Form)
 	if open.Register == nil || open.Register.Href != "/register" || open.Register.Method != http.MethodGet || !open.Register.Enabled {
 		t.Errorf("register = %+v", open.Register)
 	}
@@ -214,11 +252,12 @@ func TestSignInRefusedIsTheFrame(t *testing.T) {
 		if p.Register != nil {
 			links = append(links, string(p.Register.Label))
 		}
-		return authPage{Lead: said(p.Lede), Tagline: said(p.Tagline), Alert: alertOf(p.Plain), Fields: shownFields(p.Form),
+		return authPage{Lead: saidRuns(p.Lede), Tagline: said(p.Tagline), Alert: alertOf(p.Plain), Fields: shownFields(p.Form),
 			Buttons: labels(p.Form.Actions), Links: append(links, string(p.Forgot.Label))}
 	}
 	wrongPassword := decode[view.LoginPage](t, h.do(h.anonPostForm("/login", "/login", url.Values{"login": {"mix"}, "password": {"wrong-one"}})))
 	sameAuth(t, "a wrong password", "s-auth-13", page(wrongPassword))
+	sameMarks(t, "s-auth-13", "a wrong password", wrongPassword.Form)
 	if len(wrongPassword.Notices) != 0 {
 		t.Errorf("notices %+v: s-auth-13 draws none, the reason is at the field", wrongPassword.Notices)
 	}
@@ -285,7 +324,7 @@ func TestRegisterPagesAreTheFrames(t *testing.T) {
 	h.admin("mix", "password123")
 	openRegistration(t, h)
 	form := decode[view.RegisterPage](t, h.do(get("/register", nil)))
-	sameAuth(t, "registration", "s-auth-2", authPage{Title: said(form.Title), Sub: said(form.Lede), Alert: alertOf(form.Plain),
+	sameAuth(t, "registration", "s-auth-2", authPage{Title: said(form.Title), Sub: saidRuns(form.Lede), Alert: alertOf(form.Plain),
 		Fields: shownFields(form.Form), Buttons: labels(form.Form.Actions), Links: []string{string(form.SignIn.Label)}})
 	if form.SignIn.Href != "/login" || form.SignIn.Method != http.MethodGet {
 		t.Errorf("sign in = %+v", form.SignIn)
@@ -305,7 +344,8 @@ func TestRegisterPagesAreTheFrames(t *testing.T) {
 	}
 	sent := decode[view.RegisterPage](t, h.do(h.anonPostForm("/register", "/register",
 		url.Values{"login": {"viktor"}, "email": {address}, "password": {"password123"}, "password2": {"password123"}})))
-	sameAuth(t, "the letter went", "s-auth-3", authPage{Title: said(sent.Title), Prose: said(sent.Lede), Buttons: []string{string(sent.SignIn.Label)}})
+	sameAuth(t, "the letter went", "s-auth-3", authPage{Title: said(sent.Title), Prose: saidRuns(sent.Lede), Buttons: []string{string(sent.SignIn.Label)}})
+	sameActionMarks(t, "s-auth-3", "the letter went", []view.Action{sent.SignIn}, nil)
 	if !sent.Sent || sent.SignIn.Href != "/login" {
 		t.Errorf("sent %v, back %+v", sent.Sent, sent.SignIn)
 	}
@@ -316,11 +356,11 @@ func TestRegisterPagesAreTheFrames(t *testing.T) {
 func TestSetupPageIsTheFrame(t *testing.T) {
 	h := newHarness(t)
 	page := decode[view.SetupPage](t, h.do(get("/setup", nil)))
-	got := authPage{Title: said(page.Title), Sub: said(page.Lede), Alert: alertOf(page.Plain), Fields: shownFields(page.Form), Buttons: labels(page.Form.Actions)}
+	got := authPage{Title: said(page.Title), Sub: saidRuns(page.Lede), Alert: alertOf(page.Plain), Fields: shownFields(page.Form), Buttons: labels(page.Form.Actions)}
 	sameAuth(t, "setup", "s-auth-4", got)
 	again := decode[view.SetupPage](t, h.do(h.anonPostForm("/setup", "/setup",
 		url.Values{"login": {"mix"}, "password": {"password123"}, "password2": {"password124"}})))
-	got = authPage{Title: said(again.Title), Sub: said(again.Lede), Alert: alertOf(again.Plain), Fields: shownFields(again.Form), Buttons: labels(again.Form.Actions)}
+	got = authPage{Title: said(again.Title), Sub: saidRuns(again.Lede), Alert: alertOf(again.Plain), Fields: shownFields(again.Form), Buttons: labels(again.Form.Actions)}
 	sameAuth(t, "setup, the repeat differs", "s-auth-4", got)
 	if r := rowNamed(t, again.Form, "password2"); r.Error == "" {
 		t.Errorf("a pair that differs is not said: %+v", again.Form)
@@ -365,6 +405,26 @@ func TestForgotPagesAreTheFrames(t *testing.T) {
 	}
 	deposited := decode[view.ForgotPage](t, h.do(h.anonPostForm("/forgot", "/forgot", url.Values{"login": {"mix"}})))
 	sameAuthAs(t, "what we can do", "s-auth-6", page(deposited), options)
+	// The first card's button is the primary one; each card is a form of
+	// one button, whole: where it goes, how, and what it carries — the
+	// CSRF token, the option and the login as it was typed.
+	var cards []view.Action
+	for _, o := range deposited.Options {
+		cards = append(cards, o.Form.Actions...)
+		op := map[string]string{"Send a confirmation letter": "wipe", "Ask the administrator": "ask"}[string(o.Form.Actions[0].Label)]
+		hidden := map[string]string{}
+		for _, r := range formRows(o.Form) {
+			if r.Kind != view.InputHidden {
+				t.Errorf("card %q: a field %q the frame does not draw", o.Title, r.Name)
+			}
+			hidden[r.Name] = string(r.Value)
+		}
+		if o.Form.Action != "/forgot" || o.Form.Method != http.MethodPost || len(o.Form.Actions) != 1 ||
+			hidden["_csrf"] == "" || hidden["op"] != op || hidden["login"] != "mix" || len(hidden) != 3 {
+			t.Errorf("card %q: form %s %s, actions %+v, carries %v", o.Title, o.Form.Method, o.Form.Action, o.Form.Actions, hidden)
+		}
+	}
+	sameActionMarks(t, "s-auth-6", "what we can do", append(cards, deposited.Back), nil)
 	if !deposited.HasMail || deposited.Sent || deposited.Asked {
 		t.Errorf("options: %+v", deposited)
 	}
@@ -391,6 +451,7 @@ func TestForgotPagesAreTheFrames(t *testing.T) {
 	}
 	sent := post(deposited.Options[0])
 	sameAuth(t, "the letter", "s-auth-8", page(sent))
+	sameActionMarks(t, "s-auth-8", "the letter", []view.Action{sent.Back}, nil)
 	if letters := relay.Letters(); !sent.Sent || len(letters) != 1 || letters[0].To[0] != "mix@example.org" {
 		t.Errorf("sent %v, letters %+v", sent.Sent, letters)
 	}
@@ -422,7 +483,7 @@ func forgotShown(p view.ForgotPage) authPage {
 		}
 		cards = append(cards, said(o.Title)+" | "+said(o.Body)+" | "+button)
 	}
-	return authPage{Title: said(p.Title), Prose: said(p.Lede), Alert: alertOf(p.Plain), Fields: shownFields(p.Form),
+	return authPage{Title: said(p.Title), Prose: saidRuns(p.Lede), Alert: alertOf(p.Plain), Fields: shownFields(p.Form),
 		Buttons: append(labels(p.Form.Actions), string(p.Back.Label)), Cards: cards}
 }
 
@@ -456,7 +517,7 @@ func TestLetterThatDidNotGoIsAnAlert(t *testing.T) {
 	reg := decode[view.RegisterPage](t, h.do(h.anonPostForm("/register", "/register",
 		url.Values{"login": {"viktor"}, "email": {"v@example.org"}, "password": {"password123"}, "password2": {"password123"}})))
 	sent := authFrame(t, "s-auth-3")
-	if alertOf(reg.Plain) == "" || reg.Lede != "" || reg.Sent || len(reg.Form.Sets) != 0 ||
+	if alertOf(reg.Plain) == "" || len(reg.Lede) != 0 || reg.Sent || len(reg.Form.Sets) != 0 ||
 		reg.SignIn.Label != view.Text(sent.Buttons[0]) || reg.SignIn.Href != "/login" {
 		t.Errorf("registration, the letter did not go: %+v", reg)
 	}
@@ -478,8 +539,9 @@ func TestForgotWipePagesAreTheFrames(t *testing.T) {
 	if confirm.Cancel != nil {
 		cancel = []string{string(confirm.Cancel.Label)}
 	}
-	sameAuth(t, "erase", "s-auth-10", authPage{Title: said(confirm.Title), Prose: said(confirm.Lede),
+	sameAuth(t, "erase", "s-auth-10", authPage{Title: said(confirm.Title), Prose: saidRuns(confirm.Lede),
 		Fields: shownFields(confirm.Form), Buttons: append(labels(confirm.Form.Actions), cancel...)})
+	sameActionMarks(t, "s-auth-10", "erase", append(confirm.Form.Actions, *confirm.Cancel), nil)
 	if confirm.Cancel == nil || confirm.Cancel.Href != "/login" || len(confirm.Form.Actions) != 1 || !confirm.Form.Actions[0].Danger {
 		t.Errorf("cancel %+v, actions %+v", confirm.Cancel, confirm.Form.Actions)
 	}
@@ -488,7 +550,7 @@ func TestForgotWipePagesAreTheFrames(t *testing.T) {
 	}
 
 	next := decode[view.ForgotWipePage](t, h.do(h.anonPostForm(link, link, formFields(confirm.Form))))
-	sameAuth(t, "a new password", "s-auth-11", authPage{Title: said(next.Title), Sub: said(next.Lede), Alert: alertOf(next.Plain),
+	sameAuth(t, "a new password", "s-auth-11", authPage{Title: said(next.Title), Sub: saidRuns(next.Lede), Alert: alertOf(next.Plain),
 		Fields: shownFields(next.Form), Buttons: labels(next.Form.Actions)})
 	if next.Step != view.WipePassword || next.Cancel != nil {
 		t.Errorf("step %q, cancel %+v", next.Step, next.Cancel)
@@ -505,7 +567,8 @@ func TestConfirmEmailPageIsTheFrame(t *testing.T) {
 		t.Fatal(err)
 	}
 	page := decode[view.ConfirmEmailPage](t, h.do(get("/confirm-email/"+token, nil)))
-	sameAuth(t, "confirmed", "rest-2", authPage{Title: said(page.Title), Prose: said(page.Lede), Buttons: []string{string(page.Next.Label)}})
+	sameAuth(t, "confirmed", "rest-2", authPage{Title: said(page.Title), Prose: saidRuns(page.Lede), Buttons: []string{string(page.Next.Label)}})
+	sameActionMarks(t, "rest-2", "confirmed", []view.Action{page.Next}, nil)
 }
 
 // rest-1 (from-typecase note 24): one page answers any dead secret link —
@@ -538,8 +601,9 @@ func TestDeadLinkPageIsTheFrame(t *testing.T) {
 		if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
 			t.Fatalf("%s %s: %d %q", req.Method, req.URL.Path, rec.Code, rec.Body.String())
 		}
-		sameAuthAs(t, req.Method+" "+req.URL.Path, "rest-1", authPage{Title: said(page.Title), Prose: said(page.Lede),
+		sameAuthAs(t, req.Method+" "+req.URL.Path, "rest-1", authPage{Title: said(page.Title), Prose: saidRuns(page.Lede),
 			Buttons: []string{string(page.SignIn.Label)}}, want)
+		sameActionMarks(t, "rest-1", req.URL.Path, []view.Action{page.SignIn}, nil)
 		if page.SignIn.Href != "/login" || page.SignIn.Method != http.MethodGet || !page.SignIn.Enabled {
 			t.Errorf("%s: sign in = %+v", req.URL.Path, page.SignIn)
 		}
@@ -564,16 +628,20 @@ func TestAboutPageIsTheFrame(t *testing.T) {
 	h := newHarness(t)
 	h.admin("mix", "password123")
 	want := authFrame(t, "rest-3")
+	// The line under the title is the build — Version and Commit, drawn
+	// monospaced as a whole — not a lede in pieces.
+	want.Sub = strings.TrimSuffix(strings.TrimPrefix(want.Sub, "⟨mono:"), "⟩")
 	if !regexp.MustCompile(`^\S+ · [0-9a-f]+$`).MatchString(want.Sub) {
 		t.Fatalf("rest-3 build = %q: read the frame again", want.Sub)
 	}
 	page := func(p view.AboutPage) authPage {
 		return authPage{Title: said(p.Title), Sub: string(p.Version) + " · " + string(p.Commit), Prose: said(p.Licence),
-			Lead: said(p.Lede), Tagline: said(p.Tagline), Buttons: []string{string(p.Source.Label), string(p.Third.Label), string(p.Back.Label)}}
+			Lead: saidRuns(p.Lede), Tagline: said(p.Tagline), Buttons: []string{string(p.Source.Label), string(p.Third.Label), string(p.Back.Label)}}
 	}
 	anon := decode[view.AboutPage](t, h.do(get("/about", nil)))
 	want.Sub = string(anon.Version) + " · " + string(anon.Commit)
 	sameAuthAs(t, "about", "rest-3", page(anon), want)
+	sameActionMarks(t, "rest-3", "about", []view.Action{anon.Source, anon.Third, anon.Back}, nil)
 	if anon.Back.Href != "/login" {
 		t.Errorf("back without a session = %+v", anon.Back)
 	}
