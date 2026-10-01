@@ -536,11 +536,20 @@
   "name": "New contact",
   "notices": [],
   "photo": {
-    "actions": [],
-    "editable": false,
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/new/photo-preview?op=upload",
+        "id": "photo.add",
+        "label": "Add",
+        "method": "POST"
+      }
+    ],
+    "editable": true,
     "href": "",
     "initials": "",
-    "note": ""
+    "note": "JPEG, PNG, GIF or WebP."
   },
   "print": {
     "range": "",

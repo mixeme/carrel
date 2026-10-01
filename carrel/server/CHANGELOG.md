@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.108 — 2026-10-01
+
+The full form of a new contact drew no photo (s-contacts-27): the photo steps
+were a card's, and before Save there is no card.
+
+### Added
+
+- **A photo for a new contact** (C-5.4, S-13). The new form's `photo` is a
+  card's without a photo: Add and «JPEG, PNG, GIF or WebP.». Add posts the
+  file to `/app/contacts/{account}/{col}/new/photo-preview?op=upload`, which
+  issues the UID the card will have and keeps the upload in the session's
+  photo draft under it; the frame steps are the card's, on that address with
+  `uid=`. Save photo writes nothing: it goes back to `/new?uid=`, where the
+  form shows the chosen frame with Replace, Crop and Remove and carries the
+  UID in a hidden `uid`. Save of the form creates the card under that UID,
+  with the photo as framed. Cancel of a first upload, Remove and a form left
+  unsaved write nothing. The upload's caps, types and refusals are a card's;
+  a `uid` not in the shape the server issues is not taken.
+- A form whose `uid` names a photo the session no longer holds (another
+  card's photo took the one draft) is not saved silently without it: the
+  form comes back, «Nothing was saved», without the photo; saving again
+  saves the card.
+
 ## v0.2.107 — 2026-10-01
 
 Mentions (mockup 7.23) stay deferred until after the first working version;

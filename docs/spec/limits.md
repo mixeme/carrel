@@ -125,7 +125,7 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | Что | Значение | Константа | Статус |
 |---|---|---|---|
 | Тело обычного POST (формы, JSON, CSRF) | 1 MiB | `MaxFormBodyBytes` | ✅ |
-| Тело POST `photo-preview` (загрузка фото) | `CARREL_PHOTO_MAX_UPLOAD_BYTES` + 1 MiB | `bodyLimit` | ✅ |
+| Тело POST `photo-preview` (загрузка фото карточки и новой формы) | `CARREL_PHOTO_MAX_UPLOAD_BYTES` + 1 MiB | `bodyLimit` | ✅ |
 | Ближайший кадр фото контакта | 400 % наибольшего квадрата | `PhotoMaxZoom` | ✅ |
 | Тело multipart POST `upload` (файлы) | без потолка; поля перед первым файлом — 1 MiB | `isFileUpload`, `readUploadFields` | ✅ |
 | Строк в очереди передач сессии | 50 | `TransferQueueLen` | ✅ |

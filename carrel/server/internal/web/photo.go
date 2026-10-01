@@ -348,6 +348,12 @@ type photoDraft struct {
 	Crop      photo.Crop
 	HadPhoto  bool // the card keeps a photo of its own, so Remove photo is offered
 	Step      int  // the preview's address changes with every step
+	// New: the draft of a new form (s-contacts-27), under the UID its
+	// upload issued; there is no card and no version yet. Chosen: Save
+	// photo was pressed, and the form shows and saves the frame Kept.
+	New    bool
+	Chosen bool
+	Kept   photo.Crop
 }
 
 func loadPhotoDraft(c *collectionCtx, uid string) (photoDraft, bool) {
@@ -385,7 +391,10 @@ func clearPhotoDraft(c *collectionCtx, uid string) {
 // only links to. Every step names the version of the edit form.
 func (s *Server) photoBlock(c *collectionCtx, st editState) view.PhotoBlock {
 	b := view.PhotoBlock{Initials: text(initials(first(st.values["fn"])))}
-	if st.isNew || st.obj == nil {
+	if st.isNew {
+		return s.newPhotoBlock(c, st, b)
+	}
+	if st.obj == nil {
 		return b
 	}
 	o, uid, here := c.origin(), st.uid, photoAddress(c, st.uid)
@@ -422,9 +431,19 @@ func (s *Server) photoBlock(c *collectionCtx, st editState) view.PhotoBlock {
 // field names are the page's own: zoom, offsetX, offsetY, rotate.
 func (s *Server) photoPreviewPage(c *collectionCtx, uid string, d photoDraft, notices ...view.Notice) view.PhotoPreviewPage {
 	sh := s.buildShell(c.sess, "Photo")
-	sh.Rail = s.recordRail(c, s.cardBack(c, uid))
+	back := s.cardBack(c, uid)
+	if d.New {
+		back = s.backAction(c.spec, "Back to the form", newFormAddress(c, uid))
+	}
+	sh.Rail = s.recordRail(c, back)
 	sh.Notices = append(sh.Notices, notices...)
-	here := photoAddress(c, uid)
+	step := func(fields url.Values) string {
+		if d.New {
+			fields.Set("uid", uid)
+			return s.postQuery(newPhotoAddress(c, ""), fields)
+		}
+		return s.postQuery(photoAddress(c, uid), fields)
+	}
 	page := view.PhotoPreviewPage{
 		Shell:   sh,
 		Href:    s.route(c.origin().photoPath(uid) + "?preview=" + strconv.Itoa(d.Step)),
@@ -442,17 +461,17 @@ func (s *Server) photoPreviewPage(c *collectionCtx, uid string, d photoDraft, no
 	for _, deg := range []int{0, 90, 180, 270} {
 		page.Actions = append(page.Actions, view.Action{
 			ID: "photo.rotate." + strconv.Itoa(deg), Label: text(strconv.Itoa(deg) + "°"), Method: "POST", Enabled: true, On: d.Crop.Rotate == deg,
-			Href: s.postQuery(here, url.Values{"op": {"frame"}, "rotate": {strconv.Itoa(deg)}}),
+			Href: step(url.Values{"op": {"frame"}, "rotate": {strconv.Itoa(deg)}}),
 		})
 	}
 	page.Actions = append(page.Actions,
-		view.Action{ID: "photo.save", Label: "Save photo", Href: s.postQuery(here, url.Values{"op": {"save"}}), Method: "POST", Primary: true, Enabled: true},
-		view.Action{ID: "photo.cancel", Label: "Cancel", Href: s.postQuery(here, url.Values{"op": {"cancel"}}), Method: "POST", Enabled: true},
+		view.Action{ID: "photo.save", Label: "Save photo", Href: step(url.Values{"op": {"save"}}), Method: "POST", Primary: true, Enabled: true},
+		view.Action{ID: "photo.cancel", Label: "Cancel", Href: step(url.Values{"op": {"cancel"}}), Method: "POST", Enabled: true},
 	)
 	if d.HadPhoto {
 		page.Actions = append(page.Actions, view.Action{
 			ID: "photo.remove", Label: "Remove photo", Method: "POST", Danger: true, Enabled: true,
-			Href: s.postQuery(here, url.Values{"op": {"remove"}, "etag": {d.ETag}}),
+			Href: step(url.Values{"op": {"remove"}, "etag": {d.ETag}}),
 		})
 	}
 	return page

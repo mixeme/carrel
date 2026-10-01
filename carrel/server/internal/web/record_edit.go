@@ -1945,6 +1945,9 @@ type editState struct {
 	// unfold: the form came with ?fields=all — «Show N empty fields»
 	// without scripts — and folds nothing; its posts keep it so.
 	unfold bool
+	// formUID: the UID a new contact's form carries once a photo is chosen
+	// for it (photo_new.go); Save creates the card under it.
+	formUID string
 }
 
 func (s *Server) editAction(c *collectionCtx, st editState) string {
@@ -1993,6 +1996,9 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		name := strings.TrimSpace(first(st.values["fn"]))
 		if st.isNew || name == "" {
 			name = "New contact"
+		}
+		if st.isNew && st.formUID != "" && len(form.Sets) > 0 {
+			form.Sets[0].Rows = append(form.Sets[0].Rows, view.FormRow{Name: "uid", Kind: view.InputHidden, Value: text(st.formUID)})
 		}
 		page := view.ContactEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: view.Text(c.stamp()), Form: form, Loss: st.loss, ReadOnly: c.col.ReadOnly}
 		page.Photo = s.photoBlock(c, st)
@@ -2957,14 +2963,14 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 	case pick:
 		s.writePage(w, r, http.StatusOK, s.newSheet(c, true))
 	default:
-		values := s.emptyValues(c)
-		for _, f := range editFields[c.spec.kind] {
-			if f.newRow != "" {
-				values[f.name], values[f.name+".type"] = []string{"", ""}, []string{f.newRow, ""}
-			}
-		}
+		values := s.newFormValues(c)
 		carried(c, r, values)
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: values, isNew: true, readAt: s.now()}))
+		st := editState{values: values, isNew: true, readAt: s.now()}
+		if c.card != nil {
+			// The form of a photo chosen before the card (photo_new.go).
+			st.formUID = chosenUID(c, r.URL.Query().Get("uid"))
+		}
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 	}
 }
 
@@ -3071,7 +3077,7 @@ func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind stri
 		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now()}))
 		return
 	}
-	s.createRecord(w, r, c, want)
+	s.createRecord(w, r, c, want, "")
 }
 
 // sameDayEnds gives a time the quick sheet draws without its date the day of
@@ -3196,28 +3202,52 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		return
 	}
 	want := s.submittedValues(c, r)
+	// The UID of a contact's form with a photo chosen (photo_new.go).
+	var formUID string
+	if c.card != nil {
+		formUID = chosenUID(c, r.FormValue("uid"))
+	}
 	if add := r.FormValue("add"); add != "" {
 		// «Add …» without scripts: the form back with one row more, and no
 		// record until Save (C-6.8 InputAdd).
 		addedRow(c.spec.kind, want, add)
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now()}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), formUID: formUID}))
 		return
 	}
 	if remove := r.FormValue("remove"); remove != "" {
 		removeRow(c.spec.kind, want, remove)
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now()}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), formUID: formUID}))
 		return
 	}
-	s.createRecord(w, r, c, want)
+	if c.card != nil && formUID == "" && r.FormValue("uid") != "" {
+		// The form shows a photo the session no longer holds: saving
+		// without it is the person's choice, not a silent one.
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), notices: []view.Notice{lostPhotoNotice}}))
+		return
+	}
+	s.createRecord(w, r, c, want, formUID)
 }
 
 // createRecord writes a new record. The full form and the quick sheet both
-// come here: two screens, one way of saving (U-6.16).
-func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collectionCtx, want formValues) {
-	st := editState{values: want, isNew: true, readAt: s.now()}
-	uid, err := model.NewUID()
+// come here: two screens, one way of saving (U-6.16). A contact's form with
+// a photo chosen names its UID (formUID): the card is created under it, with
+// the photo in it, and the draft goes (S-13, photo_new.go).
+func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collectionCtx, want formValues, formUID string) {
+	st := editState{values: want, isNew: true, readAt: s.now(), formUID: formUID}
+	uid, err := formUID, error(nil)
+	if uid == "" {
+		uid, err = model.NewUID()
+	}
 	if err != nil {
 		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	portrait, err := s.newCardPhoto(c, formUID)
+	if err != nil {
+		clearPhotoDraft(c, formUID)
+		st.formUID = ""
+		st.notices = []view.Notice{s.photoRefusal(err)}
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
 	now := time.Now()
@@ -3236,6 +3266,12 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 	}
 	path := strings.TrimSuffix(c.col.Path, "/") + "/" + uid + c.spec.ext
 	sent, err := c.apply(obj, ch)
+	if err == nil && portrait != nil {
+		patch, perr := model.NewPatch(card.PhotoOps(sent, portrait)...)
+		if err = perr; err == nil {
+			err = patch.Apply(sent)
+		}
+	}
 	if err == nil {
 		sent.Path = path
 		err = c.create(r.Context(), path, sent)
@@ -3258,6 +3294,9 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 	if key, unlocked := c.sess.DataKey(); unlocked {
 		_ = s.users.SetLastUsed(c.sess.AccountID(), key,
 			sealed.Selection{Kind: c.spec.kind, AccountID: c.col.AccountID, Path: c.col.Path})
+	}
+	if formUID != "" {
+		clearPhotoDraft(c, formUID)
 	}
 	s.finishCreate(w, r, c, uid, sent)
 }
