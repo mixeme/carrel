@@ -1604,17 +1604,31 @@ type ExportSheet struct {
 
 type ImportPage struct {
     Shell
-    Kind    Kind
-    Step    ImportStep // C-8
-    Source  ImportSource
-    Into    TargetPicker
-    Preview []ImportTable
-    Report  *ImportReport
-    Actions []Action
+    Kind     Kind
+    Step     ImportStep // C-8
+    Steps    []Text     // строка шагов (s-io-3…9): «1 · Source», «2 · Preview», «3 · Report»; текущий — по Step, в этом порядке
+    Subtitle Runs       // под заголовком: на предпросмотре файл моноширинно, размер и формат — «‹Разное (mix).vcf› · 84 KB · vCard 3.0» (s-io-5…8), у папки — имя, размер и число файлов; в отчёте — куда легло, «nextcloud · Контакты» (s-io-9); на первом шаге пусто
+    Source   ImportSource
+    Into     TargetPicker
+    Counts   []ImportCount // над таблицей предпросмотра (s-io-5…8): ready всегда; with errors (Error), UID collisions, skipped — когда не ноль
+    Preview  []ImportTable
+    Report   *ImportReport
+    Actions  []Action
 }
-type ImportSource struct { Kinds []Text; Folder *TargetPicker; Note Text }
+type ImportSource struct {
+    Kinds      []Text
+    Hint       Runs          // строка под полем файла: что берётся, расширение другого рода моноширинно — «… take ‹.ics› here instead» (s-io-3)
+    Folder     *TargetPicker // у заметок — папки WebDAV (s-io-4): вариант — GET, приходит с выбранной (Chosen)
+    Preview    *Action       // «Preview folder» под деревом (s-io-4): POST выбранной; выключена с причиной, пока папка не выбрана; nil — папок нет
+    FolderHint Runs          // строка под деревом: «Every ‹.md› directly in that folder …» (s-io-4)
+    Note       Runs          // сообщение шага: на первом — «Nothing is written until the preview has been read …» (s-io-3), у заметок — front matter и ‹X-›свойства (s-io-4); на предпросмотре — что импорт делает с записями рода (s-io-5…8)
+}
+type ImportCount struct { Count int; Label Text; Error bool } // «‹122› ready», «‹3› with errors» (s-io-5)
 type ImportTable struct { Rubric Text; Columns []Text; Rows [][]Text; Count int }
-type ImportReport struct { Created, Skipped, Renamed int; Rows []ImportTable; Note Text }
+// Отчёт числами (s-io-9): Created; UID collisions — Renames, «1a77-… → 9c02-…»;
+// Failed — не записано (запись не прочлась или сервер отказал), Failures —
+// почему, строка на запись. Rows — те же записи таблицами.
+type ImportReport struct { Created, Skipped, Renamed, Failed int; Failures, Renames []Text; Rows []ImportTable; Note Text }
 
 type PublishSheet struct {
     Kind    Kind

@@ -339,7 +339,10 @@ func TestImportNotesFromAFolder(t *testing.T) {
 	if page.Source.Folder == nil || len(page.Source.Folder.Options) != 1 {
 		t.Fatalf("no folder to take notes from: %+v", page.Source)
 	}
-	page = decode[view.ImportPage](t, f.h.do(postForm(page.Source.Folder.Options[0].ID, f.sess, url.Values{})))
+	// The folder is chosen in the tree, and «Preview folder» takes it
+	// (s-io-4).
+	page = decode[view.ImportPage](t, f.h.do(get(page.Source.Folder.Options[0].ID, f.sess)))
+	page = decode[view.ImportPage](t, f.h.do(postForm(page.Source.Preview.Href, f.sess, url.Values{})))
 	if page.Step != view.ImportStepPreview {
 		t.Fatalf("step = %q notices = %+v", page.Step, page.Notices)
 	}

@@ -10,6 +10,7 @@
       "primary": true
     }
   ],
+  "counts": [],
   "details": null,
   "into": {
     "chosen": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
@@ -242,12 +243,36 @@
   "report": null,
   "source": {
     "folder": null,
+    "folderHint": [],
+    "hint": [
+      {
+        "text": "vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take "
+      },
+      {
+        "mark": "mono",
+        "text": ".ics"
+      },
+      {
+        "text": " here instead."
+      }
+    ],
     "kinds": [
       ".vcf"
     ],
-    "note": "Nothing here is overwritten. Every record in the file is created, and one whose identity the collection already holds is created under a new one."
+    "note": [
+      {
+        "text": "Nothing is written until the preview has been read: the next step counts what was parsed and names what failed."
+      }
+    ],
+    "preview": null
   },
   "step": "source",
+  "steps": [
+    "1 · Source",
+    "2 · Preview",
+    "3 · Report"
+  ],
+  "subtitle": [],
   "title": "Import",
   "top": {
     "new": {

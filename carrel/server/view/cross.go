@@ -238,18 +238,51 @@ type ExportSheet struct {
 
 type ImportPage struct {
 	Shell
-	Kind    Kind          `json:"kind"`
-	Step    ImportStep    `json:"step"` // C-8
-	Source  ImportSource  `json:"source"`
-	Into    TargetPicker  `json:"into"`
+	Kind Kind       `json:"kind"`
+	Step ImportStep `json:"step"` // C-8
+	// Steps — строка шагов мастера (s-io-3…9): «1 · Source», «2 · Preview»,
+	// «3 · Report»; текущий — по Step, в этом же порядке
+	Steps []Text `json:"steps"`
+	// Subtitle — строка под заголовком: на предпросмотре файл моноширинно,
+	// размер и формат — «‹Разное (mix).vcf› · 84 KB · vCard 3.0»
+	// (s-io-5…8), у папки — её имя, размер и число файлов; в отчёте — куда
+	// легло, «nextcloud · Контакты» (s-io-9); на первом шаге пусто
+	Subtitle Runs         `json:"subtitle"`
+	Source   ImportSource `json:"source"`
+	Into     TargetPicker `json:"into"`
+	// Counts — счёт над таблицей предпросмотра (s-io-5…8): ready всегда,
+	// with errors (Error), UID collisions, skipped — когда не ноль
+	Counts  []ImportCount `json:"counts"`
 	Preview []ImportTable `json:"preview"`
 	Report  *ImportReport `json:"report"`
 	Actions []Action      `json:"actions"`
 }
 type ImportSource struct {
-	Kinds  []Text        `json:"kinds"`
+	Kinds []Text `json:"kinds"`
+	// Hint — строка под полем файла: что берётся, расширение другого рода
+	// моноширинно (s-io-3, s-io-4)
+	Hint Runs `json:"hint"`
+	// Folder — второй источник заметок, папки WebDAV (s-io-4): вариант —
+	// GET, выбирает папку (Chosen); берёт её Preview
 	Folder *TargetPicker `json:"folder"`
-	Note   Text          `json:"note"`
+	// Preview — «Preview folder» под деревом (s-io-4): выключена с причиной,
+	// пока папка не выбрана; nil — папок нет
+	Preview *Action `json:"preview"`
+	// FolderHint — строка под деревом папок (s-io-4): берутся ‹.md› прямо в
+	// папке, вглубь не идут, на сервере ничего не трогается
+	FolderHint Runs `json:"folderHint"`
+	// Note — сообщение шага (tc-msg): на первом — что ничего не пишется до
+	// предпросмотра (s-io-3), у заметок — front matter и ‹X-›свойства
+	// (s-io-4); на предпросмотре — что импорт делает с записями этого рода
+	// (s-io-5…8)
+	Note Runs `json:"note"`
+}
+
+// ImportCount — один счёт предпросмотра: «‹122› ready» (s-io-5…8)
+type ImportCount struct {
+	Count int  `json:"count"`
+	Label Text `json:"label"` // «ready», «with errors», «UID collisions», «skipped»
+	Error bool `json:"error,omitempty"`
 }
 type ImportTable struct {
 	Rubric  Text     `json:"rubric"`
@@ -258,9 +291,16 @@ type ImportTable struct {
 	Count   int      `json:"count"`
 }
 type ImportReport struct {
-	Created int           `json:"created"`
-	Skipped int           `json:"skipped"`
-	Renamed int           `json:"renamed"`
+	Created int `json:"created"`
+	Skipped int `json:"skipped"`
+	Renamed int `json:"renamed"`
+	// Failed — не записано: запись файла не прочлась или сервер отказал
+	// (s-io-9, «Failed»); Failures — почему, строка на запись
+	Failed   int    `json:"failed"`
+	Failures []Text `json:"failures"`
+	// Renames — UID, что сменились: «1a77-40de-bb02 → 9c02-4411-7ee1»
+	// (s-io-9, «UID collisions»)
+	Renames []Text        `json:"renames"`
 	Rows    []ImportTable `json:"rows"`
 	Note    Text          `json:"note"`
 }

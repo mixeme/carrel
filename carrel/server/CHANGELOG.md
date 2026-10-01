@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.110 — 2026-10-01
+
+The import wizard by its frames (s-io-3…9): what the steps, the head, the
+counts and the report draw, the server now sends.
+
+### Changed
+
+- **`ImportPage`** (C-6): `steps` — «1 · Source», «2 · Preview», «3 ·
+  Report», the current one by `step`; `subtitle` (Runs) — on the preview the
+  file monospaced, its size and the format it was read as («vCard 3.0»,
+  «iCalendar 2.0», «Markdown»), for a folder its name, size and how many
+  files it held; on the report the collection the records went into;
+  `counts` — «ready», and «with errors» (`error`), «UID collisions»,
+  «skipped» when there are any.
+- **`ImportReport`**: `failed` and `failures` — what was not written and
+  why, a line a record (a file of a folder that could not be read, a write
+  the server refused); `renames` — «old → new» for every UID that changed.
+  `skipped` no longer counts what failed.
+- **`ImportSource.note` is `Runs`** (was `Text`), in the frames' words: on
+  the first step what the preview does, for notes what front matter brings
+  with ‹X-› monospaced; on the preview what the import does with records of
+  the kind. `hint` — the line under the file, the other kind's extension
+  monospaced; `folderHint` — the line under the tree of folders.
+- **Notes from a folder**: an option of `source.folder` is a GET that comes
+  back with the folder chosen; `source.preview`, «Preview folder», takes it
+  (POST, off with a reason until a folder is chosen). A file of the folder
+  that is not Markdown is named and counted as skipped; one that cannot be
+  read, as an error. A note without front matter is dated by the time the
+  server gives its file.
+
 ## v0.2.109 — 2026-10-01
 
 The line of a subscription card ended at «read 2 min ago»; the frames go on
