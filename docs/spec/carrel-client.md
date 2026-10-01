@@ -360,14 +360,17 @@ Carrel не знает; всё, что ей нужно, приходит зна�
 | 3 | `ContactsListPage`, `ContactTimelinePage`: «⋯» полосы (`Bar.More`) | s-contacts-1, s-contacts-7 | «⋯» полосы без сценариев | 60 | владелец 01.10.2026 |
 | 4 | `ContactsListPage`, `ContactTimelinePage`: Columns (`Bar.Columns`) | s-contacts-1, s-contacts-7 | меню-форма закрыта, без сценариев не открыть | 60 | владелец 01.10.2026 |
 | 5 | `app-contacts/empty`, `app-contacts/partial`, `app-contacts/unavailable`, `app-contacts-one/empty`, `app-contacts-one/source-error` (`ContactsListPage`) | — | кадры состояний списка: пусто, частичный и недоступный ответ, отказ книги | 66 | владелец 01.10.2026 |
+| 6 | `app-contact-edit/loss` (`ContactEditPage`) | — | кадр отчёта о потерях на правке | 66 | владелец 01.10.2026 |
 | 7 | `app-contact-timeline/normal` (`ContactTimelinePage`) | s-contacts-7 | ряд группы: месяц фикстуры против двух в кадре | 61 | владелец 01.10.2026 |
 | 8 | `app-contacts-one/readonly` (`ContactsListPage`) | states-4 | кадр обрезан: без полосы и групп, фикстура их несёт | 62 | владелец 01.10.2026 |
+| 9 | `app-contact-edit/no-photo`, `app-contact-new/normal` (`ContactEditPage`) | s-contacts-4, s-contacts-27 | кадры обрезаны на телефонах, фикстуры — полная форма | 62 | владелец 01.10.2026 |
 | 10 | `ContactsListPage`, `ContactPage`, `ContactTimelinePage`: метки (`Tag`) рейла и полей | s-contacts-1, s-contacts-6, s-contacts-7 | `Tag.Href`: фильтр по категории никуда не ведёт | 63 | владелец 01.10.2026 |
 | 11 | `ContactsListPage`, `ContactPage`, `ContactTimelinePage`: фото в шапке (`HeadPhoto`) | s-contacts-1, s-contacts-6, s-contacts-7 | `HeadPhoto.Src`: фотография не показывается | 64 | владелец 01.10.2026 |
 | 12 | `ContactsListPage`: фильтр полосы (`Bar.FilterForm`) | s-contacts-1 | скрытые поля `Filter`: task, sort, tag не уходят | 65 | владелец 01.10.2026 |
 | 13 | `ContactsListPage`: «Compact rows» (`Bar.Compact`) | s-contacts-1 | отметка полосы вне формы: форма GET контракта не встаёт | — (новая, сервер C13 закрыт) | владелец 01.10.2026 |
 | 14 | `ContactTimelinePage`: крестик панели (`Card.Close`) | s-contacts-7 | адреса у крестика нет | сервер, долг C16 | владелец 01.10.2026 |
 | 15 | `app-contact/normal`, `app-contact/outcome` (`ContactPage`) | s-contacts-6, s-contacts-16 | ряд поля карточки (`dt`, `dd` чередуются): полей у фикстуры 6, в кадре 8; у итога хронология не открыта, кадр рисует её строки; обновления (`TopBar.Refresh`) у карточки нет | 61; сервер, долг C17 | владелец 01.10.2026 |
+| 16 | `app-contact-edit/normal` (`ContactEditPage`) | s-contacts-3 | подпись второго телефона в кадре — поле ввода, в фикстуре — выбор; обновления (`TopBar.Refresh`) у правки нет | 62; сервер, долг C17 | владелец 01.10.2026 |
 
 ### U-5.6 Что принадлежит экрану
 

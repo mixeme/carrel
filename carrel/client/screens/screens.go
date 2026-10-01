@@ -4,6 +4,7 @@ import (
 	"carrel.dev/carrel/client/screens/about"
 	"carrel.dev/carrel/client/screens/confirm"
 	"carrel.dev/carrel/client/screens/contact"
+	"carrel.dev/carrel/client/screens/contactedit"
 	"carrel.dev/carrel/client/screens/contacts"
 	"carrel.dev/carrel/client/screens/deadlink"
 	"carrel.dev/carrel/client/screens/forgot"
@@ -180,6 +181,19 @@ var All = []Screen{
 			{Row: 4, Control: ".Items(Bar).Items(Button)"},                           // ждёт библиотеку: U-5.5 #4
 			{Row: 7, Fixture: "app-contact-timeline/normal"},                         // ждёт библиотеку: U-5.5 #7
 			{Row: 14, Control: ".Side(Side).Items(Head).Acts(Acts).Items(Close)"},    // ждёт библиотеку: U-5.5 #14
+		},
+	},
+	{
+		Model:  func() any { return new(view.ContactEditPage) },
+		Frames: []string{"s-contacts-3", "s-contacts-4", "s-contacts-27"},
+		Draw:   func(model any) Root { return contactedit.Screen(model.(*view.ContactEditPage)) },
+		Title:  func(model any) string { return string(model.(*view.ContactEditPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return contactedit.Forms(model.(*view.ContactEditPage)) },
+		Waits: []Wait{
+			{Row: 16, Fixture: "app-contact-edit/normal"},  // ждёт библиотеку: U-5.5 #16
+			{Row: 6, Fixture: "app-contact-edit/loss"},     // ждёт библиотеку: U-5.5 #6
+			{Row: 9, Fixture: "app-contact-edit/no-photo"}, // ждёт библиотеку: U-5.5 #9
+			{Row: 9, Fixture: "app-contact-new/normal"},    // ждёт библиотеку: U-5.5 #9
 		},
 	},
 }
