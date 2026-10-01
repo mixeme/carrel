@@ -389,6 +389,22 @@ a.tc-btn[aria-disabled=true]{opacity:.45;cursor:default}
   flex:none;white-space:nowrap}
 .tc-seg__opt{padding:0 11px;display:inline-flex;align-items:center;font-size:12.5px;color:var(--tc-muted);border-right:.5px solid var(--tc-hair)}
 .tc-seg__opt:last-child{border-right:0}
+/* Сегмент, которому тесно (решение 30.09.2026): на узкой полосе он складывается в выпадающий выбор —
+   текущий вариант и меню остальных. <details> открывается без сценария; варианты — ссылки. */
+.tc-segfold{display:inline-flex}
+.tc-segfold__pick{display:none;position:relative}
+/* Текущий вариант — как поле-список (.tc-in.is-pick), меню — как .tc-menu: свои элементы, не чужие блоки. */
+.tc-segfold__current{height:28px;border:.5px solid var(--tc-edge);border-radius:3px;background:var(--tc-surface);padding:0 26px 0 9px;
+  font-size:12.5px;display:flex;align-items:center;color:var(--tc-ink);white-space:nowrap;position:relative;list-style:none;cursor:pointer}
+.tc-segfold__current::-webkit-details-marker{display:none}
+.tc-segfold__current::after{content:"";position:absolute;right:9px;top:50%;width:6px;height:6px;
+  margin-top:-4px;border-right:1.3px solid currentColor;border-bottom:1.3px solid currentColor;
+  transform:rotate(45deg);opacity:.5;pointer-events:none}
+.tc-segfold__menu{position:absolute;top:100%;left:0;margin-top:4px;z-index:6;width:180px;
+  background:var(--tc-surface);border:.5px solid var(--tc-edge);border-radius:4px;padding:4px}
+.tc-segfold__item{display:flex;align-items:center;gap:9px;height:28px;padding:0 8px;border-radius:3px;font-size:12.5px;color:var(--tc-ink)}
+.tc-segfold__item.is-on{background:var(--tc-card)}
+.tc-segfold__count{margin-left:auto;color:var(--tc-dusty)}
 .tc-seg__opt.is-on{background:var(--tc-card);color:var(--tc-ink);font-weight:600}
 /* Сегмент на радиокнопках: выбранный — тот, чья кнопка отмечена. */
 label.tc-seg__opt{position:relative;cursor:pointer}
@@ -518,6 +534,9 @@ label.tc-check{position:relative;cursor:pointer}
 .tc-row--cols > .tc-col--kind{width:56px}
 /* Просрочен срок, а не всё дело: остальные числа строки своего цвета. */
 .tc-row--cols.is-overdue > .tc-row__cell{color:var(--tc-dusty)}
+/* Значение поля, которое куда-то ведёт (почта, телефон, связанная запись): вид значения, подчёркивание — при наведении. */
+.tc-fields__link{color:inherit;text-decoration:none}
+.tc-fields__link:hover{text-decoration:underline}
 /* Упоминание карточки, которой в отмеченных книгах нет: имя, не ссылка. */
 .tc-mention.is-lost{color:var(--tc-dusty);text-decoration:underline dotted;text-underline-offset:2px}
 .tc-row--timecols{grid-template-columns:3px 62px minmax(168px,2fr) minmax(110px,1fr) 96px 140px}
@@ -779,6 +798,8 @@ label.tc-menu__item{position:relative;cursor:pointer}
    is-2nd уходит под «...» с 960, а не с 800. Агенда, хронология человека. */
 @container tcbox (max-width:960px){
   .tc-bar--wide .is-2nd{display:none}
+  .tc-bar--wide .tc-segfold > .tc-seg{display:none}
+  .tc-bar--wide .tc-segfold__pick{display:block}
   .tc-bar--wide:has(.is-2nd) .tc-bar__more,.tc-bar--wide:has(.is-2nd) .tc-drop:has(> .tc-bar__more){display:inline-flex}
   .tc-bar--wide:has(.is-2nd) .tc-bar__more + .tc-menu{display:block}
 }
@@ -790,6 +811,8 @@ label.tc-menu__item{position:relative;cursor:pointer}
 @container tcbox (max-width:800px){
   /* is-2nd уходит под «...». У таблицы порог 700: ячейка умеет сжиматься. */
   .tc-bar .is-2nd{display:none}
+  .tc-bar .tc-segfold > .tc-seg{display:none}
+  .tc-bar .tc-segfold__pick{display:block}
   /* Панель выделения теряет подписи, не действия. */
   .tc-bar--sel .tc-btn > .tc-btn__label{display:none}
   .tc-bar--sel .tc-btn:has(> .tc-btn__label){padding:0 9px}
@@ -983,7 +1006,8 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-nav--bottom .tc-nav__item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:auto;padding:7px 0 9px;font-size:9.5px;color:var(--tc-dusty);border-radius:0}
   .tc-nav--bottom .tc-nav__item.is-on{color:var(--tc-accent);background:transparent;font-weight:400}
   .tc-nav--bottom svg{width:17px;height:17px;stroke:currentColor;stroke-width:1.3;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:1}
-  .tc-btn,.tc-in,.tc-seg{height:38px}
+  .tc-btn,.tc-in,.tc-seg,.tc-segfold__current{height:38px}
+  .tc-segfold__item{height:40px}
   .tc-bar .tc-btn,.tc-docbar .tc-btn,.tc-head .tc-acts .tc-btn,.tc-formfoot .tc-btn,
   .tc-queue__head .tc-btn:not(.is-sm),.tc-sheet__head .tc-btn,
   .tc-form .tc-btn:not(.is-sm),.tc-fset .tc-btn:not(.is-sm),.tc-field .tc-btn:not(.is-sm),
@@ -3568,13 +3592,13 @@ Read  2 min ago</div>
             <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>Edit</button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg>Send</button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button>
-            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
+            <span class="tc-drop"><button class="tc-btn" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button><div class="tc-menu is-pop is-right tc-menu--w212" hidden><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-move"/></svg>Move</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-dup"/></svg>Copy</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-down"/></svg>Export <span class="tc-mono tc-mono--t11">.vcf</span></button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-link"/></svg>Publish a link</button></div></span>
           </div>
         </div>
         <dl class="tc-fields">
-          <dt>Phone · mobile</dt><dd class="tc-mono">+7 912 445-10-88</dd>
+          <dt>Phone · mobile</dt><dd class="tc-mono"><a class="tc-fields__link" href="tel:+79124451088">+7 912 445-10-88</a></dd>
           <dt>Phone · work</dt><dd class="tc-mono">+7 495 120-45-00</dd>
-          <dt>Email · work</dt><dd>a.kovaleva@example.org</dd>
+          <dt>Email · work</dt><dd><a class="tc-fields__link" href="mailto:a.kovaleva@example.org">a.kovaleva@example.org</a></dd>
           <dt>Email · second</dt><dd>anna.kovaleva@slovo.example</dd>
           <dt>Address · work</dt><dd>Москва, Тверская 12, стр. 3</dd>
           <dt>Birthday</dt><dd class="tc-mono">1987-03-14 <span class="tc-dim">· in 7 months</span></dd>
@@ -4024,8 +4048,8 @@ Read  2 min ago · not changed on server</div>
           </div>
         </div>
         <div class="tc-bar tc-bar--wide">
-          <span class="tc-range"><input class="tc-in is-mono" type="date" value="2026-01-01"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-11-10"><button class="tc-btn" type="button">Show</button></span>
-          <span class="tc-seg is-2nd"><button class="is-on tc-seg__opt" type="button">All 24</button><button class="tc-seg__opt" type="button">Events 14</button><button class="tc-seg__opt" type="button">Tasks 2</button><button class="tc-seg__opt" type="button">Notes 4</button><button class="tc-seg__opt" type="button">Files 4</button></span>
+          <form class="tc-range" action="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline" method="get"><input class="tc-in is-mono" type="date" value="2026-01-01" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-11-10" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
+          <span class="tc-segfold"><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline">All 24</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=event">Events 14</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=task">Tasks 2</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=note">Notes 4</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=file">Files 4</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">All 24</summary><div class="tc-segfold__menu"><a class="is-on tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline">All<span class="tc-segfold__count">24</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=event">Events<span class="tc-segfold__count">14</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=task">Tasks<span class="tc-segfold__count">2</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=note">Notes<span class="tc-segfold__count">4</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=file">Files<span class="tc-segfold__count">4</span></a></div></details></span>
           <button class="tc-btn is-2nd" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</button>
           <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           <span class="tc-bar__right is-2nd"><span class="tc-mono">newest first</span></span>
@@ -4068,7 +4092,7 @@ Read  2 min ago · not changed on server</div>
             <span class="tc-avatar--photo is-ph tc-avatar--photo--sq76-t20">АК</span>
             <div class="tc-head__text">
               <div class="tc-rubric">Card</div>
-              <div class="tc-line tc-line--gap-5 tc-sec__acts"><button class="tc-btn is-sm" type="button">Open the card</button><button class="tc-btn is-sm" type="button">Edit</button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></div>
+              <div class="tc-line tc-line--gap-5 tc-sec__acts"><button class="tc-btn is-sm" type="button">Open the card</button><button class="tc-btn is-sm" type="button">Edit</button><span class="tc-drop"><button class="tc-btn is-sm" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button><div class="tc-menu is-pop tc-menu--w212" hidden><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-move"/></svg>Move</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-dup"/></svg>Copy</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-down"/></svg>Export <span class="tc-mono tc-mono--t11">.vcf</span></button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-link"/></svg>Publish a link</button></div></span></div>
             </div>
           </div>
           <div class="tc-acts"><button class="tc-btn tc-close" title="Close the panel" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button></div>
@@ -4103,7 +4127,7 @@ Read  2 min ago</div>
 <figcaption><b>Экран отвечает на «что у меня с этим человеком», а не «что за карточка».</b> Второй вопрос теперь у карточки свой (<a href="#card">выше</a>), и разделение это не потеря, а условие: список записей с диапазоном дат и столбцами и карточка с телефонами — разные поверхности, и та, что стояла в закрываемой панели, всё время проигрывала. Карточка справа осталась, но как контекст: закрыли — экран не изменил смысла. <b>Это и есть ответ на вопрос «зачем четыре раздела вместе».</b> Справа — что человек сообщил о себе: телефоны, адреса, день рождения. Слева — что о нём накопилось за год работы: встречи с его участием, задачи, где он организатор или участник, и файлы, приложенные к этим записям, — с трёх серверов, в одной хронологии, с полоской источника у каждой строки. Ни один отдельно взятый календарь такого не покажет, и ни один клиент, который смотрит в один сервер, тоже.
 <br><br><b>Колонка «почему совпало»</b> — обязательная, а не украшение: человек должен видеть, откуда взялась строка. «Attendee · accepted» — адрес карточки в <code>ATTENDEE</code>, «related to this person» — <code>RELATED-TO</code> на её UID, у файла — имя в имени файла. <b>Записей, где о человеке только пишут, здесь нет:</b> хронология — где он участник; где он упомянут в тексте или заголовке — это «Упоминания», отдельная функция-кандидат. Движок это знает; донести признак от поиска до строки дешевле, чем что-либо ещё на этом экране.
 <br><br><b>Что уже работает:</b> опрос календарей адресами и именем с карточки, события, задачи и заметки одним ответом (они лежат в календарных коллекциях), связанные записи из разных книг. <b>Что нужно добавить:</b> вкладку «Файлы» (вложения берутся из уже загруженных записей, без второго опроса), признак совпадения в строке и кнопки «заметка о ней», «встреча с ней» — они создают запись с уже подставленным участником и открытой связью.
-<br><br><b>Диапазон дат стоит в полосе первым</b>, с кнопкой Show, и не помечен <code>is-2nd</code>: при открытой панели подробностей колонка уже меньше 800&nbsp;px, и спрятанный диапазон оставлял бы «Widen the range» без контрола, которым отвечают.</figcaption>
+<br><br><b>Диапазон дат стоит в полосе первым</b>, с кнопкой Show, и не помечен <code>is-2nd</code>: при открытой панели подробностей колонка уже меньше 800&nbsp;px, и спрятанный диапазон оставлял бы «Widen the range» без контрола, которым отвечают. <b>Фильтр по роду на узкой полосе не прячется под «⋯»</b>, а складывается в выпадающий выбор «All 24 ▾» с числами у вариантов (решение 30.09.2026): фильтр — главное на этом экране. Варианты — ссылки; выбор открывается без сценария.</figcaption>
 </figure>
 
 <figure style="flex:0 1 300px">
@@ -4254,7 +4278,7 @@ Read  2 min ago</div>
         </div>
         <div class="tc-bar tc-bar--wide">
           <span class="tc-seg"><button class="tc-seg__opt" type="button">Day</button><button class="is-on tc-seg__opt" type="button">Week</button><button class="tc-seg__opt" type="button">Month</button><button class="tc-seg__opt" type="button">Range</button></span>
-          <span class="tc-range is-2nd"><input class="tc-in is-mono" type="date" value="2026-08-10"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16"><button class="tc-btn" type="button">Show</button></span>
+          <form class="tc-range is-2nd" action="/app/calendar" method="get"><input class="tc-in is-mono" type="date" value="2026-08-10" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
           <span class="tc-bar__sep is-2nd"></span>
           <button class="tc-check is-3rd" type="button"><span class="tc-tickrow__tick"></span>Events</button>
           <button class="tc-check is-3rd" type="button"><span class="tc-tickrow__tick is-off"></span>Tasks due</button>
@@ -4662,6 +4686,18 @@ SEQUENCE  2</div>
     </div>
   </div>
   <figcaption>Частота; всё тоньше — дни недели, «до» и «сколько раз» — рядом полями, а редкие правила — в Advanced RRULE.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-agenda-11">
+    <div class="frame-label"><span>Календарь, в который сервер взял не всё</span><span class="frag">фрагмент</span><i>над списками календаря · iCloud</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-msg"><b>The server did not take tasks.</b> The server made «Дом» for events only and said nothing of the tasks you asked for. Tasks need another calendar: make one for them on this server or another. <button class="tc-btn is-sm" type="button">New calendar</button></div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>iCloud заводит календарь с одним родом из тех, что просили (SV-52): «события и задачи» становятся календарём событий, и сервер молчит. Списки такого календаря — агенда, задачи, заметки — начинаются с этого уведомления: что сервер оставил, чего не взял и куда девать не взятое. Уведомление — сведение, не тревога: ничего не сломано, календарь работает для событий. «New calendar» открывает лист новой коллекции с нужным родом — на этом сервере или другом.</figcaption>
   </figure>
 </div>
 
@@ -15069,7 +15105,7 @@ Read  2 min ago · not changed on server</div>
           </div>
         </div>
         <div class="tc-bar">
-          <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All 8</button><button class="tc-seg__opt" type="button">Cards 4</button><button class="tc-seg__opt" type="button">Events 1</button><button class="tc-seg__opt" type="button">Tasks 1</button><button class="tc-seg__opt" type="button">Notes 2</button></span>
+          <span class="tc-segfold"><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/mentions">All 8</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/mentions?kind=contact">Cards 4</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/mentions?kind=event">Events 1</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/mentions?kind=task">Tasks 1</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/mentions?kind=note">Notes 2</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">All 8</summary><div class="tc-segfold__menu"><a class="is-on tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/mentions">All<span class="tc-segfold__count">8</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/mentions?kind=contact">Cards<span class="tc-segfold__count">4</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/mentions?kind=event">Events<span class="tc-segfold__count">1</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/mentions?kind=task">Tasks<span class="tc-segfold__count">1</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/mentions?kind=note">Notes<span class="tc-segfold__count">2</span></a></div></details></span>
           <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</button>
           <span class="tc-bar__right is-2nd"><span class="tc-mono">newest first</span></span>
         </div>
@@ -16691,7 +16727,7 @@ DATA                → 550 5.7.1 Daily sending limit reached
         </div>
         <div class="tc-bar tc-bar--wide">
           <span class="tc-range"><input class="tc-in is-mono" type="date" value="2026-01-01"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="text" value="today"><button class="tc-btn" type="button">Show</button></span>
-          <span class="tc-seg is-2nd"><button class="is-on tc-seg__opt" type="button">All 30</button><button class="tc-seg__opt" type="button">Events 14</button><button class="tc-seg__opt" type="button">Tasks 2</button><button class="tc-seg__opt" type="button">Notes 4</button><button class="tc-seg__opt" type="button">Files 4</button><button class="tc-seg__opt" type="button">Mail 6</button></span>
+          <span class="tc-segfold"><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline">All 30</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=event">Events 14</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=task">Tasks 2</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=note">Notes 4</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=file">Files 4</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=mail">Mail 6</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">All 30</summary><div class="tc-segfold__menu"><a class="is-on tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline">All<span class="tc-segfold__count">30</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=event">Events<span class="tc-segfold__count">14</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=task">Tasks<span class="tc-segfold__count">2</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=note">Notes<span class="tc-segfold__count">4</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=file">Files<span class="tc-segfold__count">4</span></a><a class="tc-segfold__item" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=mail">Mail<span class="tc-segfold__count">6</span></a></div></details></span>
           <button class="tc-btn is-2nd" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</button>
           <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           <span class="tc-bar__right is-2nd"><span class="tc-mono">newest first</span></span>
