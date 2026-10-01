@@ -1,289 +1,251 @@
-// Drafted by frame2go from frame «Человек · хронология» (s-contacts-7) of the Typecase mockup: the
-// frame's widgets and its data, top to bottom. The data is the frame's; it
-// is to become the application's (docs/guide/screen.md).
-package draft
+// Package timeline is everything a person is in,
+// /app/contacts/{account}/{col}/{uid}/timeline, drawn by frame «Контакт ·
+// хронология» (s-contacts-7) of the mockup: the draft frame2go printed for
+// it, with the frame's data become the view model's (U-5.1, U-6.1).
+package timeline
 
-import w "carrel.dev/typecase/widget"
+import (
+	"strconv"
 
-// Contacts7 is frame «Человек · хронология» (s-contacts-7).
-func Contacts7() interface{ Render() string } {
-	return w.Shell{
-		Top: &w.Top{
-			Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
-			Search: &w.Search{Query: w.Query{Value: "Search everything…", Label: "Search everything…"}},
-			Actions: []w.TopAction{
-				w.Button{Label: "New note", Menu: true, Icon: "quill", Kind: w.ButtonPrimary},
-				w.Button{Label: "2 min ago", Icon: "refresh"},
-				w.UserMenu{Name: "mix"},
-			},
-		},
-		Body: w.ShellBody{
-			Rail: []w.RailPart{
-				w.Nav{
-					Items: []w.NavItem{
-						{Icon: "con", Label: "Contacts", Count: &w.Num{Value: 312}, Href: "#"},
-						{Icon: "cal", Label: "Calendar", Count: &w.Num{Value: 14}, Href: "#"},
-						{Icon: "task", Label: "Tasks", Count: &w.Num{Value: 3}, Href: "#"},
-						{Icon: "note", Label: "Notes", Count: &w.Num{Value: 86}, Href: "#"},
-						{Icon: "file", Label: "Files", Href: "#"},
-						{Icon: "dup", Label: "Duplicates", Count: &w.Num{Value: 3}, Href: "#"},
-					},
-					On: 1,
-				},
-				w.Nav{Items: []w.NavItem{
-					{Icon: "back", Label: "Back to list", Short: "Back", Href: "#"}}, Apart: true},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "Where to look"},
-						w.TickRow{
-							Ticked:  w.TickedPart,
-							Kind:    w.TickRowAll,
-							Mark:    w.Mark{Kind: w.MarkMulti},
-							Label:   "Combined calendar",
-							Meta:    "20",
-							Current: true,
-						},
-						w.TickRow{Mark: w.Mark{Colour: "#4A6B52"}, Label: "Личный", Meta: "9"},
-						w.TickRow{Mark: w.Mark{Colour: "#3F6E8C"}, Label: "Работа", Meta: "7"},
-						w.TickRow{Ticked: w.TickedOff, Mark: w.Mark{Colour: "#A05A2C"}, Label: "Дни рождения", Meta: "—", Hidden: true},
-						w.TickRow{Mark: w.Mark{Colour: "#6B4E7A"}, Label: "Проекты", Meta: "4"},
-						w.TickRow{Mark: w.Mark{Colour: "#8C6239"}, Label: "Дежурства", Meta: "0"},
-						w.TickRow{
-							Mark:      w.Mark{Colour: "#9A9280"},
-							Label:     "Общий",
-							Meta:      "password · 401",
-							MetaTitle: "401 Unauthorized — the saved password was refused. Open Connections to update it.",
-							Error:     true,
-							Trail:     w.Button{Label: "Retry", Small: true},
-						},
-						w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8C6239"}, Label: "Праздники РФ", Meta: "ro"},
-						w.TickRow{
-							Ticked: w.TickedOff,
-							Kind:   w.TickRowExternal,
-							Mark:   w.Mark{Colour: "#6B4E7A"},
-							Label:  "Расписание лиги",
-							Meta:   "ro",
-							Hidden: true,
-						},
-					},
-				},
-				w.RailFoot{
-					Items: []w.RailFootPart{w.Emblem{Symbol: "davloom", Title: "davloom · running · 3 devices"}},
-					About: &w.About{Name: "Carrel", Build: w.Mono{Text: "0.0.1 · 786949a"}, Href: "#rest"},
-				},
-			},
-			Main: w.Main{
-				Items: []w.MainPart{
-					w.Head{
-						Avatar: &w.Avatar{Initials: "АК", Size: w.Avatar44},
-						Kicker: &w.Rubric{Text: "Timeline", Variant: w.RubricBottom2},
-						Title:  &w.HeadTitle{Text: "Анна Ковалёва"},
-						Subs: []w.HeadSub{
-							w.HeadSub{
-								Parts: []w.HeadSubPart{
-									w.Text("Издательство «Слово» · Выпускающий редактор "),
-									w.Badge{Label: "in 2 books", Tone: w.BadgeLinked},
-								},
-							},
-						},
-						Acts: &w.Acts{
-							Items: []w.ActsPart{
-								w.Button{Label: "Write a note", Icon: "quill", Kind: w.ButtonPrimary},
-								w.Button{Label: "New event", Icon: "cal"},
-								w.Button{Label: "New task", Icon: "task"},
-								w.Button{Label: "Print", Icon: "print"},
-							},
-						},
-						Pad: w.HeadPadBottom10,
-					},
-					w.Bar{
-						Items: []w.BarPart{
-							w.Range{
-								From:   w.Input{Kind: w.InputDate, Name: "from", Value: "2026-01-01", Label: "From", Mono: true},
-								To:     w.Input{Kind: w.InputDate, Name: "to", Value: "2026-11-10", Label: "To", Mono: true},
-								Show:   w.Button{Label: "Show"},
-								Action: "/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline",
-							},
-							w.SegFold{
-								Seg: w.Seg{
-									Options: []w.SegOption{
-										{
-											Label: "All",
-											Count: "24",
-											Href:  "/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline",
-											On:    true,
-										},
-										{
-											Label: "Events",
-											Count: "14",
-											Href:  "/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=event",
-										},
-										{
-											Label: "Tasks",
-											Count: "2",
-											Href:  "/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=task",
-										},
-										{
-											Label: "Notes",
-											Count: "4",
-											Href:  "/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=note",
-										},
-										{
-											Label: "Files",
-											Count: "4",
-											Href:  "/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline?kind=file",
-										},
-									},
-								},
-							},
-							w.Button{Label: "Columns", Icon: "cols", Secondary: true},
-						},
-						More:    &w.Button{Icon: "dots", Title: "More"},
-						Right:   &w.BarRight{Items: []w.BarPart{w.Mono{Text: "newest first"}}, Secondary: true},
-						Variant: w.BarWide,
-					},
-					w.Runbar{
-						Meter: w.Meter{Percent: 83},
-						Parts: []w.RunbarPart{
-							w.Text("Polled 5 of 6 calendars · matched by "),
-							w.Mono{Text: "a.kovaleva@example.org"},
-							w.Text(", "),
-							w.Mono{Text: "anna.kovaleva@slovo.example"},
-							w.Text(" and the name · "),
-							w.Span{Face: w.FaceDanger, Text: "baikal · Общий unavailable"},
-						},
-					},
-					w.ListGroup{Title: w.Rubric{Text: "August 2026", Form: w.RubricInline}, Count: &w.Num{Value: 3}},
-					w.List{
-						Rows: []w.ListRow{
-							w.FindRow{
-								Mark:   w.Mark{Colour: "#4A6B52"},
-								Date:   "10 Aug",
-								Title:  []w.Inline{w.Text("Синк-ап по релизу")},
-								Detail: []w.Inline{w.Text("attendee · accepted")},
-								What:   "event",
-								Source: "nextcloud · Личный",
-							},
-							w.FindRow{
-								Mark:   w.Mark{Colour: "#4A6B52"},
-								Date:   "4 Aug",
-								Title:  []w.Inline{w.Text("2026-08-04-обложка.pdf")},
-								Detail: []w.Inline{w.Text("attached to «Согласовать обложку»")},
-								What:   "file",
-								Source: "sftpgo · vps · Documents",
-							},
-							w.FindRow{
-								Mark:   w.Mark{Colour: "#3F6E8C"},
-								Date:   "4 Aug",
-								Title:  []w.Inline{w.Text("Согласовать обложку")},
-								Detail: []w.Inline{w.Text("organiser · done")},
-								What:   "task",
-								Source: "nextcloud · Работа",
-							},
-						},
-					},
-					w.ListGroup{Title: w.Rubric{Text: "July 2026", Form: w.RubricInline}, Count: &w.Num{Value: 5}},
-					w.List{
-						Rows: []w.ListRow{
-							w.FindRow{
-								Mark:   w.Mark{Colour: "#6B4E7A"},
-								Date:   "29 Jul",
-								Title:  []w.Inline{w.Text("Ревью вёрстки сборника")},
-								Detail: []w.Inline{w.Text("attendee · no reply")},
-								What:   "event",
-								Source: "radicale · vps · Проекты",
-							},
-						},
-					},
-					w.Empty{
-						Parts:   []w.EmptyPart{w.Text("Nothing was looked for before January 2026. Widen the range if you need it.")},
-						Variant: w.EmptySmallTop,
-					},
-				},
-			},
-			Side: &w.Side{
-				Items: []w.SidePart{
-					w.Head{
-						Photo:  &w.HeadPhoto{Initials: "АК", Large: true},
-						Kicker: &w.Rubric{Text: "Card"},
-						Tools: []w.HeadTool{
-							w.Button{Label: "Open the card", Small: true},
-							w.Button{Label: "Edit", Small: true},
-							w.Drop{
-								Trigger: w.Button{Icon: "dots", Small: true, Title: "More"},
-								Menu: w.Menu{
-									Items: []w.MenuPart{
-										w.MenuItem{Icon: "move", Label: "Move"},
-										w.MenuItem{Icon: "dup", Label: "Copy"},
-										w.MenuItem{Icon: "down", Detail: &w.Mono{Text: ".vcf", Variant: w.Mono11}, Label: "Export"},
-										w.MenuItem{Icon: "link", Label: "Publish a link"},
-									},
-									Width: w.MenuWidth212,
-									Pop:   w.MenuUnder,
-								},
-							},
-						},
-						Acts:   &w.Acts{Items: []w.ActsPart{w.Close{Label: "Close the panel"}}},
-						Middle: true,
-						Pad:    w.HeadPadBottom10,
-					},
-					w.Fields{
-						Items: []w.FieldsItem{
-							{Term: "Phone · mobile", Value: []w.ValuePart{w.Text("+7 912 445-10-88")}, Face: w.ValueMono},
-							{Term: "Phone · work", Value: []w.ValuePart{w.Text("+7 495 120-45-00")}, Face: w.ValueMono},
-							{Term: "Email · work", Value: []w.ValuePart{w.Text("a.kovaleva@example.org")}},
-							{Term: "Email · second", Value: []w.ValuePart{w.Text("anna.kovaleva@slovo.example")}},
-							{
-								Term:  "Birthday",
-								Value: []w.ValuePart{w.Text("1987-03-14 "), w.Dim{Parts: []w.Inline{w.Text("· in 7 months")}}},
-								Face:  w.ValueMono,
-							},
-							{
-								Term:  "Tags",
-								Value: []w.ValuePart{w.Tag{Label: "работа"}, w.Text(" "), w.Tag{Label: "издательство"}},
-							},
-							{Term: "Note", Value: []w.ValuePart{w.Text("Пишет по вторникам, отвечает в тот же день.")}},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{
-								Text:  "The same person in other books",
-								Items: []w.RubricPart{w.Badge{Label: "2", Tone: w.BadgeLinked}},
-							},
-							w.SecList{
-								Items: [][]w.SecItemPart{
-									[]w.SecItemPart{
-										w.Mark{Colour: "#6B4E7A", Size: w.MarkH11Inline},
-										w.Text(" "),
-										w.Link{Text: "radicale · vps · Команда", Href: "#"},
-										w.Text(" "),
-										w.Dim{Parts: []w.Inline{w.Text("· Phone, email differ")}},
-									},
-									[]w.SecItemPart{
-										w.Mark{Colour: "#9A9280", Size: w.MarkH11Inline},
-										w.Text(" "),
-										w.Link{Text: "baikal · Общий", Href: "#"},
-										w.Text(" "),
-										w.Dim{Parts: []w.Inline{w.Text("· The server did not answer; the record stays linked")}},
-									},
-								},
-								Gap: 6,
-							},
-							w.SecHint{
-								Text:  "Linked on the duplicates screen. The records stay on their own servers; here they are shown as one person.",
-								Apart: true,
-							},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Source"},
-							w.Diag{Text: "UID   4f2b-9c31-a0e7\nRead  2 min ago"}},
-					},
-					w.Danger{Button: w.Button{Label: "Delete contact", Kind: w.ButtonDangerSolid}},
-				},
-			},
-		},
+	"carrel.dev/carrel/client/bind"
+	"carrel.dev/carrel/server/view"
+	w "carrel.dev/typecase/widget"
+)
+
+// The IDs of the page's forms: the rail's (its ticks submit it) and the
+// card's deletion.
+const (
+	formRail   = "rail"
+	formDelete = "delete"
+)
+
+// The screen's words (U-1.3) for the shell: the mark, the search, the rail.
+var (
+	top = bind.TopWords{
+		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
+		Search: "Search everything…",
 	}
+	rail = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom"}
+)
+
+// Screen draws the timeline from its view model.
+//
+//   - The shell: the top bar; the rail of sections with «Back to list» apart
+//     under them, and «Where to look» — the sources the timeline polled,
+//     with their ticks, a feed ro, one that did not answer in error with
+//     its retry —, the foot.
+//   - The head: the person's avatar, «Timeline», the name, where and who,
+//     «in 2 books» for a person in several (Linked); the actions — write a
+//     note, a new event, a new task about the person, Print.
+//   - The bar: the range of dates (a GET form, From, To, Show), the filter
+//     by kind with each count (links; on a narrow bar it folds), Columns,
+//     «⋯», «newest first».
+//   - The poll's bar while it runs or a source did not answer: what it
+//     matched by, monospaced, the source that did not answer as an alarm.
+//   - The months with their count, a row for each record: its mark, the
+//     day, the title, why it is here, its kind, where it lives.
+//   - The foot: from when the timeline looked (Note).
+//   - The card in the panel, the screen's context (Card): photo, «Card»,
+//     Open the card, Edit, «⋯» with the card's menu; its fields, the same
+//     person in other books, the source, the deletion.
+func Screen(p *view.ContactTimelinePage) w.Shell {
+	var avatar w.Avatar
+	if p.Card.Avatar != nil {
+		avatar = bind.Avatar(*p.Card.Avatar)
+	}
+	avatar.Size = w.Avatar44
+	h := w.Head{
+		Avatar: &avatar,
+		Kicker: &w.Rubric{Text: "Timeline", Variant: w.RubricBottom2},
+		Title:  &w.HeadTitle{Text: string(p.Name)},
+		Pad:    w.HeadPadBottom10,
+	}
+	sub := w.HeadSub{}
+	if p.Subtitle != "" {
+		lead := string(p.Subtitle)
+		if p.Linked != nil {
+			lead += " "
+		}
+		sub.Parts = append(sub.Parts, w.Text(lead))
+	}
+	if p.Linked != nil {
+		sub.Parts = append(sub.Parts, bind.Badge(*p.Linked))
+	}
+	if len(sub.Parts) > 0 {
+		h.Subs = []w.HeadSub{sub}
+	}
+	var acts []w.ActsPart
+	for _, a := range p.Actions {
+		acts = append(acts, bind.Button(a, ""))
+	}
+	h.Acts = &w.Acts{Items: acts}
+	main := []w.MainPart{}
+	for _, n := range p.Notices {
+		main = append(main, bind.Notice(n, w.MsgSpacePage))
+	}
+	main = append(main, h, bar(p))
+	if r := bind.Runbar(&p.Poll); r != nil {
+		main = append(main, *r)
+	}
+	for _, g := range p.Groups {
+		rows := make([]w.ListRow, 0, len(g.Rows))
+		for _, r := range g.Rows {
+			rows = append(rows, w.FindRow{
+				Mark:   w.Mark{Colour: string(r.Colour)},
+				Date:   string(r.When),
+				Title:  []w.Inline{w.Text(r.Title)},
+				Detail: []w.Inline{w.Text(r.Why)},
+				What:   string(r.Kind),
+				Source: string(r.Stamp),
+				Href:   r.Href,
+			})
+		}
+		main = append(main,
+			w.ListGroup{Title: w.Rubric{Text: string(g.Rubric), Form: w.RubricInline}, Count: &w.Num{Value: g.Count}},
+			w.List{Rows: rows})
+	}
+	if p.Note != "" {
+		main = append(main, w.Empty{Parts: []w.EmptyPart{w.Text(p.Note)}, Variant: w.EmptySmallTop})
+	}
+	t := bind.Top(p.Top, top)
+	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}, Side: side(p.Card)}}
+}
+
+// Forms are the page's forms: the rail's, the retries of its sources, the
+// card's deletion.
+func Forms(p *view.ContactTimelinePage) []w.PostForm {
+	var out []w.PostForm
+	if f := bind.RailForm(p.Rail, formRail); f != nil {
+		out = append(out, *f)
+	}
+	out = append(out, bind.RetryForms(p.Rail)...)
+	out = append(out, bind.NoticeForms(p.Notices)...)
+	for _, a := range p.Card.Actions {
+		if a.Danger && a.Method == "POST" && a.Enabled {
+			out = append(out, bind.ActionForm(a, formDelete))
+		}
+	}
+	return out
+}
+
+// railParts is the rail of sections with the way back apart under them.
+func railParts(r view.Rail) []w.RailPart {
+	nav, back := w.Nav{}, w.Nav{Apart: true}
+	for _, n := range r.Nav {
+		it := bind.NavItem(n)
+		if n.ID == "nav.back" {
+			it.Short = "Back"
+			back.Items = append(back.Items, it)
+			continue
+		}
+		nav.Items = append(nav.Items, it)
+		if n.On {
+			nav.On = len(nav.Items)
+		}
+	}
+	parts := []w.RailPart{nav}
+	if len(back.Items) > 0 {
+		parts = append(parts, back)
+	}
+	parts = append(parts, bind.Sources(r, rail)...)
+	return append(parts, bind.Foot(r, rail))
+}
+
+// bar is the bar over the timeline.
+func bar(p *view.ContactTimelinePage) w.Bar {
+	var items []w.BarPart
+	if f := p.Range.Form; f != nil {
+		rng := w.Range{Action: f.Action}
+		rows := bind.Rows(*f)
+		if len(rows) > 0 {
+			rng.From = bind.Input(rows[0])
+		}
+		if len(rows) > 1 {
+			rng.To = bind.Input(rows[1])
+		}
+		for _, a := range f.Actions {
+			rng.Show = bind.Submit(a)
+		}
+		items = append(items, rng)
+	}
+	if len(p.Bar.Segments) > 0 {
+		seg := w.Seg{}
+		for _, a := range p.Bar.Segments {
+			seg.Options = append(seg.Options, bind.SegOption(a))
+		}
+		items = append(items, w.SegFold{Seg: seg})
+	}
+	if c := p.Bar.Columns; c != nil {
+		// ждёт библиотеку: U-5.5 #4 — Columns, a closed menu without scripts
+		items = append(items, w.Button{Label: string(c.Label), Icon: bind.Icon(c.Icon), Secondary: true})
+	}
+	return w.Bar{
+		Items: items,
+		// ждёт библиотеку: U-5.5 #3 — the bar's «⋯» without scripts
+		More:    &w.Button{Icon: "dots", Title: "More"},
+		Right:   &w.BarRight{Items: []w.BarPart{w.Mono{Text: "newest first"}}, Secondary: true},
+		Variant: w.BarWide,
+	}
+}
+
+// side is the card in the panel: the screen's context, not a selection.
+func side(c view.Details) *w.Side {
+	var tools []w.HeadTool
+	var danger []w.Button
+	for _, a := range c.Actions {
+		b := bind.Button(a, formDelete)
+		if a.Danger {
+			b.Icon = ""
+			danger = append(danger, b)
+			continue
+		}
+		b.Small = true
+		tools = append(tools, b)
+	}
+	if len(c.Menu) > 0 {
+		// ждёт библиотеку: U-5.5 #2 — the card's «⋯», a closed menu without scripts
+		tools = append(tools, w.Drop{
+			Trigger: w.Button{Icon: "dots", Small: true, Title: "More"},
+			Menu:    w.Menu{Items: bind.MenuItems(c.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnder},
+		})
+	}
+	photo := &w.HeadPhoto{Large: true}
+	if c.Avatar != nil {
+		// ждёт библиотеку: U-5.5 #11 — the photo in the head (Avatar.Href)
+		photo.Initials = string(c.Avatar.Initials)
+	}
+	h := w.Head{
+		Photo:  photo,
+		Kicker: &w.Rubric{Text: "Card"},
+		Tools:  tools,
+		// ждёт библиотеку: U-5.5 #14 — the cross has no address (сервер, долг C16)
+		Acts:   &w.Acts{Items: []w.ActsPart{w.Close{Label: "Close the panel", Href: c.Close}}},
+		Middle: true,
+		Pad:    w.HeadPadBottom10,
+	}
+	items := []w.SidePart{h}
+	fields := w.Fields{}
+	for _, f := range c.Fields {
+		fields.Items = append(fields.Items, bind.FieldsItem(f, "· "))
+	}
+	items = append(items, fields)
+	if len(c.Books) > 0 {
+		var lines [][]w.SecItemPart
+		for _, f := range c.Books {
+			lines = append(lines, bind.Book(f, "· "))
+		}
+		items = append(items, w.Sec{Items: []w.SecPart{
+			w.Rubric{Text: "The same person in other books", Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(c.Books)), Tone: w.BadgeLinked}}},
+			w.SecList{Items: lines, Gap: 6},
+			w.SecHint{Text: "Linked on the duplicates screen. The records stay on their own servers; here they are shown as one person.", Apart: true},
+		}})
+	}
+	items = append(items, w.Sec{Items: []w.SecPart{
+		w.Rubric{Text: "Source"},
+		bind.Diag(bind.DiagLine{Name: "UID", Value: string(c.Source.UID)}, bind.DiagLine{Name: "Read", Value: string(c.Source.LastRead)}),
+	}})
+	for _, b := range danger {
+		items = append(items, w.Danger{Button: b})
+	}
+	return &w.Side{Items: items}
 }

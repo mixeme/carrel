@@ -11,6 +11,7 @@ import (
 	"carrel.dev/carrel/client/screens/login"
 	"carrel.dev/carrel/client/screens/register"
 	"carrel.dev/carrel/client/screens/setup"
+	"carrel.dev/carrel/client/screens/timeline"
 	"carrel.dev/carrel/client/screens/wipe"
 	"carrel.dev/carrel/server/view"
 	"carrel.dev/typecase/widget"
@@ -165,6 +166,20 @@ var All = []Screen{
 			{Row: 1, Control: ".Main(Main).Items(Head).Acts(Acts).Items(Drop).Trigger(Button)"}, // ждёт библиотеку: U-5.5 #1
 			{Row: 15, Fixture: "app-contact/normal"},                                            // ждёт библиотеку: U-5.5 #15
 			{Row: 15, Fixture: "app-contact/outcome"},                                           // ждёт библиотеку: U-5.5 #15
+		},
+	},
+	{
+		Model:  func() any { return new(view.ContactTimelinePage) },
+		Frames: []string{"s-contacts-7"},
+		Draw:   func(model any) Root { return timeline.Screen(model.(*view.ContactTimelinePage)) },
+		Title:  func(model any) string { return string(model.(*view.ContactTimelinePage).Title) },
+		Forms:  func(model any) []widget.PostForm { return timeline.Forms(model.(*view.ContactTimelinePage)) },
+		Waits: []Wait{
+			{Row: 2, Control: ".Side(Side).Items(Head).Tools(Drop).Trigger(Button)"}, // ждёт библиотеку: U-5.5 #2
+			{Row: 3, Control: ".Items(Bar).More(Button)"},                            // ждёт библиотеку: U-5.5 #3
+			{Row: 4, Control: ".Items(Bar).Items(Button)"},                           // ждёт библиотеку: U-5.5 #4
+			{Row: 7, Fixture: "app-contact-timeline/normal"},                         // ждёт библиотеку: U-5.5 #7
+			{Row: 14, Control: ".Side(Side).Items(Head).Acts(Acts).Items(Close)"},    // ждёт библиотеку: U-5.5 #14
 		},
 	},
 }
