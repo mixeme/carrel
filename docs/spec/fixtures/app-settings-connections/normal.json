@@ -25,7 +25,8 @@
           "href": "/app/settings/connections/disconnect?account=a-nc-home",
           "id": "connection.disconnect",
           "label": "Disconnect",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "csrf": "csrf",
@@ -41,7 +42,8 @@
           "icon": "i-plus",
           "id": "collection.new",
           "label": "New collection",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         }
       ],
       "answered": "",
@@ -61,7 +63,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -69,7 +72,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -77,7 +81,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -93,7 +98,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -103,7 +109,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -125,7 +132,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -133,7 +141,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -141,7 +150,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -157,7 +167,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -167,7 +178,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -189,7 +201,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -197,7 +210,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -205,7 +219,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -221,7 +236,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -231,7 +247,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -253,7 +270,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -261,7 +279,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -269,7 +288,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -285,7 +305,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -295,7 +316,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -318,7 +340,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -326,7 +349,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -334,7 +358,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -350,7 +375,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -360,7 +386,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -382,7 +409,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -390,7 +418,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -398,7 +427,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -414,7 +444,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -424,7 +455,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -446,7 +478,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -454,7 +487,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -462,7 +496,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -478,7 +513,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -488,7 +524,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -510,7 +547,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -518,7 +556,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -526,7 +565,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -542,7 +582,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -552,7 +593,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -574,7 +616,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -582,7 +625,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -590,7 +634,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -598,7 +643,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -608,7 +654,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -623,7 +670,8 @@
           "href": "/app/settings/unlock",
           "id": "connection.password",
           "label": "Show password",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         "shown": false,
         "value": ""
@@ -659,7 +707,8 @@
           "href": "/app/settings/connections/disconnect?account=a-rad-vps",
           "id": "connection.disconnect",
           "label": "Disconnect",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "csrf": "csrf",
@@ -675,7 +724,8 @@
           "icon": "i-plus",
           "id": "collection.new",
           "label": "New collection",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         }
       ],
       "answered": "",
@@ -695,7 +745,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -703,7 +754,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -711,7 +763,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -727,7 +780,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -737,7 +791,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -759,7 +814,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -767,7 +823,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -775,7 +832,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -791,7 +849,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -801,7 +860,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -823,7 +883,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -831,7 +892,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -839,7 +901,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -855,7 +918,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -865,7 +929,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -887,7 +952,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -895,7 +961,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -903,7 +970,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -919,7 +987,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -929,7 +998,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -944,7 +1014,8 @@
           "href": "/app/settings/unlock",
           "id": "connection.password",
           "label": "Show password",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         "shown": false,
         "value": ""
@@ -980,7 +1051,8 @@
           "href": "/app/settings/connections/disconnect?account=a-baikal",
           "id": "connection.disconnect",
           "label": "Disconnect",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "csrf": "csrf",
@@ -996,7 +1068,8 @@
           "icon": "i-plus",
           "id": "collection.new",
           "label": "New collection",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         }
       ],
       "answered": "",
@@ -1016,7 +1089,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1024,7 +1098,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1032,7 +1107,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1048,7 +1124,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -1058,7 +1135,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -1073,7 +1151,8 @@
           "href": "/app/settings/unlock",
           "id": "connection.password",
           "label": "Show password",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         "shown": false,
         "value": ""
@@ -1109,7 +1188,8 @@
           "href": "/app/settings/connections/disconnect?account=a-sftp-vps",
           "id": "connection.disconnect",
           "label": "Disconnect",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "csrf": "csrf",
@@ -1125,7 +1205,8 @@
           "icon": "i-plus",
           "id": "folder.new",
           "label": "New folder",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         }
       ],
       "answered": "",
@@ -1145,7 +1226,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1153,7 +1235,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1161,7 +1244,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1169,7 +1253,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -1179,7 +1264,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -1201,7 +1287,8 @@
               "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1209,7 +1296,8 @@
               "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1217,7 +1305,8 @@
               "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1225,7 +1314,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -1235,7 +1325,8 @@
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "objects": null,
@@ -1250,7 +1341,8 @@
           "href": "/app/settings/unlock",
           "id": "connection.password",
           "label": "Show password",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         "shown": false,
         "value": ""
@@ -1413,7 +1505,8 @@
           "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
           "id": "feed.edit",
           "label": "Edit",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "csrf": "csrf",
@@ -1452,7 +1545,8 @@
           "href": "/app/collections/rename?a=f-league\u0026c=feed",
           "id": "feed.edit",
           "label": "Edit",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "csrf": "csrf",
@@ -1498,7 +1592,8 @@
           "icon": "i-quill",
           "id": "new.notes",
           "label": "Note",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1507,7 +1602,8 @@
           "id": "new.contacts",
           "label": "Contact",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1515,7 +1611,8 @@
           "icon": "i-cal",
           "id": "new.calendar",
           "label": "Event",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1523,7 +1620,8 @@
           "icon": "i-task",
           "id": "new.tasks",
           "label": "Task",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1532,7 +1630,8 @@
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1541,7 +1640,8 @@
           "id": "new.letter",
           "label": "Letter",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         }
       ],
       "enabled": true,
@@ -1550,7 +1650,8 @@
       "id": "new.notes",
       "label": "New note",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     },
     "refresh": {
       "action": {

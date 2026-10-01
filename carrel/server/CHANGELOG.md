@@ -17,6 +17,40 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.123 — 2026-10-02
+
+Every action and form says which zone a fragment answer of it replaces
+(stage 4 of the client's plan, С1).
+
+### Added
+
+- **`Action.target`, `Form.target`** — the zone of C-7.2 a fragment answer
+  replaces, by C-5: `sheet` where the address answers with a sheet (Move,
+  Publish a link, the collection sheets, the password sheet, the quick
+  sheets, the picker, Reset a password…), `rail` for the rail's form,
+  `poll` for Stop and Retry of the poll bar, `queue` for an upload, `main`
+  for a new folder. No key — a move to another page: ask for no fragment
+  there (C-7.1). A button of a form (no `href`) has none; its form has it.
+  The server puts it in on rendering, as the token (`Action.csrf`).
+- **`ContactRow.target`, `AgendaRow.target`, `TaskRow.target`,
+  `NoteRow.target`, `TimelineRow.target`** — `details`: a row of a list, and
+  a record's row of a person's timeline, opens the record in the panel, a
+  fragment at the record's address (C-5.4, C-7.2). The same address from a
+  menu's Open, a row of the card's timeline and a related record are moves.
+
+### Changed
+
+- C-5: the rewrite sheet answers «лист (GET); страница, редирект (POST)»;
+  `/app/sources/{kind}` names `files` among its kinds.
+- The poll bar of the progress stream carries the session's token on its
+  POSTs, as the pages' bars do (it went out without).
+
+### For consumers
+
+Aim a fragment request at `target` and nowhere else; an action, a form or a
+row without it is a page to go to. Fixtures regenerated: every screen with
+a sheet, a rail, a poll bar or a list.
+
 ## v0.2.122 — 2026-10-02
 
 Three answers that were fragments outside every zone of C-7.2 are pages

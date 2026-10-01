@@ -494,6 +494,11 @@ func TestSearchProgressStream(t *testing.T) {
 		!strings.Contains(body, "event: poll\ndata: {\"target\":\"poll\"") || !strings.Contains(body, "event: poll-finished\n") {
 		t.Fatalf("stream %d %q:\n%s", rec.Code, rec.Header().Get("Content-Type"), body)
 	}
+	// An event goes past the page's stamping: its Stop is a POST with the
+	// session's token, aimed at the bar (C-11, C-7.2) all the same.
+	if !strings.Contains(body, `"id":"poll.stop"`) || !strings.Contains(body, `"csrf":"`+f.sess.CSRFToken()+`"`) || !strings.Contains(body, `"target":"poll"}`) {
+		t.Errorf("the bar of the stream carries no token or no target:\n%s", body)
+	}
 
 	other := f.h.login("owner", "password123")
 	for _, req := range []*http.Request{

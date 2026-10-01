@@ -68,7 +68,8 @@
         "id": "poll.stop",
         "label": "Stop",
         "method": "POST",
-        "reason": "The search has finished."
+        "reason": "The search has finished.",
+        "target": "poll"
       },
       {
         "enabled": true,
@@ -185,7 +186,8 @@
           "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
           "id": "source.retry",
           "label": "Retry",
-          "method": "POST"
+          "method": "POST",
+          "target": "poll"
         },
         "stamp": "baikal · Общий",
         "state": "error"
@@ -472,7 +474,8 @@
               "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
               "id": "source.retry",
               "label": "Retry",
-              "method": "POST"
+              "method": "POST",
+              "target": "poll"
             },
             "state": "unavailable",
             "tick": "on"
@@ -551,7 +554,8 @@
           "icon": "i-quill",
           "id": "new.notes",
           "label": "Note",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -560,7 +564,8 @@
           "id": "new.contacts",
           "label": "Contact",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -568,7 +573,8 @@
           "icon": "i-cal",
           "id": "new.calendar",
           "label": "Event",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -576,7 +582,8 @@
           "icon": "i-task",
           "id": "new.tasks",
           "label": "Task",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -585,7 +592,8 @@
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -594,7 +602,8 @@
           "id": "new.letter",
           "label": "Letter",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         }
       ],
       "enabled": true,
@@ -603,7 +612,8 @@
       "id": "new.notes",
       "label": "New note",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     },
     "refresh": {
       "action": {

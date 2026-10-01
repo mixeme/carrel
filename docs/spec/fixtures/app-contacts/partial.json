@@ -63,7 +63,8 @@
           "icon": "i-quill",
           "id": "new.notes",
           "label": "Note",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -72,7 +73,8 @@
           "id": "new.contacts",
           "label": "Contact",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -80,7 +82,8 @@
           "icon": "i-cal",
           "id": "new.calendar",
           "label": "Event",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -88,7 +91,8 @@
           "icon": "i-task",
           "id": "new.tasks",
           "label": "Task",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -97,7 +101,8 @@
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -106,7 +111,8 @@
           "id": "new.letter",
           "label": "Letter",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         }
       ],
       "enabled": true,
@@ -115,7 +121,8 @@
       "id": "new.notes",
       "label": "New note",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     },
     "userHref": "/app/settings/account"
   },
@@ -223,7 +230,8 @@
                 "href": "/app/collections/rename?a=a-nc-home&c=arhiv",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-pencil"
+                "icon": "i-pencil",
+                "target": "sheet"
               },
               {
                 "id": "collection.move",
@@ -231,7 +239,8 @@
                 "href": "/app/collections/move?a=a-nc-home&c=arhiv",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-move"
+                "icon": "i-move",
+                "target": "sheet"
               },
               {
                 "id": "collection.copy",
@@ -239,7 +248,8 @@
                 "href": "/app/collections/move?a=a-nc-home&c=arhiv&copy=1",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-dup"
+                "icon": "i-dup",
+                "target": "sheet"
               },
               {
                 "id": "collection.import",
@@ -266,7 +276,8 @@
                 "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true,
-                "icon": "i-trash"
+                "icon": "i-trash",
+                "target": "sheet"
               }
             ],
             "feed": false,
@@ -290,7 +301,8 @@
                 "href": "/app/collections/rename?a=a-nc-home&c=kontakty",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-pencil"
+                "icon": "i-pencil",
+                "target": "sheet"
               },
               {
                 "id": "collection.move",
@@ -298,7 +310,8 @@
                 "href": "/app/collections/move?a=a-nc-home&c=kontakty",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-move"
+                "icon": "i-move",
+                "target": "sheet"
               },
               {
                 "id": "collection.copy",
@@ -306,7 +319,8 @@
                 "href": "/app/collections/move?a=a-nc-home&c=kontakty&copy=1",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-dup"
+                "icon": "i-dup",
+                "target": "sheet"
               },
               {
                 "id": "collection.import",
@@ -333,7 +347,8 @@
                 "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true,
-                "icon": "i-trash"
+                "icon": "i-trash",
+                "target": "sheet"
               }
             ],
             "feed": false,
@@ -364,7 +379,8 @@
                 "href": "/app/collections/rename?a=a-rad-vps&c=komanda",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-pencil"
+                "icon": "i-pencil",
+                "target": "sheet"
               },
               {
                 "id": "collection.move",
@@ -372,7 +388,8 @@
                 "href": "/app/collections/move?a=a-rad-vps&c=komanda",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-move"
+                "icon": "i-move",
+                "target": "sheet"
               },
               {
                 "id": "collection.copy",
@@ -380,7 +397,8 @@
                 "href": "/app/collections/move?a=a-rad-vps&c=komanda&copy=1",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-dup"
+                "icon": "i-dup",
+                "target": "sheet"
               },
               {
                 "id": "collection.export",
@@ -399,7 +417,8 @@
                 "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true,
-                "icon": "i-trash"
+                "icon": "i-trash",
+                "target": "sheet"
               }
             ],
             "feed": false,
@@ -423,7 +442,8 @@
                 "href": "/app/collections/rename?a=a-rad-vps&c=rassylki",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-pencil"
+                "icon": "i-pencil",
+                "target": "sheet"
               },
               {
                 "id": "collection.move",
@@ -431,7 +451,8 @@
                 "href": "/app/collections/move?a=a-rad-vps&c=rassylki",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-move"
+                "icon": "i-move",
+                "target": "sheet"
               },
               {
                 "id": "collection.copy",
@@ -439,7 +460,8 @@
                 "href": "/app/collections/move?a=a-rad-vps&c=rassylki&copy=1",
                 "method": "GET",
                 "enabled": true,
-                "icon": "i-dup"
+                "icon": "i-dup",
+                "target": "sheet"
               },
               {
                 "id": "collection.import",
@@ -466,7 +488,8 @@
                 "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true,
-                "icon": "i-trash"
+                "icon": "i-trash",
+                "target": "sheet"
               }
             ],
             "feed": false,
@@ -499,7 +522,8 @@
         "href": "/app/collections/new?kind=contact",
         "method": "GET",
         "enabled": true,
-        "icon": "i-plus"
+        "icon": "i-plus",
+        "target": "sheet"
       },
       {
         "id": "account.connect",
@@ -566,7 +590,8 @@
           ],
           "unfold": null
         }
-      ]
+      ],
+      "target": "rail"
     }
   },
   "notices": [],
@@ -708,7 +733,8 @@
         "icon": "i-down",
         "href": "/app/contacts/export",
         "method": "GET",
-        "enabled": true
+        "enabled": true,
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -902,7 +928,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -910,7 +937,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -926,7 +954,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -944,7 +973,8 @@
           "birthday": "",
           "changed": "31 Jul",
           "tags": [],
-          "on": false
+          "on": false,
+          "target": "details"
         },
         {
           "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
@@ -985,7 +1015,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -993,7 +1024,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1009,7 +1041,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -1038,7 +1071,8 @@
               "on": false
             }
           ],
-          "on": false
+          "on": false,
+          "target": "details"
         },
         {
           "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
@@ -1079,7 +1113,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1087,7 +1122,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1103,7 +1139,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -1121,7 +1158,8 @@
           "birthday": "",
           "changed": "12 Jun",
           "tags": [],
-          "on": false
+          "on": false,
+          "target": "details"
         }
       ],
       "count": 3
@@ -1168,7 +1206,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1176,7 +1215,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1192,7 +1232,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -1210,7 +1251,8 @@
           "birthday": "",
           "changed": "18 Feb 2024",
           "tags": [],
-          "on": false
+          "on": false,
+          "target": "details"
         },
         {
           "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83",
@@ -1251,7 +1293,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1259,7 +1302,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -1275,7 +1319,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "danger": true,
@@ -1293,7 +1338,8 @@
           "birthday": "",
           "changed": "5 Aug",
           "tags": [],
-          "on": false
+          "on": false,
+          "target": "details"
         }
       ],
       "count": 2
@@ -1345,7 +1391,8 @@
         "href": "/app/search/progress/t-task/cancel",
         "method": "POST",
         "enabled": true,
-        "csrf": "csrf"
+        "csrf": "csrf",
+        "target": "poll"
       },
       {
         "id": "poll.again",

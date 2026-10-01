@@ -19,6 +19,7 @@ import (
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -470,6 +471,7 @@ func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot
 			}
 			row.Title, row.Why, at = text(recordTitle(it.Kind, it.Object)), text(why), when
 			row.Href = s.route(o.recordPath(segmentOf(it.Kind), it.UID))
+			row.Target = render.TargetDetails // its card in the panel (s-contacts-7)
 		}
 		if !at.IsZero() {
 			row.When = text(tf.shortDay(at)) // a list's day, «10 Aug» (s-contacts-7, -26; C-10)
@@ -679,6 +681,8 @@ func (s *Server) timelineInset(c *collectionCtx, uid string, obj *model.Object) 
 		if len(out) == timelineInsetRows {
 			break
 		}
+		// On the card a row is a move to the record: the card has no panel.
+		r.row.Target = ""
 		out = append(out, r.row)
 	}
 	n := len(rows)

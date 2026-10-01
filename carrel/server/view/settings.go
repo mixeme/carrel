@@ -2,8 +2,11 @@ package view
 
 // Form — общая форма: поля, ошибки, кнопки.
 type Form struct {
-	Action  string       `json:"action"`
-	Method  string       `json:"method"`
+	Action string `json:"action"`
+	Method string `json:"method"`
+	// Target — зона C-7.2, которую меняет ответ-фрагмент на эту форму, как
+	// у Action: sheet у формы листа, rail у формы рейла; пусто — переход
+	Target  string       `json:"target,omitempty"`
 	Sets    []FieldSet   `json:"sets"`
 	Errors  []FieldError `json:"errors"`
 	Actions []Action     `json:"actions"`

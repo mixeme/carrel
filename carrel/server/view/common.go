@@ -50,6 +50,11 @@ type Action struct {
 	// файла и _csrf — «file» у Attach и «From this computer», «photo» у Add
 	// и Replace фотографии; пусто — действие без файла
 	File string `json:"file,omitempty"`
+	// Target — зона C-7.2, которую меняет ответ-фрагмент на это действие
+	// (C-7.1): sheet у адреса, отвечающего листом, rail у формы рейла, poll
+	// у полосы хода, queue у загрузки, main у новой папки — по C-5; пусто —
+	// переход. У кнопки формы (Href пуст) — пусто: цель у формы
+	Target string `json:"target,omitempty"`
 }
 
 type MenuItem struct {

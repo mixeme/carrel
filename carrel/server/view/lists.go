@@ -81,7 +81,10 @@ type ContactGroup struct {
 	Rows   []ContactRow `json:"rows"`
 }
 type ContactRow struct {
-	Href   string `json:"href"`
+	Href string `json:"href"`
+	// Target — details: строка открывает запись в панели подробностей —
+	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
+	Target string `json:"target,omitempty"`
 	UID    string `json:"uid"`
 	Colour Colour `json:"colour"`
 	Stamp  Stamp  `json:"stamp"`
@@ -121,8 +124,11 @@ type AgendaDay struct {
 	Rows   []AgendaRow `json:"rows"`
 }
 type AgendaRow struct {
-	Kind     Kind   `json:"kind"` // event, task (срок) или note на одной ленте
-	Href     string `json:"href"`
+	Kind Kind   `json:"kind"` // event, task (срок) или note на одной ленте
+	Href string `json:"href"`
+	// Target — details: строка открывает запись в панели подробностей —
+	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
+	Target   string `json:"target,omitempty"`
 	UID      string `json:"uid"`
 	Colour   Colour `json:"colour"`
 	Stamp    Stamp  `json:"stamp"`
@@ -152,7 +158,10 @@ type TaskGroup struct {
 	Rows   []TaskRow `json:"rows"`
 }
 type TaskRow struct {
-	Href    string `json:"href"`
+	Href string `json:"href"`
+	// Target — details: строка открывает запись в панели подробностей —
+	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
+	Target  string `json:"target,omitempty"`
 	UID     string `json:"uid"`
 	Colour  Colour `json:"colour"`
 	Stamp   Stamp  `json:"stamp"`
@@ -186,7 +195,10 @@ type NoteGroup struct {
 	Rows   []NoteRow `json:"rows"`
 }
 type NoteRow struct {
-	Href    string      `json:"href"`
+	Href string `json:"href"`
+	// Target — details: строка открывает запись в панели подробностей —
+	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
+	Target  string      `json:"target,omitempty"`
 	UID     string      `json:"uid"`
 	Colour  Colour      `json:"colour"`
 	Stamp   Stamp       `json:"stamp"`

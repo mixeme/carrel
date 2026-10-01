@@ -9,7 +9,8 @@
         "label": "Show",
         "method": "POST",
         "primary": true,
-        "csrf": "csrf"
+        "csrf": "csrf",
+        "target": "sheet"
       }
     ],
     "errors": [],
@@ -46,7 +47,8 @@
         ],
         "unfold": null
       }
-    ]
+    ],
+    "target": "sheet"
   },
   "purpose": "Confirm your password to reveal stored credentials, download a device profile, issue a davloom device password, change key escrow, or delete your account.",
   "until": null,

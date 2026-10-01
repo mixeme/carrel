@@ -60,7 +60,10 @@ type TimelineGroup struct {
 // (RELATED-TO), и файлы с его именем в названии (S-15.4). Упоминание —
 // другая функция («Упоминания», раздел 7.23 макета), сюда не входит.
 type TimelineRow struct {
-	Href   string `json:"href"`
+	Href string `json:"href"`
+	// Target — details у строки хронологии: карточка записи в панели
+	// (s-contacts-7); у связанной записи карточки и панели пусто — переход
+	Target string `json:"target,omitempty"`
 	Colour Colour `json:"colour"` // метка коллекции записи
 	Kind   Kind   `json:"kind"`
 	When   Text   `json:"when"`

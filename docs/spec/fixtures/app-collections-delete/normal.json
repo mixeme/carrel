@@ -7,7 +7,8 @@
       "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
       "id": "collection.delete.confirm",
       "label": "Delete on the server",
-      "method": "POST"
+      "method": "POST",
+      "target": "sheet"
     }
   ],
   "archive": [
@@ -62,7 +63,8 @@
         ],
         "unfold": null
       }
-    ]
+    ],
+    "target": "sheet"
   },
   "kind": "contact",
   "references": [],

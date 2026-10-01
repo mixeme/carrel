@@ -212,7 +212,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -220,7 +221,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -236,7 +238,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "csrf": "csrf",
@@ -265,6 +268,7 @@
               "on": false
             }
           ],
+          "target": "details",
           "tick": {
             "csrf": "csrf",
             "enabled": true,
@@ -310,7 +314,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -318,7 +323,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -334,7 +340,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "csrf": "csrf",
@@ -363,6 +370,7 @@
               "on": false
             }
           ],
+          "target": "details",
           "tick": {
             "csrf": "csrf",
             "enabled": true,
@@ -408,7 +416,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -416,7 +425,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -432,7 +442,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "csrf": "csrf",
@@ -455,6 +466,7 @@
           "status": "Needs action",
           "summary": "Продлить страховку",
           "tags": [],
+          "target": "details",
           "tick": {
             "csrf": "csrf",
             "enabled": true,
@@ -493,7 +505,8 @@
         "icon": "i-plus",
         "id": "collection.new",
         "label": "New list",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -612,7 +625,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -620,7 +634,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -628,7 +643,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -655,7 +671,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -679,7 +696,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -687,7 +705,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -695,7 +714,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -722,7 +742,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -753,7 +774,8 @@
                 "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
                 "id": "feed.edit",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -824,7 +846,8 @@
           ],
           "unfold": null
         }
-      ]
+      ],
+      "target": "rail"
     }
   },
   "title": "Дела",
@@ -837,7 +860,8 @@
           "icon": "i-quill",
           "id": "new.notes",
           "label": "Note",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -846,7 +870,8 @@
           "id": "new.contacts",
           "label": "Contact",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -854,7 +879,8 @@
           "icon": "i-cal",
           "id": "new.calendar",
           "label": "Event",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -862,7 +888,8 @@
           "icon": "i-task",
           "id": "new.tasks",
           "label": "Task",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -871,7 +898,8 @@
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -880,7 +908,8 @@
           "id": "new.letter",
           "label": "Letter",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         }
       ],
       "enabled": true,
@@ -889,7 +918,8 @@
       "id": "new.notes",
       "label": "New note",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     },
     "refresh": {
       "action": {

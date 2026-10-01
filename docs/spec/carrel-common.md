@@ -318,6 +318,17 @@ spec/fixtures/<screen>/<state>.json
 **текст** (плоский ответ для чужого скрипта), **DAV**, **редирект**.
 *Вью-модель*: имя структуры из C-6; `—` там, где вью-модели нет по существу.
 
+**Цель ответа — данные** (этап 4 клиента, С1). Ответ «лист» меняет зону
+`sheet`, «фрагмент» — зону своей вью-модели (`Rail` — `rail`, `PollBar` —
+`poll`, `TransferQueue` — `queue`, `FilesPage` — `main`, лист — `sheet`); у
+прочих ответов зоны нет — это переход. Сервер называет её в каждом действии
+и форме (`Action.Target`, `Form.Target`, C-6.2), сверяясь с этой картой;
+ответ, разный по методу, сказан частями: «лист (GET); страница, редирект
+(POST)». Строка списка, открывающая запись в панели, несёт `details` сама
+(`ContactRow.Target` и соседи, C-6.4): тот же адрес из меню (Open) — переход.
+Сторож — `view.TestFixtureTargetsAreC5`: каждое действие и форма каждой
+фикстуры против этой карты, прочитанной из спеки.
+
 ### C-5.1 Вне оболочки
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
@@ -365,7 +376,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/duplicates` | GET | вход | страница | `DuplicatesPage` |
 | `/app/duplicates/decide` | POST | вход | страница, редирект | `DuplicatesPage` — решение по группе (`do=`): ответ — дубликаты, как они теперь стоят, сказанное — в `notices`; форма без сценариев, когда сказать нечего, — редирект на `/app/duplicates`. Группа — не зона C-7.2, фрагментом не приходит |
 | `/app/duplicates/merge` | GET, POST | вход | страница | `DuplicatesMergePage` |
-| `/app/sources/{kind}` | POST | вход | фрагмент, редирект | `Rail`; форма рейла (`Rail.Ticks`): `toggle` — одна строка, `tick` — весь выбор, `back` — страница раздела, куда вернуться без сценариев |
+| `/app/sources/{kind}` | POST | вход | фрагмент, редирект | `Rail`; `{kind}` — четыре рода и `files`; форма рейла (`Rail.Ticks`): `toggle` — одна строка, `tick` — весь выбор, `back` — страница раздела, куда вернуться без сценариев |
 | `/app/publish` | GET, POST | вход | лист | `PublishSheet` |
 | `/app/mail/compose` | GET, POST | вход | лист | `MailSheet` |
 | `/app/mail/attach` | GET, POST | вход | лист | `MailAttachSheet` |
@@ -395,7 +406,7 @@ spec/fixtures/<screen>/<state>.json
 | `/c/{account}/{col}/{uid}/photo` | GET | вход | поток | — |
 | `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage` |
 | `/app/{kind}/{account}/{col}/{uid}/move` | GET, POST | вход | лист | `MoveSheet` |
-| `/app/contacts/{account}/{col}/{uid}/rewrite` | GET, POST | вход | лист, страница, редирект | `RewriteSheet`; `?plan=` — план, выданный сохранением карточки (S-15.4). POST переписывает и отвечает карточкой (`ContactPage`) с итогом (s-contacts-16); с `op=leave` — редирект на карточку, ничего не переписав; без живого плана GET и POST — редирект на карточку |
+| `/app/contacts/{account}/{col}/{uid}/rewrite` | GET, POST | вход | лист (GET); страница, редирект (POST) | `RewriteSheet`; `?plan=` — план, выданный сохранением карточки (S-15.4). POST переписывает и отвечает карточкой (`ContactPage`) с итогом (s-contacts-16); с `op=leave` — редирект на карточку, ничего не переписав; без живого плана GET и POST — редирект на карточку |
 | `/app/{kind}/{account}/{col}/{uid}/delete` | POST | вход | редирект | — |
 | `/app/{kind}/import` | GET | вход | страница | `ImportPage` — вход из сведённого вида: мастер спрашивает «Into» |
 | `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage` |
@@ -589,6 +600,7 @@ type Action struct {
     Arrow   []MenuItem // стрелка кнопки (.m-split): пункты её меню; пусто — без стрелки
     CSRF    string  // у POST — токен сеанса: без сценариев действие уходит своей формой со скрытым _csrf этого значения (C-11); у GET и на страницах вне входа пусто
     File    string  // у POST, который несёт файл, — имя поля файла: без сценариев действие уходит формой multipart/form-data с этим полем выбора файла и _csrf — «file» у Attach и «From this computer» (attach.add), «photo» у Add и Replace фотографии (photo.add, photo.replace); пусто — без файла
+    Target  string  // зона C-7.2, которую меняет ответ-фрагмент на действие (C-7.1), по C-5: sheet у адреса, отвечающего листом, rail у формы рейла, poll у полосы хода, queue у загрузки, main у новой папки; пусто — переход. У кнопки формы (Href пуст) — пусто: цель у формы (Form.Target)
 }
 // Кнопка со стрелкой — одно действие: само Action — то, что делает кнопка,
 // Arrow — меню стрелки в порядке кадра. Первый пункт повторяет кнопку (тот же
@@ -1028,7 +1040,9 @@ type ContactsListPage struct {
 }
 type ContactGroup struct { Rubric Text; Count int; Rows []ContactRow } // Count — сколько карточек в группе
 type ContactRow struct {
-    Href, UID string
+    Href      string
+    Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
+    UID       string
     Colour    Colour
     Stamp     Stamp
     Avatar    Avatar
@@ -1061,7 +1075,9 @@ type AgendaPage struct {
 type AgendaDay struct { Rubric Text; Count int; Rows []AgendaRow } // Rubric — «Monday · 10 August» (C-10); Count — строк в дне
 type AgendaRow struct {
     Kind      Kind // event, task (срок) или note на одной ленте
-    Href, UID string
+    Href      string
+    Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
+    UID       string
     Colour    Colour
     Stamp     Stamp
     Time      Text // «10:00» или «all day» (s-agenda-1)
@@ -1087,7 +1103,9 @@ type TasksPage struct {
 }
 type TaskGroup struct { Rubric Text; Rows []TaskRow }
 type TaskRow struct {
-    Href, UID string
+    Href      string
+    Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
+    UID       string
     Colour    Colour
     Stamp     Stamp
     Done      bool
@@ -1114,7 +1132,9 @@ type NotesPage struct {
 }
 type NoteGroup struct { Rubric Text; Rows []NoteRow }
 type NoteRow struct {
-    Href, UID string
+    Href      string
+    Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
+    UID       string
     Colour    Colour
     Stamp     Stamp
     Title     Text
@@ -1225,6 +1245,7 @@ type TimelineGroup struct { Rubric Text; Count int; Rows []TimelineRow }
 // с его именем в названии. Упоминание — другая функция (раздел 7.23 макета).
 type TimelineRow struct {
     Href    string
+    Target  string // details у строки хронологии — карточка записи в панели (s-contacts-7); у связанной записи карточки и панели пусто — переход
     Colour  Colour // метка коллекции записи
     Kind    Kind   // C-8; значение и есть слово столбца Kind — «event», «task», «file» (s-contacts-7)
     When    Text // день списка коротко, «10 Aug» (s-contacts-7, -26; C-10)
@@ -1864,6 +1885,7 @@ type PublishedRow struct {
 type Form struct { // общая форма: поля, ошибки, кнопки
     Action  string
     Method  string
+    Target  string // зона C-7.2, которую меняет ответ-фрагмент на форму, как у Action: sheet у формы листа, rail у формы рейла; пусто — переход
     Sets    []FieldSet
     Errors  []FieldError
     Actions []Action
@@ -2560,7 +2582,9 @@ Markdown и отдаёт дерево; собирает из него узлы �
 Сервер отличает одно от другого по признаку запроса и **никогда — по адресу**.
 Клиент не может попросить фрагмент там, где кадр показывает переход, и наоборот.
 Признак — заголовки запроса: `Carrel-View: fragment` просит фрагмент,
-`Carrel-Target: <цель>` называет зону (C-7.2; без него — `main`).
+`Carrel-Target: <цель>` называет зону (C-7.2; без него — `main`). Какую
+зону просить, говорит вью-модель: `Target` действия, формы, строки списка
+(C-5, C-6.2); пустой `Target` — переход, и фрагмент там не просят.
 
 ### C-7.2 Цели
 

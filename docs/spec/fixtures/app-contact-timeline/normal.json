@@ -7,7 +7,8 @@
       "label": "Write a note",
       "method": "GET",
       "primary": true,
-      "icon": "i-quill"
+      "icon": "i-quill",
+      "target": "sheet"
     },
     {
       "enabled": true,
@@ -15,7 +16,8 @@
       "id": "timeline.event",
       "label": "New event",
       "method": "GET",
-      "icon": "i-cal"
+      "icon": "i-cal",
+      "target": "sheet"
     },
     {
       "enabled": true,
@@ -23,7 +25,8 @@
       "id": "timeline.task",
       "label": "New task",
       "method": "GET",
-      "icon": "i-task"
+      "icon": "i-task",
+      "target": "sheet"
     },
     {
       "enabled": true,
@@ -260,7 +263,8 @@
         "icon": "i-move",
         "id": "record.move",
         "label": "Move",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -268,7 +272,8 @@
         "icon": "i-dup",
         "id": "record.copy",
         "label": "Copy",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -284,7 +289,8 @@
         "icon": "i-link",
         "id": "publish",
         "label": "Publish a link",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       }
     ],
     "attach": [],
@@ -316,7 +322,8 @@
           "title": "Синк-ап по релизу",
           "when": "10 Aug",
           "why": "attendee · accepted",
-          "colour": "#4a6b52"
+          "colour": "#4a6b52",
+          "target": "details"
         }
       ],
       "rubric": "August 2026",
@@ -335,7 +342,8 @@
         "label": "Stop",
         "method": "POST",
         "reason": "The timeline has finished.",
-        "csrf": "csrf"
+        "csrf": "csrf",
+        "target": "poll"
       },
       {
         "enabled": true,
@@ -450,7 +458,8 @@
           "id": "source.retry",
           "label": "Retry",
           "method": "POST",
-          "csrf": "csrf"
+          "csrf": "csrf",
+          "target": "poll"
         },
         "stamp": "baikal · Общий",
         "state": "error"
@@ -698,7 +707,8 @@
               "id": "source.retry",
               "label": "Retry",
               "method": "POST",
-              "csrf": "csrf"
+              "csrf": "csrf",
+              "target": "poll"
             },
             "state": "unavailable",
             "tick": "on",
@@ -779,7 +789,8 @@
           ],
           "unfold": null
         }
-      ]
+      ],
+      "target": "rail"
     }
   },
   "range": {
@@ -896,7 +907,8 @@
           "icon": "i-quill",
           "id": "new.notes",
           "label": "Note",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -905,7 +917,8 @@
           "id": "new.contacts",
           "label": "Contact",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -913,7 +926,8 @@
           "icon": "i-cal",
           "id": "new.calendar",
           "label": "Event",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -921,7 +935,8 @@
           "icon": "i-task",
           "id": "new.tasks",
           "label": "Task",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -930,7 +945,8 @@
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -939,7 +955,8 @@
           "id": "new.letter",
           "label": "Letter",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         }
       ],
       "enabled": true,
@@ -948,7 +965,8 @@
       "id": "new.notes",
       "label": "New note",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     },
     "userHref": "/app/settings/account"
   },

@@ -68,7 +68,8 @@
         "icon": "i-down",
         "id": "collection.export",
         "label": "Export",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -375,7 +376,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -383,7 +385,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -399,7 +402,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "csrf": "csrf",
@@ -418,6 +422,7 @@
           "stamp": "nextcloud · Работа",
           "state": "ok",
           "summary": "Дежурство: первая линия",
+          "target": "details",
           "time": "all day",
           "uid": "2f04-8b71-e39a",
           "zone": ""
@@ -456,7 +461,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -464,7 +470,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -480,7 +487,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "csrf": "csrf",
@@ -499,6 +507,7 @@
           "stamp": "radicale · vps · Дежурства",
           "state": "ok",
           "summary": "Дежурство: первая линия",
+          "target": "details",
           "time": "all day",
           "uid": "5e90-33c1-a8d2",
           "zone": ""
@@ -541,7 +550,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -549,7 +559,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -565,7 +576,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "csrf": "csrf",
@@ -584,6 +596,7 @@
           "stamp": "nextcloud · Личный",
           "state": "ok",
           "summary": "Синк-ап по релизу",
+          "target": "details",
           "time": "10:00",
           "uid": "8f1c-4a02-b7d3",
           "zone": "Asia/Yekaterinburg"
@@ -622,7 +635,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -630,7 +644,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -646,7 +661,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "csrf": "csrf",
@@ -665,6 +681,7 @@
           "stamp": "nextcloud · Работа",
           "state": "ok",
           "summary": "Созвон с подрядчиком",
+          "target": "details",
           "time": "15:00",
           "uid": "7ae3-1c48-55b0",
           "zone": ""
@@ -709,7 +726,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -717,7 +735,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -733,7 +752,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "csrf": "csrf",
@@ -752,6 +772,7 @@
           "stamp": "radicale · vps · Проекты",
           "state": "ok",
           "summary": "Ревью архитектуры",
+          "target": "details",
           "time": "09:30",
           "uid": "9c27-0e5d-4412",
           "zone": ""
@@ -785,7 +806,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -793,7 +815,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -809,7 +832,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "csrf": "csrf",
@@ -828,6 +852,7 @@
           "stamp": "nextcloud · Личный",
           "state": "ok",
           "summary": "Забрать документы",
+          "target": "details",
           "time": "18:00",
           "uid": "1d55-90fe-3c27",
           "zone": ""
@@ -888,7 +913,8 @@
             "icon": "i-file",
             "id": "attach.files",
             "label": "From Files",
-            "method": "GET"
+            "method": "GET",
+            "target": "sheet"
           }
         ],
         "csrf": "csrf",
@@ -1037,7 +1063,8 @@
         "icon": "i-move",
         "id": "record.move",
         "label": "Move",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -1045,7 +1072,8 @@
         "icon": "i-dup",
         "id": "record.copy",
         "label": "Copy",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -1061,7 +1089,8 @@
         "icon": "i-link",
         "id": "publish",
         "label": "Publish a link",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       }
     ],
     "related": [
@@ -1101,7 +1130,8 @@
         "id": "poll.stop",
         "label": "Stop",
         "method": "POST",
-        "reason": "The list has finished."
+        "reason": "The list has finished.",
+        "target": "poll"
       },
       {
         "enabled": true,
@@ -1164,7 +1194,8 @@
           "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
           "id": "source.retry",
           "label": "Retry",
-          "method": "POST"
+          "method": "POST",
+          "target": "poll"
         },
         "stamp": "baikal · Общий",
         "state": "error"
@@ -1215,7 +1246,8 @@
         "icon": "i-plus",
         "id": "collection.new",
         "label": "New calendar",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -1334,7 +1366,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1342,7 +1375,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1350,7 +1384,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1377,7 +1412,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -1401,7 +1437,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1409,7 +1446,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1417,7 +1455,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1444,7 +1483,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -1468,7 +1508,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1476,7 +1517,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1484,7 +1526,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1511,7 +1554,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -1542,7 +1586,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1550,7 +1595,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1558,7 +1604,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1585,7 +1632,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -1609,7 +1657,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1617,7 +1666,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1625,7 +1675,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1652,7 +1703,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -1683,7 +1735,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1691,7 +1744,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1699,7 +1753,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1726,7 +1781,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "password · 401",
@@ -1738,7 +1794,8 @@
               "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
               "id": "source.retry",
               "label": "Retry",
-              "method": "POST"
+              "method": "POST",
+              "target": "poll"
             },
             "state": "unavailable",
             "tick": "on"
@@ -1764,7 +1821,8 @@
                 "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
                 "id": "feed.edit",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1795,7 +1853,8 @@
                 "href": "/app/collections/rename?a=f-league\u0026c=feed",
                 "id": "feed.edit",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1871,7 +1930,8 @@
           ],
           "unfold": null
         }
-      ]
+      ],
+      "target": "rail"
     }
   },
   "subtitle": [
@@ -1893,7 +1953,8 @@
           "icon": "i-quill",
           "id": "new.notes",
           "label": "Note",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1902,7 +1963,8 @@
           "id": "new.contacts",
           "label": "Contact",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1910,7 +1972,8 @@
           "icon": "i-cal",
           "id": "new.calendar",
           "label": "Event",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1918,7 +1981,8 @@
           "icon": "i-task",
           "id": "new.tasks",
           "label": "Task",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1927,7 +1991,8 @@
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1936,7 +2001,8 @@
           "id": "new.letter",
           "label": "Letter",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         }
       ],
       "enabled": true,
@@ -1945,7 +2011,8 @@
       "id": "new.notes",
       "label": "New note",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     },
     "refresh": {
       "action": {

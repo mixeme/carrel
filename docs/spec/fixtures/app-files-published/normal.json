@@ -127,7 +127,8 @@
           "href": "/app/mail/compose?id=link-smeta\u0026op=link",
           "id": "publish.mail",
           "label": "Send",
-          "method": "POST"
+          "method": "POST",
+          "target": "sheet"
         },
         {
           "csrf": "csrf",
@@ -136,7 +137,8 @@
           "href": "/app/publish?id=link-smeta\u0026op=revoke",
           "id": "publish.revoke",
           "label": "Revoke",
-          "method": "POST"
+          "method": "POST",
+          "target": "sheet"
         }
       ],
       "created": "10 August 2026",
@@ -163,7 +165,8 @@
           "href": "/app/mail/compose?id=link-lichnyj\u0026op=link",
           "id": "publish.mail",
           "label": "Send",
-          "method": "POST"
+          "method": "POST",
+          "target": "sheet"
         },
         {
           "csrf": "csrf",
@@ -172,7 +175,8 @@
           "href": "/app/publish?id=link-lichnyj\u0026op=revoke",
           "id": "publish.revoke",
           "label": "Revoke",
-          "method": "POST"
+          "method": "POST",
+          "target": "sheet"
         }
       ],
       "created": "9 August 2026",
@@ -195,7 +199,8 @@
           "icon": "i-quill",
           "id": "new.notes",
           "label": "Note",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -204,7 +209,8 @@
           "id": "new.contacts",
           "label": "Contact",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -212,7 +218,8 @@
           "icon": "i-cal",
           "id": "new.calendar",
           "label": "Event",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -220,7 +227,8 @@
           "icon": "i-task",
           "id": "new.tasks",
           "label": "Task",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -229,7 +237,8 @@
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -238,7 +247,8 @@
           "id": "new.letter",
           "label": "Letter",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         }
       ],
       "enabled": true,
@@ -247,7 +257,8 @@
       "id": "new.notes",
       "label": "New note",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     },
     "refresh": {
       "action": {

@@ -323,7 +323,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -331,7 +332,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -347,7 +349,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "csrf": "csrf",
@@ -366,6 +369,7 @@
           "stamp": "",
           "state": "ok",
           "summary": "Синк-ап по релизу",
+          "target": "details",
           "time": "10:00",
           "uid": "8f1c-4a02-b7d3",
           "zone": "Asia/Yekaterinburg"
@@ -405,7 +409,8 @@
               "icon": "i-move",
               "id": "record.move",
               "label": "Move",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -413,7 +418,8 @@
               "icon": "i-dup",
               "id": "record.copy",
               "label": "Copy",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "enabled": true,
@@ -429,7 +435,8 @@
               "icon": "i-link",
               "id": "publish",
               "label": "Publish a link",
-              "method": "GET"
+              "method": "GET",
+              "target": "sheet"
             },
             {
               "csrf": "csrf",
@@ -448,6 +455,7 @@
           "stamp": "",
           "state": "ok",
           "summary": "Забрать документы",
+          "target": "details",
           "time": "18:00",
           "uid": "1d55-90fe-3c27",
           "zone": ""
@@ -508,7 +516,8 @@
             "icon": "i-file",
             "id": "attach.files",
             "label": "From Files",
-            "method": "GET"
+            "method": "GET",
+            "target": "sheet"
           }
         ],
         "csrf": "csrf",
@@ -657,7 +666,8 @@
         "icon": "i-move",
         "id": "record.move",
         "label": "Move",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -665,7 +675,8 @@
         "icon": "i-dup",
         "id": "record.copy",
         "label": "Copy",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -681,7 +692,8 @@
         "icon": "i-link",
         "id": "publish",
         "label": "Publish a link",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       }
     ],
     "related": [
@@ -735,7 +747,8 @@
         "icon": "i-plus",
         "id": "collection.new",
         "label": "New calendar",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -854,7 +867,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -862,7 +876,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -870,7 +885,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -897,7 +913,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -921,7 +938,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -929,7 +947,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -937,7 +956,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -964,7 +984,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -988,7 +1009,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -996,7 +1018,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1004,7 +1027,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1031,7 +1055,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -1062,7 +1087,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1070,7 +1096,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1078,7 +1105,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1105,7 +1133,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -1129,7 +1158,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1137,7 +1167,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1145,7 +1176,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1172,7 +1204,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "",
@@ -1203,7 +1236,8 @@
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1211,7 +1245,8 @@
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1219,7 +1254,8 @@
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1246,7 +1282,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "target": "sheet"
               }
             ],
             "message": "password · 401",
@@ -1258,7 +1295,8 @@
               "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
               "id": "source.retry",
               "label": "Retry",
-              "method": "POST"
+              "method": "POST",
+              "target": "poll"
             },
             "state": "unavailable",
             "tick": "on"
@@ -1284,7 +1322,8 @@
                 "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
                 "id": "feed.edit",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1315,7 +1354,8 @@
                 "href": "/app/collections/rename?a=f-league\u0026c=feed",
                 "id": "feed.edit",
                 "label": "Rename",
-                "method": "GET"
+                "method": "GET",
+                "target": "sheet"
               },
               {
                 "enabled": true,
@@ -1391,7 +1431,8 @@
           ],
           "unfold": null
         }
-      ]
+      ],
+      "target": "rail"
     }
   },
   "subtitle": [
@@ -1413,7 +1454,8 @@
           "icon": "i-quill",
           "id": "new.notes",
           "label": "Note",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1422,7 +1464,8 @@
           "id": "new.contacts",
           "label": "Contact",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1430,7 +1473,8 @@
           "icon": "i-cal",
           "id": "new.calendar",
           "label": "Event",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1438,7 +1482,8 @@
           "icon": "i-task",
           "id": "new.tasks",
           "label": "Task",
-          "method": "GET"
+          "method": "GET",
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1447,7 +1492,8 @@
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         },
         {
           "enabled": true,
@@ -1456,7 +1502,8 @@
           "id": "new.letter",
           "label": "Letter",
           "method": "GET",
-          "separator": true
+          "separator": true,
+          "target": "sheet"
         }
       ],
       "enabled": true,
@@ -1465,7 +1512,8 @@
       "id": "new.notes",
       "label": "New note",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     },
     "refresh": {
       "action": {

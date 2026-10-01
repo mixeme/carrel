@@ -988,13 +988,15 @@ func (s *Server) getSearchProgressSSE(w http.ResponseWriter, r *http.Request) {
 	}
 	_ = rc.Flush()
 
-	blob, tf := s.catalogOf(sess), s.timeFor(sess)
+	blob, tf, token := s.catalogOf(sess), s.timeFor(sess), sess.CSRFToken()
 	ping := time.NewTicker(sseKeepAlive)
 	defer ping.Stop()
 	for {
 		changed := task.Changed()
 		snap := task.Snapshot()
-		bar := s.pollBar(tf, blob, snap, owner)
+		// An event is no page and goes past the stamping renderer: its
+		// POSTs get the session's token and every action its target here.
+		bar := stampView(s.pollBar(tf, blob, snap, owner), token, s.basePath)
 		if err := s.render.Event(w, "poll", render.TargetPoll, bar); err != nil {
 			return
 		}

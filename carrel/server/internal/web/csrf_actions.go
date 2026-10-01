@@ -3,6 +3,7 @@ package web
 import (
 	"net/http"
 	"reflect"
+	"strings"
 
 	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
@@ -10,25 +11,28 @@ import (
 
 // stampingRenderer gives every POST action of what it renders the token of
 // the request's session (C-11, Action.CSRF): a client without scripts sends
-// a POST outside a form as a form of its own, with that token as _csrf. One
-// place for every action the handlers build, and nothing else of the view
-// model changes. A request without a session — the pages outside the
-// shell, the public ones — stamps nothing: their forms carry their own.
+// a POST outside a form as a form of its own, with that token as _csrf. A
+// request without a session — the pages outside the shell, the public ones
+// — stamps no token: their forms carry their own. And every action and
+// form gets the zone of C-7.2 a fragment answer of its address replaces
+// (Action.Target, Form.Target; targets.go), by C-5. One place for every
+// action the handlers build, and nothing else of the view model changes.
 type stampingRenderer struct {
 	render.Renderer
 	token func(r *http.Request) string
+	base  string // CARREL_BASE_PATH, normalised: the addresses carry it
 }
 
 func (sr stampingRenderer) Page(w http.ResponseWriter, r *http.Request, status int, body any) error {
-	return sr.Renderer.Page(w, r, status, stampCSRF(body, sr.token(r)))
+	return sr.Renderer.Page(w, r, status, stampView(body, sr.token(r), sr.base))
 }
 
 func (sr stampingRenderer) Fragment(w http.ResponseWriter, r *http.Request, status int, target string, body any, extra []render.OOB) error {
 	token := sr.token(r)
 	for i := range extra {
-		extra[i].Body = stampCSRF(extra[i].Body, token)
+		extra[i].Body = stampView(extra[i].Body, token, sr.base)
 	}
-	return sr.Renderer.Fragment(w, r, status, target, stampCSRF(body, token), extra)
+	return sr.Renderer.Fragment(w, r, status, target, stampView(body, token, sr.base), extra)
 }
 
 // sessionToken is the CSRF token of the request's session; empty without
@@ -40,22 +44,30 @@ func (s *Server) sessionToken(r *http.Request) string {
 	return ""
 }
 
-var actionType = reflect.TypeOf(view.Action{})
+var (
+	actionType = reflect.TypeOf(view.Action{})
+	formType   = reflect.TypeOf(view.Form{})
+)
 
-// stampCSRF returns body with token in every POST Action, the items of an
-// arrow and of a menu among them. The body is copied, never changed in
-// place: a handler may keep what it rendered.
-func stampCSRF(body any, token string) any {
-	if token == "" || body == nil {
+// stampView returns body with token in every POST Action, the items of an arrow
+// and of a menu among them, and with the target of C-7.2 in every Action
+// and Form that has none. The body is copied, never changed in place: a
+// handler may keep what it rendered.
+func stampView(body any, token, base string) any {
+	if body == nil {
 		return body
 	}
 	v := reflect.ValueOf(body)
 	out := reflect.New(v.Type()).Elem()
-	out.Set(stampValue(v, token))
+	out.Set(stampValue(v, stamper{token: token, base: base}))
 	return out.Interface()
 }
 
-func stampValue(v reflect.Value, token string) reflect.Value {
+// stamper is what stampView puts in: the session's token, and the base path the
+// addresses are read under.
+type stamper struct{ token, base string }
+
+func stampValue(v reflect.Value, token stamper) reflect.Value {
 	switch v.Kind() {
 	case reflect.Pointer:
 		if v.IsNil() {
@@ -103,8 +115,19 @@ func stampValue(v reflect.Value, token string) reflect.Value {
 				fresh.Field(i).Set(stampValue(v.Field(i), token))
 			}
 		}
-		if v.Type() == actionType && fresh.FieldByName("Method").String() == http.MethodPost {
-			fresh.FieldByName("CSRF").SetString(token)
+		switch v.Type() {
+		case actionType:
+			method := fresh.FieldByName("Method").String()
+			if method == http.MethodPost && token.token != "" {
+				fresh.FieldByName("CSRF").SetString(token.token)
+			}
+			if t := fresh.FieldByName("Target"); t.String() == "" {
+				t.SetString(answerZone(token.base, method, fresh.FieldByName("Href").String()))
+			}
+		case formType:
+			if t := fresh.FieldByName("Target"); t.String() == "" {
+				t.SetString(answerZone(token.base, strings.ToUpper(fresh.FieldByName("Method").String()), fresh.FieldByName("Action").String()))
+			}
 		}
 		return fresh
 	}

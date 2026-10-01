@@ -24,6 +24,7 @@ import (
 	"carrel.dev/carrel/server/internal/publish"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -888,6 +889,7 @@ func (s *Server) contactGroups(sess *session.Session, tf timeFmt, items []listed
 		uid := card.UID(it.obj)
 		row := view.ContactRow{
 			Href:   s.route(it.from.recordPath(segment, uid)),
+			Target: render.TargetDetails, // the row opens in the panel (C-7.2)
 			UID:    uid,
 			Avatar: avatarFor(uid, name),
 			Name:   text(name),
@@ -1331,6 +1333,7 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 			row := view.AgendaRow{
 				Kind:    it.kind,
 				Href:    s.route(it.from.recordPath(segmentOf(it.kind), uid)),
+				Target:  render.TargetDetails,
 				UID:     uid,
 				Time:    text(tf.timeLabel(at, false)),
 				Summary: text(titleOr(cal.Text(it.pick("SUMMARY"), "SUMMARY"), untitledOf(it.kind))),
@@ -1374,6 +1377,7 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 			occ := occurrence{at: at, allDay: tm.AllDay, order: string(it.from.stamp()) + "\x00" + it.from.listPath(segment), row: view.AgendaRow{
 				Kind:     view.KindEvent,
 				Href:     s.route(it.from.recordPath(segment, uid)),
+				Target:   render.TargetDetails,
 				UID:      uid,
 				Time:     text(tf.timeLabel(at, tm.AllDay)),
 				Zone:     text(tf.zone(tm.Zone)),
@@ -1579,7 +1583,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 			continue
 		}
 		row := view.TaskRow{
-			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Done: isDone,
+			Href: s.route(it.from.recordPath(segment, uid)), Target: render.TargetDetails, UID: uid, Done: isDone,
 			Summary: text(titleOr(cal.Text(it.pick("SUMMARY"), "SUMMARY"), "Untitled task")),
 			Percent: percentOf(o), Tags: filter.tags(categoriesOf(view.KindTask, o)), State: linkedState(it),
 			Badges: linkedBadge(it), Sources: linkedSources(it),
@@ -1741,7 +1745,7 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		title := noteTitle(cal.Text(it.pick("SUMMARY"), "SUMMARY"), body)
 		at := noteTime(o, tf.tz)
 		row := view.NoteRow{
-			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Title: text(title), Excerpt: text(noteExcerpt(body, title)),
+			Href: s.route(it.from.recordPath(segment, uid)), Target: render.TargetDetails, UID: uid, Title: text(title), Excerpt: text(noteExcerpt(body, title)),
 			Tags: filter.tags(categoriesOf(view.KindNote, o)), State: linkedState(it),
 			Badges: linkedBadge(it), Sources: linkedSources(it),
 			Menu: s.recordOps(it.from, recordKinds[segment], uid, o.ETag).rowMenu(),
