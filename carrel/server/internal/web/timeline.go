@@ -372,6 +372,17 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 	// Columns (s-contacts-25): Title, Date, Kind, Source; why a record is
 	// here stands after its title always and is not a column (s-contacts-26).
 	tl.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), "timeline", card+"/timeline/columns", r.URL.Query(), false)
+	// The panel's cross (s-contacts-7): without scripts the same timeline —
+	// its range and kind — without the panel. The screen keeps its sense;
+	// the other links of the screen do not carry card=0 and open it again.
+	q := r.URL.Query()
+	if q.Get("card") == "0" {
+		tl.Card, tl.CardClosed = view.Details{}, true
+	} else {
+		q.Del("again") // closing asks the servers nothing
+		q.Set("card", "0")
+		tl.Card.Close = s.route(card+"/timeline") + "?" + q.Encode()
+	}
 	s.writePage(w, r, http.StatusOK, tl)
 }
 

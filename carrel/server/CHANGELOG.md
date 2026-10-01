@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.100 — 2026-10-01
+
+The cross of the card in the timeline's panel went nowhere without scripts
+(the client's stop C16).
+
+### Changed
+
+- **The timeline's card closes** (C-6.5 `ContactTimelinePage`, s-contacts-7):
+  `card.close` is the same timeline — its range and kind kept — with
+  `?card=0`; there `cardClosed` is true and `card` is empty: no panel, the
+  screen keeps its sense. The screen's other links do not carry `card=0`
+  and open the panel again. A new field, not `card` becoming a pointer: the
+  client draws `card` as a value today.
+
 ## v0.2.99 — 2026-10-01
 
 The pieces of the server's sentences the frames mark — a command or a day

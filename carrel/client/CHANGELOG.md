@@ -4,6 +4,16 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.1.1 — 2026-10-01
+
+Server `v0.2.100`.
+
+### Changed
+
+- **The timeline's panel closes.** The cross of the card in the panel
+  (`s-contacts-7`) leads to `Card.Close` — the same timeline with `?card=0`;
+  a closed panel (`CardClosed`) is not drawn. U-5.5 row #14 is gone.
+
 ## v0.1.0 — 2026-10-01
 
 The shell and the contacts section: the first screens inside the sign-in.

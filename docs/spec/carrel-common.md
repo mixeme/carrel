@@ -1165,6 +1165,7 @@ type ContactTimelinePage struct {
     Subtitle Text   // под именем: где и кем, как у карточки — «Издательство «Слово» · Выпускающий редактор»
     Linked  *Badge  // «in 2 books» (BadgeLinked) у человека в нескольких книгах; nil — в одной
     Card    Details // карточка стоит в панели как контекст экрана, а не как выделение; Avatar — и аватар шапки
+    CardClosed bool // панель закрыта крестиком без сценариев (Card.Close — та же хронология с ?card=0): Card пуст, панели нет; прочие ссылки экрана открывают её снова (s-contacts-7)
     Bar     ListBar
     Range   Range   // окно на полосе: From, To и Show в Form; Presets пуст — «Widen the range» отвечают им
     Poll    PollBar // хронология — поиск по одному человеку (S-15.4)

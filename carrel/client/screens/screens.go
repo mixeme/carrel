@@ -180,7 +180,6 @@ var All = []Screen{
 			{Row: 3, Control: ".Items(Bar).More(Button)"},                            // ждёт библиотеку: U-5.5 #3
 			{Row: 4, Control: ".Items(Bar).Items(Button)"},                           // ждёт библиотеку: U-5.5 #4
 			{Row: 7, Fixture: "app-contact-timeline/normal"},                         // ждёт библиотеку: U-5.5 #7
-			{Row: 14, Control: ".Side(Side).Items(Head).Acts(Acts).Items(Close)"},    // ждёт библиотеку: U-5.5 #14
 		},
 	},
 	{

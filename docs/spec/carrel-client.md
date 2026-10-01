@@ -368,7 +368,6 @@ Carrel не знает; всё, что ей нужно, приходит зна�
 | 11 | `ContactsListPage`, `ContactPage`, `ContactTimelinePage`: фото в шапке (`HeadPhoto`) | s-contacts-1, s-contacts-6, s-contacts-7 | `HeadPhoto.Src`: фотография не показывается | 64 | владелец 01.10.2026 |
 | 12 | `ContactsListPage`: фильтр полосы (`Bar.FilterForm`) | s-contacts-1 | скрытые поля `Filter`: task, sort, tag не уходят | 65 | владелец 01.10.2026 |
 | 13 | `ContactsListPage`: «Compact rows» (`Bar.Compact`) | s-contacts-1 | отметка полосы вне формы: форма GET контракта не встаёт | — (новая, сервер C13 закрыт) | владелец 01.10.2026 |
-| 14 | `ContactTimelinePage`: крестик панели (`Card.Close`) | s-contacts-7 | адреса у крестика нет | сервер, долг C16 | владелец 01.10.2026 |
 | 15 | `app-contact/normal`, `app-contact/outcome` (`ContactPage`) | s-contacts-6, s-contacts-16 | ряд поля карточки (`dt`, `dd` чередуются): полей у фикстуры 6, в кадре 8; у итога хронология не открыта, кадр рисует её строки; обновления (`TopBar.Refresh`) у карточки нет | 61; сервер, долг C17 | владелец 01.10.2026 |
 | 16 | `app-contact-edit/normal` (`ContactEditPage`) | s-contacts-3 | подпись второго телефона в кадре — поле ввода, в фикстуре — выбор; обновления (`TopBar.Refresh`) у правки нет | 62; сервер, долг C17 | владелец 01.10.2026 |
 

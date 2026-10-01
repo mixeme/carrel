@@ -32,17 +32,20 @@ type ContactPage struct {
 // записей, а не карточка.
 type ContactTimelinePage struct {
 	Shell
-	UID      string          `json:"uid"`
-	Name     Text            `json:"name"`
-	Subtitle Text            `json:"subtitle"` // где и кем, как у карточки
-	Linked   *Badge          `json:"linked"`   // «in 2 books»; nil — человек в одной книге
-	Card     Details         `json:"card"`     // карточка стоит в панели как контекст экрана, а не как выделение
-	Bar      ListBar         `json:"bar"`
-	Range    Range           `json:"range"` // окно на полосе: From, To и Show в Form; «Widen the range» отвечают им
-	Poll     PollBar         `json:"poll"`  // хронология — поиск по одному человеку (S-15.4)
-	Groups   []TimelineGroup `json:"groups"`
-	Note     Text            `json:"note"` // «Nothing was looked for before …»
-	Actions  []Action        `json:"actions"`
+	UID      string  `json:"uid"`
+	Name     Text    `json:"name"`
+	Subtitle Text    `json:"subtitle"` // где и кем, как у карточки
+	Linked   *Badge  `json:"linked"`   // «in 2 books»; nil — человек в одной книге
+	Card     Details `json:"card"`     // карточка стоит в панели как контекст экрана, а не как выделение
+	// CardClosed — панель закрыта крестиком без сценариев (Card.Close,
+	// ?card=0): Card пуст, панели нет; прочие ссылки экрана открывают её снова
+	CardClosed bool            `json:"cardClosed"`
+	Bar        ListBar         `json:"bar"`
+	Range      Range           `json:"range"` // окно на полосе: From, To и Show в Form; «Widen the range» отвечают им
+	Poll       PollBar         `json:"poll"`  // хронология — поиск по одному человеку (S-15.4)
+	Groups     []TimelineGroup `json:"groups"`
+	Note       Text            `json:"note"` // «Nothing was looked for before …»
+	Actions    []Action        `json:"actions"`
 }
 
 // TimelineGroup — месяц хронологии; записи без даты — последней группой.

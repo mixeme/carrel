@@ -108,7 +108,11 @@ func Screen(p *view.ContactTimelinePage) w.Shell {
 		main = append(main, w.Empty{Parts: []w.EmptyPart{w.Text(p.Note)}, Variant: w.EmptySmallTop})
 	}
 	t := bind.Top(p.Top, top)
-	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}, Side: side(p.Card)}}
+	var panel *w.Side
+	if !p.CardClosed {
+		panel = side(p.Card)
+	}
+	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}, Side: panel}}
 }
 
 // Forms are the page's forms: the rail's, the retries of its sources, the
@@ -218,7 +222,6 @@ func side(c view.Details) *w.Side {
 		Photo:  photo,
 		Kicker: &w.Rubric{Text: "Card"},
 		Tools:  tools,
-		// ждёт библиотеку: U-5.5 #14 — the cross has no address (сервер, долг C16)
 		Acts:   &w.Acts{Items: []w.ActsPart{w.Close{Label: "Close the panel", Href: c.Close}}},
 		Middle: true,
 		Pad:    w.HeadPadBottom10,

@@ -299,7 +299,7 @@
     "related": [],
     "rendered": [],
     "subtitle": "",
-    "close": "",
+    "close": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?card=0",
     "books": [],
     "foreignShow": null,
     "date": ""
@@ -951,5 +951,6 @@
   },
   "uid": "4f2b-9c31-a0e7",
   "linked": null,
-  "subtitle": "Издательство «Слово» · Выпускающий редактор"
+  "subtitle": "Издательство «Слово» · Выпускающий редактор",
+  "cardClosed": false
 }
