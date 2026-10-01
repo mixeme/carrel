@@ -43,39 +43,44 @@
     "segments": [
       {
         "enabled": true,
-        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=all",
-        "id": "timeline.show.all",
-        "label": "All 1",
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+        "id": "timeline.kind.all",
+        "label": "All",
         "method": "GET",
-        "on": true
+        "on": true,
+        "tally": "1"
       },
       {
         "enabled": true,
-        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=events",
-        "id": "timeline.show.events",
-        "label": "Events 1",
-        "method": "GET"
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?kind=event",
+        "id": "timeline.kind.event",
+        "label": "Events",
+        "method": "GET",
+        "tally": "1"
       },
       {
         "enabled": true,
-        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=tasks",
-        "id": "timeline.show.tasks",
-        "label": "Tasks 0",
-        "method": "GET"
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?kind=task",
+        "id": "timeline.kind.task",
+        "label": "Tasks",
+        "method": "GET",
+        "tally": "0"
       },
       {
         "enabled": true,
-        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=notes",
-        "id": "timeline.show.notes",
-        "label": "Notes 0",
-        "method": "GET"
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?kind=note",
+        "id": "timeline.kind.note",
+        "label": "Notes",
+        "method": "GET",
+        "tally": "0"
       },
       {
         "enabled": true,
-        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=files",
-        "id": "timeline.show.files",
-        "label": "Files 0",
-        "method": "GET"
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?kind=file",
+        "id": "timeline.kind.file",
+        "label": "Files",
+        "method": "GET",
+        "tally": "0"
       }
     ],
     "selected": 0,
@@ -182,13 +187,13 @@
     ],
     "fields": [
       {
-        "href": "tel:+7912445-10-88",
+        "href": "tel:+79124451088",
         "label": "Phone · mobile",
         "mono": true,
         "value": "+7 912 445-10-88"
       },
       {
-        "href": "tel:+7495120-45-00",
+        "href": "tel:+74951204500",
         "label": "Phone · work",
         "mono": true,
         "value": "+7 495 120-45-00"

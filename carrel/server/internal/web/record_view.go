@@ -311,7 +311,7 @@ type displayField struct {
 var contactFields = []displayField{
 	{prop: "ORG", label: "Organisation", shape: structured},
 	{prop: "TITLE", label: "Title"},
-	{prop: "TEL", label: "Phone", href: func(v string) string { return "tel:" + strings.ReplaceAll(v, " ", "") }},
+	{prop: "TEL", label: "Phone", href: telHref},
 	{prop: "EMAIL", label: "Email", href: func(v string) string { return "mailto:" + v }},
 	{prop: "ADR", label: "Address", shape: structured},
 	{prop: "ROLE", label: "Role"},
@@ -333,6 +333,36 @@ var contactFields = []displayField{
 // commas of CATEGORIES separate values, and the card shows them apart.
 func listShown(v string) string {
 	return strings.Join(listItems(v), ", ")
+}
+
+// telHref is a number to call as the card's link writes it (s-contacts-6):
+// the digits and the leading plus, without what is there only to be read —
+// «+7 912 445-10-88» is tel:+79124451088. A number that is already a tel:
+// URI (vCard 4.0, VALUE=uri) keeps its own form; one with no digit, or with
+// anything but digits and separators, is no link.
+func telHref(v string) string {
+	v = strings.TrimSpace(v)
+	if strings.HasPrefix(strings.ToLower(v), "tel:") {
+		return v
+	}
+	var b strings.Builder
+	for i, r := range v {
+		switch {
+		case r >= '0' && r <= '9':
+			b.WriteRune(r)
+		case r == '+' && i == 0:
+			b.WriteRune(r)
+		case r == ' ' || r == '-' || r == '.' || r == '(' || r == ')' || r == '/':
+		default:
+			// An extension, a pause, a letter: not a number to call as it
+			// stands, and the link is not guessed at — the value is shown.
+			return ""
+		}
+	}
+	if strings.TrimPrefix(b.String(), "+") == "" {
+		return ""
+	}
+	return "tel:" + b.String()
 }
 
 func webHref(v string) string {

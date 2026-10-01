@@ -21,7 +21,8 @@ var (
 	frameRunbar   = regexp.MustCompile(`(?s)<div class="tc-runbar">(.*?)</div>`)
 	frameRunMono  = regexp.MustCompile(`<span class="tc-mono">([^<]*)</span>`)
 	frameRunAlarm = regexp.MustCompile(`<span class="tc-dim--danger">([^<]*)</span>`)
-	frameTLRange  = regexp.MustCompile(`(?s)<span class="tc-range">(.*?)</span>`)
+	frameTLRange  = regexp.MustCompile(`(?s)<form class="tc-range" action="([^"]*)" method="(get)">(.*?)</form>`)
+	frameTLDay    = regexp.MustCompile(`<input class="tc-in[^"]*" type="date" value="[^"]*" name="([^"]*)" aria-label="([^"]*)">`)
 	frameSideDL   = regexp.MustCompile(`(?s)<div class="tc-side">.*?<dl class="tc-fields">(.*?)</dl>`)
 )
 
@@ -58,17 +59,40 @@ func TestTimelineIsTheFrame(t *testing.T) {
 		t.Errorf("Print = %+v", p)
 	}
 
-	// The range: two days and Show, nothing under them.
-	if r := frameTLRange.FindStringSubmatch(frame); r == nil || strings.Contains(r[1], "tc-field__hint") {
-		t.Fatal("s-contacts-7 draws no range, or a hint in it: read the frame again")
+	// The range: a GET form to the timeline (task 51) — two days by their
+	// names and Show sending it, nothing under them.
+	r := frameTLRange.FindStringSubmatch(frame)
+	if r == nil || strings.Contains(r[3], "tc-field__hint") || !strings.Contains(r[3], `type="submit">Show</button>`) {
+		t.Fatal("s-contacts-7 draws no range form, or a hint in it: read the frame again")
 	}
-	for _, s := range page.Range.Form.Sets {
-		for _, r := range s.Rows {
-			if r.Hint != "" {
-				t.Errorf("%s: hint %q, the frame draws none", r.Name, r.Hint)
+	form := page.Range.Form
+	if form == nil || form.Method != "GET" || screenPlace(form.Action) != screenPlace(r[1]) || form.Action != card+"/timeline" {
+		t.Fatalf("range form = %+v, the frame %s %q", form, r[2], r[1])
+	}
+	var days, frameDays []string
+	for _, s := range form.Sets {
+		for _, row := range s.Rows {
+			if row.Kind != view.InputHidden {
+				days = append(days, row.Name+" "+string(row.Label)+" "+string(row.Kind))
+			}
+			if row.Hint != "" {
+				t.Errorf("%s: hint %q, the frame draws none", row.Name, row.Hint)
 			}
 		}
 	}
+	for _, d := range frameTLDay.FindAllStringSubmatch(r[3], -1) {
+		frameDays = append(frameDays, d[1]+" "+d[2]+" date")
+	}
+	if strings.Join(days, " | ") != strings.Join(frameDays, " | ") || len(frameDays) != 2 {
+		t.Errorf("range fields = %q, the frame %q", days, frameDays)
+	}
+	if show := actionByID(form.Actions, "range.show"); show == nil || show.Label != "Show" || show.Method != "GET" {
+		t.Errorf("range actions = %+v, want Show sending the form", form.Actions)
+	}
+
+	// The card's «⋯» in the panel: a button with its menu, drawn closed
+	// (task 49), the menu the card's own.
+	sameMenu(t, "timeline card", page.Card.Menu, "s-contacts-7")
 
 	// The run bar in pieces.
 	bar := frameRunbar.FindStringSubmatch(frame)

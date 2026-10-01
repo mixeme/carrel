@@ -3,6 +3,7 @@ package web_test
 import (
 	"net/http"
 	"net/url"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -175,6 +176,68 @@ func TestCreateSaysWhatTheServerDidNotTake(t *testing.T) {
 	sheet := decode[view.CollectionNewSheet](t, rec)
 	if sheet.Failure == nil || !strings.Contains(noticeWords(*sheet.Failure), "500") {
 		t.Errorf("notes alone: failure %+v, want the server's 500", sheet.Failure)
+	}
+}
+
+// s-agenda-11 (from-typecase note 28, task 53): the calendar the server made
+// with less than was asked says so over its lists as the frame writes it —
+// the title, the text with the calendar's name, and «New calendar», which
+// opens the sheet of a new calendar on this server with what was not taken
+// ticked.
+func TestTheNoticeOfWhatWasNotTakenIsTheFrame(t *testing.T) {
+	frame, _, _ := strings.Cut(mockupFrame(t, "s-agenda-11"), "<figcaption")
+	m := regexp.MustCompile(`(?s)<div class="tc-msg"><b>([^<]*)</b>(.*?)</div>`).FindStringSubmatch(frame)
+	if m == nil {
+		t.Fatal("s-agenda-11 draws no notice: read the frame again")
+	}
+	var buttons []string
+	for _, b := range frameButton.FindAllStringSubmatch(m[2], -1) {
+		buttons = append(buttons, frameText(b[1]))
+	}
+	body := frameText(frameButton.ReplaceAllString(m[2], ""))
+	named := regexp.MustCompile(`«([^»]*)»`).FindStringSubmatch(body)
+	if len(buttons) == 0 || named == nil {
+		t.Fatalf("s-agenda-11 draws no button or no calendar's name: %q", m[2])
+	}
+
+	f := calendarFixture(t, nil)
+	f.srv.CreateKeepsFirstComponent = true
+	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess,
+		url.Values{"account": {f.id}, "name": {named[1]}, "components": {"VEVENT", "VTODO"}}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("create: %d %s", rec.Code, rec.Body.String())
+	}
+	page := decode[view.AgendaPage](t, f.h.do(get(rec.Header().Get("Location"), f.sess)))
+	if len(page.Notices) != 1 {
+		t.Fatalf("notices = %+v, want one", page.Notices)
+	}
+	n := page.Notices[0]
+	if string(n.Title) != frameText(m[1]) || string(n.Body) != body || n.Role != view.NoticeInfo {
+		t.Errorf("notice = %q / %q (%s), the frame %q / %q", n.Title, n.Body, n.Role, frameText(m[1]), body)
+	}
+	if got := labels(n.Actions); !equalStrings(got, buttons) {
+		t.Fatalf("notice actions = %q, the frame %q", got, buttons)
+	}
+	a := n.Actions[0]
+	if a.Method != "GET" || !a.Enabled || a.Primary {
+		t.Errorf("New calendar = %+v: a plain button opening a sheet", a)
+	}
+	sheet := decode[view.CollectionNewSheet](t, f.h.do(get(a.Href, f.sess)))
+	if sheet.Kind != view.KindEvent || sheet.Target.Chosen != f.id {
+		t.Errorf("sheet = %+v, want a new calendar on this server", sheet)
+	}
+	parts := formRow(sheet.Form, "components")
+	var ticked []string
+	for _, o := range parts.Options {
+		if o.Selected {
+			ticked = append(ticked, o.Value)
+		}
+	}
+	if !equalStrings(ticked, []string{"VTODO"}) {
+		t.Errorf("ticked = %q, want only what the server did not take", ticked)
+	}
+	if kind := formRow(sheet.Form, "kind"); kind != nil {
+		t.Errorf("the sheet asks what it is: %+v", kind)
 	}
 }
 

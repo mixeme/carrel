@@ -388,7 +388,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии |
-| `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage` |
+| `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage`; `?kind=` — фильтр по роду: `event`, `task`, `note` или `file` (сегменты-ссылки, s-contacts-7), без него — All; `?from=&to=` — окно, форма GET диапазона (`Range.Form`) |
 | `/app/contacts/{account}/{col}/{uid}/timeline/columns` | POST | вход | редирект | — ; меню Columns хронологии (s-contacts-25), как у списков (S-9.6) |
 | `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage` |
 | `/c/{account}/{col}/{uid}/photo` | GET | вход | поток | — |
@@ -449,7 +449,7 @@ Typecase): рейл с соседними заметками и колонка �
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
-| `/app/collections/new` | GET, POST | вход | лист; `?back=` — мастер импорта, куда вернуться с новой коллекцией (S-19); `?kind=file&a=` — New folder хранилища (S-12.1) | `CollectionNewSheet` |
+| `/app/collections/new` | GET, POST | вход | лист; `?back=` — мастер импорта, куда вернуться с новой коллекцией (S-19); `?kind=file&a=` — New folder хранилища (S-12.1); `?components=` (GET) — что отмечено в «What goes in it»: «New calendar» уведомления о невзятом роде (s-agenda-11) | `CollectionNewSheet` |
 | `/app/collections/rename` | GET, POST | вход | лист | `CollectionRenameSheet` |
 | `/app/collections/move` | GET, POST | вход | лист | `CollectionMoveSheet` |
 | `/app/collections/delete` | GET, POST | вход | лист | `CollectionDeleteSheet` |
@@ -584,6 +584,7 @@ type Action struct {
     Enabled bool
     On      bool    // включено: открытый раздел рейла, выбранный сегмент, включённый флажок ленты
     Reason  Text    // почему выключено; пусто, если включено
+    Tally   Text    // счёт сегмента отдельно от подписи: Label «All», Tally «24» (SegOption.Count); пусто — кадр счёта не пишет
     Arrow   []MenuItem // стрелка кнопки (.m-split): пункты её меню; пусто — без стрелки
 }
 // Кнопка со стрелкой — одно действие: само Action — то, что делает кнопка,
@@ -597,9 +598,14 @@ type Action struct {
 // кадр (DeleteNote, DangerNote, Note), а не Reason (записки 11 и 17 Typecase,
 // решение владельца). Выключенного без причины не бывает. Сегмент, вкладка
 // или окно, показанные сейчас, — On и Enabled: показать их ещё раз безвредно,
-// и «показано сейчас» — не причина выключать. Счёт в подписи сегмента — там,
-// где его пишет кадр, через пробел: «Open 12», «All 24»; кадр без счёта —
-// подпись без него. Сторож — view.TestFixtureActionsSayWhyTheyAreOff.
+// и «показано сейчас» — не причина выключать. Счёт сегмента — там, где его
+// пишет кадр, и отдельно от подписи: Label «Open», Tally «12» (кадр пишет
+// «Open 12»); кадр без счёта — Tally пуст; Count у строк рейла занят числом. Врозь потому, что сложенный
+// сегмент (SegFold, s-contacts-7) пишет подпись и счёт в разных местах, а
+// клиент строку сервера не режет (записка 28 Typecase). Сегмент со ссылкой
+// (Href) ведёт туда же, куда вариант кадра: фильтр хронологии по роду —
+// ?kind=event|task|note|file, «All» — без него. Сторож —
+// view.TestFixtureActionsSayWhyTheyAreOff.
 // Primary — там, где кадр рисует кнопку основной: кнопка, отправляющая
 // форму (Sign in, Save, Create link), подтверждение листа (Move here,
 // Create), главное действие шапки (New contact, Edit, Add user), первая
@@ -630,7 +636,7 @@ type Notice struct {
     Title   Text
     Body    Text
     Details *Diagnostic // технический блок; nil — его нет, C-9
-    Actions []Action
+    Actions []Action    // кнопки уведомления: «New calendar» у календаря, в который сервер взял не всё (s-agenda-11, SV-52)
 }
 
 type Avatar struct {
@@ -809,7 +815,7 @@ type Details struct {
 type Field struct {
     Label  Text
     Value  Text
-    Href   string
+    Href   string // значение ведёт (FieldsItem.Href, s-contacts-6): телефон — tel: из цифр и плюса, «+7 912 445-10-88» → tel:+79124451088; почта — mailto:; другая книга — карточка там
     Mono   bool   // путь, идентификатор, диагностика; у контакта — телефоны и день рождения (s-contacts-6)
     Aside  Text   // приглушённо после значения: «in 7 months» у дня рождения (s-contacts-6)
     Tags   []Tag  // строка категорий — метками, Value пуст (s-contacts-6, панели всех родов)
@@ -958,7 +964,7 @@ type ColumnItem struct {
 type Range struct {
     From, To Text
     Presets  []Action // Day · Week · Month, «предыдущая» и «следующая»
-    Form     *Form    // произвольный диапазон: два поля и «Show»; nil — его нет
+    Form     *Form    // произвольный диапазон: форма GET на Form.Action, поля from и to, «Show» её отправляет (Range.Action, s-contacts-7, s-agenda-1); nil — его нет
 }
 
 type ContactsListPage struct {
@@ -1132,7 +1138,7 @@ type ContactPage struct {
     More      Action        // «Open the timeline» (i-all) — ведёт на /timeline
     Source    SourceBlock
     Actions   []Action   // на виду: Edit (i-pencil), Send (i-mail), Print (i-print, ?print=1); удаление — Danger, внизу карточки
-    Menu      []MenuItem // «⋯»: Move, Copy, Export .vcf, Publish a link (s-contacts-10)
+    Menu      []MenuItem // «⋯»: Move, Copy, Export .vcf, Publish a link (s-contacts-10); кадр карточки рисует его закрытым с пунктами — кнопка с меню (Drop, s-contacts-6)
     ReadOnly  bool
 }
 

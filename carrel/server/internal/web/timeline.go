@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -367,7 +368,7 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	tl := s.timelinePage(r.Context(), c, obj, person, task, from, last, r.URL.Query().Get("show"), notices)
+	tl := s.timelinePage(r.Context(), c, obj, person, task, from, last, r.URL.Query().Get("kind"), notices)
 	// Columns (s-contacts-25): Title, Date, Kind, Source; why a record is
 	// here stands after its title always and is not a column (s-contacts-26).
 	tl.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), "timeline", card+"/timeline/columns", r.URL.Query(), false)
@@ -500,15 +501,17 @@ func (s *Server) timelineRail(c *collectionCtx, snap *fanout.Snapshot, back stri
 	}
 }
 
+// timelineShows are the kinds the timeline is filtered by, ?kind= as the
+// frame's links write it (s-contacts-7): All is the timeline without it.
 var timelineShows = []struct {
-	value, label string
-	kind         view.Kind
+	label string
+	kind  view.Kind
 }{
-	{"all", "All", ""}, {"events", "Events", view.KindEvent}, {"tasks", "Tasks", view.KindTask},
-	{"notes", "Notes", view.KindNote}, {"files", "Files", view.KindFile},
+	{"All", ""}, {"Events", view.KindEvent}, {"Tasks", view.KindTask},
+	{"Notes", view.KindNote}, {"Files", view.KindFile},
 }
 
-func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.Object, person timelinePerson, task *timelineTask, from, last time.Time, show string, notices []view.Notice) view.ContactTimelinePage {
+func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.Object, person timelinePerson, task *timelineTask, from, last time.Time, kind string, notices []view.Notice) view.ContactTimelinePage {
 	tf := c.tf
 	card := c.recordPath(person.uid)
 	sh := s.buildShell(c.sess, person.name+" · Timeline")
@@ -575,20 +578,21 @@ func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.
 	}
 	current := timelineShows[0]
 	for _, sh := range timelineShows {
-		if sh.value == show {
+		if string(sh.kind) == kind {
 			current = sh
 		}
 	}
 	for _, sh := range timelineShows {
-		n := len(rows)
+		n, id, href := len(rows), "timeline.kind.all", here
 		if sh.kind != "" {
-			n = counts[sh.kind]
+			n, id, href = counts[sh.kind], "timeline.kind."+string(sh.kind), withQuery(here, "kind", string(sh.kind))
 		}
-		href := withQuery(here, "show", sh.value)
-		// «All 24» as the frame writes it; the one shown now is on and
-		// stays a choice — a ticked item under «⋯» of a narrow strip.
-		page.Bar.Segments = append(page.Bar.Segments, view.Action{ID: "timeline.show." + sh.value, Label: text(fmt.Sprintf("%s %d", sh.label, n)),
-			Href: s.route(href), Method: "GET", Enabled: true, On: sh.value == current.value})
+		// «All 24» as the frame writes it, the label and its count apart:
+		// a narrow strip folds the segment into a choice that writes them
+		// apart (SegFold, from-typecase note 28). The one shown now is on
+		// and stays a choice.
+		page.Bar.Segments = append(page.Bar.Segments, view.Action{ID: id, Label: text(sh.label), Tally: text(strconv.Itoa(n)),
+			Href: s.route(href), Method: "GET", Enabled: true, On: sh.kind == current.kind})
 	}
 	for _, r := range rows {
 		if current.kind != "" && r.row.Kind != current.kind {

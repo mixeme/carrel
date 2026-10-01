@@ -50,7 +50,10 @@ type Range struct {
 	From    Text     `json:"from"`
 	To      Text     `json:"to"`
 	Presets []Action `json:"presets"` // Day · Week · Month, «предыдущая» и «следующая»
-	Form    *Form    `json:"form"`    // произвольный диапазон: два поля и «Show»; nil — его нет
+	// Form — произвольный диапазон: форма GET на Form.Action, поля from и
+	// to, «Show» её отправляет (Range.Action, s-contacts-7, s-agenda-1); nil —
+	// его нет
+	Form *Form `json:"form"`
 }
 
 type ContactsListPage struct {

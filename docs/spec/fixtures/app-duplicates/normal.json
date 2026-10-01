@@ -12,37 +12,42 @@
         "enabled": true,
         "href": "/app/duplicates",
         "id": "duplicates.kind.all",
-        "label": "All 0",
-        "method": "GET"
+        "label": "All",
+        "method": "GET",
+        "tally": "0"
       },
       {
         "enabled": true,
         "href": "/app/duplicates?kind=contact",
         "id": "duplicates.kind.contact",
-        "label": "Contacts 0",
+        "label": "Contacts",
         "method": "GET",
-        "on": true
+        "on": true,
+        "tally": "0"
       },
       {
         "enabled": true,
         "href": "/app/duplicates?kind=event",
         "id": "duplicates.kind.event",
-        "label": "Events 0",
-        "method": "GET"
+        "label": "Events",
+        "method": "GET",
+        "tally": "0"
       },
       {
         "enabled": true,
         "href": "/app/duplicates?kind=task",
         "id": "duplicates.kind.task",
-        "label": "Tasks 0",
-        "method": "GET"
+        "label": "Tasks",
+        "method": "GET",
+        "tally": "0"
       },
       {
         "enabled": true,
         "href": "/app/duplicates?kind=note",
         "id": "duplicates.kind.note",
-        "label": "Notes 0",
-        "method": "GET"
+        "label": "Notes",
+        "method": "GET",
+        "tally": "0"
       }
     ],
     "selected": 0,

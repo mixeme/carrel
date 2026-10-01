@@ -3,7 +3,6 @@ package web_test
 import (
 	"fmt"
 	"net/url"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -99,24 +98,28 @@ func TestContactTimeline(t *testing.T) {
 	if !strings.Contains(string(page.Note), "Nothing was looked for before") {
 		t.Errorf("note = %q", page.Note)
 	}
-	// The segments are the frame's (s-contacts-7), the count after a space
-	// as the frame writes it; the one shown now is on and stays a choice —
-	// under «⋯» of a narrow strip it is a ticked item (s-contacts-14).
+	// The segments are the frame's (s-contacts-7): links by kind, the label
+	// and its count apart — a narrow strip folds them into a choice that
+	// writes them apart (SegFold, from-typecase note 28); the one shown now
+	// is on and stays a choice.
 	sameSegments(t, "timeline", page.Bar.Segments, "s-contacts-7", 0)
 	var segments, names []string
 	for _, a := range page.Bar.Segments {
-		segments = append(segments, string(a.Label))
-		if a.On != (a.ID == "timeline.show.all") || !a.Enabled || a.Reason != "" {
+		segments = append(segments, segmentWords(a))
+		if a.On != (a.ID == "timeline.kind.all") || !a.Enabled || a.Reason != "" {
 			t.Errorf("segment %+v: only All is on, and every one can be taken", a)
 		}
 	}
-	for _, m := range regexp.MustCompile(`tc-seg__opt" type="button">(\w+) \d+<`).FindAllStringSubmatch(mockupFrame(t, "s-contacts-7"), -1) {
-		names = append(names, m[1])
+	for _, o := range frameSegments(t, "s-contacts-7", 0) {
+		names = append(names, frameCount.FindStringSubmatch(o.text)[1])
 	}
 	if want := fmt.Sprintf("%s 5|%s 2|%s 1|%s 1|%s 1", names[0], names[1], names[2], names[3], names[4]); len(names) != 5 || strings.Join(segments, "|") != want {
 		t.Errorf("segments = %v, want %s", segments, want)
 	}
-	events := decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline?show=events", f.sess)))
+	if all := page.Bar.Segments[0].Href; all != card+"/timeline" {
+		t.Errorf("All goes to %q, want the timeline itself", all)
+	}
+	events := decode[view.ContactTimelinePage](t, f.h.do(get(actionHref(t, page.Bar.Segments, "timeline.kind.event"), f.sess)))
 	if n := len(timelineRows(events)); n != 2 {
 		t.Errorf("events segment has %d rows", n)
 	}

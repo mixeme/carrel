@@ -510,8 +510,8 @@ func TestTimelineColumnsAreTheFrame(t *testing.T) {
 
 	order, _ := frameColsRows(t, "s-contacts-26")
 	want := asMenu(order, "title", "detail")
-	back, cookie := postColumns(t, f.h, f.sess, card+"/timeline/columns?show=events", want[1:])
-	if back != card+"/timeline?show=events" || len(cookie) != 1 || cookie[0].Name != "carrel_cols_timeline" {
+	back, cookie := postColumns(t, f.h, f.sess, card+"/timeline/columns?kind=event", want[1:])
+	if back != card+"/timeline?kind=event" || len(cookie) != 1 || cookie[0].Name != "carrel_cols_timeline" {
 		t.Fatalf("the timeline's choice leads to %q with %+v", back, cookie)
 	}
 	if got := columnsOn(barOf(t, f.h, f.sess, card+"/timeline", cookie...).Bar.Columns); strings.Join(got, " ") != strings.Join(want, " ") {

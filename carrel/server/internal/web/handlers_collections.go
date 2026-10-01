@@ -172,6 +172,20 @@ func (s *Server) getCollectionNew(w http.ResponseWriter, r *http.Request) {
 	if c := componentOf(f.kind); c != "" {
 		f.components = []string{c}
 	}
+	// ?components= ticks what a calendar is for: the kinds a server did not
+	// take into another one (s-agenda-11, SV-52). Only the known parts, in
+	// their order; none known leaves the kind's own.
+	if f.kind != view.KindContact && f.kind != view.KindFile {
+		var asked []string
+		for _, p := range calendarParts {
+			if slices.Contains(q["components"], p.component) {
+				asked = append(asked, p.component)
+			}
+		}
+		if len(asked) > 0 {
+			f.components = asked
+		}
+	}
 	s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, nil))
 }
 
@@ -286,7 +300,7 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 		components, kinds = settleComponents(r.Context(), client, path, f.components)
 		// docs/servers.md, SV-52: iCloud answers 201 and keeps the first
 		// component of the set, without a word. What it did not take is
-		// kept for the session and said on the calendar (droppedNotice);
+		// kept for the session and said on the calendar (s.droppedNotice);
 		// another calendar for it is the person's to make, not Carrel's.
 		for _, c := range f.components {
 			if !slices.Contains(components, c) {
@@ -366,16 +380,20 @@ func refusedComponent(component string) string { return "create:" + component }
 // some of what was asked for: iCloud keeps the first component of the set and
 // says nothing of the rest (docs/servers.md, SV-52). The catalog already holds
 // what the server kept (settleComponents); this says what it did not, and
-// where those records go instead. Nil when the server took everything.
-func droppedNotice(sess *session.Session, connID string, col sealed.Collection) *view.Notice {
+// where those records go instead: «New calendar» opens the sheet of a new
+// calendar on this server, what was not taken ticked (s-agenda-11). Nil when
+// the server took everything.
+func (s *Server) droppedNotice(sess *session.Session, connID string, col sealed.Collection) *view.Notice {
 	if sess == nil {
 		return nil
 	}
 	var dropped, kept []string
+	sheet := url.Values{"kind": {string(view.KindEvent)}, "a": {connID}}
 	for _, p := range calendarParts {
 		switch {
 		case sess.Refused(connID, col.Path, refusedComponent(p.component)):
 			dropped = append(dropped, strings.ToLower(p.label))
+			sheet.Add("components", p.component)
 		case slices.Contains(col.Components, p.component):
 			kept = append(kept, strings.ToLower(p.label))
 		}
@@ -389,7 +407,8 @@ func droppedNotice(sess *session.Session, connID string, col sealed.Collection) 
 	}
 	body += " and said nothing of the " + wordList(dropped) + " you asked for. " +
 		upperFirst(wordList(dropped)) + " need another calendar: make one for them on this server or another."
-	return &view.Notice{Role: view.NoticeInfo, Title: text("The server did not take " + wordList(dropped)), Body: text(body)}
+	return &view.Notice{Role: view.NoticeInfo, Title: text("The server did not take " + wordList(dropped) + "."), Body: text(body),
+		Actions: []view.Action{{ID: "collection.new", Label: "New calendar", Href: s.postQuery("/app/collections/new", sheet), Method: "GET", Enabled: true}}}
 }
 
 // wordList joins words the way a sentence does: «tasks and notes».

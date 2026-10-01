@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 	"slices"
@@ -679,7 +678,7 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 		if sorted != nil {
 			own = append(own, *sorted)
 		}
-		if n := droppedNotice(c.sess, c.conn.ID, c.col); n != nil {
+		if n := s.droppedNotice(c.sess, c.conn.ID, c.col); n != nil {
 			return append([]view.Notice{*n}, own...)
 		}
 		return own
@@ -1484,12 +1483,13 @@ func dueRubric(due time.Time, done bool, now time.Time) string {
 }
 
 // taskSegments switch between open, done and all, and keep the category
-// filter: «Open 12», «Done 48», «All 60», as s-tasks-1 writes them. The one
-// shown now is on and stays a choice (C-6.2).
+// filter: «Open 12», «Done 48», «All 60», as s-tasks-1 writes them — the
+// label and its count apart (C-6.2). The one shown now is on and stays a
+// choice.
 func (s *Server) taskSegments(base, tag, show string, open, done int) []view.Action {
 	segment := func(id, label, value string, n int) view.Action {
 		f := tagFilter{base: base, query: url.Values{"show": {value}}, route: s.route}
-		return view.Action{ID: id, Label: text(fmt.Sprintf("%s %d", label, n)), Href: f.href(tag), Method: "GET", Enabled: true, On: show == value}
+		return view.Action{ID: id, Label: text(label), Tally: text(strconv.Itoa(n)), Href: f.href(tag), Method: "GET", Enabled: true, On: show == value}
 	}
 	return []view.Action{
 		segment("tasks.open", "Open", "open", open),

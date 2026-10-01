@@ -133,23 +133,26 @@
         "enabled": true,
         "href": "/app/tasks?show=open",
         "id": "tasks.open",
-        "label": "Open 0",
+        "label": "Open",
         "method": "GET",
-        "on": true
+        "on": true,
+        "tally": "0"
       },
       {
         "enabled": true,
         "href": "/app/tasks?show=done",
         "id": "tasks.done",
-        "label": "Done 0",
-        "method": "GET"
+        "label": "Done",
+        "method": "GET",
+        "tally": "0"
       },
       {
         "enabled": true,
         "href": "/app/tasks?show=all",
         "id": "tasks.all",
-        "label": "All 0",
-        "method": "GET"
+        "label": "All",
+        "method": "GET",
+        "tally": "0"
       },
       {
         "enabled": true,

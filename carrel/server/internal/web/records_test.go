@@ -827,7 +827,7 @@ func TestTasksAndNotes(t *testing.T) {
 	}
 	var segments []string
 	for _, s := range open.Bar.Segments {
-		segments = append(segments, string(s.Label))
+		segments = append(segments, segmentWords(s))
 	}
 	// The orders of the list stand beside the segments (review Р-12).
 	if strings.Join(segments, ",") != "Open 1,Done 1,All 2,By due,By priority,Recently changed" {

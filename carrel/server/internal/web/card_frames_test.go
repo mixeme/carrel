@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"html"
 	"regexp"
 	"strconv"
 	"strings"
@@ -21,6 +22,7 @@ import (
 var (
 	frameCardHead  = regexp.MustCompile(`(?s)<div class="tc-main">\s*<div class="tc-head">.*?<div class="tc-acts">(.*?)</div>`)
 	frameCardField = regexp.MustCompile(`(?s)<dt>([^<]*)</dt>\s*<dd( class="tc-mono")?>(.*?)</dd>`)
+	frameFieldLink = regexp.MustCompile(`(?s)<a class="tc-fields__link" href="([^"]*)">(.*?)</a>`)
 	frameDim       = regexp.MustCompile(`<span class="tc-dim">([^<]*)</span>`)
 	frameShowKept  = regexp.MustCompile(`Kept as the server sent them <button class="tc-btn is-sm" type="button">([^<]*)</button>`)
 	frameInset     = regexp.MustCompile(`<div class="tc-rubric">Timeline <span class="tc-mono[^"]*">(\d+)</span>`)
@@ -45,8 +47,16 @@ func TestContactCardIsTheFrames(t *testing.T) {
 	if head == nil {
 		t.Fatal("s-contacts-6 draws no head: read the frame again")
 	}
+	// The «⋯» is a button with its menu, drawn closed (from-typecase note
+	// 28, task 49): the buttons of the head are those before its menu, and
+	// the menu is the card's own, item by item.
+	buttons, menu, closed := strings.Cut(head[1], `<div class="tc-menu`)
+	if !closed || !strings.Contains(buttons, `<span class="tc-drop">`) || !strings.Contains(menu, " hidden>") {
+		t.Fatal("s-contacts-6 draws no closed «⋯» with its menu in the head: read the frame again")
+	}
+	sameMenu(t, "card", page.Menu, "s-contacts-6")
 	var want, got []string
-	for _, b := range frameHeadButton.FindAllStringSubmatch(head[1], -1) {
+	for _, b := range frameHeadButton.FindAllStringSubmatch(buttons, -1) {
 		if label := frameText(b[2]); label != "" {
 			icon := frameIcon.FindStringSubmatch(b[2])[1]
 			want = append(want, label+" ["+icon+"]")
@@ -84,6 +94,12 @@ func TestContactCardIsTheFrames(t *testing.T) {
 		if f.Mono != (m[2] != "") {
 			t.Errorf("%q: mono %v, the frame %v", label, f.Mono, m[2] != "")
 		}
+		// A value that goes somewhere is a link (task 52): a phone to
+		// call, an address to write to — where the frame draws one, the
+		// server's is the same.
+		if l := frameFieldLink.FindStringSubmatch(m[3]); l != nil && (f.Href != html.UnescapeString(l[1]) || string(f.Value) != frameText(l[2])) {
+			t.Errorf("%q: %q → %q, the frame %q → %q", label, f.Value, f.Href, frameText(l[2]), l[1])
+		}
 		if label == "Tags" && (len(f.Tags) == 0 || f.Value != "") {
 			t.Errorf("Tags is a row of tags: %+v", f)
 		}
@@ -92,6 +108,12 @@ func TestContactCardIsTheFrames(t *testing.T) {
 			if !regexp.MustCompile(shape).MatchString(string(f.Aside)) {
 				t.Errorf("%q: aside %q, the frame %q", label, f.Aside, d[1])
 			}
+		}
+	}
+	for _, f := range page.Fields {
+		phone, email := strings.HasPrefix(string(f.Label), "Phone"), strings.HasPrefix(string(f.Label), "Email")
+		if phone && !strings.HasPrefix(f.Href, "tel:") || email && f.Href != "mailto:"+string(f.Value) {
+			t.Errorf("%q = %q goes to %q: every phone is a tel: link, every address a mailto:", f.Label, f.Value, f.Href)
 		}
 	}
 	at := func(list []string, s string) int {

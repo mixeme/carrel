@@ -417,7 +417,7 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 		if k != "" {
 			q.Set("kind", string(k))
 		}
-		a := view.Action{ID: "duplicates.kind." + string(k), Label: text(fmt.Sprintf("%s %d", label, n)), Href: s.postQuery("/app/duplicates", q), Method: "GET", Enabled: true, On: only == k}
+		a := view.Action{ID: "duplicates.kind." + string(k), Label: text(label), Tally: text(strconv.Itoa(n)), Href: s.postQuery("/app/duplicates", q), Method: "GET", Enabled: true, On: only == k}
 		if k == "" {
 			a.ID = "duplicates.kind.all"
 		}

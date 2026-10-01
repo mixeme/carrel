@@ -34,6 +34,10 @@ type Action struct {
 	Enabled bool `json:"enabled"`
 	On      bool `json:"on,omitempty"`     // включённый переключатель: флажок ленты, сегмент «сейчас показано»
 	Reason  Text `json:"reason,omitempty"` // почему выключено; пусто, если включено
+	// Tally — счёт сегмента отдельно от подписи: «All» и «24» (SegOption.Count;
+	// сложенный сегмент пишет их врозь, s-contacts-7); пусто — кадр счёта не
+	// пишет. Не Count: у строк рейла (NavRow, Shortcut) свой Count числом
+	Tally Text `json:"tally,omitempty"`
 	// Arrow — стрелка кнопки (.m-split): пункты её меню; сама кнопка — то,
 	// что делается без стрелки. Пусто — кнопка без стрелки
 	Arrow []MenuItem `json:"arrow,omitempty"`
@@ -60,7 +64,9 @@ type Notice struct {
 	Title   Text        `json:"title"`
 	Body    Text        `json:"body"`
 	Details *Diagnostic `json:"details"` // технический блок; nil — его нет, C-9
-	Actions []Action    `json:"actions"`
+	// Actions — кнопки уведомления: «New calendar» у календаря, в который
+	// сервер взял не всё (s-agenda-11, SV-52)
+	Actions []Action `json:"actions"`
 }
 
 type Avatar struct {

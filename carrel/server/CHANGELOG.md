@@ -17,6 +17,51 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.92 — 2026-10-01
+
+What the mockup copy of from-typecase note 28 (Typecase `2b50f5e`,
+`da558ec`, tasks 48–53) draws on the contacts card, the person's timeline
+and a calendar the server made with less than was asked.
+
+### Changed
+
+- **A segment's count is apart from its label** (C-6.2): `Action.tally`
+  — `label` «All», `tally` «24» where `label` was «All 24». The timeline
+  (s-contacts-7) folds its kind filter on a narrow strip into a choice that
+  writes the two apart (`SegFold`), and the client does not cut the
+  server's strings. The same on the tasks' Open / Done / All and the
+  duplicates' kinds. Not `count`: the rail's rows (`NavRow`, `Shortcut`)
+  already have a `count`, a number.
+- **The timeline filters by `?kind=`** (C-5.4): `event`, `task`, `note`,
+  `file`, as the frame's links write it; All is the timeline without it.
+  The segments are `timeline.kind.all`, `timeline.kind.event`, …;
+  `?show=events` and `timeline.show.*` are gone.
+- **A phone's link is digits and the plus** (s-contacts-6): «+7 912
+  445-10-88» goes to `tel:+79124451088`, not `tel:+7912445-10-88`. A number
+  already written as a `tel:` URI keeps its form; one with an extension or a
+  letter has no link.
+
+### Added
+
+- **«New calendar» on the notice of what the server did not take**
+  (s-agenda-11, SV-52): `Notice.actions` holds `collection.new`, GET
+  `/app/collections/new?kind=event&a={account}&components=VTODO…` — the
+  sheet of a new calendar on this server with what was not taken ticked.
+  The notice's title ends with a full stop, as the frame writes it.
+- **`/app/collections/new?components=`** (GET, C-5.6) ticks the parts of
+  «What goes in it»; unknown values are ignored.
+
+### For consumers
+
+Read `Action.tally` after the label of a segment; build nothing from
+`label`. The card's «⋯» (s-contacts-6, -7) is `ContactPage.menu` and
+`Details.menu` as before — the frames now draw it closed with its items
+(`Drop`); the range of the timeline and the agenda is `Range.form`, a GET
+form with `from` and `to`, as before (`Range.Action`). Fixtures changed:
+`app-contact-timeline/normal`, `app-contact/normal`, `app-contact/outcome`,
+`app-contacts/normal`, `app-duplicates/normal`, `app-tasks/normal`,
+`app-tasks-all/empty`.
+
 ## v0.2.91 — 2026-10-01
 
 Two false loss reports on Google go away (docs/servers.md, SV-56).

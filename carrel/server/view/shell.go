@@ -149,10 +149,12 @@ type Details struct {
 }
 
 type Field struct {
-	Label Text   `json:"label"`
-	Value Text   `json:"value"`
-	Href  string `json:"href"`
-	Mono  bool   `json:"mono"` // путь, идентификатор, диагностика; у контакта — телефоны и день рождения
+	Label Text `json:"label"`
+	Value Text `json:"value"`
+	// Href — значение ведёт (FieldsItem.Href, s-contacts-6): телефон — tel:
+	// из цифр и плюса, почта — mailto:, другая книга — карточка там
+	Href string `json:"href"`
+	Mono bool   `json:"mono"` // путь, идентификатор, диагностика; у контакта — телефоны и день рождения
 	// Aside — приглушённо после значения: «in 7 months» у дня рождения
 	Aside Text `json:"aside,omitempty"`
 	// Tags — строка категорий метками; Value пуст
