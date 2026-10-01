@@ -8,7 +8,8 @@ import "strings"
 // reading of such a value goes through splitUIDRef, so the form is decided
 // in one place: the import keeps it when it points a link elsewhere
 // (linkPatch), and Mentions (mockup 7.23, deferred) will read @-links and
-// RELATED of a card by it.
+// RELATED of a card by it (docs/architecture.md, «Упоминания —
+// подготовка»).
 
 const urnUUID = "urn:uuid:"
 

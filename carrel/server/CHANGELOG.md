@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.107 — 2026-10-01
+
+Mentions (mockup 7.23) stay deferred until after the first working version;
+what is ready for them, and what is to be settled when they are taken up,
+is written down.
+
+### Changed
+
+- Nothing in the running server. docs/architecture.md, «Упоминания —
+  подготовка»: what v0.2.101…v0.2.106 prepared and where Mentions plug in;
+  the open questions — relinking of @-links when a UID changes, the form
+  and case of `urn:uuid:`, a «group» kind, the timeline and `urn:`
+  references, servers that do not keep links — are also in plan/server.md
+  under the deferred item.
+
 ## v0.2.106 — 2026-10-01
 
 «Mentioned» now belongs to Mentions (mockup 7.23): the timeline is not
