@@ -2,7 +2,6 @@ package web
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -297,34 +296,19 @@ func (s *Server) relatedOptions(c *collectionCtx, self, selected string) (opts [
 	var list []loaded
 	var current *loaded
 	seen := map[string]bool{self: true, "": true}
-	for _, col := range blob.Collections {
-		if col.Gone {
-			continue
+	eachIndexed(c.sess, blob, func(col sealed.Collection, e indexEntry) {
+		if seen[e.UID] {
+			return
 		}
-		for _, comp := range []string{"VEVENT", "VTODO", "VJOURNAL", ""} {
-			data, ok := c.sess.Cache().PeekETagMap(col.AccountID, col.Path+"\x00"+comp)
-			if !ok {
-				continue
-			}
-			var part []indexEntry
-			if json.Unmarshal(data, &part) != nil {
-				continue
-			}
-			for _, e := range part {
-				if seen[e.UID] {
-					continue
-				}
-				seen[e.UID] = true
-				l := loaded{e, catalogColour(col)}
-				switch {
-				case e.Kind != view.KindContact:
-					list = append(list, l)
-				case e.UID == selected:
-					current = &l
-				}
-			}
+		seen[e.UID] = true
+		l := loaded{e, catalogColour(col)}
+		switch {
+		case e.Kind != view.KindContact:
+			list = append(list, l)
+		case e.UID == selected:
+			current = &l
 		}
-	}
+	})
 	sort.SliceStable(list, func(i, j int) bool {
 		a, b := list[i], list[j]
 		if (a.At == 0) != (b.At == 0) {

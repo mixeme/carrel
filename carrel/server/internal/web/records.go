@@ -465,25 +465,51 @@ func (c *collectionCtx) putIndex(entries []indexEntry) {
 // its collection's (S-11).
 func (s *Server) sessionIndex(sess *session.Session, blob sealed.Blob) map[string]indexEntry {
 	out := map[string]indexEntry{}
+	eachIndexed(sess, blob, func(_ sealed.Collection, e indexEntry) {
+		if _, seen := out[e.UID]; !seen {
+			out[e.UID] = e
+		}
+	})
+	return out
+}
+
+// indexSlots are the slots a collection's loaded lists are kept under: an
+// address book's, then a calendar's events, tasks and notes. A collection
+// fills either the first or the other three.
+var indexSlots = []string{"", "VEVENT", "VTODO", "VJOURNAL"}
+
+// eachIndexed walks every record of the lists this session has loaded, of
+// every collection of the catalog that is not gone, in the catalog's order
+// and then the order of indexSlots; no server is asked. Whoever needs
+// records Carrel has already seen anywhere — the hints of the search box,
+// the titles of links, the list of Related to, and later the people a note
+// names (Mentions) — reads them here.
+func eachIndexed(sess *session.Session, blob sealed.Blob, fn func(col sealed.Collection, e indexEntry)) {
 	for _, col := range blob.Collections {
 		if col.Gone {
 			continue
 		}
-		for _, comp := range []string{"", "VEVENT", "VTODO", "VJOURNAL"} {
-			data, ok := sess.Cache().PeekETagMap(col.AccountID, col.Path+"\x00"+comp)
-			if !ok {
-				continue
-			}
-			var part []indexEntry
-			if json.Unmarshal(data, &part) != nil {
-				continue
-			}
-			for _, e := range part {
-				if _, seen := out[e.UID]; !seen {
-					out[e.UID] = e
-				}
-			}
+		for _, e := range indexedIn(sess, col) {
+			fn(col, e)
 		}
+	}
+}
+
+// indexedIn is what this session has loaded of one collection: the entries
+// of its lists in the order of indexSlots. A slot never loaded, or one that
+// does not decode, gives nothing.
+func indexedIn(sess *session.Session, col sealed.Collection) []indexEntry {
+	var out []indexEntry
+	for _, comp := range indexSlots {
+		data, ok := sess.Cache().PeekETagMap(col.AccountID, col.Path+"\x00"+comp)
+		if !ok {
+			continue
+		}
+		var part []indexEntry
+		if json.Unmarshal(data, &part) != nil {
+			continue
+		}
+		out = append(out, part...)
 	}
 	return out
 }

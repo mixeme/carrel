@@ -2,7 +2,6 @@ package web
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -472,24 +471,16 @@ func (s *Server) jumpRows(sess *session.Session, blob sealed.Blob, q string) []v
 		if strings.Contains(strings.ToLower(label), needle) && len(out) < jumpRowsMost {
 			out = append(out, view.JumpRow{Href: s.route(collectionHref(col)), Kind: col.Kinds[0], Title: text(label), Stamp: stamp(host, label)})
 		}
-		for _, comp := range []string{"", "VEVENT", "VTODO", "VJOURNAL"} {
-			data, ok := sess.Cache().PeekETagMap(conn.ID, col.Path+"\x00"+comp)
-			if !ok {
-				continue
-			}
-			var entries []indexEntry
-			if json.Unmarshal(data, &entries) != nil {
-				continue
-			}
-			for _, e := range entries {
-				if len(out) < jumpRowsMost && strings.Contains(strings.ToLower(e.Title), needle) {
-					out = append(out, view.JumpRow{
-						Href:  s.route("/app/" + segmentOf(e.Kind) + "/" + conn.ID + "/" + url.PathEscape(col.Path) + "/" + url.PathEscape(e.UID)),
-						Kind:  e.Kind,
-						Title: text(e.Title),
-						Stamp: stamp(host, label),
-					})
-				}
+		// The collection's name stands before its records, so this is
+		// a walk of collections and not eachIndexed.
+		for _, e := range indexedIn(sess, col) {
+			if len(out) < jumpRowsMost && strings.Contains(strings.ToLower(e.Title), needle) {
+				out = append(out, view.JumpRow{
+					Href:  s.route("/app/" + segmentOf(e.Kind) + "/" + conn.ID + "/" + url.PathEscape(col.Path) + "/" + url.PathEscape(e.UID)),
+					Kind:  e.Kind,
+					Title: text(e.Title),
+					Stamp: stamp(host, label),
+				})
 			}
 		}
 	}

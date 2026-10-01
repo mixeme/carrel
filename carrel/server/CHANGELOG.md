@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.104 — 2026-10-01
+
+Preparation for Mentions: the records this session has loaded are walked
+in one place.
+
+### Changed
+
+- Nothing a consumer sees. `eachIndexed` walks every record of the loaded
+  lists of the catalog, `indexedIn` those of one collection; the hints of
+  the search box, the titles of links and the list of Related to read them
+  there instead of three loops of their own. Every answer is the same, byte
+  for byte.
+
 ## v0.2.103 — 2026-10-01
 
 Preparation for Mentions (mockup 7.23, deferred until after the first
