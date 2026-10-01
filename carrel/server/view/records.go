@@ -55,8 +55,10 @@ type TimelineGroup struct {
 	Rows   []TimelineRow `json:"rows"`
 }
 
-// TimelineRow — хронология человека: события, задачи, заметки и файлы, где
-// он упомянут.
+// TimelineRow — хронология человека: события, задачи и заметки, где он
+// участник или организатор или с которыми связана его карточка
+// (RELATED-TO), и файлы с его именем в названии (S-15.4). Упоминание —
+// другая функция («Упоминания», раздел 7.23 макета), сюда не входит.
 type TimelineRow struct {
 	Href   string `json:"href"`
 	Colour Colour `json:"colour"` // метка коллекции записи
@@ -64,7 +66,7 @@ type TimelineRow struct {
 	When   Text   `json:"when"`
 	Title  Text   `json:"title"`
 	Stamp  Stamp  `json:"stamp"`
-	Why    Text   `json:"why"` // «участник · приняла», «упомянута в тексте» — колонка обязательна
+	Why    Text   `json:"why"` // «attendee · accepted», «organiser», «related to this person», «name in the file name» — колонка обязательна
 }
 
 type ContactEditPage struct {

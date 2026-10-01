@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.106 — 2026-10-01
+
+«Mentioned» now belongs to Mentions (mockup 7.23): the timeline is not
+described with it any more.
+
+### Changed
+
+- Words only: `TimelineRow` (C-6.5) is the records where the person is an
+  attendee or the organiser, the records tied to their card by RELATED-TO,
+  and files with their name — not records where they are «mentioned». The
+  examples of `why` are the ones the server sends: «attendee · accepted»,
+  «organiser», «related to this person», «name in the file name». The
+  glossary of the client spec says the same of `Timeline`.
+
 ## v0.2.105 — 2026-10-01
 
 Preparation for Mentions: the ways a record points to a person are a list.
