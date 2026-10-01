@@ -1,12 +1,28 @@
 #!/usr/bin/env bash
 # Manual gates for the Linux dev machine (docs/plan/server.md, «Linux-машина»).
 # Run from carrel/server after reading dev/env.txt on that host.
+#
+# The code comes packed by scripts/linux-ship.sh and unpacked into
+# /opt/carrel-dev/run-<commit>/: this repository as carrel/ and the clone of
+# Typecase at the commit of the client's plan as typecase/ beside it. The
+# binary wires in the client, the client takes Typecase by a replace onto the
+# neighbouring clone (../../../typecase from here), and the image is built
+# from the directory that holds both.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
 if [[ "$(uname -s)" != "Linux" ]]; then
   echo "linux-gates.sh is for Linux only (Windows skips F-10 by design)" >&2
+  exit 1
+fi
+
+# The directory that holds carrel/ and typecase/: the build context of the
+# image and the mount of the race detector.
+ctx=$(cd ../../.. && pwd)
+if [[ "$(basename "$(cd ../.. && pwd)")" != "carrel" || ! -f "$ctx/typecase/go.mod" ]]; then
+  echo "want this repository as carrel/ with Typecase as typecase/ beside it in $ctx" >&2
+  echo "(scripts/linux-ship.sh packs them so)" >&2
   exit 1
 fi
 
@@ -52,9 +68,9 @@ go test -timeout 30m ./...
 if [[ "${CARREL_RACE:-}" == "1" ]]; then
   echo "== race detector =="
   docker run --rm \
-    -v "$(cd ../.. && pwd)":/src \
+    -v "$ctx":/src \
     -v carrel-race-gomod:/go/pkg/mod \
-    -w /src/carrel/server \
+    -w /src/carrel/carrel/server \
     --memory=3g \
     -e GOTOOLCHAIN=auto \
     golang:1.27-bookworm \
@@ -65,10 +81,14 @@ echo "== F-10: server.key permission check =="
 go test -run '^TestLoadServerKeyRejectsPermissiveMode$' ./internal/crypt/...
 
 echo "== S-28: Docker image build and smoke =="
-docker build -t carrel:linux-gates \
+# From the directory above the repository, with Typecase beside it; the
+# Dockerfile's own ignore file (Dockerfile.dockerignore, read by BuildKit)
+# lets in the server, the client and Typecase and nothing else.
+DOCKER_BUILDKIT=1 docker build -t carrel:linux-gates \
+  -f "$ctx/carrel/carrel/server/Dockerfile" \
   --build-arg VERSION=linux-gates \
   --build-arg COMMIT=local \
-  .
+  "$ctx"
 # A fresh volume every run: the first start on an empty /data is what ships.
 # CARREL_BIND stays at the image default (0.0.0.0 inside the container);
 # the host side is loopback-only through -p.
@@ -98,6 +118,26 @@ if ! curl -sf http://127.0.0.1:18080/healthz | grep -qx ok; then
   docker logs "$cid" >&2 || true
   exit 1
 fi
+# A page of the client from the image, and the library's files it names,
+# from the binary (C-5.9): on an empty volume /login leads to /setup.
+ctype=$(curl -sfL -o /tmp/carrel-linux-gates-login.html -w '%{content_type}' http://127.0.0.1:18080/login)
+if [[ "$ctype" != "text/html; charset=utf-8" ]]; then
+  echo "/login is not the client's page: $ctype" >&2
+  exit 1
+fi
+files=$(grep -oE '(src|href)="/static/tc/[0-9a-f]{12}/[^"]+"' /tmp/carrel-linux-gates-login.html | sed -E 's/^(src|href)="//; s/"$//')
+rm -f /tmp/carrel-linux-gates-login.html
+if [[ $(grep -c . <<<"$files") -ne 3 ]]; then
+  echo "/login does not name the three files of the library: $files" >&2
+  exit 1
+fi
+for f in $files; do
+  if ! curl -sfI "http://127.0.0.1:18080$f" | grep -qi '^cache-control: public, max-age=31536000, immutable'; then
+    echo "$f: not served from the image as a file kept for good" >&2
+    exit 1
+  fi
+done
+echo "client page and library files ok"
 
 echo "== S-30.2: Radicale integration =="
 # Start from nothing of ours running. This step deliberately runs the whole

@@ -17,6 +17,60 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.90 — 2026-10-01
+
+The binary answers with the client: a page whose view model has a screen is
+HTML, the rest is JSON as before. Typecase's files are served from the
+binary.
+
+### Added
+
+- **The client in `cmd/carrel`**: `web.New` gets the client's renderer
+  (`carrel.dev/carrel/client/renderer`). A page whose view model has a
+  screen — every page outside the shell: sign-in, registration, first run,
+  forgotten password, the wipe, the invitation, the address's confirmation,
+  the dead link, About — is the screen's document, `text/html`, with the
+  status as before. Every other page, every fragment but `main` of such a
+  page, the out-of-band updates and the events are the same JSON as
+  `render.JSONRenderer`'s, byte for byte.
+- **Static files (C-5.9)**: `GET /static/tc/{version}/css/typecase.css`,
+  `…/fonts/{file}`, `…/js/theme.js`, `…/js/tc.js`; `{version}` is 12 hex
+  digits of the SHA-256 of their contents. Found — `Cache-Control: public,
+  max-age=31536000, immutable`; another version, a directory, an unknown
+  name — 404 `no-store`. The headers of every answer (CSP, `nosniff`, `DENY`,
+  `same-origin`) as they were; not metered by the session's bucket.
+- **`web.Server.Static`** — mounts files from the binary at a prefix; only
+  `cmd/carrel` calls it.
+- **`scripts/linux-ship.sh`** — packs this repository at HEAD and the
+  Typecase clone at the commit of «Typecase сборки» (docs/plan/client.md)
+  side by side for the Linux machine.
+
+### Changed
+
+- **`go.mod`** requires `carrel.dev/carrel/client` (`replace => ../client`)
+  and repeats the client's `replace carrel.dev/typecase =>
+  ../../../typecase`: a dependency's replaces do not apply here. Building
+  the server needs the Typecase clone beside the repository.
+- **The image** is built from the directory above the repository, which
+  holds `carrel/` and `typecase/`:
+  `docker build -f carrel/carrel/server/Dockerfile -t carrel .`;
+  `Dockerfile.dockerignore` (BuildKit) lets in the server, the client and
+  Typecase only.
+- **`scripts/linux-gates.sh`** wants the Typecase clone beside the
+  repository, builds the image from there, mounts it for the race detector,
+  and the smoke fetches `/login` (HTML) and the three files it names from
+  the image.
+- **`nodep_test.go`**: no package of the module but `cmd/carrel` depends on
+  the client or on Typecase, directly or not; `cmd/carrel` does.
+
+### For consumers
+
+The pages outside the shell answer HTML: whatever read their JSON from the
+binary reads HTML now (the fixture checks build their own server on
+`render.JSONRenderer` and are unchanged). The pages in the shell, their
+zones, the sheets and the events are JSON still. Build the image from the
+parent directory with the Typecase clone beside the repository.
+
 ## v0.2.89 — 2026-10-01
 
 The form of a contact as the frames draw it (the client's scan of the

@@ -36,7 +36,9 @@
 ### Что нельзя
 
 - Шаблоны, CSS, `tc-*`, имена виджетов в `carrel/server`; `import` клиента
-  или Typecase из любого пакета сервера, кроме `cmd/carrel`.
+  или Typecase из любого пакета сервера, кроме `cmd/carrel` — он один
+  подключает отрисовщик клиента и файлы Typecase, прочие пакеты не тянут их
+  и косвенно (`nodep_test.go`).
 - В клиенте (`carrel/client`) — своя разметка, свой CSS, своё поведение и
   варианты виджетов «пока что». Общее и повторяющееся — задача для Typecase;
   экран начинается с черновика `frame2go` отдельным коммитом; кадр не
@@ -77,7 +79,9 @@
   приходит с таким образцом, красным до правки. Разрешённый импорт экрана
   добавляется своим коммитом с причиной в `guard.AllowedImports`.
 - **Linux-ворота** — `scripts/linux-gates.sh` на машине разработки: F-10
-  (права `server.key`), образ S-28 (`--read-only`, `--cap-drop=ALL`), живой
+  (права `server.key`), образ S-28 (`--read-only`, `--cap-drop=ALL`; сборка
+  из каталога над репозиторием с Typecase рядом, в дыме — страница `/login`
+  клиентом и три файла Typecase из образа), живой
   набор против Radicale, Stalwart, Xandikos, Davis, DAViCal; `CARREL_RACE=1` —
   `go test -race` в `golang:1.27` по одному пакету и по одному тесту
   (`-p 1 -parallel 1`): под детектором Argon2 каждого стенда съедает память, и
@@ -103,9 +107,19 @@
 Доступ и правила — `dev/env.txt` (в git не входит). Каталог `dev/` на машину
 не копируется. На той же машине живёт SelfPost — его контейнеры, тома и
 каталоги (`selfpost-*`, `~/selfpost*`) не трогать; всё Carrel — в Docker, на
-хосте ничего не ставится. Код едет git-бандлом в
-`/opt/carrel-dev/run-<commit>/`, ворота — `nohup` и короткие опросы лога:
-долгие ssh-сессии машина рвёт. Go на хосте старше `go.mod` —
+хосте ничего не ставится. Код едет одним архивом
+`carrel/server/scripts/linux-ship.sh` (с 01.10.2026; прежде — git-бандл):
+`carrel/` — `git archive` HEAD этого репозитория, `typecase/` — `git archive`
+соседнего клона Typecase на коммите строки «Typecase сборки» в
+[plan/client.md](plan/client.md), рядом, как их ждут `replace` модулей и
+сборка образа. Скрипт предупреждает, если дерево Carrel грязное или клон
+Typecase не на этом коммите, и печатает команды для машины: архив
+распаковывается в `/opt/carrel-dev/run-<commit>/`, ворота — из
+`run-<commit>/carrel/carrel/server` (`linux-gates.sh` без Typecase рядом
+не начинает). Ворота — `nohup` и короткие опросы лога:
+долгие ssh-сессии машина рвёт. Образ вручную — из `run-<commit>/`:
+`docker build -f carrel/carrel/server/Dockerfile -t carrel .` (BuildKit:
+контекст ограничивает `Dockerfile.dockerignore`). Go на хосте старше `go.mod` —
 `GOTOOLCHAIN=auto`; компилятора C нет. Radicale — на `127.0.0.1:5232`;
 тесты, которым нужен и SFTPGo, идут с Windows через туннель
 (`ssh -N -L 15232:127.0.0.1:5232`).

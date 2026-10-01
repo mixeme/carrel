@@ -18,6 +18,8 @@ import (
 	// event may be moved to (s-agenda-8) must load there too.
 	_ "time/tzdata"
 
+	"carrel.dev/carrel/client/document"
+	"carrel.dev/carrel/client/renderer"
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/crypt"
 	"carrel.dev/carrel/server/internal/dav"
@@ -26,7 +28,6 @@ import (
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/internal/web"
-	"carrel.dev/carrel/server/render"
 )
 
 // version and commit are set by -ldflags at build time (C-13: the About
@@ -91,7 +92,12 @@ func serve(ctx context.Context, cfg *conf.Config) error {
 	defer stopPurge()
 
 	users := user.New(st, mgr, cfg)
-	srv := web.New(cfg, st, mgr, users, render.JSONRenderer{}, version, commit)
+	// The client draws the pages that have a screen and answers JSON for the
+	// rest (carrel.dev/carrel/client/renderer); the library's files its pages
+	// name are served from the binary (C-5.9). This is the one package of the
+	// server that imports the client (docs/architecture.md, «Модули»).
+	srv := web.New(cfg, st, mgr, users, renderer.New(conf.NormalizeBasePath(cfg.BasePath)), version, commit)
+	srv.Static(document.Static, document.Files())
 
 	addr := net.JoinHostPort(cfg.Bind, strconv.Itoa(cfg.Port))
 	servers := []*http.Server{{

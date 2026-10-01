@@ -298,6 +298,17 @@ func (s *Server) Handler() http.Handler {
 	return s.observe(http.StripPrefix(s.basePath, secureHeaders(s.mux)))
 }
 
+// Static mounts files served from the binary (C-5.9) at prefix of the mux,
+// which sees paths without the base path: the client's library files, which
+// cmd/carrel alone can name. GET and HEAD only; the security headers of every
+// answer are around it as around any route, and the handler sets its own
+// caching over their no-store. It stands outside the routes' buckets and
+// CSRF (serve): the same files for everyone, read from memory, and a page
+// loads several of them at once.
+func (s *Server) Static(prefix string, h http.Handler) {
+	s.mux.Handle("GET "+strings.TrimSuffix(prefix, "/")+"/", h)
+}
+
 func (s *Server) sessionFrom(r *http.Request) (*session.Session, bool) {
 	c, err := r.Cookie(cookieName)
 	if err != nil {

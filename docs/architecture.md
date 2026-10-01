@@ -22,8 +22,24 @@ Typecase; `internal/*` ему недоступны. Сервер импорти�
 `cmd/carrel` — через него же, и только там, в граф сервера входит Typecase.
 Typecase подключается `replace` на соседний репозиторий
 (`../../../typecase` от модуля клиента; решение владельца 28.09.2026), версия
-— её коммит в плане клиента; сборке образа нужен соседний клон. Пока клиент не печатает HTML, `cmd/carrel` его не подключает и
-сервер отвечает `render.JSONRenderer`.
+— её коммит в плане клиента («Typecase сборки»). Сервер требует клиент с
+`replace => ../client` и повторяет `replace` Typecase: `replace` зависимости
+к главному модулю не применяется. Образ собирается из каталога над
+репозиторием, где рядом лежит клон Typecase (`carrel/` и `typecase/`,
+`Dockerfile.dockerignore` пускает только сервер, клиент и Typecase); на
+Linux-машину Typecase едет архивом того же коммита (development.md).
+
+**Подключено** (`v0.2.90`, клиент `v0.0.7`): `cmd/carrel` отдаёт `web.New`
+отрисовщик клиента (`renderer`) и монтирует файлы Typecase
+(`web.Server.Static`, C-5.9). Отрисовщик выбирает экран по типу вью-модели:
+есть экран в `screens.All` — страница HTML (`document.Of`); нет — тот же
+JSON, что отдавал `render.JSONRenderer`, байт в байт. Фрагмент — HTML только
+для `main` страницы вне оболочки и `sheet` листа без внеполосных; зоны
+оболочки, OOB и события (C-7.2–C-7.4) — JSON до оболочки. Так сервер
+переходит на HTML экран за экраном, без второго переключателя. Проверки
+фикстур и `internal/web` строят сервер на `JSONRenderer` и от клиента не
+зависят; кроме `cmd/carrel`, ни один пакет сервера не тянет ни клиент, ни
+Typecase (`nodep_test.go`).
 
 `VERSION` в корне — версия продукта. `THIRD_PARTY.md` — в том модуле, куда
 добавили зависимость, тем же коммитом.
@@ -38,12 +54,14 @@ carrel/server/
   internal/provider/{card,cal,file}
   internal/photo fanout dupes web user mail backup publish proxy
   integration/           живой набор, -tags=integration
-  testdata/ scripts/ Dockerfile docker-compose.linux.yml
+  testdata/ scripts/ Dockerfile (+ .dockerignore) docker-compose.linux.yml
 carrel/client/           module carrel.dev/carrel/client; require server (replace ../server)
+  renderer/              render.Renderer: экран по типу вью-модели, иначе JSON
+  document/              page.Document Typecase вокруг экрана; файлы C-5.9
   zone/                  зона вью-модели страницы по цели C-7.2
-  screens/               экраны: только вызовы виджетов (U-5.2); пока пуст
-  guard_test.go          защиты U-15.2: импорты, строки, файлы, реестры
-  testdata/              нарочно испорченные образцы — укусы защит
+  bind/                  типы контракта в виджеты (U-5.7)
+  screens/               экраны: только вызовы виджетов (U-5.2)
+  guard/                 защиты U-15.2, сверка с кадрами; testdata — укусы
 ```
 
 Зависимости только вниз: `web` → `view`, `render`, `session`, `store`, `fanout`,
@@ -55,9 +73,10 @@ carrel/client/           module carrel.dev/carrel/client; require server (replac
 `[]view.Block`, `card.Foreign` → `[]view.Field`. Общего `internal/provider`
 нет: интерфейс источника — в `internal/fanout`.
 
-**Пока клиент не печатает HTML** страницы, фрагменты и листы отвечают JSON
-вью-модели (`render.Renderer`, сейчас `render.JSONRenderer`). Потоки, файлы,
-SSE, DAV, редиректы, `/healthz` — настоящие. `render` знает только контракт
+**Страницы, фрагменты и листы, у вью-модели которых ещё нет экрана,**
+отвечают JSON вью-модели (`render.Renderer`: в бинарнике — отрисовщик
+клиента, в проверках — `render.JSONRenderer`); с экраном — HTML клиента
+(«Модули»). Потоки, файлы, SSE, DAV, редиректы, `/healthz` — настоящие. `render` знает только контракт
 C-7.1–C-7.3 — ни разметки, ни имён виджетов; `view` и `render` — всё, что
 клиент видит у сервера.
 

@@ -1,0 +1,16 @@
+# The context of the image is the directory above this repository (see the
+# Dockerfile): it holds carrel/ and typecase/ side by side — and, on a
+# developer's machine, whatever else lies there. BuildKit reads this file,
+# named after the Dockerfile, instead of a .dockerignore at the context's
+# root, so what goes in is named here and nothing else: the server, the
+# client, Typecase. dev/ (credentials) is never in the context.
+*
+!carrel/carrel/server
+!carrel/carrel/client
+!typecase
+
+# Of those: no history, no documentation, no test stands.
+**/.git
+typecase/docs
+carrel/carrel/server/testdata
+carrel/carrel/client/guard/testdata
