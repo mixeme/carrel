@@ -306,8 +306,9 @@ func ordinal(n int) string {
 }
 
 // recurrence is RecurrenceBlock.Summary: the rule in words. What the words do
-// not cover is admitted, and the raw rule stands beside it.
-func (f timeFmt) recurrence(raw string) string {
+// not cover is admitted, and the raw rule stands beside it. Until is the last
+// day an occurrence can start on (ruleUntil); start is DTSTART.
+func (f timeFmt) recurrence(raw string, start time.Time) string {
 	if raw == "" {
 		return "On extra dates"
 	}
@@ -359,7 +360,9 @@ func (f timeFmt) recurrence(raw string) string {
 	case opt.Count > 1:
 		fmt.Fprintf(&b, ", %d times", opt.Count)
 	}
-	if !opt.Until.IsZero() {
+	if day, ok := ruleUntil(raw, start, f.tz); ok {
+		b.WriteString(", until " + day.Format("2 January 2006"))
+	} else if !opt.Until.IsZero() {
 		b.WriteString(", until " + f.date(opt.Until))
 	}
 	if len(opt.Bysetpos)+len(opt.Byyearday)+len(opt.Byweekno)+len(opt.Byhour)+len(opt.Byminute)+len(opt.Bysecond)+len(opt.Byeaster) > 0 {

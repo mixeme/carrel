@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.117 — 2026-10-01
+
+Two findings of the client's scan of the calendar: the «empty» week was not
+empty (Б16), and the end of a series was shown a day late (Г3).
+
+### Fixed
+
+- **The day a series ends is the last day it can start on** (C-10):
+  `UNTIL=20261228T235959Z` of «Синк-ап по релизу» (Mondays, 12:00
+  Asia/Yekaterinburg) is 29 December, 02:59 in Moscow, and the card said
+  «Weekly on Monday, until 29 December 2026», the form's Until 2026-12-29 —
+  while the last Monday is the 28th. An UNTIL whose clock in the instance
+  zone is before the series' time of day now ends it the day before; a date
+  UNTIL is that day; what the form writes (the end of the day typed, in the
+  instance zone) reads back as that day. `RecurrenceBlock.summary`, the
+  form's `repeat.until` and the block's Until field agree.
+- **`app-agenda/empty` is empty**: the fixture showed the week of 2
+  November, and the weekly series falls on its Monday — the occurrence was
+  right, the week was not («1 event», `loaded` 1, and a row). The fixture
+  now shows 4–10 January 2027, after the series; its test checks the week
+  holds nothing before comparing.
+
+### For consumers
+
+Fixtures regenerated: `app-agenda/empty` (another week), `app-event/normal`,
+`app-event-edit/normal`, `/loss` (until 28 December).
+
 ## v0.2.116 — 2026-10-01
 
 The range form of the agenda put the session's token in the address (the

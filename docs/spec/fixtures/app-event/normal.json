@@ -441,7 +441,7 @@
     ],
     "note": "Series is edited and deleted whole.",
     "raw": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z",
-    "summary": "Weekly on Monday, until 29 December 2026"
+    "summary": "Weekly on Monday, until 28 December 2026"
   },
   "related": [
     {

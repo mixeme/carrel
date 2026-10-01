@@ -20,7 +20,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/calendar/a-nc-home/lichnyj/export?from=2026-11-02\u0026to=2026-11-08",
+        "href": "/app/calendar/a-nc-home/lichnyj/export?from=2027-01-04\u0026to=2027-01-10",
         "icon": "i-down",
         "id": "collection.export",
         "label": "Export",
@@ -31,7 +31,7 @@
     "compact": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 1,
+    "loaded": 0,
     "range": {
       "form": {
         "action": "/app/calendar/a-nc-home/lichnyj",
@@ -73,7 +73,7 @@
                 "options": [],
                 "readOnly": false,
                 "required": false,
-                "value": "2026-11-02"
+                "value": "2027-01-04"
               },
               {
                 "error": "",
@@ -86,18 +86,18 @@
                 "options": [],
                 "readOnly": false,
                 "required": false,
-                "value": "2026-11-08"
+                "value": "2027-01-10"
               }
             ],
             "unfold": null
           }
         ]
       },
-      "from": "2 November 2026",
+      "from": "4 January 2027",
       "presets": [
         {
           "enabled": true,
-          "href": "/app/calendar/a-nc-home/lichnyj?from=2026-10-26",
+          "href": "/app/calendar/a-nc-home/lichnyj?from=2026-12-28",
           "id": "range.previous",
           "label": "Previous",
           "method": "GET"
@@ -111,21 +111,21 @@
         },
         {
           "enabled": true,
-          "href": "/app/calendar/a-nc-home/lichnyj?from=2026-11-09",
+          "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-11",
           "id": "range.next",
           "label": "Next",
           "method": "GET"
         },
         {
           "enabled": true,
-          "href": "/app/calendar/a-nc-home/lichnyj?from=2026-11-02\u0026view=day",
+          "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026view=day",
           "id": "range.day",
           "label": "Day",
           "method": "GET"
         },
         {
           "enabled": true,
-          "href": "/app/calendar/a-nc-home/lichnyj?from=2026-11-02",
+          "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04",
           "id": "range.week",
           "label": "Week",
           "method": "GET",
@@ -133,13 +133,13 @@
         },
         {
           "enabled": true,
-          "href": "/app/calendar/a-nc-home/lichnyj?from=2026-11-02\u0026view=month",
+          "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026view=month",
           "id": "range.month",
           "label": "Month",
           "method": "GET"
         }
       ],
-      "to": "8 November 2026"
+      "to": "10 January 2027"
     },
     "segments": [
       {
@@ -152,14 +152,14 @@
       },
       {
         "enabled": true,
-        "href": "/app/calendar/a-nc-home/lichnyj?from=2026-11-02\u0026with=tasks",
+        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026with=tasks",
         "id": "agenda.tasks",
         "label": "Tasks due",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/calendar/a-nc-home/lichnyj?from=2026-11-02\u0026with=notes",
+        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026with=notes",
         "id": "agenda.notes",
         "label": "Notes",
         "method": "GET"
@@ -170,115 +170,39 @@
   },
   "days": [
     {
-      "rows": [
-        {
-          "badges": [],
-          "colour": "",
-          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
-          "kind": "event",
-          "location": "Переговорная 2",
-          "menu": [
-            {
-              "enabled": true,
-              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
-              "icon": "i-cal",
-              "id": "record.open",
-              "label": "Open",
-              "method": "GET"
-            },
-            {
-              "enabled": true,
-              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit",
-              "icon": "i-pencil",
-              "id": "record.edit",
-              "label": "Edit",
-              "method": "GET"
-            },
-            {
-              "enabled": true,
-              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/move",
-              "icon": "i-move",
-              "id": "record.move",
-              "label": "Move",
-              "method": "GET"
-            },
-            {
-              "enabled": true,
-              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/move?copy=1",
-              "icon": "i-dup",
-              "id": "record.copy",
-              "label": "Copy",
-              "method": "GET"
-            },
-            {
-              "enabled": true,
-              "href": "/app/calendar/a-nc-home/lichnyj/export?uid=8f1c-4a02-b7d3",
-              "icon": "i-down",
-              "id": "record.export",
-              "label": "Export .ics",
-              "method": "GET"
-            },
-            {
-              "enabled": true,
-              "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
-              "icon": "i-link",
-              "id": "publish",
-              "label": "Publish a link",
-              "method": "GET"
-            },
-            {
-              "csrf": "csrf",
-              "danger": true,
-              "enabled": true,
-              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e6",
-              "icon": "i-trash",
-              "id": "record.delete",
-              "label": "Delete event",
-              "method": "POST",
-              "separator": true
-            }
-          ],
-          "sources": [],
-          "stamp": "",
-          "state": "ok",
-          "summary": "Синк-ап по релизу",
-          "time": "10:00",
-          "uid": "8f1c-4a02-b7d3",
-          "zone": "Asia/Yekaterinburg"
-        }
-      ],
-      "rubric": "Monday, 2 November"
+      "rows": [],
+      "rubric": "Monday, 4 January"
     },
     {
       "rows": [],
-      "rubric": "Tuesday, 3 November"
+      "rubric": "Tuesday, 5 January"
     },
     {
       "rows": [],
-      "rubric": "Wednesday, 4 November"
+      "rubric": "Wednesday, 6 January"
     },
     {
       "rows": [],
-      "rubric": "Thursday, 5 November"
+      "rubric": "Thursday, 7 January"
     },
     {
       "rows": [],
-      "rubric": "Friday, 6 November"
+      "rubric": "Friday, 8 January"
     },
     {
       "rows": [],
-      "rubric": "Saturday, 7 November"
+      "rubric": "Saturday, 9 January"
     },
     {
       "rows": [],
-      "rubric": "Sunday, 8 November"
+      "rubric": "Sunday, 10 January"
     }
   ],
   "details": null,
   "notices": [],
   "poll": null,
   "print": {
-    "range": "2 November 2026 – 8 November 2026 · 1 event",
+    "range": "4 January 2027 – 10 January 2027 · 0 events",
     "taken": "10 August 2026, 17:06",
     "title": "Личный"
   },
@@ -894,23 +818,7 @@
       }
     ],
     "shortcuts": [],
-    "tags": [
-      {
-        "href": "/app/calendar/a-nc-home/lichnyj?from=2026-11-02",
-        "label": "all",
-        "on": true
-      },
-      {
-        "href": "/app/calendar/a-nc-home/lichnyj?from=2026-11-02\u0026tag=release",
-        "label": "release",
-        "on": false
-      },
-      {
-        "href": "/app/calendar/a-nc-home/lichnyj?from=2026-11-02\u0026tag=team",
-        "label": "team",
-        "on": false
-      }
-    ],
+    "tags": [],
     "ticks": {
       "action": "/app/sources/calendar",
       "actions": [],

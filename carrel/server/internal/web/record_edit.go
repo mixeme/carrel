@@ -410,10 +410,41 @@ func (r ruleParts) String() string {
 	return strings.Join(parts, ";")
 }
 
+// ruleUntil is the day a rule's UNTIL ends the series on, as a person counts
+// it (the client's scan of the calendar, Г3): the last day an occurrence can
+// start on. RFC 5545 §3.3.10 bounds the start by UNTIL inclusively. A date
+// UNTIL is that day. A UTC instant is its day in tz — unless its clock there
+// is before the series' time of day, in which case no occurrence of that day
+// reaches it and the day before is the last: UNTIL=20261228T235959Z of a
+// series on Mondays at 12:00 in Yekaterinburg is 29 December, 02:59 in
+// Moscow, and the series ends on Monday 28 December. start is DTSTART; a
+// zero start compares nothing. What the form writes back — the end of the
+// day in tz — reads as that day again. ok is false without an UNTIL.
+func ruleUntil(raw string, start time.Time, tz *time.Location) (time.Time, bool) {
+	u := parseRule(raw).get("UNTIL")
+	if len(u) == len("20060102") {
+		d, err := time.Parse("20060102", u)
+		return d, err == nil
+	}
+	at, err := time.Parse("20060102T150405Z", u)
+	if err != nil || tz == nil {
+		return time.Time{}, false
+	}
+	local := at.In(tz)
+	day := time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, tz)
+	if !start.IsZero() {
+		s := start.In(tz)
+		if clock := time.Date(day.Year(), day.Month(), day.Day(), s.Hour(), s.Minute(), s.Second(), 0, tz); local.Before(clock) {
+			day = day.AddDate(0, 0, -1)
+		}
+	}
+	return day, true
+}
+
 // repeatValues are an RRULE as the form shows it: frequency, every, the plain
-// days of BYDAY in the form's order, until as a day in tz, count, and the rule
-// itself.
-func repeatValues(raw string, tz *time.Location) []string {
+// days of BYDAY in the form's order, until as the last day of the series in
+// tz (ruleUntil; start is DTSTART), count, and the rule itself.
+func repeatValues(raw string, tz *time.Location, start time.Time) []string {
 	r := parseRule(raw)
 	out := make([]string, 6)
 	out[repFreq], out[repCount], out[repRule] = r.get("FREQ"), r.get("COUNT"), strings.TrimSpace(raw)
@@ -434,12 +465,8 @@ func repeatValues(raw string, tz *time.Location) []string {
 		}
 	}
 	out[repOn] = strings.Join(on, ",")
-	if u := r.get("UNTIL"); len(u) == len("20060102") {
-		if t, err := time.Parse("20060102", u); err == nil {
-			out[repUntil] = t.Format("2006-01-02")
-		}
-	} else if t, err := time.Parse("20060102T150405Z", u); err == nil && tz != nil {
-		out[repUntil] = t.In(tz).Format("2006-01-02")
+	if day, ok := ruleUntil(raw, start, tz); ok {
+		out[repUntil] = day.Format("2006-01-02")
 	}
 	return out
 }
@@ -824,7 +851,11 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 		case fieldZone:
 			vals[f.name] = []string{zoneOf(props[f.prop])}
 		case fieldRepeat:
-			vals[f.name] = repeatValues(firstValue(obj, f.prop), tz)
+			var start time.Time
+			if tm, err := cal.TimingOf(obj, tz); err == nil {
+				start = tm.Start
+			}
+			vals[f.name] = repeatValues(firstValue(obj, f.prop), tz, start)
 		case fieldRelated:
 			vals[f.name] = []string{strings.TrimSpace(firstValue(obj, f.prop))}
 		case fieldAttendee:
@@ -968,7 +999,7 @@ func (s *Server) emptyValues(c *collectionCtx) formValues {
 		case fieldName:
 			vals[f.name] = []string{"", ""}
 		case fieldRepeat:
-			vals[f.name] = repeatValues("", nil)
+			vals[f.name] = repeatValues("", nil, time.Time{})
 		case fieldChoice:
 			vals[f.name] = []string{f.blank}
 		case fieldZone:
@@ -2008,7 +2039,11 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		if st.obj != nil {
 			if cal.HasRecurrence(st.obj) {
 				page.Recurrence = s.recurrenceBlock(st.obj, tf)
-				page.Recurrence.Fields = append(repeatFields(repeatValues(cal.RawRRULE(st.obj), tf.tz)), page.Recurrence.Fields...)
+				var start time.Time
+				if tm, err := cal.TimingOf(st.obj, tf.tz); err == nil {
+					start = tm.Start
+				}
+				page.Recurrence.Fields = append(repeatFields(repeatValues(cal.RawRRULE(st.obj), tf.tz, start)), page.Recurrence.Fields...)
 				// The line stands under Delete here, and once.
 				page.Recurrence.Note = ""
 				if del != nil {

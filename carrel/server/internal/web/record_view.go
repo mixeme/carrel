@@ -771,8 +771,12 @@ const seriesNote = "Series is edited and deleted whole."
 func (s *Server) recurrenceBlock(obj *model.Object, tf timeFmt) view.RecurrenceBlock {
 	tz := tf.tz
 	raw := cal.RawRRULE(obj)
+	var start time.Time
+	if tm, err := cal.TimingOf(obj, tz); err == nil {
+		start = tm.Start
+	}
 	b := view.RecurrenceBlock{
-		Summary: text(tf.recurrence(raw)),
+		Summary: text(tf.recurrence(raw, start)),
 		Raw:     text(raw),
 		Note:    seriesNote,
 	}

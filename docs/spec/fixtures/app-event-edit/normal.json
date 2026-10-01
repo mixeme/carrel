@@ -2949,7 +2949,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "2026-12-29"
+            "value": "2026-12-28"
           },
           {
             "error": "",
@@ -3250,7 +3250,7 @@
         "href": "",
         "label": "Until",
         "mono": false,
-        "value": "2026-12-29"
+        "value": "2026-12-28"
       },
       {
         "href": "",
@@ -3273,7 +3273,7 @@
     ],
     "note": "",
     "raw": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z",
-    "summary": "Weekly on Monday, until 29 December 2026"
+    "summary": "Weekly on Monday, until 28 December 2026"
   },
   "reminders": [],
   "title": "Edit event",

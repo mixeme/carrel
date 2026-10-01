@@ -1705,9 +1705,21 @@ func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 		app := newMockupApp(t)
 		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 		// A week of the set that holds nothing: an agenda is empty by the
-		// window it shows, not by the calendar being empty.
-		app.compare(t, "app-agenda/empty.json",
-			app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"?from=2026-11-02", app.sess)))
+		// window it shows, not by the calendar being empty. «Синк-ап по
+		// релизу» repeats every Monday until 28 December, so the week is
+		// after it (the client's scan Б16: the week of 2 November held its
+		// Monday, and the «empty» state was not).
+		week := app.listPath(t, "calendar", "lichnyj") + "?from=2027-01-04"
+		page := decode[view.AgendaPage](t, app.h.do(get(week, app.sess)))
+		if page.Bar.Loaded != 0 {
+			t.Errorf("the empty week holds %d events", page.Bar.Loaded)
+		}
+		for _, d := range page.Days {
+			if len(d.Rows) > 0 {
+				t.Errorf("the empty week has rows on %s: %+v", d.Rubric, d.Rows)
+			}
+		}
+		app.compare(t, "app-agenda/empty.json", app.h.do(get(week, app.sess)))
 	})
 	for _, one := range []struct{ dir, segment, slug string }{
 		{"app-tasks", "tasks", "dela"},
