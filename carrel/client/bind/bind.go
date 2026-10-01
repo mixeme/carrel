@@ -288,3 +288,42 @@ func Msg(n view.Notice, space w.MsgSpace) w.Msg {
 	}
 	return w.Msg{Parts: parts, Tone: Tone(n.Role), Space: space}
 }
+
+// Remove is the button that closes a line of a repeating field (InputRemove,
+// C-6.8): a submit button of the form that sends its name and the line
+// (remove=<line>) — without scripts the server answers without the line;
+// with them the library empties and hides its fields. It is destructive in
+// the plain way: it breaks the line off, the card keeps its data until it
+// is saved.
+func Remove(r view.FormRow) w.Button {
+	return w.Button{Label: string(r.Label), Kind: w.ButtonDanger, Submit: true, Name: r.Name, Value: string(r.Value)}
+}
+
+// Add is the button «Add …» of a repeating field (InputAdd, C-6.8) and the
+// template of the lines one press adds in place (Template), each line drawn
+// by line — the screen's, which lays it out as its frame does. The
+// template's ID is the row's name and value («add.tel»).
+func Add(r view.FormRow, line func(view.FormRow) []w.FieldSetPart) (w.Button, w.Template) {
+	id := r.Name + "." + string(r.Value)
+	t := w.Template{ID: id}
+	for _, row := range r.Template {
+		t.Items = append(t.Items, line(row)...)
+	}
+	return w.Button{Label: string(r.Label), Adds: id}, t
+}
+
+// Loss is what the server did not keep of a save (C-9 LossReport) as a
+// notice in the alert's tone: what it means (Note), then the properties
+// lost, monospaced, a comma between them. A notice, not a lock: the record
+// is written.
+func Loss(l view.LossReport, space w.MsgSpace) w.Msg {
+	parts := []w.MsgPart{w.Text(l.Note)}
+	for i, p := range l.Properties {
+		sep := ", "
+		if i == 0 {
+			sep = " "
+		}
+		parts = append(parts, w.Text(sep), w.Mono{Text: string(p)})
+	}
+	return w.Msg{Parts: parts, Tone: w.MsgAlert, Space: space}
+}

@@ -115,6 +115,20 @@ func ticks(c control) string {
 	return "a tick box that sends nothing (Send)"
 }
 
+// links says whether every option of a switch (Seg) is a link.
+func links(c control) bool {
+	opts := c.v.FieldByName("Options")
+	if !opts.IsValid() || opts.Kind() != reflect.Slice || opts.Len() == 0 {
+		return false
+	}
+	for i := range opts.Len() {
+		if (control{v: opts.Index(i)}).str("Href") == "" {
+			return false
+		}
+	}
+	return true
+}
+
 // buttonDisabled is widget.ButtonDisabled; the guard reads the widget's value
 // by reflection and does not import the library.
 const buttonDisabled = 2
@@ -156,7 +170,36 @@ var contract = map[string]rule{
 		if c.flag("Theme") { // the theme is this browser's, kept by the script (U-12)
 			return ""
 		}
+		if links(c) { // a switch of links: each option goes (SegOption.Href)
+			return ""
+		}
 		return field(c)
+	},
+	// An option of a switch is judged on the switch (Seg).
+	"SegOption": func(control) string { return "" },
+	// A range of dates is a form (GET) that sends From and To: its fields
+	// and its Show are judged in it.
+	"Range": needs("Action"),
+	// A line of a card: its value may go somewhere (Href: tel:, mailto:, the
+	// record in another book) or be words — whether it goes is the model's,
+	// as with a Span.
+	"FieldsItem": func(control) string { return "" },
+	// The rows of a list that are a record each, and the line of the build:
+	// links (U-8 — every record is read without a script).
+	"FaceRow":   needs("Href"),
+	"FindRow":   needs("Href"),
+	"LinkedRow": needs("Href"),
+	"About":     needs("Href"),
+	// A source of the rail with its tick (the owner's decision of
+	// 30.09.2026, C-6.3): with the rail's form its tick sends the source's
+	// choice (Send, as a Tick); on the rail of return the choice is made and
+	// the rail sends none (Rail.Ticks is nil): the tick shows it, sends
+	// nothing, and is no finding.
+	"TickRow": func(c control) string {
+		if form, name := c.send(); form == "" && name == "" {
+			return ""
+		}
+		return ticks(c)
 	},
 	"MenuItem": func(c control) string {
 		switch {
@@ -188,7 +231,7 @@ var contract = map[string]rule{
 // opensForm says whether the widget is a form that sends, for its parts.
 func opensForm(c control) bool {
 	switch c.v.Type().Name() {
-	case "Form", "Menu", "Search", "Filter":
+	case "Form", "Menu", "Search", "Filter", "Range":
 		return c.str("Action") != ""
 	}
 	return false
