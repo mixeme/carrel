@@ -1,8 +1,10 @@
 package model
 
 import (
+	"maps"
 	"sort"
 	"strings"
+	"time"
 )
 
 // LossAggregator records properties a server has already been seen dropping (S-7.1).
@@ -43,7 +45,7 @@ func compare(serverID string, sent, got *Object, agg LossAggregator, theirUID bo
 		if isServerStamp(prop) || theirUID && strings.EqualFold(prop, "UID") {
 			continue
 		}
-		if !propsEqual(sent, got, prop) {
+		if !propsEqual(sent, got, prop) && !(strings.EqualFold(prop, "DTEND") && impliedEndLeftOut(sent, got)) {
 			lost = append(lost, prop)
 			if agg == nil || !agg.Has(serverID, prop) {
 				allAggregated = false
@@ -89,11 +91,77 @@ func propsEqual(a, b *Object, prop string) bool {
 		default:
 			return false
 		}
-		if !sameParams(av[i].params, bv[i].params) {
+		if !sameParams(av[i].params, withoutAddedPref(av[i].params, bv[i].params)) {
 			return false
 		}
 	}
 	return true
+}
+
+// withoutAddedPref is the parameters got came back with, less a PREF among
+// its TYPE values that sent did not carry. Google marks the first phone,
+// address and e-mail of a card PREF and keeps every label it was given
+// (docs/servers.md, SV-56): the mark is the server's, and calling the value
+// lost told a person of a loss that had not happened. A PREF sent and not
+// kept is still compared, and still a loss.
+func withoutAddedPref(sent, got map[string]string) map[string]string {
+	for k, v := range sent {
+		if strings.EqualFold(k, "TYPE") && hasPref(v) {
+			return got
+		}
+	}
+	for k, v := range got {
+		if !strings.EqualFold(k, "TYPE") || !hasPref(v) {
+			continue
+		}
+		var kept []string
+		for _, t := range strings.Split(v, ",") {
+			if !strings.EqualFold(strings.TrimSpace(t), "pref") {
+				kept = append(kept, t)
+			}
+		}
+		out := maps.Clone(got)
+		if len(kept) == 0 {
+			delete(out, k)
+		} else {
+			out[k] = strings.Join(kept, ",")
+		}
+		return out
+	}
+	return got
+}
+
+func hasPref(types string) bool {
+	for _, t := range strings.Split(types, ",") {
+		if strings.EqualFold(strings.TrimSpace(t), "pref") {
+			return true
+		}
+	}
+	return false
+}
+
+// impliedEndLeftOut reports a DTEND the server left out that its DTSTART
+// implies anyway. RFC 5545 §3.6.1 ends an event without DTEND or DURATION at
+// its start when the start is a time, and a day later when it is a date: the
+// end Carrel writes for an event the person gave none (SV-53). Google keeps
+// such an event without the DTEND (docs/servers.md, SV-56) — the same event,
+// and calling its end lost told a person of a loss that had not happened. The
+// start has to have come back as it was sent; an end with another zone or a
+// longer span is the person's, and its loss is still reported.
+func impliedEndLeftOut(sent, got *Object) bool {
+	if got.propValues("DTEND") != nil || got.propValues("DURATION") != nil || !propsEqual(sent, got, "DTSTART") {
+		return false
+	}
+	starts, ends := sent.propValues("DTSTART"), sent.propValues("DTEND")
+	if len(starts) != 1 || len(ends) != 1 || !sameParams(starts[0].params, ends[0].params) {
+		return false
+	}
+	start, end := strings.TrimSpace(starts[0].text), strings.TrimSpace(ends[0].text)
+	if strings.Contains(start, "T") {
+		return start == end
+	}
+	day, err := time.Parse("20060102", start)
+	return err == nil && day.AddDate(0, 0, 1).Format("20060102") == end
 }
 
 // isRule names the properties whose value is a set of parts separated by

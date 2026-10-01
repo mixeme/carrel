@@ -262,6 +262,12 @@ func liveContactFields(ctx context.Context, t *testing.T, app *liveApp, client *
 	if kept := uidOf(seeded); kept != "" && kept != uid {
 		t.Logf("the server named the card %q, not %q", kept, uid)
 		uid = kept
+		// Google answers GET at the address it was sent to and 404 to a
+		// DELETE there: the card lives under the name it gave, which is its
+		// UID (SV-25). A cleanup at the sent address deleted nothing and said
+		// nothing, and by 01.10.2026 eleven «Vera Lebedeva» cards sat in the
+		// Google book.
+		removeLater(t, client, book+kept)
 	}
 	keeps := func(line string) bool { return strings.Contains(strings.ToLower(seeded), strings.ToLower(line)) }
 	rec := "/app/contacts/" + connID + "/" + url.PathEscape(book) + "/" + url.PathEscape(uid)
@@ -309,7 +315,7 @@ func liveContactFields(ctx context.Context, t *testing.T, app *liveApp, client *
 	mustHave(t, "birthday, label, address", got, asked(lost, "X-CUSTOM:keep-me")...)
 	mustValue(t, "birthday, label, address", got, "EMAIL", "vera@carrel.test")
 	if !contains(lost, "TEL") {
-		mustHave(t, "birthday, label, address", got, "TEL;TYPE=cell:+7 912 000 00 01")
+		mustLabel(t, "birthday, label, address", got, "TEL", "cell", "+7 912 000 00 01")
 	}
 	if keeps("ADR") && !contains(lost, "ADR") {
 		mustAddress(t, "birthday, label, address", got, "PO 7", "Flat 2", "Lenina 1", "Ekaterinburg", "Sverdlovsk", "620000", "Russia")

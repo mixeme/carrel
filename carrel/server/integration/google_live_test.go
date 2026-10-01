@@ -4,6 +4,7 @@ package integration
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"os"
@@ -142,7 +143,18 @@ func TestGoogleEventInTheExistingCalendar(t *testing.T) {
 	form.Set("summary", summary)
 	form.Set("start.date", "2031-03-11")
 	form.Set("start.time", "09:30")
-	loc := redirected(t, "new event", app.post(events+"/new", form))
+	// A save that answers with the form may have written the event all the
+	// same — a loss report does (S-7.1) — and on 01.10.2026 one such run left
+	// its event in the owner's calendar: the cleanup below is set up only
+	// after the redirect. The form names the record it holds.
+	made := app.post(events+"/new", form)
+	if made.Code != http.StatusSeeOther {
+		var page view.EventEditPage
+		if json.Unmarshal(made.Body.Bytes(), &page) == nil && page.UID != "" {
+			removeLater(t, client, cal.Path+page.UID+".ics")
+		}
+	}
+	loc := redirected(t, "new event", made)
 	uid, _ := url.PathUnescape(loc[strings.LastIndex(loc, "/")+1:])
 	// Google keeps both the UID and the resource name of an event (SV-25
 	// notes that only a card is renamed).

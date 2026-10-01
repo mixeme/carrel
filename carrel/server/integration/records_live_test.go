@@ -611,6 +611,44 @@ func mustValue(t *testing.T, step, got, prop, value string) {
 	t.Errorf("%s: no %s with %q in\n%s", step, prop, value, got)
 }
 
+// mustLabel checks that a property carries a value under one label: its TYPE
+// values, read in any case, are that label and nothing else but PREF. Google
+// keeps TEL;TYPE=cell as TEL;TYPE=CELL,PREF — the first number of a card is
+// its preferred one there (docs/servers.md, SV-56) — and the label the person
+// chose is still the only one the number has.
+func mustLabel(t *testing.T, step, got, prop, label, value string) {
+	t.Helper()
+	prop = strings.ToUpper(prop)
+	for _, l := range strings.Split(strings.ReplaceAll(got, "\r\n", "\n"), "\n") {
+		head, val, ok := strings.Cut(strings.TrimSpace(l), ":")
+		if !ok {
+			continue
+		}
+		params := strings.Split(head, ";")
+		if strings.ToUpper(params[0]) != prop || !strings.EqualFold(strings.TrimSpace(val), value) {
+			continue
+		}
+		var types []string
+		for _, p := range params[1:] {
+			name, vals, _ := strings.Cut(p, "=")
+			if !strings.EqualFold(name, "TYPE") {
+				continue
+			}
+			for _, v := range strings.Split(strings.Trim(vals, `"`), ",") {
+				if !strings.EqualFold(v, "pref") {
+					types = append(types, strings.ToLower(v))
+				}
+			}
+		}
+		if len(types) == 1 && types[0] == strings.ToLower(label) {
+			return
+		}
+		t.Errorf("%s: %s %q is labelled %v, want %q alone (PREF aside):\n%s", step, prop, value, types, label, got)
+		return
+	}
+	t.Errorf("%s: no %s with %q in\n%s", step, prop, value, got)
+}
+
 // mustAddress checks that every part written into an address is still in
 // it. A server may move the parts between components — iCloud folds the box
 // and the flat into the street with newlines — and the address is the same

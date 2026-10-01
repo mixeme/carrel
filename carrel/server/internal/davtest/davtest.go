@@ -17,6 +17,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -120,6 +121,17 @@ type Server struct {
 	// all-day, the way iCloud does (docs/servers.md, SV-53), although RFC
 	// 5545 §3.6.1 allows one.
 	RefuseEventWithoutEnd bool
+
+	// DropsZeroLengthEnd keeps an event whose DTEND is its DTSTART — the
+	// same time, the same zone — without the DTEND, the way Google does
+	// (docs/servers.md, SV-56). An end on a date, and an end later than the
+	// start, are kept.
+	DropsZeroLengthEnd bool
+
+	// MarksThePreferred keeps a card's TYPE values in capitals and marks the
+	// first phone, the first address and the first e-mail PREF, the way
+	// Google does (docs/servers.md, SV-56).
+	MarksThePreferred bool
 
 	// OneUIDPerAccount answers 412 with an empty body to a PUT of a calendar
 	// object whose UID another resource of the account holds, in any
@@ -1369,9 +1381,30 @@ func dropComponentProps(c *ical.Component, names []string) {
 	}
 }
 
+// dropZeroLengthEnds takes DTEND out of every event whose DTEND is its
+// DTSTART to the letter — value and parameters — and says whether it took
+// any (SV-56).
+func dropZeroLengthEnds(c *ical.Component) bool {
+	dropped := false
+	for _, child := range c.Children {
+		if child.Name != ical.CompEvent {
+			continue
+		}
+		start, end := child.Props.Get(ical.PropDateTimeStart), child.Props.Get(ical.PropDateTimeEnd)
+		if start == nil || end == nil || start.Value != end.Value || !strings.Contains(start.Value, "T") ||
+			start.Params.Get(ical.ParamTimezoneID) != end.Params.Get(ical.ParamTimezoneID) {
+			continue
+		}
+		child.Props.Del(ical.PropDateTimeEnd)
+		dropped = true
+	}
+	return dropped
+}
+
 func (b calBackend) PutCalendarObject(_ context.Context, p string, cal *ical.Calendar, opts *caldav.PutCalendarObjectOptions) (*caldav.CalendarObject, error) {
 	data := b.s.takeSent(p)
-	if len(b.s.Drop) > 0 || data == nil {
+	zeroEnd := b.s.DropsZeroLengthEnd && dropZeroLengthEnds(cal.Component)
+	if len(b.s.Drop) > 0 || data == nil || zeroEnd {
 		dropComponentProps(cal.Component, b.s.Drop)
 		var buf bytes.Buffer
 		if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
@@ -1482,6 +1515,9 @@ func (b cardBackend) PutAddressObject(_ context.Context, p string, card vcard.Ca
 	if b.s.CutPhotoDataURI && data != nil {
 		data = cutPhotoDataURI(data)
 	}
+	if b.s.MarksThePreferred && data != nil {
+		data = markPreferred(data)
+	}
 	if len(b.s.Drop) > 0 || data == nil {
 		for _, n := range b.s.Drop {
 			delete(card, strings.ToUpper(n))
@@ -1510,6 +1546,46 @@ func cutPhotoDataURI(doc []byte) []byte {
 		}
 		value, _, _ = strings.Cut(value, ",")
 		lines[i] = name + ":" + strings.ReplaceAll(value, ";", `\;`)
+	}
+	return []byte(strings.Join(lines, "\r\n"))
+}
+
+// markPreferred is Google's keeping of a card's phones, addresses and
+// e-mails: the TYPE values in capitals, and the first of each kind marked
+// PREF — TEL;TYPE=cell is kept as TEL;TYPE=CELL,PREF, a bare EMAIL as
+// EMAIL;TYPE=PREF (docs/servers.md, SV-56).
+func markPreferred(doc []byte) []byte {
+	lines := strings.Split(string(doc), "\r\n")
+	seen := map[string]bool{}
+	for i, l := range lines {
+		head, value, ok := strings.Cut(l, ":")
+		if !ok || strings.HasPrefix(l, " ") {
+			continue
+		}
+		params := strings.Split(head, ";")
+		name := strings.ToUpper(params[0][strings.LastIndex(params[0], ".")+1:])
+		if name != "TEL" && name != "EMAIL" && name != "ADR" {
+			continue
+		}
+		first := !seen[name]
+		seen[name] = true
+		typed := false
+		for j, p := range params[1:] {
+			k, v, _ := strings.Cut(p, "=")
+			if !strings.EqualFold(k, "TYPE") {
+				continue
+			}
+			v = strings.ToUpper(v)
+			if first && !slices.Contains(strings.Split(v, ","), "PREF") {
+				v += ",PREF"
+			}
+			params[j+1] = "TYPE=" + v
+			typed = true
+		}
+		if first && !typed {
+			params = append(params, "TYPE=PREF")
+		}
+		lines[i] = strings.Join(params, ";") + ":" + value
 	}
 	return []byte(strings.Join(lines, "\r\n"))
 }

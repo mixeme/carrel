@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.91 — 2026-10-01
+
+Two false loss reports on Google go away (docs/servers.md, SV-56).
+
+### Fixed
+
+- **An end the start implies is not lost when the server leaves it out**
+  (S-7.1, S-11). Since v0.2.80 an event the person gave no end is written
+  with `DTEND` equal to `DTSTART` (SV-53), and Google keeps such an event
+  without the `DTEND`: a new event there came back as its form with «The
+  server did not keep … DTEND» instead of opening. RFC 5545 §3.6.1 ends a
+  timed event without an end at its start, and a dated one a day later; a
+  `DTEND` that says just that, left out by the server while `DTSTART` came
+  back as sent and neither `DTEND` nor `DURATION` is there, is no loss. An
+  end in another zone, or a longer one, still is.
+- **A `PREF` the server adds is not a loss.** Google marks the first phone,
+  address and e-mail of a card `PREF`: a contact made with a phone and an
+  e-mail came back with «The server did not keep EMAIL, TEL». A `PREF` among
+  the `TYPE` values that was not sent is left out of the comparison; a
+  `PREF` sent and not kept is still reported.
+
+### For consumers
+
+Nothing in the contract changed. A yearless birthday on Google is still
+reported lost — Google drops `--MMDD`; whether to write it in Apple's form
+(`1604-…;X-APPLE-OMIT-YEAR=1604`) is the owner's call (SV-56).
+
 ## v0.2.90 — 2026-10-01
 
 The binary answers with the client: a page whose view model has a screen is
