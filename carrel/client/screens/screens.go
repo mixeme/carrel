@@ -3,6 +3,7 @@ package screens
 import (
 	"carrel.dev/carrel/client/screens/about"
 	"carrel.dev/carrel/client/screens/confirm"
+	"carrel.dev/carrel/client/screens/contacts"
 	"carrel.dev/carrel/client/screens/deadlink"
 	"carrel.dev/carrel/client/screens/forgot"
 	"carrel.dev/carrel/client/screens/invite"
@@ -133,5 +134,24 @@ var All = []Screen{
 		Frames: []string{"rest-1"},
 		Draw:   func(model any) Root { return deadlink.Screen(model.(*view.DeadLinkPage)) },
 		Title:  func(model any) string { return string(model.(*view.DeadLinkPage).Title) },
+	},
+	{
+		Model:  func() any { return new(view.ContactsListPage) },
+		Frames: []string{"s-contacts-1", "states-4"},
+		Draw:   func(model any) Root { return contacts.Screen(model.(*view.ContactsListPage)) },
+		Title:  func(model any) string { return string(model.(*view.ContactsListPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return contacts.Forms(model.(*view.ContactsListPage)) },
+		Waits: []Wait{
+			{Row: 2, Control: ".Side(Side).Items(Head).Tools(Drop).Trigger(Button)"}, // ждёт библиотеку: U-5.5 #2
+			{Row: 3, Control: ".Items(Bar).More(Button)"},                            // ждёт библиотеку: U-5.5 #3
+			{Row: 4, Control: ".Items(Bar).Items(Button)"},                           // ждёт библиотеку: U-5.5 #4
+			{Row: 5, Fixture: "app-contacts/empty"},                                  // ждёт библиотеку: U-5.5 #5
+			{Row: 5, Fixture: "app-contacts/partial"},                                // ждёт библиотеку: U-5.5 #5
+			{Row: 5, Fixture: "app-contacts/unavailable"},                            // ждёт библиотеку: U-5.5 #5
+			{Row: 5, Fixture: "app-contacts-one/empty"},                              // ждёт библиотеку: U-5.5 #5
+			{Row: 5, Fixture: "app-contacts-one/source-error"},                       // ждёт библиотеку: U-5.5 #5
+			{Row: 8, Fixture: "app-contacts-one/readonly"},                           // ждёт библиотеку: U-5.5 #8
+			{Row: 13, Control: ".Items(Bar).Right(BarRight).Items(Check)"},           // ждёт библиотеку: U-5.5 #13
+		},
 	},
 }

@@ -1,208 +1,307 @@
-// Drafted by frame2go from frame «Контакты · список и карточка» (s-contacts-1) of the Typecase mockup: the
-// frame's widgets and its data, top to bottom. The data is the frame's; it
-// is to become the application's (docs/guide/screen.md).
-package draft
+// Package contacts is the list of contacts, /app/contacts (the combined view)
+// and /app/contacts/{account}/{col} (one book), drawn by frame «Контакты ·
+// список и карточка» (s-contacts-1) of the mockup, and the read-only book by
+// its state's frame (states-4): the drafts frame2go printed for them, with
+// the frames' data become the view model's (U-5.1, U-6.1).
+package contacts
 
-import w "carrel.dev/typecase/widget"
+import (
+	"strconv"
 
-// Contacts1 is frame «Контакты · список и карточка» (s-contacts-1).
-func Contacts1() interface{ Render() string } {
-	return w.Shell{
-		Top: &w.Top{
-			Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
-			Search: &w.Search{Query: w.Query{Value: "Search everything…", Label: "Search everything…"}},
-			Actions: []w.TopAction{
-				w.Button{Label: "New note", Menu: true, Icon: "quill", Kind: w.ButtonPrimary},
-				w.Button{Label: "2 min ago", Icon: "refresh"},
-				w.UserMenu{Name: "mix"},
-			},
-		},
-		Body: w.ShellBody{
-			Rail: []w.RailPart{
-				w.Nav{
-					Items: []w.NavItem{
-						{Icon: "con", Label: "Contacts", Count: &w.Num{Value: 312}, Href: "#"},
-						{Icon: "cal", Label: "Calendar", Count: &w.Num{Value: 14}, Href: "#"},
-						{Icon: "task", Label: "Tasks", Count: &w.Num{Value: 3}, Href: "#"},
-						{Icon: "note", Label: "Notes", Count: &w.Num{Value: 86}, Href: "#"},
-						{Icon: "file", Label: "Files", Href: "#"},
-						{Icon: "dup", Label: "Duplicates", Count: &w.Num{Value: 3}, Href: "#"},
-					},
-					On: 1,
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.TickRow{
-							Ticked:  w.TickedPart,
-							Kind:    w.TickRowAll,
-							Mark:    w.Mark{Kind: w.MarkMulti},
-							Label:   "Combined address book",
-							Meta:    "312",
-							Current: true,
-						},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "nextcloud"},
-						w.TickRow{Mark: w.Mark{Colour: "#4A6B52"}, Label: "Контакты", Meta: "248"},
-						w.TickRow{Mark: w.Mark{Colour: "#A05A2C"}, Label: "Архив", Meta: "51"},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "radicale · vps"},
-						w.TickRow{Mark: w.Mark{Colour: "#6B4E7A"}, Label: "Команда", Meta: "13", Trail: w.Badge{Label: "ro"}},
-						w.TickRow{Ticked: w.TickedOff, Mark: w.Mark{Colour: "#8C6239"}, Label: "Рассылки", Meta: "—", Hidden: true},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "Tags"}},
-					Tags: []w.Tag{w.Tag{Label: "all", On: true}, w.Tag{Label: "работа"}, w.Tag{Label: "издательство"}},
-				},
-				w.RailFoot{
-					Items: []w.RailFootPart{
-						w.Button{Icon: "plus", Title: "New address book"},
-						w.Button{Icon: "server", Title: "Connect account"},
-						w.Button{Icon: "link", Title: "Subscribe to a feed"},
-						w.Emblem{Symbol: "davloom", Title: "davloom · running · 3 devices"},
-					},
-					About: &w.About{Name: "Carrel", Build: w.Mono{Text: "0.0.1 · 786949a"}, Href: "#rest"},
-				},
-			},
-			Main: w.Main{
-				Items: []w.MainPart{
-					w.Head{
-						Title: &w.HeadTitle{Mark: &w.Mark{Kind: w.MarkMulti, Size: w.MarkH20}, Text: "Combined address book"},
-						Subs:  []w.HeadSub{w.HeadSub{Parts: []w.HeadSubPart{w.Text("3 of 4 books · 2 accounts · 312 cards")}}},
-						Acts: &w.Acts{
-							Items: []w.ActsPart{
-								w.Button{Label: "New contact", Menu: true, Icon: "plus", Kind: w.ButtonPrimary},
-								w.Button{Label: "Import", Icon: "up"},
-								w.Button{Label: "Export", Icon: "down"},
-								w.Button{Label: "Print", Icon: "print"},
-							},
-						},
-					},
-					w.Bar{
-						Items: []w.BarPart{
-							w.Filter{
-								Query:   w.Query{Value: "Filter the loaded cards", Label: "Filter the loaded cards"},
-								Waiting: true,
-								Variant: w.FilterH26W220,
-							},
-							w.Seg{Options: []w.SegOption{{Label: "A–Z", On: true}, {Label: "Recently changed"}}, Secondary: true},
-							w.Button{Label: "Columns", Icon: "cols"},
-						},
-						More: &w.Button{Icon: "dots", Title: "More"},
-						Right: &w.BarRight{
-							Items:     []w.BarPart{w.Check{Parts: []w.CheckPart{w.Text("Compact rows")}}, w.Mono{Text: "312"}},
-							Secondary: true,
-						},
-					},
-					w.ListGroup{Title: w.Rubric{Text: "А", Form: w.RubricInline}, Count: &w.Num{Value: 3}},
-					w.List{
-						Rows: []w.ListRow{
-							w.FaceRow{
-								Mark:     w.Mark{Colour: "#4A6B52"},
-								Avatar:   w.Avatar{Initials: "АК"},
-								Title:    []w.Inline{w.Text("Анна Ковалёва")},
-								Strong:   true,
-								Subtitle: "+7 912 445-10-88",
-								Detail:   "a.kovaleva@example.org",
-								Caption:  "Издательство «Слово»",
-								Source:   "nextcloud · Контакты",
-								On:       true,
-							},
-							w.FaceRow{
-								Mark:       w.Mark{Colour: "#6B4E7A"},
-								Avatar:     w.Avatar{Photo: true},
-								Title:      []w.Inline{w.Text("Артём Белов ")},
-								TitleBadge: &w.Badge{Label: "linked ×2", Tone: w.BadgeLinked},
-								Subtitle:   "+7 903 118-22-04",
-								Detail:     "a.belov@example.org",
-								Caption:    "Тензор",
-								Source:     "radicale · vps · Команда",
-							},
-							w.FaceRow{
-								Mark:     w.Mark{Colour: "#4A6B52"},
-								Avatar:   w.Avatar{Initials: "АС"},
-								Title:    []w.Inline{w.Text("Алексей Смирнов")},
-								Subtitle: "+7 916 200-71-15",
-								Detail:   "—",
-								Caption:  "—",
-								Source:   "nextcloud · Контакты",
-							},
-						},
-					},
-					w.ListGroup{Title: w.Rubric{Text: "В", Form: w.RubricInline}, Count: &w.Num{Value: 2}},
-					w.List{
-						Rows: []w.ListRow{
-							w.FaceRow{
-								Mark:     w.Mark{Colour: "#4A6B52"},
-								Avatar:   w.Avatar{Initials: "ВГ"},
-								Title:    []w.Inline{w.Text("Виктор Гончаров")},
-								Subtitle: "—",
-								Detail:   "v.goncharov@example.org",
-								Caption:  "Городская библиотека №4",
-								Source:   "nextcloud · Контакты",
-							},
-							w.FaceRow{
-								Mark:     w.Mark{Colour: "#A05A2C"},
-								Avatar:   w.Avatar{Initials: "ВЛ"},
-								Title:    []w.Inline{w.Text("Вера Лебедева")},
-								Subtitle: "+7 905 331-09-42",
-								Detail:   "vera@example.net",
-								Caption:  "—",
-								Source:   "nextcloud · Архив",
-							},
-						},
-					},
-				},
-			},
-			Side: &w.Side{
-				Items: []w.SidePart{
-					w.Head{
-						Photo: &w.HeadPhoto{Initials: "АК"},
-						Title: &w.HeadTitle{Text: "Анна Ковалёва", Size: w.HeadTitle19},
-						Tools: []w.HeadTool{
-							w.Button{Label: "Edit", Small: true},
-							w.Button{Label: "All records", Small: true},
-							w.Button{Icon: "dots", Small: true, Title: "More"},
-						},
-						Subs:   []w.HeadSub{w.HeadSub{Parts: []w.HeadSubPart{w.Text("nextcloud · Контакты")}}},
-						Acts:   &w.Acts{Items: []w.ActsPart{w.Close{Label: "Close the panel"}}},
-						Middle: true,
-					},
-					w.Fields{
-						Items: []w.FieldsItem{
-							{Term: "Organisation", Value: []w.ValuePart{w.Text("Издательство «Слово»")}},
-							{Term: "Title", Value: []w.ValuePart{w.Text("Выпускающий редактор")}},
-							{Term: "Phone · mobile", Value: []w.ValuePart{w.Text("+7 912 445-10-88")}, Face: w.ValueMono},
-							{Term: "Phone · work", Value: []w.ValuePart{w.Text("+7 495 120-45-00")}, Face: w.ValueMono},
-							{Term: "Email · work", Value: []w.ValuePart{w.Text("a.kovaleva@example.org")}},
-							{Term: "Birthday", Value: []w.ValuePart{w.Text("1987-03-14")}, Face: w.ValueMono},
-							{
-								Term:  "Tags",
-								Value: []w.ValuePart{w.Tag{Label: "работа"}, w.Text(" "), w.Tag{Label: "издательство"}},
-							},
-							{Term: "Note", Value: []w.ValuePart{w.Text("Пишет по вторникам, отвечает в тот же день.")}},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Kept as the server sent them", Items: []w.RubricPart{w.Button{Label: "Show 3", Small: true}}},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Source"},
-							w.Diag{Text: "UID   4f2b-9c31-a0e7\nRead  2 min ago"}},
-					},
-					w.Danger{Button: w.Button{Label: "Delete contact", Kind: w.ButtonDangerSolid}},
-				},
-			},
-		},
+	"carrel.dev/carrel/client/bind"
+	"carrel.dev/carrel/server/view"
+	w "carrel.dev/typecase/widget"
+)
+
+// The IDs of the page's forms: the rail's (its ticks submit it) and the
+// panel's deletion.
+const (
+	formRail   = "rail"
+	formDelete = "delete"
+)
+
+// The screen's words (U-1.3) for the shell: the mark, the search, the rail.
+var (
+	top = bind.TopWords{
+		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
+		Search: "Search everything…",
 	}
+	rail = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom"}
+)
+
+// empty is the screen's word for a cell the record has nothing in (L9).
+const empty = "—"
+
+// Screen draws the list from its view model, in the state the model is in.
+//
+//   - The shell (U-2.1): the top bar; the rail of sections (Rail.Nav, the
+//     open one on), the sources by account with their ticks, which submit
+//     the rail's form (Rail.Ticks), the tags, the foot; the notices over the
+//     page (Notices).
+//   - The head: the title with the mark of what is open — all the books at
+//     once, or the book's colour —, read-only where the book is (ReadOnly),
+//     what is in it (Subtitle), and the bar's actions: New contact with its
+//     arrow «Write into» (a closed menu of the ticked books, «last used»,
+//     «ro» for one that takes nothing), Import, Export, Print.
+//   - The bar: the filter of what is loaded (a GET form, FilterForm), the
+//     order (Segments, links), Columns, «⋯», «Compact rows» and the count
+//     loaded.
+//   - The poll's bar while the poll runs or a source did not answer (C-6.4).
+//   - The groups by letter with their count, a row for each card: its book's
+//     mark, the avatar, the name (bold while it is open in the panel, a badge
+//     of a linked record), phone, email, organisation — the dash where there
+//     is none —, the book; the row leads to the card.
+//   - Nothing to show (Empty): why, and the buttons that help.
+//   - The panel (Shell.Details), for the row opened with ?open=: the photo or
+//     initials, the name, Edit and All records, «⋯» with the record's menu,
+//     the book, the cross that closes it (Details.Close); the fields; the
+//     properties kept as the server sent them; the source; the deletion.
+func Screen(p *view.ContactsListPage) w.Shell {
+	main := []w.MainPart{}
+	for _, n := range p.Notices {
+		main = append(main, bind.Notice(n, w.MsgSpacePage))
+	}
+	main = append(main, head(p), bar(p))
+	if r := bind.Runbar(p.Poll); r != nil {
+		main = append(main, *r)
+	}
+	compact := false
+	if p.Bar.Compact != nil {
+		for _, r := range bind.Rows(*p.Bar.Compact) {
+			for _, o := range r.Options {
+				compact = compact || o.Selected
+			}
+		}
+	}
+	for _, g := range p.Groups {
+		rows := make([]w.ListRow, 0, len(g.Rows))
+		for _, r := range g.Rows {
+			rows = append(rows, row(r))
+		}
+		main = append(main,
+			w.ListGroup{Title: w.Rubric{Text: string(g.Rubric), Form: w.RubricInline}, Count: &w.Num{Value: g.Count}},
+			w.List{Rows: rows, Compact: compact})
+	}
+	if p.Empty != nil {
+		parts := []w.EmptyPart{w.Text(p.Empty.Body)}
+		for _, a := range p.Empty.Actions {
+			parts = append(parts, bind.Button(a, a.ID))
+		}
+		main = append(main, w.Empty{Lead: string(p.Empty.Title), Parts: parts})
+	}
+	body := w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}
+	if p.Details != nil {
+		body.Side = side(*p.Details)
+	}
+	t := bind.Top(p.Top, top)
+	return w.Shell{Top: &t, Body: body}
+}
+
+// Forms are the page's forms: the rail's, which its ticks submit, and the
+// panel's deletion, the retries of the sources, the buttons of the empty
+// state that post.
+func Forms(p *view.ContactsListPage) []w.PostForm {
+	var out []w.PostForm
+	if f := bind.RailForm(p.Rail, formRail); f != nil {
+		out = append(out, *f)
+	}
+	out = append(out, bind.RetryForms(p.Rail)...)
+	out = append(out, bind.NoticeForms(p.Notices)...)
+	if p.Empty != nil {
+		for _, a := range p.Empty.Actions {
+			if a.Method == "POST" && a.Enabled {
+				out = append(out, bind.ActionForm(a, a.ID))
+			}
+		}
+	}
+	if p.Details != nil {
+		for _, a := range p.Details.Actions {
+			if a.Danger && a.Method == "POST" {
+				out = append(out, bind.ActionForm(a, formDelete))
+			}
+		}
+	}
+	return out
+}
+
+// railParts is the rail of sections: the sections, the sources and tags, the
+// foot.
+func railParts(r view.Rail) []w.RailPart {
+	nav := w.Nav{}
+	for _, n := range r.Nav {
+		nav.Items = append(nav.Items, bind.NavItem(n))
+		if n.On {
+			nav.On = len(nav.Items)
+		}
+	}
+	parts := []w.RailPart{nav}
+	parts = append(parts, bind.Sources(r, rail)...)
+	return append(parts, bind.Foot(r, rail))
+}
+
+// head is the list's head: what is open, what is in it, the bar's actions.
+func head(p *view.ContactsListPage) w.Head {
+	title := &w.HeadTitle{Text: string(p.Title)}
+	for _, sec := range p.Rail.Sections {
+		for _, r := range sec.Rows {
+			switch {
+			case !r.On:
+			case r.Colour == "":
+				title.Mark = &w.Mark{Kind: w.MarkMulti, Size: w.MarkH20}
+			default:
+				title.Mark = &w.Mark{Colour: string(r.Colour), Size: w.MarkH20}
+			}
+		}
+	}
+	if p.ReadOnly {
+		title.Mark = nil
+		title.Badge = &w.Badge{Label: "read-only"}
+	}
+	var acts []w.ActsPart
+	for _, a := range p.Bar.Actions {
+		b := bind.Button(a, "")
+		if len(a.Arrow) == 0 {
+			acts = append(acts, b)
+			continue
+		}
+		b.Menu = true
+		acts = append(acts, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(a.Arrow, rail.ReadOnly), Pop: w.MenuUnder}})
+	}
+	return w.Head{
+		Title: title,
+		Subs:  []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}},
+		Acts:  &w.Acts{Items: acts},
+	}
+}
+
+// bar is the bar over the list.
+func bar(p *view.ContactsListPage) w.Bar {
+	b := p.Bar
+	var items []w.BarPart
+	if b.FilterForm != nil {
+		f := w.Filter{
+			Query:   w.Query{Value: string(b.Filter), Label: "Filter the loaded cards"},
+			Waiting: b.Filter == "",
+			Variant: w.FilterH26W220,
+			Action:  b.FilterForm.Action,
+		}
+		// ждёт библиотеку: U-5.5 #12 — the filter's hidden fields (task, sort,
+		// tag) are not sent: the library's filter has none
+		for _, r := range bind.Rows(*b.FilterForm) {
+			f.Query.Name = r.Name
+		}
+		items = append(items, f)
+	}
+	if len(b.Segments) > 0 {
+		seg := w.Seg{Secondary: true}
+		for _, a := range b.Segments {
+			seg.Options = append(seg.Options, bind.SegOption(a))
+		}
+		items = append(items, seg)
+	}
+	if b.Columns != nil {
+		// ждёт библиотеку: U-5.5 #4 — Columns, a closed menu without scripts
+		items = append(items, w.Button{Label: string(b.Columns.Label), Icon: bind.Icon(b.Columns.Icon)})
+	}
+	var right []w.BarPart
+	if b.Compact != nil {
+		// ждёт библиотеку: U-5.5 #13 — «Compact rows» is a form (GET) of the
+		// contract, and a tick of the library's bar stands in no form
+		for _, r := range bind.Rows(*b.Compact) {
+			for _, o := range r.Options {
+				right = append(right, w.Check{On: o.Selected, Name: r.Name, Value: o.Value, Parts: []w.CheckPart{w.Text(r.Label)}})
+			}
+		}
+	}
+	right = append(right, w.Mono{Text: strconv.Itoa(b.Loaded)})
+	return w.Bar{
+		Items: items,
+		// ждёт библиотеку: U-5.5 #3 — the bar's «⋯» without scripts
+		More:  &w.Button{Icon: "dots", Title: "More"},
+		Right: &w.BarRight{Items: right, Secondary: true},
+	}
+}
+
+// row is a card in the list.
+func row(r view.ContactRow) w.FaceRow {
+	f := w.FaceRow{
+		Mark:     w.Mark{Colour: string(r.Colour)},
+		Avatar:   bind.Avatar(r.Avatar),
+		Title:    []w.Inline{w.Text(r.Name)},
+		Strong:   r.On,
+		Subtitle: or(r.Phone),
+		Detail:   or(r.Email),
+		Caption:  or(r.Org),
+		Source:   string(r.Stamp),
+		On:       r.On,
+		Href:     r.Href,
+	}
+	if len(r.Badges) > 0 {
+		b := bind.Badge(r.Badges[0])
+		f.TitleBadge = &b
+	}
+	return f
+}
+
+// or is a cell's words, the dash when the record has none.
+func or(t view.Text) string {
+	if t == "" {
+		return empty
+	}
+	return string(t)
+}
+
+// side is the panel of the row opened (Details).
+func side(d view.Details) *w.Side {
+	var tools []w.HeadTool
+	var danger []w.Button
+	for _, a := range d.Actions {
+		b := bind.Button(a, formDelete)
+		if a.Danger {
+			b.Icon = ""
+			danger = append(danger, b)
+			continue
+		}
+		b.Small = true
+		tools = append(tools, b)
+	}
+	if len(d.Menu) > 0 {
+		// ждёт библиотеку: U-5.5 #2 — the panel's «⋯», a closed menu without scripts
+		tools = append(tools, w.Drop{
+			Trigger: w.Button{Icon: "dots", Small: true, Title: "More"},
+			Menu:    w.Menu{Items: bind.MenuItems(d.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
+		})
+	}
+	h := w.Head{
+		Title:  &w.HeadTitle{Text: string(d.Title), Size: w.HeadTitle19},
+		Tools:  tools,
+		Subs:   []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(d.Subtitle)}}},
+		Acts:   &w.Acts{Items: []w.ActsPart{w.Close{Label: "Close the panel", Href: d.Close}}},
+		Middle: true,
+	}
+	if d.Avatar != nil {
+		// ждёт библиотеку: U-5.5 #11 — the photo in the head (Avatar.Href)
+		h.Photo = &w.HeadPhoto{Initials: string(d.Avatar.Initials)}
+	}
+	items := []w.SidePart{h}
+	fields := w.Fields{}
+	for _, f := range d.Fields {
+		fields.Items = append(fields.Items, bind.FieldsItem(f, ""))
+	}
+	items = append(items, fields)
+	if d.ForeignShow != nil {
+		show := bind.Button(*d.ForeignShow, "")
+		show.Small = true
+		items = append(items, w.Sec{Items: []w.SecPart{
+			w.Rubric{Text: "Kept as the server sent them", Items: []w.RubricPart{show}},
+		}})
+	}
+	items = append(items, w.Sec{Items: []w.SecPart{
+		w.Rubric{Text: "Source"},
+		bind.Diag(bind.DiagLine{Name: "UID", Value: string(d.Source.UID)}, bind.DiagLine{Name: "Read", Value: string(d.Source.LastRead)}),
+	}})
+	for _, b := range danger {
+		items = append(items, w.Danger{Button: b})
+	}
+	return &w.Side{Items: items}
 }
