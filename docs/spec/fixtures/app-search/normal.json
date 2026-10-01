@@ -81,8 +81,10 @@
     ],
     "answeredAt": "10 August, 17:06",
     "aside": "",
+    "every": 700,
     "note": "",
     "percent": 100,
+    "poll": "/app/search/progress/t-task/poll",
     "running": false,
     "sources": [
       {
@@ -220,6 +222,7 @@
         "state": "empty"
       }
     ],
+    "stream": "/app/search/progress/t-task",
     "summary": [
       {
         "text": "13 of 14 sources answered · 1 found · 1 refused"

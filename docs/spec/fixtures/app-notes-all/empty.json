@@ -155,10 +155,13 @@
     "actions": [],
     "answeredAt": "",
     "aside": "",
+    "every": 0,
     "note": "",
     "percent": 0,
+    "poll": "",
     "running": false,
     "sources": [],
+    "stream": "",
     "summary": [
       {
         "text": "No collections are ticked, so there is nothing to show. Tick collections in the rail."

@@ -329,6 +329,25 @@ type pollOwner struct {
 	// did not answer: what is shown and what is not (states-6, states-9),
 	// for that many sources; nil — no line.
 	missing func(sources int) string
+	// query is the query of the page the bar stands on — a list's filter,
+	// window and switches —, carried by the addresses of the stream and the
+	// poll: the rail the end of the poll brings is that page's (C-7.3).
+	query url.Values
+}
+
+// pageQuery is a page's query as the addresses of its poll carry it: what
+// chooses what the page shows, not the task, a run asked again, the panel
+// or the print.
+func pageQuery(q url.Values) url.Values {
+	out := url.Values{}
+	for k, v := range q {
+		switch k {
+		case "task", "again", "open", "foreign", "print", "card":
+		default:
+			out[k] = v
+		}
+	}
+	return out
 }
 
 func searchOwner(q string) pollOwner {
@@ -348,6 +367,16 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 	now := s.now()
 	bar := view.PollBar{TaskID: snap.ID, Running: snap.Running}
 	base := "/app/search/progress/" + snap.ID
+	// Where to follow it (C-7.4): the stream, unless the instance polls
+	// instead, the poll and its interval — with the page's query.
+	query := ""
+	if len(owner.query) > 0 {
+		query = "?" + owner.query.Encode()
+	}
+	if s.cfg.ProgressMode != "poll" {
+		bar.Stream = s.route(base + query)
+	}
+	bar.Poll, bar.Every = s.route(base+"/poll"+query), s.cfg.ProgressPollMillis
 	var answered, refused, timedOut, unreachable, stopped, cached int
 	for _, st := range snap.Sources {
 		if st.FromCache {
@@ -949,7 +978,9 @@ func (s *Server) openSearchTask(w http.ResponseWriter, r *http.Request) (*sessio
 	case *fanout.Task:
 		return sess, v, searchOwner(v.Query().Text), true
 	case *listTask:
-		return sess, v.Task, listOwner(v), true
+		owner := listOwner(v)
+		owner.query = pageQuery(r.URL.Query())
+		return sess, v.Task, owner, true
 	case *timelineTask:
 		return sess, v.Task, timelineOwner(v), true
 	}
@@ -972,6 +1003,7 @@ func (s *Server) getSearchProgressSSE(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	t, _ := sess.Task(r.PathValue("task"))
 	if s.cfg.ProgressMode == "poll" {
 		s.notFound(w, r)
 		return
@@ -997,11 +1029,18 @@ func (s *Server) getSearchProgressSSE(w http.ResponseWriter, r *http.Request) {
 		// An event is no page and goes past the stamping renderer: its
 		// POSTs get the session's token and every action its target here.
 		bar := stampView(s.pollBar(tf, blob, snap, owner), token, s.basePath)
-		if err := s.render.Event(w, "poll", render.TargetPoll, bar); err != nil {
+		if err := s.render.Event(w, render.EventPoll, render.TargetPoll, bar); err != nil {
 			return
 		}
 		if !snap.Running {
-			_ = s.render.Event(w, "poll-finished", render.TargetPoll, bar)
+			// The end brings the page's rail: its counts and the states of
+			// its rows are the poll's (C-7.3, C-7.4). A page that is gone
+			// has no rail to bring, and the end is said with the bar.
+			if rail := s.railAtTheEnd(sess, t, snap, r.URL.Query()); rail != nil {
+				_ = s.render.Event(w, render.EventPollFinished, render.TargetRail, stampView(*rail, token, s.basePath))
+			} else {
+				_ = s.render.Event(w, render.EventPollFinished, render.TargetPoll, bar)
+			}
 			_ = rc.Flush()
 			return
 		}
@@ -1033,7 +1072,51 @@ func (s *Server) getSearchProgressPoll(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetPoll, s.pollBar(s.timeFor(sess), s.catalogOf(sess), task.Snapshot(), owner), nil)
+	snap := task.Snapshot()
+	var extra []render.OOB
+	if !snap.Running {
+		// Finished: the page's rail with it, as the stream's end brings it.
+		t, _ := sess.Task(r.PathValue("task"))
+		if rail := s.railAtTheEnd(sess, t, snap, r.URL.Query()); rail != nil {
+			extra = append(extra, render.OOB{Target: render.TargetRail, Body: *rail})
+		}
+	}
+	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetPoll, s.pollBar(s.timeFor(sess), s.catalogOf(sess), snap, owner), extra)
+}
+
+// railAtTheEnd is the rail of the page a finished poll stands on, as that
+// page draws it now: the counts of its rows and the nav, and the states of
+// the rows that did not answer, are the poll's (C-7.3). query is the page's
+// (PollBar.Stream carries it). nil — the page is not there any more.
+func (s *Server) railAtTheEnd(sess *session.Session, t any, snap fanout.Snapshot, query url.Values) *view.Rail {
+	blob := s.catalogOf(sess)
+	var rail view.Rail
+	switch v := t.(type) {
+	case *fanout.Task:
+		rail = s.searchRail(sess, blob, &snap)
+	case *timelineTask:
+		c, ok := s.collectionOf(sess, recordKinds["contacts"], v.account, v.col)
+		if !ok {
+			return nil
+		}
+		rail = s.timelineRail(c, &snap, c.recordPath(v.uid)+"/timeline")
+	case *listTask:
+		spec, ok := recordKinds[segmentOf(v.kind)]
+		if !ok {
+			return nil
+		}
+		// What the page does when it is read after the poll: the counts are
+		// the kept index of what answered.
+		s.indexAnswered(sess, blob, spec, snap)
+		base := "/app/" + spec.segment
+		rail = s.kindRail(sess, blob, spec, &snap, base)
+		q := pageQuery(query)
+		q.Set("task", v.ID())
+		rail.Tags = s.tagFilter(base, q).rail(v.kind, listedOf(blob, snap.Items))
+	default:
+		return nil
+	}
+	return &rail
 }
 
 // postSearchProgressRetry asks one source again and nobody else (S-15.1).

@@ -277,6 +277,7 @@ func (s *Server) readCombined(r *http.Request, sess *session.Session, blob seale
 		// tag, and Refresh is how a person asks for what is there now — the
 		// same again=1 a search and a timeline are run again by.
 		owner.again, again = withQuery(owner.again, "again", "1"), withQuery(again, "again", "1")
+		owner.query = pageQuery(r.URL.Query())
 		*st.poll = s.pollBar(tf, blob, snap, owner)
 		s.indexAnswered(sess, blob, spec, snap)
 		st.items = listedOf(blob, snap.Items)

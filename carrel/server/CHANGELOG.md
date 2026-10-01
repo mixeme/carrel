@@ -17,6 +17,39 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.124 — 2026-10-02
+
+The poll bar says where to follow it, and the events of the progress stream
+are two (stage 4 of the client's plan, С2, П1, С4).
+
+### Added
+
+- **`PollBar.stream`, `.poll`, `.every`** — the address of the progress
+  stream (empty with `CARREL_PROGRESS_MODE=poll`), of the fallback poll, and
+  its interval in milliseconds (`CARREL_PROGRESS_POLL_MILLIS`), each with
+  the query of the page the bar stands on (a list's filter, window,
+  switches). A bar without a task has none.
+- **`render.EventPoll`, `render.EventPollFinished`, `render.Events()`** —
+  the names of C-7.4.
+
+### Changed
+
+- **C-7.4 is the stream's two events**: `poll` — the bar changed, its last
+  one with the outcome; `poll-finished` — the poll is over, and its data is
+  the **rail** of the page the poll stands on (its counts, the nav's, and
+  the states of the rows that did not answer are the poll's, C-7.3), or the
+  bar when that page is gone. It carried the bar a second time. The six
+  other names of C-7.4 were never sent and are gone from it: what they
+  named is a notice, a move, an out-of-band zone or an empty fragment.
+- **The fallback poll of a finished task** answers the bar with the page's
+  rail out of band.
+
+### For consumers
+
+Follow `stream` while `running`; without it, ask `poll` every `every`
+milliseconds. On `poll-finished`, replace the rail with its data and close
+the stream. Fixtures regenerated: every screen with a poll bar.
+
 ## v0.2.123 — 2026-10-02
 
 Every action and form says which zone a fragment answer of it replaces

@@ -33,7 +33,15 @@ type JumpRow struct {
 }
 
 type PollBar struct {
-	TaskID     string `json:"taskID"`
+	TaskID string `json:"taskID"`
+	// Stream, Poll, Every — адреса хода задачи (C-5.3, C-7.4) с запросом
+	// страницы, на которой стоит полоса: поток событий (пусто при
+	// CARREL_PROGRESS_MODE=poll), запасной опрос (фрагмент poll) и его
+	// интервал в миллисекундах (CARREL_PROGRESS_POLL_MILLIS); у полосы без
+	// задачи пусты
+	Stream     string `json:"stream"`
+	Poll       string `json:"poll"`
+	Every      int    `json:"every"`
 	Summary    Runs   `json:"summary"`    // «Polled 5 of 7 · 12 records · 1 refused» кусками (s-contacts-7)
 	AnsweredAt When   `json:"answeredAt"` // когда собрана показанная выдача
 	// Aside — справа на полосе моноширинно: когда собрана выдача, «2 min ago»,

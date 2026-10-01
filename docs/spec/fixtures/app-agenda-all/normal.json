@@ -1143,8 +1143,10 @@
     ],
     "answeredAt": "10 August, 17:04",
     "aside": "2 min ago",
+    "every": 700,
     "note": "What arrived in time is shown. Records from the unavailable source are missing — not “there are none”, but “we have not seen them”.",
     "percent": 100,
+    "poll": "/app/search/progress/t-task/poll?from=2026-08-10",
     "running": false,
     "sources": [
       {
@@ -1210,6 +1212,7 @@
         "state": "done"
       }
     ],
+    "stream": "/app/search/progress/t-task?from=2026-08-10",
     "summary": [
       {
         "text": "Polled 5 of 6 sources · 9 events"

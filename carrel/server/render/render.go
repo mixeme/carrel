@@ -45,6 +45,19 @@ func Targets() []string {
 	return []string{TargetMain, TargetRail, TargetDetails, TargetNotices, TargetPoll, TargetQueue, TargetSheet, TargetTopbar}
 }
 
+// Event names of C-7.4: the events of the progress stream — the bar changed,
+// and the poll is over. The data of an event is the fragment of its target
+// (FragmentPayload): poll carries the bar, poll-finished the rail of the
+// page the poll stands on (C-7.3), or the bar when that page is gone. The
+// list is closed (the lead's decision П1, 02.10.2026).
+const (
+	EventPoll         = "poll"
+	EventPollFinished = "poll-finished"
+)
+
+// Events is every event of C-7.4, in the order of its table.
+func Events() []string { return []string{EventPoll, EventPollFinished} }
+
 // Renderer writes view models to the response. JSONRenderer is used until a
 // client supplies HTML (architecture.md).
 type Renderer interface {

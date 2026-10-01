@@ -513,7 +513,10 @@
     ],
     "taskID": "t-task",
     "aside": "just now",
-    "note": ""
+    "note": "",
+    "every": 700,
+    "poll": "/app/search/progress/t-task/poll",
+    "stream": "/app/search/progress/t-task"
   },
   "print": {
     "range": "",

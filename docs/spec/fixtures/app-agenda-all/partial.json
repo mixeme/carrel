@@ -717,8 +717,10 @@
     ],
     "answeredAt": "",
     "aside": "",
+    "every": 700,
     "note": "",
     "percent": 66,
+    "poll": "/app/search/progress/t-task/poll",
     "running": true,
     "sources": [
       {
@@ -784,6 +786,7 @@
         "state": "done"
       }
     ],
+    "stream": "/app/search/progress/t-task",
     "summary": [
       {
         "text": "Polled 3 of 6 sources · 7 events"
