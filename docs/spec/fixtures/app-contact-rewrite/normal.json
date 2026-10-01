@@ -1,6 +1,7 @@
 {
   "actions": [
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/rewrite?plan=r-plan",
       "id": "contact.rewrite.confirm",
@@ -9,6 +10,7 @@
       "primary": true
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/rewrite?op=leave\u0026plan=r-plan",
       "id": "contact.rewrite.leave",

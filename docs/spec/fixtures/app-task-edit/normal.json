@@ -1,6 +1,7 @@
 {
   "attach": [],
   "delete": {
+    "csrf": "csrf",
     "danger": true,
     "enabled": true,
     "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e13",
@@ -15,6 +16,7 @@
     "action": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "id": "record.save",
         "label": "Save",
@@ -31,6 +33,7 @@
       {
         "arrow": [
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e13\u0026from=edit\u0026op=attach",
             "icon": "i-up",
@@ -47,6 +50,7 @@
             "method": "GET"
           }
         ],
+        "csrf": "csrf",
         "enabled": true,
         "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e13\u0026from=edit\u0026op=attach",
         "icon": "i-up",
@@ -731,6 +735,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

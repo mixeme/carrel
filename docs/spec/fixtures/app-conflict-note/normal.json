@@ -1,6 +1,7 @@
 {
   "actions": [
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?etag=e19\u0026op=combine",
       "id": "conflict.combine",
@@ -9,6 +10,7 @@
       "primary": true
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?etag=e19\u0026op=mine",
       "id": "conflict.mine",
@@ -16,6 +18,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?etag=e19\u0026op=theirs",
       "id": "conflict.theirs",
@@ -23,6 +26,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?op=cancel",
       "id": "conflict.cancel",
@@ -333,6 +337,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

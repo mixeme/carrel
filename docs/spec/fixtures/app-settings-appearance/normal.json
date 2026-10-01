@@ -6,7 +6,8 @@
         "enabled": true,
         "id": "appearance.save",
         "label": "Save",
-        "method": "POST"
+        "method": "POST",
+        "csrf": "csrf"
       }
     ],
     "errors": [],
@@ -270,7 +271,8 @@
         "id": "user.logout",
         "label": "Sign out",
         "method": "POST",
-        "separator": true
+        "separator": true,
+        "csrf": "csrf"
       }
     ],
     "new": {

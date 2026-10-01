@@ -40,6 +40,7 @@
         "action": "/app/contacts/a-nc-home/kontakty/columns",
         "actions": [
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/contacts/a-nc-home/kontakty/columns",
             "id": "columns.apply",
@@ -48,6 +49,7 @@
             "primary": true
           },
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/contacts/a-nc-home/kontakty/columns",
             "id": "columns.default",
@@ -777,6 +779,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

@@ -37,7 +37,8 @@
         "href": "/logout",
         "method": "POST",
         "enabled": true,
-        "separator": true
+        "separator": true,
+        "csrf": "csrf"
       }
     ],
     "unlocked": null,
@@ -591,7 +592,8 @@
         "icon": "i-trash",
         "id": "record.delete",
         "label": "Delete contact",
-        "method": "POST"
+        "method": "POST",
+        "csrf": "csrf"
       }
     ],
     "attach": [],
@@ -904,14 +906,16 @@
             "id": "columns.apply",
             "label": "Apply",
             "method": "POST",
-            "primary": true
+            "primary": true,
+            "csrf": "csrf"
           },
           {
             "enabled": true,
             "href": "/app/contacts/columns?task=t-task",
             "id": "columns.default",
             "label": "Reset to defaults",
-            "method": "POST"
+            "method": "POST",
+            "csrf": "csrf"
           }
         ],
         "errors": [],
@@ -1107,7 +1111,8 @@
               "id": "record.delete",
               "label": "Delete contact",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "csrf": "csrf"
             }
           ],
           "state": "ok",
@@ -1189,7 +1194,8 @@
               "id": "record.delete",
               "label": "Delete contact",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "csrf": "csrf"
             }
           ],
           "state": "ok",
@@ -1352,7 +1358,8 @@
               "id": "record.delete",
               "label": "Delete contact",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "csrf": "csrf"
             }
           ],
           "state": "ok",
@@ -1434,7 +1441,8 @@
               "id": "record.delete",
               "label": "Delete contact",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "csrf": "csrf"
             }
           ],
           "state": "ok",
@@ -1493,7 +1501,8 @@
         "href": "/app/search/progress/t-task/cancel",
         "method": "POST",
         "enabled": false,
-        "reason": "The list has finished."
+        "reason": "The list has finished.",
+        "csrf": "csrf"
       },
       {
         "id": "poll.again",

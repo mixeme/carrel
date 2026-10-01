@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -178,6 +179,23 @@ func TestFixtureActionsSayWhyTheyAreOff(t *testing.T) {
 			t.Errorf("%s %s: %s «%s» is off without a reason", screen, at, a.ID, a.Label)
 		case a.Reason == "Shown now.":
 			t.Errorf("%s %s: %s «%s» is switched off for being shown: it is On and enabled", screen, at, a.ID, a.Label)
+		}
+	})
+}
+
+// C-11, the client's stop C15: a POST is sent without scripts as a form
+// of its own, and the server takes none without the session's token. Every
+// POST action of a screen behind sign-in (app-*, admin-*) carries it — the
+// buttons of a form too, so the client never asks which form a button is
+// in. Pages outside the shell put theirs in their forms' _csrf.
+func TestFixturePostActionsCarryTheToken(t *testing.T) {
+	eachFixtureAction(t, func(screen, at string, a Action) {
+		signed := strings.HasPrefix(screen, "app-") || strings.HasPrefix(screen, "admin-")
+		if signed && a.Method == "POST" && a.CSRF == "" {
+			t.Errorf("%s %s: %s «%s» is a POST without the session's token", screen, at, a.ID, a.Label)
+		}
+		if a.Method != "POST" && a.CSRF != "" {
+			t.Errorf("%s %s: %s «%s» is a %s with a token", screen, at, a.ID, a.Label, a.Method)
 		}
 	})
 }

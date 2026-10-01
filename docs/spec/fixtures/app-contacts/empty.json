@@ -40,6 +40,7 @@
         "action": "/app/contacts/columns",
         "actions": [
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/contacts/columns",
             "id": "columns.apply",
@@ -48,6 +49,7 @@
             "primary": true
           },
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/contacts/columns",
             "id": "columns.default",
@@ -229,6 +231,7 @@
   "empty": {
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/app/sources/contacts?back=%2Fapp%2Fcontacts\u0026toggle=%2Fapp%2Fcontacts",
         "id": "rail.tick.all",
@@ -791,6 +794,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

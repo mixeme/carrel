@@ -8,7 +8,8 @@
         "id": "admin.settings.instance",
         "label": "Save",
         "method": "POST",
-        "primary": true
+        "primary": true,
+        "csrf": "csrf"
       }
     ],
     "errors": [],
@@ -118,7 +119,8 @@
         "id": "admin.settings.limits",
         "label": "Save",
         "method": "POST",
-        "primary": true
+        "primary": true,
+        "csrf": "csrf"
       }
     ],
     "errors": [],
@@ -227,7 +229,8 @@
         "enabled": true,
         "id": "admin.settings.mailtest",
         "label": "Send test",
-        "method": "POST"
+        "method": "POST",
+        "csrf": "csrf"
       }
     ],
     "errors": [],
@@ -365,7 +368,8 @@
         "id": "admin.settings.save",
         "label": "Save",
         "method": "POST",
-        "primary": true
+        "primary": true,
+        "csrf": "csrf"
       }
     ],
     "errors": [],
@@ -567,7 +571,8 @@
         "id": "user.logout",
         "label": "Sign out",
         "method": "POST",
-        "separator": true
+        "separator": true,
+        "csrf": "csrf"
       }
     ],
     "new": {

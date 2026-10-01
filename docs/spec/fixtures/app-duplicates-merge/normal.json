@@ -6,7 +6,8 @@
       "id": "duplicates.merge.confirm",
       "label": "Write the merge and delete the rest",
       "method": "POST",
-      "reason": "Команда is read-only: its record could be neither rewritten nor deleted."
+      "reason": "Команда is read-only: its record could be neither rewritten nor deleted.",
+      "csrf": "csrf"
     },
     {
       "enabled": true,
@@ -210,7 +211,8 @@
         "id": "user.logout",
         "label": "Sign out",
         "method": "POST",
-        "separator": true
+        "separator": true,
+        "csrf": "csrf"
       }
     ],
     "new": {

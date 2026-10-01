@@ -17,7 +17,8 @@
         "href": "/admin/escrow",
         "id": "escrow.policy.save",
         "label": "Save",
-        "method": "POST"
+        "method": "POST",
+        "csrf": "csrf"
       }
     ],
     "errors": [],
@@ -76,7 +77,8 @@
         "href": "/admin/escrow",
         "id": "escrow.master.change",
         "label": "Change",
-        "method": "POST"
+        "method": "POST",
+        "csrf": "csrf"
       }
     ],
     "errors": [],
@@ -251,7 +253,8 @@
         "id": "escrow.recover",
         "label": "Recover",
         "method": "POST",
-        "danger": true
+        "danger": true,
+        "csrf": "csrf"
       }
     ],
     "errors": [],
@@ -376,7 +379,8 @@
         "id": "user.logout",
         "label": "Sign out",
         "method": "POST",
-        "separator": true
+        "separator": true,
+        "csrf": "csrf"
       }
     ],
     "new": {

@@ -9,7 +9,8 @@
         "id": "password.save",
         "label": "Change password",
         "method": "POST",
-        "primary": true
+        "primary": true,
+        "csrf": "csrf"
       }
     ],
     "errors": [],
@@ -228,7 +229,8 @@
         "id": "user.logout",
         "label": "Sign out",
         "method": "POST",
-        "separator": true
+        "separator": true,
+        "csrf": "csrf"
       }
     ],
     "new": {

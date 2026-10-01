@@ -39,6 +39,7 @@
     "davloom": "davloom · running · 0 devices",
     "foot": [
       {
+        "csrf": "csrf",
         "enabled": false,
         "icon": "i-plus",
         "id": "rail.folder.new",
@@ -373,6 +374,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

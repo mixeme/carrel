@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -548,7 +549,9 @@ func TestUnlockRequiresPassword(t *testing.T) {
 		t.Fatalf("top bar unlocked after a wrong password: %s", rec.Body.String())
 	}
 	// The shell's top bar is what an unlock changes; the page itself differs
-	// between two sessions anyway — its forms carry each session's _csrf.
+	// between two sessions anyway — its forms carry each session's _csrf,
+	// and so does every POST action, Sign out of the top bar too.
+	token := regexp.MustCompile(`"csrf":"[^"]*"`)
 	top := func(s *session.Session) string {
 		var p struct {
 			Top json.RawMessage `json:"top"`
@@ -556,7 +559,7 @@ func TestUnlockRequiresPassword(t *testing.T) {
 		if err := json.Unmarshal(h.do(get("/app/contacts", s)).Body.Bytes(), &p); err != nil || len(p.Top) == 0 {
 			t.Fatalf("top: %v", err)
 		}
-		return string(p.Top)
+		return token.ReplaceAllString(string(p.Top), `"csrf":""`)
 	}
 	if top(sess) != top(other) {
 		t.Fatal("wrong password changed the shell")

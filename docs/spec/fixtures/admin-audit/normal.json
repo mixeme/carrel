@@ -50,14 +50,16 @@
             "id": "columns.apply",
             "label": "Apply",
             "method": "POST",
-            "primary": true
+            "primary": true,
+            "csrf": "csrf"
           },
           {
             "enabled": true,
             "href": "/admin/audit/columns",
             "id": "columns.default",
             "label": "Reset to defaults",
-            "method": "POST"
+            "method": "POST",
+            "csrf": "csrf"
           }
         ],
         "errors": [],
@@ -419,7 +421,8 @@
         "id": "user.logout",
         "label": "Sign out",
         "method": "POST",
-        "separator": true
+        "separator": true,
+        "csrf": "csrf"
       }
     ],
     "new": {

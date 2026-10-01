@@ -6,7 +6,8 @@
       "id": "collection.create",
       "label": "Create",
       "method": "POST",
-      "primary": true
+      "primary": true,
+      "csrf": "csrf"
     }
   ],
   "failure": null,

@@ -58,6 +58,7 @@
     {
       "actions": [
         {
+          "csrf": "csrf",
           "enabled": true,
           "href": "/app/duplicates/decide?do=unlink\u0026group=g-artem",
           "id": "duplicates.unlink",
@@ -252,6 +253,7 @@
     "value": 60,
     "weightActions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/app/duplicates/decide?do=weights",
         "id": "duplicates.weights.save",
@@ -260,6 +262,7 @@
         "primary": true
       },
       {
+        "csrf": "csrf",
         "enabled": false,
         "id": "duplicates.weights.defaults",
         "label": "Back to defaults",
@@ -418,6 +421,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

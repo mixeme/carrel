@@ -1,6 +1,7 @@
 {
   "actions": [
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
       "id": "collection.save",

@@ -3,6 +3,7 @@
     "action": "/app/settings/backup?op=save",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/app/settings/backup?op=save",
         "id": "backup.save",
@@ -397,6 +398,7 @@
       "action": "/app/settings/backup?op=restore-open",
       "actions": [
         {
+          "csrf": "csrf",
           "enabled": true,
           "href": "/app/settings/backup?op=restore-open",
           "id": "restore.open",
@@ -405,6 +407,7 @@
           "primary": true
         },
         {
+          "csrf": "csrf",
           "enabled": true,
           "href": "/app/settings/backup?op=restore-open\u0026source=upload",
           "icon": "i-up",
@@ -637,6 +640,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

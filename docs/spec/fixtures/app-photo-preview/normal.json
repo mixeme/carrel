@@ -1,6 +1,7 @@
 {
   "actions": [
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=frame\u0026rotate=0",
       "id": "photo.rotate.0",
@@ -9,6 +10,7 @@
       "on": true
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=frame\u0026rotate=90",
       "id": "photo.rotate.90",
@@ -16,6 +18,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=frame\u0026rotate=180",
       "id": "photo.rotate.180",
@@ -23,6 +26,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=frame\u0026rotate=270",
       "id": "photo.rotate.270",
@@ -30,6 +34,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=save",
       "id": "photo.save",
@@ -38,6 +43,7 @@
       "primary": true
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=cancel",
       "id": "photo.cancel",
@@ -333,6 +339,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

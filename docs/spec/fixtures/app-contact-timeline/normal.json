@@ -95,14 +95,16 @@
             "id": "columns.apply",
             "label": "Apply",
             "method": "POST",
-            "primary": true
+            "primary": true,
+            "csrf": "csrf"
           },
           {
             "enabled": true,
             "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline/columns",
             "id": "columns.default",
             "label": "Reset to defaults",
-            "method": "POST"
+            "method": "POST",
+            "csrf": "csrf"
           }
         ],
         "errors": [],
@@ -183,7 +185,8 @@
         "icon": "i-trash",
         "id": "record.delete",
         "label": "Delete contact",
-        "method": "POST"
+        "method": "POST",
+        "csrf": "csrf"
       }
     ],
     "fields": [
@@ -329,7 +332,8 @@
         "id": "poll.stop",
         "label": "Stop",
         "method": "POST",
-        "reason": "The timeline has finished."
+        "reason": "The timeline has finished.",
+        "csrf": "csrf"
       },
       {
         "enabled": true,
@@ -443,7 +447,8 @@
           "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
           "id": "source.retry",
           "label": "Retry",
-          "method": "POST"
+          "method": "POST",
+          "csrf": "csrf"
         },
         "stamp": "baikal · Общий",
         "state": "error"
@@ -688,7 +693,8 @@
               "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
               "id": "source.retry",
               "label": "Retry",
-              "method": "POST"
+              "method": "POST",
+              "csrf": "csrf"
             },
             "state": "unavailable",
             "tick": "on",
@@ -874,7 +880,8 @@
         "id": "user.logout",
         "label": "Sign out",
         "method": "POST",
-        "separator": true
+        "separator": true,
+        "csrf": "csrf"
       }
     ],
     "new": {

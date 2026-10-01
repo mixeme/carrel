@@ -61,6 +61,7 @@
   "poll": {
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": false,
         "href": "/app/search/progress/t-task/cancel",
         "id": "poll.stop",
@@ -176,6 +177,7 @@
         "fromCache": false,
         "message": "The server answered 401 Unauthorized.",
         "retry": {
+          "csrf": "csrf",
           "enabled": true,
           "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
           "id": "source.retry",
@@ -462,6 +464,7 @@
             "on": false,
             "readOnly": false,
             "retry": {
+              "csrf": "csrf",
               "enabled": true,
               "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
               "id": "source.retry",
@@ -655,6 +658,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

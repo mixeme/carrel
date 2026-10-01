@@ -1,6 +1,7 @@
 {
   "actions": [
     {
+      "csrf": "csrf",
       "danger": true,
       "enabled": true,
       "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",

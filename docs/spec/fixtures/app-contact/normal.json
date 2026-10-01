@@ -10,6 +10,7 @@
       "primary": true
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/mail/attach?a=a-nc-home\u0026c=kontakty\u0026uid=4f2b-9c31-a0e7\u0026what=contact",
       "icon": "i-mail",
@@ -26,6 +27,7 @@
       "method": "GET"
     },
     {
+      "csrf": "csrf",
       "danger": true,
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e19",
@@ -473,6 +475,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

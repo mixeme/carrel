@@ -3,6 +3,7 @@
   "doc": {
     "bar": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026readat=1786370760",
         "id": "record.save",
@@ -20,6 +21,7 @@
       {
         "arrow": [
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026from=edit\u0026op=attach",
             "icon": "i-up",
@@ -36,6 +38,7 @@
             "method": "GET"
           }
         ],
+        "csrf": "csrf",
         "enabled": true,
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026from=edit\u0026op=attach",
         "icon": "i-up",
@@ -231,6 +234,7 @@
       {
         "arrow": [
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026from=edit\u0026op=attach",
             "icon": "i-up",
@@ -247,6 +251,7 @@
             "method": "GET"
           }
         ],
+        "csrf": "csrf",
         "enabled": true,
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026from=edit\u0026op=attach",
         "icon": "i-up",
@@ -255,6 +260,7 @@
         "method": "POST"
       },
       {
+        "csrf": "csrf",
         "danger": true,
         "enabled": true,
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e16",
@@ -583,6 +589,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

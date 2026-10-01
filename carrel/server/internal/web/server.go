@@ -284,6 +284,7 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 		commit:   commit,
 		proxies:  conf.ParseTrustedProxies(cfg.TrustedProxies),
 	}
+	s.render = stampingRenderer{Renderer: rd, token: s.sessionToken}
 	s.mux = http.NewServeMux()
 	s.registerRoutes()
 	return s

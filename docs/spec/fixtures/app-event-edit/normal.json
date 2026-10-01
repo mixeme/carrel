@@ -3,6 +3,7 @@
     {
       "actions": [
         {
+          "csrf": "csrf",
           "enabled": true,
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026from=edit\u0026n=0\u0026op=detach",
           "icon": "i-trash",
@@ -37,6 +38,7 @@
     }
   ],
   "delete": {
+    "csrf": "csrf",
     "danger": true,
     "enabled": true,
     "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e6",
@@ -51,6 +53,7 @@
     "action": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "id": "record.save",
         "label": "Save",
@@ -67,6 +70,7 @@
       {
         "arrow": [
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026from=edit\u0026op=attach",
             "icon": "i-up",
@@ -83,6 +87,7 @@
             "method": "GET"
           }
         ],
+        "csrf": "csrf",
         "enabled": true,
         "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026from=edit\u0026op=attach",
         "icon": "i-up",
@@ -3377,6 +3382,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

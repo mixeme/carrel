@@ -4,6 +4,7 @@
     "action": "/app/contacts/a-nc-home/kontakty/new",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "id": "record.save",
         "label": "Save",
@@ -825,6 +826,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

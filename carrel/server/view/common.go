@@ -41,6 +41,10 @@ type Action struct {
 	// Arrow — стрелка кнопки (.m-split): пункты её меню; сама кнопка — то,
 	// что делается без стрелки. Пусто — кнопка без стрелки
 	Arrow []MenuItem `json:"arrow,omitempty"`
+	// CSRF — токен сеанса у POST (C-11): без сценариев клиент шлёт действие
+	// своей формой со скрытым _csrf этого значения; у GET и у страниц вне
+	// входа пусто
+	CSRF string `json:"csrf,omitempty"`
 }
 
 type MenuItem struct {

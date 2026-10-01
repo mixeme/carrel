@@ -7,7 +7,8 @@
         "enabled": true,
         "id": "attachments.save",
         "label": "Save",
-        "method": "POST"
+        "method": "POST",
+        "csrf": "csrf"
       },
       {
         "enabled": true,
@@ -469,7 +470,8 @@
         "id": "user.logout",
         "label": "Sign out",
         "method": "POST",
-        "separator": true
+        "separator": true,
+        "csrf": "csrf"
       }
     ],
     "new": {

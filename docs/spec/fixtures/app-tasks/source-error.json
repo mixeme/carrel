@@ -32,6 +32,7 @@
         "action": "/app/tasks/a-nc-home/dela/columns",
         "actions": [
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/tasks/a-nc-home/dela/columns",
             "id": "columns.apply",
@@ -40,6 +41,7 @@
             "primary": true
           },
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/tasks/a-nc-home/dela/columns",
             "id": "columns.default",
@@ -603,6 +605,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

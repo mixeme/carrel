@@ -8,7 +8,8 @@
         "id": "unlock.submit",
         "label": "Show",
         "method": "POST",
-        "primary": true
+        "primary": true,
+        "csrf": "csrf"
       }
     ],
     "errors": [],

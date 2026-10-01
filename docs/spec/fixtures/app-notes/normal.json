@@ -32,6 +32,7 @@
         "action": "/app/notes/a-nc-home/zapisi/columns",
         "actions": [
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/notes/a-nc-home/zapisi/columns",
             "id": "columns.apply",
@@ -40,6 +41,7 @@
             "primary": true
           },
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/notes/a-nc-home/zapisi/columns",
             "id": "columns.default",
@@ -199,6 +201,7 @@
               "method": "GET"
             },
             {
+              "csrf": "csrf",
               "danger": true,
               "enabled": true,
               "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e16",
@@ -284,6 +287,7 @@
               "method": "GET"
             },
             {
+              "csrf": "csrf",
               "danger": true,
               "enabled": true,
               "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/delete?etag=e17",
@@ -746,6 +750,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

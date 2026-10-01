@@ -1,6 +1,7 @@
 {
   "actions": [
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/mail/compose?op=attach\u0026what=contact",
       "id": "mail.attach.contact",
@@ -8,6 +9,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/mail/compose?op=attach\u0026what=book",
       "id": "mail.attach.book",
@@ -15,6 +17,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/mail/compose?op=attach\u0026what=event",
       "id": "mail.attach.event",
@@ -22,6 +25,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/mail/compose?op=attach\u0026what=calendar",
       "id": "mail.attach.calendar",
@@ -29,6 +33,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/mail/compose?op=attach\u0026what=task",
       "id": "mail.attach.task",
@@ -36,6 +41,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/mail/compose?op=attach\u0026what=note",
       "id": "mail.attach.note",
@@ -43,6 +49,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/mail/compose?op=attach\u0026what=file",
       "id": "mail.attach.file",
@@ -50,6 +57,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/app/mail/compose?op=attach\u0026what=folder",
       "id": "mail.attach.folder",
@@ -57,6 +65,7 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
       "enabled": false,
       "href": "/app/mail/compose?op=send",
       "id": "mail.send",
@@ -66,6 +75,7 @@
       "reason": "Add a recipient."
     },
     {
+      "csrf": "csrf",
       "danger": true,
       "enabled": true,
       "href": "/app/mail/compose?op=discard",

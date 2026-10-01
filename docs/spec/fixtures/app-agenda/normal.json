@@ -239,6 +239,7 @@
               "method": "GET"
             },
             {
+              "csrf": "csrf",
               "danger": true,
               "enabled": true,
               "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e6",
@@ -318,6 +319,7 @@
               "method": "GET"
             },
             {
+              "csrf": "csrf",
               "danger": true,
               "enabled": true,
               "href": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27/delete?etag=e7",
@@ -903,6 +905,7 @@
             "on": false,
             "readOnly": false,
             "retry": {
+              "csrf": "csrf",
               "enabled": true,
               "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
               "id": "source.retry",
@@ -1148,6 +1151,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

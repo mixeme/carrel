@@ -4,6 +4,7 @@
     "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "id": "record.save",
         "label": "Save",
@@ -664,6 +665,7 @@
   "photo": {
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e19\u0026op=upload",
         "id": "photo.replace",
@@ -671,6 +673,7 @@
         "method": "POST"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e19\u0026op=crop",
         "id": "photo.crop",
@@ -678,6 +681,7 @@
         "method": "POST"
       },
       {
+        "csrf": "csrf",
         "danger": true,
         "enabled": true,
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e19\u0026op=remove",
@@ -975,6 +979,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

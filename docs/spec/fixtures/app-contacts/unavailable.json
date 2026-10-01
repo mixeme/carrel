@@ -70,6 +70,7 @@
         "action": "/app/contacts/columns?task=t-task",
         "actions": [
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/contacts/columns?task=t-task",
             "id": "columns.apply",
@@ -78,6 +79,7 @@
             "primary": true
           },
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/app/contacts/columns?task=t-task",
             "id": "columns.default",
@@ -347,6 +349,7 @@
               "method": "GET"
             },
             {
+              "csrf": "csrf",
               "danger": true,
               "enabled": true,
               "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5/delete?etag=e2",
@@ -429,6 +432,7 @@
               "method": "GET"
             },
             {
+              "csrf": "csrf",
               "danger": true,
               "enabled": true,
               "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e1",
@@ -522,6 +526,7 @@
               "method": "GET"
             },
             {
+              "csrf": "csrf",
               "danger": true,
               "enabled": true,
               "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09/delete?etag=e4",
@@ -610,6 +615,7 @@
               "method": "GET"
             },
             {
+              "csrf": "csrf",
               "danger": true,
               "enabled": true,
               "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/delete?etag=e5",
@@ -692,6 +698,7 @@
               "method": "GET"
             },
             {
+              "csrf": "csrf",
               "danger": true,
               "enabled": true,
               "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83/delete?etag=e3",
@@ -720,6 +727,7 @@
   "poll": {
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": false,
         "href": "/app/search/progress/t-task/cancel",
         "id": "poll.stop",
@@ -763,6 +771,7 @@
         "fromCache": false,
         "message": "The server answered 503 Service Unavailable.",
         "retry": {
+          "csrf": "csrf",
           "enabled": true,
           "href": "/app/search/progress/t-task/retry?source=a-rad-vps%3Akomanda",
           "id": "source.retry",
@@ -1104,6 +1113,7 @@
             "on": false,
             "readOnly": true,
             "retry": {
+              "csrf": "csrf",
               "enabled": true,
               "href": "/app/search/progress/t-task/retry?source=a-rad-vps%3Akomanda",
               "id": "source.retry",
@@ -1351,6 +1361,7 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/logout",
         "id": "user.logout",

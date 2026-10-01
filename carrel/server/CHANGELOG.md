@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.96 — 2026-10-01
+
+A POST outside a form could not be sent without scripts: nothing in the
+view model gave the client the session's token (the client's stop C15).
+
+### Changed
+
+- **Every POST action of a screen behind sign-in carries the session's
+  token** (C-6.2 `Action.CSRF`, C-11): Delete and Send of a card, Retry of
+  a source, the photo's steps, «Tick every book», Sign out, the buttons of
+  sheets and forms alike. Without scripts the client sends such an action
+  as a form of its own with `_csrf` of that value; with scripts the header
+  is as before. GET actions and the pages outside the shell carry none —
+  their forms have their `_csrf`. The token is put in at rendering, for
+  every action whatever handler built it; the rest of the view model is
+  untouched.
+
 ## v0.2.95 — 2026-10-01
 
 The primary buttons and the monospaced fields no fixture carried and no

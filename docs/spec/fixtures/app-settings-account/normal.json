@@ -72,7 +72,8 @@
               "href": "/app/settings/account?op=name",
               "id": "account.name.save",
               "label": "Save",
-              "method": "POST"
+              "method": "POST",
+              "csrf": "csrf"
             },
             "hint": "Shown as the sender and used as the signature in letters you send. Blank means your login.",
             "kind": "text",
@@ -96,7 +97,8 @@
               "href": "/app/settings/account?op=email",
               "id": "account.email.change",
               "label": "Change",
-              "method": "POST"
+              "method": "POST",
+              "csrf": "csrf"
             },
             "hint": "Used for service notices, and as Reply-To on letters you send.",
             "kind": "email",
@@ -216,7 +218,8 @@
         "id": "account.session.end",
         "label": "End",
         "method": "POST",
-        "reason": "This is the session you are in: sign out to end it."
+        "reason": "This is the session you are in: sign out to end it.",
+        "csrf": "csrf"
       },
       "lastSeen": "just now",
       "started": "10 August 2026, 17:04"
@@ -271,7 +274,8 @@
         "id": "user.logout",
         "label": "Sign out",
         "method": "POST",
-        "separator": true
+        "separator": true,
+        "csrf": "csrf"
       }
     ],
     "new": {

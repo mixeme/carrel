@@ -142,7 +142,8 @@
         "id": "user.logout",
         "label": "Sign out",
         "method": "POST",
-        "separator": true
+        "separator": true,
+        "csrf": "csrf"
       }
     ],
     "new": {
@@ -222,14 +223,16 @@
           "id": "admin.invite.create",
           "label": "Create link",
           "method": "POST",
-          "primary": true
+          "primary": true,
+          "csrf": "csrf"
         },
         {
           "enabled": true,
           "href": "/admin/invites?action=send",
           "id": "admin.invite.send",
           "label": "Send invitation",
-          "method": "POST"
+          "method": "POST",
+          "csrf": "csrf"
         }
       ],
       "errors": [],
@@ -309,7 +312,8 @@
           "href": "/admin/invites",
           "id": "admin.selfreg.save",
           "label": "Save",
-          "method": "POST"
+          "method": "POST",
+          "csrf": "csrf"
         }
       ],
       "errors": [],
@@ -382,7 +386,8 @@
           "id": "admin.user.create",
           "label": "Create user",
           "method": "POST",
-          "primary": true
+          "primary": true,
+          "csrf": "csrf"
         }
       ],
       "errors": [],

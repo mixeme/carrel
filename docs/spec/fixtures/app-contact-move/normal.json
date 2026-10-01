@@ -1,6 +1,7 @@
 {
   "actions": [
     {
+      "csrf": "csrf",
       "enabled": false,
       "id": "record.move.confirm",
       "label": "Move here",
