@@ -24,7 +24,10 @@ type FormRow struct {
 	// Приглушённая часть подписи, после неё: «(optional)» у «Email»
 	// (s-admin-1, s-auth-4), «SHA-256 · optional» у «Certificate
 	// fingerprint» (s-profile-2); у прочих пусто
-	LabelAside Text      `json:"labelAside,omitempty"`
+	LabelAside Text `json:"labelAside,omitempty"`
+	// Приглушённое после выбранного значения: «as sent» у пояса, пока выбран
+	// тот, с которым запись пришла (s-agenda-3); у прочих пусто
+	ValueAside Text      `json:"valueAside,omitempty"`
 	Kind       InputKind `json:"kind"` // C-8
 	Value      Text      `json:"value"`
 	Options    []Option  `json:"options"`

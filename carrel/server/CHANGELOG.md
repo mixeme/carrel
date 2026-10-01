@@ -17,6 +17,41 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.120 — 2026-10-02
+
+The form of an event as s-agenda-3 draws it (the client's scan of the
+calendar, group Д, and Г11).
+
+### Added
+
+- **`EventEditPage.name`** (the event; «New event» for a new one) and
+  **`.subtitle`** (the calendar) — the form's head.
+- **`EventEditPage.foreign`** — «Kept as the server sent them»: the
+  properties of the event Carrel does not know, name and value as they are,
+  monospaced (`SEQUENCE`, `X-MOZ-GENERATION`, …).
+- **`FormRow.valueAside`** — dim after the chosen value: «as sent» by the
+  time zone the event came with, while it is chosen.
+
+### Changed
+
+- **Advanced RRULE is empty**, the record's rule its sample (`placeholder`)
+  and the hidden `repeat.base`: a rule typed there wins over the fields;
+  left empty it is no rule typed — the series keeps its rule, changed by the
+  fields. «The advanced value takes precedence when set.» under it.
+- No hints under Tags and Count of the event's form (the frame draws none).
+- **`EventEditPage.reminders` and `.recurrence` are gone**: the reminders
+  are the rows `reminder.N` of the form, the rule is its Repeats; the line
+  under the deletion stays `DeleteNote`. `Attendees` lists the organiser
+  first, as the card does.
+
+### For consumers
+
+Read the head of the event's form from `name` and `subtitle`; send
+Advanced RRULE empty unless it is typed, with `repeat.base` as it came.
+Fixtures regenerated: `app-event-edit/normal`, `/loss`. The full form of a
+new event (`/new`: «New event», no `delete`) has its head too; its fixture
+waits for the client's map of fixture screens (`app-event-new`).
+
 ## v0.2.119 — 2026-10-01
 
 The event's card and its panel beside the agenda as s-agenda-1 and

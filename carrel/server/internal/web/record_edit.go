@@ -564,7 +564,20 @@ func repeatFields(v []string) []view.Field {
 }
 
 // repeatSet is the Repeats field set of the event form.
-func repeatSet(f editField, vals []string, errText view.Text) view.FieldSet {
+// typedRule is Advanced RRULE as the form sent it: empty is no rule typed,
+// and the rule the form was shown with — its hidden «.base» — stands, so the
+// fields change it and nothing is read as a rule taken away (s-agenda-3).
+func typedRule(r *http.Request, name string) string {
+	if v := strings.TrimSpace(r.FormValue(name + ".rule")); v != "" {
+		return v
+	}
+	return strings.TrimSpace(r.FormValue(name + ".base"))
+}
+
+// held is the rule the record has: the sample of Advanced RRULE, which shows
+// empty until a rule other than it is typed (s-agenda-3), and the hidden
+// «.base» the form sends back with it (typedRule).
+func repeatSet(f editField, vals []string, held string, errText view.Text) view.FieldSet {
 	v := append(append([]string(nil), vals...), make([]string, 6)...)[:6]
 	// The list of s-agenda-10: a line under «Does not repeat».
 	freqs := []view.Option{{Value: "", Label: "Does not repeat"}, {Value: "DAILY", Label: "Daily", Separator: true}, {Value: "WEEKLY", Label: "Weekly"},
@@ -591,12 +604,23 @@ func repeatSet(f editField, vals []string, errText view.Text) view.FieldSet {
 	for _, d := range repeatDays {
 		days.Options = append(days.Options, view.Option{Value: d.code, Label: text(d.code), Selected: on[d.code]})
 	}
+	// Count and Advanced RRULE as s-agenda-3 draws them: no hint under
+	// Count (both at once is refused with its reason), and the advanced rule
+	// empty with the rule the series has as its sample — typed, it wins over
+	// the fields above.
+	typed := strings.TrimSpace(v[repRule])
+	if typed == held {
+		typed = ""
+	}
 	set.Rows = append(set.Rows, days,
 		view.FormRow{Name: f.name + ".until", Label: "Until", Kind: view.InputDate, Value: text(v[repUntil]), Mono: true},
-		view.FormRow{Name: f.name + ".count", Label: "Count", Kind: view.InputNumber, Value: text(v[repCount]), Hint: "Until or Count, not both."},
-		view.FormRow{Name: f.name + ".rule", Label: "Advanced RRULE", Kind: view.InputText, Value: text(v[repRule]), Mono: true,
-			Hint: "Changed here, the rule is written as typed and wins over the fields above. Exceptions and moved instances are not edited: the series is edited as a whole."},
+		view.FormRow{Name: f.name + ".count", Label: "Count", Kind: view.InputNumber, Value: text(v[repCount])},
+		view.FormRow{Name: f.name + ".rule", Label: "Advanced RRULE", Kind: view.InputText, Mono: true, Value: text(typed), Placeholder: text(held),
+			Hint: "The advanced value takes precedence when set."},
 	)
+	if held != "" {
+		set.Rows = append(set.Rows, view.FormRow{Name: f.name + ".base", Kind: view.InputHidden, Value: text(held)})
+	}
 	return set
 }
 
@@ -662,7 +686,8 @@ var editFields = map[view.Kind][]editField{
 		{name: "summary", label: "Summary", prop: "SUMMARY", typ: fieldText, quick: "Title"},
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText},
 		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: eventStatuses},
-		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
+		// No hint under Tags (s-agenda-3).
+		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
 		{name: "attendee", label: "Attendee", prop: "ATTENDEE", typ: fieldAttendee},
 		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, required: true, allDay: true, set: "When",
@@ -1070,7 +1095,7 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 			vals[f.name] = []string{
 				freq, strings.TrimSpace(r.FormValue(f.name + ".interval")),
 				strings.Join(on, ","), strings.TrimSpace(r.FormValue(f.name + ".until")),
-				strings.TrimSpace(r.FormValue(f.name + ".count")), strings.TrimSpace(r.FormValue(f.name + ".rule")),
+				strings.TrimSpace(r.FormValue(f.name + ".count")), typedRule(r, f.name),
 			}
 		case fieldAddress:
 			part := func(prefix string) string {
@@ -2035,25 +2060,26 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		page.Photo = s.photoBlock(c, st)
 		return page
 	case view.KindEvent:
-		page := view.EventEditPage{Shell: sh, UID: st.uid, Form: form, Reminders: reminderRows(st.alarms, tf), Loss: st.loss, Delete: del}
+		// The head: the event and its calendar (s-agenda-3). The reminders
+		// and the rule are the form's rows; the rule's words stand on the
+		// card, not here.
+		name := strings.TrimSpace(first(st.values["summary"]))
+		if st.isNew || name == "" {
+			name = "New event"
+		}
+		page := view.EventEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: view.Text(c.stamp()), Form: form, Loss: st.loss, Delete: del}
 		if st.obj != nil {
-			if cal.HasRecurrence(st.obj) {
-				page.Recurrence = s.recurrenceBlock(st.obj, tf)
-				var start time.Time
-				if tm, err := cal.TimingOf(st.obj, tf.tz); err == nil {
-					start = tm.Start
-				}
-				page.Recurrence.Fields = append(repeatFields(repeatValues(cal.RawRRULE(st.obj), tf.tz, start)), page.Recurrence.Fields...)
-				// The line stands under Delete here, and once.
-				page.Recurrence.Note = ""
-				if del != nil {
-					page.DeleteNote = seriesNote
-				}
+			if cal.HasRecurrence(st.obj) && del != nil {
+				// The line stands under Delete, once.
+				page.DeleteNote = seriesNote
 			}
-			for _, a := range cal.Attendees(st.obj) {
-				page.Attendees = append(page.Attendees, view.AttendeeRow{Name: text(a.Name), Email: text(a.Email), Status: text(partstatLabel(a.Status))})
-			}
+			page.Attendees = eventPeople(st.obj)
 			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
+			// «Kept as the server sent them» (s-agenda-3): what Carrel does
+			// not know, as it came.
+			for _, name := range cal.EventForeign(st.obj) {
+				page.Foreign = append(page.Foreign, view.Field{Label: text(name), Value: text(strings.Join(st.obj.PropText(name), ", ")), Mono: true})
+			}
 		}
 		return page
 	case view.KindTask:
@@ -2244,7 +2270,11 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		case fieldList:
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
 		case fieldRepeat:
-			set.Rows = append(set.Rows, repeatSet(f, vals, errText).Rows...)
+			held := ""
+			if st.obj != nil {
+				held = strings.TrimSpace(firstValue(st.obj, f.prop))
+			}
+			set.Rows = append(set.Rows, repeatSet(f, vals, held, errText).Rows...)
 		case fieldAttendee:
 			if v := first(vals); v != "" {
 				set.Rows = append(set.Rows, view.FormRow{Name: f.name, Kind: view.InputHidden, Value: text(v), Error: errText})
@@ -2275,8 +2305,14 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(chosen),
 					Options: newZoneOptions(chosen), Placeholder: "Find a zone", Error: errText})
 			case held != "":
-				set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(chosen),
-					Options: zoneOptions(held, chosen), Placeholder: "Find a zone", Error: errText})
+				row := view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(chosen),
+					Options: zoneOptions(held, chosen), Placeholder: "Find a zone", Error: errText}
+				if chosen == held {
+					// «as sent» after the zone the event came with
+					// (s-agenda-3).
+					row.ValueAside = "as sent"
+				}
+				set.Rows = append(set.Rows, row)
 			default:
 				// A day has no zone.
 			}

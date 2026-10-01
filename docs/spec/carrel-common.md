@@ -1293,11 +1293,19 @@ type EventPage struct { // чтение: то, что открывается п�
 type EventEditPage struct { // правка: та же запись формой
     Shell
     UID       string
+    Name      Text // заголовок: название события, у нового — «New event» (s-agenda-3)
+    Subtitle  Text // календарь: «nextcloud · Личный»
+    // Напоминания — строки формы reminder.N (First, Reminder…) и Add
+    // reminder; повторение — набор Repeats: Advanced RRULE пуст, правило
+    // записи — его образец (Placeholder) и скрытое repeat.base; набранное
+    // правило побеждает поля, пустое — не правило. Подсказок у Tags и Count
+    // нет, у Advanced RRULE — «The advanced value takes precedence when set.»;
+    // у пояса записи, пока он выбран, ValueAside «as sent». Attach — по имени
+    // (attach.add), клиент ставит его в набор «Attachments» (s-agenda-3)
     Form      Form
-    Recurrence RecurrenceBlock
-    Reminders []ReminderRow
-    Attendees []AttendeeRow
+    Attendees []AttendeeRow // организатор первым; только чтение (U-6.2; кадр s-agenda-3 их не рисует — задача Typecase 77)
     Attach    []AttachRow
+    Foreign   []Field // «Kept as the server sent them»: свойства, которых Carrel не знает, — имя и значение как есть, Mono (s-agenda-3: SEQUENCE, X-MOZ-GENERATION, …); пусто — нет
     Loss      *LossReport
     Delete    *Action // внизу формы (s-agenda-3); nil — у новой записи
     DeleteNote Text   // строка под удалением: у серии «Series is edited and deleted whole.»
@@ -1870,6 +1878,7 @@ type FormRow struct {
     Name     string
     Label    Text
     LabelAside Text    // приглушённая часть подписи, после неё: «(optional)» у «Email» (s-admin-1, s-auth-4), «SHA-256 · optional» у «Certificate fingerprint» (s-profile-2); у прочих пусто
+    ValueAside Text    // приглушённое после выбранного значения: «as sent» у пояса события, пока выбран тот, с которым оно пришло (s-agenda-3); у прочих пусто
     Kind     InputKind // C-8
     Value    Text
     Options  []Option

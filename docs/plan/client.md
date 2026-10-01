@@ -677,10 +677,16 @@ Typecase (у Carrel `s-agenda-1` ещё без формы «Compact rows» и и
   (`s-agenda-1`; так же `s-contacts-7`, где хронологию держит ожидание U-5.5
   #7) — у `RailSection` нет признака, что это ленты. Слово «external» —
   экрана, но ставить его не по чему: сравнивать `Account` со словом нельзя.
+  **Закрыт `v0.2.118`:** `RailSection.Feeds` — секция подписок; бейдж
+  «external» — слово экрана по признаку.
 - **А2.** Обновление: у агенды одной коллекции (`app-agenda/normal`,
   `/empty`) и у единого вида без отметок (`app-agenda-all/empty`)
   `TopBar.Refresh` пуст — ни действия, ни «2 min ago», а `s-agenda-1`
   рисует кнопку (как C17 у карточки). У единого вида с опросом — `poll.again`.
+  **Закрыт `v0.2.118`:** у списка одной коллекции (всех родов) —
+  `list.refresh`, тот же адрес, `Answered` — когда сеанс её читал; у единого
+  вида, где ничего не отмечено, — `poll.again` выключен с причиной «Nothing is
+  ticked to ask.». Заодно у одной книги контактов и пустого выбора (долг C19).
 
 ### Б. Агенда (`AgendaPage`, `s-agenda-1`)
 
@@ -694,44 +700,86 @@ Typecase (у Carrel `s-agenda-1` ещё без формы «Compact rows» и и
   `FIXTURE_SCREEN` ставит `app-agenda-all` на `/app/calendar/{account}/{col}`,
   а не на `/app/calendar`: `data-screen` у `s-agenda-1` называет только
   коллекцию (у `s-contacts-1` — оба адреса).
+  **Закрыт `v0.2.118`:** фикстура `app-agenda-all/normal` — единый вид, опрос
+  с отказом baikal, с `v0.2.119` и панелью «Синк-апа». `FIXTURE_SCREEN`
+  остаётся на адресе коллекции; `data-screen` без `/app/calendar` и свой кадр
+  агенды одной коллекции (`app-agenda` сверяется с `s-agenda-1`) — **ждёт
+  задачи Typecase 77**.
 - **Б2.** Подзаголовок шапки «5 of 7 calendars · 3 accounts · 10 – 16 August
   2026 · ‹mono›Europe/Moscow‹/mono›» — поля нет (как L1; пояс моноширинно —
   `Runs`). Подзаголовки состояний — «5 of 7 calendars · 10 – 16 August 2026»
   (`states-3`), «6 of 7 calendars · one source did not answer» (`states-6`).
+  **Закрыт `v0.2.118`:** `AgendaPage.Subtitle` (`Runs`): «6 of 8 calendars · 3
+  accounts · 10 – 16 August 2026 · ‹Europe/Moscow›» (подписки — календари, но
+  не аккаунты), одна коллекция — «nextcloud · 10 – 16 August 2026 ·
+  ‹Europe/Moscow›» (C-10). Подзаголовки `states-3`, `-6` другие, а фикстур у
+  этих кадров нет — **ждёт задачи 77**.
 - **Б3.** Print в шапке — действия нет (как L4, `?print=1`).
+  **Закрыт `v0.2.118`:** `list.print` (`i-print`) — адрес агенды с её окном и
+  `print=1`.
 - **Б4.** New event в едином виде: сама кнопка ведёт в «Дни рождения»
   (`…/dni-rozhdeniya/new?pick=1`) — коллекцию, снятую в рейле; у пунктов
   стрелки нет «last used» (`MenuItem.Aside`, как L3).
+  **Закрыт `v0.2.118`:** кнопка пишет в последний использованный календарь,
+  если он отмечен, иначе в первый отмеченный — в снятый никогда; в наборе
+  «last used» — «Личный». Стрелка есть у единого вида, `s-agenda-1` её не
+  рисует — **ждёт задачи 77**.
 - **Б5.** Диапазон: сегменты кадра Day · Week · Month · Range; модель
   (`Range.Presets`) — Previous, Today, Next, Day, Week, Month: варианта
   «Range» (произвольный диапазон, `view=range`) нет, а Previous, Today, Next
   кадр не рисует (вопрос к кадрам — Ж).
+  **Закрыт `v0.2.118`:** `range.range` «Range» — показанное окно своим
+  диапазоном (`view=range`, `from`, `to`; `On` у диапазона). Previous, Today,
+  Next остаются — нарисовать их **ждёт задачи 77**.
 - **Б6.** Форма диапазона (`Range.Form`, GET) несёт скрытый `_csrf`: токен
   сеанса уходит в адрес (C-11; у хронологии его нет). Подсказка у To «Both
   days are in the list.» — кадр её не рисует (как D3).
+  **Закрыт `v0.2.116` (безопасность):** ни одна форма GET не несёт `_csrf` —
+  проверка `TestFixtureGetFormsCarryNoToken` по всем фикстурам, красная до
+  правки; C-11. Подсказки у To нет.
 - **Б7.** «Events · Tasks due · Notes» в кадре — отметки полосы (`Check`,
   вторая очередь), в модели — `Bar.Segments`, ссылки (`with=tasks`), Events
   выключен с причиной: у отметки смысл — поле формы, ссылки нет (как C13).
   Нужна форма GET — `with` с отмеченными, скрытые `from`, `view`; Events в
   кадре отмечен и не выключен.
+  **Закрыт `v0.2.118`:** `ListBar.Show` — одна форма GET: скрытые поля окна и
+  `tag`, пустое `with` (форма сказала) и отметка `with` с `events`, `tasks`,
+  `notes`; Events — отметка, как в кадре; адрес без `with` — одни события.
+  `Bar.Segments` агенды пуст. Typecase: задача 74.
 - **Б8.** «Compact rows» — `Bar.Compact` = nil у агенды; кадр (Typecase
   `5b9d0a9`, задача 67) — форма GET `/app/calendar` с Apply (как B4).
+  **Закрыт `v0.2.118`:** `Bar.Compact` у агенды, кука
+  `carrel_compact_calendar`.
 - **Б9.** Счёт дня в рубрике (`ListGroup.Count`) — у `AgendaDay` нет (как
   L5).
+  **Закрыт `v0.2.118`:** `AgendaDay.Count`.
 - **Б10.** Рубрика дня «Monday, 10 August», кадр — «Monday · 10 August»
   (C-10).
+  **Закрыт `v0.2.118`:** «Monday · 10 August» (C-10).
 - **Б11.** Строка, открытая в панели (`is-on`, жирное название), — у
   `AgendaRow` признака нет (как L6).
+  **Закрыт `v0.2.119`:** `AgendaRow.On` — строки записи, открытой в панели
+  (`?open=`).
 - **Б12.** Бейдж строки: «4 attendees», «repeats weekly», «tentative» (тон
   тревоги) — `Badges` у строк пусты: сервер кладёт туда только «Due»,
   связанность и «Cancelled»; ни участников, ни повторения, ни статуса.
+  **Закрыт `v0.2.118`:** `Badges` по важности, кадр рисует первый: статус
+  «tentative»/«cancelled» тревогой, «linked ×2», «N attendees» — люди с
+  организатором (у ревью так и выходит «2 attendees» кадра), «repeats weekly»;
+  «Due» и «Cancelled» вхождения — первыми.
 - **Б13.** Время весь день — «All day», кадр «all day» (комментарий
   `AgendaRow.Time` — «весь день», устарел).
+  **Закрыт `v0.2.118`:** «all day» (C-10).
 - **Б14.** Полоса опроса: кадр — «Polled 5 of 6 sources · 14 events ·
   ‹danger›baikal unavailable‹/danger›» и справа моноширинно «from cache · 2 min
   ago»; `partial` — «Polled 3 of 6 sources · 7 events · 1 refused» одним
   куском, без отказа (`RunDanger` есть у хронологии), а правому куску поля
   нет (`AnsweredAt` без «from cache»).
+  **Закрыт `v0.2.118`:** у календаря не ответивший назван тревогой вместо
+  счёта — подписью источника, как у хронологии: «… · ‹baikal · Общий
+  unavailable›» (`s-agenda-1` пишет «baikal», `s-contacts-7` — «baikal ·
+  Общий»); правый кусок — `PollBar.Aside`: «2 min ago», с «from cache · »,
+  когда источник ответил тем, что сеанс держал.
 - **Б15.** Состояния без кадра и без строки `STATE_FRAME`:
   `app-agenda-all/partial` (опрос идёт, baikal отказал) стоит между
   `states-3` (первый ответ не пришёл: заготовки строк, «Polling 6
@@ -744,25 +792,48 @@ Typecase (у Carrel `s-agenda-1` ещё без формы «Compact rows» и и
   calendar»); `app-agenda/empty` — неделя из семи «Nothing this day.»,
   кадра нет. Рейлы `states-3`, `-6` — не набор (вопрос к кадрам, как
   задача 55).
+  **Закрыт в части сервера `v0.2.118`:** ничего не отмечено —
+  `AgendaPage.Empty` с основной «Tick every calendar», `Poll` = nil (как S2);
+  строка «What arrived in time is shown. Records from the unavailable source
+  are missing…» — `PollBar.Note`, когда опрос кончен и источник не ответил (и
+  у контактов — «Cards … book», `states-9`). Кадров у
+  `app-agenda-all/partial`, `/empty`, `app-agenda/empty` нет, рейлы и шапки
+  `states-3`, `-6` — не набор; `states-3` (первый ответ не пришёл) —
+  мгновение, а не состояние набора — **ждёт задачи 77**.
 - **Б16.** `app-agenda/empty` не пуста: окно 2–8 ноября, а серия «Синк-ап
   по релизу» (еженедельно по понедельникам до 28.12) падает на 2 ноября;
   `Loaded` = 1 и печать «· 1 event», а строки нет — развёртка или раскладка
   по дням теряет вхождение, либо неделя выбрана не та.
+  **Закрыт `v0.2.117`:** развёртка верна — неделя выбрана не та: серия падает
+  на понедельник 2 ноября. `app-agenda/empty` — неделя 4–10 января 2027, после
+  серии; тест проверяет пустоту до сверки (красный на прежней неделе).
 - **Б17.** `AgendaRow.Zone` («Asia/Yekaterinburg») — у строки кадра места
   нет: пояс кадр рисует в панели, бейджем у When. Модель несёт лишнее или
   строке нужен пояс — вопрос, сверок не держит.
+  **Не пробел:** исходный пояс у времени строки требует C-10 (и README набора:
+  без метки встреча показана «не в то время» молча) — `Zone` остаётся; места
+  под него у строки кадра нет — **ждёт задачи 77**.
 
 ### В. Панель события на агенде (`Shell.Details`, `s-agenda-1`)
 
 - **В1.** Панели нет ни в одной фикстуре агенды (`Details` = null; у
   контактов — `?open=`, L8). Кадр: метка цвета у заголовка, источник, Edit,
   «⋯» (`Menu`), крестик (`Close`); удаление и строка серии (`DeleteNote`).
+  **Закрыт `v0.2.119`:** `?open={адрес строки}` у агенды (одной коллекции и
+  единого вида) — панель в `Shell.Details`, `Details.Close` — агенда без неё,
+  строки `On`; метка цвета — `Source.Colour`; Edit, «⋯» (`Menu`), удаление с
+  `DeleteNote`. Фикстуры `app-agenda/normal`, `app-agenda-all/normal` — с
+  панелью «Синк-апа».
 - **В2.** Чего у `Details` нет против панели кадра: цвета (разве что
   `Source.Colour`); строк Reminders и Repeats среди `Fields` — у `Details`
   нет ни `Recurrence`, ни `Reminders`, порядок кадра When, Reminders,
   Repeats, Where, Status, Tags; остальное — как у страницы события (Г2, Г3,
   Г7, Г10: When кусками, «until» бейджем, место вложения, Path и сравнение у
   источника; Attach со стрелкой — в рубрике «Attachments»).
+  **Закрыт `v0.2.119`:** поля панели — те же, что у карточки, в порядке
+  панели: When, Reminders, Repeats, Where, Status, Tags; When кусками и
+  «until» бейджем (Г2, Г3), путь и изменение у источника (Г10); Attach — по
+  имени (Г1).
 
 ### Г. Событие (`EventPage`, `s-agenda-2`)
 
@@ -770,74 +841,146 @@ Typecase (у Carrel `s-agenda-1` ещё без формы «Compact rows» и и
   Print (`i-print`, `record.print`) нет, хотя U-6.2 их называет; Attach стоит
   в `Actions`, а кадр рисует его в рубрике «Attachments» — экрану выбирать
   его по `ID` или полю блока вложений.
+  **Закрыт `v0.2.119`:** Edit — `i-pencil`, New task — `i-task` (и в календаре
+  без задач: лист задачи в списке, куда идёт новая), Print — `record.print`,
+  `i-print`. **Не пробел:** Attach стоит в `Actions` под своим именем
+  `attach.add` (C-7.5) — экран ставит его в рубрику «Attachments».
 - **Г2.** When — одной строкой «Monday, 10 August 2026, 10:00 – 11:00» и
   отдельной строкой «Original time zone»; кадр — моноширинное «10:00 –
   11:00», «, Monday 10 August» и бейдж «created 12:00 Asia/Yekaterinburg»
   (подсказка «Created in another time zone»). У `Field` ни кусков, ни
   бейджа.
+  **Закрыт `v0.2.119`:** `Field.Runs` — «‹10:00 – 11:00›, Monday 10 August»
+  (год — только не нынешний), `Value` пуст; `Field.Badge` — «created 12:00
+  Asia/Yekaterinburg»; строки «Original time zone» нет. Подсказка «Created in
+  another time zone» — слово экрана.
 - **Г3.** Repeats — строка `Fields` между When и Reminders: «Weekly on Mon»
   и бейдж «until 2026-12-28»; модель — `Recurrence.Summary` «Weekly on
   Monday, until 29 December 2026» вне `Fields`. UNTIL `20261228T235959Z`
   показан в поясе экземпляра 29 декабря, последнее вхождение — 28-го (и на
   правке Until «2026-12-29» против кадра «2026-12-28»). `Recurrence.Fields`
   (Next, Then…) и `Raw` кадр не рисует.
+  **Закрыт `v0.2.117`** (дефект: день UNTIL брался из момента, а последний
+  день серии — 28-е; `ruleUntil`, C-10, проверка красная до правки) **и
+  `v0.2.119`:** строка Repeats в `Fields` между When и Reminders — «Weekly on
+  Mon», бейдж «until 2026-12-28»; Until формы — 2026-12-28.
+  `Recurrence.Fields` и `Raw` модель несёт для печати — сверок не держат.
 - **Г4.** Reminders — строка `Fields` («10 minutes before»); в наборе у
   события VALARM нет, `Reminders` пуст, и на чтении напоминание — строка
   полей, а не `ReminderRow` с `Remove`.
+  **Закрыт `v0.2.119`:** Reminders — строка `Fields` («10 minutes before»);
+  `EventPage.Reminders` снят; у «Синк-апа» в наборе VALARM.
 - **Г5.** Organiser — строка `Fields` фикстуры, кадр её не рисует (и счёт
   участников в рубрике 4 при трёх строках — вопрос к кадру).
+  **Закрыт `v0.2.119`:** организатора среди полей нет — он первый в
+  `Attendees` (`Status` «organiser»), и счёт кадра «4» — число людей с ним;
+  что кадр рисует три строки при «4» — **ждёт задачи 77**.
 - **Г6.** Статус участника с заглавной («Accepted», «No reply»), кадр —
   «accepted», «no reply» (и в панели «· accepted»).
+  **Закрыт `v0.2.119`:** «accepted», «tentative», «no reply» — строчными.
 - **Г7.** Вложение: в наборе — ссылка на файл (ATTACH по https, `Inline`
   false), кадр — «in the event»; размер «3.0 KB», кадр «3 KB». Строке
   вложения-ссылки S-20 велит сказать, где лежит файл, — поля нет
   (`AttachRow` без места), `Href` пуст. `AttachRow.Actions` («Remove link,
   keep the file») кадр не рисует ни на чтении, ни на правке.
+  **Закрыт `v0.2.119`:** в наборе чек-лист лежит внутри события (`Inline`, «in
+  the event» — слово экрана), размер «3 KB» (C-10: без «.0»). **Не пробел:**
+  места у вложения-ссылки S-20 не требует — он требует сказать, что снимается
+  ссылка, а файл остаётся («Remove link, keep the file»), и чужая ссылка не
+  открывается (`Href` пуст). `AttachRow.Actions` (снять вложение) кадры не
+  рисуют нигде — **ждёт задачи 77**.
 - **Г8.** Related: строка — UID «5c81-77aa-0d64» с причиной «Not in the
   lists loaded for this collection», без `Kind` и `Href`; кадр — «Заметка со
   встречи 10.08 · note» (фикстура снята до загрузки заметок — как C8).
+  **Закрыт `v0.2.119` фикстурой:** заметки прочитаны до карточки — Related:
+  «Заметка со встречи 10.08», `Kind` note. Заметка в другой коллекции, и
+  ссылкой она не стоит (S-11); кадр рисует её акцентным текстом, не ссылкой.
 - **Г9.** «The same event in other calendars» (счёт, «radicale · vps ·
   Проекты · Holds the same») — `Linked` пуст: в наборе связанного события
   нет (как C7).
+  **Закрыт `v0.2.119` фикстурой:** тест карточки кладёт копию «Синк-апа» в
+  radicale · vps · Проекты и связывает их — `Linked`: «radicale · vps ·
+  Проекты · Holds the same»; в агенде такой строки нет.
 - **Г10.** Источник: `Path`, `Compared`, `Changed` у события пусты (C9 сделан
   только у контакта); и слова кадра — «changed on server 3 days ago», у
   `Compared` контакта — «changed on server since»: фразу целиком.
+  **Закрыт `v0.2.119`:** `Source.Path`; `Compared` события — «changed on
+  server 3 days ago» по LAST-MODIFIED (фраза целиком), «changed on server
+  since», когда прочитанный список держит другую версию.
 - **Г11.** «Kept as the server sent them» — у `EventPage` и `EventEditPage`
   нет `Foreign` (у контакта есть); `s-agenda-3` рисует X-MOZ-GENERATION,
   X-APPLE-TRAVEL-ADVISORY-BEHAVIOR, SEQUENCE, в наборе таких свойств нет.
+  **Закрыт `v0.2.120`:** `EventEditPage.Foreign` — имя и значение как есть,
+  `Mono`; в наборе — SEQUENCE, X-MOZ-GENERATION,
+  X-APPLE-TRAVEL-ADVISORY-BEHAVIOR (X-JTX-COLOR снят). Карточка (`s-agenda-2`)
+  их не рисует — у `EventPage` их нет.
 - **Г12.** Attach без сценариев: «From this computer» — POST multipart
   (C-5), а имени поля файла у действия нет (у `PostForm` Typecase есть
   `File`) — как C14.
+  **Закрыт `v0.2.119`:** `Action.File` — «file» у Attach и «From this
+  computer»; заодно «photo» у Add и Replace фотографии контакта.
 
 ### Д. Правка (`EventEditPage`, `s-agenda-3`)
 
 - **Д1.** Шапка: название события и календарь («nextcloud · Личный») — у
   страницы только `Title` «Edit event» (как E1).
+  **Закрыт `v0.2.120`:** `EventEditPage.Name` (у нового — «New event») и
+  `.Subtitle`.
 - **Д2.** Подсказки, которых кадр не рисует: Tags «Separated by commas.»,
   Count «Until or Count, not both.»; у Advanced RRULE — другими словами
   (кадр «The advanced value takes precedence when set.»).
+  **Закрыт `v0.2.120`:** у Tags и Count подсказок нет, у Advanced RRULE — «The
+  advanced value takes precedence when set.».
 - **Д3.** Count и Advanced RRULE в кадре — пустые поля с образцом («—» и
   правило), в фикстуре Advanced RRULE заполнен всем правилом, у Count
   образца нет. Поле, которое «побеждает, когда задано», заполненным пишет
   правило всегда.
+  **Закрыт `v0.2.120`:** Advanced RRULE пуст, правило записи — образец и
+  скрытое `repeat.base`; набранное правило побеждает поля, пустое — не
+  правило. Образец «—» у Count — слово экрана.
 - **Д4.** Time zone: приглушённое «as sent» после выбранного пояса
   (`Pick.Aside`) — поля нет (`Option.Group` «As sent» — рубрика списка,
   `s-agenda-8`).
+  **Закрыт `v0.2.120`:** `FormRow.ValueAside` «as sent» у пояса записи, пока
+  он выбран. «Europe/Moscow as sent» кадра против события из Екатеринбурга —
+  **ждёт задачи 77**.
 - **Д5.** Напоминания: кадр — First «10 minutes before» и Reminder «1 day
   before» выбором, затем Add reminder; в наборе VALARM нет — только строка
   `add` с шаблоном. И откуда приходят имеющиеся — строками формы
   `reminder.N` или `EventEditPage.Reminders` (`ReminderRow` с `Remove`,
   которого кадр не рисует): у модели два места.
+  **Закрыт `v0.2.119`, `v0.2.120`:** имеющиеся напоминания — строки формы
+  `reminder.N` (в наборе VALARM: First «10 minutes before»), затем Add
+  reminder; `EventEditPage.Reminders` снят — место одно. Второе напоминание «1
+  day before» рисует только `s-agenda-3`, карточка и панель — одно; кадрам —
+  **задача 77**.
 - **Д6.** Attach стоит в `Form.Actions` рядом с Save и Cancel, кадр — первым
   в наборе «Attachments» (между Reminders и Repeats); строка вложения — Г7.
+  **Не пробел:** Attach — по имени `attach.add` (C-7.5), экран ставит его в
+  набор «Attachments»; в `Form.Actions` он стоит, как стоял.
 - **Д7.** `Attendees` и `Recurrence` (`Summary`, `Raw`, `Fields`) есть в
   модели правки, кадр их не рисует (U-6.2 называет таблицу участников на
   правке) — кадру или модели.
+  **Закрыт `v0.2.120`:** `EventEditPage.Recurrence` снят — правило в наборе
+  Repeats формы. `Attendees` остаются (U-6.2 называет их на правке;
+  организатор первым); что `s-agenda-3` их не рисует — **ждёт задачи 77**.
 - **Д8.** `app-event-edit/loss` — отчёт о потерях, кадра нет (как E8, U-5.5
   #6).
+  **Ждёт кадра:** отчёт о потерях правки события (`LossReport`) рисовать нечем
+  — у контакта это `states-12`; в задаче 77 это не названо — ведущему
+  дописать.
 - **Д9.** Новое событие: `/app/calendar/{account}/{col}/new`
   (`EventEditPage`) — ни фикстуры, ни кадра (у контакта — `app-contact-new`
   и `s-contacts-27`, задача 59).
+  **Сервер готов `v0.2.120`, фикстура ждёт клиента:** у формы `/new` —
+  шапка «New event» и календарь, без `Delete`; фикстура
+  `app-event-new/normal` снята сервером и не положена: клиентская
+  `fixtures.Models` не знает каталога `app-event-new`, и `zone` краснеет
+  (код клиента сервер не правит). Клиенту — строка `"app-event-new":
+  &view.EventEditPage{}` в `fixtures.Models`, серверу затем — фикстура,
+  `fixtureTypes`, `FIXTURE_SCREEN` и `FRAME_TODO` (по шаблону рода маршрут
+  сводится к `s-contacts-27`, рейл там — книги). Кадра нет — **ждёт задачи
+  77**.
 
 ### Е. Слова кадра без поля в модели
 
@@ -910,6 +1053,24 @@ time is shown…», «Polling 6 sources…», «0.4 s» (Б15), бейджи с�
 
 Итого: оболочка 2, агенда 17, панель 2, событие 12, правка 9 — 42 пробела
 контракта; Typecase 7, защит и `bind` 4.
+
+**Ответ сервера (`v0.2.116`…`v0.2.120`, 01–02.10.2026):** закрыто 38 —
+оболочка 2, агенда 16 (Б6 — безопасность, `v0.2.116`; Б16 — неделя
+фикстуры, Г3 — день конца серии, `v0.2.117`; Б15 — в части сервера), панель
+2, событие 12, правка 6; не пробелы — 2 (Б17 — пояс строки требует C-10, Д6
+— Attach по имени), с ними и части Г1, Г7; ждёт кадра — 1 (Д8); Д9 — сервер
+готов, фикстура ждёт строки клиента в `fixtures.Models`. Ждут задачи
+Typecase 77 части Б1, Б2, Б4, Б5, Б15, Б17, Г5, Г7, Д4, Д5, Д7, Д9; в ней
+не названы Д8 (отчёт о потерях правки события) и снятие вложения
+(`AttachRow.Actions`) — ведущему дописать. Контракт, который клиент должен
+знать: `ListBar.Show` вместо сегментов агенды, `AgendaPage.Subtitle`,
+`.Empty`, `AgendaDay.Count`, `AgendaRow.On`, `PollBar.Aside`, `.Note`,
+`RailSection.Feeds`, `Field.Runs`, `.Badge`, `Action.File`,
+`FormRow.ValueAside`, `EventEditPage.Name`, `.Subtitle`, `.Foreign`; сняты
+`EventPage.Reminders`, `EventEditPage.Reminders`, `.Recurrence`; рубрика
+дня «Monday · 10 August», «all day», статусы участников строчными,
+организатор — первый из `Attendees`, размеры без «.0», Advanced RRULE
+пуст с `repeat.base`.
 
 ---
 

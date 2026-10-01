@@ -128,15 +128,20 @@ type EventPage struct {
 // EventEditPage — правка: та же запись формой.
 type EventEditPage struct {
 	Shell
-	UID        string          `json:"uid"`
-	Form       Form            `json:"form"`
-	Recurrence RecurrenceBlock `json:"recurrence"`
-	Reminders  []ReminderRow   `json:"reminders"`
-	Attendees  []AttendeeRow   `json:"attendees"`
-	Attach     []AttachRow     `json:"attach"`
-	Loss       *LossReport     `json:"loss"`
-	Delete     *Action         `json:"delete"`     // внизу формы; nil — у новой записи
-	DeleteNote Text            `json:"deleteNote"` // строка под удалением: «Series is edited and deleted whole.»
+	UID      string `json:"uid"`
+	Name     Text   `json:"name"`     // заголовок: название события, у нового — «New event» (s-agenda-3)
+	Subtitle Text   `json:"subtitle"` // календарь: «nextcloud · Личный»
+	// Form — поля, напоминания строками reminder.N, повторение (Advanced
+	// RRULE пуст, правило — его образец)
+	Form      Form          `json:"form"`
+	Attendees []AttendeeRow `json:"attendees"` // организатор первым; только чтение (U-6.2)
+	Attach    []AttachRow   `json:"attach"`
+	// Foreign — «Kept as the server sent them»: свойства, которых Carrel не
+	// знает, имя и значение как есть, моноширинно (s-agenda-3); пусто — нет
+	Foreign    []Field     `json:"foreign"`
+	Loss       *LossReport `json:"loss"`
+	Delete     *Action     `json:"delete"`     // внизу формы; nil — у новой записи
+	DeleteNote Text        `json:"deleteNote"` // строка под удалением: «Series is edited and deleted whole.»
 }
 
 type RecurrenceBlock struct {

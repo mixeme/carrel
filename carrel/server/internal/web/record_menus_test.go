@@ -310,9 +310,6 @@ func TestDeleteOnTheEditPage(t *testing.T) {
 	if ev.DeleteNote != view.Text(strings.TrimSpace(series[1])) {
 		t.Errorf("series line = %q, want %q", ev.DeleteNote, series[1])
 	}
-	if ev.Recurrence.Note != "" {
-		t.Errorf("the line stands under Delete, not twice: recurrence note %q", ev.Recurrence.Note)
-	}
 	saves := 0
 	for _, a := range ev.Form.Actions {
 		if a.ID == "record.save" || a.ID == "record.cancel" {

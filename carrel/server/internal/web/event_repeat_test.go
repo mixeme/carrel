@@ -34,12 +34,13 @@ func TestEventRepeats(t *testing.T) {
 
 	page := decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess)))
 	form := formFields(page.Form)
+	// Advanced RRULE is empty, the rule its sample (s-agenda-3).
 	if form.Get("repeat.freq") != "WEEKLY" || form.Get("repeat.interval") != "1" || strings.Join(form["repeat.on"], ",") != "TH" || form.Get("repeat.count") != "5" || form.Get("repeat.until") != "" ||
-		form.Get("repeat.rule") != "FREQ=WEEKLY;BYDAY=TH;WKST=MO;COUNT=5" {
+		form.Get("repeat.rule") != "" {
 		t.Fatalf("form = %v", form)
 	}
-	if len(page.Recurrence.Fields) == 0 {
-		t.Error("the recurrence block of the form carries no fields")
+	if r := formRowOf(page.Form, "repeat.rule"); r == nil || r.Placeholder != "FREQ=WEEKLY;BYDAY=TH;WKST=MO;COUNT=5" {
+		t.Errorf("Advanced RRULE = %+v", r)
 	}
 
 	got := save(map[string]string{"summary": "Review again"})

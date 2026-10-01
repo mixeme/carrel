@@ -35,3 +35,32 @@ func NoteForeign(obj *model.Object) []string {
 	sort.Strings(out)
 	return out
 }
+
+// eventKnown are the properties of an event its card and its form show or
+// keep by themselves: the fields, the times and the rule, the people, the
+// attachments and links, and the bookkeeping every calendar object carries.
+// SEQUENCE is not among them: Carrel does not schedule, and the form shows
+// it as kept (s-agenda-3).
+var eventKnown = map[string]bool{
+	"UID": true, "DTSTAMP": true, "CREATED": true, "LAST-MODIFIED": true,
+	"SUMMARY": true, "LOCATION": true, "STATUS": true, "CATEGORIES": true, "DESCRIPTION": true, "URL": true,
+	"DTSTART": true, "DTEND": true, "DURATION": true, "RRULE": true, "RDATE": true, "EXDATE": true, "RECURRENCE-ID": true,
+	"ORGANIZER": true, "ATTENDEE": true, "ATTACH": true, "RELATED-TO": true,
+}
+
+// EventForeign are the names of the properties of an event Carrel does not
+// know, each once, in the order of their names: «Kept as the server sent
+// them» of its form (s-agenda-3).
+func EventForeign(obj *model.Object) []string {
+	if obj == nil {
+		return nil
+	}
+	var out []string
+	for name := range obj.Props() {
+		if upper := strings.ToUpper(name); !eventKnown[upper] && !slices.Contains(out, upper) {
+			out = append(out, upper)
+		}
+	}
+	sort.Strings(out)
+	return out
+}

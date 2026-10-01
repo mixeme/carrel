@@ -23,6 +23,11 @@
   ],
   "attendees": [
     {
+      "email": "mix@example.org",
+      "name": "Михаил Енученко",
+      "status": "organiser"
+    },
+    {
       "email": "a.kovaleva@example.org",
       "name": "Анна Ковалёва",
       "status": "accepted"
@@ -50,6 +55,26 @@
   },
   "deleteNote": "Series is edited and deleted whole.",
   "details": null,
+  "foreign": [
+    {
+      "href": "",
+      "label": "SEQUENCE",
+      "mono": true,
+      "value": "2"
+    },
+    {
+      "href": "",
+      "label": "X-APPLE-TRAVEL-ADVISORY-BEHAVIOR",
+      "mono": true,
+      "value": "AUTOMATIC"
+    },
+    {
+      "href": "",
+      "label": "X-MOZ-GENERATION",
+      "mono": true,
+      "value": "3"
+    }
+  ],
   "form": {
     "action": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit",
     "actions": [
@@ -203,7 +228,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "Separated by commas.",
+            "hint": "",
             "kind": "text",
             "label": "Tags",
             "name": "categories",
@@ -2764,7 +2789,8 @@
             "placeholder": "Find a zone",
             "readOnly": false,
             "required": false,
-            "value": "Asia/Yekaterinburg"
+            "value": "Asia/Yekaterinburg",
+            "valueAside": "as sent"
           }
         ],
         "unfold": null
@@ -3006,7 +3032,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "Until or Count, not both.",
+            "hint": "",
             "kind": "number",
             "label": "Count",
             "name": "repeat.count",
@@ -3018,11 +3044,24 @@
           {
             "error": "",
             "extra": null,
-            "hint": "Changed here, the rule is written as typed and wins over the fields above. Exceptions and moved instances are not edited: the series is edited as a whole.",
+            "hint": "The advanced value takes precedence when set.",
             "kind": "text",
             "label": "Advanced RRULE",
             "mono": true,
             "name": "repeat.rule",
+            "options": [],
+            "placeholder": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z",
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "repeat.base",
             "options": [],
             "readOnly": false,
             "required": false,
@@ -3034,6 +3073,7 @@
     ]
   },
   "loss": null,
+  "name": "Синк-ап по релизу",
   "notices": [],
   "print": {
     "range": "",
@@ -3278,67 +3318,7 @@
     "tags": [],
     "ticks": null
   },
-  "recurrence": {
-    "fields": [
-      {
-        "href": "",
-        "label": "Frequency",
-        "mono": false,
-        "value": "weekly"
-      },
-      {
-        "href": "",
-        "label": "Every",
-        "mono": false,
-        "value": "1"
-      },
-      {
-        "href": "",
-        "label": "On",
-        "mono": false,
-        "value": "Monday"
-      },
-      {
-        "href": "",
-        "label": "Until",
-        "mono": false,
-        "value": "2026-12-28"
-      },
-      {
-        "href": "",
-        "label": "Next",
-        "mono": false,
-        "value": "17 August 2026, 10:00"
-      },
-      {
-        "href": "",
-        "label": "Then",
-        "mono": false,
-        "value": "24 August 2026, 10:00"
-      },
-      {
-        "href": "",
-        "label": "Then",
-        "mono": false,
-        "value": "31 August 2026, 10:00"
-      }
-    ],
-    "note": "",
-    "raw": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z",
-    "summary": "Weekly on Monday, until 28 December 2026"
-  },
-  "reminders": [
-    {
-      "fields": [],
-      "label": "10 minutes before",
-      "remove": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      }
-    }
-  ],
+  "subtitle": "nextcloud · Личный",
   "title": "Edit event",
   "top": {
     "new": {
