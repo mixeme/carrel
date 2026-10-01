@@ -296,9 +296,11 @@ func TestAddPhoneIsAButton(t *testing.T) {
 	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada\nTEL;TYPE=cell:+1 555 0100\nEND:VCARD\n")
 	list := f.path("contacts")
 
+	// A new contact comes with one empty phone row (s-contacts-27), and
+	// nothing more: no empty e-mail or address.
 	fresh := decode[view.ContactEditPage](t, f.h.do(get(list+"/new", f.sess)))
-	if hasRow(fresh.Form, "tel.0") {
-		t.Errorf("a new contact comes with an empty phone row")
+	if !hasRow(fresh.Form, "tel.0") || hasRow(fresh.Form, "tel.1") || hasRow(fresh.Form, "email.0") {
+		t.Errorf("a new contact comes without one empty phone row, or with more")
 	}
 	form := formFields(fresh.Form)
 	form.Set("fn", "Bob")
@@ -307,8 +309,8 @@ func TestAddPhoneIsAButton(t *testing.T) {
 	if len(f.srv.Paths(f.col)) != 1 {
 		t.Errorf("adding a row created a record: %v", f.srv.Paths(f.col))
 	}
-	rowNamed(t, more.Form, "tel.0")
-	rowNamed(t, more.Form, "tel.0.type")
+	rowNamed(t, more.Form, "tel.1")
+	rowNamed(t, more.Form, "tel.1.type")
 
 	page := decode[view.ContactEditPage](t, f.h.do(get(list+"/ada/edit", f.sess)))
 	form = formFields(page.Form)

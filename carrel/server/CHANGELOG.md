@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.93 — 2026-10-01
+
+The full form of a new contact has a frame of its own, s-contacts-27
+(Typecase `4af7ad7`, from-typecase note 30, task 59).
+
+### Changed
+
+- **A new contact's full form starts with one empty phone row**
+  (s-contacts-27, C-6.8): Label «mobile» (`cell`), Number empty, Remove,
+  then Add phone. A record's form still carries no empty row beforehand
+  (s-contacts-3); a row left empty is not written (S-7).
+- `docs/spec/check.py`: `FRAME_TODO` «app-contact-new: нет кадра» is gone —
+  check 8 holds `app-contact-new/normal` against s-contacts-27, the frame of
+  its route. The caret of the new contact is held against s-contacts-27.
+
+### Not yet
+
+- The frame draws the photograph's Add on the new form; the photo steps are
+  a card's, and the card does not exist before Save (plan/server.md,
+  «Открыто»).
+
 ## v0.2.92 — 2026-10-01
 
 What the mockup copy of from-typecase note 28 (Typecase `2b50f5e`,

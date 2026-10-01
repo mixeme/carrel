@@ -110,9 +110,13 @@ type editField struct {
 	// it so writes nothing (S-7).
 	blank string
 	// add is the button under the rows of a repeating field, «Add phone»
-	// (C-6.8 InputAdd): the form draws no empty row beforehand
+	// (C-6.8 InputAdd): the form of a record draws no empty row beforehand
 	// (s-contacts-3).
 	add string
+	// newRow is the label of the one empty row the full form of a new
+	// record starts the field with, «mobile» under Phone numbers
+	// (s-contacts-27); empty — no row, only the button.
+	newRow string
 	// quick is the label a field has on the quick sheet where it differs
 	// from the full form's (s-notes-8, s-notes-9): Title; a time's date,
 	// Date; the one row of a repeating field, which draws neither its label
@@ -635,7 +639,7 @@ var editFields = map[view.Kind][]editField{
 		{name: "title", label: "Title", prop: "TITLE", typ: fieldText, optional: true},
 		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday,
 			hint: "Type it: 14.03.1987, or 14.03 without the year."},
-		{name: "tel", label: "Number", prop: "TEL", typ: fieldMulti, typed: true, mono: true, set: "Phone numbers", add: "Add phone", quick: "Phone", quickSample: "+7 …"},
+		{name: "tel", label: "Number", prop: "TEL", typ: fieldMulti, typed: true, mono: true, set: "Phone numbers", add: "Add phone", newRow: "cell", quick: "Phone", quickSample: "+7 …"},
 		{name: "email", label: "Address", prop: "EMAIL", typ: fieldMulti, typed: true, set: "Email addresses", add: "Add email", quick: "Email", quickSample: "name@example.org"},
 		// Addresses after the e-mail (s-contacts-3), folded away with their
 		// button when the card has none.
@@ -2956,6 +2960,11 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 		s.writePage(w, r, http.StatusOK, s.newSheet(c, true))
 	default:
 		values := s.emptyValues(c)
+		for _, f := range editFields[c.spec.kind] {
+			if f.newRow != "" {
+				values[f.name], values[f.name+".type"] = []string{"", ""}, []string{f.newRow, ""}
+			}
+		}
 		carried(c, r, values)
 		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: values, isNew: true, readAt: s.now()}))
 	}

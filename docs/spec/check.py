@@ -238,9 +238,7 @@ SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-
           "app-publish", "app-files-picker", "app-mail-compose",
           "app-contact-rewrite"}
 
-FRAME_TODO = {
-    "app-contact-new: нет кадра": "задача 59 — кадр полной формы создания `/new`",
-}
+FRAME_TODO = {}
 
 # Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
 # записка в from-typecase.md. Закрылось на сервере — строка уходит.
@@ -270,10 +268,8 @@ STATE_FRAME = {
     "app-contacts-one/readonly": "states-4",
     "app-contact-edit/no-photo": "s-contacts-4",
 }
-# Без строки: app-contact-new/normal — полная форма создания (`/new`), и кадра
-# у неё нет: s-notes-8 — лист `/new/quick` (Typecase 0de7609), s-contacts-4 —
-# правка Анны с возвратом «Back to the card», которого у новой записи нет.
-# Ждёт Typecase (FRAME_TODO, задача 59).
+# Без строки: app-contact-new/normal — полная форма создания (`/new`) — свой
+# кадр маршрута, s-contacts-27 (Typecase 4af7ad7, задача 59).
 
 def frame_by_id(fid):
     m = re.search(r'<div class="frame" data-frame="%s"[^>]*>' % re.escape(fid), mock)

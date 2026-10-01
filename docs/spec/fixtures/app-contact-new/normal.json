@@ -156,6 +156,74 @@
             "error": "",
             "extra": null,
             "hint": "",
+            "kind": "select",
+            "label": "Label",
+            "name": "tel.0.type",
+            "options": [
+              {
+                "label": "mobile",
+                "selected": true,
+                "value": "cell"
+              },
+              {
+                "label": "work",
+                "selected": false,
+                "value": "work"
+              },
+              {
+                "label": "home",
+                "selected": false,
+                "value": "home"
+              },
+              {
+                "label": "main",
+                "selected": false,
+                "value": "main"
+              },
+              {
+                "label": "fax",
+                "selected": false,
+                "value": "fax"
+              },
+              {
+                "label": "other",
+                "selected": false,
+                "value": "other"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "cell"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Number",
+            "mono": true,
+            "name": "tel.0",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "remove",
+            "label": "Remove",
+            "name": "remove",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "tel.0"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
             "kind": "add",
             "label": "Add phone",
             "name": "add",
