@@ -1213,6 +1213,7 @@ type PhotoPreviewPage struct {
     OffsetX int
     OffsetY int
     Rotate  int
+    Saved   Text // что запишет Save photo: «512 × 512 · JPEG · about 90 KB» (s-contacts-5)
     Actions []Action
 }
 
@@ -1674,6 +1675,7 @@ type FileCollectionRow struct {
 type FilesPage struct {
     Shell
     Subtitle Text
+    Attachments bool // папка вложений (S-20): метка «attachment folder» в строке под заголовком (s-files-1); слово — экрана
     Crumbs  []Crumb
     Bar     ListBar
     View    FileView // список или плитки
@@ -2012,6 +2014,8 @@ type ConnectionCard struct {
     Login       Text
     Password    *SecretField // Show password; nil у сервера, который пароля не спрашивает (s-profile-15)
     Access      Text         // «no password» в строке адреса у такого сервера; у прочих пусто
+    Plain       Text         // «plain WebDAV, no principal» в строке адреса у хранилища без принципала (s-profile-1); у прочих пусто
+    Answered    When         // когда сервер последним ответил сеансу — новейшее чтение его коллекций: «5 min ago» после слов экрана «last answer» (s-profile-1); пусто — не читал
     State       CollectionState
     Collections []CollectionRow
     Trace       *DiagnosticTrace // след последней проверки
@@ -2395,6 +2399,7 @@ type PublishedFile struct {
     Size    Size
     Type    Text
     Preview PreviewKind // C-8: изображение, PDF, текст, разметка, ничего
+    Changed When        // день последней правки, «2026-08-10» после слова экрана «changed» (s-publish-9)
     Body    Text
     Blocks  []Block
     Href    string

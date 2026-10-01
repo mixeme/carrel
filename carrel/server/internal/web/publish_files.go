@@ -181,6 +181,9 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 			download := s.route("/p/" + token + "/download")
 			mt := fileType(e.Name, e.Type)
 			page.File = &view.PublishedFile{Name: text(e.Name), Size: formatSize(e.Size), Type: text(mt), Preview: view.PreviewNone, Href: download}
+			if !e.Modified.IsZero() {
+				page.File.Changed = view.When(c.tf.dayKey(e.Modified)) // «changed 2026-08-10» (s-publish-9)
+			}
 			if inlineTypes[mt] {
 				page.File.Preview, page.File.Href = view.PreviewImage, download+"?inline=1"
 			}

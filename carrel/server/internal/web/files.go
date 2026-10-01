@@ -532,6 +532,11 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 	if c.col.ReadOnly {
 		page.Subtitle += " · read-only: nothing can be uploaded or made here"
 	}
+	// «attachment folder» by the line (s-files-1): this folder is the one
+	// attachments are written to (S-20).
+	if fc := s.savedFolder(c.sess, c.blob); fc != nil && fc.href("", fc.segs, true) == here {
+		page.Attachments = true
+	}
 	page.Crumbs = []view.Crumb{{Label: text(collectionLabel(c.col)), Href: s.route(c.href("", nil, true))}}
 	for i, seg := range segs {
 		page.Crumbs = append(page.Crumbs, view.Crumb{Label: text(seg), Href: s.route(c.href("", segs[:i+1], true))})

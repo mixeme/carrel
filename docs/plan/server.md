@@ -32,23 +32,11 @@
       — шаги существующей карточки, до Save её нет. Нужен путь: Add
       сохраняет карточку и ведёт к загрузке, или черновик фотографии живёт
       под UID новой формы до Save. `v0.2.93` фото новой формы не шлёт.
-- [ ] **Строки кадров, которых сервер не шлёт** (найдено в записке 18,
-      `v0.2.69`): значок «attachment folder» в строке под заголовком папки
-      вложений (`s-files-1`; `FilesPage.Subtitle` несёт только подключение);
-      в строке адреса карточки подключения — «last answer 2 min ago» и «plain
-      WebDAV, no principal» (`s-profile-1`, `-15`; у `ConnectionCard` есть
-      только `Access`).
-- [ ] **Кадры, с которыми сервер расходится вне записок** (найдено в записке
-      19, `v0.2.71`): `/register` — не `s-auth-2` (заголовок «Create an
-      account», строка о письме подтверждения, предупреждение о пароле над
-      полями, Repeat password, «Already have an account? Sign in»; сервер —
-      «Create account», «Registration is open on this instance.», без
-      повтора пароля); строка листа переименования коллекции (`s-profile-7`:
-      «…the address does not change… The new name and colour are written to
-      the server…»; сервер — «the address stays as it is… The new name is
-      written…»). Подсказки строки поиска и члены пары на экране дубликатов
-      (`indexEntry.Detail`) пишут день полной формой — по C-10 у списка она
-      короткая; сверить с их кадрами.
+- [ ] **Строка подписки в карточке подключений** (остаток «Строк кадров,
+      которых сервер не шлёт», `v0.2.98`): «… · no password · read 2 min
+      ago · 34 KB · 0.4 s» (s-profile-1, -10) — сколько весил и сколько
+      читался последний ответ ленты; у `SubscriptionCard` есть только
+      `Checked`. Нужен замер при чтении ленты (`feedReader`).
 - [ ] **Почта** ([carrel-mailbox.md](../spec/carrel-mailbox.md)) — отложена
       владельцем; ядро к ней готово (`v0.2.54`, «Почта — подготовка» в
       architecture.md: срез `Blob.Mailboxes`, приставка `mb-`, счёт
@@ -170,6 +158,7 @@
 | Основная кнопка и моноширинное поле там, где их не видела ни фикстура, ни проверка: Upload в папке (s-files-1, -2, -4, -15), Download публичного файла и размер на ней у файла без предпросмотра (s-publish-9, -11), Send by letter первым (s-publish-13), Done устройства (s-davloom-3), Open the kept record (s-dup-5), шаги импорта словами кадров — Preview file, «Import N …», Back to list без «Import another file», без Cancel на первом шаге (s-io-3, -5, -9), восстановление — Open the manifest, «Restore N collections», Cancel (s-backup-7, -8), UID в Related to (s-tasks-11); значения вне формы, нарисованные моноширинным полем, — слово экрана | `v0.2.95` |
 | POST вне формы без сценариев (C15 плана клиента): каждое POST-действие экрана за входом несёт токен сеанса (`Action.CSRF`, C-11), проставляется при отрисовке; проверки — все фикстуры (`TestFixturePostActionsCarryTheToken`) и отправка своей формой без заголовка | `v0.2.96` |
 | Обновление в шапке карточки записи и её правки (C17 плана клиента): `record.refresh` — та же страница, «2 min ago» — когда сеанс читал коллекцию записи | `v0.2.97` |
+| Строки кадров, которых сервер не слал, и расхождения вне записок: метка «attachment folder» у папки вложений (`FilesPage.Attachments`, s-files-1), в строке адреса подключения «plain WebDAV, no principal» и «last answer …» (`ConnectionCard.Plain`, `.Answered`, s-profile-1), «changed …» публичного файла (`PublishedFile.Changed`, s-publish-9), «Saved as» кадрирования (`PhotoPreviewPage.Saved`, s-contacts-5), строка листа переименования словами кадра (s-profile-7), день у членов пары дубликатов коротко (C-10, s-dup-1); регистрация по s-auth-2 — с `v0.2.75` | `v0.2.98` |
 
 S-30.4 (чужие клиенты, прокси у себя, вид письма у получателя, архив месячной
 давности) машиной не закрывается — перечислено в README сервера как ручное.

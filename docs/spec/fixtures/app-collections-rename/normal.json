@@ -52,6 +52,6 @@
     ]
   },
   "kind": "contact",
-  "note": "Renaming is not moving: the address stays as it is, so devices, published links and backup jobs pointing here go on working. The new name is written to the server, and other clients show it at their next sync.",
+  "note": "Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. The new name is written to the server — other clients will show it at their next sync.",
   "stamp": "nextcloud"
 }

@@ -898,8 +898,13 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 			Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Primary: true, Enabled: true}},
 		}
 	}
-	note := "Renaming is not moving: the address stays as it is, so devices, published links and backup jobs pointing here go on working. " +
-		"The new name is written to the server, and other clients show it at their next sync."
+	// The frame's words (s-profile-7); a book has no colour to write.
+	note := "Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. " +
+		"The new name and colour are written to the server — other clients will show them at their next sync."
+	if col.Has(view.KindContact) {
+		note = "Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. " +
+			"The new name is written to the server — other clients will show it at their next sync."
+	}
 	sheet := view.CollectionRenameSheet{
 		Kind:    col.Kinds[0],
 		Stamp:   view.Stamp(connLabel(conn)),

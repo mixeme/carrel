@@ -21,13 +21,16 @@ type FilesPage struct {
 	// хранилища только для чтения с тем, почему Upload и New folder
 	// выключены: «sftpgo · vps · read-only: nothing can be uploaded or made
 	// here» (s-files-15)
-	Subtitle Text           `json:"subtitle"`
-	Crumbs   []Crumb        `json:"crumbs"`
-	Bar      ListBar        `json:"bar"`
-	View     FileView       `json:"view"` // список или плитки
-	Rows     []FileRow      `json:"rows"`
-	Queue    *TransferQueue `json:"queue"`
-	Tree     *FileTree      `json:"tree"` // дерево выбора; на странице раздела nil
+	Subtitle Text `json:"subtitle"`
+	// Attachments — эта папка — папка вложений (S-20): метка «attachment
+	// folder» в строке под заголовком (s-files-1); слово — экрана
+	Attachments bool           `json:"attachments"`
+	Crumbs      []Crumb        `json:"crumbs"`
+	Bar         ListBar        `json:"bar"`
+	View        FileView       `json:"view"` // список или плитки
+	Rows        []FileRow      `json:"rows"`
+	Queue       *TransferQueue `json:"queue"`
+	Tree        *FileTree      `json:"tree"` // дерево выбора; на странице раздела nil
 }
 type Crumb struct {
 	Label Text   `json:"label"`

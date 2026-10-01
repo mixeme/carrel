@@ -44,6 +44,7 @@
           "method": "GET"
         }
       ],
+      "answered": "",
       "collections": [
         {
           "changed": "",
@@ -627,6 +628,7 @@
         "shown": false,
         "value": ""
       },
+      "plain": "",
       "server": "https://nextcloud.example/dav.php",
       "state": "ok",
       "title": "nextcloud",
@@ -676,6 +678,7 @@
           "method": "GET"
         }
       ],
+      "answered": "",
       "collections": [
         {
           "changed": "",
@@ -946,6 +949,7 @@
         "shown": false,
         "value": ""
       },
+      "plain": "",
       "server": "https://radicale.example",
       "state": "ok",
       "title": "radicale · vps",
@@ -995,6 +999,7 @@
           "method": "GET"
         }
       ],
+      "answered": "",
       "collections": [
         {
           "changed": "",
@@ -1073,6 +1078,7 @@
         "shown": false,
         "value": ""
       },
+      "plain": "",
       "server": "https://baikal.example/dav.php",
       "state": "ok",
       "title": "baikal",
@@ -1122,6 +1128,7 @@
           "method": "GET"
         }
       ],
+      "answered": "",
       "collections": [
         {
           "changed": "",
@@ -1248,6 +1255,7 @@
         "shown": false,
         "value": ""
       },
+      "plain": "plain WebDAV, no principal",
       "server": "https://files.example.org/dav",
       "state": "ok",
       "title": "sftpgo · vps",

@@ -85,11 +85,14 @@ type PhotoBlock struct {
 
 type PhotoPreviewPage struct {
 	Shell
-	Href    string   `json:"href"` // предпросмотр текущего кадра
-	Zoom    int      `json:"zoom"`
-	OffsetX int      `json:"offsetX"`
-	OffsetY int      `json:"offsetY"`
-	Rotate  int      `json:"rotate"`
+	Href    string `json:"href"` // предпросмотр текущего кадра
+	Zoom    int    `json:"zoom"`
+	OffsetX int    `json:"offsetX"`
+	OffsetY int    `json:"offsetY"`
+	Rotate  int    `json:"rotate"`
+	// Saved — что будет записано в карточку: «512 × 512 · JPEG · about 90
+	// KB» (s-contacts-5)
+	Saved   Text     `json:"saved"`
 	Actions []Action `json:"actions"`
 }
 

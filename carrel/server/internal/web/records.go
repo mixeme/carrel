@@ -405,17 +405,17 @@ func indexOf(tf timeFmt, k view.Kind, items []listed) []indexEntry {
 		case view.KindEvent:
 			e.UID, e.Title, e.Related = cal.UID(o), titleOr(cal.Text(o, "SUMMARY"), "Untitled event"), cal.RelatedTo(o)
 			if tm, err := cal.TimingOf(o, tf.tz); err == nil && !tm.Start.IsZero() {
-				e.Detail, e.At = tf.timeOrDate(tm), tm.Start.Unix()
+				e.Detail, e.At = tf.shortDue(tm), tm.Start.Unix()
 			}
 		case view.KindTask:
 			e.UID, e.Title, e.Related = cal.UID(o), titleOr(cal.Text(o, "SUMMARY"), "Untitled task"), cal.RelatedTo(o)
 			if due, err := cal.DueOf(o, tf.tz); err == nil && !due.Start.IsZero() {
-				e.Detail, e.At = "Due "+tf.timeOrDate(due), due.Start.Unix()
+				e.Detail, e.At = tf.shortDue(due), due.Start.Unix()
 			}
 		default:
 			e.UID, e.Title, e.Related = cal.UID(o), noteTitle(cal.Text(o, "SUMMARY"), cal.Description(o)), cal.RelatedTo(o)
 			if at := noteTime(o, tf.tz); !at.IsZero() {
-				e.Detail, e.At = tf.date(at), at.Unix()
+				e.Detail, e.At = tf.shortDay(at), at.Unix()
 			}
 		}
 		out = append(out, e)

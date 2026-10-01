@@ -557,6 +557,7 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			Method: "GET", Enabled: true,
 		})
 	}
+	var answered time.Time
 	for _, col := range blob.CollectionsOf(c.ID) {
 		if col.Gone {
 			continue // named by goneNotice: a row has no state to carry it
@@ -571,7 +572,17 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 		row.LastRead, row.Changed = readingOf(sess, tf, c.ID, col.Path)
 		row.Menu = s.collectionRowMenu(blob, c, col)
 		card.Collections = append(card.Collections, row)
+		if r, ok := sess.ReadingOf(c.ID, col.Path); ok && r.At.After(answered) {
+			answered = r.At
+		}
 	}
+	// The address line (s-profile-1): a storage whose server named no
+	// principal says so, and «last answer» is the newest read of any of its
+	// collections this session made.
+	if c.FileRoot != "" {
+		card.Plain = "plain WebDAV, no principal"
+	}
+	card.Answered = tf.formatWhen(answered, true, tf.now)
 	return card
 }
 

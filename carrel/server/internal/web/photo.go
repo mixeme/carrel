@@ -433,6 +433,12 @@ func (s *Server) photoPreviewPage(c *collectionCtx, uid string, d photoDraft, no
 		OffsetY: d.Crop.OffsetY,
 		Rotate:  d.Crop.Rotate,
 	}
+	// What Save photo writes into the card, said before it is pressed
+	// (s-contacts-5): the frame as it would be saved, measured.
+	if body, err := s.renderDraft(d); err == nil {
+		side := strconv.Itoa(s.cfg.PhotoMaxSide)
+		page.Saved = text(side + " × " + side + " · JPEG · about " + string(formatSize(int64(len(body)))))
+	}
 	for _, deg := range []int{0, 90, 180, 270} {
 		page.Actions = append(page.Actions, view.Action{
 			ID: "photo.rotate." + strconv.Itoa(deg), Label: text(strconv.Itoa(deg) + "°"), Method: "POST", Enabled: true, On: d.Crop.Rotate == deg,

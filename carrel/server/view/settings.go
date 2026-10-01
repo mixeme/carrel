@@ -173,12 +173,19 @@ type ConnectionsPage struct {
 	Actions        []Action `json:"actions"` // Connect account · Subscribe to a feed
 }
 type ConnectionCard struct {
-	AccountID   string           `json:"accountID"`
-	Title       Text             `json:"title"`
-	Server      Text             `json:"server"`
-	Login       Text             `json:"login"`
-	Password    *SecretField     `json:"password"` // Show password; nil у сервера без пароля (s-profile-15)
-	Access      Text             `json:"access"`   // «no password» в строке адреса (s-profile-15); у прочих пусто
+	AccountID string       `json:"accountID"`
+	Title     Text         `json:"title"`
+	Server    Text         `json:"server"`
+	Login     Text         `json:"login"`
+	Password  *SecretField `json:"password"` // Show password; nil у сервера без пароля (s-profile-15)
+	Access    Text         `json:"access"`   // «no password» в строке адреса (s-profile-15); у прочих пусто
+	// Plain — «plain WebDAV, no principal» в строке адреса у хранилища, где
+	// сервер не назвал принципала (s-profile-1); у прочих пусто
+	Plain Text `json:"plain"`
+	// Answered — когда сервер ответил сеансу последним: «5 min ago» после
+	// слов экрана «last answer» (s-profile-1); пусто — сеанс ещё не читал ни
+	// одной его коллекции
+	Answered    When             `json:"answered"`
 	State       CollectionState  `json:"state"`
 	Collections []CollectionRow  `json:"collections"`
 	Trace       *DiagnosticTrace `json:"trace"`   // след последней проверки

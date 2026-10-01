@@ -17,6 +17,35 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.98 — 2026-10-01
+
+Strings the frames draw that the server did not send, or sent otherwise
+(plan/server.md, two items «Открыто»). A constant word of a frame is the
+screen's (U-1.3); what depends on the data or the state is sent.
+
+### Added
+
+- `FilesPage.attachments`: the folder is the attachment folder — the badge
+  «attachment folder» under its title (s-files-1).
+- `ConnectionCard.plain`: «plain WebDAV, no principal» for a storage whose
+  server named no principal; `ConnectionCard.answered`: when the server
+  last answered this session, the newest read of its collections — «5 min
+  ago» after the screen's «last answer» (s-profile-1).
+- `PublishedFile.changed`: the day the public file last changed,
+  «2026-08-10» after the screen's «changed» (s-publish-9).
+- `PhotoPreviewPage.saved`: what Save photo writes — «512 × 512 · JPEG ·
+  about 90 KB», measured from the frame as it would be saved (s-contacts-5).
+
+### Changed
+
+- The note of the rename sheet is the frame's: «the address does not
+  change … The new name and colour are written to the server — other
+  clients will show them at their next sync.»; a book, without a colour,
+  says the name alone (s-profile-7).
+- A member of a pair on the duplicates screen says its day the short way of
+  a list (C-10): «12 Aug 18:00», «12 Aug», a note's «12 Aug»; was «Due 12
+  August 2026, 18:00» (s-dup-1).
+
 ## v0.2.97 — 2026-10-01
 
 The top bar of a record's page had no refresh, while every frame draws

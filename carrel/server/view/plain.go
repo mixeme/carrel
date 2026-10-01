@@ -129,6 +129,7 @@ type PublishedFile struct {
 	Size    Size        `json:"size"`
 	Type    Text        `json:"type"`
 	Preview PreviewKind `json:"preview"` // C-8: изображение, PDF, текст, разметка, ничего
+	Changed When        `json:"changed"` // день последней правки: «2026-08-10» после слова экрана «changed» (s-publish-9)
 	Body    Text        `json:"body"`
 	Blocks  []Block     `json:"blocks"`
 	Href    string      `json:"href"`
