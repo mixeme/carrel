@@ -76,6 +76,7 @@ func (s *Server) sendSystemMail(ctx context.Context, to, subject, body string) (
 		var reply string
 		reply, err = cmail.Send(ctx, relay, []string{to}, data)
 		if err == nil {
+			s.markSent()
 			return reply, nil
 		}
 	}

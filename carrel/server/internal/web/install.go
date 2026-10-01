@@ -127,6 +127,7 @@ func (s *Server) postAdminInstall(w http.ResponseWriter, r *http.Request) {
 	}
 	cookie, _ := r.Cookie(cookieName)
 	rows := s.runInstallCheck(r.Context(), sess, origin, cookie)
+	s.markChecked(rows)
 	bad := 0
 	for _, row := range rows {
 		if row.State == view.CheckBad {

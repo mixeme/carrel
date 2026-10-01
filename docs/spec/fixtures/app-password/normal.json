@@ -171,7 +171,18 @@
     "neighbours": [],
     "shortcuts": [],
     "davloom": "davloom · running · 0 devices",
-    "ticks": null
+    "ticks": null,
+    "status": [
+      {
+        "line": [
+          {
+            "text": "No device has connected since the start."
+          }
+        ],
+        "title": "davloom · running · 0 devices",
+        "tone": "on"
+      }
+    ]
   },
   "title": "Change password",
   "top": {

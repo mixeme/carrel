@@ -17,6 +17,31 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.113 — 2026-10-01
+
+The settings and administration rails drew a state block at their foot that
+the server did not send (components-35).
+
+### Added
+
+- **`Rail.status`** (C-6, `RailStatus`: `tone` — C-8 `StatusTone` `on`,
+  `off`, `alert` —, `title`, `line` as Runs, the time monospaced «2026-08-16
+  09:41»). Settings: davloom — off («No device connects until it is
+  started.») or «davloom · running · N devices» with the last answer to a
+  device since the start; the copies when there are jobs — «Backups are
+  running», «Last backup … · verified», alert when the newest is older than
+  a week or not whole, «No backup yet» before the first. Administration:
+  mail — «SMTP not configured» (alert) or «Mail is going out» with the last
+  letter sent since the start; the installation check — «Checks passed» or
+  «N checks failed» with when, «Not checked since the start» before one.
+  Other rails have no `status` key.
+
+### Fixed
+
+- The preview of a notes folder with no Markdown said only «The folder
+  holds no Markdown file.»: the message before it was lost when the two
+  were joined (v0.2.110).
+
 ## v0.2.112 — 2026-10-01
 
 The head and the empty state of Backup by their frames (s-backup-1,

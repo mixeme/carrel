@@ -54,11 +54,6 @@
       заметка davloom, день заметки в панели, жирная первая фраза
       сообщений — `Notice.Title`). Осталось там, где сервер шлёт `Text`
       или не шлёт ничего:
-      - строки состояния рейла настроек и администрирования — «Last
-        response ‹mono›», «Last backup ‹mono› · verified», «Last sent /
-        Last check ‹mono›» (account-*, s-profile-*, s-plan-*, s-davloom-*,
-        s-backup-*, s-admin-*): `Rail` их не несёт вовсе — нужен блок
-        состояния рейла (состояние davloom, копии, почты, проверки и время);
       - строки под заголовком: «destination **WebDAV and download**»
         (s-backup-3), путь архива (s-backup-8), строка файла публикации
         моноширинно (s-publish-8…11), опасный кусок строки davloom
@@ -187,6 +182,7 @@
 | Мастер импорта по кадрам (s-io-3…9): строка шагов (`ImportPage.Steps`), под заголовком файл моноширинно, размер и формат или папка и число файлов, в отчёте — куда легло (`Subtitle`), счёт ready / with errors / UID collisions / skipped (`Counts`), отчёт числами — Failed и почему, сменившиеся UID (`ImportReport.Failed`, `.Failures`, `.Renames`); строка под файлом с ‹.ics› / ‹.vcf› (`Source.Hint`), сообщения шагов словами кадров, ‹X-› у заметок (`Source.Note` — `Runs`); папка заметок выбирается в дереве GET-ом, берёт её «Preview folder» (`Source.Preview`), строка под деревом (`FolderHint`); не-Markdown папки — skipped, непрочтённое — with errors, заметка без front matter датирована временем файла | `v0.2.110` |
 | Лист новой коллекции после отказа (s-profile-6): «Back to the form» — та же форма без отказа, серверу ничего (`op=back`), и «Try again» — форма ещё раз; у папки хранилища так же | `v0.2.111` |
 | Шапка и пустое состояние Backup (s-backup-1, s-backup-6): New job (`?job=new` — страница нового задания) и Restore (`?restore=1`, `RestoreBlock.Open`) в шапке и без заданий; под заголовком счёт заданий или «No jobs yet», пустое состояние словами кадра (‹.ics›, ‹.vcf›, **Restore**) | `v0.2.112` |
+| Блок состояния в подвале рейлов настроек и администрирования (components-35, account-*, s-profile-*, s-backup-*, s-admin-*): `Rail.Status` (`RailStatus`, C-8 `StatusTone`) — davloom и копии, почта и проверка установки, время моноширинно; последнее письмо и проверка — с запуска (`railMarks`); `join` берёт `Runs` (в `v0.2.110` сообщение папки без Markdown теряло начало) | `v0.2.113` |
 
 S-30.4 (чужие клиенты, прокси у себя, вид письма у получателя, архив месячной
 давности) машиной не закрывается — перечислено в README сервера как ручное.

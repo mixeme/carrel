@@ -97,6 +97,17 @@
     "note": "",
     "sections": [],
     "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "No device has connected since the start."
+          }
+        ],
+        "title": "davloom · running · 0 devices",
+        "tone": "on"
+      }
+    ],
     "tags": [],
     "ticks": null
   },

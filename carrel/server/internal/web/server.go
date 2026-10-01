@@ -211,6 +211,7 @@ type Server struct {
 	limit    *Limiter
 	guard    *dav.Guard // every outbound DAV request of this server (S-5.1)
 	probes   probes     // self-requests of a running installation check (S-28.1)
+	marks    railMarks  // the last letter and check the rails' state block names
 	version  string
 	commit   string
 	mux      *http.ServeMux

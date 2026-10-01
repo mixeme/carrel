@@ -581,6 +581,7 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 	if _, err := cmail.Send(sendCtx, s.relay(), to, data); err != nil {
 		return 0, errors.New("The relay did not take the letter: " + err.Error())
 	}
+	s.markSent()
 	sent = true
 	var attached []string
 	for _, k := range attachKinds {

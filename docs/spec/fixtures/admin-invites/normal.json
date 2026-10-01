@@ -90,7 +90,27 @@
     "neighbours": [],
     "shortcuts": [],
     "davloom": "davloom · running · 0 devices",
-    "ticks": null
+    "ticks": null,
+    "status": [
+      {
+        "line": [
+          {
+            "text": "No letter since the start."
+          }
+        ],
+        "title": "Mail is going out",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Run the installation check."
+          }
+        ],
+        "title": "Not checked since the start",
+        "tone": "off"
+      }
+    ]
   },
   "rows": [],
   "title": "Add users",

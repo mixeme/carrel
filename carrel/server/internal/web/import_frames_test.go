@@ -145,3 +145,23 @@ func TestImportNotesFolderByFrames(t *testing.T) {
 		t.Errorf("counts = %q", got)
 	}
 }
+
+// A folder with no Markdown says so after the preview's own message: the
+// two are one sentence in pieces, neither lost.
+func TestImportFolderWithoutMarkdownSaysSo(t *testing.T) {
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "secret"
+	notebook := davtest.CalendarHome + "notes/"
+	srv.AddCalendar(caldav.Calendar{Path: notebook, Name: "Notebook", SupportedComponentSet: []string{"VJOURNAL"}})
+	srv.SeedFolder(davtest.FileRoot + "docs/")
+	srv.SeedFile(davtest.FileRoot+"docs/skan.pdf", "not a note")
+	f := connectFixture(t, srv, notebook, nil)
+	addFileCollection(t, f, davtest.FileRoot+"docs/", "Docs")
+	page := decode[view.ImportPage](t, f.h.do(get(f.path("notes")+"/import", f.sess)))
+	page = decode[view.ImportPage](t, f.h.do(get(page.Source.Folder.Options[0].ID, f.sess)))
+	page = decode[view.ImportPage](t, f.h.do(postForm(page.Source.Preview.Href, f.sess, url.Values{})))
+	got := saidRuns(page.Source.Note)
+	if !strings.HasPrefix(got, "Markdown is stored as it was written") || !strings.HasSuffix(got, "The folder holds no Markdown file.") {
+		t.Errorf("note = %q", got)
+	}
+}

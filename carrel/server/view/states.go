@@ -187,6 +187,15 @@ const (
 	CheckUnknown CheckState = "unknown" // серый флажок: то, что снаружи не измерить
 )
 
+// StatusTone — точка строки состояния рейла (RailStatus, components-35).
+type StatusTone string
+
+const (
+	StatusOn    StatusTone = "on"    // идёт как надо — точка акцента
+	StatusOff   StatusTone = "off"   // выключено или не проверялось — приглушённо
+	StatusAlert StatusTone = "alert" // требует внимания — тревога
+)
+
 type PreviewKind string
 
 const (

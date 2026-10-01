@@ -754,6 +754,23 @@ type Rail struct {
     // слушатель того же процесса (S-27.1), и его отказ останавливает Carrel
     Davloom  Text
     Note     Text      // строка состояния под списком
+    // Блок состояния в подвале (components-35): у рейла настроек — davloom
+    // (выключен — off, «No device connects until it is started.»; работает
+    // — «davloom · running · N devices», «Last response ‹…›» — последний
+    // ответ устройству с запуска) и копии, когда задания есть («Backups are
+    // running», «Last backup ‹…› · verified»; старше недели или неполная —
+    // alert); у администрирования — почта («Mail is going out», «Last sent
+    // ‹…›»; без SMTP — alert «SMTP not configured») и проверка установки
+    // («Checks passed» или «N checks failed», «Last check ‹…›»; с запуска
+    // не было — off). Время — моноширинно, «2026-08-16 09:41»; то, чего
+    // сервер с запуска не видел, так и сказано. У прочих рейлов поля нет
+    Status   []RailStatus
+}
+
+type RailStatus struct {
+    Tone  StatusTone // C-8: точка — on, off, alert
+    Title Text
+    Line  Runs
 }
 
 type RailAbout struct {
@@ -2732,6 +2749,9 @@ const ( TabApple DeviceTab = "apple"; TabAndroid = "android"
 
 type CheckState string
 const ( CheckOK CheckState = "ok"; CheckBad = "bad"; CheckUnknown = "unknown" )
+
+type StatusTone string // точка строки состояния рейла (RailStatus)
+const ( StatusOn StatusTone = "on"; StatusOff = "off"; StatusAlert = "alert" )
 
 type PreviewKind string
 const ( PreviewNone PreviewKind = "none"; PreviewImage = "image"

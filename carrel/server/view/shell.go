@@ -78,6 +78,21 @@ type Rail struct {
 	// running · 3 devices»; пусто — режим выключен
 	Davloom Text `json:"davloom"`
 	Note    Text `json:"note"` // строка состояния под списком
+	// Status — блок состояния в подвале рейла (components-35): у рейла
+	// настроек — davloom и копии, у администрирования — почта и проверка
+	// установки; у прочих рейлов пусто и в ответе нет
+	Status []RailStatus `json:"status,omitempty"`
+}
+
+// RailStatus — одна строка блока состояния: точка тоном, заголовок и строка
+// под ним — «davloom · running · 3 devices» / «Last response
+// ‹2026-08-16 09:41›», «Backups are running» / «Last backup ‹…› ·
+// verified», «Mail is going out» / «Last sent ‹…›», «Checks passed» /
+// «Last check ‹…›»; время — моноширинно
+type RailStatus struct {
+	Tone  StatusTone `json:"tone"` // C-8
+	Title Text       `json:"title"`
+	Line  Runs       `json:"line"`
 }
 
 // RailAbout — последняя строка рейла: название и сборка порознь, сборка

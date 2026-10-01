@@ -42,6 +42,7 @@ func (s *Server) settingsRail(sess *session.Session, open string) view.Rail {
 			Count: r.count,
 		})
 	}
+	rail.Status = s.settingsStatus(sess)
 	return rail
 }
 
@@ -85,6 +86,7 @@ func (s *Server) adminRail(sess *session.Session, open string) view.Rail {
 			Count: r.count,
 		})
 	}
+	rail.Status = s.adminStatus(sess)
 	return rail
 }
 

@@ -57,6 +57,12 @@ func join(parts ...any) view.Runs {
 			out = append(out, v)
 		case []view.Run:
 			out = append(out, v...)
+		case view.Runs:
+			// A sentence already in pieces: dropping it here was the
+			// note of a folder without Markdown lost (v0.2.110).
+			out = append(out, v...)
+		default:
+			panic(fmt.Sprintf("join: a piece of type %T", p))
 		}
 	}
 	// Plain neighbours make one piece: the client writes pieces as they
