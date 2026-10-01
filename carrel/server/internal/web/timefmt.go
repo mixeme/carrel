@@ -101,8 +101,27 @@ func (f timeFmt) sentAt(t time.Time) (view.When, string) {
 	return view.When(f.dayOfYear(t) + ", " + f.clock(t)), "on " + f.dayOfYear(t) + " at " + f.clock(t)
 }
 
+// dayRubric is the rubric of a day of the agenda: «Monday · 10 August»
+// (s-agenda-1, C-10).
 func (f timeFmt) dayRubric(t time.Time) string {
-	return t.In(f.tz).Format("Monday, 2 January")
+	return t.In(f.tz).Format("Monday · 2 January")
+}
+
+// window is the days of an agenda's window in one phrase, as the line under
+// its title says it: «10 – 16 August 2026», «28 September – 4 October 2026»,
+// «28 December 2026 – 3 January 2027», one day «10 August 2026» (s-agenda-1).
+// to is the day after the last.
+func (f timeFmt) window(from, to time.Time) string {
+	a, b := from.In(f.tz), to.In(f.tz).AddDate(0, 0, -1)
+	switch {
+	case f.dayKey(a) == f.dayKey(b) || b.Before(a):
+		return a.Format("2 January 2006")
+	case a.Year() != b.Year():
+		return a.Format("2 January 2006") + " – " + b.Format("2 January 2006")
+	case a.Month() != b.Month():
+		return a.Format("2 January") + " – " + b.Format("2 January 2006")
+	}
+	return a.Format("2") + " – " + b.Format("2 January 2006")
 }
 
 func (f timeFmt) dayKey(t time.Time) string {
@@ -116,10 +135,11 @@ func (f timeFmt) clock(t time.Time) string {
 	return t.In(f.tz).Format("15:04")
 }
 
-// timeLabel is the time column of an agenda row.
+// timeLabel is the time column of an agenda row: the clock, or «all day»
+// (s-agenda-1).
 func (f timeFmt) timeLabel(t time.Time, allDay bool) string {
 	if allDay {
-		return "All day"
+		return "all day"
 	}
 	return f.clock(t)
 }

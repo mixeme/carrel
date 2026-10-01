@@ -702,6 +702,14 @@ func matchedSummary(answered, total int, addresses []string, sources []view.Sour
 	} else {
 		out = append(out, view.Run{Text: "the name"})
 	}
+	return append(out, troubleRuns(sources)...)
+}
+
+// troubleRuns name every source of a poll that did not answer, each as an
+// alarm after a separator: « · ‹baikal · Общий unavailable›» (s-contacts-7,
+// s-agenda-1).
+func troubleRuns(sources []view.SourceProgress) view.Runs {
+	var out view.Runs
 	for _, sp := range sources {
 		why := ""
 		switch sp.State {

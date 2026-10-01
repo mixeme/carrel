@@ -14,7 +14,13 @@ type ListBar struct {
 	// адрес списка — скрытые поля запроса списка, скрытое compact=0 и
 	// отметка compact с одним вариантом «1» (Selected — строки плотные);
 	// выбор помнит кука раздела (S-9.6); nil — переключателя нет
-	Compact  *Form    `json:"compact"`
+	Compact *Form `json:"compact"`
+	// Show — отметки «Events · Tasks due · Notes» агенды (s-agenda-1): форма
+	// GET на адрес агенды — скрытые поля окна и запроса, скрытое пустое with
+	// и отметка with (InputCheck) с вариантами events, tasks, notes; Selected
+	// — род на ленте. Адрес без with — одни события; nil — у списка отметок
+	// нет
+	Show     *Form    `json:"show"`
 	Segments []Action `json:"segments"` // Open / Done / All; All / Contacts / Events / …
 	Range    *Range   `json:"range"`    // диапазон дат там, где он есть
 	Actions  []Action `json:"actions"`  // операции над выделенным
@@ -99,28 +105,39 @@ type ContactRow struct {
 
 type AgendaPage struct {
 	Shell
-	Bar  ListBar     `json:"bar"`
-	Days []AgendaDay `json:"days"`
-	Poll *PollBar    `json:"poll"`
+	// Subtitle — под заголовком: единый вид — «5 of 7 calendars · 3 accounts ·
+	// 10 – 16 August 2026 · ‹Europe/Moscow›», один календарь — «nextcloud ·
+	// 10 – 16 August 2026 · ‹Europe/Moscow›»: окно и пояс экземпляра
+	// моноширинно (s-agenda-1)
+	Subtitle Runs        `json:"subtitle"`
+	Bar      ListBar     `json:"bar"`
+	Days     []AgendaDay `json:"days"`
+	Poll     *PollBar    `json:"poll"`  // единый вид; nil — один календарь или ничего не отмечено
+	Empty    *Notice     `json:"empty"` // ничего не отмечено: почему и кнопка «Tick every calendar» (U-6.0); nil — есть что показать
 }
 type AgendaDay struct {
-	Rubric Text        `json:"rubric"`
+	Rubric Text        `json:"rubric"` // «Monday · 10 August» (C-10)
+	Count  int         `json:"count"`  // сколько строк в дне
 	Rows   []AgendaRow `json:"rows"`
 }
 type AgendaRow struct {
-	Kind     Kind        `json:"kind"` // event, task (срок) или note на одной ленте
-	Href     string      `json:"href"`
-	UID      string      `json:"uid"`
-	Colour   Colour      `json:"colour"`
-	Stamp    Stamp       `json:"stamp"`
-	Time     Text        `json:"time"` // «10:00» или «весь день»
-	Zone     Text        `json:"zone"` // исходный пояс, когда он отличается; иначе пусто
-	Summary  Text        `json:"summary"`
-	Location Text        `json:"location"`
-	Badges   []Badge     `json:"badges"`
-	Sources  []Stamp     `json:"sources"`
-	Menu     []MenuItem  `json:"menu"`
-	State    RecordState `json:"state"`
+	Kind     Kind   `json:"kind"` // event, task (срок) или note на одной ленте
+	Href     string `json:"href"`
+	UID      string `json:"uid"`
+	Colour   Colour `json:"colour"`
+	Stamp    Stamp  `json:"stamp"`
+	Time     Text   `json:"time"` // «10:00» или «all day»
+	Zone     Text   `json:"zone"` // исходный пояс, когда он отличается; иначе пусто
+	Summary  Text   `json:"summary"`
+	Location Text   `json:"location"`
+	// Badges — по важности: «Due» задачи, «Cancelled» отменённого
+	// вхождения, «tentative» (тревога) и «cancelled» статуса, «linked ×2»,
+	// «4 attendees» (участники с организатором), «repeats weekly»; строка
+	// кадра рисует первый (s-agenda-1)
+	Badges  []Badge     `json:"badges"`
+	Sources []Stamp     `json:"sources"`
+	Menu    []MenuItem  `json:"menu"`
+	State   RecordState `json:"state"`
 }
 
 type TasksPage struct {

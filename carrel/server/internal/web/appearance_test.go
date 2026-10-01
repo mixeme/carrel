@@ -73,8 +73,8 @@ func TestAccountWeekStartAndClock(t *testing.T) {
 
 	agenda = decode[view.AgendaPage](t, f.h.do(get(f.path("calendar")+"?from=2026-01-11", f.sess)))
 	want := []string{
-		"Monday, 12 January|10:00 AM|Standup|",
-		"Wednesday, 14 January|4:00 PM|Call New York|America/New_York",
+		"Monday · 12 January|10:00 AM|Standup|",
+		"Wednesday · 14 January|4:00 PM|Call New York|America/New_York",
 	}
 	if got := agendaLines(agenda); strings.Join(got, "\n") != strings.Join(want, "\n") {
 		t.Errorf("week of 11 January:\n%s\nwant:\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))

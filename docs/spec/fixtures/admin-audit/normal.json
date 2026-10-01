@@ -121,7 +121,8 @@
       "label": "Columns",
       "icon": "i-cols"
     },
-    "filterForm": null
+    "filterForm": null,
+    "show": null
   },
   "details": null,
   "notices": [],

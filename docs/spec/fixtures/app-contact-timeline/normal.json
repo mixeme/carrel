@@ -160,7 +160,8 @@
       "label": "Columns",
       "icon": "i-cols"
     },
-    "filterForm": null
+    "filterForm": null,
+    "show": null
   },
   "card": {
     "actions": [
@@ -501,7 +502,9 @@
         "text": "baikal · Общий unavailable"
       }
     ],
-    "taskID": "t-task"
+    "taskID": "t-task",
+    "aside": "just now",
+    "note": ""
   },
   "print": {
     "range": "",

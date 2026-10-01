@@ -4,12 +4,14 @@
       {
         "arrow": [
           {
+            "aside": "last used",
             "colour": "#4a6b52",
             "enabled": true,
             "href": "/app/calendar/a-nc-home/lichnyj/new",
             "id": "record.new",
             "label": "Личный",
-            "method": "GET"
+            "method": "GET",
+            "on": true
           },
           {
             "colour": "#3f6e8c",
@@ -45,7 +47,7 @@
           }
         ],
         "enabled": true,
-        "href": "/app/calendar/a-nc-home/dni-rozhdeniya/new?pick=1",
+        "href": "/app/calendar/a-nc-home/lichnyj/new",
         "icon": "i-plus",
         "id": "record.new",
         "label": "New event",
@@ -67,10 +69,73 @@
         "id": "collection.export",
         "label": "Export",
         "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "columns": null,
-    "compact": null,
+    "compact": {
+      "action": "/app/calendar",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "task",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "t-task"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "compact",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "0"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "check",
+              "label": "Compact rows",
+              "name": "compact",
+              "options": [
+                {
+                  "label": "Compact rows",
+                  "selected": false,
+                  "value": "1"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "filter": "",
     "filterForm": null,
     "loaded": 4,
@@ -179,42 +244,86 @@
           "id": "range.month",
           "label": "Month",
           "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-10\u0026to=2026-08-16\u0026view=range",
+          "id": "range.range",
+          "label": "Range",
+          "method": "GET"
         }
       ],
       "to": "16 August 2026"
     },
-    "segments": [
-      {
-        "enabled": false,
-        "id": "agenda.events",
-        "label": "Events",
-        "method": "GET",
-        "on": true,
-        "reason": "The agenda always shows its events."
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar?with=tasks",
-        "id": "agenda.tasks",
-        "label": "Tasks due",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar?with=notes",
-        "id": "agenda.notes",
-        "label": "Notes",
-        "method": "GET"
-      }
-    ],
+    "segments": [],
     "selected": 0,
+    "show": {
+      "action": "/app/calendar",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "with",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "check",
+              "label": "Show",
+              "name": "with",
+              "options": [
+                {
+                  "label": "Events",
+                  "selected": true,
+                  "value": "events"
+                },
+                {
+                  "label": "Tasks due",
+                  "selected": false,
+                  "value": "tasks"
+                },
+                {
+                  "label": "Notes",
+                  "selected": false,
+                  "value": "notes"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "total": null
   },
   "days": [
     {
+      "count": 3,
       "rows": [
         {
-          "badges": [],
+          "badges": [
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
           "colour": "#3f6e8c",
           "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
           "kind": "event",
@@ -284,12 +393,21 @@
           "stamp": "nextcloud · Работа",
           "state": "ok",
           "summary": "Дежурство: первая линия",
-          "time": "All day",
+          "time": "all day",
           "uid": "2f04-8b71-e39a",
           "zone": ""
         },
         {
-          "badges": [],
+          "badges": [
+            {
+              "label": "4 attendees",
+              "role": "neutral"
+            },
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
           "colour": "#4a6b52",
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
           "kind": "event",
@@ -364,7 +482,12 @@
           "zone": "Asia/Yekaterinburg"
         },
         {
-          "badges": [],
+          "badges": [
+            {
+              "label": "tentative",
+              "role": "alert"
+            }
+          ],
           "colour": "#3f6e8c",
           "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0",
           "kind": "event",
@@ -439,9 +562,10 @@
           "zone": ""
         }
       ],
-      "rubric": "Monday, 10 August"
+      "rubric": "Monday · 10 August"
     },
     {
+      "count": 1,
       "rows": [
         {
           "badges": [],
@@ -519,30 +643,36 @@
           "zone": ""
         }
       ],
-      "rubric": "Tuesday, 11 August"
+      "rubric": "Tuesday · 11 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Wednesday, 12 August"
+      "rubric": "Wednesday · 12 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Thursday, 13 August"
+      "rubric": "Thursday · 13 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Friday, 14 August"
+      "rubric": "Friday · 14 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Saturday, 15 August"
+      "rubric": "Saturday · 15 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Sunday, 16 August"
+      "rubric": "Sunday · 16 August"
     }
   ],
   "details": null,
+  "empty": null,
   "notices": [],
   "poll": {
     "actions": [
@@ -564,6 +694,8 @@
       }
     ],
     "answeredAt": "",
+    "aside": "",
+    "note": "",
     "percent": 66,
     "running": true,
     "sources": [
@@ -631,7 +763,14 @@
     ],
     "summary": [
       {
-        "text": "Polled 3 of 6 sources · 7 events · 1 refused"
+        "text": "Polled 3 of 6 sources · 7 events"
+      },
+      {
+        "text": " · "
+      },
+      {
+        "mark": "danger",
+        "text": "baikal · Общий unavailable"
       }
     ],
     "taskID": "t-task"
@@ -1192,6 +1331,7 @@
       {
         "account": "Subscriptions",
         "accountID": "",
+        "feeds": true,
         "rows": [
           {
             "colour": "#8c6239",
@@ -1316,6 +1456,15 @@
       ]
     }
   },
+  "subtitle": [
+    {
+      "text": "6 of 8 calendars · 3 accounts · 10 – 16 August 2026 · "
+    },
+    {
+      "mark": "mono",
+      "text": "Europe/Moscow"
+    }
+  ],
   "title": "Combined calendar",
   "top": {
     "new": {

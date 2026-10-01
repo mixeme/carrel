@@ -321,6 +321,14 @@ type pollOwner struct {
 	// bar says them, in mono, and names a source that did not answer as an
 	// alarm instead of counting it (s-contacts-7).
 	matched []string
+	// named: the bar names a source that did not answer, as an alarm,
+	// instead of counting it — «Polled 5 of 6 sources · 14 events ·
+	// ‹baikal · Общий unavailable›» (s-agenda-1).
+	named bool
+	// missing is the line under the rows once the poll is over and a source
+	// did not answer: what is shown and what is not (states-6, states-9),
+	// for that many sources; nil — no line.
+	missing func(sources int) string
 }
 
 func searchOwner(q string) pollOwner {
@@ -340,8 +348,11 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 	now := s.now()
 	bar := view.PollBar{TaskID: snap.ID, Running: snap.Running}
 	base := "/app/search/progress/" + snap.ID
-	var answered, refused, timedOut, unreachable, stopped int
+	var answered, refused, timedOut, unreachable, stopped, cached int
 	for _, st := range snap.Sources {
+		if st.FromCache {
+			cached++
+		}
 		account, path, _ := strings.Cut(st.ID, ":")
 		origin, colour := sourceOrigin(blob, account, path)
 		sp := view.SourceProgress{
@@ -392,11 +403,23 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 			owner.found(len(snap.Items)),
 		}
 		bar.Summary = line(strings.Join(append(parts, pollTroubles(refused, unreachable, timedOut, stopped)...), " · "))
+		if owner.named {
+			bar.Summary = append(view.Runs{{Text: text(strings.Join(parts, " · "))}}, troubleRuns(bar.Sources)...)
+		}
 		if owner.matched != nil {
 			bar.Summary = matchedSummary(answered, total, owner.matched, bar.Sources)
 		}
 		if !snap.Running {
 			bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)
+			// The right of the bar (s-agenda-1): when the answer was
+			// gathered, and that it came from what the session held.
+			bar.Aside = view.Text(tf.formatWhen(snap.Finished, true, now))
+			if cached > 0 {
+				bar.Aside = "from cache · " + bar.Aside
+			}
+			if down := refused + timedOut + unreachable + stopped; down > 0 && owner.missing != nil {
+				bar.Note = text(owner.missing(down))
+			}
 		}
 	case snap.Running:
 		bar.Summary = line(fmt.Sprintf("Asking %s · %d answered · %s", plural(total, "source"), answered, owner.found(len(snap.Items))))

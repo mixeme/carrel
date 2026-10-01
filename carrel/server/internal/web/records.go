@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"maps"
 	"net/http"
 	"net/url"
 	"slices"
@@ -673,6 +674,18 @@ func (s *Server) listActions(c *collectionCtx, export url.Values) []view.Action 
 	return append(out, s.exportAction(c, export))
 }
 
+// listRefresh is the top bar's refresh of one collection's list
+// (s-agenda-1; the client's scan of the calendar, А2): the circle reads the
+// list again — its address as it stands —, and the words say when this
+// session last read the collection.
+func (s *Server) listRefresh(c *collectionCtx, r *http.Request) view.Refresh {
+	last, _ := readingOf(c.sess, c.tf, c.conn.ID, c.col.Path)
+	return view.Refresh{
+		Action:   view.Action{ID: "list.refresh", Label: "Refresh", Icon: "i-refresh", Href: s.route(retryPath(c, r)), Method: "GET", Enabled: true},
+		Answered: last,
+	}
+}
+
 func retryPath(c *collectionCtx, r *http.Request) string {
 	if r.URL.RawQuery != "" {
 		return c.listPath() + "?" + r.URL.RawQuery
@@ -685,10 +698,13 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 	if !ok {
 		return
 	}
-	if c.spec.kind == view.KindContact {
+	if c.spec.kind == view.KindContact || c.spec.kind == view.KindEvent {
+		// «Compact rows» of the contacts and of the agenda (S-9.6).
 		if s.compactChoice(w, r, c.spec.segment, c.listPath()) {
 			return
 		}
+	}
+	if c.spec.kind == view.KindContact {
 		r = withoutOpen(r)
 	}
 	// The rail is built after the list: the list is what fills its counts.
@@ -717,21 +733,25 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 		p := s.contactsList(r, c)
 		p.Rail = rail(p.Rail.Tags)
 		p.Notices = notices(p.Notices)
+		p.Top.Refresh = s.listRefresh(c, r)
 		page = p
 	case view.KindEvent:
 		p := s.agenda(r, c)
 		p.Rail = rail(p.Rail.Tags)
 		p.Notices = notices(p.Notices)
+		p.Top.Refresh = s.listRefresh(c, r)
 		page = p
 	case view.KindTask:
 		p := s.tasksList(r, c)
 		p.Rail = rail(p.Rail.Tags)
 		p.Notices = notices(p.Notices)
+		p.Top.Refresh = s.listRefresh(c, r)
 		page = p
 	default:
 		p := s.notesList(r, c)
 		p.Rail = rail(p.Rail.Tags)
 		p.Notices = notices(p.Notices)
+		p.Top.Refresh = s.listRefresh(c, r)
 		page = p
 	}
 	s.writePage(w, r, http.StatusOK, page)
@@ -1003,13 +1023,21 @@ func keptQuery(keep url.Values, drop ...string) url.Values {
 	return out
 }
 
-// agendaWith are the kinds the agenda shows besides events: tasks by their
-// due date and notes by their date, on the same line of days (s-agenda-1,
-// U-6: they are switches, not a choice of one).
+// agendaWith are the kinds the agenda shows on its line of days (s-agenda-1,
+// U-6: switches, not a choice of one): the values of with — events, tasks
+// by their due date, notes by their date. An address without with shows the
+// events; the form of the bar (agendaShow) always sends an empty with, so
+// a form with nothing ticked is obeyed, not taken for the plain address.
 func agendaWith(q url.Values) map[view.Kind]bool {
-	on := map[view.Kind]bool{view.KindEvent: true}
-	for _, v := range q["with"] {
+	vals, spoke := q["with"]
+	if !spoke {
+		return map[view.Kind]bool{view.KindEvent: true}
+	}
+	on := map[view.Kind]bool{}
+	for _, v := range vals {
 		switch strings.TrimSpace(v) {
+		case "events":
+			on[view.KindEvent] = true
 		case "tasks":
 			on[view.KindTask] = true
 		case "notes":
@@ -1019,37 +1047,54 @@ func agendaWith(q url.Values) map[view.Kind]bool {
 	return on
 }
 
-// agendaSegments are the three switches of the line. Events are always on
-// it: the agenda is the calendar, and a calendar without its events is not
-// one.
-func (s *Server) agendaSegments(base, tag string, on map[view.Kind]bool, keep url.Values) []view.Action {
-	out := []view.Action{{ID: "agenda.events", Label: "Events", Method: "GET", Enabled: false, On: true,
-		Reason: "The agenda always shows its events."}}
-	for _, seg := range []struct {
-		id, label, value string
-		kind             view.Kind
-	}{
-		{"agenda.tasks", "Tasks due", "tasks", view.KindTask},
-		{"agenda.notes", "Notes", "notes", view.KindNote},
-	} {
-		q := keptQuery(keep, "with")
-		for _, other := range []struct {
-			value string
-			kind  view.Kind
-		}{{"tasks", view.KindTask}, {"notes", view.KindNote}} {
-			// The switch keeps the other one as it stands and turns itself.
-			stays := on[other.kind]
-			if other.kind == seg.kind {
-				stays = !stays
-			}
-			if stays {
-				q.Add("with", other.value)
-			}
+// agendaKinds are the ticks of the bar in their order: the value of with,
+// the word and the kind.
+var agendaKinds = []struct {
+	value, label string
+	kind         view.Kind
+}{{"events", "Events", view.KindEvent}, {"tasks", "Tasks due", view.KindTask}, {"notes", "Notes", view.KindNote}}
+
+// withValues is what an address says of the ticks: nothing for the events
+// alone, else every ticked kind — and the empty with, when none is.
+func withValues(on map[view.Kind]bool) []string {
+	if len(on) == 1 && on[view.KindEvent] {
+		return nil
+	}
+	var out []string
+	for _, k := range agendaKinds {
+		if on[k.kind] {
+			out = append(out, k.value)
 		}
-		out = append(out, view.Action{ID: seg.id, Label: text(seg.label), Method: "GET", Enabled: true, On: on[seg.kind],
-			Href: tagFilter{base: base, query: q, route: s.route}.href(tag)})
+	}
+	if len(out) == 0 {
+		return []string{""}
 	}
 	return out
+}
+
+// agendaShow is «Events · Tasks due · Notes» of the bar (s-agenda-1): one
+// GET form on the agenda — the window and the category of the address kept
+// hidden, an empty with that says the form spoke, and the check with whose
+// values are the kinds, each Selected when it is on the line. The poll is
+// not kept: other ticks are another poll (S-15.1).
+func (s *Server) agendaShow(base string, on map[view.Kind]bool, q url.Values) *view.Form {
+	kept := keptQuery(q, "with", "compact")
+	if tag := strings.TrimSpace(q.Get("tag")); tag != "" {
+		kept.Set("tag", tag)
+	}
+	var rows []view.FormRow
+	for _, name := range slices.Sorted(maps.Keys(kept)) {
+		for _, v := range kept[name] {
+			rows = append(rows, view.FormRow{Name: name, Kind: view.InputHidden, Value: text(v)})
+		}
+	}
+	check := view.FormRow{Name: "with", Label: "Show", Kind: view.InputCheck}
+	for _, k := range agendaKinds {
+		check.Options = append(check.Options, view.Option{Value: k.value, Label: text(k.label), Selected: on[k.kind]})
+	}
+	rows = append(rows, view.FormRow{Name: "with", Kind: view.InputHidden, Value: ""}, check)
+	f := s.plainForm(base, "GET", rows...)
+	return &f
 }
 
 // todayQuery is the window of today: the week is the address without a view
@@ -1111,6 +1156,10 @@ func (s *Server) agendaRange(tf timeFmt, base, tag, kind string, from, to time.T
 		rng.Presets = append(rng.Presets, view.Action{ID: w.id, Label: text(w.label), Method: "GET", Enabled: true,
 			On: w.kind == kind, Href: window(w.kind, anchor)})
 	}
+	// Range — the window on the screen as a range of its own, its days in
+	// the form below (s-agenda-1).
+	rng.Presets = append(rng.Presets, view.Action{ID: "range.range", Label: "Range", Method: "GET", Enabled: true, On: kind == agendaRange,
+		Href: href(url.Values{"view": {agendaRange}, "from": {from.Format("2006-01-02")}, "to": {to.AddDate(0, 0, -1).Format("2006-01-02")}})})
 	// A GET form puts its fields in the address: no _csrf here (C-11, the
 	// client's scan Б6). To has no hint: the frame draws none (s-agenda-1).
 	form := s.plainForm(base, "GET",
@@ -1121,6 +1170,23 @@ func (s *Server) agendaRange(tf timeFmt, base, tag, kind string, from, to time.T
 	form.Actions = []view.Action{{ID: "range.show", Label: "Show", Href: s.route(base), Method: "GET", Enabled: true}}
 	rng.Form = &form
 	return rng
+}
+
+// agendaSubtitle is the line under the title of an agenda (s-agenda-1):
+// where — «5 of 7 calendars · 3 accounts» or the calendar's connection —,
+// the days of the window and the instance zone, monospaced.
+func agendaSubtitle(tf timeFmt, where string, from, to time.Time) view.Runs {
+	return view.Runs{{Text: text(where + " · " + tf.window(from, to) + " · ")}, {Text: text(tf.tz.String()), Mark: view.RunMono}}
+}
+
+// agendaPrintAction is Print of an agenda's head (U-10): the same address,
+// its window and ticks, with print=1.
+func (s *Server) agendaPrintAction(base string, q url.Values) view.Action {
+	a := s.printAction(base)
+	q = keptQuery(q, "print", "compact")
+	q.Set("print", "1")
+	a.Href = s.route(base) + "?" + q.Encode()
+	return a
 }
 
 // agendaPrint is the week of an agenda in its print header.
@@ -1135,13 +1201,17 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	tf := c.tf
 	kind, from, to := agendaWindow(tf, r.URL.Query())
 	page := view.AgendaPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
+	page.Subtitle = agendaSubtitle(tf, connLabel(c.conn), from, to)
 	// The export of a calendar takes the week the screen shows: that is where
 	// the range is (S-19). Every other list is handed over whole.
-	page.Bar.Actions = s.listActions(c, url.Values{
+	page.Bar.Actions = append(s.listActions(c, url.Values{
 		"from": {from.Format("2006-01-02")}, "to": {to.AddDate(0, 0, -1).Format("2006-01-02")},
-	})
+	}), s.agendaPrintAction(c.listPath(), r.URL.Query()))
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	page.Bar.Range = s.agendaRange(tf, c.listPath(), filter.tag, kind, from, to, r.URL.Query())
+	on := agendaWith(r.URL.Query())
+	page.Bar.Show, page.Bar.Segments = s.agendaShow(c.listPath(), on, r.URL.Query()), []view.Action{}
+	page.Bar.Compact = s.compactForm(r, c.spec.segment, c.listPath())
 
 	objs, bad, err := c.calQuery(r.Context(), c.spec.component, &from, &to)
 	if err != nil {
@@ -1149,9 +1219,10 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 		return page
 	}
 	items := c.listed(objs)
-	on := agendaWith(r.URL.Query())
-	page.Bar.Segments = s.agendaSegments(c.listPath(), filter.tag, on, r.URL.Query())
-	shown := kindedAll(s.foldLinked(s.catalogOf(c.sess), view.KindEvent, filter.keep(view.KindEvent, items)), view.KindEvent)
+	var shown []kinded
+	if on[view.KindEvent] {
+		shown = kindedAll(s.foldLinked(s.catalogOf(c.sess), view.KindEvent, filter.keep(view.KindEvent, items)), view.KindEvent)
+	}
 	// Tasks due and notes come from the same collection, each by its own
 	// component (s-agenda-1); a collection that holds none is simply silent.
 	for _, k := range []view.Kind{view.KindTask, view.KindNote} {
@@ -1235,7 +1306,7 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 			if mark {
 				row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
 			}
-			occs = append(occs, occurrence{at: at, order: it.from.listPath(segment), row: row})
+			occs = append(occs, occurrence{at: at, order: string(it.from.stamp()) + "\x00" + it.from.listPath(segment), row: row})
 			continue
 		}
 		summary := titleOr(cal.Text(o, "SUMMARY"), "Untitled event")
@@ -1263,7 +1334,7 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 			if at.Before(from) || !at.Before(to) {
 				continue
 			}
-			occ := occurrence{at: at, allDay: tm.AllDay, order: it.from.listPath(segment), row: view.AgendaRow{
+			occ := occurrence{at: at, allDay: tm.AllDay, order: string(it.from.stamp()) + "\x00" + it.from.listPath(segment), row: view.AgendaRow{
 				Kind:     view.KindEvent,
 				Href:     s.route(it.from.recordPath(segment, uid)),
 				UID:      uid,
@@ -1272,7 +1343,7 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 				Summary:  text(titleOr(cal.Text(it.pick("SUMMARY"), "SUMMARY"), summary)),
 				Location: text(cal.Text(it.pick("LOCATION"), "LOCATION")),
 				State:    linkedState(it.listed),
-				Badges:   linkedBadge(it.listed),
+				Badges:   agendaBadges(o, it.listed),
 				Sources:  linkedSources(it.listed),
 				Menu:     menu,
 			}}
@@ -1295,7 +1366,7 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 					occ.row.Location = text(ov.Location)
 				}
 				if ov.Cancelled {
-					occ.row.Badges = append(occ.row.Badges, view.Badge{Label: "Cancelled", Role: view.BadgeAlert})
+					occ.row.Badges = append([]view.Badge{{Label: "Cancelled", Role: view.BadgeAlert}}, occ.row.Badges...)
 				}
 			}
 			occs = append(occs, occ)
@@ -1327,9 +1398,78 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 	}
 	var days []view.AgendaDay
 	for day := from; day.Before(to); day = day.AddDate(0, 0, 1) {
-		days = append(days, view.AgendaDay{Rubric: text(tf.dayRubric(day)), Rows: byDay[tf.dayKey(day)]})
+		rows := byDay[tf.dayKey(day)]
+		days = append(days, view.AgendaDay{Rubric: text(tf.dayRubric(day)), Count: len(rows), Rows: rows})
 	}
 	return days, len(occs), bad
+}
+
+// agendaBadges are the badges of an event's row, the first of them the one
+// the row of the frame draws (s-agenda-1): a status that is not plain —
+// «tentative» or «cancelled», as an alarm —, the linked group, how many
+// people take part, and the repeat.
+func agendaBadges(o *model.Object, it listed) []view.Badge {
+	var out []view.Badge
+	switch strings.ToUpper(strings.TrimSpace(cal.Text(o, "STATUS"))) {
+	case "TENTATIVE":
+		out = append(out, view.Badge{Label: "tentative", Role: view.BadgeAlert})
+	case "CANCELLED":
+		out = append(out, view.Badge{Label: "cancelled", Role: view.BadgeAlert})
+	}
+	out = append(out, linkedBadge(it)...)
+	if n := len(eventPeople(o)); n > 0 {
+		out = append(out, view.Badge{Label: text(plural(n, "attendee")), Role: view.BadgeNeutral})
+	}
+	if cal.HasRecurrence(o) {
+		out = append(out, view.Badge{Label: text(repeatsWord(cal.RawRRULE(o))), Role: view.BadgeNeutral})
+	}
+	return out
+}
+
+// repeatsWord is the badge of a series in the agenda: «repeats weekly»,
+// «repeats every 2 weeks», and «repeats» for a rule the words do not cover
+// or extra dates alone.
+func repeatsWord(raw string) string {
+	r := parseRule(raw)
+	words := map[string][2]string{"DAILY": {"daily", "day"}, "WEEKLY": {"weekly", "week"},
+		"MONTHLY": {"monthly", "month"}, "YEARLY": {"yearly", "year"}}
+	w, ok := words[strings.ToUpper(r.get("FREQ"))]
+	if !ok {
+		return "repeats"
+	}
+	if n, err := strconv.Atoi(r.get("INTERVAL")); err == nil && n > 1 {
+		return "repeats every " + plural(n, w[1])
+	}
+	return "repeats " + w[0]
+}
+
+// eventPeople are the people of an event as its card lists them
+// (s-agenda-1, s-agenda-2): the organiser first, as one of them («4
+// attendees» of three ATTENDEE and the ORGANIZER), then the attendees. An
+// organiser who is an attendee too is listed once, as the organiser.
+func eventPeople(o *model.Object) []view.AttendeeRow {
+	var out []view.AttendeeRow
+	organiser := ""
+	for _, v := range o.Props()["ORGANIZER"] {
+		organiser = cal.CalAddress(v.Text)
+		who := v.Params["CN"]
+		if who == "" {
+			who = organiser
+		}
+		out = append(out, view.AttendeeRow{Name: text(who), Email: text(organiser), Status: "organiser"})
+		break
+	}
+	for _, a := range cal.Attendees(o) {
+		if organiser != "" && strings.EqualFold(a.Email, organiser) {
+			continue
+		}
+		name := a.Name
+		if name == "" {
+			name = a.Email
+		}
+		out = append(out, view.AttendeeRow{Name: text(name), Email: text(a.Email), Status: text(partstatLabel(a.Status))})
+	}
+	return out
 }
 
 func taskShow(r *http.Request) string {

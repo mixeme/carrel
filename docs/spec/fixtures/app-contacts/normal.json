@@ -1033,7 +1033,8 @@
           "unfold": null
         }
       ]
-    }
+    },
+    "show": null
   },
   "groups": [
     {
@@ -1512,7 +1513,9 @@
         "method": "GET",
         "enabled": true
       }
-    ]
+    ],
+    "aside": "2 min ago",
+    "note": ""
   },
   "empty": null,
   "readOnly": false,

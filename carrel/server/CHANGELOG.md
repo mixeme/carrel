@@ -17,6 +17,75 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.118 — 2026-10-01
+
+The agenda and the shell of the calendar as s-agenda-1 draws them (the
+client's scan of the calendar section, groups А and Б).
+
+### Added
+
+- **`AgendaPage.subtitle`** (Runs): «6 of 8 calendars · 3 accounts · 10 – 16
+  August 2026 · ‹Europe/Moscow›» on the combined calendar (subscriptions are
+  calendars, not accounts), «nextcloud · 10 – 16 August 2026 ·
+  ‹Europe/Moscow›» on one (C-10: the window's phrase).
+- **`AgendaPage.empty`**: nothing ticked — «No calendars are ticked» and
+  «Tick every calendar» (`rail.tick.all`), `poll` is `null`, as the contacts'.
+- **`ListBar.show`** — «Events · Tasks due · Notes» as one GET form on the
+  agenda: the window and the category hidden, an empty `with` (the form
+  spoke) and the check `with` with `events`, `tasks`, `notes`. Events is a
+  tick like the others (s-agenda-1 draws it ticked, not locked). An address
+  without `with` shows the events, as before. `null` on every other list.
+- **Range** among the windows (`range.range`, `view=range` with the shown
+  days; `on` when the window is a range); Previous, Today, Next stay.
+- **Print** (`list.print`, `i-print`): the agenda's address with `print=1`.
+- **«Compact rows»** on the agenda (`ListBar.compact`), cookie
+  `carrel_compact_calendar` (S-9.6).
+- **`AgendaDay.count`**.
+- **Badges of an event's row**, by importance, the first the one the row
+  draws: «tentative» / «cancelled» of its status (alert), «linked ×2»,
+  «4 attendees» (the organiser and the attendees), «repeats weekly»
+  («repeats every 2 weeks», «repeats»). «Due» and an instance's
+  «Cancelled» stay first.
+- **`PollBar.aside`** — the right of the bar once the poll is over: «2 min
+  ago», «from cache · 2 min ago»; **`PollBar.note`** — under the rows when a
+  source did not answer: «What arrived in time is shown. Records from the
+  unavailable source are missing — …» (states-6; contacts «Cards … book»,
+  states-9).
+- **`RailSection.feeds`** — the section of subscriptions (the frame's badge
+  «external» is the screen's word); in the answer only when true.
+- **Refresh of one collection's list** (`list.refresh`, the list's address
+  as it stands; `answered` — when this session read it), every kind; the
+  combined view with nothing ticked shows `poll.again` off, «Nothing is
+  ticked to ask.».
+
+### Changed
+
+- **The poll of the calendar names the source that did not answer**:
+  «Polled 5 of 6 sources · 14 events · ‹baikal · Общий unavailable›» (was
+  «… · 1 refused»); the other lists count as before.
+- **The day's rubric is «Monday · 10 August»**, an all-day row's time «all
+  day» (C-10).
+- **New event of the combined calendar** writes into the last used
+  calendar when it is ticked, else into the first ticked one — never into
+  an unticked one (it led to «Дни рождения»). The fixture set's last used
+  calendar is «Личный».
+- **«Tick every book / calendar …» is primary** (states-7; the client's stop
+  C19).
+- `Bar.segments` of the agenda is empty: its kinds are `show`.
+- Two rows of the agenda at the same time with the same title stand in the
+  order of their sources' stamps («nextcloud · Работа» before «radicale ·
+  vps · Дежурства»), not of the identifiers Carrel issued — the order
+  changed from run to run.
+
+### For consumers
+
+Read the agenda's kinds from `bar.show` and send it as the form it is; the
+first badge of a row is its caption. Fixtures: `app-agenda-all/normal` is
+new (the combined calendar, s-agenda-1); regenerated — every agenda, every
+list (`bar.show`, `null`), the one-collection lists (refresh), every poll
+(`aside`, `note`), the rails with subscriptions (`feeds`),
+`app-contacts/empty` (primary). `check.py`: `SERVER_TODO` is empty.
+
 ## v0.2.117 — 2026-10-01
 
 Two findings of the client's scan of the calendar: the «empty» week was not

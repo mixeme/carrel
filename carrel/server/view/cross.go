@@ -33,13 +33,21 @@ type JumpRow struct {
 }
 
 type PollBar struct {
-	TaskID     string           `json:"taskID"`
-	Summary    Runs             `json:"summary"`    // «Polled 5 of 7 · 12 records · 1 refused» кусками (s-contacts-7)
-	AnsweredAt When             `json:"answeredAt"` // когда собрана показанная выдача
-	Running    bool             `json:"running"`
-	Percent    int              `json:"percent"`
-	Sources    []SourceProgress `json:"sources"`
-	Actions    []Action         `json:"actions"` // Stop · Search again
+	TaskID     string `json:"taskID"`
+	Summary    Runs   `json:"summary"`    // «Polled 5 of 7 · 12 records · 1 refused» кусками (s-contacts-7)
+	AnsweredAt When   `json:"answeredAt"` // когда собрана показанная выдача
+	// Aside — справа на полосе моноширинно: когда собрана выдача, «2 min ago»,
+	// и «from cache · » перед этим, когда источник ответил тем, что сеанс
+	// уже держал (s-agenda-1); пусто, пока опрос идёт
+	Aside Text `json:"aside"`
+	// Note — под строками, когда источник не ответил: что показано и чего
+	// нет — «What arrived in time is shown. Records from the unavailable
+	// source are missing — …» (states-6, states-9); пусто — ответили все
+	Note    Text             `json:"note"`
+	Running bool             `json:"running"`
+	Percent int              `json:"percent"`
+	Sources []SourceProgress `json:"sources"`
+	Actions []Action         `json:"actions"` // Stop · Search again
 }
 
 type SourceProgress struct {

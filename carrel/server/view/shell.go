@@ -119,7 +119,10 @@ type RailSection struct {
 	Account   Text            `json:"account"`
 	AccountID string          `json:"accountID"`
 	State     CollectionState `json:"state"` // недоступен — помечается здесь, C-8
-	Rows      []SourceRow     `json:"rows"`
+	// Feeds — секция подписок: ленты, прочитанные снаружи; кадр ставит у
+	// рубрики бейдж «external» (s-agenda-1, s-contacts-7)
+	Feeds bool        `json:"feeds,omitempty"`
+	Rows  []SourceRow `json:"rows"`
 }
 
 type SourceRow struct {

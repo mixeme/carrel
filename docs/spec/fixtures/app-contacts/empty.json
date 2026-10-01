@@ -225,6 +225,7 @@
       }
     ],
     "selected": 0,
+    "show": null,
     "total": 0
   },
   "details": null,
@@ -236,7 +237,8 @@
         "href": "/app/sources/contacts?back=%2Fapp%2Fcontacts\u0026toggle=%2Fapp%2Fcontacts",
         "id": "rail.tick.all",
         "label": "Tick every book",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       }
     ],
     "body": "Tick the books to show in the rail, or all of them at once.",
@@ -755,9 +757,12 @@
     "refresh": {
       "action": {
         "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "href": "/app/contacts",
+        "icon": "i-refresh",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET",
+        "reason": "Nothing is ticked to ask."
       },
       "answered": "",
       "running": false

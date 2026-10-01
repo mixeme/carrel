@@ -215,7 +215,7 @@ func TestPublishIsOffered(t *testing.T) {
 		acts = acts[:strings.Index(acts, `</div>`)]
 		out := []string{}
 		for _, m := range frameButton.FindAllStringSubmatch(acts, -1) {
-			if label := frameText(m[1]); label != "Print" || frame == "s-contacts-1" {
+			if label := frameText(m[1]); label != "Print" || frame == "s-contacts-1" || frame == "s-agenda-1" {
 				out = append(out, label)
 			}
 		}

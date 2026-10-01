@@ -279,6 +279,7 @@
       }
     ],
     "selected": 0,
+    "show": null,
     "total": 5
   },
   "details": null,
@@ -744,6 +745,8 @@
       }
     ],
     "answeredAt": "10 August, 17:04",
+    "aside": "2 min ago",
+    "note": "What arrived in time is shown. Cards from the unavailable book are missing — not “there are none”, but “we have not seen them”.",
     "percent": 100,
     "running": false,
     "sources": [

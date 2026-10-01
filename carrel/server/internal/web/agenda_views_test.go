@@ -108,8 +108,45 @@ func TestAgendaWindows(t *testing.T) {
 	}
 }
 
-// review Р-12 (s-agenda-1, U-6): tasks due and notes stand on the same
-// line of days, each behind its own switch; events are always there.
+// showQuery is the address the ticks of the bar (ListBar.Show) send, as a
+// browser sends the form: every hidden field — the empty with too — and the
+// kinds ticked.
+func showQuery(t *testing.T, base string, form *view.Form, kinds ...string) string {
+	t.Helper()
+	if form == nil || form.Method != "GET" {
+		t.Fatalf("the ticks of the bar = %+v", form)
+	}
+	q := url.Values{}
+	for _, row := range form.Sets[0].Rows {
+		if row.Kind == view.InputHidden {
+			q.Add(row.Name, string(row.Value))
+		}
+	}
+	for _, k := range kinds {
+		q.Add("with", k)
+	}
+	return base + "?" + q.Encode()
+}
+
+// showTicks are the kinds the ticks of the bar say are on the line.
+func showTicks(p view.AgendaPage) string {
+	var on []string
+	for _, row := range p.Bar.Show.Sets[0].Rows {
+		if row.Kind != view.InputCheck {
+			continue
+		}
+		for _, o := range row.Options {
+			if o.Selected {
+				on = append(on, o.Value)
+			}
+		}
+	}
+	return strings.Join(on, ",")
+}
+
+// review Р-12 (s-agenda-1, U-6), the client's scan Б7: events, tasks due and
+// notes stand on the same line of days, each behind its own tick of one GET
+// form; the plain address is the events.
 func TestAgendaTasksAndNotesOnTheLine(t *testing.T) {
 	tz := time.UTC
 	today := time.Now().In(tz)
@@ -125,30 +162,19 @@ func TestAgendaTasksAndNotesOnTheLine(t *testing.T) {
 	list := f.path("calendar")
 
 	page := decode[view.AgendaPage](t, f.h.do(get(list, f.sess)))
-	events := actionByID(page.Bar.Segments, "agenda.events")
-	tasks := actionByID(page.Bar.Segments, "agenda.tasks")
-	notes := actionByID(page.Bar.Segments, "agenda.notes")
-	if events == nil || !events.On || events.Enabled {
-		t.Fatalf("Events switch = %+v, want on and not switchable", events)
-	}
-	if tasks == nil || tasks.On || notes == nil || notes.On {
-		t.Fatalf("switches = %+v", page.Bar.Segments)
+	if got := showTicks(page); got != "events" {
+		t.Fatalf("the ticks of the plain address = %q", got)
 	}
 	if got := agendaTitles(page); got != "Standup" {
-		t.Errorf("the line without the switches = %q", got)
+		t.Errorf("the line of the plain address = %q", got)
 	}
 
-	u, _ := url.Parse(tasks.Href)
-	withTasks := decode[view.AgendaPage](t, f.h.do(get(u.RequestURI(), f.sess)))
-	if got := agendaTitles(withTasks); got != "Morning note,Standup,Send the report" && got != "Standup,Send the report" {
-		t.Errorf("with tasks = %q", got)
+	withTasks := decode[view.AgendaPage](t, f.h.do(get(showQuery(t, list, page.Bar.Show, "events", "tasks"), f.sess)))
+	if got := agendaTitles(withTasks); got != "Standup,Send the report" {
+		t.Errorf("events and tasks = %q", got)
 	}
-	if !strings.Contains(agendaTitles(withTasks), "Send the report") {
-		t.Errorf("the task due today is not on the line: %q", agendaTitles(withTasks))
-	}
-	on := actionByID(withTasks.Bar.Segments, "agenda.tasks")
-	if on == nil || !on.On {
-		t.Errorf("the switch does not say it is on: %+v", on)
+	if got := showTicks(withTasks); got != "events,tasks" {
+		t.Errorf("the ticks do not say what is on: %q", got)
 	}
 	var kinds []string
 	for _, d := range withTasks.Days {
@@ -160,21 +186,24 @@ func TestAgendaTasksAndNotesOnTheLine(t *testing.T) {
 		t.Errorf("rows carry no kind: %v", kinds)
 	}
 
-	// Both switches at once, and turning one off keeps the other.
-	u, _ = url.Parse(actionByID(withTasks.Bar.Segments, "agenda.notes").Href)
-	both := decode[view.AgendaPage](t, f.h.do(get(u.RequestURI(), f.sess)))
-	if got := agendaTitles(both); !strings.Contains(got, "Morning note") || !strings.Contains(got, "Send the report") {
-		t.Fatalf("with both = %q", got)
+	// All three, then the notes alone: Events is a tick like the others
+	// (s-agenda-1 draws it ticked, not locked).
+	all := decode[view.AgendaPage](t, f.h.do(get(showQuery(t, list, withTasks.Bar.Show, "events", "tasks", "notes"), f.sess)))
+	if got := agendaTitles(all); !strings.Contains(got, "Morning note") || !strings.Contains(got, "Send the report") || !strings.Contains(got, "Standup") {
+		t.Fatalf("all three = %q", got)
 	}
-	u, _ = url.Parse(actionByID(both.Bar.Segments, "agenda.tasks").Href)
-	notesOnly := decode[view.AgendaPage](t, f.h.do(get(u.RequestURI(), f.sess)))
-	got := agendaTitles(notesOnly)
-	if !strings.Contains(got, "Morning note") || strings.Contains(got, "Send the report") {
-		t.Errorf("turning tasks off = %q, want the notes kept", got)
+	notesOnly := decode[view.AgendaPage](t, f.h.do(get(showQuery(t, list, all.Bar.Show, "notes"), f.sess)))
+	if got := agendaTitles(notesOnly); got != "Morning note" {
+		t.Errorf("the notes alone = %q", got)
+	}
+	// Nothing ticked is obeyed: the form spoke.
+	none := decode[view.AgendaPage](t, f.h.do(get(showQuery(t, list, all.Bar.Show), f.sess)))
+	if got := agendaTitles(none); got != "" || showTicks(none) != "" {
+		t.Errorf("nothing ticked = %q (%q)", got, showTicks(none))
 	}
 }
 
-// The switches work the same in the combined calendar: the poll asks every
+// The ticks work the same in the combined calendar: the poll asks every
 // ticked calendar for what they turned on (S-14).
 func TestCombinedAgendaSwitches(t *testing.T) {
 	tz := time.UTC
@@ -191,16 +220,11 @@ func TestCombinedAgendaSwitches(t *testing.T) {
 
 	agendaPoll := func(p view.AgendaPage) *view.PollBar { return p.Poll }
 	page := combined(t, f.h, f.sess, "/app/calendar", agendaPoll)
-	tasks := actionByID(page.Bar.Segments, "agenda.tasks")
-	if tasks == nil {
-		t.Fatalf("no switch on the combined agenda: %+v", page.Bar.Segments)
-	}
-	u, _ := url.Parse(tasks.Href)
-	with := combined(t, f.h, f.sess, u.RequestURI(), agendaPoll)
-	if got := agendaTitles(with); !strings.Contains(got, "Send the report") {
+	with := combined(t, f.h, f.sess, showQuery(t, "/app/calendar", page.Bar.Show, "events", "tasks"), agendaPoll)
+	if got := agendaTitles(with); !strings.Contains(got, "Send the report") || !strings.Contains(got, "Standup") {
 		t.Errorf("the combined agenda with tasks on = %q", got)
 	}
 	if got := agendaTitles(page); strings.Contains(got, "Send the report") {
-		t.Errorf("the switch was off and the task is on the line: %q", got)
+		t.Errorf("the tick was off and the task is on the line: %q", got)
 	}
 }

@@ -384,7 +384,7 @@ spec/fixtures/<screen>/<state>.json
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже |
-| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним) |
+| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=` и `?print=1` — как у контактов |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
@@ -711,7 +711,10 @@ type SignedIn struct {
 // У карточки записи и её правки (s-contacts-6, s-contacts-3, s-agenda-2,
 // s-tasks-2, s-notes-2): Action — та же страница снова (запись читается с
 // сервера), Answered — когда сеанс читал её коллекцию, как «read 2 min ago»
-// источника; у папки файлов — та же папка снова
+// источника; у папки файлов — та же папка снова. У списка одной коллекции
+// (s-agenda-1) — list.refresh: тот же список с его запросом, Answered — когда
+// сеанс её читал. У единого вида, где ничего не отмечено, — poll.again
+// выключен с причиной «Nothing is ticked to ask.»
 type Refresh struct {
     Action   Action
     Answered When // когда закончился последний веерный опрос этого раздела; у записи — чтение её коллекции
@@ -799,6 +802,7 @@ type RailSection struct {
     Account   Text
     AccountID string
     State     CollectionState // недоступен — помечается здесь, C-8
+    Feeds     bool            // секция подписок «Subscriptions»: ленты, прочитанные снаружи; у рубрики — бейдж «external», слово экрана (s-agenda-1, s-contacts-7); в ответе только true
     Rows      []SourceRow
 }
 
@@ -970,7 +974,13 @@ type ListBar struct {
     // сценариями форма уходит сменой отметки. Выбор помнит кука раздела
     // (S-9.6); nil — переключателя нет
     Compact  *Form
-    Segments []Action // Open / Done / All; All / Contacts / Events / …
+    // «Events · Tasks due · Notes» агенды (s-agenda-1) — отметки одной формы
+    // GET на адрес агенды: скрытые поля окна и запроса (view, from, to, tag),
+    // скрытое пустое with — форма сказала — и отметка with (InputCheck) с
+    // вариантами events, tasks, notes, Selected — род на ленте. Адрес без with
+    // — одни события; nil — у списка отметок нет
+    Show     *Form
+    Segments []Action // Open / Done / All; All / Contacts / Events / …; у агенды пусто — роды в Show
     Range    *Range   // диапазон дат там, где он есть
     Actions  []Action // операции над выделенным
     Selected int
@@ -996,7 +1006,7 @@ type ColumnItem struct {
 
 type Range struct {
     From, To Text
-    Presets  []Action // Day · Week · Month, «предыдущая» и «следующая»
+    Presets  []Action // у агенды: Previous, Today, Next, Day · Week · Month и Range (range.range — показанное окно своим диапазоном, view=range с from и to; On, когда окно — диапазон); у хронологии пусто
     Form     *Form    // произвольный диапазон: форма GET на Form.Action, поля from и to, «Show» её отправляет (Range.Action, s-contacts-7, s-agenda-1); без _csrf (C-11) и без подсказок; nil — его нет
 }
 
@@ -1035,20 +1045,30 @@ type ContactRow struct {
 
 type AgendaPage struct {
     Shell
-    Bar  ListBar
-    Days []AgendaDay
-    Poll *PollBar
+    // Под заголовком: где, окно и пояс экземпляра моноширинно — единый вид
+    // «5 of 7 calendars · 3 accounts · 10 – 16 August 2026 · ‹Europe/Moscow›»
+    // (подписки — календари, но не аккаунты), один календарь — «nextcloud ·
+    // 10 – 16 August 2026 · ‹Europe/Moscow›» (s-agenda-1)
+    Subtitle Runs
+    Bar      ListBar // Actions: New event (единый вид — со стрелкой «куда», кнопка пишет в последнюю или первую отмеченную), Import, Export (окно), Print (i-print, тот же адрес с ?print=1); Range; Show; Compact
+    Days     []AgendaDay
+    Poll     *PollBar // единый вид; nil — один календарь или ничего не отмечено
+    Empty    *Notice  // ничего не отмечено: почему и кнопка «Tick every calendar» (rail.tick.all, U-6.0); nil — есть что показать
 }
-type AgendaDay struct { Rubric Text; Rows []AgendaRow }
+type AgendaDay struct { Rubric Text; Count int; Rows []AgendaRow } // Rubric — «Monday · 10 August» (C-10); Count — строк в дне
 type AgendaRow struct {
     Kind      Kind // event, task (срок) или note на одной ленте
     Href, UID string
     Colour    Colour
     Stamp     Stamp
-    Time      Text // «10:00» или «весь день»
+    Time      Text // «10:00» или «all day» (s-agenda-1)
     Zone      Text // исходный пояс, когда он отличается; иначе пусто
     Summary   Text
     Location  Text
+    // По важности: «Due» задачи, «Cancelled» отменённого вхождения, статус
+    // «tentative» или «cancelled» (тревога), «linked ×2», «4 attendees» —
+    // участники вместе с организатором, «repeats weekly» («repeats every 2
+    // weeks», «repeats»); строка кадра рисует первый (s-agenda-1)
     Badges    []Badge
     Sources   []Stamp
     Menu      []MenuItem
@@ -1413,8 +1433,10 @@ type JumpRow struct { Href string; Kind Kind; Title Text; Stamp Stamp }
 
 type PollBar struct {
     TaskID      string
-    Summary     Runs // «Polled 5 of 7 · 12 records · 1 refused» кусками: у хронологии адреса моноширинно, не ответивший — тревогой (s-contacts-7)
+    Summary     Runs // «Polled 5 of 7 · 12 records · 1 refused» кусками: у хронологии адреса моноширинно, не ответивший — тревогой (s-contacts-7); у календаря не ответивший назван тревогой вместо счёта — «Polled 5 of 6 sources · 14 events · ‹baikal · Общий unavailable›» (s-agenda-1)
     AnsweredAt  When // когда собрана показанная выдача
+    Aside       Text // справа на полосе моноширинно, когда опрос кончен: «2 min ago», с «from cache · » перед ним, когда источник ответил тем, что сеанс уже держал (s-agenda-1); пусто, пока опрос идёт
+    Note        Text // под строками, когда опрос кончен и источник не ответил: «What arrived in time is shown. Records from the unavailable source are missing — not “there are none”, but “we have not seen them”.» (states-6; у контактов — «Cards … book», states-9); пусто — ответили все
     Running     bool
     Percent     int
     Sources     []SourceProgress
@@ -2843,6 +2865,7 @@ type LossReport struct { // сервер принял запись, но что-
 |---|---|
 | **Время** | 12 или 24 часа — из настроек аккаунта. Часовой пояс — один на экземпляр, ставит администратор. Событие, показанное двум людям в двух зонах, — источник ошибок, а не удобство |
 | **Исходный пояс** | Показывается **только когда отличается** от зоны экземпляра, отдельной подписью рядом со временем |
+| **Агенда** | Рубрика дня — «Monday · 10 August»; время строки — «10:00» или «all day»; окно под заголовком — «10 – 16 August 2026», «28 September – 4 October 2026», «28 December 2026 – 3 January 2027», один день — «10 August 2026» (s-agenda-1) |
 | **Конец серии** | День `UNTIL` — последний день, в который серия может начаться, в зоне экземпляра: момент `UNTIL`, который в свой день раньше времени дня серии, кончает её днём раньше (`UNTIL=20261228T235959Z` у серии по понедельникам в 12:00 по Екатеринбургу — 28 декабря, а не 29-е, как в Москве). Тем же днём его показывает поле Until формы, и запись его (конец дня в зоне экземпляра) читается тем же днём |
 | **Дата** | Отдельной настройки нет. Первый день недели — из настроек аккаунта |
 | **День в списке** | У списка своя короткая форма: колонки строк (срок задачи, день заметки, строки поиска), список поля Related to и связи записи пишут «12 Aug», со временем — «12 Aug 18:00», год — только не нынешний: «12 Aug 2025» (s-tasks-1, s-notes-1, s-tasks-10, s-notes-2). Полная форма — в самой записи: «Monday, 10 August 2026, 10:00 – 11:00», «10 August 2026, 11:05» |

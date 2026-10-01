@@ -138,6 +138,7 @@
       }
     ],
     "selected": 0,
+    "show": null,
     "total": null
   },
   "details": null,
@@ -710,12 +711,14 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi",
+        "icon": "i-refresh",
+        "id": "list.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "just now",
       "running": false
     },
     "search": {

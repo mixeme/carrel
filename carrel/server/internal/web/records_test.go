@@ -260,9 +260,9 @@ func TestAgendaWeekOverridesAndZones(t *testing.T) {
 
 	page := decode[view.AgendaPage](t, f.h.do(get(agenda+"?from=2026-01-12", f.sess)))
 	want := []string{
-		"Monday, 12 January|10:00|Standup|",
-		"Tuesday, 13 January|All day|Holiday|",
-		"Wednesday, 14 January|16:00|Call New York|America/New_York",
+		"Monday · 12 January|10:00|Standup|",
+		"Tuesday · 13 January|all day|Holiday|",
+		"Wednesday · 14 January|16:00|Call New York|America/New_York",
 	}
 	if got := agendaLines(page); strings.Join(got, "\n") != strings.Join(want, "\n") {
 		t.Errorf("week of 12 January:\n%s\nwant:\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
@@ -272,7 +272,7 @@ func TestAgendaWeekOverridesAndZones(t *testing.T) {
 	}
 
 	page = decode[view.AgendaPage](t, f.h.do(get(agenda+"?from=2026-01-19", f.sess)))
-	if got := agendaLines(page); strings.Join(got, "\n") != "Monday, 19 January|12:00|Standup moved|" {
+	if got := agendaLines(page); strings.Join(got, "\n") != "Monday · 19 January|12:00|Standup moved|" {
 		t.Errorf("week of 19 January: %v", got)
 	}
 }

@@ -649,15 +649,18 @@ func newMockupApp(t *testing.T) *mockupApp {
 	}
 	tickMockup(t, h, sess)
 	// «Контакты» is where a contact was last made: New contact's arrow says
-	// «last used» by it (s-contacts-9).
+	// «last used» by it (s-contacts-9). «Личный» is where an event was: New
+	// event of the combined calendar writes there (states-3, states-6 draw
+	// its arrow; the client's scan of the calendar, Б4).
+	lastUsed := map[string]view.Kind{"kontakty": view.KindContact, "lichnyj": view.KindEvent}
 	for _, c := range func() []sealed.Collection {
 		key, _ := sess.DataKey()
 		b, _ := h.users.Catalog(sess.AccountID(), key)
 		return b.Collections
 	}() {
-		if collectionSlugOf(c.Path) == "kontakty" {
+		if k, ok := lastUsed[collectionSlugOf(c.Path)]; ok {
 			key, _ := sess.DataKey()
-			if err := h.users.SetLastUsed(sess.AccountID(), key, sealed.Selection{Kind: view.KindContact, AccountID: c.AccountID, Path: c.Path}); err != nil {
+			if err := h.users.SetLastUsed(sess.AccountID(), key, sealed.Selection{Kind: k, AccountID: c.AccountID, Path: c.Path}); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -1134,6 +1137,16 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	here := app.listPath(t, "calendar", "lichnyj") + "?from=2026-08-10"
 	app.compare(t, "app-agenda/normal.json", app.h.do(get(here, app.sess)))
+}
+
+// C-14.2: the combined calendar as s-agenda-1 draws it — every ticked
+// calendar polled, baikal refusing, the screen two minutes after the poll
+// (the client's scan of the calendar, Б1).
+func TestFixtureCombinedCalendar(t *testing.T) {
+	app := newMockupApp(t)
+	page := combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	app.compare(t, "app-agenda-all/normal.json", app.h.do(get("/app/calendar?from=2026-08-10&task="+page.Poll.TaskID, app.sess)))
 }
 
 // C-14.2: the card of an event (s-agenda-2).

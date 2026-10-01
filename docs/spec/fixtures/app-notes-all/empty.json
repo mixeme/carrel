@@ -144,6 +144,7 @@
       }
     ],
     "selected": 0,
+    "show": null,
     "total": null
   },
   "details": null,
@@ -152,6 +153,8 @@
   "poll": {
     "actions": [],
     "answeredAt": "",
+    "aside": "",
+    "note": "",
     "percent": 0,
     "running": false,
     "sources": [],
@@ -535,9 +538,12 @@
     "refresh": {
       "action": {
         "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "href": "/app/notes",
+        "icon": "i-refresh",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET",
+        "reason": "Nothing is ticked to ask."
       },
       "answered": "",
       "running": false

@@ -25,10 +25,73 @@
         "id": "collection.export",
         "label": "Export",
         "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj?from=2026-08-10\u0026print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "columns": null,
-    "compact": null,
+    "compact": {
+      "action": "/app/calendar/a-nc-home/lichnyj",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "from",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "2026-08-10"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "compact",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "0"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "check",
+              "label": "Compact rows",
+              "name": "compact",
+              "options": [
+                {
+                  "label": "Compact rows",
+                  "selected": false,
+                  "value": "1"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "filter": "",
     "filterForm": null,
     "loaded": 2,
@@ -137,42 +200,102 @@
           "id": "range.month",
           "label": "Month",
           "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/lichnyj?from=2026-08-10\u0026to=2026-08-16\u0026view=range",
+          "id": "range.range",
+          "label": "Range",
+          "method": "GET"
         }
       ],
       "to": "16 August 2026"
     },
-    "segments": [
-      {
-        "enabled": false,
-        "id": "agenda.events",
-        "label": "Events",
-        "method": "GET",
-        "on": true,
-        "reason": "The agenda always shows its events."
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar/a-nc-home/lichnyj?from=2026-08-10\u0026with=tasks",
-        "id": "agenda.tasks",
-        "label": "Tasks due",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar/a-nc-home/lichnyj?from=2026-08-10\u0026with=notes",
-        "id": "agenda.notes",
-        "label": "Notes",
-        "method": "GET"
-      }
-    ],
+    "segments": [],
     "selected": 0,
+    "show": {
+      "action": "/app/calendar/a-nc-home/lichnyj",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "from",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "2026-08-10"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "with",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "check",
+              "label": "Show",
+              "name": "with",
+              "options": [
+                {
+                  "label": "Events",
+                  "selected": true,
+                  "value": "events"
+                },
+                {
+                  "label": "Tasks due",
+                  "selected": false,
+                  "value": "tasks"
+                },
+                {
+                  "label": "Notes",
+                  "selected": false,
+                  "value": "notes"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "total": null
   },
   "days": [
     {
+      "count": 1,
       "rows": [
         {
-          "badges": [],
+          "badges": [
+            {
+              "label": "4 attendees",
+              "role": "neutral"
+            },
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
           "colour": "",
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
           "kind": "event",
@@ -247,9 +370,10 @@
           "zone": "Asia/Yekaterinburg"
         }
       ],
-      "rubric": "Monday, 10 August"
+      "rubric": "Monday · 10 August"
     },
     {
+      "count": 1,
       "rows": [
         {
           "badges": [],
@@ -327,30 +451,36 @@
           "zone": ""
         }
       ],
-      "rubric": "Tuesday, 11 August"
+      "rubric": "Tuesday · 11 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Wednesday, 12 August"
+      "rubric": "Wednesday · 12 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Thursday, 13 August"
+      "rubric": "Thursday · 13 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Friday, 14 August"
+      "rubric": "Friday · 14 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Saturday, 15 August"
+      "rubric": "Saturday · 15 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Sunday, 16 August"
+      "rubric": "Sunday · 16 August"
     }
   ],
   "details": null,
+  "empty": null,
   "notices": [],
   "poll": null,
   "print": {
@@ -909,6 +1039,7 @@
       {
         "account": "Subscriptions",
         "accountID": "",
+        "feeds": true,
         "rows": [
           {
             "colour": "#8c6239",
@@ -1033,6 +1164,15 @@
       ]
     }
   },
+  "subtitle": [
+    {
+      "text": "nextcloud · 10 – 16 August 2026 · "
+    },
+    {
+      "mark": "mono",
+      "text": "Europe/Moscow"
+    }
+  ],
   "title": "Личный",
   "top": {
     "new": {
@@ -1099,12 +1239,14 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj?from=2026-08-10",
+        "icon": "i-refresh",
+        "id": "list.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "just now",
       "running": false
     },
     "search": {

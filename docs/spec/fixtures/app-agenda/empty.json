@@ -25,10 +25,73 @@
         "id": "collection.export",
         "label": "Export",
         "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "columns": null,
-    "compact": null,
+    "compact": {
+      "action": "/app/calendar/a-nc-home/lichnyj",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "from",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "2027-01-04"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "compact",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "0"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "check",
+              "label": "Compact rows",
+              "name": "compact",
+              "options": [
+                {
+                  "label": "Compact rows",
+                  "selected": false,
+                  "value": "1"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "filter": "",
     "filterForm": null,
     "loaded": 0,
@@ -137,68 +200,126 @@
           "id": "range.month",
           "label": "Month",
           "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026to=2027-01-10\u0026view=range",
+          "id": "range.range",
+          "label": "Range",
+          "method": "GET"
         }
       ],
       "to": "10 January 2027"
     },
-    "segments": [
-      {
-        "enabled": false,
-        "id": "agenda.events",
-        "label": "Events",
-        "method": "GET",
-        "on": true,
-        "reason": "The agenda always shows its events."
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026with=tasks",
-        "id": "agenda.tasks",
-        "label": "Tasks due",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026with=notes",
-        "id": "agenda.notes",
-        "label": "Notes",
-        "method": "GET"
-      }
-    ],
+    "segments": [],
     "selected": 0,
+    "show": {
+      "action": "/app/calendar/a-nc-home/lichnyj",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "from",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "2027-01-04"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "with",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "check",
+              "label": "Show",
+              "name": "with",
+              "options": [
+                {
+                  "label": "Events",
+                  "selected": true,
+                  "value": "events"
+                },
+                {
+                  "label": "Tasks due",
+                  "selected": false,
+                  "value": "tasks"
+                },
+                {
+                  "label": "Notes",
+                  "selected": false,
+                  "value": "notes"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "total": null
   },
   "days": [
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Monday, 4 January"
+      "rubric": "Monday · 4 January"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Tuesday, 5 January"
+      "rubric": "Tuesday · 5 January"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Wednesday, 6 January"
+      "rubric": "Wednesday · 6 January"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Thursday, 7 January"
+      "rubric": "Thursday · 7 January"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Friday, 8 January"
+      "rubric": "Friday · 8 January"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Saturday, 9 January"
+      "rubric": "Saturday · 9 January"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Sunday, 10 January"
+      "rubric": "Sunday · 10 January"
     }
   ],
   "details": null,
+  "empty": null,
   "notices": [],
   "poll": null,
   "print": {
@@ -750,6 +871,7 @@
       {
         "account": "Subscriptions",
         "accountID": "",
+        "feeds": true,
         "rows": [
           {
             "colour": "#8c6239",
@@ -858,6 +980,15 @@
       ]
     }
   },
+  "subtitle": [
+    {
+      "text": "nextcloud · 4 – 10 January 2027 · "
+    },
+    {
+      "mark": "mono",
+      "text": "Europe/Moscow"
+    }
+  ],
   "title": "Личный",
   "top": {
     "new": {
@@ -924,12 +1055,14 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04",
+        "icon": "i-refresh",
+        "id": "list.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "just now",
       "running": false
     },
     "search": {

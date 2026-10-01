@@ -82,10 +82,12 @@ func (s *Server) getKindRoot(w http.ResponseWriter, r *http.Request, segment str
 		s.notFound(w, r)
 		return
 	}
-	if spec.kind == view.KindContact {
+	if spec.kind == view.KindContact || spec.kind == view.KindEvent {
 		if s.compactChoice(w, r, segment, "/app/"+segment) {
 			return
 		}
+	}
+	if spec.kind == view.KindContact {
 		r = withoutOpen(r)
 	}
 	page, err := s.combinedPage(r, sess, s.catalogOf(sess), spec)
@@ -119,13 +121,8 @@ func (s *Server) combinedQuery(r *http.Request, tf timeFmt, spec kindSpec) (fano
 	// The switches belong to the window too: a list of events is not the
 	// list of events and tasks, and reusing one for the other would show a
 	// poll that never asked for them.
-	for _, k := range []struct {
-		value string
-		kind  view.Kind
-	}{{"tasks", view.KindTask}, {"notes", view.KindNote}} {
-		if agendaWith(r.URL.Query())[k.kind] {
-			q.Add("with", k.value)
-		}
+	for _, v := range withValues(agendaWith(r.URL.Query())) {
+		q.Add("with", v)
 	}
 	if len(q) > 0 {
 		page += "?" + q.Encode()
@@ -210,7 +207,24 @@ func listOwner(lt *listTask) pollOwner {
 		what:       "list",
 		polled:     true,
 		found:      func(n int) string { return plural(n, recordNouns[lt.kind]) },
+		// The calendar names the source that did not answer (s-agenda-1);
+		// the other lists count it until their frames are read.
+		named:   lt.kind == view.KindEvent,
+		missing: func(n int) string { return missingLine(lt.kind, n) },
 	}
+}
+
+// missingLine is what a combined list says under its rows when sources did
+// not answer (states-6, states-9): what arrived is shown, and what is not
+// there is unseen, not absent.
+func missingLine(k view.Kind, n int) string {
+	what := map[view.Kind][2]string{view.KindContact: {"Cards", "book"}, view.KindEvent: {"Records", "source"},
+		view.KindTask: {"Tasks", "list"}, view.KindNote: {"Notes", "notebook"}}[k]
+	from := "the unavailable " + what[1]
+	if n > 1 {
+		from += "s"
+	}
+	return "What arrived in time is shown. " + what[0] + " from " + from + " are missing — not “there are none”, but “we have not seen them”."
 }
 
 func withQuery(path, name, value string) string {
@@ -246,6 +260,10 @@ func (s *Server) readCombined(r *http.Request, sess *session.Session, blob seale
 		return st, err
 	case task == nil:
 		st.poll.Summary = line(combinedNoTicks)
+		// The circle stands where every list draws it, and says why it has
+		// nothing to ask (the client's scan of the calendar, А2).
+		st.shell.Top.Refresh = view.Refresh{Action: view.Action{ID: "poll.again", Label: "Refresh", Icon: "i-refresh",
+			Method: "GET", Href: s.route("/app/" + spec.segment), Reason: "Nothing is ticked to ask."}}
 	default:
 		snap := task.Snapshot()
 		st.task, st.snap = task, &snap
@@ -368,9 +386,13 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	case view.KindEvent:
 		page := view.AgendaPage{Shell: st.shell, Poll: st.poll}
 		kind, from, to := agendaWindow(tf, r.URL.Query())
+		page.Subtitle = agendaSubtitle(tf, combinedSubtitle(page.Rail, spec, false), from, to)
 		var bad []unreadable
 		on := agendaWith(r.URL.Query())
-		rows := kindedAll(shown, view.KindEvent)
+		var rows []kinded
+		if on[view.KindEvent] {
+			rows = kindedAll(shown, view.KindEvent)
+		}
 		for _, k := range []view.Kind{view.KindTask, view.KindNote} {
 			if !on[k] {
 				continue
@@ -381,9 +403,14 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		}
 		page.Days, page.Bar.Loaded, bad = s.agendaDays(tf, rows, from, to, spec.segment, true)
 		page.Bar.Range = s.agendaRange(tf, base, filter.tag, kind, from, to, r.URL.Query())
-		page.Bar.Segments = s.agendaSegments(base, filter.tag, on, r.URL.Query())
-		page.Bar.Actions = actions
+		page.Bar.Show, page.Bar.Segments = s.agendaShow(base, on, r.URL.Query()), []view.Action{}
+		page.Bar.Compact = s.compactForm(r, spec.segment, base)
+		page.Bar.Actions = append(actions, s.agendaPrintAction(base, query))
 		page.Notices = appendUnreadable(page.Notices, bad)
+		if st.task == nil && len(page.Notices) == 0 {
+			// Nothing ticked: no poll, and the agenda says why (U-6.0).
+			page.Poll, page.Empty = nil, s.nothingTicked(spec)
+		}
 		page.Print = header(agendaPrint(tf, from, to), counted(page.Bar.Loaded, "event"))
 		return page, nil
 	case view.KindTask:
@@ -446,17 +473,24 @@ func (s *Server) combinedIOActions(blob sealed.Blob, spec kindSpec) []view.Actio
 	return []view.Action{imp, exp}
 }
 
+// The button writes into the collection last written to, when the view shows
+// it; else into the first ticked one that takes records — never into one the
+// view does not show (the client's scan of the calendar, Б4: «Дни рождения»,
+// unticked, came first in the catalog); with none ticked, the first that
+// takes records.
 func (s *Server) combinedNewAction(blob sealed.Blob, spec kindSpec) view.Action {
 	a := view.Action{ID: "record.new", Label: text("New " + spec.noun), Icon: "i-plus", Method: "GET", Primary: true}
-	for _, col := range blob.Collections {
-		conn, ok := blob.Connection(col.AccountID)
-		if !ok || col.Gone || col.ReadOnly || !col.Has(spec.kind) {
-			continue
+	for _, ticks := range []bool{true, false} {
+		for _, col := range blob.Collections {
+			conn, ok := blob.Connection(col.AccountID)
+			if !ok || conn.Feed || col.Gone || col.ReadOnly || !col.Has(spec.kind) || (ticks && !isTicked(blob, spec.kind, col.AccountID, col.Path)) {
+				continue
+			}
+			a.Href, a.Enabled = s.route(origin{conn: conn, col: col}.listPath(spec.segment)+"/new?pick=1"), true
+			// In a combined view New asks where, by its arrow (s-contacts-9).
+			s.whereTo(blob, spec, &a)
+			return a
 		}
-		a.Href, a.Enabled = s.route(origin{conn: conn, col: col}.listPath(spec.segment)+"/new?pick=1"), true
-		// In a combined view New asks where, by its arrow (s-contacts-9).
-		s.whereTo(blob, spec, &a)
-		return a
 	}
 	a.Reason = text("No collection of this kind takes new records.")
 	return a
@@ -870,7 +904,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 	}
 	// Subscriptions last, as a section of their own: someone else's, read
 	// only, renamed here and nowhere else (S-25.2).
-	feeds := view.RailSection{Account: "Subscriptions", State: view.CollectionOK}
+	feeds := view.RailSection{Account: "Subscriptions", State: view.CollectionOK, Feeds: true}
 	for _, f := range blob.Subscriptions {
 		col, conn := f.FeedCollection(), f.FeedConnection()
 		if !col.Has(spec.kind) {

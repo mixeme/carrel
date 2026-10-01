@@ -154,6 +154,9 @@ check("7. фикстуры разбираются", badfix)
 FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут из C-5
     "app-contacts": "/app/contacts",
     "app-contacts-one": "/app/contacts/{account}/{col}",
+    # Единый календарь рисует s-agenda-1 («Combined calendar»), а его
+    # data-screen называет только адрес коллекции — задача Typecase 77;
+    # своего кадра у агенды одной коллекции (app-agenda) нет — та же задача.
     "app-agenda-all": "/app/calendar/{account}/{col}",
     "app-tasks-all": "/app/tasks/{account}/{col}",
     "app-notes-all": "/app/notes/{account}/{col}",
@@ -245,10 +248,7 @@ FRAME_TODO = {}
 # сервере — строка уходит. Ключ — как у FRAME_TODO: «каталог: что
 # расходится», без состояния; держит проверки 8 и 9.
 SERVER_TODO = {
-    # states-7 (ничего не отмечено, Typecase 515beec) рисует «Tick every book»
-    # основной кнопкой, а rail.tick.all фикстуры не Primary.
-    "app-contacts: «Tick every book» (rail.tick.all)":
-        "plan/client.md, долг сервера C19: «Tick every book» — основная (states-7)",
+    # «Tick every book» (states-7) основная с сервера v0.2.118 (долг C19).
 }
 
 # Состояние, которое рисует свой кадр маршрута — часть (data-part), а не

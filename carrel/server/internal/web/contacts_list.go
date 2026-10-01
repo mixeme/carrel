@@ -218,7 +218,11 @@ func combinedSubtitle(rail view.Rail, spec kindSpec, done bool) string {
 			live++
 			if row.Tick == view.TickOn {
 				on++
-				accounts[string(sec.Account)] = true
+				// Subscriptions are calendars the view shows, and no
+				// account (s-agenda-1: «3 accounts»).
+				if !sec.Feeds {
+					accounts[string(sec.Account)] = true
+				}
 			}
 		}
 	}
@@ -261,12 +265,13 @@ func bookEmpty(c *collectionCtx, actions []view.Action) *view.Notice {
 }
 
 // nothingTicked is what a combined book says with no book ticked: why it is
-// empty, and a button that ticks every one (U-6.0, S-14).
+// empty, and a button that ticks every one (U-6.0, S-14) — the primary one
+// (states-7; the client's stop C19).
 func (s *Server) nothingTicked(spec kindSpec) *view.Notice {
 	root := "/app/" + spec.segment
 	return &view.Notice{Role: view.NoticeInfo, Title: text("No " + collectionNouns[spec.kind] + "s are ticked"),
 		Body: text("Tick the " + collectionNouns[spec.kind] + "s to show in the rail, or all of them at once."),
-		Actions: []view.Action{{ID: "rail.tick.all", Label: text("Tick every " + collectionNouns[spec.kind]), Method: "POST", Enabled: true,
+		Actions: []view.Action{{ID: "rail.tick.all", Label: text("Tick every " + collectionNouns[spec.kind]), Method: "POST", Enabled: true, Primary: true,
 			Href: s.postQuery("/app/sources/"+spec.segment, url.Values{"toggle": {s.route(root)}, "back": {root}})}}}
 }
 

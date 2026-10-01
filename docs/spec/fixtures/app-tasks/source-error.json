@@ -127,6 +127,7 @@
     "range": null,
     "segments": [],
     "selected": 0,
+    "show": null,
     "total": null
   },
   "details": null,
@@ -422,6 +423,7 @@
       {
         "account": "Subscriptions",
         "accountID": "",
+        "feeds": true,
         "rows": [
           {
             "colour": "#8c6239",
@@ -565,10 +567,12 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela",
+        "icon": "i-refresh",
+        "id": "list.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
       "answered": "",
       "running": false

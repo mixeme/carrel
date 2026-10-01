@@ -25,10 +25,61 @@
         "id": "collection.export",
         "label": "Export",
         "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "columns": null,
-    "compact": null,
+    "compact": {
+      "action": "/app/calendar",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "compact",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "0"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "check",
+              "label": "Compact rows",
+              "name": "compact",
+              "options": [
+                {
+                  "label": "Compact rows",
+                  "selected": false,
+                  "value": "1"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "filter": "",
     "filterForm": null,
     "loaded": 0,
@@ -137,82 +188,132 @@
           "id": "range.month",
           "label": "Month",
           "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-10\u0026to=2026-08-16\u0026view=range",
+          "id": "range.range",
+          "label": "Range",
+          "method": "GET"
         }
       ],
       "to": "16 August 2026"
     },
-    "segments": [
-      {
-        "enabled": false,
-        "id": "agenda.events",
-        "label": "Events",
-        "method": "GET",
-        "on": true,
-        "reason": "The agenda always shows its events."
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar?with=tasks",
-        "id": "agenda.tasks",
-        "label": "Tasks due",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar?with=notes",
-        "id": "agenda.notes",
-        "label": "Notes",
-        "method": "GET"
-      }
-    ],
+    "segments": [],
     "selected": 0,
+    "show": {
+      "action": "/app/calendar",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "with",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "check",
+              "label": "Show",
+              "name": "with",
+              "options": [
+                {
+                  "label": "Events",
+                  "selected": true,
+                  "value": "events"
+                },
+                {
+                  "label": "Tasks due",
+                  "selected": false,
+                  "value": "tasks"
+                },
+                {
+                  "label": "Notes",
+                  "selected": false,
+                  "value": "notes"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "total": null
   },
   "days": [
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Monday, 10 August"
+      "rubric": "Monday · 10 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Tuesday, 11 August"
+      "rubric": "Tuesday · 11 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Wednesday, 12 August"
+      "rubric": "Wednesday · 12 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Thursday, 13 August"
+      "rubric": "Thursday · 13 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Friday, 14 August"
+      "rubric": "Friday · 14 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Saturday, 15 August"
+      "rubric": "Saturday · 15 August"
     },
     {
+      "count": 0,
       "rows": [],
-      "rubric": "Sunday, 16 August"
+      "rubric": "Sunday · 16 August"
     }
   ],
   "details": null,
-  "notices": [],
-  "poll": {
-    "actions": [],
-    "answeredAt": "",
-    "percent": 0,
-    "running": false,
-    "sources": [],
-    "summary": [
+  "empty": {
+    "actions": [
       {
-        "text": "No collections are ticked, so there is nothing to show. Tick collections in the rail."
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/sources/calendar?back=%2Fapp%2Fcalendar\u0026toggle=%2Fapp%2Fcalendar",
+        "id": "rail.tick.all",
+        "label": "Tick every calendar",
+        "method": "POST",
+        "primary": true
       }
     ],
-    "taskID": ""
+    "body": "Tick the calendars to show in the rail, or all of them at once.",
+    "details": null,
+    "role": "info",
+    "title": "No calendars are ticked"
   },
+  "notices": [],
+  "poll": null,
   "print": {
     "range": "",
     "taken": "",
@@ -762,6 +863,7 @@
       {
         "account": "Subscriptions",
         "accountID": "",
+        "feeds": true,
         "rows": [
           {
             "colour": "#8c6239",
@@ -870,6 +972,15 @@
       ]
     }
   },
+  "subtitle": [
+    {
+      "text": "0 of 8 calendars · 0 accounts · 10 – 16 August 2026 · "
+    },
+    {
+      "mark": "mono",
+      "text": "Europe/Moscow"
+    }
+  ],
   "title": "Combined calendar",
   "top": {
     "new": {
@@ -937,9 +1048,12 @@
     "refresh": {
       "action": {
         "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "href": "/app/calendar",
+        "icon": "i-refresh",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET",
+        "reason": "Nothing is ticked to ask."
       },
       "answered": "",
       "running": false
