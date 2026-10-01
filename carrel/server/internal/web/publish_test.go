@@ -239,7 +239,11 @@ func TestPublishIsOffered(t *testing.T) {
 func TestPublishLinkLivesForWhatWasChosen(t *testing.T) {
 	f := publishFixture(t)
 	now := time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC)
+	// Both clocks: the list of links drops an expired one by the service's
+	// own, and on the wall clock a 7-day link made on 24.09 at noon was gone
+	// by 01.10 at noon — the test went red on its own that afternoon.
 	f.h.srv.SetClock(now)
+	f.h.users.SetClock(now)
 	href := f.publishHref("contacts", searchBook, "ada")
 	for _, c := range []struct {
 		lives string
