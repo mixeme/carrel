@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"sort"
 	"strings"
@@ -58,12 +59,30 @@ func (p *Provider) stamp(obj *model.Object) error {
 
 // Get fetches and parses one contact.
 func (p *Provider) Get(ctx context.Context, path string) (*model.Object, error) {
-	rc, etag, err := p.t.Get(ctx, path, nil)
+	rc, etag, err := p.get(ctx, path)
 	if err != nil {
 		return nil, err
 	}
 	defer rc.Close()
 	return Parse(path, etag, rc)
+}
+
+// get reads one card asking for vCard 4.0, as every read of a card asks
+// (S-7, docs/servers.md, SV-1): sabre/dav answers a GET without Accept in
+// 3.0 and drops what 3.0 cannot hold — KIND among others — before any
+// patch, and the edit wrote 3.0 back. A server that keeps cards as sent
+// answers as kept either way. One that refuses the version — 406 Not
+// Acceptable, or a refusal as a report's — is asked again without it.
+func (p *Provider) get(ctx context.Context, path string) (io.ReadCloser, string, error) {
+	g, ok := p.t.(dav.CardGetter)
+	if !ok {
+		return p.t.Get(ctx, path, nil)
+	}
+	rc, etag, err := g.GetCard(ctx, path, dav.VCard4)
+	if dav.IsStatus(err, http.StatusNotAcceptable) || refusedVersion(err) {
+		return p.t.Get(ctx, path, nil)
+	}
+	return rc, etag, err
 }
 
 // Parse reads a vCard stream into an Object.

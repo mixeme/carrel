@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.102 — 2026-10-01
+
+The GET of one card asked for no version (docs/servers.md, SV-1): sabre/dav
+(Baikal, Nextcloud) answers it in 3.0 without what only 4.0 holds, though
+every report already asked for 4.0.
+
+### Fixed
+
+- **A card read by its address asks for vCard 4.0**: `Accept: text/vcard;
+  version=4.0`, as the reports ask by `address-data`. Such reads are the
+  ones that find a record under another identity — after a create, a move
+  or an import into a server that writes its own UID. A server that answers
+  406 or refuses the version is asked again without `Accept`.
+
 ## v0.2.101 — 2026-10-01
 
 A link in a note went wherever its text said: `[a](javascript:…)` reached

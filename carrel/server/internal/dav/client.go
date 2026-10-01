@@ -97,11 +97,30 @@ func (c *Client) PropFind(ctx context.Context, p string, depth Depth, props []xm
 }
 
 func (c *Client) Get(ctx context.Context, p string, rng *Range) (io.ReadCloser, string, error) {
+	return c.get(ctx, p, rng, "")
+}
+
+// GetCard is a GET of one card that asks for the version by its Accept,
+// text/vcard; version=… (RFC 6350 §10.1). A server that converts cards
+// (sabre/dav: Baikal, Nextcloud) otherwise answers in 3.0, as it answers a
+// report that names no version (docs/servers.md, SV-1). Empty: no Accept.
+func (c *Client) GetCard(ctx context.Context, p, version string) (io.ReadCloser, string, error) {
+	accept := ""
+	if version != "" {
+		accept = "text/vcard; version=" + version
+	}
+	return c.get(ctx, p, nil, accept)
+}
+
+func (c *Client) get(ctx context.Context, p string, rng *Range, accept string) (io.ReadCloser, string, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.resolve(p), nil)
 	if err != nil {
 		return nil, "", err
 	}
 	setRange(req, rng)
+	if accept != "" {
+		req.Header.Set("Accept", accept)
+	}
 	resp, err := c.hc.Do(req)
 	if err != nil {
 		return nil, "", err

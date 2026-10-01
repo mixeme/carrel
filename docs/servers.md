@@ -242,10 +242,18 @@ Graph, протоколы другого устройства. Самая рас
   `supported-address-data`.
 - **Чем грозило.** Правка записывала 3.0 обратно, и карточка 4.0 теряла `KIND`
   насовсем — отчёт о потере этого не видел.
-- **Carrel.** Все чтения карточек просят `text/vcard; version=4.0`
-  (`dav.CardQuerier`), отказ — повтор без версии. Карточка 3.0 после правки
-  хранится в 4.0: меняется формат, не данные (`v0.0.60`).
-- **Сторож.** `TestBaikalVCard4Edit`; без сети — `TestCardReadsAskForVCard4`.
+- **Carrel.** Все чтения карточек просят 4.0: отчёты — `address-data` с
+  `content-type="text/vcard" version="4.0"` (запрос и поиск —
+  `dav.CardQuerier`, multiget книги без запроса — `dav.CardFetcher`), GET
+  одной карточки — `Accept: text/vcard; version=4.0` (`dav.CardGetter`,
+  `v0.2.101`; до того GET шёл без `Accept`, и карточка, прочитанная по
+  адресу, — запись под чужим UID после создания, переноса или импорта —
+  приходила в 3.0). Отказ — повтор без версии; у GET отказ — и 406. Карточка
+  3.0 после правки хранится в 4.0: меняется формат, не данные (`v0.0.60`).
+- **Сторож.** `TestBaikalVCard4Edit`; без сети — `TestCardReadsAskForVCard4`,
+  `TestCardReadsOfAConvertingServerKeepVCard4` (стенд `davtest`
+  `ConvertsCards`: чтение без 4.0 — в 3.0 без `KIND`, каждым путём),
+  `TestCardGetFallsBackWhenVersionIsRefused`.
 
 ### SV-2. text-match в CalDAV: регистр только у латиницы
 

@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -42,6 +43,12 @@ type CardMatch struct {
 	// Nobody asks for it — FindUID checks the UID itself — and whoever
 	// starts should expect silence rather than a refusal.
 	Equals bool
+}
+
+// CardGetter reads one card in a version, which Transport.Get has no word
+// for. It sits beside CardQuerier, outside Transport.
+type CardGetter interface {
+	GetCard(ctx context.Context, path, version string) (io.ReadCloser, string, error)
 }
 
 // CardObject is a card as a REPORT returned it: decoded, and the text it was

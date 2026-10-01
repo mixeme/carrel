@@ -199,6 +199,13 @@ type Server struct {
 	// honoured: go-webdav's own text-match counts case and ignores collation.
 	RefuseCollation bool
 
+	// ConvertsCards answers a read of a card that does not ask for vCard 4.0
+	// in 3.0, without KIND and with sabre's PRODID, the way sabre/dav does
+	// (Baikal, Nextcloud; docs/servers.md, SV-1): a GET whose Accept names
+	// no version=4.0, a REPORT whose address-data names no version="4.0".
+	// The card is kept as sent; only the answer is converted.
+	ConvertsCards bool
+
 	// CutPhotoDataURI keeps a card's PHOTO data: URI the way Radicale does
 	// through vobject: cut at its comma, with ';' escaped — the image is gone.
 	CutPhotoDataURI bool
@@ -661,6 +668,9 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 		if bytes.Contains(body, []byte(`"i;unicode-casemap"`)) {
 			r = r.WithContext(context.WithValue(r.Context(), foldCase{}, true))
 		}
+	}
+	if s.ConvertsCards && strings.HasPrefix(p, AddressBookHome) && !asksVCard4(r, body) {
+		r = r.WithContext(context.WithValue(r.Context(), inVCard3{}, true))
 	}
 	if r.Method == http.MethodPut {
 		s.mu.Lock()
@@ -1476,18 +1486,57 @@ func addressObject(p string, o object) (*carddav.AddressObject, error) {
 	}, nil
 }
 
-func (b cardBackend) GetAddressObject(_ context.Context, p string, _ *carddav.AddressDataRequest) (*carddav.AddressObject, error) {
+func (b cardBackend) GetAddressObject(ctx context.Context, p string, _ *carddav.AddressDataRequest) (*carddav.AddressObject, error) {
 	o, err := b.s.get(p)
 	if err != nil {
 		return nil, err
 	}
-	return addressObject(p, o)
+	return addressObject(p, converted(ctx, o))
 }
 
-func (b cardBackend) ListAddressObjects(_ context.Context, p string, _ *carddav.AddressDataRequest) ([]carddav.AddressObject, error) {
+// inVCard3 marks a read of a card that ConvertsCards answers in 3.0.
+type inVCard3 struct{}
+
+// asksVCard4 reports a read that names vCard 4.0: a GET by its Accept, a
+// REPORT by its address-data.
+func asksVCard4(r *http.Request, body []byte) bool {
+	switch r.Method {
+	case http.MethodGet, http.MethodHead:
+		return strings.Contains(strings.ReplaceAll(r.Header.Get("Accept"), `"`, ""), "version=4.0")
+	case "REPORT":
+		return bytes.Contains(body, []byte(`version="4.0"`))
+	}
+	return true
+}
+
+// converted is the card as sabre/dav answers a read that asked for no
+// version: VERSION 3.0, sabre's PRODID, and KIND — which 3.0 does not hold —
+// gone.
+func converted(ctx context.Context, o object) object {
+	if ctx.Value(inVCard3{}) == nil {
+		return o
+	}
+	var out []string
+	for _, l := range strings.Split(string(o.data), "\r\n") {
+		name, _, _ := strings.Cut(l, ":")
+		name, _, _ = strings.Cut(strings.ToUpper(name), ";")
+		switch name {
+		case "VERSION":
+			out = append(out, "VERSION:3.0", "PRODID:-//Sabre//Sabre VObject 4.5.6//EN")
+			continue
+		case "KIND", "PRODID":
+			continue
+		}
+		out = append(out, l)
+	}
+	o.data = []byte(strings.Join(out, "\r\n"))
+	return o
+}
+
+func (b cardBackend) ListAddressObjects(ctx context.Context, p string, _ *carddav.AddressDataRequest) ([]carddav.AddressObject, error) {
 	var out []carddav.AddressObject
 	for op, o := range b.s.objectsIn(p) {
-		ao, err := addressObject(op, o)
+		ao, err := addressObject(op, converted(ctx, o))
 		if err != nil {
 			return nil, err
 		}
