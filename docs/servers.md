@@ -217,7 +217,7 @@ Graph, протоколы другого устройства. Самая рас
 | SV-53 | iCloud | `PUT` события без `DTEND` и `DURATION` — 404 с пустым телом | конец пишется всегда: `DTEND` равен `DTSTART`, у события на дату — следующий день (v0.2.80) | `TestAnEventWithoutAnEndIsWrittenWithOne`; `TestICloudEventWithoutAnEnd` |
 | SV-54 | iCloud | `calendar-query` с `text-match` по `UID` — 412 с пустым телом; по `SUMMARY` и прочим — 207 без совпадений | поиск по тексту держит путь SV-47; запись по `UID` ищется без фильтра — `GET <UID>.ics`, затем компонент целиком и сверка у себя, отказ сеанс помнит (v0.2.80) | `TestAUIDTheServerWillNotFilterIsFoundWithoutTheFilter`, `TestARecordOpensWhereTheServerRefusesAUIDFilter`; `TestICloudSearch`, `TestICloudRecords` |
 | SV-55 | iCloud | UID занят на всю учётную запись: `PUT` записи с UID, лежащим в другом календаре, — 412 с пустым телом, под любым именем и без `If-None-Match` | 412 на имя, под которым ничего нет, — «UID занят»: копия (v0.2.81) и запись импорта (v0.2.84) пишутся со своим UID, экран и отчёт говорят это словами (решение владельца) | `TestACopyGetsAUIDOfItsOwnWhereTheAccountHoldsOneRecordPerUID`, `TestAnImportGetsAUIDOfItsOwnWhereTheAccountHoldsOneRecordPerUID`, `TestICloudMove/copy_back` |
-| SV-56 | Google | выбрасывает `DTEND`, равный `DTSTART`; первым `TEL`, `EMAIL`, `ADR` дописывает `PREF`, `TYPE` пишет заглавными; день рождения без года (`--MMDD`) выбрасывает | конец, который подразумевает начало (RFC 5545 §3.6.1), и `PREF`, дописанный сервером, — не потеря (v0.2.91); день рождения — честная потеря, обход ждёт владельца | `TestAnEndTheStartImpliesIsNotLostWhenTheServerLeavesItOut`, `TestAPreferredMarkTheServerAddsIsNotALoss`; `TestGoogleEventInTheExistingCalendar`, `TestGoogleContactFields` |
+| SV-56 | Google | выбрасывает `DTEND`, равный `DTSTART`; первым `TEL`, `EMAIL`, `ADR` дописывает `PREF`, `TYPE` пишет заглавными; день рождения без года (`--MMDD`) выбрасывает | конец, который подразумевает начало (RFC 5545 §3.6.1), и `PREF`, дописанный сервером, — не потеря (v0.2.91); день рождения — честная потеря (решение владельца 01.10.2026; пересмотр по эксплуатации) | `TestAnEndTheStartImpliesIsNotLostWhenTheServerLeavesItOut`, `TestAPreferredMarkTheServerAddsIsNotALoss`; `TestGoogleEventInTheExistingCalendar`, `TestGoogleContactFields` |
 | SV-27 | SoGo | у составного значения отбрасывает хвостовые пустые части: `N:Фамилия;Имя;;;` → `N:Фамилия;Имя` | сравнивает составные значения по частям, хвостовые пустые не считая: то же имя, записанное короче, — не потеря | `TestCompareIgnoresTrailingEmptyComponents`, `TestSoGoTrimsEmptyNameComponents` |
 | SV-26 | Google (и go-webdav) | `addressbook-query` отвечает 207 без ответов; `allprop` внутри `address-data` — 400 | просит карточку пустым `address-data`, своим multiget'ом; пустому отчёту не верит на слово, а сверяет со списком книги | `TestHollowQueryIsCheckedAgainstTheBook`, `TestSearchLooksAgainWhenAQueryAnswersNothing` |
 | SV-31 | библиотеки | ни go-vcard, ни go-ical не сворачивают длинные строки | сворачивает сам, по 75 октетов | `TestFoldLines`, `TestEncodeFoldsLongLines` |
@@ -517,8 +517,9 @@ Graph, протоколы другого устройства. Самая рас
 - **Без обхода.** День рождения без года на Google — настоящая потеря, и
   отчёт о ней верный. Обход возможен (писать такой день формой Apple с
   `X-APPLE-OMIT-YEAR`, как она уже пишется там, где карточка держит этот
-  маркер), но другие клиенты тогда увидят год 1604 — развилка для владельца,
-  не решена. Час, который Google дописывает событию без конца, Carrel больше
+  маркер), но другие клиенты тогда увидят год 1604. **Решение владельца
+  01.10.2026: потеря остаётся** — кандидат на пересмотр по результатам
+  эксплуатации. Час, который Google дописывает событию без конца, Carrel больше
   не встречает: конец пишется всегда (SV-53).
 - **Сторож.** `model.TestAnEndTheStartImpliesIsNotLostWhenTheServerLeavesItOut`,
   `model.TestAPreferredMarkTheServerAddsIsNotALoss`; на `davtest`
