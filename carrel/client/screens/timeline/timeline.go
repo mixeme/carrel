@@ -25,7 +25,8 @@ var (
 		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
 		Search: "Search everything…",
 	}
-	rail = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom"}
+	rail    = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom"}
+	columns = bind.ColumnWords{Name: "col", Reset: "default", Drag: "drag"}
 )
 
 // Screen draws the timeline from its view model.
@@ -79,10 +80,7 @@ func Screen(p *view.ContactTimelinePage) w.Shell {
 		acts = append(acts, bind.Button(a, ""))
 	}
 	h.Acts = &w.Acts{Items: acts}
-	main := []w.MainPart{}
-	for _, n := range p.Notices {
-		main = append(main, bind.Notice(n, w.MsgSpacePage))
-	}
+	main := bind.Notices(p.Notices, w.MsgSpacePage)
 	main = append(main, h, bar(p))
 	if r := bind.Runbar(&p.Poll); r != nil {
 		main = append(main, *r)
@@ -116,9 +114,9 @@ func Screen(p *view.ContactTimelinePage) w.Shell {
 }
 
 // Forms are the page's forms: the rail's, the retries of its sources, the
-// card's deletion.
+// card's deletion, the items of the menus that post (Sign out).
 func Forms(p *view.ContactTimelinePage) []w.PostForm {
-	var out []w.PostForm
+	out := append(bind.TopForms(p.Top), bind.MenuForms(p.Card.Menu)...)
 	if f := bind.RailForm(p.Rail, formRail); f != nil {
 		out = append(out, *f)
 	}
@@ -180,12 +178,17 @@ func bar(p *view.ContactTimelinePage) w.Bar {
 		items = append(items, w.SegFold{Seg: seg})
 	}
 	if c := p.Bar.Columns; c != nil {
-		// ждёт библиотеку: U-5.5 #4 — Columns, a closed menu without scripts
-		items = append(items, w.Button{Label: string(c.Label), Icon: bind.Icon(c.Icon), Secondary: true})
+		cols := bind.Columns(*c, columns)
+		trigger := cols.Trigger.(w.Button)
+		trigger.Secondary = true
+		cols.Trigger, cols.Menu.Pop = trigger, w.MenuUnder
+		items = append(items, cols)
 	}
 	return w.Bar{
 		Items: items,
-		// ждёт библиотеку: U-5.5 #3 — the bar's «⋯» without scripts
+		// ждёт библиотеку: U-5.5 #22 — the bar's «⋯»: a button with no menu
+		// of what left the bar (components-19); a tick that is a form has no
+		// twin in a menu
 		More:    &w.Button{Icon: "dots", Title: "More"},
 		Right:   &w.BarRight{Items: []w.BarPart{w.Mono{Text: "newest first"}}, Secondary: true},
 		Variant: w.BarWide,
@@ -207,7 +210,6 @@ func side(c view.Details) *w.Side {
 		tools = append(tools, b)
 	}
 	if len(c.Menu) > 0 {
-		// ждёт библиотеку: U-5.5 #2 — the card's «⋯», a closed menu without scripts
 		tools = append(tools, w.Drop{
 			Trigger: w.Button{Icon: "dots", Small: true, Title: "More"},
 			Menu:    w.Menu{Items: bind.MenuItems(c.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnder},
@@ -215,8 +217,7 @@ func side(c view.Details) *w.Side {
 	}
 	photo := &w.HeadPhoto{Large: true}
 	if c.Avatar != nil {
-		// ждёт библиотеку: U-5.5 #11 — the photo in the head (Avatar.Href)
-		photo.Initials = string(c.Avatar.Initials)
+		photo.Initials, photo.Src = string(c.Avatar.Initials), c.Avatar.Href
 	}
 	h := w.Head{
 		Photo:  photo,

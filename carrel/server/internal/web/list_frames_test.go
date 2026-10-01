@@ -196,19 +196,20 @@ func TestContactsListIsTheFrames(t *testing.T) {
 		t.Errorf("filtered = %q (filter %q)", names, filtered.Bar.Filter)
 	}
 
-	// Compact rows: a check of a form, off as the frame draws it
-	// (TestCompactRowsIsACheck holds the rest).
-	tick := regexp.MustCompile(`<button class="tc-check" type="button"><span class="tc-tickrow__tick( is-off)?"></span>([^<]*)</button>`).FindStringSubmatch(frame)
+	// Compact rows: a check of a GET form (Typecase's task 67, tc-checkform),
+	// off as the frame draws it (TestCompactRowsIsACheck holds the rest).
+	tick := regexp.MustCompile(`<form class="tc-checkform" action="[^"]*" method="get"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="([^"]*)" value="([^"]*)"( checked)?><span class="tc-tickrow__tick( is-off)?"></span>([^<]*)</label>`).FindStringSubmatch(frame)
 	if tick == nil {
 		t.Fatal("s-contacts-1 draws no «Compact rows»: read the frame again")
 	}
 	c := page.Bar.Compact
-	if c == nil || len(c.Sets) != 1 {
+	if c == nil || len(c.Sets) != 1 || c.Method != "GET" {
 		t.Fatalf("compact = %+v", c)
 	}
 	check := c.Sets[0].Rows[len(c.Sets[0].Rows)-1]
-	if check.Kind != view.InputCheck || len(check.Options) != 1 || string(check.Options[0].Label) != tick[2] || check.Options[0].Selected != (tick[1] == "") {
-		t.Errorf("compact check = %+v, the frame %q on %v", check, tick[2], tick[1] == "")
+	if check.Kind != view.InputCheck || check.Name != tick[1] || len(check.Options) != 1 || check.Options[0].Value != tick[2] ||
+		string(check.Options[0].Label) != tick[5] || check.Options[0].Selected != (tick[3] != "") {
+		t.Errorf("compact check = %+v, the frame %q=%q «%s» on %v", check, tick[1], tick[2], tick[5], tick[3] != "")
 	}
 }
 

@@ -17,6 +17,23 @@ import (
 // it (Button.Form).
 const formID = "edit"
 
+// none is the screen's word (U-1.3) in an empty field the model gives no
+// pattern for: the dash the frames draw as its placeholder (s-contacts-3,
+// -4, -27).
+const none = "—"
+
+// field is a row of the form as a field of the width of its name, an empty
+// line showing the dash where the model gives no pattern of its own — but
+// the one with the cursor, which the frames draw bare (s-contacts-27).
+func field(r view.FormRow) w.Field {
+	f := bind.Field(r, width(r.Name))
+	if in, ok := f.Parts[0].(w.Input); ok && in.Placeholder == "" && !in.Focus {
+		in.Placeholder = none
+		f.Parts[0] = in
+	}
+	return f
+}
+
 // The screen's words (U-1.3) for the shell: the mark, the search, the rail.
 var (
 	top = bind.TopWords{
@@ -72,7 +89,8 @@ func width(name string) w.FieldWidth {
 //     each line closed by Remove (it sends remove=<line> without scripts),
 //     «Add …» adding the lines of its template in place; the folded rubric
 //     as its button «Show N empty fields», which unfolds them (Unfold).
-//   - Under the form: properties Carrel does not know are kept (U-6.1).
+//   - Under the form of a card that exists: properties Carrel does not know
+//     are kept (U-6.1); a new card has none (s-contacts-27).
 func Screen(p *view.ContactEditPage) w.Shell {
 	var plain, primary []w.ActsPart
 	for _, a := range p.Form.Actions {
@@ -91,11 +109,9 @@ func Screen(p *view.ContactEditPage) w.Shell {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}
 	main := []w.MainPart{h}
-	for _, n := range p.Notices {
-		main = append(main, bind.Notice(n, w.MsgSpacePage))
-	}
+	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
 	if p.Loss != nil {
-		main = append(main, bind.Loss(*p.Loss, w.MsgSpacePage))
+		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2))
 	}
 	form := bind.Form(p.Form, formID)
 	form.Items = append(form.Items, photo(p.Photo))
@@ -112,24 +128,28 @@ func Screen(p *view.ContactEditPage) w.Shell {
 		case i == 0 && set.Legend == "":
 			cols := w.FormCols{}
 			for _, r := range rows {
-				cols.Items = append(cols.Items, bind.Field(r, width(r.Name)))
+				cols.Items = append(cols.Items, field(r))
 			}
 			form.Items = append(form.Items, cols)
 		default:
 			form.Items = append(form.Items, fieldSet(set.Legend, rows))
 		}
 	}
-	main = append(main, form, w.FormFoot{Items: []w.FormFootPart{
-		w.Dim{Parts: []w.Inline{w.Text("Properties Carrel does not know are kept unchanged.")}, Size: w.Dim11_5},
-	}})
+	main = append(main, form)
+	if p.UID != "" {
+		main = append(main, w.FormFoot{Items: []w.FormFootPart{
+			w.Dim{Parts: []w.Inline{w.Text("Properties Carrel does not know are kept unchanged.")}, Size: w.Dim11_5},
+		}})
+	}
 	t := bind.Top(p.Top, top)
 	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail, p.UID == ""), Main: w.Main{Items: main}}}
 }
 
 // Forms are the forms of the photo's actions, which post with none of their
-// own, each under its action's ID.
+// own, each under its action's ID, of the notices' buttons and of the menus'
+// items that post (Sign out).
 func Forms(p *view.ContactEditPage) []w.PostForm {
-	out := bind.NoticeForms(p.Notices)
+	out := append(bind.TopForms(p.Top), bind.NoticeForms(p.Notices)...)
 	for _, a := range p.Photo.Actions {
 		if a.Method == "POST" && a.Enabled {
 			out = append(out, bind.ActionForm(a, a.ID))
@@ -198,14 +218,14 @@ func fieldSet(legend view.Text, rows []view.FormRow) w.FieldSet {
 				if t.Kind == view.InputRemove {
 					return []w.FieldSetPart{bind.Remove(t), w.Grow{}}
 				}
-				f := bind.Field(t, width(t.Name))
+				f := field(t)
 				f.Label = ""
 				return []w.FieldSetPart{f}
 			})
 			add.Icon, add.Small = "plus", true
 			set.Items = append(set.Items, add, tmpl)
 		default:
-			f := bind.Field(r, width(r.Name))
+			f := field(r)
 			if !first {
 				f.Label = ""
 			}

@@ -313,9 +313,9 @@ func Add(r view.FormRow, line func(view.FormRow) []w.FieldSetPart) (w.Button, w.
 }
 
 // Loss is what the server did not keep of a save (C-9 LossReport) as a
-// notice in the alert's tone: what it means (Note), then the properties
-// lost, monospaced, a comma between them. A notice, not a lock: the record
-// is written.
+// notice in the plain tone, as its frame draws it (states-12): what it means
+// (Note), then the properties lost, monospaced, a comma between them. A
+// notice, not a lock and not an alarm: the record is written.
 func Loss(l view.LossReport, space w.MsgSpace) w.Msg {
 	parts := []w.MsgPart{w.Text(l.Note)}
 	for i, p := range l.Properties {
@@ -325,5 +325,5 @@ func Loss(l view.LossReport, space w.MsgSpace) w.Msg {
 		}
 		parts = append(parts, w.Text(sep), w.Mono{Text: string(p)})
 	}
-	return w.Msg{Parts: parts, Tone: w.MsgAlert, Space: space}
+	return w.Msg{Parts: parts, Space: space}
 }

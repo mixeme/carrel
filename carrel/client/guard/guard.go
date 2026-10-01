@@ -271,9 +271,10 @@ var word = regexp.MustCompile(`\pL`)
 
 // protocol are the strings of the contract that are no words of the
 // interface: the values of Action.Method (C-6.2), which bind compares an
-// action's method with, and the prefix of an icon's name (U-4, «i-down»),
-// which it takes off for the widget.
-var protocol = []string{"GET", "POST", "i-"}
+// action's method with, the prefix of an icon's name (U-4, «i-down»),
+// which it takes off for the widget, and the name of the session's token in
+// a form (C-11), under which an action's own token (Action.CSRF) is sent.
+var protocol = []string{"GET", "POST", "i-", "_csrf"}
 
 // Words names every string or rune constant holding a letter in a Go file
 // under dir — the bind/ directory of the client. bind hands a widget only the

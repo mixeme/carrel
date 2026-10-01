@@ -486,26 +486,31 @@ func TestQuickTaskSheetIsTheFrame(t *testing.T) {
 	}
 }
 
-var frameZoneItem = regexp.MustCompile(`(?s)<input[^>]*placeholder="([^"]*)"|<span class="tc-rubric">(.*?)</span>|<span class="tc-menu__sep"></span>|<button class="[^"]*tc-menu__item[^"]*"[^>]*>(.*?)</button>`)
+// A zone of s-agenda-8 is a radio button of the edit form (Typecase's task
+// 73): its name, its value, its words.
+var frameZoneItem = regexp.MustCompile(`(?s)<label class="[^"]*tc-menu__item[^"]*"><input[^>]*name="([^"]*)" value="([^"]*)"[^>]*>(.*?)</label>|<input[^>]*placeholder="([^"]*)"|<span class="tc-rubric">(.*?)</span>|<span class="tc-menu__sep"></span>`)
 
 // zoneMenu is the zone list as s-agenda-8 draws it: «find: » the search,
-// «# » a heading, «—» a line, then the zone.
-func frameZoneMenu(t *testing.T) []string {
+// «# » a heading, «—» a line, then the zone; and the value each zone sends
+// under the name of the form's row (sent).
+func frameZoneMenu(t *testing.T) (out []string, sent map[string]string) {
 	t.Helper()
-	var out []string
+	sent = map[string]string{}
 	for _, m := range frameZoneItem.FindAllStringSubmatch(mockupFrame(t, "s-agenda-8"), -1) {
 		switch {
+		case strings.HasPrefix(m[0], "<label"):
+			label := frameText(m[3])
+			out = append(out, label)
+			sent[label] = m[1] + "=" + m[2]
 		case strings.HasPrefix(m[0], "<input"):
-			out = append(out, "find: "+m[1])
+			out = append(out, "find: "+m[4])
 		case strings.HasPrefix(m[0], `<span class="tc-rubric"`):
-			out = append(out, "# "+frameText(m[2]))
-		case strings.HasPrefix(m[0], "<span"):
-			out = append(out, "—")
+			out = append(out, "# "+frameText(m[5]))
 		default:
-			out = append(out, frameText(m[3]))
+			out = append(out, "—")
 		}
 	}
-	return out
+	return out, sent
 }
 
 func serverZoneMenu(row view.FormRow) []string {
@@ -534,9 +539,16 @@ func TestZoneListIsTheFramesList(t *testing.T) {
 	rec := f.path("calendar") + "/meet"
 	page := decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess)))
 	row := rowNamed(t, page.Form, "tz")
-	got, frame := serverZoneMenu(row), frameZoneMenu(t)
-	if len(frame) < 6 {
+	frame, sent := frameZoneMenu(t)
+	got := serverZoneMenu(row)
+	if len(frame) < 6 || len(sent) < 3 {
 		t.Fatalf("s-agenda-8 = %q: the frame changed, read it again", frame)
+	}
+	// Each zone the frame draws sends what the row's option of it sends.
+	for _, o := range row.Options {
+		if want, ok := sent[string(o.Label)]; ok && want != row.Name+"="+o.Value {
+			t.Errorf("zone %q sends %s=%s, the frame %s", o.Label, row.Name, o.Value, want)
+		}
 	}
 	head, tail := frame[:4], frame[len(frame)-2:]
 	if len(got) < 6 || !equalStrings(got[:4], head) || !equalStrings(got[len(got)-2:], tail) {

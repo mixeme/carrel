@@ -24,12 +24,16 @@ type TopWords struct {
 }
 
 // Top is the top bar (TopBar): the mark, the search that sends its query to
-// Search.Action under Search.Name, then New — the primary button with its arrow (Action.Arrow:
+// Search.Action under Search.Name — the screen's words its placeholder and
+// its accessible name —, then New — the primary button with its arrow (Action.Arrow:
 // the menu of what else can be made, a closed menu the frame draws beside
 // the screen) —, the refresh, which says when the last poll of this section
 // ended and polls again (none where the page has no poll of its own:
-// Refresh.Action is empty), and the account's button, which goes to the
-// account's page (UserHref).
+// Refresh.Action is empty), and the account's button. With the account's
+// menu (User) the button opens it, without a script too (a closed menu):
+// who is signed in and where, then the items — Sign out posts its form
+// (MenuForms, TopForms); without a menu the button goes to the account's
+// page (UserHref).
 func Top(t view.TopBar, words TopWords) w.Top {
 	newBtn := Button(t.New, "")
 	newBtn.Menu = len(t.New.Arrow) > 0
@@ -44,19 +48,45 @@ func Top(t view.TopBar, words TopWords) w.Top {
 		refresh.Label = string(t.Refresh.Answered)
 		actions = append(actions, refresh)
 	}
-	actions = append(actions, w.UserMenu{Name: string(t.Signed.Login), Href: t.UserHref})
+	user := w.UserMenu{Name: string(t.Signed.Login)}
+	if len(t.User) == 0 {
+		user.Href = t.UserHref
+		actions = append(actions, user)
+	} else {
+		items := []w.MenuPart{w.MenuHeading{
+			Rubric: w.Rubric{
+				Text:    string(t.Signed.Login),
+				Items:   []w.RubricPart{w.Mono{Text: string(t.Signed.Instance), Variant: w.MonoTightPlain}},
+				Form:    w.RubricItem,
+				Variant: w.RubricItemLine,
+			},
+			Form: w.MenuHeadingSplit,
+		}}
+		actions = append(actions, w.TopDrop{
+			Trigger: user,
+			Menu:    w.Menu{Items: append(items, MenuItems(t.User, "")...), Width: w.MenuWidth290},
+			End:     true,
+		})
+	}
 	return w.Top{
 		Brand: words.Brand,
 		Search: &w.Search{
-			Query:  w.Query{Value: string(t.Search.Query), Label: words.Search, Name: t.Search.Name},
+			Query:  w.Query{Value: string(t.Search.Query), Placeholder: words.Search, Label: words.Search, Name: t.Search.Name},
 			Action: t.Search.Action,
 		},
 		Actions: actions,
 	}
 }
 
+// TopForms are the forms of the top bar's menus that post (Sign out), for
+// the page's end (MenuForms).
+func TopForms(t view.TopBar) []w.PostForm {
+	return append(MenuForms(t.New.Arrow), MenuForms(t.User)...)
+}
+
 // MenuItems are the items of a menu (C-6.2 MenuItem), a rule before an item
-// that has one (Separator): its icon, its words, where it goes; the mark of
+// that has one (Separator): its icon, its words, where it goes — an item
+// that posts (Sign out) submits the form of its ID (MenuForms); the mark of
 // its collection (Colour) and the muted words at its end (Aside, «last
 // used»); one switched off says why (Reason), and one of a collection that
 // cannot be written to carries ro, the screen's word for it; a destructive
@@ -68,10 +98,13 @@ func MenuItems(items []view.MenuItem, ro string) []w.MenuPart {
 			out = append(out, w.MenuSep{})
 		}
 		m := w.MenuItem{Icon: Icon(it.Icon), Label: string(it.Label), On: it.On}
-		if it.Enabled {
-			m.Href = it.Href
-		} else {
+		switch {
+		case !it.Enabled:
 			m.Reason = string(it.Reason)
+		case it.Method == "POST":
+			m.Form = it.ID
+		default:
+			m.Href = it.Href
 		}
 		if it.Colour != "" {
 			m.Mark = &w.Mark{Colour: string(it.Colour)}
@@ -86,6 +119,18 @@ func MenuItems(items []view.MenuItem, ro string) []w.MenuPart {
 			m.Tone = w.MenuToneDanger
 		}
 		out = append(out, m)
+	}
+	return out
+}
+
+// MenuForms are the forms of a menu's items that post (MenuItems), by their
+// IDs, for the page's end.
+func MenuForms(items []view.MenuItem) []w.PostForm {
+	var out []w.PostForm
+	for _, it := range items {
+		if it.Method == "POST" && it.Enabled {
+			out = append(out, ActionForm(it.Action, it.ID))
+		}
 	}
 	return out
 }
@@ -128,7 +173,8 @@ func Ticked(t view.TickState) w.Ticked {
 
 // TickRow is a source of the rail (SourceRow) as a row with its tick: the
 // tick's state, the mark of its colour — the row of the combined view, which
-// has none, is all the sources at once —, a feed read from outside, its
+// has none, is all the sources at once —, a feed read from outside (the row,
+// its mark the plain colour), its
 // name, the open one (On), one not shown (ticked off). Its count, the dash
 // when it has none; a feed shows ro instead. A source that cannot be written
 // to carries ro after its count. One that does not answer is in error,
@@ -145,7 +191,9 @@ func TickRow(r view.SourceRow, words RailWords) w.TickRow {
 	}
 	switch {
 	case r.Feed:
-		row.Kind, row.Mark.Kind = w.TickRowExternal, w.MarkExternal
+		// The row is the feed's; its mark is only its colour — the frames
+		// draw the row is-ext, never the mark (s-contacts-7, s-agenda-1).
+		row.Kind = w.TickRowExternal
 	case r.Colour == "":
 		row.Kind, row.Mark.Kind = w.TickRowAll, w.MarkMulti
 	}
@@ -175,9 +223,8 @@ func TickRow(r view.SourceRow, words RailWords) w.TickRow {
 
 // Sources are the rail's sections of sources (Rail.Sections), each its
 // account as the rubric when it has one and its sources' rows, and after
-// them the tags (Rail.Tags) under the screen's rubric. A tag does not lead
-// anywhere yet: ждёт библиотеку: U-5.5 #10 — a tag of the library has no
-// address, and the rail's filter by category goes nowhere until it has.
+// them the tags (Rail.Tags) under the screen's rubric, each the list
+// filtered by it.
 func Sources(r view.Rail, words RailWords) []w.RailPart {
 	rf := words
 	if r.Ticks == nil {
@@ -200,14 +247,19 @@ func Sources(r view.Rail, words RailWords) []w.RailPart {
 	return out
 }
 
-// Tags are the categories (C-6.2 Tag) as tags, the one chosen on; the tag's
-// address waits for the library (ждёт библиотеку: U-5.5 #10).
+// Tags are the categories (C-6.2 Tag) as tags (Tag), the one chosen on.
 func Tags(tags []view.Tag) []w.Tag {
 	out := make([]w.Tag, 0, len(tags))
 	for _, t := range tags {
-		out = append(out, w.Tag{Label: string(t.Label), On: t.On})
+		out = append(out, Tag(t))
 	}
 	return out
+}
+
+// Tag is a category (C-6.2 Tag) as a tag: its words, the list filtered by it
+// where it goes (Href), the one chosen on.
+func Tag(t view.Tag) w.Tag {
+	return w.Tag{Label: string(t.Label), On: t.On, Href: t.Href}
 }
 
 // RetryID is the ID of the form of a source's retry (SourceRow.Retry): its
@@ -327,7 +379,7 @@ func Avatar(a view.Avatar) w.Avatar {
 // goes (Href: tel:, mailto:, the record in another book), the muted words
 // after it (Aside, «in 7 months») led by lead, the screen's — none where
 // the frame draws no aside (lead is empty); categories as
-// tags, a space between them (ждёт библиотеку: U-5.5 #10 — a tag's address).
+// tags (Tag), each going where it goes, a space between them.
 func FieldsItem(f view.Field, lead string) w.FieldsItem {
 	it := w.FieldsItem{Term: string(f.Label), Href: f.Href}
 	if f.Mono {
@@ -337,7 +389,7 @@ func FieldsItem(f view.Field, lead string) w.FieldsItem {
 		if i > 0 {
 			it.Value = append(it.Value, w.Text(" "))
 		}
-		it.Value = append(it.Value, w.Tag{Label: string(t.Label), On: t.On})
+		it.Value = append(it.Value, Tag(t))
 	}
 	if f.Value != "" {
 		v := string(f.Value)
@@ -378,11 +430,21 @@ func Submit(a view.Action) w.Button {
 	return w.Button{Label: string(a.Label), Icon: Icon(a.Icon), Kind: Kind(a), Submit: true}
 }
 
+// csrfField is the name of the session's token in a form that posts (C-11):
+// the protocol's, not a word of the interface.
+const csrfField = "_csrf"
+
 // ActionForm is an action that posts with no form of its own (Delete
-// contact, Send) as the PostForm its button submits from where it stands,
-// under the screen's ID: it posts to the action's address.
+// contact, Send, Sign out) as the PostForm its button submits from where it
+// stands, under the screen's ID: it posts to the action's address, with the
+// session's token the action carries (Action.CSRF, C-11) — without a script
+// nothing else sends it.
 func ActionForm(a view.Action, id string) w.PostForm {
-	return w.PostForm{ID: id, Action: a.Href}
+	f := w.PostForm{ID: id, Action: a.Href}
+	if a.CSRF != "" {
+		f.Fields = []w.Hidden{{Name: csrfField, Value: a.CSRF}}
+	}
+	return f
 }
 
 // DiagLine is a line of a technical block: its name and its value.
@@ -412,14 +474,75 @@ func Diag(lines ...DiagLine) w.Diag {
 }
 
 // Notice is a notice of the shell (Shell.Notices, C-6.2) over the page: its
-// message (Msg) and its buttons after the words, an action that posts
-// submitting the form of its ID (NoticeForms).
+// message (Msg) and its buttons after the words, small — every frame draws a
+// message's buttons so (states-11, s-agenda-11, s-mail-*) —, an action that
+// posts submitting the form of its ID (NoticeForms).
 func Notice(n view.Notice, space w.MsgSpace) w.Msg {
 	m := Msg(n, space)
 	for _, a := range n.Actions {
-		m.Parts = append(m.Parts, w.Text(" "), Button(a, a.ID))
+		b := Button(a, a.ID)
+		b.Small = true
+		m.Parts = append(m.Parts, w.Text(" "), b)
 	}
 	return m
+}
+
+// Notices are the notices of the shell on the page (the zone notices, C-7.2):
+// each its message (Notice) and under it its technical block, where it has
+// one (NoticeDiag).
+func Notices(ns []view.Notice, space w.MsgSpace) []w.MainPart {
+	var out []w.MainPart
+	for _, n := range ns {
+		out = append(out, Notice(n, space))
+		if d := NoticeDiag(n); d != nil {
+			out = append(out, *d)
+		}
+	}
+	return out
+}
+
+// NoticeDiag is a notice's technical block (Notice.Details, C-9) under its
+// message on the page: what was asked, then its lines, one a line; nil when
+// the notice has none.
+func NoticeDiag(n view.Notice) *w.MainDiag {
+	if n.Details == nil {
+		return nil
+	}
+	text := string(n.Details.Summary)
+	for _, l := range n.Details.Lines {
+		if text != "" {
+			text += "\n"
+		}
+		text += string(l)
+	}
+	return &w.MainDiag{Diag: w.Diag{Text: text}}
+}
+
+// EmptyParts are what an empty state says (C-6.2 Notice of Empty) as its
+// parts: the title bold, the body after it, then its buttons, a space between
+// them; an action that posts submits the form of its ID.
+func EmptyParts(n view.Notice) []w.EmptyPart {
+	var parts []w.EmptyPart
+	if n.Title != "" {
+		parts = append(parts, w.Strong(n.Title))
+	}
+	if n.Body != "" {
+		body := string(n.Body)
+		if len(parts) > 0 {
+			body = " " + body
+		}
+		if len(n.Actions) > 0 {
+			body += " "
+		}
+		parts = append(parts, w.Text(body))
+	}
+	for i, a := range n.Actions {
+		if i > 0 {
+			parts = append(parts, w.Text(" "))
+		}
+		parts = append(parts, Button(a, a.ID))
+	}
+	return parts
 }
 
 // NoticeForms are the forms of the notices' actions that post, by their

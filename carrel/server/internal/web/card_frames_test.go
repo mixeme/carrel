@@ -48,10 +48,11 @@ func TestContactCardIsTheFrames(t *testing.T) {
 		t.Fatal("s-contacts-6 draws no head: read the frame again")
 	}
 	// The «⋯» is a button with its menu, drawn closed (from-typecase note
-	// 28, task 49): the buttons of the head are those before its menu, and
-	// the menu is the card's own, item by item.
-	buttons, menu, closed := strings.Cut(head[1], `<div class="tc-menu`)
-	if !closed || !strings.Contains(buttons, `<span class="tc-drop">`) || !strings.Contains(menu, " hidden>") {
+	// 28, task 49) — a details whose summary is the button, which opens
+	// without a script (Typecase's task 60): the buttons of the head are
+	// those before its menu, and the menu is the card's own, item by item.
+	buttons, _, closed := strings.Cut(head[1], `<div class="tc-menu`)
+	if !closed || !strings.Contains(buttons, `<details class="tc-drop"><summary class="tc-btn"`) {
 		t.Fatal("s-contacts-6 draws no closed «⋯» with its menu in the head: read the frame again")
 	}
 	sameMenu(t, "card", page.Menu, "s-contacts-6")

@@ -24,7 +24,7 @@ func TestTop(t *testing.T) {
 	}
 	same(t, "the top bar", bind.Top(bar, bind.TopWords{Brand: brand, Search: "Search everything…"}), w.Top{
 		Brand:  brand,
-		Search: &w.Search{Query: w.Query{Value: "anna", Label: "Search everything…", Name: "q"}, Action: "/app/search"},
+		Search: &w.Search{Query: w.Query{Value: "anna", Placeholder: "Search everything…", Label: "Search everything…", Name: "q"}, Action: "/app/search"},
 		Actions: []w.TopAction{
 			w.TopDrop{
 				Trigger: w.Button{Label: "New note", Icon: "quill", Kind: w.ButtonPrimary, Href: "/app/notes/quick", Menu: true},
@@ -40,6 +40,26 @@ func TestTop(t *testing.T) {
 		w.Button{Label: "New note", Icon: "quill", Kind: w.ButtonPrimary, Href: "/app/notes/quick"},
 		w.UserMenu{Name: "mix", Href: "/app/settings/account"},
 	})
+	// The account's menu: the button opens it (a closed menu, without a
+	// script too) — who is signed in and where, the items; Sign out posts its
+	// form, with the session's token.
+	bar.Signed.Instance = "carrel.example"
+	bar.User = []view.MenuItem{
+		{Action: view.Action{ID: "user.settings", Label: "Settings", Icon: "i-gear", Href: "/app/settings/account", Method: "GET", Enabled: true}},
+		{Action: view.Action{ID: "user.logout", Label: "Sign out", Href: "/logout", Method: "POST", Enabled: true, CSRF: "c"}, Separator: true},
+	}
+	got = bind.Top(bar, bind.TopWords{Brand: brand})
+	same(t, "the account's menu", got.Actions[1], w.TopAction(w.TopDrop{
+		Trigger: w.UserMenu{Name: "mix"},
+		Menu: w.Menu{Items: []w.MenuPart{
+			w.MenuHeading{Rubric: w.Rubric{Text: "mix", Items: []w.RubricPart{w.Mono{Text: "carrel.example", Variant: w.MonoTightPlain}}, Form: w.RubricItem, Variant: w.RubricItemLine}, Form: w.MenuHeadingSplit},
+			w.MenuItem{Icon: "gear", Label: "Settings", Href: "/app/settings/account"},
+			w.MenuSep{},
+			w.MenuItem{Label: "Sign out", Form: "user.logout"},
+		}, Width: w.MenuWidth290},
+		End: true,
+	}))
+	same(t, "the forms of the top bar", bind.TopForms(bar), []w.PostForm{{ID: "user.logout", Action: "/logout", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}}})
 }
 
 func TestMenuItems(t *testing.T) {
@@ -48,6 +68,8 @@ func TestMenuItems(t *testing.T) {
 		{Action: view.Action{Label: "Контакты", Href: "/k/new", Enabled: true, On: true}, Colour: "#4a6b52", Aside: "last used"},
 		{Action: view.Action{Label: "Команда", Href: "/t/new", Reason: "Read-only"}, Colour: "#6b4e7a", ReadOnly: true},
 		{Action: view.Action{Label: "Delete", Icon: "i-trash", Href: "/d", Enabled: true, Danger: true}, Separator: true},
+		{Action: view.Action{ID: "record.delete", Label: "Delete now", Href: "/d?etag=e", Method: "POST", Enabled: true, Danger: true, CSRF: "c"}},
+		{Action: view.Action{ID: "record.off", Label: "Off", Href: "/o", Method: "POST", Reason: "No"}},
 	}
 	same(t, "the items", bind.MenuItems(items, "ro"), []w.MenuPart{
 		w.MenuItem{Label: "Архив", Href: "/a/new", Mark: &w.Mark{Colour: "#a05a2c"}},
@@ -55,7 +77,10 @@ func TestMenuItems(t *testing.T) {
 		w.MenuItem{Label: "Команда", Reason: "Read-only", Mark: &w.Mark{Colour: "#6b4e7a"}, Trail: w.Badge{Label: "ro"}},
 		w.MenuSep{},
 		w.MenuItem{Icon: "trash", Label: "Delete", Href: "/d", Tone: w.MenuToneDanger},
+		w.MenuItem{Label: "Delete now", Form: "record.delete", Tone: w.MenuToneDanger},
+		w.MenuItem{Label: "Off", Reason: "No"},
 	})
+	same(t, "the forms of the items that post", bind.MenuForms(items), []w.PostForm{{ID: "record.delete", Action: "/d?etag=e", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}}})
 }
 
 func TestNavItem(t *testing.T) {
@@ -86,7 +111,9 @@ func TestTickRow(t *testing.T) {
 		},
 		"a feed": {
 			view.SourceRow{Href: "/f", Label: "Праздники РФ", Colour: "#8c6239", Tick: view.TickOn, Feed: true, ReadOnly: true}, bind.RailWords{ReadOnly: "ro"},
-			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239", Kind: w.MarkExternal}, Label: "Праздники РФ", Meta: "ro"},
+			// The row is the feed's (is-ext), its mark only its colour: no frame
+			// draws the mark is-ext in a rail (s-contacts-7, s-agenda-1).
+			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239"}, Label: "Праздники РФ", Meta: "ro"},
 		},
 		"no answer, with its retry": {
 			view.SourceRow{Href: "/o", Label: "Общий", Colour: "#9a9280", Tick: view.TickOn, State: view.CollectionUnavailable, Message: "password · 401", Detail: "401 Unauthorized",
@@ -111,7 +138,7 @@ func TestSources(t *testing.T) {
 	}
 	all := w.TickRow{Kind: w.TickRowAll, Mark: w.Mark{Kind: w.MarkMulti}, Label: "All", Meta: "2"}
 	k := w.TickRow{Mark: w.Mark{Colour: "#4a6b52"}, Label: "Контакты", Meta: "2"}
-	tags := w.RailSec{Items: []w.RailSecPart{w.Rubric{Text: "Tags"}}, Tags: []w.Tag{{Label: "all", On: true}, {Label: "работа"}}}
+	tags := w.RailSec{Items: []w.RailSecPart{w.Rubric{Text: "Tags"}}, Tags: []w.Tag{{Label: "all", On: true, Href: "/t"}, {Label: "работа", Href: "/t?r"}}}
 	same(t, "a rail that sends nothing", bind.Sources(rail, words), []w.RailPart{
 		w.RailSec{Items: []w.RailSecPart{all}},
 		w.RailSec{Items: []w.RailSecPart{w.Rubric{Text: "nextcloud"}, k}},
@@ -165,7 +192,7 @@ func TestFieldsItem(t *testing.T) {
 	same(t, "no aside where the frame draws none", bind.FieldsItem(bday, ""),
 		w.FieldsItem{Term: "Birthday", Value: []w.ValuePart{w.Text("1987-03-14")}, Face: w.ValueMono})
 	same(t, "the tags", bind.FieldsItem(view.Field{Label: "Tags", Tags: []view.Tag{{Label: "a", Href: "/a"}, {Label: "b"}}}, "· "),
-		w.FieldsItem{Term: "Tags", Value: []w.ValuePart{w.Tag{Label: "a"}, w.Text(" "), w.Tag{Label: "b"}}})
+		w.FieldsItem{Term: "Tags", Value: []w.ValuePart{w.Tag{Label: "a", Href: "/a"}, w.Text(" "), w.Tag{Label: "b"}}})
 	same(t, "a book", bind.Book(view.Field{Label: "radicale · Команда", Value: "Phone differs", Href: "/c", Colour: "#6b4e7a"}, "· "), []w.SecItemPart{
 		w.Mark{Colour: "#6b4e7a", Size: w.MarkH11Inline}, w.Text(" "), w.Link{Text: "radicale · Команда", Href: "/c"}, w.Text(" "), w.Dim{Parts: []w.Inline{w.Text("· Phone differs")}},
 	})
@@ -175,6 +202,10 @@ func TestActions(t *testing.T) {
 	same(t, "a segment", bind.SegOption(view.Action{Label: "All", Tally: "24", Href: "/t", On: true}), w.SegOption{Label: "All", Count: "24", Href: "/t", On: true})
 	same(t, "a submit", bind.Submit(view.Action{Label: "Show", Href: "/t", Method: "GET", Primary: true}), w.Button{Label: "Show", Kind: w.ButtonPrimary, Submit: true})
 	same(t, "a form of an action", bind.ActionForm(view.Action{Href: "/d?etag=e1", Method: "POST"}, "delete"), w.PostForm{ID: "delete", Action: "/d?etag=e1"})
+	same(t, "a form of an action with the session's token", bind.ActionForm(view.Action{Href: "/d?etag=e1", Method: "POST", CSRF: "c"}, "delete"),
+		w.PostForm{ID: "delete", Action: "/d?etag=e1", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}})
+	rail := view.Rail{Sections: []view.RailSection{{Rows: []view.SourceRow{{Href: "/o", Retry: &view.Action{ID: "source.retry", Href: "/retry", Method: "POST", Enabled: true, CSRF: "c"}}}}}}
+	same(t, "a retry's form, with the token", bind.RetryForms(rail), []w.PostForm{{ID: "source.retry/o", Action: "/retry", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}}})
 	same(t, "a technical block", bind.Diag(bind.DiagLine{Name: "UID", Value: "4f2b"}, bind.DiagLine{Name: "Read", Value: "2 min ago"}),
 		w.Diag{Text: "UID   4f2b\nRead  2 min ago"})
 }
@@ -187,5 +218,29 @@ func TestRepeating(t *testing.T) {
 	same(t, "Add", btn, w.Button{Label: "Add phone", Adds: "add.tel"})
 	same(t, "its template", tmpl, w.Template{ID: "add.tel", Items: []w.FieldSetPart{w.Field{Label: "tel.{n}"}, w.Field{Label: "remove"}}})
 	loss := view.LossReport{Note: "The change was saved, but:", Properties: []view.Text{"X-A", "X-B"}}
-	same(t, "a loss", bind.Loss(loss, w.MsgFlush), w.Msg{Parts: []w.MsgPart{w.Text("The change was saved, but:"), w.Text(" "), w.Mono{Text: "X-A"}, w.Text(", "), w.Mono{Text: "X-B"}}, Tone: w.MsgAlert, Space: w.MsgFlush})
+	// A notice in the plain tone, not an alert: the record is written (states-12).
+	same(t, "a loss", bind.Loss(loss, w.MsgFlush), w.Msg{Parts: []w.MsgPart{w.Text("The change was saved, but:"), w.Text(" "), w.Mono{Text: "X-A"}, w.Text(", "), w.Mono{Text: "X-B"}}, Space: w.MsgFlush})
+}
+
+func TestNoticeDiagAndEmpty(t *testing.T) {
+	n := view.Notice{Role: view.NoticeAlert, Title: "Контакты is unavailable", Body: "Nothing comes from it.",
+		Details: &view.Diagnostic{Summary: "REPORT /a/", Lines: []view.Text{"nextcloud", "dav: HTTP 503"}},
+		Actions: []view.Action{{ID: "source.retry", Label: "Try again", Href: "/k", Method: "GET", Enabled: true}}}
+	same(t, "the technical block", bind.NoticeDiag(n), &w.MainDiag{Diag: w.Diag{Text: "REPORT /a/\nnextcloud\ndav: HTTP 503"}})
+	same(t, "none", bind.NoticeDiag(view.Notice{}), (*w.MainDiag)(nil))
+	msg := w.Msg{Parts: []w.MsgPart{w.Strong("Контакты is unavailable"), w.Text(" "), w.Text("Nothing comes from it."), w.Text(" "),
+		w.Button{Label: "Try again", Small: true, Href: "/k"}}, Tone: w.MsgAlert}
+	same(t, "a notice, its button small", bind.Notice(n, w.MsgSpacePage), msg)
+	same(t, "the notices, each with its technical block", bind.Notices([]view.Notice{n, {Body: "Saved."}}, w.MsgSpacePage), []w.MainPart{
+		msg, w.MainDiag{Diag: w.Diag{Text: "REPORT /a/\nnextcloud\ndav: HTTP 503"}}, w.Msg{Parts: []w.MsgPart{w.Text("Saved.")}},
+	})
+	empty := view.Notice{Title: "This book is empty.", Body: "Add a contact, or import a file of them.", Actions: []view.Action{
+		{ID: "record.new", Label: "New contact", Icon: "i-plus", Href: "/new", Method: "GET", Enabled: true, Primary: true},
+		{ID: "collection.import", Label: "Import", Href: "/import", Method: "GET", Enabled: true},
+	}}
+	same(t, "an empty state", bind.EmptyParts(empty), []w.EmptyPart{
+		w.Strong("This book is empty."), w.Text(" Add a contact, or import a file of them. "),
+		w.Button{Label: "New contact", Icon: "plus", Kind: w.ButtonPrimary, Href: "/new"}, w.Text(" "), w.Button{Label: "Import", Href: "/import"},
+	})
+	same(t, "words only", bind.EmptyParts(view.Notice{Body: "Nothing here."}), []w.EmptyPart{w.Text("Nothing here.")})
 }

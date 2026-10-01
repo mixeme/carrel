@@ -15,7 +15,9 @@ import (
 
 var (
 	frameFormPart = regexp.MustCompile(`(?s)<div class="tc-rubric">(.*?)</div>|<label>(.*?)</label>(?:\s*<button class="tc-(?:btn|check)"[^>]*>(.*?)</button>)?|<button class="tc-check"[^>]*>(.*?)</button>`)
-	frameSegOpt   = regexp.MustCompile(`(?s)<button class="[^"]*tc-seg__opt[^"]*"[^>]*>(.*?)</button>`)
+	// An option of a switch that is a row of checkboxes (Seg.Multiple,
+	// Typecase's task 72): its value, ticked or not, its words.
+	frameSegOpt = regexp.MustCompile(`(?s)<label class="[^"]*tc-seg__opt[^"]*"><input class="tc-seg__box" type="checkbox"[^>]*value="([^"]*)"( checked)?>(.*?)</label>`)
 )
 
 // frameForm is the form of a frame as «rubric / label», in order; a field
@@ -100,17 +102,28 @@ func TestEventFormIsTheFramesRubrics(t *testing.T) {
 		t.Errorf("event form =\n%q,\nwant (s-agenda-3)\n%q", got, want)
 	}
 
-	// On is one row of the days, as the frame draws it, not seven boxes.
-	var days []string
+	// On is one row of the days, as the frame draws it, not seven boxes: a
+	// check row, each day an option sent by its value, the ticked ones as the
+	// frame ticks them. The frame's field name (byday) is the frame's, as
+	// csrf in components-42: the row is the form's repeat.on.
+	var days, values, ticked []string
 	for _, m := range frameSegOpt.FindAllStringSubmatch(mockupFrame(t, "s-agenda-3"), -1) {
-		days = append(days, frameText(m[1]))
+		days = append(days, frameText(m[3]))
+		values = append(values, m[1])
+		if m[2] != "" {
+			ticked = append(ticked, m[1])
+		}
 	}
 	on := rowNamed(t, page.Form, "repeat.on")
-	if on.Kind != view.InputCheck || !equalStrings(serverList(on.Options), days) {
-		t.Errorf("On = %+v, want a check row of %q", on, days)
+	var sent []string
+	for _, o := range on.Options {
+		sent = append(sent, o.Value)
 	}
-	if sel := selectedOf(on.Options); len(sel) != 1 || sel[0] != "MO" {
-		t.Errorf("On selects %q, want MO", sel)
+	if len(days) != 7 || on.Kind != view.InputCheck || !equalStrings(serverList(on.Options), days) || !equalStrings(sent, values) {
+		t.Errorf("On = %+v, want a check row of %q sending %q", on, days, values)
+	}
+	if sel := selectedOf(on.Options); !equalStrings(sel, ticked) {
+		t.Errorf("On selects %q, the frame %q", sel, ticked)
 	}
 }
 

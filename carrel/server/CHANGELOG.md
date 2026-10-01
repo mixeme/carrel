@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.115 — 2026-10-01
+
+The mockup's copy is Typecase `29413d6`'s (Carrel's tasks 60–76): the frames
+say the same in new markup, and the server's answers stand as they were.
+
+### For consumers
+
+Nothing in the running server; no view model changes. The frames the
+server's checks read: a closed «⋯» is a `details` whose summary is its
+button (s-contacts-6, task 60); «Compact rows» is a `tc-checkform`, a GET
+form (s-contacts-1, task 67) — as `ListBar.compact` is since `v0.2.94`;
+Attach with its arrow is a closed menu in the rubric (s-agenda-1, s-tasks-1,
+s-notes-2, task 71) — as `attach.add` with `arrow` From this computer and
+From Files is; the time zones of s-agenda-8 are radio buttons of the edit
+form, `tz` and the zone (task 73) — as the row `tz` sends; the days of a
+repeat are checkboxes (`Seg.Multiple`, task 72) — as the check row
+`repeat.on` with an option a day is (the frame's field name `byday` is the
+frame's, as `csrf` in components-42). `check.py`: the contacts' states
+(`states-7` … `-12`) in `STATE_FRAME`; check 9 holds no bar tick's Apply
+against an action and keeps `SERVER_TODO` («Tick every book»).
+
 ## v0.2.114 — 2026-10-01
 
 Lines under titles and messages in the pieces the frames mark (C-6.2 Runs).

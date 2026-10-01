@@ -15,10 +15,11 @@ import (
 // contract of Typecase's guide: a link has its Href; a button leads (Href),
 // submits a form by name (Form), is a submit button inside a form that sends
 // (Submit in a Form with Action), adds a row (Adds), opens a sheet (Opens) or
-// is disabled; a field has its Name and stands in a form that sends; a tick
-// box sends (Send.Form, or Send.Name inside a form); a search and a filter
-// are forms (Action). A Form a button names must be on the page: a Form with
-// that ID or a PostForm.
+// is disabled, or is the button of a closed menu, which opens it without a
+// script; a field has its Name and stands in a form that sends; a tick
+// box sends (Send.Form, or Send.Name inside a form); a search, a filter and
+// a bar's ticks are forms (Action). A Form a button or a menu's item names
+// must be on the page: a Form with that ID or a PostForm.
 //
 // The contract is a table by widget type (contract below). A widget of a
 // type the table does not name, but that carries a field of meaning — Href,
@@ -36,12 +37,18 @@ import (
 // the contract of each type that has it.
 var meaningFields = []string{"Href", "Action", "To", "Form", "Send"}
 
-// control is the state of the walk at a widget: the path to it and whether
-// it stands in a form that sends.
+// control is the state of the walk at a widget: the path to it, whether it
+// stands in a form that sends, the type of the widget it is a part of, and
+// whether it is the button of a closed menu (opens).
 type control struct {
 	v      reflect.Value
 	path   string
 	inForm bool
+	holder string
+	// opens: the widget is the trigger of a closed Drop or TopDrop with a
+	// menu — the library prints it as the summary of a details, and it opens
+	// the menu without a script (Typecase's task 60, U-8).
+	opens bool
 }
 
 func (c control) str(name string) string {
@@ -137,7 +144,7 @@ const buttonDisabled = 2
 // must carry (docs/guide/screen.md of Typecase, §3 and §5).
 var contract = map[string]rule{
 	"Button": func(c control) string {
-		if c.v.FieldByName("State").Int() == buttonDisabled {
+		if c.v.FieldByName("State").Int() == buttonDisabled || c.opens {
 			return ""
 		}
 		for _, f := range []string{"Href", "Form", "Adds", "Opens"} {
@@ -159,13 +166,20 @@ var contract = map[string]rule{
 	// account? Sign in» (s-auth-2), an action of the model drawn as words
 	// (bind.Span) —, without it words nobody presses, as a Text is. Neither
 	// needs more; whether the words lead somewhere is the model's.
-	"Span":     func(control) string { return "" },
-	"NavItem":  needs("Href"),
-	"UserMenu": needs("Href"),
-	"Input":    field,
-	"Pick":     field,
-	"Check":    field,
-	"Query":    field,
+	"Span":    func(control) string { return "" },
+	"NavItem": needs("Href"),
+	// The account's button goes to the account's page, or opens its menu
+	// (a closed TopDrop: the summary of a details).
+	"UserMenu": func(c control) string {
+		if c.opens {
+			return ""
+		}
+		return needs("Href")(c)
+	},
+	"Input": field,
+	"Pick":  field,
+	"Check": field,
+	"Query": field,
 	"Seg": func(c control) string {
 		if c.flag("Theme") { // the theme is this browser's, kept by the script (U-12)
 			return ""
@@ -189,7 +203,13 @@ var contract = map[string]rule{
 	"FaceRow":   needs("Href"),
 	"FindRow":   needs("Href"),
 	"LinkedRow": needs("Href"),
+	"TimeRow":   needs("Href"),
 	"About":     needs("Href"),
+	// A category (Typecase's task 63): with Href it goes to the list filtered
+	// by it, without it is words — whether it goes is the model's (C-6.2
+	// Tag.Href), as with a Span; in a row that is a link itself the library
+	// prints it as words.
+	"Tag": func(control) string { return "" },
 	// A source of the rail with its tick (the owner's decision of
 	// 30.09.2026, C-6.3): with the rail's form its tick sends the source's
 	// choice (Send, as a Tick); on the rail of return the choice is made and
@@ -207,6 +227,8 @@ var contract = map[string]rule{
 			return ""
 		case c.str("Href") != "":
 			return ""
+		case c.str("Form") != "": // submits a PostForm of the page (Sign out, Typecase's task 68)
+			return ""
 		case c.str("Name") != "" && c.inForm:
 			return ""
 		case c.str("Name") != "":
@@ -220,10 +242,30 @@ var contract = map[string]rule{
 	"Menu":     func(control) string { return "" }, // a menu without Action is a list: its items say so
 	"Search":   needs("Action"),
 	"Filter":   needs("Action"),
+	// A bar's ticks that are a form (GET, Typecase's task 67): its checks and
+	// its Apply are judged in it.
+	"CheckForm": needs("Action"),
 	// A tick box. The rows and cells that hold one (TickRow, CardPick,
 	// TableCell…) join when a screen draws them: whether their box is there
 	// depends on the row, and that is decided with the screen.
 	"Tick": ticks,
+	// The tick box of a menu's item draws the item's state: the item sends
+	// (its Name in the menu's form) and is judged as a MenuItem; elsewhere
+	// (a row's pick) the box sends itself.
+	"TickBox": func(c control) string {
+		if c.holder == "MenuItem" {
+			return ""
+		}
+		return ticks(c)
+	},
+	// A cell of a table: with a tick box that picks the row (Pick) it sends
+	// the row's name (Send); its other parts are judged themselves.
+	"TableCell": func(c control) string {
+		if p := c.v.FieldByName("Pick"); p.IsValid() && p.Kind() == reflect.Pointer && !p.IsNil() {
+			return ticks(c)
+		}
+		return ""
+	},
 	// What a tick box sends is judged on the box that has it.
 	"Send": func(control) string { return "" },
 }
@@ -231,10 +273,28 @@ var contract = map[string]rule{
 // opensForm says whether the widget is a form that sends, for its parts.
 func opensForm(c control) bool {
 	switch c.v.Type().Name() {
-	case "Form", "Menu", "Search", "Filter", "Range":
+	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm":
 		return c.str("Action") != ""
 	}
 	return false
+}
+
+// closedMenu says whether the widget is a closed button with its menu (Drop,
+// TopDrop not Open) whose menu has items: its trigger opens the menu, without
+// a script too — the library prints a closed one as a details whose summary
+// is the button (Typecase's task 60). A trigger that is a link (Href) stays
+// a link: it is judged as one.
+func closedMenu(c control) bool {
+	switch c.v.Type().Name() {
+	case "Drop", "TopDrop":
+	default:
+		return false
+	}
+	if c.flag("Open") {
+		return false
+	}
+	items := c.v.FieldByName("Menu").FieldByName("Items")
+	return items.IsValid() && items.Kind() == reflect.Slice && items.Len() > 0
 }
 
 // carriesMeaning says whether a widget type has a field of meaning.
@@ -281,7 +341,7 @@ func Meaning(v any, forms ...string) []string {
 			if id := c.str("ID"); id != "" && (name == "PostForm" || c.str("Action") != "") {
 				ids = append(ids, id)
 			}
-		case "Button":
+		case "Button", "MenuItem":
 			if f := c.str("Form"); f != "" {
 				names = append(names, named{c.path, f})
 			}
@@ -290,6 +350,7 @@ func Meaning(v any, forms ...string) []string {
 			names = append(names, named{c.path, f})
 		}
 		inForm := c.inForm || opensForm(c)
+		closed := closedMenu(c)
 		for i := range t.NumField() {
 			f := t.Field(i)
 			if !f.IsExported() {
@@ -297,15 +358,16 @@ func Meaning(v any, forms ...string) []string {
 			}
 			fv := c.v.Field(i)
 			at := c.path + "." + f.Name
+			opens := closed && f.Name == "Trigger"
 			switch f.Type.Kind() {
 			case reflect.Struct, reflect.Pointer, reflect.Interface:
 				if w := deref(fv); isControl(w, pkg) {
-					walk(control{v: w, path: at + "(" + w.Type().Name() + ")", inForm: inForm})
+					walk(control{v: w, path: at + "(" + w.Type().Name() + ")", inForm: inForm, holder: name, opens: opens})
 				}
 			case reflect.Slice, reflect.Array:
 				for j := range fv.Len() {
 					if w := deref(fv.Index(j)); isControl(w, pkg) {
-						walk(control{v: w, path: fmt.Sprintf("%s[%d](%s)", at, j, w.Type().Name()), inForm: inForm})
+						walk(control{v: w, path: fmt.Sprintf("%s[%d](%s)", at, j, w.Type().Name()), inForm: inForm, holder: name})
 					}
 				}
 			}

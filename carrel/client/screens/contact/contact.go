@@ -62,8 +62,7 @@ var icons = map[view.Kind]w.Icon{
 func Screen(p *view.ContactPage) w.Shell {
 	h := w.Head{Title: &w.HeadTitle{Text: string(p.Name)}}
 	if p.PhotoHref != "" {
-		// ждёт библиотеку: U-5.5 #11 — the photo in the head (PhotoHref)
-		h.Photo = &w.HeadPhoto{}
+		h.Photo = &w.HeadPhoto{Src: p.PhotoHref}
 	} else {
 		h.Photo = &w.HeadPhoto{Initials: string(p.Avatar.Initials)}
 	}
@@ -86,7 +85,6 @@ func Screen(p *view.ContactPage) w.Shell {
 		acts = append(acts, b)
 	}
 	if len(p.Menu) > 0 {
-		// ждёт библиотеку: U-5.5 #1 — the card's «⋯», a closed menu without scripts
 		acts = append(acts, w.Drop{
 			Trigger: w.Button{Icon: "dots", Title: "More"},
 			Menu:    w.Menu{Items: bind.MenuItems(p.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
@@ -94,9 +92,7 @@ func Screen(p *view.ContactPage) w.Shell {
 	}
 	h.Acts = &w.Acts{Items: acts}
 	main := []w.MainPart{h}
-	for _, n := range p.Notices {
-		main = append(main, bind.Notice(n, w.MsgSpacePage))
-	}
+	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
 	fields := w.Fields{}
 	for _, f := range p.Fields {
 		fields.Items = append(fields.Items, bind.FieldsItem(f, "· "))
@@ -164,9 +160,11 @@ func Screen(p *view.ContactPage) w.Shell {
 }
 
 // Forms are the forms of the actions that post with none of their own: Send
-// and the deletion.
+// and the deletion, the notices' buttons and the menus' items that post
+// (Sign out).
 func Forms(p *view.ContactPage) []w.PostForm {
-	out := bind.NoticeForms(p.Notices)
+	out := append(bind.TopForms(p.Top), bind.MenuForms(p.Menu)...)
+	out = append(out, bind.NoticeForms(p.Notices)...)
 	for _, a := range p.Actions {
 		if a.Method != "POST" || !a.Enabled {
 			continue

@@ -87,6 +87,10 @@ var All = []Screen{
 		Frames: []string{"s-auth-1", "s-auth-13"},
 		Draw:   func(model any) Root { return login.Screen(model.(*view.LoginPage)) },
 		Title:  func(model any) string { return string(model.(*view.LoginPage).Title) },
+		Waits: []Wait{
+			{Row: 17, Fixture: "login/normal"},  // ждёт библиотеку: U-5.5 #17
+			{Row: 17, Fixture: "login/refused"}, // ждёт библиотеку: U-5.5 #17
+		},
 	},
 	{
 		Model:  func() any { return new(view.AboutPage) },
@@ -99,6 +103,9 @@ var All = []Screen{
 		Frames: []string{"s-auth-12"},
 		Draw:   func(model any) Root { return invite.Screen(model.(*view.InvitePage)) },
 		Title:  func(model any) string { return string(model.(*view.InvitePage).Title) },
+		Waits: []Wait{
+			{Row: 18, Fixture: "invite/link"}, // ждёт библиотеку: U-5.5 #18
+		},
 	},
 	{
 		Model:  func() any { return new(view.ConfirmEmailPage) },
@@ -140,21 +147,18 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.ContactsListPage) },
-		Frames: []string{"s-contacts-1", "states-4"},
+		Frames: []string{"s-contacts-1", "states-4", "states-7", "states-8", "states-9", "states-10", "states-11"},
 		Draw:   func(model any) Root { return contacts.Screen(model.(*view.ContactsListPage)) },
 		Title:  func(model any) string { return string(model.(*view.ContactsListPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return contacts.Forms(model.(*view.ContactsListPage)) },
 		Waits: []Wait{
-			{Row: 2, Control: ".Side(Side).Items(Head).Tools(Drop).Trigger(Button)"}, // ждёт библиотеку: U-5.5 #2
-			{Row: 3, Control: ".Items(Bar).More(Button)"},                            // ждёт библиотеку: U-5.5 #3
-			{Row: 4, Control: ".Items(Bar).Items(Button)"},                           // ждёт библиотеку: U-5.5 #4
-			{Row: 5, Fixture: "app-contacts/empty"},                                  // ждёт библиотеку: U-5.5 #5
-			{Row: 5, Fixture: "app-contacts/partial"},                                // ждёт библиотеку: U-5.5 #5
-			{Row: 5, Fixture: "app-contacts/unavailable"},                            // ждёт библиотеку: U-5.5 #5
-			{Row: 5, Fixture: "app-contacts-one/empty"},                              // ждёт библиотеку: U-5.5 #5
-			{Row: 5, Fixture: "app-contacts-one/source-error"},                       // ждёт библиотеку: U-5.5 #5
-			{Row: 8, Fixture: "app-contacts-one/readonly"},                           // ждёт библиотеку: U-5.5 #8
-			{Row: 13, Control: ".Items(Bar).Right(BarRight).Items(Check)"},           // ждёт библиотеку: U-5.5 #13
+			{Row: 22, Control: ".Items(Bar).More(Button)"},      // ждёт библиотеку: U-5.5 #22
+			{Row: 19, Fixture: "app-contacts/empty"},            // ждёт библиотеку: U-5.5 #19
+			{Row: 19, Fixture: "app-contacts/partial"},          // ждёт библиотеку: U-5.5 #19
+			{Row: 19, Fixture: "app-contacts/unavailable"},      // ждёт библиотеку: U-5.5 #19
+			{Row: 19, Fixture: "app-contacts-one/empty"},        // ждёт библиотеку: U-5.5 #19
+			{Row: 19, Fixture: "app-contacts-one/readonly"},     // ждёт библиотеку: U-5.5 #19
+			{Row: 19, Fixture: "app-contacts-one/source-error"}, // ждёт библиотеку: U-5.5 #19
 		},
 	},
 	{
@@ -164,9 +168,8 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.ContactPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return contact.Forms(model.(*view.ContactPage)) },
 		Waits: []Wait{
-			{Row: 1, Control: ".Main(Main).Items(Head).Acts(Acts).Items(Drop).Trigger(Button)"}, // ждёт библиотеку: U-5.5 #1
-			{Row: 15, Fixture: "app-contact/normal"},                                            // ждёт библиотеку: U-5.5 #15
-			{Row: 15, Fixture: "app-contact/outcome"},                                           // ждёт библиотеку: U-5.5 #15
+			{Row: 20, Fixture: "app-contact/normal"},  // ждёт библиотеку: U-5.5 #20
+			{Row: 20, Fixture: "app-contact/outcome"}, // ждёт библиотеку: U-5.5 #20
 		},
 	},
 	{
@@ -176,23 +179,21 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.ContactTimelinePage).Title) },
 		Forms:  func(model any) []widget.PostForm { return timeline.Forms(model.(*view.ContactTimelinePage)) },
 		Waits: []Wait{
-			{Row: 2, Control: ".Side(Side).Items(Head).Tools(Drop).Trigger(Button)"}, // ждёт библиотеку: U-5.5 #2
-			{Row: 3, Control: ".Items(Bar).More(Button)"},                            // ждёт библиотеку: U-5.5 #3
-			{Row: 4, Control: ".Items(Bar).Items(Button)"},                           // ждёт библиотеку: U-5.5 #4
-			{Row: 7, Fixture: "app-contact-timeline/normal"},                         // ждёт библиотеку: U-5.5 #7
+			{Row: 22, Control: ".Items(Bar).More(Button)"},    // ждёт библиотеку: U-5.5 #22
+			{Row: 20, Fixture: "app-contact-timeline/normal"}, // ждёт библиотеку: U-5.5 #20
 		},
 	},
 	{
 		Model:  func() any { return new(view.ContactEditPage) },
-		Frames: []string{"s-contacts-3", "s-contacts-4", "s-contacts-27"},
+		Frames: []string{"s-contacts-3", "s-contacts-4", "s-contacts-27", "states-12"},
 		Draw:   func(model any) Root { return contactedit.Screen(model.(*view.ContactEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.ContactEditPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return contactedit.Forms(model.(*view.ContactEditPage)) },
 		Waits: []Wait{
-			{Row: 16, Fixture: "app-contact-edit/normal"},  // ждёт библиотеку: U-5.5 #16
-			{Row: 6, Fixture: "app-contact-edit/loss"},     // ждёт библиотеку: U-5.5 #6
-			{Row: 9, Fixture: "app-contact-edit/no-photo"}, // ждёт библиотеку: U-5.5 #9
-			{Row: 9, Fixture: "app-contact-new/normal"},    // ждёт библиотеку: U-5.5 #9
+			{Row: 21, Fixture: "app-contact-edit/normal"},   // ждёт библиотеку: U-5.5 #21
+			{Row: 21, Fixture: "app-contact-edit/no-photo"}, // ждёт библиотеку: U-5.5 #21
+			{Row: 21, Fixture: "app-contact-edit/loss"},     // ждёт библиотеку: U-5.5 #21
+			{Row: 21, Fixture: "app-contact-new/normal"},    // ждёт библиотеку: U-5.5 #21
 		},
 	},
 }

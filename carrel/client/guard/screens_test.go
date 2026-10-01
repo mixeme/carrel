@@ -582,7 +582,9 @@ func signIn(spoil func(*w.Page)) screens.Screen {
 							w.Form{Items: fields, Variant: w.FormColumnFlush},
 							w.Button{Label: "Sign in", Kind: w.ButtonPrimary},
 						},
-						Links: []w.Link{{Text: string(p.Forgot.Label)}},
+						// The frame's two links — «Create an account» while
+						// registration is open, as s-auth-1 and -13 draw it.
+						Links: []w.Link{{Text: "Create an account"}, {Text: string(p.Forgot.Label)}},
 					},
 				},
 				Variant: w.DialogNarrow,

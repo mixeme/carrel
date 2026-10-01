@@ -149,6 +149,8 @@ func ShellZone(scr screens.Screen, model any, target string) (string, bool) {
 		if err != nil {
 			return "", false
 		}
+		// The messages: a notice's technical block (MainDiag, under it on the
+		// page) prints nothing alone in the library — the zone carries none.
 		out := ""
 		for _, n := range ns.([]view.Notice) {
 			out += bind.Notice(n, w.MsgSpacePage).Render()

@@ -355,21 +355,12 @@ Carrel не знает; всё, что ей нужно, приходит зна�
 
 | # | Экран | Кадр | Чего нет | Задача Typecase | Решение |
 |---|---|---|---|---|---|
-| 1 | `ContactPage`: «⋯» шапки карточки | s-contacts-6, s-contacts-16 | закрытое меню без сценариев: кнопке некуда вести | 60 | владелец 01.10.2026 |
-| 2 | `ContactsListPage`, `ContactTimelinePage`: «⋯» карточки в панели | s-contacts-1, s-contacts-7 | закрытое меню без сценариев | 60 | владелец 01.10.2026 |
-| 3 | `ContactsListPage`, `ContactTimelinePage`: «⋯» полосы (`Bar.More`) | s-contacts-1, s-contacts-7 | «⋯» полосы без сценариев | 60 | владелец 01.10.2026 |
-| 4 | `ContactsListPage`, `ContactTimelinePage`: Columns (`Bar.Columns`) | s-contacts-1, s-contacts-7 | меню-форма закрыта, без сценариев не открыть | 60 | владелец 01.10.2026 |
-| 5 | `app-contacts/empty`, `app-contacts/partial`, `app-contacts/unavailable`, `app-contacts-one/empty`, `app-contacts-one/source-error` (`ContactsListPage`) | — | кадры состояний списка: пусто, частичный и недоступный ответ, отказ книги | 66 | владелец 01.10.2026 |
-| 6 | `app-contact-edit/loss` (`ContactEditPage`) | — | кадр отчёта о потерях на правке | 66 | владелец 01.10.2026 |
-| 7 | `app-contact-timeline/normal` (`ContactTimelinePage`) | s-contacts-7 | ряд группы: месяц фикстуры против двух в кадре | 61 | владелец 01.10.2026 |
-| 8 | `app-contacts-one/readonly` (`ContactsListPage`) | states-4 | кадр обрезан: без полосы и групп, фикстура их несёт | 62 | владелец 01.10.2026 |
-| 9 | `app-contact-edit/no-photo`, `app-contact-new/normal` (`ContactEditPage`) | s-contacts-4, s-contacts-27 | кадры обрезаны на телефонах, фикстуры — полная форма | 62 | владелец 01.10.2026 |
-| 10 | `ContactsListPage`, `ContactPage`, `ContactTimelinePage`: метки (`Tag`) рейла и полей | s-contacts-1, s-contacts-6, s-contacts-7 | `Tag.Href`: фильтр по категории никуда не ведёт | 63 | владелец 01.10.2026 |
-| 11 | `ContactsListPage`, `ContactPage`, `ContactTimelinePage`: фото в шапке (`HeadPhoto`) | s-contacts-1, s-contacts-6, s-contacts-7 | `HeadPhoto.Src`: фотография не показывается | 64 | владелец 01.10.2026 |
-| 12 | `ContactsListPage`: фильтр полосы (`Bar.FilterForm`) | s-contacts-1 | скрытые поля `Filter`: task, sort, tag не уходят | 65 | владелец 01.10.2026 |
-| 13 | `ContactsListPage`: «Compact rows» (`Bar.Compact`) | s-contacts-1 | отметка полосы вне формы: форма GET контракта не встаёт | — (новая, сервер C13 закрыт) | владелец 01.10.2026 |
-| 15 | `app-contact/normal`, `app-contact/outcome` (`ContactPage`) | s-contacts-6, s-contacts-16 | ряд поля карточки (`dt`, `dd` чередуются): полей у фикстуры 6, в кадре 8; у итога хронология не открыта, кадр рисует её строки; обновления (`TopBar.Refresh`) у карточки нет | 61; сервер, долг C17 | владелец 01.10.2026 |
-| 16 | `app-contact-edit/normal` (`ContactEditPage`) | s-contacts-3 | подпись второго телефона в кадре — поле ввода, в фикстуре — выбор; обновления (`TopBar.Refresh`) у правки нет | 62; сервер, долг C17 | владелец 01.10.2026 |
+| 17 | `login/normal`, `login/refused` (`LoginPage`) | s-auth-1, s-auth-13 | кадры рисуют открытую регистрацию («Create an account»), фикстуры — экземпляр с закрытой (`Register` пуст) | сервер, долг C18 | владелец 01.10.2026 |
+| 18 | `invite/link` (`InvitePage`) | s-auth-12 | приглашение по ссылке — без строки Email; кадр рисует приглашение письмом, своего кадра у состояния нет | кандидат Typecase: кадр приглашения по ссылке | владелец 01.10.2026 |
+| 19 | `app-contacts/empty`, `app-contacts/partial`, `app-contacts/unavailable`, `app-contacts-one/empty`, `app-contacts-one/readonly`, `app-contacts-one/source-error` (`ContactsListPage`) | states-7, states-8, states-9, states-10, states-4, states-11 | шапки кадров короче модели и s-contacts-1, у одной книги нет её метки и чужие теги в рейле, states-9 рисует отказ в полосе опроса, а строку рейла — обычной; обновления (`TopBar.Refresh`) у одной книги и при пустом выборе нет, «Tick every book» не основная | кандидат Typecase: кадры состояний контактов по s-contacts-1; сервер, долги C19, C20 | владелец 01.10.2026 |
+| 20 | `app-contact/normal`, `app-contact/outcome` (`ContactPage`), `app-contact-timeline/normal` (`ContactTimelinePage`) | s-contacts-6, s-contacts-16, s-contacts-7 | набор фикстур беднее кадров: Анна ни с кем не связана (`Books`, `Linked`), в хронологии одна запись против трёх и двух месяцев, один адрес почты; у хронологии нет обновления (`TopBar.Refresh`) | сервер, долг C20 | владелец 01.10.2026 |
+| 21 | `app-contact-edit/normal`, `app-contact-edit/no-photo`, `app-contact-edit/loss`, `app-contact-new/normal` (`ContactEditPage`) | s-contacts-3, s-contacts-4, states-12, s-contacts-27 | у Анны в наборе нет адреса; отчёт о потерях — одной строкой без жирной первой фразы; у новой карточки нет пустой строки почты и свёрнутой рубрики «Show 6 empty fields»; s-contacts-4 и states-12 рисуют Анну без дня рождения | сервер, долг C21; кандидат Typecase: данные Анны в s-contacts-4 и states-12 | владелец 01.10.2026 |
+| 22 | `ContactsListPage`, `ContactTimelinePage`: «⋯» полосы (`Bar.More`) | s-contacts-1, s-contacts-7 | меню «⋯» — близнецы ушедшего с полосы (components-19): `Bar.More` — кнопка без меню, а отметке-форме (`CheckForm`, GET) близнеца в меню нет — меню-форма шлёт POST | кандидат Typecase: меню «⋯» полосы | владелец 01.10.2026 |
 
 ### U-5.6 Что принадлежит экрану
 
@@ -1802,10 +1793,12 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
    приёмке (`CARREL_ACCEPTANCE=1`), до неё проверка его только считает.
 6. **Смысл.** У каждого нажимаемого элемента экрана на каждой его фикстуре
    заполнено поле смысла по карте «контракт → виджет»: ссылка — `Href`;
-   кнопка — `Href`, `Form` или отправка своей формы с адресом; поле — `Name`
-   внутри отправляемой формы; пункт меню — `Href` или `Name` в меню-форме;
-   галка — `Send`; поиск, фильтр, `PostForm` — адрес; форма, названная
-   кнопкой, есть на странице. Виджет с полем смысла, которого таблица не
+   кнопка — `Href`, `Form` или отправка своей формы с адресом, а кнопка
+   закрытого меню (`Drop`, `TopDrop`) открывает его и без сценария; поле —
+   `Name` внутри отправляемой формы; пункт меню — `Href`, `Name` в
+   меню-форме или `Form` (`PostForm` страницы: Sign out); галка — `Send`;
+   поиск, фильтр, отметки полосы (`CheckForm`), `PostForm` — адрес; форма,
+   названная кнопкой или пунктом, есть на странице. Виджет с полем смысла, которого таблица не
    знает, — сам находка: таблица растёт решением, а не молча. Находку у
    контрола, который ждёт библиотеку (U-5.5), снимает его ожидание.
 

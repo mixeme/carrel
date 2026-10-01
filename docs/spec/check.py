@@ -241,8 +241,15 @@ SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-
 FRAME_TODO = {}
 
 # Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
-# записка в from-typecase.md. Закрылось на сервере — строка уходит.
-SERVER_TODO = {}
+# записка в from-typecase.md или долг сервера в plan/client.md. Закрылось на
+# сервере — строка уходит. Ключ — как у FRAME_TODO: «каталог: что
+# расходится», без состояния; держит проверки 8 и 9.
+SERVER_TODO = {
+    # states-7 (ничего не отмечено, Typecase 515beec) рисует «Tick every book»
+    # основной кнопкой, а rail.tick.all фикстуры не Primary.
+    "app-contacts: «Tick every book» (rail.tick.all)":
+        "plan/client.md, долг сервера C19: «Tick every book» — основная (states-7)",
+}
 
 # Состояние, которое рисует свой кадр маршрута — часть (data-part), а не
 # кадр экрана целиком: отказ входа — s-auth-13, не s-auth-1. Шаги страниц
@@ -267,6 +274,14 @@ STATE_FRAME = {
     # Typecase d5481b2 (задача 55).
     "app-contacts-one/readonly": "states-4",
     "app-contact-edit/no-photo": "s-contacts-4",
+    # Состояния списка контактов и правки с потерей — свои кадры главы
+    # состояний (Typecase 515beec, задача 66), части маршрутов по data-part.
+    "app-contacts/empty": "states-7",
+    "app-contacts/partial": "states-8",
+    "app-contacts/unavailable": "states-9",
+    "app-contacts-one/empty": "states-10",
+    "app-contacts-one/source-error": "states-11",
+    "app-contact-edit/loss": "states-12",
 }
 # Без строки: app-contact-new/normal — полная форма создания (`/new`) — свой
 # кадр маршрута, s-contacts-27 (Typecase 4af7ad7, задача 59).
@@ -433,6 +448,12 @@ def html_unescape(s):
 def frame_buttons(frame):
     """Подпись кнопки -> множество «основная ли» по всем её местам в кадре."""
     out = {}
+    # Apply отметки полосы (tc-checkform__apply, Typecase 5b9d0a9, задача 67)
+    # отправляет форму без сценариев — кнопка библиотеки, не действие модели:
+    # у формы «Compact rows» действий нет. Сверять с ней Apply меню столбцов
+    # (columns.apply, основная в своём кадре s-contacts-25) значило бы сверять
+    # чужую кнопку.
+    frame = re.sub(r'<span class="tc-checkform__apply">.*?</span>', '', frame, flags=re.S)
     for m in re.finditer(r'<(button|a) class="(tc-btn(?: [^"]*)?)"[^>]*>(.*?)</\1>', frame, re.S):
         lab = tag_text(m.group(3))
         if lab:
@@ -475,7 +496,7 @@ def walk(x, acts, rows):
         for v in x:
             walk(v, acts, rows)
 
-marks = []
+marks, known9 = [], []
 for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
     d = os.path.basename(os.path.dirname(p))
     state = os.path.splitext(os.path.basename(p))[0]
@@ -502,6 +523,10 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
         if bool(a.get("primary")) != want:
             marks.append("%s: «%s» (%s) — кадр рисует %s" % (key, lab, a.get("id"),
                          "основной" if want else "не основной"))
+            flat = "%s: «%s» (%s)" % (d, lab, a.get("id"))
+            if flat in SERVER_TODO:
+                known9.append("ждёт сервер: %s — %s" % (flat, SERVER_TODO[flat]))
+                marks.pop()
     for r in rows:
         lab = " ".join(str(r.get("label") or "").split())
         drawn = fi.get(lab)
@@ -512,6 +537,8 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
             marks.append("%s: поле «%s» (%s) — кадр рисует %s" % (key, lab, r.get("name"),
                          "моноширинным" if want else "обычным"))
 check("9. основная кнопка и моноширинное поле — как в кадре", sorted(set(marks)))
+for k in sorted(set(known9)):
+    print("         " + k)
 
 print()
 print("ИТОГ: %d красных проверок" % len(fails))

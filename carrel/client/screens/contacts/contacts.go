@@ -26,7 +26,8 @@ var (
 		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
 		Search: "Search everything…",
 	}
-	rail = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom"}
+	rail    = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom"}
+	columns = bind.ColumnWords{Name: "col", Reset: "default", Drag: "drag"}
 )
 
 // empty is the screen's word for a cell the record has nothing in (L9).
@@ -36,43 +37,39 @@ const empty = "—"
 //
 //   - The shell (U-2.1): the top bar; the rail of sections (Rail.Nav, the
 //     open one on), the sources by account with their ticks, which submit
-//     the rail's form (Rail.Ticks), the tags, the foot; the notices over the
-//     page (Notices).
+//     the rail's form (Rail.Ticks), the tags, the foot.
 //   - The head: the title with the mark of what is open — all the books at
 //     once, or the book's colour —, read-only where the book is (ReadOnly),
 //     what is in it (Subtitle), and the bar's actions: New contact with its
 //     arrow «Write into» (a closed menu of the ticked books, «last used»,
 //     «ro» for one that takes nothing), Import, Export, Print.
-//   - The bar: the filter of what is loaded (a GET form, FilterForm), the
-//     order (Segments, links), Columns, «⋯», «Compact rows» and the count
-//     loaded.
+//   - The notices under the head (Notices: a book that did not answer, its
+//     Try again small), each with its technical block (states-11).
+//   - The bar, while there are cards or a filter to clear (the empty states'
+//     frames draw none): the filter of what is loaded (a GET form,
+//     FilterForm, with the list's other choices), the order (Segments,
+//     links), Columns with its menu (a form, closed), «⋯», «Compact rows» (a
+//     GET form with its Apply) and the count loaded.
 //   - The poll's bar while the poll runs or a source did not answer (C-6.4).
 //   - The groups by letter with their count, a row for each card: its book's
 //     mark, the avatar, the name (bold while it is open in the panel, a badge
 //     of a linked record), phone, email, organisation — the dash where there
 //     is none —, the book; the row leads to the card.
-//   - Nothing to show (Empty): why, and the buttons that help.
+//   - Nothing to show (Empty): what, bold, why, and the buttons that help
+//     (states-7, states-10).
 //   - The panel (Shell.Details), for the row opened with ?open=: the photo or
 //     initials, the name, Edit and All records, «⋯» with the record's menu,
 //     the book, the cross that closes it (Details.Close); the fields; the
 //     properties kept as the server sent them; the source; the deletion.
 func Screen(p *view.ContactsListPage) w.Shell {
-	main := []w.MainPart{}
-	for _, n := range p.Notices {
-		main = append(main, bind.Notice(n, w.MsgSpacePage))
+	main := append([]w.MainPart{head(p)}, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	if len(p.Groups) > 0 || p.Bar.Filter != "" {
+		main = append(main, bar(p))
 	}
-	main = append(main, head(p), bar(p))
 	if r := bind.Runbar(p.Poll); r != nil {
 		main = append(main, *r)
 	}
-	compact := false
-	if p.Bar.Compact != nil {
-		for _, r := range bind.Rows(*p.Bar.Compact) {
-			for _, o := range r.Options {
-				compact = compact || o.Selected
-			}
-		}
-	}
+	compact := bind.Checked(p.Bar.Compact)
 	for _, g := range p.Groups {
 		rows := make([]w.ListRow, 0, len(g.Rows))
 		for _, r := range g.Rows {
@@ -83,11 +80,7 @@ func Screen(p *view.ContactsListPage) w.Shell {
 			w.List{Rows: rows, Compact: compact})
 	}
 	if p.Empty != nil {
-		parts := []w.EmptyPart{w.Text(p.Empty.Body)}
-		for _, a := range p.Empty.Actions {
-			parts = append(parts, bind.Button(a, a.ID))
-		}
-		main = append(main, w.Empty{Lead: string(p.Empty.Title), Parts: parts})
+		main = append(main, w.Empty{Parts: bind.EmptyParts(*p.Empty)})
 	}
 	body := w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}
 	if p.Details != nil {
@@ -99,9 +92,12 @@ func Screen(p *view.ContactsListPage) w.Shell {
 
 // Forms are the page's forms: the rail's, which its ticks submit, and the
 // panel's deletion, the retries of the sources, the buttons of the empty
-// state that post.
+// state and the items of the menus that post (Sign out).
 func Forms(p *view.ContactsListPage) []w.PostForm {
-	var out []w.PostForm
+	out := bind.TopForms(p.Top)
+	for _, a := range p.Bar.Actions {
+		out = append(out, bind.MenuForms(a.Arrow)...)
+	}
 	if f := bind.RailForm(p.Rail, formRail); f != nil {
 		out = append(out, *f)
 	}
@@ -120,6 +116,7 @@ func Forms(p *view.ContactsListPage) []w.PostForm {
 				out = append(out, bind.ActionForm(a, formDelete))
 			}
 		}
+		out = append(out, bind.MenuForms(p.Details.Menu)...)
 	}
 	return out
 }
@@ -179,17 +176,8 @@ func bar(p *view.ContactsListPage) w.Bar {
 	b := p.Bar
 	var items []w.BarPart
 	if b.FilterForm != nil {
-		f := w.Filter{
-			Query:   w.Query{Value: string(b.Filter), Label: "Filter the loaded cards"},
-			Waiting: b.Filter == "",
-			Variant: w.FilterH26W220,
-			Action:  b.FilterForm.Action,
-		}
-		// ждёт библиотеку: U-5.5 #12 — the filter's hidden fields (task, sort,
-		// tag) are not sent: the library's filter has none
-		for _, r := range bind.Rows(*b.FilterForm) {
-			f.Query.Name = r.Name
-		}
+		f := bind.Filter(b, "Filter the loaded cards")
+		f.Variant = w.FilterH26W220
 		items = append(items, f)
 	}
 	if len(b.Segments) > 0 {
@@ -200,23 +188,20 @@ func bar(p *view.ContactsListPage) w.Bar {
 		items = append(items, seg)
 	}
 	if b.Columns != nil {
-		// ждёт библиотеку: U-5.5 #4 — Columns, a closed menu without scripts
-		items = append(items, w.Button{Label: string(b.Columns.Label), Icon: bind.Icon(b.Columns.Icon)})
+		cols := bind.Columns(*b.Columns, columns)
+		cols.Menu.Pop = w.MenuUnder
+		items = append(items, cols)
 	}
 	var right []w.BarPart
 	if b.Compact != nil {
-		// ждёт библиотеку: U-5.5 #13 — «Compact rows» is a form (GET) of the
-		// contract, and a tick of the library's bar stands in no form
-		for _, r := range bind.Rows(*b.Compact) {
-			for _, o := range r.Options {
-				right = append(right, w.Check{On: o.Selected, Name: r.Name, Value: o.Value, Parts: []w.CheckPart{w.Text(r.Label)}})
-			}
-		}
+		right = append(right, bind.CheckForm(*b.Compact, "Apply"))
 	}
 	right = append(right, w.Mono{Text: strconv.Itoa(b.Loaded)})
 	return w.Bar{
 		Items: items,
-		// ждёт библиотеку: U-5.5 #3 — the bar's «⋯» without scripts
+		// ждёт библиотеку: U-5.5 #22 — the bar's «⋯»: a button with no menu
+		// of what left the bar (components-19); a tick that is a form has no
+		// twin in a menu
 		More:  &w.Button{Icon: "dots", Title: "More"},
 		Right: &w.BarRight{Items: right, Secondary: true},
 	}
@@ -266,7 +251,6 @@ func side(d view.Details) *w.Side {
 		tools = append(tools, b)
 	}
 	if len(d.Menu) > 0 {
-		// ждёт библиотеку: U-5.5 #2 — the panel's «⋯», a closed menu without scripts
 		tools = append(tools, w.Drop{
 			Trigger: w.Button{Icon: "dots", Small: true, Title: "More"},
 			Menu:    w.Menu{Items: bind.MenuItems(d.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
@@ -280,8 +264,7 @@ func side(d view.Details) *w.Side {
 		Middle: true,
 	}
 	if d.Avatar != nil {
-		// ждёт библиотеку: U-5.5 #11 — the photo in the head (Avatar.Href)
-		h.Photo = &w.HeadPhoto{Initials: string(d.Avatar.Initials)}
+		h.Photo = &w.HeadPhoto{Initials: string(d.Avatar.Initials), Src: d.Avatar.Href}
 	}
 	items := []w.SidePart{h}
 	fields := w.Fields{}

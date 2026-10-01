@@ -14,8 +14,11 @@ import (
 var (
 	frameMenuItem = regexp.MustCompile(`(?s)<span class="tc-menu__sep"></span>|<button class="tc-menu__item[^"]*"[^>]*role="menuitem"[^>]*>(.*?)</button>`)
 	frameButton   = regexp.MustCompile(`(?s)<button\b[^>]*>(.*?)</button>`)
-	frameIcon     = regexp.MustCompile(`#(i-[\w-]+)`)
-	frameTag      = regexp.MustCompile(`(?s)<svg.*?</svg>|<[^>]+>`)
+	// A button with its menu, closed, is the summary of a details (Typecase's
+	// task 60): Attach with its arrow in a rubric (task 71, s-agenda-1).
+	frameButtonOrSummary = regexp.MustCompile(`(?s)<(?:button|summary)\b[^>]*>(.*?)</(?:button|summary)>`)
+	frameIcon            = regexp.MustCompile(`#(i-[\w-]+)`)
+	frameTag             = regexp.MustCompile(`(?s)<svg.*?</svg>|<[^>]+>`)
 )
 
 // frameText is what a piece of a frame says, tags and icons dropped.
@@ -81,7 +84,7 @@ func sameMenu(t *testing.T, what string, got []view.MenuItem, frame string, drop
 func drawn(t *testing.T, what string, actions []view.Action, frame string, skip ...string) {
 	t.Helper()
 	labels, icons := map[string]bool{}, map[string]bool{}
-	for _, m := range frameButton.FindAllStringSubmatch(mockupFrame(t, frame), -1) {
+	for _, m := range frameButtonOrSummary.FindAllStringSubmatch(mockupFrame(t, frame), -1) {
 		if label := frameText(m[1]); label != "" {
 			labels[label] = true
 		} else if i := frameIcon.FindStringSubmatch(m[1]); i != nil {
