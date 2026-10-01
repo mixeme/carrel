@@ -64,7 +64,10 @@ go test -timeout 30m ./...
 # One package at a time and one test at a time: under the detector every
 # harness pays Argon2 at 64 MiB several times over, and on 28.09.2026
 # internal/web in parallel was killed at the 3 GB limit on a 4 GB host;
-# serially it passes (about five minutes for web alone).
+# serially it passes (about five minutes for web alone). On 01.10.2026 even
+# the serial run was killed at 2.3 GB: the heap grows faster under the
+# detector than the collector frees it. GOMEMLIMIT makes it collect sooner;
+# with it internal/web passes in about six minutes and no race is found.
 if [[ "${CARREL_RACE:-}" == "1" ]]; then
   echo "== race detector =="
   docker run --rm \
@@ -73,6 +76,7 @@ if [[ "${CARREL_RACE:-}" == "1" ]]; then
     -w /src/carrel/carrel/server \
     --memory=3g \
     -e GOTOOLCHAIN=auto \
+    -e GOMEMLIMIT=1400MiB \
     golang:1.27-bookworm \
     go test -race -count=1 -p 1 -parallel 1 -timeout 120m ./...
 fi
