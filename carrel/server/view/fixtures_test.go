@@ -200,6 +200,86 @@ func TestFixturePostActionsCarryTheToken(t *testing.T) {
 	})
 }
 
+// C-11, the client's scan of the calendar (Б6): a GET form puts its fields
+// in the address, and the session's token in an address is a token in the
+// history, the logs and the Referer. No GET form of any fixture carries
+// _csrf, in any of its sets or in a template of a repeating row.
+func TestFixtureGetFormsCarryNoToken(t *testing.T) {
+	forms := 0
+	eachFixtureValue(t, reflect.TypeOf(Form{}), func(screen, at string, v reflect.Value) {
+		f := v.Interface().(Form)
+		if !strings.EqualFold(f.Method, "GET") {
+			return
+		}
+		forms++
+		var rows func(rs []FormRow, at string)
+		rows = func(rs []FormRow, at string) {
+			for i, r := range rs {
+				if r.Name == "_csrf" {
+					t.Errorf("%s %s[%d]: a GET form to %s carries the session's token", screen, at, i, f.Action)
+				}
+				rows(r.Template, fmt.Sprintf("%s[%d].Template", at, i))
+			}
+		}
+		for i, set := range f.Sets {
+			rows(set.Rows, fmt.Sprintf("%s.Sets[%d].Rows", at, i))
+		}
+	})
+	if forms == 0 {
+		t.Fatal("no GET form in any fixture: the check looks at nothing")
+	}
+}
+
+// eachFixtureValue calls fn for every value of type typ in every fixture on
+// disk, each walked as its view model; at is the field path to it. A value
+// of typ is not walked into.
+func eachFixtureValue(t *testing.T, typ reflect.Type, fn func(screen, at string, v reflect.Value)) {
+	t.Helper()
+	screens, err := os.ReadDir(fixtureDir)
+	if err != nil {
+		t.Fatalf("read fixture dir: %v", err)
+	}
+	for _, screen := range screens {
+		newModel, ok := fixtureTypes[screen.Name()]
+		if !screen.IsDir() || !ok {
+			continue
+		}
+		states, _ := filepath.Glob(filepath.Join(fixtureDir, screen.Name(), "*.json"))
+		for _, path := range states {
+			raw, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			model := newModel()
+			if err := json.Unmarshal(raw, model); err != nil {
+				t.Fatalf("%s: %v", path, err)
+			}
+			var walk func(v reflect.Value, at string)
+			walk = func(v reflect.Value, at string) {
+				switch v.Kind() {
+				case reflect.Pointer, reflect.Interface:
+					if !v.IsNil() {
+						walk(v.Elem(), at)
+					}
+				case reflect.Slice, reflect.Array:
+					for i := 0; i < v.Len(); i++ {
+						walk(v.Index(i), fmt.Sprintf("%s[%d]", at, i))
+					}
+				case reflect.Struct:
+					if v.Type() == typ {
+						fn(screen.Name(), at, v)
+						return
+					}
+					for i := 0; i < v.NumField(); i++ {
+						walk(v.Field(i), at+"."+v.Type().Field(i).Name)
+					}
+				}
+			}
+			walk(reflect.ValueOf(model), screen.Name()+"/"+filepath.Base(path))
+		}
+	}
+}
+
 // eachFixtureAction calls fn for every Action in every fixture on disk,
 // each walked as its view model; at is the field path to it.
 func eachFixtureAction(t *testing.T, fn func(screen, at string, a Action)) {

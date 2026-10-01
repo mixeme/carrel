@@ -98,18 +98,6 @@
                 "hint": "",
                 "kind": "hidden",
                 "label": "",
-                "name": "_csrf",
-                "options": [],
-                "readOnly": false,
-                "required": false,
-                "value": "csrf"
-              },
-              {
-                "error": "",
-                "extra": null,
-                "hint": "",
-                "kind": "hidden",
-                "label": "",
                 "name": "view",
                 "options": [],
                 "readOnly": false,
@@ -132,7 +120,7 @@
               {
                 "error": "",
                 "extra": null,
-                "hint": "Both days are in the list.",
+                "hint": "",
                 "kind": "date",
                 "label": "To",
                 "mono": true,

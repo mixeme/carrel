@@ -380,7 +380,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			rows = append(rows, kindedAll(filter.keep(k, listedOfKind(blob, st.snap, k)), k)...)
 		}
 		page.Days, page.Bar.Loaded, bad = s.agendaDays(tf, rows, from, to, spec.segment, true)
-		page.Bar.Range = s.agendaRange(sess, tf, base, filter.tag, kind, from, to, r.URL.Query())
+		page.Bar.Range = s.agendaRange(tf, base, filter.tag, kind, from, to, r.URL.Query())
 		page.Bar.Segments = s.agendaSegments(base, filter.tag, on, r.URL.Query())
 		page.Bar.Actions = actions
 		page.Notices = appendUnreadable(page.Notices, bad)

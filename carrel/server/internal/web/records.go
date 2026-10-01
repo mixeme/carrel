@@ -1064,7 +1064,7 @@ func todayQuery(kind string) url.Values {
 // agendaRange is the window on the screen: Day, Week and Month to switch
 // between, the one before and the one after, and a range of one's own. It
 // keeps the category filter and the segment of the address.
-func (s *Server) agendaRange(sess *session.Session, tf timeFmt, base, tag, kind string, from, to time.Time, keep url.Values) *view.Range {
+func (s *Server) agendaRange(tf timeFmt, base, tag, kind string, from, to time.Time, keep url.Values) *view.Range {
 	href := func(set url.Values) string {
 		q := keptQuery(keep, "view", "from", "to")
 		for name, v := range set {
@@ -1111,12 +1111,12 @@ func (s *Server) agendaRange(sess *session.Session, tf timeFmt, base, tag, kind 
 		rng.Presets = append(rng.Presets, view.Action{ID: w.id, Label: text(w.label), Method: "GET", Enabled: true,
 			On: w.kind == kind, Href: window(w.kind, anchor)})
 	}
+	// A GET form puts its fields in the address: no _csrf here (C-11, the
+	// client's scan Б6). To has no hint: the frame draws none (s-agenda-1).
 	form := s.plainForm(base, "GET",
-		csrfField(sess),
 		view.FormRow{Name: "view", Kind: view.InputHidden, Value: agendaRange},
 		view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Value: text(from.Format("2006-01-02")), Mono: true},
-		view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(to.AddDate(0, 0, -1).Format("2006-01-02")), Mono: true,
-			Hint: "Both days are in the list."},
+		view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(to.AddDate(0, 0, -1).Format("2006-01-02")), Mono: true},
 	)
 	form.Actions = []view.Action{{ID: "range.show", Label: "Show", Href: s.route(base), Method: "GET", Enabled: true}}
 	rng.Form = &form
@@ -1141,7 +1141,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 		"from": {from.Format("2006-01-02")}, "to": {to.AddDate(0, 0, -1).Format("2006-01-02")},
 	})
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
-	page.Bar.Range = s.agendaRange(c.sess, tf, c.listPath(), filter.tag, kind, from, to, r.URL.Query())
+	page.Bar.Range = s.agendaRange(tf, c.listPath(), filter.tag, kind, from, to, r.URL.Query())
 
 	objs, bad, err := c.calQuery(r.Context(), c.spec.component, &from, &to)
 	if err != nil {

@@ -52,8 +52,8 @@ type Range struct {
 	To      Text     `json:"to"`
 	Presets []Action `json:"presets"` // Day · Week · Month, «предыдущая» и «следующая»
 	// Form — произвольный диапазон: форма GET на Form.Action, поля from и
-	// to, «Show» её отправляет (Range.Action, s-contacts-7, s-agenda-1); nil —
-	// его нет
+	// to, «Show» её отправляет (Range.Action, s-contacts-7, s-agenda-1); без
+	// _csrf — поля GET уходят в адрес (C-11); nil — его нет
 	Form *Form `json:"form"`
 }
 

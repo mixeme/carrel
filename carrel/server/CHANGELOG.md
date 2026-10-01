@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.116 — 2026-10-01
+
+The range form of the agenda put the session's token in the address (the
+client's scan of the calendar, Б6).
+
+### Fixed
+
+- **No GET form carries `_csrf`** (C-11): the agenda's `Range.form` (GET
+  `/app/calendar…` with `view`, `from`, `to`) sent the session's token as a
+  hidden field, so «Show» wrote it into the address — the history, the logs,
+  the Referer of the next page. It is gone; the range never needed it, a GET
+  changes nothing. `TestFixtureGetFormsCarryNoToken` walks every GET form of
+  every fixture (red on `v0.2.115`: the four agenda fixtures).
+- The range's To has no hint «Both days are in the list.» (s-agenda-1 draws
+  none, as the timeline's since `v0.2.88`).
+
+### For consumers
+
+Put `_csrf` in a POST form only. Fixtures regenerated: `app-agenda/normal`,
+`/empty`, `app-agenda-all/empty`, `/partial`.
+
 ## v0.2.115 — 2026-10-01
 
 The mockup's copy is Typecase `29413d6`'s (Carrel's tasks 60–76): the frames
