@@ -1522,6 +1522,7 @@
   ],
   "title": "Combined calendar",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

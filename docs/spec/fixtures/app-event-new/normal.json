@@ -3168,6 +3168,7 @@
   "subtitle": "nextcloud · Личный",
   "title": "New event",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

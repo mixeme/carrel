@@ -614,6 +614,7 @@
   ],
   "title": "Backup",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

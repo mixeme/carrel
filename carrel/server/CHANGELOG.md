@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.127 — 2026-10-02
+
+Lock now, as s-profile-4 and s-plan-1…5 draw it beside «credentials
+unlocked · 4:12».
+
+### Added
+
+- **`TopBar.lock`** — Lock now (`unlock.lock`, POST), while the unlock
+  window of the session is open; `null` otherwise.
+- **`POST /app/settings/lock`** — ends the unlock window of this session at
+  once: every secret asks for the sheet again; the sign-in, the session's
+  key and its data stay (S-10.7). Nothing is released, nothing journaled.
+  The answer is a redirect to the page it was pressed on — the `Referer` of
+  this origin under `/app/` or `/admin/` —, else Connections.
+- **The messages about it, in pieces**: under the cards of Connections while
+  the window is open, «While credentials are unlocked, every account opens
+  without a question — … **Lock now** ends it at once; so does signing
+  out.» (`ConnectionsPage.note`; an open feed panel says its own); under the
+  rows of «Anything else» **`DevicesPage.unlockNote`**, «Credentials are
+  unlocked for five minutes — … **Lock now**; every reveal is written to the
+  audit log.», the span in words from `CARREL_UNLOCK_TTL`.
+
+### For consumers
+
+Draw `top.lock` beside the mark of the window; it posts with its token.
+Fixtures regenerated: every page in the shell (`top.lock: null`),
+`app-settings-devices/normal`.
+
 ## v0.2.126 — 2026-10-02
 
 Carrel installs as an application: the web manifest and its PNG icons come

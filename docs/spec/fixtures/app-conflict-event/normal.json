@@ -312,6 +312,7 @@
   "serverAt": "1 August, 03:00",
   "title": "Changed elsewhere",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

@@ -318,6 +318,7 @@
   },
   "title": "Duplicates",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

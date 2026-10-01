@@ -271,6 +271,7 @@
   },
   "title": "Files",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

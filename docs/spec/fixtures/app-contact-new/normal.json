@@ -739,6 +739,7 @@
   "subtitle": "nextcloud · Контакты",
   "title": "New contact",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

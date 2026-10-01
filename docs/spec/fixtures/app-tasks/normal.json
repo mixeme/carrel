@@ -852,6 +852,7 @@
   },
   "title": "Дела",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

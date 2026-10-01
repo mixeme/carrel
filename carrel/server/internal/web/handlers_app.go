@@ -3,6 +3,7 @@ package web
 import (
 	"errors"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -181,6 +182,31 @@ func (s *Server) getSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 	// Without scripts a sheet is a page of its own (U-8): "Show password" is
 	// a plain link here, and a 404 behind it left no way to the password.
 	s.writePage(w, r, http.StatusOK, s.unlockSheet(sess, ""))
+}
+
+// postSettingsLock is Lock now (s-profile-4, s-plan-1…5): the unlock window
+// of this session ends at once, before its time — every secret is asked for
+// again through the sheet —, and the sign-in stays: the session, its key
+// and its data are as they were (S-10.7). It releases nothing, so nothing
+// goes to the journal. The answer is the page it was pressed on, read from
+// the Referer of this very origin; anything else goes to Connections.
+func (s *Server) postSettingsLock(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	sess.SetUnlockUntil(time.Time{})
+	back := "/app/settings/connections"
+	if ref, err := url.Parse(r.Referer()); err == nil && ref.Host == r.Host && (ref.Scheme == "http" || ref.Scheme == "https") {
+		if p, ok := strings.CutPrefix(ref.EscapedPath(), s.basePath+"/"); ok && !strings.HasPrefix(p, "/") && !strings.Contains(p, "\\") &&
+			(strings.HasPrefix(p, "app/") || strings.HasPrefix(p, "admin/")) {
+			back = "/" + p
+			if ref.RawQuery != "" {
+				back += "?" + ref.RawQuery
+			}
+		}
+	}
+	s.redirect(w, r, back)
 }
 
 // postSettingsUnlock is the one confirmation sheet behind every secret

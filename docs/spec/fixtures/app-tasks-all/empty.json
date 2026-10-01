@@ -564,6 +564,7 @@
   },
   "title": "Combined list",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

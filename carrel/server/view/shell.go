@@ -21,9 +21,13 @@ type TopBar struct {
 	User   []MenuItem `json:"user"`   // меню учётной записи
 	// UserHref — куда ведёт кнопка учётной записи без сценариев: страница
 	// учётной записи
-	UserHref string  `json:"userHref"`
-	Unlocked *When   `json:"unlocked"` // до какого времени открыта выдача учётных данных
-	Refresh  Refresh `json:"refresh"`
+	UserHref string `json:"userHref"`
+	Unlocked *When  `json:"unlocked"` // до какого времени открыта выдача учётных данных
+	// Lock — Lock now рядом с меткой «credentials unlocked · 4:12»
+	// (s-profile-4, s-plan-1, -2, -4, -5): запирает выдачу этого сеанса до
+	// срока, вход остаётся (S-10.7); nil — выдача закрыта
+	Lock    *Action `json:"lock"`
+	Refresh Refresh `json:"refresh"`
 }
 
 // SignedIn — кто вошёл и на каком экземпляре. Экземпляров у человека

@@ -499,6 +499,7 @@
   },
   "title": "Edit note",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

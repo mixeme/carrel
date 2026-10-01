@@ -247,6 +247,7 @@
   "serverAt": "10 August, 17:02",
   "title": "Changed elsewhere",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

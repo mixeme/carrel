@@ -876,6 +876,7 @@
   "subtitle": "nextcloud · Контакты",
   "title": "Edit contact",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

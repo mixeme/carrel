@@ -1446,6 +1446,7 @@
   ],
   "title": "Личный",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

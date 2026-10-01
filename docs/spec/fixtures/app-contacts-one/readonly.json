@@ -747,6 +747,7 @@
   "subtitle": "radicale · vps · the server granted no write access",
   "title": "Команда",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

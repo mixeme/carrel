@@ -3337,6 +3337,7 @@
   "subtitle": "nextcloud · Личный",
   "title": "Edit event",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

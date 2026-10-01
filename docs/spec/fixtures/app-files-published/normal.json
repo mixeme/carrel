@@ -191,6 +191,7 @@
   ],
   "title": "Published links",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

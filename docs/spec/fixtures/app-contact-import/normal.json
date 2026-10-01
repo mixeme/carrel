@@ -284,6 +284,7 @@
   "subtitle": [],
   "title": "Import",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

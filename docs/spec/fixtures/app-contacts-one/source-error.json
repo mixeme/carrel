@@ -694,6 +694,7 @@
   "subtitle": "nextcloud",
   "title": "Контакты",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

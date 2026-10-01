@@ -129,6 +129,11 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 		page.Actions = append(page.Actions, view.Action{ID: "device.tab." + string(t), Label: text(deviceTabLabels[t]),
 			Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(t)}}), Method: "GET", Enabled: true, On: t == tab})
 	}
+	if unlocked && tab == view.TabOther {
+		// Under the rows while the window is open (s-plan-5).
+		page.UnlockNote = join("Credentials are unlocked for "+durationWords(s.cfg.UnlockTTL)+" — here and everywhere else they are handed out. Everything shown closes when the time is up or when you press ",
+			strongRun("Lock now"), "; every reveal is written to the audit log.")
+	}
 	unlock := s.route("/app/settings/unlock")
 	secret := func(conn sealed.Connection) view.SecretField {
 		if unlocked {

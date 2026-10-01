@@ -462,6 +462,7 @@
   },
   "title": "Записи",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

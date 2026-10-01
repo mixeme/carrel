@@ -487,6 +487,7 @@
   },
   "title": "Combined notebook",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

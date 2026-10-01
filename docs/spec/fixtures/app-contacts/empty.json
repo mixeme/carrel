@@ -712,6 +712,7 @@
   "subtitle": "0 of 4 books · 0 accounts",
   "title": "Combined address book",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

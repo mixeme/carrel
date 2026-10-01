@@ -1303,6 +1303,7 @@
   "subtitle": "3 of 4 books · 2 accounts · 5 cards",
   "title": "Combined address book",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

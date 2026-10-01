@@ -360,7 +360,8 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account"
+    "userHref": "/app/settings/account",
+    "lock": null
   },
   "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it.",
   "email": {

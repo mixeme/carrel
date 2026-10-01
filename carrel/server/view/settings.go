@@ -253,6 +253,10 @@ type DevicesPage struct {
 	Warning  Notice          `json:"warning"` // что содержит профиль и куда он попадает
 	Actions  []Action        `json:"actions"`
 	Note     Text            `json:"note"` // строка над Generate profile: как его выдадут; пусто вне Apple
+	// UnlockNote — под строками «Anything else», пока выдача открыта
+	// (s-plan-5): срок словами, что всё закроется по сроку или по **Lock
+	// now**, и журнал; иначе пусто
+	UnlockNote Runs `json:"unlockNote"`
 }
 type DeviceAccount struct {
 	Title    Text        `json:"title"`

@@ -555,6 +555,7 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account"
+    "userHref": "/app/settings/account",
+    "lock": null
   }
 }

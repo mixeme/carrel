@@ -417,6 +417,7 @@
   "tab": "apple",
   "title": "Set up a new device",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {
@@ -539,6 +540,7 @@
     ],
     "userHref": "/app/settings/account"
   },
+  "unlockNote": [],
   "warning": {
     "actions": [],
     "body": "It is an ordinary file: it lands in Downloads, in a messenger, in the phone's backup. Open it on the device and delete it. The link opens once and lives 5 minutes, for you signed in to Carrel; nothing is written to the server's disk, and the issue is recorded in the audit log.",

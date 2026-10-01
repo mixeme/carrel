@@ -297,6 +297,7 @@
   ],
   "title": "Users",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

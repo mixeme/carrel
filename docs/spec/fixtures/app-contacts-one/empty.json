@@ -712,6 +712,7 @@
   "subtitle": "radicale · vps · 0 cards",
   "title": "Рассылки",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

@@ -642,6 +642,7 @@
   "reminders": [],
   "title": "Edit task",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

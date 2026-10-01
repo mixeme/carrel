@@ -1584,6 +1584,7 @@
   ],
   "title": "Connections",
   "top": {
+    "lock": null,
     "new": {
       "arrow": [
         {

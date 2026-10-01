@@ -4,7 +4,9 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
+	"time"
 
 	"carrel.dev/carrel/server/view"
 )
@@ -117,4 +119,29 @@ func stamp(account, collection string) view.Stamp {
 
 func encodePathSegment(seg string) string {
 	return strings.ReplaceAll(seg, "/", "%2F")
+}
+
+// durationWords says a span the way a sentence of the frames does: «five
+// minutes» (s-plan-3, s-plan-5), «an hour», «90 seconds» — whole minutes or
+// hours in words up to twelve, anything else in figures.
+func durationWords(d time.Duration) string {
+	words := []string{"", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"}
+	say := func(n int, unit string) string {
+		switch {
+		case n == 1 && unit == "hour":
+			return "an hour"
+		case n == 1:
+			return "a " + unit
+		case n < len(words):
+			return words[n] + " " + unit + "s"
+		}
+		return strconv.Itoa(n) + " " + unit + "s"
+	}
+	switch {
+	case d >= time.Hour && d%time.Hour == 0:
+		return say(int(d/time.Hour), "hour")
+	case d >= time.Minute && d%time.Minute == 0:
+		return say(int(d/time.Minute), "minute")
+	}
+	return say(int(d.Round(time.Second)/time.Second), "second")
 }

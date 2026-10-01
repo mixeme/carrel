@@ -33,6 +33,9 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 		now := s.now()
 		if until := sess.UnlockUntil(now); until != nil {
 			sh.Top.Unlocked = ptrWhen(s.timeFor(sess).formatWhen(*until, false, now))
+			// Lock now beside the mark (s-profile-4, s-plan-1…5): the window
+			// ends before its time, the sign-in stays (S-10.7).
+			sh.Top.Lock = &view.Action{ID: "unlock.lock", Label: "Lock now", Href: s.route("/app/settings/lock"), Method: "POST", Enabled: true}
 		}
 		if history := sess.History(); len(history) > 0 {
 			tf := s.timeFor(sess)

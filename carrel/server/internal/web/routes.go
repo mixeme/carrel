@@ -122,6 +122,7 @@ func (s *Server) registerRoutes() {
 	s.handle("POST /app/settings/appearance", (*Server).postSettingsAppearance)
 	s.handle("GET /app/settings/unlock", (*Server).getSettingsUnlock)
 	s.handle("POST /app/settings/unlock", (*Server).postSettingsUnlock)
+	s.handle("POST /app/settings/lock", (*Server).postSettingsLock)
 
 	// C-5.8
 	s.handle("GET /admin/", (*Server).getAdminUsers)

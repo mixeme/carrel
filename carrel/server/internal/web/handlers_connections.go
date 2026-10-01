@@ -417,6 +417,12 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 	if key, live := sess.DataKey(); live {
 		if blob, ok := s.users.Catalog(sess.AccountID(), key); ok {
 			unlocked := sess.UnlockUntil(time.Now()) != nil
+			if unlocked {
+				// Under the cards while the window is open (s-profile-4); the
+				// panel of a feed, open, says its own instead.
+				page.Note = join("While credentials are unlocked, every account opens without a question — here, on the New device screen and when a profile is built. ",
+					strongRun("Lock now"), " ends it at once; so does signing out.")
+			}
 			tf := s.timeFor(sess)
 			cols := 0
 			for _, c := range blob.Connections {

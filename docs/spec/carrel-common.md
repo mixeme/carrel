@@ -494,9 +494,11 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/settings/backup` | GET, POST | вход | страница | `BackupPage` |
 | `/app/settings/appearance` | GET, POST | вход | страница | `AppearancePage` |
 | `/app/settings/unlock` | GET, POST | вход | лист | `UnlockSheet` |
+| `/app/settings/lock` | POST | вход | редирект | — ; Lock now (`TopBar.Lock`, s-profile-4, s-plan-1…5): выдача учётных данных этого сеанса закрывается до срока, вход остаётся (S-10.7); ответ — страница, где нажали (`Referer` этого же адреса), иначе Connections |
 
 `unlock` — общий лист подтверждения пароля, открывающий выдачу учётных данных
-везде на назначенный срок. Он один на все места, где секрет выходит наружу:
+везде на назначенный срок; `lock` (Lock now) закрывает её раньше срока, сеанс
+и вход остаются. Он один на все места, где секрет выходит наружу:
 показ пароля подключения, сборка профиля устройства, депонирование ключа. Двух
 таймеров и двух разных листов не бывает. `escrow/deposit` — тот же `UnlockSheet`
 со своей целью и кнопкой (account-2): пароль из него открывает то же окно и
@@ -726,6 +728,7 @@ type TopBar struct {
     User     []MenuItem // меню учётной записи
     UserHref string     // куда ведёт кнопка учётной записи без сценариев: страница учётной записи
     Unlocked *When      // до какого времени открыта выдача учётных данных
+    Lock     *Action    // Lock now рядом с меткой «credentials unlocked · 4:12» (s-profile-4, s-plan-1, -2, -4, -5): запирает выдачу этого сеанса до срока, вход остаётся (S-10.7); nil — выдача закрыта
     Refresh  Refresh    // круговая стрелка (Action.Icon i-refresh) и «2 min ago»
 }
 
@@ -2217,6 +2220,12 @@ type DevicesPage struct {
     Warning  Notice // что содержит профиль и куда он попадает
     Actions  []Action
     Note     Text   // строка над Generate profile: как его выдадут (s-plan-1, s-plan-3); пусто вне Apple
+    // Под строками «Anything else», пока выдача открыта (s-plan-5):
+    // «Credentials are unlocked for five minutes — here and everywhere else
+    // they are handed out. Everything shown closes when the time is up or
+    // when you press **Lock now**; every reveal is written to the audit
+    // log.» — срок словами из CARREL_UNLOCK_TTL; иначе пусто
+    UnlockNote Runs
 }
 // Учётные данные — у своего аккаунта, на этой же странице: за паролем на
 // «Connections» не уходят. Пароль показан внутри общего окна разблокировки

@@ -326,7 +326,8 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account"
+    "userHref": "/app/settings/account",
+    "lock": null
   },
   "subtitle": "No copy of your data key is deposited",
   "rubric": "What a deposit does"
