@@ -178,7 +178,10 @@ func TestCaretInRecordFormsIsTheFrames(t *testing.T) {
 	edit := decode[view.ContactEditPage](t, f.h.do(get(anna+"/edit", f.sess))).Form
 	sameCaret(t, "s-contacts-3", "contact", edit)
 	sameCaret(t, "s-contacts-4", "contact without a photo", decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/bare/edit", f.sess))).Form)
-	sameCaret(t, "s-notes-8", "new contact", decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/new", f.sess))).Form)
+	// The full form of a new contact has no frame of its own (s-notes-8 is
+	// the quick sheet, /new/quick): it is the form of a card without a
+	// photograph, empty, and the caret stands where s-contacts-4 draws it.
+	sameCaret(t, "s-contacts-4", "new contact", decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/new", f.sess))).Form)
 	form := formFields(edit)
 	form.Set("bday", "31.02.1987")
 	sameCaret(t, "s-contacts-18", "a birthday that is not there", decode[view.ContactEditPage](t, f.h.do(postForm(anna+"/edit", f.sess, form))).Form)

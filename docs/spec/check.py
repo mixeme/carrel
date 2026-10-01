@@ -235,10 +235,12 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # тут нечего, и молчание здесь — не исключение, а род экрана.
 SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
-          "app-publish", "app-files-picker", "app-mail-compose", "app-contact-new",
+          "app-publish", "app-files-picker", "app-mail-compose",
           "app-contact-rewrite"}
 
-FRAME_TODO = {}
+FRAME_TODO = {
+    "app-contact-new: нет кадра": "задача 59 — кадр полной формы создания `/new`",
+}
 
 # Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
 # записка в from-typecase.md. Закрылось на сервере — строка уходит.
@@ -262,10 +264,16 @@ STATE_FRAME = {
     # Итог листа «переписать адрес» на карточке рисует свой кадр, s-contacts-16
     # (без data-screen: у маршрута карточки кадр — s-contacts-6).
     "app-contact/outcome": "s-contacts-16",
+    # Книга только для чтения (states-4, без data-screen) и правка карточки
+    # без фотографии (s-contacts-4, часть no-photo): их рейлы — набор книг с
+    # Typecase d5481b2 (задача 55).
+    "app-contacts-one/readonly": "states-4",
+    "app-contact-edit/no-photo": "s-contacts-4",
 }
-# Без строки: app-contact-edit/no-photo рисует s-contacts-4 (часть no-photo), но
-# рейл кадра — одна книга «Контакты», у набора их две; сверяется с кадром
-# маршрута s-contacts-3, чей рейл — набор. Вопрос к кадрам, как у states-4.
+# Без строки: app-contact-new/normal — полная форма создания (`/new`), и кадра
+# у неё нет: s-notes-8 — лист `/new/quick` (Typecase 0de7609), s-contacts-4 —
+# правка Анны с возвратом «Back to the card», которого у новой записи нет.
+# Ждёт Typecase (FRAME_TODO, задача 59).
 
 def frame_by_id(fid):
     m = re.search(r'<div class="frame" data-frame="%s"[^>]*>' % re.escape(fid), mock)

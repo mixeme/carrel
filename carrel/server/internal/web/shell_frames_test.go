@@ -184,6 +184,23 @@ func TestRailIsTheFrames(t *testing.T) {
 	if !shape.MatchString(e[1]) || !shape.MatchString(string(page.Rail.Davloom)) {
 		t.Errorf("davloom = %q, the frame %q", page.Rail.Davloom, e[1])
 	}
+	// Every rail draws its foot (C-13; Typecase d5481b2): the card, its
+	// timeline and its edit too, the same line as the list's.
+	ep := decode[view.ContactEditPage](t, app.h.do(get(card+"/edit", app.sess)))
+	for _, r := range []struct {
+		frame string
+		rail  view.Rail
+	}{{"s-contacts-6", cp.Rail}, {"s-contacts-7", tl.Rail}, {"s-contacts-3", ep.Rail}} {
+		f := mockupFrame(t, r.frame)
+		m, e := frameShellAbout.FindStringSubmatch(f), frameShellEmblem.FindStringSubmatch(f)
+		if m == nil || e == nil {
+			t.Errorf("%s draws no rail foot: read the frame again", r.frame)
+			continue
+		}
+		if r.rail.About.Label != about.Label || r.rail.About.Build != about.Build || r.rail.About.Href != about.Href || !shape.MatchString(string(r.rail.Davloom)) || frameText(m[1]) != string(r.rail.About.Label) {
+			t.Errorf("%s: foot %+v %q, the frame %q %q", r.frame, r.rail.About, r.rail.Davloom, frameText(m[1]), e[1])
+		}
+	}
 	for _, a := range page.Rail.Foot {
 		if a.ID == "rail.apply" {
 			t.Errorf("the foot carries Apply: %+v", page.Rail.Foot)
