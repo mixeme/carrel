@@ -248,6 +248,13 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	if p := addressProblem(f.address); p != "" {
 		f.errs["address"] = text(p)
 	}
+	// «Back to the form» after a refusal (s-profile-6): the form as it was
+	// sent, and nothing sent to the server.
+	if r.URL.Query().Get("op") == "back" {
+		f.errs = map[string]view.Text{}
+		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, nil))
+		return
+	}
 	if len(f.errs) > 0 {
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, nil))
 		return
@@ -757,6 +764,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 			create.Reason = sheet.Note
 		}
 		sheet.Actions = []view.Action{create}
+		s.afterRefusal(&sheet, action)
 		return sheet
 	}
 	if f.kind != view.KindContact {
@@ -786,7 +794,28 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		create.Reason = sheet.Note
 	}
 	sheet.Actions = []view.Action{create}
+	s.afterRefusal(&sheet, action)
 	return sheet
+}
+
+// afterRefusal is the foot of a sheet the server refused (s-profile-6): the
+// answer is the sheet's content, and the way on is «Back to the form» — the
+// form as it was left, nothing sent — or «Try again», the same form sent
+// once more. Both send the form the sheet still holds.
+func (s *Server) afterRefusal(sheet *view.CollectionNewSheet, action string) {
+	if sheet.Failure == nil || len(sheet.Actions) == 0 || !sheet.Actions[0].Enabled {
+		return
+	}
+	back := action + "?op=back"
+	if strings.Contains(action, "?") {
+		back = action + "&op=back"
+	}
+	again := sheet.Actions[0]
+	again.Label, again.Primary = "Try again", false
+	sheet.Actions = []view.Action{
+		{ID: "collection.back", Label: "Back to the form", Href: s.route(back), Method: "POST", Primary: true, Enabled: true},
+		again,
+	}
 }
 
 // openCollectionSheet opens the catalog entry a sheet names: ?a is the

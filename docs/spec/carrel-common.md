@@ -1555,7 +1555,7 @@ type CollectionNewSheet struct {
     Note    Text         // почему в списке не все подключения
     Form    Form         // имя, цвет, набор компонентов, адрес с подсказкой
     Failure *Notice      // отказ сервера: метод, адрес, код, тело (S-12.2); nil — отказа не было
-    Actions []Action
+    Actions []Action     // Create; после отказа (s-profile-6) — «Back to the form» (основная, POST с op=back: та же форма, без отказа, серверу ничего не шлётся) и «Try again» (та же форма ещё раз); обе шлют Form
 }
 
 type CollectionRenameSheet struct {

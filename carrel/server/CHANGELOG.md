@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.111 — 2026-10-01
+
+A refused new collection left the sheet with Create only; the frame's foot
+is the way on (s-profile-6).
+
+### Changed
+
+- **`CollectionNewSheet.actions` after a refusal** (C-6): «Back to the
+  form» (primary) — POST of the form with `op=back`: the sheet again with
+  what was typed and no refusal, nothing sent to the server — and «Try
+  again», the same form sent once more (`collection.create`). A sheet
+  without a refusal keeps Create alone. The same for a folder of a storage.
+
 ## v0.2.110 — 2026-10-01
 
 The import wizard by its frames (s-io-3…9): what the steps, the head, the

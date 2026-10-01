@@ -331,3 +331,37 @@ func TestCreateTakesTheKindsTheServerReports(t *testing.T) {
 		t.Errorf("catalog components = %v, want what the server holds", entry.Components)
 	}
 }
+
+// After a refusal the sheet is the server's answer, and its foot is the way
+// on (s-profile-6): «Back to the form» — the form as it was left, no
+// refusal, nothing sent — and «Try again», the same form sent once more.
+func TestRefusedCreateOffersBackAndAgain(t *testing.T) {
+	f := calendarFixture(t, nil)
+	f.srv.Refuse("MKCALENDAR", http.StatusForbidden, `<?xml version="1.0"?><D:error xmlns:D="DAV:"><D:need-privileges/></D:error>`)
+	form := url.Values{"account": {f.id}, "name": {"Trips"}, "components": {"VEVENT"}}
+	sheet := decode[view.CollectionNewSheet](t, f.h.do(postForm("/app/collections/new?kind=event", f.sess, form)))
+	var labels []string
+	for _, a := range sheet.Actions {
+		labels = append(labels, string(a.Label))
+	}
+	if strings.Join(labels, "|") != "Back to the form|Try again" || !sheet.Actions[0].Primary || sheet.Actions[1].Primary {
+		t.Fatalf("actions after a refusal = %+v", sheet.Actions)
+	}
+	for _, a := range sheet.Actions {
+		if a.Method != "POST" || !a.Enabled || a.Href == "" {
+			t.Errorf("%s does not send the form: %+v", a.Label, a)
+		}
+	}
+	tries := f.srv.CountRequests("MKCALENDAR", "")
+	back := decode[view.CollectionNewSheet](t, f.h.do(postForm(sheet.Actions[0].Href, f.sess, form)))
+	if back.Failure != nil || rowNamed(t, back.Form, "name").Value != "Trips" || len(back.Actions) != 1 || back.Actions[0].Label != "Create" {
+		t.Errorf("back to the form = failure %+v, actions %+v", back.Failure, back.Actions)
+	}
+	if n := f.srv.CountRequests("MKCALENDAR", "") - tries; n != 0 {
+		t.Errorf("Back to the form sent %d requests", n)
+	}
+	again := decode[view.CollectionNewSheet](t, f.h.do(postForm(sheet.Actions[1].Href, f.sess, form)))
+	if again.Failure == nil || f.srv.CountRequests("MKCALENDAR", "")-tries != 1 {
+		t.Errorf("Try again: failure %+v, sent %d", again.Failure, f.srv.CountRequests("MKCALENDAR", "")-tries)
+	}
+}
