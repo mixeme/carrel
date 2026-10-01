@@ -239,6 +239,19 @@ func (s *Server) recordPage(c *collectionCtx, uid string, obj *model.Object, not
 // recordShell carries the back rail (C-6.3). The print header is filled by
 // the page once the record is read: a record that could not be asked for has
 // nothing to print.
+// recordRefresh is the top bar's refresh of a record's page and of its edit
+// (s-contacts-6, s-contacts-3, s-agenda-2, s-tasks-2, s-notes-2; the
+// client's stop C17): the circle opens the page again, which reads the
+// record from its server, and the words say when this session last read its
+// collection — what «read 2 min ago» of its source says too.
+func (s *Server) recordRefresh(c *collectionCtx, here string) view.Refresh {
+	last, _ := readingOf(c.sess, c.tf, c.conn.ID, c.col.Path)
+	return view.Refresh{
+		Action:   view.Action{ID: "record.refresh", Label: "Refresh", Icon: "i-refresh", Href: s.route(here), Method: "GET", Enabled: true},
+		Answered: last,
+	}
+}
+
 func (s *Server) recordShell(c *collectionCtx, title string, notices []view.Notice) view.Shell {
 	sh := s.buildShell(c.sess, title)
 	sh.Rail = s.recordRail(c, s.listBack(c))
@@ -409,6 +422,7 @@ func typedLabel(label string, params map[string]string) string {
 
 func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, notices []view.Notice) view.ContactPage {
 	page := view.ContactPage{Shell: s.recordShell(c, "Contact", notices), UID: uid, Source: c.source(), ReadOnly: c.col.ReadOnly}
+	page.Top.Refresh = s.recordRefresh(c, c.recordPath(uid))
 	if obj == nil {
 		return page
 	}
@@ -526,6 +540,7 @@ func contactFieldsOf(obj *model.Object) []propField {
 
 func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, notices []view.Notice) view.EventPage {
 	page := view.EventPage{Shell: s.recordShell(c, "Event", notices), UID: uid, Source: c.source(), ReadOnly: c.col.ReadOnly}
+	page.Top.Refresh = s.recordRefresh(c, c.recordPath(uid))
 	if obj == nil {
 		return page
 	}
@@ -570,6 +585,7 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 
 func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notices []view.Notice) view.TaskPage {
 	page := view.TaskPage{Shell: s.recordShell(c, "Task", notices), UID: uid, Source: c.source(), ReadOnly: c.col.ReadOnly}
+	page.Top.Refresh = s.recordRefresh(c, c.recordPath(uid))
 	if obj == nil {
 		return page
 	}
@@ -613,6 +629,7 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 
 func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notices []view.Notice) view.NotePage {
 	page := view.NotePage{Shell: s.recordShell(c, "Note", notices), UID: uid, Source: c.source()}
+	page.Top.Refresh = s.recordRefresh(c, c.recordPath(uid))
 	page.Doc = view.NoteDoc{Mode: view.NoteReading, ReadOnly: c.col.ReadOnly}
 	if obj == nil {
 		return page

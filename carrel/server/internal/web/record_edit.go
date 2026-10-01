@@ -1984,6 +1984,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		back = s.listBack(c)
 	}
 	sh.Rail = s.recordRail(c, back)
+	sh.Top.Refresh = s.recordRefresh(c, s.editAction(c, st))
 	sh.Notices = append(sh.Notices, st.notices...)
 	if len(st.errors) > 0 {
 		sh.Notices = append(sh.Notices, view.Notice{Role: view.NoticeAlert, Title: "Nothing was saved", Body: "Correct the marked fields and save again."})

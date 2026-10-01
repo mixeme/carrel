@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.97 — 2026-10-01
+
+The top bar of a record's page had no refresh, while every frame draws
+«2 min ago» there (the client's stop C17).
+
+### Changed
+
+- **A record's page and its edit carry the top bar's refresh** (C-6.3
+  `Refresh`): `record.refresh`, a GET to the same page — which reads the
+  record from its server —, and `answered`, when this session last read
+  the record's collection: the same «2 min ago» as the source's «read 2
+  min ago» (s-contacts-6, s-contacts-3, s-agenda-2, s-tasks-2, s-notes-2).
+  The new record's form too.
+
 ## v0.2.96 — 2026-10-01
 
 A POST outside a form could not be sent without scripts: nothing in the
