@@ -3,6 +3,7 @@ package screens
 import (
 	"carrel.dev/carrel/client/screens/about"
 	"carrel.dev/carrel/client/screens/confirm"
+	"carrel.dev/carrel/client/screens/contact"
 	"carrel.dev/carrel/client/screens/contacts"
 	"carrel.dev/carrel/client/screens/deadlink"
 	"carrel.dev/carrel/client/screens/forgot"
@@ -152,6 +153,18 @@ var All = []Screen{
 			{Row: 5, Fixture: "app-contacts-one/source-error"},                       // ждёт библиотеку: U-5.5 #5
 			{Row: 8, Fixture: "app-contacts-one/readonly"},                           // ждёт библиотеку: U-5.5 #8
 			{Row: 13, Control: ".Items(Bar).Right(BarRight).Items(Check)"},           // ждёт библиотеку: U-5.5 #13
+		},
+	},
+	{
+		Model:  func() any { return new(view.ContactPage) },
+		Frames: []string{"s-contacts-6", "s-contacts-16"},
+		Draw:   func(model any) Root { return contact.Screen(model.(*view.ContactPage)) },
+		Title:  func(model any) string { return string(model.(*view.ContactPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return contact.Forms(model.(*view.ContactPage)) },
+		Waits: []Wait{
+			{Row: 1, Control: ".Main(Main).Items(Head).Acts(Acts).Items(Drop).Trigger(Button)"}, // ждёт библиотеку: U-5.5 #1
+			{Row: 15, Fixture: "app-contact/normal"},                                            // ждёт библиотеку: U-5.5 #15
+			{Row: 15, Fixture: "app-contact/outcome"},                                           // ждёт библиотеку: U-5.5 #15
 		},
 	},
 }

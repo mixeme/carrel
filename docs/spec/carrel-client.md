@@ -355,6 +355,7 @@ Carrel не знает; всё, что ей нужно, приходит зна�
 
 | # | Экран | Кадр | Чего нет | Задача Typecase | Решение |
 |---|---|---|---|---|---|
+| 1 | `ContactPage`: «⋯» шапки карточки | s-contacts-6, s-contacts-16 | закрытое меню без сценариев: кнопке некуда вести | 60 | владелец 01.10.2026 |
 | 2 | `ContactsListPage`, `ContactTimelinePage`: «⋯» карточки в панели | s-contacts-1, s-contacts-7 | закрытое меню без сценариев | 60 | владелец 01.10.2026 |
 | 3 | `ContactsListPage`, `ContactTimelinePage`: «⋯» полосы (`Bar.More`) | s-contacts-1, s-contacts-7 | «⋯» полосы без сценариев | 60 | владелец 01.10.2026 |
 | 4 | `ContactsListPage`, `ContactTimelinePage`: Columns (`Bar.Columns`) | s-contacts-1, s-contacts-7 | меню-форма закрыта, без сценариев не открыть | 60 | владелец 01.10.2026 |
@@ -364,6 +365,7 @@ Carrel не знает; всё, что ей нужно, приходит зна�
 | 11 | `ContactsListPage`, `ContactPage`, `ContactTimelinePage`: фото в шапке (`HeadPhoto`) | s-contacts-1, s-contacts-6, s-contacts-7 | `HeadPhoto.Src`: фотография не показывается | 64 | владелец 01.10.2026 |
 | 12 | `ContactsListPage`: фильтр полосы (`Bar.FilterForm`) | s-contacts-1 | скрытые поля `Filter`: task, sort, tag не уходят | 65 | владелец 01.10.2026 |
 | 13 | `ContactsListPage`: «Compact rows» (`Bar.Compact`) | s-contacts-1 | отметка полосы вне формы: форма GET контракта не встаёт | — (новая, сервер C13 закрыт) | владелец 01.10.2026 |
+| 15 | `app-contact/normal`, `app-contact/outcome` (`ContactPage`) | s-contacts-6, s-contacts-16 | ряд поля карточки (`dt`, `dd` чередуются): полей у фикстуры 6, в кадре 8; у итога хронология не открыта, кадр рисует её строки; обновления (`TopBar.Refresh`) у карточки нет | 61; сервер, долг C17 | владелец 01.10.2026 |
 
 ### U-5.6 Что принадлежит экрану
 
