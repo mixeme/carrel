@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.126 — 2026-10-02
+
+Carrel installs as an application: the web manifest and its PNG icons come
+from the binary (U-11, the lead's decision П3).
+
+### Added
+
+- **`GET /manifest.webmanifest`** (`render.ManifestPath`) — the name, the
+  start at `/app/`, `standalone`, the colours, and the icons; `no-cache`.
+  Anonymous, outside the buckets, as the library's files.
+- **`GET /static/icon/{version}/{file}`** — `icon-192.png`, `icon-512.png`
+  on the light plate and `icon-maskable-512.png` on the canvas of 120 of the
+  icon reference (`docs/visual/carrel-icon.html`, 1.1), drawn in code from
+  the mark's master geometry on the first request; the version is the hash
+  of what was drawn, the files `immutable`, another version 404.
+
+### For consumers
+
+Link the manifest at `render.ManifestPath` under the base path (Typecase's
+task 91 prints the link and the worker of the shell).
+
 ## v0.2.125 — 2026-10-02
 
 The names the client hands the library are the server's constants, and

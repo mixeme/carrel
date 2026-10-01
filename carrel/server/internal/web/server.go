@@ -204,6 +204,7 @@ type Users interface {
 type Server struct {
 	cfg      *conf.Config
 	basePath string // normalised CARREL_BASE_PATH
+	icons    icons  // the manifest's, drawn on the first request (manifest.go)
 	store    *store.Store
 	sessions *session.Manager
 	users    Users
@@ -288,6 +289,10 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 	s.render = stampingRenderer{Renderer: rd, token: s.sessionToken, base: s.basePath}
 	s.mux = http.NewServeMux()
 	s.registerRoutes()
+	// The manifest and its icons (C-5.9) as the library's files: anonymous,
+	// from memory, outside the buckets and CSRF.
+	s.mux.HandleFunc("GET "+render.ManifestPath, s.getManifest)
+	s.mux.HandleFunc("GET /static/icon/{version}/{file}", s.getIcon)
 	return s
 }
 

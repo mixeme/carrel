@@ -59,6 +59,11 @@ const (
 	PrintValue = "1"
 )
 
+// ManifestPath is the web manifest of installing Carrel as an application
+// (U-11, C-5.9), under the base path: the document links it (the library's
+// task 91); its icons it names itself.
+const ManifestPath = "/manifest.webmanifest"
+
 // Event names of C-7.4: the events of the progress stream — the bar changed,
 // and the poll is over. The data of an event is the fragment of its target
 // (FragmentPayload): poll carries the bar, poll-finished the rail of the
