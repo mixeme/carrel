@@ -81,21 +81,10 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 			Href: s.route(c.recordPath(uid) + "/timeline"), Method: "GET", Enabled: true}, ops.del)
 	case view.KindEvent:
 		page := s.eventPage(c, uid, obj, nil)
-		// Reminders and Repeats stand in the field list, under When
-		// (s-agenda-1): the panel has no room for their blocks.
-		var more []view.Field
-		if len(page.Reminders) > 0 {
-			var labels []string
-			for _, r := range page.Reminders {
-				labels = append(labels, string(r.Label))
-			}
-			more = append(more, view.Field{Label: "Reminders", Value: text(strings.Join(labels, ", "))})
-		}
-		if page.Recurrence.Summary != "" {
-			more = append(more, view.Field{Label: "Repeats", Value: page.Recurrence.Summary})
-		}
-		d.Fields = panelFields(page.Fields, more)
+		// The fields of the card, Reminders before Repeats (s-agenda-1).
+		d.Fields = reminderFirst(page.Fields)
 		d.Body, d.Attendees, d.Attach, d.Related = page.Body, page.Attendees, page.Attach, page.Related
+		d.Source.Path, d.Source.Compared = page.Source.Path, page.Source.Compared
 		d.Actions = shown(ops.edit, attach, ops.del)
 		if ops.del != nil && cal.HasRecurrence(obj) {
 			d.DeleteNote = seriesNote
@@ -124,6 +113,18 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		}
 	}
 	return d
+}
+
+// reminderFirst is the fields of an event's card in the order of its panel
+// (s-agenda-1): Reminders before Repeats.
+func reminderFirst(fields []view.Field) []view.Field {
+	out := slices.Clone(fields)
+	r := slices.IndexFunc(out, func(f view.Field) bool { return f.Label == "Repeats" })
+	m := slices.IndexFunc(out, func(f view.Field) bool { return f.Label == "Reminders" })
+	if r >= 0 && m > r {
+		out[r], out[m] = out[m], out[r]
+	}
+	return out
 }
 
 // panelFields are the fields of a record's page for its panel: more stands
@@ -547,38 +548,83 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	summary := titleOr(cal.Text(obj, "SUMMARY"), "Untitled event")
 	page.Shell.Title, page.Summary = text(summary), text(summary)
 	page.Print = s.recordPrint(c, page.Summary)
-	if tm, err := cal.TimingOf(obj, tz); err != nil {
+	// When, Repeats, Reminders, then the record's own fields (s-agenda-2).
+	tm, err := cal.TimingOf(obj, tz)
+	if err != nil {
 		page.Notices = append(page.Notices, readNotice(obj.Path, err))
-	} else if !tm.Start.IsZero() {
-		page.Fields = append(page.Fields, view.Field{Label: "When", Value: text(tf.when(tm))})
-		if z := tf.zone(tm.Zone); z != "" {
-			page.Fields = append(page.Fields, view.Field{Label: "Original time zone", Value: text(z)})
-		}
 	}
-	page.Fields = withTagLinks(append(page.Fields, calendarFields(obj)...), s.recordTags(c, obj))
+	page.Fields = append(eventHead(tf, obj, tm), calendarFields(obj)...)
+	page.Fields = withTagLinks(page.Fields, s.recordTags(c, obj))
 	page.Body = text(cal.Description(obj))
 	if cal.HasRecurrence(obj) {
 		page.Recurrence = s.recurrenceBlock(obj, tf)
 	}
-	alarms, _ := cal.Alarms(obj)
-	page.Reminders = reminderRows(alarms, tf)
-	for _, a := range cal.Attendees(obj) {
-		page.Attendees = append(page.Attendees, view.AttendeeRow{Name: text(a.Name), Email: text(a.Email), Status: text(partstatLabel(a.Status))})
-	}
+	page.Attendees = eventPeople(obj)
 	page.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
+	page.Source.Path, page.Source.Compared = text(obj.Path), s.eventCompared(c, uid, obj)
 	page.Related = s.relatedRows(c, obj)
 	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
 	var task *view.Action
-	if c.feed == nil && !c.col.ReadOnly && c.col.Has(view.KindTask) {
-		// New task (s-agenda-2): the quick sheet of a task in this calendar,
-		// related to the event.
-		task = &view.Action{ID: "event.task", Label: "New task", Icon: "i-plus", Method: "GET", Enabled: true,
-			Href: s.postQuery(c.origin().listPath(segmentOf(view.KindTask))+"/new/quick", url.Values{"related": {uid}})}
+	// New task (s-agenda-2): the quick sheet of a task related to the
+	// event — in this calendar when it holds tasks, else in the task list
+	// a new task goes to (the sheet lets another be chosen).
+	tasks, ok := c.origin(), c.feed == nil && !c.col.ReadOnly && c.col.Has(view.KindTask)
+	if !ok && c.feed == nil && !c.col.ReadOnly {
+		tasks, ok = firstWritable(s.catalogOf(c.sess), view.KindTask)
 	}
-	// Edit and New task in the head, Attach in its block, the deletion at the
-	// foot; the rest is the «⋯» (s-agenda-2, s-agenda-5).
-	page.Actions, page.Menu = shown(primary(ops.edit), s.attachOf(c, uid, obj.ETag), task, ops.del), ops.menu
+	if ok {
+		task = &view.Action{ID: "event.task", Label: "New task", Icon: "i-task", Method: "GET", Enabled: true,
+			Href: s.postQuery(tasks.listPath(segmentOf(view.KindTask))+"/new/quick", url.Values{"related": {uid}})}
+	}
+	// Edit, New task and Print in the head, Attach in its block (by its
+	// name, attach.add), the deletion at the foot; the rest is the «⋯»
+	// (s-agenda-2, s-agenda-5). Print is the card with print=1 (U-10).
+	edit := primary(ops.edit)
+	if edit != nil {
+		edit.Icon = "i-pencil"
+	}
+	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + "?print=1"), Method: "GET", Enabled: true}
+	page.Actions, page.Menu = shown(edit, s.attachOf(c, uid, obj.ETag), task, print, ops.del), ops.menu
 	return page
+}
+
+// eventHead are the first fields of an event, in the order of its card
+// (s-agenda-2): When in pieces, with the zone it was made in as a badge;
+// Repeats in short words with its end as a badge; Reminders. The panel puts
+// Reminders before Repeats (s-agenda-1).
+func eventHead(tf timeFmt, obj *model.Object, tm cal.Timing) []view.Field {
+	var out []view.Field
+	if !tm.Start.IsZero() {
+		out = append(out, view.Field{Label: "When", Runs: tf.whenRuns(tm), Badge: tf.createdIn(tm)})
+	}
+	if cal.HasRecurrence(obj) {
+		words, end := tf.repeats(cal.RawRRULE(obj), tm.Start)
+		out = append(out, view.Field{Label: "Repeats", Value: text(words), Badge: end})
+	}
+	alarms, _ := cal.Alarms(obj)
+	if rows := reminderRows(alarms, tf); len(rows) > 0 {
+		labels := make([]string, 0, len(rows))
+		for _, r := range rows {
+			labels = append(labels, string(r.Label))
+		}
+		out = append(out, view.Field{Label: "Reminders", Value: text(strings.Join(labels, ", "))})
+	}
+	return out
+}
+
+// eventCompared is the second half of the line «Read 2 min ago · changed on
+// server 3 days ago» of an event's source (s-agenda-1, s-agenda-2): changed
+// since the list of this session read it, or else when the record says it
+// last changed; without either, what the version says (compared).
+func (s *Server) eventCompared(c *collectionCtx, uid string, obj *model.Object) view.Text {
+	said := s.compared(c, uid, obj)
+	if said == "changed on server since" {
+		return said
+	}
+	if t, ok := cal.TimeOf(obj, "LAST-MODIFIED", c.tf.tz); ok {
+		return text("changed on server " + c.tf.ago(t, c.tf.now))
+	}
+	return said
 }
 
 func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notices []view.Notice) view.TaskPage {
@@ -665,7 +711,12 @@ func calendarFields(obj *model.Object) []view.Field {
 	if v := cal.Text(obj, "STATUS"); v != "" {
 		out = append(out, view.Field{Label: "Status", Value: text(statusLabel(v))})
 	}
+	// An event's organiser is the first of its people (eventPeople,
+	// s-agenda-2), not a field.
 	for _, v := range obj.Props()["ORGANIZER"] {
+		if obj.MainComponent() == "VEVENT" {
+			break
+		}
 		who := v.Params["CN"]
 		if who == "" {
 			who = strings.TrimPrefix(strings.TrimPrefix(v.Text, "mailto:"), "MAILTO:")
@@ -716,7 +767,8 @@ func (s *Server) relatedRows(c *collectionCtx, obj *model.Object) []view.Timelin
 		// The target is in another collection, or in none this session has
 		// read: a title when some list of this session holds it, the UID
 		// itself when nothing does. No link either way — a record is opened
-		// at its own collection's address (S-11).
+		// at its own collection's address (S-11); the frames draw it as
+		// words, not a link (s-agenda-1, s-agenda-2).
 		if e, ok := s.sessionIndex(c.sess, s.catalogOf(c.sess))[target]; ok && e.Title != "" {
 			rows = append(rows, view.TimelineRow{Kind: e.Kind, When: day(e), Title: text(e.Title), Why: "Related to · in another collection"})
 			continue
@@ -745,20 +797,22 @@ func reminderRows(alarms []cal.Alarm, tf timeFmt) []view.ReminderRow {
 	return rows
 }
 
+// partstatLabel is an attendee's answer as the frames write it after the
+// name, in lower case: «accepted», «no reply» (s-agenda-1, s-agenda-2).
 func partstatLabel(v string) string {
 	switch strings.ToUpper(v) {
 	case "ACCEPTED":
-		return "Accepted"
+		return "accepted"
 	case "DECLINED":
-		return "Declined"
+		return "declined"
 	case "TENTATIVE":
-		return "Tentative"
+		return "tentative"
 	case "DELEGATED":
-		return "Delegated"
+		return "delegated"
 	case "", "NEEDS-ACTION":
-		return "No reply"
+		return "no reply"
 	default:
-		return v
+		return strings.ToLower(v)
 	}
 }
 

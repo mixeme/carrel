@@ -290,17 +290,22 @@ func TestEventPageRelatedRemindersAttendees(t *testing.T) {
 	if len(ev.Related) != 2 || ev.Related[0].Href != "" || ev.Related[1].Href != "" || ev.Related[0].Title != "task-1" {
 		t.Errorf("before any list is loaded, related = %+v", ev.Related)
 	}
-	if len(ev.Reminders) != 1 || ev.Reminders[0].Label != "15 minutes before" {
-		t.Errorf("reminders = %+v", ev.Reminders)
+	// Reminders and Repeats are rows of the fields (s-agenda-2).
+	if r := fieldOf(ev.Fields, "Reminders"); r == nil || r.Value != "15 minutes before" {
+		t.Errorf("reminders = %+v", r)
 	}
-	if len(ev.Attendees) != 1 || ev.Attendees[0] != (view.AttendeeRow{Name: "Ada", Email: "ada@example.com", Status: "Accepted"}) {
+	if r := fieldOf(ev.Fields, "Repeats"); r == nil || r.Value != "Weekly on Thu" || r.Badge.Label != "5 times" {
+		t.Errorf("repeats = %+v", r)
+	}
+	if len(ev.Attendees) != 1 || ev.Attendees[0] != (view.AttendeeRow{Name: "Ada", Email: "ada@example.com", Status: "accepted"}) {
 		t.Errorf("attendees = %+v", ev.Attendees)
 	}
 	if !strings.Contains(string(ev.Recurrence.Raw), "FREQ=WEEKLY") || ev.Recurrence.Summary != "Weekly on Thursday, 5 times" ||
 		ev.Recurrence.Note != view.Text(frameSeriesLine(t)) {
 		t.Errorf("recurrence = %+v", ev.Recurrence)
 	}
-	if len(ev.Fields) == 0 || ev.Fields[0].Value != "Thursday, 15 January 2026, 10:00 – 11:00" {
+	if len(ev.Fields) == 0 || len(ev.Fields[0].Runs) != 2 || ev.Fields[0].Runs[0].Text != "10:00 – 11:00" ||
+		!strings.HasPrefix(string(ev.Fields[0].Runs[1].Text), ", Thursday 15 January") {
 		t.Errorf("fields = %+v", ev.Fields)
 	}
 

@@ -21,6 +21,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
+          "file": "file",
           "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e13\u0026op=attach",
           "icon": "i-up",
           "id": "attach.add",
@@ -38,6 +39,7 @@
       ],
       "csrf": "csrf",
       "enabled": true,
+      "file": "file",
       "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e13\u0026op=attach",
       "icon": "i-up",
       "id": "attach.add",

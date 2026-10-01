@@ -3,6 +3,7 @@
     {
       "enabled": true,
       "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit",
+      "icon": "i-pencil",
       "id": "record.edit",
       "label": "Edit",
       "method": "GET",
@@ -13,6 +14,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
+          "file": "file",
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026op=attach",
           "icon": "i-up",
           "id": "attach.add",
@@ -30,11 +32,28 @@
       ],
       "csrf": "csrf",
       "enabled": true,
+      "file": "file",
       "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026op=attach",
       "icon": "i-up",
       "id": "attach.add",
       "label": "Attach",
       "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/new/quick?related=8f1c-4a02-b7d3",
+      "icon": "i-task",
+      "id": "event.task",
+      "label": "New task",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3?print=1",
+      "icon": "i-print",
+      "id": "record.print",
+      "label": "Print",
+      "method": "GET"
     },
     {
       "csrf": "csrf",
@@ -52,53 +71,82 @@
       "actions": [
         {
           "csrf": "csrf",
+          "danger": true,
           "enabled": true,
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026n=0\u0026op=detach",
           "icon": "i-trash",
           "id": "attach.remove",
-          "label": "Remove link, keep the file",
+          "label": "Remove",
           "method": "POST"
         }
       ],
-      "href": "",
-      "inline": false,
+      "href": "/app/attach/a-nc-home/lichnyj/8f1c-4a02-b7d3/0",
+      "inline": true,
       "name": "release-checklist.md",
-      "size": "3.0 KB",
+      "size": "3 KB",
       "state": "ok",
       "type": "text/markdown"
     }
   ],
   "attendees": [
     {
+      "email": "mix@example.org",
+      "name": "Михаил Енученко",
+      "status": "organiser"
+    },
+    {
       "email": "a.kovaleva@example.org",
       "name": "Анна Ковалёва",
-      "status": "Accepted"
+      "status": "accepted"
     },
     {
       "email": "a.belov@example.org",
       "name": "Артём Белов",
-      "status": "Tentative"
+      "status": "tentative"
     },
     {
       "email": "v.goncharov@example.org",
       "name": "Виктор Гончаров",
-      "status": "No reply"
+      "status": "no reply"
     }
   ],
   "body": "Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям.",
   "details": null,
   "fields": [
     {
+      "badge": {
+        "label": "created 12:00 Asia/Yekaterinburg",
+        "role": "neutral"
+      },
       "href": "",
       "label": "When",
       "mono": false,
-      "value": "Monday, 10 August 2026, 10:00 – 11:00"
+      "runs": [
+        {
+          "mark": "mono",
+          "text": "10:00 – 11:00"
+        },
+        {
+          "text": ", Monday 10 August"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "badge": {
+        "label": "until 2026-12-28",
+        "role": "neutral"
+      },
+      "href": "",
+      "label": "Repeats",
+      "mono": false,
+      "value": "Weekly on Mon"
     },
     {
       "href": "",
-      "label": "Original time zone",
+      "label": "Reminders",
       "mono": false,
-      "value": "Asia/Yekaterinburg"
+      "value": "10 minutes before"
     },
     {
       "href": "",
@@ -111,12 +159,6 @@
       "label": "Status",
       "mono": false,
       "value": "Confirmed"
-    },
-    {
-      "href": "",
-      "label": "Organiser",
-      "mono": false,
-      "value": "Михаил Енученко"
     },
     {
       "href": "",
@@ -137,7 +179,15 @@
       "value": ""
     }
   ],
-  "linked": [],
+  "linked": [
+    {
+      "colour": "#6b4e7a",
+      "href": "/app/calendar/a-rad-vps/proekty/4b2e-9d10-8f1c",
+      "label": "radicale · vps · Проекты",
+      "mono": false,
+      "value": "Holds the same"
+    }
+  ],
   "loss": null,
   "menu": [
     {
@@ -447,21 +497,20 @@
     {
       "colour": "",
       "href": "",
-      "kind": "",
+      "kind": "note",
       "stamp": "",
-      "title": "5c81-77aa-0d64",
-      "when": "",
-      "why": "Not in the lists loaded for this collection"
+      "title": "Заметка со встречи 10.08",
+      "when": "10 Aug",
+      "why": "Related to · in another collection"
     }
   ],
-  "reminders": [],
   "source": {
     "changed": "",
     "colour": "#4a6b52",
-    "compared": "",
+    "compared": "changed on server 3 days ago",
     "lastRead": "2 min ago",
     "objects": null,
-    "path": "",
+    "path": "/alice/calendars/lichnyj/8f1c-4a02-b7d3.ics",
     "readOnly": false,
     "stamp": "nextcloud · Личный",
     "uid": ""

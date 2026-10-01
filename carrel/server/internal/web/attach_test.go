@@ -147,7 +147,7 @@ func TestLargeAttachmentGoesToTheFolder(t *testing.T) {
 
 	page := eventAt(t, f, "e1")
 	row := page.Attach[0]
-	if row.Inline || row.Name != want || row.Size != "2.0 KB" || row.Href == "" {
+	if row.Inline || row.Name != want || row.Size != "2 KB" || row.Href == "" {
 		t.Fatalf("row = %+v", row)
 	}
 	if got := f.h.do(get(row.Href, f.sess)); got.Code != http.StatusOK || got.Body.Len() != len(data) {

@@ -389,6 +389,7 @@
               "separator": true
             }
           ],
+          "on": false,
           "sources": [],
           "stamp": "nextcloud · Работа",
           "state": "ok",
@@ -473,6 +474,7 @@
               "separator": true
             }
           ],
+          "on": false,
           "sources": [],
           "stamp": "nextcloud · Личный",
           "state": "ok",
@@ -553,6 +555,7 @@
               "separator": true
             }
           ],
+          "on": false,
           "sources": [],
           "stamp": "nextcloud · Работа",
           "state": "ok",
@@ -634,6 +637,7 @@
               "separator": true
             }
           ],
+          "on": false,
           "sources": [],
           "stamp": "nextcloud · Личный",
           "state": "ok",

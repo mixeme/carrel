@@ -17,6 +17,67 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.119 — 2026-10-01
+
+The event's card and its panel beside the agenda as s-agenda-1 and
+s-agenda-2 draw them (the client's scan of the calendar, groups В and Г).
+
+### Added
+
+- **The panel beside the agenda without scripts**: `?open={a row's href}`
+  on an agenda (one calendar and the combined one) answers with the record
+  in `Shell.details` — `Details.close` is the agenda without it — and every
+  row of that record `on` (**`AgendaRow.on`**), as the contacts' since
+  `v0.2.86`.
+- **`Field.runs`** — a value in pieces: When of an event is «‹10:00 –
+  11:00›, Monday 10 August» (the year only when it is not this year's; a day
+  — «all day, Monday 10 August»), `value` empty. **`Field.badge`** — a badge
+  after the value: «created 12:00 Asia/Yekaterinburg» by When of an event
+  made in another zone (the row «Original time zone» is gone), «until
+  2026-12-28», «5 times», «once» by Repeats; no key without one.
+- **Repeats and Reminders are rows of an event's fields**: «Weekly on Mon»
+  with its end as the badge, «10 minutes before»; the card's order is When,
+  Repeats, Reminders, Where, Status, Tags, the panel's When, Reminders,
+  Repeats, … (s-agenda-2, s-agenda-1). `RecurrenceBlock` stays (the rule in
+  words, the raw rule, the next times, the line under the deletion).
+- **Print on an event's card** (`record.print`, `i-print`, `?print=1`); Edit
+  has `i-pencil`, New task `i-task`, and New task is there in a calendar
+  that holds no tasks too — the quick sheet in the task list a new task goes
+  to, related to the event.
+- **`Action.file`** — the field of the file of a POST that carries one:
+  «file» on Attach and From this computer (`attach.add`), «photo» on Add and
+  Replace of a contact's photo. Without scripts the action is a
+  multipart/form-data form with that file input and `_csrf`.
+- **The source of an event** says its path and when it changed:
+  «changed on server 3 days ago» from LAST-MODIFIED (`SourceBlock.compared`;
+  «changed on server since» when the read list holds another version).
+
+### Changed
+
+- **The organiser is the first of an event's people** (`Attendees`, status
+  «organiser») and no field; statuses are written in lower case,
+  «accepted», «no reply» (s-agenda-1, s-agenda-2). An organiser who is an
+  attendee too is listed once.
+- **`EventPage.reminders` is gone**: the reminders are the row Reminders.
+- **Sizes** have no «.0» and no decimal from a hundred up: «3 KB», «2.8
+  MB», «412 KB» (C-10).
+- **The fixture set**: «Синк-ап по релизу» carries a reminder ten minutes
+  before, its checklist inside the event (3 KB, «in the event»), and
+  `SEQUENCE`, `X-MOZ-GENERATION`, `X-APPLE-TRAVEL-ADVISORY-BEHAVIOR` (its
+  `X-JTX-COLOR` is gone); the event card's test links it with a copy in
+  radicale · vps · Проекты («Holds the same») and reads the notes first, so
+  Related names «Заметка со встречи 10.08 · note».
+
+### For consumers
+
+Read When and Repeats from `runs`, `value` and `badge`; Attach is found by
+its name (`attach.add`) wherever the frame stands it; send a file by
+`Action.file`. Fixtures regenerated: `app-agenda/normal` and
+`app-agenda-all/normal` (with the panel, Синк-ап open), `/partial`,
+`app-event/normal`, `app-event-edit/normal`, `/loss`, the edits and cards of
+tasks and notes and the contact's edit (`file`), `app-mail-compose/normal`
+(sizes).
+
 ## v0.2.118 — 2026-10-01
 
 The agenda and the shell of the calendar as s-agenda-1 draws them (the

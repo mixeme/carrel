@@ -455,8 +455,15 @@ func liveCalendarIn(ctx context.Context, t *testing.T, app *liveApp, client *dav
 		t.Fatalf("agenda = %+v", agenda)
 	}
 	event := liveDecode[view.EventPage](t, "event", app.get(loc))
-	if len(event.Reminders) != 1 || event.Reminders[0].Label != "10 minutes before" {
-		t.Errorf("reminders = %+v", event.Reminders)
+	// The reminders are a row of the fields (s-agenda-2).
+	reminders := ""
+	for _, f := range event.Fields {
+		if f.Label == "Reminders" {
+			reminders = string(f.Value)
+		}
+	}
+	if reminders != "10 minutes before" {
+		t.Errorf("reminders = %q (fields %+v)", reminders, event.Fields)
 	}
 
 	series := "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other client//EN\r\n" +

@@ -91,7 +91,12 @@ func formatSize(n int64) view.Size {
 	exp := int(math.Log(float64(n)) / math.Log(unit))
 	suffix := []string{"B", "KB", "MB", "GB", "TB"}[exp]
 	val := float64(n) / math.Pow(unit, float64(exp))
-	return view.Size(fmt.Sprintf("%.1f %s", val, suffix))
+	// One decimal, as the frames write it, but not «.0» and not from a
+	// hundred up: «3 KB», «2.8 MB», «412 KB» (s-agenda-2, s-files-1).
+	if val >= 100 {
+		return view.Size(fmt.Sprintf("%.0f %s", val, suffix))
+	}
+	return view.Size(strings.TrimSuffix(fmt.Sprintf("%.1f", val), ".0") + " " + suffix)
 }
 
 // collectionPalette is the mockup's six tones (s-profile-7, C-10): the colour

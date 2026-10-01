@@ -471,7 +471,7 @@ func TestUploadAsksAboutTakenNames(t *testing.T) {
 
 	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
 	done, ask := queueRow(t, page.Queue, "new.txt"), queueRow(t, page.Queue, "taken.txt")
-	if done.State != view.OpDone || done.Percent != 100 || done.Size != "2.0 MB" || ask.State != view.OpIdle || len(ask.Question.Options) != 3 {
+	if done.State != view.OpDone || done.Percent != 100 || done.Size != "2 MB" || ask.State != view.OpIdle || len(ask.Question.Options) != 3 {
 		t.Fatalf("queue = %+v", page.Queue)
 	}
 	again := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))

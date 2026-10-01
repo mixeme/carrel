@@ -23,6 +23,7 @@
           {
             "csrf": "csrf",
             "enabled": true,
+            "file": "file",
             "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026from=edit\u0026op=attach",
             "icon": "i-up",
             "id": "attach.add",
@@ -40,6 +41,7 @@
         ],
         "csrf": "csrf",
         "enabled": true,
+        "file": "file",
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026from=edit\u0026op=attach",
         "icon": "i-up",
         "id": "attach.add",
@@ -236,6 +238,7 @@
           {
             "csrf": "csrf",
             "enabled": true,
+            "file": "file",
             "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026from=edit\u0026op=attach",
             "icon": "i-up",
             "id": "attach.add",
@@ -253,6 +256,7 @@
         ],
         "csrf": "csrf",
         "enabled": true,
+        "file": "file",
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026from=edit\u0026op=attach",
         "icon": "i-up",
         "id": "attach.add",

@@ -329,12 +329,63 @@ func ordinal(n int) string {
 // not cover is admitted, and the raw rule stands beside it. Until is the last
 // day an occurrence can start on (ruleUntil); start is DTSTART.
 func (f timeFmt) recurrence(raw string, start time.Time) string {
+	words, ok := f.ruleWords(raw, false)
+	if !ok {
+		return words
+	}
+	opt, _ := rrule.StrToROption(raw)
+	switch {
+	case opt.Count == 1:
+		words += ", once"
+	case opt.Count > 1:
+		words += fmt.Sprintf(", %d times", opt.Count)
+	}
+	if day, ok := ruleUntil(raw, start, f.tz); ok {
+		words += ", until " + day.Format("2 January 2006")
+	} else if !opt.Until.IsZero() {
+		words += ", until " + f.date(opt.Until)
+	}
+	return words + ruleMore(opt)
+}
+
+// repeats is the row Repeats of an event's fields (s-agenda-1, s-agenda-2):
+// the rule in short words — «Weekly on Mon» —, and its end as a badge,
+// «until 2026-12-28» (the last day it can start on, ruleUntil), «5 times»,
+// «once»; no badge for a series without an end.
+func (f timeFmt) repeats(raw string, start time.Time) (string, view.Badge) {
+	words, ok := f.ruleWords(raw, true)
+	if !ok {
+		return words, view.Badge{}
+	}
+	opt, _ := rrule.StrToROption(raw)
+	words += ruleMore(opt)
+	var end string
+	switch {
+	case opt.Count == 1:
+		end = "once"
+	case opt.Count > 1:
+		end = fmt.Sprintf("%d times", opt.Count)
+	}
+	if day, ok := ruleUntil(raw, start, f.tz); ok {
+		end = "until " + day.Format("2006-01-02")
+	}
+	if end == "" {
+		return words, view.Badge{}
+	}
+	return words, view.Badge{Label: text(end), Role: view.BadgeNeutral}
+}
+
+// ruleWords is a rule's frequency and its days in words, without its end;
+// short writes the days as the frames abbreviate them, «Mon». ok is false
+// when the words are all there is to say: no rule, or one RFC 5545 does not
+// read.
+func (f timeFmt) ruleWords(raw string, short bool) (string, bool) {
 	if raw == "" {
-		return "On extra dates"
+		return "On extra dates", false
 	}
 	opt, err := rrule.StrToROption(raw)
 	if err != nil {
-		return "Custom rule"
+		return "Custom rule", false
 	}
 	units := map[rrule.Frequency]string{
 		rrule.YEARLY: "year", rrule.MONTHLY: "month", rrule.WEEKLY: "week", rrule.DAILY: "day",
@@ -354,7 +405,11 @@ func (f timeFmt) recurrence(raw string, start time.Time) string {
 	if len(opt.Byweekday) > 0 {
 		days := make([]string, 0, len(opt.Byweekday))
 		for _, d := range opt.Byweekday {
-			days = append(days, weekdayPhrase(d.String()))
+			day := weekdayPhrase(d.String())
+			if short {
+				day = shortWeekday(day)
+			}
+			days = append(days, day)
 		}
 		b.WriteString(" on " + strings.Join(days, ", "))
 	}
@@ -374,19 +429,81 @@ func (f timeFmt) recurrence(raw string, start time.Time) string {
 		}
 		b.WriteString(" in " + strings.Join(months, ", "))
 	}
-	switch {
-	case opt.Count == 1:
-		b.WriteString(", once")
-	case opt.Count > 1:
-		fmt.Fprintf(&b, ", %d times", opt.Count)
-	}
-	if day, ok := ruleUntil(raw, start, f.tz); ok {
-		b.WriteString(", until " + day.Format("2 January 2006"))
-	} else if !opt.Until.IsZero() {
-		b.WriteString(", until " + f.date(opt.Until))
+	return b.String(), true
+}
+
+// ruleMore admits the parts of a rule the words do not say.
+func ruleMore(opt *rrule.ROption) string {
+	if opt == nil {
+		return ""
 	}
 	if len(opt.Bysetpos)+len(opt.Byyearday)+len(opt.Byweekno)+len(opt.Byhour)+len(opt.Byminute)+len(opt.Bysecond)+len(opt.Byeaster) > 0 {
-		b.WriteString(", with further conditions")
+		return ", with further conditions"
 	}
-	return b.String()
+	return ""
+}
+
+// shortWeekday is a day's name as the frames abbreviate it, «Mon»; an
+// ordinal before it stays, «first Mon».
+func shortWeekday(phrase string) string {
+	for _, name := range weekdayNames {
+		if strings.HasSuffix(phrase, name) {
+			return strings.TrimSuffix(phrase, name) + name[:3]
+		}
+	}
+	return phrase
+}
+
+// whenRuns is the When of an event as the frames write it (s-agenda-1,
+// s-agenda-2): the clock monospaced, then the day — «‹10:00 – 11:00›, Monday
+// 10 August»; the year only when it is not this year's. A day is «all day,
+// Monday 10 August».
+func (f timeFmt) whenRuns(tm cal.Timing) view.Runs {
+	day := func(t time.Time) string {
+		t = t.In(f.tz)
+		if t.Year() == f.now.In(f.tz).Year() {
+			return t.Format("Monday 2 January")
+		}
+		return t.Format("Monday 2 January 2006")
+	}
+	mono := func(s string) view.Run { return view.Run{Text: text(s), Mark: view.RunMono} }
+	plain := func(s string) view.Run { return view.Run{Text: text(s)} }
+	if tm.AllDay {
+		first := tm.Start.In(f.tz)
+		words := day(first)
+		if !tm.End.IsZero() {
+			// DTEND of a day is exclusive: the last day is the one before.
+			if last := tm.End.In(f.tz).AddDate(0, 0, -1); last.After(first) {
+				words += " – " + day(last)
+			}
+		}
+		return view.Runs{plain("all day, " + words)}
+	}
+	start, end := tm.Start, tm.End
+	switch {
+	case end.IsZero():
+		return view.Runs{mono(f.clock(start)), plain(", " + day(start))}
+	case f.dayKey(start) == f.dayKey(end):
+		return view.Runs{mono(f.clock(start) + " – " + f.clock(end)), plain(", " + day(start))}
+	}
+	return view.Runs{mono(f.clock(start)), plain(", " + day(start) + " – "), mono(f.clock(end)), plain(", " + day(end))}
+}
+
+// createdIn is the badge by the When of a time made in another zone
+// (s-agenda-1, s-agenda-2): «created 12:00 Asia/Yekaterinburg», the start's
+// clock there. None for the instance zone, a day or a floating time.
+func (f timeFmt) createdIn(tm cal.Timing) view.Badge {
+	zone := f.zone(tm.Zone)
+	if zone == "" || tm.AllDay {
+		return view.Badge{}
+	}
+	loc, err := time.LoadLocation(zone)
+	if err != nil {
+		return view.Badge{Label: text("created in " + zone), Role: view.BadgeNeutral}
+	}
+	layout := "15:04"
+	if f.h12 {
+		layout = "3:04 PM"
+	}
+	return view.Badge{Label: text("created " + tm.Start.In(loc).Format(layout) + " " + zone), Role: view.BadgeNeutral}
 }

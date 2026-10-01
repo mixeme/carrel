@@ -1134,9 +1134,12 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 	// Every ticked calendar carries its number in the frame (s-agenda-1): the
 	// combined calendar was opened first, as a person comes to it.
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+	// The notes were read too: the panel's Related names its note (s-agenda-1).
+	openList(t, app, "/app/notes")
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	here := app.listPath(t, "calendar", "lichnyj") + "?from=2026-08-10"
-	app.compare(t, "app-agenda/normal.json", app.h.do(get(here, app.sess)))
+	// «Синк-ап по релизу» open in the panel, as the frame draws it.
+	app.compare(t, "app-agenda/normal.json", app.h.do(get(here+"&open="+url.QueryEscape(app.listPath(t, "calendar", "lichnyj")+"/8f1c-4a02-b7d3"), app.sess)))
 }
 
 // C-14.2: the combined calendar as s-agenda-1 draws it — every ticked
@@ -1144,19 +1147,71 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 // (the client's scan of the calendar, Б1).
 func TestFixtureCombinedCalendar(t *testing.T) {
 	app := newMockupApp(t)
+	openList(t, app, "/app/notes") // the panel's Related names its note
 	page := combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-	app.compare(t, "app-agenda-all/normal.json", app.h.do(get("/app/calendar?from=2026-08-10&task="+page.Poll.TaskID, app.sess)))
+	// «Синк-ап по релизу» open in the panel (s-agenda-1, В1).
+	open := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3"
+	app.compare(t, "app-agenda-all/normal.json", app.h.do(get("/app/calendar?from=2026-08-10&task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
 }
 
 // C-14.2: the card of an event (s-agenda-2).
 func TestFixtureEventCard(t *testing.T) {
 	app := newMockupApp(t)
+	linkMockupEvent(t, app)
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+	openList(t, app, "/app/notes") // Related names its note (s-agenda-2, Г8)
 	app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"?from=2026-08-10", app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3"
 	app.compare(t, "app-event/normal.json", app.h.do(get(rec, app.sess)))
+}
+
+// linkMockupEvent puts a copy of «Синк-ап по релизу» in radicale · vps ·
+// Проекты and links the two (S-16): «The same event in other calendars ·
+// radicale · vps · Проекты · Holds the same» of s-agenda-2 (the client's
+// scan Г9). The copy lives in this test alone: the agenda frames draw no
+// such row in Проекты.
+func linkMockupEvent(t *testing.T, app *mockupApp) {
+	t.Helper()
+	const copyUID = "4b2e-9d10-8f1c"
+	body, err := os.ReadFile(filepath.Join(mockupRoot(t), "nextcloud-home", "lichnyj.ics"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var event string
+	for _, rec := range splitRecords(string(body)) {
+		if strings.Contains(rec, "UID:8f1c-4a02-b7d3") {
+			event = strings.Replace(rec, "UID:8f1c-4a02-b7d3", "UID:"+copyUID, 1)
+		}
+	}
+	if event == "" {
+		t.Fatal("«Синк-ап по релизу» is not in the set")
+	}
+	app.servers["radicale · vps"].Seed(davtest.CalendarHome+"proekty/"+copyUID+".ics", event)
+	key, _ := app.sess.DataKey()
+	blob, _ := app.h.users.Catalog(app.sess.AccountID(), key)
+	var members []sealed.RecordRef
+	for _, slug := range []string{"lichnyj", "proekty"} {
+		for _, c := range blob.Collections {
+			if collectionSlugOf(c.Path) == slug {
+				uid := "8f1c-4a02-b7d3"
+				if slug == "proekty" {
+					uid = copyUID
+				}
+				members = append(members, sealed.RecordRef{AccountID: c.AccountID, Col: c.Path, UID: uid})
+			}
+		}
+	}
+	if len(members) != 2 {
+		t.Fatalf("the two calendars are not in the catalog: %+v", members)
+	}
+	if err := app.h.users.EditDuplicates(app.sess.AccountID(), key, "duplicates.link", "", func(d *sealed.Duplicates) error {
+		d.Linked = append(d.Linked, sealed.LinkedGroup{ID: "g-sinkap", Kind: view.KindEvent, Members: members})
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // C-14.2: one list of tasks (s-tasks-1).

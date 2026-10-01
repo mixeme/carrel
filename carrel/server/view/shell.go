@@ -185,6 +185,13 @@ type Field struct {
 	Tags []Tag `json:"tags,omitempty"`
 	// Colour — метка коллекции у строки другой книги или календаря (Books, Linked)
 	Colour Colour `json:"colour,omitempty"`
+	// Runs — значение кусками, когда кадр выделяет часть (s-agenda-2: When —
+	// «‹10:00 – 11:00›, Monday 10 August»); Value тогда пуст
+	Runs Runs `json:"runs,omitempty"`
+	// Badge — бейдж после значения: «created 12:00 Asia/Yekaterinburg» у When
+	// события из другого пояса (подсказка «Created in another time zone» —
+	// слово экрана), «until 2026-12-28» у Repeats (s-agenda-1, -2)
+	Badge Badge `json:"badge,omitzero"`
 }
 
 // Print — колонтитул распечатки, C-10.

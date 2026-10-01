@@ -87,7 +87,7 @@ func (s *Server) getKindRoot(w http.ResponseWriter, r *http.Request, segment str
 			return
 		}
 	}
-	if spec.kind == view.KindContact {
+	if spec.kind == view.KindContact || spec.kind == view.KindEvent {
 		r = withoutOpen(r)
 	}
 	page, err := s.combinedPage(r, sess, s.catalogOf(sess), spec)
@@ -402,6 +402,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			rows = append(rows, kindedAll(filter.keep(k, listedOfKind(blob, st.snap, k)), k)...)
 		}
 		page.Days, page.Bar.Loaded, bad = s.agendaDays(tf, rows, from, to, spec.segment, true)
+		page.Details = s.openInAgenda(r, sess, base, rows, page.Days)
 		page.Bar.Range = s.agendaRange(tf, base, filter.tag, kind, from, to, r.URL.Query())
 		page.Bar.Show, page.Bar.Segments = s.agendaShow(base, on, r.URL.Query()), []view.Action{}
 		page.Bar.Compact = s.compactForm(r, spec.segment, base)
@@ -480,20 +481,30 @@ func (s *Server) combinedIOActions(blob sealed.Blob, spec kindSpec) []view.Actio
 // takes records.
 func (s *Server) combinedNewAction(blob sealed.Blob, spec kindSpec) view.Action {
 	a := view.Action{ID: "record.new", Label: text("New " + spec.noun), Icon: "i-plus", Method: "GET", Primary: true}
-	for _, ticks := range []bool{true, false} {
-		for _, col := range blob.Collections {
-			conn, ok := blob.Connection(col.AccountID)
-			if !ok || conn.Feed || col.Gone || col.ReadOnly || !col.Has(spec.kind) || (ticks && !isTicked(blob, spec.kind, col.AccountID, col.Path)) {
-				continue
-			}
-			a.Href, a.Enabled = s.route(origin{conn: conn, col: col}.listPath(spec.segment)+"/new?pick=1"), true
-			// In a combined view New asks where, by its arrow (s-contacts-9).
-			s.whereTo(blob, spec, &a)
-			return a
-		}
+	if o, ok := firstWritable(blob, spec.kind); ok {
+		a.Href, a.Enabled = s.route(o.listPath(spec.segment)+"/new?pick=1"), true
+		// In a combined view New asks where, by its arrow (s-contacts-9).
+		s.whereTo(blob, spec, &a)
+		return a
 	}
 	a.Reason = text("No collection of this kind takes new records.")
 	return a
+}
+
+// firstWritable is the collection of a kind a new record goes to when
+// nothing chose one: the first ticked one that takes records, else the
+// first that takes them; ok is false when none does.
+func firstWritable(blob sealed.Blob, k view.Kind) (origin, bool) {
+	for _, ticks := range []bool{true, false} {
+		for _, col := range blob.Collections {
+			conn, ok := blob.Connection(col.AccountID)
+			if !ok || conn.Feed || col.Gone || col.ReadOnly || !col.Has(k) || (ticks && !isTicked(blob, k, col.AccountID, col.Path)) {
+				continue
+			}
+			return origin{conn: conn, col: col}, true
+		}
+	}
+	return origin{}, false
 }
 
 // listedOf turns the items of a snapshot into rows' input with their origin.

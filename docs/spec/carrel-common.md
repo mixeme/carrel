@@ -384,7 +384,7 @@ spec/fixtures/<screen>/<state>.json
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже |
-| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=` и `?print=1` — как у контактов |
+| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
@@ -588,6 +588,7 @@ type Action struct {
     Tally   Text    // счёт сегмента отдельно от подписи: Label «All», Tally «24» (SegOption.Count); пусто — кадр счёта не пишет
     Arrow   []MenuItem // стрелка кнопки (.m-split): пункты её меню; пусто — без стрелки
     CSRF    string  // у POST — токен сеанса: без сценариев действие уходит своей формой со скрытым _csrf этого значения (C-11); у GET и на страницах вне входа пусто
+    File    string  // у POST, который несёт файл, — имя поля файла: без сценариев действие уходит формой multipart/form-data с этим полем выбора файла и _csrf — «file» у Attach и «From this computer» (attach.add), «photo» у Add и Replace фотографии (photo.add, photo.replace); пусто — без файла
 }
 // Кнопка со стрелкой — одно действие: само Action — то, что делает кнопка,
 // Arrow — меню стрелки в порядке кадра. Первый пункт повторяет кнопку (тот же
@@ -661,7 +662,7 @@ type Tag struct {
 type SourceBlock struct { // «откуда запись и что с ней на сервере»
     UID      Text     // идентификатор записи — строка UID источника в панели (s-contacts-1, -7)
     Path     Text     // путь записи на её сервере — строка Path источника карточки (s-contacts-6)
-    Compared Text     // после Read: «not changed on server» — версия на сервере та же, что в прочитанном списке; «changed on server since» — другая; пусто — списка не читали
+    Compared Text     // после Read: «not changed on server» — версия на сервере та же, что в прочитанном списке; «changed on server since» — другая; пусто — списка не читали. У события — «changed on server 3 days ago» по LAST-MODIFIED, если версия та же или списка не читали (s-agenda-1, -2)
     Stamp    Stamp
     Colour   Colour
     ReadOnly bool
@@ -854,6 +855,8 @@ type Field struct {
     Aside  Text   // приглушённо после значения: «in 7 months» у дня рождения (s-contacts-6)
     Tags   []Tag  // строка категорий — метками, Value пуст (s-contacts-6, панели всех родов)
     Colour Colour // метка коллекции у строки другой книги или календаря (Books, Linked; s-contacts-6)
+    Runs   Runs   // значение кусками, когда кадр выделяет часть: When события — «‹10:00 – 11:00›, Monday 10 August», день — «all day, Monday 10 August» (год — только не нынешний); Value тогда пуст (s-agenda-1, -2)
+    Badge  Badge  // бейдж после значения: «created 12:00 Asia/Yekaterinburg» у When события из другого пояса (подсказка «Created in another time zone» — слово экрана), «until 2026-12-28», «5 times», «once» у Repeats (s-agenda-1, -2); нет бейджа — ключа нет
 }
 
 type Print struct { // колонтитул распечатки, C-10
@@ -1073,6 +1076,7 @@ type AgendaRow struct {
     Sources   []Stamp
     Menu      []MenuItem
     State     RecordState
+    On        bool // строка записи, открытой в панели (?open=, is-on; s-agenda-1); у серии — каждое её вхождение
 }
 
 type TasksPage struct {
@@ -1266,17 +1270,22 @@ type EventPage struct { // чтение: то, что открывается п�
     Shell
     UID       string
     Summary   Text // заголовок записи; заголовок документа — Shell.Title
+    // В порядке кадра (s-agenda-2): When (Runs и Badge пояса), Repeats
+    // (короткими словами, «Weekly on Mon», конец — Badge), Reminders («10
+    // minutes before», через запятую), Where, Status, Link, Tags. Организатора
+    // среди полей нет — он первый в Attendees. Панель (Details) ставит
+    // Reminders перед Repeats (s-agenda-1)
     Fields    []Field
     Body      Text
     Recurrence RecurrenceBlock
-    Reminders []ReminderRow
-    Attendees []AttendeeRow // только чтение, без согласования
+    Attendees []AttendeeRow // организатор первым (Status «organiser»), за ним участники; только чтение, без согласования
+
     Attach    []AttachRow
     Related   []TimelineRow
     Linked    []Field // та же встреча в других календарях (S-16)
     Source    SourceBlock
     Loss      *LossReport
-    Actions   []Action   // на виду: Edit, Attach, New task; удаление — Danger, внизу
+    Actions   []Action   // на виду: Edit (i-pencil), Attach (attach.add — клиент ставит его в рубрику «Attachments», s-agenda-2), New task (i-task; в этом календаре, если он держит задачи, иначе в списке, куда идёт новая задача), Print (record.print, i-print, ?print=1); удаление — Danger, внизу
     Menu      []MenuItem // «⋯»: Move, Copy, Export .ics, Publish a link (s-agenda-5)
     ReadOnly  bool       // чужая коллекция: правки нет вовсе, а не заблокированная форма
 }
@@ -1302,7 +1311,7 @@ type RecurrenceBlock struct {
 }
 
 type ReminderRow struct { Label Text; Fields []Field; Remove Action }
-type AttendeeRow struct { Name Text; Email Text; Status Text }
+type AttendeeRow struct { Name Text; Email Text; Status Text } // Status — как пишет кадр, строчными: «organiser», «accepted», «tentative», «declined», «no reply» (s-agenda-1, -2)
 type AttachRow struct {
     Href    string
     Name    Text
@@ -2870,7 +2879,7 @@ type LossReport struct { // сервер принял запись, но что-
 | **Дата** | Отдельной настройки нет. Первый день недели — из настроек аккаунта |
 | **День в списке** | У списка своя короткая форма: колонки строк (срок задачи, день заметки, строки поиска), список поля Related to и связи записи пишут «12 Aug», со временем — «12 Aug 18:00», год — только не нынешний: «12 Aug 2025» (s-tasks-1, s-notes-1, s-tasks-10, s-notes-2). Полная форма — в самой записи: «Monday, 10 August 2026, 10:00 – 11:00», «10 August 2026, 11:05» |
 | **Относительное время** | Только там, где его рисует кадр («2 min ago»). В агенде, в списках и в колонтитуле — абсолютное |
-| **Размер** | Округление до одного знака, единицы рядом. Ноль байт — «0 B», а не пусто |
+| **Размер** | Один знак после запятой, «.0» не пишется, от сотни — целым: «3 KB», «2.8 MB», «412 KB» (s-agenda-2, s-files-1); единицы рядом. Ноль байт — «0 B», а не пусто |
 | **Число** | Счётчик отсутствует, если неизвестен: место остаётся пустым, ноль не подставляется |
 | **Цвет коллекции** | Берётся с сервера. Если сервер его не прислал — выводится **детерминированно из адреса коллекции** по приглушённой шкале, а не из чистых тонов: цвет принадлежит данным и не должен спорить с интерфейсом. Шкала — шесть тонов макета (`s-profile-7`): `#4A6B52`, `#3F6E8C`, `#6B4E7A`, `#A05A2C`, `#8C6239`, `#9A9280`; форма коллекции предлагает их же, в этом порядке |
 | **Подпись источника** | `account · collection`, готовой строкой. Обязательна в каждой строке любого сводного списка |

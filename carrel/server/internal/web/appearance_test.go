@@ -87,10 +87,14 @@ func TestAccountWeekStartAndClock(t *testing.T) {
 	var when string
 	for _, fld := range event.Fields {
 		if fld.Label == "When" {
-			when = string(fld.Value)
+			for _, r := range fld.Runs {
+				when += string(r.Text)
+			}
 		}
 	}
-	if when != "Monday, 12 January 2026, 10:00 AM – 10:30 AM" {
+	// The clock of the person's twelve hours, the day after it (s-agenda-2);
+	// the year only when it is not this year's.
+	if !strings.HasPrefix(when, "10:00 AM – 10:30 AM, Monday 12 January") {
 		t.Errorf("When = %q", when)
 	}
 

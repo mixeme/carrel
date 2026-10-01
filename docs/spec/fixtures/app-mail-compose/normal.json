@@ -89,7 +89,7 @@
   "from": "Михаил Енученко \u003cmix@carrel.example\u003e",
   "limits": [
     {
-      "text": "0 of 20 recipients. Everyone sees the whole list. An attachment up to 10.0 MB, the letter up to 25.0 MB; a folder, and anything larger, goes as a link that lives 30 days and can be revoked in "
+      "text": "0 of 20 recipients. Everyone sees the whole list. An attachment up to 10 MB, the letter up to 25 MB; a folder, and anything larger, goes as a link that lives 30 days and can be revoked in "
     },
     {
       "mark": "strong",

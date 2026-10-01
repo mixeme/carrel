@@ -138,6 +138,7 @@ type AgendaRow struct {
 	Sources []Stamp     `json:"sources"`
 	Menu    []MenuItem  `json:"menu"`
 	State   RecordState `json:"state"`
+	On      bool        `json:"on"` // строка открыта в панели подробностей (is-on, s-agenda-1)
 }
 
 type TasksPage struct {

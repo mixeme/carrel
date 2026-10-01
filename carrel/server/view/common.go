@@ -45,6 +45,11 @@ type Action struct {
 	// своей формой со скрытым _csrf этого значения; у GET и у страниц вне
 	// входа пусто
 	CSRF string `json:"csrf,omitempty"`
+	// File — имя поля файла у POST, который несёт файл: без сценариев
+	// клиент шлёт действие формой multipart/form-data с этим полем выбора
+	// файла и _csrf — «file» у Attach и «From this computer», «photo» у Add
+	// и Replace фотографии; пусто — действие без файла
+	File string `json:"file,omitempty"`
 }
 
 type MenuItem struct {

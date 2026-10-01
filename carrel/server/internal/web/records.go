@@ -704,7 +704,7 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 			return
 		}
 	}
-	if c.spec.kind == view.KindContact {
+	if c.spec.kind == view.KindContact || c.spec.kind == view.KindEvent {
 		r = withoutOpen(r)
 	}
 	// The rail is built after the list: the list is what fills its counts.
@@ -1172,6 +1172,42 @@ func (s *Server) agendaRange(tf timeFmt, base, tag, kind string, from, to time.T
 	return rng
 }
 
+// openInAgenda answers ?open={a row's href} on an agenda without scripts
+// (s-agenda-1): every row of that record is on, and the record stands in the
+// panel, read; Close is the agenda without it. With scripts the panel is a
+// fragment at the record's address (C-7.2).
+func (s *Server) openInAgenda(r *http.Request, sess *session.Session, base string, items []kinded, days []view.AgendaDay) *view.Details {
+	open, _ := r.Context().Value(openKey{}).(string)
+	if open == "" {
+		return nil
+	}
+	for _, it := range items {
+		uid := cal.UID(it.obj)
+		segment := segmentOf(it.kind)
+		if s.route(it.from.recordPath(segment, uid)) != open {
+			continue
+		}
+		c, ok := s.collectionOf(sess, recordKinds[segment], it.from.conn.ID, it.from.col.Path)
+		if !ok {
+			return nil
+		}
+		for di := range days {
+			for ri := range days[di].Rows {
+				if days[di].Rows[ri].Href == open {
+					days[di].Rows[ri].On = true
+				}
+			}
+		}
+		d := s.recordDetails(c, uid, it.obj)
+		d.Close = s.route(base)
+		if r.URL.RawQuery != "" {
+			d.Close += "?" + r.URL.RawQuery
+		}
+		return &d
+	}
+	return nil
+}
+
 // agendaSubtitle is the line under the title of an agenda (s-agenda-1):
 // where — «5 of 7 calendars · 3 accounts» or the calendar's connection —,
 // the days of the window and the instance zone, monospaced.
@@ -1242,6 +1278,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	}
 	var more []unreadable
 	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, shown, from, to, c.spec.segment, false)
+	page.Details = s.openInAgenda(r, c.sess, c.listPath(), shown, page.Days)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindEvent, items)
 	c.putIndex(indexOf(c.tf, view.KindEvent, items))

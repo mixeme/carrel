@@ -399,10 +399,14 @@ func (s *Server) photoBlock(c *collectionCtx, st editState) view.PhotoBlock {
 	}
 	o, uid, here := c.origin(), st.uid, photoAddress(c, st.uid)
 	step := func(id, label, op string, danger bool) view.Action {
-		return view.Action{
+		a := view.Action{
 			ID: id, Label: text(label), Method: "POST", Danger: danger, Enabled: true,
 			Href: s.postQuery(here, url.Values{"op": {op}, "etag": {st.etag}}),
 		}
+		if op == "upload" {
+			a.File = "photo" // the field the upload reads
+		}
+		return a
 	}
 	switch photoOf(st.obj) {
 	case linkedPhoto:

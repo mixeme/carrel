@@ -286,7 +286,10 @@ func (s *Server) opQuery(op, etag, from string) url.Values {
 // again and From Files — the tree of Files choosing a file that lies there
 // already (/app/files/picker?for=attach), written by the same rule.
 func (s *Server) attachAction(c *collectionCtx, uid, etag, from string) view.Action {
-	a := view.Action{ID: "attach.add", Label: "Attach", Icon: "i-up", Href: s.postQuery(c.recordPath(uid)+"/edit", s.opQuery("attach", etag, from)), Method: "POST", Enabled: true}
+	// File names the field of the file without scripts; the first file of
+	// any name is taken (firstFile).
+	a := view.Action{ID: "attach.add", Label: "Attach", Icon: "i-up", Href: s.postQuery(c.recordPath(uid)+"/edit", s.opQuery("attach", etag, from)), Method: "POST", Enabled: true,
+		File: "file"}
 	here := a
 	here.Label = "From this computer"
 	q := url.Values{"for": {"attach"}, "k": {c.spec.segment}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}, "etag": {etag}}

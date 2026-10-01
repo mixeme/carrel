@@ -112,16 +112,17 @@ type EventPage struct {
 	Fields     []Field         `json:"fields"`
 	Body       Text            `json:"body"`
 	Recurrence RecurrenceBlock `json:"recurrence"`
-	Reminders  []ReminderRow   `json:"reminders"`
-	Attendees  []AttendeeRow   `json:"attendees"` // только чтение, без согласования
-	Attach     []AttachRow     `json:"attach"`
-	Related    []TimelineRow   `json:"related"`
-	Linked     []Field         `json:"linked"` // та же встреча в других календарях (S-16)
-	Source     SourceBlock     `json:"source"`
-	Loss       *LossReport     `json:"loss"`
-	Actions    []Action        `json:"actions"`  // на виду: правка, вложение, новая задача, удаление
-	Menu       []MenuItem      `json:"menu"`     // «⋯»: Move, Copy, Export .ics, Publish a link
-	ReadOnly   bool            `json:"readOnly"` // чужая коллекция: правки нет вовсе, а не заблокированная форма
+	// Attendees — люди события: организатор первым (Status «organiser»),
+	// за ним участники; только чтение, без согласования
+	Attendees []AttendeeRow `json:"attendees"`
+	Attach    []AttachRow   `json:"attach"`
+	Related   []TimelineRow `json:"related"`
+	Linked    []Field       `json:"linked"` // та же встреча в других календарях (S-16)
+	Source    SourceBlock   `json:"source"`
+	Loss      *LossReport   `json:"loss"`
+	Actions   []Action      `json:"actions"`  // на виду: правка, вложение, новая задача, удаление
+	Menu      []MenuItem    `json:"menu"`     // «⋯»: Move, Copy, Export .ics, Publish a link
+	ReadOnly  bool          `json:"readOnly"` // чужая коллекция: правки нет вовсе, а не заблокированная форма
 }
 
 // EventEditPage — правка: та же запись формой.

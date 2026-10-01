@@ -10,6 +10,7 @@
     python docs/visual/fixtures/make-fixtures.py
 """
 
+import base64
 import io
 import os
 
@@ -167,6 +168,19 @@ def cal(name, body, zones=(VTZ_MSK,)):
 
 
 # «Личный» — nextcloud · home
+
+# Чек-лист релиза лежит внутри события (s-agenda-1, -2: «in the event»,
+# «text/markdown · 3 KB»): 3072 байта Markdown, вложение ATTACH с двоичным
+# значением (S-20).
+def checklist():
+    text = u'# Release checklist\n\n'
+    i = 0
+    while len(text.encode('utf-8')) < 3072:
+        i += 1
+        text += u'- [ ] Step %02d: check the build, sign off, note the result.\n' % i
+    return text.encode('utf-8')[:3071] + b'\n'
+
+
 sinkap = [
     u'BEGIN:VEVENT',
     u'UID:8f1c-4a02-b7d3',
@@ -189,10 +203,21 @@ sinkap = [
     u'ATTENDEE;CN=Артём Белов;PARTSTAT=TENTATIVE:mailto:a.belov@example.org',
     u'ATTENDEE;CN=Виктор Гончаров;PARTSTAT=NEEDS-ACTION:'
     u'mailto:v.goncharov@example.org',
-    u'ATTACH;FILENAME=release-checklist.md;FMTTYPE=text/markdown;SIZE=3072:'
-    u'https://files.example.org/carrel/release-checklist.md',
+    u'ATTACH;FMTTYPE=text/markdown;ENCODING=BASE64;VALUE=BINARY;'
+    u'FILENAME=release-checklist.md:' + base64.b64encode(checklist()).decode('ascii'),
     u'RELATED-TO;RELTYPE=SIBLING:5c81-77aa-0d64',
-    u'X-JTX-COLOR:#4A6B52',
+    # Чужие свойства, которые правка показывает как есть: «Kept as the
+    # server sent them» (s-agenda-3).
+    u'SEQUENCE:2',
+    u'X-MOZ-GENERATION:3',
+    u'X-APPLE-TRAVEL-ADVISORY-BEHAVIOR:AUTOMATIC',
+    # Напоминание за 10 минут (s-agenda-1, -2: «Reminders · 10 minutes
+    # before»).
+    u'BEGIN:VALARM',
+    u'ACTION:DISPLAY',
+    u'DESCRIPTION:Синк-ап по релизу',
+    u'TRIGGER:-PT10M',
+    u'END:VALARM',
     u'END:VEVENT']
 
 mfc = [
