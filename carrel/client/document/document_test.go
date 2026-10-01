@@ -48,9 +48,9 @@ func check(t *testing.T, at string, scr screens.Screen, model any, base string) 
 	}
 	for _, want := range []string{
 		`<html lang="en"`,
-		`<script src="` + base + `/static/tc/js/theme.js"></script>`,
-		`<link rel="stylesheet" href="` + base + `/static/tc/css/typecase.css">`,
-		`<script src="` + base + `/static/tc/js/tc.js"></script></body></html>`,
+		`<script src="` + base + `/static/tc/` + document.Version() + `/js/theme.js"></script>`,
+		`<link rel="stylesheet" href="` + base + `/static/tc/` + document.Version() + `/css/typecase.css">`,
+		`<script src="` + base + `/static/tc/` + document.Version() + `/js/tc.js"></script></body></html>`,
 		scr.Draw(model).Render(),
 	} {
 		if !strings.Contains(html, want) {
@@ -92,16 +92,50 @@ func TestDocument(t *testing.T) {
 	}
 }
 
-// The files the page names are served where it names them.
+// The files the page names are served where it names them, and a browser
+// keeps them: their addresses carry the version of their contents
+// (document.Version), so an address never names two different files.
 func TestFiles(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.Handle(document.Static+"/", document.Files())
-	a := document.Assets("")
-	for path, kind := range map[string]string{a.CSS: "text/css", a.Theme: "javascript", a.JS: "javascript"} {
+	mux.Handle("GET "+document.Static+"/", document.Files())
+	get := func(path string) *httptest.ResponseRecorder {
 		rec := httptest.NewRecorder()
 		mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
+		return rec
+	}
+	a := document.Assets("")
+	font := strings.TrimSuffix(a.CSS, "css/typecase.css") + "fonts/PublicSans.ttf"
+	for path, kind := range map[string]string{a.CSS: "text/css", a.Theme: "javascript", a.JS: "javascript", font: "font/ttf"} {
+		if !strings.HasPrefix(path, document.Static+"/"+document.Version()+"/") {
+			t.Errorf("%s: not under the version of the files %s", path, document.Version())
+		}
+		rec := get(path)
 		if rec.Code != http.StatusOK || !strings.Contains(rec.Header().Get("Content-Type"), kind) || rec.Body.Len() == 0 {
 			t.Errorf("%s: %d %q, %d bytes", path, rec.Code, rec.Header().Get("Content-Type"), rec.Body.Len())
 		}
+		if got := rec.Header().Get("Cache-Control"); got != document.Immutable {
+			t.Errorf("%s: Cache-Control %q, want %q", path, got, document.Immutable)
+		}
+	}
+	// What is not a file of this version is not found, and not kept: an old
+	// version's address, the files without a version, a directory's listing,
+	// a file the library does not have.
+	for _, path := range []string{
+		document.Static + "/000000000000/css/typecase.css",
+		document.Static + "/css/typecase.css",
+		document.Static + "/" + document.Version() + "/fonts/",
+		document.Static + "/" + document.Version() + "/",
+		document.Static + "/" + document.Version() + "/css/other.css",
+	} {
+		rec := get(path)
+		if rec.Code != http.StatusNotFound {
+			t.Errorf("%s: %d, want 404", path, rec.Code)
+		}
+		if got := rec.Header().Get("Cache-Control"); got == document.Immutable {
+			t.Errorf("%s: a miss is kept: Cache-Control %q", path, got)
+		}
+	}
+	if v := document.Version(); len(v) != 12 || strings.Trim(v, "0123456789abcdef") != "" {
+		t.Errorf("version %q: want 12 hex digits", v)
 	}
 }

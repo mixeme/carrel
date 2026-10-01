@@ -4,6 +4,41 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.0.7 — 2026-10-01
+
+The client is wired into the server (`v0.2.90`): the binary answers the
+pages that have a screen with them. Typecase `2b50f5e`.
+
+### Added
+
+- **`renderer`** — the server's `render.Renderer`. A view model whose type
+  has a screen in `screens.All` (a value or a pointer) is a page:
+  `document.Of` under the instance's base path, `text/html`, the server's
+  status. A fragment is the screen's root and its forms for `main` of a page
+  outside the shell and `sheet` of a sheet, when nothing goes out of band.
+  Everything else — a model without a screen, the zones of the shell, the
+  out-of-band updates, the events, `JSON` — is `render.JSONRenderer`'s
+  answer, byte for byte, until the shell and Typecase's swapping of zones.
+- **`document.Version`** — 12 hex digits of the SHA-256 of the library's
+  files (stylesheet, both scripts, fonts); **`document.Immutable`** — their
+  caching.
+- **Checks of the renderer on every fixture** (`guard/renderer_test.go`): a
+  built screen's page is its document, whose root as served passes the frame
+  comparison (`shape`, the classes of Typecase's CSS) under both base paths,
+  and so does the fragment of `main`; a model without a screen answers the
+  JSON renderer's page, `main` and `sheet`; a built screen answers JSON for
+  `rail`, `sheet`, `main` with an update out of band, `JSON` and an event.
+
+### Changed
+
+- **The library's files are at `document.Static/{version}/…`**
+  (`/static/tc/{version}/css/typecase.css` and so on): `document.Assets`
+  names them there, `document.Files` serves only them — `GET`, `HEAD`,
+  `Cache-Control: public, max-age=31536000, immutable` on a file found;
+  another version, a directory, an unknown name — 404, not kept. Fonts carry
+  their type (`font/ttf`) whatever the system's tables say. Mount with
+  `mux.Handle("GET "+document.Static+"/", document.Files())`.
+
 ## v0.0.6 — 2026-09-30
 
 Every page outside the shell is on `main`. The types of the contract become
