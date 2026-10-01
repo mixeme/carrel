@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.105 — 2026-10-01
+
+Preparation for Mentions: the ways a record points to a person are a list.
+
+### Changed
+
+- Nothing a consumer sees. The timeline asks `timelineMatchers` in order,
+  strongest first — the person's own line, a line they stand behind,
+  RELATED-TO their card — each a `personMatcher`; the first answer is the
+  row's Why, as before. A new way is one more matcher.
+
 ## v0.2.104 — 2026-10-01
 
 Preparation for Mentions: the records this session has loaded are walked

@@ -25,8 +25,9 @@ import (
 // The person's timeline (S-15.4): a search for one person over the ticked
 // sources. A record matches by an address of the card in ORGANIZER or
 // ATTENDEE, by an address of theirs standing behind one of those lines in
-// SENT-BY, DELEGATED-FROM or DELEGATED-TO, or by RELATED-TO the card's UID;
-// a file by the person's name in its name. Every component of a record is
+// SENT-BY, DELEGATED-FROM or DELEGATED-TO, or by RELATED-TO the card's UID
+// — each way a personMatcher of timelineMatchers; a file by the person's
+// name in its name. Every component of a record is
 // read, not only the main one: an overridden occurrence of a series has an
 // organiser and attendees of its own. It is gathered only when opened; the card's inset shows what this
 // session gathered.
@@ -190,55 +191,94 @@ func (p timelinePerson) match(k view.Kind, obj *model.Object, tz *time.Location)
 	if obj == nil {
 		return "", time.Time{}, false
 	}
-	why := ""
 	// Everyone the record names, in every component it has: an overridden
 	// occurrence carries its own organiser and attendees, and someone
 	// added to one Thursday of a series is named nowhere else.
-	people := cal.People(obj)
-	for _, who := range people {
+	rec := timelineRecord{obj: obj, people: cal.People(obj)}
+	for _, m := range timelineMatchers {
+		if why := m.why(p, rec); why != "" {
+			return why, timelineWhen(k, obj, tz), true
+		}
+	}
+	return "", time.Time{}, false
+}
+
+// personMatcher is one way a record points to a person: why says how, in
+// the words of the row's Why, or "" when the record does not point to them
+// this way. The timeline asks timelineMatchers in order, strongest first,
+// and the first answer is the row's. A new way — the person named in the
+// record's text, which Mentions will read — is one more matcher in the
+// list, not another branch of match.
+type personMatcher interface {
+	why(p timelinePerson, rec timelineRecord) string
+}
+
+// timelineRecord is a record as the matchers read it: the object, and the
+// people it names in every component, read once for all of them.
+type timelineRecord struct {
+	obj    *model.Object
+	people []cal.Person
+}
+
+// timelineMatchers are the ways a record points to a person, strongest
+// first (S-15.4): a line of their own, a line they stand behind, a link to
+// their card.
+var timelineMatchers = []personMatcher{ownLine{}, behindALine{}, relatedToCard{}}
+
+// ownLine is the person's address in ORGANIZER or ATTENDEE: «organiser», or
+// «attendee» with their answer when they gave one.
+type ownLine struct{}
+
+func (ownLine) why(p timelinePerson, rec timelineRecord) string {
+	for _, who := range rec.people {
 		if !p.has(who.Email) {
 			continue
 		}
 		if who.Organiser {
-			why = "organiser"
-			break
+			return "organiser"
 		}
-		why = "attendee"
+		why := "attendee"
 		if st := strings.ToLower(who.Status); st != "" && st != "needs-action" {
 			why += " · " + st
 		}
-		break
+		return why
 	}
-	// A person can be in a record without being on a line of their own.
-	// SENT-BY is who really sent it — the assistant who put the meeting in
-	// for someone else — and DELEGATED-FROM names the one who handed
-	// participation over, who is often struck from the attendee list in the
-	// same breath. Reading only ORGANIZER and ATTENDEE left both of them
-	// with an empty timeline over a record that names them (RFC 5545
-	// §3.2.18, §3.2.4, §3.2.5).
-	if why == "" {
-		for _, who := range people {
-			part := "an attendee"
-			if who.Organiser {
-				part = "the organiser"
-			}
-			if w := p.throughSomeoneElse(who.Attendee, part); w != "" {
-				why = w
-				break
-			}
+	return ""
+}
+
+// behindALine is the person standing behind another's line. A person can
+// be in a record without being on a line of their own. SENT-BY is who
+// really sent it — the assistant who put the meeting in for someone else —
+// and DELEGATED-FROM names the one who handed participation over, who is
+// often struck from the attendee list in the same breath. Reading only
+// ORGANIZER and ATTENDEE left both of them with an empty timeline over a
+// record that names them (RFC 5545 §3.2.18, §3.2.4, §3.2.5).
+type behindALine struct{}
+
+func (behindALine) why(p timelinePerson, rec timelineRecord) string {
+	for _, who := range rec.people {
+		part := "an attendee"
+		if who.Organiser {
+			part = "the organiser"
+		}
+		if w := p.throughSomeoneElse(who.Attendee, part); w != "" {
+			return w
 		}
 	}
-	if why == "" {
-		for _, rel := range cal.RelatedTo(obj) {
-			if rel == p.uid {
-				why = "related to this person"
-			}
+	return ""
+}
+
+// relatedToCard is RELATED-TO the card's UID: a task or a note made from
+// the person's timeline, or tied to them by hand.
+type relatedToCard struct{}
+
+func (relatedToCard) why(p timelinePerson, rec timelineRecord) string {
+	for _, rel := range cal.RelatedTo(rec.obj) {
+		if rel == p.uid {
+			return "related to this person"
 		}
 	}
-	if why == "" {
-		return "", time.Time{}, false
-	}
-	return why, timelineWhen(k, obj, tz), true
+	return ""
 }
 
 func timelineWhen(k view.Kind, obj *model.Object, tz *time.Location) time.Time {
