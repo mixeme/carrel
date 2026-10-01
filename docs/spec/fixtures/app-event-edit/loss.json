@@ -216,7 +216,8 @@
             "required": false,
             "value": "Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям."
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "When",
@@ -2757,7 +2758,8 @@
             "required": false,
             "value": "Asia/Yekaterinburg"
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "Reminders",
@@ -2825,7 +2827,8 @@
             ],
             "value": "reminder"
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "Repeats",
@@ -2968,7 +2971,8 @@
             "required": false,
             "value": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z"
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },
@@ -3353,6 +3357,7 @@
       "action": "/app/search",
       "history": [],
       "jump": [],
+      "name": "q",
       "query": "",
       "whole": null
     },

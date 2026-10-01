@@ -345,7 +345,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Details = s.openInPanel(r, sess, base, kept, page.Groups)
 		total := len(st.items)
 		page.Bar = view.ListBar{Filter: text(sift), Loaded: len(kept), Total: &total, Actions: append(actions, s.printAction(base)),
-			FilterForm: s.listFilter(base, query, sift), Compact: s.compactAction(r, spec.segment, base),
+			FilterForm: s.listFilter(base, query, sift), Compact: s.compactForm(r, spec.segment, base),
 			Segments: s.sortSegments(base, view.KindContact, by, r.URL.Query()),
 			Columns:  columns()}
 		page.Subtitle = text(combinedSubtitle(page.Rail, spec, st.snap != nil && !st.snap.Running))

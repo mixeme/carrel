@@ -384,10 +384,10 @@ spec/fixtures/<screen>/<state>.json
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже |
-| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи, `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6) |
+| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним) |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
-| `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10) |
-| `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии |
+| `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
+| `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
 | `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage`; `?kind=` — фильтр по роду: `event`, `task`, `note` или `file` (сегменты-ссылки, s-contacts-7), без него — All; `?from=&to=` — окно, форма GET диапазона (`Range.Form`) |
 | `/app/contacts/{account}/{col}/{uid}/timeline/columns` | POST | вход | редирект | — ; меню Columns хронологии (s-contacts-25), как у списков (S-9.6) |
 | `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage` |
@@ -709,7 +709,8 @@ type Refresh struct {
 
 type SearchBox struct {
     Query   Text
-    Action  string
+    Action  string             // форма GET поиска
+    Name    string             // имя её поля запроса: «q»
     History []SearchHistoryRow // C-6.6
     Jump    []JumpRow          // подсказки из памяти сеанса: ни одного запроса
     Whole   *Action            // «Timeline · имя»; nil — контакт не совпал
@@ -803,7 +804,7 @@ type Details struct {
     Attach     []AttachRow
     Related    []TimelineRow
     Foreign    []Field       // контакт: «Kept as the server sent them»
-    ForeignShow Text         // «Show 3» — кнопка, раскрывающая Foreign; пусто — чужих свойств нет
+    ForeignShow *Action      // «Show 3» — кнопка, раскрывающая Foreign; без сценариев — тот же список с этой панелью и ?foreign=1; nil — чужих свойств нет или они раскрыты
     Books      []Field       // контакт: «The same person in other books» (s-contacts-7) — как у ContactPage
     Source     SourceBlock
     Actions    []Action   // кнопки на виду; удаление — Danger, клиент ставит его внизу панели
@@ -934,9 +935,12 @@ type ListBar struct {
     FilterForm *Form
     Loaded   int
     Total    *int
-    // «Compact rows» (s-contacts-1): On — строки плотные; ведёт на тот же список
-    // с compact=1 или 0, выбор помнит кука раздела (S-9.6); nil — переключателя нет
-    Compact  *Action
+    // «Compact rows» (s-contacts-1, components-38) — отметка формы GET на адрес
+    // списка: скрытые поля запроса списка, скрытое compact=0 и отметка compact
+    // (InputCheck) с одним вариантом «1», Selected — строки плотные; со
+    // сценариями форма уходит сменой отметки. Выбор помнит кука раздела
+    // (S-9.6); nil — переключателя нет
+    Compact  *Form
     Segments []Action // Open / Done / All; All / Contacts / Events / …
     Range    *Range   // диапазон дат там, где он есть
     Actions  []Action // операции над выделенным
@@ -1131,7 +1135,7 @@ type ContactPage struct {
     PhotoNote Text     // «внешняя ссылка, правка недоступна»
     Fields    []Field  // категории — строкой «Tags» между Birthday и Note (Field.Tags); у дня рождения Aside
     Foreign   []Field  // чужие свойства, показанные как есть
-    ForeignShow Text   // «Show 3» — кнопка, раскрывающая Foreign (свёрнуты); пусто — их нет
+    ForeignShow *Action // «Show 3» — кнопка, раскрывающая Foreign (свёрнуты); без сценариев — ссылка на эту карточку с ?foreign=1; nil — их нет или они раскрыты
     Books     []Field  // тот же человек в других книгах: Label — книга, Value — чем разнится, Href, Colour
     Timeline  []TimelineRow // врезка: несколько последних, не вся хронология
     TimelineCount *int      // сколько всего нашла хронология этой сессии — число в рубрике; nil — её не открывали
@@ -1775,8 +1779,11 @@ type Form struct { // общая форма: поля, ошибки, кнопк�
     Actions []Action
 }
 // Folded — набор свёрнут: его Legend — кнопка, раскрывающая строки («Show 6
-// empty fields», s-contacts-3); без сценариев — details/summary
-type FieldSet struct { Legend Text; Folded bool; Rows []FormRow }
+// empty fields», s-contacts-3). Unfold — та же кнопка без сценариев: GET на
+// ту же форму с ?fields=all, где свёрнутого нет и каждое поле стоит в своей
+// рубрике; набранное до неё не переносится — со сценариями клиент раскрывает
+// набор на месте. nil у несвёрнутого
+type FieldSet struct { Legend Text; Folded bool; Unfold *Action; Rows []FormRow }
 type FormRow struct {
     Name     string
     Label    Text

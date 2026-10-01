@@ -67,7 +67,8 @@
             "required": true,
             "value": ""
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },
@@ -195,7 +196,8 @@
       ],
       "jump": [],
       "query": "",
-      "whole": null
+      "whole": null,
+      "name": "q"
     },
     "signed": {
       "instance": "carrel.example",

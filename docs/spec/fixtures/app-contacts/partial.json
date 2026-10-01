@@ -6,7 +6,8 @@
       "query": "",
       "history": [],
       "jump": [],
-      "whole": null
+      "whole": null,
+      "name": "q"
     },
     "signed": {
       "login": "mix",
@@ -561,7 +562,8 @@
               "required": false,
               "value": "/app/contacts"
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     }
@@ -578,11 +580,60 @@
     "loaded": 5,
     "total": 5,
     "compact": {
-      "enabled": true,
-      "href": "/app/contacts?compact=1&task=t-task",
-      "id": "list.compact",
-      "label": "Compact rows",
-      "method": "GET"
+      "method": "GET",
+      "action": "/app/contacts",
+      "actions": [],
+      "errors": [],
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "task",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "t-task"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "compact",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "0"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "check",
+              "label": "Compact rows",
+              "name": "compact",
+              "options": [
+                {
+                  "label": "Compact rows",
+                  "selected": false,
+                  "value": "1"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
     },
     "segments": [
       {
@@ -706,7 +757,8 @@
                 "required": false,
                 "value": "csrf"
               }
-            ]
+            ],
+            "unfold": null
           }
         ]
       },
@@ -797,7 +849,8 @@
               "required": false,
               "value": ""
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     }

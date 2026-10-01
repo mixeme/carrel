@@ -1519,6 +1519,7 @@
       "action": "/app/search",
       "history": [],
       "jump": [],
+      "name": "q",
       "query": "",
       "whole": null
     },

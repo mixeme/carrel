@@ -100,7 +100,8 @@
                 "required": false,
                 "value": "2026-08-16"
               }
-            ]
+            ],
+            "unfold": null
           }
         ]
       },
@@ -875,7 +876,8 @@
               "required": false,
               "value": "/app/calendar"
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     }
@@ -958,6 +960,7 @@
       "action": "/app/search",
       "history": [],
       "jump": [],
+      "name": "q",
       "query": "",
       "whole": null
     },

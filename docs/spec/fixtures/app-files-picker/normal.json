@@ -137,7 +137,8 @@
               "value": "",
               "focus": true
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     }

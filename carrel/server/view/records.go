@@ -13,8 +13,10 @@ type ContactPage struct {
 	PhotoNote Text    `json:"photoNote"` // «внешняя ссылка, правка недоступна»
 	Fields    []Field `json:"fields"`    // категории — строкой «Tags» между Birthday и Note
 	Foreign   []Field `json:"foreign"`   // чужие свойства, показанные как есть
-	// ForeignShow — «Show 3», кнопка, раскрывающая Foreign; пусто — их нет
-	ForeignShow Text          `json:"foreignShow"`
+	// ForeignShow — «Show 3», кнопка, раскрывающая Foreign (свёрнуты): без
+	// сценариев — ссылка на ту же карточку с ?foreign=1; nil — их нет или
+	// они раскрыты
+	ForeignShow *Action       `json:"foreignShow"`
 	Books       []Field       `json:"books"`    // тот же человек в других книгах: книга, чем разнится, ссылка, цвет
 	Timeline    []TimelineRow `json:"timeline"` // врезка: несколько последних, не вся хронология
 	// TimelineCount — сколько всего нашла хронология этой сессии; nil — её не открывали

@@ -82,7 +82,8 @@
             "required": true,
             "value": ""
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },

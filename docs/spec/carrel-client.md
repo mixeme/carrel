@@ -485,7 +485,7 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
   книги с меткой (`MenuItem.Colour`), «last used» (`Aside`), «ro» у
   `ReadOnly`. Полоса над списком: фильтр по уже загруженному **браузером, без
   второго опроса** — без сценариев форма `Bar.FilterForm`; счётчик
-  загруженного; «Compact rows» — `Bar.Compact` (ссылка, `On` — включено).
+  загруженного; «Compact rows» — `Bar.Compact` (форма GET: отметка `compact`, `Selected` — включено, C-6.4).
   Счёт у группы — `ContactGroup.Count`. Операции над выделенным.
   Columns — `Bar.Columns` (components-42): меню-форма с пунктами в их
   порядке, Apply и «Reset to defaults»; строки — `ColumnRow` с отмеченными
@@ -496,7 +496,7 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
   на виду Edit и All records (хронология человека), «⋯» — `Menu`; поля,
   среди них категории — строка «Tags» с метками (`Field.Tags`, у панели
   любого рода одна), «Kept as the server sent them» (`Foreign`, свёрнуты,
-  кнопка — `ForeignShow`), источник (`Source.UID`);
+  кнопка — `ForeignShow`, без сценариев — её ссылка), источник (`Source.UID`);
   удаление внизу панели (s-contacts-8). Строка в панели — `ContactRow.On`;
   без сценариев панель приходит с `?open=` и закрывается ссылкой
   `Details.Close` (C-6.4).
@@ -520,7 +520,8 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
   `TimelineCount`. Поля: телефоны и день рождения моноширинно
   (`Field.Mono`), у дня рождения — `Field.Aside` («in 7 months»), категории —
   строка «Tags» между Birthday и Note (`Field.Tags`). «Kept as the server
-  sent them» свёрнуто, кнопка — `ForeignShow` («Show 3»). Другие книги —
+  sent them» свёрнуто, кнопка — `ForeignShow` («Show 3», без сценариев — её
+  ссылка, `?foreign=1`). Другие книги —
   `Books`: метка книги (`Field.Colour`), ссылка, чем разнится. Источник —
   `Source.Path` и `Source.Compared` («not changed on server»).
 - **Особое.** Здесь стоит **вся карточка**: телефоны и адреса с их метками,
@@ -576,12 +577,13 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
   голова (Display name, Given, Family, Nickname, Organisation, Title,
   Birthday), Phone numbers, Email addresses, Addresses, Other (Tags, Note),
   и в конце формы, после всех рубрик, своей строкой — «Show N empty fields»
-  (последний `FieldSet`, `Folded`: легенда — кнопка, строки свёрнуты; у
-  карточки без адресов в нём и «Add address»). Ширина поля — раскладка
+  (последний `FieldSet`, `Folded`: легенда — кнопка, строки свёрнуты, без
+  сценариев — ссылка `Unfold`; у карточки без адресов в нём и «Add address»). Ширина поля — раскладка
   экрана по `Name` (C-6.1: ширин вью-модель не несёт).
   Повторяющиеся строки телефонов, почты и адресов — с кнопкой добавления
   (`InputAdd`, «Add phone», «Add email», «Add address»), а не насыпанными
-  заранее пустыми полями: нажатие вставляет строки её `Template` (C-6.8). У
+  заранее пустыми полями (у новой карточки — одна пустая строка телефона,
+  s-contacts-27): нажатие вставляет строки её `Template` (C-6.8). У
   строки телефона и почты — Label, потом Number или Address; у адреса —
   Label (home, work…), Street, City, Region, Postcode, Country. Подписи Label
   и Number сервер шлёт у каждой строки, кадр ставит их только над первой — это
@@ -941,7 +943,7 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
 
 #### Подсказки поля поиска
 
-- **Вью-модель.** `SearchBox` внутри `TopBar`.
+- **Вью-модель.** `SearchBox` внутри `TopBar`; имя поля запроса — `Name` («q»).
 - **Виджеты.** `tc-search`.
 - **Особое.** Пока поле пусто — только история и подпись, что делать. Нажатие без
   запроса никуда не ведёт. При наборе появляется переход к уже известному из

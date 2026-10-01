@@ -3,8 +3,10 @@ package web
 import (
 	"context"
 	"fmt"
+	"maps"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 
 	"carrel.dev/carrel/server/internal/conf"
@@ -22,10 +24,14 @@ import (
 // the panel itself, and what a list with nothing to show says (U-6.0).
 
 // openKey carries ?open= past the builders of a list: the panel's row is
-// not a query the list's other links keep (C-6.4).
-type openKey struct{}
+// not a query the list's other links keep (C-6.4). foreignKey carries
+// ?foreign=1 with it: the panel's kept properties open (C-6.3 Details).
+type (
+	openKey    struct{}
+	foreignKey struct{}
+)
 
-// withoutOpen takes ?open= out of the request, to the context.
+// withoutOpen takes ?open= and ?foreign= out of the request, to the context.
 func withoutOpen(r *http.Request) *http.Request {
 	q := r.URL.Query()
 	open := q.Get("open")
@@ -33,7 +39,12 @@ func withoutOpen(r *http.Request) *http.Request {
 		return r
 	}
 	q.Del("open")
-	r = r.WithContext(context.WithValue(r.Context(), openKey{}, open))
+	ctx := context.WithValue(r.Context(), openKey{}, open)
+	if q.Get("foreign") == "1" {
+		ctx = context.WithValue(ctx, foreignKey{}, true)
+	}
+	q.Del("foreign")
+	r = r.WithContext(ctx)
 	u := *r.URL
 	u.RawQuery = q.Encode()
 	r.URL = &u
@@ -45,7 +56,8 @@ func compactCookie(segment string) string { return "carrel_compact_" + segment }
 
 // compactChoice takes «Compact rows» (?compact=1 or 0): the choice is this
 // browser's, kept by a cookie of the section, and the list comes back
-// without the mark. It reports whether it answered.
+// without the mark. The form of the bar sends the hidden 0 and, ticked, the
+// 1 after it: the last value is the choice. It reports whether it answered.
 func (s *Server) compactChoice(w http.ResponseWriter, r *http.Request, segment, back string) bool {
 	q := r.URL.Query()
 	v, ok := q["compact"]
@@ -54,7 +66,7 @@ func (s *Server) compactChoice(w http.ResponseWriter, r *http.Request, segment, 
 	}
 	cookie := &http.Cookie{Name: compactCookie(segment), Path: s.cookiePath(), HttpOnly: true,
 		SameSite: http.SameSiteLaxMode, Secure: s.secureCookies(r), MaxAge: -1}
-	if len(v) > 0 && v[0] == "1" {
+	if len(v) > 0 && v[len(v)-1] == "1" {
 		cookie.Value, cookie.MaxAge = "1", int(conf.ColumnsChoiceAge.Seconds())
 	}
 	http.SetCookie(w, cookie)
@@ -66,16 +78,31 @@ func (s *Server) compactChoice(w http.ResponseWriter, r *http.Request, segment, 
 	return true
 }
 
-// compactAction is «Compact rows» of the bar: on when this browser chose it,
-// and a link to the other choice.
-func (s *Server) compactAction(r *http.Request, segment, base string) *view.Action {
+// compactForm is «Compact rows» of the bar (s-contacts-1, components-38): a
+// check of a GET form on the list — the list's query hidden, so the choice
+// comes back to the same list, the hidden compact=0, and the check whose one
+// value is 1, ticked when this browser chose dense rows.
+func (s *Server) compactForm(r *http.Request, segment, base string) *view.Form {
 	on := false
 	if c, err := r.Cookie(compactCookie(segment)); err == nil && c.Value == "1" {
 		on = true
 	}
 	q := r.URL.Query()
-	q.Set("compact", map[bool]string{true: "0", false: "1"}[on])
-	return &view.Action{ID: "list.compact", Label: "Compact rows", Href: s.route(base + "?" + q.Encode()), Method: "GET", Enabled: true, On: on}
+	var rows []view.FormRow
+	for _, name := range slices.Sorted(maps.Keys(q)) {
+		if name == "compact" {
+			continue
+		}
+		for _, v := range q[name] {
+			rows = append(rows, view.FormRow{Name: name, Kind: view.InputHidden, Value: text(v)})
+		}
+	}
+	rows = append(rows,
+		view.FormRow{Name: "compact", Kind: view.InputHidden, Value: "0"},
+		view.FormRow{Name: "compact", Label: "Compact rows", Kind: view.InputCheck, Value: text(map[bool]string{true: "1"}[on]),
+			Options: []view.Option{{Value: "1", Label: "Compact rows", Selected: on}}})
+	f := s.plainForm(base, "GET", rows...)
+	return &f
 }
 
 // printAction is Print of a list's head (the owner's decision 4 of the
@@ -146,6 +173,16 @@ func (s *Server) openInPanel(r *http.Request, sess *session.Session, base string
 				d.Close = s.route(base)
 				if r.URL.RawQuery != "" {
 					d.Close += "?" + r.URL.RawQuery
+				}
+				// «Show 3» without scripts: the same list, the same panel,
+				// the kept properties open.
+				if opened, _ := r.Context().Value(foreignKey{}).(bool); opened {
+					d.ForeignShow = nil
+				} else if d.ForeignShow != nil {
+					q := r.URL.Query()
+					q.Set("open", open)
+					q.Set("foreign", "1")
+					d.ForeignShow.Href = s.route(base) + "?" + q.Encode()
 				}
 				return &d
 			}

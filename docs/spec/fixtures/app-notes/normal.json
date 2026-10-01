@@ -65,7 +65,8 @@
                 "required": false,
                 "value": "csrf"
               }
-            ]
+            ],
+            "unfold": null
           }
         ]
       },
@@ -633,7 +634,8 @@
               "required": false,
               "value": "/app/notes/a-nc-home/zapisi"
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     }
@@ -716,6 +718,7 @@
       "action": "/app/search",
       "history": [],
       "jump": [],
+      "name": "q",
       "query": "",
       "whole": null
     },

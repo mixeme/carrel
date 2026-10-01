@@ -62,7 +62,8 @@
             "required": false,
             "value": "true"
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },
@@ -144,7 +145,8 @@
             "required": true,
             "value": ""
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },
@@ -319,7 +321,8 @@
             "value": "temp-password",
             "mono": true
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },
@@ -341,7 +344,8 @@
       "history": [],
       "jump": [],
       "query": "",
-      "whole": null
+      "whole": null,
+      "name": "q"
     },
     "signed": {
       "instance": "carrel.example",

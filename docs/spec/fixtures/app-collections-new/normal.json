@@ -151,7 +151,8 @@
             "value": "",
             "mono": true
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },

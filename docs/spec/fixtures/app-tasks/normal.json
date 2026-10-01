@@ -65,7 +65,8 @@
                 "required": false,
                 "value": "csrf"
               }
-            ]
+            ],
+            "unfold": null
           }
         ]
       },
@@ -810,7 +811,8 @@
               "required": false,
               "value": "/app/tasks/a-nc-home/dela"
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     }
@@ -893,6 +895,7 @@
       "action": "/app/search",
       "history": [],
       "jump": [],
+      "name": "q",
       "query": "",
       "whole": null
     },

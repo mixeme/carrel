@@ -83,7 +83,8 @@
             "required": false,
             "value": "Михаил Енученко"
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "Email",
@@ -106,7 +107,8 @@
             "required": false,
             "value": "mix@example.org"
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },
@@ -237,7 +239,8 @@
       "history": [],
       "jump": [],
       "query": "",
-      "whole": null
+      "whole": null,
+      "name": "q"
     },
     "signed": {
       "instance": "carrel.example",

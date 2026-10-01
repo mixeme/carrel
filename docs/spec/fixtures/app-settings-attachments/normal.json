@@ -156,7 +156,8 @@
             "required": false,
             "value": "2 MB"
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "Folder",
@@ -237,7 +238,8 @@
             "required": false,
             "value": ""
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "File name",
@@ -270,7 +272,8 @@
             "required": false,
             "value": "dated"
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "In this folder now",
@@ -311,7 +314,8 @@
             "required": false,
             "value": "https://files.example.org/dav/alice/files/Documents/carrel/attachments/"
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },
@@ -433,7 +437,8 @@
       "history": [],
       "jump": [],
       "query": "",
-      "whole": null
+      "whole": null,
+      "name": "q"
     },
     "signed": {
       "instance": "carrel.example",

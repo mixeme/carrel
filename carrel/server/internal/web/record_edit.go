@@ -1958,6 +1958,9 @@ type editState struct {
 	// linked is the same note in other notebooks (S-16), for the column of
 	// its edit.
 	linked []view.Field
+	// unfold: the form came with ?fields=all — «Show N empty fields»
+	// without scripts — and folds nothing; its posts keep it so.
+	unfold bool
 }
 
 func (s *Server) editAction(c *collectionCtx, st editState) string {
@@ -2189,7 +2192,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		vals, errText := st.values[f.name], text(st.errors[f.name])
 		blank := !slices.ContainsFunc(vals, func(v string) bool { return strings.TrimSpace(v) != "" }) &&
 			!slices.ContainsFunc(removed, func(n string) bool { return strings.HasPrefix(n, f.name+".") })
-		hide := f.optional && full && st.obj != nil && blank && errText == ""
+		hide := f.optional && full && st.obj != nil && blank && errText == "" && !st.unfold
 		// The quick sheet is too small for rubrics: its few fields stand
 		// together, and only the reminders keep their own set (U-6.16).
 		legend := f.set
@@ -2412,10 +2415,17 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		if folded == 1 {
 			legend = "Show 1 empty field"
 		}
-		sets = append(sets, view.FieldSet{Legend: text(legend), Folded: true, Rows: empty})
+		// Without scripts the fold is a link to the same form with every
+		// field in its rubric.
+		unfold := &view.Action{ID: "form.unfold", Label: text(legend), Href: s.route(s.editAction(c, st) + "?fields=all"), Method: "GET", Enabled: true}
+		sets = append(sets, view.FieldSet{Legend: text(legend), Folded: true, Unfold: unfold, Rows: empty})
+	}
+	action := s.editAction(c, st)
+	if st.unfold {
+		action += "?fields=all"
 	}
 	form := view.Form{
-		Action: s.route(s.editAction(c, st)), Method: "POST", Sets: sets,
+		Action: s.route(action), Method: "POST", Sets: sets,
 		Actions: []view.Action{{ID: "record.save", Label: "Save", Method: "POST", Primary: true, Enabled: !c.col.ReadOnly}, s.cancelAction(c, st)},
 	}
 	names := make([]string, 0, len(st.errors))
@@ -2590,7 +2600,7 @@ func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string
 	s.rememberBody(c, obj)
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
 		obj: obj, uid: uid, values: vals, alarms: alarms, etag: obj.ETag, readAt: s.now(),
-		linked: s.noteLinked(r.Context(), c, uid, obj),
+		linked: s.noteLinked(r.Context(), c, uid, obj), unfold: r.URL.Query().Get("fields") == "all",
 	}))
 }
 
@@ -2644,7 +2654,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	etag := strings.TrimSpace(r.FormValue("etag"))
 	readAt := unixForm(r.FormValue("readat"))
 	want := s.submittedValues(c, r)
-	st := editState{uid: uid, values: want, etag: etag, readAt: readAt}
+	st := editState{uid: uid, values: want, etag: etag, readAt: readAt, unfold: r.URL.Query().Get("fields") == "all"}
 	// A note's Notebook other than its own: the edit is saved, then the
 	// note moves there (s-notes-20, S-18).
 	moving := false

@@ -131,8 +131,8 @@ func TestContactCardIsTheFrames(t *testing.T) {
 	// «Show 3» by the kept properties.
 	if m := frameShowKept.FindStringSubmatch(frame); m == nil {
 		t.Fatal("s-contacts-6 draws no «Show N»: read the frame again")
-	} else if shape := regexp.MustCompile("^" + frameDigits.ReplaceAllString(m[1], `\d+`) + "$"); !shape.MatchString(string(page.ForeignShow)) || !strings.HasSuffix(string(page.ForeignShow), " "+strconv.Itoa(len(page.Foreign))) {
-		t.Errorf("foreign show = %q for %d, the frame %q", page.ForeignShow, len(page.Foreign), m[1])
+	} else if shape := regexp.MustCompile("^" + frameDigits.ReplaceAllString(m[1], `\d+`) + "$"); page.ForeignShow == nil || !shape.MatchString(string(page.ForeignShow.Label)) || !strings.HasSuffix(string(page.ForeignShow.Label), " "+strconv.Itoa(len(page.Foreign))) {
+		t.Errorf("foreign show = %+v for %d, the frame %q", page.ForeignShow, len(page.Foreign), m[1])
 	}
 
 	// The inset: its count, a colour by each row, the icon of the way to it.

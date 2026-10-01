@@ -49,6 +49,7 @@ type Refresh struct {
 type SearchBox struct {
 	Query   Text               `json:"query"`
 	Action  string             `json:"action"`
+	Name    string             `json:"name"`    // имя поля запроса формы GET на Action: «q»
 	History []SearchHistoryRow `json:"history"` // C-6.6
 	Jump    []JumpRow          `json:"jump"`    // подсказки из памяти сеанса: ни одного запроса
 	Whole   *Action            `json:"whole"`   // «Timeline · имя»; nil — контакт не совпал
@@ -136,8 +137,10 @@ type Details struct {
 	Attach    []AttachRow   `json:"attach"`
 	Related   []TimelineRow `json:"related"`
 	Foreign   []Field       `json:"foreign"` // контакт: чужие свойства, как их прислал сервер
-	// ForeignShow — «Show 3», кнопка, раскрывающая Foreign; пусто — их нет
-	ForeignShow Text        `json:"foreignShow"`
+	// ForeignShow — «Show 3», кнопка, раскрывающая Foreign: без сценариев —
+	// ссылка на тот же список с этой панелью и ?foreign=1; nil — их нет или
+	// они раскрыты
+	ForeignShow *Action     `json:"foreignShow"`
 	Books       []Field     `json:"books"` // контакт: тот же человек в других книгах (s-contacts-7)
 	Source      SourceBlock `json:"source"`
 	Actions     []Action    `json:"actions"`    // кнопки на виду; удаление — Danger, внизу панели

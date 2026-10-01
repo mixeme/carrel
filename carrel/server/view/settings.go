@@ -12,7 +12,10 @@ type FieldSet struct {
 	Legend Text `json:"legend"`
 	// Folded — набор свёрнут: Legend — кнопка, раскрывающая строки («Show 6
 	// empty fields», s-contacts-3)
-	Folded bool      `json:"folded,omitempty"`
+	Folded bool `json:"folded,omitempty"`
+	// Unfold — та кнопка без сценариев: GET на ту же форму с ?fields=all,
+	// где каждое поле в своей рубрике; nil у несвёрнутого набора
+	Unfold *Action   `json:"unfold"`
 	Rows   []FormRow `json:"rows"`
 }
 type FormRow struct {

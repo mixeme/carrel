@@ -36,7 +36,13 @@ func (s *Server) getKindRecord(w http.ResponseWriter, r *http.Request, kind stri
 		// panel — the same record, without the screen around it.
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetDetails, s.recordDetails(c, uid, obj), nil)
 	default:
-		s.writePage(w, r, http.StatusOK, s.withLinked(r.Context(), c, uid, obj, s.recordPage(c, uid, obj)))
+		page := s.withLinked(r.Context(), c, uid, obj, s.recordPage(c, uid, obj))
+		// «Show 3» without scripts: the card with the kept properties open.
+		if p, ok := page.(view.ContactPage); ok && r.URL.Query().Get("foreign") == "1" {
+			p.ForeignShow = nil
+			page = p
+		}
+		s.writePage(w, r, http.StatusOK, page)
 	}
 }
 
@@ -68,7 +74,8 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		av := avatarFor(uid, contactName(obj))
 		av.Href, _ = s.cardPhoto(c, uid, obj)
 		d.Avatar = &av
-		d.Foreign, d.ForeignShow = card.Foreign(obj), foreignShow(card.Foreign(obj))
+		d.Foreign = card.Foreign(obj)
+		d.ForeignShow = s.foreignShow(d.Foreign, c.recordPath(uid))
 		// All records: the person's timeline, beside Edit (s-contacts-1).
 		d.Actions = shown(ops.edit, &view.Action{ID: "contact.timeline", Label: "All records",
 			Href: s.route(c.recordPath(uid) + "/timeline"), Method: "GET", Enabled: true}, ops.del)
@@ -132,12 +139,15 @@ func panelFields(own, more []view.Field) []view.Field {
 }
 
 // foreignShow is the button that opens the kept properties, with their
-// count: «Show 3» (s-contacts-1, -6); none when there are none.
-func foreignShow(foreign []view.Field) view.Text {
+// count: «Show 3» (s-contacts-1, -6); none when there are none. Without
+// scripts it is the card with them open (?foreign=1); the panel beside a
+// list points it at the list with the panel instead (openInPanel).
+func (s *Server) foreignShow(foreign []view.Field, card string) *view.Action {
 	if len(foreign) == 0 {
-		return ""
+		return nil
 	}
-	return text("Show " + strconv.Itoa(len(foreign)))
+	return &view.Action{ID: "contact.foreign", Label: text("Show " + strconv.Itoa(len(foreign))),
+		Href: s.route(card + "?foreign=1"), Method: "GET", Enabled: true}
 }
 
 // noteWhen is when a note was written: its day, and the time when it has
@@ -417,7 +427,7 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	}
 	page.Fields = withBirthdayAside(withTagLinks(page.Fields, s.recordTags(c, obj)), c.tf)
 	page.Foreign = card.Foreign(obj)
-	page.ForeignShow = foreignShow(page.Foreign)
+	page.ForeignShow = s.foreignShow(page.Foreign, c.recordPath(uid))
 	// The inset shows the timeline this session gathered; opening the card
 	// gathers nothing (S-15.4). The way to it is always there.
 	page.Timeline, page.TimelineCount = s.timelineInset(c, uid, obj)

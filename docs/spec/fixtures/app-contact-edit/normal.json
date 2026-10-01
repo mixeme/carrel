@@ -147,7 +147,8 @@
             "required": false,
             "value": "14.03.1987"
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "Phone numbers",
@@ -370,7 +371,8 @@
             ],
             "value": "tel"
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "Email addresses",
@@ -493,7 +495,8 @@
             ],
             "value": "email"
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "Other",
@@ -522,7 +525,8 @@
             "required": false,
             "value": "Пишет по вторникам, отвечает в тот же день."
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "folded": true,
@@ -643,7 +647,14 @@
             ],
             "value": "adr"
           }
-        ]
+        ],
+        "unfold": {
+          "enabled": true,
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit?fields=all",
+          "id": "form.unfold",
+          "label": "Show 1 empty field",
+          "method": "GET"
+        }
       }
     ]
   },
@@ -936,6 +947,7 @@
       "action": "/app/search",
       "history": [],
       "jump": [],
+      "name": "q",
       "query": "",
       "whole": null
     },

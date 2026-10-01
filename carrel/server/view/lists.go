@@ -10,10 +10,11 @@ type ListBar struct {
 	FilterForm *Form `json:"filterForm"`
 	Loaded     int   `json:"loaded"`
 	Total      *int  `json:"total"`
-	// Compact — «Compact rows» (s-contacts-1): On — строки плотные; ведёт на
-	// тот же список с compact=1 или 0 (кука раздела, S-9.6); nil —
-	// переключателя нет
-	Compact  *Action  `json:"compact"`
+	// Compact — «Compact rows» (s-contacts-1, components-38): форма GET на
+	// адрес списка — скрытые поля запроса списка, скрытое compact=0 и
+	// отметка compact с одним вариантом «1» (Selected — строки плотные);
+	// выбор помнит кука раздела (S-9.6); nil — переключателя нет
+	Compact  *Form    `json:"compact"`
 	Segments []Action `json:"segments"` // Open / Done / All; All / Contacts / Events / …
 	Range    *Range   `json:"range"`    // диапазон дат там, где он есть
 	Actions  []Action `json:"actions"`  // операции над выделенным

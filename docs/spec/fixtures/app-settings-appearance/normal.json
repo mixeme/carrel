@@ -78,7 +78,8 @@
             "required": false,
             "value": "24"
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },
@@ -111,7 +112,8 @@
             "required": false,
             "value": "Europe/Moscow"
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },
@@ -236,7 +238,8 @@
       "history": [],
       "jump": [],
       "query": "",
-      "whole": null
+      "whole": null,
+      "name": "q"
     },
     "signed": {
       "instance": "carrel.example",

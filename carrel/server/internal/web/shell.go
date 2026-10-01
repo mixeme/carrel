@@ -15,6 +15,7 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 		Top: view.TopBar{
 			Search: view.SearchBox{
 				Action:  s.route("/app/search"),
+				Name:    "q",
 				History: nil,
 				Jump:    nil,
 				Whole:   nil,

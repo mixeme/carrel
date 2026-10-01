@@ -261,7 +261,8 @@
               "required": false,
               "value": "/app/files"
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     }
@@ -344,6 +345,7 @@
       "action": "/app/search",
       "history": [],
       "jump": [],
+      "name": "q",
       "query": "",
       "whole": null
     },

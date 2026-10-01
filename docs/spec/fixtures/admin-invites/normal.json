@@ -110,7 +110,8 @@
       "history": [],
       "jump": [],
       "query": "",
-      "whole": null
+      "whole": null,
+      "name": "q"
     },
     "signed": {
       "instance": "carrel.example",
@@ -285,7 +286,8 @@
               "required": false,
               "value": ""
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     },
@@ -352,7 +354,8 @@
               "required": false,
               "value": ""
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     },
@@ -474,7 +477,8 @@
               "value": "temp-password",
               "mono": true
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     },

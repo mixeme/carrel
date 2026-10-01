@@ -45,7 +45,8 @@
             "required": false,
             "value": "csrf"
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },

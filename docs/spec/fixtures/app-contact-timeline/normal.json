@@ -123,7 +123,8 @@
                 "required": false,
                 "value": "csrf"
               }
-            ]
+            ],
+            "unfold": null
           }
         ]
       },
@@ -297,7 +298,7 @@
     "subtitle": "",
     "close": "",
     "books": [],
-    "foreignShow": ""
+    "foreignShow": null
   },
   "details": null,
   "groups": [
@@ -765,7 +766,8 @@
               "required": false,
               "value": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline"
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     }
@@ -814,7 +816,8 @@
               "value": "2026-11-10",
               "mono": true
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     },
@@ -839,7 +842,8 @@
       "history": [],
       "jump": [],
       "query": "",
-      "whole": null
+      "whole": null,
+      "name": "q"
     },
     "signed": {
       "instance": "carrel.example",

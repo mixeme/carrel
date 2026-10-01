@@ -73,7 +73,8 @@
                 "required": false,
                 "value": "csrf"
               }
-            ]
+            ],
+            "unfold": null
           }
         ]
       },
@@ -126,11 +127,48 @@
       "label": "Columns"
     },
     "compact": {
-      "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty?compact=1",
-      "id": "list.compact",
-      "label": "Compact rows",
-      "method": "GET"
+      "action": "/app/contacts/a-nc-home/kontakty",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "compact",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "0"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "check",
+              "label": "Compact rows",
+              "name": "compact",
+              "options": [
+                {
+                  "label": "Compact rows",
+                  "selected": false,
+                  "value": "1"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
     },
     "filter": "",
     "filterForm": {
@@ -154,7 +192,8 @@
               "required": false,
               "value": ""
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     },
@@ -624,7 +663,8 @@
               "required": false,
               "value": "/app/contacts/a-nc-home/kontakty"
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     }
@@ -709,6 +749,7 @@
       "action": "/app/search",
       "history": [],
       "jump": [],
+      "name": "q",
       "query": "",
       "whole": null
     },

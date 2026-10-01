@@ -772,7 +772,7 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 	sift := strings.TrimSpace(r.URL.Query().Get("filter"))
 	page.Bar.Filter, page.Bar.FilterForm = text(sift), s.listFilter(c.listPath(), r.URL.Query(), sift)
-	page.Bar.Compact = s.compactAction(r, c.spec.segment, c.listPath())
+	page.Bar.Compact = s.compactForm(r, c.spec.segment, c.listPath())
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, err := c.contactsAll(r.Context())
 	if err != nil {

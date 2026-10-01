@@ -280,7 +280,8 @@
             "required": false,
             "value": "0"
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },
@@ -521,7 +522,8 @@
               "required": false,
               "value": ""
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     },
@@ -606,6 +608,7 @@
       "action": "/app/search",
       "history": [],
       "jump": [],
+      "name": "q",
       "query": "",
       "whole": null
     },

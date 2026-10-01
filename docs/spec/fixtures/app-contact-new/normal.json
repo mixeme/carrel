@@ -147,7 +147,8 @@
             "required": false,
             "value": ""
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "Phone numbers",
@@ -302,7 +303,8 @@
             ],
             "value": "tel"
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "Email addresses",
@@ -373,7 +375,8 @@
             ],
             "value": "email"
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "Addresses",
@@ -493,7 +496,8 @@
             ],
             "value": "adr"
           }
-        ]
+        ],
+        "unfold": null
       },
       {
         "legend": "Other",
@@ -522,7 +526,8 @@
             "required": false,
             "value": ""
           }
-        ]
+        ],
+        "unfold": null
       }
     ]
   },
@@ -792,6 +797,7 @@
       "action": "/app/search",
       "history": [],
       "jump": [],
+      "name": "q",
       "query": "",
       "whole": null
     },

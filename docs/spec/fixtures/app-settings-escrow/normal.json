@@ -62,7 +62,8 @@
               "value": "",
               "focus": true
             }
-          ]
+          ],
+          "unfold": null
         }
       ]
     },
@@ -207,7 +208,8 @@
       "history": [],
       "jump": [],
       "query": "",
-      "whole": null
+      "whole": null,
+      "name": "q"
     },
     "signed": {
       "instance": "carrel.example",

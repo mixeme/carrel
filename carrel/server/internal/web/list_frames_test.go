@@ -196,28 +196,19 @@ func TestContactsListIsTheFrames(t *testing.T) {
 		t.Errorf("filtered = %q (filter %q)", names, filtered.Bar.Filter)
 	}
 
-	// Compact rows: a link, remembered by this browser.
+	// Compact rows: a check of a form, off as the frame draws it
+	// (TestCompactRowsIsACheck holds the rest).
+	tick := regexp.MustCompile(`<button class="tc-check" type="button"><span class="tc-tickrow__tick( is-off)?"></span>([^<]*)</button>`).FindStringSubmatch(frame)
+	if tick == nil {
+		t.Fatal("s-contacts-1 draws no «Compact rows»: read the frame again")
+	}
 	c := page.Bar.Compact
-	if c == nil || c.On || !strings.Contains(c.Href, "compact=1") {
+	if c == nil || len(c.Sets) != 1 {
 		t.Fatalf("compact = %+v", c)
 	}
-	rec := app.h.do(get(c.Href, app.sess))
-	if rec.Code != http.StatusSeeOther || strings.Contains(rec.Header().Get("Location"), "compact") {
-		t.Fatalf("compact: %d %q", rec.Code, rec.Header().Get("Location"))
-	}
-	var cookie *http.Cookie
-	for _, k := range rec.Result().Cookies() {
-		if k.Name == "carrel_compact_contacts" {
-			cookie = k
-		}
-	}
-	if cookie == nil || cookie.Value != "1" || !cookie.HttpOnly {
-		t.Fatalf("cookie = %+v", cookie)
-	}
-	req := get("/app/contacts?task="+page.Poll.TaskID, app.sess)
-	req.AddCookie(cookie)
-	if again := decode[view.ContactsListPage](t, app.h.do(req)); again.Bar.Compact == nil || !again.Bar.Compact.On || !strings.Contains(again.Bar.Compact.Href, "compact=0") {
-		t.Errorf("compact after the choice = %+v", again.Bar.Compact)
+	check := c.Sets[0].Rows[len(c.Sets[0].Rows)-1]
+	if check.Kind != view.InputCheck || len(check.Options) != 1 || string(check.Options[0].Label) != tick[2] || check.Options[0].Selected != (tick[1] == "") {
+		t.Errorf("compact check = %+v, the frame %q on %v", check, tick[2], tick[1] == "")
 	}
 }
 

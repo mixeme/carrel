@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.94 — 2026-10-01
+
+What the client's stop of the contacts section (plan/client.md, C12–C14)
+found the contract owing: buttons of the frames with nowhere to go without
+scripts, a check sent as a link, a field the client had to name itself.
+
+### Changed
+
+- **`ForeignShow` is an action** (C-6.3 `Details`, C-6.5 `ContactPage`):
+  «Show 3» with a link to the same card with `?foreign=1`, or to the same
+  list with the same panel and `?foreign=1`; there it is `null` and the kept
+  properties stay — `null` means none, or open. Was the label alone.
+- **«Show N empty fields» has a way without scripts** (C-6.8
+  `FieldSet.Unfold`): GET to the same form with `?fields=all`, where nothing
+  is folded and every field stands in its rubric; the form posts back there
+  and stays unfolded.
+- **«Compact rows» is a check of a form** (C-6.4 `ListBar.Compact` is a
+  `Form` now, s-contacts-1, components-38): GET to the list, the list's
+  query hidden, a hidden `compact=0`, and the check `compact` with one
+  option `1`, selected when dense. `?compact=` with several values takes
+  the last. Was a link with `On`.
+- **The search box names its field** (C-6.3 `SearchBox.Name`): `q`.
+
 ## v0.2.93 — 2026-10-01
 
 The full form of a new contact has a frame of its own, s-contacts-27
