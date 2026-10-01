@@ -207,8 +207,8 @@ func TestRendererFallsBackToJSON(t *testing.T) {
 }
 
 // A built screen falls back to JSON where the answer is not its screen: a
-// zone a page outside the shell does not have, an update out of band, JSON
-// itself, an event.
+// zone a page outside the shell does not have, a zone of the shell no screen
+// draws alone (queue, topbar), an update out of band, JSON itself, an event.
 func TestRendererFallsBackOnBuiltScreens(t *testing.T) {
 	l := load(t)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -224,10 +224,7 @@ func TestRendererFallsBackOnBuiltScreens(t *testing.T) {
 			t.Fatal(err)
 		}
 		at := label(scr)
-		for name, write := range map[string]writing{
-			"rail": func(rd render.Renderer, w http.ResponseWriter) error {
-				return rd.Fragment(w, req, http.StatusOK, render.TargetRail, byValue(model), nil)
-			},
+		cases := map[string]writing{
 			"sheet": func(rd render.Renderer, w http.ResponseWriter) error {
 				return rd.Fragment(w, req, http.StatusOK, render.TargetSheet, byValue(model), nil)
 			},
@@ -237,7 +234,19 @@ func TestRendererFallsBackOnBuiltScreens(t *testing.T) {
 			"json": func(rd render.Renderer, w http.ResponseWriter) error {
 				return rd.JSON(w, http.StatusOK, byValue(model))
 			},
-		} {
+		}
+		// A page outside the shell has no rail; a page in the shell has a
+		// queue and a top bar no screen draws alone.
+		others := []string{render.TargetRail}
+		if zone.KindOf(model) == zone.ShellPage {
+			others = []string{render.TargetQueue, render.TargetTopbar}
+		}
+		for _, target := range others {
+			cases[target] = func(rd render.Renderer, w http.ResponseWriter) error {
+				return rd.Fragment(w, req, http.StatusOK, target, byValue(model), nil)
+			}
+		}
+		for name, write := range cases {
 			c1, t1, b1 := answer(t, rd, write)
 			c2, t2, b2 := answer(t, render.JSONRenderer{}, write)
 			if c1 != c2 || t1 != t2 || b1 != b2 {
@@ -254,5 +263,59 @@ func TestRendererFallsBackOnBuiltScreens(t *testing.T) {
 		if got.String() != want.String() {
 			t.Errorf("%s: the event is not the JSON renderer's", at)
 		}
+	}
+}
+
+// Each fixture of a built screen in the shell answers the zones of C-7.2 its
+// screen draws alone as HTML (renderer.ShellZone): main — the page as the
+// page shows it, a part of the page that passed the frame comparison —,
+// details — the panel, or nothing —, rail, notices and poll (nothing while
+// no bar stands), each with the page's forms after it, and each a part of
+// the page served; their classes are the library's.
+func TestRendererDrawsShellZones(t *testing.T) {
+	l := load(t)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	n := 0
+	for _, scr := range screens.All {
+		for _, path := range l.fixtures(scr) {
+			model, err := decode(scr, path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if zone.KindOf(model) != zone.ShellPage {
+				continue
+			}
+			at := label(scr) + " on " + key(path)
+			_, _, page := answer(t, renderer.New(""), func(rd render.Renderer, w http.ResponseWriter) error {
+				return rd.Page(w, req, http.StatusOK, byValue(model))
+			})
+			forms := formsOf(scr, model)
+			for _, target := range []string{render.TargetMain, render.TargetDetails, render.TargetRail, render.TargetNotices, render.TargetPoll} {
+				want, drawn := renderer.ShellZone(scr, model, target)
+				if !drawn {
+					if target != render.TargetPoll {
+						t.Errorf("%s: the screen does not draw %s alone", at, target)
+					}
+					continue
+				}
+				n++
+				code, ctype, body := answer(t, renderer.New(""), func(rd render.Renderer, w http.ResponseWriter) error {
+					return rd.Fragment(w, req, http.StatusOK, target, byValue(model), nil)
+				})
+				if code != http.StatusOK || ctype != htmlType || body != want+forms {
+					t.Errorf("%s, %s: %d %q, not the zone and the forms", at, target, code, ctype)
+					continue
+				}
+				if !strings.Contains(page, want) {
+					t.Errorf("%s, %s: the zone is not a part of the page", at, target)
+				}
+				for _, f := range classFindings(l, at+", "+target, want) {
+					t.Error(f)
+				}
+			}
+		}
+	}
+	if n == 0 {
+		t.Fatal("no zone of a built screen in the shell")
 	}
 }

@@ -11,13 +11,17 @@
 //   - Page: the model has a screen — the screen's document (document.Of:
 //     Typecase's page around the root, the forms at its end), text/html,
 //     with the status the server gives; otherwise JSON.
-//   - Fragment: the model has a screen, the target is main of a page
-//     outside the shell or sheet of a sheet, and nothing goes out of band —
-//     the screen's root and the forms its buttons submit, text/html;
-//     otherwise JSON. The zones proper — rail, details, notices, poll,
-//     queue, topbar cut out of a page in the shell (zone), and the
-//     out-of-band updates of C-7.3 — come with the shell and Typecase's
-//     swapping of zones; until then they are JSON.
+//   - Fragment: the model has a screen and nothing goes out of band. Of a
+//     page outside the shell, main, and of a sheet, sheet, are the screen's
+//     root and the forms its buttons submit. Of a page in the shell, a zone
+//     of C-7.2 the screen draws alone is the part of its tree that zone is
+//     (shellZone): main — the page (tc-main), details — the panel (tc-side;
+//     an empty answer when there is none, which closes it), rail — the
+//     rail's parts, notices — the notices as the screens draw them
+//     (bind.Notice), poll — the poll's bar (bind.Runbar; empty while none
+//     stands), each with the page's forms; text/html. The rest — queue and
+//     topbar, which no screen built draws alone, the out-of-band updates of
+//     C-7.3 — is JSON until Typecase swaps zones.
 //   - Event and JSON: JSON — the events of C-7.4 carry fragments of the
 //     shell, and JSON is JSON.
 package renderer
@@ -27,10 +31,13 @@ import (
 	"net/http"
 	"reflect"
 
+	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/client/document"
 	"carrel.dev/carrel/client/screens"
 	"carrel.dev/carrel/client/zone"
 	"carrel.dev/carrel/server/render"
+	"carrel.dev/carrel/server/view"
+	w "carrel.dev/typecase/widget"
 )
 
 // Renderer answers the server's view models with the client's screens.
@@ -96,23 +103,95 @@ func (r *Renderer) Page(w http.ResponseWriter, req *http.Request, status int, bo
 }
 
 // Fragment answers a fragment: the screen's root and its forms for main of a
-// page outside the shell and for sheet of a sheet, when nothing goes out of
-// band; JSON otherwise (the package's doc).
+// page outside the shell and for sheet of a sheet, a zone the screen draws
+// alone of a page in the shell, when nothing goes out of band; JSON
+// otherwise (the package's doc).
 func (r *Renderer) Fragment(w http.ResponseWriter, req *http.Request, status int, target string, body any, extra []render.OOB) error {
 	scr, model, ok := r.screenOf(body)
 	if ok && len(extra) == 0 {
 		kind := zone.KindOf(model)
-		if (target == render.TargetMain && kind == zone.PlainPage) || (target == render.TargetSheet && kind == zone.Sheet) {
-			out := scr.Draw(model).Render()
-			if scr.Forms != nil {
-				for _, f := range scr.Forms(model) {
-					out += f.Render()
-				}
-			}
-			return writeHTML(w, status, out)
+		out, drawn := "", false
+		switch {
+		case (target == render.TargetMain && kind == zone.PlainPage) || (target == render.TargetSheet && kind == zone.Sheet):
+			out, drawn = scr.Draw(model).Render(), true
+		case kind == zone.ShellPage:
+			out, drawn = ShellZone(scr, model, target)
+		}
+		if drawn {
+			return writeHTML(w, status, out+forms(scr, model))
 		}
 	}
 	return r.json.Fragment(w, req, status, target, body, extra)
+}
+
+// forms are the forms a screen prints at the page's end, printed.
+func forms(scr screens.Screen, model any) string {
+	out := ""
+	if scr.Forms != nil {
+		for _, f := range scr.Forms(model) {
+			out += f.Render()
+		}
+	}
+	return out
+}
+
+// renders is a widget that prints itself.
+type renders interface{ Render() string }
+
+// ShellZone is the zone target of a page in the shell as its screen draws it
+// (the package's doc), and whether the screen draws that zone alone: main,
+// details and rail are the parts of the screen's shell; notices and poll are
+// the model's zone (zone.Of) translated as the screens translate them.
+func ShellZone(scr screens.Screen, model any, target string) (string, bool) {
+	switch target {
+	case render.TargetNotices:
+		ns, err := zone.Of(model, target)
+		if err != nil {
+			return "", false
+		}
+		out := ""
+		for _, n := range ns.([]view.Notice) {
+			out += bind.Notice(n, w.MsgSpacePage).Render()
+		}
+		return out, true
+	case render.TargetPoll:
+		p, err := zone.Of(model, target)
+		if err != nil {
+			return "", false
+		}
+		if bar := bind.Runbar(p.(*view.PollBar)); bar != nil {
+			return bar.Render(), true
+		}
+		return "", true
+	}
+	shell, ok := scr.Draw(model).(w.Shell)
+	if !ok {
+		return "", false
+	}
+	body, ok := shell.Body.(w.ShellBody)
+	if !ok {
+		return "", false
+	}
+	switch target {
+	case render.TargetMain:
+		return body.Main.Render(), true
+	case render.TargetDetails:
+		if body.Side == nil {
+			return "", true
+		}
+		return body.Side.Render(), true
+	case render.TargetRail:
+		out := ""
+		for _, part := range body.Rail {
+			p, ok := part.(renders)
+			if !ok {
+				return "", false
+			}
+			out += p.Render()
+		}
+		return out, true
+	}
+	return "", false
 }
 
 // JSON is JSON.
