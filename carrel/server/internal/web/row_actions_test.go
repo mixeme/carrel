@@ -165,7 +165,9 @@ func TestBackupRowsAndJobPageAreTheFrame(t *testing.T) {
 	if dlPage.Title != text(dl.Name) || dlPage.Subtitle != "Job · last copy just now" {
 		t.Errorf("head = %q / %q", dlPage.Title, dlPage.Subtitle)
 	}
-	if list.Subtitle != "" || list.Title != "Backup" {
+	// The list counts its jobs under the title (s-backup-1: «Three jobs ·
+	// their own sources, destinations and triggers»).
+	if list.Subtitle != "Two jobs · their own sources, destinations and triggers" || list.Title != "Backup" {
 		t.Errorf("list head = %q / %q", list.Title, list.Subtitle)
 	}
 	page := decode[view.BackupPage](t, f.h.do(get(actionHref(t, list.Jobs[1].Actions, "backup.edit"), f.sess)))

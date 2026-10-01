@@ -1,4 +1,23 @@
 {
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/settings/backup?job=new",
+      "icon": "i-plus",
+      "id": "backup.new",
+      "label": "New job",
+      "method": "GET",
+      "primary": true
+    },
+    {
+      "enabled": true,
+      "href": "/app/settings/backup?restore=1",
+      "icon": "i-back",
+      "id": "restore.start",
+      "label": "Restore",
+      "method": "GET"
+    }
+  ],
   "add": {
     "action": "/app/settings/backup?op=save",
     "actions": [
@@ -289,6 +308,37 @@
   "delete": null,
   "deleteNote": "",
   "details": null,
+  "empty": [
+    {
+      "text": "Carrel copies raw "
+    },
+    {
+      "mark": "mono",
+      "text": ".ics"
+    },
+    {
+      "text": ", "
+    },
+    {
+      "mark": "mono",
+      "text": ".vcf"
+    },
+    {
+      "text": " and files to storage of your own, with a manifest and a read-back check. Nothing is kept here."
+    }
+  ],
+  "emptyNote": [
+    {
+      "text": "Already have an archive from another instance? "
+    },
+    {
+      "mark": "strong",
+      "text": "Restore"
+    },
+    {
+      "text": " takes it from a file — a job is not needed for that."
+    }
+  ],
   "jobs": [],
   "notices": [],
   "print": {
@@ -393,6 +443,7 @@
   "restore": {
     "actions": [],
     "note": "Restoring creates: the records go into a new collection, never over what is there now. The archive is opened and shown before anything is written.",
+    "open": false,
     "preview": [],
     "source": {
       "action": "/app/settings/backup?op=restore-open",
@@ -533,7 +584,7 @@
     },
     "targets": []
   },
-  "subtitle": "",
+  "subtitle": "No jobs yet",
   "title": "Backup",
   "top": {
     "new": {

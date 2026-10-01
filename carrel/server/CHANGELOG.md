@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.112 — 2026-10-01
+
+The head and the empty state of Backup by their frames (s-backup-1,
+s-backup-6): Restore is found where the copies are, with or without a job.
+
+### Changed
+
+- **`BackupPage.actions`** (C-6): New job (primary, `?job=new` — the page
+  of a job not made yet: «New job», the form, Save and Cancel) and Restore
+  (`?restore=1` — the page with `restore.open`), on the list with jobs and
+  without.
+- **`BackupPage.subtitle` on the list**: «Three jobs · their own sources,
+  destinations and triggers», «One job · …», «No jobs yet» (was empty).
+- **`BackupPage.empty`, `.emptyNote`** (Runs): with no job, what a copy does
+  (‹.ics›, ‹.vcf› monospaced) and that Restore needs no job (**Restore**).
+- **`RestoreBlock.open`**: the restore is open — from Restore in the head,
+  or with an archive open.
+
 ## v0.2.111 — 2026-10-01
 
 A refused new collection left the sheet with Create only; the frame's foot

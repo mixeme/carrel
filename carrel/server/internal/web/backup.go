@@ -460,7 +460,31 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 		page.DeleteNote = "Archives already made stay where they are: the schedule is deleted, not the copies."
 	}
 	page.Restore = s.restoreBlock(sess, blob)
+	if editing == nil {
+		backupHead(&page, len(blob.BackupJobs))
+		page.Actions = []view.Action{
+			{ID: "backup.new", Label: "New job", Icon: "i-plus", Href: s.postQuery("/app/settings/backup", url.Values{"job": {"new"}}), Method: "GET", Primary: true, Enabled: true},
+			{ID: "restore.start", Label: "Restore", Icon: "i-back", Href: s.postQuery("/app/settings/backup", url.Values{"restore": {"1"}}), Method: "GET", Enabled: true},
+		}
+	}
 	return page
+}
+
+// backupHead is the line under the title of the list and its empty state
+// (s-backup-1, s-backup-6): how many jobs there are, or that there are none
+// and that a restore needs none.
+func backupHead(page *view.BackupPage, jobs int) {
+	switch jobs {
+	case 0:
+		page.Subtitle = "No jobs yet"
+		page.Empty = join("Carrel copies raw ", monoRun(".ics"), ", ", monoRun(".vcf"), " and files to storage of your own, with a manifest and a read-back check. Nothing is kept here.")
+		page.EmptyNote = join("Already have an archive from another instance? ", strongRun("Restore"), " takes it from a file — a job is not needed for that.")
+	case 1:
+		page.Subtitle = "One job · its own sources, destination and trigger"
+	default:
+		n := countWord(jobs)
+		page.Subtitle = text(strings.ToUpper(n[:1]) + n[1:] + " jobs · their own sources, destinations and triggers")
+	}
 }
 
 // backupRunAction starts the job from the screen. A job that writes to
@@ -630,7 +654,18 @@ func (s *Server) getSettingsBackup(w http.ResponseWriter, r *http.Request) {
 		editing = &job
 	}
 	w.Header().Set("Cache-Control", "no-store")
-	s.writePage(w, r, http.StatusOK, s.backupPage(sess, editing, nil))
+	page := s.backupPage(sess, editing, nil)
+	switch {
+	case q.Get("job") == "new":
+		// New job (s-backup-1): the page of a job not made yet — the form,
+		// Save and Cancel.
+		page.Title, page.Subtitle, page.Actions, page.Empty, page.EmptyNote = "New job", "", nil, nil, nil
+		page.Add.Actions = append(page.Add.Actions,
+			view.Action{ID: "backup.cancel", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true})
+	case q.Get("restore") != "":
+		page.Restore.Open = true
+	}
+	s.writePage(w, r, http.StatusOK, page)
 }
 
 func runningNotice(job sealed.BackupJob) view.Notice {

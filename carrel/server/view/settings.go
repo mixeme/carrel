@@ -275,7 +275,20 @@ type ProxyDevice struct {
 
 type BackupPage struct {
 	Shell
-	Subtitle   Text         `json:"subtitle"` // на странице задания: «Job · last copy 2 days ago»; пусто на списке
+	// Subtitle — на странице задания: «Job · last copy 2 days ago»; на
+	// списке — счёт заданий, «Three jobs · their own sources, destinations
+	// and triggers» (s-backup-1), без заданий — «No jobs yet» (s-backup-6);
+	// у нового задания пусто
+	Subtitle Text `json:"subtitle"`
+	// Actions — шапка списка (s-backup-1, s-backup-6): New job (основная,
+	// ?job=new — страница нового задания) и Restore (?restore=1 — открытое
+	// восстановление, RestoreBlock.Open); и без заданий тоже
+	Actions []Action `json:"actions"`
+	// Empty и EmptyNote — пустое состояние без заданий (s-backup-6): что
+	// делает копия, ‹.ics› и ‹.vcf› моноширинно; и что для восстановления
+	// задание не нужно, **Restore** жирным. С заданиями пусто
+	Empty      Runs         `json:"empty"`
+	EmptyNote  Runs         `json:"emptyNote"`
 	Jobs       []BackupJob  `json:"jobs"`
 	Add        Form         `json:"add"`        // новое задание; на странице задания (s-backup-2) — оно само
 	Delete     *Action      `json:"delete"`     // внизу страницы задания; nil — на списке и у нового
@@ -317,6 +330,9 @@ type BackupRun struct {
 	Download *Action `json:"download"`
 }
 type RestoreBlock struct {
+	// Open — восстановление открыто: Restore в шапке (?restore=1) или
+	// архив уже открыт (шаг сопоставления)
+	Open    bool           `json:"open"`
 	Source  Form           `json:"source"`
 	Preview []ImportTable  `json:"preview"`
 	Targets []TargetPicker `json:"targets"`

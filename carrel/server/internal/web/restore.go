@@ -142,6 +142,7 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob) view.Rest
 		{ID: "restore.upload", Label: "Open a file from this computer", Icon: "i-up", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}, "source": {"upload"}}), Method: "POST", Enabled: true},
 	}
 	if t := restoreOf(sess); t != nil {
+		b.Open = true
 		s.fillRestore(sess, blob, t, &b)
 	}
 	return b

@@ -2147,7 +2147,10 @@ type ProxyDevice struct {
 
 type BackupPage struct {
     Shell
-    Subtitle   Text    // на странице задания: «Job · last copy 2 days ago» (s-backup-2), Title — имя задания; пусто на списке
+    Subtitle   Text    // на странице задания: «Job · last copy 2 days ago» (s-backup-2), Title — имя задания; на списке — «Three jobs · their own sources, destinations and triggers» (s-backup-1), без заданий — «No jobs yet» (s-backup-6); у нового задания (?job=new, Title «New job») пусто
+    Actions    []Action // шапка списка: New job (основная, ?job=new) и Restore (?restore=1 — RestoreBlock.Open); и без заданий (s-backup-1, s-backup-6)
+    Empty      Runs    // без заданий (s-backup-6): «Carrel copies raw ‹.ics›, ‹.vcf› and files …»; с заданиями пусто
+    EmptyNote  Runs    // «Already have an archive from another instance? **Restore** takes it from a file — a job is not needed for that.»
     Jobs       []BackupJob
     Add        Form    // новое задание; на странице задания (?job=, s-backup-2) — оно само: Save · Cancel · Run now
     Delete     *Action // внизу страницы задания; nil — на списке и у нового
@@ -2175,6 +2178,7 @@ type TriggerBlock struct {
 }
 type BackupRun struct { ID Text; Started When; State OpState; Size Size; Download *Action }
 type RestoreBlock struct {
+    Open    bool // восстановление открыто: Restore в шапке (?restore=1) или архив уже открыт
     Source  Form
     Preview []ImportTable
     Targets []TargetPicker
