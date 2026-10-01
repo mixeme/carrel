@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.103 — 2026-10-01
+
+Preparation for Mentions (mockup 7.23, deferred until after the first
+working version): a reference by UID is read in one place.
+
+### Changed
+
+- Nothing a consumer sees. `splitUIDRef` reads a value that names a record
+  by UID — `urn:uuid:` in the case it was written, or a bare UID — and the
+  import's relinking (`linkPatch`) uses it; the timeline and the relinking
+  after a move or a merge are as they were.
+
 ## v0.2.102 — 2026-10-01
 
 The GET of one card asked for no version (docs/servers.md, SV-1): sabre/dav

@@ -3,7 +3,6 @@ package web
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/emersion/go-ical"
 
@@ -20,9 +19,8 @@ import (
 // from a server that writes its own (SV-25) — the links to it inside the
 // import name the new one. Records already on the servers that name the old
 // identity are left alone: where that identity came from is not known, and a
-// card of it may live on elsewhere (owner's decision, 24.09.2026).
-
-const urnUUID = "urn:uuid:"
+// card of it may live on elsewhere (owner's decision, 24.09.2026). A value
+// is read as its form and its UID by splitUIDRef (uidref.go).
 
 // linkProps are the properties by which a record of dest's kind names
 // another by UID.
@@ -86,10 +84,7 @@ func linkPatch(obj *model.Object, props []string, moved map[string]string) (*mod
 		changed := false
 		for i, v := range vals {
 			texts[i] = v.Text
-			prefix, target := "", v.Text
-			if len(v.Text) > len(urnUUID) && strings.EqualFold(v.Text[:len(urnUUID)], urnUUID) {
-				prefix, target = v.Text[:len(urnUUID)], v.Text[len(urnUUID):]
-			}
+			prefix, target := splitUIDRef(v.Text)
 			if to, ok := moved[target]; ok {
 				texts[i], changed = prefix+to, true
 			}
