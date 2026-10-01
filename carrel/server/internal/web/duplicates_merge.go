@@ -510,8 +510,10 @@ func (s *Server) mergeResult(w http.ResponseWriter, r *http.Request, sess *sessi
 	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge on the server"), GroupID: mr.g.id, Warning: n}
 	page.Rail = view.Rail{Nav: s.navRows(sess, s.catalogOf(sess), "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess)}
 	page.Target = s.member(mr.st, mr.g.kind, target.ref)
+	kept := s.openThere(target.c, target.ref.UID, "Open the kept record")
+	kept.Primary = true // s-dup-5
 	page.Actions = []view.Action{
-		s.openThere(target.c, target.ref.UID, "Open the kept record"),
+		kept,
 		{ID: "duplicates.back", Label: "Back to duplicates", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true},
 	}
 	s.writePage(w, r, http.StatusOK, page)

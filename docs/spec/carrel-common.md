@@ -608,9 +608,14 @@ type Action struct {
 // view.TestFixtureActionsSayWhyTheyAreOff.
 // Primary — там, где кадр рисует кнопку основной: кнопка, отправляющая
 // форму (Sign in, Save, Create link), подтверждение листа (Move here,
-// Create), главное действие шапки (New contact, Edit, Add user), первая
-// карточка забытого пароля (s-auth-6), единственная дверь страницы вне
-// оболочки (Sign in у rest-1 и rest-2). Порядок Actions основного не
+// Create), главное действие шапки (New contact, Edit, Add user, Upload в
+// папке — и только для чтения, s-files-1, -15), первая карточка забытого
+// пароля (s-auth-6), единственная дверь страницы вне оболочки (Sign in у
+// rest-1 и rest-2, Download публичного файла — s-publish-9, -11), шаг
+// мастера (Preview file, «Import 122 contacts», Back to list — s-io-3,
+// -5, -9; Open the manifest, «Restore 3 collections» — s-backup-7, -8),
+// Send by letter листа готовой ссылки (s-publish-13), Done пароля
+// устройства (s-davloom-3), Open the kept record (s-dup-5). Порядок Actions основного не
 // назначает: кнопка, которую кадр рисует разрушающей (Danger) или
 // обычной, основной не бывает, даже если она первая. Сторож — проверка 9
 // check.py: основная кнопка каждой фикстуры — та, что в её кадре.
@@ -1826,8 +1831,15 @@ type FormRow struct {
     // копируют знак в знак, — логин у первого запуска (s-auth-4), адрес
     // сервера и отпечаток сертификата (s-profile-2), номер телефона, дата,
     // время и индекс (s-contacts-3, s-agenda-3, s-tasks-3), временный пароль
-    // (s-admin-13, -19), числа настроек экземпляра (s-admin-1); у прочих
-    // false. Сторож — проверка 9 check.py
+    // (s-admin-13, -19), числа настроек экземпляра (s-admin-1), UID, набранный
+    // в Related to после «By UID…» (s-tasks-11); у прочих false. Значение
+    // вне формы, которое кадр рисует моноширинным полем только для чтения, —
+    // ссылка листа публикации (s-publish-7, -13), пароли окна и устройств
+    // (s-profile-4, s-plan-2), адрес davloom (s-davloom-1), строка и секрет
+    // внешнего запуска (s-backup-4, -5), порог и веса дубликатов (s-dup-1,
+    // -3, -7), адрес проверки установки (s-admin-4), — Text своего поля: его
+    // вид — постоянное слово экрана (U-1.3), Mono ему не нужен. Сторож —
+    // проверка 9 check.py и проверки кадров (marks_more_test.go)
     Mono bool
 }
 // Повторяющееся поле — телефоны, почта, адреса карточки, напоминания — это
@@ -2371,7 +2383,7 @@ type PublishedPage struct {
     Note     *NoteDoc
     File     *PublishedFile
     Folder   *PublishedFolder
-    Actions  []Action // Download · Download folder
+    Actions  []Action // Download · Download folder; у файла без предпросмотра — с размером: «Download 84.2 MB» (s-publish-11)
 }
 type PublishedFile struct {
     Name    Text

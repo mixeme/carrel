@@ -4,15 +4,9 @@
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
       "id": "import.choose",
-      "label": "Read the file",
-      "method": "POST"
-    },
-    {
-      "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty",
-      "id": "import.cancel",
-      "label": "Cancel",
-      "method": "GET"
+      "label": "Preview file",
+      "method": "POST",
+      "primary": true
     }
   ],
   "details": null,

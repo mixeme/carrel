@@ -400,8 +400,9 @@
           "enabled": true,
           "href": "/app/settings/backup?op=restore-open",
           "id": "restore.open",
-          "label": "Open the archive",
-          "method": "POST"
+          "label": "Open the manifest",
+          "method": "POST",
+          "primary": true
         },
         {
           "enabled": true,

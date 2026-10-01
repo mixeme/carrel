@@ -83,23 +83,17 @@
         коллекции (s-profile-5), `https://`, `webcal://` (s-profile-10),
         три подсказки вложений (attachments-1), конверт `noreply@…`
         (s-admin-3), **after** (s-backup-2), расширения (s-io-3, -4).
-- [ ] **`Primary` и `Mono` там, где их не видит ни фикстура, ни проверка
-      кадра** (`v0.2.79` закрыл все фикстуры — проверка 9 check.py — и
-      формы и листы тестов кадров). Основная кнопка: «Upload» в шапке
-      файлов (s-files-1, -2, -4, -15), «Download» публичного файла
-      (s-publish-9, -11), «Send by letter» (s-publish-13), «Done» устройства
-      (s-davloom-3), «Open the kept record» (s-dup-5), шаги импорта —
-      «Preview file/folder», «Import N …», «Back to list» (s-io-3, -4,
-      -6…-9), копия — «Copy the line/script», «Restore», «Open the
-      manifest», «Restore 3 collections» (s-backup-2, -3, -6…-8; у сервера
-      «Restore into new collections»), «Back to the form» (s-profile-6).
-      Моноширинное поле: «Related to» — строка набора UID (s-tasks-11),
-      «Match threshold» и веса (s-dup-1, -3, -7), поля окна открытых паролей
-      (s-profile-4) и пароли устройства (s-plan-2), «Link» (s-publish-13),
-      строка ссылки (s-publish-7), «Saved as» (s-contacts-5), поля без
-      подписи s-admin-4, -7, s-backup-4, -5, «Address for the client»
-      (s-davloom-1). Подпись «Upload here» листа загрузки — в кадре «Upload
-      2 files» (s-notes-11).
+- [ ] **Мастера импорта и восстановления по кадрам** (остаток пункта
+      «`Primary` и `Mono`…», `v0.2.95`: кнопки шагов в словах кадров и
+      основные). Импорт (s-io-3…9): шаги «1 · Source · 2 · Preview · 3 ·
+      Report», строка файла в шапке предпросмотра (имя, размер, формат),
+      счёт «ready / with errors / UID collisions / skipped», отчёт числами;
+      у заметок — кнопка «Preview folder» под деревом (сервер выбирает папку
+      вариантом `TargetOption`, кнопки нет). Восстановление (s-backup-6…8):
+      пустое состояние «No jobs yet» с New job и Restore в шапке, «Restore
+      into» у каждой строки, Skip, Select all, «matched by path».
+      Лист новой коллекции после отказа (s-profile-6): «Back to the form» и
+      «Try again» — у сервера только сообщение на листе.
 - [ ] **Пересмотреть по результатам эксплуатации:** день рождения без года на
       Google (SV-56) — сейчас честная потеря (решение владельца 01.10.2026);
       обход — форма Apple `1604-…` с `X-APPLE-OMIT-YEAR`, ценой года 1604 в
@@ -173,6 +167,7 @@
 | Записка 28 Typecase (задачи 48–53) на сервере: счёт сегмента отдельно от подписи (`Action.tally`; хронология, задачи, дубликаты — для `SegFold`), фильтр хронологии `?kind=` ссылками кадра, `tel:` из цифр и плюса (s-contacts-6), «New calendar» в уведомлении SV-52 (s-agenda-11) с `?components=` листа новой коллекции; меню «⋯» карточки, диапазон формой GET и ссылки почты сервер уже нёс — чтения кадров в проверках поправлены | `v0.2.92` |
 | Записка 30 (Typecase `4af7ad7`, задача 59): полная форма новой карточки — свой кадр `s-contacts-27`, `FRAME_TODO` снят, проверка 8 и каретка сверяют её с ним; телефоны новой формы начинаются одной пустой строкой «mobile» с Remove (C-6.8) | `v0.2.93` |
 | Остановка клиента в разделе контактов (C12–C14 плана клиента): «Show 3» — действие со ссылкой `?foreign=1` у карточки и панели (`ForeignShow`), «Show N empty fields» — ссылка `?fields=all` (`FieldSet.Unfold`), «Compact rows» — отметка формы GET (`ListBar.Compact` — `Form`), имя поля поиска (`SearchBox.Name`) | `v0.2.94` |
+| Основная кнопка и моноширинное поле там, где их не видела ни фикстура, ни проверка: Upload в папке (s-files-1, -2, -4, -15), Download публичного файла и размер на ней у файла без предпросмотра (s-publish-9, -11), Send by letter первым (s-publish-13), Done устройства (s-davloom-3), Open the kept record (s-dup-5), шаги импорта словами кадров — Preview file, «Import N …», Back to list без «Import another file», без Cancel на первом шаге (s-io-3, -5, -9), восстановление — Open the manifest, «Restore N collections», Cancel (s-backup-7, -8), UID в Related to (s-tasks-11); значения вне формы, нарисованные моноширинным полем, — слово экрана | `v0.2.95` |
 
 S-30.4 (чужие клиенты, прокси у себя, вид письма у получателя, архив месячной
 давности) машиной не закрывается — перечислено в README сервера как ручное.

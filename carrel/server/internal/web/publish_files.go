@@ -184,7 +184,14 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 			if inlineTypes[mt] {
 				page.File.Preview, page.File.Href = view.PreviewImage, download+"?inline=1"
 			}
-			page.Actions = []view.Action{{ID: "published.download", Label: "Download", Icon: "i-down", Href: download, Method: "GET", Enabled: true}}
+			// The one door of the page (s-publish-9); a file the browser is
+			// not shown carries its size on it, before anyone presses it
+			// (s-publish-11).
+			label := view.Text("Download")
+			if page.File.Preview == view.PreviewNone {
+				label += " " + view.Text(page.File.Size)
+			}
+			page.Actions = []view.Action{{ID: "published.download", Label: label, Icon: "i-down", Href: download, Method: "GET", Primary: true, Enabled: true}}
 		}
 		s.writePage(w, r, http.StatusOK, page)
 		return

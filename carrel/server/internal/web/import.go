@@ -222,24 +222,24 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 	if c.spec.kind == view.KindNote {
 		page.Source.Folder = s.noteFolders(c)
 	}
-	back := view.Action{ID: "import.cancel", Label: "Cancel", Href: s.route(c.listPath()), Method: "GET", Enabled: true}
 	switch {
 	case st.report != nil:
+		// The report's one door, to the list the records went into (s-io-9).
 		page.Step = view.ImportStepReport
-		done := view.Action{ID: "import.done", Label: "Open the collection", Method: "GET", Enabled: true,
+		done := view.Action{ID: "import.done", Label: "Back to list", Method: "GET", Primary: true, Enabled: true,
 			Href: s.route(c.listPath())}
 		if st.dest != nil {
 			done.Href = s.route(st.dest.listPath())
 		}
-		page.Actions = []view.Action{done, {ID: "import.again", Label: "Import another file",
-			Href: s.importHref(c, "", "", ""), Method: "GET", Enabled: true}}
+		page.Actions = []view.Action{done}
 	case st.draft != nil:
 		page.Step = view.ImportStepPreview
 		page.Source.Note = text("From " + st.draft.Source + ". " + string(page.Source.Note))
 		if st.draft.Note != "" {
 			page.Source.Note = text(string(page.Source.Note) + " " + st.draft.Note)
 		}
-		run := view.Action{ID: "import.run", Label: "Import", Method: "POST", Enabled: true}
+		// «Import 122 contacts» (s-io-5…8): what the press creates.
+		run := view.Action{ID: "import.run", Label: text("Import " + plural(len(st.draft.Records), c.spec.noun)), Method: "POST", Primary: true, Enabled: true}
 		switch {
 		case st.dest == nil:
 			run.Enabled, run.Reason = false, "Choose a collection that can be written."
@@ -254,12 +254,14 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 			Href: s.importHref(c, "cancel", "", ""), Method: "POST", Enabled: true}}
 	default:
 		to, into := targetOf(st.dest)
-		choose := view.Action{ID: "import.choose", Label: "Read the file", Method: "POST", Enabled: true,
+		// The first step has one button; the rail is the way out (s-io-3,
+		// s-io-4).
+		choose := view.Action{ID: "import.choose", Label: "Preview file", Method: "POST", Primary: true, Enabled: true,
 			Href: s.importHref(c, "", to, into)}
 		if st.dest == nil {
 			choose.Enabled, choose.Reason = false, "Choose a collection that can be written."
 		}
-		page.Actions = []view.Action{choose, back}
+		page.Actions = []view.Action{choose}
 	}
 	return page
 }

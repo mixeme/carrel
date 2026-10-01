@@ -395,6 +395,7 @@
             "hint": "",
             "kind": "select",
             "label": "Related to",
+            "mono": true,
             "name": "related",
             "options": [
               {

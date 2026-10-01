@@ -682,6 +682,8 @@ func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry) [
 	files.Label, files.Icon = "Files", "i-doc"
 	folder.ID, folder.Label, folder.Icon = "file.upload.folder", "Folder", "i-file"
 	upload.Arrow = []view.MenuItem{{Action: files}, {Action: folder}}
+	// The bar's primary button, read-only folder too (s-files-1, -15).
+	upload.Primary = true
 	actions := []view.Action{
 		upload,
 		writeAction(c, view.Action{ID: "folder.new", Label: "New folder", Icon: "i-plus", Href: s.route(c.href("mkcol", segs, true)), Method: "POST", Enabled: true}),

@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.95 — 2026-10-01
+
+The primary buttons and the monospaced fields no fixture carried and no
+frame test read (plan/server.md, the item «`Primary` и `Mono`…»).
+
+### Changed
+
+- **Primary as the frames draw it**: Upload of a folder's bar, read-only
+  too (s-files-1, -2, -4, -15); Download of a public file (s-publish-9);
+  Send by letter, now first on the sheet of a link just made
+  (s-publish-13); Done under a device's password (s-davloom-3); Open the
+  kept record after a merge that stopped (s-dup-5).
+- **A public file that cannot be shown** says its size on the button:
+  «Download 84.2 MB» (s-publish-11).
+- **The import's buttons are the frames'**: Preview file (was «Read the
+  file»), the first step's only button — no Cancel, the rail is the way
+  out (s-io-3); «Import 122 contacts» (was «Import»; s-io-5…8); the report
+  has Back to list alone (was «Open the collection» and «Import another
+  file»; s-io-9). All three primary.
+- **The restore's buttons are the frames'**: Open the manifest (was «Open
+  the archive»), «Restore 3 collections» (was «Restore into new
+  collections»), Cancel (was «Close the archive»); s-backup-7, -8.
+- **Related to is monospaced** (`FormRow.mono`): what is typed after «By
+  UID…» is a UID (s-tasks-11).
+- C-6.2 and C-6.8 say which values outside a form the frames draw in a
+  monospaced read-only field — links, passwords, addresses, weights — and
+  that their look is the screen's constant (U-1.3), not `Mono`.
+
 ## v0.2.94 — 2026-10-01
 
 What the client's stop of the contacts section (plan/client.md, C12–C14)

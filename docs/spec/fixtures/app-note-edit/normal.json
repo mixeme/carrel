@@ -116,6 +116,7 @@
         "hint": "A record that is not loaded here: its UID.",
         "kind": "select",
         "label": "Related to",
+        "mono": true,
         "name": "related",
         "options": [
           {

@@ -2228,7 +2228,10 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			// loaded, or typed after «By UID…» — the same name either way.
 			opts, unloaded := s.relatedOptions(c, st.uid, first(vals))
 			row := view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
-				Options: opts, Placeholder: "UID of the record", Error: errText}
+				Options: opts, Placeholder: "UID of the record", Error: errText,
+				// What is typed after «By UID…» is a UID, monospaced
+				// (s-tasks-11); the list itself is the select's.
+				Mono: true}
 			if unloaded {
 				row.Hint = "A record that is not loaded here: its UID."
 			}

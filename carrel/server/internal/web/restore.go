@@ -138,7 +138,7 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob) view.Rest
 		view.FormRow{Name: "password", Label: "Archive password", Kind: view.InputPassword, Hint: "The job's own password. An archive that is not encrypted needs none."},
 	)
 	b.Source.Actions = []view.Action{
-		{ID: "restore.open", Label: "Open the archive", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}}), Method: "POST", Enabled: true},
+		{ID: "restore.open", Label: "Open the manifest", Primary: true, Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}}), Method: "POST", Enabled: true},
 		{ID: "restore.upload", Label: "Open a file from this computer", Icon: "i-up", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}, "source": {"upload"}}), Method: "POST", Enabled: true},
 	}
 	if t := restoreOf(sess); t != nil {
@@ -207,8 +207,9 @@ func (s *Server) fillRestore(sess *session.Session, blob sealed.Blob, t *restore
 		b.Targets = append(b.Targets, picker)
 	}
 	b.Actions = append(b.Actions,
-		view.Action{ID: "restore.run", Label: "Restore into new collections", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-run"}}), Method: "POST", Enabled: true},
-		view.Action{ID: "restore.cancel", Label: "Close the archive", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-cancel"}}), Method: "POST", Enabled: true},
+		// «Restore 3 collections» (s-backup-8): what the press restores.
+		view.Action{ID: "restore.run", Label: text("Restore " + plural(len(t.manifest.Collections), "collection")), Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-run"}}), Method: "POST", Primary: true, Enabled: true},
+		view.Action{ID: "restore.cancel", Label: "Cancel", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-cancel"}}), Method: "POST", Enabled: true},
 	)
 }
 

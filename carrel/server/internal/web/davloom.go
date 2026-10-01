@@ -206,7 +206,7 @@ func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.
 			{Name: "login", Label: "User name", Kind: view.InputText, Value: text(sess.Login()), ReadOnly: true, Mono: true,
 				Hint: "Your Carrel login; the password is the device's, not yours."},
 		}}}
-		form.Actions = []view.Action{{ID: "davloom.done", Label: "Done", Href: s.route("/app/settings/davloom"), Method: "GET", Enabled: true}}
+		form.Actions = []view.Action{{ID: "davloom.done", Label: "Done", Href: s.route("/app/settings/davloom"), Method: "GET", Primary: true, Enabled: true}}
 		return form
 	}
 
