@@ -44,6 +44,7 @@ func runFiles(t *testing.T, client *dav.Client, p *file.Provider, root string) {
 	}
 
 	const big = 11 << 20
+	began := time.Now()
 	seedFile(ctx, t, p, root+"big.bin", func() io.Reader { return strings.NewReader(strings.Repeat("z", big)) })
 	d, err := p.Open(ctx, root+"big.bin", nil)
 	if err != nil {
@@ -54,6 +55,11 @@ func runFiles(t *testing.T, client *dav.Client, p *file.Provider, root string) {
 	if err != nil || n != big {
 		t.Fatalf("download read %d of %d: %v", n, big, err)
 	}
+	// SFTPGo stands under a millisecond away from the machine the suite runs
+	// on, and the whole run takes half a second: this line is the evidence
+	// that it was the eleven megabytes, both ways, and not a step skipped
+	// (01.10.2026).
+	t.Logf("%d MiB written and read back whole in %v", big>>20, time.Since(began).Round(time.Millisecond))
 
 	if _, err := p.Stat(ctx, root+"big.bin"); err != nil {
 		t.Errorf("stat of a taken name: %v", err)
