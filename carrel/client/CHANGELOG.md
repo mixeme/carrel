@@ -4,6 +4,52 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.1.0 — 2026-10-01
+
+The shell and the contacts section: the first screens inside the sign-in.
+Typecase `8c99103` (`4af7ad7` and a test of its ladder; widgets, CSS and the
+mockup the same), server `v0.2.94`.
+
+### Added
+
+- **The list of contacts** (`/app/contacts`, `/app/contacts/{account}/{col}`,
+  `s-contacts-1`, read-only book `states-4`) from `ContactsListPage`; **the
+  card** (`/app/contacts/{account}/{col}/{uid}`, `s-contacts-6`, after the
+  rewrite `s-contacts-16`) from `ContactPage`; **the timeline**
+  (`…/{uid}/timeline`, `s-contacts-7`) from `ContactTimelinePage`; **the
+  edit and the full new form** (`…/{uid}/edit`, `…/new`, `s-contacts-3`,
+  `-4`, `-27`) from `ContactEditPage`. Each a draft of `frame2go -self`
+  committed as printed, then the screen over it.
+- **The shell in `bind`** (`bind/shell.go`): the top bar (`Top`: the search
+  as a GET form under `SearchBox.Name`, New with its arrow as a closed menu,
+  the refresh, the account's button), the menu items (`MenuItems`), the rail
+  (`NavItem`, `TickRow`, `Sources`, `Tags`, `RailForm`, `RetryForms`,
+  `Foot`), the poll's bar (`Running`, `Runbar`, C-6.4), the notices
+  (`Notice`, `NoticeForms`), `Badge`, `Avatar`, a card's line (`FieldsItem`,
+  `Book`), `SegOption`, `Submit`, `ActionForm`, `Diag`, and of a form's
+  repeating field `Remove`, `Add` (with its `Template`), the loss of a save
+  (`Loss`). The screen's words come in with the screen (`TopWords`,
+  `RailWords`). A test for each.
+- **Zones of the shell in the renderer**: a fragment of `main`, `details`,
+  `rail`, `notices` and `poll` of a page in the shell is the part its screen
+  draws (`renderer.ShellZone`), with the page's forms; `queue`, `topbar`,
+  out-of-band updates and events stay JSON.
+- **Waiting for the library beyond an address** (the owner's decision,
+  U-5.5): a row names a state (fixture) or a control; `Screen.Waits`; a
+  waiting state is drawn and not held against a frame; a waiting control's
+  meaning finding is excused; a wait with nothing to excuse is red. Rows
+  1–16 of U-5.5 for the contacts section (Typecase tasks 60–66, a new one for
+  the bar's tick, and the server's debts C16, C17).
+- **The meaning guard's table** grows: `TickRow` (the rail of return sends
+  nothing), `FaceRow`, `FindRow`, `LinkedRow`, `About`, `Range` (a GET form),
+  `FieldsItem`, `SegOption`, `Seg` of links.
+
+### Changed
+
+- **Kinship takes shape's rule** (the lead's decision): a button with its
+  menu (`Drop`, `TopDrop`) is its button.
+- **A state's frame is STATE_FRAME's**, whether or not it names the route.
+
 ## v0.0.7 — 2026-10-01
 
 The client is wired into the server (`v0.2.90`): the binary answers the
