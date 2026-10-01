@@ -1221,8 +1221,8 @@ func agendaSubtitle(tf timeFmt, where string, from, to time.Time) view.Runs {
 // its window and ticks, with print=1.
 func (s *Server) agendaPrintAction(base string, q url.Values) view.Action {
 	a := s.printAction(base)
-	q = keptQuery(q, "print", "compact")
-	q.Set("print", "1")
+	q = keptQuery(q, render.PrintParam, "compact")
+	q.Set(render.PrintParam, render.PrintValue)
 	a.Href = s.route(base) + "?" + q.Encode()
 	return a
 }

@@ -21,8 +21,8 @@ import (
 
 const (
 	cookieName     = "carrel_sid"
-	csrfFormField  = "_csrf"
-	csrfHeaderName = "X-CSRF-Token"
+	csrfFormField  = render.CSRFField
+	csrfHeaderName = render.CSRFHeader
 )
 
 // Users handles accounts and secrets (S-10). Implemented by internal/user.

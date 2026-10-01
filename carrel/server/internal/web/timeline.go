@@ -612,7 +612,7 @@ func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.
 		{ID: "timeline.note", Label: "Write a note", Icon: "i-quill", Href: s.postQuery("/app/notes/quick", q), Method: "GET", Primary: true, Enabled: true},
 		{ID: "timeline.event", Label: "New event", Icon: "i-cal", Href: s.postQuery("/app/calendar/quick", url.Values{"attendee": {person.first}}), Method: "GET", Enabled: person.first != ""},
 		{ID: "timeline.task", Label: "New task", Icon: "i-task", Href: s.postQuery("/app/tasks/quick", q), Method: "GET", Enabled: true},
-		{ID: "timeline.print", Label: "Print", Icon: "i-print", Href: s.route(card + "/timeline?print=1"), Method: "GET", Enabled: true},
+		{ID: "timeline.print", Label: "Print", Icon: "i-print", Href: s.route(card + "/timeline" + printQuery), Method: "GET", Enabled: true},
 	}
 	if person.first == "" {
 		page.Actions[1].Reason = "The card has no address to invite."

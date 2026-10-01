@@ -14,6 +14,7 @@ import (
 	"carrel.dev/carrel/server/internal/provider/card"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -108,8 +109,12 @@ func (s *Server) compactForm(r *http.Request, segment, base string) *view.Form {
 // printAction is Print of a list's head (the owner's decision 4 of the
 // client's plan, 28.09.2026): the same address with print=1, the same view
 // model, drawn on paper by the client (U-10).
+// printQuery is the query of a printed page: ?print=1 (render.PrintParam,
+// render.PrintValue; C-5 names the addresses that take it).
+const printQuery = "?" + render.PrintParam + "=" + render.PrintValue
+
 func (s *Server) printAction(base string) view.Action {
-	return view.Action{ID: "list.print", Label: "Print", Icon: "i-print", Href: s.route(base + "?print=1"), Method: "GET", Enabled: true}
+	return view.Action{ID: "list.print", Label: "Print", Icon: "i-print", Href: s.route(base + printQuery), Method: "GET", Enabled: true}
 }
 
 // listFilter is the filter of a list without scripts: a GET to the list

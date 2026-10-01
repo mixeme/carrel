@@ -464,7 +464,7 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	if edit != nil {
 		edit.Icon = "i-pencil"
 	}
-	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + "?print=1"), Method: "GET", Enabled: true}
+	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
 	page.Actions, page.Menu = shown(edit, send, print, ops.del), ops.menu
 	return page
 }
@@ -583,7 +583,7 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	if edit != nil {
 		edit.Icon = "i-pencil"
 	}
-	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + "?print=1"), Method: "GET", Enabled: true}
+	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
 	page.Actions, page.Menu = shown(edit, s.attachOf(c, uid, obj.ETag), task, print, ops.del), ops.menu
 	return page
 }

@@ -82,7 +82,8 @@ func (s *Server) signedIn(sess *session.Session) view.SignedIn {
 // administration for an administrator, and the way out past the line.
 // Theme and the keyboard sheet stand there too, in the frame, and are not
 // here: they have no route and nothing on the server behind them — the
-// client draws and remembers them itself (U-11).
+// client draws them, words of its screen (the lead's decision П6), and the
+// theme is this browser's (U-12; the keys and their sheet — U-7).
 func (s *Server) userMenu(sess *session.Session) []view.MenuItem {
 	out := []view.MenuItem{{Action: view.Action{
 		ID: "user.settings", Label: "Settings", Icon: "i-gear",
@@ -149,13 +150,13 @@ func (s *Server) plainForm(action, method string, rows ...view.FormRow) view.For
 
 func csrfField(sess *session.Session) view.FormRow {
 	if sess == nil {
-		return view.FormRow{Name: "_csrf", Kind: view.InputHidden, Value: ""}
+		return view.FormRow{Name: csrfFormField, Kind: view.InputHidden, Value: ""}
 	}
-	return view.FormRow{Name: "_csrf", Kind: view.InputHidden, Value: text(sess.CSRFToken())}
+	return view.FormRow{Name: csrfFormField, Kind: view.InputHidden, Value: text(sess.CSRFToken())}
 }
 
 func csrfFormRow(token string) view.FormRow {
-	return view.FormRow{Name: "_csrf", Kind: view.InputHidden, Value: text(token)}
+	return view.FormRow{Name: csrfFormField, Kind: view.InputHidden, Value: text(token)}
 }
 
 func (s *Server) anonPlainForm(w http.ResponseWriter, r *http.Request, action, method string, rows ...view.FormRow) view.Form {

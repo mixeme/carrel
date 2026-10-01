@@ -342,7 +342,7 @@ func pageQuery(q url.Values) url.Values {
 	out := url.Values{}
 	for k, v := range q {
 		switch k {
-		case "task", "again", "open", "foreign", "print", "card":
+		case "task", "again", "open", "foreign", render.PrintParam, "card":
 		default:
 			out[k] = v
 		}

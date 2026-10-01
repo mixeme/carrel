@@ -1,8 +1,9 @@
 // Package render is the open contract between the request layer and whatever
 // draws its answers: the Renderer the server calls with a view model, the
 // header names and view values of C-7.1, the target names of C-7.2, the
-// out-of-band updates of C-7.3, and the JSON renderer the server answers with
-// until the client (carrel.dev/carrel/client) supplies HTML.
+// out-of-band updates of C-7.3, the events of C-7.4, the names of the token
+// (C-11) and of print, and the JSON renderer the server answers with until
+// the client (carrel.dev/carrel/client) supplies HTML.
 //
 // It is a package of the server module, not of internal/, so that the client
 // module can implement Renderer and name the targets without reaching into
@@ -44,6 +45,19 @@ const (
 func Targets() []string {
 	return []string{TargetMain, TargetRail, TargetDetails, TargetNotices, TargetPoll, TargetQueue, TargetSheet, TargetTopbar}
 }
+
+// The names the client hands the library as data, so that no screen and no
+// glue of the client writes them as literals (stage 4 of the client's plan):
+// the field and the header of the session's token (C-11) — a form sent by a
+// script carries the field and the header both —, and the parameter of a
+// printed page (the owner's decision 4: the same route and view model, drawn
+// on paper; C-5 names the addresses that take it).
+const (
+	CSRFField  = "_csrf"
+	CSRFHeader = "X-CSRF-Token"
+	PrintParam = "print"
+	PrintValue = "1"
+)
 
 // Event names of C-7.4: the events of the progress stream — the bar changed,
 // and the poll is over. The data of an event is the fragment of its target

@@ -226,3 +226,31 @@ func TestFixtureTargetsAreC5(t *testing.T) {
 	}
 	t.Log(fmt.Sprintf("%d actions, %d forms, %d rows held against C-5", actions, forms, rowsSeen))
 }
+
+// The owner's decision 4 of the client's plan (stage 4, С5): Print is the
+// same address with ?print=1 — render.PrintParam and render.PrintValue —,
+// the same route and view model, drawn on paper. Which addresses take it is
+// C-5's to say: every Print of every fixture leads to its address with the
+// parameter, and the row of C-5 that address belongs to names `?print=1`.
+func TestFixturePrintsAreC5(t *testing.T) {
+	rows := c5Rows(t)
+	prints := 0
+	eachFixtureAction(t, func(screen, at string, a Action) {
+		if !strings.HasSuffix(a.ID, ".print") {
+			return
+		}
+		prints++
+		u, err := url.Parse(a.Href)
+		if err != nil || u.Query().Get(render.PrintParam) != render.PrintValue || a.Method != "GET" {
+			t.Errorf("%s %s: Print is %s %s, want GET with %s=%s", screen, at, a.Method, a.Href, render.PrintParam, render.PrintValue)
+			return
+		}
+		row, route, ok := c5Of(rows, "GET", a.Href)
+		if want := "`?" + render.PrintParam + "=" + render.PrintValue + "`"; !ok || !strings.Contains(row.model, want) {
+			t.Errorf("%s %s: %s leads to %s, whose row of C-5 does not name %s", screen, at, a.Href, route, want)
+		}
+	})
+	if prints < 3 {
+		t.Fatalf("%d prints: the fixtures were not walked", prints)
+	}
+}

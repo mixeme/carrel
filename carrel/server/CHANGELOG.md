@@ -17,6 +17,38 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.125 — 2026-10-02
+
+The names the client hands the library are the server's constants, and
+C-5 says which addresses print (stage 4 of the client's plan, С5, С6, П4,
+П5).
+
+### Added
+
+- **`render.CSRFField`, `render.CSRFHeader`** (`_csrf`, `X-CSRF-Token`),
+  **`render.PrintParam`, `render.PrintValue`** (`print`, `1`) beside the
+  headers, zones and events already there: the client's glue names none of
+  them as a literal. The server reads its token and writes its Print links
+  by them. `render.TestTheNamesAreTheSpecs` holds every name of the package
+  against C-5, C-7.1, C-7.2, C-7.4 and C-11 read from the spec.
+
+### Changed
+
+- **C-5: which addresses take `?print=1`** — the list of contacts and the
+  agenda (combined and one collection, `/app/{kind}` with the same
+  parameters as the row under it), a record's card (Print in the head of a
+  contact's and an event's), a person's timeline; the same route and view
+  model, the parameter unread by the server. Guard:
+  `view.TestFixturePrintsAreC5`.
+- **C-6.8 `Disables`**: the field it names is disabled and is not sent while
+  the tick stands (the lead's decision П5, as the library does it).
+- **C-11**: a POST outside a form is its own form with `_csrf`, scripts or
+  none; a form sent by a script carries the field and the header (П4).
+
+### For consumers
+
+Take the names from `render`. Nothing on the wire changed.
+
 ## v0.2.124 — 2026-10-02
 
 The poll bar says where to follow it, and the events of the progress stream
