@@ -22,8 +22,9 @@ func restoreTemps(t *testing.T) []string {
 	return found
 }
 
-// S-24.3: restoring is an import into NEW collections. The archive is opened
-// with its password and previewed before anything is written; a wrong
+// S-24.3: restoring is an import, and New collection in a row's «Restore
+// into» makes one for it — a new folder for files. The archive is opened
+// with its password and matched before anything is written; a wrong
 // password says so; what was there before is not touched; the archive kept
 // for the steps is deleted when the restore ends.
 func TestRestoreFromHistoryIntoNewCollections(t *testing.T) {
@@ -40,7 +41,7 @@ func TestRestoreFromHistoryIntoNewCollections(t *testing.T) {
 		}))
 	}
 	wrong := decode[view.BackupPage](t, open("nope"))
-	if !hasNotice(wrong.Notices, "The archive could not be opened") || len(wrong.Restore.Preview) != 0 {
+	if !hasNotice(wrong.Notices, "The archive could not be opened") || wrong.Restore.Match != nil {
 		t.Fatalf("wrong password = %+v", wrong.Notices)
 	}
 	made := f.srv.CountRequests("MKCOL", "") + f.srv.CountRequests("MKCALENDAR", "")
@@ -48,17 +49,17 @@ func TestRestoreFromHistoryIntoNewCollections(t *testing.T) {
 		t.Fatalf("open: %d %s", rec.Code, rec.Body.String())
 	}
 	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-	if len(page.Restore.Preview) != 3 || len(page.Restore.Targets) != 3 || page.Restore.Preview[0].Count != 1 {
-		t.Fatalf("preview = %+v", page.Restore.Preview)
+	if m := page.Restore.Match; m == nil || len(m.Rows) != 3 || m.Rows[0].Count != 1 {
+		t.Fatalf("matching = %+v", page.Restore.Match)
 	}
 	if n := f.srv.CountRequests("MKCOL", "") + f.srv.CountRequests("MKCALENDAR", ""); n != made {
 		t.Errorf("opening and previewing made %d collections", n-made)
 	}
 	rec := f.h.do(postForm("/app/settings/backup?op=restore-run", f.sess, url.Values{
-		"target.0": {f.id}, "target.1": {f.id}, "target.2": {sel(f, filesDocs)},
+		"into.0": {"new"}, "into.1": {"new"}, "into.2": {"new"}, "pick.0": {"on"}, "pick.1": {"on"}, "pick.2": {"on"},
 	}))
 	done := decode[view.BackupPage](t, rec)
-	if !hasNotice(done.Notices, "Restored into new collections") {
+	if !hasNotice(done.Notices, "Restored") {
 		t.Fatalf("restore = %+v", done.Notices)
 	}
 	key, _ := f.sess.DataKey()
@@ -124,8 +125,8 @@ func TestRestoreFromThisComputer(t *testing.T) {
 		t.Fatalf("upload: %d %s", rec.Code, rec.Body.String())
 	}
 	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-	if len(page.Restore.Preview) != 3 {
-		t.Fatalf("preview = %+v", page.Restore.Preview)
+	if page.Restore.Match == nil || len(page.Restore.Match.Rows) != 3 {
+		t.Fatalf("matching = %+v", page.Restore.Match)
 	}
 	if len(restoreTemps(t)) != before+1 {
 		t.Error("the uploaded archive is not kept for the next step")
@@ -136,7 +137,7 @@ func TestRestoreFromThisComputer(t *testing.T) {
 	if n := len(restoreTemps(t)); n != before {
 		t.Errorf("closing left the archive on disk (%d)", n-before)
 	}
-	if again := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess))); len(again.Restore.Preview) != 0 {
+	if again := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess))); again.Restore.Match != nil {
 		t.Error("a closed archive is still previewed")
 	}
 }

@@ -362,12 +362,45 @@ type RestoreBlock struct {
 	// задание, что в манифесте, и где архив лежит — моноширинно; «Job
 	// «Личное» · manifest read · 4 collections · 1 214 records ·
 	// ‹carrel-backup/2026-08-14T09-12.zip›»; архив не открыт — пусто
-	Subtitle Runs           `json:"subtitle"`
-	Source   Form           `json:"source"`
-	Preview  []ImportTable  `json:"preview"`
-	Targets  []TargetPicker `json:"targets"`
-	Note     Runs           `json:"note"` // восстановление создаёт, а не откатывает; «creates» — жирным (s-backup-8)
-	Actions  []Action       `json:"actions"`
+	Subtitle Runs `json:"subtitle"`
+	Source   Form `json:"source"`
+	// Match — шаг сопоставления (s-backup-8); nil — архив не открыт
+	Match   *RestoreMatch `json:"match"`
+	Note    Runs          `json:"note"`    // восстановление создаёт, как импорт, а не откатывает; «creates» — жирным (s-backup-8)
+	Actions []Action      `json:"actions"` // Cancel открытого архива
+}
+
+// RestoreMatch — сопоставление (s-backup-8): строка на коллекцию архива,
+// отметка — что восстанавливать, «Restore into» — куда. Восстановление —
+// импорт (S-24.3): недостающее создаётся, такое же не повторяется, занятый
+// UID с другим содержимым получает новый; ничего не удаляется и не
+// перезаписывается. Без сценариев — одна форма: строки шлют pick.N и
+// into.N, кнопки полосы — та же форма на свой адрес.
+type RestoreMatch struct {
+	// Form — POST ?op=restore-run, скрытый _csrf; кнопки — «Restore 3
+	// collections» (основная) и полосы: Restore into, Skip, Select all
+	Form     Form `json:"form"`
+	Selected int  `json:"selected"` // «3 selected»
+	// Into — список «Restore into» полосы: цель всем отмеченным строкам
+	Into FormRow      `json:"into"`
+	Rows []RestoreRow `json:"rows"`
+}
+
+// RestoreRow — коллекция архива в сопоставлении.
+type RestoreRow struct {
+	Name   Text   `json:"name"`   // «nextcloud / personal»: подключение и коллекция в архиве
+	Colour Colour `json:"colour"` // метка совпавшей коллекции, иначе выведенная из пути
+	Kind   Kind   `json:"kind"`
+	Count  int    `json:"count"` // записей; у файловой коллекции — файлов
+	// Pick — отметка строки (pick.N): восстанавливать
+	Pick FormRow `json:"pick"`
+	// Into — «Restore into» (into.N): коллекции рода, куда можно писать,
+	// черта, New collection, Skip this one; заранее — совпавшая по пути
+	Into FormRow `json:"into"`
+	// Will — «What will happen»: «matched by path — 4 records missing, will
+	// be created», «that server is gone — another collection chosen», «skip»
+	Will   Text `json:"will"`
+	Danger bool `json:"danger"` // Will тревогой: сервер исчез, архив не читается
 }
 
 type AppearancePage struct {

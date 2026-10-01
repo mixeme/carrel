@@ -17,6 +17,50 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.128 — 2026-10-02
+
+Restoring as s-backup-8 draws it: each collection of the archive goes where
+its row says, and restoring is an import, not a rollback (the lead's
+decision: the frame rules).
+
+### Added
+
+- **`RestoreBlock.match`** (`RestoreMatch`) — the matching: a row per
+  collection of the archive (`RestoreRow`: «nextcloud / personal», its
+  colour, kind, how many), its tick (`pick.N`), «Restore into» (`into.N`:
+  the collections of its kind that take writes on every connection, then
+  New collection, Skip this one) preset to the collection matched by path —
+  on a server that is gone, another one —, and «What will happen» before
+  anything is written («matched by path — 4 records missing, will be
+  created», «no differences», «that server is gone — another collection
+  chosen», «a new collection on nextcloud — 312 records will be created»,
+  «skip»; `danger` when it is an alarm). The bar of the selection — «3
+  selected», Restore into (`into`) for the ticked rows, Skip, Select all —
+  is the same form sent to `?op=restore-match&do=into|skip|all`; the page
+  comes back with the choice. «Restore N collections» counts the ticked
+  rows that go somewhere.
+
+### Changed
+
+- **Restoring creates what is missing and nothing else**: into an existing
+  collection, a record missing there is created under its UID, the same
+  record (same UID, same content but the server's stamps) is not made
+  twice, a UID held there by different content gets a fresh UID and a line
+  in the report; files the same way (the same bytes stay, other bytes under
+  the name get a file beside it). Nothing on the server is deleted or
+  overwritten. New collection makes one as before (a new folder for files).
+  The report: «Restored» or «Restored in part», what went where, the fresh
+  UIDs.
+- **`RestoreBlock.preview` and `.targets` are gone**; `actions` holds Cancel,
+  «Restore N collections» stands in the matching form. The note under it
+  is the frame's. S-24.3 says the rule.
+
+### For consumers
+
+Draw the matching from `restore.match`; send its form with every row's
+`into.N` and the ticked `pick.N`. Fixture regenerated:
+`app-settings-backup/normal`.
+
 ## v0.2.127 — 2026-10-02
 
 Lock now, as s-profile-4 and s-plan-1…5 draw it beside «credentials

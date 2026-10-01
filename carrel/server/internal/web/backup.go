@@ -781,6 +781,8 @@ func (s *Server) postSettingsBackup(w http.ResponseWriter, r *http.Request) {
 		s.openRestore(w, r, sess, blob)
 	case "restore-run":
 		s.runRestore(w, r, sess, key, blob)
+	case "restore-match":
+		s.matchRestore(w, r, sess, blob)
 	case "restore-cancel":
 		endRestore(sess)
 		s.redirect(w, r, "/app/settings/backup")

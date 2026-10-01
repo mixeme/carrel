@@ -85,25 +85,25 @@ func TestRestoreReadsArchiveMembersUnderTheImportCeilings(t *testing.T) {
 		t.Fatalf("open: %d %s", rec.Code, rec.Body.String())
 	}
 	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-	if len(page.Restore.Preview) != 3 {
-		t.Fatalf("preview = %+v", page.Restore.Preview)
+	if page.Restore.Match == nil || len(page.Restore.Match.Rows) != 3 {
+		t.Fatalf("matching = %+v", page.Restore.Match)
 	}
+	rows := page.Restore.Match.Rows
 	for i, want := range []string{"larger than", "records", ""} {
-		rubric := string(page.Restore.Preview[i].Rubric)
+		will := string(rows[i].Will)
 		if want == "" {
-			if strings.Contains(rubric, "cannot be restored") || len(page.Restore.Preview[i].Rows) != 1 {
-				t.Errorf("preview[%d] = %+v", i, page.Restore.Preview[i])
+			// Its server is not here: another book is chosen, and said so.
+			if will != "that server is gone — another collection chosen" || !rows[i].Danger {
+				t.Errorf("row %d = %q", i, will)
 			}
 			continue
 		}
-		if !strings.Contains(rubric, "cannot be restored") || !strings.Contains(rubric, want) || len(page.Restore.Preview[i].Rows) != 0 {
-			t.Errorf("preview[%d] = %q rows %d", i, rubric, len(page.Restore.Preview[i].Rows))
+		if !strings.Contains(will, "cannot be restored") || !strings.Contains(will, want) || !rows[i].Danger {
+			t.Errorf("row %d = %q", i, will)
 		}
 	}
 	made := f.srv.CountRequests("PUT", "")
-	done := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=restore-run", f.sess, url.Values{
-		"target.0": {f.id}, "target.1": {f.id}, "target.2": {f.id},
-	})))
+	done := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=restore-run", f.sess, matchForm(*page.Restore.Match))))
 	if !hasNotice(done.Notices, "Restored in part") {
 		t.Fatalf("restore = %+v", done.Notices)
 	}
@@ -130,9 +130,9 @@ func TestRestoreNeverWritesWhereTheManifestPoints(t *testing.T) {
 	}
 	before := len(f.srv.Requests())
 	done := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=restore-run", f.sess, url.Values{
-		"target.0": {sel(f, filesDocs)},
+		"into.0": {sel(f, filesDocs)}, "pick.0": {"on"},
 	})))
-	if !hasNotice(done.Notices, "Restored into new collections") {
+	if !hasNotice(done.Notices, "Restored") {
 		t.Fatalf("restore = %+v", done.Notices)
 	}
 	wrote := 0

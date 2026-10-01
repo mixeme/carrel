@@ -144,11 +144,12 @@ func TestRestoreStepsAreTheFrames(t *testing.T) {
 		t.Fatalf("open: %d", rec.Code)
 	}
 	page = decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-	r := actionByID(page.Restore.Actions, "restore.run")
+	actions := append(append([]view.Action{}, page.Restore.Actions...), page.Restore.Match.Form.Actions...)
+	r := actionByID(actions, "restore.run")
 	if r == nil || string(r.Label) != "Restore 3 collections" || !r.Primary {
 		t.Errorf("restore = %+v, the frame «Restore 3 collections», primary (s-backup-8)", r)
 	}
-	sameActionMarks(t, "s-backup-8", "restore", page.Restore.Actions, nil)
+	sameActionMarks(t, "s-backup-8", "restore", actions, nil)
 }
 
 // s-tasks-11: Related to typed by hand is a UID, monospaced.

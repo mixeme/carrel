@@ -2302,10 +2302,40 @@ type RestoreBlock struct {
     Open    bool // восстановление открыто: Restore в шапке (?restore=1) или архив уже открыт
     Subtitle Runs // открытый архив (s-backup-8): «Job «Личное» · manifest read · 4 collections · 1 214 records · ‹carrel-backup/2026-08-14T09-12.zip›»; не открыт — пусто
     Source  Form
-    Preview []ImportTable
-    Targets []TargetPicker
-    Note    Runs // восстановление создаёт, а не откатывает; «creates» жирным (s-backup-8)
-    Actions []Action
+    Match   *RestoreMatch // шаг сопоставления (s-backup-8); nil — архив не открыт
+    Note    Runs // восстановление создаёт, как импорт, а не откатывает: «creates» жирным (s-backup-8)
+    Actions []Action // Cancel открытого архива
+}
+// Сопоставление (s-backup-8): строка на коллекцию архива — отметка, что
+// восстанавливать, и «Restore into» — куда. Восстановление — импорт (S-24.3):
+// в выбранной коллекции создаются недостающие записи, такие же (тот же UID,
+// то же содержимое) не повторяются, запись с занятым UID и другим
+// содержимым получает новый UID и строку отчёта; на сервере ничего не
+// удаляется и не перезаписывается. Без сценариев всё — одна форма: строки
+// шлют pick.N и into.N, кнопки полосы — та же форма на свой адрес
+// (`?op=restore-match&do=into|skip|all`), ответ — страница с новым выбором.
+type RestoreMatch struct {
+    Form     Form       // POST `/app/settings/backup?op=restore-run`: скрытый _csrf; кнопки — «Restore 3 collections» (по отмеченным строкам, основная) и полосы: Restore into, Skip, Select all
+    Selected int        // «3 selected» на полосе
+    Into     FormRow    // список «Restore into» полосы (into): цель всем отмеченным строкам — коллекции, черта, New collection, Skip this one
+    Rows     []RestoreRow
+}
+type RestoreRow struct {
+    Name   Text   // «nextcloud / personal» — подключение и коллекция в архиве
+    Colour Colour // метка совпавшей коллекции, иначе выведенная из пути
+    Kind   Kind
+    Count  int     // записей; у файловой коллекции — файлов
+    Pick   FormRow // отметка строки (pick.N): восстанавливать
+    // «Restore into» (into.N): коллекции этого рода, куда можно писать, со
+    // всех подключений, черта, New collection, Skip this one (`skip`);
+    // заранее — совпавшая по пути, у исчезнувшего сервера — другая
+    Into   FormRow
+    // «What will happen»: «matched by path — 4 records missing, will be
+    // created», «matched by path — no differences», «that server is gone —
+    // another collection chosen», «a new collection on nextcloud — 312
+    // records will be created», «skip»
+    Will   Text
+    Danger bool // Will тревогой: сервер исчез, архив не читается
 }
 
 type AppearancePage struct {
