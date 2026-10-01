@@ -112,9 +112,7 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		page := s.notePage(c, uid, obj, nil)
 		// Where the note lies and when it was written, in one line under
 		// its title (s-notes-1); no field repeats the date.
-		if when := noteWhen(obj, c.tf); when != "" {
-			d.Subtitle += text(" · " + when)
-		}
+		d.Date = text(noteWhen(obj, c.tf))
 		d.Rendered, d.Attach, d.Related = page.Doc.Rendered, page.Meta.Attach, page.Meta.Related
 		d.Fields = tagsField(s.recordTags(c, obj))
 		// The page of the note is a bare icon beside Edit; the deletion is

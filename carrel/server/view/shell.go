@@ -127,8 +127,11 @@ type SourceRow struct {
 // (s-contacts-1, s-agenda-1, s-tasks-1, s-notes-1). Типы блоков — те же, что
 // у страницы записи.
 type Details struct {
-	Title     Text          `json:"title"`
-	Subtitle  Text          `json:"subtitle"`  // под заголовком: откуда запись, у заметки — и когда
+	Title    Text `json:"title"`
+	Subtitle Text `json:"subtitle"` // под заголовком: откуда запись, у заметки — и когда
+	// Date — у заметки день и время, когда они у неё есть, моноширинно после
+	// Subtitle (s-notes-1), как NoteMeta.Date страницы; у прочих пусто
+	Date      Text          `json:"date"`
 	Avatar    *Avatar       `json:"avatar"`    // контакт: фото или инициалы; у других родов nil
 	Fields    []Field       `json:"fields"`    // категории — строкой «Tags» с Field.Tags
 	Body      Text          `json:"body"`      // описание события и задачи, как есть

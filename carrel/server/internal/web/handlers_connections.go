@@ -431,7 +431,8 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 			// collections are the rows of those cards, unticked ones too, and
 			// a server not answering now counts what it had at its last
 			// answer (s-profile-1).
-			page.Subtitle = text(fmt.Sprintf("Signed in as %s · %s · %s · %s", sess.Login(),
+			// The login in bold (s-profile-10).
+			page.Subtitle = join("Signed in as ", strongRun(sess.Login()), fmt.Sprintf(" · %s · %s · %s",
 				plural(len(blob.Connections), "server"), plural(cols, "collection"), plural(len(blob.Subscriptions), "subscription")))
 			page.Actions = append(page.Actions,
 				view.Action{ID: "connection.add", Label: "Connect account", Icon: "i-plus", Href: s.connectHref(), Method: "GET", Primary: true, Enabled: true},

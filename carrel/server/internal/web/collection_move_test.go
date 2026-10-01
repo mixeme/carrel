@@ -111,15 +111,15 @@ func TestCollectionMoveSheetSaysBeforeItStarts(t *testing.T) {
 	if o := sheet.Target.Options[0]; !o.ReadOnly || o.Reason != "already there" {
 		t.Errorf("current connection = %+v", o)
 	}
-	if c := sheet.Actions[0]; c.Enabled || c.Reason == "" || sheet.Warning != "" {
+	if c := sheet.Actions[0]; c.Enabled || c.Reason == "" || len(sheet.Warning) != 0 {
 		t.Errorf("nothing chosen: confirm %+v, warning %q", c, sheet.Warning)
 	}
 	chosen := decode[view.CollectionMoveSheet](t, f.h.do(get(sheet.Target.Options[1].ID, f.sess)))
-	if !chosen.Actions[0].Enabled || !strings.Contains(string(chosen.Warning), "old address") || chosen.Target.Chosen != sheet.Target.Options[1].ID {
+	if !chosen.Actions[0].Enabled || !strings.Contains(plainText(chosen.Warning), "old address") || chosen.Target.Chosen != sheet.Target.Options[1].ID {
 		t.Errorf("chosen = %+v", chosen)
 	}
 	copySheet := decode[view.CollectionMoveSheet](t, f.h.do(get(colSheetHref(f.davFixture, f.otherID, true), f.sess)))
-	if !copySheet.Copy || copySheet.Actions[0].ID != "collection.copy.confirm" || strings.Contains(string(copySheet.Warning), "deletes") {
+	if !copySheet.Copy || copySheet.Actions[0].ID != "collection.copy.confirm" || strings.Contains(plainText(copySheet.Warning), "deletes") {
 		t.Errorf("copy sheet = %+v", copySheet)
 	}
 

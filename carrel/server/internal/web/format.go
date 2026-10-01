@@ -34,7 +34,43 @@ func runs(parts ...view.Run) view.Runs {
 	return out
 }
 
-func plainRun(s string) view.Run  { return view.Run{Text: view.Text(s)} }
+func plainRun(s string) view.Run { return view.Run{Text: view.Text(s)} }
+
+// allOf is «all 51 events» with the number in bold, as the sheets of a
+// collection write it (s-profile-8, -9, -19).
+func allOf(n int, unit string) []view.Run {
+	if n != 1 {
+		unit += "s"
+	}
+	return []view.Run{plainRun("all "), strongRun(fmt.Sprint(n)), plainRun(" " + unit)}
+}
+
+// join is the pieces of a sentence in order: runs, the marked ones among
+// them, and plain strings between.
+func join(parts ...any) view.Runs {
+	var out []view.Run
+	for _, p := range parts {
+		switch v := p.(type) {
+		case string:
+			out = append(out, plainRun(v))
+		case view.Run:
+			out = append(out, v)
+		case []view.Run:
+			out = append(out, v...)
+		}
+	}
+	// Plain neighbours make one piece: the client writes pieces as they
+	// come, and a sentence split for nothing is harder to read back.
+	var merged view.Runs
+	for _, r := range runs(out...) {
+		if n := len(merged); n > 0 && merged[n-1].Mark == view.RunPlain && r.Mark == view.RunPlain {
+			merged[n-1].Text += r.Text
+			continue
+		}
+		merged = append(merged, r)
+	}
+	return merged
+}
 func monoRun(s string) view.Run   { return view.Run{Text: view.Text(s), Mark: view.RunMono} }
 func strongRun(s string) view.Run { return view.Run{Text: view.Text(s), Mark: view.RunStrong} }
 

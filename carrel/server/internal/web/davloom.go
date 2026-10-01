@@ -141,11 +141,12 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 		Shell:   s.withRail(s.buildShell(sess, "DAV proxy"), s.settingsRail(sess, "/app/settings/davloom")),
 		Enabled: s.cfg.DAVloomPort != 0,
 		Address: text(s.davloomAddress()),
-		Note: "Changing your Carrel password does not disconnect devices: each has its own key wrapper. " +
-			"To disconnect one, revoke it here — that is the only thing that stops it.",
+		// «not» in bold (s-davloom-1).
+		Note: join("Changing your Carrel password does ", strongRun("not"), " disconnect devices: each has its own key wrapper. "+
+			"To disconnect one, revoke it here — that is the only thing that stops it."),
 	}
 	if !page.Enabled {
-		page.Note = "davloom is off on this instance: the administrator turns it on with CARREL_DAVLOOM_PORT. " + page.Note
+		page.Note = join("davloom is off on this instance: the administrator turns it on with CARREL_DAVLOOM_PORT. ", []view.Run(page.Note))
 	}
 	blob := s.catalogOf(sess)
 	tf, now := s.timeFor(sess), s.now()

@@ -71,7 +71,7 @@ func TestRadicaleBaikalCollectionMove(t *testing.T) {
 	sheet := liveDecode[view.CollectionMoveSheet](t, "calendar sheet", app.get("/app/collections/move?"+url.Values{
 		"a": {radID}, "c": {srcCal.Path}, "to": {baiID},
 	}.Encode()))
-	if sheet.Warning == "" || !strings.Contains(string(sheet.Subject), "Carrel S-12.3") {
+	if len(sheet.Warning) == 0 || !strings.Contains(string(sheet.Subject), "Carrel S-12.3") {
 		t.Fatalf("sheet = %+v", sheet)
 	}
 	loc := redirected(t, "move calendar", app.post(liveAction(t, sheet.Actions, "collection.move.confirm"), url.Values{}))

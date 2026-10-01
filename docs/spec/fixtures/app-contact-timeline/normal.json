@@ -301,7 +301,8 @@
     "subtitle": "",
     "close": "",
     "books": [],
-    "foreignShow": null
+    "foreignShow": null,
+    "date": ""
   },
   "details": null,
   "groups": [

@@ -310,7 +310,7 @@ func TestICloudMove(t *testing.T) {
 	}
 
 	sheet := liveDecode[view.MoveSheet](t, "move sheet", app.get(moveURL(from.Path, into.Path, false)))
-	if !strings.HasPrefix(string(sheet.Warning), "Inside one server this is MOVE") {
+	if !strings.HasPrefix(runsText(sheet.Warning), "Inside one server this is MOVE") {
 		t.Errorf("a move on one account warned of something else: %q", sheet.Warning)
 	}
 	redirected(t, "move", app.post(liveAction(t, sheet.Actions, "record.move.confirm"), url.Values{}))
@@ -362,7 +362,7 @@ func TestICloudMove(t *testing.T) {
 
 		// The account is known now: the next copy's sheet says so first.
 		again := liveDecode[view.MoveSheet](t, "copy sheet again", app.get(moveURL(into.Path, from.Path, true)))
-		if !strings.Contains(string(again.Warning), "a UID of its own") {
+		if !strings.Contains(runsText(again.Warning), "a UID of its own") {
 			t.Errorf("the second copy sheet warned %q", again.Warning)
 		}
 	})

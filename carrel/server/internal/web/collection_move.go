@@ -156,22 +156,22 @@ func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, c
 		if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
 			unit = spec.noun
 		}
-		records := "all its " + unit + "s"
+		records := []view.Run{plainRun("all its " + unit + "s")}
 		if count != nil && *count > 0 {
-			records = "all " + plural(*count, unit)
+			records = allOf(*count, unit)
 		}
 		switch {
 		case col.Has(view.KindFile) && copying:
 			// S-17.1: between storages every file travels through Carrel.
-			sheet.Warning = text(fmt.Sprintf("Carrel creates a folder there and copies everything in it, each file downloaded and uploaded again; this one on %s stays as it is.", here))
+			sheet.Warning = line(fmt.Sprintf("Carrel creates a folder there and copies everything in it, each file downloaded and uploaded again; this one on %s stays as it is.", here))
 		case col.Has(view.KindFile):
-			sheet.Warning = text(fmt.Sprintf("Carrel creates a folder there, copies everything in it — each file downloaded and uploaded again — then deletes this one on %s. "+
+			sheet.Warning = line(fmt.Sprintf("Carrel creates a folder there, copies everything in it — each file downloaded and uploaded again — then deletes this one on %s. "+
 				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the files live on.", here))
 		case copying:
-			sheet.Warning = text(fmt.Sprintf("Carrel creates a %s there and copies %s; this one on %s stays as it is.", noun, records, here))
+			sheet.Warning = join("Carrel creates a "+noun+" there and copies ", records, "; this one on "+here+" stays as it is.")
 		default:
-			sheet.Warning = text(fmt.Sprintf("Carrel creates a %s there, copies %s, then deletes this one on %s. "+
-				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path.", noun, records, here))
+			sheet.Warning = join("Carrel creates a "+noun+" there, copies ", records, ", then deletes this one on "+here+". "+
+				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path.")
 		}
 	}
 	sheet.Actions = []view.Action{confirm}

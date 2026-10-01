@@ -10,7 +10,11 @@
       "method": "POST"
     }
   ],
-  "archive": "No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new address book at a new address — not into this one, and not to this address.",
+  "archive": [
+    {
+      "text": "No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new address book at a new address — not into this one, and not to this address."
+    }
+  ],
   "export": {
     "enabled": true,
     "href": "/app/contacts/a-nc-home/kontakty/export",
@@ -63,5 +67,16 @@
   "kind": "contact",
   "references": [],
   "subject": "nextcloud · Контакты",
-  "warning": "The address book and all 4 contacts in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+  "warning": [
+    {
+      "text": "The address book and all "
+    },
+    {
+      "mark": "strong",
+      "text": "4"
+    },
+    {
+      "text": " contacts in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+    }
+  ]
 }

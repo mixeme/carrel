@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.99 — 2026-10-01
+
+The pieces of the server's sentences the frames mark — a command or a day
+monospaced, a count or the one word that matters in bold — in the sheets
+and sentences the sections and the shell show (C-6.2 `Runs`, plan item
+«Выделенные куски в других фразах сервера»).
+
+### Changed
+
+- **`Runs` instead of `Text`**: `MoveSheet.warning` and `FileOpSheet.warning`
+  — `MOVE` monospaced (s-contacts-2, s-files-4); `CollectionMoveSheet.warning`
+  and `CollectionDeleteSheet.warning` — the count in bold, «all **51**
+  events» (s-profile-8, -9, -19); `CollectionDeleteSheet.archive` — the day
+  monospaced and **new** in bold; `ConnectionsPage.subtitle` — «Signed in
+  as **mix** · …» (s-profile-10); `DavloomPage.note` — «does **not**
+  disconnect devices» (s-davloom-1).
+- **`Details.date`**: a note's day and time in the panel, apart from
+  `subtitle`, to be written monospaced after it (s-notes-1) — as the note's
+  page keeps it in `NoteMeta.date`. `subtitle` is the connection and the
+  notebook alone now.
+- **A message's bold first sentence is its `Title`, with its stop**, as the
+  frames draw it: «Nothing is loaded yet.» (s-dup-6), «One record is
+  rewritten and 1 other deleted.» (s-dup-2, -4), «Written, but not every
+  other record was deleted.» (s-dup-5).
+
+### Not yet
+
+- The settings' and the administration's rail status lines, hints of
+  fields and a few sentences of copy and mail: plan/server.md, «Открыто».
+
 ## v0.2.98 — 2026-10-01
 
 Strings the frames draw that the server did not send, or sent otherwise

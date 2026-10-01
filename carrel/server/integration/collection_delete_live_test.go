@@ -72,7 +72,7 @@ func runCollectionDelete(t *testing.T, endpoint, user, pass string) {
 
 	t.Run("calendar", func(t *testing.T) {
 		sheet := liveDeleteSheet(t, app, connID, cal.Path)
-		if w := string(sheet.Warning); !strings.Contains(w, "all 2 records") {
+		if w := runsText(sheet.Warning); !strings.Contains(w, "all 2 records") {
 			t.Errorf("warning = %q", w)
 		}
 		if sheet.Export == nil || string(sheet.Export.Label) != "Download .ics first" {
@@ -92,7 +92,7 @@ func runCollectionDelete(t *testing.T, endpoint, user, pass string) {
 
 	t.Run("contacts", func(t *testing.T) {
 		sheet := liveDeleteSheet(t, app, connID, book.Path)
-		if w := string(sheet.Warning); !strings.Contains(w, "address book and all 1 contact in it") {
+		if w := runsText(sheet.Warning); !strings.Contains(w, "address book and all 1 contact in it") {
 			t.Errorf("warning = %q", w)
 		}
 		if sheet.Export == nil || string(sheet.Export.Label) != "Download .vcf first" {

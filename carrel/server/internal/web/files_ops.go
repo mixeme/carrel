@@ -786,7 +786,7 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 			run.Add("etag", e.ETag)
 		}
 		confirm = writeAction(c, confirm)
-		sheet.Warning = "Carrel keeps no index of what points at a file: it may be the attachment of a note or an event, and nothing checks that before it goes. Deleting cannot be undone."
+		sheet.Warning = line("Carrel keeps no index of what points at a file: it may be the attachment of a note or an event, and nothing checks that before it goes. Deleting cannot be undone.")
 	default:
 		confirm.Label = "Move here"
 		if op == view.FileCopy {
@@ -812,11 +812,12 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		// will cost, said before it starts.
 		switch {
 		case op == view.FileCopy:
-			sheet.Warning = "A copy travels through Carrel even inside one server: each file is downloaded and uploaded again, one at a time."
+			sheet.Warning = line("A copy travels through Carrel even inside one server: each file is downloaded and uploaded again, one at a time.")
 		case dest != nil && dest.conn.ID != c.conn.ID:
-			sheet.Warning = "This goes to another storage, so nothing moves on a server: Carrel downloads each file and uploads it there, and deletes the original only once its copy is complete."
+			sheet.Warning = line("This goes to another storage, so nothing moves on a server: Carrel downloads each file and uploads it there, and deletes the original only once its copy is complete.")
 		default:
-			sheet.Warning = "Inside one server this is MOVE: instant, no traffic. To another storage the file has to be downloaded and uploaded again — Carrel says so before it starts, not after."
+			// MOVE monospaced (s-files-4).
+			sheet.Warning = join("Inside one server this is ", monoRun("MOVE"), ": instant, no traffic. To another storage the file has to be downloaded and uploaded again — Carrel says so before it starts, not after.")
 		}
 	}
 	if confirm.Enabled {

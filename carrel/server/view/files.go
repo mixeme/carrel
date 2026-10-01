@@ -112,7 +112,7 @@ type FileOpSheet struct {
 	Subject Text      `json:"subject"` // откуда: «from Documents / carrel / attachments»
 	Items   []Text    `json:"items"`
 	Target  *FileTree `json:"target"`
-	Warning Text      `json:"warning"` // что сделает перенос: на одном сервере MOVE, между хранилищами — скачивание и загрузка
+	Warning Runs      `json:"warning"` // что сделает перенос: на одном сервере MOVE (моноширинно, s-files-4), между хранилищами — скачивание и загрузка
 	Failure *Notice   `json:"failure"` // New folder не завёл папку; nil — отказа не было
 	Actions []Action  `json:"actions"`
 }

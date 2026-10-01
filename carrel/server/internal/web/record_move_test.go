@@ -126,16 +126,16 @@ func TestMoveSheetSaysBeforeItStarts(t *testing.T) {
 	friends := moveOption(t, sheet, "Friends").ID
 	chosen := decode[view.MoveSheet](t, f.h.do(get(friends, f.sess)))
 	// On one account the message is the sheet's standing one: a MOVE.
-	if c := confirmOf(t, chosen); !c.Enabled || c.Method != "POST" || chosen.Target.Chosen != friends || strings.Contains(string(chosen.Warning), "another account") {
+	if c := confirmOf(t, chosen); !c.Enabled || c.Method != "POST" || chosen.Target.Chosen != friends || strings.Contains(plainText(chosen.Warning), "another account") {
 		t.Errorf("same account: confirm %+v chosen %q warning %q", c, chosen.Target.Chosen, chosen.Warning)
 	}
 
 	work := decode[view.MoveSheet](t, f.h.do(get(moveOption(t, sheet, "Work").ID, f.sess)))
-	if !strings.Contains(string(work.Warning), "another account") || !confirmOf(t, work).Enabled {
+	if !strings.Contains(plainText(work.Warning), "another account") || !confirmOf(t, work).Enabled {
 		t.Errorf("another account must be named before the move: %+v", work)
 	}
 	copySheet := decode[view.MoveSheet](t, f.h.do(get(moveOption(t, sheet, "Work").ID+"&copy=1", f.sess)))
-	if !copySheet.Copy || strings.Contains(string(copySheet.Warning), "delete") || confirmOf(t, copySheet).ID != "record.copy.confirm" {
+	if !copySheet.Copy || strings.Contains(plainText(copySheet.Warning), "delete") || confirmOf(t, copySheet).ID != "record.copy.confirm" {
 		t.Errorf("copy to another account: %+v", copySheet)
 	}
 
@@ -442,7 +442,7 @@ func TestMovedEventTakesItsZoneAndInstances(t *testing.T) {
 	record := f.path("calendar") + "/standup"
 	q := url.Values{"to": {otherID}, "into": {team}}
 	sheet := decode[view.MoveSheet](t, f.h.do(get(record+"/move?"+q.Encode(), f.sess)))
-	if sheet.Kind != view.KindEvent || sheet.Warning == "" {
+	if sheet.Kind != view.KindEvent || len(sheet.Warning) == 0 {
 		t.Fatalf("sheet = %+v", sheet)
 	}
 	resp := f.h.do(postForm(confirmOf(t, sheet).Href, f.sess, url.Values{}))

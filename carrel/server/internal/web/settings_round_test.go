@@ -274,7 +274,7 @@ func TestFolderMenuIsTheFrame(t *testing.T) {
 
 	// Copy to another server: the tree arrives, the original stays.
 	cp := decode[view.CollectionMoveSheet](t, f.h.do(get("/app/collections/move?"+url.Values{"a": {aID}, "c": {pics}, "to": {bID}, "copy": {"1"}}.Encode(), f.sess)))
-	if len(cp.Actions) != 1 || !cp.Actions[0].Enabled || cp.Warning == "" {
+	if len(cp.Actions) != 1 || !cp.Actions[0].Enabled || len(cp.Warning) == 0 {
 		t.Fatalf("copy sheet = %+v", cp)
 	}
 	if rec := f.h.do(postForm(cp.Actions[0].Href, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {

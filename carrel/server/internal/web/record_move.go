@@ -120,15 +120,16 @@ func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, de
 	record, where := recordNouns[c.spec.kind], moveCollectionNouns[c.spec.kind]
 	switch {
 	case copying && dest != nil && knownOneUIDPerAccount(c, dest):
-		sheet.Warning = text("A copy is written into the chosen " + where + " whole, with a UID of its own: this server holds one record per UID across the account, " +
+		sheet.Warning = line("A copy is written into the chosen " + where + " whole, with a UID of its own: this server holds one record per UID across the account, " +
 			"so for other apps the copy is another " + record + ". The " + record + " here stays as it is.")
 	case copying:
-		sheet.Warning = text("A copy is written into the chosen " + where + " whole, with the same UID; the " + record + " here stays as it is.")
+		sheet.Warning = line("A copy is written into the chosen " + where + " whole, with the same UID; the " + record + " here stays as it is.")
 	case dest != nil && dest.conn.ID != c.conn.ID:
-		sheet.Warning = text("This goes to another account, so nothing moves on a server: Carrel reads the " + c.spec.noun +
+		sheet.Warning = line("This goes to another account, so nothing moves on a server: Carrel reads the " + c.spec.noun +
 			" whole, writes it there, reads it back, and deletes the original only if the copy kept everything.")
 	default:
-		sheet.Warning = text("Inside one server this is MOVE: instant, no traffic. To another " + where + " the " + record +
+		// MOVE monospaced (s-contacts-2).
+		sheet.Warning = join("Inside one server this is ", monoRun("MOVE"), ": instant, no traffic. To another "+where+" the "+record+
 			" is copied and then deleted — Carrel says so before it starts, not after.")
 	}
 	cancel := view.Action{ID: "record.move.cancel", Label: "Cancel", Href: s.route(c.recordPath(uid)), Method: "GET", Enabled: true}

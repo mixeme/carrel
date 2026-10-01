@@ -151,7 +151,7 @@ type MoveSheet struct {
 	Title   Text         `json:"title"`   // «Move contact», «Copy event» (s-contacts-2)
 	Subject Text         `json:"subject"` // что и откуда: «Анна Ковалёва · from nextcloud · Контакты»
 	Target  TargetPicker `json:"target"`
-	Warning Text         `json:"warning"` // что сделает перенос: на одном сервере MOVE, на другой аккаунт — копия и удаление исходника
+	Warning Runs         `json:"warning"` // что сделает перенос: на одном сервере MOVE (моноширинно, s-contacts-2), на другой аккаунт — копия и удаление исходника
 	Actions []Action     `json:"actions"`
 }
 
@@ -181,16 +181,16 @@ type CollectionMoveSheet struct {
 	Copy    bool         `json:"copy"`    // тот же лист с другой кнопкой; исходная остаётся
 	Subject Text         `json:"subject"` // что переносят: «Дни рождения · nextcloud»
 	Target  TargetPicker `json:"target"`  // цель — подключение, а не коллекция (S-12.3)
-	Warning Text         `json:"warning"` // завести там, перенести записи, удалить здесь — до начала
+	Warning Runs         `json:"warning"` // завести там, перенести записи, удалить здесь — до начала; число записей жирным (s-profile-8)
 	Actions []Action     `json:"actions"`
 }
 
 type CollectionDeleteSheet struct {
 	Kind       Kind     `json:"kind"`
 	Subject    Text     `json:"subject"`
-	Warning    Text     `json:"warning"`    // что именно исчезнет и что копии у Carrel нет
+	Warning    Runs     `json:"warning"`    // что именно исчезнет и что копии у Carrel нет; число жирным (s-profile-9, -19)
 	References []Text   `json:"references"` // что на неё ссылается: ссылки и устройства счётом, задания по имени
-	Archive    Text     `json:"archive"`    // когда попадала в архив и чего восстановление не сделает
+	Archive    Runs     `json:"archive"`    // когда попадала в архив (день моноширинно) и чего восстановление не сделает («new» жирным; s-profile-9, -19)
 	Export     *Action  `json:"export"`     // «сначала скачать»; nil — экспортировать нечем
 	ExportNote Text     `json:"exportNote"`
 	Form       Form     `json:"form"` // подтверждение набором имени

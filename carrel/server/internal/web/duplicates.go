@@ -467,7 +467,7 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 	if st.compared == 0 {
 		page.Notices = append(page.Notices, view.Notice{
 			Role:  view.NoticeInfo,
-			Title: "Nothing is loaded yet",
+			Title: "Nothing is loaded yet.",
 			Body:  "Duplicates are found only among the records this session has already read, so no server was asked. Open a list or a combined view, then come back.",
 		})
 	}

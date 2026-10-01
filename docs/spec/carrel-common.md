@@ -805,7 +805,8 @@ type SourceRow struct {
 // не рисует.
 type Details struct {
     Title      Text
-    Subtitle   Text          // под заголовком: «nextcloud · Записи», у заметки — и дата со временем
+    Subtitle   Text          // под заголовком: «nextcloud · Записи»
+    Date       Text          // у заметки — день и время, когда они есть, моноширинно после Subtitle (s-notes-1), как NoteMeta.Date; у прочих пусто
     Avatar     *Avatar       // контакт: фото или инициалы; у других родов nil
     Fields     []Field       // категории — строкой «Tags» с Field.Tags там, где её рисует кадр
     Body       Text          // описание события и задачи, как есть
@@ -1501,7 +1502,7 @@ type MoveSheet struct {
     Title   Text
     Subject Text
     Target  TargetPicker
-    Warning Text
+    Warning Runs // что сделает перенос; на одном сервере `MOVE` моноширинно (s-contacts-2)
     Actions []Action
 }
 
@@ -1571,16 +1572,16 @@ type CollectionMoveSheet struct {
     Copy    bool         // тот же лист с другой кнопкой; исходная остаётся
     Subject Text         // что переносят: «nextcloud · Дни рождения»
     Target  TargetPicker // цель — подключение, а не коллекция (S-12.3)
-    Warning Text
+    Warning Runs // число записей жирным: «copies all ‹51› events» (s-profile-8)
     Actions []Action
 }
 
 type CollectionDeleteSheet struct {
     Kind       Kind
     Subject    Text
-    Warning    Text    // что именно исчезнет и что копии у Carrel нет
+    Warning    Runs    // что именно исчезнет и что копии у Carrel нет; число жирным (s-profile-9, -19)
     References []Text  // что на неё ссылается: ссылки и устройства счётом, задания по имени
-    Archive    Text    // когда попадала в архив и чего восстановление не сделает
+    Archive    Runs    // когда попадала в архив — день моноширинно — и чего восстановление не сделает, «new» жирным (s-profile-9, -19)
     Export     *Action // «сначала скачать»; nil — экспортировать нечем
     ExportNote Text
     Form       Form    // подтверждение набором имени
@@ -1758,7 +1759,7 @@ type FileOpSheet struct {
     Subject Text
     Items   []Text
     Target  *FileTree
-    Warning Text
+    Warning Runs // на одном сервере `MOVE` моноширинно (s-files-4)
     Failure *Notice
     Actions []Action
 }
@@ -1993,7 +1994,7 @@ type ConnectionsPage struct {
     // (подписки не в счёте), коллекции — строки коллекций и папок в этих
     // карточках, снятые тоже; у сервера, который сейчас не отвечает, —
     // сколько было при последнем ответе
-    Subtitle      Text
+    Subtitle      Runs // логин жирным (s-profile-10)
     Accounts      []ConnectionCard
     Subscriptions []SubscriptionCard
     // Диалог подключения (`?op=add`, s-profile-2), его правка (`?op=edit`)
@@ -2106,7 +2107,7 @@ type DavloomPage struct {
     Address Text
     Devices []ProxyDevice
     Add     Form
-    Note    Text // смена основного пароля не отключает устройства
+    Note    Runs // смена основного пароля не отключает устройства; «not» жирным (s-davloom-1)
 }
 type ProxyDevice struct {
     Name     Text

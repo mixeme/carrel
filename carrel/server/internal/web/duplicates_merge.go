@@ -332,7 +332,7 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 	}
 	page.Warning = view.Notice{
 		Role:  view.NoticeAlert,
-		Title: text(fmt.Sprintf("One record is rewritten and %s deleted", plural(len(others), "other"))),
+		Title: text(fmt.Sprintf("One record is rewritten and %s deleted.", plural(len(others), "other"))),
 		Body: "The kept record is rewritten with the values you chose, and only once the server has kept it are the others deleted. " +
 			"This cannot be undone from here.",
 		Details: &view.Diagnostic{Summary: "What changes", Lines: lines},
@@ -447,7 +447,7 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 	var deleted []mergeMember
 	for i, o := range others {
 		if err := o.c.remove(ctx, o.obj.Path, o.obj.ETag); err != nil {
-			n := moveFailure(o.c, "Written, but not every other record was deleted", "DELETE", o.obj.Path, err)
+			n := moveFailure(o.c, "Written, but not every other record was deleted.", "DELETE", o.obj.Path, err)
 			n.Body = text(fmt.Sprintf("The merge was written and %s deleted; %s refused, and the rest were not tried. Nothing is undone.",
 				plural(len(deleted), "record"), o.label()))
 			if dav.IsStatus(err, http.StatusPreconditionFailed) {

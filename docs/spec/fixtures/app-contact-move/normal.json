@@ -63,5 +63,16 @@
     ]
   },
   "title": "Move contact",
-  "warning": "Inside one server this is MOVE: instant, no traffic. To another address book the card is copied and then deleted — Carrel says so before it starts, not after."
+  "warning": [
+    {
+      "text": "Inside one server this is "
+    },
+    {
+      "mark": "mono",
+      "text": "MOVE"
+    },
+    {
+      "text": ": instant, no traffic. To another address book the card is copied and then deleted — Carrel says so before it starts, not after."
+    }
+  ]
 }

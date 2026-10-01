@@ -745,7 +745,8 @@
       "id": "contact.foreign",
       "label": "Show 3",
       "method": "GET"
-    }
+    },
+    "date": ""
   },
   "print": {
     "title": "Combined address book",

@@ -117,7 +117,7 @@ func TestDuplicatesNeedWhatIsLoaded(t *testing.T) {
 	f := newDupFixture(t)
 	before := f.requests()
 	p := f.page(t)
-	if len(p.Groups) != 0 || p.Bar.Loaded != 0 || !hasNotice(p.Notices, "Nothing is loaded yet") {
+	if len(p.Groups) != 0 || p.Bar.Loaded != 0 || !hasNotice(p.Notices, "Nothing is loaded yet.") {
 		t.Errorf("empty cache: %+v", p)
 	}
 	if n := f.requests() - before; n != 0 {
@@ -424,7 +424,7 @@ func TestMergeStopsAtTheFirstRefusedDelete(t *testing.T) {
 	f.srv.Refuse(http.MethodDelete, http.StatusForbidden, "no")
 	f.other.Refuse(http.MethodDelete, http.StatusForbidden, "no")
 	got := decode[view.DuplicatesMergePage](t, f.h.do(postForm(mergeAction(t, p, "duplicates.merge.confirm").Href, f.sess, url.Values{})))
-	if got.Warning.Title != "Written, but not every other record was deleted" || got.Warning.Details == nil {
+	if got.Warning.Title != "Written, but not every other record was deleted." || got.Warning.Details == nil {
 		t.Fatalf("result = %+v", got.Warning)
 	}
 	if !strings.Contains(string(got.Warning.Details.Lines[0]), "Still there: ") {
@@ -612,7 +612,7 @@ func TestWhatWasReadOutlivesTheCollectionTTL(t *testing.T) {
 	f.load(t)
 	time.Sleep(20 * time.Millisecond)
 	p := f.page(t)
-	if len(p.Groups) != 1 || hasNotice(p.Notices, "Nothing is loaded yet") {
+	if len(p.Groups) != 1 || hasNotice(p.Notices, "Nothing is loaded yet.") {
 		t.Fatalf("after the TTL: groups %d, notices %+v", len(p.Groups), p.Notices)
 	}
 	if c := navCount(t, p.Rail); c == nil || *c != 1 {

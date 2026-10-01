@@ -60,7 +60,7 @@ func TestFileCopyAndOtherStorageAreTheFrames(t *testing.T) {
 	if want := strings.Replace(cpTitle, n[1]+" items", "1 item", 1); string(cp.Title) != want {
 		t.Errorf("copy title = %q, want %q", cp.Title, want)
 	}
-	if string(cp.Warning) != cpMsg || cp.Actions[0].Label != view.Text(cpConfirm) {
+	if plainText(cp.Warning) != cpMsg || cp.Actions[0].Label != view.Text(cpConfirm) {
 		t.Errorf("copy: message %q, confirm %+v\nthe frame %q, %q", cp.Warning, cp.Actions[0], cpMsg, cpConfirm)
 	}
 	sameActionMarks(t, "s-files-11", "copy", cp.Actions, nil)
@@ -68,7 +68,7 @@ func TestFileCopyAndOtherStorageAreTheFrames(t *testing.T) {
 	if want := strings.Replace(moveTitle, n[1]+" items", "1 item", 1); string(mv.Title) != want {
 		t.Errorf("move title = %q, want %q", mv.Title, want)
 	}
-	if string(mv.Warning) != farMsg {
+	if plainText(mv.Warning) != farMsg {
 		t.Errorf("move to another storage: %q\nthe frame %q", mv.Warning, farMsg)
 	}
 	sameActionMarks(t, "s-files-4", "move", mv.Actions, nil)
@@ -203,7 +203,7 @@ func TestRecordCopySheetIsTheFrame(t *testing.T) {
 	f := newMoveFixture(t)
 	sheet := decode[view.MoveSheet](t, f.h.do(get(f.record(f.id, peopleBook, "ada")+"/move", f.sess)))
 	cp := decode[view.MoveSheet](t, f.h.do(get(moveOption(t, sheet, "Friends").ID+"&copy=1", f.sess)))
-	if string(cp.Title) != title || string(cp.Warning) != msg || confirmOf(t, cp).Label != view.Text(confirm) {
+	if string(cp.Title) != title || plainText(cp.Warning) != msg || confirmOf(t, cp).Label != view.Text(confirm) {
 		t.Errorf("copy = %q, %q, %+v\nthe frame %q, %q, %q", cp.Title, cp.Warning, confirmOf(t, cp), title, msg, confirm)
 	}
 	sameActionMarks(t, "s-contacts-17", "copy", cp.Actions, nil)

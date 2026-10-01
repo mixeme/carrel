@@ -321,7 +321,7 @@ func TestACopyGetsAUIDOfItsOwnWhereTheAccountHoldsOneRecordPerUID(t *testing.T) 
 
 	// The account is known now: the sheet says it before the start, and the
 	// next copy goes out with its own UID at once.
-	if w := string(sheetOf("call").Warning); !strings.Contains(w, "a UID of its own") {
+	if w := plainText(sheetOf("call").Warning); !strings.Contains(w, "a UID of its own") {
 		t.Errorf("sheet warning = %q, want it to say the copy gets a UID of its own", w)
 	}
 	copyOf("call", "Call")

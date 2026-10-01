@@ -55,13 +55,13 @@ func TestCollectionDeleteSheetSaysWhatGoes(t *testing.T) {
 	if sheet.Kind != view.KindEvent || !strings.HasSuffix(string(sheet.Subject), " · Work") {
 		t.Errorf("sheet = %+v", sheet)
 	}
-	if w := string(sheet.Warning); !strings.Contains(w, "all 2 records") || !strings.Contains(w, "Carrel holds no copy") {
+	if w := plainText(sheet.Warning); !strings.Contains(w, "all 2 records") || !strings.Contains(w, "Carrel holds no copy") {
 		t.Errorf("warning = %q", w)
 	}
 	if sheet.References == nil || len(sheet.References) != 0 {
 		t.Errorf("references = %#v, want an empty list", sheet.References)
 	}
-	if !strings.Contains(string(sheet.Archive), "new calendar at a new address") {
+	if !strings.Contains(plainText(sheet.Archive), "new calendar at a new address") {
 		t.Errorf("archive = %q", sheet.Archive)
 	}
 	if c := sheet.Actions[0]; c.ID != "collection.delete.confirm" || c.Method != "POST" || !c.Danger {
@@ -87,7 +87,7 @@ func TestCollectionDeleteSheetExportByKind(t *testing.T) {
 	if sheet.Export == nil || string(sheet.Export.Label) != "Download .vcf first" || sheet.Export.Href != book.path("contacts")+"/export" {
 		t.Errorf("book export = %+v", sheet.Export)
 	}
-	if !strings.Contains(string(sheet.Warning), "address book and all 1 contact in it") {
+	if !strings.Contains(plainText(sheet.Warning), "address book and all 1 contact in it") {
 		t.Errorf("warning = %q", sheet.Warning)
 	}
 
@@ -272,13 +272,13 @@ func TestCollectionDeleteSheetIsTheFrame(t *testing.T) {
 
 	sheet := decode[view.CollectionDeleteSheet](t, f.h.do(get(colDeleteHref(f), f.sess)))
 	host := strings.Split(string(sheet.Subject), " · ")[0]
-	if !strings.Contains(string(sheet.Warning), "deleted on "+host+".") {
+	if !strings.Contains(plainText(sheet.Warning), "deleted on "+host+".") {
 		t.Errorf("head %q, warning %q: the server named as in the head", sheet.Subject, sheet.Warning)
 	}
 	if !equalStrings(texts(sheet.References), refs) {
 		t.Errorf("references = %q,\nthe frame    %q", sheet.References, refs)
 	}
-	if string(sheet.Archive) != archive {
+	if plainText(sheet.Archive) != archive {
 		t.Errorf("archive = %q,\nthe frame %q", sheet.Archive, archive)
 	}
 }
@@ -305,7 +305,7 @@ func TestCollectionDeleteSheetCaptionCases(t *testing.T) {
 	sheet := func() view.CollectionDeleteSheet {
 		return decode[view.CollectionDeleteSheet](t, f.h.do(get(colDeleteHref(f), f.sess)))
 	}
-	if got := string(sheet().Archive); got != noArchive {
+	if got := plainText(sheet().Archive); got != noArchive {
 		t.Errorf("no job copies it: archive = %q,\nthe caption %q", got, noArchive)
 	}
 
@@ -323,7 +323,7 @@ func TestCollectionDeleteSheetCaptionCases(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := sheet()
-	if !strings.HasPrefix(string(got.Archive), notWhole) {
+	if !strings.HasPrefix(plainText(got.Archive), notWhole) {
 		t.Errorf("a job copies it, none whole yet: archive = %q,\nthe caption %q…", got.Archive, notWhole)
 	}
 	refs := texts(got.References)

@@ -157,8 +157,9 @@ type UnlockSheet struct {
 type ConnectionsPage struct {
 	Shell
 	// Subtitle — строка под заголовком: «Signed in as mix · 3 servers · 12
-	// collections · 2 subscriptions» (s-profile-1); та же и под диалогом
-	Subtitle      Text               `json:"subtitle"`
+	// collections · 2 subscriptions» (s-profile-1); та же и под диалогом;
+	// логин — жирным (s-profile-10)
+	Subtitle      Runs               `json:"subtitle"`
 	Accounts      []ConnectionCard   `json:"accounts"`
 	Subscriptions []SubscriptionCard `json:"subscriptions"`
 	// Add — диалог подключения, его правка или подписка; nil — на списке:
@@ -257,7 +258,7 @@ type DavloomPage struct {
 	Address Text          `json:"address"`
 	Devices []ProxyDevice `json:"devices"`
 	Add     Form          `json:"add"`
-	Note    Text          `json:"note"` // смена основного пароля не отключает устройства
+	Note    Runs          `json:"note"` // смена основного пароля не отключает устройства; «not» — жирным (s-davloom-1)
 }
 type ProxyDevice struct {
 	Name     Text     `json:"name"`

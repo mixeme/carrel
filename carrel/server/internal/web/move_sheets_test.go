@@ -82,7 +82,7 @@ func TestFileMoveSheetIsTheFrame(t *testing.T) {
 	if want := "from Docs / " + strings.Join(segs, " / "); string(sheet.Subject) != want {
 		t.Errorf("subject = %q, want %q", sheet.Subject, want)
 	}
-	if string(sheet.Warning) != msg {
+	if plainText(sheet.Warning) != msg {
 		t.Errorf("message = %q\nthe frame %q", sheet.Warning, msg)
 	}
 	if sheet.Actions[0].Label != view.Text(confirm) || !sheet.Actions[0].Enabled {
@@ -175,7 +175,7 @@ func TestRecordMoveSheetIsTheFrame(t *testing.T) {
 	}
 
 	chosen := decode[view.MoveSheet](t, f.h.do(get(moveOption(t, sheet, "Friends").ID, f.sess)))
-	if string(chosen.Warning) != msg {
+	if plainText(chosen.Warning) != msg {
 		t.Errorf("message = %q\nthe frame %q", chosen.Warning, msg)
 	}
 	if c := confirmOf(t, chosen); c.Label != view.Text(confirm) || !c.Enabled {
@@ -244,7 +244,7 @@ func TestCollectionMoveSheetIsTheFrame(t *testing.T) {
 		t.Errorf("the chosen server = %+v, the frame %q", o, holds)
 	}
 	want := strings.ReplaceAll(strings.Replace(msg, "all "+count[1]+" events", "all 2 events", 1), "on "+host+".", "on "+string(src.Label)+".")
-	if string(chosen.Warning) != want {
+	if plainText(chosen.Warning) != want {
 		t.Errorf("message = %q\nwant      %q", chosen.Warning, want)
 	}
 	if len(chosen.Actions) != 1 || chosen.Actions[0].Label != view.Text(confirm) || !chosen.Actions[0].Enabled {

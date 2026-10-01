@@ -1460,7 +1460,18 @@
       "url": "https://league.example/season.ics"
     }
   ],
-  "subtitle": "Signed in as mix · 4 servers · 16 collections · 2 subscriptions",
+  "subtitle": [
+    {
+      "text": "Signed in as "
+    },
+    {
+      "mark": "strong",
+      "text": "mix"
+    },
+    {
+      "text": " · 4 servers · 16 collections · 2 subscriptions"
+    }
+  ],
   "title": "Connections",
   "top": {
     "new": {

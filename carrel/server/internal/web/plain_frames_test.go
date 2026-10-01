@@ -703,3 +703,12 @@ func TestPasswordPageIsTheFrame(t *testing.T) {
 	must.Buttons = want.Buttons[:1]
 	sameAuthAs(t, "a temporary password", "account-3", page(forced), must)
 }
+
+// plainText is a sentence of the server in pieces read as plain words.
+func plainText(r view.Runs) string {
+	var b strings.Builder
+	for _, p := range r {
+		b.WriteString(string(p.Text))
+	}
+	return b.String()
+}

@@ -338,7 +338,18 @@
   "details": null,
   "devices": [],
   "enabled": true,
-  "note": "Changing your Carrel password does not disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it.",
+  "note": [
+    {
+      "text": "Changing your Carrel password does "
+    },
+    {
+      "mark": "strong",
+      "text": "not"
+    },
+    {
+      "text": " disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it."
+    }
+  ],
   "notices": [],
   "print": {
     "range": "",

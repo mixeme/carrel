@@ -36,7 +36,7 @@ func TestEditConnectionIsADialogOverThePage(t *testing.T) {
 			t.Errorf("%s: dialog %v, head %q · %q, the frame %q · %q", one.frame, page.Add != nil,
 				page.DialogTitle, page.DialogSubtitle, frameText(head[1]), frameText(head[2]))
 		}
-		if page.Title != list.Title || page.Subtitle != list.Subtitle || len(page.Accounts) != len(list.Accounts) {
+		if page.Title != list.Title || saidRuns(page.Subtitle) != saidRuns(list.Subtitle) || len(page.Accounts) != len(list.Accounts) {
 			t.Errorf("%s: the page under it = %q · %q with %d cards, want %q · %q with %d", one.frame,
 				page.Title, page.Subtitle, len(page.Accounts), list.Title, list.Subtitle, len(list.Accounts))
 		}
@@ -186,13 +186,13 @@ func TestFolderDeleteSheetIsTheFrame(t *testing.T) {
 	}
 	// The server is named by its connection, as on the move sheet (s-profile-8).
 	want := strings.Replace(strings.Replace(warning, "all "+count[1]+" files", "all 1 file", 1), "on "+host[1]+".", "on vps.", 1)
-	if string(sheet.Warning) != want {
+	if plainText(sheet.Warning) != want {
 		t.Errorf("warning = %q\nwant      %q", sheet.Warning, want)
 	}
 	if !equalStrings(texts(sheet.References), refs) {
 		t.Errorf("references = %q, the frame %q", sheet.References, refs)
 	}
-	if string(sheet.Archive) != archive {
+	if plainText(sheet.Archive) != archive {
 		t.Errorf("archive = %q,\nthe frame %q", sheet.Archive, archive)
 	}
 	if sheet.Export == nil || string(sheet.Export.Label) != open[1] || string(sheet.ExportNote) != open[2] {
@@ -316,7 +316,7 @@ func TestConnectionsSubtitleCountsTheCards(t *testing.T) {
 	cols := len(catalogOf(t, f).CollectionsOf(f.id))
 	want := regexp.MustCompile(`\d+ servers · \d+ collections · \d+ subscriptions`).ReplaceAllString(
 		regexp.MustCompile(`as \S+`).ReplaceAllString(sub, "as owner"), "3 servers · "+strconv.Itoa(cols+3)+" collections · 0 subscriptions")
-	if string(page.Subtitle) != want {
+	if plainText(page.Subtitle) != want {
 		t.Errorf("line = %q, want %q", page.Subtitle, want)
 	}
 }

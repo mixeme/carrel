@@ -28,7 +28,8 @@ func TestTheSettingsCarryTheirRail(t *testing.T) {
 	for _, route := range []string{"/app/settings/account", "/app/settings/connections",
 		"/app/settings/attachments", "/app/settings/devices", "/app/settings/davloom",
 		"/app/settings/backup", "/app/settings/appearance"} {
-		page := decode[view.AccountPage](t, h.do(get(route, sess)))
+		// Every settings page is read for its shell alone.
+		page := decode[struct{ view.Shell }](t, h.do(get(route, sess)))
 		if got := railLabels(page.Rail.Nav); !equalStrings(got, want) {
 			t.Errorf("%s: rail = %v,\n        want %v", route, got, want)
 		}

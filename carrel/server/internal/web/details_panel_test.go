@@ -116,8 +116,8 @@ func TestPanelsReadAsTheirFrames(t *testing.T) {
 	check("s-tasks-1", panelOf(cal.h, cal.path("tasks")+"/td", cal))
 	note := panelOf(cal.h, cal.path("notes")+"/nt", cal)
 	check("s-notes-1", note)
-	if !strings.Contains(string(note.Subtitle), "2026") {
-		t.Errorf("s-notes-1: the subtitle of a note says when it was written: %q", note.Subtitle)
+	if !strings.Contains(string(note.Date), "2026") {
+		t.Errorf("s-notes-1: the panel of a note says when it was written: %q", note.Date)
 	}
 }
 

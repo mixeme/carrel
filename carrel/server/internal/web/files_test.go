@@ -662,7 +662,7 @@ func TestFileOperationsOnOneServer(t *testing.T) {
 
 	moveB := opSheet(t, f, rowMenu(t, fileRow(t, page, "b.txt"), "file.move"), url.Values{"to": {f.at("", "sub", "")}})
 	// Inside one server the sheet says only what it always says: a MOVE.
-	if !strings.HasPrefix(string(moveB.Warning), "Inside one server this is MOVE") {
+	if !strings.HasPrefix(plainText(moveB.Warning), "Inside one server this is MOVE") {
 		t.Errorf("a move inside one server warned of something else: %q", moveB.Warning)
 	}
 	moves, puts := f.srv.CountRequests("MOVE", filesDocs), f.srv.CountRequests("PUT", filesDocs)
@@ -685,7 +685,7 @@ func TestFileOperationsOnOneServer(t *testing.T) {
 
 	page = decode[view.FilesPage](t, f.h.do(get(f.at("", "sub", ""), f.sess)))
 	del := opSheet(t, f, rowMenu(t, fileRow(t, page, "inner.txt"), "file.delete"), url.Values{})
-	if !del.Actions[0].Danger || !strings.Contains(string(del.Warning), "no index") {
+	if !del.Actions[0].Danger || !strings.Contains(plainText(del.Warning), "no index") {
 		t.Errorf("delete sheet = %+v", del)
 	}
 	f.srv.SeedFile(filesDocs+"sub/inner.txt", "changed elsewhere, longer")
@@ -729,7 +729,7 @@ func TestMoveBetweenStorages(t *testing.T) {
 
 	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
 	sheet := opSheet(t, f, rowMenu(t, fileRow(t, page, "a.txt"), "file.move"), url.Values{"to": {farRoot}})
-	if !strings.HasPrefix(string(sheet.Warning), "This goes to another storage") || len(sheet.Target.Nodes) != 2 {
+	if !strings.HasPrefix(plainText(sheet.Warning), "This goes to another storage") || len(sheet.Target.Nodes) != 2 {
 		t.Fatalf("sheet = %+v", sheet)
 	}
 	f.h.do(postForm(confirmHref(t, sheet), f.sess, url.Values{}))

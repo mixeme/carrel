@@ -88,17 +88,16 @@ func recordNoun(col sealed.Collection) string {
 // in it, or -1 when it did not say.
 func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connection, col sealed.Collection, count int, typed string, errText view.Text) view.CollectionDeleteSheet {
 	noun, label, host := collectionNoun(col), collectionLabel(col), connLabel(conn)
-	what := "everything in it"
+	what := []view.Run{plainRun("everything in it")}
 	if count > 0 {
-		what = "all " + plural(count, recordNoun(col)) + " in it"
+		what = append(allOf(count, recordNoun(col)), plainRun(" in it"))
 	}
 	action := "/app/collections/delete?" + collectionDeleteQuery(conn, col).Encode()
 	sheet := view.CollectionDeleteSheet{
 		Kind: col.Kinds[0],
 		// The server, then the collection (s-profile-9, s-profile-19).
 		Subject: text(host + " · " + label),
-		Warning: text(fmt.Sprintf("The %s and %s are deleted on %s. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.",
-			noun, what, host)),
+		Warning: join("The "+noun+" and ", what, " are deleted on "+host+". Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."),
 		// What else points at it and stops working with it (S-12.4): the
 		// person's published links (S-25), copy jobs (S-24) and davloom
 		// devices whose scope names it (S-27).
@@ -113,7 +112,7 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 		Actions: []view.Action{{ID: "collection.delete.confirm", Label: "Delete on the server", Href: s.route(action), Method: "POST", Danger: true, Enabled: true}},
 	}
 	if count == 0 {
-		sheet.Warning = text(fmt.Sprintf("The %s is deleted on %s. It holds nothing now; Carrel keeps no copy of it either.", noun, host))
+		sheet.Warning = line(fmt.Sprintf("The %s is deleted on %s. It holds nothing now; Carrel keeps no copy of it either.", noun, host))
 		sheet.ExportNote = "There is nothing in it to download."
 		return sheet
 	}
@@ -266,7 +265,9 @@ func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connect
 // collectionArchive is the archive line (s-profile-9, s-profile-19): when a
 // backup job of Carrel last made a whole archive of the collection, and that
 // a restore brings it back into a new one, not to this address.
-func (s *Server) collectionArchive(sess *session.Session, conn sealed.Connection, col sealed.Collection) view.Text {
+//
+// The day is monospaced and «new» bold, as the frames mark them.
+func (s *Server) collectionArchive(sess *session.Session, conn sealed.Connection, col sealed.Collection) view.Runs {
 	what, into := "records", "collection"
 	if col.Has(view.KindFile) {
 		what, into = "files", "folder"
@@ -283,16 +284,16 @@ func (s *Server) collectionArchive(sess *session.Session, conn sealed.Connection
 			last = at
 		}
 	}
-	restore := fmt.Sprintf("Restoring brings the %s back into a new %s — not into this one, and not to this address.", what, into)
+	restore := []view.Run{plainRun("Restoring brings the " + what + " back into a "), strongRun("new"), plainRun(" " + into + " — not into this one, and not to this address.")}
 	switch {
 	case !last.IsZero():
-		return text("Last time it was in an archive: " + last.In(s.timeFor(sess).tz).Format("2006-01-02") + ". " + restore)
+		return join("Last time it was in an archive: ", monoRun(last.In(s.timeFor(sess).tz).Format("2006-01-02")), ". ", restore)
 	case copied:
-		return text("A backup job copies it, but none has finished whole yet, so there is no archive of it here. " + restore)
+		return join("A backup job copies it, but none has finished whole yet, so there is no archive of it here. ", restore)
 	}
 	if col.Has(view.KindFile) {
-		return "No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the files back into a new folder at a new address — not into this one."
+		return line("No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the files back into a new folder at a new address — not into this one.")
 	}
-	return text("No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new " +
+	return line("No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new " +
 		collectionNoun(col) + " at a new address — not into this one, and not to this address.")
 }
