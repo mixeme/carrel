@@ -1445,11 +1445,8 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
 |---|---|---|
 | `/app/search/progress/{task}` и `…/poll`, `…/retry`, `…/cancel` | `PollBar` | Полоса хода; поток событий или запасной опрос (C-7.4) |
 | `/app/sources/{kind}` | `Rail` | Рейл после применения отметок; без сценариев — вся страница |
-| `/app/duplicates/decide` | `DuplicateGroup` | Группа дубликатов после решения |
 | `/app/files/{account}/{col}/upload/{path…}` | `TransferQueue` | Очередь передач |
 | `/app/files/{account}/{col}/op/{path…}` | `FileOpSheet` | Лист операции над выделенным (U-6.5) |
-| `/app/settings/connections/test` | `DiagnosticTrace` | След проверки под формой подключения |
-| `/admin/settings/mail-test` | `MailTestResult` | Итог пробного письма под формой почты |
 
 ---
 

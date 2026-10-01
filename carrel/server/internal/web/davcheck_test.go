@@ -10,8 +10,9 @@ import (
 	"github.com/emersion/go-webdav/carddav"
 )
 
+// traceFragment is the connections page Test only answers with (П2).
 type traceFragment struct {
-	Body view.DiagnosticTrace `json:"body"`
+	Body view.ConnectionsPage `json:"body"`
 }
 
 func checkServer(t *testing.T) *davtest.Server {
@@ -29,12 +30,12 @@ func TestConnectionTestShowsTheTrace(t *testing.T) {
 	srv := checkServer(t)
 	h, sess := davHarness(t)
 	ok := decode[traceFragment](t, h.do(fragment(postForm("/app/settings/connections/test", sess, url.Values{
-		"server": {srv.URL}, "login": {"alice"}, "password": {"davpass"}}), "main"))).Body
+		"server": {srv.URL}, "login": {"alice"}, "password": {"davpass"}}), "main"))).Body.Trace
 	if !ok.OK || len(ok.Steps) < 2 {
 		t.Errorf("trace = %+v", ok)
 	}
 	bad := decode[traceFragment](t, h.do(fragment(postForm("/app/settings/connections/test", sess, url.Values{
-		"server": {srv.URL}, "login": {"alice"}, "password": {"wrong"}}), "main"))).Body
+		"server": {srv.URL}, "login": {"alice"}, "password": {"wrong"}}), "main"))).Body.Trace
 	if bad.OK || len(bad.Steps) == 0 {
 		t.Errorf("wrong password = %+v", bad)
 	}

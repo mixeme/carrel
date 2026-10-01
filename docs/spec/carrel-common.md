@@ -363,7 +363,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/search/progress/{task}/retry` | POST | вход | фрагмент | `PollBar` |
 | `/app/search/progress/{task}/cancel` | POST | вход | фрагмент | `PollBar` |
 | `/app/duplicates` | GET | вход | страница | `DuplicatesPage` |
-| `/app/duplicates/decide` | POST | вход | фрагмент | `DuplicateGroup` |
+| `/app/duplicates/decide` | POST | вход | страница, редирект | `DuplicatesPage` — решение по группе (`do=`): ответ — дубликаты, как они теперь стоят, сказанное — в `notices`; форма без сценариев, когда сказать нечего, — редирект на `/app/duplicates`. Группа — не зона C-7.2, фрагментом не приходит |
 | `/app/duplicates/merge` | GET, POST | вход | страница | `DuplicatesMergePage` |
 | `/app/sources/{kind}` | POST | вход | фрагмент, редирект | `Rail`; форма рейла (`Rail.Ticks`): `toggle` — одна строка, `tick` — весь выбор, `back` — страница раздела, куда вернуться без сценариев |
 | `/app/publish` | GET, POST | вход | лист | `PublishSheet` |
@@ -464,7 +464,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/settings/escrow/deposit` | GET | вход | лист | `UnlockSheet` |
 | `/app/settings/escrow/withdraw` | GET | вход | лист | `EscrowWithdrawSheet` |
 | `/app/settings/connections` | GET, POST | вход | страница | `ConnectionsPage`; `?op=add` — диалог Connect account |
-| `/app/settings/connections/test` | POST | вход | фрагмент | `DiagnosticTrace` |
+| `/app/settings/connections/test` | POST | вход | страница | `ConnectionsPage` — «Test only»: диалог с набранным (пароль не возвращается) и след проверки в `Trace`; ничего не пишет, сценарии ни при чём |
 | `/app/settings/connections/disconnect` | GET, POST | вход | лист | `ConnectionRemoveSheet` |
 | `/app/settings/attachments` | GET, POST | вход | страница | `AttachmentsPage` |
 | `/app/settings/devices` | GET, POST | вход | страница | `DevicesPage` |
@@ -490,7 +490,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/admin/reset` | GET, POST | админ | лист | `PasswordResetSheet` — «Reset a password» из шапки (s-admin-13); `?target=` выбирает человека. POST (`target`, `password`) сбрасывает: ответ — лист с `Issued`, не переход; отказ — у своего поля |
 | `/admin/invites` | GET, POST | админ | страница | `AdminInvitesPage`; `?invite=` — ссылку этого приглашения показывает карточка Invitation. POST `action=` `link`, `send`, `user` (временный пароль: ответ — страница с `Issued`, не переход), `selfreg`, `resend`, `extend`, `revoke` |
 | `/admin/settings` | GET, POST | админ | страница | `AdminSettingsPage` |
-| `/admin/settings/mail-test` | POST | админ | фрагмент | `MailTestResult` |
+| `/admin/settings/mail-test` | POST | админ | страница | `AdminSettingsPage` — пробное письмо: итог в `Test` |
 | `/admin/escrow` | GET, POST | админ | страница | `AdminEscrowPage` |
 | `/admin/audit` | GET | админ | страница, файл (`?format=csv`); `?show=`, `?action=` — фильтры | `AdminAuditPage` |
 | `/admin/columns`, `/admin/audit/columns` | POST | админ | редирект | — ; меню Columns пользователей (s-admin-21) и журнала (s-admin-23), как у списков (S-9.6) |
@@ -2084,6 +2084,10 @@ type ConnectionsPage struct {
     // books alike.»; пусто — диалога нет или это подписка
     DialogTitle    Text
     DialogSubtitle Text
+    // След «Test only» под диалогом: та же проверка, что у администратора
+    // (`AdminDavPage.Trace`), без записи; диалог — с набранным, пароль не
+    // возвращается. nil — проверки не было
+    Trace         *DiagnosticTrace
     Actions       []Action // Connect account (→ `?op=add`) · Subscribe to a feed
     Note          Runs     // с открытой панелью подписки — «A feed is read again on every visit … **Check** asks whether the address still replies.» (s-profile-10); без панели пусто
 }
@@ -2606,6 +2610,12 @@ Markdown и отдаёт дерево; собирает из него узлы �
 вне оболочки `Plain.Notices` — часть её карточки, а не полоса над
 содержимым, и отдельной зоной не приходят. Лист, открытый переходом без
 сценариев, — своя страница (C-7.1), а не зона.
+
+**Фрагмент — всегда одна из этих зон.** Ответ, которому зоны нет, —
+вся страница: решение по группе дубликатов (`DuplicatesPage`), «Test only»
+у формы подключения (`ConnectionsPage.Trace`), пробное письмо
+(`AdminSettingsPage.Test`) — решение ведущего П2, 02.10.2026. Клиент,
+попросивший фрагмент, вырезает из неё свою зону, как у любой страницы.
 
 ### C-7.3 Внеполосные фрагменты
 

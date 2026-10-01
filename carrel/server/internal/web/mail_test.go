@@ -14,8 +14,9 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
+// testFragment is the settings page a test letter answers with (П2).
 type testFragment struct {
-	Body view.MailTestResult `json:"body"`
+	Body view.AdminSettingsPage `json:"body"`
 }
 
 // relayed is a harness whose instance sends through a relay in memory.
@@ -113,7 +114,7 @@ func TestAdminSetsRelayAndSendsATestLetter(t *testing.T) {
 		t.Errorf("sender = %q", snap.Settings.SMTP.Sender)
 	}
 
-	result := decode[testFragment](t, h.do(fragment(postForm("/admin/settings/mail-test", alice, url.Values{"to": {"alice@example.org"}}), "main"))).Body
+	result := decode[testFragment](t, h.do(fragment(postForm("/admin/settings/mail-test", alice, url.Values{"to": {"alice@example.org"}}), "main"))).Body.Test
 	if !result.OK || !strings.HasPrefix(string(result.Reply), "250") || strings.Contains(string(result.Reply), "relay-secret") {
 		t.Errorf("test = %+v", result)
 	}
@@ -122,7 +123,7 @@ func TestAdminSetsRelayAndSendsATestLetter(t *testing.T) {
 	}
 
 	relay.Refuse = "nobody@example.org"
-	result = decode[testFragment](t, h.do(fragment(postForm("/admin/settings/mail-test", alice, url.Values{"to": {"nobody@example.org"}}), "main"))).Body
+	result = decode[testFragment](t, h.do(fragment(postForm("/admin/settings/mail-test", alice, url.Values{"to": {"nobody@example.org"}}), "main"))).Body.Test
 	if result.OK || !strings.Contains(string(result.Reply), "550") {
 		t.Errorf("a refusal = %+v", result)
 	}

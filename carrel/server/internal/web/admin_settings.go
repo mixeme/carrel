@@ -11,7 +11,6 @@ import (
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
-	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -109,7 +108,8 @@ func (s *Server) postAdminSettings(w http.ResponseWriter, r *http.Request) {
 }
 
 // postAdminMailTest sends a test letter and shows the relay's whole answer,
-// or its whole refusal — never the relay's password, which is in neither.
+// or its whole refusal — never the relay's password, which is in neither —
+// on the settings page (AdminSettingsPage.Test).
 func (s *Server) postAdminMailTest(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireAdmin(w, r)
 	if !ok {
@@ -132,10 +132,8 @@ func (s *Server) postAdminMailTest(w http.ResponseWriter, r *http.Request) {
 			result.OK, result.Reply = true, text(reply)
 		}
 	}
-	if render.WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetMain, result, nil)
-		return
-	}
+	// The page, with scripts or without: a result is no zone of C-7.2 (the
+	// lead's decision П2, 02.10.2026).
 	s.writePage(w, r, http.StatusOK, s.adminSettingsPage(sess, settingsFlash{testTo: to, test: &result}))
 }
 

@@ -225,7 +225,7 @@ func TestConnectWithoutPassword(t *testing.T) {
 
 	// Test only reads no password under the mark either.
 	trace := decode[traceFragment](t, h.do(fragment(postForm("/app/settings/connections/test", sess, url.Values{
-		"server": {srv.URL}, "login": {"mix"}, "password": {"typed-left-over-9"}, "noPassword": {"on"}}), "main"))).Body
+		"server": {srv.URL}, "login": {"mix"}, "password": {"typed-left-over-9"}, "noPassword": {"on"}}), "main"))).Body.Trace
 	if !trace.OK {
 		t.Errorf("Test only with the mark = %+v", trace)
 	}

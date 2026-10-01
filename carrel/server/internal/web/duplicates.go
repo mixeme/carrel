@@ -487,10 +487,12 @@ func (s *Server) getDuplicates(w http.ResponseWriter, r *http.Request) {
 // on group=, a link carrying the answers to the group's Choices as
 // choice.<PROP>=<option>, and do=choose changing them on a linked group; do=threshold with value= (empty or 0: the instance's number
 // again); or do=weights with weight.<signal>= for the signals sent (empty:
-// the instance's weight again). The answer to a decision is the group as it
-// now stands (C-5); a form without scripts, the threshold and the weights go
-// back to the screen. No weighting suits everyone, so the person sets their
-// own; a number out of range is not saved.
+// the instance's weight again). The answer to a decision is the page of
+// duplicates as it now stands, with what there is to say in its notices —
+// a group is no zone of C-7.2 (the lead's decision П2, 02.10.2026); a form
+// without scripts and nothing to say, the threshold and the weights go back
+// to the screen. No weighting suits everyone, so the person sets their own;
+// a number out of range is not saved.
 func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -608,36 +610,15 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not save the decision", http.StatusInternalServerError)
 		return
 	}
-	if !render.WantsFragment(r) {
+	if notice == nil && !render.WantsFragment(r) {
 		s.redirect(w, r, "/app/duplicates")
 		return
 	}
-	var out view.DuplicateGroup
-	if found {
-		st = s.readDuplicates(sess, false)
-		if now, ok := st.decided(g, do); ok {
-			out = s.groupView(st, now)
-		}
-	}
-	notices := []view.Notice{}
+	page := s.duplicatesPage(sess, s.readDuplicates(sess, false), kindFilter(r))
 	if notice != nil {
-		notices = append(notices, *notice)
+		page.Notices = append(page.Notices, *notice)
 	}
-	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetMain, out, []render.OOB{{Target: render.TargetNotices, Body: notices}})
-}
-
-// decided is the group a decision left: a link is the linked group that
-// holds the first member, anything else the same set of records.
-func (st dupState) decided(g dupGroup, do string) (dupGroup, bool) {
-	if do == "link" && len(g.refs) > 0 {
-		if l, ok := dupes.LinkedOf(st.blob.Duplicates.Linked, g.refs[0]); ok {
-			return st.group(l.ID)
-		}
-	}
-	if do == "unlink" {
-		return st.group(dupes.Signature(g.kind, g.refs))
-	}
-	return st.group(g.id)
+	s.writePage(w, r, http.StatusOK, page)
 }
 
 func without(list []string, v string) []string {

@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.122 — 2026-10-02
+
+Three answers that were fragments outside every zone of C-7.2 are pages
+(the lead's decision П2, stage 4 of the client's plan).
+
+### Changed
+
+- **`POST /app/duplicates/decide`** answers the duplicates page as it now
+  stands (`DuplicatesPage`), what there is to say in `notices` — not the
+  group (`DuplicateGroup`) aimed at `main`. A form without scripts and
+  nothing to say is still a redirect to `/app/duplicates`; «This group is
+  not among the loaded records» now reaches it too (it was dropped by the
+  redirect).
+- **`POST /app/settings/connections/test`** (Test only) answers the
+  connections page with the dialog as typed — the password is not given
+  back — and the trace in the new **`ConnectionsPage.trace`**; without
+  scripts it works too (it was 404).
+- **`POST /admin/settings/mail-test`** answers the settings page with its
+  `test`, asked for a fragment or not.
+
+### For consumers
+
+Ask these three for a page, or for the zone you show of it (C-7.2): no
+fragment of C-5 is outside the zones any more. Fixture regenerated:
+`app-settings-connections/normal` (`trace: null`).
+
 ## v0.2.121 — 2026-10-02
 
 The full form of a new event has its fixture (the client's scan of the

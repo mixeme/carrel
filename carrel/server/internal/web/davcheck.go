@@ -8,7 +8,6 @@ import (
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/discover"
 	"carrel.dev/carrel/server/internal/session"
-	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -40,18 +39,27 @@ func (s *Server) traceOf(r *http.Request) (*discover.Result, *view.DiagnosticTra
 	return res, trace
 }
 
-// postSettingsConnectionsTest is Test beside the connection form: the
-// trace, nothing saved.
+// postSettingsConnectionsTest is Test only beside the connection form: the
+// connections page with the dialog as it was typed — the password is not
+// given back — and the trace under it, nothing saved. A trace is no zone of
+// C-7.2, so the answer is the page, with scripts or without (the lead's
+// decision П2, 02.10.2026).
 func (s *Server) postSettingsConnectionsTest(w http.ResponseWriter, r *http.Request) {
-	if _, ok := s.requireLogin(w, r); !ok {
-		return
-	}
-	if !render.WantsFragment(r) {
-		s.notFound(w, r)
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
 		return
 	}
 	_, trace := s.traceOf(r)
-	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetMain, *trace, nil)
+	page := s.connectionsPage(sess, connectionForm{
+		Label:           connectionLabel(r.FormValue("label")),
+		Server:          strings.TrimSpace(r.FormValue("server")),
+		Login:           strings.TrimSpace(r.FormValue("login")),
+		CertFingerprint: strings.TrimSpace(r.FormValue("certFingerprint")),
+		NoPassword:      noPasswordMark(r),
+		Open:            true,
+	}, nil)
+	page.Trace = trace
+	s.writePage(w, r, http.StatusOK, page)
 }
 
 func (s *Server) getAdminDav(w http.ResponseWriter, r *http.Request) {

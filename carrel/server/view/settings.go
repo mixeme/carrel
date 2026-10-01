@@ -172,9 +172,13 @@ type ConnectionsPage struct {
 	// account» (s-profile-2), «Edit connection» (s-profile-16) и строка «One
 	// connection gives calendars and address books alike.»; пусто — диалога
 	// нет или это подписка
-	DialogTitle    Text     `json:"dialogTitle"`
-	DialogSubtitle Text     `json:"dialogSubtitle"`
-	Actions        []Action `json:"actions"` // Connect account · Subscribe to a feed
+	DialogTitle    Text `json:"dialogTitle"`
+	DialogSubtitle Text `json:"dialogSubtitle"`
+	// Trace — след «Test only» под диалогом: та же проверка, что у
+	// администратора (AdminDavPage.Trace), без записи; диалог — с набранным,
+	// пароль не возвращается. nil — проверки не было
+	Trace   *DiagnosticTrace `json:"trace"`
+	Actions []Action         `json:"actions"` // Connect account · Subscribe to a feed
 	// Note — сообщение страницы под карточками: с открытой панелью подписки
 	// — что ленту читают на каждом визите и что делает **Check**
 	// (s-profile-10); без панели пусто
