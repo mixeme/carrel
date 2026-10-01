@@ -1419,8 +1419,10 @@
         "event",
         "task"
       ],
+      "size": "",
       "stale": false,
       "title": "Праздники РФ",
+      "took": "",
       "url": "https://feeds.example/ru-holidays.ics"
     },
     {
@@ -1455,8 +1457,10 @@
       "kinds": [
         "event"
       ],
+      "size": "",
       "stale": false,
       "title": "Расписание лиги",
+      "took": "",
       "url": "https://league.example/season.ics"
     }
   ],

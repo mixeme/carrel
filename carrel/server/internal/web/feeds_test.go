@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -249,5 +251,40 @@ func TestSearchSiftsAFeed(t *testing.T) {
 	// «ro» stands only where the number would be what it holds.
 	if _, row := railRow(t, search(t, f.h, f.sess, "q=KNOWLEDGE").Rail, "Праздники"); row.Count == nil || *row.Count != 1 {
 		t.Errorf("feed in the search's rail = %+v", row)
+	}
+}
+
+// The line of a subscription card (s-profile-1, -10): «… · read 2 min ago ·
+// 34 KB · 0.4 s» — when the feed was last read, what that read weighed and
+// how long it took. Nothing read in this session, nothing said; a read of
+// the feed's list says all three, and the next read replaces them.
+func TestSubscriptionCardSaysTheLastRead(t *testing.T) {
+	f := feedHarness(t)
+	feed := newFeedServer(t, holidays, "")
+	sub := subscribe(t, f, url.Values{"url": {feed.URL + "/ru.ics"}})
+	card := func() view.SubscriptionCard {
+		t.Helper()
+		page := decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess)))
+		if len(page.Subscriptions) != 1 {
+			t.Fatalf("cards = %+v", page.Subscriptions)
+		}
+		return page.Subscriptions[0]
+	}
+	if c := card(); c.Checked != "" || c.Size != "" || c.Took != "" {
+		t.Errorf("before a read: checked %q, size %q, took %q", c.Checked, c.Size, c.Took)
+	}
+	took := regexp.MustCompile(`^(\d+ ms|\d+\.\d s)$`)
+	list := "/app/calendar/" + sub.ID + "/feed"
+	_ = f.h.do(get(list+"?from=2026-08-31", f.sess))
+	c := card()
+	if c.Checked == "" || c.Size != view.Text(strconv.Itoa(len(holidays))+" B") || !took.MatchString(string(c.Took)) {
+		t.Errorf("after a read: checked %q, size %q, took %q", c.Checked, c.Size, c.Took)
+	}
+	// 41 092 bytes: «40 KB», whole kilobytes as the frame writes them.
+	pad := strings.Repeat("X-PAD:"+strings.Repeat("x", 60)+"\r\n", 600)
+	feed.set(strings.Replace(holidays, "END:VCALENDAR", pad+"END:VCALENDAR", 1))
+	_ = f.h.do(get(list+"?from=2026-08-31", f.sess))
+	if c := card(); c.Size != "40 KB" || !took.MatchString(string(c.Took)) {
+		t.Errorf("after a larger read: size %q, took %q", c.Size, c.Took)
 	}
 }

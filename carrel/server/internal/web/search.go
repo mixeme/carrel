@@ -637,7 +637,7 @@ func (s *Server) openSource(sess *session.Session, id string, conn sealed.Connec
 	src := &collectionSource{id: id, conn: conn, col: col, maxEntries: s.cfg.FilesMaxEntries, sess: sess, ttl: s.cfg.CacheCollectionTTL, now: s.now}
 	src.root = fileRoot(conn, col)
 	if conn.Feed && !col.Has(view.KindFile) {
-		src.feed = s.newFeedReader(conn.Server, conn.Login, conn.Password)
+		src.feed = s.newFeedReader(sess, conn)
 		return src
 	}
 	client, err := dav.NewClient(s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)

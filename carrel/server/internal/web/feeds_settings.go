@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -177,8 +178,10 @@ func feedTrace(addr string, got publish.Feed, parsed publish.Parsed, err error) 
 	}
 }
 
+// readFeed reads an address that is not a subscription yet: nothing of it
+// is noted.
 func (s *Server) readFeed(ctx context.Context, addr, login, password string) (publish.Parsed, publish.Feed, error) {
-	return s.newFeedReader(addr, login, password).read(ctx)
+	return s.newFeedReader(nil, sealed.Connection{Server: addr, Login: login, Password: password}).read(ctx)
 }
 
 // postFeed checks the address (op=feed.check) or subscribes to it
@@ -284,7 +287,7 @@ func (s *Server) recheckFeed(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
-	parsed, got, err := s.readFeed(r.Context(), f.URL, f.Login, f.Password)
+	parsed, got, err := s.newFeedReader(sess, sealed.Connection{ID: f.ID, Server: f.URL, Login: f.Login, Password: f.Password}).read(r.Context())
 	if err == nil && len(parsed.Kinds()) > 0 {
 		_ = s.users.EditFeed(sess.AccountID(), key, f.ID, "", "", parsed.Kinds())
 	}
@@ -316,6 +319,9 @@ func (s *Server) subscriptionCard(sess *session.Session, tf timeFmt, f sealed.Su
 	col := f.FeedCollection()
 	card := view.SubscriptionCard{Title: text(collectionLabel(col)), URL: text(f.URL), Colour: catalogColour(col), Kinds: f.Kinds}
 	card.Checked, _ = readingOf(sess, tf, f.ID, sealed.FeedPath)
+	if r, ok := sess.ReadingOf(f.ID, sealed.FeedPath); ok && r.Fetched {
+		card.Size, card.Took = text(roughSize(r.Size)), text(tookText(r.Took))
+	}
 	q := func(op string) string {
 		return s.postQuery("/app/settings/connections", url.Values{"op": {op}, "feed": {f.ID}})
 	}
@@ -325,4 +331,26 @@ func (s *Server) subscriptionCard(sess *session.Session, tf timeFmt, f sealed.Su
 		{ID: "feed.unsubscribe", Label: "Unsubscribe", Href: q("feed.unsubscribe"), Method: "POST", Danger: true, Enabled: true},
 	}
 	return card
+}
+
+// roughSize is a size as the line of a subscription card writes it
+// (s-profile-1): bytes under a kilobyte, whole kilobytes under a megabyte,
+// then megabytes with one decimal — «34 KB».
+func roughSize(n int64) string {
+	switch {
+	case n < 1024:
+		return strconv.FormatInt(n, 10) + " B"
+	case n < 1024*1024:
+		return strconv.FormatInt((n+512)/1024, 10) + " KB"
+	}
+	return fmt.Sprintf("%.1f MB", float64(n)/(1024*1024))
+}
+
+// tookText is how long a read took, as the same line writes it: tenths of a
+// second — «0.4 s» —, milliseconds under a tenth.
+func tookText(d time.Duration) string {
+	if d < 100*time.Millisecond {
+		return strconv.FormatInt(d.Milliseconds(), 10) + " ms"
+	}
+	return fmt.Sprintf("%.1f s", d.Seconds())
 }

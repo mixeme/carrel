@@ -177,7 +177,7 @@ func (s *Server) newCollectionCtx(sess *session.Session, spec kindSpec, conn sea
 	}
 	c := &collectionCtx{sess: sess, spec: spec, conn: conn, col: col, t: client, tf: s.timeFor(sess), ttl: s.cfg.CacheCollectionTTL, now: s.now}
 	if conn.Feed {
-		c.feed = s.newFeedReader(conn.Server, conn.Login, conn.Password)
+		c.feed = s.newFeedReader(sess, conn)
 	}
 	if spec.kind == view.KindContact {
 		c.card, err = card.New(client)
@@ -274,7 +274,9 @@ func noteRead(sess *session.Session, accountID, path string, at time.Time, items
 // session read; both empty when it has read no list of it.
 func readingOf(sess *session.Session, tf timeFmt, accountID, path string) (lastRead, changed view.When) {
 	r, ok := sess.ReadingOf(accountID, path)
-	if !ok {
+	if !ok || r.At.IsZero() {
+		// A feed fetched outside a list (a record, search) is measured,
+		// not read as a list.
 		return "", ""
 	}
 	lastRead = tf.formatWhen(r.At, true, tf.now)

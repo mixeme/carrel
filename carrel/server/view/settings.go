@@ -209,12 +209,16 @@ type CollectionRow struct {
 	Menu     []MenuItem `json:"menu"` // Rename · Delete · Move
 }
 type SubscriptionCard struct {
-	Title   Text     `json:"title"`
-	URL     Text     `json:"url"`
-	Colour  Colour   `json:"colour"`
-	Kinds   []Kind   `json:"kinds"`
-	Stale   bool     `json:"stale"`
-	Checked When     `json:"checked"`
+	Title   Text   `json:"title"`
+	URL     Text   `json:"url"`
+	Colour  Colour `json:"colour"`
+	Kinds   []Kind `json:"kinds"`
+	Stale   bool   `json:"stale"`
+	Checked When   `json:"checked"`
+	// Size и Took — сколько весил и сколько читался последний ответ ленты в
+	// этом сеансе: «34 KB», «0.4 s» (s-profile-1, -10); не читалась — пусто
+	Size    Text     `json:"size"`
+	Took    Text     `json:"took"`
 	Actions []Action `json:"actions"` // Check · Edit · Unsubscribe
 }
 

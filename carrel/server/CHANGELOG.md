@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.109 — 2026-10-01
+
+The line of a subscription card ended at «read 2 min ago»; the frames go on
+with what the last read weighed and how long it took (s-profile-1, -10).
+
+### Added
+
+- **`SubscriptionCard.size` and `.took`** (C-6): «34 KB», «0.4 s» — the
+  last answer of the feed read in this session: by its list, a record of it,
+  search or Check. Whole kilobytes under a megabyte, bytes under a
+  kilobyte; tenths of a second, milliseconds under a tenth. Empty when the
+  feed has not been read in this session. Checking an address before
+  subscribing notes nothing.
+
 ## v0.2.108 — 2026-10-01
 
 The full form of a new contact drew no photo (s-contacts-27): the photo steps

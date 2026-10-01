@@ -11,6 +11,8 @@ import (
 	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/provider/card"
 	"carrel.dev/carrel/server/internal/publish"
+	"carrel.dev/carrel/server/internal/sealed"
+	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -19,16 +21,22 @@ import (
 // the combined views and search it is a read-only collection; what would
 // write is not there at all.
 
-// feedReader reads one feed.
+// feedReader reads one feed. Every answer it reads whole is measured into
+// the session's reading of the feed (session.Reading.Size, .Took): the line
+// of the subscription card says what the last read weighed and how long it
+// took (s-profile-1, -10).
 type feedReader struct {
 	client          *http.Client
 	url             string
 	login, password string
 	max             int64
+	sess            *session.Session // nil: nothing is noted
+	account         string
 }
 
-func (s *Server) newFeedReader(url, login, password string) *feedReader {
-	return &feedReader{client: s.guard.HTTPClient(), url: url, login: login, password: password, max: s.cfg.DAVMaxResponseBytes}
+func (s *Server) newFeedReader(sess *session.Session, conn sealed.Connection) *feedReader {
+	return &feedReader{client: s.guard.HTTPClient(), url: conn.Server, login: conn.Login, password: conn.Password,
+		max: s.cfg.DAVMaxResponseBytes, sess: sess, account: conn.ID}
 }
 
 // read fetches and parses the feed.
@@ -36,6 +44,9 @@ func (f *feedReader) read(ctx context.Context) (publish.Parsed, publish.Feed, er
 	got, err := publish.Fetch(ctx, f.client, f.url, f.login, f.password, f.max)
 	if err != nil {
 		return publish.Parsed{}, got, err
+	}
+	if f.sess != nil {
+		f.sess.NoteReading(f.account, sealed.FeedPath, session.Reading{Fetched: true, Size: got.Size, Took: got.Took})
 	}
 	p, err := publish.Parse(got.Doc, time.Now())
 	return p, got, err

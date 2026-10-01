@@ -2067,6 +2067,12 @@ type SubscriptionCard struct {
     Kinds    []Kind
     Stale    bool
     Checked  When
+    // Size и Took — сколько весил и сколько читался последний ответ ленты в
+    // этом сеансе (её список, запись, поиск, Check): «34 KB», «0.4 s»
+    // (s-profile-1, -10); не читалась — пусто. Строка карточки: «… · read
+    // 2 min ago · 34 KB · 0.4 s»
+    Size     Text
+    Took     Text
     Actions  []Action // Check · Edit · Unsubscribe
 }
 
