@@ -55,7 +55,7 @@ echo "== unit suite =="
 # internal/web — hundreds of tests against real HTTP stands — crossed it on
 # 24.09.2026: the run was killed mid-test, which reads as a failure and is
 # not one. How long the package takes is watched on its own (docs/plan).
-go test -timeout 30m ./...
+go test -count=1 -timeout 30m ./...
 
 # The race detector, behind a flag: it needs cgo and a C compiler, the host
 # has neither, so it runs in golang:1.27-bookworm with a module cache volume
