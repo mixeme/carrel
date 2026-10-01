@@ -60,6 +60,7 @@ var fixtureTypes = map[string]func() any{
 	"app-duplicates-merge":     func() any { return &DuplicatesMergePage{} },
 	"app-event":                func() any { return &EventPage{} },
 	"app-event-edit":           func() any { return &EventEditPage{} },
+	"app-event-new":            func() any { return &EventEditPage{} },
 	"app-files":                func() any { return &FilesRootPage{} },
 	"app-files-picker":         func() any { return &FilePickerSheet{} },
 	"app-files-published":      func() any { return &PublishedLinksPage{} },

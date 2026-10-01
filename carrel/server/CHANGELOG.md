@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.121 — 2026-10-02
+
+The full form of a new event has its fixture (the client's scan of the
+calendar, Д9).
+
+### Added
+
+- **Fixture `app-event-new/normal`** — `/app/calendar/{account}/{col}/new`,
+  the full form of a new event in «Личный»: «New event», the calendar, no
+  `delete`. Its frame is not drawn yet: `check.py` holds it in `FRAME_TODO`
+  (to-typecase task 77).
+
+### For consumers
+
+Nothing in the running server. The client's registry of fixture screens
+knows `app-event-new` (client `v0.1.3`).
+
 ## v0.2.120 — 2026-10-02
 
 The form of an event as s-agenda-3 draws it (the client's scan of the

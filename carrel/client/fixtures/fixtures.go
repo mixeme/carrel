@@ -44,6 +44,7 @@ var Models = map[string]func() any{
 	"app-duplicates-merge":     func() any { return &view.DuplicatesMergePage{} },
 	"app-event":                func() any { return &view.EventPage{} },
 	"app-event-edit":           func() any { return &view.EventEditPage{} },
+	"app-event-new":            func() any { return &view.EventEditPage{} },
 	"app-files":                func() any { return &view.FilesRootPage{} },
 	"app-files-picker":         func() any { return &view.FilePickerSheet{} },
 	"app-files-published":      func() any { return &view.PublishedLinksPage{} },

@@ -217,6 +217,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-contact-timeline": "/app/contacts/{account}/{col}/{uid}/timeline",
     "app-photo-preview": "/app/contacts/{account}/{col}/{uid}/photo-preview",
     "app-contact-new": "/app/contacts/{account}/{col}/new",
+    "app-event-new": "/app/calendar/{account}/{col}/new",
     "app-contact-import": "/app/contacts/{account}/{col}/import",
     "app-contact-move": "/app/contacts/{account}/{col}/{uid}/move",
     "app-contact-rewrite": "/app/contacts/{account}/{col}/{uid}/rewrite",
@@ -241,7 +242,12 @@ SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-
           "app-publish", "app-files-picker", "app-mail-compose",
           "app-contact-rewrite"}
 
-FRAME_TODO = {}
+FRAME_TODO = {
+    # Полной формы нового события кадр не рисует: по шаблону рода маршрут
+    # сводится к s-contacts-27, форме новой карточки, и рейл там — книги.
+    "app-event-new: коллекции рейла":
+        "to-typecase.md, задача 77: кадра полной формы нового события нет",
+}
 
 # Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
 # записка в from-typecase.md или долг сервера в plan/client.md. Закрылось на

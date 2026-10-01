@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.1.3 — 2026-10-02
+
+Server `v0.2.121`.
+
+### Added
+
+- **Fixture type `app-event-new`** in `fixtures.Models` (`EventEditPage`):
+  the full form of a new event, the fixture the server added (Д9).
+
 ## v0.1.2 — 2026-10-01
 
 Typecase `29413d6` (Carrel's tasks 60–76; the mockup's copy byte for byte
