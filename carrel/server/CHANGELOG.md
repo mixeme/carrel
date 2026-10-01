@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.101 — 2026-10-01
+
+A link in a note went wherever its text said: `[a](javascript:…)` reached
+`Block.href` as written, on the note's page and on its public page `/p/`.
+
+### Security
+
+- **A link of a note goes only to `http`, `https`, `mailto`, `tel`** (C-6.9,
+  C-11): `http` and `https` with a host. `javascript:`, `data:`,
+  `vbscript:`, `file:`, a relative or scheme-relative address, a scheme in
+  any case, behind `&#58;` or behind a space, a tab or a control character
+  get no `href`: the link's words are plain text in the run of the
+  paragraph. The address is read as Markdown itself writes it — character
+  references resolved, spaces and the rest percent-encoded — so `href` of a
+  link with such characters is now the encoded form.
+- An e-mail autolink `<anna@example.com>` has `href` `mailto:anna@example.com`
+  (it was the bare address, a relative link).
+
 ## v0.2.100 — 2026-10-01
 
 The cross of the card in the timeline's panel went nowhere without scripts

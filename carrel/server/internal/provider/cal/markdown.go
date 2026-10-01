@@ -3,6 +3,8 @@ package cal
 import (
 	"bytes"
 	"html"
+	"net/url"
+	"strings"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
@@ -170,14 +172,34 @@ func inlines(n ast.Node, src []byte) []view.Block {
 			}
 			out = append(out, inlineMark(kind, c, src, ""))
 		case ast.KindLink:
-			flush()
-			link := c.(*ast.Link)
-			out = append(out, inlineMark(view.BlockLink, c, src, string(link.Destination)))
+			if href := linkHref(c.(*ast.Link).Destination); href != "" {
+				flush()
+				out = append(out, inlineMark(view.BlockLink, c, src, href))
+				continue
+			}
+			// A link that may not go is its words, in the run of the text
+			// around it; its emphasis and code stay what they are.
+			for _, k := range inlines(c, src) {
+				if k.Kind == view.BlockPara && len(k.Children) == 0 {
+					text.WriteString(string(k.Text))
+					continue
+				}
+				flush()
+				out = append(out, k)
+			}
 		case ast.KindAutoLink:
-			flush()
 			al := c.(*ast.AutoLink)
-			u := string(al.URL(src))
-			out = append(out, view.Block{Kind: view.BlockLink, Href: u, Text: view.Text(u)})
+			u := al.URL(src)
+			dest := u
+			if al.AutoLinkType == ast.AutoLinkEmail && !bytes.HasPrefix(bytes.ToLower(u), []byte("mailto:")) {
+				dest = append([]byte("mailto:"), u...)
+			}
+			if href := linkHref(dest); href != "" {
+				flush()
+				out = append(out, view.Block{Kind: view.BlockLink, Href: href, Text: view.Text(u)})
+				continue
+			}
+			text.Write(u)
 		case ast.KindCodeSpan:
 			flush()
 			out = append(out, view.Block{Kind: view.BlockCode, Text: view.Text(textContent(c, src))})
@@ -193,6 +215,39 @@ func inlines(n ast.Node, src []byte) []view.Block {
 	}
 	flush()
 	return out
+}
+
+// linkHref is where a link of a note goes, or "" when it may not go at all
+// (C-6.9, docs/security.md «Ссылки из текста записи»). The note is someone
+// else's text — whoever writes to the collection, and anyone at all on a
+// public page (/p/) — so a link goes only to http and https with a host,
+// mailto and tel: never javascript:, data:, vbscript:, file:, never a
+// relative or scheme-relative address on Carrel's own origin. The
+// destination is read as goldmark's own renderer writes it — backslash
+// escapes and character references resolved, spaces, control characters
+// and the rest percent-encoded — so «javascript&#58;» is the javascript: it
+// means, and a tab or a space in front of the scheme leaves no scheme.
+// A urn:uuid: reference to a card is no link here either: Carrel does not
+// build the card's own address from it yet.
+func linkHref(dest []byte) string {
+	href := string(util.URLEscape(dest, true))
+	u, err := url.Parse(href)
+	if err != nil {
+		return ""
+	}
+	switch strings.ToLower(u.Scheme) {
+	case "http", "https":
+		if u.Host == "" {
+			return ""
+		}
+	case "mailto", "tel":
+		if u.Opaque == "" {
+			return ""
+		}
+	default:
+		return ""
+	}
+	return href
 }
 
 func inlineMark(kind view.BlockKind, n ast.Node, src []byte, href string) view.Block {
