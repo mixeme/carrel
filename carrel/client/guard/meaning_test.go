@@ -3,6 +3,7 @@ package guard_test
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -15,8 +16,11 @@ import (
 // meaningFindings is the meaning guard (U-8, U-15.2) on each screen, drawn on
 // every fixture of its view model: its tree, whose buttons may name the
 // forms the page prints at its end (Screen.Forms), and each of those forms.
+// A finding at a control that waits for the library (screens.Wait.Control,
+// U-5.5) is excused; a wait that excuses nothing is a finding.
 func meaningFindings(l lib, all []screens.Screen) []string {
 	var out []string
+	used := map[waitKey]bool{}
 	for _, scr := range all {
 		at := label(scr)
 		for _, path := range l.fixtures(scr) {
@@ -41,11 +45,45 @@ func meaningFindings(l lib, all []screens.Screen) []string {
 				}
 			}
 			for _, f := range guard.Meaning(scr.Draw(model), ids...) {
+				if i := excuse(scr, f); i >= 0 {
+					used[waitKey{at, i}] = true
+					continue
+				}
 				out = append(out, fmt.Sprintf("%s on %s: %s", at, fx, f))
+			}
+		}
+		for i, wt := range scr.Waits {
+			if wt.Control != "" && !used[waitKey{at, i}] {
+				out = append(out, fmt.Sprintf("%s: the control %s waits (U-5.5 #%d) and has its meaning on every fixture", at, wt.Control, wt.Row))
 			}
 		}
 	}
 	return out
+}
+
+type waitKey struct {
+	screen string
+	wait   int
+}
+
+// indexes are the places in a path of the meaning guard: «Items[3]».
+var indexes = regexp.MustCompile(`\[\d+\]`)
+
+// excuse is the wait of a screen that excuses a finding of the meaning guard
+// — a control waiting for the library (screens.Wait.Control) at the end of
+// the finding's path, the indexes left out —, or -1.
+func excuse(scr screens.Screen, finding string) int {
+	path, _, ok := strings.Cut(finding, ": ")
+	if !ok {
+		return -1
+	}
+	path = indexes.ReplaceAllString(path, "")
+	for i, wt := range scr.Waits {
+		if wt.Control != "" && strings.HasSuffix(path, wt.Control) {
+			return i
+		}
+	}
+	return -1
 }
 
 func TestScreensHaveMeaning(t *testing.T) {
@@ -56,7 +94,23 @@ func TestScreensHaveMeaning(t *testing.T) {
 // no meaning — a button that sends nothing, a link to nowhere, fields in no
 // form — and each is named.
 func TestMeaningBite(t *testing.T) {
-	found := meaningFindings(load(t), []screens.Screen{signIn(nil)})
+	// A control that waits for the library (U-5.5) is excused where it
+	// stands, and only there; a wait at a control with its meaning is red.
+	waiting := signIn(nil)
+	waiting.Waits = []screens.Wait{{Row: 1, Control: ".Items(AuthStack).Items(Button)"}, {Row: 2, Control: ".Links(Link)"}, {Row: 3, Control: ".Items(Dialog)"}}
+	found := meaningFindings(load(t), []screens.Screen{waiting})
+	for _, f := range found {
+		if strings.Contains(f, "(AuthStack).Items[1](Button)") || strings.Contains(f, "(AuthStack).Links[0](Link)") {
+			t.Errorf("a waiting control stayed in the findings: %s", f)
+		}
+	}
+	if !slices.ContainsFunc(found, func(f string) bool { return strings.Contains(f, "(Field).Parts[0](Input): a field outside") }) {
+		t.Errorf("a wait excused another control: %q", found)
+	}
+	if !slices.ContainsFunc(found, func(f string) bool { return strings.Contains(f, ".Items(Dialog) waits (U-5.5 #3) and has its meaning") }) {
+		t.Errorf("a wait that excuses nothing stayed green: %q", found)
+	}
+	found = meaningFindings(load(t), []screens.Screen{signIn(nil)})
 	for _, want := range []string{
 		"(AuthStack).Items[1](Button): a button with nothing to follow or send",
 		"(AuthStack).Links[0](Link): no Href",

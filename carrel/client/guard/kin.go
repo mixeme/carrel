@@ -42,6 +42,9 @@ import (
 // below, the ones Typecase's package shape drops from a screen as well — are
 // not in the skeleton.
 //
+// A button with its menu (Drop, TopDrop) is its button: its skeleton is its
+// trigger's, as shape reads it (menus below).
+//
 // Leaf values — strings, bools, plain numbers, slices of strings — are the
 // data and are not compared; so is a field of a named string type (an icon's
 // name). What they draw is held by the frame comparison (U-15.1), not here.
@@ -93,8 +96,21 @@ func isWidget(v reflect.Value, pkg string) bool {
 	return v.IsValid() && v.Kind() == reflect.Struct && v.Type().PkgPath() == pkg && !meaning[v.Type().Name()]
 }
 
+// menus are the widgets of a button with its menu (Typecase's Drop and
+// TopDrop). The frames draw such a button where it stands and the menu's
+// contents in a frame of their own beside the screen, and shape reads the
+// pair as its button (Typecase's task 49); so does kinship: the skeleton of a
+// button with its menu is its trigger's, and the menu is not in it (the lead's
+// decision of 01.10.2026, U-15.2, 3).
+var menus = map[string]bool{"Drop": true, "TopDrop": true}
+
 func skeleton(v reflect.Value, pkg string) *Node {
 	t := v.Type()
+	if menus[t.Name()] {
+		if tr := deref(v.FieldByName("Trigger")); isWidget(tr, pkg) {
+			return skeleton(tr, pkg)
+		}
+	}
 	n := &Node{Type: t.Name()}
 	for i := range t.NumField() {
 		f := t.Field(i)

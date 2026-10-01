@@ -101,9 +101,55 @@ func addressOf(route string, c5 []Address) (Address, bool) {
 	return Address{}, false
 }
 
-// routeCell is the address a row of the list «ждёт библиотеку» names in its
-// cell «Экран».
-var routeCell = regexp.MustCompile("`(/[^`]*)`")
+// What a row of the list «ждёт библиотеку» names in its cell «Экран» (the
+// owner's decision of 01.10.2026, U-5.5): an address that waits whole
+// (routeCell); a state of a screen, by its fixture «directory/state»
+// (fixtureCell), drawn and not held against a frame; a control of a screen,
+// by the screen's view model (modelName) and the words after it, whose
+// finding a mark at the control excuses.
+var (
+	routeCell   = regexp.MustCompile("`(/[^`]*)`")
+	fixtureCell = regexp.MustCompile("`([a-z0-9-]+/[a-z0-9-]+)`")
+)
+
+// WaitRow is a row of the list «ждёт библиотеку» that waits for less than an
+// address: the fixtures it names (states drawn without their frame) and the
+// view models whose controls it names.
+type WaitRow struct {
+	Num, Line int
+	Fixtures  []string // «app-contacts/empty»
+	Models    []string // «ContactPage»
+}
+
+// WaitRows reads the rows of the list «ждёт библиотеку» of the client spec
+// that name a fixture or a screen's control (WaitRow), by their numbers; a
+// row that names an address is CheckAddresses'. What CheckAddresses and
+// CheckRegistries find in the list is theirs too, and not repeated here.
+func WaitRows(clientSpecPath string) (map[int]WaitRow, error) {
+	client, err := os.ReadFile(clientSpecPath)
+	if err != nil {
+		return nil, err
+	}
+	rows, _ := readRegistry(client, filepath.Base(clientSpecPath), Registries[0])
+	out := map[int]WaitRow{}
+	for _, r := range rows {
+		cell := r.cells[1]
+		if routeCell.MatchString(cell) {
+			continue
+		}
+		w := WaitRow{Num: r.num, Line: r.line}
+		for _, m := range fixtureCell.FindAllStringSubmatch(cell, -1) {
+			w.Fixtures = append(w.Fixtures, m[1])
+		}
+		for _, m := range modelName.FindAllStringSubmatch(cell, -1) {
+			w.Models = append(w.Models, m[1])
+		}
+		if len(w.Fixtures) > 0 || len(w.Models) > 0 {
+			out[r.num] = w
+		}
+	}
+	return out, nil
+}
 
 // CheckAddresses holds the screens built against C-5 of the common spec and
 // the list «ждёт библиотеку» of U-5.5 in the client spec (U-15.2, 5). A
@@ -166,7 +212,9 @@ func CheckAddresses(commonSpecPath, clientSpecPath string, built []string) (find
 	for _, row := range rows {
 		m := routeCell.FindStringSubmatch(row.cells[1])
 		if m == nil {
-			findings = append(findings, Finding{Path: clientName, Line: row.line, Rule: RuleAddress, What: fmt.Sprintf("U-5.5 #%d: the cell «Экран» names no address", row.num)})
+			if !fixtureCell.MatchString(row.cells[1]) && !modelName.MatchString(row.cells[1]) {
+				findings = append(findings, Finding{Path: clientName, Line: row.line, Rule: RuleAddress, What: fmt.Sprintf("U-5.5 #%d: the cell «Экран» names no address, fixture or screen", row.num)})
+			}
 			continue
 		}
 		a, ok := addressOf(m[1], c5)

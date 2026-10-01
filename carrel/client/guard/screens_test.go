@@ -301,23 +301,27 @@ func (l lib) frameOf(path string) string {
 	return ""
 }
 
-// namesRoute tells whether the frame's data-screen names the route: a state's
-// frame is a part of the route's screen.
-func namesRoute(mock, frame, route string) bool {
-	m := frameDiv.FindStringSubmatch(frameBlock(mock, frame))
-	if m == nil {
-		return false
+// waits is the wait of a screen for a fixture's state («login/refused»),
+// if it has one (screens.Wait).
+func waits(scr screens.Screen, k string) (screens.Wait, bool) {
+	for _, w := range scr.Waits {
+		if w.Fixture != "" && w.Fixture == k {
+			return w, true
+		}
 	}
-	ds := dataScreen.FindStringSubmatch(m[1])
-	return ds != nil && slices.Contains(strings.Fields(ds[1]), route)
+	return screens.Wait{}, false
 }
 
 // frameFindings is the frame comparison (U-15.2, 4; U-15.1) of each screen:
 // on every fixture of its view model the screen has the make-up of the
-// fixture's frame (shape.Check) — the frame check.py gives it, a frame of
-// the fixture's route, one the screen names — and no class Typecase's CSS
-// does not have. Each frame the screen names is drawn by a fixture, and is
-// the same in both copies of the mockup.
+// fixture's frame (shape.Check) — the frame check.py gives it, its state's by
+// STATE_FRAME (which need not name the route in data-screen: the lead's
+// decision of 01.10.2026), else its route's; one the screen names — and no
+// class Typecase's CSS does not have. Each frame the screen names is drawn by
+// a fixture, and is the same in both copies of the mockup. A state that
+// waits for the library (screens.Wait, U-5.5) is drawn and its classes
+// held, not its make-up; and one whose make-up already matches its frame
+// waits for nothing — its row is to be closed.
 func frameFindings(l lib, all []screens.Screen) []string {
 	var out []string
 	for _, scr := range all {
@@ -349,9 +353,6 @@ func frameFindings(l lib, all []screens.Screen) []string {
 			case frame == "":
 				out = append(out, fmt.Sprintf("%s on %s: no frame of the route %s", at, fx, route))
 				continue
-			case frame != canonFrame(l.mock, route) && !namesRoute(l.mock, frame, route):
-				out = append(out, fmt.Sprintf("%s on %s: the state's frame %s does not name the route %s", at, fx, frame, route))
-				continue
 			case !slices.Contains(scr.Frames, frame):
 				out = append(out, fmt.Sprintf("%s on %s: drawn by %s (check.py), which the screen does not name", at, fx, frame))
 				continue
@@ -362,6 +363,13 @@ func frameFindings(l lib, all []screens.Screen) []string {
 			root, err := draw(scr, path)
 			if err != nil {
 				out = append(out, fmt.Sprintf("%s on %s: %v", at, fx, err))
+				continue
+			}
+			if w, ok := waits(scr, key(path)); ok {
+				out = append(out, classFindings(l, at+" on "+fx, root.Render())...)
+				if l.shape.Check(frame, root.Render()) == nil {
+					out = append(out, fmt.Sprintf("%s on %s: waits (U-5.5 #%d) and matches its frame", at, fx, w.Row))
+				}
 				continue
 			}
 			out = append(out, htmlFindings(l, frame, at+" on "+fx, root.Render())...)
@@ -382,6 +390,13 @@ func htmlFindings(l lib, frame, at, html string) []string {
 	if err := l.shape.Check(frame, html); err != nil {
 		out = append(out, fmt.Sprintf("%s: %v", at, err))
 	}
+	return append(out, classFindings(l, at, html)...)
+}
+
+// classFindings holds a screen's printed HTML to the classes of Typecase's
+// CSS.
+func classFindings(l lib, at, html string) []string {
+	var out []string
 	for _, m := range classAttr.FindAllStringSubmatch(html, -1) {
 		for _, c := range strings.Fields(m[1]) {
 			if !l.classes[c] {
@@ -395,7 +410,8 @@ func htmlFindings(l lib, frame, at, html string) []string {
 // kinFindings is the kinship with the draft (U-15.2, 3): the screen drawn
 // on each normal fixture of its view model, and on each fixture whose state
 // has a frame of its own (STATE_FRAME), against the draft of that fixture's
-// frame — each frame the screen names has its draft.
+// frame — each frame the screen names has its draft. A state that waits for
+// the library (screens.Wait) is not held against a draft.
 func kinFindings(l lib, drafts map[string]*guard.Node, all []screens.Screen) []string {
 	var out []string
 	for _, scr := range all {
@@ -411,6 +427,9 @@ func kinFindings(l lib, drafts map[string]*guard.Node, all []screens.Screen) []s
 			if filepath.Base(path) == "normal.json" {
 				normal++
 			} else if !state {
+				continue
+			}
+			if _, ok := waits(scr, key(path)); ok {
 				continue
 			}
 			frame := l.frameOf(path)
@@ -727,11 +746,18 @@ func TestFrameComparisonBite(t *testing.T) {
 			t.Errorf("a finding not of the refused state: %s", f)
 		}
 	}
-	// A state's frame is a frame of the route.
+	// A state's frame is STATE_FRAME's, whether or not it names the route
+	// (the lead's decision of 01.10.2026): the screen names it, and the state
+	// is held against it.
 	elsewhere := l
 	elsewhere.states = map[string]string{"login/refused": "s-auth-2"}
-	if found := frameFindings(elsewhere, []screens.Screen{signIn(nil)}); !slices.ContainsFunc(found, func(f string) bool { return strings.Contains(f, "does not name the route") }) {
-		t.Errorf("a state's frame of another route stayed out of the findings: %q", found)
+	if found := frameFindings(elsewhere, []screens.Screen{signIn(nil)}); !has(found, "login/refused.json: drawn by s-auth-2 (check.py)") {
+		t.Errorf("a state's frame STATE_FRAME gives stayed out of what the screen must name: %q", found)
+	}
+	other := signIn(nil)
+	other.Frames = []string{"s-auth-1", "s-auth-2"}
+	if found := frameFindings(elsewhere, []screens.Screen{other}); !has(found, "login/refused.json (s-auth-2)") {
+		t.Errorf("a state drawn as another frame than STATE_FRAME's stayed green: %q", found)
 	}
 	// The two copies of the mockup part on a state's frame.
 	partedState := l
@@ -741,6 +767,16 @@ func TestFrameComparisonBite(t *testing.T) {
 	}
 	if found := frameFindings(partedState, []screens.Screen{signIn(nil)}); !slices.ContainsFunc(found, func(f string) bool { return strings.Contains(f, "frame s-auth-13 differs") }) {
 		t.Errorf("a state's frame that differs between the copies stayed out of the findings: %q", found)
+	}
+	// A state that waits for the library (U-5.5) is drawn and not held
+	// against its frame; one that matches its frame waits for nothing.
+	waiting := noReason
+	waiting.Waits = []screens.Wait{{Row: 1, Fixture: "login/refused"}}
+	none(t, "a waiting state", frameFindings(l, []screens.Screen{waiting}))
+	idle := signIn(nil)
+	idle.Waits = []screens.Wait{{Row: 1, Fixture: "login/normal"}}
+	if found := frameFindings(l, []screens.Screen{idle}); !has(found, "login/normal.json (s-auth-1): waits (U-5.5 #1) and matches its frame") {
+		t.Errorf("a state that waits and matches its frame stayed green: %q", found)
 	}
 }
 
@@ -752,6 +788,9 @@ func TestKinshipBite(t *testing.T) {
 		t.Error("no draft of the refused state's frame s-auth-13")
 	}
 	none(t, "the good sample", kinFindings(l, d, []screens.Screen{signIn(nil)}))
+	waiting := plainReason
+	waiting.Waits = []screens.Wait{{Row: 1, Fixture: "login/refused"}}
+	none(t, "a waiting state", kinFindings(l, d, []screens.Screen{waiting}))
 	for name, s := range map[string]screens.Screen{"wrapped": wrapped, "other variant": otherVariant, "no button": otherWidget, "the reason in another hint": plainReason} {
 		if found := kinFindings(l, d, []screens.Screen{s}); len(found) == 0 {
 			t.Errorf("%s: kinship stayed green", name)
@@ -812,5 +851,112 @@ func TestAddressesBite(t *testing.T) {
 	// and is itself waiting in U-5.5 #4, by one of its kinds.
 	if want := []string{"/invite/{token}", "/about", "/app/{kind}", "/app/{kind}/{account}/{col}/{uid}", "/app/nothing"}; !slices.Equal(left, want) {
 		t.Errorf("left %q, want %q", left, want)
+	}
+}
+
+// A button with its menu (Drop, TopDrop) is its button for kinship, as for
+// shape (the lead's decision of 01.10.2026): its trigger is held against the
+// draft's button, its menu is not.
+func TestKinMenus(t *testing.T) {
+	menu := w.Menu{Items: []w.MenuPart{w.MenuItem{Label: "Move", Href: "/move"}, w.MenuSep{}}, Pop: w.MenuUnder}
+	acts := func(items ...w.ActsPart) w.Acts { return w.Acts{Items: items} }
+	top := func(items ...w.TopAction) w.Top { return w.Top{Actions: items} }
+	dots := w.Button{Icon: "dots", Title: "More"}
+	for name, c := range map[string]struct {
+		draft, screen any
+		kin           bool
+	}{
+		"a closed menu where the draft has its button": {acts(dots), acts(w.Drop{Trigger: dots, Menu: menu}), true},
+		"the draft's menu and the screen's button":     {acts(w.Drop{Trigger: dots, Menu: menu}), acts(dots), true},
+		"a menu of the top bar":                        {top(w.UserMenu{Name: "mix"}), top(w.TopDrop{Trigger: w.UserMenu{Name: "x", Href: "/a"}, Menu: menu}), true},
+		"a menu around another button":                 {acts(dots), acts(w.Drop{Trigger: w.Button{Icon: "dots", Kind: w.ButtonPrimary}, Menu: menu}), false},
+		"a menu around another widget":                 {top(w.Button{Label: "New"}), top(w.TopDrop{Trigger: w.UserMenu{Name: "x"}, Menu: menu}), false},
+	} {
+		err := guard.Kin(guard.Skeleton(c.draft), guard.Skeleton(c.screen))
+		if (err == nil) != c.kin {
+			t.Errorf("%s: kin %v, want %v (%v)", name, err == nil, c.kin, err)
+		}
+	}
+}
+
+// The rows of the list «ждёт библиотеку» that name a state or a control
+// (U-5.5, the owner's decision of 01.10.2026), and every wait of every
+// screen against them: a wait names a row that names its fixture or its
+// screen, and every state a row names waits on the screen of its fixture.
+func waitFindings(l lib, rows map[int]guard.WaitRow, all []screens.Screen) []string {
+	var out []string
+	named := map[string]bool{}
+	for _, scr := range all {
+		at := label(scr)
+		mine := map[string]bool{}
+		for _, path := range l.fixtures(scr) {
+			mine[key(path)] = true
+		}
+		for _, wt := range scr.Waits {
+			r, ok := rows[wt.Row]
+			switch {
+			case !ok:
+				out = append(out, fmt.Sprintf("%s: a wait of U-5.5 #%d, which names no state or control", at, wt.Row))
+			case (wt.Fixture == "") == (wt.Control == ""):
+				out = append(out, fmt.Sprintf("%s: the wait of U-5.5 #%d names neither a state nor a control, or both", at, wt.Row))
+			case wt.Fixture != "" && !mine[wt.Fixture]:
+				out = append(out, fmt.Sprintf("%s: the wait of U-5.5 #%d names %s, no fixture of its view model", at, wt.Row, wt.Fixture))
+			case wt.Fixture != "" && !slices.Contains(r.Fixtures, wt.Fixture):
+				out = append(out, fmt.Sprintf("%s: U-5.5 #%d does not name %s", at, wt.Row, wt.Fixture))
+			case wt.Control != "" && !slices.Contains(r.Models, modelName(scr)):
+				out = append(out, fmt.Sprintf("%s: U-5.5 #%d does not name %s", at, wt.Row, modelName(scr)))
+			}
+			if wt.Fixture != "" {
+				named[wt.Fixture] = true
+			}
+		}
+	}
+	for _, r := range rows {
+		for _, f := range r.Fixtures {
+			if !named[f] {
+				out = append(out, fmt.Sprintf("U-5.5 #%d: %s waits on no screen", r.Num, f))
+			}
+		}
+	}
+	slices.Sort(out)
+	return out
+}
+
+func TestWaitsAreRows(t *testing.T) {
+	rows, err := guard.WaitRows(clientSpec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	none(t, "waits", waitFindings(load(t), rows, screens.All))
+}
+
+func TestWaitsBite(t *testing.T) {
+	l := load(t)
+	rows, err := guard.WaitRows("testdata/addresses/client.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r := rows[8]; !slices.Equal(r.Fixtures, []string{"login/refused"}) || !slices.Equal(r.Models, []string{"LoginPage"}) {
+		t.Fatalf("U-5.5 #8 of the sample: %+v", r)
+	}
+	good := signIn(nil)
+	good.Waits = []screens.Wait{{Row: 8, Fixture: "login/refused"}, {Row: 9, Control: ".Links(Link)"}}
+	none(t, "good waits", waitFindings(l, rows, []screens.Screen{good}))
+	bad := signIn(nil)
+	bad.Waits = []screens.Wait{{Row: 1, Control: ".Links(Link)"}, {Row: 8, Fixture: "login/normal"}, {Row: 9, Fixture: "register/sent"}, {Row: 10, Control: ".Links(Link)"}, {Row: 8}}
+	want := []string{
+		"LoginPage (s-auth-1, s-auth-13): U-5.5 #8 does not name login/normal",
+		"LoginPage (s-auth-1, s-auth-13): U-5.5 #10 does not name LoginPage",
+		"LoginPage (s-auth-1, s-auth-13): a wait of U-5.5 #1, which names no state or control",
+		"LoginPage (s-auth-1, s-auth-13): the wait of U-5.5 #8 names neither a state nor a control, or both",
+		"LoginPage (s-auth-1, s-auth-13): the wait of U-5.5 #9 names register/sent, no fixture of its view model",
+		"U-5.5 #8: login/refused waits on no screen",
+	}
+	got := waitFindings(l, rows, []screens.Screen{bad})
+	t.Log(strings.Join(got, "\n"))
+	for _, w := range want {
+		if !slices.Contains(got, w) {
+			t.Errorf("waits: missing %q in\n%s", w, strings.Join(got, "\n"))
+		}
 	}
 }

@@ -43,6 +43,30 @@ type Screen struct {
 	// the forgotten password (s-auth-6), the wipe's confirmation (s-auth-10).
 	// nil — the screen has none.
 	Forms func(model any) []widget.PostForm
+	// Waits are what of the screen waits for the library (U-5.5, the
+	// owner's decision of 01.10.2026): each a row of the list «ждёт
+	// библиотеку», and the row's mark stands at the line here and at the
+	// control in the screen's code. nil — nothing waits.
+	Waits []Wait
+}
+
+// Wait is one thing of a screen the library cannot draw yet, by its row of
+// the list «ждёт библиотеку» (U-5.5):
+//
+//   - a state with no frame of its own, or one its frame draws cut short —
+//     Fixture, «app-contacts/empty»: the screen draws it, and it is not held
+//     against a frame (no frame comparison, no kinship); the meaning guard
+//     and the classes of the library hold it as any other;
+//   - a control the library cannot give its meaning yet — Control, the end
+//     of its path in the screen's tree as the meaning guard names it, without
+//     the indexes («.Main(Main).Items(Bar).More(Button)»): the meaning
+//     guard's finding there is excused, on every fixture.
+//
+// A wait that excuses nothing is a finding: the row is to be closed.
+type Wait struct {
+	Row     int
+	Fixture string
+	Control string
 }
 
 // Root is what a screen draws: one of Typecase's roots — a shell, a page
