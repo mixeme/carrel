@@ -4,6 +4,60 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.1.2 — 2026-10-01
+
+Typecase `29413d6` (Carrel's tasks 60–76; the mockup's copy byte for byte
+the same), server `v0.2.115`. The drafts whose print changed and those of the
+new state frames went in first, as printed, under `screens/*/_draft/`; the
+screens over them took the drafts out.
+
+### Added
+
+- **Closed menus that open without a script** (Typecase task 60): the «⋯» of
+  a card's head and of the card in a panel, Columns with its menu — a form of
+  the columns, their handles, Apply and «Reset to defaults»
+  (`bind.Columns`) — and the account's menu: who is signed in and where, the
+  items of `TopBar.User`, Sign out an item that posts its form (task 68,
+  `bind.MenuItems`, `bind.MenuForms`, `bind.TopForms`).
+- **The session's token in a form of an action** (`Action.CSRF`, C-11):
+  Delete, Send, a source's retry, Sign out post with `_csrf` without a script.
+- **The bar's tick is a form** (task 67, `bind.CheckForm`, `bind.Checked`):
+  «Compact rows» goes with the list's choices, Apply without a script. **The
+  filter sends the list's other choices** (task 65, `bind.Filter`). **Tags
+  go to the list filtered by them** (task 63, `bind.Tag`). **The photo in a
+  card's head** (task 64). **The search's and the filter's words are their
+  placeholder** (task 69).
+- **The states of contacts are held against their frames** (task 66,
+  `states-7` … `-12`; `STATE_FRAME` in `check.py`), the read-only book and
+  the edits against frames drawn whole (task 62).
+- `bind.Notices` (a notice and its technical block, `bind.NoticeDiag`; a
+  message's buttons small), `bind.EmptyParts` (an empty state: its title
+  bold, its words, its buttons). Tests for each.
+- **The meaning guard's table** (Ж9): `TimeRow`, `TableCell` with its pick,
+  `TickBox` of a menu's item, `CheckForm`, `Tag`, the button of a closed
+  menu, a menu's item that submits a form.
+- U-5.5 rows 17–22 (the owner's decision of 01.10.2026): what the strict
+  frame comparison (task 76) found that is not the client's — the server's
+  debts C18–C21 and Typecase's candidates (plan, «Подъём на Typecase
+  `29413d6`»).
+
+### Changed
+
+- **A feed's row in the rail** is the feed's (`is-ext`), its mark only its
+  colour, as every frame draws it (Ж8).
+- **A loss on save** is a notice in the plain tone (`states-12`).
+- **The list**: its notices under the head, its bar while there are cards or
+  a filter to clear, its empty state as the frames draw it. **The edit**: an
+  empty field shows the dash, but the one with the cursor; the line under
+  the form only for a card that exists.
+- `check.py`: check 9 does not hold the Apply of a bar's tick (the library's
+  button) against an action, and keeps `SERVER_TODO` («Tick every book»).
+
+### Removed
+
+- U-5.5 rows 1–16: each wait is lifted by Typecase's tasks 60–69 or by the
+  server (C17), or stands now on a row of its own.
+
 ## v0.1.1 — 2026-10-01
 
 Server `v0.2.100`.
