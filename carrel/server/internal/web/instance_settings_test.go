@@ -68,7 +68,7 @@ func TestInstanceSettingsAreEdited(t *testing.T) {
 		t.Fatalf("limits: %d %s", rec.Code, rec.Body)
 	}
 	sheet := decode[view.MailSheet](t, h.do(get("/app/mail/compose", alice)))
-	if !strings.Contains(string(sheet.Limits), "0 of 5 recipients") || !strings.Contains(string(sheet.Limits), "9 letters left") {
+	if !strings.Contains(saidRuns(sheet.Limits), "0 of 5 recipients") || !strings.Contains(saidRuns(sheet.Limits), "9 letters left") {
 		t.Errorf("limits = %q", sheet.Limits)
 	}
 	if h.users.Settings().Name != "Контора" {

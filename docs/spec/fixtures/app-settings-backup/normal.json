@@ -453,7 +453,18 @@
   },
   "restore": {
     "actions": [],
-    "note": "Restoring creates: the records go into a new collection, never over what is there now. The archive is opened and shown before anything is written.",
+    "note": [
+      {
+        "text": "Restoring "
+      },
+      {
+        "mark": "strong",
+        "text": "creates"
+      },
+      {
+        "text": ": the records go into a new collection, never over what is there now. The archive is opened and shown before anything is written."
+      }
+    ],
     "open": false,
     "preview": [],
     "source": {
@@ -593,9 +604,14 @@
         }
       ]
     },
+    "subtitle": [],
     "targets": []
   },
-  "subtitle": "No jobs yet",
+  "subtitle": [
+    {
+      "text": "No jobs yet"
+    }
+  ],
   "title": "Backup",
   "top": {
     "new": {

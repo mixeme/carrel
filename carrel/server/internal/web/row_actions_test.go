@@ -162,17 +162,18 @@ func TestBackupRowsAndJobPageAreTheFrame(t *testing.T) {
 		t.Fatalf("s-backup-2 head = %v: read the frame again", sub)
 	}
 	dlPage := decode[view.BackupPage](t, f.h.do(get(actionHref(t, list.Jobs[0].Actions, "backup.edit"), f.sess)))
-	if dlPage.Title != text(dl.Name) || dlPage.Subtitle != "Job · last copy just now" {
-		t.Errorf("head = %q / %q", dlPage.Title, dlPage.Subtitle)
+	// A destination other than WebDAV alone is named (s-backup-3).
+	if dlPage.Title != text(dl.Name) || saidRuns(dlPage.Subtitle) != "Job · destination ⟨strong:download⟩ · last copy just now" {
+		t.Errorf("head = %q / %q", dlPage.Title, saidRuns(dlPage.Subtitle))
 	}
 	// The list counts its jobs under the title (s-backup-1: «Three jobs ·
 	// their own sources, destinations and triggers»).
-	if list.Subtitle != "Two jobs · their own sources, destinations and triggers" || list.Title != "Backup" {
-		t.Errorf("list head = %q / %q", list.Title, list.Subtitle)
+	if saidRuns(list.Subtitle) != "Two jobs · their own sources, destinations and triggers" || list.Title != "Backup" {
+		t.Errorf("list head = %q / %q", list.Title, saidRuns(list.Subtitle))
 	}
 	page := decode[view.BackupPage](t, f.h.do(get(actionHref(t, list.Jobs[1].Actions, "backup.edit"), f.sess)))
-	if page.Subtitle != "Job · no copy yet" {
-		t.Errorf("never run: subtitle %q", page.Subtitle)
+	if saidRuns(page.Subtitle) != "Job · no copy yet" {
+		t.Errorf("never run: subtitle %q", saidRuns(page.Subtitle))
 	}
 	drawn(t, "job page", page.Add.Actions, "s-backup-2")
 	if got := ids(page.Add.Actions); !equalStrings(got, []string{"backup.save", "backup.cancel", "backup.run"}) {

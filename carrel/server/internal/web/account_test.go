@@ -81,7 +81,7 @@ func TestLetterSaysWhereRepliesGo(t *testing.T) {
 	bob := h.login("bob", "bobpass123")
 
 	sheet := decode[view.MailSheet](t, h.do(get("/app/mail/compose", bob)))
-	if sheet.ReplyTo != "" || !strings.Contains(string(sheet.ReplyNote), "no reply address") {
+	if sheet.ReplyTo != "" || !strings.Contains(saidRuns(sheet.ReplyNote), "no reply address") {
 		t.Errorf("replyTo = %q, note %q", sheet.ReplyTo, sheet.ReplyNote)
 	}
 	if sheet.From != "bob (via Carrel) <noreply@carrel.example>" {
@@ -103,6 +103,19 @@ func TestLetterSaysWhereRepliesGo(t *testing.T) {
 	}
 	if sheet.ReplyTo != "bob@example.org" {
 		t.Errorf("replyTo = %q", sheet.ReplyTo)
+	}
+	// The foot of the sheet says how the letter is signed, the name in
+	// bold, and where replies go (s-mail-1).
+	foot := regexp.MustCompile(`(?s)<span class="tc-dim[^"]*">(Signed .*?)</span>`).FindStringSubmatch(mockupFrame(t, "s-mail-1"))
+	if foot == nil || !strings.HasPrefix(framePieces(foot[1]), "Signed ⟨strong:") {
+		t.Fatalf("s-mail-1 draws no signature: read the frame again")
+	}
+	if got := saidRuns(sheet.ReplyNote); got != "Signed ⟨strong:Боб⟩ · replies go to bob@example.org" {
+		t.Errorf("signature = %q, the frame %q", got, framePieces(foot[1]))
+	}
+	// «Published links» in the limits is bold (s-mail-1).
+	if got := saidRuns(sheet.Limits); !strings.Contains(got, "can be revoked in ⟨strong:Published links⟩") {
+		t.Errorf("limits = %q", got)
 	}
 }
 

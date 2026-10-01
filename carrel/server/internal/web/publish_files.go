@@ -184,6 +184,13 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 			if !e.Modified.IsZero() {
 				page.File.Changed = view.When(c.tf.dayKey(e.Modified)) // «changed 2026-08-10» (s-publish-9)
 			}
+			// The line under the name is one monospaced piece (s-publish-9…11):
+			// the type, the size, and when it changed.
+			head := []string{mt, string(page.File.Size)}
+			if page.File.Changed != "" {
+				head = append(head, "changed "+string(page.File.Changed))
+			}
+			page.Lede = runs(monoRun(strings.Join(head, " · ")))
 			if inlineTypes[mt] {
 				page.File.Preview, page.File.Href = view.PreviewImage, download+"?inline=1"
 			}

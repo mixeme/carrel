@@ -94,7 +94,7 @@ func TestLetterCarriesFilesAndLinks(t *testing.T) {
 	if strings.Join(suggested, "|") != "ada@example.com work Ada Lovelace|ada@home.example home Ada Lovelace" || len(sheet.NotAsked) != 0 {
 		t.Errorf("suggest = %v, not asked = %v", suggested, sheet.NotAsked)
 	}
-	if sheet.ReplyTo != "" || !strings.Contains(string(sheet.ReplyNote), "no reply address") || sheet.From != "owner (via Carrel) <noreply@carrel.example>" {
+	if sheet.ReplyTo != "" || !strings.Contains(saidRuns(sheet.ReplyNote), "no reply address") || sheet.From != "owner (via Carrel) <noreply@carrel.example>" {
 		t.Errorf("from %q reply %q note %q", sheet.From, sheet.ReplyTo, sheet.ReplyNote)
 	}
 
@@ -177,18 +177,18 @@ func TestLetterCeilings(t *testing.T) {
 		}
 		return decode[view.MailSheet](t, rec)
 	}
-	if sheet := send("a@example.org", "b@example.org", "c@example.org"); !strings.Contains(string(sheet.Limits), "2 recipients at most") {
+	if sheet := send("a@example.org", "b@example.org", "c@example.org"); !strings.Contains(saidRuns(sheet.Limits), "2 recipients at most") {
 		t.Errorf("three recipients: %q", sheet.Limits)
 	}
 	relay.Refuse = "nobody@example.org"
-	if sheet := send("nobody@example.org"); !strings.Contains(string(sheet.Limits), "did not take") {
+	if sheet := send("nobody@example.org"); !strings.Contains(saidRuns(sheet.Limits), "did not take") {
 		t.Errorf("refused: %q", sheet.Limits)
 	}
-	if sheet := send("a@example.org"); sheet.Limits != "" {
+	if sheet := send("a@example.org"); len(sheet.Limits) != 0 {
 		t.Fatalf("the refused letter was counted: %q", sheet.Limits)
 	}
 	sheet := send("a@example.org")
-	if !strings.Contains(string(sheet.Limits), "as many letters today") {
+	if !strings.Contains(saidRuns(sheet.Limits), "as many letters today") {
 		t.Errorf("second letter: %q", sheet.Limits)
 	}
 	for _, a := range sheet.Actions {

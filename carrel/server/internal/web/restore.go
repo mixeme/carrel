@@ -43,6 +43,7 @@ type restoreTask struct {
 	id       string
 	path     string
 	password string
+	file     string // where the archive lay: the run's file, the path on the storage, the uploaded name
 	manifest backup.Manifest
 	mu       sync.Mutex
 	gone     bool // cancelled: the file is deleted
@@ -107,7 +108,7 @@ func (t *restoreTask) open() (*zip.Reader, *os.File, error) {
 // restoreBlock is the restore part of the Backup screen: which archive, then
 // what it holds and where each collection goes.
 func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob) view.RestoreBlock {
-	b := view.RestoreBlock{Note: "Restoring creates: the records go into a new collection, never over what is there now. The archive is opened and shown before anything is written."}
+	b := view.RestoreBlock{Note: join("Restoring ", strongRun("creates"), ": the records go into a new collection, never over what is there now. The archive is opened and shown before anything is written.")}
 	var runs, stores []view.Option
 	byJob := s.users.BackupRuns(sess.AccountID())
 	tf, now := s.timeFor(sess), s.now()
@@ -143,6 +144,7 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob) view.Rest
 	}
 	if t := restoreOf(sess); t != nil {
 		b.Open = true
+		b.Subtitle = archiveLine(t)
 		s.fillRestore(sess, blob, t, &b)
 	}
 	return b
@@ -268,6 +270,7 @@ func (s *Server) openRestore(w http.ResponseWriter, r *http.Request, sess *sessi
 	fields := r.PostForm
 	var src io.Reader
 	var closer io.Closer
+	var name string
 	source := r.URL.Query().Get("source")
 	if source == "" {
 		source = fields.Get("source")
@@ -278,10 +281,10 @@ func (s *Server) openRestore(w http.ResponseWriter, r *http.Request, sess *sessi
 			s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, restoreFailure("No file came with the form.")))
 			return
 		}
-		fields, src = up.fields, up.next
+		fields, src, name = up.fields, up.next, up.next.FileName()
 	} else {
 		var err error
-		src, closer, err = s.restoreSource(r.Context(), sess, blob, source, fields)
+		src, closer, name, err = s.restoreSource(r.Context(), sess, blob, source, fields)
 		if err != nil {
 			s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, restoreFailure(err.Error())))
 			return
@@ -295,7 +298,7 @@ func (s *Server) openRestore(w http.ResponseWriter, r *http.Request, sess *sessi
 	}
 	size, err := io.Copy(f, src)
 	f.Close()
-	t := &restoreTask{path: f.Name(), password: fields.Get("password")}
+	t := &restoreTask{path: f.Name(), password: fields.Get("password"), file: name}
 	if err != nil {
 		t.Cancel()
 		s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, restoreFailure("The archive did not arrive whole: "+err.Error())))
@@ -326,54 +329,91 @@ func (s *Server) openRestore(w http.ResponseWriter, r *http.Request, sess *sessi
 	s.redirect(w, r, "/app/settings/backup")
 }
 
+// archiveLine is the line under the title of an open archive (s-backup-8):
+// its job, what the manifest holds, and where it lay, monospaced.
+func archiveLine(t *restoreTask) view.Runs {
+	records := 0
+	for _, e := range t.manifest.Collections {
+		if e.Kind != view.KindFile {
+			records += e.Count
+		}
+	}
+	head := "Archive · "
+	if t.manifest.Job != "" {
+		head = "Job «" + t.manifest.Job + "» · "
+	}
+	parts := []any{head + "manifest read · " + plural(len(t.manifest.Collections), "collection") + " · " + grouped(records) + " " + pluralWord(records, "record")}
+	if t.file != "" {
+		parts = append(parts, " · ", monoRun(t.file))
+	}
+	return join(parts...)
+}
+
+// grouped is a count with its thousands apart, as the frames write it:
+// «1 214».
+func grouped(n int) string {
+	s := strconv.Itoa(n)
+	for i := len(s) - 3; i > 0; i -= 3 {
+		s = s[:i] + " " + s[i:]
+	}
+	return s
+}
+
+func pluralWord(n int, unit string) string {
+	if n == 1 {
+		return unit
+	}
+	return unit + "s"
+}
+
 func restoreFailure(body string) view.Notice {
 	return view.Notice{Role: view.NoticeAlert, Title: "The archive could not be opened", Body: text(body)}
 }
 
 // restoreSource opens the archive a form names: a run of a job, or a file on
 // a storage of the catalog.
-func (s *Server) restoreSource(ctx context.Context, sess *session.Session, blob sealed.Blob, source string, f url.Values) (io.Reader, io.Closer, error) {
+func (s *Server) restoreSource(ctx context.Context, sess *session.Session, blob sealed.Blob, source string, f url.Values) (io.Reader, io.Closer, string, error) {
 	switch source {
 	case "run":
 		jobID, runID, _ := strings.Cut(f.Get("run"), "|")
 		job, ok := blob.BackupJob(jobID)
 		if !ok {
-			return nil, nil, errors.New("choose a copy")
+			return nil, nil, "", errors.New("choose a copy")
 		}
 		for _, r := range s.users.BackupRuns(sess.AccountID())[jobID] {
 			if r.ID == runID && r.File != "" && r.Verified {
 				dest, err := s.backupDest(blob, job)
 				if err != nil {
-					return nil, nil, err
+					return nil, nil, "", err
 				}
 				body, err := dest.Open(ctx, r.File)
-				return body, body, err
+				return body, body, r.File, err
 			}
 		}
-		return nil, nil, errors.New("choose a copy")
+		return nil, nil, "", errors.New("choose a copy")
 	case "webdav":
 		acc, colPath, _ := strings.Cut(f.Get("store"), "|")
 		col, ok := blob.Collection(acc, colPath)
 		conn, hasConn := blob.Connection(acc)
 		segs, okPath := relSegs(f.Get("file"))
 		if !ok || !hasConn || !col.Has(view.KindFile) || !okPath || len(segs) == 0 {
-			return nil, nil, errors.New("choose a storage and the archive's path in it")
+			return nil, nil, "", errors.New("choose a storage and the archive's path in it")
 		}
 		files, err := s.filesOf(conn)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, "", err
 		}
 		p, err := file.Join(fileRoot(conn, col), segs...)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, "", err
 		}
 		d, err := files.Open(ctx, p, nil)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, "", err
 		}
-		return d.Body, d.Body, nil
+		return d.Body, d.Body, strings.Join(segs, "/"), nil
 	}
-	return nil, nil, errors.New("choose where the archive is")
+	return nil, nil, "", errors.New("choose where the archive is")
 }
 
 // runRestore is step three: every collection with a target goes into a new

@@ -52,19 +52,23 @@
       администрирование** (`v0.2.79`: `Plain.Lede`; `v0.2.99`: листы
       переноса и удаления записи, папки и коллекции, строка подключений,
       заметка davloom, день заметки в панели, жирная первая фраза
-      сообщений — `Notice.Title`). Осталось там, где сервер шлёт `Text`
-      или не шлёт ничего:
-      - строки под заголовком: «destination **WebDAV and download**»
-        (s-backup-3), путь архива (s-backup-8), строка файла публикации
-        моноширинно (s-publish-8…11), опасный кусок строки davloom
-        (s-davloom-1); у списков календаря, задач и заметок строки под
-        заголовком нет совсем — «5 of 7 calendars · 3 accounts · 10 – 16
-        August 2026 · ‹Europe/Moscow›» (s-agenda-1), «2 of 3 lists · …»
-        (s-tasks-1), «2 of 3 notebooks · …» (s-notes-1): это скан этих
-        разделов, как у контактов (группы А–Д);
-      - сообщения: **Lock now** (s-profile-4, s-plan-5), **Check**
-        (s-profile-10), логин (s-admin-14, -17), **Published links** и
-        подпись (s-mail-1), куски сообщений копии (s-backup-2…6, -8);
+      сообщений — `Notice.Title`; `v0.2.113`: блок состояния рейла;
+      `v0.2.114`: строки под заголовком копии, архива, публикации и
+      davloom, сообщения Check, логина, письма, восстановления). Осталось:
+      - у списков календаря, задач и заметок строки под заголовком нет
+        совсем — «5 of 7 calendars · 3 accounts · 10 – 16 August 2026 ·
+        ‹Europe/Moscow›» (s-agenda-1), «2 of 3 lists · …» (s-tasks-1),
+        «2 of 3 notebooks · …» (s-notes-1): это скан этих разделов, как у
+        контактов (группы А–Д);
+      - **Lock now** (s-profile-4, s-plan-5): сообщение говорит о кнопке
+        «Lock now» рядом с меткой «credentials unlocked · 4:12», а у
+        сервера её нет — `Top.Unlocked` без действия; сначала действие
+        (запереть выдачу до срока), потом слова о нём;
+      - сообщения копии s-backup-2…5 («**Download** streams …», «This line
+        **starts** a copy …», ‹set -eu›, ‹409›, второе задание GoSentry):
+        это пояснения к вкладкам внешнего запуска (crontab, GoSentry,
+        Gitea, curl), а `TriggerBlock` несёт одну строку `Command` без
+        вкладок — сначала вкладки;
       - подсказки полей: `Reply-To` (account-1, -8…-10, s-mail-9),
         `.well-known` (s-profile-2, -14, -16), четыре подсказки листа новой
         коллекции (s-profile-5), `https://`, `webcal://` (s-profile-10), три
@@ -183,6 +187,7 @@
 | Лист новой коллекции после отказа (s-profile-6): «Back to the form» — та же форма без отказа, серверу ничего (`op=back`), и «Try again» — форма ещё раз; у папки хранилища так же | `v0.2.111` |
 | Шапка и пустое состояние Backup (s-backup-1, s-backup-6): New job (`?job=new` — страница нового задания) и Restore (`?restore=1`, `RestoreBlock.Open`) в шапке и без заданий; под заголовком счёт заданий или «No jobs yet», пустое состояние словами кадра (‹.ics›, ‹.vcf›, **Restore**) | `v0.2.112` |
 | Блок состояния в подвале рейлов настроек и администрирования (components-35, account-*, s-profile-*, s-backup-*, s-admin-*): `Rail.Status` (`RailStatus`, C-8 `StatusTone`) — davloom и копии, почта и проверка установки, время моноширинно; последнее письмо и проверка — с запуска (`railMarks`); `join` берёт `Runs` (в `v0.2.110` сообщение папки без Markdown теряло начало) | `v0.2.113` |
+| Выделенные куски — строки под заголовком и сообщения: задание копии с назначением жирным (s-backup-3), открытый архив — задание, манифест, путь моноширинно (`RestoreBlock.Subtitle`, s-backup-8), строка публичного файла и день публичной заметки моноширинно (`Plain.Lede`, s-publish-8…11), davloom с тревогой у локального адреса (`DavloomPage.Subtitle`, s-davloom-1); `ConnectionsPage.Note` с **Check** у панели подписки (s-profile-10), логин жирным в `IssuedPassword.Message` (s-admin-14, -17), подпись и **Published links** письма (`MailSheet.ReplyNote`, `.Limits`, s-mail-1), «Restoring **creates**» (`RestoreBlock.Note`); `BackupPage.Subtitle` — `Runs` | `v0.2.114` |
 
 S-30.4 (чужие клиенты, прокси у себя, вид письма у получателя, архив месячной
 давности) машиной не закрывается — перечислено в README сервера как ручное.

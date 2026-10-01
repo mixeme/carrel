@@ -540,6 +540,15 @@ func (s *Server) publicRecord(c *collectionCtx, obj *model.Object, page *view.Pu
 	default:
 		body := cal.Description(obj)
 		page.Note = &view.NoteDoc{Mode: view.NoteReading, Title: page.Title, Body: text(body), Rendered: cal.RenderMarkdown(body), ReadOnly: true}
+		// A note always says its day, monospaced (s-publish-8): a note
+		// without one looks forged. Its time when it has one.
+		if t := noteTime(obj, tf.tz); !t.IsZero() {
+			day := tf.date(t)
+			if lt := t.In(tf.tz); lt.Hour() != 0 || lt.Minute() != 0 {
+				day += ", " + tf.clock(t)
+			}
+			page.Lede = runs(monoRun(day))
+		}
 	}
 }
 

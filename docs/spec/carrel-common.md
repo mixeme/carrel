@@ -1665,10 +1665,10 @@ type MailSheet struct {
     Body       Text
     From       Text   // с какого адреса уйдёт — видно до отправки
     ReplyTo    Text   // пусто — в письме будет строка «отвечать не нужно»
-    ReplyNote  Text
+    ReplyNote  Runs   // подвал: «Signed **Михаил Енученко** · replies go to mix@example.org» (s-mail-1); без подтверждённого адреса — что ответа не будет
     Attach     []MailAttachRow
     NotAsked   []Stamp // книги, которые не ответили, названы прямо
-    Limits     Text
+    Limits     Runs    // «Published links» жирным (s-mail-1)
     Actions    []Action
 }
 type Recipient struct { Address Text; Label Text; Name Text }
@@ -2045,6 +2045,7 @@ type ConnectionsPage struct {
     DialogTitle    Text
     DialogSubtitle Text
     Actions       []Action // Connect account (→ `?op=add`) · Subscribe to a feed
+    Note          Runs     // с открытой панелью подписки — «A feed is read again on every visit … **Check** asks whether the address still replies.» (s-profile-10); без панели пусто
 }
 type ConnectionCard struct {
     AccountID   string
@@ -2147,6 +2148,7 @@ type DeviceRow struct {
 
 type DavloomPage struct {
     Shell
+    Subtitle Runs // «One address for every device instead of an account for every server»; у локального адреса — и « · ‹danger›a phone on mobile data will not reach a local address» (s-davloom-1)
     Enabled bool
     Address Text
     Devices []ProxyDevice
@@ -2164,7 +2166,7 @@ type ProxyDevice struct {
 
 type BackupPage struct {
     Shell
-    Subtitle   Text    // на странице задания: «Job · last copy 2 days ago» (s-backup-2), Title — имя задания; на списке — «Three jobs · their own sources, destinations and triggers» (s-backup-1), без заданий — «No jobs yet» (s-backup-6); у нового задания (?job=new, Title «New job») пусто
+    Subtitle   Runs    // на странице задания: «Job · last copy 2 days ago» (s-backup-2), назначение не только WebDAV — жирным: «Job · destination **WebDAV and download** · last copy …» (s-backup-3); Title — имя задания; на списке — «Three jobs · their own sources, destinations and triggers» (s-backup-1), без заданий — «No jobs yet» (s-backup-6); у нового задания (?job=new, Title «New job») пусто
     Actions    []Action // шапка списка: New job (основная, ?job=new) и Restore (?restore=1 — RestoreBlock.Open); и без заданий (s-backup-1, s-backup-6)
     Empty      Runs    // без заданий (s-backup-6): «Carrel copies raw ‹.ics›, ‹.vcf› and files …»; с заданиями пусто
     EmptyNote  Runs    // «Already have an archive from another instance? **Restore** takes it from a file — a job is not needed for that.»
@@ -2196,10 +2198,11 @@ type TriggerBlock struct {
 type BackupRun struct { ID Text; Started When; State OpState; Size Size; Download *Action }
 type RestoreBlock struct {
     Open    bool // восстановление открыто: Restore в шапке (?restore=1) или архив уже открыт
+    Subtitle Runs // открытый архив (s-backup-8): «Job «Личное» · manifest read · 4 collections · 1 214 records · ‹carrel-backup/2026-08-14T09-12.zip›»; не открыт — пусто
     Source  Form
     Preview []ImportTable
     Targets []TargetPicker
-    Note    Text // восстановление создаёт, а не откатывает
+    Note    Runs // восстановление создаёт, а не откатывает; «creates» жирным (s-backup-8)
     Actions []Action
 }
 
@@ -2268,7 +2271,7 @@ type IssuedPassword struct {
     Login    Text
     Password Text
     Copy     Action
-    Message  Text   // «The password of anna is reset.» (s-admin-14), «The user viktor is created. Hand this over; …» (s-admin-17); Login в нём — жирным
+    Message  Runs   // «The password of anna is reset.» (s-admin-14), «The user viktor is created. Hand this over; …» (s-admin-17); Login в нём — жирным
     Note     Text   // строка рядом с Copy: «Hand it over yourself; they choose their own at the next sign-in.»; пусто — нет
     Done     Action // Done: у листа сброса — в подвале листа, у карточки Create user — рядом с Copy
 }
@@ -2426,6 +2429,9 @@ type AboutPage struct { // rest-3: Title «Carrel», Lede — первая ст�
     Back    Action // без сеанса «Back to sign in»; из оболочки — туда, где были
 }
 
+// Plain.Lede публичной страницы: у файла — одна моноширинная строка «тип ·
+// размер · changed день» (s-publish-9…11), у заметки — её день моноширинно
+// (s-publish-8), у события — когда и где (s-publish-16).
 type PublishedPage struct {
     Plain
     Kind     Kind

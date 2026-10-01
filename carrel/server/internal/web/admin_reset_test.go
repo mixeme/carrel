@@ -135,8 +135,9 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 	// whose, the card with Copy and its line, and Done in the foot; no form
 	// and no warning any more.
 	answer := mockupFrame(t, "s-admin-14")
-	wantMsg := strings.Replace(frameText(frameIssuedMsg.FindStringSubmatch(answer)[1]), "anna", "bob", 1)
-	if got := done.Issued; string(got.Message) != wantMsg || string(got.Note) != frameText(frameFootDim.FindStringSubmatch(answer)[1]) ||
+	// The login in it is bold (s-admin-14).
+	wantMsg := strings.Replace(framePieces(frameIssuedMsg.FindStringSubmatch(answer)[1]), "⟨strong:anna⟩", "⟨strong:bob⟩", 1)
+	if got := done.Issued; saidRuns(got.Message) != wantMsg || string(got.Note) != frameText(frameFootDim.FindStringSubmatch(answer)[1]) ||
 		got.Copy.Label != "Copy" || got.Done.Label != "Done" || got.Done.Href != "/admin/" || !got.Done.Enabled {
 		t.Errorf("issued = %+v, want (s-admin-14) %q, %q, Copy and Done", got, wantMsg, frameText(frameFootDim.FindStringSubmatch(answer)[1]))
 	}

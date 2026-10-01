@@ -117,13 +117,13 @@ func (s *Server) postFolder(w http.ResponseWriter, r *http.Request, sess *sessio
 	addr, err := publish.FolderURL(f.URL)
 	if err != nil {
 		f.URLErr = "Give the address of a WebDAV folder: https://."
-		page.Add = s.feedForm(sess, f)
+		page.Add, page.Note = s.feedForm(sess, f), feedPanelNote
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
 	n, took, err := s.probeFolder(r.Context(), addr, f.Login, password)
 	if err != nil || r.FormValue("op") == "feed.check" {
-		page.Add = s.feedForm(sess, f)
+		page.Add, page.Note = s.feedForm(sess, f), feedPanelNote
 		page.Shell.Notices = append(page.Shell.Notices, folderTrace(addr, n, took, err))
 		s.writePage(w, r, http.StatusOK, page)
 		return
@@ -207,7 +207,7 @@ func (s *Server) postFeed(w http.ResponseWriter, r *http.Request) {
 	page := s.connectionsPage(sess, connectionForm{}, nil)
 	if _, err := publish.FeedURL(f.URL); err != nil {
 		f.URLErr = "Give the address of a .ics or .vcf file: https:// or webcal://."
-		page.Add = s.feedForm(sess, f)
+		page.Add, page.Note = s.feedForm(sess, f), feedPanelNote
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
@@ -220,7 +220,7 @@ func (s *Server) postFeed(w http.ResponseWriter, r *http.Request) {
 		if f.Name == "" {
 			f.Name = parsed.Name
 		}
-		page.Add = s.feedForm(sess, f)
+		page.Add, page.Note = s.feedForm(sess, f), feedPanelNote
 		page.Shell.Notices = append(page.Shell.Notices, notice)
 		s.writePage(w, r, http.StatusOK, page)
 		return
@@ -354,3 +354,9 @@ func tookText(d time.Duration) string {
 	}
 	return fmt.Sprintf("%.1f s", d.Seconds())
 }
+
+// feedPanelNote is the message of the page while the panel of a
+// subscription is open (s-profile-10): a feed has nothing to synchronise,
+// and Check — the card's button, in bold — asks whether it still replies.
+var feedPanelNote = join("A feed is read again on every visit to the section, so there is nothing here to synchronise and nothing to refresh. ",
+	strongRun("Check"), " asks whether the address still replies.")

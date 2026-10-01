@@ -577,5 +577,14 @@
       "primary": true
     },
     "userHref": "/app/settings/account"
-  }
+  },
+  "subtitle": [
+    {
+      "text": "One address for every device instead of an account for every server · "
+    },
+    {
+      "mark": "danger",
+      "text": "a phone on mobile data will not reach a local address"
+    }
+  ]
 }

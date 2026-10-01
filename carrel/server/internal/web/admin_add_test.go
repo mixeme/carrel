@@ -315,8 +315,8 @@ func TestTemporaryPasswordMakesTheAccount(t *testing.T) {
 	// s-admin-17: in the card, as after a reset — the message naming whom,
 	// Copy and Done beside it, no line of its own.
 	created := mockupFrame(t, "s-admin-17")
-	msg := frameText(regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush[^"]*">(.*?)</div>`).FindStringSubmatch(created)[1])
-	if !strings.Contains(msg, "viktor") || issued.Message != view.Text(msg) || issued.Note != "" ||
+	msg := framePieces(regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush[^"]*">(.*?)</div>`).FindStringSubmatch(created)[1])
+	if !strings.Contains(msg, "⟨strong:viktor⟩") || saidRuns(issued.Message) != msg || issued.Note != "" ||
 		issued.Done.Label != "Done" || issued.Done.Href != "/admin/invites" || !issued.Done.Enabled {
 		t.Errorf("issued = %+v, want (s-admin-17) %q with Done", issued, msg)
 	}

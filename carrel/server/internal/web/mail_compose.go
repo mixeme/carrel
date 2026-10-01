@@ -235,6 +235,10 @@ func splitRecipients(values []string) []string {
 	return out
 }
 
+// publishedLinksMark stands for «Published links» in the limits until the
+// sentence is cut into pieces.
+const publishedLinksMark = "{published-links}"
+
 // mailSheet is the letter as it will go: who it is from and where replies
 // go, the recipients, what goes as a file and what as a link.
 func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDraft, q, note string) view.MailSheet {
@@ -274,8 +278,8 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 	left := s.users.LettersLeft(u.ID, s.mailPolicy().PerDay)
 	limits := []string{
 		fmt.Sprintf("%d of %d recipients. Everyone sees the whole list.", len(d.To), s.mailPolicy().Recipients),
-		fmt.Sprintf("An attachment up to %s, the letter up to %s; a folder, and anything larger, goes as a link that lives 30 days and can be revoked in Published links.",
-			formatSize(s.mailPolicy().Attach), formatSize(s.mailPolicy().Letter)),
+		fmt.Sprintf("An attachment up to %s, the letter up to %s; a folder, and anything larger, goes as a link that lives 30 days and can be revoked in %s.",
+			formatSize(s.mailPolicy().Attach), formatSize(s.mailPolicy().Letter), publishedLinksMark),
 		fmt.Sprintf("%s left today.", plural(left, "letter")),
 	}
 	if links > 0 {
@@ -284,7 +288,10 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 	if note != "" {
 		limits = append([]string{note}, limits...)
 	}
-	sheet.Limits = text(strings.Join(limits, " "))
+	// «Published links» is bold (s-mail-1): the place the links are
+	// revoked, named as the rail names it.
+	before, after, _ := strings.Cut(strings.Join(limits, " "), publishedLinksMark)
+	sheet.Limits = join(before, strongRun("Published links"), after)
 
 	for _, k := range attachKinds {
 		sheet.Actions = append(sheet.Actions, view.Action{ID: "mail.attach." + k.What, Label: text(k.Label), Method: "POST", Enabled: true,

@@ -221,7 +221,7 @@ func (s *Server) postAdminReset(w http.ResponseWriter, r *http.Request) {
 			Login:    text(u.Login),
 			Password: text(temp),
 			Copy:     view.Action{ID: "admin.reset.copy", Label: "Copy", Method: "GET", Primary: true, Enabled: true},
-			Message:  text("The password of " + u.Login + " is reset."),
+			Message:  join("The password of ", strongRun(u.Login), " is reset."),
 			Note:     "Hand it over yourself; they choose their own at the next sign-in.",
 			Done:     view.Action{ID: "admin.reset.done", Label: "Done", Href: s.route("/admin/"), Method: "GET", Primary: true, Enabled: true},
 		},
@@ -379,7 +379,7 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 			Login:    text(login),
 			Password: text(password),
 			Copy:     view.Action{ID: "admin.user.password.copy", Label: "Copy", Method: "GET", Primary: true, Enabled: true},
-			Message:  text("The user " + login + " is created. Hand this over; until they change it, you can sign in as them."),
+			Message:  join("The user ", strongRun(login), " is created. Hand this over; until they change it, you can sign in as them."),
 			Done:     view.Action{ID: "admin.user.password.done", Label: "Done", Href: s.route("/admin/invites"), Method: "GET", Enabled: true},
 		}
 	case "selfreg":

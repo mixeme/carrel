@@ -50,12 +50,13 @@ func (s *Server) senderOf(u *store.User) letterSender {
 	return ls
 }
 
-// replyNote says where answers go, or that there will be none.
-func (ls letterSender) replyNote() view.Text {
+// replyNote is the foot of the letter's sheet (s-mail-1): how it is signed,
+// the name in bold, and where answers go, or that there will be none.
+func (ls letterSender) replyNote() view.Runs {
 	if ls.ReplyTo == "" {
-		return "Your address is not confirmed, so the letter carries no reply address and says at its foot that it cannot be answered."
+		return join("Signed ", strongRun(ls.Name), " · your address is not confirmed, so the letter carries no reply address and says at its foot that it cannot be answered.")
 	}
-	return text("Replies go to " + ls.ReplyTo + ".")
+	return join("Signed ", strongRun(ls.Name), " · replies go to "+ls.ReplyTo)
 }
 
 type accountFlash struct {

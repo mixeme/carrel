@@ -21,8 +21,8 @@ func TestBackupHeadAndEmptyState(t *testing.T) {
 	}
 	f := backupFixture(t)
 	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-	if page.Subtitle != "No jobs yet" {
-		t.Errorf("subtitle = %q", page.Subtitle)
+	if saidRuns(page.Subtitle) != "No jobs yet" {
+		t.Errorf("subtitle = %q", saidRuns(page.Subtitle))
 	}
 	if got := saidRuns(page.Empty); got != framePieces(empty[1]) {
 		t.Errorf("empty = %q, the frame %q", got, framePieces(empty[1]))
@@ -54,7 +54,7 @@ func TestBackupHeadAndEmptyState(t *testing.T) {
 
 	saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "secret-pass"))
 	page = decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-	if !strings.HasPrefix(string(page.Subtitle), "One job · ") || len(page.Empty) != 0 || len(page.Actions) != 2 {
-		t.Errorf("with a job: subtitle %q, empty %q, head %+v", page.Subtitle, saidRuns(page.Empty), page.Actions)
+	if !strings.HasPrefix(saidRuns(page.Subtitle), "One job · ") || len(page.Empty) != 0 || len(page.Actions) != 2 {
+		t.Errorf("with a job: subtitle %q, empty %q, head %+v", saidRuns(page.Subtitle), saidRuns(page.Empty), page.Actions)
 	}
 }

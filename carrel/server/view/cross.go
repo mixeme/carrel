@@ -317,16 +317,19 @@ type PublishSheet struct {
 }
 
 type MailSheet struct {
-	To        []Recipient     `json:"to"`
-	Suggest   []Recipient     `json:"suggest"`
-	Subject   Text            `json:"subject"`
-	Body      Text            `json:"body"`
-	From      Text            `json:"from"`    // с какого адреса уйдёт — видно до отправки
-	ReplyTo   Text            `json:"replyTo"` // пусто — в письме будет строка «отвечать не нужно»
-	ReplyNote Text            `json:"replyNote"`
+	To      []Recipient `json:"to"`
+	Suggest []Recipient `json:"suggest"`
+	Subject Text        `json:"subject"`
+	Body    Text        `json:"body"`
+	From    Text        `json:"from"`    // с какого адреса уйдёт — видно до отправки
+	ReplyTo Text        `json:"replyTo"` // пусто — в письме будет строка «отвечать не нужно»
+	// ReplyNote — строка подвала: чем подписано и куда придёт ответ, имя
+	// жирным — «Signed **Михаил Енученко** · replies go to mix@example.org»
+	// (s-mail-1); без подтверждённого адреса — что ответа не будет
+	ReplyNote Runs            `json:"replyNote"`
 	Attach    []MailAttachRow `json:"attach"`
 	NotAsked  []Stamp         `json:"notAsked"` // книги, которые не ответили, названы прямо
-	Limits    Text            `json:"limits"`
+	Limits    Runs            `json:"limits"`   // «Published links» — жирным (s-mail-1)
 	Actions   []Action        `json:"actions"`
 }
 type Recipient struct {

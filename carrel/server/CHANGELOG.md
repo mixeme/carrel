@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.114 — 2026-10-01
+
+Lines under titles and messages in the pieces the frames mark (C-6.2 Runs).
+
+### Changed
+
+- **`BackupPage.subtitle` is `Runs`** (was `Text`): a job whose destination
+  is not WebDAV alone names it in bold — «Job · destination **WebDAV and
+  download** · last copy …» (s-backup-3); WebDAV alone goes unsaid
+  (s-backup-2).
+- **`RestoreBlock.subtitle`** (new): the open archive — its job, what the
+  manifest holds, where it lay monospaced (s-backup-8). **`RestoreBlock.note`
+  is `Runs`**, «Restoring **creates** …».
+- **`DavloomPage.subtitle`** (new): «One address for every device instead of
+  an account for every server», and on a local address (loopback, private
+  network, localhost, .local, .lan, .home.arpa) « · ‹danger›a phone on
+  mobile data will not reach a local address» (s-davloom-1).
+- **Public pages**: `lede` of a file is one monospaced piece «type · size ·
+  changed day» (s-publish-9…11, was «Read-only. Published from Carrel.»); of
+  a note, its day monospaced, with the time when it has one (s-publish-8).
+- **`ConnectionsPage.note`** (new): with the panel of a subscription open,
+  «A feed is read again on every visit … **Check** asks whether the address
+  still replies.» (s-profile-10).
+- **`IssuedPassword.message` is `Runs`**: the login in bold (s-admin-14,
+  -17).
+- **`MailSheet.replyNote` and `.limits` are `Runs`**: «Signed **name** ·
+  replies go to …» (s-mail-1), «Published links» in bold.
+
 ## v0.2.113 — 2026-10-01
 
 The settings and administration rails drew a state block at their foot that

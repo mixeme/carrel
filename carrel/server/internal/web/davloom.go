@@ -3,6 +3,7 @@ package web
 import (
 	"errors"
 	"net/http"
+	"net/netip"
 	"net/url"
 	"strconv"
 	"strings"
@@ -40,6 +41,22 @@ func (s *Server) davloomAddress() string {
 		return o + "/dav/"
 	}
 	return "http://127.0.0.1:" + strconv.Itoa(s.cfg.DAVloomPort) + "/"
+}
+
+// localAddress reports whether an address names this machine or a private
+// network: loopback, a private or link-local IP, localhost, .local, .lan,
+// .home.arpa.
+func localAddress(raw string) bool {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return false
+	}
+	host := strings.ToLower(u.Hostname())
+	if ip, err := netip.ParseAddr(host); err == nil {
+		return ip.IsLoopback() || ip.IsPrivate() || ip.IsLinkLocalUnicast()
+	}
+	return host == "localhost" || strings.HasSuffix(host, ".local") || strings.HasSuffix(host, ".lan") ||
+		strings.HasSuffix(host, ".home.arpa") || strings.HasSuffix(host, ".localhost")
 }
 
 type issuedDevice struct {
@@ -138,12 +155,18 @@ func scopeFromForm(r *http.Request) user.DeviceScope {
 
 func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *issuedDevice, formErr error, editing string) view.DavloomPage {
 	page := view.DavloomPage{
-		Shell:   s.withRail(s.buildShell(sess, "DAV proxy"), s.settingsRail(sess, "/app/settings/davloom")),
-		Enabled: s.cfg.DAVloomPort != 0,
-		Address: text(s.davloomAddress()),
+		Shell:    s.withRail(s.buildShell(sess, "DAV proxy"), s.settingsRail(sess, "/app/settings/davloom")),
+		Subtitle: line("One address for every device instead of an account for every server"),
+		Enabled:  s.cfg.DAVloomPort != 0,
+		Address:  text(s.davloomAddress()),
 		// «not» in bold (s-davloom-1).
 		Note: join("Changing your Carrel password does ", strongRun("not"), " disconnect devices: each has its own key wrapper. "+
 			"To disconnect one, revoke it here — that is the only thing that stops it."),
+	}
+	// A local address does not reach a phone away from home, and the line
+	// under the title says so where the address is given (s-davloom-1).
+	if page.Enabled && localAddress(s.davloomAddress()) {
+		page.Subtitle = join(page.Subtitle, " · ", view.Run{Text: "a phone on mobile data will not reach a local address", Mark: view.RunDanger})
 	}
 	if !page.Enabled {
 		page.Note = join("davloom is off on this instance: the administrator turns it on with CARREL_DAVLOOM_PORT. ", []view.Run(page.Note))

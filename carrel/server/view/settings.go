@@ -172,6 +172,10 @@ type ConnectionsPage struct {
 	DialogTitle    Text     `json:"dialogTitle"`
 	DialogSubtitle Text     `json:"dialogSubtitle"`
 	Actions        []Action `json:"actions"` // Connect account · Subscribe to a feed
+	// Note — сообщение страницы под карточками: с открытой панелью подписки
+	// — что ленту читают на каждом визите и что делает **Check**
+	// (s-profile-10); без панели пусто
+	Note Runs `json:"note"`
 }
 type ConnectionCard struct {
 	AccountID string       `json:"accountID"`
@@ -258,11 +262,15 @@ type DeviceRow struct {
 
 type DavloomPage struct {
 	Shell
-	Enabled bool          `json:"enabled"`
-	Address Text          `json:"address"`
-	Devices []ProxyDevice `json:"devices"`
-	Add     Form          `json:"add"`
-	Note    Runs          `json:"note"` // смена основного пароля не отключает устройства; «not» — жирным (s-davloom-1)
+	// Subtitle — строка под заголовком (s-davloom-1): «One address for every
+	// device instead of an account for every server», у локального адреса —
+	// и « · ‹danger›a phone on mobile data will not reach a local address»
+	Subtitle Runs          `json:"subtitle"`
+	Enabled  bool          `json:"enabled"`
+	Address  Text          `json:"address"`
+	Devices  []ProxyDevice `json:"devices"`
+	Add      Form          `json:"add"`
+	Note     Runs          `json:"note"` // смена основного пароля не отключает устройства; «not» — жирным (s-davloom-1)
 }
 type ProxyDevice struct {
 	Name     Text     `json:"name"`
@@ -275,11 +283,13 @@ type ProxyDevice struct {
 
 type BackupPage struct {
 	Shell
-	// Subtitle — на странице задания: «Job · last copy 2 days ago»; на
-	// списке — счёт заданий, «Three jobs · their own sources, destinations
-	// and triggers» (s-backup-1), без заданий — «No jobs yet» (s-backup-6);
-	// у нового задания пусто
-	Subtitle Text `json:"subtitle"`
+	// Subtitle — на странице задания: «Job · last copy 2 days ago»
+	// (s-backup-2), назначение не только WebDAV — жирным: «Job · destination
+	// **WebDAV and download** · last copy …» (s-backup-3); на списке — счёт
+	// заданий, «Three jobs · their own sources, destinations and triggers»
+	// (s-backup-1), без заданий — «No jobs yet» (s-backup-6); у нового
+	// задания пусто
+	Subtitle Runs `json:"subtitle"`
 	// Actions — шапка списка (s-backup-1, s-backup-6): New job (основная,
 	// ?job=new — страница нового задания) и Restore (?restore=1 — открытое
 	// восстановление, RestoreBlock.Open); и без заданий тоже
@@ -332,12 +342,17 @@ type BackupRun struct {
 type RestoreBlock struct {
 	// Open — восстановление открыто: Restore в шапке (?restore=1) или
 	// архив уже открыт (шаг сопоставления)
-	Open    bool           `json:"open"`
-	Source  Form           `json:"source"`
-	Preview []ImportTable  `json:"preview"`
-	Targets []TargetPicker `json:"targets"`
-	Note    Text           `json:"note"` // восстановление создаёт, а не откатывает
-	Actions []Action       `json:"actions"`
+	Open bool `json:"open"`
+	// Subtitle — строка под заголовком открытого архива (s-backup-8):
+	// задание, что в манифесте, и где архив лежит — моноширинно; «Job
+	// «Личное» · manifest read · 4 collections · 1 214 records ·
+	// ‹carrel-backup/2026-08-14T09-12.zip›»; архив не открыт — пусто
+	Subtitle Runs           `json:"subtitle"`
+	Source   Form           `json:"source"`
+	Preview  []ImportTable  `json:"preview"`
+	Targets  []TargetPicker `json:"targets"`
+	Note     Runs           `json:"note"` // восстановление создаёт, а не откатывает; «creates» — жирным (s-backup-8)
+	Actions  []Action       `json:"actions"`
 }
 
 type AppearancePage struct {
@@ -410,7 +425,7 @@ type IssuedPassword struct {
 	Login    Text   `json:"login"`
 	Password Text   `json:"password"`
 	Copy     Action `json:"copy"`
-	Message  Text   `json:"message"` // «The password of anna is reset.» (s-admin-14), «The user viktor is created. Hand this over; …» (s-admin-17); Login в нём — жирным
+	Message  Runs   `json:"message"` // «The password of anna is reset.» (s-admin-14), «The user viktor is created. Hand this over; …» (s-admin-17); Login в нём — жирным
 	Note     Text   `json:"note"`    // строка рядом с Copy: «Hand it over yourself; they choose their own at the next sign-in.»; пусто — нет
 	Done     Action `json:"done"`    // Done: у листа сброса — в подвале листа, у карточки Create user — рядом с Copy
 }

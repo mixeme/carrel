@@ -444,9 +444,15 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 	if saved, ok := blob.BackupJob(job.ID); ok && job.ID != "" {
 		// The job's page is headed by its name and its last copy
 		// (s-backup-2: «Job · last copy 2 days ago»).
-		page.Title, page.Subtitle = text(saved.Name), "Job · no copy yet"
+		// A destination other than WebDAV alone is named, in bold
+		// (s-backup-3: «Job · destination **WebDAV and download** · …»).
+		last := "no copy yet"
 		if r := runs[job.ID]; len(r) > 0 {
-			page.Subtitle = "Job · last copy " + text(tf.ago(r[0].Started, now))
+			last = "last copy " + string(tf.ago(r[0].Started, now))
+		}
+		page.Title, page.Subtitle = text(saved.Name), line("Job · "+last)
+		if where := jobDestinationWords[saved.Mode]; where != "" {
+			page.Subtitle = join("Job · destination ", strongRun(where), " · "+last)
 		}
 	}
 	// The job's own page (s-backup-2): Cancel and Run now beside Save, the
@@ -470,20 +476,28 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 	return page
 }
 
+// jobDestinationWords are the destinations a job's page names under its
+// title (s-backup-3); WebDAV alone is the usual one and goes unsaid
+// (s-backup-2).
+var jobDestinationWords = map[string]string{
+	sealed.BackupToDownload: "download",
+	sealed.BackupToBoth:     "WebDAV and download",
+}
+
 // backupHead is the line under the title of the list and its empty state
 // (s-backup-1, s-backup-6): how many jobs there are, or that there are none
 // and that a restore needs none.
 func backupHead(page *view.BackupPage, jobs int) {
 	switch jobs {
 	case 0:
-		page.Subtitle = "No jobs yet"
+		page.Subtitle = line("No jobs yet")
 		page.Empty = join("Carrel copies raw ", monoRun(".ics"), ", ", monoRun(".vcf"), " and files to storage of your own, with a manifest and a read-back check. Nothing is kept here.")
 		page.EmptyNote = join("Already have an archive from another instance? ", strongRun("Restore"), " takes it from a file — a job is not needed for that.")
 	case 1:
-		page.Subtitle = "One job · its own sources, destination and trigger"
+		page.Subtitle = line("One job · its own sources, destination and trigger")
 	default:
 		n := countWord(jobs)
-		page.Subtitle = text(strings.ToUpper(n[:1]) + n[1:] + " jobs · their own sources, destinations and triggers")
+		page.Subtitle = line(strings.ToUpper(n[:1]) + n[1:] + " jobs · their own sources, destinations and triggers")
 	}
 }
 
@@ -659,7 +673,7 @@ func (s *Server) getSettingsBackup(w http.ResponseWriter, r *http.Request) {
 	case q.Get("job") == "new":
 		// New job (s-backup-1): the page of a job not made yet — the form,
 		// Save and Cancel.
-		page.Title, page.Subtitle, page.Actions, page.Empty, page.EmptyNote = "New job", "", nil, nil, nil
+		page.Title, page.Subtitle, page.Actions, page.Empty, page.EmptyNote = "New job", nil, nil, nil, nil
 		page.Add.Actions = append(page.Add.Actions,
 			view.Action{ID: "backup.cancel", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true})
 	case q.Get("restore") != "":
