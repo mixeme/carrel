@@ -202,7 +202,8 @@ func TestCalendarMenusAreTheFrames(t *testing.T) {
 
 	note := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1", f.sess)))
 	sameMenu(t, "note page", note.Meta.Menu, "s-notes-14")
-	if got := ids(note.Doc.Bar); !equalStrings(got, []string{"record.edit", "note.export"}) {
+	// Print over the text since the client's scan of the notes (НГ2).
+	if got := ids(note.Doc.Bar); !equalStrings(got, []string{"record.edit", "note.export", "record.print"}) {
 		t.Errorf("note bar = %v", got)
 	}
 	drawn(t, "note bar", note.Doc.Bar, "s-notes-2")

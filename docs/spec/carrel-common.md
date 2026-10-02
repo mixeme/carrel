@@ -397,7 +397,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже, с теми же параметрами: `?print=1`, `?open=`, `?filter=`, `?compact=`, у календаря окно и роды |
 | `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1); у заметок (и у `/app/notes`): `?open={адрес строки}` и `?filter=` — «Filter by word» без сценариев, по названию и тексту (s-notes-1) |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
-| `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта, события и задачи); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
+| `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта, события и задачи, у заметки — в полосе над текстом, `Doc.Bar`); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
 | `/app/contacts/suggest` | GET | вход | фрагмент | `SuggestList` — подсказки поля участников правки события (`AttendeeField.Suggest`, s-agenda-12, -13): `?q=` — набранное; ищутся отмеченные книги, чьи списки сеанс читал (сервер DAV не спрашивается), по имени и по адресу; строка на каждый адрес человека; набранный адрес не из книг — первым «Add» и `Note`. Ставит ответ в меню поля живой слой Typecase (`tc-live.js`, L-1); без сценариев набранное уходит с формой правки |
 | `/app/{kind}/{account}/{col}/{uid}/related` | GET | вход | фрагмент | `SuggestList` — подсказки поля Related to (`FormRow.Suggest`, s-tasks-10, s-notes-20); `{kind}` — `tasks`, `notes`; `{uid}` — запись формы, `new` у новой: она в подсказки не входит; `?q=` — набранное. Записи, загруженные сеансом, — события, задачи и заметки всех коллекций (сервер DAV не спрашивается), в чьём названии набранное: начинающиеся с него первыми, затем новые; строка — название с найденным жирным, метка коллекции, «event · 12 Aug» (`Meta`), UID — значение. Ставит ответ в меню поля живой слой Typecase; без сценариев — варианты поля (U-6.3) |
@@ -423,7 +423,7 @@ spec/fixtures/<screen>/<state>.json
 та же вью-модель, страница рисуется на бумаге (`Shell.Print` — колонтитул).
 Принимают параметр адреса, у которых в кадрах есть Print и в этой таблице
 стоит `?print=1`: список контактов, список задач и агенда (единый вид и одна коллекция),
-карточка записи (Print в шапке — у контакта, события и задачи), хронология человека.
+карточка записи (Print в шапке — у контакта, события и задачи, у заметки — в полосе над текстом), хронология человека.
 Сервер параметр не читает и вью-модель не меняет: его ставит ссылка Print
 (`list.print`, `record.print`, `timeline.print`), читает отрисовщик клиента.
 Сторож — `view.TestFixturePrintsAreC5`.
@@ -1459,7 +1459,12 @@ type AttachRow struct {
     Name    Text
     Size    Size
     Type    Text
-    Inline  bool // данные внутри записи, а не файл в папке (S-20)
+    Inline  bool // данные внутри записи, а не файл в папке (S-20); слово «in the event», «in the task», «in the note» — экрана
+    // Где лежит файл ссылки (s-notes-1, -2, -20): в папке вложений — где
+    // лежит она, как её называет рейл файлов (Shortcut.Place), «Documents /
+    // carrel»; в другом месте Files — хранилище и папки над файлом; у данных
+    // внутри записи и у ссылки вне каталога пусто, ключа нет
+    Place   Text
     State   RecordState
     Actions []Action
 }
@@ -1512,7 +1517,7 @@ type NotePage struct {
     UID    string
     Doc    NoteDoc
     Meta   NoteMeta
-    Source SourceBlock
+    Source SourceBlock // колонка: UID заметки и когда прочитана (s-notes-2, -20); у новой UID пуст
     Loss   *LossReport
 }
 
@@ -1521,7 +1526,7 @@ type NoteDoc struct { // колонка текста страницы замет
     Title    Text
     Body     Text     // исходный текст, не HTML; в правке курсор — в нём (s-notes-20)
     Rendered []Block  // разобранный Markdown, C-6.9
-    Bar      []Action // панель правки; отступает по рангу (L-4)
+    Bar      []Action // полоса над текстом, отступает по рангу (L-4): в чтении — Edit (i-pencil), Export Markdown (без значка), Print (record.print, i-print, ?print=1; s-notes-2), Source и ширина текста — клиента; в правке — Save (Submits), Cancel, Attach
     Dirty    bool
     ReadOnly bool
     // Правка без сценариев (U-8, s-notes-20): документ — форма. Action и

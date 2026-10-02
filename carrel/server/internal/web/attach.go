@@ -196,6 +196,7 @@ func sameVersion(shown, current string) bool {
 func (s *Server) attachRows(c *collectionCtx, uid string, obj *model.Object, etag, from string) []view.AttachRow {
 	var blob sealed.Blob
 	loaded := false
+	var folder *fileCtx
 	var rows []view.AttachRow
 	for _, a := range cal.Attachments(obj) {
 		row := view.AttachRow{Inline: a.Inline, State: view.RecordOK}
@@ -208,9 +209,11 @@ func (s *Server) attachRows(c *collectionCtx, uid string, obj *model.Object, eta
 		} else {
 			if !loaded {
 				blob, loaded = s.catalogOf(c.sess), true
+				folder = s.savedFolder(c.sess, blob)
 			}
 			name = linkName(a)
 			row.Href = s.attachLinkHref(blob, a.URI)
+			row.Place = attachPlace(blob, folder, a.URI)
 		}
 		row.Name, row.Type = text(name), text(fileType(name, a.Type))
 		if a.Size >= 0 {
@@ -242,11 +245,46 @@ func linkName(a cal.Attachment) string {
 // of the catalog — its server and a path under its root — or "" for any other
 // link: that one is shown and not fetched.
 func (s *Server) attachLinkHref(blob sealed.Blob, uri string) string {
-	u, err := url.Parse(uri)
-	if err != nil || !u.IsAbs() || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
+	conn, col, segs, ok := attachLinkAt(blob, uri)
+	if !ok {
 		return ""
 	}
-	best, bestLen := "", -1
+	return s.route(attachHref(conn, col.Path, segs))
+}
+
+// attachPlace is where the file a link points at lies, as the frames of the
+// notes say it by the row (s-notes-1, -2, -20): in the attachment folder —
+// where that folder lies, as the rail of Files names it («Documents /
+// carrel», filesShortcuts); elsewhere in Files — its storage and the
+// folders above it; outside the catalog — nothing.
+func attachPlace(blob sealed.Blob, folder *fileCtx, uri string) view.Text {
+	_, col, segs, ok := attachLinkAt(blob, uri)
+	if !ok {
+		return ""
+	}
+	if folder != nil && folder.col.Path == col.Path && folder.conn.ID == col.AccountID &&
+		len(segs) > len(folder.segs) && slices.Equal(segs[:len(folder.segs)], folder.segs) {
+		place := []string{collectionLabel(folder.col)}
+		if len(folder.segs) > 1 {
+			place = append(place, folder.segs[:len(folder.segs)-1]...)
+		}
+		return text(strings.Join(place, " / "))
+	}
+	return text(strings.Join(append([]string{collectionLabel(col)}, segs[:len(segs)-1]...), " / "))
+}
+
+// attachLinkAt is the file collection of the catalog a link points into —
+// its connection, the collection and the segments of the path under its
+// root —; not ok for any other link.
+func attachLinkAt(blob sealed.Blob, uri string) (string, sealed.Collection, []string, bool) {
+	u, err := url.Parse(uri)
+	if err != nil || !u.IsAbs() || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
+		return "", sealed.Collection{}, nil, false
+	}
+	var bestConn string
+	var bestCol sealed.Collection
+	var bestSegs []string
+	bestLen := -1
 	for _, col := range blob.Collections {
 		conn, ok := blob.Connection(col.AccountID)
 		if !ok || col.Gone || !col.Has(view.KindFile) {
@@ -265,12 +303,9 @@ func (s *Server) attachLinkHref(blob sealed.Blob, uri string) string {
 		if slices.ContainsFunc(segs, func(seg string) bool { return file.CheckName(seg) != nil }) {
 			continue
 		}
-		best, bestLen = attachHref(conn.ID, col.Path, segs), len(root)
+		bestConn, bestCol, bestSegs, bestLen = conn.ID, col, segs, len(root)
 	}
-	if best == "" {
-		return ""
-	}
-	return s.route(best)
+	return bestConn, bestCol, bestSegs, bestLen >= 0
 }
 
 func (s *Server) opQuery(op, etag, from string) url.Values {

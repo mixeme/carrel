@@ -1214,6 +1214,39 @@ func linkMockupNote(t *testing.T, app *mockupApp) {
 		})
 }
 
+// linkMockupMeeting puts a copy of «Заметка со встречи 10.08», its text
+// another, in nextcloud · Дневник and links the two (S-16): «The same note
+// in other notebooks · nextcloud · Дневник · Text differ» (s-notes-2, -20;
+// the client's scan НГ5). The copy lives in the tests alone.
+func linkMockupMeeting(t *testing.T, app *mockupApp) {
+	t.Helper()
+	linkMockupCopy(t, app, view.KindNote, "g-vstrecha", mockupRecord{"nextcloud", "zapisi", "5c81-77aa-0d64", "nextcloud-home/zapisi.ics"},
+		mockupRecord{"nextcloud", "dnevnik", "9e31-40b7-c012", ""}, func(rec string) string {
+			return strings.Replace(rec, "DESCRIPTION:", "DESCRIPTION:Черновик. ", 1)
+		})
+}
+
+// attachMockupRecording links «Заметка со встречи 10.08» to the recording
+// of the meeting in the attachment folder, Documents / carrel / attachments
+// (s-notes-1, -2, -20: «запись-встречи.m4a · 24 MB · Documents / carrel»;
+// the client's scan НГ4). The address of the storage is the stand's, known
+// only here: the set's file cannot hold it.
+func attachMockupRecording(t *testing.T, app *mockupApp) {
+	t.Helper()
+	sftp := app.servers["sftpgo · vps"]
+	at := davtest.FileRoot + "Documents/carrel/attachments/2026-08/"
+	sftp.SeedFolder(at)
+	sftp.SeedFile(at+"запись-встречи.m4a", "a stub of the recording")
+	nc := app.servers["nextcloud"]
+	p := davtest.CalendarHome + "zapisi/5c81-77aa-0d64.ics"
+	body, _, ok := nc.Object(p)
+	if !ok {
+		t.Fatal("the note is not on the stand")
+	}
+	link := "ATTACH;FMTTYPE=audio/mp4;SIZE=25165824:" + sftp.URL + davtest.FileRoot + "Documents/carrel/attachments/2026-08/" + url.PathEscape("запись-встречи.m4a")
+	nc.Seed(p, strings.Replace(body, "END:VJOURNAL", link+"\r\nEND:VJOURNAL", 1))
+}
+
 // mockupRecord is a record of the set: where it lies and in which file of
 // the set; a copy has no file.
 type mockupRecord struct{ account, slug, uid, file string }
@@ -1327,8 +1360,10 @@ func TestFixtureCombinedTasks(t *testing.T) {
 // panel, as the frame draws it.
 func TestFixtureNoteList(t *testing.T) {
 	app := newMockupApp(t)
-	// The calendar was read: the panel's Related names «Синк-ап».
+	// The calendar and the tasks were read: the panel's Related names
+	// «Синк-ап» and «Дописать раздел про кэш».
 	openList(t, app, "/app/calendar?from=2026-08-10")
+	openList(t, app, "/app/tasks")
 	// Both notebooks are ticked and counted in the frame (s-notes-1): the
 	// combined notebook was opened first, as a person comes to it.
 	combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
@@ -1346,6 +1381,7 @@ func TestFixtureCombinedNotes(t *testing.T) {
 	linkMockupNote(t, app)
 	app.lastUsed(t, "zapisi", view.KindNote)
 	openList(t, app, "/app/calendar?from=2026-08-10")
+	openList(t, app, "/app/tasks")
 	page := combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	open := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64"
@@ -1369,9 +1405,15 @@ func TestFixtureTaskCard(t *testing.T) {
 	app.compare(t, "app-task/normal.json", app.h.do(get(rec, app.sess)))
 }
 
-// C-14.2: one note, read (s-notes-2).
+// C-14.2: one note, read (s-notes-2): its copy in «Дневник», the recording
+// in the attachment folder, the event and the task it is related to, read
+// before (the client's scan НГ3–НГ5).
 func TestFixtureNoteCard(t *testing.T) {
 	app := newMockupApp(t)
+	linkMockupMeeting(t, app)
+	attachMockupRecording(t, app)
+	openList(t, app, "/app/calendar?from=2026-08-10")
+	openList(t, app, "/app/tasks")
 	combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 	app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
@@ -1431,11 +1473,18 @@ func TestFixtureTaskEdit(t *testing.T) {
 // from.
 func TestFixtureNoteEdit(t *testing.T) {
 	app := newMockupApp(t)
+	linkMockupMeeting(t, app)
+	attachMockupRecording(t, app)
+	// The calendar was read: Related to names «Синк-ап по релизу».
+	openList(t, app, "/app/calendar?from=2026-08-10")
 	combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 	app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64/edit"
 	app.compare(t, "app-note-edit/normal.json", app.h.do(get(rec, app.sess)))
+	// The full form of a new note in «Записи» (C-5.4 /new; the client's
+	// scan НД6 — no frame draws it yet, task 97).
+	app.compare(t, "app-note-edit/new.json", app.h.do(get(app.listPath(t, "notes", "zapisi")+"/new", app.sess)))
 }
 
 // C-14.2: the screens of the settings and of the administration. They hold

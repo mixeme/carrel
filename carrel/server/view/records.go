@@ -230,11 +230,16 @@ type SuggestItem struct {
 	Meta Text `json:"meta,omitempty"`
 }
 type AttachRow struct {
-	Href    string      `json:"href"`
-	Name    Text        `json:"name"`
-	Size    Size        `json:"size"`
-	Type    Text        `json:"type"`
-	Inline  bool        `json:"inline"` // данные внутри записи, а не файл в папке (S-20)
+	Href   string `json:"href"`
+	Name   Text   `json:"name"`
+	Size   Size   `json:"size"`
+	Type   Text   `json:"type"`
+	Inline bool   `json:"inline"` // данные внутри записи, а не файл в папке (S-20)
+	// Place — где лежит файл ссылки (s-notes-1, -2, -20): в папке вложений —
+	// где лежит она, как её называет рейл файлов, «Documents / carrel»;
+	// иначе в Files — хранилище и папки; у данных внутри записи и у ссылки
+	// вне каталога пусто
+	Place   Text        `json:"place,omitempty"`
 	State   RecordState `json:"state"`
 	Actions []Action    `json:"actions"`
 }

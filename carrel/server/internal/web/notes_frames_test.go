@@ -34,6 +34,7 @@ func TestNotebookIsTheFrame(t *testing.T) {
 	linkMockupNote(t, app)
 	app.lastUsed(t, "zapisi", view.KindNote)
 	openList(t, app, "/app/calendar?from=2026-08-10") // the panel's Related
+	openList(t, app, "/app/tasks")
 	first := combined(t, app.h, app.sess, "/app/notes", notesPoll)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	open := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64"
@@ -73,7 +74,9 @@ func TestNotebookIsTheFrame(t *testing.T) {
 	if got := []string{d.Actions[0].ID, d.Actions[1].ID}; !slices.Equal(got, []string{"record.edit", "record.open"}) || d.Menu[len(d.Menu)-1].ID != "record.delete" {
 		t.Errorf("panel actions = %+v, menu = %+v (s-notes-12)", d.Actions, d.Menu)
 	}
-	if len(d.Related) != 1 || d.Related[0].Title != "Синк-ап по релизу" {
+	// s-notes-1 draws the event alone; the page draws it and the task
+	// (s-notes-2) — the same note, both relations (task 105).
+	if len(d.Related) != 2 || d.Related[0].Title != "Синк-ап по релизу" || d.Related[1].Title != "Дописать раздел про кэш" {
 		t.Errorf("related = %+v", d.Related)
 	}
 

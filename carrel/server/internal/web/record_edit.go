@@ -2185,6 +2185,9 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 func (s *Server) noteEditPage(c *collectionCtx, st editState, sh view.Shell, form view.Form, attaching bool, del *view.Action) view.NotePage {
 	body := first(st.values["description"])
 	page := view.NotePage{Shell: sh, UID: st.uid, Source: c.source(), Loss: st.loss}
+	if !st.isNew {
+		page.Source.UID = text(st.uid) // «UID …» of the column's Source (s-notes-20)
+	}
 	page.Doc = view.NoteDoc{
 		Mode: view.NoteEditing, Title: text(first(st.values["summary"])), Body: text(body),
 		Rendered: cal.RenderMarkdown(body), ReadOnly: c.col.ReadOnly,

@@ -17,6 +17,40 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.144 — 2026-10-02
+
+The page of a note, read and in edit, as s-notes-2 and s-notes-20 draw it
+(the client's scan of the notes, groups Г and Д).
+
+### Added
+
+- **Print over the text of a note** (`record.print`, `i-print`,
+  `?print=1`); Edit has `i-pencil`, Export Markdown no icon (s-notes-2).
+- **`AttachRow.place`** — where the file a link points at lies: in the
+  attachment folder, where that folder lies as the rail of Files names it,
+  «Documents / carrel»; elsewhere in Files, the storage and the folders
+  above it; none for a file inside the record or a link outside the
+  catalog (s-notes-1, -2, -20). The same for every kind: the calendar's
+  decision of `v0.2.119` (Г7) said the place is not required; the frames of
+  the notes draw it, so it is there.
+- **`SourceBlock.uid` of a note's page**, read and in edit (s-notes-2, -20).
+
+### Changed
+
+- The set: «Заметка со встречи 10.08» is related to «Дописать раздел про
+  кэш» too, holds the board of the meeting inside (412 KB) and two more
+  properties Carrel does not know («X-JTX-COLOR and two more»); the tests
+  put the recording of the meeting into the attachment folder and link it
+  (24 MB), and a copy of the note into «Дневник» («Text differ»).
+
+### For consumers
+
+Read the bar of a note from `doc.bar`, the place of a linked file from
+`place`. Fixtures: `app-note-edit/new` is new — the full form of a new
+note (no frame draws it yet); regenerated — `app-note/normal` (the event
+and the task read before, the attachments, the copy), `app-note-edit/normal`,
+`app-notes/normal`, `app-notes-all/normal`.
+
 ## v0.2.143 — 2026-10-02
 
 The notebook and its panel as s-notes-1 draws them (the client's scan of

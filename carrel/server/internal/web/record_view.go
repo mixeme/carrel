@@ -670,6 +670,7 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 
 func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notices []view.Notice) view.NotePage {
 	page := view.NotePage{Shell: s.recordShell(c, "Note", notices), UID: uid, Source: c.source()}
+	page.Source.UID = text(uid) // «UID …» of the column's Source (s-notes-2)
 	page.Top.Refresh = s.recordRefresh(c, c.recordPath(uid))
 	page.Doc = view.NoteDoc{Mode: view.NoteReading, ReadOnly: c.col.ReadOnly}
 	if obj == nil {
@@ -682,13 +683,19 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	page.Print = s.recordPrint(c, text(title))
 	page.Rail.Neighbours = s.noteNeighbours(c, uid)
 	page.Doc.Title, page.Doc.Body, page.Doc.Rendered = text(title), text(body), cal.RenderMarkdown(body)
-	// Edit and Export Markdown sit in the bar over the text, Attach and the
-	// deletion in the column beside it; what the bar has no room for is its
-	// «⋯» (s-notes-2, s-notes-14). Print and Source are the client's: the
-	// source is Doc.Body.
+	// Edit with its pencil, Export Markdown and Print sit in the bar over
+	// the text, Attach and the deletion in the column beside it; what the
+	// bar has no room for is its «⋯» (s-notes-2, s-notes-14). Print is the
+	// note with print=1 (U-10); Source is the client's: the source is
+	// Doc.Body.
 	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
-	page.Doc.Bar = shown(primary(ops.edit), &view.Action{ID: "note.export", Label: "Export Markdown", Icon: "i-down", Method: "GET", Enabled: true,
-		Href: s.postQuery(c.listPath()+"/export", url.Values{"uid": {uid}})})
+	edit := primary(ops.edit)
+	if edit != nil {
+		edit.Icon = "i-pencil"
+	}
+	page.Doc.Bar = shown(edit, &view.Action{ID: "note.export", Label: "Export Markdown", Method: "GET", Enabled: true,
+		Href: s.postQuery(c.listPath()+"/export", url.Values{"uid": {uid}})},
+		&view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true})
 	page.Meta.Actions = shown(s.attachOf(c, uid, obj.ETag), ops.del)
 	page.Meta.Menu = menuWithout(ops.menu, "record.export")
 	// The day, and the time when the note has one (s-notes-2).

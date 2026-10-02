@@ -389,6 +389,17 @@ NOTE_TEXT = (u'Договорились заморозить ветку в ср�
              u'Перенос старых вложений в новую папку — Виктор посмотрит, '
              u'сколько их вообще.')
 
+# Доска со встречи внутри заметки (s-notes-1, -2, -20: «2026-08-10-sync-
+# board.png · 412 KB · in the note»): 421 888 байт, ATTACH с двоичным
+# значением. Содержимое — заглушка: сверяются имя, тип и размер. Запись
+# встречи (24 MB) лежит в папке вложений, и ссылку на неё кладут проверки:
+# адрес хранилища известен только им (README).
+def sync_board():
+    head = b'\x89PNG\r\n\x1a\n' + b'sync board, a stub of the mockup set\n'
+    body = (b'fedcba9876543210' * 26368)[:421888 - len(head)]
+    return head + body
+
+
 write(u'nextcloud-home/zapisi.ics', cal(u'Записи',
       [u'BEGIN:VJOURNAL',
        u'UID:5c81-77aa-0d64',
@@ -398,7 +409,16 @@ write(u'nextcloud-home/zapisi.ics', cal(u'Записи',
        u'CATEGORIES:встречи,релиз',
        u'DESCRIPTION:%s' % esc(NOTE_TEXT),
        u'RELATED-TO;RELTYPE=SIBLING:8f1c-4a02-b7d3',
+       # Вторая связь — задача «Дописать раздел про кэш» (s-notes-2).
+       u'RELATED-TO;RELTYPE=SIBLING:bb21-0fa8-3d66',
+       u'ATTACH;FMTTYPE=image/png;ENCODING=BASE64;VALUE=BINARY;'
+       u'FILENAME=2026-08-10-sync-board.png:' +
+       base64.b64encode(sync_board()).decode('ascii'),
+       # Три свойства, которых Carrel не знает: «X-JTX-COLOR and two more»
+       # (s-notes-20).
        u'X-JTX-COLOR:#4A6B52',
+       u'X-JTX-PINNED:FALSE',
+       u'X-MOZ-LASTACK:20260810T081000Z',
        u'END:VJOURNAL'] +
       [u'BEGIN:VJOURNAL',
        u'UID:6d92-13ef-b408',

@@ -215,7 +215,28 @@
         "method": "POST"
       }
     ],
-    "attach": [],
+    "attach": [
+      {
+        "actions": [
+          {
+            "csrf": "csrf",
+            "danger": true,
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026n=0\u0026op=detach",
+            "icon": "i-trash",
+            "id": "attach.remove",
+            "label": "Remove",
+            "method": "POST"
+          }
+        ],
+        "href": "/app/attach/a-nc-home/zapisi/5c81-77aa-0d64/0",
+        "inline": true,
+        "name": "2026-08-10-sync-board.png",
+        "size": "412 KB",
+        "state": "ok",
+        "type": "image/png"
+      }
+    ],
     "attendees": [],
     "avatar": null,
     "body": "",
@@ -301,6 +322,15 @@
         "stamp": "",
         "title": "Синк-ап по релизу",
         "when": "10 Aug",
+        "why": "Related to · in another collection"
+      },
+      {
+        "colour": "",
+        "href": "",
+        "kind": "task",
+        "stamp": "",
+        "title": "Дописать раздел про кэш",
+        "when": "14 Aug",
         "why": "Related to · in another collection"
       }
     ],
@@ -635,7 +665,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 5,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
