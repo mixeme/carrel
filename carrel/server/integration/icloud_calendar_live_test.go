@@ -162,6 +162,8 @@ func TestICloudEventWithoutAnEnd(t *testing.T) {
 		form := liveForm(liveDecode[view.EventEditPage](t, "new event form", app.get(events+"/new")).Form)
 		form.Set("summary", "Carrel probe "+yandexSuffix("sv53"))
 		form.Set("start.date", "2031-03-13")
+		form.Set("end.date", "") // the form starts at the next whole hour (s-agenda-15)
+		form.Set("end.time", "")
 		if allDay {
 			form.Set("start.allday", "on")
 		} else {

@@ -1355,7 +1355,11 @@ type EventEditPage struct { // правка: та же запись формой
     // нет, у Advanced RRULE — «The advanced value takes precedence when set.»;
     // у пояса записи, пока он выбран, ValueAside «as sent»; времена When — в
     // поясе события (S-11: s-agenda-3 — 12:00–13:00 Asia/Yekaterinburg, как
-    // пришло), набранное читается в выбранном поясе. Attach — по имени
+    // пришло), набранное читается в выбранном поясе. Новое событие — та же
+    // форма пустой (s-agenda-15): When — следующий целый час, час длиной, в
+    // поясе экземпляра без «as sent»; одно напоминание, First «10 minutes
+    // before»; Every 1, повторения нет; это значения, не образцы — Save
+    // пишет их. Attach — по имени
     // (attach.add), клиент ставит его в набор «Attachments» (s-agenda-3)
     Form      Form
     Attendees []AttendeeRow // организатор первым; только чтение (U-6.2; кадр s-agenda-3 их не рисует — задача Typecase 77)

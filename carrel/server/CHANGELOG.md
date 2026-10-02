@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.137 — 2026-10-02
+
+The form of a new event as s-agenda-15 draws it (Typecase task 77): the
+edit's form, empty, with what a new event starts with.
+
+### Changed
+
+- **The full form of a new event** (`/app/calendar/{account}/{col}/new`)
+  starts at the next whole hour, an hour long, in the instance zone (chosen,
+  without «as sent»); with one reminder, First «10 minutes before», and
+  Every 1, nothing repeating. They are values, not samples: Save writes
+  them. Still no `foreign` and no `delete`. The quick sheet is as it was.
+
+### For consumers
+
+A form saved as shown writes the hour and the reminder; clear Start or End
+to have none. Fixture regenerated: `app-event-new/normal`.
+
 ## v0.2.136 — 2026-10-02
 
 The agenda by the frames of task 77: a day without events is not printed

@@ -434,6 +434,10 @@ func liveCalendarIn(ctx context.Context, t *testing.T, app *liveApp, client *dav
 	form.Set("summary", "Live dentist, "+suffix)
 	form.Set("start.date", "2026-10-05")
 	form.Set("start.time", "09:30")
+	// The form starts at the next whole hour (s-agenda-15); this event
+	// has no end of its own.
+	form.Set("end.date", "")
+	form.Set("end.time", "")
 	form.Set("reminder.0", "-PT10M")
 	for k, v := range newEvent {
 		form.Set(k, v)

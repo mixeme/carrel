@@ -122,6 +122,9 @@ func (s *Server) newFormValues(c *collectionCtx) formValues {
 			values[f.name], values[f.name+".type"] = []string{"", ""}, []string{f.newRow, ""}
 		}
 	}
+	if c.spec.kind == view.KindEvent {
+		s.newEventValues(values)
+	}
 	return values
 }
 

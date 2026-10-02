@@ -1067,6 +1067,24 @@ func (s *Server) emptyValues(c *collectionCtx) formValues {
 	return vals
 }
 
+// newEventValues are what the full form of a new event starts with
+// (s-agenda-15, Typecase task 77): the next whole hour, an hour long, in the
+// zone chosen — the instance's; one reminder, First, 10 minutes before;
+// Every 1, nothing repeating. They are values, not samples: a new record is
+// measured against the empty form (createRecord), so saved as shown they are
+// written.
+func (s *Server) newEventValues(values formValues) {
+	now := s.now().In(formZone(first(values["tz"]), s.tz()))
+	start := time.Date(now.Year(), now.Month(), now.Day(), now.Hour()+1, 0, 0, 0, now.Location())
+	end := start.Add(time.Hour)
+	values["start"] = []string{start.Format("2006-01-02"), start.Format("15:04"), ""}
+	values["end"] = []string{end.Format("2006-01-02"), end.Format("15:04"), ""}
+	values["reminder"] = []string{"-PT10M", ""}
+	if rep := values["repeat"]; len(rep) > repInterval {
+		rep[repInterval] = "1"
+	}
+}
+
 func checkbox(r *http.Request, name string) string {
 	if v := r.FormValue(name); v != "" && v != "off" {
 		return "on"

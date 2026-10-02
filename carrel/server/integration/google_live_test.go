@@ -143,6 +143,10 @@ func TestGoogleEventInTheExistingCalendar(t *testing.T) {
 	form.Set("summary", summary)
 	form.Set("start.date", "2031-03-11")
 	form.Set("start.time", "09:30")
+	// The form starts at the next whole hour (s-agenda-15); this event
+	// has no end of its own.
+	form.Set("end.date", "")
+	form.Set("end.time", "")
 	// A save that answers with the form may have written the event all the
 	// same — a loss report does (S-7.1) — and on 01.10.2026 one such run left
 	// its event in the owner's calendar: the cleanup below is set up only

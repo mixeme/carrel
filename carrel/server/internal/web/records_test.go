@@ -645,6 +645,11 @@ func TestNewEventIsSkeletonPlusPatch(t *testing.T) {
 	page := decode[view.EventEditPage](t, f.h.do(get(events+"/new", f.sess)))
 	form := formFields(page.Form)
 	form.Set("summary", "No date")
+	// The form starts at the next whole hour (s-agenda-15); cleared, the
+	// event has no start.
+	for _, n := range []string{"start.date", "start.time", "end.date", "end.time"} {
+		form.Set(n, "")
+	}
 	refused := decode[view.EventEditPage](t, f.h.do(postForm(events+"/new", f.sess, form)))
 	if len(refused.Form.Errors) == 0 || refused.Form.Errors[0].Name != "start" || len(f.srv.Paths(f.col)) != 0 {
 		t.Fatalf("an event without a start: errors %+v, stored %v", refused.Form.Errors, f.srv.Paths(f.col))

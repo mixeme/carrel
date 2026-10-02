@@ -97,9 +97,9 @@ func TestAnEventWithoutAnEndIsWrittenWithOne(t *testing.T) {
 
 	newForm := f.path("calendar") + "/new"
 	sameEnd("timed, full form", made("timed, full form", newForm,
-		map[string]string{"summary": "Call", "start.date": "2031-03-11", "start.time": "09:30"}))
+		map[string]string{"summary": "Call", "start.date": "2031-03-11", "start.time": "09:30", "end.date": "", "end.time": ""}))
 	mustContain(t, made("all day, full form", newForm,
-		map[string]string{"summary": "Holiday", "start.date": "2031-03-11", "start.allday": "on"}),
+		map[string]string{"summary": "Holiday", "start.date": "2031-03-11", "start.allday": "on", "end.date": "", "end.time": ""}),
 		"DTSTART;VALUE=DATE:20310311", "DTEND;VALUE=DATE:20310312")
 	quick := f.path("calendar") + "/new/quick"
 	sameEnd("timed, quick sheet", made("timed, quick sheet", quick,

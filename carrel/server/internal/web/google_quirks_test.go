@@ -54,7 +54,7 @@ func TestAnEndTheServerKeepsAsNoEndIsNotALoss(t *testing.T) {
 	}
 
 	noEnd("timed, full form", made("timed, full form", f.path("calendar")+"/new",
-		map[string]string{"summary": "Call", "start.date": "2031-03-11", "start.time": "09:30"}))
+		map[string]string{"summary": "Call", "start.date": "2031-03-11", "start.time": "09:30", "end.date": "", "end.time": ""}))
 	noEnd("timed, quick sheet", made("timed, quick sheet", f.path("calendar")+"/new/quick",
 		map[string]string{"summary": "Call", "start.date": "2031-03-12", "start.time": "09:30"}))
 

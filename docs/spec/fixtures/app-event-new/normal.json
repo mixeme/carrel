@@ -178,7 +178,7 @@
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": ""
+            "value": "2026-08-10"
           },
           {
             "error": "",
@@ -191,7 +191,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "18:00"
           },
           {
             "error": "",
@@ -204,7 +204,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "2026-08-10"
           },
           {
             "error": "",
@@ -217,7 +217,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "19:00"
           },
           {
             "error": "",
@@ -2699,6 +2699,55 @@
             "error": "",
             "extra": null,
             "hint": "",
+            "kind": "select",
+            "label": "First",
+            "name": "reminder.0",
+            "options": [
+              {
+                "label": "At the time",
+                "selected": false,
+                "value": "PT0S"
+              },
+              {
+                "label": "5 minutes before",
+                "selected": false,
+                "value": "-PT5M"
+              },
+              {
+                "label": "10 minutes before",
+                "selected": true,
+                "value": "-PT10M"
+              },
+              {
+                "label": "30 minutes before",
+                "selected": false,
+                "value": "-PT30M"
+              },
+              {
+                "label": "1 hour before",
+                "selected": false,
+                "value": "-PT1H"
+              },
+              {
+                "label": "1 day before",
+                "selected": false,
+                "value": "-P1D"
+              },
+              {
+                "label": "No reminder",
+                "selected": false,
+                "separator": true,
+                "value": ""
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "-PT10M"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
             "kind": "add",
             "label": "Add reminder",
             "name": "add",
@@ -2711,7 +2760,7 @@
                 "extra": null,
                 "hint": "",
                 "kind": "select",
-                "label": "First",
+                "label": "Reminder",
                 "name": "reminder.{n}",
                 "options": [
                   {
@@ -2814,7 +2863,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "1"
           },
           {
             "error": "",
