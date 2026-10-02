@@ -8,6 +8,7 @@ import (
 	"carrel.dev/carrel/client/screens/contactedit"
 	"carrel.dev/carrel/client/screens/contacts"
 	"carrel.dev/carrel/client/screens/deadlink"
+	"carrel.dev/carrel/client/screens/event"
 	"carrel.dev/carrel/client/screens/forgot"
 	"carrel.dev/carrel/client/screens/invite"
 	"carrel.dev/carrel/client/screens/login"
@@ -210,5 +211,12 @@ var All = []Screen{
 			{Row: 24, Fixture: "app-agenda/empty"},                                   // ждёт библиотеку: U-5.5 #24
 			{Row: 25, Fixture: "app-agenda/normal"},                                  // ждёт библиотеку: U-5.5 #25
 		},
+	},
+	{
+		Model:  func() any { return new(view.EventPage) },
+		Frames: []string{"s-agenda-2"},
+		Draw:   func(model any) Root { return event.Screen(model.(*view.EventPage)) },
+		Title:  func(model any) string { return string(model.(*view.EventPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return event.Forms(model.(*view.EventPage)) },
 	},
 }
