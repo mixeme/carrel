@@ -738,7 +738,8 @@ var editFields = map[view.Kind][]editField{
 		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
 		{name: "description", label: "Body", prop: "DESCRIPTION", typ: fieldArea},
 		{name: "start", label: "Date", prop: "DTSTART", typ: fieldTime, timeOptional: true},
-		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
+		// No hint under Tags (s-notes-20), as the event's.
+		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated},
 	},
 }
@@ -2177,7 +2178,9 @@ func (s *Server) noteEditPage(c *collectionCtx, st editState, sh view.Shell, for
 		Mode: view.NoteEditing, Title: text(first(st.values["summary"])), Body: text(body),
 		Rendered: cal.RenderMarkdown(body), ReadOnly: c.col.ReadOnly,
 		Bar: []view.Action{
-			{ID: "record.save", Label: "Save", Href: s.postQuery(s.editAction(c, st), url.Values{"etag": {st.etag}, "readat": {strconv.FormatInt(st.readAt.Unix(), 10)}}), Method: "POST", Primary: true, Enabled: true},
+			// Save sends the document's form (Submits): without scripts the
+			// title, the text and the fields go with it (НД1, U-8).
+			{ID: "record.save", Label: "Save", Href: s.postQuery(s.editAction(c, st), url.Values{"etag": {st.etag}, "readat": {strconv.FormatInt(st.readAt.Unix(), 10)}}), Method: "POST", Primary: true, Enabled: true, Submits: true},
 			s.cancelAction(c, st),
 		},
 	}
@@ -2193,15 +2196,27 @@ func (s *Server) noteEditPage(c *collectionCtx, st editState, sh view.Shell, for
 		// notebook moves it there (S-18).
 		page.Doc.Fields = append(page.Doc.Fields, s.notebookRow(c, st.notebook))
 	}
-	// The title and the body are the document; the version travels in
-	// the address of Save. The rest of the form is Fields (C-6).
+	// The document is the form (НД1, U-8): its hidden rows — the token and
+	// the version —, the title and the text by the names the server reads.
+	// The rest of the form is Fields (C-6), sent with it.
+	doc := view.Form{Action: form.Action, Method: form.Method, Target: form.Target, Sets: []view.FieldSet{{}}, Errors: form.Errors, Actions: []view.Action{}}
+	var title, texts []view.FormRow
 	for _, set := range form.Sets {
 		for _, row := range set.Rows {
-			if row.Kind != view.InputHidden && row.Name != "summary" && row.Name != "description" {
+			switch {
+			case row.Kind == view.InputHidden:
+				doc.Sets[0].Rows = append(doc.Sets[0].Rows, row)
+			case row.Name == "summary":
+				title = append(title, row)
+			case row.Name == "description":
+				texts = append(texts, row)
+			default:
 				page.Doc.Fields = append(page.Doc.Fields, row)
 			}
 		}
 	}
+	doc.Sets[0].Rows = append(append(doc.Sets[0].Rows, title...), texts...)
+	page.Doc.Form = &doc
 	if exists {
 		page.Rail.Neighbours = s.noteNeighbours(c, st.uid)
 		page.Doc.Foreign = foreignLine(cal.NoteForeign(st.obj))

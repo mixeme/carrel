@@ -287,6 +287,12 @@ type NoteDoc struct {
 	Bar      []Action `json:"bar"`      // панель правки; отступает по рангу (L-4)
 	Dirty    bool     `json:"dirty"`
 	ReadOnly bool     `json:"readOnly"`
+	// Form — правка без сценариев (U-8, s-notes-20): документ — форма. Action
+	// и Method — сохранение (POST на адрес правки, у новой — /new); строки —
+	// скрытые _csrf, etag, readat, затем заголовок (summary, «Title») и текст
+	// (description, «Body», Focus) с теми же значениями, что Title и Body;
+	// Fields уходят с этой же формой; Save — в Bar (Submits). nil — чтение
+	Form *Form `json:"form"`
 	// Fields — поля правки вне текста: тетрадь, дата и время, теги, связь
 	// (s-notes-20). Только в режиме правки; уходят тем же сохранением, что
 	// заголовок и тело.

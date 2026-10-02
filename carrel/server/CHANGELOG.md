@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.140 — 2026-10-02
+
+A note in edit is sent without scripts (the client's scan of the notes,
+НД1; U-8): the document is a form.
+
+### Added
+
+- **`NoteDoc.form`** — the edit's form: where Save sends it (POST to the
+  edit's address, a new note's `/new`), its hidden rows (`_csrf`, `etag`,
+  `readat`), then the title (`summary`) and the text (`description`, with
+  the caret) — the same values as `title` and `body`. The fields beside the
+  text (`fields`) go with it. `null` while reading.
+
+### Changed
+
+- **Save of the edit's bar sends the document's form** (`Action.submits`):
+  without scripts the title, the text and the fields go with it; its
+  address carries the version as before. `Action.submits` without `file`
+  sends the form itself.
+- No hint under Tags of a note's edit (s-notes-20 draws none).
+
+### For consumers
+
+Draw the note's edit inside `doc.form`: the title and the text under the
+names of its rows, the fields with them, Save as its submit button.
+Fixtures regenerated: `app-note-edit/normal`, `app-note/normal`
+(`form: null`).
+
 ## v0.2.139 — 2026-10-02
 
 The organiser edits the attendees (s-agenda-3, -12 … -15; Typecase task 77,

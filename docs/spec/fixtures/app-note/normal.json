@@ -23,6 +23,7 @@
     "dirty": false,
     "fields": [],
     "foreign": "",
+    "form": null,
     "mode": "reading",
     "readOnly": false,
     "rendered": [
