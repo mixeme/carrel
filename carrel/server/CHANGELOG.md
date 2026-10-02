@@ -17,6 +17,44 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.147 — 2026-10-02
+
+Files without scripts (U-8; the client's scan of the files section, ФГ3,
+ФБ12, ФБ9, ФБ13, ФГ1, ФГ2, ФБ14): rename, New folder, selection, upload and
+the choice of a folder in a tree were not reachable through the view model.
+
+### Fixed
+
+- **Rename** had no field for the new name: `FileOpSheet.form` — POST to
+  the confirmed operation, `_csrf` and `name`, the current name first.
+- **New folder** of the folder's head and of the rail posted no name and
+  was refused. Without `name`, `POST …/mkcol/{path…}` answers the folder
+  with the line of the name open: `FilesPage.name` («Name of the new
+  folder», `folder.new.create`, `folder.new.cancel`); a refusal keeps it
+  open with what was typed.
+- **Selection** sent nothing: `FilesPage.select` — a GET of the folder with
+  its query and `select`; a row's tick sends `toggle` with its name, the
+  head's tick `all=1`; the answer redirects to the folder with the new
+  `select`. «Clear selection» — `files.select.clear`.
+- **Uploads** named no file field: `file.upload`, its Files and Folder,
+  `files.picker.upload` carry `file: "file"`. A folder's row carries
+  `FileRow.upload` (`folder.upload`) — the upload into it, for a drop on
+  the row.
+- **A tree chose nothing without scripts**: `FileTreeNode.href` — the same
+  sheet with that node chosen. The operation sheet answers GET as well
+  (`GET …/op/{path…}`: the sheet only; `go`, `mkcol`, `transfer` are
+  dropped). «Choose this folder» of the upload picker names the chosen
+  folder in its address.
+
+### For consumers
+
+C-5.5 now names every field: `select`, `toggle`, `all`, `view`, `sort`,
+`filter` of a folder; `file`, `size.<name>` and `size` of an upload (S-17.1:
+the sizes go in front of the files); `op`, `item`, `to`, `go`, `name` of an
+operation. Draw a folder row's tick as a submit of `FilesPage.select`
+(`toggle`), the head's as `all`; a tree node as a link to `href`; the rename
+sheet's field from `form`. Fixture regenerated: `app-files-picker/normal`.
+
 ## v0.2.146 — 2026-10-02
 
 The mockup copy of Typecase `bc575a8` (from-typecase note 32: tasks 78–82,

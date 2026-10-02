@@ -454,6 +454,12 @@ func (s *Server) showAddress(w http.ResponseWriter, r *http.Request, c *fileCtx)
 // fragment for target when one is asked for. A name to select that is not in
 // the folder is 404; one that is a folder goes to that folder.
 func (s *Server) writeFolder(w http.ResponseWriter, r *http.Request, c *fileCtx, segs []string, pick string, q url.Values, target string, notices ...view.Notice) {
+	s.writeFolderWith(w, r, c, segs, pick, q, target, nil, notices...)
+}
+
+// writeFolderWith is writeFolder with edit applied to the page before it
+// goes: the line of a new folder's name (postFilesMkcol).
+func (s *Server) writeFolderWith(w http.ResponseWriter, r *http.Request, c *fileCtx, segs []string, pick string, q url.Values, target string, edit func(*view.FilesPage), notices ...view.Notice) {
 	folder, err := c.path(segs, true)
 	if err != nil {
 		s.notFound(w, r)
@@ -477,6 +483,10 @@ func (s *Server) writeFolder(w http.ResponseWriter, r *http.Request, c *fileCtx,
 			Actions: []view.Action{{ID: "source.retry", Label: "Try again", Href: s.route(retry), Method: "GET", Enabled: true}},
 		})
 	}
+	if err == nil && (q.Has("toggle") || q.Has("all")) {
+		s.redirect(w, r, c.href("", segs, true)+querySuffix(selectionAfter(entries, q)))
+		return
+	}
 	if pick != "" {
 		i := slices.IndexFunc(entries, func(e file.Entry) bool { return e.Name == pick })
 		switch {
@@ -491,11 +501,80 @@ func (s *Server) writeFolder(w http.ResponseWriter, r *http.Request, c *fileCtx,
 		q.Add("select", pick)
 	}
 	page := s.folderPage(r, c, segs, entries, q, notices)
+	if edit != nil {
+		edit(&page)
+	}
 	if target != "" && render.WantsFragment(r) {
 		_ = s.render.Fragment(w, r, http.StatusOK, target, page, nil)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// selectionAfter is the query of a folder after a tick of its selection form
+// (FilesPage.Select): toggle flips one name the folder holds, all selects
+// every row the filter shows, or clears them when all are selected already.
+// Names the folder does not hold go.
+func selectionAfter(entries []file.Entry, q url.Values) url.Values {
+	out := cloneValues(q)
+	out.Del("toggle")
+	out.Del("all")
+	out.Del("select")
+	held := map[string]bool{}
+	for _, e := range entries {
+		held[e.Name] = true
+	}
+	var picked []string
+	for _, name := range q["select"] {
+		if held[name] && !slices.Contains(picked, name) {
+			picked = append(picked, name)
+		}
+	}
+	for _, name := range q["toggle"] {
+		switch i := slices.Index(picked, name); {
+		case i >= 0:
+			picked = slices.Delete(picked, i, i+1)
+		case held[name]:
+			picked = append(picked, name)
+		}
+	}
+	if q.Get("all") != "" {
+		needle := strings.ToLower(strings.TrimSpace(q.Get("filter")))
+		var shown []string
+		for _, e := range entries {
+			if needle == "" || strings.Contains(strings.ToLower(e.Name), needle) {
+				shown = append(shown, e.Name)
+			}
+		}
+		every := true
+		for _, name := range shown {
+			if !slices.Contains(picked, name) {
+				every = false
+			}
+		}
+		if every {
+			picked = slices.DeleteFunc(picked, func(n string) bool { return slices.Contains(shown, n) })
+		} else {
+			for _, name := range shown {
+				if !slices.Contains(picked, name) {
+					picked = append(picked, name)
+				}
+			}
+		}
+	}
+	slices.Sort(picked)
+	for _, name := range picked {
+		out.Add("select", name)
+	}
+	return out
+}
+
+// querySuffix is "?" and the query, or nothing for an empty one.
+func querySuffix(q url.Values) string {
+	if enc := q.Encode(); enc != "" {
+		return "?" + enc
+	}
+	return ""
 }
 
 func cloneValues(q url.Values) url.Values {
@@ -598,6 +677,10 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		}
 		if e.Dir {
 			row.Href, row.Type = s.route(c.href("", rowSegs, true)), "folder"
+			// A drop on the row goes into it (U-15.3, s-files-1).
+			into := writeAction(c, view.Action{ID: "folder.upload", Label: text("Upload into " + e.Name), Icon: "i-up",
+				Href: s.route(c.href("upload", rowSegs, true)), Method: "POST", Enabled: true, File: uploadField})
+			row.Upload = &into
 		} else {
 			mt := fileType(e.Name, e.Type)
 			row.Href, row.Type, row.Size = s.route(c.href("download", rowSegs, false)), text(mt), formatSize(e.Size)
@@ -627,15 +710,40 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		page.Bar.Segments = append(page.Bar.Segments, option(o.id, o.label, "sort", o.value, order))
 	}
 	page.Bar.Actions = s.folderActions(c, segs, picked)
+	page.Select = s.selectForm(here, q)
 	page.Queue = s.transferQueue(c.sess)
 	page.Print = view.Print{Title: page.Title, Range: printRange(string(c.stamp()), plural(total, "item"), filter), Taken: c.tf.taken(now)}
 	return page
+}
+
+// selectForm is the selection of a folder without scripts (U-8): a GET of
+// the folder with its query, the names selected now among it; a row's tick
+// sends toggle with its name, the head's all=1 (selectionAfter). Clear
+// selection is the folder with its query and nothing selected.
+func (s *Server) selectForm(here string, q url.Values) *view.Form {
+	var rows []view.FormRow
+	for _, name := range []string{"view", "sort", "filter", "select"} {
+		for _, v := range q[name] {
+			rows = append(rows, view.FormRow{Name: name, Kind: view.InputHidden, Value: text(v)})
+		}
+	}
+	f := s.plainForm(here, "GET", rows...)
+	if len(q["select"]) > 0 {
+		clear := cloneValues(q)
+		clear.Del("select")
+		f.Actions = []view.Action{{ID: "files.select.clear", Label: "Clear selection", Href: s.route(here + querySuffix(clear)), Method: "GET", Enabled: true}}
+	}
+	return &f
 }
 
 // opHref opens the sheet of an operation over names of one folder.
 func (s *Server) opHref(c *fileCtx, segs []string, op view.FileOp, names ...string) string {
 	return s.postQuery(c.href("op", segs, true), url.Values{"op": {string(op)}, "item": names})
 }
+
+// uploadField is the file field of an upload (C-5.5): the route reads every
+// file part whatever its name, and the actions name this one.
+const uploadField = "file"
 
 // writeAction is an operation that changes the storage: shown on a read-only
 // storage too, and disabled there with the reason (U-6.5: visible and not
@@ -682,7 +790,9 @@ func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry) [
 	// Upload has an arrow (s-files-8): Files, which the button is, and
 	// Folder — the same POST, a folder arriving as files with their paths;
 	// only the dialog of the system differs, and that is the client's.
-	upload := writeAction(c, view.Action{ID: "file.upload", Label: "Upload", Icon: "i-up", Href: s.route(c.href("upload", segs, true)), Method: "POST", Enabled: true})
+	// Each carries the file field it sends (Action.File): without scripts
+	// the client sends it as a form of its own with that field (U-8).
+	upload := writeAction(c, view.Action{ID: "file.upload", Label: "Upload", Icon: "i-up", Href: s.route(c.href("upload", segs, true)), Method: "POST", Enabled: true, File: uploadField})
 	files, folder := upload, upload
 	files.Label, files.Icon = "Files", "i-doc"
 	folder.ID, folder.Label, folder.Icon = "file.upload.folder", "Folder", "i-file"

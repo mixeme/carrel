@@ -31,6 +31,20 @@ type FilesPage struct {
 	Rows        []FileRow      `json:"rows"`
 	Queue       *TransferQueue `json:"queue"`
 	Tree        *FileTree      `json:"tree"` // дерево выбора; на странице раздела nil
+	// Select — форма выделения без сценариев (U-8, как RestoreMatch.Form):
+	// GET на адрес папки, скрытые поля её запроса (view, sort, filter) и
+	// select каждого выделенного. Отметка строки — кнопка отправки этой
+	// формы: поле toggle, значение — имя строки; отметка в шапке таблицы —
+	// поле all со значением 1 (выделить все показанные, а все выделенные —
+	// снять). Сервер отвечает редиректом на папку с новым select. Actions —
+	// «Clear selection» (files.select.clear, папка без select), пока выделено
+	Select *Form `json:"select"`
+	// Name — строка имени новой папки, которую открывает New folder шапки и
+	// рейла (POST mkcol без поля name): поле name «Name of the new folder»,
+	// Create (Form.Action — адрес mkcol) и Cancel — та же папка. После отказа
+	// строка приходит с набранным, отказ — в Notices; nil — строку не
+	// открывали
+	Name *Form `json:"name"`
 }
 type Crumb struct {
 	Label Text   `json:"label"`
@@ -46,6 +60,10 @@ type FileRow struct {
 	Thumb    string     `json:"thumb"` // адрес миниатюры; пусто — значок типа
 	Selected bool       `json:"selected"`
 	Menu     []MenuItem `json:"menu"`
+	// Upload — у строки папки: загрузка в неё (бросок на строку, U-15.3;
+	// s-files-1), POST …/upload/{путь папки}/ с полем файла File; у
+	// хранилища только для чтения выключена с причиной; у файла nil
+	Upload *Action `json:"upload"`
 }
 type TransferQueue struct {
 	Rows []TransferRow `json:"rows"`
@@ -92,6 +110,10 @@ type FileTreeNode struct {
 	// правилу вложения (S-20); у прочих узлов пусто
 	Size  Size `json:"size,omitempty"`
 	Lands Text `json:"lands,omitempty"`
+	// Href — тот же лист, где выбран этот узел (GET; у листа операции —
+	// адрес op без go, с to=ID): без сценариев узел выбирает ссылкой;
+	// недоступный узел — пусто
+	Href string `json:"href,omitempty"`
 }
 
 type FilePickerSheet struct {
@@ -114,7 +136,11 @@ type FileOpSheet struct {
 	Target  *FileTree `json:"target"`
 	Warning Runs      `json:"warning"` // что сделает перенос: на одном сервере MOVE (моноширинно, s-files-4), между хранилищами — скачивание и загрузка
 	Failure *Notice   `json:"failure"` // New folder не завёл папку; nil — отказа не было
-	Actions []Action  `json:"actions"`
+	// Form — у переименования: POST на адрес подтверждения (go=1), скрытый
+	// _csrf и поле name — новое имя, сначала нынешнее, курсор в нём; Rename
+	// листа отправляет её. У прочих операций nil
+	Form    *Form    `json:"form"`
+	Actions []Action `json:"actions"`
 }
 
 type PublishedLinksPage struct {

@@ -485,7 +485,9 @@ func (s *Server) answerUpload(w http.ResponseWriter, r *http.Request, c *fileCtx
 }
 
 // New folder (C-5.5): MKCOL of the name the form sends in the folder of the
-// address.
+// address. New folder of the bar and of the rail sends no name: the answer
+// is the folder with the line of the name open (FilesPage.Name), and the
+// line sends it. A refusal keeps the line open with what was typed.
 func (s *Server) postFilesMkcol(w http.ResponseWriter, r *http.Request) {
 	c, ok := s.openFiles(w, r, "mkcol")
 	if !ok {
@@ -495,15 +497,42 @@ func (s *Server) postFilesMkcol(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	var notices []view.Notice
-	if n := s.makeFolder(r.Context(), c, strings.TrimSpace(r.FormValue("name"))); n != nil {
-		notices = append(notices, *n)
+	name := strings.TrimSpace(r.FormValue("name"))
+	if _, sent := r.PostForm["name"]; !sent && !c.col.ReadOnly {
+		s.writeFolderWith(w, r, c, c.segs, "", url.Values{}, render.TargetMain, s.nameLine(c, ""))
+		return
 	}
-	if len(notices) == 0 && !render.WantsFragment(r) {
+	n := s.makeFolder(r.Context(), c, name)
+	if n == nil && !render.WantsFragment(r) {
 		s.redirect(w, r, c.href("", c.segs, true))
 		return
 	}
-	s.writeFolder(w, r, c, c.segs, "", url.Values{}, render.TargetMain, notices...)
+	var notices []view.Notice
+	var edit func(*view.FilesPage)
+	if n != nil {
+		notices = append(notices, *n)
+		if !c.col.ReadOnly {
+			edit = s.nameLine(c, name)
+		}
+	}
+	s.writeFolderWith(w, r, c, c.segs, "", url.Values{}, render.TargetMain, edit, notices...)
+}
+
+// nameLine opens the line of a new folder's name over the folder c is at,
+// with typed in it: Create posts it to mkcol, Cancel is the folder.
+func (s *Server) nameLine(c *fileCtx, typed string) func(*view.FilesPage) {
+	return func(page *view.FilesPage) {
+		create := s.route(c.href("mkcol", c.segs, true))
+		form := view.Form{Action: create, Method: "POST",
+			Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(c.sess),
+				{Name: "name", Label: "Name of the new folder", Kind: view.InputText, Value: text(typed), Required: true}}}},
+			Actions: []view.Action{
+				{ID: "folder.new.create", Label: "Create", Href: create, Method: "POST", Primary: true, Enabled: true},
+				{ID: "folder.new.cancel", Label: "Cancel", Href: s.route(c.href("", c.segs, true)), Method: "GET", Enabled: true},
+			}}
+		form = focused(form, "name")
+		page.Name = &form
+	}
 }
 
 // makeFolder is MKCOL of name in the folder c is at: nil when the folder is
@@ -554,6 +583,8 @@ func (s *Server) makeFolder(ctx context.Context, c *fileCtx, name string) *view.
 // Operations (C-5.5): rename, move, copy and delete over names of one folder,
 // one address with the named operation. Without go=1 the answer is the sheet,
 // which says what will happen before it does; with it, the operation runs.
+// A GET is only ever the sheet — a node of the tree chooses by its address
+// (FileTreeNode.Href) — and runs, makes and answers nothing, go=1 or not.
 
 func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 	c, ok := s.openFiles(w, r, "op")
@@ -565,8 +596,14 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	// The tree of the sheet chooses a folder with a form field; the confirmed
-	// operation names it in its address.
+	if r.Method == http.MethodGet {
+		q.Del("go")
+		q.Del("mkcol")
+		q.Del("transfer")
+	}
+	// The tree of the sheet chooses a folder by the address of a node, or
+	// with the form field to; the confirmed operation names it in its
+	// address.
 	if to := r.PostFormValue("to"); to != "" {
 		q.Set("to", to)
 	}
@@ -800,6 +837,9 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 			dest = nil
 		}
 		sheet.Target = s.fileTree(r.Context(), c, dest)
+		linkTree(sheet.Target, func(id string) string {
+			return s.postQuery(c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "to": {id}})
+		})
 		back := url.Values{"op": {string(op)}, "item": names}
 		if dest != nil {
 			back.Set("to", s.route(dest.href("", dest.segs, true)))
@@ -825,6 +865,14 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 	}
 	if confirm.Enabled {
 		confirm.Href = s.postQuery(c.href("op", c.segs, true), run)
+	}
+	// The new name is the form's field: without it Rename has nothing to
+	// send (U-8). It starts as the name there now.
+	if op == view.FileRename && confirm.Enabled {
+		form := view.Form{Action: confirm.Href, Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(c.sess),
+			{Name: "name", Label: "New name", Kind: view.InputText, Value: text(items[0].Name), Required: true}}}}}
+		form = focused(form, "name")
+		sheet.Form = &form
 	}
 	sheet.Actions = []view.Action{confirm, {ID: "file.op.cancel", Label: "Cancel", Href: s.route(c.href("", c.segs, true)), Method: "GET", Enabled: true}}
 	return sheet
@@ -873,6 +921,22 @@ func (s *Server) tree(ctx context.Context, blob sealed.Blob, chosen *fileCtx, na
 		tree.Chosen = s.route(chosen.href("", chosen.segs, true))
 	}
 	return tree
+}
+
+// linkTree gives every node a reader can choose the address of its sheet
+// with that node chosen (FileTreeNode.Href): a link chooses without scripts.
+// A node closed for this purpose has none.
+func linkTree(tree *view.FileTree, href func(id string) string) {
+	var walk func(nodes []view.FileTreeNode)
+	walk = func(nodes []view.FileTreeNode) {
+		for i := range nodes {
+			if !nodes[i].ReadOnly {
+				nodes[i].Href = href(nodes[i].ID)
+			}
+			walk(nodes[i].Children)
+		}
+	}
+	walk(tree.Nodes)
 }
 
 func (s *Server) treeLevel(ctx context.Context, dest *fileCtx, at []string, files bool, limit int64) []view.FileTreeNode {

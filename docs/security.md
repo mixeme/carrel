@@ -178,6 +178,12 @@ Markdown — адрес на странице Carrel. `Block.Href` получа�
   (`DraftNewAttach`), под UID, который выдал сервер (`issuedUID`); дерево
   Files с `?new=` открывается только при живом черновике этой коллекции
   (`readNewAttachUpload`, `getAttachPicker`, `v0.2.145`).
+- Файлы без сценариев (`v0.2.147`): `GET …/op/{path…}` — только лист (`go`,
+  `mkcol`, `transfer` отбрасываются, ничего не пишется), цель `to` — адрес
+  узла из каталога сеанса (`folderAddress`); выделение `?toggle=`/`?all=` —
+  редирект, имена — только из прочитанного списка папки (`selectionAfter`);
+  `mkcol` без `name` отвечает строкой имени, имя — `file.CheckName`;
+  переименование — то же `name` через `runOp`.
 
 ---
 

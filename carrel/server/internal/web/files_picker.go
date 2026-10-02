@@ -98,6 +98,11 @@ func (s *Server) getAttachPicker(w http.ResponseWriter, r *http.Request, sess *s
 		Purpose: text(fmt.Sprintf("Attach a file that is in Files already. Up to %s it is written into the record, as a file from this computer is; a larger one stays where it lies, and the record keeps a link to it.", sizeText(limit))),
 		Tree:    *s.sourceTree(r.Context(), blob, at, name, limit),
 	}
+	linkTree(&sheet.Tree, func(id string) string {
+		v := cloneValues(q)
+		v.Set("to", id)
+		return s.postQuery("/app/files/picker", v)
+	})
 	// The head names the record the file goes to (s-files-16).
 	if fresh != "" {
 		sheet.Subject = text("to the new " + c.spec.noun)
@@ -144,6 +149,9 @@ func (s *Server) attachmentsPicker(r *http.Request, sess *session.Session) view.
 		Purpose: "Where large attachments go: a folder of a file collection you can write to. Carrel makes it on first use.",
 		Tree:    *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen),
 	}
+	linkTree(&sheet.Tree, func(id string) string {
+		return s.postQuery("/app/files/picker", url.Values{"for": {"attachments"}, "to": {id}})
+	})
 	choose := view.Action{ID: "files.picker.choose", Label: "Choose this folder", Method: "GET", Primary: true}
 	switch {
 	case chosen == nil:
@@ -224,9 +232,18 @@ func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fi
 		chosen = s.uploadFolder(sess, blob)
 	}
 	sheet := view.FilePickerSheet{Title: "Upload files", Purpose: purpose, Tree: *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen), Failure: failure}
+	linkTree(&sheet.Tree, func(id string) string {
+		return s.postQuery("/app/files/picker", url.Values{"for": {"upload"}, "to": {id}})
+	})
+	// Choose this folder names the chosen one in its address: without
+	// scripts nothing else would send it (U-8).
+	remember := url.Values{"for": {"upload"}}
+	if chosen != nil {
+		remember.Set("to", s.route(chosen.href("", chosen.segs, true)))
+	}
 	choose := view.Action{ID: "files.picker.choose", Label: "Choose this folder", Method: "POST", Enabled: true,
-		Href: s.postQuery("/app/files/picker", url.Values{"for": {"upload"}})}
-	upload := view.Action{ID: "files.picker.upload", Label: "Upload here", Method: "POST", Primary: true}
+		Href: s.postQuery("/app/files/picker", remember)}
+	upload := view.Action{ID: "files.picker.upload", Label: "Upload here", Method: "POST", Primary: true, File: uploadField}
 	switch {
 	case chosen == nil:
 		upload.Reason = "Choose a folder in the tree first."

@@ -8,11 +8,12 @@
       "method": "POST",
       "primary": true,
       "csrf": "csrf",
-      "target": "queue"
+      "target": "queue",
+      "file": "file"
     },
     {
       "enabled": true,
-      "href": "/app/files/picker?for=upload",
+      "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
       "id": "files.picker.choose",
       "label": "Choose this folder",
       "method": "POST",
@@ -37,7 +38,8 @@
         "id": "/app/files/a-nc-home/Files/",
         "label": "Files",
         "readOnly": false,
-        "stamp": "nextcloud · Files"
+        "stamp": "nextcloud · Files",
+        "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F"
       },
       {
         "children": [
@@ -51,28 +53,32 @@
                     "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
                     "label": "2026-07",
                     "readOnly": false,
-                    "stamp": ""
+                    "stamp": "",
+                    "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F"
                   }
                 ],
                 "expanded": true,
                 "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
                 "label": "attachments",
                 "readOnly": false,
-                "stamp": ""
+                "stamp": "",
+                "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F"
               }
             ],
             "expanded": true,
             "id": "/app/files/a-sftp-vps/Documents/carrel/",
             "label": "carrel",
             "readOnly": false,
-            "stamp": ""
+            "stamp": "",
+            "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2F"
           }
         ],
         "expanded": true,
         "id": "/app/files/a-sftp-vps/Documents/",
         "label": "Documents",
         "readOnly": false,
-        "stamp": "sftpgo · vps · Documents"
+        "stamp": "sftpgo · vps · Documents",
+        "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2F"
       },
       {
         "children": [],

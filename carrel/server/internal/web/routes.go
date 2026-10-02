@@ -87,6 +87,7 @@ func (s *Server) registerRoutes() {
 	s.handle("POST /app/files/{account}/{col}/upload/{path...}", (*Server).postFilesUpload)
 	s.handle("POST /app/files/{account}/{col}/mkcol/{path...}", (*Server).postFilesMkcol)
 	s.handle("POST /app/files/{account}/{col}/op/{path...}", (*Server).postFilesOp)
+	s.handle("GET /app/files/{account}/{col}/op/{path...}", (*Server).postFilesOp)
 	s.handle("POST /app/files/{account}/{col}/columns/{path...}", (*Server).postFilesColumns)
 	s.handle("GET /app/files/picker", (*Server).getFilesPicker)
 	s.handle("POST /app/files/picker", (*Server).postFilesPicker)
