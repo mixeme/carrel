@@ -1,186 +1,258 @@
-// Drafted by frame2go from frame «Заметка · чтение на весь экран» (s-notes-2) of the Typecase mockup: the
-// frame's widgets and its data, top to bottom. The data is the frame's; it
-// is to become the application's (docs/guide/screen.md).
-package draft
+// Package note is a note, /app/notes/{account}/{col}/{uid}, read — frame
+// «Заметка · чтение» (s-notes-2) — and edited at …/{uid}/edit and …/new —
+// frame «Заметка · правка» (s-notes-20, edit.go): one view model, NotePage,
+// in either mode (U-6.4). The drafts frame2go printed for both, with the
+// frame's data become the view model's (U-5.1).
+package note
 
-import w "carrel.dev/typecase/widget"
+import (
+	"strconv"
 
-// Notes2 is frame «Заметка · чтение на весь экран» (s-notes-2).
-func Notes2() interface{ Render() string } {
-	return w.Shell{
-		Top: &w.Top{
-			Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
-			Search: &w.Search{Query: w.Query{Placeholder: "Search everything…", Label: "Search everything…"}},
-			Actions: []w.TopAction{
-				w.Button{Label: "New note", Menu: true, Icon: "quill", Kind: w.ButtonPrimary},
-				w.Button{Label: "2 min ago", Icon: "refresh"},
-				w.UserMenu{Name: "mix"},
-			},
-		},
-		Body: w.ShellBody{
-			Rail: []w.RailPart{
-				w.Nav{Items: []w.NavItem{
-					{Icon: "back", Label: "Back to list", Short: "Back", Href: "#"}}},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "nextcloud"},
-						w.TickRow{Mark: w.Mark{Colour: "#4A6B52"}, Label: "Записи", Meta: "64", Current: true},
-						w.TickRow{Mark: w.Mark{Colour: "#6B4E7A"}, Label: "Дневник", Meta: "22"},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "Neighbours"},
-						w.Tree{
-							Rows: []w.TreeRow{
-								{Icon: "note", Label: "Планы на осень"},
-								{Icon: "note", Label: "Заметка со встречи"},
-								{Icon: "note", Label: "Что почитать про CRDT"},
-							},
-							On:      2,
-							Variant: w.TreePadded,
-						},
-					},
-				},
-				w.RailFoot{
-					Items: []w.RailFootPart{w.Emblem{Symbol: "davloom", Title: "davloom · running · 3 devices"}},
-					About: &w.About{Name: "Carrel", Build: w.Mono{Text: "0.0.1 · 786949a"}, Href: "#rest"},
-				},
-			},
-			Main: w.Main{
-				Items: []w.MainPart{
-					w.Head{
-						Meta: &w.HeadSub{
-							Parts: []w.HeadSubPart{
-								w.Mark{Colour: "#4A6B52", Size: w.MarkH12},
-								w.Text("nextcloud · Записи · "),
-								w.Mono{Text: "10 August 2026, 11:05"},
-							},
-						},
-						Acts: &w.Acts{
-							Items: []w.ActsPart{
-								w.Button{Label: "Edit", Icon: "pencil", Kind: w.ButtonPrimary},
-								w.Button{Label: "Export Markdown"},
-								w.Button{Label: "Print", Icon: "print"},
-								w.Button{Label: "Source"},
-								w.Seg{Options: []w.SegOption{{Label: "Full width", On: true}, {Label: "Reading width"}}},
-								w.Button{Icon: "panel", Title: "Hide the side column"},
-								w.Button{Icon: "dots", Title: "More"},
-							},
-						},
-						Pad: w.HeadRule,
-					},
-					w.DocLayout{
-						Items: []w.DocLayoutPart{
-							w.Doc{
-								Items: []w.DocPart{
-									w.DocTitle{Text: "Заметка со встречи 10.08"},
-									w.Prose{
-										Parts: []w.Inline{
-											w.Text("Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт."),
-										},
-										Variant: w.ProseLead,
-									},
-									w.DocTasks{
-										Title: w.Rubric{Text: "Что делаем", Variant: w.RubricBottom8},
-										Items: []w.DocTask{
-											{Tick: w.Tick{Variant: w.TickNudge, Sign: true}, Text: "проверить changelog"},
-											{Tick: w.Tick{Done: true, Variant: w.TickNudge, Sign: true}, Text: "попросить у Артёма скриншоты"},
-										},
-									},
-									w.Prose{
-										Parts: []w.Inline{
-											w.Text("Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг."),
-										},
-										Variant: w.ProseLeadAfter,
-									},
-								},
-							},
-							w.Docmeta{
-								Sections: []w.DocmetaSec{
-									{
-										Title: w.Rubric{Text: "Tags"},
-										Items: []w.DocmetaPart{
-											w.Line{Block: true, Gap: w.LineGap4, Items: []w.LinePart{w.Tag{Label: "встречи"}, w.Tag{Label: "релиз"}}},
-										},
-									},
-									{
-										Title: w.Rubric{Text: "Related"},
-										Items: []w.DocmetaPart{
-											w.DocRefs{
-												Items: []w.DocRef{
-													{Name: "Синк-ап по релизу", What: w.Dim{Parts: []w.Inline{w.Text("· event · 10 Aug")}}},
-													{Name: "Дописать раздел про кэш", What: w.Dim{Parts: []w.Inline{w.Text("· task")}}},
-												},
-											},
-										},
-									},
-									{
-										Title: w.Rubric{
-											Text: "Attachments",
-											Items: []w.RubricPart{
-												w.Drop{
-													Trigger: w.Button{Label: "Attach", Menu: true, Small: true},
-													Menu: w.Menu{
-														Items: []w.MenuPart{
-															w.MenuItem{
-																Icon:  "up",
-																File:  &w.FileField{Form: "post-attach", Name: "file", Label: "From this computer"},
-																Label: "From this computer",
-															},
-															w.MenuItem{Icon: "file", Label: "From Files"},
-															w.MenuItem{Label: "Upload", NoScript: true, Form: "post-attach"},
-														},
-														Width: w.MenuWidth212,
-														Pop:   w.MenuUnder,
-													},
-												},
-											},
-										},
-										Items: []w.DocmetaPart{
-											w.DocAttach{
-												Name:  "2026-08-10-sync-board.png",
-												Size:  w.Dim{Parts: []w.Inline{w.Text("· 412 KB")}},
-												Where: w.Badge{Label: "in the note"},
-												Href:  "#",
-											},
-											w.DocAttach{
-												Name:  "запись-встречи.m4a",
-												Size:  w.Dim{Parts: []w.Inline{w.Text("· 24 MB")}},
-												Where: w.Badge{Label: "Documents / carrel"},
-												Href:  "#",
-											},
-										},
-									},
-									{
-										Title: w.Rubric{
-											Text:  "The same note in other notebooks",
-											Items: []w.RubricPart{w.Badge{Label: "1", Tone: w.BadgeLinked}},
-										},
-										Items: []w.DocmetaPart{
-											w.DocRefs{
-												Items: []w.DocRef{
-													{
-														Mark: &w.Mark{Colour: "#4A6B52", Size: w.MarkH11Inline},
-														Name: "nextcloud · Дневник",
-														Href: "#",
-														What: w.Dim{Parts: []w.Inline{w.Text("· Text differ")}},
-													},
-												},
-											},
-										},
-									},
-									{
-										Title: w.Rubric{Text: "Source"},
-										Items: []w.DocmetaPart{w.Diag{Text: "UID   9e31-40b7-c012\nRead  2 min ago"}},
-									},
-								},
-								Danger: &w.Danger{Button: w.Button{Label: "Delete note", Kind: w.ButtonDangerSolid}, Space: w.DangerAtEnd},
-							},
-						},
-					},
-				},
-			},
-		},
+	"carrel.dev/carrel/client/bind"
+	"carrel.dev/carrel/server/view"
+	w "carrel.dev/typecase/widget"
+)
+
+// The IDs of the page's forms: the deletion posts with no form of its own;
+// the edit is a document that is a form, which Save of its bar submits.
+const (
+	formDelete = "delete"
+	formEdit   = "note-edit"
+)
+
+// The screen's words (U-1.3) for the shell: the mark, the search, the rail.
+var (
+	top = bind.TopWords{
+		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
+		Search: "Search everything…",
 	}
+	rail = bind.RailWords{Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
+)
+
+// The screen's words (U-1.3): the rubrics of the column, the lead of a kind
+// and of a difference, what joins a kind and a day, the attachment kept
+// inside the note, the rail's rubric of the neighbours and the phone's short
+// «Back», «Upload» after Attach's arrow (Typecase's task 109).
+const (
+	neighbours = "Neighbours"
+	back       = "Back"
+	lead       = "· "
+	sep        = " · "
+	inside     = "in the note"
+	upload     = "Upload"
+)
+
+// The client's controls of the bar over the text (U-6.4): the source, the
+// width of the text, the side column — none of them the server's.
+const (
+	source     = "Source"
+	fullWidth  = "Full width"
+	readWidth  = "Reading width"
+	hideColumn = "Hide the side column"
+)
+
+// The names of the contract the screen places by (C-7.5): Attach goes in the
+// rubric of attachments.
+const attachID = "attach.add"
+
+// faces are the faces the page draws a note's text in (s-notes-2).
+var faces = bind.TextFaces{Lead: w.ProseLead, After: w.ProseLeadAfter, Tasks: w.RubricBottom8, Tick: w.TickNudge, Code: w.MonoChip}
+
+// Screen draws the note from its view model, read or in its edit
+// (NoteDoc.Mode).
+//
+//   - The shell: the top bar; the rail of return — «Back to list», the
+//     notebooks, the notes beside it (Neighbours, the open one on), the
+//     foot.
+//   - Read: the head — the notebook's mark, where the note lives and when,
+//     monospaced —, Edit, Export Markdown, Print, the client's Source, width
+//     and side column, «⋯» with the record's menu (Move, Copy, Publish a
+//     link); the notices; the text — its title, its paragraphs, headings,
+//     tasks (a tick a sign, U-6.4), lists, quotations, code, tables —; the
+//     column: tags, related records, attachments with Attach, the same note in
+//     other notebooks, the source, Delete note.
+//   - In the edit — edit.go.
+func Screen(p *view.NotePage) w.Shell {
+	var main []w.MainPart
+	if p.Doc.Mode == view.NoteEditing {
+		main = edit(p)
+	} else {
+		main = read(p)
+	}
+	t := bind.Top(p.Top, top)
+	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}}
+}
+
+// Forms are the forms of the actions that post with none of their own: the
+// deletion, Attach «From this computer» with its file, the notices' buttons
+// and the menus' items that post (Sign out). The edit's form is its
+// document.
+func Forms(p *view.NotePage) []w.PostForm {
+	out := append(bind.TopForms(p.Top), bind.MenuForms(p.Meta.Menu)...)
+	out = append(out, bind.NoticeForms(p.Notices)...)
+	for _, a := range p.Meta.Actions {
+		switch {
+		case a.ID == attachID:
+			out = append(out, bind.MenuForms(a.Arrow)...)
+		case a.Danger && a.Method == "POST" && a.Enabled:
+			out = append(out, bind.ActionForm(a, formDelete))
+		}
+	}
+	return out
+}
+
+// railParts is the rail of return: «Back to list», with the phone's short
+// «Back» (U-1.3), the notebooks, the notes beside the open one, the foot.
+func railParts(r view.Rail) []w.RailPart {
+	nav := w.Nav{}
+	for _, n := range r.Nav {
+		it := bind.NavItem(n)
+		it.Short = back
+		nav.Items = append(nav.Items, it)
+	}
+	parts := []w.RailPart{nav}
+	parts = append(parts, bind.Sources(r, rail)...)
+	if len(r.Neighbours) > 0 {
+		tree := w.Tree{Variant: w.TreePadded}
+		for i, a := range r.Neighbours {
+			tree.Rows = append(tree.Rows, bind.TreeRow(a))
+			if a.On {
+				tree.On = i + 1
+			}
+		}
+		parts = append(parts, w.RailSec{Items: []w.RailSecPart{w.Rubric{Text: neighbours}, tree}})
+	}
+	return append(parts, bind.Foot(r, rail))
+}
+
+// read is the note read: its head, the notices, the text and its column.
+func read(p *view.NotePage) []w.MainPart {
+	var acts []w.ActsPart
+	for _, a := range p.Doc.Bar {
+		acts = append(acts, bind.Button(a, ""))
+	}
+	// ждёт библиотеку: U-5.5 #41 — the client's Source, width and side
+	// column do nothing without a script (Typecase's task 104)
+	acts = append(acts,
+		w.Button{Label: source},
+		w.Seg{Options: []w.SegOption{{Label: fullWidth, On: true}, {Label: readWidth}}},
+		w.Button{Icon: "panel", Title: hideColumn},
+	)
+	if len(p.Meta.Menu) > 0 {
+		acts = append(acts, w.Drop{
+			Trigger: w.Button{Icon: "dots", Title: "More"},
+			Menu:    w.Menu{Items: bind.MenuItems(p.Meta.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
+		})
+	}
+	meta := []w.HeadSubPart{w.Mark{Colour: string(p.Source.Colour), Size: w.MarkH12}, w.Text(p.Source.Stamp)}
+	if p.Meta.Date != "" {
+		meta = []w.HeadSubPart{meta[0], w.Text(string(p.Source.Stamp) + sep), w.Mono{Text: string(p.Meta.Date)}}
+	}
+	main := []w.MainPart{w.Head{Meta: &w.HeadSub{Parts: meta}, Acts: &w.Acts{Items: acts}, Pad: w.HeadRule}}
+	main = append(main, notices(p)...)
+	doc := w.Doc{Items: append([]w.DocPart{w.DocTitle{Text: string(p.Doc.Title)}}, bind.DocText(p.Doc.Rendered, faces)...)}
+	var secs []w.DocmetaSec
+	if len(p.Meta.Tags) > 0 {
+		var tags []w.LinePart
+		for _, t := range bind.Tags(p.Meta.Tags) {
+			tags = append(tags, t)
+		}
+		secs = append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Tags"}, Items: []w.DocmetaPart{w.Line{Block: true, Gap: w.LineGap4, Items: tags}}})
+	}
+	if len(p.Meta.Related) > 0 {
+		refs := w.DocRefs{}
+		for _, r := range p.Meta.Related {
+			about := lead + string(r.Kind)
+			if r.When != "" {
+				about += sep + string(r.When)
+			}
+			refs.Items = append(refs.Items, w.DocRef{Name: string(r.Title), Href: r.Href, What: w.Dim{Parts: []w.Inline{w.Text(about)}}})
+		}
+		secs = append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Related"}, Items: []w.DocmetaPart{refs}})
+	}
+	secs = append(secs, column(p)...)
+	return append(main, w.DocLayout{Items: []w.DocLayoutPart{doc, w.Docmeta{Sections: secs, Danger: danger(p.Meta.Actions)}}})
+}
+
+// notices are the notices over the text and what the server did not keep of
+// the last save.
+func notices(p *view.NotePage) []w.MainPart {
+	out := bind.Notices(p.Notices, w.MsgSpacePage)
+	if p.Loss != nil {
+		out = append(out, bind.Loss(*p.Loss, w.MsgSpacePage))
+	}
+	return out
+}
+
+// column is what the column holds read and in the edit alike: the
+// attachments with Attach and its arrow, the same note in other notebooks,
+// the source.
+func column(p *view.NotePage) []w.DocmetaSec {
+	var secs []w.DocmetaSec
+	var attach *view.Action
+	for _, a := range p.Meta.Actions {
+		if a.ID == attachID {
+			attach = &a
+		}
+	}
+	if attach != nil || len(p.Meta.Attach) > 0 {
+		rubric := w.Rubric{Text: "Attachments"}
+		if attach != nil {
+			// ждёт библиотеку: U-5.5 #36 — the arrow's items of a new note
+			// (Action.Submits) post forms of their own, not the form typed
+			b := bind.Button(*attach, "")
+			b.Icon, b.Menu, b.Small = "", true, true
+			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
+		}
+		var items []w.DocmetaPart
+		for _, a := range p.Meta.Attach {
+			at := w.DocAttach{Name: string(a.Name), Size: w.Dim{Parts: []w.Inline{w.Text(lead + string(a.Size))}}, Href: a.Href}
+			switch {
+			case a.Inline:
+				at.Where = w.Badge{Label: inside}
+			case a.Place != "":
+				at.Where = w.Badge{Label: string(a.Place)}
+			}
+			items = append(items, at)
+		}
+		secs = append(secs, w.DocmetaSec{Title: rubric, Items: items})
+	}
+	if len(p.Meta.Linked) > 0 {
+		refs := w.DocRefs{}
+		for _, f := range p.Meta.Linked {
+			refs.Items = append(refs.Items, w.DocRef{
+				Mark: &w.Mark{Colour: string(f.Colour), Size: w.MarkH11Inline},
+				Name: string(f.Label),
+				Href: f.Href,
+				What: w.Dim{Parts: []w.Inline{w.Text(lead + string(f.Value))}},
+			})
+		}
+		secs = append(secs, w.DocmetaSec{
+			Title: w.Rubric{Text: "The same note in other notebooks", Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Meta.Linked)), Tone: w.BadgeLinked}}},
+			Items: []w.DocmetaPart{refs},
+		})
+	}
+	var lines []bind.DiagLine
+	if p.Source.UID != "" {
+		lines = append(lines, bind.DiagLine{Name: "UID", Value: string(p.Source.UID)})
+	}
+	read := string(p.Source.LastRead)
+	if p.Source.Compared != "" {
+		read += sep + string(p.Source.Compared)
+	}
+	lines = append(lines, bind.DiagLine{Name: "Read", Value: read})
+	return append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Source"}, Items: []w.DocmetaPart{bind.Diag(lines...)}})
+}
+
+// danger is the deletion at the column's end; nil where there is none (a new
+// note).
+func danger(actions []view.Action) *w.Danger {
+	for _, a := range actions {
+		if a.Danger {
+			b := bind.Button(a, formDelete)
+			b.Icon = ""
+			return &w.Danger{Button: b, Space: w.DangerAtEnd}
+		}
+	}
+	return nil
 }

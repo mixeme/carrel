@@ -13,6 +13,7 @@ import (
 	"carrel.dev/carrel/client/screens/forgot"
 	"carrel.dev/carrel/client/screens/invite"
 	"carrel.dev/carrel/client/screens/login"
+	"carrel.dev/carrel/client/screens/note"
 	"carrel.dev/carrel/client/screens/notes"
 	"carrel.dev/carrel/client/screens/register"
 	"carrel.dev/carrel/client/screens/setup"
@@ -276,6 +277,25 @@ var All = []Screen{
 			{Row: 38, Fixture: "app-notes/normal"},       // ждёт библиотеку: U-5.5 #38
 			{Row: 38, Fixture: "app-notes/source-error"}, // ждёт библиотеку: U-5.5 #38
 			{Row: 38, Fixture: "app-notes-all/empty"},    // ждёт библиотеку: U-5.5 #38
+		},
+	},
+	{
+		Model:  func() any { return new(view.NotePage) },
+		Frames: []string{"s-notes-2", "s-notes-20"},
+		Draw:   func(model any) Root { return note.Screen(model.(*view.NotePage)) },
+		Title:  func(model any) string { return string(model.(*view.NotePage).Title) },
+		Forms:  func(model any) []widget.PostForm { return note.Forms(model.(*view.NotePage)) },
+		Waits: []Wait{
+			{Row: 40, Fixture: "app-note/normal"},                       // ждёт библиотеку: U-5.5 #40
+			{Row: 40, Fixture: "app-note-edit/normal"},                  // ждёт библиотеку: U-5.5 #40
+			{Row: 42, Fixture: "app-note-edit/new"},                     // ждёт библиотеку: U-5.5 #42
+			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Button)"}, // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Seg)"},    // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Docbar).Items(Button)"},          // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Docbar).More(Button)"},           // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Docbar).End(Check)"},             // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Docbar).End(Seg)"},               // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Docbar).End(Button)"},            // ждёт библиотеку: U-5.5 #41
 		},
 	},
 }
