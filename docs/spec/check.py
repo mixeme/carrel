@@ -126,7 +126,7 @@ check("6b. названные правила введены заголовком
 
 # 7. Фикстуры разбираются и лежат по правилам имён
 states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","unavailable","outcome","refused",
-          "sent","options","no-mail","wipe-sent","asked","password","link","no-photo"}
+          "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -294,7 +294,10 @@ STATE_FRAME = {
 }
 # Без строки: app-contact-new/normal и app-event-new/normal — полные формы
 # создания (`/new`) — свои кадры маршрута, s-contacts-27 (Typecase 4af7ad7,
-# задача 59) и s-agenda-15 (Typecase 9e69804, задача 77).
+# задача 59) и s-agenda-15 (Typecase 9e69804, задача 77). Полные формы новой
+# задачи и новой заметки — состояние new каталога правки (app-task-edit/new,
+# app-note-edit/new): своих кадров у них нет (задача Typecase 97), и они
+# сверяются с кадром правки — рейл тот же.
 
 def frame_by_id(fid):
     m = re.search(r'<div class="frame" data-frame="%s"[^>]*>' % re.escape(fid), mock)

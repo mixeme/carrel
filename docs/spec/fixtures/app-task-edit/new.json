@@ -1,0 +1,796 @@
+{
+  "attach": [],
+  "delete": null,
+  "details": null,
+  "form": {
+    "action": "/app/tasks/a-nc-home/dela/new",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "id": "record.save",
+        "label": "Save",
+        "method": "POST",
+        "primary": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela",
+        "id": "record.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "etag",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "readat",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "1786370760"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "focus": true,
+            "hint": "",
+            "kind": "text",
+            "label": "Summary",
+            "name": "summary",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "area",
+            "label": "Description",
+            "name": "description",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "When",
+        "rows": [
+          {
+            "disables": "start.time due.time",
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "All day",
+            "name": "allday",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "date",
+            "label": "Start date",
+            "mono": true,
+            "name": "start.date",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "time",
+            "label": "Start time",
+            "mono": true,
+            "name": "start.time",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "date",
+            "label": "Due date",
+            "mono": true,
+            "name": "due.date",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "time",
+            "label": "Due time",
+            "mono": true,
+            "name": "due.time",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Progress",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Status",
+            "name": "status",
+            "options": [
+              {
+                "label": "Needs action",
+                "selected": true,
+                "value": "NEEDS-ACTION"
+              },
+              {
+                "label": "In process",
+                "selected": false,
+                "value": "IN-PROCESS"
+              },
+              {
+                "label": "Completed",
+                "selected": false,
+                "value": "COMPLETED"
+              },
+              {
+                "label": "Cancelled",
+                "selected": false,
+                "value": "CANCELLED"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "NEEDS-ACTION"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Priority",
+            "name": "priority",
+            "options": [
+              {
+                "label": "No priority",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "High · 1",
+                "selected": false,
+                "separator": true,
+                "value": "1"
+              },
+              {
+                "label": "Medium · 5",
+                "selected": false,
+                "value": "5"
+              },
+              {
+                "label": "Low · 9",
+                "selected": false,
+                "value": "9"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Percent complete",
+            "mono": true,
+            "name": "percent",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "0"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Done",
+            "name": "done",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Reminders",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "add",
+            "label": "Add reminder",
+            "name": "add",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "template": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "select",
+                "label": "First",
+                "name": "reminder.{n}",
+                "options": [
+                  {
+                    "label": "At the time",
+                    "selected": false,
+                    "value": "PT0S"
+                  },
+                  {
+                    "label": "5 minutes before",
+                    "selected": false,
+                    "value": "-PT5M"
+                  },
+                  {
+                    "label": "10 minutes before",
+                    "selected": false,
+                    "value": "-PT10M"
+                  },
+                  {
+                    "label": "30 minutes before",
+                    "selected": false,
+                    "value": "-PT30M"
+                  },
+                  {
+                    "label": "1 hour before",
+                    "selected": false,
+                    "value": "-PT1H"
+                  },
+                  {
+                    "label": "1 day before",
+                    "selected": false,
+                    "value": "-P1D"
+                  },
+                  {
+                    "label": "No reminder",
+                    "selected": true,
+                    "separator": true,
+                    "value": ""
+                  }
+                ],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              }
+            ],
+            "value": "reminder"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Other",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Location",
+            "name": "location",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Tags",
+            "name": "categories",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Related to",
+            "mono": true,
+            "name": "related",
+            "options": [
+              {
+                "colour": "#3f6e8c",
+                "label": "Дописать раздел про кэш",
+                "meta": "task · 14 Aug",
+                "selected": false,
+                "value": "bb21-0fa8-3d66"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Собрать чемодан",
+                "meta": "task · 12 Aug",
+                "selected": false,
+                "value": "aa11-2d09-5f84"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Забрать документы",
+                "meta": "event · 11 Aug",
+                "selected": false,
+                "value": "1d55-90fe-3c27"
+              },
+              {
+                "colour": "#6b4e7a",
+                "label": "Ревью архитектуры",
+                "meta": "event · 11 Aug",
+                "selected": false,
+                "value": "9c27-0e5d-4412"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Созвон с подрядчиком",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "7ae3-1c48-55b0"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Синк-ап по релизу",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "8f1c-4a02-b7d3"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Дежурство: первая линия",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "2f04-8b71-e39a"
+              },
+              {
+                "colour": "#8c6239",
+                "label": "Дежурство: первая линия",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "5e90-33c1-a8d2"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Ответить подрядчику по смете",
+                "meta": "task · 8 Aug",
+                "selected": false,
+                "value": "bb20-4c17-8a52"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Отправить документы в МФЦ",
+                "meta": "task · 7 Aug",
+                "selected": false,
+                "value": "aa10-77bc-0e31"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Продлить страховку",
+                "meta": "task",
+                "selected": false,
+                "value": "aa12-9e44-c703"
+              },
+              {
+                "hint": "By UID: a record that is not among the loaded ones.",
+                "label": "By UID…",
+                "selected": false,
+                "separator": true,
+                "typed": true,
+                "value": ""
+              }
+            ],
+            "placeholder": "UID of the record",
+            "readOnly": false,
+            "required": false,
+            "suggest": "/app/tasks/a-nc-home/dela/new/related",
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "loss": null,
+  "name": "New task",
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "/app/tasks/a-nc-home/dela",
+            "label": "Дела",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dela",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dela",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dela\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/dela/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/dela/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dela",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "message": "",
+            "on": true,
+            "readOnly": false,
+            "retry": null,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "/app/tasks/a-nc-home/rabota",
+            "label": "Работа",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/rabota/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/rabota/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "message": "",
+            "on": false,
+            "readOnly": false,
+            "retry": null,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "source": {
+    "changed": "10 August 2026, 17:04",
+    "colour": "#4a6b52",
+    "compared": "",
+    "lastRead": "2 min ago",
+    "objects": null,
+    "path": "",
+    "readOnly": false,
+    "stamp": "nextcloud · Дела",
+    "uid": ""
+  },
+  "subtitle": [
+    {
+      "text": "nextcloud · Дела"
+    }
+  ],
+  "title": "New task",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-up",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela/new",
+        "icon": "i-refresh",
+        "id": "record.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "2 min ago",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "uid": ""
+}

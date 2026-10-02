@@ -1320,14 +1320,20 @@ func TestFixtureNoteList(t *testing.T) {
 	app.compare(t, "app-notes/normal.json", app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess)))
 }
 
-// C-14.2: the card of a task (s-tasks-2).
+// C-14.2: the card of a task (s-tasks-2): «Собрать чемодан», the task the
+// frame draws — its copy in another list, the event it is related to, the
+// file inside it (the client's scan ЗГ5).
 func TestFixtureTaskCard(t *testing.T) {
 	app := newMockupApp(t)
+	linkMockupTask(t, app)
+	seedMockupTrip(t, app)
+	// The calendar was read: Related names the trip.
+	openList(t, app, "/app/calendar?from=2026-08-10")
 	// The lists were opened before the record: that is where the counts
 	// of the rail come from.
 	combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-	rec := app.listPath(t, "tasks", "dela") + "/aa10-77bc-0e31"
+	rec := app.listPath(t, "tasks", "dela") + "/aa11-2d09-5f84"
 	app.compare(t, "app-task/normal.json", app.h.do(get(rec, app.sess)))
 }
 
@@ -1373,15 +1379,19 @@ func TestFixtureEventEdit(t *testing.T) {
 	app.compare(t, "app-event-new/normal.json", app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"/new", app.sess)))
 }
 
-// C-14.2: the form of a task (s-tasks-3).
+// C-14.2: the form of a task (s-tasks-3), and the full form of a new one
+// (C-5.4 /new; the client's scan ЗД10 — no frame draws it yet, task 97).
 func TestFixtureTaskEdit(t *testing.T) {
 	app := newMockupApp(t)
+	// The calendar was read: Related to names «Забрать документы».
+	openList(t, app, "/app/calendar?from=2026-08-10")
 	// The lists were opened before the record: that is where the counts
 	// of the rail come from.
 	combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "tasks", "dela") + "/aa10-77bc-0e31/edit"
 	app.compare(t, "app-task-edit/normal.json", app.h.do(get(rec, app.sess)))
+	app.compare(t, "app-task-edit/new.json", app.h.do(get(app.listPath(t, "tasks", "dela")+"/new", app.sess)))
 }
 
 // C-14.2: a note in edit (s-notes-20). The notebook was listed first, as a
@@ -1828,7 +1838,9 @@ func TestFixtureConflictsOfEveryKind(t *testing.T) {
 			// from (s-conflict-3, s-conflict-4), as for a contact.
 			openList(t, app, one.list)
 			rec := app.listPath(t, one.segment, one.slug) + "/" + one.uid
-			form := formFields(decode[view.EventEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
+			form := formFields(decode[struct {
+				Form view.Form `json:"form"`
+			}](t, app.h.do(get(rec+"/edit", app.sess))).Form)
 			app.servers["nextcloud"].Seed(davtest.CalendarHome+one.slug+"/"+one.uid+".ics", one.body)
 			form.Set("summary", one.now)
 			if resp := app.h.do(postForm(rec+"/edit", app.sess, form)); resp.Code != 303 {
@@ -1943,7 +1955,9 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 		t.Run(one.dir+"-loss", func(t *testing.T) {
 			app := newMockupApp(t)
 			rec := app.listPath(t, one.segment, one.slug) + "/" + one.uid
-			form := formFields(decode[view.EventEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
+			form := formFields(decode[struct {
+				Form view.Form `json:"form"`
+			}](t, app.h.do(get(rec+"/edit", app.sess))).Form)
 			app.servers["nextcloud"].Drop = one.drop
 			form.Set("summary", string(form.Get("summary"))+" ·")
 			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))

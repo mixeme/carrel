@@ -632,44 +632,39 @@ func (s *Server) eventCompared(c *collectionCtx, uid string, obj *model.Object) 
 func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notices []view.Notice) view.TaskPage {
 	page := view.TaskPage{Shell: s.recordShell(c, "Task", notices), UID: uid, Source: c.source(), ReadOnly: c.col.ReadOnly}
 	page.Top.Refresh = s.recordRefresh(c, c.recordPath(uid))
+	page.Subtitle = taskSubtitle(c, obj)
 	if obj == nil {
 		return page
 	}
-	tf := c.tf
-	tz := tf.tz
 	summary := titleOr(cal.Text(obj, "SUMMARY"), "Untitled task")
 	page.Shell.Title, page.Summary = text(summary), text(summary)
 	page.Print = s.recordPrint(c, page.Summary)
-	if due, err := cal.DueOf(obj, tz); err != nil {
+	// The fields in the order of the card (s-tasks-2).
+	fields, err := taskFields(c.tf, obj, false, s.recordTags(c, obj))
+	if err != nil {
 		page.Notices = append(page.Notices, readNotice(obj.Path, err))
-	} else if !due.Start.IsZero() {
-		page.Fields = append(page.Fields, view.Field{Label: "Due", Value: text(tf.timeOrDate(due))})
-		if z := tf.zone(due.Zone); z != "" {
-			page.Fields = append(page.Fields, view.Field{Label: "Original time zone", Value: text(z)})
-		}
 	}
-	if start, err := cal.TimingOf(obj, tz); err == nil && !start.Start.IsZero() {
-		page.Fields = append(page.Fields, view.Field{Label: "Starts", Value: text(tf.timeOrDate(start))})
-	}
-	if p := firstValue(obj, "PRIORITY"); p != "" && p != "0" {
-		page.Fields = append(page.Fields, view.Field{Label: "Priority", Value: text(p)})
-	}
-	page.Fields = withTagLinks(append(page.Fields, calendarFields(obj)...), s.recordTags(c, obj))
+	page.Fields = fields
 	page.Body = text(cal.Description(obj))
-	page.Done, page.Percent = taskDone(obj), percentOf(obj)
-	alarms, _ := cal.Alarms(obj)
-	page.Reminders = reminderRows(alarms, tf)
+	page.Done = taskDone(obj)
 	page.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Related = s.relatedRows(c, obj)
+	page.Source.Path, page.Source.Compared = text(obj.Path), s.eventCompared(c, uid, obj)
 	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
 	var done *view.Action
 	if c.feed == nil && !c.col.ReadOnly {
 		a := s.doneAction(c.recordPath(uid)+"/edit", obj.ETag, page.Done, "")
 		done = &a
 	}
-	// Edit and Mark done in the head, Attach in its block, the deletion at
-	// the foot; the rest is the «⋯» (s-tasks-2, s-tasks-6).
-	page.Actions, page.Menu = shown(primary(ops.edit), done, s.attachOf(c, uid, obj.ETag), ops.del), ops.menu
+	// Edit, Mark done and Print in the head, Attach in its block (by its
+	// name, attach.add), the deletion at the foot; the rest is the «⋯»
+	// (s-tasks-2, s-tasks-6). Print is the card with print=1 (U-10).
+	edit := primary(ops.edit)
+	if edit != nil {
+		edit.Icon = "i-pencil"
+	}
+	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
+	page.Actions, page.Menu = shown(edit, done, s.attachOf(c, uid, obj.ETag), print, ops.del), ops.menu
 	return page
 }
 

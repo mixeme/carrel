@@ -17,6 +17,61 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.142 — 2026-10-02
+
+The card and the form of a task as s-tasks-2 and s-tasks-3 draw them (the
+client's scan of the tasks, groups Г and Д).
+
+### Added
+
+- **`TaskPage.subtitle`**, **`TaskEditPage.subtitle`** (Runs): where the
+  task is and, when it is late, by how much in alarm — «nextcloud · Дела ·
+  ‹overdue by 3 days›». **`TaskEditPage.name`** — the task; «New task» for
+  a new one.
+- **Print** on a task's card (`record.print`, `i-print`, `?print=1`); Edit
+  has `i-pencil`.
+- **`TaskEditPage.source`** — Source in the form: the path, when it was read
+  and what the server says of it. The card's source has its path and the
+  comparison too.
+- **`FormRow.suggest`** — where a field asks for suggestions as one types:
+  Related to of a task and of a note asks
+  **`GET /app/{tasks|notes}/{account}/{col}/{uid}/related?q=`** (`new` for
+  a record not yet made) → `SuggestList`: the events, tasks and notes the
+  session has loaded whose title holds what was typed — those it begins
+  first, then the newest —, the title with the found part strong, the mark
+  of the collection, «event · 11 Aug» in **`SuggestItem.meta`**, the UID the
+  value; the record itself left out. Without scripts the field's options
+  are the same records (U-6.3).
+
+### Changed
+
+- **The fields of a task's card** in the frame's order: Status (Needs
+  action when it says none), Due (monospaced, how late in alarm), Starts,
+  Complete («0%» when it says none) and Priority monospaced, Reminders as a
+  field, Where, Link, Tags. «Original time zone» is a badge by Due.
+- **`FormRow.disables` names every field the tick switches off, a space
+  between them**: All day of a task switches off both its times —
+  «start.time due.time» —, which come `readOnly` while it stands.
+- **Percent complete is «0»** for a task that says none, as its card
+  says «0%»: the form saved as shown writes nothing.
+- No hint under Tags of a task's form (s-tasks-3).
+
+### Removed
+
+- `TaskPage.percent`, `TaskPage.reminders`, `TaskEditPage.done`,
+  `.percent`, `.reminders`: the card's fields and the form's rows say them,
+  each in one place (as the event's since `v0.2.120`).
+
+### For consumers
+
+Read the task's head from `name` and `subtitle`, its fields from `fields`,
+its form's progress and reminders from the form's rows; switch off every
+field `disables` names; ask `suggest` with `?q=`. Fixtures: `app-task/normal`
+is «Собрать чемодан» (the frame's task: the trip, the copy in «Работа», the
+file inside); `app-task-edit/new` is new — the full form of a new task (no
+frame draws it yet); regenerated — `app-task-edit/normal`, `/loss`,
+`app-note-edit/normal` (`suggest`).
+
 ## v0.2.141 — 2026-10-02
 
 The list of tasks and its panel as s-tasks-1 draws them (the client's scan

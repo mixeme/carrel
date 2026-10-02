@@ -159,6 +159,23 @@ func taskFields(tf timeFmt, obj *model.Object, panel bool, tags []view.Tag) ([]v
 	return out, err
 }
 
+// taskSubtitle is the line under a task's title (s-tasks-2, s-tasks-3):
+// where it is, and how late it is, in alarm — the person who came by a link
+// has seen no list. obj is the version stored; nil — a new task.
+func taskSubtitle(c *collectionCtx, obj *model.Object) view.Runs {
+	out := view.Runs{{Text: text(string(c.stamp()))}}
+	if obj == nil {
+		return out
+	}
+	if due, err := cal.DueOf(obj, c.tf.tz); err == nil {
+		if late := overdueBy(c.tf, due, taskDone(obj)); late != "" {
+			out[0].Text += " · "
+			out = append(out, view.Run{Text: text(late), Mark: view.RunDanger})
+		}
+	}
+	return out
+}
+
 // taskAttachHint is the line under the attachments of a task's panel
 // (s-tasks-1): up to the limit the file goes into the task, above it into
 // the attachment folder (S-20) — the limit is the instance's.

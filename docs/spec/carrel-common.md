@@ -397,9 +397,10 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже, с теми же параметрами: `?print=1`, `?open=`, `?filter=`, `?compact=`, у календаря окно и роды |
 | `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1) |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
-| `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта и события); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
+| `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта, события и задачи); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
 | `/app/contacts/suggest` | GET | вход | фрагмент | `SuggestList` — подсказки поля участников правки события (`AttendeeField.Suggest`, s-agenda-12, -13): `?q=` — набранное; ищутся отмеченные книги, чьи списки сеанс читал (сервер DAV не спрашивается), по имени и по адресу; строка на каждый адрес человека; набранный адрес не из книг — первым «Add» и `Note`. Ставит ответ в меню поля живой слой Typecase (`tc-live.js`, L-1); без сценариев набранное уходит с формой правки |
+| `/app/{kind}/{account}/{col}/{uid}/related` | GET | вход | фрагмент | `SuggestList` — подсказки поля Related to (`FormRow.Suggest`, s-tasks-10, s-notes-20); `{kind}` — `tasks`, `notes`; `{uid}` — запись формы, `new` у новой: она в подсказки не входит; `?q=` — набранное. Записи, загруженные сеансом, — события, задачи и заметки всех коллекций (сервер DAV не спрашивается), в чьём названии набранное: начинающиеся с него первыми, затем новые; строка — название с найденным жирным, метка коллекции, «event · 12 Aug» (`Meta`), UID — значение. Ставит ответ в меню поля живой слой Typecase; без сценариев — варианты поля (U-6.3) |
 | `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage`; `?print=1` — та же хронология для печати (U-10); `?kind=` — фильтр по роду: `event`, `task`, `note` или `file` (сегменты-ссылки, s-contacts-7), без него — All; `?from=&to=` — окно, форма GET диапазона (`Range.Form`) |
 | `/app/contacts/{account}/{col}/{uid}/timeline/columns` | POST | вход | редирект | — ; меню Columns хронологии (s-contacts-25), как у списков (S-9.6) |
 | `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage` |
@@ -422,7 +423,7 @@ spec/fixtures/<screen>/<state>.json
 та же вью-модель, страница рисуется на бумаге (`Shell.Print` — колонтитул).
 Принимают параметр адреса, у которых в кадрах есть Print и в этой таблице
 стоит `?print=1`: список контактов, список задач и агенда (единый вид и одна коллекция),
-карточка записи (Print в шапке — у контакта и события), хронология человека.
+карточка записи (Print в шапке — у контакта, события и задачи), хронология человека.
 Сервер параметр не читает и вью-модель не меняет: его ставит ссылка Print
 (`list.print`, `record.print`, `timeline.print`), читает отрисовщик клиента.
 Сторож — `view.TestFixturePrintsAreC5`.
@@ -1427,7 +1428,9 @@ type AttendeeField struct {
     ReadOnly bool          // приглашённый или календарь только для чтения
 }
 
-// Подсказки поля участников (s-agenda-12, -13): ответ /app/contacts/suggest.
+// Подсказки поля по мере набора: участников (s-agenda-12, -13) — ответ
+// /app/contacts/suggest; Related to задачи и заметки (s-tasks-10) — ответ
+// /app/{kind}/{account}/{col}/{uid}/related: записи, загруженные сеансом.
 type SuggestList struct {
     Items []SuggestItem
     Note  Text // под чертой: набранный адрес не из книг — «Not in the ticked address books.»; иначе пусто
@@ -1437,8 +1440,9 @@ type SuggestItem struct {
     Email  Text   // адрес, на который придёт приглашение
     Book   Text   // книга справа, «Архив»; у Add пусто
     Colour Colour // метка книги; у Add пусто
-    Value  string // значение плашки, которую подсказка ставит: «mailto:vera@example.net»
+    Value  string // значение плашки, которую подсказка ставит: «mailto:vera@example.net»; у записи — её UID
     Add    bool   // «Add ‹адрес›» — набранный адрес не из книг, первой строкой (s-agenda-13)
+    Meta   Text   // у записи Related to — род и день справа, «event · 12 Aug» (s-tasks-10); у людей пусто, ключа нет
 }
 type AttachRow struct {
     Href    string
@@ -1454,17 +1458,22 @@ type TaskPage struct { // чтение
     Shell
     UID       string
     Summary   Text // заголовок записи; заголовок документа — Shell.Title
+    Subtitle  Runs // где задача и, когда просрочена, на сколько — тревогой: «nextcloud · Дела · ‹overdue by 3 days›» (s-tasks-2, U-6.3)
+    // В порядке кадра (s-tasks-2): Status (без STATUS — «Needs action»), Due
+    // (Runs: срок моноширинно, « · overdue by 3 days» тревогой; Badge —
+    // исходный пояс), Starts, Complete («0%» без PERCENT-COMPLETE,
+    // моноширинно), Priority (моноширинно), Reminders («1 day before», через
+    // запятую), Where, Link, Tags. Панель (Details) — Status, Due, Priority,
+    // Complete, Where, Link, Tags (s-tasks-1)
     Fields    []Field
     Body      Text
-    Done      bool
-    Percent   *int
-    Reminders []ReminderRow
+    Done      bool       // выполнена: Mark done (task.done) снимает отметку
     Attach    []AttachRow
     Related   []TimelineRow
     Linked    []Field // та же задача в других списках (S-16)
-    Source    SourceBlock
+    Source    SourceBlock // Path и сравнение с сервером, как у события
     Loss      *LossReport
-    Actions   []Action   // на виду: Edit, Mark done, Attach; удаление — Danger, внизу
+    Actions   []Action   // на виду: Edit (i-pencil), Mark done, Attach (attach.add — клиент ставит его в рубрику «Attachments»), Print (record.print, i-print, ?print=1); удаление — Danger, внизу
     Menu      []MenuItem // «⋯»: Move, Copy, Export .ics, Publish a link (s-tasks-6)
     ReadOnly  bool
 }
@@ -1472,11 +1481,18 @@ type TaskPage struct { // чтение
 type TaskEditPage struct { // правка
     Shell
     UID       string
+    Name      Text // заголовок: название задачи, у новой — «New task» (s-tasks-3)
+    Subtitle  Runs // список и просрочка тревогой: «nextcloud · Дела · ‹overdue by 3 days›» (s-tasks-3 рисует её бейджем тревоги)
+    // Поля в рубриках кадра (s-tasks-3): When — All day (Disables: оба
+    // времени; пока стоит — времена ReadOnly и не читаются), даты и времена;
+    // Progress — Status, Priority, Percent complete («0» без
+    // PERCENT-COMPLETE: сохранённое как есть ничего не пишет), Done;
+    // Reminders — reminder.N и Add reminder; Other — Location, Tags (без
+    // подсказки), Related to (Suggest — подсказки по мере набора). Attach —
+    // по имени (attach.add), клиент ставит его в набор «Attachments»
     Form      Form
-    Done      bool
-    Percent   *int
-    Reminders []ReminderRow
     Attach    []AttachRow
+    Source    SourceBlock // рубрика Source формы: Path, Read и сравнение с сервером (s-tasks-3); у новой — без пути
     Loss      *LossReport
     Delete    *Action // внизу формы (s-tasks-3), одна кнопка без строки под ней; nil — у новой записи
 }
@@ -2036,9 +2052,11 @@ type FormRow struct {
     // «Find a zone» (s-agenda-8): поиск есть, когда образец есть; у прочих
     // полей пусто
     Placeholder Text
-    // У отметки — Name поля, которое она выключает, пока стоит (s-profile-14:
-    // «The server asks no password» выключает Password): поле выключено и с
-    // формой не уходит; у прочих пусто
+    // У отметки — Name полей, которые она выключает, пока стоит, через
+    // пробел — список имён, как список классов (s-profile-14: «The server
+    // asks no password» выключает Password; s-tasks-3: All day задачи —
+    // «start.time due.time»): поля выключены и с формой не уходят; у прочих
+    // пусто. Клиент отдаёт строку библиотеке как есть
     Disables string
     // У InputAdd — строки, которые добавляет одно нажатие, пустые, в порядке
     // кадра; у прочих пусто
@@ -2058,6 +2076,12 @@ type FormRow struct {
     // быстрого листа (s-contacts-3, s-agenda-3, s-tasks-3, s-notes-8 … -10),
     // текст заметки на быстром листе (s-notes-5); у прочих false
     Focus bool
+    // Адрес подсказок по мере набора (C-5): набранное уходит в ?q=, ответ —
+    // SuggestList, его ставит в меню поля живой слой Typecase; без
+    // сценариев — варианты Options (U-6.3). Related to задачи и заметки —
+    // /app/{kind}/{account}/{col}/{uid}/related (s-tasks-10, s-notes-20); у
+    // прочих пусто
+    Suggest string
     // Моноширинное поле, как его рисует кадр (is-mono): то, что набирают и
     // копируют знак в знак, — логин у первого запуска (s-auth-4), адрес
     // сервера и отпечаток сертификата (s-profile-2), номер телефона, дата,
@@ -2094,11 +2118,12 @@ type FormRow struct {
 // скрытыми и пустыми под прежними номерами, а скрытое «removed» с её именем
 // называет её снова с каждой отправкой до Save.
 // Отметка с Disables — общее правило, не особенность одной формы. Сервер
-// присылает ReadOnly названного поля по текущему значению отметки; клиент
-// рисует такое поле выключенным и, когда отметку ставят и снимают, включает
-// и выключает его сам, без похода на сервер (решение ведущего П5, по коду
-// библиотеки): выключенное поле остаётся на своём месте и с формой не
-// уходит. Пока отметка стоит, сервер его значение не читает, даже пришедшее.
+// присылает ReadOnly названных полей по текущему значению отметки; клиент
+// рисует такие поля выключенными и, когда отметку ставят и снимают,
+// включает и выключает их сам, без похода на сервер (решение ведущего П5,
+// по коду библиотеки): выключенное поле остаётся на своём месте и с формой
+// не уходит. Пока отметка стоит, сервер их значения не читает, даже
+// пришедшие.
 // Вариант списка — в порядке кадра списка рядом с экраном. Separator — черта
 // перед ним, как у MenuItem; Disabled — виден и не выбирается, Reason — почему
 // («Read-only»). Ни один вариант не Selected — поле пусто и уходит пустым.
@@ -3312,6 +3337,7 @@ type LossReport struct { // сервер принял запись, но что-
 | `password` | Второй шаг ссылки: учётная запись стёрта, новый пароль | Ссылка стирания (s-auth-11) |
 | `no-photo` | Карточка без фотографии: на месте Replace, Crop, Remove — Add и форматы | Правка контакта (кадр s-contacts-4, часть `no-photo`; `normal` — с фотографией, s-contacts-3) |
 | `link` | Приглашение ссылкой: адреса нет, и поля адреса нет; строка под заголовком — из подписи кадра | Приглашение (`normal` — письмом, кадр s-auth-12; у приглашения ссылкой своего кадра нет — подпись s-auth-12, строки в `STATE_FRAME` нет) |
+| `new` | Полная форма новой записи (`/new`): пустая, с тем, с чего запись начинается, без удаления | Правка задачи и заметки (`app-task-edit`, `app-note-edit`): своего кадра у формы нет (задача Typecase 97) — сверяется с кадром правки; у контакта и события — свои каталоги `app-contact-new`, `app-event-new` |
 
 Шаги страниц вне оболочки (`sent` … `password`) названы по `data-part` своего
 кадра; кадр состояния, а не маршрута, назван в `STATE_FRAME` проверки

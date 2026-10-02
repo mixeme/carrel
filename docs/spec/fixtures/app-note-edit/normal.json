@@ -157,6 +157,7 @@
         "placeholder": "UID of the record",
         "readOnly": false,
         "required": false,
+        "suggest": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/related",
         "value": "8f1c-4a02-b7d3"
       }
     ],

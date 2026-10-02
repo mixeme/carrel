@@ -731,7 +731,8 @@ var editFields = map[view.Kind][]editField{
 		{name: "done", label: "Done", prop: "STATUS", typ: fieldDone, set: "Progress"},
 		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders", add: "Add reminder", quick: "Remind"},
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText, set: "Other"},
-		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas.", set: "Other"},
+		// No hint under Tags (s-tasks-3), as the event's and the note's.
+		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, set: "Other"},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated, set: "Other"},
 	},
 	view.KindNote: {
@@ -962,7 +963,12 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 				vals[f.name] = []string{"on"}
 			}
 		case fieldPercent:
+			// None is «0» (s-tasks-3, s-tasks-2 «0%»): saved as shown it
+			// writes nothing — the version is measured by the same value.
 			vals[f.name] = []string{strings.TrimSpace(firstValue(obj, f.prop))}
+			if vals[f.name][0] == "" {
+				vals[f.name][0] = "0"
+			}
 		case fieldReminders:
 			var err error
 			if alarms, err = cal.Alarms(obj); err != nil {
@@ -1062,6 +1068,8 @@ func (s *Server) emptyValues(c *collectionCtx) formValues {
 			vals[f.name] = []string{s.instanceZone()}
 		case fieldAttendee:
 			vals[f.name] = []string{}
+		case fieldPercent:
+			vals[f.name] = []string{"0"} // as a task without one shows it
 		default:
 			vals[f.name] = []string{""}
 		}
@@ -2081,7 +2089,6 @@ func (s *Server) editAction(c *collectionCtx, st editState) string {
 }
 
 func (s *Server) editPage(c *collectionCtx, st editState) any {
-	tf := c.tf
 	title := "Edit " + c.spec.noun
 	if st.isNew {
 		title = "New " + c.spec.noun
@@ -2150,12 +2157,16 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		}
 		return page
 	case view.KindTask:
-		page := view.TaskEditPage{Shell: sh, UID: st.uid, Form: form, Done: first(st.values["done"]) == "on", Reminders: reminderRows(st.alarms, tf), Loss: st.loss, Delete: del}
-		if st.obj != nil {
-			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
+		// The head: the task, its list and how late it is; Source in the
+		// form (s-tasks-3).
+		name := strings.TrimSpace(first(st.values["summary"]))
+		if st.isNew || name == "" {
+			name = "New task"
 		}
-		if n, err := strconv.Atoi(first(st.values["percent"])); err == nil {
-			page.Percent = &n
+		page := view.TaskEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: taskSubtitle(c, st.obj), Form: form, Source: c.source(), Loss: st.loss, Delete: del}
+		if st.obj != nil && !st.isNew {
+			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
+			page.Source.Path, page.Source.Compared = text(st.obj.Path), s.eventCompared(c, st.uid, st.obj)
 		}
 		return page
 	default:
@@ -2369,7 +2380,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			// loaded, or typed after «By UID…» — the same name either way.
 			opts, unloaded := s.relatedOptions(c, st.uid, first(vals))
 			row := view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
-				Options: opts, Placeholder: "UID of the record", Error: errText,
+				Options: opts, Placeholder: "UID of the record", Error: errText, Suggest: s.relatedSuggest(c, st),
 				// What is typed after «By UID…» is a UID, monospaced
 				// (s-tasks-11); the list itself is the select's.
 				Mono: true}
@@ -2492,10 +2503,16 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			// The quick sheet has no box of a task: a date without a time
 			// is the whole day (s-notes-10, quickTaskDay).
 			if f.taskDay && full && !slices.ContainsFunc(set.Rows, func(r view.FormRow) bool { return r.Name == taskDayBox }) {
-				set.Rows = append(set.Rows, view.FormRow{Name: taskDayBox, Label: "All day", Kind: view.InputCheck, Value: text(first(st.values[taskDayBox]))})
+				// It switches both times off while it stands (s-tasks-3,
+				// C-6.8 Disables).
+				set.Rows = append(set.Rows, view.FormRow{Name: taskDayBox, Label: "All day", Kind: view.InputCheck, Value: text(first(st.values[taskDayBox])),
+					Disables: taskTimes()})
 			}
 			date := view.FormRow{Name: f.name + ".date", Label: text(f.label), Kind: view.InputDate, Value: text(row[0]), Error: errText, Required: f.required, Mono: true}
 			clock := view.FormRow{Name: f.name + ".time", Label: text(timeLabel(f)), Kind: view.InputTime, Value: text(row[1]), Mono: true}
+			if f.taskDay && full && first(st.values[taskDayBox]) == "on" {
+				clock.ReadOnly = true
+			}
 			switch {
 			case full:
 				set.Rows = append(set.Rows, date, clock)

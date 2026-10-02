@@ -223,8 +223,11 @@ type SuggestItem struct {
 	Email  Text   `json:"email"`  // адрес, на который придёт приглашение
 	Book   Text   `json:"book"`   // книга справа: «Архив»; у Add пусто
 	Colour Colour `json:"colour"` // метка книги; у Add пусто
-	Value  string `json:"value"`  // значение плашки, которую подсказка ставит: «mailto:vera@example.net»
+	Value  string `json:"value"`  // значение плашки, которую подсказка ставит: «mailto:vera@example.net»; у записи — её UID
 	Add    bool   `json:"add"`    // «Add ‹адрес›» (s-agenda-13)
+	// Meta — у подсказки Related to: род и день записи справа, «event · 12
+	// Aug» (s-tasks-10); у людей пусто
+	Meta Text `json:"meta,omitempty"`
 }
 type AttachRow struct {
 	Href    string      `json:"href"`
@@ -239,34 +242,48 @@ type AttachRow struct {
 // TaskPage — чтение.
 type TaskPage struct {
 	Shell
-	UID       string        `json:"uid"`
-	Summary   Text          `json:"summary"` // заголовок записи; документа — Shell.Title
-	Fields    []Field       `json:"fields"`
-	Body      Text          `json:"body"`
-	Done      bool          `json:"done"`
-	Percent   *int          `json:"percent"`
-	Reminders []ReminderRow `json:"reminders"`
-	Attach    []AttachRow   `json:"attach"`
-	Related   []TimelineRow `json:"related"`
-	Linked    []Field       `json:"linked"` // та же задача в других списках (S-16)
-	Source    SourceBlock   `json:"source"`
-	Loss      *LossReport   `json:"loss"`
-	Actions   []Action      `json:"actions"` // на виду: правка, отметка, вложение, удаление
-	Menu      []MenuItem    `json:"menu"`    // «⋯»: Move, Copy, Export .ics, Publish a link
-	ReadOnly  bool          `json:"readOnly"`
+	UID     string `json:"uid"`
+	Summary Text   `json:"summary"` // заголовок записи; документа — Shell.Title
+	// Subtitle — под заголовком: где задача и, когда она просрочена, на
+	// сколько — тревогой, «nextcloud · Дела · ‹overdue by 3 days›»
+	// (s-tasks-2)
+	Subtitle Runs `json:"subtitle"`
+	// Fields — в порядке кадра (s-tasks-2): Status (без STATUS — «Needs
+	// action»), Due (Runs: срок моноширинно, просрочка тревогой), Starts,
+	// Complete («0%», моноширинно), Priority (моноширинно), Reminders, Where,
+	// Link, Tags
+	Fields  []Field       `json:"fields"`
+	Body    Text          `json:"body"`
+	Done    bool          `json:"done"`
+	Attach  []AttachRow   `json:"attach"`
+	Related []TimelineRow `json:"related"`
+	Linked  []Field       `json:"linked"` // та же задача в других списках (S-16)
+	Source  SourceBlock   `json:"source"`
+	Loss    *LossReport   `json:"loss"`
+	// Actions — на виду: Edit (i-pencil), Mark done, Attach, Print
+	// (record.print); удаление — Danger, внизу
+	Actions  []Action   `json:"actions"`
+	Menu     []MenuItem `json:"menu"` // «⋯»: Move, Copy, Export .ics, Publish a link
+	ReadOnly bool       `json:"readOnly"`
 }
 
 // TaskEditPage — правка.
 type TaskEditPage struct {
 	Shell
-	UID       string        `json:"uid"`
-	Form      Form          `json:"form"`
-	Done      bool          `json:"done"`
-	Percent   *int          `json:"percent"`
-	Reminders []ReminderRow `json:"reminders"`
-	Attach    []AttachRow   `json:"attach"`
-	Loss      *LossReport   `json:"loss"`
-	Delete    *Action       `json:"delete"` // внизу формы, одна кнопка без строки под ней; nil — у новой записи
+	UID  string `json:"uid"`
+	Name Text   `json:"name"` // заголовок: название задачи, у новой — «New task» (s-tasks-3)
+	// Subtitle — список и просрочка тревогой: «nextcloud · Дела ·
+	// ‹overdue by 3 days›» (s-tasks-3)
+	Subtitle Runs `json:"subtitle"`
+	// Form — поля в рубриках кадра: выполнение (Done, Percent complete) и
+	// напоминания (reminder.N) — его строки
+	Form   Form        `json:"form"`
+	Attach []AttachRow `json:"attach"`
+	// Source — рубрика Source формы (s-tasks-3): Path, Read и сравнение с
+	// сервером; у новой — без пути
+	Source SourceBlock `json:"source"`
+	Loss   *LossReport `json:"loss"`
+	Delete *Action     `json:"delete"` // внизу формы, одна кнопка без строки под ней; nil — у новой записи
 }
 
 type NotePage struct {

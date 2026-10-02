@@ -31,7 +31,8 @@ spec/fixtures/<screen>/<state>.json
 `partial`, `long`, `conflict`, `narrow`, `loss`, `unavailable`, `outcome`,
 `refused`, и шаги страниц вне оболочки по `data-part` их кадров — `sent`,
 `options`, `no-mail`, `wipe-sent`, `asked`, `password`; `link` — приглашение
-ссылкой, без поля адреса (у `invite/normal` — приглашение письмом, s-auth-12).
+ссылкой, без поля адреса (у `invite/normal` — приглашение письмом, s-auth-12);
+`new` — полная форма новой задачи и заметки (`/new`) в каталоге правки.
 
 ## Имена полей
 

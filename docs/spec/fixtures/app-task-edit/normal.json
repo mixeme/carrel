@@ -11,7 +11,6 @@
     "method": "POST"
   },
   "details": null,
-  "done": false,
   "form": {
     "action": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit",
     "actions": [
@@ -136,6 +135,7 @@
         "legend": "When",
         "rows": [
           {
+            "disables": "start.time due.time",
             "error": "",
             "extra": null,
             "hint": "",
@@ -169,7 +169,7 @@
             "mono": true,
             "name": "start.time",
             "options": [],
-            "readOnly": false,
+            "readOnly": true,
             "required": false,
             "value": ""
           },
@@ -195,7 +195,7 @@
             "mono": true,
             "name": "due.time",
             "options": [],
-            "readOnly": false,
+            "readOnly": true,
             "required": false,
             "value": ""
           }
@@ -283,7 +283,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "0"
           },
           {
             "error": "",
@@ -436,7 +436,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "Separated by commas.",
+            "hint": "",
             "kind": "text",
             "label": "Tags",
             "name": "categories",
@@ -448,17 +448,12 @@
           {
             "error": "",
             "extra": null,
-            "hint": "A record that is not loaded here: its UID.",
+            "hint": "",
             "kind": "select",
             "label": "Related to",
             "mono": true,
             "name": "related",
             "options": [
-              {
-                "label": "1d55-90fe-3c27",
-                "selected": true,
-                "value": "1d55-90fe-3c27"
-              },
               {
                 "colour": "#3f6e8c",
                 "label": "Дописать раздел про кэш",
@@ -472,6 +467,48 @@
                 "meta": "task · 12 Aug",
                 "selected": false,
                 "value": "aa11-2d09-5f84"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Забрать документы",
+                "meta": "event · 11 Aug",
+                "selected": true,
+                "value": "1d55-90fe-3c27"
+              },
+              {
+                "colour": "#6b4e7a",
+                "label": "Ревью архитектуры",
+                "meta": "event · 11 Aug",
+                "selected": false,
+                "value": "9c27-0e5d-4412"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Созвон с подрядчиком",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "7ae3-1c48-55b0"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Синк-ап по релизу",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "8f1c-4a02-b7d3"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Дежурство: первая линия",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "2f04-8b71-e39a"
+              },
+              {
+                "colour": "#8c6239",
+                "label": "Дежурство: первая линия",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "5e90-33c1-a8d2"
               },
               {
                 "colour": "#3f6e8c",
@@ -499,6 +536,7 @@
             "placeholder": "UID of the record",
             "readOnly": false,
             "required": false,
+            "suggest": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/related",
             "value": "1d55-90fe-3c27"
           }
         ],
@@ -507,8 +545,8 @@
     ]
   },
   "loss": null,
+  "name": "Отправить документы в МФЦ",
   "notices": [],
-  "percent": null,
   "print": {
     "range": "",
     "taken": "",
@@ -693,16 +731,24 @@
     "tags": [],
     "ticks": null
   },
-  "reminders": [
+  "source": {
+    "changed": "10 August 2026, 17:04",
+    "colour": "#4a6b52",
+    "compared": "not changed on server",
+    "lastRead": "2 min ago",
+    "objects": null,
+    "path": "/alice/calendars/dela/aa10-77bc-0e31.ics",
+    "readOnly": false,
+    "stamp": "nextcloud · Дела",
+    "uid": ""
+  },
+  "subtitle": [
     {
-      "fields": [],
-      "label": "1 day before",
-      "remove": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      }
+      "text": "nextcloud · Дела · "
+    },
+    {
+      "mark": "danger",
+      "text": "overdue by 3 days"
     }
   ],
   "title": "Edit task",

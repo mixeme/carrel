@@ -66,6 +66,11 @@ func (s *Server) registerRoutes() {
 	s.handle("POST /app/contacts/{account}/{col}/{uid}/timeline/columns", (*Server).postTimelineColumns)
 
 	s.handle("GET /app/contacts/suggest", (*Server).getContactsSuggest)
+	// The suggestions of Related to (s-tasks-10, s-notes-20): the record's
+	// own address, «new» for one not yet made.
+	for _, kind := range []string{"tasks", "notes"} {
+		s.handle("GET /app/"+kind+"/{account}/{col}/{uid}/related", relatedSuggestHandler(kind))
+	}
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/timeline", (*Server).getContactTimeline)
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/rewrite", (*Server).getContactRewrite)
 	s.handle("POST /app/contacts/{account}/{col}/{uid}/rewrite", (*Server).postContactRewrite)
@@ -167,6 +172,12 @@ func registerKindRoutes(s *Server, kind string) {
 	s.handle("GET /app/"+kind+"/quick", kindQuickEntryHandler(kind))
 	s.handle("GET /app/"+kind+"/{account}/{col}/new/quick", kindQuickGetHandler(kind))
 	s.handle("POST /app/"+kind+"/{account}/{col}/new/quick", kindQuickPostHandler(kind))
+}
+
+func relatedSuggestHandler(kind string) handler {
+	return func(s *Server, w http.ResponseWriter, r *http.Request) {
+		s.getRelatedSuggest(w, r, kind)
+	}
 }
 
 func kindRootHandler(kind string) handler {
