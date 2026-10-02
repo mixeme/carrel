@@ -4,6 +4,70 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.2.0 — 2026-10-02
+
+The calendar section: the second section built whole. Typecase `9e69804`
+(Carrel's tasks 71–77: a menu in a rubric and in a line, days as one row,
+the time zone as a menu of the form's radio buttons, a bar's ticks of
+several checks, the attendees' tags), server `v0.2.142`. Each screen went in
+as the draft `frame2go -self` printed, alone, then the screen over it.
+
+**Tagged:** `client-v0.2.0`.
+
+### Added
+
+- **The agenda** (`/app/calendar`, `/app/calendar/{account}/{col}`,
+  `s-agenda-1`; the poll running `states-13`, nothing ticked `states-14`,
+  one calendar's empty week `states-15`) from `AgendaPage`: the head with
+  what is open and shown, New event with its arrow in the combined view; the
+  bar — the step back, Today and forward, the windows (links), the range of
+  dates (a GET form), «Events · Tasks due · Notes» and «Compact rows» (GET
+  forms of ticks), «⋯» with their twins; the poll's bar with its right; the
+  days that have events, a row each record; the empty state; the event's
+  panel (`?open=`) — its fields, description, attendees, attachments with
+  Attach and its arrow, related records, source, deletion.
+- **The event** (`/app/calendar/{account}/{col}/{uid}`, `s-agenda-2`) from
+  `EventPage`: read, not edited — Edit, New task, Print, «⋯»; the same event
+  in other calendars.
+- **The edit and the full new form** (`…/{uid}/edit`, `…/new`,
+  `s-agenda-3`, `-15`) from `EventEditPage`: When with All day and the time
+  zone as a choice with its menu, Reminders with «Add reminder», Attendees
+  as tags with the line the next is typed in, Attachments, Repeats with its
+  days as one row, what is kept as the server sent it; the deletion and the
+  line of a series under the form.
+- **`bind` for them**: the head's line in its pieces (`Sub`), a person of an
+  event read (`Attendee`) and the field of attendees (`Attendees`), a form's
+  tick (`Check`), the days of a series (`Days`), a choice with its menu
+  (`PickMenu`); a field's value in its pieces and its badge
+  (`FieldsItem`: `Field.Runs`, `.Badge`); the right of the poll's bar
+  (`PollBar.Aside`); an action's file (`ActionForm`: `Action.File`). A test
+  for each.
+- **The meaning guard's table**: a choice that opens its menu (the time
+  zone) and a menu's line that finds its items are no findings; bites in
+  `TestMeaningRules`.
+- U-5.5 rows 23–29 and row 22 wider (the owner's decision of 01.10.2026):
+  what the library or the frames do not give yet, each with its Typecase
+  task or the server's debt (C22, C23 — plan, «Экраны раздела»).
+
+### Changed
+
+- **The rubric of subscriptions** carries the screen's badge «external» by
+  `RailSection.Feeds` (Ж8, ЗЖ4; `TestSources` red before the fix).
+- **The row of the combined view, ticked off,** stays as it is: nothing is
+  ticked, no source is hidden (`states-14`; `TestTickRow` red before).
+
+### Not yet
+
+- **Held against their frames only in part** (U-5.5 22–29): the state
+  frames of the agenda are drawn shorter than the model and `s-agenda-1`;
+  one calendar has no frame of its own; the edit's frame has a second
+  reminder and an organiser from the books; a new event has no Attach
+  (C22); the range of dates sends no `view=range`; a file goes from no
+  form without a script; no frame takes an attachment off.
+- **The suggestions of attendees** (`s-agenda-12`, `-13`) come with the live
+  layer (stage 4): without a script what is typed goes with the form, and
+  the server finds the person.
+
 ## v0.1.4 — 2026-10-02
 
 Typecase `9e69804` (Carrel's task 77, the calendar's frames; the live layer
