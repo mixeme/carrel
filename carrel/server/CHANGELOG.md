@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.134 — 2026-10-02
+
+The password sheet works without scripts (U-8; the lead's decision: a
+defect).
+
+### Fixed
+
+- **`POST /app/settings/unlock` as a plain form** answered 404: the sheet
+  opened by a plain link is a page, and its form could not be sent. Now the
+  right password opens the window and redirects to the page the sheet was
+  opened over; a wrong one answers the sheet as a page with the error at
+  its field. The sheet's form carries a hidden **`back`** — `?back=`, else
+  where the link was followed from —, followed only when it is a page of
+  this instance under `/app/` or `/admin/`; otherwise Connections. Lock now
+  reads its way back by the same check. With scripts nothing changed.
+- No other sheet answered a plain POST with 404 (the pattern was looked for
+  in every handler; the progress poll is a fragment by its nature).
+
+### For consumers
+
+Send the sheet's hidden `back` with its form. Fixture regenerated:
+`app-settings-unlock/normal`.
+
 ## v0.2.133 — 2026-10-02
 
 The photo buttons of a new contact's form send the form itself, so what was

@@ -564,9 +564,11 @@ func TestUnlockRequiresPassword(t *testing.T) {
 	if top(sess) != top(other) {
 		t.Fatal("wrong password changed the shell")
 	}
+	// Without scripts the sheet is a page, and a wrong password brings it
+	// back as one (U-8; it was a 404).
 	rec = h.do(postForm("/app/settings/unlock", sess, url.Values{"password": {"wrongpassword"}}))
-	if rec.Code != http.StatusNotFound {
-		t.Fatalf("unlock as a page: status = %d, want 404", rec.Code)
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "Password is wrong") {
+		t.Fatalf("unlock as a page: status = %d, %s", rec.Code, rec.Body.String())
 	}
 
 	rec = h.do(fragment(postForm("/app/settings/unlock", sess, url.Values{"password": {"password123"}}), "sheet"))

@@ -35,14 +35,26 @@
             "error": "",
             "extra": null,
             "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "back",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "focus": true,
+            "hint": "",
             "kind": "password",
             "label": "Your Carrel password",
             "name": "password",
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": "",
-            "focus": true
+            "value": ""
           }
         ],
         "unfold": null

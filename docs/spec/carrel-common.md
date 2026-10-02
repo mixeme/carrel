@@ -493,7 +493,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/settings/davloom` | GET, POST | вход | страница | `DavloomPage` |
 | `/app/settings/backup` | GET, POST | вход | страница | `BackupPage` |
 | `/app/settings/appearance` | GET, POST | вход | страница | `AppearancePage` |
-| `/app/settings/unlock` | GET, POST | вход | лист | `UnlockSheet` |
+| `/app/settings/unlock` | GET, POST | вход | лист, редирект | `UnlockSheet`; без сценариев — страница (U-8): скрытое `back` — страница, над которой открыт лист (`?back=` или откуда пришли по ссылке, только `/app/` и `/admin/` этого адреса); POST с верным паролем — редирект туда (иначе Connections), с неверным — лист страницей с ошибкой у поля |
 | `/app/settings/lock` | POST | вход | редирект | — ; Lock now (`TopBar.Lock`, s-profile-4, s-plan-1…5): выдача учётных данных этого сеанса закрывается до срока, вход остаётся (S-10.7); ответ — страница, где нажали (`Referer` этого же адреса), иначе Connections |
 
 `unlock` — общий лист подтверждения пароля, открывающий выдачу учётных данных

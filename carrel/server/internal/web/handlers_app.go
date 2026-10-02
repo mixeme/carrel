@@ -154,13 +154,16 @@ func connectionWarnings(server, certFingerprint string) []view.Notice {
 	return out
 }
 
-func (s *Server) unlockSheet(sess *session.Session, errText view.Text) view.UnlockSheet {
+// unlockSheet is the password sheet; back is the page it was opened over,
+// where its form goes back to when it is a page of its own (no scripts).
+func (s *Server) unlockSheet(sess *session.Session, errText view.Text, back string) view.UnlockSheet {
 	sheet := view.UnlockSheet{
 		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, issue a davloom device password, change key escrow, or delete your account."),
 		Warning: text("Everything revealed in this window is written to the audit log."),
 		// The person's own password, not the server's (s-plan-3, s-profile-3).
 		Form: focused(withPrimary(s.plainForm("/app/settings/unlock", "POST",
 			csrfField(sess),
+			view.FormRow{Name: "back", Kind: view.InputHidden, Value: text(back)},
 			view.FormRow{Name: "password", Label: "Your Carrel password", Kind: view.InputPassword, Required: true, Error: errText},
 		), "unlock.submit", "Show"), "password"),
 	}
@@ -175,13 +178,43 @@ func (s *Server) getSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	// The page the sheet is opened over: ?back=, else where the link was
+	// followed from.
+	back, ok := s.returnPath(r, r.URL.Query().Get("back"))
+	if !ok {
+		back, _ = s.returnPath(r, r.Referer())
+	}
 	if render.WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, ""), nil)
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, "", back), nil)
 		return
 	}
 	// Without scripts a sheet is a page of its own (U-8): "Show password" is
 	// a plain link here, and a 404 behind it left no way to the password.
-	s.writePage(w, r, http.StatusOK, s.unlockSheet(sess, ""))
+	s.writePage(w, r, http.StatusOK, s.unlockSheet(sess, "", back))
+}
+
+// returnPath reads a page of this instance to come back to, from an address
+// (a Referer) or a path (a form's back): a path under /app/ or /admin/ of
+// this origin and base path, with its query. Anything else — another host,
+// //host, a page outside the shell — is not followed.
+func (s *Server) returnPath(r *http.Request, raw string) (string, bool) {
+	u, err := url.Parse(raw)
+	if err != nil || raw == "" || u.Opaque != "" || u.User != nil {
+		return "", false
+	}
+	if u.Scheme != "" || u.Host != "" {
+		if (u.Scheme != "http" && u.Scheme != "https") || u.Host != r.Host {
+			return "", false
+		}
+	}
+	p, ok := strings.CutPrefix(u.EscapedPath(), s.basePath+"/")
+	if !ok || strings.HasPrefix(p, "/") || strings.Contains(p, "\\") || !(strings.HasPrefix(p, "app/") || strings.HasPrefix(p, "admin/")) {
+		return "", false
+	}
+	if u.RawQuery != "" {
+		p += "?" + u.RawQuery
+	}
+	return "/" + p, true
 }
 
 // postSettingsLock is Lock now (s-profile-4, s-plan-1…5): the unlock window
@@ -196,15 +229,9 @@ func (s *Server) postSettingsLock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sess.SetUnlockUntil(time.Time{})
-	back := "/app/settings/connections"
-	if ref, err := url.Parse(r.Referer()); err == nil && ref.Host == r.Host && (ref.Scheme == "http" || ref.Scheme == "https") {
-		if p, ok := strings.CutPrefix(ref.EscapedPath(), s.basePath+"/"); ok && !strings.HasPrefix(p, "/") && !strings.Contains(p, "\\") &&
-			(strings.HasPrefix(p, "app/") || strings.HasPrefix(p, "admin/")) {
-			back = "/" + p
-			if ref.RawQuery != "" {
-				back += "?" + ref.RawQuery
-			}
-		}
+	back, ok := s.returnPath(r, r.Referer())
+	if !ok {
+		back = "/app/settings/connections"
 	}
 	s.redirect(w, r, back)
 }
@@ -219,10 +246,7 @@ func (s *Server) postSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if !render.WantsFragment(r) {
-		s.notFound(w, r)
-		return
-	}
+	back, backOK := s.returnPath(r, r.FormValue("back"))
 	start := time.Now()
 	if !s.limit.allowLogin(sess.Login(), s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
@@ -230,11 +254,22 @@ func (s *Server) postSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 	}
 	if !s.users.Unlock(r.Context(), sess.AccountID(), r.FormValue("password")) {
 		constantTimeDelay(start, 300*time.Millisecond)
-		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, text("Password is wrong.")), nil)
+		// Without scripts the sheet is a page of its own (U-8): it comes
+		// back as one, the error at its field.
+		s.writePage(w, r, http.StatusOK, s.unlockSheet(sess, text("Password is wrong."), back))
 		return
 	}
 	sess.SetUnlockUntil(time.Now().Add(s.cfg.UnlockTTL))
+	if !render.WantsFragment(r) {
+		// A plain form goes back to the page the sheet was opened over; it
+		// draws the open window itself.
+		if !backOK {
+			back = "/app/settings/connections"
+		}
+		s.redirect(w, r, back)
+		return
+	}
 	top := s.buildShell(sess, "").Top
 	extra := []render.OOB{{Target: render.TargetTopbar, Body: top}}
-	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, ""), extra)
+	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, "", back), extra)
 }
