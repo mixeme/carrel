@@ -4,6 +4,35 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.3.1 — 2026-10-02
+
+Typecase `d29ecf8` (Carrel's tasks 96, 98–103, 109, 111 and the owner's
+acceptance of 02.10.2026), server `v0.2.150`. The drafts that print otherwise
+went in first, unchanged (`52a47d9`); the screens over them here.
+
+### Changed
+
+- **A file without a script** (task 109): «From this computer» in every
+  Attach menu is the label of its file input, which the browser opens
+  without a script, and «Upload» after the menu's items, shown only without
+  a script, sends the file picked (`bind.MenuItems`, `bind.Uploads`); the
+  photo's Replace and Add likewise, «Upload» beside them
+  (`bind.FileButton`, `bind.Upload`; the input takes a picture).
+- **Related to without a script** (task 96): the records loaded are the
+  choices of its line, each sent by its UID and shown with what it is
+  (`bind.Related`, `TagAdd.Options`).
+- **All day switches off both times** (task 111): the library's check takes
+  the names the server sends.
+- **The agenda's Day · Week · Month · Range** fold on a phone's bar only
+  (`SegFold.Phone`).
+- The meaning guard's table: a button or a menu's item that picks a file is
+  judged by its file field — a form of the page and the field's name.
+
+### Closed
+
+- U-5.5 rows 28 (a file without a script), 30 (Related to without a
+  script), 34 (All day's two fields).
+
 ## v0.3.0 — 2026-10-02
 
 The tasks section: the third section built whole. Typecase `bc575a8`,

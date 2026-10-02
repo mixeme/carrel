@@ -148,7 +148,7 @@ const (
 // must carry (docs/guide/screen.md of Typecase, §3 and §5).
 var contract = map[string]rule{
 	"Button": func(c control) string {
-		if c.v.FieldByName("State").Int() == buttonDisabled || c.opens {
+		if c.v.FieldByName("State").Int() == buttonDisabled || c.opens || picksFile(c) {
 			return ""
 		}
 		for _, f := range []string{"Href", "Form", "Adds", "Opens"} {
@@ -253,6 +253,8 @@ var contract = map[string]rule{
 		switch {
 		case c.str("Reason") != "": // switched off, says why
 			return ""
+		case picksFile(c): // the label of a file input, judged as its FileField
+			return ""
 		case c.str("Href") != "":
 			return ""
 		case c.str("Form") != "": // submits a PostForm of the page (Sign out, Typecase's task 68)
@@ -263,6 +265,21 @@ var contract = map[string]rule{
 			return "a menu item with Name in a menu that is no form (Menu.Action)"
 		}
 		return "a menu item that leads nowhere (Href) and sends nothing (Name)"
+	},
+	// A file without a script (Typecase's task 109): the file input whose
+	// label a button or a menu's item is (Button.File, MenuItem.File) — «From
+	// this computer», the photo's Replace — sends its file under its Name
+	// with a PostForm of the page (Form), which «Upload» beside it submits
+	// without a script (NoScript, a Button or a MenuItem with Form).
+	"FileField": func(c control) string {
+		var msg []string
+		if m := needs("Form")(c); m != "" {
+			msg = append(msg, m)
+		}
+		if c.str("Name") == "" {
+			msg = append(msg, "a file field without Name")
+		}
+		return strings.Join(msg, "; ")
 	},
 	// The forms: what sends. Their parts are judged in the form's context.
 	"Form":     func(control) string { return "" }, // a Form without Action is a group of fields: its fields say so
@@ -296,6 +313,13 @@ var contract = map[string]rule{
 	},
 	// What a tick box sends is judged on the box that has it.
 	"Send": func(control) string { return "" },
+}
+
+// picksFile says whether a button or a menu's item is the label of a file
+// input (File, Typecase's task 109): what it sends is its FileField's.
+func picksFile(c control) bool {
+	f := c.v.FieldByName("File")
+	return f.IsValid() && f.Kind() == reflect.Pointer && !f.IsNil()
 }
 
 // opensForm says whether the widget is a form that sends, for its parts.
@@ -369,7 +393,7 @@ func Meaning(v any, forms ...string) []string {
 			if id := c.str("ID"); id != "" && (name == "PostForm" || c.str("Action") != "") {
 				ids = append(ids, id)
 			}
-		case "Button", "MenuItem":
+		case "Button", "MenuItem", "FileField":
 			if f := c.str("Form"); f != "" {
 				names = append(names, named{c.path, f})
 			}

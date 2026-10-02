@@ -41,8 +41,10 @@ func submitWithFile(path string, sess *session.Session, form url.Values, field, 
 // for this draft; Save creates the event under that UID with the files in
 // it. Nothing is written before Save.
 func TestNewEventAttachIsTheFrame(t *testing.T) {
-	frame := mockupFrame(t, "s-agenda-15")
-	if !strings.Contains(frame, ">From this computer</button>") || !strings.Contains(frame, ">From Files</button>") {
+	// «From this computer» is the label of its file input (Typecase's task
+	// 109), «From Files» a button.
+	items := strings.Join(frameMenu(t, "s-agenda-15"), "\n")
+	if !strings.Contains(items, "From this computer [i-up]") || !strings.Contains(items, "From Files [i-file]") {
 		t.Fatal("s-agenda-15 draws no Attach with its arrow: read the frame again")
 	}
 	f := attachFixture(t, 0, []string{"carrel"})

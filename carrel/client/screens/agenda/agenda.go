@@ -228,7 +228,9 @@ func bar(p *view.AgendaPage) w.Bar {
 			}
 		}
 		if len(seg.Options) > 0 {
-			items = append(items, seg)
+			// Day · Week · Month · Range — links that fold on a phone's bar
+			// only (SegFold.Phone, s-agenda-1)
+			items = append(items, w.SegFold{Seg: seg, Phone: true})
 		}
 		if r.Form != nil {
 			rng := dates(*r.Form)
@@ -367,7 +369,7 @@ func side(d view.Details) *w.Side {
 		if attach != nil {
 			b := bind.Button(*attach, "")
 			b.Icon, b.Menu, b.Small = "", true, true
-			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(attach.Arrow, ""), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
+			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
 		}
 		sec := []w.SecPart{rubric}
 		if len(d.Attach) > 0 {
@@ -441,3 +443,7 @@ func source(s view.SourceBlock) w.Diag {
 	}
 	return bind.Diag(bind.DiagLine{Name: "Path", Value: string(s.Path)}, bind.DiagLine{Name: "Read", Value: read})
 }
+
+// upload is the screen's word (U-1.3) for the item after Attach's arrow that
+// sends the file picked on a page without a script (Typecase's task 109).
+const upload = "Upload"

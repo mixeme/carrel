@@ -104,7 +104,7 @@ func Screen(p *view.EventPage) w.Shell {
 		if attach != nil {
 			b := bind.Button(*attach, "")
 			b.Icon, b.Menu, b.Small = "", true, true
-			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(attach.Arrow, ""), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
+			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
 		}
 		sec := []w.SecPart{rubric}
 		if len(p.Attach) > 0 {
@@ -217,3 +217,7 @@ func attachments(rows []view.AttachRow) [][]w.SecItemPart {
 	}
 	return out
 }
+
+// upload is the screen's word (U-1.3) for the item after Attach's arrow that
+// sends the file picked on a page without a script (Typecase's task 109).
+const upload = "Upload"

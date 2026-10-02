@@ -219,6 +219,18 @@ func TestMeaningRules(t *testing.T) {
 		"a menu's line that finds is no field": {w.Menu{Items: []w.MenuPart{w.Input{Kind: w.InputSearch, Placeholder: "Find a zone"}}}, nil},
 		"a line of text in a menu is":          {w.Menu{Items: []w.MenuPart{w.Input{Placeholder: "Find a zone"}}}, []string{"(Input): a field without Name"}},
 		"a search line outside a menu is":      {w.Form{Action: "/e", Items: []w.FormPart{w.Field{Parts: []w.FieldPart{w.Input{Kind: w.InputSearch}}}}}, []string{"(Input): a field without Name"}},
+		// A file without a script (Typecase's task 109): the button or the
+		// item is the label of a file input of a PostForm of the page, which
+		// «Upload» (shown only without a script) sends.
+		"a button and an item that pick a file": {w.Line{Items: []w.LinePart{
+			w.Button{Label: "Replace", File: &w.FileField{Form: "post", Name: "photo"}}, w.Button{Label: "Upload", Form: "post", NoScript: true},
+			w.Drop{Trigger: w.Button{Label: "Attach", Menu: true}, Menu: w.Menu{Items: []w.MenuPart{
+				w.MenuItem{Label: "From this computer", File: &w.FileField{Form: "post", Name: "file"}}, w.MenuItem{Label: "Upload", Form: "post", NoScript: true}}}},
+		}}, nil},
+		"a file of a form nobody has": {w.Line{Items: []w.LinePart{w.Button{Label: "Replace", File: &w.FileField{Form: "photo", Name: "photo"}}}},
+			[]string{`(FileField): submits form "photo", which is not on the page`}},
+		"a file of no form, of no name": {w.Menu{Items: []w.MenuPart{w.MenuItem{Label: "From this computer", File: &w.FileField{}}}},
+			[]string{"(FileField): no Form; a file field without Name"}},
 	} {
 		found := guard.Meaning(c.tree, "post")
 		if len(found) != len(c.want) {

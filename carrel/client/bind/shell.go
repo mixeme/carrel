@@ -86,7 +86,10 @@ func TopForms(t view.TopBar) []w.PostForm {
 
 // MenuItems are the items of a menu (C-6.2 MenuItem), a rule before an item
 // that has one (Separator): its icon, its words, where it goes — an item
-// that posts (Sign out) submits the form of its ID (MenuForms); the mark of
+// that posts (Sign out) submits the form of its ID (MenuForms), one that
+// carries a file (Action.File: «From this computer») is the label of the
+// file input of that form, which the browser opens without a script
+// (Typecase's task 109; its «Upload» — Uploads); the mark of
 // its collection (Colour) and the muted words at its end (Aside, «last
 // used»); one switched off says why (Reason), and one of a collection that
 // cannot be written to carries ro, the screen's word for it; a destructive
@@ -101,6 +104,8 @@ func MenuItems(items []view.MenuItem, ro string) []w.MenuPart {
 		switch {
 		case !it.Enabled:
 			m.Reason = string(it.Reason)
+		case it.Method == "POST" && it.File != "":
+			m.File = &w.FileField{Form: it.ID, Name: it.File, Label: string(it.Label)}
 		case it.Method == "POST":
 			m.Form = it.ID
 		default:
@@ -119,6 +124,21 @@ func MenuItems(items []view.MenuItem, ro string) []w.MenuPart {
 			m.Tone = w.MenuToneDanger
 		}
 		out = append(out, m)
+	}
+	return out
+}
+
+// Uploads are the items «Upload» of a menu's items that carry a file
+// (MenuItems), each shown only on a page without a script and sending the
+// form of its item's ID with the file picked (Typecase's task 109); word is
+// the screen's. The frames draw them after the menu's items (s-agenda-6,
+// s-tasks-7).
+func Uploads(items []view.MenuItem, word string) []w.MenuPart {
+	var out []w.MenuPart
+	for _, it := range items {
+		if it.Method == "POST" && it.Enabled && it.File != "" {
+			out = append(out, w.MenuItem{Label: word, NoScript: true, Form: it.ID})
+		}
 	}
 	return out
 }
@@ -533,8 +553,6 @@ const csrfField = "_csrf"
 // nothing else sends it —, and multipart with the action's file field
 // (Action.File: Attach, «From this computer») where it carries a file.
 func ActionForm(a view.Action, id string) w.PostForm {
-	// ждёт библиотеку: U-5.5 #28 — the file field stands in a form nobody
-	// sees: without a script no file is chosen
 	f := w.PostForm{ID: id, Action: a.Href, File: a.File}
 	if a.CSRF != "" {
 		f.Fields = []w.Hidden{{Name: csrfField, Value: a.CSRF}}

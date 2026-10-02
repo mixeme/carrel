@@ -416,6 +416,9 @@ a.tc-btn[aria-disabled=true]{opacity:.45;cursor:default}
 .tc-segfold__item.is-on{background:var(--tc-card)}
 .tc-segfold__count{margin-left:auto;color:var(--tc-dusty)}
 .tc-seg__opt.is-on{background:var(--tc-card);color:var(--tc-ink);font-weight:600}
+/* Вариант-ссылка — того же цвета, что вариант-кнопка: правило ссылок корня (color:inherit) его не перекрашивает. */
+.tc-root a.tc-seg__opt{color:var(--tc-muted)}
+.tc-root a.tc-seg__opt.is-on{color:var(--tc-ink)}
 /* Сегмент на радиокнопках: выбранный — тот, чья кнопка отмечена. */
 label.tc-seg__opt{position:relative;cursor:pointer}
 .tc-seg__opt:has(> .tc-seg__box:checked){background:var(--tc-card);color:var(--tc-ink);font-weight:600}
@@ -691,6 +694,10 @@ a.tc-row__title:hover{text-decoration:underline}
 [data-tc-noscript] .tc-checkform__apply{display:contents}
 /* «Save as» показанного текста (задача 94): файл собирает сценарий страницы — без него кнопки нет. */
 [data-tc-noscript] [data-tc-save]{display:none}
+/* Файл без сценария (задача 109): кнопка и пункт — подпись поля файла, браузер открывает выбор сам. Со сценарием выбор сразу отправляет форму; без него поле видно, и Upload отправляет. */
+.tc-file{position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;pointer-events:none}
+:root:not([data-tc-noscript]) .tc-nojs{display:none}
+[data-tc-noscript] .tc-file{position:static;opacity:1;width:auto;height:auto;max-width:200px;font-size:11px;pointer-events:auto}
 /* Двойник отметок в меню «⋯» (задача 82): та же форма, отметки — пункты-флажки столбиком; Apply без сценария — под ними. */
 .tc-menu .tc-checkform{display:flex;flex-direction:column;align-items:stretch;gap:0}
 [data-tc-noscript] .tc-menu .tc-checkform__apply{display:block;padding:4px 10px 6px}
@@ -716,6 +723,9 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-menu__item.is-drag{opacity:.5}
 .tc-menu__item > .tc-ico--op-35:first-of-type{cursor:grab}
 .tc-menu__item:disabled{opacity:.45;cursor:default}
+/* Выбор коллекции (задача 103): метка — и в пункте, и в поле; коллекция только для чтения видна со значком ro, не выбирается, причина — в подсказке. */
+.tc-menu__item:has(> .tc-seg__box:disabled){cursor:default}
+.tc-in.is-pick > .tc-mark{margin-right:7px}
 .tc-menu__item > svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.3;fill:none;stroke-linecap:round;opacity:.75}
 .tc-menu__item > .tc-kbd{margin-left:auto}
 /* Разделитель меню — 1 px: полпикселя на короткой линии пропадает. */
@@ -737,6 +747,10 @@ label.tc-menu__item{position:relative;cursor:pointer}
 /* Форма POST без полей — для кнопок вне формы (атрибут form): её не видно. */
 .tc-post{display:none}
 .tc-doc__table{margin:14px 0 4px}
+/* Части текста заметки (задача 102): цитата — приглушённый текст за чертой; код — как написан, длинная строка прокручивается в блоке; вложенный список — кружками. */
+.tc-doc__quote{margin:0;padding:2px 0 2px 14px;border-left:2px solid var(--tc-rule);color:var(--tc-muted);font-size:14.5px;line-height:1.7}
+.tc-doc__code{margin:0;font-family:var(--tc-font-mono);font-size:12px;line-height:1.6;background:var(--tc-card);border-radius:3px;padding:10px 12px;overflow-x:auto;white-space:pre;scrollbar-width:thin}
+.tc-doc__bullets .tc-doc__bullets.tc-doc__bullets{margin-top:6px;list-style:circle}
 .tc-doc__tablebar{display:none;justify-content:flex-end;margin-bottom:6px}
 .tc-doc__scroll{overflow-x:auto;scrollbar-width:thin}
 .tc-doc__grid{border-collapse:collapse;width:100%;font-size:13.5px;line-height:1.45}
@@ -830,6 +844,11 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-bar--wide .tc-segfold__pick{display:block}
   .tc-bar--wide:has(.is-2nd) .tc-bar__more,.tc-bar--wide:has(.is-2nd) .tc-drop:has(> .tc-bar__more){display:inline-flex}
   .tc-bar--wide:has(.is-2nd) .tc-bar__more + .tc-menu{display:block}
+}
+/* Короткий переключатель (.tc-segfold--phone, Day / Week / Month / Range агенды) широкая полоса держит целиком: он складывается только на телефоне, с 640. */
+@container tcbox (min-width:641px){
+  .tc-bar .tc-segfold.tc-segfold--phone > .tc-seg{display:inline-flex}
+  .tc-bar .tc-segfold.tc-segfold--phone > .tc-segfold__pick{display:none}
 }
 /* Без is-2nd панели правки нужно 740: дальше кнопки теряют подписи, не действия, и стоят плотнее. */
 @container tcbox (max-width:740px){
@@ -3344,7 +3363,7 @@ Read  2 min ago</div>
             <div class="tc-field__photo-row">
               <span class="tc-avatar--photo"></span>
               <div class="tc-stack tc-stack--gap-6 tc-field__photo-side">
-                <span class="tc-line tc-line--gap-6"><button class="tc-btn" type="button">Replace</button><button class="tc-btn" type="button">Crop</button></span>
+                <span class="tc-line tc-line--gap-6"><label class="tc-btn">Replace<input class="tc-file" type="file" name="photo" form="post-photo" accept="image/*" aria-label="Photo"></label><button class="tc-btn tc-nojs" type="submit" form="post-photo">Upload</button><button class="tc-btn" type="button">Crop</button></span>
                 <button class="tc-btn is-danger" type="button">Remove</button>
                 <span class="tc-field__hint tc-field__hint--max150">EXIF orientation applied, metadata stripped.</span>
               </div>
@@ -3527,7 +3546,7 @@ Read  2 min ago</div>
             <div class="tc-field__photo-row">
               <span class="tc-avatar--photo is-ph">АК</span>
               <div class="tc-stack tc-stack--gap-6 tc-field__photo-side">
-                <button class="tc-btn" type="button">Add</button>
+                <span class="tc-line tc-line--gap-6"><label class="tc-btn">Add<input class="tc-file" type="file" name="photo" form="post-photo" accept="image/*" aria-label="Photo"></label><button class="tc-btn tc-nojs" type="submit" form="post-photo">Upload</button></span>
                 <span class="tc-field__hint tc-field__hint--max150">JPEG, PNG, GIF or WebP.</span>
               </div>
             </div>
@@ -3626,7 +3645,7 @@ Read  2 min ago</div>
             <div class="tc-field__photo-row">
               <span class="tc-avatar--photo"></span>
               <div class="tc-stack tc-stack--gap-6 tc-field__photo-side">
-                <button class="tc-btn" type="button">Add</button>
+                <span class="tc-line tc-line--gap-6"><label class="tc-btn">Add<input class="tc-file" type="file" name="photo" form="post-photo" accept="image/*" aria-label="Photo"></label><button class="tc-btn tc-nojs" type="submit" form="post-photo">Upload</button></span>
                 <span class="tc-field__hint tc-field__hint--max150">JPEG, PNG, GIF or WebP.</span>
               </div>
             </div>
@@ -3856,7 +3875,7 @@ Read  2 min ago · not changed on server</div>
             <div class="tc-field__photo-row">
               <span class="tc-avatar--photo"></span>
               <div class="tc-stack tc-stack--gap-6 tc-field__photo-side">
-                <span class="tc-line tc-line--gap-6"><button class="tc-btn" type="button">Replace</button><button class="tc-btn" type="button">Crop</button></span>
+                <span class="tc-line tc-line--gap-6"><label class="tc-btn">Replace<input class="tc-file" type="file" name="photo" form="post-photo" accept="image/*" aria-label="Photo"></label><button class="tc-btn tc-nojs" type="submit" form="post-photo">Upload</button><button class="tc-btn" type="button">Crop</button></span>
                 <button class="tc-btn is-danger" type="button">Remove</button>
                 <span class="tc-field__hint tc-field__hint--max150">EXIF orientation applied, metadata stripped.</span>
               </div>
@@ -4463,7 +4482,7 @@ Read  2 min ago</div>
         </div>
         <div class="tc-bar tc-bar--wide">
           <a class="tc-btn" href="/app/calendar?from=2026-08-03" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/app/calendar">Today</a><a class="tc-btn" href="/app/calendar?from=2026-08-17" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
-          <span class="tc-seg"><button class="tc-seg__opt" type="button">Day</button><button class="is-on tc-seg__opt" type="button">Week</button><button class="tc-seg__opt" type="button">Month</button><button class="tc-seg__opt" type="button">Range</button></span>
+          <span class="tc-segfold tc-segfold--phone"><span class="tc-seg"><a class="tc-seg__opt" href="/app/calendar?view=day">Day</a><a class="is-on tc-seg__opt" href="/app/calendar?view=week">Week</a><a class="tc-seg__opt" href="/app/calendar?view=month">Month</a><a class="tc-seg__opt" href="/app/calendar?view=range">Range</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">Week</summary><div class="tc-segfold__menu"><a class="tc-segfold__item" href="/app/calendar?view=day">Day</a><a class="is-on tc-segfold__item" href="/app/calendar?view=week">Week</a><a class="tc-segfold__item" href="/app/calendar?view=month">Month</a><a class="tc-segfold__item" href="/app/calendar?view=range">Range</a></div></details></span>
           <form class="tc-range is-2nd" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-08-10" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
           <span class="tc-bar__sep is-2nd"></span>
           <form class="tc-checkform is-3rd" action="/app/calendar" method="get"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="events" checked><span class="tc-tickrow__tick"></span>Events</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="tasks"><span class="tc-tickrow__tick is-off"></span>Tasks due</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="notes"><span class="tc-tickrow__tick is-off"></span>Notes</label><span class="tc-checkform__apply"><button class="tc-btn is-sm" type="submit">Apply</button></span></form>
@@ -4555,7 +4574,7 @@ Read  2 min ago</div>
           <ul class="tc-sec__list tc-sec__list--cols"><li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="#">Мария Лебедева</a> <span class="tc-dim">· organiser</span></li><li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">Анна Ковалёва</a> <span class="tc-dim">· accepted</span></li><li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="#">Артём Белов</a> <span class="tc-dim">· tentative</span></li><li><span class="tc-mono">v@example.org</span> <span class="tc-dim">· no reply</span></li></ul>
         </div>
         <div class="tc-sec">
-          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
+          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details></div>
           <ul class="tc-stack tc-stack--gap-6 tc-sec__list">
             <li><a class="tc-dim--accent" href="#">release-checklist.md</a> <span class="tc-dim">text/markdown · 3 KB</span> <span class="tc-badge">in the event</span></li>
           </ul>
@@ -4651,7 +4670,7 @@ Read  2 min ago · changed on server 3 days ago</div>
           <ul class="tc-sec__list tc-sec__list--cols"><li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="#">Мария Лебедева</a> <span class="tc-dim">· organiser</span></li><li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">Анна Ковалёва</a> <span class="tc-dim">· accepted</span></li><li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="#">Артём Белов</a> <span class="tc-dim">· tentative</span></li><li><span class="tc-mono">v@example.org</span> <span class="tc-dim">· no reply</span></li></ul>
         </div>
         <div class="tc-sec">
-          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
+          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details></div>
           <ul class="tc-stack tc-stack--gap-6 tc-sec__list">
             <li><a class="tc-dim--accent" href="#">release-checklist.md</a> <span class="tc-dim">text/markdown · 3 KB</span> <span class="tc-badge">in the event</span></li>
           </ul>
@@ -4758,7 +4777,7 @@ Read  2 min ago · changed on server 3 days ago</div>
           <div class="tc-fset">
             <div class="tc-rubric">Attachments</div>
             <div class="tc-grow tc-line tc-line--gap-8">
-              <details class="tc-drop"><summary class="tc-btn"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
+              <details class="tc-drop"><summary class="tc-btn"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details>
               <span class="tc-dim--t12-5">release-checklist.md <span class="tc-dim">text/markdown · 3 KB</span> <span class="tc-badge">in the event</span></span><button class="tc-btn is-sm is-danger" type="button">Remove</button>
             </div>
           </div>
@@ -4848,7 +4867,7 @@ SEQUENCE  2</div>
           <div class="tc-fset">
             <div class="tc-rubric">Attachments</div>
             <div class="tc-grow tc-line tc-line--gap-8">
-              <details class="tc-drop"><summary class="tc-btn"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
+              <details class="tc-drop"><summary class="tc-btn"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details>
               <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Nothing attached</span>
             </div>
           </div>
@@ -4988,8 +5007,9 @@ SEQUENCE  2</div>
     <div class="frame-label"><span>Attach · стрелка</span><span class="frag">меню</span><i>вложение</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w212">
-        <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button>
+        <label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label>
         <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button>
+        <button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button>
       </div>
     </div>
   </div>
@@ -5122,7 +5142,7 @@ SEQUENCE  2</div>
         <div class="tc-sec"><div class="tc-rubric">Description</div><div class="tc-prose tc-prose--t13">Зарядки, переходник, распечатать посадочный.</div></div>
         <div class="tc-sec"><div class="tc-rubric">Related</div><ul class="tc-sec__list"><li><span class="tc-dim--accent">Поездка в Казань</span> <span class="tc-dim">· event</span></li></ul></div>
         <div class="tc-sec">
-          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
+          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details></div>
           <ul class="tc-stack tc-stack--gap-6 tc-sec__list">
             <li><a class="tc-dim--accent" href="#">посадочный-казань.pdf</a> <span class="tc-dim">application/pdf · 128 KB</span> <span class="tc-badge">in the task</span></li>
           </ul>
@@ -5259,7 +5279,7 @@ SEQUENCE  2</div>
           <div class="tc-prose">Зарядки, переходник, распечатать посадочный.</div>
         </div>
         <div class="tc-sec">
-          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
+          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details></div>
           <ul class="tc-stack tc-stack--gap-6 tc-sec__list">
             <li><a class="tc-dim--accent" href="#">посадочный-казань.pdf</a> <span class="tc-dim">application/pdf · 128 KB</span> <span class="tc-badge">in the task</span></li>
           </ul>
@@ -5371,7 +5391,7 @@ Read  2 min ago · not changed on server</div>
           <div class="tc-fset">
             <div class="tc-rubric">Attachments</div>
             <div class="tc-grow tc-line tc-line--gap-8">
-              <details class="tc-drop"><summary class="tc-btn"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
+              <details class="tc-drop"><summary class="tc-btn"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details>
               <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Ничего не вложено</span>
             </div>
           </div>
@@ -5429,8 +5449,9 @@ Read  2 min ago · not changed on server</div>
     <div class="frame-label"><span>Attach · стрелка</span><span class="frag">меню</span><i>вложение</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w212">
-        <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button>
+        <label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label>
         <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button>
+        <button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button>
       </div>
     </div>
   </div>
@@ -5537,7 +5558,7 @@ Read  2 min ago · not changed on server</div>
           <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Import</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Export</button></div>
         </div>
         <div class="tc-bar">
-          <input class="tc-in is-ph tc-in--h26-w200" type="search" placeholder="Filter by word" aria-label="Filter by word">
+          <label class="tc-in is-ph tc-in--h26-w200"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Filter by word" aria-label="Filter by word"></label>
           <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">Newest</button><button class="tc-seg__opt" type="button">Oldest</button><button class="tc-seg__opt" type="button">Title</button></span>
           <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</button>
           <span class="tc-bar__right is-2nd"><span class="tc-mono">86</span></span>
@@ -5584,15 +5605,15 @@ Read  2 min ago · not changed on server</div>
 
 Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.</div>
           <ul class="tc-stack tc-stack--gap-7 tc-doc__list">
-            <li class="tc-doc__task"><button class="tc-tick tc-tick--nudge" type="button"></button>проверить changelog</li>
-            <li class="tc-doc__task"><button class="tc-tick tc-tick--nudge" type="button"></button>попросить у Артёма скриншоты</li>
+            <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>проверить changelog</li>
+            <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>попросить у Артёма скриншоты</li>
           </ul>
         </div>
         <dl class="tc-fields">
           <dt>Tags</dt><dd><span class="tc-tag">встречи</span> <span class="tc-tag">релиз</span></dd>
         </dl>
         <div class="tc-sec">
-          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
+          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details></div>
           <ul class="tc-stack tc-stack--gap-6 tc-sec__list">
             <li><a class="tc-dim--accent" href="#">2026-08-10-sync-board.png</a> <span class="tc-dim">image/png · 412 KB</span> <span class="tc-badge">in the note</span></li>
             <li><a class="tc-dim--accent" href="#">запись-встречи.m4a</a> <span class="tc-dim">audio/mp4 · 24 MB</span> <span class="tc-badge">Documents / carrel</span></li>
@@ -5732,8 +5753,8 @@ Read  2 min ago · not changed on server</div>
             <div class="tc-doc__sec">
               <div class="tc-rubric tc-rubric--bot8">Что делаем</div>
               <ul class="tc-stack tc-stack--gap-7 tc-doc__list">
-                <li class="tc-doc__task"><button class="tc-tick tc-tick--nudge" type="button"></button>проверить changelog</li>
-                <li class="tc-doc__task"><button class="tc-tick is-done tc-tick--nudge" type="button"></button><span class="tc-dim tc-dim--struck">попросить у Артёма скриншоты</span></li>
+                <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>проверить changelog</li>
+                <li class="tc-doc__task"><span class="tc-tick is-done tc-tick--nudge" role="img" aria-label="Done"></span><span class="tc-dim tc-dim--struck">попросить у Артёма скриншоты</span></li>
               </ul>
             </div>
             <div class="tc-prose tc-prose--lead tc-prose--top18">Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг.</div>
@@ -5751,7 +5772,7 @@ Read  2 min ago · not changed on server</div>
               </div>
             </div>
             <div class="tc-docmeta__sec">
-              <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
+              <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details></div>
               <div class="tc-line__text"><a class="tc-dim--accent" href="#">2026-08-10-sync-board.png</a> <span class="tc-dim">· 412 KB</span> <span class="tc-badge">in the note</span></div>
               <div class="tc-line__text"><a class="tc-dim--accent" href="#">запись-встречи.m4a</a> <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span></div>
             </div>
@@ -5815,6 +5836,30 @@ Read  2 min ago</div>
     </div>
   </div>
   <figcaption>Единого ответа для узкого экрана нет — зависит от данных: короткие столбцы лучше читаются переносом, длинная строка — в одну линию. Поэтому в контейнере 640 px и уже над таблицей переключатель <b>Wrap / One line</b>: «One line» держит каждую строку в одну линию, и таблица прокручивается вбок. На широком экране переключателя нет — таблица помещается.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-notes-25">
+    <div class="frame-label"><span>Заметка · части текста</span><span class="frag">фрагмент</span><i>чтение</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-doc tc-stack tc-stack--gap-14">
+            <div class="tc-doc__title">Разбор релиза 0.3</div>
+            <div class="tc-prose tc-prose--read">Итоги созвона в <em>четверг</em>: релиз держат две вещи, обе — до пятницы. Миграцию гоняем только с <span class="tc-mono tc-mono--chip">--dry-run</span>, подробности — в <a class="tc-dim--accent" href="#">заметке о схеме</a>.</div>
+            <div class="tc-doc__heading">Что держит</div>
+            <ul class="tc-stack tc-stack--gap-6 tc-doc__bullets">
+              <li>миграция схемы — <a class="tc-dim--accent" href="#">задача у Виктора</a></li>
+              <li>тесты<ul class="tc-stack tc-stack--gap-6 tc-doc__bullets"><li><span class="tc-mono tc-mono--chip">go test -race ./...</span> — зелёный</li><li>нагрузочный — после 20.08</li></ul></li>
+            </ul>
+            <blockquote class="tc-doc__quote">Не выпускаем, пока не прогоним миграцию на копии базы.</blockquote>
+            <div class="tc-doc__heading">Как проверить</div>
+            <pre class="tc-doc__code">make db-copy
+./carrel migrate --dry-run --from 0.2 --to 0.3 --database ./copy/carrel.db</pre>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption><b>Всё, что разбирается из Markdown заметки</b> (задача 102): курсив, ссылка и код внутри абзаца и пункта, вложенный список, цитата, блок кода. Цитата — приглушённый текст за чертой, а не курсив: курсив остаётся словам. Блок кода стоит как написан — пробелы и переносы его; строка, которой тесно, прокручивается внутри блока, а не переносится. Вложенный список отмечен кружками, чтобы уровень читался и без отступа.</figcaption>
   </figure>
 </div>
 
@@ -5887,8 +5932,8 @@ Read  2 min ago</div>
             <div class="tc-doc__sec">
               <div class="tc-rubric tc-rubric--bot8">Что делаем</div>
               <ul class="tc-stack tc-stack--gap-7 tc-doc__list">
-                <li class="tc-doc__task"><button class="tc-tick tc-tick--nudge" type="button"></button>проверить changelog</li>
-                <li class="tc-doc__task"><button class="tc-tick is-done tc-tick--nudge" type="button"></button><span class="tc-dim tc-dim--struck">попросить у Артёма скриншоты</span></li>
+                <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>проверить changelog</li>
+                <li class="tc-doc__task"><span class="tc-tick is-done tc-tick--nudge" role="img" aria-label="Done"></span><span class="tc-dim tc-dim--struck">попросить у Артёма скриншоты</span></li>
               </ul>
             </div>
             <div class="tc-prose tc-prose--lead tc-prose--top18">Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг.</div>
@@ -5906,7 +5951,7 @@ Read  2 min ago</div>
               </div>
             </div>
             <div class="tc-docmeta__sec">
-              <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
+              <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details></div>
               <div class="tc-line__text"><a class="tc-dim--accent" href="#">2026-08-10-sync-board.png</a> <span class="tc-dim">· 412 KB</span> <span class="tc-badge">in the note</span></div>
               <div class="tc-line__text"><a class="tc-dim--accent" href="#">запись-встречи.m4a</a> <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span></div>
             </div>
@@ -5958,8 +6003,8 @@ Read  2 min ago</div>
       </div>
       <div class="tc-main">
         <div class="tc-docbar">
-          <button class="tc-btn is-primary" type="button">Save</button>
-          <button class="tc-btn" type="button">Cancel</button>
+          <button class="tc-btn is-primary" type="submit" form="note-edit">Save</button>
+          <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012">Cancel</a>
           <span class="tc-bar__sep"></span>
           <button class="tc-btn" type="button"><b>B</b></button>
           <button class="tc-btn tc-btn--fontstyle-italic" type="button">I</button>
@@ -5978,13 +6023,13 @@ Read  2 min ago</div>
           </span>
         </div>
         <div class="tc-doc__layout">
-          <div class="tc-doc">
-            <textarea class="tc-in tc-in--title">Заметка со встречи 10.08</textarea>
+          <form class="tc-doc" id="note-edit" action="/app/notes/nextcloud/zapisi/9e31-40b7-c012" method="post">
+            <textarea class="tc-in tc-in--title" name="summary">Заметка со встречи 10.08</textarea>
             <div class="tc-doc__fields">
-              <div class="tc-field tc-field--flex2-280"><label>Notebook</label><button class="tc-in is-pick" type="button">nextcloud · Записи</button></div>
-              <div class="tc-field tc-field--fix150"><label>Date</label><input class="tc-in is-mono" type="date" value="2026-08-10" aria-label="Date"></div>
-              <div class="tc-field tc-field--fix130"><label>Time</label><input class="tc-in is-mono" type="time" value="11:05" aria-label="Time"></div>
-              <div class="tc-field tc-field--flex3-320"><label>Tags</label><input class="tc-in" type="text" value="встречи, релиз" aria-label="Tags"></div>
+              <div class="tc-field tc-field--flex2-280"><label>Notebook</label><details class="tc-drop"><summary class="tc-in is-pick"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/zapisi" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/dnevnik"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</label><label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/semya" disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></label></div></details></div>
+              <div class="tc-field tc-field--fix150"><label>Date</label><input class="tc-in is-mono" type="date" value="2026-08-10" name="dtstart.date" aria-label="Date"></div>
+              <div class="tc-field tc-field--fix130"><label>Time</label><input class="tc-in is-mono" type="time" value="11:05" name="dtstart.time" aria-label="Time"></div>
+              <div class="tc-field tc-field--flex3-320"><label>Tags</label><input class="tc-in" type="text" value="встречи, релиз" name="categories" aria-label="Tags"></div>
               <div class="tc-field tc-field--flex3-340">
                 <label>Related to</label>
                 <span class="tc-in tc-in--tags">
@@ -5993,7 +6038,7 @@ Read  2 min ago</div>
                 </span>
               </div>
             </div>
-            <textarea class="tc-in is-area is-focus tc-in--body">Договорились заморозить ветку в среду.
+            <textarea class="tc-in is-area is-focus tc-in--body" name="description">Договорились заморозить ветку в среду.
 
 Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.
 
@@ -6006,10 +6051,10 @@ Read  2 min ago</div>
 
 Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще.</textarea>
             <div class="tc-doc__note">Properties Carrel does not know — X-JTX-COLOR and two more — are kept unchanged and not shown here.</div>
-          </div>
+          </form>
           <div class="tc-docmeta">
             <div class="tc-docmeta__sec">
-              <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
+              <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details></div>
               <div class="tc-line__text"><a class="tc-dim--accent" href="#">2026-08-10-sync-board.png</a> <span class="tc-dim">· 412 KB</span> <span class="tc-badge">in the note</span></div>
               <div class="tc-line__text"><a class="tc-dim--accent" href="#">запись-встречи.m4a</a> <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span></div>
             </div>
@@ -6050,8 +6095,8 @@ Read  2 min ago</div>
     <div class="tc-shell__body tc-shell__body--no-rail">
       <div class="tc-main">
         <div class="tc-docbar">
-          <button class="tc-btn is-primary" type="button">Save</button>
-          <button class="tc-btn" type="button">Cancel</button>
+          <button class="tc-btn is-primary" type="submit" form="note-edit">Save</button>
+          <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012">Cancel</a>
           <span class="tc-bar__sep"></span>
           <button class="tc-btn" type="button"><b>B</b></button>
           <button class="tc-btn tc-btn--fontstyle-italic" type="button">I</button>
@@ -6070,13 +6115,13 @@ Read  2 min ago</div>
           </span>
         </div>
         <div class="tc-doc__layout is-focus">
-          <div class="tc-doc">
-            <textarea class="tc-in is-focus tc-in--title">Заметка со встречи 10.08</textarea>
+          <form class="tc-doc" id="note-edit" action="/app/notes/nextcloud/zapisi/9e31-40b7-c012" method="post">
+            <textarea class="tc-in is-focus tc-in--title" name="summary">Заметка со встречи 10.08</textarea>
             <div class="tc-doc__fields">
-              <div class="tc-field tc-field--flex2-280"><label>Notebook</label><button class="tc-in is-pick" type="button">nextcloud · Записи</button></div>
-              <div class="tc-field tc-field--fix150"><label>Date</label><input class="tc-in is-mono" type="date" value="2026-08-10" aria-label="Date"></div>
-              <div class="tc-field tc-field--fix130"><label>Time</label><input class="tc-in is-mono" type="time" value="11:05" aria-label="Time"></div>
-              <div class="tc-field tc-field--flex3-320"><label>Tags</label><input class="tc-in" type="text" value="встречи, релиз" aria-label="Tags"></div>
+              <div class="tc-field tc-field--flex2-280"><label>Notebook</label><details class="tc-drop"><summary class="tc-in is-pick"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/zapisi" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/dnevnik"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</label><label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/semya" disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></label></div></details></div>
+              <div class="tc-field tc-field--fix150"><label>Date</label><input class="tc-in is-mono" type="date" value="2026-08-10" name="dtstart.date" aria-label="Date"></div>
+              <div class="tc-field tc-field--fix130"><label>Time</label><input class="tc-in is-mono" type="time" value="11:05" name="dtstart.time" aria-label="Time"></div>
+              <div class="tc-field tc-field--flex3-320"><label>Tags</label><input class="tc-in" type="text" value="встречи, релиз" name="categories" aria-label="Tags"></div>
               <div class="tc-field tc-field--flex3-340">
                 <label>Related to</label>
                 <span class="tc-drop"><span class="tc-in is-focus tc-in--tags">
@@ -6092,7 +6137,7 @@ Read  2 min ago</div>
                 </div></span>
               </div>
             </div>
-            <textarea class="tc-in is-area tc-in--body">Договорились заморозить ветку в среду.
+            <textarea class="tc-in is-area tc-in--body" name="description">Договорились заморозить ветку в среду.
 
 Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.
 
@@ -6105,7 +6150,7 @@ Read  2 min ago</div>
 
 Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще.</textarea>
             <div class="tc-doc__note">Properties Carrel does not know — <span class="tc-mono">X-JTX-COLOR</span> and two more — are kept unchanged and not shown here.</div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
@@ -6120,8 +6165,9 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Тетрадь</span><span class="frag">список</span><i>поле Notebook</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w290">
-        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</button>
+        <label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/zapisi" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/dnevnik"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</label>
+        <label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/semya" disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></label>
       </div>
     </div>
   </div>
@@ -8838,7 +8884,7 @@ Read  2 min ago</div>
           <dt>Where</dt><dd>Переговорная 2</dd>
         </dl>
         <div class="tc-sec">
-          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
+          <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details></div>
           <ul class="tc-stack tc-stack--gap-6 tc-sec__list">
             <li><a class="tc-dim--accent" href="#">release-checklist.md</a> <span class="tc-dim">text/markdown · 3 KB</span> <span class="tc-badge">in the event</span></li>
           </ul>
@@ -13371,8 +13417,8 @@ jobs:
             <div class="tc-doc__sec">
               <div class="tc-rubric tc-rubric--bot8">Что делаем</div>
               <ul class="tc-stack tc-stack--gap-7 tc-doc__list">
-                <li class="tc-doc__task"><button class="tc-tick tc-tick--nudge" type="button"></button>проверить changelog</li>
-                <li class="tc-doc__task"><button class="tc-tick is-done tc-tick--nudge" type="button"></button><span class="tc-dim tc-dim--struck">попросить у Артёма скриншоты</span></li>
+                <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>проверить changelog</li>
+                <li class="tc-doc__task"><span class="tc-tick is-done tc-tick--nudge" role="img" aria-label="Done"></span><span class="tc-dim tc-dim--struck">попросить у Артёма скриншоты</span></li>
               </ul>
             </div>
             <div class="tc-doc__sec--rule">
@@ -14323,7 +14369,7 @@ password  9f2-brick-lamp</div>
           <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add user</button><button class="tc-btn" type="button">Reset a password</button></div>
         </div>
         <div class="tc-bar">
-          <input class="tc-in is-ph tc-in--h26-w200" type="search" placeholder="Filter by login" aria-label="Filter by login">
+          <label class="tc-in is-ph tc-in--h26-w200"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Filter by login" aria-label="Filter by login"></label>
           <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All</button><button class="tc-seg__opt" type="button">Administrators</button><button class="tc-seg__opt" type="button">Disabled</button></span>
           <button class="tc-btn" title="Columns" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg><span class="tc-btn__label">Columns</span></button>
         </div>
@@ -17848,7 +17894,7 @@ SMTP  mail.home.example:465  TLS
           </div>
           <div class="tc-bar tc-bar--wide">
             <a class="tc-btn" href="/app/calendar?from=2026-08-03" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/app/calendar">Today</a><a class="tc-btn" href="/app/calendar?from=2026-08-17" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
-            <span class="tc-seg"><button class="tc-seg__opt" type="button">Day</button><button class="is-on tc-seg__opt" type="button">Week</button><button class="tc-seg__opt" type="button">Month</button><button class="tc-seg__opt" type="button">Range</button></span>
+            <span class="tc-segfold tc-segfold--phone"><span class="tc-seg"><a class="tc-seg__opt" href="/app/calendar?view=day">Day</a><a class="is-on tc-seg__opt" href="/app/calendar?view=week">Week</a><a class="tc-seg__opt" href="/app/calendar?view=month">Month</a><a class="tc-seg__opt" href="/app/calendar?view=range">Range</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">Week</summary><div class="tc-segfold__menu"><a class="tc-segfold__item" href="/app/calendar?view=day">Day</a><a class="is-on tc-segfold__item" href="/app/calendar?view=week">Week</a><a class="tc-segfold__item" href="/app/calendar?view=month">Month</a><a class="tc-segfold__item" href="/app/calendar?view=range">Range</a></div></details></span>
             <form class="tc-range is-2nd" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-08-10" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
             <span class="tc-bar__sep is-2nd"></span>
             <form class="tc-checkform is-3rd" action="/app/calendar" method="get"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="events" checked><span class="tc-tickrow__tick"></span>Events</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="tasks"><span class="tc-tickrow__tick is-off"></span>Tasks due</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="notes"><span class="tc-tickrow__tick is-off"></span>Notes</label><span class="tc-checkform__apply"><button class="tc-btn is-sm" type="submit">Apply</button></span></form>
@@ -18060,7 +18106,7 @@ SMTP  mail.home.example:465  TLS
           </div>
           <div class="tc-bar tc-bar--wide">
             <a class="tc-btn" href="/app/calendar?from=2026-08-03" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/app/calendar">Today</a><a class="tc-btn" href="/app/calendar?from=2026-08-17" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
-            <span class="tc-seg"><button class="tc-seg__opt" type="button">Day</button><button class="is-on tc-seg__opt" type="button">Week</button><button class="tc-seg__opt" type="button">Month</button><button class="tc-seg__opt" type="button">Range</button></span>
+            <span class="tc-segfold tc-segfold--phone"><span class="tc-seg"><a class="tc-seg__opt" href="/app/calendar?view=day">Day</a><a class="is-on tc-seg__opt" href="/app/calendar?view=week">Week</a><a class="tc-seg__opt" href="/app/calendar?view=month">Month</a><a class="tc-seg__opt" href="/app/calendar?view=range">Range</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">Week</summary><div class="tc-segfold__menu"><a class="tc-segfold__item" href="/app/calendar?view=day">Day</a><a class="is-on tc-segfold__item" href="/app/calendar?view=week">Week</a><a class="tc-segfold__item" href="/app/calendar?view=month">Month</a><a class="tc-segfold__item" href="/app/calendar?view=range">Range</a></div></details></span>
             <form class="tc-range is-2nd" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-08-10" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
             <span class="tc-bar__sep is-2nd"></span>
             <form class="tc-checkform is-3rd" action="/app/calendar" method="get"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="events" checked><span class="tc-tickrow__tick"></span>Events</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="tasks"><span class="tc-tickrow__tick is-off"></span>Tasks due</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="notes"><span class="tc-tickrow__tick is-off"></span>Notes</label><span class="tc-checkform__apply"><button class="tc-btn is-sm" type="submit">Apply</button></span></form>
@@ -18152,7 +18198,7 @@ SMTP  mail.home.example:465  TLS
           <div class="tc-fset">
             <div class="tc-rubric">Attachments</div>
             <div class="tc-grow tc-line tc-line--gap-8">
-              <details class="tc-drop"><summary class="tc-btn"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-up"/></svg>From this computer</button><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
+              <details class="tc-drop"><summary class="tc-btn"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="post-attach" aria-label="From this computer"></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button><button class="tc-menu__item tc-nojs" type="submit" form="post-attach" role="menuitem">Upload</button></div></details>
               <span class="tc-dim--t12-5">release-checklist.md <span class="tc-dim">text/markdown · 3 KB</span> <span class="tc-badge">in the event</span></span><button class="tc-btn is-sm is-danger" type="button">Remove</button>
             </div>
           </div>
@@ -18563,7 +18609,7 @@ dav: HTTP 503: the server is busy</div></div>
             <div class="tc-field__photo-row">
               <span class="tc-avatar--photo is-ph">АК</span>
               <div class="tc-stack tc-stack--gap-6 tc-field__photo-side">
-                <button class="tc-btn" type="button">Add</button>
+                <span class="tc-line tc-line--gap-6"><label class="tc-btn">Add<input class="tc-file" type="file" name="photo" form="post-photo" accept="image/*" aria-label="Photo"></label><button class="tc-btn tc-nojs" type="submit" form="post-photo">Upload</button></span>
                 <span class="tc-field__hint tc-field__hint--max150">JPEG, PNG, GIF or WebP.</span>
               </div>
             </div>
@@ -18688,7 +18734,7 @@ dav: HTTP 503: the server is busy</div></div>
           </div>
           <div class="tc-bar tc-bar--wide">
             <a class="tc-btn" href="/app/calendar?from=2026-08-03" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/app/calendar">Today</a><a class="tc-btn" href="/app/calendar?from=2026-08-17" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
-            <span class="tc-seg"><button class="tc-seg__opt" type="button">Day</button><button class="is-on tc-seg__opt" type="button">Week</button><button class="tc-seg__opt" type="button">Month</button><button class="tc-seg__opt" type="button">Range</button></span>
+            <span class="tc-segfold tc-segfold--phone"><span class="tc-seg"><a class="tc-seg__opt" href="/app/calendar?view=day">Day</a><a class="is-on tc-seg__opt" href="/app/calendar?view=week">Week</a><a class="tc-seg__opt" href="/app/calendar?view=month">Month</a><a class="tc-seg__opt" href="/app/calendar?view=range">Range</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">Week</summary><div class="tc-segfold__menu"><a class="tc-segfold__item" href="/app/calendar?view=day">Day</a><a class="is-on tc-segfold__item" href="/app/calendar?view=week">Week</a><a class="tc-segfold__item" href="/app/calendar?view=month">Month</a><a class="tc-segfold__item" href="/app/calendar?view=range">Range</a></div></details></span>
             <form class="tc-range is-2nd" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-08-10" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
             <span class="tc-bar__sep is-2nd"></span>
             <form class="tc-checkform is-3rd" action="/app/calendar" method="get"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="events" checked><span class="tc-tickrow__tick"></span>Events</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="tasks"><span class="tc-tickrow__tick is-off"></span>Tasks due</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="notes"><span class="tc-tickrow__tick is-off"></span>Notes</label><span class="tc-checkform__apply"><button class="tc-btn is-sm" type="submit">Apply</button></span></form>
@@ -18834,7 +18880,7 @@ dav: HTTP 503: the server is busy</div></div>
           </div>
           <div class="tc-bar tc-bar--wide">
             <a class="tc-btn" href="/app/calendar/nextcloud/lichny?from=2026-10-26" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/app/calendar/nextcloud/lichny">Today</a><a class="tc-btn" href="/app/calendar/nextcloud/lichny?from=2026-11-09" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
-            <span class="tc-seg"><button class="tc-seg__opt" type="button">Day</button><button class="is-on tc-seg__opt" type="button">Week</button><button class="tc-seg__opt" type="button">Month</button><button class="tc-seg__opt" type="button">Range</button></span>
+            <span class="tc-segfold tc-segfold--phone"><span class="tc-seg"><a class="tc-seg__opt" href="/app/calendar?view=day">Day</a><a class="is-on tc-seg__opt" href="/app/calendar?view=week">Week</a><a class="tc-seg__opt" href="/app/calendar?view=month">Month</a><a class="tc-seg__opt" href="/app/calendar?view=range">Range</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">Week</summary><div class="tc-segfold__menu"><a class="tc-segfold__item" href="/app/calendar?view=day">Day</a><a class="is-on tc-segfold__item" href="/app/calendar?view=week">Week</a><a class="tc-segfold__item" href="/app/calendar?view=month">Month</a><a class="tc-segfold__item" href="/app/calendar?view=range">Range</a></div></details></span>
             <form class="tc-range is-2nd" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-11-02" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-11-08" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
             <span class="tc-bar__sep is-2nd"></span>
             <form class="tc-checkform is-3rd" action="/app/calendar" method="get"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="events" checked><span class="tc-tickrow__tick"></span>Events</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="tasks"><span class="tc-tickrow__tick is-off"></span>Tasks due</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="show" value="notes"><span class="tc-tickrow__tick is-off"></span>Notes</label><span class="tc-checkform__apply"><button class="tc-btn is-sm" type="submit">Apply</button></span></form>
@@ -19419,8 +19465,8 @@ dav: HTTP 503: the server is busy</div></div>
           <div class="tc-doc__acts">
             <div class="tc-rubric tc-rubric--bot7">Что делаем</div>
             <ul class="tc-stack tc-stack--gap-9 tc-doc__list">
-              <li class="tc-doc__task"><button class="tc-tick tc-tick--nudge" type="button"></button>проверить changelog</li>
-              <li class="tc-doc__task"><button class="tc-tick is-done tc-tick--nudge" type="button"></button><span class="tc-dim tc-dim--struck">попросить скриншоты</span></li>
+              <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>проверить changelog</li>
+              <li class="tc-doc__task"><span class="tc-tick is-done tc-tick--nudge" role="img" aria-label="Done"></span><span class="tc-dim tc-dim--struck">попросить скриншоты</span></li>
             </ul>
           </div>
           <div class="tc-doc__sec--rule16">
@@ -19487,7 +19533,7 @@ dav: HTTP 503: the server is busy</div></div>
             <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Import</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Export</button></div>
           </div>
           <div class="tc-bar">
-            <input class="tc-in is-ph tc-in--h26-w200" type="search" placeholder="Filter by word" aria-label="Filter by word">
+            <label class="tc-in is-ph tc-in--h26-w200"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Filter by word" aria-label="Filter by word"></label>
             <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">Newest</button><button class="tc-seg__opt" type="button">Oldest</button><button class="tc-seg__opt" type="button">Title</button></span>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</button>
             <span class="tc-bar__right is-2nd"><span class="tc-mono">86</span></span>
@@ -20043,8 +20089,9 @@ dav: HTTP 503: the server is busy</div></div>
     <div class="frame-label"><span>Тетрадь</span><span class="frag">список</span><i>куда ляжет заметка</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w290">
-        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</button>
+        <label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/zapisi" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/dnevnik"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</label>
+        <label class="tc-menu__item" title="Read-only: this account cannot write here"><input class="tc-seg__box" type="radio" role="menuitemradio" name="notebook" value="nextcloud/semya" disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></label>
       </div>
     </div>
   </div>

@@ -175,7 +175,10 @@ func photo(b view.PhotoBlock) w.Field {
 	var side []w.FieldPart
 	var line []w.LinePart
 	for _, a := range b.Actions {
-		btn := bind.Button(a, a.ID)
+		btn := bind.FileButton(a, a.ID)
+		if btn.File != nil {
+			btn.File.Label, btn.File.Accept = photoLabel, photoAccept
+		}
 		switch {
 		case a.Danger:
 			btn.Kind = w.ButtonDanger
@@ -186,6 +189,9 @@ func photo(b view.PhotoBlock) w.Field {
 			side = append(side, btn)
 		default:
 			line = append(line, btn)
+			if up := bind.Upload(a, a.ID, upload); up != nil {
+				line = append(line, *up)
+			}
 		}
 	}
 	if len(line) == 1 {
@@ -200,8 +206,18 @@ func photo(b view.PhotoBlock) w.Field {
 	if b.Href == "" {
 		ph.Initials = string(b.Initials)
 	}
-	return w.Field{Label: "Photo", LabelSpan: true, Parts: []w.FieldPart{ph}, Width: w.FieldFixAuto}
+	return w.Field{Label: photoLabel, LabelSpan: true, Parts: []w.FieldPart{ph}, Width: w.FieldFixAuto}
 }
+
+// The screen's words (U-1.3) for the photo's file: the field's name, which is
+// the file input's accessible name too, what it takes — a picture — and the
+// button that sends the file picked on a page without a script (Typecase's
+// task 109; s-contacts-3, -4).
+const (
+	photoLabel  = "Photo"
+	photoAccept = "image/*"
+	upload      = "Upload"
+)
 
 // fieldSet is a rubric of the form: its lines, labels over the first only,
 // each line closed by its Remove; «Add …» with the template of its lines.

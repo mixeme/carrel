@@ -81,6 +81,39 @@ func TestMenuItems(t *testing.T) {
 		w.MenuItem{Label: "Off", Reason: "No"},
 	})
 	same(t, "the forms of the items that post", bind.MenuForms(items), []w.PostForm{{ID: "record.delete", Action: "/d?etag=e", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}}})
+
+	// An item that carries a file (Action.File: «From this computer») is the
+	// label of the file input of its form, which the browser opens without
+	// a script (Typecase's task 109); «Upload», shown only without a script,
+	// sends the file picked — the screen's word.
+	attach := []view.MenuItem{
+		{Action: view.Action{ID: "attach.add", Label: "From this computer", Icon: "i-up", Href: "/e?op=attach", Method: "POST", Enabled: true, CSRF: "c", File: "file"}},
+		{Action: view.Action{ID: "attach.files", Label: "From Files", Icon: "i-file", Href: "/app/files/picker", Method: "GET", Enabled: true}},
+		{Action: view.Action{ID: "attach.off", Label: "Off", Href: "/o", Method: "POST", File: "file", Reason: "No"}},
+	}
+	same(t, "an item with a file", bind.MenuItems(attach, ""), []w.MenuPart{
+		w.MenuItem{Icon: "up", Label: "From this computer", File: &w.FileField{Form: "attach.add", Name: "file", Label: "From this computer"}},
+		w.MenuItem{Icon: "file", Label: "From Files", Href: "/app/files/picker"},
+		w.MenuItem{Label: "Off", Reason: "No"},
+	})
+	same(t, "its Upload", bind.Uploads(attach, "Upload"), []w.MenuPart{w.MenuItem{Label: "Upload", NoScript: true, Form: "attach.add"}})
+	same(t, "the form of the item with a file", bind.MenuForms(attach), []w.PostForm{{ID: "attach.add", Action: "/e?op=attach", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}, File: "file"}})
+}
+
+func TestFileButton(t *testing.T) {
+	// A button that carries a file (Action.File: the photo's Replace and Add)
+	// is the label of the file input of its form (Typecase's task 109);
+	// «Upload» beside it, shown only without a script, sends the file.
+	replace := view.Action{ID: "photo.replace", Label: "Replace", Href: "/p?op=upload", Method: "POST", Enabled: true, CSRF: "c", File: "photo"}
+	same(t, "a button with a file", bind.FileButton(replace, "photo.replace"),
+		w.Button{Label: "Replace", File: &w.FileField{Form: "photo.replace", Name: "photo", Label: "Replace"}})
+	same(t, "its Upload", bind.Upload(replace, "photo.replace", "Upload"), &w.Button{Label: "Upload", Form: "photo.replace", NoScript: true})
+	crop := view.Action{ID: "photo.crop", Label: "Crop", Href: "/p?op=crop", Method: "POST", Enabled: true}
+	same(t, "a button without a file", bind.FileButton(crop, "photo.crop"), w.Button{Label: "Crop", Form: "photo.crop"})
+	same(t, "no file: no Upload", bind.Upload(crop, "photo.crop", "Upload"), (*w.Button)(nil))
+	replace.Enabled, replace.Reason = false, "Read-only"
+	same(t, "switched off: no file", bind.FileButton(replace, "photo.replace"), w.Button{Label: "Replace", State: w.ButtonDisabled, Reason: "Read-only"})
+	same(t, "switched off: no Upload", bind.Upload(replace, "photo.replace", "Upload"), (*w.Button)(nil))
 }
 
 func TestNavItem(t *testing.T) {

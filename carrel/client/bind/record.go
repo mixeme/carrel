@@ -75,18 +75,28 @@ func TickID(a view.Action) string {
 // sent with its value (the UID). One relation: with none chosen, the line a
 // UID is typed in, sent under the same name, its pattern the row's
 // (Placeholder), its suggestions where the row says (Suggest, the library's
-// live layer).
+// live layer); without a script the records loaded are its choices
+// (Typecase's task 96) — each its UID sent, its label and what it is
+// (Option.Meta: «event · 11 Aug») shown beside it; «By UID…» (Typed) is the
+// line itself.
 func Related(r view.FormRow) w.TagInput {
-	// ждёт библиотеку: U-5.5 #30 — without a script the field has no list
-	// of the loaded records to choose from (Typecase's task 96)
 	in := w.TagInput{Name: r.Name}
+	var choices []w.ListOption
 	for _, o := range r.Options {
-		if o.Selected && !o.Typed {
+		switch {
+		case o.Typed:
+		case o.Selected:
 			in.Parts = append(in.Parts, w.Tag{Label: string(o.Label), Removable: true, Value: o.Value})
+		default:
+			label := string(o.Label)
+			if o.Meta != "" {
+				label += runSep + string(o.Meta)
+			}
+			choices = append(choices, w.ListOption{Value: o.Value, Label: label})
 		}
 	}
 	if len(in.Parts) == 0 {
-		in.Add = &w.TagAdd{Name: r.Name, Placeholder: string(r.Placeholder), Label: string(r.Label), Suggest: r.Suggest}
+		in.Add = &w.TagAdd{Name: r.Name, Placeholder: string(r.Placeholder), Label: string(r.Label), Suggest: r.Suggest, Options: choices}
 	}
 	return in
 }

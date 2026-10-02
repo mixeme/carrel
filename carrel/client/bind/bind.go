@@ -93,6 +93,31 @@ func Button(a view.Action, form string) w.Button {
 	return b
 }
 
+// FileButton is an action as a button (Button) — one that carries a file
+// (Action.File: the photo's Replace and Add) the label of the file input of
+// the form named form, which the browser opens without a script and whose
+// pick sends the form with the library's script (Typecase's task 109); the
+// input's accessible name is the action's label, the screen's where its
+// frame names it otherwise. Without a script «Upload» beside it sends the
+// file (Upload).
+func FileButton(a view.Action, form string) w.Button {
+	if a.File == "" || !a.Enabled || a.Method != "POST" {
+		return Button(a, form)
+	}
+	return w.Button{Label: string(a.Label), Icon: Icon(a.Icon), Kind: Kind(a), File: &w.FileField{Form: form, Name: a.File, Label: string(a.Label)}}
+}
+
+// Upload is the button «Upload» beside a button that picks a file
+// (FileButton): shown only on a page without a script, it sends the form
+// named form with the file picked; word is the screen's. nil where the
+// action picks no file.
+func Upload(a view.Action, form, word string) *w.Button {
+	if a.File == "" || !a.Enabled || a.Method != "POST" {
+		return nil
+	}
+	return &w.Button{Label: word, Form: form, NoScript: true}
+}
+
 // iconPrefix is what the contract's icon names start with (U-4: «i-down»),
 // the id of the symbol in the sprite; the widget takes the name without it.
 const iconPrefix = "i-"

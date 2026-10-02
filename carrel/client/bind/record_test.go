@@ -86,8 +86,14 @@ func TestRelated(t *testing.T) {
 		{Label: "By UID…", Separator: true, Typed: true, Hint: "By UID: a record that is not among the loaded ones."},
 	}}
 	same(t, "the record chosen", bind.Related(r), w.TagInput{Name: "related", Parts: []w.TagInputPart{w.Tag{Label: "Забрать документы", Removable: true, Value: "1d55"}}})
+	// With none chosen, the line of a UID, and the records loaded as its
+	// choices without a script (Typecase's task 96): the UID sent, the label
+	// and what the record is shown beside it; «By UID…» is the line itself.
 	r.Options[1].Selected, r.Value = false, ""
-	same(t, "none chosen: the line of a UID", bind.Related(r), w.TagInput{Name: "related", Add: &w.TagAdd{Name: "related", Placeholder: "UID of the record", Label: "Related to", Suggest: "/app/tasks/a/dela/aa10/related"}})
+	same(t, "none chosen: the line of a UID", bind.Related(r), w.TagInput{Name: "related", Add: &w.TagAdd{
+		Name: "related", Placeholder: "UID of the record", Label: "Related to", Suggest: "/app/tasks/a/dela/aa10/related",
+		Options: []w.ListOption{{Value: "bb21", Label: "Дописать раздел про кэш · task · 14 Aug"}, {Value: "1d55", Label: "Забрать документы · event · 11 Aug"}},
+	}})
 }
 
 func TestPickMenu(t *testing.T) {

@@ -213,8 +213,6 @@ func visible(rows []view.FormRow) []view.FormRow {
 func field(r view.FormRow, at int) w.Field {
 	switch {
 	case r.Kind == view.InputCheck:
-		// ждёт библиотеку: U-5.5 #34 — All day switches off two fields
-		// (Disables names them with a space), the library's check one
 		c := w.Field{Parts: []w.FieldPart{bind.Check(r)}}
 		if at > 0 {
 			c.Label = blank
@@ -250,7 +248,7 @@ func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 		// (Action.Submits) post forms of their own, not the form they stand in
 		b := bind.Button(*attach, "")
 		b.Menu = true
-		items = append(items, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(attach.Arrow, ""), Width: w.MenuWidth212, Pop: w.MenuUnder}})
+		items = append(items, w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}})
 	}
 	for _, a := range rows {
 		parts := []w.LinePart{w.Text(string(a.Name) + " "), w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + sep + string(a.Size))}}}
@@ -306,3 +304,7 @@ func railParts(r view.Rail, list bool) []w.RailPart {
 	parts = append(parts, bind.Sources(r, rail)...)
 	return append(parts, bind.Foot(r, rail))
 }
+
+// upload is the screen's word (U-1.3) for the item after Attach's arrow that
+// sends the file picked on a page without a script (Typecase's task 109).
+const upload = "Upload"

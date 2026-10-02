@@ -19,6 +19,11 @@ var (
 	framePhotoSide = regexp.MustCompile(`(?s)<div class="tc-stack[^"]*tc-field__photo-side">(.*?)<span class="tc-field__hint[^"]*">([^<]*)</span>`)
 	frameEditField = regexp.MustCompile(`(?s)<div class="tc-field[^"]*">\s*<label>([^<]*)</label>(.*?)</div>`)
 	frameShowEmpty = regexp.MustCompile(`<div class="tc-field">\s*<button class="tc-btn" type="button">(Show \d+ empty fields?)</button>\s*</div>`)
+	// A button that picks a file is the label of its file input (Typecase's
+	// task 109): Replace and Add are labels; «Upload» beside them (tc-nojs)
+	// is shown only without a script and sends the file they picked — the
+	// same action, no button of the model.
+	framePhotoButton = regexp.MustCompile(`(?s)<(?:button|label) class="([^"]*)"[^>]*>(.*?)</(?:button|label)>`)
 )
 
 // framePhotoButtons are the photograph's buttons of a form frame, «!» after
@@ -29,7 +34,10 @@ func framePhotoButtons(t *testing.T, id string) (buttons []string, line string) 
 	if m == nil {
 		t.Fatalf("%s draws no photograph: read the frame again", id)
 	}
-	for _, b := range frameHeadButton.FindAllStringSubmatch(m[1], -1) {
+	for _, b := range framePhotoButton.FindAllStringSubmatch(m[1], -1) {
+		if strings.Contains(b[1], "tc-nojs") {
+			continue
+		}
 		one := frameText(b[2])
 		if strings.Contains(b[1], "is-danger") {
 			one += "!"
