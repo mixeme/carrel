@@ -231,7 +231,15 @@ func combinedSubtitle(rail view.Rail, spec kindSpec, done bool) string {
 			}
 		}
 	}
-	parts := []string{fmt.Sprintf("%d of %s", on, plural(live, collectionNouns[spec.kind])), plural(len(accounts), "account")}
+	// One account is named, as s-tasks-1 writes it — «2 of 3 lists ·
+	// nextcloud»; more are counted (s-contacts-1, s-agenda-1).
+	where := plural(len(accounts), "account")
+	if len(accounts) == 1 {
+		for name := range accounts {
+			where = name
+		}
+	}
+	parts := []string{fmt.Sprintf("%d of %s", on, plural(live, collectionNouns[spec.kind])), where}
 	if done && total != nil {
 		parts = append(parts, plural(*total, recordNouns[spec.kind]))
 	}

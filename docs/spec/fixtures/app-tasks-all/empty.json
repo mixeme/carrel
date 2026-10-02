@@ -26,6 +26,14 @@
         "label": "Export",
         "method": "GET",
         "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "columns": {
@@ -186,26 +194,27 @@
     "total": null
   },
   "details": null,
-  "groups": [],
-  "notices": [],
-  "poll": {
-    "actions": [],
-    "answeredAt": "",
-    "aside": "",
-    "every": 0,
-    "note": "",
-    "percent": 0,
-    "poll": "",
-    "running": false,
-    "sources": [],
-    "stream": "",
-    "summary": [
+  "empty": {
+    "actions": [
       {
-        "text": "No collections are ticked, so there is nothing to show. Tick collections in the rail."
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/sources/tasks?back=%2Fapp%2Ftasks\u0026toggle=%2Fapp%2Ftasks",
+        "id": "rail.tick.all",
+        "label": "Tick every list",
+        "method": "POST",
+        "primary": true,
+        "target": "rail"
       }
     ],
-    "taskID": ""
+    "body": "Tick the lists to show in the rail, or all of them at once.",
+    "details": null,
+    "role": "info",
+    "title": "No lists are ticked"
   },
+  "groups": [],
+  "notices": [],
+  "poll": null,
   "print": {
     "range": "",
     "taken": "",
@@ -562,6 +571,7 @@
       "target": "rail"
     }
   },
+  "subtitle": "0 of 3 lists · 0 accounts",
   "title": "Combined list",
   "top": {
     "lock": null,

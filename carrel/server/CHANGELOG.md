@@ -17,6 +17,55 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.141 — 2026-10-02
+
+The list of tasks and its panel as s-tasks-1 draws them (the client's scan
+of the tasks, groups Б and В).
+
+### Added
+
+- **`TasksPage.subtitle`**: «2 of 3 lists · nextcloud · 5 tasks» on the
+  combined list, «nextcloud · 3 tasks» on one. **`TasksPage.empty`**:
+  nothing ticked — «No lists are ticked» and «Tick every list»
+  (`rail.tick.all`), `poll` is `null`, as the contacts' and the agenda's.
+- **Print** in the head of a list of tasks (`list.print`, `?print=1`).
+- **`TaskGroup.count`** and **`.overdue`** — the count by the rubric, an
+  alarm for «Overdue».
+- **The panel beside a list of tasks without scripts**: `?open={a row's
+  href}` on one list and on the combined one answers with the task in
+  `Shell.details`, `Details.close` the list without it, its row
+  **`TaskRow.on`**.
+- **The panel's fields** in the frame's order: Status (Needs action when
+  the task has none), Due monospaced — and how late, in alarm, when it is
+  (`Field.runs`) —, Priority and Complete monospaced («0%» when it says
+  none), Where, Link, Tags. **`Details.attachHint`** under a task's
+  attachments: «… up to 2 MB the file is written into the task itself,
+  above that it goes to the attachments folder …» (the instance's limit).
+
+### Changed
+
+- **A linked row of a combined list of tasks** says how many sources it
+  has: `stamp` «2 sources», the stamps in `sources` (s-tasks-1).
+- **The line under a combined list names its account when there is one**:
+  «2 of 3 lists · nextcloud» (s-tasks-1); more are counted, as before.
+- `?open=` is taken out of every list's address (it stayed in the links of
+  the lists of tasks and notes).
+- The set: «Собрать чемодан» has a description, priority 5, a reminder a day
+  before, its boarding pass inside (128 KB) and a relation to «Поездка в
+  Казань» — an event in a file of its own, put into «Личный» by the tests of
+  the tasks (the agenda frames do not draw it); «Отправить документы в
+  МФЦ» has the description, priority 1, reminder and relation of s-tasks-3.
+  The tests link «Собрать чемодан» with a copy in «Работа».
+
+### For consumers
+
+Draw the subtitle, the counts, the open row and the panel from the list's
+model; a linked row's source column is its `stamp`, its hint `sources`.
+Fixtures: `app-tasks-all/normal` is new (the combined list, the panel of
+«Собрать чемодан»); regenerated — `app-tasks/normal` (with the panel),
+`/source-error`, `app-tasks-all/empty`, `app-task/normal`,
+`app-task-edit/normal`, `/loss` (the set).
+
 ## v0.2.140 — 2026-10-02
 
 A note in edit is sent without scripts (the client's scan of the notes,

@@ -148,13 +148,22 @@ type AgendaRow struct {
 
 type TasksPage struct {
 	Shell
-	Bar    ListBar     `json:"bar"` // сегменты Open / Done / All со счётом
-	Groups []TaskGroup `json:"groups"`
-	Poll   *PollBar    `json:"poll"`
+	// Subtitle — под заголовком: единый вид — «2 of 3 lists · nextcloud · 30
+	// tasks» (одно подключение — его имя, несколько — «2 accounts»; число
+	// задач — когда опрос закончен), один список — «nextcloud · 21 tasks»
+	// (s-tasks-1)
+	Subtitle Text        `json:"subtitle"`
+	Bar      ListBar     `json:"bar"` // сегменты Open / Done / All со счётом
+	Groups   []TaskGroup `json:"groups"`
+	Poll     *PollBar    `json:"poll"`  // единый вид; nil — один список или ничего не отмечено
+	Empty    *Notice     `json:"empty"` // ничего не отмечено: почему и кнопка «Tick every list» (U-6.0); nil — есть что показать
 }
 type TaskGroup struct {
-	Rubric Text      `json:"rubric"`
-	Rows   []TaskRow `json:"rows"`
+	Rubric Text `json:"rubric"`
+	Count  int  `json:"count"` // сколько задач в группе
+	// Overdue — группа просроченного: счёт тревогой (is-alert, s-tasks-1)
+	Overdue bool      `json:"overdue"`
+	Rows    []TaskRow `json:"rows"`
 }
 type TaskRow struct {
 	Href string `json:"href"`
@@ -173,14 +182,17 @@ type TaskRow struct {
 	// Столбцы, которые человек может выбрать (s-tasks-12, -13): приоритет
 	// числом, «5»; статус словом списка, «In process» (без STATUS — «Needs
 	// action»); последняя правка коротко с временем, «10 Aug 11:02» (C-10)
-	Priority Text        `json:"priority"`
-	Status   Text        `json:"status"`
-	Changed  Text        `json:"changed"`
-	Badges   []Badge     `json:"badges"`  // «2 источника» у связанной задачи
-	Sources  []Stamp     `json:"sources"` // источники связанной группы
-	Tick     *Action     `json:"tick"`    // отметка выполнения в строке; nil — только чтение
-	Menu     []MenuItem  `json:"menu"`
-	State    RecordState `json:"state"`
+	Priority Text    `json:"priority"`
+	Status   Text    `json:"status"`
+	Changed  Text    `json:"changed"`
+	Badges   []Badge `json:"badges"` // «linked ×2» у связанной задачи
+	// Sources — источники связанной группы (подсказка столбца источника);
+	// Stamp такой строки в едином виде — их счёт, «2 sources» (s-tasks-1)
+	Sources []Stamp     `json:"sources"`
+	Tick    *Action     `json:"tick"` // отметка выполнения в строке; nil — только чтение
+	Menu    []MenuItem  `json:"menu"`
+	State   RecordState `json:"state"`
+	On      bool        `json:"on"` // строка открыта в панели подробностей (is-on, s-tasks-1)
 }
 
 type NotesPage struct {

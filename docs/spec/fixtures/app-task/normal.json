@@ -59,7 +59,7 @@
     }
   ],
   "attach": [],
-  "body": "",
+  "body": "Опись, копия паспорта и заявление. Приём до 18:00, окно 4.",
   "details": null,
   "done": false,
   "fields": [
@@ -68,6 +68,12 @@
       "label": "Due",
       "mono": false,
       "value": "7 August 2026"
+    },
+    {
+      "href": "",
+      "label": "Priority",
+      "mono": false,
+      "value": "1"
     },
     {
       "href": "",
@@ -309,8 +315,29 @@
     "ticks": null
   },
   "readOnly": false,
-  "related": [],
-  "reminders": [],
+  "related": [
+    {
+      "colour": "",
+      "href": "",
+      "kind": "",
+      "stamp": "",
+      "title": "1d55-90fe-3c27",
+      "when": "",
+      "why": "Not in the lists loaded for this collection"
+    }
+  ],
+  "reminders": [
+    {
+      "fields": [],
+      "label": "1 day before",
+      "remove": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      }
+    }
+  ],
   "source": {
     "changed": "10 August 2026, 17:04",
     "colour": "#4a6b52",

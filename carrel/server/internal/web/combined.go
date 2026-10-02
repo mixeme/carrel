@@ -87,9 +87,8 @@ func (s *Server) getKindRoot(w http.ResponseWriter, r *http.Request, segment str
 			return
 		}
 	}
-	if spec.kind == view.KindContact || spec.kind == view.KindEvent {
-		r = withoutOpen(r)
-	}
+	// ?open= of every list: the panel's row is no query the list keeps.
+	r = withoutOpen(r)
 	page, err := s.combinedPage(r, sess, s.catalogOf(sess), spec)
 	if err != nil {
 		http.Error(w, "could not start the list", http.StatusInternalServerError)
@@ -431,11 +430,17 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		var bad []unreadable
 		by := sortOf(r, view.KindTask)
 		page.Groups, open, done, page.Bar.Loaded, bad = s.taskGroups(tf, show, shown, spec.segment, true, filter, tf.now, by)
+		page.Details = s.openRow(r, sess, base, spec, shown, taskRowsOn(page.Groups))
 		page.Bar.Segments = append(s.taskSegments(base, filter.tag, show, open, done),
 			s.sortSegments(base, view.KindTask, by, r.URL.Query())...)
-		page.Bar.Actions = actions
+		page.Bar.Actions = append(actions, s.printAction(base))
 		page.Bar.Columns = columns()
 		page.Notices = appendUnreadable(page.Notices, bad)
+		page.Subtitle = text(combinedSubtitle(page.Rail, spec, st.snap != nil && !st.snap.Running))
+		if st.task == nil && len(page.Notices) == 0 {
+			// Nothing ticked: no poll, and the list says why (U-6.0).
+			page.Poll, page.Empty = nil, s.nothingTicked(spec)
+		}
 		page.Print = header(showLabels[show], counted(page.Bar.Loaded, "task"))
 		return page, nil
 	default:

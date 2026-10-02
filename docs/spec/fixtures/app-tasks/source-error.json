@@ -25,6 +25,14 @@
         "id": "collection.export",
         "label": "Export",
         "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "columns": {
@@ -131,6 +139,7 @@
     "total": null
   },
   "details": null,
+  "empty": null,
   "groups": [],
   "notices": [
     {
@@ -512,6 +521,7 @@
       "target": "rail"
     }
   },
+  "subtitle": "nextcloud",
   "title": "Дела",
   "top": {
     "lock": null,

@@ -705,9 +705,8 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 			return
 		}
 	}
-	if c.spec.kind == view.KindContact || c.spec.kind == view.KindEvent {
-		r = withoutOpen(r)
-	}
+	// ?open= of every list: the panel's row is no query the list keeps.
+	r = withoutOpen(r)
 	// The rail is built after the list: the list is what fills its counts.
 	// The list leaves the tags of what it read in the shell's rail.
 	rail := func(tags []view.Tag) view.Rail {
@@ -1604,11 +1603,14 @@ func taskShow(r *http.Request) string {
 func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	show := taskShow(r)
 	page := view.TasksPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
-	page.Bar.Actions = s.listActions(c, nil)
+	// New task, Import, Export and Print (s-tasks-1): Print is the list
+	// with print=1 (U-10).
+	page.Bar.Actions = append(s.listActions(c, nil), s.printAction(c.listPath()))
 	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, bad, err := c.calQuery(r.Context(), c.spec.component, nil, nil)
 	if err != nil {
+		page.Subtitle = text(bookSubtitle(c, 0, false))
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
 	}
@@ -1616,7 +1618,10 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	var open, done int
 	var more []unreadable
 	by := sortOf(r, view.KindTask)
-	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items)), c.spec.segment, false, filter, c.tf.now, by)
+	shown := s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items))
+	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, shown, c.spec.segment, false, filter, c.tf.now, by)
+	page.Subtitle = text(bookSubtitle(c, len(objs), true))
+	page.Details = s.openRow(r, c.sess, c.listPath(), c.spec, shown, taskRowsOn(page.Groups))
 	page.Bar.Segments = append(s.taskSegments(c.listPath(), filter.tag, show, open, done),
 		s.sortSegments(c.listPath(), view.KindTask, by, r.URL.Query())...)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
@@ -1670,6 +1675,11 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 		}
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
+			if len(it.also) > 0 {
+				// A linked row says how many sources it has; the stamps
+				// are its hint (s-tasks-1).
+				row.Stamp = sourcesCount(it)
+			}
 		}
 		row.Menu = s.recordOps(it.from, recordKinds[segment], uid, o.ETag).rowMenu()
 		if !it.from.col.ReadOnly && !it.from.conn.Feed {
@@ -1741,6 +1751,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 		g := &groups[len(groups)-1]
 		g.Rows = append(g.Rows, it.row)
 	}
+	countTaskGroups(groups)
 	return groups, open, done, len(rows), bad
 }
 

@@ -274,14 +274,14 @@ func TestClockTickSaysItsPrice(t *testing.T) {
 }
 
 // from-typecase note 19, task 31: the head of the task list is the head of
-// every kind — New task, Import, Export (s-tasks-1) — and Print, which is
-// the client's.
+// every kind — New task, Import, Export (s-tasks-1) — and Print, the list
+// with print=1 since the owner's decision 4 of the client's plan (the
+// client's scan of the tasks, ЗБ3).
 func TestTaskListHeadIsTheFrame(t *testing.T) {
 	var want []string
 	for _, b := range headButtons(t, "s-tasks-1") {
-		if label, _, _ := strings.Cut(b, " ["); label != "Print" {
-			want = append(want, label)
-		}
+		label, _, _ := strings.Cut(b, " [")
+		want = append(want, label)
 	}
 	f := calendarFixture(t, nil)
 	page := decode[struct {

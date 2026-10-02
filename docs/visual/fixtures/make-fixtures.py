@@ -299,24 +299,70 @@ write(u'radicale-vps/dezhurstva.ics', cal(u'Дежурства', duty_radicale))
 
 # Задачи (VTODO). «Сегодня» в макетах — неделя 10–16 августа 2026,
 # поэтому 7 и 8 августа попадают в «Overdue».
-def todo(uid, summary, due=None, cats=(), percent=None, stamp=u'20260810T060000Z'):
+def todo(uid, summary, due=None, cats=(), percent=None, stamp=u'20260810T060000Z',
+         desc=None, priority=None, alarm=None, related=None, attach=()):
     L = [u'BEGIN:VTODO', u'UID:%s' % uid, u'DTSTAMP:%s' % stamp,
          u'SUMMARY:%s' % esc(summary)]
     if due:
         L.append(u'DUE%s' % due)
+    if desc:
+        L.append(u'DESCRIPTION:%s' % esc(desc))
+    if priority is not None:
+        L.append(u'PRIORITY:%d' % priority)
     if cats:
         L.append(u'CATEGORIES:%s' % u','.join(cats))
     if percent is not None:
         L.append(u'PERCENT-COMPLETE:%d' % percent)
+    if related:
+        L.append(u'RELATED-TO;RELTYPE=SIBLING:%s' % related)
+    L.extend(attach)
+    if alarm:
+        L.extend([u'BEGIN:VALARM', u'ACTION:DISPLAY',
+                  u'DESCRIPTION:%s' % esc(summary), u'TRIGGER:%s' % alarm,
+                  u'END:VALARM'])
     L.append(u'END:VTODO')
     return L
 
 
+# Посадочный внутри задачи (s-tasks-1, -2: «посадочный-казань.pdf ·
+# application/pdf · 128 KB · in the task»): 131 072 байта, вложение ATTACH с
+# двоичным значением (S-20). Содержимое — заглушка: сверяются имя, тип и
+# размер.
+def boarding_pass():
+    head = b'%PDF-1.4\n% boarding pass, a stub of the mockup set\n'
+    body = (b'0123456789abcdef' * 8192)[:131072 - len(head)]
+    return head + body
+
+
+# «Поездка в Казань» — событие, с которым связана «Собрать чемодан»
+# (s-tasks-1, -2, -10: «Поездка в Казань · event · 12 Aug»). Кадры агенды
+# его не рисуют, и в «Личный» его кладут сами проверки задач — файл лежит
+# отдельно и в коллекцию набора не входит (README).
+write(u'nextcloud-home/lichnyj-poezdka.ics', cal(u'Личный', [
+    u'BEGIN:VEVENT',
+    u'UID:3e6b-71d4-a209',
+    u'DTSTAMP:20260801T090000Z',
+    u'DTSTART;VALUE=DATE:20260812',
+    u'DTEND;VALUE=DATE:20260815',
+    u'SUMMARY:Поездка в Казань',
+    u'END:VEVENT']))
+
 write(u'nextcloud-home/dela.ics', cal(u'Дела',
+      # Правка задачи (s-tasks-3): описание, приоритет «High · 1»,
+      # напоминание за день, связь с событием «Забрать документы».
       todo(u'aa10-77bc-0e31', u'Отправить документы в МФЦ',
-           due=u';VALUE=DATE:20260807', cats=[u'дом']) +
+           due=u';VALUE=DATE:20260807', cats=[u'дом'],
+           desc=u'Опись, копия паспорта и заявление. Приём до 18:00, окно 4.',
+           priority=1, alarm=u'-P1D', related=u'1d55-90fe-3c27') +
+      # Карточка и панель задачи (s-tasks-1, -2): описание, приоритет 5,
+      # напоминание за день, посадочный внутри, связь с поездкой.
       todo(u'aa11-2d09-5f84', u'Собрать чемодан',
-           due=u';TZID=Europe/Moscow:20260812T180000', cats=[u'дом']) +
+           due=u';TZID=Europe/Moscow:20260812T180000', cats=[u'дом'],
+           desc=u'Зарядки, переходник, распечатать посадочный.',
+           priority=5, alarm=u'-P1D', related=u'3e6b-71d4-a209',
+           attach=[u'ATTACH;FMTTYPE=application/pdf;ENCODING=BASE64;'
+                   u'VALUE=BINARY;FILENAME=посадочный-казань.pdf:' +
+                   base64.b64encode(boarding_pass()).decode('ascii')]) +
       todo(u'aa12-9e44-c703', u'Продлить страховку', percent=100)))
 
 write(u'nextcloud-home/rabota-zadachi.ics', cal(u'Работа · задачи',

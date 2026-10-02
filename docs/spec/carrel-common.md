@@ -395,7 +395,7 @@ spec/fixtures/<screen>/<state>.json
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже, с теми же параметрами: `?print=1`, `?open=`, `?filter=`, `?compact=`, у календаря окно и роды |
-| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов |
+| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1) |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта и события); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
@@ -421,7 +421,7 @@ spec/fixtures/<screen>/<state>.json
 имя и значение — `render.PrintParam`, `render.PrintValue`): тот же маршрут и
 та же вью-модель, страница рисуется на бумаге (`Shell.Print` — колонтитул).
 Принимают параметр адреса, у которых в кадрах есть Print и в этой таблице
-стоит `?print=1`: список контактов и агенда (единый вид и одна коллекция),
+стоит `?print=1`: список контактов, список задач и агенда (единый вид и одна коллекция),
 карточка записи (Print в шапке — у контакта и события), хронология человека.
 Сервер параметр не читает и вью-модель не меняет: его ставит ссылка Print
 (`list.print`, `record.print`, `timeline.print`), читает отрисовщик клиента.
@@ -870,6 +870,7 @@ type Details struct {
     Rendered   []Block       // текст заметки, разобранный (C-6.9): абзацы, задачи с отметками
     Attendees  []AttendeeRow // участники события, только чтение
     Attach     []AttachRow
+    AttachHint Text          // строка под вложениями задачи (s-tasks-1): «The same block events and notes have: up to 2 MB the file is written into the task itself, above that it goes to the attachments folder and the task keeps a link. …» — порог, настройка экземпляра (S-20); у прочих родов пусто, ключа нет
     Related    []TimelineRow
     Foreign    []Field       // контакт: «Kept as the server sent them»
     ForeignShow *Action      // «Show 3» — кнопка, раскрывающая Foreign; без сценариев — тот же список с этой панелью и ?foreign=1; nil — чужих свойств нет или они раскрыты
@@ -1130,11 +1131,20 @@ type AgendaRow struct {
 
 type TasksPage struct {
     Shell
-    Bar   ListBar // сегменты «Open 12», «Done 48», «All 60» (s-tasks-1)
+    // Под заголовком: единый вид — где и сколько, «2 of 3 lists · nextcloud
+    // · 30 tasks» (одно подключение названо, несколько — «2 accounts»; число
+    // задач — когда опрос закончен); один список — подключение и сколько в
+    // нём задач, «nextcloud · 21 tasks», список только для чтения —
+    // «nextcloud · the server granted no write access» (s-tasks-1)
+    Subtitle Text
+    Bar   ListBar // сегменты «Open 12», «Done 48», «All 60» (s-tasks-1); Actions: New task (в едином виде со стрелкой «куда», s-tasks-5), Import, Export, Print (i-print, ?print=1)
     Groups []TaskGroup
-    Poll  *PollBar
+    Poll  *PollBar // единый вид; nil — один список или ничего не отмечено
+    Empty *Notice  // ничего не отмечено: «No lists are ticked» и «Tick every list» (rail.tick.all, U-6.0), Poll — nil; nil — есть что показать
 }
-type TaskGroup struct { Rubric Text; Rows []TaskRow }
+// Count — сколько задач в группе; Overdue — группа просроченного, её счёт
+// тревогой (is-alert, s-tasks-1)
+type TaskGroup struct { Rubric Text; Count int; Overdue bool; Rows []TaskRow }
 type TaskRow struct {
     Href      string
     Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
@@ -1150,11 +1160,12 @@ type TaskRow struct {
     Priority  Text     // приоритет числом, «5»; пусто — нет (s-tasks-13)
     Status    Text     // статус словом списка, «In process»; без STATUS — «Needs action» (s-tasks-13)
     Changed   Text     // последняя правка коротко с временем, «10 Aug 11:02» (s-tasks-13, C-10)
-    Badges    []Badge  // «2 источника» у связанной задачи
-    Sources   []Stamp  // источники связанной группы
+    Badges    []Badge  // «linked ×2» у связанной задачи
+    Sources   []Stamp  // источники связанной группы — подсказка столбца источника; Stamp такой строки в едином виде — их счёт, «2 sources» (s-tasks-1)
     Tick      *Action  // отметка выполнения в строке (task.done); nil — только чтение
     Menu      []MenuItem
     State     RecordState
+    On        bool     // строка открыта в панели подробностей (?open=, is-on; s-tasks-1)
 }
 
 type NotesPage struct {
@@ -1202,10 +1213,11 @@ type NoteRow struct {
 Source в её меню нет, и `Stamp` в её строках пуст. У хронологии источник
 свой у каждой строки, и Source в её меню есть всегда.
 
-**Панель у списка без сценариев** (s-contacts-1): список контактов с
-`?open={адрес строки}` приходит с панелью этой записи в `Shell.Details`, её
-строка — `On`, `Details.Close` — тот же список без `open`. Со сценариями
-панель — фрагмент по адресу записи (C-7.2), и `Close` пуст.
+**Панель у списка без сценариев** (s-contacts-1, s-agenda-1, s-tasks-1):
+список с `?open={адрес строки}` приходит с панелью этой записи в
+`Shell.Details`, её строка — `On`, `Details.Close` — тот же список без
+`open`. Со сценариями панель — фрагмент по адресу записи (C-7.2), и `Close`
+пуст.
 
 **Полоса опроса стоит, пока есть что сказать.** Клиент рисует `PollBar`, пока
 опрос идёт (`Running`) или когда источник не ответил (состояние не `done` и

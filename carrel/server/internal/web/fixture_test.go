@@ -1183,54 +1183,131 @@ func TestFixtureEventCard(t *testing.T) {
 // such row in Проекты.
 func linkMockupEvent(t *testing.T, app *mockupApp) {
 	t.Helper()
-	const copyUID = "4b2e-9d10-8f1c"
-	body, err := os.ReadFile(filepath.Join(mockupRoot(t), "nextcloud-home", "lichnyj.ics"))
+	linkMockupCopy(t, app, view.KindEvent, "g-sinkap", mockupRecord{"nextcloud", "lichnyj", "8f1c-4a02-b7d3", "nextcloud-home/lichnyj.ics"},
+		mockupRecord{"radicale · vps", "proekty", "4b2e-9d10-8f1c", ""}, nil)
+}
+
+// linkMockupTask puts a copy of «Собрать чемодан», due an hour later, in
+// nextcloud · Работа and links the two (S-16): «linked ×2», «2 sources»
+// (s-tasks-1) and «The same task in other lists · … · Time differ»
+// (s-tasks-2; the client's scan ЗБ6, ЗГ5). The frames put the copy in
+// radicale · vps · Личное, a list no rail of theirs draws (task 105); here
+// it is a list the rails hold. The copy lives in the tests alone.
+func linkMockupTask(t *testing.T, app *mockupApp) {
+	t.Helper()
+	linkMockupCopy(t, app, view.KindTask, "g-chemodan", mockupRecord{"nextcloud", "dela", "aa11-2d09-5f84", "nextcloud-home/dela.ics"},
+		mockupRecord{"nextcloud", "rabota", "cc11-5a20-7e94", ""}, func(rec string) string {
+			return strings.Replace(rec, "DUE;TZID=Europe/Moscow:20260812T180000", "DUE;TZID=Europe/Moscow:20260812T190000", 1)
+		})
+}
+
+// mockupRecord is a record of the set: where it lies and in which file of
+// the set; a copy has no file.
+type mockupRecord struct{ account, slug, uid, file string }
+
+// linkMockupCopy puts a copy of a record of the set, changed by edit, under
+// another UID into another collection, and links the two as the person
+// would (S-16).
+func linkMockupCopy(t *testing.T, app *mockupApp, kind view.Kind, group string, of, copy mockupRecord, edit func(string) string) {
+	t.Helper()
+	body, err := os.ReadFile(filepath.Join(mockupRoot(t), filepath.FromSlash(of.file)))
 	if err != nil {
 		t.Fatal(err)
 	}
-	var event string
-	for _, rec := range splitRecords(string(body)) {
-		if strings.Contains(rec, "UID:8f1c-4a02-b7d3") {
-			event = strings.Replace(rec, "UID:8f1c-4a02-b7d3", "UID:"+copyUID, 1)
+	var rec string
+	for _, one := range splitRecords(string(body)) {
+		if strings.Contains(one, "UID:"+of.uid) {
+			rec = strings.Replace(one, "UID:"+of.uid, "UID:"+copy.uid, 1)
 		}
 	}
-	if event == "" {
-		t.Fatal("«Синк-ап по релизу» is not in the set")
+	if rec == "" {
+		t.Fatalf("%s is not in %s", of.uid, of.file)
 	}
-	app.servers["radicale · vps"].Seed(davtest.CalendarHome+"proekty/"+copyUID+".ics", event)
+	if edit != nil {
+		rec = edit(rec)
+	}
+	app.servers[copy.account].Seed(davtest.CalendarHome+copy.slug+"/"+copy.uid+".ics", rec)
 	key, _ := app.sess.DataKey()
 	blob, _ := app.h.users.Catalog(app.sess.AccountID(), key)
 	var members []sealed.RecordRef
-	for _, slug := range []string{"lichnyj", "proekty"} {
+	for _, one := range []mockupRecord{of, copy} {
 		for _, c := range blob.Collections {
-			if collectionSlugOf(c.Path) == slug {
-				uid := "8f1c-4a02-b7d3"
-				if slug == "proekty" {
-					uid = copyUID
-				}
-				members = append(members, sealed.RecordRef{AccountID: c.AccountID, Col: c.Path, UID: uid})
+			conn, _ := blob.Connection(c.AccountID)
+			if collectionSlugOf(c.Path) == one.slug && connLabelOf(conn) == one.account {
+				members = append(members, sealed.RecordRef{AccountID: c.AccountID, Col: c.Path, UID: one.uid})
 			}
 		}
 	}
 	if len(members) != 2 {
-		t.Fatalf("the two calendars are not in the catalog: %+v", members)
+		t.Fatalf("the two collections are not in the catalog: %+v", members)
 	}
 	if err := app.h.users.EditDuplicates(app.sess.AccountID(), key, "duplicates.link", "", func(d *sealed.Duplicates) error {
-		d.Linked = append(d.Linked, sealed.LinkedGroup{ID: "g-sinkap", Kind: view.KindEvent, Members: members})
+		d.Linked = append(d.Linked, sealed.LinkedGroup{ID: group, Kind: kind, Members: members})
 		return nil
 	}); err != nil {
 		t.Fatal(err)
 	}
 }
 
-// C-14.2: one list of tasks (s-tasks-1).
+// seedMockupTrip puts «Поездка в Казань» into «Личный»: the event «Собрать
+// чемодан» is related to (s-tasks-1, -2, -10). The agenda frames do not draw
+// it, so the set keeps it in a file of its own (README).
+func seedMockupTrip(t *testing.T, app *mockupApp) {
+	t.Helper()
+	body, err := os.ReadFile(filepath.Join(mockupRoot(t), "nextcloud-home", "lichnyj-poezdka.ics"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, rec := range splitRecords(string(body)) {
+		app.servers["nextcloud"].Seed(davtest.CalendarHome+"lichnyj/3e6b-71d4-a209.ics", rec)
+	}
+}
+
+// lastUsed makes the collection of the set the one a record of kind was
+// last made in: New's arrow says «last used» by it (s-tasks-5, s-notes-13).
+func (a *mockupApp) lastUsed(t *testing.T, slug string, kind view.Kind) {
+	t.Helper()
+	key, _ := a.sess.DataKey()
+	blob, _ := a.h.users.Catalog(a.sess.AccountID(), key)
+	for _, c := range blob.Collections {
+		if collectionSlugOf(c.Path) == slug {
+			if err := a.h.users.SetLastUsed(a.sess.AccountID(), key, sealed.Selection{Kind: kind, AccountID: c.AccountID, Path: c.Path}); err != nil {
+				t.Fatal(err)
+			}
+			return
+		}
+	}
+	t.Fatalf("no collection %s", slug)
+}
+
+// C-14.2: one list of tasks (s-tasks-1), «Собрать чемодан» open in the
+// panel, as the frame draws it.
 func TestFixtureTaskList(t *testing.T) {
 	app := newMockupApp(t)
+	seedMockupTrip(t, app)
+	// The calendar was read: the panel's Related names the trip.
+	openList(t, app, "/app/calendar?from=2026-08-10")
 	// Both task lists are counted in the frame (s-tasks-1): the combined
 	// list was opened first, as a person comes to it.
 	combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-	app.compare(t, "app-tasks/normal.json", app.h.do(get(app.listPath(t, "tasks", "dela"), app.sess)))
+	list := app.listPath(t, "tasks", "dela")
+	app.compare(t, "app-tasks/normal.json", app.h.do(get(list+"?open="+url.QueryEscape(list+"/aa11-2d09-5f84"), app.sess)))
+}
+
+// C-14.2: the combined list of tasks as s-tasks-1 draws it (the client's
+// scan of the tasks, ЗБ1): both lists, «Собрать чемодан» linked with its
+// copy and open in the panel, New task writing into «Дела», last used.
+func TestFixtureCombinedTasks(t *testing.T) {
+	app := newMockupApp(t)
+	linkMockupTask(t, app)
+	seedMockupTrip(t, app)
+	app.lastUsed(t, "dela", view.KindTask)
+	openList(t, app, "/app/calendar?from=2026-08-10")
+	page := combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	open := app.listPath(t, "tasks", "dela") + "/aa11-2d09-5f84"
+	app.compare(t, "app-tasks-all/normal.json", app.h.do(get("/app/tasks?task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
 }
 
 // C-14.2: one notebook (s-notes-1).

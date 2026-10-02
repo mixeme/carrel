@@ -160,8 +160,13 @@ type Details struct {
 	Rendered  []Block       `json:"rendered"`  // текст заметки, разобранный (C-6.9)
 	Attendees []AttendeeRow `json:"attendees"` // участники события, только чтение
 	Attach    []AttachRow   `json:"attach"`
-	Related   []TimelineRow `json:"related"`
-	Foreign   []Field       `json:"foreign"` // контакт: чужие свойства, как их прислал сервер
+	// AttachHint — строка под вложениями задачи (s-tasks-1): до какого
+	// объёма файл пишется в саму запись, а больше — в папку вложений, «…up
+	// to 2 MB the file is written into the task itself…» (порог — настройка
+	// экземпляра, S-20); у прочих родов пусто
+	AttachHint Text          `json:"attachHint,omitempty"`
+	Related    []TimelineRow `json:"related"`
+	Foreign    []Field       `json:"foreign"` // контакт: чужие свойства, как их прислал сервер
 	// ForeignShow — «Show 3», кнопка, раскрывающая Foreign: без сценариев —
 	// ссылка на тот же список с этой панелью и ?foreign=1; nil — их нет или
 	// они раскрыты

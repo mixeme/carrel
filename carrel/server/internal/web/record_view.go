@@ -91,12 +91,14 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		}
 	case view.KindTask:
 		page := s.taskPage(c, uid, obj, nil)
-		d.Fields = panelFields(page.Fields, nil)
-		if page.Percent != nil {
-			d.Fields = append(d.Fields, view.Field{Label: "Complete", Value: text(strconv.Itoa(*page.Percent) + "%")})
-		}
+		// The fields of the panel (s-tasks-1): Status, Due, Priority,
+		// Complete, Tags — monospaced where the frame sets them.
+		d.Fields, _ = taskFields(c.tf, obj, true, s.recordTags(c, obj))
 		d.Body, d.Attach, d.Related = page.Body, page.Attach, page.Related
 		d.Actions = shown(ops.edit, attach, ops.del)
+		if attach != nil {
+			d.AttachHint = taskAttachHint(c)
+		}
 	default:
 		page := s.notePage(c, uid, obj, nil)
 		// Where the note lies and when it was written, in one line under
