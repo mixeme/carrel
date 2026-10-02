@@ -1,154 +1,204 @@
-// Drafted by frame2go from frame «Задача · чтение» (s-tasks-2) of the Typecase mockup: the
-// frame's widgets and its data, top to bottom. The data is the frame's; it
-// is to become the application's (docs/guide/screen.md).
-package draft
+// Package task is a task, /app/tasks/{account}/{col}/{uid}, drawn by frame
+// «Задача · чтение» (s-tasks-2) of the mockup: the draft frame2go printed for
+// it, with the frame's data become the view model's (U-5.1, U-6.3). It is
+// read; the edit has its own address. Marking it done is no edit of the form
+// but the same three properties the list's tick changes.
+package task
 
-import w "carrel.dev/typecase/widget"
+import (
+	"strconv"
 
-// Tasks2 is frame «Задача · чтение» (s-tasks-2).
-func Tasks2() interface{ Render() string } {
-	return w.Shell{
-		Top: &w.Top{
-			Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
-			Search: &w.Search{Query: w.Query{Placeholder: "Search everything…", Label: "Search everything…"}},
-			Actions: []w.TopAction{
-				w.Button{Label: "New note", Menu: true, Icon: "quill", Kind: w.ButtonPrimary},
-				w.Button{Label: "2 min ago", Icon: "refresh"},
-				w.UserMenu{Name: "mix"},
-			},
-		},
-		Body: w.ShellBody{
-			Rail: []w.RailPart{
-				w.Nav{Items: []w.NavItem{
-					{Icon: "back", Label: "Back to list", Short: "Back", Href: "#"}}},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "nextcloud"},
-						w.TickRow{Mark: w.Mark{Colour: "#4A6B52"}, Label: "Дела", Meta: "21", Current: true},
-						w.TickRow{Mark: w.Mark{Colour: "#3F6E8C"}, Label: "Работа", Meta: "9"},
-					},
-				},
-				w.RailFoot{
-					Items: []w.RailFootPart{w.Emblem{Symbol: "davloom", Title: "davloom · running · 3 devices"}},
-					About: &w.About{Name: "Carrel", Build: w.Mono{Text: "0.0.1 · 786949a"}, Href: "#rest"},
-				},
-			},
-			Main: w.Main{
-				Items: []w.MainPart{
-					w.Head{
-						Title: &w.HeadTitle{Text: "Собрать чемодан"},
-						Subs: []w.HeadSub{
-							w.HeadSub{
-								Parts: []w.HeadSubPart{w.Text("nextcloud · Дела · "), w.Span{Face: w.FaceDanger, Text: "overdue by 3 days"}},
-							},
-						},
-						Acts: &w.Acts{
-							Items: []w.ActsPart{
-								w.Button{Label: "Edit", Icon: "pencil", Kind: w.ButtonPrimary},
-								w.Button{Label: "Mark done", Tick: &w.Tick{Glyph: true}},
-								w.Button{Label: "Print", Icon: "print"},
-								w.Button{Icon: "dots", Title: "More"},
-							},
-						},
-					},
-					w.Fields{
-						Items: []w.FieldsItem{
-							{Term: "Status", Value: []w.ValuePart{w.Text("Needs action")}},
-							{
-								Term: "Due",
-								Value: []w.ValuePart{
-									w.Mono{Text: "2026-08-12 18:00"},
-									w.Text(" "),
-									w.Span{Face: w.FaceDanger, Text: "· overdue by 3 days"},
-								},
-							},
-							{Term: "Complete", Value: []w.ValuePart{w.Text("0%")}, Face: w.ValueMono},
-							{Term: "Priority", Value: []w.ValuePart{w.Text("5")}, Face: w.ValueMono},
-							{Term: "Reminders", Value: []w.ValuePart{w.Text("1 day before")}},
-							{Term: "Tags", Value: []w.ValuePart{w.Tag{Label: "дом"}}},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Description"},
-							w.Prose{Parts: []w.Inline{w.Text("Зарядки, переходник, распечатать посадочный.")}},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{
-								Text: "Attachments",
-								Items: []w.RubricPart{
-									w.Drop{
-										Trigger: w.Button{Label: "Attach", Menu: true, Small: true},
-										Menu: w.Menu{
-											Items: []w.MenuPart{
-												w.MenuItem{Icon: "up", Label: "From this computer"},
-												w.MenuItem{Icon: "file", Label: "From Files"},
-											},
-											Width: w.MenuWidth212,
-											Pop:   w.MenuUnder,
-										},
-									},
-								},
-							},
-							w.SecList{
-								Items: [][]w.SecItemPart{
-									[]w.SecItemPart{
-										w.Link{Text: "посадочный-казань.pdf", Href: "#"},
-										w.Text(" "),
-										w.Dim{Parts: []w.Inline{w.Text("application/pdf · 128 KB")}},
-										w.Text(" "),
-										w.Badge{Label: "in the task"},
-									},
-								},
-								Gap: 6,
-							},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Related"},
-							w.SecList{
-								Items: [][]w.SecItemPart{
-									[]w.SecItemPart{
-										w.Span{Face: w.FaceAccent, Text: "Поездка в Казань"},
-										w.Text(" "),
-										w.Dim{Parts: []w.Inline{w.Text("· event · 12 Aug")}},
-									},
-								},
-							},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{
-								Text:  "The same task in other lists",
-								Items: []w.RubricPart{w.Badge{Label: "1", Tone: w.BadgeLinked}},
-							},
-							w.SecList{
-								Items: [][]w.SecItemPart{
-									[]w.SecItemPart{
-										w.Mark{Colour: "#6B4E7A", Size: w.MarkH11Inline},
-										w.Text(" "),
-										w.Link{Text: "radicale · vps · Личное", Href: "#"},
-										w.Text(" "),
-										w.Dim{Parts: []w.Inline{w.Text("· Time differ")}},
-									},
-								},
-								Gap: 5,
-							},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Source"},
-							w.Diag{Text: "Path  /dav.php/calendars/mix/tasks/c41a.ics\nRead  2 min ago · not changed on server"},
-						},
-					},
-					w.Danger{Button: w.Button{Label: "Delete task", Icon: "trash", Kind: w.ButtonDangerSolid}},
-				},
-			},
-		},
+	"carrel.dev/carrel/client/bind"
+	"carrel.dev/carrel/server/view"
+	w "carrel.dev/typecase/widget"
+)
+
+// The IDs of the page's forms: the deletion posts with no form of its own.
+const formDelete = "delete"
+
+// The screen's words (U-1.3) for the shell: the mark, the search, the rail.
+var (
+	top = bind.TopWords{
+		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
+		Search: "Search everything…",
 	}
+	rail = bind.RailWords{Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
+)
+
+// The screen's words (U-1.3): the lead of a kind and a difference, what
+// joins a related record's kind and day, the attachment kept inside the task.
+const (
+	lead   = "· "
+	sep    = " · "
+	inside = "in the task"
+)
+
+// The names of the contract the screen places by (C-7.5): Attach goes in the
+// rubric of attachments, Mark done carries the tick's glyph.
+const (
+	attachID = "attach.add"
+	doneID   = "task.done"
+)
+
+// Screen draws the task from its view model. It is read, not edited.
+//
+//   - The shell: the top bar; the rail of return — «Back to list», the
+//     list's sources, the foot.
+//   - The head: the title, where the task lives and — overdue — by how long,
+//     in alarm; the actions on view — Edit, Mark done with its tick, Print —
+//     and «⋯» with the record's menu (Move, Copy, Export .ics, Publish a
+//     link).
+//   - The notices, and what the server did not keep of the last save.
+//   - The fields: Status, Due (overdue in alarm), Starts, Complete and
+//     Priority monospaced, Reminders, Where, Link, the tags.
+//   - The description; the attachments with Attach and its arrow, each where
+//     it is kept; the related records with their kind and day; the same task
+//     in other lists; the source.
+//   - The deletion at the foot.
+func Screen(p *view.TaskPage) w.Shell {
+	h := w.Head{Title: &w.HeadTitle{Text: string(p.Summary)}, Subs: bind.Sub(p.Subtitle)}
+	var acts []w.ActsPart
+	var attach *view.Action
+	var danger []w.Button
+	for _, a := range p.Actions {
+		switch {
+		case a.ID == attachID:
+			attach = &a
+		case a.Danger:
+			danger = append(danger, bind.Button(a, formDelete))
+		case a.ID == doneID:
+			b := bind.Button(a, bind.TickID(a))
+			b.Tick = &w.Tick{Glyph: true, Done: p.Done}
+			acts = append(acts, b)
+		default:
+			acts = append(acts, bind.Button(a, ""))
+		}
+	}
+	if len(p.Menu) > 0 {
+		acts = append(acts, w.Drop{
+			Trigger: w.Button{Icon: "dots", Title: "More"},
+			Menu:    w.Menu{Items: bind.MenuItems(p.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
+		})
+	}
+	h.Acts = &w.Acts{Items: acts}
+	main := []w.MainPart{h}
+	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	if p.Loss != nil {
+		main = append(main, bind.Loss(*p.Loss, w.MsgSpacePage))
+	}
+	fields := w.Fields{}
+	for _, f := range p.Fields {
+		fields.Items = append(fields.Items, bind.FieldsItem(f, lead))
+	}
+	main = append(main, fields)
+	if p.Body != "" {
+		main = append(main, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Description"}, w.Prose{Parts: []w.Inline{w.Text(p.Body)}}}})
+	}
+	if attach != nil || len(p.Attach) > 0 {
+		rubric := w.Rubric{Text: "Attachments"}
+		if attach != nil {
+			b := bind.Button(*attach, "")
+			b.Icon, b.Menu, b.Small = "", true, true
+			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(attach.Arrow, ""), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
+		}
+		sec := []w.SecPart{rubric}
+		if len(p.Attach) > 0 {
+			sec = append(sec, w.SecList{Items: attachments(p.Attach), Gap: 6})
+		}
+		main = append(main, w.Sec{Items: sec})
+	}
+	if len(p.Related) > 0 {
+		var lines [][]w.SecItemPart
+		for _, r := range p.Related {
+			about := lead + string(r.Kind)
+			if r.When != "" {
+				about += sep + string(r.When)
+			}
+			lines = append(lines, []w.SecItemPart{
+				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
+				w.Text(" "),
+				w.Dim{Parts: []w.Inline{w.Text(about)}},
+			})
+		}
+		main = append(main, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
+	}
+	if len(p.Linked) > 0 {
+		var lines [][]w.SecItemPart
+		for _, f := range p.Linked {
+			lines = append(lines, bind.Book(f, lead))
+		}
+		main = append(main, w.Sec{Items: []w.SecPart{
+			w.Rubric{Text: "The same task in other lists", Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Linked)), Tone: w.BadgeLinked}}},
+			w.SecList{Items: lines, Gap: 5},
+		}})
+	}
+	read := string(p.Source.LastRead)
+	if p.Source.Compared != "" {
+		read += sep + string(p.Source.Compared)
+	}
+	main = append(main, w.Sec{Items: []w.SecPart{
+		w.Rubric{Text: "Source"},
+		bind.Diag(bind.DiagLine{Name: "Path", Value: string(p.Source.Path)}, bind.DiagLine{Name: "Read", Value: read}),
+	}})
+	for _, b := range danger {
+		main = append(main, w.Danger{Button: b})
+	}
+	t := bind.Top(p.Top, top)
+	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}}
+}
+
+// Forms are the forms of the actions that post with none of their own: Mark
+// done, the deletion, Attach «From this computer» with its file, the
+// notices' buttons and the menus' items that post (Sign out).
+func Forms(p *view.TaskPage) []w.PostForm {
+	out := append(bind.TopForms(p.Top), bind.MenuForms(p.Menu)...)
+	out = append(out, bind.NoticeForms(p.Notices)...)
+	for _, a := range p.Actions {
+		switch {
+		case a.ID == attachID:
+			out = append(out, bind.MenuForms(a.Arrow)...)
+		case a.Method != "POST" || !a.Enabled:
+		case a.Danger:
+			out = append(out, bind.ActionForm(a, formDelete))
+		case a.ID == doneID:
+			out = append(out, bind.ActionForm(a, bind.TickID(a)))
+		}
+	}
+	return out
+}
+
+// railParts is the rail of return: «Back to list», with the phone's short
+// «Back» (U-1.3), the list's sources, the foot.
+func railParts(r view.Rail) []w.RailPart {
+	nav := w.Nav{}
+	for _, n := range r.Nav {
+		it := bind.NavItem(n)
+		it.Short = "Back"
+		nav.Items = append(nav.Items, it)
+	}
+	parts := []w.RailPart{nav}
+	parts = append(parts, bind.Sources(r, rail)...)
+	return append(parts, bind.Foot(r, rail))
+}
+
+// attachments are the lines of the task's attachments: the name, a link
+// where it goes (data inside the task downloads, a file in Files opens
+// there), the type and size muted, and «in the task» for data inside it
+// (S-20). An attachment is taken off on the edit only.
+func attachments(rows []view.AttachRow) [][]w.SecItemPart {
+	var out [][]w.SecItemPart
+	for _, a := range rows {
+		var line []w.SecItemPart
+		if a.Href != "" {
+			line = append(line, w.Link{Text: string(a.Name), Href: a.Href}, w.Text(" "))
+		} else {
+			line = append(line, w.Text(string(a.Name)+" "))
+		}
+		line = append(line, w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + " · " + string(a.Size))}})
+		if a.Inline {
+			line = append(line, w.Text(" "), w.Badge{Label: inside})
+		}
+		out = append(out, line)
+	}
+	return out
 }
