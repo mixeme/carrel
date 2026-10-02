@@ -47,6 +47,22 @@
         "label": "New folder",
         "method": "POST",
         "target": "main"
+      },
+      {
+        "enabled": false,
+        "icon": "i-panel",
+        "id": "files.details",
+        "label": "Details",
+        "method": "GET",
+        "reason": "Choose one file to see its details."
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/a-nc-home/Files/Scans/?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "columns": {
@@ -126,7 +142,32 @@
     },
     "compact": null,
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/app/files/a-nc-home/Files/Scans/",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter this folder",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 0,
     "range": null,
     "segments": [
@@ -136,14 +177,16 @@
         "id": "files.view.list",
         "label": "List",
         "method": "GET",
-        "on": true
+        "on": true,
+        "icon": "i-menu"
       },
       {
         "enabled": true,
         "href": "/app/files/a-nc-home/Files/Scans/?view=tiles",
         "id": "files.view.tiles",
         "label": "Tiles",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-grid"
       },
       {
         "enabled": true,
@@ -249,7 +292,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -304,7 +347,8 @@
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "part"
+            "tick": "part",
+            "meta": "2 of 3"
           }
         ],
         "state": "ok"
@@ -321,7 +365,7 @@
             "href": "/app/files/a-nc-home/Files/",
             "label": "Files",
             "menu": [],
-            "on": false,
+            "on": true,
             "readOnly": false,
             "state": "ok",
             "tick": "on"
@@ -522,7 +566,7 @@
         "label": "Refresh",
         "method": "GET"
       },
-      "answered": "",
+      "answered": "just now",
       "running": false
     },
     "search": {

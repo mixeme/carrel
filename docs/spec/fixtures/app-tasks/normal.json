@@ -149,7 +149,7 @@
         "id": "tasks.done",
         "label": "Done",
         "method": "GET",
-        "tally": "0"
+        "tally": "1"
       },
       {
         "enabled": true,
@@ -157,7 +157,7 @@
         "id": "tasks.all",
         "label": "All",
         "method": "GET",
-        "tally": "3"
+        "tally": "4"
       },
       {
         "enabled": true,
@@ -340,6 +340,7 @@
         "target": "sheet"
       }
     ],
+    "preview": null,
     "related": [
       {
         "colour": "",
@@ -742,7 +743,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -788,7 +789,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 5,
+            "count": 6,
             "detail": "",
             "feed": false,
             "href": "/app/tasks",
@@ -808,7 +809,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 3,
+            "count": 4,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/dela",
@@ -997,6 +998,11 @@
         "href": "/app/tasks/a-nc-home/dela?tag=%D0%B4%D0%BE%D0%BC",
         "label": "дом",
         "on": false
+      },
+      {
+        "href": "/app/tasks/a-nc-home/dela?tag=read",
+        "label": "read",
+        "on": false
       }
     ],
     "ticks": {
@@ -1039,7 +1045,7 @@
       "target": "rail"
     }
   },
-  "subtitle": "nextcloud · 3 tasks",
+  "subtitle": "nextcloud · 4 tasks",
   "title": "Дела",
   "top": {
     "lock": null,

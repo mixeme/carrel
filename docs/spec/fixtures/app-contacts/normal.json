@@ -765,7 +765,8 @@
       "label": "Show 3",
       "method": "GET"
     },
-    "date": ""
+    "date": "",
+    "preview": null
   },
   "print": {
     "title": "Combined address book",

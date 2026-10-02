@@ -115,7 +115,8 @@ func TestTaskListIsTheFrame(t *testing.T) {
 
 	// One list: where and how many, Print, the panel.
 	one := decode[view.TasksPage](t, app.h.do(get(app.listPath(t, "tasks", "dela")+"?open="+url.QueryEscape(open), app.sess)))
-	if one.Subtitle != "nextcloud · 3 tasks" || actionByID(one.Bar.Actions, "list.print") == nil || one.Details == nil {
+	// Four: the done one tagged «read» counts too (C24 of the client).
+	if one.Subtitle != "nextcloud · 4 tasks" || actionByID(one.Bar.Actions, "list.print") == nil || one.Details == nil {
 		t.Errorf("one list = %q %+v %+v", one.Subtitle, one.Bar.Actions, one.Details)
 	}
 

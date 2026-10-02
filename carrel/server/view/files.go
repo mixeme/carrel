@@ -2,13 +2,21 @@ package view
 
 type FilesRootPage struct {
 	Shell
+	// Subtitle — под заголовком: «2 of 3 storages on 2 servers» (s-files-6):
+	// отмечено из живых хранилищ и на скольких подключениях они все
+	Subtitle    Text                `json:"subtitle"`
 	Collections []FileCollectionRow `json:"collections"`
-	Empty       *Notice             `json:"empty"` // ни одной папки: почему пусто и что сделать
+	// Note — сообщение под таблицей (s-files-6): что такое корень и, когда
+	// есть снятые хранилища, кто не отмечен — их имена жирным, «‹Public› is
+	// not ticked, so it is not here.»; пусто — показать нечего
+	Note  Runs    `json:"note"`
+	Empty *Notice `json:"empty"` // ни одной папки: почему пусто и что сделать
 }
 type FileCollectionRow struct {
 	Href     string          `json:"href"`
 	Label    Text            `json:"label"`
 	Stamp    Stamp           `json:"stamp"`
+	Server   Text            `json:"server"` // подключение — столбец Server моноширинно, «sftpgo · vps» (s-files-6)
 	Colour   Colour          `json:"colour"`
 	ReadOnly bool            `json:"readOnly"`
 	Purpose  Text            `json:"purpose"` // вложения, публикации
@@ -51,13 +59,19 @@ type Crumb struct {
 	Href  string `json:"href"`
 }
 type FileRow struct {
-	Href     string     `json:"href"`
-	Name     Text       `json:"name"`
-	IsDir    bool       `json:"isDir"`
-	Type     Text       `json:"type"`
-	Size     Size       `json:"size"`
-	Modified When       `json:"modified"`
-	Thumb    string     `json:"thumb"` // адрес миниатюры; пусто — значок типа
+	Href     string `json:"href"`
+	Name     Text   `json:"name"`
+	IsDir    bool   `json:"isDir"`
+	Type     Text   `json:"type"`
+	Size     Size   `json:"size"`
+	Modified When   `json:"modified"`
+	Thumb    string `json:"thumb"` // адрес миниатюры; пусто — значок типа
+	// Icon — значок строки по типу (s-files-1): i-file у папки, i-img у
+	// картинки, i-doc у прочего
+	Icon string `json:"icon"`
+	// Note — почему у картинки нет миниатюры: «too large» — больше потолка
+	// миниатюры (s-files-5); у прочих пусто
+	Note     Text       `json:"note,omitempty"`
 	Selected bool       `json:"selected"`
 	Menu     []MenuItem `json:"menu"`
 	// Upload — у строки папки: загрузка в неё (бросок на строку, U-15.3;

@@ -7,7 +7,8 @@
       "purpose": "",
       "readOnly": false,
       "stamp": "nextcloud · Files",
-      "state": "ok"
+      "state": "ok",
+      "server": "nextcloud"
     },
     {
       "colour": "#a05a2c",
@@ -16,7 +17,8 @@
       "purpose": "attachments",
       "readOnly": false,
       "stamp": "sftpgo · vps · Documents",
-      "state": "ok"
+      "state": "ok",
+      "server": "sftpgo · vps"
     }
   ],
   "details": null,
@@ -84,7 +86,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -136,10 +138,11 @@
             "href": "/app/files",
             "label": "Selected collections",
             "menu": [],
-            "on": false,
+            "on": true,
             "readOnly": false,
             "state": "ok",
-            "tick": "part"
+            "tick": "part",
+            "meta": "2 of 3"
           }
         ],
         "state": "ok"
@@ -335,12 +338,14 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "id": "files.refresh",
+        "label": "Refresh",
+        "method": "GET",
+        "href": "/app/files",
+        "icon": "i-refresh"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {
@@ -385,5 +390,21 @@
       }
     ],
     "userHref": "/app/settings/account"
-  }
+  },
+  "note": [
+    {
+      "text": "This is where the section starts: the storages you ticked in the rail, as top-level folders. Open one and its own tree opens — contents of different servers are never mixed in one folder, because a file has one path and belongs to its own storage."
+    },
+    {
+      "text": " "
+    },
+    {
+      "mark": "strong",
+      "text": "Public"
+    },
+    {
+      "text": " is not ticked, so it is not here."
+    }
+  ],
+  "subtitle": "2 of 3 storages on 2 servers"
 }

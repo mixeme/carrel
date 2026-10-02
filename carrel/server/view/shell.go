@@ -130,15 +130,18 @@ type RailSection struct {
 }
 
 type SourceRow struct {
-	Href     string          `json:"href"`
-	Label    Text            `json:"label"`
-	Colour   Colour          `json:"colour"`
-	Count    *int            `json:"count"` // nil — коллекция снята или ещё не отвечала: прочерк, не ноль
-	Tick     TickState       `json:"tick"`  // C-8
-	ReadOnly bool            `json:"readOnly"`
-	On       bool            `json:"on"`   // открытая: её список на экране или запись из неё (is-on)
-	Feed     bool            `json:"feed"` // подписка — лента, прочитанная снаружи (is-ext)
-	State    CollectionState `json:"state"`
+	Href     string    `json:"href"`
+	Label    Text      `json:"label"`
+	Colour   Colour    `json:"colour"`
+	Count    *int      `json:"count"` // nil — коллекция снята или ещё не отвечала: прочерк, не ноль
+	Tick     TickState `json:"tick"`  // C-8
+	ReadOnly bool      `json:"readOnly"`
+	On       bool      `json:"on"` // открытая: её список на экране или запись из неё (is-on)
+	// Meta — приглушённое справа у строки корня файлов: «2 of 3» — сколько
+	// хранилищ отмечено из живых (s-files-6); у прочих пусто
+	Meta  Text            `json:"meta,omitempty"`
+	Feed  bool            `json:"feed"` // подписка — лента, прочитанная снаружи (is-ext)
+	State CollectionState `json:"state"`
 	// Detail — не ответила: почему, полностью — подсказка значка ошибки
 	// строки, «401 Unauthorized — the saved password was refused. Open
 	// Connections to update it.»; ни слов рядом с именем, ни Retry в рейле
@@ -156,8 +159,11 @@ type Details struct {
 	Subtitle Text `json:"subtitle"` // под заголовком: откуда запись, у заметки — и когда
 	// Date — у заметки день и время, когда они у неё есть, моноширинно после
 	// Subtitle (s-notes-1), как NoteMeta.Date страницы; у прочих пусто
-	Date      Text          `json:"date"`
-	Avatar    *Avatar       `json:"avatar"`    // контакт: фото или инициалы; у других родов nil
+	Date   Text    `json:"date"`
+	Avatar *Avatar `json:"avatar"` // контакт: фото или инициалы; у других родов nil
+	// Preview — место превью выбранного файла (s-files-1): миниатюра или
+	// значок типа; у записей nil
+	Preview   *Thumb        `json:"preview"`
 	Fields    []Field       `json:"fields"`    // категории — строкой «Tags» с Field.Tags
 	Body      Text          `json:"body"`      // описание события и задачи, как есть
 	Rendered  []Block       `json:"rendered"`  // текст заметки, разобранный (C-6.9)
@@ -182,6 +188,13 @@ type Details struct {
 	// Close — крестик без сценариев: тот же список без панели; пусто —
 	// панель пришла фрагментом (C-7.2)
 	Close string `json:"close"`
+}
+
+// Thumb — превью файла: Href — адрес миниатюры (картинка не больше потолка
+// миниатюры), пусто — значок Icon по типу (i-img, i-doc, i-file).
+type Thumb struct {
+	Href string `json:"href"`
+	Icon string `json:"icon"`
 }
 
 type Field struct {

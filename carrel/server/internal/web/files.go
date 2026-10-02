@@ -16,6 +16,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
@@ -234,6 +235,11 @@ func (s *Server) readFolder(ctx context.Context, c *fileCtx, folder string, from
 	if err != nil {
 		return nil, err
 	}
+	// When the folder was read is what its refresh says, and the root's —
+	// the newest of its storages (S-22: kept from reads that happen anyway).
+	at := s.now()
+	c.sess.NoteReading(c.conn.ID, folder, session.Reading{At: at})
+	c.sess.NoteReading(c.conn.ID, c.col.Path, session.Reading{At: at})
 	if data, err := json.Marshal(entries); err == nil {
 		c.sess.Cache().PutETagMap(c.conn.ID, listKey(folder), data)
 	}
@@ -246,7 +252,14 @@ func forgetFolder(sess *session.Session, connID, folder string) {
 }
 
 func onlyCuts(q url.Values) bool {
-	return q.Has("filter") || q.Has("sort") || q.Has("view") || q.Has("select")
+	return q.Has("filter") || q.Has("sort") || q.Has("view") || q.Has("select") || q.Has("details") || q.Has("print")
+}
+
+// Markdown is not in Go's own table of types, and what a system's table says
+// differs from one machine to the next: a folder of notes would read
+// «text/markdown» on one and nothing on another (s-files-1 says it).
+func init() {
+	_ = mime.AddExtensionType(".md", "text/markdown; charset=utf-8")
 }
 
 // Markdown is not in Go's own table of types, and what a system's table says
@@ -318,11 +331,35 @@ func (s *Server) getFilesRoot(w http.ResponseWriter, r *http.Request) {
 	page := view.FilesRootPage{Shell: s.buildShell(sess, "Files")}
 	page.Rail = s.filesRail(sess, blob, nil)
 	page.Print = view.Print{Title: page.Title}
+	// The root asks no server: its refresh reads it again, and says when a
+	// folder of a ticked storage was read last (s-files-6).
+	page.Top.Refresh = view.Refresh{Action: view.Action{ID: "files.refresh", Label: "Refresh", Icon: "i-refresh", Href: s.route("/app/files"), Method: "GET", Enabled: true}}
+	var last time.Time
+	for _, col := range ticked(blob, view.KindFile) {
+		if r, ok := sess.ReadingOf(col.AccountID, col.Path); ok && r.At.After(last) {
+			last = r.At
+		}
+	}
+	page.Top.Refresh.Answered = s.timeFor(sess).formatWhen(last, true, s.now())
+	live, servers := 0, map[string]bool{}
+	var off []string
+	for _, col := range blob.Collections {
+		if _, ok := blob.Connection(col.AccountID); !ok || col.Gone || !col.Has(view.KindFile) {
+			continue
+		}
+		live++
+		servers[col.AccountID] = true
+		if !isTicked(blob, view.KindFile, col.AccountID, col.Path) {
+			off = append(off, collectionLabel(col))
+		}
+	}
+	page.Subtitle = text(fmt.Sprintf("%d of %s on %s", live-len(off), plural(live, "storage"), plural(len(servers), "server")))
 	for _, col := range ticked(blob, view.KindFile) {
 		conn, _ := blob.Connection(col.AccountID)
 		row := view.FileCollectionRow{
 			Label:    text(collectionLabel(col)),
 			Stamp:    stamp(connLabel(conn), collectionLabel(col)),
+			Server:   text(connLabel(conn)),
 			Colour:   catalogColour(col),
 			ReadOnly: col.ReadOnly,
 			State:    view.CollectionOK,
@@ -346,6 +383,24 @@ func (s *Server) getFilesRoot(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(page.Collections) == 0 {
 		page.Empty = filesEmpty(s, blob)
+	} else {
+		// What the root is, and which storages it leaves out (s-files-6).
+		page.Note = line("This is where the section starts: the storages you ticked in the rail, as top-level folders. " +
+			"Open one and its own tree opens — contents of different servers are never mixed in one folder, because a file has one path and belongs to its own storage.")
+		if len(off) > 0 {
+			parts := []any{" "}
+			for i, name := range off {
+				if i > 0 {
+					parts = append(parts, ", ")
+				}
+				parts = append(parts, strongRun(name))
+			}
+			verb := " is not ticked, so it is not here."
+			if len(off) > 1 {
+				verb = " are not ticked, so they are not here."
+			}
+			page.Note = append(page.Note, join(append(parts, verb)...)...)
+		}
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
@@ -355,10 +410,13 @@ func (s *Server) getFilesRoot(w http.ResponseWriter, r *http.Request) {
 func filesEmpty(s *Server, blob sealed.Blob) *view.Notice {
 	for _, col := range blob.Collections {
 		if _, ok := blob.Connection(col.AccountID); ok && !col.Gone && col.Has(view.KindFile) {
+			// What to do is a button (U-6.0): the root row's tick, all of them.
 			return &view.Notice{
 				Role:  view.NoticeInfo,
 				Title: "No storage is ticked",
 				Body:  "Tick the storages to show here in the rail. Each opens as its own folder: the trees of different servers are never mixed.",
+				Actions: []view.Action{{ID: "rail.tick.all", Label: "Tick every storage", Method: "POST", Enabled: true, Primary: true,
+					Href: s.postQuery("/app/sources/files", url.Values{"toggle": {s.route("/app/files")}, "back": {"/app/files"}})}},
 			}
 		}
 	}
@@ -386,7 +444,15 @@ func (s *Server) filesRail(sess *session.Session, blob sealed.Blob, open *fileCt
 	case live:
 		root.Tick = view.TickOn
 	}
+	root.Meta = text(fmt.Sprintf("%d of %d", on, live))
 	rail.Sections = append([]view.RailSection{{State: view.CollectionOK, Rows: []view.SourceRow{root}}}, sections...)
+	// The row of what is on the screen is open (s-files-6: the root; s-files-1:
+	// the storage of the folder).
+	if open == nil {
+		markOpen(rail.Sections, s.route("/app/files"))
+	} else {
+		markOpen(rail.Sections, s.route(fileHref(open.conn.ID, open.col.Path, "", nil, true)))
+	}
 	// The foot of s-files-1: New folder where a folder is open, Connect
 	// account, Subscribe to a feed — somebody's folder is such a feed, and
 	// the form opens for a folder. Apply is the rail's submit without
@@ -611,6 +677,11 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 	page.Rail = s.filesRail(c.sess, c.blob, c.at(segs))
 	page.Notices = append(page.Notices, notices...)
 	page.Top.Refresh = view.Refresh{Action: view.Action{ID: "folder.refresh", Label: "Refresh", Icon: "i-refresh", Href: s.route(here), Method: "GET", Enabled: true}}
+	if folder, err := c.path(segs, true); err == nil {
+		if r, ok := c.sess.ReadingOf(c.conn.ID, folder); ok {
+			page.Top.Refresh.Answered = c.tf.formatWhen(r.At, true, now)
+		}
+	}
 
 	// The line under the title: whose storage this is and, on a read-only
 	// one, the one reason Upload and New folder stand off (s-files-15).
@@ -682,6 +753,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 			Selected: selected[e.Name],
 			Menu:     s.fileMenu(c, segs, e),
 		}
+		row.Icon, row.Note = fileIcon(e), thumbNote(e)
 		if e.Dir {
 			row.Href, row.Type = s.route(c.href("", rowSegs, true)), "folder"
 			// A drop on the row goes into it (U-15.3, s-files-1).
@@ -703,24 +775,141 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 
 	total := len(entries)
 	page.Bar = view.ListBar{Filter: text(filter), Loaded: len(page.Rows), Total: &total, Selected: len(picked),
-		Columns: s.columnsMenu(r, csrfField(c.sess), "files", c.href("columns", segs, true), q, false)}
+		Columns: s.columnsMenu(r, csrfField(c.sess), "files", c.href("columns", segs, true), q, false),
+		Size:    sizeOf(entries)}
+	if len(picked) > 0 {
+		page.Bar.SelectedSize = sizeOf(picked)
+	}
+	// «Filter this folder» without scripts: a GET of the folder that keeps
+	// its view and order (C-6.4; with scripts the client sifts the rows).
+	var keep []view.FormRow
+	for _, name := range []string{"view", "sort"} {
+		if v := q.Get(name); v != "" {
+			keep = append(keep, view.FormRow{Name: name, Kind: view.InputHidden, Value: text(v)})
+		}
+	}
+	filterForm := s.plainForm(here, "GET", append(keep, view.FormRow{Name: "filter", Label: "Filter this folder", Kind: view.InputText, Value: text(filter)})...)
+	page.Bar.FilterForm = &filterForm
 	option := func(id, label, key, value, current string) view.Action {
 		v := cloneValues(q)
 		v.Set(key, value)
 		return view.Action{ID: id, Label: text(label), Href: s.route(here + "?" + v.Encode()), Method: "GET", Enabled: true, On: value == current}
 	}
-	page.Bar.Segments = []view.Action{
-		option("files.view.list", "List", "view", string(view.FileList), string(page.View)),
-		option("files.view.tiles", "Tiles", "view", string(view.FileTiles), string(page.View)),
-	}
+	list := option("files.view.list", "List", "view", string(view.FileList), string(page.View))
+	tiles := option("files.view.tiles", "Tiles", "view", string(view.FileTiles), string(page.View))
+	list.Icon, tiles.Icon = "i-menu", "i-grid" // s-files-1, -5
+	page.Bar.Segments = []view.Action{list, tiles}
 	for _, o := range listSorts[view.KindFile] {
 		page.Bar.Segments = append(page.Bar.Segments, option(o.id, o.label, "sort", o.value, order))
 	}
 	page.Bar.Actions = s.folderActions(c, segs, picked)
+	// One file chosen opens its panel (s-files-1); Details shows and hides
+	// it, Print is the «⋯» of the head (s-files-7).
+	shown := len(picked) == 1 && !picked[0].Dir && q.Get("details") != "0"
+	if shown {
+		page.Details = s.filePanel(c, segs, picked[0], here, q)
+	}
+	page.Bar.Actions = append(page.Bar.Actions, s.detailsToggle(here, q, picked, shown), s.printAction(here))
 	page.Select = s.selectForm(here, q)
 	page.Queue = s.transferQueue(c.sess)
 	page.Print = view.Print{Title: page.Title, Range: printRange(string(c.stamp()), plural(total, "item"), filter), Taken: c.tf.taken(now)}
 	return page
+}
+
+// fileIcon is the icon of a row by its type (s-files-1): a folder, an
+// image, anything else.
+func fileIcon(e file.Entry) string {
+	switch {
+	case e.Dir:
+		return "i-file"
+	case strings.HasPrefix(fileType(e.Name, e.Type), "image/"):
+		return "i-img"
+	}
+	return "i-doc"
+}
+
+// thumbNote says why an image a browser could show has no thumbnail: it is
+// larger than a thumbnail is allowed to be (s-files-5).
+func thumbNote(e file.Entry) view.Text {
+	if !e.Dir && inlineTypes[fileType(e.Name, e.Type)] && e.Size > conf.FileThumbMaxBytes {
+		return "too large"
+	}
+	return ""
+}
+
+// sizeOf is what the files among entries weigh together; empty without a
+// file.
+func sizeOf(entries []file.Entry) view.Size {
+	var n int64
+	files := 0
+	for _, e := range entries {
+		if !e.Dir && e.Size > 0 {
+			n += e.Size
+			files++
+		}
+	}
+	if files == 0 {
+		return ""
+	}
+	return formatSize(n)
+}
+
+// filePanel is the panel of the one file chosen (s-files-1): where it is,
+// its preview, Download first, Open (an image, in place), Rename and Move;
+// size, type, when it changed and its path on the server; Delete. Close is
+// the folder with nothing chosen.
+func (s *Server) filePanel(c *fileCtx, segs []string, e file.Entry, here string, q url.Values) *view.Details {
+	at := append(slices.Clone(segs), e.Name)
+	mt := fileType(e.Name, e.Type)
+	download := s.route(c.href("download", at, false))
+	d := &view.Details{Title: text(e.Name), Subtitle: text(string(c.stamp())), Preview: &view.Thumb{Icon: fileIcon(e)}}
+	if inlineTypes[mt] && e.Size > 0 && e.Size <= conf.FileThumbMaxBytes {
+		d.Preview.Href = download + "?inline=1"
+	}
+	open := view.Action{ID: "file.view", Label: "Open", Method: "GET"}
+	if inlineTypes[mt] {
+		open.Enabled, open.Href = true, download+"?inline=1"
+	} else {
+		open.Reason = "Carrel shows only an image in place: download the file to open it."
+	}
+	d.Actions = []view.Action{
+		{ID: "file.download", Label: "Download", Icon: "i-down", Href: download, Method: "GET", Enabled: true, Primary: true},
+		open,
+		writeAction(c, view.Action{ID: "file.rename", Label: "Rename", Icon: "i-pencil", Href: s.opHref(c, segs, view.FileRename, e.Name), Method: "POST", Enabled: true}),
+		writeAction(c, view.Action{ID: "file.move", Label: "Move", Icon: "i-move", Href: s.opHref(c, segs, view.FileMove, e.Name), Method: "POST", Enabled: true}),
+		writeAction(c, view.Action{ID: "file.delete", Label: "Delete", Icon: "i-trash", Href: s.opHref(c, segs, view.FileDelete, e.Name), Method: "POST", Danger: true, Enabled: true}),
+	}
+	path, _ := c.path(at, false)
+	d.Fields = []view.Field{
+		{Label: "Size", Value: text(string(formatSize(e.Size))), Mono: true},
+		{Label: "Type", Value: text(mt), Mono: true},
+		{Label: "Changed", Value: text(string(c.tf.formatWhen(e.Modified, false, s.now()))), Mono: true},
+		{Label: "Path", Value: text(path), Mono: true},
+	}
+	closed := cloneValues(q)
+	closed.Del("select")
+	closed.Del("details")
+	d.Close = s.route(here + querySuffix(closed))
+	return d
+}
+
+// detailsToggle is Details of the head (s-files-1): it hides the panel of
+// the file chosen (details=0) and shows it again; with no one file chosen
+// there is no panel to show.
+func (s *Server) detailsToggle(here string, q url.Values, picked []file.Entry, shown bool) view.Action {
+	a := view.Action{ID: "files.details", Label: "Details", Icon: "i-panel", Method: "GET", On: shown}
+	if len(picked) != 1 || picked[0].Dir {
+		a.Reason = "Choose one file to see its details."
+		return a
+	}
+	v := cloneValues(q)
+	if shown {
+		v.Set("details", "0")
+	} else {
+		v.Del("details")
+	}
+	a.Enabled, a.Href = true, s.route(here+querySuffix(v))
+	return a
 }
 
 // selectForm is the selection of a folder without scripts (U-8): a GET of
@@ -729,7 +918,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 // selection is the folder with its query and nothing selected.
 func (s *Server) selectForm(here string, q url.Values) *view.Form {
 	var rows []view.FormRow
-	for _, name := range []string{"view", "sort", "filter", "select"} {
+	for _, name := range []string{"view", "sort", "filter", "details", "select"} {
 		for _, v := range q[name] {
 			rows = append(rows, view.FormRow{Name: name, Kind: view.InputHidden, Value: text(v)})
 		}
@@ -738,6 +927,7 @@ func (s *Server) selectForm(here string, q url.Values) *view.Form {
 	if len(q["select"]) > 0 {
 		clear := cloneValues(q)
 		clear.Del("select")
+		clear.Del("details")
 		f.Actions = []view.Action{{ID: "files.select.clear", Label: "Clear selection", Href: s.route(here + querySuffix(clear)), Method: "GET", Enabled: true}}
 	}
 	return &f

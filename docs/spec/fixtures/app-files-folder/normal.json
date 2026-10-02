@@ -96,6 +96,23 @@
         "label": "Delete",
         "method": "POST",
         "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?details=0&select=2026-08-10-sync-board.png",
+        "icon": "i-panel",
+        "id": "files.details",
+        "label": "Details",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "columns": {
@@ -175,7 +192,32 @@
     },
     "compact": null,
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter this folder",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 5,
     "range": null,
     "segments": [
@@ -185,14 +227,16 @@
         "id": "files.view.list",
         "label": "List",
         "method": "GET",
-        "on": true
+        "on": true,
+        "icon": "i-menu"
       },
       {
         "enabled": true,
         "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?select=2026-08-10-sync-board.png&view=tiles",
         "id": "files.view.tiles",
         "label": "Tiles",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-grid"
       },
       {
         "enabled": true,
@@ -219,7 +263,9 @@
     ],
     "selected": 1,
     "show": null,
-    "total": 5
+    "total": 5,
+    "selectedSize": "412 KB",
+    "size": "4.4 MB"
   },
   "crumbs": [
     {
@@ -235,7 +281,113 @@
       "label": "attachments"
     }
   ],
-  "details": null,
+  "details": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",
+        "icon": "i-down",
+        "id": "file.download",
+        "label": "Download",
+        "method": "GET",
+        "primary": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png?inline=1",
+        "id": "file.view",
+        "label": "Open",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&op=rename",
+        "icon": "i-pencil",
+        "id": "file.rename",
+        "label": "Rename",
+        "method": "POST",
+        "target": "sheet"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&op=move",
+        "icon": "i-move",
+        "id": "file.move",
+        "label": "Move",
+        "method": "POST",
+        "target": "sheet"
+      },
+      {
+        "csrf": "csrf",
+        "danger": true,
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&op=delete",
+        "icon": "i-trash",
+        "id": "file.delete",
+        "label": "Delete",
+        "method": "POST",
+        "target": "sheet"
+      }
+    ],
+    "attach": [],
+    "attendees": [],
+    "avatar": null,
+    "body": "",
+    "books": [],
+    "close": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+    "date": "",
+    "deleteNote": "",
+    "fields": [
+      {
+        "href": "",
+        "label": "Size",
+        "mono": true,
+        "value": "412 KB"
+      },
+      {
+        "href": "",
+        "label": "Type",
+        "mono": true,
+        "value": "image/png"
+      },
+      {
+        "href": "",
+        "label": "Changed",
+        "mono": true,
+        "value": "10 August, 11:07"
+      },
+      {
+        "href": "",
+        "label": "Path",
+        "mono": true,
+        "value": "/alice/files/Documents/carrel/attachments/2026-08-10-sync-board.png"
+      }
+    ],
+    "foreign": [],
+    "foreignShow": null,
+    "menu": [],
+    "preview": {
+      "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png?inline=1",
+      "icon": "i-img"
+    },
+    "related": [],
+    "rendered": [],
+    "source": {
+      "changed": "",
+      "colour": "",
+      "compared": "",
+      "lastRead": "",
+      "objects": null,
+      "path": "",
+      "readOnly": false,
+      "stamp": "",
+      "uid": ""
+    },
+    "subtitle": "sftpgo · vps · Documents",
+    "title": "2026-08-10-sync-board.png"
+  },
   "name": null,
   "notices": [],
   "print": {
@@ -302,7 +454,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -357,7 +509,8 @@
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "part"
+            "tick": "part",
+            "meta": "2 of 3"
           }
         ],
         "state": "ok"
@@ -394,7 +547,7 @@
             "href": "/app/files/a-sftp-vps/Documents/",
             "label": "Documents",
             "menu": [],
-            "on": false,
+            "on": true,
             "readOnly": false,
             "state": "ok",
             "tick": "on"
@@ -569,7 +722,8 @@
         "label": "Upload into 2026-07",
         "method": "POST",
         "target": "queue"
-      }
+      },
+      "icon": "i-file"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-04-whiteboard.jpg",
@@ -649,7 +803,9 @@
       "size": "2.8 MB",
       "thumb": "",
       "type": "image/jpeg",
-      "upload": null
+      "upload": null,
+      "icon": "i-img",
+      "note": "too large"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",
@@ -729,7 +885,8 @@
       "size": "412 KB",
       "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png?inline=1",
       "type": "image/png",
-      "upload": null
+      "upload": null,
+      "icon": "i-img"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/release-checklist.md",
@@ -809,7 +966,8 @@
       "size": "3 KB",
       "thumb": "",
       "type": "text/markdown",
-      "upload": null
+      "upload": null,
+      "icon": "i-doc"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
@@ -889,7 +1047,8 @@
       "size": "1.2 MB",
       "thumb": "",
       "type": "application/pdf",
-      "upload": null
+      "upload": null,
+      "icon": "i-doc"
     }
   ],
   "select": {
@@ -1008,7 +1167,7 @@
         "label": "Refresh",
         "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

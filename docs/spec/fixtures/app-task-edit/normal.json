@@ -525,6 +525,13 @@
                 "value": "aa12-9e44-c703"
               },
               {
+                "colour": "#4a6b52",
+                "label": "Прочитать договор аренды",
+                "meta": "task",
+                "selected": false,
+                "value": "aa13-5b2e-71c0"
+              },
+              {
                 "hint": "By UID: a record that is not among the loaded ones.",
                 "label": "By UID…",
                 "selected": false,
@@ -583,7 +590,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 3,
+            "count": 4,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/dela",

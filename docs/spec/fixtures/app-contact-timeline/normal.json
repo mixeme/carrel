@@ -309,7 +309,8 @@
     "close": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?card=0",
     "books": [],
     "foreignShow": null,
-    "date": ""
+    "date": "",
+    "preview": null
   },
   "details": null,
   "groups": [

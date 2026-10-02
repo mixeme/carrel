@@ -25,6 +25,11 @@ type ListBar struct {
 	Range    *Range   `json:"range"`    // диапазон дат там, где он есть
 	Actions  []Action `json:"actions"`  // операции над выделенным
 	Selected int      `json:"selected"`
+	// Size и SelectedSize — у папки файлов: объём всех её файлов («14 items ·
+	// 38.2 MB») и выделенных («412 KB» перед чертой полосы выделения,
+	// s-files-1, -2); у прочих списков пусто
+	Size         Size `json:"size,omitempty"`
+	SelectedSize Size `json:"selectedSize,omitempty"`
 	// Columns — кнопка Columns полосы и её меню-форма (components-42 и
 	// меню записки 25); nil — у списка выбора столбцов нет
 	Columns *Columns `json:"columns"`

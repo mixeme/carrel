@@ -51,6 +51,22 @@
         "method": "POST",
         "reason": "This storage is read-only.",
         "target": "main"
+      },
+      {
+        "enabled": false,
+        "icon": "i-panel",
+        "id": "files.details",
+        "label": "Details",
+        "method": "GET",
+        "reason": "Choose one file to see its details."
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Public/?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "columns": {
@@ -130,7 +146,32 @@
     },
     "compact": null,
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/app/files/a-sftp-vps/Public/",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter this folder",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 1,
     "range": null,
     "segments": [
@@ -140,14 +181,16 @@
         "id": "files.view.list",
         "label": "List",
         "method": "GET",
-        "on": true
+        "on": true,
+        "icon": "i-menu"
       },
       {
         "enabled": true,
         "href": "/app/files/a-sftp-vps/Public/?view=tiles",
         "id": "files.view.tiles",
         "label": "Tiles",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-grid"
       },
       {
         "enabled": true,
@@ -174,7 +217,8 @@
     ],
     "selected": 0,
     "show": null,
-    "total": 1
+    "total": 1,
+    "size": "95 B"
   },
   "crumbs": [
     {
@@ -248,7 +292,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -303,7 +347,8 @@
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "part"
+            "tick": "part",
+            "meta": "2 of 3"
           }
         ],
         "state": "ok"
@@ -353,7 +398,7 @@
             "href": "/app/files/a-sftp-vps/Public/",
             "label": "Public",
             "menu": [],
-            "on": false,
+            "on": true,
             "readOnly": true,
             "state": "read-only",
             "tick": "off"
@@ -507,7 +552,8 @@
       "size": "95 B",
       "thumb": "",
       "type": "text/plain",
-      "upload": null
+      "upload": null,
+      "icon": "i-doc"
     }
   ],
   "select": {
@@ -605,7 +651,7 @@
         "label": "Refresh",
         "method": "GET"
       },
-      "answered": "",
+      "answered": "just now",
       "running": false
     },
     "search": {

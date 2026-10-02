@@ -17,6 +17,50 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.149 — 2026-10-02
+
+The root and a folder of the files section as their frames draw them (the
+client's scan: ФА1–ФА3, ФБ1–ФБ4, ФБ6–ФБ8, ФБ10, ФБ11, ФБ15) and a task
+tagged «read» in the set (C24).
+
+### Added
+
+- **The root** (s-files-6): `FilesRootPage.subtitle` — «2 of 3 storages on 2
+  servers»; `.note` — what the root is and, in bold, the storages not
+  ticked; `FileCollectionRow.server` — the connection of the Server column;
+  the refresh `files.refresh`, its `answered` — when a folder of a ticked
+  storage was read last. Nothing ticked: «Tick every storage»
+  (`rail.tick.all`).
+- **The rail**: the root row is open on the root and the storage of the
+  folder in a folder (`SourceRow.on`); the root row says «2 of 3»
+  (`SourceRow.meta`).
+- **A folder** (s-files-1, -2, -5, -7): one file chosen opens its panel —
+  `Shell.details` with `Details.preview` (`Thumb`: the thumbnail or the
+  icon of its type), Download (primary), Open (`file.view`, an image in
+  place), Rename, Move, Size, Type, Changed, Path, Delete; `Close` is the
+  folder with nothing chosen. `files.details` (Details of the head) hides
+  and shows it (`?details=0`); `list.print` — Print in «⋯» of the head
+  (`?print=1`). `ListBar.filterForm` — «Filter this folder» without
+  scripts; `ListBar.size` and `.selectedSize` — what the folder and the
+  selection weigh; `FileRow.icon` (`i-file`, `i-img`, `i-doc`) and
+  `FileRow.note` «too large» for an image over the thumbnail's ceiling;
+  the view switch has its icons (`i-menu`, `i-grid`). A folder's refresh
+  says when it was read (`answered`).
+
+### Changed
+
+- The set has a done task «Прочитать договор аренды» tagged «read»
+  (s-tasks-1 draws the tag in the rail). Every record's version in the
+  fixtures moved by one.
+
+### For consumers
+
+Draw the root's message from `note` and the Server column from `server`;
+the panel of a file from `details` (the words «Links», «Carrel keeps no
+index of what points at this file…» are the screen's). `Details.preview`
+is null for records. Fixtures regenerated: every fixture of the files, and
+every one that carries a record's version or the tasks' counts.
+
 ## v0.2.148 — 2026-10-02
 
 Fixtures of the files section (the client's scan, ФБ5, ФВ1, ФГ8, ФА5, ФД5,

@@ -238,13 +238,14 @@ func TestFileRowMenusAreTheFrames(t *testing.T) {
 	if a := actionByID(page.Bar.Actions, "publish"); a != nil {
 		t.Errorf("the folder bar publishes: %+v", a)
 	}
-	// The head of Files is Upload and New folder; its «⋯» (s-files-7) holds
-	// Print alone, and that is the client's: no Import, no Export.
+	// The head of Files is Upload, New folder and Details; its «⋯»
+	// (s-files-7) holds Print alone — the same address with print=1, as the
+	// lists' Print (the client's scan, ФБ7): no Import, no Export.
 	if want := []string{"Print [i-print]"}; !equalStrings(frameMenu(t, "s-files-7"), want) {
 		t.Fatalf("s-files-7 = %q, want %q: read the frame again", frameMenu(t, "s-files-7"), want)
 	}
-	if got := ids(page.Bar.Actions); !equalStrings(got, []string{"file.upload", "folder.new"}) {
-		t.Errorf("files head = %q, want Upload and New folder only", got)
+	if got := ids(page.Bar.Actions); !equalStrings(got, []string{"file.upload", "folder.new", "files.details", "list.print"}) {
+		t.Errorf("files head = %q, want Upload, New folder, Details and Print", got)
 	}
 }
 

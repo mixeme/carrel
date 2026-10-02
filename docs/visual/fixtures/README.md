@@ -21,7 +21,7 @@
 | `nextcloud-home/dni-rozhdeniya.ics` | nextcloud · **Дни рождения** | 7.2, коллекция со снятым флажком |
 | `radicale-vps/proekty.ics` | radicale · **Проекты** | 7.2, «Ревью архитектуры» |
 | `radicale-vps/dezhurstva.ics` | radicale · **Дежурства** | 7.2, вторая копия дежурства |
-| `nextcloud-home/dela.ics` | nextcloud · **Дела** | 7.3 «Задачи · фильтры, просрочка» |
+| `nextcloud-home/dela.ics` | nextcloud · **Дела** | 7.3 «Задачи · фильтры, просрочка»; выполненная «Прочитать договор аренды» — тег «read» рейла (s-tasks-1) |
 | `nextcloud-home/lichnyj-poezdka.ics` | nextcloud · **Личный**, только для проверок задач | 7.3, «Поездка в Казань» — связь «Собрать чемодан» |
 | `nextcloud-home/rabota-zadachi.ics` | nextcloud · **Работа** (задачи) | 7.3 |
 | `nextcloud-home/zapisi.ics` | nextcloud · **Записи** | 7.4 «Заметки», полноэкранная правка |

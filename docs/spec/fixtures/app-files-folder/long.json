@@ -95,6 +95,22 @@
         "label": "Delete",
         "method": "POST",
         "target": "sheet"
+      },
+      {
+        "enabled": false,
+        "icon": "i-panel",
+        "id": "files.details",
+        "label": "Details",
+        "method": "GET",
+        "reason": "Choose one file to see its details."
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "columns": {
@@ -174,7 +190,32 @@
     },
     "compact": null,
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter this folder",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 6,
     "range": null,
     "segments": [
@@ -184,14 +225,16 @@
         "id": "files.view.list",
         "label": "List",
         "method": "GET",
-        "on": true
+        "on": true,
+        "icon": "i-menu"
       },
       {
         "enabled": true,
         "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?select=2026-08-10-sync-board.png&select=release-checklist.md&select=2026-08-04-whiteboard.jpg&view=tiles",
         "id": "files.view.tiles",
         "label": "Tiles",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-grid"
       },
       {
         "enabled": true,
@@ -218,7 +261,9 @@
     ],
     "selected": 3,
     "show": null,
-    "total": 6
+    "total": 6,
+    "selectedSize": "3.2 MB",
+    "size": "8.5 MB"
   },
   "crumbs": [
     {
@@ -353,7 +398,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -408,7 +453,8 @@
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "part"
+            "tick": "part",
+            "meta": "2 of 3"
           }
         ],
         "state": "ok"
@@ -445,7 +491,7 @@
             "href": "/app/files/a-sftp-vps/Documents/",
             "label": "Documents",
             "menu": [],
-            "on": false,
+            "on": true,
             "readOnly": false,
             "state": "ok",
             "tick": "on"
@@ -620,7 +666,8 @@
         "label": "Upload into 2026-07",
         "method": "POST",
         "target": "queue"
-      }
+      },
+      "icon": "i-file"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-04-whiteboard.jpg",
@@ -700,7 +747,9 @@
       "size": "2.8 MB",
       "thumb": "",
       "type": "image/jpeg",
-      "upload": null
+      "upload": null,
+      "icon": "i-img",
+      "note": "too large"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",
@@ -780,7 +829,8 @@
       "size": "412 KB",
       "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png?inline=1",
       "type": "image/png",
-      "upload": null
+      "upload": null,
+      "icon": "i-img"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/release-checklist.md",
@@ -860,7 +910,8 @@
       "size": "3 KB",
       "thumb": "",
       "type": "text/markdown",
-      "upload": null
+      "upload": null,
+      "icon": "i-doc"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/%D0%BE%D1%82%D1%87%D1%91%D1%82-%D0%B8%D1%8E%D0%BB%D1%8C.pdf",
@@ -940,7 +991,8 @@
       "size": "4.1 MB",
       "thumb": "",
       "type": "application/pdf",
-      "upload": null
+      "upload": null,
+      "icon": "i-doc"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
@@ -1020,7 +1072,8 @@
       "size": "1.2 MB",
       "thumb": "",
       "type": "application/pdf",
-      "upload": null
+      "upload": null,
+      "icon": "i-doc"
     }
   ],
   "select": {
@@ -1163,7 +1216,7 @@
         "label": "Refresh",
         "method": "GET"
       },
-      "answered": "",
+      "answered": "just now",
       "running": false
     },
     "search": {

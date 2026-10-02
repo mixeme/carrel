@@ -423,7 +423,7 @@ spec/fixtures/<screen>/<state>.json
 та же вью-модель, страница рисуется на бумаге (`Shell.Print` — колонтитул).
 Принимают параметр адреса, у которых в кадрах есть Print и в этой таблице
 стоит `?print=1`: список контактов, список задач и агенда (единый вид и одна коллекция),
-карточка записи (Print в шапке — у контакта, события и задачи, у заметки — в полосе над текстом), хронология человека.
+карточка записи (Print в шапке — у контакта, события и задачи, у заметки — в полосе над текстом), хронология человека, папка файлов (Print в «⋯» шапки, s-files-7).
 Сервер параметр не читает и вью-модель не меняет: его ставит ссылка Print
 (`list.print`, `record.print`, `timeline.print`), читает отрисовщик клиента.
 Сторож — `view.TestFixturePrintsAreC5`.
@@ -454,7 +454,7 @@ Typecase): рейл с соседними заметками и колонка �
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/app/files` | GET | вход | страница | `FilesRootPage` |
-| `/app/files/{account}/{col}/{path…}` | GET | вход | страница | `FilesPage`; адрес файла (без «/» в конце) — его папка с ним выделенным; `?select=` — выделенные имена (значений несколько), `?toggle=` (имя) и `?all=1` — форма выделения без сценариев (`FilesPage.Select`): ответ — редирект на папку с новым `select` (`toggle` переключает одно имя папки, `all` выделяет все показанные, а все выделенные — снимает); `?view=tiles` — плитки (без него — список), `?sort=` (`name`, `size`, `changed`), `?filter=` — по имени, по уже прочитанному списку |
+| `/app/files/{account}/{col}/{path…}` | GET | вход | страница | `FilesPage`; адрес файла (без «/» в конце) — его папка с ним выделенным; `?select=` — выделенные имена (значений несколько), `?toggle=` (имя) и `?all=1` — форма выделения без сценариев (`FilesPage.Select`): ответ — редирект на папку с новым `select` (`toggle` переключает одно имя папки, `all` выделяет все показанные, а все выделенные — снимает); `?view=tiles` — плитки (без него — список), `?sort=` (`name`, `size`, `changed`), `?filter=` — по имени, по уже прочитанному списку («Filter this folder» без сценариев — `ListBar.FilterForm`); один выделенный файл — с его панелью (`Shell.Details`), `?details=0` — панель скрыта (Details шапки); `?print=1` — та же папка для печати (U-10, Print в «⋯» шапки) |
 | `/app/files/{account}/{col}/download/{path…}` | GET | вход | поток; адрес папки (`…/`) с `?zip=1` — папка архивом zip (S-17.5) | — |
 | `/app/files/{account}/{col}/upload/{path…}` | POST | вход | фрагмент | `TransferQueue`; multipart: файлы — поле `file` (`Action.File`), у загрузки папки имя файла — путь внутри неё; перед файлами со сценарием — `size.<имя>` (длина файла в байтах, у загрузки папки имя — тот же путь) или `size` у одного файла: без них тело уходит без длины, и сервер, которому она нужна, отказывает (S-17.1); `?transfer=&answer=` (`skip`, `both`, `overwrite`) — ответ очереди на занятое имя |
 | `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | фрагмент | `FilesPage`; поле `name` — имя новой папки; без поля (New folder шапки и рейла) — папка с открытой строкой имени (`FilesPage.Name`) |
@@ -850,7 +850,8 @@ type SourceRow struct {
     Count    *int      // nil — коллекция снята или ещё не отвечала: прочерк, не ноль
     Tick     TickState // C-8
     ReadOnly bool
-    On       bool      // открытая: её список на экране или запись из неё; в едином виде — строка единого вида (is-on)
+    On       bool      // открытая: её список на экране или запись из неё; в едином виде — строка единого вида (is-on); у файлов — корень на корне, хранилище папки в папке
+    Meta     Text      // приглушённое справа у строки корня файлов: «2 of 3» — сколько хранилищ отмечено из живых (s-files-6); у прочих пусто
     Feed     bool      // подписка — лента, прочитанная снаружи (is-ext); на месте числа «ro»
     State    CollectionState
     Detail   Text      // не ответила: почему, полностью — подсказка значка ошибки строки, «401 Unauthorized — the saved password was refused. Open Connections to update it.»; ни слов у имени, ни Retry в рейле нет (решение владельца 02.10.2026: отказ целиком и его Retry — в меню «N failed» полосы хода, PollBar.Failed, states-16)
@@ -865,6 +866,7 @@ type Details struct {
     Subtitle   Text          // под заголовком: «nextcloud · Записи»
     Date       Text          // у заметки — день и время, когда они есть, моноширинно после Subtitle (s-notes-1), как NoteMeta.Date; у прочих пусто
     Avatar     *Avatar       // контакт: фото или инициалы; у других родов nil
+    Preview    *Thumb        // файл папки (s-files-1): миниатюра или значок типа; у записей nil
     Fields     []Field       // категории — строкой «Tags» с Field.Tags там, где её рисует кадр
     Body       Text          // описание события и задачи, как есть
     Rendered   []Block       // текст заметки, разобранный (C-6.9): абзацы, задачи с отметками
@@ -881,6 +883,10 @@ type Details struct {
     DeleteNote Text       // строка у удаления: у серии «Series is edited and deleted whole.»
     Close      string     // крестик без сценариев: тот же список без панели; пусто — панель пришла фрагментом (C-7.2)
 }
+
+// Thumb — превью файла: Href — адрес миниатюры (картинка не больше потолка
+// миниатюры), пусто — значок Icon по типу (i-img, i-doc, i-file).
+type Thumb struct { Href, Icon string }
 
 type Field struct {
     Label  Text
@@ -1022,6 +1028,11 @@ type ListBar struct {
     Range    *Range   // диапазон дат там, где он есть
     Actions  []Action // операции над выделенным
     Selected int
+    // Size и SelectedSize — у папки файлов: объём всех её файлов («14 items ·
+    // 38.2 MB») и выделенных («412 KB» перед чертой полосы выделения,
+    // s-files-1, -2); у прочих списков пусто.
+    Size         Size
+    SelectedSize Size
     Columns  *Columns // кнопка Columns и её меню-форма (components-42); nil — у списка выбора столбцов нет
 }
 
@@ -1911,15 +1922,24 @@ type MailAttachSheet struct {
 ### C-6.7 Файлы
 
 ```go
+// Subtitle — «2 of 3 storages on 2 servers» (s-files-6): отмечено из живых
+// хранилищ и на скольких подключениях они все. Note — сообщение под
+// таблицей: что такое корень и, когда есть снятые хранилища, кто не отмечен
+// — имена жирным, «‹Public› is not ticked, so it is not here.»; пусто, когда
+// показать нечего. Empty — с кнопкой: «No storage is ticked» — «Tick every
+// storage» (rail.tick.all, отметка строки корня).
 type FilesRootPage struct {
     Shell
+    Subtitle    Text
     Collections []FileCollectionRow
+    Note        Runs
     Empty       *Notice  // ни одной папки: почему пусто и что сделать
 }
 type FileCollectionRow struct {
     Href     string
     Label    Text
     Stamp    Stamp
+    Server   Text // подключение — столбец Server моноширинно, «sftpgo · vps» (s-files-6)
     Colour   Colour
     ReadOnly bool
     Purpose  Text // вложения, публикации
@@ -1962,6 +1982,8 @@ type FileRow struct {
     Size     Size
     Modified When
     Thumb    string // адрес миниатюры; пусто — значок типа
+    Icon     string // значок по типу (s-files-1): i-file у папки, i-img у картинки, i-doc у прочего
+    Note     Text   // почему у картинки нет миниатюры: «too large» — больше потолка миниатюры (s-files-5)
     Selected bool
     Menu     []MenuItem
     // Upload — у строки папки: загрузка в неё (бросок на строку, U-15.3,
@@ -2979,7 +3001,11 @@ Open, `file.download` Download, `file.rename`, `file.move`, `file.copy`,
 selection» формы выделения папки, `folder.new.create` и `folder.new.cancel`
 строки имени новой папки, `folder.upload` — загрузка в папку строки (бросок
 на неё); загрузки — `file.upload` (Files), `file.upload.folder` (Folder),
-`files.picker.upload` — с полем файла `Action.File`.
+`files.picker.upload` — с полем файла `Action.File`. Корень и папка:
+`files.refresh` (корень), `folder.refresh`, `files.details` — Details шапки
+папки, `list.print` — Print в её «⋯»; панель файла — `file.download`,
+`file.view` Open (картинка на месте), `file.rename`, `file.move`,
+`file.delete`.
 
 ---
 

@@ -228,7 +228,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026op=attach",
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e17\u0026op=attach",
             "icon": "i-up",
             "id": "attach.add",
             "label": "From this computer",
@@ -236,7 +236,7 @@
           },
           {
             "enabled": true,
-            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e16\u0026for=attach\u0026k=notes\u0026uid=5c81-77aa-0d64",
+            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e17\u0026for=attach\u0026k=notes\u0026uid=5c81-77aa-0d64",
             "icon": "i-file",
             "id": "attach.files",
             "label": "From Files",
@@ -247,7 +247,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "file",
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026op=attach",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e17\u0026op=attach",
         "icon": "i-up",
         "id": "attach.add",
         "label": "Attach",
@@ -334,7 +334,7 @@
         "csrf": "csrf",
         "danger": true,
         "enabled": true,
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e16",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e17",
         "icon": "i-trash",
         "id": "record.delete",
         "label": "Delete note",
@@ -342,6 +342,7 @@
         "separator": true
       }
     ],
+    "preview": null,
     "related": [
       {
         "colour": "",
@@ -511,7 +512,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e16",
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e17",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",
@@ -607,7 +608,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/delete?etag=e17",
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/delete?etag=e18",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",
@@ -696,7 +697,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/delete?etag=e18",
+              "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/delete?etag=e19",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",
@@ -836,7 +837,7 @@
         "method": "GET"
       },
       {
-        "count": 5,
+        "count": 6,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",

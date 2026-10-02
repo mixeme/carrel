@@ -1751,6 +1751,7 @@ func TestFixtureMoreStates(t *testing.T) {
 func TestFixtureFilesAndInvite(t *testing.T) {
 	app := newMockupApp(t)
 	openSections(t, app)
+	readFolders(t, app)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	for _, one := range []struct{ dir, state, route string }{
 		{"app-files", "normal", "/app/files"},
@@ -1800,6 +1801,21 @@ func openSections(t *testing.T, app *mockupApp) {
 	}
 }
 
+// readFolders reads the folders the files fixtures show at the set's hour:
+// a screen is taken two minutes after, and its refresh says «2 min ago», as
+// the frames draw it (s-files-1, -6).
+func readFolders(t *testing.T, app *mockupApp) {
+	t.Helper()
+	for _, at := range []string{
+		app.filesAt(t, "Documents", "", "carrel", "attachments"), app.filesAt(t, "Documents", ""),
+		app.filesAt(t, "Public", ""), app.filesAt(t, "Files", ""),
+	} {
+		if rec := app.h.do(get(at, app.sess)); rec.Code != 200 {
+			t.Fatalf("%s: %d", at, rec.Code)
+		}
+	}
+}
+
 // filesAt is an address of a file collection of the set, as Carrel issued
 // it: marker, then the path under the collection a segment at a time.
 func (a *mockupApp) filesAt(t *testing.T, slug, marker string, segs ...string) string {
@@ -1824,6 +1840,7 @@ func (a *mockupApp) filesAt(t *testing.T, slug, marker string, segs ...string) s
 func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	app := newMockupApp(t)
 	openSections(t, app)
+	readFolders(t, app)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	attachments := app.filesAt(t, "Documents", "", "carrel", "attachments")
 	op := app.filesAt(t, "Documents", "op", "carrel", "attachments")
@@ -1834,7 +1851,8 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	}
 
 	app.compare(t, "app-files-folder/normal.json", app.h.do(get(attachments+"?select="+url.QueryEscape(three[0]), app.sess)))
-	app.compare(t, "app-files-folder/tiles.json", app.h.do(get(attachments+"?view=tiles&select="+url.QueryEscape(three[2]), app.sess)))
+	// s-files-5 draws the chosen tile without the panel: Details off.
+	app.compare(t, "app-files-folder/tiles.json", app.h.do(get(attachments+"?view=tiles&details=0&select="+url.QueryEscape(three[2]), app.sess)))
 	app.compare(t, "app-files-folder/readonly.json", app.h.do(get(app.filesAt(t, "Public", ""), app.sess)))
 	app.servers["nextcloud"].SeedFolder(davtest.FileRoot + "Files/Scans/")
 	app.compare(t, "app-files-folder/empty.json", app.h.do(get(app.filesAt(t, "Files", "", "Scans"), app.sess)))
