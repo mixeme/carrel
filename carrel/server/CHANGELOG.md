@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.135 — 2026-10-02
+
+The mockup copy of Typecase `9e69804` (task 77): an event is edited in its
+own zone (s-agenda-3, the owner's decision of 02.10.2026); `check.py` maps
+the calendar's new frames.
+
+### Changed
+
+- **An event's form is in the event's zone.** The times of When are shown
+  in the zone `DTSTART` is written in — an event from Asia/Yekaterinburg
+  reads 12:00–13:00, as it was sent; UTC in UTC; a floating time, a day and
+  a zone the database does not know as before, in the instance zone. The
+  times typed are read in the zone chosen: choosing another zone keeps the
+  clock the form shows (it used to keep the instant), Floating keeps it
+  without a zone, and a new event in UTC is written at the clock typed in
+  UTC. Tasks have no zone and stay in the instance zone. S-11, C-6.
+- `docs/spec/check.py`: `app-agenda-all` is checked against
+  `/app/calendar` (s-agenda-1 names both addresses); the agenda's states
+  have their frames — `app-agenda-all/partial` states-13, `/empty`
+  states-14, `app-agenda/empty` states-15; `app-event-new` is s-agenda-15,
+  and its `FRAME_TODO` row is gone.
+
+### For consumers
+
+Show and send the event form's times as they come: they are the event's
+zone's. Fixtures regenerated: `app-event-edit/normal`, `/loss`.
+
 ## v0.2.134 — 2026-10-02
 
 The password sheet works without scripts (U-8; the lead's decision: a

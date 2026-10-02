@@ -1342,7 +1342,9 @@ type EventEditPage struct { // правка: та же запись формой
     // записи — его образец (Placeholder) и скрытое repeat.base; набранное
     // правило побеждает поля, пустое — не правило. Подсказок у Tags и Count
     // нет, у Advanced RRULE — «The advanced value takes precedence when set.»;
-    // у пояса записи, пока он выбран, ValueAside «as sent». Attach — по имени
+    // у пояса записи, пока он выбран, ValueAside «as sent»; времена When — в
+    // поясе события (S-11: s-agenda-3 — 12:00–13:00 Asia/Yekaterinburg, как
+    // пришло), набранное читается в выбранном поясе. Attach — по имени
     // (attach.add), клиент ставит его в набор «Attachments» (s-agenda-3)
     Form      Form
     Attendees []AttendeeRow // организатор первым; только чтение (U-6.2; кадр s-agenda-3 их не рисует — задача Typecase 77)

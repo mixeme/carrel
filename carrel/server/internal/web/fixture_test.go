@@ -1280,7 +1280,7 @@ func TestFixtureEventEdit(t *testing.T) {
 	rec := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3/edit"
 	app.compare(t, "app-event-edit/normal.json", app.h.do(get(rec, app.sess)))
 	// The full form of a new event in «Личный» (C-5.4 /new; the client's
-	// scan Д9): its frame is not drawn yet (to-typecase task 77).
+	// scan Д9) — s-agenda-15 (Typecase task 77).
 	app.compare(t, "app-event-new/normal.json", app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"/new", app.sess)))
 }
 

@@ -77,9 +77,9 @@ func TestEventStatusAndCategories(t *testing.T) {
 
 // review Р-10, "Пояс события": the zone the event was sent in is shown as
 // such (under «As sent», s-agenda-8) and kept by every save that does not change it. Another
-// zone rewrites DTSTART and DTEND at the same instants in that zone and
-// brings its VTIMEZONE; UTC writes Z and no TZID. The form's own times stay
-// in the instance zone (C-10).
+// zone rewrites DTSTART and DTEND at the clock the form shows, in that zone,
+// and brings its VTIMEZONE; UTC writes Z and no TZID. The form's own times
+// are in the event's zone (s-agenda-3, the owner's decision of 02.10.2026).
 func TestEventTimeZone(t *testing.T) {
 	f := calendarFixture(t, nil, "meet.ics", ics("BEGIN:VEVENT\nUID:meet\nDTSTAMP:20260101T000000Z\n"+
 		"DTSTART;TZID=Europe/Moscow:20260115T100000\nDTEND;TZID=Europe/Moscow:20260115T110000\nSUMMARY:Review\nEND:VEVENT"))
@@ -102,19 +102,19 @@ func TestEventTimeZone(t *testing.T) {
 		zone.Options[0].Label != "Europe/Moscow" || zone.Options[0].Group != "As sent" || !zone.Options[0].Selected {
 		t.Fatalf("zone row = %+v", zone)
 	}
-	if form := formFields(page.Form); form.Get("start.time") != "07:00" {
-		t.Errorf("start shown at %s, want the instance zone's 07:00", form.Get("start.time"))
+	if form := formFields(page.Form); form.Get("start.time") != "10:00" {
+		t.Errorf("start shown at %s, want the event zone's 10:00", form.Get("start.time"))
 	}
 
 	got := save(map[string]string{"summary": "Review again"})
 	mustContain(t, got, "DTSTART;TZID=Europe/Moscow:20260115T100000", "DTEND;TZID=Europe/Moscow:20260115T110000")
 
 	got = save(map[string]string{"tz": "Europe/London"})
-	mustContain(t, got, "DTSTART;TZID=Europe/London:20260115T070000", "DTEND;TZID=Europe/London:20260115T080000",
+	mustContain(t, got, "DTSTART;TZID=Europe/London:20260115T100000", "DTEND;TZID=Europe/London:20260115T110000",
 		"BEGIN:VTIMEZONE", "TZID:Europe/London", "SUMMARY:Review again")
 
 	got = save(map[string]string{"tz": "UTC"})
-	mustContain(t, got, "DTSTART:20260115T070000Z", "DTEND:20260115T080000Z")
+	mustContain(t, got, "DTSTART:20260115T100000Z", "DTEND:20260115T110000Z")
 
 	form := formFields(decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
 	form.Set("tz", "Mars/Olympus")

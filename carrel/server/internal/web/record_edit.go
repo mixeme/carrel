@@ -61,7 +61,9 @@ const (
 	// A value another client wrote is kept as a choice.
 	fieldChoice
 	// fieldZone is the zone DTSTART and DTEND are written in: their TZID,
-	// "UTC" or "floating". The form's times stay in the instance zone (C-10).
+	// "UTC" or "floating". The form's times are in it (formZone): an event
+	// is edited in its own zone (s-agenda-3, the owner's decision of
+	// 02.10.2026), and the clock typed is the clock in the zone chosen.
 	fieldZone
 	// fieldRepeat is RRULE, edited as a whole series (S-11): Frequency,
 	// Every, On, Until, Count, and the rule itself. See repeatValues.
@@ -158,6 +160,24 @@ func zoneOf(cur []model.RawValue) string {
 		return "UTC"
 	}
 	return "floating"
+}
+
+// formZone is the zone an event's form shows and reads its times in: the
+// zone its start is written in (s-agenda-3: 12:00–13:00 of an event from
+// Asia/Yekaterinburg, as sent) — a TZID the zone database knows, or UTC. A
+// floating time, a day and a TZID the database does not know are read as a
+// wall clock in the instance zone, and so shown.
+func formZone(zone string, tz *time.Location) *time.Location {
+	switch zone {
+	case "", "floating":
+		return tz
+	case "UTC":
+		return time.UTC
+	}
+	if loc, err := time.LoadLocation(zone); err == nil {
+		return loc
+	}
+	return tz
 }
 
 // floatingLabel is the choice that is not a zone but its absence: the same
@@ -862,6 +882,12 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 	tz := s.tz()
 	vals := formValues{}
 	props := obj.Props()
+	// An event's times are shown in its own zone; a task's in the
+	// instance's: it has no zone to choose.
+	at := tz
+	if hasField(c.spec.kind, "tz") {
+		at = formZone(zoneOf(props["DTSTART"]), tz)
+	}
 	var alarms []cal.Alarm
 	for _, f := range editFields[c.spec.kind] {
 		switch f.typ {
@@ -926,7 +952,7 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			if err != nil {
 				return nil, nil, err
 			}
-			vals[f.name] = timeRow(f, tm, tz)
+			vals[f.name] = timeRow(f, tm, at)
 		case fieldDone:
 			vals[f.name] = []string{""}
 			if taskDone(obj) {
@@ -1169,10 +1195,11 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	}
 	startRow := triple(want["start"])
 	startChanged := !sameRows(want["start"], have["start"])
-	// A new zone rewrites both times at the instants the form names, even
-	// when neither row changed. A new event is written in the zone chosen
-	// — the instance's unless another was (the quick sheet chooses none) —
-	// the same way (from-typecase note 19).
+	// A new zone rewrites both times at the clock the form names, in that
+	// zone, even when neither row changed: the form is in the event's own
+	// zone (formZone), and what it shows is what is written. A new event is
+	// written in the zone chosen — the instance's unless another was (the
+	// quick sheet chooses none) — the same way (from-typecase note 19).
 	var zone string
 	held, chosen := first(have["tz"]), first(want["tz"])
 	fresh := hasField(c.spec.kind, "tz") && len(props["DTSTART"]) == 0
@@ -1192,6 +1219,15 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			if loc != nil && zone != "UTC" {
 				ch.zone = loc
 			}
+		}
+	}
+	// The rows are read in the zone they are written in: the one chosen,
+	// else the one held. A task has no zone and reads the instance's.
+	clock := tz
+	if hasField(c.spec.kind, "tz") {
+		clock = formZone(held, tz)
+		if zone != "" {
+			clock = formZone(zone, tz)
 		}
 	}
 	var startAt, endAt time.Time
@@ -1352,7 +1388,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				ch.errors[f.name] = f.label + " is required."
 				continue
 			}
-			at, err := rowTime(row, allDay, tz)
+			at, err := rowTime(row, allDay, clock)
 			if err != nil {
 				ch.errors[f.name] = err.Error()
 				continue
@@ -1370,7 +1406,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			if f.name == "end" && allDay {
 				shift = 1
 			}
-			ops := timeOps(f.prop, props[f.prop], row, allDay, shift, tz, zone)
+			ops := timeOps(f.prop, props[f.prop], row, allDay, shift, clock, zone)
 			if f.name == "start" && ch.zone != nil {
 				ch.zoneYear = at.Year()
 			}

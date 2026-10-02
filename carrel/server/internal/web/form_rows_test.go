@@ -528,12 +528,14 @@ func serverZoneMenu(row view.FormRow) []string {
 }
 
 // s-agenda-8: a search over all zones; the zone the event came in under «As
-// sent»; a line; the zones; a line and Floating, always last. Every zone
-// offered loads, and choosing one or Floating is written (S-11).
+// sent» — Asia/Yekaterinburg, as the frame's event (task 77) —; a line; the
+// zones; a line and Floating, always last. Every zone offered loads, and
+// choosing one or Floating is written (S-11), at the clock the form shows:
+// the form is in the event's own zone (s-agenda-3).
 func TestZoneListIsTheFramesList(t *testing.T) {
 	f := calendarFixture(t, nil,
 		"meet.ics", ics("BEGIN:VEVENT\nUID:meet\nDTSTAMP:20260101T000000Z\n"+
-			"DTSTART;TZID=Europe/Moscow:20260115T100000\nDTEND;TZID=Europe/Moscow:20260115T110000\nSUMMARY:Review\nEND:VEVENT"),
+			"DTSTART;TZID=Asia/Yekaterinburg:20260115T120000\nDTEND;TZID=Asia/Yekaterinburg:20260115T130000\nSUMMARY:Review\nEND:VEVENT"),
 		"float.ics", ics("BEGIN:VEVENT\nUID:float\nDTSTAMP:20260101T000000Z\n"+
 			"DTSTART:20260116T100000\nDTEND:20260116T110000\nSUMMARY:Anywhere\nEND:VEVENT"))
 	rec := f.path("calendar") + "/meet"
@@ -572,7 +574,7 @@ func TestZoneListIsTheFramesList(t *testing.T) {
 			t.Errorf("zone %+v: %v", o, err)
 		}
 	}
-	if !row.Options[0].Selected || row.Options[0].Value != "Europe/Moscow" || row.Options[len(row.Options)-1].Value != "floating" {
+	if !row.Options[0].Selected || row.Options[0].Value != "Asia/Yekaterinburg" || row.Options[len(row.Options)-1].Value != "floating" {
 		t.Errorf("first %+v, last %+v", row.Options[0], row.Options[len(row.Options)-1])
 	}
 
@@ -585,11 +587,11 @@ func TestZoneListIsTheFramesList(t *testing.T) {
 		}
 		return body(t, f, "meet.ics")
 	}
-	// Moscow at 10:00 is 07:00 UTC and 12:45 in Kathmandu.
-	mustContain(t, save("Asia/Kathmandu"), "DTSTART;TZID=Asia/Kathmandu:20260115T124500", "TZID:Asia/Kathmandu", "BEGIN:VTIMEZONE")
-	// Floating drops TZID: the clock time in the instance zone, anywhere.
+	// The form shows 12:00 in Yekaterinburg; another zone keeps that clock.
+	mustContain(t, save("Asia/Kathmandu"), "DTSTART;TZID=Asia/Kathmandu:20260115T120000", "TZID:Asia/Kathmandu", "BEGIN:VTIMEZONE")
+	// Floating drops TZID: the clock the form shows, anywhere.
 	floating := save("floating")
-	mustContain(t, floating, "DTSTART:20260115T070000\r\n", "DTEND:20260115T080000\r\n")
+	mustContain(t, floating, "DTSTART:20260115T120000\r\n", "DTEND:20260115T130000\r\n")
 
 	// An event that came floating has Floating under «As sent», once.
 	float := rowNamed(t, decode[view.EventEditPage](t, f.h.do(get(f.path("calendar")+"/float/edit", f.sess))).Form, "tz")

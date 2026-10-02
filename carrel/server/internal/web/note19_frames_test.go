@@ -550,8 +550,9 @@ func TestNewEventIsWrittenInItsZone(t *testing.T) {
 	if strings.Contains(got, "TZID") || strings.Contains(got, "T100000Z") {
 		t.Errorf("a floating event:\n%s", got)
 	}
+	// The clock typed is the clock in the zone chosen (s-agenda-3, -15).
 	utc := create(map[string]string{"summary": "Zulu", "start.date": "2026-03-16", "start.time": "10:00", "tz": "UTC"})
-	mustContain(t, body(t, f, utc+".ics"), "DTSTART:20260316T090000Z")
+	mustContain(t, body(t, f, utc+".ics"), "DTSTART:20260316T100000Z")
 
 	// The quick sheet: no zone row, the instance zone written.
 	quick := decode[view.NewSheet](t, f.h.do(get(list+"/new/quick", f.sess)))

@@ -154,10 +154,9 @@ check("7. фикстуры разбираются", badfix)
 FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут из C-5
     "app-contacts": "/app/contacts",
     "app-contacts-one": "/app/contacts/{account}/{col}",
-    # Единый календарь рисует s-agenda-1 («Combined calendar»), а его
-    # data-screen называет только адрес коллекции — задача Typecase 77;
-    # своего кадра у агенды одной коллекции (app-agenda) нет — та же задача.
-    "app-agenda-all": "/app/calendar/{account}/{col}",
+    # Единый календарь и одна коллекция — один кадр s-agenda-1: его
+    # data-screen называет оба адреса (Typecase 9e69804, задача 77).
+    "app-agenda-all": "/app/calendar",
     "app-tasks-all": "/app/tasks/{account}/{col}",
     "app-notes-all": "/app/notes/{account}/{col}",
     "app-contact": "/app/contacts/{account}/{col}/{uid}",
@@ -243,10 +242,8 @@ SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-
           "app-contact-rewrite"}
 
 FRAME_TODO = {
-    # Полной формы нового события кадр не рисует: по шаблону рода маршрут
-    # сводится к s-contacts-27, форме новой карточки, и рейл там — книги.
-    "app-event-new: коллекции рейла":
-        "to-typecase.md, задача 77: кадра полной формы нового события нет",
+    # Полная форма нового события — свой кадр s-agenda-15 (Typecase 9e69804,
+    # задача 77): строки больше нет.
 }
 
 # Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
@@ -288,9 +285,16 @@ STATE_FRAME = {
     "app-contacts-one/empty": "states-10",
     "app-contacts-one/source-error": "states-11",
     "app-contact-edit/loss": "states-12",
+    # Состояния агенды — свои кадры (Typecase 9e69804, задача 77): опрос
+    # идёт (states-13), ничего не отмечено (states-14), пустая неделя одного
+    # календаря — одна строка, а не семь пустых дней (states-15).
+    "app-agenda-all/partial": "states-13",
+    "app-agenda-all/empty": "states-14",
+    "app-agenda/empty": "states-15",
 }
-# Без строки: app-contact-new/normal — полная форма создания (`/new`) — свой
-# кадр маршрута, s-contacts-27 (Typecase 4af7ad7, задача 59).
+# Без строки: app-contact-new/normal и app-event-new/normal — полные формы
+# создания (`/new`) — свои кадры маршрута, s-contacts-27 (Typecase 4af7ad7,
+# задача 59) и s-agenda-15 (Typecase 9e69804, задача 77).
 
 def frame_by_id(fid):
     m = re.search(r'<div class="frame" data-frame="%s"[^>]*>' % re.escape(fid), mock)
