@@ -402,7 +402,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage`; `?print=1` — та же хронология для печати (U-10); `?kind=` — фильтр по роду: `event`, `task`, `note` или `file` (сегменты-ссылки, s-contacts-7), без него — All; `?from=&to=` — окно, форма GET диапазона (`Range.Form`) |
 | `/app/contacts/{account}/{col}/{uid}/timeline/columns` | POST | вход | редирект | — ; меню Columns хронологии (s-contacts-25), как у списков (S-9.6) |
 | `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage` |
-| `/app/contacts/{account}/{col}/new/photo-preview` | GET, POST | вход | страница, редирект | `PhotoPreviewPage` — фотография новой карточки (s-contacts-27, S-13): шаги те же, `?op=` — `upload` (multipart, потолки и типы карточки), `frame`, `save`, `cancel`, `crop`, `remove`; `uid` — черновик формы: его выдаёт первая загрузка, Replace его хранит. Ничего не пишет: Save photo отмечает кадр выбранным и ведёт на `/new?uid=`; Cancel первой загрузки и Remove — на `/new` без черновика; кадр показывает `/c/{account}/{col}/{uid}/photo?preview=` |
+| `/app/contacts/{account}/{col}/new/photo-preview` | GET, POST | вход | страница, редирект | `PhotoPreviewPage` — фотография новой карточки (s-contacts-27, S-13): шаги те же, `?op=` — `upload` (multipart, потолки и типы карточки), `frame`, `save`, `cancel`, `crop`, `remove`; `uid` — черновик формы: его выдаёт первая загрузка, Replace его хранит. Кнопки фотографии новой формы шлют саму форму (`Action.Submits`): набранное хранится с черновиком под тем же `uid` и возвращается с формой. Ничего не пишет: Save photo отмечает кадр выбранным и ведёт на `/new?uid=`; Cancel первой загрузки и Remove — на `/new?uid=` с одним набранным (ничего не набрано — на `/new` без черновика); кадр показывает `/c/{account}/{col}/{uid}/photo?preview=` |
 | `/c/{account}/{col}/{uid}/photo` | GET | вход | поток | — |
 | `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage` |
 | `/app/{kind}/{account}/{col}/{uid}/move` | GET, POST | вход | лист | `MoveSheet` |
@@ -619,6 +619,7 @@ type Action struct {
     Arrow   []MenuItem // стрелка кнопки (.m-split): пункты её меню; пусто — без стрелки
     CSRF    string  // у POST — токен сеанса: без сценариев действие уходит своей формой со скрытым _csrf этого значения (C-11); у GET и на страницах вне входа пусто
     File    string  // у POST, который несёт файл, — имя поля файла: без сценариев действие уходит формой multipart/form-data с этим полем выбора файла и _csrf — «file» у Attach и «From this computer» (attach.add), «photo» у Add и Replace фотографии (photo.add, photo.replace); пусто — без файла
+    Submits bool    // кнопка отправляет форму, в которой стоит, на свой Href (formaction): multipart с полем файла File, набранное едет с файлом — фотография новой карточки (s-contacts-27: Add, Replace, Crop, Remove); false — своей формой
     Target  string  // зона C-7.2, которую меняет ответ-фрагмент на действие (C-7.1), по C-5: sheet у адреса, отвечающего листом, rail у формы рейла, poll у полосы хода, queue у загрузки, main у новой папки; пусто — переход. У кнопки формы (Href пуст) — пусто: цель у формы (Form.Target)
 }
 // Кнопка со стрелкой — одно действие: само Action — то, что делает кнопка,

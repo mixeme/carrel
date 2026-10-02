@@ -540,10 +540,12 @@
       {
         "csrf": "csrf",
         "enabled": true,
+        "file": "photo",
         "href": "/app/contacts/a-nc-home/kontakty/new/photo-preview?op=upload",
         "id": "photo.add",
         "label": "Add",
-        "method": "POST"
+        "method": "POST",
+        "submits": true
       }
     ],
     "editable": true,

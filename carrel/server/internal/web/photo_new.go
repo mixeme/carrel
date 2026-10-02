@@ -4,7 +4,9 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
+	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/photo"
 	"carrel.dev/carrel/server/view"
@@ -22,6 +24,12 @@ import (
 // (createRecord). Cancel of the frame, Remove, and a form left unsaved
 // write nothing; a photo chosen for another card replaces the draft, and the
 // form says so at Save.
+//
+// The photo buttons of the new form send the form itself (Action.Submits,
+// the lead's decision on s-contacts-27): what was typed rides with the file
+// and is kept with the draft (photoDraft.Values), and the form comes back
+// with it — after Save photo, after Cancel of a first upload, after Remove,
+// whose draft then holds the typing alone under the same UID.
 
 // newPhotoAddress is the photo steps of a new form; with a UID, of its draft.
 func newPhotoAddress(c *collectionCtx, uid string) string {
@@ -84,16 +92,24 @@ func (s *Server) newPhotoBlock(c *collectionCtx, st editState, b view.PhotoBlock
 		if st.formUID != "" {
 			fields.Set("uid", st.formUID)
 		}
-		return view.Action{ID: id, Label: text(label), Method: "POST", Danger: danger, Enabled: true, Href: s.postQuery(newPhotoAddress(c, ""), fields)}
+		return view.Action{ID: id, Label: text(label), Method: "POST", Danger: danger, Enabled: true, Submits: true, Href: s.postQuery(newPhotoAddress(c, ""), fields)}
 	}
 	if d, ok := newPhotoDraft(c, st.formUID); ok && d.Chosen {
 		b.Href = s.route(c.origin().photoPath(d.UID) + "?preview=" + strconv.Itoa(d.Step))
 		b.Note = "EXIF orientation applied, metadata stripped."
 		b.Actions = []view.Action{step("photo.replace", "Replace", "upload", false), step("photo.crop", "Crop", "crop", false), step("photo.remove", "Remove", "remove", true)}
+		b.Actions[0].File = "photo"
 		return b
 	}
 	b.Note = "JPEG, PNG, GIF or WebP."
-	b.Actions = []view.Action{step("photo.add", "Add", "upload", false)}
+	add := step("photo.add", "Add", "upload", false)
+	add.File = "photo"
+	// The typing alone kept under a UID (a photo cancelled or removed):
+	// the next photo keeps that UID and the typing with it.
+	if st.formUID == "" && st.typedUID != "" {
+		add.Href = s.postQuery(newPhotoAddress(c, ""), url.Values{"op": {"upload"}, "uid": {st.typedUID}})
+	}
+	b.Actions = []view.Action{add}
 	return b
 }
 
@@ -109,11 +125,44 @@ func (s *Server) newFormValues(c *collectionCtx) formValues {
 	return values
 }
 
-// newPhotoForm is the empty new form with what a photo step has to say.
-func (s *Server) newPhotoForm(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, notices ...view.Notice) {
+// newPhotoForm is the new form with what a photo step has to say: as it was
+// typed, when the step brought the form, else empty.
+func (s *Server) newPhotoForm(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, typed formValues, notices ...view.Notice) {
+	values := typed
+	if values == nil {
+		values = s.newFormValues(c)
+	}
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
-		values: s.newFormValues(c), isNew: true, readAt: s.now(), formUID: chosenUID(c, uid), notices: notices,
+		values: values, isNew: true, readAt: s.now(), formUID: chosenUID(c, uid), notices: notices,
 	}))
+}
+
+// postedNewForm is what the new form sent with a photo step, when it sent
+// itself (Action.Submits): the form has its Display name, empty or not. A
+// step of the frame's own forms carries no field of the card.
+func (s *Server) postedNewForm(c *collectionCtx, r *http.Request) (formValues, bool) {
+	if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
+		if r.MultipartForm == nil && r.ParseMultipartForm(conf.MaxFormBodyBytes) != nil {
+			return nil, false
+		}
+	} else if r.ParseForm() != nil {
+		return nil, false
+	}
+	if _, sent := r.Form["fn"]; !sent {
+		return nil, false
+	}
+	return s.submittedValues(c, r), true
+}
+
+// keepTyping leaves the typing alone under uid: the photo is gone, the form
+// comes back as it was typed. Nothing typed — nothing kept.
+func keepTyping(c *collectionCtx, uid string, values map[string][]string) string {
+	if values == nil {
+		clearPhotoDraft(c, uid)
+		return newFormAddress(c, "")
+	}
+	savePhotoDraft(c, photoDraft{Account: c.conn.ID, Col: c.col.Path, UID: uid, New: true, Values: values})
+	return newFormAddress(c, uid)
 }
 
 // getNewPhotoPreview shows the frame of a new form's draft. Without one there
@@ -128,7 +177,7 @@ func (s *Server) getNewPhotoPreview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	d, ok := newPhotoDraft(c, issuedUID(r.URL.Query().Get("uid")))
-	if !ok {
+	if !ok || len(d.Data) == 0 {
 		s.redirect(w, r, newFormAddress(c, ""))
 		return
 	}
@@ -154,13 +203,22 @@ func (s *Server) postNewPhotoPreview(w http.ResponseWriter, r *http.Request) {
 	}
 	uid := issuedUID(r.URL.Query().Get("uid"))
 	op := r.URL.Query().Get("op")
+	typed, sent := s.postedNewForm(c, r)
 	if op == "upload" {
-		s.newPhotoUpload(w, r, c, uid)
+		s.newPhotoUpload(w, r, c, uid, typed)
 		return
 	}
 	d, ok := newPhotoDraft(c, uid)
 	if !ok {
 		s.redirect(w, r, newFormAddress(c, ""))
+		return
+	}
+	if sent {
+		d.Values = typed
+	}
+	if len(d.Data) == 0 {
+		// The typing alone: no photo to frame, Remove or Cancel.
+		s.redirect(w, r, keepTyping(c, uid, d.Values))
 		return
 	}
 	switch op {
@@ -178,7 +236,7 @@ func (s *Server) postNewPhotoPreview(w http.ResponseWriter, r *http.Request) {
 		d.Crop = submittedCrop(r, d.Crop)
 		if _, err := s.renderDraft(d); err != nil {
 			clearPhotoDraft(c, uid)
-			s.newPhotoForm(w, r, c, "", s.photoRefusal(err))
+			s.newPhotoForm(w, r, c, "", d.Values, s.photoRefusal(err))
 			return
 		}
 		d.Chosen, d.Kept = true, d.Crop
@@ -189,8 +247,7 @@ func (s *Server) postNewPhotoPreview(w http.ResponseWriter, r *http.Request) {
 		// A frame chosen before stays as it was chosen; a first upload
 		// leaves nothing.
 		if !d.Chosen {
-			clearPhotoDraft(c, uid)
-			s.redirect(w, r, newFormAddress(c, ""))
+			s.redirect(w, r, keepTyping(c, uid, d.Values))
 			return
 		}
 		d.Crop = d.Kept
@@ -198,29 +255,33 @@ func (s *Server) postNewPhotoPreview(w http.ResponseWriter, r *http.Request) {
 		savePhotoDraft(c, d)
 		s.redirect(w, r, newFormAddress(c, uid))
 	case "remove":
-		clearPhotoDraft(c, uid)
-		s.redirect(w, r, newFormAddress(c, ""))
+		s.redirect(w, r, keepTyping(c, uid, d.Values))
 	default:
 		s.notFound(w, r)
 	}
 }
 
 // newPhotoUpload takes a file for a new form. Replace keeps the UID of the
-// draft it replaces; Add issues one. The caps and the refusals are the
-// card's (S-13): a refused file leaves the form as it was.
-func (s *Server) newPhotoUpload(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
-	if _, ok := newPhotoDraft(c, uid); !ok {
+// draft it replaces; Add issues one, or keeps the one the typing alone is
+// kept under. The caps and the refusals are the card's (S-13): a refused
+// file leaves the form as it was — as it was typed, when it came along.
+func (s *Server) newPhotoUpload(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, typed formValues) {
+	held, ok := newPhotoDraft(c, uid)
+	if !ok {
 		uid = ""
+	}
+	if typed == nil {
+		typed = held.Values
 	}
 	file, err := uploadedPhoto(r)
 	if err != nil {
-		s.newPhotoForm(w, r, c, uid, s.photoRefusal(err))
+		s.newPhotoForm(w, r, c, uid, typed, s.photoRefusal(err))
 		return
 	}
 	src, err := photo.Load(file, s.cfg.PhotoMaxUploadBytes, s.cfg.PhotoMaxPixels)
 	file.Close()
 	if err != nil {
-		s.newPhotoForm(w, r, c, uid, s.photoRefusal(err))
+		s.newPhotoForm(w, r, c, uid, typed, s.photoRefusal(err))
 		return
 	}
 	if uid == "" {
@@ -231,7 +292,7 @@ func (s *Server) newPhotoUpload(w http.ResponseWriter, r *http.Request, c *colle
 	}
 	savePhotoDraft(c, photoDraft{
 		Account: c.conn.ID, Col: c.col.Path, UID: uid, New: true,
-		Data: src.Data, MediaType: src.MediaType, Crop: photo.DefaultCrop, Step: 1,
+		Data: src.Data, MediaType: src.MediaType, Crop: photo.DefaultCrop, Step: 1, Values: typed,
 	})
 	s.redirect(w, r, newPhotoAddress(c, uid))
 }

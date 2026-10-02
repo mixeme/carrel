@@ -50,6 +50,11 @@ type Action struct {
 	// файла и _csrf — «file» у Attach и «From this computer», «photo» у Add
 	// и Replace фотографии; пусто — действие без файла
 	File string `json:"file,omitempty"`
+	// Submits — кнопка отправляет форму, в которой стоит, на свой Href
+	// (formaction): multipart с полем файла File, набранное едет вместе с
+	// файлом — Add, Replace, Crop и Remove фотографии новой карточки
+	// (s-contacts-27); false — действие уходит своей формой
+	Submits bool `json:"submits,omitempty"`
 	// Target — зона C-7.2, которую меняет ответ-фрагмент на это действие
 	// (C-7.1): sheet у адреса, отвечающего листом, rail у формы рейла, poll
 	// у полосы хода, queue у загрузки, main у новой папки — по C-5; пусто —

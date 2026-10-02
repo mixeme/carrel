@@ -354,6 +354,11 @@ type photoDraft struct {
 	New    bool
 	Chosen bool
 	Kept   photo.Crop
+	// Values: what was typed into the new form when one of its photo
+	// buttons sent it (Action.Submits) — the form comes back with it. A
+	// draft of a new form with values and no Data is the typing alone: the
+	// photo was cancelled or removed
+	Values map[string][]string
 }
 
 func loadPhotoDraft(c *collectionCtx, uid string) (photoDraft, bool) {

@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.133 — 2026-10-02
+
+The photo buttons of a new contact's form send the form itself, so what was
+typed is not lost (s-contacts-27, the lead's decision).
+
+### Added
+
+- **`Action.submits`** — the button sends the form it stands in to its
+  `href` (formaction), multipart with the file field `file`: what was typed
+  rides with the file. Add, Replace, Crop and Remove of the new form's
+  photo carry it (Add and Replace with `file: photo`).
+
+### Changed
+
+- **The photo steps of a new form keep the typing** with the draft under
+  the form's UID and give the form back with it: after Save photo, after
+  Cancel of a first upload and after Remove — then under the same UID with
+  no photo, and the next Add keeps that UID. A step that brings no form
+  (the frame's own) keeps what was kept; nothing typed — as before, `/new`
+  without a draft. A refused file gives the form back as typed.
+
+### For consumers
+
+Draw a `submits` action as a submit button of its form with `formaction`
+and `formenctype="multipart/form-data"`, its file field inside the form.
+Fixture regenerated: `app-contact-new/normal`.
+
 ## v0.2.132 — 2026-10-02
 
 The folder of notes is chosen in a tree, down into the folders of a

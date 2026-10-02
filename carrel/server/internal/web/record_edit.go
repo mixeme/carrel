@@ -2002,8 +2002,11 @@ type editState struct {
 	// without scripts — and folds nothing; its posts keep it so.
 	unfold bool
 	// formUID: the UID a new contact's form carries once a photo is chosen
-	// for it (photo_new.go); Save creates the card under it.
-	formUID string
+	// for it (photo_new.go); Save creates the card under it. typedUID: the
+	// UID the typing alone is kept under, the photo cancelled or removed —
+	// the next Add keeps it
+	formUID  string
+	typedUID string
 }
 
 func (s *Server) editAction(c *collectionCtx, st editState) string {
@@ -3038,8 +3041,15 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 		carried(c, r, values)
 		st := editState{values: values, isNew: true, readAt: s.now()}
 		if c.card != nil {
-			// The form of a photo chosen before the card (photo_new.go).
+			// The form of a photo chosen before the card (photo_new.go),
+			// as it was typed when a photo button sent it.
 			st.formUID = chosenUID(c, r.URL.Query().Get("uid"))
+			if d, ok := newPhotoDraft(c, issuedUID(r.URL.Query().Get("uid"))); ok && d.Values != nil {
+				st.values = d.Values
+				if len(d.Data) == 0 {
+					st.typedUID = d.UID
+				}
+			}
 		}
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 	}
