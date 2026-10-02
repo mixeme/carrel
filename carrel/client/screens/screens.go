@@ -15,6 +15,7 @@ import (
 	"carrel.dev/carrel/client/screens/login"
 	"carrel.dev/carrel/client/screens/register"
 	"carrel.dev/carrel/client/screens/setup"
+	"carrel.dev/carrel/client/screens/tasks"
 	"carrel.dev/carrel/client/screens/timeline"
 	"carrel.dev/carrel/client/screens/wipe"
 	"carrel.dev/carrel/server/view"
@@ -224,6 +225,19 @@ var All = []Screen{
 		Waits: []Wait{
 			{Row: 26, Fixture: "app-event-edit/normal"}, // ждёт библиотеку: U-5.5 #26
 			{Row: 26, Fixture: "app-event-edit/loss"},   // ждёт библиотеку: U-5.5 #26
+		},
+	},
+	{
+		Model:  func() any { return new(view.TasksPage) },
+		Frames: []string{"s-tasks-1"},
+		Draw:   func(model any) Root { return tasks.Screen(model.(*view.TasksPage)) },
+		Title:  func(model any) string { return string(model.(*view.TasksPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return tasks.Forms(model.(*view.TasksPage)) },
+		Waits: []Wait{
+			{Row: 31, Fixture: "app-tasks-all/normal"},   // ждёт библиотеку: U-5.5 #31
+			{Row: 32, Fixture: "app-tasks/normal"},       // ждёт библиотеку: U-5.5 #32
+			{Row: 32, Fixture: "app-tasks/source-error"}, // ждёт библиотеку: U-5.5 #32
+			{Row: 32, Fixture: "app-tasks-all/empty"},    // ждёт библиотеку: U-5.5 #32
 		},
 	},
 }

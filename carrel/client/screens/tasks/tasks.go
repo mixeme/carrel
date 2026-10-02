@@ -1,259 +1,456 @@
-// Drafted by frame2go from frame «Задачи · фильтры, просрочка» (s-tasks-1) of the Typecase mockup: the
-// frame's widgets and its data, top to bottom. The data is the frame's; it
-// is to become the application's (docs/guide/screen.md).
-package draft
+// Package tasks is the list of tasks, /app/tasks (the combined view) and
+// /app/tasks/{account}/{col} (one list), drawn by frame «Задачи · фильтры,
+// просрочка» (s-tasks-1) of the mockup: the draft frame2go printed for it,
+// with the frame's data become the view model's (U-5.1, U-6.3). A task is
+// ticked done right in its row: the tick changes three properties, not the
+// record.
+package tasks
 
-import w "carrel.dev/typecase/widget"
+import (
+	"slices"
+	"strconv"
 
-// Tasks1 is frame «Задачи · фильтры, просрочка» (s-tasks-1).
-func Tasks1() interface{ Render() string } {
-	return w.Shell{
-		Top: &w.Top{
-			Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
-			Search: &w.Search{Query: w.Query{Placeholder: "Search everything…", Label: "Search everything…"}},
-			Actions: []w.TopAction{
-				w.Button{Label: "New note", Menu: true, Icon: "quill", Kind: w.ButtonPrimary},
-				w.Button{Label: "2 min ago", Icon: "refresh"},
-				w.UserMenu{Name: "mix"},
-			},
-		},
-		Body: w.ShellBody{
-			Rail: []w.RailPart{
-				w.Nav{
-					Items: []w.NavItem{
-						{Icon: "con", Label: "Contacts", Count: &w.Num{Value: 312}, Href: "#"},
-						{Icon: "cal", Label: "Calendar", Count: &w.Num{Value: 14}, Href: "#"},
-						{Icon: "task", Label: "Tasks", Count: &w.Num{Value: 3}, Href: "#"},
-						{Icon: "note", Label: "Notes", Count: &w.Num{Value: 86}, Href: "#"},
-						{Icon: "file", Label: "Files", Href: "#"},
-						{Icon: "dup", Label: "Duplicates", Count: &w.Num{Value: 3}, Href: "#"},
-					},
-					On: 3,
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.TickRow{
-							Ticked:  w.TickedPart,
-							Kind:    w.TickRowAll,
-							Mark:    w.Mark{Kind: w.MarkMulti},
-							Label:   "Combined list",
-							Meta:    "30",
-							Current: true,
-						},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "nextcloud"},
-						w.TickRow{Mark: w.Mark{Colour: "#4A6B52"}, Label: "Дела", Meta: "21"},
-						w.TickRow{Mark: w.Mark{Colour: "#3F6E8C"}, Label: "Работа", Meta: "9"},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "Subscriptions", Items: []w.RubricPart{w.Badge{Label: "external"}}},
-						w.TickRow{
-							Ticked: w.TickedOff,
-							Kind:   w.TickRowExternal,
-							Mark:   w.Mark{Colour: "#8C6239"},
-							Label:  "Праздники РФ",
-							Meta:   "—",
-							Hidden: true,
-						},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "Tags"}},
-					Tags: []w.Tag{w.Tag{Label: "all", On: true}, w.Tag{Label: "дом"}, w.Tag{Label: "релиз"}, w.Tag{Label: "read"}},
-				},
-				w.RailFoot{
-					Items: []w.RailFootPart{
-						w.Button{Icon: "plus", Title: "New list"},
-						w.Button{Icon: "server", Title: "Connect account"},
-						w.Button{Icon: "link", Title: "Subscribe to a feed"},
-						w.Emblem{Symbol: "davloom", Title: "davloom · running · 3 devices"},
-					},
-					About: &w.About{Name: "Carrel", Build: w.Mono{Text: "0.0.1 · 786949a"}, Href: "#rest"},
-				},
-			},
-			Main: w.Main{
-				Items: []w.MainPart{
-					w.Head{
-						Title: &w.HeadTitle{Mark: &w.Mark{Kind: w.MarkMulti, Size: w.MarkH20}, Text: "Combined list"},
-						Subs:  []w.HeadSub{w.HeadSub{Parts: []w.HeadSubPart{w.Text("2 of 3 lists · nextcloud · 30 tasks")}}},
-						Acts: &w.Acts{
-							Items: []w.ActsPart{
-								w.Button{Label: "New task", Menu: true, Icon: "plus", Kind: w.ButtonPrimary},
-								w.Button{Label: "Import", Icon: "up"},
-								w.Button{Label: "Export", Icon: "down"},
-								w.Button{Label: "Print", Icon: "print"},
-							},
-						},
-					},
-					w.Bar{
-						Items: []w.BarPart{
-							w.Seg{Options: []w.SegOption{{Label: "Open 12", On: true}, {Label: "Done 48"}, {Label: "All 60"}}},
-							w.Seg{
-								Options:   []w.SegOption{{Label: "By due", On: true}, {Label: "By priority"}, {Label: "Recently changed"}},
-								Secondary: true,
-							},
-							w.Button{Label: "Columns", Icon: "cols"},
-						},
-					},
-					w.ListGroup{Title: w.Rubric{Text: "Overdue", Form: w.RubricInline}, Count: &w.Num{Value: 3, Alert: true}},
-					w.List{
-						Rows: []w.ListRow{
-							w.DueRow{
-								Tick:     w.Tick{Label: "Done"},
-								Mark:     w.Mark{Colour: "#4A6B52"},
-								Title:    []w.Inline{w.Text("Отправить документы в МФЦ")},
-								Tags:     []w.RowTag{w.Tag{Label: "дом"}},
-								Due:      "7 Aug",
-								Progress: "—",
-								Source:   "nextcloud · Дела",
-								Overdue:  true,
-								Href:     "#",
-							},
-							w.DueRow{
-								Tick:     w.Tick{Label: "Done"},
-								Mark:     w.Mark{Colour: "#3F6E8C"},
-								Title:    []w.Inline{w.Text("Ответить подрядчику по смете")},
-								Tags:     []w.RowTag{w.Tag{Label: "релиз"}},
-								Due:      "8 Aug",
-								Progress: "40%",
-								Source:   "nextcloud · Работа",
-								Overdue:  true,
-								Href:     "#",
-							},
-						},
-					},
-					w.ListGroup{Title: w.Rubric{Text: "This week", Form: w.RubricInline}, Count: &w.Num{Value: 5}},
-					w.List{
-						Rows: []w.ListRow{
-							w.DueRow{
-								Tick:       w.Tick{Label: "Done"},
-								Mark:       w.Mark{Colour: "#4A6B52"},
-								Title:      []w.Inline{w.Text("Собрать чемодан ")},
-								Strong:     true,
-								TitleBadge: &w.Badge{Label: "linked ×2", Tone: w.BadgeLinked},
-								Tags:       []w.RowTag{w.Tag{Label: "дом"}},
-								Due:        "12 Aug 18:00",
-								Progress:   "—",
-								Source:     "2 sources",
-								SourceHint: "nextcloud · Дела, radicale · vps · Личное",
-								On:         true,
-								Href:       "#",
-							},
-							w.DueRow{
-								Tick:     w.Tick{Label: "Done"},
-								Mark:     w.Mark{Colour: "#3F6E8C"},
-								Title:    []w.Inline{w.Text("Дописать раздел про кэш")},
-								Tags:     []w.RowTag{w.Tag{Label: "релиз"}},
-								Due:      "14 Aug",
-								Progress: "70%",
-								Source:   "nextcloud · Работа",
-								Href:     "#",
-							},
-						},
-					},
-					w.ListGroup{Title: w.Rubric{Text: "No due date", Form: w.RubricInline}, Count: &w.Num{Value: 4}},
-					w.List{
-						Rows: []w.ListRow{
-							w.DueRow{
-								Tick:     w.Tick{Done: true, Label: "Done"},
-								Mark:     w.Mark{Colour: "#4A6B52"},
-								Title:    []w.Inline{w.Text("Продлить страховку")},
-								Due:      "—",
-								Progress: "100%",
-								Source:   "nextcloud · Дела",
-								Href:     "#",
-							},
-						},
-					},
-				},
-			},
-			Side: &w.Side{
-				Items: []w.SidePart{
-					w.Head{
-						Title: &w.HeadTitle{Text: "Собрать чемодан", Size: w.HeadTitle19},
-						Subs:  []w.HeadSub{w.HeadSub{Parts: []w.HeadSubPart{w.Text("nextcloud · Дела")}}},
-						Acts: &w.Acts{
-							Items: []w.ActsPart{
-								w.Button{Label: "Edit", Small: true},
-								w.Button{Icon: "dots", Small: true, Title: "More"},
-								w.Close{Label: "Close the panel"},
-							},
-						},
-					},
-					w.Fields{
-						Items: []w.FieldsItem{
-							{Term: "Status", Value: []w.ValuePart{w.Text("Needs action")}},
-							{Term: "Due", Value: []w.ValuePart{w.Text("2026-08-12 18:00")}, Face: w.ValueMono},
-							{Term: "Priority", Value: []w.ValuePart{w.Text("5")}, Face: w.ValueMono},
-							{Term: "Complete", Value: []w.ValuePart{w.Text("0%")}, Face: w.ValueMono},
-							{Term: "Tags", Value: []w.ValuePart{w.Tag{Label: "дом"}}},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Description"},
-							w.Prose{Parts: []w.Inline{w.Text("Зарядки, переходник, распечатать посадочный.")}, Variant: w.Prose13},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Related"},
-							w.SecList{
-								Items: [][]w.SecItemPart{
-									[]w.SecItemPart{
-										w.Span{Face: w.FaceAccent, Text: "Поездка в Казань"},
-										w.Text(" "),
-										w.Dim{Parts: []w.Inline{w.Text("· event")}},
-									},
-								},
-							},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{
-								Text: "Attachments",
-								Items: []w.RubricPart{
-									w.Drop{
-										Trigger: w.Button{Label: "Attach", Menu: true, Small: true},
-										Menu: w.Menu{
-											Items: []w.MenuPart{
-												w.MenuItem{Icon: "up", Label: "From this computer"},
-												w.MenuItem{Icon: "file", Label: "From Files"},
-											},
-											Width: w.MenuWidth212,
-											Pop:   w.MenuUnder,
-										},
-									},
-								},
-							},
-							w.SecList{
-								Items: [][]w.SecItemPart{
-									[]w.SecItemPart{
-										w.Link{Text: "посадочный-казань.pdf", Href: "#"},
-										w.Text(" "),
-										w.Dim{Parts: []w.Inline{w.Text("application/pdf · 128 KB")}},
-										w.Text(" "),
-										w.Badge{Label: "in the task"},
-									},
-								},
-								Gap: 6,
-							},
-							w.SecHint{
-								Text:  "The same block events and notes have: up to 2 MB the file is written into the task itself, above that it goes to the attachments folder and the task keeps a link. Pasting and dropping work the same way.",
-								Apart: true,
-							},
-						},
-					},
-					w.Danger{Button: w.Button{Label: "Delete task", Kind: w.ButtonDangerSolid}},
-				},
-			},
-		},
+	"carrel.dev/carrel/client/bind"
+	"carrel.dev/carrel/server/view"
+	w "carrel.dev/typecase/widget"
+)
+
+// The IDs of the page's forms: the rail's (its ticks submit it) and the
+// panel's deletion.
+const (
+	formRail   = "rail"
+	formDelete = "delete"
+)
+
+// The screen's words (U-1.3) for the shell: the mark, the search, the rail;
+// and what the choice of columns sends (C-6.4 Columns).
+var (
+	top = bind.TopWords{
+		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
+		Search: "Search everything…",
 	}
+	rail    = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
+	columns = bind.ColumnWords{Name: "col", Reset: "default", Drag: "drag"}
+)
+
+// The screen's words (U-1.3): the dash of a row with no due date or share
+// done, the share's sign, the accessible name of a row's tick, the lead of a
+// kind, the attachment kept inside the task, what joins the sources of a
+// linked row in its hint.
+const (
+	none    = "—"
+	percent = "%"
+	done    = "Done"
+	lead    = "· "
+	inside  = "in the task"
+	joined  = ", "
+)
+
+// The names of the contract the screen sorts by (C-7): the bar's switch of
+// order starts with sortID — the other switch is what is shown, Open, Done,
+// All —; Attach the panel puts in the rubric of attachments.
+const (
+	sortID   = "sort."
+	attachID = "attach.add"
+)
+
+// The columns of a task's row by their IDs (C-6.4 ColumnItem.ID): the ones
+// the frame's row draws, in its order (DueRow, s-tasks-1) — the source in
+// the combined view only —, and the cell of each column a person may choose
+// (s-tasks-12, -13).
+var (
+	dueColumns = []string{"title", "tags", "due", "complete", "source"}
+	cells      = map[string]w.Column{
+		"title": w.ColumnName, "tags": w.ColumnTags, "due": w.ColumnDue, "complete": w.ColumnComplete,
+		"source": w.ColumnSource, "priority": w.ColumnPriority, "status": w.ColumnStatus, "changed": w.ColumnChanged,
+	}
+)
+
+// Screen draws the list of tasks from its view model, in the state the model
+// is in.
+//
+//   - The shell (U-2.1): the top bar; the rail of sections (the open one
+//     on), the sources by account with their ticks, which submit the rail's
+//     form, the feeds' rubric «external», a source that did not answer as an
+//     error, the tags, the foot.
+//   - The head: the mark of what is open — every list at once, or the
+//     list's colour —, the title, what is shown (Subtitle) and the bar's
+//     actions: New task — with its arrow in the combined view, a closed menu
+//     of the ticked lists, «last used» —, Import, Export, Print.
+//   - The notices under the head, each with its technical block.
+//   - The bar while something is ticked and there is something to show or
+//     choose: what is shown — Open, Done, All with their counts —, the
+//     order, Columns with its menu (a form).
+//   - The poll's bar while the poll runs or a source did not answer (C-6.4).
+//   - The groups, each with its count — the overdue one's in alarm —, a row
+//     for each task: its tick, which posts Mark done without a script, the
+//     list's mark, the title leading to the task (bold while open in the
+//     panel) with its first badge, the tags, the due date and the share done
+//     monospaced (the dash where there is none), where it lives — «2
+//     sources» of a linked task, the sources in its hint; with the columns
+//     a person chose (Columns), a row of them (s-tasks-13).
+//   - Nothing to show (Empty): what, bold, why, and the button that helps.
+//   - The panel (Shell.Details), for the row opened with ?open=: the title,
+//     the list, Edit, «⋯» with the record's menu, the cross that closes it;
+//     the fields, the description, the related records, the attachments with
+//     Attach and the line of where a file goes, the deletion.
+func Screen(p *view.TasksPage) w.Shell {
+	main := []w.MainPart{head(p)}
+	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	if ticked(p.Rail) && (len(p.Groups) > 0 || len(p.Bar.Segments) > 0) {
+		if b, ok := bar(p.Bar); ok {
+			main = append(main, b)
+		}
+	}
+	if r := bind.Runbar(p.Poll); r != nil {
+		main = append(main, *r)
+	}
+	shown := chosen(p.Bar.Columns)
+	for _, g := range p.Groups {
+		rows := make([]w.ListRow, 0, len(g.Rows))
+		for _, r := range g.Rows {
+			if shown != nil {
+				rows = append(rows, columnRow(r, shown))
+			} else {
+				rows = append(rows, row(r))
+			}
+		}
+		main = append(main,
+			w.ListGroup{Title: w.Rubric{Text: string(g.Rubric), Form: w.RubricInline}, Count: &w.Num{Value: g.Count, Alert: g.Overdue}},
+			w.List{Rows: rows})
+	}
+	if p.Empty != nil {
+		main = append(main, w.Empty{Parts: bind.EmptyParts(*p.Empty)})
+	}
+	body := w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}
+	if p.Details != nil {
+		body.Side = side(*p.Details)
+	}
+	t := bind.Top(p.Top, top)
+	return w.Shell{Top: &t, Body: body}
+}
+
+// Forms are the page's forms: the rail's, which its ticks submit, the
+// retries of the sources, the buttons of the notices and of the empty state
+// that post, the items of the menus that post (Sign out, the arrow of New
+// task), the ticks of the rows, and of the panel — its deletion, its menu,
+// Attach «From this computer» with its file.
+func Forms(p *view.TasksPage) []w.PostForm {
+	out := bind.TopForms(p.Top)
+	for _, a := range p.Bar.Actions {
+		out = append(out, bind.MenuForms(a.Arrow)...)
+	}
+	if f := bind.RailForm(p.Rail, formRail); f != nil {
+		out = append(out, *f)
+	}
+	out = append(out, bind.PollForms(p.Poll)...)
+	out = append(out, bind.NoticeForms(p.Notices)...)
+	if p.Empty != nil {
+		for _, a := range p.Empty.Actions {
+			if a.Method == "POST" && a.Enabled {
+				out = append(out, bind.ActionForm(a, a.ID))
+			}
+		}
+	}
+	for _, g := range p.Groups {
+		for _, r := range g.Rows {
+			if a := r.Tick; a != nil && a.Method == "POST" && a.Enabled {
+				out = append(out, bind.ActionForm(*a, bind.TickID(*a)))
+			}
+		}
+	}
+	if d := p.Details; d != nil {
+		for _, a := range d.Actions {
+			switch {
+			case a.Danger && a.Method == "POST" && a.Enabled:
+				out = append(out, bind.ActionForm(a, formDelete))
+			case a.ID == attachID:
+				out = append(out, bind.MenuForms(a.Arrow)...)
+			}
+		}
+		out = append(out, bind.MenuForms(d.Menu)...)
+	}
+	return out
+}
+
+// ticked tells whether any source of the rail is ticked: with nothing ticked
+// there is nothing to show or order, and the list draws no bar; nor does a
+// list that did not answer, with no rows and no switch.
+func ticked(r view.Rail) bool {
+	for _, sec := range r.Sections {
+		for _, row := range sec.Rows {
+			if row.Tick != view.TickOff {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// railParts is the rail of sections: the sections, the sources and tags, the
+// foot.
+func railParts(r view.Rail) []w.RailPart {
+	nav := w.Nav{}
+	for _, n := range r.Nav {
+		nav.Items = append(nav.Items, bind.NavItem(n))
+		if n.On {
+			nav.On = len(nav.Items)
+		}
+	}
+	parts := []w.RailPart{nav}
+	parts = append(parts, bind.Sources(r, rail)...)
+	return append(parts, bind.Foot(r, rail))
+}
+
+// head is the list's head: what is open, what is shown, the bar's actions.
+func head(p *view.TasksPage) w.Head {
+	title := &w.HeadTitle{Text: string(p.Title)}
+	for _, sec := range p.Rail.Sections {
+		for _, r := range sec.Rows {
+			switch {
+			case !r.On:
+			case r.Colour == "":
+				title.Mark = &w.Mark{Kind: w.MarkMulti, Size: w.MarkH20}
+			default:
+				title.Mark = &w.Mark{Colour: string(r.Colour), Size: w.MarkH20}
+			}
+		}
+	}
+	var acts []w.ActsPart
+	for _, a := range p.Bar.Actions {
+		b := bind.Button(a, "")
+		if len(a.Arrow) == 0 {
+			acts = append(acts, b)
+			continue
+		}
+		b.Menu = true
+		acts = append(acts, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(a.Arrow, rail.ReadOnly), Pop: w.MenuUnder}})
+	}
+	h := w.Head{Title: title, Acts: &w.Acts{Items: acts}}
+	if p.Subtitle != "" {
+		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
+	}
+	return h
+}
+
+// bar is the bar over the list: what is shown (Open, Done, All, each with
+// its count), the order, Columns; false when it has none of them.
+func bar(b view.ListBar) (w.Bar, bool) {
+	var items []w.BarPart
+	shown, order := w.Seg{}, w.Seg{Secondary: true}
+	for _, a := range b.Segments {
+		if len(a.ID) >= len(sortID) && a.ID[:len(sortID)] == sortID {
+			order.Options = append(order.Options, bind.SegOption(a))
+		} else {
+			shown.Options = append(shown.Options, bind.SegOption(a))
+		}
+	}
+	for _, s := range []w.Seg{shown, order} {
+		if len(s.Options) > 0 {
+			items = append(items, s)
+		}
+	}
+	if b.Columns != nil {
+		cols := bind.Columns(*b.Columns, columns)
+		cols.Menu.Pop = w.MenuUnder
+		items = append(items, cols)
+	}
+	return w.Bar{Items: items}, len(items) > 0
+}
+
+// row is a task in the list.
+func row(r view.TaskRow) w.DueRow {
+	d := w.DueRow{
+		Tick:     bind.Tick(r.Tick, r.Done, done),
+		Mark:     w.Mark{Colour: string(r.Colour)},
+		Title:    []w.Inline{w.Text(r.Summary)},
+		Strong:   r.On,
+		Due:      or(r.Due),
+		Progress: progress(r.Percent),
+		Source:   string(r.Stamp),
+		On:       r.On,
+		Overdue:  r.Overdue,
+		Href:     r.Href,
+	}
+	if len(r.Badges) > 0 {
+		b := bind.Badge(r.Badges[0])
+		d.TitleBadge = &b
+	}
+	for _, t := range bind.Tags(r.Tags) {
+		d.Tags = append(d.Tags, t)
+	}
+	for i, s := range r.Sources {
+		if i > 0 {
+			d.SourceHint += joined
+		}
+		d.SourceHint += string(s)
+	}
+	return d
+}
+
+// chosen are the columns a person chose for the list, by ID in their order
+// (Columns.Items on); nil where they are the frame's own row's.
+func chosen(c *view.Columns) []string {
+	if c == nil {
+		return nil
+	}
+	var on []string
+	for _, it := range c.Items {
+		if it.On {
+			on = append(on, it.ID)
+		}
+	}
+	if slices.Equal(on, dueColumns) || slices.Equal(on, dueColumns[:len(dueColumns)-1]) {
+		return nil
+	}
+	return on
+}
+
+// columnRow is a task in a list of the columns a person chose (s-tasks-13):
+// its tick, the list's mark, a cell for each column in their order — the
+// dash where the task has nothing —, leading to the task.
+func columnRow(r view.TaskRow, shown []string) w.ColumnRow {
+	t := bind.Tick(r.Tick, r.Done, done)
+	c := w.ColumnRow{Tick: &t, Mark: w.Mark{Colour: string(r.Colour)}, Strong: r.On, On: r.On, Overdue: r.Overdue, Href: r.Href}
+	for _, id := range shown {
+		col, ok := cells[id]
+		if !ok {
+			continue
+		}
+		cell := w.ColumnCell{Column: col}
+		switch col {
+		case w.ColumnName:
+			cell.Text = string(r.Summary)
+		case w.ColumnTags:
+			for _, tag := range bind.Tags(r.Tags) {
+				cell.Tags = append(cell.Tags, tag)
+			}
+		case w.ColumnDue:
+			cell.Text = or(r.Due)
+		case w.ColumnComplete:
+			cell.Text = progress(r.Percent)
+		case w.ColumnSource:
+			cell.Text = string(r.Stamp)
+		case w.ColumnPriority:
+			cell.Text = or(r.Priority)
+		case w.ColumnStatus:
+			cell.Text = or(r.Status)
+		case w.ColumnChanged:
+			cell.Text = or(r.Changed)
+		}
+		c.Cells = append(c.Cells, cell)
+	}
+	return c
+}
+
+// or is a cell's words, the dash when the task has none.
+func or(t view.Text) string {
+	if t == "" {
+		return none
+	}
+	return string(t)
+}
+
+// progress is the share of a task done, «40%», the dash when it has none.
+func progress(p *int) string {
+	if p == nil {
+		return none
+	}
+	return strconv.Itoa(*p) + percent
+}
+
+// side is the panel of the task opened (Details).
+func side(d view.Details) *w.Side {
+	var acts []w.ActsPart
+	var attach *view.Action
+	var danger []w.Button
+	for _, a := range d.Actions {
+		switch {
+		case a.Danger:
+			b := bind.Button(a, formDelete)
+			b.Icon = ""
+			danger = append(danger, b)
+		case a.ID == attachID:
+			attach = &a
+		default:
+			b := bind.Button(a, "")
+			b.Small = true
+			acts = append(acts, b)
+		}
+	}
+	if len(d.Menu) > 0 {
+		acts = append(acts, w.Drop{
+			Trigger: w.Button{Icon: "dots", Small: true, Title: "More"},
+			Menu:    w.Menu{Items: bind.MenuItems(d.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
+		})
+	}
+	acts = append(acts, w.Close{Label: "Close the panel", Href: d.Close})
+	items := []w.SidePart{w.Head{
+		Title: &w.HeadTitle{Text: string(d.Title), Size: w.HeadTitle19},
+		Subs:  []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(d.Subtitle)}}},
+		Acts:  &w.Acts{Items: acts},
+	}}
+	fields := w.Fields{}
+	for _, f := range d.Fields {
+		fields.Items = append(fields.Items, bind.FieldsItem(f, lead))
+	}
+	items = append(items, fields)
+	if d.Body != "" {
+		items = append(items, w.Sec{Items: []w.SecPart{
+			w.Rubric{Text: "Description"},
+			w.Prose{Parts: []w.Inline{w.Text(d.Body)}, Variant: w.Prose13},
+		}})
+	}
+	if len(d.Related) > 0 {
+		var lines [][]w.SecItemPart
+		for _, r := range d.Related {
+			lines = append(lines, []w.SecItemPart{
+				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
+				w.Text(" "),
+				w.Dim{Parts: []w.Inline{w.Text(lead + string(r.Kind))}},
+			})
+		}
+		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
+	}
+	if attach != nil || len(d.Attach) > 0 {
+		rubric := w.Rubric{Text: "Attachments"}
+		if attach != nil {
+			b := bind.Button(*attach, "")
+			b.Icon, b.Menu, b.Small = "", true, true
+			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(attach.Arrow, ""), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
+		}
+		sec := []w.SecPart{rubric}
+		if len(d.Attach) > 0 {
+			sec = append(sec, w.SecList{Items: attachments(d.Attach), Gap: 6})
+		}
+		if d.AttachHint != "" {
+			sec = append(sec, w.SecHint{Text: string(d.AttachHint), Apart: true})
+		}
+		items = append(items, w.Sec{Items: sec})
+	}
+	for _, b := range danger {
+		items = append(items, w.Danger{Button: b, Note: string(d.DeleteNote)})
+	}
+	return &w.Side{Items: items}
+}
+
+// attachments are the lines of a task's attachments: the name, a link where
+// it goes (data inside the task downloads, a file in Files opens there), the
+// type and size muted, and «in the task» for data inside it (S-20).
+func attachments(rows []view.AttachRow) [][]w.SecItemPart {
+	var out [][]w.SecItemPart
+	for _, a := range rows {
+		var line []w.SecItemPart
+		if a.Href != "" {
+			line = append(line, w.Link{Text: string(a.Name), Href: a.Href}, w.Text(" "))
+		} else {
+			line = append(line, w.Text(string(a.Name)+" "))
+		}
+		line = append(line, w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + " · " + string(a.Size))}})
+		if a.Inline {
+			line = append(line, w.Text(" "), w.Badge{Label: inside})
+		}
+		out = append(out, line)
+	}
+	return out
 }
