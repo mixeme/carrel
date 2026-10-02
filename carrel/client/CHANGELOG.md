@@ -4,6 +4,66 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.3.0 — 2026-10-02
+
+The tasks section: the third section built whole. Typecase `bc575a8`,
+server `v0.2.146`. Each screen went in as the draft `frame2go -self`
+printed, alone, then the screen over it.
+
+**Tagged:** `client-v0.3.0`.
+
+### Added
+
+- **The list of tasks** (`/app/tasks`, `/app/tasks/{account}/{col}`,
+  `s-tasks-1`) from `TasksPage`: the head with what is open and shown, New
+  task with its arrow in the combined view; the bar — Open, Done, All with
+  their counts and the order (links), Columns with its menu (a form); the
+  poll's bar; the groups with their counts, Overdue's in alarm; a row each
+  task — its tick posts Mark done without a script, its title leads to the
+  task, «2 sources» of a linked one with the sources in its hint; with the
+  columns a person chose, a row of them (`s-tasks-13`); the empty state;
+  the task's panel (`?open=`) — its fields, description, related records,
+  attachments with Attach and its arrow and the line of where a file goes,
+  deletion.
+- **The task** (`/app/tasks/{account}/{col}/{uid}`, `s-tasks-2`) from
+  `TaskPage`: read, not edited — Edit, Mark done with its tick, Print, «⋯»;
+  overdue in alarm in the head and after the due date; the related records
+  with their kind and day; the same task in other lists; the source.
+- **The edit and the full new form** (`…/{uid}/edit`, `…/new`,
+  `s-tasks-3`) from `TaskEditPage`: the list's mark and overdue as a badge
+  in the head; When with All day, the dates and times; Progress — Status,
+  Priority, Percent complete, Done; Reminders with «Add reminder»; Other —
+  Location, Tags, Related to as the record chosen (or the line of a UID);
+  Attachments with Attach and Remove; the source; the deletion under the
+  form.
+- **`bind` for them**: the head's line whose alarm is a badge (`SubAlert`),
+  a task's tick (`Tick`, `TickID`), the field Related to (`Related`); a
+  card's value of one monospaced piece is the line's monospaced face
+  (`FieldsItem`). A test for each.
+- **The meaning guard's table**: a task's row (`DueRow`, Typecase's task
+  95) and a row of chosen columns (`ColumnRow`) lead to the record; bites in
+  `TestMeaningRules`.
+- U-5.5 rows 30–36 and row 28 wider (the owner's decision of 01.10.2026):
+  what the library or the frames do not give yet, each with its Typecase
+  task or the server's debt (C24 — plan, «Экраны раздела»).
+
+### Not yet
+
+- **Held against their frames only in part** (U-5.5 31–33, 35): the
+  combined list's frame has a tag the set lacks and a task done the set has
+  open; the task's frame draws it overdue on a day it is not; the edit's
+  frame has All day off for a due date without a time; one list, a list
+  that did not answer, nothing ticked, the loss of a save and the new
+  task's form have no frames of their own (Typecase's task 97).
+- **Without a script** Related to offers no list of the loaded records
+  (row 30, task 96); All day's two fields stay as the server sent them,
+  not as it is ticked (row 34, task 111) — both done in Typecase
+  `d29ecf8`, which the client takes with its next bump; the arrow of a new
+  task's Attach posts its own form, not the form it stands in (row 36).
+- **The suggestions of Related to** (`s-tasks-10`) come with the live
+  layer (stage 4): `FormRow.Suggest` is handed to the field, and without a
+  script a UID is typed in its line.
+
 ## v0.2.1 — 2026-10-02
 
 Typecase `bc575a8` (Carrel's tasks 78–82, 93–95, 106, 107 and the owner's
