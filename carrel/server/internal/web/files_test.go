@@ -476,7 +476,7 @@ func TestUploadAsksAboutTakenNames(t *testing.T) {
 		t.Fatalf("queue = %+v", page.Queue)
 	}
 	again := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
-	if again.Queue == nil || len(again.Queue.Rows) != 1 || !strings.Contains(string(again.Queue.Note), "waiting for an answer") {
+	if again.Queue == nil || len(again.Queue.Rows) != 1 || again.Queue.Title != "Uploading 1 of 1" {
 		t.Fatalf("the finished row stayed or the question went: %+v", again.Queue)
 	}
 

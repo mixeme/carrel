@@ -22,22 +22,24 @@ func (s *Server) settingsRail(sess *session.Session, open string) view.Rail {
 		{Action: view.Action{ID: "settings.back", Label: "Back to app", Icon: "i-back",
 			Href: s.route("/app/contacts"), Method: "GET", Enabled: true}},
 	}}
+	// Each row has its icon, as the sections' rows do (s-publish-1,
+	// account-1); davloom's is its mark, which the screen draws.
 	rows := []struct {
-		id, label, route string
-		count            *int
+		id, label, icon, route string
+		count                  *int
 	}{
-		{"settings.account", "Account", "/app/settings/account", nil},
-		{"settings.connections", "Connections", "/app/settings/connections", count(blob.ConnectionCount())},
-		{"settings.attachments", "Attachments", "/app/settings/attachments", nil},
-		{"settings.devices", "New device", "/app/settings/devices", nil},
-		{"settings.davloom", "davloom", "/app/settings/davloom", count(len(s.users.Devices(sess.AccountID())))},
-		{"settings.backup", "Backup", "/app/settings/backup", countSome(len(blob.BackupJobs))},
-		{"settings.published", "Published links", "/app/files/published", count(len(s.users.PublishedLinks(sess.AccountID())))},
-		{"settings.appearance", "Appearance", "/app/settings/appearance", nil},
+		{"settings.account", "Account", "i-user", "/app/settings/account", nil},
+		{"settings.connections", "Connections", "i-server", "/app/settings/connections", count(blob.ConnectionCount())},
+		{"settings.attachments", "Attachments", "i-file", "/app/settings/attachments", nil},
+		{"settings.devices", "New device", "i-device", "/app/settings/devices", nil},
+		{"settings.davloom", "davloom", "", "/app/settings/davloom", count(len(s.users.Devices(sess.AccountID())))},
+		{"settings.backup", "Backup", "i-archive", "/app/settings/backup", countSome(len(blob.BackupJobs))},
+		{"settings.published", "Published links", "i-link", "/app/files/published", count(len(s.users.PublishedLinks(sess.AccountID())))},
+		{"settings.appearance", "Appearance", "i-theme", "/app/settings/appearance", nil},
 	}
 	for _, r := range rows {
 		rail.Nav = append(rail.Nav, view.NavRow{
-			Action: view.Action{ID: r.id, Label: text(r.label), Href: s.route(r.route), Method: "GET",
+			Action: view.Action{ID: r.id, Label: text(r.label), Icon: r.icon, Href: s.route(r.route), Method: "GET",
 				Enabled: true, On: r.route == open},
 			Count: r.count,
 		})

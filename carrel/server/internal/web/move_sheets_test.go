@@ -94,7 +94,13 @@ func TestFileMoveSheetIsTheFrame(t *testing.T) {
 
 	// New folder makes the folder in the chosen one, and the sheet comes
 	// back with it chosen.
-	made := opSheet(t, f, sheet.Target.New.Href, url.Values{"name": {"2026-08"}})
+	// New opens the line of the name (a GET of the sheet, ФГ4); the line
+	// makes it.
+	line := decode[view.FileOpSheet](t, f.h.do(get(sheet.Target.New.Href, f.sess)))
+	if line.Target == nil || line.Target.Name == nil {
+		t.Fatalf("New did not open the line: %+v", line.Target)
+	}
+	made := opSheet(t, f, line.Target.Name.Action, url.Values{"name": {"2026-08"}})
 	if want := f.at("", "2026-07", "2026-08", ""); made.Target == nil || made.Target.Chosen != want || made.Failure != nil {
 		t.Fatalf("after New folder: chosen %+v, failure %+v", made.Target, made.Failure)
 	}
@@ -104,8 +110,8 @@ func TestFileMoveSheetIsTheFrame(t *testing.T) {
 	if string(made.Title) != title || !made.Actions[0].Enabled {
 		t.Errorf("the sheet did not come back whole: %+v", made)
 	}
-	taken := opSheet(t, f, sheet.Target.New.Href, url.Values{"name": {"2026-08"}})
-	if taken.Failure == nil || taken.Target.Chosen != there {
+	taken := opSheet(t, f, line.Target.Name.Action, url.Values{"name": {"2026-08"}})
+	if taken.Failure == nil || taken.Target.Chosen != there || taken.Target.Name == nil {
 		t.Errorf("a taken name: failure %+v, chosen %q", taken.Failure, taken.Target.Chosen)
 	}
 
@@ -126,7 +132,11 @@ func TestUploadPickerMakesAFolder(t *testing.T) {
 	if sheet.Tree.New == nil || sheet.Tree.New.Label != view.Text(newFolder) || !sheet.Tree.New.Enabled {
 		t.Fatalf("the picker has no %q: %+v", newFolder, sheet.Tree)
 	}
-	made := decode[view.FilePickerSheet](t, f.h.do(postForm(sheet.Tree.New.Href, f.sess, url.Values{"name": {"2026-08"}})))
+	line := decode[view.FilePickerSheet](t, f.h.do(get(sheet.Tree.New.Href, f.sess)))
+	if line.Tree.Name == nil {
+		t.Fatalf("New did not open the line: %+v", line.Tree)
+	}
+	made := decode[view.FilePickerSheet](t, f.h.do(postForm(line.Tree.Name.Action, f.sess, url.Values{"name": {"2026-08"}})))
 	if want := f.at("", "carrel", "2026-08", ""); made.Tree.Chosen != want {
 		t.Fatalf("after New folder the chosen is %q, want %q", made.Tree.Chosen, want)
 	}

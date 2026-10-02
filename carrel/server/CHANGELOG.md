@@ -17,6 +17,49 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.150 — 2026-10-02
+
+The queue, the trees of the sheets and the published links as their frames
+draw them (the client's scan: ФВ2, ФВ3, ФГ4–ФГ6, ФА1, ФА4, ФД1–ФД3).
+
+### Changed
+
+- **The queue** (s-files-2): `TransferQueue.title` — «Uploading 2 of 3»
+  while a row waits for an answer, «Uploaded 2 of 3» when all are answered
+  (Moving, Copying, Renaming, Transferring by the rows' kind); `.total` —
+  what its files weigh; `.note` says only why something failed. A taken
+  name is answered Keep both · Replace · Skip, in that order; Replace is no
+  longer drawn as a danger (`transfer.overwrite`, the same answer).
+- **New folder of a tree is a link** (ФГ4): `FileTree.new` is a GET of the
+  same sheet with `new=1`, which answers it with the line of the name open;
+  `FileTree.name` stands only then (and after a refusal), its `action` is
+  the POST that makes the folder. Without `new=1` the sheet has no line.
+- **A storage's node names its connection** (`FileTreeNode.stamp` —
+  «sftpgo · vps»); `FileTreeNode.attachments` marks the attachment folder,
+  `.fresh` the folder New folder just made (s-notes-11).
+- `PublishedRow.kind` is a word, not a kind of record: a collection's link
+  says its collection («calendar», «address book», «task list»,
+  «notebook»), a record's its kind, and «file», «folder».
+
+### Added
+
+- `FilePickerSheet.where` — the chosen folder by its path, «Documents /
+  carrel / 2026-08» (the head of the upload picker, s-notes-11, s-files-19).
+- **Published links** (s-publish-1): `PublishedLinksPage.subtitle` — what a
+  link is and, on a local instance, that it opens only from its network
+  (danger); `PublishedRow.colour` and `.icon` (`i-doc` a file, `i-file` a
+  folder); the refresh `published.refresh`.
+- The settings rail's rows have their icons (`i-user`, `i-server`,
+  `i-file`, `i-device`, `i-archive`, `i-link`, `i-theme`; davloom draws its
+  mark).
+
+### For consumers
+
+Open the line of a tree's New folder by following `new.href`; send the
+name with `name.action`. Draw the queue's head from `title` and `total`.
+Fixtures regenerated: the files sheets and folders, the published links,
+every page with the settings rail.
+
 ## v0.2.149 — 2026-10-02
 
 The root and a folder of the files section as their frames draw them (the

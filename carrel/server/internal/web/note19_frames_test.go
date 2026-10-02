@@ -524,7 +524,12 @@ func TestUploadSheetNewFolderRefusalIsTheFrame(t *testing.T) {
 	if up, ch := actionByID(sheet.Actions, "files.picker.upload"), actionByID(sheet.Actions, "files.picker.choose"); up == nil || !up.Primary || ch == nil || ch.Primary {
 		t.Errorf("upload %+v, choose %+v: want the upload primary, as s-notes-11 draws it", up, ch)
 	}
-	taken := decode[view.FilePickerSheet](t, f.h.do(postForm(sheet.Tree.Name.Action, f.sess, url.Values{"name": {typed}})))
+	// New opens the line (a GET with new=1, ФГ4); the line sends the name.
+	line := decode[view.FilePickerSheet](t, f.h.do(get(sheet.Tree.New.Href, f.sess)))
+	if line.Tree.Name == nil {
+		t.Fatalf("New did not open the line: %+v", line.Tree)
+	}
+	taken := decode[view.FilePickerSheet](t, f.h.do(postForm(line.Tree.Name.Action, f.sess, url.Values{"name": {typed}})))
 	if taken.Failure == nil || taken.Failure.Role != view.NoticeAlert || taken.Failure.Title != "" || string(taken.Failure.Body) != refusal {
 		t.Errorf("refusal = %+v, want (s-files-19) %q", taken.Failure, refusal)
 	}
@@ -541,7 +546,7 @@ func TestUploadSheetNewFolderRefusalIsTheFrame(t *testing.T) {
 	}
 	// The other refusals — a name that cannot be one — stand on the same
 	// place in the server's words, the line open.
-	bad := decode[view.FilePickerSheet](t, f.h.do(postForm(sheet.Tree.Name.Action, f.sess, url.Values{"name": {".."}})))
+	bad := decode[view.FilePickerSheet](t, f.h.do(postForm(line.Tree.Name.Action, f.sess, url.Values{"name": {".."}})))
 	if bad.Failure == nil || bad.Failure.Role != view.NoticeAlert || string(bad.Purpose) != purpose ||
 		bad.Tree.Name == nil || string(visibleRows(*bad.Tree.Name)[0].Value) != ".." {
 		t.Errorf("a name that is none: failure %+v, purpose %q, line %+v", bad.Failure, bad.Purpose, bad.Tree.Name)

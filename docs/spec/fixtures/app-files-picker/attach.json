@@ -34,7 +34,7 @@
         "id": "/app/files/a-nc-home/Files/",
         "label": "Files",
         "readOnly": false,
-        "stamp": "nextcloud · Files"
+        "stamp": "nextcloud"
       },
       {
         "children": [
@@ -121,7 +121,7 @@
         "id": "/app/files/a-sftp-vps/Documents/",
         "label": "Documents",
         "readOnly": false,
-        "stamp": "sftpgo · vps · Documents"
+        "stamp": "sftpgo · vps"
       },
       {
         "children": [],
@@ -130,8 +130,9 @@
         "id": "/app/files/a-sftp-vps/Public/",
         "label": "Public",
         "readOnly": false,
-        "stamp": "sftpgo · vps · Public"
+        "stamp": "sftpgo · vps"
       }
     ]
-  }
+  },
+  "where": ""
 }

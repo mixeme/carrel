@@ -95,6 +95,9 @@ func (s *Server) transferQueue(sess *session.Session) *view.TransferQueue {
 	}
 	q := &view.TransferQueue{}
 	counts := map[view.OpState]int{}
+	kinds := map[string]bool{}
+	var total int64
+	sized := false
 	var reasons []string
 	for _, row := range rows {
 		t, ok := row.(*transfer)
@@ -102,9 +105,11 @@ func (s *Server) transferQueue(sess *session.Session) *view.TransferQueue {
 			continue
 		}
 		counts[t.state]++
+		kinds[t.kind] = true
 		tr := view.TransferRow{Name: text(t.label()), State: t.state}
 		if !t.dir {
 			tr.Size = formatSize(t.size)
+			total, sized = total+t.size, true
 		}
 		if t.state == view.OpDone {
 			tr.Percent = 100
@@ -113,30 +118,41 @@ func (s *Server) transferQueue(sess *session.Session) *view.TransferQueue {
 			reasons = append(reasons, t.label()+": "+t.note)
 		}
 		if t.Waiting() {
-			answer := func(id, label, value string, danger bool) view.Action {
+			answer := func(id, label, value string) view.Action {
 				return view.Action{
-					ID: id, Label: text(label), Method: "POST", Danger: danger, Enabled: true,
+					ID: id, Label: text(label), Method: "POST", Enabled: true,
 					Href: s.postQuery(fileHref(t.account, t.col, t.marker(), t.folder, true), url.Values{"transfer": {t.id}, "answer": {value}}),
 				}
 			}
+			// The frame's words and order (s-files-2): Replace overwrites on
+			// purpose, the one write without a precondition (S-17.1).
 			tr.Question = &view.NameClash{Name: text(t.label()), Options: []view.Action{
-				answer("transfer.skip", "Skip", "skip", false),
-				answer("transfer.both", "Keep both", "both", false),
-				answer("transfer.overwrite", "Overwrite this one", "overwrite", true),
+				answer("transfer.both", "Keep both", "both"),
+				answer("transfer.overwrite", "Replace", "overwrite"),
+				answer("transfer.skip", "Skip", "skip"),
 			}}
 		}
 		q.Rows = append(q.Rows, tr)
 	}
-	var parts []string
-	for _, c := range []struct {
-		state view.OpState
-		what  string
-	}{{view.OpIdle, "waiting for an answer: the name is taken"}, {view.OpDone, "done"}, {view.OpFailed, "failed"}, {view.OpCancelled, "skipped"}} {
-		if n := counts[c.state]; n > 0 {
-			parts = append(parts, fmt.Sprintf("%d %s", n, c.what))
+	// The head (s-files-2): while a row waits for an answer, which one the
+	// queue stands at; when all are answered, how many were done.
+	n := len(q.Rows)
+	verb := [2]string{"Transferring", "Transferred"}
+	if len(kinds) == 1 {
+		for k := range kinds {
+			verb = map[string][2]string{"upload": {"Uploading", "Uploaded"}, "move": {"Moving", "Moved"},
+				"copy": {"Copying", "Copied"}, "rename": {"Renaming", "Renamed"}}[k]
 		}
 	}
-	q.Note = text(strings.Join(append(parts, reasons...), " · "))
+	if waiting := counts[view.OpIdle]; waiting > 0 {
+		q.Title = text(fmt.Sprintf("%s %d of %d", verb[0], n-waiting+1, n))
+	} else {
+		q.Title = text(fmt.Sprintf("%s %d of %d", verb[1], counts[view.OpDone], n))
+	}
+	if sized {
+		q.Total = formatSize(total)
+	}
+	q.Note = text(strings.Join(reasons, " · "))
 	return q
 }
 
@@ -652,12 +668,17 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 		// New folder of the tree: MKCOL into the chosen folder, then the
 		// same sheet with the new one chosen (s-files-4).
 		var failure *view.Notice
+		made := ""
 		name := strings.TrimSpace(r.PostFormValue("name"))
 		if q.Get("mkcol") != "" && (op == view.FileMove || op == view.FileCopy) {
 			q.Del("mkcol")
 			if dest, ok := s.destination(c, q); ok {
 				if failure = s.makeFolder(r.Context(), dest, name); failure == nil {
-					q.Set("to", s.route(dest.href("", append(slices.Clone(dest.segs), name), true)))
+					made = s.route(dest.href("", append(slices.Clone(dest.segs), name), true))
+					q.Set("to", made)
+				} else {
+					// A refusal keeps the line of the name open (s-files-13).
+					q.Set("new", "1")
 				}
 			}
 		}
@@ -665,6 +686,9 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 		sheet.Failure = failure
 		if failure != nil {
 			keepTyped(sheet.Target, name)
+		}
+		if sheet.Target != nil {
+			s.markTree(sheet.Target, c.blob, made)
 		}
 		if render.WantsFragment(r) {
 			_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
@@ -759,13 +783,15 @@ func moveBlock(c *fileCtx, op view.FileOp, items []file.Entry, dest *fileCtx) st
 var fileOpVerbs = map[view.FileOp]string{view.FileMove: "Move", view.FileCopy: "Copy", view.FileRename: "Rename", view.FileDelete: "Delete"}
 
 // newFolder is New folder of a tree (s-files-4, s-notes-11) and the line it
-// opens over the tree (s-files-13): a POST of the field "name" to address
-// with q, which makes the folder in dest, the chosen one, and answers the
-// sheet with it chosen; back is the line's Cancel — the same sheet, the line
-// closed. New is closed with the reason where nothing can be made, and there
-// is no line then.
-func (s *Server) newFolder(tree *view.FileTree, dest *fileCtx, address string, q url.Values, back view.Action) {
-	a := &view.Action{ID: "files.tree.new", Label: "New folder", Icon: "i-plus", Method: "POST"}
+// opens over the tree (s-files-13). New is a GET of the sheet at sheet with
+// the query back and new=1, which answers it with the line open; the line
+// is a POST of the field "name" to address with q, which makes the folder
+// in dest, the chosen one, and answers the sheet with it chosen; its Cancel
+// is the sheet with the line closed. open says the line stands now (new=1,
+// or a refusal). New is closed with the reason where nothing can be made,
+// and there is no line then.
+func (s *Server) newFolder(tree *view.FileTree, dest *fileCtx, address string, q url.Values, sheet string, back url.Values, open bool) {
+	a := &view.Action{ID: "files.tree.new", Label: "New folder", Icon: "i-plus", Method: "GET"}
 	tree.New, tree.Name = a, nil
 	switch {
 	case dest == nil:
@@ -776,13 +802,47 @@ func (s *Server) newFolder(tree *view.FileTree, dest *fileCtx, address string, q
 		return
 	}
 	q.Set("to", s.route(dest.href("", dest.segs, true)))
-	a.Enabled, a.Href = true, s.postQuery(address, q)
-	back.ID, back.Label, back.Enabled = "files.tree.new.cancel", "Cancel", true
-	tree.Name = &view.Form{Action: a.Href, Method: "POST",
+	create := s.postQuery(address, q)
+	opened := cloneValues(back)
+	opened.Set("new", "1")
+	a.Enabled, a.Href = true, s.postQuery(sheet, opened)
+	if !open {
+		return
+	}
+	cancel := view.Action{ID: "files.tree.new.cancel", Label: "Cancel", Href: s.postQuery(sheet, back), Method: "GET", Enabled: true}
+	tree.Name = &view.Form{Action: create, Method: "POST",
 		Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(dest.sess),
 			{Name: "name", Label: "Name of the new folder", Kind: view.InputText, Required: true}}}},
-		Actions: []view.Action{{ID: "files.tree.new.create", Label: "Create", Href: a.Href, Method: "POST", Primary: true, Enabled: true}, back}}
+		Actions: []view.Action{{ID: "files.tree.new.create", Label: "Create", Href: create, Method: "POST", Primary: true, Enabled: true}, cancel}}
 	*tree.Name = focused(*tree.Name, "name")
+}
+
+// markTree marks the attachment folder among the nodes of a tree and the
+// one just made, fresh (s-notes-11: «attachment folder», «just created»).
+func (s *Server) markTree(tree *view.FileTree, blob sealed.Blob, fresh string) {
+	attach := ""
+	if a := blob.Attachments; a != nil {
+		attach = s.route(fileHref(a.AccountID, a.Path, "", a.Folder, true))
+	}
+	var walk func(nodes []view.FileTreeNode)
+	walk = func(nodes []view.FileTreeNode) {
+		for i := range nodes {
+			id := nodes[i].ID
+			nodes[i].Attachments = !nodes[i].File && id == attach
+			nodes[i].Fresh = fresh != "" && id == fresh
+			walk(nodes[i].Children)
+		}
+	}
+	walk(tree.Nodes)
+}
+
+// wherePath is a chosen folder the way the head of a picker names it:
+// «Documents / carrel / 2026-08».
+func wherePath(c *fileCtx) view.Text {
+	if c == nil {
+		return ""
+	}
+	return text(strings.Join(append([]string{collectionLabel(c.col)}, c.segs...), " / "))
 }
 
 // keepTyped opens the line of New folder again with the name a refusal
@@ -845,7 +905,7 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 			back.Set("to", s.route(dest.href("", dest.segs, true)))
 		}
 		s.newFolder(sheet.Target, dest, c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "mkcol": {"1"}},
-			view.Action{Href: s.postQuery(c.href("op", c.segs, true), back), Method: "POST"})
+			c.href("op", c.segs, true), back, q.Get("new") != "")
 		if reason := moveBlock(c, op, items, dest); reason != "" {
 			confirm.Enabled, confirm.Reason = false, text(reason)
 		} else {
@@ -904,9 +964,10 @@ func (s *Server) tree(ctx context.Context, blob sealed.Blob, chosen *fileCtx, na
 			continue
 		}
 		node := view.FileTreeNode{
-			ID:       s.route(fileHref(conn.ID, col.Path, "", nil, true)),
-			Label:    collectionLabel(col),
-			Stamp:    stamp(connLabel(conn), collectionLabel(col)),
+			ID:    s.route(fileHref(conn.ID, col.Path, "", nil, true)),
+			Label: collectionLabel(col),
+			// The connection, as the node's trail draws it (s-files-4).
+			Stamp:    view.Stamp(connLabel(conn)),
 			ReadOnly: col.ReadOnly && !files,
 		}
 		if chosen != nil && chosen.conn.ID == conn.ID && chosen.col.Path == col.Path {

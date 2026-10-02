@@ -42,7 +42,7 @@ func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
 	if to := r.FormValue("to"); to != "" {
 		chosen, _ = s.folderAddress(sess, to)
 	}
-	s.writeMailSheet(w, r, s.uploadPicker(r, sess, chosen, nil))
+	s.writeMailSheet(w, r, s.uploadPicker(r, sess, chosen, nil, r.FormValue("new") != "", ""))
 }
 
 // getAttachPicker is From Files of Attach (s-agenda-6, s-tasks-7): the same
@@ -148,7 +148,9 @@ func (s *Server) attachmentsPicker(r *http.Request, sess *session.Session) view.
 		Title:   "Attachment folder",
 		Purpose: "Where large attachments go: a folder of a file collection you can write to. Carrel makes it on first use.",
 		Tree:    *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen),
+		Where:   wherePath(chosen),
 	}
+	s.markTree(&sheet.Tree, blob, "")
 	linkTree(&sheet.Tree, func(id string) string {
 		return s.postQuery("/app/files/picker", url.Values{"for": {"attachments"}, "to": {id}})
 	})
@@ -181,10 +183,10 @@ func (s *Server) postFilesPicker(w http.ResponseWriter, r *http.Request) {
 	dest, ok := s.folderAddress(sess, r.FormValue("to"))
 	switch {
 	case !ok:
-		s.writeMailSheet(w, r, s.uploadPicker(r, sess, nil, &view.Notice{Role: view.NoticeAlert, Body: "Choose a folder of a file collection in the tree."}))
+		s.writeMailSheet(w, r, s.uploadPicker(r, sess, nil, &view.Notice{Role: view.NoticeAlert, Body: "Choose a folder of a file collection in the tree."}, false, ""))
 		return
 	case dest.col.ReadOnly:
-		s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest, &view.Notice{Role: view.NoticeAlert, Body: readOnlyReason + " Choose a folder you can write to."}))
+		s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest, &view.Notice{Role: view.NoticeAlert, Body: readOnlyReason + " Choose a folder you can write to."}, false, ""))
 		return
 	}
 	// New folder of the tree (s-notes-11): made in the chosen folder and
@@ -195,17 +197,18 @@ func (s *Server) postFilesPicker(w http.ResponseWriter, r *http.Request) {
 		// stays (s-files-19).
 		name := strings.TrimSpace(r.PostFormValue("name"))
 		if n := s.makeFolder(r.Context(), dest, name); n != nil {
-			sheet := s.uploadPicker(r, sess, dest, n)
+			sheet := s.uploadPicker(r, sess, dest, n, true, "")
 			keepTyped(&sheet.Tree, name)
 			s.writeMailSheet(w, r, sheet)
 			return
 		}
-		s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest.at(append(slices.Clone(dest.segs), name)), nil))
+		made := dest.at(append(slices.Clone(dest.segs), name))
+		s.writeMailSheet(w, r, s.uploadPicker(r, sess, made, nil, false, s.route(made.href("", made.segs, true))))
 		return
 	}
 	key, _ := sess.DataKey()
 	_ = s.users.SetUploadFolder(sess.AccountID(), key, sealed.AttachmentFolder{AccountID: dest.conn.ID, Path: dest.col.Path, Folder: dest.segs})
-	s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest, nil))
+	s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest, nil, false, ""))
 }
 
 // uploadFolder is where the menu's upload goes: the folder chosen here
@@ -223,15 +226,17 @@ func (s *Server) uploadFolder(sess *session.Session, blob sealed.Blob) *fileCtx 
 
 // uploadPicker is «Upload files» (s-notes-11): the tree with New folder,
 // the line saying where the folder comes from, and a refusal, when there is
-// one, beside it — never in its place (s-files-19).
-func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fileCtx, failure *view.Notice) view.FilePickerSheet {
+// one, beside it — never in its place (s-files-19). open says the line of a
+// new folder's name stands; fresh is the folder New folder just made.
+func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fileCtx, failure *view.Notice, open bool, fresh string) view.FilePickerSheet {
 	blob := s.catalogOf(sess)
 	const purpose = "The folder is the attachment folder from Settings → Attachments, named once and remembered — unless you make a new one here. " +
 		"Change it here and the next upload from this menu goes to the new one."
 	if chosen == nil {
 		chosen = s.uploadFolder(sess, blob)
 	}
-	sheet := view.FilePickerSheet{Title: "Upload files", Purpose: purpose, Tree: *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen), Failure: failure}
+	sheet := view.FilePickerSheet{Title: "Upload files", Purpose: purpose, Tree: *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen), Failure: failure, Where: wherePath(chosen)}
+	s.markTree(&sheet.Tree, blob, fresh)
 	linkTree(&sheet.Tree, func(id string) string {
 		return s.postQuery("/app/files/picker", url.Values{"for": {"upload"}, "to": {id}})
 	})
@@ -256,8 +261,7 @@ func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fi
 	if chosen != nil {
 		back.Set("to", s.route(chosen.href("", chosen.segs, true)))
 	}
-	s.newFolder(&sheet.Tree, chosen, "/app/files/picker", url.Values{"for": {"upload"}, "mkcol": {"1"}},
-		view.Action{Href: s.postQuery("/app/files/picker", back), Method: "GET"})
+	s.newFolder(&sheet.Tree, chosen, "/app/files/picker", url.Values{"for": {"upload"}, "mkcol": {"1"}}, "/app/files/picker", back, open)
 	sheet.Actions = []view.Action{upload, choose,
 		{ID: "files.picker.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.route("/app/files")}}
 	return sheet

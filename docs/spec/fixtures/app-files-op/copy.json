@@ -29,74 +29,14 @@
   "subject": "from Documents / carrel / attachments",
   "target": {
     "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
-    "name": {
-      "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&mkcol=1&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
-      "actions": [
-        {
-          "csrf": "csrf",
-          "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&mkcol=1&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
-          "id": "files.tree.new.create",
-          "label": "Create",
-          "method": "POST",
-          "primary": true,
-          "target": "sheet"
-        },
-        {
-          "csrf": "csrf",
-          "enabled": true,
-          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
-          "id": "files.tree.new.cancel",
-          "label": "Cancel",
-          "method": "POST",
-          "target": "sheet"
-        }
-      ],
-      "errors": [],
-      "method": "POST",
-      "sets": [
-        {
-          "legend": "",
-          "rows": [
-            {
-              "error": "",
-              "extra": null,
-              "hint": "",
-              "kind": "hidden",
-              "label": "",
-              "name": "_csrf",
-              "options": [],
-              "readOnly": false,
-              "required": false,
-              "value": "csrf"
-            },
-            {
-              "error": "",
-              "extra": null,
-              "focus": true,
-              "hint": "",
-              "kind": "text",
-              "label": "Name of the new folder",
-              "name": "name",
-              "options": [],
-              "readOnly": false,
-              "required": true,
-              "value": ""
-            }
-          ],
-          "unfold": null
-        }
-      ],
-      "target": "sheet"
-    },
+    "name": null,
     "new": {
-      "csrf": "csrf",
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&mkcol=1&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&new=1&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
       "icon": "i-plus",
       "id": "files.tree.new",
       "label": "New folder",
-      "method": "POST",
+      "method": "GET",
       "target": "sheet"
     },
     "nodes": [
@@ -107,7 +47,7 @@
         "id": "/app/files/a-nc-home/Files/",
         "label": "Files",
         "readOnly": false,
-        "stamp": "nextcloud · Files"
+        "stamp": "nextcloud"
       },
       {
         "children": [
@@ -130,7 +70,8 @@
                 "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
                 "label": "attachments",
                 "readOnly": false,
-                "stamp": ""
+                "stamp": "",
+                "attachments": true
               }
             ],
             "expanded": true,
@@ -146,7 +87,7 @@
         "id": "/app/files/a-sftp-vps/Documents/",
         "label": "Documents",
         "readOnly": false,
-        "stamp": "sftpgo · vps · Documents"
+        "stamp": "sftpgo · vps"
       },
       {
         "children": [],
@@ -154,7 +95,7 @@
         "id": "/app/files/a-sftp-vps/Public/",
         "label": "Public",
         "readOnly": true,
-        "stamp": "sftpgo · vps · Public"
+        "stamp": "sftpgo · vps"
       }
     ]
   },

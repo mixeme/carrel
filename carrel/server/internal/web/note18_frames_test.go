@@ -97,8 +97,12 @@ func TestNewFolderLineIsTheFrame(t *testing.T) {
 	f.srv.SeedFile(filesDocs+"a.txt", "alpha")
 	f.srv.SeedFolder(filesDocs + in[1] + "/" + typed + "/")
 	sheet := opSheet(t, f, f.at("op", "")+"?"+url.Values{"op": {"move"}, "item": {"a.txt"}}.Encode(), url.Values{"to": {f.at("", in[1], "")}})
-	tree := sheet.Target
-	if tree == nil || tree.New == nil || !tree.New.Enabled || tree.Name == nil {
+	if sheet.Target == nil || sheet.Target.New == nil || !sheet.Target.New.Enabled || sheet.Target.Name != nil {
+		t.Fatalf("tree = %+v, want New folder and its line closed", sheet.Target)
+	}
+	// New opens the line: the same sheet with new=1 (ФГ4).
+	tree := decode[view.FileOpSheet](t, f.h.do(get(sheet.Target.New.Href, f.sess))).Target
+	if tree == nil || tree.Name == nil {
 		t.Fatalf("tree = %+v, want New folder with its line", tree)
 	}
 	sameCaret(t, "s-files-13", "new folder", *tree.Name)
@@ -110,7 +114,7 @@ func TestNewFolderLineIsTheFrame(t *testing.T) {
 	for _, a := range tree.Name.Actions {
 		got = append(got, string(a.Label))
 	}
-	if !equalStrings(got, buttons) || tree.Name.Action != tree.New.Href || tree.Name.Method != "POST" {
+	if !equalStrings(got, buttons) || !strings.Contains(tree.Name.Action, "mkcol=1") || tree.Name.Method != "POST" {
 		t.Errorf("the line = %+v, the frame's buttons %q", *tree.Name, buttons)
 	}
 

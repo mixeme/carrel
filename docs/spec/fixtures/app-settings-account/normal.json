@@ -143,7 +143,8 @@
         "id": "settings.account",
         "label": "Account",
         "method": "GET",
-        "on": true
+        "on": true,
+        "icon": "i-user"
       },
       {
         "count": 4,
@@ -151,7 +152,8 @@
         "href": "/app/settings/connections",
         "id": "settings.connections",
         "label": "Connections",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-server"
       },
       {
         "count": null,
@@ -159,7 +161,8 @@
         "href": "/app/settings/attachments",
         "id": "settings.attachments",
         "label": "Attachments",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-file"
       },
       {
         "count": null,
@@ -167,7 +170,8 @@
         "href": "/app/settings/devices",
         "id": "settings.devices",
         "label": "New device",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-device"
       },
       {
         "count": 0,
@@ -183,7 +187,8 @@
         "href": "/app/settings/backup",
         "id": "settings.backup",
         "label": "Backup",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-archive"
       },
       {
         "count": 2,
@@ -191,7 +196,8 @@
         "href": "/app/files/published",
         "id": "settings.published",
         "label": "Published links",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-link"
       },
       {
         "count": null,
@@ -199,7 +205,8 @@
         "href": "/app/settings/appearance",
         "id": "settings.appearance",
         "label": "Appearance",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-theme"
       }
     ],
     "note": "",

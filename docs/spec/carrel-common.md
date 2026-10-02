@@ -458,9 +458,9 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/files/{account}/{col}/download/{path…}` | GET | вход | поток; адрес папки (`…/`) с `?zip=1` — папка архивом zip (S-17.5) | — |
 | `/app/files/{account}/{col}/upload/{path…}` | POST | вход | фрагмент | `TransferQueue`; multipart: файлы — поле `file` (`Action.File`), у загрузки папки имя файла — путь внутри неё; перед файлами со сценарием — `size.<имя>` (длина файла в байтах, у загрузки папки имя — тот же путь) или `size` у одного файла: без них тело уходит без длины, и сервер, которому она нужна, отказывает (S-17.1); `?transfer=&answer=` (`skip`, `both`, `overwrite`) — ответ очереди на занятое имя |
 | `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | фрагмент | `FilesPage`; поле `name` — имя новой папки; без поля (New folder шапки и рейла) — папка с открытой строкой имени (`FilesPage.Name`) |
-| `/app/files/{account}/{col}/op/{path…}` | GET, POST | вход | лист | `FileOpSheet`; `?op=` (`rename`, `move`, `copy`, `delete`), `item` — имена папки (значений несколько), `to` — папка назначения переноса и копии: адрес узла дерева (`FileTreeNode.Href` несёт его в адресе; у POST и полем формы). GET — только лист; POST с `go=1` выполняет (у `rename` — поле `name`, новое имя; у `delete` — `etag` показанных версий), с `mkcol=1` и полем `name` — New folder дерева, с `transfer=&answer=` — ответ очереди |
+| `/app/files/{account}/{col}/op/{path…}` | GET, POST | вход | лист | `FileOpSheet`; `?op=` (`rename`, `move`, `copy`, `delete`), `item` — имена папки (значений несколько), `to` — папка назначения переноса и копии: адрес узла дерева (`FileTreeNode.Href` несёт его в адресе; у POST и полем формы). GET — только лист; POST с `go=1` выполняет (у `rename` — поле `name`, новое имя; у `delete` — `etag` показанных версий), с `mkcol=1` и полем `name` — New folder дерева, с `transfer=&answer=` — ответ очереди; GET с `new=1` — лист с открытой строкой имени (`FileTree.Name`) |
 | `/app/files/{account}/{col}/columns/{path…}` | POST | вход | редирект | — ; меню Columns папки (s-files-20); ответ — папка `{path…}` с её запросом (S-9.6) |
-| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=upload` — папка загрузки из меню создания; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attach&k=&a=&c=&new=` — то же для черновика новой записи (вместо `uid`), Attach шлёт `…/new?op=attachfile&uid=&file=`, Cancel — назад к форме `/new?uid=`; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=` |
+| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=upload` — папка загрузки из меню создания; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attach&k=&a=&c=&new=` — то же для черновика новой записи (вместо `uid`), Attach шлёт `…/new?op=attachfile&uid=&file=`, Cancel — назад к форме `/new?uid=`; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=`; `?for=upload&new=1` — с открытой строкой имени новой папки, POST `?for=upload&mkcol=1&to=` с полем `name` её заводит |
 | `/app/files/published` | GET | вход | страница | `PublishedLinksPage` |
 | `/app/attach/{account}/{col}/{path…}` | GET | вход | поток | — |
 
@@ -1991,9 +1991,16 @@ type FileRow struct {
     // хранилища только для чтения выключена с причиной; у файла nil.
     Upload *Action
 }
+// Title — шапка очереди (s-files-2): «Uploading 2 of 3» — пока строка ждёт
+// ответа, которая она по счёту; всё решено — «Uploaded 2 of 3», сколько
+// сделано; глагол — по роду строк (Moving, Copying, Renaming, у разных —
+// Transferring). Total — объём файлов очереди моноширинно, «12.4 MB». Note —
+// почему: отказы строк и отказ загрузки целиком; пусто — сказать нечего.
 type TransferQueue struct {
-    Rows []TransferRow
-    Note Text
+    Title Text
+    Total Size
+    Rows  []TransferRow
+    Note  Text
 }
 type TransferRow struct {
     Name     Text
@@ -2003,15 +2010,17 @@ type TransferRow struct {
     Question *NameClash // занятое имя — вопрос на месте, а не настройка
     Actions  []Action
 }
-type NameClash struct { Name Text; Options []Action } // Skip · Keep both · Overwrite this one
-// New — «New folder» в рубрике дерева (s-files-4, s-notes-11): POST поля
-// name заводит папку в выбранной и отвечает тем же листом, где выбрана новая;
-// выбранная только для чтения — выключена с причиной. У дерева страницы nil.
-// Name — строка имени, которую New открывает над деревом (s-files-13): поле
-// name «Name of the new folder», «Create» (Form.Action — New.Href) и Cancel —
+type NameClash struct { Name Text; Options []Action } // Keep both · Replace · Skip (s-files-2); Replace перезаписывает осознанно — единственная запись без предусловия (S-17.1)
+// New — «New folder» в рубрике дерева (s-files-4, s-notes-11): GET того же
+// листа с new=1 — лист с открытой строкой имени; выбранная только для чтения
+// — выключена с причиной. У дерева страницы nil.
+// Name — строка имени, которую New открывает над деревом (s-files-13): POST
+// поля name (Form.Action) заводит папку в выбранной и отвечает тем же листом,
+// где выбрана новая; поле name «Name of the new folder», «Create» и Cancel —
 // тот же лист, строка закрыта. Отказ стоит под строкой одной фразой — «There
 // is a folder called «2026-07» in carrel already. Choose another name.», —
-// и строка приходит открытой, с набранным. nil — New нет или она выключена.
+// и строка приходит открытой, с набранным. nil — строка не открыта, New нет
+// или она выключена.
 type FileTree struct { Nodes []FileTreeNode; Chosen string; New *Action; Name *Form }
 // Дерево, из которого выбирают файл (From Files у Attach), показывает и
 // файлы: File — узел-файл, он выбирается и не раскрывается; ID — его адрес в
@@ -2022,6 +2031,10 @@ type FileTree struct { Nodes []FileTreeNode; Chosen string; New *Action; Name *F
 // которого сервер не сказал, не угадывается, и обоих тогда нет. Href — тот
 // же лист, где выбран этот узел (GET; у листа операции — адрес op без go, с
 // to=ID): без сценариев узел выбирает ссылкой; у недоступного узла пусто.
+// Stamp — у корня хранилища: подключение, «sftpgo · vps» (хвост узла,
+// s-files-4). Attachments — это папка вложений (бейдж «attachment folder»),
+// Fresh — папка только что заведена New folder этого листа («just
+// created», s-notes-11); слова — экрана.
 type FileTreeNode struct {
     ID, Label string
     Stamp     Stamp
@@ -2031,6 +2044,7 @@ type FileTreeNode struct {
     File      bool
     Size      Size
     Lands     Text
+    Attachments, Fresh bool
     Href      string
 }
 
@@ -2041,6 +2055,7 @@ type FilePickerSheet struct {
     Title   Text
     Subject Text
     Purpose Text // зачем выбирают: папка вложений, назначение копии, файл для вложения; остаётся и при отказе
+    Where   Text // выбранная папка путём, «Documents / carrel / 2026-08» (выбор в шапке листа загрузки, s-notes-11, s-files-19); пусто — не выбрана или шапки выбора нет
     Tree    FileTree
     Failure *Notice // отказ: New folder не завёл папку (под строкой имени, как FileOpSheet.Failure, s-files-19) или папку нельзя выбрать; nil — отказа не было
     Actions []Action
@@ -2065,14 +2080,24 @@ type FileOpSheet struct {
     Actions []Action
 }
 
+// Subtitle — «Read-only, one object or one collection per link» и у
+// локального экземпляра «this instance is local: the link opens only from
+// your network» тревогой (s-publish-1). Kind строки — что за ссылка словом:
+// у коллекции — её род («calendar», «address book», «task list»,
+// «notebook»), у записи — род записи («event», «contact», «task», «note»),
+// «file», «folder». Colour — метка коллекции у ссылки на коллекцию и запись;
+// Icon — значок у файла (i-doc) и папки (i-file).
 type PublishedLinksPage struct {
     Shell
-    Rows []PublishedRow
+    Subtitle Runs
+    Rows     []PublishedRow
 }
 type PublishedRow struct {
     Title    Text
-    Kind     Kind
+    Kind     Text
     Stamp    Stamp
+    Colour   Colour
+    Icon     string
     Link     Text
     Created  When
     Expires  Text
@@ -3005,7 +3030,9 @@ selection» формы выделения папки, `folder.new.create` и `fo
 `files.refresh` (корень), `folder.refresh`, `files.details` — Details шапки
 папки, `list.print` — Print в её «⋯»; панель файла — `file.download`,
 `file.view` Open (картинка на месте), `file.rename`, `file.move`,
-`file.delete`.
+`file.delete`. Очередь: `transfer.both` Keep both, `transfer.overwrite`
+Replace, `transfer.skip` Skip — в этом порядке (s-files-2). Опубликованное —
+`published.refresh`.
 
 ---
 

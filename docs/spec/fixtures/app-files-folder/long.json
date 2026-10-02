@@ -288,7 +288,7 @@
     "title": "attachments"
   },
   "queue": {
-    "note": "1 waiting for an answer: the name is taken · 1 done",
+    "note": "",
     "rows": [
       {
         "actions": [],
@@ -308,15 +308,6 @@
             {
               "csrf": "csrf",
               "enabled": true,
-              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=skip&transfer=q-transfer",
-              "id": "transfer.skip",
-              "label": "Skip",
-              "method": "POST",
-              "target": "queue"
-            },
-            {
-              "csrf": "csrf",
-              "enabled": true,
               "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=both&transfer=q-transfer",
               "id": "transfer.both",
               "label": "Keep both",
@@ -325,11 +316,19 @@
             },
             {
               "csrf": "csrf",
-              "danger": true,
               "enabled": true,
               "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=overwrite&transfer=q-transfer",
               "id": "transfer.overwrite",
-              "label": "Overwrite this one",
+              "label": "Replace",
+              "method": "POST",
+              "target": "queue"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=skip&transfer=q-transfer",
+              "id": "transfer.skip",
+              "label": "Skip",
               "method": "POST",
               "target": "queue"
             }
@@ -338,7 +337,9 @@
         "size": "7 B",
         "state": "idle"
       }
-    ]
+    ],
+    "title": "Uploading 2 of 2",
+    "total": "4.1 MB"
   },
   "rail": {
     "about": {

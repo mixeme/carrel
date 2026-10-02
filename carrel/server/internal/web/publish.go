@@ -323,6 +323,24 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 // publishedTitle is what a link opens: a calendar given out for some days
 // says which, «Личный · 10–31 August» (s-publish-1) — two links to one
 // calendar are told apart by them.
+// publishedKind is what a link is, in a word (s-publish-1: «calendar»): a
+// collection by the kind of its collection, a record by its kind, a file
+// and a folder by what they are, with their icons.
+func publishedKind(t user.PublishTarget) (string, string) {
+	switch {
+	case t.Kind == string(view.KindFile) && t.Folder:
+		return "folder", "i-file"
+	case t.Kind == string(view.KindFile):
+		return "file", "i-doc"
+	case t.UID != "":
+		return t.Kind, ""
+	}
+	if word, ok := map[string]string{"event": "calendar", "contact": "address book", "task": "task list", "note": "notebook"}[t.Kind]; ok {
+		return word, ""
+	}
+	return t.Kind, ""
+}
+
 func publishedTitle(t user.PublishTarget) string {
 	if t.From == "" || t.To == "" {
 		return t.Title
@@ -362,6 +380,15 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 	// The frame stands it in the settings rail (s-publish-1): the list is
 	// reached from the files as well, but it is the person's, not a folder's.
 	page := view.PublishedLinksPage{Shell: s.withRail(s.buildShell(sess, "Published links"), s.settingsRail(sess, "/app/files/published"))}
+	// The list is the instance's own: its refresh reads it again, and there
+	// is no server's answer to date (s-publish-1).
+	page.Top.Refresh = view.Refresh{Action: view.Action{ID: "published.refresh", Label: "Refresh", Icon: "i-refresh", Href: s.route("/app/files/published"), Method: "GET", Enabled: true}}
+	// What a link is; on a local instance, that it does not leave the
+	// network (s-publish-1).
+	page.Subtitle = line("Read-only, one object or one collection per link")
+	if s.instanceLocal() {
+		page.Subtitle = append(page.Subtitle, plainRun(" · "), view.Run{Text: "this instance is local: the link opens only from your network", Mark: view.RunDanger})
+	}
 	blob := s.catalogOf(sess)
 	tf, now := s.timeFor(sess), s.now()
 	mail := s.canSendLetters(sess)
@@ -371,11 +398,17 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 			host = connLabel(conn)
 		}
 		label := l.Target.Col
+		var colour view.Colour
 		if col, ok := blob.Collection(l.Target.AccountID, l.Target.Col); ok {
 			label = collectionLabel(col)
+			colour = catalogColour(col)
+		}
+		kind, icon := publishedKind(l.Target)
+		if icon != "" {
+			colour = ""
 		}
 		row := view.PublishedRow{
-			Title: text(publishedTitle(l.Target)), Kind: view.Kind(l.Target.Kind), Stamp: stamp(host, label),
+			Title: text(publishedTitle(l.Target)), Kind: text(kind), Stamp: stamp(host, label), Colour: colour, Icon: icon,
 			Created: view.When(tf.date(l.CreatedAt)), Expires: "No expiry", LastSeen: "never opened", Opens: l.Opens,
 		}
 		if l.ExpiresAt != nil {

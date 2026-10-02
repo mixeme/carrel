@@ -33,7 +33,8 @@
         "href": "/app/settings/account",
         "id": "settings.account",
         "label": "Account",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-user"
       },
       {
         "count": 4,
@@ -41,7 +42,8 @@
         "href": "/app/settings/connections",
         "id": "settings.connections",
         "label": "Connections",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-server"
       },
       {
         "count": null,
@@ -49,7 +51,8 @@
         "href": "/app/settings/attachments",
         "id": "settings.attachments",
         "label": "Attachments",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-file"
       },
       {
         "count": null,
@@ -57,7 +60,8 @@
         "href": "/app/settings/devices",
         "id": "settings.devices",
         "label": "New device",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-device"
       },
       {
         "count": 0,
@@ -73,7 +77,8 @@
         "href": "/app/settings/backup",
         "id": "settings.backup",
         "label": "Backup",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-archive"
       },
       {
         "count": 0,
@@ -82,7 +87,8 @@
         "id": "settings.published",
         "label": "Published links",
         "method": "GET",
-        "on": true
+        "on": true,
+        "icon": "i-link"
       },
       {
         "count": null,
@@ -90,7 +96,8 @@
         "href": "/app/settings/appearance",
         "id": "settings.appearance",
         "label": "Appearance",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-theme"
       }
     ],
     "neighbours": [],
@@ -186,10 +193,12 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "id": "published.refresh",
+        "label": "Refresh",
+        "method": "GET",
+        "href": "/app/files/published",
+        "icon": "i-refresh"
       },
       "answered": "",
       "running": false
@@ -236,5 +245,17 @@
       }
     ],
     "userHref": "/app/settings/account"
-  }
+  },
+  "subtitle": [
+    {
+      "text": "Read-only, one object or one collection per link"
+    },
+    {
+      "text": " · "
+    },
+    {
+      "mark": "danger",
+      "text": "this instance is local: the link opens only from your network"
+    }
+  ]
 }

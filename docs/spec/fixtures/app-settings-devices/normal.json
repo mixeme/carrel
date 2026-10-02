@@ -334,6 +334,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/account",
+        "icon": "i-user",
         "id": "settings.account",
         "label": "Account",
         "method": "GET"
@@ -342,6 +343,7 @@
         "count": 4,
         "enabled": true,
         "href": "/app/settings/connections",
+        "icon": "i-server",
         "id": "settings.connections",
         "label": "Connections",
         "method": "GET"
@@ -350,6 +352,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/attachments",
+        "icon": "i-file",
         "id": "settings.attachments",
         "label": "Attachments",
         "method": "GET"
@@ -358,6 +361,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/devices",
+        "icon": "i-device",
         "id": "settings.devices",
         "label": "New device",
         "method": "GET",
@@ -375,6 +379,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/backup",
+        "icon": "i-archive",
         "id": "settings.backup",
         "label": "Backup",
         "method": "GET"
@@ -383,6 +388,7 @@
         "count": 2,
         "enabled": true,
         "href": "/app/files/published",
+        "icon": "i-link",
         "id": "settings.published",
         "label": "Published links",
         "method": "GET"
@@ -391,6 +397,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/appearance",
+        "icon": "i-theme",
         "id": "settings.appearance",
         "label": "Appearance",
         "method": "GET"

@@ -100,13 +100,12 @@
       "target": "sheet"
     },
     "new": {
-      "csrf": "csrf",
       "enabled": true,
-      "href": "/app/files/picker?for=upload&mkcol=1&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+      "href": "/app/files/picker?for=upload&new=1&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
       "icon": "i-plus",
       "id": "files.tree.new",
       "label": "New folder",
-      "method": "POST",
+      "method": "GET",
       "target": "sheet"
     },
     "nodes": [
@@ -117,7 +116,7 @@
         "id": "/app/files/a-nc-home/Files/",
         "label": "Files",
         "readOnly": false,
-        "stamp": "nextcloud · Files"
+        "stamp": "nextcloud"
       },
       {
         "children": [
@@ -140,7 +139,8 @@
                 "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
                 "label": "attachments",
                 "readOnly": false,
-                "stamp": ""
+                "stamp": "",
+                "attachments": true
               }
             ],
             "expanded": true,
@@ -156,7 +156,7 @@
         "id": "/app/files/a-sftp-vps/Documents/",
         "label": "Documents",
         "readOnly": false,
-        "stamp": "sftpgo · vps · Documents"
+        "stamp": "sftpgo · vps"
       },
       {
         "children": [],
@@ -164,8 +164,9 @@
         "id": "/app/files/a-sftp-vps/Public/",
         "label": "Public",
         "readOnly": true,
-        "stamp": "sftpgo · vps · Public"
+        "stamp": "sftpgo · vps"
       }
     ]
-  }
+  },
+  "where": "Documents / carrel / attachments"
 }

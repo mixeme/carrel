@@ -80,8 +80,16 @@ type FileRow struct {
 	Upload *Action `json:"upload"`
 }
 type TransferQueue struct {
-	Rows []TransferRow `json:"rows"`
-	Note Text          `json:"note"`
+	// Title — шапка очереди (s-files-2): «Uploading 2 of 3» — пока строка
+	// ждёт ответа, которая она по счёту; всё решено — «Uploaded 2 of 3»,
+	// сколько сделано; глагол — по роду строк (Moving, Copying, Renaming,
+	// Transferring у разных)
+	Title Text          `json:"title"`
+	Total Size          `json:"total"` // объём файлов очереди моноширинно: «12.4 MB»
+	Rows  []TransferRow `json:"rows"`
+	// Note — почему: отказы строк и отказ загрузки целиком, через « · »;
+	// пусто — сказать нечего
+	Note Text `json:"note"`
 }
 type TransferRow struct {
 	Name     Text       `json:"name"`
@@ -92,7 +100,8 @@ type TransferRow struct {
 	Actions  []Action   `json:"actions"`
 }
 
-// NameClash — Skip · Keep both · Overwrite this one.
+// NameClash — Keep both · Replace · Skip (s-files-2): Replace перезаписывает
+// осознанно, единственная запись без предусловия (S-17.1).
 type NameClash struct {
 	Name    Text     `json:"name"`
 	Options []Action `json:"options"`
@@ -124,6 +133,11 @@ type FileTreeNode struct {
 	// правилу вложения (S-20); у прочих узлов пусто
 	Size  Size `json:"size,omitempty"`
 	Lands Text `json:"lands,omitempty"`
+	// Attachments — это папка вложений (бейдж «attachment folder», s-notes-11);
+	// Fresh — папка только что заведена New folder этого листа («just
+	// created»); слова — экрана
+	Attachments bool `json:"attachments,omitempty"`
+	Fresh       bool `json:"fresh,omitempty"`
 	// Href — тот же лист, где выбран этот узел (GET; у листа операции —
 	// адрес op без go, с to=ID): без сценариев узел выбирает ссылкой;
 	// недоступный узел — пусто
@@ -131,10 +145,14 @@ type FileTreeNode struct {
 }
 
 type FilePickerSheet struct {
-	Title   Text     `json:"title"`   // «Upload files» (s-notes-11), «Attach from Files» (s-files-16)
-	Subject Text     `json:"subject"` // для чего: «to «Собрать чемодан»»; пусто — строки нет
-	Purpose Text     `json:"purpose"` // зачем выбирают: папка вложений, назначение копии, файл для вложения; остаётся и при отказе
-	Tree    FileTree `json:"tree"`
+	Title   Text `json:"title"`   // «Upload files» (s-notes-11), «Attach from Files» (s-files-16)
+	Subject Text `json:"subject"` // для чего: «to «Собрать чемодан»»; пусто — строки нет
+	Purpose Text `json:"purpose"` // зачем выбирают: папка вложений, назначение копии, файл для вложения; остаётся и при отказе
+	// Where — выбранная папка путём, «Documents / carrel / 2026-08» (выбор в
+	// шапке листа загрузки, s-notes-11, s-files-19); пусто — не выбрана или
+	// у листа шапки выбора нет
+	Where Text     `json:"where"`
+	Tree  FileTree `json:"tree"`
 	// Failure — отказ: New folder не завёл папку (под строкой имени, как
 	// FileOpSheet.Failure, s-files-19) или папку нельзя выбрать; nil — отказа
 	// не было
@@ -159,12 +177,23 @@ type FileOpSheet struct {
 
 type PublishedLinksPage struct {
 	Shell
-	Rows []PublishedRow `json:"rows"`
+	// Subtitle — под заголовком (s-publish-1): «Read-only, one object or one
+	// collection per link»; у локального экземпляра — и «this instance is
+	// local: the link opens only from your network» тревогой
+	Subtitle Runs           `json:"subtitle"`
+	Rows     []PublishedRow `json:"rows"`
 }
 type PublishedRow struct {
-	Title    Text     `json:"title"`
-	Kind     Kind     `json:"kind"`
-	Stamp    Stamp    `json:"stamp"`
+	Title Text `json:"title"`
+	// Kind — что за ссылка словом (s-publish-1): у коллекции — её род,
+	// «calendar», «address book», «task list», «notebook»; у записи — род
+	// записи, «event», «contact», «task», «note»; «file», «folder»
+	Kind  Text  `json:"kind"`
+	Stamp Stamp `json:"stamp"`
+	// Colour — метка коллекции у ссылки на коллекцию и запись; Icon — значок
+	// у файла (i-doc) и папки (i-file); у прочих пусто
+	Colour   Colour   `json:"colour,omitempty"`
+	Icon     string   `json:"icon,omitempty"`
 	Link     Text     `json:"link"`
 	Created  When     `json:"created"`
 	Expires  Text     `json:"expires"`
