@@ -55,17 +55,25 @@ func (s *Server) getAttachPicker(w http.ResponseWriter, r *http.Request, sess *s
 	q := r.URL.Query()
 	spec, known := recordKinds[q.Get("k")]
 	account, col, uid := q.Get("a"), q.Get("c"), q.Get("uid")
-	if !known || spec.component == "" || account == "" || col == "" || uid == "" {
+	// ?new= — the draft of a new form (attach_new.go): no record yet.
+	fresh := issuedUID(q.Get("new"))
+	if !known || spec.component == "" || account == "" || col == "" || (uid == "" && fresh == "") {
 		s.notFound(w, r)
 		return
 	}
-	if !s.checkOwnership(w, r, sess, account, col, uid) {
+	if fresh == "" && !s.checkOwnership(w, r, sess, account, col, uid) {
 		return
 	}
 	c, ok := s.collectionOf(sess, spec, account, col)
 	if !ok || c.col.ReadOnly || c.feed != nil || c.cal == nil {
 		s.notFound(w, r)
 		return
+	}
+	if fresh != "" {
+		if _, held := loadAttachDraft(c, fresh); !held {
+			s.notFound(w, r)
+			return
+		}
 	}
 	blob := s.catalogOf(sess)
 	var at *fileCtx
@@ -91,19 +99,28 @@ func (s *Server) getAttachPicker(w http.ResponseWriter, r *http.Request, sess *s
 		Tree:    *s.sourceTree(r.Context(), blob, at, name, limit),
 	}
 	// The head names the record the file goes to (s-files-16).
-	if obj, err := c.find(r.Context(), uid); err == nil {
+	if fresh != "" {
+		sheet.Subject = text("to the new " + c.spec.noun)
+	} else if obj, err := c.find(r.Context(), uid); err == nil {
 		sheet.Subject = text("to «" + recordTitle(c.spec.kind, obj) + "»")
 	}
 	attach := view.Action{ID: "files.picker.attach", Label: "Attach", Icon: "i-up", Method: "POST", Primary: true}
-	if name == "" {
+	cancel := s.route(attachBack(c, uid, from))
+	switch {
+	case name == "":
 		attach.Reason = "Choose a file in the tree."
-	} else {
+	case fresh != "":
+		attach.Enabled, attach.Href = true, s.newAttachStep(c, "attachfile", fresh, url.Values{"file": {sheet.Tree.Chosen}})
+	default:
 		op := s.opQuery("attachfile", etag, from)
 		op.Set("file", sheet.Tree.Chosen)
 		attach.Enabled, attach.Href = true, s.postQuery(c.recordPath(uid)+"/edit", op)
 	}
+	if fresh != "" {
+		cancel = s.route(newFormAddress(c, fresh))
+	}
 	sheet.Actions = []view.Action{attach,
-		{ID: "files.picker.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.route(attachBack(c, uid, from))}}
+		{ID: "files.picker.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: cancel}}
 	s.writeMailSheet(w, r, sheet)
 }
 

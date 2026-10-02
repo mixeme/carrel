@@ -22,12 +22,27 @@ func restoreTemps(t *testing.T) []string {
 	return found
 }
 
+// ownTemp points os.TempDir at a directory of the test's own (TMPDIR on
+// Linux, TMP and TEMP on Windows): a test that counts the temporary files
+// the server leaves counts its own, not another run's at the same time.
+func ownTemp(t *testing.T) {
+	t.Helper()
+	dir := t.TempDir()
+	for _, k := range []string{"TMPDIR", "TMP", "TEMP"} {
+		t.Setenv(k, dir)
+	}
+	if os.TempDir() != dir {
+		t.Fatalf("os.TempDir() = %q, not the directory set", os.TempDir())
+	}
+}
+
 // S-24.3: restoring is an import, and New collection in a row's «Restore
 // into» makes one for it — a new folder for files. The archive is opened
 // with its password and matched before anything is written; a wrong
 // password says so; what was there before is not touched; the archive kept
 // for the steps is deleted when the restore ends.
 func TestRestoreFromHistoryIntoNewCollections(t *testing.T) {
+	ownTemp(t)
 	before := len(restoreTemps(t))
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "archive-pw"))
@@ -107,6 +122,7 @@ func TestRestoreFromHistoryIntoNewCollections(t *testing.T) {
 // An archive brought from this computer: the file streams in with the form,
 // and closing the archive deletes it.
 func TestRestoreFromThisComputer(t *testing.T) {
+	ownTemp(t)
 	before := len(restoreTemps(t))
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToDownload, "8", ""))

@@ -17,6 +17,42 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.145 — 2026-10-02
+
+Attach on a new event, task and note (s-agenda-15; the lead's decision with
+task 106, as the photo of a new card, `v0.2.133`).
+
+### Added
+
+- **Attach of a new form sends the form itself** (`Action.submits`,
+  `file: file`): the first step issues the UID the record will have, the
+  file waits under it in the session with what was typed, and the form
+  comes back — `/new?uid=` — with the typing, the files in `attach` (each
+  with Remove, which sends the form too) and the hidden `uid`. Its arrow:
+  From this computer, and From Files, which sends the form and opens the
+  tree of Files for the draft (`/app/files/picker?for=attach&new=`); the
+  tree's Attach adds the file to the draft. Save creates the record under
+  that UID with the files in it. Nothing is written before Save. Up to the
+  attachment limit the files of a new record go inside it, together; a
+  larger file of this computer is not taken (save, then attach — a new
+  record has no link to keep), a larger file of Files is linked where it
+  lies. `POST /app/{kind}/{account}/{col}/new?op=attach|pickfile|attachfile|detach`
+  (C-5). The new note's Attach stands in the bar and the column.
+
+### Fixed
+
+- `TestRestoreFromHistoryIntoNewCollections`, `TestRestoreFromThisComputer`
+  and `TestUploadAsksAboutTakenNames` counted the temporary files of the
+  whole machine: another run at the same time made them fail. They count
+  their own now (`TMPDIR`, `TMP`, `TEMP` at the test's directory).
+
+### For consumers
+
+Draw a new form's Attach as a submit button of the form with `formaction`
+and the file field `file`; its arrow and Remove as submit buttons too.
+Fixtures regenerated: `app-event-new/normal`, `app-task-edit/new`,
+`app-note-edit/new`.
+
 ## v0.2.144 — 2026-10-02
 
 The page of a note, read and in edit, as s-notes-2 and s-notes-20 draw it

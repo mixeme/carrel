@@ -449,6 +449,7 @@ func option(t *testing.T, row view.TransferRow, id string) string {
 // this one, each answered once and only by this session; the end of the
 // session lets the file go.
 func TestUploadAsksAboutTakenNames(t *testing.T) {
+	ownTemp(t) // it counts the uploads held in the temporary directory
 	f := filesFixture(t, true)
 	f.srv.FilesIgnoreIfNoneMatch = true
 	f.srv.SeedFile(filesDocs+"taken.txt", "original")

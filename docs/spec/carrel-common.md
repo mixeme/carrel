@@ -414,7 +414,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage` |
 | `/app/{kind}/export` | GET | вход | лист | `ExportSheet` — вход из сведённого вида: из какой коллекции |
 | `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — ; с `?uid=` — одна запись (S-19) |
-| `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage`; у контакта `?uid=` — форма с выбранной фотографией (`…/new/photo-preview`): её кадр в `Photo`, скрытое поле `uid`, Save создаёт карточку под этим UID с фотографией; UID, чьего кадра сеанс не держит, не берётся, а форма с таким `uid` не сохраняется молча без фотографии |
+| `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage`; у контакта `?uid=` — форма с выбранной фотографией (`…/new/photo-preview`): её кадр в `Photo`, скрытое поле `uid`, Save создаёт карточку под этим UID с фотографией; UID, чьего кадра сеанс не держит, не берётся, а форма с таким `uid` не сохраняется молча без фотографии. У события, задачи и заметки — вложения до записи (s-agenda-15, S-20): POST с `?op=` — `attach` (multipart: вся форма и файл `file`, кнопка Attach шлёт саму форму — `Action.Submits`), `pickfile` (форма; редирект в дерево Files `?for=attach&new=`), `attachfile&file=` (файл Files), `detach&n=` (форма); первый шаг выдаёт UID записи, файлы ждут под ним с набранным, ответ — `/new?uid=` (форма как набрана, файлы в `Attach`, скрытое `uid`). До Save ничего не пишется: внутрь записи — до порога вместе, больший файл с этого компьютера не берётся (запись сначала сохраняют), больший файл Files — ссылка; Save создаёт запись под этим UID с файлами |
 | `/app/{kind}/{account}/{col}/new/quick` | GET, POST | вход | лист, редирект | `NewSheet`; POST сохраняет запись, «Open the card» переносит набранное в `/new` телом запроса |
 | `/app/{kind}/quick` | GET | вход | лист | `NewSheet` — вход из шапки: на последней использованной коллекции рода, а пока её нет — только выбор «куда» |
 
@@ -460,7 +460,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | фрагмент | `FilesPage` |
 | `/app/files/{account}/{col}/op/{path…}` | POST | вход | фрагмент, лист | `FileOpSheet` |
 | `/app/files/{account}/{col}/columns/{path…}` | POST | вход | редирект | — ; меню Columns папки (s-files-20); ответ — папка `{path…}` с её запросом (S-9.6) |
-| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=upload` — папка загрузки из меню создания; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=` |
+| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=upload` — папка загрузки из меню создания; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attach&k=&a=&c=&new=` — то же для черновика новой записи (вместо `uid`), Attach шлёт `…/new?op=attachfile&uid=&file=`, Cancel — назад к форме `/new?uid=`; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=` |
 | `/app/files/published` | GET | вход | страница | `PublishedLinksPage` |
 | `/app/attach/{account}/{col}/{path…}` | GET | вход | поток | — |
 
@@ -621,7 +621,7 @@ type Action struct {
     Arrow   []MenuItem // стрелка кнопки (.m-split): пункты её меню; пусто — без стрелки
     CSRF    string  // у POST — токен сеанса: без сценариев действие уходит своей формой со скрытым _csrf этого значения (C-11); у GET и на страницах вне входа пусто
     File    string  // у POST, который несёт файл, — имя поля файла: без сценариев действие уходит формой multipart/form-data с этим полем выбора файла и _csrf — «file» у Attach и «From this computer» (attach.add), «photo» у Add и Replace фотографии (photo.add, photo.replace); пусто — без файла
-    Submits bool    // кнопка отправляет форму, в которой стоит, на свой Href (formaction); с File — multipart с этим полем файла, набранное едет с файлом — фотография новой карточки (s-contacts-27: Add, Replace, Crop, Remove); без File — сама форма: Save правки заметки (Doc.Bar, форма — NoteDoc.Form, s-notes-20); false — своей формой
+    Submits bool    // кнопка отправляет форму, в которой стоит, на свой Href (formaction); с File — multipart с этим полем файла, набранное едет с файлом — фотография новой карточки (s-contacts-27: Add, Replace, Crop, Remove), Attach новой записи (s-agenda-15); без File — сама форма: Save правки заметки (Doc.Bar, форма — NoteDoc.Form, s-notes-20), From Files и Remove вложений новой записи; false — своей формой
     Target  string  // зона C-7.2, которую меняет ответ-фрагмент на действие (C-7.1), по C-5: sheet у адреса, отвечающего листом, rail у формы рейла, poll у полосы хода, queue у загрузки, main у новой папки; пусто — переход. У кнопки формы (Href пуст) — пусто: цель у формы (Form.Target)
 }
 // Кнопка со стрелкой — одно действие: само Action — то, что делает кнопка,
@@ -1384,7 +1384,10 @@ type EventEditPage struct { // правка: та же запись формой
     // поясе экземпляра без «as sent»; одно напоминание, First «10 minutes
     // before»; Every 1, повторения нет; это значения, не образцы — Save
     // пишет их. Attach — по имени
-    // (attach.add), клиент ставит его в набор «Attachments» (s-agenda-3)
+    // (attach.add), клиент ставит его в набор «Attachments» (s-agenda-3); у
+    // нового — кнопка формы (Submits, File «file»: шлёт форму с файлом), её
+    // стрелка — From this computer и From Files (Submits), ждущие Save файлы
+    // — в Attach со своим Remove (Submits), скрытое uid — черновик (C-5)
     Form      Form
     Attendees AttendeeField // поле участников (s-agenda-3, -14, -15): клиент ставит его набором «Attendees» между Reminders и Attachments
     Attach    []AttachRow

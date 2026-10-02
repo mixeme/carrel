@@ -18,6 +18,40 @@
         "id": "record.cancel",
         "label": "Cancel",
         "method": "GET"
+      },
+      {
+        "arrow": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "file": "file",
+            "href": "/app/notes/a-nc-home/zapisi/new?op=attach",
+            "icon": "i-up",
+            "id": "attach.add",
+            "label": "From this computer",
+            "method": "POST",
+            "submits": true
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/new?op=pickfile",
+            "icon": "i-file",
+            "id": "attach.files",
+            "label": "From Files",
+            "method": "POST",
+            "submits": true
+          }
+        ],
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/notes/a-nc-home/zapisi/new?op=attach",
+        "icon": "i-up",
+        "id": "attach.add",
+        "label": "Attach",
+        "method": "POST",
+        "submits": true
       }
     ],
     "body": "",
@@ -239,7 +273,42 @@
   },
   "loss": null,
   "meta": {
-    "actions": [],
+    "actions": [
+      {
+        "arrow": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "file": "file",
+            "href": "/app/notes/a-nc-home/zapisi/new?op=attach",
+            "icon": "i-up",
+            "id": "attach.add",
+            "label": "From this computer",
+            "method": "POST",
+            "submits": true
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/new?op=pickfile",
+            "icon": "i-file",
+            "id": "attach.files",
+            "label": "From Files",
+            "method": "POST",
+            "submits": true
+          }
+        ],
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/notes/a-nc-home/zapisi/new?op=attach",
+        "icon": "i-up",
+        "id": "attach.add",
+        "label": "Attach",
+        "method": "POST",
+        "submits": true
+      }
+    ],
     "attach": [],
     "date": "",
     "linked": [],

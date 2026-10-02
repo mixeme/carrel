@@ -53,8 +53,10 @@ type Action struct {
 	// Submits — кнопка отправляет форму, в которой стоит, на свой Href
 	// (formaction); с File — multipart с этим полем файла, набранное едет
 	// вместе с файлом: Add, Replace, Crop и Remove фотографии новой
-	// карточки (s-contacts-27); без File — сама форма: Save правки заметки
-	// (NoteDoc.Form, s-notes-20); false — действие уходит своей формой
+	// карточки (s-contacts-27), Attach новой записи (s-agenda-15); без File
+	// — сама форма: Save правки заметки (NoteDoc.Form, s-notes-20), From
+	// Files и Remove вложений новой записи; false — действие уходит своей
+	// формой
 	Submits bool `json:"submits,omitempty"`
 	// Target — зона C-7.2, которую меняет ответ-фрагмент на это действие
 	// (C-7.1): sheet у адреса, отвечающего листом, rail у формы рейла, poll

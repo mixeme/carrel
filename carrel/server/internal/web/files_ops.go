@@ -167,6 +167,9 @@ func isFileUpload(r *http.Request) bool {
 		return true
 	case len(seg) == 7 && seg[1] == "app" && seg[6] == "edit" && r.URL.Query().Get("op") == "attach":
 		return recordKinds[seg[2]].component != ""
+	case len(seg) == 6 && seg[1] == "app" && seg[5] == "new" && r.URL.Query().Get("op") == "attach":
+		// A new form's Attach sends the form with its file (attach_new.go).
+		return recordKinds[seg[2]].component != ""
 	case len(seg) == 4 && seg[1] == "app" && seg[2] == "settings" && seg[3] == "backup" && r.URL.Query().Get("op") == "restore-open":
 		// An archive brought from this computer: as large as a copy is.
 		return true

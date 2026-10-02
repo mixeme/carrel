@@ -32,6 +32,9 @@ const (
 	// about (S-15.4): the pairs, and once scanned, the records it would
 	// write with the version each was read at.
 	DraftRewrite
+	// DraftNewAttach is the files of a new event, task or note waiting for
+	// Save under the UID it will have, with what was typed (S-20).
+	DraftNewAttach
 	numDraftSlots
 )
 

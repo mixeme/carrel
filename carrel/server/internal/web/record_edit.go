@@ -2107,11 +2107,23 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		sh.Notices = append(sh.Notices, view.Notice{Role: view.NoticeAlert, Title: "Nothing was saved", Body: "Correct the marked fields and save again."})
 	}
 	form := s.recordForm(c, st)
-	// Attaching is a write of its own (S-20): a record not yet created has
-	// nowhere to take a file.
+	// Attaching is a write of its own (S-20). A record not yet created
+	// keeps its files in a draft under the UID it will have, and its Attach
+	// sends the form (attach_new.go, s-agenda-15).
 	attaching := st.obj != nil && !st.isNew && !c.col.ReadOnly && c.cal != nil
+	var draft attachDraft
+	newAttach := st.isNew && !c.col.ReadOnly && c.cal != nil
+	if newAttach {
+		draft, _ = loadAttachDraft(c, st.formUID)
+		if st.formUID != "" && len(form.Sets) > 0 {
+			form.Sets[0].Rows = append(form.Sets[0].Rows, view.FormRow{Name: "uid", Kind: view.InputHidden, Value: text(st.formUID)})
+		}
+	}
 	if attaching && c.spec.kind != view.KindNote {
 		form.Actions = append(form.Actions, s.attachAction(c, st.uid, st.etag, "edit"))
+	}
+	if newAttach && c.spec.kind != view.KindNote {
+		form.Actions = append(form.Actions, s.newAttachAction(c, st.formUID))
 	}
 	// The foot of the form of a record that exists is its deletion, with
 	// the line the frame writes under it (from-typecase note 2: s-agenda-3,
@@ -2143,6 +2155,9 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		}
 		page := view.EventEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: view.Text(c.stamp()), Form: form, Loss: st.loss, Delete: del,
 			Attendees: s.attendeeField(c, st)}
+		if newAttach {
+			page.Attach = s.draftRows(c, draft)
+		}
 		if st.obj != nil {
 			if cal.HasRecurrence(st.obj) && del != nil {
 				// The line stands under Delete, once.
@@ -2168,9 +2183,21 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
 			page.Source.Path, page.Source.Compared = text(st.obj.Path), s.eventCompared(c, st.uid, st.obj)
 		}
+		if newAttach {
+			page.Attach = s.draftRows(c, draft)
+		}
 		return page
 	default:
-		return s.noteEditPage(c, st, sh, form, attaching, del)
+		page := s.noteEditPage(c, st, sh, form, attaching, del)
+		if newAttach {
+			// The note's Attach stands in the bar and the column, as on
+			// one that exists (s-notes-20).
+			a := s.newAttachAction(c, st.formUID)
+			page.Doc.Bar = append(page.Doc.Bar, a)
+			page.Meta.Actions = shown(&a)
+			page.Meta.Attach = s.draftRows(c, draft)
+		}
+		return page
 	}
 }
 
@@ -3142,6 +3169,14 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 		values := s.newFormValues(c)
 		carried(c, r, values)
 		st := editState{values: values, isNew: true, readAt: s.now()}
+		// The form of files attached before the record (attach_new.go), as
+		// it was typed when Attach sent it.
+		if d, ok := newDraftUID(c, r.URL.Query().Get("uid")); ok {
+			st.formUID = d.UID
+			if d.Values != nil {
+				st.values = d.Values
+			}
+		}
 		if c.card != nil {
 			// The form of a photo chosen before the card (photo_new.go),
 			// as it was typed when a photo button sent it.
@@ -3384,11 +3419,20 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		s.notFound(w, r)
 		return
 	}
+	// A step of a new form's attachments (attach_new.go): its file is read
+	// from the body as it comes, nothing may parse the form before.
+	if op := r.URL.Query().Get("op"); op != "" && c.cal != nil {
+		s.postNewAttach(w, r, c, op)
+		return
+	}
 	want := s.submittedValues(c, r)
-	// The UID of a contact's form with a photo chosen (photo_new.go).
+	// The UID of a contact's form with a photo chosen (photo_new.go), of a
+	// new record's form with files attached (attach_new.go).
 	var formUID string
 	if c.card != nil {
 		formUID = chosenUID(c, r.FormValue("uid"))
+	} else if d, ok := newDraftUID(c, r.FormValue("uid")); ok {
+		formUID = d.UID
 	}
 	if add := r.FormValue("add"); add != "" {
 		// «Add …» without scripts: the form back with one row more, and no
@@ -3455,6 +3499,14 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 			err = patch.Apply(sent)
 		}
 	}
+	// The files attached before the record (attach_new.go).
+	draft, drafted := attachDraft{}, false
+	if c.cal != nil {
+		draft, drafted = loadAttachDraft(c, formUID)
+	}
+	if err == nil && drafted {
+		err = applyDraft(sent, draft)
+	}
 	if err == nil {
 		sent.Path = path
 		err = c.create(r.Context(), path, sent)
@@ -3480,6 +3532,7 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 	}
 	if formUID != "" {
 		clearPhotoDraft(c, formUID)
+		clearAttachDraft(c, formUID)
 	}
 	s.finishCreate(w, r, c, uid, sent)
 }
