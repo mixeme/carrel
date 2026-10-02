@@ -249,6 +249,13 @@ func onlyCuts(q url.Values) bool {
 	return q.Has("filter") || q.Has("sort") || q.Has("view") || q.Has("select")
 }
 
+// Markdown is not in Go's own table of types, and what a system's table says
+// differs from one machine to the next: a folder of notes would read
+// «text/markdown» on one and nothing on another (s-files-1 says it).
+func init() {
+	_ = mime.AddExtensionType(".md", "text/markdown; charset=utf-8")
+}
+
 // fileType is the media type of a file without its parameters: the one the
 // server sent, else the one its extension names, else none.
 func fileType(name, sent string) string {

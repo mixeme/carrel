@@ -63,6 +63,8 @@ var fixtureTypes = map[string]func() any{
 	"app-event-edit":           func() any { return &EventEditPage{} },
 	"app-event-new":            func() any { return &EventEditPage{} },
 	"app-files":                func() any { return &FilesRootPage{} },
+	"app-files-folder":         func() any { return &FilesPage{} },
+	"app-files-op":             func() any { return &FileOpSheet{} },
 	"app-files-picker":         func() any { return &FilePickerSheet{} },
 	"app-files-published":      func() any { return &PublishedLinksPage{} },
 	"app-mail-compose":         func() any { return &MailSheet{} },

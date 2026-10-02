@@ -1,0 +1,635 @@
+{
+  "attachments": false,
+  "bar": {
+    "actions": [
+      {
+        "arrow": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "file": "file",
+            "href": "/app/files/a-nc-home/Files/upload/",
+            "icon": "i-doc",
+            "id": "file.upload",
+            "label": "Files",
+            "method": "POST",
+            "target": "queue"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "file": "file",
+            "href": "/app/files/a-nc-home/Files/upload/",
+            "icon": "i-file",
+            "id": "file.upload.folder",
+            "label": "Folder",
+            "method": "POST",
+            "target": "queue"
+          }
+        ],
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/files/a-nc-home/Files/upload/",
+        "icon": "i-up",
+        "id": "file.upload",
+        "label": "Upload",
+        "method": "POST",
+        "primary": true,
+        "target": "queue"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/files/a-nc-home/Files/mkcol/",
+        "icon": "i-plus",
+        "id": "folder.new",
+        "label": "New folder",
+        "method": "POST",
+        "target": "main"
+      }
+    ],
+    "columns": {
+      "form": {
+        "action": "/app/files/a-nc-home/Files/columns/",
+        "actions": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/files/a-nc-home/Files/columns/",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/files/a-nc-home/Files/columns/",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "icon": "i-cols",
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "name",
+          "label": "Name",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "size",
+          "label": "Size",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "type",
+          "label": "Type",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": true
+        }
+      ],
+      "label": "Columns"
+    },
+    "compact": null,
+    "filter": "",
+    "filterForm": null,
+    "loaded": 0,
+    "range": null,
+    "segments": [
+      {
+        "enabled": true,
+        "href": "/app/files/a-nc-home/Files/?view=list",
+        "id": "files.view.list",
+        "label": "List",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/a-nc-home/Files/?view=tiles",
+        "id": "files.view.tiles",
+        "label": "Tiles",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/a-nc-home/Files/?sort=name",
+        "id": "files.sort.name",
+        "label": "Name",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/a-nc-home/Files/?sort=size",
+        "id": "files.sort.size",
+        "label": "Size",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/a-nc-home/Files/?sort=changed",
+        "id": "files.sort.changed",
+        "label": "Changed",
+        "method": "GET"
+      }
+    ],
+    "selected": 0,
+    "show": null,
+    "total": 0
+  },
+  "crumbs": [
+    {
+      "href": "",
+      "label": "Files"
+    }
+  ],
+  "details": null,
+  "name": null,
+  "notices": [
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/files/a-nc-home/Files/",
+          "id": "source.retry",
+          "label": "Try again",
+          "method": "GET"
+        }
+      ],
+      "body": "The server answered 503 Service Unavailable. Nothing on this screen comes from the server.",
+      "details": {
+        "lines": [
+          "nextcloud/alice/files/Files/",
+          "dav: HTTP 503: 503 Service Unavailable"
+        ],
+        "summary": "PROPFIND /alice/files/Files/"
+      },
+      "role": "alert",
+      "title": "Files is unavailable"
+    }
+  ],
+  "print": {
+    "range": "nextcloud · Files · 0 items",
+    "taken": "10 August 2026, 17:06",
+    "title": "Files"
+  },
+  "queue": {
+    "note": "1 waiting for an answer: the name is taken",
+    "rows": [
+      {
+        "actions": [],
+        "name": "release-checklist.md",
+        "percent": 0,
+        "question": {
+          "name": "release-checklist.md",
+          "options": [
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=skip&transfer=q-transfer",
+              "id": "transfer.skip",
+              "label": "Skip",
+              "method": "POST",
+              "target": "queue"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=both&transfer=q-transfer",
+              "id": "transfer.both",
+              "label": "Keep both",
+              "method": "POST",
+              "target": "queue"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=overwrite&transfer=q-transfer",
+              "id": "transfer.overwrite",
+              "label": "Overwrite this one",
+              "method": "POST",
+              "target": "queue"
+            }
+          ]
+        },
+        "size": "7 B",
+        "state": "idle"
+      }
+    ]
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/files/a-nc-home/Files/mkcol/",
+        "icon": "i-plus",
+        "id": "rail.folder.new",
+        "label": "New folder",
+        "method": "POST",
+        "target": "main"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections?op=add",
+        "icon": "i-server",
+        "id": "account.connect",
+        "label": "Connect account",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections?kind=folder&op=feed",
+        "icon": "i-link",
+        "id": "feed.subscribe",
+        "label": "Subscribe to a feed",
+        "method": "GET"
+      }
+    ],
+    "nav": [
+      {
+        "count": 6,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-con",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": 6,
+        "enabled": true,
+        "href": "/app/calendar",
+        "icon": "i-cal",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET"
+      },
+      {
+        "count": 5,
+        "enabled": true,
+        "href": "/app/tasks",
+        "icon": "i-task",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/notes",
+        "icon": "i-note",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "icon": "i-file",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": 1,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "icon": "i-dup",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "2 of 3 storages ticked",
+    "sections": [
+      {
+        "account": "",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/files",
+            "label": "Selected collections",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "part"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#9a9280",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/files/a-nc-home/Files/",
+            "label": "Files",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "sftpgo · vps",
+        "accountID": "a-sftp-vps",
+        "rows": [
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/files/a-sftp-vps/Documents/",
+            "label": "Documents",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/files/a-sftp-vps/Public/",
+            "label": "Public",
+            "menu": [],
+            "on": false,
+            "readOnly": true,
+            "state": "read-only",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+        "icon": "i-file",
+        "id": "files.attachments",
+        "label": "Attachments",
+        "method": "GET",
+        "place": "Documents / carrel"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-link",
+        "id": "files.published",
+        "label": "Published",
+        "method": "GET",
+        "place": ""
+      }
+    ],
+    "tags": [],
+    "ticks": {
+      "action": "/app/sources/files",
+      "actions": [],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "back",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "/app/files/a-nc-home/Files/"
+            }
+          ],
+          "unfold": null
+        }
+      ],
+      "target": "rail"
+    }
+  },
+  "rows": [],
+  "select": {
+    "action": "/app/files/a-nc-home/Files/",
+    "actions": [],
+    "errors": [],
+    "method": "GET",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [],
+        "unfold": null
+      }
+    ]
+  },
+  "subtitle": "nextcloud",
+  "title": "Files",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-up",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/files/a-nc-home/Files/",
+        "icon": "i-refresh",
+        "id": "folder.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "tree": null,
+  "view": "list"
+}

@@ -1,0 +1,137 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": false,
+      "icon": "i-up",
+      "id": "files.picker.attach",
+      "label": "Attach",
+      "method": "POST",
+      "primary": true,
+      "reason": "Choose a file in the tree."
+    },
+    {
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84",
+      "id": "files.picker.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "failure": null,
+  "purpose": "Attach a file that is in Files already. Up to 2 MB it is written into the record, as a file from this computer is; a larger one stays where it lies, and the record keeps a link to it.",
+  "subject": "to «Собрать чемодан»",
+  "title": "Attach from Files",
+  "tree": {
+    "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+    "name": null,
+    "new": null,
+    "nodes": [
+      {
+        "children": [],
+        "expanded": false,
+        "href": "/app/files/picker?a=a-nc-home&c=dela&for=attach&k=tasks&to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F&uid=aa11-2d09-5f84",
+        "id": "/app/files/a-nc-home/Files/",
+        "label": "Files",
+        "readOnly": false,
+        "stamp": "nextcloud · Files"
+      },
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "expanded": false,
+                    "href": "/app/files/picker?a=a-nc-home&c=dela&for=attach&k=tasks&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F&uid=aa11-2d09-5f84",
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
+                    "label": "2026-07",
+                    "readOnly": false,
+                    "stamp": ""
+                  },
+                  {
+                    "children": [],
+                    "expanded": false,
+                    "file": true,
+                    "href": "/app/files/picker?a=a-nc-home&c=dela&for=attach&k=tasks&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-08-04-whiteboard.jpg&uid=aa11-2d09-5f84",
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08-04-whiteboard.jpg",
+                    "label": "2026-08-04-whiteboard.jpg",
+                    "lands": "link",
+                    "readOnly": false,
+                    "size": "2.8 MB",
+                    "stamp": ""
+                  },
+                  {
+                    "children": [],
+                    "expanded": false,
+                    "file": true,
+                    "href": "/app/files/picker?a=a-nc-home&c=dela&for=attach&k=tasks&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-08-10-sync-board.png&uid=aa11-2d09-5f84",
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08-10-sync-board.png",
+                    "label": "2026-08-10-sync-board.png",
+                    "lands": "inside",
+                    "readOnly": false,
+                    "size": "412 KB",
+                    "stamp": ""
+                  },
+                  {
+                    "children": [],
+                    "expanded": false,
+                    "file": true,
+                    "href": "/app/files/picker?a=a-nc-home&c=dela&for=attach&k=tasks&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2Frelease-checklist.md&uid=aa11-2d09-5f84",
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/release-checklist.md",
+                    "label": "release-checklist.md",
+                    "lands": "inside",
+                    "readOnly": false,
+                    "size": "3 KB",
+                    "stamp": ""
+                  },
+                  {
+                    "children": [],
+                    "expanded": false,
+                    "file": true,
+                    "href": "/app/files/picker?a=a-nc-home&c=dela&for=attach&k=tasks&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F%25D1%2581%25D0%25BC%25D0%25B5%25D1%2582%25D0%25B0-%25D0%25BF%25D0%25BE%25D0%25B4%25D1%2580%25D1%258F%25D0%25B4%25D1%2587%25D0%25B8%25D0%25BA.pdf&uid=aa11-2d09-5f84",
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
+                    "label": "смета-подрядчик.pdf",
+                    "lands": "inside",
+                    "readOnly": false,
+                    "size": "1.2 MB",
+                    "stamp": ""
+                  }
+                ],
+                "expanded": true,
+                "href": "/app/files/picker?a=a-nc-home&c=dela&for=attach&k=tasks&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F&uid=aa11-2d09-5f84",
+                "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+                "label": "attachments",
+                "readOnly": false,
+                "stamp": ""
+              }
+            ],
+            "expanded": true,
+            "href": "/app/files/picker?a=a-nc-home&c=dela&for=attach&k=tasks&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2F&uid=aa11-2d09-5f84",
+            "id": "/app/files/a-sftp-vps/Documents/carrel/",
+            "label": "carrel",
+            "readOnly": false,
+            "stamp": ""
+          }
+        ],
+        "expanded": true,
+        "href": "/app/files/picker?a=a-nc-home&c=dela&for=attach&k=tasks&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2F&uid=aa11-2d09-5f84",
+        "id": "/app/files/a-sftp-vps/Documents/",
+        "label": "Documents",
+        "readOnly": false,
+        "stamp": "sftpgo · vps · Documents"
+      },
+      {
+        "children": [],
+        "expanded": false,
+        "href": "/app/files/picker?a=a-nc-home&c=dela&for=attach&k=tasks&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FPublic%2F&uid=aa11-2d09-5f84",
+        "id": "/app/files/a-sftp-vps/Public/",
+        "label": "Public",
+        "readOnly": false,
+        "stamp": "sftpgo · vps · Public"
+      }
+    ]
+  }
+}

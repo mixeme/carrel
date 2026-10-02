@@ -126,7 +126,8 @@ check("6b. названные правила введены заголовком
 
 # 7. Фикстуры разбираются и лежат по правилам имён
 states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","unavailable","outcome","refused",
-          "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new"}
+          "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
+          "tiles","copy","elsewhere","rename","delete","attach"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -196,6 +197,11 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-mail-compose": "/app/mail/compose",
     "app-search": "/app/search",
     "app-files": "/app/files",
+    # Папка: маршрут C-5 — /app/files/{account}/{col}/{path…}, а data-screen
+    # кадра s-files-1 — без {path…} (задача Typecase 121); до ответа папка
+    # сверяется по data-screen кадра.
+    "app-files-folder": "/app/files/{account}/{col}",
+    "app-files-op": "/app/files/{account}/{col}/op/{path…}",
     "app-files-published": "/app/files/published",
     "app-files-picker": "/app/files/picker",
     "invite": "/invite/{token}",
@@ -241,7 +247,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # тут нечего, и молчание здесь — не исключение, а род экрана.
 SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
-          "app-publish", "app-files-picker", "app-mail-compose",
+          "app-publish", "app-files-picker", "app-files-op", "app-mail-compose",
           "app-contact-rewrite"}
 
 FRAME_TODO = {
@@ -300,6 +306,19 @@ STATE_FRAME = {
     # Подсказки поля участников (Typecase de3f083, задача 77): «ве» — Вера.
     "app-contacts-suggest/normal": "s-agenda-12",
     "app-event-edit/loss": "states-17",
+    # Папка (скан файлов, ФБ5): выделено три с очередью загрузки — s-files-2,
+    # плитки — s-files-5. Листы операции и выбора — кадры-фрагменты своих
+    # состояний (рейла у листа нет, SHEETS): копия s-files-11, другое
+    # хранилище s-files-12, отказ New folder s-files-13 и s-files-19, From
+    # Files s-files-16. Переименования и удаления кадров нет (задача 121) —
+    # они сверяются с кадром листа переноса.
+    "app-files-folder/long": "s-files-2",
+    "app-files-folder/tiles": "s-files-5",
+    "app-files-op/copy": "s-files-11",
+    "app-files-op/elsewhere": "s-files-12",
+    "app-files-op/refused": "s-files-13",
+    "app-files-picker/attach": "s-files-16",
+    "app-files-picker/refused": "s-files-19",
 }
 # Без строки: app-contact-new/normal и app-event-new/normal — полные формы
 # создания (`/new`) — свои кадры маршрута, s-contacts-27 (Typecase 4af7ad7,

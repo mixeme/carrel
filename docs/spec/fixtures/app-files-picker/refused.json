@@ -1,0 +1,171 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "file": "file",
+      "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/",
+      "id": "files.picker.upload",
+      "label": "Upload here",
+      "method": "POST",
+      "primary": true,
+      "target": "queue"
+    },
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+      "id": "files.picker.choose",
+      "label": "Choose this folder",
+      "method": "POST",
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/files",
+      "id": "files.picker.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "failure": {
+    "actions": [],
+    "body": "There is a folder called «2026-07» in attachments already. Choose another name.",
+    "details": null,
+    "role": "alert",
+    "title": ""
+  },
+  "purpose": "The folder is the attachment folder from Settings → Attachments, named once and remembered — unless you make a new one here. Change it here and the next upload from this menu goes to the new one.",
+  "subject": "",
+  "title": "Upload files",
+  "tree": {
+    "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+    "name": {
+      "action": "/app/files/picker?for=upload&mkcol=1&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/files/picker?for=upload&mkcol=1&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+          "id": "files.tree.new.create",
+          "label": "Create",
+          "method": "POST",
+          "primary": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+          "id": "files.tree.new.cancel",
+          "label": "Cancel",
+          "method": "GET",
+          "target": "sheet"
+        }
+      ],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "focus": true,
+              "hint": "",
+              "kind": "text",
+              "label": "Name of the new folder",
+              "name": "name",
+              "options": [],
+              "readOnly": false,
+              "required": true,
+              "value": "2026-07"
+            }
+          ],
+          "unfold": null
+        }
+      ],
+      "target": "sheet"
+    },
+    "new": {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/files/picker?for=upload&mkcol=1&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+      "icon": "i-plus",
+      "id": "files.tree.new",
+      "label": "New folder",
+      "method": "POST",
+      "target": "sheet"
+    },
+    "nodes": [
+      {
+        "children": [],
+        "expanded": false,
+        "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
+        "id": "/app/files/a-nc-home/Files/",
+        "label": "Files",
+        "readOnly": false,
+        "stamp": "nextcloud · Files"
+      },
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "expanded": false,
+                    "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
+                    "label": "2026-07",
+                    "readOnly": false,
+                    "stamp": ""
+                  }
+                ],
+                "expanded": true,
+                "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+                "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+                "label": "attachments",
+                "readOnly": false,
+                "stamp": ""
+              }
+            ],
+            "expanded": true,
+            "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2F",
+            "id": "/app/files/a-sftp-vps/Documents/carrel/",
+            "label": "carrel",
+            "readOnly": false,
+            "stamp": ""
+          }
+        ],
+        "expanded": true,
+        "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2F",
+        "id": "/app/files/a-sftp-vps/Documents/",
+        "label": "Documents",
+        "readOnly": false,
+        "stamp": "sftpgo · vps · Documents"
+      },
+      {
+        "children": [],
+        "expanded": false,
+        "id": "/app/files/a-sftp-vps/Public/",
+        "label": "Public",
+        "readOnly": true,
+        "stamp": "sftpgo · vps · Public"
+      }
+    ]
+  }
+}

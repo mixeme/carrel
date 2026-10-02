@@ -57,7 +57,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/connections?kind=folder\u0026op=feed",
+        "href": "/app/settings/connections?kind=folder&op=feed",
         "icon": "i-link",
         "id": "feed.subscribe",
         "label": "Subscribe to a feed",
@@ -66,7 +66,7 @@
     ],
     "nav": [
       {
-        "count": null,
+        "count": 6,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -75,7 +75,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 6,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -84,7 +84,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 5,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -93,7 +93,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 3,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -112,7 +112,7 @@
         "on": true
       },
       {
-        "count": 0,
+        "count": 1,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",

@@ -1,0 +1,167 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1&item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+      "id": "file.copy.confirm",
+      "label": "Copy here",
+      "method": "POST",
+      "primary": true,
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+      "id": "file.op.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "failure": null,
+  "form": null,
+  "items": [
+    "2026-08-10-sync-board.png",
+    "release-checklist.md",
+    "2026-08-04-whiteboard.jpg"
+  ],
+  "op": "copy",
+  "subject": "from Documents / carrel / attachments",
+  "target": {
+    "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
+    "name": {
+      "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&mkcol=1&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&mkcol=1&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+          "id": "files.tree.new.create",
+          "label": "Create",
+          "method": "POST",
+          "primary": true,
+          "target": "sheet"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+          "id": "files.tree.new.cancel",
+          "label": "Cancel",
+          "method": "POST",
+          "target": "sheet"
+        }
+      ],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "focus": true,
+              "hint": "",
+              "kind": "text",
+              "label": "Name of the new folder",
+              "name": "name",
+              "options": [],
+              "readOnly": false,
+              "required": true,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ],
+      "target": "sheet"
+    },
+    "new": {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&mkcol=1&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+      "icon": "i-plus",
+      "id": "files.tree.new",
+      "label": "New folder",
+      "method": "POST",
+      "target": "sheet"
+    },
+    "nodes": [
+      {
+        "children": [],
+        "expanded": false,
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=copy&to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
+        "id": "/app/files/a-nc-home/Files/",
+        "label": "Files",
+        "readOnly": false,
+        "stamp": "nextcloud · Files"
+      },
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "expanded": true,
+                    "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
+                    "label": "2026-07",
+                    "readOnly": false,
+                    "stamp": ""
+                  }
+                ],
+                "expanded": true,
+                "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+                "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+                "label": "attachments",
+                "readOnly": false,
+                "stamp": ""
+              }
+            ],
+            "expanded": true,
+            "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2F",
+            "id": "/app/files/a-sftp-vps/Documents/carrel/",
+            "label": "carrel",
+            "readOnly": false,
+            "stamp": ""
+          }
+        ],
+        "expanded": true,
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=copy&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2F",
+        "id": "/app/files/a-sftp-vps/Documents/",
+        "label": "Documents",
+        "readOnly": false,
+        "stamp": "sftpgo · vps · Documents"
+      },
+      {
+        "children": [],
+        "expanded": false,
+        "id": "/app/files/a-sftp-vps/Public/",
+        "label": "Public",
+        "readOnly": true,
+        "stamp": "sftpgo · vps · Public"
+      }
+    ]
+  },
+  "title": "Copy 3 items",
+  "warning": [
+    {
+      "text": "A copy travels through Carrel even inside one server: each file is downloaded and uploaded again, one at a time."
+    }
+  ]
+}

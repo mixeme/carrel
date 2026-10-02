@@ -26,6 +26,8 @@ spec/fixtures/<screen>/<state>.json
 | `/p/{token}` | `p-token` |
 | `/confirm-email/{token}` | `confirm-email` |
 | `/app/contacts/suggest` (фрагмент, `SuggestList`) | `app-contacts-suggest` |
+| `/app/files/{account}/{col}/{path…}` | `app-files-folder` |
+| `/app/files/{account}/{col}/op/{path…}` (лист, `FileOpSheet`) | `app-files-op` |
 | мёртвый секрет любого адреса с токеном (rest-1, C-5.2) | `dead-link` |
 
 `<state>` — из таблицы C-14.3: `normal`, `empty`, `readonly`, `source-error`,
@@ -34,7 +36,11 @@ spec/fixtures/<screen>/<state>.json
 `options`, `no-mail`, `wipe-sent`, `asked`, `password`; `link` — приглашение
 ссылкой, поле адреса пустое (s-auth-14; у `invite/normal` — приглашение
 письмом, s-auth-12);
-`new` — полная форма новой задачи и заметки (`/new`) в каталоге правки.
+`new` — полная форма новой задачи и заметки (`/new`) в каталоге правки;
+у файлов — `tiles` (папка плитками), `copy`, `elsewhere`, `rename`, `delete`
+(лист операции) и `attach` (From Files листа выбора). Очередь загрузки
+(`TransferQueue`, ответ `…/upload/…`) своего каталога не имеет: это та же
+модель, что `FilesPage.Queue`, и она — в `app-files-folder/long`.
 
 ## Имена полей
 

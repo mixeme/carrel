@@ -174,6 +174,21 @@ var mockupFileCols = []struct {
 	{account: "nextcloud", slug: "Files", name: "Files", local: "nextcloud-home/Files"},
 }
 
+// mockupFileShapes are the sizes and times the frames give the files of
+// the set (s-files-1): the files on disk are stubs, and the stand pads them
+// to the size; a folder's time is set after what is in it.
+var mockupFileShapes = []struct {
+	slug, rel string
+	size      int64
+	at        string
+}{
+	{slug: "Documents", rel: "carrel/attachments/2026-08-10-sync-board.png", size: 412 << 10, at: "2026-08-10 11:07"},
+	{slug: "Documents", rel: "carrel/attachments/release-checklist.md", size: 3 << 10, at: "2026-08-09 18:44"},
+	{slug: "Documents", rel: "carrel/attachments/смета-подрядчик.pdf", size: 1258291, at: "2026-08-05 14:20"},
+	{slug: "Documents", rel: "carrel/attachments/2026-08-04-whiteboard.jpg", size: 2936013, at: "2026-08-04 17:03"},
+	{slug: "Documents", rel: "carrel/attachments/2026-07", at: "2026-07-01 09:12"},
+}
+
 // mockupFiles puts the file collections of the set in the catalog and their
 // files on the stands, ticks the two the frames tick, and makes
 // «Documents / carrel / attachments» the folder attachments go to. The file
@@ -228,6 +243,23 @@ func mockupFiles(t *testing.T, h *harness, sess *session.Session, root string, s
 		})
 		if err != nil {
 			t.Fatal(err)
+		}
+		// The set's files are stubs of a few bytes; the stand gives the ones
+		// the frames draw their sizes and times (s-files-1, -2, -5): 412 KB
+		// under the thumbnail's ceiling, 2.8 MB over it, a folder of July.
+		for _, one := range mockupFileShapes {
+			if one.slug != fc.slug {
+				continue
+			}
+			target := path + one.rel
+			if one.size > 0 {
+				data, ok := srv.File(target)
+				if !ok {
+					t.Fatalf("the set has no %s", target)
+				}
+				srv.SeedFile(target, data+strings.Repeat(".", int(one.size)-len(data)))
+			}
+			srv.SetModified(target, mockupDayAt(t, one.at))
 		}
 		col := sealed.Collection{Path: path, Name: fc.name, Kinds: []view.Kind{view.KindFile}, ReadOnly: fc.readOnly}
 		if fc.account == "sftpgo · vps" {
@@ -846,6 +878,7 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`"[a-z2-7]{4}(?:-[a-z2-7]{4}){4}"`).ReplaceAllString(s, `"temp-password"`)
 	s = regexp.MustCompile(`t-[0-9A-Z]{10}`).ReplaceAllString(s, "t-task")
 	s = regexp.MustCompile(`plan=r-[0-9A-Z]{10}`).ReplaceAllString(s, "plan=r-plan")
+	s = regexp.MustCompile(`transfer=q-[0-9A-Z]{10}`).ReplaceAllString(s, "transfer=q-transfer")
 	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
 	// A group of duplicates is named by a digest of the records in it, and
 	// those carry the account identifier, which is issued.
@@ -886,6 +919,12 @@ func steadyStamps(v any) {
 	switch t := v.(type) {
 	case map[string]any:
 		for k, x := range t {
+			// A link's last open is written by the service's clock, which
+			// the set freezes (mockupPublished: 08:41): it is data, not a
+			// stamp of the run (the client's scan ФД5).
+			if _, link := t["opens"]; link && k == "lastSeen" {
+				continue
+			}
 			if s, ok := x.(string); ok && runStamps[k] && dateLike.MatchString(s) {
 				t[k] = mockupStamp
 				continue
@@ -1711,6 +1750,7 @@ func TestFixtureMoreStates(t *testing.T) {
 // opens.
 func TestFixtureFilesAndInvite(t *testing.T) {
 	app := newMockupApp(t)
+	openSections(t, app)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	for _, one := range []struct{ dir, state, route string }{
 		{"app-files", "normal", "/app/files"},
@@ -1739,6 +1779,94 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		}
 		app.compare(t, "invite/link.json", app.h.do(get("/invite/"+link, nil)))
 	})
+	t.Run("published-empty", func(t *testing.T) {
+		// Every link revoked: the list says so (the client's scan ФД6).
+		for _, l := range app.h.users.PublishedLinks(app.sess.AccountID()) {
+			if rec := app.h.do(postForm("/app/publish?"+url.Values{"op": {"revoke"}, "id": {l.ID}}.Encode(), app.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+				t.Fatalf("revoke: %d %s", rec.Code, rec.Body)
+			}
+		}
+		app.compare(t, "app-files-published/empty.json", app.h.do(get("/app/files/published", app.sess)))
+	})
+}
+
+// openSections reads every section once, as a person who comes to the
+// files has: the counts of the sections' rail come from there (s-files-1,
+// -6; the client's scan ФА5).
+func openSections(t *testing.T, app *mockupApp) {
+	t.Helper()
+	for _, path := range []string{"/app/contacts", "/app/calendar?from=2026-08-10", "/app/tasks", "/app/notes"} {
+		openList(t, app, path)
+	}
+}
+
+// filesAt is an address of a file collection of the set, as Carrel issued
+// it: marker, then the path under the collection a segment at a time.
+func (a *mockupApp) filesAt(t *testing.T, slug, marker string, segs ...string) string {
+	t.Helper()
+	h := "/app/files/" + a.realAccount(t, slug) + "/" + url.PathEscape(a.realPath(t, slug)) + "/"
+	if marker != "" {
+		h += marker + "/"
+	}
+	for _, s := range segs {
+		h += url.PathEscape(s) + "/"
+	}
+	return h
+}
+
+// C-14.2: a folder of the files (ФБ5) and its states — one file chosen with
+// its panel (s-files-1), tiles (s-files-5), a read-only storage (s-files-15),
+// an empty folder, a storage that did not answer, three chosen with the
+// queue of an upload (s-files-2) — and the sheets over it: move (s-files-4),
+// copy (s-files-11), to another storage (s-files-12), New folder refused
+// (s-files-13), rename, delete; From Files (s-files-16) and New folder of
+// the upload picker refused (s-files-19).
+func TestFixtureFilesFolderAndSheets(t *testing.T) {
+	app := newMockupApp(t)
+	openSections(t, app)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	attachments := app.filesAt(t, "Documents", "", "carrel", "attachments")
+	op := app.filesAt(t, "Documents", "op", "carrel", "attachments")
+	three := []string{"2026-08-10-sync-board.png", "release-checklist.md", "2026-08-04-whiteboard.jpg"}
+	sheet := func(name string, form url.Values) {
+		t.Helper()
+		app.compare(t, "app-files-op/"+name+".json", app.h.do(postForm(op+"?"+form.Encode(), app.sess, url.Values{})))
+	}
+
+	app.compare(t, "app-files-folder/normal.json", app.h.do(get(attachments+"?select="+url.QueryEscape(three[0]), app.sess)))
+	app.compare(t, "app-files-folder/tiles.json", app.h.do(get(attachments+"?view=tiles&select="+url.QueryEscape(three[2]), app.sess)))
+	app.compare(t, "app-files-folder/readonly.json", app.h.do(get(app.filesAt(t, "Public", ""), app.sess)))
+	app.servers["nextcloud"].SeedFolder(davtest.FileRoot + "Files/Scans/")
+	app.compare(t, "app-files-folder/empty.json", app.h.do(get(app.filesAt(t, "Files", "", "Scans"), app.sess)))
+
+	july := app.filesAt(t, "Documents", "", "carrel", "attachments", "2026-07")
+	sheet("normal", url.Values{"op": {"move"}, "item": three, "to": {july}})
+	sheet("copy", url.Values{"op": {"copy"}, "item": three, "to": {july}})
+	sheet("elsewhere", url.Values{"op": {"move"}, "item": three, "to": {app.filesAt(t, "Files", "")}})
+	sheet("rename", url.Values{"op": {"rename"}, "item": three[:1]})
+	sheet("delete", url.Values{"op": {"delete"}, "item": three})
+	// New folder of the tree with a name taken in the chosen folder.
+	app.compare(t, "app-files-op/refused.json", app.h.do(postForm(op+"?"+url.Values{"op": {"move"}, "item": three, "mkcol": {"1"},
+		"to": {app.filesAt(t, "Documents", "", "carrel", "attachments")}}.Encode(), app.sess, url.Values{"name": {"2026-07"}})))
+
+	from := "/app/files/picker?" + url.Values{"for": {"attach"}, "k": {"tasks"}, "a": {app.realAccount(t, "dela")}, "c": {app.realPath(t, "dela")},
+		"uid": {"aa11-2d09-5f84"}, "to": {attachments}}.Encode()
+	app.compare(t, "app-files-picker/attach.json", app.h.do(get(from, app.sess)))
+	app.compare(t, "app-files-picker/refused.json", app.h.do(postForm("/app/files/picker?"+url.Values{"for": {"upload"}, "mkcol": {"1"},
+		"to": {attachments}}.Encode(), app.sess, url.Values{"name": {"2026-07"}})))
+
+	// The queue (s-files-2): a report uploaded, a name already taken.
+	rec := app.h.do(uploadForm(app.filesAt(t, "Documents", "upload", "carrel", "attachments"), app.sess, false,
+		upload{"отчёт-июль.pdf", strings.Repeat(".", 4300000)}, upload{"release-checklist.md", "# again"}))
+	if rec.Code >= 400 {
+		t.Fatalf("upload: %d %s", rec.Code, rec.Body)
+	}
+	// The stand stamps what arrives with the wall clock; the set's day stands.
+	app.servers["sftpgo · vps"].SetModified(app.realPath(t, "Documents")+"carrel/attachments/отчёт-июль.pdf", mockupNow(t))
+	app.compare(t, "app-files-folder/long.json", app.h.do(get(attachments+"?"+url.Values{"select": three}.Encode(), app.sess)))
+
+	app.servers["nextcloud"].Refuse("PROPFIND", http.StatusServiceUnavailable, "")
+	app.compare(t, "app-files-folder/source-error.json", app.h.do(get(app.filesAt(t, "Files", ""), app.sess)))
 }
 
 // C-14.2: the one page of every dead secret link (rest-1). What the link

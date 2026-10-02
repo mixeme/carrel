@@ -1,0 +1,37 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "danger": true,
+      "enabled": true,
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?etag=18ca6326aee5680067000&etag=18ca2d8254f28000c00&etag=18c89f188a41c8002ccccd&go=1&item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=delete",
+      "id": "file.delete.confirm",
+      "label": "Delete",
+      "method": "POST",
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+      "id": "file.op.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "failure": null,
+  "form": null,
+  "items": [
+    "2026-08-10-sync-board.png",
+    "release-checklist.md",
+    "2026-08-04-whiteboard.jpg"
+  ],
+  "op": "delete",
+  "subject": "from Documents / carrel / attachments",
+  "target": null,
+  "title": "Delete 3 items",
+  "warning": [
+    {
+      "text": "Carrel keeps no index of what points at a file: it may be the attachment of a note or an event, and nothing checks that before it goes. Deleting cannot be undone."
+    }
+  ]
+}

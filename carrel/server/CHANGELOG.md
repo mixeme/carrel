@@ -17,6 +17,45 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.148 — 2026-10-02
+
+Fixtures of the files section (the client's scan, ФБ5, ФВ1, ФГ8, ФА5, ФД5,
+ФД6): a folder, the operation sheet and more of the picker had none.
+
+### Added
+
+- `app-files-folder` (`FilesPage`): `normal` — one file chosen (s-files-1),
+  `long` — three chosen and the queue of an upload, one done and one name
+  taken (s-files-2), `tiles` (s-files-5), `readonly` (s-files-15), `empty`,
+  `source-error`.
+- `app-files-op` (`FileOpSheet`): `normal` — move (s-files-4), `copy`
+  (s-files-11), `elsewhere` — to another storage (s-files-12), `refused` —
+  New folder of the tree on a taken name (s-files-13), `rename`, `delete`.
+- `app-files-picker/attach` — From Files (s-files-16), `/refused` — New
+  folder of the upload picker refused (s-files-19);
+  `app-files-published/empty`.
+- New states of C-14.3: `tiles`, `copy`, `elsewhere`, `rename`, `delete`,
+  `attach`.
+
+### Changed
+
+- `.md` is `text/markdown` on every machine: Go's table lacks it, and a
+  system's table may not have it either.
+- The set's files have the sizes and times the frames draw (412 KB under the
+  thumbnail's ceiling, 2.8 MB over it); the files fixtures are taken after
+  every section was read, so the sections' rail has its counts; a link's
+  «Last opened» is the time of its last open (08:41), not a stamp of the
+  run.
+
+### For consumers
+
+`FIXTURE_SCREEN` of `check.py` checks the folder against the `data-screen`
+of s-files-1, which has no `{path…}` (Typecase task 121). The queue of an
+upload is `FilesPage.queue` in `app-files-folder/long`: the fragment of
+`…/upload/…` is the same `TransferQueue`. Fixtures regenerated:
+`app-files/normal`, `app-files-published/normal`,
+`app-settings-attachments/normal`.
+
 ## v0.2.147 — 2026-10-02
 
 Files without scripts (U-8; the client's scan of the files section, ФГ3,
