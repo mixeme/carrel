@@ -91,13 +91,15 @@ func runImportExport(t *testing.T, endpoint, user, pass string) {
 		if page.Step != view.ImportStepPreview || len(page.Notices) > 0 {
 			t.Fatalf("preview: step %q, notices %+v", page.Step, page.Notices)
 		}
-		if row := liveRow(t, page.Preview, "Carrel S-19", "Standup imported"); !strings.Contains(string(row[2]), "Taken here") {
+		if row := livePreviewRow(t, page.Preview, "Standup imported"); row[3] != "New UID will be assigned" {
 			t.Errorf("the taken series in the preview = %q", row)
 		}
-		if row := liveRow(t, page.Preview, "Carrel S-19", "Ковка"); string(row[2]) != "New" {
+		if row := livePreviewRow(t, page.Preview, "Ковка"); row[3] != "Ready" {
 			t.Errorf("the new event in the preview = %q", row)
 		}
-		liveRow(t, page.Preview, "Skipped", "VTODO")
+		if row := livePreviewRow(t, page.Preview, "VTODO"); !strings.HasPrefix(string(row[3]), "Skipped:") {
+			t.Errorf("the task in the preview = %q", row)
+		}
 
 		page = liveDecode[view.ImportPage](t, "calendar run", app.post(liveAction(t, page.Actions, "import.run"), url.Values{}))
 		if r := page.Report; r == nil || r.Created != 2 || r.Renamed != 1 || r.Skipped != 1 {
@@ -208,17 +210,30 @@ func TestBaikalSFTPGoNotesFromFolder(t *testing.T) {
 		t.Fatalf("no folder offered: %+v", page.Source)
 	}
 	source := ""
-	for _, o := range page.Source.Folder.Options {
+	for _, o := range page.Source.Folder.Nodes {
 		u, err := url.Parse(o.ID)
 		if err == nil && strings.HasSuffix(strings.TrimSuffix(u.Query().Get("path"), "/"), strings.TrimSuffix(folder, "/")) {
 			source = o.ID
 		}
 	}
 	if source == "" {
-		t.Fatalf("the folder %s is not among %+v", folder, page.Source.Folder.Options)
+		t.Fatalf("the folder %s is not among %+v", folder, page.Source.Folder.Nodes)
 	}
-	page = liveDecode[view.ImportPage](t, "folder", app.post(source, url.Values{}))
-	if page.Step != view.ImportStepPreview || len(page.Preview) == 0 || page.Preview[0].Count != 2 {
+	// Chosen in the tree, taken by «Preview folder» (s-io-4).
+	page = liveDecode[view.ImportPage](t, "folder chosen", app.get(source))
+	if page.Source.Preview == nil || !page.Source.Preview.Enabled {
+		t.Fatalf("Preview folder after the choice: %+v", page.Source.Preview)
+	}
+	page = liveDecode[view.ImportPage](t, "folder", app.post(page.Source.Preview.Href, url.Values{}))
+	ready := 0
+	if len(page.Preview) == 1 {
+		for _, row := range page.Preview[0].Rows {
+			if strings.HasPrefix(string(row[len(row)-1]), "Ready") {
+				ready++
+			}
+		}
+	}
+	if page.Step != view.ImportStepPreview || ready != 2 {
 		t.Fatalf("preview: step %q, tables %+v, notices %+v", page.Step, page.Preview, page.Notices)
 	}
 	page = liveDecode[view.ImportPage](t, "notes run", app.post(liveAction(t, page.Actions, "import.run"), url.Values{}))
@@ -261,6 +276,23 @@ func liveRow(t *testing.T, tables []view.ImportTable, rubric, what string) []vie
 		}
 	}
 	t.Fatalf("no row %q under %q in %+v", what, rubric, tables)
+	return nil
+}
+
+// livePreviewRow is the row of the preview's one table (s-io-5…8) with what
+// in a cell.
+func livePreviewRow(t *testing.T, tables []view.ImportTable, what string) []view.Text {
+	t.Helper()
+	for _, tb := range tables {
+		for _, row := range tb.Rows {
+			for _, cell := range row {
+				if strings.Contains(string(cell), what) {
+					return row
+				}
+			}
+		}
+	}
+	t.Fatalf("no row %q in %+v", what, tables)
 	return nil
 }
 

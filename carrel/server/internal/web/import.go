@@ -192,39 +192,96 @@ func (s *Server) importTargets(c *collectionCtx, dest *collectionCtx) view.Targe
 
 // noteFolders is the second source of notes (S-19): a folder on a WebDAV
 // server of this person, read through the guard like every outbound request.
-// A folder is chosen in the tree — each option a GET that comes back with it
-// chosen — and «Preview folder» under it takes the chosen one (s-io-4). No
-// file collection, no second source.
-func (s *Server) noteFolders(c *collectionCtx, st importState) (*view.TargetPicker, *view.Action) {
-	picker := view.TargetPicker{}
+// The folder is chosen in a tree (s-io-4) — the storages, and the folders of
+// the one opened, level by level, down to the folder chosen: each node a GET
+// that comes back with it chosen —, and «Preview folder» under it takes the
+// chosen one. No file collection, no second source.
+func (s *Server) noteFolders(c *collectionCtx, st importState) (*view.FileTree, *view.Action) {
+	tree := &view.FileTree{}
 	to, into := targetOf(st.dest)
 	blob := s.catalogOf(c.sess)
 	preview := &view.Action{ID: "import.folder", Label: "Preview folder", Method: "POST", Primary: true,
 		Reason: "Choose a folder in the tree first."}
+	link := func(acc, colPath string, segs []string, op string) string {
+		q := importQuery(op, to, into)
+		q.Set("folder", acc)
+		q.Set("path", colPath)
+		if len(segs) > 0 {
+			q.Set("in", strings.Join(segs, "/"))
+		}
+		return s.postQuery(c.listPath()+"/import", q)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), s.cfg.ProgressSourceTimeout)
+	defer cancel()
 	for _, conn := range blob.Connections {
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Gone || !col.Has(view.KindFile) {
 				continue
 			}
-			q := importQuery("", to, into)
-			q.Set("folder", conn.ID)
-			q.Set("path", col.Path)
-			opt := view.TargetOption{
-				ID:    s.postQuery(c.listPath()+"/import", q),
-				Label: text(collectionLabel(col)), Stamp: origin{conn: conn, col: col}.stamp(),
-			}
+			node := view.FileTreeNode{ID: link(conn.ID, col.Path, nil, ""), Label: collectionLabel(col), Stamp: origin{conn: conn, col: col}.stamp()}
 			if conn.ID == st.folderAcc && col.Path == st.folderPath {
-				picker.Chosen = opt.ID
-				q.Set("op", "folder")
-				preview.Href, preview.Enabled, preview.Reason = s.postQuery(c.listPath()+"/import", q), true, ""
+				if prov, err := s.filesOf(conn); err == nil {
+					node.Expanded = true
+					node.Children = s.folderLevel(ctx, prov, col.Path, nil, st.folderIn, func(segs []string) string { return link(conn.ID, col.Path, segs, "") })
+				}
+				tree.Chosen = link(conn.ID, col.Path, st.folderIn, "")
+				preview.Href, preview.Enabled, preview.Reason = link(conn.ID, col.Path, st.folderIn, "folder"), true, ""
 			}
-			picker.Options = append(picker.Options, opt)
+			tree.Nodes = append(tree.Nodes, node)
 		}
 	}
-	if len(picker.Options) == 0 {
+	if len(tree.Nodes) == 0 {
 		return nil, nil
 	}
-	return &picker, preview
+	return tree, preview
+}
+
+// folderLevel is the folders of base at at, the one on the way to chosen
+// opened with its own: one PROPFIND a level, as the tree of Move.
+func (s *Server) folderLevel(ctx context.Context, prov *file.Provider, base string, at, chosen []string, link func([]string) string) []view.FileTreeNode {
+	entries, err := prov.List(ctx, folderUnder(base, at))
+	if err != nil {
+		return nil
+	}
+	var dirs []string
+	for _, e := range entries {
+		if e.Dir {
+			dirs = append(dirs, e.Name)
+		}
+	}
+	slices.SortFunc(dirs, func(a, b string) int { return strings.Compare(strings.ToLower(a), strings.ToLower(b)) })
+	if len(dirs) > s.cfg.FilesMaxEntries {
+		dirs = dirs[:s.cfg.FilesMaxEntries]
+	}
+	var out []view.FileTreeNode
+	for _, name := range dirs {
+		segs := append(slices.Clone(at), name)
+		node := view.FileTreeNode{ID: link(segs), Label: name}
+		if len(chosen) > len(at) && chosen[len(at)] == name {
+			node.Expanded, node.Children = true, s.folderLevel(ctx, prov, base, segs, chosen, link)
+		}
+		out = append(out, node)
+	}
+	return out
+}
+
+// folderUnder is the folder segs below the collection's base.
+func folderUnder(base string, segs []string) string {
+	if len(segs) == 0 {
+		return base
+	}
+	return strings.TrimSuffix(base, "/") + "/" + strings.Join(segs, "/") + "/"
+}
+
+// folderChoice reads the folder chosen in the tree of notes from a query:
+// the storage, its path, and ?in= — the folder below its root, segments
+// that stay inside it. One that would leave it chooses nothing.
+func folderChoice(q url.Values) (acc, colPath string, in []string) {
+	in, ok := relSegs(q.Get("in"))
+	if !ok {
+		return "", "", nil
+	}
+	return q.Get("folder"), q.Get("path"), in
 }
 
 // importState is what one request of the wizard shows.
@@ -235,9 +292,11 @@ type importState struct {
 	taken   map[string]bool // the identities the destination holds, for the counts
 	report  *view.ImportReport
 	notices []view.Notice
-	// folderAcc and folderPath are the folder chosen in the tree of notes
-	// (s-io-4), before «Preview folder» takes it.
+	// folderAcc, folderPath and folderIn are the folder chosen in the tree
+	// of notes (s-io-4) — the storage and the folder below its root —,
+	// before «Preview folder» takes it.
 	folderAcc, folderPath string
+	folderIn              []string
 }
 
 // importSteps are the words of the wizard's steps line (s-io-3…9), in the
@@ -468,7 +527,8 @@ func (s *Server) getKindImport(w http.ResponseWriter, r *http.Request, kind stri
 		return
 	}
 	q := r.URL.Query()
-	st := importState{dest: s.importTarget(c, q.Get("to"), q.Get("into")), folderAcc: q.Get("folder"), folderPath: q.Get("path")}
+	st := importState{dest: s.importTarget(c, q.Get("to"), q.Get("into"))}
+	st.folderAcc, st.folderPath, st.folderIn = folderChoice(q)
 	if d, has := loadImportDraft(c); has {
 		st.draft = d
 		if q.Get("to") == "" {
@@ -502,7 +562,8 @@ func (s *Server) postKindImport(w http.ResponseWriter, r *http.Request, kind str
 	case "run":
 		s.runImport(w, r, c, dest)
 	case "folder":
-		s.takeFolder(w, r, c, dest, q.Get("folder"), q.Get("path"))
+		acc, colPath, in := folderChoice(q)
+		s.takeFolder(w, r, c, dest, acc, colPath, in)
 	default:
 		s.takeFile(w, r, c, dest)
 	}
@@ -731,9 +792,10 @@ func titleOf(k view.Kind, obj *model.Object) string {
 }
 
 // takeFolder reads a folder of Markdown files as notes: the second source
-// notes have (S-19). The files are read through the guard, and the folder is
+// notes have (S-19) — a storage's root, or the folder in below it chosen in
+// the tree (s-io-4). The files are read through the guard, and the folder is
 // read one level deep — a notebook is a folder, not a tree.
-func (s *Server) takeFolder(w http.ResponseWriter, r *http.Request, c *collectionCtx, dest *collectionCtx, account, folder string) {
+func (s *Server) takeFolder(w http.ResponseWriter, r *http.Request, c *collectionCtx, dest *collectionCtx, account, folder string, in []string) {
 	fail := func(n view.Notice) {
 		s.writePage(w, r, http.StatusOK, s.importPage(c, importState{dest: dest, notices: []view.Notice{n}}))
 	}
@@ -751,17 +813,18 @@ func (s *Server) takeFolder(w http.ResponseWriter, r *http.Request, c *collectio
 	prov, err := s.filesOf(conn)
 	var entries []file.Entry
 	if err == nil {
-		entries, err = prov.List(r.Context(), col.Path)
+		entries, err = prov.List(r.Context(), folderUnder(col.Path, in))
 	}
 	if err != nil {
 		fail(view.Notice{
 			Role: view.NoticeAlert, Title: text(collectionLabel(col) + " is unavailable"),
 			Body:    text("The folder could not be read, so nothing was taken from it."),
-			Details: &view.Diagnostic{Summary: text("PROPFIND " + col.Path), Lines: []view.Text{text(connLabel(conn)), text(err.Error())}},
+			Details: &view.Diagnostic{Summary: text("PROPFIND " + folderUnder(col.Path, in)), Lines: []view.Text{text(connLabel(conn)), text(err.Error())}},
 		})
 		return
 	}
-	d := &importDraft{Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, Source: collectionLabel(col)}
+	// «Documents › notes» (s-io-4): the storage, and the way to the folder.
+	d := &importDraft{Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, Source: strings.Join(append([]string{collectionLabel(col)}, in...), " › ")}
 	left := s.cfg.ImportMaxBytes
 	markdown := 0
 	for _, e := range entries {

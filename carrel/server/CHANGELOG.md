@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.132 — 2026-10-02
+
+The folder of notes is chosen in a tree, down into the folders of a
+storage (s-io-4).
+
+### Changed
+
+- **`ImportSource.folder` is a `FileTree`** (was a `TargetPicker`): the
+  storages, and the folders of the one opened, level by level down to the
+  folder chosen; each node is a GET that comes back with it chosen
+  (`chosen`), the folder below the root in `?in=`. «Preview folder» takes
+  the folder chosen — its own `.md` files, not its subfolders' —, and the
+  head of the preview says the way, «Docs › notes». A path in `in` that
+  would leave the storage chooses nothing.
+
+### For consumers
+
+Draw the folder of notes as a tree, as the trees of Move and of the quick
+upload. No fixture shows it.
+
+The live suite of import reads the preview as one table (it still read the
+two tables of `v0.2.129`) and chooses the folder in the tree.
+
 ## v0.2.131 — 2026-10-02
 
 Notes come from a zip of Markdown files too (s-io-8).

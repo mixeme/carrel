@@ -1730,7 +1730,7 @@ type ImportPage struct {
 type ImportSource struct {
     Kinds      []Text
     Hint       Runs          // строка под полем файла: что берётся, расширение другого рода моноширинно — «… take ‹.ics› here instead» (s-io-3)
-    Folder     *TargetPicker // у заметок — папки WebDAV (s-io-4): вариант — GET, приходит с выбранной (Chosen)
+    Folder     *FileTree     // у заметок — дерево папок WebDAV (s-io-4): хранилища и папки открытого вглубь до выбранной, «Documents › notes»; узел — GET, приходит с ним выбранным (Chosen)
     Preview    *Action       // «Preview folder» под деревом (s-io-4): POST выбранной; выключена с причиной, пока папка не выбрана; nil — папок нет
     FolderHint Runs          // строка под деревом: «Every ‹.md› directly in that folder …» (s-io-4)
     Note       Runs          // сообщение шага: на первом — «Nothing is written until the preview has been read …» (s-io-3), у заметок — front matter и ‹X-›свойства (s-io-4); на предпросмотре — что импорт делает с записями рода (s-io-5…8)

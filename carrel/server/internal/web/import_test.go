@@ -336,12 +336,12 @@ func TestImportNotesFromAFolder(t *testing.T) {
 	addFileCollection(t, f, davtest.FileRoot+"docs/", "Docs")
 
 	page := decode[view.ImportPage](t, f.h.do(get(f.path("notes")+"/import", f.sess)))
-	if page.Source.Folder == nil || len(page.Source.Folder.Options) != 1 {
+	if page.Source.Folder == nil || len(page.Source.Folder.Nodes) != 1 {
 		t.Fatalf("no folder to take notes from: %+v", page.Source)
 	}
 	// The folder is chosen in the tree, and «Preview folder» takes it
 	// (s-io-4).
-	page = decode[view.ImportPage](t, f.h.do(get(page.Source.Folder.Options[0].ID, f.sess)))
+	page = decode[view.ImportPage](t, f.h.do(get(page.Source.Folder.Nodes[0].ID, f.sess)))
 	page = decode[view.ImportPage](t, f.h.do(postForm(page.Source.Preview.Href, f.sess, url.Values{})))
 	if page.Step != view.ImportStepPreview {
 		t.Fatalf("step = %q notices = %+v", page.Step, page.Notices)

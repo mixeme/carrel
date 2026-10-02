@@ -278,9 +278,10 @@ type ImportSource struct {
 	// Hint — строка под полем файла: что берётся, расширение другого рода
 	// моноширинно (s-io-3, s-io-4)
 	Hint Runs `json:"hint"`
-	// Folder — второй источник заметок, папки WebDAV (s-io-4): вариант —
-	// GET, выбирает папку (Chosen); берёт её Preview
-	Folder *TargetPicker `json:"folder"`
+	// Folder — второй источник заметок, дерево папок WebDAV (s-io-4):
+	// хранилища и папки открытого вглубь до выбранной, узел — GET, приходит
+	// с ним выбранным (Chosen); берёт её Preview
+	Folder *FileTree `json:"folder"`
 	// Preview — «Preview folder» под деревом (s-io-4): выключена с причиной,
 	// пока папка не выбрана; nil — папок нет
 	Preview *Action `json:"preview"`

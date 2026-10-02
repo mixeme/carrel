@@ -119,15 +119,15 @@ func TestImportNotesFolderByFrames(t *testing.T) {
 	if got := saidRuns(page.Source.Note); !msgDrawn(frameMsgs(t, "s-io-4"), got) {
 		t.Errorf("note = %q, the frame %q", got, frameMsgs(t, "s-io-4"))
 	}
-	if page.Source.Folder == nil || len(page.Source.Folder.Options) != 1 || page.Source.Folder.Chosen != "" {
+	if page.Source.Folder == nil || len(page.Source.Folder.Nodes) != 1 || page.Source.Folder.Chosen != "" {
 		t.Fatalf("folder = %+v", page.Source.Folder)
 	}
 	preview := page.Source.Preview
 	if preview == nil || preview.Label != "Preview folder" || preview.Enabled || preview.Reason == "" {
 		t.Fatalf("Preview folder before a folder is chosen: %+v", preview)
 	}
-	page = decode[view.ImportPage](t, f.h.do(get(page.Source.Folder.Options[0].ID, f.sess)))
-	if page.Step != view.ImportStepSource || page.Source.Folder.Chosen != page.Source.Folder.Options[0].ID {
+	page = decode[view.ImportPage](t, f.h.do(get(page.Source.Folder.Nodes[0].ID, f.sess)))
+	if page.Step != view.ImportStepSource || page.Source.Folder.Chosen != page.Source.Folder.Nodes[0].ID {
 		t.Fatalf("choosing a folder: step %q, chosen %q", page.Step, page.Source.Folder.Chosen)
 	}
 	preview = page.Source.Preview
@@ -158,7 +158,7 @@ func TestImportFolderWithoutMarkdownSaysSo(t *testing.T) {
 	f := connectFixture(t, srv, notebook, nil)
 	addFileCollection(t, f, davtest.FileRoot+"docs/", "Docs")
 	page := decode[view.ImportPage](t, f.h.do(get(f.path("notes")+"/import", f.sess)))
-	page = decode[view.ImportPage](t, f.h.do(get(page.Source.Folder.Options[0].ID, f.sess)))
+	page = decode[view.ImportPage](t, f.h.do(get(page.Source.Folder.Nodes[0].ID, f.sess)))
 	page = decode[view.ImportPage](t, f.h.do(postForm(page.Source.Preview.Href, f.sess, url.Values{})))
 	got := saidRuns(page.Source.Note)
 	if !strings.HasPrefix(got, "Markdown is stored as it was written") || !strings.HasSuffix(got, "The folder holds no Markdown file.") {
