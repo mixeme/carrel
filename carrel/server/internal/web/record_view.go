@@ -559,7 +559,7 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	if cal.HasRecurrence(obj) {
 		page.Recurrence = s.recurrenceBlock(obj, tf)
 	}
-	page.Attendees = eventPeople(obj)
+	page.Attendees = eventPeople(obj, s.knownPeople(c.sess))
 	page.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Source.Path, page.Source.Compared = text(obj.Path), s.eventCompared(c, uid, obj)
 	page.Related = s.relatedRows(c, obj)

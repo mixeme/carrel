@@ -23,17 +23,23 @@
   ],
   "attendees": [
     {
+      "colour": "",
       "email": "a.kovaleva@example.org",
+      "href": "",
       "name": "Анна Ковалёва",
       "status": "accepted"
     },
     {
+      "colour": "",
       "email": "a.belov@example.org",
+      "href": "",
       "name": "Артём Белов",
       "status": "tentative"
     },
     {
-      "email": "v.goncharov@example.org",
+      "colour": "",
+      "email": "v@example.org",
+      "href": "",
       "name": "Виктор Гончаров",
       "status": "no reply"
     }

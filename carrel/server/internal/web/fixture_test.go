@@ -1136,6 +1136,9 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	// The notes were read too: the panel's Related names its note (s-agenda-1).
 	openList(t, app, "/app/notes")
+	// The address books were read too: an attendee found in one is known
+	// (s-agenda-1, -2: the mark of the book and a link; task 77).
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	here := app.listPath(t, "calendar", "lichnyj") + "?from=2026-08-10"
 	// «Синк-ап по релизу» open in the panel, as the frame draws it.
@@ -1148,6 +1151,9 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 func TestFixtureCombinedCalendar(t *testing.T) {
 	app := newMockupApp(t)
 	openList(t, app, "/app/notes") // the panel's Related names its note
+	// The address books were read too: an attendee found in one is known
+	// (s-agenda-1, -2: the mark of the book and a link; task 77).
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	page := combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	// «Синк-ап по релизу» open in the panel (s-agenda-1, В1).
@@ -1161,6 +1167,9 @@ func TestFixtureEventCard(t *testing.T) {
 	linkMockupEvent(t, app)
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	openList(t, app, "/app/notes") // Related names its note (s-agenda-2, Г8)
+	// The address books were read too: an attendee found in one is known
+	// (s-agenda-1, -2: the mark of the book and a link; task 77).
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"?from=2026-08-10", app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3"
@@ -1276,6 +1285,9 @@ func TestFixtureEventEdit(t *testing.T) {
 	app := newMockupApp(t)
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"?from=2026-08-10", app.sess))
+	// The address books were read too: an attendee found in one is known
+	// (s-agenda-1, -2: the mark of the book and a link; task 77).
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3/edit"
 	app.compare(t, "app-event-edit/normal.json", app.h.do(get(rec, app.sess)))

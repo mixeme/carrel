@@ -2130,7 +2130,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 				// The line stands under Delete, once.
 				page.DeleteNote = seriesNote
 			}
-			page.Attendees = eventPeople(st.obj)
+			page.Attendees = eventPeople(st.obj, s.knownPeople(c.sess))
 			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
 			// «Kept as the server sent them» (s-agenda-3): what Carrel does
 			// not know, as it came.

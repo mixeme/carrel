@@ -201,8 +201,10 @@ sinkap = [
     u'ORGANIZER;CN=Михаил Енученко:mailto:mix@example.org',
     u'ATTENDEE;CN=Анна Ковалёва;PARTSTAT=ACCEPTED:mailto:a.kovaleva@example.org',
     u'ATTENDEE;CN=Артём Белов;PARTSTAT=TENTATIVE:mailto:a.belov@example.org',
+    # Адрес не из книг — незнакомый участник (задача 77: участник — адрес,
+    # книги только подсказывают; s-agenda-1, -2 рисуют его адресом).
     u'ATTENDEE;CN=Виктор Гончаров;PARTSTAT=NEEDS-ACTION:'
-    u'mailto:v.goncharov@example.org',
+    u'mailto:v@example.org',
     u'ATTACH;FMTTYPE=text/markdown;ENCODING=BASE64;VALUE=BINARY;'
     u'FILENAME=release-checklist.md:' + base64.b64encode(checklist()).decode('ascii'),
     u'RELATED-TO;RELTYPE=SIBLING:5c81-77aa-0d64',

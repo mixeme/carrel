@@ -1378,7 +1378,17 @@ type RecurrenceBlock struct {
 }
 
 type ReminderRow struct { Label Text; Fields []Field; Remove Action }
-type AttendeeRow struct { Name Text; Email Text; Status Text } // Status — как пишет кадр, строчными: «organiser», «accepted», «tentative», «declined», «no reply» (s-agenda-1, -2)
+// Участник — адрес (ATTENDEE, ORGANIZER), книги только говорят, кто это
+// (решения владельца 01–02.10.2026, задача 77). Карточка и панель рисуют
+// участников колонками (s-agenda-1, -2): знакомый — метка его книги и ссылка
+// на карточку, незнакомый — адрес моноширинно; счёт в рубрике — по строкам.
+type AttendeeRow struct {
+    Name   Text   // CN, без него — имя карточки, иначе адрес
+    Email  Text
+    Status Text   // как пишет кадр, строчными: «organiser», «accepted», «tentative», «declined», «no reply» (s-agenda-1, -2)
+    Href   string // карточка с этим адресом в отмеченных книгах, чьи списки сеанс читал (сервер не спрашивается — как Related); пусто — незнакомый
+    Colour Colour // метка книги этой карточки; пусто у незнакомого
+}
 type AttachRow struct {
     Href    string
     Name    Text

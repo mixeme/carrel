@@ -42,8 +42,8 @@ ATTENDEE;CN=Анна Ковалёва;PARTSTAT=ACCEPTED:mailto:a.kovaleva@e
  xample.org
 ATTENDEE;CN=Артём Белов;PARTSTAT=TENTATIVE:mailto:a.belov@example
  .org
-ATTENDEE;CN=Виктор Гончаров;PARTSTAT=NEEDS-ACTION:mailto:v.go
- ncharov@example.org
+ATTENDEE;CN=Виктор Гончаров;PARTSTAT=NEEDS-ACTION:mailto:v@ex
+ ample.org
 ATTACH;FMTTYPE=text/markdown;ENCODING=BASE64;VALUE=BINARY;FILENAME=release-
  checklist.md:IyBSZWxlYXNlIGNoZWNrbGlzdAoKLSBbIF0gU3RlcCAwMTogY2hlY2sgdGhl
  IGJ1aWxkLCBzaWduIG9mZiwgbm90ZSB0aGUgcmVzdWx0LgotIFsgXSBTdGVwIDAyOiBjaGVja

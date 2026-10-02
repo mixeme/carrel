@@ -1520,7 +1520,7 @@ func agendaBadges(o *model.Object, it listed) []view.Badge {
 		out = append(out, view.Badge{Label: "cancelled", Role: view.BadgeAlert})
 	}
 	out = append(out, linkedBadge(it)...)
-	if n := len(eventPeople(o)); n > 0 {
+	if n := len(eventPeople(o, nil)); n > 0 {
 		out = append(out, view.Badge{Label: text(plural(n, "attendee")), Role: view.BadgeNeutral})
 	}
 	if cal.HasRecurrence(o) {
@@ -1550,27 +1550,68 @@ func repeatsWord(raw string) string {
 // (s-agenda-1, s-agenda-2): the organiser first, as one of them («4
 // attendees» of three ATTENDEE and the ORGANIZER), then the attendees. An
 // organiser who is an attendee too is listed once, as the organiser.
-func eventPeople(o *model.Object) []view.AttendeeRow {
+func eventPeople(o *model.Object, known map[string]knownPerson) []view.AttendeeRow {
 	var out []view.AttendeeRow
+	row := func(name, email, status string) view.AttendeeRow {
+		p, ok := known[dupes.NormEmail(email)]
+		if name == "" {
+			name = p.name
+		}
+		if name == "" {
+			name = email
+		}
+		r := view.AttendeeRow{Name: text(name), Email: text(email), Status: text(status)}
+		if ok {
+			r.Href, r.Colour = p.href, p.colour
+		}
+		return r
+	}
 	organiser := ""
 	for _, v := range o.Props()["ORGANIZER"] {
 		organiser = cal.CalAddress(v.Text)
-		who := v.Params["CN"]
-		if who == "" {
-			who = organiser
-		}
-		out = append(out, view.AttendeeRow{Name: text(who), Email: text(organiser), Status: "organiser"})
+		out = append(out, row(v.Params["CN"], organiser, "organiser"))
 		break
 	}
 	for _, a := range cal.Attendees(o) {
 		if organiser != "" && strings.EqualFold(a.Email, organiser) {
 			continue
 		}
-		name := a.Name
-		if name == "" {
-			name = a.Email
+		out = append(out, row(a.Name, a.Email, partstatLabel(a.Status)))
+	}
+	return out
+}
+
+// knownPerson is a card an address of an event is found in: who, where it
+// is read, and the colour of its book.
+type knownPerson struct {
+	name, href string
+	colour     view.Colour
+}
+
+// knownPeople are the people of the ticked address books whose lists the
+// session has read, by their addresses (task 77: an attendee is an address,
+// the books say who it is — s-agenda-1, -2). No server is asked: as Related,
+// what is not loaded is not known. An address on two cards is the first
+// book's, in the catalog's order.
+func (s *Server) knownPeople(sess *session.Session) map[string]knownPerson {
+	blob := s.catalogOf(sess)
+	out := map[string]knownPerson{}
+	for _, col := range blob.Collections {
+		conn, ok := blob.Connection(col.AccountID)
+		if !ok || col.Gone || !col.Has(view.KindContact) || !isTicked(blob, view.KindContact, col.AccountID, col.Path) {
+			continue
 		}
-		out = append(out, view.AttendeeRow{Name: text(name), Email: text(a.Email), Status: text(partstatLabel(a.Status))})
+		from := origin{conn: conn, col: col}
+		for _, e := range indexedIn(sess, col) {
+			if e.Kind != view.KindContact || e.UID == "" {
+				continue
+			}
+			for _, mail := range e.Keys.Emails {
+				if _, seen := out[mail]; !seen {
+					out[mail] = knownPerson{name: e.Title, href: s.route(from.recordPath(segmentOf(view.KindContact), e.UID)), colour: catalogColour(col)}
+				}
+			}
+		}
 	}
 	return out
 }

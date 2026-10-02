@@ -159,10 +159,18 @@ type ReminderRow struct {
 	Fields []Field `json:"fields"`
 	Remove Action  `json:"remove"`
 }
+
+// AttendeeRow — участник: адрес (ATTENDEE, ORGANIZER) с именем и статусом;
+// книги только говорят, кто это (задача 77, s-agenda-1, -2).
 type AttendeeRow struct {
 	Name   Text `json:"name"`
 	Email  Text `json:"email"`
 	Status Text `json:"status"`
+	// Href — карточка человека, найденная по адресу в отмеченных книгах,
+	// чьи списки сеанс читал; пусто — незнакомый: экран рисует адрес
+	Href string `json:"href"`
+	// Colour — метка книги этой карточки; пусто у незнакомого
+	Colour Colour `json:"colour"`
 }
 type AttachRow struct {
 	Href    string      `json:"href"`

@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.138 — 2026-10-02
+
+The attendees of an event's card and panel as the frames of task 77 draw
+them (s-agenda-1, -2; the owner's decisions of 01–02.10.2026): an attendee
+is an address, and the address books say who it is.
+
+### Added
+
+- **`AttendeeRow.href`, `.colour`**: a person found by the address in a
+  ticked address book is a link to their card and the mark of their book;
+  an unknown one has neither, and the screen draws the address. The books
+  are the ticked ones whose lists the session has read — no server is asked,
+  as for the records of Related. An address on two cards is the first
+  book's, in the catalog's order. A name without CN is the card's.
+
+### Changed
+
+- The set of the frames: Виктор Гончаров is invited at `v@example.org`, an
+  address in no book (`make-fixtures.py`, `lichnyj.ics`), as s-agenda-1 and
+  -2 draw the unknown attendee.
+
+### For consumers
+
+Draw a known attendee by `colour` and `href`, an unknown one by `email`.
+Fixtures regenerated: `app-event/normal`, `app-event-edit/normal`, `/loss`,
+`app-agenda/normal`, `app-agenda-all/normal` (the address books are read
+before them).
+
 ## v0.2.137 — 2026-10-02
 
 The form of a new event as s-agenda-15 draws it (Typecase task 77): the

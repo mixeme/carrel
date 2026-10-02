@@ -539,22 +539,30 @@
     ],
     "attendees": [
       {
+        "colour": "",
         "email": "mix@example.org",
+        "href": "",
         "name": "Михаил Енученко",
         "status": "organiser"
       },
       {
+        "colour": "#4a6b52",
         "email": "a.kovaleva@example.org",
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
         "name": "Анна Ковалёва",
         "status": "accepted"
       },
       {
+        "colour": "#4a6b52",
         "email": "a.belov@example.org",
+        "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
         "name": "Артём Белов",
         "status": "tentative"
       },
       {
-        "email": "v.goncharov@example.org",
+        "colour": "",
+        "email": "v@example.org",
+        "href": "",
         "name": "Виктор Гончаров",
         "status": "no reply"
       }
@@ -744,7 +752,7 @@
     ],
     "nav": [
       {
-        "count": null,
+        "count": 6,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
