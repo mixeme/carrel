@@ -110,6 +110,9 @@ func ticks(c control) string {
 	if c.flag("Glyph") { // only the drawn box inside another button
 		return ""
 	}
+	if c.flag("Sign") { // a task's tick in a text: a sign, not pressed (Typecase's task 99)
+		return ""
+	}
 	form, name := c.send()
 	switch {
 	case form != "":
@@ -233,6 +236,16 @@ var contract = map[string]rule{
 	// task's tick in it is judged as a Tick.
 	"ColumnRow": needs("Href"),
 	"About":     needs("Href"),
+	// A note's row (s-notes-1) and a neighbour of the rail's tree (s-notes-2):
+	// links to the note, as the other rows of a list.
+	"ExcerptRow": needs("Href"),
+	"TreeRow":    needs("Href"),
+	// A record a document's column points at (Related, the same note in
+	// other notebooks) and an attachment there: a link where the model gives
+	// an address — a record not loaded, a file that has none, are words —, as
+	// with a Span.
+	"DocRef":    func(control) string { return "" },
+	"DocAttach": func(control) string { return "" },
 	// A category (Typecase's task 63): with Href it goes to the list filtered
 	// by it, without it is words — whether it goes is the model's (C-6.2
 	// Tag.Href), as with a Span; in a row that is a link itself the library
@@ -282,7 +295,11 @@ var contract = map[string]rule{
 		return strings.Join(msg, "; ")
 	},
 	// The forms: what sends. Their parts are judged in the form's context.
-	"Form":     func(control) string { return "" }, // a Form without Action is a group of fields: its fields say so
+	"Form": func(control) string { return "" }, // a Form without Action is a group of fields: its fields say so
+	// A document is a form in its edit (Typecase's task 98): with Action it
+	// sends its fields, which the edit bar's Save names by its ID; read,
+	// it has none and sends nothing.
+	"Doc":      func(control) string { return "" },
 	"PostForm": needs("Action"),
 	"Menu":     func(control) string { return "" }, // a menu without Action is a list: its items say so
 	"Search":   needs("Action"),
@@ -325,7 +342,7 @@ func picksFile(c control) bool {
 // opensForm says whether the widget is a form that sends, for its parts.
 func opensForm(c control) bool {
 	switch c.v.Type().Name() {
-	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm":
+	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc":
 		return c.str("Action") != ""
 	}
 	return false
@@ -389,7 +406,7 @@ func Meaning(v any, forms ...string) []string {
 			out = append(out, fmt.Sprintf("%s: %s carries meaning the guard's contract does not know", c.path, name))
 		}
 		switch name {
-		case "Form", "PostForm":
+		case "Form", "PostForm", "Doc":
 			if id := c.str("ID"); id != "" && (name == "PostForm" || c.str("Action") != "") {
 				ids = append(ids, id)
 			}

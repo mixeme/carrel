@@ -174,7 +174,7 @@ func TestMeaningRules(t *testing.T) {
 		"a link without Href":        {login(named, submit, w.Link{Text: "Forgotten your password?"}), []string{"Links[0](Link): no Href"}},
 		"a field without Name":       {login(w.Input{}, submit), []string{"(Input): a field without Name"}},
 		"a cross without Href":       {w.Close{Label: "Close"}, []string{"Close: no Href"}},
-		"a control the guard lacks":  {w.List{Rows: []w.ListRow{w.ExcerptRow{}}}, []string{"(ExcerptRow): ExcerptRow carries meaning the guard's contract does not know"}},
+		"a control the guard lacks":  {w.List{Rows: []w.ListRow{w.BriefRow{}}}, []string{"(BriefRow): BriefRow carries meaning the guard's contract does not know"}},
 		"rows that lead":             {w.List{Rows: []w.ListRow{w.FaceRow{Href: "/c"}, w.FindRow{Href: "/e"}, w.LinkedRow{Href: "/t"}, w.TimeRow{Href: "/v"}}}, nil},
 		"rows that lead nowhere":     {w.List{Rows: []w.ListRow{w.FaceRow{}, w.FindRow{}, w.LinkedRow{}, w.TimeRow{}}}, []string{"(FaceRow): no Href", "(FindRow): no Href", "(LinkedRow): no Href", "(TimeRow): no Href"}},
 		// A task's row (Typecase's task 95): its title leads to the record,
@@ -229,6 +229,29 @@ func TestMeaningRules(t *testing.T) {
 		}}, nil},
 		"a file of a form nobody has": {w.Line{Items: []w.LinePart{w.Button{Label: "Replace", File: &w.FileField{Form: "photo", Name: "photo"}}}},
 			[]string{`(FileField): submits form "photo", which is not on the page`}},
+		// The notes (the client's notes section): a note's row and a neighbour
+		// of the rail lead to the note; a task's tick in a text is a sign
+		// (Typecase's task 99); a record related and an attachment of a
+		// document's column go where the model says or are words; the edit is
+		// a document that is a form (task 98), which Save submits by its ID.
+		"a note's row and a neighbour that lead": {w.Shell{Body: w.ShellBody{
+			Rail: []w.RailPart{w.RailSec{Items: []w.RailSecPart{w.Tree{Rows: []w.TreeRow{{Label: "Что почитать", Href: "/n"}}}}}},
+			Main: w.Main{Items: []w.MainPart{w.List{Rows: []w.ListRow{w.ExcerptRow{Href: "/n"}}}}}}}, nil},
+		"a note's row and a neighbour that lead nowhere": {w.Shell{Body: w.ShellBody{
+			Rail: []w.RailPart{w.RailSec{Items: []w.RailSecPart{w.Tree{Rows: []w.TreeRow{{Label: "Что почитать"}}}}}},
+			Main: w.Main{Items: []w.MainPart{w.List{Rows: []w.ListRow{w.ExcerptRow{}}}}}}}, []string{"(TreeRow): no Href", "(ExcerptRow): no Href"}},
+		"a task's tick in a text":                 {w.Sec{Items: []w.SecPart{w.SecTasks{Items: []w.DocTask{{Tick: w.Tick{Sign: true}, Text: "проверить"}}}}}, nil},
+		"a task's tick in a text that is no sign": {w.Sec{Items: []w.SecPart{w.SecTasks{Items: []w.DocTask{{Tick: w.Tick{}, Text: "проверить"}}}}}, []string{"(Tick): a tick box that sends nothing"}},
+		"records and files of a column": {w.Docmeta{Sections: []w.DocmetaSec{{Items: []w.DocmetaPart{
+			w.DocRefs{Items: []w.DocRef{{Name: "Синк-ап"}, {Name: "nextcloud · Дневник", Href: "/n"}}}, w.DocAttach{Name: "a.png", Href: "/a"}, w.DocAttach{Name: "b.png"}}}}}, nil},
+		"the edit, a form Save submits": {w.Main{Items: []w.MainPart{
+			w.Docbar{Items: []w.DocbarPart{w.Button{Label: "Save", Form: "note-edit"}}},
+			w.DocLayout{Items: []w.DocLayoutPart{w.Doc{Action: "/e", ID: "note-edit", Items: []w.DocPart{w.Area{Name: "summary"}, w.DocFields{Items: []w.Field{{Parts: []w.FieldPart{w.Input{Name: "start.date"}}}}}}}}},
+		}}, nil},
+		"the edit, no form": {w.Main{Items: []w.MainPart{
+			w.Docbar{Items: []w.DocbarPart{w.Button{Label: "Save", Form: "note-edit"}}},
+			w.DocLayout{Items: []w.DocLayoutPart{w.Doc{ID: "note-edit", Items: []w.DocPart{w.DocFields{Items: []w.Field{{Parts: []w.FieldPart{w.Input{Name: "start.date"}}}}}}}}},
+		}}, []string{"(Input): a field outside a form", `(Button): submits form "note-edit", which is not on the page`}},
 		"a file of no form, of no name": {w.Menu{Items: []w.MenuPart{w.MenuItem{Label: "From this computer", File: &w.FileField{}}}},
 			[]string{"(FileField): no Form; a file field without Name"}},
 	} {
