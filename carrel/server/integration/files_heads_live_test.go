@@ -10,6 +10,7 @@ import (
 	"image"
 	"image/jpeg"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -40,6 +41,41 @@ func TestOpenCloudFolderHeads(t *testing.T) {
 	client, p, space := opencloudClient(t)
 	said := false
 	runFolderHeads(t, client, p, fmt.Sprintf("%s/carrel-heads-%d/", space, os.Getpid()), &said)
+}
+
+// Stalwart and Davis serve files beside CalDAV and CardDAV (TestStalwartFiles,
+// TestDavisFiles). Probed on the Linux gates' stands 03.10.2026: neither
+// counts, both answer the range 206 (SV-57).
+func TestStalwartFolderHeads(t *testing.T) {
+	endpoint, user, pass := stalwartConfig(t)
+	said := false
+	client, err := dav.NewClient(testGuard(t), endpoint, user, pass, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := file.New(client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	runFolderHeads(t, client, p, fmt.Sprintf("/dav/file/%s/carrel-heads-%d/", user, os.Getpid()), &said)
+}
+
+func TestDavisFolderHeads(t *testing.T) {
+	endpoint, user, pass := davisConfig(t)
+	said := false
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client, err := dav.NewClient(testGuard(t), u.Scheme+"://"+u.Host+"/", user, pass, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := file.New(client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	runFolderHeads(t, client, p, fmt.Sprintf("/dav/home/%s/carrel-heads-%d/", user, os.Getpid()), &said)
 }
 
 // runFolderHeads lays out a folder with three members and a camera's JPEG
