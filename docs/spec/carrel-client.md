@@ -999,7 +999,7 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
   `tc-badge`, `tc-btn`, `tc-in` (порог в подвале рейла), `tc-empty`.
 - **Контролы.** Связать, «не дубликаты», объединить на сервере; порог и меню
   Weights со столбцами Default и Yours, под ними кнопки Save и Back to defaults
-  (`ThresholdControl.WeightActions`, `s-dup-3`); свой вес помечен «changed»
+  (`ThresholdControl.WeightForm`, `s-dup-3`); свой вес помечен «changed»
   (`WeightControl.Own`).
 - **Особое.** **Причина совпадения стоит рядом со счётом**: причину человек может
   проверить, число — нет. Никаких автоматических действий. Связывание **ничего не

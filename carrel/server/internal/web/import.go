@@ -178,8 +178,11 @@ func (s *Server) importTargets(c *collectionCtx, dest *collectionCtx) view.Targe
 				ID:    s.importHref(c, "", conn.ID, col.Path),
 				Label: text(collectionLabel(col)), Stamp: o.stamp(), Colour: catalogColour(col),
 			}
+			// A choice is a link to the wizard with it chosen (U-8,
+			// s-io-10…13); a read-only one is shown and leads nowhere.
+			opt.Href = opt.ID
 			if col.ReadOnly {
-				opt.ReadOnly, opt.Reason = true, "Read-only"
+				opt.ReadOnly, opt.Reason, opt.Href = true, "Read-only", ""
 			}
 			if dest != nil && conn.ID == dest.conn.ID && col.Path == dest.col.Path {
 				picker.Chosen = opt.ID
@@ -219,6 +222,7 @@ func (s *Server) noteFolders(c *collectionCtx, st importState) (*view.FileTree, 
 				continue
 			}
 			node := view.FileTreeNode{ID: link(conn.ID, col.Path, nil, ""), Label: collectionLabel(col), Stamp: origin{conn: conn, col: col}.stamp()}
+			node.Href = node.ID // a node chooses by a link, as the trees of Files (U-8)
 			if conn.ID == st.folderAcc && col.Path == st.folderPath {
 				if prov, err := s.filesOf(conn); err == nil {
 					node.Expanded = true
@@ -257,6 +261,7 @@ func (s *Server) folderLevel(ctx context.Context, prov *file.Provider, base stri
 	for _, name := range dirs {
 		segs := append(slices.Clone(at), name)
 		node := view.FileTreeNode{ID: link(segs), Label: name}
+		node.Href = node.ID
 		if len(chosen) > len(at) && chosen[len(at)] == name {
 			node.Expanded, node.Children = true, s.folderLevel(ctx, prov, base, segs, chosen, link)
 		}
@@ -292,6 +297,9 @@ type importState struct {
 	taken   map[string]bool // the identities the destination holds, for the counts
 	report  *view.ImportReport
 	notices []view.Notice
+	// entry: the wizard was opened from a combined view, and nothing is
+	// chosen under «Into» until the person chooses it (C-5, U-6.9).
+	entry bool
 	// folderAcc, folderPath and folderIn are the folder chosen in the tree
 	// of notes (s-io-4) — the storage and the folder below its root —,
 	// before «Preview folder» takes it.
@@ -380,10 +388,15 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 		to, into := targetOf(st.dest)
 		// The first step has one button; the rail is the way out (s-io-3,
 		// s-io-4).
+		// Without scripts the file goes in a form of its own, its field
+		// named «file» (U-8; importPart reads that part).
 		choose := view.Action{ID: "import.choose", Label: "Preview file", Method: "POST", Primary: true, Enabled: true,
-			Href: s.importHref(c, "", to, into)}
+			Href: s.importHref(c, "", to, into), File: "file"}
 		if st.dest == nil {
-			choose.Enabled, choose.Reason = false, "Choose a collection that can be written."
+			choose.Enabled, choose.Reason, choose.Href = false, "Choose a collection that can be written.", ""
+			if st.entry {
+				choose.Reason = "Choose under «Into» where the records go."
+			}
 		}
 		page.Actions = []view.Action{choose}
 	}
@@ -449,9 +462,11 @@ func targetOf(dest *collectionCtx) (string, string) {
 // getKindImport is the wizard: the source step, or the preview of the file
 // that is already in hand, counted against the collection now chosen.
 // getKindImportEntry is the way into the import from a combined view, where
-// no collection is chosen yet (s-contacts-1): the wizard opens on the first
-// writable collection of the kind and asks "Into" for the rest. Nothing of
-// the kind takes records — 404, and the bar says so before the click.
+// no collection is chosen yet (s-contacts-1): the wizard's first step, with
+// nothing chosen under «Into» — it asks, and a choice there is the wizard of
+// the first writable collection with that one chosen. It used to open on
+// that first collection chosen in silence. Nothing of the kind takes
+// records — 404, and the bar says so before the click.
 func (s *Server) getKindImportEntry(w http.ResponseWriter, r *http.Request, kind string) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -469,7 +484,9 @@ func (s *Server) getKindImportEntry(w http.ResponseWriter, r *http.Request, kind
 				continue
 			}
 			if c, made := s.collectionOf(sess, spec, conn.ID, col.Path); made {
-				s.redirect(w, r, c.listPath()+"/import")
+				page := s.importPage(c, importState{entry: true})
+				page.Rail = s.combinedBackRail(c)
+				s.writePage(w, r, http.StatusOK, page)
 				return
 			}
 		}
@@ -504,8 +521,9 @@ func (s *Server) getKindExportEntry(w http.ResponseWriter, r *http.Request, kind
 			if spec.kind == view.KindEvent {
 				q.Set("whole", "1") // a calendar goes whole from here: there is no week on this screen
 			}
+			href := s.postQuery(o.listPath(spec.segment)+"/export", q)
 			sheet.Target.Options = append(sheet.Target.Options, view.TargetOption{
-				ID: s.postQuery(o.listPath(spec.segment)+"/export", q), Label: text(collectionLabel(col)),
+				ID: href, Href: href, Label: text(collectionLabel(col)),
 				Stamp: o.stamp(), Colour: catalogColour(col),
 			})
 		}
@@ -1335,4 +1353,10 @@ func (s *Server) importRefusal(err error) view.Notice {
 		n.Details = &view.Diagnostic{Summary: "Import", Lines: []view.Text{text(err.Error())}}
 	}
 	return n
+}
+
+// combinedBackRail is the rail of the wizard opened from a combined view:
+// the way back is that view, and no collection is open on it.
+func (s *Server) combinedBackRail(c *collectionCtx) view.Rail {
+	return s.backRail(c.sess, s.catalogOf(c.sess), c.spec, c.conn.ID, s.backAction(c.spec, "", "/app/"+c.spec.segment))
 }

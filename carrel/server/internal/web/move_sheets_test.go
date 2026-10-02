@@ -257,11 +257,11 @@ func TestCollectionMoveSheetIsTheFrame(t *testing.T) {
 	if plainText(chosen.Warning) != want {
 		t.Errorf("message = %q\nwant      %q", chosen.Warning, want)
 	}
-	if len(chosen.Actions) != 1 || chosen.Actions[0].Label != view.Text(confirm) || !chosen.Actions[0].Enabled {
+	if len(chosen.Actions) != 2 || chosen.Actions[1].ID != "collection.cancel" || chosen.Actions[0].Label != view.Text(confirm) || !chosen.Actions[0].Enabled {
 		t.Errorf("actions = %+v, the frame %q and Cancel", chosen.Actions, confirm)
 	}
 	cp := decode[view.CollectionMoveSheet](t, f.h.do(get(menuHref(t, row.Menu, "collection.copy"), f.sess)))
-	if !cp.Copy || len(cp.Actions) != 1 || cp.Actions[0].Label != "Copy here" {
+	if !cp.Copy || len(cp.Actions) != 2 || cp.Actions[0].Label != "Copy here" {
 		t.Errorf("copy = %+v", cp)
 	}
 }

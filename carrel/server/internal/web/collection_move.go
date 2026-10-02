@@ -39,7 +39,10 @@ func collectionNoun(col sealed.Collection) string {
 	return "calendar"
 }
 
-func collectionMoveQuery(conn sealed.Connection, col sealed.Collection, to string, copying bool) url.Values {
+// collectionMoveQuery is the address of the move sheet: the collection, the
+// destination chosen, copy, and back — the screen it was opened from, kept
+// through every choice so that its Cancel still leads there.
+func collectionMoveQuery(conn sealed.Connection, col sealed.Collection, to string, copying bool, back string) url.Values {
 	q := url.Values{"a": {conn.ID}, "c": {col.Path}}
 	if to != "" {
 		q.Set("to", to)
@@ -47,18 +50,21 @@ func collectionMoveQuery(conn sealed.Connection, col sealed.Collection, to strin
 	if copying {
 		q.Set("copy", "1")
 	}
+	if back != "" {
+		q.Set("back", back)
+	}
 	return q
 }
 
 // collectionMoveTargets are every connection, the current one and those that
 // cannot hold the kind shown and closed with the reason; eligible counts the
 // others.
-func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool) (opts []view.TargetOption, eligible int) {
+func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, back string) (opts []view.TargetOption, eligible int) {
 	for _, c := range blob.Connections {
 		// Beside a server the sheet says what it takes, or why not
 		// (s-profile-8): «calendars», «already there», «files only».
 		opt := view.TargetOption{
-			ID:    s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, c.ID, copying)),
+			ID:    s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, c.ID, copying, back)),
 			Label: text(connLabel(c)),
 		}
 		switch {
@@ -72,6 +78,7 @@ func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection,
 			opt.ReadOnly, opt.Reason = true, text("no "+collectionNoun(col)+"s")
 		default:
 			opt.Stamp = view.Stamp(collectionNoun(col) + "s")
+			opt.Href = opt.ID // the sheet with it chosen (U-8)
 			eligible++
 		}
 		opts = append(opts, opt)
@@ -83,16 +90,16 @@ func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection,
 // Copy to another server (s-profile-1, s-profile-12) — or none: with no other
 // connection that holds the kind there is nowhere to go (S-12.3). A folder
 // goes to another file storage as a tree (S-12.1).
-func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, col sealed.Collection) []view.MenuItem {
+func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, back string) []view.MenuItem {
 	if col.Gone || col.Feed || len(col.Kinds) == 0 {
 		return nil
 	}
-	if _, eligible := s.collectionMoveTargets(blob, conn, col, false); eligible == 0 {
+	if _, eligible := s.collectionMoveTargets(blob, conn, col, false, ""); eligible == 0 {
 		return nil
 	}
 	copying := view.MenuItem{Action: view.Action{
 		ID: "collection.copy", Label: "Copy to another server", Icon: "i-dup",
-		Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", true)),
+		Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", true, back)),
 		Method: "GET", Enabled: true,
 	}}
 	if col.Has(view.KindFile) && storageRoot(conn, col) {
@@ -103,7 +110,7 @@ func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, c
 	return []view.MenuItem{
 		{Action: view.Action{
 			ID: "collection.move", Label: "Move to another server", Icon: "i-move",
-			Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", false)),
+			Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", false, back)),
 			Method: "GET", Enabled: true,
 		}},
 		copying,
@@ -134,10 +141,14 @@ func collectionMoveBlock(blob sealed.Blob, conn sealed.Connection, col sealed.Co
 // it goes, that the address changes, and when the original is deleted.
 // count is the records the collection holds as the session last learnt it,
 // nil when it does not know.
-func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, to string, count *int) view.CollectionMoveSheet {
+func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, to string, count *int, back string) view.CollectionMoveSheet {
 	noun, label, here := collectionNoun(col), collectionLabel(col), connLabel(conn)
-	sheet := view.CollectionMoveSheet{Kind: col.Kinds[0], Copy: copying, Subject: text(here + " · " + label)}
-	sheet.Target.Options, _ = s.collectionMoveTargets(blob, conn, col, copying)
+	verb := "Move "
+	if copying {
+		verb = "Copy "
+	}
+	sheet := view.CollectionMoveSheet{Kind: col.Kinds[0], Copy: copying, Title: text(verb + noun), Subject: text(here + " · " + label)}
+	sheet.Target.Options, _ = s.collectionMoveTargets(blob, conn, col, copying, back)
 	dest, known := blob.Connection(to)
 	confirm := view.Action{ID: "collection.move.confirm", Label: "Move here", Method: "POST", Primary: true, Enabled: true}
 	if copying {
@@ -146,7 +157,7 @@ func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, c
 	if reason := collectionMoveBlock(blob, conn, col, dest, known, copying); reason != "" {
 		confirm.Enabled, confirm.Reason = false, text(reason)
 	} else {
-		chosen := s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, dest.ID, copying))
+		chosen := s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, dest.ID, copying, back))
 		sheet.Target.Chosen, confirm.Href = chosen, chosen
 		// The words of s-profile-8: what is made, how much goes, and what
 		// becomes of this one.
@@ -174,7 +185,7 @@ func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, c
 				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path.")
 		}
 	}
-	sheet.Actions = []view.Action{confirm}
+	sheet.Actions = []view.Action{confirm, s.sheetCancel(back, collectionList(conn, col))}
 	return sheet
 }
 
@@ -184,7 +195,7 @@ func (s *Server) getCollectionMove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	blob := s.catalogOf(sess)
-	if s.collectionMoveItems(blob, conn, col) == nil {
+	if s.collectionMoveItems(blob, conn, col, "") == nil {
 		s.notFound(w, r)
 		return
 	}
@@ -193,7 +204,7 @@ func (s *Server) getCollectionMove(w http.ResponseWriter, r *http.Request) {
 	if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
 		count = collectionCount(sess, conn.ID, col, spec)
 	}
-	s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(blob, conn, col, q.Get("copy") != "", q.Get("to"), count))
+	s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(blob, conn, col, q.Get("copy") != "", q.Get("to"), count, sheetBack(q.Get("back"))))
 }
 
 // postCollectionMove runs a confirmed move or copy. What happens is on the
@@ -205,7 +216,7 @@ func (s *Server) postCollectionMove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	blob := s.catalogOf(sess)
-	if s.collectionMoveItems(blob, conn, col) == nil {
+	if s.collectionMoveItems(blob, conn, col, "") == nil {
 		s.notFound(w, r)
 		return
 	}
@@ -216,7 +227,7 @@ func (s *Server) postCollectionMove(w http.ResponseWriter, r *http.Request) {
 		if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
 			count = collectionCount(sess, conn.ID, col, spec)
 		}
-		s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(blob, conn, col, copying, to, count))
+		s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(blob, conn, col, copying, to, count, sheetBack(r.URL.Query().Get("back"))))
 		return
 	}
 	m := &collectionMove{s: s, sess: sess, key: key, conn: conn, col: col, dest: dest, copying: copying, home: collectionHome(blob, dest, col)}

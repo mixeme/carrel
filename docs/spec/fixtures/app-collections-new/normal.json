@@ -9,6 +9,13 @@
       "primary": true,
       "csrf": "csrf",
       "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/calendar",
+      "id": "collection.cancel",
+      "label": "Cancel",
+      "method": "GET"
     }
   ],
   "failure": null,
@@ -202,5 +209,6 @@
       }
     ],
     "new": null
-  }
+  },
+  "title": "New calendar"
 }

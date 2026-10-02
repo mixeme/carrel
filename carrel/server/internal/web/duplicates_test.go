@@ -363,7 +363,7 @@ func TestMergeWritesThenDeletes(t *testing.T) {
 	}
 	var fn *view.MergeRow
 	for i := range p.Rows {
-		if p.Rows[i].Property == "FN" {
+		if p.Rows[i].Name == "choice.FN" {
 			fn = &p.Rows[i]
 		}
 	}
@@ -467,7 +467,7 @@ func TestLinkRemembersTheAnswer(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
-	if len(g.Choices) != 1 || g.Choices[0].Property != "FN" || len(g.Choices[0].Options) != 2 {
+	if len(g.Choices) != 1 || g.Choices[0].Name != "choice.FN" || len(g.Choices[0].Options) != 2 {
 		t.Fatalf("choices = %+v", g.Choices)
 	}
 	pick := optionIndex(t, g.Choices[0], "LOVELACE Ada")
@@ -509,7 +509,7 @@ func TestLinkRemembersTheAnswer(t *testing.T) {
 
 	p := mergePage(t, f, actionOf(t, linked, "duplicates.merge").Href)
 	for _, row := range p.Rows {
-		if row.Property == "FN" && string(row.Options[row.Chosen]) != "LOVELACE Ada" {
+		if row.Name == "choice.FN" && string(row.Options[row.Chosen]) != "LOVELACE Ada" {
 			t.Errorf("merge does not start from the answer: %+v", row)
 		}
 	}

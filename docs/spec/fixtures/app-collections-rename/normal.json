@@ -9,6 +9,13 @@
       "method": "POST",
       "primary": true,
       "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty",
+      "id": "collection.cancel",
+      "label": "Cancel",
+      "method": "GET"
     }
   ],
   "address": "https://nextcloud.example/dav.php/alice/contacts/kontakty/",
@@ -55,5 +62,6 @@
   },
   "kind": "contact",
   "note": "Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. The new name is written to the server — other clients will show it at their next sync.",
-  "stamp": "nextcloud"
+  "stamp": "nextcloud",
+  "title": "Rename"
 }

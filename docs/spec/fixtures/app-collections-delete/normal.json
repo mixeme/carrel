@@ -9,6 +9,13 @@
       "label": "Delete on the server",
       "method": "POST",
       "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty",
+      "id": "collection.cancel",
+      "label": "Cancel",
+      "method": "GET"
     }
   ],
   "archive": [
@@ -69,6 +76,7 @@
   "kind": "contact",
   "references": [],
   "subject": "nextcloud · Контакты",
+  "title": "Delete on the server",
   "warning": [
     {
       "text": "The address book and all "

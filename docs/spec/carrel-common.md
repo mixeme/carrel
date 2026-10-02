@@ -368,14 +368,14 @@ spec/fixtures/<screen>/<state>.json
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/app/` | GET | вход | редирект | — |
-| `/app/search` | GET | вход | страница | `SearchPage` |
+| `/app/search` | GET | вход | страница | `SearchPage`; `?q=` — запрос (форма верхней панели, `SearchBox.Name`; пустой — страница без обхода); `?kind=` — сегмент по роду (`contact`, `event`, `task`, `note`, `file`; без него — All); `?filter=` — по уже пришедшему, серверы не спрашиваются; `?again=1` — «Search again»: тот же запрос заново, мимо прочитанного сеансом (S-15.3) |
 | `/app/search/progress/{task}` | GET | вход | SSE | `PollBar` — поток хода (C-7.4): `poll`, в конце `poll-finished` с рейлом; адрес — `PollBar.Stream`, с запросом страницы полосы |
 | `/app/search/progress/{task}/poll` | GET | вход | фрагмент | `PollBar` — запасной опрос: адрес — `PollBar.Poll`, раз в `PollBar.Every` мс; законченный — с рейлом страницы внеполосно |
 | `/app/search/progress/{task}/retry` | POST | вход | фрагмент | `PollBar` — `?source=` — повтор одного источника (`SourceProgress.Retry`); без него — каждого не ответившего («Retry all», `PollBar.RetryAll`, states-16) |
 | `/app/search/progress/{task}/cancel` | POST | вход | фрагмент | `PollBar` |
 | `/app/duplicates` | GET | вход | страница | `DuplicatesPage` |
-| `/app/duplicates/decide` | POST | вход | страница, редирект | `DuplicatesPage` — решение по группе (`do=`): ответ — дубликаты, как они теперь стоят, сказанное — в `notices`; форма без сценариев, когда сказать нечего, — редирект на `/app/duplicates`. Группа — не зона C-7.2, фрагментом не приходит |
-| `/app/duplicates/merge` | GET, POST | вход | страница | `DuplicatesMergePage` |
+| `/app/duplicates/decide` | POST | вход | страница, редирект | `DuplicatesPage` — решение по группе (`do=`): `do=link`, `ignore` («Not duplicates»), `again` («Offer again»), `choose` («Keep these values») и `unlink` с `group=` — группа (`DuplicateGroup.ID`); `link` и `choose` несут ответы `choice.<свойство>=` — номер варианта (`MergeRow.Name`, форма группы `DuplicateGroup.Form`); `do=threshold` с `value=` — порог (пусто или 0 — число экземпляра; форма `ThresholdControl.Form`); `do=weights` с `weight.<признак>=` (`WeightControl.Name`; пусто — вес экземпляра) и `do=defaults` — веса экземпляра всем (форма `ThresholdControl.WeightForm`). Ответ — дубликаты, как они теперь стоят, сказанное — в `notices`; форма без сценариев, когда сказать нечего, — редирект на `/app/duplicates`. Группа — не зона C-7.2, фрагментом не приходит |
+| `/app/duplicates/merge` | GET, POST | вход | страница | `DuplicatesMergePage`; `group=` — группа, `into=` — место оставляемой в группе (`Keep … instead`), `choice.<свойство>=` — номер варианта ответа (`MergeRow.Name`); POST — ещё `v.<место>=` — версия каждой записи, показанная GET: изменившаяся с тех пор не сливается |
 | `/app/sources/{kind}` | POST | вход | фрагмент, редирект | `Rail`; `{kind}` — четыре рода и `files`; форма рейла (`Rail.Ticks`): `toggle` — одна строка, `tick` — весь выбор, `back` — страница раздела, куда вернуться без сценариев |
 | `/app/publish` | GET, POST | вход | лист | `PublishSheet` |
 | `/app/mail/compose` | GET, POST | вход | лист | `MailSheet` |
@@ -406,12 +406,12 @@ spec/fixtures/<screen>/<state>.json
 | `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage` |
 | `/app/contacts/{account}/{col}/new/photo-preview` | GET, POST | вход | страница, редирект | `PhotoPreviewPage` — фотография новой карточки (s-contacts-27, S-13): шаги те же, `?op=` — `upload` (multipart, потолки и типы карточки), `frame`, `save`, `cancel`, `crop`, `remove`; `uid` — черновик формы: его выдаёт первая загрузка, Replace его хранит. Кнопки фотографии новой формы шлют саму форму (`Action.Submits`): набранное хранится с черновиком под тем же `uid` и возвращается с формой. Ничего не пишет: Save photo отмечает кадр выбранным и ведёт на `/new?uid=`; Cancel первой загрузки и Remove — на `/new?uid=` с одним набранным (ничего не набрано — на `/new` без черновика); кадр показывает `/c/{account}/{col}/{uid}/photo?preview=` |
 | `/c/{account}/{col}/{uid}/photo` | GET | вход | поток | — |
-| `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage` |
+| `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage`; POST: `op=combine` («Write this combination», форма `ConflictPage.Form` с `choice.<n>=mine` или `theirs` на строку — `ConflictRow.Name`; строка без поля — выбранное заранее, `ConflictRow.Choice`), `op=mine`, `op=theirs`, `op=cancel`; у всех, кроме `cancel`, `etag=` — версия, против которой показан выбор: сервер ушёл дальше — страница строится заново |
 | `/app/{kind}/{account}/{col}/{uid}/move` | GET, POST | вход | лист | `MoveSheet` |
 | `/app/contacts/{account}/{col}/{uid}/rewrite` | GET, POST | вход | лист (GET); страница, редирект (POST) | `RewriteSheet`; `?plan=` — план, выданный сохранением карточки (S-15.4). POST переписывает и отвечает карточкой (`ContactPage`) с итогом (s-contacts-16); с `op=leave` — редирект на карточку, ничего не переписав; без живого плана GET и POST — редирект на карточку |
 | `/app/{kind}/{account}/{col}/{uid}/delete` | POST | вход | редирект | — |
 | `/app/{kind}/import` | GET | вход | страница | `ImportPage` — вход из сведённого вида: мастер спрашивает «Into» |
-| `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage` |
+| `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage`; `to=` и `into=` — подключение и коллекция «Into» (адрес варианта `TargetOption.Href`); POST без `op` — файл: multipart, поле `file` (`Action.File` у Preview file); `op=run` — записать предпросмотр, `op=cancel` — бросить файл; у заметок `folder=` (подключение), `path=` (хранилище) и `in=` (папка внутри него, сегменты через «/») — папка дерева (`FileTreeNode.Href`, GET), `op=folder` с ними — «Preview folder» |
 | `/app/{kind}/export` | GET | вход | лист | `ExportSheet` — вход из сведённого вида: из какой коллекции |
 | `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — ; с `?uid=` — одна запись (S-19) |
 | `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage`; у контакта `?uid=` — форма с выбранной фотографией (`…/new/photo-preview`): её кадр в `Photo`, скрытое поле `uid`, Save создаёт карточку под этим UID с фотографией; UID, чьего кадра сеанс не держит, не берётся, а форма с таким `uid` не сохраняется молча без фотографии. У события, задачи и заметки — вложения до записи (s-agenda-15, S-20): POST с `?op=` — `attach` (multipart: вся форма и файл `file`, кнопка Attach шлёт саму форму — `Action.Submits`), `pickfile` (форма; редирект в дерево Files `?for=attach&new=`), `attachfile&file=` (файл Files), `detach&n=` (форма); первый шаг выдаёт UID записи, файлы ждут под ним с набранным, ответ — `/new?uid=` (форма как набрана, файлы в `Attach`, скрытое `uid`). До Save ничего не пишется: внутрь записи — до порога вместе, больший файл с этого компьютера не берётся (запись сначала сохраняют), больший файл Files — ссылка; Save создаёт запись под этим UID с файлами |
@@ -473,10 +473,10 @@ Typecase): рейл с соседними заметками и колонка �
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
-| `/app/collections/new` | GET, POST | вход | лист; `?back=` — мастер импорта, куда вернуться с новой коллекцией (S-19); `?kind=file&a=` — New folder хранилища (S-12.1); `?components=` (GET) — что отмечено в «What goes in it»: «New calendar» уведомления о невзятом роде (s-agenda-11) | `CollectionNewSheet` |
-| `/app/collections/rename` | GET, POST | вход | лист | `CollectionRenameSheet` |
-| `/app/collections/move` | GET, POST | вход | лист | `CollectionMoveSheet` |
-| `/app/collections/delete` | GET, POST | вход | лист | `CollectionDeleteSheet` |
+| `/app/collections/new` | GET, POST | вход | лист; `?kind=` — род (`contact`, `event`, `task`, `note`, `file`; без него — «What it is», поле `kind`); `?a=` — подключение карточки, откуда открыт; `?back=` — откуда открыт: Cancel ведёт туда, а мастер импорта (S-19) получает новую коллекцию выбранной; `?kind=file&a=` — New folder хранилища (S-12.1); `?components=` (GET) — что отмечено в «What goes in it»: «New calendar» уведомления о невзятом роде (s-agenda-11); POST — поля `account`, `name`, `colour`, `components` (значений несколько), `address`; `?op=back` — «Back to the form» после отказа: форма как была, серверу ничего не шлётся | `CollectionNewSheet` |
+| `/app/collections/rename` | GET, POST | вход | лист; `?a=` — подключение, `?c=` — адрес коллекции; `?back=` — откуда открыт (Cancel); POST — поля `name`, `colour` | `CollectionRenameSheet` |
+| `/app/collections/move` | GET, POST | вход | лист; `?a=`, `?c=` — коллекция; `?to=` — подключение-цель (адрес варианта, `TargetOption.Href`); `?copy=1` — копия; `?back=` — откуда открыт (Cancel), его несут и варианты | `CollectionMoveSheet` |
+| `/app/collections/delete` | GET, POST | вход | лист; `?a=`, `?c=` — коллекция; `?back=` — откуда открыт (Cancel); POST — поле `name`, имя набором | `CollectionDeleteSheet` |
 
 ### C-5.7 Настройки
 
@@ -1579,14 +1579,20 @@ type ConflictPage struct {
     ReadAt   When
     ServerAt When
     Rows     []ConflictRow
-    Actions  []Action // Write this combination · Use only my edit · Use only the server version · Cancel
+    // Выбор по строкам без сценариев (U-8, s-conflict-1): POST …/conflict,
+    // скрытые _csrf, etag показанной версии и op=combine; радио строк —
+    // ConflictRow.Name; Actions — «Write this combination», её отправка.
+    // nil — писать нечего: запись удалена на сервере или не прочлась
+    Form    *Form
+    Actions []Action // Use only my edit · Use only the server version · Cancel — каждая своей формой; «Write this combination» — кнопка Form, рисуется первой
 }
 
 type ConflictRow struct { // карточка расхождения, варианты столбиком
     Property Text
     Mine     Text
     Theirs   Text
-    Choice   ConflictChoice // C-8
+    Choice   ConflictChoice // C-8: что выбрано заранее (радио отмечено); его же сервер берёт, когда поле строки не пришло
+    Name     string         // поле строки в Form: choice.<номер строки>; радио «Your edit» — mine, «Server» — theirs
 }
 ```
 
@@ -1669,8 +1675,14 @@ type DuplicateGroup struct {
     Actions []Action // Link · Not duplicates · Merge on the server
     Decision DuplicateDecision // C-8
     // Расхождения в однозначных полях: ответ уходит с Link как
-    // choice.<Property>=<номер варианта> и запоминается при связанной группе
+    // MergeRow.Name=<номер варианта> и запоминается при связанной группе
     Choices []MergeRow
+    // Карточка группы формой, когда выбирать есть что (U-8, s-dup-1): POST
+    // /app/duplicates/decide, скрытые _csrf и group; радио Choices стоят в
+    // ней, решения группы (Actions, POST) — её кнопки на свой адрес
+    // (Action.Submits) с do и group в адресе; Merge on the server — ссылка.
+    // nil — выбирать нечего: решения уходят каждое своей формой
+    Form *Form
 }
 
 type DuplicateMember struct {
@@ -1687,16 +1699,22 @@ type ThresholdControl struct {
     Default int
     Note    Text
     Weights []WeightControl // очки каждого признака; своё у человека, иначе экземпляра
-    // Кнопки под весами (s-dup-3): Save отправляет поля weight.<Signal> как
-    // они стоят; Back to defaults — все пустыми, то есть веса экземпляра.
-    // Своих весов нет — Back to defaults выключена с причиной.
-    WeightActions []Action
+    // Поле «Match threshold» без сценариев (U-8, s-dup-1): POST
+    // /app/duplicates/decide, скрытые _csrf и do=threshold, строка value
+    // (число, моноширинно; пусто или 0 — число экземпляра); уходит по Enter
+    Form Form
+    // Меню Weights формой (s-dup-3, -7): POST /app/duplicates/decide?do=weights,
+    // скрытый _csrf; поля — Weights по их Name. Actions — Save (отправка
+    // формы) и Back to defaults — та же форма на свой адрес (Action.Submits,
+    // do=defaults): веса экземпляра всем; своих весов нет — выключена с
+    // причиной
+    WeightForm Form
 }
 
-// Очки признака дубликата (S-16). Signal — имя поля формы weight.<Signal>;
-// 0 выключает признак.
+// Очки признака дубликата (S-16); 0 выключает признак.
 type WeightControl struct {
     Signal  string
+    Name    string // поле признака в WeightForm: weight.<Signal>; пустое значение — вес экземпляра
     Label   Text
     Value   int
     Default int
@@ -1711,7 +1729,12 @@ type DuplicatesMergePage struct {
     Warning Notice // что будет записано, что удалено
     Actions []Action
 }
-type MergeRow struct { Property Text; Options []Text; Chosen int; Union bool }
+// Свойство, о котором спрашивают (s-dup-1: поле с радио), или объединяемое
+// множеством (Union). Property — подпись по-человечески: «Display name»,
+// «Organisation», «Photo», «Title», «Location»; Name — поле вопроса,
+// choice.<свойство> («choice.FN»), вариант уходит своим номером в Options;
+// у Union Name пусто.
+type MergeRow struct { Property Text; Name string; Options []Text; Chosen int; Union bool }
 
 type TargetPicker struct { // «куда» в шапке листа
     Options []TargetOption
@@ -1720,6 +1743,7 @@ type TargetPicker struct { // «куда» в шапке листа
 }
 type TargetOption struct {
     ID       string
+    Href     string // пункт «куда» ссылкой (U-8, s-io-10…13, s-profile-8): тот же экран с этим вариантом выбранным (GET); пусто, когда вариант — значение поля формы (сервер листа новой коллекции) или недоступен
     Label    Text
     Stamp    Stamp
     Colour   Colour
@@ -1790,32 +1814,40 @@ type RewritePair struct {
 // берётся из Kind, а состав полей у всех четырёх один и тот же.
 type CollectionNewSheet struct {
     Kind    Kind
+    Title   Text         // заголовок по роду: «New calendar», «New address book», «New task list», «New notebook», «New folder» (s-profile-5, -20, -21); без рода (?kind нет) — «New collection»
     Target  TargetPicker // «на каком сервере»; неотвечающий виден с причиной
     Note    Text         // почему в списке не все подключения
     Form    Form         // имя, цвет, набор компонентов, адрес с подсказкой
     Failure *Notice      // отказ сервера: метод, адрес, код, тело (S-12.2); nil — отказа не было
-    Actions []Action     // Create; после отказа (s-profile-6) — «Back to the form» (основная, POST с op=back: та же форма, без отказа, серверу ничего не шлётся) и «Try again» (та же форма ещё раз); обе шлют Form
+    Actions []Action     // Create; после отказа (s-profile-6) — «Back to the form» (основная, POST с op=back: та же форма, без отказа, серверу ничего не шлётся) и «Try again» (та же форма ещё раз); обе шлют Form; последней — Cancel (collection.cancel, GET: ?back= листа, иначе экран рода)
 }
 
 type CollectionRenameSheet struct {
     Kind    Kind
+    Title   Text    // «Rename and colour» у календаря (s-profile-7), «Rename» у книги и папки (s-profile-18)
     Stamp   Stamp   // имя сервера; у папки хранилища — сервер и папка, «sftpgo · vps · Documents» (s-profile-18); пусто у подписки — у неё имя местное
     Form    Form    // имя и цвет одним листом: оба уходят одним запросом
     Address Text    // показан и не правится (S-12.2); пусто у папки хранилища: её имя и есть адрес
     Note    Text    // «переименование — не перенос»: адрес остаётся прежним
     Failure *Notice // отказ сервера; форма хранит введённое
-    Actions []Action
+    Actions []Action // Save (у папки — Rename) и Cancel
 }
 
 // Лист переноса коллекции (s-profile-8): у подключения справа — что оно
 // примет (Stamp «calendars») или почему нет (Reason «already there», «files
-// only», «no calendars»). Warning — когда цель выбрана: что заводится, сколько
-// записей уходит (число — как его знает сеанс) и что станет с этой. Actions —
-// одна кнопка, «Move here» или «Copy here»; Cancel — забота клиента (C-7.2).
-// В меню строки коллекции — Move и Copy to another server (s-profile-1).
+// only», «no calendars»); подходящее — ссылка (TargetOption.Href, лист с ним
+// выбранным). Warning — когда цель выбрана: что заводится, сколько записей
+// уходит (число — как его знает сеанс) и что станет с этой. Actions — «Move
+// here» или «Copy here» и Cancel. В меню строки коллекции — Move и Copy to
+// another server (s-profile-1).
+//
+// Cancel всех четырёх листов (collection.cancel, GET) ведёт туда, откуда лист
+// открыт: ?back= адреса листа (путь приложения, C-5.6), без него — список
+// коллекции (у папки — её корень в Files), у новой — экран рода.
 type CollectionMoveSheet struct {
     Kind    Kind
     Copy    bool         // тот же лист с другой кнопкой; исходная остаётся
+    Title   Text         // «Move calendar», «Copy address book», «Move folder» (s-profile-8)
     Subject Text         // что переносят: «nextcloud · Дни рождения»
     Target  TargetPicker // цель — подключение, а не коллекция (S-12.3)
     Warning Runs // число записей жирным: «copies all ‹51› events» (s-profile-8)
@@ -1824,6 +1856,7 @@ type CollectionMoveSheet struct {
 
 type CollectionDeleteSheet struct {
     Kind       Kind
+    Title      Text // «Delete on the server» (s-profile-9, -19)
     Subject    Text
     Warning    Runs    // что именно исчезнет и что копии у Carrel нет; число жирным (s-profile-9, -19)
     References []Text  // что на неё ссылается: ссылки и устройства счётом, задания по имени
@@ -1831,7 +1864,7 @@ type CollectionDeleteSheet struct {
     Export     *Action // «сначала скачать»; nil — экспортировать нечем
     ExportNote Text
     Form       Form    // подтверждение набором имени
-    Actions    []Action
+    Actions    []Action // Delete on the server и Cancel
 }
 
 // Лист «из какой коллекции отдать» — вход в экспорт из сведённого вида.
@@ -3045,7 +3078,15 @@ selection» формы выделения папки, `folder.new.create` и `fo
 `file.view` Open (картинка на месте), `file.rename`, `file.move`,
 `file.delete`. Очередь: `transfer.both` Keep both, `transfer.overwrite`
 Replace, `transfer.skip` Skip — в этом порядке (s-files-2). Опубликованное —
-`published.refresh`.
+`published.refresh`. Сквозные без сценариев (U-8): `conflict.combine` «Write
+this combination» — кнопка формы расхождения (`ConflictPage.Form`),
+`conflict.mine`, `conflict.theirs`, `conflict.cancel` — каждая своей формой;
+решения группы дубликатов `duplicates.link`, `duplicates.ignore`,
+`duplicates.choose`, `duplicates.unlink` — кнопки её формы
+(`DuplicateGroup.Form`), когда выбирать есть что, `duplicates.merge` — ссылка;
+меню Weights — `duplicates.weights.save` и `duplicates.weights.defaults`;
+`import.choose` Preview file — с полем файла `Action.File`;
+`collection.cancel` — Cancel четырёх листов коллекции.
 
 ---
 

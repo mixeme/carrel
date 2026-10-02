@@ -551,7 +551,7 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 	if c.CalendarHome != "" || c.AddressBookHome != "" {
 		card.Actions = append(card.Actions, view.Action{
 			ID: "collection.new", Label: "New collection", Icon: "i-plus",
-			Href:   s.postQuery("/app/collections/new", url.Values{"a": {c.ID}}),
+			Href:   s.postQuery("/app/collections/new", url.Values{"a": {c.ID}, "back": {settingsBack}}),
 			Method: "GET", Enabled: true,
 		})
 	}
@@ -560,7 +560,7 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 	if c.FileRoot != "" {
 		card.Actions = append(card.Actions, view.Action{
 			ID: "folder.new", Label: "New folder", Icon: "i-plus",
-			Href:   s.postQuery("/app/collections/new", url.Values{"a": {c.ID}, "kind": {string(view.KindFile)}}),
+			Href:   s.postQuery("/app/collections/new", url.Values{"a": {c.ID}, "kind": {string(view.KindFile)}, "back": {settingsBack}}),
 			Method: "GET", Enabled: true,
 		})
 	}
@@ -604,7 +604,7 @@ func (s *Server) collectionRowMenu(blob sealed.Blob, c sealed.Connection, col se
 		return nil
 	}
 	rename := view.Action{ID: "collection.rename", Label: "Rename and colour", Icon: "i-pencil",
-		Href: s.postQuery("/app/collections/rename", url.Values{"a": {c.ID}, "c": {col.Path}}), Method: "GET", Enabled: true}
+		Href: s.postQuery("/app/collections/rename", url.Values{"a": {c.ID}, "c": {col.Path}, "back": {settingsBack}}), Method: "GET", Enabled: true}
 	if col.Has(view.KindFile) {
 		rename.Label = "Rename"
 		if storageRoot(c, col) {
@@ -612,7 +612,7 @@ func (s *Server) collectionRowMenu(blob sealed.Blob, c sealed.Connection, col se
 		}
 	}
 	menu := []view.MenuItem{{Action: rename}}
-	menu = append(menu, s.collectionMoveItems(blob, c, col)...)
+	menu = append(menu, s.collectionMoveItems(blob, c, col, settingsBack)...)
 	if col.Has(view.KindFile) {
 		menu = append(menu, view.MenuItem{Action: view.Action{ID: "publish", Label: "Publish a link", Icon: "i-link", Method: "GET", Enabled: true,
 			Href: s.postQuery("/app/publish", url.Values{"k": {filesSpec.segment}, "a": {c.ID}, "c": {col.Path}, "f": {""}, "dir": {"1"}})}})
@@ -621,11 +621,15 @@ func (s *Server) collectionRowMenu(blob sealed.Blob, c sealed.Connection, col se
 		menu = append(menu, view.MenuItem{Action: export},
 			view.MenuItem{Action: s.publishActionAt(origin{conn: c, col: col}, segmentOf(col.Kinds[0]), "")})
 	}
-	if item, ok := s.collectionDeleteItem(c, col); ok {
+	if item, ok := s.collectionDeleteItem(c, col, settingsBack); ok {
 		menu = append(menu, item)
 	}
 	return menu
 }
+
+// settingsBack is where a collection sheet opened from Connections goes
+// back to (?back=, C-5.6).
+const settingsBack = "/app/settings/connections"
 
 // revealPassword fills one card's password: only inside this session's unlock
 // window, only for this person's connection, and only once the release is in

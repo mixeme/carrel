@@ -114,14 +114,14 @@ func TestWeightButtonsAreTheFrame(t *testing.T) {
 	f.load(t)
 	p := f.page(t)
 	var got []string
-	for _, a := range p.Threshold.WeightActions {
+	for _, a := range p.Threshold.WeightForm.Actions {
 		got = append(got, string(a.Label))
 	}
 	if !equalStrings(got, want) {
 		t.Fatalf("buttons = %v, the frame %v", got, want)
 	}
-	sameActionMarks(t, "s-dup-3", "weights", p.Threshold.WeightActions, nil)
-	save, reset := p.Threshold.WeightActions[0], p.Threshold.WeightActions[1]
+	sameActionMarks(t, "s-dup-3", "weights", p.Threshold.WeightForm.Actions, nil)
+	save, reset := p.Threshold.WeightForm.Actions[0], p.Threshold.WeightForm.Actions[1]
 	if !save.Enabled || save.Method != "POST" || reset.Enabled || reset.Reason == "" {
 		t.Errorf("before any choice: save %+v, back to defaults %+v", save, reset)
 	}
@@ -137,7 +137,10 @@ func TestWeightButtonsAreTheFrame(t *testing.T) {
 	if signal == "" {
 		t.Fatalf("no weight %q", label)
 	}
-	if rec := f.h.do(postForm(save.Href, f.sess, url.Values{"weight." + signal: {strconv.Itoa(yours)}})); rec.Code != http.StatusSeeOther {
+	if save.Href != "" {
+		t.Fatalf("Save is not the button of the weights form: %+v", save)
+	}
+	if rec := f.h.do(postForm(p.Threshold.WeightForm.Action, f.sess, url.Values{"weight." + signal: {strconv.Itoa(yours)}})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("save: %d", rec.Code)
 	}
 	p = f.page(t)
@@ -146,7 +149,7 @@ func TestWeightButtonsAreTheFrame(t *testing.T) {
 			t.Errorf("after save: %+v", w)
 		}
 	}
-	reset = p.Threshold.WeightActions[1]
+	reset = p.Threshold.WeightForm.Actions[1]
 	if !reset.Enabled || reset.Method != "POST" {
 		t.Fatalf("back to defaults = %+v", reset)
 	}

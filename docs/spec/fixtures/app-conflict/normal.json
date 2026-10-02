@@ -3,15 +3,6 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict?etag=e20\u0026op=combine",
-      "id": "conflict.combine",
-      "label": "Write this combination",
-      "method": "POST",
-      "primary": true
-    },
-    {
-      "csrf": "csrf",
-      "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict?etag=e20\u0026op=mine",
       "id": "conflict.mine",
       "label": "Use only my edit",
@@ -35,6 +26,65 @@
     }
   ],
   "details": null,
+  "form": {
+    "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "id": "conflict.combine",
+        "label": "Write this combination",
+        "method": "POST",
+        "primary": true
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "etag",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "e20"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "op",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "combine"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
   "kind": "contact",
   "notices": [
     {
@@ -228,14 +278,16 @@
   "readAt": "10 August, 17:04",
   "rows": [
     {
-      "choice": "",
+      "choice": "mine",
       "mine": "Главный редактор",
+      "name": "choice.0",
       "property": "TITLE",
       "theirs": "Выпускающий редактор"
     },
     {
-      "choice": "",
+      "choice": "mine",
       "mine": "Пишет по вторникам, отвечает в тот же день. Просила писать на рабочий адрес.",
+      "name": "choice.1",
       "property": "NOTE",
       "theirs": "Empty"
     }

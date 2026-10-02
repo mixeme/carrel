@@ -36,7 +36,8 @@ func TestCollectionDeleteSheetSaysWhatGoes(t *testing.T) {
 	page := decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess)))
 	row := page.Accounts[0].Collections[0]
 	item := row.Menu[len(row.Menu)-1]
-	if item.ID != "collection.delete" || !item.Danger || !item.Separator || item.Href != colDeleteHref(f) {
+	fromSettings := "/app/collections/delete?" + url.Values{"a": {f.id}, "c": {f.col}, "back": {"/app/settings/connections"}}.Encode()
+	if item.ID != "collection.delete" || !item.Danger || !item.Separator || item.Href != fromSettings {
 		t.Fatalf("connections menu = %+v", row.Menu)
 	}
 	rail := decode[view.AgendaPage](t, f.h.do(get(f.path("calendar"), f.sess)))

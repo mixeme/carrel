@@ -381,7 +381,16 @@ func liveContacts(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 	if len(conflict.Rows) != 1 || conflict.Rows[0].Property != "TITLE" || conflict.Rows[0].Mine != "Countess" {
 		t.Fatalf("conflict rows = %+v", conflict.Rows)
 	}
-	redirected(t, "combine", app.post(liveAction(t, conflict.Actions, "conflict.combine"), url.Values{}))
+	// «Write this combination» sends the conflict's form with each row as
+	// the page shows it chosen (U-8).
+	if conflict.Form == nil {
+		t.Fatal("the conflict has no form")
+	}
+	choice := liveForm(*conflict.Form)
+	for _, row := range conflict.Rows {
+		choice.Set(row.Name, string(row.Choice))
+	}
+	redirected(t, "combine", app.post(conflict.Form.Action, choice))
 	got, _ = rawBody(ctx, t, client, file)
 	mustHave(t, "combine", got, "TITLE:Countess", "NOTE:server note", "FN:Ada King", "X-CUSTOM:keep-me")
 

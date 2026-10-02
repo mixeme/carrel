@@ -151,7 +151,7 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 		Body: text("Another client changed this " + string(c.spec.kind) +
 			" while you were editing it. Nothing has been overwritten."),
 	})
-	for _, f := range conflictFields(c.spec.kind, d, theirs) {
+	for i, f := range conflictFields(c.spec.kind, d, theirs) {
 		page.Rows = append(page.Rows, view.ConflictRow{
 			// The record's own name for the property, not a label of ours
 			// (s-conflict-1): a conflict is read against the file, and a
@@ -159,7 +159,8 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 			Property: text(f.prop),
 			Mine:     text(s.showValues(c, f, d.Mine[f.name], d.Mine[f.name+".type"], alarms)),
 			Theirs:   text(s.showValues(c, f, theirs[f.name], theirs[f.name+".type"], alarms)),
-			Choice:   view.ChoiceUnset,
+			Choice:   view.ChoiceMine,
+			Name:     choiceField(i),
 		})
 	}
 	op := func(name string) string {
@@ -180,17 +181,41 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 				"«Use only the server version» and Cancel leave it where it is.")})
 	}
 	writable := len(page.Rows) > 0 || moving
+	// Without scripts the choice of every row is a form (U-8): its radios
+	// carry their rows' names, and «Write this combination» sends it. The
+	// other three need no choice and go as forms of their own.
+	combine := view.Action{ID: "conflict.combine", Label: "Write this combination", Method: "POST", Primary: true, Enabled: writable}
+	page.Form = &view.Form{Action: s.route(path), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
+		csrfField(c.sess),
+		{Name: "etag", Kind: view.InputHidden, Value: text(obj.ETag)},
+		{Name: "op", Kind: view.InputHidden, Value: "combine"},
+	}}}}
 	page.Actions = []view.Action{
-		{ID: "conflict.combine", Label: "Write this combination", Href: op("combine"), Method: "POST", Primary: true, Enabled: writable},
 		{ID: "conflict.mine", Label: "Use only my edit", Href: op("mine"), Method: "POST", Enabled: writable},
 		{ID: "conflict.theirs", Label: "Use only the server version", Href: op("theirs"), Method: "POST", Enabled: true},
 		cancel,
 	}
 	if !writable && !moving {
-		page.Actions[0].Reason, page.Actions[1].Reason = "The server version already has your change.", "The server version already has your change."
+		combine.Reason, page.Actions[0].Reason = "The server version already has your change.", "The server version already has your change."
 		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: "Nothing differs", Body: "The server version already holds everything you changed."})
 	}
+	page.Form.Actions = []view.Action{combine}
 	return page
+}
+
+// choiceField is the field of row n of the conflict's form.
+func choiceField(n int) string { return fmt.Sprintf("choice.%d", n) }
+
+// chosenSide is what the form says of a row: the side it names, else the
+// one the page showed chosen (ConflictRow.Choice). A browser sends every
+// radio that is checked; a row it did not send is not the person's edit by
+// default — that was the page's guess, and the page said it.
+func chosenSide(r *http.Request, n int, shown view.ConflictChoice) view.ConflictChoice {
+	switch v := view.ConflictChoice(r.FormValue(choiceField(n))); v {
+	case view.ChoiceMine, view.ChoiceTheirs:
+		return v
+	}
+	return shown
 }
 
 func (s *Server) getKindConflict(w http.ResponseWriter, r *http.Request, kind string) {
@@ -269,7 +294,7 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 		want[k] = v
 	}
 	for i, f := range conflictFields(c.spec.kind, d, theirs) {
-		if op == "mine" || r.FormValue(fmt.Sprintf("choice.%d", i)) != string(view.ChoiceTheirs) {
+		if op == "mine" || chosenSide(r, i, view.ChoiceMine) == view.ChoiceMine {
 			want[f.name] = d.Mine[f.name]
 			if f.typed {
 				want[f.name+".type"] = d.Mine[f.name+".type"]

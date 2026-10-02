@@ -26,6 +26,7 @@
     "options": [
       {
         "colour": "#a05a2c",
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=arhiv\u0026to=a-nc-home",
         "id": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=arhiv\u0026to=a-nc-home",
         "label": "Архив",
         "last": false,
@@ -53,6 +54,7 @@
       },
       {
         "colour": "#6b4e7a",
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=rassylki\u0026to=a-rad-vps",
         "id": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=rassylki\u0026to=a-rad-vps",
         "label": "Рассылки",
         "last": false,

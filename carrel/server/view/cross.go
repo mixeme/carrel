@@ -100,8 +100,14 @@ type DuplicateGroup struct {
 	Actions  []Action          `json:"actions"`  // Link · Not duplicates · Merge on the server
 	Decision DuplicateDecision `json:"decision"` // C-8
 	// Расхождения в однозначных полях: ответ уходит с Link как
-	// choice.<Property>=<номер варианта> и запоминается при связанной группе
+	// MergeRow.Name=<номер варианта> и запоминается при связанной группе
 	Choices []MergeRow `json:"choices"`
+	// Form — карточка группы формой, когда выбирать есть что (U-8, s-dup-1):
+	// POST /app/duplicates/decide, скрытые _csrf и group; радио Choices
+	// стоят в ней, а решения группы (Actions, POST) — её кнопки на свой
+	// адрес (Action.Submits), каждая с do и group в адресе. nil — выбирать
+	// нечего: решения уходят каждое своей формой
+	Form *Form `json:"form"`
 }
 
 type DuplicateMember struct {
@@ -118,15 +124,25 @@ type ThresholdControl struct {
 	Default int             `json:"default"`
 	Note    Text            `json:"note"`
 	Weights []WeightControl `json:"weights"` // очки каждого признака; своё у человека, иначе экземпляра
-	// Кнопки под весами (s-dup-3): Save отправляет поля weight.<Signal>,
-	// Back to defaults — все пустыми
-	WeightActions []Action `json:"weightActions"`
+	// Form — поле «Match threshold» без сценариев (U-8, s-dup-1): POST
+	// /app/duplicates/decide, скрытые _csrf и do=threshold, строка value
+	// (число, моноширинно); уходит по Enter, кнопки у него нет
+	Form Form `json:"form"`
+	// WeightForm — меню Weights формой (s-dup-3, -7): POST
+	// /app/duplicates/decide?do=weights, скрытый _csrf; поля — Weights по
+	// их Name. Actions — Save (отправка формы) и Back to defaults — та же
+	// форма на свой адрес (Action.Submits, do=defaults): веса экземпляра
+	// всем; своих весов нет — выключена с причиной
+	WeightForm Form `json:"weightForm"`
 }
 
-// WeightControl — очки одного признака дубликата (S-16). Signal — имя поля
-// формы weight.<Signal>; 0 выключает признак.
+// WeightControl — очки одного признака дубликата (S-16); 0 выключает
+// признак.
 type WeightControl struct {
-	Signal  string `json:"signal"`
+	Signal string `json:"signal"`
+	// Name — поле признака в WeightForm: weight.<Signal>; пустое значение —
+	// вес экземпляра
+	Name    string `json:"name"`
 	Label   Text   `json:"label"`
 	Value   int    `json:"value"`
 	Default int    `json:"default"`
@@ -141,11 +157,19 @@ type DuplicatesMergePage struct {
 	Warning Notice          `json:"warning"` // что будет записано, что удалено
 	Actions []Action        `json:"actions"`
 }
+
+// MergeRow — свойство, о котором спрашивают (s-dup-1: поле с радио), или
+// объединяемое множеством (Union).
 type MergeRow struct {
-	Property Text   `json:"property"`
-	Options  []Text `json:"options"`
-	Chosen   int    `json:"chosen"`
-	Union    bool   `json:"union"`
+	// Property — подпись поля по-человечески: «Display name», «Organisation»,
+	// «Photo», «Title», «Location»
+	Property Text `json:"property"`
+	// Name — поле формы вопроса, choice.<свойство>: «choice.FN»; вариант
+	// уходит своим номером в Options (0, 1, …). У Union пусто
+	Name    string `json:"name"`
+	Options []Text `json:"options"`
+	Chosen  int    `json:"chosen"`
+	Union   bool   `json:"union"`
 }
 
 // TargetPicker — «куда» в шапке листа.
@@ -155,7 +179,11 @@ type TargetPicker struct {
 	New     *Action        `json:"new"` // строка под чертой: новая коллекция прямо отсюда (s-io-10…13)
 }
 type TargetOption struct {
-	ID       string `json:"id"`
+	ID string `json:"id"`
+	// Href — пункт меню «куда» ссылкой (U-8, s-io-10…13, s-profile-8): тот
+	// же экран с этим вариантом выбранным (GET); пусто, когда вариант —
+	// значение поля формы (сервер листа новой коллекции) или недоступен
+	Href     string `json:"href,omitempty"`
 	Label    Text   `json:"label"`
 	Stamp    Stamp  `json:"stamp"`
 	Colour   Colour `json:"colour"`
@@ -190,7 +218,10 @@ type MoveSheet struct {
 // Четыре листа коллекции (C-5.6). Родов записей они не различают: заголовок
 // берётся из Kind, а состав полей у всех четырёх один и тот же.
 type CollectionNewSheet struct {
-	Kind    Kind         `json:"kind"`
+	Kind Kind `json:"kind"`
+	// Title — заголовок листа по роду: «New calendar», «New address book»,
+	// «New task list», «New notebook», «New folder» (s-profile-5, -20, -21)
+	Title   Text         `json:"title"`
 	Target  TargetPicker `json:"target"`  // «на каком сервере»; неотвечающий виден с причиной
 	Note    Text         `json:"note"`    // почему в списке не все подключения
 	Form    Form         `json:"form"`    // имя, цвет, набор компонентов, адрес с подсказкой
@@ -199,7 +230,10 @@ type CollectionNewSheet struct {
 }
 
 type CollectionRenameSheet struct {
-	Kind    Kind     `json:"kind"`
+	Kind Kind `json:"kind"`
+	// Title — «Rename and colour» у календаря (s-profile-7), «Rename» у
+	// книги, подписки без цвета и папки (s-profile-18)
+	Title   Text     `json:"title"`
 	Stamp   Stamp    `json:"stamp"`   // имя сервера; у папки хранилища — сервер и папка, «sftpgo · vps · Documents» (s-profile-18); пусто у подписки — у неё имя местное
 	Form    Form     `json:"form"`    // имя и цвет одним листом: оба уходят одним запросом
 	Address Text     `json:"address"` // показан и не правится (S-12.2); пусто у папки хранилища: её имя и есть адрес
@@ -211,6 +245,7 @@ type CollectionRenameSheet struct {
 type CollectionMoveSheet struct {
 	Kind    Kind         `json:"kind"`
 	Copy    bool         `json:"copy"`    // тот же лист с другой кнопкой; исходная остаётся
+	Title   Text         `json:"title"`   // «Move calendar», «Copy address book», «Move folder» (s-profile-8)
 	Subject Text         `json:"subject"` // что переносят: «Дни рождения · nextcloud»
 	Target  TargetPicker `json:"target"`  // цель — подключение, а не коллекция (S-12.3)
 	Warning Runs         `json:"warning"` // завести там, перенести записи, удалить здесь — до начала; число записей жирным (s-profile-8)
@@ -219,6 +254,7 @@ type CollectionMoveSheet struct {
 
 type CollectionDeleteSheet struct {
 	Kind       Kind     `json:"kind"`
+	Title      Text     `json:"title"` // «Delete on the server» (s-profile-9, -19)
 	Subject    Text     `json:"subject"`
 	Warning    Runs     `json:"warning"`    // что именно исчезнет и что копии у Carrel нет; число жирным (s-profile-9, -19)
 	References []Text   `json:"references"` // что на неё ссылается: ссылки и устройства счётом, задания по имени

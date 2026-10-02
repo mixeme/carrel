@@ -8,6 +8,13 @@
       "method": "POST",
       "primary": true,
       "reason": "Choose a server."
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty",
+      "id": "collection.cancel",
+      "label": "Cancel",
+      "method": "GET"
     }
   ],
   "copy": false,
@@ -28,6 +35,7 @@
       },
       {
         "colour": "",
+        "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-rad-vps",
         "id": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-rad-vps",
         "label": "radicale · vps",
         "last": false,
@@ -37,6 +45,7 @@
       },
       {
         "colour": "",
+        "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-baikal",
         "id": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-baikal",
         "label": "baikal",
         "last": false,
@@ -55,5 +64,6 @@
       }
     ]
   },
+  "title": "Move address book",
   "warning": []
 }

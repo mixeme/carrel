@@ -199,13 +199,10 @@ func TestCombinedImportAndExportAsk(t *testing.T) {
 	if imp == nil || !imp.Enabled || exp == nil || !exp.Enabled {
 		t.Fatalf("combined bar = %+v", page.Bar.Actions)
 	}
-	// Import opens the wizard with its "Into" picker.
-	rec := f.h.do(get(imp.Href, f.sess))
-	if rec.Code != 303 {
-		t.Fatalf("import entry: %d", rec.Code)
-	}
-	wizard := decode[view.ImportPage](t, f.h.do(get(rec.Header().Get("Location"), f.sess)))
-	if len(wizard.Into.Options) == 0 || wizard.Into.Chosen == "" {
+	// Import opens the wizard with its "Into" picker, nothing chosen in it
+	// (U-6.9): the person chooses, the server does not.
+	wizard := decode[view.ImportPage](t, f.h.do(get(imp.Href, f.sess)))
+	if len(wizard.Into.Options) == 0 || wizard.Into.Chosen != "" {
 		t.Errorf("the wizard does not ask where: %+v", wizard.Into)
 	}
 	// Export opens the sheet of collections to hand over.

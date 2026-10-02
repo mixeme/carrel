@@ -17,6 +17,62 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.153 — 2026-10-03
+
+The conflict, the duplicates, the import and the collection sheets without
+scripts (U-8; the client's scan of these sections: РБ2, ДбБ2–ДбБ4, ИБ4–ИБ6,
+КА1, КА2, КГ2), and C-5 names what they read (ПБ9, ДбБ9, РБ9, ИБ10, КА4).
+
+### Fixed
+
+- **«Write this combination» wrote the person's edit over every row.** The
+  radios of the conflict had no names and stood in no form, so without
+  scripts the button sent no choice, and the server took «mine» for each
+  row — the server's value the person chose to keep was overwritten.
+  `ConflictPage.form` — POST …/conflict, `_csrf`, `etag`, `op=combine`; each
+  row's radio is `ConflictRow.name` (`choice.<n>`) with `mine` or `theirs`,
+  and `ConflictRow.choice` is what is chosen beforehand: a row the request
+  does not name takes it. The button is the form's; Use only my edit, Use
+  only the server version and Cancel stay forms of their own.
+- **The threshold and the weights sent nothing.** `ThresholdControl.form` —
+  `do=threshold` and the field `value`; `.weightForm` — POST
+  `…/decide?do=weights`, a field per signal by `WeightControl.name`
+  (`weight.<signal>`); Back to defaults sends the same form to `do=defaults`
+  (the instance's weights for all). `weightActions` is gone: its buttons are
+  `weightForm.actions`.
+- **The answer to a group's question went nowhere.** With something to
+  choose, `DuplicateGroup.form` — POST `/app/duplicates/decide`, `_csrf`,
+  `group`; the radios stand in it (`MergeRow.name`, `choice.<PROP>`, the
+  option's index) and its decisions are its buttons (`Action.submits`).
+  `MergeRow.property` is the label: «Display name», «Organisation»,
+  «Photo»; a photo's option is its server, «nextcloud».
+- **Preview file** named no file field: `import.choose` carries `file:
+  "file"`.
+- **«Into» and the folders of notes chose nothing without scripts:**
+  `TargetOption.href` — the wizard with that collection chosen, empty on a
+  read-only one; `FileTreeNode.href` on the nodes of the folder tree. The
+  move sheets of a record and of a collection and the export sheet carry
+  `href` too.
+- **The way in from a combined view chose «Into» in silence**: `GET
+  /app/{kind}/import` answers the wizard's first step with nothing chosen,
+  Preview file off with the reason, the rail back to the combined view.
+- **The four collection sheets** have their head (`title`: «New calendar»,
+  «Rename and colour», «Move calendar», «Delete on the server» …) and Cancel
+  (`collection.cancel`): back to `?back=` — a path of the app; the settings
+  pass `/app/settings/connections` — else the collection's list, a new
+  one's kind.
+
+### For consumers
+
+C-5 now names the parameters of `/app/search`, `/app/duplicates/decide`
+and `…/merge`, `…/{uid}/conflict`, `…/import` and the four collection
+sheets (guard `TestC5NamesTheFieldsOfTheCrossScreens`). Draw the conflict's
+radios by `ConflictRow.name` inside `ConflictPage.form`, its button first;
+a group with choices as its form; the weights menu as `weightForm`; «Into»
+items as links to `href`. Fixtures regenerated: the four conflicts, the
+duplicates, the import, the record's move, the four collection sheets and
+the connections page (the sheets' addresses carry `back`).
+
 ## v0.2.152 — 2026-10-03
 
 The notebook's panel carries both attachments its frame draws (the

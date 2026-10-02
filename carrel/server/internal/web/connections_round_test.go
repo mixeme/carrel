@@ -137,7 +137,7 @@ func TestFolderRenameSheetIsTheFrame(t *testing.T) {
 			got = append(got, string(r.Label))
 		}
 	}
-	if !equalStrings(got, fields) || len(sheet.Actions) != 1 || string(sheet.Actions[0].Label) != button {
+	if !equalStrings(got, fields) || len(sheet.Actions) != 2 || sheet.Actions[1].ID != "collection.cancel" || string(sheet.Actions[0].Label) != button {
 		t.Errorf("fields %q, actions %+v; the frame %q and %q", got, sheet.Actions, fields, button)
 	}
 }
@@ -202,7 +202,7 @@ func TestFolderDeleteSheetIsTheFrame(t *testing.T) {
 	if string(name.Label) != field[1] || name.Placeholder != "Docs" || name.Hint != "" {
 		t.Errorf("name = %+v, the frame %q with the name as its sample", name, field[1])
 	}
-	if len(sheet.Actions) != 1 || string(sheet.Actions[0].Label) != button {
+	if len(sheet.Actions) != 2 || sheet.Actions[1].ID != "collection.cancel" || string(sheet.Actions[0].Label) != button {
 		t.Errorf("actions = %+v, the frame %q", sheet.Actions, button)
 	}
 }

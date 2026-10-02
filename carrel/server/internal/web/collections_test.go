@@ -344,17 +344,17 @@ func TestRefusedCreateOffersBackAndAgain(t *testing.T) {
 	for _, a := range sheet.Actions {
 		labels = append(labels, string(a.Label))
 	}
-	if strings.Join(labels, "|") != "Back to the form|Try again" || !sheet.Actions[0].Primary || sheet.Actions[1].Primary {
+	if strings.Join(labels, "|") != "Back to the form|Try again|Cancel" || !sheet.Actions[0].Primary || sheet.Actions[1].Primary {
 		t.Fatalf("actions after a refusal = %+v", sheet.Actions)
 	}
-	for _, a := range sheet.Actions {
+	for _, a := range sheet.Actions[:2] {
 		if a.Method != "POST" || !a.Enabled || a.Href == "" {
 			t.Errorf("%s does not send the form: %+v", a.Label, a)
 		}
 	}
 	tries := f.srv.CountRequests("MKCALENDAR", "")
 	back := decode[view.CollectionNewSheet](t, f.h.do(postForm(sheet.Actions[0].Href, f.sess, form)))
-	if back.Failure != nil || rowNamed(t, back.Form, "name").Value != "Trips" || len(back.Actions) != 1 || back.Actions[0].Label != "Create" {
+	if back.Failure != nil || rowNamed(t, back.Form, "name").Value != "Trips" || len(back.Actions) != 2 || back.Actions[0].Label != "Create" {
 		t.Errorf("back to the form = failure %+v, actions %+v", back.Failure, back.Actions)
 	}
 	if n := f.srv.CountRequests("MKCALENDAR", "") - tries; n != 0 {

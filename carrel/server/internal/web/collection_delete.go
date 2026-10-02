@@ -34,13 +34,17 @@ func collectionDeleteQuery(conn sealed.Connection, col sealed.Collection) url.Va
 // for a file collection and one that is gone. It is not hidden on a read-only
 // row: the right to delete lives on the home, not on the collection, and a
 // refusal is shown when it happens (S-12.2).
-func (s *Server) collectionDeleteItem(conn sealed.Connection, col sealed.Collection) (view.MenuItem, bool) {
+func (s *Server) collectionDeleteItem(conn sealed.Connection, col sealed.Collection, back string) (view.MenuItem, bool) {
 	if col.Gone || col.Feed || len(col.Kinds) == 0 {
 		return view.MenuItem{}, false
 	}
+	q := collectionDeleteQuery(conn, col)
+	if back != "" {
+		q.Set("back", back)
+	}
 	item := view.MenuItem{Separator: true, Action: view.Action{
 		ID: "collection.delete", Label: "Delete on the server…", Icon: "i-trash",
-		Href:   s.postQuery("/app/collections/delete", collectionDeleteQuery(conn, col)),
+		Href:   s.postQuery("/app/collections/delete", q),
 		Method: "GET", Danger: true, Enabled: true,
 	}}
 	if col.Has(view.KindFile) && storageRoot(conn, col) {
@@ -86,15 +90,20 @@ func recordNoun(col sealed.Collection) string {
 
 // collectionDeleteSheet is the sheet; count is the resources the server holds
 // in it, or -1 when it did not say.
-func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connection, col sealed.Collection, count int, typed string, errText view.Text) view.CollectionDeleteSheet {
+func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connection, col sealed.Collection, count int, typed string, errText view.Text, back string) view.CollectionDeleteSheet {
 	noun, label, host := collectionNoun(col), collectionLabel(col), connLabel(conn)
 	what := []view.Run{plainRun("everything in it")}
 	if count > 0 {
 		what = append(allOf(count, recordNoun(col)), plainRun(" in it"))
 	}
-	action := "/app/collections/delete?" + collectionDeleteQuery(conn, col).Encode()
+	q := collectionDeleteQuery(conn, col)
+	if back != "" {
+		q.Set("back", back)
+	}
+	action := "/app/collections/delete?" + q.Encode()
 	sheet := view.CollectionDeleteSheet{
-		Kind: col.Kinds[0],
+		Kind:  col.Kinds[0],
+		Title: "Delete on the server",
 		// The server, then the collection (s-profile-9, s-profile-19).
 		Subject: text(host + " · " + label),
 		Warning: join("The "+noun+" and ", what, " are deleted on "+host+". Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."),
@@ -109,7 +118,10 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 			view.FormRow{Name: "name", Label: "Type the name to confirm", Kind: view.InputText, Value: text(typed),
 				Placeholder: text(label), Error: errText, Required: true},
 		), "name"),
-		Actions: []view.Action{{ID: "collection.delete.confirm", Label: "Delete on the server", Href: s.route(action), Method: "POST", Danger: true, Enabled: true}},
+		Actions: []view.Action{
+			{ID: "collection.delete.confirm", Label: "Delete on the server", Href: s.route(action), Method: "POST", Danger: true, Enabled: true},
+			s.sheetCancel(back, collectionList(conn, col)),
+		},
 	}
 	if count == 0 {
 		sheet.Warning = line(fmt.Sprintf("The %s is deleted on %s. It holds nothing now; Carrel keeps no copy of it either.", noun, host))
@@ -158,12 +170,12 @@ func (s *Server) getCollectionDelete(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if item, ok := s.collectionDeleteItem(conn, col); !ok || !item.Enabled {
+	if item, ok := s.collectionDeleteItem(conn, col, ""); !ok || !item.Enabled {
 		s.notFound(w, r)
 		return
 	}
 	count := s.countMembers(r.Context(), conn, col)
-	s.writePage(w, r, http.StatusOK, s.collectionDeleteSheet(sess, conn, col, count, "", ""))
+	s.writePage(w, r, http.StatusOK, s.collectionDeleteSheet(sess, conn, col, count, "", "", sheetBack(r.URL.Query().Get("back"))))
 }
 
 // postCollectionDelete deletes a collection whose name was typed. A name that
@@ -174,7 +186,7 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if item, ok := s.collectionDeleteItem(conn, col); !ok || !item.Enabled {
+	if item, ok := s.collectionDeleteItem(conn, col, ""); !ok || !item.Enabled {
 		s.notFound(w, r)
 		return
 	}
@@ -186,7 +198,7 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 			errText = text("Type the name to confirm: " + label)
 		}
 		count := s.countMembers(r.Context(), conn, col)
-		s.writePage(w, r, http.StatusOK, s.collectionDeleteSheet(sess, conn, col, count, typed, errText))
+		s.writePage(w, r, http.StatusOK, s.collectionDeleteSheet(sess, conn, col, count, typed, errText, sheetBack(r.URL.Query().Get("back"))))
 		return
 	}
 	client, err := dav.NewClient(s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)

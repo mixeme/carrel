@@ -547,9 +547,9 @@ func TestConflictScreenAndCombination(t *testing.T) {
 	// The name was changed, so N is part of that change and the screen says so
 	// (U-6.1): the card on the server carries none, and this one now would.
 	want := []view.ConflictRow{
-		{Property: "FN", Mine: "Ada King", Theirs: "Ada Byron", Choice: view.ChoiceUnset},
-		{Property: "N", Mine: "Ada, King", Theirs: "Empty", Choice: view.ChoiceUnset},
-		{Property: "TITLE", Mine: "Countess", Theirs: "Empty", Choice: view.ChoiceUnset},
+		{Property: "FN", Mine: "Ada King", Theirs: "Ada Byron", Choice: view.ChoiceMine, Name: "choice.0"},
+		{Property: "N", Mine: "Ada, King", Theirs: "Empty", Choice: view.ChoiceMine, Name: "choice.1"},
+		{Property: "TITLE", Mine: "Countess", Theirs: "Empty", Choice: view.ChoiceMine, Name: "choice.2"},
 	}
 	if len(page.Rows) != len(want) || page.Rows[0] != want[0] || page.Rows[1] != want[1] || page.Rows[2] != want[2] {
 		t.Fatalf("rows = %+v", page.Rows)
@@ -562,7 +562,9 @@ func TestConflictScreenAndCombination(t *testing.T) {
 		t.Errorf("conflict rail %+v, print %+v", nav, page.Print)
 	}
 
-	resp = f.h.do(postForm(actionHref(t, page.Actions, "conflict.combine"), f.sess, url.Values{"choice.0": {"theirs"}}))
+	choice := formFields(*page.Form)
+	choice.Set("choice.0", "theirs")
+	resp = f.h.do(postForm(page.Form.Action, f.sess, choice))
 	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != rec {
 		t.Fatalf("combine: %d %q %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
 	}

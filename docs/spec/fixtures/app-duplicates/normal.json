@@ -78,6 +78,7 @@
       ],
       "choices": [],
       "decision": "linked",
+      "form": null,
       "id": "g-artem",
       "kind": "contact",
       "reasons": [
@@ -244,31 +245,107 @@
   },
   "threshold": {
     "default": 60,
+    "form": {
+      "action": "/app/duplicates/decide",
+      "actions": [],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "do",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "threshold"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "number",
+              "label": "Match threshold",
+              "mono": true,
+              "name": "value",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "60"
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "note": "The instance's number. Set your own to change what is offered.",
     "value": 60,
-    "weightActions": [
-      {
-        "csrf": "csrf",
-        "enabled": true,
-        "href": "/app/duplicates/decide?do=weights",
-        "id": "duplicates.weights.save",
-        "label": "Save",
-        "method": "POST",
-        "primary": true
-      },
-      {
-        "csrf": "csrf",
-        "enabled": false,
-        "id": "duplicates.weights.defaults",
-        "label": "Back to defaults",
-        "method": "POST",
-        "reason": "Every weight is the default already."
-      }
-    ],
+    "weightForm": {
+      "action": "/app/duplicates/decide?do=weights",
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.weights.save",
+          "label": "Save",
+          "method": "POST",
+          "primary": true
+        },
+        {
+          "csrf": "csrf",
+          "enabled": false,
+          "id": "duplicates.weights.defaults",
+          "label": "Back to defaults",
+          "method": "POST",
+          "reason": "Every weight is the default already."
+        }
+      ],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "weights": [
       {
         "default": 80,
         "label": "Same UID",
+        "name": "weight.uid",
         "own": false,
         "signal": "uid",
         "value": 80
@@ -276,6 +353,7 @@
       {
         "default": 60,
         "label": "Same email",
+        "name": "weight.email",
         "own": false,
         "signal": "email",
         "value": 60
@@ -283,6 +361,7 @@
       {
         "default": 60,
         "label": "Same phone",
+        "name": "weight.phone",
         "own": false,
         "signal": "phone",
         "value": 60
@@ -290,6 +369,7 @@
       {
         "default": 20,
         "label": "Same name",
+        "name": "weight.name",
         "own": false,
         "signal": "name",
         "value": 20
@@ -297,6 +377,7 @@
       {
         "default": 10,
         "label": "Same birthday",
+        "name": "weight.birthday",
         "own": false,
         "signal": "birthday",
         "value": 10
@@ -304,6 +385,7 @@
       {
         "default": 70,
         "label": "Same title and date (events, tasks, notes)",
+        "name": "weight.title-date",
         "own": false,
         "signal": "title-date",
         "value": 70

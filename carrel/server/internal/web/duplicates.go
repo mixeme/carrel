@@ -289,7 +289,7 @@ func (s *Server) decideAction(id, label, group, do string) view.Action {
 	}
 }
 
-func (s *Server) groupView(st dupState, g dupGroup) view.DuplicateGroup {
+func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.DuplicateGroup {
 	out := view.DuplicateGroup{ID: g.id, Kind: g.kind, Score: g.score, Decision: g.decision}
 	for _, r := range g.reasons {
 		out.Reasons = append(out.Reasons, text(reasonText(g.kind, r)))
@@ -307,7 +307,7 @@ func (s *Server) groupView(st dupState, g dupGroup) view.DuplicateGroup {
 	cs := st.choices(g)
 	prefs := st.linkedPrefs(g.id)
 	for _, c := range cs {
-		row := view.MergeRow{Property: text(c.prop), Chosen: chosen(c, prefs)}
+		row := view.MergeRow{Property: text(choiceLabel(c.prop)), Name: "choice." + c.prop, Chosen: chosen(c, prefs)}
 		for _, o := range c.opts {
 			row.Options = append(row.Options, text(o.label))
 		}
@@ -328,7 +328,42 @@ func (s *Server) groupView(st dupState, g dupGroup) view.DuplicateGroup {
 			merge,
 		}
 	}
+	// With something to choose, the card is a form (U-8, s-dup-1): its
+	// radios stand in it, and every decision is a button of it sent to its
+	// own address — a decision of its own form inside it would be a form
+	// in a form. Merge on the server stays a link.
+	if len(cs) > 0 {
+		out.Form = &view.Form{Action: s.route("/app/duplicates/decide"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
+			csrfField(sess),
+			{Name: "group", Kind: view.InputHidden, Value: text(g.id)},
+		}}}}
+		for i := range out.Actions {
+			if out.Actions[i].Method == "POST" {
+				out.Actions[i].Submits = true
+			}
+		}
+	}
 	return out
+}
+
+// choiceLabels name a property asked about or joined, as the frame labels
+// a question (s-dup-1: «Display name», «Organisation», «Photo»): the
+// property is the file's, the label the person's. One Carrel does not
+// label is named as the file names it.
+var choiceLabels = map[string]string{
+	"FN": "Display name", "N": "Name", "ORG": "Organisation", "PHOTO": "Photo", "BDAY": "Birthday",
+	"ANNIVERSARY": "Anniversary", "GENDER": "Gender", "TEL": "Phone numbers", "EMAIL": "Email addresses",
+	"ADR": "Addresses", "NOTE": "Note", "CATEGORIES": "Tags", "URL": "Web address",
+	"SUMMARY": "Title", "DESCRIPTION": "Description", "LOCATION": "Location", "STATUS": "Status",
+	"PRIORITY": "Priority", "PERCENT-COMPLETE": "Percent complete", "COMPLETED": "Completed",
+	"ORGANIZER": "Organiser", "ATTENDEE": "Attendees", "CLASS": "Class", "TRANSP": "Busy", "COLOR": "Colour",
+}
+
+func choiceLabel(prop string) string {
+	if l, ok := choiceLabels[prop]; ok {
+		return l
+	}
+	return prop
 }
 
 func kindFilter(r *http.Request) view.Kind {
@@ -409,7 +444,7 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 			counts[g.kind]++
 		}
 		if only == "" || g.kind == only {
-			page.Groups = append(page.Groups, s.groupView(st, g))
+			page.Groups = append(page.Groups, s.groupView(sess, st, g))
 		}
 	}
 	segment := func(k view.Kind, label string, n int) view.Action {
@@ -433,27 +468,39 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 	}
 	page.Bar.Loaded = st.compared
 	page.Threshold = view.ThresholdControl{Value: st.threshold, Default: s.cfg.DuplicatesThreshold}
+	// The threshold is a form of its own (U-8, s-dup-1): the field goes by
+	// Enter, as the frame draws no button beside it.
+	page.Threshold.Form = view.Form{Action: s.route("/app/duplicates/decide"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
+		csrfField(sess),
+		{Name: "do", Kind: view.InputHidden, Value: "threshold"},
+		{Name: "value", Label: "Match threshold", Kind: view.InputNumber, Value: text(strconv.Itoa(st.threshold)), Mono: true},
+	}}}}
 	mine := s.dupWeights(st.blob)
-	// Save sends the fields as they stand; Back to defaults sends every one
-	// empty, which is the instance's weight again (s-dup-3).
-	defaults := url.Values{"do": {"weights"}}
 	owned := false
 	for _, sig := range dupes.Signals {
 		_, own := st.blob.Duplicates.Weights[string(sig)]
 		owned = owned || own
-		defaults.Set("weight."+string(sig), "")
 		page.Threshold.Weights = append(page.Threshold.Weights, view.WeightControl{
-			Signal: string(sig), Label: text(signalLabels[sig]), Value: dupes.Weight(mine, sig),
+			Signal: string(sig), Name: "weight." + string(sig), Label: text(signalLabels[sig]), Value: dupes.Weight(mine, sig),
 			Default: dupes.Weight(s.cfg.DuplicatesWeights, sig), Own: own,
 		})
 	}
-	reset := view.Action{ID: "duplicates.weights.defaults", Label: "Back to defaults", Href: s.postQuery("/app/duplicates/decide", defaults), Method: "POST", Enabled: owned}
+	// The menu of weights is a form (s-dup-3): Save sends the fields as
+	// they stand; Back to defaults sends the same form to do=defaults,
+	// which is the instance's weight for every signal. The address says
+	// what to do — a hidden do would be read before it.
+	reset := view.Action{ID: "duplicates.weights.defaults", Label: "Back to defaults", Href: s.postQuery("/app/duplicates/decide", url.Values{"do": {"defaults"}}),
+		Method: "POST", Enabled: owned, Submits: true}
 	if !owned {
-		reset.Href, reset.Reason = "", "Every weight is the default already."
+		reset.Href, reset.Reason, reset.Submits = "", "Every weight is the default already.", false
 	}
-	page.Threshold.WeightActions = []view.Action{
-		{ID: "duplicates.weights.save", Label: "Save", Href: s.postQuery("/app/duplicates/decide", url.Values{"do": {"weights"}}), Method: "POST", Primary: true, Enabled: true},
-		reset,
+	page.Threshold.WeightForm = view.Form{
+		Action: s.postQuery("/app/duplicates/decide", url.Values{"do": {"weights"}}), Method: "POST",
+		Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(sess)}}},
+		Actions: []view.Action{
+			{ID: "duplicates.weights.save", Label: "Save", Method: "POST", Primary: true, Enabled: true},
+			reset,
+		},
 	}
 	if st.blob.Duplicates.Threshold > 0 {
 		page.Threshold.Note = text(fmt.Sprintf("Your own number, kept with your decisions. The instance uses %d.", s.cfg.DuplicatesThreshold))
@@ -516,6 +563,14 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 				return nil
 			})
 		}
+		s.redirect(w, r, "/app/duplicates")
+		return
+	}
+	if do == "defaults" {
+		_ = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.weights", "", func(d *sealed.Duplicates) error {
+			d.Weights = nil
+			return nil
+		})
 		s.redirect(w, r, "/app/duplicates")
 		return
 	}
@@ -797,7 +852,9 @@ func (st dupState) choices(g dupGroup) []choice {
 			seen[v] = true
 			label := v
 			if prop == "PHOTO" {
-				label = string(l.from.stamp())
+				// A photo is told by where it lives: the server, as the
+				// frame names it (s-dup-1, «nextcloud», «radicale · vps»).
+				label = connLabel(l.from.conn)
 			}
 			c.opts = append(c.opts, choiceOption{label: label, ref: ref})
 		}

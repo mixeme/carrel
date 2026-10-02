@@ -344,13 +344,27 @@ type ConflictPage struct {
 	ReadAt   When          `json:"readAt"`
 	ServerAt When          `json:"serverAt"`
 	Rows     []ConflictRow `json:"rows"`
-	Actions  []Action      `json:"actions"` // Write this combination · Use only my edit · Use only the server version · Cancel
+	// Form — выбор по строкам без сценариев (U-8, s-conflict-1): POST
+	// …/conflict, скрытые _csrf, etag показанной версии и op=combine;
+	// строки шлют Name своей ConflictRow со значением mine или theirs (C-8
+	// ConflictChoice), а Actions — «Write this combination», её отправка.
+	// nil — писать нечего: запись удалена на сервере или не прочлась
+	Form *Form `json:"form"`
+	// Actions — Use only my edit · Use only the server version · Cancel:
+	// каждая своей формой (POST с op и etag в адресе); «Write this
+	// combination» — кнопка Form, рисуется первой (s-conflict-1)
+	Actions []Action `json:"actions"`
 }
 
 // ConflictRow — карточка расхождения, варианты столбиком.
 type ConflictRow struct {
-	Property Text           `json:"property"`
-	Mine     Text           `json:"mine"`
-	Theirs   Text           `json:"theirs"`
-	Choice   ConflictChoice `json:"choice"` // C-8
+	Property Text `json:"property"`
+	Mine     Text `json:"mine"`
+	Theirs   Text `json:"theirs"`
+	// Choice — что выбрано заранее (радио отмечено, C-8); его же сервер
+	// берёт, когда поле строки не пришло
+	Choice ConflictChoice `json:"choice"`
+	// Name — поле формы строки, choice.<номер строки>: радио «Your edit» —
+	// значение mine, «Server» — theirs (ConflictPage.Form)
+	Name string `json:"name"`
 }

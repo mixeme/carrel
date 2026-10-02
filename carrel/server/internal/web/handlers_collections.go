@@ -57,6 +57,9 @@ type collectionForm struct {
 	// back is the import wizard the sheet was opened from (S-19): the new
 	// collection goes back into it, chosen. Empty for any other way in.
 	back string
+	// ret is the screen the sheet was opened from (?back=, sheetBack), the
+	// wizard or any other: where Cancel leads. Empty — the kind's screen.
+	ret  string
 	errs map[string]view.Text
 }
 
@@ -69,6 +72,40 @@ func collectionBack(v string, k view.Kind) string {
 		return v
 	}
 	return ""
+}
+
+// sheetBack is the screen a collection sheet was opened from, as its address
+// names it (?back=): a path of this instance's app and nothing else — no
+// host, no scheme, no query, no way up. Anything else is no way back, and
+// the sheet goes back to its default.
+func sheetBack(v string) string {
+	u, err := url.Parse(v)
+	if v == "" || err != nil || u.Scheme != "" || u.Host != "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
+		return ""
+	}
+	p := u.EscapedPath()
+	if !strings.HasPrefix(p, "/app/") || strings.Contains(p, "..") || strings.Contains(p, "//") || strings.ContainsAny(p, "\\\x00") {
+		return ""
+	}
+	return p
+}
+
+// sheetCancel is the way out of a collection sheet (s-profile-5 … -9, Esc):
+// back where it was opened, else to def.
+func (s *Server) sheetCancel(back, def string) view.Action {
+	if back == "" {
+		back = def
+	}
+	return view.Action{ID: "collection.cancel", Label: "Cancel", Href: s.route(back), Method: "GET", Enabled: true}
+}
+
+// collectionList is the screen a sheet of the collection goes back to when
+// its address names none: the collection's list, a folder its root folder.
+func collectionList(conn sealed.Connection, col sealed.Collection) string {
+	if col.Has(view.KindFile) {
+		return fileHref(conn.ID, col.Path, "", nil, true)
+	}
+	return origin{conn: conn, col: col}.listPath(segmentOf(col.Kinds[0]))
 }
 
 func newCollectionKind(v string) (k view.Kind, choice, ok bool) {
@@ -160,6 +197,7 @@ func (s *Server) getCollectionNew(w http.ResponseWriter, r *http.Request) {
 	if !f.kindChoice {
 		f.back = collectionBack(q.Get("back"), f.kind)
 	}
+	f.ret = sheetBack(q.Get("back"))
 	if f.kindChoice {
 		conn, known := blob.Connection(f.account)
 		if !known && len(blob.Connections) > 0 {
@@ -207,6 +245,7 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	if !f.kindChoice {
 		f.back = collectionBack(r.URL.Query().Get("back"), f.kind)
 	}
+	f.ret = sheetBack(r.URL.Query().Get("back"))
 	if f.kindChoice {
 		if f.kind, _, ok = newCollectionKind(r.PostFormValue("kind")); !ok || f.kind == "" {
 			f.kind = view.KindEvent
@@ -666,7 +705,10 @@ func countWord(n int) string {
 
 func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f collectionForm, failure *view.Notice) view.CollectionNewSheet {
 	noun := newCollectionTitle(f.kind)
-	sheet := view.CollectionNewSheet{Kind: f.kind, Failure: failure}
+	sheet := view.CollectionNewSheet{Kind: f.kind, Title: newCollectionHeads[f.kind], Failure: failure}
+	if f.kindChoice {
+		sheet.Title = "New collection"
+	}
 	var eligible []sealed.Connection
 	var holding int
 	var silent []string
@@ -706,13 +748,19 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	}
 
 	action := "/app/collections/new"
+	q := url.Values{}
 	if !f.kindChoice {
-		q := url.Values{"kind": {string(f.kind)}}
-		if f.back != "" {
-			q.Set("back", f.back)
-		}
+		q.Set("kind", string(f.kind))
+	}
+	if f.ret != "" {
+		q.Set("back", f.ret)
+	}
+	if len(q) > 0 {
 		action += "?" + q.Encode()
 	}
+	// The way out (s-profile-5, Esc): where the sheet was opened, else the
+	// screen of its kind.
+	cancel := s.sheetCancel(f.ret, newCollectionDefault(f.kind))
 	errs := f.errs
 	rows := []view.FormRow{csrfField(sess)}
 	if f.kindChoice {
@@ -765,6 +813,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		}
 		sheet.Actions = []view.Action{create}
 		s.afterRefusal(&sheet, action)
+		sheet.Actions = append(sheet.Actions, cancel)
 		return sheet
 	}
 	if f.kind != view.KindContact {
@@ -795,7 +844,25 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	}
 	sheet.Actions = []view.Action{create}
 	s.afterRefusal(&sheet, action)
+	sheet.Actions = append(sheet.Actions, cancel)
 	return sheet
+}
+
+// newCollectionHeads are the heads of the new-collection sheet by kind
+// (s-profile-5, -20, -21; «New task list», «New notebook» as «Into» of the
+// import names them, s-io-10…13).
+var newCollectionHeads = map[view.Kind]view.Text{
+	view.KindContact: "New address book", view.KindEvent: "New calendar", view.KindTask: "New task list",
+	view.KindNote: "New notebook", view.KindFile: "New folder",
+}
+
+// newCollectionDefault is where a new-collection sheet opened from nowhere
+// in particular goes back to: the kind's screen.
+func newCollectionDefault(k view.Kind) string {
+	if k == view.KindFile {
+		return "/app/files"
+	}
+	return "/app/" + segmentOf(k)
 }
 
 // afterRefusal is the foot of a sheet the server refused (s-profile-6): the
@@ -848,7 +915,7 @@ func (s *Server) getCollectionRename(w http.ResponseWriter, r *http.Request) {
 	if !inPalette(colour) {
 		colour = ""
 	}
-	s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, col.Name, colour, nil, nil))
+	s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, col.Name, colour, nil, nil, sheetBack(r.URL.Query().Get("back"))))
 }
 
 // postCollectionRename writes the name, and the colour of a calendar, in one
@@ -869,7 +936,7 @@ func (s *Server) postCollectionRename(w http.ResponseWriter, r *http.Request) {
 		errs["colour"] = text("Choose one of the colours shown.")
 	}
 	if len(errs) > 0 {
-		s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, name, colour, errs, nil))
+		s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, name, colour, errs, nil, sheetBack(r.URL.Query().Get("back"))))
 		return
 	}
 	if conn.Feed {
@@ -896,7 +963,7 @@ func (s *Server) postCollectionRename(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, name, colour, nil,
-			davRefusal(renameRefusal, conn, "PROPPATCH", col.Path, err)))
+			davRefusal(renameRefusal, conn, "PROPPATCH", col.Path, err), sheetBack(r.URL.Query().Get("back"))))
 		return
 	}
 	if err := s.users.RenameCollection(sess.AccountID(), key, conn.ID, col.Path, name, colour); err != nil {
@@ -906,8 +973,13 @@ func (s *Server) postCollectionRename(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/app/settings/connections")
 }
 
-func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connection, col sealed.Collection, name, colour string, errs map[string]view.Text, failure *view.Notice) view.CollectionRenameSheet {
-	action := "/app/collections/rename?" + url.Values{"a": {conn.ID}, "c": {col.Path}}.Encode()
+func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connection, col sealed.Collection, name, colour string, errs map[string]view.Text, failure *view.Notice, back string) view.CollectionRenameSheet {
+	q := url.Values{"a": {conn.ID}, "c": {col.Path}}
+	if back != "" {
+		q.Set("back", back)
+	}
+	action := "/app/collections/rename?" + q.Encode()
+	cancel := s.sheetCancel(back, collectionList(conn, col))
 	rows := []view.FormRow{
 		csrfField(sess),
 		{Name: "name", Label: "Name", Kind: view.InputText, Value: text(name), Required: true, Error: errs["name"]},
@@ -919,12 +991,17 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 		if !col.Has(view.KindContact) {
 			rows[len(rows)-1] = paletteRow(colour, errs["colour"], "Kept here: a feed sends no colour of its own.")
 		}
+		title := view.Text("Rename and colour")
+		if col.Has(view.KindContact) {
+			title = "Rename"
+		}
 		return view.CollectionRenameSheet{
 			Kind:    col.Kinds[0],
+			Title:   title,
 			Form:    focused(s.plainForm(action, "POST", rows...), "name"),
 			Address: text(conn.Server),
 			Note:    "The name is yours: it stays in Carrel and is never sent to the feed.",
-			Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Primary: true, Enabled: true}},
+			Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Primary: true, Enabled: true}, cancel},
 		}
 	}
 	// The frame's words (s-profile-7); a book has no colour to write.
@@ -934,14 +1011,21 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 		note = "Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. " +
 			"The new name is written to the server — other clients will show it at their next sync."
 	}
+	// The head says what the sheet changes (s-profile-7, -18): a book and a
+	// folder have no colour to write.
+	title := view.Text("Rename and colour")
+	if col.Has(view.KindContact) || col.Has(view.KindFile) {
+		title = "Rename"
+	}
 	sheet := view.CollectionRenameSheet{
 		Kind:    col.Kinds[0],
+		Title:   title,
 		Stamp:   view.Stamp(connLabel(conn)),
 		Form:    focused(s.plainForm(action, "POST", rows...), "name"),
 		Address: text(serverOrigin(conn.Server) + col.Path),
 		Note:    text(note),
 		Failure: failure,
-		Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Primary: true, Enabled: true}},
+		Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Primary: true, Enabled: true}, cancel},
 	}
 	if col.Has(view.KindFile) {
 		// A folder's name is its address (S-12.1): renaming it moves it, and

@@ -291,7 +291,7 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 
 	q := url.Values{}
 	for _, qn := range plan.Questions {
-		row := view.MergeRow{Property: text(qn.Prop)}
+		row := view.MergeRow{Property: text(choiceLabel(qn.Prop)), Name: "choice." + qn.Prop}
 		chosen := 0
 		if n, ok := choices[qn.Prop]; ok && n >= 0 && n < len(qn.Options) {
 			chosen = n
@@ -304,7 +304,7 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 		q.Set("choice."+qn.Prop, strconv.Itoa(chosen))
 	}
 	for _, prop := range plan.Union {
-		row := view.MergeRow{Property: text(prop), Union: true}
+		row := view.MergeRow{Property: text(choiceLabel(prop)), Union: true}
 		for _, v := range merged.Props()[prop] {
 			row.Options = append(row.Options, text(valueText(calendar, prop, v, target)))
 		}

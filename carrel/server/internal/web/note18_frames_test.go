@@ -173,11 +173,11 @@ func TestBackToDefaultsIsOffAsTheFrameDraws(t *testing.T) {
 	}
 	f := newDupFixture(t)
 	f.load(t)
-	reset := f.page(t).Threshold.WeightActions[1]
+	reset := f.page(t).Threshold.WeightForm.Actions[1]
 	if string(reset.Label) != m[2] || reset.Enabled || string(reset.Reason) != m[1] {
 		t.Errorf("Back to defaults = %+v, the frame %q off with %q", reset, m[2], m[1])
 	}
-	sameActionMarks(t, "s-dup-7", "weights", f.page(t).Threshold.WeightActions, nil)
+	sameActionMarks(t, "s-dup-7", "weights", f.page(t).Threshold.WeightForm.Actions, nil)
 }
 
 // s-contacts-18: a day that is not there is refused under the field in the

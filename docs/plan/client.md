@@ -2611,6 +2611,9 @@ From Files (`s-files-17`, `attach.go`), сообщения листов (`s-file
   кадра, набору — записи кадра.
 - **ПБ9.** C-5: у `/app/search` не названо ни одного параметра — `q`, `kind`
   (сегменты), `filter`, `again` знает только код сервера (как ФБ8).
+  **Закрыт `v0.2.153`:** C-5.3 называет `q` (поле `SearchBox.Name`), `kind`
+  (сегменты), `filter` и `again` («Search again»); сторож
+  `TestC5NamesTheFieldsOfTheCrossScreens`.
 
 ### В. Подсказки поля поиска (`SearchBox`, `s-find-2`, `-3`)
 
@@ -2709,11 +2712,20 @@ server» — ссылка, подтверждение слияния — POST с
   (`postDuplicatesDecide`), C-5 их не называет; поле, которое ничего не
   шлёт (смысл красный). Нужна форма порога (POST `/app/duplicates/decide`,
   скрытые `_csrf`, `do`, строка `value`).
+  **Закрыт `v0.2.153`:** `ThresholdControl.Form` — POST
+  `/app/duplicates/decide`, скрытые `_csrf` и `do=threshold`, строка `value`
+  (число, моноширинно, подпись «Match threshold»); уходит по Enter. Поле в
+  шапке без формы — задача Typecase 131.
 - **ДбБ3.** Веса (`s-dup-3`, `-7`): поля «Yours» уходят как
   `weight.<Signal>` — имя экран собирал бы сам; Save — POST без формы
   (`WeightActions`), Back to defaults — POST с пустыми полями в адресе. Нужна
   форма весов (адрес, скрытые, строка на признак с именем) — меню-форма в
   библиотеке есть (`Menu.Action`, `MenuField`).
+  **Закрыт `v0.2.153`:** `ThresholdControl.WeightForm` — POST
+  `…/decide?do=weights`, скрытый `_csrf`; поле признака — `WeightControl.Name`
+  (`weight.<признак>`); кнопки — `WeightForm.Actions`: Save (отправка формы) и
+  Back to defaults — та же форма на `do=defaults` (`Action.Submits`).
+  `WeightActions` снят.
 - **ДбБ4.** Выбор значения при расхождении: кадр — поле на свойство с
   подписью «Display name», «Organisation», «Photo» и радио вариантов
   («nextcloud», «radicale · vps» у фото); модель — `MergeRow.Property` —
@@ -2724,6 +2736,13 @@ server» — ссылка, подтверждение слияния — POST с
   (смысл красный). Нужна форма группы (адрес решения, скрытые `group`,
   строка `choice.<PROP>` с вариантами-значениями, подпись свойства);
   «Not duplicates» и «Unlink» — свои `PostForm`, как сейчас.
+  **Закрыт `v0.2.153`:** `DuplicateGroup.Form`, когда выбирать есть что: POST
+  `/app/duplicates/decide`, скрытые `_csrf` и `group`; радио вопросов —
+  `MergeRow.Name` (`choice.FN`), вариант — номер в `Options`; решения группы —
+  кнопки формы (`Action.Submits`, `do` и `group` в адресе), Merge on the
+  server — ссылка. `MergeRow.Property` — подпись («Display name»,
+  «Organisation», «Photo»; у слияния так же), вариант фото — сервер
+  («nextcloud»). Карточка формой у библиотеки — задача Typecase 131.
 - **ДбБ5.** Строка участника по роду — как ПБ4: кадр — `FaceRow` (аватар,
   телефон, почта, организация), `TimeRow` («all day», место «—», бейдж
   «repeats weekly»), `DueRow` (галка, теги, срок «12 Aug 18:00», «—»),
@@ -2755,6 +2774,10 @@ server» — ссылка, подтверждение слияния — POST с
   `choice.<PROP>`, `value`, `weight.<signal>` знает только код; у
   `/app/duplicates/merge` — ни одного (`group`, `into`, `choice.<PROP>`,
   `v.<n>`).
+  **Закрыт `v0.2.153`:** C-5.3 называет `do` (`link`, `ignore`, `again`,
+  `choose`, `unlink`, `threshold`, `weights`, `defaults`), `group`,
+  `choice.<свойство>`, `value`, `weight.<признак>`; у слияния — `group`,
+  `into`, `choice.<свойство>`, `v.<место>`.
 
 ### В. Слияние (`DuplicatesMergePage`, `s-dup-2`, `-4`, `-5`)
 
@@ -2869,6 +2892,14 @@ combination» не работает:** выбор по строкам — рад
   расхождение с именем и значениями `mine`, `theirs`), «Write this
   combination» — её отправка; остальные три — свои формы. Смысл красный («a
   field without Name») на всех четырёх фикстурах; библиотека — РЖ1.
+  **Закрыт `v0.2.153`:** `ConflictPage.Form` — POST `…/conflict`, скрытые
+  `_csrf`, `etag`, `op=combine`; радио строки — `ConflictRow.Name`
+  (`choice.<n>`) со значениями `mine`, `theirs`; выбранное заранее —
+  `ConflictRow.Choice`, его же сервер берёт за строку, которой в запросе нет
+  (прежде — «моё» за всё). «Write this combination» — кнопка формы
+  (`Form.Actions`), прочие три — `Actions`, каждая своей формой. Красная до
+  правки — `TestConflictCombinationWithoutScripts`. `Diff` в форме — задача
+  Typecase 132.
 - **РБ3.** Вид расхождения: кадр — у свойства справа «both changed», «only
   in your edit», «only on the server», и от него слова вариантов: «Your
   edit» / «Server», «Your edit · include» / «Leave it out», «Your edit» /
@@ -2905,6 +2936,8 @@ combination» не работает:** выбор по строкам — рад
   кадры их не рисуют (РЖ3).
 - **РБ9.** C-5: у `…/{uid}/conflict` не названы `op` (`combine`, `mine`,
   `theirs`, `cancel`), `etag`, `choice.<n>`.
+  **Закрыт `v0.2.153`:** C-5.4 называет `op` (`combine`, `mine`, `theirs`,
+  `cancel`), `etag`, `choice.<n>`.
 
 ### Е. Слова кадра без поля в модели
 
@@ -2998,15 +3031,24 @@ Import остаётся (U-8), а на экране не сказано (зад�
   сведённого вида (`/app/{kind}/import`) отвечает редиректом в мастер первой
   записываемой коллекции («Архив») — «Into» выбрано молча, а C-5 и U-6.9
   говорят: мастер спрашивает «Into».
+  **Закрыт `v0.2.153`:** `TargetOption.Href` — мастер с этой коллекцией
+  выбранной (пусто у только для чтения); так же у переноса записи и листа
+  экспорта. Вход из сведённого вида (`/app/{kind}/import`) отвечает первым
+  шагом мастера без выбранного «Into»: Preview file выключена с причиной, рейл
+  — назад в сведённый вид.
 - **ИБ5.** Поле файла: Preview file (`import.choose`) — POST без
   `Action.File`, а сервер читает часть `file` (`importPart`); без
   сценариев файл не уходит (как ФБ13). Подпись поля по роду — «vCard file»,
   «Markdown or a zip of them» — поля нет (`Source.Kinds` — только `accept`).
   Подстановка подписи.
+  **Закрыт частично `v0.2.153`:** `import.choose` несёт `File: "file"`.
+  Подпись поля по роду — ниже.
 - **ИБ6.** Папка заметок (`s-io-4`): узлы дерева — адрес выбора в
   `FileTreeNode.ID`, без `Href` (как ФГ2 до `v0.2.147`) — без сценариев
   папку не выбрать; хвост корня — «sftpgo», «nextcloud» (подключение), у
   модели `Stamp` «sftpgo · vps · Documents» (как ФГ6).
+  **Закрыт частично `v0.2.153`:** `FileTreeNode.Href` у узлов дерева папок
+  (тот же адрес, что `ID`). Хвост корня — ниже.
 - **ИБ7.** Таблица предпросмотра: кадр отмечает ячейки — результат с ошибкой
   тревогой («vCard 2.1 quoted-printable: cannot decode line 12»),
   пропущенное и пустой срок приглушённо, «— (no FN)» блёкло, чужой род —
@@ -3026,6 +3068,8 @@ Import остаётся (U-8), а на экране не сказано (зад�
   фразы (расширение и коллекция). Бросок на открытую карточку (`s-io-2`) —
   вложение, оно есть (U-6.2).
 - **ИБ10.** C-5: у мастера не названы `to`, `into`, `op` (`cancel`, `run`,
+  `folder`), `folder`, `path`, `in` и поле файла `file`.
+  **Закрыт `v0.2.153`:** C-5.4 называет `to`, `into`, `op` (`run`, `cancel`,
   `folder`), `folder`, `path`, `in` и поле файла `file`.
 
 ### Е. Слова кадра без поля в модели
@@ -3099,11 +3143,20 @@ Typecase 2, защит и `bind` 1, вопросов к кадрам 1.
   «Delete on the server» (`-9`, `-19`); у четырёх моделей поля нет (`Kind`,
   `Copy` — экран собирал бы слова по роду, а это данные; у `MoveSheet`
   записи `Title` есть). Подстановка.
+  **Закрыт `v0.2.153`:** `Title` у четырёх листов: «New calendar», «New
+  address book», «New task list», «New notebook», «New folder» (без рода —
+  «New collection»); «Rename and colour» у календаря, «Rename» у книги и
+  папки; «Move …» / «Copy …» по роду коллекции; «Delete on the server».
 - **КА2.** Cancel и Esc в подвале каждого листа — в модели нет ни Cancel,
   ни адреса возврата (`back` — только у новой коллекции из мастера
   импорта): без сценариев лист — страница, и уйти с неё некуда, кроме
   «назад» браузера. Нужен Cancel с адресом экрана, откуда лист открыт (как
   у `FileOpSheet`). Подстановка.
+  **Закрыт `v0.2.153`:** Cancel (`collection.cancel`, GET) последним в
+  `Actions` каждого листа: `?back=` листа (путь приложения, `sheetBack`;
+  Connections шлют `/app/settings/connections`, варианты переноса и формы его
+  несут), без него — список коллекции (у папки — её корень), у новой — экран
+  рода. Лист формой у библиотеки — задача Typecase 134.
 - **КА3.** Подсказки полей с кусками и словами кадра: «Two of three are
   listed: ‹baikal› is not answering…», «Written to the server as
   ‹calendar-color› — DAVx5 and Thunderbird will show the same one.», «…
@@ -3116,6 +3169,9 @@ Typecase 2, защит и `bind` 1, вопросов к кадрам 1.
 - **КА4.** C-5: у `new` названы `back`, `kind`, `a`, `components`; у
   `rename`, `move`, `delete` — ни одного (`a`, `c`, `to`, `copy`), у `new`
   нет `op=back` («Back to the form» отказа).
+  **Закрыт `v0.2.153`:** C-5.6 называет `kind`, `a`, `c`, `to`, `copy`,
+  `back`, `components`, `op=back` и поля форм (`account`, `name`, `colour`,
+  `address`).
 
 ### Б. Новая коллекция (`CollectionNewSheet`, `s-profile-5`, `-6`, `-13`, `-20`, `-21`)
 
@@ -3162,6 +3218,8 @@ Typecase 2, защит и `bind` 1, вопросов к кадрам 1.
   у закрытых, а сервер, который не отвечает (baikal; лист новой коллекции
   его закрывает «not answering»), здесь подходящий. Нужны `Href` и проверка
   «отвечает ли» как у новой коллекции.
+  **Закрыт частично `v0.2.153`:** `TargetOption.Href` у подходящих серверов
+  (лист с ним выбранным), у закрытых пусто. Хвост узла и «отвечает ли» — ниже.
 - **КГ3.** Слова предупреждения: «Carrel creates a address book there…» —
   артикль перед гласной («an address book»).
 

@@ -182,11 +182,11 @@ func (s *Server) createFolder(w http.ResponseWriter, r *http.Request, sess *sess
 func (s *Server) renameFileCollection(w http.ResponseWriter, r *http.Request, sess *session.Session, key [32]byte, conn sealed.Connection, col sealed.Collection, name string) {
 	switch {
 	case storageRoot(conn, col):
-		s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, name, "", map[string]view.Text{"name": storageRootReason}, nil))
+		s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, name, "", map[string]view.Text{"name": storageRootReason}, nil, sheetBack(r.URL.Query().Get("back"))))
 		return
 	case file.CheckName(name) != nil:
 		s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, name, "",
-			map[string]view.Text{"name": "A name cannot be “.” or “..”, and cannot hold “/” or “\\”."}, nil))
+			map[string]view.Text{"name": "A name cannot be “.” or “..”, and cannot hold “/” or “\\”."}, nil, sheetBack(r.URL.Query().Get("back"))))
 		return
 	case name == collectionLabel(col):
 		s.redirect(w, r, "/app/settings/connections")
@@ -195,7 +195,7 @@ func (s *Server) renameFileCollection(w http.ResponseWriter, r *http.Request, se
 	renamed, err := s.renameFolder(r.Context(), conn, col, name)
 	if err != nil {
 		s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, name, "", nil,
-			davRefusal(renameRefusal, conn, "MOVE", col.Path, err)))
+			davRefusal(renameRefusal, conn, "MOVE", col.Path, err), sheetBack(r.URL.Query().Get("back"))))
 		return
 	}
 	if err := s.users.PlaceMovedCollection(sess.AccountID(), key, conn.ID, col.Path, conn.ID, renamed, true); err != nil {

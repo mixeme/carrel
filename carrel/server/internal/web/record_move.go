@@ -102,6 +102,8 @@ func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, de
 				opt.ReadOnly, opt.Reason = true, "already there"
 			case col.ReadOnly:
 				opt.ReadOnly, opt.Reason = true, "read-only"
+			default:
+				opt.Href = opt.ID // the sheet with it chosen (U-8)
 			}
 			sheet.Target.Options = append(sheet.Target.Options, opt)
 		}
