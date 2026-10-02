@@ -384,8 +384,8 @@ func (s *Server) backupPage(sess *session.Session, editing *sealed.BackupJob, er
 	return s.backupPageWith(sess, editing, errs, nil, nil, notices...)
 }
 
-// backupPageIssued is the page right after a trigger was issued: its command
-// and secret, shown this once.
+// backupPageIssued is the page right after a trigger was issued: by job, the
+// address a script reaches Carrel at, and the secret, shown this once.
 func (s *Server) backupPageIssued(sess *session.Session, commands, secrets map[string]string) view.BackupPage {
 	return s.backupPageWith(sess, nil, nil, commands, secrets)
 }
@@ -425,10 +425,7 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 			row.Runs = append(row.Runs, run)
 		}
 		row.Clock, row.ClockHint = s.triggerTick(sess, job, commands), triggerPrice
-		row.Trigger = s.triggerBlock(sess, job, commands)
-		if row.Trigger != nil && secrets[job.ID] != "" {
-			row.Trigger.Password.Value = text(secrets[job.ID])
-		}
+		row.Trigger = s.triggerBlock(sess, job, commands, secrets)
 		// The row is what a job is opened for, Run and Edit (s-backup-1);
 		// the trigger is turned off on its card and the job deleted on its
 		// page (s-backup-2).

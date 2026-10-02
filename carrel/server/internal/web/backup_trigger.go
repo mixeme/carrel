@@ -13,10 +13,12 @@ import (
 )
 
 // What the screen hands over for the external trigger is not the secret but
-// the thing to paste where the clock already is (S-24.4): a crontab line for
-// a job that writes to WebDAV — one step, start it — a line with -o for a
-// job that downloads, and a short script for Both, which has two steps: start
-// it, wait, take the file. The secret is shown once, when it is issued.
+// the thing to paste where the clock already is (S-24.4, s-backup-2…5): for
+// a job that writes to WebDAV — one step, start it — a crontab line; for one
+// that downloads, and for Both, a short script — somebody has to take the
+// stream — and the line that runs it; the fields of a GoSentry job, a Gitea
+// workflow, the request alone, and what the secret opens. The secret is
+// shown once, when it is issued.
 
 // publicOrigin is Carrel's address as a script outside reaches it:
 // CARREL_PUBLIC_URL, else the address this request came to.
@@ -31,28 +33,80 @@ func (s *Server) publicOrigin(r *http.Request) string {
 	return scheme + "://" + r.Host
 }
 
-// triggerCommand is what to paste for job with secret, reaching base.
-func triggerCommand(base string, job sealed.BackupJob, secret string) string {
-	h := "Authorization: Bearer " + secret
+// triggerSchedule is the schedule the handed-over lines carry, and its time
+// as the card says it: it is changed there, on the machine that keeps it.
+const (
+	triggerSchedule = "0 3 * * *"
+	triggerAt       = "03:00"
+	triggerHeader   = "Authorization"
+)
+
+// triggerScript is the script a job that downloads needs: somebody has to be
+// at the other end of the stream. Download takes the archive in the request
+// that builds it; Both starts the copy, waits for it, and takes the file.
+// The date lives in the script: cron reads % as a newline.
+func triggerScript(base string, job sealed.BackupJob, secret string) string {
 	q := url.Values{"job": {job.ID}}.Encode()
-	switch job.Mode {
-	case sealed.BackupToDownload:
-		// cron reads % as a newline: \% keeps the date in the line.
-		return "0 3 * * * curl -fsS -H '" + h + "' -o /var/backups/carrel-" + job.ID + "-$(date +\\%F).zip '" + base + "/api/backup/download?" + q + "'"
-	case sealed.BackupToBoth:
-		return strings.Join([]string{
-			"#!/bin/sh",
-			"set -eu",
-			"h='" + h + "'",
-			"b=" + base + "/api/backup",
-			"out=/var/backups",
-			`id=$(curl -fsS -X POST -H "$h" "$b/run?` + q + `")`,
-			`until [ "$(curl -fsS -H "$h" "$b/status?id=$id")" != running ]; do sleep 20; done`,
-			`curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-` + job.ID + `-$(date +%F).zip"`,
-		}, "\n")
-	default:
-		return "0 3 * * * curl -fsS -m 30 -X POST -H '" + h + "' '" + base + "/api/backup/run?" + q + "'"
+	head := []string{"#!/bin/sh", "set -eu", "h='" + triggerHeader + ": Bearer " + secret + "'", "b=" + base + "/api/backup", "out=/var/backups", ""}
+	if job.Mode == sealed.BackupToDownload {
+		return strings.Join(append(head, `curl -fsS -H "$h" "$b/download?`+q+`" -o "$out/carrel-`+job.ID+`-$(date +%F).zip"`), "\n")
 	}
+	return strings.Join(append(head,
+		`id=$(curl -fsS -X POST -H "$h" "$b/run?`+q+`")`,
+		`until [ "$(curl -fsS -H "$h" "$b/status?id=$id")" != running ]; do sleep 20; done`,
+		`curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-`+job.ID+`-$(date +%F).zip"`,
+	), "\n")
+}
+
+// triggerTabs fills the card with what each tab hands over for job, with
+// secret, reaching base (s-backup-2…5): crontab — the line that starts a
+// copy, or the script and the line that runs it; GoSentry — the fields of
+// its job dialog; Gitea — a workflow of Gitea Actions on the same schedule,
+// the secret by the name of a repository secret; curl — the request alone;
+// and what the secret opens.
+func triggerTabs(b *view.TriggerBlock, base string, job sealed.BackupJob, secret string) {
+	q := url.Values{"job": {job.ID}}.Encode()
+	runURL := base + "/api/backup/run?" + q
+	bearer := triggerHeader + ": Bearer " + secret
+	b.Shown, b.At, b.Header = true, triggerAt, triggerHeader
+	b.Script = job.Mode == sealed.BackupToDownload || job.Mode == sealed.BackupToBoth
+	b.Curl = text("curl -fsS -m 30 -X POST -H '" + bearer + "' '" + runURL + "'")
+	b.GoSentry = view.GoSentryJob{Name: text("Carrel · " + job.Name), Folder: "Backup", Schedule: triggerSchedule}
+	b.Status = text("GET /api/backup/status?" + q)
+	b.GiteaSecret = text("CARREL_BACKUP_" + strings.ToUpper(strings.ReplaceAll(job.ID, "-", "_")))
+	b.GiteaFile = text(".gitea/workflows/carrel-" + job.ID + ".yml")
+	fromRepo := "${{ secrets." + string(b.GiteaSecret) + " }}"
+	gitea := []string{"name: Carrel · " + job.Name, "on:", "  schedule:", "    - cron: '" + triggerSchedule + "'", "  workflow_dispatch:",
+		"jobs:", "  backup:", "    runs-on: ubuntu-latest", "    steps:"}
+	if b.Script {
+		name := "carrel-" + job.ID + ".sh"
+		b.Command, b.ScriptName = text(triggerScript(base, job, secret)), text(name)
+		b.CronLine = text(triggerSchedule + " /usr/local/bin/" + name)
+		b.GoSentry.Command = text("/usr/local/bin/" + name)
+		// The same script with the repository's secret; the run keeps the
+		// archive it took.
+		gitea = append(gitea, "      - run: |")
+		for _, l := range strings.Split(triggerScript(base, job, fromRepo), "\n")[1:] {
+			if l == "out=/var/backups" {
+				l = "out=."
+			}
+			gitea = append(gitea, strings.TrimRight("          "+l, " "))
+		}
+		gitea = append(gitea, "      - uses: actions/upload-artifact@v3", "        with:", "          name: carrel-"+job.ID, "          path: carrel-*.zip")
+	} else {
+		b.Command = text(triggerSchedule + " " + string(b.Curl))
+		b.GoSentry.Command = "curl"
+		b.GoSentry.Arguments = []view.Text{"-fsS", "-m", "30", "-X", "POST", "-H", text(bearer), text(runURL)}
+		gitea = append(gitea, `      - run: curl -fsS -m 30 -X POST -H "`+triggerHeader+": Bearer "+fromRepo+`" '`+runURL+"'")
+	}
+	b.Gitea = text(strings.Join(gitea, "\n"))
+	// What the secret opens (s-backup-5): a job that downloads takes its
+	// archive in one request; the others start, ask, take.
+	if job.Mode == sealed.BackupToDownload {
+		b.Endpoints = []view.Text{text("GET /api/backup/download?" + q)}
+		return
+	}
+	b.Endpoints = []view.Text{text("POST /api/backup/run?" + q), b.Status, "GET /api/backup/{id}/download"}
 }
 
 // triggerClock is the tick of s-backup-2 that turns the external trigger on
@@ -86,7 +140,7 @@ func (s *Server) triggerTick(sess *session.Session, job sealed.BackupJob, issued
 // when they have just been issued, otherwise that it is on and how to renew
 // it. While the trigger is off there is nothing to show or renew, and no
 // card (owner's decision, from-typecase note 19).
-func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issued map[string]string) *view.TriggerBlock {
+func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issued, secrets map[string]string) *view.TriggerBlock {
 	on := s.users.BackupTriggerOn(sess.AccountID(), job.ID)
 	if !on && issued[job.ID] == "" {
 		return nil
@@ -95,9 +149,9 @@ func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issue
 		Password: view.SecretField{Reveal: view.Action{ID: "backup.trigger", Label: "Regenerate", Method: "POST", Enabled: true,
 			Href: s.postQuery("/app/settings/backup", url.Values{"op": {"trigger"}, "job": {job.ID}})}},
 	}
-	if issued[job.ID] != "" {
-		b.Command = text(issued[job.ID])
-		b.Password.Shown = true
+	if issued[job.ID] != "" && secrets[job.ID] != "" {
+		triggerTabs(b, issued[job.ID], job, secrets[job.ID])
+		b.Password.Shown, b.Password.Value = true, text(secrets[job.ID])
 		// What turning it on cost is said under the tick (triggerPrice), not
 		// a second time here.
 		b.Note = "Visible only now. Every use is logged; Regenerate replaces the secret, and every line already handed out stops working."
@@ -164,6 +218,6 @@ func (s *Server) enableTrigger(w http.ResponseWriter, r *http.Request, sess *ses
 		return
 	}
 	w.Header().Set("Cache-Control", "no-store")
-	page := s.backupPageIssued(sess, map[string]string{job.ID: triggerCommand(s.publicOrigin(r), job, secret)}, map[string]string{job.ID: secret})
+	page := s.backupPageIssued(sess, map[string]string{job.ID: s.publicOrigin(r)}, map[string]string{job.ID: secret})
 	s.writePage(w, r, http.StatusOK, page)
 }

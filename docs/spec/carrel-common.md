@@ -2292,10 +2292,38 @@ type BackupJob struct {
     Runs        []BackupRun
     Actions     []Action // Run · Edit (s-backup-1); Run задания «Download» — поток архива
 }
+// Карточка внешнего запуска (s-backup-2…5): вкладки crontab · GoSentry ·
+// Gitea · curl несут то, что вставить туда, где уже есть часы. Данные —
+// сервера: адрес, имя заголовка секрета, задание, сам секрет; неизменные
+// слова карточки (рубрики, подписи кнопок, пояснения) — слова экрана
+// (U-1.3). Только что выданный (Shown) — со всем этим, «visible only now»;
+// потом вкладки пусты, и Regenerate выдаёт новый.
 type TriggerBlock struct {
-    Command  Text // готовая строка или скрипт, собранный под назначение
-    Password SecretField
-    Note     Text
+    Shown      bool   // только что выдан: вкладки несут секрет, рубрика — «visible only now»
+    Script     bool   // назначению нужен скрипт (Download, Both): «The script to paste», «Copy the script»; иначе строка
+    Command    Text   // crontab: строка запуска или скрипт, собранный под назначение
+    ScriptName Text   // имя файла скрипта — «Save as carrel-personal.sh»; у строки пусто
+    CronLine   Text   // у скрипта — строка crontab, которая его запускает: «0 3 * * * /usr/local/bin/carrel-personal.sh»; у строки пусто
+    At         Text   // время расписания в строке: «03:00» — «Runs at 03:00»
+    Header     Text   // имя заголовка секрета: «Authorization» (значение — «Bearer» и секрет)
+    GoSentry   GoSentryJob // вкладка GoSentry: поля диалога задания
+    Status     Text   // запрос второго задания GoSentry, следящего за итогом: «GET /api/backup/status?job=…»
+    Gitea      Text   // вкладка Gitea: workflow Gitea Actions — расписание и тот же запуск, секрет по имени
+    GiteaFile  Text   // где workflow лежит в репозитории: «.gitea/workflows/carrel-….yml»
+    GiteaSecret Text  // имя секрета репозитория, который workflow читает
+    Curl       Text   // вкладка curl: один запрос, без расписания
+    Endpoints  []Text // «What it opens» (s-backup-5): метод и адрес — запуск, состояние, архив; у задания Download — архив сразу
+    Password   SecretField
+    Note       Text
+}
+// Поля задания GoSentry (s-backup-4): так они названы в его диалоге.
+// Скрипту — путь к нему в Command и расписание, Arguments пусты.
+type GoSentryJob struct {
+    Name      Text
+    Folder    Text
+    Schedule  Text
+    Command   Text
+    Arguments []Text // по одному аргументу в строке, без кавычек
 }
 type BackupRun struct { ID Text; Started When; State OpState; Size Size; Download *Action }
 type RestoreBlock struct {

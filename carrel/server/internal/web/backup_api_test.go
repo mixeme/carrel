@@ -112,13 +112,14 @@ func TestExternalTriggerRunsWithoutASession(t *testing.T) {
 	}
 }
 
-// A job that downloads is taken in the one request that builds it; Both
-// gets a script, not a line; an unencrypted job is warned twice.
+// A job that downloads is taken in the one request that builds it, by a
+// script; Both gets a script too, not a line; an unencrypted job is warned.
 func TestExternalTriggerDownloadAndBoth(t *testing.T) {
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToDownload, "8", ""))
 	secret, tb := issueTrigger(t, f, job)
-	if !strings.Contains(string(tb.Command), "-o /var/backups/") || !strings.Contains(string(tb.Command), `\%F`) {
+	// A stream needs somebody at its end: a script, the date in it (s-backup-2).
+	if !tb.Script || !strings.Contains(string(tb.Command), "out=/var/backups") || !strings.Contains(string(tb.Command), "/download?job="+job.ID) || !strings.Contains(string(tb.Command), "$(date +%F)") {
 		t.Errorf("download command = %q", tb.Command)
 	}
 	if !strings.Contains(string(tb.Note), "not encrypted") {

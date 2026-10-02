@@ -342,10 +342,47 @@ type BackupJob struct {
 	Runs    []BackupRun   `json:"runs"`
 	Actions []Action      `json:"actions"` // Run · Edit (s-backup-1)
 }
+
+// TriggerBlock — карточка внешнего запуска (s-backup-2…5): вкладки crontab ·
+// GoSentry · Gitea · curl несут данные — адрес, имя заголовка секрета,
+// задание, сам секрет; неизменные слова карточки — экрана (U-1.3). Вкладки
+// полны, только пока секрет только что выдан (Shown).
 type TriggerBlock struct {
-	Command  Text        `json:"command"` // готовая строка или скрипт, собранный под назначение
-	Password SecretField `json:"password"`
-	Note     Text        `json:"note"`
+	Shown bool `json:"shown"` // только что выдан: «visible only now»
+	// Script — назначению нужен скрипт (Download, Both): «The script to
+	// paste», «Copy the script»; иначе строка
+	Script     bool `json:"script"`
+	Command    Text `json:"command"`    // crontab: строка запуска или скрипт
+	ScriptName Text `json:"scriptName"` // «carrel-personal.sh» — Save as; у строки пусто
+	// CronLine — у скрипта строка crontab, которая его запускает: «0 3 * *
+	// * /usr/local/bin/carrel-personal.sh»; у строки пусто
+	CronLine Text        `json:"cronLine"`
+	At       Text        `json:"at"`     // «03:00» — «Runs at 03:00»
+	Header   Text        `json:"header"` // имя заголовка секрета: «Authorization»
+	GoSentry GoSentryJob `json:"goSentry"`
+	// Status — запрос второго задания GoSentry, следящего за итогом: «GET
+	// /api/backup/status?job=…»
+	Status Text `json:"status"`
+	// Gitea — workflow Gitea Actions: расписание и тот же запуск, секрет по
+	// имени GiteaSecret; GiteaFile — где он лежит в репозитории
+	Gitea       Text `json:"gitea"`
+	GiteaFile   Text `json:"giteaFile"`
+	GiteaSecret Text `json:"giteaSecret"`
+	Curl        Text `json:"curl"` // один запрос, без расписания
+	// Endpoints — «What it opens» (s-backup-5): метод и адрес каждого входа
+	Endpoints []Text      `json:"endpoints"`
+	Password  SecretField `json:"password"`
+	Note      Text        `json:"note"`
+}
+
+// GoSentryJob — поля задания GoSentry (s-backup-4), как они названы в его
+// диалоге; скрипту — путь к нему в Command, Arguments пусты.
+type GoSentryJob struct {
+	Name      Text   `json:"name"`
+	Folder    Text   `json:"folder"`
+	Schedule  Text   `json:"schedule"`
+	Command   Text   `json:"command"`
+	Arguments []Text `json:"arguments"` // по одному в строке, без кавычек
 }
 type BackupRun struct {
 	ID       Text    `json:"id"`

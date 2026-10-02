@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.129 — 2026-10-02
+
+The card of the external trigger hands over its tabs as s-backup-2…5 draw
+them: crontab, GoSentry, Gitea, curl, and the password on its own.
+
+### Added
+
+- **`TriggerBlock`**: `shown` (just issued — «visible only now»; the tabs
+  are empty after), `script` (the job needs a script: Download, Both),
+  `command` (crontab: the line, or the script), `scriptName` («Save as
+  carrel-….sh»), `cronLine` (the line of crontab that runs the script),
+  `at` («03:00»), `header` (the secret's header, «Authorization»),
+  **`goSentry`** (`GoSentryJob`: Name, Folder, Schedule, Command,
+  Arguments one per line — for a script, its path and no arguments),
+  `status` (the request of the second GoSentry job: `GET
+  /api/backup/status?job=…`), `gitea`, `giteaFile`, `giteaSecret` (a Gitea
+  Actions workflow on the same schedule, the secret a repository secret by
+  name, never in the text), `curl` (the request alone), `endpoints` («What
+  it opens»). The words of the card are the screen's (U-1.3).
+
+### Changed
+
+- **A job that downloads gets a script**, as the frame says («Put Download in
+  the destination and what is handed over here becomes a short script»),
+  not a line with `-o`.
+
+### For consumers
+
+Draw the tabs from these fields while `shown`. No fixture carries a trigger.
+
 ## v0.2.128 — 2026-10-02
 
 Restoring as s-backup-8 draws it: each collection of the archive goes where
