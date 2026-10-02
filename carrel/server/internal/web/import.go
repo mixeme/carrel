@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"path"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -60,6 +61,12 @@ type importRecord struct {
 	Title  string
 	Detail string
 	Doc    []byte
+	// File is the file of a folder or a zip the record was read from; empty
+	// for one file (the draft's Source)
+	File string
+	// Ready is what its row says after «Ready» (s-io-6, s-io-7): «the series
+	// as one record»; empty — Ready alone
+	Ready string
 }
 
 // importSkip is what the file held and this import does not write.
@@ -566,8 +573,8 @@ func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*import
 	for _, obj := range objs {
 		if k := cal.Kind(obj); k != c.spec.kind {
 			d.Skipped = append(d.Skipped, importSkip{
-				What: obj.MainComponent(), Title: titleOf(k, obj), Where: kindTitle(segmentOf(k)),
-				Reason: "Not a " + c.spec.noun + ".",
+				What: obj.MainComponent(), Title: titleOf(k, obj), Where: kindHolders[k][0],
+				Reason: kindHolders[c.spec.kind][0] + " takes " + kindHolders[c.spec.kind][1],
 			})
 			continue
 		}
@@ -613,14 +620,50 @@ func icalFormat(body []byte) string {
 
 // add keeps one record of the file as its own document.
 func (d *importDraft) add(c *collectionCtx, obj *model.Object) error {
+	return d.addFrom(c, obj, "")
+}
+
+// addFrom keeps one record read from file, a file of a folder or a zip.
+func (d *importDraft) addFrom(c *collectionCtx, obj *model.Object, file string) error {
 	doc, err := c.body(obj)
 	if err != nil {
 		return err
 	}
 	d.Records = append(d.Records, importRecord{
 		UID: uidOf(c, obj), Title: titleOf(c.spec.kind, obj), Detail: c.importDetail(obj), Doc: doc,
+		File: file, Ready: readyNote(c.spec.kind, obj),
 	})
 	return nil
+}
+
+// readyNote is what a row says after «Ready» when the record is not plain
+// (s-io-6, s-io-7): a repeating event comes as its series, a task keeps how
+// far it got and its priority.
+func readyNote(k view.Kind, obj *model.Object) string {
+	switch k {
+	case view.KindEvent:
+		if len(obj.PropText("RRULE")) > 0 {
+			return "the series as one record"
+		}
+	case view.KindTask:
+		var parts []string
+		if p := percentOf(obj); p != nil && *p > 0 && *p < 100 {
+			parts = append(parts, strconv.Itoa(*p)+" % done")
+		}
+		if v := obj.PropText("PRIORITY"); len(v) > 0 && strings.TrimSpace(v[0]) != "" && strings.TrimSpace(v[0]) != "0" {
+			parts = append(parts, "priority "+strings.TrimSpace(v[0]))
+		}
+		return strings.Join(parts, ", ")
+	}
+	return ""
+}
+
+// kindHolders are what holds a kind, as the preview says where a stray
+// record belongs (s-io-6, s-io-7).
+var kindHolders = map[view.Kind][2]string{
+	view.KindEvent: {"a calendar", "events"},
+	view.KindTask:  {"a list of tasks", "tasks"},
+	view.KindNote:  {"a notebook", "notes"},
 }
 
 // importColumns are the columns one kind shows in the preview and the report:
@@ -751,7 +794,7 @@ func (s *Server) takeFolder(w http.ResponseWriter, r *http.Request, c *collectio
 			d.Skipped = append(d.Skipped, importSkip{What: e.Name, Reason: err.Error(), Failed: true})
 			continue
 		}
-		if err := d.add(c, obj); err != nil {
+		if err := d.addFrom(c, obj, e.Name); err != nil {
 			d.Skipped = append(d.Skipped, importSkip{What: e.Name, Reason: err.Error(), Failed: true})
 		}
 	}
@@ -811,30 +854,67 @@ func (s *Server) importPreview(ctx context.Context, c *collectionCtx, d *importD
 			notices = append(notices, s.unavailableNotice(dest, s.importHref(c, "", dest.conn.ID, dest.col.Path), err))
 		}
 	}
-	create := view.ImportTable{
-		Rubric:  text("To create in " + destLabel(dest)),
-		Columns: importColumns(c.spec.kind),
-		Count:   len(d.Records),
-	}
-	for _, rec := range d.Records {
-		state := "New"
-		if taken[rec.UID] {
-			state = "Taken here: this record is created under a new identity"
-		}
-		create.Rows = append(create.Rows, []view.Text{text(rec.Title), text(rec.Detail), text(state)})
-	}
-	tables := []view.ImportTable{create}
-	if t, ok := skippedTable(d.Skipped); ok {
-		tables = append(tables, t)
-	}
-	return tables, taken, notices
+	return []view.ImportTable{previewTable(c.spec.kind, d, taken)}, taken, notices
 }
 
-func destLabel(dest *collectionCtx) string {
-	if dest == nil {
-		return "the collection"
+// previewTable is the preview as the frames draw it (s-io-5…8): one table,
+// the columns of the kind and Result last; the records first, what the file
+// holds and this import does not write after them, each with why.
+func previewTable(k view.Kind, d *importDraft, taken map[string]bool) view.ImportTable {
+	t := view.ImportTable{Columns: previewColumns[k]}
+	source := func(file string) view.Text {
+		if file != "" {
+			return text(file)
+		}
+		return text(d.Source)
 	}
-	return collectionLabel(dest.col)
+	for _, rec := range d.Records {
+		result := "Ready"
+		switch {
+		case taken[rec.UID]:
+			result = "New UID will be assigned"
+		case rec.Ready != "":
+			result += " — " + rec.Ready
+		}
+		third := rec.Detail
+		if k == view.KindContact {
+			third = rec.UID
+		}
+		t.Rows = append(t.Rows, []view.Text{source(rec.File), text(rec.Title), text(third), text(result)})
+	}
+	for _, sk := range d.Skipped {
+		result := sk.Reason
+		if !sk.Failed {
+			result = "Skipped: " + lowerFirst(strings.TrimSuffix(sk.Reason, "."))
+			if sk.Where != "" {
+				result += " — import it into " + sk.Where
+			}
+		}
+		file, what := "", sk.What
+		if k == view.KindNote {
+			file, what = sk.What, ""
+		}
+		t.Rows = append(t.Rows, []view.Text{source(file), text(sk.Title), text(what), text(result)})
+	}
+	t.Count = len(t.Rows)
+	return t
+}
+
+// previewColumns are the columns of the preview by kind (s-io-5…8).
+var previewColumns = map[view.Kind][]view.Text{
+	view.KindContact: {"Source", "Name", "UID", "Result"},
+	view.KindEvent:   {"Source", "Summary", "When", "Result"},
+	view.KindTask:    {"Source", "Summary", "Due", "Result"},
+	view.KindNote:    {"File", "Title", "Date", "Result"},
+}
+
+// lowerFirst writes a sentence's first letter small, as it reads after
+// «Skipped: ».
+func lowerFirst(s string) string {
+	for i, r := range s {
+		return strings.ToLower(string(r)) + s[i+len(string(r)):]
+	}
+	return s
 }
 
 // skippedTable names what the file held and the import does not write, and

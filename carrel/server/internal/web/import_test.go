@@ -118,14 +118,14 @@ func TestImportPreviewCountsAgainstTheChosenCollection(t *testing.T) {
 	}
 	// The preview of each kind is its own: a card is told from a card by its
 	// address, an event by its time.
-	if cols := page.Preview[0].Columns; len(cols) != 3 || cols[1] != "Email" {
+	if cols := page.Preview[0].Columns; len(cols) != 4 || cols[2] != "UID" {
 		t.Errorf("columns = %v", cols)
 	}
-	if row := tableRow(t, page.Preview, "People", "Ада"); !strings.Contains(string(row[2]), "Taken here") {
-		t.Errorf("Ada against People = %q", row[2])
+	if row := previewRow(t, page.Preview, "Ада"); row[3] != "New UID will be assigned" {
+		t.Errorf("Ada against People = %q", row[3])
 	}
-	if row := tableRow(t, page.Preview, "People", "Grace"); string(row[2]) != "New" {
-		t.Errorf("Grace against People = %q", row[2])
+	if row := previewRow(t, page.Preview, "Grace"); row[3] != "Ready" {
+		t.Errorf("Grace against People = %q", row[3])
 	}
 
 	// The same file against an empty collection: nothing is taken there.
@@ -134,8 +134,8 @@ func TestImportPreviewCountsAgainstTheChosenCollection(t *testing.T) {
 		t.Fatalf("the file was lost when the collection changed: step = %q", page.Step)
 	}
 	for _, who := range []string{"Ада", "Grace"} {
-		if row := tableRow(t, page.Preview, "Friends", who); string(row[2]) != "New" {
-			t.Errorf("%s against Friends = %q", who, row[2])
+		if row := previewRow(t, page.Preview, who); row[3] != "Ready" {
+			t.Errorf("%s against Friends = %q", who, row[3])
 		}
 	}
 }
@@ -277,13 +277,13 @@ func TestImportNamesWhatItDoesNotWrite(t *testing.T) {
 	page := decode[view.ImportPage](t, f.h.do(get(f.path("calendar")+"/import", f.sess)))
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "cal.ics", []byte(importedCalendar))))
 
-	if row := tableRow(t, page.Preview, "Skipped", "VTODO"); string(row[2]) != "Tasks" {
+	if row := previewRow(t, page.Preview, "VTODO"); !strings.HasSuffix(string(row[3]), "import it into a list of tasks") {
 		t.Errorf("the task was not sent anywhere: %q", row)
 	}
-	if row := tableRow(t, page.Preview, "Work", "Ковка"); string(row[2]) != "New" || !strings.Contains(string(row[1]), "January") {
+	if row := previewRow(t, page.Preview, "Ковка"); row[3] != "Ready" || !strings.Contains(string(row[2]), "January") {
 		t.Errorf("event = %q", row)
 	}
-	if cols := page.Preview[0].Columns; len(cols) != 3 || cols[1] != "When" {
+	if cols := page.Preview[0].Columns; len(cols) != 4 || cols[2] != "When" {
 		t.Errorf("columns = %v", cols)
 	}
 	page = decode[view.ImportPage](t, f.h.do(postForm(actionHref(t, page.Actions, "import.run"), f.sess, url.Values{})))
@@ -346,11 +346,15 @@ func TestImportNotesFromAFolder(t *testing.T) {
 	if page.Step != view.ImportStepPreview {
 		t.Fatalf("step = %q notices = %+v", page.Step, page.Notices)
 	}
-	if tb := page.Preview[0]; tb.Count != 2 {
-		t.Fatalf("the folder gave %d notes: %+v", tb.Count, tb.Rows)
+	if row := previewRow(t, page.Preview, "Ковка"); row[0] != "kovka.md" || row[3] != "Ready" {
+		t.Errorf("Ковка = %q", row)
 	}
-	tableRow(t, page.Preview, "Notebook", "Ковка")
-	tableRow(t, page.Preview, "Notebook", "Уголь")
+	if row := previewRow(t, page.Preview, "Уголь"); row[0] != "plain.md" || row[3] != "Ready" {
+		t.Errorf("Уголь = %q", row)
+	}
+	if row := previewRow(t, page.Preview, "photo.jpg"); row[3] != "Skipped: not Markdown" {
+		t.Errorf("the photo = %q", row)
+	}
 
 	page = decode[view.ImportPage](t, f.h.do(postForm(actionHref(t, page.Actions, "import.run"), f.sess, url.Values{})))
 	if page.Report.Created != 2 {

@@ -1716,6 +1716,13 @@ type ImportPage struct {
     Source   ImportSource
     Into     TargetPicker
     Counts   []ImportCount // над таблицей предпросмотра (s-io-5…8): ready всегда; with errors (Error), UID collisions, skipped — когда не ноль
+    // Предпросмотр — одна таблица (s-io-5…8): столбцы рода и Result
+    // последним — контакты: Source, Name, UID; события: Source, Summary,
+    // When; задачи: Source, Summary, Due; заметки: File, Title, Date. Сначала
+    // записи («Ready», «Ready — the series as one record», «New UID will be
+    // assigned»), за ними то, что файл несёт и импорт не пишет: «Skipped: a
+    // calendar takes events — import it into a list of tasks», ошибка
+    // разбора — её словами. Rubric пуст, Count — строки
     Preview  []ImportTable
     Report   *ImportReport
     Actions  []Action

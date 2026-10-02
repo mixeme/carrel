@@ -17,6 +17,26 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.130 — 2026-10-02
+
+The preview of an import is the frames' one table (s-io-5…8).
+
+### Changed
+
+- **`ImportPage.preview` is one table**: the kind's columns and `Result`
+  last — contacts Source, Name, UID; events Source, Summary, When; tasks
+  Source, Summary, Due; notes File, Title, Date. The records first —
+  «Ready», «Ready — the series as one record», «Ready — 40 % done, priority
+  1», «New UID will be assigned» —, then what the file holds and the import
+  does not write: «Skipped: a calendar takes events — import it into a list
+  of tasks», «Skipped: not Markdown», a parse error in its words. The
+  tables «To create in …» and «Skipped» are gone; `rubric` is empty,
+  `count` the rows. A note of a folder names its file.
+
+### For consumers
+
+Draw `preview[0]`. No fixture shows a preview.
+
 ## v0.2.129 — 2026-10-02
 
 The card of the external trigger hands over its tabs as s-backup-2…5 draw
