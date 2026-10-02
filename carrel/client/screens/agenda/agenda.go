@@ -129,7 +129,7 @@ func Forms(p *view.AgendaPage) []w.PostForm {
 	if f := bind.RailForm(p.Rail, formRail); f != nil {
 		out = append(out, *f)
 	}
-	out = append(out, bind.RetryForms(p.Rail)...)
+	out = append(out, bind.PollForms(p.Poll)...)
 	out = append(out, bind.NoticeForms(p.Notices)...)
 	if p.Empty != nil {
 		for _, a := range p.Empty.Actions {
@@ -231,9 +231,6 @@ func bar(p *view.AgendaPage) w.Bar {
 			items = append(items, seg)
 		}
 		if r.Form != nil {
-			// ждёт библиотеку: U-5.5 #23 — the range sends From and To only:
-			// Range has no hidden fields, and the window «Range» of the
-			// contract (view=range) does not go with them
 			rng := dates(*r.Form)
 			rng.Secondary = true
 			items = append(items, rng)
@@ -246,10 +243,7 @@ func bar(p *view.AgendaPage) w.Bar {
 		show := bind.CheckForm(*f, "Apply")
 		show.Tertiary = true
 		items = append(items, w.BarSep{Secondary: true}, show)
-		for _, c := range show.Checks {
-			menu = append(menu, tick(c, true))
-		}
-		menu = append(menu, w.MenuSep{Tertiary: true})
+		menu = append(menu, show, w.MenuSep{Tertiary: true})
 	}
 	for _, t := range twins {
 		menu = append(menu, t)
@@ -258,15 +252,11 @@ func bar(p *view.AgendaPage) w.Bar {
 	if b.Compact != nil {
 		compact := bind.CheckForm(*b.Compact, "Apply")
 		right = append(right, compact)
-		menu = append(menu, w.MenuSep{})
-		for _, c := range compact.Checks {
-			menu = append(menu, tick(c, false))
-		}
+		menu = append(menu, w.MenuSep{}, compact)
 	}
 	if len(menu) > 0 {
-		// ждёт библиотеку: U-5.5 #22 — the twins of the bar's ticks in «⋯»
-		// (components-19): a tick of a form that goes GET has no twin in a
-		// menu, whose form posts
+		// «⋯» holds the twins of what leaves the bar as it narrows
+		// (components-19, task 82): the ticks are the same GET forms.
 		items = append(items, w.Drop{
 			Trigger: w.Button{Icon: "dots", Title: "More"},
 			More:    true,
@@ -281,9 +271,10 @@ func bar(p *view.AgendaPage) w.Bar {
 }
 
 // dates is the range of dates of the bar (Range.Form, a GET form): From and
-// To, Show its submit.
+// To, Show its submit, the list's other choices its hidden fields — the
+// window «Range» (view=range) among them (task 107).
 func dates(f view.Form) w.Range {
-	rng := w.Range{Action: f.Action}
+	rng := w.Range{Action: f.Action, Hidden: bind.Hidden(f)}
 	rows := bind.Rows(f)
 	if len(rows) > 0 {
 		rng.From = bind.Input(rows[0])
@@ -295,22 +286,6 @@ func dates(f view.Form) w.Range {
 		rng.Show = bind.Submit(a)
 	}
 	return rng
-}
-
-// tick is the twin of a bar's tick in its «⋯»: the item, its box as the
-// tick is, its words.
-func tick(c w.Check, tertiary bool) w.MenuItem {
-	box := &w.TickBox{}
-	if !c.On {
-		box.Ticked = w.TickedOff
-	}
-	var label string
-	for _, p := range c.Parts {
-		if t, ok := p.(w.Text); ok {
-			label += string(t)
-		}
-	}
-	return w.MenuItem{Tick: box, Label: label, Tertiary: tertiary}
 }
 
 // row is a record of the agenda.
@@ -436,14 +411,19 @@ func fields(fs []view.Field) w.Fields {
 
 // attachments are the lines of a record's attachments: the name, the type
 // and size muted, and where the file is kept — «in the event» for data inside
-// it (S-20).
-//
-// ждёт библиотеку: U-5.5 #29 — no frame draws a line's actions
-// (AttachRow.Actions, Remove): an attachment is not taken off here
+// it (S-20). The name is a link where it goes (Href: data inside the record
+// downloads, a file in Files opens there; task 93); an attachment is taken
+// off on the edit only (s-agenda-3), and the card carries no action for it.
 func attachments(rows []view.AttachRow) [][]w.SecItemPart {
 	var out [][]w.SecItemPart
 	for _, a := range rows {
-		line := []w.SecItemPart{w.Text(string(a.Name) + " "), w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + " · " + string(a.Size))}}}
+		var line []w.SecItemPart
+		if a.Href != "" {
+			line = append(line, w.Link{Text: string(a.Name), Href: a.Href}, w.Text(" "))
+		} else {
+			line = append(line, w.Text(string(a.Name)+" "))
+		}
+		line = append(line, w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + " · " + string(a.Size))}})
 		if a.Inline {
 			line = append(line, w.Text(" "), w.Badge{Label: inside})
 		}

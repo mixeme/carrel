@@ -206,9 +206,6 @@ func listOwner(lt *listTask) pollOwner {
 		what:       "list",
 		polled:     true,
 		found:      func(n int) string { return plural(n, recordNouns[lt.kind]) },
-		// The calendar names the source that did not answer (s-agenda-1);
-		// the other lists count it until their frames are read.
-		named: lt.kind == view.KindEvent,
 		// And says how long the poll has run (states-3, states-13); the
 		// frames of the other lists draw no time (states-8).
 		timed:   lt.kind == view.KindEvent,
@@ -708,12 +705,13 @@ func lastPollRefused(snap *fanout.Snapshot, col sealed.Collection) bool {
 }
 
 // railTrouble is what a rail row says of a collection that did not answer
-// this poll: a few words beside its name, the whole sentence on hover, and a
-// Retry of it alone. Frames have drawn it on every rail for a long time
-// («password · 401»); the contract carries it since 24.09.2026.
+// this poll: only its mark of an error, the whole sentence its hint (the
+// owner's decision of 02.10.2026: the fight with the length of a line is
+// lost). Until then the row said a few words beside the name, «password ·
+// 401», and offered a Retry of it alone; both are in the menu «N failed» of
+// the poll bar now (PollBar.Failed, states-16).
 type railTrouble struct {
-	message, detail string
-	retry           *view.Action
+	detail string
 }
 
 // troublesOf are the sources of a poll that did not answer, by source ID:
@@ -728,28 +726,17 @@ func (s *Server) troublesOf(snap *fanout.Snapshot) map[string]railTrouble {
 		var t railTrouble
 		switch st.State {
 		case view.SourceError:
-			t.message, t.detail = "error", refusalReason(st.Err)
-			var se *dav.StatusError
-			if errors.As(st.Err, &se) {
-				switch {
-				case se.Code == http.StatusUnauthorized:
-					t.message = "password · 401"
-					t.detail = "401 Unauthorized — the saved password was refused. Open Connections to update it."
-				case se.Code >= 500:
-					t.message = fmt.Sprintf("error · %d", se.Code)
-				default:
-					t.message = fmt.Sprintf("refused · %d", se.Code)
-				}
+			t.detail = refusalReason(st.Err)
+			if dav.IsStatus(st.Err, http.StatusUnauthorized) {
+				t.detail = "401 Unauthorized — the saved password was refused. Open Connections to update it."
 			}
 		case view.SourceTimeout:
-			t.message, t.detail = "no reply", "The server did not answer in time."
+			t.detail = "The server did not answer in time."
 		case view.SourceUnavailable:
-			t.message, t.detail = "unreachable", "The server could not be reached."
+			t.detail = "The server could not be reached."
 		default:
 			continue
 		}
-		t.retry = &view.Action{ID: "source.retry", Label: "Retry", Method: "POST", Enabled: true,
-			Href: s.route("/app/search/progress/" + snap.ID + "/retry?source=" + url.QueryEscape(st.ID))}
 		out[st.ID] = t
 	}
 	return out
@@ -856,7 +843,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 		t, ok := troubles[id]
 		if ok {
 			row.State = view.CollectionUnavailable
-			row.Message, row.Detail, row.Retry = text(t.message), text(t.detail), t.retry
+			row.Detail = text(t.detail)
 		}
 		return ok
 	}

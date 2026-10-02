@@ -34,6 +34,10 @@ type Action struct {
 	Enabled bool `json:"enabled"`
 	On      bool `json:"on,omitempty"`     // включённый переключатель: флажок ленты, сегмент «сейчас показано»
 	Reason  Text `json:"reason,omitempty"` // почему выключено; пусто, если включено
+	// Hint — подсказка у включённого действия (title кнопки): чем оно
+	// обернётся — у New password внешнего запуска «The old password stops
+	// working; …» (s-backup-2, -3, -10, -11); пусто — подсказки нет
+	Hint Text `json:"hint,omitempty"`
 	// Tally — счёт сегмента отдельно от подписи: «All» и «24» (SegOption.Count;
 	// сложенный сегмент пишет их врозь, s-contacts-7); пусто — кадр счёта не
 	// пишет. Не Count: у строк рейла (NavRow, Shortcut) свой Count числом

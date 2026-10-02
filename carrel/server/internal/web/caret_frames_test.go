@@ -116,19 +116,19 @@ func TestCaretOutsideTheShellIsTheFrames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sameCaret(t, "s-auth-12", "invitation by link", decode[view.InvitePage](t, h.do(get("/invite/"+byLink, nil))).Form)
+	sameCaret(t, "s-auth-14", "invitation by link", decode[view.InvitePage](t, h.do(get("/invite/"+byLink, nil))).Form)
 	byLetter, err := h.users.Invite(adminID, "anna@example.org", store.RoleUser)
 	if err != nil {
 		t.Fatal(err)
 	}
 	sameCaret(t, "s-auth-12", "invitation by letter", decode[view.InvitePage](t, h.do(get("/invite/"+byLetter, nil))).Form)
 	// A login the invitation names does not change: the caret is in the
-	// first field that does.
+	// first field that does — the address (s-auth-12, -14 show it to change).
 	named, err := h.users.CreateInvite(adminID, "bob", "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if f := decode[view.InvitePage](t, h.do(get("/invite/"+named, nil))).Form; !rowNamed(t, f, "password").Focus || rowNamed(t, f, "login").Focus {
+	if f := decode[view.InvitePage](t, h.do(get("/invite/"+named, nil))).Form; !rowNamed(t, f, "email").Focus || rowNamed(t, f, "login").Focus {
 		t.Errorf("an invitation naming the login: %+v", f.Sets)
 	}
 

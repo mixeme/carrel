@@ -198,9 +198,7 @@
             "tick": "part",
             "readOnly": false,
             "state": "ok",
-            "message": "",
             "detail": "",
-            "retry": null,
             "menu": [],
             "feed": false,
             "on": true
@@ -220,9 +218,7 @@
             "tick": "on",
             "readOnly": false,
             "state": "ok",
-            "message": "",
             "detail": "",
-            "retry": null,
             "menu": [
               {
                 "id": "collection.rename",
@@ -291,9 +287,7 @@
             "tick": "on",
             "readOnly": false,
             "state": "ok",
-            "message": "",
             "detail": "",
-            "retry": null,
             "menu": [
               {
                 "id": "collection.rename",
@@ -369,9 +363,7 @@
             "tick": "on",
             "readOnly": true,
             "state": "read-only",
-            "message": "",
             "detail": "",
-            "retry": null,
             "menu": [
               {
                 "id": "collection.rename",
@@ -432,9 +424,7 @@
             "tick": "off",
             "readOnly": false,
             "state": "ok",
-            "message": "",
             "detail": "",
-            "retry": null,
             "menu": [
               {
                 "id": "collection.rename",
@@ -1568,7 +1558,8 @@
     "note": "",
     "every": 700,
     "poll": "/app/search/progress/t-task/poll",
-    "stream": "/app/search/progress/t-task"
+    "stream": "/app/search/progress/t-task",
+    "retryAll": null
   },
   "empty": null,
   "readOnly": false,

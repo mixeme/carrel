@@ -265,6 +265,36 @@ func (t *Task) Retry(sourceID string) error {
 	return nil
 }
 
+// RetryFailed asks again every settled source that did not answer —
+// refused, timed out or unreachable —, and nobody else: «Retry all» of the
+// menu of refusals (states-16). A source stopped by hand stays as it is.
+// None of them is no error and asks nothing. After the end of the task this
+// is a new round, which needs a slot.
+func (t *Task) RetryFailed() error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	var again []int
+	for i, r := range t.runs {
+		if r.state == view.SourceError || r.state == view.SourceTimeout || r.state == view.SourceUnavailable {
+			again = append(again, i)
+		}
+	}
+	if len(again) == 0 {
+		return nil
+	}
+	if t.pending == 0 {
+		if t.opts.Acquire != nil && !t.opts.Acquire() {
+			return ErrBusy
+		}
+		t.beginRoundLocked()
+	}
+	for _, i := range again {
+		t.launchLocked(i)
+	}
+	t.notifyLocked()
+	return nil
+}
+
 func (t *Task) beginRoundLocked() {
 	t.ctx, t.cancel = context.WithTimeout(context.Background(), t.opts.TotalTimeout)
 	t.round++

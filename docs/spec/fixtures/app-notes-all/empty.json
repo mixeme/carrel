@@ -309,10 +309,8 @@
             "href": "/app/notes",
             "label": "Combined notebook",
             "menu": [],
-            "message": "",
             "on": true,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           }
@@ -387,10 +385,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           },
@@ -458,10 +454,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           }

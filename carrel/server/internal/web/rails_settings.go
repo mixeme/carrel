@@ -31,7 +31,7 @@ func (s *Server) settingsRail(sess *session.Session, open string) view.Rail {
 		{"settings.attachments", "Attachments", "/app/settings/attachments", nil},
 		{"settings.devices", "New device", "/app/settings/devices", nil},
 		{"settings.davloom", "davloom", "/app/settings/davloom", count(len(s.users.Devices(sess.AccountID())))},
-		{"settings.backup", "Backup", "/app/settings/backup", count(len(blob.BackupJobs))},
+		{"settings.backup", "Backup", "/app/settings/backup", countSome(len(blob.BackupJobs))},
 		{"settings.published", "Published links", "/app/files/published", count(len(s.users.PublishedLinks(sess.AccountID())))},
 		{"settings.appearance", "Appearance", "/app/settings/appearance", nil},
 	}
@@ -91,6 +91,16 @@ func (s *Server) adminRail(sess *session.Session, open string) view.Rail {
 }
 
 func count(n int) *int { return &n }
+
+// countSome is a count drawn only when there is something to count: no
+// backup job is no number by Backup (s-backup-6, the owner's decision of
+// 02.10.2026).
+func countSome(n int) *int {
+	if n == 0 {
+		return nil
+	}
+	return &n
+}
 
 // withRail is the shell with its rail: the settings and the administration
 // build theirs where the shell is made, not after it.

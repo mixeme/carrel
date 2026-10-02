@@ -74,27 +74,44 @@ type OpenInvite struct {
 	Login, Email, By string
 }
 
-// CompleteInvite accepts an invitation that names its login.
+// CompleteInvite accepts an invitation that names its login, with the
+// address it names.
 func (s *Service) CompleteInvite(ctx context.Context, token, password string) error {
-	return s.AcceptInvite(ctx, token, "", password)
+	_, err := s.AcceptInvite(ctx, token, "", "", password)
+	return err
 }
 
 // AcceptInvite sets the invited person's password and makes the account
 // with the invitation's role (s-admin-8). An invitation naming no login
 // takes the one the person chose; a login taken meanwhile — by an account,
 // or by another invitation still waiting for it — answers ErrLoginTaken and
-// leaves the invitation alive.
-func (s *Service) AcceptInvite(ctx context.Context, token, login, password string) error {
+// leaves the invitation alive. email is the address the person gave
+// (s-auth-12, -14; the owner's decision of 02.10.2026): empty — the one the
+// invitation names; not one address — ErrBadAddress. Only the address the
+// letter of the invitation went to is proven; any other waits as pending,
+// and confirm is the token of its link for the mail layer.
+func (s *Service) AcceptInvite(ctx context.Context, token, login, email, password string) (confirm string, err error) {
 	if err := validatePassword(password); err != nil {
-		return err
+		return "", err
 	}
 	hash, err := hashToken(token)
 	if err != nil {
-		return ErrNotFound
+		return "", ErrNotFound
+	}
+	if email = strings.TrimSpace(email); email != "" {
+		addrs, err := cmail.Addresses([]string{email})
+		if err != nil || len(addrs) != 1 {
+			return "", ErrBadAddress
+		}
+		email = addrs[0]
+	}
+	raw, confirmHash, err := newSecret()
+	if err != nil {
+		return "", err
 	}
 	login = normalizeLogin(login)
 	now := s.now()
-	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		var inv *store.Invite
 		for i := range st.Invites {
 			if inviteLive(&st.Invites[i], now) && verifyHash(st.Invites[i].SecretHash, hash) {
@@ -139,14 +156,27 @@ func (s *Service) AcceptInvite(ctx context.Context, token, login, password strin
 		// handed over proves nothing about the address typed beside it, and
 		// with Reply-To (S-26.1) a wrong one sends people's answers to a
 		// stranger.
-		// An unproven address waits as pending — in Email it would lock the
-		// person out: sign-in refuses an unconfirmed Email (registration).
-		u.EmailConfirmed = u.Email != "" && inv.Mailed == "sent"
-		if u.EmailConfirmed {
-			u.EmailConfirmedAt = &now
+		// An unproven address waits as pending with a link of its own — in
+		// Email it would lock the person out: sign-in refuses an
+		// unconfirmed Email (registration).
+		address := email
+		if address == "" {
+			address = inv.Email
 		}
-		if u.Email != "" && !u.EmailConfirmed {
-			u.Email, u.PendingEmail = "", u.Email
+		u.Email, u.PendingEmail, u.EmailConfirmed, u.EmailConfirmedAt = "", "", false, nil
+		burnTokens(st, u.ID, tokenEmailConfirm)
+		switch {
+		case address != "" && inv.Mailed == "sent" && strings.EqualFold(address, inv.Email):
+			u.Email, u.EmailConfirmed, u.EmailConfirmedAt = address, true, &now
+			raw = ""
+		case address != "":
+			u.PendingEmail = address
+			st.Tokens = append(st.Tokens, store.SecretToken{
+				Kind: tokenEmailConfirm, Hash: confirmHash, UserID: u.ID, Email: address,
+				CreatedAt: now, ExpiresAt: now.Add(conf.EmailConfirmTTL),
+			})
+		default:
+			raw = ""
 		}
 		inv.Login = name
 		inv.Used = true
@@ -156,6 +186,10 @@ func (s *Service) AcceptInvite(ctx context.Context, token, login, password strin
 			When: now, Who: u.Login, What: "user.invite.complete", Whom: u.Login, Detail: roleDetail(role),
 		}}, nil
 	})
+	if err != nil {
+		return "", err
+	}
+	return raw, nil
 }
 
 // inviteRole is the role an invitation gives: a user unless it says

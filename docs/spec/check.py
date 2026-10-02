@@ -154,6 +154,9 @@ check("7. фикстуры разбираются", badfix)
 FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут из C-5
     "app-contacts": "/app/contacts",
     "app-contacts-one": "/app/contacts/{account}/{col}",
+    # Подсказки поля участников — фрагмент, своего кадра маршрута нет: кадр
+    # состояния — s-agenda-12 (STATE_FRAME), рейла у него нет.
+    "app-contacts-suggest": "/app/contacts/suggest",
     # Единый календарь и одна коллекция — один кадр s-agenda-1: его
     # data-screen называет оба адреса (Typecase 9e69804, задача 77).
     "app-agenda-all": "/app/calendar",
@@ -291,6 +294,12 @@ STATE_FRAME = {
     "app-agenda-all/partial": "states-13",
     "app-agenda-all/empty": "states-14",
     "app-agenda/empty": "states-15",
+    # Приглашение ссылкой и потеря свойств при записи события — свои кадры
+    # (Typecase 05ea994, 002fce3; задачи 79, 93).
+    "invite/link": "s-auth-14",
+    # Подсказки поля участников (Typecase de3f083, задача 77): «ве» — Вера.
+    "app-contacts-suggest/normal": "s-agenda-12",
+    "app-event-edit/loss": "states-17",
 }
 # Без строки: app-contact-new/normal и app-event-new/normal — полные формы
 # создания (`/new`) — свои кадры маршрута, s-contacts-27 (Typecase 4af7ad7,

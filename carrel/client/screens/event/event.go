@@ -197,14 +197,19 @@ func fields(fs []view.Field) w.Fields {
 
 // attachments are the lines of the event's attachments: the name, the type
 // and size muted, and where the file is kept — «in the event» for data
-// inside it (S-20).
-//
-// ждёт библиотеку: U-5.5 #29 — no frame draws a line's actions
-// (AttachRow.Actions, Remove): an attachment is not taken off here
+// inside it (S-20). The name is a link where it goes (Href: data inside the record
+// downloads, a file in Files opens there; task 93); an attachment is taken
+// off on the edit only (s-agenda-3), and the card carries no action for it.
 func attachments(rows []view.AttachRow) [][]w.SecItemPart {
 	var out [][]w.SecItemPart
 	for _, a := range rows {
-		line := []w.SecItemPart{w.Text(string(a.Name) + " "), w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + " · " + string(a.Size))}}}
+		var line []w.SecItemPart
+		if a.Href != "" {
+			line = append(line, w.Link{Text: string(a.Name), Href: a.Href}, w.Text(" "))
+		} else {
+			line = append(line, w.Text(string(a.Name)+" "))
+		}
+		line = append(line, w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + " · " + string(a.Size))}})
 		if a.Inline {
 			line = append(line, w.Text(" "), w.Badge{Label: inside})
 		}

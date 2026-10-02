@@ -396,10 +396,8 @@
             "href": "/app/calendar",
             "label": "Combined calendar",
             "menu": [],
-            "message": "",
             "on": true,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           }
@@ -474,10 +472,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           },
@@ -545,10 +541,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           },
@@ -616,10 +610,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           }
@@ -694,10 +686,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           },
@@ -765,10 +755,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           }
@@ -843,10 +831,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           }
@@ -883,10 +869,8 @@
                 "method": "GET"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "off"
           },
@@ -915,10 +899,8 @@
                 "method": "GET"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "off"
           }

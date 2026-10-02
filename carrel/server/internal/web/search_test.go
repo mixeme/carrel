@@ -433,14 +433,14 @@ func TestSearchStopAndCeiling(t *testing.T) {
 		t.Errorf("history = %+v", h)
 	}
 	// s-find-1: the rail's row of a source that did not answer says so in
-	// the frame's words — the search has no list read before to fall back
-	// on (from-typecase note 18).
-	noReply := regexp.MustCompile(`<span class="tc-tickrow__meta" title="([^"]*)">(no reply)</span>`).FindStringSubmatch(mockupFrame(t, "s-find-1"))
-	if noReply == nil {
-		t.Fatal("s-find-1 draws no «no reply»: read the frame again")
+	// the frame's words, in the hint of its mark (from-typecase notes 18,
+	// 32) — the search has no list read before to fall back on.
+	noReply := regexp.MustCompile(`<span class="tc-tickrow__err" role="img" aria-label="([^"]*)" title="([^"]*)">`).FindStringSubmatch(mockupFrame(t, "s-find-1"))
+	if noReply == nil || noReply[1] != noReply[2] {
+		t.Fatal("s-find-1 draws no mark of a source that did not answer: read the frame again")
 	}
-	if _, docs := railRow(t, search(t, f.h, f.sess, "q=Ada").Rail, "Docs"); string(docs.Message) != noReply[2] || string(docs.Detail) != frameText(noReply[1]) {
-		t.Errorf("Docs in the rail = %q «%s», the frame draws %q «%s»", docs.Message, docs.Detail, noReply[2], frameText(noReply[1]))
+	if _, docs := railRow(t, search(t, f.h, f.sess, "q=Ada").Rail, "Docs"); docs.State != view.CollectionUnavailable || string(docs.Detail) != frameText(noReply[2]) {
+		t.Errorf("Docs in the rail = %s «%s», the frame draws «%s»", docs.State, docs.Detail, frameText(noReply[2]))
 	}
 }
 

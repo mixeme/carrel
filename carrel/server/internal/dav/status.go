@@ -11,6 +11,9 @@ import (
 type StatusError struct {
 	Code int
 	Msg  string
+	// Method and Path are the request the server answered so — what the
+	// menu of refusals says was asked (states-16); empty when not known.
+	Method, Path string
 	// Resent is true when the guard had sent this request once already and
 	// the connection died before the answer. The refusal then means the
 	// first attempt landed, not that someone else took the name.
@@ -63,5 +66,9 @@ func httpStatusError(resp *http.Response) error {
 	if msg == "" {
 		msg = resp.Status
 	}
-	return &StatusError{Code: resp.StatusCode, Msg: msg, Resent: resp.Header.Get(headerResent) != ""}
+	se := &StatusError{Code: resp.StatusCode, Msg: msg, Resent: resp.Header.Get(headerResent) != ""}
+	if resp.Request != nil && resp.Request.URL != nil {
+		se.Method, se.Path = resp.Request.Method, resp.Request.URL.Path
+	}
+	return se
 }

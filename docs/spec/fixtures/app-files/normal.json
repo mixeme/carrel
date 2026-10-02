@@ -136,10 +136,8 @@
             "href": "/app/files",
             "label": "Selected collections",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "part"
           }
@@ -158,10 +156,8 @@
             "href": "/app/files/a-nc-home/Files/",
             "label": "Files",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -180,10 +176,8 @@
             "href": "/app/files/a-sftp-vps/Documents/",
             "label": "Documents",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -195,10 +189,8 @@
             "href": "/app/files/a-sftp-vps/Public/",
             "label": "Public",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "off"
           }

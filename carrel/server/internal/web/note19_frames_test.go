@@ -83,21 +83,45 @@ func TestMutedPartOfALabelIsData(t *testing.T) {
 	}
 }
 
-// from-typecase note 19, task 30: /invite/{token} is s-auth-12, not the
-// registration of s-auth-2 — «Join» and the instance, who invited, the
-// warning over the fields, then Login, the address of a letter as a field
-// that does not change, Password and Repeat password, Create account. A
-// link has no address field; an invitation that named its login shows it
-// the same way, off. A refusal at Login is said in the words of s-admin-19.
+// from-typecase notes 19 and 32, tasks 30 and 79: /invite/{token} is
+// s-auth-12 (a letter) and s-auth-14 (a link), not the registration of
+// s-auth-2 — «Join» and the instance, who invited, the warning over the
+// fields, then Login, Email, Password and Repeat password, Create account.
+// The address is shown and can be changed (the owner's decision of 02.10):
+// a letter's is put in, the one the invitation went to, a link's is empty;
+// each says under it how it is confirmed. An address the letter did not go
+// to waits for its own letter of confirmation; the one it went to is proven.
+// An invitation that named its login shows it off. A refusal at Login is
+// said in the words of s-admin-19.
 func TestInvitePageIsTheFrame(t *testing.T) {
 	frame := mockupFrame(t, "s-auth-12")
 	title := frameText(regexp.MustCompile(`(?s)<div class="tc-head__title[^"]*">(.*?)</div>`).FindStringSubmatch(frame)[1])
 	lede := frameText(regexp.MustCompile(`(?s)<div class="tc-head__sub[^"]*">(.*?)</div>`).FindStringSubmatch(frame)[1])
 	warning := frameText(frameCardAlert.FindStringSubmatch(frame)[1])
-	fields := regexp.MustCompile(`<label>([^<]*)</label><input class="tc-in[^"]*" type="text" value="([^"]*)" aria-label="[^"]*"( disabled)?>`).FindAllStringSubmatch(frame, -1)
+	type field struct{ label, value, placeholder, hint string }
+	fieldsOf := func(id string) []field {
+		var out []field
+		for _, m := range regexp.MustCompile(`(?s)<label>([^<]*)</label><input ([^>]*)>(?:<span class="tc-field__hint">(.*?)</span>)?`).FindAllStringSubmatch(mockupFrame(t, id), -1) {
+			attrs := map[string]string{}
+			for _, a := range frameAttr.FindAllStringSubmatch(m[2], -1) {
+				attrs[a[1]] = a[2]
+			}
+			if strings.Contains(m[2], " disabled") {
+				t.Fatalf("%s draws %q off: read the frame again", id, m[1])
+			}
+			out = append(out, field{m[1], attrs["value"], attrs["placeholder"], frameText(m[3])})
+		}
+		return out
+	}
+	letterFields, linkFields := fieldsOf("s-auth-12"), fieldsOf("s-auth-14")
 	submit := frameText(regexp.MustCompile(`(?s)<div class="tc-formfoot[^"]*"><button class="tc-btn is-primary"[^>]*>(.*?)</button>`).FindStringSubmatch(frame)[1])
-	if title != "Join carrel.example" || !strings.HasPrefix(lede, "mix invited you.") || len(fields) != 4 || fields[1][1] != "Email" || fields[1][3] == "" {
-		t.Fatalf("s-auth-12 = %q, %q, %q: read the frame again", title, lede, fields)
+	if title != "Join carrel.example" || lede != "mix invited you. Choose a login and a password." || len(letterFields) != 4 || len(linkFields) != 4 ||
+		letterFields[1].label != "Email" || letterFields[1].value != "anna@example.org" || letterFields[1].hint == "" ||
+		linkFields[1].label != "Email" || linkFields[1].value != "" || linkFields[1].placeholder == "" || linkFields[1].hint == "" {
+		t.Fatalf("s-auth-12, -14 = %q, %q, %q, %q: read the frames again", title, lede, letterFields, linkFields)
+	}
+	if linkLede := frameText(regexp.MustCompile(`(?s)<div class="tc-head__sub[^"]*">(.*?)</div>`).FindStringSubmatch(mockupFrame(t, "s-auth-14"))[1]); linkLede != lede {
+		t.Fatalf("s-auth-14 says %q under the title, s-auth-12 %q: read the frames again", linkLede, lede)
 	}
 
 	h := newHarness(t)
@@ -108,7 +132,7 @@ func TestInvitePageIsTheFrame(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	h.relayed()
+	relay := h.relayed()
 	alice := h.login("alice", "password123")
 	secretOf := func(action, email string) string {
 		t.Helper()
@@ -123,15 +147,15 @@ func TestInvitePageIsTheFrame(t *testing.T) {
 		return snap.Invites[before].Secret
 	}
 	type row struct {
-		label, value string
-		off          bool
+		label, value, placeholder, hint string
+		off, required                   bool
 	}
 	rows := func(p view.InvitePage) []row {
 		var out []row
 		for _, set := range p.Form.Sets {
 			for _, r := range set.Rows {
 				if r.Kind != view.InputHidden {
-					out = append(out, row{string(r.Label), string(r.Value), r.ReadOnly})
+					out = append(out, row{string(r.Label), string(r.Value), string(r.Placeholder), string(r.Hint), r.ReadOnly, r.Required})
 				}
 			}
 		}
@@ -151,36 +175,94 @@ func TestInvitePageIsTheFrame(t *testing.T) {
 		}
 	}
 	// The line under the title by the kind of invitation is the caption's
-	// (from-typecase note 22): a link, a login named before, no record of
-	// who invited — without the first sentence.
+	// (from-typecase note 22): a login named before, no record of who
+	// invited — without the first sentence.
 	_, caption, _ := strings.Cut(frame, "<figcaption>")
 	var kinds []string
 	for _, m := range regexp.MustCompile(`«([^«»]*)»`).FindAllStringSubmatch(caption, -1) {
 		kinds = append(kinds, frameText(m[1]))
 	}
-	if len(kinds) != 2 || !strings.HasPrefix(kinds[0], "mix invited you. ") || !strings.HasPrefix(kinds[1], "mix invited you. ") ||
+	if len(kinds) != 2 || kinds[0] != lede || !strings.HasPrefix(kinds[1], "mix invited you. ") ||
 		!strings.Contains(caption, "без записи, кто пригласил, — без первой фразы") {
 		t.Fatalf("s-auth-12 caption lines = %q: read the frame again", kinds)
 	}
 	byAlice := func(s string) string { return strings.Replace(s, "mix", "alice", 1) }
 	lede = byAlice(lede)
+	email := func(value, hint string) row {
+		return row{"Email", value, linkFields[1].placeholder, hint, false, true}
+	}
+	pass := []row{{"Password", "", "", "", false, true}, {"Repeat password", "", "", "", false, true}}
+	login := row{"Login", "", "", "", false, true}
+	linkRows := append([]row{login, email("", linkFields[1].hint)}, pass...)
 
 	letter := secretOf("send", "anna@example.org")
 	check("a letter", decode[view.InvitePage](t, h.do(get("/invite/"+letter, nil))), lede,
-		[]row{{"Login", "", false}, {"Email", "anna@example.org", true}, {"Password", "", false}, {"Repeat password", "", false}})
+		append([]row{login, email("anna@example.org", letterFields[1].hint)}, pass...))
 
 	link := secretOf("link", "")
-	check("a link", decode[view.InvitePage](t, h.do(get("/invite/"+link, nil))), byAlice(kinds[0]),
-		[]row{{"Login", "", false}, {"Password", "", false}, {"Repeat password", "", false}})
+	check("a link", decode[view.InvitePage](t, h.do(get("/invite/"+link, nil))), lede, linkRows)
 
 	named, err := h.users.CreateInvite(adminID, "vera", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 	check("a login named", decode[view.InvitePage](t, h.do(get("/invite/"+named, nil))), byAlice(kinds[1]),
-		[]row{{"Login", "vera", true}, {"Password", "", false}, {"Repeat password", "", false}})
+		append([]row{{"Login", "vera", "", "", true, false}, email("", linkFields[1].hint)}, pass...))
+
+	// The login is refused at its field in the words of s-admin-19; an
+	// address that is no address, at its own, with what was typed kept.
+	taken := decode[view.InvitePage](t, h.do(h.anonPostForm("/invite/"+link, "/invite/"+link,
+		url.Values{"login": {"alice"}, "email": {"vera@example.org"}, "password": {"verapass123"}, "password2": {"verapass123"}})))
+	if r := rowNamed(t, taken.Form, "login"); r.Error != "Login is already taken." {
+		t.Errorf("a login taken: %+v", r)
+	}
+	for _, typed := range []string{"", "vera at example"} {
+		bad := decode[view.InvitePage](t, h.do(h.anonPostForm("/invite/"+link, "/invite/"+link,
+			url.Values{"login": {"vera"}, "email": {typed}, "password": {"verapass123"}, "password2": {"verapass123"}})))
+		if r := rowNamed(t, bad.Form, "email"); r.Error == "" || string(r.Value) != typed || string(rowNamed(t, bad.Form, "login").Value) != "vera" {
+			t.Errorf("the address %q: %+v", typed, bad.Form)
+		}
+	}
+	if snap := h.st.Snapshot(); snap.UserByLogin("vera") != nil && len(snap.UserByLogin("vera").LoginHash) > 0 {
+		t.Fatal("a refused form made the account")
+	}
+
+	// Accepted: the address the letter went to is proven; another one, and
+	// a link's, wait for a letter of their own.
+	accept := func(secret, login, email string) store.User {
+		t.Helper()
+		sent := len(relay.Letters())
+		if rec := h.do(h.anonPostForm("/invite/"+secret, "/invite/"+secret,
+			url.Values{"login": {login}, "email": {email}, "password": {"verapass123"}, "password2": {"verapass123"}})); rec.Code != http.StatusSeeOther {
+			t.Fatalf("%s: %d %s", login, rec.Code, rec.Body)
+		}
+		snap := h.st.Snapshot()
+		u := snap.UserByLogin(login)
+		if u == nil {
+			t.Fatalf("%s: no account", login)
+		}
+		letters := relay.Letters()[sent:]
+		switch {
+		case u.EmailConfirmed && len(letters) != 0:
+			t.Errorf("%s: the address is proven, and a letter went: %+v", login, letters)
+		case !u.EmailConfirmed && (len(letters) != 1 || !slices.Equal(letters[0].To, []string{email}) || !strings.Contains(letters[0].Data, "/confirm-email/")):
+			t.Errorf("%s: the letter of confirmation = %+v", login, letters)
+		}
+		return *u
+	}
+	if u := accept(letter, "anna", "anna@example.org"); u.Email != "anna@example.org" || !u.EmailConfirmed || u.PendingEmail != "" {
+		t.Errorf("the address the invitation went to: %+v", u)
+	}
+	other := secretOf("send", "boris@example.org")
+	if u := accept(other, "boris", "b.petrov@example.org"); u.Email != "" || u.EmailConfirmed || u.PendingEmail != "b.petrov@example.org" {
+		t.Errorf("another address: %+v", u)
+	}
+	if u := accept(link, "vera2", "vera@example.org"); u.Email != "" || u.EmailConfirmed || u.PendingEmail != "vera@example.org" {
+		t.Errorf("a link's address: %+v", u)
+	}
 
 	// An invitation without a record of who made it has no first sentence.
+	last := secretOf("link", "")
 	if err := h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		for i := range st.Invites {
 			st.Invites[i].By = ""
@@ -189,15 +271,7 @@ func TestInvitePageIsTheFrame(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	check("a link, nobody named", decode[view.InvitePage](t, h.do(get("/invite/"+link, nil))), strings.TrimPrefix(kinds[0], "mix invited you. "),
-		[]row{{"Login", "", false}, {"Password", "", false}, {"Repeat password", "", false}})
-
-	// The login is refused at its field in the words of s-admin-19.
-	taken := decode[view.InvitePage](t, h.do(h.anonPostForm("/invite/"+link, "/invite/"+link,
-		url.Values{"login": {"alice"}, "password": {"verapass123"}, "password2": {"verapass123"}})))
-	if r := rowNamed(t, taken.Form, "login"); r.Error != "Login is already taken." {
-		t.Errorf("a login taken: %+v", r)
-	}
+	check("a link, nobody named", decode[view.InvitePage](t, h.do(get("/invite/"+last, nil))), strings.TrimPrefix(lede, "alice invited you. "), linkRows)
 }
 
 // from-typecase notes 19 and 22: «local» is the instance's, not a screen's —

@@ -101,7 +101,7 @@ func Forms(p *view.ContactsListPage) []w.PostForm {
 	if f := bind.RailForm(p.Rail, formRail); f != nil {
 		out = append(out, *f)
 	}
-	out = append(out, bind.RetryForms(p.Rail)...)
+	out = append(out, bind.PollForms(p.Poll)...)
 	out = append(out, bind.NoticeForms(p.Notices)...)
 	if p.Empty != nil {
 		for _, a := range p.Empty.Actions {
@@ -180,12 +180,19 @@ func bar(p *view.ContactsListPage) w.Bar {
 		f.Variant = w.FilterH26W220
 		items = append(items, f)
 	}
+	// «⋯» holds the twins of what leaves the bar as it narrows
+	// (components-19, task 82): the order as items, the tick its same GET
+	// form.
+	var more []w.MenuPart
 	if len(b.Segments) > 0 {
 		seg := w.Seg{Secondary: true}
+		var order []view.MenuItem
 		for _, a := range b.Segments {
 			seg.Options = append(seg.Options, bind.SegOption(a))
+			order = append(order, view.MenuItem{Action: a})
 		}
 		items = append(items, seg)
+		more = append(more, bind.MenuItems(order, "")...)
 	}
 	if b.Columns != nil {
 		cols := bind.Columns(*b.Columns, columns)
@@ -194,17 +201,22 @@ func bar(p *view.ContactsListPage) w.Bar {
 	}
 	var right []w.BarPart
 	if b.Compact != nil {
-		right = append(right, bind.CheckForm(*b.Compact, "Apply"))
+		compact := bind.CheckForm(*b.Compact, "Apply")
+		right = append(right, compact)
+		if len(more) > 0 {
+			more = append(more, w.MenuSep{})
+		}
+		more = append(more, compact)
 	}
 	right = append(right, w.Mono{Text: strconv.Itoa(b.Loaded)})
-	return w.Bar{
-		Items: items,
-		// ждёт библиотеку: U-5.5 #22 — the bar's «⋯»: a button with no menu
-		// of what left the bar (components-19); a tick that is a form has no
-		// twin in a menu
-		More:  &w.Button{Icon: "dots", Title: "More"},
-		Right: &w.BarRight{Items: right, Secondary: true},
+	if len(more) > 0 {
+		items = append(items, w.Drop{
+			Trigger: w.Button{Icon: "dots", Title: "More"},
+			More:    true,
+			Menu:    w.Menu{Items: more, Pop: w.MenuUnderEnd, Inline: true},
+		})
 	}
+	return w.Bar{Items: items, Right: &w.BarRight{Items: right, Secondary: true}}
 }
 
 // row is a card in the list.

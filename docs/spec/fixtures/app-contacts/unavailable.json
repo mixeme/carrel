@@ -769,9 +769,11 @@
     "answeredAt": "10 August, 17:04",
     "aside": "2 min ago",
     "every": 700,
+    "failed": "1 failed",
     "note": "What arrived in time is shown. Cards from the unavailable book are missing — not “there are none”, but “we have not seen them”.",
     "percent": 100,
     "poll": "/app/search/progress/t-task/poll",
+    "retryAll": null,
     "running": false,
     "sources": [
       {
@@ -793,6 +795,7 @@
         "state": "done"
       },
       {
+        "answer": "REPORT /alice/contacts/komanda/ → 503 Service Unavailable",
         "colour": "#6b4e7a",
         "count": null,
         "fromCache": false,
@@ -813,7 +816,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polled 2 of 3 sources · 5 cards · 1 refused"
+        "text": "Polled 2 of 3 sources · 5 cards"
       }
     ],
     "taskID": "t-task"
@@ -932,10 +935,8 @@
             "href": "/app/contacts",
             "label": "Combined address book",
             "menu": [],
-            "message": "",
             "on": true,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "part"
           }
@@ -1010,10 +1011,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -1081,10 +1080,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -1151,18 +1148,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "error · 503",
             "on": false,
             "readOnly": true,
-            "retry": {
-              "csrf": "csrf",
-              "enabled": true,
-              "href": "/app/search/progress/t-task/retry?source=a-rad-vps%3Akomanda",
-              "id": "source.retry",
-              "label": "Retry",
-              "method": "POST",
-              "target": "poll"
-            },
             "state": "unavailable",
             "tick": "on"
           },
@@ -1230,10 +1217,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           }

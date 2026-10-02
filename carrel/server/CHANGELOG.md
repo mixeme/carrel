@@ -17,6 +17,58 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.146 — 2026-10-02
+
+The mockup copy of Typecase `bc575a8` (from-typecase note 32: tasks 78–82,
+93, 94, 95, 106, 107 and the owner's decisions of 02.10.2026), with what its
+frames now show.
+
+### Changed
+
+- **A source that did not answer** (states-16): the rail row is a mark with
+  the reason in its hint — `SourceRow.message` and `.retry` are gone,
+  `detail` stays. The poll bar over a list and a timeline no longer names
+  the refusal in its summary («1 refused», the danger run): `PollBar.failed`
+  — «1 failed», the red button of the menu of refusals; each refused source
+  carries `SourceProgress.answer` — what was asked and what the server
+  answered, «REPORT /dav/calendars/duty/ → 503 Service Unavailable»;
+  `PollBar.retryAll` — «Retry all» when there are more than one:
+  `POST /app/search/progress/{task}/retry` without `source` asks every
+  refused source again. A stopped source is still said («1 stopped»).
+- **The invitation shows the address and lets it change** (s-auth-12,
+  s-auth-14): Email is in both forms, required — a letter's put in with
+  «The address the invitation went to. Another one is confirmed by a
+  letter.», a link's empty with «you@example.org» and «Confirmed by a
+  letter.»; the line under the title no longer speaks of the address. Only
+  the address the letter went to is proven; another one waits as pending
+  and gets its own letter of confirmation.
+- **An attachment's name is a link in every card** (task 93): data inside
+  the record downloads, a file in Files opens there — `AttachRow.href` of a
+  link is `/app/files/…`, its folder with the file chosen. Remove stands on
+  the edit only: the card and the panel carry no `actions` for an
+  attachment.
+- **Backup** (s-backup-2…11, task 94): «Regenerate» is «New password», with
+  `Action.hint` «The old password stops working; whatever runs this job has
+  to be given the new one.»; the Gitea workflow is «Carrel backup · …», its
+  secret `CARREL_BACKUP`, its file `.gitea/workflows/carrel-….yaml`. With no
+  job, Backup in the settings rail has no count (s-backup-6).
+
+### Added
+
+- `Action.hint`: the hint of an action that can be taken, where its frame
+  draws one.
+- Fixture `app-contacts-suggest/normal` — the suggestions of the attendees'
+  field (`SuggestList`, s-agenda-12).
+
+### For consumers
+
+Draw a refused source in the rail as an error mark with `detail` as its
+hint; draw `PollBar.failed` as a red button with the menu of refusals
+(`Drop`, `MenuRefusal`, `MenuFoot` with Retry all). The invitation's Email
+is a field to type in. Fixtures regenerated: every page with a rail or a
+poll bar, `invite/normal`, `invite/link`, the cards and edits with
+attachments, `app-settings-*` (the Backup count).
+
 ## v0.2.145 — 2026-10-02
 
 Attach on a new event, task and note (s-agenda-15; the lead's decision with

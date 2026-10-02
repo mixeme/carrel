@@ -430,7 +430,7 @@
             "method": "POST"
           }
         ],
-        "href": "/app/attach/a-sftp-vps/Documents/carrel/attachments/2026-08/%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D1%8C-%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8.m4a",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D1%8C-%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8.m4a",
         "inline": false,
         "name": "запись-встречи.m4a",
         "place": "Documents / carrel",
@@ -570,10 +570,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -641,10 +639,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": true,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }

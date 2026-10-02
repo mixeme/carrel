@@ -40,7 +40,7 @@ type Users interface {
 	// chooses it) and whether the token is one.
 	InviteFor(ctx context.Context, token string) (inv user.OpenInvite, valid bool)
 	CompleteInvite(ctx context.Context, token, password string) error
-	AcceptInvite(ctx context.Context, token, login, password string) error
+	AcceptInvite(ctx context.Context, token, login, email, password string) (confirm string, err error)
 
 	ConfirmEmail(ctx context.Context, token string) (ok bool)
 	// Register and ForgotRequest return the raw link token for the mail

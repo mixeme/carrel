@@ -180,8 +180,10 @@ func Ticked(t view.TickState) w.Ticked {
 // name, the open one (On), one not shown (ticked off; the combined view's
 // row ticked off is nothing ticked, and stays as it is). Its count, the dash
 // when it has none; a feed shows ro instead. A source that cannot be written
-// to carries ro after its count. One that does not answer is in error,
-// says why short and in full, and offers to retry only it. With the rail's
+// to carries ro after its count. One that does not answer is in error: its
+// mark, the reason in full the mark's hint (Detail) — no words by its name
+// and no Retry, which are the poll bar's menu of refusals (Runbar; the
+// owner's decision of 02.10.2026, states-16). With the rail's
 // form (Rail.Ticks), the tick sends the row's address under Toggle; without
 // it the choice is made, and the tick shows it (the rail of return, C-6.3).
 func TickRow(r view.SourceRow, words RailWords) w.TickRow {
@@ -204,12 +206,7 @@ func TickRow(r view.SourceRow, words RailWords) w.TickRow {
 	}
 	switch {
 	case r.State == view.CollectionUnavailable:
-		row.Error, row.Meta, row.MetaTitle = true, string(r.Message), string(r.Detail)
-		if r.Retry != nil {
-			retry := Button(*r.Retry, RetryID(r))
-			retry.Small = true
-			row.Trail = retry
-		}
+		row.Error, row.MetaTitle = true, string(r.Detail)
 	case r.Feed:
 		row.Meta = words.ReadOnly
 	case r.Count != nil:
@@ -272,27 +269,75 @@ func Tag(t view.Tag) w.Tag {
 	return w.Tag{Label: string(t.Label), On: t.On, Href: t.Href}
 }
 
-// RetryID is the ID of the form of a source's retry (SourceRow.Retry): its
-// action's and the source's address, one per source.
-func RetryID(r view.SourceRow) string {
-	if r.Retry == nil {
+// RetryID is the ID of the form of a retry of the poll bar's menu of
+// refusals (SourceProgress.Retry, PollBar.RetryAll): its action's ID and
+// address, one per source.
+func RetryID(a *view.Action) string {
+	if a == nil {
 		return ""
 	}
-	return r.Retry.ID + r.Href
+	return a.ID + a.Href
 }
 
-// RetryForms are the forms of the retries of the rail's sources that post
-// (RetryID), for the page's end.
-func RetryForms(r view.Rail) []w.PostForm {
-	var out []w.PostForm
-	for _, sec := range r.Sections {
-		for _, row := range sec.Rows {
-			if row.Retry != nil && row.Retry.Method == "POST" && row.Retry.Enabled {
-				out = append(out, ActionForm(*row.Retry, RetryID(row)))
-			}
+// runSep is what the pieces of a poll bar are joined by, as the server joins
+// its Summary: «Polled 5 of 6 sources · 14 events · ‹1 failed›» (s-agenda-1).
+const runSep = " · "
+
+// refused are the sources of a poll that did not answer, as its menu of
+// refusals lists them: each with what was asked and answered (Answer).
+func refused(p *view.PollBar) []view.SourceProgress {
+	var out []view.SourceProgress
+	for _, s := range p.Sources {
+		if s.Answer != "" {
+			out = append(out, s)
 		}
 	}
 	return out
+}
+
+// PollForms are the forms of the retries of the poll bar's menu of refusals
+// that post (RetryID): each refused source's and Retry all, for the page's
+// end.
+func PollForms(p *view.PollBar) []w.PostForm {
+	if p == nil || p.Failed == "" {
+		return nil
+	}
+	var out []w.PostForm
+	for _, s := range refused(p) {
+		if s.Retry != nil && s.Retry.Method == "POST" && s.Retry.Enabled {
+			out = append(out, ActionForm(*s.Retry, RetryID(s.Retry)))
+		}
+	}
+	if a := p.RetryAll; a != nil && a.Method == "POST" && a.Enabled {
+		out = append(out, ActionForm(*a, RetryID(a)))
+	}
+	return out
+}
+
+// Refusals is the poll bar's «N failed» (PollBar.Failed) as its button, red
+// and small, with its menu of refusals (states-16): for each source that did
+// not answer its mark, its name, what was asked and what the server
+// answered in full, and its Retry; Retry all under them when there are more
+// than one (RetryAll).
+func Refusals(p *view.PollBar) w.Drop {
+	var items []w.MenuPart
+	for _, s := range refused(p) {
+		r := w.MenuRefusal{Mark: w.Mark{Colour: string(s.Colour)}, Source: string(s.Stamp), Answer: string(s.Answer)}
+		if s.Retry != nil {
+			r.Retry = Button(*s.Retry, RetryID(s.Retry))
+			r.Retry.Small = true
+		}
+		items = append(items, r)
+	}
+	if p.RetryAll != nil {
+		all := Button(*p.RetryAll, RetryID(p.RetryAll))
+		all.Small = true
+		items = append(items, w.MenuFoot{Items: []w.Button{all}})
+	}
+	return w.Drop{
+		Trigger: w.Button{Label: string(p.Failed), Menu: true, Kind: w.ButtonDanger, Small: true},
+		Menu:    w.Menu{Items: items, Width: w.MenuWidth420, Pop: w.MenuUnderEnd},
+	}
 }
 
 // RailForm is the rail's form (Rail.Ticks) as the PostForm its ticks submit,
@@ -344,10 +389,12 @@ func Running(p *view.PollBar) bool {
 }
 
 // Runbar is a poll (PollBar) as its bar: how far, and what it says in its
-// pieces (Summary: addresses monospaced, a source that did not answer as an
-// alarm), then on its right what it says there (Aside: when the shown
-// answer was gathered, how long the poll runs), monospaced and pushed to the
-// end; nil when the bar does not stand (Running).
+// pieces (Summary: addresses monospaced), the red «N failed» with its menu
+// of refusals after the separator the summary's pieces are joined by
+// (runSep; Refusals), then
+// on its right what it says there (Aside: when the shown answer was
+// gathered, how long the poll runs), monospaced and pushed to the end; nil
+// when the bar does not stand (Running).
 func Runbar(p *view.PollBar) *w.Runbar {
 	if !Running(p) {
 		return nil
@@ -362,6 +409,9 @@ func Runbar(p *view.PollBar) *w.Runbar {
 		default:
 			parts = append(parts, w.Text(r.Text))
 		}
+	}
+	if p.Failed != "" {
+		parts = append(parts, w.Text(runSep), Refusals(p))
 	}
 	if p.Aside != "" {
 		parts = append(parts, w.Mono{Text: string(p.Aside), Place: w.Pushed})

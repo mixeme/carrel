@@ -203,10 +203,8 @@
             "href": "",
             "label": "Архив",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -218,10 +216,8 @@
             "href": "",
             "label": "Контакты",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -233,10 +229,8 @@
             "href": "",
             "label": "Команда",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }

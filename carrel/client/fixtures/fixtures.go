@@ -40,6 +40,7 @@ var Models = map[string]func() any{
 	"app-contact-timeline":     func() any { return &view.ContactTimelinePage{} },
 	"app-contacts":             func() any { return &view.ContactsListPage{} },
 	"app-contacts-one":         func() any { return &view.ContactsListPage{} },
+	"app-contacts-suggest":     func() any { return &view.SuggestList{} },
 	"app-duplicates":           func() any { return &view.DuplicatesPage{} },
 	"app-duplicates-merge":     func() any { return &view.DuplicatesMergePage{} },
 	"app-event":                func() any { return &view.EventPage{} },

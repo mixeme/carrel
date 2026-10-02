@@ -102,19 +102,20 @@ func TestAgendaByItsFrame(t *testing.T) {
 	if times["Дежурство: первая линия"] != "all day" {
 		t.Errorf("a day's time = %q, want «all day»", times["Дежурство: первая линия"])
 	}
-	// Б14, Б15: the source that did not answer, by name and in alarm; when
-	// the answer was gathered; what is missing.
+	// Б14, Б15: the source that did not answer — «1 failed», its refusal in
+	// the menu (from-typecase note 32); when the answer was gathered; what
+	// is missing.
 	if page.Poll == nil {
 		t.Fatal("no poll")
 	}
-	danger := ""
-	for _, r := range page.Poll.Summary {
-		if r.Mark == view.RunDanger {
-			danger = string(r.Text)
+	refused := ""
+	for _, sp := range page.Poll.Sources {
+		if sp.Answer != "" {
+			refused = string(sp.Stamp)
 		}
 	}
-	if danger != "baikal · Общий unavailable" || strings.Contains(string(page.Poll.Summary[0].Text), "refused") {
-		t.Errorf("poll = %+v", page.Poll.Summary)
+	if refused != "baikal · Общий" || page.Poll.Failed != "1 failed" || len(page.Poll.Summary) != 1 || strings.Contains(string(page.Poll.Summary[0].Text), "refused") {
+		t.Errorf("poll = %q, %q, refused %q", page.Poll.Summary, page.Poll.Failed, refused)
 	}
 	if !strings.HasSuffix(string(page.Poll.Aside), "2 min ago") {
 		t.Errorf("the poll's aside = %q", page.Poll.Aside)

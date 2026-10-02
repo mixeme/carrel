@@ -56,6 +56,7 @@ var fixtureTypes = map[string]func() any{
 	"app-contact-timeline":     func() any { return &ContactTimelinePage{} },
 	"app-contacts":             func() any { return &ContactsListPage{} },
 	"app-contacts-one":         func() any { return &ContactsListPage{} },
+	"app-contacts-suggest":     func() any { return &SuggestList{} },
 	"app-duplicates":           func() any { return &DuplicatesPage{} },
 	"app-duplicates-merge":     func() any { return &DuplicatesMergePage{} },
 	"app-event":                func() any { return &EventPage{} },

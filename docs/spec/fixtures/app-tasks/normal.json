@@ -239,18 +239,7 @@
     ],
     "attach": [
       {
-        "actions": [
-          {
-            "csrf": "csrf",
-            "danger": true,
-            "enabled": true,
-            "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit?etag=e14\u0026n=0\u0026op=detach",
-            "icon": "i-trash",
-            "id": "attach.remove",
-            "label": "Remove",
-            "method": "POST"
-          }
-        ],
+        "actions": [],
         "href": "/app/attach/a-nc-home/dela/aa11-2d09-5f84/0",
         "inline": true,
         "name": "посадочный-казань.pdf",
@@ -805,10 +794,8 @@
             "href": "/app/tasks",
             "label": "Combined list",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "part"
           }
@@ -883,10 +870,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": true,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -954,10 +939,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -994,10 +977,8 @@
                 "method": "GET"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "off"
           }

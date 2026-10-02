@@ -56,6 +56,15 @@ type PollBar struct {
 	Percent int              `json:"percent"`
 	Sources []SourceProgress `json:"sources"`
 	Actions []Action         `json:"actions"` // Stop · Search again
+	// Failed — красная кнопка полосы над списком и хронологией, «1 failed»
+	// (решение владельца 02.10.2026, states-16): закрытое меню отказов —
+	// строка на каждый источник с Answer, его Retry; пусто — не ответили
+	// все или полоса этих слов не пишет (поиск, s-find-1). Summary тогда
+	// отказов не называет
+	Failed Text `json:"failed,omitempty"`
+	// RetryAll — «Retry all» внизу того же меню, когда отказов больше
+	// одного: каждый неответивший источник снова; nil — отказ один или нет
+	RetryAll *Action `json:"retryAll"`
 }
 
 type SourceProgress struct {
@@ -65,7 +74,14 @@ type SourceProgress struct {
 	Count     *int        `json:"count"`
 	FromCache bool        `json:"fromCache"`
 	Message   Text        `json:"message"` // краткая причина отказа
-	Retry     *Action     `json:"retry"`   // повтор только этого источника
+	// Answer — не ответил: что спросили и что ответил сервер, целиком, как
+	// пишет меню отказов (states-16) — «REPORT /dav/calendars/duty/ → 503
+	// Service Unavailable», «PROPFIND /dav.php/calendars/mix/ → 401
+	// Unauthorized: the saved password was refused. Open Connections to
+	// update it.»; без ответа — где спросили и что ответа не было; у
+	// ответившего и остановленного пусто
+	Answer Text    `json:"answer,omitempty"`
+	Retry  *Action `json:"retry"` // повтор только этого источника
 }
 
 type DuplicatesPage struct {

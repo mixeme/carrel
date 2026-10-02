@@ -71,6 +71,13 @@ func eventAt(t *testing.T, f davFixture, uid string) view.EventPage {
 	return decode[view.EventPage](t, f.h.do(get(f.path("calendar")+"/"+uid, f.sess)))
 }
 
+// eventEditAt is the edit of an event: where its attachments are removed
+// (s-agenda-3; the card only links them).
+func eventEditAt(t *testing.T, f davFixture, uid string) view.EventEditPage {
+	t.Helper()
+	return decode[view.EventEditPage](t, f.h.do(get(f.path("calendar")+"/"+uid+"/edit", f.sess)))
+}
+
 // folderRows is what the files section shows in a folder of the file
 // collection.
 func folderRows(t *testing.T, f davFixture, segs ...string) []view.FileRow {
@@ -150,8 +157,10 @@ func TestLargeAttachmentGoesToTheFolder(t *testing.T) {
 	if row.Inline || row.Name != want || row.Size != "2 KB" || row.Href == "" {
 		t.Fatalf("row = %+v", row)
 	}
-	if got := f.h.do(get(row.Href, f.sess)); got.Code != http.StatusOK || got.Body.Len() != len(data) {
-		t.Errorf("open: %d %d bytes", got.Code, got.Body.Len())
+	// It opens in Files, its folder with it chosen (task 93); the file
+	// itself is there.
+	if got := f.h.do(get(row.Href, f.sess)); got.Code != http.StatusOK || !strings.HasPrefix(row.Href, "/app/files/") {
+		t.Errorf("open %q: %d", row.Href, got.Code)
 	}
 
 	href = actionHref(t, page.Actions, "attach.add")
@@ -270,7 +279,9 @@ func TestForeignAttachmentsAreLeftAsStored(t *testing.T) {
 }
 
 // Removing a link leaves the file where it is — another record may point at it
-// — and the label says so; an inline attachment goes with its only copy.
+// — and the label says so; an inline attachment goes with its only copy. The
+// card links the file — in Files it opens there — and removes nothing; the
+// edit does (s-agenda-3).
 func TestDetachLinkKeepsTheFile(t *testing.T) {
 	f := attachFixture(t, 0, []string{"carrel"}, "e1.ics", attachEvent("e1", "Sync-up", ""))
 	f.srv.SeedFile(attachFiles+"carrel/keep.txt", "keep")
@@ -279,14 +290,14 @@ func TestDetachLinkKeepsTheFile(t *testing.T) {
 		"ATTACH;FMTTYPE=text/plain;FILENAME=keep.txt:"+uri+"\n"+
 			"ATTACH;ENCODING=BASE64;VALUE=BINARY;FILENAME=inline.txt:"+base64.StdEncoding.EncodeToString([]byte("inline"))+"\n"))
 
-	page := eventAt(t, f, "e1")
-	link, inline := page.Attach[0], page.Attach[1]
-	if link.Href == "" || link.Inline {
+	card := eventAt(t, f, "e1")
+	if link := card.Attach[0]; !strings.HasPrefix(link.Href, "/app/files/") || link.Inline || len(link.Actions) != 0 {
 		t.Fatalf("a link into a storage of the catalog: %+v", link)
+	} else if got := f.h.do(get(link.Href, f.sess)); got.Code != http.StatusOK {
+		t.Errorf("open in Files: %d", got.Code)
 	}
-	if got := f.h.do(get(link.Href, f.sess)); got.Code != http.StatusOK || got.Body.String() != "keep" {
-		t.Errorf("open: %d %q", got.Code, got.Body.String())
-	}
+	page := eventEditAt(t, f, "e1")
+	link, inline := page.Attach[0], page.Attach[1]
 	remove := rowAction(t, link, "attach.remove")
 	if link.Actions[0].Label != "Remove link, keep the file" || link.Actions[0].Danger {
 		t.Errorf("removing a link: %+v", link.Actions[0])
@@ -306,7 +317,7 @@ func TestDetachLinkKeepsTheFile(t *testing.T) {
 		t.Errorf("the file went with the link")
 	}
 
-	page = eventAt(t, f, "e1")
+	page = eventEditAt(t, f, "e1")
 	if resp := f.h.do(postForm(rowAction(t, page.Attach[0], "attach.remove"), f.sess, url.Values{})); resp.Code != http.StatusSeeOther {
 		t.Fatalf("detach inline: %d %s", resp.Code, resp.Body.String())
 	}

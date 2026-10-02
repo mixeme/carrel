@@ -365,10 +365,8 @@
             "href": "/app/contacts",
             "label": "Combined address book",
             "menu": [],
-            "message": "",
             "on": true,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           }
@@ -443,10 +441,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           },
@@ -514,10 +510,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           }
@@ -584,10 +578,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "off"
           },
@@ -655,10 +647,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           }

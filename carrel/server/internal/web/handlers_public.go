@@ -376,42 +376,52 @@ func (s *Server) getInvite(w http.ResponseWriter, r *http.Request) {
 		s.tokenNotFound(w, r, start)
 		return
 	}
-	s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, inv, "", nil, nil))
+	s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, inv, inviteTyped{email: inv.Email}))
 }
 
-// invitePage is the form an invited person fills (s-auth-12): what Carrel
-// does not know yet — the login and the password. The address of a letter
-// is known and shown, not changed; a link has none, it is set later in the
-// account. An invitation made before v0.2.68 names its login, shown the
-// same way. The line under the title is by the kind of invitation, and
-// without a record of who invited it has no first sentence (the frame's
-// caption). The warning is the registration's (s-auth-2).
-func (s *Server) invitePage(w http.ResponseWriter, r *http.Request, token string, inv user.OpenInvite, typed string, loginErr, passErr error) view.InvitePage {
+// inviteTyped is what the form of an invitation carries back: what was
+// typed, and why it was refused.
+type inviteTyped struct {
+	login, email               string
+	loginErr, emailErr, passEr error
+}
+
+// invitePage is the form an invited person fills (s-auth-12 by a letter,
+// s-auth-14 by a link): what Carrel does not know yet — the login and the
+// password — and the address, shown and changed (the owner's decision of
+// 02.10.2026). A letter's is put in, the one the invitation went to; a
+// link's is empty; under it, how it is confirmed. An invitation made before
+// v0.2.68 names its login, shown off. The line under the title is by the
+// kind of invitation, and without a record of who invited it has no first
+// sentence (the frame's caption). The warning is the registration's
+// (s-auth-2).
+func (s *Server) invitePage(w http.ResponseWriter, r *http.Request, token string, inv user.OpenInvite, typed inviteTyped) view.InvitePage {
 	lede := "Choose a login and a password."
-	login := view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true, Value: text(typed)}
-	rows := []view.FormRow{login}
-	switch {
-	case inv.Login != "":
+	login := view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true, Value: text(typed.login)}
+	if inv.Login != "" {
 		lede = "Choose a password; the login is the one the invitation names."
-		rows[0].Value, rows[0].ReadOnly, rows[0].Required = text(inv.Login), true, false
-	case inv.Email != "":
-		lede = "Choose a login and a password; the address is the one the invitation went to."
+		login.Value, login.ReadOnly, login.Required = text(inv.Login), true, false
 	}
+	if typed.loginErr != nil {
+		login.Error = formError(typed.loginErr)
+	}
+	email := view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail, Required: true, Value: text(typed.email),
+		Placeholder: "you@example.org", Hint: "Confirmed by a letter."}
 	if inv.Email != "" {
-		rows = append(rows, view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail, Value: text(inv.Email), ReadOnly: true})
+		email.Hint = "The address the invitation went to. Another one is confirmed by a letter."
+	}
+	if typed.emailErr != nil {
+		email.Error = formError(typed.emailErr)
 	}
 	if inv.By != "" {
 		lede = inv.By + " invited you. " + lede
 	}
-	if loginErr != nil {
-		rows[0].Error = formError(loginErr)
-	}
 	password := view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true}
-	if passErr != nil {
-		password.Error = formError(passErr)
+	if typed.passEr != nil {
+		password.Error = formError(typed.passEr)
 	}
-	rows = append(rows, password,
-		view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true})
+	rows := []view.FormRow{login, email, password,
+		{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true}}
 	return view.InvitePage{
 		Plain: view.Plain{
 			Title:   text("Join " + s.users.Settings().InstanceName()),
@@ -434,21 +444,42 @@ func (s *Server) postInvite(w http.ResponseWriter, r *http.Request) {
 		s.tokenNotFound(w, r, start)
 		return
 	}
-	typed := strings.TrimSpace(r.FormValue("login"))
+	typed := inviteTyped{login: strings.TrimSpace(r.FormValue("login")), email: strings.TrimSpace(r.FormValue("email"))}
 	if err := passwordPair(r.FormValue("password"), r.FormValue("password2")); err != nil {
-		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, inv, typed, nil, err))
+		typed.passEr = err
+		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, inv, typed))
 		return
 	}
-	// A login the person chose and cannot have is said on its field: the
-	// invitation lives on. Whatever else goes wrong (the token died between
-	// GET and POST) answers like a dead token: the form has nothing more to
-	// say to someone holding an invalid secret.
-	err := s.users.AcceptInvite(r.Context(), token, typed, r.FormValue("password"))
+	// The address is asked for: an empty one is not an address.
+	if typed.email == "" {
+		typed.emailErr = user.ErrBadAddress
+		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, inv, typed))
+		return
+	}
+	// A login the person chose and cannot have, or an address that is not
+	// one, is said on its field: the invitation lives on. Whatever else goes
+	// wrong (the token died between GET and POST) answers like a dead token:
+	// the form has nothing more to say to someone holding an invalid secret.
+	confirm, err := s.users.AcceptInvite(r.Context(), token, typed.login, typed.email, r.FormValue("password"))
 	switch {
 	case err == nil:
+		// An address the invitation did not go to waits for its own letter
+		// (S-26): the confirmation token goes to the mail layer, never into
+		// a response.
+		name := inv.Login
+		if name == "" {
+			name = typed.login
+		}
+		if confirm != "" && s.sendConfirmMail(r, name, typed.email, confirm) {
+			_ = s.users.ConfirmMailed(confirm)
+		}
 		s.redirect(w, r, "/login")
+	case errors.Is(err, user.ErrBadAddress):
+		typed.emailErr = err
+		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, inv, typed))
 	case inv.Login == "" && (errors.Is(err, user.ErrLoginTaken) || errors.Is(err, user.ErrLoginEmpty)):
-		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, inv, typed, err, nil))
+		typed.loginErr = err
+		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, inv, typed))
 	default:
 		s.tokenNotFound(w, r, start)
 	}

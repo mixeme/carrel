@@ -147,7 +147,7 @@ func TestInvitationConfirmsOnlyAMailedAddress(t *testing.T) {
 			secret = inv.Secret
 		}
 	}
-	if err := h.users.AcceptInvite(t.Context(), secret, "dan", "danpass1234"); err != nil {
+	if _, err := h.users.AcceptInvite(t.Context(), secret, "dan", "", "danpass1234"); err != nil {
 		t.Fatal(err)
 	}
 	snap = h.st.Snapshot()

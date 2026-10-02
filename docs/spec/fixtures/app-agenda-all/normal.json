@@ -910,18 +910,7 @@
     ],
     "attach": [
       {
-        "actions": [
-          {
-            "csrf": "csrf",
-            "danger": true,
-            "enabled": true,
-            "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026n=0\u0026op=detach",
-            "icon": "i-trash",
-            "id": "attach.remove",
-            "label": "Remove",
-            "method": "POST"
-          }
-        ],
+        "actions": [],
         "href": "/app/attach/a-nc-home/lichnyj/8f1c-4a02-b7d3/0",
         "inline": true,
         "name": "release-checklist.md",
@@ -1123,9 +1112,11 @@
     "answeredAt": "10 August, 17:04",
     "aside": "2 min ago",
     "every": 700,
+    "failed": "1 failed",
     "note": "What arrived in time is shown. Records from the unavailable source are missing — not “there are none”, but “we have not seen them”.",
     "percent": 100,
     "poll": "/app/search/progress/t-task/poll?from=2026-08-10",
+    "retryAll": null,
     "running": false,
     "sources": [
       {
@@ -1165,6 +1156,7 @@
         "state": "done"
       },
       {
+        "answer": "REPORT /alice/calendars/obshchij/ → 401 Unauthorized: the saved password was refused. Open Connections to update it.",
         "colour": "#9a9280",
         "count": null,
         "fromCache": false,
@@ -1195,13 +1187,6 @@
     "summary": [
       {
         "text": "Polled 5 of 6 sources · 9 events"
-      },
-      {
-        "text": " · "
-      },
-      {
-        "mark": "danger",
-        "text": "baikal · Общий unavailable"
       }
     ],
     "taskID": "t-task"
@@ -1320,10 +1305,8 @@
             "href": "/app/calendar",
             "label": "Combined calendar",
             "menu": [],
-            "message": "",
             "on": true,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "part"
           }
@@ -1398,10 +1381,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           },
@@ -1469,10 +1450,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -1540,10 +1519,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -1618,10 +1595,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -1689,10 +1664,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -1767,18 +1740,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "password · 401",
             "on": false,
             "readOnly": false,
-            "retry": {
-              "csrf": "csrf",
-              "enabled": true,
-              "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
-              "id": "source.retry",
-              "label": "Retry",
-              "method": "POST",
-              "target": "poll"
-            },
             "state": "unavailable",
             "tick": "on"
           }
@@ -1815,10 +1778,8 @@
                 "method": "GET"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "on"
           },
@@ -1847,10 +1808,8 @@
                 "method": "GET"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "off"
           }

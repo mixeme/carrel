@@ -103,12 +103,9 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.InvitePage) },
-		Frames: []string{"s-auth-12"},
+		Frames: []string{"s-auth-12", "s-auth-14"},
 		Draw:   func(model any) Root { return invite.Screen(model.(*view.InvitePage)) },
 		Title:  func(model any) string { return string(model.(*view.InvitePage).Title) },
-		Waits: []Wait{
-			{Row: 18, Fixture: "invite/link"}, // ждёт библиотеку: U-5.5 #18
-		},
 	},
 	{
 		Model:  func() any { return new(view.ConfirmEmailPage) },
@@ -155,7 +152,6 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.ContactsListPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return contacts.Forms(model.(*view.ContactsListPage)) },
 		Waits: []Wait{
-			{Row: 22, Control: ".Items(Bar).More(Button)"},      // ждёт библиотеку: U-5.5 #22
 			{Row: 19, Fixture: "app-contacts/empty"},            // ждёт библиотеку: U-5.5 #19
 			{Row: 19, Fixture: "app-contacts/partial"},          // ждёт библиотеку: U-5.5 #19
 			{Row: 19, Fixture: "app-contacts/unavailable"},      // ждёт библиотеку: U-5.5 #19
@@ -206,11 +202,10 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.AgendaPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return agenda.Forms(model.(*view.AgendaPage)) },
 		Waits: []Wait{
-			{Row: 22, Control: ".Items(Bar).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #22
-			{Row: 24, Fixture: "app-agenda-all/partial"},                             // ждёт библиотеку: U-5.5 #24
-			{Row: 24, Fixture: "app-agenda-all/empty"},                               // ждёт библиотеку: U-5.5 #24
-			{Row: 24, Fixture: "app-agenda/empty"},                                   // ждёт библиотеку: U-5.5 #24
-			{Row: 25, Fixture: "app-agenda/normal"},                                  // ждёт библиотеку: U-5.5 #25
+			{Row: 24, Fixture: "app-agenda-all/partial"}, // ждёт библиотеку: U-5.5 #24
+			{Row: 24, Fixture: "app-agenda-all/empty"},   // ждёт библиотеку: U-5.5 #24
+			{Row: 24, Fixture: "app-agenda/empty"},       // ждёт библиотеку: U-5.5 #24
+			{Row: 25, Fixture: "app-agenda/normal"},      // ждёт библиотеку: U-5.5 #25
 		},
 	},
 	{
@@ -222,14 +217,13 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.EventEditPage) },
-		Frames: []string{"s-agenda-3", "s-agenda-15"},
+		Frames: []string{"s-agenda-3", "s-agenda-15", "states-17"},
 		Draw:   func(model any) Root { return eventedit.Screen(model.(*view.EventEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.EventEditPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return eventedit.Forms(model.(*view.EventEditPage)) },
 		Waits: []Wait{
 			{Row: 26, Fixture: "app-event-edit/normal"}, // ждёт библиотеку: U-5.5 #26
 			{Row: 26, Fixture: "app-event-edit/loss"},   // ждёт библиотеку: U-5.5 #26
-			{Row: 27, Fixture: "app-event-new/normal"},  // ждёт библиотеку: U-5.5 #27
 		},
 	},
 }

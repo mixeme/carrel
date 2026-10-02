@@ -34,7 +34,10 @@ type frameTick struct {
 	label, meta string
 	feed, error bool
 	retry       bool
+	hint        string // the hint of the error mark (from-typecase note 32)
 }
+
+var frameTickErr = regexp.MustCompile(`<span class="tc-tickrow__err"[^>]* title="([^"]*)">`)
 
 // frameTicks are the rows of a frame's rail, as it draws them.
 func frameTicks(frame string) []frameTick {
@@ -48,6 +51,9 @@ func frameTicks(frame string) []frameTick {
 			retry: strings.Contains(m[2], ">Retry<")}
 		if meta := frameTickMeta.FindStringSubmatch(m[2]); meta != nil {
 			row.meta = meta[1]
+		}
+		if hint := frameTickErr.FindStringSubmatch(m[2]); hint != nil {
+			row.hint = frameText(hint[1])
 		}
 		out = append(out, row)
 	}
@@ -67,9 +73,10 @@ func frameNav(frame string) []string {
 }
 
 // s-find-1: every source of the search counts its finds, the one that did
-// not answer says so with a Retry of it alone, and the rubric says how many
-// sources were asked of how many are ticked. Until v0.2.59 the rail was
-// built before the poll and carried no numbers and no troubles at all.
+// not answer is marked, its reason in the mark's hint — its Retry is the
+// poll bar's (from-typecase note 32) —, and the rubric says how many sources
+// were asked of how many are ticked. Until v0.2.59 the rail was built before
+// the poll and carried no numbers and no troubles at all.
 func TestSearchRailCountsWhatEachSourceFound(t *testing.T) {
 	frame := mockupFrame(t, "s-find-1")
 	ticks := frameTicks(frame)
@@ -87,8 +94,8 @@ func TestSearchRailCountsWhatEachSourceFound(t *testing.T) {
 		switch {
 		case r.error:
 			down++
-			if !r.retry {
-				t.Errorf("s-find-1: the row that did not answer has no Retry: %+v", r)
+			if r.retry || r.meta != "" || r.hint == "" {
+				t.Errorf("s-find-1: the row that did not answer is not a mark with a hint: %+v", r)
 			}
 		case regexp.MustCompile(`^\d+$`).MatchString(r.meta):
 			counted++
@@ -118,7 +125,7 @@ func TestSearchRailCountsWhatEachSourceFound(t *testing.T) {
 		t.Fatalf("rail without a query = %+v, want the rubric %q", empty.Rail.Sections, want)
 	}
 	for _, r := range empty.Rail.Sections[0].Rows {
-		if r.Count != nil || r.Retry != nil {
+		if r.Count != nil || r.State == view.CollectionUnavailable {
 			t.Errorf("without a query nothing was asked, yet %q = %+v", r.Label, r)
 		}
 	}
@@ -130,13 +137,15 @@ func TestSearchRailCountsWhatEachSourceFound(t *testing.T) {
 		t.Fatalf("rail = %+v, want the rubric %q", page.Rail.Sections, want)
 	}
 	_, people := railRow(t, page.Rail, "People")
-	if people.Count == nil || *people.Count != 1 || people.Retry != nil || people.State != view.CollectionOK {
+	if people.Count == nil || *people.Count != 1 || people.Detail != "" || people.State != view.CollectionOK {
 		t.Errorf("People found one: %+v", people)
 	}
 	_, work := railRow(t, page.Rail, "Work")
-	if work.Count != nil || work.State != view.CollectionUnavailable || work.Message == "" ||
-		work.Retry == nil || !strings.Contains(work.Retry.Href, "/app/search/progress/"+page.Poll.TaskID+"/retry?source=") {
+	if work.Count != nil || work.State != view.CollectionUnavailable || work.Detail == "" {
 		t.Errorf("Work did not answer: %+v", work)
+	}
+	if retry := sourceNamed(t, page.Poll, "Work").Retry; retry == nil || !strings.Contains(retry.Href, "/app/search/progress/"+page.Poll.TaskID+"/retry?source=") {
+		t.Errorf("Work is retried from the poll bar: %+v", retry)
 	}
 }
 
@@ -255,7 +264,7 @@ func TestSearchRailListsAGoneCollectionUnasked(t *testing.T) {
 	if len(page.Rail.Sections) != 1 || page.Rail.Sections[0].Account != "Sources 1 / 2" {
 		t.Fatalf("rail = %+v, want the rubric «Sources 1 / 2»", page.Rail.Sections)
 	}
-	if _, team := railRow(t, page.Rail, "Team"); team.State != view.CollectionGone || team.Count != nil || team.Retry != nil {
+	if _, team := railRow(t, page.Rail, "Team"); team.State != view.CollectionGone || team.Count != nil || team.Detail != "" {
 		t.Errorf("gone Team = %+v", team)
 	}
 	if _, people := railRow(t, page.Rail, "People"); people.Count == nil || *people.Count != 1 {

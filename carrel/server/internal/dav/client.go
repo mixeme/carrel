@@ -184,7 +184,7 @@ func (c *Client) Delete(ctx context.Context, p, ifMatch string) error {
 	case resp.StatusCode == http.StatusMultiStatus:
 		// A folder some of whose members the server could not delete (RFC
 		// 4918 §9.6.1): it is still there.
-		return &StatusError{Code: resp.StatusCode, Msg: "some members were not deleted"}
+		return &StatusError{Code: resp.StatusCode, Msg: "some members were not deleted", Method: req.Method, Path: req.URL.Path}
 	case resp.StatusCode/100 != 2 && resp.StatusCode != http.StatusNotFound:
 		return httpStatusError(resp)
 	}
@@ -215,7 +215,7 @@ func (c *Client) doStatus(req *http.Request, partial string) error {
 		if partial == "" {
 			partial = resp.Status
 		}
-		return &StatusError{Code: resp.StatusCode, Msg: partial}
+		return &StatusError{Code: resp.StatusCode, Msg: partial, Method: req.Method, Path: req.URL.Path}
 	case resp.StatusCode/100 != 2:
 		return httpStatusError(resp)
 	}

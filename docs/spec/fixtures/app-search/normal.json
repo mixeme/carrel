@@ -85,6 +85,7 @@
     "note": "",
     "percent": 100,
     "poll": "/app/search/progress/t-task/poll",
+    "retryAll": null,
     "running": false,
     "sources": [
       {
@@ -178,6 +179,7 @@
         "state": "empty"
       },
       {
+        "answer": "REPORT /alice/calendars/obshchij/ → 401 Unauthorized: the saved password was refused. Open Connections to update it.",
         "colour": "#9a9280",
         "count": null,
         "fromCache": false,
@@ -318,10 +320,8 @@
             "href": "",
             "label": "Архив",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -333,10 +333,8 @@
             "href": "",
             "label": "Контакты",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -348,10 +346,8 @@
             "href": "",
             "label": "Команда",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -363,10 +359,8 @@
             "href": "",
             "label": "Дела",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -378,10 +372,8 @@
             "href": "",
             "label": "Работа",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -393,10 +385,8 @@
             "href": "",
             "label": "Дневник",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -408,10 +398,8 @@
             "href": "",
             "label": "Записи",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -423,10 +411,8 @@
             "href": "",
             "label": "Личный",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -438,10 +424,8 @@
             "href": "",
             "label": "Дежурства",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -453,10 +437,8 @@
             "href": "",
             "label": "Проекты",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -468,18 +450,8 @@
             "href": "",
             "label": "Общий",
             "menu": [],
-            "message": "password · 401",
             "on": false,
             "readOnly": false,
-            "retry": {
-              "csrf": "csrf",
-              "enabled": true,
-              "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
-              "id": "source.retry",
-              "label": "Retry",
-              "method": "POST",
-              "target": "poll"
-            },
             "state": "unavailable",
             "tick": "on"
           },
@@ -491,10 +463,8 @@
             "href": "",
             "label": "Праздники РФ",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -506,10 +476,8 @@
             "href": "",
             "label": "Files",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -521,10 +489,8 @@
             "href": "",
             "label": "Documents",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }

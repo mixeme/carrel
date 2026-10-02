@@ -122,17 +122,13 @@ func TestTickRow(t *testing.T) {
 			// draws the mark is-ext in a rail (s-contacts-7, s-agenda-1).
 			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239"}, Label: "Праздники РФ", Meta: "ro"},
 		},
-		"no answer, with its retry": {
-			view.SourceRow{Href: "/o", Label: "Общий", Colour: "#9a9280", Tick: view.TickOn, State: view.CollectionUnavailable, Message: "password · 401", Detail: "401 Unauthorized",
-				Retry: &view.Action{ID: "source.retry", Label: "Retry", Href: "/retry", Method: "POST", Enabled: true}}, bind.RailWords{},
-			w.TickRow{Mark: w.Mark{Colour: "#9a9280"}, Label: "Общий", Meta: "password · 401", MetaTitle: "401 Unauthorized", Error: true,
-				Trail: w.Button{Label: "Retry", Small: true, Form: "source.retry/o"}},
+		"no answer: a mark, the reason its hint, no retry (states-16)": {
+			view.SourceRow{Href: "/o", Label: "Общий", Colour: "#9a9280", Tick: view.TickOn, State: view.CollectionUnavailable, Detail: "401 Unauthorized"}, bind.RailWords{None: "—"},
+			w.TickRow{Mark: w.Mark{Colour: "#9a9280"}, Label: "Общий", MetaTitle: "401 Unauthorized", Error: true},
 		},
 	} {
 		same(t, name, bind.TickRow(c.row, c.words), c.want)
 	}
-	rail := view.Rail{Sections: []view.RailSection{{Rows: []view.SourceRow{{Href: "/o", Retry: &view.Action{ID: "source.retry", Href: "/retry", Method: "POST", Enabled: true}}}}}}
-	same(t, "the retries' forms", bind.RetryForms(rail), []w.PostForm{{ID: "source.retry/o", Action: "/retry"}})
 }
 
 func TestSources(t *testing.T) {
@@ -201,6 +197,32 @@ func TestRunbar(t *testing.T) {
 	// end.
 	failed.Aside = "from cache · 2 min ago"
 	same(t, "its right", bind.Runbar(failed).Parts[4:], []w.RunbarPart{w.Mono{Text: "from cache · 2 min ago", Place: w.Pushed}})
+
+	// What did not answer is the red «N failed» with its menu of refusals
+	// (states-16): each source's mark, name, what was asked and answered, its
+	// Retry; Retry all when there are more than one.
+	retry := func(src string) *view.Action {
+		return &view.Action{ID: "source.retry", Label: "Retry", Href: "/retry?source=" + src, Method: "POST", Enabled: true}
+	}
+	two := &view.PollBar{Percent: 66, Summary: view.Runs{{Text: "Polled 4 of 6 sources · 9 events"}}, Failed: "2 failed",
+		RetryAll: &view.Action{ID: "poll.retry", Label: "Retry all", Href: "/retry", Method: "POST", Enabled: true},
+		Sources: []view.SourceProgress{{State: view.SourceDone},
+			{Stamp: "baikal · Общий", Colour: "#9a9280", State: view.SourceError, Answer: "PROPFIND /c/ → 401 Unauthorized", Retry: retry("b")},
+			{Stamp: "radicale · vps · Проекты", Colour: "#6b4e7a", State: view.SourceError, Answer: "REPORT /p/ → 503 Service Unavailable", Retry: retry("r")}}}
+	same(t, "two refused", bind.Runbar(two), &w.Runbar{Meter: w.Meter{Percent: 66}, Parts: []w.RunbarPart{
+		w.Text("Polled 4 of 6 sources · 9 events"), w.Text(" · "),
+		w.Drop{
+			Trigger: w.Button{Label: "2 failed", Menu: true, Kind: w.ButtonDanger, Small: true},
+			Menu: w.Menu{Width: w.MenuWidth420, Pop: w.MenuUnderEnd, Items: []w.MenuPart{
+				w.MenuRefusal{Mark: w.Mark{Colour: "#9a9280"}, Source: "baikal · Общий", Answer: "PROPFIND /c/ → 401 Unauthorized",
+					Retry: w.Button{Label: "Retry", Small: true, Form: "source.retry/retry?source=b"}},
+				w.MenuRefusal{Mark: w.Mark{Colour: "#6b4e7a"}, Source: "radicale · vps · Проекты", Answer: "REPORT /p/ → 503 Service Unavailable",
+					Retry: w.Button{Label: "Retry", Small: true, Form: "source.retry/retry?source=r"}},
+				w.MenuFoot{Items: []w.Button{{Label: "Retry all", Small: true, Form: "poll.retry/retry"}}},
+			}},
+		},
+	}})
+	same(t, "their forms", len(bind.PollForms(two)), 3)
 }
 
 func TestBadgeAvatar(t *testing.T) {
@@ -243,8 +265,9 @@ func TestActions(t *testing.T) {
 	// computer») posts multipart with its file field.
 	same(t, "a form of an action with a file", bind.ActionForm(view.Action{Href: "/e?op=attach", Method: "POST", CSRF: "c", File: "file"}, "attach.add"),
 		w.PostForm{ID: "attach.add", Action: "/e?op=attach", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}, File: "file"})
-	rail := view.Rail{Sections: []view.RailSection{{Rows: []view.SourceRow{{Href: "/o", Retry: &view.Action{ID: "source.retry", Href: "/retry", Method: "POST", Enabled: true, CSRF: "c"}}}}}}
-	same(t, "a retry's form, with the token", bind.RetryForms(rail), []w.PostForm{{ID: "source.retry/o", Action: "/retry", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}}})
+	poll := &view.PollBar{Failed: "1 failed", Sources: []view.SourceProgress{{Answer: "REPORT /o → 503",
+		Retry: &view.Action{ID: "source.retry", Href: "/retry?source=o", Method: "POST", Enabled: true, CSRF: "c"}}}}
+	same(t, "a retry's form, with the token", bind.PollForms(poll), []w.PostForm{{ID: "source.retry/retry?source=o", Action: "/retry?source=o", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}}})
 	same(t, "a technical block", bind.Diag(bind.DiagLine{Name: "UID", Value: "4f2b"}, bind.DiagLine{Name: "Read", Value: "2 min ago"}),
 		w.Diag{Text: "UID   4f2b\nRead  2 min ago"})
 }

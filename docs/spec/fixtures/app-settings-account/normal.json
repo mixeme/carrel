@@ -178,7 +178,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": null,
         "enabled": true,
         "href": "/app/settings/backup",
         "id": "settings.backup",

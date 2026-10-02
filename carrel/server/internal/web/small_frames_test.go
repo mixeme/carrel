@@ -12,7 +12,7 @@ import (
 )
 
 // From-typecase note 13, the small things, each read off its frame: the
-// birthday typed as text (s-contacts-3, s-contacts-4), the buttons under the
+// birthday typed as text (s-contacts-3, s-contacts-27), the buttons under the
 // duplicate weights (s-dup-3), the download of a public page named by its
 // file (s-publish-6, -7, -8), the Shortcuts of the files rail (s-files-1).
 
@@ -40,8 +40,13 @@ func readFrameBirthday(t *testing.T, id string) frameField {
 	return frameField{kind: attrs["type"], value: attrs["value"], placeholder: attrs["placeholder"], hint: frameInline(m[2])}
 }
 
+// Anna's birthday is filled in every edit (from-typecase note 32, task 81):
+// the empty field is the new card's (s-contacts-27).
 func TestBirthdayIsTypedAsTheFrameDrawsIt(t *testing.T) {
-	filled, empty := readFrameBirthday(t, "s-contacts-3"), readFrameBirthday(t, "s-contacts-4")
+	filled, empty := readFrameBirthday(t, "s-contacts-3"), readFrameBirthday(t, "s-contacts-27")
+	if again := readFrameBirthday(t, "s-contacts-4"); again != filled {
+		t.Fatalf("s-contacts-4 draws Anna's birthday %+v, s-contacts-3 %+v: read the frames again", again, filled)
+	}
 	examples := regexp.MustCompile(`^Type it: (\S+), or (\S+) without the year\.$`).FindStringSubmatch(filled.hint)
 	if examples == nil || filled.value != examples[1] || empty.placeholder == "" {
 		t.Fatalf("hint %q, value %q, placeholder %q: the frames changed, read them again", filled.hint, filled.value, empty.placeholder)

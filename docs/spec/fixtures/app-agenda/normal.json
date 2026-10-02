@@ -517,18 +517,7 @@
     ],
     "attach": [
       {
-        "actions": [
-          {
-            "csrf": "csrf",
-            "danger": true,
-            "enabled": true,
-            "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026n=0\u0026op=detach",
-            "icon": "i-trash",
-            "id": "attach.remove",
-            "label": "Remove",
-            "method": "POST"
-          }
-        ],
+        "actions": [],
         "href": "/app/attach/a-nc-home/lichnyj/8f1c-4a02-b7d3/0",
         "inline": true,
         "name": "release-checklist.md",
@@ -822,10 +811,8 @@
             "href": "/app/calendar",
             "label": "Combined calendar",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "part"
           }
@@ -900,10 +887,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           },
@@ -971,10 +956,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": true,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -1042,10 +1025,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -1120,10 +1101,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -1191,10 +1170,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -1269,18 +1246,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "password · 401",
             "on": false,
             "readOnly": false,
-            "retry": {
-              "csrf": "csrf",
-              "enabled": true,
-              "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
-              "id": "source.retry",
-              "label": "Retry",
-              "method": "POST",
-              "target": "poll"
-            },
             "state": "unavailable",
             "tick": "on"
           }
@@ -1317,10 +1284,8 @@
                 "method": "GET"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "on"
           },
@@ -1349,10 +1314,8 @@
                 "method": "GET"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "off"
           }

@@ -72,15 +72,19 @@ func Kind(a view.Action) w.ButtonKind {
 // Button is an action as a button with its meaning (U-5.1, U-8): an action
 // that goes somewhere (GET) is a link to its Href; one that posts (POST)
 // submits the form named form — the Form it stands under, or a PostForm of
-// the page (Button.Form); an action switched off is drawn disabled and says
-// why (Reason), and leads nowhere. The label, the icon and the kind are the
-// action's.
+// the page (Button.Form), or — one that sends the form it stands in
+// (Submits, without a file) — submits that form to its own Href
+// (formaction: Remove of a new record's attachment); an action switched off
+// is drawn disabled and says why (Reason), and leads nowhere. The label,
+// the icon and the kind are the action's.
 func Button(a view.Action, form string) w.Button {
 	b := w.Button{Label: string(a.Label), Icon: Icon(a.Icon), Kind: Kind(a)}
 	switch {
 	case !a.Enabled:
 		b.State = w.ButtonDisabled
 		b.Reason = string(a.Reason)
+	case a.Method == "POST" && a.Submits && a.File == "":
+		b.Submit, b.To = true, a.Href
 	case a.Method == "POST":
 		b.Form = form
 	default:

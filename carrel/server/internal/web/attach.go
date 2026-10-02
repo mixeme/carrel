@@ -219,7 +219,10 @@ func (s *Server) attachRows(c *collectionCtx, uid string, obj *model.Object, eta
 		if a.Size >= 0 {
 			row.Size = formatSize(a.Size)
 		}
-		if !c.col.ReadOnly {
+		// Remove stands on the edit only (the owner's decision of
+		// 02.10.2026, s-agenda-3): the card's name is a link, and nothing
+		// else is done with it there.
+		if !c.col.ReadOnly && from == "edit" {
 			row.Actions = []view.Action{s.detachAction(c, uid, etag, from, a)}
 		}
 		rows = append(rows, row)
@@ -243,13 +246,15 @@ func linkName(a cal.Attachment) string {
 
 // attachLinkHref is the Carrel address of a link into a live file collection
 // of the catalog — its server and a path under its root — or "" for any other
-// link: that one is shown and not fetched.
+// link: that one is shown and not fetched. The file opens in Files, its
+// folder with it chosen (the owner's decision of 02.10.2026: an attachment
+// in the record downloads, one in Files opens there).
 func (s *Server) attachLinkHref(blob sealed.Blob, uri string) string {
 	conn, col, segs, ok := attachLinkAt(blob, uri)
 	if !ok {
 		return ""
 	}
-	return s.route(attachHref(conn, col.Path, segs))
+	return s.route(fileHref(conn, col.Path, "", segs, false))
 }
 
 // attachPlace is where the file a link points at lies, as the frames of the

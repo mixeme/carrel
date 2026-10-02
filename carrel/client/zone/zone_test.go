@@ -35,6 +35,7 @@ func routeKinds(t *testing.T) map[string]zone.Kind {
 	c5 := section(t, spec, "## C-5. ", "## C-6. ")
 	ident := regexp.MustCompile("`([A-Z][A-Za-z]*)`")
 	kinds := map[string]zone.Kind{}
+	var fragments []string
 	sub := ""
 	for _, line := range strings.Split(c5, "\n") {
 		if strings.HasPrefix(line, "### ") {
@@ -65,10 +66,20 @@ func routeKinds(t *testing.T) map[string]zone.Kind {
 				}
 				kinds[m[1]] = kind
 			}
+		case strings.Contains(answer, "фрагмент") && len(models) > 0:
+			fragments = append(fragments, models[0][1])
 		}
 	}
 	if len(kinds) == 0 {
 		t.Fatal("C-5: no page or sheet rows read")
+	}
+	// A view model C-5 answers only as a fragment of its own — the
+	// suggestions of a field (SuggestList, /app/contacts/suggest) — is no
+	// page: it has no zones, the live layer puts it where the markup says.
+	for _, f := range fragments {
+		if _, ok := kinds[f]; !ok {
+			kinds[f] = zone.NotPage
+		}
 	}
 	return kinds
 }
@@ -274,6 +285,12 @@ func TestEveryFixtureHasItsZones(t *testing.T) {
 				}
 				for _, target := range render.Targets() {
 					got, err := zone.Of(model, target)
+					if kind == zone.NotPage {
+						if !errors.Is(err, zone.ErrNotPage) {
+							t.Errorf("%s answers only as a fragment, and target %s is %v, %v", name, target, got, err)
+						}
+						continue
+					}
 					w, has := want[target]
 					if !has {
 						if !errors.Is(err, zone.ErrNoZone) {

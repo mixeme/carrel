@@ -583,7 +583,7 @@ func TestDeadLinkPageIsTheFrame(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rec := h.do(h.anonPostForm("/invite/"+used, "/invite/"+used, url.Values{"password": {"bobpass123"}, "password2": {"bobpass123"}})); rec.Code != http.StatusSeeOther {
+	if rec := h.do(h.anonPostForm("/invite/"+used, "/invite/"+used, url.Values{"email": {"bob@example.org"}, "password": {"bobpass123"}, "password2": {"bobpass123"}})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("accept: %d %s", rec.Code, rec.Body.String())
 	}
 	want := authFrame(t, "rest-1")

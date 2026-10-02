@@ -45,14 +45,15 @@
           {
             "error": "",
             "extra": null,
-            "hint": "",
+            "hint": "The address the invitation went to. Another one is confirmed by a letter.",
             "kind": "email",
             "label": "Email",
             "name": "email",
             "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "anna@example.org"
+            "readOnly": false,
+            "required": true,
+            "value": "anna@example.org",
+            "placeholder": "you@example.org"
           },
           {
             "error": "",
@@ -85,7 +86,7 @@
   },
   "lede": [
     {
-      "text": "mix invited you. Choose a login and a password; the address is the one the invitation went to."
+      "text": "mix invited you. Choose a login and a password."
     }
   ],
   "notices": [

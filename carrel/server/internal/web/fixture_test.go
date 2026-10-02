@@ -1145,6 +1145,15 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 	app.compare(t, "app-agenda/normal.json", app.h.do(get(here+"&open="+url.QueryEscape(app.listPath(t, "calendar", "lichnyj")+"/8f1c-4a02-b7d3"), app.sess)))
 }
 
+// C-14.2: the suggestions of the attendees' field as s-agenda-12 draws them
+// — «ве» typed, Вера of «Архив» found by her name in the books the session
+// has read (task 77, server v0.2.139).
+func TestFixtureAttendeeSuggest(t *testing.T) {
+	app := newMockupApp(t)
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	app.compare(t, "app-contacts-suggest/normal.json", app.h.do(get("/app/contacts/suggest?q="+url.QueryEscape("ве"), app.sess)))
+}
+
 // C-14.2: the combined calendar as s-agenda-1 draws it — every ticked
 // calendar polled, baikal refusing, the screen two minutes after the poll
 // (the client's scan of the calendar, Б1).

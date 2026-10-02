@@ -12,18 +12,18 @@ import (
 // of the contacts section, 30.09.2026, group Г): the head with the avatar,
 // the line of where and as what, «in 2 books»; the buttons with icons and
 // Print; the range without a hint; the run bar in pieces — the addresses in
-// mono, a source that did not answer as an alarm; the count of each month;
+// mono, a source that did not answer as the red «1 failed» of the menu of
+// refusals (from-typecase note 32); the count of each month;
 // the card in the panel with its avatar, without the head's rows, with the
 // other books and its UID.
 
 var (
-	frameTLHead   = regexp.MustCompile(`(?s)<div class="tc-main">\s*<div class="tc-head[^"]*">\s*<div class="tc-head__titles[^"]*">\s*<span class="tc-avatar[^"]*">([^<]*)</span>.*?<div class="tc-head__sub">([^<]*)<span class="tc-badge is-linked">([^<]*)</span>.*?<div class="tc-acts">(.*?)</div>`)
-	frameRunbar   = regexp.MustCompile(`(?s)<div class="tc-runbar">(.*?)</div>`)
-	frameRunMono  = regexp.MustCompile(`<span class="tc-mono">([^<]*)</span>`)
-	frameRunAlarm = regexp.MustCompile(`<span class="tc-dim--danger">([^<]*)</span>`)
-	frameTLRange  = regexp.MustCompile(`(?s)<form class="tc-range" action="([^"]*)" method="(get)">(.*?)</form>`)
-	frameTLDay    = regexp.MustCompile(`<input class="tc-in[^"]*" type="date" value="[^"]*" name="([^"]*)" aria-label="([^"]*)">`)
-	frameSideDL   = regexp.MustCompile(`(?s)<div class="tc-side">.*?<dl class="tc-fields">(.*?)</dl>`)
+	frameTLHead  = regexp.MustCompile(`(?s)<div class="tc-main">\s*<div class="tc-head[^"]*">\s*<div class="tc-head__titles[^"]*">\s*<span class="tc-avatar[^"]*">([^<]*)</span>.*?<div class="tc-head__sub">([^<]*)<span class="tc-badge is-linked">([^<]*)</span>.*?<div class="tc-acts">(.*?)</div>`)
+	frameRunbar  = regexp.MustCompile(`(?s)<div class="tc-runbar">(.*?)<details class="tc-drop"><summary class="tc-btn is-sm is-danger">(\d+ failed)`)
+	frameRunMono = regexp.MustCompile(`<span class="tc-mono">([^<]*)</span>`)
+	frameTLRange = regexp.MustCompile(`(?s)<form class="tc-range" action="([^"]*)" method="(get)">(.*?)</form>`)
+	frameTLDay   = regexp.MustCompile(`<input class="tc-in[^"]*" type="date" value="[^"]*" name="([^"]*)" aria-label="([^"]*)">`)
+	frameSideDL  = regexp.MustCompile(`(?s)<div class="tc-side">.*?<dl class="tc-fields">(.*?)</dl>`)
 )
 
 func TestTimelineIsTheFrame(t *testing.T) {
@@ -96,8 +96,8 @@ func TestTimelineIsTheFrame(t *testing.T) {
 
 	// The run bar in pieces.
 	bar := frameRunbar.FindStringSubmatch(frame)
-	if bar == nil || len(frameRunMono.FindAllString(bar[1], -1)) == 0 || frameRunAlarm.FindString(bar[1]) == "" {
-		t.Fatal("s-contacts-7 draws no run bar with addresses and an alarm: read the frame again")
+	if bar == nil || len(frameRunMono.FindAllString(bar[1], -1)) == 0 || strings.Contains(bar[1], "tc-dim--danger") {
+		t.Fatal("s-contacts-7 draws no run bar with addresses and «N failed»: read the frame again")
 	}
 	var mono, alarm []string
 	var words strings.Builder
@@ -114,8 +114,8 @@ func TestTimelineIsTheFrame(t *testing.T) {
 	if strings.Join(mono, ",") != "a.kovaleva@example.org" || !strings.Contains(said, " · matched by ") || !strings.Contains(said, " and the name") {
 		t.Errorf("summary %q (mono %q), the frame %q", said, mono, frameText(bar[1]))
 	}
-	if len(alarm) != 1 || alarm[0] != "baikal · Общий unavailable" || !strings.HasPrefix(said, "Polled ") {
-		t.Errorf("summary %q: alarm %q, the frame %q", said, alarm, frameRunAlarm.FindStringSubmatch(bar[1])[1])
+	if len(alarm) != 0 || !strings.HasPrefix(said, "Polled ") || !strings.HasSuffix(said, " and the name") || string(page.Poll.Failed) != bar[2] {
+		t.Errorf("summary %q: alarm %q, failed %q; the frame «%s» and %q", said, alarm, page.Poll.Failed, frameText(bar[1]), bar[2])
 	}
 
 	// Each month says how many.

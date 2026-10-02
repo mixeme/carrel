@@ -120,7 +120,7 @@ func Forms(p *view.ContactTimelinePage) []w.PostForm {
 	if f := bind.RailForm(p.Rail, formRail); f != nil {
 		out = append(out, *f)
 	}
-	out = append(out, bind.RetryForms(p.Rail)...)
+	out = append(out, bind.PollForms(&p.Poll)...)
 	out = append(out, bind.NoticeForms(p.Notices)...)
 	for _, a := range p.Card.Actions {
 		if a.Danger && a.Method == "POST" && a.Enabled {

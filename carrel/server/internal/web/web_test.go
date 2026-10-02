@@ -638,7 +638,7 @@ func TestInviteFormErrorsAreNot404(t *testing.T) {
 	if _, _, _, ok := h.users.Authenticate(context.Background(), "bob", "bobpass123"); ok {
 		t.Fatal("password set despite the form error")
 	}
-	rec = h.do(h.anonPostForm(path, path, url.Values{"password": {"bobpass123"}, "password2": {"bobpass123"}}))
+	rec = h.do(h.anonPostForm(path, path, url.Values{"email": {"bob@example.org"}, "password": {"bobpass123"}, "password2": {"bobpass123"}}))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("accept: status = %d", rec.Code)
 	}
@@ -719,7 +719,7 @@ func TestPublicSecretStubsAnswerAlike(t *testing.T) {
 		t.Fatal(err)
 	}
 	_ = h.do(h.anonPostForm("/invite/"+secret, "/invite/"+secret, url.Values{
-		"password": {"bobpass123"}, "password2": {"bobpass123"},
+		"email": {"bob@example.org"}, "password": {"bobpass123"}, "password2": {"bobpass123"},
 	}))
 	never := strings.Repeat("A", 43)
 	baseline := h.do(get("/forgot/"+never, nil))

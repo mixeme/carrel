@@ -4,6 +4,43 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.2.1 — 2026-10-02
+
+Typecase `bc575a8` (Carrel's tasks 78–82, 93–95, 106, 107 and the owner's
+decisions of 02.10.2026), server `v0.2.146`. The drafts that print otherwise
+went in first, unchanged (`437bd97`); the screens over them here.
+
+### Changed
+
+- **A source that did not answer** is an error mark in the rail, its reason
+  the mark's hint (`SourceRow.Detail`); no words by its name and no Retry
+  there. The poll bar says «N failed» (`PollBar.Failed`) — a red button with
+  the menu of refusals: each source's mark, name, what was asked and
+  answered (`SourceProgress.Answer`), its Retry; Retry all under them
+  (`RetryAll`). `bind.Refusals`, `bind.PollForms` (the retries' forms at the
+  page's end); `bind.RetryForms` of the rail is gone.
+- **The bar's «⋯» holds its twins** (task 82): the contacts list — the
+  order as items and «Compact rows» as the same GET form; the agenda — the
+  ticks «Events · Tasks due · Notes» and «Compact rows» as forms, the range.
+- **The range sends the window** (task 107): `Range.Hidden` carries
+  `view=range` and the list's other choices.
+- **An attachment's name is a link** in the event, its panel and the agenda
+  (task 93); **Remove** stands on the edit (`AttachRow.Actions`, red for
+  data inside, plain for a link). `bind.Button`: an action that sends the
+  form it stands in (`Action.Submits`, no file) submits it to its address.
+- **The invitation by link** has its frame (`s-auth-14`), the event's loss
+  its frame (`states-17`).
+- `zone`: a view model C-5 answers only as a fragment of its own
+  (`SuggestList`) is no page, and has no zones; `fixtures.Models` names
+  `app-contacts-suggest`.
+
+### Closed
+
+- U-5.5 rows 18 (`s-auth-14`), 23 (`Range.Hidden`), 27 (Attach of the new
+  form, server `v0.2.145`), 29 (Remove on the edit); row 22 narrowed to the
+  timeline's «⋯» (its frame draws no menu), 19, 21 and 26 to what still
+  differs.
+
 ## v0.2.0 — 2026-10-02
 
 The calendar section: the second section built whole. Typecase `9e69804`

@@ -371,7 +371,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/search` | GET | вход | страница | `SearchPage` |
 | `/app/search/progress/{task}` | GET | вход | SSE | `PollBar` — поток хода (C-7.4): `poll`, в конце `poll-finished` с рейлом; адрес — `PollBar.Stream`, с запросом страницы полосы |
 | `/app/search/progress/{task}/poll` | GET | вход | фрагмент | `PollBar` — запасной опрос: адрес — `PollBar.Poll`, раз в `PollBar.Every` мс; законченный — с рейлом страницы внеполосно |
-| `/app/search/progress/{task}/retry` | POST | вход | фрагмент | `PollBar` |
+| `/app/search/progress/{task}/retry` | POST | вход | фрагмент | `PollBar` — `?source=` — повтор одного источника (`SourceProgress.Retry`); без него — каждого не ответившего («Retry all», `PollBar.RetryAll`, states-16) |
 | `/app/search/progress/{task}/cancel` | POST | вход | фрагмент | `PollBar` |
 | `/app/duplicates` | GET | вход | страница | `DuplicatesPage` |
 | `/app/duplicates/decide` | POST | вход | страница, редирект | `DuplicatesPage` — решение по группе (`do=`): ответ — дубликаты, как они теперь стоят, сказанное — в `notices`; форма без сценариев, когда сказать нечего, — редирект на `/app/duplicates`. Группа — не зона C-7.2, фрагментом не приходит |
@@ -617,6 +617,7 @@ type Action struct {
     Enabled bool
     On      bool    // включено: открытый раздел рейла, выбранный сегмент, включённый флажок ленты
     Reason  Text    // почему выключено; пусто, если включено
+    Hint    Text    // подсказка у включённого действия (title кнопки), когда её рисует кадр: чем оно обернётся — New password внешнего запуска, «The old password stops working; whatever runs this job has to be given the new one.» (s-backup-2, -3, -10, -11); пусто — подсказки нет
     Tally   Text    // счёт сегмента отдельно от подписи: Label «All», Tally «24» (SegOption.Count); пусто — кадр счёта не пишет
     Arrow   []MenuItem // стрелка кнопки (.m-split): пункты её меню; пусто — без стрелки
     CSRF    string  // у POST — токен сеанса: без сценариев действие уходит своей формой со скрытым _csrf этого значения (C-11); у GET и на страницах вне входа пусто
@@ -852,9 +853,7 @@ type SourceRow struct {
     On       bool      // открытая: её список на экране или запись из неё; в едином виде — строка единого вида (is-on)
     Feed     bool      // подписка — лента, прочитанная снаружи (is-ext); на месте числа «ro»
     State    CollectionState
-    Message  Text      // не ответила: коротко, «password · 401», «no reply»
-    Detail   Text      // и полностью, для подсказки
-    Retry    *Action   // повтор только этой коллекции
+    Detail   Text      // не ответила: почему, полностью — подсказка значка ошибки строки, «401 Unauthorized — the saved password was refused. Open Connections to update it.»; ни слов у имени, ни Retry в рейле нет (решение владельца 02.10.2026: отказ целиком и его Retry — в меню «N failed» полосы хода, PollBar.Failed, states-16)
     Menu     []MenuItem
 }
 
@@ -1458,7 +1457,7 @@ type SuggestItem struct {
     Meta   Text   // у записи Related to — род и день справа, «event · 12 Aug» (s-tasks-10); у людей пусто, ключа нет
 }
 type AttachRow struct {
-    Href    string
+    Href    string // имя — ссылка в любой карточке (решение владельца 02.10.2026): данные внутри записи — скачать (/app/attach/…), файл ссылки в Files — открыть там, папку с выбранным файлом (/app/files/…); ссылка вне каталога — пусто
     Name    Text
     Size    Size
     Type    Text
@@ -1469,7 +1468,7 @@ type AttachRow struct {
     // внутри записи и у ссылки вне каталога пусто, ключа нет
     Place   Text
     State   RecordState
-    Actions []Action
+    Actions []Action // только на правке (s-agenda-3): Remove — «Remove link, keep the file» у ссылки; в карточке и панели действий у вложения нет
 }
 
 type TaskPage struct { // чтение
@@ -1620,7 +1619,7 @@ type PollBar struct {
     Stream      string
     Poll        string
     Every       int
-    Summary     Runs // «Polled 5 of 7 · 12 records · 1 refused» кусками: у хронологии адреса моноширинно, не ответивший — тревогой (s-contacts-7); у календаря не ответивший назван тревогой вместо счёта — «Polled 5 of 6 sources · 14 events · ‹baikal · Общий unavailable›» (s-agenda-1)
+    Summary     Runs // кусками: над списком и хронологией — «Polled 5 of 6 sources · 14 events», у хронологии адреса моноширинно (s-agenda-1, s-contacts-7); не ответивших не называет — это Failed, остановленные — «1 stopped»; у поиска — «13 of 14 sources answered · 12 found · 1 timed out»
     AnsweredAt  When // когда собрана показанная выдача
     Aside       Text // справа на полосе моноширинно, когда опрос кончен: «2 min ago», с «from cache · » перед ним, когда источник ответил тем, что сеанс уже держал (s-agenda-1); пока опрос идёт — у календаря сколько он длится, «0.8 s», за минутой «1 min 20 s» (states-3, states-13), у прочих пусто
     Note        Text // под строками, когда опрос кончен и источник не ответил: «What arrived in time is shown. Records from the unavailable source are missing — not “there are none”, but “we have not seen them”.» (states-6; у контактов — «Cards … book», states-9); пусто — ответили все
@@ -1628,6 +1627,8 @@ type PollBar struct {
     Percent     int
     Sources     []SourceProgress
     Actions     []Action // Stop · Search again
+    Failed      Text     // красная кнопка «1 failed» полосы над списком и хронологией (решение владельца 02.10.2026, states-16): закрытое меню отказов — строка на источник с Answer, его Retry; пусто — не ответили все или полоса этих слов не пишет (поиск, s-find-1)
+    RetryAll    *Action  // «Retry all» внизу того же меню, когда отказов больше одного: POST /app/search/progress/{task}/retry без source; nil — отказ один или нет
 }
 
 type SourceProgress struct {
@@ -1637,6 +1638,7 @@ type SourceProgress struct {
     Count     *int
     FromCache bool
     Message   Text   // краткая причина отказа
+    Answer    Text   // не ответил: что спросили и что ответил сервер, целиком, как пишет меню отказов (states-16) — «REPORT /dav/calendars/duty/ → 503 Service Unavailable», «PROPFIND /dav.php/calendars/mix/ → 401 Unauthorized: the saved password was refused. Open Connections to update it.»; без ответа — коллекция и «no answer in time», «the server could not be reached: …»; у ответившего и остановленного пусто
     Retry     *Action // повтор только этого источника
 }
 
@@ -2434,7 +2436,8 @@ type BackupJob struct {
 // сервера: адрес, имя заголовка секрета, задание, сам секрет; неизменные
 // слова карточки (рубрики, подписи кнопок, пояснения) — слова экрана
 // (U-1.3). Только что выданный (Shown) — со всем этим, «visible only now»;
-// потом вкладки пусты, и Regenerate выдаёт новый.
+// потом вкладки пусты, и New password выдаёт новый (Password.Reveal, с
+// подсказкой Hint — старый пароль перестаёт работать; s-backup-2, -3).
 type TriggerBlock struct {
     Shown      bool   // только что выдан: вкладки несут секрет, рубрика — «visible only now»
     Script     bool   // назначению нужен скрипт (Download, Both): «The script to paste», «Copy the script»; иначе строка
@@ -2445,9 +2448,9 @@ type TriggerBlock struct {
     Header     Text   // имя заголовка секрета: «Authorization» (значение — «Bearer» и секрет)
     GoSentry   GoSentryJob // вкладка GoSentry: поля диалога задания
     Status     Text   // запрос второго задания GoSentry, следящего за итогом: «GET /api/backup/status?job=…»
-    Gitea      Text   // вкладка Gitea: workflow Gitea Actions — расписание и тот же запуск, секрет по имени
-    GiteaFile  Text   // где workflow лежит в репозитории: «.gitea/workflows/carrel-….yml»
-    GiteaSecret Text  // имя секрета репозитория, который workflow читает
+    Gitea      Text   // вкладка Gitea (s-backup-10): workflow Gitea Actions «Carrel backup · ‹задание›» — расписание и тот же запуск, секрет по имени; у задания со скачиванием — скрипт шагом и архив через actions/upload-artifact
+    GiteaFile  Text   // где workflow лежит в репозитории: «.gitea/workflows/carrel-‹задание›.yaml»; его имя — «Save as»
+    GiteaSecret Text  // имя секрета репозитория, который workflow читает: «CARREL_BACKUP»
     Curl       Text   // вкладка curl: один запрос, без расписания
     Endpoints  []Text // «What it opens» (s-backup-5): метод и адрес — запуск, состояние, архив; у задания Download — архив сразу
     Password   SecretField
@@ -2683,7 +2686,17 @@ type RegisterPage struct { // s-auth-2, после отправки s-auth-3
     Sent   bool
     SignIn Action // «Already have an account? Sign in» у формы, «Back to sign in» после отправки
 }
-type InvitePage   struct { Plain; Form Form }
+type InvitePage   struct { // s-auth-12 (письмом), s-auth-14 (ссылкой)
+    Plain
+    // Login, Email, Password, Repeat password. Email показан и правится
+    // (решение владельца 02.10.2026): у приглашения письмом подставлен
+    // адрес приглашения, подсказка «The address the invitation went to.
+    // Another one is confirmed by a letter.»; ссылкой — пуст, образец
+    // «you@example.org», «Confirmed by a letter.». Адрес нужен; подтверждён
+    // только тот, на который ушло письмо, другой ждёт своего письма
+    // подтверждения. Login приглашения, названного логином, выключен
+    Form Form
+}
 type ConfirmEmailPage struct { Plain; Next Action }
 type DeadLinkPage struct { // rest-1: мёртвая ссылка-секрет — /invite/, /forgot/, /confirm-email/, /p/
     Plain         // «This link does not work» и почему так бывает; одни слова на все роды ссылок
@@ -3354,7 +3367,7 @@ type LossReport struct { // сервер принял запись, но что-
 | `asked` | Просьба к администратору записана | Забытый пароль с депонированным ключом (s-auth-9) |
 | `password` | Второй шаг ссылки: учётная запись стёрта, новый пароль | Ссылка стирания (s-auth-11) |
 | `no-photo` | Карточка без фотографии: на месте Replace, Crop, Remove — Add и форматы | Правка контакта (кадр s-contacts-4, часть `no-photo`; `normal` — с фотографией, s-contacts-3) |
-| `link` | Приглашение ссылкой: адреса нет, и поля адреса нет; строка под заголовком — из подписи кадра | Приглашение (`normal` — письмом, кадр s-auth-12; у приглашения ссылкой своего кадра нет — подпись s-auth-12, строки в `STATE_FRAME` нет) |
+| `link` | Приглашение ссылкой: адреса Carrel не знает — поле Email пустое и вписывается тут же | Приглашение (`normal` — письмом, кадр s-auth-12; ссылкой — свой кадр s-auth-14, часть `link`, Typecase `05ea994`) |
 | `new` | Полная форма новой записи (`/new`): пустая, с тем, с чего запись начинается, без удаления | Правка задачи и заметки (`app-task-edit`, `app-note-edit`): своего кадра у формы нет (задача Typecase 97) — сверяется с кадром правки; у контакта и события — свои каталоги `app-contact-new`, `app-event-new` |
 
 Шаги страниц вне оболочки (`sent` … `password`) названы по `data-part` своего

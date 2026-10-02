@@ -691,9 +691,11 @@
     "answeredAt": "",
     "aside": "2 min 0 s",
     "every": 700,
+    "failed": "1 failed",
     "note": "",
     "percent": 66,
     "poll": "/app/search/progress/t-task/poll",
+    "retryAll": null,
     "running": true,
     "sources": [
       {
@@ -733,6 +735,7 @@
         "state": "querying"
       },
       {
+        "answer": "REPORT /alice/calendars/obshchij/ → 401 Unauthorized: the saved password was refused. Open Connections to update it.",
         "colour": "#9a9280",
         "count": null,
         "fromCache": false,
@@ -763,13 +766,6 @@
     "summary": [
       {
         "text": "Polled 3 of 6 sources · 7 events"
-      },
-      {
-        "text": " · "
-      },
-      {
-        "mark": "danger",
-        "text": "baikal · Общий unavailable"
       }
     ],
     "taskID": "t-task"
@@ -888,10 +884,8 @@
             "href": "/app/calendar",
             "label": "Combined calendar",
             "menu": [],
-            "message": "",
             "on": true,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "part"
           }
@@ -966,10 +960,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off"
           },
@@ -1037,10 +1029,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -1108,10 +1098,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -1186,10 +1174,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -1257,10 +1243,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -1335,18 +1319,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "password · 401",
             "on": false,
             "readOnly": false,
-            "retry": {
-              "csrf": "csrf",
-              "enabled": true,
-              "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
-              "id": "source.retry",
-              "label": "Retry",
-              "method": "POST",
-              "target": "poll"
-            },
             "state": "unavailable",
             "tick": "on"
           }
@@ -1383,10 +1357,8 @@
                 "method": "GET"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "on"
           },
@@ -1415,10 +1387,8 @@
                 "method": "GET"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "off"
           }

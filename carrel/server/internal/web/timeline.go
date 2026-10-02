@@ -690,10 +690,11 @@ func (s *Server) timelineInset(c *collectionCtx, uid string, obj *model.Object) 
 }
 
 // matchedSummary is the bar of a person's timeline in pieces (s-contacts-7):
-// how many sources answered, what the records were matched by — the card's
-// addresses in mono, and the name, which files are looked for by — and each
-// source that did not answer, as an alarm.
-func matchedSummary(answered, total int, addresses []string, sources []view.SourceProgress) view.Runs {
+// how many sources answered, and what the records were matched by — the
+// card's addresses in mono, and the name, which files are looked for by.
+// A source that did not answer is the bar's «N failed» (PollBar.Failed); one
+// stopped by hand is counted after.
+func matchedSummary(answered, total int, addresses []string, stopped int) view.Runs {
 	out := view.Runs{{Text: text(fmt.Sprintf("Polled %d of %s · matched by ", answered, plural(total, "source")))}}
 	for i, a := range addresses {
 		if i > 0 {
@@ -706,27 +707,8 @@ func matchedSummary(answered, total int, addresses []string, sources []view.Sour
 	} else {
 		out = append(out, view.Run{Text: "the name"})
 	}
-	return append(out, troubleRuns(sources)...)
-}
-
-// troubleRuns name every source of a poll that did not answer, each as an
-// alarm after a separator: « · ‹baikal · Общий unavailable›» (s-contacts-7,
-// s-agenda-1).
-func troubleRuns(sources []view.SourceProgress) view.Runs {
-	var out view.Runs
-	for _, sp := range sources {
-		why := ""
-		switch sp.State {
-		case view.SourceError, view.SourceUnavailable:
-			why = "unavailable"
-		case view.SourceTimeout:
-			why = "did not answer in time"
-		case view.SourceCancelled:
-			why = "stopped"
-		default:
-			continue
-		}
-		out = append(out, view.Run{Text: " · "}, view.Run{Text: text(string(sp.Stamp) + " " + why), Mark: view.RunDanger})
+	if stopped > 0 {
+		out = append(out, view.Run{Text: text(fmt.Sprintf(" · %d stopped", stopped))})
 	}
 	return out
 }

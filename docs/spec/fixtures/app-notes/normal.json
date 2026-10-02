@@ -217,18 +217,7 @@
     ],
     "attach": [
       {
-        "actions": [
-          {
-            "csrf": "csrf",
-            "danger": true,
-            "enabled": true,
-            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026n=0\u0026op=detach",
-            "icon": "i-trash",
-            "id": "attach.remove",
-            "label": "Remove",
-            "method": "POST"
-          }
-        ],
+        "actions": [],
         "href": "/app/attach/a-nc-home/zapisi/5c81-77aa-0d64/0",
         "inline": true,
         "name": "2026-08-10-sync-board.png",
@@ -717,10 +706,8 @@
             "href": "/app/notes",
             "label": "Combined notebook",
             "menu": [],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -795,10 +782,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -866,10 +851,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": true,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }

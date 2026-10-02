@@ -45,6 +45,19 @@
           {
             "error": "",
             "extra": null,
+            "hint": "Confirmed by a letter.",
+            "kind": "email",
+            "label": "Email",
+            "name": "email",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": "",
+            "placeholder": "you@example.org"
+          },
+          {
+            "error": "",
+            "extra": null,
             "hint": "",
             "kind": "password",
             "label": "Password",

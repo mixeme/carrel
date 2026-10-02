@@ -25,13 +25,15 @@ spec/fixtures/<screen>/<state>.json
 | `/app/settings/connections` | `app-settings-connections` |
 | `/p/{token}` | `p-token` |
 | `/confirm-email/{token}` | `confirm-email` |
+| `/app/contacts/suggest` (фрагмент, `SuggestList`) | `app-contacts-suggest` |
 | мёртвый секрет любого адреса с токеном (rest-1, C-5.2) | `dead-link` |
 
 `<state>` — из таблицы C-14.3: `normal`, `empty`, `readonly`, `source-error`,
 `partial`, `long`, `conflict`, `narrow`, `loss`, `unavailable`, `outcome`,
 `refused`, и шаги страниц вне оболочки по `data-part` их кадров — `sent`,
 `options`, `no-mail`, `wipe-sent`, `asked`, `password`; `link` — приглашение
-ссылкой, без поля адреса (у `invite/normal` — приглашение письмом, s-auth-12);
+ссылкой, поле адреса пустое (s-auth-14; у `invite/normal` — приглашение
+письмом, s-auth-12);
 `new` — полная форма новой задачи и заметки (`/new`) в каталоге правки.
 
 ## Имена полей

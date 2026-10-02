@@ -161,7 +161,20 @@ func Forms(p *view.EventEditPage) []w.PostForm {
 	if d := p.Delete; d != nil && d.Method == "POST" && d.Enabled {
 		out = append(out, bind.ActionForm(*d, formDelete))
 	}
+	for _, a := range p.Attach {
+		for _, act := range a.Actions {
+			if act.Method == "POST" && act.Enabled && !act.Submits {
+				out = append(out, bind.ActionForm(act, removeID(act)))
+			}
+		}
+	}
 	return out
+}
+
+// removeID is the ID of the form of an attachment's Remove: its action's ID
+// and address, one per attachment.
+func removeID(a view.Action) string {
+	return a.ID + a.Href
 }
 
 // The names the form's rows of reminders and of the repetition start with
@@ -279,10 +292,9 @@ func attendees(f view.AttendeeField) w.FieldSet {
 
 // attachments is the set of the attachments: Attach with its arrow (From
 // this computer, From Files), then each attachment — its name, its type and
-// size muted, where it is kept —, or «Nothing attached».
-//
-// ждёт библиотеку: U-5.5 #29 — no frame draws a line's actions
-// (AttachRow.Actions, Remove): an attachment is not taken off here
+// size muted, where it is kept — and its Remove (AttachRow.Actions; red for
+// data that goes with its only copy, plain for a link whose file stays;
+// s-agenda-3, task 93), or «Nothing attached».
 func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 	var items []w.LinePart
 	if attach != nil {
@@ -296,6 +308,14 @@ func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 			parts = append(parts, w.Text(" "), w.Badge{Label: inside})
 		}
 		items = append(items, w.Faced{Face: w.FaceLarge, Items: parts})
+		for _, act := range a.Actions {
+			b := bind.Button(act, removeID(act))
+			b.Kind, b.Small = w.ButtonPlain, true
+			if act.Danger {
+				b.Kind = w.ButtonDanger
+			}
+			items = append(items, b)
+		}
 	}
 	if len(rows) == 0 {
 		items = append(items, w.Dim{Parts: []w.Inline{w.Text(nothing)}, Size: w.Dim11_5, Variant: w.DimWrap})

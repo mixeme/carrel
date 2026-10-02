@@ -73,10 +73,12 @@ func triggerTabs(b *view.TriggerBlock, base string, job sealed.BackupJob, secret
 	b.Curl = text("curl -fsS -m 30 -X POST -H '" + bearer + "' '" + runURL + "'")
 	b.GoSentry = view.GoSentryJob{Name: text("Carrel · " + job.Name), Folder: "Backup", Schedule: triggerSchedule}
 	b.Status = text("GET /api/backup/status?" + q)
-	b.GiteaSecret = text("CARREL_BACKUP_" + strings.ToUpper(strings.ReplaceAll(job.ID, "-", "_")))
-	b.GiteaFile = text(".gitea/workflows/carrel-" + job.ID + ".yml")
+	// The repository keeps the password under the name the workflow gives
+	// it, and the file under the job's name (s-backup-10).
+	b.GiteaSecret = "CARREL_BACKUP"
+	b.GiteaFile = text(".gitea/workflows/carrel-" + job.ID + ".yaml")
 	fromRepo := "${{ secrets." + string(b.GiteaSecret) + " }}"
-	gitea := []string{"name: Carrel · " + job.Name, "on:", "  schedule:", "    - cron: '" + triggerSchedule + "'", "  workflow_dispatch:",
+	gitea := []string{"name: Carrel backup · " + job.Name, "on:", "  schedule:", "    - cron: '" + triggerSchedule + "'",
 		"jobs:", "  backup:", "    runs-on: ubuntu-latest", "    steps:"}
 	if b.Script {
 		name := "carrel-" + job.ID + ".sh"
@@ -146,7 +148,8 @@ func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issue
 		return nil
 	}
 	b := &view.TriggerBlock{
-		Password: view.SecretField{Reveal: view.Action{ID: "backup.trigger", Label: "Regenerate", Method: "POST", Enabled: true,
+		Password: view.SecretField{Reveal: view.Action{ID: "backup.trigger", Label: "New password", Method: "POST", Enabled: true,
+			Hint: "The old password stops working; whatever runs this job has to be given the new one.",
 			Href: s.postQuery("/app/settings/backup", url.Values{"op": {"trigger"}, "job": {job.ID}})}},
 	}
 	if issued[job.ID] != "" && secrets[job.ID] != "" {
@@ -154,11 +157,11 @@ func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issue
 		b.Password.Shown, b.Password.Value = true, text(secrets[job.ID])
 		// What turning it on cost is said under the tick (triggerPrice), not
 		// a second time here.
-		b.Note = "Visible only now. Every use is logged; Regenerate replaces the secret, and every line already handed out stops working."
+		b.Note = "Visible only now. Every use is logged; New password replaces it on the spot, and every line already handed out stops working."
 	} else {
-		b.Note = "The external trigger is on. The secret was shown once; Regenerate issues a new one and the old lines stop working."
+		b.Note = "The external trigger is on. The password was shown once; New password issues another, and the old lines stop working."
 	}
-	// Outside the unlock window Regenerate opens the password sheet; what
+	// Outside the unlock window New password opens the password sheet; what
 	// it is for is said in the note, not as a reason of a working button
 	// (C-6.2).
 	if sess.UnlockUntil(time.Now()) == nil {

@@ -318,13 +318,8 @@ type pollOwner struct {
 	polled bool
 	found  func(n int) string
 	// matched are the addresses a person's timeline is looked for by: its
-	// bar says them, in mono, and names a source that did not answer as an
-	// alarm instead of counting it (s-contacts-7).
+	// bar says them, in mono (s-contacts-7).
 	matched []string
-	// named: the bar names a source that did not answer, as an alarm,
-	// instead of counting it — «Polled 5 of 6 sources · 14 events ·
-	// ‹baikal · Общий unavailable›» (s-agenda-1).
-	named bool
 	// timed: while the poll runs, the right of the bar says how long it
 	// has run — «0.8 s» (states-3, states-13).
 	timed bool
@@ -419,8 +414,10 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 				Href: s.route(base + "/retry?source=" + url.QueryEscape(st.ID)),
 			}
 		}
+		sp.Answer = text(refusalAnswer(st.State, st.Err, path))
 		bar.Sources = append(bar.Sources, sp)
 	}
+	failed := refused + timedOut + unreachable
 	total := len(snap.Sources)
 	if total > 0 {
 		bar.Percent = (answered + refused + timedOut + unreachable + stopped) * 100 / total
@@ -430,16 +427,22 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 		// One sentence, running or not: the meter and the Stop button
 		// already say whether it is still going, and a bar that rewords
 		// itself under the same numbers reads as two different answers.
+		// What did not answer is not counted in words: the bar's red
+		// «N failed» opens the menu of refusals (the owner's decision of
+		// 02.10.2026, states-16); a source stopped by hand is still said.
 		parts := []string{
 			fmt.Sprintf("Polled %d of %s", answered, plural(total, "source")),
 			owner.found(len(snap.Items)),
 		}
-		bar.Summary = line(strings.Join(append(parts, pollTroubles(refused, unreachable, timedOut, stopped)...), " · "))
-		if owner.named {
-			bar.Summary = append(view.Runs{{Text: text(strings.Join(parts, " · "))}}, troubleRuns(bar.Sources)...)
-		}
+		bar.Summary = line(strings.Join(append(parts, pollTroubles(0, 0, 0, stopped)...), " · "))
 		if owner.matched != nil {
-			bar.Summary = matchedSummary(answered, total, owner.matched, bar.Sources)
+			bar.Summary = matchedSummary(answered, total, owner.matched, stopped)
+		}
+		if failed > 0 {
+			bar.Failed = text(fmt.Sprintf("%d failed", failed))
+		}
+		if failed > 1 {
+			bar.RetryAll = &view.Action{ID: "poll.retry", Label: "Retry all", Method: "POST", Enabled: true, Href: s.route(base + "/retry")}
 		}
 		if !snap.Running {
 			bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)
@@ -501,6 +504,38 @@ func pollTroubles(refused, unreachable, timedOut, stopped int) []string {
 		}
 	}
 	return out
+}
+
+// refusalAnswer is what a source that did not answer was asked and what it
+// answered, in full, as the menu of refusals writes it (states-16): the
+// request and the status — «REPORT /dav/calendars/duty/ → 503 Service
+// Unavailable» —, a refused password with what to do about it; no answer —
+// the collection asked and that nothing came. A source that answered, or
+// was stopped by hand, has none.
+func refusalAnswer(state view.SourceState, err error, path string) string {
+	var se *dav.StatusError
+	switch {
+	case state == view.SourceError && errors.As(err, &se):
+		what := path
+		if se.Method != "" {
+			what = se.Method + " " + se.Path
+		}
+		answer := fmt.Sprintf("%s → %d %s", what, se.Code, http.StatusText(se.Code))
+		if se.Code == http.StatusUnauthorized {
+			answer += ": the saved password was refused. Open Connections to update it."
+		}
+		return answer
+	case state == view.SourceError:
+		return path + " → " + refusalReason(err)
+	case state == view.SourceTimeout:
+		return path + " → no answer in time"
+	case state == view.SourceUnavailable:
+		if err != nil {
+			return path + " → the server could not be reached: " + err.Error()
+		}
+		return path + " → the server could not be reached"
+	}
+	return ""
 }
 
 func refusalReason(err error) string {
@@ -641,7 +676,7 @@ func (s *Server) searchRail(sess *session.Session, blob sealed.Blob, snap *fanou
 		}
 		if t, ok := troubles[id]; ok {
 			row.State = view.CollectionUnavailable
-			row.Message, row.Detail, row.Retry = text(t.message), text(t.detail), t.retry
+			row.Detail = text(t.detail)
 		}
 		sec.Rows = append(sec.Rows, row)
 	}
@@ -1136,14 +1171,22 @@ func (s *Server) railAtTheEnd(sess *session.Session, t any, snap fanout.Snapshot
 	return &rail
 }
 
-// postSearchProgressRetry asks one source again and nobody else (S-15.1).
+// postSearchProgressRetry asks one source again and nobody else (S-15.1);
+// without ?source=, every source that did not answer.
 func (s *Server) postSearchProgressRetry(w http.ResponseWriter, r *http.Request) {
 	sess, task, owner, ok := s.openSearchTask(w, r)
 	if !ok {
 		return
 	}
+	// Without a source it is «Retry all» of the menu of refusals: every
+	// source that did not answer (states-16).
 	source := r.FormValue("source")
-	err := task.Retry(source)
+	var err error
+	if _, named := r.Form["source"]; named {
+		err = task.Retry(source)
+	} else {
+		err = task.RetryFailed()
+	}
 	if errors.Is(err, fanout.ErrUnknownSource) {
 		s.notFound(w, r)
 		return

@@ -139,10 +139,13 @@ type SourceRow struct {
 	On       bool            `json:"on"`   // открытая: её список на экране или запись из неё (is-on)
 	Feed     bool            `json:"feed"` // подписка — лента, прочитанная снаружи (is-ext)
 	State    CollectionState `json:"state"`
-	Message  Text            `json:"message"` // не ответила: коротко, «password · 401»
-	Detail   Text            `json:"detail"`  // и полностью, для подсказки
-	Retry    *Action         `json:"retry"`   // повтор только этой коллекции
-	Menu     []MenuItem      `json:"menu"`
+	// Detail — не ответила: почему, полностью — подсказка значка ошибки
+	// строки, «401 Unauthorized — the saved password was refused. Open
+	// Connections to update it.»; ни слов рядом с именем, ни Retry в рейле
+	// нет (решение владельца 02.10.2026: отказ целиком и его Retry — в меню
+	// «N failed» полосы хода, PollBar.Failed, states-16)
+	Detail Text       `json:"detail"`
+	Menu   []MenuItem `json:"menu"`
 }
 
 // Details — панель у списка: запись для чтения, как её рисуют кадры панелей

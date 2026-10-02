@@ -462,7 +462,8 @@
           "target": "poll"
         },
         "stamp": "baikal · Общий",
-        "state": "error"
+        "state": "error",
+        "answer": "REPORT /alice/calendars/obshchij/ → 401 Unauthorized: the saved password was refused. Open Connections to update it."
       },
       {
         "colour": "#8c6239",
@@ -502,13 +503,6 @@
       },
       {
         "text": " and the name"
-      },
-      {
-        "text": " · "
-      },
-      {
-        "mark": "danger",
-        "text": "baikal · Общий unavailable"
       }
     ],
     "taskID": "t-task",
@@ -516,7 +510,9 @@
     "note": "",
     "every": 700,
     "poll": "/app/search/progress/t-task/poll",
-    "stream": "/app/search/progress/t-task"
+    "stream": "/app/search/progress/t-task",
+    "failed": "1 failed",
+    "retryAll": null
   },
   "print": {
     "range": "",
@@ -612,9 +608,7 @@
             "href": "/app/calendar",
             "label": "Combined calendar",
             "menu": [],
-            "message": "",
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "part",
             "feed": false,
@@ -627,9 +621,7 @@
             "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
             "label": "Дни рождения",
             "menu": [],
-            "message": "",
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "off",
             "feed": false,
@@ -642,9 +634,7 @@
             "href": "/app/calendar/a-nc-home/lichnyj",
             "label": "Личный",
             "menu": [],
-            "message": "",
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on",
             "feed": false,
@@ -657,9 +647,7 @@
             "href": "/app/calendar/a-nc-home/rabota",
             "label": "Работа",
             "menu": [],
-            "message": "",
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on",
             "feed": false,
@@ -672,9 +660,7 @@
             "href": "/app/calendar/a-rad-vps/dezhurstva",
             "label": "Дежурства",
             "menu": [],
-            "message": "",
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on",
             "feed": false,
@@ -687,9 +673,7 @@
             "href": "/app/calendar/a-rad-vps/proekty",
             "label": "Проекты",
             "menu": [],
-            "message": "",
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on",
             "feed": false,
@@ -702,17 +686,7 @@
             "href": "/app/calendar/a-baikal/obshchij",
             "label": "Общий",
             "menu": [],
-            "message": "password · 401",
             "readOnly": false,
-            "retry": {
-              "enabled": true,
-              "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
-              "id": "source.retry",
-              "label": "Retry",
-              "method": "POST",
-              "csrf": "csrf",
-              "target": "poll"
-            },
             "state": "unavailable",
             "tick": "on",
             "feed": false,
@@ -725,9 +699,7 @@
             "href": "/app/calendar/f-ru-holidays/feed",
             "label": "Праздники РФ",
             "menu": [],
-            "message": "",
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "on",
             "feed": true,
@@ -740,9 +712,7 @@
             "href": "/app/calendar/f-league/feed",
             "label": "Расписание лиги",
             "menu": [],
-            "message": "",
             "readOnly": true,
-            "retry": null,
             "state": "read-only",
             "tick": "off",
             "feed": true,

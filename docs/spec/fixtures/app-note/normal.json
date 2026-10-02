@@ -150,18 +150,7 @@
     ],
     "attach": [
       {
-        "actions": [
-          {
-            "csrf": "csrf",
-            "danger": true,
-            "enabled": true,
-            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e20\u0026n=0\u0026op=detach",
-            "icon": "i-trash",
-            "id": "attach.remove",
-            "label": "Remove",
-            "method": "POST"
-          }
-        ],
+        "actions": [],
         "href": "/app/attach/a-nc-home/zapisi/5c81-77aa-0d64/0",
         "inline": true,
         "name": "2026-08-10-sync-board.png",
@@ -170,18 +159,8 @@
         "type": "image/png"
       },
       {
-        "actions": [
-          {
-            "csrf": "csrf",
-            "enabled": true,
-            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e20\u0026n=1\u0026op=detach",
-            "icon": "i-trash",
-            "id": "attach.remove",
-            "label": "Remove link, keep the file",
-            "method": "POST"
-          }
-        ],
-        "href": "/app/attach/a-sftp-vps/Documents/carrel/attachments/2026-08/%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D1%8C-%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8.m4a",
+        "actions": [],
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D1%8C-%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8.m4a",
         "inline": false,
         "name": "запись-встречи.m4a",
         "place": "Documents / carrel",
@@ -379,10 +358,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": false,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           },
@@ -450,10 +427,8 @@
                 "target": "sheet"
               }
             ],
-            "message": "",
             "on": true,
             "readOnly": false,
-            "retry": null,
             "state": "ok",
             "tick": "on"
           }

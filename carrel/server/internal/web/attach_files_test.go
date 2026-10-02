@@ -178,11 +178,12 @@ func TestAttachFromFilesFollowsTheRule(t *testing.T) {
 	if row.Inline || row.Name != "big report.pdf" || row.Href == "" {
 		t.Fatalf("link row = %+v", row)
 	}
-	if got := f.h.do(get(row.Href, f.sess)); got.Code != http.StatusOK || got.Body.String() != big {
-		t.Errorf("open the link: %d %d bytes", got.Code, got.Body.Len())
+	// The link opens the file in Files (task 93); it is removed on the edit.
+	if got := f.h.do(get(row.Href, f.sess)); !strings.HasPrefix(row.Href, "/app/files/") || got.Code != http.StatusOK {
+		t.Errorf("open the link %q: %d", row.Href, got.Code)
 	}
-	if remove := row.Actions[0]; remove.Label != "Remove link, keep the file" {
-		t.Errorf("removing it = %+v", remove)
+	if edit := eventEditAt(t, f, "e1").Attach; len(edit) != 2 || len(edit[1].Actions) != 1 || edit[1].Actions[0].Label != "Remove link, keep the file" {
+		t.Errorf("removing it = %+v", edit)
 	}
 }
 

@@ -263,7 +263,7 @@ func TestInvitationCarriesItsRole(t *testing.T) {
 		t.Fatalf("invite form login row = %+v, want Login to type", login)
 	}
 	// A login already taken is said on its field; the invitation lives on.
-	form := url.Values{"login": {"alice"}, "password": {"verapass123"}, "password2": {"verapass123"}}
+	form := url.Values{"login": {"alice"}, "email": {"vera@example.org"}, "password": {"verapass123"}, "password2": {"verapass123"}}
 	taken := decode[view.InvitePage](t, h.do(h.anonPostForm("/invite/"+secret, "/invite/"+secret, form)))
 	if row := rowByName(taken.Form, "login"); row == nil || row.Error == "" {
 		t.Fatalf("taken login: %+v", taken.Form)
