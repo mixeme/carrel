@@ -200,6 +200,16 @@ func TestMeaningRules(t *testing.T) {
 		"a range that sends":                   {w.Bar{Items: []w.BarPart{w.Range{Action: "/t", From: w.Input{Name: "from"}, To: w.Input{Name: "to"}, Show: w.Button{Submit: true}}}}, nil},
 		"a range that is no form":              {w.Bar{Items: []w.BarPart{w.Range{From: w.Input{Name: "from"}, To: w.Input{Name: "to"}, Show: w.Button{Submit: true}}}}, []string{"(Range): no Action", "(Input): a field outside", "(Input): a field outside", "(Button): a submit button outside"}},
 		"a value that goes, and one not":       {w.Fields{Items: []w.FieldsItem{{Term: "Phone", Href: "tel:+7"}, {Term: "Note"}}}, nil},
+		// The calendar (Typecase's task 73): a choice whose menu is the radio
+		// items of the form it stands in — the time zone —, its menu's line
+		// that finds an option.
+		"a closed menu's pick opens it": {w.Form{Action: "/e", Items: []w.FormPart{w.Field{Parts: []w.FieldPart{w.Drop{Trigger: w.Pick{Value: "UTC"},
+			Menu: w.Menu{Items: []w.MenuPart{w.Input{Kind: w.InputSearch, Placeholder: "Find a zone"}, w.MenuItem{Label: "UTC", Name: "tz", Value: "UTC", On: true}}}}}}}}, nil},
+		"an open menu's pick does not": {w.Form{Action: "/e", Items: []w.FormPart{w.Field{Parts: []w.FieldPart{w.Drop{Open: true, Trigger: w.Pick{Value: "UTC"},
+			Menu: w.Menu{Items: []w.MenuPart{w.MenuItem{Label: "UTC", Name: "tz", Value: "UTC"}}}}}}}}, []string{"(Pick): a field without Name"}},
+		"a menu's line that finds is no field": {w.Menu{Items: []w.MenuPart{w.Input{Kind: w.InputSearch, Placeholder: "Find a zone"}}}, nil},
+		"a line of text in a menu is":          {w.Menu{Items: []w.MenuPart{w.Input{Placeholder: "Find a zone"}}}, []string{"(Input): a field without Name"}},
+		"a search line outside a menu is":      {w.Form{Action: "/e", Items: []w.FormPart{w.Field{Parts: []w.FieldPart{w.Input{Kind: w.InputSearch}}}}}, []string{"(Input): a field without Name"}},
 	} {
 		found := guard.Meaning(c.tree, "post")
 		if len(found) != len(c.want) {

@@ -149,8 +149,9 @@ func NavItem(n view.NavRow) w.NavItem {
 // RailWords are what the rail takes from the screen: the ID of the rail's
 // form (Rail.Ticks), the name a tick sends its row by (toggle, C-5
 // /app/sources/{kind}), the screen's words for a count nobody has (the dash)
-// and for read-only (ro), the rubric of the tags, and the emblem's symbol of
-// davloom in the sprite.
+// and for read-only (ro), the rubric of the tags, the emblem's symbol of
+// davloom in the sprite, and the badge of the rubric of feeds read from
+// outside (external).
 type RailWords struct {
 	Form     string
 	Toggle   string
@@ -158,6 +159,7 @@ type RailWords struct {
 	ReadOnly string
 	Tags     string
 	Davloom  string
+	External string
 }
 
 // Ticked is the state of a source's tick (C-8 TickState) as the box's.
@@ -175,7 +177,8 @@ func Ticked(t view.TickState) w.Ticked {
 // tick's state, the mark of its colour — the row of the combined view, which
 // has none, is all the sources at once —, a feed read from outside (the row,
 // its mark the plain colour), its
-// name, the open one (On), one not shown (ticked off). Its count, the dash
+// name, the open one (On), one not shown (ticked off; the combined view's
+// row ticked off is nothing ticked, and stays as it is). Its count, the dash
 // when it has none; a feed shows ro instead. A source that cannot be written
 // to carries ro after its count. One that does not answer is in error,
 // says why short and in full, and offers to retry only it. With the rail's
@@ -195,7 +198,9 @@ func TickRow(r view.SourceRow, words RailWords) w.TickRow {
 		// draw the row is-ext, never the mark (s-contacts-7, s-agenda-1).
 		row.Kind = w.TickRowExternal
 	case r.Colour == "":
-		row.Kind, row.Mark.Kind = w.TickRowAll, w.MarkMulti
+		// Every source at once: ticked off, it is nothing ticked, not a
+		// source hidden (states-14).
+		row.Kind, row.Mark.Kind, row.Hidden = w.TickRowAll, w.MarkMulti, false
 	}
 	switch {
 	case r.State == view.CollectionUnavailable:
@@ -222,9 +227,10 @@ func TickRow(r view.SourceRow, words RailWords) w.TickRow {
 }
 
 // Sources are the rail's sections of sources (Rail.Sections), each its
-// account as the rubric when it has one and its sources' rows, and after
-// them the tags (Rail.Tags) under the screen's rubric, each the list
-// filtered by it.
+// account as the rubric when it has one — the section of feeds read from
+// outside (Feeds) with the screen's badge External after it — and its
+// sources' rows, and after them the tags (Rail.Tags) under the screen's
+// rubric, each the list filtered by it.
 func Sources(r view.Rail, words RailWords) []w.RailPart {
 	rf := words
 	if r.Ticks == nil {
@@ -234,7 +240,11 @@ func Sources(r view.Rail, words RailWords) []w.RailPart {
 	for _, sec := range r.Sections {
 		var items []w.RailSecPart
 		if sec.Account != "" {
-			items = append(items, w.Rubric{Text: string(sec.Account)})
+			rubric := w.Rubric{Text: string(sec.Account)}
+			if sec.Feeds && words.External != "" {
+				rubric.Items = []w.RubricPart{w.Badge{Label: words.External}}
+			}
+			items = append(items, rubric)
 		}
 		for _, row := range sec.Rows {
 			items = append(items, TickRow(row, rf))
@@ -335,7 +345,9 @@ func Running(p *view.PollBar) bool {
 
 // Runbar is a poll (PollBar) as its bar: how far, and what it says in its
 // pieces (Summary: addresses monospaced, a source that did not answer as an
-// alarm); nil when the bar does not stand (Running).
+// alarm), then on its right what it says there (Aside: when the shown
+// answer was gathered, how long the poll runs), monospaced and pushed to the
+// end; nil when the bar does not stand (Running).
 func Runbar(p *view.PollBar) *w.Runbar {
 	if !Running(p) {
 		return nil
@@ -350,6 +362,9 @@ func Runbar(p *view.PollBar) *w.Runbar {
 		default:
 			parts = append(parts, w.Text(r.Text))
 		}
+	}
+	if p.Aside != "" {
+		parts = append(parts, w.Mono{Text: string(p.Aside), Place: w.Pushed})
 	}
 	return &w.Runbar{Meter: w.Meter{Percent: p.Percent}, Parts: parts}
 }
@@ -379,7 +394,9 @@ func Avatar(a view.Avatar) w.Avatar {
 // goes (Href: tel:, mailto:, the record in another book), the muted words
 // after it (Aside, «in 7 months») led by lead, the screen's — none where
 // the frame draws no aside (lead is empty); categories as
-// tags (Tag), each going where it goes, a space between them.
+// tags (Tag), each going where it goes, a space between them. A value in
+// its pieces (Runs: the time monospaced) is drawn in them, and a badge after
+// the value (Badge: «until 2026-12-28») stands after a space.
 func FieldsItem(f view.Field, lead string) w.FieldsItem {
 	it := w.FieldsItem{Term: string(f.Label), Href: f.Href}
 	if f.Mono {
@@ -398,8 +415,28 @@ func FieldsItem(f view.Field, lead string) w.FieldsItem {
 		}
 		it.Value = append(it.Value, w.Text(v))
 	}
+	for _, r := range f.Runs {
+		switch r.Mark {
+		case view.RunMono:
+			it.Value = append(it.Value, w.Mono{Text: string(r.Text)})
+		case view.RunDanger:
+			it.Value = append(it.Value, w.Span{Face: w.FaceDanger, Text: string(r.Text)})
+		default: // a card's value has no bold piece: the widget takes none
+			it.Value = append(it.Value, w.Text(r.Text))
+		}
+	}
 	if f.Aside != "" && lead != "" {
 		it.Value = append(it.Value, w.Dim{Parts: []w.Inline{w.Text(lead + string(f.Aside))}})
+	}
+	if f.Badge.Label != "" {
+		if n := len(it.Value); n > 0 {
+			if t, ok := it.Value[n-1].(w.Text); ok {
+				it.Value[n-1] = t + " "
+			} else {
+				it.Value = append(it.Value, w.Text(" "))
+			}
+		}
+		it.Value = append(it.Value, Badge(f.Badge))
 	}
 	return it
 }
@@ -438,9 +475,12 @@ const csrfField = "_csrf"
 // contact, Send, Sign out) as the PostForm its button submits from where it
 // stands, under the screen's ID: it posts to the action's address, with the
 // session's token the action carries (Action.CSRF, C-11) — without a script
-// nothing else sends it.
+// nothing else sends it —, and multipart with the action's file field
+// (Action.File: Attach, «From this computer») where it carries a file.
 func ActionForm(a view.Action, id string) w.PostForm {
-	f := w.PostForm{ID: id, Action: a.Href}
+	// ждёт библиотеку: U-5.5 #28 — the file field stands in a form nobody
+	// sees: without a script no file is chosen
+	f := w.PostForm{ID: id, Action: a.Href, File: a.File}
 	if a.CSRF != "" {
 		f.Fields = []w.Hidden{{Name: csrfField, Value: a.CSRF}}
 	}

@@ -136,9 +136,13 @@ func links(c control) bool {
 	return true
 }
 
-// buttonDisabled is widget.ButtonDisabled; the guard reads the widget's value
-// by reflection and does not import the library.
-const buttonDisabled = 2
+// buttonDisabled is widget.ButtonDisabled, inputSearch widget.InputSearch;
+// the guard reads the widget's value by reflection and does not import the
+// library.
+const (
+	buttonDisabled = 2
+	inputSearch    = 3
+)
 
 // contract is the meaning each type of control of Typecase's widget package
 // must carry (docs/guide/screen.md of Typecase, §3 and §5).
@@ -176,8 +180,25 @@ var contract = map[string]rule{
 		}
 		return needs("Href")(c)
 	},
-	"Input": field,
-	"Pick":  field,
+	// A line of text is a field — but the line of a menu that finds its
+	// items (a search in a Menu: «Find a zone», s-agenda-8), which the
+	// library's script filters by and which sends nothing; without a script
+	// it is not there (Typecase's Menu).
+	"Input": func(c control) string {
+		if c.holder == "Menu" && c.v.FieldByName("Kind").Int() == inputSearch {
+			return ""
+		}
+		return field(c)
+	},
+	// A choice is a field — but the choice that opens its menu (the trigger
+	// of a closed Drop: the time zone, Typecase's task 73), whose radio items
+	// send the value in the form it stands in.
+	"Pick": func(c control) string {
+		if c.opens {
+			return ""
+		}
+		return field(c)
+	},
 	"Check": field,
 	"Query": field,
 	"Seg": func(c control) string {

@@ -10,7 +10,7 @@ import (
 
 func ptr[T any](v T) *T { return &v }
 
-var words = bind.RailWords{Form: "rail", Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom"}
+var words = bind.RailWords{Form: "rail", Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
 
 func TestTop(t *testing.T) {
 	brand := w.Brand{Title: "Contacts"}
@@ -101,6 +101,13 @@ func TestTickRow(t *testing.T) {
 			w.TickRow{Ticked: w.TickedPart, Kind: w.TickRowAll, Mark: w.Mark{Kind: w.MarkMulti}, Label: "Combined address book", Meta: "6", Current: true,
 				Send: w.Send{Form: "rail", Name: "toggle", Value: "/app/contacts"}},
 		},
+		// Nothing ticked (states-14): the row of the combined view is ticked
+		// off, and stays as it is — it is every source, not one hidden.
+		"the combined view, nothing ticked": {
+			view.SourceRow{Href: "/app/calendar", Label: "Combined calendar", Tick: view.TickOff, On: true}, words,
+			w.TickRow{Ticked: w.TickedOff, Kind: w.TickRowAll, Mark: w.Mark{Kind: w.MarkMulti}, Label: "Combined calendar", Meta: "—", Current: true,
+				Send: w.Send{Form: "rail", Name: "toggle", Value: "/app/calendar"}},
+		},
 		"read-only": {
 			view.SourceRow{Href: "/k", Label: "Команда", Colour: "#6b4e7a", Count: ptr(1), Tick: view.TickOn, ReadOnly: true}, words,
 			w.TickRow{Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Команда", Meta: "1", Trail: w.Badge{Label: "ro"}, Send: w.Send{Form: "rail", Name: "toggle", Value: "/k"}},
@@ -149,6 +156,20 @@ func TestSources(t *testing.T) {
 	all.Send = w.Send{Form: "rail", Name: "toggle", Value: "/all"}
 	same(t, "a rail that sends", bind.Sources(rail, words)[0], w.RailPart(w.RailSec{Items: []w.RailSecPart{all}}))
 	same(t, "its form", bind.RailForm(rail, "rail"), &w.PostForm{ID: "rail", Action: "/app/sources/contacts", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}})
+	// The section of feeds read from outside (RailSection.Feeds): its rubric
+	// carries the screen's badge «external» (s-agenda-1, s-contacts-7,
+	// s-tasks-1); an account's rubric carries none.
+	feeds := view.Rail{Sections: []view.RailSection{
+		{Account: "nextcloud", Rows: []view.SourceRow{{Href: "/k", Label: "Личный", Colour: "#4a6b52", Count: ptr(7), Tick: view.TickOn}}},
+		{Account: "Subscriptions", Feeds: true, Rows: []view.SourceRow{{Href: "/f", Label: "Праздники РФ", Colour: "#8c6239", Feed: true, ReadOnly: true, Tick: view.TickOn}}},
+	}}
+	same(t, "the feeds' rubric", bind.Sources(feeds, words), []w.RailPart{
+		w.RailSec{Items: []w.RailSecPart{w.Rubric{Text: "nextcloud"}, w.TickRow{Mark: w.Mark{Colour: "#4a6b52"}, Label: "Личный", Meta: "7"}}},
+		w.RailSec{Items: []w.RailSecPart{
+			w.Rubric{Text: "Subscriptions", Items: []w.RubricPart{w.Badge{Label: "external"}}},
+			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239"}, Label: "Праздники РФ", Meta: "ro"},
+		}},
+	})
 }
 
 func TestFoot(t *testing.T) {
@@ -175,6 +196,11 @@ func TestRunbar(t *testing.T) {
 		w.Text("Polled 5 of 6 · matched by "), w.Mono{Text: "a@b"}, w.Text(" · "), w.Span{Face: w.FaceDanger, Text: "baikal unavailable"},
 	}})
 	same(t, "running", bind.Running(&view.PollBar{Running: true}), true)
+	// What the bar says on its right (Aside, s-agenda-1: «from cache · 2 min
+	// ago», states-13: how long the poll runs), monospaced and pushed to the
+	// end.
+	failed.Aside = "from cache · 2 min ago"
+	same(t, "its right", bind.Runbar(failed).Parts[4:], []w.RunbarPart{w.Mono{Text: "from cache · 2 min ago", Place: w.Pushed}})
 }
 
 func TestBadgeAvatar(t *testing.T) {
@@ -193,6 +219,15 @@ func TestFieldsItem(t *testing.T) {
 		w.FieldsItem{Term: "Birthday", Value: []w.ValuePart{w.Text("1987-03-14")}, Face: w.ValueMono})
 	same(t, "the tags", bind.FieldsItem(view.Field{Label: "Tags", Tags: []view.Tag{{Label: "a", Href: "/a"}, {Label: "b"}}}, "· "),
 		w.FieldsItem{Term: "Tags", Value: []w.ValuePart{w.Tag{Label: "a", Href: "/a"}, w.Text(" "), w.Tag{Label: "b"}}})
+	// A value in its pieces (Runs: the time monospaced, s-agenda-2) and the
+	// badge after it (Badge: «created 12:00 Asia/Yekaterinburg», «until
+	// 2026-12-28»), a space before the badge.
+	when := view.Field{Label: "When", Runs: view.Runs{{Text: "10:00 – 11:00", Mark: view.RunMono}, {Text: ", Monday 10 August"}}, Badge: view.Badge{Label: "created 12:00 Asia/Yekaterinburg"}}
+	same(t, "a value in pieces with its badge", bind.FieldsItem(when, "· "), w.FieldsItem{Term: "When", Value: []w.ValuePart{
+		w.Mono{Text: "10:00 – 11:00"}, w.Text(", Monday 10 August "), w.Badge{Label: "created 12:00 Asia/Yekaterinburg"},
+	}})
+	same(t, "a value with its badge", bind.FieldsItem(view.Field{Label: "Repeats", Value: "Weekly on Mon", Badge: view.Badge{Label: "until 2026-12-28"}}, "· "),
+		w.FieldsItem{Term: "Repeats", Value: []w.ValuePart{w.Text("Weekly on Mon "), w.Badge{Label: "until 2026-12-28"}}})
 	same(t, "a book", bind.Book(view.Field{Label: "radicale · Команда", Value: "Phone differs", Href: "/c", Colour: "#6b4e7a"}, "· "), []w.SecItemPart{
 		w.Mark{Colour: "#6b4e7a", Size: w.MarkH11Inline}, w.Text(" "), w.Link{Text: "radicale · Команда", Href: "/c"}, w.Text(" "), w.Dim{Parts: []w.Inline{w.Text("· Phone differs")}},
 	})
@@ -204,6 +239,10 @@ func TestActions(t *testing.T) {
 	same(t, "a form of an action", bind.ActionForm(view.Action{Href: "/d?etag=e1", Method: "POST"}, "delete"), w.PostForm{ID: "delete", Action: "/d?etag=e1"})
 	same(t, "a form of an action with the session's token", bind.ActionForm(view.Action{Href: "/d?etag=e1", Method: "POST", CSRF: "c"}, "delete"),
 		w.PostForm{ID: "delete", Action: "/d?etag=e1", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}})
+	// An action that carries a file (Action.File: Attach, «From this
+	// computer») posts multipart with its file field.
+	same(t, "a form of an action with a file", bind.ActionForm(view.Action{Href: "/e?op=attach", Method: "POST", CSRF: "c", File: "file"}, "attach.add"),
+		w.PostForm{ID: "attach.add", Action: "/e?op=attach", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}, File: "file"})
 	rail := view.Rail{Sections: []view.RailSection{{Rows: []view.SourceRow{{Href: "/o", Retry: &view.Action{ID: "source.retry", Href: "/retry", Method: "POST", Enabled: true, CSRF: "c"}}}}}}
 	same(t, "a retry's form, with the token", bind.RetryForms(rail), []w.PostForm{{ID: "source.retry/o", Action: "/retry", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}}})
 	same(t, "a technical block", bind.Diag(bind.DiagLine{Name: "UID", Value: "4f2b"}, bind.DiagLine{Name: "Read", Value: "2 min ago"}),
