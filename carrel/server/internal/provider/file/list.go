@@ -22,6 +22,9 @@ type Entry struct {
 	Type     string // getcontenttype as the server sent it; empty for a folder
 	ETag     string
 	Modified time.Time
+	// Items is how many members a folder holds, as its server said in the
+	// same answer (docs/servers.md, SV-57); nil — it did not say.
+	Items *int `json:",omitempty"`
 }
 
 var (
@@ -31,7 +34,17 @@ var (
 	propETag          = xml.Name{Space: "DAV:", Local: "getetag"}
 	propLastModified  = xml.Name{Space: "DAV:", Local: "getlastmodified"}
 
-	entryProps = []xml.Name{propResourceType, propContentLength, propContentType, propETag, propLastModified}
+	// What a folder holds, said in the same answer (docs/servers.md, SV-57):
+	// Nextcloud counts the folders and the files inside each folder; the
+	// draft of collection properties (draft-hopmann-collection-props, as IIS
+	// and Exchange answer it) names DAV:childcount. A server that knows
+	// neither answers them 404 beside the rest, and the folder has no count.
+	propFolderCount = xml.Name{Space: "http://nextcloud.org/ns", Local: "contained-folder-count"}
+	propFileCount   = xml.Name{Space: "http://nextcloud.org/ns", Local: "contained-file-count"}
+	propChildCount  = xml.Name{Space: "DAV:", Local: "childcount"}
+
+	entryProps = []xml.Name{propResourceType, propContentLength, propContentType, propETag, propLastModified,
+		propFolderCount, propFileCount, propChildCount}
 )
 
 // List reads one folder with PROPFIND depth 1 (S-17): names, sizes, types and
@@ -94,6 +107,7 @@ func entryOf(r dav.Response) (Entry, bool) {
 	}
 	if e.Dir {
 		e.Path += "/"
+		e.Items = folderItems(r.Props)
 	} else {
 		e.Type = propText(r.Props[propContentType])
 	}
@@ -104,6 +118,26 @@ func entryOf(r dav.Response) (Entry, bool) {
 		e.Modified = t
 	}
 	return e, true
+}
+
+// folderItems is how many members a folder holds by its own answer: the
+// folders and the files Nextcloud counts, else DAV:childcount; nil when the
+// server said neither.
+func folderItems(props map[xml.Name][]byte) *int {
+	count := func(n xml.Name) (int, bool) {
+		v, err := strconv.Atoi(propText(props[n]))
+		return v, err == nil && v >= 0
+	}
+	if folders, ok := count(propFolderCount); ok {
+		if files, ok := count(propFileCount); ok {
+			n := folders + files
+			return &n
+		}
+	}
+	if n, ok := count(propChildCount); ok {
+		return &n
+	}
+	return nil
 }
 
 func hrefPath(href string) string {

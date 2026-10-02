@@ -741,6 +741,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 	}
 
 	var picked []file.Entry
+	chosen := -1 // the row of the one file chosen
 	for _, e := range sorted {
 		if needle != "" && !strings.Contains(strings.ToLower(e.Name), needle) {
 			continue
@@ -756,6 +757,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		row.Icon, row.Note = fileIcon(e), thumbNote(e)
 		if e.Dir {
 			row.Href, row.Type = s.route(c.href("", rowSegs, true)), "folder"
+			row.Items = s.folderItems(c, rowSegs, e)
 			// A drop on the row goes into it (U-15.3, s-files-1).
 			into := writeAction(c, view.Action{ID: "folder.upload", Label: text("Upload into " + e.Name), Icon: "i-up",
 				Href: s.route(c.href("upload", rowSegs, true)), Method: "POST", Enabled: true, File: uploadField})
@@ -769,6 +771,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		}
 		if row.Selected {
 			picked = append(picked, e)
+			chosen = len(page.Rows)
 		}
 		page.Rows = append(page.Rows, row)
 	}
@@ -806,8 +809,15 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 	// One file chosen opens its panel (s-files-1); Details shows and hides
 	// it, Print is the «⋯» of the head (s-files-7).
 	shown := len(picked) == 1 && !picked[0].Dir && q.Get("details") != "0"
+	// One image chosen says its size (ФБ11): its row or tile and its panel,
+	// from one ranged read of its head (S-17); the others say none.
+	var dims view.Text
+	if len(picked) == 1 && !picked[0].Dir {
+		dims = s.imageSize(r.Context(), c, segs, picked[0])
+		page.Rows[chosen].Dimensions = dims
+	}
 	if shown {
-		page.Details = s.filePanel(c, segs, picked[0], here, q)
+		page.Details = s.filePanel(c, segs, picked[0], here, q, dims)
 	}
 	page.Bar.Actions = append(page.Bar.Actions, s.detailsToggle(here, q, picked, shown), s.printAction(here))
 	page.Select = s.selectForm(here, q)
@@ -837,6 +847,60 @@ func thumbNote(e file.Entry) view.Text {
 	return ""
 }
 
+// folderItems is what the row of a folder says it holds (ФБ11: s-files-1
+// «folder · 34 items», s-files-5 «12 items»): the count its server gave in
+// the folder's one PROPFIND (docs/servers.md, SV-57), else the length of the
+// listing of it this session holds (S-4.2) — whatever its age, as the rail's
+// numbers are; empty otherwise. Never a request per row (S-17).
+func (s *Server) folderItems(c *fileCtx, segs []string, e file.Entry) view.Text {
+	if e.Items != nil {
+		return text(plural(*e.Items, "item"))
+	}
+	folder, err := c.path(segs, true)
+	if err != nil {
+		return ""
+	}
+	if data, ok := c.sess.Cache().PeekETagMap(c.conn.ID, listKey(folder)); ok {
+		var members []json.RawMessage
+		if json.Unmarshal(data, &members) == nil {
+			return text(plural(len(members), "item"))
+		}
+	}
+	return ""
+}
+
+// imageSize is «4032×3024» of an image a browser shows (S-17, ФБ11): one
+// GET of its head (file.Provider.Dimensions), kept by the file's version, so
+// another look at the same version reads nothing. A file that is not such an
+// image, a header that does not say within the cap, a server that did not
+// answer — no size, and the page stands without it.
+func (s *Server) imageSize(ctx context.Context, c *fileCtx, segs []string, e file.Entry) view.Text {
+	if e.Dir || e.Size == 0 || !inlineTypes[fileType(e.Name, e.Type)] {
+		return ""
+	}
+	p, err := c.path(append(slices.Clone(segs), e.Name), false)
+	if err != nil {
+		return ""
+	}
+	if e.ETag != "" {
+		if data, ok := c.sess.Cache().GetImageSize(c.conn.ID, p, e.ETag); ok {
+			return view.Text(data)
+		}
+	}
+	w, h, ok, err := c.files.Dimensions(ctx, p)
+	if err != nil {
+		return ""
+	}
+	var dims view.Text
+	if ok {
+		dims = view.Text(fmt.Sprintf("%d×%d", w, h))
+	}
+	if e.ETag != "" {
+		c.sess.Cache().PutImageSize(c.conn.ID, p, e.ETag, []byte(dims))
+	}
+	return dims
+}
+
 // sizeOf is what the files among entries weigh together; empty without a
 // file.
 func sizeOf(entries []file.Entry) view.Size {
@@ -856,9 +920,10 @@ func sizeOf(entries []file.Entry) view.Size {
 
 // filePanel is the panel of the one file chosen (s-files-1): where it is,
 // its preview, Download first, Open (an image, in place), Rename and Move;
-// size, type, when it changed and its path on the server; Delete. Close is
-// the folder with nothing chosen.
-func (s *Server) filePanel(c *fileCtx, segs []string, e file.Entry, here string, q url.Values) *view.Details {
+// size, type, an image's width and height when its head said them, when it
+// changed and its path on the server; Delete. Close is the folder with
+// nothing chosen.
+func (s *Server) filePanel(c *fileCtx, segs []string, e file.Entry, here string, q url.Values, dims view.Text) *view.Details {
 	at := append(slices.Clone(segs), e.Name)
 	mt := fileType(e.Name, e.Type)
 	download := s.route(c.href("download", at, false))
@@ -883,9 +948,14 @@ func (s *Server) filePanel(c *fileCtx, segs []string, e file.Entry, here string,
 	d.Fields = []view.Field{
 		{Label: "Size", Value: text(string(formatSize(e.Size))), Mono: true},
 		{Label: "Type", Value: text(mt), Mono: true},
-		{Label: "Changed", Value: text(string(c.tf.formatWhen(e.Modified, false, s.now()))), Mono: true},
-		{Label: "Path", Value: text(path), Mono: true},
 	}
+	if dims != "" {
+		d.Fields = append(d.Fields, view.Field{Label: "Dimensions", Value: dims, Mono: true})
+	}
+	d.Fields = append(d.Fields,
+		view.Field{Label: "Changed", Value: text(string(c.tf.formatWhen(e.Modified, false, s.now()))), Mono: true},
+		view.Field{Label: "Path", Value: text(path), Mono: true},
+	)
 	closed := cloneValues(q)
 	closed.Del("select")
 	closed.Del("details")

@@ -92,6 +92,16 @@ func TestNextcloudPhoto(t *testing.T) {
 // space, so every address arrives percent-encoded. A file layer that builds
 // addresses by hand breaks on exactly that.
 func TestNextcloudFiles(t *testing.T) {
+	client, p, home := nextcloudFiles(t)
+	root := fmt.Sprintf("%scarrel-files-%d/", home, os.Getpid())
+	t.Logf("root: %s", root)
+	runFiles(t, client, p, root)
+}
+
+// nextcloudFiles dials the files of the account and says where its home
+// is: /remote.php/dav/files/<user id>/.
+func nextcloudFiles(t *testing.T) (*dav.Client, *file.Provider, string) {
+	t.Helper()
 	endpoint, user, pass := nextcloudConfig(t)
 	g := testGuard(t)
 	res, trace, err := discover.Run(context.Background(), g, endpoint, user, pass, "")
@@ -120,7 +130,5 @@ func TestNextcloudFiles(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := fmt.Sprintf("/remote.php/dav/files/%s/carrel-files-%d/", uid, os.Getpid())
-	t.Logf("root: %s", root)
-	runFiles(t, client, p, root)
+	return client, p, fmt.Sprintf("/remote.php/dav/files/%s/", uid)
 }

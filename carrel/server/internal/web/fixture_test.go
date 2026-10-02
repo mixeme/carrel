@@ -176,18 +176,26 @@ var mockupFileCols = []struct {
 
 // mockupFileShapes are the sizes and times the frames give the files of
 // the set (s-files-1): the files on disk are stubs, and the stand pads them
-// to the size; a folder's time is set after what is in it.
+// to the size; a folder's time is set after what is in it. head goes before
+// the stub: the frame header of an image whose width and height a frame
+// draws (s-files-5: «2.8 MB · 4032×3024»).
 var mockupFileShapes = []struct {
 	slug, rel string
 	size      int64
 	at        string
+	head      string
 }{
 	{slug: "Documents", rel: "carrel/attachments/2026-08-10-sync-board.png", size: 412 << 10, at: "2026-08-10 11:07"},
 	{slug: "Documents", rel: "carrel/attachments/release-checklist.md", size: 3 << 10, at: "2026-08-09 18:44"},
 	{slug: "Documents", rel: "carrel/attachments/смета-подрядчик.pdf", size: 1258291, at: "2026-08-05 14:20"},
-	{slug: "Documents", rel: "carrel/attachments/2026-08-04-whiteboard.jpg", size: 2936013, at: "2026-08-04 17:03"},
+	{slug: "Documents", rel: "carrel/attachments/2026-08-04-whiteboard.jpg", size: 2936013, at: "2026-08-04 17:03", head: jpegHead4032x3024},
 	{slug: "Documents", rel: "carrel/attachments/2026-07", at: "2026-07-01 09:12"},
 }
+
+// jpegHead4032x3024 is the start of a JPEG and its baseline frame header:
+// 3024 lines of 4032, three components — what the head of a camera's
+// picture tells, and all of it the size of an image is read from (S-17).
+const jpegHead4032x3024 = "\xff\xd8\xff\xc0\x00\x11\x08\x0b\xd0\x0f\xc0\x03\x01\x22\x00\x02\x11\x01\x03\x11\x01"
 
 // mockupFiles puts the file collections of the set in the catalog and their
 // files on the stands, ticks the two the frames tick, and makes
@@ -257,6 +265,7 @@ func mockupFiles(t *testing.T, h *harness, sess *session.Session, root string, s
 				if !ok {
 					t.Fatalf("the set has no %s", target)
 				}
+				data = one.head + data
 				srv.SeedFile(target, data+strings.Repeat(".", int(one.size)-len(data)))
 			}
 			srv.SetModified(target, mockupDayAt(t, one.at))

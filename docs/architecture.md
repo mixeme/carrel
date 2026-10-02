@@ -360,6 +360,7 @@ TTL секретов, тело POST и частота — продуктовые
 | Пароль человека / мастер-пароль | от 8 / от 16 |
 | Argon2id входа и обёртки / мастера | t=3, 64 MiB, p=1 / t=4, 256 MiB, p=1 |
 | `AttachInlineMax` / `FileThumbMaxBytes` / `TransferQueueLen` | 2 МиБ / 512 КиБ / 50 |
+| `ImageHeadBytes` — начало картинки ради размеров (S-17.1) | 64 КиБ, один `GET` с `Range`; срок — `CARREL_DAV_REQUEST_TIMEOUT` на весь обмен |
 
 Как применять:
 

@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.151 — 2026-10-03
+
+What a folder holds and how large an image is, without a request per row
+(the client's scan ФБ11; the owner's decision of 03.10.2026; S-17.1,
+docs/servers.md SV-57).
+
+### Added
+
+- `FileRow.items` — a folder's «34 items», «1 item», «0 items». The folder's
+  one PROPFIND now also asks for `nc:contained-folder-count`,
+  `nc:contained-file-count` (Nextcloud) and `DAV:childcount`; where the
+  server says nothing, a folder this session has already read is counted
+  from that reading; otherwise the field is absent — unknown, not zero.
+- `FileRow.dimensions` — «4032×3024» of the one image chosen (PNG, JPEG,
+  GIF, WebP), and a `Dimensions` field in its panel after `Type`. It comes
+  from one GET of the file's head, `Range: bytes=0-65535`; a server that
+  sends the whole file is read no further, and a header past that leaves
+  the size out. The result is kept per file version for the session.
+
+### For consumers
+
+Draw a folder's Type as «folder · 34 items» and its tile as «34 items» when
+`items` is there, «folder» and nothing otherwise; an image tile chosen as
+«2.8 MB · 4032×3024». Fixture regenerated: `app-files-folder/tiles.json`
+(the chosen tile's size).
+
 ## v0.2.150 — 2026-10-02
 
 The queue, the trees of the sheets and the published links as their frames

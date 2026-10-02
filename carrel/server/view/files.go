@@ -71,9 +71,19 @@ type FileRow struct {
 	Icon string `json:"icon"`
 	// Note — почему у картинки нет миниатюры: «too large» — больше потолка
 	// миниатюры (s-files-5); у прочих пусто
-	Note     Text       `json:"note,omitempty"`
-	Selected bool       `json:"selected"`
-	Menu     []MenuItem `json:"menu"`
+	Note Text `json:"note,omitempty"`
+	// Items — у папки: сколько в ней, «34 items», «1 item», «0 items»
+	// (s-files-1: Type «folder · 34 items»; s-files-5: плитка «12 items»).
+	// Число — из того же PROPFIND папки, где сервер его называет (Nextcloud),
+	// иначе — из папки, которую эта сессия уже читала; пусто — неизвестно
+	// (не «0 items»). У файла пусто
+	Items Text `json:"items,omitempty"`
+	// Dimensions — у картинки: ширина и высота, «4032×3024» (s-files-5:
+	// «2.8 MB · 4032×3024»), — у одной выбранной, из начала файла (S-17);
+	// у прочих пусто
+	Dimensions Text       `json:"dimensions,omitempty"`
+	Selected   bool       `json:"selected"`
+	Menu       []MenuItem `json:"menu"`
 	// Upload — у строки папки: загрузка в неё (бросок на строку, U-15.3;
 	// s-files-1), POST …/upload/{путь папки}/ с полем файла File; у
 	// хранилища только для чтения выключена с причиной; у файла nil

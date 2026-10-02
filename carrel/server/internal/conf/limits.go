@@ -39,6 +39,11 @@ const (
 	// thumbnail: the original is what is served, so a larger one gets the icon
 	// of its type (S-17).
 	FileThumbMaxBytes = 512 << 10
+	// ImageHeadBytes is how much of an image is read for its width and
+	// height when it is the one file chosen (S-17): one GET with Range:
+	// bytes=0-65535, and no more of an answer that came whole. A header
+	// further in leaves the size unsaid.
+	ImageHeadBytes = 64 << 10
 	// AttachInlineMax is the largest record an attachment is written into
 	// (S-20): up to it the file travels inside the event, the task or the note;
 	// past it the file goes to the attachment folder and the record keeps a

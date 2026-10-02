@@ -133,6 +133,19 @@ func (c *Cache) GetThumb(connID, path, version string) ([]byte, bool) {
 	return c.get(thumbKey(connID, path, version))
 }
 
+// PutImageSize stores what the head of an image said of its size, by
+// connection, path and file version (S-4.2, S-17): one ranged read per
+// version. It is kept with the bodies — its key is one — so taking a path or
+// a connection out takes it too.
+func (c *Cache) PutImageSize(connID, path, version string, data []byte) {
+	c.put(kindBody, bodyKey(connID, path, "size\x00"+version), data)
+}
+
+// GetImageSize returns what PutImageSize stored for that version.
+func (c *Cache) GetImageSize(connID, path, version string) ([]byte, bool) {
+	return c.get(bodyKey(connID, path, "size\x00"+version))
+}
+
 // InvalidateCollectionList drops a cached collection list for one account.
 func (c *Cache) InvalidateCollectionList(account string) {
 	c.mu.Lock()

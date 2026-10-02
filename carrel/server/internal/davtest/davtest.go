@@ -17,6 +17,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"sort"
 	"strings"
@@ -62,6 +63,25 @@ type Server struct {
 	// name, the way x/net/webdav does (SFTPGo): the header is dropped before
 	// the file server sees it.
 	FilesIgnoreIfNoneMatch bool
+
+	// FolderCounts answers a PROPFIND under FileRoot that asks for
+	// nc:contained-folder-count and nc:contained-file-count with how many
+	// folders and files each folder holds, the way Nextcloud does
+	// (docs/servers.md, SV-57). Without it they are 404, as on SFTPGo and
+	// OpenCloud.
+	FolderCounts bool
+
+	// ChildCount answers DAV:childcount of each folder under FileRoot with
+	// how many members it holds, as the draft of collection properties
+	// (draft-hopmann-collection-props) names it. No server of the lineup
+	// does (docs/servers.md, SV-57); the stand holds what Carrel would take.
+	ChildCount bool
+
+	// FilesIgnoreRange answers a GET under FileRoot whole, 200, whatever
+	// Range it carried. Every server of the lineup answered 206
+	// (docs/servers.md, SV-57); the stand holds the reader of an image's
+	// head to its cap all the same.
+	FilesIgnoreRange bool
 
 	// MoveRewritesUID gives a record moved into another address book a UID of
 	// the server's own, the way SoGo does (docs/servers.md, SV-18). The name it
@@ -233,6 +253,7 @@ type Server struct {
 	stalls    map[string]chan struct{}
 	hangUp    map[string]bool
 	requests  []string
+	ranges    []string // the Range of each GET under FileRoot, as sent
 	seq       int
 	// uidMatchesRefused counts the calendar-queries RefuseUIDTextMatch
 	// answered 412.
@@ -562,6 +583,87 @@ func (s *Server) CountRequests(method, prefix string) int {
 	return n
 }
 
+// Ranges is the Range header of every GET under FileRoot so far, as sent;
+// "" for a GET that carried none.
+func (s *Server) Ranges() []string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return append([]string(nil), s.ranges...)
+}
+
+// serveFiles is the file tree behind FileRoot: go-webdav's own handler, with
+// what FolderCounts, ChildCount and FilesIgnoreRange add to it.
+func (s *Server) serveFiles(w http.ResponseWriter, r *http.Request, body []byte, files http.Handler) {
+	if r.Method == http.MethodGet {
+		s.mu.Lock()
+		s.ranges = append(s.ranges, r.Header.Get("Range"))
+		s.mu.Unlock()
+		if s.FilesIgnoreRange {
+			r.Header.Del("Range")
+		}
+	}
+	nc := s.FolderCounts && bytes.Contains(body, []byte("contained-folder-count"))
+	cc := s.ChildCount && bytes.Contains(body, []byte("childcount"))
+	if r.Method != "PROPFIND" || !nc && !cc {
+		files.ServeHTTP(w, r)
+		return
+	}
+	rec := httptest.NewRecorder()
+	files.ServeHTTP(rec, r)
+	out := rec.Body.Bytes()
+	if rec.Code == http.StatusMultiStatus {
+		out = s.withFolderCounts(out, nc, cc)
+	}
+	for k, v := range rec.Header() {
+		w.Header()[k] = v
+	}
+	w.Header().Del("Content-Length")
+	w.WriteHeader(rec.Code)
+	_, _ = w.Write(out)
+}
+
+var fileResponse = regexp.MustCompile(`(?s)(<response xmlns="DAV:"><href>)([^<]*)(</href>)(.*?)(</response>)`)
+
+// withFolderCounts writes the counts into the 200 propstat of each folder
+// of a multistatus go-webdav wrote, and takes them out of its 404 one.
+func (s *Server) withFolderCounts(out []byte, nc, cc bool) []byte {
+	const (
+		ncFolders = `<contained-folder-count xmlns="http://nextcloud.org/ns">`
+		ncFiles   = `<contained-file-count xmlns="http://nextcloud.org/ns">`
+		davChild  = `<childcount xmlns="DAV:">`
+	)
+	return fileResponse.ReplaceAllFunc(out, func(m []byte) []byte {
+		parts := fileResponse.FindSubmatch(m)
+		href, err := url.PathUnescape(string(parts[2]))
+		if err != nil {
+			return m
+		}
+		entries, err := os.ReadDir(s.localPath(href))
+		if err != nil {
+			return m
+		}
+		folders := 0
+		for _, e := range entries {
+			if e.IsDir() {
+				folders++
+			}
+		}
+		inner := string(parts[4])
+		var add string
+		if nc {
+			inner = strings.ReplaceAll(inner, ncFolders+`</contained-folder-count>`, "")
+			inner = strings.ReplaceAll(inner, ncFiles+`</contained-file-count>`, "")
+			add += fmt.Sprintf(ncFolders+"%d</contained-folder-count>"+ncFiles+"%d</contained-file-count>", folders, len(entries)-folders)
+		}
+		if cc {
+			inner = strings.ReplaceAll(inner, davChild+`</childcount>`, "")
+			add += fmt.Sprintf(davChild+"%d</childcount>", len(entries))
+		}
+		inner = strings.Replace(inner, `<prop xmlns="DAV:">`, `<prop xmlns="DAV:">`+add, 1)
+		return []byte(string(parts[1]) + string(parts[2]) + string(parts[3]) + inner + string(parts[5]))
+	})
+}
+
 func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, files http.Handler) {
 	s.mu.Lock()
 	s.requests = append(s.requests, r.Method+" "+r.URL.Path)
@@ -743,7 +845,7 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 
 	switch {
 	case strings.HasPrefix(p, FileRoot):
-		files.ServeHTTP(w, r)
+		s.serveFiles(w, r, body, files)
 	case strings.HasPrefix(p, CalendarHome):
 		cal.ServeHTTP(w, r)
 	case strings.HasPrefix(p, AddressBookHome):

@@ -710,7 +710,8 @@
       "type": "image/jpeg",
       "upload": null,
       "icon": "i-img",
-      "note": "too large"
+      "note": "too large",
+      "dimensions": "4032×3024"
     },
     {
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",

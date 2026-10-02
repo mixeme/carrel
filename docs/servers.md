@@ -211,6 +211,7 @@ Graph, протоколы другого устройства. Самая рас
 | SV-24 | Google | контакты и календари на разных хостах; рекомендованный `caldav/v2` требует OAuth | подключение на протокол, как у Yandex; прямой путь обнаружения работает без правок | `TestGoogleContactInTheOnlyBook`, `TestLiveDiscoveryReport` |
 | SV-25 | Google | новую карточку называет сам и переписывает её `UID`; `Location` при этом шлёт | созданную запись перечитывает по адресу, куда писал, и берёт личность оттуда; нигде не нашлась — говорит и ведёт в коллекцию | `TestCreateWhereTheServerRewritesTheUID`, `TestGoogleContactInTheOnlyBook` |
 | SV-30 | Nextcloud | удалённый календарь остаётся по адресу и в доме, и называет себя календарём — пока не спросишь про `nc:deleted-at` | обход спрашивает об этом в том же запросе и помеченное удалённым не берёт; след говорит, сколько пропущено | `TestDiscoverySkipsWhatTheServerPutInItsTrashBin`, `TestNextcloudCollectionDelete` |
+| SV-57 | Nextcloud (и все с файлами) | число в папке в `PROPFIND` даёт только Nextcloud (`nc:contained-folder-count`, `nc:contained-file-count`); размеров картинки не даёт никто; `Range` на `GET` соблюдают все проверенные | спрашивает число в том же `PROPFIND`, иначе берёт из прочитанного сессией; размеры выбранной картинки — один `GET` с `Range: bytes=0-65535`, не дальше 64 КиБ и при ответе целиком | `TestListTakesWhatAFolderHoldsFromTheSameAnswer`, `TestDimensionsAskForTheHeadOnly`, `TestNextcloudFolderHeads`, `TestSFTPGoFolderHeads`, `TestOpenCloudFolderHeads` |
 | SV-28 | iCloud | **снята 30.09.2026**: календарный хост отказывал 401 тем же данным, которые принимает адресный; теперь отвечает | подключение на протокол, как у Google | `TestICloudCalendarDiscovery` |
 | SV-29 | iCloud | у единственной книги нет `displayname` вовсе, а `resourcetype` — без `<collection/>`; вторую не завести (403) | род ресурса берётся по адресному признаку; безымянную коллекцию обнаружение называет родом («Address book»), а несколько таких в одном доме различает адресом; живой набор пишет в единственную книгу | `TestACollectionWithoutANameIsNamedByItsKind`, `TestICloudContactLifecycle` |
 | SV-52 | iCloud | календарь держит один компонент: из набора `MKCALENDAR` берёт первый и отвечает 201; только `VJOURNAL` — 500 | каталог берёт ответ сервера (S-12.2); списки календаря говорят, каких родов сервер не взял и что им нужен другой календарь (v0.2.80), с кнопкой «New calendar» на лист нового с невзятым родом (v0.2.92, s-agenda-11) | `TestCreateSaysWhatTheServerDidNotTake`, `TestTheNoticeOfWhatWasNotTakenIsTheFrame`; `TestICloudCollections`, `TestICloudCalendarDiscovery` |
@@ -966,6 +967,54 @@ Graph, протоколы другого устройства. Самая рас
 - **Сторож.** `TestDiscoverySkipsWhatTheServerPutInItsTrashBin` на `davtest`
   (`Trash`, который отвечает `nc:deleted-at` только спросившему); живьём —
   `TestNextcloudCollectionDelete`.
+
+### SV-57. Число в папке говорит только Nextcloud, размеров картинки не даёт никто
+
+- **Проба.** 02–03.10.2026, решение владельца по ФБ11 (строки папки «folder ·
+  34 items» и плитка картинки «4032×3024» без запроса на строку). На каждом
+  сервере — папка с вложенной (два файла и папка внутри), PNG 300×200 и JPEG
+  640×480 с сегментом Exif в 20 КБ перед заголовком кадра. Один `PROPFIND`
+  глубины 1 спрашивал `DAV:childcount`, `visiblecount`, `objectcount`,
+  `hassubs`, `iscollection`, `oc:size`, `oc:fileid`, `oc:image`, `oc:photo`,
+  `nc:contained-folder-count`, `nc:contained-file-count`,
+  `nc:metadata-photos-size`, `nc:file-metadata-size`, `nc:metadata-photos-exif`,
+  `nc:metadata-blurhash`, `nc:has-preview`; потом `propname` у папки и у JPEG;
+  потом `GET` с `Range: bytes=0-65535` и `bytes=0-99`.
+
+  | Сервер | Число в папке | Размеры картинки | `Range` на `GET` |
+  |---|---|---|---|
+  | Nextcloud 28.0.3 | `nc:contained-folder-count` и `nc:contained-file-count` у каждой папки ответа, и у читаемой тоже: у вложенной 1 и 3 (папка и файлы порознь); `DAV:childcount` и прочие — 404 | нет: `nc:metadata-photos-size` и `nc:file-metadata-size` — 404 и у свежих, и у картинок `Photos/` из набора самого Nextcloud; метаданные фото этот экземпляр не собирает, и имя свойства живьём не подтверждено | 206, `Content-Range` верный |
+  | OpenCloud (за Apache 2.4.65) | нет: всё 404; `oc:size` — объём папки, не число | нет: `oc:image`, `oc:photo` — 404 | 206, `Accept-Ranges: bytes` |
+  | SFTPGo 2.7.5 | нет: всё 404 | нет | 206, `Accept-Ranges: bytes` |
+  | Stalwart, Davis | **не проверено**: стенды поднимают только Linux-ворота, проба шла с Windows | — | — |
+  | Yandex Диск | **не проверено**: `PROPFIND` — 402 (WebDAV Диска — только Яндекс 360) | — | — |
+  | Mail.ru Облако | **не проверено**: 403 паролем приложения CalDAV; адреса и пароля WebDAV у нас нет | — | — |
+
+  Radicale, Baikal, Xandikos, DAViCal, SoGo, Google и iCloud файлов не держат.
+- **Что из этого следует.** Число в папке приходит даром только у Nextcloud —
+  сумма двух чисел. `DAV:childcount` (черновик свойств коллекций,
+  draft-hopmann-collection-props, так отвечают IIS и Exchange) спрашивается
+  заодно: в линейке его не дал никто, но вопрос ничего не стоит. Размеров
+  картинки в `PROPFIND` нет ни у кого, а неподтверждённое свойство Nextcloud
+  Carrel не спрашивает. Диапазон соблюли все трое.
+- **Чем грозило.** Без этого — запрос на каждую строку (`PROPFIND` каждой
+  подпапки, чтение начала каждой картинки) или «0 items» там, где сервер
+  просто промолчал.
+- **Carrel.** `file.List` просит три свойства в своём единственном `PROPFIND`;
+  `Entry.Items` — `nil`, когда сервер не сказал, и тогда число берётся из
+  списка этой папки, уже прочитанного сессией, иначе его нет (S-17.1).
+  Размеры — только у одной выбранной картинки: `file.Provider.Dimensions`, один
+  `GET` с `Range: bytes=0-65535`, чтение не дальше `conf.ImageHeadBytes` и
+  тогда, когда сервер ответил 200 целиком, — ответ закрывается; разбор
+  заголовка — `file.ImageSize`.
+- **Сторож.** Без сети — `davtest` с `FolderCounts` (как Nextcloud),
+  `ChildCount` и `FilesIgnoreRange` (200 и весь файл на любой `Range`):
+  `TestListTakesWhatAFolderHoldsFromTheSameAnswer`,
+  `TestDimensionsAskForTheHeadOnly`, `TestImageSizeReadsNoFurtherThanTheCap`,
+  `TestFolderRowsSayWhatTheyHold`, `TestChosenImageSaysItsSize`. Живьём —
+  `TestNextcloudFolderHeads` (число есть), `TestSFTPGoFolderHeads` и
+  `TestOpenCloudFolderHeads` (числа нет; заговорит сервер — сторож упадёт), у
+  всех трёх диапазон — 206.
 
 ---
 

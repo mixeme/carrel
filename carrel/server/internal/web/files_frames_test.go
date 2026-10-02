@@ -101,7 +101,8 @@ func TestFolderPanelIsTheFrame(t *testing.T) {
 			t.Errorf("field %q is not monospaced", fl.Label)
 		}
 	}
-	if strings.Join(terms, ",") != "Size,Type,Changed,Path" || d.Fields[3].Value != view.Text(filesDocs+"a.png") {
+	// The image's head says its size (ФБ11, TestChosenImageSaysItsSize).
+	if strings.Join(terms, ",") != "Size,Type,Dimensions,Changed,Path" || d.Fields[2].Value != "4×4" || d.Fields[4].Value != view.Text(filesDocs+"a.png") {
 		t.Errorf("fields = %+v", d.Fields)
 	}
 	toggle := actionByID(page.Bar.Actions, "files.details")

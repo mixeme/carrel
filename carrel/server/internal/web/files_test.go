@@ -217,8 +217,11 @@ func TestFolderPage(t *testing.T) {
 	if rec := f.h.do(get(f.at("", "sub"), f.sess)); rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != f.at("", "sub", "") {
 		t.Errorf("folder without its slash: %d %q", rec.Code, rec.Header().Get("Location"))
 	}
-	if n := f.srv.CountRequests("GET", filesDocs); n != 0 {
-		t.Errorf("the listing read %d file bodies", n)
+	// No body is read for a listing; the one image chosen gives the head of
+	// its own for its size, once (ФБ11).
+	if n, head := f.srv.CountRequests("GET", filesDocs), f.srv.CountRequests("GET", filesDocs+"a.png"); n != 1 || head != 1 ||
+		f.srv.Ranges()[0] != "bytes=0-65535" {
+		t.Errorf("the listing read %d file bodies, %d of them the chosen image's head: %q", n, head, f.srv.Ranges())
 	}
 	for _, path := range []string{
 		f.at("", "none.txt"),
