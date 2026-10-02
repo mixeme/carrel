@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.131 — 2026-10-02
+
+Notes come from a zip of Markdown files too (s-io-8).
+
+### Added
+
+- **A zip of Markdown files in the wizard of notes**: every `.md` in it,
+  its folders too, is a note, its row naming its file («idei/crdt.md»);
+  what is not Markdown is «Skipped: not Markdown», an empty one «Empty
+  file: nothing to store and nothing to name it by». `Source.kinds` of
+  notes takes `.zip`. The archive is somebody else's (S-29.4): told by its
+  content, its members counted against `CARREL_IMPORT_MAX_RECORDS` before
+  one is read, what is unpacked counted against `CARREL_IMPORT_MAX_BYTES` as
+  it is read (a member past it refuses the file whole); no name of it is a
+  path — one that would climb out is named and left out; an encrypted
+  member is not opened.
+
+### For consumers
+
+Offer `.zip` where `source.kinds` says so.
+
 ## v0.2.130 — 2026-10-02
 
 The preview of an import is the frames' one table (s-io-5…8).

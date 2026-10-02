@@ -112,7 +112,7 @@ func importFormats(k view.Kind) []view.Text {
 		return []view.Text{".vcf"}
 	}
 	if k == view.KindNote {
-		return []view.Text{".ics", ".md"}
+		return []view.Text{".ics", ".md", ".zip"}
 	}
 	return []view.Text{".ics"}
 }
@@ -532,6 +532,9 @@ func (s *Server) takeFile(w http.ResponseWriter, r *http.Request, c *collectionC
 // three kinds at once, and the two this collection does not keep are named,
 // not dropped (S-19).
 func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*importDraft, error) {
+	if c.spec.kind == view.KindNote && isZip(body) {
+		return s.readZipNotes(c, name, body)
+	}
 	d := &importDraft{Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, Source: name, Size: int64(len(body))}
 	if c.spec.kind == view.KindNote && isMarkdown(name) {
 		d.Format = "Markdown"
