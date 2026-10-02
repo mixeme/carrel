@@ -136,8 +136,10 @@ type EventEditPage struct {
 	Subtitle Text   `json:"subtitle"` // календарь: «nextcloud · Личный»
 	// Form — поля, напоминания строками reminder.N, повторение (Advanced
 	// RRULE пуст, правило — его образец)
-	Form      Form          `json:"form"`
-	Attendees []AttendeeRow `json:"attendees"` // организатор первым; только чтение (U-6.2)
+	Form Form `json:"form"`
+	// Attendees — поле участников (s-agenda-3, -14, -15): клиент ставит его
+	// набором «Attendees» формы, между Reminders и Attachments
+	Attendees AttendeeField `json:"attendees"`
 	Attach    []AttachRow   `json:"attach"`
 	// Foreign — «Kept as the server sent them»: свойства, которых Carrel не
 	// знает, имя и значение как есть, моноширинно (s-agenda-3); пусто — нет
@@ -171,6 +173,58 @@ type AttendeeRow struct {
 	Href string `json:"href"`
 	// Colour — метка книги этой карточки; пусто у незнакомого
 	Colour Colour `json:"colour"`
+	// Value — значение плашки в форме правки, «mailto:…»; на чтении пусто
+	Value string `json:"value,omitempty"`
+	// Fixed — организатор в своей правке: плашка без крестика, уходит
+	// скрытым полем (s-agenda-3)
+	Fixed bool `json:"fixed,omitempty"`
+}
+
+// AttendeeField — участники в правке события (задача 77, s-agenda-3):
+// плашки колонками и строка набора. Форма шлёт организатора скрытым полем
+// Name, каждого другого — отмеченным флажком того же Name, и набранное в
+// строке (Add.Name): сервер берёт человека, найденного по имени в отмеченных
+// книгах, или адрес, иначе ошибка у строки. Форма без строки набора
+// участников не меняет. Приглашённый (ReadOnly) видит плашки без крестиков
+// и без строки, и почему — Hint (s-agenda-14).
+type AttendeeField struct {
+	Name string        `json:"name"` // «attendee»
+	Rows []AttendeeRow `json:"rows"` // организатор первым; Value и Fixed
+	// Add — строка набора: Name «attendee.add», Label «Add attendee»,
+	// Placeholder «Name or address», Value — набранное, Error — почему не
+	// взято; nil — список меняет только организатор
+	Add *FormRow `json:"add"`
+	// Suggest — адрес подсказок (C-5, /app/contacts/suggest): набранное
+	// уходит в ?q=, ответ — SuggestList (s-agenda-12, -13)
+	Suggest string `json:"suggest"`
+	// Hint — под полем: где ищется и кто шлёт приглашения — «A name or an
+	// address: the ticked address books are searched. On save, nextcloud
+	// sends the invitations and their changes — Carrel sends no mail
+	// itself.»; у приглашённого — «You are invited by Мария Лебедева: only
+	// the organiser changes the list.»
+	Hint     Text `json:"hint"`
+	ReadOnly bool `json:"readOnly"` // приглашённый или календарь только для чтения
+}
+
+// SuggestList — подсказки поля участников (s-agenda-12, -13): ответ на
+// /app/contacts/suggest?q=. Ищутся отмеченные книги, чьи списки сеанс
+// читал, по имени и по адресу; строка на каждый адрес человека.
+type SuggestList struct {
+	Items []SuggestItem `json:"items"`
+	// Note — под чертой: набранный адрес не из книг — «Not in the ticked
+	// address books.»; иначе пусто
+	Note Text `json:"note"`
+}
+
+// SuggestItem — одна подсказка: человек одним адресом, или «Add» адреса,
+// которого в книгах нет (Add).
+type SuggestItem struct {
+	Name   Runs   `json:"name"`   // имя, найденное — RunStrong: «‹Ве›ра Лебедева»; у Add пусто
+	Email  Text   `json:"email"`  // адрес, на который придёт приглашение
+	Book   Text   `json:"book"`   // книга справа: «Архив»; у Add пусто
+	Colour Colour `json:"colour"` // метка книги; у Add пусто
+	Value  string `json:"value"`  // значение плашки, которую подсказка ставит: «mailto:vera@example.net»
+	Add    bool   `json:"add"`    // «Add ‹адрес›» (s-agenda-13)
 }
 type AttachRow struct {
 	Href    string      `json:"href"`

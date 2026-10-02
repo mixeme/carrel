@@ -207,7 +207,7 @@ func TestContactTimeline(t *testing.T) {
 	found := false
 	for _, p := range f.srv.Paths(searchWork) {
 		b, _, _ := f.srv.Object(p)
-		found = found || strings.Contains(unfolded(b), "SUMMARY:Coffee with Anna") && strings.Contains(unfolded(b), "ATTENDEE:mailto:anna@example.com")
+		found = found || strings.Contains(unfolded(b), "SUMMARY:Coffee with Anna") && strings.Contains(unfolded(b), "ATTENDEE;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:anna@example.com")
 	}
 	if !found {
 		t.Error("the new event does not invite the person")

@@ -72,9 +72,11 @@ const (
 	// session has loaded, or typed as a UID after «By UID…» (S-11,
 	// s-tasks-10).
 	fieldRelated
-	// fieldAttendee adds one ATTENDEE to a new event: the person a timeline
-	// creates it for (S-15.4). It shows nothing of what the event holds —
-	// attendees are EventEditPage.Attendees — and travels hidden.
+	// fieldAttendee is the attendees of an event (Typecase task 77,
+	// s-agenda-3): their addresses, «mailto:…», the organiser first. The full
+	// form draws them as EventEditPage.Attendees and posts each kept one and
+	// the line typed in (attendee.add); the quick sheet carries the person a
+	// timeline creates the event for (S-15.4) hidden. See attendees.go.
 	fieldAttendee
 )
 
@@ -709,7 +711,7 @@ var editFields = map[view.Kind][]editField{
 		// No hint under Tags (s-agenda-3).
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
-		{name: "attendee", label: "Attendee", prop: "ATTENDEE", typ: fieldAttendee},
+		{name: "attendee", label: "Attendees", prop: "ATTENDEE", typ: fieldAttendee},
 		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, required: true, allDay: true, set: "When",
 			quick: "Date", quickTime: "Start"},
 		{name: "end", label: "End date", timeLabel: "End time", prop: "DTEND", typ: fieldTime, set: "When", quickTime: "End", quickNoDate: true},
@@ -910,7 +912,7 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 		case fieldRelated:
 			vals[f.name] = []string{strings.TrimSpace(firstValue(obj, f.prop))}
 		case fieldAttendee:
-			vals[f.name] = []string{""}
+			vals[f.name] = attendeeValues(obj)
 		case fieldList:
 			vals[f.name] = []string{strings.Join(categoriesOf(c.spec.kind, obj), ", ")}
 		case fieldBirthday:
@@ -1057,6 +1059,8 @@ func (s *Server) emptyValues(c *collectionCtx) formValues {
 			// A new event is written in the instance zone unless another is
 			// chosen (from-typecase note 19).
 			vals[f.name] = []string{s.instanceZone()}
+		case fieldAttendee:
+			vals[f.name] = []string{}
 		default:
 			vals[f.name] = []string{""}
 		}
@@ -1111,8 +1115,21 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 	vals := formValues{}
 	for _, f := range editFields[c.spec.kind] {
 		switch f.typ {
-		case fieldText, fieldPercent, fieldList, fieldBirthday, fieldChoice, fieldZone, fieldAttendee:
+		case fieldText, fieldPercent, fieldList, fieldBirthday, fieldChoice, fieldZone:
 			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name))}
+		case fieldAttendee:
+			// Every kept one under the one name; the line typed in only
+			// when the form drew the field (attendeeOps).
+			r.FormValue(f.name) // parses the form
+			vals[f.name] = []string{}
+			for _, v := range r.Form[f.name] {
+				if v = strings.TrimSpace(v); v != "" {
+					vals[f.name] = append(vals[f.name], v)
+				}
+			}
+			if _, drawn := r.Form[f.name+".add"]; drawn {
+				vals[f.name+".add"] = []string{strings.TrimSpace(r.FormValue(f.name + ".add"))}
+			}
 		case fieldArea:
 			vals[f.name] = []string{strings.TrimRight(strings.ReplaceAll(r.FormValue(f.name), "\r\n", "\n"), "\n ")}
 		case fieldName:
@@ -1346,15 +1363,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], v, false)...)
 		case fieldAttendee:
-			v := strings.ToLower(strings.TrimPrefix(first(w), "mailto:"))
-			if v == "" {
-				continue
-			}
-			if !strings.Contains(v, "@") || strings.ContainsAny(v, " \t;:,<>") {
-				ch.errors[f.name] = "An attendee is an e-mail address."
-				continue
-			}
-			ch.ops = append(ch.ops, model.AddValue{Prop: f.prop, Value: "mailto:" + v})
+			ch.ops = append(ch.ops, s.attendeeOps(c, obj, have, want, ch.errors)...)
 		case fieldRelated:
 			if first(w) == first(h) {
 				continue
@@ -2124,13 +2133,13 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		if st.isNew || name == "" {
 			name = "New event"
 		}
-		page := view.EventEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: view.Text(c.stamp()), Form: form, Loss: st.loss, Delete: del}
+		page := view.EventEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: view.Text(c.stamp()), Form: form, Loss: st.loss, Delete: del,
+			Attendees: s.attendeeField(c, st)}
 		if st.obj != nil {
 			if cal.HasRecurrence(st.obj) && del != nil {
 				// The line stands under Delete, once.
 				page.DeleteNote = seriesNote
 			}
-			page.Attendees = eventPeople(st.obj, s.knownPeople(c.sess))
 			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
 			// «Kept as the server sent them» (s-agenda-3): what Carrel does
 			// not know, as it came.
@@ -2333,8 +2342,12 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			}
 			set.Rows = append(set.Rows, repeatSet(f, vals, held, errText).Rows...)
 		case fieldAttendee:
-			if v := first(vals); v != "" {
-				set.Rows = append(set.Rows, view.FormRow{Name: f.name, Kind: view.InputHidden, Value: text(v), Error: errText})
+			// The full form draws the field (EventEditPage.Attendees); the
+			// quick sheet carries whom it is made for, hidden.
+			if !full {
+				for _, v := range attendeeAddresses(vals) {
+					set.Rows = append(set.Rows, view.FormRow{Name: f.name, Kind: view.InputHidden, Value: text("mailto:" + v), Error: errText})
+				}
 			}
 		case fieldRelated:
 			// One field (s-tasks-10): picked from what the session has

@@ -399,6 +399,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта и события); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
+| `/app/contacts/suggest` | GET | вход | фрагмент | `SuggestList` — подсказки поля участников правки события (`AttendeeField.Suggest`, s-agenda-12, -13): `?q=` — набранное; ищутся отмеченные книги, чьи списки сеанс читал (сервер DAV не спрашивается), по имени и по адресу; строка на каждый адрес человека; набранный адрес не из книг — первым «Add» и `Note`. Ставит ответ в меню поля живой слой Typecase (`tc-live.js`, L-1); без сценариев набранное уходит с формой правки |
 | `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage`; `?print=1` — та же хронология для печати (U-10); `?kind=` — фильтр по роду: `event`, `task`, `note` или `file` (сегменты-ссылки, s-contacts-7), без него — All; `?from=&to=` — окно, форма GET диапазона (`Range.Form`) |
 | `/app/contacts/{account}/{col}/{uid}/timeline/columns` | POST | вход | редирект | — ; меню Columns хронологии (s-contacts-25), как у списков (S-9.6) |
 | `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage` |
@@ -1362,7 +1363,7 @@ type EventEditPage struct { // правка: та же запись формой
     // пишет их. Attach — по имени
     // (attach.add), клиент ставит его в набор «Attachments» (s-agenda-3)
     Form      Form
-    Attendees []AttendeeRow // организатор первым; только чтение (U-6.2; кадр s-agenda-3 их не рисует — задача Typecase 77)
+    Attendees AttendeeField // поле участников (s-agenda-3, -14, -15): клиент ставит его набором «Attendees» между Reminders и Attachments
     Attach    []AttachRow
     Foreign   []Field // «Kept as the server sent them»: свойства, которых Carrel не знает, — имя и значение как есть, Mono (s-agenda-3: SEQUENCE, X-MOZ-GENERATION, …); пусто — нет
     Loss      *LossReport
@@ -1388,6 +1389,44 @@ type AttendeeRow struct {
     Status Text   // как пишет кадр, строчными: «organiser», «accepted», «tentative», «declined», «no reply» (s-agenda-1, -2)
     Href   string // карточка с этим адресом в отмеченных книгах, чьи списки сеанс читал (сервер не спрашивается — как Related); пусто — незнакомый
     Colour Colour // метка книги этой карточки; пусто у незнакомого
+    Value  string // значение плашки в правке, «mailto:…»; на чтении пусто
+    Fixed  bool   // организатор в своей правке: плашка без крестика, уходит скрытым полем (s-agenda-3)
+}
+
+// Участники в правке события (задача 77, s-agenda-3): плашки колонками и
+// строка набора. Форма шлёт организатора скрытым полем Name, каждого другого
+// — отмеченным флажком того же Name (снятый крестиком — не уходит), и
+// набранное в строке под Add.Name. Без сценариев сервер решает при записи:
+// адрес — как набран, иначе человек отмеченных книг, в чьём имени набранное,
+// если у него один адрес; иначе — ошибка у строки, ничего не записано.
+// Добавленный — ATTENDEE с CN книги, PARTSTAT=NEEDS-ACTION и RSVP=TRUE;
+// снятый уходит, прочие — как были (S-7); у записи без ORGANIZER, получившей
+// участников, — свой адрес на подключении (calendar-user-address-set) и имя
+// аккаунта. Форма без строки набора (быстрый лист, человек хронологии)
+// участников только добавляет. Приглашённый — ORGANIZER не свой адрес — видит
+// плашки без крестиков и без строки (ReadOnly, Add — nil), и его запись
+// список не меняет (s-agenda-14).
+type AttendeeField struct {
+    Name     string        // «attendee»
+    Rows     []AttendeeRow // организатор первым; Value, Fixed
+    Add      *FormRow      // строка набора: Name «attendee.add», Label «Add attendee», Placeholder «Name or address», Value — набранное, Error — почему не взято; nil — список меняет только организатор
+    Suggest  string        // адрес подсказок, /app/contacts/suggest (C-5): набранное — ?q=
+    Hint     Text          // под полем: «A name or an address: the ticked address books are searched. On save, nextcloud sends the invitations and their changes — Carrel sends no mail itself.» (сервер планирует, RFC 6638), «… nextcloud sends no invitations, and Carrel sends no mail itself.», «… nextcloud did not say whether it sends invitations; …»; приглашённому — «You are invited by Мария Лебедева: only the organiser changes the list.»
+    ReadOnly bool          // приглашённый или календарь только для чтения
+}
+
+// Подсказки поля участников (s-agenda-12, -13): ответ /app/contacts/suggest.
+type SuggestList struct {
+    Items []SuggestItem
+    Note  Text // под чертой: набранный адрес не из книг — «Not in the ticked address books.»; иначе пусто
+}
+type SuggestItem struct {
+    Name   Runs   // имя, найденное — RunStrong: «‹Ве›ра Лебедева», «Се‹ве›рин Ким»; у Add пусто
+    Email  Text   // адрес, на который придёт приглашение
+    Book   Text   // книга справа, «Архив»; у Add пусто
+    Colour Colour // метка книги; у Add пусто
+    Value  string // значение плашки, которую подсказка ставит: «mailto:vera@example.net»
+    Add    bool   // «Add ‹адрес›» — набранный адрес не из книг, первой строкой (s-agenda-13)
 }
 type AttachRow struct {
     Href    string

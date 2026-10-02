@@ -65,6 +65,7 @@ func (s *Server) registerRoutes() {
 	}
 	s.handle("POST /app/contacts/{account}/{col}/{uid}/timeline/columns", (*Server).postTimelineColumns)
 
+	s.handle("GET /app/contacts/suggest", (*Server).getContactsSuggest)
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/timeline", (*Server).getContactTimeline)
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/rewrite", (*Server).getContactRewrite)
 	s.handle("POST /app/contacts/{account}/{col}/{uid}/rewrite", (*Server).postContactRewrite)

@@ -17,6 +17,45 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.139 — 2026-10-02
+
+The organiser edits the attendees (s-agenda-3, -12 … -15; Typecase task 77,
+the owner's decisions of 01–02.10.2026): an attendee is an address, the
+address books only suggest.
+
+### Added
+
+- **`EventEditPage.attendees`** is an `AttendeeField` now (it was the
+  read-only rows): the tags in columns — the organiser `fixed`, posted
+  hidden; each other a ticked box under `name` (`attendee`), its `value`
+  «mailto:…» —, the line typed in (`add`: `attendee.add`, «Add attendee»,
+  «Name or address»), where its suggestions are asked (`suggest`) and the
+  hint under it: who sends the invitations — the DAV server when it
+  schedules (RFC 6638, as discovery learned), Carrel never. An invited
+  person (`ORGANIZER` not one of their addresses on the connection) sees the
+  tags read-only, no line, and «You are invited by …: only the organiser
+  changes the list.» (s-agenda-14); their save changes no attendee.
+- **Saving the attendees** (S-7): an unticked one goes, the others keep
+  their values and parameters; one added comes with the name of their card,
+  `PARTSTAT=NEEDS-ACTION` and `RSVP=TRUE`. What is typed without scripts is
+  an address as it is, else the one person of the ticked books whose name
+  holds it, if they have one address — else an error at the line and
+  nothing written. A record that gains its first attendees without an
+  organiser gets the person's own address and name. A form without the
+  line (the quick sheet, a person's timeline) only adds.
+- **`GET /app/contacts/suggest?q=`** → `SuggestList` (s-agenda-12, -13): the
+  people of the ticked address books the session has read whose name or
+  address holds what is typed, a row per address — the name with the found
+  part strong, the address, the book and its mark, the value of the tag —;
+  an address no book holds first as «Add», with «Not in the ticked address
+  books.» It is the address the field names for Typecase's live layer.
+
+### For consumers
+
+Draw the attendees' field from `attendees` inside the form, post the tags
+and the line; ask `suggest` with `?q=`. Fixtures regenerated:
+`app-event-edit/normal`, `/loss`, `app-event-new/normal`.
+
 ## v0.2.138 — 2026-10-02
 
 The attendees of an event's card and panel as the frames of task 77 draw

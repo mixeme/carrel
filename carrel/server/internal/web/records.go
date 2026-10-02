@@ -1588,33 +1588,10 @@ type knownPerson struct {
 	colour     view.Colour
 }
 
-// knownPeople are the people of the ticked address books whose lists the
-// session has read, by their addresses (task 77: an attendee is an address,
-// the books say who it is — s-agenda-1, -2). No server is asked: as Related,
-// what is not loaded is not known. An address on two cards is the first
-// book's, in the catalog's order.
-func (s *Server) knownPeople(sess *session.Session) map[string]knownPerson {
-	blob := s.catalogOf(sess)
-	out := map[string]knownPerson{}
-	for _, col := range blob.Collections {
-		conn, ok := blob.Connection(col.AccountID)
-		if !ok || col.Gone || !col.Has(view.KindContact) || !isTicked(blob, view.KindContact, col.AccountID, col.Path) {
-			continue
-		}
-		from := origin{conn: conn, col: col}
-		for _, e := range indexedIn(sess, col) {
-			if e.Kind != view.KindContact || e.UID == "" {
-				continue
-			}
-			for _, mail := range e.Keys.Emails {
-				if _, seen := out[mail]; !seen {
-					out[mail] = knownPerson{name: e.Title, href: s.route(from.recordPath(segmentOf(view.KindContact), e.UID)), colour: catalogColour(col)}
-				}
-			}
-		}
-	}
-	return out
-}
+// knownPeople (attendees.go) are the people of the ticked address books
+// whose lists the session has read, by their addresses (task 77: an attendee
+// is an address, the books say who it is — s-agenda-1, -2). No server is
+// asked: as Related, what is not loaded is not known.
 
 func taskShow(r *http.Request) string {
 	show := r.URL.Query().Get("show")

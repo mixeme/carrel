@@ -21,36 +21,60 @@
       "type": "text/markdown"
     }
   ],
-  "attendees": [
-    {
-      "colour": "",
-      "email": "mix@example.org",
-      "href": "",
-      "name": "Михаил Енученко",
-      "status": "organiser"
+  "attendees": {
+    "add": {
+      "error": "",
+      "extra": null,
+      "hint": "",
+      "kind": "text",
+      "label": "Add attendee",
+      "name": "attendee.add",
+      "options": [],
+      "placeholder": "Name or address",
+      "readOnly": false,
+      "required": false,
+      "value": ""
     },
-    {
-      "colour": "#4a6b52",
-      "email": "a.kovaleva@example.org",
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
-      "name": "Анна Ковалёва",
-      "status": "accepted"
-    },
-    {
-      "colour": "#4a6b52",
-      "email": "a.belov@example.org",
-      "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
-      "name": "Артём Белов",
-      "status": "tentative"
-    },
-    {
-      "colour": "",
-      "email": "v@example.org",
-      "href": "",
-      "name": "Виктор Гончаров",
-      "status": "no reply"
-    }
-  ],
+    "hint": "A name or an address: the ticked address books are searched. On save, nextcloud sends the invitations and their changes — Carrel sends no mail itself.",
+    "name": "attendee",
+    "readOnly": false,
+    "rows": [
+      {
+        "colour": "",
+        "email": "mix@example.org",
+        "fixed": true,
+        "href": "",
+        "name": "Михаил Енученко",
+        "status": "organiser",
+        "value": "mailto:mix@example.org"
+      },
+      {
+        "colour": "#4a6b52",
+        "email": "a.kovaleva@example.org",
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+        "name": "Анна Ковалёва",
+        "status": "accepted",
+        "value": "mailto:a.kovaleva@example.org"
+      },
+      {
+        "colour": "#4a6b52",
+        "email": "a.belov@example.org",
+        "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
+        "name": "Артём Белов",
+        "status": "tentative",
+        "value": "mailto:a.belov@example.org"
+      },
+      {
+        "colour": "",
+        "email": "v@example.org",
+        "href": "",
+        "name": "Виктор Гончаров",
+        "status": "no reply",
+        "value": "mailto:v@example.org"
+      }
+    ],
+    "suggest": "/app/contacts/suggest"
+  },
   "delete": {
     "csrf": "csrf",
     "danger": true,
