@@ -4,6 +4,80 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.0 — 2026-10-03
+
+The notes section: the fourth section built whole. Typecase `d29ecf8`,
+server `v0.2.150`. Each screen went in as the draft `frame2go -self`
+printed, alone, then the screen over it.
+
+**Tagged:** `client-v0.4.0`.
+
+### Added
+
+- **The notebook** (`/app/notes`, `/app/notes/{account}/{col}`, `s-notes-1`)
+  from `NotesPage`: the head with what is open and shown, New note with its
+  arrow in the combined view, Import, Export; the bar — the filter by word
+  (a GET form), the order (links), Columns with its menu (a form), how many
+  notes are loaded; the poll's bar; the months with their counts, a row each
+  note — its title leading to the note, its excerpt, tags, date, «2 sources»
+  of a linked one with the sources in its hint; with the columns a person
+  chose, a row of them; the empty state; the note's panel (`?open=`) — Edit,
+  the note's page, «⋯» with Delete note last, the notebook and when, the
+  text with its tasks (a tick a sign, not pressed), the tags, the
+  attachments with Attach and its arrow, the related records.
+- **The note** (`/app/notes/{account}/{col}/{uid}`, `s-notes-2`) from
+  `NotePage` read: the head — the notebook's mark, where and when —, Edit,
+  Export Markdown, Print, «⋯» (Move, Copy, Publish a link); the text — its
+  title, paragraphs, headings, tasks, lists with their nested lists,
+  quotations, code, tables (`s-notes-21`, `-25`); the column — tags, related
+  records, attachments with Attach, the same note in other notebooks, the
+  source, Delete note; the rail of return with the notes beside it.
+- **The edit and the full new form** (`…/{uid}/edit`, `…/new`,
+  `s-notes-20`) from `NotePage` in its edit: the document is the form
+  (`Doc.Action`), which Save of the bar submits without a script; the title,
+  Notebook as a choice with the notebooks' marks (a read-only one shown and
+  off, «ro»), Date and Time, Tags, Related to as the record chosen or the
+  line of a UID with the records loaded as its choices, the text, the line
+  of the properties Carrel does not know; the column without the tags and
+  related records.
+- **`bind` for them**: a note's text as a document's parts (`DocText`,
+  `Spans`) and as a panel's (`SecText`), the edit's document (`DocForm`) and
+  its Save (`SubmitForm`), a choice of collections with their marks
+  (`Marks`), a neighbour of the rail (`TreeRow`). A test for each.
+- **The meaning guard's table**: a note's row (`ExcerptRow`) and a
+  neighbour (`TreeRow`) lead to the note; a task's tick in a text is a sign
+  (`Tick.Sign`); a record and an attachment of a document's column
+  (`DocRef`, `DocAttach`) go where the model says; a document in its edit
+  is a form (`Doc` with `Action`). Bites in `TestMeaningRules`.
+- U-5.5 rows 37–42 and row 36 wider (the owner's decision of 01.10.2026):
+  what the library or the frames do not give yet, each with its Typecase
+  task or the server's debt (C25 — plan, «Экраны раздела»).
+
+### Changed
+
+- U-5.5 row 31 narrowed: the set carries a task tagged «read» since the
+  server `v0.2.149` (C24 closed); what still waits is a task done under
+  Open (Typecase's task 105). Row 36 names Typecase's task 122.
+
+### Not yet
+
+- **Held against their frames only in part** (U-5.5 37, 38, 40, 42): the
+  combined notebook's frame has three notebooks, a fifth tag, a «linked»
+  badge among the tags, a shorter text and two attachments in the panel;
+  the note's frames have a third neighbour, and the read one a text without
+  the set's second heading; one notebook, a notebook that did not answer,
+  nothing ticked and the new note's form have no frames of their own
+  (Typecase's tasks 105, 97).
+- **The panel's text** is paragraphs and tasks (row 39): its headings,
+  lists, quotations, code and tables stand as words among the paragraphs.
+- **The client's controls** of the note — Source, the width of the text,
+  the side column, the markup's buttons, Auto-save, the draft in this
+  window, Focus — do nothing without a script (row 41, task 104); the modes
+  Reading width (`s-notes-3`) and Focus (`s-notes-4`) are the client's,
+  stage 4.
+- **The arrow of a new note's Attach** posts its own form, not the form it
+  stands in (row 36).
+
 ## v0.3.1 — 2026-10-02
 
 Typecase `d29ecf8` (Carrel's tasks 96, 98–103, 109, 111 and the owner's
