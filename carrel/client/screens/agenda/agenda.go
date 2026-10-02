@@ -1,383 +1,463 @@
-// Drafted by frame2go from frame «Календарь · агенда со списком и карточкой» (s-agenda-1) of the Typecase mockup: the
-// frame's widgets and its data, top to bottom. The data is the frame's; it
-// is to become the application's (docs/guide/screen.md).
-package draft
+// Package agenda is the agenda, /app/calendar (the combined view) and
+// /app/calendar/{account}/{col} (one calendar), drawn by frame «Календарь ·
+// агенда со списком и карточкой» (s-agenda-1) of the mockup and by the
+// frames of its states — the poll running (states-13), nothing ticked
+// (states-14), one calendar's empty window (states-15): the drafts frame2go
+// printed for them, with the frames' data become the view model's (U-5.1,
+// U-6.2). The agenda is a list, not a grid: Day, Week and Month are windows
+// of the same list.
+package agenda
 
-import w "carrel.dev/typecase/widget"
+import (
+	"strconv"
 
-// Agenda1 is frame «Календарь · агенда со списком и карточкой» (s-agenda-1).
-func Agenda1() interface{ Render() string } {
-	return w.Shell{
-		Top: &w.Top{
-			Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
-			Search: &w.Search{Query: w.Query{Placeholder: "Search everything…", Label: "Search everything…"}},
-			Actions: []w.TopAction{
-				w.Button{Label: "New note", Menu: true, Icon: "quill", Kind: w.ButtonPrimary},
-				w.Button{Label: "2 min ago", Icon: "refresh"},
-				w.UserMenu{Name: "mix"},
-			},
-		},
-		Body: w.ShellBody{
-			Rail: []w.RailPart{
-				w.Nav{
-					Items: []w.NavItem{
-						{Icon: "con", Label: "Contacts", Count: &w.Num{Value: 312}, Href: "#"},
-						{Icon: "cal", Label: "Calendar", Count: &w.Num{Value: 14}, Href: "#"},
-						{Icon: "task", Label: "Tasks", Count: &w.Num{Value: 3}, Href: "#"},
-						{Icon: "note", Label: "Notes", Count: &w.Num{Value: 86}, Href: "#"},
-						{Icon: "file", Label: "Files", Href: "#"},
-						{Icon: "dup", Label: "Duplicates", Count: &w.Num{Value: 3}, Href: "#"},
-					},
-					On: 2,
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.TickRow{
-							Ticked:  w.TickedPart,
-							Kind:    w.TickRowAll,
-							Mark:    w.Mark{Kind: w.MarkMulti},
-							Label:   "Combined calendar",
-							Meta:    "14",
-							Current: true,
-						},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "nextcloud"},
-						w.TickRow{Ticked: w.TickedOff, Mark: w.Mark{Colour: "#A05A2C"}, Label: "Дни рождения", Meta: "—", Hidden: true},
-						w.TickRow{Mark: w.Mark{Colour: "#4A6B52"}, Label: "Личный", Meta: "7"},
-						w.TickRow{Mark: w.Mark{Colour: "#3F6E8C"}, Label: "Работа", Meta: "4"},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "radicale · vps"},
-						w.TickRow{Mark: w.Mark{Colour: "#8C6239"}, Label: "Дежурства", Meta: "1"},
-						w.TickRow{Mark: w.Mark{Colour: "#6B4E7A"}, Label: "Проекты", Meta: "2"},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "baikal"},
-						w.TickRow{
-							Mark:      w.Mark{Colour: "#9A9280"},
-							Label:     "Общий",
-							Meta:      "password · 401",
-							MetaTitle: "401 Unauthorized — the saved password was refused. Open Connections to update it.",
-							Error:     true,
-							Trail:     w.Button{Label: "Retry", Small: true},
-						},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "Subscriptions", Items: []w.RubricPart{w.Badge{Label: "external"}}},
-						w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8C6239"}, Label: "Праздники РФ", Meta: "ro"},
-						w.TickRow{
-							Ticked: w.TickedOff,
-							Kind:   w.TickRowExternal,
-							Mark:   w.Mark{Colour: "#6B4E7A"},
-							Label:  "Расписание лиги",
-							Meta:   "ro",
-							Hidden: true,
-						},
-					},
-				},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "Tags"}},
-					Tags: []w.Tag{w.Tag{Label: "all", On: true}, w.Tag{Label: "релиз"}, w.Tag{Label: "работа"}},
-				},
-				w.RailFoot{
-					Items: []w.RailFootPart{
-						w.Button{Icon: "plus", Title: "New calendar"},
-						w.Button{Icon: "server", Title: "Connect account"},
-						w.Button{Icon: "link", Title: "Subscribe to a feed"},
-						w.Emblem{Symbol: "davloom", Title: "davloom · running · 3 devices"},
-					},
-					About: &w.About{Name: "Carrel", Build: w.Mono{Text: "0.0.1 · 786949a"}, Href: "#rest"},
-				},
-			},
-			Main: w.Main{
-				Items: []w.MainPart{
-					w.Head{
-						Title: &w.HeadTitle{Mark: &w.Mark{Kind: w.MarkMulti, Size: w.MarkH20}, Text: "Combined calendar"},
-						Subs: []w.HeadSub{
-							w.HeadSub{
-								Parts: []w.HeadSubPart{w.Text("5 of 7 calendars · 3 accounts · 10 – 16 August 2026 · "), w.Mono{Text: "Europe/Moscow"}},
-							},
-						},
-						Acts: &w.Acts{
-							Items: []w.ActsPart{
-								w.Button{Label: "New event", Menu: true, Icon: "plus", Kind: w.ButtonPrimary},
-								w.Button{Label: "Import", Icon: "up"},
-								w.Button{Label: "Export", Icon: "down"},
-								w.Button{Label: "Print", Icon: "print"},
-							},
-						},
-					},
-					w.Bar{
-						Items: []w.BarPart{
-							w.Button{Icon: "back", Title: "Previous week", Href: "/app/calendar?from=2026-08-03"},
-							w.Button{Label: "Today", Href: "/app/calendar"},
-							w.Button{Icon: "next", Title: "Next week", Href: "/app/calendar?from=2026-08-17"},
-							w.Seg{
-								Options: []w.SegOption{{Label: "Day"}, {Label: "Week", On: true}, {Label: "Month"}, {Label: "Range"}},
-							},
-							w.Range{
-								From:      w.Input{Kind: w.InputDate, Name: "from", Value: "2026-08-10", Label: "From", Mono: true},
-								To:        w.Input{Kind: w.InputDate, Name: "to", Value: "2026-08-16", Label: "To", Mono: true},
-								Show:      w.Button{Label: "Show"},
-								Secondary: true,
-								Action:    "/app/calendar",
-							},
-							w.BarSep{Secondary: true},
-							w.CheckForm{
-								Checks: []w.Check{
-									w.Check{On: true, Name: "show", Value: "events", Parts: []w.CheckPart{w.Text("Events")}},
-									w.Check{Name: "show", Value: "tasks", Parts: []w.CheckPart{w.Text("Tasks due")}},
-									w.Check{Name: "show", Value: "notes", Parts: []w.CheckPart{w.Text("Notes")}},
-								},
-								Action:   "/app/calendar",
-								Tertiary: true,
-								Apply:    w.Button{Label: "Apply", Small: true},
-							},
-							w.Drop{
-								Open:    true,
-								Trigger: w.Button{Icon: "dots", Title: "More"},
-								More:    true,
-								Menu: w.Menu{
-									Items: []w.MenuPart{
-										w.MenuItem{Tick: &w.TickBox{}, Label: "Events", Tertiary: true},
-										w.MenuItem{Tick: &w.TickBox{Ticked: w.TickedOff}, Label: "Tasks due", Tertiary: true},
-										w.MenuItem{Tick: &w.TickBox{Ticked: w.TickedOff}, Label: "Notes", Tertiary: true},
-										w.MenuSep{Tertiary: true},
-										w.Range{
-											From: w.Input{Kind: w.InputDate, Value: "2026-08-10", Label: "From", Mono: true},
-											To:   w.Input{Kind: w.InputDate, Value: "2026-08-16", Label: "To", Mono: true},
-											Show: w.Button{Label: "Show"},
-											Wrap: true,
-										},
-										w.MenuSep{},
-										w.MenuItem{Tick: &w.TickBox{Ticked: w.TickedOff}, Label: "Compact rows"},
-									},
-									Pop:    w.MenuUnderEnd,
-									Inline: true,
-								},
-							},
-						},
-						Right: &w.BarRight{
-							Items: []w.BarPart{
-								w.CheckForm{
-									Checks: []w.Check{w.Check{Name: "compact", Value: "1", Parts: []w.CheckPart{w.Text("Compact rows")}}},
-									Action: "/app/calendar",
-									Apply:  w.Button{Label: "Apply", Small: true},
-								},
-							},
-							Secondary: true,
-						},
-						Variant: w.BarWide,
-					},
-					w.Runbar{
-						Meter: w.Meter{Percent: 83},
-						Parts: []w.RunbarPart{
-							w.Text("Polled 5 of 6 sources · 14 events · "),
-							w.Span{Face: w.FaceDanger, Text: "baikal unavailable"},
-							w.Mono{Text: "from cache · 2 min ago", Place: w.Pushed},
-						},
-					},
-					w.ListGroup{Title: w.Rubric{Text: "Monday · 10 August", Form: w.RubricInline}, Count: &w.Num{Value: 4}},
-					w.List{
-						Rows: []w.ListRow{
-							w.TimeRow{
-								Mark:    w.Mark{Colour: "#4A6B52"},
-								Time:    "10:00",
-								Title:   []w.Inline{w.Text("Синк-ап по релизу")},
-								Strong:  true,
-								Detail:  "Переговорная 2",
-								Caption: &w.Badge{Label: "4 attendees"},
-								Source:  "nextcloud · Личный",
-								On:      true,
-							},
-							w.TimeRow{
-								Mark:    w.Mark{Colour: "#3F6E8C"},
-								Time:    "all day",
-								Title:   []w.Inline{w.Text("Дежурство: первая линия")},
-								Detail:  "—",
-								Caption: &w.Badge{Label: "repeats weekly"},
-								Source:  "nextcloud · Работа",
-							},
-							w.TimeRow{
-								Mark:    w.Mark{Colour: "#8C6239"},
-								Time:    "all day",
-								Title:   []w.Inline{w.Text("Дежурство: первая линия")},
-								Detail:  "—",
-								Caption: &w.Badge{Label: "repeats weekly"},
-								Source:  "radicale · vps · Дежурства",
-							},
-							w.TimeRow{
-								Mark:    w.Mark{Colour: "#3F6E8C"},
-								Time:    "15:00",
-								Title:   []w.Inline{w.Text("Созвон с подрядчиком")},
-								Detail:  "Jitsi",
-								Caption: &w.Badge{Label: "tentative", Tone: w.BadgeAlert},
-								Source:  "nextcloud · Работа",
-							},
-						},
-					},
-					w.ListGroup{Title: w.Rubric{Text: "Tuesday · 11 August", Form: w.RubricInline}, Count: &w.Num{Value: 2}},
-					w.List{
-						Rows: []w.ListRow{
-							w.TimeRow{
-								Mark:    w.Mark{Colour: "#6B4E7A"},
-								Time:    "09:30",
-								Title:   []w.Inline{w.Text("Ревью архитектуры")},
-								Detail:  "Переговорная 1",
-								Caption: &w.Badge{Label: "2 attendees"},
-								Source:  "radicale · vps · Проекты",
-							},
-							w.TimeRow{
-								Mark:   w.Mark{Colour: "#4A6B52"},
-								Time:   "18:00",
-								Title:  []w.Inline{w.Text("Забрать документы")},
-								Detail: "МФЦ, Мясницкая 13",
-								Source: "nextcloud · Личный",
-							},
-						},
-					},
-				},
-			},
-			Side: &w.Side{
-				Items: []w.SidePart{
-					w.Head{
-						Title: &w.HeadTitle{Mark: &w.Mark{Colour: "#4A6B52", Size: w.MarkH19}, Text: "Синк-ап по релизу", Size: w.HeadTitle19},
-						Subs:  []w.HeadSub{w.HeadSub{Parts: []w.HeadSubPart{w.Text("nextcloud · Личный")}}},
-						Acts: &w.Acts{
-							Items: []w.ActsPart{
-								w.Button{Label: "Edit", Small: true},
-								w.Button{Icon: "dots", Small: true, Title: "More"},
-								w.Close{Label: "Close the panel"},
-							},
-						},
-					},
-					w.Fields{
-						Items: []w.FieldsItem{
-							{
-								Term: "When",
-								Value: []w.ValuePart{
-									w.Mono{Text: "10:00 – 11:00"},
-									w.Text(", Monday 10 August "),
-									w.Badge{Label: "created 12:00 Asia/Yekaterinburg", Title: "Created in another time zone"},
-								},
-							},
-							{Term: "Reminders", Value: []w.ValuePart{w.Text("10 minutes before")}},
-							{Term: "Repeats", Value: []w.ValuePart{w.Text("Weekly on Mon "), w.Badge{Label: "until 2026-12-28"}}},
-							{Term: "Where", Value: []w.ValuePart{w.Text("Переговорная 2")}},
-							{Term: "Status", Value: []w.ValuePart{w.Text("Confirmed")}},
-							{Term: "Tags", Value: []w.ValuePart{w.Tag{Label: "release"}, w.Text(" "), w.Tag{Label: "team"}}},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Description"},
-							w.Prose{
-								Parts:   []w.Inline{w.Text("Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям.")},
-								Variant: w.Prose13,
-							},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Attendees", Items: []w.RubricPart{w.Mono{Text: "4", Variant: w.MonoTight}}},
-							w.SecList{
-								Items: [][]w.SecItemPart{
-									[]w.SecItemPart{
-										w.Mark{Colour: "#6B4E7A", Size: w.MarkH11Inline},
-										w.Text(" "),
-										w.Link{Text: "Мария Лебедева", Href: "#"},
-										w.Text(" "),
-										w.Dim{Parts: []w.Inline{w.Text("· organiser")}},
-									},
-									[]w.SecItemPart{
-										w.Mark{Colour: "#4A6B52", Size: w.MarkH11Inline},
-										w.Text(" "),
-										w.Link{Text: "Анна Ковалёва", Href: "#"},
-										w.Text(" "),
-										w.Dim{Parts: []w.Inline{w.Text("· accepted")}},
-									},
-									[]w.SecItemPart{
-										w.Mark{Colour: "#6B4E7A", Size: w.MarkH11Inline},
-										w.Text(" "),
-										w.Link{Text: "Артём Белов", Href: "#"},
-										w.Text(" "),
-										w.Dim{Parts: []w.Inline{w.Text("· tentative")}},
-									},
-									[]w.SecItemPart{w.Mono{Text: "v@example.org"}, w.Text(" "), w.Dim{Parts: []w.Inline{w.Text("· no reply")}}},
-								},
-								Columns: true,
-							},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{
-								Text: "Attachments",
-								Items: []w.RubricPart{
-									w.Drop{
-										Trigger: w.Button{Label: "Attach", Menu: true, Small: true},
-										Menu: w.Menu{
-											Items: []w.MenuPart{
-												w.MenuItem{Icon: "up", Label: "From this computer"},
-												w.MenuItem{Icon: "file", Label: "From Files"},
-											},
-											Width: w.MenuWidth212,
-											Pop:   w.MenuUnder,
-										},
-									},
-								},
-							},
-							w.SecList{
-								Items: [][]w.SecItemPart{
-									[]w.SecItemPart{
-										w.Text("release-checklist.md "),
-										w.Dim{Parts: []w.Inline{w.Text("text/markdown · 3 KB")}},
-										w.Text(" "),
-										w.Badge{Label: "in the event"},
-									},
-								},
-								Gap: 6,
-							},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Related"},
-							w.SecList{
-								Items: [][]w.SecItemPart{
-									[]w.SecItemPart{
-										w.Span{Face: w.FaceAccent, Text: "Заметка со встречи 10.08"},
-										w.Text(" "),
-										w.Dim{Parts: []w.Inline{w.Text("· note")}},
-									},
-								},
-							},
-						},
-					},
-					w.Sec{
-						Items: []w.SecPart{
-							w.Rubric{Text: "Source"},
-							w.Diag{
-								Text: "Path  /dav.php/calendars/mix/personal/8f1c.ics\nRead  2 min ago · changed on server 3 days ago",
-							},
-						},
-					},
-					w.Danger{
-						Button: w.Button{Label: "Delete event", Kind: w.ButtonDangerSolid},
-						Note:   "Series is edited and deleted whole.",
-					},
-				},
-			},
-		},
+	"carrel.dev/carrel/client/bind"
+	"carrel.dev/carrel/server/view"
+	w "carrel.dev/typecase/widget"
+)
+
+// The IDs of the page's forms: the rail's (its ticks submit it) and the
+// panel's deletion.
+const (
+	formRail   = "rail"
+	formDelete = "delete"
+)
+
+// The screen's words (U-1.3) for the shell: the mark, the search, the rail.
+var (
+	top = bind.TopWords{
+		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
+		Search: "Search everything…",
 	}
+	rail = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
+)
+
+// The screen's words (U-1.3): the dash of a row with no place, the lead of a
+// status and a kind, what a badge of a time made in another zone says, the
+// attachment kept inside the event.
+const (
+	none     = "—"
+	lead     = "· "
+	zoneHint = "Created in another time zone"
+	inside   = "in the event"
+)
+
+// The IDs of the range's presets the bar draws as buttons (C-7): the step
+// back, today, the step forward; the others are its switch of windows. And
+// the name of the action Attach (C-7.5), which the panel puts in the rubric
+// of attachments.
+const (
+	presetPrevious = "range.previous"
+	presetToday    = "range.current"
+	presetNext     = "range.next"
+	attachID       = "attach.add"
+)
+
+// Screen draws the agenda from its view model, in the state the model is in.
+//
+//   - The shell (U-2.1): the top bar; the rail of sections (the open one
+//     on), the sources by account with their ticks, which submit the rail's
+//     form, the feeds' rubric «external», a source that did not answer in
+//     error with its retry, the tags, the foot.
+//   - The head: the mark of what is open — every calendar at once, or the
+//     calendar's colour —, the title, what is shown (Subtitle: the window,
+//     the zone monospaced) and the bar's actions: New event — with its arrow
+//     in the combined view, a closed menu of the ticked calendars, «last
+//     used» —, Import, Export, Print.
+//   - The notices under the head.
+//   - The bar while something is ticked (states-14 draws none): the step
+//     back, Today and the step forward, the switch of windows (Day, Week,
+//     Month, Range — links), the range of dates (a GET form, From, To,
+//     Show), «Events · Tasks due · Notes» (a GET form of ticks with its
+//     Apply), «⋯» with their twins for a narrow bar, and on its right
+//     «Compact rows» (a GET form).
+//   - The poll's bar while the poll runs or a source did not answer (C-6.4):
+//     what it polled, the source that did not answer as an alarm, on its
+//     right when the answer was gathered or how long the poll runs.
+//   - The days with events only (a day without one is not printed), each
+//     with its count, a row for each record: its calendar's mark, the time
+//     monospaced, the title (bold while open in the panel), the place (the
+//     dash where there is none), the first badge, where it lives; the row
+//     leads to the record.
+//   - Nothing to show (Empty): what, bold, why, and the button that helps.
+//   - The panel (Shell.Details), for the row opened with ?open=: the
+//     calendar's mark, the title, the calendar, Edit, «⋯» with the record's
+//     menu, the cross that closes it; the fields (When in its pieces, the zone
+//     it was made in as a badge, Repeats with its end as a badge), the
+//     description, the attendees, the attachments with Attach, the related
+//     records, the source, the deletion and the line of a series under it.
+func Screen(p *view.AgendaPage) w.Shell {
+	main := []w.MainPart{head(p)}
+	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	if ticked(p.Rail) {
+		main = append(main, bar(p))
+	}
+	if r := bind.Runbar(p.Poll); r != nil {
+		main = append(main, *r)
+	}
+	compact := bind.Checked(p.Bar.Compact)
+	for _, d := range p.Days {
+		rows := make([]w.ListRow, 0, len(d.Rows))
+		for _, r := range d.Rows {
+			rows = append(rows, row(r))
+		}
+		main = append(main,
+			w.ListGroup{Title: w.Rubric{Text: string(d.Rubric), Form: w.RubricInline}, Count: &w.Num{Value: d.Count}},
+			w.List{Rows: rows, Compact: compact})
+	}
+	if p.Empty != nil {
+		main = append(main, w.Empty{Parts: bind.EmptyParts(*p.Empty)})
+	}
+	body := w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}
+	if p.Details != nil {
+		body.Side = side(*p.Details)
+	}
+	t := bind.Top(p.Top, top)
+	return w.Shell{Top: &t, Body: body}
+}
+
+// Forms are the page's forms: the rail's, which its ticks submit, the
+// retries of the sources, the buttons of the notices and of the empty state
+// that post, the items of the menus that post (Sign out, the arrow of New
+// event), and of the panel — its deletion, its menu, Attach «From this
+// computer» with its file.
+func Forms(p *view.AgendaPage) []w.PostForm {
+	out := bind.TopForms(p.Top)
+	for _, a := range p.Bar.Actions {
+		out = append(out, bind.MenuForms(a.Arrow)...)
+	}
+	if f := bind.RailForm(p.Rail, formRail); f != nil {
+		out = append(out, *f)
+	}
+	out = append(out, bind.RetryForms(p.Rail)...)
+	out = append(out, bind.NoticeForms(p.Notices)...)
+	if p.Empty != nil {
+		for _, a := range p.Empty.Actions {
+			if a.Method == "POST" && a.Enabled {
+				out = append(out, bind.ActionForm(a, a.ID))
+			}
+		}
+	}
+	if d := p.Details; d != nil {
+		for _, a := range d.Actions {
+			switch {
+			case a.Danger && a.Method == "POST" && a.Enabled:
+				out = append(out, bind.ActionForm(a, formDelete))
+			case a.ID == attachID:
+				out = append(out, bind.MenuForms(a.Arrow)...)
+			}
+		}
+		out = append(out, bind.MenuForms(d.Menu)...)
+	}
+	return out
+}
+
+// ticked tells whether any source of the rail is ticked: with nothing ticked
+// the agenda has no window to move, and draws no bar (states-14).
+func ticked(r view.Rail) bool {
+	for _, sec := range r.Sections {
+		for _, row := range sec.Rows {
+			if row.Tick != view.TickOff {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// railParts is the rail of sections: the sections, the sources and tags, the
+// foot.
+func railParts(r view.Rail) []w.RailPart {
+	nav := w.Nav{}
+	for _, n := range r.Nav {
+		nav.Items = append(nav.Items, bind.NavItem(n))
+		if n.On {
+			nav.On = len(nav.Items)
+		}
+	}
+	parts := []w.RailPart{nav}
+	parts = append(parts, bind.Sources(r, rail)...)
+	return append(parts, bind.Foot(r, rail))
+}
+
+// head is the agenda's head: what is open, what is shown, the bar's actions.
+func head(p *view.AgendaPage) w.Head {
+	title := &w.HeadTitle{Text: string(p.Title)}
+	for _, sec := range p.Rail.Sections {
+		for _, r := range sec.Rows {
+			switch {
+			case !r.On:
+			case r.Colour == "":
+				title.Mark = &w.Mark{Kind: w.MarkMulti, Size: w.MarkH20}
+			default:
+				title.Mark = &w.Mark{Colour: string(r.Colour), Size: w.MarkH20}
+			}
+		}
+	}
+	var acts []w.ActsPart
+	for _, a := range p.Bar.Actions {
+		b := bind.Button(a, "")
+		if len(a.Arrow) == 0 {
+			acts = append(acts, b)
+			continue
+		}
+		b.Menu = true
+		acts = append(acts, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(a.Arrow, rail.ReadOnly), Pop: w.MenuUnder}})
+	}
+	return w.Head{Title: title, Subs: bind.Sub(p.Subtitle), Acts: &w.Acts{Items: acts}}
+}
+
+// bar is the bar over the agenda.
+func bar(p *view.AgendaPage) w.Bar {
+	b := p.Bar
+	var items []w.BarPart
+	var twins []w.Range
+	var menu []w.MenuPart
+	if r := b.Range; r != nil {
+		seg := w.Seg{}
+		for _, a := range r.Presets {
+			switch a.ID {
+			case presetPrevious, presetToday, presetNext:
+				btn := bind.Button(a, "")
+				if btn.Icon != "" {
+					btn.Title, btn.Label = btn.Label, ""
+				}
+				items = append(items, btn)
+			default:
+				seg.Options = append(seg.Options, bind.SegOption(a))
+			}
+		}
+		if len(seg.Options) > 0 {
+			items = append(items, seg)
+		}
+		if r.Form != nil {
+			// ждёт библиотеку: U-5.5 #23 — the range sends From and To only:
+			// Range has no hidden fields, and the window «Range» of the
+			// contract (view=range) does not go with them
+			rng := dates(*r.Form)
+			rng.Secondary = true
+			items = append(items, rng)
+			twin := dates(*r.Form)
+			twin.Wrap = true
+			twins = append(twins, twin)
+		}
+	}
+	if f := b.Show; f != nil {
+		show := bind.CheckForm(*f, "Apply")
+		show.Tertiary = true
+		items = append(items, w.BarSep{Secondary: true}, show)
+		for _, c := range show.Checks {
+			menu = append(menu, tick(c, true))
+		}
+		menu = append(menu, w.MenuSep{Tertiary: true})
+	}
+	for _, t := range twins {
+		menu = append(menu, t)
+	}
+	var right []w.BarPart
+	if b.Compact != nil {
+		compact := bind.CheckForm(*b.Compact, "Apply")
+		right = append(right, compact)
+		menu = append(menu, w.MenuSep{})
+		for _, c := range compact.Checks {
+			menu = append(menu, tick(c, false))
+		}
+	}
+	if len(menu) > 0 {
+		// ждёт библиотеку: U-5.5 #22 — the twins of the bar's ticks in «⋯»
+		// (components-19): a tick of a form that goes GET has no twin in a
+		// menu, whose form posts
+		items = append(items, w.Drop{
+			Trigger: w.Button{Icon: "dots", Title: "More"},
+			More:    true,
+			Menu:    w.Menu{Items: menu, Pop: w.MenuUnderEnd, Inline: true},
+		})
+	}
+	bar := w.Bar{Items: items, Variant: w.BarWide}
+	if len(right) > 0 {
+		bar.Right = &w.BarRight{Items: right, Secondary: true}
+	}
+	return bar
+}
+
+// dates is the range of dates of the bar (Range.Form, a GET form): From and
+// To, Show its submit.
+func dates(f view.Form) w.Range {
+	rng := w.Range{Action: f.Action}
+	rows := bind.Rows(f)
+	if len(rows) > 0 {
+		rng.From = bind.Input(rows[0])
+	}
+	if len(rows) > 1 {
+		rng.To = bind.Input(rows[1])
+	}
+	for _, a := range f.Actions {
+		rng.Show = bind.Submit(a)
+	}
+	return rng
+}
+
+// tick is the twin of a bar's tick in its «⋯»: the item, its box as the
+// tick is, its words.
+func tick(c w.Check, tertiary bool) w.MenuItem {
+	box := &w.TickBox{}
+	if !c.On {
+		box.Ticked = w.TickedOff
+	}
+	var label string
+	for _, p := range c.Parts {
+		if t, ok := p.(w.Text); ok {
+			label += string(t)
+		}
+	}
+	return w.MenuItem{Tick: box, Label: label, Tertiary: tertiary}
+}
+
+// row is a record of the agenda.
+func row(r view.AgendaRow) w.TimeRow {
+	t := w.TimeRow{
+		Mark:   w.Mark{Colour: string(r.Colour)},
+		Time:   string(r.Time),
+		Title:  []w.Inline{w.Text(r.Summary)},
+		Strong: r.On,
+		Detail: string(r.Location),
+		Source: string(r.Stamp),
+		On:     r.On,
+		Href:   r.Href,
+	}
+	if t.Detail == "" {
+		t.Detail = none
+	}
+	if len(r.Badges) > 0 {
+		b := bind.Badge(r.Badges[0])
+		t.Caption = &b
+	}
+	return t
+}
+
+// side is the panel of the event opened (Details).
+func side(d view.Details) *w.Side {
+	var acts []w.ActsPart
+	var attach *view.Action
+	var danger []w.Button
+	for _, a := range d.Actions {
+		switch {
+		case a.Danger:
+			b := bind.Button(a, formDelete)
+			b.Icon = ""
+			danger = append(danger, b)
+		case a.ID == attachID:
+			attach = &a
+		default:
+			b := bind.Button(a, "")
+			b.Small = true
+			acts = append(acts, b)
+		}
+	}
+	if len(d.Menu) > 0 {
+		acts = append(acts, w.Drop{
+			Trigger: w.Button{Icon: "dots", Small: true, Title: "More"},
+			Menu:    w.Menu{Items: bind.MenuItems(d.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
+		})
+	}
+	acts = append(acts, w.Close{Label: "Close the panel", Href: d.Close})
+	title := &w.HeadTitle{Text: string(d.Title), Size: w.HeadTitle19}
+	if d.Source.Colour != "" {
+		title.Mark = &w.Mark{Colour: string(d.Source.Colour), Size: w.MarkH19}
+	}
+	items := []w.SidePart{w.Head{
+		Title: title,
+		Subs:  []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(d.Subtitle)}}},
+		Acts:  &w.Acts{Items: acts},
+	}}
+	items = append(items, fields(d.Fields))
+	if d.Body != "" {
+		items = append(items, w.Sec{Items: []w.SecPart{
+			w.Rubric{Text: "Description"},
+			w.Prose{Parts: []w.Inline{w.Text(d.Body)}, Variant: w.Prose13},
+		}})
+	}
+	if len(d.Attendees) > 0 {
+		var lines [][]w.SecItemPart
+		for _, a := range d.Attendees {
+			lines = append(lines, bind.Attendee(a, lead))
+		}
+		items = append(items, w.Sec{Items: []w.SecPart{
+			w.Rubric{Text: "Attendees", Items: []w.RubricPart{w.Mono{Text: strconv.Itoa(len(d.Attendees)), Variant: w.MonoTight}}},
+			w.SecList{Items: lines, Columns: true},
+		}})
+	}
+	if attach != nil || len(d.Attach) > 0 {
+		rubric := w.Rubric{Text: "Attachments"}
+		if attach != nil {
+			b := bind.Button(*attach, "")
+			b.Icon, b.Menu, b.Small = "", true, true
+			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(attach.Arrow, ""), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
+		}
+		sec := []w.SecPart{rubric}
+		if len(d.Attach) > 0 {
+			sec = append(sec, w.SecList{Items: attachments(d.Attach), Gap: 6})
+		}
+		items = append(items, w.Sec{Items: sec})
+	}
+	if len(d.Related) > 0 {
+		var lines [][]w.SecItemPart
+		for _, r := range d.Related {
+			lines = append(lines, []w.SecItemPart{
+				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
+				w.Text(" "),
+				w.Dim{Parts: []w.Inline{w.Text(lead + string(r.Kind))}},
+			})
+		}
+		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
+	}
+	items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Source"}, source(d.Source)}})
+	for _, b := range danger {
+		items = append(items, w.Danger{Button: b, Note: string(d.DeleteNote)})
+	}
+	return &w.Side{Items: items}
+}
+
+// fields are a record's fields as the lines of a card: When in its pieces,
+// a badge of a time made in another zone saying so where a pointer rests.
+func fields(fs []view.Field) w.Fields {
+	out := w.Fields{}
+	for _, f := range fs {
+		it := bind.FieldsItem(f, lead)
+		if len(f.Runs) > 0 && f.Badge.Label != "" {
+			b := it.Value[len(it.Value)-1].(w.Badge)
+			b.Title = zoneHint
+			it.Value[len(it.Value)-1] = b
+		}
+		out.Items = append(out.Items, it)
+	}
+	return out
+}
+
+// attachments are the lines of a record's attachments: the name, the type
+// and size muted, and where the file is kept — «in the event» for data inside
+// it (S-20).
+//
+// ждёт библиотеку: U-5.5 #29 — no frame draws a line's actions
+// (AttachRow.Actions, Remove): an attachment is not taken off here
+func attachments(rows []view.AttachRow) [][]w.SecItemPart {
+	var out [][]w.SecItemPart
+	for _, a := range rows {
+		line := []w.SecItemPart{w.Text(string(a.Name) + " "), w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + " · " + string(a.Size))}}}
+		if a.Inline {
+			line = append(line, w.Text(" "), w.Badge{Label: inside})
+		}
+		out = append(out, line)
+	}
+	return out
+}
+
+// source is the technical block of a record's source: its path, when it was
+// read and whether it changed on the server.
+func source(s view.SourceBlock) w.Diag {
+	read := string(s.LastRead)
+	if s.Compared != "" {
+		read += " · " + string(s.Compared)
+	}
+	return bind.Diag(bind.DiagLine{Name: "Path", Value: string(s.Path)}, bind.DiagLine{Name: "Read", Value: read})
 }

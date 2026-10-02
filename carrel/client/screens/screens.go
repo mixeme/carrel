@@ -2,6 +2,7 @@ package screens
 
 import (
 	"carrel.dev/carrel/client/screens/about"
+	"carrel.dev/carrel/client/screens/agenda"
 	"carrel.dev/carrel/client/screens/confirm"
 	"carrel.dev/carrel/client/screens/contact"
 	"carrel.dev/carrel/client/screens/contactedit"
@@ -194,6 +195,20 @@ var All = []Screen{
 			{Row: 21, Fixture: "app-contact-edit/no-photo"}, // ждёт библиотеку: U-5.5 #21
 			{Row: 21, Fixture: "app-contact-edit/loss"},     // ждёт библиотеку: U-5.5 #21
 			{Row: 21, Fixture: "app-contact-new/normal"},    // ждёт библиотеку: U-5.5 #21
+		},
+	},
+	{
+		Model:  func() any { return new(view.AgendaPage) },
+		Frames: []string{"s-agenda-1", "states-13", "states-14", "states-15"},
+		Draw:   func(model any) Root { return agenda.Screen(model.(*view.AgendaPage)) },
+		Title:  func(model any) string { return string(model.(*view.AgendaPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return agenda.Forms(model.(*view.AgendaPage)) },
+		Waits: []Wait{
+			{Row: 22, Control: ".Items(Bar).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #22
+			{Row: 24, Fixture: "app-agenda-all/partial"},                             // ждёт библиотеку: U-5.5 #24
+			{Row: 24, Fixture: "app-agenda-all/empty"},                               // ждёт библиотеку: U-5.5 #24
+			{Row: 24, Fixture: "app-agenda/empty"},                                   // ждёт библиотеку: U-5.5 #24
+			{Row: 25, Fixture: "app-agenda/normal"},                                  // ждёт библиотеку: U-5.5 #25
 		},
 	},
 }
