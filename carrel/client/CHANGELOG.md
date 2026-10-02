@@ -4,6 +4,30 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.1.4 — 2026-10-02
+
+Typecase `9e69804` (Carrel's task 77, the calendar's frames; the live layer
+`tc-live.js`, L-1), server `v0.2.135`. The drafts of every frame the
+screens draw print the same as on `29413d6`; no row of U-5.5 is resolved
+by it, and none is added — the guards and the screens are green as they
+were.
+
+### Fixed
+
+- **The version of the library's files** (`document.Version`) is taken in
+  the order of the files' names: it was taken in a map's order, and the
+  same files could give another version on the next start, so a browser
+  fetched them again. It covers the live layer too: `page.Static` serves
+  `js/tc-live.js` beside `tc.js` whether a page names it or not, and a new
+  layer now gets a new address. `TestVersionCoversEveryScript` red before
+  the fix (both).
+
+### Not yet
+
+- **No page loads the live layer** (`page.Document.Live` stays false; the
+  library prints it only when asked): the client takes it with its stage 4,
+  after Typecase's tasks 84 and 85 (`TestNoPageLoadsTheLiveLayer`).
+
 ## v0.1.3 — 2026-10-02
 
 Server `v0.2.121`.

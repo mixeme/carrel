@@ -139,3 +139,48 @@ func TestFiles(t *testing.T) {
 		t.Errorf("version %q: want 12 hex digits", v)
 	}
 }
+
+// The version is taken over every script the library serves — the theme's,
+// its own and its live layer (Typecase b381931, L-1), which page.Static
+// serves at the same version whether a page names it or not —, each as
+// served; and the same files give the same version every time it is taken.
+func TestVersionCoversEveryScript(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.Handle("GET "+document.Static+"/", document.Files())
+	a := document.Assets("")
+	prefix := document.Static + "/" + document.Version() + "/"
+	scripts := document.Scripts()
+	for _, path := range []string{a.Theme, a.JS, a.Live} {
+		name := strings.TrimPrefix(path, prefix)
+		read, ok := scripts[name]
+		if !ok {
+			t.Errorf("%s: served, and not in the version", name)
+			continue
+		}
+		b, err := read()
+		rec := httptest.NewRecorder()
+		mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
+		if err != nil || rec.Code != http.StatusOK || rec.Body.String() != string(b) {
+			t.Errorf("%s: the version reads other contents than are served (%v, %d)", name, err, rec.Code)
+		}
+	}
+	for range 20 {
+		if v := document.VersionOf(); v != document.Version() {
+			t.Fatalf("the version is %s once and %s another time", document.Version(), v)
+		}
+	}
+}
+
+// No page loads the live layer yet: the client takes it with its stage 4,
+// after Typecase's tasks 84 and 85 (plan, «Typecase сборки»).
+func TestNoPageLoadsTheLiveLayer(t *testing.T) {
+	for _, scr := range screens.All {
+		html, err := document.Of(scr, scr.Model(), "").Render()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if live := document.Assets("").Live; strings.Contains(html, live) {
+			t.Errorf("%T: the page loads %s", scr.Model(), live)
+		}
+	}
+}

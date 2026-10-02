@@ -18,8 +18,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"io/fs"
+	"maps"
 	"net/http"
 	"path"
+	"slices"
 	"strings"
 	"sync"
 
@@ -30,8 +32,8 @@ import (
 
 // Static is where the client serves Typecase's files, under the base path of
 // the instance: Static/{version}/css/typecase.css, Static/{version}/fonts/…,
-// Static/{version}/js/theme.js, Static/{version}/js/tc.js — the version is
-// Version.
+// Static/{version}/js/theme.js, Static/{version}/js/tc.js and the live layer
+// beside it, which no page loads yet — the version is Version.
 const Static = "/static/tc"
 
 // Immutable is the caching of a file served at Static: its address carries
@@ -45,11 +47,23 @@ const Lang = "en"
 
 // Version is the version of the library's files in the binary: the first 12
 // hex digits of SHA-256 over each file's name and contents — the stylesheet,
-// both scripts, the fonts. The same files give the same version on every
+// the scripts, the fonts. The same files give the same version on every
 // build; any change of any of them gives another.
 func Version() string { return version() }
 
-var version = sync.OnceValue(func() string {
+var version = sync.OnceValue(versionOf)
+
+// scripts are the library's scripts by their path under Static, each with
+// what reads it from the library: the theme's, its own and its live layer
+// (L-1). page.Static serves the live layer whether a page names it or not,
+// so the version is taken over it too: a new layer gets a new address.
+func scripts() map[string]func() ([]byte, error) {
+	at := page.At("")
+	name := func(p string) string { return strings.TrimPrefix(p, "/") }
+	return map[string]func() ([]byte, error){name(at.Theme): typecase.ThemeJS, name(at.JS): typecase.JS, name(at.Live): typecase.LiveJS}
+}
+
+func versionOf() string {
 	h := sha256.New()
 	add := func(name string, b []byte) {
 		h.Write([]byte(name))
@@ -62,8 +76,11 @@ var version = sync.OnceValue(func() string {
 		panic(err) // the library's own embedded files: a broken build
 	}
 	add("css/typecase.css", []byte(css))
-	for name, read := range map[string]func() ([]byte, error){"js/theme.js": typecase.ThemeJS, "js/tc.js": typecase.JS} {
-		b, err := read()
+	// In the order of their names: the same files, the same version, every
+	// time (a map's own order is not one).
+	js := scripts()
+	for _, name := range slices.Sorted(maps.Keys(js)) {
+		b, err := js[name]()
 		if err != nil {
 			panic(err)
 		}
@@ -85,7 +102,7 @@ var version = sync.OnceValue(func() string {
 		panic(err)
 	}
 	return hex.EncodeToString(h.Sum(nil))[:12]
-})
+}
 
 // Assets are the addresses of the library's files for an instance served at
 // base ("" or "/carrel", as CARREL_BASE_PATH normalised).
