@@ -1,168 +1,308 @@
-// Drafted by frame2go from frame «Задача · правка, срок, выполнение» (s-tasks-3) of the Typecase mockup: the
-// frame's widgets and its data, top to bottom. The data is the frame's; it
-// is to become the application's (docs/guide/screen.md).
-package draft
+// Package taskedit is the edit of a task,
+// /app/tasks/{account}/{col}/{uid}/edit, and the full form of a new one,
+// /app/tasks/{account}/{col}/new — one view model (TaskEditPage) —, drawn by
+// frame «Задача · правка, срок, выполнение» (s-tasks-3) of the mockup: the
+// draft frame2go printed for it, with the frame's data become the view
+// model's (U-5.1, U-6.3). A form, and only a form: All day is one for the
+// task, making both its start and its due days.
+package taskedit
 
-import w "carrel.dev/typecase/widget"
+import (
+	"carrel.dev/carrel/client/bind"
+	"carrel.dev/carrel/server/view"
+	w "carrel.dev/typecase/widget"
+)
 
-// Tasks3 is frame «Задача · правка, срок, выполнение» (s-tasks-3).
-func Tasks3() interface{ Render() string } {
-	return w.Shell{
-		Top: &w.Top{
-			Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
-			Search: &w.Search{Query: w.Query{Placeholder: "Search everything…", Label: "Search everything…"}},
-			Actions: []w.TopAction{
-				w.Button{Label: "New note", Menu: true, Icon: "quill", Kind: w.ButtonPrimary},
-				w.Button{Label: "2 min ago", Icon: "refresh"},
-				w.UserMenu{Name: "mix"},
-			},
-		},
-		Body: w.ShellBody{
-			Rail: []w.RailPart{
-				w.Nav{Items: []w.NavItem{
-					{Icon: "back", Label: "Back to the card", Href: "#"}}},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "nextcloud"},
-						w.TickRow{Mark: w.Mark{Colour: "#4A6B52"}, Label: "Дела", Meta: "21", Current: true},
-						w.TickRow{Mark: w.Mark{Colour: "#3F6E8C"}, Label: "Работа", Meta: "9"},
-					},
-				},
-				w.RailFoot{
-					Items: []w.RailFootPart{w.Emblem{Symbol: "davloom", Title: "davloom · running · 3 devices"}},
-					About: &w.About{Name: "Carrel", Build: w.Mono{Text: "0.0.1 · 786949a"}, Href: "#rest"},
-				},
-			},
-			Main: w.Main{
-				Items: []w.MainPart{
-					w.Head{
-						Title: &w.HeadTitle{Mark: &w.Mark{Colour: "#4A6B52", Size: w.MarkH20}, Text: "Отправить документы в МФЦ"},
-						Subs: []w.HeadSub{
-							w.HeadSub{
-								Parts: []w.HeadSubPart{w.Text("nextcloud · Дела · "), w.Badge{Label: "overdue by 3 days", Tone: w.BadgeAlert}},
-							},
-						},
-						Acts: &w.Acts{Items: []w.ActsPart{w.Button{Label: "Cancel"}, w.Button{Label: "Save", Kind: w.ButtonPrimary}}},
-					},
-					w.Form{
-						Items: []w.FormPart{
-							w.Field{
-								Label: "Summary",
-								Parts: []w.FieldPart{w.Input{Value: "Отправить документы в МФЦ", Label: "Summary", Focus: true}},
-								Width: w.FieldFull,
-							},
-							w.Field{
-								Label: "Description",
-								Parts: []w.FieldPart{w.Area{Text: "Опись, копия паспорта и заявление. Приём до 18:00, окно 4.", Label: "Text"}},
-								Width: w.FieldFull,
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "When"},
-								Items: []w.FieldSetPart{
-									w.Field{Parts: []w.FieldPart{w.Check{Parts: []w.CheckPart{w.Text("All day")}}}},
-									w.Field{
-										Label: "Start date",
-										Parts: []w.FieldPart{w.Input{Kind: w.InputDate, Placeholder: "YYYY-MM-DD", Label: "Start date", Mono: true}},
-										Width: w.FieldSM,
-									},
-									w.Field{
-										Label: "Start time",
-										Parts: []w.FieldPart{w.Input{Placeholder: "--:--", Label: "Start time", Mono: true}},
-										Width: w.FieldXS,
-									},
-									w.Field{
-										Label: "Due date",
-										Parts: []w.FieldPart{w.Input{Kind: w.InputDate, Value: "2026-08-07", Label: "Due date", Mono: true}},
-										Width: w.FieldSM,
-									},
-									w.Field{
-										Label: "Due time",
-										Parts: []w.FieldPart{w.Input{Placeholder: "--:--", Label: "Due time", Mono: true}},
-										Width: w.FieldXS,
-									},
-								},
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "Progress"},
-								Items: []w.FieldSetPart{
-									w.Field{Label: "Status", Parts: []w.FieldPart{w.Pick{Value: "Needs action"}}, Width: w.FieldSM},
-									w.Field{Label: "Priority", Parts: []w.FieldPart{w.Pick{Value: "High · 1"}}, Width: w.FieldSM},
-									w.Field{
-										Label: "Percent complete",
-										Parts: []w.FieldPart{w.Input{Value: "0", Label: "Percent complete", Mono: true}},
-										Width: w.FieldSM,
-									},
-									w.Field{Label: "\u00a0", Parts: []w.FieldPart{w.Check{Parts: []w.CheckPart{w.Text("Done")}}}},
-								},
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "Reminders"},
-								Items: []w.FieldSetPart{
-									w.Field{Label: "First", Parts: []w.FieldPart{w.Pick{Value: "1 day before"}}, Width: w.FieldMD},
-									w.Field{Label: "\u00a0", Parts: []w.FieldPart{w.Button{Label: "Add reminder"}}},
-								},
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "Other"},
-								Items: []w.FieldSetPart{
-									w.Field{
-										Label: "Location",
-										Parts: []w.FieldPart{w.Input{Placeholder: "optional", Label: "Location"}},
-										Width: w.FieldMD,
-									},
-									w.Field{Label: "Tags", Parts: []w.FieldPart{w.Input{Value: "дом", Label: "Tags"}}, Width: w.FieldMD},
-									w.Field{
-										Label: "Related to",
-										Parts: []w.FieldPart{w.TagInput{Parts: []w.TagInputPart{w.Tag{Label: "Забрать документы", Removable: true}}}},
-										Width: w.FieldLG,
-									},
-								},
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "Attachments"},
-								Items: []w.FieldSetPart{
-									w.Line{
-										Items: []w.LinePart{
-											w.Drop{
-												Trigger: w.Button{Label: "Attach", Menu: true, Icon: "up"},
-												Menu: w.Menu{
-													Items: []w.MenuPart{
-														w.MenuItem{Icon: "up", Label: "From this computer"},
-														w.MenuItem{Icon: "file", Label: "From Files"},
-													},
-													Width: w.MenuWidth212,
-													Pop:   w.MenuUnder,
-												},
-											},
-											w.Dim{Parts: []w.Inline{w.Text("Ничего не вложено")}, Size: w.Dim11_5, Variant: w.DimWrap},
-										},
-										Gap:   w.LineGap8,
-										Block: true,
-										Place: w.Grown,
-									},
-								},
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "Source"},
-								Items: []w.FieldSetPart{
-									w.Fields{
-										Items: []w.FieldsItem{
-											{
-												Term:  "Path",
-												Value: []w.ValuePart{w.Text("/remote.php/dav/calendars/mix/dela/aa10.ics")},
-												Face:  w.ValueMono,
-											},
-											{Term: "Read", Value: []w.ValuePart{w.Text("2 min ago · не менялась на сервере")}},
-										},
-										Place: w.Grown,
-									},
-								},
-							},
-						},
-					},
-					w.Danger{Button: w.Button{Label: "Delete task", Icon: "trash", Kind: w.ButtonDangerSolid}},
-				},
-			},
-		},
+// The IDs of the page's forms: the task's, which Save in the head submits
+// (Button.Form), and the deletion's, which posts with no form of its own.
+const (
+	formID     = "edit"
+	formDelete = "delete"
+)
+
+// The screen's words (U-1.3) for the shell: the mark, the search, the rail.
+var (
+	top = bind.TopWords{
+		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
+		Search: "Search everything…",
 	}
+	rail = bind.RailWords{Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
+)
+
+// The screen's words (U-1.3): the dash in an empty field the screen has no
+// pattern for, the accessible name of the description's text, the label of
+// a line that stands under the labels of its neighbours (a no-break space:
+// Done, «Add reminder»), the rubrics of the attachments and the source, the
+// attachment kept inside the task, a form with nothing attached, the names
+// of the source's lines and what joins when it was read and whether it
+// changed.
+const (
+	none    = "—"
+	text    = "Text"
+	blank   = " "
+	files   = "Attachments"
+	source  = "Source"
+	inside  = "in the task"
+	nothing = "Nothing attached"
+	path    = "Path"
+	read    = "Read"
+	sep     = " · "
+)
+
+// The names of the contract the screen places by (C-7.5): Attach goes in
+// the set of attachments, not with Save and Cancel.
+const attachID = "attach.add"
+
+// widths are the widths of the form's fields by their name, the last part
+// that is no number (C-6.1: the view model carries no widths; the layout is
+// the screen's, from its frame): «reminder.1» is a reminder.
+var widths = map[string]w.FieldWidth{
+	"summary": w.FieldFull, "description": w.FieldFull,
+	"start.date": w.FieldSM, "start.time": w.FieldXS, "due.date": w.FieldSM, "due.time": w.FieldXS,
+	"status": w.FieldSM, "priority": w.FieldSM, "percent": w.FieldSM,
+	"reminder": w.FieldMD,
+	"location": w.FieldMD, "categories": w.FieldMD, "related": w.FieldLG,
+}
+
+// patterns are the patterns of the form's empty fields by their name, as
+// the frame draws them (U-1.3: the screen's words); an empty line of text
+// the frame draws none for shows the dash.
+var patterns = map[string]string{
+	"start.date": "YYYY-MM-DD", "due.date": "YYYY-MM-DD",
+	"start.time": "--:--", "due.time": "--:--",
+	"location": "optional",
+}
+
+// width is the width of a field by its name: the whole name, else its first
+// part when the rest is a number («reminder.0»).
+func width(name string) w.FieldWidth {
+	if fw, ok := widths[name]; ok {
+		return fw
+	}
+	for i := 0; i < len(name); i++ {
+		if name[i] == '.' {
+			return widths[name[:i]]
+		}
+	}
+	return w.FieldAuto
+}
+
+// Screen draws the edit from its view model, in the state the model is in.
+//
+//   - The shell: the top bar; the rail of return — «Back to the card» (or
+//     «Back to list» for a new task, with the phone's short «Back»), the
+//     list's sources, the foot.
+//   - The head: the list's mark, the task's title (a new one's «New task»),
+//     the list and — overdue — by how long, as a badge in alarm; Cancel and
+//     Save, which submits the form by its name.
+//   - What the server lost of the last save (Loss): a notice over the form.
+//   - The form: Summary with the cursor and the description; When — All
+//     day, which makes the start and the due days, the dates and the times
+//     monospaced; Progress — Status, Priority, Percent complete, Done;
+//     Reminders — each a choice, «Add reminder» adding one in place; Other
+//     — Location, Tags, Related to as the record chosen; Attachments —
+//     Attach with its arrow, each attachment where it is kept and its
+//     Remove, or «Nothing attached»; the source — its path, when it was
+//     read and whether it changed on the server.
+//   - Under the form the deletion.
+func Screen(p *view.TaskEditPage) w.Shell {
+	var plain, primary []w.ActsPart
+	var attach *view.Action
+	for _, a := range p.Form.Actions {
+		if a.ID == attachID {
+			attach = &a
+			continue
+		}
+		b := bind.Button(a, formID)
+		if a.Primary {
+			primary = append(primary, b)
+		} else {
+			plain = append(plain, b)
+		}
+	}
+	title := &w.HeadTitle{Text: string(p.Name)}
+	if p.Source.Colour != "" {
+		title.Mark = &w.Mark{Colour: string(p.Source.Colour), Size: w.MarkH20}
+	}
+	h := w.Head{Title: title, Subs: bind.SubAlert(p.Subtitle), Acts: &w.Acts{Items: append(plain, primary...)}}
+	main := []w.MainPart{h}
+	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	if p.Loss != nil {
+		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2))
+	}
+	form := bind.Form(p.Form, formID)
+	for _, set := range p.Form.Sets {
+		rows := visible(set.Rows)
+		if set.Legend == "" {
+			for i, r := range rows {
+				form.Items = append(form.Items, field(r, i))
+			}
+			continue
+		}
+		form.Items = append(form.Items, fieldSet(set.Legend, rows))
+	}
+	form.Items = append(form.Items, attachments(attach, p.Attach), sourceSet(p.Source))
+	main = append(main, form)
+	if p.Delete != nil {
+		main = append(main, w.Danger{Button: bind.Button(*p.Delete, formDelete)})
+	}
+	t := bind.Top(p.Top, top)
+	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail, p.UID == ""), Main: w.Main{Items: main}}}
+}
+
+// Forms are the forms of the actions that post with none of their own: the
+// deletion, Attach «From this computer» with its file, an attachment's
+// Remove, the notices' buttons and the menus' items that post (Sign out).
+func Forms(p *view.TaskEditPage) []w.PostForm {
+	out := append(bind.TopForms(p.Top), bind.NoticeForms(p.Notices)...)
+	for _, a := range p.Form.Actions {
+		if a.ID == attachID {
+			out = append(out, bind.MenuForms(a.Arrow)...)
+		}
+	}
+	if d := p.Delete; d != nil && d.Method == "POST" && d.Enabled {
+		out = append(out, bind.ActionForm(*d, formDelete))
+	}
+	for _, a := range p.Attach {
+		for _, act := range a.Actions {
+			if act.Method == "POST" && act.Enabled && !act.Submits {
+				out = append(out, bind.ActionForm(act, removeID(act)))
+			}
+		}
+	}
+	return out
+}
+
+// removeID is the ID of the form of an attachment's Remove: its action's ID
+// and address, one per attachment.
+func removeID(a view.Action) string {
+	return a.ID + a.Href
+}
+
+// fieldSet is a rubric of the form: its fields, «Add …» on the line of the
+// labels with the template of what it adds.
+func fieldSet(legend view.Text, rows []view.FormRow) w.FieldSet {
+	fs := w.FieldSet{Rubric: w.Rubric{Text: string(legend)}}
+	for i, r := range rows {
+		if r.Kind == view.InputAdd {
+			add, tmpl := bind.Add(r, func(t view.FormRow) []w.FieldSetPart { return []w.FieldSetPart{field(t, 0)} })
+			fs.Items = append(fs.Items, w.Field{Label: blank, Parts: []w.FieldPart{add}}, tmpl)
+			continue
+		}
+		fs.Items = append(fs.Items, field(r, i))
+	}
+	return fs
+}
+
+// visible are the rows of a set a person sees: all but the hidden ones.
+func visible(rows []view.FormRow) []view.FormRow {
+	var out []view.FormRow
+	for _, r := range rows {
+		if r.Kind != view.InputHidden {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// field is a row of the form as its field, the row's place in its set at:
+// a tick bare at the head of its set (All day) and under a blank label
+// beside fields (Done); Related to as the record chosen (Related); the
+// description's text; any other row as a field of the width of its name —
+// an empty one showing the frame's pattern for it, or the dash.
+func field(r view.FormRow, at int) w.Field {
+	switch {
+	case r.Kind == view.InputCheck:
+		// ждёт библиотеку: U-5.5 #34 — All day switches off two fields
+		// (Disables names them with a space), the library's check one
+		c := w.Field{Parts: []w.FieldPart{bind.Check(r)}}
+		if at > 0 {
+			c.Label = blank
+		}
+		return c
+	case r.Kind == view.InputSelect && r.Suggest != "":
+		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{bind.Related(r)}, bind.Hint(r)...), Width: width(r.Name)}
+	case r.Kind == view.InputArea:
+		a := bind.Area(r)
+		a.Label = text
+		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{a}, bind.Hint(r)...), Width: width(r.Name)}
+	}
+	f := bind.Field(r, width(r.Name))
+	if in, ok := f.Parts[0].(w.Input); ok && in.Placeholder == "" && in.Value == "" {
+		in.Placeholder = none
+		if p, ok := patterns[r.Name]; ok {
+			in.Placeholder = p
+		}
+		f.Parts[0] = in
+	}
+	return f
+}
+
+// attachments is the set of the attachments: Attach with its arrow (From
+// this computer, From Files), then each attachment — its name, its type and
+// size muted, where it is kept — and its Remove (AttachRow.Actions; red for
+// data that goes with its only copy, plain for a link whose file stays), or
+// «Nothing attached».
+func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
+	var items []w.LinePart
+	if attach != nil {
+		// ждёт библиотеку: U-5.5 #36 — the arrow's items of a new task
+		// (Action.Submits) post forms of their own, not the form they stand in
+		b := bind.Button(*attach, "")
+		b.Menu = true
+		items = append(items, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(attach.Arrow, ""), Width: w.MenuWidth212, Pop: w.MenuUnder}})
+	}
+	for _, a := range rows {
+		parts := []w.LinePart{w.Text(string(a.Name) + " "), w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + sep + string(a.Size))}}}
+		if a.Inline {
+			parts = append(parts, w.Text(" "), w.Badge{Label: inside})
+		}
+		items = append(items, w.Faced{Face: w.FaceLarge, Items: parts})
+		for _, act := range a.Actions {
+			b := bind.Button(act, removeID(act))
+			b.Kind, b.Small = w.ButtonPlain, true
+			if act.Danger {
+				b.Kind = w.ButtonDanger
+			}
+			items = append(items, b)
+		}
+	}
+	if len(rows) == 0 {
+		items = append(items, w.Dim{Parts: []w.Inline{w.Text(nothing)}, Size: w.Dim11_5, Variant: w.DimWrap})
+	}
+	return w.FieldSet{Rubric: w.Rubric{Text: files}, Items: []w.FieldSetPart{w.Line{Items: items, Gap: w.LineGap8, Block: true, Place: w.Grown}}}
+}
+
+// sourceSet is the set of the task's source: its path monospaced (none for a
+// new task), when it was read and whether it changed on the server.
+func sourceSet(s view.SourceBlock) w.FieldSet {
+	lines := w.Fields{Place: w.Grown}
+	if s.Path != "" {
+		lines.Items = append(lines.Items, w.FieldsItem{Term: path, Value: []w.ValuePart{w.Text(s.Path)}, Face: w.ValueMono})
+	}
+	when := string(s.LastRead)
+	if s.Compared != "" {
+		when += sep + string(s.Compared)
+	}
+	if when != "" {
+		lines.Items = append(lines.Items, w.FieldsItem{Term: read, Value: []w.ValuePart{w.Text(when)}})
+	}
+	return w.FieldSet{Rubric: w.Rubric{Text: source}, Items: []w.FieldSetPart{lines}}
+}
+
+// railParts is the rail of return: the way back — to the card, or to the
+// list for a new task, which has the phone's short «Back» (U-1.3) —, the
+// list's sources, the foot.
+func railParts(r view.Rail, list bool) []w.RailPart {
+	nav := w.Nav{}
+	for _, n := range r.Nav {
+		it := bind.NavItem(n)
+		if list {
+			it.Short = "Back"
+		}
+		nav.Items = append(nav.Items, it)
+	}
+	parts := []w.RailPart{nav}
+	parts = append(parts, bind.Sources(r, rail)...)
+	return append(parts, bind.Foot(r, rail))
 }

@@ -16,6 +16,7 @@ import (
 	"carrel.dev/carrel/client/screens/register"
 	"carrel.dev/carrel/client/screens/setup"
 	"carrel.dev/carrel/client/screens/task"
+	"carrel.dev/carrel/client/screens/taskedit"
 	"carrel.dev/carrel/client/screens/tasks"
 	"carrel.dev/carrel/client/screens/timeline"
 	"carrel.dev/carrel/client/screens/wipe"
@@ -249,6 +250,18 @@ var All = []Screen{
 		Forms:  func(model any) []widget.PostForm { return task.Forms(model.(*view.TaskPage)) },
 		Waits: []Wait{
 			{Row: 33, Fixture: "app-task/normal"}, // ждёт библиотеку: U-5.5 #33
+		},
+	},
+	{
+		Model:  func() any { return new(view.TaskEditPage) },
+		Frames: []string{"s-tasks-3"},
+		Draw:   func(model any) Root { return taskedit.Screen(model.(*view.TaskEditPage)) },
+		Title:  func(model any) string { return string(model.(*view.TaskEditPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return taskedit.Forms(model.(*view.TaskEditPage)) },
+		Waits: []Wait{
+			{Row: 35, Fixture: "app-task-edit/normal"}, // ждёт библиотеку: U-5.5 #35
+			{Row: 35, Fixture: "app-task-edit/loss"},   // ждёт библиотеку: U-5.5 #35
+			{Row: 35, Fixture: "app-task-edit/new"},    // ждёт библиотеку: U-5.5 #35
 		},
 	},
 }
