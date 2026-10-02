@@ -1,288 +1,321 @@
-// Drafted by frame2go from frame «Событие · правка, повторение» (s-agenda-3) of the Typecase mockup: the
-// frame's widgets and its data, top to bottom. The data is the frame's; it
-// is to become the application's (docs/guide/screen.md).
-package draft
+// Package eventedit is the edit of an event,
+// /app/calendar/{account}/{col}/{uid}/edit, and the full form of a new one,
+// /app/calendar/{account}/{col}/new — one view model (EventEditPage) —, drawn
+// by frame «Событие · правка, повторение» (s-agenda-3) of the mockup and the
+// new event's form (s-agenda-15): the drafts frame2go printed for them, with
+// the frames' data become the view model's (U-5.1, U-6.2). A form, and only a
+// form: the event is edited in the zone it was written in, a series whole.
+package eventedit
 
-import w "carrel.dev/typecase/widget"
+import (
+	"carrel.dev/carrel/client/bind"
+	"carrel.dev/carrel/server/view"
+	w "carrel.dev/typecase/widget"
+)
 
-// Agenda3 is frame «Событие · правка, повторение» (s-agenda-3).
-func Agenda3() interface{ Render() string } {
-	return w.Shell{
-		Top: &w.Top{
-			Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
-			Search: &w.Search{Query: w.Query{Placeholder: "Search everything…", Label: "Search everything…"}},
-			Actions: []w.TopAction{
-				w.Button{Label: "New note", Menu: true, Icon: "quill", Kind: w.ButtonPrimary},
-				w.Button{Label: "2 min ago", Icon: "refresh"},
-				w.UserMenu{Name: "mix"},
-			},
-		},
-		Body: w.ShellBody{
-			Rail: []w.RailPart{
-				w.Nav{Items: []w.NavItem{
-					{Icon: "back", Label: "Back to the card", Href: "#"}}},
-				w.RailSec{
-					Items: []w.RailSecPart{
-						w.Rubric{Text: "nextcloud"},
-						w.TickRow{Ticked: w.TickedOff, Mark: w.Mark{Colour: "#A05A2C"}, Label: "Дни рождения", Meta: "—", Hidden: true},
-						w.TickRow{Mark: w.Mark{Colour: "#4A6B52"}, Label: "Личный", Meta: "7", Current: true},
-						w.TickRow{Mark: w.Mark{Colour: "#3F6E8C"}, Label: "Работа", Meta: "4"},
-					},
-				},
-				w.RailFoot{
-					Items: []w.RailFootPart{w.Emblem{Symbol: "davloom", Title: "davloom · running · 3 devices"}},
-					About: &w.About{Name: "Carrel", Build: w.Mono{Text: "0.0.1 · 786949a"}, Href: "#rest"},
-				},
-			},
-			Main: w.Main{
-				Items: []w.MainPart{
-					w.Head{
-						Title: &w.HeadTitle{Text: "Синк-ап по релизу"},
-						Subs:  []w.HeadSub{w.HeadSub{Parts: []w.HeadSubPart{w.Text("nextcloud · Личный")}}},
-						Acts:  &w.Acts{Items: []w.ActsPart{w.Button{Label: "Cancel"}, w.Button{Label: "Save", Kind: w.ButtonPrimary}}},
-					},
-					w.Form{
-						Items: []w.FormPart{
-							w.Field{
-								Label: "Summary",
-								Parts: []w.FieldPart{w.Input{Value: "Синк-ап по релизу", Label: "Summary", Focus: true}},
-								Width: w.FieldXL,
-							},
-							w.Field{
-								Label: "Location",
-								Parts: []w.FieldPart{w.Input{Value: "Переговорная 2", Label: "Location"}},
-								Width: w.FieldLG,
-							},
-							w.Field{Label: "Status", Parts: []w.FieldPart{w.Pick{Value: "Confirmed"}}, Width: w.FieldSM},
-							w.Field{
-								Label: "Tags",
-								Parts: []w.FieldPart{w.Input{Value: "release, team", Label: "Tags"}},
-								Width: w.FieldMD,
-							},
-							w.Field{
-								Label: "Description",
-								Parts: []w.FieldPart{
-									w.Area{Text: "Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям.", Label: "Text"},
-								},
-								Width: w.FieldFull,
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "When"},
-								Items: []w.FieldSetPart{
-									w.Field{Parts: []w.FieldPart{w.Check{Parts: []w.CheckPart{w.Text("All day")}}}},
-									w.Field{
-										Label: "Start date",
-										Parts: []w.FieldPart{w.Input{Kind: w.InputDate, Value: "2026-08-10", Label: "Start date", Mono: true}},
-										Width: w.FieldSM,
-									},
-									w.Field{
-										Label: "Start time",
-										Parts: []w.FieldPart{w.Input{Kind: w.InputTime, Value: "12:00", Label: "Start time", Mono: true}},
-										Width: w.FieldXS,
-									},
-									w.Field{
-										Label: "End date",
-										Parts: []w.FieldPart{w.Input{Kind: w.InputDate, Value: "2026-08-10", Label: "End date", Mono: true}},
-										Width: w.FieldSM,
-									},
-									w.Field{
-										Label: "End time",
-										Parts: []w.FieldPart{w.Input{Kind: w.InputTime, Value: "13:00", Label: "End time", Mono: true}},
-										Width: w.FieldXS,
-									},
-									w.Field{
-										Label: "Time zone",
-										Parts: []w.FieldPart{
-											w.Drop{
-												Trigger: w.Pick{
-													Value: "Asia/Yekaterinburg",
-													Aside: &w.Dim{Parts: []w.Inline{w.Text("as sent")}, Variant: w.DimIndent},
-												},
-												Menu: w.Menu{
-													Items: []w.MenuPart{
-														w.Input{Kind: w.InputSearch, Placeholder: "Find a zone", Label: "Find a zone"},
-														w.Rubric{Text: "As sent", Form: w.RubricInline},
-														w.MenuItem{Label: "Asia/Yekaterinburg", On: true, Name: "tz", Value: "Asia/Yekaterinburg"},
-														w.MenuSep{},
-														w.MenuItem{Label: "Europe/Moscow", Name: "tz", Value: "Europe/Moscow"},
-														w.MenuItem{Label: "UTC", Name: "tz", Value: "UTC"},
-														w.MenuSep{},
-														w.MenuItem{Label: "Floating — the same clock time anywhere", Name: "tz", Value: "floating"},
-													},
-													Width: w.MenuWidth290,
-													Pop:   w.MenuUnder,
-												},
-											},
-										},
-										Width: w.FieldMD,
-									},
-								},
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "Reminders"},
-								Items: []w.FieldSetPart{
-									w.Field{Label: "First", Parts: []w.FieldPart{w.Pick{Value: "10 minutes before"}}, Width: w.FieldMD},
-									w.Field{Label: "Reminder", Parts: []w.FieldPart{w.Pick{Value: "1 day before"}}, Width: w.FieldMD},
-									w.Field{Label: "\u00a0", Parts: []w.FieldPart{w.Button{Label: "Add reminder"}}},
-								},
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "Attendees"},
-								Items: []w.FieldSetPart{
-									w.Field{
-										Parts: []w.FieldPart{
-											w.Drop{
-												Trigger: w.TagInput{
-													Parts: []w.TagInputPart{
-														w.Tag{
-															Label: "Мария Лебедева",
-															Mark:  &w.Mark{Colour: "#6B4E7A", Size: w.MarkH11},
-															Fixed: true,
-															Aside: &w.Dim{Parts: []w.Inline{w.Text("· organiser")}},
-															Title: "m.lebedeva@example.org",
-															Name:  "attendee",
-															Value: "mailto:m.lebedeva@example.org",
-														},
-														w.Tag{
-															Label:     "Анна Ковалёва",
-															Mark:      &w.Mark{Colour: "#4A6B52", Size: w.MarkH11},
-															Removable: true,
-															Aside:     &w.Dim{Parts: []w.Inline{w.Text("· accepted")}},
-															Title:     "a.kovaleva@example.org",
-															Name:      "attendee",
-															Value:     "mailto:a.kovaleva@example.org",
-														},
-														w.Tag{
-															Label:     "Артём Белов",
-															Mark:      &w.Mark{Colour: "#6B4E7A", Size: w.MarkH11},
-															Removable: true,
-															Aside:     &w.Dim{Parts: []w.Inline{w.Text("· tentative")}},
-															Title:     "a.belov@example.org",
-															Name:      "attendee",
-															Value:     "mailto:a.belov@example.org",
-														},
-														w.Tag{
-															Address:   &w.Mono{Text: "v@example.org"},
-															Removable: true,
-															Aside:     &w.Dim{Parts: []w.Inline{w.Text("· no reply")}},
-															Title:     "v@example.org",
-															Name:      "attendee",
-															Value:     "mailto:v@example.org",
-														},
-													},
-													Columns: true,
-													Name:    "attendee",
-													Add: &w.TagAdd{
-														Name:        "attendee.add",
-														Placeholder: "Name or address",
-														Label:       "Add attendee",
-														Suggest:     "/app/contacts/suggest",
-													},
-												},
-												Menu: w.Menu{Items: []w.MenuPart{}, Width: w.MenuWidth420, Pop: w.MenuUnder},
-											},
-											w.FieldHint{
-												Parts: []w.Inline{
-													w.Text("A name or an address: the ticked address books are searched. On save, nextcloud sends the invitations and their changes — Carrel sends no mail itself."),
-												},
-											},
-										},
-										Width: w.FieldFull,
-									},
-								},
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "Attachments"},
-								Items: []w.FieldSetPart{
-									w.Line{
-										Items: []w.LinePart{
-											w.Drop{
-												Trigger: w.Button{Label: "Attach", Menu: true, Icon: "up"},
-												Menu: w.Menu{
-													Items: []w.MenuPart{
-														w.MenuItem{Icon: "up", Label: "From this computer"},
-														w.MenuItem{Icon: "file", Label: "From Files"},
-													},
-													Width: w.MenuWidth212,
-													Pop:   w.MenuUnder,
-												},
-											},
-											w.Faced{
-												Face: w.FaceLarge,
-												Items: []w.LinePart{
-													w.Text("release-checklist.md "),
-													w.Dim{Parts: []w.Inline{w.Text("text/markdown · 3 KB")}},
-													w.Text(" "),
-													w.Badge{Label: "in the event"},
-												},
-											},
-										},
-										Gap:   w.LineGap8,
-										Block: true,
-										Place: w.Grown,
-									},
-								},
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "Repeats"},
-								Items: []w.FieldSetPart{
-									w.Field{Label: "Frequency", Parts: []w.FieldPart{w.Pick{Value: "Weekly"}}, Width: w.FieldSM},
-									w.Field{
-										Label: "Every",
-										Parts: []w.FieldPart{w.Input{Value: "1", Label: "Every", Mono: true}},
-										Width: w.FieldXS,
-									},
-									w.Field{
-										Label: "On",
-										Parts: []w.FieldPart{
-											w.Seg{
-												Options: []w.SegOption{
-													{Label: "MO", On: true, Value: "MO"},
-													{Label: "TU", Value: "TU"},
-													{Label: "WE", Value: "WE"},
-													{Label: "TH", Value: "TH"},
-													{Label: "FR", Value: "FR"},
-													{Label: "SA", Value: "SA"},
-													{Label: "SU", Value: "SU"},
-												},
-												Name:     "byday",
-												Multiple: true,
-											},
-										},
-									},
-									w.Field{
-										Label: "Until",
-										Parts: []w.FieldPart{w.Input{Kind: w.InputDate, Value: "2026-12-28", Label: "Until", Mono: true}},
-										Width: w.FieldSM,
-									},
-									w.Field{Label: "Count", Parts: []w.FieldPart{w.Input{Placeholder: "—", Label: "Count"}}, Width: w.FieldXS},
-									w.Field{
-										Label: "Advanced RRULE",
-										Parts: []w.FieldPart{
-											w.Input{Placeholder: "FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228", Label: "Advanced RRULE", Mono: true},
-											w.FieldHint{Parts: []w.Inline{w.Text("The advanced value takes precedence when set.")}},
-										},
-										Width: w.FieldXL,
-									},
-								},
-							},
-							w.FieldSet{
-								Rubric: w.Rubric{Text: "Kept as the server sent them"},
-								Items: []w.FieldSetPart{
-									w.Diag{
-										Text:  "X-MOZ-GENERATION  3\nX-APPLE-TRAVEL-ADVISORY-BEHAVIOR  AUTOMATIC\nSEQUENCE  2",
-										Place: w.Grown,
-									},
-								},
-							},
-						},
-					},
-					w.Danger{
-						Button: w.Button{Label: "Delete event", Icon: "trash", Kind: w.ButtonDangerSolid},
-						Note:   "Series is edited and deleted whole.",
-					},
-				},
-			},
-		},
+// The IDs of the page's forms: the event's, which Save in the head submits
+// (Button.Form), and the deletion's, which posts with no form of its own.
+const (
+	formID     = "edit"
+	formDelete = "delete"
+)
+
+// The screen's words (U-1.3) for the shell: the mark, the search, the rail.
+var (
+	top = bind.TopWords{
+		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
+		Search: "Search everything…",
 	}
+	rail = bind.RailWords{Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
+)
+
+// The screen's words (U-1.3): the dash in an empty field the model gives no
+// pattern for, the accessible name of the description's text, the label of
+// the line of «Add reminder» (a space: the button stands under the labels),
+// the lead of a status, the rubrics of the attendees, the attachments and
+// what is kept, the attachment kept inside the event, a form with nothing
+// attached.
+const (
+	none     = "—"
+	text     = "Text"
+	blank    = " "
+	lead     = "· "
+	people   = "Attendees"
+	files    = "Attachments"
+	kept     = "Kept as the server sent them"
+	inside   = "in the event"
+	nothing  = "Nothing attached"
+	attachID = "attach.add"
+)
+
+// widths are the widths of the form's fields by their name, the last part
+// that is no number (C-6.1: the view model carries no widths; the layout is
+// the screen's, from its frame): «reminder.1» is a reminder.
+var widths = map[string]w.FieldWidth{
+	"summary": w.FieldXL, "location": w.FieldLG, "status": w.FieldSM, "categories": w.FieldMD, "description": w.FieldFull,
+	"start.date": w.FieldSM, "start.time": w.FieldXS, "end.date": w.FieldSM, "end.time": w.FieldXS, "tz": w.FieldMD,
+	"reminder":    w.FieldMD,
+	"repeat.freq": w.FieldSM, "repeat.interval": w.FieldXS, "repeat.until": w.FieldSM, "repeat.count": w.FieldXS, "repeat.rule": w.FieldXL,
+}
+
+// width is the width of a field by its name: the whole name, else its first
+// part when the rest is a number («reminder.0»).
+func width(name string) w.FieldWidth {
+	if fw, ok := widths[name]; ok {
+		return fw
+	}
+	for i := 0; i < len(name); i++ {
+		if name[i] == '.' {
+			return widths[name[:i]]
+		}
+	}
+	return w.FieldAuto
+}
+
+// Screen draws the edit from its view model, in the state the model is in.
+//
+//   - The shell: the top bar; the rail of return — «Back to the card» (or
+//     «Back to list» for a new event, with the phone's short «Back»), the
+//     calendar's sources, the foot.
+//   - The head: the event's title (a new one's «New event»), the calendar,
+//     Cancel and Save, which submits the form by its name.
+//   - What the server lost of the last save (Loss): a notice over the form.
+//   - The form: Summary with the cursor, Location, Status, Tags, the
+//     description; When — All day, the dates and times monospaced, the time
+//     zone a choice with its menu (find a zone, «As sent», Floating last);
+//     Reminders — each a choice, «Add reminder» adding one in place;
+//     Attendees — the people as tags, the line the next is typed in, who
+//     sends the invitations (or, invited, why the list is read only);
+//     Attachments — Attach with its arrow, each attachment where it is kept,
+//     or «Nothing attached»; Repeats — the frequency, every, the days as one
+//     row, until, count, the advanced rule with its pattern; the properties
+//     kept as the server sent them.
+//   - Under the form the deletion, and the line of a series under it.
+func Screen(p *view.EventEditPage) w.Shell {
+	var plain, primary []w.ActsPart
+	var attach *view.Action
+	for _, a := range p.Form.Actions {
+		if a.ID == attachID {
+			attach = &a
+			continue
+		}
+		b := bind.Button(a, formID)
+		if a.Primary {
+			primary = append(primary, b)
+		} else {
+			plain = append(plain, b)
+		}
+	}
+	h := w.Head{Title: &w.HeadTitle{Text: string(p.Name)}, Acts: &w.Acts{Items: append(plain, primary...)}}
+	if p.Subtitle != "" {
+		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
+	}
+	main := []w.MainPart{h}
+	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
+	if p.Loss != nil {
+		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2))
+	}
+	form := bind.Form(p.Form, formID)
+	after := reminders(p.Form)
+	for i, set := range p.Form.Sets {
+		rows := visible(set.Rows)
+		if set.Legend == "" {
+			for _, r := range rows {
+				form.Items = append(form.Items, field(r))
+			}
+		} else {
+			form.Items = append(form.Items, fieldSet(set.Legend, rows))
+		}
+		if i == after {
+			form.Items = append(form.Items, attendees(p.Attendees), attachments(attach, p.Attach))
+		}
+	}
+	if len(p.Foreign) > 0 {
+		var lines string
+		for i, f := range p.Foreign {
+			if i > 0 {
+				lines += "\n"
+			}
+			lines += string(f.Label) + "  " + string(f.Value)
+		}
+		form.Items = append(form.Items, w.FieldSet{Rubric: w.Rubric{Text: kept}, Items: []w.FieldSetPart{w.Diag{Text: lines, Place: w.Grown}}})
+	}
+	main = append(main, form)
+	if p.Delete != nil {
+		main = append(main, w.Danger{Button: bind.Button(*p.Delete, formDelete), Note: string(p.DeleteNote)})
+	}
+	t := bind.Top(p.Top, top)
+	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail, p.UID == ""), Main: w.Main{Items: main}}}
+}
+
+// Forms are the forms of the actions that post with none of their own: the
+// deletion, Attach «From this computer» with its file, the notices' buttons
+// and the menus' items that post (Sign out).
+func Forms(p *view.EventEditPage) []w.PostForm {
+	out := append(bind.TopForms(p.Top), bind.NoticeForms(p.Notices)...)
+	for _, a := range p.Form.Actions {
+		if a.ID == attachID {
+			out = append(out, bind.MenuForms(a.Arrow)...)
+		}
+	}
+	if d := p.Delete; d != nil && d.Method == "POST" && d.Enabled {
+		out = append(out, bind.ActionForm(*d, formDelete))
+	}
+	return out
+}
+
+// The names the form's rows of reminders and of the repetition start with
+// (C-6.8: reminder.N, repeat.freq…).
+const (
+	reminderRow = "reminder"
+	repeatRow   = "repeat."
+)
+
+// reminders is the index of the form's set of reminders — the set with the
+// rows reminder.N or «Add reminder» —: the attendees and the attachments
+// stand after it (U-6.2, s-agenda-3); with none, before the repetition, or
+// after the last set.
+func reminders(f view.Form) int {
+	at := -1
+	for i, set := range f.Sets {
+		for _, r := range set.Rows {
+			if r.Kind == view.InputAdd || starts(r.Name, reminderRow) {
+				at = i
+			}
+		}
+	}
+	if at >= 0 {
+		return at
+	}
+	for i, set := range f.Sets {
+		for _, r := range set.Rows {
+			if starts(r.Name, repeatRow) {
+				return i - 1
+			}
+		}
+	}
+	return len(f.Sets) - 1
+}
+
+// starts tells whether a row's name starts with a prefix.
+func starts(name, prefix string) bool {
+	return len(name) >= len(prefix) && name[:len(prefix)] == prefix
+}
+
+// fieldSet is a rubric of the form: its fields, a tick bare, «Add …» on the
+// line of the labels with the template of what it adds.
+func fieldSet(legend view.Text, rows []view.FormRow) w.FieldSet {
+	fs := w.FieldSet{Rubric: w.Rubric{Text: string(legend)}}
+	for _, r := range rows {
+		if r.Kind == view.InputAdd {
+			add, tmpl := bind.Add(r, func(t view.FormRow) []w.FieldSetPart { return []w.FieldSetPart{field(t)} })
+			fs.Items = append(fs.Items, w.Field{Label: blank, Parts: []w.FieldPart{add}}, tmpl)
+			continue
+		}
+		fs.Items = append(fs.Items, field(r))
+	}
+	return fs
+}
+
+// visible are the rows of a set a person sees: all but the hidden ones.
+func visible(rows []view.FormRow) []view.FormRow {
+	var out []view.FormRow
+	for _, r := range rows {
+		if r.Kind != view.InputHidden {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// field is a row of the form as its field: a tick (All day) bare, the days a
+// series repeats on as one row (Seg), a choice with a line that finds an
+// option (the time zone) as a choice with its menu, the description's text,
+// and any other row as a field of the width of its name — an empty line of
+// text showing the dash where the model gives no pattern of its own.
+func field(r view.FormRow) w.Field {
+	switch {
+	case r.Kind == view.InputCheck && len(r.Options) > 0:
+		return w.Field{Label: string(r.Label), Parts: []w.FieldPart{bind.Days(r)}}
+	case r.Kind == view.InputCheck:
+		return w.Field{Parts: []w.FieldPart{bind.Check(r)}}
+	case r.Kind == view.InputSelect && r.Placeholder != "":
+		d := bind.PickMenu(r)
+		d.Menu.Width, d.Menu.Pop = w.MenuWidth290, w.MenuUnder
+		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{d}, bind.Hint(r)...), Width: width(r.Name)}
+	case r.Kind == view.InputArea:
+		a := bind.Area(r)
+		a.Label = text
+		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{a}, bind.Hint(r)...), Width: width(r.Name)}
+	}
+	f := bind.Field(r, width(r.Name))
+	if in, ok := f.Parts[0].(w.Input); ok && in.Placeholder == "" && in.Value == "" && in.Kind != w.InputDate && in.Kind != w.InputTime {
+		in.Placeholder = none
+		f.Parts[0] = in
+	}
+	return f
+}
+
+// attendees is the set of the attendees (AttendeeField): the people as tags
+// in columns with the line the next is typed in — a field whose suggestions
+// are a menu under it —, and under them who sends the invitations; invited,
+// the tags alone and why the list is read only.
+func attendees(f view.AttendeeField) w.FieldSet {
+	in := bind.Attendees(f, lead)
+	var parts []w.FieldPart
+	if f.ReadOnly {
+		parts = append(parts, in)
+	} else {
+		parts = append(parts, w.Drop{Trigger: in, Menu: w.Menu{Items: []w.MenuPart{}, Width: w.MenuWidth420, Pop: w.MenuUnder}})
+	}
+	if f.Hint != "" {
+		parts = append(parts, w.FieldHint{Parts: []w.Inline{w.Text(f.Hint)}})
+	}
+	if f.Add != nil && f.Add.Error != "" {
+		parts = append(parts, w.FieldHint{Parts: []w.Inline{w.Text(f.Add.Error)}, Variant: w.HintDanger})
+	}
+	return w.FieldSet{Rubric: w.Rubric{Text: people}, Items: []w.FieldSetPart{w.Field{Parts: parts, Width: w.FieldFull}}}
+}
+
+// attachments is the set of the attachments: Attach with its arrow (From
+// this computer, From Files), then each attachment — its name, its type and
+// size muted, where it is kept —, or «Nothing attached».
+//
+// ждёт библиотеку: U-5.5 #29 — no frame draws a line's actions
+// (AttachRow.Actions, Remove): an attachment is not taken off here
+func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
+	var items []w.LinePart
+	if attach != nil {
+		b := bind.Button(*attach, "")
+		b.Menu = true
+		items = append(items, w.Drop{Trigger: b, Menu: w.Menu{Items: bind.MenuItems(attach.Arrow, ""), Width: w.MenuWidth212, Pop: w.MenuUnder}})
+	}
+	for _, a := range rows {
+		parts := []w.LinePart{w.Text(string(a.Name) + " "), w.Dim{Parts: []w.Inline{w.Text(string(a.Type) + " · " + string(a.Size))}}}
+		if a.Inline {
+			parts = append(parts, w.Text(" "), w.Badge{Label: inside})
+		}
+		items = append(items, w.Faced{Face: w.FaceLarge, Items: parts})
+	}
+	if len(rows) == 0 {
+		items = append(items, w.Dim{Parts: []w.Inline{w.Text(nothing)}, Size: w.Dim11_5, Variant: w.DimWrap})
+	}
+	return w.FieldSet{Rubric: w.Rubric{Text: files}, Items: []w.FieldSetPart{w.Line{Items: items, Gap: w.LineGap8, Block: true, Place: w.Grown}}}
+}
+
+// railParts is the rail of return: the way back — to the card, or to the
+// list for a new event, which has the phone's short «Back» (U-1.3) —, the
+// calendar's sources, the foot.
+func railParts(r view.Rail, list bool) []w.RailPart {
+	nav := w.Nav{}
+	for _, n := range r.Nav {
+		it := bind.NavItem(n)
+		if list {
+			it.Short = "Back"
+		}
+		nav.Items = append(nav.Items, it)
+	}
+	parts := []w.RailPart{nav}
+	parts = append(parts, bind.Sources(r, rail)...)
+	return append(parts, bind.Foot(r, rail))
 }

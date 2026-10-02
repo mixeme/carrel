@@ -9,6 +9,7 @@ import (
 	"carrel.dev/carrel/client/screens/contacts"
 	"carrel.dev/carrel/client/screens/deadlink"
 	"carrel.dev/carrel/client/screens/event"
+	"carrel.dev/carrel/client/screens/eventedit"
 	"carrel.dev/carrel/client/screens/forgot"
 	"carrel.dev/carrel/client/screens/invite"
 	"carrel.dev/carrel/client/screens/login"
@@ -218,5 +219,17 @@ var All = []Screen{
 		Draw:   func(model any) Root { return event.Screen(model.(*view.EventPage)) },
 		Title:  func(model any) string { return string(model.(*view.EventPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return event.Forms(model.(*view.EventPage)) },
+	},
+	{
+		Model:  func() any { return new(view.EventEditPage) },
+		Frames: []string{"s-agenda-3", "s-agenda-15"},
+		Draw:   func(model any) Root { return eventedit.Screen(model.(*view.EventEditPage)) },
+		Title:  func(model any) string { return string(model.(*view.EventEditPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return eventedit.Forms(model.(*view.EventEditPage)) },
+		Waits: []Wait{
+			{Row: 26, Fixture: "app-event-edit/normal"}, // ждёт библиотеку: U-5.5 #26
+			{Row: 26, Fixture: "app-event-edit/loss"},   // ждёт библиотеку: U-5.5 #26
+			{Row: 27, Fixture: "app-event-new/normal"},  // ждёт библиотеку: U-5.5 #27
+		},
 	},
 }
