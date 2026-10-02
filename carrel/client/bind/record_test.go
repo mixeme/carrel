@@ -61,6 +61,35 @@ func TestCheckAndDays(t *testing.T) {
 	same(t, "the days", bind.Days(days), w.Seg{Name: "repeat.on", Multiple: true, Options: []w.SegOption{{Label: "MO", Value: "MO", On: true}, {Label: "TU", Value: "TU"}}})
 }
 
+func TestSubAlert(t *testing.T) {
+	r := view.Runs{{Text: "nextcloud · Дела · "}, {Text: "overdue by 3 days", Mark: view.RunDanger}}
+	same(t, "the alarm a badge", bind.SubAlert(r), []w.HeadSub{{Parts: []w.HeadSubPart{w.Text("nextcloud · Дела · "), w.Badge{Label: "overdue by 3 days", Tone: w.BadgeAlert}}}})
+	same(t, "the alarm in words where Sub draws it", bind.Sub(r), []w.HeadSub{{Parts: []w.HeadSubPart{w.Text("nextcloud · Дела · "), w.Span{Face: w.FaceDanger, Text: "overdue by 3 days"}}}})
+	same(t, "nothing", bind.SubAlert(nil), []w.HeadSub(nil))
+}
+
+func TestTick(t *testing.T) {
+	done := view.Action{ID: "task.done", Label: "Mark done", Method: "POST", Enabled: true, Href: "/app/tasks/a/dela/aa10/edit?done=on&op=done", CSRF: "c"}
+	same(t, "a tick that posts", bind.Tick(&done, false, "Done"), w.Tick{Label: "Done", Send: w.Send{Form: "task.done/app/tasks/a/dela/aa10/edit?done=on&op=done"}})
+	same(t, "its form", bind.ActionForm(done, bind.TickID(done)), w.PostForm{ID: bind.TickID(done), Action: done.Href, Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}})
+	same(t, "a task done", bind.Tick(&done, true, "Done").Done, true)
+	same(t, "a row read only", bind.Tick(nil, true, "Done"), w.Tick{Done: true, Label: "Done"})
+	off := done
+	off.Enabled, off.Reason = false, "Read only"
+	same(t, "a tick switched off", bind.Tick(&off, false, "Done"), w.Tick{Label: "Done"})
+}
+
+func TestRelated(t *testing.T) {
+	r := view.FormRow{Name: "related", Label: "Related to", Kind: view.InputSelect, Placeholder: "UID of the record", Suggest: "/app/tasks/a/dela/aa10/related", Value: "1d55", Options: []view.Option{
+		{Value: "bb21", Label: "Дописать раздел про кэш", Colour: "#3f6e8c", Meta: "task · 14 Aug"},
+		{Value: "1d55", Label: "Забрать документы", Colour: "#4a6b52", Meta: "event · 11 Aug", Selected: true},
+		{Label: "By UID…", Separator: true, Typed: true, Hint: "By UID: a record that is not among the loaded ones."},
+	}}
+	same(t, "the record chosen", bind.Related(r), w.TagInput{Name: "related", Parts: []w.TagInputPart{w.Tag{Label: "Забрать документы", Removable: true, Value: "1d55"}}})
+	r.Options[1].Selected, r.Value = false, ""
+	same(t, "none chosen: the line of a UID", bind.Related(r), w.TagInput{Name: "related", Add: &w.TagAdd{Name: "related", Placeholder: "UID of the record", Label: "Related to", Suggest: "/app/tasks/a/dela/aa10/related"}})
+}
+
 func TestPickMenu(t *testing.T) {
 	tz := view.FormRow{Name: "tz", Label: "Time zone", Kind: view.InputSelect, Placeholder: "Find a zone", ValueAside: "as sent", Options: []view.Option{
 		{Value: "Asia/Yekaterinburg", Label: "Asia/Yekaterinburg", Selected: true, Group: "As sent"},

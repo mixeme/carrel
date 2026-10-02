@@ -225,6 +225,13 @@ var contract = map[string]rule{
 	"FindRow":   needs("Href"),
 	"LinkedRow": needs("Href"),
 	"TimeRow":   needs("Href"),
+	// A task's row (Typecase's task 95): its title is the link — the row
+	// cannot be one, its tick is a control of its own, judged as a Tick.
+	"DueRow": needs("Href"),
+	// A row of the columns a person chose (Columns; s-tasks-13,
+	// s-contacts-23): a link to the record, as the list's own row; a
+	// task's tick in it is judged as a Tick.
+	"ColumnRow": needs("Href"),
 	"About":     needs("Href"),
 	// A category (Typecase's task 63): with Href it goes to the list filtered
 	// by it, without it is words — whether it goes is the model's (C-6.2

@@ -248,6 +248,15 @@ func TestFieldsItem(t *testing.T) {
 	same(t, "a value in pieces with its badge", bind.FieldsItem(when, "· "), w.FieldsItem{Term: "When", Value: []w.ValuePart{
 		w.Mono{Text: "10:00 – 11:00"}, w.Text(", Monday 10 August "), w.Badge{Label: "created 12:00 Asia/Yekaterinburg"},
 	}})
+	// A value of one monospaced piece is the line's monospaced face, as the
+	// panel of a task draws its due date (s-tasks-1); with more pieces —
+	// overdue in alarm after it (s-tasks-2) — each piece in its face.
+	due := view.Field{Label: "Due", Runs: view.Runs{{Text: "12 August 2026, 18:00", Mark: view.RunMono}}}
+	same(t, "a value of one monospaced piece", bind.FieldsItem(due, "· "), w.FieldsItem{Term: "Due", Value: []w.ValuePart{w.Text("12 August 2026, 18:00")}, Face: w.ValueMono})
+	due.Runs = append(due.Runs, view.Run{Text: " · overdue by 3 days", Mark: view.RunDanger})
+	same(t, "a value of pieces", bind.FieldsItem(due, "· "), w.FieldsItem{Term: "Due", Value: []w.ValuePart{
+		w.Mono{Text: "12 August 2026, 18:00"}, w.Span{Face: w.FaceDanger, Text: " · overdue by 3 days"},
+	}})
 	same(t, "a value with its badge", bind.FieldsItem(view.Field{Label: "Repeats", Value: "Weekly on Mon", Badge: view.Badge{Label: "until 2026-12-28"}}, "· "),
 		w.FieldsItem{Term: "Repeats", Value: []w.ValuePart{w.Text("Weekly on Mon "), w.Badge{Label: "until 2026-12-28"}}})
 	same(t, "a book", bind.Book(view.Field{Label: "radicale · Команда", Value: "Phone differs", Href: "/c", Colour: "#6b4e7a"}, "· "), []w.SecItemPart{

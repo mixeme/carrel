@@ -177,6 +177,15 @@ func TestMeaningRules(t *testing.T) {
 		"a control the guard lacks":  {w.List{Rows: []w.ListRow{w.ExcerptRow{}}}, []string{"(ExcerptRow): ExcerptRow carries meaning the guard's contract does not know"}},
 		"rows that lead":             {w.List{Rows: []w.ListRow{w.FaceRow{Href: "/c"}, w.FindRow{Href: "/e"}, w.LinkedRow{Href: "/t"}, w.TimeRow{Href: "/v"}}}, nil},
 		"rows that lead nowhere":     {w.List{Rows: []w.ListRow{w.FaceRow{}, w.FindRow{}, w.LinkedRow{}, w.TimeRow{}}}, []string{"(FaceRow): no Href", "(FindRow): no Href", "(LinkedRow): no Href", "(TimeRow): no Href"}},
+		// A task's row (Typecase's task 95): its title leads to the record,
+		// its tick posts the form of Mark done.
+		"a task's row that leads": {w.List{Rows: []w.ListRow{w.DueRow{Href: "/t", Tick: w.Tick{Label: "Done", Send: w.Send{Form: "post"}}}}}, nil},
+		"a task's row that leads nowhere": {w.List{Rows: []w.ListRow{w.DueRow{Tick: w.Tick{Label: "Done"}}}},
+			[]string{"(DueRow): no Href", "(Tick): a tick box that sends nothing"}},
+		// A row of the columns a person chose (s-tasks-13, s-contacts-23):
+		// it leads to the record, its tick posts as a task's row's.
+		"a row of chosen columns that leads":         {w.List{Rows: []w.ListRow{w.ColumnRow{Href: "/t", Tick: &w.Tick{Label: "Done", Send: w.Send{Form: "post"}}}}}, nil},
+		"a row of chosen columns that leads nowhere": {w.List{Rows: []w.ListRow{w.ColumnRow{}}}, []string{"(ColumnRow): no Href"}},
 		// Typecase's tasks 60, 63, 67, 68 (the bump to 29413d6).
 		"tags that go and tags that are words": {w.RailSec{Tags: []w.Tag{{Label: "работа", Href: "/t"}, {Label: "all"}}}, nil},
 		"a closed menu's button opens it":      {w.Acts{Items: []w.ActsPart{w.Drop{Trigger: w.Button{Icon: "dots"}, Menu: w.Menu{Items: []w.MenuPart{w.MenuItem{Label: "Move", Href: "/m"}}}}}}, nil},

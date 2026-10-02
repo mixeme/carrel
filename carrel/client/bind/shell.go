@@ -445,10 +445,15 @@ func Avatar(a view.Avatar) w.Avatar {
 // after it (Aside, «in 7 months») led by lead, the screen's — none where
 // the frame draws no aside (lead is empty); categories as
 // tags (Tag), each going where it goes, a space between them. A value in
-// its pieces (Runs: the time monospaced) is drawn in them, and a badge after
-// the value (Badge: «until 2026-12-28») stands after a space.
+// its pieces (Runs: the time monospaced) is drawn in them — one piece,
+// monospaced, is the line's monospaced face (a task's due date in its
+// panel, s-tasks-1) —, and a badge after the value (Badge: «until
+// 2026-12-28») stands after a space.
 func FieldsItem(f view.Field, lead string) w.FieldsItem {
 	it := w.FieldsItem{Term: string(f.Label), Href: f.Href}
+	if len(f.Runs) == 1 && f.Runs[0].Mark == view.RunMono && f.Value == "" {
+		f.Mono, f.Value, f.Runs = true, f.Runs[0].Text, nil
+	}
 	if f.Mono {
 		it.Face = w.ValueMono
 	}

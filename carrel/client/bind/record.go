@@ -5,16 +5,30 @@ import (
 	w "carrel.dev/typecase/widget"
 )
 
-// The blocks of a record and of its form that the event's screens draw
-// first (C-6.5, C-6.8): the line under a head in its pieces, the people of
-// an event, a form's tick, a row of days, a choice from a list that is a
-// menu. The words the frame keeps the same whatever the data — the lead
-// before a status — come from the screen.
+// The blocks of a record and of its form that the event's and the task's
+// screens draw first (C-6.5, C-6.8): the line under a head in its pieces,
+// the people of an event, a form's tick, a row of days, a choice from a list
+// that is a menu, a task's tick, the record a task is related to. The words
+// the frame keeps the same whatever the data — the lead before a status,
+// what a task's tick is called — come from the screen.
 
 // Sub is a sentence of the model in its pieces (Runs) as a line under a
-// head (HeadSub): the window of an agenda, the zone monospaced (s-agenda-1).
-// A sentence with nothing in it is no line: nil.
+// head (HeadSub): the window of an agenda, the zone monospaced (s-agenda-1),
+// a task's overdue in the danger's words (s-tasks-2). A sentence with
+// nothing in it is no line: nil.
 func Sub(r view.Runs) []w.HeadSub {
+	return sub(r, func(t view.Text) w.HeadSubPart { return w.Span{Face: w.FaceDanger, Text: string(t)} })
+}
+
+// SubAlert is a sentence of the model in its pieces as the line under a
+// head, as Sub, whose alarm (RunDanger) is a badge in the alert's tone: the
+// edit's «overdue by 3 days» (s-tasks-3).
+func SubAlert(r view.Runs) []w.HeadSub {
+	return sub(r, func(t view.Text) w.HeadSubPart { return w.Badge{Label: string(t), Tone: w.BadgeAlert} })
+}
+
+// sub is the line under a head in its pieces, the alarm as danger draws it.
+func sub(r view.Runs, danger func(view.Text) w.HeadSubPart) []w.HeadSub {
 	var parts []w.HeadSubPart
 	for _, p := range r {
 		switch p.Mark {
@@ -23,7 +37,7 @@ func Sub(r view.Runs) []w.HeadSub {
 		case view.RunStrong:
 			parts = append(parts, w.Strong(p.Text))
 		case view.RunDanger:
-			parts = append(parts, w.Span{Face: w.FaceDanger, Text: string(p.Text)})
+			parts = append(parts, danger(p.Text))
 		default:
 			parts = append(parts, w.Text(p.Text))
 		}
@@ -32,6 +46,49 @@ func Sub(r view.Runs) []w.HeadSub {
 		return nil
 	}
 	return []w.HeadSub{{Parts: parts}}
+}
+
+// Tick is the tick of a task's row (C-6.4 TaskRow.Tick, .Done): ticked where
+// the task is done, its accessible name label — the screen's word —;
+// pressing it posts the action (Mark done, or not done) by the form of its
+// ID (TickID), which the page prints at its end (ActionForm): without a
+// script too (U-8). A row read only (no action) or an action switched off
+// has a tick that shows and sends nothing.
+func Tick(a *view.Action, done bool, label string) w.Tick {
+	t := w.Tick{Done: done, Label: label}
+	if a != nil && a.Enabled && a.Method == "POST" {
+		t.Send = w.Send{Form: TickID(*a)}
+	}
+	return t
+}
+
+// TickID is the ID of the form a task's tick posts (Tick): its action's ID
+// and address, one per row.
+func TickID(a view.Action) string {
+	return a.ID + a.Href
+}
+
+// Related is the field Related to of a task's form (C-6.8 InputSelect whose
+// last option is typed by hand, Option.Typed; s-tasks-3, -10, -11) as a
+// field of tags under the row's name: the record chosen — the label of the
+// option selected, a record not loaded its UID — a tag the cross unticks,
+// sent with its value (the UID). One relation: with none chosen, the line a
+// UID is typed in, sent under the same name, its pattern the row's
+// (Placeholder), its suggestions where the row says (Suggest, the library's
+// live layer).
+func Related(r view.FormRow) w.TagInput {
+	// ждёт библиотеку: U-5.5 #30 — without a script the field has no list
+	// of the loaded records to choose from (Typecase's task 96)
+	in := w.TagInput{Name: r.Name}
+	for _, o := range r.Options {
+		if o.Selected && !o.Typed {
+			in.Parts = append(in.Parts, w.Tag{Label: string(o.Label), Removable: true, Value: o.Value})
+		}
+	}
+	if len(in.Parts) == 0 {
+		in.Add = &w.TagAdd{Name: r.Name, Placeholder: string(r.Placeholder), Label: string(r.Label), Suggest: r.Suggest}
+	}
+	return in
 }
 
 // Attendee is a person of an event (C-6.5 AttendeeRow) as a line of the
