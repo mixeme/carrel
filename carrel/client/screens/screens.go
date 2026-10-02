@@ -13,6 +13,7 @@ import (
 	"carrel.dev/carrel/client/screens/forgot"
 	"carrel.dev/carrel/client/screens/invite"
 	"carrel.dev/carrel/client/screens/login"
+	"carrel.dev/carrel/client/screens/notes"
 	"carrel.dev/carrel/client/screens/register"
 	"carrel.dev/carrel/client/screens/setup"
 	"carrel.dev/carrel/client/screens/task"
@@ -262,6 +263,19 @@ var All = []Screen{
 			{Row: 35, Fixture: "app-task-edit/normal"}, // ждёт библиотеку: U-5.5 #35
 			{Row: 35, Fixture: "app-task-edit/loss"},   // ждёт библиотеку: U-5.5 #35
 			{Row: 35, Fixture: "app-task-edit/new"},    // ждёт библиотеку: U-5.5 #35
+		},
+	},
+	{
+		Model:  func() any { return new(view.NotesPage) },
+		Frames: []string{"s-notes-1"},
+		Draw:   func(model any) Root { return notes.Screen(model.(*view.NotesPage)) },
+		Title:  func(model any) string { return string(model.(*view.NotesPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return notes.Forms(model.(*view.NotesPage)) },
+		Waits: []Wait{
+			{Row: 37, Fixture: "app-notes-all/normal"},   // ждёт библиотеку: U-5.5 #37
+			{Row: 38, Fixture: "app-notes/normal"},       // ждёт библиотеку: U-5.5 #38
+			{Row: 38, Fixture: "app-notes/source-error"}, // ждёт библиотеку: U-5.5 #38
+			{Row: 38, Fixture: "app-notes-all/empty"},    // ждёт библиотеку: U-5.5 #38
 		},
 	},
 }
