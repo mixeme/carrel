@@ -1802,16 +1802,23 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	page := view.NotesPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = s.listActions(c, nil)
 	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
+	// «Filter by word» without scripts (s-notes-1): a GET to the list.
+	sift := strings.TrimSpace(r.URL.Query().Get("filter"))
+	page.Bar.Filter, page.Bar.FilterForm = text(sift), s.listFilter(c.listPath(), r.URL.Query(), sift)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, bad, err := c.calQuery(r.Context(), c.spec.component, nil, nil)
 	if err != nil {
+		page.Subtitle = text(notebookSubtitle(bookSubtitle(c, 0, false), c.col.ReadOnly))
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
 	}
 	items := c.listed(objs)
 	var more []unreadable
 	by := sortOf(r, view.KindNote)
-	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, s.foldLinked(s.catalogOf(c.sess), view.KindNote, filter.keep(view.KindNote, items)), c.spec.segment, false, filter, by)
+	shown := filterNotes(s.foldLinked(s.catalogOf(c.sess), view.KindNote, filter.keep(view.KindNote, items)), sift)
+	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, shown, c.spec.segment, false, filter, by)
+	page.Subtitle = text(notebookSubtitle(bookSubtitle(c, len(objs), true), c.col.ReadOnly))
+	page.Details = s.openRow(r, c.sess, c.listPath(), c.spec, shown, noteRowsOn(page.Groups))
 	page.Bar.Segments = s.sortSegments(c.listPath(), view.KindNote, by, r.URL.Query())
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindNote, items)
@@ -1843,6 +1850,11 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		}
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
+			if len(it.also) > 0 {
+				// A linked row says how many sources it has; the stamps
+				// are its hint (s-notes-1).
+				row.Stamp = sourcesCount(it)
+			}
 		}
 		if !at.IsZero() {
 			row.Date = text(tf.shortDay(at))
@@ -1869,13 +1881,23 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		}
 		return rows[i].order < rows[j].order
 	})
+	// Under the month of their date, newest or oldest first (s-notes-1:
+	// «August 2026» and its count); without a date last; by title one list.
 	var groups []view.NoteGroup
-	if len(rows) > 0 {
-		group := view.NoteGroup{}
-		for _, it := range rows {
-			group.Rows = append(group.Rows, it.row)
+	for _, it := range rows {
+		rubric := ""
+		if by != "title" {
+			rubric = "No date"
+			if !it.at.IsZero() {
+				rubric = it.at.In(tf.tz).Format("January 2006")
+			}
 		}
-		groups = []view.NoteGroup{group}
+		if n := len(groups); n == 0 || string(groups[n-1].Rubric) != rubric {
+			groups = append(groups, view.NoteGroup{Rubric: text(rubric)})
+		}
+		g := &groups[len(groups)-1]
+		g.Rows = append(g.Rows, it.row)
+		g.Count = len(g.Rows)
 	}
 	return groups, len(rows), nil
 }

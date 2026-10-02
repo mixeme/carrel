@@ -197,29 +197,43 @@ type TaskRow struct {
 
 type NotesPage struct {
 	Shell
-	Bar    ListBar     `json:"bar"`
-	Groups []NoteGroup `json:"groups"`
-	Poll   *PollBar    `json:"poll"`
+	// Subtitle — под заголовком: единый вид — «2 of 3 notebooks · 86 notes
+	// · VJOURNAL» (число заметок — когда опрос закончен), одна тетрадь —
+	// «nextcloud · 2 notes · VJOURNAL»: компонент, которым заметки лежат на
+	// сервере (s-notes-1)
+	Subtitle Text        `json:"subtitle"`
+	Bar      ListBar     `json:"bar"`
+	Groups   []NoteGroup `json:"groups"`
+	Poll     *PollBar    `json:"poll"`  // единый вид; nil — одна тетрадь или ничего не отмечено
+	Empty    *Notice     `json:"empty"` // ничего не отмечено: почему и кнопка «Tick every notebook» (U-6.0); nil — есть что показать
 }
+
+// NoteGroup — месяц тетради, «August 2026», по дате заметки; без даты —
+// последней группой «No date»; по названию — одна группа без рубрики
+// (s-notes-1).
 type NoteGroup struct {
 	Rubric Text      `json:"rubric"`
+	Count  int       `json:"count"` // сколько заметок в группе
 	Rows   []NoteRow `json:"rows"`
 }
 type NoteRow struct {
 	Href string `json:"href"`
 	// Target — details: строка открывает запись в панели подробностей —
 	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
-	Target  string      `json:"target,omitempty"`
-	UID     string      `json:"uid"`
-	Colour  Colour      `json:"colour"`
-	Stamp   Stamp       `json:"stamp"`
-	Title   Text        `json:"title"`
-	Excerpt Text        `json:"excerpt"`
-	Date    Text        `json:"date"`
-	Tags    []Tag       `json:"tags"`
-	Changed Text        `json:"changed"` // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
-	Badges  []Badge     `json:"badges"`  // «2 источника» у связанной заметки
-	Sources []Stamp     `json:"sources"` // источники связанной группы
+	Target  string  `json:"target,omitempty"`
+	UID     string  `json:"uid"`
+	Colour  Colour  `json:"colour"`
+	Stamp   Stamp   `json:"stamp"`
+	Title   Text    `json:"title"`
+	Excerpt Text    `json:"excerpt"`
+	Date    Text    `json:"date"`
+	Tags    []Tag   `json:"tags"`
+	Changed Text    `json:"changed"` // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
+	Badges  []Badge `json:"badges"`  // «linked ×2» у связанной заметки
+	// Sources — источники связанной группы (подсказка столбца источника);
+	// Stamp такой строки в едином виде — их счёт, «2 sources» (s-notes-1)
+	Sources []Stamp     `json:"sources"`
 	Menu    []MenuItem  `json:"menu"`
 	State   RecordState `json:"state"`
+	On      bool        `json:"on"` // строка открыта в панели подробностей (is-on, s-notes-1)
 }

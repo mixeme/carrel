@@ -1201,6 +1201,19 @@ func linkMockupTask(t *testing.T, app *mockupApp) {
 		})
 }
 
+// linkMockupNote puts a copy of «Что почитать про CRDT», its text longer,
+// in nextcloud · Дневник and links the two (S-16): «linked ×2», «2 sources»
+// (s-notes-1; the client's scan НБ6). The frame puts the copy in radicale ·
+// vps · Дневник, a notebook no rail of its draws (task 105). The copy lives
+// in the tests alone.
+func linkMockupNote(t *testing.T, app *mockupApp) {
+	t.Helper()
+	linkMockupCopy(t, app, view.KindNote, "g-crdt", mockupRecord{"nextcloud", "zapisi", "6d92-13ef-b408", "nextcloud-home/zapisi.ics"},
+		mockupRecord{"nextcloud", "dnevnik", "8e04-21ab-d517", ""}, func(rec string) string {
+			return strings.Replace(rec, "SUMMARY:Что почитать про CRDT", "SUMMARY:Что почитать про CRDT\r\nX-CARREL-COPY:dnevnik", 1)
+		})
+}
+
 // mockupRecord is a record of the set: where it lies and in which file of
 // the set; a copy has no file.
 type mockupRecord struct{ account, slug, uid, file string }
@@ -1310,14 +1323,33 @@ func TestFixtureCombinedTasks(t *testing.T) {
 	app.compare(t, "app-tasks-all/normal.json", app.h.do(get("/app/tasks?task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
 }
 
-// C-14.2: one notebook (s-notes-1).
+// C-14.2: one notebook (s-notes-1), «Заметка со встречи 10.08» open in the
+// panel, as the frame draws it.
 func TestFixtureNoteList(t *testing.T) {
 	app := newMockupApp(t)
+	// The calendar was read: the panel's Related names «Синк-ап».
+	openList(t, app, "/app/calendar?from=2026-08-10")
 	// Both notebooks are ticked and counted in the frame (s-notes-1): the
 	// combined notebook was opened first, as a person comes to it.
 	combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-	app.compare(t, "app-notes/normal.json", app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess)))
+	list := app.listPath(t, "notes", "zapisi")
+	app.compare(t, "app-notes/normal.json", app.h.do(get(list+"?open="+url.QueryEscape(list+"/5c81-77aa-0d64"), app.sess)))
+}
+
+// C-14.2: the combined notebook as s-notes-1 draws it (the client's scan of
+// the notes, НБ1): both notebooks, «Что почитать про CRDT» linked with its
+// copy, «Заметка со встречи 10.08» open in the panel, New note writing into
+// «Записи», last used.
+func TestFixtureCombinedNotes(t *testing.T) {
+	app := newMockupApp(t)
+	linkMockupNote(t, app)
+	app.lastUsed(t, "zapisi", view.KindNote)
+	openList(t, app, "/app/calendar?from=2026-08-10")
+	page := combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	open := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64"
+	app.compare(t, "app-notes-all/normal.json", app.h.do(get("/app/notes?task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
 }
 
 // C-14.2: the card of a task (s-tasks-2): «Собрать чемодан», the task the

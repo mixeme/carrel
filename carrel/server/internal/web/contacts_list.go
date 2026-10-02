@@ -208,6 +208,18 @@ func countGroups(groups []view.ContactGroup) {
 // the books are ticked, on how many accounts, and — once the poll is over —
 // how many cards (s-contacts-1).
 func combinedSubtitle(rail view.Rail, spec kindSpec, done bool) string {
+	ticked, where, count := combinedParts(rail, spec, done)
+	parts := []string{ticked, where}
+	if count != "" {
+		parts = append(parts, count)
+	}
+	return strings.Join(parts, " · ")
+}
+
+// combinedParts are the pieces of that line: how many of the collections
+// are ticked, where — the one account, or how many —, and how many records
+// once the poll is over (empty before).
+func combinedParts(rail view.Rail, spec kindSpec, done bool) (ticked, where, count string) {
 	live, on := 0, 0
 	accounts := map[string]bool{}
 	var total *int
@@ -233,17 +245,17 @@ func combinedSubtitle(rail view.Rail, spec kindSpec, done bool) string {
 	}
 	// One account is named, as s-tasks-1 writes it — «2 of 3 lists ·
 	// nextcloud»; more are counted (s-contacts-1, s-agenda-1).
-	where := plural(len(accounts), "account")
+	where = plural(len(accounts), "account")
 	if len(accounts) == 1 {
 		for name := range accounts {
 			where = name
 		}
 	}
-	parts := []string{fmt.Sprintf("%d of %s", on, plural(live, collectionNouns[spec.kind])), where}
+	ticked = fmt.Sprintf("%d of %s", on, plural(live, collectionNouns[spec.kind]))
 	if done && total != nil {
-		parts = append(parts, plural(*total, recordNouns[spec.kind]))
+		count = plural(*total, recordNouns[spec.kind])
 	}
-	return strings.Join(parts, " · ")
+	return ticked, where, count
 }
 
 // bookSubtitle is the line under one book's title: its connection and how

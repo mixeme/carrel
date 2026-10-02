@@ -395,7 +395,7 @@ spec/fixtures/<screen>/<state>.json
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже, с теми же параметрами: `?print=1`, `?open=`, `?filter=`, `?compact=`, у календаря окно и роды |
-| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1) |
+| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1); у заметок (и у `/app/notes`): `?open={адрес строки}` и `?filter=` — «Filter by word» без сценариев, по названию и тексту (s-notes-1) |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта, события и задачи); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
@@ -1171,11 +1171,20 @@ type TaskRow struct {
 
 type NotesPage struct {
     Shell
-    Bar    ListBar
+    // Под заголовком: единый вид — где, сколько и чем лежат, «2 of 3
+    // notebooks · 86 notes · VJOURNAL» (число заметок — когда опрос
+    // закончен); одна тетрадь — «nextcloud · 2 notes · VJOURNAL», только для
+    // чтения — «nextcloud · the server granted no write access» (s-notes-1)
+    Subtitle Text
+    Bar    ListBar // Filter и FilterForm — «Filter by word» без сценариев (?filter=, по названию и тексту); сегменты Newest · Oldest · Title; Actions: New note (в едином виде со стрелкой «куда», s-notes-13), Import, Export
     Groups []NoteGroup
-    Poll   *PollBar
+    Poll   *PollBar // единый вид; nil — одна тетрадь или ничего не отмечено
+    Empty  *Notice  // ничего не отмечено: «No notebooks are ticked» и «Tick every notebook» (rail.tick.all, U-6.0), Poll — nil; nil — есть что показать
 }
-type NoteGroup struct { Rubric Text; Rows []NoteRow }
+// Месяц тетради по дате заметки, «August 2026»; без даты — последней
+// группой «No date»; по названию — одна группа без рубрики (s-notes-1).
+// Count — сколько заметок в группе
+type NoteGroup struct { Rubric Text; Count int; Rows []NoteRow }
 type NoteRow struct {
     Href      string
     Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
@@ -1187,10 +1196,11 @@ type NoteRow struct {
     Date      Text
     Tags      []Tag
     Changed   Text     // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
-    Badges    []Badge  // «2 источника» у связанной заметки
-    Sources   []Stamp  // источники связанной группы
+    Badges    []Badge  // «linked ×2» у связанной заметки
+    Sources   []Stamp  // источники связанной группы — подсказка столбца источника; Stamp такой строки в едином виде — их счёт, «2 sources» (s-notes-1)
     Menu      []MenuItem
     State     RecordState
+    On        bool     // строка открыта в панели подробностей (?open=, is-on; s-notes-1)
 }
 ```
 
@@ -1214,7 +1224,7 @@ type NoteRow struct {
 Source в её меню нет, и `Stamp` в её строках пуст. У хронологии источник
 свой у каждой строки, и Source в её меню есть всегда.
 
-**Панель у списка без сценариев** (s-contacts-1, s-agenda-1, s-tasks-1):
+**Панель у списка без сценариев** (s-contacts-1, s-agenda-1, s-tasks-1, s-notes-1):
 список с `?open={адрес строки}` приходит с панелью этой записи в
 `Shell.Details`, её строка — `On`, `Details.Close` — тот же список без
 `open`. Со сценариями панель — фрагмент по адресу записи (C-7.2), и `Close`

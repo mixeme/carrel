@@ -17,6 +17,43 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.143 — 2026-10-02
+
+The notebook and its panel as s-notes-1 draws them (the client's scan of
+the notes, groups Б and В).
+
+### Added
+
+- **`NotesPage.subtitle`**: «2 of 2 notebooks · 4 notes · VJOURNAL» on the
+  combined notebook (the frame names no account), «nextcloud · 2 notes ·
+  VJOURNAL» on one — how the notes lie on the server. **`NotesPage.empty`**:
+  nothing ticked — «No notebooks are ticked» and «Tick every notebook»
+  (`rail.tick.all`), `poll` is `null`.
+- **Months**: the notes stand under the month of their date, «August 2026»,
+  newest or oldest first, those without a date last under «No date»; by
+  title one list without a rubric. **`NoteGroup.count`**.
+- **«Filter by word» without scripts**: `ListBar.filterForm` of a notebook
+  and of the combined one, `?filter=` — the notes whose title or text holds
+  the word (C-5).
+- **The panel beside a notebook without scripts**: `?open={a row's href}`
+  answers with the note in `Shell.details`, `Details.close` the notebook
+  without it, its row **`NoteRow.on`**.
+
+### Changed
+
+- **A linked row of the combined notebook** says how many sources it has:
+  `stamp` «2 sources», the stamps in `sources` (s-notes-1).
+- The line under a combined list is built of its pieces (`combinedParts`):
+  an account named «radicale · vps» is not cut at its dot.
+
+### For consumers
+
+Draw the subtitle, the months and their counts, the filter form, the open
+row and the panel from the notebook's model. Fixtures: `app-notes-all/normal`
+is new (the combined notebook, «Что почитать про CRDT» linked, the panel of
+«Заметка со встречи 10.08»); regenerated — `app-notes/normal` (with the
+panel), `/source-error`, `app-notes-all/empty`.
+
 ## v0.2.142 — 2026-10-02
 
 The card and the form of a task as s-tasks-2 and s-tasks-3 draw them (the

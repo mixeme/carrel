@@ -110,7 +110,32 @@
     },
     "compact": null,
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/app/notes/a-nc-home/zapisi",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 2,
     "range": null,
     "segments": [
@@ -141,9 +166,229 @@
     "show": null,
     "total": null
   },
-  "details": null,
+  "details": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
+        "id": "record.edit",
+        "label": "Edit",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+        "icon": "i-expand",
+        "id": "record.open",
+        "label": "Open the note page",
+        "method": "GET"
+      },
+      {
+        "arrow": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "file": "file",
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026op=attach",
+            "icon": "i-up",
+            "id": "attach.add",
+            "label": "From this computer",
+            "method": "POST"
+          },
+          {
+            "enabled": true,
+            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e16\u0026for=attach\u0026k=notes\u0026uid=5c81-77aa-0d64",
+            "icon": "i-file",
+            "id": "attach.files",
+            "label": "From Files",
+            "method": "GET",
+            "target": "sheet"
+          }
+        ],
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026op=attach",
+        "icon": "i-up",
+        "id": "attach.add",
+        "label": "Attach",
+        "method": "POST"
+      }
+    ],
+    "attach": [],
+    "attendees": [],
+    "avatar": null,
+    "body": "",
+    "books": [],
+    "close": "/app/notes/a-nc-home/zapisi",
+    "date": "10 August 2026, 11:05",
+    "deleteNote": "",
+    "fields": [
+      {
+        "href": "",
+        "label": "Tags",
+        "mono": false,
+        "tags": [
+          {
+            "href": "/app/notes/a-nc-home/zapisi?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8",
+            "label": "встречи",
+            "on": false
+          },
+          {
+            "href": "/app/notes/a-nc-home/zapisi?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7",
+            "label": "релиз",
+            "on": false
+          }
+        ],
+        "value": ""
+      }
+    ],
+    "foreign": [],
+    "foreignShow": null,
+    "menu": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move",
+        "icon": "i-move",
+        "id": "record.move",
+        "label": "Move",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move?copy=1",
+        "icon": "i-dup",
+        "id": "record.copy",
+        "label": "Copy",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/export?uid=5c81-77aa-0d64",
+        "icon": "i-down",
+        "id": "record.export",
+        "label": "Export .md",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
+        "icon": "i-link",
+        "id": "publish",
+        "label": "Publish a link",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "csrf": "csrf",
+        "danger": true,
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e16",
+        "icon": "i-trash",
+        "id": "record.delete",
+        "label": "Delete note",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "related": [
+      {
+        "colour": "",
+        "href": "",
+        "kind": "event",
+        "stamp": "",
+        "title": "Синк-ап по релизу",
+        "when": "10 Aug",
+        "why": "Related to · in another collection"
+      }
+    ],
+    "rendered": [
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Договорились заморозить ветку в среду."
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт."
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "heading",
+        "level": 2,
+        "text": "Что делаем"
+      },
+      {
+        "checked": false,
+        "children": [
+          {
+            "checked": false,
+            "children": [],
+            "href": "",
+            "kind": "task",
+            "level": 0,
+            "text": "проверить changelog"
+          },
+          {
+            "checked": true,
+            "children": [],
+            "href": "",
+            "kind": "task",
+            "level": 0,
+            "text": "попросить у Артёма скриншоты"
+          }
+        ],
+        "href": "",
+        "kind": "list",
+        "level": 0,
+        "text": ""
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "heading",
+        "level": 2,
+        "text": "Отложено до следующего спринта"
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще."
+      }
+    ],
+    "source": {
+      "changed": "10 August 2026, 17:04",
+      "colour": "#4a6b52",
+      "compared": "",
+      "lastRead": "2 min ago",
+      "objects": null,
+      "path": "",
+      "readOnly": false,
+      "stamp": "nextcloud · Записи",
+      "uid": "5c81-77aa-0d64"
+    },
+    "subtitle": "nextcloud · Записи",
+    "title": "Заметка со встречи 10.08"
+  },
+  "empty": null,
   "groups": [
     {
+      "count": 2,
       "rows": [
         {
           "badges": [],
@@ -216,6 +461,7 @@
               "separator": true
             }
           ],
+          "on": true,
           "sources": [],
           "stamp": "",
           "state": "ok",
@@ -306,6 +552,7 @@
               "separator": true
             }
           ],
+          "on": false,
           "sources": [],
           "stamp": "",
           "state": "ok",
@@ -321,7 +568,7 @@
           "uid": "6d92-13ef-b408"
         }
       ],
-      "rubric": ""
+      "rubric": "August 2026"
     }
   ],
   "notices": [],
@@ -379,7 +626,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 6,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -416,7 +663,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 1,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",
@@ -663,6 +910,7 @@
       "target": "rail"
     }
   },
+  "subtitle": "nextcloud · 2 notes · VJOURNAL",
   "title": "Записи",
   "top": {
     "lock": null,

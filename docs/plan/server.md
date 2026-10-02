@@ -55,10 +55,6 @@
       сообщений — `Notice.Title`; `v0.2.113`: блок состояния рейла;
       `v0.2.114`: строки под заголовком копии, архива, публикации и
       davloom, сообщения Check, логина, письма, восстановления). Осталось:
-      - у списков задач и заметок строки под заголовком нет совсем — «2 of
-        3 lists · …» (s-tasks-1), «2 of 3 notebooks · …» (s-notes-1): это
-        скан этих разделов, как у контактов и календаря (у агенды —
-        `v0.2.118`);
       - подсказки полей: `Reply-To` (account-1, -8…-10, s-mail-9),
         `.well-known` (s-profile-2, -14, -16), четыре подсказки листа новой
         коллекции (s-profile-5), `https://`, `webcal://` (s-profile-10), три
@@ -190,6 +186,7 @@
 | Правка заметки без сценариев (скан заметок, НД1, U-8): документ — форма, `NoteDoc.Form` (адрес и метод сохранения, скрытые `_csrf`, `etag`, `readat`, заголовок `summary` и текст `description`), Save полосы — кнопка этой формы (`Action.Submits`); без подсказки у Tags | `v0.2.140` |
 | Список задач и его панель по `s-tasks-1` (скан задач, группы Б, В): `TasksPage.Subtitle`, `.Empty`, Print, `TaskGroup.Count`, `.Overdue`, `?open=` с `TaskRow.On` и `Details.Close`, поля панели в порядке кадра, `Details.AttachHint`; связанная строка единого вида — «2 sources»; одно подключение подзаголовок называет; фикстура `app-tasks-all/normal`; набор — данные задач кадров | `v0.2.141` |
 | Карточка и правка задачи по `s-tasks-2`, `-3` (скан задач, группы Г, Д): `TaskPage.Subtitle`, `TaskEditPage.Name`, `.Subtitle`, `.Source`; поля карточки в порядке кадра, просрочка тревогой, Print и Edit со значком; `FormRow.Disables` — имена через пробел (All day — оба времени), `FormRow.Suggest` и `GET /app/{kind}/…/{uid}/related` — `SuggestList` записей сеанса (Related to задачи и заметки); сняты `TaskPage.Percent`, `.Reminders`, `TaskEditPage.Done`, `.Percent`, `.Reminders`; фикстура `app-task-edit/new` | `v0.2.142` |
+| Тетрадь и её панель по `s-notes-1` (скан заметок, группы Б, В): `NotesPage.Subtitle` («… · VJOURNAL»), `.Empty`, группы по месяцу с `NoteGroup.Count`, «Filter by word» без сценариев (`FilterForm`, `?filter=`), `?open=` с `NoteRow.On`; связанная строка единого вида — «2 sources»; фикстура `app-notes-all/normal` | `v0.2.143` |
 
 S-30.4 (чужие клиенты, прокси у себя, вид письма у получателя, архив месячной
 давности) машиной не закрывается — перечислено в README сервера как ручное.

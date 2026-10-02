@@ -110,7 +110,32 @@
     },
     "compact": null,
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/app/notes/a-nc-home/zapisi",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 0,
     "range": null,
     "segments": [],
@@ -119,6 +144,7 @@
     "total": null
   },
   "details": null,
+  "empty": null,
   "groups": [],
   "notices": [
     {
@@ -460,6 +486,7 @@
       "target": "rail"
     }
   },
+  "subtitle": "nextcloud · VJOURNAL",
   "title": "Записи",
   "top": {
     "lock": null,

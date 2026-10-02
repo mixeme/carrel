@@ -117,7 +117,32 @@
     },
     "compact": null,
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/app/notes",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 0,
     "range": null,
     "segments": [
@@ -149,26 +174,27 @@
     "total": null
   },
   "details": null,
-  "groups": [],
-  "notices": [],
-  "poll": {
-    "actions": [],
-    "answeredAt": "",
-    "aside": "",
-    "every": 0,
-    "note": "",
-    "percent": 0,
-    "poll": "",
-    "running": false,
-    "sources": [],
-    "stream": "",
-    "summary": [
+  "empty": {
+    "actions": [
       {
-        "text": "No collections are ticked, so there is nothing to show. Tick collections in the rail."
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/sources/notes?back=%2Fapp%2Fnotes\u0026toggle=%2Fapp%2Fnotes",
+        "id": "rail.tick.all",
+        "label": "Tick every notebook",
+        "method": "POST",
+        "primary": true,
+        "target": "rail"
       }
     ],
-    "taskID": ""
+    "body": "Tick the notebooks to show in the rail, or all of them at once.",
+    "details": null,
+    "role": "info",
+    "title": "No notebooks are ticked"
   },
+  "groups": [],
+  "notices": [],
+  "poll": null,
   "print": {
     "range": "",
     "taken": "",
@@ -485,6 +511,7 @@
       "target": "rail"
     }
   },
+  "subtitle": "0 of 2 notebooks · VJOURNAL",
   "title": "Combined notebook",
   "top": {
     "lock": null,

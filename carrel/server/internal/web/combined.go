@@ -447,11 +447,21 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page := view.NotesPage{Shell: st.shell, Poll: st.poll}
 		var bad []unreadable
 		by := sortOf(r, view.KindNote)
-		page.Groups, page.Bar.Loaded, bad = s.noteGroups(tf, shown, spec.segment, true, filter, by)
+		// «Filter by word» without scripts (s-notes-1).
+		sift := strings.TrimSpace(r.URL.Query().Get("filter"))
+		kept := filterNotes(shown, sift)
+		page.Groups, page.Bar.Loaded, bad = s.noteGroups(tf, kept, spec.segment, true, filter, by)
+		page.Details = s.openRow(r, sess, base, spec, kept, noteRowsOn(page.Groups))
+		page.Bar.Filter, page.Bar.FilterForm = text(sift), s.listFilter(base, query, sift)
 		page.Bar.Segments = s.sortSegments(base, view.KindNote, by, r.URL.Query())
 		page.Bar.Actions = actions
 		page.Bar.Columns = columns()
 		page.Notices = appendUnreadable(page.Notices, bad)
+		page.Subtitle = text(notebookSubtitle(combinedNotebooks(page.Rail, spec, st.snap != nil && !st.snap.Running), false))
+		if st.task == nil && len(page.Notices) == 0 {
+			// Nothing ticked: no poll, and the notebook says why (U-6.0).
+			page.Poll, page.Empty = nil, s.nothingTicked(spec)
+		}
 		page.Print = header(counted(page.Bar.Loaded, "note"))
 		return page, nil
 	}

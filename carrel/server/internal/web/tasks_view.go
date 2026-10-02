@@ -60,6 +60,58 @@ func taskRowsOn(groups []view.TaskGroup) func(string) {
 	}
 }
 
+// noteRowsOn marks the rows of an address on: the note open in the panel.
+func noteRowsOn(groups []view.NoteGroup) func(string) {
+	return func(href string) {
+		for gi := range groups {
+			for ri := range groups[gi].Rows {
+				if groups[gi].Rows[ri].Href == href {
+					groups[gi].Rows[ri].On = true
+				}
+			}
+		}
+	}
+}
+
+// filterNotes keeps the notes whose title or text holds the word (s-notes-1,
+// «Filter by word»), as the client sifts them with scripts.
+func filterNotes(items []listed, filter string) []listed {
+	needle := strings.ToLower(strings.TrimSpace(filter))
+	if needle == "" {
+		return items
+	}
+	var out []listed
+	for _, it := range items {
+		title := strings.ToLower(cal.Text(it.pick("SUMMARY"), "SUMMARY"))
+		body := strings.ToLower(cal.Description(it.obj))
+		if strings.Contains(title, needle) || strings.Contains(body, needle) {
+			out = append(out, it)
+		}
+	}
+	return out
+}
+
+// notebookSubtitle is the line under a notebook's title: what the list of
+// any kind says, and how the notes lie on the server — «… · 86 notes ·
+// VJOURNAL» (s-notes-1); a notebook given no write says only that.
+func notebookSubtitle(line string, readOnly bool) string {
+	if readOnly {
+		return line
+	}
+	return line + " · VJOURNAL"
+}
+
+// combinedNotebooks is the line under the combined notebook (s-notes-1): how
+// many of the notebooks are ticked and, once the poll is over, how many
+// notes — no account: the frame names none.
+func combinedNotebooks(rail view.Rail, spec kindSpec, done bool) string {
+	ticked, _, count := combinedParts(rail, spec, done)
+	if count == "" {
+		return ticked
+	}
+	return ticked + " · " + count
+}
+
 // countTaskGroups puts each group's count by its rubric, the overdue one an
 // alarm (s-tasks-1): the client does not count (C-6.1).
 func countTaskGroups(groups []view.TaskGroup) {
