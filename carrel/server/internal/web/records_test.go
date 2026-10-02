@@ -236,15 +236,16 @@ func agendaLines(p view.AgendaPage) []string {
 	var out []string
 	for _, d := range p.Days {
 		for _, r := range d.Rows {
-			out = append(out, strings.Join([]string{string(d.Rubric), string(r.Time), string(r.Summary), string(r.Zone)}, "|"))
+			out = append(out, strings.Join([]string{string(d.Rubric), string(r.Time), string(r.Summary)}, "|"))
 		}
 	}
 	return out
 }
 
 // S-11: the week goes to the server as the window; series expand here; an
-// instance rewritten by another client replaces the instant it names; the
-// original zone shows only where it differs from the instance zone (C-10).
+// instance rewritten by another client replaces the instant it names; a row
+// is in the instance zone and prints no zone of its own (task 77: the zone
+// the event came in is in its card, at When).
 func TestAgendaWeekOverridesAndZones(t *testing.T) {
 	f := calendarFixture(t, func(h *harness) { h.cfg.Timezone = "Europe/Berlin" },
 		"series.ics", ics("BEGIN:VEVENT\nUID:series\nDTSTAMP:20260101T000000Z\nDTSTART:20260112T090000Z\nDTEND:20260112T093000Z\n"+
@@ -260,9 +261,9 @@ func TestAgendaWeekOverridesAndZones(t *testing.T) {
 
 	page := decode[view.AgendaPage](t, f.h.do(get(agenda+"?from=2026-01-12", f.sess)))
 	want := []string{
-		"Monday · 12 January|10:00|Standup|",
-		"Tuesday · 13 January|all day|Holiday|",
-		"Wednesday · 14 January|16:00|Call New York|America/New_York",
+		"Monday · 12 January|10:00|Standup",
+		"Tuesday · 13 January|all day|Holiday",
+		"Wednesday · 14 January|16:00|Call New York",
 	}
 	if got := agendaLines(page); strings.Join(got, "\n") != strings.Join(want, "\n") {
 		t.Errorf("week of 12 January:\n%s\nwant:\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
@@ -272,7 +273,7 @@ func TestAgendaWeekOverridesAndZones(t *testing.T) {
 	}
 
 	page = decode[view.AgendaPage](t, f.h.do(get(agenda+"?from=2026-01-19", f.sess)))
-	if got := agendaLines(page); strings.Join(got, "\n") != "Monday · 19 January|12:00|Standup moved|" {
+	if got := agendaLines(page); strings.Join(got, "\n") != "Monday · 19 January|12:00|Standup moved" {
 		t.Errorf("week of 19 January: %v", got)
 	}
 }

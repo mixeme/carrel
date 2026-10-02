@@ -150,8 +150,9 @@
         {
           "enabled": true,
           "href": "/app/calendar?from=2026-08-03",
+          "icon": "i-back",
           "id": "range.previous",
-          "label": "Previous",
+          "label": "Previous week",
           "method": "GET"
         },
         {
@@ -164,8 +165,9 @@
         {
           "enabled": true,
           "href": "/app/calendar?from=2026-08-17",
+          "icon": "i-next",
           "id": "range.next",
-          "label": "Next",
+          "label": "Next week",
           "method": "GET"
         },
         {
@@ -258,43 +260,7 @@
     },
     "total": null
   },
-  "days": [
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Monday · 10 August"
-    },
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Tuesday · 11 August"
-    },
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Wednesday · 12 August"
-    },
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Thursday · 13 August"
-    },
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Friday · 14 August"
-    },
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Saturday · 15 August"
-    },
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Sunday · 16 August"
-    }
-  ],
+  "days": [],
   "details": null,
   "empty": {
     "actions": [
@@ -1004,11 +970,7 @@
   },
   "subtitle": [
     {
-      "text": "0 of 8 calendars · 0 accounts · 10 – 16 August 2026 · "
-    },
-    {
-      "mark": "mono",
-      "text": "Europe/Moscow"
+      "text": "0 of 8 calendars · 0 accounts"
     }
   ],
   "title": "Combined calendar",

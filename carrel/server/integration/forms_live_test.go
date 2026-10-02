@@ -411,7 +411,9 @@ func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *da
 		mustRule(t, "repeat", got, "FREQ=WEEKLY", "BYDAY=MO", "WKST=MO", "COUNT=8", "INTERVAL=2")
 	}
 
-	// A server may keep the same instant in a zone of its own choosing —
+	// Another zone keeps the clock the form shows, 10:00 in Moscow becoming
+	// 10:00 in Yekaterinburg: the form is in the event's zone (s-agenda-3,
+	// v0.2.135). A server may keep the same instant in a zone of its own choosing —
 	// Yandex writes the time back in UTC and drops the VTIMEZONE. Carrel
 	// reports the difference, which is the honest answer; the file is then
 	// only asked for what the server did keep.
@@ -421,8 +423,8 @@ func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *da
 		t.Logf("the server rewrote the times (%v); it keeps them as:\n%s", movedTimes, got)
 		mustHave(t, "time zone", got, exceptions...)
 	} else {
-		mustHave(t, "time zone", got, append([]string{"DTSTART;TZID=Asia/Yekaterinburg:20260112T120000",
-			"DTEND;TZID=Asia/Yekaterinburg:20260112T130000", "TZID:Asia/Yekaterinburg", "BEGIN:VTIMEZONE"}, exceptions...)...)
+		mustHave(t, "time zone", got, append([]string{"DTSTART;TZID=Asia/Yekaterinburg:20260112T100000",
+			"DTEND;TZID=Asia/Yekaterinburg:20260112T110000", "TZID:Asia/Yekaterinburg", "BEGIN:VTIMEZONE"}, exceptions...)...)
 	}
 }
 

@@ -325,6 +325,9 @@ type pollOwner struct {
 	// instead of counting it — «Polled 5 of 6 sources · 14 events ·
 	// ‹baikal · Общий unavailable›» (s-agenda-1).
 	named bool
+	// timed: while the poll runs, the right of the bar says how long it
+	// has run — «0.8 s» (states-3, states-13).
+	timed bool
 	// missing is the line under the rows once the poll is over and a source
 	// did not answer: what is shown and what is not (states-6, states-9),
 	// for that many sources; nil — no line.
@@ -449,6 +452,8 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 			if down := refused + timedOut + unreachable + stopped; down > 0 && owner.missing != nil {
 				bar.Note = text(owner.missing(down))
 			}
+		} else if owner.timed && !snap.Started.IsZero() {
+			bar.Aside = text(runningFor(now.Sub(snap.Started)))
 		}
 	case snap.Running:
 		bar.Summary = line(fmt.Sprintf("Asking %s · %d answered · %s", plural(total, "source"), answered, owner.found(len(snap.Items))))
@@ -469,6 +474,18 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 	}
 	bar.Actions = []view.Action{stop, again}
 	return bar
+}
+
+// runningFor is how long a poll has run, as the right of its bar says it:
+// «0.8 s», «12.0 s»; past a minute in minutes and seconds, «1 min 20 s».
+func runningFor(d time.Duration) string {
+	if d < 0 {
+		d = 0
+	}
+	if d < time.Minute {
+		return fmt.Sprintf("%.1f s", d.Seconds())
+	}
+	return fmt.Sprintf("%d min %d s", int(d.Minutes()), int(d.Seconds())%60)
 }
 
 // pollTroubles names what went wrong, each kind of trouble once and only

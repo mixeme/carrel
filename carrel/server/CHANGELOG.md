@@ -17,6 +17,45 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.136 — 2026-10-02
+
+The agenda by the frames of task 77: a day without events is not printed
+(the owner's decision of 02.10.2026), the steps of the bar are icons, and
+the states have their own lines (s-agenda-1, states-13, -14, -15).
+
+### Changed
+
+- **`AgendaPage.days`** holds only the days with events: a week with
+  events has no empty rubric (s-agenda-1 lost its empty Wednesday), and a
+  window without any has no day at all. The published calendar's days too.
+- **`AgendaPage.empty`** also says that a window holds nothing — one line,
+  not seven empty days (states-15): «No events this week» (this day, this
+  month, in this range) and «Nothing in Личный from 2 to 8 November.»; the
+  combined calendar, once its poll is over, «Nothing in the ticked
+  calendars …». No buttons.
+- **`Range.presets`**: Previous and Next are named by the step and carry
+  their icon — «Previous week» `i-back`, «Next week» `i-next`, «Previous
+  day», «Next month» (s-agenda-1 draws them as icons with that title).
+- **`AgendaPage.subtitle`** of one calendar is its connection, the window
+  and how many events are in it — «nextcloud · 2 – 8 November 2026 · 0
+  events» (states-15), no zone; with nothing ticked the combined calendar
+  says only where it would look — «0 of 8 calendars · 0 accounts»
+  (states-14).
+- **`PollBar.aside`** of the calendar says how long the poll has run while
+  it runs — «0.8 s», past a minute «1 min 20 s» (states-3, states-13).
+
+### Removed
+
+- **`AgendaRow.zone`**: the row of an agenda prints no zone (task 77); the
+  zone an event came in is its card's, a badge at When. C-10.
+
+### For consumers
+
+Draw the agenda's days as they come, and its `empty` when there are none;
+Previous and Next by their icon, the label their title. Fixtures
+regenerated: `app-agenda/normal`, `/empty`, `app-agenda-all/normal`,
+`/empty`, `/partial`.
+
 ## v0.2.135 — 2026-10-02
 
 The mockup copy of Typecase `9e69804` (task 77): an event is edited in its

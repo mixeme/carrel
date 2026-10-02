@@ -1140,10 +1140,16 @@ func (s *Server) agendaRange(tf timeFmt, base, tag, kind string, from, to time.T
 	}
 	rng := &view.Range{From: text(tf.date(from)), To: text(tf.date(to.AddDate(0, 0, -1)))}
 	if kind != agendaRange {
+		// Previous · Today · Next lead the bar (s-agenda-1, task 77): the
+		// steps are icons named by the step — «Previous week».
+		step := map[string]string{agendaDay: "day", agendaMonth: "month"}[kind]
+		if step == "" {
+			step = "week"
+		}
 		rng.Presets = []view.Action{
-			{ID: "range.previous", Label: "Previous", Href: window(kind, back), Method: "GET", Enabled: true},
+			{ID: "range.previous", Label: text("Previous " + step), Icon: "i-back", Href: window(kind, back), Method: "GET", Enabled: true},
 			{ID: "range.current", Label: "Today", Href: href(todayQuery(kind)), Method: "GET", Enabled: true},
-			{ID: "range.next", Label: "Next", Href: window(kind, ahead), Method: "GET", Enabled: true},
+			{ID: "range.next", Label: text("Next " + step), Icon: "i-next", Href: window(kind, ahead), Method: "GET", Enabled: true},
 		}
 	}
 	// Switching the window keeps where the person is: today when today is in
@@ -1210,11 +1216,62 @@ func (s *Server) openInAgenda(r *http.Request, sess *session.Session, base strin
 	return nil
 }
 
-// agendaSubtitle is the line under the title of an agenda (s-agenda-1):
-// where — «5 of 7 calendars · 3 accounts» or the calendar's connection —,
-// the days of the window and the instance zone, monospaced.
+// agendaSubtitle is the line under the title of the combined calendar
+// (s-agenda-1): «5 of 7 calendars · 3 accounts», the days of the window and
+// the instance zone, monospaced.
 func agendaSubtitle(tf timeFmt, where string, from, to time.Time) view.Runs {
 	return view.Runs{{Text: text(where + " · " + tf.window(from, to) + " · ")}, {Text: text(tf.tz.String()), Mark: view.RunMono}}
+}
+
+// calendarSubtitle is the line under one calendar's title (states-15):
+// its connection, the days of the window and how many events are in it —
+// «nextcloud · 2 – 8 November 2026 · 0 events»; without the count when the
+// calendar did not answer.
+func calendarSubtitle(tf timeFmt, where string, from, to time.Time, events *int) view.Runs {
+	line := where + " · " + tf.window(from, to)
+	if events != nil {
+		line += " · " + plural(*events, "event")
+	}
+	return view.Runs{{Text: text(line)}}
+}
+
+// eventsIn counts the events of an agenda's days: the tasks due and the
+// notes the bar may put among them are not events.
+func eventsIn(days []view.AgendaDay) int {
+	n := 0
+	for _, d := range days {
+		for _, r := range d.Rows {
+			if r.Kind == view.KindEvent {
+				n++
+			}
+		}
+	}
+	return n
+}
+
+// windowEmpty is what an agenda says when its window holds nothing (the
+// owner's decision of 02.10.2026, states-15): one line for the window, not
+// a rubric for each of its days — «No events this week», «Nothing in
+// Личный from 2 to 8 November.»; where is the calendar, or the ticked ones.
+func windowEmpty(tf timeFmt, kind, where string, from, to time.Time) *view.Notice {
+	title := map[string]string{agendaDay: "No events this day", agendaMonth: "No events this month",
+		agendaRange: "No events in this range"}[kind]
+	if title == "" {
+		title = "No events this week"
+	}
+	a, b := from.In(tf.tz), to.In(tf.tz).AddDate(0, 0, -1)
+	var when string
+	switch {
+	case tf.dayKey(a) == tf.dayKey(b) || b.Before(a):
+		when = "on " + a.Format("2 January")
+	case a.Year() != b.Year():
+		when = "from " + a.Format("2 January 2006") + " to " + b.Format("2 January 2006")
+	case a.Month() != b.Month():
+		when = "from " + a.Format("2 January") + " to " + b.Format("2 January")
+	default:
+		when = "from " + a.Format("2") + " to " + b.Format("2 January")
+	}
+	return &view.Notice{Role: view.NoticeInfo, Title: text(title), Body: text("Nothing in " + where + " " + when + "."), Actions: []view.Action{}}
 }
 
 // agendaPrintAction is Print of an agenda's head (U-10): the same address,
@@ -1238,8 +1295,8 @@ func agendaPrint(tf timeFmt, from, to time.Time) string {
 func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	tf := c.tf
 	kind, from, to := agendaWindow(tf, r.URL.Query())
-	page := view.AgendaPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
-	page.Subtitle = agendaSubtitle(tf, connLabel(c.conn), from, to)
+	page := view.AgendaPage{Shell: s.buildShell(c.sess, collectionLabel(c.col)), Days: []view.AgendaDay{}}
+	page.Subtitle = calendarSubtitle(tf, connLabel(c.conn), from, to, nil)
 	// The export of a calendar takes the week the screen shows: that is where
 	// the range is (S-19). Every other list is handed over whole.
 	page.Bar.Actions = append(s.listActions(c, url.Values{
@@ -1280,6 +1337,11 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	}
 	var more []unreadable
 	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, shown, from, to, c.spec.segment, false)
+	events := eventsIn(page.Days)
+	page.Subtitle = calendarSubtitle(tf, connLabel(c.conn), from, to, &events)
+	if len(page.Days) == 0 && len(page.Notices) == 0 {
+		page.Empty = windowEmpty(tf, kind, collectionLabel(c.col), from, to)
+	}
 	page.Details = s.openInAgenda(r, c.sess, c.listPath(), shown, page.Days)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindEvent, items)
@@ -1380,7 +1442,6 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 				Target:   render.TargetDetails,
 				UID:      uid,
 				Time:     text(tf.timeLabel(at, tm.AllDay)),
-				Zone:     text(tf.zone(tm.Zone)),
 				Summary:  text(titleOr(cal.Text(it.pick("SUMMARY"), "SUMMARY"), summary)),
 				Location: text(cal.Text(it.pick("LOCATION"), "LOCATION")),
 				State:    linkedState(it.listed),
@@ -1398,7 +1459,6 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 				if !ov.Timing.Start.IsZero() {
 					occ.at, occ.allDay = ov.Timing.Start, ov.Timing.AllDay
 					occ.row.Time = text(tf.timeLabel(ov.Timing.Start, ov.Timing.AllDay))
-					occ.row.Zone = text(tf.zone(ov.Timing.Zone))
 				}
 				if ov.Summary != "" {
 					occ.row.Summary = text(ov.Summary)
@@ -1429,18 +1489,20 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 		}
 		return occs[i].order < occs[j].order
 	})
-	// Every day of the window stands, empty ones included (s-agenda-1: a day
-	// with nothing in it says so). Without them the list silently skips days
-	// and a week looks shorter than it is.
+	// A day without events is not printed (the owner's decision of
+	// 02.10.2026, task 77): a week with events has no empty rubric
+	// (s-agenda-1), and a window without any is one line, the page's Empty
+	// (states-15; windowEmpty).
 	byDay := map[string][]view.AgendaRow{}
 	for _, o := range occs {
 		k := tf.dayKey(o.at)
 		byDay[k] = append(byDay[k], o.row)
 	}
-	var days []view.AgendaDay
+	days := []view.AgendaDay{}
 	for day := from; day.Before(to); day = day.AddDate(0, 0, 1) {
-		rows := byDay[tf.dayKey(day)]
-		days = append(days, view.AgendaDay{Rubric: text(tf.dayRubric(day)), Count: len(rows), Rows: rows})
+		if rows := byDay[tf.dayKey(day)]; len(rows) > 0 {
+			days = append(days, view.AgendaDay{Rubric: text(tf.dayRubric(day)), Count: len(rows), Rows: rows})
+		}
 	}
 	return days, len(occs), bad
 }

@@ -161,8 +161,9 @@
         {
           "enabled": true,
           "href": "/app/calendar/a-nc-home/lichnyj?from=2026-08-03",
+          "icon": "i-back",
           "id": "range.previous",
-          "label": "Previous",
+          "label": "Previous week",
           "method": "GET"
         },
         {
@@ -175,8 +176,9 @@
         {
           "enabled": true,
           "href": "/app/calendar/a-nc-home/lichnyj?from=2026-08-17",
+          "icon": "i-next",
           "id": "range.next",
-          "label": "Next",
+          "label": "Next week",
           "method": "GET"
         },
         {
@@ -371,8 +373,7 @@
           "summary": "Синк-ап по релизу",
           "target": "details",
           "time": "10:00",
-          "uid": "8f1c-4a02-b7d3",
-          "zone": "Asia/Yekaterinburg"
+          "uid": "8f1c-4a02-b7d3"
         }
       ],
       "rubric": "Monday · 10 August"
@@ -457,36 +458,10 @@
           "summary": "Забрать документы",
           "target": "details",
           "time": "18:00",
-          "uid": "1d55-90fe-3c27",
-          "zone": ""
+          "uid": "1d55-90fe-3c27"
         }
       ],
       "rubric": "Tuesday · 11 August"
-    },
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Wednesday · 12 August"
-    },
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Thursday · 13 August"
-    },
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Friday · 14 August"
-    },
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Saturday · 15 August"
-    },
-    {
-      "count": 0,
-      "rows": [],
-      "rubric": "Sunday · 16 August"
     }
   ],
   "details": {
@@ -1437,11 +1412,7 @@
   },
   "subtitle": [
     {
-      "text": "nextcloud · 10 – 16 August 2026 · "
-    },
-    {
-      "mark": "mono",
-      "text": "Europe/Moscow"
+      "text": "nextcloud · 10 – 16 August 2026 · 2 events"
     }
   ],
   "title": "Личный",

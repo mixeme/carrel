@@ -133,7 +133,6 @@ type AgendaRow struct {
 	Colour   Colour `json:"colour"`
 	Stamp    Stamp  `json:"stamp"`
 	Time     Text   `json:"time"` // «10:00» или «all day»
-	Zone     Text   `json:"zone"` // исходный пояс, когда он отличается; иначе пусто
 	Summary  Text   `json:"summary"`
 	Location Text   `json:"location"`
 	// Badges — по важности: «Due» задачи, «Cancelled» отменённого

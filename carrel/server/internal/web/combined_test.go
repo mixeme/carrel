@@ -257,8 +257,8 @@ func TestCombinedAgendaTasksAndNotesMerge(t *testing.T) {
 			events = append(events, string(r.Summary)+" · "+strings.SplitN(string(r.Stamp), " · ", 2)[1])
 		}
 	}
-	// Seven days: the empty ones stand too (review Р-12, s-agenda-1).
-	if strings.Join(events, ", ") != "Gym · Home, Standup · Work, Dinner · Home" || len(agenda.Days) != 7 {
+	// The days with events: a day without any is not printed (task 77).
+	if strings.Join(events, ", ") != "Gym · Home, Standup · Work, Dinner · Home" || len(agenda.Days) != 2 {
 		t.Fatalf("agenda = %v (%d days)", events, len(agenda.Days))
 	}
 	if agenda.Bar.Range == nil || actionHref(t, agenda.Bar.Range.Presets, "range.next") != "/app/calendar?from=2026-09-14" {

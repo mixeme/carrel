@@ -209,7 +209,10 @@ func listOwner(lt *listTask) pollOwner {
 		found:      func(n int) string { return plural(n, recordNouns[lt.kind]) },
 		// The calendar names the source that did not answer (s-agenda-1);
 		// the other lists count it until their frames are read.
-		named:   lt.kind == view.KindEvent,
+		named: lt.kind == view.KindEvent,
+		// And says how long the poll has run (states-3, states-13); the
+		// frames of the other lists draw no time (states-8).
+		timed:   lt.kind == view.KindEvent,
 		missing: func(n int) string { return missingLine(lt.kind, n) },
 	}
 }
@@ -409,9 +412,15 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Bar.Compact = s.compactForm(r, spec.segment, base)
 		page.Bar.Actions = append(actions, s.agendaPrintAction(base, query))
 		page.Notices = appendUnreadable(page.Notices, bad)
-		if st.task == nil && len(page.Notices) == 0 {
-			// Nothing ticked: no poll, and the agenda says why (U-6.0).
+		switch {
+		case st.task == nil && len(page.Notices) == 0:
+			// Nothing ticked: no poll, and the agenda says why (U-6.0) —
+			// and where it would look, not when: nothing is shown
+			// (states-14).
 			page.Poll, page.Empty = nil, s.nothingTicked(spec)
+			page.Subtitle = view.Runs{{Text: text(combinedSubtitle(page.Rail, spec, false))}}
+		case st.snap != nil && !st.snap.Running && len(page.Days) == 0 && len(page.Notices) == 0:
+			page.Empty = windowEmpty(tf, kind, "the ticked calendars", from, to)
 		}
 		page.Print = header(agendaPrint(tf, from, to), counted(page.Bar.Loaded, "event"))
 		return page, nil

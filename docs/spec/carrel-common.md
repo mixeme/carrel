@@ -1042,7 +1042,7 @@ type ColumnItem struct {
 
 type Range struct {
     From, To Text
-    Presets  []Action // у агенды: Previous, Today, Next, Day · Week · Month и Range (range.range — показанное окно своим диапазоном, view=range с from и to; On, когда окно — диапазон); у хронологии пусто
+    Presets  []Action // у агенды: Previous, Today, Next — ссылки перед масштабом (s-agenda-1, задача 77): шаг назад и вперёд — значки i-back, i-next с подписью по шагу, «Previous week», «Next day», «Previous month» (у диапазона их нет); затем Day · Week · Month и Range (range.range — показанное окно своим диапазоном, view=range с from и to; On, когда окно — диапазон); у хронологии пусто
     Form     *Form    // произвольный диапазон: форма GET на Form.Action, поля from и to, «Show» её отправляет (Range.Action, s-contacts-7, s-agenda-1); без _csrf (C-11) и без подсказок; nil — его нет
 }
 
@@ -1083,17 +1083,29 @@ type ContactRow struct {
 
 type AgendaPage struct {
     Shell
-    // Под заголовком: где, окно и пояс экземпляра моноширинно — единый вид
+    // Под заголовком: единый вид — где, окно и пояс экземпляра моноширинно,
     // «5 of 7 calendars · 3 accounts · 10 – 16 August 2026 · ‹Europe/Moscow›»
-    // (подписки — календари, но не аккаунты), один календарь — «nextcloud ·
-    // 10 – 16 August 2026 · ‹Europe/Moscow›» (s-agenda-1)
+    // (подписки — календари, но не аккаунты; s-agenda-1), ничего не отмечено
+    // — только где, «0 of 7 calendars · 0 accounts» (states-14); один
+    // календарь — подключение, окно и сколько в нём событий, «nextcloud · 2 –
+    // 8 November 2026 · 0 events» (states-15; без счёта, когда календарь не
+    // ответил)
     Subtitle Runs
     Bar      ListBar // Actions: New event (единый вид — со стрелкой «куда», кнопка пишет в последнюю или первую отмеченную), Import, Export (окно), Print (i-print, тот же адрес с ?print=1); Range; Show; Compact
+    // Только дни с событиями: день без событий не печатается (решение
+    // владельца 02.10.2026, задача 77) — ни в неделе с событиями
+    // (s-agenda-1), ни в пустой; окно — Bar.Range
     Days     []AgendaDay
     Poll     *PollBar // единый вид; nil — один календарь или ничего не отмечено
-    Empty    *Notice  // ничего не отмечено: почему и кнопка «Tick every calendar» (rail.tick.all, U-6.0); nil — есть что показать
+    // Показать нечего, почему: ничего не отмечено — «No calendars are
+    // ticked» и кнопка «Tick every calendar» (rail.tick.all, U-6.0,
+    // states-14); в окне нет событий — одна строка на окно, «No events this
+    // week» (this day, this month, in this range) и «Nothing in Личный from 2
+    // to 8 November.», в едином виде — «in the ticked calendars», когда опрос
+    // кончен; без кнопок (states-15). nil — есть что показать
+    Empty    *Notice
 }
-type AgendaDay struct { Rubric Text; Count int; Rows []AgendaRow } // Rubric — «Monday · 10 August» (C-10); Count — строк в дне
+type AgendaDay struct { Rubric Text; Count int; Rows []AgendaRow } // Rubric — «Monday · 10 August» (C-10); Count — строк в дне, не меньше одной
 type AgendaRow struct {
     Kind      Kind // event, task (срок) или note на одной ленте
     Href      string
@@ -1101,8 +1113,7 @@ type AgendaRow struct {
     UID       string
     Colour    Colour
     Stamp     Stamp
-    Time      Text // «10:00» или «all day» (s-agenda-1)
-    Zone      Text // исходный пояс, когда он отличается; иначе пусто
+    Time      Text // «10:00» или «all day» в поясе экземпляра (s-agenda-1); пояса у строки нет — исходный пояс в карточке, бейджем у When (задача 77)
     Summary   Text
     Location  Text
     // По важности: «Due» задачи, «Cancelled» отменённого вхождения, статус
@@ -1504,7 +1515,7 @@ type PollBar struct {
     Every       int
     Summary     Runs // «Polled 5 of 7 · 12 records · 1 refused» кусками: у хронологии адреса моноширинно, не ответивший — тревогой (s-contacts-7); у календаря не ответивший назван тревогой вместо счёта — «Polled 5 of 6 sources · 14 events · ‹baikal · Общий unavailable›» (s-agenda-1)
     AnsweredAt  When // когда собрана показанная выдача
-    Aside       Text // справа на полосе моноширинно, когда опрос кончен: «2 min ago», с «from cache · » перед ним, когда источник ответил тем, что сеанс уже держал (s-agenda-1); пусто, пока опрос идёт
+    Aside       Text // справа на полосе моноширинно, когда опрос кончен: «2 min ago», с «from cache · » перед ним, когда источник ответил тем, что сеанс уже держал (s-agenda-1); пока опрос идёт — у календаря сколько он длится, «0.8 s», за минутой «1 min 20 s» (states-3, states-13), у прочих пусто
     Note        Text // под строками, когда опрос кончен и источник не ответил: «What arrived in time is shown. Records from the unavailable source are missing — not “there are none”, but “we have not seen them”.» (states-6; у контактов — «Cards … book», states-9); пусто — ответили все
     Running     bool
     Percent     int
@@ -3032,8 +3043,8 @@ type LossReport struct { // сервер принял запись, но что-
 | Что | Правило |
 |---|---|
 | **Время** | 12 или 24 часа — из настроек аккаунта. Часовой пояс — один на экземпляр, ставит администратор. Событие, показанное двум людям в двух зонах, — источник ошибок, а не удобство |
-| **Исходный пояс** | Показывается **только когда отличается** от зоны экземпляра, отдельной подписью рядом со временем |
-| **Агенда** | Рубрика дня — «Monday · 10 August»; время строки — «10:00» или «all day»; окно под заголовком — «10 – 16 August 2026», «28 September – 4 October 2026», «28 December 2026 – 3 January 2027», один день — «10 August 2026» (s-agenda-1) |
+| **Исходный пояс** | Показывается **только когда отличается** от зоны экземпляра, бейджем у When в карточке события («created 12:00 Asia/Yekaterinburg»); в строке агенды пояса нет — лента читается подряд в поясе экземпляра (задача 77). Правка события — в его поясе (S-11) |
+| **Агенда** | Рубрика дня — «Monday · 10 August», только у дня с событиями; время строки — «10:00» или «all day»; окно под заголовком — «10 – 16 August 2026», «28 September – 4 October 2026», «28 December 2026 – 3 January 2027», один день — «10 August 2026» (s-agenda-1); пустое окно — «Nothing in Личный from 2 to 8 November.», «… on 10 August.», «… from 28 September to 4 October.» (states-15) |
 | **Конец серии** | День `UNTIL` — последний день, в который серия может начаться, в зоне экземпляра: момент `UNTIL`, который в свой день раньше времени дня серии, кончает её днём раньше (`UNTIL=20261228T235959Z` у серии по понедельникам в 12:00 по Екатеринбургу — 28 декабря, а не 29-е, как в Москве). Тем же днём его показывает поле Until формы, и запись его (конец дня в зоне экземпляра) читается тем же днём |
 | **Дата** | Отдельной настройки нет. Первый день недели — из настроек аккаунта |
 | **День в списке** | У списка своя короткая форма: колонки строк (срок задачи, день заметки, строки поиска), список поля Related to и связи записи пишут «12 Aug», со временем — «12 Aug 18:00», год — только не нынешний: «12 Aug 2025» (s-tasks-1, s-notes-1, s-tasks-10, s-notes-2). Полная форма — в самой записи: «Monday, 10 August 2026, 10:00 – 11:00», «10 August 2026, 11:05» |

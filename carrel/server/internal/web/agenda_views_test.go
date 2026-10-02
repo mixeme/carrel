@@ -37,9 +37,9 @@ func agendaTitles(p view.AgendaPage) string {
 }
 
 // review Р-12 (s-agenda-1): the agenda is a list, and Day, Week and Month
-// are how much of it is shown — with a range of one's own beside them. Every
-// day of the window stands, the empty ones included: a day with nothing in
-// it says so instead of being skipped.
+// are how much of it is shown — with a range of one's own beside them. A day
+// without events is not printed (the owner's decision of 02.10.2026, task
+// 77): the window is the range's, and only the days with events stand.
 func TestAgendaWindows(t *testing.T) {
 	tz := time.UTC
 	today := time.Now().In(tz)
@@ -58,18 +58,26 @@ func TestAgendaWindows(t *testing.T) {
 		"other.ics", ics("BEGIN:VEVENT\nUID:other\nDTSTAMP:20260101T000000Z\nDTSTART:"+at(other, 9)+"\nDTEND:"+at(other, 10)+"\nSUMMARY:Other day\nEND:VEVENT"))
 	list := f.path("calendar")
 
-	week := decode[view.AgendaPage](t, f.h.do(get(list, f.sess)))
-	if len(week.Days) != 7 {
-		t.Fatalf("a week has %d days, want 7 with the empty ones", len(week.Days))
+	span := func(p view.AgendaPage) int {
+		t.Helper()
+		a, err1 := time.Parse("2 January 2006", string(p.Bar.Range.From))
+		b, err2 := time.Parse("2 January 2006", string(p.Bar.Range.To))
+		if err1 != nil || err2 != nil {
+			t.Fatalf("range %q — %q", p.Bar.Range.From, p.Bar.Range.To)
+		}
+		return int(b.Sub(a).Hours()/24) + 1
 	}
-	empty := 0
+	week := decode[view.AgendaPage](t, f.h.do(get(list, f.sess)))
+	if n := span(week); n != 7 {
+		t.Fatalf("a week spans %d days", n)
+	}
+	if len(week.Days) == 0 || len(week.Days) > 2 {
+		t.Errorf("the week prints %d days, want those with events", len(week.Days))
+	}
 	for _, d := range week.Days {
 		if len(d.Rows) == 0 {
-			empty++
+			t.Errorf("%s: a day without events is printed", d.Rubric)
 		}
-	}
-	if empty == 0 {
-		t.Error("no empty day in the week: they are skipped")
 	}
 
 	day := decode[view.AgendaPage](t, f.h.do(get(presetHref(t, week.Bar.Range, "range.day"), f.sess)))
@@ -77,8 +85,8 @@ func TestAgendaWindows(t *testing.T) {
 		t.Errorf("Day = %+v (%q)", day.Days, agendaTitles(day))
 	}
 	month := decode[view.AgendaPage](t, f.h.do(get(presetHref(t, week.Bar.Range, "range.month"), f.sess)))
-	if n := len(month.Days); n < 28 || n > 31 {
-		t.Errorf("Month has %d days", n)
+	if n := span(month); n < 28 || n > 31 || len(month.Days) != 2 {
+		t.Errorf("Month spans %d days and prints %d", n, len(month.Days))
 	}
 	titles := agendaTitles(month)
 	if !strings.Contains(titles, "Today event") || !strings.Contains(titles, "Other day") {
@@ -94,7 +102,7 @@ func TestAgendaWindows(t *testing.T) {
 	v.Set("from", first.Format("2006-01-02"))
 	v.Set("to", first.Format("2006-01-02"))
 	own := decode[view.AgendaPage](t, f.h.do(get(list+"?"+v.Encode(), f.sess)))
-	if len(own.Days) != 1 || own.Days[0].Rubric == "" {
+	if len(own.Days) != 1 || own.Days[0].Rubric == "" || agendaTitles(own) != "Other day" && first.Day() == other.Day() {
 		t.Errorf("a range of one day = %+v", own.Days)
 	}
 	if own.Bar.Range.From != own.Bar.Range.To {
@@ -103,8 +111,8 @@ func TestAgendaWindows(t *testing.T) {
 
 	// A range that ends before it starts is not obeyed: the week stands.
 	bad := decode[view.AgendaPage](t, f.h.do(get(list+"?view=range&from="+first.AddDate(0, 0, 3).Format("2006-01-02")+"&to="+first.Format("2006-01-02"), f.sess)))
-	if len(bad.Days) != 7 {
-		t.Errorf("a backwards range gave %d days, want the week", len(bad.Days))
+	if n := span(bad); n != 7 {
+		t.Errorf("a backwards range spans %d days, want the week", n)
 	}
 }
 

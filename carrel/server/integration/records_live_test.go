@@ -448,9 +448,9 @@ func liveCalendarIn(ctx context.Context, t *testing.T, app *liveApp, client *dav
 	mustHave(t, "new event", got, "UID:"+m[1], "DTSTART:20261005T093000Z", "TRIGGER:-PT10M", `SUMMARY:Live dentist\, `+suffix)
 
 	agenda := liveDecode[view.AgendaPage](t, "agenda", app.get(events+"?from=2026-10-05"))
-	// A week is seven days, and the days nothing falls on are shown empty
-	// (review Р-12): a gap in an agenda is a day, not a missing row.
-	if len(agenda.Notices) > 0 || len(agenda.Days) != 7 || len(agenda.Days[0].Rows) != 1 ||
+	// Only the days with events are printed (task 77): the Monday of the
+	// new event is the first.
+	if len(agenda.Notices) > 0 || len(agenda.Days) == 0 || agenda.Days[0].Rubric != "Monday · 5 October" || len(agenda.Days[0].Rows) != 1 ||
 		agenda.Days[0].Rows[0].Time != "09:30" {
 		t.Fatalf("agenda = %+v", agenda)
 	}
