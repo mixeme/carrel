@@ -71,7 +71,7 @@ func sameSegments(t *testing.T, what string, got []view.Action, frame string, nt
 		} else if string(a.Label) != want[i].text || a.Tally != "" {
 			t.Errorf("%s segment %d = %q, count %q; want %q (%s draws no count)", what, i, a.Label, a.Tally, want[i].text, frame)
 		}
-		if want[i].href != "" && screenPlace(a.Href) != screenPlace(want[i].href) {
+		if want[i].href != "" && !sameScreenPlace(a.Href, want[i].href) {
 			t.Errorf("%s segment %d goes to %q, %s to %q", what, i, a.Href, frame, want[i].href)
 		}
 		if a.On {
@@ -92,6 +92,20 @@ func sameSegments(t *testing.T, what string, got []view.Action, frame string, nt
 func screenPlace(href string) string {
 	path, query, _ := strings.Cut(href, "?")
 	return path[strings.LastIndex(path, "/")+1:] + "?" + query
+}
+
+// sameScreenPlace says whether the server's address goes where the frame's
+// does within the screen. A frame drawn on a section's combined view links
+// its order to the section's root («/app/contacts?sort=az», s-contacts-1,
+// Typecase ac658b0) while the set's list is one collection: there only the
+// query is the screen's place.
+func sameScreenPlace(server, frame string) bool {
+	if screenPlace(server) == screenPlace(frame) {
+		return true
+	}
+	path, query, _ := strings.Cut(frame, "?")
+	_, have, _ := strings.Cut(server, "?")
+	return strings.Count(strings.Trim(path, "/"), "/") == 1 && query == have
 }
 
 // segmentsOf picks the segments by the prefix of their ID.

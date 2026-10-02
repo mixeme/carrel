@@ -99,21 +99,31 @@ func Button(a view.Action, form string) w.Button {
 // pick sends the form with the library's script (Typecase's task 109); the
 // input's accessible name is the action's label, the screen's where its
 // frame names it otherwise. Without a script «Upload» beside it sends the
-// file (Upload).
+// file (Upload). One that sends the form it stands in (Submits: the photo of
+// a new card) picks a file that sends that form to the action's address
+// (FileField.To, Typecase's task 122): the typing goes with the file.
 func FileButton(a view.Action, form string) w.Button {
 	if a.File == "" || !a.Enabled || a.Method != "POST" {
 		return Button(a, form)
 	}
-	return w.Button{Label: string(a.Label), Icon: Icon(a.Icon), Kind: Kind(a), File: &w.FileField{Form: form, Name: a.File, Label: string(a.Label)}}
+	f := &w.FileField{Form: form, Name: a.File, Label: string(a.Label)}
+	if a.Submits {
+		f.Form, f.To = "", a.Href
+	}
+	return w.Button{Label: string(a.Label), Icon: Icon(a.Icon), Kind: Kind(a), File: f}
 }
 
 // Upload is the button «Upload» beside a button that picks a file
 // (FileButton): shown only on a page without a script, it sends the form
-// named form with the file picked; word is the screen's. nil where the
-// action picks no file.
+// named form with the file picked — or, for an action that sends the form
+// it stands in (Submits), that form to the action's address; word is the
+// screen's. nil where the action picks no file.
 func Upload(a view.Action, form, word string) *w.Button {
 	if a.File == "" || !a.Enabled || a.Method != "POST" {
 		return nil
+	}
+	if a.Submits {
+		return &w.Button{Label: word, Submit: true, To: a.Href, NoScript: true}
 	}
 	return &w.Button{Label: word, Form: form, NoScript: true}
 }

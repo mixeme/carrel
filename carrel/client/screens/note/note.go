@@ -84,9 +84,9 @@ func Screen(p *view.NotePage) w.Shell {
 }
 
 // Forms are the forms of the actions that post with none of their own: the
-// deletion, Attach «From this computer» with its file, the notices' buttons
-// and the menus' items that post (Sign out). The edit's form is its
-// document.
+// deletion, Attach «From this computer» with its file, an attachment's
+// Remove in the edit, the notices' buttons and the menus' items that post
+// (Sign out). The edit's form is its document.
 func Forms(p *view.NotePage) []w.PostForm {
 	out := append(bind.TopForms(p.Top), bind.MenuForms(p.Meta.Menu)...)
 	out = append(out, bind.NoticeForms(p.Notices)...)
@@ -98,7 +98,22 @@ func Forms(p *view.NotePage) []w.PostForm {
 			out = append(out, bind.ActionForm(a, formDelete))
 		}
 	}
+	if p.Doc.Mode == view.NoteEditing {
+		for _, a := range p.Meta.Attach {
+			for _, act := range a.Actions {
+				if act.Method == "POST" && act.Enabled && !act.Submits {
+					out = append(out, bind.ActionForm(act, removeID(act)))
+				}
+			}
+		}
+	}
 	return out
+}
+
+// removeID is the ID of the form of an attachment's Remove: its action's ID
+// and address, one per attachment.
+func removeID(a view.Action) string {
+	return a.ID + a.Href
 }
 
 // railParts is the rail of return: «Back to list», with the phone's short
@@ -185,8 +200,9 @@ func notices(p *view.NotePage) []w.MainPart {
 }
 
 // column is what the column holds read and in the edit alike: the
-// attachments with Attach and its arrow, the same note in other notebooks,
-// the source.
+// attachments with Attach and its arrow — in the edit each with its Remove
+// at the right (DocAttach.Remove, s-notes-20) —, the same note in other
+// notebooks, the source.
 func column(p *view.NotePage) []w.DocmetaSec {
 	var secs []w.DocmetaSec
 	var attach *view.Action
@@ -198,15 +214,38 @@ func column(p *view.NotePage) []w.DocmetaSec {
 	if attach != nil || len(p.Meta.Attach) > 0 {
 		rubric := w.Rubric{Text: "Attachments"}
 		if attach != nil {
-			// ждёт библиотеку: U-5.5 #36 — the arrow's items of a new note
-			// (Action.Submits) post forms of their own, not the form typed
+			// ждёт библиотеку: U-5.5 #43 — the frame draws the file a field
+			// of the edit that goes with Save (FileField.List); it goes by
+			// its own form, as the contract has it, until Save takes files
 			b := bind.Button(*attach, "")
 			b.Icon, b.Menu, b.Small = "", true, true
-			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
+			items := append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...)
+			for _, it := range items {
+				// A new note's file sends the document it is typed in (Submits,
+				// FileField.To): the column stands outside it.
+				if m, ok := it.(w.MenuItem); ok && m.File != nil && m.File.To != "" {
+					m.File.Form = formEdit
+				}
+			}
+			// ждёт библиотеку: U-5.5 #36 — a new note's From Files and
+			// «Upload» send the form they stand in (MenuItem.To), and the
+			// column stands outside the document
+			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: items, Width: w.MenuWidth212, Pop: w.MenuUnder}}}
 		}
 		var items []w.DocmetaPart
 		for _, a := range p.Meta.Attach {
 			at := w.DocAttach{Name: string(a.Name), Size: w.Dim{Parts: []w.Inline{w.Text(lead + string(a.Size))}}, Href: a.Href}
+			for _, act := range a.Actions {
+				if p.Doc.Mode != view.NoteEditing {
+					break
+				}
+				r := bind.Button(act, removeID(act))
+				r.Icon, r.Kind, r.Small = "", w.ButtonPlain, true
+				if act.Danger {
+					r.Kind = w.ButtonDanger
+				}
+				at.Remove = &r
+			}
 			switch {
 			case a.Inline:
 				at.Where = w.Badge{Label: inside}

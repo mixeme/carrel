@@ -254,6 +254,21 @@ func TestMeaningRules(t *testing.T) {
 		}}, []string{"(Input): a field outside a form", `(Button): submits form "note-edit", which is not on the page`}},
 		"a file of no form, of no name": {w.Menu{Items: []w.MenuPart{w.MenuItem{Label: "From this computer", File: &w.FileField{}}}},
 			[]string{"(FileField): no Form; a file field without Name"}},
+		// Typecase's task 122 (ac658b0): an item, a file and «Upload» of a new
+		// record's Attach send the form they stand in to their own address
+		// (To) — inside it; outside a form they send nothing.
+		"items that send the form they stand in": {w.Form{Action: "/new", Items: []w.FormPart{w.Field{Parts: []w.FieldPart{w.Drop{
+			Trigger: w.Button{Label: "Attach", Menu: true},
+			Menu: w.Menu{Items: []w.MenuPart{
+				w.MenuItem{Label: "From this computer", File: &w.FileField{Name: "file", To: "/new?op=attach"}},
+				w.MenuItem{Label: "From Files", To: "/new?op=pickfile"},
+				w.MenuItem{Label: "Upload", To: "/new?op=attach", NoScript: true},
+			}},
+		}}}}}, nil},
+		"items that send no form they stand in": {w.Menu{Items: []w.MenuPart{
+			w.MenuItem{Label: "From this computer", File: &w.FileField{Name: "file", To: "/new?op=attach"}},
+			w.MenuItem{Label: "From Files", To: "/new?op=pickfile"},
+		}}, []string{"(FileField): a file field with To outside a form that sends", "(MenuItem): a menu item with To outside a form that sends"}},
 	} {
 		found := guard.Meaning(c.tree, "post")
 		if len(found) != len(c.want) {

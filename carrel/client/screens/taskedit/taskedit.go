@@ -14,10 +14,19 @@ import (
 )
 
 // The IDs of the page's forms: the task's, which Save in the head submits
-// (Button.Form), and the deletion's, which posts with no form of its own.
+// (Button.Form) and the line of Save names (Runbar.Progress) — as the frame
+// names it (s-tasks-3) —, and the deletion's, which posts with no form of
+// its own.
 const (
-	formID     = "edit"
+	formID     = "task-edit"
 	formDelete = "delete"
+)
+
+// The screen's words (U-1.3) of the line of Save that sends files
+// (Typecase ac658b0): what it says before the library's script moves it.
+const (
+	saving  = "Saving · "
+	noBytes = "0 of 0 MB"
 )
 
 // The screen's words (U-1.3) for the shell: the mark, the search, the rail.
@@ -95,6 +104,8 @@ func width(name string) w.FieldWidth {
 //   - The head: the list's mark, the task's title (a new one's «New task»),
 //     the list and — overdue — by how long, as a badge in alarm; Cancel and
 //     Save, which submits the form by its name.
+//   - The line of Save that sends files (Runbar.Progress), hidden until the
+//     library's live layer moves it.
 //   - What the server lost of the last save (Loss): a notice over the form.
 //   - The form: Summary with the cursor and the description; When — All
 //     day, which makes the start and the due days, the dates and the times
@@ -125,7 +136,7 @@ func Screen(p *view.TaskEditPage) w.Shell {
 		title.Mark = &w.Mark{Colour: string(p.Source.Colour), Size: w.MarkH20}
 	}
 	h := w.Head{Title: title, Subs: bind.SubAlert(p.Subtitle), Acts: &w.Acts{Items: append(plain, primary...)}}
-	main := []w.MainPart{h}
+	main := []w.MainPart{h, w.Runbar{Progress: formID, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}}}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
 	if p.Loss != nil {
 		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2))
@@ -244,8 +255,9 @@ func field(r view.FormRow, at int) w.Field {
 func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 	var items []w.LinePart
 	if attach != nil {
-		// ждёт библиотеку: U-5.5 #36 — the arrow's items of a new task
-		// (Action.Submits) post forms of their own, not the form they stand in
+		// ждёт библиотеку: U-5.5 #43 — the frame draws the file a field of
+		// the form that goes with Save (FileField.List); it goes by its own
+		// form, as the contract has it, until Save takes files
 		b := bind.Button(*attach, "")
 		b.Menu = true
 		items = append(items, w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}})
@@ -266,7 +278,7 @@ func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 		}
 	}
 	if len(rows) == 0 {
-		items = append(items, w.Dim{Parts: []w.Inline{w.Text(nothing)}, Size: w.Dim11_5, Variant: w.DimWrap})
+		items = append(items, w.Dim{Parts: []w.Inline{w.Text(nothing)}, Size: w.Dim11_5, Variant: w.DimWrap, Empty: true})
 	}
 	return w.FieldSet{Rubric: w.Rubric{Text: files}, Items: []w.FieldSetPart{w.Line{Items: items, Gap: w.LineGap8, Block: true, Place: w.Grown}}}
 }

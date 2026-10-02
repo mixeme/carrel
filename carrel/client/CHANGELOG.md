@@ -4,6 +4,47 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.1 — 2026-10-03
+
+Typecase `ac658b0` (Carrel's tasks 112, 113, 115, 117, 122, 123 and the
+owner's decisions of 02.10.2026 on edits), server `v0.2.152`. The drafts
+that print otherwise went in first, unchanged (`0dce6a6`); the screens over
+them here.
+
+### Changed
+
+- **The line of Save** (`Runbar.Progress`) stands under the head of every
+  edit — a contact's that exists, an event's, a new event's, a task's, a
+  note's —, hidden until the library's live layer moves it; the edits'
+  forms take the frames' IDs (`contact-edit`, `event-edit`, `event-new`,
+  `task-edit`, `note-edit`).
+- **A new record's Attach and a new card's photo send the form they stand
+  in** (task 122): From Files and «Upload» to their own address
+  (`MenuItem.To`, `Button.To`), the file picked with the script
+  (`FileField.To`) — what was typed goes with them (`bind.MenuItems`,
+  `bind.Uploads`, `bind.FileButton`, `bind.Upload`).
+- **The timeline's «⋯»** opens its menu (task 112): the twin of Columns.
+- **A note's attachment in its edit** has its Remove at the right
+  (`DocAttach.Remove`, `s-notes-20`).
+- «Nothing attached» is the words of an empty list (`Dim.Empty`).
+- The meaning guard's table: an item or a file field that sends the form it
+  stands in (`To`) — only inside a form that sends.
+
+### Closed
+
+- U-5.5 row 36 for the new task and the new event; row 22 narrowed to the
+  twin of Columns; row 19 without the «⋯» of `states-8`, `-9`.
+
+### Not yet
+
+- **A file of an edit with its Save** (row 43, the owner's decision of
+  02.10.2026): the frames draw the file and the photo a field of the edit's
+  form; the library's form prints no multipart without a script, and the
+  server's Save takes no file yet (debt C26). The file goes by its own form,
+  as before.
+- **A new note's From Files and «Upload»** (row 36): the column stands
+  outside the note's form.
+
 ## v0.4.0 — 2026-10-03
 
 The notes section: the fourth section built whole. Typecase `d29ecf8`,

@@ -98,6 +98,23 @@ func TestMenuItems(t *testing.T) {
 	})
 	same(t, "its Upload", bind.Uploads(attach, "Upload"), []w.MenuPart{w.MenuItem{Label: "Upload", NoScript: true, Form: "attach.add"}})
 	same(t, "the form of the item with a file", bind.MenuForms(attach), []w.PostForm{{ID: "attach.add", Action: "/e?op=attach", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}, File: "file"}})
+
+	// The items of a new record's Attach send the form they stand in to
+	// their own address (Action.Submits, Typecase's task 122): the file's
+	// item picks a file that sends the form at once with the library's
+	// script (FileField.To), its «Upload» sends it without one, From Files
+	// sends it as it is (MenuItem.To) — and none of them has a form of its
+	// own.
+	fresh := []view.MenuItem{
+		{Action: view.Action{ID: "attach.add", Label: "From this computer", Icon: "i-up", Href: "/new?op=attach", Method: "POST", Enabled: true, CSRF: "c", File: "file", Submits: true}},
+		{Action: view.Action{ID: "attach.files", Label: "From Files", Icon: "i-file", Href: "/new?op=pickfile", Method: "POST", Enabled: true, CSRF: "c", Submits: true}},
+	}
+	same(t, "a new record's items", bind.MenuItems(fresh, ""), []w.MenuPart{
+		w.MenuItem{Icon: "up", Label: "From this computer", File: &w.FileField{Name: "file", Label: "From this computer", To: "/new?op=attach"}},
+		w.MenuItem{Icon: "file", Label: "From Files", To: "/new?op=pickfile"},
+	})
+	same(t, "their Upload", bind.Uploads(fresh, "Upload"), []w.MenuPart{w.MenuItem{Label: "Upload", NoScript: true, To: "/new?op=attach"}})
+	same(t, "their forms", bind.MenuForms(fresh), []w.PostForm(nil))
 }
 
 func TestFileButton(t *testing.T) {
@@ -114,6 +131,14 @@ func TestFileButton(t *testing.T) {
 	replace.Enabled, replace.Reason = false, "Read-only"
 	same(t, "switched off: no file", bind.FileButton(replace, "photo.replace"), w.Button{Label: "Replace", State: w.ButtonDisabled, Reason: "Read-only"})
 	same(t, "switched off: no Upload", bind.Upload(replace, "photo.replace", "Upload"), (*w.Button)(nil))
+
+	// A new card's photo sends the form it stands in (Action.Submits,
+	// Typecase's task 122): the picked file at once with the script
+	// (FileField.To), «Upload» without it — the typing goes with the file.
+	add := view.Action{ID: "photo.add", Label: "Add", Href: "/new/photo-preview?op=upload", Method: "POST", Enabled: true, CSRF: "c", File: "photo", Submits: true}
+	same(t, "a new card's photo", bind.FileButton(add, "photo.add"),
+		w.Button{Label: "Add", File: &w.FileField{Name: "photo", Label: "Add", To: "/new/photo-preview?op=upload"}})
+	same(t, "its Upload", bind.Upload(add, "photo.add", "Upload"), &w.Button{Label: "Upload", Submit: true, To: "/new/photo-preview?op=upload", NoScript: true})
 }
 
 func TestNavItem(t *testing.T) {

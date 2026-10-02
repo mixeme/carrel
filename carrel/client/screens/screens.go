@@ -183,8 +183,8 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.ContactTimelinePage).Title) },
 		Forms:  func(model any) []widget.PostForm { return timeline.Forms(model.(*view.ContactTimelinePage)) },
 		Waits: []Wait{
-			{Row: 22, Control: ".Items(Bar).More(Button)"},    // ждёт библиотеку: U-5.5 #22
-			{Row: 20, Fixture: "app-contact-timeline/normal"}, // ждёт библиотеку: U-5.5 #20
+			{Row: 22, Control: ".Items(Bar).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #22
+			{Row: 20, Fixture: "app-contact-timeline/normal"},                        // ждёт библиотеку: U-5.5 #20
 		},
 	},
 	{
@@ -286,16 +286,17 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.NotePage).Title) },
 		Forms:  func(model any) []widget.PostForm { return note.Forms(model.(*view.NotePage)) },
 		Waits: []Wait{
-			{Row: 40, Fixture: "app-note/normal"},                       // ждёт библиотеку: U-5.5 #40
-			{Row: 40, Fixture: "app-note-edit/normal"},                  // ждёт библиотеку: U-5.5 #40
-			{Row: 42, Fixture: "app-note-edit/new"},                     // ждёт библиотеку: U-5.5 #42
-			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Button)"}, // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Seg)"},    // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Docbar).Items(Button)"},          // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Docbar).More(Button)"},           // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Docbar).End(Check)"},             // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Docbar).End(Seg)"},               // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Docbar).End(Button)"},            // ждёт библиотеку: U-5.5 #41
+			{Row: 40, Fixture: "app-note/normal"},                                       // ждёт библиотеку: U-5.5 #40
+			{Row: 40, Fixture: "app-note-edit/normal"},                                  // ждёт библиотеку: U-5.5 #40
+			{Row: 42, Fixture: "app-note-edit/new"},                                     // ждёт библиотеку: U-5.5 #42
+			{Row: 36, Control: ".Title(Rubric).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #36
+			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Button)"},                 // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Seg)"},                    // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Docbar).Items(Button)"},                          // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Docbar).More(Button)"},                           // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Docbar).End(Check)"},                             // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Docbar).End(Seg)"},                               // ждёт библиотеку: U-5.5 #41
+			{Row: 41, Control: ".Items(Docbar).End(Button)"},                            // ждёт библиотеку: U-5.5 #41
 		},
 	},
 }

@@ -42,7 +42,10 @@ func submitWithFile(path string, sess *session.Session, form url.Values, field, 
 // it. Nothing is written before Save.
 func TestNewEventAttachIsTheFrame(t *testing.T) {
 	// «From this computer» is the label of its file input (Typecase's task
-	// 109), «From Files» a button.
+	// 109), «From Files» a button. Since Typecase ac658b0 the frame draws the
+	// file as a field of the form that goes with Save (the owner's decision
+	// of 02.10, note 34): Save takes no file yet — the server's debt C26
+	// (plan/client.md) —, and the file goes by its own step, as below.
 	items := strings.Join(frameMenu(t, "s-agenda-15"), "\n")
 	if !strings.Contains(items, "From this computer [i-up]") || !strings.Contains(items, "From Files [i-file]") {
 		t.Fatal("s-agenda-15 draws no Attach with its arrow: read the frame again")

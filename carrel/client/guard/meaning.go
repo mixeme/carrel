@@ -272,6 +272,10 @@ var contract = map[string]rule{
 			return ""
 		case c.str("Form") != "": // submits a PostForm of the page (Sign out, Typecase's task 68)
 			return ""
+		case c.str("To") != "" && c.inForm: // sends the form it stands in to its own address (Typecase's task 122)
+			return ""
+		case c.str("To") != "":
+			return "a menu item with To outside a form that sends"
 		case c.str("Name") != "" && c.inForm:
 			return ""
 		case c.str("Name") != "":
@@ -283,11 +287,21 @@ var contract = map[string]rule{
 	// label a button or a menu's item is (Button.File, MenuItem.File) — «From
 	// this computer», the photo's Replace — sends its file under its Name
 	// with a PostForm of the page (Form), which «Upload» beside it submits
-	// without a script (NoScript, a Button or a MenuItem with Form).
+	// without a script (NoScript, a Button or a MenuItem with Form). One of a
+	// new record's form (To, Typecase's task 122) sends the form it stands in
+	// to its own address, as its «Upload» does (a Button or a MenuItem with
+	// To): it must stand in one.
 	"FileField": func(c control) string {
 		var msg []string
-		if m := needs("Form")(c); m != "" {
-			msg = append(msg, m)
+		switch {
+		case c.str("Form") == "" && c.str("To") != "":
+			if !c.inForm {
+				msg = append(msg, "a file field with To outside a form that sends")
+			}
+		default:
+			if m := needs("Form")(c); m != "" {
+				msg = append(msg, m)
+			}
 		}
 		if c.str("Name") == "" {
 			msg = append(msg, "a file field without Name")

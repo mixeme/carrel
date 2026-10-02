@@ -91,8 +91,16 @@ func TestTimelineIsTheFrame(t *testing.T) {
 	}
 
 	// The card's «⋯» in the panel: a button with its menu, drawn closed
-	// (task 49), the menu the card's own.
-	sameMenu(t, "timeline card", page.Card.Menu, "s-contacts-7")
+	// (task 49), the menu the card's own — the panel's, not the bar's «⋯»
+	// with the twin of Columns before it (Typecase's task 112, ac658b0).
+	_, panel, ok := strings.Cut(frame, `class="tc-side`)
+	if !ok {
+		t.Fatal("s-contacts-7 draws no panel: read the frame again")
+	}
+	cardMenu := frameMenuIn(t, "s-contacts-7", panel)
+	if g := serverMenu(page.Card.Menu); !equalStrings(g, cardMenu) {
+		t.Errorf("timeline card «⋯» = %q,\nwant (s-contacts-7) %q", g, cardMenu)
+	}
 
 	// The run bar in pieces.
 	bar := frameRunbar.FindStringSubmatch(frame)

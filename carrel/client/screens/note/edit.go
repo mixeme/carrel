@@ -9,7 +9,8 @@ import (
 // The screen's words (U-1.3) of the edit: the accessible name of the title
 // and the text (the frame names both «Text»), the bar's buttons of the
 // markup, «⋯», Auto-save, where the draft is kept and the key that saves, the
-// focus.
+// focus; what the line of Save that sends files says before the library's
+// script moves it (Typecase ac658b0).
 const (
 	text     = "Text"
 	bold     = "B"
@@ -24,6 +25,8 @@ const (
 	draft    = "Draft in this window ·"
 	saveKey  = "Ctrl+S"
 	focus    = "Focus"
+	saving   = "Saving · "
+	noBytes  = "0 of 0 MB"
 )
 
 // The names of the contract the edit places by (C-6.8, C-7.5): the title and
@@ -51,8 +54,9 @@ var ro = w.Badge{Label: "ro", Place: w.Pushed}
 
 // edit is the note in its edit (s-notes-20): the bar — Save, which submits
 // the document, Cancel, the client's buttons of the markup, Attach, «⋯»,
-// Auto-save, the draft, the key, the width, Focus —; the notices; the
-// document, which is the form — the title, the fields (Notebook with the
+// Auto-save, the draft, the key, the width, Focus —; the line of Save that
+// sends files (Runbar.Progress), hidden until the library's live layer moves
+// it; the notices; the document, which is the form — the title, the fields (Notebook with the
 // notebooks' marks, Date and Time monospaced, Tags, Related to as the record
 // chosen), the text, the line of the properties Carrel does not know —; the
 // column without the tags and related records, which are fields here.
@@ -96,7 +100,7 @@ func edit(p *view.NotePage) []w.MainPart {
 			w.Button{Folds: true, Label: focus, Icon: "focus", Title: focus},
 		},
 	}
-	main := []w.MainPart{bar}
+	main := []w.MainPart{bar, w.Runbar{Progress: formEdit, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}}}
 	main = append(main, notices(p)...)
 	doc := bind.DocForm(p.Doc.Form, formEdit)
 	var title, body w.Area

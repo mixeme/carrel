@@ -20,16 +20,20 @@ import (
 var (
 	frameRowActs = regexp.MustCompile(`(?s)<td class="tc-acts">(.*?)</td>`)
 	frameDanger  = regexp.MustCompile(`(?s)<div class="tc-danger"><button[^>]*>(.*?)</button>(.*?)</div>`)
+	// A row's «⋯» with its menu (Typecase's task 117, ac658b0) is a details
+	// after the row's buttons: its items are their twins, not buttons of the
+	// row.
+	frameRowDrop = regexp.MustCompile(`(?s)<details class="tc-drop">.*?</details>`)
 )
 
 // frameRows are the labelled buttons of each row of a frame's table, the
-// bare «⋯» left out.
+// «⋯» and the twins in its menu left out.
 func frameRows(t *testing.T, id string) [][]string {
 	t.Helper()
 	var out [][]string
 	for _, m := range frameRowActs.FindAllStringSubmatch(mockupFrame(t, id), -1) {
 		row := []string{}
-		for _, b := range frameButton.FindAllStringSubmatch(m[1], -1) {
+		for _, b := range frameButton.FindAllStringSubmatch(frameRowDrop.ReplaceAllString(m[1], ""), -1) {
 			if label := frameText(b[1]); label != "" {
 				row = append(row, label)
 			}

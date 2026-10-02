@@ -14,8 +14,16 @@ import (
 )
 
 // formID names the card's form for Save, which stands in the head, outside
-// it (Button.Form).
-const formID = "edit"
+// it (Button.Form), and for the line of Save (Runbar.Progress) — as the
+// frames name it (s-contacts-3, -4).
+const formID = "contact-edit"
+
+// The screen's words (U-1.3) of the line of Save that sends files
+// (Typecase ac658b0): what it says before the library's script moves it.
+const (
+	saving  = "Saving · "
+	noBytes = "0 of 0 MB"
+)
 
 // none is the screen's word (U-1.3) in an empty field the model gives no
 // pattern for: the dash the frames draw as its placeholder (s-contacts-3,
@@ -79,6 +87,9 @@ func width(name string) w.FieldWidth {
 //     «Back to list» for a new card), the book's sources, the foot.
 //   - The head: the name (a new card's «New contact»), the book, Cancel and
 //     Save, which submits the form by its name.
+//   - The line of Save that sends files (Runbar.Progress), hidden until the
+//     library's live layer moves it — on a card that exists: the new card's
+//     frame has none (s-contacts-27).
 //   - What the server lost of the last save (Loss): a notice over the form,
 //     not a lock (C-9).
 //   - The form: the photo with what can be done to it, and what was done
@@ -109,6 +120,9 @@ func Screen(p *view.ContactEditPage) w.Shell {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}
 	main := []w.MainPart{h}
+	if p.UID != "" {
+		main = append(main, w.Runbar{Progress: formID, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}})
+	}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
 	if p.Loss != nil {
 		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2))
@@ -146,12 +160,13 @@ func Screen(p *view.ContactEditPage) w.Shell {
 }
 
 // Forms are the forms of the photo's actions, which post with none of their
-// own, each under its action's ID, of the notices' buttons and of the menus'
-// items that post (Sign out).
+// own, each under its action's ID — not a new card's, which send the form
+// they stand in (Submits) —, of the notices' buttons and of the menus' items
+// that post (Sign out).
 func Forms(p *view.ContactEditPage) []w.PostForm {
 	out := append(bind.TopForms(p.Top), bind.NoticeForms(p.Notices)...)
 	for _, a := range p.Photo.Actions {
-		if a.Method == "POST" && a.Enabled {
+		if a.Method == "POST" && a.Enabled && !a.Submits {
 			out = append(out, bind.ActionForm(a, a.ID))
 		}
 	}
@@ -170,10 +185,15 @@ func visible(rows []view.FormRow) []view.FormRow {
 }
 
 // photo is the photo's field: the picture or the initials, and beside it
-// what can be done to it and what was done to it (Note).
+// what can be done to it and what was done to it (Note). A new card's
+// photo sends the form it stands in, the typing with the file (Submits,
+// Typecase's task 122).
 func photo(b view.PhotoBlock) w.Field {
 	var side []w.FieldPart
 	var line []w.LinePart
+	// ждёт библиотеку: U-5.5 #43 — the frames draw the photo a field of the
+	// form that goes with Save (FileField.Preview); it goes by its own form,
+	// as the contract has it, until Save takes files
 	for _, a := range b.Actions {
 		btn := bind.FileButton(a, a.ID)
 		if btn.File != nil {

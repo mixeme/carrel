@@ -183,13 +183,19 @@ func bar(p *view.ContactTimelinePage) w.Bar {
 		trigger.Secondary = true
 		cols.Trigger, cols.Menu.Pop = trigger, w.MenuUnder
 		items = append(items, cols)
+		// «⋯» holds the twin of what leaves the bar as it narrows
+		// (components-19, Typecase's task 112: s-contacts-7, -14): Columns.
+		// ждёт библиотеку: U-5.5 #22 — the twin of Columns is an item with
+		// nothing to follow or send: the menu that is a form of the columns
+		// stands in no item
+		items = append(items, w.Drop{
+			Trigger: w.Button{Icon: "dots", Title: "More"},
+			More:    true,
+			Menu:    w.Menu{Items: []w.MenuPart{w.MenuItem{Icon: bind.Icon(c.Icon), Label: string(c.Label)}}, Pop: w.MenuUnderEnd, Inline: true},
+		})
 	}
 	return w.Bar{
-		Items: items,
-		// ждёт библиотеку: U-5.5 #22 — the bar's «⋯»: a button with no menu
-		// of what left the bar (components-19); a tick that is a form has no
-		// twin in a menu
-		More:    &w.Button{Icon: "dots", Title: "More"},
+		Items:   items,
 		Right:   &w.BarRight{Items: []w.BarPart{w.Mono{Text: "newest first"}}, Secondary: true},
 		Variant: w.BarWide,
 	}

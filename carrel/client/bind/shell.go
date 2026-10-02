@@ -89,7 +89,11 @@ func TopForms(t view.TopBar) []w.PostForm {
 // that posts (Sign out) submits the form of its ID (MenuForms), one that
 // carries a file (Action.File: «From this computer») is the label of the
 // file input of that form, which the browser opens without a script
-// (Typecase's task 109; its «Upload» — Uploads); the mark of
+// (Typecase's task 109; its «Upload» — Uploads); an item that sends the form
+// it stands in (Action.Submits: Attach of a new record) sends it to its own
+// address (MenuItem.To, Typecase's task 122) — with a file, the file picked
+// sends it at once with the library's script (FileField.To), and «Upload»
+// without one; the mark of
 // its collection (Colour) and the muted words at its end (Aside, «last
 // used»); one switched off says why (Reason), and one of a collection that
 // cannot be written to carries ro, the screen's word for it; a destructive
@@ -104,6 +108,10 @@ func MenuItems(items []view.MenuItem, ro string) []w.MenuPart {
 		switch {
 		case !it.Enabled:
 			m.Reason = string(it.Reason)
+		case it.Method == "POST" && it.Submits && it.File != "":
+			m.File = &w.FileField{Name: it.File, Label: string(it.Label), To: it.Href}
+		case it.Method == "POST" && it.Submits:
+			m.To = it.Href
 		case it.Method == "POST" && it.File != "":
 			m.File = &w.FileField{Form: it.ID, Name: it.File, Label: string(it.Label)}
 		case it.Method == "POST":
@@ -132,11 +140,16 @@ func MenuItems(items []view.MenuItem, ro string) []w.MenuPart {
 // (MenuItems), each shown only on a page without a script and sending the
 // form of its item's ID with the file picked (Typecase's task 109); word is
 // the screen's. The frames draw them after the menu's items (s-agenda-6,
-// s-tasks-7).
+// s-tasks-7). The «Upload» of an item that sends the form it stands in
+// (Submits) sends that form to the item's address (MenuItem.To).
 func Uploads(items []view.MenuItem, word string) []w.MenuPart {
 	var out []w.MenuPart
 	for _, it := range items {
-		if it.Method == "POST" && it.Enabled && it.File != "" {
+		switch {
+		case it.Method != "POST" || !it.Enabled || it.File == "":
+		case it.Submits:
+			out = append(out, w.MenuItem{Label: word, NoScript: true, To: it.Href})
+		default:
 			out = append(out, w.MenuItem{Label: word, NoScript: true, Form: it.ID})
 		}
 	}
@@ -144,11 +157,12 @@ func Uploads(items []view.MenuItem, word string) []w.MenuPart {
 }
 
 // MenuForms are the forms of a menu's items that post (MenuItems), by their
-// IDs, for the page's end.
+// IDs, for the page's end; an item that sends the form it stands in
+// (Submits) has none of its own.
 func MenuForms(items []view.MenuItem) []w.PostForm {
 	var out []w.PostForm
 	for _, it := range items {
-		if it.Method == "POST" && it.Enabled {
+		if it.Method == "POST" && it.Enabled && !it.Submits {
 			out = append(out, ActionForm(it.Action, it.ID))
 		}
 	}

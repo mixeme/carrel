@@ -23,20 +23,32 @@ var (
 	frameButtonOrSummary = regexp.MustCompile(`(?s)<(?:button|summary)\b[^>]*>(.*?)</(?:button|summary)>`)
 	frameIcon            = regexp.MustCompile(`#(i-[\w-]+)`)
 	frameTag             = regexp.MustCompile(`(?s)<svg.*?</svg>|<[^>]+>`)
+	// The row a file picked in an edit becomes (Typecase ac658b0,
+	// MenuItem.Row) waits in a template inside its item's label: the words
+	// of that row («{name}», Remove), not of the item.
+	frameTemplate = regexp.MustCompile(`(?s)<template\b.*?</template>`)
 )
 
 // frameText is what a piece of a frame says, tags and icons dropped.
 func frameText(s string) string {
-	return strings.Join(strings.Fields(html.UnescapeString(frameTag.ReplaceAllString(s, " "))), " ")
+	return strings.Join(strings.Fields(html.UnescapeString(frameTag.ReplaceAllString(frameTemplate.ReplaceAllString(s, " "), " "))), " ")
 }
 
 // frameMenu is the «⋯» a frame draws open, item by item: the label, the icon
 // in brackets, and «— » before an item a line stands above.
 func frameMenu(t *testing.T, id string) []string {
 	t.Helper()
+	return frameMenuIn(t, id, mockupFrame(t, id))
+}
+
+// frameMenuIn is frameMenu of a part of the frame id: where the frame draws
+// more than one menu (the bar's «⋯» with its twins beside a panel's, Typecase
+// ac658b0), the part that holds the one meant.
+func frameMenuIn(t *testing.T, id, part string) []string {
+	t.Helper()
 	var out []string
 	line := false
-	for _, m := range frameMenuItem.FindAllStringSubmatch(mockupFrame(t, id), -1) {
+	for _, m := range frameMenuItem.FindAllStringSubmatch(part, -1) {
 		if strings.HasPrefix(m[0], "<span") {
 			line = true
 			continue

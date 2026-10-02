@@ -14,10 +14,20 @@ import (
 )
 
 // The IDs of the page's forms: the event's, which Save in the head submits
-// (Button.Form), and the deletion's, which posts with no form of its own.
+// (Button.Form) and the line of Save names (Runbar.Progress) — the edit's
+// and a new event's, as the frames name them (s-agenda-3, -15) —, and the
+// deletion's, which posts with no form of its own.
 const (
-	formID     = "edit"
+	formEdit   = "event-edit"
+	formNew    = "event-new"
 	formDelete = "delete"
+)
+
+// The screen's words (U-1.3) of the line of Save that sends files
+// (Typecase ac658b0): what it says before the library's script moves it.
+const (
+	saving  = "Saving · "
+	noBytes = "0 of 0 MB"
 )
 
 // The screen's words (U-1.3) for the shell: the mark, the search, the rail.
@@ -79,6 +89,8 @@ func width(name string) w.FieldWidth {
 //     calendar's sources, the foot.
 //   - The head: the event's title (a new one's «New event»), the calendar,
 //     Cancel and Save, which submits the form by its name.
+//   - The line of Save that sends files (Runbar.Progress), hidden until the
+//     library's live layer moves it.
 //   - What the server lost of the last save (Loss): a notice over the form.
 //   - The form: Summary with the cursor, Location, Status, Tags, the
 //     description; When — All day, the dates and times monospaced, the time
@@ -92,6 +104,7 @@ func width(name string) w.FieldWidth {
 //     kept as the server sent them.
 //   - Under the form the deletion, and the line of a series under it.
 func Screen(p *view.EventEditPage) w.Shell {
+	id := formID(p)
 	var plain, primary []w.ActsPart
 	var attach *view.Action
 	for _, a := range p.Form.Actions {
@@ -99,7 +112,7 @@ func Screen(p *view.EventEditPage) w.Shell {
 			attach = &a
 			continue
 		}
-		b := bind.Button(a, formID)
+		b := bind.Button(a, id)
 		if a.Primary {
 			primary = append(primary, b)
 		} else {
@@ -110,12 +123,12 @@ func Screen(p *view.EventEditPage) w.Shell {
 	if p.Subtitle != "" {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}
-	main := []w.MainPart{h}
+	main := []w.MainPart{h, w.Runbar{Progress: id, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}}}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
 	if p.Loss != nil {
 		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2))
 	}
-	form := bind.Form(p.Form, formID)
+	form := bind.Form(p.Form, id)
 	after := reminders(p.Form)
 	for i, set := range p.Form.Sets {
 		rows := visible(set.Rows)
@@ -146,6 +159,14 @@ func Screen(p *view.EventEditPage) w.Shell {
 	}
 	t := bind.Top(p.Top, top)
 	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail, p.UID == ""), Main: w.Main{Items: main}}}
+}
+
+// formID is the ID of the event's form: a new event's, or the edit's.
+func formID(p *view.EventEditPage) string {
+	if p.UID == "" {
+		return formNew
+	}
+	return formEdit
 }
 
 // Forms are the forms of the actions that post with none of their own: the
@@ -298,6 +319,9 @@ func attendees(f view.AttendeeField) w.FieldSet {
 func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 	var items []w.LinePart
 	if attach != nil {
+		// ждёт библиотеку: U-5.5 #43 — the frames draw the file a field of
+		// the form that goes with Save (FileField.List); it goes by its own
+		// form, as the contract has it, until Save takes files
 		b := bind.Button(*attach, "")
 		b.Menu = true
 		items = append(items, w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}})
@@ -318,7 +342,7 @@ func attachments(attach *view.Action, rows []view.AttachRow) w.FieldSet {
 		}
 	}
 	if len(rows) == 0 {
-		items = append(items, w.Dim{Parts: []w.Inline{w.Text(nothing)}, Size: w.Dim11_5, Variant: w.DimWrap})
+		items = append(items, w.Dim{Parts: []w.Inline{w.Text(nothing)}, Size: w.Dim11_5, Variant: w.DimWrap, Empty: true})
 	}
 	return w.FieldSet{Rubric: w.Rubric{Text: files}, Items: []w.FieldSetPart{w.Line{Items: items, Gap: w.LineGap8, Block: true, Place: w.Grown}}}
 }
