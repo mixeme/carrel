@@ -103,3 +103,30 @@ func TestNotebookIsTheFrame(t *testing.T) {
 		t.Errorf("nothing ticked = poll %+v, empty %+v", none.Poll, none.Empty)
 	}
 }
+
+// The client's notes build, debt C25: the panel of s-notes-1 draws both
+// attachments of «Заметка со встречи 10.08» — the board inside the note
+// and the link to the recording in Documents / carrel. The fixtures of the
+// notebook with that panel carry what the frame draws, in its order.
+func TestNotebookPanelFixturesCarryTheFramesAttachments(t *testing.T) {
+	var frame []string
+	for _, m := range frameAttachLink.FindAllStringSubmatch(mockupFrame(t, "s-notes-1"), -1) {
+		frame = append(frame, frameText(m[1]))
+	}
+	if len(frame) != 2 {
+		t.Fatalf("s-notes-1 attachments %q: read the frame again", frame)
+	}
+	for _, name := range []string{"app-notes-all/normal.json", "app-notes/normal.json"} {
+		details, _ := loadFixture(t, name)["details"].(map[string]any)
+		rows, _ := details["attach"].([]any)
+		var got []string
+		for _, r := range rows {
+			row, _ := r.(map[string]any)
+			n, _ := row["name"].(string)
+			got = append(got, n)
+		}
+		if !slices.Equal(got, frame) {
+			t.Errorf("%s: the panel's attachments %q, s-notes-1 draws %q", name, got, frame)
+		}
+	}
+}

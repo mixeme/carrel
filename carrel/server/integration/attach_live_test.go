@@ -231,11 +231,17 @@ func runAttachments(t *testing.T, endpoint, user, pass, sEndpoint, sUser, sPass 
 
 	page = liveDecode[view.EventPage](t, "event with three attachments", app.get(record))
 	link := liveAttachment(t, page.Attach, want)
-	if link.Inline || link.Href == "" {
+	if link.Inline || !strings.HasPrefix(link.Href, "/app/files/") {
 		t.Fatalf("the large attachment = %+v", link)
 	}
-	if got := app.get(link.Href); got.Code != http.StatusOK || got.Body.Len() != len(big) {
-		t.Errorf("open the link: %d, %d bytes of %d", got.Code, got.Body.Len(), len(big))
+	// A link into a storage opens in Files: its folder, the file chosen,
+	// Download first (the owner's decision of 02.10.2026, v0.2.146).
+	inFiles := liveDecode[view.FilesPage](t, "open the link", app.get(link.Href))
+	if inFiles.Details == nil || string(inFiles.Details.Title) != want {
+		t.Fatalf("the link opens the panel %+v, want %q chosen", inFiles.Details, want)
+	}
+	if got := app.get(liveAction(t, inFiles.Details.Actions, "file.download")); got.Code != http.StatusOK || got.Body.Len() != len(big) {
+		t.Errorf("download the linked file: %d, %d bytes of %d", got.Code, got.Body.Len(), len(big))
 	}
 
 	// The same name again is not overwritten: the next one gets a number. It
@@ -250,9 +256,15 @@ func runAttachments(t *testing.T, endpoint, user, pass, sEndpoint, sUser, sPass 
 		t.Errorf("the first file was overwritten: %v", err)
 	}
 
-	// Removing a link removes the link; the file stays where it is.
+	// Removing a link removes the link; the file stays where it is. Remove
+	// stands on the edit only: on the card the attachment is a link and
+	// nothing else (s-agenda-2, -3; v0.2.146).
 	page = liveDecode[view.EventPage](t, "event before removing", app.get(record))
-	redirected(t, "remove the link", app.post(liveAction(t, liveAttachment(t, page.Attach, want).Actions, "attach.remove"), url.Values{}))
+	if card := liveAttachment(t, page.Attach, want); len(card.Actions) != 0 {
+		t.Errorf("the card's attachment carries %+v, want no action", card.Actions)
+	}
+	edit := liveDecode[view.EventEditPage](t, "the edit before removing", app.get(record+"/edit"))
+	redirected(t, "remove the link", app.post(liveAction(t, liveAttachment(t, edit.Attach, want).Actions, "attach.remove"), url.Values{}))
 	raw, _ = rawBody(ctx, t, client, calPath+uid+".ics")
 	if strings.Contains(raw, url.PathEscape(want)) {
 		t.Errorf("the link stayed in the record")

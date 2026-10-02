@@ -1414,9 +1414,11 @@ func TestFixtureCombinedTasks(t *testing.T) {
 }
 
 // C-14.2: one notebook (s-notes-1), «Заметка со встречи 10.08» open in the
-// panel, as the frame draws it.
+// panel, as the frame draws it — the recording in the attachment folder
+// with it (C25).
 func TestFixtureNoteList(t *testing.T) {
 	app := newMockupApp(t)
+	attachMockupRecording(t, app)
 	// The calendar and the tasks were read: the panel's Related names
 	// «Синк-ап» and «Дописать раздел про кэш».
 	openList(t, app, "/app/calendar?from=2026-08-10")
@@ -1432,10 +1434,12 @@ func TestFixtureNoteList(t *testing.T) {
 // C-14.2: the combined notebook as s-notes-1 draws it (the client's scan of
 // the notes, НБ1): both notebooks, «Что почитать про CRDT» linked with its
 // copy, «Заметка со встречи 10.08» open in the panel, New note writing into
-// «Записи», last used.
+// «Записи», last used; the recording in the attachment folder is the
+// panel's second attachment (C25).
 func TestFixtureCombinedNotes(t *testing.T) {
 	app := newMockupApp(t)
 	linkMockupNote(t, app)
+	attachMockupRecording(t, app)
 	app.lastUsed(t, "zapisi", view.KindNote)
 	openList(t, app, "/app/calendar?from=2026-08-10")
 	openList(t, app, "/app/tasks")

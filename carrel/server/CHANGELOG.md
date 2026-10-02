@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.152 — 2026-10-03
+
+The notebook's panel carries both attachments its frame draws (the
+client's notes build, C25), and the live attachment suite follows the
+card that only links an attachment.
+
+### Changed
+
+- Fixtures `app-notes-all/normal` and `app-notes/normal`: «Заметка со
+  встречи 10.08» in the panel has its second attachment, the link to
+  `запись-встречи.m4a` (24 MB, «Documents / carrel»), as s-notes-1 draws
+  it; the tests of both put the link, as the note's page and edit did.
+  The note's version in their actions moved.
+
+### Fixed
+
+- The live suite of attachments (`TestBaikalAttachments`,
+  `TestRadicaleAttachments`) took Remove from the card and expected the
+  link to download: since v0.2.146 Remove stands on the edit only, and a
+  link into a storage opens in Files with the file chosen. It now opens
+  the link in Files, downloads the file from the panel and removes the
+  link on the edit.
+
+### For consumers
+
+Nothing in the running server. The panel of the notebook draws the
+recording as the frame does; fixtures regenerated: the two above.
+
 ## v0.2.151 — 2026-10-03
 
 What a folder holds and how large an image is, without a request per row
