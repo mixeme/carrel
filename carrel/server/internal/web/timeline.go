@@ -529,7 +529,7 @@ func (s *Server) timelineRail(c *collectionCtx, snap *fanout.Snapshot, back stri
 	for _, sec := range sections {
 		for _, row := range sec.Rows {
 			row.Menu = nil // what to do with a calendar is the calendar's rail
-			if row.Count != nil {
+			if row.Count != nil && !row.Feed {
 				sum, answered = sum+*row.Count, true
 			}
 			where.Rows = append(where.Rows, row)

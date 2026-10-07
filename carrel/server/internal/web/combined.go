@@ -206,9 +206,9 @@ func listOwner(lt *listTask) pollOwner {
 		what:       "list",
 		polled:     true,
 		found:      func(n int) string { return plural(n, recordNouns[lt.kind]) },
-		// And says how long the poll has run (states-3, states-13); the
-		// frames of the other lists draw no time (states-8).
-		timed:   lt.kind == view.KindEvent,
+		// And says how long the poll has run, in every section (the owner's
+		// decision of 07.10.2026, Р-39: states-3, -8, -13, -19, -26).
+		timed:   true,
 		missing: func(n int) string { return missingLine(lt.kind, n) },
 	}
 }
@@ -652,9 +652,8 @@ func kindCount(sess *session.Session, blob sealed.Blob, spec kindSpec) *int {
 	sum := 0
 	down := lastPoll(sess, spec.kind)
 	for _, col := range ticked(blob, spec.kind) {
-		// A feed is someone else's and has no number of its own (the frames
-		// draw «ro» in its place), so the section's sum is of the person's
-		// own collections. One that did not answer the last poll says why
+		// A feed is someone else's: its number stands in its own row, and
+		// the section's sum is of the person's own collections. One that did not answer the last poll says why
 		// in its own row, and the sum is of the ones that did (s-agenda-1:
 		// «Общий» refuses, and the calendar still counts 14).
 		if col.Gone || col.Feed || lastPollRefused(down, col) {
@@ -726,10 +725,7 @@ func (s *Server) troublesOf(snap *fanout.Snapshot) map[string]railTrouble {
 		var t railTrouble
 		switch st.State {
 		case view.SourceError:
-			t.detail = refusalReason(st.Err)
-			if dav.IsStatus(st.Err, http.StatusUnauthorized) {
-				t.detail = "401 Unauthorized — the saved password was refused. Open Connections to update it."
-			}
+			t.detail = refusalDetail(st.Err)
 		case view.SourceTimeout:
 			t.detail = "The server did not answer in time."
 		case view.SourceUnavailable:
@@ -740,6 +736,16 @@ func (s *Server) troublesOf(snap *fanout.Snapshot) map[string]railTrouble {
 		out[st.ID] = t
 	}
 	return out
+}
+
+// refusalDetail is what the rail says of a collection whose server answered
+// with a refusal: the reason, and for a password that stopped fitting where
+// to mend it.
+func refusalDetail(err error) string {
+	if dav.IsStatus(err, http.StatusUnauthorized) {
+		return "401 Unauthorized — the saved password was refused. Open Connections to update it."
+	}
+	return refusalReason(err)
 }
 
 // kindRail is the sections rail of a record kind (C-6.3): the kinds and
@@ -837,7 +843,9 @@ func (s *Server) ticksForm(sess *session.Session, segment, back string) *view.Fo
 // among them. troubles are the collections that did not answer the poll the
 // rail stands beside, with what to say of each. count, when given, is what a
 // ticked row counts instead of its records — a timeline counts what it found
-// of one person there. A feed counts nothing either way.
+// of one person there. A ticked feed has its count as a collection has (the
+// frames draw it where a count stands and «ro» beside it — Р-34 of Typecase,
+// from-typecase note 35); it is not in the section's sum.
 func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kindSpec, troubles map[string]railTrouble, count func(sourceID string) *int) (sections []view.RailSection, live, on int) {
 	trouble := func(row *view.SourceRow, id string) bool {
 		t, ok := troubles[id]
@@ -952,9 +960,10 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 		if tick {
 			row.Tick = view.TickOn
 			on++
-			// A feed has no number, not even what a timeline found in it:
-			// «ro» stands in its place in every frame (C-6.3, s-agenda-1,
-			// s-contacts-7), and it is not in the section's sum.
+			// A feed's count stands where a count stands, «ro» beside it
+			// (C-6.3, s-agenda-1, s-contacts-7: «0» and «ro»); it is not in
+			// the section's sum (kindCount, timelineRail).
+			row.Count = counted(f.ID, col)
 		}
 		feeds.Rows = append(feeds.Rows, row)
 	}

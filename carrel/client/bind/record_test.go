@@ -73,10 +73,12 @@ func TestTick(t *testing.T) {
 	same(t, "a tick that posts", bind.Tick(&done, false, "Done"), w.Tick{Label: "Done", Send: w.Send{Form: "task.done/app/tasks/a/dela/aa10/edit?done=on&op=done"}})
 	same(t, "its form", bind.ActionForm(done, bind.TickID(done)), w.PostForm{ID: bind.TickID(done), Action: done.Href, Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}})
 	same(t, "a task done", bind.Tick(&done, true, "Done").Done, true)
-	same(t, "a row read only", bind.Tick(nil, true, "Done"), w.Tick{Done: true, Label: "Done"})
+	// In a list read only the tick is a sign: it looks as usual, is not
+	// pressed and sends nothing (Р-38 of Typecase, 80d1319; states-23).
+	same(t, "a row read only", bind.Tick(nil, true, "Done"), w.Tick{Done: true, Label: "Done", Sign: true})
 	off := done
 	off.Enabled, off.Reason = false, "Read only"
-	same(t, "a tick switched off", bind.Tick(&off, false, "Done"), w.Tick{Label: "Done"})
+	same(t, "a tick switched off", bind.Tick(&off, false, "Done"), w.Tick{Label: "Done", Sign: true})
 }
 
 func TestRelated(t *testing.T) {

@@ -294,7 +294,7 @@
           {
             "colour": "#4a6b52",
             "count": null,
-            "detail": "",
+            "detail": "The server answered 503 Service Unavailable.",
             "feed": false,
             "href": "/app/tasks/a-nc-home/dela",
             "label": "Дела",
@@ -357,7 +357,7 @@
             ],
             "on": true,
             "readOnly": false,
-            "state": "ok",
+            "state": "unavailable",
             "tick": "on"
           },
           {

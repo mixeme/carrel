@@ -1394,7 +1394,7 @@
         "reason": "The list is still running."
       }
     ],
-    "aside": "",
+    "aside": "0.0 s",
     "note": "",
     "every": 700,
     "poll": "/app/search/progress/t-task/poll",

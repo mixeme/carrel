@@ -94,9 +94,10 @@ func TestDocText(t *testing.T) {
 }
 
 func TestSecText(t *testing.T) {
-	// The panel (s-notes-1): paragraphs as prose in the panel's face, tasks
-	// as its list of tasks; what else the text holds stays its words among
-	// the paragraphs (U-5.5).
+	// The panel (s-notes-1, -28): paragraphs as prose in the panel's face,
+	// tasks as its list of tasks, and the parts its page has — a heading, a
+	// bulleted list, a quotation, code, a table (Typecase's task 125,
+	// 0a046d8).
 	note := []view.Block{
 		para("Договорились заморозить ветку."), para("Письмо пишет Анна."),
 		{Kind: view.BlockHeading, Level: 2, Text: "Что делаем"},
@@ -107,9 +108,24 @@ func TestSecText(t *testing.T) {
 	panel := faces
 	panel.Lead = w.ProseRead
 	same(t, "the panel's text", bind.SecText(note, panel), []w.SecPart{
-		w.Prose{Parts: []w.Inline{w.Text("Договорились заморозить ветку.\n\nПисьмо пишет Анна.\n\nЧто делаем")}, Variant: w.ProseRead},
+		w.Prose{Parts: []w.Inline{w.Text("Договорились заморозить ветку.\n\nПисьмо пишет Анна.")}, Variant: w.ProseRead},
+		w.DocHeading{Text: "Что делаем"},
 		w.SecTasks{Items: []w.DocTask{{Tick: w.Tick{Variant: w.TickNudge, Sign: true}, Text: "проверить changelog"}}},
-		w.Prose{Parts: []w.Inline{w.Text("Отложено\n\nПеренос вложений.\n\nраз\nдва")}, Variant: w.ProseRead},
+		w.DocHeading{Text: "Отложено"},
+		w.Prose{Parts: []w.Inline{w.Text("Перенос вложений.")}, Variant: w.ProseRead},
+		w.DocBullets{Items: [][]w.Inline{{w.Text("раз")}, {w.Text("два")}}},
+	})
+	same(t, "a quotation, code and a table", bind.SecText([]view.Block{
+		{Kind: view.BlockQuote, Children: []view.Block{para("Не выпускаем.")}},
+		{Kind: view.BlockCode, Text: "./carrel migrate"},
+		{Kind: view.BlockTable, Children: []view.Block{
+			{Kind: view.BlockRow, Header: true, Children: []view.Block{{Kind: view.BlockCell, Text: "Что"}}},
+			{Kind: view.BlockRow, Children: []view.Block{{Kind: view.BlockCell, Text: "Чемодан"}}},
+		}},
+	}, panel), []w.SecPart{
+		w.DocQuote{Parts: []w.Inline{w.Text("Не выпускаем.")}},
+		w.DocCode{Text: "./carrel migrate"},
+		w.DocTable{Head: [][]w.Inline{{w.Text("Что")}}, Rows: [][][]w.Inline{{{w.Text("Чемодан")}}}, Align: []w.DocAlign{w.DocAlignStart}, Switch: w.DocTableSwitch(false)},
 	})
 }
 

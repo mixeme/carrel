@@ -18,7 +18,10 @@ import (
 // out of the frame.
 
 var (
-	frameSheetSub  = regexp.MustCompile(`(?s)<b class="tc-sheet__title">.*?</b>\s*<span class="tc-push tc-dim[^"]*">(.*?)</span>`)
+	// The line beside a sheet's title — «from …», «to …» —, after the pick of
+	// the server the head has since Typecase 88c2a63 (from-typecase note 35,
+	// Р-37: «sftpgo · vps»; the model names no server yet — the files round).
+	frameSheetSub  = regexp.MustCompile(`(?s)<b class="tc-sheet__title">.*?</b>\s*(?:<button class="tc-in is-pick[^"]*"[^>]*>[^<]*</button>\s*)?<span class="(?:tc-push )?tc-dim[^"]*">(.*?)</span>`)
 	frameSheetMsg  = regexp.MustCompile(`(?s)<div class="tc-sheet__body">.*?<div class="tc-msg[^"]*">(.*?)</div>`)
 	frameSheetMain = regexp.MustCompile(`(?s)<div class="tc-sheet__foot"><button class="tc-btn is-primary"[^>]*>(.*?)</button>`)
 	frameTreeNew   = regexp.MustCompile(`(?s)<div class="tc-rubric">([^<]*?)\s*<button class="tc-btn is-sm"[^>]*>(.*?)</button></div>\s*<div class="tc-tree">`)

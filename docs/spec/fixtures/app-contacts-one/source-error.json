@@ -431,7 +431,7 @@
           {
             "colour": "#4a6b52",
             "count": null,
-            "detail": "",
+            "detail": "The server answered 503 Service Unavailable.",
             "feed": false,
             "href": "/app/contacts/a-nc-home/kontakty",
             "label": "Контакты",
@@ -494,7 +494,7 @@
             ],
             "on": true,
             "readOnly": false,
-            "state": "ok",
+            "state": "unavailable",
             "tick": "on"
           }
         ],

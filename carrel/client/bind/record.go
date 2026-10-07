@@ -53,11 +53,14 @@ func sub(r view.Runs, danger func(view.Text) w.HeadSubPart) []w.HeadSub {
 // pressing it posts the action (Mark done, or not done) by the form of its
 // ID (TickID), which the page prints at its end (ActionForm): without a
 // script too (U-8). A row read only (no action) or an action switched off
-// has a tick that shows and sends nothing.
+// has a tick that is a sign: it looks as usual, is not pressed and sends
+// nothing (Р-38 of Typecase, 80d1319: Tick.Sign, states-23).
 func Tick(a *view.Action, done bool, label string) w.Tick {
 	t := w.Tick{Done: done, Label: label}
 	if a != nil && a.Enabled && a.Method == "POST" {
 		t.Send = w.Send{Form: TickID(*a)}
+	} else {
+		t.Sign = true
 	}
 	return t
 }

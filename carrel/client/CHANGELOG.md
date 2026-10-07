@@ -4,6 +4,61 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.2 — 2026-10-08
+
+Typecase `80d1319` (Typecase's notes 35 and 36: Carrel's tasks 86, 97, 104,
+108, 114, 116, 118, 120, 124–126, 128, 129, 131–135, the rest of 106, and
+the owner's decisions of 02–07.10.2026, Р-34 … Р-41), server `v0.2.154`. The
+drafts that print otherwise and the drafts of the new frames that have a
+fixture went in first, unchanged (`d7efae9`); the screens over them here.
+
+### Changed
+
+- **A rail's count and «ro» stand apart** (Р-34): a feed has its count
+  where a count stands — the dash when it has none — and «ro» as a badge
+  beside it, as a read-only collection has; a source that does not answer
+  has the sign alone (`bind.TickRow`).
+- **The refresh switched off says why** (Р-39): with nothing ticked or
+  while the poll runs its words are its own, «Refresh», and the reason its
+  hint (`bind.Top`).
+- **The poll's bar is red only when the poll ended with a refusal** (Р-40);
+  while it runs it is green (`bind.Runbar`, `Meter.Alert`).
+- **What is shown and what is missing stands under the rows** of a list
+  whose source did not answer (`PollBar.Note`): the calendar (`s-agenda-1`),
+  contacts, tasks, notes.
+- **In a list read only a task's tick is a sign** (Р-38): it looks as usual,
+  is not pressed and sends nothing (`bind.Tick`, `Tick.Sign`).
+- **A note's text in its panel has the parts its page has** (task 125): a
+  heading, a bulleted list, a quotation, code, a table (`bind.SecText`).
+- **A note's edit has the bar of an edit** (`Docbar.Edit`, task 104):
+  without a script only Save and Cancel stand; its Attach opens its menu
+  (task 126), each item by a form of the bar's own. A new note with nothing
+  written says nothing of a draft (Р-41), and has no source in its column;
+  its form is `note-new`.
+- **A new task** (`s-tasks-14`): its form is `task-new`, «Add reminder»
+  stands alone without a blank label, and there is no source.
+- **The frames of one collection and of the states** are the screens' own:
+  `s-agenda-17`, `s-tasks-15`, `s-notes-31`, `states-18`, `-22`, `-24`,
+  `-25`, `-29`, `s-tasks-14`, `s-notes-30`.
+- The meaning guard's table: a `Field` and a `Card` with `Action` are forms
+  of their own (task 131); in an edit's bar (`Docbar.Edit`) what is neither
+  a link nor a submit is the page's script's and needs no meaning.
+
+### Closed
+
+- U-5.5 row 39 (the parts of a text in a panel). Row 24 without
+  `app-agenda-all/empty`, which matches `states-14`; row 41 without the
+  edit's bar. Rows 19, 24, 25, 32, 35–38, 41, 42 rewritten for the new
+  frames: what each still waits for is the server's or Typecase's
+  (docs/plan/server.md, «Переход на Typecase `80d1319`»).
+
+### Not yet
+
+- **A note's Source, width and side column** (row 41): the frame draws
+  them links the live layer swaps in place; the model carries no address
+  for them yet.
+- **A new note's notebook and a new record's Related to** (rows 35, 42).
+
 ## v0.4.1 — 2026-10-03
 
 Typecase `ac658b0` (Carrel's tasks 112, 113, 115, 117, 122, 123 and the

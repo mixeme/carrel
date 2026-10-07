@@ -116,6 +116,11 @@ func Screen(p *view.NotesPage) w.Shell {
 	if p.Empty != nil {
 		main = append(main, w.Empty{Parts: bind.EmptyParts(*p.Empty)})
 	}
+	if p.Poll != nil && p.Poll.Note != "" {
+		// What is shown and what is missing, under the rows, once a source
+		// did not answer (PollBar.Note; states-27).
+		main = append(main, w.Empty{Parts: []w.EmptyPart{w.Text(p.Poll.Note)}, Variant: w.EmptySmall})
+	}
 	body := w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}
 	if p.Details != nil {
 		body.Side = side(*p.Details)
@@ -398,7 +403,7 @@ func side(d view.Details) *w.Side {
 				w.Dim{Parts: []w.Inline{w.Text(about)}},
 			})
 		}
-		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
+		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines, Gap: 6}}})
 	}
 	return &w.Side{Items: items}
 }

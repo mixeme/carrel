@@ -102,6 +102,20 @@
         {
           "copy": {
             "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/calendars/zapiski-obshchie/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "note",
+          "label": "Общие с семьёй",
+          "type": "CalDAV",
+          "url": "https://nextcloud.example/dav.php/alice/calendars/zapiski-obshchie/"
+        },
+        {
+          "copy": {
+            "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/contacts/arhiv/",
             "id": "device.copy",
             "label": "Copy",

@@ -45,6 +45,7 @@
           {
             "error": "",
             "extra": null,
+            "focus": true,
             "hint": "For you: this is how you will know what you are revoking later.",
             "kind": "text",
             "label": "Name",
@@ -52,8 +53,7 @@
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": "",
-            "focus": true
+            "value": ""
           },
           {
             "error": "",
@@ -215,6 +215,18 @@
             "extra": null,
             "hint": "",
             "kind": "check",
+            "label": "nextcloud · Общие с семьёй",
+            "name": "col.a-nc-home|/alice/calendars/zapiski-obshchie/",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "true"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
             "label": "nextcloud · Архив",
             "name": "col.a-nc-home|/alice/contacts/arhiv/",
             "options": [],
@@ -359,13 +371,14 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
       "label": "Carrel",
-      "method": "GET",
-      "build": "0.0.1 · 786949a"
+      "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [],
     "nav": [
       {
@@ -381,37 +394,37 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/account",
+        "icon": "i-user",
         "id": "settings.account",
         "label": "Account",
-        "method": "GET",
-        "icon": "i-user"
+        "method": "GET"
       },
       {
         "count": 4,
         "enabled": true,
         "href": "/app/settings/connections",
+        "icon": "i-server",
         "id": "settings.connections",
         "label": "Connections",
-        "method": "GET",
-        "icon": "i-server"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/attachments",
+        "icon": "i-file",
         "id": "settings.attachments",
         "label": "Attachments",
-        "method": "GET",
-        "icon": "i-file"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/devices",
+        "icon": "i-device",
         "id": "settings.devices",
         "label": "New device",
-        "method": "GET",
-        "icon": "i-device"
+        "method": "GET"
       },
       {
         "count": 0,
@@ -426,37 +439,34 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/backup",
+        "icon": "i-archive",
         "id": "settings.backup",
         "label": "Backup",
-        "method": "GET",
-        "icon": "i-archive"
+        "method": "GET"
       },
       {
         "count": 2,
         "enabled": true,
         "href": "/app/files/published",
+        "icon": "i-link",
         "id": "settings.published",
         "label": "Published links",
-        "method": "GET",
-        "icon": "i-link"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/appearance",
+        "icon": "i-theme",
         "id": "settings.appearance",
         "label": "Appearance",
-        "method": "GET",
-        "icon": "i-theme"
+        "method": "GET"
       }
     ],
+    "neighbours": [],
     "note": "",
     "sections": [],
-    "tags": [],
-    "neighbours": [],
     "shortcuts": [],
-    "davloom": "davloom · running · 0 devices",
-    "ticks": null,
     "status": [
       {
         "line": [
@@ -467,61 +477,22 @@
         "title": "davloom · running · 0 devices",
         "tone": "on"
       }
-    ]
+    ],
+    "tags": [],
+    "ticks": null
   },
+  "subtitle": [
+    {
+      "text": "One address for every device instead of an account for every server · "
+    },
+    {
+      "mark": "danger",
+      "text": "a phone on mobile data will not reach a local address"
+    }
+  ],
   "title": "DAV proxy",
   "top": {
-    "refresh": {
-      "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "answered": "",
-      "running": false
-    },
-    "search": {
-      "action": "/app/search",
-      "history": [],
-      "jump": [],
-      "query": "",
-      "whole": null,
-      "name": "q"
-    },
-    "signed": {
-      "instance": "carrel.example",
-      "login": "mix",
-      "local": true
-    },
-    "unlocked": null,
-    "user": [
-      {
-        "enabled": true,
-        "href": "/app/settings/account",
-        "icon": "i-gear",
-        "id": "user.settings",
-        "label": "Settings",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/admin/",
-        "icon": "i-adm",
-        "id": "user.admin",
-        "label": "Administration",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/logout",
-        "id": "user.logout",
-        "label": "Sign out",
-        "method": "POST",
-        "separator": true,
-        "csrf": "csrf"
-      }
-    ],
+    "lock": null,
     "new": {
       "arrow": [
         {
@@ -591,16 +562,57 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account",
-    "lock": null
-  },
-  "subtitle": [
-    {
-      "text": "One address for every device instead of an account for every server · "
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
     },
-    {
-      "mark": "danger",
-      "text": "a phone on mobile data will not reach a local address"
-    }
-  ]
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
 }

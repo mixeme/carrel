@@ -122,6 +122,11 @@ func Screen(p *view.TasksPage) w.Shell {
 	if p.Empty != nil {
 		main = append(main, w.Empty{Parts: bind.EmptyParts(*p.Empty)})
 	}
+	if p.Poll != nil && p.Poll.Note != "" {
+		// What is shown and what is missing, under the rows, once a source
+		// did not answer (PollBar.Note; states-20).
+		main = append(main, w.Empty{Parts: []w.EmptyPart{w.Text(p.Poll.Note)}, Variant: w.EmptySmall})
+	}
 	body := w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}
 	if p.Details != nil {
 		body.Side = side(*p.Details)

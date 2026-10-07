@@ -2,8 +2,46 @@
   "bar": {
     "actions": [
       {
+        "arrow": [
+          {
+            "colour": "#a05a2c",
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/arhiv/new",
+            "id": "record.new",
+            "label": "Архив",
+            "method": "GET"
+          },
+          {
+            "aside": "last used",
+            "colour": "#4a6b52",
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/kontakty/new",
+            "id": "record.new",
+            "label": "Контакты",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "colour": "#6b4e7a",
+            "enabled": false,
+            "href": "/app/contacts/a-rad-vps/komanda/new",
+            "id": "record.new",
+            "label": "Команда",
+            "method": "GET",
+            "readOnly": true,
+            "reason": "Read-only"
+          },
+          {
+            "colour": "#6b4e7a",
+            "enabled": true,
+            "href": "/app/contacts/a-rad-vps/rassylki/new",
+            "id": "record.new",
+            "label": "Рассылки",
+            "method": "GET"
+          }
+        ],
         "enabled": true,
-        "href": "/app/contacts/a-nc-home/arhiv/new?pick=1",
+        "href": "/app/contacts/a-nc-home/kontakty/new",
         "icon": "i-plus",
         "id": "record.new",
         "label": "New contact",

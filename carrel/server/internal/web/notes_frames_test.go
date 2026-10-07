@@ -106,8 +106,10 @@ func TestNotebookIsTheFrame(t *testing.T) {
 
 // The client's notes build, debt C25: the panel of s-notes-1 draws both
 // attachments of «Заметка со встречи 10.08» — the board inside the note
-// and the link to the recording in Documents / carrel. The fixtures of the
-// notebook with that panel carry what the frame draws, in its order.
+// and the link to the recording in Documents / carrel. The fixture of the
+// notebook with that panel carries what the frame draws, in its order — the
+// combined notebook's: one notebook has its own frame since Typecase
+// 80d1319, without a panel (s-notes-31).
 func TestNotebookPanelFixturesCarryTheFramesAttachments(t *testing.T) {
 	var frame []string
 	for _, m := range frameAttachLink.FindAllStringSubmatch(mockupFrame(t, "s-notes-1"), -1) {
@@ -116,7 +118,7 @@ func TestNotebookPanelFixturesCarryTheFramesAttachments(t *testing.T) {
 	if len(frame) != 2 {
 		t.Fatalf("s-notes-1 attachments %q: read the frame again", frame)
 	}
-	for _, name := range []string{"app-notes-all/normal.json", "app-notes/normal.json"} {
+	for _, name := range []string{"app-notes-all/normal.json"} {
 		details, _ := loadFixture(t, name)["details"].(map[string]any)
 		rows, _ := details["attach"].([]any)
 		var got []string

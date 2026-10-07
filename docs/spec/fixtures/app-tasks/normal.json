@@ -186,187 +186,7 @@
     "show": null,
     "total": null
   },
-  "details": {
-    "actions": [
-      {
-        "enabled": true,
-        "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit",
-        "id": "record.edit",
-        "label": "Edit",
-        "method": "GET"
-      },
-      {
-        "arrow": [
-          {
-            "csrf": "csrf",
-            "enabled": true,
-            "file": "file",
-            "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit?etag=e14\u0026op=attach",
-            "icon": "i-up",
-            "id": "attach.add",
-            "label": "From this computer",
-            "method": "POST"
-          },
-          {
-            "enabled": true,
-            "href": "/app/files/picker?a=a-nc-home\u0026c=dela\u0026etag=e14\u0026for=attach\u0026k=tasks\u0026uid=aa11-2d09-5f84",
-            "icon": "i-file",
-            "id": "attach.files",
-            "label": "From Files",
-            "method": "GET",
-            "target": "sheet"
-          }
-        ],
-        "csrf": "csrf",
-        "enabled": true,
-        "file": "file",
-        "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit?etag=e14\u0026op=attach",
-        "icon": "i-up",
-        "id": "attach.add",
-        "label": "Attach",
-        "method": "POST"
-      },
-      {
-        "csrf": "csrf",
-        "danger": true,
-        "enabled": true,
-        "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/delete?etag=e14",
-        "icon": "i-trash",
-        "id": "record.delete",
-        "label": "Delete task",
-        "method": "POST"
-      }
-    ],
-    "attach": [
-      {
-        "actions": [],
-        "href": "/app/attach/a-nc-home/dela/aa11-2d09-5f84/0",
-        "inline": true,
-        "name": "посадочный-казань.pdf",
-        "size": "128 KB",
-        "state": "ok",
-        "type": "application/pdf"
-      }
-    ],
-    "attachHint": "The same block events and notes have: up to 2 MB the file is written into the task itself, above that it goes to the attachments folder and the task keeps a link. Pasting and dropping work the same way.",
-    "attendees": [],
-    "avatar": null,
-    "body": "Зарядки, переходник, распечатать посадочный.",
-    "books": [],
-    "close": "/app/tasks/a-nc-home/dela",
-    "date": "",
-    "deleteNote": "",
-    "fields": [
-      {
-        "href": "",
-        "label": "Status",
-        "mono": false,
-        "value": "Needs action"
-      },
-      {
-        "href": "",
-        "label": "Due",
-        "mono": false,
-        "runs": [
-          {
-            "mark": "mono",
-            "text": "12 August 2026, 18:00"
-          }
-        ],
-        "value": ""
-      },
-      {
-        "href": "",
-        "label": "Priority",
-        "mono": true,
-        "value": "5"
-      },
-      {
-        "href": "",
-        "label": "Complete",
-        "mono": true,
-        "value": "0%"
-      },
-      {
-        "href": "",
-        "label": "Tags",
-        "mono": false,
-        "tags": [
-          {
-            "href": "/app/tasks/a-nc-home/dela?tag=%D0%B4%D0%BE%D0%BC",
-            "label": "дом",
-            "on": false
-          }
-        ],
-        "value": ""
-      }
-    ],
-    "foreign": [],
-    "foreignShow": null,
-    "menu": [
-      {
-        "enabled": true,
-        "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/move",
-        "icon": "i-move",
-        "id": "record.move",
-        "label": "Move",
-        "method": "GET",
-        "target": "sheet"
-      },
-      {
-        "enabled": true,
-        "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/move?copy=1",
-        "icon": "i-dup",
-        "id": "record.copy",
-        "label": "Copy",
-        "method": "GET",
-        "target": "sheet"
-      },
-      {
-        "enabled": true,
-        "href": "/app/tasks/a-nc-home/dela/export?uid=aa11-2d09-5f84",
-        "icon": "i-down",
-        "id": "record.export",
-        "label": "Export .ics",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/publish?a=a-nc-home\u0026c=dela\u0026k=tasks\u0026uid=aa11-2d09-5f84",
-        "icon": "i-link",
-        "id": "publish",
-        "label": "Publish a link",
-        "method": "GET",
-        "target": "sheet"
-      }
-    ],
-    "preview": null,
-    "related": [
-      {
-        "colour": "",
-        "href": "",
-        "kind": "event",
-        "stamp": "",
-        "title": "Поездка в Казань",
-        "when": "12 Aug",
-        "why": "Related to · in another collection"
-      }
-    ],
-    "rendered": [],
-    "source": {
-      "changed": "10 August 2026, 17:04",
-      "colour": "#4a6b52",
-      "compared": "",
-      "lastRead": "2 min ago",
-      "objects": null,
-      "path": "",
-      "readOnly": false,
-      "stamp": "nextcloud · Дела",
-      "uid": "aa11-2d09-5f84"
-    },
-    "subtitle": "nextcloud · Дела",
-    "title": "Собрать чемодан"
-  },
+  "details": null,
   "empty": null,
   "groups": [
     {
@@ -479,7 +299,12 @@
       "overdue": false,
       "rows": [
         {
-          "badges": [],
+          "badges": [
+            {
+              "label": "linked ×2",
+              "role": "linked"
+            }
+          ],
           "changed": "10 Aug 09:00",
           "colour": "",
           "done": false,
@@ -549,13 +374,16 @@
               "separator": true
             }
           ],
-          "on": true,
+          "on": false,
           "overdue": false,
           "percent": null,
           "priority": "5",
-          "sources": [],
+          "sources": [
+            "nextcloud · Дела",
+            "nextcloud · Работа"
+          ],
           "stamp": "",
-          "state": "ok",
+          "state": "linked",
           "status": "Needs action",
           "summary": "Собрать чемодан",
           "tags": [
@@ -743,7 +571,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": 7,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -789,7 +617,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 6,
+            "count": 7,
             "detail": "",
             "feed": false,
             "href": "/app/tasks",
@@ -878,7 +706,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/rabota",

@@ -158,11 +158,14 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     # Подсказки поля участников — фрагмент, своего кадра маршрута нет: кадр
     # состояния — s-agenda-12 (STATE_FRAME), рейла у него нет.
     "app-contacts-suggest": "/app/contacts/suggest",
-    # Единый календарь и одна коллекция — один кадр s-agenda-1: его
-    # data-screen называет оба адреса (Typecase 9e69804, задача 77).
+    # Общий кадр называет только общий адрес (Typecase 80d1319, задачи 97,
+    # 108): s-agenda-1 — /app/calendar, s-tasks-1 — /app/tasks, s-notes-1 —
+    # /app/notes; адрес коллекции — у кадров одной коллекции s-agenda-17,
+    # s-tasks-15, s-notes-31. У контактов оба адреса по-прежнему у
+    # s-contacts-1.
     "app-agenda-all": "/app/calendar",
-    "app-tasks-all": "/app/tasks/{account}/{col}",
-    "app-notes-all": "/app/notes/{account}/{col}",
+    "app-tasks-all": "/app/tasks",
+    "app-notes-all": "/app/notes",
     "app-contact": "/app/contacts/{account}/{col}/{uid}",
     "app-agenda": "/app/calendar/{account}/{col}",
     "app-event": "/app/calendar/{account}/{col}/{uid}",
@@ -312,6 +315,20 @@ STATE_FRAME = {
     # хранилище s-files-12, отказ New folder s-files-13 и s-files-19, From
     # Files s-files-16. Переименования и удаления кадров нет (задача 121) —
     # они сверяются с кадром листа переноса.
+    # Состояния задач и заметок — свои кадры (Typecase 80d1319, задача 97):
+    # ничего не отмечено (states-18, -25), сервер одного списка не ответил
+    # (states-22, -29), потеря свойств при записи задачи (states-24); полные
+    # формы новой задачи и новой заметки — состояние new каталога правки, их
+    # кадры — s-tasks-14 и s-notes-30 (маршрут …/new). Кадры states-19 … -21,
+    # -23, -26 … -28, -30, -31 (опрос идёт, источник отказал, пустой список,
+    # только для чтения, потеря у заметки) фикстур пока не имеют.
+    "app-tasks-all/empty": "states-18",
+    "app-tasks/source-error": "states-22",
+    "app-task-edit/loss": "states-24",
+    "app-task-edit/new": "s-tasks-14",
+    "app-notes-all/empty": "states-25",
+    "app-notes/source-error": "states-29",
+    "app-note-edit/new": "s-notes-30",
     "app-files-folder/long": "s-files-2",
     "app-files-folder/tiles": "s-files-5",
     "app-files-op/copy": "s-files-11",
@@ -322,10 +339,7 @@ STATE_FRAME = {
 }
 # Без строки: app-contact-new/normal и app-event-new/normal — полные формы
 # создания (`/new`) — свои кадры маршрута, s-contacts-27 (Typecase 4af7ad7,
-# задача 59) и s-agenda-15 (Typecase 9e69804, задача 77). Полные формы новой
-# задачи и новой заметки — состояние new каталога правки (app-task-edit/new,
-# app-note-edit/new): своих кадров у них нет (задача Typecase 97), и они
-# сверяются с кадром правки — рейл тот же.
+# задача 59) и s-agenda-15 (Typecase 9e69804, задача 77).
 
 def frame_by_id(fid):
     m = re.search(r'<div class="frame" data-frame="%s"[^>]*>' % re.escape(fid), mock)

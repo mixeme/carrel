@@ -265,6 +265,22 @@ func TestMeaningRules(t *testing.T) {
 				w.MenuItem{Label: "Upload", To: "/new?op=attach", NoScript: true},
 			}},
 		}}}}}, nil},
+		// An edit's bar (Docbar.Edit, Typecase's task 104, 0a046d8): without a
+		// script only its Save and Cancel stand, and the rest is the page's
+		// script's — the buttons of the markup, «⋯», Auto-save, the width,
+		// Focus need no meaning of HTML; in a bar that is no edit's they do.
+		"an edit's bar, the script's controls": {w.Docbar{Edit: true, Items: []w.DocbarPart{w.Button{Label: "Cancel", Href: "/n"}, w.Button{Label: "B", Bold: true}},
+			More: &w.Button{Icon: "dots"}, End: []w.DocbarEnd{w.Check{Parts: []w.CheckPart{w.Text("Auto-save")}}, w.Seg{Options: []w.SegOption{{Label: "Full width", On: true}}}, w.Button{Label: "Focus"}}}, nil},
+		"a bar that is no edit's": {w.Docbar{Items: []w.DocbarPart{w.Button{Label: "Cancel", Href: "/n"}, w.Button{Label: "B", Bold: true}},
+			More: &w.Button{Icon: "dots"}, End: []w.DocbarEnd{w.Check{Parts: []w.CheckPart{w.Text("Auto-save")}}, w.Seg{Options: []w.SegOption{{Label: "Full width", On: true}}}, w.Button{Label: "Focus"}}},
+			[]string{"Items[1](Button): a button with nothing", "More(Button): a button with nothing", "(Check): a field without Name", "(Seg): a field without Name", "End[2](Button): a button with nothing"}},
+		// Typecase's task 131 (80d1319): a field and a card with Action are
+		// forms of their own — what stands in them sends; without it they are
+		// groups, and what stands in them stands outside a form.
+		"a field that is a form of its own": {w.Field{Action: "/app/duplicates", Parts: []w.FieldPart{w.Input{Name: "threshold"}}}, nil},
+		"a field that is no form":           {w.Field{Parts: []w.FieldPart{w.Input{Name: "threshold"}}}, []string{"(Input): a field outside a form"}},
+		"a card that is a form":             {w.Card{Action: "/app/duplicates/merge", Items: []w.CardPart{w.Line{Items: []w.LinePart{w.Button{Label: "Merge", Submit: true}}}}}, nil},
+		"a card that is no form":            {w.Card{Items: []w.CardPart{w.Line{Items: []w.LinePart{w.Button{Label: "Merge", Submit: true}}}}}, []string{"(Button): a submit button outside a form"}},
 		"items that send no form they stand in": {w.Menu{Items: []w.MenuPart{
 			w.MenuItem{Label: "From this computer", File: &w.FileField{Name: "file", To: "/new?op=attach"}},
 			w.MenuItem{Label: "From Files", To: "/new?op=pickfile"},

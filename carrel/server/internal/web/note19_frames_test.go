@@ -468,7 +468,9 @@ func TestEscrowPageWithTheSchemeOffIsTheFrame(t *testing.T) {
 // of a move gets: nothing is written into it.
 func TestFromFilesReadOnlyStorageIsASource(t *testing.T) {
 	frame := mockupFrame(t, "s-files-16")
-	row := regexp.MustCompile(`<div class="([^"]*)">(?:<svg>.*?</svg>)?Public <span class="([^"]*)">([^<]*)</span></div>`).FindStringSubmatch(frame)
+	// The storage's row carries no words since Typecase 88c2a63 (note 35,
+	// Р-37: the server is the head's pick, not a mark of the row).
+	row := regexp.MustCompile(`<div class="([^"]*)">(?:<svg>.*?</svg>)?Public(?: <span class="([^"]*)">([^<]*)</span>)?</div>`).FindStringSubmatch(frame)
 	if row == nil || strings.Contains(row[1], "op-55") || strings.Contains(row[2], "tc-badge") {
 		t.Fatalf("s-files-16 draws Public as %q: read the frame again", row)
 	}
@@ -500,8 +502,22 @@ func TestFromFilesReadOnlyStorageIsASource(t *testing.T) {
 func TestUploadSheetNewFolderRefusalIsTheFrame(t *testing.T) {
 	frame := mockupFrame(t, "s-files-19")
 	refusal := frameOne(t, frameAlertMsg, frame, "refusal")[1]
-	stays := frameText(frameFootDim.FindStringSubmatch(frame)[1])
-	purpose := frameText(frameFootDim.FindStringSubmatch(mockupFrame(t, "s-notes-11"))[1])
+	// The sheet's own line stands in its body; the head has a line of its
+	// own since Typecase 4b6e096 — the full path of the folder chosen, beside
+	// the pick of the server (note 35, Р-37).
+	ownLine := func(frame string) string {
+		at := strings.Index(frame, `class="tc-sheet__body"`)
+		if at < 0 {
+			t.Fatal("the sheet has no body: read the frame again")
+		}
+		m := frameFootDim.FindStringSubmatch(frame[at:])
+		if m == nil {
+			t.Fatal("the sheet's body has no line of its own: read the frame again")
+		}
+		return frameText(m[1])
+	}
+	stays := ownLine(frame)
+	purpose := ownLine(mockupFrame(t, "s-notes-11"))
 	m := regexp.MustCompile(`«([^»]+)» in (\S+) already`).FindStringSubmatch(refusal)
 	if m == nil || !strings.HasPrefix(purpose, stays) {
 		t.Fatalf("s-files-19 refuses %q under %q, s-notes-11 says %q: read the frames again", refusal, stays, purpose)

@@ -34,6 +34,12 @@ func TestTop(t *testing.T) {
 			w.UserMenu{Name: "mix", Href: "/app/settings/account"},
 		},
 	})
+	// Nothing to ask, or a poll that still runs (Р-39 of Typecase, states-7,
+	// -8, -13, -14, -18, -25): the refresh is switched off, says why, and its
+	// words are its own — there is no answer to say the time of.
+	bar.Refresh = view.Refresh{Action: view.Action{ID: "poll.again", Label: "Refresh", Icon: "i-refresh", Href: "/app/contacts?again=1", Method: "GET", Reason: "Nothing is ticked to ask."}}
+	same(t, "a refresh switched off", bind.Top(bar, bind.TopWords{Brand: brand}).Actions[1],
+		w.TopAction(w.Button{Label: "Refresh", Icon: "refresh", State: w.ButtonDisabled, Reason: "Nothing is ticked to ask."}))
 	bar.New.Arrow, bar.Refresh = nil, view.Refresh{}
 	got := bind.Top(bar, bind.TopWords{Brand: brand})
 	same(t, "no arrow, no refresh", got.Actions, []w.TopAction{
@@ -175,14 +181,26 @@ func TestTickRow(t *testing.T) {
 			w.TickRow{Ticked: w.TickedOff, Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Рассылки", Meta: "—", Hidden: true},
 		},
 		"a feed": {
-			view.SourceRow{Href: "/f", Label: "Праздники РФ", Colour: "#8c6239", Tick: view.TickOn, Feed: true, ReadOnly: true}, bind.RailWords{ReadOnly: "ro"},
+			view.SourceRow{Href: "/f", Label: "Праздники РФ", Colour: "#8c6239", Count: ptr(0), Tick: view.TickOn, Feed: true, ReadOnly: true}, bind.RailWords{None: "—", ReadOnly: "ro"},
 			// The row is the feed's (is-ext), its mark only its colour: no frame
-			// draws the mark is-ext in a rail (s-contacts-7, s-agenda-1).
-			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239"}, Label: "Праздники РФ", Meta: "ro"},
+			// draws the mark is-ext in a rail (s-contacts-7, s-agenda-1). Its
+			// count stands where a count stands and «ro» is a badge beside it
+			// (Р-34 of Typecase, 80d1319).
+			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239"}, Label: "Праздники РФ", Meta: "0", Trail: w.Badge{Label: "ro"}},
+		},
+		"a feed ticked off": {
+			view.SourceRow{Href: "/l", Label: "Расписание лиги", Colour: "#6b4e7a", Tick: view.TickOff, Feed: true, ReadOnly: true}, bind.RailWords{None: "—", ReadOnly: "ro"},
+			w.TickRow{Ticked: w.TickedOff, Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Расписание лиги", Meta: "—", Hidden: true, Trail: w.Badge{Label: "ro"}},
 		},
 		"no answer: a mark, the reason its hint, no retry (states-16)": {
 			view.SourceRow{Href: "/o", Label: "Общий", Colour: "#9a9280", Tick: view.TickOn, State: view.CollectionUnavailable, Detail: "401 Unauthorized"}, bind.RailWords{None: "—"},
 			w.TickRow{Mark: w.Mark{Colour: "#9a9280"}, Label: "Общий", MetaTitle: "401 Unauthorized", Error: true},
+		},
+		// A book read only that does not answer has the sign alone: no count
+		// and no «ro» beside it (states-9: «Команда»).
+		"no answer, read-only": {
+			view.SourceRow{Href: "/k", Label: "Команда", Colour: "#6b4e7a", Tick: view.TickOn, ReadOnly: true, State: view.CollectionUnavailable, Detail: "503"}, bind.RailWords{None: "—", ReadOnly: "ro"},
+			w.TickRow{Mark: w.Mark{Colour: "#6b4e7a"}, Label: "Команда", MetaTitle: "503", Error: true},
 		},
 	} {
 		same(t, name, bind.TickRow(c.row, c.words), c.want)
@@ -221,7 +239,7 @@ func TestSources(t *testing.T) {
 		w.RailSec{Items: []w.RailSecPart{w.Rubric{Text: "nextcloud"}, w.TickRow{Mark: w.Mark{Colour: "#4a6b52"}, Label: "Личный", Meta: "7"}}},
 		w.RailSec{Items: []w.RailSecPart{
 			w.Rubric{Text: "Subscriptions", Items: []w.RubricPart{w.Badge{Label: "external"}}},
-			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239"}, Label: "Праздники РФ", Meta: "ro"},
+			w.TickRow{Kind: w.TickRowExternal, Mark: w.Mark{Colour: "#8c6239"}, Label: "Праздники РФ", Meta: "—", Trail: w.Badge{Label: "ro"}},
 		}},
 	})
 }
@@ -246,9 +264,15 @@ func TestRunbar(t *testing.T) {
 	same(t, "no poll", bind.Runbar(nil), (*w.Runbar)(nil))
 	failed := &view.PollBar{Percent: 83, Summary: view.Runs{{Text: "Polled 5 of 6 · matched by "}, {Text: "a@b", Mark: view.RunMono}, {Text: " · "}, {Text: "baikal unavailable", Mark: view.RunDanger}},
 		Sources: []view.SourceProgress{{State: view.SourceDone}, {State: view.SourceError}}}
-	same(t, "a source did not answer", bind.Runbar(failed), &w.Runbar{Meter: w.Meter{Percent: 83}, Parts: []w.RunbarPart{
+	// The bar is red only when the poll ended with a refusal; while it runs
+	// it is green, whatever has refused so far (Р-40 of Typecase, 80d1319:
+	// Meter.Alert).
+	same(t, "a source did not answer", bind.Runbar(failed), &w.Runbar{Meter: w.Meter{Percent: 83, Alert: true}, Parts: []w.RunbarPart{
 		w.Text("Polled 5 of 6 · matched by "), w.Mono{Text: "a@b"}, w.Text(" · "), w.Span{Face: w.FaceDanger, Text: "baikal unavailable"},
 	}})
+	still := *failed
+	still.Running = true
+	same(t, "a source did not answer, the poll still runs", bind.Runbar(&still).Meter, w.Meter{Percent: 83})
 	same(t, "running", bind.Running(&view.PollBar{Running: true}), true)
 	// What the bar says on its right (Aside, s-agenda-1: «from cache · 2 min
 	// ago», states-13: how long the poll runs), monospaced and pushed to the
@@ -267,7 +291,7 @@ func TestRunbar(t *testing.T) {
 		Sources: []view.SourceProgress{{State: view.SourceDone},
 			{Stamp: "baikal · Общий", Colour: "#9a9280", State: view.SourceError, Answer: "PROPFIND /c/ → 401 Unauthorized", Retry: retry("b")},
 			{Stamp: "radicale · vps · Проекты", Colour: "#6b4e7a", State: view.SourceError, Answer: "REPORT /p/ → 503 Service Unavailable", Retry: retry("r")}}}
-	same(t, "two refused", bind.Runbar(two), &w.Runbar{Meter: w.Meter{Percent: 66}, Parts: []w.RunbarPart{
+	same(t, "two refused", bind.Runbar(two), &w.Runbar{Meter: w.Meter{Percent: 66, Alert: true}, Parts: []w.RunbarPart{
 		w.Text("Polled 4 of 6 sources · 9 events"), w.Text(" · "),
 		w.Drop{
 			Trigger: w.Button{Label: "2 failed", Menu: true, Kind: w.ButtonDanger, Small: true},

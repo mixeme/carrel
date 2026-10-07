@@ -6,8 +6,8 @@
       "id": "record.new",
       "label": "New note",
       "method": "GET",
-      "reason": "Choose the collection the new note goes to.",
-      "primary": true
+      "primary": true,
+      "reason": "Choose the collection the new note goes to."
     }
   ],
   "form": {
@@ -20,6 +20,7 @@
   "kind": "note",
   "target": {
     "chosen": "",
+    "new": null,
     "options": [
       {
         "colour": "#6b4e7a",
@@ -38,8 +39,16 @@
         "readOnly": false,
         "reason": "",
         "stamp": "nextcloud · Записи"
+      },
+      {
+        "colour": "#3f6e8c",
+        "id": "/app/notes/a-nc-home/zapiski-obshchie/new",
+        "label": "Общие с семьёй",
+        "last": false,
+        "readOnly": true,
+        "reason": "Read-only",
+        "stamp": "nextcloud · Общие с семьёй"
       }
-    ],
-    "new": null
+    ]
   }
 }

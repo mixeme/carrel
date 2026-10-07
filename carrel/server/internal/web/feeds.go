@@ -124,6 +124,11 @@ func (c *collectionCtx) contactsAll(ctx context.Context) ([]*model.Object, error
 func (c *collectionCtx) calQuery(ctx context.Context, component string, from, to *time.Time) ([]*model.Object, []cal.Unreadable, error) {
 	if c.feed != nil {
 		objs, err := c.feed.records(ctx, componentKinds[component])
+		if err == nil && component == "VEVENT" {
+			// What the feed's row counts in the rail (C-6.3), as a whole
+			// read of a calendar leaves it below.
+			putCount(c.sess, c.conn.ID, c.col.Path, component, len(objs))
+		}
 		return objs, nil, err
 	}
 	if from == nil && to == nil {

@@ -1334,7 +1334,7 @@
         "rows": [
           {
             "colour": "#8c6239",
-            "count": null,
+            "count": 3,
             "detail": "",
             "feed": true,
             "href": "/app/calendar/f-ru-holidays/feed",

@@ -248,14 +248,12 @@ func DocText(blocks []view.Block, f TextFaces) []w.DocPart {
 	return out
 }
 
-// SecText is a note's text as the parts of a panel (s-notes-1): its
-// paragraphs one prose in the face of the lead, a list of tasks with their
-// ticks. A panel has no part for a heading, a bulleted list, a quotation,
-// code or a table: their words stand among the paragraphs — a heading and a
-// quotation a paragraph, a list's items and a table's rows a line each, the
-// cells of a row joined as the poll's pieces are.
+// SecText is a note's text as the parts of a panel (s-notes-1, -28): what
+// its page has (Typecase's task 125) — its paragraphs a prose in the face of
+// the lead, a heading, a list of tasks with their ticks, another list
+// bulleted with its nested lists, a quotation, a block of code as written,
+// a table. A panel's tasks have no rubric: a heading over them is a heading.
 func SecText(blocks []view.Block, f TextFaces) []w.SecPart {
-	// ждёт библиотеку: U-5.5 #39 — a panel draws paragraphs and tasks only
 	var out []w.SecPart
 	var prose []w.Inline
 	flush := func() {
@@ -265,51 +263,30 @@ func SecText(blocks []view.Block, f TextFaces) []w.SecPart {
 		}
 	}
 	for _, b := range blocks {
-		if isTasks(b) {
-			flush()
-			out = append(out, w.SecTasks{Items: tasks(b, f)})
+		if b.Kind == view.BlockPara {
+			prose = joinInlines(prose, paraSep, Spans(b, f))
 			continue
 		}
-		prose = joinInlines(prose, paraSep, lines(b, f))
+		flush()
+		switch {
+		case b.Kind == view.BlockHeading:
+			out = append(out, w.DocHeading{Text: flat(b)})
+		case isTasks(b):
+			out = append(out, w.SecTasks{Items: tasks(b, f)})
+		case b.Kind == view.BlockList:
+			out = append(out, bullets(b, f))
+		case b.Kind == view.BlockQuote:
+			out = append(out, quote(b, f))
+		case b.Kind == view.BlockCode:
+			out = append(out, w.DocCode{Text: string(b.Text)})
+		case b.Kind == view.BlockTable:
+			out = append(out, table(b, f))
+		default:
+			prose = joinInlines(prose, paraSep, Spans(b, f))
+		}
 	}
 	flush()
 	return out
-}
-
-// lines are the words of a block of the text as one paragraph of a panel:
-// a list's items and a table's rows a line each.
-func lines(b view.Block, f TextFaces) []w.Inline {
-	switch b.Kind {
-	case view.BlockList, view.BlockTable:
-		var out []w.Inline
-		for _, c := range b.Children {
-			out = joinInlines(out, lineSep, lines(c, f))
-		}
-		return out
-	case view.BlockRow:
-		var out []w.Inline
-		for _, c := range b.Children {
-			out = joinInlines(out, runSep, Spans(c, f))
-		}
-		return out
-	case view.BlockQuote:
-		var out []w.Inline
-		for _, c := range b.Children {
-			out = joinInlines(out, paraSep, lines(c, f))
-		}
-		return out
-	case view.BlockCode:
-		return []w.Inline{w.Text(b.Text)}
-	case view.BlockItem, view.BlockTask:
-		if blockish(b) {
-			var out []w.Inline
-			for _, c := range b.Children {
-				out = joinInlines(out, lineSep, lines(c, f))
-			}
-			return out
-		}
-	}
-	return Spans(b, f)
 }
 
 // DocForm is a note's edit as the document that is its form (NoteDoc.Form,

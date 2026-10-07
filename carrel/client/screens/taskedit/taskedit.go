@@ -1,9 +1,10 @@
 // Package taskedit is the edit of a task,
 // /app/tasks/{account}/{col}/{uid}/edit, and the full form of a new one,
 // /app/tasks/{account}/{col}/new — one view model (TaskEditPage) —, drawn by
-// frame «Задача · правка, срок, выполнение» (s-tasks-3) of the mockup: the
-// draft frame2go printed for it, with the frame's data become the view
-// model's (U-5.1, U-6.3). A form, and only a form: All day is one for the
+// frames «Задача · правка, срок, выполнение» (s-tasks-3), «Задача · новая»
+// (s-tasks-14) and «Правка задачи · сервер сохранил не всё» (states-24) of
+// the mockup: the drafts frame2go printed for them, with the frames' data
+// become the view model's (U-5.1, U-6.3). A form, and only a form: All day is one for the
 // task, making both its start and its due days.
 package taskedit
 
@@ -14,11 +15,12 @@ import (
 )
 
 // The IDs of the page's forms: the task's, which Save in the head submits
-// (Button.Form) and the line of Save names (Runbar.Progress) — as the frame
-// names it (s-tasks-3) —, and the deletion's, which posts with no form of
-// its own.
+// (Button.Form) and the line of Save names (Runbar.Progress) — as the frames
+// name it, an edit's (s-tasks-3) and a new task's (s-tasks-14) —, and the
+// deletion's, which posts with no form of its own.
 const (
-	formID     = "task-edit"
+	formEdit   = "task-edit"
+	formNew    = "task-new"
 	formDelete = "delete"
 )
 
@@ -114,9 +116,14 @@ func width(name string) w.FieldWidth {
 //     — Location, Tags, Related to as the record chosen; Attachments —
 //     Attach with its arrow, each attachment where it is kept and its
 //     Remove, or «Nothing attached»; the source — its path, when it was
-//     read and whether it changed on the server.
+//     read and whether it changed on the server —, none for a new task,
+//     which has no record yet (s-tasks-14).
 //   - Under the form the deletion.
 func Screen(p *view.TaskEditPage) w.Shell {
+	formID := formEdit
+	if p.UID == "" {
+		formID = formNew
+	}
 	var plain, primary []w.ActsPart
 	var attach *view.Action
 	for _, a := range p.Form.Actions {
@@ -152,7 +159,10 @@ func Screen(p *view.TaskEditPage) w.Shell {
 		}
 		form.Items = append(form.Items, fieldSet(set.Legend, rows))
 	}
-	form.Items = append(form.Items, attachments(attach, p.Attach), sourceSet(p.Source))
+	form.Items = append(form.Items, attachments(attach, p.Attach))
+	if p.UID != "" {
+		form.Items = append(form.Items, sourceSet(p.Source))
+	}
 	main = append(main, form)
 	if p.Delete != nil {
 		main = append(main, w.Danger{Button: bind.Button(*p.Delete, formDelete)})
@@ -191,13 +201,19 @@ func removeID(a view.Action) string {
 }
 
 // fieldSet is a rubric of the form: its fields, «Add …» on the line of the
-// labels with the template of what it adds.
+// labels with the template of what it adds — under a blank label beside
+// fields (s-tasks-3), bare where it stands alone (s-tasks-14: a new task has
+// no reminder yet).
 func fieldSet(legend view.Text, rows []view.FormRow) w.FieldSet {
 	fs := w.FieldSet{Rubric: w.Rubric{Text: string(legend)}}
 	for i, r := range rows {
 		if r.Kind == view.InputAdd {
 			add, tmpl := bind.Add(r, func(t view.FormRow) []w.FieldSetPart { return []w.FieldSetPart{field(t, 0)} })
-			fs.Items = append(fs.Items, w.Field{Label: blank, Parts: []w.FieldPart{add}}, tmpl)
+			f := w.Field{Parts: []w.FieldPart{add}}
+			if i > 0 {
+				f.Label = blank
+			}
+			fs.Items = append(fs.Items, f, tmpl)
 			continue
 		}
 		fs.Items = append(fs.Items, field(r, i))

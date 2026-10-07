@@ -119,6 +119,11 @@
                 "value": "a-nc-home|/alice/calendars/zapisi/"
               },
               {
+                "label": "nextcloud · Общие с семьёй",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/zapiski-obshchie/"
+              },
+              {
                 "label": "nextcloud · Архив",
                 "selected": false,
                 "value": "a-nc-home|/alice/contacts/arhiv/"

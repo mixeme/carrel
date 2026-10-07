@@ -4,11 +4,11 @@
     "action": "/app/settings/attachments",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "id": "attachments.save",
         "label": "Save",
-        "method": "POST",
-        "csrf": "csrf"
+        "method": "POST"
       },
       {
         "enabled": true,
@@ -126,6 +126,18 @@
             "extra": null,
             "hint": "",
             "kind": "text",
+            "label": "nextcloud · Общие с семьёй",
+            "name": "limit.a-nc-home./alice/calendars/zapiski-obshchie/",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "2 MB"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
             "label": "radicale · vps · Дежурства",
             "name": "limit.a-rad-vps./alice/calendars/dezhurstva/",
             "options": [],
@@ -212,7 +224,7 @@
             "error": "",
             "extra": {
               "enabled": true,
-              "href": "/app/files/picker?for=attachments&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+              "href": "/app/files/picker?for=attachments\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
               "id": "attachments.browse",
               "label": "Browse",
               "method": "GET",
@@ -221,12 +233,12 @@
             "hint": "Created on first use. It stays an ordinary folder: openable in Files, mountable as a network drive, readable without Carrel.",
             "kind": "text",
             "label": "Folder in it",
+            "mono": true,
             "name": "folder",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "/carrel/attachments",
-            "mono": true
+            "value": "/carrel/attachments"
           },
           {
             "error": "",
@@ -330,13 +342,14 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
       "label": "Carrel",
-      "method": "GET",
-      "build": "0.0.1 · 786949a"
+      "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [],
     "nav": [
       {
@@ -352,38 +365,38 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/account",
+        "icon": "i-user",
         "id": "settings.account",
         "label": "Account",
-        "method": "GET",
-        "icon": "i-user"
+        "method": "GET"
       },
       {
         "count": 4,
         "enabled": true,
         "href": "/app/settings/connections",
+        "icon": "i-server",
         "id": "settings.connections",
         "label": "Connections",
-        "method": "GET",
-        "icon": "i-server"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/attachments",
+        "icon": "i-file",
         "id": "settings.attachments",
         "label": "Attachments",
         "method": "GET",
-        "on": true,
-        "icon": "i-file"
+        "on": true
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/devices",
+        "icon": "i-device",
         "id": "settings.devices",
         "label": "New device",
-        "method": "GET",
-        "icon": "i-device"
+        "method": "GET"
       },
       {
         "count": 0,
@@ -397,37 +410,34 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/backup",
+        "icon": "i-archive",
         "id": "settings.backup",
         "label": "Backup",
-        "method": "GET",
-        "icon": "i-archive"
+        "method": "GET"
       },
       {
         "count": 2,
         "enabled": true,
         "href": "/app/files/published",
+        "icon": "i-link",
         "id": "settings.published",
         "label": "Published links",
-        "method": "GET",
-        "icon": "i-link"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/appearance",
+        "icon": "i-theme",
         "id": "settings.appearance",
         "label": "Appearance",
-        "method": "GET",
-        "icon": "i-theme"
+        "method": "GET"
       }
     ],
+    "neighbours": [],
     "note": "",
     "sections": [],
-    "tags": [],
-    "neighbours": [],
     "shortcuts": [],
-    "davloom": "davloom · running · 0 devices",
-    "ticks": null,
     "status": [
       {
         "line": [
@@ -438,61 +448,13 @@
         "title": "davloom · running · 0 devices",
         "tone": "on"
       }
-    ]
+    ],
+    "tags": [],
+    "ticks": null
   },
   "title": "Attachments",
   "top": {
-    "refresh": {
-      "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "answered": "",
-      "running": false
-    },
-    "search": {
-      "action": "/app/search",
-      "history": [],
-      "jump": [],
-      "query": "",
-      "whole": null,
-      "name": "q"
-    },
-    "signed": {
-      "instance": "carrel.example",
-      "login": "mix",
-      "local": true
-    },
-    "unlocked": null,
-    "user": [
-      {
-        "enabled": true,
-        "href": "/app/settings/account",
-        "icon": "i-gear",
-        "id": "user.settings",
-        "label": "Settings",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/admin/",
-        "icon": "i-adm",
-        "id": "user.admin",
-        "label": "Administration",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/logout",
-        "id": "user.logout",
-        "label": "Sign out",
-        "method": "POST",
-        "separator": true,
-        "csrf": "csrf"
-      }
-    ],
+    "lock": null,
     "new": {
       "arrow": [
         {
@@ -562,7 +524,57 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account",
-    "lock": null
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
   }
 }

@@ -49,6 +49,12 @@ type control struct {
 	// menu — the library prints it as the summary of a details, and it opens
 	// the menu without a script (Typecase's task 60, U-8).
 	opens bool
+	// scripted: the widget stands in an edit's bar (Docbar.Edit, Typecase's
+	// task 104): without a script the bar draws only what leads or sends —
+	// its Save and Cancel —, and the rest is the page's script's: the buttons
+	// of the markup, «⋯», Auto-save, the width, Focus. Such a control needs no
+	// meaning of HTML, and one that has it is held as any other.
+	scripted bool
 }
 
 func (c control) str(name string) string {
@@ -151,7 +157,7 @@ const (
 // must carry (docs/guide/screen.md of Typecase, §3 and §5).
 var contract = map[string]rule{
 	"Button": func(c control) string {
-		if c.v.FieldByName("State").Int() == buttonDisabled || c.opens || picksFile(c) {
+		if c.v.FieldByName("State").Int() == buttonDisabled || c.opens || c.scripted || picksFile(c) {
 			return ""
 		}
 		for _, f := range []string{"Href", "Form", "Adds", "Opens"} {
@@ -202,10 +208,18 @@ var contract = map[string]rule{
 		}
 		return field(c)
 	},
-	"Check": field,
+	"Check": func(c control) string {
+		if c.scripted { // Auto-save of an edit's bar
+			return ""
+		}
+		return field(c)
+	},
 	"Query": field,
 	"Seg": func(c control) string {
 		if c.flag("Theme") { // the theme is this browser's, kept by the script (U-12)
+			return ""
+		}
+		if c.scripted { // the width of the text in an edit's bar
 			return ""
 		}
 		if links(c) { // a switch of links: each option goes (SegOption.Href)
@@ -310,6 +324,13 @@ var contract = map[string]rule{
 	},
 	// The forms: what sends. Their parts are judged in the form's context.
 	"Form": func(control) string { return "" }, // a Form without Action is a group of fields: its fields say so
+	// A field is a group — a label and its controls — and with Action a GET
+	// form of its own, which Enter in its line sends (the duplicates'
+	// threshold, Typecase's task 131, 80d1319): its controls say whether they
+	// stand in a form that sends. A card with Action is a form the same way
+	// (a group of duplicates sends its choices and the button pressed).
+	"Field": func(control) string { return "" },
+	"Card":  func(control) string { return "" },
 	// A document is a form in its edit (Typecase's task 98): with Action it
 	// sends its fields, which the edit bar's Save names by its ID; read,
 	// it has none and sends nothing.
@@ -356,7 +377,7 @@ func picksFile(c control) bool {
 // opensForm says whether the widget is a form that sends, for its parts.
 func opensForm(c control) bool {
 	switch c.v.Type().Name() {
-	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc":
+	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc", "Field", "Card":
 		return c.str("Action") != ""
 	}
 	return false
@@ -434,6 +455,7 @@ func Meaning(v any, forms ...string) []string {
 		}
 		inForm := c.inForm || opensForm(c)
 		closed := closedMenu(c)
+		scripted := name == "Docbar" && c.flag("Edit")
 		for i := range t.NumField() {
 			f := t.Field(i)
 			if !f.IsExported() {
@@ -445,12 +467,12 @@ func Meaning(v any, forms ...string) []string {
 			switch f.Type.Kind() {
 			case reflect.Struct, reflect.Pointer, reflect.Interface:
 				if w := deref(fv); isControl(w, pkg) {
-					walk(control{v: w, path: at + "(" + w.Type().Name() + ")", inForm: inForm, holder: name, opens: opens})
+					walk(control{v: w, path: at + "(" + w.Type().Name() + ")", inForm: inForm, holder: name, opens: opens, scripted: scripted})
 				}
 			case reflect.Slice, reflect.Array:
 				for j := range fv.Len() {
 					if w := deref(fv.Index(j)); isControl(w, pkg) {
-						walk(control{v: w, path: fmt.Sprintf("%s[%d](%s)", at, j, w.Type().Name()), inForm: inForm, holder: name})
+						walk(control{v: w, path: fmt.Sprintf("%s[%d](%s)", at, j, w.Type().Name()), inForm: inForm, holder: name, scripted: scripted})
 					}
 				}
 			}

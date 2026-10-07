@@ -695,7 +695,7 @@
           },
           {
             "colour": "#8c6239",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "/app/calendar/f-ru-holidays/feed",
             "label": "Праздники РФ",

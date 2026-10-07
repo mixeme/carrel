@@ -17,6 +17,46 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.154 — 2026-10-08
+
+The frames of Typecase `80d1319` (Typecase's notes 35 and 36; the owner's
+decisions of 07.10.2026, Р-34, Р-38, Р-39), with the client's `v0.4.2`: the
+copy of the mockup came with it (416 frames).
+
+### Changed
+
+- **A subscription has its count in the rail.** `SourceRow.count` of a
+  ticked feed is how many records the feed read holds (in a timeline — how
+  many it found there), `null` until it is read or when it is not ticked;
+  «ro» is no longer said in its place. The count is not in the section's
+  sum nor in the combined row's.
+- **New… keeps its arrow with nothing ticked.** The arrow of `record.new`
+  of a combined view then lists every collection of the kind, and the
+  button writes into the one last used, else the first that takes records.
+- **A read-only list offers nothing that writes.** `ListBar.actions` of one
+  collection that can only be read has neither `record.new` nor
+  `collection.import` — Export, and Print where the list prints. Before,
+  `record.new` stood there switched off with its reason.
+- **A running poll says how long it runs in every section.**
+  `PollBar.aside` — «0.8 s», «1 min 20 s» — for contacts, tasks and notes
+  as for the calendar.
+- **A list whose server did not answer has the sign in its own row.** On
+  the page of one collection whose read failed, the collection's row of
+  the rail is `unavailable` with the reason in `detail`. A count shown
+  before stays in `count`.
+- **A linked record says so in the list of one collection.** `badges`
+  («linked ×2»), `sources` and `state` of a task's and a note's row count
+  the members of its group that live in other collections.
+
+### Fixtures
+
+- The set has a third notebook, «Общие с семьёй»: read-only, not ticked,
+  empty («2 of 3 notebooks»). Every rail and choice of notebooks holds it.
+- `app-agenda/normal`, `app-tasks/normal`, `app-notes/normal` are one
+  collection as its own frame draws it (`s-agenda-17`, `s-tasks-15`,
+  `s-notes-31`): no record open in a panel; the task and the note linked
+  with their copies.
+
 ## v0.2.153 — 2026-10-03
 
 The conflict, the duplicates, the import and the collection sheets without

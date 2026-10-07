@@ -916,6 +916,10 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 	switch {
 	case c.feed != nil && q.Text == "":
 		objs, err = c.feed.records(ctx, k)
+		if err == nil && component == "VEVENT" {
+			// What the feed's row counts in the rail (C-6.3; calQuery).
+			putCount(c.sess, c.conn.ID, c.col.Path, component, len(objs))
+		}
 	case c.feed != nil:
 		objs, err = c.feed.search(ctx, k, q.Text)
 	case q.Text == "":

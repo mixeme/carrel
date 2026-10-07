@@ -78,6 +78,10 @@ type listed struct {
 	from origin
 	// also are the other members of a linked group shown in this row (S-16).
 	also []listed
+	// elsewhere are the stamps of the members of the row's linked group that
+	// live in other collections than the one list on the screen, which reads
+	// only its own (linkedElsewhere; s-tasks-15, s-notes-31).
+	elsewhere []view.Stamp
 	// prefer names, by property, the member whose value the linked row shows:
 	// the answer the person gave when linking.
 	prefer map[string]*model.Object
@@ -114,6 +118,9 @@ type collectionCtx struct {
 	tf   timeFmt
 	// feed reads a subscription (S-25.2); nil for a collection of a server.
 	feed *feedReader
+	// refused is what the read of this collection's list failed with, when
+	// it did (unavailableNotice): the rail's row of the list says it.
+	refused error
 	// ttl is the soft limit on a kept whole read where the server gives no
 	// change tag (S-4.2, wholeread.go), and the clock it is measured by.
 	ttl time.Duration
@@ -585,6 +592,7 @@ func (s *Server) readVersion(c *collectionCtx, path, etag string) (*model.Object
 // unavailableNotice is a source failure on the screen (C-9.1, S-21): what
 // failed, the server's answer, and a retry of this source only.
 func (s *Server) unavailableNotice(c *collectionCtx, retry string, err error) view.Notice {
+	c.refused = err // the rail's row of this list says it too (states-11, -22, -29)
 	return view.Notice{
 		Role:  view.NoticeAlert,
 		Title: text(collectionLabel(c.col) + " is unavailable"),
@@ -663,14 +671,16 @@ func (s *Server) newRecordAction(c *collectionCtx) view.Action {
 
 // listActions are the operations of one collection's list (S-19): a new
 // record, the wizard that brings a file in, and the file it hands over. A
-// read-only collection is not offered the wizard — nothing here would write
-// it — and is handed over like any other: reading is what it allows. The
+// read-only collection is offered nothing that writes — neither the new
+// record nor the wizard (the owner's decision of 07.10.2026, Р-38: states-4,
+// -23, -30 draw Export and Print alone) — and is handed over like any
+// other: reading is what it allows. The
 // collection is published from its menu in Connections, not from here
 // (owner's decision, to-typecase task 12; s-contacts-1, s-agenda-1).
 func (s *Server) listActions(c *collectionCtx, export url.Values) []view.Action {
-	out := []view.Action{s.newRecordAction(c)}
+	var out []view.Action
 	if !c.col.ReadOnly {
-		out = append(out, s.importAction(c))
+		out = append(out, s.newRecordAction(c), s.importAction(c))
 	}
 	return append(out, s.exportAction(c, export))
 }
@@ -712,6 +722,19 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 	rail := func(tags []view.Tag) view.Rail {
 		rl := s.kindRail(c.sess, s.catalogOf(c.sess), c.spec, nil, c.listPath())
 		rl.Tags = tags
+		if c.refused != nil {
+			// The list on the screen did not answer: its row has the sign
+			// with the reason, not a dash (states-11, -22, -29; from-typecase
+			// note 36) — whatever the last poll of the section knew of it. A
+			// count once shown stays in the model (C-6.3).
+			for i := range rl.Sections {
+				for j := range rl.Sections[i].Rows {
+					if row := &rl.Sections[i].Rows[j]; row.On && row.Colour != "" {
+						row.State, row.Detail = view.CollectionUnavailable, text(refusalDetail(c.refused))
+					}
+				}
+			}
+		}
 		return rl
 	}
 	// A calendar the server made without some of what was asked says so on
@@ -1618,7 +1641,7 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	var open, done int
 	var more []unreadable
 	by := sortOf(r, view.KindTask)
-	shown := s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items))
+	shown := linkedElsewhere(s.catalogOf(c.sess), view.KindTask, s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items)))
 	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, shown, c.spec.segment, false, filter, c.tf.now, by)
 	page.Subtitle = text(bookSubtitle(c, len(objs), true))
 	page.Details = s.openRow(r, c.sess, c.listPath(), c.spec, shown, taskRowsOn(page.Groups))
@@ -1815,7 +1838,7 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	items := c.listed(objs)
 	var more []unreadable
 	by := sortOf(r, view.KindNote)
-	shown := filterNotes(s.foldLinked(s.catalogOf(c.sess), view.KindNote, filter.keep(view.KindNote, items)), sift)
+	shown := filterNotes(linkedElsewhere(s.catalogOf(c.sess), view.KindNote, s.foldLinked(s.catalogOf(c.sess), view.KindNote, filter.keep(view.KindNote, items))), sift)
 	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, shown, c.spec.segment, false, filter, by)
 	page.Subtitle = text(notebookSubtitle(bookSubtitle(c, len(objs), true), c.col.ReadOnly))
 	page.Details = s.openRow(r, c.sess, c.listPath(), c.spec, shown, noteRowsOn(page.Groups))

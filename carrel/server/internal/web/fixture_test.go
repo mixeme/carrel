@@ -111,6 +111,13 @@ var mockupSet = []mockupCollection{
 	// the rail counts it (s-notes-1). Until then it was drawn unticked.
 	{account: "nextcloud", slug: "dnevnik", name: "Дневник", colour: "#6B4E7A",
 		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/dnevnik.ics"},
+	// «Общие с семьёй» is the third notebook of every rail of the notes
+	// since Typecase 55104b7 (from-typecase note 35, tasks 105, 127): this
+	// account may only read it, and it stands with its tick off — «2 of 3
+	// notebooks», «—» and «ro» (s-notes-1). The frames draw none of its
+	// notes, and the set holds none.
+	{account: "nextcloud", slug: "zapiski-obshchie", name: "Общие с семьёй", colour: "#3F6E8C",
+		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, readOnly: true, unticked: true},
 	// «Команда» is a book this account may only read, and «Рассылки» stands
 	// in the catalog out of the combined views: both are what the frames show.
 	{account: "radicale · vps", slug: "komanda", name: "Команда", colour: "#6B4E7A",
@@ -579,7 +586,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 			path = davtest.AddressBookHome + col.slug + "/"
 			srv.AddAddressBook(carddav.AddressBook{Path: path, Name: col.name, ReadOnly: col.readOnly})
 		} else {
-			srv.AddCalendar(caldav.Calendar{Path: path, Name: col.name, SupportedComponentSet: col.comps})
+			srv.AddCalendar(caldav.Calendar{Path: path, Name: col.name, SupportedComponentSet: col.comps, ReadOnly: col.readOnly})
 		}
 		srv.SetColour(path, col.colour)
 		paths[col.slug] = path
@@ -1176,7 +1183,9 @@ func TestFixtureContactRewrite(t *testing.T) {
 	app.compare(t, "app-contact/outcome.json", app.h.do(postForm(confirm.Href, app.sess, url.Values{})))
 }
 
-// C-14.2: one calendar as an agenda (s-agenda-1).
+// C-14.2: one calendar as an agenda — its own frame since Typecase 80d1319
+// (s-agenda-17, from-typecase note 36): the calendar's row open in the rail,
+// no record open in a panel.
 func TestFixtureCalendarAgenda(t *testing.T) {
 	app := newMockupApp(t)
 	// Every ticked calendar carries its number in the frame (s-agenda-1): the
@@ -1189,8 +1198,9 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	here := app.listPath(t, "calendar", "lichnyj") + "?from=2026-08-10"
-	// «Синк-ап по релизу» open in the panel, as the frame draws it.
-	app.compare(t, "app-agenda/normal.json", app.h.do(get(here+"&open="+url.QueryEscape(app.listPath(t, "calendar", "lichnyj")+"/8f1c-4a02-b7d3"), app.sess)))
+	// No panel: the frame of one calendar draws none (the panel is the
+	// combined calendar's, s-agenda-1).
+	app.compare(t, "app-agenda/normal.json", app.h.do(get(here, app.sess)))
 }
 
 // C-14.2: the suggestions of the attendees' field as s-agenda-12 draws them
@@ -1383,10 +1393,12 @@ func (a *mockupApp) lastUsed(t *testing.T, slug string, kind view.Kind) {
 	t.Fatalf("no collection %s", slug)
 }
 
-// C-14.2: one list of tasks (s-tasks-1), «Собрать чемодан» open in the
-// panel, as the frame draws it.
+// C-14.2: one list of tasks — its own frame since Typecase 80d1319
+// (s-tasks-15, from-typecase note 36): «Собрать чемодан» linked with its
+// copy in «Работа» («linked ×2», «2 sources»), no record open in a panel.
 func TestFixtureTaskList(t *testing.T) {
 	app := newMockupApp(t)
+	linkMockupTask(t, app)
 	seedMockupTrip(t, app)
 	// The calendar was read: the panel's Related names the trip.
 	openList(t, app, "/app/calendar?from=2026-08-10")
@@ -1395,7 +1407,7 @@ func TestFixtureTaskList(t *testing.T) {
 	combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	list := app.listPath(t, "tasks", "dela")
-	app.compare(t, "app-tasks/normal.json", app.h.do(get(list+"?open="+url.QueryEscape(list+"/aa11-2d09-5f84"), app.sess)))
+	app.compare(t, "app-tasks/normal.json", app.h.do(get(list, app.sess)))
 }
 
 // C-14.2: the combined list of tasks as s-tasks-1 draws it (the client's
@@ -1413,11 +1425,12 @@ func TestFixtureCombinedTasks(t *testing.T) {
 	app.compare(t, "app-tasks-all/normal.json", app.h.do(get("/app/tasks?task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
 }
 
-// C-14.2: one notebook (s-notes-1), «Заметка со встречи 10.08» open in the
-// panel, as the frame draws it — the recording in the attachment folder
-// with it (C25).
+// C-14.2: one notebook — its own frame since Typecase 80d1319 (s-notes-31,
+// from-typecase note 36): «Что почитать про CRDT» linked with its copy in
+// «Дневник» («linked ×2», «2 sources»), no record open in a panel.
 func TestFixtureNoteList(t *testing.T) {
 	app := newMockupApp(t)
+	linkMockupNote(t, app)
 	attachMockupRecording(t, app)
 	// The calendar and the tasks were read: the panel's Related names
 	// «Синк-ап» and «Дописать раздел про кэш».
@@ -1428,7 +1441,7 @@ func TestFixtureNoteList(t *testing.T) {
 	combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	list := app.listPath(t, "notes", "zapisi")
-	app.compare(t, "app-notes/normal.json", app.h.do(get(list+"?open="+url.QueryEscape(list+"/5c81-77aa-0d64"), app.sess)))
+	app.compare(t, "app-notes/normal.json", app.h.do(get(list, app.sess)))
 }
 
 // C-14.2: the combined notebook as s-notes-1 draws it (the client's scan of

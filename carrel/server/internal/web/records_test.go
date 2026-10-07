@@ -792,15 +792,13 @@ func TestReadOnlyCollectionHasNoEditing(t *testing.T) {
 	if got := ids(menuActions(card.Menu)); !card.ReadOnly || !equalStrings(ids(card.Actions), []string{"record.print"}) || !equalStrings(got, []string{"record.copy", "record.export", "publish"}) {
 		t.Errorf("card: read-only %v, actions %v, menu %v", card.ReadOnly, ids(card.Actions), got)
 	}
-	// New is closed with its reason and the wizard that would write here is
-	// not offered at all; Export is, because reading is what read-only
-	// allows (the collection is published from Connections).
+	// Nothing that writes is offered — neither New nor the wizard (the
+	// owner's decision of 07.10.2026, Р-38: states-4 draws Export and Print
+	// alone); Export is, because reading is what read-only allows (the
+	// collection is published from Connections).
 	page := decode[view.ContactsListPage](t, f.h.do(get(list, f.sess)))
-	if len(page.Bar.Actions) != 3 || page.Bar.Actions[0].Enabled || page.Bar.Actions[0].Reason == "" || page.Bar.Actions[2].ID != "list.print" {
-		t.Errorf("new action = %+v", page.Bar.Actions)
-	}
-	if page.Bar.Actions[1].ID != "collection.export" {
-		t.Errorf("bar = %+v", page.Bar.Actions)
+	if got := ids(page.Bar.Actions); !equalStrings(got, []string{"collection.export", "list.print"}) {
+		t.Errorf("bar = %q, want Export and Print alone", got)
 	}
 	before := body(t, f, "ada.vcf")
 	for _, req := range []*http.Request{

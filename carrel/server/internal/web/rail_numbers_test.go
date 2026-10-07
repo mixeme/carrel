@@ -34,6 +34,7 @@ type frameTick struct {
 	label, meta string
 	feed, error bool
 	retry       bool
+	ro          bool   // the badge «ro» beside the count (from-typecase note 35, Р-34)
 	hint        string // the hint of the error mark (from-typecase note 32)
 }
 
@@ -48,7 +49,7 @@ func frameTicks(frame string) []frameTick {
 			continue
 		}
 		row := frameTick{label: lab[1], feed: strings.Contains(m[1], "is-ext"), error: strings.Contains(m[1], "is-error"),
-			retry: strings.Contains(m[2], ">Retry<")}
+			retry: strings.Contains(m[2], ">Retry<"), ro: strings.Contains(m[2], `<span class="tc-badge">ro</span>`)}
 		if meta := frameTickMeta.FindStringSubmatch(m[2]); meta != nil {
 			row.meta = meta[1]
 		}
@@ -150,8 +151,10 @@ func TestSearchRailCountsWhatEachSourceFound(t *testing.T) {
 }
 
 // s-contacts-7: the timeline's navigation is the sections in full, as on
-// every screen of the section, and then the way back; a feed has «ro» in
-// place of a number, as in the agenda, and is not in the combined row's sum.
+// every screen of the section, and then the way back; a feed has its count
+// where a count stands — «—» ticked off — and «ro» as a badge beside it, as
+// in the agenda (from-typecase note 35, Р-34), and is not in the combined
+// row's sum.
 func TestTimelineRailHasTheSectionsAndNoFeedNumber(t *testing.T) {
 	frame := mockupFrame(t, "s-contacts-7")
 	nav := frameNav(frame)
@@ -162,16 +165,16 @@ func TestTimelineRailHasTheSectionsAndNoFeedNumber(t *testing.T) {
 	for _, r := range frameTicks(frame) {
 		if r.feed {
 			feeds++
-			if r.meta != "ro" {
-				t.Fatalf("s-contacts-7: feed %q shows %q", r.label, r.meta)
+			if _, err := strconv.Atoi(r.meta); (err != nil && r.meta != "—") || !r.ro {
+				t.Fatalf("s-contacts-7: feed %q shows %q, ro %v: want a count or the dash, and the badge", r.label, r.meta, r.ro)
 			}
 		}
 	}
 	if feeds == 0 {
 		t.Fatal("s-contacts-7 draws no feed: read the frame again")
 	}
-	// The combined row is the sum of the calendars' numbers — the feeds'
-	// «ro» are not numbers (from-typecase note 18: 9 + 7 + 4 + 0 = 20).
+	// The combined row is the sum of the calendars' numbers — a feed's is
+	// not in it (from-typecase note 18: 9 + 7 + 4 + 0 = 20).
 	var sum, combined int
 	for i, r := range frameTicks(frame) {
 		n, err := strconv.Atoi(r.meta)
@@ -235,8 +238,10 @@ func TestTimelineRailHasTheSectionsAndNoFeedNumber(t *testing.T) {
 	}
 
 	_, league := railRow(t, page.Rail, "League")
-	if league.Count != nil || league.Tick != view.TickOn {
-		t.Errorf("the feed row = %+v, want no number", league)
+	// A feed counts what the timeline found in it, as a calendar does (Р-34
+	// of Typecase, 80d1319: s-contacts-7 draws its count and «ro» apart).
+	if league.Count == nil || *league.Count != 1 || league.Tick != view.TickOn {
+		t.Errorf("the feed row = %+v, want the one record found in it", league)
 	}
 	_, work := railRow(t, page.Rail, "Work")
 	_, all := railRow(t, page.Rail, "Combined calendar")

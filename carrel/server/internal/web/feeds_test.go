@@ -176,6 +176,15 @@ func TestFeedIsAReadOnlyCollection(t *testing.T) {
 	if !strings.Contains(strings.Join(agendaLines(all), "|"), "Knowledge Day") {
 		t.Errorf("the combined calendar lacks the feed: %v", agendaLines(all))
 	}
+	// A feed's count stands where a count stands, and «ro» apart from it
+	// (Р-34 of Typecase, 80d1319: s-agenda-1 draws «0» and «ro»): read, the
+	// feed says how many events it holds; it is not in the section's sum.
+	if _, row := railRow(t, all.Rail, "Праздники"); row.Count == nil || *row.Count != 1 || !row.ReadOnly || !row.Feed {
+		t.Errorf("the feed's row after its read = %+v, want its one event counted", row)
+	}
+	if _, row := railRow(t, all.Rail, "Combined calendar"); row.Count != nil && *row.Count != 0 {
+		t.Errorf("the combined row = %+v: the feed is not in its sum", row)
+	}
 	if n := feed.writes(); n != 0 {
 		t.Errorf("the feed was asked to write %d times", n)
 	}

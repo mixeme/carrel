@@ -763,29 +763,65 @@ func shownFirst(linked []sealed.LinkedGroup, k view.Kind, row listed) listed {
 	return first
 }
 
-// linkedSources are the stamps of a folded row: its own and its others'.
+// linkedElsewhere gives the rows of one collection's list the members of
+// their linked groups that live in other collections: the list reads only
+// its own, and the link is still the person's decision (S-16) — the frames
+// of one list draw «linked ×2» and both sources (s-tasks-15, s-notes-31;
+// from-typecase note 36). A member whose collection the catalog no longer
+// holds is not named.
+func linkedElsewhere(blob sealed.Blob, k view.Kind, items []listed) []listed {
+	if len(blob.Duplicates.Linked) == 0 {
+		return items
+	}
+	for i, it := range items {
+		ref := sealed.RecordRef{AccountID: it.from.conn.ID, Col: it.from.col.Path, UID: listedUID(k, it)}
+		g, ok := dupes.LinkedOf(blob.Duplicates.Linked, ref)
+		if !ok || g.Kind != k {
+			continue
+		}
+		here := map[sealed.RecordRef]bool{ref: true}
+		for _, o := range it.also {
+			here[sealed.RecordRef{AccountID: o.from.conn.ID, Col: o.from.col.Path, UID: listedUID(k, o)}] = true
+		}
+		for _, m := range g.Members {
+			if here[m] {
+				continue
+			}
+			conn, okConn := blob.Connection(m.AccountID)
+			col, okCol := blob.Collection(m.AccountID, m.Col)
+			if okConn && okCol && !col.Gone {
+				items[i].elsewhere = append(items[i].elsewhere, origin{conn: conn, col: col}.stamp())
+			}
+		}
+	}
+	return items
+}
+
+// linkedSources are the stamps of a folded row: its own, its others' and
+// those of the members that live elsewhere (linkedElsewhere).
 func linkedSources(it listed) []view.Stamp {
-	if len(it.also) == 0 {
+	if len(it.also)+len(it.elsewhere) == 0 {
 		return nil
 	}
 	out := []view.Stamp{it.from.stamp()}
 	for _, o := range it.also {
 		out = append(out, o.from.stamp())
 	}
-	return out
+	return append(out, it.elsewhere...)
 }
 
 func linkedBadge(it listed) []view.Badge {
-	if len(it.also) == 0 {
+	n := len(it.also) + len(it.elsewhere)
+	if n == 0 {
 		return nil
 	}
 	// «linked ×2», as the frames say it (s-contacts-1): the sources stand
 	// beside the badge, so naming them twice says nothing.
-	return []view.Badge{{Label: text(fmt.Sprintf("linked ×%d", len(it.also)+1)), Role: view.BadgeLinked}}
+	return []view.Badge{{Label: text(fmt.Sprintf("linked ×%d", n+1)), Role: view.BadgeLinked}}
 }
 
 func linkedState(it listed) view.RecordState {
-	if len(it.also) > 0 {
+	if len(it.also)+len(it.elsewhere) > 0 {
 		return view.RecordLinked
 	}
 	return view.RecordOK

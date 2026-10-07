@@ -2,8 +2,60 @@
   "bar": {
     "actions": [
       {
+        "arrow": [
+          {
+            "colour": "#a05a2c",
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/dni-rozhdeniya/new",
+            "id": "record.new",
+            "label": "Дни рождения",
+            "method": "GET"
+          },
+          {
+            "aside": "last used",
+            "colour": "#4a6b52",
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/lichnyj/new",
+            "id": "record.new",
+            "label": "Личный",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "colour": "#3f6e8c",
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/rabota/new",
+            "id": "record.new",
+            "label": "Работа",
+            "method": "GET"
+          },
+          {
+            "colour": "#8c6239",
+            "enabled": true,
+            "href": "/app/calendar/a-rad-vps/dezhurstva/new",
+            "id": "record.new",
+            "label": "Дежурства",
+            "method": "GET"
+          },
+          {
+            "colour": "#6b4e7a",
+            "enabled": true,
+            "href": "/app/calendar/a-rad-vps/proekty/new",
+            "id": "record.new",
+            "label": "Проекты",
+            "method": "GET"
+          },
+          {
+            "colour": "#9a9280",
+            "enabled": true,
+            "href": "/app/calendar/a-baikal/obshchij/new",
+            "id": "record.new",
+            "label": "Общий",
+            "method": "GET"
+          }
+        ],
         "enabled": true,
-        "href": "/app/calendar/a-nc-home/dni-rozhdeniya/new?pick=1",
+        "href": "/app/calendar/a-nc-home/lichnyj/new",
         "icon": "i-plus",
         "id": "record.new",
         "label": "New event",

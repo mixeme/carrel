@@ -28,8 +28,10 @@ type TopWords struct {
 // its accessible name —, then New — the primary button with its arrow (Action.Arrow:
 // the menu of what else can be made, a closed menu the frame draws beside
 // the screen) —, the refresh, which says when the last poll of this section
-// ended and polls again (none where the page has no poll of its own:
-// Refresh.Action is empty), and the account's button. With the account's
+// ended and polls again — its own words where there is no answer to say the
+// time of: switched off, with nothing ticked to ask or while the poll still
+// runs, it says why (Р-39 of Typecase, states-7, -8) —, none where the page
+// has no poll of its own (Refresh.Action is empty), and the account's button. With the account's
 // menu (User) the button opens it, without a script too (a closed menu):
 // who is signed in and where, then the items — Sign out posts its form
 // (MenuForms, TopForms); without a menu the button goes to the account's
@@ -45,7 +47,9 @@ func Top(t view.TopBar, words TopWords) w.Top {
 	}
 	if t.Refresh.Action.ID != "" {
 		refresh := Button(t.Refresh.Action, "")
-		refresh.Label = string(t.Refresh.Answered)
+		if t.Refresh.Answered != "" {
+			refresh.Label = string(t.Refresh.Answered)
+		}
 		actions = append(actions, refresh)
 	}
 	user := w.UserMenu{Name: string(t.Signed.Login)}
@@ -213,8 +217,10 @@ func Ticked(t view.TickState) w.Ticked {
 // its mark the plain colour), its
 // name, the open one (On), one not shown (ticked off; the combined view's
 // row ticked off is nothing ticked, and stays as it is). Its count, the dash
-// when it has none; a feed shows ro instead. A source that cannot be written
-// to carries ro after its count. One that does not answer is in error: its
+// when it has none — a feed's too (Р-34 of Typecase, 80d1319: the count and
+// «ro» stand apart). A source that cannot be written to, a feed among them,
+// carries ro after its count. One that does not answer is in error, with
+// neither a count nor ro (states-9): its
 // mark, the reason in full the mark's hint (Detail) — no words by its name
 // and no Retry, which are the poll bar's menu of refusals (Runbar; the
 // owner's decision of 02.10.2026, states-16). With the rail's
@@ -241,14 +247,12 @@ func TickRow(r view.SourceRow, words RailWords) w.TickRow {
 	switch {
 	case r.State == view.CollectionUnavailable:
 		row.Error, row.MetaTitle = true, string(r.Detail)
-	case r.Feed:
-		row.Meta = words.ReadOnly
 	case r.Count != nil:
 		row.Meta = strconv.Itoa(*r.Count)
 	default:
 		row.Meta = words.None
 	}
-	if r.ReadOnly && !r.Feed && row.Trail == nil {
+	if r.ReadOnly && words.ReadOnly != "" && !row.Error {
 		row.Trail = w.Badge{Label: words.ReadOnly}
 	}
 	if words.Form != "" {
@@ -423,7 +427,9 @@ func Running(p *view.PollBar) bool {
 }
 
 // Runbar is a poll (PollBar) as its bar: how far, and what it says in its
-// pieces (Summary: addresses monospaced), the red «N failed» with its menu
+// pieces (Summary: addresses monospaced) — red only when the poll ended with
+// a refusal, green while it runs (Р-40 of Typecase, Meter.Alert) —, the red
+// «N failed» with its menu
 // of refusals after the separator the summary's pieces are joined by
 // (runSep; Refusals), then
 // on its right what it says there (Aside: when the shown answer was
@@ -450,7 +456,23 @@ func Runbar(p *view.PollBar) *w.Runbar {
 	if p.Aside != "" {
 		parts = append(parts, w.Mono{Text: string(p.Aside), Place: w.Pushed})
 	}
-	return &w.Runbar{Meter: w.Meter{Percent: p.Percent}, Parts: parts}
+	return &w.Runbar{Meter: w.Meter{Percent: p.Percent, Alert: refusedAtEnd(p)}, Parts: parts}
+}
+
+// refusedAtEnd tells whether a poll ended with a refusal: it runs no more,
+// and a source of it answered with one, was not in time or does not answer
+// at all.
+func refusedAtEnd(p *view.PollBar) bool {
+	if p.Running {
+		return false
+	}
+	for _, s := range p.Sources {
+		switch s.State {
+		case view.SourceError, view.SourceTimeout, view.SourceUnavailable:
+			return true
+		}
+	}
+	return false
 }
 
 // Badge is a badge of the model (C-6.2 Badge) in the tone of its role.

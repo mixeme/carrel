@@ -2,16 +2,6 @@
   "bar": {
     "actions": [
       {
-        "enabled": false,
-        "href": "/app/contacts/a-rad-vps/komanda/new",
-        "icon": "i-plus",
-        "id": "record.new",
-        "label": "New contact",
-        "method": "GET",
-        "primary": true,
-        "reason": "This collection is read-only."
-      },
-      {
         "enabled": true,
         "href": "/app/contacts/a-rad-vps/komanda/export",
         "icon": "i-down",

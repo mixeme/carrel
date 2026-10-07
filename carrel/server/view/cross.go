@@ -46,7 +46,8 @@ type PollBar struct {
 	AnsweredAt When   `json:"answeredAt"` // когда собрана показанная выдача
 	// Aside — справа на полосе моноширинно: когда собрана выдача, «2 min ago»,
 	// и «from cache · » перед этим, когда источник ответил тем, что сеанс
-	// уже держал (s-agenda-1); пусто, пока опрос идёт
+	// уже держал (s-agenda-1); пока опрос идёт — сколько он длится, «0.8 s»,
+	// у всех разделов (states-3, -8, -13, -19, -26)
 	Aside Text `json:"aside"`
 	// Note — под строками, когда источник не ответил: что показано и чего
 	// нет — «What arrived in time is shown. Records from the unavailable

@@ -140,7 +140,7 @@ type SourceRow struct {
 	// Meta — приглушённое справа у строки корня файлов: «2 of 3» — сколько
 	// хранилищ отмечено из живых (s-files-6); у прочих пусто
 	Meta  Text            `json:"meta,omitempty"`
-	Feed  bool            `json:"feed"` // подписка — лента, прочитанная снаружи (is-ext)
+	Feed  bool            `json:"feed"` // подписка — лента, прочитанная снаружи (is-ext); её счёт — в Count, «ro» рядом — слово экрана
 	State CollectionState `json:"state"`
 	// Detail — не ответила: почему, полностью — подсказка значка ошибки
 	// строки, «401 Unauthorized — the saved password was refused. Open

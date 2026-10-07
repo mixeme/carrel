@@ -303,13 +303,18 @@ func (s *Server) nothingTicked(spec kindSpec) *view.Notice {
 // whereTo is New's arrow in a combined view (s-contacts-9): the ticked
 // collections of the view, each a way to a new record there; the one the
 // last record was made in is on and «last used», and the button writes
-// there; a read-only one is shown closed with its reason («ro»).
+// there; a read-only one is shown closed with its reason («ro»). With
+// nothing ticked the arrow stays — New does not depend on the ticks, and a
+// record can be written into a collection that is not ticked (the owner's
+// decision of 07.10.2026, Р-39; states-7, -14, -18, -25): it lists every
+// collection of the kind.
 func (s *Server) whereTo(blob sealed.Blob, spec kindSpec, button *view.Action) {
 	last, remembered := blob.LastFor(spec.kind)
+	shown := len(ticked(blob, spec.kind)) > 0
 	var items []view.MenuItem
 	for _, col := range blob.Collections {
 		conn, ok := blob.Connection(col.AccountID)
-		if !ok || conn.Feed || col.Gone || !col.Has(spec.kind) || !isTicked(blob, spec.kind, col.AccountID, col.Path) {
+		if !ok || conn.Feed || col.Gone || !col.Has(spec.kind) || (shown && !isTicked(blob, spec.kind, col.AccountID, col.Path)) {
 			continue
 		}
 		it := view.MenuItem{Action: view.Action{ID: "record.new", Label: text(collectionLabel(col)), Method: "GET",

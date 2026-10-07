@@ -2,6 +2,24 @@
   "bar": {
     "actions": [
       {
+        "arrow": [
+          {
+            "colour": "#4a6b52",
+            "enabled": true,
+            "href": "/app/tasks/a-nc-home/dela/new",
+            "id": "record.new",
+            "label": "Дела",
+            "method": "GET"
+          },
+          {
+            "colour": "#3f6e8c",
+            "enabled": true,
+            "href": "/app/tasks/a-nc-home/rabota/new",
+            "id": "record.new",
+            "label": "Работа",
+            "method": "GET"
+          }
+        ],
         "enabled": true,
         "href": "/app/tasks/a-nc-home/dela/new?pick=1",
         "icon": "i-plus",

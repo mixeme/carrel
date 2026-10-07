@@ -38,7 +38,9 @@ type Screen struct {
 	// Frames are the data-frame of each frame the screen draws: the frame
 	// of every fixture of its view model — its state's by STATE_FRAME of
 	// docs/spec/check.py («register/sent» is s-auth-3), else the frame whose
-	// data-screen names the fixture's route (FIXTURE_SCREEN). The screen's
+	// data-screen names the fixture's route (FIXTURE_SCREEN): the combined
+	// view's and one collection's are two frames since Typecase 80d1319
+	// (s-tasks-1 and s-tasks-15). The screen's
 	// drafts are printed from them, and it is checked against each on every
 	// fixture it draws, and each is drawn by some fixture.
 	Frames []string
@@ -202,13 +204,12 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.AgendaPage) },
-		Frames: []string{"s-agenda-1", "states-13", "states-14", "states-15"},
+		Frames: []string{"s-agenda-1", "s-agenda-17", "states-13", "states-14", "states-15"},
 		Draw:   func(model any) Root { return agenda.Screen(model.(*view.AgendaPage)) },
 		Title:  func(model any) string { return string(model.(*view.AgendaPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return agenda.Forms(model.(*view.AgendaPage)) },
 		Waits: []Wait{
 			{Row: 24, Fixture: "app-agenda-all/partial"}, // ждёт библиотеку: U-5.5 #24
-			{Row: 24, Fixture: "app-agenda-all/empty"},   // ждёт библиотеку: U-5.5 #24
 			{Row: 24, Fixture: "app-agenda/empty"},       // ждёт библиотеку: U-5.5 #24
 			{Row: 25, Fixture: "app-agenda/normal"},      // ждёт библиотеку: U-5.5 #25
 		},
@@ -233,7 +234,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.TasksPage) },
-		Frames: []string{"s-tasks-1"},
+		Frames: []string{"s-tasks-1", "s-tasks-15", "states-18", "states-22"},
 		Draw:   func(model any) Root { return tasks.Screen(model.(*view.TasksPage)) },
 		Title:  func(model any) string { return string(model.(*view.TasksPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return tasks.Forms(model.(*view.TasksPage)) },
@@ -256,7 +257,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.TaskEditPage) },
-		Frames: []string{"s-tasks-3"},
+		Frames: []string{"s-tasks-3", "s-tasks-14", "states-24"},
 		Draw:   func(model any) Root { return taskedit.Screen(model.(*view.TaskEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.TaskEditPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return taskedit.Forms(model.(*view.TaskEditPage)) },
@@ -268,7 +269,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.NotesPage) },
-		Frames: []string{"s-notes-1"},
+		Frames: []string{"s-notes-1", "s-notes-31", "states-25", "states-29"},
 		Draw:   func(model any) Root { return notes.Screen(model.(*view.NotesPage)) },
 		Title:  func(model any) string { return string(model.(*view.NotesPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return notes.Forms(model.(*view.NotesPage)) },
@@ -281,7 +282,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.NotePage) },
-		Frames: []string{"s-notes-2", "s-notes-20"},
+		Frames: []string{"s-notes-2", "s-notes-20", "s-notes-30"},
 		Draw:   func(model any) Root { return note.Screen(model.(*view.NotePage)) },
 		Title:  func(model any) string { return string(model.(*view.NotePage).Title) },
 		Forms:  func(model any) []widget.PostForm { return note.Forms(model.(*view.NotePage)) },
@@ -290,13 +291,9 @@ var All = []Screen{
 			{Row: 40, Fixture: "app-note-edit/normal"},                                  // ждёт библиотеку: U-5.5 #40
 			{Row: 42, Fixture: "app-note-edit/new"},                                     // ждёт библиотеку: U-5.5 #42
 			{Row: 36, Control: ".Title(Rubric).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #36
+			{Row: 36, Control: ".Items(Docbar).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #36
 			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Button)"},                 // ждёт библиотеку: U-5.5 #41
 			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Seg)"},                    // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Docbar).Items(Button)"},                          // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Docbar).More(Button)"},                           // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Docbar).End(Check)"},                             // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Docbar).End(Seg)"},                               // ждёт библиотеку: U-5.5 #41
-			{Row: 41, Control: ".Items(Docbar).End(Button)"},                            // ждёт библиотеку: U-5.5 #41
 		},
 	},
 }

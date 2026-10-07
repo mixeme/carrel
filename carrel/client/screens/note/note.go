@@ -1,8 +1,9 @@
 // Package note is a note, /app/notes/{account}/{col}/{uid}, read — frame
-// «Заметка · чтение» (s-notes-2) — and edited at …/{uid}/edit and …/new —
-// frame «Заметка · правка» (s-notes-20, edit.go): one view model, NotePage,
-// in either mode (U-6.4). The drafts frame2go printed for both, with the
-// frame's data become the view model's (U-5.1).
+// «Заметка · чтение» (s-notes-2) — and edited at …/{uid}/edit — frame
+// «Заметка · правка» (s-notes-20) — and at …/new — frame «Заметка · новая»
+// (s-notes-30; edit.go): one view model, NotePage, in either mode (U-6.4).
+// The drafts frame2go printed for them, with the frames' data become the
+// view model's (U-5.1).
 package note
 
 import (
@@ -14,11 +15,25 @@ import (
 )
 
 // The IDs of the page's forms: the deletion posts with no form of its own;
-// the edit is a document that is a form, which Save of its bar submits.
+// the edit is a document that is a form, which Save of its bar submits — as
+// the frames name it, an edit's (s-notes-20) and a new note's (s-notes-30);
+// barSuffix is what the IDs of the forms of the bar's Attach end with — the
+// column's Attach has the same items, and a file input each.
 const (
 	formDelete = "delete"
 	formEdit   = "note-edit"
+	formNew    = "note-new"
+	barSuffix  = ".bar"
 )
+
+// formOf is the ID of the document that is the form of the note's edit: a
+// new note's, which has no record yet, or an edit's.
+func formOf(p *view.NotePage) string {
+	if p.Source.UID == "" {
+		return formNew
+	}
+	return formEdit
+}
 
 // The screen's words (U-1.3) for the shell: the mark, the search, the rail.
 var (
@@ -99,6 +114,11 @@ func Forms(p *view.NotePage) []w.PostForm {
 		}
 	}
 	if p.Doc.Mode == view.NoteEditing {
+		for _, a := range p.Doc.Bar {
+			if a.ID == attachID {
+				out = append(out, bind.MenuForms(barItems(a.Arrow))...)
+			}
+		}
 		for _, a := range p.Meta.Attach {
 			for _, act := range a.Actions {
 				if act.Method == "POST" && act.Enabled && !act.Submits {
@@ -202,7 +222,8 @@ func notices(p *view.NotePage) []w.MainPart {
 // column is what the column holds read and in the edit alike: the
 // attachments with Attach and its arrow — in the edit each with its Remove
 // at the right (DocAttach.Remove, s-notes-20) —, the same note in other
-// notebooks, the source.
+// notebooks, the source — none for a new note, which has no record yet
+// (s-notes-30).
 func column(p *view.NotePage) []w.DocmetaSec {
 	var secs []w.DocmetaSec
 	var attach *view.Action
@@ -224,7 +245,7 @@ func column(p *view.NotePage) []w.DocmetaSec {
 				// A new note's file sends the document it is typed in (Submits,
 				// FileField.To): the column stands outside it.
 				if m, ok := it.(w.MenuItem); ok && m.File != nil && m.File.To != "" {
-					m.File.Form = formEdit
+					m.File.Form = formOf(p)
 				}
 			}
 			// ждёт библиотеку: U-5.5 #36 — a new note's From Files and
@@ -271,10 +292,10 @@ func column(p *view.NotePage) []w.DocmetaSec {
 			Items: []w.DocmetaPart{refs},
 		})
 	}
-	var lines []bind.DiagLine
-	if p.Source.UID != "" {
-		lines = append(lines, bind.DiagLine{Name: "UID", Value: string(p.Source.UID)})
+	if p.Source.UID == "" {
+		return secs
 	}
+	lines := []bind.DiagLine{{Name: "UID", Value: string(p.Source.UID)}}
 	read := string(p.Source.LastRead)
 	if p.Source.Compared != "" {
 		read += sep + string(p.Source.Compared)

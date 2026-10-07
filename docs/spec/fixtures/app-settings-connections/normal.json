@@ -465,6 +465,75 @@
         },
         {
           "changed": "",
+          "colour": "#3f6e8c",
+          "kinds": [
+            "note"
+          ],
+          "label": "Общие с семьёй",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapiski-obshchie",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapiski-obshchie",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapiski-obshchie\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapiski-obshchie/export?whole=1",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapiski-obshchie\u0026k=notes",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapiski-obshchie",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/zapiski-obshchie/",
+          "readOnly": true
+        },
+        {
+          "changed": "",
           "colour": "#a05a2c",
           "kinds": [
             "contact"
@@ -1586,7 +1655,7 @@
       "text": "mix"
     },
     {
-      "text": " · 4 servers · 16 collections · 2 subscriptions"
+      "text": " · 4 servers · 17 collections · 2 subscriptions"
     }
   ],
   "title": "Connections",
