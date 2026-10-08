@@ -347,7 +347,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 6,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -384,7 +384,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 1,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",
@@ -402,7 +402,7 @@
         "rows": [
           {
             "colour": "",
-            "count": null,
+            "count": 6,
             "detail": "",
             "feed": false,
             "href": "/app/calendar",
@@ -560,7 +560,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": null,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/rabota",
@@ -636,7 +636,7 @@
         "rows": [
           {
             "colour": "#8c6239",
-            "count": null,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-rad-vps/dezhurstva",
@@ -705,7 +705,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": null,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-rad-vps/proekty",
@@ -781,7 +781,7 @@
         "rows": [
           {
             "colour": "#9a9280",
-            "count": null,
+            "count": 0,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-baikal/obshchij",
@@ -858,7 +858,7 @@
         "rows": [
           {
             "colour": "#8c6239",
-            "count": null,
+            "count": 3,
             "detail": "",
             "feed": true,
             "href": "/app/calendar/f-ru-holidays/feed",
@@ -921,7 +921,23 @@
       }
     ],
     "shortcuts": [],
-    "tags": [],
+    "tags": [
+      {
+        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04",
+        "label": "all",
+        "on": true
+      },
+      {
+        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026tag=release",
+        "label": "release",
+        "on": false
+      },
+      {
+        "href": "/app/calendar/a-nc-home/lichnyj?from=2027-01-04\u0026tag=team",
+        "label": "team",
+        "on": false
+      }
+    ],
     "ticks": {
       "action": "/app/sources/calendar",
       "actions": [],

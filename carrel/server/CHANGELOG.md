@@ -17,6 +17,31 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.155 — 2026-10-08
+
+The owner's decision of 08.10.2026: a rail's tags are the section's.
+
+### Changed
+
+- **The rail of one collection carries the section's tags.** `Rail.tags` on
+  the page of one collection are the categories of what the list read and
+  of what the last poll of the section in this session read in the other
+  ticked collections — in this one too when it did not answer now, and, for
+  a calendar, in another window of it. Before, they were the open list's
+  alone, and a list that did not answer had none. Each tag still leads to
+  the open list with `?tag=…`: a tag no record of that list has gives an
+  empty list. A session that has not polled the section knows the open
+  list's tags only.
+
+### Fixtures
+
+- The states of one collection are taken after the section was read, as a
+  person comes to them: `app-contacts-one/*`, `app-agenda/empty`,
+  `app-tasks/source-error`, `app-notes/source-error` carry the section's
+  counts and tags. «Команда» holds a second card in `app-contacts-one/*`
+  (states-4 draws two letters); in `app-agenda/empty` «Общий» answers, as
+  states-15 draws it. Both live in the tests alone.
+
 ## v0.2.154 — 2026-10-08
 
 The frames of Typecase `80d1319` (Typecase's notes 35 and 36; the owner's

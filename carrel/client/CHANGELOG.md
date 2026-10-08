@@ -4,6 +4,19 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.3 — 2026-10-08
+
+Server `v0.2.155` (the rail of one collection carries the section's tags).
+No screen changed.
+
+### Closed
+
+- Three states match their frames and wait no more: a read-only book
+  (`app-contacts-one/readonly`, `states-4`), one calendar's empty week
+  (`app-agenda/empty`, `states-15`), a list of tasks whose server did not
+  answer (`app-tasks/source-error`, `states-22`). U-5.5 rows 19, 24, 32, 38
+  narrowed to what is Typecase's (its tasks 138–143) and the set's.
+
 ## v0.4.2 — 2026-10-08
 
 Typecase `80d1319` (Typecase's notes 35 and 36: Carrel's tasks 86, 97, 104,

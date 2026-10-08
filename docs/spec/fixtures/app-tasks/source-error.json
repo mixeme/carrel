@@ -227,7 +227,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 6,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -273,7 +273,7 @@
         "rows": [
           {
             "colour": "",
-            "count": null,
+            "count": 6,
             "detail": "",
             "feed": false,
             "href": "/app/tasks",
@@ -293,7 +293,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 4,
             "detail": "The server answered 503 Service Unavailable.",
             "feed": false,
             "href": "/app/tasks/a-nc-home/dela",
@@ -362,7 +362,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": null,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/rabota",
@@ -472,7 +472,28 @@
       }
     ],
     "shortcuts": [],
-    "tags": [],
+    "tags": [
+      {
+        "href": "/app/tasks/a-nc-home/dela",
+        "label": "all",
+        "on": true
+      },
+      {
+        "href": "/app/tasks/a-nc-home/dela?tag=%D0%B4%D0%BE%D0%BC",
+        "label": "дом",
+        "on": false
+      },
+      {
+        "href": "/app/tasks/a-nc-home/dela?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7",
+        "label": "релиз",
+        "on": false
+      },
+      {
+        "href": "/app/tasks/a-nc-home/dela?tag=read",
+        "label": "read",
+        "on": false
+      }
+    ],
     "ticks": {
       "action": "/app/sources/tasks",
       "actions": [],
@@ -595,7 +616,7 @@
         "label": "Refresh",
         "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

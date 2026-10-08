@@ -208,3 +208,54 @@ func TestOneListSaysARecordIsLinked(t *testing.T) {
 		t.Error("the notebook lacks the linked note")
 	})
 }
+
+// The tags of a rail are the section's, not the open list's (the owner's
+// decision of 08.10.2026): the rail of one collection carries the set the
+// combined view of the section has — the categories of the ticked
+// collections the session has read —, each leading to the open list
+// filtered by it; and it keeps them when the list itself did not answer
+// (s-tasks-15 draws «релиз», a tag of «Работа», in the rail of «Дела»;
+// states-22 draws the tags over a list that is unavailable).
+func TestRailTagsAreTheSections(t *testing.T) {
+	for _, id := range []string{"s-tasks-15", "states-22"} {
+		if !strings.Contains(mockupFrame(t, id), `>релиз</`) {
+			t.Fatalf("%s draws no «релиз» among the rail's tags: read the frame again", id)
+		}
+	}
+	labels := func(tags []view.Tag) string {
+		var out []string
+		for _, tg := range tags {
+			out = append(out, string(tg.Label))
+		}
+		return strings.Join(out, ", ")
+	}
+	app := newMockupApp(t)
+	all := combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
+	want := labels(all.Rail.Tags)
+	if !strings.Contains(want, "релиз") || !strings.Contains(want, "дом") {
+		t.Fatalf("the combined list's tags = %q: the set changed", want)
+	}
+	list := app.listPath(t, "tasks", "dela")
+	one := decode[view.TasksPage](t, app.h.do(get(list, app.sess)))
+	if got := labels(one.Rail.Tags); got != want {
+		t.Errorf("the rail of one list has the tags %q, the section's are %q", got, want)
+	}
+	for _, tg := range one.Rail.Tags {
+		if !strings.HasPrefix(tg.Href, list) {
+			t.Errorf("the tag %q leads to %q, not to the open list", tg.Label, tg.Href)
+		}
+	}
+	// The session holds what it read (S-4.2) and asks only whether it
+	// changed: the stand refuses that too.
+	for _, m := range []string{"PROPFIND", "REPORT"} {
+		app.servers["nextcloud"].Refuse(m, 503, "the server is busy")
+		defer app.servers["nextcloud"].Accept(m)
+	}
+	refused := decode[view.TasksPage](t, app.h.do(get(list, app.sess)))
+	if len(refused.Notices) == 0 {
+		t.Fatal("the list answered: the stand did not refuse")
+	}
+	if got := labels(refused.Rail.Tags); got != want {
+		t.Errorf("the rail of a list that did not answer has the tags %q, the section's are %q", got, want)
+	}
+}

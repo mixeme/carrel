@@ -241,7 +241,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 3,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -278,7 +278,7 @@
         "rows": [
           {
             "colour": "",
-            "count": null,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/notes",
@@ -298,7 +298,7 @@
         "rows": [
           {
             "colour": "#6b4e7a",
-            "count": null,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "/app/notes/a-nc-home/dnevnik",
@@ -367,7 +367,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 2,
             "detail": "The server answered 503 Service Unavailable.",
             "feed": false,
             "href": "/app/notes/a-nc-home/zapisi",
@@ -500,7 +500,28 @@
       }
     ],
     "shortcuts": [],
-    "tags": [],
+    "tags": [
+      {
+        "href": "/app/notes/a-nc-home/zapisi",
+        "label": "all",
+        "on": true
+      },
+      {
+        "href": "/app/notes/a-nc-home/zapisi?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8",
+        "label": "встречи",
+        "on": false
+      },
+      {
+        "href": "/app/notes/a-nc-home/zapisi?tag=%D0%BA%D0%BD%D0%B8%D0%B3%D0%B8",
+        "label": "книги",
+        "on": false
+      },
+      {
+        "href": "/app/notes/a-nc-home/zapisi?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7",
+        "label": "релиз",
+        "on": false
+      }
+    ],
     "ticks": {
       "action": "/app/sources/notes",
       "actions": [],
@@ -623,7 +644,7 @@
         "label": "Refresh",
         "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

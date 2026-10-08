@@ -828,6 +828,11 @@
         "on": false
       },
       {
+        "href": "/app/tasks/a-nc-home/dela?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7",
+        "label": "релиз",
+        "on": false
+      },
+      {
         "href": "/app/tasks/a-nc-home/dela?tag=read",
         "label": "read",
         "on": false

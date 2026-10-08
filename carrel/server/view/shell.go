@@ -66,7 +66,7 @@ type Rail struct {
 	// правка (s-notes-2, s-notes-20), в порядке списка тетради; On — открытая.
 	// Берутся из списка, уже загруженного сеансом: не загружен — пусто.
 	Neighbours []Action `json:"neighbours"`
-	Tags       []Tag    `json:"tags"` // фильтр по категориям; у файлов пуст
+	Tags       []Tag    `json:"tags"` // фильтр по категориям — теги раздела, не открытого списка (C-6.3); у файлов пуст
 	// Shortcuts — рубрика «Shortcuts» рейла файлов (s-files-1, s-files-6):
 	// Attachments и Published на каждом экране файлов; у прочих разделов пусто
 	Shortcuts []Shortcut `json:"shortcuts"`

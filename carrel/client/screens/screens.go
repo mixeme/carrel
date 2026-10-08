@@ -163,7 +163,6 @@ var All = []Screen{
 			{Row: 19, Fixture: "app-contacts/partial"},          // ждёт библиотеку: U-5.5 #19
 			{Row: 19, Fixture: "app-contacts/unavailable"},      // ждёт библиотеку: U-5.5 #19
 			{Row: 19, Fixture: "app-contacts-one/empty"},        // ждёт библиотеку: U-5.5 #19
-			{Row: 19, Fixture: "app-contacts-one/readonly"},     // ждёт библиотеку: U-5.5 #19
 			{Row: 19, Fixture: "app-contacts-one/source-error"}, // ждёт библиотеку: U-5.5 #19
 		},
 	},
@@ -210,7 +209,6 @@ var All = []Screen{
 		Forms:  func(model any) []widget.PostForm { return agenda.Forms(model.(*view.AgendaPage)) },
 		Waits: []Wait{
 			{Row: 24, Fixture: "app-agenda-all/partial"}, // ждёт библиотеку: U-5.5 #24
-			{Row: 24, Fixture: "app-agenda/empty"},       // ждёт библиотеку: U-5.5 #24
 			{Row: 25, Fixture: "app-agenda/normal"},      // ждёт библиотеку: U-5.5 #25
 		},
 	},
@@ -239,10 +237,9 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.TasksPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return tasks.Forms(model.(*view.TasksPage)) },
 		Waits: []Wait{
-			{Row: 31, Fixture: "app-tasks-all/normal"},   // ждёт библиотеку: U-5.5 #31
-			{Row: 32, Fixture: "app-tasks/normal"},       // ждёт библиотеку: U-5.5 #32
-			{Row: 32, Fixture: "app-tasks/source-error"}, // ждёт библиотеку: U-5.5 #32
-			{Row: 32, Fixture: "app-tasks-all/empty"},    // ждёт библиотеку: U-5.5 #32
+			{Row: 31, Fixture: "app-tasks-all/normal"}, // ждёт библиотеку: U-5.5 #31
+			{Row: 32, Fixture: "app-tasks/normal"},     // ждёт библиотеку: U-5.5 #32
+			{Row: 32, Fixture: "app-tasks-all/empty"},  // ждёт библиотеку: U-5.5 #32
 		},
 	},
 	{

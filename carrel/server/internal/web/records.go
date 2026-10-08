@@ -121,6 +121,9 @@ type collectionCtx struct {
 	// refused is what the read of this collection's list failed with, when
 	// it did (unavailableNotice): the rail's row of the list says it.
 	refused error
+	// read are the records the list on the screen read, for the tags of its
+	// rail (sectionTags).
+	read []listed
 	// ttl is the soft limit on a kept whole read where the server gives no
 	// change tag (S-4.2, wholeread.go), and the clock it is measured by.
 	ttl time.Duration
@@ -722,6 +725,9 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 	rail := func(tags []view.Tag) view.Rail {
 		rl := s.kindRail(c.sess, s.catalogOf(c.sess), c.spec, nil, c.listPath())
 		rl.Tags = tags
+		if c.spec.kind != view.KindFile {
+			rl.Tags = s.sectionTags(c, r)
+		}
 		if c.refused != nil {
 			// The list on the screen did not answer: its row has the sign
 			// with the reason, not a dash (states-11, -22, -29; from-typecase
@@ -778,6 +784,35 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 		page = p
 	}
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// sectionTags are the tags of the rail of one collection's list: the
+// section's, not the list's (the owner's decision of 08.10.2026; s-tasks-15,
+// s-notes-31, states-4, -10, -11, -15, -22, -29) — the categories of what
+// the list just read and of what the last poll of the section read in the
+// other ticked collections, and in this one when it did not answer now. Each
+// leads to the open list filtered by it: a tag no record of the list has
+// gives an empty list. A calendar's list reads one window, so what the poll
+// read of this calendar in another counts too, each record once. A session
+// that has polled nothing knows the list's own alone.
+func (s *Server) sectionTags(c *collectionCtx, r *http.Request) []view.Tag {
+	items := append([]listed{}, c.read...)
+	have := map[string]bool{}
+	for _, it := range c.read {
+		have[listedUID(c.spec.kind, it)] = true
+	}
+	blob := s.catalogOf(c.sess)
+	for _, it := range listedOfKind(blob, lastPoll(c.sess, c.spec.kind), c.spec.kind) {
+		own := it.from.conn.ID == c.conn.ID && it.from.col.Path == c.col.Path
+		switch {
+		case !isTicked(blob, c.spec.kind, it.from.conn.ID, it.from.col.Path):
+			continue
+		case own && c.refused == nil && (c.spec.kind != view.KindEvent || have[listedUID(c.spec.kind, it)]):
+			continue
+		}
+		items = append(items, it)
+	}
+	return s.tagFilter(c.listPath(), r.URL.Query()).rail(c.spec.kind, items)
 }
 
 // listSort is the order a list is shown in (review Р-12, s-contacts-1,
@@ -862,6 +897,7 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 		page.Empty = bookEmpty(c, page.Bar.Actions)
 	}
 	page.Bar.Segments = s.sortSegments(c.listPath(), view.KindContact, by, r.URL.Query())
+	c.read = items
 	page.Rail.Tags = filter.rail(view.KindContact, items)
 	c.putIndex(indexOf(c.tf, view.KindContact, items))
 	c.noteRead(items, true)
@@ -1366,6 +1402,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	}
 	page.Details = s.openInAgenda(r, c.sess, c.listPath(), shown, page.Days)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
+	c.read = items
 	page.Rail.Tags = filter.rail(view.KindEvent, items)
 	c.putIndex(indexOf(c.tf, view.KindEvent, items))
 	c.noteRead(items, false)
@@ -1648,6 +1685,7 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	page.Bar.Segments = append(s.taskSegments(c.listPath(), filter.tag, show, open, done),
 		s.sortSegments(c.listPath(), view.KindTask, by, r.URL.Query())...)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
+	c.read = items
 	page.Rail.Tags = filter.rail(view.KindTask, items)
 	c.putIndex(indexOf(c.tf, view.KindTask, items))
 	c.noteRead(items, true)
@@ -1844,6 +1882,7 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	page.Details = s.openRow(r, c.sess, c.listPath(), c.spec, shown, noteRowsOn(page.Groups))
 	page.Bar.Segments = s.sortSegments(c.listPath(), view.KindNote, by, r.URL.Query())
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
+	c.read = items
 	page.Rail.Tags = filter.rail(view.KindNote, items)
 	c.putIndex(indexOf(c.tf, view.KindNote, items))
 	c.noteRead(items, true)

@@ -1689,6 +1689,14 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 // one. Each is a state of the screen, not another screen.
 func TestFixtureContactsStates(t *testing.T) {
 	app := newMockupApp(t)
+	// The combined book was opened first, as a person comes to it: the rail
+	// of one book carries the section's count and tags (states-4, -10, -11;
+	// the owner's decision of 08.10.2026 on the tags). «Команда» holds a
+	// second card here, as states-4 draws the book — two letters, «И» and
+	// another; the card lives in this test alone.
+	app.servers["radicale · vps"].Seed(davtest.AddressBookHome+"komanda/1e77-40c2-fa19.vcf",
+		"BEGIN:VCARD\nVERSION:3.0\nUID:1e77-40c2-fa19\nN:Фомина;Ирина;;;\nFN:Ирина Фомина\nTEL;TYPE=CELL:+7 900 000-00-00\nREV:20260810T081200Z\nEND:VCARD\n")
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 
 	// empty: «Рассылки» holds nothing at all.
@@ -1704,8 +1712,8 @@ func TestFixtureContactsStates(t *testing.T) {
 	// source-error: the stand refuses, and the screen says so instead of
 	// showing an empty list (C-8).
 	t.Run("source-error", func(t *testing.T) {
-		app.servers["nextcloud"].Refuse("REPORT", 503, "the server is busy")
-		defer app.servers["nextcloud"].Accept("REPORT")
+		refuseReads(app.servers["nextcloud"])
+		defer acceptReads(app.servers["nextcloud"])
 		app.compare(t, "app-contacts-one/source-error.json",
 			app.h.do(get(app.listPath(t, "contacts", "kontakty"), app.sess)))
 	})
@@ -2137,6 +2145,11 @@ func TestFixturePhotoPreview(t *testing.T) {
 func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 	t.Run("agenda-empty", func(t *testing.T) {
 		app := newMockupApp(t)
+		// The combined calendar was opened first: the rail of one calendar
+		// carries the section's tags, whatever its own week holds (states-15).
+		// The frame draws «Общий» answering, so here its password fits.
+		app.servers["baikal"].Accept("REPORT")
+		combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 		// A week of the set that holds nothing: an agenda is empty by the
 		// window it shows, not by the calendar being empty. «Синк-ап по
@@ -2161,8 +2174,12 @@ func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 	} {
 		t.Run(one.dir+"-source-error", func(t *testing.T) {
 			app := newMockupApp(t)
-			app.servers["nextcloud"].Refuse("REPORT", 503, "the server is busy")
-			defer app.servers["nextcloud"].Accept("REPORT")
+			// The section was read before its server stopped answering: the
+			// rail keeps its tags over the list that is unavailable
+			// (states-22, -29).
+			openList(t, app, "/app/"+one.segment)
+			refuseReads(app.servers["nextcloud"])
+			defer acceptReads(app.servers["nextcloud"])
 			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 			app.compare(t, one.dir+"/source-error.json",
 				app.h.do(get(app.listPath(t, one.segment, one.slug), app.sess)))
@@ -2286,6 +2303,21 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 			app.compare(t, one.dir+"/partial.json", app.h.do(get("/app/"+one.segment+"?task="+task, app.sess)))
 		})
+	}
+}
+
+// refuseReads makes a stand refuse what a list is read by: the question
+// whether it changed, which a session that holds the list asks first
+// (S-4.2), and the read itself. acceptReads takes the refusal back.
+func refuseReads(srv *davtest.Server) {
+	for _, m := range []string{"PROPFIND", "REPORT"} {
+		srv.Refuse(m, 503, "the server is busy")
+	}
+}
+
+func acceptReads(srv *davtest.Server) {
+	for _, m := range []string{"PROPFIND", "REPORT"} {
+		srv.Accept(m)
 	}
 }
 
