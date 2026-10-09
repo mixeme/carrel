@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"regexp"
 	"strings"
 	"testing"
@@ -144,5 +145,79 @@ func TestRowNameHasItsAddress(t *testing.T) {
 	opened := decode[view.FilesPage](t, f.h.do(get(file.Open, f.sess)))
 	if len(opened.Rows) != 2 || !opened.Rows[1].Selected || opened.Details == nil {
 		t.Errorf("the name's address did not open the folder with the file chosen: %+v", opened.Rows)
+	}
+}
+
+// ФН5 (the owner's decisions of 09.10.2026: the frame is right, and without
+// scripts the selection bar always stands): a tick of a row or of a tile is
+// a field of a form — «item», its value the name (s-files-5) —, and the
+// form is the operations': Move, Copy, Delete and Rename of the bar send
+// it. So the bar's operations are there with nothing selected too, and
+// what is ticked travels with the one pressed.
+func TestSelectionIsTheOperationsForm(t *testing.T) {
+	field := frameOne(t, regexp.MustCompile(`<input class="tc-tile__box" type="checkbox" name="([^"]+)" value="[^"]+"`), mockupFrame(t, "s-files-5"), "tick of a tile")[1]
+
+	f := filesFixture(t, true)
+	for _, name := range []string{"a.txt", "b.txt", "c.md"} {
+		f.srv.SeedFile(filesDocs+name, name)
+	}
+	f.srv.SeedFolder(filesDocs + "sub/")
+	here := f.at("")
+	page := decode[view.FilesPage](t, f.h.do(get(here, f.sess)))
+	sel := page.Select
+	if sel == nil || sel.Method != "POST" || sel.Action != f.at("op") || formRow(*sel, "_csrf") == nil || len(sel.Actions) != 0 {
+		t.Fatalf("selection form = %+v, want a POST of the operations with nothing to clear", sel)
+	}
+	if page.SelectField != field {
+		t.Fatalf("a tick is the field %q, the frame's %q", page.SelectField, field)
+	}
+	// Nothing selected, the operations stand: each is the form's button
+	// with its operation in its address and no names of its own.
+	for _, id := range []string{"file.rename", "file.move", "file.copy", "file.delete"} {
+		a := actionByID(page.Bar.Actions, id)
+		if a == nil || !a.Enabled || !a.Submits || a.Method != "POST" || strings.Contains(a.Href, "item=") ||
+			!strings.HasPrefix(a.Href, f.at("op")+"?op=") {
+			t.Errorf("%s = %+v, want a button of the selection form", id, a)
+		}
+	}
+	if d := actionByID(page.Bar.Actions, "file.download"); d == nil || d.Enabled || d.Reason == "" {
+		t.Errorf("Download with nothing selected = %+v", d)
+	}
+	send := func(id string, names ...string) *httptest.ResponseRecorder {
+		t.Helper()
+		fields := formFields(*sel)
+		for _, n := range names {
+			fields.Add(field, n)
+		}
+		return f.h.do(postForm(actionHref(t, page.Bar.Actions, id), f.sess, fields))
+	}
+	// Two ticked and Move pressed: the sheet of a move of the two.
+	sheet := decode[view.FileOpSheet](t, send("file.move", "a.txt", "b.txt"))
+	if sheet.Op != view.FileMove || len(sheet.Items) != 2 || sheet.Form == nil || !strings.Contains(sheet.Form.Action, "item=a.txt") || !strings.Contains(sheet.Form.Action, "item=b.txt") {
+		t.Fatalf("the sheet of two ticked = %+v", sheet)
+	}
+	// Nothing ticked, and a rename of two, say so on the folder.
+	if none := decode[view.FilesPage](t, send("file.delete")); !hasNoticeBody(none.Notices, "Tick the files and folders first.") {
+		t.Errorf("nothing ticked: %+v", none.Notices)
+	}
+	if two := decode[view.FilesPage](t, send("file.rename", "a.txt", "b.txt")); !hasNoticeBody(two.Notices, "Rename takes one item.") {
+		t.Errorf("a rename of two: %+v", two.Notices)
+	}
+	if one := decode[view.FileOpSheet](t, send("file.rename", "c.md")); one.Op != view.FileRename || one.Form == nil {
+		t.Errorf("a rename of one ticked = %+v", one)
+	}
+
+	// What the address selects is ticked, counted and can be cleared; the
+	// old ticks of the address — toggle, all — are no longer answered.
+	picked := decode[view.FilesPage](t, f.h.do(get(here+"?sort=size&select=b.txt", f.sess)))
+	if !fileRow(t, picked, "b.txt").Selected || picked.Bar.Selected != 1 ||
+		actionHref(t, picked.Select.Actions, "files.select.clear") != here+"?sort=size" {
+		t.Fatalf("selected by the address: bar %d, form %+v", picked.Bar.Selected, picked.Select)
+	}
+	if d := actionByID(picked.Bar.Actions, "file.download"); d == nil || !d.Enabled || d.Submits {
+		t.Errorf("Download of the one selected = %+v", d)
+	}
+	if rec := f.h.do(get(here+"?toggle=a.txt", f.sess)); rec.Code != http.StatusOK {
+		t.Errorf("toggle in the address: %d, want the folder as it is", rec.Code)
 	}
 }

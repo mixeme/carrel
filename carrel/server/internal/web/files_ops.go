@@ -645,11 +645,27 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	op := view.FileOp(q.Get("op"))
+	// The names are those of the address and those ticked in the selection
+	// form (FilesPage.Select): its fields «item».
+	if r.Method == http.MethodPost {
+		for _, name := range r.PostForm["item"] {
+			if !slices.Contains(q["item"], name) {
+				q.Add("item", name)
+			}
+		}
+	}
 	names := q["item"]
-	switch {
-	case op != view.FileRename && op != view.FileMove && op != view.FileCopy && op != view.FileDelete,
-		len(names) == 0, op == view.FileRename && len(names) != 1:
+	if op != view.FileRename && op != view.FileMove && op != view.FileCopy && op != view.FileDelete {
 		s.notFound(w, r)
+		return
+	}
+	// A button of the selection form pressed over the wrong number of ticks
+	// is told so on the folder.
+	if reason := ""; len(names) == 0 || op == view.FileRename && len(names) != 1 {
+		if reason = "Rename takes one item."; len(names) == 0 {
+			reason = "Tick the files and folders first."
+		}
+		s.writeFolder(w, r, c, c.segs, "", url.Values{}, render.TargetMain, view.Notice{Role: view.NoticeAlert, Title: "Nothing was done", Body: text(reason)})
 		return
 	}
 	folder, _ := c.path(c.segs, true)

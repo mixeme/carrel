@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.166 — 2026-10-09
+
+The files section, the client's second scan (ФН5; the owner's decisions of
+09.10.2026 — the frame is right, and without scripts the selection bar
+always stands): the selection of a folder is the form of its operations
+(`s-files-5`).
+
+### Changed
+
+- **`FilesPage.select` is a POST of the folder's operations**
+  (`…/op/{path…}`) with the hidden `_csrf`, not a GET of the folder. A tick
+  of a row or of a tile is its field `selectField` — «item» — with the
+  row's name as the value, ticked where `FileRow.selected` is.
+- **Rename, Move, Copy and Delete of the bar are buttons of that form**
+  (`submits`): the operation is in the button's address, the names are the
+  ticks. They come in `bar.actions` with nothing selected too — a client
+  without scripts draws the selection bar always, one with scripts while
+  something is selected. An empty folder has none. Download stays a link,
+  on for the one file the address selects.
+- **The operations' address takes `item` from the form too.** Nothing
+  ticked, or a rename of other than one, answers the folder with «Nothing
+  was done» and why («Tick the files and folders first.», «Rename takes one
+  item.») — it was a 404.
+
+### Removed
+
+- `?toggle=` and `?all=1` of a folder's address: the ticks are fields now.
+  `?select=` stays — what the address selects is ticked, counted and opens
+  the panel.
+
 ## v0.2.165 — 2026-10-09
 
 The files section, the client's second scan (ФН10; the owner's decision of

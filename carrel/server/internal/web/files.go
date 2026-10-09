@@ -556,10 +556,6 @@ func (s *Server) writeFolderWith(w http.ResponseWriter, r *http.Request, c *file
 			Actions: []view.Action{{ID: "source.retry", Label: "Try again", Href: s.route(retry), Method: "GET", Enabled: true}},
 		})
 	}
-	if err == nil && (q.Has("toggle") || q.Has("all")) {
-		s.redirect(w, r, c.href("", segs, true)+querySuffix(selectionAfter(entries, q)))
-		return
-	}
 	if pick != "" {
 		i := slices.IndexFunc(entries, func(e file.Entry) bool { return e.Name == pick })
 		switch {
@@ -586,64 +582,6 @@ func (s *Server) writeFolderWith(w http.ResponseWriter, r *http.Request, c *file
 		return
 	}
 	s.writePage(w, r, http.StatusOK, page)
-}
-
-// selectionAfter is the query of a folder after a tick of its selection form
-// (FilesPage.Select): toggle flips one name the folder holds, all selects
-// every row the filter shows, or clears them when all are selected already.
-// Names the folder does not hold go.
-func selectionAfter(entries []file.Entry, q url.Values) url.Values {
-	out := cloneValues(q)
-	out.Del("toggle")
-	out.Del("all")
-	out.Del("select")
-	held := map[string]bool{}
-	for _, e := range entries {
-		held[e.Name] = true
-	}
-	var picked []string
-	for _, name := range q["select"] {
-		if held[name] && !slices.Contains(picked, name) {
-			picked = append(picked, name)
-		}
-	}
-	for _, name := range q["toggle"] {
-		switch i := slices.Index(picked, name); {
-		case i >= 0:
-			picked = slices.Delete(picked, i, i+1)
-		case held[name]:
-			picked = append(picked, name)
-		}
-	}
-	if q.Get("all") != "" {
-		needle := strings.ToLower(strings.TrimSpace(q.Get("filter")))
-		var shown []string
-		for _, e := range entries {
-			if needle == "" || strings.Contains(strings.ToLower(e.Name), needle) {
-				shown = append(shown, e.Name)
-			}
-		}
-		every := true
-		for _, name := range shown {
-			if !slices.Contains(picked, name) {
-				every = false
-			}
-		}
-		if every {
-			picked = slices.DeleteFunc(picked, func(n string) bool { return slices.Contains(shown, n) })
-		} else {
-			for _, name := range shown {
-				if !slices.Contains(picked, name) {
-					picked = append(picked, name)
-				}
-			}
-		}
-	}
-	slices.Sort(picked)
-	for _, name := range picked {
-		out.Add("select", name)
-	}
-	return out
 }
 
 // querySuffix is "?" and the query, or nothing for an empty one.
@@ -813,14 +751,14 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 	for _, o := range listSorts[view.KindFile] {
 		page.Bar.Segments = append(page.Bar.Segments, option(o.id, o.label, "sort", o.value, order))
 	}
-	page.Bar.Actions = s.folderActions(c, segs, picked)
+	page.Bar.Actions = s.folderActions(c, segs, picked, len(entries) > 0)
 	// An empty folder says what to do with it, with the head's own buttons
 	// (states-32); a read-only one has nothing to offer.
 	if len(entries) == 0 {
 		page.Empty = &view.Notice{Role: view.NoticeInfo, Title: "This folder is empty."}
 		if !c.col.ReadOnly {
 			page.Empty.Body = "Upload files into it, or drop them onto the window."
-			page.Empty.Actions = s.folderActions(c, segs, nil)
+			page.Empty.Actions = s.folderActions(c, segs, nil, false)
 		}
 	}
 	// One file chosen opens its panel (s-files-1); Details shows and hides
@@ -837,7 +775,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		page.Details = s.filePanel(c, segs, picked[0], here, q, dims)
 	}
 	page.Bar.Actions = append(page.Bar.Actions, s.detailsToggle(here, q, picked, shown), s.printAction(here))
-	page.Select = s.selectForm(here, q)
+	page.Select, page.SelectField = s.selectForm(c, segs, here, q), "item"
 	page.Queue = s.transferQueue(c.sess)
 	page.Print = view.Print{Title: page.Title, Range: printRange(string(c.stamp()), plural(total, "item"), filter), Taken: c.tf.taken(now)}
 	return page
@@ -999,18 +937,14 @@ func (s *Server) detailsToggle(here string, q url.Values, picked []file.Entry, s
 	return a
 }
 
-// selectForm is the selection of a folder without scripts (U-8): a GET of
-// the folder with its query, the names selected now among it; a row's tick
-// sends toggle with its name, the head's all=1 (selectionAfter). Clear
-// selection is the folder with its query and nothing selected.
-func (s *Server) selectForm(here string, q url.Values) *view.Form {
-	var rows []view.FormRow
-	for _, name := range []string{"view", "sort", "filter", "details", "select"} {
-		for _, v := range q[name] {
-			rows = append(rows, view.FormRow{Name: name, Kind: view.InputHidden, Value: text(v)})
-		}
-	}
-	f := s.plainForm(here, "GET", rows...)
+// selectForm is the selection of a folder (s-files-5): the form of its
+// operations — a POST of the folder's op with the token —, whose ticks are
+// the fields «item» and whose buttons are the operations of the bar. Clear
+// selection is the folder with its query and nothing selected by the
+// address.
+func (s *Server) selectForm(c *fileCtx, segs []string, here string, q url.Values) *view.Form {
+	f := view.Form{Action: s.route(c.href("op", segs, true)), Method: "POST", Target: render.TargetSheet,
+		Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(c.sess)}}}}
 	if len(q["select"]) > 0 {
 		clear := cloneValues(q)
 		clear.Del("select")
@@ -1070,7 +1004,7 @@ func (s *Server) fileMenu(c *fileCtx, segs []string, e file.Entry) []view.MenuIt
 // selection Download (one file), Rename (one), Move, Copy and Delete. The bar
 // publishes nothing (s-files-1): a folder is published from its row in the
 // folder above.
-func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry) []view.Action {
+func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry, bulk bool) []view.Action {
 	// Upload has an arrow (s-files-8): Files, which the button is, and
 	// Folder — the same POST, a folder arriving as files with their paths;
 	// only the dialog of the system differs, and that is the client's.
@@ -1087,27 +1021,30 @@ func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry) [
 		upload,
 		writeAction(c, view.Action{ID: "folder.new", Label: "New folder", Icon: "i-plus", Href: s.route(c.href("mkcol", segs, true)), Method: "POST", Enabled: true}),
 	}
-	if len(picked) == 0 {
+	if !bulk {
 		return actions
 	}
-	names := make([]string, len(picked))
-	for i, e := range picked {
-		names[i] = e.Name
-	}
+	// The operations of the selection bar are buttons of the selection form
+	// (FilesPage.Select): what is ticked goes with the one pressed, so they
+	// name no item themselves and stand with nothing selected too — without
+	// scripts the bar is always there (the owner's decision of 09.10.2026).
+	// Download is a link, and has one only for the one file the address
+	// selects.
 	download := view.Action{ID: "file.download", Label: "Download", Icon: "i-down", Method: "GET", Enabled: len(picked) == 1 && !picked[0].Dir}
 	if download.Enabled {
-		download.Href = s.route(c.href("download", append(slices.Clone(segs), names[0]), false))
+		download.Href = s.route(c.href("download", append(slices.Clone(segs), picked[0].Name), false))
 	} else {
 		download.Reason = "Download takes one file."
 	}
-	rename := writeAction(c, view.Action{ID: "file.rename", Label: "Rename", Icon: "i-pencil", Href: s.opHref(c, segs, view.FileRename, names[0]), Method: "POST", Enabled: len(picked) == 1})
-	if len(picked) != 1 {
-		rename.Href, rename.Reason = "", "Rename takes one item."
+	op := func(a view.Action, op view.FileOp) view.Action {
+		a.Href, a.Method, a.Enabled, a.Submits = s.opHref(c, segs, op), "POST", true, true
+		return a
 	}
-	return append(actions, download, rename,
-		writeAction(c, view.Action{ID: "file.move", Label: "Move", Icon: "i-move", Href: s.opHref(c, segs, view.FileMove, names...), Method: "POST", Enabled: true}),
-		view.Action{ID: "file.copy", Label: "Copy", Icon: "i-dup", Href: s.opHref(c, segs, view.FileCopy, names...), Method: "POST", Enabled: true},
-		writeAction(c, view.Action{ID: "file.delete", Label: "Delete", Icon: "i-trash", Href: s.opHref(c, segs, view.FileDelete, names...), Method: "POST", Danger: true, Enabled: true}),
+	return append(actions, download,
+		writeAction(c, op(view.Action{ID: "file.rename", Label: "Rename", Icon: "i-pencil"}, view.FileRename)),
+		writeAction(c, op(view.Action{ID: "file.move", Label: "Move", Icon: "i-move"}, view.FileMove)),
+		op(view.Action{ID: "file.copy", Label: "Copy", Icon: "i-dup"}, view.FileCopy),
+		writeAction(c, op(view.Action{ID: "file.delete", Label: "Delete", Icon: "i-trash", Danger: true}, view.FileDelete)),
 	)
 }
 

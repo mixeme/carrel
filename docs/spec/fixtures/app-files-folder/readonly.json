@@ -55,6 +55,62 @@
       },
       {
         "enabled": false,
+        "icon": "i-down",
+        "id": "file.download",
+        "label": "Download",
+        "method": "GET",
+        "reason": "Download takes one file."
+      },
+      {
+        "csrf": "csrf",
+        "enabled": false,
+        "href": "/app/files/a-sftp-vps/Public/op/?op=rename",
+        "icon": "i-pencil",
+        "id": "file.rename",
+        "label": "Rename",
+        "method": "POST",
+        "reason": "This storage is read-only.",
+        "submits": true,
+        "target": "sheet"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": false,
+        "href": "/app/files/a-sftp-vps/Public/op/?op=move",
+        "icon": "i-move",
+        "id": "file.move",
+        "label": "Move",
+        "method": "POST",
+        "reason": "This storage is read-only.",
+        "submits": true,
+        "target": "sheet"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Public/op/?op=copy",
+        "icon": "i-dup",
+        "id": "file.copy",
+        "label": "Copy",
+        "method": "POST",
+        "submits": true,
+        "target": "sheet"
+      },
+      {
+        "csrf": "csrf",
+        "danger": true,
+        "enabled": false,
+        "href": "/app/files/a-sftp-vps/Public/op/?op=delete",
+        "icon": "i-trash",
+        "id": "file.delete",
+        "label": "Delete",
+        "method": "POST",
+        "reason": "This storage is read-only.",
+        "submits": true,
+        "target": "sheet"
+      },
+      {
+        "enabled": false,
         "icon": "i-panel",
         "id": "files.details",
         "label": "Details",
@@ -565,18 +621,34 @@
     }
   ],
   "select": {
-    "action": "/app/files/a-sftp-vps/Public/",
+    "action": "/app/files/a-sftp-vps/Public/op/",
     "actions": [],
     "errors": [],
-    "method": "GET",
+    "method": "POST",
     "sets": [
       {
         "legend": "",
-        "rows": [],
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          }
+        ],
         "unfold": null
       }
-    ]
+    ],
+    "target": "sheet"
   },
+  "selectField": "item",
   "subtitle": "sftpgo · vps",
   "title": "Public",
   "top": {

@@ -24,7 +24,7 @@ func TestC5NamesTheFieldsOfFiles(t *testing.T) {
 	section, _, _ = strings.Cut(section, "\n### ")
 	// A field is named in backticks, alone or as a parameter: `name`,
 	// `?view=…`, `size.<имя>`.
-	for _, field := range []string{"size.<имя>", "select", "toggle", "all", "view", "sort", "filter", "to", "name"} {
+	for _, field := range []string{"size.<имя>", "select", "item", "view", "sort", "filter", "to", "name"} {
 		if !regexp.MustCompile(`\x60\??` + regexp.QuoteMeta(field) + `[\x60=]`).MatchString(section) {
 			t.Errorf("C-5.5 does not name %s", field)
 		}

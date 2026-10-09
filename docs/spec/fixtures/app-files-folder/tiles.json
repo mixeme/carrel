@@ -60,42 +60,46 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-04-whiteboard.jpg\u0026op=rename",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?op=rename",
         "icon": "i-pencil",
         "id": "file.rename",
         "label": "Rename",
         "method": "POST",
+        "submits": true,
         "target": "sheet"
       },
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-04-whiteboard.jpg\u0026op=move",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?op=move",
         "icon": "i-move",
         "id": "file.move",
         "label": "Move",
         "method": "POST",
+        "submits": true,
         "target": "sheet"
       },
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-04-whiteboard.jpg\u0026op=copy",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?op=copy",
         "icon": "i-dup",
         "id": "file.copy",
         "label": "Copy",
         "method": "POST",
+        "submits": true,
         "target": "sheet"
       },
       {
         "csrf": "csrf",
         "danger": true,
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-04-whiteboard.jpg\u0026op=delete",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?op=delete",
         "icon": "i-trash",
         "id": "file.delete",
         "label": "Delete",
         "method": "POST",
+        "submits": true,
         "target": "sheet"
       },
       {
@@ -971,7 +975,7 @@
     }
   ],
   "select": {
-    "action": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/",
     "actions": [
       {
         "enabled": true,
@@ -982,7 +986,7 @@
       }
     ],
     "errors": [],
-    "method": "GET",
+    "method": "POST",
     "sets": [
       {
         "legend": "",
@@ -994,43 +998,19 @@
             "hint": "",
             "kind": "hidden",
             "label": "",
-            "name": "view",
+            "name": "_csrf",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "tiles"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "hidden",
-            "label": "",
-            "name": "details",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "0"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "hidden",
-            "label": "",
-            "name": "select",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "2026-08-04-whiteboard.jpg"
+            "value": "csrf"
           }
         ],
         "unfold": null
       }
-    ]
+    ],
+    "target": "sheet"
   },
+  "selectField": "item",
   "subtitle": "sftpgo · vps",
   "title": "attachments",
   "top": {

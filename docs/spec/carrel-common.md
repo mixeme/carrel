@@ -454,11 +454,11 @@ Typecase): рейл с соседними заметками и колонка �
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/app/files` | GET | вход | страница | `FilesRootPage` |
-| `/app/files/{account}/{col}/{path…}` | GET | вход | страница | `FilesPage`; адрес файла (без «/» в конце) — его папка с ним выделенным; `?select=` — выделенные имена (значений несколько), `?toggle=` (имя) и `?all=1` — форма выделения без сценариев (`FilesPage.Select`): ответ — редирект на папку с новым `select` (`toggle` переключает одно имя папки, `all` выделяет все показанные, а все выделенные — снимает); `?view=tiles` — плитки (без него — список), `?sort=` (`name`, `size`, `changed`), `?filter=` — по имени, по уже прочитанному списку («Filter this folder» без сценариев — `ListBar.FilterForm`); один выделенный файл — с его панелью (`Shell.Details`), `?details=0` — панель скрыта (Details шапки); у одной выделенной картинки — её ширина и высота (`FileRow.Dimensions`, поле Dimensions панели после Type): одно чтение начала файла, `Range: bytes=0-65535` (S-17); `?print=1` — та же папка для печати (U-10, Print в «⋯» шапки) |
+| `/app/files/{account}/{col}/{path…}` | GET | вход | страница | `FilesPage`; адрес файла (без «/» в конце) — его папка с ним выделенным; `?select=` — выделенные имена (значений несколько); `?view=tiles` — плитки (без него — список), `?sort=` (`name`, `size`, `changed`), `?filter=` — по имени, по уже прочитанному списку («Filter this folder» без сценариев — `ListBar.FilterForm`); один выделенный файл — с его панелью (`Shell.Details`), `?details=0` — панель скрыта (Details шапки); у одной выделенной картинки — её ширина и высота (`FileRow.Dimensions`, поле Dimensions панели после Type): одно чтение начала файла, `Range: bytes=0-65535` (S-17); `?print=1` — та же папка для печати (U-10, Print в «⋯» шапки) |
 | `/app/files/{account}/{col}/download/{path…}` | GET | вход | поток; адрес папки (`…/`) с `?zip=1` — папка архивом zip (S-17.5) | — |
 | `/app/files/{account}/{col}/upload/{path…}` | POST | вход | фрагмент | `TransferQueue`; multipart: файлы — поле `file` (`Action.File`), у загрузки папки имя файла — путь внутри неё; перед файлами со сценарием — `size.<имя>` (длина файла в байтах, у загрузки папки имя — тот же путь) или `size` у одного файла: без них тело уходит без длины, и сервер, которому она нужна, отказывает (S-17.1); полей файла с именем `file` у формы может быть два (Files и Folder, s-files-8) — размеры стоят перед файлами своего поля, значит и между файлами, а поле, в котором ничего не выбрано, приходит частью без имени файла — это не файл; `?transfer=&answer=` (`skip`, `both`, `overwrite`) — ответ очереди на занятое имя |
 | `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | фрагмент | `FilesPage`; поле `name` — имя новой папки; без поля (New folder шапки и рейла) — папка с открытой строкой имени (`FilesPage.Name`) |
-| `/app/files/{account}/{col}/op/{path…}` | GET, POST | вход | лист | `FileOpSheet`; `?op=` (`rename`, `move`, `copy`, `delete`), `item` — имена папки (значений несколько), `to` — папка назначения переноса и копии: адрес узла дерева (`FileTreeNode.Href` несёт его в адресе; у POST и полем формы). GET — только лист; POST с `go=1` выполняет (у `rename` — поле `name`, новое имя; у `delete` — `etag` показанных версий), с `mkcol=1` и полем `name` — New folder дерева, с `transfer=&answer=` — ответ очереди; GET с `new=1` — лист с открытой строкой имени (`FileTree.Name`) |
+| `/app/files/{account}/{col}/op/{path…}` | GET, POST | вход | лист | `FileOpSheet`; `?op=` (`rename`, `move`, `copy`, `delete`), `item` — имена папки (значений несколько; у POST и полями формы выделения, `FilesPage.Select`: ничего не отмечено или у `rename` отмечено не одно — папка с отказом «Nothing was done»), `to` — папка назначения переноса и копии: адрес узла дерева (`FileTreeNode.Href` несёт его в адресе; у POST и полем формы). GET — только лист; POST с `go=1` выполняет (у `rename` — поле `name`, новое имя; у `delete` — `etag` показанных версий), с `mkcol=1` и полем `name` — New folder дерева, с `transfer=&answer=` — ответ очереди; GET с `new=1` — лист с открытой строкой имени (`FileTree.Name`) |
 | `/app/files/{account}/{col}/columns/{path…}` | POST | вход | редирект | — ; меню Columns папки (s-files-20); ответ — папка `{path…}` с её запросом (S-9.6) |
 | `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=upload` — папка загрузки из меню создания; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attach&k=&a=&c=&new=` — то же для черновика новой записи (вместо `uid`), Attach шлёт `…/new?op=attachfile&uid=&file=`, Cancel — назад к форме `/new?uid=`; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=`; `?for=upload&new=1` — с открытой строкой имени новой папки, POST `?for=upload&mkcol=1&to=` с полем `name` её заводит |
 | `/app/files/published` | GET | вход | страница | `PublishedLinksPage` |
@@ -2025,14 +2025,18 @@ type FilesPage struct {
     Unread bool
     Queue   *TransferQueue
     Tree    *FileTree // дерево выбора; на странице раздела nil
-    // Select — форма выделения без сценариев (U-8, как RestoreMatch.Form):
-    // GET на адрес папки, скрытые поля её запроса (view, sort, filter) и
-    // select каждого выделенного. Отметка строки — кнопка отправки этой
-    // формы: поле toggle, значение — имя строки; отметка в шапке таблицы —
-    // поле all со значением 1. Ответ — редирект на папку с новым select (C-5).
-    // Actions — «Clear selection» (files.select.clear, папка без select),
-    // пока выделено.
+    // Select — форма выделения (s-files-5; решение владельца 09.10.2026):
+    // POST на адрес операций папки (…/op/…) со скрытым _csrf. Отметка строки
+    // и плитки — её поле SelectField («item») со значением — именем строки,
+    // отмеченное у выделенных (FileRow.Selected); операции полосы выделения
+    // — Rename, Move, Copy, Delete — её кнопки (Action.Submits, операция — в
+    // адресе кнопки, имён в нём нет). Без сценариев полоса выделения стоит
+    // всегда, поэтому операции приходят в Bar.Actions и когда ничего не
+    // выделено (у пустой папки их нет). Download — ссылка, и включена у
+    // одного файла, выделенного адресом. Actions — «Clear selection»
+    // (files.select.clear, папка без select), пока выделено адресом.
     Select *Form
+    SelectField string
     // Name — строка имени новой папки, которую открывает New folder шапки
     // и рейла (POST mkcol без поля name): поле name «Name of the new
     // folder», Create (Form.Action — адрес mkcol) и Cancel — та же папка.

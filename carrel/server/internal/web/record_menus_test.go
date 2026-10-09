@@ -264,8 +264,12 @@ func TestFileRowMenusAreTheFrames(t *testing.T) {
 	if want := []string{"Print [i-print]"}; !equalStrings(frameMenu(t, "s-files-7"), want) {
 		t.Fatalf("s-files-7 = %q, want %q: read the frame again", frameMenu(t, "s-files-7"), want)
 	}
-	if got := ids(page.Bar.Actions); !equalStrings(got, []string{"file.upload", "folder.new", "files.details", "list.print"}) {
-		t.Errorf("files head = %q, want Upload, New folder, Details and Print", got)
+	// Between them stand the operations of the selection bar, the buttons
+	// of the selection form (ФН5): the bar is drawn while something is
+	// selected and, without scripts, always.
+	if got := ids(page.Bar.Actions); !equalStrings(got, []string{"file.upload", "folder.new",
+		"file.download", "file.rename", "file.move", "file.copy", "file.delete", "files.details", "list.print"}) {
+		t.Errorf("files head = %q, want Upload, New folder, the selection's operations, Details and Print", got)
 	}
 }
 

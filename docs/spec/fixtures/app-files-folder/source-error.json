@@ -497,18 +497,34 @@
   },
   "rows": [],
   "select": {
-    "action": "/app/files/a-nc-home/Files/",
+    "action": "/app/files/a-nc-home/Files/op/",
     "actions": [],
     "errors": [],
-    "method": "GET",
+    "method": "POST",
     "sets": [
       {
         "legend": "",
-        "rows": [],
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          }
+        ],
         "unfold": null
       }
-    ]
+    ],
+    "target": "sheet"
   },
+  "selectField": "item",
   "subtitle": "nextcloud",
   "title": "Files",
   "top": {

@@ -54,14 +54,18 @@ type FilesPage struct {
 	Unread bool           `json:"unread"`
 	Queue  *TransferQueue `json:"queue"`
 	Tree   *FileTree      `json:"tree"` // дерево выбора; на странице раздела nil
-	// Select — форма выделения без сценариев (U-8, как RestoreMatch.Form):
-	// GET на адрес папки, скрытые поля её запроса (view, sort, filter) и
-	// select каждого выделенного. Отметка строки — кнопка отправки этой
-	// формы: поле toggle, значение — имя строки; отметка в шапке таблицы —
-	// поле all со значением 1 (выделить все показанные, а все выделенные —
-	// снять). Сервер отвечает редиректом на папку с новым select. Actions —
-	// «Clear selection» (files.select.clear, папка без select), пока выделено
+	// Select — форма выделения (s-files-5; решение владельца 09.10.2026):
+	// POST на адрес операций папки (…/op/…) со скрытым _csrf. Отметка
+	// строки и плитки — поле этой формы SelectField со значением — именем
+	// строки, отмеченное у выделенных (FileRow.Selected); операции полосы
+	// выделения — Rename, Move, Copy, Delete — её кнопки (Action.Submits,
+	// операция — в адресе кнопки). Без сценариев полоса выделения стоит
+	// всегда, поэтому операции приходят и когда ничего не выделено. Actions
+	// — «Clear selection» (files.select.clear, папка без select), пока
+	// выделено адресом
 	Select *Form `json:"select"`
+	// SelectField — имя поля отметки формы Select: «item»
+	SelectField string `json:"selectField"`
 	// Name — строка имени новой папки, которую открывает New folder шапки и
 	// рейла (POST mkcol без поля name): поле name «Name of the new folder»,
 	// Create (Form.Action — адрес mkcol) и Cancel — та же папка. После отказа
