@@ -56,6 +56,19 @@ func (f timeFmt) date(t time.Time) string {
 	return t.In(f.tz).Format("2 January 2006")
 }
 
+// numDate and numStamp are a day and a minute in numbers, as the tables of
+// files and of links draw them monospaced (s-files-1, s-publish-1): «2026-
+// 08-10», «2026-08-10 08:41». The owner's word of 09.10.2026: as the frame
+// draws them, for now — C-10 says dates in words everywhere else.
+func (f timeFmt) numDate(t time.Time) string { return t.In(f.tz).Format("2006-01-02") }
+
+func (f timeFmt) numStamp(t time.Time) view.When {
+	if t.IsZero() {
+		return ""
+	}
+	return view.When(t.In(f.tz).Format("2006-01-02 15:04"))
+}
+
 // dayOfYear is a day without its year when it is this year's: «14
 // February» (account-8), «14 February 2025» otherwise.
 func (f timeFmt) dayOfYear(t time.Time) string {

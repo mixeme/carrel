@@ -86,8 +86,8 @@ type FileRow struct {
 	IsDir    bool   `json:"isDir"`
 	Type     Text   `json:"type"`
 	Size     Size   `json:"size"`
-	Modified When   `json:"modified"`
-	Thumb    string `json:"thumb"` // адрес миниатюры; пусто — значок типа
+	Modified When   `json:"modified"` // числами: «2026-08-10 11:07» (s-files-1)
+	Thumb    string `json:"thumb"`    // адрес миниатюры; пусто — значок типа
 	// Icon — значок строки по типу (s-files-1): i-file у папки, i-img у
 	// картинки, i-doc у прочего
 	Icon string `json:"icon"`
@@ -246,12 +246,21 @@ type PublishedRow struct {
 	Stamp Stamp `json:"stamp"`
 	// Colour — метка коллекции у ссылки на коллекцию и запись; Icon — значок
 	// у файла (i-doc) и папки (i-file); у прочих пусто
-	Colour   Colour   `json:"colour,omitempty"`
-	Icon     string   `json:"icon,omitempty"`
-	Link     Text     `json:"link"`
-	Created  When     `json:"created"`
-	Expires  Text     `json:"expires"`
-	LastSeen When     `json:"lastSeen"`
+	Colour Colour `json:"colour,omitempty"`
+	Icon   string `json:"icon,omitempty"`
+	Link   Text   `json:"link"`
+	// Address — ссылка целиком, со схемой и узлом: её берёт Copy
+	// (s-publish-1: «https://carrel.example/p/9c1f4e»); Link — путь
+	Address Text `json:"address"`
+	// Created, Expires, LastSeen — числами, моноширинно в таблице
+	// (s-publish-1; слово владельца 09.10.2026 — пока как в кадре):
+	// «2026-08-10», «2026-09-08» или «No expiry», «2026-08-10 08:41» или
+	// «never opened»
+	Created  When `json:"created"`
+	Expires  Text `json:"expires"`
+	LastSeen When `json:"lastSeen"`
+	// Unopened — ссылку ни разу не открывали: LastSeen приглушён
+	Unopened bool     `json:"unopened"`
 	Opens    int      `json:"opens"`
 	Actions  []Action `json:"actions"` // Copy · Send (с почтой) · Revoke (s-publish-1)
 }

@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.168 — 2026-10-09
+
+The files section, the client's second scan (ФН17–ФН19; the owner's word of
+09.10.2026 — dates as the frame draws them, for now): the tables of files
+and of published links by their frames (`s-files-1`, `s-publish-1`).
+
+### Changed
+
+- **Dates of the two tables are numbers.** `FileRow.modified` —
+  «2026-08-10 11:07» (was «10 August, 11:07»); `PublishedRow.created` and
+  `.expires` — «2026-08-10» (was «10 August 2026»), `.lastSeen` —
+  «2026-08-10 08:41». «No expiry» and «never opened» are as they were.
+  Everywhere else dates are said in words (C-10), as before.
+
+### Added
+
+- `PublishedRow.address` — the link whole, with the scheme and the host
+  (`CARREL_PUBLIC_URL`, else the address the request came to): what Copy
+  takes. `link` stays the path.
+- `PublishedRow.unopened` — nobody opened the link: its «never opened» is
+  drawn dimmed.
+
 ## v0.2.167 — 2026-10-09
 
 The owner's words of 09.10.2026: what cannot be done is switched off, and

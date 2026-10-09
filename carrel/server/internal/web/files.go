@@ -694,7 +694,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		row := view.FileRow{
 			Name:     text(e.Name),
 			IsDir:    e.Dir,
-			Modified: c.tf.formatWhen(e.Modified, false, now),
+			Modified: c.tf.numStamp(e.Modified),
 			Selected: selected[e.Name],
 			Menu:     s.fileMenu(c, segs, e),
 		}

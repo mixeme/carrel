@@ -2052,7 +2052,7 @@ type FileRow struct {
     IsDir    bool
     Type     Text
     Size     Size
-    Modified When
+    Modified When // числами: «2026-08-10 11:07» (s-files-1)
     Thumb    string // адрес миниатюры; пусто — значок типа
     Icon     string // значок по типу (s-files-1): i-file у папки, i-img у картинки, i-doc у прочего
     Note     Text   // почему у картинки нет миниатюры: «too large» — больше потолка миниатюры (s-files-5)
@@ -2200,9 +2200,15 @@ type PublishedRow struct {
     Colour   Colour
     Icon     string
     Link     Text
+    Address  Text // ссылка целиком, со схемой и узлом: её берёт Copy (s-publish-1); Link — путь
+    // Created, Expires, LastSeen — числами, моноширинно в таблице
+    // (s-publish-1; слово владельца 09.10.2026 — пока как в кадре):
+    // «2026-08-10», «2026-09-08» или «No expiry», «2026-08-10 08:41» или
+    // «never opened».
     Created  When
     Expires  Text
     LastSeen When
+    Unopened bool // ссылку ни разу не открывали: LastSeen приглушён
     Opens    int      // сколько раз открыли: так видно, что ссылка ушла дальше, чем думали
     Actions  []Action // Copy · Send (с почтой) · Revoke (s-publish-1)
 }

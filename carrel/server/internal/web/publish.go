@@ -389,7 +389,7 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		page.Subtitle = append(page.Subtitle, plainRun(" · "), view.Run{Text: "this instance is local: the link opens only from your network", Mark: view.RunDanger})
 	}
 	blob := s.catalogOf(sess)
-	tf, now := s.timeFor(sess), s.now()
+	tf := s.timeFor(sess)
 	mail := s.canSendLetters(sess)
 	for _, l := range s.users.PublishedLinks(sess.AccountID()) {
 		host := l.Target.AccountID
@@ -408,13 +408,13 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		}
 		row := view.PublishedRow{
 			Title: text(publishedTitle(l.Target)), Kind: text(kind), Stamp: stamp(host, label), Colour: colour, Icon: icon,
-			Created: view.When(tf.date(l.CreatedAt)), Expires: "No expiry", LastSeen: "never opened", Opens: l.Opens,
+			Created: view.When(tf.numDate(l.CreatedAt)), Expires: "No expiry", LastSeen: "never opened", Unopened: true, Opens: l.Opens,
 		}
 		if l.ExpiresAt != nil {
-			row.Expires = text(tf.date(*l.ExpiresAt))
+			row.Expires = text(tf.numDate(*l.ExpiresAt))
 		}
 		if l.LastSeen != nil {
-			row.LastSeen = tf.formatWhen(*l.LastSeen, false, now)
+			row.LastSeen, row.Unopened = tf.numStamp(*l.LastSeen), false
 		}
 		copyLink := view.Action{ID: "publish.copy", Label: "Copy", Method: "GET", Enabled: true}
 		send := view.Action{ID: "publish.mail", Label: "Send", Method: "POST", Enabled: true,
@@ -424,6 +424,8 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		// exist) — the row shows it and offers it.
 		link := s.route("/p/" + blob.Links[l.ID])
 		row.Link, copyLink.Href = text(link), link
+		// Copy takes the link whole (s-publish-1).
+		row.Address = text(s.publicOrigin(r) + link)
 		row.Actions = append(row.Actions, copyLink)
 		if mail {
 			row.Actions = append(row.Actions, send)

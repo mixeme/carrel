@@ -31,37 +31,37 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/account",
+        "icon": "i-user",
         "id": "settings.account",
         "label": "Account",
-        "method": "GET",
-        "icon": "i-user"
+        "method": "GET"
       },
       {
         "count": 4,
         "enabled": true,
         "href": "/app/settings/connections",
+        "icon": "i-server",
         "id": "settings.connections",
         "label": "Connections",
-        "method": "GET",
-        "icon": "i-server"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/attachments",
+        "icon": "i-file",
         "id": "settings.attachments",
         "label": "Attachments",
-        "method": "GET",
-        "icon": "i-file"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/devices",
+        "icon": "i-device",
         "id": "settings.devices",
         "label": "New device",
-        "method": "GET",
-        "icon": "i-device"
+        "method": "GET"
       },
       {
         "count": 0,
@@ -75,29 +75,29 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/backup",
+        "icon": "i-archive",
         "id": "settings.backup",
         "label": "Backup",
-        "method": "GET",
-        "icon": "i-archive"
+        "method": "GET"
       },
       {
         "count": 2,
         "enabled": true,
         "href": "/app/files/published",
+        "icon": "i-link",
         "id": "settings.published",
         "label": "Published links",
         "method": "GET",
-        "on": true,
-        "icon": "i-link"
+        "on": true
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/appearance",
+        "icon": "i-theme",
         "id": "settings.appearance",
         "label": "Appearance",
-        "method": "GET",
-        "icon": "i-theme"
+        "method": "GET"
       }
     ],
     "neighbours": [],
@@ -131,7 +131,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/mail/compose?id=link-smeta&op=link",
+          "href": "/app/mail/compose?id=link-smeta\u0026op=link",
           "id": "publish.mail",
           "label": "Send",
           "method": "POST",
@@ -141,22 +141,24 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/publish?id=link-smeta&op=revoke",
+          "href": "/app/publish?id=link-smeta\u0026op=revoke",
           "id": "publish.revoke",
           "label": "Revoke",
           "method": "POST",
           "target": "sheet"
         }
       ],
-      "created": "10 August 2026",
+      "address": "http://example.com/p/link-smeta-token",
+      "created": "2026-08-10",
       "expires": "No expiry",
+      "icon": "i-doc",
       "kind": "file",
       "lastSeen": "never opened",
       "link": "/p/link-smeta-token",
       "opens": 0,
       "stamp": "sftpgo · vps · Documents",
       "title": "смета-подрядчик.pdf",
-      "icon": "i-doc"
+      "unopened": true
     },
     {
       "actions": [
@@ -170,7 +172,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/mail/compose?id=link-lichnyj&op=link",
+          "href": "/app/mail/compose?id=link-lichnyj\u0026op=link",
           "id": "publish.mail",
           "label": "Send",
           "method": "POST",
@@ -180,22 +182,36 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/publish?id=link-lichnyj&op=revoke",
+          "href": "/app/publish?id=link-lichnyj\u0026op=revoke",
           "id": "publish.revoke",
           "label": "Revoke",
           "method": "POST",
           "target": "sheet"
         }
       ],
-      "created": "9 August 2026",
-      "expires": "8 September 2026",
+      "address": "http://example.com/p/link-lichnyj-token",
+      "colour": "#4a6b52",
+      "created": "2026-08-09",
+      "expires": "2026-09-08",
       "kind": "calendar",
-      "lastSeen": "10 August, 08:41",
+      "lastSeen": "2026-08-10 08:41",
       "link": "/p/link-lichnyj-token",
       "opens": 12,
       "stamp": "nextcloud · Личный",
       "title": "Личный · 10–31 August",
-      "colour": "#4a6b52"
+      "unopened": false
+    }
+  ],
+  "subtitle": [
+    {
+      "text": "Read-only, one object or one collection per link"
+    },
+    {
+      "text": " · "
+    },
+    {
+      "mark": "danger",
+      "text": "this instance is local: the link opens only from your network"
     }
   ],
   "title": "Published links",
@@ -273,11 +289,11 @@
     "refresh": {
       "action": {
         "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-refresh",
         "id": "published.refresh",
         "label": "Refresh",
-        "method": "GET",
-        "href": "/app/files/published",
-        "icon": "i-refresh"
+        "method": "GET"
       },
       "answered": "",
       "running": false
@@ -324,17 +340,5 @@
       }
     ],
     "userHref": "/app/settings/account"
-  },
-  "subtitle": [
-    {
-      "text": "Read-only, one object or one collection per link"
-    },
-    {
-      "text": " · "
-    },
-    {
-      "mark": "danger",
-      "text": "this instance is local: the link opens only from your network"
-    }
-  ]
+  }
 }

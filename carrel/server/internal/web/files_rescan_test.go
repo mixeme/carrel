@@ -229,3 +229,51 @@ func TestSelectionIsTheOperationsForm(t *testing.T) {
 		t.Errorf("toggle in the address: %d, want the folder as it is", rec.Code)
 	}
 }
+
+// ФН17…ФН19 (the owner's word of 09.10.2026: dates as the frame draws them,
+// for now): the tables of files and of links say dates in numbers — «2026-
+// 08-10», «2026-08-10 08:41» (s-files-1, s-publish-1) —; Copy of a link
+// takes its whole address, and a link nobody opened says so by a mark, not
+// by its words alone.
+func TestFileAndLinkTablesAreTheFrames(t *testing.T) {
+	day, stamp := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`), regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$`)
+	links := mockupFrame(t, "s-publish-1")
+	cells := regexp.MustCompile(`<td class="tc-mono[^"]*">([^<]*)</td>`).FindAllStringSubmatch(links, -1)
+	copied := frameOne(t, regexp.MustCompile(`data-tc-copy="([^"]+)"`), links, "address Copy takes")[1]
+	if len(cells) < 10 || !day.MatchString(cells[1][1]) || !stamp.MatchString(cells[8][1]) || !regexp.MustCompile(`^https?://[^/]+/p/`).MatchString(copied) ||
+		!strings.Contains(links, `<td class="tc-mono is-2nd tc-mono--dusty">never opened</td>`) {
+		t.Fatalf("s-publish-1 draws %q and copies %q: read the frame again", cells, copied)
+	}
+	changed := regexp.MustCompile(`<td class="tc-mono">(\d[^<]*)</td>`).FindStringSubmatch(mockupFrame(t, "s-files-1"))
+	if changed == nil || !stamp.MatchString(changed[1]) {
+		t.Fatalf("s-files-1 says Changed as %q: read the frame again", changed)
+	}
+
+	f := publishFixture(t)
+	link := publishLink(t, f, f.publishHref("calendar", searchWork, ""), false)
+	row := decode[view.PublishedLinksPage](t, f.h.do(get("/app/files/published", f.sess))).Rows[0]
+	if !day.MatchString(string(row.Created)) || !day.MatchString(string(row.Expires)) || row.LastSeen != "never opened" || !row.Unopened {
+		t.Errorf("a link nobody opened: created %q, expires %q, last seen %q, unopened %v", row.Created, row.Expires, row.LastSeen, row.Unopened)
+	}
+	if a := string(row.Address); !regexp.MustCompile(`^https?://[^/]+`+regexp.QuoteMeta(link)+`$`).MatchString(a) || string(row.Link) != link {
+		t.Errorf("address %q, link %q; want the whole address of %q", row.Address, row.Link, link)
+	}
+	publicPage(t, f, link)
+	row = decode[view.PublishedLinksPage](t, f.h.do(get("/app/files/published", f.sess))).Rows[0]
+	if !stamp.MatchString(string(row.LastSeen)) || row.Unopened || row.Opens != 1 {
+		t.Errorf("a link opened once: last seen %q, unopened %v, opens %d", row.LastSeen, row.Unopened, row.Opens)
+	}
+	forever := publishLink(t, f, f.publishHref("notes", searchWork, "n1"), true)
+	for _, r := range decode[view.PublishedLinksPage](t, f.h.do(get("/app/files/published", f.sess))).Rows {
+		if string(r.Link) == forever && r.Expires != "No expiry" {
+			t.Errorf("a link without an end expires %q", r.Expires)
+		}
+	}
+
+	files := filesFixture(t, true)
+	files.srv.SeedFile(filesDocs+"a.txt", "alpha")
+	page := decode[view.FilesPage](t, files.h.do(get(files.at(""), files.sess)))
+	if !stamp.MatchString(string(fileRow(t, page, "a.txt").Modified)) {
+		t.Errorf("a file changed %q, want it in numbers", fileRow(t, page, "a.txt").Modified)
+	}
+}
