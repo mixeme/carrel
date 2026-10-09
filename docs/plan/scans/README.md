@@ -79,6 +79,25 @@ Typecase, кадры с тех пор менялись записками 35–4
 - *Ошибка в листе публикации папки* (Пб4): строка начинается с точки —
   «. Whoever has the link can also mount…».
 
+Эти четыре **перепроверены исполнителем по коду** (третий сеанс
+09.10.2026, main с сервером `v0.2.176`; сервер не запускался) — все
+подтверждены:
+
+- Пс11, Пб2, Пб3 — лист публикации записи (`sheetFor`, `publish.go`) несёт
+  одну отметку `download`; `publicRecord` кладёт на страницу контакта все
+  поля `contactFieldsOf`, `publicCollection` — `TEL` и `EMAIL` каждой
+  строки книги; у ссылки (`PublishTarget`) полей «что видит гость» нет.
+  Кадр `s-publish-3` рисует пять отметок, выключенных почти все, и
+  говорит, что `.vcf` им подчиняется. Первым в круге сервера по U-6.12.
+- Пб15 — `postMailCompose`, `op=link`: `d = &mailDraft{…}` и
+  `saveMailDraft` без взгляда на прежний черновик.
+- Ад7 — пункт `admin.user.delete` — POST `op("delete")` без `login`;
+  `DeleteUser` сверяет `loginConfirm` с логином и отвечает
+  `ErrLoginConfirm`.
+- Пб4 — `fileSheet` дописывает «. Whoever has the link can also mount the
+  folder as a read-only drive.» к `Expires`, которого `sheetFor` не
+  заполняет.
+
 **Сквозное, к владельцу при сведении:**
 
 - *Формы.* Листы файлов кадр рисует формами (решение владельца: кадр
