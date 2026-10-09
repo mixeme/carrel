@@ -65,6 +65,26 @@ func TestTaskListIsTheFrame(t *testing.T) {
 	if !shape.MatchString(string(page.Subtitle)) {
 		t.Errorf("subtitle = %q, want the shape of %q", page.Subtitle, frameSubtitle(t, "s-tasks-1"))
 	}
+	// The table counts rows, the rail records (the owner's decision of
+	// 09.10.2026): the linked task is one of «6 tasks» — the done one
+	// counts too —, and one of each of its lists in the rail.
+	if sub := frameSubtitle(t, "s-tasks-1"); string(page.Subtitle) != sub || !strings.HasSuffix(runsText(page.Poll.Summary), " · 6 tasks") {
+		t.Errorf("subtitle = %q, poll %q; the frame %q", page.Subtitle, runsText(page.Poll.Summary), sub)
+	}
+	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 7 {
+		t.Errorf("the rail's combined row = %+v, want the 7 tasks of the ticked lists", all.Count)
+	}
+	// The section Tasks counts the overdue ones (Typecase's note 39, Р-47:
+	// «Tasks 2» of every frame — the two under Overdue).
+	nav := regexp.MustCompile(`<a[^>]*class="[^"]*tc-nav__item[^"]*"[^>]*>(?:<svg.*?</svg>)?Tasks<span class="tc-num">(\d+)</span>`).FindStringSubmatch(frame)
+	if nav == nil || nav[1] != "2" || !groups[0].alert {
+		t.Fatalf("s-tasks-1 nav = %v: read the frame again", nav)
+	}
+	for _, n := range page.Rail.Nav {
+		if n.ID == "nav.tasks" && (n.Count == nil || *n.Count != 2) {
+			t.Errorf("the section Tasks counts %v, want the 2 overdue", n.Count)
+		}
+	}
 	if actionByID(page.Bar.Actions, "list.print") == nil {
 		t.Errorf("no Print in the head: %+v", page.Bar.Actions)
 	}

@@ -399,6 +399,11 @@ type indexEntry struct {
 	// kind's orders the list of Related to and names its day (s-tasks-10).
 	At   int64      `json:"at,omitempty"`
 	Keys dupes.Keys `json:"keys,omitzero"`
+	// Done and Day are a task's: whether it is done, and whether it is due
+	// on a day, without a time — what tells an overdue task without reading
+	// it again (the section's number, navRows).
+	Done bool `json:"done,omitempty"`
+	Day  bool `json:"day,omitempty"`
 	// Fields are the single-valued properties a row shows, as the record
 	// holds them: what the duplicates screen asks about when members
 	// disagree, without reading a record again. PHOTO is a digest.
@@ -423,8 +428,9 @@ func indexOf(tf timeFmt, k view.Kind, items []listed) []indexEntry {
 			}
 		case view.KindTask:
 			e.UID, e.Title, e.Related = cal.UID(o), titleOr(cal.Text(o, "SUMMARY"), "Untitled task"), cal.RelatedTo(o)
+			e.Done = taskDone(o)
 			if due, err := cal.DueOf(o, tf.tz); err == nil && !due.Start.IsZero() {
-				e.Detail, e.At = tf.shortDue(due), due.Start.Unix()
+				e.Detail, e.At, e.Day = tf.shortDue(due), due.Start.Unix(), due.AllDay
 			}
 		default:
 			e.UID, e.Title, e.Related = cal.UID(o), noteTitle(cal.Text(o, "SUMMARY"), cal.Description(o)), cal.RelatedTo(o)

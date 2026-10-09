@@ -49,6 +49,17 @@ func TestContactsListIsTheFrames(t *testing.T) {
 	if !shape.MatchString(string(page.Subtitle)) {
 		t.Errorf("subtitle = %q, the frame %q", page.Subtitle, frameText(head[1]))
 	}
+	// The table counts what a person sees, the rail what lies in a
+	// collection (the owner's decision of 09.10.2026): Артём Белов, linked
+	// in two books, is one row and one card of the line under the title and
+	// of the poll's bar — the frame's «5 cards» —, and a card of each book
+	// in the rail.
+	if string(page.Subtitle) != frameText(head[1]) || !strings.HasSuffix(runsText(page.Poll.Summary), " · 5 cards") {
+		t.Errorf("subtitle = %q, poll %q; the frame %q", page.Subtitle, runsText(page.Poll.Summary), frameText(head[1]))
+	}
+	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 6 {
+		t.Errorf("the rail's combined row = %+v, want the 6 cards of the ticked books", all.Count)
+	}
 	var want, got []string
 	for _, b := range frameHeadButton.FindAllStringSubmatch(head[2], -1) {
 		icons := frameIcon.FindAllStringSubmatch(b[2], -1)

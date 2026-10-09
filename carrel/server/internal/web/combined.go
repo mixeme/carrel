@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
@@ -242,6 +243,34 @@ type combinedState struct {
 	poll  *view.PollBar
 	shell view.Shell
 	items []listed
+	// seen is how many records of the kind the view shows: its rows, a
+	// linked record one of them; of a calendar, the events of the window.
+	// The poll's bar and the line under the title count it (the owner's
+	// decision of 09.10.2026: the table counts what a person sees, the rail
+	// what lies in a collection). nil — nothing is asked.
+	seen *int
+}
+
+// counted is seen once the poll is over, nil while it runs: the line under
+// the title counts nothing before (states-8, -13, -19, -26).
+func (st combinedState) counted() *int {
+	if st.snap == nil || st.snap.Running {
+		return nil
+	}
+	return st.seen
+}
+
+// seenRows counts the rows a combined view shows of what a poll brought:
+// linked records folded into one, and of a calendar the events of the
+// window on the screen.
+func (s *Server) seenRows(r *http.Request, tf timeFmt, blob sealed.Blob, spec kindSpec, items []listed) int {
+	rows := s.foldLinked(blob, spec.kind, items)
+	if spec.kind != view.KindEvent {
+		return len(rows)
+	}
+	_, from, to := agendaWindow(tf, r.URL.Query())
+	days, _, _ := s.agendaDays(tf, kindedAll(rows, view.KindEvent), from, to, spec.segment, true)
+	return eventsIn(days)
 }
 
 func (s *Server) readCombined(r *http.Request, sess *session.Session, blob sealed.Blob, spec kindSpec) (combinedState, error) {
@@ -277,9 +306,11 @@ func (s *Server) readCombined(r *http.Request, sess *session.Session, blob seale
 		// same again=1 a search and a timeline are run again by.
 		owner.again, again = withQuery(owner.again, "again", "1"), withQuery(again, "again", "1")
 		owner.query = pageQuery(r.URL.Query())
+		st.items = listedOf(blob, snap.Items)
+		seen := s.seenRows(r, tf, blob, spec, st.items)
+		st.seen, owner.seen = &seen, &seen
 		*st.poll = s.pollBar(tf, blob, snap, owner)
 		s.indexAnswered(sess, blob, spec, snap)
-		st.items = listedOf(blob, snap.Items)
 		refresh := view.Action{ID: "poll.again", Label: "Refresh", Icon: "i-refresh", Href: s.route(again), Method: "GET", Enabled: !snap.Running}
 		if snap.Running {
 			refresh.Reason = "The poll is still running."
@@ -366,7 +397,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			FilterForm: s.listFilter(base, query, sift), Compact: s.compactForm(r, spec.segment, base),
 			Segments: s.sortSegments(base, view.KindContact, by, r.URL.Query()),
 			Columns:  columns()}
-		page.Subtitle = text(combinedSubtitle(page.Rail, spec, st.snap != nil && !st.snap.Running))
+		page.Subtitle = text(combinedSubtitle(page.Rail, spec, st.counted()))
 		switch {
 		case st.task == nil && len(page.Notices) == 0:
 			// Nothing ticked: no poll, and the list says why (U-6.0).
@@ -386,7 +417,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	case view.KindEvent:
 		page := view.AgendaPage{Shell: st.shell, Poll: st.poll}
 		kind, from, to := agendaWindow(tf, r.URL.Query())
-		page.Subtitle = agendaSubtitle(tf, combinedSubtitle(page.Rail, spec, false), from, to, nil)
+		page.Subtitle = agendaSubtitle(tf, combinedSubtitle(page.Rail, spec, nil), from, to, nil)
 		var bad []unreadable
 		on := agendaWith(r.URL.Query())
 		var rows []kinded
@@ -406,7 +437,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			// The poll is over: the line counts the events of the window
 			// (s-agenda-1; states-13 — while it runs there is no count).
 			events := eventsIn(page.Days)
-			page.Subtitle = agendaSubtitle(tf, combinedSubtitle(page.Rail, spec, false), from, to, &events)
+			page.Subtitle = agendaSubtitle(tf, combinedSubtitle(page.Rail, spec, nil), from, to, &events)
 		}
 		page.Details = s.openInAgenda(r, sess, base, rows, page.Days)
 		page.Bar.Range = s.agendaRange(tf, base, filter.tag, kind, from, to, r.URL.Query())
@@ -420,7 +451,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			// and where it would look, not when: nothing is shown
 			// (states-14).
 			page.Poll, page.Empty = nil, s.nothingTicked(spec)
-			page.Subtitle = view.Runs{{Text: text(combinedSubtitle(page.Rail, spec, false))}}
+			page.Subtitle = view.Runs{{Text: text(combinedSubtitle(page.Rail, spec, nil))}}
 		case st.snap != nil && !st.snap.Running && len(page.Days) == 0 && len(page.Notices) == 0:
 			page.Empty = windowEmpty(tf, kind, "the ticked calendars", from, to)
 		}
@@ -439,7 +470,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Bar.Actions = append(actions, s.printAction(base))
 		page.Bar.Columns = columns()
 		page.Notices = appendUnreadable(page.Notices, bad)
-		page.Subtitle = text(combinedSubtitle(page.Rail, spec, st.snap != nil && !st.snap.Running))
+		page.Subtitle = text(combinedSubtitle(page.Rail, spec, st.counted()))
 		if st.task == nil && len(page.Notices) == 0 {
 			// Nothing ticked: no poll, and the list says why (U-6.0).
 			page.Poll, page.Empty = nil, s.nothingTicked(spec)
@@ -460,7 +491,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Bar.Actions = actions
 		page.Bar.Columns = columns()
 		page.Notices = appendUnreadable(page.Notices, bad)
-		page.Subtitle = text(notebookSubtitle(combinedNotebooks(page.Rail, spec, st.snap != nil && !st.snap.Running)))
+		page.Subtitle = text(notebookSubtitle(combinedNotebooks(page.Rail, spec, st.counted())))
 		if st.task == nil && len(page.Notices) == 0 {
 			// Nothing ticked: no poll, and the notebook says why (U-6.0).
 			page.Poll, page.Empty = nil, s.nothingTicked(spec)
@@ -616,16 +647,51 @@ func collectionCount(sess *session.Session, accountID string, col sealed.Collect
 		}
 		return &n
 	}
-	data, ok := sess.Cache().PeekETagMap(accountID, col.Path+"\x00"+spec.component)
+	entries, ok := peekIndex(sess, accountID, col.Path, spec.component)
 	if !ok {
-		return nil
-	}
-	var entries []indexEntry
-	if json.Unmarshal(data, &entries) != nil {
 		return nil
 	}
 	n := len(entries)
 	return &n
+}
+
+// peekIndex is the index of a collection's component as the session last
+// read it whole; false when it has not.
+func peekIndex(sess *session.Session, accountID, path, component string) ([]indexEntry, bool) {
+	data, ok := sess.Cache().PeekETagMap(accountID, path+"\x00"+component)
+	if !ok {
+		return nil, false
+	}
+	var entries []indexEntry
+	if json.Unmarshal(data, &entries) != nil {
+		return nil, false
+	}
+	return entries, true
+}
+
+// overdueCount is the number of the section Tasks (Р-47 of Typecase,
+// 0bf5f71: «Tasks 2» — the overdue ones, where the other sections say how
+// many records they hold): the tasks of the ticked lists that are late and
+// not done, as the session last read them; nil while a list is not read.
+func overdueCount(sess *session.Session, blob sealed.Blob, tf timeFmt) *int {
+	spec := recordKinds[segmentOf(view.KindTask)]
+	late := 0
+	down := lastPoll(sess, spec.kind)
+	for _, col := range ticked(blob, spec.kind) {
+		if col.Gone || col.Feed || lastPollRefused(down, col) {
+			continue
+		}
+		entries, ok := peekIndex(sess, col.AccountID, col.Path, spec.component)
+		if !ok {
+			return nil
+		}
+		for _, e := range entries {
+			if e.At != 0 && overdueBy(tf, cal.Timing{Start: time.Unix(e.At, 0), AllDay: e.Day}, e.Done) != "" {
+				late++
+			}
+		}
+	}
+	return &late
 }
 
 // countKey names the number a collection's component was last counted at.
@@ -794,9 +860,13 @@ func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec
 func (s *Server) navRows(sess *session.Session, blob sealed.Blob, open string) []view.NavRow {
 	var nav []view.NavRow
 	for _, seg := range []string{"contacts", "calendar", "tasks", "notes"} {
+		count := kindCount(sess, blob, recordKinds[seg])
+		if recordKinds[seg].kind == view.KindTask {
+			count = overdueCount(sess, blob, s.timeFor(sess))
+		}
 		nav = append(nav, view.NavRow{
 			Action: view.Action{ID: "nav." + seg, Label: text(kindTitle(seg)), Icon: kindIcons[recordKinds[seg].kind], Href: s.route("/app/" + seg), Method: "GET", Enabled: true, On: seg == open},
-			Count:  kindCount(sess, blob, recordKinds[seg]),
+			Count:  count,
 		})
 	}
 	return append(nav,

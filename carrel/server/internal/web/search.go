@@ -317,6 +317,10 @@ type pollOwner struct {
 	// search says something else: it is asked once and answers once.
 	polled bool
 	found  func(n int) string
+	// seen is the number found says when it is not the number of records
+	// the sources brought: the rows a list shows of them, a linked record
+	// one (the owner's decision of 09.10.2026). nil — the records brought.
+	seen *int
 	// matched are the addresses a person's timeline is looked for by: its
 	// bar says them, in mono (s-contacts-7).
 	matched []string
@@ -356,6 +360,14 @@ func searchOwner(q string) pollOwner {
 		what:       "search",
 		found:      func(n int) string { return fmt.Sprintf("%d found", n) },
 	}
+}
+
+// count is the number a bar's found says: seen, or the records brought.
+func (o pollOwner) count(snap fanout.Snapshot) int {
+	if o.seen != nil {
+		return *o.seen
+	}
+	return len(snap.Items)
 }
 
 // pollBar is the fanout on the screen (C-8.1): every source with its state
@@ -432,7 +444,7 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 		// 02.10.2026, states-16); a source stopped by hand is still said.
 		parts := []string{
 			fmt.Sprintf("Polled %d of %s", answered, plural(total, "source")),
-			owner.found(len(snap.Items)),
+			owner.found(owner.count(snap)),
 		}
 		bar.Summary = line(strings.Join(append(parts, pollTroubles(0, 0, 0, stopped)...), " · "))
 		if owner.matched != nil {
@@ -459,11 +471,11 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 			bar.Aside = text(runningFor(now.Sub(snap.Started)))
 		}
 	case snap.Running:
-		bar.Summary = line(fmt.Sprintf("Asking %s · %d answered · %s", plural(total, "source"), answered, owner.found(len(snap.Items))))
+		bar.Summary = line(fmt.Sprintf("Asking %s · %d answered · %s", plural(total, "source"), answered, owner.found(owner.count(snap))))
 	default:
 		parts := []string{
 			fmt.Sprintf("%d of %s answered", answered, plural(total, "source")),
-			owner.found(len(snap.Items)),
+			owner.found(owner.count(snap)),
 		}
 		bar.Summary = line(strings.Join(append(parts, pollTroubles(refused, unreachable, timedOut, stopped)...), " · "))
 		bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)

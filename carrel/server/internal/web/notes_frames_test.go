@@ -43,6 +43,15 @@ func TestNotebookIsTheFrame(t *testing.T) {
 	if !shape.MatchString(string(page.Subtitle)) {
 		t.Errorf("subtitle = %q, want the shape of %q", page.Subtitle, frameSubtitle(t, "s-notes-1"))
 	}
+	// The table counts rows, the rail records (the owner's decision of
+	// 09.10.2026): the linked note is one of «3 notes», and one of each of
+	// its notebooks in the rail.
+	if sub := frameSubtitle(t, "s-notes-1"); string(page.Subtitle) != sub || !strings.HasSuffix(runsText(page.Poll.Summary), " · 3 notes") {
+		t.Errorf("subtitle = %q, poll %q; the frame %q", page.Subtitle, runsText(page.Poll.Summary), sub)
+	}
+	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 4 {
+		t.Errorf("the rail's combined row = %+v, want the 4 notes of the ticked notebooks", all.Count)
+	}
 	if len(page.Groups) != 1 || page.Groups[0].Rubric != "August 2026" || page.Groups[0].Count != len(page.Groups[0].Rows) || page.Groups[0].Count != 3 {
 		t.Errorf("groups = %+v", page.Groups)
 	}

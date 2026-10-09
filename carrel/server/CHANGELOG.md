@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.157 — 2026-10-09
+
+The owner's decision of 09.10.2026: a table counts what a person sees, the
+rail what lies in a collection. C-6.3 says so.
+
+### Changed
+
+- **The line under a combined view's title and the poll's bar count rows.**
+  `Subtitle` and `PollBar.summary` of the combined book, list and notebook
+  count the rows shown — a linked record is one —, not the sum of the
+  rail: «3 of 4 books · 2 accounts · 5 cards», «Polled 3 of 3 sources · 5
+  cards» where the rail's books hold 6. The poll's bar of the combined
+  calendar counts the events of the window on the screen, as the line
+  under its title does (before: everything the poll brought).
+- **The rail is as it was**: `SourceRow.count` is how many records the
+  collection holds, the combined row their sum.
+- **The section Tasks counts the overdue.** `NavRow.count` of `nav.tasks`
+  is the tasks of the ticked lists that are late and not done; the other
+  sections count records, as before.
+
+### Fixtures
+
+- `app-contacts/normal`, `app-tasks-all/normal`, `app-notes-all/normal`
+  (the line under the title, the poll), `app-agenda-all/normal`,
+  `-/partial` (the poll); `nav.tasks` in twelve fixtures.
+
 ## v0.2.156 — 2026-10-09
 
 The frames of Typecase `0bf5f71` (Typecase's notes 37, 38 and 39; the

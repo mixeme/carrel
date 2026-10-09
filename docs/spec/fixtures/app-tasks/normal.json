@@ -571,7 +571,7 @@
         "method": "GET"
       },
       {
-        "count": 7,
+        "count": 2,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",

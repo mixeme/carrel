@@ -962,7 +962,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polled 2 of 2 sources · 7 tasks"
+        "text": "Polled 2 of 2 sources · 6 tasks"
       }
     ],
     "taskID": "t-task"
@@ -1029,7 +1029,7 @@
         "method": "GET"
       },
       {
-        "count": 7,
+        "count": 2,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -1336,7 +1336,7 @@
       "target": "rail"
     }
   },
-  "subtitle": "2 of 3 lists · nextcloud · 7 tasks",
+  "subtitle": "2 of 3 lists · nextcloud · 6 tasks",
   "title": "Combined list",
   "top": {
     "lock": null,

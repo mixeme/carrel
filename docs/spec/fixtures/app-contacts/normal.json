@@ -1503,7 +1503,7 @@
     "percent": 100,
     "summary": [
       {
-        "text": "Polled 3 of 3 sources · 6 cards"
+        "text": "Polled 3 of 3 sources · 5 cards"
       }
     ],
     "answeredAt": "10 August, 17:04",
@@ -1564,5 +1564,5 @@
   },
   "empty": null,
   "readOnly": false,
-  "subtitle": "3 of 4 books · 2 accounts · 6 cards"
+  "subtitle": "3 of 4 books · 2 accounts · 5 cards"
 }

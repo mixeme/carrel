@@ -780,7 +780,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polled 2 of 2 sources · 4 notes"
+        "text": "Polled 2 of 2 sources · 3 notes"
       }
     ],
     "taskID": "t-task"
@@ -847,7 +847,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": 2,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -1177,7 +1177,7 @@
       "target": "rail"
     }
   },
-  "subtitle": "2 of 3 notebooks · 4 notes · VJOURNAL",
+  "subtitle": "2 of 3 notebooks · 3 notes · VJOURNAL",
   "title": "Combined notebook",
   "top": {
     "lock": null,

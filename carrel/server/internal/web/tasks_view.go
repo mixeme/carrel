@@ -113,8 +113,8 @@ func oneNotebookSubtitle(c *collectionCtx, notes int, read bool) string {
 // combinedNotebooks is the line under the combined notebook (s-notes-1): how
 // many of the notebooks are ticked and, once the poll is over, how many
 // notes — no account: the frame names none.
-func combinedNotebooks(rail view.Rail, spec kindSpec, done bool) string {
-	ticked, _, count := combinedParts(rail, spec, done)
+func combinedNotebooks(rail view.Rail, spec kindSpec, seen *int) string {
+	ticked, _, count := combinedParts(rail, spec, seen)
 	if count == "" {
 		return ticked
 	}

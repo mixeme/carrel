@@ -206,9 +206,11 @@ func countGroups(groups []view.ContactGroup) {
 
 // combinedSubtitle is the line under a combined book's title: how many of
 // the books are ticked, on how many accounts, and — once the poll is over —
-// how many cards (s-contacts-1).
-func combinedSubtitle(rail view.Rail, spec kindSpec, done bool) string {
-	ticked, where, count := combinedParts(rail, spec, done)
+// how many cards (s-contacts-1). seen is that number, nil before: the rows
+// a person sees, a linked record one of them (the owner's decision of
+// 09.10.2026) — not the rail's sum, which counts what lies in each book.
+func combinedSubtitle(rail view.Rail, spec kindSpec, seen *int) string {
+	ticked, where, count := combinedParts(rail, spec, seen)
 	parts := []string{ticked, where}
 	if count != "" {
 		parts = append(parts, count)
@@ -218,16 +220,14 @@ func combinedSubtitle(rail view.Rail, spec kindSpec, done bool) string {
 
 // combinedParts are the pieces of that line: how many of the collections
 // are ticked, where — the one account, or how many —, and how many records
-// once the poll is over (empty before).
-func combinedParts(rail view.Rail, spec kindSpec, done bool) (ticked, where, count string) {
+// are seen once the poll is over (empty before).
+func combinedParts(rail view.Rail, spec kindSpec, seen *int) (ticked, where, count string) {
 	live, on := 0, 0
 	accounts := map[string]bool{}
-	var total *int
 	for i, sec := range rail.Sections {
 		for _, row := range sec.Rows {
 			if i == 0 && sec.AccountID == "" && sec.Account == "" {
-				total = row.Count // the combined row
-				continue
+				continue // the combined row
 			}
 			if row.State == view.CollectionGone {
 				continue
@@ -252,8 +252,8 @@ func combinedParts(rail view.Rail, spec kindSpec, done bool) (ticked, where, cou
 		}
 	}
 	ticked = fmt.Sprintf("%d of %s", on, plural(live, collectionNouns[spec.kind]))
-	if done && total != nil {
-		count = plural(*total, recordNouns[spec.kind])
+	if seen != nil {
+		count = plural(*seen, recordNouns[spec.kind])
 	}
 	return ticked, where, count
 }

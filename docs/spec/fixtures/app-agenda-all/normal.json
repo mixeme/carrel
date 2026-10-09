@@ -1187,7 +1187,7 @@
     "stream": "/app/search/progress/t-task?from=2026-08-10",
     "summary": [
       {
-        "text": "Polled 5 of 6 sources · 9 events"
+        "text": "Polled 5 of 6 sources · 6 events"
       }
     ],
     "taskID": "t-task"
