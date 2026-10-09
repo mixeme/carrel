@@ -9,6 +9,9 @@ import (
 	"strings"
 	"testing"
 
+	"golang.org/x/image/bmp"
+	"golang.org/x/image/tiff"
+
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/view"
 )
@@ -16,7 +19,7 @@ import (
 // The owner's decision (said again on 09.10.2026): the thumbnail of a file is
 // made by the server — the original does not travel for it — and it is made
 // for a picture of up to 16 MiB (S-17.1; s-files-5 draws pictures of 640 KB,
-// 712 KB and 2.8 MB as thumbnails). The row and the panel name the address
+// 712 KB and 2.8 MB as thumbnails, and «too large» on a TIFF of 84 MB). The row and the panel name the address
 // of the thumbnail; the answer is a small JPEG that fits a square of
 // conf.FileThumbSide, kept by the version of the file; a picture over the
 // ceiling has none and says «too large»; one that does not decode answers
@@ -35,7 +38,18 @@ func TestFileThumbnailIsMadeByTheServer(t *testing.T) {
 	f.srv.SeedFile(filesDocs+"edge.png", "png")
 	f.srv.Grow(filesDocs+"edge.png", conf.FileThumbMaxBytes)
 	f.srv.SeedFile(filesDocs+"broken.png", "not a picture")
-	f.srv.SeedFile(filesDocs+"scan.tif", "tiff")
+	var scan, chart bytes.Buffer
+	if err := tiff.Encode(&scan, noise.SubImage(image.Rect(0, 0, 800, 200)), nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := bmp.Encode(&chart, noise.SubImage(image.Rect(0, 0, 200, 400))); err != nil {
+		t.Fatal(err)
+	}
+	f.srv.SeedFile(filesDocs+"scan.tif", scan.String())
+	f.srv.SeedFile(filesDocs+"chart.bmp", chart.String())
+	f.srv.SeedFile(filesDocs+"panorama.tiff", "tiff")
+	f.srv.Grow(filesDocs+"panorama.tiff", conf.FileThumbMaxBytes+1)
+	f.srv.SeedFile(filesDocs+"drawing.svg", "<svg xmlns='http://www.w3.org/2000/svg'/>")
 
 	page := decode[view.FilesPage](t, f.h.do(get(f.at("")+"?select=photo.jpg", f.sess)))
 	row := fileRow(t, page, "photo.jpg")
@@ -51,8 +65,30 @@ func TestFileThumbnailIsMadeByTheServer(t *testing.T) {
 	if edge := fileRow(t, page, "edge.png"); edge.Thumb == "" || edge.Note != "" {
 		t.Errorf("a picture of the ceiling exactly: thumb %q, note %q", edge.Thumb, edge.Note)
 	}
-	if tif := fileRow(t, page, "scan.tif"); tif.Thumb != "" || tif.Note != "" {
-		t.Errorf("a picture no browser shows: thumb %q, note %q", tif.Thumb, tif.Note)
+	// Every raster format the server reads without a dependency of its own
+	// (the owner's decision of 09.10.2026): a TIFF and a BMP too, which no
+	// browser shows — the thumbnail is a JPEG all the same.
+	for name, want := range map[string]image.Point{"scan.tif": {X: conf.FileThumbSide, Y: conf.FileThumbSide / 4}, "chart.bmp": {X: 200, Y: 400}} {
+		one := fileRow(t, page, name)
+		if !strings.Contains(one.Thumb, "thumb=1") || one.Note != "" || one.Icon != "i-img" {
+			t.Errorf("%s: thumb %q, note %q, icon %q", name, one.Thumb, one.Note, one.Icon)
+			continue
+		}
+		rec := f.h.do(get(one.Thumb, f.sess))
+		img, err := jpeg.Decode(bytes.NewReader(rec.Body.Bytes()))
+		if rec.Code != http.StatusOK || rec.Header().Get("Content-Type") != "image/jpeg" || err != nil || img.Bounds().Size() != want {
+			t.Errorf("%s: %d %s %v, want a JPEG of %v", name, rec.Code, rec.Header().Get("Content-Type"), err, want)
+		}
+	}
+	if pano := fileRow(t, page, "panorama.tiff"); pano.Thumb != "" || pano.Note != "too large" {
+		t.Errorf("a TIFF over the ceiling: thumb %q, note %q", pano.Thumb, pano.Note)
+	}
+	if svg := fileRow(t, page, "drawing.svg"); svg.Thumb != "" || svg.Note != "" {
+		t.Errorf("a drawing the server has no decoder for: thumb %q, note %q", svg.Thumb, svg.Note)
+	}
+	// The width and height of the one chosen are read from its head.
+	if dims := fileRow(t, decode[view.FilesPage](t, f.h.do(get(f.at("")+"?select=chart.bmp", f.sess))), "chart.bmp").Dimensions; dims != "200×400" {
+		t.Errorf("a BMP chosen says %q", dims)
 	}
 
 	before := f.srv.CountRequests(http.MethodGet, filesDocs+"photo.jpg")

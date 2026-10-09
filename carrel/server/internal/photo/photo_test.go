@@ -17,6 +17,9 @@ import (
 	"strings"
 	"testing"
 
+	"golang.org/x/image/bmp"
+	"golang.org/x/image/tiff"
+
 	"carrel.dev/carrel/server/internal/conf"
 )
 
@@ -456,5 +459,57 @@ func TestFitKeepsTheWholePicture(t *testing.T) {
 	img := decodeJPEG(t, out)
 	if b := img.Bounds(); b.Dx() != 480 || b.Dy() != 120 || !isRed(img.At(20, 60)) || !isBlue(img.At(460, 60)) {
 		t.Errorf("a wide picture: %v", img.Bounds())
+	}
+}
+
+// A file's thumbnail is made from every raster format the module reads —
+// BMP and TIFF beside the four (S-17.1) —, by the bytes; a contact's photo
+// stays one of the four.
+func TestOpenPictureTakesBMPAndTIFFAndAPhotoDoesNot(t *testing.T) {
+	var bmpData, tiffData bytes.Buffer
+	if err := bmp.Encode(&bmpData, halves(80, 60)); err != nil {
+		t.Fatal(err)
+	}
+	if err := tiff.Encode(&tiffData, halves(80, 60), nil); err != nil {
+		t.Fatal(err)
+	}
+	for name, tc := range map[string]struct {
+		data []byte
+		mt   string
+	}{
+		"bmp":  {bmpData.Bytes(), "image/bmp"},
+		"tiff": {tiffData.Bytes(), "image/tiff"},
+		"png":  {encodePNG(t, halves(80, 60)), "image/png"},
+		"jpeg": {encodeJPEG(t, halves(80, 60)), "image/jpeg"},
+	} {
+		src, err := OpenPicture(tc.data, 1<<20)
+		if err != nil || src.MediaType != tc.mt || src.Width != 80 || src.Height != 60 {
+			t.Errorf("%s: %+v %v", name, Source{MediaType: src.MediaType, Width: src.Width, Height: src.Height}, err)
+			continue
+		}
+		out, err := Fit(src, 40, 90)
+		if err != nil {
+			t.Errorf("%s: %v", name, err)
+			continue
+		}
+		if img := decodeJPEG(t, out); img.Bounds().Dx() != 40 || img.Bounds().Dy() != 30 || !isRed(img.At(3, 15)) || !isBlue(img.At(36, 15)) {
+			t.Errorf("%s: the thumbnail is %v", name, img.Bounds())
+		}
+	}
+	if _, err := OpenPicture(bmpData.Bytes(), 4799); !errors.Is(err, ErrTooManyPixels) {
+		t.Errorf("4800 px over a cap of 4799: %v, want ErrTooManyPixels", err)
+	}
+	if _, err := OpenPicture([]byte("II*\x00 not a picture"), 1<<20); err == nil {
+		t.Error("a file that only begins as a TIFF was taken")
+	}
+	// A card is held to the four.
+	if _, err := Open(bmpData.Bytes(), "image/bmp", 1<<20); !errors.Is(err, ErrFormat) {
+		t.Errorf("a BMP as a photo: %v, want ErrFormat", err)
+	}
+	if _, err := Open(tiffData.Bytes(), "image/jpeg", 1<<20); !errors.Is(err, ErrFormat) {
+		t.Errorf("a TIFF declared a JPEG as a photo: %v, want ErrFormat", err)
+	}
+	if _, err := Load(bytes.NewReader(tiffData.Bytes()), 1<<20, 1<<20); !errors.Is(err, ErrFormat) {
+		t.Errorf("a TIFF uploaded as a photo: %v, want ErrFormat", err)
 	}
 }

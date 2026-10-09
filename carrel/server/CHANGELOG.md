@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.178 — 2026-10-10
+
+A thumbnail for every picture the server can read (the owner's decision):
+BMP and TIFF beside PNG, JPEG, GIF and WebP.
+
+### Changed
+
+- **A BMP and a TIFF have a thumbnail** (`FileRow.thumb`, the panel's
+  preview) — a JPEG, like the others, so a browser that shows neither
+  format shows the thumbnail. Over 16 MiB they say «too large», as
+  `s-files-5` draws «панорама.tif». A picture is known by its bytes: a file
+  named `.png` that holds a JPEG has its thumbnail too.
+- **Dimensions** of a chosen BMP or TIFF are read from its head; a TIFF
+  whose directory lies past the first 64 KiB says none.
+- `.bmp`, `.tif` and `.tiff` have their media types on every machine
+  (`image/bmp`, `image/tiff`), whatever the system's table says.
+- A contact's photo is one of four formats, as before.
+
 ## v0.2.177 — 2026-10-09
 
 The thumbnail of a file is made by the server (the owner's decision; S-17.1

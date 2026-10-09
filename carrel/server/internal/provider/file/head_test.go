@@ -12,6 +12,9 @@ import (
 	"strings"
 	"testing"
 
+	"golang.org/x/image/bmp"
+	"golang.org/x/image/tiff"
+
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/davtest"
 )
@@ -68,7 +71,8 @@ func TestListTakesWhatAFolderHoldsFromTheSameAnswer(t *testing.T) {
 
 // S-17: the size of an image is read from its header within the first
 // conf.ImageHeadBytes — PNG's IHDR, JPEG's SOFn past an Exif segment, GIF's
-// screen, WebP's VP8, VP8L and VP8X — and from nothing else.
+// screen, WebP's VP8, VP8L and VP8X, BMP's header, TIFF's directory — and
+// from nothing else.
 func TestImageSizeReadsTheHeader(t *testing.T) {
 	for _, tc := range []struct {
 		name string
@@ -88,6 +92,10 @@ func TestImageSizeReadsTheHeader(t *testing.T) {
 		{"webp VP8", webpLossy(4032, 3024), 4032, 3024, true},
 		{"webp VP8L", webpLossless(1920, 1080), 1920, 1080, true},
 		{"webp VP8X", webpExtended(16000, 9), 16000, 9, true},
+		{"bmp", encoded(t, bmp.Encode, 31, 17), 31, 17, true},
+		{"tiff", encoded(t, func(w io.Writer, m image.Image) error { return tiff.Encode(w, m, nil) }, 640, 20), 640, 20, true},
+		// 200 by 200 uncompressed is 160 KB of pixels before the directory.
+		{"tiff whose directory is past the cap", encoded(t, func(w io.Writer, m image.Image) error { return tiff.Encode(w, m, nil) }, 200, 200), 0, 0, false},
 		{"text", []byte("Заглушка файла из кадров"), 0, 0, false},
 		{"png cut short", encoded(t, png.Encode, 3, 3)[:12], 0, 0, false},
 		{"nothing", nil, 0, 0, false},

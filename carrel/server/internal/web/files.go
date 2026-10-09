@@ -38,10 +38,16 @@ import (
 
 var filesSpec = kindSpec{segment: "files", kind: view.KindFile, noun: "storage"}
 
-// inlineTypes are the images a browser may show from Carrel as they are: a
-// thumbnail is the original file (S-17.1). Anything else, SVG included, is
-// only ever an attachment.
+// inlineTypes are the images a browser may show from Carrel as they are —
+// Open of a picture. Anything else, SVG included, is only ever an
+// attachment.
 var inlineTypes = map[string]bool{"image/png": true, "image/jpeg": true, "image/gif": true, "image/webp": true}
+
+// thumbTypes are the pictures the server makes a thumbnail of and reads the
+// width and height of (S-17.1): every raster format it has a decoder for
+// without a dependency of its own — the four a browser shows, BMP and TIFF.
+var thumbTypes = map[string]bool{"image/png": true, "image/jpeg": true, "image/gif": true, "image/webp": true,
+	"image/bmp": true, "image/tiff": true}
 
 // fileCtx is one live file collection of the catalog opened for a request,
 // and the address in it.
@@ -258,16 +264,13 @@ func onlyCuts(q url.Values) bool {
 
 // Markdown is not in Go's own table of types, and what a system's table says
 // differs from one machine to the next: a folder of notes would read
-// «text/markdown» on one and nothing on another (s-files-1 says it).
+// «text/markdown» on one and nothing on another (s-files-1 says it). BMP and
+// TIFF are not in it either, and a thumbnail goes by the type.
 func init() {
 	_ = mime.AddExtensionType(".md", "text/markdown; charset=utf-8")
-}
-
-// Markdown is not in Go's own table of types, and what a system's table says
-// differs from one machine to the next: a folder of notes would read
-// «text/markdown» on one and nothing on another (s-files-1 says it).
-func init() {
-	_ = mime.AddExtensionType(".md", "text/markdown; charset=utf-8")
+	_ = mime.AddExtensionType(".bmp", "image/bmp")
+	_ = mime.AddExtensionType(".tif", "image/tiff")
+	_ = mime.AddExtensionType(".tiff", "image/tiff")
 }
 
 // fileType is the media type of a file without its parameters: the one the
@@ -812,10 +815,10 @@ func fileIcon(e file.Entry) string {
 
 // thumbHref is the address of a file's thumbnail (S-17.1): the download
 // address with ?thumb=1 and, when the listing gave one, the version the
-// thumbnail is kept by. Empty for what has none: not one of the four raster
-// types, empty, or larger than a thumbnail is made for.
+// thumbnail is kept by. Empty for what has none: not one of thumbTypes,
+// empty, or larger than a thumbnail is made for.
 func (s *Server) thumbHref(c *fileCtx, segs []string, e file.Entry) string {
-	if e.Dir || !inlineTypes[fileType(e.Name, e.Type)] || e.Size <= 0 || e.Size > conf.FileThumbMaxBytes {
+	if e.Dir || !thumbTypes[fileType(e.Name, e.Type)] || e.Size <= 0 || e.Size > conf.FileThumbMaxBytes {
 		return ""
 	}
 	q := url.Values{"thumb": {"1"}}
@@ -825,10 +828,10 @@ func (s *Server) thumbHref(c *fileCtx, segs []string, e file.Entry) string {
 	return s.route(c.href("download", segs, false) + "?" + q.Encode())
 }
 
-// thumbNote says why an image a browser could show has no thumbnail: it is
-// larger than a thumbnail is made for (s-files-5).
+// thumbNote says why a picture has no thumbnail: it is larger than a
+// thumbnail is made for (s-files-5: «панорама.tif», «84 MB · too large»).
 func thumbNote(e file.Entry) view.Text {
-	if !e.Dir && inlineTypes[fileType(e.Name, e.Type)] && e.Size > conf.FileThumbMaxBytes {
+	if !e.Dir && thumbTypes[fileType(e.Name, e.Type)] && e.Size > conf.FileThumbMaxBytes {
 		return "too large"
 	}
 	return ""
@@ -862,7 +865,7 @@ func (s *Server) folderItems(c *fileCtx, segs []string, e file.Entry) view.Text 
 // image, a header that does not say within the cap, a server that did not
 // answer — no size, and the page stands without it.
 func (s *Server) imageSize(ctx context.Context, c *fileCtx, segs []string, e file.Entry) view.Text {
-	if e.Dir || e.Size == 0 || !inlineTypes[fileType(e.Name, e.Type)] {
+	if e.Dir || e.Size == 0 || !thumbTypes[fileType(e.Name, e.Type)] {
 		return ""
 	}
 	p, err := c.path(append(slices.Clone(segs), e.Name), false)
@@ -1156,13 +1159,13 @@ var thumbBuilds = make(chan struct{}, conf.FileThumbBuilds)
 // scaled to fit conf.FileThumbSide, a JPEG — the original does not travel
 // for a thumbnail. It lives in the session's thumbnail cache by the version
 // of the file (?v= of the address the row gave), so the same version is read
-// from its server once. A file that is not one of the four raster types,
+// from its server once. A file that is not one of thumbTypes by its name,
 // that is larger than conf.FileThumbMaxBytes, has more pixels than
 // CARREL_PHOTO_MAX_PIXELS or does not decode has no thumbnail: 404, and that
 // too is remembered for the version. A server that did not answer is asked
 // again the next time.
 func (s *Server) sendThumb(w http.ResponseWriter, r *http.Request, c *fileCtx, p, name string) {
-	if !inlineTypes[fileType(name, "")] {
+	if !thumbTypes[fileType(name, "")] {
 		s.notFound(w, r)
 		return
 	}
@@ -1199,8 +1202,7 @@ func (s *Server) makeThumb(ctx context.Context, c *fileCtx, p, name string) (dat
 		return nil, "", err
 	}
 	defer d.Body.Close()
-	mt := fileType(name, d.Type)
-	if !inlineTypes[mt] || d.Length > conf.FileThumbMaxBytes {
+	if d.Length > conf.FileThumbMaxBytes {
 		return nil, d.ETag, nil
 	}
 	body, err := io.ReadAll(io.LimitReader(d.Body, conf.FileThumbMaxBytes+1))
@@ -1210,7 +1212,8 @@ func (s *Server) makeThumb(ctx context.Context, c *fileCtx, p, name string) (dat
 	if len(body) > conf.FileThumbMaxBytes {
 		return nil, d.ETag, nil
 	}
-	src, err := photo.Open(body, mt, s.cfg.PhotoMaxPixels)
+	// By its bytes, whatever the name and the far server call it.
+	src, err := photo.OpenPicture(body, s.cfg.PhotoMaxPixels)
 	if err != nil {
 		return nil, d.ETag, nil
 	}

@@ -9,6 +9,9 @@ import (
 	"image/png"
 	"io"
 
+	"golang.org/x/image/bmp"
+	"golang.org/x/image/tiff"
+
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
 )
@@ -20,8 +23,8 @@ import (
 // this is how the one file chosen learns it. A server that ignores the range
 // and sends the whole file is read no further than the cap either: the
 // answer is closed there. ok is false when the header does not say within
-// those bytes, or the type is not one of PNG, JPEG, GIF, WebP; that is not
-// an error.
+// those bytes, or the type is not one of PNG, JPEG, GIF, WebP, BMP, TIFF;
+// that is not an error.
 func (p *Provider) Dimensions(ctx context.Context, path string) (w, h int, ok bool, err error) {
 	body, _, err := p.t.Get(ctx, path, &dav.Range{Start: 0, End: conf.ImageHeadBytes - 1})
 	if err != nil {
@@ -35,10 +38,11 @@ func (p *Provider) Dimensions(ctx context.Context, path string) (w, h int, ok bo
 // ImageSize reads at most conf.ImageHeadBytes of r and says the width and
 // height its header gives: PNG's IHDR, JPEG's frame header past whatever
 // APPn segments (Exif) stand before it, GIF's logical screen, WebP's VP8,
-// VP8L or VP8X chunk. Only the standard library: the decoders of image/png
-// and image/gif read their header out of the bytes already read, never out
-// of r. JPEG is walked here: image/jpeg reads on to the scan, which may lie
-// past the cap when the frame header does not.
+// VP8L or VP8X chunk, BMP's header, TIFF's first directory. The decoders of
+// image/png, image/gif and of golang.org/x/image for BMP and TIFF read their
+// header out of the bytes already read, never out of r. JPEG is walked here:
+// image/jpeg reads on to the scan, which may lie past the cap when the frame
+// header does not.
 func ImageSize(r io.Reader) (w, h int, ok bool) {
 	head, err := io.ReadAll(io.LimitReader(r, conf.ImageHeadBytes))
 	if err != nil && len(head) == 0 {
@@ -56,6 +60,12 @@ func ImageSize(r io.Reader) (w, h int, ok bool) {
 	case len(head) >= 12 && string(head[:4]) == "RIFF" && string(head[8:12]) == "WEBP":
 		w, h = webpSize(head)
 		return w, h, w > 0 && h > 0
+	case bytes.HasPrefix(head, []byte("BM")):
+		cfg, err = bmp.DecodeConfig(bytes.NewReader(head))
+	case bytes.HasPrefix(head, []byte("II*\x00")), bytes.HasPrefix(head, []byte("MM\x00*")):
+		// A TIFF keeps its directory wherever its writer put it: one that
+		// lies past the cap says nothing here.
+		cfg, err = tiff.DecodeConfig(bytes.NewReader(head))
 	default:
 		return 0, 0, false
 	}

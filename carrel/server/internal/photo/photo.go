@@ -17,6 +17,8 @@ import (
 	"os"
 	"strings"
 
+	_ "golang.org/x/image/bmp"  // BMP and TIFF: a file's thumbnail only (S-17.1)
+	_ "golang.org/x/image/tiff" // never a contact's photo
 	_ "golang.org/x/image/webp"
 
 	"carrel.dev/carrel/server/internal/conf"
@@ -60,6 +62,36 @@ func MediaType(declared string) (string, bool) {
 	return mt, ok
 }
 
+// pictures are the formats a file's thumbnail is made from (S-17.1): the
+// four a photo may be, and BMP and TIFF — every raster format this module
+// already has a decoder for (the owner's decision of 09.10.2026).
+var pictures = map[string]string{
+	"jpeg": "image/jpeg",
+	"png":  "image/png",
+	"gif":  "image/gif",
+	"webp": "image/webp",
+	"bmp":  "image/bmp",
+	"tiff": "image/tiff",
+}
+
+// OpenPicture checks a file that is in hand for its thumbnail: one of the
+// pictures by its bytes, whatever its name says, within the pixel cap. It is
+// not how a photo is taken in — Open and Load hold a card to four formats.
+func OpenPicture(data []byte, maxPixels int64) (Source, error) {
+	cfg, mt, err := config(bytes.NewReader(data), maxPixels, pictures)
+	if err != nil {
+		return Source{}, err
+	}
+	src := Source{Data: data, MediaType: mt, Width: cfg.Width, Height: cfg.Height, Orientation: 1}
+	switch mt {
+	case "image/jpeg":
+		src.Orientation = orientation(data)
+	case "image/tiff":
+		src.Orientation = tiffOrientation(data)
+	}
+	return src, nil
+}
+
 // Source is an image checked for format and size, not yet decoded.
 type Source struct {
 	Data          []byte
@@ -91,7 +123,7 @@ func Load(r io.Reader, maxBytes, maxPixels int64) (Source, error) {
 	if _, err := f.Seek(0, io.SeekStart); err != nil {
 		return Source{}, err
 	}
-	if _, _, err := config(bufio.NewReader(f), maxPixels); err != nil {
+	if _, _, err := config(bufio.NewReader(f), maxPixels, formats); err != nil {
 		return Source{}, err
 	}
 	if _, err := f.Seek(0, io.SeekStart); err != nil {
@@ -129,7 +161,7 @@ func Open(data []byte, declared string, maxPixels int64) (Source, error) {
 }
 
 func inspect(data []byte, maxPixels int64) (Source, error) {
-	cfg, mt, err := config(bytes.NewReader(data), maxPixels)
+	cfg, mt, err := config(bytes.NewReader(data), maxPixels, formats)
 	if err != nil {
 		return Source{}, err
 	}
@@ -140,7 +172,7 @@ func inspect(data []byte, maxPixels int64) (Source, error) {
 	return src, nil
 }
 
-func config(r io.Reader, maxPixels int64) (image.Config, string, error) {
+func config(r io.Reader, maxPixels int64, formats map[string]string) (image.Config, string, error) {
 	cfg, format, err := image.DecodeConfig(r)
 	if err != nil {
 		return image.Config{}, "", ErrFormat
