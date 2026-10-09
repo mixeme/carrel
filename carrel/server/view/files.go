@@ -137,6 +137,11 @@ type NameClash struct {
 type FileTree struct {
 	Nodes  []FileTreeNode `json:"nodes"`
 	Chosen string         `json:"chosen"`
+	// Field — у дерева листа переноса и копии (s-files-4): имя поля формы
+	// листа, которым узел отмечают, — «to», значение — ID узла; у узла
+	// только для чтения отметка выключена. Пусто — дерево выбирает адресом
+	// узла (Href): листы выбора
+	Field string `json:"field"`
 	// New — «New folder» в рубрике дерева (s-files-4, s-notes-11): папка
 	// заводится в выбранной и сразу выбирается; nil — дерево без неё
 	New *Action `json:"new"`
@@ -208,9 +213,14 @@ type FileOpSheet struct {
 	// что ссылок на файлы никто не считал (s-files-22)
 	Warning Runs    `json:"warning"`
 	Failure *Notice `json:"failure"` // New folder не завёл папку; nil — отказа не было
-	// Form — у переименования: POST на адрес подтверждения (go=1), скрытый
-	// _csrf и поле name — новое имя, сначала нынешнее, курсор в нём; Rename
-	// листа отправляет её. У прочих операций nil
+	// Form — форма листа. У переименования: POST на адрес подтверждения
+	// (go=1), скрытый _csrf и поле name — новое имя, сначала нынешнее,
+	// курсор в нём; Rename листа отправляет её. У переноса и копии
+	// (s-files-4): POST на адрес подтверждения со скрытым _csrf, цель — поле
+	// Target.Field, отметка узла дерева; «Move here» и «Copy here» —
+	// кнопка этой формы (Submits) и от выбранного узла не зависит: цель,
+	// которой быть нельзя, получает отказ в ответ на отправку. У удаления
+	// nil
 	Form    *Form    `json:"form"`
 	Actions []Action `json:"actions"`
 }

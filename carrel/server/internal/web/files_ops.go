@@ -931,9 +931,16 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		}
 		s.newFolder(sheet.Target, dest, c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "mkcol": {"1"}},
 			c.href("op", c.segs, true), back, q.Get("new") != "")
-		if reason := moveBlock(c, op, items, dest); reason != "" {
-			confirm.Enabled, confirm.Reason = false, text(reason)
-		} else {
+		// The sheet is a form (s-files-4): a node is a tick of its field
+		// «to», and the button sends whatever is ticked — so it stands off
+		// only where no node could help, a move out of a read-only storage.
+		// A destination that cannot be one is refused when it is sent
+		// (runOp).
+		sheet.Target.Field = "to"
+		confirm.Submits = true
+		if op == view.FileMove && c.col.ReadOnly {
+			confirm.Enabled, confirm.Reason = false, readOnlyReason
+		} else if dest != nil {
 			run.Set("to", s.route(dest.href("", dest.segs, true)))
 		}
 		// The message stands on the sheet (s-files-4): what the operation
@@ -950,6 +957,10 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 	}
 	if confirm.Enabled {
 		confirm.Href = s.postQuery(c.href("op", c.segs, true), run)
+	}
+	if (op == view.FileMove || op == view.FileCopy) && confirm.Enabled {
+		sheet.Form = &view.Form{Action: confirm.Href, Method: "POST", Target: render.TargetSheet,
+			Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(c.sess)}}}}
 	}
 	// The new name is the form's field: without it Rename has nothing to
 	// send (U-8). It starts as the name there now.

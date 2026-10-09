@@ -1,23 +1,23 @@
 {
   "actions": [
     {
+      "csrf": "csrf",
       "enabled": true,
+      "file": "file",
       "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/",
       "id": "files.picker.upload",
       "label": "Upload",
       "method": "POST",
       "primary": true,
-      "csrf": "csrf",
-      "target": "queue",
-      "file": "file"
+      "target": "queue"
     },
     {
+      "csrf": "csrf",
       "enabled": true,
-      "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+      "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
       "id": "files.picker.choose",
       "label": "Choose this folder",
       "method": "POST",
-      "csrf": "csrf",
       "target": "sheet"
     },
     {
@@ -28,58 +28,72 @@
       "method": "GET"
     }
   ],
+  "failure": null,
   "purpose": "The folder is the attachment folder from Settings → Attachments, named once and remembered — unless you make a new one here. Change it here and the next upload from this menu goes to the new one.",
+  "subject": "",
+  "title": "Upload files",
   "tree": {
     "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+    "field": "",
+    "name": null,
+    "new": {
+      "enabled": true,
+      "href": "/app/files/picker?for=upload\u0026new=1\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+      "icon": "i-plus",
+      "id": "files.tree.new",
+      "label": "New folder",
+      "method": "GET",
+      "target": "sheet"
+    },
     "nodes": [
       {
         "children": [],
         "expanded": false,
+        "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
         "id": "/app/files/a-nc-home/Files/",
         "label": "Files",
         "readOnly": false,
-        "stamp": "nextcloud",
-        "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F"
+        "stamp": "nextcloud"
       },
       {
         "children": [
           {
             "children": [
               {
+                "attachments": true,
                 "children": [
                   {
                     "children": [],
                     "expanded": false,
+                    "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
                     "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
                     "label": "2026-07",
                     "readOnly": false,
-                    "stamp": "",
-                    "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F"
+                    "stamp": ""
                   }
                 ],
                 "expanded": true,
+                "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
                 "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
                 "label": "attachments",
                 "readOnly": false,
-                "stamp": "",
-                "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
-                "attachments": true
+                "stamp": ""
               }
             ],
             "expanded": true,
+            "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2F",
             "id": "/app/files/a-sftp-vps/Documents/carrel/",
             "label": "carrel",
             "readOnly": false,
-            "stamp": "",
-            "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2F"
+            "stamp": ""
           }
         ],
         "expanded": true,
+        "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2F",
         "id": "/app/files/a-sftp-vps/Documents/",
         "label": "Documents",
         "readOnly": false,
-        "stamp": "sftpgo · vps",
-        "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2F"
+        "stamp": "sftpgo · vps"
       },
       {
         "children": [],
@@ -89,20 +103,7 @@
         "readOnly": true,
         "stamp": "sftpgo · vps"
       }
-    ],
-    "new": {
-      "enabled": true,
-      "href": "/app/files/picker?for=upload&new=1&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
-      "icon": "i-plus",
-      "id": "files.tree.new",
-      "label": "New folder",
-      "method": "GET",
-      "target": "sheet"
-    },
-    "name": null
+    ]
   },
-  "subject": "",
-  "title": "Upload files",
-  "failure": null,
   "where": "Documents / carrel / attachments"
 }

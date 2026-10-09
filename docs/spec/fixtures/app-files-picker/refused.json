@@ -14,7 +14,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+      "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
       "id": "files.picker.choose",
       "label": "Choose this folder",
       "method": "POST",
@@ -40,13 +40,14 @@
   "title": "Upload files",
   "tree": {
     "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+    "field": "",
     "name": {
-      "action": "/app/files/picker?for=upload&mkcol=1&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+      "action": "/app/files/picker?for=upload\u0026mkcol=1\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
       "actions": [
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/picker?for=upload&mkcol=1&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+          "href": "/app/files/picker?for=upload\u0026mkcol=1\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
           "id": "files.tree.new.create",
           "label": "Create",
           "method": "POST",
@@ -55,7 +56,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+          "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
           "id": "files.tree.new.cancel",
           "label": "Cancel",
           "method": "GET",
@@ -103,7 +104,7 @@
     },
     "new": {
       "enabled": true,
-      "href": "/app/files/picker?for=upload&new=1&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+      "href": "/app/files/picker?for=upload\u0026new=1\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
       "icon": "i-plus",
       "id": "files.tree.new",
       "label": "New folder",
@@ -114,7 +115,7 @@
       {
         "children": [],
         "expanded": false,
-        "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
+        "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
         "id": "/app/files/a-nc-home/Files/",
         "label": "Files",
         "readOnly": false,
@@ -125,11 +126,12 @@
           {
             "children": [
               {
+                "attachments": true,
                 "children": [
                   {
                     "children": [],
                     "expanded": false,
-                    "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+                    "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
                     "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
                     "label": "2026-07",
                     "readOnly": false,
@@ -137,16 +139,15 @@
                   }
                 ],
                 "expanded": true,
-                "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+                "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
                 "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
                 "label": "attachments",
                 "readOnly": false,
-                "stamp": "",
-                "attachments": true
+                "stamp": ""
               }
             ],
             "expanded": true,
-            "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2F",
+            "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2F",
             "id": "/app/files/a-sftp-vps/Documents/carrel/",
             "label": "carrel",
             "readOnly": false,
@@ -154,7 +155,7 @@
           }
         ],
         "expanded": true,
-        "href": "/app/files/picker?for=upload&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2F",
+        "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2F",
         "id": "/app/files/a-sftp-vps/Documents/",
         "label": "Documents",
         "readOnly": false,

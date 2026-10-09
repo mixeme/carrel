@@ -106,3 +106,54 @@ func TestDeleteSheetIsTheFrame(t *testing.T) {
 		t.Errorf("a folder and a file: %q", got)
 	}
 }
+
+// ФН10 (the owner's decision of 09.10.2026: the frame is right): the sheet
+// of a move and of a copy is a form (s-files-4) — a node of the tree is a
+// tick of its field «to», «Move here» sends it. So the button does not
+// depend on the node chosen when the sheet was drawn: a destination that
+// cannot be one is refused when it is sent, in the words the button used to
+// stand off with.
+func TestMoveSheetIsAForm(t *testing.T) {
+	frame := mockupFrame(t, "s-files-4")
+	form := frameOne(t, regexp.MustCompile(`<form class="tc-sheet[^"]*" action="[^"]*\?op=move" method="(post)">`), frame, "form of the sheet")
+	field := frameOne(t, regexp.MustCompile(`<input class="tc-tree__box" type="radio" name="([^"]+)" value="[^"]+" checked>`), frame, "chosen node")[1]
+	if !regexp.MustCompile(`<button class="tc-btn is-primary" type="submit">Move here</button>`).MatchString(frame) || form[1] != "post" {
+		t.Fatal("s-files-4 does not send its sheet with «Move here»: read the frame again")
+	}
+
+	f := filesFixture(t, true)
+	f.srv.SeedFile(filesDocs+"a.txt", "alpha")
+	f.srv.SeedFolder(filesDocs + "sub/")
+	for _, op := range []string{"move", "copy"} {
+		sheet := opSheetOf(t, f, op, []string{"a.txt"})
+		confirm := sheet.Actions[0]
+		if sheet.Form == nil || sheet.Form.Method != "POST" || formRow(*sheet.Form, "_csrf") == nil || sheet.Form.Action != confirm.Href ||
+			!strings.Contains(sheet.Form.Action, "go=1") {
+			t.Fatalf("%s: form = %+v, confirm %+v", op, sheet.Form, confirm)
+		}
+		if sheet.Target == nil || sheet.Target.Field != field {
+			t.Fatalf("%s: the tree sends %+v, want the field %q", op, sheet.Target, field)
+		}
+		if !confirm.Enabled || !confirm.Submits || confirm.Reason != "" {
+			t.Errorf("%s: confirm = %+v, want the form's button, on", op, confirm)
+		}
+	}
+
+	// The sheet opens with the folder of the items chosen; sent as it is, a
+	// move is refused and nothing moves.
+	sheet := opSheetOf(t, f, "move", []string{"a.txt"})
+	fields := formFields(*sheet.Form)
+	fields.Set(field, sheet.Target.Chosen)
+	page := decode[view.FilesPage](t, f.h.do(postForm(sheet.Form.Action, f.sess, fields)))
+	if !hasNoticeBody(page.Notices, "These items are already here.") {
+		t.Errorf("a move to its own folder: %+v", page.Notices)
+	}
+	// Another node ticked, the form sends its ID and the file goes there.
+	fields.Set(field, f.at("", "sub", ""))
+	if rec := f.h.do(postForm(sheet.Form.Action, f.sess, fields)); rec.Code >= 400 {
+		t.Fatalf("move: %d %s", rec.Code, rec.Body)
+	}
+	if got, ok := f.srv.File(filesDocs + "sub/a.txt"); !ok || got != "alpha" {
+		t.Errorf("after the move sub/a.txt = %q %v", got, ok)
+	}
+}

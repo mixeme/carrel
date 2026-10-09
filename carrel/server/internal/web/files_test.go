@@ -680,12 +680,17 @@ func TestFileOperationsOnOneServer(t *testing.T) {
 	}
 
 	move := opSheet(t, f, rowMenu(t, fileRow(t, page, "sub"), "file.move"), url.Values{})
-	if move.Target == nil || move.Actions[0].Enabled || move.Actions[0].Reason != "These items are already here." {
+	// The sheet is a form (ФН10): a destination that cannot be one is
+	// refused when it is sent, not by a button that stands off.
+	if move.Target == nil || !move.Actions[0].Enabled {
 		t.Errorf("move to its own folder = %+v", move.Actions[0])
 	}
+	if here := decode[view.FilesPage](t, f.h.do(postForm(confirmHref(t, move), f.sess, url.Values{}))); !hasNoticeBody(here.Notices, "These items are already here.") {
+		t.Errorf("move to its own folder: %+v", here.Notices)
+	}
 	into := opSheet(t, f, rowMenu(t, fileRow(t, page, "sub"), "file.move"), url.Values{"to": {f.at("", "sub", "")}})
-	if into.Actions[0].Enabled || into.Actions[0].Reason != "A folder cannot go inside itself." {
-		t.Errorf("move into itself = %+v", into.Actions[0])
+	if inside := decode[view.FilesPage](t, f.h.do(postForm(confirmHref(t, into), f.sess, url.Values{}))); !hasNoticeBody(inside.Notices, "A folder cannot go inside itself.") {
+		t.Errorf("move into itself: %+v", inside.Notices)
 	}
 	if into.Target.Chosen != f.at("", "sub", "") || len(into.Target.Nodes) != 1 || !into.Target.Nodes[0].Expanded ||
 		len(into.Target.Nodes[0].Children) != 1 || into.Target.Nodes[0].Children[0].ID != f.at("", "sub", "") {

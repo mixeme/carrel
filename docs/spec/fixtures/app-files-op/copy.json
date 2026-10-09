@@ -8,6 +8,7 @@
       "label": "Copy here",
       "method": "POST",
       "primary": true,
+      "submits": true,
       "target": "sheet"
     },
     {
@@ -20,7 +21,34 @@
   ],
   "alert": [],
   "failure": null,
-  "form": null,
+  "form": {
+    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1\u0026item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=copy\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          }
+        ],
+        "unfold": null
+      }
+    ],
+    "target": "sheet"
+  },
   "items": [
     "2026-08-10-sync-board.png",
     "release-checklist.md",
@@ -30,6 +58,7 @@
   "subject": "from Documents / carrel / attachments",
   "target": {
     "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
+    "field": "to",
     "name": null,
     "new": {
       "enabled": true,

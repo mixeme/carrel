@@ -2101,7 +2101,11 @@ type NameClash struct { Name Text; Options []Action } // Keep both · Replace ·
 // is a folder called «2026-07» in carrel already. Choose another name.», —
 // и строка приходит открытой, с набранным. nil — строка не открыта, New нет
 // или она выключена.
-type FileTree struct { Nodes []FileTreeNode; Chosen string; New *Action; Name *Form }
+// Field — у дерева листа переноса и копии (s-files-4): имя поля формы листа
+// (FileOpSheet.Form), которым узел отмечают, — «to», значение — ID узла; у
+// узла только для чтения отметка выключена. Пусто — дерево выбирает адресом
+// узла (Href): листы выбора.
+type FileTree struct { Nodes []FileTreeNode; Chosen string; Field string; New *Action; Name *Form }
 // Дерево, из которого выбирают файл (From Files у Attach), показывает и
 // файлы: File — узел-файл, он выбирается и не раскрывается; ID — его адрес в
 // разделе файлов без «/» в конце. ReadOnly — узел недоступен для этой цели:
@@ -2160,6 +2164,11 @@ type FileOpSheet struct {
     Alert   Runs
     Warning Runs // перенос: на одном сервере `MOVE` моноширинно (s-files-4); переименование — кого заденет новый адрес (s-files-21); удаление — что ссылок никто не считал (s-files-22)
     Failure *Notice
+    // Form — форма листа: у переименования — с полем name; у переноса и
+    // копии (s-files-4) — POST подтверждения со скрытым _csrf, цель — поле
+    // Target.Field, отметка узла; «Move here» и «Copy here» — её кнопка
+    // (Action.Submits) и от выбранного узла не зависит: цель, которой быть
+    // нельзя, получает отказ в ответ на отправку. У удаления nil.
     Form    *Form
     Actions []Action
 }

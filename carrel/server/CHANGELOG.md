@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.165 — 2026-10-09
+
+The files section, the client's second scan (ФН10; the owner's decision of
+09.10.2026 — the frame is right): the sheet of a move and of a copy is a
+form (`s-files-4`).
+
+### Changed
+
+- **«Move here» and «Copy here» send the sheet's form.** `FileOpSheet.form`
+  stands at a move and a copy too: a POST of the confirmed operation with
+  the hidden `_csrf`. The tree names the field a node is ticked with —
+  `FileTree.field`, «to» — and a node's value is its `id`. The button is
+  the form's (`submits`), and it no longer stands off because of the node
+  that was chosen when the sheet was drawn: «These items are already
+  here.», «The chosen storage is read-only.», «A folder cannot go inside
+  itself.» come as the answer to the form — «Nothing was done» — instead of
+  as the button's reason. It stands off only for a move out of a read-only
+  storage. A node's `href` — the sheet with it chosen — is still there.
+
 ## v0.2.164 — 2026-10-09
 
 The files section, the client's second scan (ФН11, ФН12): the words of a

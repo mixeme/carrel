@@ -37,10 +37,14 @@ func TestRenameSheetCarriesTheNewName(t *testing.T) {
 	if got, ok := f.srv.File(filesDocs + "b.txt"); !ok || got != "alpha" {
 		t.Errorf("renamed: %q %v", got, ok)
 	}
-	// Move, copy and delete name nothing new.
+	// Move, copy and delete name nothing new: a move's form (ФН10) has no
+	// field of a name, a deletion has no form.
 	page = decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
-	if move := opSheet(t, f, rowMenu(t, fileRow(t, page, "b.txt"), "file.move"), url.Values{}); move.Form != nil {
+	if move := opSheet(t, f, rowMenu(t, fileRow(t, page, "b.txt"), "file.move"), url.Values{}); move.Form == nil || formRow(*move.Form, "name") != nil {
 		t.Errorf("a move sheet with a name: %+v", move.Form)
+	}
+	if del := opSheet(t, f, rowMenu(t, fileRow(t, page, "b.txt"), "file.delete"), url.Values{}); del.Form != nil {
+		t.Errorf("a deletion with a form: %+v", del.Form)
 	}
 }
 
