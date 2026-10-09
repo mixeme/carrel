@@ -190,7 +190,8 @@ type Details struct {
 	Close string `json:"close"`
 }
 
-// Thumb — превью файла: Href — адрес миниатюры (картинка не больше потолка
+// Thumb — превью файла: Href — адрес миниатюры, которую делает сервер
+// (…/download/{path…}?thumb=1, S-17.1; картинка не больше потолка
 // миниатюры), пусто — значок Icon по типу (i-img, i-doc, i-file).
 type Thumb struct {
 	Href string `json:"href"`

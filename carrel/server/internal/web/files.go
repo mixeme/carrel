@@ -20,6 +20,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/photo"
 	"carrel.dev/carrel/server/internal/provider/file"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
@@ -716,9 +717,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 			mt := fileType(e.Name, e.Type)
 			row.Href, row.Type, row.Size = s.route(c.href("download", rowSegs, false)), text(mt), formatSize(e.Size)
 			row.Open = s.route(c.href("", rowSegs, false))
-			if inlineTypes[mt] && e.Size > 0 && e.Size <= conf.FileThumbMaxBytes {
-				row.Thumb = s.route(c.href("download", rowSegs, false) + "?inline=1")
-			}
+			row.Thumb = s.thumbHref(c, rowSegs, e)
 		}
 		if row.Selected {
 			picked = append(picked, e)
@@ -811,8 +810,23 @@ func fileIcon(e file.Entry) string {
 	return "i-doc"
 }
 
+// thumbHref is the address of a file's thumbnail (S-17.1): the download
+// address with ?thumb=1 and, when the listing gave one, the version the
+// thumbnail is kept by. Empty for what has none: not one of the four raster
+// types, empty, or larger than a thumbnail is made for.
+func (s *Server) thumbHref(c *fileCtx, segs []string, e file.Entry) string {
+	if e.Dir || !inlineTypes[fileType(e.Name, e.Type)] || e.Size <= 0 || e.Size > conf.FileThumbMaxBytes {
+		return ""
+	}
+	q := url.Values{"thumb": {"1"}}
+	if e.ETag != "" {
+		q.Set("v", e.ETag)
+	}
+	return s.route(c.href("download", segs, false) + "?" + q.Encode())
+}
+
 // thumbNote says why an image a browser could show has no thumbnail: it is
-// larger than a thumbnail is allowed to be (s-files-5).
+// larger than a thumbnail is made for (s-files-5).
 func thumbNote(e file.Entry) view.Text {
 	if !e.Dir && inlineTypes[fileType(e.Name, e.Type)] && e.Size > conf.FileThumbMaxBytes {
 		return "too large"
@@ -900,10 +914,7 @@ func (s *Server) filePanel(c *fileCtx, segs []string, e file.Entry, here string,
 	at := append(slices.Clone(segs), e.Name)
 	mt := fileType(e.Name, e.Type)
 	download := s.route(c.href("download", at, false))
-	d := &view.Details{Title: text(e.Name), Subtitle: text(string(c.stamp())), Preview: &view.Thumb{Icon: fileIcon(e)}}
-	if inlineTypes[mt] && e.Size > 0 && e.Size <= conf.FileThumbMaxBytes {
-		d.Preview.Href = download + "?inline=1"
-	}
+	d := &view.Details{Title: text(e.Name), Subtitle: text(string(c.stamp())), Preview: &view.Thumb{Icon: fileIcon(e), Href: s.thumbHref(c, at, e)}}
 	open := view.Action{ID: "file.view", Label: "Open", Method: "GET"}
 	if inlineTypes[mt] {
 		open.Enabled, open.Href = true, download+"?inline=1"
@@ -1074,8 +1085,8 @@ func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry, b
 // Download (C-5.5): the file as it comes, with the server's length, version
 // and range. It is always an attachment in a sandbox, whatever its type: a
 // page served from Carrel's origin must not run what someone uploaded. Only
-// ?inline=1 of one of the four raster types is shown in place, for a
-// thumbnail.
+// ?inline=1 of one of the four raster types is shown in place — Open of a
+// picture. ?thumb=1 is not the file but its thumbnail, made here (sendThumb).
 
 func (s *Server) getFilesDownload(w http.ResponseWriter, r *http.Request) {
 	c, ok := s.openFiles(w, r, "download")
@@ -1099,6 +1110,10 @@ func (s *Server) getFilesDownload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	name := c.segs[len(c.segs)-1]
+	if r.URL.Query().Get("thumb") != "" {
+		s.sendThumb(w, r, c, p, name)
+		return
+	}
 	inline := r.URL.Query().Get("inline") != ""
 	switch err := s.sendFile(w, r, c, p, name, inline); {
 	case err == nil:
@@ -1131,6 +1146,100 @@ func (s *Server) downloadFolder(w http.ResponseWriter, r *http.Request, c *fileC
 	default:
 		s.writeFolder(w, r, c, c.segs[:len(c.segs)-1], "", url.Values{}, "", s.fileFailure(c, name+" could not be downloaded", "PROPFIND", p, err))
 	}
+}
+
+// thumbBuilds lets conf.FileThumbBuilds thumbnails be made at a time: a
+// folder of pictures opened as tiles asks for them all at once.
+var thumbBuilds = make(chan struct{}, conf.FileThumbBuilds)
+
+// sendThumb answers ?thumb=1 of a download address (S-17.1): the picture
+// scaled to fit conf.FileThumbSide, a JPEG — the original does not travel
+// for a thumbnail. It lives in the session's thumbnail cache by the version
+// of the file (?v= of the address the row gave), so the same version is read
+// from its server once. A file that is not one of the four raster types,
+// that is larger than conf.FileThumbMaxBytes, has more pixels than
+// CARREL_PHOTO_MAX_PIXELS or does not decode has no thumbnail: 404, and that
+// too is remembered for the version. A server that did not answer is asked
+// again the next time.
+func (s *Server) sendThumb(w http.ResponseWriter, r *http.Request, c *fileCtx, p, name string) {
+	if !inlineTypes[fileType(name, "")] {
+		s.notFound(w, r)
+		return
+	}
+	cache, version := c.sess.Cache(), r.URL.Query().Get("v")
+	if version != "" {
+		if data, ok := cache.GetThumb(c.conn.ID, p, version); ok {
+			s.writeThumb(w, r, name, version, data)
+			return
+		}
+	}
+	select {
+	case thumbBuilds <- struct{}{}:
+		defer func() { <-thumbBuilds }()
+	case <-r.Context().Done():
+		return
+	}
+	data, made, err := s.makeThumb(r.Context(), c, p, name)
+	if err != nil {
+		s.notFound(w, r)
+		return
+	}
+	if made != "" {
+		cache.PutThumb(c.conn.ID, p, made, data)
+	}
+	s.writeThumb(w, r, name, made, data)
+}
+
+// makeThumb reads the file at p and makes its thumbnail. version is the
+// file's as its server sent it with the body. No bytes and no error — the
+// file has no thumbnail; an error — its server did not give it.
+func (s *Server) makeThumb(ctx context.Context, c *fileCtx, p, name string) (data []byte, version string, err error) {
+	d, err := c.files.Open(ctx, p, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	defer d.Body.Close()
+	mt := fileType(name, d.Type)
+	if !inlineTypes[mt] || d.Length > conf.FileThumbMaxBytes {
+		return nil, d.ETag, nil
+	}
+	body, err := io.ReadAll(io.LimitReader(d.Body, conf.FileThumbMaxBytes+1))
+	if err != nil {
+		return nil, "", err
+	}
+	if len(body) > conf.FileThumbMaxBytes {
+		return nil, d.ETag, nil
+	}
+	src, err := photo.Open(body, mt, s.cfg.PhotoMaxPixels)
+	if err != nil {
+		return nil, d.ETag, nil
+	}
+	if data, err = photo.Fit(src, conf.FileThumbSide, s.cfg.PhotoJPEGQuality); err != nil {
+		return nil, d.ETag, nil
+	}
+	return data, d.ETag, nil
+}
+
+// writeThumb hands a thumbnail to the browser, or 404 for a file that has
+// none. The address names the version, so a copy the browser holds of it
+// stands (304).
+func (s *Server) writeThumb(w http.ResponseWriter, r *http.Request, name, version string, data []byte) {
+	if len(data) == 0 {
+		s.notFound(w, r)
+		return
+	}
+	h := w.Header()
+	downloadHeaders(h, strings.TrimSuffix(name, path.Ext(name))+".jpg", "image/jpeg", true)
+	if version != "" {
+		tag := `"t-` + version + `"`
+		h.Set("ETag", tag)
+		if r.Header.Get("If-None-Match") == tag {
+			w.WriteHeader(http.StatusNotModified)
+			return
+		}
+	}
+	h.Set("Content-Length", strconv.Itoa(len(data)))
+	_, _ = w.Write(data)
 }
 
 // downloadHeaders are the headers of a file handed to the browser: its type,

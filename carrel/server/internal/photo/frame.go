@@ -28,6 +28,33 @@ func Render(src Source, crop Crop, side, quality int) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// Fit scales a source to fit a square of side and writes it as a JPEG: the
+// whole image, its proportions kept, the orientation applied — the thumbnail
+// of a file (S-17.1). A smaller image is not enlarged. As with Render,
+// nothing of the metadata survives and transparency lands on white.
+func Fit(src Source, side, quality int) ([]byte, error) {
+	img, _, err := image.Decode(bytes.NewReader(src.Data))
+	if err != nil {
+		return nil, ErrUnreadable
+	}
+	b := img.Bounds()
+	w, h := float64(b.Dx()), float64(b.Dy())
+	ow, oh := w, h // seen
+	if src.Orientation >= 5 {
+		ow, oh = h, w
+	}
+	scale := math.Max(1, math.Max(ow, oh)/float64(side))
+	nw, nh := max(1, int(math.Round(ow/scale))), max(1, int(math.Round(oh/scale)))
+	d2s := aff{1, 0, float64(b.Min.X), 0, 1, float64(b.Min.Y)}.
+		then(orient(src.Orientation, w, h)).
+		then(aff{ow / float64(nw), 0, 0, 0, oh / float64(nh), 0})
+	var buf bytes.Buffer
+	if err := jpeg.Encode(&buf, sample(img, d2s, nw, nh), &jpeg.Options{Quality: quality}); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 // aff maps a point as x' = a·x + b·y + c, y' = d·x + e·y + f. Coordinates are
 // continuous: pixel i covers [i, i+1).
 type aff [6]float64
@@ -116,9 +143,16 @@ func frame(img image.Image, o int, crop Crop, side int) *image.RGBA {
 		then(turn(crop.Rotate, ow, oh)).
 		then(aff{scale, 0, left, 0, scale, top})
 
-	// The square covers an axis-aligned rectangle of the stored image.
+	return sample(img, d2s, n, n)
+}
+
+// sample draws nw by nh pixels of img, each read where d2s puts it in the
+// stored image, on white.
+func sample(img image.Image, d2s aff, nw, nh int) *image.RGBA {
+	b := img.Bounds()
+	// The output covers an axis-aligned rectangle of the stored image.
 	x0, y0 := d2s.apply(0, 0)
-	x1, y1 := d2s.apply(float64(n), float64(n))
+	x1, y1 := d2s.apply(float64(nw), float64(nh))
 	r := image.Rect(int(math.Floor(math.Min(x0, x1))), int(math.Floor(math.Min(y0, y1))),
 		int(math.Ceil(math.Max(x0, x1))), int(math.Ceil(math.Max(y0, y1)))).Intersect(b)
 
@@ -135,7 +169,13 @@ func frame(img image.Image, o int, crop Crop, side int) *image.RGBA {
 		cur = sub.SubImage(r)
 	}
 	sr := r
-	for halve && scale*float64(cur.Bounds().Dx())/float64(r.Dx()) >= 4 && cur.Bounds().Dx() >= 2 && cur.Bounds().Dy() >= 2 {
+	// Source pixels per output pixel, by area: the same whichever way the
+	// orientation turns the rectangle.
+	per := func() float64 {
+		cb := cur.Bounds()
+		return math.Sqrt(float64(cb.Dx()) * float64(cb.Dy()) / (float64(nw) * float64(nh)))
+	}
+	for halve && per() >= 4 && cur.Bounds().Dx() >= 2 && cur.Bounds().Dy() >= 2 {
 		cb := cur.Bounds()
 		half := image.NewRGBA(image.Rect(0, 0, (cb.Dx()+1)/2, (cb.Dy()+1)/2))
 		draw.ApproxBiLinear.Scale(half, half.Bounds(), cur, cb, draw.Src, nil)
@@ -146,7 +186,7 @@ func frame(img image.Image, o int, crop Crop, side int) *image.RGBA {
 		d2s = aff{kx, 0, -float64(r.Min.X) * kx, 0, ky, -float64(r.Min.Y) * ky}.then(d2s)
 	}
 
-	out := image.NewRGBA(image.Rect(0, 0, n, n))
+	out := image.NewRGBA(image.Rect(0, 0, nw, nh))
 	draw.Draw(out, out.Bounds(), image.White, image.Point{}, draw.Src)
 	draw.CatmullRom.Transform(out, f64.Aff3(d2s.invert()), cur, sr, draw.Over, nil)
 	return out

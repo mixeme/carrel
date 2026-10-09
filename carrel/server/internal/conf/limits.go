@@ -35,10 +35,16 @@ const (
 	// largest square that fits: 400 is a quarter of its side (S-13).
 	PhotoMaxZoom = 400
 
-	// FileThumbMaxBytes is the largest image a folder shows as its own
-	// thumbnail: the original is what is served, so a larger one gets the icon
-	// of its type (S-17).
-	FileThumbMaxBytes = 512 << 10
+	// FileThumbMaxBytes is the largest picture a thumbnail is made for: the
+	// server reads the file whole to make one, so a larger picture gets the
+	// icon of its type and says «too large» (S-17.1; the owner's decision).
+	FileThumbMaxBytes = 16 << 20
+	// FileThumbSide is the square a file's thumbnail fits, in pixels: a tile
+	// and the panel's preview on a dense screen (s-files-5, s-files-1).
+	FileThumbSide = 480
+	// FileThumbBuilds is how many thumbnails are made at once in the whole
+	// process: each holds a picture decoded, tens of megabytes of it.
+	FileThumbBuilds = 2
 	// ImageHeadBytes is how much of an image is read for its width and
 	// height when it is the one file chosen (S-17): one GET with Range:
 	// bytes=0-65535, and no more of an answer that came whole. A header

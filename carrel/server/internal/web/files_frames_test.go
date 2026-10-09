@@ -84,7 +84,7 @@ func TestFolderPanelIsTheFrame(t *testing.T) {
 	if d.Title != "a.png" || !strings.HasSuffix(string(d.Subtitle), " · Docs") || d.Close != here+"?sort=size" {
 		t.Errorf("panel head = %q %q %q", d.Title, d.Subtitle, d.Close)
 	}
-	if d.Preview == nil || d.Preview.Href != f.at("download", "a.png")+"?inline=1" || d.Preview.Icon != "i-img" {
+	if d.Preview == nil || !strings.HasPrefix(d.Preview.Href, f.at("download", "a.png")+"?thumb=1") || d.Preview.Href != fileRow(t, page, "a.png").Thumb || d.Preview.Icon != "i-img" {
 		t.Errorf("preview = %+v", d.Preview)
 	}
 	var ids []string
@@ -138,7 +138,8 @@ func TestFolderPanelIsTheFrame(t *testing.T) {
 // thumbnail, the view switch's icons.
 func TestFolderBarIsTheFrame(t *testing.T) {
 	f := filesFixture(t, true)
-	f.srv.SeedFile(filesDocs+"big.jpg", strings.Repeat("j", 3<<20))
+	f.srv.SeedFile(filesDocs+"big.jpg", "j")
+	f.srv.Grow(filesDocs+"big.jpg", 17<<20) // over the thumbnail's ceiling
 	f.srv.SeedFile(filesDocs+"note.md", strings.Repeat("n", 2048))
 	f.srv.SeedFolder(filesDocs + "sub/")
 	here := f.at("")
@@ -147,7 +148,7 @@ func TestFolderBarIsTheFrame(t *testing.T) {
 	if ff == nil || ff.Method != "GET" || ff.Action != here || formRow(*ff, "filter") == nil || formRow(*ff, "view") == nil || formRow(*ff, "view").Kind != view.InputHidden {
 		t.Errorf("filter form = %+v", ff)
 	}
-	if page.Bar.Size != "3 MB" || page.Bar.SelectedSize != "2 KB" {
+	if page.Bar.Size != "17 MB" || page.Bar.SelectedSize != "2 KB" {
 		t.Errorf("sizes: folder %q, selected %q", page.Bar.Size, page.Bar.SelectedSize)
 	}
 	big, sub := fileRow(t, page, "big.jpg"), fileRow(t, page, "sub")

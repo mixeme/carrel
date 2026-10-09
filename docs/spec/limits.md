@@ -155,7 +155,9 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | Что | Значение | Константа (план) | Статус |
 |---|---|---|---|
 | Inline-вложение | 2 MiB | `AttachInlineMax` | ✅ |
-| Миниатюра из оригинала файла | 512 KiB | `FileThumbMaxBytes` | ✅ |
+| Файл, для которого сервер делает миниатюру | 16 MiB | `FileThumbMaxBytes` | ✅ |
+| Сторона миниатюры файла | 480 px | `FileThumbSide` | ✅ |
+| Миниатюр делается разом (процесс) | 2 | `FileThumbBuilds` | ✅ |
 
 Коллекция может только **уменьшить** порог через `max-resource-size` (RFC 4791).
 

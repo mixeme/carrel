@@ -17,6 +17,35 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.177 — 2026-10-09
+
+The thumbnail of a file is made by the server (the owner's decision; S-17.1
+said the opposite): the original no longer travels for it.
+
+### Changed
+
+- **`FileRow.thumb` and the preview of the file's panel are a new
+  address**: `…/download/{path…}?thumb=1&v={version}` (was the original,
+  `?inline=1`). The answer is a JPEG that fits a square of 480 px, the
+  whole picture with its proportions and its orientation; it carries an
+  `ETag` and answers 304. A client that printed the address as the source
+  of an image has nothing to change.
+- **A thumbnail is made for a picture of up to 16 MiB** (was 512 KiB):
+  `FileRow.note` «too large» starts there. `s-files-5` draws pictures of
+  640 KB, 712 KB and 2.8 MB as thumbnails.
+- **The address may answer 404** — a file named as a picture that does not
+  decode, or one of more pixels than `CARREL_PHOTO_MAX_PIXELS`: the icon of
+  the row stays.
+- `?inline=1` still gives the original in place: Open of a picture.
+
+### For operators
+
+- A thumbnail is kept in the session's thumbnail cache
+  (`CARREL_CACHE_MAX_THUMB_BYTES`, 16 MiB by default) by the version of the
+  file, beside the photos of contacts: a version is read from its server
+  once. Making one holds the picture decoded, so at most two are made at a
+  time in the process.
+
 ## v0.2.176 — 2026-10-09
 
 The files section, the client's second scan (ФН7, ФН16): the data of the

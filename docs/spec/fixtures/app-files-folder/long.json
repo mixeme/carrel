@@ -766,11 +766,10 @@
       ],
       "modified": "2026-08-04 17:03",
       "name": "2026-08-04-whiteboard.jpg",
-      "note": "too large",
       "open": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08-04-whiteboard.jpg",
       "selected": true,
       "size": "2.8 MB",
-      "thumb": "",
+      "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-04-whiteboard.jpg?thumb=1\u0026v=18c89f188a41c8002ccccd",
       "type": "image/jpeg",
       "upload": null
     },
@@ -852,7 +851,7 @@
       "open": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08-10-sync-board.png",
       "selected": true,
       "size": "412 KB",
-      "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png?inline=1",
+      "thumb": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png?thumb=1\u0026v=18ca6326aee5680067000",
       "type": "image/png",
       "upload": null
     },

@@ -403,3 +403,58 @@ func TestCropClamp(t *testing.T) {
 		t.Errorf("Clamp = %+v", got)
 	}
 }
+
+// A file's thumbnail (S-17.1): the whole picture, its proportions kept, the
+// orientation applied, never enlarged.
+func TestFitKeepsTheWholePicture(t *testing.T) {
+	stored := encodeJPEG(t, halves(80, 60))
+	cases := []struct {
+		name          string
+		o             uint16
+		side          int
+		w, h          int
+		redAt, blueAt image.Point
+	}{
+		{"as stored", 1, 40, 40, 30, image.Pt(3, 15), image.Pt(36, 15)},
+		{"orientation 6", 6, 40, 30, 40, image.Pt(15, 3), image.Pt(15, 36)},
+		{"orientation 8", 8, 40, 30, 40, image.Pt(15, 36), image.Pt(15, 3)},
+		{"smaller than the square", 1, 200, 80, 60, image.Pt(5, 30), image.Pt(75, 30)},
+	}
+	for _, tc := range cases {
+		src, err := inspect(withEXIF(stored, "II", tc.o), 1<<20)
+		if err != nil {
+			t.Fatal(err)
+		}
+		out, err := Fit(src, tc.side, 90)
+		if err != nil {
+			t.Fatalf("%s: %v", tc.name, err)
+		}
+		if bytes.Contains(out, []byte("GPS")) {
+			t.Errorf("%s: the metadata of the source is in the thumbnail", tc.name)
+		}
+		img := decodeJPEG(t, out)
+		if b := img.Bounds(); b.Dx() != tc.w || b.Dy() != tc.h {
+			t.Errorf("%s: %v, want %d×%d", tc.name, b, tc.w, tc.h)
+			continue
+		}
+		if c := img.At(tc.redAt.X, tc.redAt.Y); !isRed(c) {
+			t.Errorf("%s: at %v %v, want red", tc.name, tc.redAt, c)
+		}
+		if c := img.At(tc.blueAt.X, tc.blueAt.Y); !isBlue(c) {
+			t.Errorf("%s: at %v %v, want blue", tc.name, tc.blueAt, c)
+		}
+	}
+	// A large source goes through the halvings and keeps its proportions.
+	big, err := inspect(encodePNG(t, halves(4000, 1000)), 1<<24)
+	if err != nil {
+		t.Fatal(err)
+	}
+	out, err := Fit(big, 480, 85)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := decodeJPEG(t, out)
+	if b := img.Bounds(); b.Dx() != 480 || b.Dy() != 120 || !isRed(img.At(20, 60)) || !isBlue(img.At(460, 60)) {
+		t.Errorf("a wide picture: %v", img.Bounds())
+	}
+}

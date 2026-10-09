@@ -181,10 +181,10 @@ func TestFolderPage(t *testing.T) {
 	if !sub.IsDir || sub.Href != f.at("", "sub", "") || sub.Type != "folder" || sub.Size != "" {
 		t.Errorf("folder = %+v", sub)
 	}
-	if a.Href != f.at("download", "a.png") || a.Thumb != a.Href+"?inline=1" || a.Type != "image/png" {
+	if a.Href != f.at("download", "a.png") || !strings.HasPrefix(a.Thumb, a.Href+"?thumb=1") || a.Type != "image/png" {
 		t.Errorf("image = %+v", a)
 	}
-	if pdf.Thumb != "" || pdf.Type != "application/pdf" || pdf.Size != "10 B" || pdf.Modified == "" || big.Thumb != "" {
+	if pdf.Thumb != "" || pdf.Type != "application/pdf" || pdf.Size != "10 B" || pdf.Modified == "" || big.Thumb == "" || big.Note != "" {
 		t.Errorf("pdf %+v, big %+v", pdf, big)
 	}
 	if page.Title != "Docs" || len(page.Crumbs) != 1 || page.Crumbs[0].Href != "" || page.View != view.FileList || page.Queue != nil {
