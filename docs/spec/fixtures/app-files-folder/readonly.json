@@ -1,4 +1,5 @@
 {
+  "access": "read-only: nothing can be uploaded or made here",
   "attachments": false,
   "bar": {
     "actions": [
@@ -180,19 +181,19 @@
       {
         "enabled": true,
         "href": "/app/files/a-sftp-vps/Public/?view=list",
+        "icon": "i-menu",
         "id": "files.view.list",
         "label": "List",
         "method": "GET",
-        "on": true,
-        "icon": "i-menu"
+        "on": true
       },
       {
         "enabled": true,
         "href": "/app/files/a-sftp-vps/Public/?view=tiles",
+        "icon": "i-grid",
         "id": "files.view.tiles",
         "label": "Tiles",
-        "method": "GET",
-        "icon": "i-grid"
+        "method": "GET"
       },
       {
         "enabled": true,
@@ -219,9 +220,10 @@
     ],
     "selected": 0,
     "show": null,
-    "total": 1,
-    "size": "95 B"
+    "size": "95 B",
+    "total": 1
   },
+  "count": "1 item",
   "crumbs": [
     {
       "href": "",
@@ -229,6 +231,7 @@
     }
   ],
   "details": null,
+  "empty": null,
   "name": null,
   "notices": [],
   "print": {
@@ -267,7 +270,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/connections?kind=folder&op=feed",
+        "href": "/app/settings/connections?kind=folder\u0026op=feed",
         "icon": "i-link",
         "id": "feed.subscribe",
         "label": "Subscribe to a feed",
@@ -346,11 +349,11 @@
             "href": "/app/files",
             "label": "Selected collections",
             "menu": [],
+            "meta": "2 of 3",
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "part",
-            "meta": "2 of 3"
+            "tick": "part"
           }
         ],
         "state": "ok"
@@ -477,6 +480,7 @@
   "rows": [
     {
       "href": "/app/files/a-sftp-vps/Public/download/README.txt",
+      "icon": "i-doc",
       "isDir": false,
       "menu": [
         {
@@ -498,7 +502,7 @@
         {
           "csrf": "csrf",
           "enabled": false,
-          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt&op=rename",
+          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt\u0026op=rename",
           "icon": "i-pencil",
           "id": "file.rename",
           "label": "Rename",
@@ -509,7 +513,7 @@
         {
           "csrf": "csrf",
           "enabled": false,
-          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt&op=move",
+          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt\u0026op=move",
           "icon": "i-move",
           "id": "file.move",
           "label": "Move",
@@ -520,7 +524,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt&op=copy",
+          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt\u0026op=copy",
           "icon": "i-dup",
           "id": "file.copy",
           "label": "Copy",
@@ -529,7 +533,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/publish?a=a-sftp-vps&c=Public&f=README.txt&k=files",
+          "href": "/app/publish?a=a-sftp-vps\u0026c=Public\u0026f=README.txt\u0026k=files",
           "icon": "i-link",
           "id": "publish",
           "label": "Publish a link",
@@ -540,7 +544,7 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": false,
-          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt&op=delete",
+          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt\u0026op=delete",
           "icon": "i-trash",
           "id": "file.delete",
           "label": "Delete",
@@ -552,12 +556,12 @@
       ],
       "modified": "10 August, 17:04",
       "name": "README.txt",
+      "open": "/app/files/a-sftp-vps/Public/README.txt",
       "selected": false,
       "size": "95 B",
       "thumb": "",
       "type": "text/plain",
-      "upload": null,
-      "icon": "i-doc"
+      "upload": null
     }
   ],
   "select": {
@@ -573,7 +577,7 @@
       }
     ]
   },
-  "subtitle": "sftpgo · vps · read-only: nothing can be uploaded or made here",
+  "subtitle": "sftpgo · vps",
   "title": "Public",
   "top": {
     "lock": null,
@@ -702,5 +706,6 @@
     "userHref": "/app/settings/account"
   },
   "tree": null,
+  "unread": false,
   "view": "list"
 }

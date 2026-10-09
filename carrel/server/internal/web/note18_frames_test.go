@@ -334,8 +334,8 @@ func TestReadOnlyFolderHeadIsTheFrame(t *testing.T) {
 		}
 	})
 	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
-	if want := title + " · " + tail; string(page.Subtitle) != want {
-		t.Errorf("subtitle = %q, want %q", page.Subtitle, want)
+	if string(page.Subtitle) != title || string(page.Access) != tail {
+		t.Errorf("subtitle = %q, access %q; want %q and %q", page.Subtitle, page.Access, title, tail)
 	}
 	up, nf := actionByID(page.Bar.Actions, "file.upload"), actionByID(page.Bar.Actions, "folder.new")
 	if up == nil || nf == nil || up.Enabled || nf.Enabled || up.Reason == "" || up.Reason != nf.Reason {

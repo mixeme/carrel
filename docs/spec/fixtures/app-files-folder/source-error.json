@@ -1,4 +1,5 @@
 {
+  "access": "",
   "attachments": false,
   "bar": {
     "actions": [
@@ -176,19 +177,19 @@
       {
         "enabled": true,
         "href": "/app/files/a-nc-home/Files/?view=list",
+        "icon": "i-menu",
         "id": "files.view.list",
         "label": "List",
         "method": "GET",
-        "on": true,
-        "icon": "i-menu"
+        "on": true
       },
       {
         "enabled": true,
         "href": "/app/files/a-nc-home/Files/?view=tiles",
+        "icon": "i-grid",
         "id": "files.view.tiles",
         "label": "Tiles",
-        "method": "GET",
-        "icon": "i-grid"
+        "method": "GET"
       },
       {
         "enabled": true,
@@ -217,6 +218,7 @@
     "show": null,
     "total": 0
   },
+  "count": "",
   "crumbs": [
     {
       "href": "",
@@ -224,6 +226,7 @@
     }
   ],
   "details": null,
+  "empty": null,
   "name": null,
   "notices": [
     {
@@ -236,7 +239,7 @@
           "method": "GET"
         }
       ],
-      "body": "The server answered 503 Service Unavailable. Nothing on this screen comes from the server.",
+      "body": "The server did not answer as expected, so nothing on this screen comes from it.",
       "details": {
         "lines": [
           "nextcloud/alice/files/Files/",
@@ -253,52 +256,7 @@
     "taken": "10 August 2026, 17:06",
     "title": "Files"
   },
-  "queue": {
-    "note": "",
-    "rows": [
-      {
-        "actions": [],
-        "name": "release-checklist.md",
-        "percent": 0,
-        "question": {
-          "name": "release-checklist.md",
-          "options": [
-            {
-              "csrf": "csrf",
-              "enabled": true,
-              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=both&transfer=q-transfer",
-              "id": "transfer.both",
-              "label": "Keep both",
-              "method": "POST",
-              "target": "queue"
-            },
-            {
-              "csrf": "csrf",
-              "enabled": true,
-              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=overwrite&transfer=q-transfer",
-              "id": "transfer.overwrite",
-              "label": "Replace",
-              "method": "POST",
-              "target": "queue"
-            },
-            {
-              "csrf": "csrf",
-              "enabled": true,
-              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=skip&transfer=q-transfer",
-              "id": "transfer.skip",
-              "label": "Skip",
-              "method": "POST",
-              "target": "queue"
-            }
-          ]
-        },
-        "size": "7 B",
-        "state": "idle"
-      }
-    ],
-    "title": "Uploading 1 of 1",
-    "total": "7 B"
-  },
+  "queue": null,
   "rail": {
     "about": {
       "build": "0.0.1 · 786949a",
@@ -330,7 +288,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/connections?kind=folder&op=feed",
+        "href": "/app/settings/connections?kind=folder\u0026op=feed",
         "icon": "i-link",
         "id": "feed.subscribe",
         "label": "Subscribe to a feed",
@@ -409,11 +367,11 @@
             "href": "/app/files",
             "label": "Selected collections",
             "menu": [],
+            "meta": "2 of 3",
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "part",
-            "meta": "2 of 3"
+            "tick": "part"
           }
         ],
         "state": "ok"
@@ -680,5 +638,6 @@
     "userHref": "/app/settings/account"
   },
   "tree": null,
+  "unread": true,
   "view": "list"
 }

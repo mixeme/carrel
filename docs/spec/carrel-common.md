@@ -2002,12 +2002,27 @@ type FileCollectionRow struct {
 // · read-only: nothing can be uploaded or made here» (s-files-15).
 type FilesPage struct {
     Shell
-    Subtitle Text
+    Subtitle Text // подключение хранилища: «sftpgo · vps»
+    // Count — сколько в папке, «5 items», после метки папки вложений
+    // (s-files-1, states-32): всё, что в ней лежит, а не то, что оставил
+    // фильтр; пусто — папка не прочитана (states-33).
+    Count Text
+    // Access — у хранилища только для чтения, после счёта: «read-only:
+    // nothing can be uploaded or made here» (states-34); у прочих пусто.
+    Access Text
     Attachments bool // папка вложений (S-20): метка «attachment folder» в строке под заголовком (s-files-1); слово — экрана
     Crumbs  []Crumb
     Bar     ListBar
     View    FileView // список или плитки
     Rows    []FileRow
+    // Empty — в папке ничего нет (states-32): «This folder is empty.», что
+    // с ней сделать и кнопки шапки (Upload со стрелкой, New folder); у
+    // хранилища только для чтения — один заголовок. Полосы и таблицы у
+    // такой папки нет. nil — в папке что-то лежит (и когда всё скрыл фильтр).
+    Empty *Notice
+    // Unread — сервер хранилища не ответил (states-33): шапка без счёта и
+    // сообщение из Notices; строк, полосы и очереди нет.
+    Unread bool
     Queue   *TransferQueue
     Tree    *FileTree // дерево выбора; на странице раздела nil
     // Select — форма выделения без сценариев (U-8, как RestoreMatch.Form):
@@ -2027,6 +2042,7 @@ type FilesPage struct {
 type Crumb struct { Label Text; Href string }
 type FileRow struct {
     Href     string
+    Open     string // адрес имени строки (s-files-1): у папки — она сама, у файла — его папка с ним выделенным
     Name     Text
     IsDir    bool
     Type     Text

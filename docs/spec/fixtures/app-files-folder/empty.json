@@ -1,4 +1,5 @@
 {
+  "access": "",
   "attachments": false,
   "bar": {
     "actions": [
@@ -176,19 +177,19 @@
       {
         "enabled": true,
         "href": "/app/files/a-nc-home/Files/Scans/?view=list",
+        "icon": "i-menu",
         "id": "files.view.list",
         "label": "List",
         "method": "GET",
-        "on": true,
-        "icon": "i-menu"
+        "on": true
       },
       {
         "enabled": true,
         "href": "/app/files/a-nc-home/Files/Scans/?view=tiles",
+        "icon": "i-grid",
         "id": "files.view.tiles",
         "label": "Tiles",
-        "method": "GET",
-        "icon": "i-grid"
+        "method": "GET"
       },
       {
         "enabled": true,
@@ -217,6 +218,7 @@
     "show": null,
     "total": 0
   },
+  "count": "0 items",
   "crumbs": [
     {
       "href": "/app/files/a-nc-home/Files/",
@@ -228,6 +230,60 @@
     }
   ],
   "details": null,
+  "empty": {
+    "actions": [
+      {
+        "arrow": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "file": "file",
+            "href": "/app/files/a-nc-home/Files/upload/Scans/",
+            "icon": "i-doc",
+            "id": "file.upload",
+            "label": "Files",
+            "method": "POST",
+            "target": "queue"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "file": "file",
+            "href": "/app/files/a-nc-home/Files/upload/Scans/",
+            "icon": "i-file",
+            "id": "file.upload.folder",
+            "label": "Folder",
+            "method": "POST",
+            "target": "queue"
+          }
+        ],
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/files/a-nc-home/Files/upload/Scans/",
+        "icon": "i-up",
+        "id": "file.upload",
+        "label": "Upload",
+        "method": "POST",
+        "primary": true,
+        "target": "queue"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/files/a-nc-home/Files/mkcol/Scans/",
+        "icon": "i-plus",
+        "id": "folder.new",
+        "label": "New folder",
+        "method": "POST",
+        "target": "main"
+      }
+    ],
+    "body": "Upload files into it, or drop them onto the window.",
+    "details": null,
+    "role": "info",
+    "title": "This folder is empty."
+  },
   "name": null,
   "notices": [],
   "print": {
@@ -267,7 +323,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/connections?kind=folder&op=feed",
+        "href": "/app/settings/connections?kind=folder\u0026op=feed",
         "icon": "i-link",
         "id": "feed.subscribe",
         "label": "Subscribe to a feed",
@@ -346,11 +402,11 @@
             "href": "/app/files",
             "label": "Selected collections",
             "menu": [],
+            "meta": "2 of 3",
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "part",
-            "meta": "2 of 3"
+            "tick": "part"
           }
         ],
         "state": "ok"
@@ -617,5 +673,6 @@
     "userHref": "/app/settings/account"
   },
   "tree": null,
+  "unread": false,
   "view": "list"
 }

@@ -30,15 +30,30 @@ type FilesPage struct {
 	// выключены: «sftpgo · vps · read-only: nothing can be uploaded or made
 	// here» (s-files-15)
 	Subtitle Text `json:"subtitle"`
+	// Count — сколько в папке, «5 items», «1 item», «0 items», после метки
+	// папки вложений (s-files-1, states-32): всё, что в ней лежит, а не то,
+	// что оставил фильтр; пусто — папка не прочитана (states-33)
+	Count Text `json:"count"`
+	// Access — у хранилища только для чтения, после счёта: «read-only:
+	// nothing can be uploaded or made here» (states-34); у прочих пусто
+	Access Text `json:"access"`
 	// Attachments — эта папка — папка вложений (S-20): метка «attachment
 	// folder» в строке под заголовком (s-files-1); слово — экрана
-	Attachments bool           `json:"attachments"`
-	Crumbs      []Crumb        `json:"crumbs"`
-	Bar         ListBar        `json:"bar"`
-	View        FileView       `json:"view"` // список или плитки
-	Rows        []FileRow      `json:"rows"`
-	Queue       *TransferQueue `json:"queue"`
-	Tree        *FileTree      `json:"tree"` // дерево выбора; на странице раздела nil
+	Attachments bool      `json:"attachments"`
+	Crumbs      []Crumb   `json:"crumbs"`
+	Bar         ListBar   `json:"bar"`
+	View        FileView  `json:"view"` // список или плитки
+	Rows        []FileRow `json:"rows"`
+	// Empty — в папке ничего нет (states-32): «This folder is empty.», что с
+	// ней сделать и кнопки шапки — Upload со стрелкой и New folder; у
+	// хранилища только для чтения — один заголовок. Полосы и таблицы у такой
+	// папки нет. nil — в папке что-то лежит (и когда всё скрыл фильтр)
+	Empty *Notice `json:"empty"`
+	// Unread — сервер хранилища не ответил (states-33): на экране шапка без
+	// счёта и сообщение из Notices; строк, полосы и очереди нет
+	Unread bool           `json:"unread"`
+	Queue  *TransferQueue `json:"queue"`
+	Tree   *FileTree      `json:"tree"` // дерево выбора; на странице раздела nil
 	// Select — форма выделения без сценариев (U-8, как RestoreMatch.Form):
 	// GET на адрес папки, скрытые поля её запроса (view, sort, filter) и
 	// select каждого выделенного. Отметка строки — кнопка отправки этой
@@ -59,7 +74,10 @@ type Crumb struct {
 	Href  string `json:"href"`
 }
 type FileRow struct {
-	Href     string `json:"href"`
+	Href string `json:"href"`
+	// Open — адрес имени строки (s-files-1): у папки — она сама (как Href),
+	// у файла — его папка с ним выделенным; Href файла — скачивание
+	Open     string `json:"open"`
 	Name     Text   `json:"name"`
 	IsDir    bool   `json:"isDir"`
 	Type     Text   `json:"type"`

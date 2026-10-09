@@ -548,7 +548,7 @@ func (s *Server) writeFolderWith(w http.ResponseWriter, r *http.Request, c *file
 		notices = append(notices, view.Notice{
 			Role:  view.NoticeAlert,
 			Title: text(collectionLabel(c.col) + " is unavailable"),
-			Body:  text(fileReason(err) + " Nothing on this screen comes from the server."),
+			Body:  text("The server did not answer as expected, so nothing on this screen comes from it."),
 			Details: &view.Diagnostic{
 				Summary: text("PROPFIND " + folder),
 				Lines:   []view.Text{text(connLabel(c.conn) + folder), text(err.Error())},
@@ -574,6 +574,10 @@ func (s *Server) writeFolderWith(w http.ResponseWriter, r *http.Request, c *file
 		q.Add("select", pick)
 	}
 	page := s.folderPage(r, c, segs, entries, q, notices)
+	if err != nil {
+		// Nothing was read (states-33): the head and the message alone.
+		page.Unread, page.Count, page.Empty, page.Queue = true, "", nil, nil
+	}
 	if edit != nil {
 		edit(&page)
 	}
@@ -685,9 +689,11 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 
 	// The line under the title: whose storage this is and, on a read-only
 	// one, the one reason Upload and New folder stand off (s-files-15).
-	page.Subtitle = text(connLabel(c.conn))
+	// After it the folder counts what it holds (s-files-1), and a read-only
+	// storage says so last (states-34).
+	page.Subtitle, page.Count = text(connLabel(c.conn)), text(plural(len(entries), "item"))
 	if c.col.ReadOnly {
-		page.Subtitle += " · read-only: nothing can be uploaded or made here"
+		page.Access = "read-only: nothing can be uploaded or made here"
 	}
 	// «attachment folder» by the line (s-files-1): this folder is the one
 	// attachments are written to (S-20).
@@ -757,6 +763,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		row.Icon, row.Note = fileIcon(e), thumbNote(e)
 		if e.Dir {
 			row.Href, row.Type = s.route(c.href("", rowSegs, true)), "folder"
+			row.Open = row.Href
 			row.Items = s.folderItems(c, rowSegs, e)
 			// A drop on the row goes into it (U-15.3, s-files-1).
 			into := writeAction(c, view.Action{ID: "folder.upload", Label: text("Upload into " + e.Name), Icon: "i-up",
@@ -765,6 +772,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		} else {
 			mt := fileType(e.Name, e.Type)
 			row.Href, row.Type, row.Size = s.route(c.href("download", rowSegs, false)), text(mt), formatSize(e.Size)
+			row.Open = s.route(c.href("", rowSegs, false))
 			if inlineTypes[mt] && e.Size > 0 && e.Size <= conf.FileThumbMaxBytes {
 				row.Thumb = s.route(c.href("download", rowSegs, false) + "?inline=1")
 			}
@@ -806,6 +814,15 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		page.Bar.Segments = append(page.Bar.Segments, option(o.id, o.label, "sort", o.value, order))
 	}
 	page.Bar.Actions = s.folderActions(c, segs, picked)
+	// An empty folder says what to do with it, with the head's own buttons
+	// (states-32); a read-only one has nothing to offer.
+	if len(entries) == 0 {
+		page.Empty = &view.Notice{Role: view.NoticeInfo, Title: "This folder is empty."}
+		if !c.col.ReadOnly {
+			page.Empty.Body = "Upload files into it, or drop them onto the window."
+			page.Empty.Actions = s.folderActions(c, segs, nil)
+		}
+	}
 	// One file chosen opens its panel (s-files-1); Details shows and hides
 	// it, Print is the «⋯» of the head (s-files-7).
 	shown := len(picked) == 1 && !picked[0].Dir && q.Get("details") != "0"

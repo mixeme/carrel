@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.163 — 2026-10-09
+
+The files section, the client's second scan (ФН1–ФН4): a folder's page by
+its frames (`s-files-1`, `states-32`, `-33`, `-34`).
+
+### Changed
+
+- **The line under a folder's title is three fields.** `FilesPage.subtitle`
+  is the connection alone; `count` — «5 items», everything the folder
+  holds, whatever the filter leaves — and `access` — «read-only: nothing
+  can be uploaded or made here» — follow it. A client that drew `subtitle`
+  of a read-only storage adds `access`.
+- **A storage that did not answer** says the words of the other sections:
+  «The server did not answer as expected, so nothing on this screen comes
+  from it.» `FilesPage.unread` is true, and the page carries no count, no
+  rows and no queue.
+
+### Added
+
+- `FilesPage.empty` — an empty folder: «This folder is empty.», what to do
+  with it, Upload with its arrow and New folder; on a read-only storage the
+  title alone.
+- `FileRow.open` — where the name of a row leads: a folder's to the folder,
+  a file's to its folder with it chosen. `href` of a file is its download,
+  as before.
+
 ## v0.2.162 — 2026-10-09
 
 The frames of Typecase `0fe0244` (Typecase's note 42; the owner's decisions
