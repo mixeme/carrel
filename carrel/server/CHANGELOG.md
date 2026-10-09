@@ -17,6 +17,16 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.160 — 2026-10-09
+
+### Fixtures
+
+- The set: the text of «Заметка со встречи 10.08» is the frames'
+  (Typecase's note 37, `s-notes-2`, `-20`): no second heading «Отложено до
+  следующего спринта», and its last paragraph ends «…и скажет в четверг»
+  (`zapisi.ics`). `app-note/normal`, `app-note-edit/normal`,
+  `app-notes-all/normal` follow. Nothing in the running server.
+
 ## v0.2.159 — 2026-10-09
 
 Typecase `6833ef4` (Typecase's note 41, task 119), with the client's
