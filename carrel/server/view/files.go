@@ -124,10 +124,14 @@ type TransferQueue struct {
 	Toggle *Action `json:"toggle"`
 }
 type TransferRow struct {
-	Name     Text       `json:"name"`
-	Size     Size       `json:"size"`
-	Percent  int        `json:"percent"`
-	State    OpState    `json:"state"`    // C-8
+	Name    Text    `json:"name"`
+	Size    Size    `json:"size"`
+	Percent int     `json:"percent"`
+	State   OpState `json:"state"` // C-8
+	// Reason — у строки, которой отказано и ответить нечем (s-files-24):
+	// почему, коротко, рядом с именем — «the server needs the size»; что с
+	// этим делать, говорит TransferQueue.Note. У прочих строк пусто
+	Reason   Text       `json:"reason"`
 	Question *NameClash `json:"question"` // занятое имя — вопрос на месте, а не настройка
 	Actions  []Action   `json:"actions"`
 }

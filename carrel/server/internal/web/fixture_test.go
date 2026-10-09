@@ -1,8 +1,10 @@
 package web_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -10,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -1814,6 +1817,23 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		}
 		app.compare(t, "invite/link.json", app.h.do(get("/invite/"+link, nil)))
 	})
+	t.Run("published-no-mail", func(t *testing.T) {
+		// An instance that sends no letters (s-publish-17): the rows offer
+		// no Send. The relay is taken away for this one answer.
+		var smtp store.SMTPSettings
+		swap := func(to store.SMTPSettings) {
+			t.Helper()
+			if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+				smtp, st.Settings.SMTP = st.Settings.SMTP, to
+				return nil, nil
+			}); err != nil {
+				t.Fatal(err)
+			}
+		}
+		swap(store.SMTPSettings{})
+		defer func() { swap(smtp) }()
+		app.compare(t, "app-files-published/no-mail.json", app.h.do(get("/app/files/published", app.sess)))
+	})
 	t.Run("published-empty", func(t *testing.T) {
 		// Every link revoked: the list says so (the client's scan ФД6).
 		for _, l := range app.h.users.PublishedLinks(app.sess.AccountID()) {
@@ -1822,6 +1842,32 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 			}
 		}
 		app.compare(t, "app-files-published/empty.json", app.h.do(get("/app/files/published", app.sess)))
+	})
+	t.Run("queue-refused", func(t *testing.T) {
+		// A storage that writes only what it was told the length of
+		// (s-files-24): the file sent with its size is uploaded, the one
+		// without is refused, and its row says why.
+		srv := app.servers["sftpgo · vps"]
+		srv.RefuseUnsizedPUT = true
+		defer func() { srv.RefuseUnsizedPUT = false }()
+		report := strings.Repeat(".", 4300000)
+		var buf bytes.Buffer
+		w := multipart.NewWriter(&buf)
+		_ = w.WriteField("_csrf", app.sess.CSRFToken())
+		_ = w.WriteField("size.отчёт-июль.pdf", strconv.Itoa(len(report)))
+		part, _ := w.CreateFormFile("file", "отчёт-июль.pdf")
+		_, _ = part.Write([]byte(report))
+		part, _ = w.CreateFormFile("file", "архив-2025.zip")
+		_, _ = part.Write([]byte("zip"))
+		_ = w.Close()
+		req := httptest.NewRequest(http.MethodPost, app.filesAt(t, "Documents", "upload", "carrel", "attachments"), &buf)
+		req.Header.Set("Content-Type", w.FormDataContentType())
+		req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: app.sess.ID()})
+		if rec := app.h.do(req); rec.Code >= 400 {
+			t.Fatalf("upload: %d %s", rec.Code, rec.Body)
+		}
+		srv.SetModified(app.realPath(t, "Documents")+"carrel/attachments/отчёт-июль.pdf", mockupNow(t))
+		app.compare(t, "app-files-folder/refused.json", app.h.do(get(app.filesAt(t, "Documents", "", "carrel", "attachments"), app.sess)))
 	})
 }
 

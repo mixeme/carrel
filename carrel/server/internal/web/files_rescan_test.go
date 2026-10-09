@@ -1,6 +1,8 @@
 package web_test
 
 import (
+	"bytes"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -359,5 +361,51 @@ func TestQueueHidesAndShows(t *testing.T) {
 	}
 	if back := decode[view.FilesPage](t, f.h.do(get(q.Toggle.Href, f.sess))); back.Queue == nil || back.Queue.Hidden {
 		t.Errorf("Show did not show: %+v", back.Queue)
+	}
+}
+
+// ФН8: a refusal there is nothing to answer is a row without buttons — its
+// name and, beside it, why, in a few words (s-files-24: «the server needs
+// the size»); the queue counts what was uploaded. What to do about it stays
+// in the queue's note.
+func TestQueueRowSaysWhyItFailed(t *testing.T) {
+	frame := mockupFrame(t, "s-files-24")
+	row := frameOne(t, regexp.MustCompile(`<span class="tc-dim--danger">[^<]+</span><span class="tc-dim--danger">([^<]+)</span>`), frame, "refused row")
+	head := frameOne(t, regexp.MustCompile(`<div class="tc-queue__head"><b>([^<]+)</b>`), frame, "head")[1]
+	if head != "Uploaded 1 of 2" {
+		t.Fatalf("s-files-24 is headed %q: read the frame again", head)
+	}
+
+	f := filesFixture(t, true)
+	f.srv.SeedFolder(filesDocs)
+	f.srv.RefuseUnsizedPUT = true
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	_ = w.WriteField("_csrf", f.sess.CSRFToken())
+	_ = w.WriteField("size.sized.txt", "4")
+	part, _ := w.CreateFormFile("file", "sized.txt")
+	_, _ = part.Write([]byte("body"))
+	part, _ = w.CreateFormFile("file", "plain.txt")
+	_, _ = part.Write([]byte("body"))
+	_ = w.Close()
+	req := httptest.NewRequest(http.MethodPost, f.at("upload"), &buf)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: f.sess.ID()})
+	if rec := f.h.do(req); rec.Code >= 400 {
+		t.Fatalf("upload: %d %s", rec.Code, rec.Body)
+	}
+	queue := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess))).Queue
+	if queue == nil || string(queue.Title) != head {
+		t.Fatalf("queue = %+v, want %q", queue, head)
+	}
+	failed, done := queueRow(t, queue, "plain.txt"), queueRow(t, queue, "sized.txt")
+	if failed.State != view.OpFailed || string(failed.Reason) != row[1] || failed.Question != nil || len(failed.Actions) != 0 {
+		t.Errorf("the refused row = %+v, want %q and nothing to press", failed, row[1])
+	}
+	if done.State != view.OpDone || done.Reason != "" {
+		t.Errorf("the uploaded row = %+v", done)
+	}
+	if !strings.Contains(string(queue.Note), "Turn scripts on") {
+		t.Errorf("the queue does not say what to do: %q", queue.Note)
 	}
 }

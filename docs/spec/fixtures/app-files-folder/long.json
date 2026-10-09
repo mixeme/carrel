@@ -304,6 +304,7 @@
         "name": "отчёт-июль.pdf",
         "percent": 100,
         "question": null,
+        "reason": "",
         "size": "4.1 MB",
         "state": "done"
       },
@@ -343,6 +344,7 @@
             }
           ]
         },
+        "reason": "",
         "size": "7 B",
         "state": "idle"
       }

@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.174 — 2026-10-09
+
+The files section, the client's second scan (ФН8, ФН20): a row of the queue
+that was refused (`s-files-24`), and fixtures of two states.
+
+### Added
+
+- `TransferRow.reason` — a row that was refused says why beside its name,
+  in a few words: «the server needs the size» for a storage that writes
+  only what it was told the length of; for other refusals, what the
+  queue's `note` says of the row. What to do about it stays in `note`.
+- Fixtures: `app-files-folder/refused` — the queue with a file uploaded and
+  one refused for its size (`s-files-24`); `app-files-published/no-mail` —
+  the links of an instance that sends no letters, no Send in the rows
+  (`s-publish-17`).
+
 ## v0.2.173 — 2026-10-09
 
 The files section, the client's second scan (ФН21): the queue hides and

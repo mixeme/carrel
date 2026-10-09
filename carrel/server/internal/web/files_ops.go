@@ -40,6 +40,7 @@ type transfer struct {
 	kind  string // upload, rename, move, copy
 	state view.OpState
 	note  string // why it failed, or what it did instead
+	short string // why it failed in a few words, beside the name (s-files-24); empty — the note says it
 	size  int64
 	dir   bool
 
@@ -116,6 +117,13 @@ func (s *Server) transferQueue(sess *session.Session) *view.TransferQueue {
 		}
 		if t.note != "" {
 			reasons = append(reasons, t.label()+": "+t.note)
+		}
+		// A row refused says why beside its name (s-files-24): in its own
+		// few words where it has them, else as the note says it.
+		if t.state == view.OpFailed {
+			if tr.Reason = text(t.short); tr.Reason == "" {
+				tr.Reason = text(t.note)
+			}
 		}
 		if t.Waiting() {
 			answer := func(id, label, value string) view.Action {
@@ -382,6 +390,7 @@ func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part, ma
 			// without one. Carrel does not keep the body to measure it — there
 			// is no ceiling on a file — so it says so instead.
 			t.state, t.note = view.OpFailed, "this server writes a file only when its size is sent first, and the page did not send it. Turn scripts on, or put the file there with another client"
+			t.short = "the server needs the size" // s-files-24
 		default:
 			t.state, t.note = view.OpFailed, sentenceEnd(fileReason(err))
 		}

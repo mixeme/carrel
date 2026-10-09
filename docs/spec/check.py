@@ -350,6 +350,7 @@ STATE_FRAME = {
     "app-files-op/delete": "s-files-22",
     "app-files-op/new": "s-files-23",
     "app-files/empty": "states-35",
+    "app-files-published/no-mail": "s-publish-17",
     "app-files-picker/attach": "s-files-16",
     "app-files-picker/refused": "s-files-19",
 }
