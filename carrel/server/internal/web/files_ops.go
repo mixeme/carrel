@@ -953,13 +953,25 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		if !ok {
 			dest = nil
 		}
-		sheet.Target = s.fileTree(r.Context(), c, dest)
+		// The head chooses the server (s-files-4): the one asked for by the
+		// address, else the chosen folder's. Another server asked for,
+		// nothing of it is chosen yet.
+		server := s.treeServer(c.blob, dest, q.Get("server"), false)
+		if dest != nil && dest.conn.ID != server {
+			dest = nil
+		}
+		sheet.Servers = s.fileServers(c.blob, server, false, func(id string) string {
+			return s.postQuery(c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "server": {id}})
+		})
+		sheet.Target = s.fileTree(r.Context(), c, dest, server)
 		linkTree(sheet.Target, func(id string) string {
 			return s.postQuery(c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "to": {id}})
 		})
 		back := url.Values{"op": {string(op)}, "item": names}
 		if dest != nil {
 			back.Set("to", s.route(dest.href("", dest.segs, true)))
+		} else {
+			back.Set("server", server)
 		}
 		s.newFolder(sheet.Target, dest, c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "mkcol": {"1"}},
 			c.href("op", c.segs, true), back, q.Get("new") != "")
@@ -1039,8 +1051,59 @@ func deletionAlert(items []file.Entry, server string) view.Runs {
 // fileTree is where a move or a copy can go (C-6.7): every live file
 // collection of the catalog as a root, read-only ones shown and marked, and
 // the folders on the way to the chosen one opened, one PROPFIND a level.
-func (s *Server) fileTree(ctx context.Context, c *fileCtx, chosen *fileCtx) *view.FileTree {
-	return s.tree(ctx, c.blob, chosen, "", false, 0)
+func (s *Server) fileTree(ctx context.Context, c *fileCtx, chosen *fileCtx, server string) *view.FileTree {
+	return s.tree(ctx, c.blob, chosen, "", false, 0, server)
+}
+
+// treeCollection says whether a collection of the catalog stands in a tree:
+// a live file collection — and, in a tree a file is chosen from, not a
+// subscribed folder.
+func treeCollection(blob sealed.Blob, col sealed.Collection, files bool) bool {
+	_, ok := blob.Connection(col.AccountID)
+	return ok && !col.Gone && col.Has(view.KindFile) && !(files && col.Feed)
+}
+
+// treeServer is the server a sheet's tree shows (s-files-4: the pick of the
+// head): the one the address asks for, when it has storages; else the
+// chosen folder's; else the first that has any.
+func (s *Server) treeServer(blob sealed.Blob, chosen *fileCtx, asked string, files bool) string {
+	first := ""
+	for _, col := range blob.Collections {
+		if !treeCollection(blob, col, files) {
+			continue
+		}
+		if col.AccountID == asked {
+			return asked
+		}
+		if first == "" {
+			first = col.AccountID
+		}
+	}
+	if chosen != nil {
+		return chosen.conn.ID
+	}
+	return first
+}
+
+// fileServers are the servers the head of a sheet chooses among: every
+// connection with a storage in the tree, in the catalog's order, the one
+// shown on, the others the sheet's address with them (href).
+func (s *Server) fileServers(blob sealed.Blob, on string, files bool, href func(id string) string) []view.FileServer {
+	var out []view.FileServer
+	seen := map[string]bool{}
+	for _, col := range blob.Collections {
+		if !treeCollection(blob, col, files) || seen[col.AccountID] {
+			continue
+		}
+		seen[col.AccountID] = true
+		conn, _ := blob.Connection(col.AccountID)
+		srv := view.FileServer{Label: text(connLabel(conn)), On: conn.ID == on}
+		if !srv.On {
+			srv.Href = href(conn.ID)
+		}
+		out = append(out, srv)
+	}
+	return out
 }
 
 // sourceTree is the tree a file is chosen from (From Files of Attach): the
@@ -1050,22 +1113,22 @@ func (s *Server) fileTree(ctx context.Context, c *fileCtx, chosen *fileCtx) *vie
 // shown. name is the file chosen in the folder at, "" when none is. Each
 // file says its size and, by limit — the most a record holds inside (S-20)
 // — whether it would go inside the record or as a link (s-files-16).
-func (s *Server) sourceTree(ctx context.Context, blob sealed.Blob, at *fileCtx, name string, limit int64) *view.FileTree {
-	return s.tree(ctx, blob, at, name, true, limit)
+func (s *Server) sourceTree(ctx context.Context, blob sealed.Blob, at *fileCtx, name string, limit int64, server string) *view.FileTree {
+	return s.tree(ctx, blob, at, name, true, limit, server)
 }
 
-func (s *Server) tree(ctx context.Context, blob sealed.Blob, chosen *fileCtx, name string, files bool, limit int64) *view.FileTree {
+// tree is the storages of one server — the one the head of the sheet
+// chooses (s-files-4) — as roots, which therefore do not name it.
+func (s *Server) tree(ctx context.Context, blob sealed.Blob, chosen *fileCtx, name string, files bool, limit int64, server string) *view.FileTree {
 	tree := &view.FileTree{}
 	for _, col := range blob.Collections {
-		conn, ok := blob.Connection(col.AccountID)
-		if !ok || col.Gone || !col.Has(view.KindFile) || (files && col.Feed) {
+		conn, _ := blob.Connection(col.AccountID)
+		if !treeCollection(blob, col, files) || conn.ID != server {
 			continue
 		}
 		node := view.FileTreeNode{
-			ID:    s.route(fileHref(conn.ID, col.Path, "", nil, true)),
-			Label: collectionLabel(col),
-			// The connection, as the node's trail draws it (s-files-4).
-			Stamp:    view.Stamp(connLabel(conn)),
+			ID:       s.route(fileHref(conn.ID, col.Path, "", nil, true)),
+			Label:    collectionLabel(col),
 			ReadOnly: col.ReadOnly && !files,
 		}
 		if chosen != nil && chosen.conn.ID == conn.ID && chosen.col.Path == col.Path {

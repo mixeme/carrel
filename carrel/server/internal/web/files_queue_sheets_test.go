@@ -64,9 +64,10 @@ func TestTreeLineAndMarks(t *testing.T) {
 	if opened.Target.Name == nil || opened.Target.Name.Method != "POST" {
 		t.Fatalf("the line did not open: %+v", opened.Target)
 	}
+	// The server is the head's (ФН9): the root does not name it.
 	root := opened.Target.Nodes[0]
-	if strings.Contains(string(root.Stamp), "Docs") || root.Stamp == "" {
-		t.Errorf("root stamp %q", root.Stamp)
+	if root.Stamp != "" || len(opened.Servers) != 1 || !opened.Servers[0].On || strings.Contains(string(opened.Servers[0].Label), "Docs") {
+		t.Errorf("root stamp %q, servers %+v", root.Stamp, opened.Servers)
 	}
 	if !root.Children[0].Attachments {
 		t.Errorf("the attachment folder is not marked: %+v", root.Children[0])

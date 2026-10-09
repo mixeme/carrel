@@ -55,6 +55,18 @@
     "2026-08-04-whiteboard.jpg"
   ],
   "op": "move",
+  "servers": [
+    {
+      "href": "",
+      "label": "nextcloud",
+      "on": true
+    },
+    {
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026server=a-sftp-vps",
+      "label": "sftpgo · vps",
+      "on": false
+    }
+  ],
   "subject": "from Documents / carrel / attachments",
   "target": {
     "chosen": "/app/files/a-nc-home/Files/",
@@ -87,24 +99,7 @@
         "id": "/app/files/a-nc-home/Files/",
         "label": "Files",
         "readOnly": false,
-        "stamp": "nextcloud"
-      },
-      {
-        "children": [],
-        "expanded": false,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2F",
-        "id": "/app/files/a-sftp-vps/Documents/",
-        "label": "Documents",
-        "readOnly": false,
-        "stamp": "sftpgo · vps"
-      },
-      {
-        "children": [],
-        "expanded": false,
-        "id": "/app/files/a-sftp-vps/Public/",
-        "label": "Public",
-        "readOnly": true,
-        "stamp": "sftpgo · vps"
+        "stamp": ""
       }
     ]
   },

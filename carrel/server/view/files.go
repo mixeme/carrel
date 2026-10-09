@@ -132,6 +132,17 @@ type NameClash struct {
 	Name    Text     `json:"name"`
 	Options []Action `json:"options"`
 }
+
+// FileServer — сервер в выборе шапки листа с деревом (s-files-4,
+// s-notes-11, s-files-16: «Server»): подключение, у которого есть
+// хранилища файлов. On — выбранный: дерево листа показывает его хранилища;
+// Href — тот же лист с этим сервером (GET), у выбранного пусто
+type FileServer struct {
+	Label Text   `json:"label"`
+	Href  string `json:"href"`
+	On    bool   `json:"on"`
+}
+
 type FileTree struct {
 	Nodes  []FileTreeNode `json:"nodes"`
 	Chosen string         `json:"chosen"`
@@ -150,8 +161,10 @@ type FileTree struct {
 	Name *Form `json:"name"`
 }
 type FileTreeNode struct {
-	ID       string         `json:"id"`
-	Label    string         `json:"label"`
+	ID    string `json:"id"`
+	Label string `json:"label"`
+	// Stamp — пусто: сервер называет шапка листа (FileServer), корень
+	// хранилища его не повторяет
 	Stamp    Stamp          `json:"stamp"`
 	ReadOnly bool           `json:"readOnly"`
 	Children []FileTreeNode `json:"children"`
@@ -182,8 +195,10 @@ type FilePickerSheet struct {
 	// Where — выбранная папка путём, «Documents / carrel / 2026-08» (выбор в
 	// шапке листа загрузки, s-notes-11, s-files-19); пусто — не выбрана или
 	// у листа шапки выбора нет
-	Where Text     `json:"where"`
-	Tree  FileTree `json:"tree"`
+	Where Text `json:"where"`
+	// Servers — выбор сервера в шапке листа; Tree — хранилища выбранного
+	Servers []FileServer `json:"servers"`
+	Tree    FileTree     `json:"tree"`
 	// Failure — отказ: New folder не завёл папку (под строкой имени, как
 	// FileOpSheet.Failure, s-files-19) или папку нельзя выбрать; nil — отказа
 	// не было
@@ -197,9 +212,12 @@ type FileOpSheet struct {
 	// Subject — где: у переноса и копии «from Documents / carrel /
 	// attachments» (s-files-4), у переименования и удаления — путь без
 	// «from» (s-files-21, -22)
-	Subject Text      `json:"subject"`
-	Items   []Text    `json:"items"`
-	Target  *FileTree `json:"target"`
+	Subject Text   `json:"subject"`
+	Items   []Text `json:"items"`
+	// Servers — выбор сервера в шапке листа переноса и копии; Target —
+	// хранилища выбранного. У прочих операций пусто
+	Servers []FileServer `json:"servers"`
+	Target  *FileTree    `json:"target"`
 	// Alert — у удаления, тревогой перед Warning (s-files-22): сколько
 	// исчезнет, какого объёма и на каком сервере, и что копии нет — «‹3›
 	// files, 4.4 MB, are deleted on sftpgo · vps. …», число жирным; у папки

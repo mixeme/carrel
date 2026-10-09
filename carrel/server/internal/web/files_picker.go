@@ -93,13 +93,26 @@ func (s *Server) getAttachPicker(w http.ResponseWriter, r *http.Request, sess *s
 	}
 	etag, from := q.Get("etag"), q.Get("from")
 	limit := attachLimit(c.col)
+	// The head chooses the server (s-files-16); another one asked for,
+	// nothing of it is open yet.
+	server := s.treeServer(blob, at, q.Get("server"), true)
+	if at != nil && at.conn.ID != server {
+		at, name = nil, ""
+	}
 	sheet := view.FilePickerSheet{
 		Title:   "Attach from Files",
 		Purpose: text(fmt.Sprintf("Attach a file that is in Files already. Up to %s it is written into the record, as a file from this computer is; a larger one stays where it lies, and the record keeps a link to it.", sizeText(limit))),
-		Tree:    *s.sourceTree(r.Context(), blob, at, name, limit),
+		Tree:    *s.sourceTree(r.Context(), blob, at, name, limit, server),
+		Servers: s.fileServers(blob, server, true, func(id string) string {
+			v := cloneValues(q)
+			v.Del("to")
+			v.Set("server", id)
+			return s.postQuery("/app/files/picker", v)
+		}),
 	}
 	linkTree(&sheet.Tree, func(id string) string {
 		v := cloneValues(q)
+		v.Del("server")
 		v.Set("to", id)
 		return s.postQuery("/app/files/picker", v)
 	})
@@ -144,11 +157,18 @@ func (s *Server) attachmentsPicker(r *http.Request, sess *session.Session) view.
 	if chosen != nil && chosen.col.Feed {
 		chosen = nil
 	}
+	server := s.treeServer(blob, chosen, r.FormValue("server"), false)
+	if chosen != nil && chosen.conn.ID != server {
+		chosen = nil
+	}
 	sheet := view.FilePickerSheet{
 		Title:   "Attachment folder",
 		Purpose: "Where large attachments go: a folder of a file collection you can write to. Carrel makes it on first use.",
-		Tree:    *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen),
+		Tree:    *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen, server),
 		Where:   wherePath(chosen),
+		Servers: s.fileServers(blob, server, false, func(id string) string {
+			return s.postQuery("/app/files/picker", url.Values{"for": {"attachments"}, "server": {id}})
+		}),
 	}
 	s.markTree(&sheet.Tree, blob, "")
 	linkTree(&sheet.Tree, func(id string) string {
@@ -235,7 +255,16 @@ func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fi
 	if chosen == nil {
 		chosen = s.uploadFolder(sess, blob)
 	}
-	sheet := view.FilePickerSheet{Title: "Upload files", Purpose: purpose, Tree: *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen), Failure: failure, Where: wherePath(chosen)}
+	// The head chooses the server (s-notes-11); another one asked for,
+	// nothing of it is chosen yet.
+	server := s.treeServer(blob, chosen, r.FormValue("server"), false)
+	if chosen != nil && chosen.conn.ID != server {
+		chosen = nil
+	}
+	sheet := view.FilePickerSheet{Title: "Upload files", Purpose: purpose, Tree: *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen, server), Failure: failure, Where: wherePath(chosen),
+		Servers: s.fileServers(blob, server, false, func(id string) string {
+			return s.postQuery("/app/files/picker", url.Values{"for": {"upload"}, "server": {id}})
+		})}
 	s.markTree(&sheet.Tree, blob, fresh)
 	linkTree(&sheet.Tree, func(id string) string {
 		return s.postQuery("/app/files/picker", url.Values{"for": {"upload"}, "to": {id}})
@@ -255,6 +284,8 @@ func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fi
 	back := url.Values{"for": {"upload"}}
 	if chosen != nil {
 		back.Set("to", s.route(chosen.href("", chosen.segs, true)))
+	} else {
+		back.Set("server", server)
 	}
 	s.newFolder(&sheet.Tree, chosen, "/app/files/picker", url.Values{"for": {"upload"}, "mkcol": {"1"}}, "/app/files/picker", back, open)
 	sheet.Actions = []view.Action{upload,

@@ -21,6 +21,18 @@
   ],
   "failure": null,
   "purpose": "The folder is the attachment folder from Settings → Attachments, named once and remembered — unless you make a new one here. Change it here and the next upload from this menu goes to the new one.",
+  "servers": [
+    {
+      "href": "/app/files/picker?for=upload\u0026server=a-nc-home",
+      "label": "nextcloud",
+      "on": false
+    },
+    {
+      "href": "",
+      "label": "sftpgo · vps",
+      "on": true
+    }
+  ],
   "subject": "",
   "title": "Upload files",
   "tree": {
@@ -37,15 +49,6 @@
       "target": "sheet"
     },
     "nodes": [
-      {
-        "children": [],
-        "expanded": false,
-        "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
-        "id": "/app/files/a-nc-home/Files/",
-        "label": "Files",
-        "readOnly": false,
-        "stamp": "nextcloud"
-      },
       {
         "children": [
           {
@@ -84,7 +87,7 @@
         "id": "/app/files/a-sftp-vps/Documents/",
         "label": "Documents",
         "readOnly": false,
-        "stamp": "sftpgo · vps"
+        "stamp": ""
       },
       {
         "children": [],
@@ -92,7 +95,7 @@
         "id": "/app/files/a-sftp-vps/Public/",
         "label": "Public",
         "readOnly": true,
-        "stamp": "sftpgo · vps"
+        "stamp": ""
       }
     ]
   },

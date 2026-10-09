@@ -7,7 +7,9 @@ import (
 	"strings"
 	"testing"
 
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/view"
+	"github.com/emersion/go-webdav/carddav"
 )
 
 // The client's second scan of the files section, the sheets (client.md,
@@ -228,4 +230,77 @@ func TestNewFolderIsASheet(t *testing.T) {
 	if !fileRow(t, decode[view.FilesPage](t, f.h.do(get(here, f.sess))), "inbox").IsDir {
 		t.Error("no folder made")
 	}
+}
+
+// ФН9 (the owner's decision of 09.10.2026: the frame is right): the head
+// of a sheet with a tree chooses the server (s-files-4, s-notes-11,
+// s-files-16: the pick «Server»), and the tree holds the storages of that
+// server alone, their roots without the server's name. A server is chosen
+// by its address — the sheet with it —, and with another server chosen
+// nothing is ticked yet.
+func TestSheetsChooseTheServer(t *testing.T) {
+	for _, id := range []string{"s-files-4", "s-notes-11", "s-files-16"} {
+		if !regexp.MustCompile(`<button class="tc-in is-pick[^"]*" type="button" aria-label="Server">[^<]+</button>`).MatchString(mockupFrame(t, id)) {
+			t.Fatalf("%s draws no pick of the server: read the frame again", id)
+		}
+	}
+
+	f := filesFixture(t, true)
+	f.srv.SeedFile(filesDocs+"a.txt", "alpha")
+	far := searchServer(t)
+	far.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
+	far.SeedFolder(filesDocs)
+	farID := addAccount(t, f, far)
+	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
+		b.Collections = append(b.Collections, sealed.Collection{AccountID: farID, Path: filesDocs, Name: "Far", Kinds: []view.Kind{view.KindFile}})
+	})
+	farRoot := "/app/files/" + farID + "/" + url.PathEscape(filesDocs) + "/"
+	check := func(what string, servers []view.FileServer, tree view.FileTree, on int, roots ...string) {
+		t.Helper()
+		if len(servers) != 2 || servers[on].On == servers[1-on].On || !servers[on].On || servers[0].Label == servers[1].Label ||
+			servers[on].Href != "" || servers[1-on].Href == "" {
+			t.Fatalf("%s: servers = %+v, want two, the %d-th chosen and the other an address", what, servers, on)
+		}
+		var got []string
+		for _, n := range tree.Nodes {
+			got = append(got, n.Label)
+			if n.Stamp != "" {
+				t.Errorf("%s: the root %q is stamped %q: the head names the server", what, n.Label, n.Stamp)
+			}
+		}
+		if !equalStrings(got, roots) {
+			t.Errorf("%s: roots = %q, want %q", what, got, roots)
+		}
+	}
+
+	// A move: the server of the folder the sheet opens at; the other one by
+	// its address, with nothing chosen there and the button off.
+	move := opSheetOf(t, f, "move", []string{"a.txt"})
+	check("move", move.Servers, *move.Target, 0, "Docs")
+	other := decode[view.FileOpSheet](t, f.h.do(get(move.Servers[1].Href, f.sess)))
+	check("move, the other server", other.Servers, *other.Target, 1, "Far")
+	if other.Target.Chosen != "" || other.Actions[0].Enabled || other.Actions[0].Reason != "Choose a folder." {
+		t.Errorf("the other server: chosen %q, confirm %+v", other.Target.Chosen, other.Actions[0])
+	}
+	// A node of it chosen, the sheet is of that server and the move can go.
+	there := decode[view.FileOpSheet](t, f.h.do(get(other.Target.Nodes[0].Href, f.sess)))
+	check("move, a folder of the other server", there.Servers, *there.Target, 1, "Far")
+	if there.Target.Chosen != farRoot || !there.Actions[0].Enabled {
+		t.Errorf("a folder of the other server: chosen %q, confirm %+v", there.Target.Chosen, there.Actions[0])
+	}
+	// A rename and a deletion have no tree and no pick.
+	if del := opSheetOf(t, f, "delete", []string{"a.txt"}); len(del.Servers) != 0 {
+		t.Errorf("a deletion picks a server: %+v", del.Servers)
+	}
+
+	// The upload of the menu and Browse of the attachment folder.
+	up := decode[view.FilePickerSheet](t, f.h.do(get("/app/files/picker?for=upload&to="+url.QueryEscape(f.at("")), f.sess)))
+	check("upload", up.Servers, up.Tree, 0, "Docs")
+	upFar := decode[view.FilePickerSheet](t, f.h.do(get(up.Servers[1].Href, f.sess)))
+	check("upload, the other server", upFar.Servers, upFar.Tree, 1, "Far")
+	if upFar.Tree.Chosen != "" || upFar.Where != "" {
+		t.Errorf("upload, the other server: chosen %q, where %q", upFar.Tree.Chosen, upFar.Where)
+	}
+	browse := decode[view.FilePickerSheet](t, f.h.do(get("/app/files/picker?for=attachments&to="+url.QueryEscape(farRoot), f.sess)))
+	check("browse", browse.Servers, browse.Tree, 1, "Far")
 }

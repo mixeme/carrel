@@ -458,9 +458,9 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/files/{account}/{col}/download/{path…}` | GET | вход | поток; адрес папки (`…/`) с `?zip=1` — папка архивом zip (S-17.5) | — |
 | `/app/files/{account}/{col}/upload/{path…}` | POST | вход | фрагмент | `TransferQueue`; `?menu=1` — загрузка из листа меню создания: папка запоминается для следующей такой; multipart: файлы — поле `file` (`Action.File`), у загрузки папки имя файла — путь внутри неё; перед файлами со сценарием — `size.<имя>` (длина файла в байтах, у загрузки папки имя — тот же путь) или `size` у одного файла: без них тело уходит без длины, и сервер, которому она нужна, отказывает (S-17.1); полей файла с именем `file` у формы может быть два (Files и Folder, s-files-8) — размеры стоят перед файлами своего поля, значит и между файлами, а поле, в котором ничего не выбрано, приходит частью без имени файла — это не файл; `?transfer=&answer=` (`skip`, `both`, `overwrite`) — ответ очереди на занятое имя |
 | `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | лист | `FileOpSheet` (`Op` — `new`, s-files-23); без поля `name` (New folder шапки и рейла) — лист с полем имени; с полем — папка заводится и ответ — редирект на папку, отказ (имя занято, имя не годится) — тот же лист с отказом под полем и набранным |
-| `/app/files/{account}/{col}/op/{path…}` | GET, POST | вход | лист | `FileOpSheet`; `?op=` (`rename`, `move`, `copy`, `delete`), `item` — имена папки (значений несколько; у POST и полями формы выделения, `FilesPage.Select`: ничего не отмечено или у `rename` отмечено не одно — папка с отказом «Nothing was done»), `to` — папка назначения переноса и копии: адрес узла дерева (`FileTreeNode.Href` несёт его в адресе; у POST и полем формы). GET — только лист; POST с `go=1` выполняет (у `rename` — поле `name`, новое имя; у `delete` — `etag` показанных версий), с `mkcol=1` и полем `name` — New folder дерева, с `transfer=&answer=` — ответ очереди; GET с `new=1` — лист с открытой строкой имени (`FileTree.Name`) |
+| `/app/files/{account}/{col}/op/{path…}` | GET, POST | вход | лист | `FileOpSheet`; `?op=` (`rename`, `move`, `copy`, `delete`), `item` — имена папки (значений несколько; у POST и полями формы выделения, `FilesPage.Select`: ничего не отмечено или у `rename` отмечено не одно — папка с отказом «Nothing was done»), `server` — подключение, чьи хранилища показывает дерево листа переноса и копии (`FileServer.Href`; без него — сервер выбранной папки), `to` — папка назначения переноса и копии: адрес узла дерева (`FileTreeNode.Href` несёт его в адресе; у POST и полем формы). GET — только лист; POST с `go=1` выполняет (у `rename` — поле `name`, новое имя; у `delete` — `etag` показанных версий), с `mkcol=1` и полем `name` — New folder дерева, с `transfer=&answer=` — ответ очереди; GET с `new=1` — лист с открытой строкой имени (`FileTree.Name`) |
 | `/app/files/{account}/{col}/columns/{path…}` | POST | вход | редирект | — ; меню Columns папки (s-files-20); ответ — папка `{path…}` с её запросом (S-9.6) |
-| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=upload[&to=]` — папка загрузки из меню создания: узел выбирает её адресом, «Upload» листа шлёт файлы на загрузку выбранной папки с `?menu=1` — эта загрузка и запоминает папку для следующей из меню; «Choose this folder» в этом листе нет; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attach&k=&a=&c=&new=` — то же для черновика новой записи (вместо `uid`), Attach шлёт `…/new?op=attachfile&uid=&file=`, Cancel — назад к форме `/new?uid=`; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=`; `?for=upload&new=1` — с открытой строкой имени новой папки, POST `?for=upload&mkcol=1&to=` с полем `name` её заводит |
+| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `&server=` у любого `for` — подключение, чьи хранилища показывает дерево (`FileServer.Href`; без него — сервер выбранной папки); `?for=upload[&to=]` — папка загрузки из меню создания: узел выбирает её адресом, «Upload» листа шлёт файлы на загрузку выбранной папки с `?menu=1` — эта загрузка и запоминает папку для следующей из меню; «Choose this folder» в этом листе нет; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attach&k=&a=&c=&new=` — то же для черновика новой записи (вместо `uid`), Attach шлёт `…/new?op=attachfile&uid=&file=`, Cancel — назад к форме `/new?uid=`; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=`; `?for=upload&new=1` — с открытой строкой имени новой папки, POST `?for=upload&mkcol=1&to=` с полем `name` её заводит |
 | `/app/files/published` | GET | вход | страница | `PublishedLinksPage` |
 | `/app/attach/{account}/{col}/{path…}` | GET | вход | поток | — |
 
@@ -2106,6 +2106,12 @@ type NameClash struct { Name Text; Options []Action } // Keep both · Replace ·
 // узла только для чтения отметка выключена. Пусто — дерево выбирает адресом
 // узла (Href): листы выбора.
 type FileTree struct { Nodes []FileTreeNode; Chosen string; Field string; New *Action; Name *Form }
+// FileServer — сервер в выборе шапки листа с деревом (s-files-4, s-notes-11,
+// s-files-16: «Server»): подключение, у которого есть хранилища файлов. On —
+// выбранный: дерево листа показывает его хранилища, корни сервера не
+// называют; Href — тот же лист с этим сервером (GET, `server=`), у
+// выбранного пусто. С другим сервером в адресе ничего в нём ещё не выбрано.
+type FileServer struct { Label Text; Href string; On bool }
 // Дерево, из которого выбирают файл (From Files у Attach), показывает и
 // файлы: File — узел-файл, он выбирается и не раскрывается; ID — его адрес в
 // разделе файлов без «/» в конце. ReadOnly — узел недоступен для этой цели:
@@ -2115,8 +2121,8 @@ type FileTree struct { Nodes []FileTreeNode; Chosen string; Field string; New *A
 // которого сервер не сказал, не угадывается, и обоих тогда нет. Href — тот
 // же лист, где выбран этот узел (GET; у листа операции — адрес op без go, с
 // to=ID): без сценариев узел выбирает ссылкой; у недоступного узла пусто.
-// Stamp — у корня хранилища: подключение, «sftpgo · vps» (хвост узла,
-// s-files-4). Attachments — это папка вложений (бейдж «attachment folder»),
+// Stamp — пусто: сервер называет шапка листа (FileServer), корень хранилища
+// его не повторяет. Attachments — это папка вложений (бейдж «attachment folder»),
 // Fresh — папка только что заведена New folder этого листа («just
 // created», s-notes-11); слова — экрана.
 type FileTreeNode struct {
@@ -2140,6 +2146,7 @@ type FilePickerSheet struct {
     Subject Text
     Purpose Text // зачем выбирают: папка вложений, назначение копии, файл для вложения; остаётся и при отказе
     Where   Text // выбранная папка путём, «Documents / carrel / 2026-08» (выбор в шапке листа загрузки, s-notes-11, s-files-19); пусто — не выбрана или шапки выбора нет
+    Servers []FileServer // выбор сервера в шапке листа; Tree — хранилища выбранного
     Tree    FileTree
     Failure *Notice // отказ: New folder не завёл папку (под строкой имени, как FileOpSheet.Failure, s-files-19) или папку нельзя выбрать; nil — отказа не было
     Actions []Action
@@ -2157,6 +2164,7 @@ type FileOpSheet struct {
     Title   Text
     Subject Text // перенос и копия: «from Documents / carrel / attachments» (s-files-4); переименование и удаление — путь без «from» (s-files-21, -22)
     Items   []Text
+    Servers []FileServer // выбор сервера в шапке листа переноса и копии; у прочих операций пусто
     Target  *FileTree
     // Alert — у удаления, тревогой перед Warning (s-files-22): сколько
     // исчезнет, какого объёма, на каком сервере и что копии нет; число

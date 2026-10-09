@@ -20,6 +20,18 @@
   ],
   "failure": null,
   "purpose": "Attach a file that is in Files already. Up to 2 MB it is written into the record, as a file from this computer is; a larger one stays where it lies, and the record keeps a link to it.",
+  "servers": [
+    {
+      "href": "/app/files/picker?a=a-nc-home\u0026c=dela\u0026for=attach\u0026k=tasks\u0026server=a-nc-home\u0026uid=aa11-2d09-5f84",
+      "label": "nextcloud",
+      "on": false
+    },
+    {
+      "href": "",
+      "label": "sftpgo · vps",
+      "on": true
+    }
+  ],
   "subject": "to «Собрать чемодан»",
   "title": "Attach from Files",
   "tree": {
@@ -28,15 +40,6 @@
     "name": null,
     "new": null,
     "nodes": [
-      {
-        "children": [],
-        "expanded": false,
-        "href": "/app/files/picker?a=a-nc-home\u0026c=dela\u0026for=attach\u0026k=tasks\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F\u0026uid=aa11-2d09-5f84",
-        "id": "/app/files/a-nc-home/Files/",
-        "label": "Files",
-        "readOnly": false,
-        "stamp": "nextcloud"
-      },
       {
         "children": [
           {
@@ -122,7 +125,7 @@
         "id": "/app/files/a-sftp-vps/Documents/",
         "label": "Documents",
         "readOnly": false,
-        "stamp": "sftpgo · vps"
+        "stamp": ""
       },
       {
         "children": [],
@@ -131,7 +134,7 @@
         "id": "/app/files/a-sftp-vps/Public/",
         "label": "Public",
         "readOnly": false,
-        "stamp": "sftpgo · vps"
+        "stamp": ""
       }
     ]
   },

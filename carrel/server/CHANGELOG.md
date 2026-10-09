@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.171 — 2026-10-09
+
+The files section, the client's second scan (ФН9; the owner's decision of
+09.10.2026 — the frame is right): the head of a sheet with a tree chooses
+the server (`s-files-4`, `s-notes-11`, `s-files-16`).
+
+### Changed
+
+- **A sheet's tree holds the storages of one server.** The sheets of a
+  move and a copy (`FileOpSheet`), of the menu's upload, of From Files and
+  of Browse of the attachment folder (`FilePickerSheet`) carry `servers` —
+  every connection with storages of files, the one shown `on`, the others
+  with `href`, the same sheet with that server (`server=` in its address).
+  The tree's roots are that server's storages alone and no longer name it:
+  `FileTreeNode.stamp` of a root is empty. Without `server=` the tree is of
+  the chosen folder's server; with another one asked for, nothing of it is
+  chosen yet, so «Move», «Copy» and «Upload» stand off until a folder is.
+
 ## v0.2.170 — 2026-10-09
 
 The files section, the client's second scan (ФН13): New folder of a
