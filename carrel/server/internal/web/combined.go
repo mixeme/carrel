@@ -386,7 +386,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	case view.KindEvent:
 		page := view.AgendaPage{Shell: st.shell, Poll: st.poll}
 		kind, from, to := agendaWindow(tf, r.URL.Query())
-		page.Subtitle = agendaSubtitle(tf, combinedSubtitle(page.Rail, spec, false), from, to)
+		page.Subtitle = agendaSubtitle(tf, combinedSubtitle(page.Rail, spec, false), from, to, nil)
 		var bad []unreadable
 		on := agendaWith(r.URL.Query())
 		var rows []kinded
@@ -402,6 +402,12 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			rows = append(rows, kindedAll(filter.keep(k, listedOfKind(blob, st.snap, k)), k)...)
 		}
 		page.Days, page.Bar.Loaded, bad = s.agendaDays(tf, rows, from, to, spec.segment, true)
+		if st.snap != nil && !st.snap.Running {
+			// The poll is over: the line counts the events of the window
+			// (s-agenda-1; states-13 — while it runs there is no count).
+			events := eventsIn(page.Days)
+			page.Subtitle = agendaSubtitle(tf, combinedSubtitle(page.Rail, spec, false), from, to, &events)
+		}
 		page.Details = s.openInAgenda(r, sess, base, rows, page.Days)
 		page.Bar.Range = s.agendaRange(tf, base, filter.tag, kind, from, to, r.URL.Query())
 		page.Bar.Show, page.Bar.Segments = s.agendaShow(base, on, r.URL.Query()), []view.Action{}
@@ -454,7 +460,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Bar.Actions = actions
 		page.Bar.Columns = columns()
 		page.Notices = appendUnreadable(page.Notices, bad)
-		page.Subtitle = text(notebookSubtitle(combinedNotebooks(page.Rail, spec, st.snap != nil && !st.snap.Running), false))
+		page.Subtitle = text(notebookSubtitle(combinedNotebooks(page.Rail, spec, st.snap != nil && !st.snap.Running)))
 		if st.task == nil && len(page.Notices) == 0 {
 			// Nothing ticked: no poll, and the notebook says why (U-6.0).
 			page.Poll, page.Empty = nil, s.nothingTicked(spec)

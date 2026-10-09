@@ -159,11 +159,8 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.ContactsListPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return contacts.Forms(model.(*view.ContactsListPage)) },
 		Waits: []Wait{
-			{Row: 19, Fixture: "app-contacts/empty"},            // ждёт библиотеку: U-5.5 #19
-			{Row: 19, Fixture: "app-contacts/partial"},          // ждёт библиотеку: U-5.5 #19
-			{Row: 19, Fixture: "app-contacts/unavailable"},      // ждёт библиотеку: U-5.5 #19
-			{Row: 19, Fixture: "app-contacts-one/empty"},        // ждёт библиотеку: U-5.5 #19
-			{Row: 19, Fixture: "app-contacts-one/source-error"}, // ждёт библиотеку: U-5.5 #19
+			{Row: 19, Fixture: "app-contacts/partial"},     // ждёт библиотеку: U-5.5 #19
+			{Row: 19, Fixture: "app-contacts/unavailable"}, // ждёт библиотеку: U-5.5 #19
 		},
 	},
 	{
@@ -209,7 +206,6 @@ var All = []Screen{
 		Forms:  func(model any) []widget.PostForm { return agenda.Forms(model.(*view.AgendaPage)) },
 		Waits: []Wait{
 			{Row: 24, Fixture: "app-agenda-all/partial"}, // ждёт библиотеку: U-5.5 #24
-			{Row: 25, Fixture: "app-agenda/normal"},      // ждёт библиотеку: U-5.5 #25
 		},
 	},
 	{
@@ -239,7 +235,6 @@ var All = []Screen{
 		Waits: []Wait{
 			{Row: 31, Fixture: "app-tasks-all/normal"}, // ждёт библиотеку: U-5.5 #31
 			{Row: 32, Fixture: "app-tasks/normal"},     // ждёт библиотеку: U-5.5 #32
-			{Row: 32, Fixture: "app-tasks-all/empty"},  // ждёт библиотеку: U-5.5 #32
 		},
 	},
 	{
@@ -248,9 +243,6 @@ var All = []Screen{
 		Draw:   func(model any) Root { return task.Screen(model.(*view.TaskPage)) },
 		Title:  func(model any) string { return string(model.(*view.TaskPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return task.Forms(model.(*view.TaskPage)) },
-		Waits: []Wait{
-			{Row: 33, Fixture: "app-task/normal"}, // ждёт библиотеку: U-5.5 #33
-		},
 	},
 	{
 		Model:  func() any { return new(view.TaskEditPage) },
@@ -274,7 +266,6 @@ var All = []Screen{
 			{Row: 37, Fixture: "app-notes-all/normal"},   // ждёт библиотеку: U-5.5 #37
 			{Row: 38, Fixture: "app-notes/normal"},       // ждёт библиотеку: U-5.5 #38
 			{Row: 38, Fixture: "app-notes/source-error"}, // ждёт библиотеку: U-5.5 #38
-			{Row: 38, Fixture: "app-notes-all/empty"},    // ждёт библиотеку: U-5.5 #38
 		},
 	},
 	{

@@ -872,9 +872,10 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		sheet.Items = append(sheet.Items, text(e.Name))
 	}
 	run := url.Values{"op": {string(op)}, "item": names, "go": {"1"}}
-	// Move here and Copy here are the sheet's primary button (s-files-4,
-	// s-files-11); the deletion's is destructive.
-	confirm := view.Action{ID: "file." + string(op) + ".confirm", Method: "POST", Primary: op == view.FileMove || op == view.FileCopy, Enabled: true}
+	// Move here, Copy here and Rename are the sheet's primary button
+	// (s-files-4, s-files-11, s-files-21); the deletion's is destructive
+	// (s-files-22).
+	confirm := view.Action{ID: "file." + string(op) + ".confirm", Method: "POST", Primary: op != view.FileDelete, Enabled: true}
 	switch op {
 	case view.FileRename:
 		// The new name is the form's field "name".

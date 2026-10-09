@@ -304,15 +304,15 @@
       },
       {
         "href": "",
-        "label": "Priority",
-        "mono": true,
-        "value": "5"
-      },
-      {
-        "href": "",
         "label": "Complete",
         "mono": true,
         "value": "0%"
+      },
+      {
+        "href": "",
+        "label": "Priority",
+        "mono": true,
+        "value": "5"
       },
       {
         "href": "",
@@ -383,10 +383,10 @@
     "source": {
       "changed": "10 August 2026, 17:04",
       "colour": "#4a6b52",
-      "compared": "",
+      "compared": "not changed on server",
       "lastRead": "2 min ago",
       "objects": null,
-      "path": "",
+      "path": "/alice/calendars/dela/aa11-2d09-5f84.ics",
       "readOnly": false,
       "stamp": "nextcloud · Дела",
       "uid": "aa11-2d09-5f84"

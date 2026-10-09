@@ -1154,7 +1154,14 @@
   },
   "subtitle": [
     {
-      "text": "nextcloud · 10 – 16 August 2026 · 2 events"
+      "text": "nextcloud · 10 – 16 August 2026 · "
+    },
+    {
+      "mark": "mono",
+      "text": "Europe/Moscow"
+    },
+    {
+      "text": " · 2 events"
     }
   ],
   "title": "Личный",

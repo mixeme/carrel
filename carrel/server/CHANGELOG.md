@@ -17,6 +17,45 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.156 — 2026-10-09
+
+The frames of Typecase `0bf5f71` (Typecase's notes 37, 38 and 39; the
+owner's decisions of 08–09.10.2026, Р-45, Р-48), with the client's `v0.4.4`.
+
+### Changed
+
+- **A collection the server gave no write to counts before it says so.**
+  `Subtitle` of one book, list or notebook: «radicale · vps · 2 cards · the
+  server granted no write access», «nextcloud · 2 notes · VJOURNAL · the
+  server granted no write access» (states-4, -30). One that did not answer
+  counts nothing; a notebook that did not answer says «nextcloud» alone,
+  without «VJOURNAL» (states-29).
+- **The line under a calendar's title names the zone and counts the
+  events.** `AgendaPage.subtitle` of the combined calendar and of one
+  calendar alike: the place and the window, the instance zone as a
+  monospaced piece, then « · 6 events» — the events of the window. No count
+  while the poll runs, nor for a calendar that did not answer.
+- **The panel of a task has its card's order and its source.**
+  `Details.fields`: Complete before Priority. `Details.source.path` and
+  `.compared` are filled, as the card's (`s-tasks-1`).
+- **`NoteDoc.foreign` is pieces, not a string**: the name of the first
+  property Carrel does not know is a monospaced piece (`s-notes-20`); empty
+  — an empty list. C-6 says so.
+- **Rename is the primary button of its sheet** (`file.rename.confirm`,
+  `s-files-21`).
+
+### Fixtures
+
+- `app-agenda/normal`, `app-agenda/empty`, `app-agenda-all/normal` (the
+  line under the title), `app-contacts-one/readonly`,
+  `app-notes/source-error`, `app-tasks-all/normal` (the panel),
+  `app-note/normal`, `app-note-edit/*` (`foreign`), `app-files-op/rename`.
+- `check.py`: a folder of files is held against the frame of its own
+  address (`/app/files/{account}/{col}/{path…}`), its states against
+  states-32 … -34, the sheets of Rename and Delete against `s-files-21`,
+  `-22`. The rail of the duplicates waits for the server (`SERVER_TODO`):
+  the frames draw every source of the four kinds.
+
 ## v0.2.155 — 2026-10-08
 
 The owner's decision of 08.10.2026: a rail's tags are the section's.

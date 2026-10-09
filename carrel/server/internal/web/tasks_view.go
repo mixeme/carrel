@@ -92,13 +92,22 @@ func filterNotes(items []listed, filter string) []listed {
 }
 
 // notebookSubtitle is the line under a notebook's title: what the list of
-// any kind says, and how the notes lie on the server — «… · 86 notes ·
-// VJOURNAL» (s-notes-1); a notebook given no write says only that.
-func notebookSubtitle(line string, readOnly bool) string {
-	if readOnly {
-		return line
-	}
+// any kind says, and how the notes lie on the server — «… · 3 notes ·
+// VJOURNAL» (s-notes-1).
+func notebookSubtitle(line string) string {
 	return line + " · VJOURNAL"
+}
+
+// oneNotebookSubtitle is that line of one notebook: its connection, how many
+// notes and how they lie, then that the server gave no write (states-30:
+// «nextcloud · 2 notes · VJOURNAL · the server granted no write access»); a
+// notebook that did not answer says only where it is (states-29).
+func oneNotebookSubtitle(c *collectionCtx, notes int, read bool) string {
+	line := connLabel(c.conn)
+	if read {
+		line = notebookSubtitle(line + " · " + plural(notes, recordNouns[c.spec.kind]))
+	}
+	return line + noWriteTail(c)
 }
 
 // combinedNotebooks is the line under the combined notebook (s-notes-1): how
@@ -158,8 +167,7 @@ func overdueBy(tf timeFmt, due cal.Timing, done bool) string {
 // taskFields are the fields of a task in the order of its card (s-tasks-2):
 // Status — Needs action when it has none —, Due monospaced with how late it
 // is, Starts, Complete and Priority monospaced, Reminders, Where, Link,
-// Tags. The panel (s-tasks-1) has Priority before Complete and no
-// Reminders.
+// Tags. The panel (s-tasks-1) has the card's order and no Reminders.
 func taskFields(tf timeFmt, obj *model.Object, panel bool, tags []view.Tag) ([]view.Field, error) {
 	status := taskStatuses[0].label
 	if v := strings.TrimSpace(firstValue(obj, "STATUS")); v != "" {
@@ -186,10 +194,8 @@ func taskFields(tf timeFmt, obj *model.Object, panel bool, tags []view.Tag) ([]v
 	if p := priorityOf(obj); p <= 9 {
 		priority = []view.Field{{Label: "Priority", Value: text(strconv.Itoa(p)), Mono: true}}
 	}
-	if panel {
-		out = append(append(out, priority...), complete)
-	} else {
-		out = append(append(out, complete), priority...)
+	out = append(append(out, complete), priority...)
+	if !panel {
 		alarms, _ := cal.Alarms(obj)
 		if rows := reminderRows(alarms, tf); len(rows) > 0 {
 			labels := make([]string, 0, len(rows))

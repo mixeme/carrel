@@ -63,7 +63,7 @@ func TestNotePageIsTheFrame(t *testing.T) {
 
 	ed := decode[view.NotePage](t, app.h.do(get(rec+"/edit", app.sess)))
 	checkAttach(ed.Meta.Attach)
-	if len(ed.Meta.Linked) != 1 || !strings.Contains(string(ed.Doc.Foreign), "X-JTX-COLOR and two more") || ed.Source.UID != "5c81-77aa-0d64" {
+	if len(ed.Meta.Linked) != 1 || !strings.Contains(runsText(ed.Doc.Foreign), "X-JTX-COLOR and two more") || ed.Source.UID != "5c81-77aa-0d64" {
 		t.Errorf("edit = linked %+v, foreign %q, source %+v", ed.Meta.Linked, ed.Doc.Foreign, ed.Source)
 	}
 

@@ -980,7 +980,14 @@
   },
   "subtitle": [
     {
-      "text": "nextcloud · 4 – 10 January 2027 · 0 events"
+      "text": "nextcloud · 4 – 10 January 2027 · "
+    },
+    {
+      "mark": "mono",
+      "text": "Europe/Moscow"
+    },
+    {
+      "text": " · 0 events"
     }
   ],
   "title": "Личный",

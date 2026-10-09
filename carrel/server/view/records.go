@@ -322,9 +322,9 @@ type NoteDoc struct {
 	// Foreign — строка под текстом правки о свойствах, которых Carrel не
 	// знает: первое по имени и сколько ещё, готовой фразой — «Properties
 	// Carrel does not know — X-JTX-COLOR and two more — are kept unchanged
-	// and not shown here.» (s-notes-20). Хранятся они как есть. Пусто —
-	// таких нет или режим чтения.
-	Foreign Text `json:"foreign"`
+	// and not shown here.» (s-notes-20), имя свойства — моноширинным
+	// куском. Хранятся они как есть. Пусто — таких нет или режим чтения.
+	Foreign Runs `json:"foreign"`
 }
 
 type NoteMeta struct {

@@ -160,8 +160,8 @@ func edit(p *view.NotePage) []w.MainPart {
 		fields.Items = append(fields.Items, field(r))
 	}
 	doc.Items = []w.DocPart{title, fields, body}
-	if p.Doc.Foreign != "" {
-		doc.Items = append(doc.Items, w.DocNote{Parts: []w.Inline{w.Text(p.Doc.Foreign)}})
+	if len(p.Doc.Foreign) > 0 {
+		doc.Items = append(doc.Items, w.DocNote{Parts: bind.Inlines(p.Doc.Foreign)})
 	}
 	return append(main, w.DocLayout{Items: []w.DocLayoutPart{doc, w.Docmeta{Sections: column(p), Danger: danger(p.Meta.Actions)}}})
 }

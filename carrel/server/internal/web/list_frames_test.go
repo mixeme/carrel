@@ -214,7 +214,8 @@ func TestContactsListIsTheFrames(t *testing.T) {
 }
 
 // states-4: a book the server granted no write to says so under its title
-// and by it; one book's line is the connection and how many cards.
+// and by it, after how many cards it has (Typecase's note 39, Р-48); one
+// book's line is the connection and how many cards.
 func TestOneBookSaysWhatItIs(t *testing.T) {
 	f := contactsFixture(t, true, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEND:VCARD\n")
 	page := decode[view.ContactsListPage](t, f.h.do(get(f.path("contacts"), f.sess)))
@@ -223,7 +224,11 @@ func TestOneBookSaysWhatItIs(t *testing.T) {
 		t.Fatal("states-4 draws no line under its title: read the frame again")
 	}
 	_, tail, _ := strings.Cut(frameText(sub[1]), "vps · ")
-	if !page.ReadOnly || !strings.HasSuffix(string(page.Subtitle), " · "+tail) {
+	count, reason, ok := strings.Cut(tail, " · ")
+	if !ok || !regexp.MustCompile(`^\d+ cards$`).MatchString(count) {
+		t.Fatalf("states-4 writes %q under its title, want the count before the reason: read the frame again", tail)
+	}
+	if !page.ReadOnly || !strings.HasSuffix(string(page.Subtitle), " · 1 card · "+reason) {
 		t.Errorf("read-only book: %v %q, the frame «… · %s»", page.ReadOnly, page.Subtitle, tail)
 	}
 	w := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEND:VCARD\n")

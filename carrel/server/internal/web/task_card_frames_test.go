@@ -52,7 +52,9 @@ func TestTaskCardIsTheFrame(t *testing.T) {
 	frame := mockupFrame(t, "s-tasks-2")
 	main := frame[strings.Index(frame, `<div class="tc-main">`):]
 	want := frameFields(t, main)
-	if len(want) != 6 || !strings.Contains(main, `<span class="tc-dim--danger">overdue by 3 days</span>`) {
+	// «Собрать чемодан» is not late, and the frame says nothing of lateness
+	// (Typecase's note 37, task 105).
+	if len(want) != 6 || strings.Contains(main, "overdue") {
 		t.Fatalf("s-tasks-2 fields = %q: read the frame again", want)
 	}
 	head := headButtons(t, "s-tasks-2")
@@ -77,8 +79,13 @@ func TestTaskCardIsTheFrame(t *testing.T) {
 	if got := pageFields(page.Fields); !slices.Equal(got, want) {
 		t.Errorf("fields = %q, want (s-tasks-2) %q", got, want)
 	}
-	if len(page.Subtitle) == 0 || !strings.HasPrefix(string(page.Subtitle[0].Text), "nextcloud · Дела") {
-		t.Errorf("subtitle = %+v", page.Subtitle)
+	if sub := frameSubtitle(t, "s-tasks-2"); runsText(page.Subtitle) != sub {
+		t.Errorf("subtitle = %+v, want (s-tasks-2) %q", page.Subtitle, sub)
+	}
+	for _, f := range page.Fields {
+		if f.Label == "Due" && dangerOf(f.Runs) != "" {
+			t.Errorf("Due of a task that is not late = %+v", f)
+		}
 	}
 	edit := actionByID(page.Actions, "record.edit")
 	if edit == nil || edit.Icon != "i-pencil" || !edit.Primary || actionByID(page.Actions, "record.print") == nil || actionByID(page.Actions, "task.done") == nil {
@@ -98,7 +105,7 @@ func TestTaskCardIsTheFrame(t *testing.T) {
 	}
 
 	// A task overdue says by how much, in alarm, under its title and by its
-	// due date (s-tasks-2).
+	// due date (the rule stays; the frame's task is not late).
 	late := decode[view.TaskPage](t, app.h.do(get(list+"/aa10-77bc-0e31", app.sess)))
 	if dangerOf(late.Subtitle) != "overdue by 3 days" {
 		t.Errorf("subtitle of the late task = %+v", late.Subtitle)

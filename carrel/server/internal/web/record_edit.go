@@ -2270,15 +2270,16 @@ func (s *Server) noteEditPage(c *collectionCtx, st editState, sh view.Shell, for
 
 // foreignLine is the line under the text of a note's edit (s-notes-20): the
 // first property Carrel does not know and how many more, said by the server
-// — the client counts nothing. Nothing unknown, no line.
-func foreignLine(names []string) view.Text {
+// — the client counts nothing —, the name monospaced. Nothing unknown, no
+// line.
+func foreignLine(names []string) view.Runs {
 	switch len(names) {
 	case 0:
-		return ""
+		return nil
 	case 1:
-		return text("A property Carrel does not know — " + names[0] + " — is kept unchanged and not shown here.")
+		return join("A property Carrel does not know — ", monoRun(names[0]), " — is kept unchanged and not shown here.")
 	}
-	return text("Properties Carrel does not know — " + names[0] + " and " + countWord(len(names)-1) + " more — are kept unchanged and not shown here.")
+	return join("Properties Carrel does not know — ", monoRun(names[0]), " and "+countWord(len(names)-1)+" more — are kept unchanged and not shown here.")
 }
 
 // notebookRow is the Notebook of a note's edit (s-notes-20, s-notes-15):

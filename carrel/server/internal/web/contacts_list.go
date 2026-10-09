@@ -259,16 +259,25 @@ func combinedParts(rail view.Rail, spec kindSpec, done bool) (ticked, where, cou
 }
 
 // bookSubtitle is the line under one book's title: its connection and how
-// many cards (s-io-1), or, for a book the server gave no write to, that
-// (states-4).
+// many cards (s-io-1) — a book that did not answer counts none (states-11) —
+// and, for a book the server gave no write to, that after the count
+// (states-4: «radicale · vps · 2 cards · the server granted no write
+// access»).
 func bookSubtitle(c *collectionCtx, cards int, read bool) string {
-	switch {
-	case c.col.ReadOnly:
-		return connLabel(c.conn) + " · the server granted no write access"
-	case read:
-		return connLabel(c.conn) + " · " + plural(cards, recordNouns[c.spec.kind])
+	line := connLabel(c.conn)
+	if read {
+		line += " · " + plural(cards, recordNouns[c.spec.kind])
 	}
-	return connLabel(c.conn)
+	return line + noWriteTail(c)
+}
+
+// noWriteTail is what the line under a collection's title ends with when
+// the server gave no write to it (states-4, -30).
+func noWriteTail(c *collectionCtx) string {
+	if c.col.ReadOnly {
+		return " · the server granted no write access"
+	}
+	return ""
 }
 
 // bookEmpty is what an empty book says: that it is empty, and the way to

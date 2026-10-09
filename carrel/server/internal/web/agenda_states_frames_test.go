@@ -102,7 +102,7 @@ func TestAgendaPrintsNoEmptyDay(t *testing.T) {
 	if sub := frameSubtitle(t, "states-15"); !shapeOf(sub).MatchString(runsText(empty.Subtitle)) {
 		t.Errorf("subtitle %q, want the shape of %q (states-15)", runsText(empty.Subtitle), sub)
 	}
-	if got := runsText(week.Subtitle); got != "nextcloud · 10 – 16 August 2026 · 2 events" {
+	if got := runsText(week.Subtitle); got != "nextcloud · 10 – 16 August 2026 · Europe/Moscow · 2 events" {
 		t.Errorf("subtitle of the week = %q", got)
 	}
 }

@@ -213,7 +213,18 @@
         "value": "8f1c-4a02-b7d3"
       }
     ],
-    "foreign": "Properties Carrel does not know — X-JTX-COLOR and two more — are kept unchanged and not shown here.",
+    "foreign": [
+      {
+        "text": "Properties Carrel does not know — "
+      },
+      {
+        "mark": "mono",
+        "text": "X-JTX-COLOR"
+      },
+      {
+        "text": " and two more — are kept unchanged and not shown here."
+      }
+    ],
     "form": {
       "action": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
       "actions": [],

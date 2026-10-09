@@ -4,6 +4,43 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.4 — 2026-10-09
+
+Typecase `0bf5f71` (Typecase's notes 37, 38 and 39 in one step: Carrel's
+tasks 105, 121, 127, 136–143 and the owner's decisions of 08–09.10.2026,
+Р-42 … Р-48), server `v0.2.156`. The drafts that print otherwise — 38 of
+the 55 frames built — went in first, unchanged (`557f35d`); the screens
+over them here.
+
+### Changed
+
+- **A row in the list of one collection has no source and no column for
+  it** (Р-48): one calendar, one list of tasks, one notebook
+  (`TimeRow.Single`, `DueRow.Single`, `ExcerptRow.Single`; `bind.Single` —
+  the rail's row that is on is a source). The sources of a linked task or
+  note are the hint of its badge «linked ×2» (`bind.LinkedBadge`,
+  `Badge.Title`).
+- **The panel of a task has its card's order**: the attachments before the
+  related records, then the block Source — the path and how the task
+  compares with the server (`s-tasks-1`).
+- **The name of a property Carrel does not know is monospaced** in the line
+  under a note's text in its edit (`NoteDoc.Foreign` in pieces, `s-notes-20`).
+- The line under a calendar's title has the zone monospaced and the count
+  of the window's events after it; the server sends it, the screen draws
+  its pieces as before.
+
+### Closed
+
+- Seven states match their frames and wait no more: nothing ticked
+  (`app-contacts/empty`, `app-tasks-all/empty`, `app-notes-all/empty` —
+  states-7, -18, -25), an empty book and a book that did not answer
+  (`app-contacts-one/empty`, `-/source-error` — states-10, -11), one
+  calendar (`app-agenda/normal`, `s-agenda-17`), the card of a task
+  (`app-task/normal`, `s-tasks-2`). U-5.5 rows 25 and 33 are closed; rows
+  19, 24, 31, 32, 35, 37, 38, 40, 42 say what the new frames leave — the
+  set of fixtures against the one set of the frames (Р-47), and the
+  server's.
+
 ## v0.4.3 — 2026-10-08
 
 Server `v0.2.155` (the rail of one collection carries the section's tags).

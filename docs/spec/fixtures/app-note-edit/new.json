@@ -190,7 +190,7 @@
         "value": ""
       }
     ],
-    "foreign": "",
+    "foreign": [],
     "form": {
       "action": "/app/notes/a-nc-home/zapisi/new",
       "actions": [],

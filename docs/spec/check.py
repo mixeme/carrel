@@ -200,10 +200,9 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-mail-compose": "/app/mail/compose",
     "app-search": "/app/search",
     "app-files": "/app/files",
-    # Папка: маршрут C-5 — /app/files/{account}/{col}/{path…}, а data-screen
-    # кадра s-files-1 — без {path…} (задача Typecase 121); до ответа папка
-    # сверяется по data-screen кадра.
-    "app-files-folder": "/app/files/{account}/{col}",
+    # Папка: data-screen кадра s-files-1 — маршрут C-5 с {path…} (Typecase
+    # 7512157, задача 121).
+    "app-files-folder": "/app/files/{account}/{col}/{path…}",
     "app-files-op": "/app/files/{account}/{col}/op/{path…}",
     "app-files-published": "/app/files/published",
     "app-files-picker": "/app/files/picker",
@@ -264,6 +263,13 @@ FRAME_TODO = {
 # расходится», без состояния; держит проверки 8 и 9.
 SERVER_TODO = {
     # «Tick every book» (states-7) основная с сервера v0.2.118 (долг C19).
+    # Рейл дубликатов — все источники четырёх родов плоским списком, у
+    # каждого — сколько его записей сравнено (Typecase 7512157, задача 136,
+    # ДбЖ4; s-dup-1, -2); сервер шлёт рейл контактов.
+    "app-duplicates: коллекции рейла":
+        "записка 38 (from-typecase.md), ДбЖ4 — круг сервера по дубликатам (plan/server.md)",
+    "app-duplicates-merge: коллекции рейла":
+        "записка 38 (from-typecase.md), ДбЖ4 — круг сервера по дубликатам (plan/server.md)",
 }
 
 # Состояние, которое рисует свой кадр маршрута — часть (data-part), а не
@@ -313,8 +319,11 @@ STATE_FRAME = {
     # плитки — s-files-5. Листы операции и выбора — кадры-фрагменты своих
     # состояний (рейла у листа нет, SHEETS): копия s-files-11, другое
     # хранилище s-files-12, отказ New folder s-files-13 и s-files-19, From
-    # Files s-files-16. Переименования и удаления кадров нет (задача 121) —
-    # они сверяются с кадром листа переноса.
+    # Files s-files-16. Листы переименования, удаления и новой папки — свои
+    # кадры s-files-21 … -23 (Typecase 7512157, задача 121); фикстуры листа
+    # операции их состояний пока не называют. Состояния папки — свои кадры
+    # (там же): пуста (states-32), сервер хранилища не ответил (states-33),
+    # только для чтения (states-34).
     # Состояния задач и заметок — свои кадры (Typecase 80d1319, задача 97):
     # ничего не отмечено (states-18, -25), сервер одного списка не ответил
     # (states-22, -29), потеря свойств при записи задачи (states-24); полные
@@ -329,11 +338,16 @@ STATE_FRAME = {
     "app-notes-all/empty": "states-25",
     "app-notes/source-error": "states-29",
     "app-note-edit/new": "s-notes-30",
+    "app-files-folder/empty": "states-32",
+    "app-files-folder/source-error": "states-33",
+    "app-files-folder/readonly": "states-34",
     "app-files-folder/long": "s-files-2",
     "app-files-folder/tiles": "s-files-5",
     "app-files-op/copy": "s-files-11",
     "app-files-op/elsewhere": "s-files-12",
     "app-files-op/refused": "s-files-13",
+    "app-files-op/rename": "s-files-21",
+    "app-files-op/delete": "s-files-22",
     "app-files-picker/attach": "s-files-16",
     "app-files-picker/refused": "s-files-19",
 }

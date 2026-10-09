@@ -91,10 +91,12 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		}
 	case view.KindTask:
 		page := s.taskPage(c, uid, obj, nil)
-		// The fields of the panel (s-tasks-1): Status, Due, Priority,
-		// Complete, Tags — monospaced where the frame sets them.
+		// The fields of the panel (s-tasks-1): Status, Due, Complete,
+		// Priority, Tags — the card's order, monospaced where the frame
+		// sets them; and where the task lies, as its card says it.
 		d.Fields, _ = taskFields(c.tf, obj, true, s.recordTags(c, obj))
 		d.Body, d.Attach, d.Related = page.Body, page.Attach, page.Related
+		d.Source.Path, d.Source.Compared = page.Source.Path, page.Source.Compared
 		d.Actions = shown(ops.edit, attach, ops.del)
 		if attach != nil {
 			d.AttachHint = taskAttachHint(c)

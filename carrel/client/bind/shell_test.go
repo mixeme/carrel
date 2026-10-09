@@ -307,6 +307,22 @@ func TestRunbar(t *testing.T) {
 	same(t, "their forms", len(bind.PollForms(two)), 3)
 }
 
+// The list of one collection (Р-48 of Typecase, 0bf5f71): the rail's row
+// that is on is a source, and the sources of a linked row are the hint of
+// its badge (s-tasks-15, s-notes-31).
+func TestSingle(t *testing.T) {
+	rail := view.Rail{Sections: []view.RailSection{
+		{Rows: []view.SourceRow{{Href: "/all", Label: "All", On: true}}},
+		{Account: "nextcloud", Rows: []view.SourceRow{{Href: "/d", Label: "Дела", Colour: "#4a6b52"}}},
+	}}
+	same(t, "every source at once", bind.Single(rail), false)
+	rail.Sections[0].Rows[0].On, rail.Sections[1].Rows[0].On = false, true
+	same(t, "one collection", bind.Single(rail), true)
+	same(t, "a rail with nothing open", bind.Single(view.Rail{}), false)
+	same(t, "a linked badge with its sources", bind.LinkedBadge(view.Badge{Label: "linked ×2", Role: view.BadgeLinked}, []view.Stamp{"nextcloud · Дела", "nextcloud · Работа"}),
+		w.Badge{Label: "linked ×2", Tone: w.BadgeLinked, Title: "nextcloud · Дела, nextcloud · Работа"})
+}
+
 func TestBadgeAvatar(t *testing.T) {
 	same(t, "a linked badge", bind.Badge(view.Badge{Label: "linked ×2", Role: view.BadgeLinked}), w.Badge{Label: "linked ×2", Tone: w.BadgeLinked})
 	same(t, "a plain badge", bind.Badge(view.Badge{Label: "x", Role: view.BadgePlan}), w.Badge{Label: "x"})

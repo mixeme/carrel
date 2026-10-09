@@ -92,8 +92,9 @@ var (
 //   - Nothing to show (Empty): what, bold, why, and the button that helps.
 //   - The panel (Shell.Details), for the row opened with ?open=: the title,
 //     the list, Edit, «⋯» with the record's menu, the cross that closes it;
-//     the fields, the description, the related records, the attachments with
-//     Attach and the line of where a file goes, the deletion.
+//     the fields, the description, the attachments with Attach and the
+//     line of where a file goes, the related records, the source — its
+//     path and how it compares with the server —, the deletion.
 func Screen(p *view.TasksPage) w.Shell {
 	main := []w.MainPart{head(p)}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
@@ -106,13 +107,14 @@ func Screen(p *view.TasksPage) w.Shell {
 		main = append(main, *r)
 	}
 	shown := chosen(p.Bar.Columns)
+	single := bind.Single(p.Rail)
 	for _, g := range p.Groups {
 		rows := make([]w.ListRow, 0, len(g.Rows))
 		for _, r := range g.Rows {
 			if shown != nil {
 				rows = append(rows, columnRow(r, shown))
 			} else {
-				rows = append(rows, row(r))
+				rows = append(rows, row(r, single))
 			}
 		}
 		main = append(main,
@@ -263,8 +265,10 @@ func bar(b view.ListBar) (w.Bar, bool) {
 	return w.Bar{Items: items}, len(items) > 0
 }
 
-// row is a task in the list.
-func row(r view.TaskRow) w.DueRow {
+// row is a task in the list; in the list of one collection (single) it has
+// no source and no column for it, and the sources of a linked task are the
+// hint of its badge (s-tasks-15).
+func row(r view.TaskRow, single bool) w.DueRow {
 	d := w.DueRow{
 		Tick:     bind.Tick(r.Tick, r.Done, done),
 		Mark:     w.Mark{Colour: string(r.Colour)},
@@ -284,6 +288,14 @@ func row(r view.TaskRow) w.DueRow {
 	for _, t := range bind.Tags(r.Tags) {
 		d.Tags = append(d.Tags, t)
 	}
+	if single {
+		d.Source, d.Single = "", true
+		if len(r.Badges) > 0 {
+			b := bind.LinkedBadge(r.Badges[0], r.Sources)
+			d.TitleBadge = &b
+		}
+		return d
+	}
 	for i, s := range r.Sources {
 		if i > 0 {
 			d.SourceHint += joined
@@ -291,6 +303,16 @@ func row(r view.TaskRow) w.DueRow {
 		d.SourceHint += string(s)
 	}
 	return d
+}
+
+// source is the technical block of a task's source: its path, when it was
+// read and whether it changed on the server.
+func source(s view.SourceBlock) w.Diag {
+	read := string(s.LastRead)
+	if s.Compared != "" {
+		read += " " + lead + string(s.Compared)
+	}
+	return bind.Diag(bind.DiagLine{Name: "Path", Value: string(s.Path)}, bind.DiagLine{Name: "Read", Value: read})
 }
 
 // chosen are the columns a person chose for the list, by ID in their order
@@ -406,17 +428,6 @@ func side(d view.Details) *w.Side {
 			w.Prose{Parts: []w.Inline{w.Text(d.Body)}, Variant: w.Prose13},
 		}})
 	}
-	if len(d.Related) > 0 {
-		var lines [][]w.SecItemPart
-		for _, r := range d.Related {
-			lines = append(lines, []w.SecItemPart{
-				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
-				w.Text(" "),
-				w.Dim{Parts: []w.Inline{w.Text(lead + string(r.Kind))}},
-			})
-		}
-		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
-	}
 	if attach != nil || len(d.Attach) > 0 {
 		rubric := w.Rubric{Text: "Attachments"}
 		if attach != nil {
@@ -432,6 +443,22 @@ func side(d view.Details) *w.Side {
 			sec = append(sec, w.SecHint{Text: string(d.AttachHint), Apart: true})
 		}
 		items = append(items, w.Sec{Items: sec})
+	}
+	if len(d.Related) > 0 {
+		var lines [][]w.SecItemPart
+		for _, r := range d.Related {
+			lines = append(lines, []w.SecItemPart{
+				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
+				w.Text(" "),
+				w.Dim{Parts: []w.Inline{w.Text(lead + string(r.Kind))}},
+			})
+		}
+		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
+	}
+	if d.Source.Path != "" {
+		// Where the task lies and how it compares with the server, as its
+		// card says it (s-tasks-1).
+		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Source"}, source(d.Source)}})
 	}
 	for _, b := range danger {
 		items = append(items, w.Danger{Button: b, Note: string(d.DeleteNote)})

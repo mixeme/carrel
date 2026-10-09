@@ -7,6 +7,7 @@
       "id": "file.rename.confirm",
       "label": "Rename",
       "method": "POST",
+      "primary": true,
       "target": "sheet"
     },
     {

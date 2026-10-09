@@ -261,6 +261,36 @@ func TickRow(r view.SourceRow, words RailWords) w.TickRow {
 	return row
 }
 
+// Single tells whether the list open is one collection's: the rail's row
+// that is on is a source, not every source at once (which has no colour).
+// The rows of such a list have no source and no column for it (Р-48 of
+// Typecase, 0bf5f71: s-agenda-17, s-tasks-15, s-notes-31).
+func Single(r view.Rail) bool {
+	for _, sec := range r.Sections {
+		for _, row := range sec.Rows {
+			if row.On {
+				return row.Colour != ""
+			}
+		}
+	}
+	return false
+}
+
+// LinkedBadge is the badge of a row's title in the list of one collection:
+// the sources of a linked record are its hint — «nextcloud · Дела,
+// nextcloud · Работа» under «linked ×2» (Badge.Title; s-tasks-15,
+// s-notes-31) —, for the row has no column to say them in.
+func LinkedBadge(b view.Badge, sources []view.Stamp) w.Badge {
+	out := Badge(b)
+	for i, s := range sources {
+		if i > 0 {
+			out.Title += ", "
+		}
+		out.Title += string(s)
+	}
+	return out
+}
+
 // Sources are the rail's sections of sources (Rail.Sections), each its
 // account as the rubric when it has one — the section of feeds read from
 // outside (Feeds) with the screen's badge External after it — and its

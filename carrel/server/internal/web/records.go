@@ -1274,23 +1274,19 @@ func (s *Server) openInAgenda(r *http.Request, sess *session.Session, base strin
 	return nil
 }
 
-// agendaSubtitle is the line under the title of the combined calendar
-// (s-agenda-1): «5 of 7 calendars · 3 accounts», the days of the window and
-// the instance zone, monospaced.
-func agendaSubtitle(tf timeFmt, where string, from, to time.Time) view.Runs {
-	return view.Runs{{Text: text(where + " · " + tf.window(from, to) + " · ")}, {Text: text(tf.tz.String()), Mark: view.RunMono}}
-}
-
-// calendarSubtitle is the line under one calendar's title (states-15):
-// its connection, the days of the window and how many events are in it —
-// «nextcloud · 2 – 8 November 2026 · 0 events»; without the count when the
-// calendar did not answer.
-func calendarSubtitle(tf timeFmt, where string, from, to time.Time, events *int) view.Runs {
-	line := where + " · " + tf.window(from, to)
+// agendaSubtitle is the line under an agenda's title: where it looks — «5
+// of 7 calendars · 3 accounts» of the combined calendar (s-agenda-1), the
+// connection of one (s-agenda-17, states-15) —, the days of the window, the
+// instance zone, monospaced, and how many events are in the window: «… ·
+// 10 – 16 August 2026 · Europe/Moscow · 6 events». The count is there once
+// it is known: not while the poll runs (states-13), nor when the calendar
+// did not answer.
+func agendaSubtitle(tf timeFmt, where string, from, to time.Time, events *int) view.Runs {
+	line := view.Runs{{Text: text(where + " · " + tf.window(from, to) + " · ")}, {Text: text(tf.tz.String()), Mark: view.RunMono}}
 	if events != nil {
-		line += " · " + plural(*events, "event")
+		line = append(line, view.Run{Text: text(" · " + plural(*events, "event"))})
 	}
-	return view.Runs{{Text: text(line)}}
+	return line
 }
 
 // eventsIn counts the events of an agenda's days: the tasks due and the
@@ -1354,7 +1350,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	tf := c.tf
 	kind, from, to := agendaWindow(tf, r.URL.Query())
 	page := view.AgendaPage{Shell: s.buildShell(c.sess, collectionLabel(c.col)), Days: []view.AgendaDay{}}
-	page.Subtitle = calendarSubtitle(tf, connLabel(c.conn), from, to, nil)
+	page.Subtitle = agendaSubtitle(tf, connLabel(c.conn), from, to, nil)
 	// The export of a calendar takes the week the screen shows: that is where
 	// the range is (S-19). Every other list is handed over whole.
 	page.Bar.Actions = append(s.listActions(c, url.Values{
@@ -1396,7 +1392,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	var more []unreadable
 	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, shown, from, to, c.spec.segment, false)
 	events := eventsIn(page.Days)
-	page.Subtitle = calendarSubtitle(tf, connLabel(c.conn), from, to, &events)
+	page.Subtitle = agendaSubtitle(tf, connLabel(c.conn), from, to, &events)
 	if len(page.Days) == 0 && len(page.Notices) == 0 {
 		page.Empty = windowEmpty(tf, kind, collectionLabel(c.col), from, to)
 	}
@@ -1869,7 +1865,7 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, bad, err := c.calQuery(r.Context(), c.spec.component, nil, nil)
 	if err != nil {
-		page.Subtitle = text(notebookSubtitle(bookSubtitle(c, 0, false), c.col.ReadOnly))
+		page.Subtitle = text(oneNotebookSubtitle(c, 0, false))
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
 	}
@@ -1878,7 +1874,7 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	by := sortOf(r, view.KindNote)
 	shown := filterNotes(linkedElsewhere(s.catalogOf(c.sess), view.KindNote, s.foldLinked(s.catalogOf(c.sess), view.KindNote, filter.keep(view.KindNote, items))), sift)
 	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, shown, c.spec.segment, false, filter, by)
-	page.Subtitle = text(notebookSubtitle(bookSubtitle(c, len(objs), true), c.col.ReadOnly))
+	page.Subtitle = text(oneNotebookSubtitle(c, len(objs), true))
 	page.Details = s.openRow(r, c.sess, c.listPath(), c.spec, shown, noteRowsOn(page.Groups))
 	page.Bar.Segments = s.sortSegments(c.listPath(), view.KindNote, by, r.URL.Query())
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))

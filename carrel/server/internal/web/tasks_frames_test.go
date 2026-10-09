@@ -106,6 +106,14 @@ func TestTaskListIsTheFrame(t *testing.T) {
 	if !slices.Equal(fields, terms) {
 		t.Errorf("panel fields = %q, want %q", fields, terms)
 	}
+	// The panel says where the task lies and how it compares with the
+	// server, as its card does (Typecase's note 37: the block Source).
+	if !strings.Contains(panel, `<div class="tc-rubric">Source</div>`) {
+		t.Fatal("the panel of s-tasks-1 draws no Source: read the frame again")
+	}
+	if d.Source.Path == "" || d.Source.Compared == "" {
+		t.Errorf("panel source = %+v, want its path and what the server says of it", d.Source)
+	}
 	if !strings.Contains(string(d.AttachHint), "2 MB") || d.Body == "" || len(d.Attach) != 1 || !d.Attach[0].Inline {
 		t.Errorf("panel = %+v, want the description, the file in the task and the line under it", d)
 	}

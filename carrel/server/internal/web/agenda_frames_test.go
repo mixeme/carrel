@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 	"testing"
@@ -21,11 +22,21 @@ func TestAgendaByItsFrame(t *testing.T) {
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	page := decode[view.AgendaPage](t, app.h.do(get("/app/calendar?from=2026-08-10&task="+first.Poll.TaskID, app.sess)))
 
-	// Б2: «5 of 7 calendars · 3 accounts · 10 – 16 August 2026 · ‹Europe/Moscow›».
-	if n := len(page.Subtitle); n < 2 || page.Subtitle[n-1] != (view.Run{Text: "Europe/Moscow", Mark: view.RunMono}) ||
+	// Б2: «5 of 7 calendars · 3 accounts · 10 – 16 August 2026 ·
+	// ‹Europe/Moscow› · 6 events» — the count once the poll is over, the
+	// events of the window (Typecase's note 39, Р-48).
+	events := 0
+	for _, d := range page.Days {
+		events += len(d.Rows)
+	}
+	if n := len(page.Subtitle); n != 3 || page.Subtitle[1] != (view.Run{Text: "Europe/Moscow", Mark: view.RunMono}) ||
 		!strings.Contains(string(page.Subtitle[0].Text), " calendars · ") ||
-		!strings.HasSuffix(string(page.Subtitle[0].Text), " accounts · 10 – 16 August 2026 · ") {
-		t.Errorf("subtitle = %+v", page.Subtitle)
+		!strings.HasSuffix(string(page.Subtitle[0].Text), " accounts · 10 – 16 August 2026 · ") ||
+		events == 0 || string(page.Subtitle[2].Text) != fmt.Sprintf(" · %d events", events) {
+		t.Errorf("subtitle = %+v (%d events drawn)", page.Subtitle, events)
+	}
+	if sub := frameSubtitle(t, "s-agenda-1"); !shapeOf(sub).MatchString(runsText(page.Subtitle)) {
+		t.Errorf("subtitle %q, want the shape of %q (s-agenda-1)", runsText(page.Subtitle), sub)
 	}
 	// Б3: Print, as the contacts' (C-5.4).
 	if p := actionByID(page.Bar.Actions, "list.print"); p == nil || p.Icon != "i-print" || !strings.Contains(p.Href, "print=1") {

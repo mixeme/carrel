@@ -96,10 +96,11 @@ func Screen(p *view.AgendaPage) w.Shell {
 		main = append(main, *r)
 	}
 	compact := bind.Checked(p.Bar.Compact)
+	single := bind.Single(p.Rail)
 	for _, d := range p.Days {
 		rows := make([]w.ListRow, 0, len(d.Rows))
 		for _, r := range d.Rows {
-			rows = append(rows, row(r))
+			rows = append(rows, row(r, single))
 		}
 		main = append(main,
 			w.ListGroup{Title: w.Rubric{Text: string(d.Rubric), Form: w.RubricInline}, Count: &w.Num{Value: d.Count}},
@@ -295,8 +296,9 @@ func dates(f view.Form) w.Range {
 	return rng
 }
 
-// row is a record of the agenda.
-func row(r view.AgendaRow) w.TimeRow {
+// row is a record of the agenda; in one calendar (single) it has no source
+// and no column for it (s-agenda-17).
+func row(r view.AgendaRow, single bool) w.TimeRow {
 	t := w.TimeRow{
 		Mark:   w.Mark{Colour: string(r.Colour)},
 		Time:   string(r.Time),
@@ -313,6 +315,9 @@ func row(r view.AgendaRow) w.TimeRow {
 	if len(r.Badges) > 0 {
 		b := bind.Badge(r.Badges[0])
 		t.Caption = &b
+	}
+	if single {
+		t.Source, t.Single = "", true
 	}
 	return t
 }

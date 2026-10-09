@@ -1561,8 +1561,9 @@ type NoteDoc struct { // колонка текста страницы замет
     // первое по имени и сколько ещё словом, готовой фразой сервера:
     // «Properties Carrel does not know — X-JTX-COLOR and two more — are kept
     // unchanged and not shown here.» (s-notes-20); у одного — «A property …
-    // — X-JTX-COLOR — is kept…». Пусто — таких нет. Клиент ничего не считает
-    Foreign  Text
+    // — X-JTX-COLOR — is kept…»; имя свойства — моноширинный кусок. Пусто —
+    // таких нет. Клиент ничего не считает
+    Foreign  Runs
 }
 
 // Колонка справа. В правке Tags и Related пусты — они поля под заголовком

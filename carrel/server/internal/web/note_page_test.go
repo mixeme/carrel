@@ -203,8 +203,17 @@ func TestNoteEditIsThePage(t *testing.T) {
 		}
 		// The shelf's notes carry three properties Carrel does not know, as
 		// the frame's does: the line under the text is the frame's, ready.
-		if m := frameDocNote.FindStringSubmatch(frame); m == nil || string(p.Doc.Foreign) != frameText(m[1]) {
+		m := frameDocNote.FindStringSubmatch(frame)
+		if m == nil {
+			t.Fatalf("%s: the frame draws no line under the text: read the frame again", req.what)
+		}
+		if runsText(p.Doc.Foreign) != frameText(m[1]) {
 			t.Errorf("%s: the line of properties Carrel does not know = %q, the frame draws %v", req.what, p.Doc.Foreign, m)
+		}
+		// The property's name is monospaced, as the frame sets it.
+		if name := regexp.MustCompile(`<span class="tc-mono">([^<]*)</span>`).FindStringSubmatch(m[1]); name == nil ||
+			len(p.Doc.Foreign) != 3 || p.Doc.Foreign[1] != (view.Run{Text: view.Text(name[1]), Mark: view.RunMono}) {
+			t.Errorf("%s: the line's pieces = %+v, the frame sets %v monospaced", req.what, p.Doc.Foreign, name)
 		}
 	}
 }

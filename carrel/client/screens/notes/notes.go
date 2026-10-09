@@ -99,13 +99,14 @@ func Screen(p *view.NotesPage) w.Shell {
 		main = append(main, *r)
 	}
 	shown := chosen(p.Bar.Columns)
+	single := bind.Single(p.Rail)
 	for _, g := range p.Groups {
 		rows := make([]w.ListRow, 0, len(g.Rows))
 		for _, r := range g.Rows {
 			if shown != nil {
 				rows = append(rows, columnRow(r, shown))
 			} else {
-				rows = append(rows, row(r))
+				rows = append(rows, row(r, single))
 			}
 		}
 		if g.Rubric != "" {
@@ -247,8 +248,10 @@ func bar(b view.ListBar) w.Bar {
 	return w.Bar{Items: items, Right: &w.BarRight{Items: []w.BarPart{w.Mono{Text: strconv.Itoa(b.Loaded)}}, Secondary: true}}
 }
 
-// row is a note in the notebook.
-func row(r view.NoteRow) w.ExcerptRow {
+// row is a note in the notebook; in one notebook (single) it has no source
+// and no column for it, and the sources of a linked note are the hint of
+// its badge (s-notes-31).
+func row(r view.NoteRow, single bool) w.ExcerptRow {
 	e := w.ExcerptRow{
 		Mark:    w.Mark{Colour: string(r.Colour)},
 		Title:   []w.Inline{w.Text(r.Title)},
@@ -265,6 +268,14 @@ func row(r view.NoteRow) w.ExcerptRow {
 	}
 	for _, t := range bind.Tags(r.Tags) {
 		e.Tags = append(e.Tags, t)
+	}
+	if single {
+		e.Source, e.Single = "", true
+		if len(r.Badges) > 0 {
+			b := bind.LinkedBadge(r.Badges[0], r.Sources)
+			e.TitleBadge = &b
+		}
+		return e
 	}
 	for i, s := range r.Sources {
 		if i > 0 {
