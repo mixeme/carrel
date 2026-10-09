@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.175 — 2026-10-09
+
+The files section, the client's second scan: the panel of a chosen file by
+its frame (`s-files-1`).
+
+### Changed
+
+- **Changed of the file's panel is in numbers**, the same words as the
+  row's `FileRow.modified`: «2026-08-10 11:07» (was «10 August, 11:07»).
+  The frame draws one file twice — in the table and in the panel — and
+  says its date the same way in both.
+
 ## v0.2.174 — 2026-10-09
 
 The files section, the client's second scan (ФН8, ФН20): a row of the queue

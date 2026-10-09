@@ -409,3 +409,36 @@ func TestQueueRowSaysWhyItFailed(t *testing.T) {
 		t.Errorf("the queue does not say what to do: %q", queue.Note)
 	}
 }
+
+// The panel of a chosen file says when it changed as its row does, in
+// numbers (s-files-1: «Changed · 2026-08-10 11:07»): the frame draws one
+// file twice, and the two dates are the same words.
+func TestFilePanelSaysChangedAsTheRowDoes(t *testing.T) {
+	stamp := regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$`)
+	frame, drawn := mockupFrame(t, "s-files-1"), ""
+	for _, pair := range framePair.FindAllStringSubmatch(frame, -1) {
+		if frameText(pair[1]) == "Changed" {
+			drawn = frameText(pair[2])
+		}
+	}
+	if !stamp.MatchString(drawn) || !strings.Contains(frame, `<td class="tc-mono">`+drawn+`</td>`) {
+		t.Fatalf("s-files-1 says Changed in the panel as %q: read the frame again", drawn)
+	}
+
+	f := filesFixture(t, true)
+	f.srv.SeedFile(filesDocs+"a.txt", "alpha")
+	page := decode[view.FilesPage](t, f.h.do(get(f.at("")+"?select=a.txt", f.sess)))
+	if page.Details == nil {
+		t.Fatal("one file chosen and no panel")
+	}
+	row := string(fileRow(t, page, "a.txt").Modified)
+	for _, field := range page.Details.Fields {
+		if field.Label == "Changed" {
+			if got := string(field.Value); !stamp.MatchString(got) || got != row {
+				t.Errorf("the panel says Changed %q, the row %q; want both in numbers", got, row)
+			}
+			return
+		}
+	}
+	t.Error("the panel has no Changed")
+}

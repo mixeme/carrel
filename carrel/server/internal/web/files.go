@@ -926,7 +926,7 @@ func (s *Server) filePanel(c *fileCtx, segs []string, e file.Entry, here string,
 		d.Fields = append(d.Fields, view.Field{Label: "Dimensions", Value: dims, Mono: true})
 	}
 	d.Fields = append(d.Fields,
-		view.Field{Label: "Changed", Value: text(string(c.tf.formatWhen(e.Modified, false, s.now()))), Mono: true},
+		view.Field{Label: "Changed", Value: text(string(c.tf.numStamp(e.Modified))), Mono: true},
 		view.Field{Label: "Path", Value: text(path), Mono: true},
 	)
 	closed := cloneValues(q)
