@@ -307,6 +307,13 @@ func (s *Server) postFilesUpload(w http.ResponseWriter, r *http.Request) {
 	case n == 0:
 		s.answerUpload(w, r, c, view.Notice{Role: view.NoticeAlert, Title: "No file was chosen", Body: "Choose the files to upload and send the form again."})
 	default:
+		// An upload from the menu's sheet remembers its folder for the next
+		// one (s-notes-11: «Change it here and the next upload from this
+		// menu goes to the new one»).
+		if r.URL.Query().Get("menu") != "" {
+			key, _ := c.sess.DataKey()
+			_ = s.users.SetUploadFolder(c.sess.AccountID(), key, sealed.AttachmentFolder{AccountID: c.conn.ID, Path: c.col.Path, Folder: c.segs})
+		}
 		s.answerUpload(w, r, c)
 	}
 }

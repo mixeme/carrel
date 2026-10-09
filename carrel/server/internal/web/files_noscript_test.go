@@ -155,12 +155,10 @@ func TestTreeNodesHaveAddresses(t *testing.T) {
 	if node.Href != want {
 		t.Errorf("picker node %q, want %q", node.Href, want)
 	}
-	// Choose this folder names the chosen one in its address: without
-	// scripts there is no field to send it.
+	// The node's address is the sheet with it chosen: Upload goes there.
 	chosenPicker := decode[view.FilePickerSheet](t, f.h.do(get(node.Href, f.sess)))
-	choose := actionHref(t, chosenPicker.Actions, "files.picker.choose")
-	if cu, _ := url.Parse(choose); cu.Query().Get("to") != node.ID {
-		t.Errorf("Choose this folder = %q", choose)
+	if up := actionByID(chosenPicker.Actions, "files.picker.upload"); up == nil || chosenPicker.Tree.Chosen != node.ID || !strings.Contains(up.Href, "/upload/") {
+		t.Errorf("the sheet with a node chosen: chosen %q, upload %+v", chosenPicker.Tree.Chosen, up)
 	}
 }
 

@@ -541,8 +541,8 @@ func TestUploadSheetNewFolderRefusalIsTheFrame(t *testing.T) {
 	if again := frameOne(t, primary, frame, "primary upload")[1]; again != word {
 		t.Fatalf("s-notes-11 uploads with %q, s-files-19 with %q: read the frames again", word, again)
 	}
-	if up, ch := actionByID(sheet.Actions, "files.picker.upload"), actionByID(sheet.Actions, "files.picker.choose"); up == nil || !up.Primary || string(up.Label) != word || ch == nil || ch.Primary {
-		t.Errorf("upload %+v, choose %+v: want the upload primary and named %q, as s-notes-11 draws it", up, ch, word)
+	if up, ch := actionByID(sheet.Actions, "files.picker.upload"), actionByID(sheet.Actions, "files.picker.choose"); up == nil || !up.Primary || string(up.Label) != word || ch != nil {
+		t.Errorf("upload %+v, choose %+v: want the upload primary and named %q, and no Choose this folder, as s-notes-11 draws it", up, ch, word)
 	}
 	// New opens the line (a GET with new=1, ФГ4); the line sends the name.
 	line := decode[view.FilePickerSheet](t, f.h.do(get(sheet.Tree.New.Href, f.sess)))

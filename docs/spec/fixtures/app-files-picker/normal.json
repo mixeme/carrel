@@ -4,21 +4,12 @@
       "csrf": "csrf",
       "enabled": true,
       "file": "file",
-      "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/",
+      "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?menu=1",
       "id": "files.picker.upload",
       "label": "Upload",
       "method": "POST",
       "primary": true,
       "target": "queue"
-    },
-    {
-      "csrf": "csrf",
-      "enabled": true,
-      "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
-      "id": "files.picker.choose",
-      "label": "Choose this folder",
-      "method": "POST",
-      "target": "sheet"
     },
     {
       "enabled": true,

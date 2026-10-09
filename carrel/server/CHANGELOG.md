@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.169 — 2026-10-09
+
+The files section, the client's second scan (ФН14; Typecase's note 38): the
+sheet «Upload files» by its frame (`s-notes-11`, `s-files-19`).
+
+### Changed
+
+- **The upload from the menu remembers its folder itself.** «Upload» of
+  the sheet (`files.picker.upload`) goes to the chosen folder's upload with
+  `?menu=1`, and an upload that carried a file remembers that folder for
+  the next one from the menu. Choosing a node remembers nothing; an upload
+  from a folder's own page does not touch the menu's folder.
+
+### Removed
+
+- «Choose this folder» (`files.picker.choose`) of the sheet «Upload files»:
+  no frame draws it. Browse of the attachment folder
+  (`?for=attachments`) keeps its own.
+
 ## v0.2.168 — 2026-10-09
 
 The files section, the client's second scan (ФН17–ФН19; the owner's word of

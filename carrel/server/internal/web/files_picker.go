@@ -190,7 +190,7 @@ func (s *Server) postFilesPicker(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// New folder of the tree (s-notes-11): made in the chosen folder and
-	// chosen in its turn; remembered, like any folder, by Choose this folder.
+	// chosen in its turn; remembered, like any folder, by an upload into it.
 	if r.FormValue("mkcol") != "" {
 		// A refusal stands under the line of the name, which stays open
 		// with what was typed, as in the move sheet; the sheet's own line
@@ -240,14 +240,9 @@ func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fi
 	linkTree(&sheet.Tree, func(id string) string {
 		return s.postQuery("/app/files/picker", url.Values{"for": {"upload"}, "to": {id}})
 	})
-	// Choose this folder names the chosen one in its address: without
-	// scripts nothing else would send it (U-8).
-	remember := url.Values{"for": {"upload"}}
-	if chosen != nil {
-		remember.Set("to", s.route(chosen.href("", chosen.segs, true)))
-	}
-	choose := view.Action{ID: "files.picker.choose", Label: "Choose this folder", Method: "POST", Enabled: true,
-		Href: s.postQuery("/app/files/picker", remember)}
+	// The sheet has no «Choose this folder» (s-notes-11): a folder is
+	// chosen by its node, and the upload into it remembers it for the next
+	// one from the menu — its address says it is the menu's (menu=1).
 	upload := view.Action{ID: "files.picker.upload", Label: "Upload", Method: "POST", Primary: true, File: uploadField}
 	switch {
 	case chosen == nil:
@@ -255,14 +250,14 @@ func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fi
 	case chosen.col.ReadOnly:
 		upload.Reason = text(readOnlyReason)
 	default:
-		upload.Enabled, upload.Href = true, s.route(chosen.href("upload", chosen.segs, true))
+		upload.Enabled, upload.Href = true, s.route(chosen.href("upload", chosen.segs, true))+"?menu=1"
 	}
 	back := url.Values{"for": {"upload"}}
 	if chosen != nil {
 		back.Set("to", s.route(chosen.href("", chosen.segs, true)))
 	}
 	s.newFolder(&sheet.Tree, chosen, "/app/files/picker", url.Values{"for": {"upload"}, "mkcol": {"1"}}, "/app/files/picker", back, open)
-	sheet.Actions = []view.Action{upload, choose,
+	sheet.Actions = []view.Action{upload,
 		{ID: "files.picker.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.route("/app/files")}}
 	return sheet
 }
