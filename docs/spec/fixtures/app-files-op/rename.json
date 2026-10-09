@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1&item=2026-08-10-sync-board.png&op=rename",
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1\u0026item=2026-08-10-sync-board.png\u0026op=rename",
       "id": "file.rename.confirm",
       "label": "Rename",
       "method": "POST",
@@ -18,9 +18,10 @@
       "method": "GET"
     }
   ],
+  "alert": [],
   "failure": null,
   "form": {
-    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1&item=2026-08-10-sync-board.png&op=rename",
+    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1\u0026item=2026-08-10-sync-board.png\u0026op=rename",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -48,7 +49,7 @@
             "focus": true,
             "hint": "",
             "kind": "text",
-            "label": "New name",
+            "label": "Name",
             "name": "name",
             "options": [],
             "readOnly": false,
@@ -65,8 +66,12 @@
     "2026-08-10-sync-board.png"
   ],
   "op": "rename",
-  "subject": "from Documents / carrel / attachments",
+  "subject": "Documents / carrel / attachments",
   "target": null,
   "title": "Rename",
-  "warning": []
+  "warning": [
+    {
+      "text": "The name of a file is its address: a note or an event that keeps a link to it, and a published link, will not find it under the new name."
+    }
+  ]
 }

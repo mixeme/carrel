@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1&item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=move&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?go=1\u0026item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
       "id": "file.move.confirm",
       "label": "Move here",
       "method": "POST",
@@ -18,6 +18,7 @@
       "method": "GET"
     }
   ],
+  "alert": [],
   "failure": null,
   "form": null,
   "items": [
@@ -32,7 +33,7 @@
     "name": null,
     "new": {
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&new=1&op=move&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026new=1\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
       "icon": "i-plus",
       "id": "files.tree.new",
       "label": "New folder",
@@ -43,7 +44,7 @@
       {
         "children": [],
         "expanded": false,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=move&to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
         "id": "/app/files/a-nc-home/Files/",
         "label": "Files",
         "readOnly": false,
@@ -54,11 +55,12 @@
           {
             "children": [
               {
+                "attachments": true,
                 "children": [
                   {
                     "children": [],
                     "expanded": true,
-                    "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=move&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
+                    "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-07%2F",
                     "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
                     "label": "2026-07",
                     "readOnly": false,
@@ -66,16 +68,15 @@
                   }
                 ],
                 "expanded": true,
-                "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=move&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+                "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
                 "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
                 "label": "attachments",
                 "readOnly": false,
-                "stamp": "",
-                "attachments": true
+                "stamp": ""
               }
             ],
             "expanded": true,
-            "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=move&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2F",
+            "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2F",
             "id": "/app/files/a-sftp-vps/Documents/carrel/",
             "label": "carrel",
             "readOnly": false,
@@ -83,7 +84,7 @@
           }
         ],
         "expanded": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=move&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2F",
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2F",
         "id": "/app/files/a-sftp-vps/Documents/",
         "label": "Documents",
         "readOnly": false,

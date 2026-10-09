@@ -4,7 +4,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?etag=18ca6326aee5680067000&etag=18ca2d8254f28000c00&etag=18c89f188a41c8002ccccd&go=1&item=2026-08-10-sync-board.png&item=release-checklist.md&item=2026-08-04-whiteboard.jpg&op=delete",
+      "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?etag=18ca6326aee5680067000\u0026etag=18ca2d8254f28000c00\u0026etag=18c89f188a41c8002ccccd\u0026go=1\u0026item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=delete",
       "id": "file.delete.confirm",
       "label": "Delete",
       "method": "POST",
@@ -18,6 +18,15 @@
       "method": "GET"
     }
   ],
+  "alert": [
+    {
+      "mark": "strong",
+      "text": "3"
+    },
+    {
+      "text": " files, 3.2 MB, are deleted on sftpgo · vps. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+    }
+  ],
   "failure": null,
   "form": null,
   "items": [
@@ -26,12 +35,12 @@
     "2026-08-04-whiteboard.jpg"
   ],
   "op": "delete",
-  "subject": "from Documents / carrel / attachments",
+  "subject": "Documents / carrel / attachments",
   "target": null,
   "title": "Delete 3 items",
   "warning": [
     {
-      "text": "Carrel keeps no index of what points at a file: it may be the attachment of a note or an event, and nothing checks that before it goes. Deleting cannot be undone."
+      "text": "Carrel keeps no index of what points at these files. They may be attached to a note or an event — check before deleting."
     }
   ]
 }

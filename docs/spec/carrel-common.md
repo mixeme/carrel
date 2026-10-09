@@ -2151,10 +2151,14 @@ type FilePickerSheet struct {
 type FileOpSheet struct {
     Op      FileOp // C-8
     Title   Text
-    Subject Text
+    Subject Text // перенос и копия: «from Documents / carrel / attachments» (s-files-4); переименование и удаление — путь без «from» (s-files-21, -22)
     Items   []Text
     Target  *FileTree
-    Warning Runs // на одном сервере `MOVE` моноширинно (s-files-4)
+    // Alert — у удаления, тревогой перед Warning (s-files-22): сколько
+    // исчезнет, какого объёма, на каком сервере и что копии нет; число
+    // жирным; у папки — «The folder and everything in it …».
+    Alert   Runs
+    Warning Runs // перенос: на одном сервере `MOVE` моноширинно (s-files-4); переименование — кого заденет новый адрес (s-files-21); удаление — что ссылок никто не считал (s-files-22)
     Failure *Notice
     Form    *Form
     Actions []Action

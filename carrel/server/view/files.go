@@ -189,13 +189,25 @@ type FilePickerSheet struct {
 }
 
 type FileOpSheet struct {
-	Op      FileOp    `json:"op"`      // C-8
-	Title   Text      `json:"title"`   // «Move 3 items» (s-files-4)
-	Subject Text      `json:"subject"` // откуда: «from Documents / carrel / attachments»
+	Op    FileOp `json:"op"`    // C-8
+	Title Text   `json:"title"` // «Move 3 items» (s-files-4)
+	// Subject — где: у переноса и копии «from Documents / carrel /
+	// attachments» (s-files-4), у переименования и удаления — путь без
+	// «from» (s-files-21, -22)
+	Subject Text      `json:"subject"`
 	Items   []Text    `json:"items"`
 	Target  *FileTree `json:"target"`
-	Warning Runs      `json:"warning"` // что сделает перенос: на одном сервере MOVE (моноширинно, s-files-4), между хранилищами — скачивание и загрузка
-	Failure *Notice   `json:"failure"` // New folder не завёл папку; nil — отказа не было
+	// Alert — у удаления, тревогой перед Warning (s-files-22): сколько
+	// исчезнет, какого объёма и на каком сервере, и что копии нет — «‹3›
+	// files, 4.4 MB, are deleted on sftpgo · vps. …», число жирным; у папки
+	// — «The folder and everything in it …». У прочих операций пусто
+	Alert Runs `json:"alert"`
+	// Warning — что сделает операция: перенос на одном сервере — MOVE
+	// (моноширинно, s-files-4), между хранилищами — скачивание и загрузка;
+	// переименование — кого заденет новый адрес (s-files-21); удаление —
+	// что ссылок на файлы никто не считал (s-files-22)
+	Warning Runs    `json:"warning"`
+	Failure *Notice `json:"failure"` // New folder не завёл папку; nil — отказа не было
 	// Form — у переименования: POST на адрес подтверждения (go=1), скрытый
 	// _csrf и поле name — новое имя, сначала нынешнее, курсор в нём; Rename
 	// листа отправляет её. У прочих операций nil

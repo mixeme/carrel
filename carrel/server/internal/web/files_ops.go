@@ -882,7 +882,12 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 	if op == view.FileRename {
 		sheet.Title = "Rename"
 	}
-	sheet.Subject = text("from " + strings.Join(append([]string{collectionLabel(c.col)}, c.segs...), " / "))
+	// A move and a copy say where from (s-files-4); a rename and a deletion
+	// say where the item is (s-files-21, -22).
+	sheet.Subject = text(strings.Join(append([]string{collectionLabel(c.col)}, c.segs...), " / "))
+	if op == view.FileMove || op == view.FileCopy {
+		sheet.Subject = "from " + sheet.Subject
+	}
 	names := make([]string, len(items))
 	for i, e := range items {
 		names[i] = e.Name
@@ -898,13 +903,15 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		// The new name is the form's field "name".
 		confirm.Label = "Rename"
 		confirm = writeAction(c, confirm)
+		sheet.Warning = line("The name of a file is its address: a note or an event that keeps a link to it, and a published link, will not find it under the new name.")
 	case view.FileDelete:
 		confirm.Label, confirm.Danger = "Delete", true
 		for _, e := range items {
 			run.Add("etag", e.ETag)
 		}
 		confirm = writeAction(c, confirm)
-		sheet.Warning = line("Carrel keeps no index of what points at a file: it may be the attachment of a note or an event, and nothing checks that before it goes. Deleting cannot be undone.")
+		sheet.Alert = deletionAlert(items, connLabel(c.conn))
+		sheet.Warning = line("Carrel keeps no index of what points at these files. They may be attached to a note or an event — check before deleting.")
 	default:
 		confirm.Label = "Move here"
 		if op == view.FileCopy {
@@ -948,12 +955,38 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 	// send (U-8). It starts as the name there now.
 	if op == view.FileRename && confirm.Enabled {
 		form := view.Form{Action: confirm.Href, Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(c.sess),
-			{Name: "name", Label: "New name", Kind: view.InputText, Value: text(items[0].Name), Required: true}}}}}
+			{Name: "name", Label: "Name", Kind: view.InputText, Value: text(items[0].Name), Required: true}}}}}
 		form = focused(form, "name")
 		sheet.Form = &form
 	}
 	sheet.Actions = []view.Action{confirm, {ID: "file.op.cancel", Label: "Cancel", Href: s.route(c.href("", c.segs, true)), Method: "GET", Enabled: true}}
 	return sheet
+}
+
+// deletionAlert says what a deletion takes, how much and from which server,
+// and that there is no copy to bring it back from (s-files-22): files by
+// their count, strong, and their size; a folder with everything in it — its
+// size nobody read.
+func deletionAlert(items []file.Entry, server string) view.Runs {
+	const tail = " on %s. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+	folders := 0
+	for _, e := range items {
+		if e.Dir {
+			folders++
+		}
+	}
+	n := strconv.Itoa(len(items))
+	switch {
+	case folders == 0 && len(items) == 1:
+		return join(strongRun(n), fmt.Sprintf(" file, %s, is deleted"+tail, sizeOf(items), server))
+	case folders == 0:
+		return join(strongRun(n), fmt.Sprintf(" files, %s, are deleted"+tail, sizeOf(items), server))
+	case len(items) == 1:
+		return line(fmt.Sprintf("The folder and everything in it are deleted"+tail, server))
+	case folders == 1:
+		return join(strongRun(n), fmt.Sprintf(" items, the folder among them with everything in it, are deleted"+tail, server))
+	}
+	return join(strongRun(n), fmt.Sprintf(" items, the folders among them with everything in them, are deleted"+tail, server))
 }
 
 // fileTree is where a move or a copy can go (C-6.7): every live file

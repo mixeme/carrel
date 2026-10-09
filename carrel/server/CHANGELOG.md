@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.164 — 2026-10-09
+
+The files section, the client's second scan (ФН11, ФН12): the words of a
+rename's and a deletion's sheet by their frames (`s-files-21`, `-22`).
+
+### Changed
+
+- **A rename** says where the item is — `FileOpSheet.subject` is the path
+  without «from» —, its field is «Name» (was «New name»), and `warning`
+  says whom the new address will lose.
+- **A deletion** has `subject` without «from» too, and two messages:
+  `FileOpSheet.alert` (new) — how many files, of what size and on which
+  server are deleted, and that Carrel holds no copy, the count strong; a
+  folder goes «with everything in it» — and `warning` in new words: nothing
+  counted the links to these files. A client that drew `warning` alone
+  draws `alert` before it, as an alert.
+
 ## v0.2.163 — 2026-10-09
 
 The files section, the client's second scan (ФН1–ФН4): a folder's page by
