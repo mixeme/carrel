@@ -140,7 +140,8 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | `CARREL_DAV_MAX_RESPONSE_BYTES` | 10 485 760 | 10 MiB | Потолок одного DAV-ответа; тело файла (`dav.Streamer`) — без него |
 | `CARREL_CACHE_MAX_BODY_BYTES` | 67 108 864 | 64 MiB | Тела объектов на сессию |
 | `CARREL_CACHE_MAX_PROCESS_BYTES` | 268 435 456 | 256 MiB | Общий кэш процесса |
-| `CARREL_CACHE_MAX_THUMB_BYTES` | 16 777 216 | 16 MiB | Миниатюры на сессию |
+| `CARREL_CACHE_MAX_THUMB_BYTES` | 16 777 216 | 16 MiB | Фотографии контактов на сессию |
+| `CARREL_CACHE_MAX_FILE_THUMB_BYTES` | 67 108 864 | 64 MiB | Миниатюры файлов на сессию |
 | `CARREL_PHOTO_MAX_UPLOAD_BYTES` | 67 108 864 | 64 MiB | Загрузка фото контакта |
 | `CARREL_PHOTO_MAX_PIXELS` | 100 000 000 | 100 Mpx | Отказ до декодирования |
 | `CARREL_PHOTO_MAX_SIDE` | 512 px | — | Сторона после обрезки |
@@ -188,7 +189,8 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | `CARREL_DAV_MAX_REDIRECTS` | 5 | Цепочка редиректов DAV |
 | `CARREL_CACHE_MAX_COLLECTIONS` | 256 | Коллекций в кэше сессии |
 | `CARREL_CACHE_MAX_ETAG_ENTRIES` | 4096 | ETag-записей в кэше сессии |
-| `CARREL_CACHE_MAX_THUMB_ENTRIES` | 512 | Миниатюр в кэше сессии |
+| `CARREL_CACHE_MAX_THUMB_ENTRIES` | 512 | Фотографий контактов в кэше сессии |
+| `CARREL_CACHE_MAX_FILE_THUMB_ENTRIES` | 2048 | Миниатюр файлов в кэше сессии |
 | `CARREL_IMPORT_MAX_RECORDS` | 5000 | Записей в одном импорте |
 | `CARREL_FILES_MAX_ENTRIES` | 2000 | Членов папки в листинге |
 | `CARREL_MAIL_MAX_RECIPIENTS` | 20 | Получателей в письме |

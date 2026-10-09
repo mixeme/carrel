@@ -26,6 +26,9 @@ const (
 	kindBody    cacheKind = 2
 	kindThumb   cacheKind = 3
 	kindOther   cacheKind = 4
+	// kindFileThumb is the thumbnail of a file (S-17.1), budgeted apart from
+	// the photos of contacts (kindThumb).
+	kindFileThumb cacheKind = 5
 )
 
 type cacheEntry struct {
@@ -57,6 +60,7 @@ type Cache struct {
 	etagBytes  int64
 	thumbBytes int64
 	otherBytes int64
+	fileThumbs int64 // bytes of kindFileThumb
 }
 
 func newCache(cfg *conf.Config, mgr *Manager) *Cache {
@@ -73,6 +77,9 @@ func bodyKey(connID, path, version string) string {
 func etagKey(connID, path string) string { return "etag\x00" + connID + "\x00" + path }
 func thumbKey(connID, path, version string) string {
 	return "thumb\x00" + connID + "\x00" + path + "\x00" + version
+}
+func fileThumbKey(connID, path, version string) string {
+	return "fthumb\x00" + connID + "\x00" + path + "\x00" + version
 }
 func collKey(path string) string { return "coll\x00" + path }
 
@@ -131,6 +138,21 @@ func (c *Cache) PutThumb(connID, path, version string, data []byte) {
 // GetThumb returns a cached thumbnail.
 func (c *Cache) GetThumb(connID, path, version string) ([]byte, bool) {
 	return c.get(thumbKey(connID, path, version))
+}
+
+// PutFileThumb stores the thumbnail of a file by connection, path and file
+// version (S-4.2, S-17.1). It has a budget of its own
+// (CARREL_CACHE_MAX_FILE_THUMB_BYTES, …_ENTRIES), apart from the photos of
+// contacts: a book of contacts and a folder of pictures do not push each
+// other out, and a file's thumbnail is the dearer to make again — its file
+// is read whole from the far server. No bytes — the file has no thumbnail.
+func (c *Cache) PutFileThumb(connID, path, version string, data []byte) {
+	c.put(kindFileThumb, fileThumbKey(connID, path, version), data)
+}
+
+// GetFileThumb returns what PutFileThumb stored for that version.
+func (c *Cache) GetFileThumb(connID, path, version string) ([]byte, bool) {
+	return c.get(fileThumbKey(connID, path, version))
 }
 
 // PutImageSize stores what the head of an image said of its size, by
@@ -285,9 +307,11 @@ func (c *Cache) ttlExpiredLocked(e *cacheEntry) bool {
 func (c *Cache) enforceSessionLimitsLocked() {
 	c.evictBytesLocked(kindBody, c.cfg.CacheMaxBodyBytes, &c.bodyBytes)
 	c.evictBytesLocked(kindThumb, c.cfg.CacheMaxThumbBytes, &c.thumbBytes)
+	c.evictBytesLocked(kindFileThumb, c.cfg.CacheMaxFileThumbBytes, &c.fileThumbs)
 	// C-12 counts these in entries, not bytes.
 	c.evictCountLocked(kindETagMap, c.cfg.CacheMaxETagEntries)
 	c.evictCountLocked(kindThumb, c.cfg.CacheMaxThumbEntries)
+	c.evictCountLocked(kindFileThumb, c.cfg.CacheMaxFileThumbEntries)
 	c.evictCountLocked(kindOther, c.cfg.CacheMaxCollections)
 }
 
@@ -362,6 +386,8 @@ func (c *Cache) addBytesLocked(kind cacheKind, n int64) {
 		c.etagBytes += n
 	case kindThumb:
 		c.thumbBytes += n
+	case kindFileThumb:
+		c.fileThumbs += n
 	default:
 		c.otherBytes += n
 	}
@@ -370,7 +396,7 @@ func (c *Cache) addBytesLocked(kind cacheKind, n int64) {
 func (c *Cache) totalBytes() int64 {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	return c.bodyBytes + c.etagBytes + c.thumbBytes + c.otherBytes
+	return c.bodyBytes + c.etagBytes + c.thumbBytes + c.otherBytes + c.fileThumbs
 }
 
 func (c *Cache) clear() {
@@ -381,6 +407,7 @@ func (c *Cache) clear() {
 	c.etagBytes = 0
 	c.thumbBytes = 0
 	c.otherBytes = 0
+	c.fileThumbs = 0
 }
 
 func (c *Cache) markEnded() {
@@ -392,6 +419,7 @@ func (c *Cache) markEnded() {
 	c.etagBytes = 0
 	c.thumbBytes = 0
 	c.otherBytes = 0
+	c.fileThumbs = 0
 }
 
 // enforceProcessBudget trims caches across every session once this one has
@@ -488,7 +516,7 @@ func evictRank(k cacheKind) int {
 	switch k {
 	case kindBody:
 		return 0
-	case kindThumb:
+	case kindThumb, kindFileThumb:
 		return 1
 	case kindOther:
 		return 2

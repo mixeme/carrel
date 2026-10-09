@@ -17,6 +17,35 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.179 — 2026-10-10
+
+Where a file's thumbnail is kept (the owner's decisions of 10.10.2026): in
+the browser, by the version of the file, and in a budget of the session's
+cache that is its own.
+
+### Changed
+
+- **The browser keeps a thumbnail.** An address that names the version of
+  its file (`?thumb=1&v=…`, as the rows give it) answers with
+  `Cache-Control: private, max-age=31536000, immutable`: the browser holds
+  the thumbnail on the person's machine and does not ask again, across
+  sessions. Asked again with `If-None-Match`, the server answers 304 at
+  once — before, it made the thumbnail again when its own copy was gone.
+  An address without the version, or with one the file no longer has, is
+  asked every time, as before.
+
+### For operators
+
+- **Two new settings.** `CARREL_CACHE_MAX_FILE_THUMB_BYTES` (64 MiB) and
+  `CARREL_CACHE_MAX_FILE_THUMB_ENTRIES` (2048) are the session's budget for
+  the thumbnails of files. `CARREL_CACHE_MAX_THUMB_BYTES` and
+  `…_ENTRIES` are the photos of contacts alone again: a book of contacts
+  and a folder of pictures no longer push each other out. A session that
+  looks at many pictures may now hold up to 64 MiB more;
+  `CARREL_CACHE_MAX_PROCESS_BYTES` (256 MiB) still bounds all sessions
+  together.
+- Thumbnails are never written to the server's disk.
+
 ## v0.2.178 — 2026-10-10
 
 A thumbnail for every picture the server can read (the owner's decision):

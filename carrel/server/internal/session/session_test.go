@@ -345,3 +345,65 @@ func TestSessionEvictionByAccessTime(t *testing.T) {
 		t.Fatal("b should survive after recent access")
 	}
 }
+
+// S-4.2: the thumbnails of files and the photos of contacts have a budget
+// each — a book of contacts does not push a folder's thumbnails out, nor the
+// other way; within its own budget each gives up what was used longest ago,
+// by bytes and by count.
+func TestFileThumbnailsHaveTheirOwnBudget(t *testing.T) {
+	cfg := testCfg()
+	cfg.CacheMaxBodyBytes, cfg.CacheMaxProcessBytes = 1<<20, 1<<20
+	cfg.CacheMaxThumbBytes, cfg.CacheMaxThumbEntries = 100, 4
+	cfg.CacheMaxFileThumbBytes, cfg.CacheMaxFileThumbEntries = 300, 4
+	mgr := NewManager(cfg)
+	s, err := mgr.Create("a-1", "alice", testDataKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := s.Cache()
+	c.PutFileThumb("conn", "/files/a.jpg", "v1", make([]byte, 100))
+	c.PutFileThumb("conn", "/files/b.jpg", "v1", make([]byte, 100))
+	// A book of photos, far more than its own budget holds.
+	for i := range 20 {
+		c.PutThumb("conn", fmt.Sprintf("/book/%d", i), "e1", make([]byte, 40))
+	}
+	for _, p := range []string{"/files/a.jpg", "/files/b.jpg"} {
+		if _, ok := c.GetFileThumb("conn", p, "v1"); !ok {
+			t.Errorf("%s was pushed out by the photos of contacts", p)
+		}
+	}
+	if _, ok := c.GetThumb("conn", "/book/0", "e1"); ok {
+		t.Error("the photos of contacts outgrew their own budget")
+	}
+	if _, ok := c.GetThumb("conn", "/book/19", "e1"); !ok {
+		t.Error("the photo used last is gone")
+	}
+	// The same path under the two kinds is two entries.
+	c.PutThumb("conn", "/files/a.jpg", "v1", []byte("photo"))
+	if got, _ := c.GetFileThumb("conn", "/files/a.jpg", "v1"); len(got) != 100 {
+		t.Errorf("a photo under the path of a file replaced its thumbnail: %d bytes", len(got))
+	}
+
+	// Its own bytes: a third and a fourth of 100 leave the two used last.
+	c.PutFileThumb("conn", "/files/c.jpg", "v1", make([]byte, 100))
+	c.PutFileThumb("conn", "/files/d.jpg", "v1", make([]byte, 100))
+	if _, ok := c.GetFileThumb("conn", "/files/b.jpg", "v1"); ok {
+		t.Error("400 bytes of file thumbnails are held in a budget of 300")
+	}
+	if _, ok := c.GetFileThumb("conn", "/files/d.jpg", "v1"); !ok {
+		t.Error("the thumbnail made last is gone")
+	}
+	// Its own count: «no thumbnail» is an entry too.
+	for i := range 6 {
+		c.PutFileThumb("conn", fmt.Sprintf("/files/none-%d.png", i), "v1", nil)
+	}
+	held := 0
+	for i := range 6 {
+		if _, ok := c.GetFileThumb("conn", fmt.Sprintf("/files/none-%d.png", i), "v1"); ok {
+			held++
+		}
+	}
+	if held != 4 {
+		t.Errorf("%d entries of file thumbnails are held, the budget is 4", held)
+	}
+}

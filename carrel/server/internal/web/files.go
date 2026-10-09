@@ -1157,9 +1157,10 @@ var thumbBuilds = make(chan struct{}, conf.FileThumbBuilds)
 
 // sendThumb answers ?thumb=1 of a download address (S-17.1): the picture
 // scaled to fit conf.FileThumbSide, a JPEG — the original does not travel
-// for a thumbnail. It lives in the session's thumbnail cache by the version
-// of the file (?v= of the address the row gave), so the same version is read
-// from its server once. A file that is not one of thumbTypes by its name,
+// for a thumbnail. It lives in the session's cache of file thumbnails by the
+// version of the file (?v= of the address the row gave), so the same version
+// is read from its server once, and in the browser's own cache after that
+// (thumbKept). A file that is not one of thumbTypes by its name,
 // that is larger than conf.FileThumbMaxBytes, has more pixels than
 // CARREL_PHOTO_MAX_PIXELS or does not decode has no thumbnail: 404, and that
 // too is remembered for the version. A server that did not answer is asked
@@ -1171,8 +1172,16 @@ func (s *Server) sendThumb(w http.ResponseWriter, r *http.Request, c *fileCtx, p
 	}
 	cache, version := c.sess.Cache(), r.URL.Query().Get("v")
 	if version != "" {
-		if data, ok := cache.GetThumb(c.conn.ID, p, version); ok {
-			s.writeThumb(w, r, name, version, data)
+		// The address names the version: the copy a browser holds of it is
+		// the thumbnail, whether this session still holds one or not.
+		if r.Header.Get("If-None-Match") == thumbTag(version) {
+			w.Header().Set("ETag", thumbTag(version))
+			w.Header().Set("Cache-Control", thumbKept)
+			w.WriteHeader(http.StatusNotModified)
+			return
+		}
+		if data, ok := cache.GetFileThumb(c.conn.ID, p, version); ok {
+			s.writeThumb(w, r, name, version, version, data)
 			return
 		}
 	}
@@ -1188,9 +1197,9 @@ func (s *Server) sendThumb(w http.ResponseWriter, r *http.Request, c *fileCtx, p
 		return
 	}
 	if made != "" {
-		cache.PutThumb(c.conn.ID, p, made, data)
+		cache.PutFileThumb(c.conn.ID, p, made, data)
 	}
-	s.writeThumb(w, r, name, made, data)
+	s.writeThumb(w, r, name, version, made, data)
 }
 
 // makeThumb reads the file at p and makes its thumbnail. version is the
@@ -1223,20 +1232,34 @@ func (s *Server) makeThumb(ctx context.Context, c *fileCtx, p, name string) (dat
 	return data, d.ETag, nil
 }
 
+// thumbKept is how long a browser keeps a thumbnail whose address names the
+// version of its file: the bytes at that address never change, so it keeps
+// them a year and does not ask again — the thumbnails of a folder outlive
+// the session, on the person's own machine, and cost the server nothing
+// (S-17.1). «private»: no cache between the browser and Carrel keeps them.
+const thumbKept = "private, max-age=31536000, immutable"
+
+// thumbTag is the ETag of the thumbnail made of a version of a file.
+func thumbTag(version string) string { return `"t-` + version + `"` }
+
 // writeThumb hands a thumbnail to the browser, or 404 for a file that has
-// none. The address names the version, so a copy the browser holds of it
-// stands (304).
-func (s *Server) writeThumb(w http.ResponseWriter, r *http.Request, name, version string, data []byte) {
+// none. asked is the version the address named, made — the one the
+// thumbnail is of. Only an address that names the very version made is kept
+// by the browser; any other — no version, or a file that has changed since
+// the row was drawn — is asked again every time, as a download is.
+func (s *Server) writeThumb(w http.ResponseWriter, r *http.Request, name, asked, made string, data []byte) {
 	if len(data) == 0 {
 		s.notFound(w, r)
 		return
 	}
 	h := w.Header()
 	downloadHeaders(h, strings.TrimSuffix(name, path.Ext(name))+".jpg", "image/jpeg", true)
-	if version != "" {
-		tag := `"t-` + version + `"`
-		h.Set("ETag", tag)
-		if r.Header.Get("If-None-Match") == tag {
+	if made != "" {
+		h.Set("ETag", thumbTag(made))
+		if asked == made {
+			h.Set("Cache-Control", thumbKept)
+		}
+		if r.Header.Get("If-None-Match") == thumbTag(made) {
 			w.WriteHeader(http.StatusNotModified)
 			return
 		}

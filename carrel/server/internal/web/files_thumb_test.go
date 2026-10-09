@@ -6,6 +6,7 @@ import (
 	"image/jpeg"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -115,11 +116,33 @@ func TestFileThumbnailIsMadeByTheServer(t *testing.T) {
 	if n := f.srv.CountRequests(http.MethodGet, filesDocs+"photo.jpg") - before; n != 1 {
 		t.Errorf("the picture was read %d times for two looks at its thumbnail, want 1", n)
 	}
-	// The browser's copy of this version stands.
-	known := get(row.Thumb, f.sess)
-	known.Header.Set("If-None-Match", rec.Header().Get("ETag"))
-	if rec.Header().Get("ETag") == "" || f.h.do(known).Code != http.StatusNotModified {
-		t.Errorf("ETag %q, and the same asked with it is not 304", rec.Header().Get("ETag"))
+	// The address names the version of the file, so the browser keeps the
+	// thumbnail and does not ask again: the thumbnails of a folder outlive
+	// the session on the person's own machine.
+	if cc := rec.Header().Get("Cache-Control"); !strings.Contains(cc, "private") || !strings.Contains(cc, "immutable") || !strings.Contains(cc, "max-age=31536000") {
+		t.Errorf("Cache-Control of a thumbnail = %q", cc)
+	}
+	// And the copy it holds stands without anything being read or made —
+	// here for a picture this session never made a thumbnail of.
+	edge := fileRow(t, page, "edge.png").Thumb
+	known := get(edge, f.sess)
+	known.Header.Set("If-None-Match", `"t-`+thumbVersion(t, edge)+`"`)
+	if rec := f.h.do(known); rec.Code != http.StatusNotModified || rec.Body.Len() != 0 {
+		t.Errorf("a thumbnail the browser holds: %d, %d bytes", rec.Code, rec.Body.Len())
+	}
+	if n := f.srv.CountRequests(http.MethodGet, filesDocs+"edge.png"); n != 0 {
+		t.Errorf("a picture was read %d times to say its thumbnail has not changed", n)
+	}
+	if tag := rec.Header().Get("ETag"); tag != `"t-`+thumbVersion(t, row.Thumb)+`"` {
+		t.Errorf("ETag %q of the thumbnail at %q", tag, row.Thumb)
+	}
+	// An address without the version, or with another, is not kept: the
+	// thumbnail is of the file as it is now.
+	for _, at := range []string{f.at("download", "photo.jpg") + "?thumb=1", f.at("download", "photo.jpg") + "?thumb=1&v=stale"} {
+		loose := f.h.do(get(at, f.sess))
+		if loose.Code != http.StatusOK || strings.Contains(loose.Header().Get("Cache-Control"), "immutable") {
+			t.Errorf("%s: %d, Cache-Control %q", at, loose.Code, loose.Header().Get("Cache-Control"))
+		}
 	}
 
 	// A file that only says it is a picture: no thumbnail, and it is not
@@ -141,4 +164,14 @@ func TestFileThumbnailIsMadeByTheServer(t *testing.T) {
 	if rec := f.h.do(get(f.at("download", "photo.jpg")+"?inline=1", f.sess)); rec.Code != http.StatusOK || rec.Body.Len() != len(photo) {
 		t.Errorf("the original shown in place: %d, %d bytes", rec.Code, rec.Body.Len())
 	}
+}
+
+// thumbVersion is the version of the file an address of a thumbnail names.
+func thumbVersion(t *testing.T, href string) string {
+	t.Helper()
+	u, err := url.Parse(href)
+	if err != nil || u.Query().Get("v") == "" {
+		t.Fatalf("the thumbnail's address %q names no version", href)
+	}
+	return u.Query().Get("v")
 }

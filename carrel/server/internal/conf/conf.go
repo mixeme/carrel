@@ -38,6 +38,10 @@ type Config struct {
 	CacheMaxProcessBytes int64
 	CacheMaxThumbBytes   int64
 	CacheMaxThumbEntries int
+	// The thumbnails of files have a budget apart from the photos of
+	// contacts (S-4.2, S-17.1).
+	CacheMaxFileThumbBytes   int64
+	CacheMaxFileThumbEntries int
 
 	PhotoMaxSide        int
 	PhotoJPEGQuality    int
@@ -130,6 +134,9 @@ func defaults() *Config {
 		CacheMaxProcessBytes: 256 << 20,
 		CacheMaxThumbBytes:   16 << 20,
 		CacheMaxThumbEntries: 512,
+
+		CacheMaxFileThumbBytes:   64 << 20,
+		CacheMaxFileThumbEntries: 2048,
 
 		PhotoMaxSide:        512,
 		PhotoJPEGQuality:    85,
@@ -277,6 +284,16 @@ func applyKV(c *Config, key, val string) error {
 		}
 	case "CARREL_CACHE_MAX_THUMB_ENTRIES":
 		c.CacheMaxThumbEntries, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
+	case "CARREL_CACHE_MAX_FILE_THUMB_BYTES":
+		c.CacheMaxFileThumbBytes, err = atoi64(key, val)
+		if err != nil {
+			return err
+		}
+	case "CARREL_CACHE_MAX_FILE_THUMB_ENTRIES":
+		c.CacheMaxFileThumbEntries, err = atoi(key, val)
 		if err != nil {
 			return err
 		}
@@ -432,6 +449,12 @@ func (c *Config) validate() error {
 	}
 	if c.CacheMaxThumbEntries < 0 {
 		return fmt.Errorf("CARREL_CACHE_MAX_THUMB_ENTRIES: negative")
+	}
+	if c.CacheMaxFileThumbBytes < 0 {
+		return fmt.Errorf("CARREL_CACHE_MAX_FILE_THUMB_BYTES: negative")
+	}
+	if c.CacheMaxFileThumbEntries < 0 {
+		return fmt.Errorf("CARREL_CACHE_MAX_FILE_THUMB_ENTRIES: negative")
 	}
 	if _, err := c.ParseLogLevel(); err != nil {
 		return err
