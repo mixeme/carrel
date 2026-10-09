@@ -296,6 +296,7 @@
     "title": "attachments"
   },
   "queue": {
+    "hidden": false,
     "note": "",
     "rows": [
       {
@@ -347,6 +348,13 @@
       }
     ],
     "title": "Uploading 2 of 2",
+    "toggle": {
+      "enabled": true,
+      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?queue=0\u0026select=2026-08-10-sync-board.png\u0026select=release-checklist.md\u0026select=2026-08-04-whiteboard.jpg",
+      "id": "queue.hide",
+      "label": "Hide",
+      "method": "GET"
+    },
     "total": "4.1 MB"
   },
   "rail": {

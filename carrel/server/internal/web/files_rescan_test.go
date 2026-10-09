@@ -321,3 +321,43 @@ func TestAttachFromFilesHasNoIcon(t *testing.T) {
 		t.Errorf("Attach = %+v, want it primary and without an icon", a)
 	}
 }
+
+// ФН21: the queue hides and shows (s-files-2: Hide; s-files-3: the head
+// alone, with Show). Without scripts the button is an address — the folder
+// with the queue hidden, or shown again —, and the model says which it is.
+func TestQueueHidesAndShows(t *testing.T) {
+	head := regexp.MustCompile(`(?s)<div class="tc-queue([^"]*)">\s*<div class="tc-queue__head">.*?<button class="tc-btn is-sm" type="button">([^<]+)</button>`)
+	shown, hidden := frameOne(t, head, mockupFrame(t, "s-files-2"), "queue"), frameOne(t, head, mockupFrame(t, "s-files-3"), "queue")
+	if strings.Contains(shown[1], "is-min") || !strings.Contains(hidden[1], "is-min") || shown[2] == hidden[2] {
+		t.Fatalf("queues %q, %q: read the frames again", shown, hidden)
+	}
+
+	f := filesFixture(t, true)
+	f.srv.SeedFile(filesDocs+"a.txt", "alpha")
+	here := f.at("")
+	if page := decode[view.FilesPage](t, f.h.do(get(here, f.sess))); page.Queue != nil {
+		t.Fatalf("a queue with nothing in it: %+v", page.Queue)
+	}
+	// A name already taken waits for its answer, so the queue stays (rows
+	// finished are shown once).
+	if rec := f.h.do(uploadForm(f.at("upload"), f.sess, false, upload{"a.txt", "again"})); rec.Code >= 400 {
+		t.Fatalf("upload: %d %s", rec.Code, rec.Body)
+	}
+	page := decode[view.FilesPage](t, f.h.do(get(here+"?sort=size", f.sess)))
+	q := page.Queue
+	if q == nil || q.Hidden || q.Toggle == nil || string(q.Toggle.Label) != shown[2] || q.Toggle.Method != "GET" || !q.Toggle.Enabled || len(q.Rows) == 0 {
+		t.Fatalf("queue = %+v, want it shown with %q", q, shown[2])
+	}
+	page = decode[view.FilesPage](t, f.h.do(get(q.Toggle.Href, f.sess)))
+	q = page.Queue
+	if q == nil || !q.Hidden || q.Toggle == nil || string(q.Toggle.Label) != hidden[2] || q.Title == "" || len(q.Rows) == 0 {
+		t.Fatalf("hidden queue = %+v, want its head with %q", q, hidden[2])
+	}
+	// The folder keeps its order; Show brings the list back.
+	if !strings.Contains(q.Toggle.Href, "sort=size") || strings.Contains(q.Toggle.Href, "queue=") {
+		t.Errorf("Show = %q, want the folder as it was, the queue shown", q.Toggle.Href)
+	}
+	if back := decode[view.FilesPage](t, f.h.do(get(q.Toggle.Href, f.sess))); back.Queue == nil || back.Queue.Hidden {
+		t.Errorf("Show did not show: %+v", back.Queue)
+	}
+}

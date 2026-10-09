@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.173 — 2026-10-09
+
+The files section, the client's second scan (ФН21): the queue hides and
+shows (`s-files-2`, `s-files-3`).
+
+### Added
+
+- `TransferQueue.hidden` and `.toggle` on a folder's page: Hide
+  (`queue.hide`) is the folder's address with `?queue=0`, where the queue
+  comes hidden — its head alone is drawn — with Show (`queue.show`), the
+  folder as it was. The queue an upload answers with (the fragment) has no
+  `toggle`: it knows no folder.
+
 ## v0.2.172 — 2026-10-09
 
 The files section, the client's second scan (ФН15, ФН22): the root with no

@@ -252,7 +252,7 @@ func forgetFolder(sess *session.Session, connID, folder string) {
 }
 
 func onlyCuts(q url.Values) bool {
-	return q.Has("filter") || q.Has("sort") || q.Has("view") || q.Has("select") || q.Has("details") || q.Has("print")
+	return q.Has("filter") || q.Has("sort") || q.Has("view") || q.Has("select") || q.Has("details") || q.Has("print") || q.Has("queue")
 }
 
 // Markdown is not in Go's own table of types, and what a system's table says
@@ -781,7 +781,20 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 	}
 	page.Bar.Actions = append(page.Bar.Actions, s.detailsToggle(here, q, picked, shown), s.printAction(here))
 	page.Select, page.SelectField = s.selectForm(c, segs, here, q), "item"
-	page.Queue = s.transferQueue(c.sess)
+	// The queue hides into its head and shows again (s-files-2, -3): an
+	// address of the folder either way.
+	if page.Queue = s.transferQueue(c.sess); page.Queue != nil {
+		v := cloneValues(q)
+		toggle := view.Action{ID: "queue.hide", Label: "Hide", Method: "GET", Enabled: true}
+		if page.Queue.Hidden = q.Get("queue") == "0"; page.Queue.Hidden {
+			toggle.ID, toggle.Label = "queue.show", "Show"
+			v.Del("queue")
+		} else {
+			v.Set("queue", "0")
+		}
+		toggle.Href = s.route(here + querySuffix(v))
+		page.Queue.Toggle = &toggle
+	}
 	page.Print = view.Print{Title: page.Title, Range: printRange(string(c.stamp()), plural(total, "item"), filter), Taken: c.tf.taken(now)}
 	return page
 }

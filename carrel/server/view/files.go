@@ -116,6 +116,12 @@ type TransferQueue struct {
 	// Note — почему: отказы строк и отказ загрузки целиком, через « · »;
 	// пусто — сказать нечего
 	Note Text `json:"note"`
+	// Hidden — очередь свёрнута в строку шапки (s-files-3): список не
+	// рисуется. Toggle — Hide или Show: адрес той же папки со свёрнутой
+	// (queue=0) или развёрнутой очередью (GET); у очереди-фрагмента
+	// (ответ загрузки) nil — папки и её запроса в нём нет
+	Hidden bool    `json:"hidden"`
+	Toggle *Action `json:"toggle"`
 }
 type TransferRow struct {
 	Name     Text       `json:"name"`
