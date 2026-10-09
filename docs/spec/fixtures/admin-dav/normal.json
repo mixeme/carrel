@@ -21,6 +21,7 @@
         "legend": "Discovery without saving credentials",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -33,6 +34,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -46,6 +48,7 @@
             "mono": true
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -58,6 +61,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Asked each time: nothing of this page is kept.",
@@ -70,6 +74,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Only for a server whose certificate is not trusted: its SHA-256, as the trace shows it.",

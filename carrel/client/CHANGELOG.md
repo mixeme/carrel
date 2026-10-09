@@ -4,6 +4,25 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.7 — 2026-10-09
+
+Server `v0.2.161` (the owner's decision of 09.10.2026: several relations).
+
+### Changed
+
+- **Related to shows every relation and always has its line**
+  (`bind.Related`): each record related is a tag its cross unticks, and
+  after them stands the line one more link is typed into (`FormRow.Add`,
+  `TagInput.Add` — «Title or UID», «Add a link»), with the records loaded
+  and not yet related as its choices without a script. The edits of a task
+  and of a note draw it.
+
+### Waiting
+
+- U-5.5 rows 35, 40, 42: the field matches its frames, but the frame
+  comparison takes the `datalist` of the line's choices for something drawn
+  (Typecase's task 146).
+
 ## v0.4.6 — 2026-10-09
 
 Typecase `6833ef4` (Typecase's note 41: Carrel's task 119, the owner's

@@ -115,6 +115,14 @@ func formFields(f view.Form) url.Values {
 						out.Add(row.Name, o.Value)
 					}
 				}
+			case row.Kind == view.InputSelect && row.Multiple:
+				// Several options chosen: each one is a value (C-6.8).
+				out.Del(row.Name)
+				for _, o := range row.Options {
+					if o.Selected {
+						out.Add(row.Name, o.Value)
+					}
+				}
 			default:
 				out.Set(row.Name, string(row.Value))
 			}

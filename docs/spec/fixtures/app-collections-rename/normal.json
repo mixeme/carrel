@@ -30,6 +30,7 @@
         "legend": "",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -42,6 +43,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "focus": true,

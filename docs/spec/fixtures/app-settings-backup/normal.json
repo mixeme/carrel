@@ -38,6 +38,7 @@
         "legend": "",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -50,6 +51,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "focus": true,
@@ -63,6 +65,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -81,6 +84,7 @@
             "value": "1"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them.",
@@ -179,6 +183,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -207,6 +212,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -237,6 +243,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Created on first use.",
@@ -250,6 +257,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Copies past this number are deleted after the new one has been read back and checked, not before. An archive is dated and never overwritten.",
@@ -263,6 +271,7 @@
             "value": "8"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it, without Carrel and without a password.",
@@ -281,6 +290,7 @@
             "value": "1"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Separate from the sign-in password: the destination may be somebody else's hosting. Forget it and this job's archives open for nobody, including you.",
@@ -293,6 +303,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "0 is never. Carrel keeps no clock of its own.",
@@ -508,6 +519,7 @@
           "legend": "",
           "rows": [
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -520,6 +532,7 @@
               "value": "csrf"
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -548,6 +561,7 @@
               "value": ""
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -560,6 +574,7 @@
               "value": ""
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -588,6 +603,7 @@
               "value": ""
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "The path of the archive under the storage's root, such as backups/carrel-work-2026-08-16T031000Z.zip.age.",
@@ -600,6 +616,7 @@
               "value": ""
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "The job's own password. An archive that is not encrypted needs none.",

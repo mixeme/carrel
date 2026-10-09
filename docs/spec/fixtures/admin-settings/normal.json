@@ -19,6 +19,7 @@
         "legend": "Global",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -31,6 +32,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -43,6 +45,7 @@
             "value": "instance"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "From 1 to 720. A new invitation, and one extended, live this long.",
@@ -56,6 +59,7 @@
             "mono": true
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "From 1 to 168. Applies to sessions already open.",
@@ -69,6 +73,7 @@
             "mono": true
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "From 1 to 365. Applies to sessions started from now on.",
@@ -82,6 +87,7 @@
             "mono": true
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "On the sign-in screen and in the letters this instance sends.",
@@ -94,6 +100,7 @@
             "value": "carrel.example"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Links in letters start with it. Set with CARREL_PUBLIC_URL.",
@@ -130,6 +137,7 @@
         "legend": "Letters from users",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -142,6 +150,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -154,6 +163,7 @@
             "value": "limits"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form.",
@@ -166,6 +176,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "From 1 to 100. A larger file goes as a published link, shown as such before sending.",
@@ -179,6 +190,7 @@
             "mono": true
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "From 1 to 100, and not less than an attachment.",
@@ -192,6 +204,7 @@
             "mono": true
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "From 1 to 100.",
@@ -205,6 +218,7 @@
             "mono": true
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "From 1 to 1000, per person, per UTC day.",
@@ -240,6 +254,7 @@
         "legend": "Test",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -252,6 +267,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -399,6 +415,7 @@
         "legend": "Mail",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -411,6 +428,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Empty turns mail off: invitations and links are then handed over in person.",
@@ -424,6 +442,7 @@
             "mono": true
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -437,6 +456,7 @@
             "mono": true
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "STARTTLS on 587 and TLS on 465 are the usual pairs. None only for a relay on this host or network: the password then goes unencrypted.",
@@ -466,6 +486,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -478,6 +499,7 @@
             "value": "relay"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Leave blank to keep the current one.",
@@ -490,6 +512,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "The instance's own letters go from it, and it is the envelope sender of every letter. A person's letter never goes from their own domain: the relay vouches for this one.",
@@ -502,6 +525,7 @@
             "value": "noreply@carrel.example"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -514,6 +538,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Of people's letters. Your relay decides which of the two it will let out. The envelope sender stays the From address either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here. Replies go to the person's confirmed address in both cases.",

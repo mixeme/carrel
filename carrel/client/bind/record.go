@@ -71,17 +71,20 @@ func TickID(a view.Action) string {
 	return a.ID + a.Href
 }
 
-// Related is the field Related to of a task's form (C-6.8 InputSelect whose
-// last option is typed by hand, Option.Typed; s-tasks-3, -10, -11) as a
-// field of tags under the row's name: the record chosen — the label of the
-// option selected, a record not loaded its UID — a tag the cross unticks,
-// sent with its value (the UID). One relation: with none chosen, the line a
-// UID is typed in, sent under the same name, its pattern the row's
-// (Placeholder), its suggestions where the row says (Suggest, the library's
-// live layer); without a script the records loaded are its choices
-// (Typecase's task 96) — each its UID sent, its label and what it is
-// (Option.Meta: «event · 11 Aug») shown beside it; «By UID…» (Typed) is the
-// line itself.
+// Related is the field Related to of a task's and a note's form (C-6.8: an
+// InputSelect several options of which may be chosen, Multiple; s-tasks-3,
+// -10, -11) as a field of tags under the row's name: every record related —
+// the label of each option selected, a record not loaded its UID — a tag
+// the cross unticks, sent with its value (the UID). After the tags stands
+// the line one more link is typed into (FormRow.Add, «related.add»,
+// Typecase's task 142) — whether there are relations or not —, sent under
+// its own name, its pattern and its accessible name its own, its
+// suggestions where it says (Suggest, the library's live layer); without a
+// script the records loaded and not yet related are its choices (Typecase's
+// task 96) — each its UID sent, its label and what it is (Option.Meta:
+// «event · 11 Aug») shown beside it; «By UID…» (Typed) is the line itself.
+// A row without such a line has one only while nothing is related, under
+// the field's own name.
 func Related(r view.FormRow) w.TagInput {
 	in := w.TagInput{Name: r.Name}
 	var choices []w.ListOption
@@ -98,7 +101,10 @@ func Related(r view.FormRow) w.TagInput {
 			choices = append(choices, w.ListOption{Value: o.Value, Label: label})
 		}
 	}
-	if len(in.Parts) == 0 {
+	switch {
+	case r.Add != nil:
+		in.Add = &w.TagAdd{Name: r.Add.Name, Placeholder: string(r.Add.Placeholder), Label: string(r.Add.Label), Suggest: r.Add.Suggest, Options: choices}
+	case len(in.Parts) == 0:
 		in.Add = &w.TagAdd{Name: r.Name, Placeholder: string(r.Placeholder), Label: string(r.Label), Suggest: r.Suggest, Options: choices}
 	}
 	return in

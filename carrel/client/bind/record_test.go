@@ -88,6 +88,17 @@ func TestRelated(t *testing.T) {
 		{Label: "By UID…", Separator: true, Typed: true, Hint: "By UID: a record that is not among the loaded ones."},
 	}}
 	same(t, "the record chosen", bind.Related(r), w.TagInput{Name: "related", Parts: []w.TagInputPart{w.Tag{Label: "Забрать документы", Removable: true, Value: "1d55"}}})
+	// Every relation is a tag, and the line one more is typed into stands
+	// after them whether there are any or not (the owner's decision of
+	// 09.10.2026; Typecase's task 142): its own name, pattern and
+	// accessible name, the records not yet related its choices.
+	many := r
+	many.Multiple = true
+	many.Add = &view.FormRow{Name: "related.add", Label: "Add a link", Kind: view.InputText, Placeholder: "Title or UID", Suggest: "/app/tasks/a/dela/aa10/related"}
+	same(t, "a relation and the line", bind.Related(many), w.TagInput{Name: "related",
+		Parts: []w.TagInputPart{w.Tag{Label: "Забрать документы", Removable: true, Value: "1d55"}},
+		Add: &w.TagAdd{Name: "related.add", Placeholder: "Title or UID", Label: "Add a link", Suggest: "/app/tasks/a/dela/aa10/related",
+			Options: []w.ListOption{{Value: "bb21", Label: "Дописать раздел про кэш · task · 14 Aug"}}}})
 	// With none chosen, the line of a UID, and the records loaded as its
 	// choices without a script (Typecase's task 96): the UID sent, the label
 	// and what the record is shown beside it; «By UID…» is the line itself.

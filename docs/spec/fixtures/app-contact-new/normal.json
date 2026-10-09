@@ -26,6 +26,7 @@
         "legend": "",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -38,6 +39,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -50,6 +52,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -62,6 +65,7 @@
             "value": "1786370760"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "focus": true,
@@ -75,6 +79,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -87,6 +92,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -99,6 +105,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -111,6 +118,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -123,6 +131,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -135,6 +144,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Type it: 14.03.1987, or 14.03 without the year.",
@@ -155,6 +165,7 @@
         "legend": "Phone numbers",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -198,6 +209,7 @@
             "value": "cell"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -211,6 +223,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -223,6 +236,7 @@
             "value": "tel.0"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -234,6 +248,7 @@
             "required": false,
             "template": [
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -277,6 +292,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -290,6 +306,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -311,6 +328,7 @@
         "legend": "Email addresses",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -322,6 +340,7 @@
             "required": false,
             "template": [
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -350,6 +369,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -362,6 +382,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -383,6 +404,7 @@
         "legend": "Addresses",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -394,6 +416,7 @@
             "required": false,
             "template": [
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -422,6 +445,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -434,6 +458,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -446,6 +471,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -458,6 +484,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -471,6 +498,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -483,6 +511,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -504,6 +533,7 @@
         "legend": "Other",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -516,6 +546,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",

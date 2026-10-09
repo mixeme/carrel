@@ -34,11 +34,20 @@ type FormRow struct {
 	Kind       InputKind `json:"kind"` // C-8
 	Value      Text      `json:"value"`
 	Options    []Option  `json:"options"`
-	Hint       Text      `json:"hint"`
-	Error      Text      `json:"error"`
-	Extra      *Action   `json:"extra"` // кнопка, принадлежащая полю
-	ReadOnly   bool      `json:"readOnly"`
-	Required   bool      `json:"required"`
+	// Multiple — у InputSelect: выбрано может быть несколько вариантов, и
+	// каждый выбранный уходит значением под Name (Related to — все связи
+	// записи, s-tasks-3); Value тогда — первый из них
+	Multiple bool `json:"multiple,omitempty"`
+	// Add — у такого поля: строка, которой набирают ещё одно значение, со
+	// своим именем («related.add»), подсказкой («Title or UID»), доступным
+	// именем («Add a link») и адресом подсказок (Suggest); стоит в поле
+	// после выбранных, есть ли они или нет (s-tasks-3, -14). nil — строки нет
+	Add      *FormRow `json:"add"`
+	Hint     Text     `json:"hint"`
+	Error    Text     `json:"error"`
+	Extra    *Action  `json:"extra"` // кнопка, принадлежащая полю
+	ReadOnly bool     `json:"readOnly"`
+	Required bool     `json:"required"`
 	// Образец в пустом поле, как его рисует кадр: «DD.MM.YYYY» у дня
 	// рождения (s-contacts-4); у прочих полей пусто
 	Placeholder Text `json:"placeholder,omitempty"`

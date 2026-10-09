@@ -2,6 +2,7 @@
   "attach": [],
   "attendees": {
     "add": {
+      "add": null,
       "error": "",
       "extra": null,
       "hint": "",
@@ -84,6 +85,7 @@
         "legend": "",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -96,6 +98,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -108,6 +111,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -120,6 +124,7 @@
             "value": "1786370760"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "focus": true,
@@ -133,6 +138,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -145,6 +151,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -179,6 +186,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -191,6 +199,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -209,6 +218,7 @@
         "legend": "When",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -221,6 +231,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -234,6 +245,7 @@
             "value": "2026-08-10"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -247,6 +259,7 @@
             "value": "18:00"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -260,6 +273,7 @@
             "value": "2026-08-10"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -273,6 +287,7 @@
             "value": "19:00"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -2749,6 +2764,7 @@
         "legend": "Reminders",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -2798,6 +2814,7 @@
             "value": "-PT10M"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -2809,6 +2826,7 @@
             "required": false,
             "template": [
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -2867,6 +2885,7 @@
         "legend": "Repeats",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -2906,6 +2925,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -2919,6 +2939,7 @@
             "value": "1"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -2967,6 +2988,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -2980,6 +3002,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -2992,6 +3015,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "The advanced value takes precedence when set.",

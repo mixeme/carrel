@@ -68,9 +68,10 @@ const (
 	// fieldRepeat is RRULE, edited as a whole series (S-11): Frequency,
 	// Every, On, Until, Count, and the rule itself. See repeatValues.
 	fieldRepeat
-	// fieldRelated is the first RELATED-TO: picked from the records this
-	// session has loaded, or typed as a UID after «By UID…» (S-11,
-	// s-tasks-10).
+	// fieldRelated is every RELATED-TO of the record (the owner's decision
+	// of 09.10.2026): each picked from the records this session has loaded,
+	// or typed — a title of a loaded record or a UID — into the line
+	// «related.add» (S-11, s-tasks-3, -10).
 	fieldRelated
 	// fieldAttendee is the attendees of an event (Typecase task 77,
 	// s-agenda-3): their addresses, «mailto:…», the organiser first. The full
@@ -304,19 +305,19 @@ var relatedKinds = map[view.Kind]int{view.KindEvent: 0, view.KindTask: 1, view.K
 // notes, each with its collection's mark and «kind · day», the day the short
 // way of a list — newest first, and last, after a line, «By UID…», the value
 // typed by hand under the same name, with the line under it (s-tasks-11).
-// The record itself is not offered. The one related now is chosen; one
-// outside the loaded lists stands first: a card a timeline wrote a note for
-// as its name and «contact», anything else as its UID — and unloaded says
-// so. No «Nothing»: an empty field is no relation. Nothing is asked of the
-// servers.
-func (s *Server) relatedOptions(c *collectionCtx, self, selected string) (opts []view.Option, unloaded bool) {
+// The record itself is not offered. The ones related now are chosen; those
+// outside the loaded lists stand first, in the record's order: a card a
+// timeline wrote a note for as its name and «contact», anything else as its
+// UID — and unloaded says so. No «Nothing»: an empty field is no relation.
+// Nothing is asked of the servers.
+func (s *Server) relatedOptions(c *collectionCtx, self string, selected []string) (opts []view.Option, unloaded bool) {
 	blob := s.catalogOf(c.sess)
 	type loaded struct {
 		indexEntry
 		colour view.Colour
 	}
 	var list []loaded
-	var current *loaded
+	cards := map[string]loaded{}
 	seen := map[string]bool{self: true, "": true}
 	eachIndexed(c.sess, blob, func(col sealed.Collection, e indexEntry) {
 		if seen[e.UID] {
@@ -327,8 +328,8 @@ func (s *Server) relatedOptions(c *collectionCtx, self, selected string) (opts [
 		switch {
 		case e.Kind != view.KindContact:
 			list = append(list, l)
-		case e.UID == selected:
-			current = &l
+		case slices.Contains(selected, e.UID):
+			cards[e.UID] = l
 		}
 	})
 	sort.SliceStable(list, func(i, j int) bool {
@@ -349,15 +350,17 @@ func (s *Server) relatedOptions(c *collectionCtx, self, selected string) (opts [
 		if l.At != 0 {
 			meta += " · " + c.tf.shortDay(time.Unix(l.At, 0))
 		}
-		return view.Option{Value: l.UID, Label: text(l.Title), Colour: l.colour, Meta: text(meta), Selected: l.UID == selected}
+		return view.Option{Value: l.UID, Label: text(l.Title), Colour: l.colour, Meta: text(meta), Selected: slices.Contains(selected, l.UID)}
 	}
-	switch {
-	case current != nil:
-		// A card is its name and «contact», one pill (s-tasks-11).
-		opts = append(opts, view.Option{Value: current.UID, Label: text(current.Title + " · contact"), Colour: current.colour, Selected: true})
-	case selected != "" && !seen[selected]:
-		opts = append(opts, view.Option{Value: selected, Label: text(selected), Selected: true})
-		unloaded = true
+	for _, uid := range selected {
+		switch card, ok := cards[uid]; {
+		case ok:
+			// A card is its name and «contact», one pill (s-tasks-11).
+			opts = append(opts, view.Option{Value: card.UID, Label: text(card.Title + " · contact"), Colour: card.colour, Selected: true})
+		case uid != "" && !seen[uid]:
+			opts = append(opts, view.Option{Value: uid, Label: text(uid), Selected: true})
+			seen[uid], unloaded = true, true
+		}
 	}
 	for _, l := range list {
 		opts = append(opts, option(l))
@@ -912,7 +915,7 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			}
 			vals[f.name] = repeatValues(firstValue(obj, f.prop), tz, start)
 		case fieldRelated:
-			vals[f.name] = []string{strings.TrimSpace(firstValue(obj, f.prop))}
+			vals[f.name] = cal.RelatedTo(obj)
 		case fieldAttendee:
 			vals[f.name] = attendeeValues(obj)
 		case fieldList:
@@ -1153,7 +1156,8 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 				vals[f.name+".type"] = append(labels, "")
 			}
 		case fieldRelated:
-			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name))}
+			_ = r.FormValue(f.name) // parses the form
+			vals[f.name] = s.relatedTyped(c, r.Form[f.name], r.FormValue(f.name+".add"))
 		case fieldRepeat:
 			freq := strings.TrimSpace(r.FormValue(f.name + ".freq")) // parses the form
 			var on []string
@@ -1374,16 +1378,24 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 		case fieldAttendee:
 			ch.ops = append(ch.ops, s.attendeeOps(c, obj, have, want, ch.errors)...)
 		case fieldRelated:
-			if first(w) == first(h) {
-				continue
-			}
-			rows := []string{first(w)}
-			for i, v := range props[f.prop] {
-				if i > 0 {
-					rows = append(rows, v.Text)
+			// The relations kept stay in the record's order, the new ones
+			// follow in the form's; the same relations in another order
+			// are no change.
+			var want []string
+			for _, v := range h {
+				if slices.Contains(w, v) {
+					want = append(want, v)
 				}
 			}
-			ch.ops = append(ch.ops, multiOps(f.prop, props[f.prop], rows, nil)...)
+			for _, v := range w {
+				if !slices.Contains(h, v) {
+					want = append(want, v)
+				}
+			}
+			if slices.Equal(want, h) {
+				continue
+			}
+			ch.ops = append(ch.ops, valueOps(f.prop, props[f.prop], want)...)
 		case fieldBirthday:
 			v := first(w)
 			if v == first(h) || sameBirthday(v, first(h)) {
@@ -1795,6 +1807,58 @@ func nameOps(prop string, cur []model.RawValue, given, family string) []model.Pa
 		}
 	}
 	return ops
+}
+
+// valueOps rewrites a property that stands several times by its values: a
+// value kept keeps the parameters it had, wherever it stands now
+// (RELTYPE=SIBLING stays on the relation it was on when the one before it
+// goes), a new one comes without parameters, and what is not wanted goes.
+func valueOps(prop string, cur []model.RawValue, want []string) []model.PatchOp {
+	if len(want) == 0 {
+		if len(cur) > 0 {
+			return []model.PatchOp{model.RemoveProp{Prop: prop}}
+		}
+		return nil
+	}
+	ops := []model.PatchOp{model.SetValues{Prop: prop, Values: want}}
+	for i, v := range want {
+		for _, had := range cur {
+			if strings.TrimSpace(had.Text) != v {
+				continue
+			}
+			for _, k := range sortedKeys(had.Params) {
+				ops = append(ops, model.SetParam{Prop: prop, Index: i, Param: k, Value: had.Params[k]})
+			}
+			break
+		}
+	}
+	return ops
+}
+
+// relatedTyped are the relations a form asks for: the ones ticked, and the
+// one typed into the line «related.add» — a UID, or the title of a record
+// this session has loaded, which is that record —, each once, in the form's
+// order.
+func (s *Server) relatedTyped(c *collectionCtx, ticked []string, typed string) []string {
+	out := []string{}
+	add := func(v string) {
+		if v = strings.TrimSpace(v); v != "" && !slices.Contains(out, v) {
+			out = append(out, v)
+		}
+	}
+	for _, v := range ticked {
+		add(v)
+	}
+	if typed = strings.TrimSpace(typed); typed != "" {
+		uid := typed
+		eachIndexed(c.sess, s.catalogOf(c.sess), func(_ sealed.Collection, e indexEntry) {
+			if uid == typed && e.Kind != view.KindContact && e.Title == typed {
+				uid = e.UID
+			}
+		})
+		add(uid)
+	}
+	return out
 }
 
 // multiOps rewrites a list property row by row: a kept row keeps its
@@ -2407,17 +2471,20 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				}
 			}
 		case fieldRelated:
-			// One field (s-tasks-10): picked from what the session has
-			// loaded, or typed after «By UID…» — the same name either way.
-			opts, unloaded := s.relatedOptions(c, st.uid, first(vals))
-			row := view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
-				Options: opts, Placeholder: "UID of the record", Error: errText, Suggest: s.relatedSuggest(c, st),
-				// What is typed after «By UID…» is a UID, monospaced
-				// (s-tasks-11); the list itself is the select's.
-				Mono: true}
+			// Every relation of the record (s-tasks-3, -10): each chosen
+			// option a value under the field's name, picked from what the
+			// session has loaded, or typed after «By UID…» under the same
+			// name — a UID, monospaced (s-tasks-11); and the line one more
+			// is typed into, which stands whether there are relations or
+			// not (Typecase's task 142) — a title or a UID.
+			opts, unloaded := s.relatedOptions(c, st.uid, vals)
+			row := view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Multiple: true, Value: text(first(vals)),
+				Options: opts, Placeholder: "UID of the record", Error: errText, Suggest: s.relatedSuggest(c, st), Mono: true}
 			if unloaded {
 				row.Hint = "A record that is not loaded here: its UID."
 			}
+			row.Add = &view.FormRow{Name: f.name + ".add", Label: "Add a link", Kind: view.InputText,
+				Placeholder: "Title or UID", Suggest: s.relatedSuggest(c, st), Mono: true}
 			set.Rows = append(set.Rows, row)
 		case fieldZone:
 			held, chosen := zoneOf(props[f.prop]), first(vals)

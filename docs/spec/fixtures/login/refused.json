@@ -25,6 +25,7 @@
         "legend": "",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -37,6 +38,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -49,6 +51,7 @@
             "value": "mix"
           },
           {
+            "add": null,
             "error": "Login or password is wrong.",
             "extra": null,
             "focus": true,

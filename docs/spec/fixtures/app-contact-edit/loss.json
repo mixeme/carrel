@@ -26,6 +26,7 @@
         "legend": "",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -38,6 +39,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -50,6 +52,7 @@
             "value": "e20"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -62,6 +65,7 @@
             "value": "1786370760"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "focus": true,
@@ -75,6 +79,7 @@
             "value": "Анна Ковалёва"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -87,6 +92,7 @@
             "value": "Анна"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -99,6 +105,7 @@
             "value": "Ковалёва"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -111,6 +118,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -123,6 +131,7 @@
             "value": "Издательство «Слово»"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -135,6 +144,7 @@
             "value": "Главный редактор"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Type it: 14.03.1987, or 14.03 without the year.",
@@ -155,6 +165,7 @@
         "legend": "Phone numbers",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -198,6 +209,7 @@
             "value": "CELL"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -211,6 +223,7 @@
             "value": "+7 912 445-10-88"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -223,6 +236,7 @@
             "value": "tel.0"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -266,6 +280,7 @@
             "value": "WORK"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -279,6 +294,7 @@
             "value": "+7 495 120-45-00"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -291,6 +307,7 @@
             "value": "tel.1"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -302,6 +319,7 @@
             "required": false,
             "template": [
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -345,6 +363,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -358,6 +377,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -379,6 +399,7 @@
         "legend": "Email addresses",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -407,6 +428,7 @@
             "value": "WORK"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -419,6 +441,7 @@
             "value": "a.kovaleva@example.org"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -431,6 +454,7 @@
             "value": "email.0"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -442,6 +466,7 @@
             "required": false,
             "template": [
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -470,6 +495,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -482,6 +508,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -503,6 +530,7 @@
         "legend": "Other",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -515,6 +543,7 @@
             "value": "работа, издательство"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -534,6 +563,7 @@
         "legend": "Show 1 empty field",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -545,6 +575,7 @@
             "required": false,
             "template": [
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -573,6 +604,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -585,6 +617,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -597,6 +630,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -609,6 +643,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -622,6 +657,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -634,6 +670,7 @@
                 "value": ""
               },
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",

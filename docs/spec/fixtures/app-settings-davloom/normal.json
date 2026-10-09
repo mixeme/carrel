@@ -19,6 +19,7 @@
         "legend": "Add device",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -31,6 +32,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -43,6 +45,7 @@
             "value": "issue"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "focus": true,
@@ -56,6 +59,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Read only: the device syncs, and whatever it sends back is refused. Changed later in the device’s row, without a new password.",
@@ -79,6 +83,7 @@
             "value": "write"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -91,6 +96,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -103,6 +109,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -115,6 +122,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -127,6 +135,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -139,6 +148,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -151,6 +161,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -163,6 +174,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -175,6 +187,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -187,6 +200,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -199,6 +213,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -211,6 +226,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -223,6 +239,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -235,6 +252,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -247,6 +265,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -259,6 +278,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -271,6 +291,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -283,6 +304,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -295,6 +317,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -307,6 +330,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -319,6 +343,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -331,6 +356,7 @@
             "value": "true"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",

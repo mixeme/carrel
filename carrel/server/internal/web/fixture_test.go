@@ -2204,7 +2204,16 @@ func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 			"description": {string(doc.Body)},
 		}
 		for _, row := range doc.Fields {
-			if row.Name != "" && row.Name != "summary" && row.Name != "description" {
+			switch {
+			case row.Name == "" || row.Name == "summary" || row.Name == "description":
+			case row.Multiple:
+				// Every relation chosen is a value (C-6.8).
+				for _, o := range row.Options {
+					if o.Selected {
+						form.Add(row.Name, o.Value)
+					}
+				}
+			default:
 				form.Set(row.Name, string(row.Value))
 			}
 		}

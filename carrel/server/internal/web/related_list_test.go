@@ -131,6 +131,8 @@ func TestRelatedToIsTheFramesList(t *testing.T) {
 
 	// The note's Related to is the same list, less the note itself.
 	note := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n3/edit", f.sess))).Doc
+	// The line one more link is typed into is the field's own (FormRow.Add,
+	// Typecase's task 142), not a row beside it.
 	for _, r := range note.Fields {
 		if strings.HasPrefix(r.Name, "related.") {
 			t.Errorf("note: a second field %q beside Related to", r.Name)
@@ -226,9 +228,13 @@ func TestRelatedToOutsideTheLoadedIsTheFrame(t *testing.T) {
 		}
 	}
 
-	// One relation: the field is the first RELATED-TO, the others stay.
+	// The field is every RELATED-TO (the owner's decision of 09.10.2026):
+	// the one unticked goes, the one kept stays, the one picked is added.
 	form := formFields(decode[view.TaskEditPage](t, f.h.do(get(f.path("tasks")+"/far/edit", f.sess))).Form)
-	form.Set("related", "card")
+	if got := form["related"]; !slices.Equal(got, []string{"7c1e-40aa-b913", "second"}) {
+		t.Fatalf("the form's relations = %q, want both of the record", got)
+	}
+	form["related"] = []string{"second", "card"}
 	if rec := f.h.do(postForm(f.path("tasks")+"/far/edit", f.sess, form)); rec.Code != http.StatusSeeOther {
 		t.Fatalf("save: %d %s", rec.Code, rec.Body)
 	}

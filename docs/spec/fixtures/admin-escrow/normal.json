@@ -28,6 +28,7 @@
         "legend": "Policy",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -40,6 +41,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -52,6 +54,7 @@
             "value": "policy"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision.",
@@ -88,6 +91,7 @@
         "legend": "Master password",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -100,6 +104,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -112,6 +117,7 @@
             "value": "master"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -124,6 +130,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -136,6 +143,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Only the recovery private key is re-encrypted. The deposited copies are untouched, so nobody has to opt in again.",
@@ -284,6 +292,7 @@
         "legend": "Recover an account",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -296,6 +305,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -308,6 +318,7 @@
             "value": "recover"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -320,6 +331,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -332,6 +344,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user is mailed about it — always, not at the administrator’s discretion.",

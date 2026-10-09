@@ -55,6 +55,7 @@
     "dirty": false,
     "fields": [
       {
+        "add": null,
         "error": "",
         "extra": null,
         "hint": "",
@@ -88,6 +89,7 @@
         "value": "/app/notes/a-nc-home/zapisi"
       },
       {
+        "add": null,
         "error": "",
         "extra": null,
         "hint": "",
@@ -101,6 +103,7 @@
         "value": "2026-08-10"
       },
       {
+        "add": null,
         "error": "",
         "extra": null,
         "hint": "",
@@ -114,6 +117,7 @@
         "value": "11:05"
       },
       {
+        "add": null,
         "error": "",
         "extra": null,
         "hint": "",
@@ -126,14 +130,36 @@
         "value": "встречи, релиз"
       },
       {
+        "add": {
+          "add": null,
+          "error": "",
+          "extra": null,
+          "hint": "",
+          "kind": "text",
+          "label": "Add a link",
+          "mono": true,
+          "name": "related.add",
+          "options": [],
+          "placeholder": "Title or UID",
+          "readOnly": false,
+          "required": false,
+          "suggest": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/related",
+          "value": ""
+        },
         "error": "",
         "extra": null,
-        "hint": "",
+        "hint": "A record that is not loaded here: its UID.",
         "kind": "select",
         "label": "Related to",
         "mono": true,
+        "multiple": true,
         "name": "related",
         "options": [
+          {
+            "label": "bb21-0fa8-3d66",
+            "selected": true,
+            "value": "bb21-0fa8-3d66"
+          },
           {
             "colour": "#4a6b52",
             "label": "Забрать документы",
@@ -235,6 +261,7 @@
           "legend": "",
           "rows": [
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -247,6 +274,7 @@
               "value": "csrf"
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -259,6 +287,7 @@
               "value": "e21"
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -271,6 +300,7 @@
               "value": "1786370760"
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -283,6 +313,7 @@
               "value": "Заметка со встречи 10.08"
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "focus": true,

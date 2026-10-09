@@ -29,6 +29,7 @@
         "legend": "",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -41,6 +42,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Two of three are listed: baikal is not answering, and until it does there is nothing to create there.",
@@ -64,6 +66,7 @@
             "value": "a-nc-home"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -77,6 +80,7 @@
             "focus": true
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Written to the server as calendar-color: other clients show the same one. Left unchosen, the colour follows from the address.",
@@ -120,6 +124,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Most servers settle this when the collection is made and do not change it afterwards. The collection appears under Calendar, Tasks or Notes by what it holds, not by where it was made.",
@@ -148,6 +153,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "https://nextcloud.example/dav.php/alice/calendars/…/ — Taken from the name when left empty; yours to change. Other clients and restore by path go by the address, and it does not change later; the name they only show.",

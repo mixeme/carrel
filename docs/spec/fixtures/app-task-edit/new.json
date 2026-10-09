@@ -62,6 +62,7 @@
         "legend": "",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -74,6 +75,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -86,6 +88,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -98,6 +101,7 @@
             "value": "1786370760"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "focus": true,
@@ -111,6 +115,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -129,6 +134,7 @@
         "legend": "When",
         "rows": [
           {
+            "add": null,
             "disables": "start.time due.time",
             "error": "",
             "extra": null,
@@ -142,6 +148,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -155,6 +162,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -168,6 +176,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -181,6 +190,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -200,6 +210,7 @@
         "legend": "Progress",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -233,6 +244,7 @@
             "value": "NEEDS-ACTION"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -267,6 +279,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -280,6 +293,7 @@
             "value": "0"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -298,6 +312,7 @@
         "legend": "Reminders",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -309,6 +324,7 @@
             "required": false,
             "template": [
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -367,6 +383,7 @@
         "legend": "Other",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -379,6 +396,7 @@
             "value": ""
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -391,12 +409,29 @@
             "value": ""
           },
           {
+            "add": {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Add a link",
+              "mono": true,
+              "name": "related.add",
+              "options": [],
+              "placeholder": "Title or UID",
+              "readOnly": false,
+              "required": false,
+              "suggest": "/app/tasks/a-nc-home/dela/new/related",
+              "value": ""
+            },
             "error": "",
             "extra": null,
             "hint": "",
             "kind": "select",
             "label": "Related to",
             "mono": true,
+            "multiple": true,
             "name": "related",
             "options": [
               {

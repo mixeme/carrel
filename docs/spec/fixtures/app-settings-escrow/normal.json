@@ -27,6 +27,7 @@
           "legend": "",
           "rows": [
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -39,6 +40,7 @@
               "value": "csrf"
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -51,6 +53,7 @@
               "value": "deposit"
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "Asked because the key is being handed over, not just looked at. Same unlock as showing a saved password.",

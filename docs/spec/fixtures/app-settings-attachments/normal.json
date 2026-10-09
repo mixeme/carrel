@@ -26,6 +26,7 @@
         "legend": "Small files stay in the record",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -38,6 +39,7 @@
             "value": "Written into the event, the task or the note itself, and travels with it."
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "A collection that says it takes less (max-resource-size) lowers the boundary for itself. Nothing here raises it.",
@@ -50,6 +52,7 @@
             "value": "Put in the folder below; the record keeps a link to it."
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -62,6 +65,7 @@
             "value": "2 MB"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -74,6 +78,7 @@
             "value": "2 MB"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -86,6 +91,7 @@
             "value": "2 MB"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -98,6 +104,7 @@
             "value": "2 MB"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -110,6 +117,7 @@
             "value": "2 MB"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -122,6 +130,7 @@
             "value": "2 MB"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -134,6 +143,7 @@
             "value": "2 MB"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -146,6 +156,7 @@
             "value": "2 MB"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -158,6 +169,7 @@
             "value": "2 MB"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -176,6 +188,7 @@
         "legend": "Folder",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -188,6 +201,7 @@
             "value": "csrf"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Any file collection you can write to.",
@@ -221,6 +235,7 @@
             "value": "a-sftp-vps|/alice/files/Documents/"
           },
           {
+            "add": null,
             "error": "",
             "extra": {
               "enabled": true,
@@ -241,6 +256,7 @@
             "value": "/carrel/attachments"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "2026-07, 2026-08. Off means one flat folder — fine for a hundred files, not for ten thousand.",
@@ -259,6 +275,7 @@
         "legend": "File name",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "2026-08-10 sync-board.png. A name already taken is never overwritten: a counter is added.",
@@ -293,6 +310,7 @@
         "legend": "In this folder now",
         "rows": [
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -305,6 +323,7 @@
             "value": "5 · 4.4 MB"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "",
@@ -317,6 +336,7 @@
             "value": "2026-07-01"
           },
           {
+            "add": null,
             "error": "",
             "extra": null,
             "hint": "Carrel keeps no index of what points at these files. Nothing here deletes them: an attachment is removed from the record it hangs on, in that record.",

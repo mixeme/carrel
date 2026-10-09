@@ -17,6 +17,43 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.161 — 2026-10-09
+
+The owner's decision of 09.10.2026: a record has as many relations as it
+has. RFC 5545 gives `RELATED-TO` any number of times; the card and the
+panel already showed them all, the edit held the first.
+
+### Changed
+
+- **Related to of a task's and a note's edit holds every relation.** The
+  row `related` is an `InputSelect` with `multiple`: every option chosen is
+  a value under its name. A relation whose tick is gone is removed; one kept
+  keeps its parameters (`RELTYPE`) wherever it stands now; the kept ones
+  stay in the record's order and new ones follow. Before: the field was
+  the first `RELATED-TO`, the others were kept untouched and could not be
+  edited.
+- **The line one more link is typed into** is the field's own part,
+  `FormRow.add`: the name `related.add`, «Title or UID», «Add a link», its
+  suggestions (`suggest`). It is there whether the record has relations or
+  not (Typecase's task 142). What is typed is a UID, or the title of a
+  record the session has loaded — which is then that record; a relation
+  already there is not written twice.
+- A client that sends one value under `related` keeps working: it is the
+  one relation of the record.
+
+### For consumers
+
+- A form that sent only the first relation of a record with several now
+  removes the others on save: send every chosen option.
+- Every row of a form carries the key `add` — `null` where the field has
+  no such line.
+
+### Fixtures
+
+- `app-task-edit/normal`, `-/new`, `-/loss`, `app-note-edit/normal`,
+  `-/new`: `multiple` and `add` of the row; the note of the set has two
+  relations, the event and a task.
+
 ## v0.2.160 — 2026-10-09
 
 ### Fixtures

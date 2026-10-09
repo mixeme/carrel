@@ -94,6 +94,7 @@
             "legend": "",
             "rows": [
               {
+                "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
@@ -152,6 +153,7 @@
           "legend": "",
           "rows": [
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -503,6 +505,7 @@
           "legend": "",
           "rows": [
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
@@ -515,6 +518,7 @@
               "value": "csrf"
             },
             {
+              "add": null,
               "error": "",
               "extra": null,
               "hint": "",
