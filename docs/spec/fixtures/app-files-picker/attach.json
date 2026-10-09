@@ -3,7 +3,6 @@
     {
       "csrf": "csrf",
       "enabled": false,
-      "icon": "i-up",
       "id": "files.picker.attach",
       "label": "Attach",
       "method": "POST",

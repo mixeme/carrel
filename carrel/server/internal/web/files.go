@@ -354,6 +354,10 @@ func (s *Server) getFilesRoot(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	page.Subtitle = text(fmt.Sprintf("%d of %s on %s", live-len(off), plural(live, "storage"), plural(len(servers), "server")))
+	if live == len(off) {
+		// Nothing ticked, the servers are not counted (states-35).
+		page.Subtitle = text(fmt.Sprintf("0 of %s", plural(live, "storage")))
+	}
 	for _, col := range ticked(blob, view.KindFile) {
 		conn, _ := blob.Connection(col.AccountID)
 		row := view.FileCollectionRow{
@@ -412,9 +416,10 @@ func filesEmpty(s *Server, blob sealed.Blob) *view.Notice {
 		if _, ok := blob.Connection(col.AccountID); ok && !col.Gone && col.Has(view.KindFile) {
 			// What to do is a button (U-6.0): the root row's tick, all of them.
 			return &view.Notice{
-				Role:  view.NoticeInfo,
-				Title: "No storage is ticked",
-				Body:  "Tick the storages to show here in the rail. Each opens as its own folder: the trees of different servers are never mixed.",
+				Role: view.NoticeInfo,
+				// states-35.
+				Title: "No storages are ticked",
+				Body:  "Tick the storages to show in the rail, or all of them at once.",
 				Actions: []view.Action{{ID: "rail.tick.all", Label: "Tick every storage", Method: "POST", Enabled: true, Primary: true,
 					Href: s.postQuery("/app/sources/files", url.Values{"toggle": {s.route("/app/files")}, "back": {"/app/files"}})}},
 			}

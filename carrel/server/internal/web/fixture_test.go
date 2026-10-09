@@ -1922,6 +1922,12 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 
 	app.servers["nextcloud"].Refuse("PROPFIND", http.StatusServiceUnavailable, "")
 	app.compare(t, "app-files-folder/source-error.json", app.h.do(get(app.filesAt(t, "Files", ""), app.sess)))
+
+	// No storage ticked (states-35): the root says so and offers them all.
+	if rec := app.h.do(postForm("/app/sources/files", app.sess, url.Values{})); rec.Code >= 400 {
+		t.Fatalf("untick every storage: %d", rec.Code)
+	}
+	app.compare(t, "app-files/empty.json", app.h.do(get("/app/files", app.sess)))
 }
 
 // C-14.2: the one page of every dead secret link (rest-1). What the link

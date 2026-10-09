@@ -122,7 +122,7 @@ func (s *Server) getAttachPicker(w http.ResponseWriter, r *http.Request, sess *s
 	} else if obj, err := c.find(r.Context(), uid); err == nil {
 		sheet.Subject = text("to «" + recordTitle(c.spec.kind, obj) + "»")
 	}
-	attach := view.Action{ID: "files.picker.attach", Label: "Attach", Icon: "i-up", Method: "POST", Primary: true}
+	attach := view.Action{ID: "files.picker.attach", Label: "Attach", Method: "POST", Primary: true} // no icon: s-files-16
 	cancel := s.route(attachBack(c, uid, from))
 	switch {
 	case name == "":

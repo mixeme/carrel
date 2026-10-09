@@ -277,3 +277,47 @@ func TestFileAndLinkTablesAreTheFrames(t *testing.T) {
 		t.Errorf("a file changed %q, want it in numbers", fileRow(t, page, "a.txt").Modified)
 	}
 }
+
+// ФН22: the root with no storage ticked (states-35) — «0 of 3 storages»
+// under the title, and one message: «No storages are ticked.», what to do,
+// and the button that ticks them all.
+func TestFilesRootWithNothingTickedIsTheFrame(t *testing.T) {
+	frame := mockupFrame(t, "states-35")
+	sub := frameText(frameOne(t, frameHeadSub, frame, "line under the title")[1])
+	m := frameOne(t, regexp.MustCompile(`(?s)<div class="tc-empty"><b>(.*?)</b>(.*?)<button class="tc-btn is-primary" type="button">(.*?)</button>`), frame, "empty root")
+	title, body, tick := strings.TrimSuffix(frameText(m[1]), "."), frameText(m[2]), frameText(m[3])
+	count := regexp.MustCompile(`^0 of (\d+) storages$`).FindStringSubmatch(sub)
+	if count == nil {
+		t.Fatalf("states-35 says %q under the title: read the frame again", sub)
+	}
+
+	f := filesFixture(t, false)
+	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
+		b.Collections = append(b.Collections,
+			sealed.Collection{AccountID: f.id, Path: davFilesOld, Name: "Old", Kinds: []view.Kind{view.KindFile}},
+			sealed.Collection{AccountID: f.id, Path: filesDocs + "third/", Name: "Third", Kinds: []view.Kind{view.KindFile}})
+	})
+	root := decode[view.FilesRootPage](t, f.h.do(get("/app/files", f.sess)))
+	if string(root.Subtitle) != sub || len(root.Collections) != 0 || len(root.Note) != 0 {
+		t.Errorf("subtitle %q, %d rows, note %+v; want %q and nothing else", root.Subtitle, len(root.Collections), root.Note, sub)
+	}
+	if root.Empty == nil || string(root.Empty.Title) != title || string(root.Empty.Body) != body || len(root.Empty.Actions) != 1 {
+		t.Fatalf("empty = %+v, want %q %q", root.Empty, title, body)
+	}
+	if a := root.Empty.Actions[0]; a.ID != "rail.tick.all" || string(a.Label) != tick || !a.Primary || !a.Enabled {
+		t.Errorf("the button = %+v, want %q", a, tick)
+	}
+}
+
+// ФН15: Attach of From Files is drawn without an icon (s-files-16).
+func TestAttachFromFilesHasNoIcon(t *testing.T) {
+	if !strings.Contains(mockupFrame(t, "s-files-16"), `<button class="tc-btn is-primary" type="button" disabled>Attach</button>`) {
+		t.Fatal("s-files-16 draws Attach otherwise: read the frame again")
+	}
+	f := attachFixture(t, 1024, []string{"carrel"}, "e1.ics", attachEvent("e1", "Sync-up", ""))
+	from := menuAction(actionByID(eventAt(t, f, "e1").Actions, "attach.add").Arrow, "attach.files")
+	sheet := decode[view.FilePickerSheet](t, f.h.do(get(from.Href, f.sess)))
+	if a := actionByID(sheet.Actions, "files.picker.attach"); a == nil || a.Icon != "" || !a.Primary {
+		t.Errorf("Attach = %+v, want it primary and without an icon", a)
+	}
+}

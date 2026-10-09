@@ -112,7 +112,7 @@ func TestFilesRootFollowsTheTicks(t *testing.T) {
 
 	f := filesFixture(t, false)
 	root = decode[view.FilesRootPage](t, f.h.do(get("/app/files", f.sess)))
-	if root.Empty == nil || root.Empty.Title != "No storage is ticked" {
+	if root.Empty == nil || root.Empty.Title != "No storages are ticked" {
 		t.Fatalf("nothing ticked: %+v", root.Empty)
 	}
 	_, row := railRow(t, root.Rail, "Docs")

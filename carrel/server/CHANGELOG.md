@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.172 — 2026-10-09
+
+The files section, the client's second scan (ФН15, ФН22): the root with no
+storage ticked (`states-35`) and Attach of From Files (`s-files-16`).
+
+### Changed
+
+- **The root of Files with nothing ticked** says «0 of 3 storages» under
+  the title (the servers are not counted) and, in `empty`, «No storages are
+  ticked» — «Tick the storages to show in the rail, or all of them at
+  once.» — with «Tick every storage», as before. Fixture `app-files/empty`.
+- **Attach of From Files has no icon** (`files.picker.attach`).
+
 ## v0.2.171 — 2026-10-09
 
 The files section, the client's second scan (ФН9; the owner's decision of
