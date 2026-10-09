@@ -1040,8 +1040,13 @@ func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry, b
 		a.Href, a.Method, a.Enabled, a.Submits = s.opHref(c, segs, op), "POST", true, true
 		return a
 	}
-	return append(actions, download,
-		writeAction(c, op(view.Action{ID: "file.rename", Label: "Rename", Icon: "i-pencil"}, view.FileRename)),
+	// A rename takes one: more than one selected by the address, and it
+	// stands off with why.
+	rename := writeAction(c, op(view.Action{ID: "file.rename", Label: "Rename", Icon: "i-pencil"}, view.FileRename))
+	if len(picked) > 1 {
+		rename.Enabled, rename.Href, rename.Reason = false, "", "Rename takes one item."
+	}
+	return append(actions, download, rename,
 		writeAction(c, op(view.Action{ID: "file.move", Label: "Move", Icon: "i-move"}, view.FileMove)),
 		op(view.Action{ID: "file.copy", Label: "Copy", Icon: "i-dup"}, view.FileCopy),
 		writeAction(c, op(view.Action{ID: "file.delete", Label: "Delete", Icon: "i-trash", Danger: true}, view.FileDelete)),

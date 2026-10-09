@@ -108,9 +108,9 @@ func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, de
 			sheet.Target.Options = append(sheet.Target.Options, opt)
 		}
 	}
-	confirm := view.Action{ID: "record.move.confirm", Label: "Move here", Method: "POST", Primary: true, Enabled: true}
+	confirm := view.Action{ID: "record.move.confirm", Label: "Move", Method: "POST", Primary: true, Enabled: true}
 	if copying {
-		confirm.ID, confirm.Label = "record.copy.confirm", "Copy here"
+		confirm.ID, confirm.Label = "record.copy.confirm", "Copy"
 	}
 	if reason := recordMoveBlock(c, dest, copying); reason != "" {
 		confirm.Enabled, confirm.Reason = false, text(reason)

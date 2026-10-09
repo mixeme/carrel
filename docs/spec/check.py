@@ -585,6 +585,14 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
     fb, fi = frame_buttons(frame), frame_inputs(frame)
     for a in acts:
         lab = " ".join(str(a.get("label") or "").split())
+        # Кнопка листа переноса и копии — «Move», «Copy» (слово владельца
+        # 09.10.2026), кадры ещё рисуют «Move here», «Copy here» (задача
+        # Typecase 147): пока так, сверяется с кнопкой кадра под его словом —
+        # «Move» без «here» в кадре — другая кнопка, полосы выделения.
+        aid = str(a.get("id") or "")
+        if (aid.endswith(".move.confirm") or aid.endswith(".copy.confirm")) and lab + " here" in fb:
+            known9.append("ждёт Typecase: %s: «%s» (%s) — кадр рисует «%s here», задача 147 (to-typecase.md)" % (d, lab, aid, lab))
+            lab += " here"
         drawn = fb.get(lab)
         if drawn is None or len(drawn) != 1:
             continue

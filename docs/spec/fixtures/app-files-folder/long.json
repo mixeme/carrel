@@ -59,14 +59,13 @@
       },
       {
         "csrf": "csrf",
-        "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?op=rename",
+        "enabled": false,
         "icon": "i-pencil",
         "id": "file.rename",
         "label": "Rename",
         "method": "POST",
-        "submits": true,
-        "target": "sheet"
+        "reason": "Rename takes one item.",
+        "submits": true
       },
       {
         "csrf": "csrf",

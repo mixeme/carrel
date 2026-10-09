@@ -17,6 +17,31 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.167 — 2026-10-09
+
+The owner's words of 09.10.2026: what cannot be done is switched off, and
+the button of a move is «Move».
+
+### Changed
+
+- **«Move» and «Copy», not «Move here» and «Copy here»** — the confirming
+  button of the three sheets: files (`file.move.confirm`,
+  `file.copy.confirm`), a record (`record.…confirm`), a collection
+  (`collection.…confirm`). The identifiers are the same. The frames still
+  draw «here» (Typecase's task 147).
+
+### Fixed
+
+- **The button of a file move stands off again while the folder chosen
+  cannot be the destination** — «These items are already here.», «The
+  chosen storage is read-only.», «A folder cannot go inside itself.» are
+  its reason, as before `v0.2.165`, which had left it on and refused after
+  the press. The sheet's form (`FileOpSheet.form`) stands either way; a
+  node's `href` is the sheet with that node chosen and the button as it is
+  for it.
+- **Rename of the selection bar stands off, with why, when the address
+  selects more than one** (`v0.2.166` had left it on).
+
 ## v0.2.166 — 2026-10-09
 
 The files section, the client's second scan (ФН5; the owner's decisions of

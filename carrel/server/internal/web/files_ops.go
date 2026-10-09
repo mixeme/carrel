@@ -910,7 +910,7 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		sheet.Items = append(sheet.Items, text(e.Name))
 	}
 	run := url.Values{"op": {string(op)}, "item": names, "go": {"1"}}
-	// Move here, Copy here and Rename are the sheet's primary button
+	// Move, Copy and Rename are the sheet's primary button
 	// (s-files-4, s-files-11, s-files-21); the deletion's is destructive
 	// (s-files-22).
 	confirm := view.Action{ID: "file." + string(op) + ".confirm", Method: "POST", Primary: op != view.FileDelete, Enabled: true}
@@ -929,9 +929,11 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		sheet.Alert = deletionAlert(items, connLabel(c.conn))
 		sheet.Warning = line("Carrel keeps no index of what points at these files. They may be attached to a note or an event — check before deleting.")
 	default:
-		confirm.Label = "Move here"
+		// «Move» and «Copy», not «Move here» (the owner's word of
+		// 09.10.2026; the frames still say «here» — Typecase's task 147).
+		confirm.Label = "Move"
 		if op == view.FileCopy {
-			confirm.Label = "Copy here"
+			confirm.Label = "Copy"
 		}
 		dest, ok := s.destination(c, q)
 		if !ok {
@@ -948,15 +950,16 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		s.newFolder(sheet.Target, dest, c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "mkcol": {"1"}},
 			c.href("op", c.segs, true), back, q.Get("new") != "")
 		// The sheet is a form (s-files-4): a node is a tick of its field
-		// «to», and the button sends whatever is ticked — so it stands off
-		// only where no node could help, a move out of a read-only storage.
-		// A destination that cannot be one is refused when it is sent
-		// (runOp).
+		// «to», and the button sends it. What cannot be done is switched
+		// off (the owner's rule of 09.10.2026): the button stands off, with
+		// why, while the folder chosen cannot be the destination — a node's
+		// address (Href) is the sheet with that node chosen, and the button
+		// as it is for it.
 		sheet.Target.Field = "to"
 		confirm.Submits = true
-		if op == view.FileMove && c.col.ReadOnly {
-			confirm.Enabled, confirm.Reason = false, readOnlyReason
-		} else if dest != nil {
+		if reason := moveBlock(c, op, items, dest); reason != "" {
+			confirm.Enabled, confirm.Reason = false, text(reason)
+		} else {
 			run.Set("to", s.route(dest.href("", dest.segs, true)))
 		}
 		// The message stands on the sheet (s-files-4): what the operation
@@ -971,11 +974,14 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 			sheet.Warning = join("Inside one server this is ", monoRun("MOVE"), ": instant, no traffic. To another storage the file has to be downloaded and uploaded again — Carrel says so before it starts, not after.")
 		}
 	}
+	address := s.postQuery(c.href("op", c.segs, true), run)
 	if confirm.Enabled {
-		confirm.Href = s.postQuery(c.href("op", c.segs, true), run)
+		confirm.Href = address
 	}
-	if (op == view.FileMove || op == view.FileCopy) && confirm.Enabled {
-		sheet.Form = &view.Form{Action: confirm.Href, Method: "POST", Target: render.TargetSheet,
+	// The form stands while the button is off too: its address is the
+	// operation's, the destination the field.
+	if op == view.FileMove || op == view.FileCopy {
+		sheet.Form = &view.Form{Action: address, Method: "POST", Target: render.TargetSheet,
 			Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(c.sess)}}}}
 	}
 	// The new name is the form's field: without it Rename has nothing to

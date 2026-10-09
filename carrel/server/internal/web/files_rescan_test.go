@@ -217,6 +217,14 @@ func TestSelectionIsTheOperationsForm(t *testing.T) {
 	if d := actionByID(picked.Bar.Actions, "file.download"); d == nil || !d.Enabled || d.Submits {
 		t.Errorf("Download of the one selected = %+v", d)
 	}
+	// What cannot be done is off: a rename of the two the address selects.
+	both := decode[view.FilesPage](t, f.h.do(get(here+"?select=a.txt&select=b.txt", f.sess)))
+	if r := actionByID(both.Bar.Actions, "file.rename"); r == nil || r.Enabled || r.Reason != "Rename takes one item." {
+		t.Errorf("Rename of two selected = %+v, want it off with why", r)
+	}
+	if m := actionByID(both.Bar.Actions, "file.move"); m == nil || !m.Enabled {
+		t.Errorf("Move of two selected = %+v", m)
+	}
 	if rec := f.h.do(get(here+"?toggle=a.txt", f.sess)); rec.Code != http.StatusOK {
 		t.Errorf("toggle in the address: %d, want the folder as it is", rec.Code)
 	}

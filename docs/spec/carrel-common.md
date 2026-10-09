@@ -645,7 +645,7 @@ type Action struct {
 // ?kind=event|task|note|file, «All» — без него. Сторож —
 // view.TestFixtureActionsSayWhyTheyAreOff.
 // Primary — там, где кадр рисует кнопку основной: кнопка, отправляющая
-// форму (Sign in, Save, Create link), подтверждение листа (Move here,
+// форму (Sign in, Save, Create link), подтверждение листа (Move,
 // Create), главное действие шапки (New contact, Edit, Add user, Upload в
 // папке — и только для чтения, s-files-1, -15), первая карточка забытого
 // пароля (s-auth-6), единственная дверь страницы вне оболочки (Sign in у
@@ -1856,7 +1856,7 @@ type CollectionRenameSheet struct {
 // only», «no calendars»); подходящее — ссылка (TargetOption.Href, лист с ним
 // выбранным). Warning — когда цель выбрана: что заводится, сколько записей
 // уходит (число — как его знает сеанс) и что станет с этой. Actions — «Move
-// here» или «Copy here» и Cancel. В меню строки коллекции — Move и Copy to
+// here» или «Copy» и Cancel. В меню строки коллекции — Move и Copy to
 // another server (s-profile-1).
 //
 // Cancel всех четырёх листов (collection.cancel, GET) ведёт туда, откуда лист
@@ -2032,8 +2032,9 @@ type FilesPage struct {
     // — Rename, Move, Copy, Delete — её кнопки (Action.Submits, операция — в
     // адресе кнопки, имён в нём нет). Без сценариев полоса выделения стоит
     // всегда, поэтому операции приходят в Bar.Actions и когда ничего не
-    // выделено (у пустой папки их нет). Download — ссылка, и включена у
-    // одного файла, выделенного адресом. Actions — «Clear selection»
+    // выделено (у пустой папки их нет). Rename выключена с причиной, когда
+    // адресом выделено больше одного. Download — ссылка, и включена у одного
+    // файла, выделенного адресом. Actions — «Clear selection»
     // (files.select.clear, папка без select), пока выделено адресом.
     Select *Form
     SelectField string
@@ -2170,9 +2171,12 @@ type FileOpSheet struct {
     Failure *Notice
     // Form — форма листа: у переименования — с полем name; у переноса и
     // копии (s-files-4) — POST подтверждения со скрытым _csrf, цель — поле
-    // Target.Field, отметка узла; «Move here» и «Copy here» — её кнопка
-    // (Action.Submits) и от выбранного узла не зависит: цель, которой быть
-    // нельзя, получает отказ в ответ на отправку. У удаления nil.
+    // Target.Field, отметка узла; «Move» и «Copy» — её кнопка
+    // (Action.Submits). Пока выбранная папка целью быть не может, кнопка
+    // выключена с причиной («These items are already here.», «The chosen
+    // storage is read-only.», «A folder cannot go inside itself.»), а форма
+    // стоит: адрес узла (FileTreeNode.Href) — лист с ним выбранным и
+    // кнопкой, какая она для него. У удаления nil.
     Form    *Form
     Actions []Action
 }
@@ -3565,7 +3569,7 @@ type LossReport struct { // сервер принял запись, но что-
 | `no-photo` | Карточка без фотографии: на месте Replace, Crop, Remove — Add и форматы | Правка контакта (кадр s-contacts-4, часть `no-photo`; `normal` — с фотографией, s-contacts-3) |
 | `link` | Приглашение ссылкой: адреса Carrel не знает — поле Email пустое и вписывается тут же | Приглашение (`normal` — письмом, кадр s-auth-12; ссылкой — свой кадр s-auth-14, часть `link`, Typecase `05ea994`) |
 | `tiles` | Папка плитками (`?view=tiles`): миниатюры, размер, выбранная плитка | Папка файлов (`app-files-folder`, кадр s-files-5) |
-| `copy` | Лист копии: то же дерево, «Copy here», копия идёт через Carrel | Лист операции над файлами (`app-files-op`, s-files-11; `normal` — перенос, s-files-4) |
+| `copy` | Лист копии: то же дерево, «Copy», копия идёт через Carrel | Лист операции над файлами (`app-files-op`, s-files-11; `normal` — перенос, s-files-4) |
 | `elsewhere` | Перенос в другое хранилище: сказано до начала, что файлы скачаются и загрузятся | Лист операции над файлами (s-files-12) |
 | `rename` | Лист переименования: поле нового имени | Лист операции над файлами (своего кадра нет — задача Typecase 121) |
 | `delete` | Лист удаления: что уйдёт и что не проверяется | Лист операции над файлами (своего кадра нет — задача Typecase 121) |

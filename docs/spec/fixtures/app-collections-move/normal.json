@@ -4,7 +4,7 @@
       "csrf": "csrf",
       "enabled": false,
       "id": "collection.move.confirm",
-      "label": "Move here",
+      "label": "Move",
       "method": "POST",
       "primary": true,
       "reason": "Choose a server."
