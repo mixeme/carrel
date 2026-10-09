@@ -369,9 +369,8 @@ func dayRange(from, to string) string {
 // getFilesPublished lists the person's live links (s-publish-1): what each
 // opens, when it was made and until when, when it was last opened — the
 // days absolute, a link nobody opened says so in words — and on the row
-// Copy, Send (with mail on, 7.18 of the mockup) and Revoke. A link made
-// before links were kept has no link to show: Copy and Send are there,
-// switched off, with the reason.
+// Copy, Send (with mail on, 7.18 of the mockup; without it — s-publish-17)
+// and Revoke.
 func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -420,14 +419,11 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		copyLink := view.Action{ID: "publish.copy", Label: "Copy", Method: "GET", Enabled: true}
 		send := view.Action{ID: "publish.mail", Label: "Send", Method: "POST", Enabled: true,
 			Href: s.postQuery("/app/mail/compose", url.Values{"op": {"link"}, "id": {l.ID}})}
-		if token := blob.Links[l.ID]; token != "" {
-			link := s.route("/p/" + token)
-			row.Link, copyLink.Href = text(link), link
-		} else {
-			const kept = "This link was made before links were kept: it cannot be shown again. Revoke it and publish anew."
-			copyLink.Enabled, copyLink.Reason = false, kept
-			send.Enabled, send.Href, send.Reason = false, "", kept
-		}
+		// Every link is kept whole with its token (since 19.09.2026; the
+		// owner's decision of 09.10.2026: a link without one does not
+		// exist) — the row shows it and offers it.
+		link := s.route("/p/" + blob.Links[l.ID])
+		row.Link, copyLink.Href = text(link), link
 		row.Actions = append(row.Actions, copyLink)
 		if mail {
 			row.Actions = append(row.Actions, send)

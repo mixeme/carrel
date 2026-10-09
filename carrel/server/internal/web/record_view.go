@@ -81,8 +81,8 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 			Href: s.route(c.recordPath(uid) + "/timeline"), Method: "GET", Enabled: true}, ops.del)
 	case view.KindEvent:
 		page := s.eventPage(c, uid, obj, nil)
-		// The fields of the card, Reminders before Repeats (s-agenda-1).
-		d.Fields = reminderFirst(page.Fields)
+		// The fields of the card, in its order (s-agenda-1).
+		d.Fields = page.Fields
 		d.Body, d.Attendees, d.Attach, d.Related = page.Body, page.Attendees, page.Attach, page.Related
 		d.Source.Path, d.Source.Compared = page.Source.Path, page.Source.Compared
 		d.Actions = shown(ops.edit, attach, ops.del)
@@ -117,18 +117,6 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		}
 	}
 	return d
-}
-
-// reminderFirst is the fields of an event's card in the order of its panel
-// (s-agenda-1): Reminders before Repeats.
-func reminderFirst(fields []view.Field) []view.Field {
-	out := slices.Clone(fields)
-	r := slices.IndexFunc(out, func(f view.Field) bool { return f.Label == "Repeats" })
-	m := slices.IndexFunc(out, func(f view.Field) bool { return f.Label == "Reminders" })
-	if r >= 0 && m > r {
-		out[r], out[m] = out[m], out[r]
-	}
-	return out
 }
 
 // panelFields are the fields of a record's page for its panel: more stands
@@ -611,7 +599,9 @@ func eventHead(tf timeFmt, obj *model.Object, tm cal.Timing) []view.Field {
 		for _, r := range rows {
 			labels = append(labels, string(r.Label))
 		}
-		out = append(out, view.Field{Label: "Reminders", Value: text(strings.Join(labels, ", "))})
+		// One line, the reminders apart by the dot (s-agenda-1, -2: «10
+		// minutes before · 1 day before»).
+		out = append(out, view.Field{Label: "Reminders", Value: text(strings.Join(labels, " · "))})
 	}
 	return out
 }

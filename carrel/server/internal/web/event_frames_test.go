@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -54,8 +55,14 @@ func TestEventByItsFrames(t *testing.T) {
 	if repeats == nil || repeats.Value != "Weekly on Mon" || repeats.Badge.Label != "until 2026-12-28" {
 		t.Errorf("Repeats = %+v", repeats)
 	}
-	if r := fieldOf(page.Fields, "Reminders"); r == nil || r.Value != "10 minutes before" {
-		t.Errorf("Reminders = %+v", r)
+	// Both reminders in one line, as the frame says them (Typecase's note
+	// 40: «10 minutes before · 1 day before»).
+	said := regexp.MustCompile(`<dt>Reminders</dt><dd>([^<]*)</dd>`).FindStringSubmatch(mockupFrame(t, "s-agenda-2"))
+	if said == nil || !strings.Contains(said[1], " · ") {
+		t.Fatalf("s-agenda-2 says %v of its reminders: read the frame again", said)
+	}
+	if r := fieldOf(page.Fields, "Reminders"); r == nil || string(r.Value) != frameText(said[1]) {
+		t.Errorf("Reminders = %+v, the frame %q", r, frameText(said[1]))
 	}
 	// Г5, Г6: the organiser first among the people, statuses in lower case.
 	var people []string
@@ -99,7 +106,7 @@ func TestEventByItsFrames(t *testing.T) {
 	if d == nil {
 		t.Fatal("no panel with ?open=")
 	}
-	if got := fieldLabels(d.Fields); got != "When, Reminders, Repeats, Where, Status, Tags" {
+	if got := fieldLabels(d.Fields); got != "When, Repeats, Reminders, Where, Status, Tags" {
 		t.Errorf("the panel's fields = %s", got)
 	}
 	if d.Close == "" || strings.Contains(d.Close, "open=") || d.Source.Colour == "" || d.DeleteNote == "" {
@@ -118,5 +125,31 @@ func TestEventByItsFrames(t *testing.T) {
 	}
 	if on == 0 {
 		t.Error("no row is on beside the panel")
+	}
+}
+
+// The panel of an event has its card's fields in its card's order (Typecase's
+// note 40, s-agenda-1): When, Repeats, Reminders — both of them —, Where,
+// Status, Tags.
+func TestEventPanelHasTheCardsOrder(t *testing.T) {
+	var want []string
+	for _, m := range regexp.MustCompile(`<dt>([^<]+)</dt>`).FindAllStringSubmatch(framePanel(t, "s-agenda-1"), -1) {
+		want = append(want, m[1])
+	}
+	if strings.Join(want, ", ") != "When, Repeats, Reminders, Where, Status, Tags" {
+		t.Fatalf("the panel of s-agenda-1 = %q: read the frame again", want)
+	}
+	app := newMockupApp(t)
+	first := combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+	open := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3"
+	page := decode[view.AgendaPage](t, app.h.do(get("/app/calendar?from=2026-08-10&task="+first.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
+	if page.Details == nil {
+		t.Fatal("no panel")
+	}
+	if got := fieldLabels(page.Details.Fields); got != strings.Join(want, ", ") {
+		t.Errorf("panel fields = %s, want %q", got, want)
+	}
+	if r := fieldOf(page.Details.Fields, "Reminders"); r == nil || r.Value != "10 minutes before · 1 day before" {
+		t.Errorf("panel Reminders = %+v", r)
 	}
 }

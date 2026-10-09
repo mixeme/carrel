@@ -976,12 +976,6 @@
         "value": ""
       },
       {
-        "href": "",
-        "label": "Reminders",
-        "mono": false,
-        "value": "10 minutes before"
-      },
-      {
         "badge": {
           "label": "until 2026-12-28",
           "role": "neutral"
@@ -990,6 +984,12 @@
         "label": "Repeats",
         "mono": false,
         "value": "Weekly on Mon"
+      },
+      {
+        "href": "",
+        "label": "Reminders",
+        "mono": false,
+        "value": "10 minutes before · 1 day before"
       },
       {
         "href": "",

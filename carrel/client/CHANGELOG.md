@@ -4,6 +4,20 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.5 — 2026-10-09
+
+Typecase `3adc445` (Typecase's note 40: the rest of Carrel's tasks 106 and
+121, the owner's decision of 09.10.2026), server `v0.2.158`. The two drafts
+that print otherwise went in first, unchanged (`fe77252`). No screen
+changed: the panel and the card of an event draw the fields the server
+sends, in its order.
+
+### Closed
+
+- The second reminder of «Синк-ап по релизу» is in the set (server
+  `v0.2.158`), as the frames of the card, the panel and the edit draw it;
+  U-5.5 row 26 keeps the organiser and the report of losses.
+
 ## v0.4.4 — 2026-10-09
 
 Typecase `0bf5f71` (Typecase's notes 37, 38 and 39 in one step: Carrel's

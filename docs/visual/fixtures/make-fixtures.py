@@ -213,12 +213,17 @@ sinkap = [
     u'SEQUENCE:2',
     u'X-MOZ-GENERATION:3',
     u'X-APPLE-TRAVEL-ADVISORY-BEHAVIOR:AUTOMATIC',
-    # Напоминание за 10 минут (s-agenda-1, -2: «Reminders · 10 minutes
-    # before»).
+    # Напоминания за 10 минут и за день (s-agenda-1, -2: «Reminders · 10
+    # minutes before · 1 day before»; s-agenda-3 — оба в правке).
     u'BEGIN:VALARM',
     u'ACTION:DISPLAY',
     u'DESCRIPTION:Синк-ап по релизу',
     u'TRIGGER:-PT10M',
+    u'END:VALARM',
+    u'BEGIN:VALARM',
+    u'ACTION:DISPLAY',
+    u'DESCRIPTION:Синк-ап по релизу',
+    u'TRIGGER:-P1D',
     u'END:VALARM',
     u'END:VEVENT']
 
@@ -363,7 +368,17 @@ write(u'nextcloud-home/dela.ics', cal(u'Дела',
            attach=[u'ATTACH;FMTTYPE=application/pdf;ENCODING=BASE64;'
                    u'VALUE=BINARY;FILENAME=посадочный-казань.pdf:' +
                    base64.b64encode(boarding_pass()).decode('ascii')]) +
-      todo(u'aa12-9e44-c703', u'Продлить страховку', percent=100)))
+      todo(u'aa12-9e44-c703', u'Продлить страховку', percent=100) +
+      # Выполненная: тег «read» рейла (s-tasks-1) и «Done 1» сегмента.
+      [u'BEGIN:VTODO',
+       u'UID:aa13-5b2e-71c0',
+       u'DTSTAMP:20260810T060000Z',
+       u'SUMMARY:Прочитать договор аренды',
+       u'STATUS:COMPLETED',
+       u'COMPLETED:20260805T120000Z',
+       u'PERCENT-COMPLETE:100',
+       u'CATEGORIES:read',
+       u'END:VTODO']))
 
 write(u'nextcloud-home/rabota-zadachi.ics', cal(u'Работа · задачи',
       todo(u'bb20-4c17-8a52', u'Ответить подрядчику по смете',

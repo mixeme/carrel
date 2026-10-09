@@ -4623,8 +4623,8 @@ Read  2 min ago</div>
         <dl class="tc-fields">
           <dt>When</dt><dd><span class="tc-mono">10:00 – 11:00</span>, Monday 10 August
             <span class="tc-badge" title="Created in another time zone">created 12:00 Asia/Yekaterinburg</span></dd>
-          <dt>Reminders</dt><dd>10 minutes before</dd>
           <dt>Repeats</dt><dd>Weekly on Mon <span class="tc-badge">until 2026-12-28</span></dd>
+          <dt>Reminders</dt><dd>10 minutes before · 1 day before</dd>
           <dt>Where</dt><dd>Переговорная 2</dd>
           <dt>Status</dt><dd>Confirmed</dd>
           <dt>Tags</dt><dd><span class="tc-tag">release</span> <span class="tc-tag">team</span></dd>
@@ -4831,7 +4831,7 @@ Read  2 min ago · changed on server 3 days ago</div>
         <dl class="tc-fields">
           <dt>When</dt><dd><span class="tc-mono">10:00 – 11:00</span>, Monday 10 August <span class="tc-badge" title="Created in another time zone">created 12:00 Asia/Yekaterinburg</span></dd>
           <dt>Repeats</dt><dd>Weekly on Mon <span class="tc-badge">until 2026-12-28</span></dd>
-          <dt>Reminders</dt><dd>10 minutes before</dd>
+          <dt>Reminders</dt><dd>10 minutes before · 1 day before</dd>
           <dt>Where</dt><dd>Переговорная 2</dd>
           <dt>Status</dt><dd>Confirmed</dd>
           <dt>Tags</dt><dd><span class="tc-tag">release</span> <span class="tc-tag">team</span></dd>
@@ -14609,6 +14609,26 @@ jobs:
     </div>
   </div>
   <figcaption>На узкой ширине у строки остаётся Copy — ссылку чаще всего вставляют сами, — а Send и Revoke уходят сюда. Send открывает лист отправки письмом; та же строка стоит под ним в «Отправить ссылку письмом».</figcaption>
+  </figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-17">
+    <div class="frame-label"><span>Строки ссылок · почта не настроена</span><span class="frag">фрагмент</span><i>Send нет</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <table class="tc-table">
+          <thead><tr><th>What is published</th><th>Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
+          <tbody>
+            <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono">file</td><td class="tc-mono is-2nd tc-table__n3">2026-08-10</td><td class="tc-mono tc-table__n4">No expiry</td><td class="tc-mono is-2nd tc-mono--dusty">never opened</td><td class="tc-mono">0</td>
+              <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/9c1f4e" data-tc-copied="Copied">Copy</button><button class="tc-btn is-sm is-danger is-2nd" type="button">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><button class="tc-menu__item tc-menu__item--danger" type="button" role="menuitem">Revoke</button></div></details></td></tr>
+            <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><a class="tc-table__filename" href="/app/agenda/nextcloud/lichny?view=range&from=2026-08-10&to=2026-08-31">Личный · 10–31 August</a></span></td><td class="tc-mono">calendar</td><td class="tc-mono is-2nd tc-table__n3">2026-08-09</td><td class="tc-mono tc-table__n4">2026-09-08</td><td class="tc-mono is-2nd">2026-08-10 08:41</td><td class="tc-mono">12</td>
+              <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/7f3ac9/personal.ics" data-tc-copied="Copied">Copy</button><button class="tc-btn is-sm is-danger is-2nd" type="button">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><button class="tc-menu__item tc-menu__item--danger" type="button" role="menuitem">Revoke</button></div></details></td></tr>
+          </tbody>
+        </table>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>На экземпляре без почты (<a href="#s-mail">7.18</a>) Send в строке нет вовсе — ни кнопкой, ни в меню: выключенная кнопка обещала бы, что её можно включить отсюда, а почту настраивает администратор. Остаются Copy и Revoke; на узкой ширине под «⋯» уходит один Revoke.</figcaption>
   </figure>
 
 <figure style="flex:1 1 100%">

@@ -202,7 +202,7 @@ func taskFields(tf timeFmt, obj *model.Object, panel bool, tags []view.Tag) ([]v
 			for _, r := range rows {
 				labels = append(labels, string(r.Label))
 			}
-			out = append(out, view.Field{Label: "Reminders", Value: text(strings.Join(labels, ", "))})
+			out = append(out, view.Field{Label: "Reminders", Value: text(strings.Join(labels, " · "))})
 		}
 	}
 	if v := cal.Text(obj, "LOCATION"); v != "" {

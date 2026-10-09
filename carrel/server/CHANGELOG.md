@@ -17,6 +17,35 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.158 — 2026-10-09
+
+The frames of Typecase `3adc445` (Typecase's note 40; the owner's decision
+of 09.10.2026), with the client's `v0.4.5`.
+
+### Changed
+
+- **Reminders are said in one line, apart by the dot**: `Reminders` of an
+  event's and a task's card — «10 minutes before · 1 day before»
+  (`s-agenda-1`, `-2`); before, a comma.
+- **The panel of an event has its card's order**: `Details.fields` — When,
+  Repeats, Reminders, Where, Status, Tags; before, Reminders stood before
+  Repeats.
+
+### Removed
+
+- **A published link «made before links were kept».** Every link is kept
+  whole with its token since 19.09.2026, and no instance holds an older
+  one: the row of `/app/files/published` no longer has the state with Copy
+  and Send switched off and that reason. S-, U-6.5 say so.
+
+### Fixtures
+
+- The set: «Синк-ап по релизу» has two reminders, 10 minutes and a day
+  before (`lichnyj.ics`); `make-fixtures.py` writes the done task of
+  `dela.ics` it had lost — the file itself is the same.
+- `app-agenda-all/normal` (the panel), `app-event/normal`,
+  `app-event-edit/normal`, `-/loss` (the second reminder).
+
 ## v0.2.157 — 2026-10-09
 
 The owner's decision of 09.10.2026: a table counts what a person sees, the
