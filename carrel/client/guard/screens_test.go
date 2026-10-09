@@ -881,6 +881,23 @@ func TestKinMenus(t *testing.T) {
 	}
 }
 
+// The choices of a line of input without a script (TagAdd.Options, a
+// datalist) are the meaning of HTML, not the frame's: no frame draws them,
+// no draft has them, and shape drops them (Typecase's note 43, task 146) —
+// a screen that has them is the draft's kin all the same.
+func TestKinListOptions(t *testing.T) {
+	line := func(options ...w.ListOption) w.TagInput {
+		return w.TagInput{Parts: []w.TagInputPart{w.Tag{Label: "a"}}, Add: &w.TagAdd{Name: "related.add", Options: options}}
+	}
+	if err := guard.Kin(guard.Skeleton(line()), guard.Skeleton(line(w.ListOption{Value: "u1", Label: "One"}, w.ListOption{Value: "u2"}))); err != nil {
+		t.Errorf("a line with its choices is not kin of the draft's line: %v", err)
+	}
+	// The line itself is still held: a field without it is another field.
+	if err := guard.Kin(guard.Skeleton(line()), guard.Skeleton(w.TagInput{Parts: []w.TagInputPart{w.Tag{Label: "a"}}})); err == nil {
+		t.Error("a tag field without its line is kin of a draft that has one")
+	}
+}
+
 // The rows of the list «ждёт библиотеку» that name a state or a control
 // (U-5.5, the owner's decision of 01.10.2026), and every wait of every
 // screen against them: a wait names a row that names its fixture or its

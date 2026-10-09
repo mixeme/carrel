@@ -122,7 +122,7 @@ func TestMoveSheetIsAForm(t *testing.T) {
 	form := frameOne(t, regexp.MustCompile(`<form class="tc-sheet[^"]*" action="[^"]*\?op=move" method="(post)">`), frame, "form of the sheet")
 	field := frameOne(t, regexp.MustCompile(`<input class="tc-tree__box" type="radio" name="([^"]+)" value="[^"]+" checked>`), frame, "chosen node")[1]
 	word := frameOne(t, regexp.MustCompile(`<button class="tc-btn is-primary" type="submit">([^<]+)</button>`), frame, "button of the form")[1]
-	if form[1] != "post" || (word != "Move here" && word != "Move") {
+	if form[1] != "post" || word != "Move" {
 		t.Fatalf("s-files-4 sends its sheet with %q: read the frame again", word)
 	}
 

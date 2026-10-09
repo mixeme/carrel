@@ -251,9 +251,7 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.TaskEditPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return taskedit.Forms(model.(*view.TaskEditPage)) },
 		Waits: []Wait{
-			{Row: 35, Fixture: "app-task-edit/normal"}, // ждёт библиотеку: U-5.5 #35
-			{Row: 35, Fixture: "app-task-edit/loss"},   // ждёт библиотеку: U-5.5 #35
-			{Row: 35, Fixture: "app-task-edit/new"},    // ждёт библиотеку: U-5.5 #35
+			{Row: 35, Fixture: "app-task-edit/loss"}, // ждёт библиотеку: U-5.5 #35
 		},
 	},
 	{

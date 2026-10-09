@@ -5,7 +5,6 @@ import (
 	"html"
 	"net/url"
 	"regexp"
-	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -33,26 +32,6 @@ var (
 // space of their own («<code>MOVE</code>:» is «MOVE:»).
 func frameInline(s string) string {
 	return strings.Join(strings.Fields(html.UnescapeString(frameTag.ReplaceAllString(s, ""))), " ")
-}
-
-// confirmWord is the word of a move's or a copy's button as Carrel says it:
-// «Move», «Copy» (the owner's word of 09.10.2026). The frames still draw
-// «Move here» and «Copy here» (Typecase's task 147); when they follow, the
-// word is the frame's as it is.
-func confirmWord(drawn string) string { return strings.TrimSuffix(drawn, " here") }
-
-// asDrawn are the actions of a move's or a copy's sheet with the confirming
-// button named as the frame still names it, to be held against the frame's
-// marks (sameActionMarks): «Move» alone is another button of the frame, the
-// bar's.
-func asDrawn(actions []view.Action) []view.Action {
-	out := slices.Clone(actions)
-	for i, a := range out {
-		if strings.HasSuffix(a.ID, ".move.confirm") || strings.HasSuffix(a.ID, ".copy.confirm") {
-			out[i].Label = a.Label + " here"
-		}
-	}
-	return out
 }
 
 func frameOne(t *testing.T, re *regexp.Regexp, frame, what string) []string {
@@ -109,7 +88,7 @@ func TestFileMoveSheetIsTheFrame(t *testing.T) {
 	if plainText(sheet.Warning) != msg {
 		t.Errorf("message = %q\nthe frame %q", sheet.Warning, msg)
 	}
-	if sheet.Actions[0].Label != view.Text(confirmWord(confirm)) || !sheet.Actions[0].Enabled {
+	if sheet.Actions[0].Label != view.Text(confirm) || !sheet.Actions[0].Enabled {
 		t.Errorf("confirm = %+v, the frame %q", sheet.Actions[0], confirm)
 	}
 	if sheet.Target == nil || sheet.Target.New == nil || sheet.Target.New.Label != view.Text(newFolder) || !sheet.Target.New.Enabled {
@@ -212,7 +191,7 @@ func TestRecordMoveSheetIsTheFrame(t *testing.T) {
 	if plainText(chosen.Warning) != msg {
 		t.Errorf("message = %q\nthe frame %q", chosen.Warning, msg)
 	}
-	if c := confirmOf(t, chosen); c.Label != view.Text(confirmWord(confirm)) || !c.Enabled {
+	if c := confirmOf(t, chosen); c.Label != view.Text(confirm) || !c.Enabled {
 		t.Errorf("confirm = %+v, the frame %q", c, confirm)
 	}
 	cp := decode[view.MoveSheet](t, f.h.do(get(moveOption(t, sheet, "Friends").ID+"&copy=1", f.sess)))
@@ -281,7 +260,7 @@ func TestCollectionMoveSheetIsTheFrame(t *testing.T) {
 	if plainText(chosen.Warning) != want {
 		t.Errorf("message = %q\nwant      %q", chosen.Warning, want)
 	}
-	if len(chosen.Actions) != 2 || chosen.Actions[1].ID != "collection.cancel" || chosen.Actions[0].Label != view.Text(confirmWord(confirm)) || !chosen.Actions[0].Enabled {
+	if len(chosen.Actions) != 2 || chosen.Actions[1].ID != "collection.cancel" || chosen.Actions[0].Label != view.Text(confirm) || !chosen.Actions[0].Enabled {
 		t.Errorf("actions = %+v, the frame %q and Cancel", chosen.Actions, confirm)
 	}
 	cp := decode[view.CollectionMoveSheet](t, f.h.do(get(menuHref(t, row.Menu, "collection.copy"), f.sess)))

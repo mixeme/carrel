@@ -59,8 +59,9 @@ import (
 // and draw nothing of the frame's: a hidden field (shape drops
 // input[type=hidden]), an option of a select (option), a PostForm (tc-post),
 // the template of a row «Add …» (template is not drawn), the type of an
-// input (an attribute, not a class).
-var meaning = map[string]bool{"Hidden": true, "PickOption": true, "PostForm": true, "Template": true, "InputKind": true}
+// input (an attribute, not a class), a choice of a line of input (datalist:
+// shape drops it since Typecase's note 43).
+var meaning = map[string]bool{"Hidden": true, "PickOption": true, "PostForm": true, "Template": true, "InputKind": true, "ListOption": true}
 
 // Node is the skeleton of one widget.
 type Node struct {

@@ -4,6 +4,26 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.9 — 2026-10-10
+
+Typecase `7b8f469` (Typecase's note 43: tasks 146 and 147), server
+`v0.2.179`. No draft of a built frame prints otherwise and no screen
+changed.
+
+### Changed
+
+- **The edit of a task matches its frames** (`s-tasks-3`, `s-tasks-14`): the
+  comparison no longer takes the `datalist` of the line in Related to for
+  something drawn. `app-task-edit/normal` and `/new` no longer wait; U-5.5
+  row 35 stays for the report of what was lost (`states-24`), rows 40 and
+  42 for what else they wait for — the `datalist` is gone from all three.
+- The copy of the mockup says «Move» and «Copy» on the buttons of the six
+  sheets, as the server has since `v0.2.167`.
+- The guard of kinship with the draft takes the choices of a line of input
+  (`TagAdd.Options`, a `datalist`) for the meaning of HTML, as it takes a
+  hidden field and an option of a select: no frame draws them. Without
+  this the two screens that stopped waiting were red against their drafts.
+
 ## v0.4.8 — 2026-10-09
 
 Typecase `0fe0244` (Typecase's note 42: the files picked for an upload by
