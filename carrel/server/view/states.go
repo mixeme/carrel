@@ -71,6 +71,8 @@ const (
 	FileMove   FileOp = "move"
 	FileCopy   FileOp = "copy"
 	FileDelete FileOp = "delete"
+	// FileNewFolder — лист New folder шапки папки и подвала рейла (s-files-23)
+	FileNewFolder FileOp = "new"
 )
 
 type ImportStep string

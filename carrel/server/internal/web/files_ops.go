@@ -526,8 +526,8 @@ func (s *Server) answerUpload(w http.ResponseWriter, r *http.Request, c *fileCtx
 
 // New folder (C-5.5): MKCOL of the name the form sends in the folder of the
 // address. New folder of the bar and of the rail sends no name: the answer
-// is the folder with the line of the name open (FilesPage.Name), and the
-// line sends it. A refusal keeps the line open with what was typed.
+// is the sheet that asks for it (s-files-23), and its form sends it. A
+// refusal is the sheet again, with what was typed; a folder made, the folder.
 func (s *Server) postFilesMkcol(w http.ResponseWriter, r *http.Request) {
 	c, ok := s.openFiles(w, r, "mkcol")
 	if !ok {
@@ -537,41 +537,48 @@ func (s *Server) postFilesMkcol(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	name := strings.TrimSpace(r.FormValue("name"))
-	if _, sent := r.PostForm["name"]; !sent && !c.col.ReadOnly {
-		s.writeFolderWith(w, r, c, c.segs, "", url.Values{}, render.TargetMain, s.nameLine(c, ""))
+	// A read-only storage makes nothing, and its New folder stands off: a
+	// request all the same is told so on the folder.
+	if c.col.ReadOnly {
+		s.writeFolder(w, r, c, c.segs, "", url.Values{}, render.TargetMain, readOnlyNotice)
 		return
 	}
-	n := s.makeFolder(r.Context(), c, name)
-	if n == nil && !render.WantsFragment(r) {
-		s.redirect(w, r, c.href("", c.segs, true))
-		return
-	}
-	var notices []view.Notice
-	var edit func(*view.FilesPage)
-	if n != nil {
-		notices = append(notices, *n)
-		if !c.col.ReadOnly {
-			edit = s.nameLine(c, name)
+	name := strings.TrimSpace(r.PostFormValue("name"))
+	var failure *view.Notice
+	if _, sent := r.PostForm["name"]; sent {
+		if failure = s.makeFolder(r.Context(), c, name); failure == nil {
+			s.redirect(w, r, c.href("", c.segs, true))
+			return
 		}
 	}
-	s.writeFolderWith(w, r, c, c.segs, "", url.Values{}, render.TargetMain, edit, notices...)
+	sheet := s.newFolderSheet(c, name, failure)
+	if render.WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
+		return
+	}
+	s.writePage(w, r, http.StatusOK, sheet)
 }
 
-// nameLine opens the line of a new folder's name over the folder c is at,
-// with typed in it: Create posts it to mkcol, Cancel is the folder.
-func (s *Server) nameLine(c *fileCtx, typed string) func(*view.FilesPage) {
-	return func(page *view.FilesPage) {
-		create := s.route(c.href("mkcol", c.segs, true))
-		form := view.Form{Action: create, Method: "POST",
-			Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(c.sess),
-				{Name: "name", Label: "Name of the new folder", Kind: view.InputText, Value: text(typed), Required: true}}}},
-			Actions: []view.Action{
-				{ID: "folder.new.create", Label: "Create", Href: create, Method: "POST", Primary: true, Enabled: true},
-				{ID: "folder.new.cancel", Label: "Cancel", Href: s.route(c.href("", c.segs, true)), Method: "GET", Enabled: true},
-			}}
-		form = focused(form, "name")
-		page.Name = &form
+// newFolderSheet is the sheet New folder of a folder's head and of the
+// rail's foot opens (s-files-23): where the folder will be made, the field
+// of its name with typed in it, why the last try made nothing, Create —
+// the form's button — and Cancel, the folder.
+func (s *Server) newFolderSheet(c *fileCtx, typed string, failure *view.Notice) view.FileOpSheet {
+	create := s.route(c.href("mkcol", c.segs, true))
+	form := view.Form{Action: create, Method: "POST", Target: render.TargetSheet,
+		Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(c.sess),
+			{Name: "name", Label: "Name", Kind: view.InputText, Value: text(typed), Required: true}}}}}
+	form = focused(form, "name")
+	return view.FileOpSheet{
+		Op:      view.FileNewFolder,
+		Title:   "New folder",
+		Subject: text("in " + strings.Join(append([]string{collectionLabel(c.col)}, c.segs...), " / ")),
+		Failure: failure,
+		Form:    &form,
+		Actions: []view.Action{
+			{ID: "folder.new.create", Label: "Create", Href: create, Method: "POST", Primary: true, Enabled: true, Submits: true},
+			{ID: "folder.new.cancel", Label: "Cancel", Href: s.route(c.href("", c.segs, true)), Method: "GET", Enabled: true},
+		},
 	}
 }
 

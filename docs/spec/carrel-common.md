@@ -457,7 +457,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/files/{account}/{col}/{path…}` | GET | вход | страница | `FilesPage`; адрес файла (без «/» в конце) — его папка с ним выделенным; `?select=` — выделенные имена (значений несколько); `?view=tiles` — плитки (без него — список), `?sort=` (`name`, `size`, `changed`), `?filter=` — по имени, по уже прочитанному списку («Filter this folder» без сценариев — `ListBar.FilterForm`); один выделенный файл — с его панелью (`Shell.Details`), `?details=0` — панель скрыта (Details шапки); у одной выделенной картинки — её ширина и высота (`FileRow.Dimensions`, поле Dimensions панели после Type): одно чтение начала файла, `Range: bytes=0-65535` (S-17); `?print=1` — та же папка для печати (U-10, Print в «⋯» шапки) |
 | `/app/files/{account}/{col}/download/{path…}` | GET | вход | поток; адрес папки (`…/`) с `?zip=1` — папка архивом zip (S-17.5) | — |
 | `/app/files/{account}/{col}/upload/{path…}` | POST | вход | фрагмент | `TransferQueue`; `?menu=1` — загрузка из листа меню создания: папка запоминается для следующей такой; multipart: файлы — поле `file` (`Action.File`), у загрузки папки имя файла — путь внутри неё; перед файлами со сценарием — `size.<имя>` (длина файла в байтах, у загрузки папки имя — тот же путь) или `size` у одного файла: без них тело уходит без длины, и сервер, которому она нужна, отказывает (S-17.1); полей файла с именем `file` у формы может быть два (Files и Folder, s-files-8) — размеры стоят перед файлами своего поля, значит и между файлами, а поле, в котором ничего не выбрано, приходит частью без имени файла — это не файл; `?transfer=&answer=` (`skip`, `both`, `overwrite`) — ответ очереди на занятое имя |
-| `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | фрагмент | `FilesPage`; поле `name` — имя новой папки; без поля (New folder шапки и рейла) — папка с открытой строкой имени (`FilesPage.Name`) |
+| `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | лист | `FileOpSheet` (`Op` — `new`, s-files-23); без поля `name` (New folder шапки и рейла) — лист с полем имени; с полем — папка заводится и ответ — редирект на папку, отказ (имя занято, имя не годится) — тот же лист с отказом под полем и набранным |
 | `/app/files/{account}/{col}/op/{path…}` | GET, POST | вход | лист | `FileOpSheet`; `?op=` (`rename`, `move`, `copy`, `delete`), `item` — имена папки (значений несколько; у POST и полями формы выделения, `FilesPage.Select`: ничего не отмечено или у `rename` отмечено не одно — папка с отказом «Nothing was done»), `to` — папка назначения переноса и копии: адрес узла дерева (`FileTreeNode.Href` несёт его в адресе; у POST и полем формы). GET — только лист; POST с `go=1` выполняет (у `rename` — поле `name`, новое имя; у `delete` — `etag` показанных версий), с `mkcol=1` и полем `name` — New folder дерева, с `transfer=&answer=` — ответ очереди; GET с `new=1` — лист с открытой строкой имени (`FileTree.Name`) |
 | `/app/files/{account}/{col}/columns/{path…}` | POST | вход | редирект | — ; меню Columns папки (s-files-20); ответ — папка `{path…}` с её запросом (S-9.6) |
 | `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=upload[&to=]` — папка загрузки из меню создания: узел выбирает её адресом, «Upload» листа шлёт файлы на загрузку выбранной папки с `?menu=1` — эта загрузка и запоминает папку для следующей из меню; «Choose this folder» в этом листе нет; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attach&k=&a=&c=&new=` — то же для черновика новой записи (вместо `uid`), Attach шлёт `…/new?op=attachfile&uid=&file=`, Cancel — назад к форме `/new?uid=`; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=`; `?for=upload&new=1` — с открытой строкой имени новой папки, POST `?for=upload&mkcol=1&to=` с полем `name` её заводит |
@@ -2038,11 +2038,6 @@ type FilesPage struct {
     // (files.select.clear, папка без select), пока выделено адресом.
     Select *Form
     SelectField string
-    // Name — строка имени новой папки, которую открывает New folder шапки
-    // и рейла (POST mkcol без поля name): поле name «Name of the new
-    // folder», Create (Form.Action — адрес mkcol) и Cancel — та же папка.
-    // После отказа — с набранным, отказ — в Notices; nil — не открыта.
-    Name *Form
 }
 type Crumb struct { Label Text; Href string }
 type FileRow struct {
@@ -2169,6 +2164,10 @@ type FileOpSheet struct {
     Alert   Runs
     Warning Runs // перенос: на одном сервере `MOVE` моноширинно (s-files-4); переименование — кого заденет новый адрес (s-files-21); удаление — что ссылок никто не считал (s-files-22)
     Failure *Notice
+    // Лист New folder (Op new, s-files-23): Title «New folder», Subject «in
+    // Documents / carrel / attachments», Form — POST на адрес mkcol с полем
+    // name «Name», Failure — отказ под полем, Actions — Create (кнопка
+    // формы) и Cancel.
     // Form — форма листа: у переименования — с полем name; у переноса и
     // копии (s-files-4) — POST подтверждения со скрытым _csrf, цель — поле
     // Target.Field, отметка узла; «Move» и «Copy» — её кнопка
@@ -3142,7 +3141,7 @@ Open, `file.download` Download, `file.rename`, `file.move`, `file.copy`,
 только для чтения переименование, перенос и удаление выключены с причиной,
 скачивание и копия — нет. Без сценариев (U-8): `files.select.clear` «Clear
 selection» формы выделения папки, `folder.new.create` и `folder.new.cancel`
-строки имени новой папки, `folder.upload` — загрузка в папку строки (бросок
+листа New folder (s-files-23), `folder.upload` — загрузка в папку строки (бросок
 на неё); загрузки — `file.upload` (Files), `file.upload.folder` (Folder),
 `files.picker.upload` — с полем файла `Action.File`. Корень и папка:
 `files.refresh` (корень), `folder.refresh`, `files.details` — Details шапки
@@ -3234,7 +3233,8 @@ const (
 
 type FileOp string
 const ( FileRename FileOp = "rename"; FileMove = "move"
-        FileCopy = "copy"; FileDelete = "delete" )
+        FileCopy = "copy"; FileDelete = "delete"
+        FileNewFolder = "new" ) // лист New folder шапки папки и рейла (s-files-23)
 
 type ImportStep string
 const ( ImportStepSource ImportStep = "source"; ImportStepPreview = "preview"

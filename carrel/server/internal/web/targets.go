@@ -39,7 +39,7 @@ var fragmentRoutes = []fragmentRoute{
 	{"GET", "/app/{kind}/quick", render.TargetSheet},
 	// C-5.5
 	{"POST", "/app/files/{account}/{col}/upload/{path…}", render.TargetQueue},
-	{"POST", "/app/files/{account}/{col}/mkcol/{path…}", render.TargetMain},
+	{"POST", "/app/files/{account}/{col}/mkcol/{path…}", render.TargetSheet},
 	{"", "/app/files/{account}/{col}/op/{path…}", render.TargetSheet},
 	{"", "/app/files/picker", render.TargetSheet},
 	// C-5.6

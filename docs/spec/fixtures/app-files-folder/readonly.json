@@ -51,7 +51,7 @@
         "label": "New folder",
         "method": "POST",
         "reason": "This storage is read-only.",
-        "target": "main"
+        "target": "sheet"
       },
       {
         "enabled": false,
@@ -288,7 +288,6 @@
   ],
   "details": null,
   "empty": null,
-  "name": null,
   "notices": [],
   "print": {
     "range": "sftpgo · vps · Public · 1 item",

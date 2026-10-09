@@ -1901,6 +1901,9 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	app.compare(t, "app-files-op/refused.json", app.h.do(postForm(op+"?"+url.Values{"op": {"move"}, "item": three, "mkcol": {"1"},
 		"to": {app.filesAt(t, "Documents", "", "carrel", "attachments")}}.Encode(), app.sess, url.Values{"name": {"2026-07"}})))
 
+	// New folder of the head with a name taken (s-files-23).
+	app.compare(t, "app-files-op/new.json", app.h.do(postForm(app.filesAt(t, "Documents", "mkcol", "carrel", "attachments"), app.sess, url.Values{"name": {"2026-07"}})))
+
 	from := "/app/files/picker?" + url.Values{"for": {"attach"}, "k": {"tasks"}, "a": {app.realAccount(t, "dela")}, "c": {app.realPath(t, "dela")},
 		"uid": {"aa11-2d09-5f84"}, "to": {attachments}}.Encode()
 	app.compare(t, "app-files-picker/attach.json", app.h.do(get(from, app.sess)))

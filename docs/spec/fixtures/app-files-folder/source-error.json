@@ -47,7 +47,7 @@
         "id": "folder.new",
         "label": "New folder",
         "method": "POST",
-        "target": "main"
+        "target": "sheet"
       },
       {
         "enabled": false,
@@ -227,7 +227,6 @@
   ],
   "details": null,
   "empty": null,
-  "name": null,
   "notices": [
     {
       "actions": [
@@ -276,7 +275,7 @@
         "id": "rail.folder.new",
         "label": "New folder",
         "method": "POST",
-        "target": "main"
+        "target": "sheet"
       },
       {
         "enabled": true,

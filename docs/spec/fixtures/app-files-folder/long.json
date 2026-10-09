@@ -47,7 +47,7 @@
         "id": "folder.new",
         "label": "New folder",
         "method": "POST",
-        "target": "main"
+        "target": "sheet"
       },
       {
         "enabled": false,
@@ -289,7 +289,6 @@
   ],
   "details": null,
   "empty": null,
-  "name": null,
   "notices": [],
   "print": {
     "range": "sftpgo · vps · Documents · 6 items",
@@ -369,7 +368,7 @@
         "id": "rail.folder.new",
         "label": "New folder",
         "method": "POST",
-        "target": "main"
+        "target": "sheet"
       },
       {
         "enabled": true,

@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.170 — 2026-10-09
+
+The files section, the client's second scan (ФН13): New folder of a
+folder's head and of the rail's foot is a sheet (`s-files-23`).
+
+### Changed
+
+- **New folder opens a sheet.** A POST of `…/mkcol/{path…}` without a name
+  answers `FileOpSheet` with `op` «new» (new in C-8): «New folder», «in
+  Documents / carrel / attachments», the field «Name», Create — the form's
+  button — and Cancel. A name taken or not fit for one is the sheet again,
+  the refusal in `failure` and the name as typed; a folder made is a
+  redirect to its folder. The address answers the zone `sheet` (was
+  `main`).
+
+### Removed
+
+- `FilesPage.name` — the line of a new folder's name on the page.
+
 ## v0.2.169 — 2026-10-09
 
 The files section, the client's second scan (ФН14; Typecase's note 38): the

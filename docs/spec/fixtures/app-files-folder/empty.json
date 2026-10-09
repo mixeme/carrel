@@ -47,7 +47,7 @@
         "id": "folder.new",
         "label": "New folder",
         "method": "POST",
-        "target": "main"
+        "target": "sheet"
       },
       {
         "enabled": false,
@@ -276,7 +276,7 @@
         "id": "folder.new",
         "label": "New folder",
         "method": "POST",
-        "target": "main"
+        "target": "sheet"
       }
     ],
     "body": "Upload files into it, or drop them onto the window.",
@@ -284,7 +284,6 @@
     "role": "info",
     "title": "This folder is empty."
   },
-  "name": null,
   "notices": [],
   "print": {
     "range": "nextcloud · Files · 0 items",
@@ -311,7 +310,7 @@
         "id": "rail.folder.new",
         "label": "New folder",
         "method": "POST",
-        "target": "main"
+        "target": "sheet"
       },
       {
         "enabled": true,

@@ -66,12 +66,6 @@ type FilesPage struct {
 	Select *Form `json:"select"`
 	// SelectField — имя поля отметки формы Select: «item»
 	SelectField string `json:"selectField"`
-	// Name — строка имени новой папки, которую открывает New folder шапки и
-	// рейла (POST mkcol без поля name): поле name «Name of the new folder»,
-	// Create (Form.Action — адрес mkcol) и Cancel — та же папка. После отказа
-	// строка приходит с набранным, отказ — в Notices; nil — строку не
-	// открывали
-	Name *Form `json:"name"`
 }
 type Crumb struct {
 	Label Text   `json:"label"`
@@ -217,6 +211,11 @@ type FileOpSheet struct {
 	// что ссылок на файлы никто не считал (s-files-22)
 	Warning Runs    `json:"warning"`
 	Failure *Notice `json:"failure"` // New folder не завёл папку; nil — отказа не было
+	// У листа New folder (Op new, s-files-23): Title «New folder», Subject «in
+	// Documents / carrel / attachments», Form — POST на адрес mkcol с полем
+	// name «Name», Failure — отказ под полем (имя занято: та же фраза, что в
+	// листе переноса), Actions — Create (кнопка формы) и Cancel
+	//
 	// Form — форма листа. У переименования: POST на адрес подтверждения
 	// (go=1), скрытый _csrf и поле name — новое имя, сначала нынешнее,
 	// курсор в нём; Rename листа отправляет её. У переноса и копии

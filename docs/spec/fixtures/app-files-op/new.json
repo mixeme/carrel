@@ -1,0 +1,78 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/",
+      "id": "folder.new.create",
+      "label": "Create",
+      "method": "POST",
+      "primary": true,
+      "submits": true,
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+      "id": "folder.new.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "alert": [],
+  "failure": {
+    "actions": [],
+    "body": "There is a folder called «2026-07» in attachments already. Choose another name.",
+    "details": null,
+    "role": "alert",
+    "title": ""
+  },
+  "form": {
+    "action": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "focus": true,
+            "hint": "",
+            "kind": "text",
+            "label": "Name",
+            "name": "name",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": "2026-07"
+          }
+        ],
+        "unfold": null
+      }
+    ],
+    "target": "sheet"
+  },
+  "items": [],
+  "op": "new",
+  "subject": "in Documents / carrel / attachments",
+  "target": null,
+  "title": "New folder",
+  "warning": []
+}

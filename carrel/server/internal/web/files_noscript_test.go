@@ -48,50 +48,6 @@ func TestRenameSheetCarriesTheNewName(t *testing.T) {
 	}
 }
 
-// ФБ12: New folder of the bar and of the rail posts no name; the answer is
-// the folder with the line of the name open, and that line makes it.
-func TestNewFolderWithoutANameAsksForIt(t *testing.T) {
-	f := filesFixture(t, true)
-	f.srv.SeedFile(filesDocs+"a.txt", "alpha")
-	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
-	bar := actionHref(t, page.Bar.Actions, "folder.new")
-	var rail string
-	for _, a := range page.Rail.Foot {
-		if a.ID == "rail.folder.new" {
-			rail = a.Href
-		}
-	}
-	if rail != bar {
-		t.Fatalf("New folder of the rail %q, of the bar %q", rail, bar)
-	}
-	asked := decode[view.FilesPage](t, f.h.do(postForm(bar, f.sess, url.Values{})))
-	if len(asked.Notices) != 0 || asked.Name == nil {
-		t.Fatalf("New folder without a name: notices %+v, line %+v", asked.Notices, asked.Name)
-	}
-	name := formRow(*asked.Name, "name")
-	if name == nil || !name.Focus || !name.Required || asked.Name.Action != bar || asked.Name.Method != "POST" ||
-		actionHref(t, asked.Name.Actions, "folder.new.cancel") != f.at("") {
-		t.Fatalf("line = %+v", asked.Name)
-	}
-	fields := formFields(*asked.Name)
-	fields.Set("name", "inbox")
-	if rec := f.h.do(postForm(asked.Name.Action, f.sess, fields)); rec.Code != http.StatusSeeOther {
-		t.Fatalf("create: %d %s", rec.Code, rec.Body)
-	}
-	if !fileRow(t, decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess))), "inbox").IsDir {
-		t.Error("no folder made")
-	}
-	// A refusal keeps the line open with what was typed.
-	taken := decode[view.FilesPage](t, f.h.do(postForm(bar, f.sess, url.Values{"name": {"inbox"}})))
-	if taken.Name == nil || formRow(*taken.Name, "name").Value != "inbox" ||
-		!hasNoticeBody(taken.Notices, "There is a folder called «inbox» in Docs already.") {
-		t.Errorf("taken: line %+v, notices %+v", taken.Name, taken.Notices)
-	}
-	if plain := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess))); plain.Name != nil {
-		t.Errorf("the line stands on a folder nobody asked: %+v", plain.Name)
-	}
-}
-
 // ФБ13: the actions that carry files name their field; S-17.1's sizes are
 // what C-5 names, not only the code.
 func TestUploadActionsNameTheirFileField(t *testing.T) {

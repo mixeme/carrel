@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -161,5 +162,70 @@ func TestMoveSheetIsAForm(t *testing.T) {
 	}
 	if got, ok := f.srv.File(filesDocs + "sub/a.txt"); !ok || got != "alpha" {
 		t.Errorf("after the move sub/a.txt = %q %v", got, ok)
+	}
+}
+
+// ФН13: New folder of a folder's head and of the rail's foot opens a sheet
+// (s-files-23) — «New folder», where it will be made, the field «Name»,
+// Create and Cancel —, not a line on the page. A name already taken is
+// refused under the field in the words of the move sheet, and the sheet
+// stays with what was typed.
+func TestNewFolderIsASheet(t *testing.T) {
+	frame := mockupFrame(t, "s-files-23")
+	title := frameText(frameOne(t, regexp.MustCompile(`(?s)<b class="tc-sheet__title">(.*?)</b>`), frame, "title")[1])
+	where := frameText(frameOne(t, frameOpPath, frame, "path")[1])
+	label := frameText(frameOne(t, frameOpFieldLabel, frame, "field")[1])
+	create := frameText(frameOne(t, regexp.MustCompile(`<button class="tc-btn is-primary" type="button">([^<]+)</button>`), frame, "button")[1])
+	refusal := frameText(frameOne(t, frameOpFlushAlert, frame, "refusal")[1])
+	taken := regexp.MustCompile(`«([^»]+)» in (\S+) already`).FindStringSubmatch(refusal)
+	segs := strings.Split(strings.TrimPrefix(where, "in "), " / ")
+	if taken == nil || !strings.HasPrefix(where, "in ") || len(segs) < 2 || segs[len(segs)-1] != taken[2] {
+		t.Fatalf("s-files-23 makes %q with the refusal %q: read the frame again", where, refusal)
+	}
+
+	f := filesFixture(t, true)
+	dir := filesDocs + strings.Join(segs[1:], "/") + "/"
+	f.srv.SeedFolder(dir + taken[1] + "/")
+	here := f.at("", append(segs[1:], "")...)
+	page := decode[view.FilesPage](t, f.h.do(get(here, f.sess)))
+	bar := actionHref(t, page.Bar.Actions, "folder.new")
+	rail := ""
+	for _, a := range page.Rail.Foot {
+		if a.ID == "rail.folder.new" {
+			rail = a.Href
+		}
+	}
+	if rail != bar || actionByID(page.Bar.Actions, "folder.new").Target != "sheet" {
+		t.Fatalf("New folder of the rail %q, of the bar %q (%+v): want one address, answered by a sheet", rail, bar, actionByID(page.Bar.Actions, "folder.new"))
+	}
+	sheet := decode[view.FileOpSheet](t, f.h.do(postForm(bar, f.sess, url.Values{})))
+	if sheet.Op != view.FileNewFolder || string(sheet.Title) != title || sheet.Failure != nil || sheet.Target != nil ||
+		string(sheet.Subject) != "in Docs / "+strings.Join(segs[1:], " / ") {
+		t.Fatalf("sheet = %+v, want %q %q", sheet, title, where)
+	}
+	name := formRow(*sheet.Form, "name")
+	if name == nil || string(name.Label) != label || !name.Focus || !name.Required || name.Value != "" || sheet.Form.Action != bar || sheet.Form.Method != "POST" {
+		t.Fatalf("form = %+v", sheet.Form)
+	}
+	if c := sheet.Actions[0]; c.ID != "folder.new.create" || string(c.Label) != create || !c.Primary || !c.Submits || !c.Enabled ||
+		actionHref(t, sheet.Actions, "folder.new.cancel") != here {
+		t.Errorf("actions = %+v", sheet.Actions)
+	}
+	// A name taken: the sheet again, the refusal of the frame under the
+	// field, the name as typed.
+	fields := formFields(*sheet.Form)
+	fields.Set("name", taken[1])
+	again := decode[view.FileOpSheet](t, f.h.do(postForm(sheet.Form.Action, f.sess, fields)))
+	if again.Failure == nil || again.Failure.Role != view.NoticeAlert || string(again.Failure.Body) != refusal ||
+		string(formRow(*again.Form, "name").Value) != taken[1] {
+		t.Errorf("a taken name: failure %+v, form %+v\nthe frame %q", again.Failure, again.Form, refusal)
+	}
+	// A free one is made, and the answer is the folder.
+	fields.Set("name", "inbox")
+	if rec := f.h.do(postForm(sheet.Form.Action, f.sess, fields)); rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != here {
+		t.Fatalf("create: %d to %q", rec.Code, rec.Header().Get("Location"))
+	}
+	if !fileRow(t, decode[view.FilesPage](t, f.h.do(get(here, f.sess))), "inbox").IsDir {
+		t.Error("no folder made")
 	}
 }

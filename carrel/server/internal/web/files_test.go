@@ -616,17 +616,26 @@ func TestNewFolder(t *testing.T) {
 	if row := fileRow(t, page, "Новая папка"); !row.IsDir {
 		t.Errorf("row = %+v", row)
 	}
-	taken := decode[view.FilesPage](t, f.h.do(postForm(f.at("mkcol"), f.sess, url.Values{"name": {"old"}})))
-	bad := decode[view.FilesPage](t, f.h.do(postForm(f.at("mkcol"), f.sess, url.Values{"name": {".."}})))
-	// A taken name is one line, as s-files-13 draws it, and says whether a
-	// file or a folder holds it.
-	if !hasNoticeBody(taken.Notices, "There is a folder called «old» in Docs already. Choose another name.") || !hasNotice(bad.Notices, "Nothing was created") {
-		t.Errorf("taken %+v, bad %+v", taken.Notices, bad.Notices)
+	// A refusal is the sheet of New folder again (s-files-23), the reason
+	// under its field: a taken name is one line, as s-files-13 draws it,
+	// and says whether a file or a folder holds it.
+	refused := func(href, name string) *view.Notice {
+		t.Helper()
+		sheet := decode[view.FileOpSheet](t, f.h.do(postForm(href, f.sess, url.Values{"name": {name}})))
+		if sheet.Op != view.FileNewFolder || sheet.Failure == nil {
+			t.Fatalf("%q refused by %+v", name, sheet)
+		}
+		return sheet.Failure
+	}
+	if taken := refused(f.at("mkcol"), "old"); taken.Body != "There is a folder called «old» in Docs already. Choose another name." {
+		t.Errorf("taken %+v", taken)
+	}
+	if bad := refused(f.at("mkcol"), ".."); bad.Title != "Nothing was created" {
+		t.Errorf("bad %+v", bad)
 	}
 	f.srv.SeedFile(filesDocs+"old/x.txt", "x")
-	file := decode[view.FilesPage](t, f.h.do(postForm(f.at("mkcol", "old", ""), f.sess, url.Values{"name": {"x.txt"}})))
-	if !hasNoticeBody(file.Notices, "There is a file called «x.txt» in old already. Choose another name.") {
-		t.Errorf("a file's name: %+v", file.Notices)
+	if file := refused(f.at("mkcol", "old", ""), "x.txt"); file.Body != "There is a file called «x.txt» in old already. Choose another name." {
+		t.Errorf("a file's name: %+v", file)
 	}
 }
 
