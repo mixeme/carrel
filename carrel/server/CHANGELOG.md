@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.159 — 2026-10-09
+
+Typecase `6833ef4` (Typecase's note 41, task 119), with the client's
+`v0.4.6`.
+
+### Fixed
+
+- **The sizes of a second field of files were lost.** An upload
+  (`…/upload/{path…}`) read the fields `size.<name>` only in front of the
+  first file. A form with two fields named `file` — Files and Folder of
+  the menu Upload (`s-files-8`) — sends the sizes of each field in front
+  of its own files, so the second field's stand after the first field's
+  files: its files went out without a length, and a storage that needs one
+  refused them. The fields between files are read now, within the same
+  ceiling of a form's bytes. A field nothing was chosen in comes as a part
+  without a file's name and is no file, as before. C-5.5 says both.
+
 ## v0.2.158 — 2026-10-09
 
 The frames of Typecase `3adc445` (Typecase's note 40; the owner's decision

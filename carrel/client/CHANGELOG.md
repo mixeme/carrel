@@ -4,6 +4,20 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.6 — 2026-10-09
+
+Typecase `6833ef4` (Typecase's note 41: Carrel's task 119, the owner's
+decisions of 09.10.2026), server `v0.2.159`. No draft of a built frame
+prints otherwise and no screen changed: the frames that did — the list of
+published links (`s-publish-1`, `-17`), the menu Upload (`s-files-8`), the
+sheet of an upload (`s-notes-11`) — are of the files section, not built yet.
+
+### Closed
+
+- U-5.5 row 43 no longer waits for the library: a form with a file field
+  of its own is multipart (`Form`, `Doc`, `Card`, `Sheet`). It waits for
+  the server alone — Save of an edit takes no files (C26).
+
 ## v0.4.5 — 2026-10-09
 
 Typecase `3adc445` (Typecase's note 40: the rest of Carrel's tasks 106 and

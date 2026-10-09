@@ -416,6 +416,34 @@ func TestUploadNeedsASizeOnSuchAServer(t *testing.T) {
 	if got, ok := f.srv.File(filesDocs + "sized.txt"); !ok || got != "body" {
 		t.Errorf("sized upload wrote %q, %v", got, ok)
 	}
+
+	// Two fields of one name, Files and Folder (Typecase's note 41,
+	// s-files-8): each has the sizes of its own files in front of it — the
+	// second field's stand after the first field's files —, and the field
+	// nothing was chosen in sends a part without a file's name, which is no
+	// file.
+	buf.Reset()
+	w = multipart.NewWriter(&buf)
+	_ = w.WriteField("_csrf", f.sess.CSRFToken())
+	_ = w.WriteField("size.one.txt", "3")
+	part, _ = w.CreateFormFile("file", "one.txt")
+	_, _ = part.Write([]byte("one"))
+	_, _ = w.CreateFormFile("file", "")
+	_ = w.WriteField("size.in/two.txt", "3")
+	part, _ = w.CreateFormFile("file", "in/two.txt")
+	_, _ = part.Write([]byte("two"))
+	_ = w.Close()
+	req = httptest.NewRequest(http.MethodPost, f.at("upload"), &buf)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: f.sess.ID()})
+	if rec := f.h.do(req); rec.Code != http.StatusSeeOther {
+		t.Fatalf("upload of two fields: %d %s", rec.Code, rec.Body.String())
+	}
+	for name, want := range map[string]string{"one.txt": "one", "in/two.txt": "two"} {
+		if got, ok := f.srv.File(filesDocs + name); !ok || got != want {
+			t.Errorf("%s: wrote %q, %v — its size stood after the first field's files", name, got, ok)
+		}
+	}
 }
 
 func heldUploads(t *testing.T) int {

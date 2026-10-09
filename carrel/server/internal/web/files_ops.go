@@ -165,6 +165,25 @@ type uploadBody struct {
 	fields url.Values
 	mr     *multipart.Reader
 	next   *multipart.Part // the first file part, opened; nil when none came
+	remain int64           // what is left of a form's worth of fields (MaxFormBodyBytes)
+}
+
+// keep reads a part that is no file into the fields, within what is left of
+// a form's worth of bytes: the fields in front of the first file, and the
+// ones between files — a second field of files has the sizes of its own
+// files in front of it, after the first field's files (Typecase's note 41:
+// Files and Folder of one form). A field of files nothing was chosen in
+// comes as such a part too, empty.
+func (up *uploadBody) keep(part *multipart.Part) error {
+	data, err := io.ReadAll(io.LimitReader(part, up.remain+1))
+	if err != nil {
+		return err
+	}
+	if up.remain -= int64(len(data)); up.remain < 0 {
+		return &http.MaxBytesError{Limit: conf.MaxFormBodyBytes}
+	}
+	up.fields.Add(part.FormName(), string(data))
+	return nil
 }
 
 type uploadKey struct{}
@@ -200,8 +219,7 @@ func readUploadFields(r *http.Request) (*uploadBody, error) {
 	if err != nil {
 		return nil, err
 	}
-	up := &uploadBody{fields: url.Values{}, mr: mr}
-	remain := int64(conf.MaxFormBodyBytes)
+	up := &uploadBody{fields: url.Values{}, mr: mr, remain: int64(conf.MaxFormBodyBytes)}
 	for {
 		part, err := mr.NextPart()
 		if err == io.EOF {
@@ -214,14 +232,9 @@ func readUploadFields(r *http.Request) (*uploadBody, error) {
 			up.next = part
 			return up, nil
 		}
-		data, err := io.ReadAll(io.LimitReader(part, remain+1))
-		if err != nil {
+		if err := up.keep(part); err != nil {
 			return nil, err
 		}
-		if remain -= int64(len(data)); remain < 0 {
-			return nil, &http.MaxBytesError{Limit: conf.MaxFormBodyBytes}
-		}
-		up.fields.Add(part.FormName(), string(data))
 	}
 }
 
@@ -275,6 +288,10 @@ func (s *Server) postFilesUpload(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if part.FileName() == "" {
+			// A field between the files: the sizes of the files after it.
+			if err = up.keep(part); err != nil {
+				break
+			}
 			continue
 		}
 		n++
