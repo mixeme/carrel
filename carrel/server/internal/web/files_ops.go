@@ -875,6 +875,8 @@ func (s *Server) newFolder(tree *view.FileTree, dest *fileCtx, address string, q
 
 // markTree marks the attachment folder among the nodes of a tree and the
 // one just made, fresh (s-notes-11: «attachment folder», «just created»).
+// The fresh one stands first among the nodes beside it, whatever its name
+// (s-notes-11: «2026-08» above «2026-07»); the others keep their order.
 func (s *Server) markTree(tree *view.FileTree, blob sealed.Blob, fresh string) {
 	attach := ""
 	if a := blob.Attachments; a != nil {
@@ -887,6 +889,11 @@ func (s *Server) markTree(tree *view.FileTree, blob sealed.Blob, fresh string) {
 			nodes[i].Attachments = !nodes[i].File && id == attach
 			nodes[i].Fresh = fresh != "" && id == fresh
 			walk(nodes[i].Children)
+		}
+		if i := slices.IndexFunc(nodes, func(n view.FileTreeNode) bool { return n.Fresh }); i > 0 {
+			one := nodes[i]
+			copy(nodes[1:i+1], nodes[:i])
+			nodes[0] = one
 		}
 	}
 	walk(tree.Nodes)

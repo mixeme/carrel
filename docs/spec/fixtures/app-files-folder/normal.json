@@ -362,6 +362,12 @@
       },
       {
         "href": "",
+        "label": "Dimensions",
+        "mono": true,
+        "value": "1920×1080"
+      },
+      {
+        "href": "",
         "label": "Changed",
         "mono": true,
         "value": "2026-08-10 11:07"
@@ -820,6 +826,7 @@
       "upload": null
     },
     {
+      "dimensions": "1920×1080",
       "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",
       "icon": "i-img",
       "isDir": false,

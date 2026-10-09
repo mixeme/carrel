@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.176 — 2026-10-09
+
+The files section, the client's second scan (ФН7, ФН16): the data of the
+mockup set under the frames, and the folder a sheet has just made.
+
+### Changed
+
+- **A folder just made stands first.** The node that New folder of a tree
+  has just made (`FileTreeNode.fresh`) is the first among the nodes beside
+  it, whatever its name — «2026-08 · just created» above «2026-07»
+  (`s-notes-11`). The sheet opened again knows no fresh node, and its order
+  is by name, as before.
+
+### Fixtures
+
+- `app-files-folder/tiles` is the folder `s-files-5` draws: «2026-07» of
+  the attachment folder, seven items, 89.4 MB — pictures, a PDF, a folder
+  nobody opened (no count) and one opened and empty («0 items»).
+- `app-files-folder/readonly` is `states-34`: «Public» ticked («3 of 3»),
+  two files, 5.3 MB.
+- `app-files-picker/normal` is `s-notes-11`: the folder «2026-08» just
+  made in the attachment folder and chosen — the head says «Documents /
+  carrel / attachments / 2026-08».
+- `app-files-folder/normal` — the panel has Dimensions, «1920×1080»
+  (`s-files-1`). `app-settings-attachments/normal` counts the files of
+  «2026-07».
+
 ## v0.2.175 — 2026-10-09
 
 The files section, the client's second scan: the panel of a chosen file by

@@ -4,7 +4,7 @@
       "csrf": "csrf",
       "enabled": true,
       "file": "file",
-      "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?menu=1",
+      "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/?menu=1",
       "id": "files.picker.upload",
       "label": "Upload",
       "method": "POST",
@@ -36,12 +36,12 @@
   "subject": "",
   "title": "Upload files",
   "tree": {
-    "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+    "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
     "field": "",
     "name": null,
     "new": {
       "enabled": true,
-      "href": "/app/files/picker?for=upload\u0026new=1\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+      "href": "/app/files/picker?for=upload\u0026new=1\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-08%2F",
       "icon": "i-plus",
       "id": "files.tree.new",
       "label": "New folder",
@@ -56,6 +56,16 @@
               {
                 "attachments": true,
                 "children": [
+                  {
+                    "children": [],
+                    "expanded": true,
+                    "fresh": true,
+                    "href": "/app/files/picker?for=upload\u0026to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F2026-08%2F",
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
+                    "label": "2026-08",
+                    "readOnly": false,
+                    "stamp": ""
+                  },
                   {
                     "children": [],
                     "expanded": false,
@@ -99,5 +109,5 @@
       }
     ]
   },
-  "where": "Documents / carrel / attachments"
+  "where": "Documents / carrel / attachments / 2026-08"
 }

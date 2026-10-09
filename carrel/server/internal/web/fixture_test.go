@@ -3,7 +3,9 @@ package web_test
 import (
 	"bytes"
 	"context"
+	"encoding/binary"
 	"encoding/json"
+	"hash/crc32"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -185,17 +187,26 @@ var mockupFileCols = []struct {
 }
 
 // mockupFileShapes are the sizes and times the frames give the files of
-// the set (s-files-1): the files on disk are stubs, and the stand pads them
-// to the size; a folder's time is set after what is in it. head goes before
-// the stub: the frame header of an image whose width and height a frame
-// draws (s-files-5: «2.8 MB · 4032×3024»).
+// the set (s-files-1, s-files-5, states-34): the files on disk are stubs,
+// and the stand grows them to the size; a folder's time is set after what
+// is in it. head goes before the stub: the header of an image whose width
+// and height a frame draws (s-files-1: «Dimensions · 1920×1080»; s-files-5:
+// «2.8 MB · 4032×3024»). The sizes of «2026-07» add up to the frame's
+// «7 items · 89.4 MB», the two of «Public» to «2 items · 5.3 MB».
 var mockupFileShapes = []struct {
 	slug, rel string
 	size      int64
 	at        string
 	head      string
 }{
-	{slug: "Documents", rel: "carrel/attachments/2026-08-10-sync-board.png", size: 412 << 10, at: "2026-08-10 11:07"},
+	{slug: "Documents", rel: "carrel/attachments/2026-07/whiteboard.jpg", size: 2936013, at: "2026-07-14 16:20", head: jpegHead4032x3024},
+	{slug: "Documents", rel: "carrel/attachments/2026-07/схема-1.png", size: 640 << 10, at: "2026-07-01 12:00"},
+	{slug: "Documents", rel: "carrel/attachments/2026-07/схема-2.png", size: 712 << 10, at: "2026-07-02 10:30"},
+	{slug: "Documents", rel: "carrel/attachments/2026-07/смета.pdf", size: 1258291, at: "2026-07-09 15:45"},
+	{slug: "Documents", rel: "carrel/attachments/2026-07/панорама.tif", size: 88122982, at: "2026-07-20 13:10"},
+	{slug: "Public", rel: "прайс-2026.pdf", size: 1153434, at: "2026-07-28 10:15"},
+	{slug: "Public", rel: "схема-проезда.png", size: 4404019, at: "2026-06-02 16:40"},
+	{slug: "Documents", rel: "carrel/attachments/2026-08-10-sync-board.png", size: 412 << 10, at: "2026-08-10 11:07", head: pngHead(1920, 1080)},
 	{slug: "Documents", rel: "carrel/attachments/release-checklist.md", size: 3 << 10, at: "2026-08-09 18:44"},
 	{slug: "Documents", rel: "carrel/attachments/смета-подрядчик.pdf", size: 1258291, at: "2026-08-05 14:20"},
 	{slug: "Documents", rel: "carrel/attachments/2026-08-04-whiteboard.jpg", size: 2936013, at: "2026-08-04 17:03", head: jpegHead4032x3024},
@@ -206,6 +217,18 @@ var mockupFileShapes = []struct {
 // 3024 lines of 4032, three components — what the head of a camera's
 // picture tells, and all of it the size of an image is read from (S-17).
 const jpegHead4032x3024 = "\xff\xd8\xff\xc0\x00\x11\x08\x0b\xd0\x0f\xc0\x03\x01\x22\x00\x02\x11\x01\x03\x11\x01"
+
+// pngSignature is the eight bytes every PNG begins with.
+const pngSignature = "\x89PNG\r\n\x1a\n"
+
+// pngHead is the start of a PNG and its IHDR, w by h of eight-bit RGB: all
+// of it the size of an image is read from (S-17).
+func pngHead(w, h uint32) string {
+	ihdr := binary.BigEndian.AppendUint32(binary.BigEndian.AppendUint32([]byte("IHDR"), w), h)
+	ihdr = append(ihdr, 8, 2, 0, 0, 0)
+	head := binary.BigEndian.AppendUint32([]byte(pngSignature), 13)
+	return string(binary.BigEndian.AppendUint32(append(head, ihdr...), crc32.ChecksumIEEE(ihdr)))
+}
 
 // mockupFiles puts the file collections of the set in the catalog and their
 // files on the stands, ticks the two the frames tick, and makes
@@ -263,8 +286,9 @@ func mockupFiles(t *testing.T, h *harness, sess *session.Session, root string, s
 			t.Fatal(err)
 		}
 		// The set's files are stubs of a few bytes; the stand gives the ones
-		// the frames draw their sizes and times (s-files-1, -2, -5): 412 KB
-		// under the thumbnail's ceiling, 2.8 MB over it, a folder of July.
+		// the frames draw their sizes and times (s-files-1, -2, -5,
+		// states-34): 412 KB under the thumbnail's ceiling, 2.8 MB over it,
+		// a folder of July.
 		for _, one := range mockupFileShapes {
 			if one.slug != fc.slug {
 				continue
@@ -275,8 +299,8 @@ func mockupFiles(t *testing.T, h *harness, sess *session.Session, root string, s
 				if !ok {
 					t.Fatalf("the set has no %s", target)
 				}
-				data = one.head + data
-				srv.SeedFile(target, data+strings.Repeat(".", int(one.size)-len(data)))
+				srv.SeedFile(target, one.head+data)
+				srv.Grow(target, one.size)
 			}
 			srv.SetModified(target, mockupDayAt(t, one.at))
 		}
@@ -1793,7 +1817,6 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 	for _, one := range []struct{ dir, state, route string }{
 		{"app-files", "normal", "/app/files"},
 		{"app-files-published", "normal", "/app/files/published"},
-		{"app-files-picker", "normal", "/app/files/picker?for=upload"},
 	} {
 		t.Run(one.dir, func(t *testing.T) {
 			app.compare(t, one.dir+"/"+one.state+".json", app.h.do(get(one.route, app.sess)))
@@ -1869,6 +1892,15 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		srv.SetModified(app.realPath(t, "Documents")+"carrel/attachments/отчёт-июль.pdf", mockupNow(t))
 		app.compare(t, "app-files-folder/refused.json", app.h.do(get(app.filesAt(t, "Documents", "", "carrel", "attachments"), app.sess)))
 	})
+	t.Run("app-files-picker", func(t *testing.T) {
+		// «Upload files» of the menu (s-notes-11) with the folder New folder
+		// of its tree has just made: «2026-08» in the attachment folder,
+		// chosen, «just created», first among the folders beside it. Last
+		// here: the folder stays on the stand.
+		made := "/app/files/picker?" + url.Values{"for": {"upload"}, "mkcol": {"1"},
+			"to": {app.filesAt(t, "Documents", "", "carrel", "attachments")}}.Encode()
+		app.compare(t, "app-files-picker/normal.json", app.h.do(postForm(made, app.sess, url.Values{"name": {"2026-08"}})))
+	})
 }
 
 // openSections reads every section once, as a person who comes to the
@@ -1931,9 +1963,11 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	}
 
 	app.compare(t, "app-files-folder/normal.json", app.h.do(get(attachments+"?select="+url.QueryEscape(three[0]), app.sess)))
-	// s-files-5 draws the chosen tile without the panel: Details off.
-	app.compare(t, "app-files-folder/tiles.json", app.h.do(get(attachments+"?view=tiles&details=0&select="+url.QueryEscape(three[2]), app.sess)))
+	// states-34 draws «Public» ticked with the other two, «3 of 3»: ticked
+	// for this one answer — the other frames draw it unticked.
+	app.tickFiles(t, "Documents", "Public", "Files")
 	app.compare(t, "app-files-folder/readonly.json", app.h.do(get(app.filesAt(t, "Public", ""), app.sess)))
+	app.tickFiles(t, "Documents", "Files")
 	app.servers["nextcloud"].SeedFolder(davtest.FileRoot + "Files/Scans/")
 	app.compare(t, "app-files-folder/empty.json", app.h.do(get(app.filesAt(t, "Files", "", "Scans"), app.sess)))
 
@@ -1974,6 +2008,49 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 		t.Fatalf("untick every storage: %d", rec.Code)
 	}
 	app.compare(t, "app-files/empty.json", app.h.do(get("/app/files", app.sess)))
+}
+
+// tickFiles ticks the file collections named and no other, as the rail's
+// form does.
+func (a *mockupApp) tickFiles(t *testing.T, slugs ...string) {
+	t.Helper()
+	var picks []sealed.Selection
+	for _, slug := range slugs {
+		picks = append(picks, sealed.Selection{Kind: view.KindFile, AccountID: a.realAccount(t, slug), Path: a.realPath(t, slug)})
+	}
+	key, _ := a.sess.DataKey()
+	if err := a.h.users.SetSelection(a.sess.AccountID(), key, view.KindFile, picks); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// C-14.2: a folder of pictures as tiles (s-files-5) — «2026-07» of the
+// attachment folder: the chosen picture with its width and height, pictures
+// with their sizes, a PDF, a folder nobody opened (no count), one opened and
+// empty («0 items»), a picture too large to show. The files are the set's;
+// the two folders are made here, as «Scans» is: an empty folder has no file
+// to stand for it in the set, and the trees of the sheets (s-files-4,
+// s-notes-11) draw «2026-07» without folders in it.
+func TestFixtureFilesTiles(t *testing.T) {
+	app := newMockupApp(t)
+	july := davtest.FileRoot + "Documents/carrel/attachments/2026-07/"
+	srv := app.servers["sftpgo · vps"]
+	for _, name := range []string{"архив", "черновики"} {
+		srv.SeedFolder(july + name + "/")
+		srv.SetModified(july+name, mockupDayAt(t, "2026-07-03 11:00"))
+	}
+	srv.SetModified(strings.TrimSuffix(july, "/"), mockupDayAt(t, "2026-07-01 09:12"))
+	openSections(t, app)
+	readFolders(t, app)
+	at := app.filesAt(t, "Documents", "", "carrel", "attachments", "2026-07")
+	for _, read := range []string{at, at + url.PathEscape("черновики") + "/"} {
+		if rec := app.h.do(get(read, app.sess)); rec.Code != 200 {
+			t.Fatalf("%s: %d", read, rec.Code)
+		}
+	}
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	// The chosen tile is drawn without the panel: Details off.
+	app.compare(t, "app-files-folder/tiles.json", app.h.do(get(at+"?view=tiles&details=0&select=whiteboard.jpg", app.sess)))
 }
 
 // C-14.2: the one page of every dead secret link (rest-1). What the link

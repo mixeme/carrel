@@ -329,6 +329,14 @@ func (s *Server) SeedFile(p, body string) {
 	}
 }
 
+// Grow makes a file under FileRoot size bytes long, zeros after what it
+// holds: a file of tens of megabytes without its bytes in memory.
+func (s *Server) Grow(p string, size int64) {
+	if err := os.Truncate(s.localPath(p), size); err != nil {
+		panic(err)
+	}
+}
+
 // SetModified sets when a file under FileRoot was last changed, as the
 // server reports it (getlastmodified).
 func (s *Server) SetModified(p string, at time.Time) {

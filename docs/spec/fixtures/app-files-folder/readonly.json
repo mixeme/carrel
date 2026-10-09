@@ -231,7 +231,7 @@
         }
       ]
     },
-    "loaded": 1,
+    "loaded": 2,
     "range": null,
     "segments": [
       {
@@ -276,10 +276,10 @@
     ],
     "selected": 0,
     "show": null,
-    "size": "95 B",
-    "total": 1
+    "size": "5.3 MB",
+    "total": 2
   },
-  "count": "1 item",
+  "count": "2 items",
   "crumbs": [
     {
       "href": "",
@@ -290,7 +290,7 @@
   "empty": null,
   "notices": [],
   "print": {
-    "range": "sftpgo · vps · Public · 1 item",
+    "range": "sftpgo · vps · Public · 2 items",
     "taken": "10 August 2026, 17:06",
     "title": "Public"
   },
@@ -390,7 +390,7 @@
       }
     ],
     "neighbours": [],
-    "note": "2 of 3 storages ticked",
+    "note": "3 of 3 storages ticked",
     "sections": [
       {
         "account": "",
@@ -404,11 +404,11 @@
             "href": "/app/files",
             "label": "Selected collections",
             "menu": [],
-            "meta": "2 of 3",
+            "meta": "3 of 3",
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "part"
+            "tick": "on"
           }
         ],
         "state": "ok"
@@ -461,7 +461,7 @@
             "on": true,
             "readOnly": true,
             "state": "read-only",
-            "tick": "off"
+            "tick": "on"
           }
         ],
         "state": "ok"
@@ -534,13 +534,13 @@
   },
   "rows": [
     {
-      "href": "/app/files/a-sftp-vps/Public/download/README.txt",
+      "href": "/app/files/a-sftp-vps/Public/download/%D0%BF%D1%80%D0%B0%D0%B9%D1%81-2026.pdf",
       "icon": "i-doc",
       "isDir": false,
       "menu": [
         {
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Public/README.txt",
+          "href": "/app/files/a-sftp-vps/Public/%D0%BF%D1%80%D0%B0%D0%B9%D1%81-2026.pdf",
           "icon": "i-doc",
           "id": "file.open",
           "label": "Open",
@@ -548,7 +548,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Public/download/README.txt",
+          "href": "/app/files/a-sftp-vps/Public/download/%D0%BF%D1%80%D0%B0%D0%B9%D1%81-2026.pdf",
           "icon": "i-down",
           "id": "file.download",
           "label": "Download",
@@ -557,7 +557,7 @@
         {
           "csrf": "csrf",
           "enabled": false,
-          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt\u0026op=rename",
+          "href": "/app/files/a-sftp-vps/Public/op/?item=%D0%BF%D1%80%D0%B0%D0%B9%D1%81-2026.pdf\u0026op=rename",
           "icon": "i-pencil",
           "id": "file.rename",
           "label": "Rename",
@@ -568,7 +568,7 @@
         {
           "csrf": "csrf",
           "enabled": false,
-          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt\u0026op=move",
+          "href": "/app/files/a-sftp-vps/Public/op/?item=%D0%BF%D1%80%D0%B0%D0%B9%D1%81-2026.pdf\u0026op=move",
           "icon": "i-move",
           "id": "file.move",
           "label": "Move",
@@ -579,7 +579,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt\u0026op=copy",
+          "href": "/app/files/a-sftp-vps/Public/op/?item=%D0%BF%D1%80%D0%B0%D0%B9%D1%81-2026.pdf\u0026op=copy",
           "icon": "i-dup",
           "id": "file.copy",
           "label": "Copy",
@@ -588,7 +588,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/publish?a=a-sftp-vps\u0026c=Public\u0026f=README.txt\u0026k=files",
+          "href": "/app/publish?a=a-sftp-vps\u0026c=Public\u0026f=%D0%BF%D1%80%D0%B0%D0%B9%D1%81-2026.pdf\u0026k=files",
           "icon": "i-link",
           "id": "publish",
           "label": "Publish a link",
@@ -599,7 +599,7 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": false,
-          "href": "/app/files/a-sftp-vps/Public/op/?item=README.txt\u0026op=delete",
+          "href": "/app/files/a-sftp-vps/Public/op/?item=%D0%BF%D1%80%D0%B0%D0%B9%D1%81-2026.pdf\u0026op=delete",
           "icon": "i-trash",
           "id": "file.delete",
           "label": "Delete",
@@ -609,13 +609,99 @@
           "target": "sheet"
         }
       ],
-      "modified": "2026-08-10 17:04",
-      "name": "README.txt",
-      "open": "/app/files/a-sftp-vps/Public/README.txt",
+      "modified": "2026-07-28 10:15",
+      "name": "прайс-2026.pdf",
+      "open": "/app/files/a-sftp-vps/Public/%D0%BF%D1%80%D0%B0%D0%B9%D1%81-2026.pdf",
       "selected": false,
-      "size": "95 B",
+      "size": "1.1 MB",
       "thumb": "",
-      "type": "text/plain",
+      "type": "application/pdf",
+      "upload": null
+    },
+    {
+      "href": "/app/files/a-sftp-vps/Public/download/%D1%81%D1%85%D0%B5%D0%BC%D0%B0-%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%D0%B0.png",
+      "icon": "i-img",
+      "isDir": false,
+      "menu": [
+        {
+          "enabled": true,
+          "href": "/app/files/a-sftp-vps/Public/%D1%81%D1%85%D0%B5%D0%BC%D0%B0-%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%D0%B0.png",
+          "icon": "i-doc",
+          "id": "file.open",
+          "label": "Open",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/a-sftp-vps/Public/download/%D1%81%D1%85%D0%B5%D0%BC%D0%B0-%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%D0%B0.png",
+          "icon": "i-down",
+          "id": "file.download",
+          "label": "Download",
+          "method": "GET"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": false,
+          "href": "/app/files/a-sftp-vps/Public/op/?item=%D1%81%D1%85%D0%B5%D0%BC%D0%B0-%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%D0%B0.png\u0026op=rename",
+          "icon": "i-pencil",
+          "id": "file.rename",
+          "label": "Rename",
+          "method": "POST",
+          "reason": "This storage is read-only.",
+          "target": "sheet"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": false,
+          "href": "/app/files/a-sftp-vps/Public/op/?item=%D1%81%D1%85%D0%B5%D0%BC%D0%B0-%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%D0%B0.png\u0026op=move",
+          "icon": "i-move",
+          "id": "file.move",
+          "label": "Move",
+          "method": "POST",
+          "reason": "This storage is read-only.",
+          "target": "sheet"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/files/a-sftp-vps/Public/op/?item=%D1%81%D1%85%D0%B5%D0%BC%D0%B0-%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%D0%B0.png\u0026op=copy",
+          "icon": "i-dup",
+          "id": "file.copy",
+          "label": "Copy",
+          "method": "POST",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/publish?a=a-sftp-vps\u0026c=Public\u0026f=%D1%81%D1%85%D0%B5%D0%BC%D0%B0-%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%D0%B0.png\u0026k=files",
+          "icon": "i-link",
+          "id": "publish",
+          "label": "Publish a link",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": false,
+          "href": "/app/files/a-sftp-vps/Public/op/?item=%D1%81%D1%85%D0%B5%D0%BC%D0%B0-%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%D0%B0.png\u0026op=delete",
+          "icon": "i-trash",
+          "id": "file.delete",
+          "label": "Delete",
+          "method": "POST",
+          "reason": "This storage is read-only.",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "modified": "2026-06-02 16:40",
+      "name": "схема-проезда.png",
+      "note": "too large",
+      "open": "/app/files/a-sftp-vps/Public/%D1%81%D1%85%D0%B5%D0%BC%D0%B0-%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%D0%B0.png",
+      "selected": false,
+      "size": "4.2 MB",
+      "thumb": "",
+      "type": "image/png",
       "upload": null
     }
   ],

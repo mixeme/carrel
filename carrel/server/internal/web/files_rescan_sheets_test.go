@@ -304,3 +304,44 @@ func TestSheetsChooseTheServer(t *testing.T) {
 	browse := decode[view.FilePickerSheet](t, f.h.do(get("/app/files/picker?for=attachments&to="+url.QueryEscape(farRoot), f.sess)))
 	check("browse", browse.Servers, browse.Tree, 1, "Far")
 }
+
+// ФН16: the folder New folder of a tree has just made stands first among
+// the folders beside it (s-notes-11: «2026-08 · just created» above
+// «2026-07»), whatever its name; the others keep their order.
+func TestFolderJustMadeStandsFirst(t *testing.T) {
+	badge := regexp.MustCompile(`<span class="tc-badge tc-push">([^<]*)</span>`)
+	var rows [][2]string // the name, the badge
+	for _, m := range regexp.MustCompile(`(?s)<div class="(?:is-on )?tc-tree__row tc-tree__row--padl58">(.*?)</div>`).FindAllStringSubmatch(mockupFrame(t, "s-notes-11"), -1) {
+		row := [2]string{frameText(badge.ReplaceAllString(m[1], ""))}
+		if b := badge.FindStringSubmatch(m[1]); b != nil {
+			row[1] = b[1]
+		}
+		rows = append(rows, row)
+	}
+	if len(rows) != 2 || rows[0][1] != "just created" || rows[1][1] != "" || rows[0][0] < rows[1][0] {
+		t.Fatalf("s-notes-11 draws %q under the attachment folder: read the frame again", rows)
+	}
+	fresh, old := rows[0][0], rows[1][0]
+
+	f := filesFixture(t, true)
+	f.srv.SeedFolder(filesDocs + "carrel/" + old + "/")
+	f.srv.SeedFolder(filesDocs + "carrel/2026-06/")
+	made := decode[view.FilePickerSheet](t, f.h.do(postForm("/app/files/picker?"+url.Values{"for": {"upload"}, "mkcol": {"1"},
+		"to": {f.at("", "carrel", "")}}.Encode(), f.sess, url.Values{"name": {fresh}})))
+	var labels []string
+	for _, n := range made.Tree.Nodes[0].Children[0].Children {
+		labels = append(labels, string(n.Label))
+	}
+	if want := fresh + ",2026-06," + old; strings.Join(labels, ",") != want || !made.Tree.Nodes[0].Children[0].Children[0].Fresh {
+		t.Errorf("under the folder: %v, want %s with the first just created", labels, want)
+	}
+	// Opened again, the sheet has nothing just made, and the order is by name.
+	labels = nil
+	again := decode[view.FilePickerSheet](t, f.h.do(get("/app/files/picker?for=upload&to="+url.QueryEscape(f.at("", "carrel", "")), f.sess)))
+	for _, n := range again.Tree.Nodes[0].Children[0].Children {
+		labels = append(labels, string(n.Label))
+	}
+	if want := "2026-06," + old + "," + fresh; strings.Join(labels, ",") != want {
+		t.Errorf("opened again: %v, want %s", labels, want)
+	}
+}

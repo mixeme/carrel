@@ -2131,7 +2131,9 @@ type FileServer struct { Label Text; Href string; On bool }
 // Stamp — пусто: сервер называет шапка листа (FileServer), корень хранилища
 // его не повторяет. Attachments — это папка вложений (бейдж «attachment folder»),
 // Fresh — папка только что заведена New folder этого листа («just
-// created», s-notes-11); слова — экрана.
+// created», s-notes-11); слова — экрана. Такой узел стоит первым среди
+// соседних, каково бы ни было его имя («2026-08» над «2026-07»); открытый
+// заново лист свежего узла не знает, и порядок в нём — по имени.
 type FileTreeNode struct {
     ID, Label string
     Stamp     Stamp
