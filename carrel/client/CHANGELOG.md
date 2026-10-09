@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.8 — 2026-10-09
+
+Typecase `0fe0244` (Typecase's note 42: the files picked for an upload by
+name, the table of published links breaks no word; the owner's decisions of
+09.10.2026), server `v0.2.162`. No draft of a built frame prints otherwise
+and no screen changed: the frames that did — the sheet of an upload
+(`s-notes-11`, `s-files-19`), the list of published links (`s-publish-1`,
+`-17`) — are of the files section, not built yet.
+
 ## v0.4.7 — 2026-10-09
 
 Server `v0.2.161` (the owner's decision of 09.10.2026: several relations).

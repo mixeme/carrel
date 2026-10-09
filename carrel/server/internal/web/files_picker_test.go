@@ -11,7 +11,7 @@ import (
 // "Upload file" of the create menu (frame «Пункт Upload file — куда
 // именно»): the sheet asks where, the attachment folder first; a folder
 // chosen in the tree is remembered for the next upload from the menu, and
-// Upload here goes to the ordinary upload of that folder.
+// Upload goes to the ordinary upload of that folder.
 func TestUploadFromTheMenuAsksWhere(t *testing.T) {
 	f := filesFixture(t, true)
 	f.srv.SeedFolder(filesDocs + "inbox/")

@@ -531,14 +531,18 @@ func TestUploadSheetNewFolderRefusalIsTheFrame(t *testing.T) {
 	if string(sheet.Purpose) != purpose || sheet.Failure != nil {
 		t.Errorf("purpose %q, failure %+v; want the frame's %q and none", sheet.Purpose, sheet.Failure, purpose)
 	}
-	// The primary button of the sheet is the upload — «Upload 2 files», its
-	// count the client's —; Choose this folder, which the frame does not
-	// draw, is not (s-notes-11, s-files-19).
-	if !regexp.MustCompile(`<button class="tc-btn is-primary" type="button">Upload \d+ files</button>`).MatchString(mockupFrame(t, "s-notes-11")) {
-		t.Fatal("s-notes-11 draws no primary upload: read it again")
+	// The primary button of the sheet is the upload, in the frame's word —
+	// «Upload», without a count since Typecase c801772 (note 42: the files
+	// picked stand by name in the sheet, the button counts nothing) —;
+	// Choose this folder, which the frame does not draw, is not (s-notes-11,
+	// s-files-19).
+	primary := regexp.MustCompile(`<button class="tc-btn is-primary" type="button">([^<]+)</button>`)
+	word := frameOne(t, primary, mockupFrame(t, "s-notes-11"), "primary upload")[1]
+	if again := frameOne(t, primary, frame, "primary upload")[1]; again != word {
+		t.Fatalf("s-notes-11 uploads with %q, s-files-19 with %q: read the frames again", word, again)
 	}
-	if up, ch := actionByID(sheet.Actions, "files.picker.upload"), actionByID(sheet.Actions, "files.picker.choose"); up == nil || !up.Primary || ch == nil || ch.Primary {
-		t.Errorf("upload %+v, choose %+v: want the upload primary, as s-notes-11 draws it", up, ch)
+	if up, ch := actionByID(sheet.Actions, "files.picker.upload"), actionByID(sheet.Actions, "files.picker.choose"); up == nil || !up.Primary || string(up.Label) != word || ch == nil || ch.Primary {
+		t.Errorf("upload %+v, choose %+v: want the upload primary and named %q, as s-notes-11 draws it", up, ch, word)
 	}
 	// New opens the line (a GET with new=1, ФГ4); the line sends the name.
 	line := decode[view.FilePickerSheet](t, f.h.do(get(sheet.Tree.New.Href, f.sess)))

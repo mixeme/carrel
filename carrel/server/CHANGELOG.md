@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.162 — 2026-10-09
+
+The frames of Typecase `0fe0244` (Typecase's note 42; the owner's decisions
+of 09.10.2026), with the client's `v0.4.8`.
+
+### Changed
+
+- **The upload of the sheet «Upload files» is named «Upload».** The action
+  `files.picker.upload` of `FilePickerSheet` (`/app/files/picker?for=upload`)
+  was labelled «Upload here»; the frames (`s-notes-11`, `s-files-19`) say
+  «Upload», without a count now that the files picked stand by name in the
+  sheet. A client that shows the label shows the new word; the action's
+  identifier, address and method are the same. Fixtures
+  `app-files-picker/normal` and `refused` carry it.
+
 ## v0.2.161 — 2026-10-09
 
 The owner's decision of 09.10.2026: a record has as many relations as it

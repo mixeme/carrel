@@ -173,7 +173,7 @@ func TestUploadActionsNameTheirFileField(t *testing.T) {
 	}
 	sheet := decode[view.FilePickerSheet](t, f.h.do(get("/app/files/picker?"+url.Values{"for": {"upload"}, "to": {f.at("")}}.Encode(), f.sess)))
 	if a := sheet.Actions[0]; a.ID != "files.picker.upload" || a.File != "file" {
-		t.Errorf("Upload here = %+v", a)
+		t.Errorf("Upload = %+v", a)
 	}
 }
 

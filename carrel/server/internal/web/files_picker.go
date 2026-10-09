@@ -248,7 +248,7 @@ func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fi
 	}
 	choose := view.Action{ID: "files.picker.choose", Label: "Choose this folder", Method: "POST", Enabled: true,
 		Href: s.postQuery("/app/files/picker", remember)}
-	upload := view.Action{ID: "files.picker.upload", Label: "Upload here", Method: "POST", Primary: true, File: uploadField}
+	upload := view.Action{ID: "files.picker.upload", Label: "Upload", Method: "POST", Primary: true, File: uploadField}
 	switch {
 	case chosen == nil:
 		upload.Reason = "Choose a folder in the tree first."

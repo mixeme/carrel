@@ -4,7 +4,7 @@
       "enabled": true,
       "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/",
       "id": "files.picker.upload",
-      "label": "Upload here",
+      "label": "Upload",
       "method": "POST",
       "primary": true,
       "csrf": "csrf",
