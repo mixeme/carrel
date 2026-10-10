@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.182 — 2026-10-10
+
+«Send by letter» of a link no longer throws away the letter being written
+(the scans' Пб15).
+
+### Fixed
+
+- **A letter half written survived only until the next «Send by letter».**
+  Sending a link by letter — from the sheet of a link just made, or from a
+  row of «Published» — replaced the letter with a new one. Now the link
+  joins the letter being written: its recipients, subject, text and
+  attachments stay, and the same link asked for again is not doubled. With
+  no letter begun, the letter is started and named after the link, as
+  before.
+
+The sheet «Send this link» the frame draws (`s-mail-4`) — a letter of the
+link alone, apart from the letter being written — is not built yet.
+
 ## v0.2.181 — 2026-10-10
 
 The sheet of a published folder by its frame (`s-publish-5`; the scans'

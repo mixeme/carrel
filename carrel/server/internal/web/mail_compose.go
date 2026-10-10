@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -155,8 +156,9 @@ func (s *Server) getMailCompose(w http.ResponseWriter, r *http.Request) {
 }
 
 // postMailCompose keeps what was typed and then does the op: attach opens
-// the attach sheet, remove drops a part, link starts a letter with a link
-// just made, discard throws the letter away, send sends it.
+// the attach sheet, remove drops a part, link adds a link the person has —
+// to the letter being written, or to a new one named after it —, discard
+// throws the letter away, send sends it.
 func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -183,7 +185,14 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 			s.notFound(w, r)
 			return
 		}
-		d = &mailDraft{Parts: []mailPart{part}, Subject: part.Title}
+		// A letter being written is not thrown away for a link: the link
+		// joins it, once. With nothing begun the letter is of the link.
+		switch {
+		case len(d.To) == 0 && d.Subject == "" && strings.TrimSpace(d.Body) == "" && len(d.Parts) == 0:
+			d = &mailDraft{Parts: []mailPart{part}, Subject: part.Title}
+		case !slices.ContainsFunc(d.Parts, func(p mailPart) bool { return p.LinkID == part.LinkID }):
+			d.Parts = append(d.Parts, part)
+		}
 		saveMailDraft(sess, d)
 		s.redirect(w, r, "/app/mail/compose")
 		return

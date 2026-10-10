@@ -401,3 +401,53 @@ func TestRecipientLabelIsTheCardsLabel(t *testing.T) {
 		t.Errorf("labels = %v", got)
 	}
 }
+
+// «Send by letter» of a link does not throw away a letter being written: the
+// recipients, the subject, the text and what is attached stay, and the link
+// joins them — once, however many times it is asked for. With no letter
+// begun it starts one named after the link, as before.
+func TestSendingALinkKeepsTheLetterBeingWritten(t *testing.T) {
+	f, _ := letterFixture(t)
+	f.srv.Seed(searchBook+"bob.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:bob\nFN:Bob Builder\nEND:VCARD\n")
+	publish := func(uid string) view.PublishSheet {
+		return decode[view.PublishSheet](t, f.h.do(postForm("/app/publish?"+url.Values{"k": {"contacts"}, "a": {f.id}, "c": {searchBook}, "uid": {uid}}.Encode(), f.sess, url.Values{})))
+	}
+	ada, bob := publish("ada"), publish("bob")
+	byLetter := func(made view.PublishSheet) {
+		t.Helper()
+		if rec := f.h.do(postForm(actionHref(t, made.Actions, "publish.mail"), f.sess, url.Values{})); rec.Code != 303 {
+			t.Fatalf("send by letter: %d", rec.Code)
+		}
+	}
+
+	// A letter half written: someone to write to, a subject, a text.
+	typed := url.Values{"to": {"ann@example.org"}, "subject": {"Minutes"}, "body": {"Dear Ann,"}}
+	if rec := f.h.do(postForm("/app/mail/compose", f.sess, typed)); rec.Code >= 400 {
+		t.Fatalf("typing: %d", rec.Code)
+	}
+	byLetter(ada)
+	sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
+	if len(sheet.To) != 1 || sheet.To[0].Address != "ann@example.org" || sheet.Subject != "Minutes" || sheet.Body != "Dear Ann," {
+		t.Fatalf("the letter being written is gone: to %+v, subject %q, body %q", sheet.To, sheet.Subject, sheet.Body)
+	}
+	if len(sheet.Attach) != 1 || !sheet.Attach[0].AsLink || sheet.Attach[0].Title != "Ada Lovelace" {
+		t.Fatalf("the link did not join the letter: %+v", sheet.Attach)
+	}
+	// Another link joins too; the same one asked for again is not doubled.
+	byLetter(bob)
+	byLetter(ada)
+	sheet = decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
+	if len(sheet.Attach) != 2 || sheet.Attach[1].Title != "Bob Builder" || sheet.Subject != "Minutes" {
+		t.Errorf("after two more: subject %q, attached %+v", sheet.Subject, sheet.Attach)
+	}
+
+	// Nothing begun: the letter is of the link.
+	if rec := f.h.do(postForm("/app/mail/compose?op=discard", f.sess, url.Values{})); rec.Code != 303 {
+		t.Fatalf("discard: %d", rec.Code)
+	}
+	byLetter(bob)
+	sheet = decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
+	if len(sheet.To) != 0 || sheet.Subject != "Bob Builder" || len(sheet.Attach) != 1 {
+		t.Errorf("a letter begun by a link: to %+v, subject %q, attached %+v", sheet.To, sheet.Subject, sheet.Attach)
+	}
+}

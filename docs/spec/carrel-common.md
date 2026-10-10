@@ -378,7 +378,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/duplicates/merge` | GET, POST | вход | страница | `DuplicatesMergePage`; `group=` — группа, `into=` — место оставляемой в группе (`Keep … instead`), `choice.<свойство>=` — номер варианта ответа (`MergeRow.Name`); POST — ещё `v.<место>=` — версия каждой записи, показанная GET: изменившаяся с тех пор не сливается |
 | `/app/sources/{kind}` | POST | вход | фрагмент, редирект | `Rail`; `{kind}` — четыре рода и `files`; форма рейла (`Rail.Ticks`): `toggle` — одна строка, `tick` — весь выбор, `back` — страница раздела, куда вернуться без сценариев |
 | `/app/publish` | GET, POST | вход | лист | `PublishSheet`; у контакта и книги (s-publish-3) форма несёт набор «What the visitor sees» — отметки `name` (стоит и не снимается), `phones`, `emails`, `photo`, `note` — и `download` («Allow .vcf download and subscription»), все, кроме первой, сняты; `lives` — 7 дней, у папки (s-publish-5) — 14, у прочего 30; POST без `lives` даёт срок, на котором лист его рода стоит. POST без отметок публикует имя с организацией и без файла |
-| `/app/mail/compose` | GET, POST | вход | лист | `MailSheet` |
+| `/app/mail/compose` | GET, POST | вход | лист | `MailSheet`; POST с `op` — `send`, `attach` (`what=`), `remove` (`i=`), `discard`, `link` (`id=` — ссылка человека): ссылка добавляется к письму, которое пишется, один раз, а без начатого письма начинает его, назвав собой; набранное (`to`, `subject`, `body`) едет с каждым POST и сохраняется |
 | `/app/mail/attach` | GET, POST | вход | лист | `MailAttachSheet` |
 | `/app/password` | GET, POST | вход | страница | `PasswordPage` |
 
