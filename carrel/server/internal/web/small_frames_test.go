@@ -175,7 +175,15 @@ func TestPublicDownloadNamesItsFile(t *testing.T) {
 		if m == nil {
 			t.Fatalf("%s draws no download: read it again", c.frame)
 		}
-		page := publicPage(t, f, publishLink(t, f, f.publishHref(c.segment, c.col, c.uid), false))
+		// A book gives its file when the sheet was asked to (s-publish-3);
+		// the frame draws one that was.
+		link := ""
+		if c.segment == "contacts" {
+			link = publishWith(t, f, f.publishHref(c.segment, c.col, c.uid), "download")
+		} else {
+			link = publishLink(t, f, f.publishHref(c.segment, c.col, c.uid), false)
+		}
+		page := publicPage(t, f, link)
 		dl := actionByID(page.Actions, "published.download")
 		if dl == nil || string(dl.Label) != m[1] {
 			t.Errorf("%s: download = %+v, the frame %q", c.frame, dl, m[1])

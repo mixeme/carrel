@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.180 — 2026-10-10
+
+A published contact shows what its owner ticked, and no more (`s-publish-3`;
+the scans' Пс11, Пб2). Before, the page of a contact gave the visitor every
+field of the card, a book the phone and the address of every row, and the
+`.vcf` the cards whole.
+
+### Changed — behaviour
+
+- **The sheet of a contact and of a book asks what the visitor sees.** A
+  set «What the visitor sees»: «Name and organisation» (on, not to be
+  changed), «Phone numbers», «Email addresses», «Photo», «Note» — off —
+  and «Allow .vcf download and subscription» — off. The link lives 7 days
+  unless changed (30 for the other kinds, as before).
+- **The page, the rows of a book and the file give only that.** They are
+  made from a new card of the allowed properties, not from the card cut
+  down: an address, a birthday, a website, a property Carrel does not know
+  are never given — there is no tick for them. Without «Allow .vcf» the
+  page offers no file and `/p/{token}/download` is 404.
+- **Links of contacts made before this release show the name and the
+  organisation only.** Their file is still served, cut to the same. To
+  show more, make the link again.
+- «Photo» decides whether the photo is in the `.vcf`; the public page draws
+  initials, as its frame does.
+
+### Fixed
+
+- A calendar published without descriptions: a record whose text could not
+  be taken out was given with it. It is now left out of the file.
+
 ## v0.2.179 — 2026-10-10
 
 Where a file's thumbnail is kept (the owner's decisions of 10.10.2026): in

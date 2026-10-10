@@ -90,6 +90,11 @@ type PublishedLink struct {
 	// HideDescriptions leaves the text of events out of the public page and
 	// the file: the times are shared, what was said at them is not.
 	HideDescriptions bool `json:"hideDescriptions,omitempty"`
+	// Shows is what of a contact, or of every contact of a book, the visitor
+	// sees beside the name and the organisation: "phones", "emails",
+	// "photo", "note" — each asked for apart when the link is made
+	// (S-25.1, s-publish-3). A link without it shows none of the four.
+	Shows []string `json:"shows,omitempty"`
 	// Title is the label the link was made under: the collection's name or
 	// the record's title as it stood. The page shows the live one.
 	Title     string     `json:"title"`

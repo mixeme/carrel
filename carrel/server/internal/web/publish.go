@@ -6,6 +6,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -135,10 +136,18 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 				view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Mono: true, Hint: text("Both days are in it. " + tf.date(today) + " is today.")})
 		}
 	}
-	rows = append(rows, view.FormRow{Name: "lives", Label: "Link lives for", Kind: view.InputSelect, Value: "30", Options: []view.Option{
-		{Value: "7", Label: "7 days"},
+	// A contact's link is short-lived unless asked otherwise (s-publish-3:
+	// «7 days»); the others live a month (s-publish-2).
+	lives := "30"
+	if kind == view.KindContact {
+		lives = "7"
+		// The .vcf is off until asked for, like the fields it would carry.
+		rows = append(rows, view.FormRow{Name: "download", Label: "Allow .vcf download and subscription", Kind: view.InputCheck})
+	}
+	rows = append(rows, view.FormRow{Name: "lives", Label: "Link lives for", Kind: view.InputSelect, Value: text(lives), Options: []view.Option{
+		{Value: "7", Label: "7 days", Selected: lives == "7"},
 		{Value: "14", Label: "14 days"},
-		{Value: "30", Label: "30 days", Selected: true},
+		{Value: "30", Label: "30 days", Selected: lives == "30"},
 		{Value: "never", Label: "No expiry", Separator: true}, // s-publish-14: only Revoke closes it
 	}})
 	if kind == view.KindEvent && q.Get("uid") == "" {
@@ -147,6 +156,19 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 			view.FormRow{Name: "descriptions", Label: "Show event descriptions", Kind: view.InputCheck})
 	}
 	sheet.Form = s.plainForm("/app/publish", "POST", rows...)
+	if kind == view.KindContact {
+		// What the visitor sees, each field asked of apart and all but the
+		// first off (s-publish-3): a phone and an address belong to a person
+		// who does not know of the link. The name is what the page is of —
+		// it stands and is not to be taken off. A book's ticks are for every
+		// card of it.
+		sees := view.FieldSet{Legend: "What the visitor sees", Rows: []view.FormRow{
+			{Name: "name", Label: "Name and organisation", Kind: view.InputCheck, Value: "on", ReadOnly: true}}}
+		for _, f := range visitorFields {
+			sees.Rows = append(sees.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck})
+		}
+		sheet.Form.Sets = append([]view.FieldSet{sees}, sheet.Form.Sets...)
+	}
 	sheet.Form.Action = s.postQuery("/app/publish", q)
 	sheet.Form.Actions = sheet.Actions
 	return sheet
@@ -311,6 +333,18 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 			target.NoDownload = checkbox(r, "download") != "on"
 			target.HideDescriptions = checkbox(r, "descriptions") != "on"
 		}
+	}
+	if c.spec.kind == view.KindContact {
+		// The sheet of a contact and of a book (s-publish-3): what is not
+		// ticked is not shown, and the file is one of the things asked for.
+		// A post without the ticks — a plain POST — publishes the name and
+		// the organisation and no file.
+		for _, f := range visitorFields {
+			if checkbox(r, f.name) == "on" {
+				target.Shows = append(target.Shows, f.name)
+			}
+		}
+		target.NoDownload = checkbox(r, "download") != "on"
 	}
 	token, err := s.users.Publish(sess.AccountID(), key, c.conn, target, expires)
 	if err != nil {
@@ -527,6 +561,9 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 		case err != nil:
 			page.Notices, page.Actions = []view.Notice{publicTrouble()}, nil
 		default:
+			if c.card != nil {
+				obj = visitorCard(obj, link.Target.Shows)
+			}
 			s.publicRecord(c, obj, &page)
 		}
 		s.writePage(w, r, http.StatusOK, page)
@@ -598,6 +635,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 			return strings.ToLower(contactName(objs[i])) < strings.ToLower(contactName(objs[j]))
 		})
 		for _, o := range objs {
+			o = visitorCard(o, link.Target.Shows)
 			name := contactName(o)
 			page.Contacts = append(page.Contacts, view.ContactRow{
 				UID: card.UID(o), Avatar: view.Avatar{Initials: text(initials(name)), Colour: collectionColour(card.UID(o))},
@@ -722,7 +760,65 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 	if link.Target.HideDescriptions {
 		objs = withoutDescriptions(objs)
 	}
+	if c.card != nil {
+		// The file obeys the ticks the page does, or it would go round them.
+		for i, o := range objs {
+			objs[i] = visitorCard(o, link.Target.Shows)
+		}
+	}
 	writeExport(w, c, objs)
+}
+
+// visitorFields are the fields of a contact a link shows only when asked to
+// (S-25.1, s-publish-3), by the name of their tick: the label of the sheet
+// and the properties of the card it stands for.
+var visitorFields = []struct {
+	name, label string
+	props       []string
+}{
+	{"phones", "Phone numbers", []string{"TEL"}},
+	{"emails", "Email addresses", []string{"EMAIL"}},
+	{"photo", "Photo", []string{"PHOTO"}},
+	{"note", "Note", []string{"NOTE"}},
+}
+
+// visitorAlways are the properties of a card every link of a contact gives:
+// what the card is and whose — «Name and organisation».
+var visitorAlways = []string{"VERSION", "KIND", "UID", "REV", "FN", "N", "ORG", "TITLE"}
+
+// visitorCard is a card as a visitor of a link may have it: a new card of
+// the name, the organisation and the fields the link was made to show. It is
+// built of what is allowed, never cut down from the card: an address, a
+// birthday, a property Carrel does not know or one it will learn of later is
+// not in it without anyone having to think of taking it out. The page, the
+// rows of a book and the file are all made from it.
+func visitorCard(o *model.Object, shows []string) *model.Object {
+	if o == nil {
+		return nil
+	}
+	allowed := map[string]bool{}
+	for _, p := range visitorAlways {
+		allowed[p] = true
+	}
+	for _, f := range visitorFields {
+		if slices.Contains(shows, f.name) {
+			for _, p := range f.props {
+				allowed[p] = true
+			}
+		}
+	}
+	kept := map[string][]model.RawValue{}
+	for name, values := range o.Props() {
+		if !allowed[strings.ToUpper(name)] {
+			continue
+		}
+		for _, v := range values {
+			// The value alone: its line as it came may carry a group that
+			// ties it to a label the visitor is not shown.
+			kept[name] = append(kept[name], model.RawValue{Text: v.Text, Params: v.Params})
+		}
+	}
+	return model.NewObject(o.Path, o.ETag, kept)
 }
 
 // publishedWindow is the days a published calendar shows, when the link was
@@ -749,9 +845,10 @@ func withoutDescriptions(objs []*model.Object) []*model.Object {
 			continue
 		}
 		if len(o.Props()["DESCRIPTION"]) > 0 {
+			// A record whose text could not be taken out is left out whole:
+			// never given with what the link was made to keep back.
 			patch, err := model.NewPatch(model.RemoveProp{Prop: "DESCRIPTION"})
-			if err == nil && patch.Apply(o) == nil {
-				out = append(out, o)
+			if err != nil || patch.Apply(o) != nil {
 				continue
 			}
 		}

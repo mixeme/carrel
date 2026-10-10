@@ -44,6 +44,77 @@
     "method": "POST",
     "sets": [
       {
+        "legend": "What the visitor sees",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Name and organisation",
+            "name": "name",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "on"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Phone numbers",
+            "name": "phones",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Email addresses",
+            "name": "emails",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Photo",
+            "name": "photo",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Note",
+            "name": "note",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      },
+      {
         "legend": "",
         "rows": [
           {
@@ -64,13 +135,26 @@
             "error": "",
             "extra": null,
             "hint": "",
+            "kind": "check",
+            "label": "Allow .vcf download and subscription",
+            "name": "download",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
             "kind": "select",
             "label": "Link lives for",
             "name": "lives",
             "options": [
               {
                 "label": "7 days",
-                "selected": false,
+                "selected": true,
                 "value": "7"
               },
               {
@@ -80,7 +164,7 @@
               },
               {
                 "label": "30 days",
-                "selected": true,
+                "selected": false,
                 "value": "30"
               },
               {
@@ -92,7 +176,7 @@
             ],
             "readOnly": false,
             "required": false,
-            "value": "30"
+            "value": "7"
           }
         ],
         "unfold": null

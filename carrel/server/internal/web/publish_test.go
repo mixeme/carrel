@@ -70,12 +70,13 @@ func TestPublishedBookIsReadLive(t *testing.T) {
 	f := publishFixture(t)
 	href := f.publishHref("contacts", searchBook, "")
 	sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
-	// The lifetime is a field, 30 days unless changed (s-publish-1): the sheet
-	// says nothing of it before the link exists.
+	// The lifetime is a field — 7 days for contacts unless changed
+	// (s-publish-3), 30 for the rest (s-publish-2): the sheet says nothing
+	// of it before the link exists.
 	if !strings.Contains(string(sheet.Target), "People") || sheet.Expires != "" || sheet.Link != "" {
 		t.Fatalf("sheet = %+v", sheet)
 	}
-	if lives := rowNamed(t, sheet.Form, "lives"); lives.Value != "30" || len(lives.Options) != 4 || lives.Options[3].Value != "never" {
+	if lives := rowNamed(t, sheet.Form, "lives"); lives.Value != "7" || len(lives.Options) != 4 || lives.Options[3].Value != "never" {
 		t.Errorf("link lives for = %+v", lives)
 	}
 	if len(sheet.Actions) != 2 || sheet.Actions[0].Label != "Create link" {
@@ -85,7 +86,7 @@ func TestPublishedBookIsReadLive(t *testing.T) {
 		t.Fatal("opening the sheet published")
 	}
 
-	link := publishLink(t, f, href, false)
+	link := publishWith(t, f, href, "download") // the file is asked for (s-publish-3)
 	token := strings.TrimPrefix(link, "/p/")
 	state, _ := json.Marshal(f.h.st.Snapshot())
 	if strings.Contains(string(state), token) || strings.Contains(string(state), "dav-secret-pw") {
@@ -133,7 +134,7 @@ func TestPublishedRecords(t *testing.T) {
 	if note.Note == nil || note.Note.Title != "Reading list" || !note.Note.ReadOnly || len(note.Note.Rendered) == 0 {
 		t.Errorf("note = %+v", note.Note)
 	}
-	ada := publicPage(t, f, publishLink(t, f, f.publishHref("contacts", searchBook, "ada"), false))
+	ada := publicPage(t, f, publishWith(t, f, f.publishHref("contacts", searchBook, "ada"), "emails"))
 	if ada.Title != "Ada Lovelace" || len(ada.Fields) == 0 || len(ada.Contacts) != 0 {
 		t.Errorf("contact = %+v", ada)
 	}
