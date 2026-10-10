@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -421,7 +422,18 @@ func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *da
 	got, _ = rawBody(ctx, t, client, file)
 	if len(movedTimes) > 0 {
 		t.Logf("the server rewrote the times (%v); it keeps them as:\n%s", movedTimes, got)
-		mustHave(t, "time zone", got, exceptions...)
+		// A server that took the moved occurrence without the RECURRENCE-ID
+		// that ties it to its series holds it as an orphan, and may throw it
+		// away when the series is given other times: Mail.ru does (found
+		// 10.10.2026; the servers that keep RECURRENCE-ID keep the occurrence
+		// through this very save). It is then not asked for — and named.
+		kept := exceptions
+		if !contains(exceptions, "RECURRENCE-ID;TZID=Europe/Moscow:20260126T100000") && contains(exceptions, "SUMMARY:Duty moved") &&
+			!strings.Contains(got, "SUMMARY:Duty moved") {
+			t.Log("the server threw away the moved occurrence it held without its RECURRENCE-ID when the series was retimed")
+			kept = slices.DeleteFunc(slices.Clone(exceptions), func(l string) bool { return l == "SUMMARY:Duty moved" })
+		}
+		mustHave(t, "time zone", got, kept...)
 	} else {
 		mustHave(t, "time zone", got, append([]string{"DTSTART;TZID=Asia/Yekaterinburg:20260112T100000",
 			"DTEND;TZID=Asia/Yekaterinburg:20260112T110000", "TZID:Asia/Yekaterinburg", "BEGIN:VTIMEZONE"}, exceptions...)...)
@@ -501,12 +513,30 @@ func checksPasswords(t *testing.T, endpoint, user, pass string) bool {
 	return resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden
 }
 
+// holdsAGrudge names the servers a wrong password must not be sent to: one
+// that refuses the right password for a long while after a wrong one. iCloud's
+// calendars do (found 10.10.2026: after the one wrong password of the check
+// below the right one was answered 401 for more than five minutes — the Edit
+// and five calendar checks after it failed — while the contacts, on another
+// host, went on working). This once it is a list of names and not a question
+// to the server: the question is the wrong password itself, and a row of
+// those may lock a person's account.
+func holdsAGrudge(endpoint string) bool {
+	u, err := url.Parse(endpoint)
+	return err == nil && strings.HasSuffix(u.Hostname(), "icloud.com")
+}
+
 // review Р-9: the password went wrong — the card says so after
 // Test, Edit with the right one saves under the same ID, and Test passes.
 func liveConnectionEdit(t *testing.T, app *liveApp, connID, endpoint, user, pass string) {
 	key, _ := app.sess.DataKey()
 	blob, _ := app.users.Catalog(app.sess.AccountID(), key)
 	broken := blob.Connections[0]
+	if holdsAGrudge(endpoint) {
+		t.Log("the server refuses the right password for minutes after a wrong one: the wrong-password half is not run against it")
+		liveConnectionEditRight(t, app, connID, endpoint, user, pass, broken.Label)
+		return
+	}
 	broken.Password = pass + "-wrong"
 	if err := app.users.UpdateConnection(app.sess.AccountID(), key, broken); err != nil {
 		t.Fatal(err)
@@ -530,8 +560,16 @@ func liveConnectionEdit(t *testing.T, app *liveApp, connID, endpoint, user, pass
 			t.Fatal("no Test again")
 		}
 	}
+	liveConnectionEditRight(t, app, connID, endpoint, user, pass, broken.Label)
+}
+
+// liveConnectionEditRight is the Edit half: the right password saves under
+// the same ID, and Test passes.
+func liveConnectionEditRight(t *testing.T, app *liveApp, connID, endpoint, user, pass, label string) {
+	key, _ := app.sess.DataKey()
+	test := "/app/settings/connections?" + url.Values{"op": {"test"}, "account": {connID}}.Encode()
 	edit := "/app/settings/connections?" + url.Values{"op": {"edit"}, "account": {connID}}.Encode()
-	form := url.Values{"label": {broken.Label}, "server": {endpoint}, "login": {user}, "password": {pass}}
+	form := url.Values{"label": {label}, "server": {endpoint}, "login": {user}, "password": {pass}}
 	if pass == "" {
 		// An empty field means «leave it as it is» — otherwise editing a label
 		// would wipe the password. A server that asks none (Xandikos) is said
@@ -544,14 +582,14 @@ func liveConnectionEdit(t *testing.T, app *liveApp, connID, endpoint, user, pass
 			t.Fatalf("edit with the right password failed: %+v", n)
 		}
 	}
-	blob, _ = app.users.Catalog(app.sess.AccountID(), key)
+	blob, _ := app.users.Catalog(app.sess.AccountID(), key)
 	if len(blob.Connections) != 1 || blob.Connections[0].ID != connID {
 		t.Fatalf("after edit: %+v", blob.Connections)
 	}
 	if got := blob.Connections[0]; got.Password != pass || got.NoPassword != (pass == "") {
 		t.Fatalf("after edit the password is %q (no password: %v), want the one just entered", got.Password, got.NoPassword)
 	}
-	card = liveCard(t, liveDecode[view.ConnectionsPage](t, "test again", app.post(test, url.Values{})), connID)
+	card := liveCard(t, liveDecode[view.ConnectionsPage](t, "test again", app.post(test, url.Values{})), connID)
 	if card.Trace == nil || !card.Trace.OK || card.State != view.CollectionOK {
 		t.Errorf("after edit the connection tested %+v, state %q", card.Trace, card.State)
 	}
