@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.185 — 2026-10-10
+
+A connection the server refused says so (the owner's word of 10.10.2026:
+said as it is, nothing guessed beyond it).
+
+### Changed
+
+- **«Could not connect» names a refused login and password.** When the
+  server answers 401 to a new connection, an edited one or a re-discovery,
+  the notice reads «The server refused the login and password. Nothing was
+  saved.» (or «…changed.») in place of «Discovery stopped at the principal
+  step. …». The steps and the server's answer stay in the trace under it.
+  Any other failure still names the step it stopped at.
+
 ## v0.2.184 — 2026-10-10
 
 What the Linux gates with the race detector found on `v0.2.183`, the first

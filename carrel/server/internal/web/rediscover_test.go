@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -199,6 +200,15 @@ func TestRediscoveryFailureChangesNothing(t *testing.T) {
 	n := noticeTitled(page.Notices, "Could not connect")
 	if n == nil || !strings.Contains(string(n.Body), "Nothing was changed.") {
 		t.Fatalf("notices = %+v", page.Notices)
+	}
+	// The server answered 401, and the notice says what that is: the login
+	// and password were refused (the owner's word of 10.10.2026 — said as
+	// it is, and nothing guessed beyond it). The steps stay in the trace.
+	if string(n.Body) != "The server refused the login and password. Nothing was changed." {
+		t.Errorf("the notice of a refused password says %q", n.Body)
+	}
+	if n.Details == nil || !strings.Contains(fmt.Sprint(n.Details.Lines), "401") {
+		t.Errorf("the trace of a refused password: %+v", n.Details)
 	}
 	if card := page.Accounts[0]; card.State != view.CollectionUnavailable || card.Trace == nil {
 		t.Errorf("card state %q, trace %v", card.State, card.Trace)

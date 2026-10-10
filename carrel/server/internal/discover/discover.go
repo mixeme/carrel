@@ -632,3 +632,16 @@ func acceptWellKnownTarget(ctx context.Context, g *dav.Guard, entered, candidate
 	}
 	return true, principal
 }
+
+// Refused says whether discovery ended on the server refusing the login and
+// password: a 401. The steps that find the principal and the homes go through
+// go-webdav, whose error type is internal to it — what can be read of it is
+// its text, which begins with the status line («401 Unauthorized: …»);
+// Carrel's own requests carry the status itself. A change of that text turns
+// TestRediscoveryFailureChangesNothing red.
+func Refused(err error) bool {
+	if err == nil {
+		return false
+	}
+	return dav.IsStatus(err, 401) || strings.HasPrefix(err.Error(), "401 ")
+}

@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -143,8 +144,14 @@ func TestAddConnectionFailureSavesNothing(t *testing.T) {
 	if failure == nil || failure.Details == nil || len(failure.Details.Lines) < 3 {
 		t.Fatalf("notices = %+v", page.Notices)
 	}
-	if !strings.Contains(string(failure.Body), "principal") {
-		t.Errorf("body = %q, want the step that failed", failure.Body)
+	// A wrong password is said as what the server said — it refused the
+	// login and password (the owner's word of 10.10.2026) —, and the step
+	// that failed stays in the trace.
+	if string(failure.Body) != "The server refused the login and password. Nothing was saved." {
+		t.Errorf("body = %q, want the refusal said as it is", failure.Body)
+	}
+	if trace := fmt.Sprint(failure.Details.Lines); !strings.Contains(trace, "principal") || !strings.Contains(trace, "401") {
+		t.Errorf("trace = %q, want the step that failed and the answer", trace)
 	}
 	if got := rowNamed(t, *page.Add, "server").Value; got != text(srv.URL) {
 		t.Errorf("server field = %q, want what was entered", got)

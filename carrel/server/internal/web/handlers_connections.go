@@ -736,6 +736,13 @@ func discoveryFailure(trace *view.DiagnosticTrace, err error, nothing string) *v
 	if failed != "" {
 		n.Body = text(fmt.Sprintf("Discovery stopped at the %s step. %s", failed, nothing))
 	}
+	if discover.Refused(err) {
+		// What the server said, as it is: it refused the login and password.
+		// Whether they are wrong, or it is still refusing after an earlier
+		// wrong one (iCloud, SV-58), only the server knows — nothing is
+		// guessed here. The step stays in the trace.
+		n.Body = text("The server refused the login and password. " + nothing)
+	}
 	n.Details = d
 	return n
 }
