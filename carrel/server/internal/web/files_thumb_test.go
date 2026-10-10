@@ -116,19 +116,29 @@ func TestFileThumbnailIsMadeByTheServer(t *testing.T) {
 	if n := f.srv.CountRequests(http.MethodGet, filesDocs+"photo.jpg") - before; n != 1 {
 		t.Errorf("the picture was read %d times for two looks at its thumbnail, want 1", n)
 	}
-	// The address names the version of the file, so the browser keeps the
-	// thumbnail and does not ask again: the thumbnails of a folder outlive
-	// the session on the person's own machine.
-	if cc := rec.Header().Get("Cache-Control"); !strings.Contains(cc, "private") || !strings.Contains(cc, "immutable") || !strings.Contains(cc, "max-age=31536000") {
-		t.Errorf("Cache-Control of a thumbnail = %q", cc)
+	// The browser keeps the thumbnail and asks Carrel before every showing
+	// of it, as it does of a contact's photo (the owner's decision of
+	// 10.10.2026): signed out, it is shown nothing of what it holds.
+	if cc := rec.Header().Get("Cache-Control"); cc != "private, no-cache" {
+		t.Errorf("Cache-Control of a thumbnail = %q, want private, no-cache", cc)
 	}
 	// And the copy it holds stands without anything being read or made —
 	// here for a picture this session never made a thumbnail of.
 	edge := fileRow(t, page, "edge.png").Thumb
 	known := get(edge, f.sess)
 	known.Header.Set("If-None-Match", `"t-`+thumbVersion(t, edge)+`"`)
-	if rec := f.h.do(known); rec.Code != http.StatusNotModified || rec.Body.Len() != 0 {
-		t.Errorf("a thumbnail the browser holds: %d, %d bytes", rec.Code, rec.Body.Len())
+	held := f.h.do(known)
+	if held.Code != http.StatusNotModified || held.Body.Len() != 0 {
+		t.Errorf("a thumbnail the browser holds: %d, %d bytes", held.Code, held.Body.Len())
+	}
+	if cc := held.Header().Get("Cache-Control"); cc != "private, no-cache" {
+		t.Errorf("Cache-Control of a thumbnail that has not changed = %q, want private, no-cache", cc)
+	}
+	// Nobody signed in is told whether the copy still stands.
+	stranger := get(edge, nil)
+	stranger.Header.Set("If-None-Match", `"t-`+thumbVersion(t, edge)+`"`)
+	if rec := f.h.do(stranger); rec.Code == http.StatusNotModified || rec.Code == http.StatusOK {
+		t.Errorf("a thumbnail asked without a session: %d", rec.Code)
 	}
 	if n := f.srv.CountRequests(http.MethodGet, filesDocs+"edge.png"); n != 0 {
 		t.Errorf("a picture was read %d times to say its thumbnail has not changed", n)
@@ -136,11 +146,11 @@ func TestFileThumbnailIsMadeByTheServer(t *testing.T) {
 	if tag := rec.Header().Get("ETag"); tag != `"t-`+thumbVersion(t, row.Thumb)+`"` {
 		t.Errorf("ETag %q of the thumbnail at %q", tag, row.Thumb)
 	}
-	// An address without the version, or with another, is not kept: the
-	// thumbnail is of the file as it is now.
+	// An address without the version, or with another, gives the thumbnail
+	// of the file as it is now.
 	for _, at := range []string{f.at("download", "photo.jpg") + "?thumb=1", f.at("download", "photo.jpg") + "?thumb=1&v=stale"} {
 		loose := f.h.do(get(at, f.sess))
-		if loose.Code != http.StatusOK || strings.Contains(loose.Header().Get("Cache-Control"), "immutable") {
+		if loose.Code != http.StatusOK || loose.Header().Get("Cache-Control") != "private, no-cache" {
 			t.Errorf("%s: %d, Cache-Control %q", at, loose.Code, loose.Header().Get("Cache-Control"))
 		}
 	}

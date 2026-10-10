@@ -17,6 +17,38 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.183 — 2026-10-10
+
+Two of the owner's answers of 10.10.2026: a browser asks before it shows a
+file's thumbnail, and «Name and organisation» of a published contact can be
+taken off.
+
+### Changed — behaviour
+
+- **A thumbnail is asked for before every showing.** `?thumb=1` answers with
+  `Cache-Control: private, no-cache`, as a contact's photo does, in place of
+  `private, max-age=31536000, immutable` of `v0.2.179`: the browser keeps
+  the thumbnail and asks Carrel each time; an address that names the version
+  it holds is answered 304 with nothing read or made. Signed out, the
+  browser is told nothing and shows nothing of what it holds. Thumbnails a
+  browser took under `v0.2.179` stay in its cache for up to a year; clearing
+  the browser's cache removes them.
+- **«Name and organisation» can be taken off** on the sheet of a contact and
+  of a book (`s-publish-3`): it stands, as before, and is no longer
+  read-only. Taken off, the visitor is given the name alone — no
+  organisation and no title on the page, in the rows of a book or in the
+  `.vcf`. The link keeps the choice (`PublishTarget.HideOrganisation`,
+  `hideOrganisation` in the state). Only a post of the sheet takes it off —
+  one that carries `lives`; a post without it publishes the name with the
+  organisation, as the sheet stands. Links made before show the
+  organisation, as they did.
+
+### Unchanged
+
+The side of a thumbnail (480 px), two made at a time, and the public page of
+a file showing the original — the owner confirmed the three. The date of the
+file panel stays in figures, as its frame draws it (`s-files-1`).
+
 ## v0.2.182 — 2026-10-10
 
 «Send by letter» of a link no longer throws away the letter being written

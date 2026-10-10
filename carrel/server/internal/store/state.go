@@ -95,6 +95,9 @@ type PublishedLink struct {
 	// "photo", "note" — each asked for apart when the link is made
 	// (S-25.1, s-publish-3). A link without it shows none of the four.
 	Shows []string `json:"shows,omitempty"`
+	// HideOrganisation leaves the visitor of a contact or a book the name
+	// alone: «Name and organisation» of the sheet was taken off.
+	HideOrganisation bool `json:"hideOrganisation,omitempty"`
 	// Title is the label the link was made under: the collection's name or
 	// the record's title as it stood. The page shows the live one.
 	Title     string     `json:"title"`

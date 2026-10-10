@@ -30,6 +30,9 @@ type PublishTarget struct {
 	// Shows is what of a contact the visitor sees beside its name and
 	// organisation: "phones", "emails", "photo", "note" (S-25.1).
 	Shows []string
+	// HideOrganisation leaves the name alone: the organisation and the
+	// title of a contact are not shown.
+	HideOrganisation bool
 }
 
 // PublishedLink is a link as its owner's screens show it: no secret.
@@ -115,7 +118,7 @@ func (s *Service) Publish(viewerID string, dataKey [crypt.KeyLen]byte, conn seal
 			Hash: hash, UserID: u.ID, AccountID: target.AccountID, Kind: target.Kind, Col: target.Col,
 			UID: target.UID, Path: target.Path, Folder: target.Folder, Title: target.Title,
 			From: target.From, To: target.To, NoDownload: target.NoDownload, HideDescriptions: target.HideDescriptions,
-			Shows:     slices.Clone(target.Shows),
+			Shows: slices.Clone(target.Shows), HideOrganisation: target.HideOrganisation,
 			CreatedAt: now, ExpiresAt: expires, Envelope: env,
 		})
 		return []store.AuditEntry{{
@@ -279,7 +282,7 @@ func prunePublished(st *store.State, now time.Time) {
 func targetOf(l store.PublishedLink) PublishTarget {
 	return PublishTarget{AccountID: l.AccountID, Kind: l.Kind, Col: l.Col, UID: l.UID, Path: l.Path, Folder: l.Folder,
 		Title: l.Title, From: l.From, To: l.To, NoDownload: l.NoDownload, HideDescriptions: l.HideDescriptions,
-		Shows: slices.Clone(l.Shows)}
+		Shows: slices.Clone(l.Shows), HideOrganisation: l.HideOrganisation}
 }
 
 // LinkOf is the whole link of one of the viewer's live links, from the

@@ -1159,8 +1159,9 @@ var thumbBuilds = make(chan struct{}, conf.FileThumbBuilds)
 // scaled to fit conf.FileThumbSide, a JPEG — the original does not travel
 // for a thumbnail. It lives in the session's cache of file thumbnails by the
 // version of the file (?v= of the address the row gave), so the same version
-// is read from its server once, and in the browser's own cache after that
-// (thumbKept). A file that is not one of thumbTypes by its name,
+// is read from its server once; the browser keeps its copy and asks before
+// every showing of it (thumbHeld). A file that is not one of thumbTypes by
+// its name,
 // that is larger than conf.FileThumbMaxBytes, has more pixels than
 // CARREL_PHOTO_MAX_PIXELS or does not decode has no thumbnail: 404, and that
 // too is remembered for the version. A server that did not answer is asked
@@ -1176,12 +1177,12 @@ func (s *Server) sendThumb(w http.ResponseWriter, r *http.Request, c *fileCtx, p
 		// the thumbnail, whether this session still holds one or not.
 		if r.Header.Get("If-None-Match") == thumbTag(version) {
 			w.Header().Set("ETag", thumbTag(version))
-			w.Header().Set("Cache-Control", thumbKept)
+			w.Header().Set("Cache-Control", thumbHeld)
 			w.WriteHeader(http.StatusNotModified)
 			return
 		}
 		if data, ok := cache.GetFileThumb(c.conn.ID, p, version); ok {
-			s.writeThumb(w, r, name, version, version, data)
+			s.writeThumb(w, r, name, version, data)
 			return
 		}
 	}
@@ -1199,7 +1200,7 @@ func (s *Server) sendThumb(w http.ResponseWriter, r *http.Request, c *fileCtx, p
 	if made != "" {
 		cache.PutFileThumb(c.conn.ID, p, made, data)
 	}
-	s.writeThumb(w, r, name, version, made, data)
+	s.writeThumb(w, r, name, made, data)
 }
 
 // makeThumb reads the file at p and makes its thumbnail. version is the
@@ -1232,33 +1233,30 @@ func (s *Server) makeThumb(ctx context.Context, c *fileCtx, p, name string) (dat
 	return data, d.ETag, nil
 }
 
-// thumbKept is how long a browser keeps a thumbnail whose address names the
-// version of its file: the bytes at that address never change, so it keeps
-// them a year and does not ask again — the thumbnails of a folder outlive
-// the session, on the person's own machine, and cost the server nothing
-// (S-17.1). «private»: no cache between the browser and Carrel keeps them.
-const thumbKept = "private, max-age=31536000, immutable"
+// thumbHeld is how a browser holds a thumbnail, as it holds a contact's
+// photo: it keeps the bytes and asks Carrel before every showing of them, and
+// an address that names the version it holds is answered 304 with nothing
+// read or made. Signed out, it is told nothing, and shows nothing of what it
+// holds (the owner's decision of 10.10.2026; S-17.1). «private»: no cache
+// between the browser and Carrel keeps them.
+const thumbHeld = "private, no-cache"
 
 // thumbTag is the ETag of the thumbnail made of a version of a file.
 func thumbTag(version string) string { return `"t-` + version + `"` }
 
 // writeThumb hands a thumbnail to the browser, or 404 for a file that has
-// none. asked is the version the address named, made — the one the
-// thumbnail is of. Only an address that names the very version made is kept
-// by the browser; any other — no version, or a file that has changed since
-// the row was drawn — is asked again every time, as a download is.
-func (s *Server) writeThumb(w http.ResponseWriter, r *http.Request, name, asked, made string, data []byte) {
+// none. made is the version of the file the thumbnail is of. The browser asks
+// again before every showing (thumbHeld).
+func (s *Server) writeThumb(w http.ResponseWriter, r *http.Request, name, made string, data []byte) {
 	if len(data) == 0 {
 		s.notFound(w, r)
 		return
 	}
 	h := w.Header()
 	downloadHeaders(h, strings.TrimSuffix(name, path.Ext(name))+".jpg", "image/jpeg", true)
+	h.Set("Cache-Control", thumbHeld)
 	if made != "" {
 		h.Set("ETag", thumbTag(made))
-		if asked == made {
-			h.Set("Cache-Control", thumbKept)
-		}
 		if r.Header.Get("If-None-Match") == thumbTag(made) {
 			w.WriteHeader(http.StatusNotModified)
 			return

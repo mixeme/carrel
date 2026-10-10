@@ -156,11 +156,13 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 	if kind == view.KindContact {
 		// What the visitor sees, each field asked of apart and all but the
 		// first off (s-publish-3): a phone and an address belong to a person
-		// who does not know of the link. The name is what the page is of —
-		// it stands and is not to be taken off. A book's ticks are for every
-		// card of it.
+		// who does not know of the link. «Name and organisation» stands and
+		// is the owner's to take off (his decision of 10.10.2026): the
+		// visitor is then given the name alone — the name is what the page
+		// is of, and no tick takes it away. A book's ticks are for every card
+		// of it.
 		sees := view.FieldSet{Legend: "What the visitor sees", Rows: []view.FormRow{
-			{Name: "name", Label: "Name and organisation", Kind: view.InputCheck, Value: "on", ReadOnly: true}}}
+			{Name: "name", Label: "Name and organisation", Kind: view.InputCheck, Value: "on"}}}
 		for _, f := range visitorFields {
 			sees.Rows = append(sees.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck})
 		}
@@ -353,7 +355,10 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		// The sheet of a contact and of a book (s-publish-3): what is not
 		// ticked is not shown, and the file is one of the things asked for.
 		// A post without the ticks — a plain POST — publishes the name and
-		// the organisation and no file.
+		// the organisation and no file. «Name and organisation» stands on
+		// the sheet, so only a post of the sheet takes it off: one that says
+		// how long the link lives, as the sheet's form always does.
+		target.HideOrganisation = r.Form.Has("lives") && checkbox(r, "name") != "on"
 		for _, f := range visitorFields {
 			if checkbox(r, f.name) == "on" {
 				target.Shows = append(target.Shows, f.name)
@@ -577,7 +582,7 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 			page.Notices, page.Actions = []view.Notice{publicTrouble()}, nil
 		default:
 			if c.card != nil {
-				obj = visitorCard(obj, link.Target.Shows)
+				obj = visitorCard(obj, link.Target)
 			}
 			s.publicRecord(c, obj, &page)
 		}
@@ -650,7 +655,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 			return strings.ToLower(contactName(objs[i])) < strings.ToLower(contactName(objs[j]))
 		})
 		for _, o := range objs {
-			o = visitorCard(o, link.Target.Shows)
+			o = visitorCard(o, link.Target)
 			name := contactName(o)
 			page.Contacts = append(page.Contacts, view.ContactRow{
 				UID: card.UID(o), Avatar: view.Avatar{Initials: text(initials(name)), Colour: collectionColour(card.UID(o))},
@@ -778,7 +783,7 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 	if c.card != nil {
 		// The file obeys the ticks the page does, or it would go round them.
 		for i, o := range objs {
-			objs[i] = visitorCard(o, link.Target.Shows)
+			objs[i] = visitorCard(o, link.Target)
 		}
 	}
 	writeExport(w, c, objs)
@@ -798,16 +803,21 @@ var visitorFields = []struct {
 }
 
 // visitorAlways are the properties of a card every link of a contact gives:
-// what the card is and whose — «Name and organisation».
-var visitorAlways = []string{"VERSION", "KIND", "UID", "REV", "FN", "N", "ORG", "TITLE"}
+// what the card is and whose. visitorOrganisation are the ones «Name and
+// organisation» adds to them, unless it was taken off.
+var (
+	visitorAlways       = []string{"VERSION", "KIND", "UID", "REV", "FN", "N"}
+	visitorOrganisation = []string{"ORG", "TITLE"}
+)
 
 // visitorCard is a card as a visitor of a link may have it: a new card of
-// the name, the organisation and the fields the link was made to show. It is
+// the name, the organisation — unless the link was made without it — and
+// the fields the link was made to show. It is
 // built of what is allowed, never cut down from the card: an address, a
 // birthday, a property Carrel does not know or one it will learn of later is
 // not in it without anyone having to think of taking it out. The page, the
 // rows of a book and the file are all made from it.
-func visitorCard(o *model.Object, shows []string) *model.Object {
+func visitorCard(o *model.Object, target user.PublishTarget) *model.Object {
 	if o == nil {
 		return nil
 	}
@@ -815,8 +825,13 @@ func visitorCard(o *model.Object, shows []string) *model.Object {
 	for _, p := range visitorAlways {
 		allowed[p] = true
 	}
+	if !target.HideOrganisation {
+		for _, p := range visitorOrganisation {
+			allowed[p] = true
+		}
+	}
 	for _, f := range visitorFields {
-		if slices.Contains(shows, f.name) {
+		if slices.Contains(target.Shows, f.name) {
 			for _, p := range f.props {
 				allowed[p] = true
 			}

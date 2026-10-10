@@ -55,7 +55,7 @@
             "label": "Name and organisation",
             "name": "name",
             "options": [],
-            "readOnly": true,
+            "readOnly": false,
             "required": false,
             "value": "on"
           },

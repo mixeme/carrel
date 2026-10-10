@@ -15,7 +15,9 @@ import (
 // not know of the link, so the sheet of a contact — and of a book — asks of
 // each field apart what the visitor sees, and almost all of it is off until
 // asked for: «Name and organisation» stands, «Phone numbers», «Email
-// addresses», «Photo» and «Note» do not, nor does the .vcf. What the link
+// addresses», «Photo» and «Note» do not, nor does the .vcf. «Name and
+// organisation» can be taken off (the owner's decision of 10.10.2026): the
+// visitor is then given the name alone. What the link
 // was made with is what its page, the rows of a book and the file give — the
 // file obeys the same ticks, or the download would go round them — and
 // nothing the sheet does not name (an address, a birthday, a property Carrel
@@ -25,13 +27,24 @@ const fullCard = "BEGIN:VCARD\nVERSION:4.0\nUID:grace\nFN:Grace Hopper\nN:Hopper
 	"TEL;TYPE=cell:+1 555 0100\nEMAIL:grace@example.org\nADR:;;1 Main St;Arlington;VA;22201;USA\nBDAY:19061209\n" +
 	"NOTE:Met at the conference.\nURL:https://example.org/grace\nX-SECRET-FLAG:keep-out\nPHOTO:data:image/png;base64,iVBORw0KGgo=\nEND:VCARD\n"
 
-// contactSheet is the publish sheet of a contact or a book as the frame
-// draws it, and what a post of the form with these ticks makes.
+// publishWith is the link a post of the sheet of a contact or a book makes
+// with these ticks beside «Name and organisation», which stands as the sheet
+// has it; "-name" takes that one off. The form is posted as a browser posts
+// it: with how long the link lives.
 func publishWith(t *testing.T, f davFixture, href string, ticks ...string) string {
 	t.Helper()
 	sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
-	form := url.Values{}
+	form := url.Values{"name": {"on"}}
+	for _, o := range rowNamed(t, sheet.Form, "lives").Options {
+		if o.Selected {
+			form.Set("lives", o.Value)
+		}
+	}
 	for _, name := range ticks {
+		if name == "-name" {
+			form.Del("name")
+			continue
+		}
 		form.Set(name, "on")
 	}
 	got := decode[view.PublishSheet](t, f.h.do(postForm(actionHref(t, sheet.Actions, "publish.create"), f.sess, form)))
@@ -84,9 +97,9 @@ func TestPublishedContactShowsWhatWasTicked(t *testing.T) {
 				t.Errorf("%s: «%s» stands %v, the frame draws %v", what, r.Label, r.Value == "on", on[string(r.Label)])
 			}
 		}
-		// The name is what the page is of: it cannot be taken off.
-		if name := sees.Rows[0]; !name.ReadOnly || name.Value != "on" {
-			t.Errorf("%s: «%s» = %+v, want on and not to be changed", what, name.Label, name)
+		// It stands, and it is the owner's to take off.
+		if name := sees.Rows[0]; name.ReadOnly || name.Value != "on" || name.Name != "name" {
+			t.Errorf("%s: «%s» = %+v, want on and free to be taken off", what, name.Label, name)
 		}
 		chosen := ""
 		for _, o := range rows["lives"].Options {
@@ -136,6 +149,29 @@ func TestPublishedContactShowsWhatWasTicked(t *testing.T) {
 		t.Errorf("the file of a link made without it: %d", rec.Code)
 	}
 
+	// A post that is not the sheet's — nothing in it — makes the link the
+	// sheet stands on: the organisation is given.
+	plainSheet := decode[view.PublishSheet](t, f.h.do(get(one, f.sess)))
+	plain := decode[view.PublishSheet](t, f.h.do(postForm(actionHref(t, plainSheet.Actions, "publish.create"), f.sess, url.Values{})))
+	if p := publicPage(t, f, string(plain.Link)); string(p.Title) != "Grace Hopper" || !strings.Contains(fields(p), "Navy") {
+		t.Errorf("a contact published by a bare post: %q, %q", p.Title, fields(p))
+	}
+
+	// «Name and organisation» taken off: the name alone, on the page and in
+	// the file — no organisation, no title.
+	nameOnly := publishWith(t, f, one, "-name", "download")
+	lone := f.h.do(anon(nameOnly)).Body.String()
+	if p := publicPage(t, f, nameOnly); string(p.Title) != "Grace Hopper" || strings.Contains(lone, "Navy") || strings.Contains(lone, "Rear admiral") {
+		t.Errorf("a contact published without its organisation: %q, %q", p.Title, fields(p))
+	}
+	if _, leaked := has(lone); len(leaked) > 0 {
+		t.Errorf("a contact published without its organisation gives %q", leaked)
+	}
+	loneFile := f.h.do(anon(nameOnly + "/download")).Body.String()
+	if !strings.Contains(loneFile, "FN:Grace Hopper") || !strings.Contains(loneFile, "N:Hopper;Grace") || strings.Contains(loneFile, "ORG") || strings.Contains(loneFile, "TITLE") {
+		t.Errorf("the file of a contact published without its organisation:\n%s", loneFile)
+	}
+
 	// Phones and the file ticked: the phone on the page and in the file, and
 	// still nothing else.
 	phones := publishWith(t, f, one, "phones", "download")
@@ -175,6 +211,12 @@ func TestPublishedContactShowsWhatWasTicked(t *testing.T) {
 	}
 	if grace.Email != "grace@example.org" || grace.Phone != "" || grace.Org != "Navy" {
 		t.Errorf("a book with addresses ticked: Grace's row is %+v", grace)
+	}
+	// Taken off for a book, no row of it names an organisation.
+	for _, r := range publicPage(t, f, publishWith(t, f, book, "-name")).Contacts {
+		if r.Name == "" || r.Org != "" {
+			t.Errorf("a book published without organisations: row %+v", r)
+		}
 	}
 	whole := f.h.do(anon(open + "/download")).Body.String()
 	if missing, leaked := has(whole, "grace@example.org"); len(missing)+len(leaked) > 0 || !strings.Contains(whole, "ada@example.com") || !strings.Contains(whole, "FN:Bob Builder") {
