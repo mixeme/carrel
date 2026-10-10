@@ -14,6 +14,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync/atomic"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
@@ -253,14 +254,18 @@ func uploadOf(r *http.Request) (*uploadBody, error) {
 	return readUploadFields(r)
 }
 
+// countingReader counts what was read of an upload's body. The count is
+// asked for when the upload has ended, and an upload that failed may have
+// ended while the transport is still reading the body it was given — so it
+// is counted atomically.
 type countingReader struct {
 	r io.Reader
-	n int64
+	n atomic.Int64
 }
 
 func (c *countingReader) Read(p []byte) (int, error) {
 	n, err := c.r.Read(p)
-	c.n += int64(n)
+	c.n.Add(int64(n))
 	return n, err
 }
 
@@ -379,7 +384,7 @@ func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part, ma
 			send = dav.Sized(send, declared)
 		}
 		_, err = c.files.UploadCreate(ctx, target, send)
-		t.size = body.n
+		t.size = body.n.Load()
 		switch {
 		case err == nil:
 			t.state = view.OpDone

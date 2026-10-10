@@ -17,6 +17,31 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.184 — 2026-10-10
+
+What the Linux gates with the race detector found on `v0.2.183`, the first
+such run since `v0.2.155`.
+
+### Fixed
+
+- **A data race in the count of an uploaded file's bytes.** An upload that
+  its server refused could end while the body was still being read, and the
+  size shown in the queue's row was read at the same moment it was written
+  (`TestQueueRowSaysWhyItFailed` under `-race`). The count is atomic now —
+  for a file uploaded into a folder and for one attached to a record.
+
+### For developers
+
+- **The race run fits the dev machine again.** The container of
+  `scripts/linux-gates.sh` gets 2 GB and no swap (it had 3 GB, more than the
+  machine's other tenants leave: the host's OOM killer ended the run twice
+  and could as well have ended one of theirs) and `GOMEMLIMIT=700MiB`.
+- **Under the race detector an archive's key is stretched at 2^12**, not
+  2^18 (`internal/backup/work_race.go`, build tag `race`): at 2^18 every
+  sealing and opening takes 256 MiB and the detector's shadow of it does
+  not fit. No shipped binary is built with the detector; the product's
+  factor is unchanged and is now held by `TestArchiveIsSealedAtFullWork`.
+
 ## v0.2.183 — 2026-10-10
 
 Two of the owner's answers of 10.10.2026: a browser asks before it shows a

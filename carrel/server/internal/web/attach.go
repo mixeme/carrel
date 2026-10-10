@@ -727,11 +727,11 @@ func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *mod
 			// (attachments-1): a row of the files queue, done, naming what the
 			// file was written as.
 			if t, err := newTransfer("upload", fc, candidate); err == nil {
-				t.state, t.size, t.note = view.OpDone, counted.n, base+" was taken, so a counter was added"
+				t.state, t.size, t.note = view.OpDone, counted.n.Load(), base+" was taken, so a counter was added"
 				c.sess.KeepTransfer(t)
 			}
 		}
-		return &placedFile{files: fc, path: target, uri: fileURI(fc.conn.Server, target), size: counted.n, etag: etag}, nil
+		return &placedFile{files: fc, path: target, uri: fileURI(fc.conn.Server, target), size: counted.n.Load(), etag: etag}, nil
 	}
 	return refuse("every name for it is taken", fmt.Sprintf("The folder already holds %s and its numbered copies up to -%d.", base, attachNameTries))
 }

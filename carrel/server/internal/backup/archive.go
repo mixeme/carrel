@@ -87,6 +87,7 @@ func Write(w io.Writer, m Manifest, sources []Source, password string) (Manifest
 		if err != nil {
 			return m, err
 		}
+		r.SetWorkFactor(scryptWork)
 		if sealer, err = age.Encrypt(w, r); err != nil {
 			return m, err
 		}

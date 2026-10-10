@@ -68,15 +68,21 @@ go test -count=1 -timeout 30m ./...
 # the serial run was killed at 2.3 GB: the heap grows faster under the
 # detector than the collector frees it. GOMEMLIMIT makes it collect sooner;
 # with it internal/web passes in about six minutes and no race is found.
+# On 10.10.2026 the run was killed twice (internal/backup at 2.3 GB,
+# internal/web at 2.5 GB) by the host's own OOM killer, not the container's:
+# the machine's other tenants now leave about 2.2 GB, less than the 3 GB the
+# container was allowed, and a host-wide kill may as well take one of theirs.
+# So the container gets 2 GB and no swap — what is killed is this run — and
+# the collector 700 MiB: internal/backup then peaks at 1.9 GB and passes.
 if [[ "${CARREL_RACE:-}" == "1" ]]; then
   echo "== race detector =="
   docker run --rm \
     -v "$ctx":/src \
     -v carrel-race-gomod:/go/pkg/mod \
     -w /src/carrel/carrel/server \
-    --memory=3g \
+    --memory=2g --memory-swap=2g \
     -e GOTOOLCHAIN=auto \
-    -e GOMEMLIMIT=1400MiB \
+    -e GOMEMLIMIT=700MiB \
     golang:1.27-bookworm \
     go test -race -count=1 -p 1 -parallel 1 -timeout 120m ./...
 fi
