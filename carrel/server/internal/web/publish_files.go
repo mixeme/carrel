@@ -91,18 +91,21 @@ func (s *Server) fileSheet(sess *session.Session, c *fileCtx, segs []string, dir
 	}
 	sheet := s.sheetFor(sess, view.KindFile, what, fileTitle(c, segs), c.stamp(), filePublishQuery(c, segs, dir), back, "")
 	if dir {
-		sheet.Expires += text(". Whoever has the link can also mount the folder as a read-only drive.")
+		// What the visitor gets, said on the sheet before the link and after
+		// it (s-publish-5): the same secret mounts the folder (S-25.1).
+		sheet.Note = "The visitor gets the folder with everything inside it, read-only, and the same address mounts as a drive in Windows, macOS and Linux."
 	}
 	return sheet
 }
 
 // postPublishFile makes the link to a file or a folder that is there now.
-func (s *Server) postPublishFile(w http.ResponseWriter, r *http.Request, sess *session.Session, expires *time.Time) {
+func (s *Server) postPublishFile(w http.ResponseWriter, r *http.Request, sess *session.Session) {
 	c, segs, dir, ok := s.publishFileTarget(r, sess)
 	if !ok {
 		s.notFound(w, r)
 		return
 	}
+	expires := s.publishExpiry(r, livesOf(view.KindFile, dir))
 	p, err := c.path(segs, dir)
 	if err != nil {
 		s.notFound(w, r)

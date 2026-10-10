@@ -377,7 +377,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/duplicates/decide` | POST | вход | страница, редирект | `DuplicatesPage` — решение по группе (`do=`): `do=link`, `ignore` («Not duplicates»), `again` («Offer again»), `choose` («Keep these values») и `unlink` с `group=` — группа (`DuplicateGroup.ID`); `link` и `choose` несут ответы `choice.<свойство>=` — номер варианта (`MergeRow.Name`, форма группы `DuplicateGroup.Form`); `do=threshold` с `value=` — порог (пусто или 0 — число экземпляра; форма `ThresholdControl.Form`); `do=weights` с `weight.<признак>=` (`WeightControl.Name`; пусто — вес экземпляра) и `do=defaults` — веса экземпляра всем (форма `ThresholdControl.WeightForm`). Ответ — дубликаты, как они теперь стоят, сказанное — в `notices`; форма без сценариев, когда сказать нечего, — редирект на `/app/duplicates`. Группа — не зона C-7.2, фрагментом не приходит |
 | `/app/duplicates/merge` | GET, POST | вход | страница | `DuplicatesMergePage`; `group=` — группа, `into=` — место оставляемой в группе (`Keep … instead`), `choice.<свойство>=` — номер варианта ответа (`MergeRow.Name`); POST — ещё `v.<место>=` — версия каждой записи, показанная GET: изменившаяся с тех пор не сливается |
 | `/app/sources/{kind}` | POST | вход | фрагмент, редирект | `Rail`; `{kind}` — четыре рода и `files`; форма рейла (`Rail.Ticks`): `toggle` — одна строка, `tick` — весь выбор, `back` — страница раздела, куда вернуться без сценариев |
-| `/app/publish` | GET, POST | вход | лист | `PublishSheet`; у контакта и книги (s-publish-3) форма несёт набор «What the visitor sees» — отметки `name` (стоит и не снимается), `phones`, `emails`, `photo`, `note` — и `download` («Allow .vcf download and subscription»), все, кроме первой, сняты; `lives` — 7 дней (у прочих родов 30). POST без отметок публикует имя с организацией и без файла |
+| `/app/publish` | GET, POST | вход | лист | `PublishSheet`; у контакта и книги (s-publish-3) форма несёт набор «What the visitor sees» — отметки `name` (стоит и не снимается), `phones`, `emails`, `photo`, `note` — и `download` («Allow .vcf download and subscription»), все, кроме первой, сняты; `lives` — 7 дней, у папки (s-publish-5) — 14, у прочего 30; POST без `lives` даёт срок, на котором лист его рода стоит. POST без отметок публикует имя с организацией и без файла |
 | `/app/mail/compose` | GET, POST | вход | лист | `MailSheet` |
 | `/app/mail/attach` | GET, POST | вход | лист | `MailAttachSheet` |
 | `/app/password` | GET, POST | вход | страница | `PasswordPage` |
@@ -1933,8 +1933,9 @@ type PublishSheet struct {
     Target  Text     // что публикуется — написано в шапке, не переспрашивается
     Local   bool     // значок «local» в шапке (s-publish-2): тот же признак, что SignedIn.Local, — у листа оболочки нет, и он несёт его сам
     Range   *Range   // только у календаря
-    Form    Form     // сколько показывать, разрешить ли .ics, показывать ли описания
-    Expires Text
+    Form    Form     // сколько показывать, разрешить ли .ics, показывать ли описания; у контакта и книги — что видит гость (s-publish-3)
+    Expires Text     // до какого дня ссылка живёт, когда она создана; до создания пусто
+    Note    Text     // сообщение, которое стоит на листе всегда, до ссылки и после: у папки — что получает гость и что адрес монтируется диском (s-publish-5); у прочих пусто
     Link    Text     // готовая ссылка после создания
     Actions []Action
 }

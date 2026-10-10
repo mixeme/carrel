@@ -136,17 +136,14 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 				view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Mono: true, Hint: text("Both days are in it. " + tf.date(today) + " is today.")})
 		}
 	}
-	// A contact's link is short-lived unless asked otherwise (s-publish-3:
-	// «7 days»); the others live a month (s-publish-2).
-	lives := "30"
+	lives := livesOf(kind, what == "folder")
 	if kind == view.KindContact {
-		lives = "7"
 		// The .vcf is off until asked for, like the fields it would carry.
 		rows = append(rows, view.FormRow{Name: "download", Label: "Allow .vcf download and subscription", Kind: view.InputCheck})
 	}
 	rows = append(rows, view.FormRow{Name: "lives", Label: "Link lives for", Kind: view.InputSelect, Value: text(lives), Options: []view.Option{
 		{Value: "7", Label: "7 days", Selected: lives == "7"},
-		{Value: "14", Label: "14 days"},
+		{Value: "14", Label: "14 days", Selected: lives == "14"},
 		{Value: "30", Label: "30 days", Selected: lives == "30"},
 		{Value: "never", Label: "No expiry", Separator: true}, // s-publish-14: only Revoke closes it
 	}})
@@ -209,13 +206,31 @@ func (s *Server) madeSheet(sess *session.Session, sheet view.PublishSheet, token
 	return sheet
 }
 
+// livesOf is how long a link lives when the sheet is left as it stands, in
+// days as the field «Link lives for» names them: a contact's a week
+// (s-publish-3) — its fields are another person's —, a folder's two
+// (s-publish-5), anything else a month (s-publish-2).
+func livesOf(kind view.Kind, folder bool) string {
+	switch {
+	case kind == view.KindContact:
+		return "7"
+	case kind == view.KindFile && folder:
+		return "14"
+	}
+	return "30"
+}
+
 // publishExpiry is the lifetime the form chose: 7, 14 or 30 days, or none.
-// A post that names none — a plain POST, an old client — gets the default.
-// «expires=never» is how the sheet asked for no expiry before «Link lives
-// for» (24.09.2026), and still means it.
-func (s *Server) publishExpiry(r *http.Request) *time.Time {
+// A post that names none — a plain POST, an old client — gets what the sheet
+// of its kind stands at (livesOf). «expires=never» is how the sheet asked
+// for no expiry before «Link lives for» (24.09.2026), and still means it.
+func (s *Server) publishExpiry(r *http.Request, standing string) *time.Time {
 	ttl := publish.DefaultTTL
-	switch r.FormValue("lives") {
+	lives := r.FormValue("lives")
+	if lives == "" {
+		lives = standing
+	}
+	switch lives {
 	case "never":
 		return nil
 	case "7":
@@ -283,9 +298,8 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, "/app/files/published")
 		return
 	}
-	expires := s.publishExpiry(r)
 	if r.FormValue("k") == filesSpec.segment {
-		s.postPublishFile(w, r, sess, expires)
+		s.postPublishFile(w, r, sess)
 		return
 	}
 	c, uid, ok := s.publishTarget(r, sess)
@@ -293,6 +307,7 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
+	expires := s.publishExpiry(r, livesOf(c.spec.kind, false))
 	title, err := s.publishTitle(r.Context(), c, uid)
 	if err != nil {
 		s.notFound(w, r)

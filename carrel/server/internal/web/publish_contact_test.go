@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -178,5 +179,51 @@ func TestPublishedContactShowsWhatWasTicked(t *testing.T) {
 	whole := f.h.do(anon(open + "/download")).Body.String()
 	if missing, leaked := has(whole, "grace@example.org"); len(missing)+len(leaked) > 0 || !strings.Contains(whole, "ada@example.com") || !strings.Contains(whole, "FN:Bob Builder") {
 		t.Errorf("the file of a book with addresses ticked lacks %q, gives %q:\n%s", missing, leaked, whole)
+	}
+}
+
+// s-publish-5: the sheet of a folder says, in a message of its own, what the
+// visitor gets — the folder whole, read-only, and the same address as a
+// drive — before the link is made and after; its link lives 14 days unless
+// changed. «Expires» is the day alone, never a sentence beginning with a
+// full stop.
+func TestFolderSheetSaysWhatTheVisitorGets(t *testing.T) {
+	frame := mockupFrame(t, "s-publish-5")
+	msg := frameText(frameOne(t, regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush">(.*?)</div>`), frame, "message")[1])
+	lives := frameText(frameOne(t, regexp.MustCompile(`<label>Link lives for</label><button class="tc-in is-pick" type="button">([^<]*)</button>`), frame, "lifetime")[1])
+	if !strings.Contains(msg, "drive") || lives == "" {
+		t.Fatalf("s-publish-5 says %q and %q: read the frame again", msg, lives)
+	}
+
+	f := pubDocs(t)
+	href := "/app/publish?" + url.Values{"k": {"files"}, "a": {f.id}, "c": {filesDocs}, "f": {"share"}, "dir": {"1"}}.Encode()
+	sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
+	chosen := ""
+	for _, o := range rowNamed(t, sheet.Form, "lives").Options {
+		if o.Selected {
+			chosen = string(o.Label)
+		}
+	}
+	if string(sheet.Note) != msg || sheet.Expires != "" || chosen != lives {
+		t.Errorf("the sheet of a folder: note %q, expires %q, lives %q; want %q, nothing, %q", sheet.Note, sheet.Expires, chosen, msg, lives)
+	}
+	made := decode[view.PublishSheet](t, f.h.do(postForm(actionHref(t, sheet.Actions, "publish.create"), f.sess, url.Values{})))
+	if made.Link == "" || string(made.Note) != msg || !strings.HasPrefix(string(made.Expires), "Until ") || strings.Contains(string(made.Expires), "drive") {
+		t.Errorf("the link made: note %q, expires %q", made.Note, made.Expires)
+	}
+	// Left as the sheet stands, the link lives what the sheet said.
+	var days int
+	for _, l := range f.h.users.PublishedLinks(f.sess.AccountID()) {
+		if l.ExpiresAt != nil {
+			days = int(l.ExpiresAt.Sub(l.CreatedAt).Hours()/24 + 0.5)
+		}
+	}
+	if want := strings.TrimSuffix(lives, " days"); strconv.Itoa(days) != want {
+		t.Errorf("the link lives %d days, the sheet said %q", days, lives)
+	}
+	// A file has no such message: there is nothing to mount.
+	one := decode[view.PublishSheet](t, f.h.do(get("/app/publish?"+url.Values{"k": {"files"}, "a": {f.id}, "c": {filesDocs}, "f": {"secret.txt"}}.Encode(), f.sess)))
+	if one.Note != "" || one.Expires != "" {
+		t.Errorf("the sheet of a file: note %q, expires %q", one.Note, one.Expires)
 	}
 }

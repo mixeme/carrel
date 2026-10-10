@@ -97,7 +97,7 @@ Typecase, кадры с тех пор менялись записками 35–4
 - Ад7 — пункт `admin.user.delete` — POST `op("delete")` без `login`;
   `DeleteUser` сверяет `loginConfirm` с логином и отвечает
   `ErrLoginConfirm`.
-- Пб4 — `fileSheet` дописывает «. Whoever has the link can also mount the
+- Пб4 (**закрыто сервером `v0.2.181`**) — `fileSheet` дописывает «. Whoever has the link can also mount the
   folder as a read-only drive.» к `Expires`, которого `sheetFor` не
   заполняет.
 

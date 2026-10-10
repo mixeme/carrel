@@ -376,12 +376,17 @@ type ImportReport struct {
 }
 
 type PublishSheet struct {
-	Kind    Kind     `json:"kind"`
-	Target  Text     `json:"target"` // что публикуется — написано в шапке, не переспрашивается
-	Local   bool     `json:"local"`  // значок «local» в шапке (s-publish-2): SignedIn.Local, у листа оболочки нет
-	Range   *Range   `json:"range"`  // только у календаря
-	Form    Form     `json:"form"`   // сколько показывать, разрешить ли .ics, показывать ли описания
-	Expires Text     `json:"expires"`
+	Kind    Kind   `json:"kind"`
+	Target  Text   `json:"target"` // что публикуется — написано в шапке, не переспрашивается
+	Local   bool   `json:"local"`  // значок «local» в шапке (s-publish-2): SignedIn.Local, у листа оболочки нет
+	Range   *Range `json:"range"`  // только у календаря
+	Form    Form   `json:"form"`   // сколько показывать, разрешить ли .ics, показывать ли описания
+	Expires Text   `json:"expires"`
+	// Note — сообщение, которое стоит на листе всегда, до ссылки и после: у
+	// папки — что получает гость («The visitor gets the folder with
+	// everything inside it, read-only, and the same address mounts as a
+	// drive in Windows, macOS and Linux.», s-publish-5); у прочих пусто
+	Note    Text     `json:"note"`
 	Link    Text     `json:"link"` // готовая ссылка после создания
 	Actions []Action `json:"actions"`
 }

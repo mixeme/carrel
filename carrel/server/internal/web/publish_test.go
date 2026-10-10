@@ -236,7 +236,8 @@ func TestPublishIsOffered(t *testing.T) {
 }
 
 // «Link lives for» (s-publish-1): the lifetime chosen is the lifetime made —
-// 7, 14 or 30 days, or none.
+// 7, 14 or 30 days, or none; none chosen — what the sheet of the kind stands
+// at.
 func TestPublishLinkLivesForWhatWasChosen(t *testing.T) {
 	f := publishFixture(t)
 	now := time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC)
@@ -249,7 +250,9 @@ func TestPublishLinkLivesForWhatWasChosen(t *testing.T) {
 	for _, c := range []struct {
 		lives string
 		days  int // 0: no expiry
-	}{{"7", 7}, {"14", 14}, {"30", 30}, {"never", 0}, {"", 30}} {
+		// A post that names none gets what the sheet of a contact stands
+		// at: a week (s-publish-3).
+	}{{"7", 7}, {"14", 14}, {"30", 30}, {"never", 0}, {"", 7}} {
 		sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
 		made := decode[view.PublishSheet](t, f.h.do(postForm(actionHref(t, sheet.Actions, "publish.create"), f.sess, url.Values{"lives": {c.lives}})))
 		if made.Link == "" {

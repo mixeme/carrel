@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.181 — 2026-10-10
+
+The sheet of a published folder by its frame (`s-publish-5`; the scans'
+Пб4).
+
+### Added
+
+- `PublishSheet.note` — the message a sheet always carries, before the link
+  and after it. A folder's: «The visitor gets the folder with everything
+  inside it, read-only, and the same address mounts as a drive in Windows,
+  macOS and Linux.» Empty for the other kinds.
+
+### Fixed
+
+- **`expires` of a folder's sheet began with a full stop** — «. Whoever has
+  the link can also mount the folder as a read-only drive.» — and lost the
+  sentence once the link was made. `expires` is the day the link lives to
+  and nothing else; empty before the link.
+
+### Changed
+
+- **A folder's link lives 14 days unless changed** (was 30), as its frame
+  draws. A post that names no lifetime gets what the sheet of its kind
+  stands at: a week for a contact, two for a folder, a month for the rest
+  (in `v0.2.180` such a post of a contact still got a month).
+
 ## v0.2.180 — 2026-10-10
 
 A published contact shows what its owner ticked, and no more (`s-publish-3`;
