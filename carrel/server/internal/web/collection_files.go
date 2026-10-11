@@ -108,6 +108,14 @@ func (m *collectionMove) runFiles(ctx context.Context) (string, *view.Notice) {
 	}
 	newPath := strings.TrimSuffix(m.home, "/") + "/" + name + "/"
 	m.placed = sealed.Collection{Path: newPath, Name: name, Kinds: []view.Kind{view.KindFile}}
+	// A move deletes the original: what it holds is noted before the copy
+	// and looked at again after it (Б14 of the audit of 11.10.2026).
+	var before []file.TreeFile
+	if !m.copying {
+		if before, err = src.Tree(ctx, m.col.Path, m.s.cfg.FilesMaxEntries); err != nil {
+			return "", davRefusal(moveCollectionRefusal(m.title(), label), m.conn, "PROPFIND", m.col.Path, err)
+		}
+	}
 	if n, err := file.CopyTree(ctx, src, m.col.Path, dst, newPath, m.s.cfg.FilesMaxEntries); err != nil {
 		// The name was free when it was looked up: what stands there now is
 		// what this copy made, and a half copy is not left behind (S-12.2).
@@ -125,6 +133,13 @@ func (m *collectionMove) runFiles(ctx context.Context) (string, *view.Notice) {
 	}
 	if m.copying {
 		return m.newAddress(), nil
+	}
+	// The original goes only when it holds what it held when it was copied
+	// and the copy holds all of it; otherwise both stay, and the person is
+	// told which is which.
+	if why := movedWhole(ctx, src, m.col.Path, before, dst, newPath, m.s.cfg.FilesMaxEntries); why != "" {
+		return "", m.kept("Copied, and the original kept",
+			upperFirst(why)+", so "+label+" was not deleted on "+connLabel(m.conn)+". Both are there now: look at them, and delete the one you do not need.", nil)
 	}
 	if err := src.Delete(ctx, m.col.Path, ""); err != nil {
 		n := m.kept("Copied, but the original could not be deleted",

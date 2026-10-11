@@ -17,6 +17,43 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.193 — 2026-10-12
+
+Files: «Replace» and a move between storages no longer destroy what nobody
+looked at (Б13 and Б14 of the audit of 11.10.2026,
+`docs/plan/scans/silent-choices.md`).
+
+### Fixed
+
+- **«Replace» replaces the version it was asked about.** The question about
+  a taken name was answered for the file that stood there then — and the
+  write went without a condition, however long the question had waited: a
+  version somebody put there in between was overwritten unseen. Now what
+  stands there is looked at again, an upload goes with `If-Match`, and
+  another version stays: the row says what stood there changed while the
+  question waited, and nothing was overwritten. A server that gives files
+  no version is written as before.
+- **A folder moved to another storage is deleted only when the copy is
+  whole and the folder is what it was.** The original went as soon as the
+  copy ended: a file put into the folder while it was being copied went
+  with it, unseen. Now the folder is listed before the copy and after it,
+  and the copy is listed too; a folder that changed, or a copy that lacks a
+  file or holds one of another size, keeps the original and takes the copy
+  back, and the row says which file. So for the move of a whole file
+  storage too — there both stay, and the notice says why.
+- **A folder copy that breaks off leaves nothing under the folder's name.**
+  A folder is written beside its place, under a name of the transfer, and
+  takes the place only whole; before, half a folder stood there under the
+  real name.
+
+### For developers
+
+- `file.Provider.UploadReplace`, `.Tree`, `file.TreeDiffers`; `movedWhole`
+  in `internal/web/files_ops.go`. A move of a folder costs two more
+  listings of the original and one of the copy.
+- Not covered by a test of its own: the move of a whole file storage
+  (`collection_files.go`) — it asks the same `movedWhole`.
+
 ## v0.2.192 — 2026-10-12
 
 Typecase `462ffb5` (Typecase's notes 45 and 46, and its answer to Carrel's

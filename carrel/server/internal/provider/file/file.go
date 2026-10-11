@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -146,6 +147,18 @@ func (p *Provider) UploadOverwrite(ctx context.Context, path string, body io.Rea
 	return p.t.Put(dav.Stream(ctx), path, body, "")
 }
 
+// UploadReplace is UploadOverwrite of the version the person was asked
+// about: etag, the version that stood there when the question arose, goes
+// as If-Match, so a file somebody wrote in between stays and the answer is
+// 412 (ErrChanged). Without a version — the server gave none — it is
+// UploadOverwrite.
+func (p *Provider) UploadReplace(ctx context.Context, path string, body io.Reader, etag string) (string, error) {
+	if etag != "" {
+		etag = `"` + strings.Trim(etag, `"`) + `"`
+	}
+	return p.t.Put(dav.Stream(ctx), path, body, etag)
+}
+
 // MkCol creates a folder. A name already taken answers 405 (RFC 4918 §9.3.1).
 func (p *Provider) MkCol(ctx context.Context, path string) error {
 	return p.t.MkCol(ctx, path)
@@ -235,4 +248,69 @@ func CopyTree(ctx context.Context, from *Provider, src string, to *Provider, dst
 		}
 	}
 	return n, nil
+}
+
+// TreeFile is one member of a folder's tree: where it stands under the
+// folder, whether it is a folder itself, and — of a file — its size and the
+// version its server gives it, when it gives one.
+type TreeFile struct {
+	Rel  string
+	Dir  bool
+	Size int64
+	ETag string
+}
+
+// Tree lists everything under a folder, a level at a time, in the order of
+// its paths. More than max entries is ErrTooMany: a tree that cannot be
+// listed whole is not one to compare.
+func (p *Provider) Tree(ctx context.Context, root string, max int) ([]TreeFile, error) {
+	root = strings.TrimSuffix(root, "/") + "/"
+	type level struct{ path, rel string }
+	queue := []level{{root, ""}}
+	var out []TreeFile
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		entries, err := p.List(ctx, cur.path)
+		if err != nil {
+			return nil, err
+		}
+		for _, e := range entries {
+			if len(out) >= max {
+				return nil, fmt.Errorf("%w: stopped after %d entries", ErrTooMany, max)
+			}
+			f := TreeFile{Rel: cur.rel + e.Name, Dir: e.Dir}
+			if e.Dir {
+				queue = append(queue, level{e.Path, f.Rel + "/"})
+			} else {
+				f.Size, f.ETag = e.Size, strings.Trim(e.ETag, `"`)
+			}
+			out = append(out, f)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Rel < out[j].Rel })
+	return out, nil
+}
+
+// TreeDiffers names the first member in which two listings of a tree
+// differ — one has it and the other does not, a folder against a file,
+// another size; with versions, another version where both give one. Empty:
+// the same tree. A copy is compared with its original without versions: a
+// version is its server's own.
+func TreeDiffers(a, b []TreeFile, versions bool) string {
+	for i := 0; i < len(a) || i < len(b); i++ {
+		switch {
+		case i >= len(a):
+			return b[i].Rel
+		case i >= len(b):
+			return a[i].Rel
+		case a[i].Rel != b[i].Rel:
+			return min(a[i].Rel, b[i].Rel)
+		case a[i].Dir != b[i].Dir, !a[i].Dir && a[i].Size != b[i].Size:
+			return a[i].Rel
+		case versions && a[i].ETag != "" && b[i].ETag != "" && a[i].ETag != b[i].ETag:
+			return a[i].Rel
+		}
+	}
+	return ""
 }

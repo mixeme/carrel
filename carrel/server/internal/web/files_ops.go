@@ -52,6 +52,11 @@ type transfer struct {
 	rel          []string
 	name         string
 
+	// was is the version of what stood at the name when the question about
+	// it arose (its ETag; empty — the server gave none): «Replace» answers
+	// about that version and no other (S-17.1).
+	was string
+
 	// what it moves: an upload's file on disk, or a member of a collection
 	temp               string
 	srcAccount, srcCol string
@@ -358,9 +363,10 @@ func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part, ma
 		t.state, t.note = view.OpFailed, "the folder it goes in was not created: "+sentenceEnd(fileReason(err))
 		return nil
 	}
-	_, err = c.files.Stat(ctx, target)
+	there, err := c.files.Stat(ctx, target)
 	switch {
 	case err == nil:
+		t.was = there.ETag
 		f, err := os.CreateTemp("", "carrel-upload-*")
 		if err != nil {
 			t.state, t.note = view.OpFailed, "Carrel could not keep it to ask about the name"
@@ -1328,10 +1334,10 @@ func (s *Server) startItem(ctx context.Context, c, dest *fileCtx, kind string, e
 	t.srcAccount, t.srcCol, t.src, t.dir, t.size = c.conn.ID, c.col.Path, append(slices.Clone(c.segs), e.Name), e.Dir, e.Size
 	defer func() { c.sess.KeepTransfer(t) }()
 	target, _ := dest.path(append(slices.Clone(dest.segs), name), false)
-	_, err = dest.files.Stat(ctx, target)
+	there, err := dest.files.Stat(ctx, target)
 	switch {
 	case err == nil:
-		t.state = view.OpIdle
+		t.state, t.was = view.OpIdle, there.ETag
 	case file.NotFound(err):
 		s.finish(t, s.place(ctx, c.sess, dest, t, name, false))
 	default:
@@ -1350,15 +1356,25 @@ func (s *Server) finish(t *transfer, err error) {
 		t.state = view.OpIdle
 	default:
 		t.state, t.note = view.OpFailed, sentenceEnd(fileReason(err))
+		var kept folderKept
+		if errors.As(err, &kept) {
+			t.note = string(kept)
+		}
 		var copied *partialCopy
 		if errors.As(err, &copied) {
 			t.note = fmt.Sprintf("%s after %s; the original stays where it was", t.note, plural(copied.n, "entry"))
 			if t.kind == "copy" {
-				t.note = fmt.Sprintf("%s after %s; what arrived stays there", sentenceEnd(fileReason(err)), plural(copied.n, "entry"))
+				t.note = fmt.Sprintf("%s after %s; what arrived was taken back", sentenceEnd(fileReason(err)), plural(copied.n, "entry"))
 			}
 		}
 	}
 }
+
+// folderKept is why a folder that was copied whole was not moved after all —
+// Carrel's own reason, in its words, not a refusal of the server.
+type folderKept string
+
+func (n folderKept) Error() string { return string(n) }
 
 // partialCopy is a folder copy that stopped part way.
 type partialCopy struct {
@@ -1393,7 +1409,9 @@ func (s *Server) place(ctx context.Context, sess *session.Session, dest *fileCtx
 			body = dav.Typed(body, mt)
 		}
 		if overwrite {
-			_, err = dest.files.UploadOverwrite(ctx, dst, body)
+			// The version asked about, and no other: a file written there
+			// since is not this answer's to replace.
+			_, err = dest.files.UploadReplace(ctx, dst, body, t.was)
 		} else {
 			_, err = dest.files.UploadCreate(ctx, dst, body)
 		}
@@ -1411,32 +1429,45 @@ func (s *Server) place(ctx context.Context, sess *session.Session, dest *fileCtx
 		return dest.files.Move(ctx, srcPath, dst, overwrite)
 	}
 	if t.dir {
-		// Overwriting a folder removes what was there, so the copy is written
-		// beside it first and the old folder goes only when the new one is
-		// whole: a copy that fails half way leaves the destination as it was.
-		into := dst
-		if overwrite {
-			if into, err = dest.path(append(append(slices.Clone(t.folder), t.rel...), name+".carrel-"+t.id), true); err != nil {
+		// A folder is written beside its place first, under a name of this
+		// transfer, and takes the place only when it is whole: a copy that
+		// fails half way leaves the destination as it was — nothing stands
+		// under the real name that is half a folder —, and overwriting
+		// removes what was there only then.
+		into, err := dest.path(append(append(slices.Clone(t.folder), t.rel...), name+".carrel-"+t.id), true)
+		if err != nil {
+			return err
+		}
+		// A move deletes the original, so the original is looked at before
+		// the copy and after it: what it held when it was copied is what
+		// may go (Б14 of the audit of 11.10.2026).
+		var before []file.TreeFile
+		if t.kind == "move" {
+			if before, err = src.files.Tree(ctx, srcPath, s.cfg.FilesMaxEntries); err != nil {
 				return err
 			}
 		}
 		if n, err := file.CopyTree(ctx, src.files, srcPath, dest.files, into, s.cfg.FilesMaxEntries); err != nil {
-			if overwrite {
-				_ = dest.files.Delete(ctx, into, "")
-			}
+			_ = dest.files.Delete(context.WithoutCancel(ctx), into, "")
 			if n == 0 && dav.IsStatus(err, http.StatusMethodNotAllowed) {
 				return err
 			}
 			return &partialCopy{n: n, err: err}
 		}
+		if t.kind == "move" {
+			if why := movedWhole(ctx, src.files, srcPath, before, dest.files, into, s.cfg.FilesMaxEntries); why != "" {
+				_ = dest.files.Delete(context.WithoutCancel(ctx), into, "")
+				return folderKept(why + ", so it stays where it was and the copy was taken back. Move it again")
+			}
+		}
 		if overwrite {
 			if err := dest.files.Delete(ctx, dst, ""); err != nil {
-				_ = dest.files.Delete(ctx, into, "")
+				_ = dest.files.Delete(context.WithoutCancel(ctx), into, "")
 				return err
 			}
-			if err := dest.files.Move(ctx, into, dst, false); err != nil {
-				return fmt.Errorf("the copy is whole under %s, but it could not take the old name: %w", name+".carrel-"+t.id, err)
-			}
+		}
+		if err := dest.files.Move(ctx, into, dst, false); err != nil {
+			return fmt.Errorf("the copy is whole under %s, but it could not take the name: %w", name+".carrel-"+t.id, err)
 		}
 	} else if err := file.Copy(ctx, src.files, srcPath, dest.files, dst, overwrite); err != nil {
 		return err
@@ -1445,6 +1476,48 @@ func (s *Server) place(ctx context.Context, sess *session.Session, dest *fileCtx
 		return src.files.Delete(ctx, srcPath, "")
 	}
 	return nil
+}
+
+// movedWhole looks at a folder copied in order to be moved before its
+// original is deleted: the original holds what it held before the copy — no
+// file added, gone or written since —, and the copy holds every file of it
+// at its size. The answer is why the original must stay, for the caller to
+// finish the sentence with what it did about it; empty — it may go.
+func movedWhole(ctx context.Context, from *file.Provider, src string, before []file.TreeFile, to *file.Provider, copied string, max int) string {
+	after, err := from.Tree(ctx, src, max)
+	if err != nil {
+		return "the folder could not be read again after it was copied"
+	}
+	if at := file.TreeDiffers(before, after, true); at != "" {
+		return "the folder changed while it was copied (" + at + ")"
+	}
+	got, err := to.Tree(ctx, copied, max)
+	if err != nil {
+		return "the copy could not be read back"
+	}
+	if at := file.TreeDiffers(after, got, false); at != "" {
+		return "the copy is not whole (" + at + ")"
+	}
+	return ""
+}
+
+// changedSince reports whether what stands at a waiting row's name is no
+// longer the version the question was asked about. A row that knows no
+// version — the server gave none, or the name was found taken only by the
+// write — has nothing to compare, and the answer is taken as it is.
+func (s *Server) changedSince(ctx context.Context, dest *fileCtx, t *transfer) bool {
+	if t.was == "" {
+		return false
+	}
+	dst, err := dest.path(append(append(slices.Clone(t.folder), t.rel...), t.name), t.dir)
+	if err != nil {
+		return false
+	}
+	now, err := dest.files.Stat(ctx, dst)
+	if file.NotFound(err) {
+		return true
+	}
+	return err == nil && now.ETag != "" && strings.Trim(now.ETag, `"`) != strings.Trim(t.was, `"`)
 }
 
 // answerTransfer answers the question of one row. The row must be of this
@@ -1471,8 +1544,22 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 	case "skip":
 		next.state, next.note = view.OpCancelled, ""
 	case "overwrite":
-		s.finish(&next, s.place(ctx, c.sess, c, t, t.name, true))
-		if next.Waiting() {
+		// «Replace» was said of what stood there when the question was
+		// asked. Whatever stands there now is looked at first: another
+		// version, or nothing at all, is not what the person agreed to
+		// lose. An upload says it to the server as well (If-Match), so the
+		// write itself is refused when a version slips in between.
+		const changed = "what stood there changed while the question waited; nothing was overwritten. Send it again to choose"
+		if s.changedSince(ctx, c, t) {
+			next.state, next.note = view.OpFailed, changed
+			break
+		}
+		err := s.place(ctx, c.sess, c, t, t.name, true)
+		s.finish(&next, err)
+		switch {
+		case t.kind == "upload" && t.was != "" && file.ErrOccupied(err):
+			next.state, next.note = view.OpFailed, changed
+		case next.Waiting():
 			next.state, next.note = view.OpFailed, "the server refused to overwrite it"
 		}
 	case "both":
