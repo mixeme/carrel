@@ -526,6 +526,20 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 		return 0, fmt.Errorf("A letter goes to %d recipients at most.", s.mailPolicy().Recipients)
 	}
 	d.Parts = s.reckonLinks(d.Parts)
+	// What a letter must never give out more of than the person chose, said
+	// before anything is read or made.
+	for _, p := range d.Parts {
+		switch {
+		case p.LinkID != "" && s.linkToken(sess, p.LinkID) == "":
+			// A link the person revoked, or one that has run out, is not
+			// published again behind their back.
+			return 0, fmt.Errorf("The link to «%s» was revoked or has expired since it was put into the letter. Remove it, or publish it again.", p.Title)
+		case p.AsLink && p.From != "":
+			// A link is the calendar whole; the person chose some of its
+			// days.
+			return 0, fmt.Errorf("«%s» does not fit the letter, and a link would open the whole calendar, not these days. Remove it, or attach fewer days.", p.Title)
+		}
+	}
 
 	var files []cmail.Attachment
 	var links []string

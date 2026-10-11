@@ -191,7 +191,7 @@ func Parse(doc []byte, now time.Time) (Parsed, error) {
 			p.Name = strings.TrimSpace(m[1])
 		}
 	case strings.HasPrefix(strings.ToUpper(text), "BEGIN:VCARD"):
-		objs, err := card.Split(doc)
+		objs, _, err := card.Split(doc)
 		if err != nil {
 			return p, err
 		}

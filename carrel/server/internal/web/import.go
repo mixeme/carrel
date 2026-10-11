@@ -624,7 +624,7 @@ func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*import
 		return d, d.add(c, obj)
 	}
 	if c.card != nil {
-		objs, err := card.Split(body)
+		objs, broken, err := card.Split(body)
 		if err != nil {
 			return nil, err
 		}
@@ -632,6 +632,11 @@ func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*import
 			return nil, errTooManyRecords{len(objs), s.cfg.ImportMaxRecords}
 		}
 		d.Format = vcardFormat(objs)
+		// A card that cannot be read is counted and named; the cards after
+		// it are the file's all the same (S-19).
+		for _, b := range broken {
+			d.Skipped = append(d.Skipped, importSkip{What: "VCARD", Title: b.Name, Reason: b.Reason, Failed: true})
+		}
 		for _, obj := range objs {
 			if err := d.add(c, obj); err != nil {
 				return nil, err

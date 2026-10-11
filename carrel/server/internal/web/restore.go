@@ -588,7 +588,7 @@ func (s *Server) archiveRecords(zr *zip.Reader, e backup.Entry) ([]*model.Object
 		}
 		var objs []*model.Object
 		if ext == ".vcf" {
-			objs, err = card.Split(body)
+			objs, _, err = card.Split(body)
 		} else {
 			objs, _, err = cal.Split(body, time.Now())
 		}

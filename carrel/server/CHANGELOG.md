@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.191 — 2026-10-11
+
+Three places where data was lost or given out without a word (the audit of
+11.10.2026, `docs/plan/scans/silent-choices.md`: Б2, Б36, Б37).
+
+### Fixed
+
+- **An import of a .vcf reads past a card it cannot read.** A card cut
+  short — without its `END:VCARD` — swallowed the card after it: two people
+  came out as one contact, with both names and both UIDs, and the preview
+  showed a clean file. Each card is now read by itself; one that cannot be
+  read is counted «with errors» and named in the preview, and the cards
+  after it are the file's all the same.
+- **A letter does not publish a revoked link again.** A link put into a
+  letter and revoked, or run out, before the letter went was published anew
+  by Send — thirty days, a new address. Now the letter does not go, and
+  says so: remove the link or publish it again.
+- **A letter does not turn some days of a calendar into the whole of it.**
+  The events of a range of days that did not fit the letter went as a link,
+  and a link opens the whole calendar. Now the letter does not go, and says
+  so: remove it or attach fewer days.
+
+### For developers
+
+- `card.Split` answers a third value, the cards it could not read
+  (`card.Broken`). A restore from a backup and a feed of cards read past a
+  broken card too, and do not name it.
+
 ## v0.2.190 — 2026-10-11
 
 A repeating task marked done goes on to its next time (the owner's decision
