@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?etag=e20\u0026op=mine",
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?etag=e21\u0026op=mine",
       "id": "conflict.mine",
       "label": "Use only my edit",
       "method": "POST"
@@ -11,7 +11,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?etag=e20\u0026op=theirs",
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?etag=e21\u0026op=theirs",
       "id": "conflict.theirs",
       "label": "Use only the server version",
       "method": "POST"
@@ -68,7 +68,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e20"
+            "value": "e21"
           },
           {
             "add": null,

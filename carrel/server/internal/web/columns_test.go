@@ -34,8 +34,10 @@ var (
 	frameColumnsFoot  = regexp.MustCompile(`<button class="tc-btn[^"]*" type="submit"( name="col" value="default")?>([^<]*)</button>`)
 	frameColumnsHead  = regexp.MustCompile(`<div class="tc-rubric tc-menu__item[^"]*" role="presentation">([^<]*)</div>`)
 	frameColsRow      = regexp.MustCompile(`(?s)<div class="tc-row tc-row--cols[^"]*">(.*?)</div>`)
-	frameColsCell     = regexp.MustCompile(`<span class="[^"]*tc-col--(\w+)">((?:<span class="tc-tag">[^<]*</span>)*|[^<]*)</span>`)
-	frameColsTag      = regexp.MustCompile(`<span class="tc-tag">([^<]*)</span>`)
+	// A cell of tags shows the first and counts the rest («работа +1»); all
+	// of them are in its hint (Typecase Р-53, note 44).
+	frameColsCell = regexp.MustCompile(`<span class="[^"]*tc-col--(\w+)"(?: title="([^"]*)")?>((?:<span class="tc-tag">[^<]*</span>)?(?:<span class="tc-row__more">[^<]*</span>)?|[^<]*)</span>`)
+	frameColsTag  = regexp.MustCompile(`<span class="tc-tag">([^<]*)</span>`)
 )
 
 // frameDefaultColumns is the menu of components-21: the columns a list
@@ -106,13 +108,16 @@ func frameColsRows(t *testing.T, id string) (order []string, rows map[string]map
 	for i, r := range frameColsRow.FindAllStringSubmatch(mockupFrame(t, id), -1) {
 		cells := map[string]string{}
 		for _, c := range frameColsCell.FindAllStringSubmatch(r[1], -1) {
-			v := frameText(c[2])
+			v := frameText(c[3])
 			if c[1] == "tags" {
 				var tags []string
-				for _, g := range frameColsTag.FindAllStringSubmatch(c[2], -1) {
+				for _, g := range frameColsTag.FindAllStringSubmatch(c[3], -1) {
 					tags = append(tags, frameText(g[1]))
 				}
 				v = strings.Join(tags, ", ")
+				if c[2] != "" {
+					v = frameText(c[2])
+				}
 			}
 			cells[c[1]] = v
 			if i == 0 {

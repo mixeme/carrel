@@ -1,19 +1,26 @@
 {
   "actions": [
     {
+      "csrf": "csrf",
       "danger": true,
-      "enabled": false,
+      "enabled": true,
+      "href": "/app/duplicates/merge?choice.FN=0\u0026group=group\u0026into=0\u0026v.0=e6\u0026v.1=e5",
       "id": "duplicates.merge.confirm",
       "label": "Write the merge and delete the rest",
-      "method": "POST",
-      "reason": "Команда is read-only: its record could be neither rewritten nor deleted.",
-      "csrf": "csrf"
+      "method": "POST"
     },
     {
       "enabled": true,
       "href": "/app/duplicates",
       "id": "duplicates.merge.cancel",
       "label": "Cancel",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/duplicates/merge?group=group\u0026into=1",
+      "id": "duplicates.merge.into",
+      "label": "Keep Лебедева Вера · nextcloud · Контакты instead",
       "method": "GET"
     }
   ],
@@ -27,71 +34,73 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
       "label": "Carrel",
-      "method": "GET",
-      "build": "0.0.1 · 786949a"
+      "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [],
     "nav": [
       {
-        "count": 6,
+        "count": 7,
         "enabled": true,
         "href": "/app/contacts",
+        "icon": "i-con",
         "id": "nav.contacts",
         "label": "Contacts",
-        "method": "GET",
-        "icon": "i-con"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/calendar",
+        "icon": "i-cal",
         "id": "nav.calendar",
         "label": "Calendar",
-        "method": "GET",
-        "icon": "i-cal"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/tasks",
+        "icon": "i-task",
         "id": "nav.tasks",
         "label": "Tasks",
-        "method": "GET",
-        "icon": "i-task"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/notes",
+        "icon": "i-note",
         "id": "nav.notes",
         "label": "Notes",
-        "method": "GET",
-        "icon": "i-note"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/files",
+        "icon": "i-file",
         "id": "nav.files",
         "label": "Files",
-        "method": "GET",
-        "icon": "i-file"
+        "method": "GET"
       },
       {
         "count": 1,
         "enabled": true,
         "href": "/app/duplicates",
+        "icon": "i-dup",
         "id": "nav.duplicates",
         "label": "Duplicates",
         "method": "GET",
-        "on": true,
-        "icon": "i-dup"
+        "on": true
       }
     ],
+    "neighbours": [],
     "note": "",
     "sections": [
       {
@@ -102,113 +111,91 @@
             "colour": "#a05a2c",
             "count": 1,
             "detail": "",
+            "feed": false,
             "href": "",
             "label": "Архив",
             "menu": [],
+            "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "on",
-            "feed": false,
-            "on": false
+            "tick": "on"
           },
           {
             "colour": "#4a6b52",
-            "count": 4,
+            "count": 5,
             "detail": "",
+            "feed": false,
             "href": "",
             "label": "Контакты",
             "menu": [],
+            "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "on",
-            "feed": false,
-            "on": false
+            "tick": "on"
           },
           {
             "colour": "#6b4e7a",
             "count": 1,
             "detail": "",
+            "feed": false,
             "href": "",
             "label": "Команда",
             "menu": [],
+            "on": false,
             "readOnly": true,
             "state": "ok",
-            "tick": "on",
-            "feed": false,
-            "on": false
+            "tick": "on"
           }
         ],
         "state": "ok"
       }
     ],
-    "tags": [],
-    "neighbours": [],
     "shortcuts": [],
-    "davloom": "davloom · running · 0 devices",
+    "tags": [],
     "ticks": null
   },
-  "rows": [],
+  "rows": [
+    {
+      "chosen": 0,
+      "name": "choice.FN",
+      "options": [
+        "Вера Лебедева",
+        "Лебедева Вера"
+      ],
+      "property": "Display name",
+      "union": false
+    },
+    {
+      "chosen": 0,
+      "name": "",
+      "options": [
+        "vera@example.net",
+        "v.lebedeva@example.org"
+      ],
+      "property": "Email addresses",
+      "union": true
+    },
+    {
+      "chosen": 0,
+      "name": "",
+      "options": [
+        "+7 905 331-09-42"
+      ],
+      "property": "Phone numbers",
+      "union": true
+    }
+  ],
   "target": {
-    "colour": "#4a6b52",
-    "detail": "+7 903 118-22-04 · a.belov@example.org",
-    "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
+    "colour": "#a05a2c",
+    "detail": "+7 905 331-09-42 · vera@example.net",
+    "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
     "readOnly": false,
-    "stamp": "nextcloud · Контакты",
-    "title": "Артём Белов"
+    "stamp": "nextcloud · Архив",
+    "title": "Вера Лебедева"
   },
   "title": "Merge on the server",
   "top": {
-    "refresh": {
-      "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "answered": "",
-      "running": false
-    },
-    "search": {
-      "action": "/app/search",
-      "history": [],
-      "jump": [],
-      "query": "",
-      "whole": null,
-      "name": "q"
-    },
-    "signed": {
-      "instance": "carrel.example",
-      "login": "mix",
-      "local": true
-    },
-    "unlocked": null,
-    "user": [
-      {
-        "enabled": true,
-        "href": "/app/settings/account",
-        "icon": "i-gear",
-        "id": "user.settings",
-        "label": "Settings",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/admin/",
-        "icon": "i-adm",
-        "id": "user.admin",
-        "label": "Administration",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/logout",
-        "id": "user.logout",
-        "label": "Sign out",
-        "method": "POST",
-        "separator": true,
-        "csrf": "csrf"
-      }
-    ],
+    "lock": null,
     "new": {
       "arrow": [
         {
@@ -278,14 +265,73 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account",
-    "lock": null
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
   },
   "warning": {
     "actions": [],
-    "body": "Команда is read-only: its record could be neither rewritten nor deleted.",
-    "details": null,
+    "body": "The kept record is rewritten with the values you chose, and only once the server has kept it are the others deleted. This cannot be undone from here.",
+    "details": {
+      "lines": [
+        "Kept and rewritten: Вера Лебедева · nextcloud · Архив",
+        "Deleted afterwards: Лебедева Вера · nextcloud · Контакты",
+        "The kept record gains EMAIL;TYPE=WORK: v.lebedeva@example.org (from nextcloud · Контакты)",
+        "The kept record gains ORG: Библиотека №4 (from nextcloud · Контакты)",
+        "The kept record gains PHOTO (from nextcloud · Контакты)"
+      ],
+      "summary": "What changes"
+    },
     "role": "alert",
-    "title": "Nothing can be merged now"
+    "title": "One record is rewritten and 1 other deleted."
   }
 }

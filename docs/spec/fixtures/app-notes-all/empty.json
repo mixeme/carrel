@@ -119,12 +119,6 @@
         },
         {
           "fixed": false,
-          "id": "tags",
-          "label": "Tags",
-          "on": true
-        },
-        {
-          "fixed": false,
           "id": "date",
           "label": "Date",
           "on": true
@@ -134,6 +128,12 @@
           "id": "source",
           "label": "Source",
           "on": true
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": false
         },
         {
           "fixed": false,

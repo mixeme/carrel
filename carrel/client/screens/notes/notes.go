@@ -55,7 +55,7 @@ var faces = bind.TextFaces{Lead: w.ProseRead, Tick: w.TickNudge, Code: w.MonoChi
 // in the combined view only —, and the cell of each column a person may
 // choose (s-notes-24).
 var (
-	excerptColumns = []string{"title", "excerpt", "tags", "date", "source"}
+	excerptColumns = []string{"title", "excerpt", "date", "source"}
 	cells          = map[string]w.Column{
 		"title": w.ColumnName, "excerpt": w.ColumnExcerpt, "tags": w.ColumnTags, "date": w.ColumnDate,
 		"source": w.ColumnSource, "changed": w.ColumnChanged,
@@ -265,9 +265,6 @@ func row(r view.NoteRow, single bool) w.ExcerptRow {
 	if len(r.Badges) > 0 {
 		b := bind.Badge(r.Badges[0])
 		e.TitleBadge = &b
-	}
-	for _, t := range bind.Tags(r.Tags) {
-		e.Tags = append(e.Tags, t)
 	}
 	if single {
 		e.Source, e.Single = "", true

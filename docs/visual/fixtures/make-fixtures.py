@@ -61,11 +61,11 @@ def write(relpath, lines):
 # ─────────────────────────────────────────────────────────────────────────
 
 def vcard(uid, family, given, rev, tels=(), emails=(), org=None, title=None,
-          bday=None, cats=(), note=None, extra=()):
+          bday=None, cats=(), note=None, extra=(), fn=None):
     L = [u'BEGIN:VCARD', u'VERSION:3.0']
     L.append(u'UID:%s' % uid)
     L.append(u'N:%s;%s;;;' % (esc(family), esc(given)))
-    L.append(u'FN:%s %s' % (esc(given), esc(family)))
+    L.append(u'FN:%s' % esc(fn or u'%s %s' % (given, family)))
     if org:
         L.append(u'ORG:%s' % esc(org))
     if title:
@@ -133,8 +133,21 @@ lebedeva = vcard(
     tels=[(u'CELL', u'+7 905 331-09-42')],
     emails=[(u'HOME', u'vera@example.net')])
 
+# Та же Вера Лебедева, заведённая второй раз — фамилией вперёд и с рабочим
+# адресом: в списке она своей строкой в рубрике «Л», в «Дубликатах» —
+# кандидат к карточке из «Архива» по тому же телефону (s-contacts-1,
+# s-dup-1; записка Typecase 44, решение владельца 10.10.2026: список и
+# дубликаты рисуют одних людей).
+lebedeva_work = vcard(
+    uid=u'b52e-7d08-c6f1', family=u'Лебедева', given=u'Вера',
+    fn=u'Лебедева Вера',
+    rev=u'20260722T141000Z', org=u'Библиотека №4',
+    tels=[(u'CELL', u'+7 905 331-09-42')],
+    emails=[(u'WORK', u'v.lebedeva@example.org')],
+    extra=[u'PHOTO;VALUE=uri:https://example.org/avatars/lebedeva.jpg'])
+
 write(u'nextcloud-home/kontakty.vcf',
-      kovaleva + smirnov + goncharov + belov_home)
+      kovaleva + smirnov + goncharov + belov_home + lebedeva_work)
 write(u'nextcloud-home/arhiv.vcf', lebedeva)
 write(u'radicale-vps/komanda.vcf', belov_team)
 

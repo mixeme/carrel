@@ -70,10 +70,11 @@ func Screen(p *view.ContactsListPage) w.Shell {
 		main = append(main, *r)
 	}
 	compact := bind.Checked(p.Bar.Compact)
+	single := bind.Single(p.Rail)
 	for _, g := range p.Groups {
 		rows := make([]w.ListRow, 0, len(g.Rows))
 		for _, r := range g.Rows {
-			rows = append(rows, row(r))
+			rows = append(rows, row(r, single))
 		}
 		main = append(main,
 			w.ListGroup{Title: w.Rubric{Text: string(g.Rubric), Form: w.RubricInline}, Count: &w.Num{Value: g.Count}},
@@ -224,8 +225,9 @@ func bar(p *view.ContactsListPage) w.Bar {
 	return w.Bar{Items: items, Right: &w.BarRight{Items: right, Secondary: true}}
 }
 
-// row is a card in the list.
-func row(r view.ContactRow) w.FaceRow {
+// row is a card in the list; in one book (single) it has no source column —
+// the book is named in the head (states-4).
+func row(r view.ContactRow, single bool) w.FaceRow {
 	f := w.FaceRow{
 		Mark:     w.Mark{Colour: string(r.Colour)},
 		Avatar:   bind.Avatar(r.Avatar),
@@ -241,6 +243,9 @@ func row(r view.ContactRow) w.FaceRow {
 	if len(r.Badges) > 0 {
 		b := bind.Badge(r.Badges[0])
 		f.TitleBadge = &b
+	}
+	if single {
+		f.Source, f.Single = "", true
 	}
 	return f
 }

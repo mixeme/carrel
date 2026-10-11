@@ -186,7 +186,7 @@
         }
       ]
     },
-    "loaded": 2,
+    "loaded": 1,
     "range": null,
     "segments": [
       {
@@ -207,7 +207,7 @@
     ],
     "selected": 0,
     "show": null,
-    "total": 2
+    "total": 1
   },
   "details": null,
   "empty": null,
@@ -276,77 +276,12 @@
         }
       ],
       "rubric": "А"
-    },
-    {
-      "count": 1,
-      "rows": [
-        {
-          "avatar": {
-            "colour": "#6b4e7a",
-            "href": "",
-            "initials": "ИФ"
-          },
-          "badges": [],
-          "birthday": "",
-          "changed": "10 Aug",
-          "colour": "",
-          "email": "",
-          "href": "/app/contacts/a-rad-vps/komanda/1e77-40c2-fa19",
-          "menu": [
-            {
-              "enabled": true,
-              "href": "/app/contacts/a-rad-vps/komanda/1e77-40c2-fa19",
-              "icon": "i-con",
-              "id": "record.open",
-              "label": "Open",
-              "method": "GET"
-            },
-            {
-              "enabled": true,
-              "href": "/app/contacts/a-rad-vps/komanda/1e77-40c2-fa19/move?copy=1",
-              "icon": "i-dup",
-              "id": "record.copy",
-              "label": "Copy",
-              "method": "GET",
-              "target": "sheet"
-            },
-            {
-              "enabled": true,
-              "href": "/app/contacts/a-rad-vps/komanda/export?uid=1e77-40c2-fa19",
-              "icon": "i-down",
-              "id": "record.export",
-              "label": "Export .vcf",
-              "method": "GET"
-            },
-            {
-              "enabled": true,
-              "href": "/app/publish?a=a-rad-vps\u0026c=komanda\u0026k=contacts\u0026uid=1e77-40c2-fa19",
-              "icon": "i-link",
-              "id": "publish",
-              "label": "Publish a link",
-              "method": "GET",
-              "target": "sheet"
-            }
-          ],
-          "name": "Ирина Фомина",
-          "on": false,
-          "org": "",
-          "phone": "+7 900 000-00-00",
-          "sources": [],
-          "stamp": "",
-          "state": "ok",
-          "tags": [],
-          "target": "details",
-          "uid": "1e77-40c2-fa19"
-        }
-      ],
-      "rubric": "И"
     }
   ],
   "notices": [],
   "poll": null,
   "print": {
-    "range": "2 cards",
+    "range": "1 card",
     "taken": "10 August 2026, 17:06",
     "title": "Команда"
   },
@@ -435,7 +370,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 1,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",
@@ -542,7 +477,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": 4,
+            "count": 5,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-nc-home/kontakty",
@@ -618,7 +553,7 @@
         "rows": [
           {
             "colour": "#6b4e7a",
-            "count": 2,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-rad-vps/komanda",
@@ -811,7 +746,7 @@
     }
   },
   "readOnly": true,
-  "subtitle": "radicale · vps · 2 cards · the server granted no write access",
+  "subtitle": "radicale · vps · 1 card · the server granted no write access",
   "title": "Команда",
   "top": {
     "lock": null,

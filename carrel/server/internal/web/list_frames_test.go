@@ -52,13 +52,14 @@ func TestContactsListIsTheFrames(t *testing.T) {
 	// The table counts what a person sees, the rail what lies in a
 	// collection (the owner's decision of 09.10.2026): Артём Белов, linked
 	// in two books, is one row and one card of the line under the title and
-	// of the poll's bar — the frame's «5 cards» —, and a card of each book
-	// in the rail.
-	if string(page.Subtitle) != frameText(head[1]) || !strings.HasSuffix(runsText(page.Poll.Summary), " · 5 cards") {
+	// of the poll's bar — the frame's «6 cards» —, and a card of each book
+	// in the rail: seven (Typecase's note 44 — the set has «Лебедева Вера»,
+	// the second card of Вера Лебедева, in «Контакты»).
+	if string(page.Subtitle) != frameText(head[1]) || !strings.HasSuffix(runsText(page.Poll.Summary), " · 6 cards") {
 		t.Errorf("subtitle = %q, poll %q; the frame %q", page.Subtitle, runsText(page.Poll.Summary), frameText(head[1]))
 	}
-	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 6 {
-		t.Errorf("the rail's combined row = %+v, want the 6 cards of the ticked books", all.Count)
+	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 7 {
+		t.Errorf("the rail's combined row = %v, want the 7 cards of the ticked books", all.Count)
 	}
 	var want, got []string
 	for _, b := range frameHeadButton.FindAllStringSubmatch(head[2], -1) {
@@ -236,7 +237,7 @@ func TestOneBookSaysWhatItIs(t *testing.T) {
 	}
 	_, tail, _ := strings.Cut(frameText(sub[1]), "vps · ")
 	count, reason, ok := strings.Cut(tail, " · ")
-	if !ok || !regexp.MustCompile(`^\d+ cards$`).MatchString(count) {
+	if !ok || !regexp.MustCompile(`^\d+ cards?$`).MatchString(count) {
 		t.Fatalf("states-4 writes %q under its title, want the count before the reason: read the frame again", tail)
 	}
 	if !page.ReadOnly || !strings.HasSuffix(string(page.Subtitle), " · 1 card · "+reason) {

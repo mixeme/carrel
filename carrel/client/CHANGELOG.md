@@ -4,6 +4,29 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.10 — 2026-10-11
+
+Typecase `43ca489` (Typecase's note 44: tasks 144 and 145), server
+`v0.2.187`. The library took the tags out of the rows of tasks and notes
+(`DueRow.Tags`, `ExcerptRow.Tags` are gone): the client did not build
+until it stopped passing them.
+
+### Changed
+
+- **Rows of tasks and notes carry no tags.** They are in the panel of the
+  record and in the rail; the column «Tags», when a person turns it on,
+  shows the first tag and counts the rest (`ColumnCell.Tags`). The rows the
+  screens draw as the frames' own are now Title, Due, Complete, Source and
+  Title, Excerpt, Date, Source.
+- **The list of one address book has no source column** (`states-4`): the
+  book is named in the head.
+- The lists of notes match their frames — the combined one, one notebook
+  and a notebook that did not answer (`s-notes-1`, `s-notes-31`,
+  `states-29`) —, and so do the contacts with a book that did not answer
+  (`states-9`) and a note read (`s-notes-2`): U-5.5 rows 37 and 38 are gone,
+  19 waits for `states-8` alone (the counts of the sections while a poll
+  runs — the server's), 40 for the edit of a note (`s-notes-20`).
+
 ## v0.4.9 — 2026-10-10
 
 Typecase `7b8f469` (Typecase's note 43: tasks 146 and 147), server

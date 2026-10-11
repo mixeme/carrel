@@ -317,16 +317,18 @@ func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.
 	case view.DecisionLinked:
 		out.Actions = []view.Action{s.decideAction("duplicates.unlink", "Unlink", g.id, "unlink"), merge}
 		if len(cs) > 0 {
-			out.Actions = append([]view.Action{s.decideAction("duplicates.choose", "Keep these values", g.id, "choose")}, out.Actions...)
+			choose := s.decideAction("duplicates.choose", "Keep these values", g.id, "choose")
+			choose.Primary = true // s-dup-1
+			out.Actions = append([]view.Action{choose}, out.Actions...)
 		}
 	case view.DecisionIgnored:
 		out.Actions = []view.Action{s.decideAction("duplicates.again", "Offer again", g.id, "again")}
 	default:
-		out.Actions = []view.Action{
-			s.decideAction("duplicates.link", "Link them", g.id, "link"),
-			s.decideAction("duplicates.ignore", "Not duplicates", g.id, "ignore"),
-			merge,
-		}
+		// What a group still to decide is first offered is the frame's main
+		// button (s-dup-1).
+		link := s.decideAction("duplicates.link", "Link them", g.id, "link")
+		link.Primary = true
+		out.Actions = []view.Action{link, s.decideAction("duplicates.ignore", "Not duplicates", g.id, "ignore"), merge}
 	}
 	// With something to choose, the card is a form (U-8, s-dup-1): its
 	// radios stand in it, and every decision is a button of it sent to its

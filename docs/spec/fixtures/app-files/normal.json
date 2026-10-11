@@ -6,9 +6,9 @@
       "label": "Files",
       "purpose": "",
       "readOnly": false,
+      "server": "nextcloud",
       "stamp": "nextcloud · Files",
-      "state": "ok",
-      "server": "nextcloud"
+      "state": "ok"
     },
     {
       "colour": "#a05a2c",
@@ -16,13 +16,28 @@
       "label": "Documents",
       "purpose": "attachments",
       "readOnly": false,
+      "server": "sftpgo · vps",
       "stamp": "sftpgo · vps · Documents",
-      "state": "ok",
-      "server": "sftpgo · vps"
+      "state": "ok"
     }
   ],
   "details": null,
   "empty": null,
+  "note": [
+    {
+      "text": "This is where the section starts: the storages you ticked in the rail, as top-level folders. Open one and its own tree opens — contents of different servers are never mixed in one folder, because a file has one path and belongs to its own storage."
+    },
+    {
+      "text": " "
+    },
+    {
+      "mark": "strong",
+      "text": "Public"
+    },
+    {
+      "text": " is not ticked, so it is not here."
+    }
+  ],
   "notices": [],
   "print": {
     "range": "",
@@ -59,7 +74,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/connections?kind=folder&op=feed",
+        "href": "/app/settings/connections?kind=folder\u0026op=feed",
         "icon": "i-link",
         "id": "feed.subscribe",
         "label": "Subscribe to a feed",
@@ -68,7 +83,7 @@
     ],
     "nav": [
       {
-        "count": 6,
+        "count": 7,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -114,7 +129,7 @@
         "on": true
       },
       {
-        "count": 1,
+        "count": 2,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",
@@ -138,11 +153,11 @@
             "href": "/app/files",
             "label": "Selected collections",
             "menu": [],
+            "meta": "2 of 3",
             "on": true,
             "readOnly": false,
             "state": "ok",
-            "tick": "part",
-            "meta": "2 of 3"
+            "tick": "part"
           }
         ],
         "state": "ok"
@@ -266,6 +281,7 @@
       "target": "rail"
     }
   },
+  "subtitle": "2 of 3 storages on 2 servers",
   "title": "Files",
   "top": {
     "lock": null,
@@ -341,11 +357,11 @@
     "refresh": {
       "action": {
         "enabled": true,
+        "href": "/app/files",
+        "icon": "i-refresh",
         "id": "files.refresh",
         "label": "Refresh",
-        "method": "GET",
-        "href": "/app/files",
-        "icon": "i-refresh"
+        "method": "GET"
       },
       "answered": "2 min ago",
       "running": false
@@ -392,21 +408,5 @@
       }
     ],
     "userHref": "/app/settings/account"
-  },
-  "note": [
-    {
-      "text": "This is where the section starts: the storages you ticked in the rail, as top-level folders. Open one and its own tree opens — contents of different servers are never mixed in one folder, because a file has one path and belongs to its own storage."
-    },
-    {
-      "text": " "
-    },
-    {
-      "mark": "strong",
-      "text": "Public"
-    },
-    {
-      "text": " is not ticked, so it is not here."
-    }
-  ],
-  "subtitle": "2 of 3 storages on 2 servers"
+  }
 }

@@ -59,7 +59,7 @@ const (
 // the combined view only —, and the cell of each column a person may choose
 // (s-tasks-12, -13).
 var (
-	dueColumns = []string{"title", "tags", "due", "complete", "source"}
+	dueColumns = []string{"title", "due", "complete", "source"}
 	cells      = map[string]w.Column{
 		"title": w.ColumnName, "tags": w.ColumnTags, "due": w.ColumnDue, "complete": w.ColumnComplete,
 		"source": w.ColumnSource, "priority": w.ColumnPriority, "status": w.ColumnStatus, "changed": w.ColumnChanged,
@@ -284,9 +284,6 @@ func row(r view.TaskRow, single bool) w.DueRow {
 	if len(r.Badges) > 0 {
 		b := bind.Badge(r.Badges[0])
 		d.TitleBadge = &b
-	}
-	for _, t := range bind.Tags(r.Tags) {
-		d.Tags = append(d.Tags, t)
 	}
 	if single {
 		d.Source, d.Single = "", true

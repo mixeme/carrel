@@ -105,8 +105,10 @@ func TestAttendeesEditIsTheFrames(t *testing.T) {
 		form.Set("attendee.add", typed)
 		return app.h.do(postForm(rec+"/edit", app.sess, form)).Result()
 	}
-	// Артём unticked, Вера added by her name (Архив).
-	if resp := save([]string{"mailto:mix@example.org", "mailto:a.kovaleva@example.org", "mailto:v@example.org"}, "Вера"); resp.StatusCode != 303 {
+	// Артём unticked, Вера added by her name as «Архив» writes it: since
+	// Typecase's note 44 the set holds her twice — «Лебедева Вера» of
+	// «Контакты» is the other card —, and «Вера» alone is two people.
+	if resp := save([]string{"mailto:mix@example.org", "mailto:a.kovaleva@example.org", "mailto:v@example.org"}, "Вера Лебедева"); resp.StatusCode != 303 {
 		t.Fatalf("save: %d", resp.StatusCode)
 	}
 	got := stored()
@@ -195,8 +197,11 @@ func TestAttendeeSuggestionsAreTheFrames(t *testing.T) {
 	}
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	got := suggest("ве")
-	if len(got.Items) != 1 || got.Note != "" {
-		t.Fatalf("«ве» = %+v, want Вера alone", got)
+	// The set holds Вера twice since Typecase's note 44 — «Вера Лебедева» of
+	// «Архив», the row s-agenda-12 draws, and «Лебедева Вера» of «Контакты»,
+	// which the frame does not draw yet (to-typecase.md, 150).
+	if len(got.Items) != 2 || got.Note != "" || got.Items[1].Email != "v.lebedeva@example.org" || got.Items[1].Book != "Контакты" {
+		t.Fatalf("«ве» = %+v, want Вера of «Архив» and her other card of «Контакты»", got)
 	}
 	vera := got.Items[0]
 	if runsText(vera.Name) != "Вера Лебедева" || len(vera.Name) != 2 || vera.Name[0].Text != "Ве" || vera.Name[0].Mark != view.RunStrong ||

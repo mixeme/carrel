@@ -367,7 +367,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e6",
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e7",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete event",
@@ -452,7 +452,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27/delete?etag=e7",
+              "href": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27/delete?etag=e8",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete event",
@@ -521,7 +521,7 @@
     ],
     "nav": [
       {
-        "count": 6,
+        "count": 7,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -567,7 +567,7 @@
         "method": "GET"
       },
       {
-        "count": 1,
+        "count": 2,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",

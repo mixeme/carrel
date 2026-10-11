@@ -26,7 +26,9 @@ type listColumn struct {
 
 // listColumns are the columns of each section that has the choice, in the
 // order of its menu frame: the order they stand in by default. The first is
-// the row's name, always shown and always first. contacts: components-21,
+// the row's name, always shown and always first. No section shows tags in
+// its rows until asked to (Typecase Р-53, note 44): they are in the panel of
+// the record and in the rail. contacts: components-21,
 // -42; tasks: s-tasks-12; notes: s-notes-23; files: s-files-20; users:
 // s-admin-21; audit: s-admin-23; timeline: s-contacts-25.
 var listColumns = map[string][]listColumn{
@@ -35,12 +37,12 @@ var listColumns = map[string][]listColumn{
 		{"birthday", "Birthday", false}, {"tags", "Tags", false}, {"changed", "Changed", false}, {"source", "Source", true},
 	},
 	"tasks": {
-		{"title", "Title", true}, {"tags", "Tags", true}, {"due", "Due", true}, {"complete", "Complete", true},
-		{"source", "Source", true}, {"priority", "Priority", false}, {"status", "Status", false}, {"changed", "Changed", false},
+		{"title", "Title", true}, {"due", "Due", true}, {"complete", "Complete", true}, {"source", "Source", true},
+		{"tags", "Tags", false}, {"priority", "Priority", false}, {"status", "Status", false}, {"changed", "Changed", false},
 	},
 	"notes": {
-		{"title", "Title", true}, {"excerpt", "Excerpt", true}, {"tags", "Tags", true}, {"date", "Date", true},
-		{"source", "Source", true}, {"changed", "Changed", false},
+		{"title", "Title", true}, {"excerpt", "Excerpt", true}, {"date", "Date", true}, {"source", "Source", true},
+		{"tags", "Tags", false}, {"changed", "Changed", false},
 	},
 	"files": {
 		{"name", "Name", true}, {"size", "Size", true}, {"type", "Type", true}, {"changed", "Changed", true},

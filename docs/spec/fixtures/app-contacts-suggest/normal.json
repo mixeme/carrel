@@ -15,6 +15,25 @@
         }
       ],
       "value": "mailto:vera@example.net"
+    },
+    {
+      "add": false,
+      "book": "Контакты",
+      "colour": "#4a6b52",
+      "email": "v.lebedeva@example.org",
+      "name": [
+        {
+          "text": "Лебедева "
+        },
+        {
+          "mark": "strong",
+          "text": "Ве"
+        },
+        {
+          "text": "ра"
+        }
+      ],
+      "value": "mailto:v.lebedeva@example.org"
     }
   ],
   "note": ""

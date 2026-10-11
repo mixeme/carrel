@@ -17,6 +17,30 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.187 — 2026-10-11
+
+Typecase `43ca489` (Typecase's note 44: tasks 144 and 145), client `v0.4.10`.
+
+### Changed — behaviour
+
+- **No list shows tags in its rows until asked to.** The columns a list of
+  tasks stands with are Title, Due, Complete, Source; a list of notes —
+  Title, Excerpt, Date, Source. «Tags» is in the menu, off, after them
+  (`s-tasks-12`, `s-notes-23`). A choice a person made before is kept.
+- On the duplicates screen «Link them» of a group still to decide and «Keep
+  these values» of a linked one are the main buttons (`Action.Primary`,
+  `s-dup-1`).
+
+### For developers
+
+- The set of the mockup has a sixth card — «Лебедева Вера» in «Контакты»,
+  the same person as Вера Лебедева of «Архив» (`make-fixtures.py`): six rows
+  and seven cards in the lists, and a pair to merge on the duplicates
+  screen. Fixtures are re-shot; `app-duplicates-merge` is that pair.
+- Not done yet, open in `docs/plan/server.md`: the counts of the sections
+  while a poll runs and its words («Polling · 2 of 3 answered»), a merge
+  that chooses the collection, the tag a list is filtered by first.
+
 ## v0.2.186 — 2026-10-11
 
 A series given another time takes its exceptions with it, and a server that

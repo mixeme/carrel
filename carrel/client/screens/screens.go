@@ -159,8 +159,7 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.ContactsListPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return contacts.Forms(model.(*view.ContactsListPage)) },
 		Waits: []Wait{
-			{Row: 19, Fixture: "app-contacts/partial"},     // ждёт библиотеку: U-5.5 #19
-			{Row: 19, Fixture: "app-contacts/unavailable"}, // ждёт библиотеку: U-5.5 #19
+			{Row: 19, Fixture: "app-contacts/partial"}, // ждёт библиотеку: U-5.5 #19
 		},
 	},
 	{
@@ -260,11 +259,6 @@ var All = []Screen{
 		Draw:   func(model any) Root { return notes.Screen(model.(*view.NotesPage)) },
 		Title:  func(model any) string { return string(model.(*view.NotesPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return notes.Forms(model.(*view.NotesPage)) },
-		Waits: []Wait{
-			{Row: 37, Fixture: "app-notes-all/normal"},   // ждёт библиотеку: U-5.5 #37
-			{Row: 38, Fixture: "app-notes/normal"},       // ждёт библиотеку: U-5.5 #38
-			{Row: 38, Fixture: "app-notes/source-error"}, // ждёт библиотеку: U-5.5 #38
-		},
 	},
 	{
 		Model:  func() any { return new(view.NotePage) },
@@ -273,7 +267,6 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.NotePage).Title) },
 		Forms:  func(model any) []widget.PostForm { return note.Forms(model.(*view.NotePage)) },
 		Waits: []Wait{
-			{Row: 40, Fixture: "app-note/normal"},                                       // ждёт библиотеку: U-5.5 #40
 			{Row: 40, Fixture: "app-note-edit/normal"},                                  // ждёт библиотеку: U-5.5 #40
 			{Row: 42, Fixture: "app-note-edit/new"},                                     // ждёт библиотеку: U-5.5 #42
 			{Row: 36, Control: ".Title(Rubric).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #36

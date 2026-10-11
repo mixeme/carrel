@@ -354,7 +354,7 @@
     ],
     "nav": [
       {
-        "count": 6,
+        "count": 7,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -400,7 +400,7 @@
         "on": true
       },
       {
-        "count": 1,
+        "count": 2,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",

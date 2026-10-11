@@ -31,7 +31,7 @@
     "label": "Download .vcf first",
     "method": "GET"
   },
-  "exportNote": "4 contacts, one file, straight to you",
+  "exportNote": "5 contacts, one file, straight to you",
   "form": {
     "action": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
     "actions": [],
@@ -85,7 +85,7 @@
     },
     {
       "mark": "strong",
-      "text": "4"
+      "text": "5"
     },
     {
       "text": " contacts in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."

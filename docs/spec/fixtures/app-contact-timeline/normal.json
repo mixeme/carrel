@@ -3,29 +3,29 @@
     {
       "enabled": true,
       "href": "/app/notes/quick?related=4f2b-9c31-a0e7",
+      "icon": "i-quill",
       "id": "timeline.note",
       "label": "Write a note",
       "method": "GET",
       "primary": true,
-      "icon": "i-quill",
       "target": "sheet"
     },
     {
       "enabled": true,
       "href": "/app/calendar/quick?attendee=a.kovaleva%40example.org",
+      "icon": "i-cal",
       "id": "timeline.event",
       "label": "New event",
       "method": "GET",
-      "icon": "i-cal",
       "target": "sheet"
     },
     {
       "enabled": true,
       "href": "/app/tasks/quick?related=4f2b-9c31-a0e7",
+      "icon": "i-task",
       "id": "timeline.task",
       "label": "New task",
       "method": "GET",
-      "icon": "i-task",
       "target": "sheet"
     },
     {
@@ -39,8 +39,85 @@
   ],
   "bar": {
     "actions": [],
+    "columns": {
+      "form": {
+        "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline/columns",
+        "actions": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline/columns",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline/columns",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "icon": "i-cols",
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "date",
+          "label": "Date",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "kind",
+          "label": "Kind",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "source",
+          "label": "Source",
+          "on": true
+        }
+      ],
+      "label": "Columns"
+    },
     "compact": null,
     "filter": "",
+    "filterForm": null,
     "loaded": 1,
     "range": null,
     "segments": [
@@ -87,85 +164,8 @@
       }
     ],
     "selected": 0,
-    "total": null,
-    "columns": {
-      "form": {
-        "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline/columns",
-        "actions": [
-          {
-            "enabled": true,
-            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline/columns",
-            "id": "columns.apply",
-            "label": "Apply",
-            "method": "POST",
-            "primary": true,
-            "csrf": "csrf"
-          },
-          {
-            "enabled": true,
-            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline/columns",
-            "id": "columns.default",
-            "label": "Reset to defaults",
-            "method": "POST",
-            "csrf": "csrf"
-          }
-        ],
-        "errors": [],
-        "method": "POST",
-        "sets": [
-          {
-            "legend": "",
-            "rows": [
-              {
-                "add": null,
-                "error": "",
-                "extra": null,
-                "hint": "",
-                "kind": "hidden",
-                "label": "",
-                "name": "_csrf",
-                "options": [],
-                "readOnly": false,
-                "required": false,
-                "value": "csrf"
-              }
-            ],
-            "unfold": null
-          }
-        ]
-      },
-      "items": [
-        {
-          "aside": "always",
-          "fixed": true,
-          "id": "title",
-          "label": "Title",
-          "on": true
-        },
-        {
-          "fixed": false,
-          "id": "date",
-          "label": "Date",
-          "on": true
-        },
-        {
-          "fixed": false,
-          "id": "kind",
-          "label": "Kind",
-          "on": true
-        },
-        {
-          "fixed": false,
-          "id": "source",
-          "label": "Source",
-          "on": true
-        }
-      ],
-      "label": "Columns",
-      "icon": "i-cols"
-    },
-    "filterForm": null,
-    "show": null
+    "show": null,
+    "total": null
   },
   "card": {
     "actions": [
@@ -184,16 +184,28 @@
         "method": "GET"
       },
       {
+        "csrf": "csrf",
         "danger": true,
         "enabled": true,
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e1",
         "icon": "i-trash",
         "id": "record.delete",
         "label": "Delete contact",
-        "method": "POST",
-        "csrf": "csrf"
+        "method": "POST"
       }
     ],
+    "attach": [],
+    "attendees": [],
+    "avatar": {
+      "colour": "#8c6239",
+      "href": "",
+      "initials": "АК"
+    },
+    "body": "",
+    "books": [],
+    "close": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?card=0",
+    "date": "",
+    "deleteNote": "",
     "fields": [
       {
         "href": "tel:+79124451088",
@@ -214,17 +226,16 @@
         "value": "a.kovaleva@example.org"
       },
       {
+        "aside": "in 7 months",
         "href": "",
         "label": "Birthday",
         "mono": true,
-        "value": "1987-03-14",
-        "aside": "in 7 months"
+        "value": "1987-03-14"
       },
       {
         "href": "",
         "label": "Tags",
         "mono": false,
-        "value": "",
         "tags": [
           {
             "href": "/app/contacts/a-nc-home/kontakty?tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0",
@@ -236,7 +247,8 @@
             "label": "издательство",
             "on": false
           }
-        ]
+        ],
+        "value": ""
       },
       {
         "href": "",
@@ -245,18 +257,8 @@
         "value": "Пишет по вторникам, отвечает в тот же день."
       }
     ],
-    "source": {
-      "changed": "10 August 2026, 17:04",
-      "colour": "#4a6b52",
-      "lastRead": "2 min ago",
-      "objects": null,
-      "readOnly": false,
-      "stamp": "nextcloud · Контакты",
-      "uid": "4f2b-9c31-a0e7",
-      "compared": "",
-      "path": ""
-    },
-    "title": "Анна Ковалёва",
+    "foreign": [],
+    "foreignShow": null,
     "menu": [
       {
         "enabled": true,
@@ -286,7 +288,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=4f2b-9c31-a0e7",
+        "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts\u0026uid=4f2b-9c31-a0e7",
         "icon": "i-link",
         "id": "publish",
         "label": "Publish a link",
@@ -294,57 +296,57 @@
         "target": "sheet"
       }
     ],
-    "attach": [],
-    "attendees": [],
-    "avatar": {
-      "colour": "#8c6239",
-      "href": "",
-      "initials": "АК"
-    },
-    "body": "",
-    "deleteNote": "",
-    "foreign": [],
+    "preview": null,
     "related": [],
     "rendered": [],
+    "source": {
+      "changed": "10 August 2026, 17:04",
+      "colour": "#4a6b52",
+      "compared": "",
+      "lastRead": "2 min ago",
+      "objects": null,
+      "path": "",
+      "readOnly": false,
+      "stamp": "nextcloud · Контакты",
+      "uid": "4f2b-9c31-a0e7"
+    },
     "subtitle": "",
-    "close": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?card=0",
-    "books": [],
-    "foreignShow": null,
-    "date": "",
-    "preview": null
+    "title": "Анна Ковалёва"
   },
+  "cardClosed": false,
   "details": null,
   "groups": [
     {
+      "count": 1,
       "rows": [
         {
+          "colour": "#4a6b52",
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
           "kind": "event",
           "stamp": "nextcloud · Личный",
+          "target": "details",
           "title": "Синк-ап по релизу",
           "when": "10 Aug",
-          "why": "attendee · accepted",
-          "colour": "#4a6b52",
-          "target": "details"
+          "why": "attendee · accepted"
         }
       ],
-      "rubric": "August 2026",
-      "count": 1
+      "rubric": "August 2026"
     }
   ],
+  "linked": null,
   "name": "Анна Ковалёва",
   "note": "Nothing was looked for before 10 August 2025. Widen the range if you need it.",
   "notices": [],
   "poll": {
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": false,
         "href": "/app/search/progress/t-task/cancel",
         "id": "poll.stop",
         "label": "Stop",
         "method": "POST",
         "reason": "The timeline has finished.",
-        "csrf": "csrf",
         "target": "poll"
       },
       {
@@ -356,7 +358,13 @@
       }
     ],
     "answeredAt": "10 August, 17:06",
+    "aside": "just now",
+    "every": 700,
+    "failed": "1 failed",
+    "note": "",
     "percent": 100,
+    "poll": "/app/search/progress/t-task/poll",
+    "retryAll": null,
     "running": false,
     "sources": [
       {
@@ -450,22 +458,22 @@
         "state": "empty"
       },
       {
+        "answer": "REPORT /alice/calendars/obshchij/ → 401 Unauthorized: the saved password was refused. Open Connections to update it.",
         "colour": "#9a9280",
         "count": null,
         "fromCache": false,
         "message": "The server answered 401 Unauthorized.",
         "retry": {
+          "csrf": "csrf",
           "enabled": true,
           "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
           "id": "source.retry",
           "label": "Retry",
           "method": "POST",
-          "csrf": "csrf",
           "target": "poll"
         },
         "stamp": "baikal · Общий",
-        "state": "error",
-        "answer": "REPORT /alice/calendars/obshchij/ → 401 Unauthorized: the saved password was refused. Open Connections to update it."
+        "state": "error"
       },
       {
         "colour": "#8c6239",
@@ -495,6 +503,7 @@
         "state": "empty"
       }
     ],
+    "stream": "/app/search/progress/t-task",
     "summary": [
       {
         "text": "Polled 13 of 14 sources · matched by "
@@ -507,14 +516,7 @@
         "text": " and the name"
       }
     ],
-    "taskID": "t-task",
-    "aside": "just now",
-    "note": "",
-    "every": 700,
-    "poll": "/app/search/progress/t-task/poll",
-    "stream": "/app/search/progress/t-task",
-    "failed": "1 failed",
-    "retryAll": null
+    "taskID": "t-task"
   },
   "print": {
     "range": "",
@@ -523,69 +525,70 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
       "label": "Carrel",
-      "method": "GET",
-      "build": "0.0.1 · 786949a"
+      "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [],
     "nav": [
       {
-        "count": 6,
+        "count": 7,
         "enabled": true,
         "href": "/app/contacts",
+        "icon": "i-con",
         "id": "nav.contacts",
         "label": "Contacts",
         "method": "GET",
-        "on": true,
-        "icon": "i-con"
+        "on": true
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/calendar",
+        "icon": "i-cal",
         "id": "nav.calendar",
         "label": "Calendar",
-        "method": "GET",
-        "icon": "i-cal"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/tasks",
+        "icon": "i-task",
         "id": "nav.tasks",
         "label": "Tasks",
-        "method": "GET",
-        "icon": "i-task"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/notes",
+        "icon": "i-note",
         "id": "nav.notes",
         "label": "Notes",
-        "method": "GET",
-        "icon": "i-note"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/files",
+        "icon": "i-file",
         "id": "nav.files",
         "label": "Files",
-        "method": "GET",
-        "icon": "i-file"
+        "method": "GET"
       },
       {
-        "count": 0,
+        "count": 1,
         "enabled": true,
         "href": "/app/duplicates",
+        "icon": "i-dup",
         "id": "nav.duplicates",
         "label": "Duplicates",
-        "method": "GET",
-        "icon": "i-dup"
+        "method": "GET"
       },
       {
         "count": null,
@@ -597,6 +600,7 @@
         "method": "GET"
       }
     ],
+    "neighbours": [],
     "note": "",
     "sections": [
       {
@@ -607,127 +611,125 @@
             "colour": "",
             "count": 1,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar",
             "label": "Combined calendar",
             "menu": [],
+            "on": true,
             "readOnly": false,
             "state": "ok",
-            "tick": "part",
-            "feed": false,
-            "on": true
+            "tick": "part"
           },
           {
             "colour": "#a05a2c",
             "count": null,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
             "label": "Дни рождения",
             "menu": [],
+            "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "off",
-            "feed": false,
-            "on": false
+            "tick": "off"
           },
           {
             "colour": "#4a6b52",
             "count": 1,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar/a-nc-home/lichnyj",
             "label": "Личный",
             "menu": [],
+            "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "on",
-            "feed": false,
-            "on": false
+            "tick": "on"
           },
           {
             "colour": "#3f6e8c",
             "count": 0,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar/a-nc-home/rabota",
             "label": "Работа",
             "menu": [],
+            "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "on",
-            "feed": false,
-            "on": false
+            "tick": "on"
           },
           {
             "colour": "#8c6239",
             "count": 0,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar/a-rad-vps/dezhurstva",
             "label": "Дежурства",
             "menu": [],
+            "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "on",
-            "feed": false,
-            "on": false
+            "tick": "on"
           },
           {
             "colour": "#6b4e7a",
             "count": 0,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar/a-rad-vps/proekty",
             "label": "Проекты",
             "menu": [],
+            "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "on",
-            "feed": false,
-            "on": false
+            "tick": "on"
           },
           {
             "colour": "#9a9280",
             "count": null,
             "detail": "401 Unauthorized — the saved password was refused. Open Connections to update it.",
+            "feed": false,
             "href": "/app/calendar/a-baikal/obshchij",
             "label": "Общий",
             "menu": [],
+            "on": false,
             "readOnly": false,
             "state": "unavailable",
-            "tick": "on",
-            "feed": false,
-            "on": false
+            "tick": "on"
           },
           {
             "colour": "#8c6239",
             "count": 0,
             "detail": "",
+            "feed": true,
             "href": "/app/calendar/f-ru-holidays/feed",
             "label": "Праздники РФ",
             "menu": [],
+            "on": false,
             "readOnly": true,
             "state": "read-only",
-            "tick": "on",
-            "feed": true,
-            "on": false
+            "tick": "on"
           },
           {
             "colour": "#6b4e7a",
             "count": null,
             "detail": "",
+            "feed": true,
             "href": "/app/calendar/f-league/feed",
             "label": "Расписание лиги",
             "menu": [],
+            "on": false,
             "readOnly": true,
             "state": "read-only",
-            "tick": "off",
-            "feed": true,
-            "on": false
+            "tick": "off"
           }
         ],
         "state": "ok"
       }
     ],
-    "tags": [],
-    "neighbours": [],
     "shortcuts": [],
-    "davloom": "davloom · running · 0 devices",
+    "tags": [],
     "ticks": {
       "action": "/app/sources/calendar",
       "actions": [],
@@ -795,12 +797,12 @@
               "hint": "",
               "kind": "date",
               "label": "From",
+              "mono": true,
               "name": "from",
               "options": [],
               "readOnly": false,
               "required": false,
-              "value": "2025-08-10",
-              "mono": true
+              "value": "2025-08-10"
             },
             {
               "add": null,
@@ -809,12 +811,12 @@
               "hint": "",
               "kind": "date",
               "label": "To",
+              "mono": true,
               "name": "to",
               "options": [],
               "readOnly": false,
               "required": false,
-              "value": "2026-11-10",
-              "mono": true
+              "value": "2026-11-10"
             }
           ],
           "unfold": null
@@ -825,59 +827,10 @@
     "presets": [],
     "to": "10 November 2026"
   },
+  "subtitle": "Издательство «Слово» · Выпускающий редактор",
   "title": "Анна Ковалёва · Timeline",
   "top": {
-    "refresh": {
-      "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "answered": "",
-      "running": false
-    },
-    "search": {
-      "action": "/app/search",
-      "history": [],
-      "jump": [],
-      "query": "",
-      "whole": null,
-      "name": "q"
-    },
-    "signed": {
-      "instance": "carrel.example",
-      "login": "mix",
-      "local": true
-    },
-    "unlocked": null,
-    "user": [
-      {
-        "enabled": true,
-        "href": "/app/settings/account",
-        "icon": "i-gear",
-        "id": "user.settings",
-        "label": "Settings",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/admin/",
-        "icon": "i-adm",
-        "id": "user.admin",
-        "label": "Administration",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/logout",
-        "id": "user.logout",
-        "label": "Sign out",
-        "method": "POST",
-        "separator": true,
-        "csrf": "csrf"
-      }
-    ],
+    "lock": null,
     "new": {
       "arrow": [
         {
@@ -947,11 +900,58 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account",
-    "lock": null
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
   },
-  "uid": "4f2b-9c31-a0e7",
-  "linked": null,
-  "subtitle": "Издательство «Слово» · Выпускающий редактор",
-  "cardClosed": false
+  "uid": "4f2b-9c31-a0e7"
 }

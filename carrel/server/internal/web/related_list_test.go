@@ -170,20 +170,25 @@ func TestRelatedToIsTheFramesList(t *testing.T) {
 	}
 }
 
-// from-typecase note 19, s-tasks-11: Related to holds one relation — the
-// first RELATED-TO; the others stay as they are. A record not among the
+// from-typecase notes 19 and 44, s-tasks-11: Related to holds every
+// relation of the record — the first field of the frame draws three pills,
+// each with its own cross (task 145). A record not among the
 // loaded ones is a pill with its UID and the frame's line under it; a card
 // (a note a timeline wrote for a person) is its name and «contact». «By
 // UID…» opens a line for the UID in place of the field: its sample and its
 // line are the frame's.
 func TestRelatedToOutsideTheLoadedIsTheFrame(t *testing.T) {
 	frame := mockupFrame(t, "s-tasks-11")
-	type drawn struct{ pill, hint, placeholder string }
+	type drawn struct {
+		pill, hint, placeholder string
+		pills                   int
+	}
 	var fields []drawn
 	for _, m := range regexp.MustCompile(`(?s)<label>Related to</label>(.*?)</div>`).FindAllStringSubmatch(frame, -1) {
 		var d drawn
-		if p := regexp.MustCompile(`(?s)<span class="tc-tag tc-tag--pill">(.*?)</span>`).FindStringSubmatch(m[1]); p != nil {
-			d.pill = frameText(p[1])
+		pills := regexp.MustCompile(`(?s)<span class="tc-tag tc-tag--pill">(.*?)</span>`).FindAllStringSubmatch(m[1], -1)
+		if d.pills = len(pills); d.pills > 0 {
+			d.pill = frameText(pills[0][1])
 		}
 		if h := frameAnyHint.FindStringSubmatch(m[1]); h != nil {
 			d.hint = frameText(h[1])
@@ -193,6 +198,12 @@ func TestRelatedToOutsideTheLoadedIsTheFrame(t *testing.T) {
 		}
 		fields = append(fields, d)
 	}
+	// The first field is the one with several relations; the three after it
+	// are the ones this check reads.
+	if len(fields) != 4 || fields[0].pills < 2 {
+		t.Fatalf("s-tasks-11 = %+v, want a field of several relations first: read the frame again", fields)
+	}
+	fields = fields[1:]
 	if len(fields) != 3 || fields[0].hint == "" || !strings.HasSuffix(fields[1].pill, " · contact") || fields[1].hint != "" ||
 		fields[2].pill != "" || fields[2].placeholder == "" || fields[2].hint == "" {
 		t.Fatalf("s-tasks-11 = %+v: read the frame again", fields)

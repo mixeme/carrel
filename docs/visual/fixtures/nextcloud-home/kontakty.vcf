@@ -44,3 +44,14 @@ TEL;TYPE=CELL:+7 903 118-22-04
 EMAIL;TYPE=WORK:a.belov@example.org
 REV:20260612T101500Z
 END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+UID:b52e-7d08-c6f1
+N:Лебедева;Вера;;;
+FN:Лебедева Вера
+ORG:Библиотека №4
+TEL;TYPE=CELL:+7 905 331-09-42
+EMAIL;TYPE=WORK:v.lebedeva@example.org
+PHOTO;VALUE=uri:https://example.org/avatars/lebedeva.jpg
+REV:20260722T141000Z
+END:VCARD

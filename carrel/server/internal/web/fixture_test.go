@@ -926,7 +926,11 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	// A group of duplicates is named by a digest of the records in it, and
 	// those carry the account identifier, which is issued.
 	s = regexp.MustCompile(`g=[0-9a-f]{32}`).ReplaceAllString(s, "g=group")
+	s = regexp.MustCompile(`group=[0-9a-f]{32}`).ReplaceAllString(s, "group=group")
 	s = regexp.MustCompile(`"groupID": ?"[0-9a-f]{32}"`).ReplaceAllString(s, `"groupID":"group"`)
+	// And so is the group itself and the hidden field of its form (the
+	// candidate of the set, Typecase's note 44: a group still to decide).
+	s = regexp.MustCompile(`"(id|value)": ?"[0-9a-f]{32}"`).ReplaceAllString(s, `"$1":"group"`)
 	// When the run itself did something — started this session, created
 	// this account, wrote this journal line — the stamp is the wall clock's
 	// and cannot be frozen: a session begun on the day of the frames would
@@ -1718,11 +1722,10 @@ func TestFixtureContactsStates(t *testing.T) {
 	app := newMockupApp(t)
 	// The combined book was opened first, as a person comes to it: the rail
 	// of one book carries the section's count and tags (states-4, -10, -11;
-	// the owner's decision of 08.10.2026 on the tags). «Команда» holds a
-	// second card here, as states-4 draws the book — two letters, «И» and
-	// another; the card lives in this test alone.
-	app.servers["radicale · vps"].Seed(davtest.AddressBookHome+"komanda/1e77-40c2-fa19.vcf",
-		"BEGIN:VCARD\nVERSION:3.0\nUID:1e77-40c2-fa19\nN:Фомина;Ирина;;;\nFN:Ирина Фомина\nTEL;TYPE=CELL:+7 900 000-00-00\nREV:20260810T081200Z\nEND:VCARD\n")
+	// the owner's decision of 08.10.2026 on the tags). «Команда» is the
+	// book of the set, with its one card: states-4 draws it so since
+	// Typecase's note 44 (before, the frame drew a second card, which lived
+	// in this test alone).
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 
@@ -2097,25 +2100,25 @@ func TestFixtureBeforeAnyone(t *testing.T) {
 func TestFixtureMergeLetterAndReset(t *testing.T) {
 	t.Run("app-duplicates-merge", func(t *testing.T) {
 		app := newMockupApp(t)
-		// The two Артём Белов are linked in the set, and a linked group is
-		// decided: nothing to merge. Here they are undecided again, which
-		// is the state the merge screen exists for.
-		key, _ := app.sess.DataKey()
-		err := app.h.users.EditDuplicates(app.sess.AccountID(), key, "", "", func(d *sealed.Duplicates) error {
-			d.Linked = nil
-			return nil
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		// Since Typecase's note 44 the set holds a pair to merge — Вера
+		// Лебедева of «Архив» and «Лебедева Вера» of «Контакты», the
+		// candidate s-dup-1 draws and s-dup-2 merges — beside the two Артём
+		// Белов, who are linked and decided.
 		combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 		page := decode[view.DuplicatesPage](t, app.h.do(get("/app/duplicates?kind=contact", app.sess)))
-		if len(page.Groups) != 1 {
-			t.Fatalf("groups = %d, want the one pair of the set", len(page.Groups))
+		var merge string
+		for _, g := range page.Groups {
+			for _, a := range g.Actions {
+				if a.ID == "duplicates.merge" && a.Enabled && strings.Contains(string(g.Rows[0].Title)+string(g.Rows[1].Title), "Лебедева") {
+					merge = a.Href
+				}
+			}
+		}
+		if merge == "" {
+			t.Fatalf("no pair of Вера Лебедева to merge among %d groups", len(page.Groups))
 		}
 		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-		app.compare(t, "app-duplicates-merge/normal.json",
-			app.h.do(get(actionOf(t, page.Groups[0], "duplicates.merge").Href, app.sess)))
+		app.compare(t, "app-duplicates-merge/normal.json", app.h.do(get(merge, app.sess)))
 	})
 	t.Run("app-mail-compose", func(t *testing.T) {
 		// The instance of the set has a relay and lets people send

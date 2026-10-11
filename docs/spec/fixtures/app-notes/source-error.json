@@ -90,15 +90,15 @@
         },
         {
           "fixed": false,
-          "id": "tags",
-          "label": "Tags",
+          "id": "date",
+          "label": "Date",
           "on": true
         },
         {
           "fixed": false,
-          "id": "date",
-          "label": "Date",
-          "on": true
+          "id": "tags",
+          "label": "Tags",
+          "on": false
         },
         {
           "fixed": false,

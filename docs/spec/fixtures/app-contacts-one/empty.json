@@ -345,7 +345,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 1,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",
@@ -452,7 +452,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": 4,
+            "count": 5,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-nc-home/kontakty",
@@ -528,7 +528,7 @@
         "rows": [
           {
             "colour": "#6b4e7a",
-            "count": 2,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-rad-vps/komanda",

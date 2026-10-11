@@ -5,7 +5,7 @@
     "compact": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 6,
+    "loaded": 7,
     "range": null,
     "segments": [
       {
@@ -14,7 +14,7 @@
         "id": "duplicates.kind.all",
         "label": "All",
         "method": "GET",
-        "tally": "0"
+        "tally": "1"
       },
       {
         "enabled": true,
@@ -23,7 +23,7 @@
         "label": "Contacts",
         "method": "GET",
         "on": true,
-        "tally": "0"
+        "tally": "1"
       },
       {
         "enabled": true,
@@ -56,6 +56,115 @@
   },
   "details": null,
   "groups": [
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/duplicates/decide?do=link\u0026group=group",
+          "id": "duplicates.link",
+          "label": "Link them",
+          "method": "POST",
+          "primary": true,
+          "submits": true
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/duplicates/decide?do=ignore\u0026group=group",
+          "id": "duplicates.ignore",
+          "label": "Not duplicates",
+          "method": "POST",
+          "submits": true
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/duplicates/merge?group=group",
+          "id": "duplicates.merge",
+          "label": "Merge on the server",
+          "method": "GET"
+        }
+      ],
+      "choices": [
+        {
+          "chosen": 0,
+          "name": "choice.FN",
+          "options": [
+            "Вера Лебедева",
+            "Лебедева Вера"
+          ],
+          "property": "Display name",
+          "union": false
+        }
+      ],
+      "decision": "",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "group"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "group",
+      "kind": "contact",
+      "reasons": [
+        "same phone",
+        "same name"
+      ],
+      "rows": [
+        {
+          "colour": "#a05a2c",
+          "detail": "+7 905 331-09-42 · vera@example.net",
+          "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
+          "readOnly": false,
+          "stamp": "nextcloud · Архив",
+          "title": "Вера Лебедева"
+        },
+        {
+          "colour": "#4a6b52",
+          "detail": "+7 905 331-09-42 · v.lebedeva@example.org",
+          "href": "/app/contacts/a-nc-home/kontakty/b52e-7d08-c6f1",
+          "readOnly": false,
+          "stamp": "nextcloud · Контакты",
+          "title": "Лебедева Вера"
+        }
+      ],
+      "score": 80
+    },
     {
       "actions": [
         {
@@ -117,7 +226,7 @@
     }
   ],
   "print": {
-    "range": "6 records compared · 60 points and above",
+    "range": "7 records compared · 60 points and above",
     "taken": "",
     "title": "Duplicates"
   },
@@ -134,7 +243,7 @@
     "foot": [],
     "nav": [
       {
-        "count": 6,
+        "count": 7,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -179,7 +288,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 1,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",
@@ -211,7 +320,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": 4,
+            "count": 5,
             "detail": "",
             "feed": false,
             "href": "",
