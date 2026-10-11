@@ -9,13 +9,14 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"slices"
 	"strings"
 	"testing"
 	"time"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/discover"
+	"carrel.dev/carrel/server/internal/model"
+	calprov "carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/sealed"
 	user2 "carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
@@ -346,15 +347,15 @@ func yearless(t *testing.T, step, got, month, day string) {
 }
 
 func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *dav.Client, connID, cal, suffix string) {
+	if seriesProbe() {
+		liveSeriesProbe(ctx, t, app, client, connID, cal, suffix)
+		return
+	}
 	uid := "duty-" + suffix
 	file := cal + uid + ".ics"
-	seed(ctx, t, client, file, "text/calendar; charset=utf-8", "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Other client//EN\n"+
-		"BEGIN:VEVENT\nUID:"+uid+"\nDTSTAMP:20260101T000000Z\nDTSTART;TZID=Europe/Moscow:20260112T100000\n"+
-		"DTEND;TZID=Europe/Moscow:20260112T110000\nSUMMARY:Duty\nRRULE:FREQ=WEEKLY;BYDAY=MO;WKST=MO;COUNT=6\n"+
-		"EXDATE;TZID=Europe/Moscow:20260119T100000\nX-CUSTOM:keep-me\nEND:VEVENT\n"+
-		"BEGIN:VEVENT\nUID:"+uid+"\nDTSTAMP:20260101T000000Z\nRECURRENCE-ID;TZID=Europe/Moscow:20260126T100000\n"+
-		"DTSTART;TZID=Europe/Moscow:20260126T120000\nDTEND;TZID=Europe/Moscow:20260126T130000\nSUMMARY:Duty moved\nEND:VEVENT\n"+
-		"END:VCALENDAR\n")
+	// Mondays at ten in Moscow, the 19th left out and the 26th moved to noon.
+	series := seriesSeed(uid, true)
+	seed(ctx, t, client, file, "text/calendar; charset=utf-8", series)
 	rec := "/app/calendar/" + connID + "/" + url.PathEscape(cal) + "/" + url.PathEscape(uid)
 	form := func(p view.EventEditPage) view.Form { return p.Form }
 	// What of the seed the server kept is read back before anything is
@@ -363,12 +364,26 @@ func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *da
 	// the forms. Yandex takes no X-CUSTOM on an event.
 	seeded, _ := rawBody(ctx, t, client, file)
 	var exceptions []string
-	for _, line := range []string{"EXDATE;TZID=Europe/Moscow:20260119T100000",
-		"RECURRENCE-ID;TZID=Europe/Moscow:20260126T100000", "SUMMARY:Duty moved", "X-CUSTOM:keep-me"} {
+	for _, line := range []string{"SUMMARY:Duty moved", "X-CUSTOM:keep-me"} {
 		if strings.Contains(strings.ToLower(seeded), strings.ToLower(line)) {
 			exceptions = append(exceptions, line)
 		} else {
 			t.Logf("the server did not take %q even as sent: it is not asked for again", line)
+		}
+	}
+	// The day left out and the day moved are known by the instant they name,
+	// not by how the server writes them: Mail.ru keeps both in UTC beside a
+	// series in a zone (SV-36, read wrongly until 11.10.2026 — the lines were
+	// looked for as sent, and «not taken» was written of a server that had
+	// them).
+	takesExceptions := exceptionsHeld(t, "", series, seeded)
+	if !takesExceptions {
+		t.Log("the server did not take the exceptions of the series even as sent: they are not asked for again")
+	}
+	held := func(step, want, got string) {
+		t.Helper()
+		if takesExceptions {
+			exceptionsHeld(t, step, want, got)
 		}
 	}
 
@@ -384,6 +399,7 @@ func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *da
 		}
 	}
 	mustHave(t, "status and categories", got, append(want, exceptions...)...)
+	held("status and categories", series, got)
 	// Yandex rewrites a rule into one of its own liking — COUNT becomes
 	// UNTIL, INTERVAL=1 appears, WKST goes — and keeps the series the same
 	// series. A server that does that cannot be asked to spell a rule back,
@@ -408,6 +424,7 @@ func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *da
 	})
 	got, _ = rawBody(ctx, t, client, file)
 	mustHave(t, "repeat", got, exceptions...)
+	held("repeat", series, got)
 	if !rewrites {
 		mustRule(t, "repeat", got, "FREQ=WEEKLY", "BYDAY=MO", "WKST=MO", "COUNT=8", "INTERVAL=2")
 	}
@@ -422,22 +439,53 @@ func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *da
 	got, _ = rawBody(ctx, t, client, file)
 	if len(movedTimes) > 0 {
 		t.Logf("the server rewrote the times (%v); it keeps them as:\n%s", movedTimes, got)
-		// A server that took the moved occurrence without the RECURRENCE-ID
-		// that ties it to its series holds it as an orphan, and may throw it
-		// away when the series is given other times: Mail.ru does (found
-		// 10.10.2026; the servers that keep RECURRENCE-ID keep the occurrence
-		// through this very save). It is then not asked for — and named.
-		kept := exceptions
-		if !contains(exceptions, "RECURRENCE-ID;TZID=Europe/Moscow:20260126T100000") && contains(exceptions, "SUMMARY:Duty moved") &&
-			!strings.Contains(got, "SUMMARY:Duty moved") {
-			t.Log("the server threw away the moved occurrence it held without its RECURRENCE-ID when the series was retimed")
-			kept = slices.DeleteFunc(slices.Clone(exceptions), func(l string) bool { return l == "SUMMARY:Duty moved" })
-		}
-		mustHave(t, "time zone", got, kept...)
+		mustHave(t, "time zone", got, exceptions...)
 	} else {
 		mustHave(t, "time zone", got, append([]string{"DTSTART;TZID=Asia/Yekaterinburg:20260112T100000",
 			"DTEND;TZID=Asia/Yekaterinburg:20260112T110000", "TZID:Asia/Yekaterinburg", "BEGIN:VTIMEZONE"}, exceptions...)...)
 	}
+	// The exceptions went with the series (the owner's decision of
+	// 11.10.2026): the 19th is still left out and the 26th still the day that
+	// was moved, at ten in Yekaterinburg now — whatever zone the server
+	// writes that instant in. Before, Carrel left them at ten in Moscow,
+	// where the series no longer was: eleven servers of twelve kept them
+	// hanging, and Mail.ru threw them away (SV-59).
+	//
+	// What the server did not keep and Carrel said so is not asked of the
+	// file: Mail.ru drops a day left out that is no day of the series — and
+	// the 19th is none since the series went to every other week above — and
+	// the report of the save names EXDATE.
+	moved := strings.NewReplacer(
+		"EXDATE;TZID=Europe/Moscow:20260119T100000", "EXDATE;TZID=Asia/Yekaterinburg:20260119T100000",
+		"RECURRENCE-ID;TZID=Europe/Moscow:20260126T100000", "RECURRENCE-ID;TZID=Asia/Yekaterinburg:20260126T100000").Replace(series)
+	if contains(movedTimes, "EXDATE") {
+		t.Log("the server dropped the day left out and Carrel said so: it is not asked for")
+		moved = strings.Replace(moved, "EXDATE;TZID=Asia/Yekaterinburg:20260119T100000\n", "", 1)
+	}
+	if contains(movedTimes, "RECURRENCE-ID") {
+		t.Log("the server dropped the day moved and Carrel said so: it is not asked for")
+	} else {
+		held("time zone", moved, got)
+	}
+}
+
+// exceptionsHeld says whether got — a calendar object as its server keeps it
+// — still has the day left out and the day moved that want has, each known by
+// the instant it names. With a step it is a check, and fails the step.
+func exceptionsHeld(t *testing.T, step, want, got string) bool {
+	t.Helper()
+	parse := func(doc string) *model.Object {
+		obj, err := calprov.Parse("/x.ics", "", strings.NewReader(strings.ReplaceAll(strings.ReplaceAll(doc, "\r\n", "\n"), "\n", "\r\n")))
+		if err != nil {
+			t.Fatalf("%s: the calendar object does not parse: %v\n%s", step, err, doc)
+		}
+		return obj
+	}
+	days, moved := calprov.MissingExceptions(parse(want), parse(got))
+	if step != "" && days+moved > 0 {
+		t.Errorf("%s: %d day(s) left out and %d occurrence(s) moved are no longer in\n%s", step, days, moved, got)
+	}
+	return days+moved == 0
 }
 
 func liveTaskFields(ctx context.Context, t *testing.T, app *liveApp, client *dav.Client, connID, cal, suffix string) {

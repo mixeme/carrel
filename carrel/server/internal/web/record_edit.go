@@ -2093,15 +2093,23 @@ func timeOps(prop string, cur []model.RawValue, row [3]string, allDay bool, shif
 	return ops
 }
 
-// apply patches obj and, when the reminder set changed, rewrites it.
+// apply patches obj and, when the reminder set changed, rewrites it. A
+// series whose start the patch changed takes its exceptions with it
+// (cal.RetimeExceptions).
 func (c *collectionCtx) apply(obj *model.Object, ch change) (*model.Object, error) {
 	if len(ch.ops) > 0 {
+		started := obj.Props()["DTSTART"]
 		patch, err := model.NewPatch(ch.ops...)
 		if err != nil {
 			return nil, err
 		}
 		if err := patch.Apply(obj); err != nil {
 			return nil, err
+		}
+		if obj.IsCalendar() && len(started) > 0 {
+			if obj, _, err = cal.RetimeExceptions(obj, started[0]); err != nil {
+				return nil, err
+			}
 		}
 	}
 	if ch.alarmsChanged {
@@ -3187,7 +3195,7 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 	if wr.theirUID {
 		compare = model.CompareAfterCreate
 	}
-	loss := compare(c.conn.ID, sent, got, c.sess.Losses())
+	loss := withExceptions(compare(c.conn.ID, sent, got, c.sess.Losses()), sent, got)
 	actions, notices := tell(loss, got)
 	if loss == nil {
 		s.redirect(w, r, done)
@@ -3695,4 +3703,35 @@ func (s *Server) postKindDelete(w http.ResponseWriter, r *http.Request, kind str
 		c.noteWrite(obj.Path, nil)
 		s.redirect(w, r, c.listPath())
 	}
+}
+
+// withExceptions makes the loss of a write say what became of a series'
+// exceptions (the owner's word of 11.10.2026: warn when the server loses or
+// breaks something). The comparison of the write reads the series alone and
+// by what is written; a day left out or an occurrence changed apart is known
+// by the instant it names (cal.ExceptionLoss). A server that dropped one is
+// named by «EXDATE» or «RECURRENCE-ID» in the report even when it kept every
+// property of the series; one that only wrote the same days another way has
+// lost nothing.
+func withExceptions(loss *model.Loss, sent, got *model.Object) *model.Loss {
+	if sent == nil || got == nil || !sent.IsCalendar() || !got.IsCalendar() {
+		return loss
+	}
+	var before []string
+	if loss != nil {
+		before = loss.Properties
+	}
+	after := cal.ExceptionLoss(before, sent, got)
+	switch {
+	case len(after) == 0:
+		return nil
+	case loss == nil:
+		return &model.Loss{Properties: after}
+	}
+	if len(after) > len(before) {
+		// Something new to say: the report is not one already seen.
+		loss.Aggregated = false
+	}
+	loss.Properties = after
+	return loss
 }

@@ -17,6 +17,42 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.186 — 2026-10-11
+
+A series given another time takes its exceptions with it, and a server that
+loses them is named (the owner's decision of 11.10.2026).
+
+### Fixed
+
+- **A series moved to another hour or another zone left its exceptions
+  behind.** Carrel rewrote the start of the series and nothing else: a day
+  left out (`EXDATE`) and a day changed apart (`RECURRENCE-ID`) stayed at
+  the old time, where the series no longer had an occurrence. The day left
+  out came back, the changed day hung loose beside its series — on every
+  server, without a word; Mail.ru then threw the loose ones away. Now both
+  are moved as the start was and written the way the start is written. The
+  time a day was moved to is not touched. Events and tasks.
+
+### Changed
+
+- **The report of what a server did not keep reads the exceptions by the
+  instant they name.** A server that writes them in UTC beside a series in
+  a zone has lost nothing, and `EXDATE` no longer stands in the report for
+  that. A day left out that is gone is `EXDATE`; a changed day that is
+  gone, or kept without what ties it to its series, is `RECURRENCE-ID` —
+  also when every property of the series itself came back.
+
+### For developers
+
+- `CARREL_SERIES_REPORT=1` turns the live checks of an event's fields into
+  a report of what a server does with such a series, step by step
+  (`integration/series_probe_test.go`); `TestMemorySeriesReport` gives the
+  same against the in-memory server, which keeps exactly what Carrel
+  writes. The picture of twelve servers is in `docs/servers.md`.
+- The live check of a series knows its exceptions by instant, not by the
+  line as sent: «Mail.ru takes no `EXDATE` and no `RECURRENCE-ID`» (SV-36)
+  was that check reading UTC for absence.
+
 ## v0.2.185 — 2026-10-10
 
 A connection the server refused says so (the owner's word of 10.10.2026:
