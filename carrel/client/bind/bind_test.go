@@ -133,6 +133,10 @@ func TestInput(t *testing.T) {
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword},
 			w.Input{Kind: w.InputPassword, Name: "password", Label: "Password"},
 		},
+		"an end that follows its start": {
+			view.FormRow{Name: "end.time", Label: "End time", Kind: view.InputTime, Value: "11:00", Mono: true, Follows: "start.time", Day: "end.date"},
+			w.Input{Kind: w.InputTime, Name: "end.time", Label: "End time", Value: "11:00", Mono: true, Follows: "start.time", Day: "end.date"},
+		},
 		"email is a line of text": {
 			view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail, Value: "a@b.c"},
 			w.Input{Name: "email", Label: "Email", Value: "a@b.c"},

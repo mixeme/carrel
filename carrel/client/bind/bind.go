@@ -219,6 +219,10 @@ func Input(r view.FormRow) w.Input {
 		Disabled:    r.ReadOnly,
 		Required:    r.Required,
 		Numeric:     r.Kind == view.InputNumber,
+		// An end that follows its start, and the date of a time (C-6.8
+		// Follows, Day): handed to the library as they are.
+		Follows: r.Follows,
+		Day:     r.Day,
 	}
 	switch r.Kind {
 	case view.InputPassword:

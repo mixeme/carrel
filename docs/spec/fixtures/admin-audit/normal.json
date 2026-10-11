@@ -10,56 +10,26 @@
         "method": "GET"
       }
     ],
-    "compact": null,
-    "filter": "",
-    "loaded": 22,
-    "range": null,
-    "segments": [
-      {
-        "enabled": true,
-        "href": "/admin/audit",
-        "id": "audit.all",
-        "label": "All",
-        "method": "GET",
-        "on": true
-      },
-      {
-        "enabled": true,
-        "href": "/admin/audit?show=security",
-        "id": "audit.security",
-        "label": "Security",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/admin/audit?show=failures",
-        "id": "audit.failures",
-        "label": "Failures",
-        "method": "GET"
-      }
-    ],
-    "selected": 0,
-    "total": 22,
     "columns": {
       "form": {
         "action": "/admin/audit/columns",
         "actions": [
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/admin/audit/columns",
             "id": "columns.apply",
             "label": "Apply",
             "method": "POST",
-            "primary": true,
-            "csrf": "csrf"
+            "primary": true
           },
           {
+            "csrf": "csrf",
             "enabled": true,
             "href": "/admin/audit/columns",
             "id": "columns.default",
             "label": "Reset to defaults",
-            "method": "POST",
-            "csrf": "csrf"
+            "method": "POST"
           }
         ],
         "errors": [],
@@ -86,6 +56,7 @@
           }
         ]
       },
+      "icon": "i-cols",
       "items": [
         {
           "aside": "always",
@@ -119,13 +90,130 @@
           "on": true
         }
       ],
-      "label": "Columns",
-      "icon": "i-cols"
+      "label": "Columns"
     },
+    "compact": null,
+    "filter": "",
     "filterForm": null,
-    "show": null
+    "loaded": 22,
+    "range": null,
+    "segments": [
+      {
+        "enabled": true,
+        "href": "/admin/audit",
+        "id": "audit.all",
+        "label": "All",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/admin/audit?show=security",
+        "id": "audit.security",
+        "label": "Security",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/audit?show=failures",
+        "id": "audit.failures",
+        "label": "Failures",
+        "method": "GET"
+      }
+    ],
+    "selected": 0,
+    "total": 22
   },
   "details": null,
+  "filter": {
+    "action": "/admin/audit",
+    "actions": [],
+    "errors": [],
+    "method": "GET",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Action",
+            "name": "action",
+            "options": [
+              {
+                "label": "All actions",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "attachments.folder",
+                "selected": false,
+                "separator": true,
+                "value": "attachments.folder"
+              },
+              {
+                "label": "connection.add",
+                "selected": false,
+                "value": "connection.add"
+              },
+              {
+                "label": "duplicates.link",
+                "selected": false,
+                "value": "duplicates.link"
+              },
+              {
+                "label": "escrow.enable",
+                "selected": false,
+                "value": "escrow.enable"
+              },
+              {
+                "label": "feed.edit",
+                "selected": false,
+                "value": "feed.edit"
+              },
+              {
+                "label": "feed.subscribe",
+                "selected": false,
+                "value": "feed.subscribe"
+              },
+              {
+                "label": "login.ok",
+                "selected": false,
+                "value": "login.ok"
+              },
+              {
+                "label": "publish.create",
+                "selected": false,
+                "value": "publish.create"
+              },
+              {
+                "label": "settings.instance",
+                "selected": false,
+                "value": "settings.instance"
+              },
+              {
+                "label": "setup.first_admin",
+                "selected": false,
+                "value": "setup.first_admin"
+              },
+              {
+                "label": "sources.select",
+                "selected": false,
+                "value": "sources.select"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
   "notices": [],
   "print": {
     "range": "",
@@ -134,13 +222,14 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
       "label": "Carrel",
-      "method": "GET",
-      "build": "0.0.1 · 786949a"
+      "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [],
     "nav": [
       {
@@ -210,13 +299,10 @@
         "on": true
       }
     ],
+    "neighbours": [],
     "note": "",
     "sections": [],
-    "tags": [],
-    "neighbours": [],
     "shortcuts": [],
-    "davloom": "davloom · running · 0 devices",
-    "ticks": null,
     "status": [
       {
         "line": [
@@ -236,7 +322,9 @@
         "title": "Not checked since the start",
         "tone": "off"
       }
-    ]
+    ],
+    "tags": [],
+    "ticks": null
   },
   "rows": [
     {
@@ -396,57 +484,7 @@
   ],
   "title": "Audit log",
   "top": {
-    "refresh": {
-      "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "answered": "",
-      "running": false
-    },
-    "search": {
-      "action": "/app/search",
-      "history": [],
-      "jump": [],
-      "query": "",
-      "whole": null,
-      "name": "q"
-    },
-    "signed": {
-      "instance": "carrel.example",
-      "login": "mix",
-      "local": true
-    },
-    "unlocked": null,
-    "user": [
-      {
-        "enabled": true,
-        "href": "/app/settings/account",
-        "icon": "i-gear",
-        "id": "user.settings",
-        "label": "Settings",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/admin/",
-        "icon": "i-adm",
-        "id": "user.admin",
-        "label": "Administration",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/logout",
-        "id": "user.logout",
-        "label": "Sign out",
-        "method": "POST",
-        "separator": true,
-        "csrf": "csrf"
-      }
-    ],
+    "lock": null,
     "new": {
       "arrow": [
         {
@@ -516,96 +554,57 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account",
-    "lock": null
-  },
-  "filter": {
-    "action": "/admin/audit",
-    "actions": [],
-    "errors": [],
-    "method": "GET",
-    "sets": [
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
       {
-        "legend": "",
-        "rows": [
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "select",
-            "label": "Action",
-            "name": "action",
-            "options": [
-              {
-                "label": "All actions",
-                "selected": true,
-                "value": ""
-              },
-              {
-                "label": "attachments.folder",
-                "selected": false,
-                "separator": true,
-                "value": "attachments.folder"
-              },
-              {
-                "label": "connection.add",
-                "selected": false,
-                "value": "connection.add"
-              },
-              {
-                "label": "duplicates.link",
-                "selected": false,
-                "value": "duplicates.link"
-              },
-              {
-                "label": "escrow.enable",
-                "selected": false,
-                "value": "escrow.enable"
-              },
-              {
-                "label": "feed.edit",
-                "selected": false,
-                "value": "feed.edit"
-              },
-              {
-                "label": "feed.subscribe",
-                "selected": false,
-                "value": "feed.subscribe"
-              },
-              {
-                "label": "login.ok",
-                "selected": false,
-                "value": "login.ok"
-              },
-              {
-                "label": "publish.create",
-                "selected": false,
-                "value": "publish.create"
-              },
-              {
-                "label": "settings.instance",
-                "selected": false,
-                "value": "settings.instance"
-              },
-              {
-                "label": "setup.first_admin",
-                "selected": false,
-                "value": "setup.first_admin"
-              },
-              {
-                "label": "sources.select",
-                "selected": false,
-                "value": "sources.select"
-              }
-            ],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          }
-        ],
-        "unfold": null
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
       }
-    ]
+    ],
+    "userHref": "/app/settings/account"
   }
 }

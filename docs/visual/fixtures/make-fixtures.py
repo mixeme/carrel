@@ -131,7 +131,9 @@ lebedeva = vcard(
     uid=u'e7c2-3b95-6a14', family=u'Лебедева', given=u'Вера',
     rev=u'20240218T203311Z',
     tels=[(u'CELL', u'+7 905 331-09-42')],
-    emails=[(u'HOME', u'vera@example.net')])
+    # Два адреса: подсказка участников рисует её двумя строками
+    # (s-agenda-12; записка Typecase 46).
+    emails=[(u'HOME', u'vera@example.net'), (u'WORK', u'vera.l@work.example')])
 
 # Та же Вера Лебедева, заведённая второй раз — фамилией вперёд и с рабочим
 # адресом: в списке она своей строкой в рубрике «Л», в «Дубликатах» —

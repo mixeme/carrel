@@ -1582,6 +1582,10 @@ func TestFixtureNoteEdit(t *testing.T) {
 	attachMockupRecording(t, app)
 	// The calendar was read: Related to names «Синк-ап по релизу».
 	openList(t, app, "/app/calendar?from=2026-08-10")
+	// The tasks were read too: the note's second relation is the task
+	// «Дописать раздел про кэш» of «Работа», and s-notes-20 draws it by its
+	// name (Typecase's note 46).
+	combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
 	combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 	app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))

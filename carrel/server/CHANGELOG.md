@@ -17,6 +17,48 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.192 — 2026-10-12
+
+Typecase `462ffb5` (Typecase's notes 45 and 46, and its answer to Carrel's
+task 152), client `v0.4.11`.
+
+### Changed — behaviour
+
+- **The calendar shows events and nothing else** (Typecase Р-56, the
+  owner's decision of 11.10.2026). The ticks «Events · Tasks due · Notes» of
+  the agenda are gone, and with them the tasks and notes on its line: they
+  live in their own sections. An address that still carries `with=` is the
+  calendar all the same.
+- **The agenda has Columns** (`s-agenda-18`): Time and Title always; Where,
+  «Attendees and status» and Source shown until a person chooses; Tags and
+  Changed to add. `POST /app/calendar/columns` and
+  `/app/calendar/{account}/{col}/columns`, the cookie `carrel_cols_calendar`,
+  as the other lists keep theirs. One calendar's menu offers no Source.
+- **The end of an event follows its start** in the form (the owner's
+  decision of 11.10.2026; Б19 of the audit): End date names Start date,
+  End time names Start time and the date that goes with it over midnight
+  (`FormRow.Follows`, `FormRow.Day`); the library's script moves the end
+  before Save, so the length stays. Without a script nothing moves, and
+  what is on the screen is what is written (S-7.3).
+
+### Changed — contract
+
+- `ListBar.Show` is gone. `AgendaRow` gains `Tags` and `Changed`, and its
+  `Kind` is always `event`. `FormRow` gains `Follows` and `Day`.
+  `ColumnItem.Fixed` may stand on more than one column: the agenda's two.
+
+### For developers
+
+- The set of the mockup: Вера Лебедева of «Архив» has two addresses
+  (`vera@example.net`, `vera.l@work.example`), so the attendees' suggestion
+  draws her twice and her name alone no longer says which address — typed
+  by name she is refused with the reason. Fixtures are re-shot (37); the
+  edit of the note reads the tasks first, so both its relations are drawn
+  by their names (`s-notes-20`).
+- The rows of the agenda carry every column in any choice; what the client
+  draws of a choice other than the default waits for the library — the
+  frames draw the menu, not a line of chosen columns (to-typecase task 154).
+
 ## v0.2.191 — 2026-10-11
 
 Three places where data was lost or given out without a word (the audit of

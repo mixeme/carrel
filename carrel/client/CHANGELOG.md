@@ -4,6 +4,29 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.11 — 2026-10-12
+
+Typecase `462ffb5` (Typecase's notes 45 and 46; Carrel's task 152 answered),
+server `v0.2.192`. The copy of the mockup is `462ffb5` byte for byte (428
+frames).
+
+### Changed
+
+- **The agenda's bar has Columns where the ticks of the kinds stood**
+  (`s-agenda-1`, `-17`, `states-15`): the calendar shows events and nothing
+  else. The menu is the form of `s-agenda-18`. **The line of the agenda is
+  still the frame's own whatever is chosen**: the library has no line of
+  chosen columns for an agenda (to-typecase task 154).
+- **A relation's pill carries the mark of its record's collection**
+  (`bind.Related`, `Tag.Mark`; `s-tasks-3`, `s-notes-20`); a record that is
+  not among the loaded ones is its UID, without a mark.
+- **The end of an event follows its start** (`bind.Input` hands
+  `FormRow.Follows` and `Day` to the library's `Input`): `s-agenda-3`,
+  `s-agenda-15`, `states-17`, and the quick sheet `s-notes-9`.
+- U-5.5 row 40 (`app-note-edit/normal`) stays, for another reason: both
+  relations of the note now match `s-notes-20`; what differs is the second
+  attachment's Remove and the block of the same note in other notebooks.
+
 ## v0.4.10 — 2026-10-11
 
 Typecase `43ca489` (Typecase's note 44: tasks 144 and 145), server

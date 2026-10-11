@@ -35,7 +35,95 @@
         "method": "GET"
       }
     ],
-    "columns": null,
+    "columns": {
+      "form": {
+        "action": "/app/calendar/a-nc-home/lichnyj/columns?from=2027-01-04",
+        "actions": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/lichnyj/columns?from=2027-01-04",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/lichnyj/columns?from=2027-01-04",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "icon": "i-cols",
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "time",
+          "label": "Time",
+          "on": true
+        },
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "where",
+          "label": "Where",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "attendees",
+          "label": "Attendees and status",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        }
+      ],
+      "label": "Columns"
+    },
     "compact": {
       "action": "/app/calendar/a-nc-home/lichnyj",
       "actions": [],
@@ -221,75 +309,6 @@
     },
     "segments": [],
     "selected": 0,
-    "show": {
-      "action": "/app/calendar/a-nc-home/lichnyj",
-      "actions": [],
-      "errors": [],
-      "method": "GET",
-      "sets": [
-        {
-          "legend": "",
-          "rows": [
-            {
-              "add": null,
-              "error": "",
-              "extra": null,
-              "hint": "",
-              "kind": "hidden",
-              "label": "",
-              "name": "from",
-              "options": [],
-              "readOnly": false,
-              "required": false,
-              "value": "2027-01-04"
-            },
-            {
-              "add": null,
-              "error": "",
-              "extra": null,
-              "hint": "",
-              "kind": "hidden",
-              "label": "",
-              "name": "with",
-              "options": [],
-              "readOnly": false,
-              "required": false,
-              "value": ""
-            },
-            {
-              "add": null,
-              "error": "",
-              "extra": null,
-              "hint": "",
-              "kind": "check",
-              "label": "Show",
-              "name": "with",
-              "options": [
-                {
-                  "label": "Events",
-                  "selected": true,
-                  "value": "events"
-                },
-                {
-                  "label": "Tasks due",
-                  "selected": false,
-                  "value": "tasks"
-                },
-                {
-                  "label": "Notes",
-                  "selected": false,
-                  "value": "notes"
-                }
-              ],
-              "readOnly": false,
-              "required": false,
-              "value": ""
-            }
-          ],
-          "unfold": null
-        }
-      ]
-    },
     "total": null
   },
   "days": [],

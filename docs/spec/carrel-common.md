@@ -396,7 +396,7 @@ spec/fixtures/<screen>/<state>.json
 |---|---|---|---|---|
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже, с теми же параметрами: `?print=1`, `?open=`, `?filter=`, `?compact=`, у календаря окно и роды |
 | `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1); у заметок (и у `/app/notes`): `?open={адрес строки}` и `?filter=` — «Filter by word» без сценариев, по названию и тексту (s-notes-1) |
-| `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
+| `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `calendar`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта, события и задачи, у заметки — в полосе над текстом, `Doc.Bar`); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
 | `/app/contacts/suggest` | GET | вход | фрагмент | `SuggestList` — подсказки поля участников правки события (`AttendeeField.Suggest`, s-agenda-12, -13): `?q=` — набранное; ищутся отмеченные книги, чьи списки сеанс читал (сервер DAV не спрашивается), по имени и по адресу; строка на каждый адрес человека; набранный адрес не из книг — первым «Add» и `Note`. Ставит ответ в меню поля живой слой Typecase (`tc-live.js`, L-1); без сценариев набранное уходит с формой правки |
@@ -1036,13 +1036,7 @@ type ListBar struct {
     // сценариями форма уходит сменой отметки. Выбор помнит кука раздела
     // (S-9.6); nil — переключателя нет
     Compact  *Form
-    // «Events · Tasks due · Notes» агенды (s-agenda-1) — отметки одной формы
-    // GET на адрес агенды: скрытые поля окна и запроса (view, from, to, tag),
-    // скрытое пустое with — форма сказала — и отметка with (InputCheck) с
-    // вариантами events, tasks, notes, Selected — род на ленте. Адрес без with
-    // — одни события; nil — у списка отметок нет
-    Show     *Form
-    Segments []Action // Open / Done / All; All / Contacts / Events / …; у агенды пусто — роды в Show
+    Segments []Action // Open / Done / All; All / Contacts / Events / …; у агенды пусто: календарь показывает только события (Typecase Р-56)
     Range    *Range   // диапазон дат там, где он есть
     Actions  []Action // операции списка и над выделенным; у списка коллекции только для чтения нет ни новой записи, ни импорта — Export и Print, у тетради Export (решение владельца 07.10.2026; states-4, -23, -30)
     Selected int
@@ -1067,7 +1061,7 @@ type ColumnItem struct {
     ID    string // значение col и столбец строки — карта столбцов к полям строк ниже
     Label Text
     On    bool   // отмечен: столбец показан
-    Fixed bool   // стоит всегда первым, отметку не снять (Name, Title, Login, When); в форму не уходит
+    Fixed bool   // стоит всегда и впереди, отметку не снять (Name, Title, Login, When; у агенды два — Time и Title); в форму не уходит
     Aside Text   // приглушённое после подписи: «always» у Fixed
 }
 
@@ -1138,7 +1132,7 @@ type AgendaPage struct {
 }
 type AgendaDay struct { Rubric Text; Count int; Rows []AgendaRow } // Rubric — «Monday · 10 August» (C-10); Count — строк в дне, не меньше одной
 type AgendaRow struct {
-    Kind      Kind // event, task (срок) или note на одной ленте
+    Kind      Kind // event: календарь показывает только события (решение владельца 11.10.2026, Typecase Р-56); задачи и заметки — в своих разделах
     Href      string
     Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
     UID       string
@@ -1147,12 +1141,17 @@ type AgendaRow struct {
     Time      Text // «10:00» или «all day» в поясе экземпляра (s-agenda-1); пояса у строки нет — исходный пояс в карточке, бейджем у When (задача 77)
     Summary   Text
     Location  Text
-    // По важности: «Due» задачи, «Cancelled» отменённого вхождения, статус
+    // По важности: «Cancelled» отменённого вхождения, статус
     // «tentative» или «cancelled» (тревога), «linked ×2», «4 attendees» —
     // участники вместе с организатором, «repeats weekly» («repeats every 2
     // weeks», «repeats»); строка кадра рисует первый (s-agenda-1)
     Badges    []Badge
     Sources   []Stamp
+    // Столбцы, которые добавляет меню Columns агенды (s-agenda-18):
+    // категории события и когда оно менялось («2 Aug 11:05», C-10); пусто —
+    // у события их нет или сервер не сказал
+    Tags      []Tag
+    Changed   Text
     Menu      []MenuItem
     State     RecordState
     On        bool // строка записи, открытой в панели (?open=, is-on; s-agenda-1); у серии — каждое её вхождение
@@ -1240,6 +1239,7 @@ type NoteRow struct {
 | Список, меню | Столбцы (`ColumnItem.ID`) и поля строки |
 |---|---|
 | контакты (components-21, -42) | `name` — `Name`, `phone` — `Phone`, `email` — `Email`, `org` — `Org`, `birthday` — `Birthday`, `tags` — `Tags`, `changed` — `Changed`, `source` — `Stamp` |
+| агенда (s-agenda-18) | `time` — `Time`, `title` — `Summary` (оба стоят всегда), `where` — `Location`, `attendees` — первый из `Badges` («Attendees and status»), `source` — `Stamp`, `tags` — `Tags`, `changed` — `Changed` (`AgendaRow`) |
 | задачи (s-tasks-12, -13) | `title` — `Summary`, `tags` — `Tags`, `due` — `Due` (тревожным — только срок, `Overdue`), `complete` — `Percent` (`70%`), `source` — `Stamp`, `priority` — `Priority`, `status` — `Status`, `changed` — `Changed`; галка дела `Tick` стоит перед меткой в любом наборе |
 | заметки (s-notes-23, -24) | `title` — `Title`, `excerpt` — `Excerpt`, `tags` — `Tags`, `date` — `Date`, `source` — `Stamp`, `changed` — `Changed` |
 | файлы (s-files-20) | `name` — `Name`, `size` — `Size`, `type` — `Type`, `changed` — `Modified` (`FileRow`, C-6.7) |
@@ -2284,6 +2284,13 @@ type FormRow struct {
     // «start.time due.time»): поля выключены и с формой не уходят; у прочих
     // пусто. Клиент отдаёт строку библиотеке как есть
     Disables string
+    // У конца — Name поля той же формы, за которым он идёт: конец события
+    // сдвигается на столько же, на сколько сдвинули начало, длина остаётся
+    // (решение владельца 11.10.2026, s-agenda-3, s-notes-9); Day — у времени
+    // конца Name поля его даты: конец, перешедший полночь, берёт её с
+    // собой. У прочих пусто. Клиент отдаёт обе строки библиотеке как есть
+    Follows string
+    Day     string
     // У InputAdd — строки, которые добавляет одно нажатие, пустые, в порядке
     // кадра; у прочих пусто
     Template []FormRow
@@ -2350,6 +2357,12 @@ type FormRow struct {
 // по коду библиотеки): выключенное поле остаётся на своём месте и с формой
 // не уходит. Пока отметка стоит, сервер их значения не читает, даже
 // пришедшие.
+// Конец идёт за началом (Follows, Day) — тоже общее правило библиотеки, как
+// Disables: полная форма события называет им End date (за Start date) и End
+// time (за Start time, день — End date), быстрый лист — End (за Start).
+// Двигает конец сценарий, до сохранения: сервер пишет то, что показывает
+// форма (S-7.3), и без сценариев конец остаётся где стоял (U-8). Пустой конец
+// остаётся пустым; у задачи начало и срок длиной не связаны.
 // Вариант списка — в порядке кадра списка рядом с экраном. Separator — черта
 // перед ним, как у MenuItem; Disabled — виден и не выбирается, Reason — почему
 // («Read-only»). Ни один вариант не Selected — поле пусто и уходит пустым.

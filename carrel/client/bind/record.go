@@ -84,7 +84,8 @@ func TickID(a view.Action) string {
 // task 96) — each its UID sent, its label and what it is (Option.Meta:
 // «event · 11 Aug») shown beside it; «By UID…» (Typed) is the line itself.
 // A row without such a line has one only while nothing is related, under
-// the field's own name.
+// the field's own name. A relation to a loaded record carries the mark of
+// that record's collection.
 func Related(r view.FormRow) w.TagInput {
 	in := w.TagInput{Name: r.Name}
 	var choices []w.ListOption
@@ -92,7 +93,14 @@ func Related(r view.FormRow) w.TagInput {
 		switch {
 		case o.Typed:
 		case o.Selected:
-			in.Parts = append(in.Parts, w.Tag{Label: string(o.Label), Removable: true, Value: o.Value})
+			// A record among the loaded ones carries the mark of its
+			// collection (Option.Colour; s-tasks-3, Typecase's note 46); one
+			// that is not is its UID, and no collection is known for it.
+			tag := w.Tag{Label: string(o.Label), Removable: true, Value: o.Value}
+			if o.Colour != "" {
+				tag.Mark = &w.Mark{Colour: string(o.Colour), Size: w.MarkH11}
+			}
+			in.Parts = append(in.Parts, tag)
 		default:
 			label := string(o.Label)
 			if o.Meta != "" {

@@ -110,6 +110,10 @@ type editField struct {
 	set string
 	// timeLabel names the time input of a fieldTime; label names its date.
 	timeLabel string
+	// follows: fieldTime that keeps its distance from another — the end of
+	// an event moves with its start (the owner's decision of 11.10.2026;
+	// C-6.8 FormRow.Follows, Day). It names the field followed.
+	follows string
 	// blank is what an absent property reads as in a fieldChoice: a task
 	// without STATUS needs action. The form shows it, and a save that leaves
 	// it so writes nothing (S-7).
@@ -718,7 +722,7 @@ var editFields = map[view.Kind][]editField{
 		{name: "attendee", label: "Attendees", prop: "ATTENDEE", typ: fieldAttendee},
 		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, required: true, allDay: true, set: "When",
 			quick: "Date", quickTime: "Start"},
-		{name: "end", label: "End date", timeLabel: "End time", prop: "DTEND", typ: fieldTime, set: "When", quickTime: "End", quickNoDate: true},
+		{name: "end", label: "End date", timeLabel: "End time", prop: "DTEND", typ: fieldTime, set: "When", quickTime: "End", quickNoDate: true, follows: "start"},
 		{name: "tz", label: "Time zone", prop: "DTSTART", typ: fieldZone, set: "When"},
 		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders", add: "Add reminder", quick: "Remind"},
 		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat, set: "Repeats"},
@@ -2796,6 +2800,15 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			clock := view.FormRow{Name: f.name + ".time", Label: text(timeLabel(f)), Kind: view.InputTime, Value: text(row[1]), Mono: true}
 			if f.taskDay && full && first(st.values[taskDayBox]) == "on" {
 				clock.ReadOnly = true
+			}
+			if f.follows != "" {
+				// The end follows the start, the date a date and the time a
+				// time; a time carried over midnight takes its date along —
+				// where the form draws one (s-agenda-3; s-notes-9 draws none).
+				date.Follows, clock.Follows = f.follows+".date", f.follows+".time"
+				if full {
+					clock.Day = f.name + ".date"
+				}
 			}
 			switch {
 			case full:

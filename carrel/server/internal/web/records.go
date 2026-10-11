@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"maps"
 	"net/http"
 	"net/url"
 	"slices"
@@ -1060,17 +1059,6 @@ func agendaWindow(tf timeFmt, q url.Values) (kind string, from, to time.Time) {
 	return agendaWeek, from, to
 }
 
-// untitledOf names a record of the agenda that has no title of its own.
-func untitledOf(k view.Kind) string {
-	switch k {
-	case view.KindTask:
-		return "Untitled task"
-	case view.KindNote:
-		return "Untitled note"
-	}
-	return "Untitled event"
-}
-
 // keptQuery is the address's parameters a segment or a window keeps: not
 // the window itself, not the category, and not the poll — another list is
 // another poll (S-15.1).
@@ -1087,80 +1075,6 @@ func keptQuery(keep url.Values, drop ...string) url.Values {
 		out[name] = v
 	}
 	return out
-}
-
-// agendaWith are the kinds the agenda shows on its line of days (s-agenda-1,
-// U-6: switches, not a choice of one): the values of with — events, tasks
-// by their due date, notes by their date. An address without with shows the
-// events; the form of the bar (agendaShow) always sends an empty with, so
-// a form with nothing ticked is obeyed, not taken for the plain address.
-func agendaWith(q url.Values) map[view.Kind]bool {
-	vals, spoke := q["with"]
-	if !spoke {
-		return map[view.Kind]bool{view.KindEvent: true}
-	}
-	on := map[view.Kind]bool{}
-	for _, v := range vals {
-		switch strings.TrimSpace(v) {
-		case "events":
-			on[view.KindEvent] = true
-		case "tasks":
-			on[view.KindTask] = true
-		case "notes":
-			on[view.KindNote] = true
-		}
-	}
-	return on
-}
-
-// agendaKinds are the ticks of the bar in their order: the value of with,
-// the word and the kind.
-var agendaKinds = []struct {
-	value, label string
-	kind         view.Kind
-}{{"events", "Events", view.KindEvent}, {"tasks", "Tasks due", view.KindTask}, {"notes", "Notes", view.KindNote}}
-
-// withValues is what an address says of the ticks: nothing for the events
-// alone, else every ticked kind — and the empty with, when none is.
-func withValues(on map[view.Kind]bool) []string {
-	if len(on) == 1 && on[view.KindEvent] {
-		return nil
-	}
-	var out []string
-	for _, k := range agendaKinds {
-		if on[k.kind] {
-			out = append(out, k.value)
-		}
-	}
-	if len(out) == 0 {
-		return []string{""}
-	}
-	return out
-}
-
-// agendaShow is «Events · Tasks due · Notes» of the bar (s-agenda-1): one
-// GET form on the agenda — the window and the category of the address kept
-// hidden, an empty with that says the form spoke, and the check with whose
-// values are the kinds, each Selected when it is on the line. The poll is
-// not kept: other ticks are another poll (S-15.1).
-func (s *Server) agendaShow(base string, on map[view.Kind]bool, q url.Values) *view.Form {
-	kept := keptQuery(q, "with", "compact")
-	if tag := strings.TrimSpace(q.Get("tag")); tag != "" {
-		kept.Set("tag", tag)
-	}
-	var rows []view.FormRow
-	for _, name := range slices.Sorted(maps.Keys(kept)) {
-		for _, v := range kept[name] {
-			rows = append(rows, view.FormRow{Name: name, Kind: view.InputHidden, Value: text(v)})
-		}
-	}
-	check := view.FormRow{Name: "with", Label: "Show", Kind: view.InputCheck}
-	for _, k := range agendaKinds {
-		check.Options = append(check.Options, view.Option{Value: k.value, Label: text(k.label), Selected: on[k.kind]})
-	}
-	rows = append(rows, view.FormRow{Name: "with", Kind: view.InputHidden, Value: ""}, check)
-	f := s.plainForm(base, "GET", rows...)
-	return &f
 }
 
 // todayQuery is the window of today: the week is the address without a view
@@ -1364,9 +1278,9 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	}), s.agendaPrintAction(c.listPath(), r.URL.Query()))
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	page.Bar.Range = s.agendaRange(tf, c.listPath(), filter.tag, kind, from, to, r.URL.Query())
-	on := agendaWith(r.URL.Query())
-	page.Bar.Show, page.Bar.Segments = s.agendaShow(c.listPath(), on, r.URL.Query()), []view.Action{}
+	page.Bar.Segments = []view.Action{}
 	page.Bar.Compact = s.compactForm(r, c.spec.segment, c.listPath())
+	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 
 	objs, bad, err := c.calQuery(r.Context(), c.spec.component, &from, &to)
 	if err != nil {
@@ -1374,29 +1288,11 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 		return page
 	}
 	items := c.listed(objs)
-	var shown []kinded
-	if on[view.KindEvent] {
-		shown = kindedAll(s.foldLinked(s.catalogOf(c.sess), view.KindEvent, filter.keep(view.KindEvent, items)), view.KindEvent)
-	}
-	// Tasks due and notes come from the same collection, each by its own
-	// component (s-agenda-1); a collection that holds none is simply silent.
-	for _, k := range []view.Kind{view.KindTask, view.KindNote} {
-		if !on[k] || !c.col.Has(k) {
-			continue
-		}
-		// Whole, not by time-range: a VTODO is placed by DUE and a VJOURNAL
-		// by DTSTART, and servers filter neither reliably (docs/servers.md).
-		// The window is applied here, where the date is read anyway.
-		more, moreBad, err := c.calQuery(r.Context(), recordKinds[segmentOf(k)].component, nil, nil)
-		if err != nil {
-			page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
-			continue
-		}
-		bad = append(bad, moreBad...)
-		shown = append(shown, kindedAll(filter.keep(k, c.listed(more)), k)...)
-	}
+	// The calendar shows events and nothing else (Typecase Р-56, note 45):
+	// tasks and notes live in their own sections.
+	shown := kindedAll(s.foldLinked(s.catalogOf(c.sess), view.KindEvent, filter.keep(view.KindEvent, items)), view.KindEvent)
 	var more []unreadable
-	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, shown, from, to, c.spec.segment, false)
+	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, shown, from, to, c.spec.segment, false, filter.tags)
 	events := eventsIn(page.Days)
 	page.Subtitle = agendaSubtitle(tf, connLabel(c.conn), from, to, &events)
 	if len(page.Days) == 0 && len(page.Notices) == 0 {
@@ -1433,7 +1329,7 @@ func kindedAll(items []listed, k view.Kind) []kinded {
 	return out
 }
 
-func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segment string, mark bool) ([]view.AgendaDay, int, []unreadable) {
+func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segment string, mark bool, tags func([]string) []view.Tag) ([]view.AgendaDay, int, []unreadable) {
 	tz := tf.tz
 	type occurrence struct {
 		at     time.Time
@@ -1446,32 +1342,6 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 	for _, it := range items {
 		o := it.obj
 		uid := cal.UID(o)
-		if it.kind != view.KindEvent {
-			// A task stands on the day it is due, a note on its date; one
-			// row each, no recurrence to expand here (S-11).
-			at := timelineWhen(it.kind, o, tz)
-			if at.IsZero() || at.Before(from) || !at.Before(to) {
-				continue
-			}
-			row := view.AgendaRow{
-				Kind:    it.kind,
-				Href:    s.route(it.from.recordPath(segmentOf(it.kind), uid)),
-				Target:  render.TargetDetails,
-				UID:     uid,
-				Time:    text(tf.timeLabel(at, false)),
-				Summary: text(titleOr(cal.Text(it.pick("SUMMARY"), "SUMMARY"), untitledOf(it.kind))),
-				State:   linkedState(it.listed),
-				Menu:    s.recordOps(it.from, recordKinds[segmentOf(it.kind)], uid, o.ETag).rowMenu(),
-			}
-			if it.kind == view.KindTask {
-				row.Badges = append(row.Badges, view.Badge{Label: "Due", Role: view.BadgeNeutral})
-			}
-			if mark {
-				row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
-			}
-			occs = append(occs, occurrence{at: at, order: string(it.from.stamp()) + "\x00" + it.from.listPath(segment), row: row})
-			continue
-		}
 		summary := titleOr(cal.Text(o, "SUMMARY"), "Untitled event")
 		tm, err := cal.TimingOf(o, tz)
 		var instants []time.Time
@@ -1493,6 +1363,16 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 		// Every occurrence is the one record: the series is edited and
 		// deleted whole.
 		menu := s.recordOps(it.from, recordKinds[segment], uid, o.ETag).rowMenu()
+		// What the Columns menu adds to the line (s-agenda-18): the event's
+		// categories and when it last changed.
+		var rowTags []view.Tag
+		if tags != nil {
+			rowTags = tags(categoriesOf(view.KindEvent, o))
+		}
+		var changed view.Text
+		if at := changedAt(o, tf.tz); !at.IsZero() {
+			changed = text(tf.shortStamp(at))
+		}
 		for _, at := range instants {
 			if at.Before(from) || !at.Before(to) {
 				continue
@@ -1508,6 +1388,8 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 				State:    linkedState(it.listed),
 				Badges:   agendaBadges(o, it.listed),
 				Sources:  linkedSources(it.listed),
+				Tags:     rowTags,
+				Changed:  changed,
 				Menu:     menu,
 			}}
 			if mark {

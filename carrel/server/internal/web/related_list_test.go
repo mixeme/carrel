@@ -173,7 +173,9 @@ func TestRelatedToIsTheFramesList(t *testing.T) {
 // from-typecase notes 19 and 44, s-tasks-11: Related to holds every
 // relation of the record — the first field of the frame draws three pills,
 // each with its own cross (task 145). A record not among the
-// loaded ones is a pill with its UID and the frame's line under it; a card
+// loaded ones is a pill with its UID and the frame's line under it; a
+// loaded record's pill carries the mark of its collection (note 46), which
+// the reading here steps over; a card
 // (a note a timeline wrote for a person) is its name and «contact». «By
 // UID…» opens a line for the UID in place of the field: its sample and its
 // line are the frame's.
@@ -186,7 +188,7 @@ func TestRelatedToOutsideTheLoadedIsTheFrame(t *testing.T) {
 	var fields []drawn
 	for _, m := range regexp.MustCompile(`(?s)<label>Related to</label>(.*?)</div>`).FindAllStringSubmatch(frame, -1) {
 		var d drawn
-		pills := regexp.MustCompile(`(?s)<span class="tc-tag tc-tag--pill">(.*?)</span>`).FindAllStringSubmatch(m[1], -1)
+		pills := regexp.MustCompile(`(?s)<span class="tc-tag tc-tag--pill">(?:<span class="tc-mark[^>]*></span>)?(.*?)</span>`).FindAllStringSubmatch(m[1], -1)
 		if d.pills = len(pills); d.pills > 0 {
 			d.pill = frameText(pills[0][1])
 		}

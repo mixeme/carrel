@@ -63,23 +63,27 @@ func TestAgendaByItsFrame(t *testing.T) {
 		!strings.Contains(r.Href, "view=range") || !strings.Contains(r.Href, "to=2026-08-16") {
 		t.Errorf("Range = %+v", r)
 	}
-	// Б7: Events · Tasks due · Notes — one GET form, Events ticked.
-	show := page.Bar.Show
-	if show == nil || show.Method != "GET" {
-		t.Fatalf("the ticks of the bar = %+v", show)
+	// The calendar shows events and nothing else (Typecase Р-56, note 45):
+	// where the ticks «Events · Tasks due · Notes» stood is Columns
+	// (s-agenda-18) — Time and Title always, Where, «Attendees and status»
+	// and Source ticked, Tags and Changed to add.
+	cols := page.Bar.Columns
+	if cols == nil || cols.Label != "Columns" || cols.Form.Method != "POST" || !strings.HasPrefix(cols.Form.Action, "/app/calendar/columns") {
+		t.Fatalf("Columns of the agenda = %+v", cols)
 	}
-	var with *view.FormRow
-	for i, r := range show.Sets[0].Rows {
-		if r.Name == "_csrf" {
-			t.Error("the GET form of the ticks carries the token")
+	var drawn []string
+	for _, it := range cols.Items {
+		mark := "-"
+		switch {
+		case it.Fixed && it.Aside == "always":
+			mark = "="
+		case it.On:
+			mark = "+"
 		}
-		if r.Name == "with" && r.Kind == view.InputCheck {
-			with = &show.Sets[0].Rows[i]
-		}
+		drawn = append(drawn, mark+string(it.Label))
 	}
-	if with == nil || len(with.Options) != 3 || !with.Options[0].Selected || with.Options[0].Label != "Events" ||
-		with.Options[1].Selected || with.Options[1].Label != "Tasks due" || with.Options[2].Label != "Notes" {
-		t.Errorf("the ticks = %+v", with)
+	if got := strings.Join(drawn, " "); got != "=Time =Title +Where +Attendees and status +Source -Tags -Changed" {
+		t.Errorf("the items of Columns = %q", got)
 	}
 	if len(page.Bar.Segments) != 0 {
 		t.Errorf("the switches are links still: %+v", page.Bar.Segments)
@@ -153,8 +157,14 @@ func TestAgendaByItsFrame(t *testing.T) {
 	if len(one.Subtitle) == 0 || !strings.HasPrefix(string(one.Subtitle[0].Text), "nextcloud · 10 – 16 August 2026") {
 		t.Errorf("one calendar's subtitle = %+v", one.Subtitle)
 	}
-	if one.Bar.Show == nil || one.Bar.Compact == nil || actionByID(one.Bar.Actions, "list.print") == nil {
-		t.Errorf("one calendar's bar: show %v, compact %v, actions %+v", one.Bar.Show, one.Bar.Compact, one.Bar.Actions)
+	if one.Bar.Columns == nil || one.Bar.Compact == nil || actionByID(one.Bar.Actions, "list.print") == nil {
+		t.Errorf("one calendar's bar: columns %v, compact %v, actions %+v", one.Bar.Columns, one.Bar.Compact, one.Bar.Actions)
+	}
+	// One calendar names its source in its head: its menu offers no Source.
+	for _, it := range one.Bar.Columns.Items {
+		if it.ID == "source" {
+			t.Errorf("one calendar's Columns offers Source: %+v", one.Bar.Columns.Items)
+		}
 	}
 }
 

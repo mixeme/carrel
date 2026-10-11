@@ -333,6 +333,7 @@
             "add": null,
             "error": "",
             "extra": null,
+            "follows": "start.date",
             "hint": "",
             "kind": "date",
             "label": "End date",
@@ -345,8 +346,10 @@
           },
           {
             "add": null,
+            "day": "end.date",
             "error": "",
             "extra": null,
+            "follows": "start.time",
             "hint": "",
             "kind": "time",
             "label": "End time",

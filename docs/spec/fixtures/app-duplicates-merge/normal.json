@@ -170,6 +170,7 @@
       "name": "",
       "options": [
         "vera@example.net",
+        "vera.l@work.example",
         "v.lebedeva@example.org"
       ],
       "property": "Email addresses",

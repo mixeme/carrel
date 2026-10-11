@@ -36,6 +36,11 @@ var listColumns = map[string][]listColumn{
 		{"name", "Name", true}, {"phone", "Phone", true}, {"email", "Email", true}, {"org", "Organisation", true},
 		{"birthday", "Birthday", false}, {"tags", "Tags", false}, {"changed", "Changed", false}, {"source", "Source", true},
 	},
+	// The line of an agenda (s-agenda-18): Time and Title stand always.
+	"calendar": {
+		{"time", "Time", true}, {"title", "Title", true}, {"where", "Where", true}, {"attendees", "Attendees and status", true},
+		{"source", "Source", true}, {"tags", "Tags", false}, {"changed", "Changed", false},
+	},
 	"tasks": {
 		{"title", "Title", true}, {"due", "Due", true}, {"complete", "Complete", true}, {"source", "Source", true},
 		{"tags", "Tags", false}, {"priority", "Priority", false}, {"status", "Status", false}, {"changed", "Changed", false},
@@ -62,7 +67,24 @@ var listColumns = map[string][]listColumn{
 // recordSections are the sections of records, whose lists are a combined
 // view and one collection each; only the combined view offers Source — one
 // collection names its source in its head (note 25).
-var recordSections = []string{"contacts", "tasks", "notes"}
+var recordSections = []string{"contacts", "calendar", "tasks", "notes"}
+
+// fixedColumns is how many of a section's columns stand always, first and
+// in their order: one — the row's name — unless said here.
+var fixedColumns = map[string]int{"calendar": 2}
+
+// fixedOf are the ids of the columns of a section that stand always.
+func fixedOf(segment string) []string {
+	n := fixedColumns[segment]
+	if n == 0 {
+		n = 1
+	}
+	var out []string
+	for _, c := range listColumns[segment][:min(n, len(listColumns[segment]))] {
+		out = append(out, c.id)
+	}
+	return out
+}
 
 // sectionKinds are the kinds whose orders (listSorts) a section's list is
 // sorted by.
@@ -121,15 +143,19 @@ func knownColumns(segment string, ids []string) []string {
 	for _, c := range cols {
 		known[c.id] = true
 	}
-	seen := map[string]bool{cols[0].id: true}
-	out := []string{cols[0].id}
+	seen := map[string]bool{}
+	out := fixedOf(segment)
+	for _, id := range out {
+		seen[id] = true
+	}
+	fixed := len(out)
 	for _, id := range ids {
 		if known[id] && !seen[id] {
 			seen[id] = true
 			out = append(out, id)
 		}
 	}
-	if len(out) == 1 && !knownAny(known, ids) {
+	if len(out) == fixed && !knownAny(known, ids) {
 		return nil
 	}
 	return out
@@ -209,7 +235,7 @@ func (s *Server) columnsMenu(r *http.Request, csrf view.FormRow, segment, action
 	}
 	item := func(c listColumn, on bool) view.ColumnItem {
 		it := view.ColumnItem{ID: c.id, Label: text(c.label), On: on}
-		if c.id == cols[0].id {
+		if slices.Contains(fixedOf(segment), c.id) {
 			it.On, it.Fixed, it.Aside = true, true, "always"
 		}
 		return it
@@ -263,7 +289,7 @@ func (s *Server) saveColumns(w http.ResponseWriter, r *http.Request, segment, ba
 		cookie.MaxAge = -1
 		shown = columnIDs(offeredColumns(segment, single), true)
 	} else {
-		ids := knownColumns(segment, append([]string{listColumns[segment][0].id}, cols...))
+		ids := knownColumns(segment, append(fixedOf(segment), cols...))
 		if single && slices.Contains(recordSections, segment) && !slices.Contains(ids, "source") {
 			ids = keptSource(r, segment, ids)
 		}

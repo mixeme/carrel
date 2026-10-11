@@ -35,7 +35,95 @@
         "method": "GET"
       }
     ],
-    "columns": null,
+    "columns": {
+      "form": {
+        "action": "/app/calendar/a-nc-home/lichnyj/columns?from=2026-08-10",
+        "actions": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/lichnyj/columns?from=2026-08-10",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/lichnyj/columns?from=2026-08-10",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "icon": "i-cols",
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "time",
+          "label": "Time",
+          "on": true
+        },
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "where",
+          "label": "Where",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "attendees",
+          "label": "Attendees and status",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        }
+      ],
+      "label": "Columns"
+    },
     "compact": {
       "action": "/app/calendar/a-nc-home/lichnyj",
       "actions": [],
@@ -221,75 +309,6 @@
     },
     "segments": [],
     "selected": 0,
-    "show": {
-      "action": "/app/calendar/a-nc-home/lichnyj",
-      "actions": [],
-      "errors": [],
-      "method": "GET",
-      "sets": [
-        {
-          "legend": "",
-          "rows": [
-            {
-              "add": null,
-              "error": "",
-              "extra": null,
-              "hint": "",
-              "kind": "hidden",
-              "label": "",
-              "name": "from",
-              "options": [],
-              "readOnly": false,
-              "required": false,
-              "value": "2026-08-10"
-            },
-            {
-              "add": null,
-              "error": "",
-              "extra": null,
-              "hint": "",
-              "kind": "hidden",
-              "label": "",
-              "name": "with",
-              "options": [],
-              "readOnly": false,
-              "required": false,
-              "value": ""
-            },
-            {
-              "add": null,
-              "error": "",
-              "extra": null,
-              "hint": "",
-              "kind": "check",
-              "label": "Show",
-              "name": "with",
-              "options": [
-                {
-                  "label": "Events",
-                  "selected": true,
-                  "value": "events"
-                },
-                {
-                  "label": "Tasks due",
-                  "selected": false,
-                  "value": "tasks"
-                },
-                {
-                  "label": "Notes",
-                  "selected": false,
-                  "value": "notes"
-                }
-              ],
-              "readOnly": false,
-              "required": false,
-              "value": ""
-            }
-          ],
-          "unfold": null
-        }
-      ]
-    },
     "total": null
   },
   "days": [
@@ -307,6 +326,7 @@
               "role": "neutral"
             }
           ],
+          "changed": "7 Aug 15:15",
           "colour": "",
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
           "kind": "event",
@@ -380,6 +400,18 @@
           "stamp": "",
           "state": "ok",
           "summary": "Синк-ап по релизу",
+          "tags": [
+            {
+              "href": "/app/calendar/a-nc-home/lichnyj?from=2026-08-10\u0026tag=release",
+              "label": "release",
+              "on": false
+            },
+            {
+              "href": "/app/calendar/a-nc-home/lichnyj?from=2026-08-10\u0026tag=team",
+              "label": "team",
+              "on": false
+            }
+          ],
           "target": "details",
           "time": "10:00",
           "uid": "8f1c-4a02-b7d3"
@@ -392,6 +424,7 @@
       "rows": [
         {
           "badges": [],
+          "changed": "9 Aug 20:30",
           "colour": "",
           "href": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27",
           "kind": "event",
@@ -465,6 +498,7 @@
           "stamp": "",
           "state": "ok",
           "summary": "Забрать документы",
+          "tags": [],
           "target": "details",
           "time": "18:00",
           "uid": "1d55-90fe-3c27"

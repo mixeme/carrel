@@ -673,7 +673,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 		if err != nil {
 			return err
 		}
-		page.Days, _, _ = s.agendaDays(tf, kindedAll(c.listed(objs), view.KindEvent), from, to, c.spec.segment, false)
+		page.Days, _, _ = s.agendaDays(tf, kindedAll(c.listed(objs), view.KindEvent), from, to, c.spec.segment, false, nil)
 		for i := range page.Days {
 			for j := range page.Days[i].Rows {
 				page.Days[i].Rows[j].Href, page.Days[i].Rows[j].Menu = "", nil

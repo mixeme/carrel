@@ -80,7 +80,101 @@
         "method": "GET"
       }
     ],
-    "columns": null,
+    "columns": {
+      "form": {
+        "action": "/app/calendar/columns?task=t-task",
+        "actions": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/calendar/columns?task=t-task",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/calendar/columns?task=t-task",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "icon": "i-cols",
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "time",
+          "label": "Time",
+          "on": true
+        },
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "where",
+          "label": "Where",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "attendees",
+          "label": "Attendees and status",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "source",
+          "label": "Source",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        }
+      ],
+      "label": "Columns"
+    },
     "compact": {
       "action": "/app/calendar",
       "actions": [],
@@ -266,62 +360,6 @@
     },
     "segments": [],
     "selected": 0,
-    "show": {
-      "action": "/app/calendar",
-      "actions": [],
-      "errors": [],
-      "method": "GET",
-      "sets": [
-        {
-          "legend": "",
-          "rows": [
-            {
-              "add": null,
-              "error": "",
-              "extra": null,
-              "hint": "",
-              "kind": "hidden",
-              "label": "",
-              "name": "with",
-              "options": [],
-              "readOnly": false,
-              "required": false,
-              "value": ""
-            },
-            {
-              "add": null,
-              "error": "",
-              "extra": null,
-              "hint": "",
-              "kind": "check",
-              "label": "Show",
-              "name": "with",
-              "options": [
-                {
-                  "label": "Events",
-                  "selected": true,
-                  "value": "events"
-                },
-                {
-                  "label": "Tasks due",
-                  "selected": false,
-                  "value": "tasks"
-                },
-                {
-                  "label": "Notes",
-                  "selected": false,
-                  "value": "notes"
-                }
-              ],
-              "readOnly": false,
-              "required": false,
-              "value": ""
-            }
-          ],
-          "unfold": null
-        }
-      ]
-    },
     "total": null
   },
   "days": [
@@ -335,6 +373,7 @@
               "role": "neutral"
             }
           ],
+          "changed": "1 Jun 09:00",
           "colour": "#3f6e8c",
           "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
           "kind": "event",
@@ -408,6 +447,7 @@
           "stamp": "nextcloud · Работа",
           "state": "ok",
           "summary": "Дежурство: первая линия",
+          "tags": [],
           "target": "details",
           "time": "all day",
           "uid": "2f04-8b71-e39a"
@@ -423,6 +463,7 @@
               "role": "neutral"
             }
           ],
+          "changed": "7 Aug 15:15",
           "colour": "#4a6b52",
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
           "kind": "event",
@@ -496,6 +537,18 @@
           "stamp": "nextcloud · Личный",
           "state": "ok",
           "summary": "Синк-ап по релизу",
+          "tags": [
+            {
+              "href": "/app/calendar?tag=release\u0026task=t-task",
+              "label": "release",
+              "on": false
+            },
+            {
+              "href": "/app/calendar?tag=team\u0026task=t-task",
+              "label": "team",
+              "on": false
+            }
+          ],
           "target": "details",
           "time": "10:00",
           "uid": "8f1c-4a02-b7d3"
@@ -507,6 +560,7 @@
               "role": "alert"
             }
           ],
+          "changed": "8 Aug 12:00",
           "colour": "#3f6e8c",
           "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0",
           "kind": "event",
@@ -580,6 +634,7 @@
           "stamp": "nextcloud · Работа",
           "state": "ok",
           "summary": "Созвон с подрядчиком",
+          "tags": [],
           "target": "details",
           "time": "15:00",
           "uid": "7ae3-1c48-55b0"
@@ -592,6 +647,7 @@
       "rows": [
         {
           "badges": [],
+          "changed": "9 Aug 20:30",
           "colour": "#4a6b52",
           "href": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27",
           "kind": "event",
@@ -665,6 +721,7 @@
           "stamp": "nextcloud · Личный",
           "state": "ok",
           "summary": "Забрать документы",
+          "tags": [],
           "target": "details",
           "time": "18:00",
           "uid": "1d55-90fe-3c27"

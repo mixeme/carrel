@@ -14,13 +14,7 @@ type ListBar struct {
 	// адрес списка — скрытые поля запроса списка, скрытое compact=0 и
 	// отметка compact с одним вариантом «1» (Selected — строки плотные);
 	// выбор помнит кука раздела (S-9.6); nil — переключателя нет
-	Compact *Form `json:"compact"`
-	// Show — отметки «Events · Tasks due · Notes» агенды (s-agenda-1): форма
-	// GET на адрес агенды — скрытые поля окна и запроса, скрытое пустое with
-	// и отметка with (InputCheck) с вариантами events, tasks, notes; Selected
-	// — род на ленте. Адрес без with — одни события; nil — у списка отметок
-	// нет
-	Show     *Form    `json:"show"`
+	Compact  *Form    `json:"compact"`
 	Segments []Action `json:"segments"` // Open / Done / All; All / Contacts / Events / …
 	Range    *Range   `json:"range"`    // диапазон дат там, где он есть
 	Actions  []Action `json:"actions"`  // операции над выделенным
@@ -129,7 +123,7 @@ type AgendaDay struct {
 	Rows   []AgendaRow `json:"rows"`
 }
 type AgendaRow struct {
-	Kind Kind   `json:"kind"` // event, task (срок) или note на одной ленте
+	Kind Kind   `json:"kind"` // event: календарь показывает только события (Typecase Р-56)
 	Href string `json:"href"`
 	// Target — details: строка открывает запись в панели подробностей —
 	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
@@ -144,8 +138,13 @@ type AgendaRow struct {
 	// вхождения, «tentative» (тревога) и «cancelled» статуса, «linked ×2»,
 	// «4 attendees» (участники с организатором), «repeats weekly»; строка
 	// кадра рисует первый (s-agenda-1)
-	Badges  []Badge     `json:"badges"`
-	Sources []Stamp     `json:"sources"`
+	Badges  []Badge `json:"badges"`
+	Sources []Stamp `json:"sources"`
+	// Tags и Changed — столбцы, которые добавляет меню Columns агенды
+	// (s-agenda-18): категории события и когда оно менялось («2 Aug»,
+	// C-10); пусто — у события их нет или сервер не сказал
+	Tags    []Tag       `json:"tags"`
+	Changed Text        `json:"changed"`
 	Menu    []MenuItem  `json:"menu"`
 	State   RecordState `json:"state"`
 	On      bool        `json:"on"` // строка открыта в панели подробностей (is-on, s-agenda-1)

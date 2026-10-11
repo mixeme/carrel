@@ -116,46 +116,12 @@ func TestAgendaWindows(t *testing.T) {
 	}
 }
 
-// showQuery is the address the ticks of the bar (ListBar.Show) send, as a
-// browser sends the form: every hidden field — the empty with too — and the
-// kinds ticked.
-func showQuery(t *testing.T, base string, form *view.Form, kinds ...string) string {
-	t.Helper()
-	if form == nil || form.Method != "GET" {
-		t.Fatalf("the ticks of the bar = %+v", form)
-	}
-	q := url.Values{}
-	for _, row := range form.Sets[0].Rows {
-		if row.Kind == view.InputHidden {
-			q.Add(row.Name, string(row.Value))
-		}
-	}
-	for _, k := range kinds {
-		q.Add("with", k)
-	}
-	return base + "?" + q.Encode()
-}
-
-// showTicks are the kinds the ticks of the bar say are on the line.
-func showTicks(p view.AgendaPage) string {
-	var on []string
-	for _, row := range p.Bar.Show.Sets[0].Rows {
-		if row.Kind != view.InputCheck {
-			continue
-		}
-		for _, o := range row.Options {
-			if o.Selected {
-				on = append(on, o.Value)
-			}
-		}
-	}
-	return strings.Join(on, ",")
-}
-
-// review Р-12 (s-agenda-1, U-6), the client's scan Б7: events, tasks due and
-// notes stand on the same line of days, each behind its own tick of one GET
-// form; the plain address is the events.
-func TestAgendaTasksAndNotesOnTheLine(t *testing.T) {
+// Typecase Р-56 (note 45; the owner's decision of 11.10.2026): the calendar
+// shows events and nothing else — tasks and notes live in their own
+// sections, and only the screens that cross kinds (search, duplicates, a
+// person's timeline) show them together. An address that still carries the
+// ticks of before (with=tasks) is the calendar all the same.
+func TestTheCalendarShowsEventsAndNothingElse(t *testing.T) {
 	tz := time.UTC
 	today := time.Now().In(tz)
 	at := func(h int) string {
@@ -163,76 +129,63 @@ func TestAgendaTasksAndNotesOnTheLine(t *testing.T) {
 	}
 	srv := searchServer(t)
 	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work", SupportedComponentSet: []string{"VEVENT", "VTODO", "VJOURNAL"}})
-	srv.Seed(searchWork+"e.ics", ics("BEGIN:VEVENT\nUID:e\nDTSTAMP:20260101T000000Z\nDTSTART:"+at(10)+"\nDTEND:"+at(11)+"\nSUMMARY:Standup\nEND:VEVENT"))
+	srv.Seed(searchWork+"e.ics", ics("BEGIN:VEVENT\nUID:e\nDTSTAMP:20260101T000000Z\nDTSTART:"+at(10)+"\nDTEND:"+at(11)+"\nSUMMARY:Standup\nCATEGORIES:team\nEND:VEVENT"))
 	srv.Seed(searchWork+"t.ics", ics("BEGIN:VTODO\nUID:t\nDTSTAMP:20260101T000000Z\nDUE:"+at(15)+"\nSUMMARY:Send the report\nEND:VTODO"))
 	srv.Seed(searchWork+"n.ics", ics("BEGIN:VJOURNAL\nUID:n\nDTSTAMP:20260101T000000Z\nDTSTART:"+at(9)+"\nSUMMARY:Morning note\nEND:VJOURNAL"))
 	f := connectFixture(t, srv, searchWork, nil)
 	list := f.path("calendar")
 
-	page := decode[view.AgendaPage](t, f.h.do(get(list, f.sess)))
-	if got := showTicks(page); got != "events" {
-		t.Fatalf("the ticks of the plain address = %q", got)
-	}
-	if got := agendaTitles(page); got != "Standup" {
-		t.Errorf("the line of the plain address = %q", got)
-	}
-
-	withTasks := decode[view.AgendaPage](t, f.h.do(get(showQuery(t, list, page.Bar.Show, "events", "tasks"), f.sess)))
-	if got := agendaTitles(withTasks); got != "Standup,Send the report" {
-		t.Errorf("events and tasks = %q", got)
-	}
-	if got := showTicks(withTasks); got != "events,tasks" {
-		t.Errorf("the ticks do not say what is on: %q", got)
-	}
-	var kinds []string
-	for _, d := range withTasks.Days {
-		for _, r := range d.Rows {
-			kinds = append(kinds, string(r.Kind))
+	for _, address := range []string{list, list + "?with=events&with=tasks&with=notes", list + "?with="} {
+		page := decode[view.AgendaPage](t, f.h.do(get(address, f.sess)))
+		if got := agendaTitles(page); got != "Standup" {
+			t.Errorf("%s: the line = %q", address, got)
+		}
+		for _, d := range page.Days {
+			for _, r := range d.Rows {
+				if r.Kind != view.KindEvent {
+					t.Errorf("%s: a row of kind %q", address, r.Kind)
+				}
+			}
 		}
 	}
-	if !strings.Contains(strings.Join(kinds, ","), "task") {
-		t.Errorf("rows carry no kind: %v", kinds)
+	// What Columns adds is in the row: the event's tags.
+	page := decode[view.AgendaPage](t, f.h.do(get(list, f.sess)))
+	if row := page.Days[0].Rows[0]; len(row.Tags) != 1 || row.Tags[0].Label != "team" {
+		t.Errorf("the tags of the row = %+v", row.Tags)
 	}
 
-	// All three, then the notes alone: Events is a tick like the others
-	// (s-agenda-1 draws it ticked, not locked).
-	all := decode[view.AgendaPage](t, f.h.do(get(showQuery(t, list, withTasks.Bar.Show, "events", "tasks", "notes"), f.sess)))
-	if got := agendaTitles(all); !strings.Contains(got, "Morning note") || !strings.Contains(got, "Send the report") || !strings.Contains(got, "Standup") {
-		t.Fatalf("all three = %q", got)
-	}
-	notesOnly := decode[view.AgendaPage](t, f.h.do(get(showQuery(t, list, all.Bar.Show, "notes"), f.sess)))
-	if got := agendaTitles(notesOnly); got != "Morning note" {
-		t.Errorf("the notes alone = %q", got)
-	}
-	// Nothing ticked is obeyed: the form spoke.
-	none := decode[view.AgendaPage](t, f.h.do(get(showQuery(t, list, all.Bar.Show), f.sess)))
-	if got := agendaTitles(none); got != "" || showTicks(none) != "" {
-		t.Errorf("nothing ticked = %q (%q)", got, showTicks(none))
+	tickAll(t, f.h, f.sess)
+	agendaPoll := func(p view.AgendaPage) *view.PollBar { return p.Poll }
+	for _, address := range []string{"/app/calendar", "/app/calendar?with=events&with=tasks"} {
+		if got := agendaTitles(combined(t, f.h, f.sess, address, agendaPoll)); got != "Standup" {
+			t.Errorf("%s: the combined line = %q", address, got)
+		}
 	}
 }
 
-// The ticks work the same in the combined calendar: the poll asks every
-// ticked calendar for what they turned on (S-14).
-func TestCombinedAgendaSwitches(t *testing.T) {
-	tz := time.UTC
-	today := time.Now().In(tz)
-	at := func(h int) string {
-		return time.Date(today.Year(), today.Month(), today.Day(), h, 0, 0, 0, tz).Format("20060102T150405Z")
+// The choice of the agenda's columns is this browser's, kept as the other
+// lists keep theirs (S-9.6): Time and Title are not the form's to take away.
+func TestAgendaColumnsAreChosen(t *testing.T) {
+	f := calendarFixture(t, nil)
+	list := f.path("calendar")
+	page := decode[view.AgendaPage](t, f.h.do(get(list, f.sess)))
+	form := url.Values{"col": {"tags", "where"}}
+	resp := f.h.do(postForm(page.Bar.Columns.Form.Action, f.sess, form))
+	if resp.Code != 303 {
+		t.Fatalf("columns: %d %s", resp.Code, resp.Body.String())
 	}
-	srv := searchServer(t)
-	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work", SupportedComponentSet: []string{"VEVENT", "VTODO"}})
-	srv.Seed(searchWork+"e.ics", ics("BEGIN:VEVENT\nUID:e\nDTSTAMP:20260101T000000Z\nDTSTART:"+at(10)+"\nDTEND:"+at(11)+"\nSUMMARY:Standup\nEND:VEVENT"))
-	srv.Seed(searchWork+"t.ics", ics("BEGIN:VTODO\nUID:t\nDTSTAMP:20260101T000000Z\nDUE:"+at(15)+"\nSUMMARY:Send the report\nEND:VTODO"))
-	f := connectFixture(t, srv, searchWork, nil)
-	tickAll(t, f.h, f.sess)
-
-	agendaPoll := func(p view.AgendaPage) *view.PollBar { return p.Poll }
-	page := combined(t, f.h, f.sess, "/app/calendar", agendaPoll)
-	with := combined(t, f.h, f.sess, showQuery(t, "/app/calendar", page.Bar.Show, "events", "tasks"), agendaPoll)
-	if got := agendaTitles(with); !strings.Contains(got, "Send the report") || !strings.Contains(got, "Standup") {
-		t.Errorf("the combined agenda with tasks on = %q", got)
+	req := get(list, f.sess)
+	for _, c := range resp.Result().Cookies() {
+		req.AddCookie(c)
 	}
-	if got := agendaTitles(page); strings.Contains(got, "Send the report") {
-		t.Errorf("the tick was off and the task is on the line: %q", got)
+	page = decode[view.AgendaPage](t, f.h.do(req))
+	var on []string
+	for _, it := range page.Bar.Columns.Items {
+		if it.On {
+			on = append(on, it.ID)
+		}
+	}
+	if got := strings.Join(on, ","); got != "time,title,tags,where" {
+		t.Errorf("columns shown = %q", got)
 	}
 }

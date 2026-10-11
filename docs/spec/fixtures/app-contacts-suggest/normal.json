@@ -18,6 +18,22 @@
     },
     {
       "add": false,
+      "book": "Архив",
+      "colour": "#a05a2c",
+      "email": "vera.l@work.example",
+      "name": [
+        {
+          "mark": "strong",
+          "text": "Ве"
+        },
+        {
+          "text": "ра Лебедева"
+        }
+      ],
+      "value": "mailto:vera.l@work.example"
+    },
+    {
+      "add": false,
       "book": "Контакты",
       "colour": "#4a6b52",
       "email": "v.lebedeva@example.org",

@@ -23,13 +23,15 @@ const (
 	formDelete = "delete"
 )
 
-// The screen's words (U-1.3) for the shell: the mark, the search, the rail.
+// The screen's words (U-1.3) for the shell: the mark, the search, the rail;
+// and what the choice of columns sends (C-6.4 Columns).
 var (
 	top = bind.TopWords{
 		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
 		Search: "Search everything…",
 	}
-	rail = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
+	rail    = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
+	columns = bind.ColumnWords{Name: "col", Reset: "default", Drag: "drag"}
 )
 
 // The screen's words (U-1.3): the dash of a row with no place, the lead of a
@@ -247,11 +249,12 @@ func bar(p *view.AgendaPage) w.Bar {
 			twins = append(twins, twin)
 		}
 	}
-	if f := b.Show; f != nil {
-		show := bind.CheckForm(*f, "Apply")
-		show.Tertiary = true
-		items = append(items, w.BarSep{Secondary: true}, show)
-		menu = append(menu, show, w.MenuSep{Tertiary: true})
+	if b.Columns != nil {
+		// Columns stands where the ticks of the kinds stood (s-agenda-1,
+		// Typecase Р-56): the calendar shows events and nothing else.
+		cols := bind.Columns(*b.Columns, columns)
+		cols.Menu.Pop = w.MenuUnder
+		items = append(items, cols)
 	}
 	for _, t := range twins {
 		menu = append(menu, t)
