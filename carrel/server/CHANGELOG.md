@@ -17,6 +17,35 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.189 — 2026-10-11
+
+A write is read back whole wherever it is checked (Б1 of the audit of
+11.10.2026, `docs/plan/scans/silent-choices.md`).
+
+### Fixed
+
+- **A move no longer deletes the original of a record the other server
+  did not keep whole.** A record or a collection carried to another server
+  was compared there by the properties of its main component alone: a
+  reminder that server dropped, an occurrence changed by hand it no longer
+  tied to its day, went unseen, and the original was deleted. Now the copy
+  is read back with its reminders and the exceptions of its series, and a
+  loss keeps the original: «Copied, and the original kept», naming `VALARM`,
+  `EXDATE` or `RECURRENCE-ID`.
+- **A lost reminder is reported after every write**, not only after a move:
+  an edit, a merge of duplicates (the others are kept), an address rewritten
+  in other records. A reminder is the same reminder when it does the same
+  thing at the same time — a server that spells `-PT15M` as `-PT900S`, or
+  adds its own marks to it, has lost nothing.
+
+### For developers
+
+- `writeLoss` (`internal/web/record_edit.go`) is the one comparison of a
+  write with what was read back; nothing calls `model.CompareAfterPut` for
+  that beside it. `cal.MissingAlarms`, `cal.AlarmLoss`.
+- Not run against the live servers: a server that rewrites reminders will
+  now say `VALARM` in its loss report.
+
 ## v0.2.188 — 2026-10-11
 
 A save is the edit and nothing else (the owner's decision of 11.10.2026,

@@ -103,3 +103,45 @@ func TestSetAlarmsLeavesOverridesAlone(t *testing.T) {
 		t.Errorf("encoded:\n%s", got)
 	}
 }
+
+// A reminder is known by what it does and when, not by how a server spells
+// it or what it adds of its own (Б1 of the audit of 11.10.2026).
+func TestMissingAlarms(t *testing.T) {
+	record := func(alarms string) *model.Object {
+		t.Helper()
+		doc := "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//t//EN\r\nBEGIN:VEVENT\r\nUID:a\r\nDTSTAMP:20260101T000000Z\r\n" +
+			"DTSTART:20260112T100000Z\r\nSUMMARY:Duty\r\n" + strings.ReplaceAll(alarms, "\n", "\r\n") + "END:VEVENT\r\nEND:VCALENDAR\r\n"
+		obj, err := Parse("/c/a.ics", "e1", strings.NewReader(doc))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return obj
+	}
+	quarter := "BEGIN:VALARM\nACTION:DISPLAY\nTRIGGER:-PT15M\nDESCRIPTION:Soon\nEND:VALARM\n"
+	hour := "BEGIN:VALARM\nACTION:EMAIL\nTRIGGER;RELATED=END:-PT1H\nDESCRIPTION:Soon\nEND:VALARM\n"
+	sent := record(quarter + hour)
+	for _, tc := range []struct {
+		name    string
+		got     string
+		missing int
+	}{
+		{"kept as sent", quarter + hour, 0},
+		{"kept in another spelling, with the server's own marks",
+			"BEGIN:VALARM\nUID:x-1\nACTION:display\nTRIGGER;VALUE=DURATION:-PT900S\nX-MOZ-LASTACK:20260101T000000Z\nEND:VALARM\n" + hour, 0},
+		{"one gone", hour, 1},
+		{"both gone", "", 2},
+		{"the trigger gone", "BEGIN:VALARM\nACTION:DISPLAY\nDESCRIPTION:Soon\nEND:VALARM\n" + hour, 1},
+		{"counted from the start now", quarter + "BEGIN:VALARM\nACTION:EMAIL\nTRIGGER:-PT1H\nDESCRIPTION:Soon\nEND:VALARM\n", 1},
+		{"another action", "BEGIN:VALARM\nACTION:AUDIO\nTRIGGER:-PT15M\nEND:VALARM\n" + hour, 1},
+	} {
+		if got := MissingAlarms(sent, record(tc.got)); got != tc.missing {
+			t.Errorf("%s: %d missing, want %d", tc.name, got, tc.missing)
+		}
+	}
+	if lost := AlarmLoss([]string{"X-CUSTOM"}, sent, record(hour)); len(lost) != 2 || lost[1] != "VALARM" {
+		t.Errorf("AlarmLoss = %v", lost)
+	}
+	if lost := AlarmLoss(nil, sent, record(quarter+hour)); lost != nil {
+		t.Errorf("AlarmLoss of nothing lost = %v", lost)
+	}
+}

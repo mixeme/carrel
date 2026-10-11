@@ -521,7 +521,7 @@ func (m *collectionMove) readBack(ctx context.Context, sent []transferred) ([]vi
 			lost = append(lost, text(t.name+" · not readable after it was written"))
 			continue
 		}
-		if loss := model.CompareAfterPut(m.dest.ID, t.sent, back, m.sess.Losses()); loss != nil {
+		if loss := writeLoss(m.dest.ID, t.sent, back, m.sess.Losses(), false); loss != nil {
 			lost = append(lost, text(t.name+" · "+strings.Join(loss.Properties, ", ")))
 		}
 	}

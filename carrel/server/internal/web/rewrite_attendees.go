@@ -621,7 +621,7 @@ func (s *Server) applyRewrite(ctx context.Context, sess *session.Session, p *rew
 		dropWholeReads(sess, src.conn.ID, src.col.Path)
 		out.written++
 		if got, err := src.cal.Get(ctx, rec.Path); err == nil {
-			if loss := model.CompareAfterPut(src.conn.ID, sent, got, sess.Losses()); loss != nil {
+			if loss := writeLoss(src.conn.ID, sent, got, sess.Losses(), false); loss != nil {
 				out.lost = append(out.lost, name+" · "+rec.Where+": "+strings.Join(loss.Properties, ", "))
 			}
 		}

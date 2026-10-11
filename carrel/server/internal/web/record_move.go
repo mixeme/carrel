@@ -327,11 +327,7 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 	dest.noteWrite(got.Path, got)
 	// An identity the server chose is not a loss: the UID was Carrel's to
 	// give, never the person's (S-7.1).
-	compare := model.CompareAfterPut
-	if landed != uid {
-		compare = model.CompareAfterCreate
-	}
-	if loss := compare(dest.conn.ID, sent, got, c.sess.Losses()); loss != nil {
+	if loss := writeLoss(dest.conn.ID, sent, got, c.sess.Losses(), landed != uid); loss != nil {
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.keptNotice(dest, landed, "Copied, and the original kept",
 			"The server of "+collectionLabel(dest.col)+" did not keep "+strings.Join(loss.Properties, ", ")+
 				". The original stays here, so nothing is lost; delete it yourself if the copy is enough.")))
@@ -532,7 +528,7 @@ func (s *Server) copiedWithOwnUID(w http.ResponseWriter, r *http.Request, c, des
 		dest.noteWrite(sent.Path, sent)
 	} else {
 		dest.noteWrite(got.Path, got)
-		if loss := model.CompareAfterPut(dest.conn.ID, sent, got, c.sess.Losses()); loss != nil {
+		if loss := writeLoss(dest.conn.ID, sent, got, c.sess.Losses(), false); loss != nil {
 			body += " That server did not keep " + strings.Join(loss.Properties, ", ") + " in the copy; the original still holds it."
 		}
 	}

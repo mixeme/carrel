@@ -104,3 +104,66 @@ func SetAlarms(obj *model.Object, alarms []Alarm) (*model.Object, error) {
 	}
 	return model.NewCalendarObject(obj.Path, obj.ETag, main.Name, obj.Props(), buf.Bytes()), nil
 }
+
+// alarmKey is what makes a reminder the reminder it is to the person: what
+// it does, and when — the offset it names, from the start or from the end,
+// or the instant. How a server spells it, and what it adds of its own (a
+// UID, when it was last acknowledged), is not part of it.
+func alarmKey(a Alarm) string {
+	action := ""
+	if a.comp != nil {
+		action = strings.ToUpper(strings.TrimSpace(propText(a.comp.Props, ical.PropAction)))
+	}
+	when := strings.ToUpper(strings.TrimSpace(a.Trigger))
+	if d, ok := a.Offset(); ok && when != "" {
+		when = d.String()
+	}
+	from := "start"
+	switch {
+	case a.Absolute:
+		from = "at"
+	case a.RelatedEnd:
+		from = "end"
+	}
+	return action + "\x00" + from + "\x00" + when
+}
+
+// MissingAlarms counts the reminders of sent that got — the record as its
+// server keeps it after the write — no longer has, each as often as it
+// stands. A record that cannot be read for its reminders has none.
+func MissingAlarms(sent, got *model.Object) int {
+	want, err := Alarms(sent)
+	if err != nil {
+		return 0
+	}
+	have, _ := Alarms(got)
+	left := map[string]int{}
+	for _, a := range have {
+		left[alarmKey(a)]++
+	}
+	missing := 0
+	for _, a := range want {
+		if k := alarmKey(a); left[k] > 0 {
+			left[k]--
+		} else {
+			missing++
+		}
+	}
+	return missing
+}
+
+// AlarmLoss adds «VALARM» to the list of what a server did not keep when a
+// reminder of sent is gone from got or is no longer the reminder it was: the
+// comparison of a write reads the properties of the record, and a reminder
+// is a component inside it.
+func AlarmLoss(lost []string, sent, got *model.Object) []string {
+	if MissingAlarms(sent, got) == 0 {
+		return lost
+	}
+	for _, p := range lost {
+		if p == ical.CompAlarm {
+			return lost
+		}
+	}
+	return append(lost, ical.CompAlarm)
+}

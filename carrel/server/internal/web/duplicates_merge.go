@@ -426,7 +426,7 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	kept.noteWrite(got.Path, got)
-	if loss := model.CompareAfterPut(kept.conn.ID, merged, got, sess.Losses()); loss != nil {
+	if loss := writeLoss(kept.conn.ID, merged, got, sess.Losses(), false); loss != nil {
 		s.mergeResult(w, r, sess, mr, nil, others, view.Notice{
 			Role: view.NoticeAlert, Title: "Written, but nothing was deleted",
 			Body: text("The server of " + collectionLabel(kept.col) + " did not keep " + strings.Join(loss.Properties, ", ") +

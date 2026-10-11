@@ -3196,7 +3196,7 @@ func (s *Server) saveAndMove(w http.ResponseWriter, r *http.Request, c *collecti
 	}
 	// Asked without the session's tally: the report below asks again, and
 	// counts it then.
-	if model.CompareAfterPut(c.conn.ID, sent, got, nil) != nil {
+	if writeLoss(c.conn.ID, sent, got, nil, false) != nil {
 		s.reportWrite(w, r, c, sent, back, written{uid: uid, got: got}, func(*model.Loss, *model.Object) ([]view.Action, []view.Notice) {
 			return nil, []view.Notice{{Role: view.NoticeAlert, Title: notMoved,
 				Body: text("The server did not keep everything this edit wrote, so the " + c.spec.noun + " stayed where it was. Move it from its menu once you have looked.")}}
@@ -3306,11 +3306,7 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 		return
 	}
 	c.noteWrite(got.Path, got)
-	compare := model.CompareAfterPut
-	if wr.theirUID {
-		compare = model.CompareAfterCreate
-	}
-	loss := withExceptions(compare(c.conn.ID, sent, got, c.sess.Losses()), sent, got)
+	loss := writeLoss(c.conn.ID, sent, got, c.sess.Losses(), wr.theirUID)
 	actions, notices := tell(loss, got)
 	if loss == nil {
 		s.redirect(w, r, done)
@@ -3832,14 +3828,31 @@ func (s *Server) postKindDelete(w http.ResponseWriter, r *http.Request, kind str
 	}
 }
 
+// writeLoss is what a write left out, the record read back whole (S-7.1):
+// the properties of the record itself (model.CompareAfterPut; theirUID — the
+// identity is the server's own, model.CompareAfterCreate), the exceptions of
+// a series by the instant each names, and the reminders. Every write that
+// is a reason to delete something — a move, a merge — and every one that is
+// reported asks here, so none of them reads less than another (Б1 of the
+// audit of 11.10.2026: a move compared the series alone, and deleted the
+// original of a record whose reminders the other server had not kept).
+func writeLoss(serverID string, sent, got *model.Object, agg model.LossAggregator, theirUID bool) *model.Loss {
+	compare := model.CompareAfterPut
+	if theirUID {
+		compare = model.CompareAfterCreate
+	}
+	return withExceptions(compare(serverID, sent, got, agg), sent, got)
+}
+
 // withExceptions makes the loss of a write say what became of a series'
-// exceptions (the owner's word of 11.10.2026: warn when the server loses or
-// breaks something). The comparison of the write reads the series alone and
-// by what is written; a day left out or an occurrence changed apart is known
-// by the instant it names (cal.ExceptionLoss). A server that dropped one is
-// named by «EXDATE» or «RECURRENCE-ID» in the report even when it kept every
-// property of the series; one that only wrote the same days another way has
-// lost nothing.
+// exceptions and of the record's reminders (the owner's word of 11.10.2026:
+// warn when the server loses or breaks something). The comparison of the
+// write reads the series alone and by what is written; a day left out or an
+// occurrence changed apart is known by the instant it names
+// (cal.ExceptionLoss), a reminder by what it does and when (cal.AlarmLoss).
+// A server that dropped one is named by «EXDATE», «RECURRENCE-ID» or
+// «VALARM» in the report even when it kept every property of the series;
+// one that only wrote the same days another way has lost nothing.
 func withExceptions(loss *model.Loss, sent, got *model.Object) *model.Loss {
 	if sent == nil || got == nil || !sent.IsCalendar() || !got.IsCalendar() {
 		return loss
@@ -3848,7 +3861,7 @@ func withExceptions(loss *model.Loss, sent, got *model.Object) *model.Loss {
 	if loss != nil {
 		before = loss.Properties
 	}
-	after := cal.ExceptionLoss(before, sent, got)
+	after := cal.AlarmLoss(cal.ExceptionLoss(before, sent, got), sent, got)
 	switch {
 	case len(after) == 0:
 		return nil
