@@ -446,7 +446,18 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 			fmt.Sprintf("Polled %d of %s", answered, plural(total, "source")),
 			owner.found(owner.count(snap)),
 		}
+		if snap.Running {
+			// A poll still running says so in the present (Typecase Р-55,
+			// the owner's decision of 11.10.2026; states-8, -13, -19, -26):
+			// how many of those asked have answered and what has come so
+			// far. The one that ended speaks in the past, as before.
+			parts[0] = fmt.Sprintf("Polling · %d of %d answered", answered, total)
+		}
 		bar.Summary = line(strings.Join(append(parts, pollTroubles(0, 0, 0, stopped)...), " · "))
+		if snap.Running && answered+failed+stopped == 0 {
+			// Nobody has answered yet (states-3).
+			bar.Summary = line(fmt.Sprintf("Polling %s…", plural(total, "source")))
+		}
 		if owner.matched != nil {
 			bar.Summary = matchedSummary(answered, total, owner.matched, stopped)
 		}

@@ -23,6 +23,25 @@ func TestThePollOverAListSpeaksTheWordsOfTheFrame(t *testing.T) {
 	}
 }
 
+// Typecase Р-55 (the owner's decision of 11.10.2026): a poll still running
+// says so in the present. Before anybody has answered it names how many it
+// asks (states-3); with some answered — how many of them and what has come
+// (states-8: the fixture app-contacts/partial holds that line).
+func TestARunningPollSpeaksInThePresent(t *testing.T) {
+	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEND:VCARD\n")
+	tickRail(t, f.h, f.sess, "contacts", f.path("contacts"))
+	release := f.srv.Stall("REPORT")
+	defer release()
+
+	page := decode[view.ContactsListPage](t, f.h.do(get("/app/contacts", f.sess)))
+	if page.Poll == nil {
+		t.Fatal("the combined book has no poll")
+	}
+	if got := saidRuns(page.Poll.Summary); got != "Polling 1 source…" {
+		t.Errorf("a poll nobody has answered says %q", got)
+	}
+}
+
 // A calendar counts events, a task list tasks, a notebook notes.
 func TestEachKindCountsItsOwn(t *testing.T) {
 	f := calendarFixture(t, nil,

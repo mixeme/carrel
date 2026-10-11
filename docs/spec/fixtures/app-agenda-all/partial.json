@@ -830,7 +830,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polled 3 of 6 sources · 4 events"
+        "text": "Polling · 3 of 6 answered · 4 events"
       }
     ],
     "taskID": "t-task"

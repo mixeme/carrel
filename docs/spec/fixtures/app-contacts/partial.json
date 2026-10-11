@@ -904,7 +904,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polled 2 of 3 sources · 6 cards"
+        "text": "Polling · 2 of 3 answered · 6 cards"
       }
     ],
     "taskID": "t-task"

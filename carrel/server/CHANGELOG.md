@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.194 — 2026-10-12
+
+The words of a poll that is still running (Typecase Р-55, the owner's
+decision of 11.10.2026; left over from the transition to `43ca489`).
+
+### Changed — behaviour
+
+- **A running poll speaks in the present**: «Polling · 2 of 3 answered · 6
+  cards» over a combined list (`states-8`, `-13`, `-19`, `-26`) — how many
+  of those asked have answered and what has come so far —, and «Polling 6
+  sources…» before anybody has (`states-3`). A poll that ended says it as
+  before: «Polled 2 of 3 sources · 6 cards». The bar of a person's timeline
+  and of the search are as they were.
+
+### For developers
+
+- Fixtures `app-contacts/partial` and `app-agenda-all/partial` carry the new
+  line. U-5.5 rows 19 and 24 of the client stay: what still differs in
+  `states-8` and `states-13` is the counts of the sections while a poll runs
+  (`docs/plan/server.md`).
+
 ## v0.2.193 — 2026-10-12
 
 Files: «Replace» and a move between storages no longer destroy what nobody
