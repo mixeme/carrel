@@ -257,13 +257,19 @@ func (s *Server) attendeeOps(c *collectionCtx, obj *model.Object, have, want for
 	var params []map[string]string
 	kept := map[string]bool{}
 	for _, v := range cur {
+		// A line that is no mail address — a room by its «urn:uuid:», a
+		// phone — is not in the field, and a second line of an address is
+		// not either: neither is the form's to take away (S-7.3).
 		addr := dupes.NormEmail(cal.CalAddress(v.Text))
-		if addr == "" || !slices.Contains(asked, addr) || kept[addr] {
+		if addr != "" && !slices.Contains(asked, addr) {
 			continue
 		}
-		kept[addr] = true
+		if addr != "" {
+			kept[addr] = true
+		}
 		texts, params = append(texts, v.Text), append(params, v.Params)
 	}
+	invited := len(kept) > 0
 	for _, addr := range asked {
 		if kept[addr] || addr == organiser {
 			continue
@@ -273,6 +279,7 @@ func (s *Server) attendeeOps(c *collectionCtx, obj *model.Object, have, want for
 			p["CN"] = who
 		}
 		texts, params = append(texts, "mailto:"+addr), append(params, p)
+		invited = true
 	}
 	var ops []model.PatchOp
 	switch {
@@ -286,7 +293,7 @@ func (s *Server) attendeeOps(c *collectionCtx, obj *model.Object, have, want for
 			}
 		}
 	}
-	if organiser == "" && len(texts) > 0 {
+	if organiser == "" && invited {
 		if me := myAddress(c); me != "" {
 			ops = append(ops, model.SetText{Prop: "ORGANIZER", Value: "mailto:" + me})
 			snap := s.store.Snapshot()

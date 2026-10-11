@@ -110,3 +110,24 @@ func TestAttendeesRelatedAndText(t *testing.T) {
 		t.Errorf("related = %v", rel)
 	}
 }
+
+func TestFormatDuration(t *testing.T) {
+	for _, tc := range []struct {
+		d    time.Duration
+		days bool
+		want string
+	}{
+		{time.Hour, false, "PT1H"},
+		{150 * time.Minute, false, "PT2H30M"},
+		{45 * time.Second, false, "PT45S"},
+		{0, false, "PT0S"},
+		{48 * time.Hour, true, "P2D"},
+		{48 * time.Hour, false, "PT48H"},
+		{36 * time.Hour, true, "PT36H"},
+		{-15 * time.Minute, false, "-PT15M"},
+	} {
+		if got := FormatDuration(tc.d, tc.days); got != tc.want {
+			t.Errorf("FormatDuration(%v, %v) = %q, want %q", tc.d, tc.days, got, tc.want)
+		}
+	}
+}

@@ -41,6 +41,29 @@ type SetText struct {
 func (SetText) patchOp()       {}
 func (o SetText) prop() string { return o.Prop }
 
+// SetTextAt replaces the text of one value of a property and leaves the
+// value its parameters and its group, and every other value of the property
+// as it is: the edit of what a form showed, where the record holds more than
+// the form shows (S-7.3).
+type SetTextAt struct {
+	Prop  string
+	Index int
+	Value string
+}
+
+func (SetTextAt) patchOp()       {}
+func (o SetTextAt) prop() string { return o.Prop }
+
+// RemoveValue deletes one value of a property; the last one takes the
+// property with it.
+type RemoveValue struct {
+	Prop  string
+	Index int
+}
+
+func (RemoveValue) patchOp()       {}
+func (o RemoveValue) prop() string { return o.Prop }
+
 // AddValue appends a value to a multi-value property.
 type AddValue struct {
 	Prop  string
@@ -275,6 +298,29 @@ func applyOp(p payload, op PatchOp) error {
 			v.group = old[0].group
 		}
 		p.props[key] = propState{values: []propValue{v}}
+	case SetTextAt:
+		key := strings.ToUpper(o.Prop)
+		st, ok := p.props[key]
+		if !ok || o.Index < 0 || o.Index >= len(st.values) {
+			return fmt.Errorf("model: %s[%d]: no such value", key, o.Index)
+		}
+		if st.values[o.Index].text != o.Value {
+			st.values[o.Index].text = o.Value
+			st.values[o.Index].wire = ""
+		}
+		p.props[key] = st
+	case RemoveValue:
+		key := strings.ToUpper(o.Prop)
+		st, ok := p.props[key]
+		if !ok || o.Index < 0 || o.Index >= len(st.values) {
+			return fmt.Errorf("model: %s[%d]: no such value", key, o.Index)
+		}
+		st.values = append(st.values[:o.Index], st.values[o.Index+1:]...)
+		if len(st.values) == 0 {
+			delete(p.props, key)
+		} else {
+			p.props[key] = st
+		}
 	case AddValue:
 		key := strings.ToUpper(o.Prop)
 		st := p.props[key]

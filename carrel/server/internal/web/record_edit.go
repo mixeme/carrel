@@ -1241,6 +1241,11 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			want[f.name+".type"] = keptLabels(f.prop, want[f.name+".type"], have[f.name+".type"])
 		}
 	}
+	if c.spec.kind == view.KindTask {
+		if why := doneAndStatus(have, want); why != "" {
+			ch.errors["status"] = why
+		}
+	}
 	startRow := triple(want["start"])
 	startChanged := !sameRows(want["start"], have["start"])
 	// A new zone rewrites both times at the clock the form names, in that
@@ -1282,17 +1287,26 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 
 	for _, f := range editFields[c.spec.kind] {
 		w, h := want[f.name], have[f.name]
+		if (f.typ == fieldText || f.typ == fieldArea) && f.required && strings.TrimSpace(first(w)) == "" {
+			ch.errors[f.name] = f.label + " is required."
+			continue
+		}
+		// A field sent as the form showed it writes nothing, however its
+		// value is spelt in the record (S-7.3): a text the server holds with
+		// a line end after it comes back from the form without one. The
+		// measure is the one the save is checked by before it is sent
+		// (checkEdit). The times, the zone, Done, the attendees and the
+		// reminders depend on one another and say so themselves below.
+		switch f.typ {
+		case fieldTime, fieldZone, fieldDone, fieldAttendee, fieldReminders:
+		default:
+			if readsAs(f, have, want, have, "", "", false) {
+				continue
+			}
+		}
 		switch f.typ {
 		case fieldText, fieldArea:
-			v := first(w)
-			if f.required && strings.TrimSpace(v) == "" {
-				ch.errors[f.name] = f.label + " is required."
-				continue
-			}
-			if v == first(h) {
-				continue
-			}
-			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], v, escape)...)
+			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], first(w), escape)...)
 		case fieldMulti:
 			var labels []string
 			if f.typed {
@@ -1329,13 +1343,13 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				continue
 			}
 			if !escape {
-				ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], strings.Join(items, ","), false)...)
+				ch.ops = append(ch.ops, wholeOps(f.prop, props[f.prop], strings.Join(items, ","))...)
 				continue
 			}
 			for i := range items {
 				items[i] = cal.EscapeText(items[i])
 			}
-			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], strings.Join(items, ","), false)...)
+			ch.ops = append(ch.ops, wholeOps(f.prop, props[f.prop], strings.Join(items, ","))...)
 		case fieldRepeat:
 			if sameRows(w, h) {
 				continue
@@ -1364,15 +1378,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				continue
 			}
 			if f.prop == "STATUS" && c.spec.kind == view.KindTask {
-				if first(want["done"]) != first(have["done"]) {
-					continue // the Done box said it, and says COMPLETED with it
-				}
-				switch {
-				case v == "COMPLETED" && len(props["COMPLETED"]) == 0:
-					ch.ops = append(ch.ops, model.SetText{Prop: "COMPLETED", Value: now.UTC().Format("20060102T150405Z")})
-				case v != "COMPLETED" && len(props["COMPLETED"]) > 0:
-					ch.ops = append(ch.ops, model.RemoveProp{Prop: "COMPLETED"})
-				}
+				continue // written with the Done box, below: the two are one state
 			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], v, false)...)
 		case fieldAttendee:
@@ -1447,6 +1453,21 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			case "end":
 				endAt = at
 			}
+			if f.name == "end" && len(props["DURATION"]) > 0 && row[0] != "" {
+				// An event written by its length stays so (S-11): the length
+				// is what the form's start and end say, and one that is the
+				// length it had is not written at all.
+				if len(ch.errors) == 0 && !startAt.IsZero() {
+					length := endAt.Sub(startAt)
+					if allDay {
+						length += 24 * time.Hour // the form shows the last day
+					}
+					if tm, err := cal.TimingOf(obj, tz); err != nil || tm.End.Sub(tm.Start) != length || tm.AllDay != allDay {
+						ch.ops = append(ch.ops, model.SetTextAt{Prop: "DURATION", Index: 0, Value: cal.FormatDuration(length, allDay)})
+					}
+				}
+				continue
+			}
 			if sameRows(w, h) && !(f.name == "end" && startChanged && row[0] != "") && (zone == "" || row[0] == "") {
 				continue
 			}
@@ -1458,23 +1479,20 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			if f.name == "start" && ch.zone != nil {
 				ch.zoneYear = at.Year()
 			}
-			if f.name == "end" && len(props["DURATION"]) > 0 && row[0] != "" {
-				ops = append([]model.PatchOp{model.RemoveProp{Prop: "DURATION"}}, ops...)
-			}
 			ch.ops = append(ch.ops, ops...)
 		case fieldDone:
-			wantDone, hadDone := first(w) == "on", first(h) == "on"
-			if wantDone == hadDone {
-				continue
+			// Done and Status are one state of the task (doneAndStatus), and
+			// are written here together: the status when it is another one,
+			// the day it was completed when it is done and has none, and
+			// that day gone when it is not.
+			status, held := first(want["status"]), first(have["status"])
+			if status != held && ch.errors["status"] == "" {
+				ch.ops = append(ch.ops, textOps("STATUS", props["STATUS"], status, false)...)
 			}
-			if wantDone {
-				ch.ops = append(ch.ops,
-					model.SetText{Prop: "STATUS", Value: "COMPLETED"},
-					model.SetText{Prop: "COMPLETED", Value: now.UTC().Format("20060102T150405Z")})
-				continue
-			}
-			ch.ops = append(ch.ops, model.SetText{Prop: "STATUS", Value: "NEEDS-ACTION"})
-			if len(props["COMPLETED"]) > 0 {
+			switch done := first(w) == "on"; {
+			case done && len(props["COMPLETED"]) == 0:
+				ch.ops = append(ch.ops, model.SetText{Prop: "COMPLETED", Value: now.UTC().Format("20060102T150405Z")})
+			case !done && len(props["COMPLETED"]) > 0:
 				ch.ops = append(ch.ops, model.RemoveProp{Prop: "COMPLETED"})
 			}
 		case fieldPercent:
@@ -1531,6 +1549,45 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 		ch.errors["reminder"] = "Reminders need a due date."
 	}
 	return ch
+}
+
+// doneAndStatus makes a task's Done box and its Status say one thing before
+// the fields are walked, the way fillNames does a card's names: what reaches
+// the server is what the form then shows (S-7.3). The one the person changed
+// decides the other: Done ticked is Completed, unticked — Needs action; a
+// status chosen ticks the box when it is Completed and clears it otherwise.
+// Both changed, they have to agree — a task done and In process is not
+// written as either, and the reason is the answer. An absent STATUS reads as
+// Needs action on both sides (S-7).
+func doneAndStatus(have, want formValues) string {
+	blank := func(v []string) string {
+		if s := strings.TrimSpace(first(v)); s != "" {
+			return s
+		}
+		return "NEEDS-ACTION"
+	}
+	status, held := blank(want["status"]), blank(have["status"])
+	done, was := first(want["done"]) == "on", first(have["done"]) == "on"
+	tick := func(on bool) []string {
+		if on {
+			return []string{"on"}
+		}
+		return []string{""}
+	}
+	switch {
+	case done != was && status != held:
+		if done != (status == "COMPLETED") {
+			return "A task that is done is Completed, and one that is not has another status: change Done or Status, not both ways."
+		}
+	case done != was && done:
+		status = "COMPLETED"
+	case done != was:
+		status = "NEEDS-ACTION"
+	case status != held:
+		done = status == "COMPLETED"
+	}
+	want["status"], want["done"], have["status"] = []string{status}, tick(done), []string{held}
+	return ""
 }
 
 // fillNames is U-6.1: the display name and the two parts of N fill each
@@ -1600,17 +1657,36 @@ func rowTime(row [3]string, allDay bool, tz *time.Location) (time.Time, error) {
 	return t, nil
 }
 
-// textOps sets one value and keeps the parameters it was written with. An
-// empty value removes the property: empty is not removal (S-7).
+// textOps sets the value a field shows — the first of its property — and
+// keeps the parameters and the group it was written with. A property that
+// stands several times keeps its other values as they are: the form did not
+// show them, and a save by it is not theirs to change (S-7.3). An empty
+// value removes the one shown: empty is not removal (S-7).
 func textOps(prop string, cur []model.RawValue, v string, escape bool) []model.PatchOp {
 	if v == "" {
 		if len(cur) > 0 {
-			return []model.PatchOp{model.RemoveProp{Prop: prop}}
+			return []model.PatchOp{model.RemoveValue{Prop: prop, Index: 0}}
 		}
 		return nil
 	}
 	if escape {
 		v = cal.EscapeText(v)
+	}
+	if len(cur) > 0 {
+		return []model.PatchOp{model.SetTextAt{Prop: prop, Index: 0, Value: v}}
+	}
+	return []model.PatchOp{model.SetText{Prop: prop, Value: v}}
+}
+
+// wholeOps sets a property a field shows whole — every value of it as one —
+// to one value, with the parameters of the first: the tags of a record,
+// written on one line wherever they came on several.
+func wholeOps(prop string, cur []model.RawValue, v string) []model.PatchOp {
+	if v == "" {
+		if len(cur) > 0 {
+			return []model.PatchOp{model.RemoveProp{Prop: prop}}
+		}
+		return nil
 	}
 	ops := []model.PatchOp{model.SetText{Prop: prop, Value: v}}
 	if len(cur) > 0 {
@@ -1861,12 +1937,14 @@ func (s *Server) relatedTyped(c *collectionCtx, ticked []string, typed string) [
 	return out
 }
 
-// multiOps rewrites a list property row by row: a kept row keeps its
-// parameters (TYPE=work stays on the address it was on), an emptied row
-// disappears, the add row comes without parameters. labels, when given, are
-// the TYPE of each row as the form chose it: empty takes the label off.
+// multiOps rewrites a list property row by row. A row kept is the value it
+// was — its parameters, its group (item1.TEL stays tied to its
+// item1.X-ABLabel) and, untouched, its very line; a row whose text changed
+// is that value with another text (S-7.3). An emptied row disappears, the
+// add row comes without parameters. labels, when given, are the TYPE of
+// each row as the form chose it: empty takes the label off.
 func multiOps(prop string, cur []model.RawValue, rows, labels []string) []model.PatchOp {
-	var texts []string
+	var texts, held []string
 	var from, rowOf []int
 	for i, v := range rows {
 		if v = strings.TrimSpace(v); v == "" {
@@ -1876,8 +1954,10 @@ func multiOps(prop string, cur []model.RawValue, rows, labels []string) []model.
 		rowOf = append(rowOf, i)
 		if i < len(cur) {
 			from = append(from, i)
+			held = append(held, cur[i].Text)
 		} else {
 			from = append(from, -1)
+			held = append(held, v)
 		}
 	}
 	if len(texts) == 0 {
@@ -1886,9 +1966,14 @@ func multiOps(prop string, cur []model.RawValue, rows, labels []string) []model.
 		}
 		return nil
 	}
-	ops := []model.PatchOp{model.SetValues{Prop: prop, Values: texts}}
+	// The rows that stay are named by the text they had, so each is found
+	// and kept whole; then the ones that changed are given their new text.
+	ops := []model.PatchOp{model.SetValues{Prop: prop, Values: held}}
 	for i, src := range from {
 		if src >= 0 {
+			if strings.TrimSpace(cur[src].Text) != texts[i] {
+				ops = append(ops, model.SetTextAt{Prop: prop, Index: i, Value: texts[i]})
+			}
 			for _, k := range sortedKeys(cur[src].Params) {
 				if labels != nil && k == "TYPE" {
 					continue
@@ -2010,22 +2095,40 @@ func labelOptions(prop, selected string) []view.Option {
 
 // keptLabels are the labels a save writes: a row whose chosen label is the
 // one it showed keeps its TYPE exactly as the card holds it, and a label
-// chosen anew replaces only the label, keeping what is no label beside it
-// (WORK,PREF made home is home,PREF). have are the TYPEs of the rows the
-// form had, want the labels posted.
+// chosen anew replaces only the label shown, where it stood — what stands
+// beside it stays, a second label as much as what is no label (WORK,PREF
+// made home is home,PREF; WORK,CELL made home is home,CELL). Another
+// client's labels are shown together and replaced together. have are the
+// TYPEs of the rows the form had, want the labels posted.
 func keptLabels(prop string, want, have []string) []string {
 	out := slices.Clone(want)
 	for i := range min(len(want), len(have)) {
-		shown, _ := shownLabel(prop, have[i])
+		shown, known := shownLabel(prop, have[i])
 		if strings.EqualFold(want[i], have[i]) || strings.EqualFold(strings.TrimSpace(want[i]), shown) {
 			out[i] = have[i]
 			continue
 		}
-		_, rest := typeParts(have[i])
-		if l := strings.TrimSpace(want[i]); l != "" {
-			rest = append([]string{l}, rest...)
+		chosen := strings.TrimSpace(want[i])
+		var parts []string
+		placed := false
+		for _, p := range strings.Split(have[i], ",") {
+			p = strings.TrimSpace(p)
+			switch {
+			case p == "":
+			case notLabels[strings.ToLower(p)], known && !strings.EqualFold(p, shown), known && placed:
+				parts = append(parts, p)
+			case !placed:
+				// The label shown: the chosen one takes its place.
+				if chosen != "" {
+					parts = append(parts, chosen)
+				}
+				placed = true
+			}
 		}
-		out[i] = strings.Join(rest, ",")
+		if !placed && chosen != "" {
+			parts = append([]string{chosen}, parts...)
+		}
+		out[i] = strings.Join(parts, ",")
 	}
 	return out
 }
@@ -3012,9 +3115,21 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 
 	// The patch is applied to the record read: what it held is taken first.
 	wasEmails := cardEmails(obj)
-	sent, err := c.apply(obj, ch)
+	sent, fault, err := s.applyChecked(c, obj, ch, have, want)
 	if err != nil {
 		st.notices = []view.Notice{s.writeFailure(c, "PUT", obj.Path, err)}
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
+	if fault != nil {
+		// Not the edit the person made (S-7.3): nothing is sent. The record
+		// read was patched in memory, so the form is drawn over one read
+		// again.
+		st.values = typed
+		if st.obj, err = c.find(r.Context(), uid); err != nil {
+			st.obj = nil
+		}
+		st.notices = []view.Notice{faultNotice(fault)}
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
@@ -3561,14 +3676,26 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	ch := s.buildChange(c, obj, nil, s.emptyValues(c), want, now)
+	typed := formValues{}
+	for k, v := range want {
+		typed[k] = append([]string(nil), v...)
+	}
+	empty := s.emptyValues(c)
+	ch := s.buildChange(c, obj, nil, empty, want, now)
 	if len(ch.errors) > 0 {
 		st.errors = ch.errors
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
 	path := strings.TrimSuffix(c.col.Path, "/") + "/" + uid + c.spec.ext
-	sent, err := c.apply(obj, ch)
+	sent, fault, err := s.applyChecked(c, obj, ch, empty, want)
+	if err == nil && fault != nil {
+		// Not the record the person described (S-7.3): none is made.
+		st.values = typed
+		st.notices = []view.Notice{faultNotice(fault)}
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
 	if err == nil && portrait != nil {
 		patch, perr := model.NewPatch(card.PhotoOps(sent, portrait)...)
 		if err = perr; err == nil {

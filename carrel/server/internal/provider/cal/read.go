@@ -2,6 +2,7 @@ package cal
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -410,4 +411,29 @@ func mainComponent(obj *model.Object) (*ical.Component, error) {
 		return nil, errors.New("cal: no main component")
 	}
 	return main, nil
+}
+
+// FormatDuration writes a length of time as a DURATION (RFC 5545 §3.3.6): in
+// days when it is whole days of an all-day event, else in hours, minutes and
+// seconds, the parts that are zero left out.
+func FormatDuration(d time.Duration, days bool) string {
+	sign := ""
+	if d < 0 {
+		sign, d = "-", -d
+	}
+	if days && d%(24*time.Hour) == 0 {
+		return fmt.Sprintf("%sP%dD", sign, d/(24*time.Hour))
+	}
+	h, m, s := d/time.Hour, d%time.Hour/time.Minute, d%time.Minute/time.Second
+	out := sign + "PT"
+	if h > 0 {
+		out += fmt.Sprintf("%dH", h)
+	}
+	if m > 0 {
+		out += fmt.Sprintf("%dM", m)
+	}
+	if s > 0 || h == 0 && m == 0 {
+		out += fmt.Sprintf("%dS", s)
+	}
+	return out
 }

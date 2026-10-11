@@ -323,7 +323,17 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 		s.redirect(w, r, c.recordPath(uid))
 		return
 	}
-	sent, err := c.apply(obj, ch)
+	sent, fault, err := s.applyChecked(c, obj, ch, theirs, want)
+	if err == nil && fault != nil {
+		// Not what was chosen (S-7.3): nothing is sent, and the choice is
+		// shown again over the record as the server holds it.
+		if obj, err = c.find(r.Context(), uid); err != nil {
+			s.redirect(w, r, here)
+			return
+		}
+		s.writePage(w, r, http.StatusOK, s.conflictPage(c, d, obj, theirs, alarms, []view.Notice{faultNotice(fault)}))
+		return
+	}
 	if err == nil {
 		sent.ETag = etag
 		err = c.update(r.Context(), sent)

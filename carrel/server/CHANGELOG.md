@@ -17,6 +17,63 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.188 — 2026-10-11
+
+A save is the edit and nothing else (the owner's decision of 11.10.2026,
+S-7.3). Found by the audit of what Carrel decides for a person when it
+writes (`docs/plan/scans/silent-choices.md`).
+
+### Changed — behaviour
+
+- **A save that is not the edit is not sent.** Before a form's save goes to
+  the server it is made in memory and looked at twice: the form read from
+  the result is the form the person sent, and the lines of the record that
+  changed belong to the fields that changed and to what those are said to
+  take with them (the table of S-7.3). A save that fails either is not
+  written: the form comes back as entered under «Carrel could not save this
+  edit» — nothing was saved, the fault is Carrel's, the fields and
+  properties are named, the lines are in the details. The server log names
+  the fields and properties, never what they hold. So for an edit, a new
+  record and a record combined from a conflict.
+- **A field left as the form showed it writes nothing**, however its value
+  is spelt on the server. A description that ends in a line end, a phone
+  with a space after it, were rewritten trimmed by a save that changed
+  something else.
+- **A field that shows the first value of a property changes that value
+  alone.** A second TITLE, ORG, NOTE, DESCRIPTION or RRULE another client
+  wrote went with the first when it was edited; now it stays. Emptied, the
+  field takes the value it showed, and shows the next one.
+- **A phone, address or e-mail row keeps its group and its other labels.**
+  Changing the number of `item1.TEL` untied it from its `item1.X-ABLabel`;
+  choosing «home» for `TYPE=WORK,CELL` wrote `home` and dropped `CELL`. Now
+  the value keeps its group and parameters, and the label chosen replaces
+  the label shown, where it stood: `home,CELL`.
+- **An attendee line that is no mail address stays** — a room by
+  `urn:uuid:`, a phone — when the list is changed, and so does a second line
+  of the same address. The form never showed them.
+- **An event written by its length stays so.** A changed time replaced
+  `DURATION` with a `DTEND` in UTC. Now the length is what the form's start
+  and end say: moved whole, the event keeps its `DURATION` line untouched;
+  a new length is written as `DURATION` (`PT2H30M`), and no `DTEND` appears.
+- **Done and Status of a task are one state.** Changed together they were
+  written as Done alone and the status was dropped. Now one follows the
+  other when one is changed, and both changed have to agree: a task ticked
+  done with «In process» chosen is not written, and Status says why.
+
+### For developers
+
+- Two patch operations: `model.SetTextAt` (one value's text; parameters and
+  group stay) and `model.RemoveValue` (one value; the last takes the
+  property). `textOps` writes through them; `wholeOps` is the old «one
+  value for the whole property», used by tags.
+- `checkEdit` (`internal/web/edit_check.go`) is the check; `readsAs` is the
+  one measure of «the field is as the form showed it», used by
+  `buildChange` and by the check. A new field needs its consequences in
+  `editAlso` if it writes more than its own property.
+- What the check does not see is said in S-7.3: writes that are not a
+  form's (move, merge, import, attachments, photo, address rewrite), and the
+  meaning of a change inside a property the field owns.
+
 ## v0.2.187 — 2026-10-11
 
 Typecase `43ca489` (Typecase's note 44: tasks 144 and 145), client `v0.4.10`.
