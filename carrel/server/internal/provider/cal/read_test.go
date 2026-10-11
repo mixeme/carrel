@@ -131,3 +131,42 @@ func TestFormatDuration(t *testing.T) {
 		}
 	}
 }
+
+// NextTime: the time a repeating record stands on and the one after it.
+func TestNextTime(t *testing.T) {
+	msk, _ := time.LoadLocation("Europe/Moscow")
+	task := func(lines string) *modelObject {
+		t.Helper()
+		doc := "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//t//EN\r\nBEGIN:VTODO\r\nUID:a\r\nDTSTAMP:20260101T000000Z\r\nSUMMARY:T\r\n" +
+			strings.ReplaceAll(lines, "\n", "\r\n") + "END:VTODO\r\nEND:VCALENDAR\r\n"
+		obj, err := Parse("/c/a.ics", "e1", strings.NewReader(doc))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return obj
+	}
+	for _, tc := range []struct {
+		name, lines, next string
+	}{
+		{"weekly by its start", "DTSTART;TZID=Europe/Moscow:20260112T090000\nRRULE:FREQ=WEEKLY;BYDAY=MO\n", "2026-01-19 09:00"},
+		{"a day left out is passed over", "DTSTART;TZID=Europe/Moscow:20260112T090000\nRRULE:FREQ=WEEKLY\nEXDATE;TZID=Europe/Moscow:20260119T090000\n", "2026-01-26 09:00"},
+		{"by its due, without a start", "DUE;VALUE=DATE:20260112\nRRULE:FREQ=MONTHLY\n", "2026-02-12 00:00"},
+		{"the last time", "DTSTART:20260112T090000Z\nRRULE:FREQ=DAILY;COUNT=1\n", ""},
+		{"past its end", "DTSTART:20260112T090000Z\nRRULE:FREQ=DAILY;UNTIL=20260112T235959Z\n", ""},
+		{"no rule", "DTSTART:20260112T090000Z\n", ""},
+		{"no time at all", "RRULE:FREQ=DAILY\n", ""},
+	} {
+		_, next, ok, err := NextTime(task(tc.lines), msk)
+		if err != nil {
+			t.Errorf("%s: %v", tc.name, err)
+			continue
+		}
+		got := ""
+		if ok {
+			got = next.In(msk).Format("2006-01-02 15:04")
+		}
+		if got != tc.next {
+			t.Errorf("%s: next %q, want %q", tc.name, got, tc.next)
+		}
+	}
+}

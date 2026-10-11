@@ -318,6 +318,10 @@ func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, hav
 			}
 		}
 	}
+	if first(want[taskNext]) == "on" {
+		// A repeating task moved on to its next time counts one time fewer.
+		also["RRULE"] = true
+	}
 	retimed := false
 	for _, name := range retimes {
 		retimed = retimed || changed[name]

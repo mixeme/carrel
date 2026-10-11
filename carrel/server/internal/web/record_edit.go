@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
 	"slices"
@@ -1244,6 +1245,11 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	if c.spec.kind == view.KindTask {
 		if why := doneAndStatus(have, want); why != "" {
 			ch.errors["status"] = why
+		} else if count, on := goOn(obj, have, want, tz); on && count != "" {
+			// The series counts its times from its start, and the start
+			// has moved one on.
+			rule := parseRule(cal.RawRRULE(obj)).set("COUNT", count)
+			ch.ops = append(ch.ops, textOps("RRULE", props["RRULE"], rule.String(), false)...)
 		}
 	}
 	startRow := triple(want["start"])
@@ -1588,6 +1594,75 @@ func doneAndStatus(have, want formValues) string {
 	}
 	want["status"], want["done"], have["status"] = []string{status}, tick(done), []string{held}
 	return ""
+}
+
+// taskNext marks, among the values of a form, a repeating task that this
+// save moves on to its next time (goOn).
+const taskNext = "#next"
+
+// goOn is a repeating task marked done (the owner's decision of 11.10.2026,
+// А2 of the audit): done this time, and the series goes on. The start and
+// the due move to the next time of the series, each by as much; the task
+// stays open, as a new time of it begins — not done, Needs action, no
+// percent. So what the form asks for is rewritten before the fields are
+// walked, the way doneAndStatus does it, and what reaches the server is what
+// the form then shows (S-7.3). count is the COUNT the rule is left with,
+// when it has one. A task on its last time is not moved: it is done, as any
+// task is.
+func goOn(obj *model.Object, have, want formValues, tz *time.Location) (count string, on bool) {
+	if first(want["done"]) != "on" || first(have["done"]) == "on" {
+		return "", false
+	}
+	cur, next, ok, err := cal.NextTime(obj, tz)
+	if err != nil || !ok {
+		return "", false
+	}
+	step := next.Sub(cur)
+	moved := map[string][]string{}
+	for _, name := range []string{"start", "due"} {
+		row := triple(want[name])
+		if row[0] == "" {
+			continue
+		}
+		day := row[2] == "on"
+		at, err := rowTime(row, day, tz)
+		if err != nil {
+			return "", false // the field says why, and nothing is written
+		}
+		if day {
+			at = at.AddDate(0, 0, int(math.Round(step.Hours()/24)))
+		} else {
+			at = at.Add(step)
+			row[1] = at.Format("15:04")
+		}
+		row[0] = at.Format("2006-01-02")
+		moved[name] = row[:]
+	}
+	for name, row := range moved {
+		want[name] = row
+	}
+	want["done"], want["status"], want["percent"], want[taskNext] = []string{""}, []string{"NEEDS-ACTION"}, []string{""}, []string{"on"}
+	if n, err := strconv.Atoi(parseRule(cal.RawRRULE(obj)).get("COUNT")); err == nil && n > 1 {
+		count = strconv.Itoa(n - 1)
+	}
+	return count, true
+}
+
+// doneHint says what Done does to a repeating task before it is ticked: the
+// day it moves on to, or that this is its last time. Empty for a task that
+// does not repeat or is done.
+func (s *Server) doneHint(c *collectionCtx, obj *model.Object) view.Text {
+	if obj == nil || !obj.IsCalendar() || cal.RawRRULE(obj) == "" || taskDone(obj) {
+		return ""
+	}
+	_, next, ok, err := cal.NextTime(obj, s.tz())
+	switch {
+	case err != nil:
+		return ""
+	case !ok:
+		return "The task repeats, and this is its last time: Done completes it."
+	}
+	return text("The task repeats. Done is this time: it moves on to " + c.tf.shortDay(next) + " and stays open.")
 }
 
 // fillNames is U-6.1: the display name and the two parts of N fill each
@@ -2746,7 +2821,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				quickDay = nil
 			}
 		case fieldDone:
-			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck, Value: text(first(vals))})
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck, Value: text(first(vals)), Hint: s.doneHint(c, st.obj)})
 		case fieldPercent:
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputNumber, Value: text(first(vals)), Error: errText, Mono: true})
 		case fieldReminders:

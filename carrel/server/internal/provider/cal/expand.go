@@ -126,3 +126,54 @@ func loadMain(obj *model.Object) (*ical.Component, error) {
 	}
 	return findMain(cal), nil
 }
+
+// NextTime is the time a repeating record stands on now — its DTSTART, or
+// its DUE when it is a task without one — and the next time of its series
+// after that one, days left out (EXDATE) passed over. ok is false for a
+// record that does not repeat and for one standing on its last time.
+func NextTime(obj *model.Object, loc *time.Location) (cur, next time.Time, ok bool, err error) {
+	if obj == nil || !obj.IsCalendar() {
+		return cur, next, false, nil
+	}
+	comp, err := loadMain(obj)
+	if err != nil || comp == nil {
+		return cur, next, false, err
+	}
+	if loc == nil {
+		loc = time.UTC
+	}
+	at := comp.Props.Get(ical.PropDateTimeStart)
+	if at == nil {
+		at = comp.Props.Get(ical.PropDue)
+	}
+	if at == nil {
+		return cur, next, false, nil
+	}
+	if cur, err = propTime(at, loc); err != nil {
+		return cur, next, false, err
+	}
+	opt, err := comp.Props.RecurrenceRule()
+	if err != nil || opt == nil {
+		return cur, next, false, err
+	}
+	opt.Dtstart = cur
+	rule, err := rrule.NewRRule(*opt)
+	if err != nil {
+		return cur, next, false, err
+	}
+	set := &rrule.Set{}
+	set.RRule(rule)
+	set.DTStart(cur)
+	for _, p := range comp.Props[ical.PropExceptionDates] {
+		if ex, err := propTime(&p, loc); err == nil {
+			set.ExDate(ex)
+		}
+	}
+	for _, p := range comp.Props[ical.PropRecurrenceDates] {
+		if rd, err := propTime(&p, loc); err == nil {
+			set.RDate(rd)
+		}
+	}
+	next = set.After(cur, false)
+	return cur, next, !next.IsZero(), nil
+}

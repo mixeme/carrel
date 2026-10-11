@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.190 — 2026-10-11
+
+A repeating task marked done goes on to its next time (the owner's decision
+of 11.10.2026; А2 of the audit, `docs/plan/scans/silent-choices.md`).
+
+### Changed — behaviour
+
+- **Done on a task that repeats is this time done, not the series.** Carrel
+  wrote `STATUS:COMPLETED` on the whole series: there was no next Monday,
+  and nothing said so. Now the start and the due move to the next time of
+  the series — days left out (`EXDATE`) passed over —, and the task stays
+  open: Needs action, no percent, no day of completion. A rule with `COUNT`
+  counts one fewer. A task on its last time is completed as any task is.
+  So from the card, from the row of a list and from the form; choosing
+  «Completed» in Status does the same.
+- **The form and the card say it before the tick**: under Done, and as the
+  hint of «Mark done» — «The task repeats. Done is this time: it moves on to
+  19 Jan and stays open.», or that this is its last time.
+- No trace is left in the record that the time before was done; ending a
+  series early is taking its repetition away in another client — the task
+  form has no Repeats.
+
+### For developers
+
+- `cal.NextTime`; `goOn` rewrites what the form asks for before the fields
+  are walked, as `doneAndStatus` does, so the check of S-7.3 reads the
+  result as the form.
+
 ## v0.2.189 — 2026-10-11
 
 A write is read back whole wherever it is checked (Б1 of the audit of
