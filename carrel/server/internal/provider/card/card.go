@@ -119,6 +119,17 @@ func (p *Provider) Create(ctx context.Context, path string, obj *model.Object) (
 	return p.c.PutCreate(ctx, path, dav.Typed(&buf, MediaType))
 }
 
+// Place writes, with If-None-Match, a contact that was made elsewhere —
+// moved from another server, copied, imported — and leaves its REV as it
+// is: nobody changed it (Б34 of the audit of 11.10.2026).
+func (p *Provider) Place(ctx context.Context, path string, obj *model.Object) (string, error) {
+	var buf bytes.Buffer
+	if err := Encode(&buf, obj); err != nil {
+		return "", err
+	}
+	return p.c.PutCreate(ctx, path, dav.Typed(&buf, MediaType))
+}
+
 // MediaType is the Content-Type of a contact on PUT.
 const MediaType = "text/vcard; charset=utf-8"
 

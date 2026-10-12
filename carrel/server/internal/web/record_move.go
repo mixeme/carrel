@@ -261,7 +261,7 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 	for i := 0; i < len(names); i++ {
 		dst = strings.TrimSuffix(dest.col.Path, "/") + "/" + names[i]
 		sent.Path = dst
-		err = dest.create(ctx, dst, sent)
+		err = dest.place(ctx, dst, sent)
 		// A taken name is tried once more under another; but a refusal on a
 		// write the guard had already sent is this copy, arriving twice.
 		// Writing it again under «-2» would leave the person two records

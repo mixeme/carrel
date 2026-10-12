@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.203 — 2026-10-12
+
+An import is read back, and a record put where it was not made keeps its
+time of change (Б35 and Б34 of the audit of 11.10.2026; Б32 looked into).
+
+### Fixed
+
+- **An import says what the server did not keep.** It was the one write
+  nobody read back: a server that keeps less than it is sent answered 201,
+  and the row said «Created» over a record that had lost a part of itself.
+  Now the row says «Created. The server did not keep LOCATION», and the
+  note of the report counts such records («1 record not kept whole by the
+  server»). No more requests: the read the import already made to learn
+  the identities is the one compared.
+- **A record moved to another server, copied or imported keeps when it was
+  changed.** It was written with «changed now» — `LAST-MODIFIED` of an
+  event, a task, a note, `REV` of a card —, so every list sorted by Changed
+  put it first and the real day was gone.
+
+### For developers
+
+- `cal.Provider.Place`, `card.Provider.Place`, `collectionCtx.place`;
+  `destRecords`; `importLanded` answers how many records lost something.
+- Б32 — a note whose edit changed only its Notebook moves without the
+  form's version being compared — loses nothing: what moves is the note as
+  the server holds it, read for the move
+  (`TestANoteMovedByItsNotebookTakesWhatWasWrittenMeanwhile`). No change.
+- A restore from a backup is an import and so is read back too; it was not
+  tested apart.
+
 ## v0.2.202 — 2026-10-12
 
 A wrong number on the duplicates screen is said (Б45 of the audit of

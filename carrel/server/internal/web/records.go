@@ -339,6 +339,18 @@ func (c *collectionCtx) create(ctx context.Context, path string, obj *model.Obje
 	return err
 }
 
+// place is create for a record made elsewhere — moved, copied, imported: its
+// time of change is not touched (cal.Provider.Place).
+func (c *collectionCtx) place(ctx context.Context, path string, obj *model.Object) error {
+	var err error
+	if c.card != nil {
+		_, err = c.card.Place(ctx, path, obj)
+	} else {
+		_, err = c.cal.Place(ctx, path, obj)
+	}
+	return err
+}
+
 func (c *collectionCtx) remove(ctx context.Context, path, etag string) error {
 	if c.card != nil {
 		return c.card.Delete(ctx, path, etag)

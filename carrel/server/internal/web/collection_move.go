@@ -453,12 +453,12 @@ func (m *collectionMove) copyAll(ctx context.Context, before map[string]string, 
 		}
 		if err == nil {
 			sent.Path = dst
-			err = m.dst.create(ctx, dst, sent)
+			err = m.dst.place(ctx, dst, sent)
 			if dav.IsStatus(err, http.StatusPreconditionFailed) {
 				name = fileStem(uidOf(m.src, obj)) + "-2" + m.src.spec.ext
 				dst = m.placed.Path + name
 				sent.Path = dst
-				err = m.dst.create(ctx, dst, sent)
+				err = m.dst.place(ctx, dst, sent)
 			}
 		}
 		if err != nil {

@@ -1031,14 +1031,28 @@ func skippedTable(skipped []importSkip) (view.ImportTable, bool) {
 // holds one resource per UID whatever its component (RFC 4791 §5.3.2, RFC
 // 6352 §6.3.2), so a calendar is read whole, not by the kind alone.
 func destUIDs(ctx context.Context, dest *collectionCtx) (map[string]bool, error) {
+	recs, err := destRecords(ctx, dest)
+	if err != nil {
+		return nil, err
+	}
 	out := map[string]bool{}
+	for uid := range recs {
+		out[uid] = true
+	}
+	return out, nil
+}
+
+// destRecords are the records the destination holds, by identity: one whole
+// read.
+func destRecords(ctx context.Context, dest *collectionCtx) (map[string]*model.Object, error) {
+	out := map[string]*model.Object{}
 	if dest.card != nil {
 		objs, err := dest.card.Query(ctx, dest.col.Path)
 		if err != nil {
 			return nil, err
 		}
 		for _, obj := range objs {
-			out[card.UID(obj)] = true
+			out[card.UID(obj)] = obj
 		}
 		return out, nil
 	}
@@ -1048,7 +1062,7 @@ func destUIDs(ctx context.Context, dest *collectionCtx) (map[string]bool, error)
 			return nil, err
 		}
 		for _, obj := range objs {
-			out[cal.UID(obj)] = true
+			out[cal.UID(obj)] = obj
 		}
 	}
 	return out, nil
@@ -1149,7 +1163,7 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		made = append(made, importMade{row: len(written.Rows), uid: uid, from: rec.UID, was: was, path: obj.Path, renamed: renamed, obj: obj})
 		written.Rows = append(written.Rows, []view.Text{text(rec.Title), text(rec.Detail), text(note)})
 	}
-	s.importLanded(ctx, dest, report, &written, made)
+	lossy := s.importLanded(ctx, dest, report, &written, made)
 	// The identities that changed, as the report's card lists them (s-io-9).
 	for _, m := range made {
 		if m.held != m.from {
@@ -1165,13 +1179,13 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 	if t, ok := skippedTable(d.Skipped); ok {
 		report.Rows = append(report.Rows, t)
 	}
-	report.Note = text(importNote(report, len(refused.Rows), d.Source))
+	report.Note = text(importNote(report, len(refused.Rows), lossy, d.Source))
 
 	clearImportDraft(c)
 	s.writePage(w, r, http.StatusOK, s.importPage(c, importState{dest: dest, report: report}))
 }
 
-func importNote(report *view.ImportReport, refused int, source string) string {
+func importNote(report *view.ImportReport, refused, lossy int, source string) string {
 	parts := []string{fmt.Sprintf("%s created from %s", plural(report.Created, "record"), source)}
 	if report.Renamed > 0 {
 		parts = append(parts, fmt.Sprintf("%s under a new identity", plural(report.Renamed, "record")))
@@ -1181,6 +1195,9 @@ func importNote(report *view.ImportReport, refused int, source string) string {
 	}
 	if refused > 0 {
 		parts = append(parts, fmt.Sprintf("%s refused by the server", plural(refused, "record")))
+	}
+	if lossy > 0 {
+		parts = append(parts, fmt.Sprintf("%s not kept whole by the server", plural(lossy, "record")))
 	}
 	return strings.Join(parts, " · ") + ". Nothing there was overwritten."
 }
@@ -1210,16 +1227,30 @@ type importMade struct {
 // import follow the identities the server gave (followTheirs); what already
 // pointed at the identity a record came with is left alone: an import is a
 // copy, and a record of that identity may well live on elsewhere (S-19).
-func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *view.ImportReport, written *view.ImportTable, made []importMade) {
+//
+// The same read says what the server kept of each record (S-7.1; Б35 of the
+// audit of 11.10.2026: an import was the one write nobody read back). A
+// record that lost a part of itself says so in its row, and lossy counts
+// them for the note of the report.
+func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *view.ImportReport, written *view.ImportTable, made []importMade) (lossy int) {
 	for i := range made {
 		made[i].held = made[i].uid
 	}
 	if len(made) == 0 {
-		return
+		return 0
 	}
-	held, err := destUIDs(ctx, dest)
+	held, err := destRecords(ctx, dest)
 	if err != nil {
-		return // the rows stand as the writes were answered
+		return 0 // the rows stand as the writes were answered
+	}
+	kept := func(m *importMade, got *model.Object) {
+		if got == nil || m.obj == nil {
+			return
+		}
+		if loss := writeLoss(dest.conn.ID, m.obj, got, nil, true); loss != nil && len(loss.Properties) > 0 {
+			written.Rows[m.row][2] = text(string(written.Rows[m.row][2]) + ". The server did not keep " + strings.Join(loss.Properties, ", "))
+			lossy++
+		}
 	}
 	gave := map[string]string{} // written under → held under
 	for i := range made {
@@ -1227,7 +1258,8 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 		if m.was != "" {
 			gave[m.was] = m.uid // what was written before it names it still
 		}
-		if held[m.uid] {
+		if got := held[m.uid]; got != nil {
+			kept(m, got)
 			continue
 		}
 		at, err := dest.fetch(ctx, m.path)
@@ -1237,9 +1269,11 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 		}
 		theirs := uidOf(dest, at)
 		if theirs == "" || theirs == m.uid {
+			kept(m, at)
 			continue // there under its own identity; the listing missed it
 		}
 		written.Rows[m.row][2] = text("Created under " + theirs + ": the server gave it an identity of its own")
+		kept(m, at)
 		gave[m.uid] = theirs
 		m.held = theirs
 		dest.noteWrite(m.path, at)
@@ -1248,6 +1282,7 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 		}
 	}
 	followTheirs(ctx, dest, written.Rows, made, gave)
+	return lossy
 }
 
 // setUID gives an imported record a fresh identity, by the rules of its kind.
@@ -1266,7 +1301,7 @@ func (s *Server) createImported(ctx context.Context, dest *collectionCtx, obj *m
 	second := strings.TrimSuffix(dest.col.Path, "/") + "/" + fileStem(uid) + "-2" + dest.spec.ext
 	for _, dst := range []string{importName(dest, uid), second} {
 		obj.Path = dst
-		if err = dest.create(ctx, dst, obj); err == nil {
+		if err = dest.place(ctx, dst, obj); err == nil {
 			dest.noteWrite(dst, obj)
 			return nil
 		}

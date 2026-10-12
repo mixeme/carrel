@@ -99,6 +99,28 @@ func (p *Provider) Create(ctx context.Context, path string, obj *model.Object) (
 	return p.c.PutCreate(ctx, path, dav.Typed(&buf, MediaType))
 }
 
+// Place writes, with If-None-Match, a record that was made elsewhere — moved
+// from another server, copied, imported. Nobody changed it, so its time of
+// change stays what it was (Б34 of the audit of 11.10.2026: Create stamped
+// it «changed now»). DTSTAMP, which a record cannot go without, is given
+// only to one that has none.
+func (p *Provider) Place(ctx context.Context, path string, obj *model.Object) (string, error) {
+	if len(obj.Props()["DTSTAMP"]) == 0 {
+		patch, err := model.NewPatch(model.SetText{Prop: "DTSTAMP", Value: p.now().UTC().Format("20060102T150405Z")})
+		if err != nil {
+			return "", err
+		}
+		if err := patch.Apply(obj); err != nil {
+			return "", err
+		}
+	}
+	var buf bytes.Buffer
+	if err := Encode(&buf, obj); err != nil {
+		return "", err
+	}
+	return p.c.PutCreate(ctx, path, dav.Typed(&buf, MediaType))
+}
+
 // MediaType is the Content-Type of a calendar object on PUT.
 const MediaType = "text/calendar; charset=utf-8"
 
