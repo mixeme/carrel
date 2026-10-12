@@ -68,7 +68,8 @@ func conflictFields(kind view.Kind, d editDraft, theirs formValues) []editField 
 	for _, f := range editFields[kind] {
 		mine, changed := d.Mine[f.name]
 		relabelled := f.typed && !sameLabels(d.Mine[f.name+".type"], theirs[f.name+".type"])
-		if changed && (!sameRows(mine, theirs[f.name]) || relabelled) {
+		typed := strings.TrimSpace(first(d.Mine[f.name+".add"])) != ""
+		if changed && (!sameRows(mine, theirs[f.name]) || relabelled || typed) {
 			out = append(out, f)
 		}
 	}
@@ -308,6 +309,14 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 			want[f.name] = d.Mine[f.name]
 			if f.typed {
 				want[f.name+".type"] = d.Mine[f.name+".type"]
+			}
+			// What the form sent beside the field goes with it
+			// (changedValues).
+			if line, ok := d.Mine[f.name+".add"]; ok {
+				want[f.name+".add"] = line
+			}
+			if box, ok := d.Mine[taskDayBox]; ok && f.taskDay {
+				want[taskDayBox] = box
 			}
 		}
 	}

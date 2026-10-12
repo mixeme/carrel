@@ -3474,16 +3474,34 @@ func doneBack(c *collectionCtx, uid, from string) string {
 	return c.recordPath(uid)
 }
 
+// changedValues are the fields of want that differ from base, each with
+// what the form sends beside it and the field is not read without (Б8 of
+// the audit of 11.10.2026: a refused edit kept the rows alone, and written
+// from the conflict screen it lost the person typed into the attendees'
+// line, did not take away the attendees unticked, and took a task's «All
+// day» from the server): the labels of a typed row, the line of the
+// attendees — its presence says the field was drawn, so a name missing from
+// the list was taken away —, and a task's one «All day» box.
 func changedValues(fields []editField, base, want formValues) formValues {
 	out := formValues{}
+	day := false
 	for _, f := range fields {
 		labelled := f.typed && !sameLabels(keptLabels(f.prop, want[f.name+".type"], base[f.name+".type"]), base[f.name+".type"])
-		if !sameRows(want[f.name], base[f.name]) || labelled {
+		line, drawn := want[f.name+".add"]
+		typed := f.typ == fieldAttendee && drawn && strings.TrimSpace(first(line)) != ""
+		if !sameRows(want[f.name], base[f.name]) || labelled || typed {
 			out[f.name] = want[f.name]
 			if f.typed {
 				out[f.name+".type"] = want[f.name+".type"]
 			}
+			if f.typ == fieldAttendee && drawn {
+				out[f.name+".add"] = line
+			}
+			day = day || f.taskDay
 		}
+	}
+	if box, ok := want[taskDayBox]; ok && (day || !sameRows(box, base[taskDayBox])) {
+		out[taskDayBox] = box
 	}
 	return out
 }

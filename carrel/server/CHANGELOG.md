@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.206 — 2026-10-12
+
+An edit written from the conflict screen is the edit the person made (Б8 of
+the audit of 11.10.2026).
+
+### Fixed
+
+- **«Use only my edit» writes the attendees as the form had them.** An edit
+  refused because the record changed elsewhere kept the rows of each field
+  and not what the form sends beside them. Written from the conflict
+  screen, it lost the attendee typed into the line, and did not take away
+  the attendees unticked — the field read as one that only adds.
+- **A task's «All day» is the person's there too.** It was taken from the
+  server's version, so a task given a whole day came out with its time.
+
+### For developers
+
+- `changedValues` carries the attendees' line and a task's box;
+  `postRecordConflict` puts them back beside their fields. A line typed
+  with the list unchanged makes the attendees a row of the conflict screen.
+- Not done, Б9: a photo replaced or cropped on an existing card is a write
+  of its own, and what was typed into the form before it is lost.
+
 ## v0.2.205 — 2026-10-12
 
 Two new forms keep their own files (Б7 of the audit of 11.10.2026).
