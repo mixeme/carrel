@@ -67,10 +67,10 @@ func TestTaskFields(t *testing.T) {
 	}
 
 	got = save(map[string]string{"related": "t2"})
-	mustContain(t, got, "RELATED-TO:t2")
+	mustContain(t, got, "RELATED-TO;RELTYPE=SIBLING:t2")
 	got = save(map[string]string{"related": "elsewhere-uid"}) // typed after «By UID…»
-	mustContain(t, got, "RELATED-TO:elsewhere-uid")
-	if strings.Contains(got, "RELATED-TO:t2") {
+	mustContain(t, got, "RELATED-TO;RELTYPE=SIBLING:elsewhere-uid")
+	if strings.Contains(got, ":t2") {
 		t.Errorf("the old relation stayed:\n%s", got)
 	}
 	got = save(map[string]string{"related": "", "priority": ""})

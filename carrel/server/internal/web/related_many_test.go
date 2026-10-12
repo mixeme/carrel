@@ -71,20 +71,20 @@ func TestRelatedToHoldsEveryRelation(t *testing.T) {
 	// One more is typed by its UID: the two stay, the kept one with its
 	// parameter.
 	got := save([]string{"t2", "elsewhere"}, "t3")
-	mustContain(t, got, "RELATED-TO;RELTYPE=SIBLING:t2", "RELATED-TO:elsewhere", "RELATED-TO:t3")
+	mustContain(t, got, "RELATED-TO;RELTYPE=SIBLING:t2", "RELATED-TO:elsewhere", "RELATED-TO;RELTYPE=SIBLING:t3")
 
 	// The first is unticked: the others keep what they had — the parameter
 	// of the first does not slide onto the next.
 	got = save([]string{"elsewhere", "t3"}, "")
-	mustContain(t, got, "RELATED-TO:elsewhere", "RELATED-TO:t3")
-	if strings.Contains(got, "t2") || strings.Contains(got, "RELTYPE") {
+	mustContain(t, got, "RELATED-TO:elsewhere", "RELATED-TO;RELTYPE=SIBLING:t3")
+	if strings.Contains(got, "t2") || strings.Contains(got, "RELATED-TO;RELTYPE=SIBLING:elsewhere") {
 		t.Errorf("the unticked relation or its parameter stayed:\n%s", got)
 	}
 
 	// A title of a record the session has loaded is that record; one already
 	// related is not written twice.
 	got = save([]string{"elsewhere", "t3"}, "Rehearse")
-	mustContain(t, got, "RELATED-TO:elsewhere", "RELATED-TO:t3", "RELATED-TO:t2")
+	mustContain(t, got, "RELATED-TO:elsewhere", "RELATED-TO;RELTYPE=SIBLING:t3", "RELATED-TO;RELTYPE=SIBLING:t2")
 	got = save([]string{"elsewhere", "t3", "t2"}, "t3")
 	if strings.Count(got, "RELATED-TO") != 3 {
 		t.Errorf("a relation typed again was written twice:\n%s", got)

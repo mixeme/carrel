@@ -60,7 +60,7 @@ func TestNewTaskFromAnEvent(t *testing.T) {
 	for _, p := range f.srv.Paths(f.col) {
 		b, _, _ := f.srv.Object(p)
 		b = unfolded(b)
-		found = found || strings.Contains(b, "BEGIN:VTODO") && strings.Contains(b, "RELATED-TO:meet") && strings.Contains(b, "SUMMARY:Prepare slides")
+		found = found || strings.Contains(b, "BEGIN:VTODO") && strings.Contains(b, "RELATED-TO;RELTYPE=SIBLING:meet") && strings.Contains(b, "SUMMARY:Prepare slides")
 	}
 	if !found {
 		t.Error("no task related to the event was written")

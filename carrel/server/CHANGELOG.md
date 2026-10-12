@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.215 — 2026-10-12
+
+A relation made in Carrel is «see also», not subordination (Б29 of the
+audit of 11.10.2026; the owner's decision of 12.10.2026).
+
+### Changed
+
+- **A relation added in «Related to» is written with its type**,
+  `RELTYPE=SIBLING` — in the form of a task, an event and a note, and by
+  «Write a note», «New event» and «New task» of a person's timeline. It
+  used to be written bare, and a bare `RELATED-TO` is a parent by the
+  standard: other programs drew the task a subtask of what it only named.
+- **So a task marked done closes real subtasks only** (`v0.2.212`): tasks
+  whose relation is a parent — bare, or `RELTYPE=PARENT`, as other programs
+  write a subtask. A task Carrel related to it is left alone.
+- A relation a record already had keeps the type it came with.
+
+### To know
+
+- Relations between tasks made in Carrel before this version are bare:
+  they read as subtasks, here and elsewhere, until the relation is taken
+  off and added again.
+
 ## v0.2.214 — 2026-10-12
 
 Typecase `22f594a` (Typecase's note 49), client `v0.4.16`. The copy of the

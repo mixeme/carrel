@@ -78,7 +78,7 @@ func TestNoteDateTagsRelated(t *testing.T) {
 	mustContain(t, got, "DTSTART;VALUE=DATE:20260110", "CATEGORIES:work", "X-KEEP:yes")
 
 	got = save(map[string]string{"start.date": "2026-01-12", "start.time": "09:30", "categories": "work, ideas", "related": "n2"})
-	mustContain(t, got, "DTSTART:20260112T093000Z", "CATEGORIES:work,ideas", "RELATED-TO:n2", "DESCRIPTION:Body")
+	mustContain(t, got, "DTSTART:20260112T093000Z", "CATEGORIES:work,ideas", "RELATED-TO;RELTYPE=SIBLING:n2", "DESCRIPTION:Body")
 
 	got = save(map[string]string{"start.time": ""})
 	mustContain(t, got, "DTSTART;VALUE=DATE:20260112")

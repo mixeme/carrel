@@ -153,10 +153,10 @@ func TestRelatedToIsTheFramesList(t *testing.T) {
 		return unfolded(b)
 	}
 	// Picked from the list, and typed by hand: one name, one value.
-	mustContain(t, save("pack"), "RELATED-TO:pack")
+	mustContain(t, save("pack"), "RELATED-TO;RELTYPE=SIBLING:pack")
 	check("task related to Pack", related(), wants, "pack")
 	got := save("elsewhere-uid")
-	if !strings.Contains(got, "RELATED-TO:elsewhere-uid") || strings.Contains(got, "RELATED-TO:pack") {
+	if !strings.Contains(got, "RELATED-TO;RELTYPE=SIBLING:elsewhere-uid") || strings.Contains(got, ":pack") {
 		t.Errorf("typed by hand:\n%s", got)
 	}
 	// A record not loaded is the pill's own: its UID, first, chosen.
@@ -252,7 +252,7 @@ func TestRelatedToOutsideTheLoadedIsTheFrame(t *testing.T) {
 		t.Fatalf("save: %d %s", rec.Code, rec.Body)
 	}
 	b, _, _ := srv.Object(searchWork + "far.ics")
-	if got := unfolded(b); !strings.Contains(got, "RELATED-TO:card") || !strings.Contains(got, "RELATED-TO:second") || strings.Contains(got, "7c1e") {
+	if got := unfolded(b); !strings.Contains(got, "RELATED-TO;RELTYPE=SIBLING:card") || !strings.Contains(got, "RELATED-TO:second") || strings.Contains(got, "7c1e") {
 		t.Errorf("saved:\n%s", got)
 	}
 }

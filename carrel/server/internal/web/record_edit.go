@@ -1521,6 +1521,16 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				continue
 			}
 			ch.ops = append(ch.ops, valueOps(f.prop, props[f.prop], want)...)
+			// A relation made here is «see also», and says so (the owner's
+			// decision of 12.10.2026, Б29 of the audit of 11.10.2026): a
+			// bare RELATED-TO is a PARENT by RFC 5545, and other programs
+			// drew the record a subtask of what it only named. A relation
+			// the record came with keeps its type, a bare one included.
+			for i, v := range want {
+				if !slices.Contains(h, v) {
+					ch.ops = append(ch.ops, model.SetParam{Prop: f.prop, Index: i, Param: "RELTYPE", Value: "SIBLING"})
+				}
+			}
 		case fieldBirthday:
 			v := first(w)
 			if v == first(h) || sameBirthday(v, first(h)) {
