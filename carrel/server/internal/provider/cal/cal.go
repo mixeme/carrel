@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -73,6 +74,17 @@ func (p *Provider) Get(ctx context.Context, path string) (*model.Object, error) 
 	}
 	defer rc.Close()
 	return Parse(path, etag, rc)
+}
+
+// Raw is one calendar object as the server holds it, undecoded: what an
+// export hands over of a record Carrel could not read.
+func (p *Provider) Raw(ctx context.Context, path string) ([]byte, error) {
+	rc, _, err := p.t.Get(ctx, path, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer rc.Close()
+	return io.ReadAll(rc)
 }
 
 // Create writes a new object with If-None-Match.

@@ -109,7 +109,7 @@ func (s *Server) backupSources(ctx context.Context, blob sealed.Blob, job sealed
 				if err != nil {
 					return 0, err
 				}
-				writeCalendar(w, objs)
+				writeCalendar(w, objs, nil)
 				return len(objs), nil
 			}})
 		}

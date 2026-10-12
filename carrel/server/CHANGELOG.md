@@ -17,6 +17,42 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.197 — 2026-10-12
+
+An export no longer leaves out, without a word, a record Carrel could not
+read (Б3 of the audit of 11.10.2026, `docs/plan/scans/silent-choices.md`).
+
+### Fixed
+
+- **A record the server handed over and Carrel could not read goes into the
+  `.ics` as the server holds it.** It was left out of the file and nothing
+  said so — also in «Download .ics first» before a calendar is deleted. Now
+  the record is asked for again, raw, and its components are copied into
+  the file untouched.
+- **What cannot be put into the file is said before any file is handed
+  over.** When the server will not give the record, when nothing in it is a
+  component of a calendar, or when the file is the Markdown of notes, the
+  export answers with the collection's screen: «The file would lack 2
+  records», the records named, and «Export without them».
+
+### Changed — contract
+
+- `/app/{kind}/{account}/{col}/export` may answer with the screen of the
+  collection and the action `collection.export.without` (the same address
+  with `&without=1`) instead of a file.
+
+### For developers
+
+- `cal.Provider.Raw`; `exportUnread`, `exportLacks`, `allRecordsAndUnread`
+  in `internal/web/export.go`; `writeCalendar` and `writeExport` take the
+  raw documents.
+- Not changed, and they still leave such records out without a word: the
+  file of a public link (on purpose: nothing checked what of the record
+  the link may show), the attachment of a letter, the backup archive.
+- An address book has no unreadable records at this level: the card
+  provider does not report them.
+- The words of the notice are the developer's, not the owner's.
+
 ## v0.2.196 — 2026-10-12
 
 Attach takes every file its form carries (Б6 of the audit of 11.10.2026,

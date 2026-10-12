@@ -473,7 +473,7 @@ func (s *Server) partContent(ctx context.Context, sess *session.Session, p mailP
 			if err != nil {
 				return nil, err
 			}
-			writeCalendar(&buf, objs)
+			writeCalendar(&buf, objs, nil)
 			break
 		}
 		from, okFrom := parseDay(c.tf, p.From)
@@ -486,7 +486,7 @@ func (s *Server) partContent(ctx context.Context, sess *session.Session, p mailP
 		if err != nil {
 			return nil, err
 		}
-		writeCalendar(&buf, objs)
+		writeCalendar(&buf, objs, nil)
 	default:
 		obj, err := c.find(ctx, p.UID)
 		if err != nil {
@@ -498,7 +498,7 @@ func (s *Server) partContent(ctx context.Context, sess *session.Session, p mailP
 		case p.What == "note" && p.Format == "md":
 			err = cal.NoteMarkdown(&buf, obj)
 		default:
-			writeCalendar(&buf, []*model.Object{obj})
+			writeCalendar(&buf, []*model.Object{obj}, nil)
 		}
 		if err != nil {
 			return nil, err

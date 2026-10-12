@@ -754,9 +754,9 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 		obj, err = c.find(ctx, uid)
 		objs = []*model.Object{obj}
 	} else if w := publishedWindow(s.timeFor(nil), link); w != nil {
-		objs, err = c.exportRecords(ctx, &w[0], &w[1])
+		objs, _, err = c.exportRecords(ctx, &w[0], &w[1])
 	} else {
-		objs, err = c.exportRecords(ctx, nil, nil)
+		objs, _, err = c.exportRecords(ctx, nil, nil)
 	}
 	if err != nil {
 		page := view.PublishedPage{Plain: view.Plain{Title: text(link.Target.Title), Notices: []view.Notice{publicTrouble()}}, Kind: c.spec.kind, ReadOnly: true}
@@ -786,7 +786,9 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 			objs[i] = visitorCard(o, link.Target)
 		}
 	}
-	writeExport(w, c, objs)
+	// A record Carrel could not read stays out of a guest's file: nothing
+	// checked what of it the link may show.
+	writeExport(w, c, objs, nil)
 }
 
 // visitorFields are the fields of a contact a link shows only when asked to
