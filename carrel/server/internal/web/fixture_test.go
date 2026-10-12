@@ -1076,6 +1076,13 @@ func TestFixtureCombinedContacts(t *testing.T) {
 // taken (davtest.Stall).
 func TestFixtureCombinedContactsPartial(t *testing.T) {
 	app := newMockupApp(t)
+	// The person has looked at every book before, an hour ago: the session
+	// knows how many cards each holds — the sections of the rail keep those
+	// numbers while a poll runs (states-8) —, and what it read then is too
+	// old to answer from, so every book is asked again.
+	app.h.srv.SetClock(mockupNow(t).Add(-time.Hour))
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	app.h.srv.SetClock(mockupNow(t))
 	// «Контакты» is read alone first, so the combined poll finds it in the
 	// session and answers from there: that is what «from cache» means.
 	if rec := app.h.do(get(app.listPath(t, "contacts", "kontakty"), app.sess)); rec.Code != 200 {
@@ -1085,6 +1092,10 @@ func TestFixtureCombinedContactsPartial(t *testing.T) {
 	// is still being asked while the two of nextcloud have answered.
 	release := app.servers["radicale · vps"].Stall("REPORT")
 	defer release()
+	// A book the session has read is first asked whether it changed: that
+	// question is held too.
+	unchanged := app.servers["radicale · vps"].Stall("PROPFIND")
+	defer unchanged()
 
 	app.h.srv.SetClock(mockupNow(t))
 	first := decode[view.ContactsListPage](t, app.h.do(get("/app/contacts", app.sess)))
@@ -2401,9 +2412,17 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 	} {
 		t.Run(one.dir+"-partial", func(t *testing.T) {
 			app := newMockupApp(t)
-			release := app.servers["radicale · vps"].Stall("REPORT")
-			defer release()
+			// The person has looked at every calendar before, an hour ago:
+			// the session knows how many events each holds, and the
+			// sections of the rail keep those numbers while a poll runs
+			// (states-13); what it read then is too old to answer from.
+			app.h.srv.SetClock(mockupNow(t).Add(-time.Hour))
+			openList(t, app, "/app/"+one.segment)
 			app.h.srv.SetClock(mockupNow(t))
+			// «Проекты» alone is held: «Дежурства», on the same stand,
+			// answers (states-13).
+			release := app.servers["radicale · vps"].StallAt(app.realPath(t, "proekty"))
+			defer release()
 			first := app.h.do(get("/app/"+one.segment, app.sess))
 			task := taskOf(t, first)
 			if task == "" {

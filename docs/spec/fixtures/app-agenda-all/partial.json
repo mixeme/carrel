@@ -236,7 +236,7 @@
     },
     "filter": "",
     "filterForm": null,
-    "loaded": 4,
+    "loaded": 5,
     "range": {
       "form": {
         "action": "/app/calendar",
@@ -364,7 +364,7 @@
   },
   "days": [
     {
-      "count": 3,
+      "count": 4,
       "rows": [
         {
           "badges": [
@@ -451,6 +451,92 @@
           "target": "details",
           "time": "all day",
           "uid": "2f04-8b71-e39a"
+        },
+        {
+          "badges": [
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
+          "changed": "1 Jun 09:15",
+          "colour": "#8c6239",
+          "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
+          "kind": "event",
+          "location": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
+              "icon": "i-cal",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/export?uid=5e90-33c1-a8d2",
+              "icon": "i-down",
+              "id": "record.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-rad-vps\u0026c=dezhurstva\u0026k=calendar\u0026uid=5e90-33c1-a8d2",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2/delete?etag=e3",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete event",
+              "method": "POST",
+              "separator": true
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "radicale · vps · Дежурства",
+          "state": "ok",
+          "summary": "Дежурство: первая линия",
+          "tags": [],
+          "target": "details",
+          "time": "all day",
+          "uid": "5e90-33c1-a8d2"
         },
         {
           "badges": [
@@ -758,7 +844,7 @@
     "every": 700,
     "failed": "1 failed",
     "note": "",
-    "percent": 66,
+    "percent": 83,
     "poll": "/app/search/progress/t-task/poll",
     "retryAll": null,
     "running": true,
@@ -783,12 +869,12 @@
       },
       {
         "colour": "#8c6239",
-        "count": null,
+        "count": 1,
         "fromCache": false,
         "message": "",
         "retry": null,
         "stamp": "radicale · vps · Дежурства",
-        "state": "querying"
+        "state": "done"
       },
       {
         "colour": "#6b4e7a",
@@ -830,7 +916,7 @@
     "stream": "/app/search/progress/t-task",
     "summary": [
       {
-        "text": "Polling · 3 of 6 answered · 4 events"
+        "text": "Polling · 4 of 6 answered · 5 events"
       }
     ],
     "taskID": "t-task"
@@ -888,7 +974,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 6,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -925,7 +1011,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 1,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",
@@ -1177,7 +1263,7 @@
         "rows": [
           {
             "colour": "#8c6239",
-            "count": null,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-rad-vps/dezhurstva",

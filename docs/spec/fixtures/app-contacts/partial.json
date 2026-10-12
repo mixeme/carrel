@@ -953,7 +953,7 @@
     ],
     "nav": [
       {
-        "count": null,
+        "count": 7,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",

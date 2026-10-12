@@ -799,13 +799,46 @@ func refusalDetail(err error) string {
 // on the screen, its row marked open, and where a tick comes back to.
 func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec, snap *fanout.Snapshot, open string) view.Rail {
 	rail := view.Rail{About: s.aboutAction(), Davloom: s.davloomMark(sess), Nav: s.navRows(sess, blob, spec.segment)}
+	polling := snap // the poll of the view on the screen, when it has one
 	if snap == nil {
 		snap = lastPoll(sess, spec.kind) // one collection's page: what the last poll could not read
 	}
-	sections, live, on := s.railSections(sess, blob, spec, s.troublesOf(snap), nil)
+	// While the poll of this view runs, a collection that has not answered
+	// it yet has no number — a dash —, whatever the session knew of it
+	// before, and neither has the row of the combined view: its sum is not
+	// known until every one has answered. The sections above keep their
+	// numbers (Typecase's note 44; states-8, -13, -19, -26).
+	var count func(sourceID string) *int
+	if polling != nil && polling.Running {
+		waits := map[string]bool{}
+		for _, src := range polling.Sources {
+			if src.State == view.SourceWaiting || src.State == view.SourceQuerying {
+				waits[src.ID] = true
+			}
+		}
+		known := map[string]*int{}
+		for _, conn := range blob.Connections {
+			for _, col := range blob.CollectionsOf(conn.ID) {
+				known[conn.ID+":"+col.Path] = collectionCount(sess, conn.ID, col, spec)
+			}
+		}
+		for _, f := range blob.Subscriptions {
+			known[f.ID+":"+f.FeedCollection().Path] = collectionCount(sess, f.ID, f.FeedCollection(), spec)
+		}
+		count = func(id string) *int {
+			if waits[id] {
+				return nil
+			}
+			return known[id]
+		}
+	}
+	sections, live, on := s.railSections(sess, blob, spec, s.troublesOf(snap), count)
 	combined := view.SourceRow{
 		Href: s.route("/app/" + spec.segment), Label: text(combinedTitles[spec.kind]),
 		Count: kindCount(sess, blob, spec), Tick: view.TickPart, State: view.CollectionOK,
+	}
+	if polling != nil && polling.Running {
+		combined.Count = nil
 	}
 	switch on {
 	case 0:

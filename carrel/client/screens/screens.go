@@ -158,9 +158,7 @@ var All = []Screen{
 		Draw:   func(model any) Root { return contacts.Screen(model.(*view.ContactsListPage)) },
 		Title:  func(model any) string { return string(model.(*view.ContactsListPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return contacts.Forms(model.(*view.ContactsListPage)) },
-		Waits: []Wait{
-			{Row: 19, Fixture: "app-contacts/partial"}, // ждёт библиотеку: U-5.5 #19
-		},
+		Waits:  []Wait{},
 	},
 	{
 		Model:  func() any { return new(view.ContactPage) },
@@ -203,9 +201,7 @@ var All = []Screen{
 		Draw:   func(model any) Root { return agenda.Screen(model.(*view.AgendaPage)) },
 		Title:  func(model any) string { return string(model.(*view.AgendaPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return agenda.Forms(model.(*view.AgendaPage)) },
-		Waits: []Wait{
-			{Row: 24, Fixture: "app-agenda-all/partial"}, // ждёт библиотеку: U-5.5 #24
-		},
+		Waits:  []Wait{},
 	},
 	{
 		Model:  func() any { return new(view.EventPage) },

@@ -251,6 +251,7 @@ type Server struct {
 	objects   map[string]object
 	refuse    map[string]refusal
 	stalls    map[string]chan struct{}
+	stallsAt  map[string]chan struct{}
 	hangUp    map[string]bool
 	requests  []string
 	ranges    []string // the Range of each GET under FileRoot, as sent
@@ -287,6 +288,7 @@ func New(t testing.TB) *Server {
 		sent:      make(map[string][]byte),
 		refuse:    make(map[string]refusal),
 		stalls:    make(map[string]chan struct{}),
+		stallsAt:  make(map[string]chan struct{}),
 		hangUp:    make(map[string]bool),
 		dir:       t.TempDir(),
 	}
@@ -395,6 +397,23 @@ func (s *Server) Stall(method string) (release func()) {
 		if s.stalls[method] == ch {
 			close(ch)
 			delete(s.stalls, method)
+		}
+	}
+}
+
+// StallAt is Stall for the requests under one path alone: one collection of
+// a server held while its neighbours answer.
+func (s *Server) StallAt(prefix string) (release func()) {
+	ch := make(chan struct{})
+	s.mu.Lock()
+	s.stallsAt[prefix] = ch
+	s.mu.Unlock()
+	return func() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		if s.stallsAt[prefix] == ch {
+			close(ch)
+			delete(s.stallsAt, prefix)
 		}
 	}
 }
@@ -676,6 +695,11 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 	s.mu.Lock()
 	s.requests = append(s.requests, r.Method+" "+r.URL.Path)
 	hold := s.stalls[r.Method]
+	for prefix, ch := range s.stallsAt {
+		if hold == nil && strings.HasPrefix(r.URL.Path, prefix) {
+			hold = ch
+		}
+	}
 	s.mu.Unlock()
 	if hold != nil {
 		select {

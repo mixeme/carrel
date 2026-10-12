@@ -4,6 +4,18 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.12 — 2026-10-12
+
+Server `v0.2.195`. No screen changed.
+
+### Changed
+
+- **A combined list whose poll is still running matches its frames**
+  (`states-8` — the contacts, `states-13` — the calendar): the words of the
+  poll (`v0.2.194`) and the numbers of the rail (`v0.2.195`) are the
+  server's now. U-5.5 rows 19 and 24 are gone, and the two fixtures no
+  longer wait.
+
 ## v0.4.11 — 2026-10-12
 
 Typecase `462ffb5` (Typecase's notes 45 and 46; Carrel's task 152 answered),

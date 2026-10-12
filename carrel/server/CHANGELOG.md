@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.195 — 2026-10-12
+
+The counts of the rail while a poll runs (Typecase's note 44; the owner,
+12.10.2026: the frames are right, and the row of the combined view has a
+dash while the poll runs). The last of what the transition to `43ca489`
+left the server.
+
+### Changed — behaviour
+
+- **While the poll of a combined view runs, a collection that has not
+  answered it has a dash, and so has the row of the combined view** —
+  whatever the session knew of them before. Until now the dash stood only
+  where the number was not known at all: a book read an hour ago kept its
+  old number while it was being asked again, and the combined row its old
+  sum. **The sections above keep their numbers** (`states-8`, `-13`).
+
+### For developers
+
+- The partial fixtures are taken in a session that has seen its
+  collections before — an hour ago, so each is asked again —:
+  `app-contacts/partial` (the section says 7 with «Команда» held),
+  `app-agenda-all/partial` («Дежурства» answers and «Проекты», on the same
+  stand, is held: `davtest.Server.StallAt` holds the requests of one path).
+- U-5.5 rows 19 and 24 of the client are gone: `states-8` and `states-13`
+  match.
+
 ## v0.2.194 — 2026-10-12
 
 The words of a poll that is still running (Typecase Р-55, the owner's
