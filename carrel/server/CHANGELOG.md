@@ -17,6 +17,38 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.196 — 2026-10-12
+
+Attach takes every file its form carries (Б6 of the audit of 11.10.2026,
+`docs/plan/scans/silent-choices.md`).
+
+### Fixed
+
+- **Attach no longer drops the files after the first.** A form that carried
+  several files had the first written into the record and the rest dropped
+  without a word. Now every file goes in, each by the rule of S-20 — inside
+  the record, or to the folder for attachments with a link — and all of them
+  by one write of the record. A file that cannot be attached stops them all:
+  the record is not written, the files already put into the folder for it
+  are taken away again, and the notice names the file when it is not the
+  first («… could not be attached, so none of the files was»).
+- **So for a new event, task or note:** the files of one Attach wait for
+  Save together, or none is kept when together they would not fit inside
+  the record.
+
+### For consumers
+
+The page's own Attach sends one file — its field lets one be chosen — so a
+browser sees no change. A client that sends several files in one form gets
+them all attached or a notice; before it got the first and a redirect.
+
+### For developers
+
+- `nextFile`, `takeBack`, `settled` in `internal/web/attach.go`;
+  `readNewAttachUpload` returns every file. Fields between the files are
+  kept (`uploadBody.keep`): the sizes of the files after them.
+- The words of the notice are the developer's, not the owner's.
+
 ## v0.2.195 — 2026-10-12
 
 The counts of the rail while a poll runs (Typecase's note 44; the owner,

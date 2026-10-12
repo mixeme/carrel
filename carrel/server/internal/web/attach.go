@@ -326,8 +326,8 @@ func (s *Server) opQuery(op, etag, from string) url.Values {
 // again and From Files — the tree of Files choosing a file that lies there
 // already (/app/files/picker?for=attach), written by the same rule.
 func (s *Server) attachAction(c *collectionCtx, uid, etag, from string) view.Action {
-	// File names the field of the file without scripts; the first file of
-	// any name is taken (firstFile).
+	// File names the field of the file without scripts; every file of the
+	// form is taken, whatever its field is called (nextFile).
 	a := view.Action{ID: "attach.add", Label: "Attach", Icon: "i-up", Href: s.postQuery(c.recordPath(uid)+"/edit", s.opQuery("attach", etag, from)), Method: "POST", Enabled: true,
 		File: "file"}
 	here := a
@@ -382,15 +382,15 @@ func changedNotice(nothing string) view.Notice {
 	}
 }
 
-// firstFile is the first file part of an attachment upload; nil when the form
-// carried none.
-func firstFile(r *http.Request) (*multipart.Part, error) {
-	up, err := uploadOf(r)
-	if err != nil {
-		return nil, err
-	}
-	for part := up.next; ; part = nil {
+// nextFile is the next file part of an upload, in the order sent; nil when
+// no more came. A field between the files is kept: the sizes of the files
+// after it (uploadBody.keep).
+func nextFile(up *uploadBody) (*multipart.Part, error) {
+	for {
+		part := up.next
+		up.next = nil
 		if part == nil {
+			var err error
 			if part, err = up.mr.NextPart(); err == io.EOF {
 				return nil, nil
 			} else if err != nil {
@@ -400,19 +400,40 @@ func firstFile(r *http.Request) (*multipart.Part, error) {
 		if part.FileName() != "" {
 			return part, nil
 		}
+		if err := up.keep(part); err != nil {
+			return nil, err
+		}
 	}
 }
 
-// postAttach writes one file from this computer into the record or, when
-// the finished object would be larger than the limit, into the attachment
-// folder with a link in the record. A file put in the folder for a write the
-// server then refuses is taken away again: nothing points at it.
+// takeBack removes the files put into the attachment folder for a write that
+// was not made.
+func takeBack(ctx context.Context, placed []*placedFile) {
+	for _, p := range placed {
+		if p != nil {
+			p.remove(ctx)
+		}
+	}
+}
+
+// postAttach writes the files of the form into the record — every one of
+// them, by one write (Б6 of the audit of 11.10.2026: only the first was
+// taken, the rest dropped without a word). Each goes inside or, when the
+// finished object would be larger than the limit, into the attachment folder
+// with a link in the record, on the record the files before it made. A file
+// that cannot be attached stops them all: the record is not written, and the
+// files put in the folder for it are taken away again — nothing points at
+// them.
 func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
 	ctx := r.Context()
 	q := r.URL.Query()
 	etag, back := strings.TrimSpace(q.Get("etag")), attachBack(c, uid, q.Get("from"))
 	const nothing = "nothing was attached"
-	part, partErr := firstFile(r)
+	var part *multipart.Part
+	up, partErr := uploadOf(r)
+	if partErr == nil {
+		part, partErr = nextFile(up)
+	}
 	obj, err := c.find(ctx, uid)
 	switch {
 	case notFoundErr(err):
@@ -430,25 +451,52 @@ func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectio
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, changedNotice(nothing)))
 		return
 	}
-	name := uploadName(part.FileName())
-	mediaType := fileType(name, part.Header.Get("Content-Type"))
-	if mediaType == "application/octet-stream" {
-		mediaType = fileType(name, "")
+	sent := obj
+	var placed []*placedFile
+	for n := 0; part != nil; n++ {
+		name := uploadName(part.FileName())
+		mediaType := fileType(name, part.Header.Get("Content-Type"))
+		if mediaType == "application/octet-stream" {
+			mediaType = fileType(name, "")
+		}
+		notice := &view.Notice{Role: view.NoticeAlert, Title: "The upload broke off", Body: "Nothing was attached. Send the file again."}
+		head, err := io.ReadAll(io.LimitReader(part, attachLimit(c.col)+1))
+		if err == nil {
+			// A file that ended inside what was read travels in the record.
+			// Past it, the only length this path can know is the one the page
+			// sent in front of the files (S-17.1).
+			var next *model.Object
+			var put *placedFile
+			next, put, notice = s.attached(ctx, c, sent, attachFile{
+				name: name, mediaType: mediaType, head: head, rest: part, size: declaredSize(r, name),
+			})
+			if notice == nil {
+				sent, placed = next, append(placed, put)
+				if part, err = nextFile(up); err == nil && part != nil {
+					// The next file is attached to the record as this one left it.
+					sent, err = settled(sent)
+				}
+				if err != nil {
+					takeBack(ctx, placed)
+					s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+						Role: view.NoticeAlert, Title: "The upload broke off", Body: "Nothing was attached. Send the files again.",
+					}))
+					return
+				}
+				continue
+			}
+		}
+		if notice != nil {
+			takeBack(ctx, placed)
+			if n > 0 {
+				// The files before it were taken and are not written either.
+				notice.Body = text(name + " could not be attached, so none of the files was. " + string(notice.Body))
+			}
+			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, *notice))
+			return
+		}
 	}
-	head, err := io.ReadAll(io.LimitReader(part, attachLimit(c.col)+1))
-	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
-			Role: view.NoticeAlert, Title: "The upload broke off", Body: "Nothing was attached. Send the file again.",
-		}))
-		return
-	}
-	// A file that ended inside what was read travels in the record. Past it,
-	// the only length this path can know is the one the page sent in front
-	// of the files (S-17.1).
-	sent, placed, notice := s.attached(ctx, c, obj, attachFile{
-		name: name, mediaType: mediaType, head: head, rest: part, size: declaredSize(r, name),
-	})
-	s.writeAttached(w, r, c, uid, obj, etag, back, sent, placed, notice)
+	s.writeAttached(w, r, c, uid, obj, etag, back, sent, placed, nil)
 }
 
 // attachFile is a file on its way into a record: its name and type, and
@@ -566,13 +614,13 @@ func (s *Server) postAttachFile(w http.ResponseWriter, r *http.Request, c *colle
 		}
 	}
 	sent, placed, notice := s.attached(ctx, c, obj, in)
-	s.writeAttached(w, r, c, uid, obj, etag, back, sent, placed, notice)
+	s.writeAttached(w, r, c, uid, obj, etag, back, sent, []*placedFile{placed}, notice)
 }
 
-// writeAttached writes the record an attachment made, with If-Match of the
+// writeAttached writes the record its attachments made, with If-Match of the
 // version the page showed, and answers where the page came from. A refusal
-// takes back a file put into the attachment folder for it.
-func (s *Server) writeAttached(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, obj *model.Object, etag, back string, sent *model.Object, placed *placedFile, notice *view.Notice) {
+// takes back the files put into the attachment folder for it.
+func (s *Server) writeAttached(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, obj *model.Object, etag, back string, sent *model.Object, placed []*placedFile, notice *view.Notice) {
 	ctx := r.Context()
 	if notice != nil {
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, *notice))
@@ -580,9 +628,7 @@ func (s *Server) writeAttached(w http.ResponseWriter, r *http.Request, c *collec
 	}
 	sent.ETag = etag
 	if err := c.update(ctx, sent); err != nil {
-		if placed != nil {
-			placed.remove(ctx)
-		}
+		takeBack(ctx, placed)
 		n := attachFailure(s.writeFailure(c, "PUT", obj.Path, err))
 		if dav.IsStatus(err, http.StatusPreconditionFailed) {
 			n = changedNotice("nothing was attached")
@@ -615,6 +661,16 @@ func patched(obj *model.Object, ops []model.PatchOp) (*model.Object, error) {
 		return nil, err
 	}
 	return out, nil
+}
+
+// settled is obj as it reads once written out: what patched makes of it
+// holds the patches already applied to it.
+func settled(obj *model.Object) (*model.Object, error) {
+	var buf bytes.Buffer
+	if err := cal.Encode(&buf, obj); err != nil {
+		return nil, err
+	}
+	return cal.Parse(obj.Path, obj.ETag, &buf)
 }
 
 // inlineTrial is the record with the file inside, when the finished object

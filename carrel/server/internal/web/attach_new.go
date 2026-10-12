@@ -156,7 +156,7 @@ func (s *Server) draftRows(c *collectionCtx, d attachDraft) []view.AttachRow {
 func (s *Server) postNewAttach(w http.ResponseWriter, r *http.Request, c *collectionCtx, op string) {
 	uid := issuedUID(r.URL.Query().Get("uid"))
 	d, held := loadAttachDraft(c, uid)
-	var upload *draftFile
+	var uploads []draftFile
 	tooLarge := false
 	if op == "attach" {
 		f, large, err := readNewAttachUpload(r, attachLimit(c.col))
@@ -165,7 +165,7 @@ func (s *Server) postNewAttach(w http.ResponseWriter, r *http.Request, c *collec
 				notices: []view.Notice{{Role: view.NoticeAlert, Title: "The upload broke off", Body: "Nothing was attached. Send the file again."}}}))
 			return
 		}
-		upload, tooLarge = f, large
+		uploads, tooLarge = f, large
 	} else if r.ParseForm() != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
@@ -191,13 +191,13 @@ func (s *Server) postNewAttach(w http.ResponseWriter, r *http.Request, c *collec
 	case "attach":
 		limit := attachLimit(c.col)
 		switch {
-		case upload == nil:
+		case len(uploads) == 0 && !tooLarge:
 			notice = &view.Notice{Role: view.NoticeAlert, Title: "No file was chosen", Body: "Choose the file to attach and send the form again."}
-		case tooLarge || d.inlineBytes()+int64(len(upload.Data)) > limit:
+		case tooLarge || d.inlineBytes()+draftBytes(uploads) > limit:
 			notice = &view.Notice{Role: view.NoticeAlert, Title: "Nothing was attached: save the record first",
 				Body: text("Up to " + sizeText(limit) + " together the files of a new record go inside it. A larger file goes to the attachments folder, and only a record that exists has one to link: save, then attach.")}
 		default:
-			d.Files = append(d.Files, *upload)
+			d.Files = append(d.Files, uploads...)
 		}
 	case "detach":
 		if n, err := strconv.Atoi(r.URL.Query().Get("n")); err == nil && n >= 0 && n < len(d.Files) {
@@ -228,11 +228,22 @@ func (s *Server) postNewAttach(w http.ResponseWriter, r *http.Request, c *collec
 	s.redirect(w, r, newFormAddress(c, d.UID))
 }
 
-// readNewAttachUpload reads the form a new form's Attach sent with its file:
-// the fields before and after the file, a form's worth at most, and the file
-// itself up to the limit; large says it was over and was left unread. The
-// middleware read the fields in front of the file for _csrf (isFileUpload).
-func readNewAttachUpload(r *http.Request, limit int64) (*draftFile, bool, error) {
+// draftBytes is how much files carry inside the record.
+func draftBytes(files []draftFile) int64 {
+	var n int64
+	for _, f := range files {
+		n += int64(len(f.Data))
+	}
+	return n
+}
+
+// readNewAttachUpload reads the form a new form's Attach sent with its files:
+// the fields before and after them, a form's worth at most, and every file
+// (Б6: the first alone was kept) while together they stay within the limit;
+// large says they went over it — the rest was left unread, and none is kept.
+// The middleware read the fields in front of the files for _csrf
+// (isFileUpload).
+func readNewAttachUpload(r *http.Request, limit int64) ([]draftFile, bool, error) {
 	up, err := uploadOf(r)
 	if err != nil {
 		return nil, false, err
@@ -242,7 +253,7 @@ func readNewAttachUpload(r *http.Request, limit int64) (*draftFile, bool, error)
 		fields[k] = v
 	}
 	remain := int64(conf.MaxFormBodyBytes)
-	var got *draftFile
+	var got []draftFile
 	large := false
 	for part := up.next; ; part = nil {
 		if part == nil {
@@ -253,25 +264,25 @@ func readNewAttachUpload(r *http.Request, limit int64) (*draftFile, bool, error)
 			}
 		}
 		if part.FileName() != "" {
-			if got != nil || large {
+			if large {
 				if _, err := io.Copy(io.Discard, part); err != nil {
 					return nil, false, err
 				}
 				continue
 			}
 			name := uploadName(part.FileName())
-			data, err := io.ReadAll(io.LimitReader(part, limit+1))
+			data, err := io.ReadAll(io.LimitReader(part, limit-draftBytes(got)+1))
 			if err != nil {
 				return nil, false, err
 			}
-			if int64(len(data)) > limit {
-				large = true
+			if draftBytes(got)+int64(len(data)) > limit {
+				large, got = true, nil
 				if _, err := io.Copy(io.Discard, part); err != nil {
 					return nil, false, err
 				}
 				continue
 			}
-			got = &draftFile{Name: name, Type: fileType(name, part.Header.Get("Content-Type")), Data: data, Size: int64(len(data))}
+			got = append(got, draftFile{Name: name, Type: fileType(name, part.Header.Get("Content-Type")), Data: data, Size: int64(len(data))})
 			continue
 		}
 		data, err := io.ReadAll(io.LimitReader(part, remain+1))
