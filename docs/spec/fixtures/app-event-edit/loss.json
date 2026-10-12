@@ -281,6 +281,52 @@
             "readOnly": false,
             "required": false,
             "value": "Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям."
+          },
+          {
+            "add": {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Add a link",
+              "mono": true,
+              "name": "related.add",
+              "options": [],
+              "placeholder": "Title or UID",
+              "readOnly": false,
+              "required": false,
+              "suggest": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/related",
+              "value": ""
+            },
+            "error": "",
+            "extra": null,
+            "hint": "A record that is not loaded here: its UID.",
+            "kind": "select",
+            "label": "Related to",
+            "mono": true,
+            "multiple": true,
+            "name": "related",
+            "options": [
+              {
+                "label": "5c81-77aa-0d64",
+                "selected": true,
+                "value": "5c81-77aa-0d64"
+              },
+              {
+                "hint": "By UID: a record that is not among the loaded ones.",
+                "label": "By UID…",
+                "selected": false,
+                "separator": true,
+                "typed": true,
+                "value": ""
+              }
+            ],
+            "placeholder": "UID of the record",
+            "readOnly": false,
+            "required": false,
+            "suggest": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/related",
+            "value": "5c81-77aa-0d64"
           }
         ],
         "unfold": null

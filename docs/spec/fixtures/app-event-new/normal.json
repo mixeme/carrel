@@ -210,6 +210,89 @@
             "readOnly": false,
             "required": false,
             "value": ""
+          },
+          {
+            "add": {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Add a link",
+              "mono": true,
+              "name": "related.add",
+              "options": [],
+              "placeholder": "Title or UID",
+              "readOnly": false,
+              "required": false,
+              "suggest": "/app/calendar/a-nc-home/lichnyj/new/related",
+              "value": ""
+            },
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Related to",
+            "mono": true,
+            "multiple": true,
+            "name": "related",
+            "options": [
+              {
+                "colour": "#4a6b52",
+                "label": "Забрать документы",
+                "meta": "event · 11 Aug",
+                "selected": false,
+                "value": "1d55-90fe-3c27"
+              },
+              {
+                "colour": "#6b4e7a",
+                "label": "Ревью архитектуры",
+                "meta": "event · 11 Aug",
+                "selected": false,
+                "value": "9c27-0e5d-4412"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Созвон с подрядчиком",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "7ae3-1c48-55b0"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Синк-ап по релизу",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "8f1c-4a02-b7d3"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Дежурство: первая линия",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "2f04-8b71-e39a"
+              },
+              {
+                "colour": "#8c6239",
+                "label": "Дежурство: первая линия",
+                "meta": "event · 10 Aug",
+                "selected": false,
+                "value": "5e90-33c1-a8d2"
+              },
+              {
+                "hint": "By UID: a record that is not among the loaded ones.",
+                "label": "By UID…",
+                "selected": false,
+                "separator": true,
+                "typed": true,
+                "value": ""
+              }
+            ],
+            "placeholder": "UID of the record",
+            "readOnly": false,
+            "required": false,
+            "suggest": "/app/calendar/a-nc-home/lichnyj/new/related",
+            "value": ""
           }
         ],
         "unfold": null

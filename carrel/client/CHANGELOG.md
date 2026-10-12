@@ -4,6 +4,18 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.15 — 2026-10-12
+
+Server `v0.2.213`.
+
+### Changed
+
+- **The event's form draws «Related to»** (`s-agenda-3`, `s-agenda-15`): the
+  server sends the field for an event as it does for a task and a note, and
+  the screen draws a form's row by what it is. The frames of the event do
+  not draw it — U-5.5 row 44 (the owner, 12.10.2026), Typecase's task 160;
+  `app-event-new/normal` waits under it.
+
 ## v0.4.14 — 2026-10-12
 
 Server `v0.2.208`.

@@ -17,6 +17,31 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.213 — 2026-10-12
+
+An event relates to other records as a task and a note do, and «New event»
+on a person's timeline invites nobody (А10 of the audit of 11.10.2026; the
+owner's decisions of 12.10.2026).
+
+### Changed
+
+- **An event has «Related to»** — the field of a task's and a note's form,
+  after Description in the event's. The owner's rule: what one kind of
+  record has, every kind has.
+- **«New event» on a person's timeline relates the event to the person.**
+  It used to carry the person as an attendee in a hidden field of the quick
+  sheet, and you became the organiser: on a server that sends invitations
+  itself, one went out. Now the sheet carries the person's card as the
+  event's relation, like «Write a note» and «New task»; the event stands in
+  the timeline by it. Whom to invite is said in the event's form. The
+  button no longer needs the card to have an address.
+
+### For developers
+
+- `timeline.event` leads to `/app/calendar/quick?related=<uid>`; the
+  address parameter `attendee` of a quick sheet still works for who uses it.
+- The event's frames do not draw the field: Typecase's task 160.
+
 ## v0.2.212 — 2026-10-12
 
 ### Changed

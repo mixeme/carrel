@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 
@@ -98,8 +99,15 @@ func TestEventFormIsTheFramesRubrics(t *testing.T) {
 			"BEGIN:VALARM\nACTION:DISPLAY\nTRIGGER:-PT10M\nDESCRIPTION:x\nEND:VALARM\n"+
 			"BEGIN:VALARM\nACTION:DISPLAY\nTRIGGER:-P1D\nDESCRIPTION:x\nEND:VALARM\nEND:VEVENT"))
 	page := decode[view.EventEditPage](t, f.h.do(get(f.path("calendar")+"/e1/edit", f.sess)))
-	if got, want := serverForm(page.Form), frameForm(t, "s-agenda-3"); !equalStrings(got, want) {
-		t.Errorf("event form =\n%q,\nwant (s-agenda-3)\n%q", got, want)
+	// «Related to» is every kind's (the owner's word of 12.10.2026) and the
+	// event's frame does not draw it yet — Typecase's task 160: until it
+	// does, the form is the frame's with that one row after Description.
+	want := frameForm(t, "s-agenda-3")
+	if at := slices.Index(want, " / Description"); at >= 0 && !slices.Contains(want, " / Related to") {
+		want = slices.Insert(want, at+1, " / Related to")
+	}
+	if got := serverForm(page.Form); !equalStrings(got, want) {
+		t.Errorf("event form =\n%q,\nwant (s-agenda-3, and Related to)\n%q", got, want)
 	}
 
 	// On is one row of the days, as the frame draws it, not seven boxes: a

@@ -172,9 +172,12 @@ func TestContactTimeline(t *testing.T) {
 	if note == nil || !strings.Contains(note.Href, "related=ann") {
 		t.Errorf("actions = %+v, want Write a note related to the person", page.Actions)
 	}
+	// An event too (the owner's decisions of 12.10.2026, А10: nobody is
+	// invited from here; and a relation is every kind's): New event relates
+	// to the person as the note and the task do, and names no attendee.
 	event := actionByID(page.Actions, "timeline.event")
-	if event == nil || !strings.Contains(event.Href, "attendee=anna%40example.com") {
-		t.Errorf("actions = %+v, want New event with the person as attendee", page.Actions)
+	if event == nil || !event.Enabled || !strings.Contains(event.Href, "related=ann") || strings.Contains(event.Href, "attendee") {
+		t.Errorf("actions = %+v, want New event related to the person, with no attendee", page.Actions)
 	}
 
 	// Followed, the sheets carry the person into what is written.
@@ -194,8 +197,8 @@ func TestContactTimeline(t *testing.T) {
 	quick, _ := url.Parse(sheet.Target.Options[0].ID)
 	sheet = decode[view.NewSheet](t, f.h.do(get(strings.TrimSuffix(quick.EscapedPath(), "/new")+"/new/quick?"+quick.RawQuery, f.sess)))
 	form := formFields(sheet.Form)
-	if form.Get("attendee") != "anna@example.com" {
-		t.Fatalf("event quick form = %v, want the person as attendee", form)
+	if form.Get("related") != "ann" || form.Get("attendee") != "" {
+		t.Fatalf("event quick form = %v, want the person as its relation and no attendee", form)
 	}
 	form.Set("summary", "Coffee with Anna")
 	form.Set("start.date", now.AddDate(0, 0, 7).Format("2006-01-02"))
@@ -207,10 +210,16 @@ func TestContactTimeline(t *testing.T) {
 	found := false
 	for _, p := range f.srv.Paths(searchWork) {
 		b, _, _ := f.srv.Object(p)
-		found = found || strings.Contains(unfolded(b), "SUMMARY:Coffee with Anna") && strings.Contains(unfolded(b), "ATTENDEE;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:anna@example.com")
+		found = found || strings.Contains(unfolded(b), "SUMMARY:Coffee with Anna") && strings.Contains(unfolded(b), "RELATED-TO:ann") && !strings.Contains(unfolded(b), "ATTENDEE")
 	}
 	if !found {
-		t.Error("the new event does not invite the person")
+		t.Error("the new event is not related to the person, or invites somebody")
+	}
+	// And it stands in the person's timeline by that relation.
+	page = decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline?again=1", f.sess)))
+	waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
+	if _, ok := timelineRows(decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline", f.sess))))["Coffee with Anna"]; !ok {
+		t.Error("the event made from the timeline is not in it")
 	}
 }
 

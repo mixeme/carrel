@@ -219,6 +219,7 @@ var All = []Screen{
 		Waits: []Wait{
 			{Row: 26, Fixture: "app-event-edit/normal"}, // ждёт библиотеку: U-5.5 #26
 			{Row: 26, Fixture: "app-event-edit/loss"},   // ждёт библиотеку: U-5.5 #26
+			{Row: 44, Fixture: "app-event-new/normal"},  // ждёт библиотеку: U-5.5 #44
 		},
 	},
 	{

@@ -782,6 +782,11 @@ var editFields = map[view.Kind][]editField{
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
 		{name: "attendee", label: "Attendees", prop: "ATTENDEE", typ: fieldAttendee},
+		// An event relates to other records as a task and a note do (the
+		// owner's word of 12.10.2026: a relation is every kind's, by the
+		// equality of collections). The frames of the event do not draw the
+		// field yet — Typecase's task 160.
+		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated},
 		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, required: true, allDay: true, set: "When",
 			quick: "Date", quickTime: "Start"},
 		{name: "end", label: "End date", timeLabel: "End time", prop: "DTEND", typ: fieldTime, set: "When", quickTime: "End", quickNoDate: true, follows: "start"},
