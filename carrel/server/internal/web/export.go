@@ -8,6 +8,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 	"time"
 
@@ -164,6 +165,22 @@ func (c *collectionCtx) exportUnread(ctx context.Context, bad []cal.Unreadable, 
 		raw = append(raw, doc)
 	}
 	return raw, lost
+}
+
+// unreadKept is exportUnread for a calendar file nobody is asked about —
+// an archive of a backup, the attachment of a letter: the records that go in
+// as the server holds them, and an error naming the ones that cannot, so
+// the file is not called whole without them.
+func (c *collectionCtx) unreadKept(ctx context.Context, bad []cal.Unreadable) ([][]byte, error) {
+	raw, lost := c.exportUnread(ctx, bad, true)
+	if len(lost) == 0 {
+		return raw, nil
+	}
+	names := make([]string, len(lost))
+	for i, b := range lost {
+		names[i] = path.Base(b.Path)
+	}
+	return raw, fmt.Errorf("%s the server returned could not be read and would be left out: %s", plural(len(lost), "record"), strings.Join(names, ", "))
 }
 
 // exportLacks is the answer of an export that would leave records out: no

@@ -89,7 +89,7 @@ func (s *Server) backupSources(ctx context.Context, blob sealed.Blob, job sealed
 				if err != nil {
 					return 0, err
 				}
-				objs, err := c.allRecords(ctx)
+				objs, bad, err := c.allRecordsAndUnread(ctx)
 				if err != nil {
 					return 0, err
 				}
@@ -109,8 +109,13 @@ func (s *Server) backupSources(ctx context.Context, blob sealed.Blob, job sealed
 				if err != nil {
 					return 0, err
 				}
-				writeCalendar(w, objs, nil)
-				return len(objs), nil
+				// A record Carrel could not read goes in as the server
+				// holds it; one that cannot is why the collection is not
+				// in the archive whole (Entry.Error), never left out
+				// without a word.
+				raw, lacks := c.unreadKept(ctx, bad)
+				writeCalendar(w, objs, raw)
+				return len(objs) + len(raw), lacks
 			}})
 		}
 	}

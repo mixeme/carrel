@@ -1,10 +1,13 @@
 package web_test
 
 import (
+	"io"
 	"net/http"
 	"strings"
 	"testing"
 
+	"carrel.dev/carrel/server/internal/backup"
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -112,4 +115,38 @@ func plainLines(lines []view.Text) string {
 		b.WriteString("\n")
 	}
 	return b.String()
+}
+
+// A backup is a file nobody is asked about: the record Carrel could not
+// read is in the archive as the server holds it, and counted.
+func TestBackupKeepsARecordCarrelCannotRead(t *testing.T) {
+	f := backupFixture(t)
+	f.srv.Seed(searchWork+"orphan.ics", orphan("VEVENT", "lone"))
+	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "archive-pw"))
+	run := runJob(t, f, job)
+	if run.State != "done" || run.Whole != 3 {
+		t.Fatalf("run = %+v", run)
+	}
+	stored, _ := f.srv.File(filesDocs + "backups/work/" + run.File)
+	zr, m, err := backup.Open([]byte(stored), "archive-pw")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.Collections[1].Count != 3 || m.Collections[1].Error != "" {
+		t.Errorf("the calendar in the manifest = %+v, want three records and no error", m.Collections[1])
+	}
+	for _, zf := range zr.File {
+		if zf.Name != "02-work/calendar.ics" {
+			continue
+		}
+		rc, err := zf.Open()
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, _ := io.ReadAll(rc)
+		_ = rc.Close()
+		mustContain(t, string(data), "UID:e1", "UID:t1", "UID:lone", "RECURRENCE-ID:20260107T100000Z", "X-KEEP:mine")
+		return
+	}
+	t.Fatal("the archive has no calendar.ics")
 }

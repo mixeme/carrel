@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.200 — 2026-10-12
+
+A backup and a letter no longer leave out, without a word, a record Carrel
+could not read (found with Б3, `v0.2.197`).
+
+### Fixed
+
+- **A backup archive holds the records Carrel could not read**, as the
+  server holds them. They were left out, and the run still called the
+  calendar whole. A record that cannot be put in — the server will not
+  give it — makes the collection «not whole» in the manifest and on the
+  screen, with the names of the records; such a run rotates nothing.
+- **A calendar attached to a letter** holds them the same way; when one
+  cannot be put in, the letter does not go and says which records.
+
+### For developers
+
+- `unreadKept` in `internal/web/export.go`; the count of a calendar in a
+  backup's manifest includes the records that went in raw.
+- Not covered by a test: the record that cannot be put in (the test server
+  cannot refuse one GET and still take the archive), and the letter.
+
 ## v0.2.199 — 2026-10-12
 
 The owner's decisions of 12.10.2026 on the table of S-11 «an edit of the

@@ -469,11 +469,17 @@ func (s *Server) partContent(ctx context.Context, sess *session.Session, p mailP
 		}
 	case "calendar":
 		if p.From == "" && p.To == "" {
-			objs, _, err := c.calQuery(ctx, "VEVENT", nil, nil) // the whole calendar
+			objs, bad, err := c.calQuery(ctx, "VEVENT", nil, nil) // the whole calendar
 			if err != nil {
 				return nil, err
 			}
-			writeCalendar(&buf, objs, nil)
+			// An event Carrel could not read goes as the server holds it;
+			// a calendar that would go without one does not go (unreadKept).
+			raw, err := c.unreadKept(ctx, bad)
+			if err != nil {
+				return nil, err
+			}
+			writeCalendar(&buf, objs, raw)
 			break
 		}
 		from, okFrom := parseDay(c.tf, p.From)
@@ -482,11 +488,15 @@ func (s *Server) partContent(ctx context.Context, sess *session.Session, p mailP
 			return nil, errors.New("no range")
 		}
 		to = to.AddDate(0, 0, 1)
-		objs, _, err := c.calQuery(ctx, "VEVENT", &from, &to)
+		objs, bad, err := c.calQuery(ctx, "VEVENT", &from, &to)
 		if err != nil {
 			return nil, err
 		}
-		writeCalendar(&buf, objs, nil)
+		raw, err := c.unreadKept(ctx, bad)
+		if err != nil {
+			return nil, err
+		}
+		writeCalendar(&buf, objs, raw)
 	default:
 		obj, err := c.find(ctx, p.UID)
 		if err != nil {
