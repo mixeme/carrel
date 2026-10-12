@@ -546,7 +546,8 @@ func untilKept(rule, last string, startRow [3]string, start time.Time, tz *time.
 // repeatRule is the RRULE a changed form asks for; "" is none. A changed raw
 // rule wins and is written as typed. Otherwise only the simple parts that
 // changed are written into the rule as it was, in their places, so what the
-// fields do not show — WKST, BYMONTHDAY, a numbered BYDAY — stays.
+// fields do not show — WKST, BYMONTHDAY, a numbered BYDAY — stays, while
+// the frequency is the one it was.
 func repeatRule(want, have []string, allDay bool, tz *time.Location) (string, error) {
 	pad := func(v []string) []string { return append(append([]string(nil), v...), make([]string, 6)...)[:6] }
 	want, have = pad(want), pad(have)
@@ -558,6 +559,25 @@ func repeatRule(want, have []string, allDay bool, tz *time.Location) (string, er
 	} else {
 		r := parseRule(have[repRule])
 		if want[repFreq] != have[repFreq] {
+			if have[repFreq] != "" {
+				// Another frequency is another repeat (the owner's decision
+				// of 12.10.2026, Б26): what the fields do not show belonged
+				// to the old one — «Yearly» made «Monthly» with BYMONTH left
+				// in it still came once a year — and goes. Every N, the end
+				// of the series and the start of the week stay; the days
+				// are the ones ticked, and only a week has them.
+				var kept ruleParts
+				for _, part := range r {
+					switch part[0] {
+					case "FREQ", "INTERVAL", "COUNT", "UNTIL", "WKST":
+						kept = append(kept, part)
+					}
+				}
+				r, have[repOn] = kept, ""
+				if !strings.EqualFold(want[repFreq], "WEEKLY") {
+					want[repOn] = ""
+				}
+			}
 			r = r.set("FREQ", strings.ToUpper(want[repFreq]))
 		}
 		if want[repInterval] != have[repInterval] {
@@ -1285,6 +1305,12 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	props := obj.Props()
 	escape := c.spec.kind != view.KindContact
 	fillNames(c.spec.kind, have, want)
+	if w := want["repeat"]; len(w) > repOn && w[repFreq] != rowAt(have["repeat"], repFreq) && !strings.EqualFold(w[repFreq], "WEEKLY") {
+		// Only a week has days ticked: a form sent without scripts still
+		// carries the ticks of the frequency it was opened with, and what
+		// reaches the server is what the form then shows (S-7.3).
+		w[repOn] = ""
+	}
 	for _, f := range editFields[c.spec.kind] {
 		if f.typed {
 			want[f.name+".type"] = keptLabels(f.prop, want[f.name+".type"], have[f.name+".type"])
@@ -1342,6 +1368,20 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	}
 	var startAt, endAt time.Time
 
+	if c.spec.kind == view.KindEvent && len(props["DTSTART"]) > 0 && triple(want["start"])[2] == "on" && triple(have["start"])[2] != "on" {
+		// An event that becomes a whole day starts at midnight, and «15
+		// minutes before» would ring the night before: a reminder closer
+		// than a day becomes «1 day before» (the owner's decision of
+		// 12.10.2026, Б28). One a day away or more, and one at a set moment,
+		// stay; what the reminder does stays with it (cal.Alarm.At). The
+		// rows are changed before they are read, so the form afterwards
+		// shows what was written (S-7.3).
+		for i, v := range want["reminder"] {
+			if d, ok := cal.NewAlarm(v).Offset(); ok && v != "" && d > -24*time.Hour {
+				want["reminder"][i] = "-P1D"
+			}
+		}
+	}
 	for _, f := range editFields[c.spec.kind] {
 		w, h := want[f.name], have[f.name]
 		if (f.typ == fieldText || f.typ == fieldArea) && f.required && strings.TrimSpace(first(w)) == "" {
@@ -1545,7 +1585,16 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			if f.name == "end" && allDay {
 				shift = 1
 			}
-			ops := timeOps(f.prop, props[f.prop], row, allDay, shift, clock, zone)
+			written := zone
+			if own := zoneOf(props[f.prop]); f.name == "end" && zone != "" && !allDay && own != "" && own != held {
+				// An end written in a zone of its own — a flight lands
+				// elsewhere — stays in it: the zone chosen is the start's,
+				// the length is kept, and the moment the end then falls on
+				// is written the way the end was (Б23 of the audit of
+				// 11.10.2026).
+				written = ""
+			}
+			ops := timeOps(f.prop, props[f.prop], row, allDay, shift, clock, written)
 			if f.name == "start" && ch.zone != nil {
 				ch.zoneYear = at.Year()
 			}

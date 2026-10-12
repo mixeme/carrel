@@ -95,6 +95,13 @@ func seriesOf(comp *ical.Component, loc *time.Location) (*rrule.Set, error) {
 	}
 	if !start.IsZero() {
 		set.DTStart(start)
+		if hasRule {
+			// The start is always the first occurrence, and the rest go by
+			// the rule (the owner's decision of 12.10.2026): a start the rule
+			// does not name is an occurrence all the same, and one it names
+			// stands once.
+			set.RDate(start)
+		}
 	}
 
 	for _, p := range comp.Props[ical.PropExceptionDates] {

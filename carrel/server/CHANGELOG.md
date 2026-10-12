@@ -17,6 +17,47 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.199 — 2026-10-12
+
+The owner's decisions of 12.10.2026 on the table of S-11 «an edit of the
+time → what is written» (Б23, Б25, Б26, Б28 of the audit of 11.10.2026).
+
+### Changed — behaviour
+
+- **The start of a series is always its first occurrence; the rest go by
+  the rule.** A series on Fridays given a start on a Tuesday is written as
+  typed, as before — and is now shown so: that Tuesday, then the Fridays.
+  Carrel left the Tuesday out, in the agenda and in the «next times» of the
+  card. The days ticked are not moved by the start.
+- **Another frequency chosen in the simple fields drops what those fields
+  do not show.** «Yearly» made «Monthly» kept `BYMONTH` and so still came
+  once a year. Now every N, the end of the series and the start of the
+  week stay, the ticked days stay for «Weekly» only, and `BYMONTH`,
+  `BYMONTHDAY`, `BYSETPOS` and numbered days go. With the frequency
+  untouched they stay, as before.
+- **An event that becomes a whole day takes its reminders to the day
+  before.** A reminder closer than a day — «15 minutes before» would ring
+  at 23:45 the night before — becomes «1 day before»; one a day away or
+  more, one at a set moment, and what the reminder does, stay. The other
+  way nothing is touched.
+- **The end of an event keeps its own zone when another zone is chosen.**
+  A flight from Berlin landing in Tokyo, moved to Moscow time, keeps its
+  length and its end in Tokyo; the end was rewritten into the start's zone.
+
+### For developers
+
+- `cal.seriesOf` adds the start to the set of a rule; `repeatRule` rebuilds
+  the rule on a change of frequency; `buildChange` rewrites the reminder
+  rows and the ticked days before they are read, so the form afterwards
+  shows what was written (S-7.3).
+- Which records fall in a week of the agenda is the server's answer: a
+  server that does not count a start outside its rule will not hand over a
+  week that holds only that start (the test server does not).
+- Not done: a reminder of the person's own offset — decided, waits for a
+  frame (Typecase task 156); a task that becomes a whole day keeps its
+  reminders; a series with `COUNT` and a start outside its rule shows the
+  start on top of the count.
+
 ## v0.2.198 — 2026-10-12
 
 A series goes with its start, and so does what is written by the start's
