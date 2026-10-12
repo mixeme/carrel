@@ -21,7 +21,7 @@ import (
 // decision of task 106, as the photo of a new card, v0.2.133). Until Save
 // there is no record and no version to write a file to, so the first Attach
 // issues the UID the record will have, and the files wait under it in the
-// session's one slot of new attachments (DraftNewAttach) with what was
+// session's slot of new attachments (DraftNewAttach) with what was
 // typed: Attach and its arrow send the form itself (Action.Submits), and the
 // form comes back with the typing and the files. Save creates the record
 // under that UID with the files in it. Nothing is written before: a file
@@ -29,7 +29,7 @@ import (
 // not taken — the record is saved first, then such a file is attached to
 // it; a file of Files larger than the limit is linked where it lies, as on
 // a record. Remove takes a file off the draft; a form left unsaved writes
-// nothing, and the next new form's first Attach replaces the draft.
+// nothing. Every new form has a draft of its own (attachDraftsKept).
 
 // attachDraft is the files of a new form under the UID its record will have.
 type attachDraft struct {
@@ -50,35 +50,77 @@ type draftFile struct {
 	Size int64
 }
 
-func loadAttachDraft(c *collectionCtx, uid string) (attachDraft, bool) {
-	if uid == "" {
-		return attachDraft{}, false
-	}
+// attachDraftsKept is how many new forms may hold files at once. Each form
+// has its own draft, found by the UID its record will have (Б7 of the audit
+// of 11.10.2026: there was one draft a session, and the first Attach of a
+// second new form threw away the files of the first). Past this many the
+// oldest goes: a session does not hold files without end (C-12).
+const attachDraftsKept = 4
+
+// attachDrafts are the drafts of the session's new forms, the oldest first.
+func attachDrafts(c *collectionCtx) []attachDraft {
 	data := c.sess.Draft(session.DraftNewAttach)
 	if data == nil {
-		return attachDraft{}, false
+		return nil
 	}
-	var d attachDraft
-	if gob.NewDecoder(bytes.NewReader(data)).Decode(&d) != nil {
-		return attachDraft{}, false
+	var ds []attachDraft
+	if gob.NewDecoder(bytes.NewReader(data)).Decode(&ds) != nil {
+		return nil
 	}
-	if d.Account != c.conn.ID || d.Col != c.col.Path || d.UID != uid {
-		return attachDraft{}, false
-	}
-	return d, true
+	return ds
 }
 
-func saveAttachDraft(c *collectionCtx, d attachDraft) {
+func keepAttachDrafts(c *collectionCtx, ds []attachDraft) {
+	if len(ds) == 0 {
+		c.sess.SetDraft(session.DraftNewAttach, nil)
+		return
+	}
 	var buf bytes.Buffer
-	if gob.NewEncoder(&buf).Encode(d) == nil {
+	if gob.NewEncoder(&buf).Encode(ds) == nil {
 		c.sess.SetDraft(session.DraftNewAttach, buf.Bytes())
 	}
 }
 
-func clearAttachDraft(c *collectionCtx, uid string) {
-	if _, ok := loadAttachDraft(c, uid); ok {
-		c.sess.SetDraft(session.DraftNewAttach, nil)
+func (d attachDraft) is(c *collectionCtx, uid string) bool {
+	return d.Account == c.conn.ID && d.Col == c.col.Path && d.UID == uid
+}
+
+func loadAttachDraft(c *collectionCtx, uid string) (attachDraft, bool) {
+	if uid == "" {
+		return attachDraft{}, false
 	}
+	for _, d := range attachDrafts(c) {
+		if d.is(c, uid) {
+			return d, true
+		}
+	}
+	return attachDraft{}, false
+}
+
+// saveAttachDraft keeps a form's draft in place of the one it had, or as the
+// newest.
+func saveAttachDraft(c *collectionCtx, d attachDraft) {
+	var kept []attachDraft
+	for _, had := range attachDrafts(c) {
+		if !had.is(c, d.UID) {
+			kept = append(kept, had)
+		}
+	}
+	kept = append(kept, d)
+	if len(kept) > attachDraftsKept {
+		kept = kept[len(kept)-attachDraftsKept:]
+	}
+	keepAttachDrafts(c, kept)
+}
+
+func clearAttachDraft(c *collectionCtx, uid string) {
+	var kept []attachDraft
+	for _, had := range attachDrafts(c) {
+		if !had.is(c, uid) {
+			kept = append(kept, had)
+		}
+	}
+	keepAttachDrafts(c, kept)
 }
 
 // inlineBytes is how much the draft carries inside the record.

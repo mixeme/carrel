@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.205 — 2026-10-12
+
+Two new forms keep their own files (Б7 of the audit of 11.10.2026).
+
+### Fixed
+
+- **The files attached to a new, unsaved event, task or note are not thrown
+  away by another new form.** A session had one place for them, and the
+  first Attach of a second new form took it: the first form then saved
+  without its files, and nothing said so. Each new form now has its own;
+  a session holds four at once, and past that the oldest goes.
+
+### For developers
+
+- `attachDrafts`, `attachDraftsKept` in `internal/web/attach_new.go`; the
+  slot `DraftNewAttach` holds a list.
+- Not done: a form whose files went — the fifth new form, or the session
+  ended — still saves without them and without a word; a session may now
+  hold four times the files it held (each draft stays within the limit of
+  its collection).
+
 ## v0.2.204 — 2026-10-12
 
 The question about a replaced address is not lost, and the conflict screen

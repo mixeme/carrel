@@ -176,3 +176,30 @@ func TestNewEventAttachTakesEveryFileOfTheForm(t *testing.T) {
 		t.Errorf("the files waiting = %s, want the two kept before", got)
 	}
 }
+
+// Б7 of the audit of 11.10.2026: the files of a new form waited in the one
+// slot a session had, and the first Attach of a second new form threw them
+// away. Each form has its own.
+func TestTwoNewFormsKeepTheirOwnFiles(t *testing.T) {
+	f := attachFixture(t, 0, []string{"carrel"})
+	list := f.path("calendar")
+	begin := func(title, name string) string {
+		t.Helper()
+		page := decode[view.EventEditPage](t, f.h.do(get(list+"/new", f.sess)))
+		form := formFields(page.Form)
+		form.Set("summary", title)
+		resp := f.h.do(attachForm(actionByID(page.Form.Actions, "attach.add").Href, f.sess, form, upload{name, "text of " + name}))
+		if resp.Code != http.StatusSeeOther {
+			t.Fatalf("attach to %s: %d %s", title, resp.Code, resp.Body.String())
+		}
+		return resp.Header().Get("Location")
+	}
+	first := begin("First", "first.txt")
+	second := begin("Second", "second.txt")
+	for back, want := range map[string]string{first: "first.txt", second: "second.txt"} {
+		page := decode[view.EventEditPage](t, f.h.do(get(back, f.sess)))
+		if got := attachNames(page.Attach); got != want {
+			t.Errorf("the form at %s holds %q, want %q", back, got, want)
+		}
+	}
+}
