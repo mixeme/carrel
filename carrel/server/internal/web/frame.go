@@ -151,11 +151,18 @@ func (f tagFilter) keep(k view.Kind, items []listed) []listed {
 }
 
 // tags are the categories of one record, each a link to the list filtered to
-// it.
+// it. The one the list is filtered by stands first: a row's cell shows the
+// first tag and counts the rest (Typecase's note 44), and the row then says
+// why it is in the list. The others keep the record's order.
 func (f tagFilter) tags(values []string) []view.Tag {
 	var out []view.Tag
 	for _, v := range values {
-		out = append(out, view.Tag{Label: text(v), Href: f.href(v), On: f.tag != "" && strings.EqualFold(v, f.tag)})
+		tag := view.Tag{Label: text(v), Href: f.href(v), On: f.tag != "" && strings.EqualFold(v, f.tag)}
+		if tag.On {
+			out = slices.Insert(out, 0, tag)
+			continue
+		}
+		out = append(out, tag)
 	}
 	return out
 }

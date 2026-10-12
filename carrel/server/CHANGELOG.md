@@ -17,6 +17,16 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.209 — 2026-10-12
+
+### Changed
+
+- **The tag a list is filtered by stands first in a row's tags** (Typecase's
+  note 44; contacts, agenda, tasks, notes). The cell «Tags» shows the first
+  tag and a count of the rest, so a filtered row now says why it is in the
+  list. The other tags keep the record's order, and a list without a filter
+  is as before.
+
 ## v0.2.208 — 2026-10-12
 
 A photo changed on a card no longer loses what was typed into its form (Б9
