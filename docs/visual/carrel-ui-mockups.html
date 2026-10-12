@@ -8064,11 +8064,11 @@ Read  2 min ago</div>
         <div class="tc-bar tc-bar--sel">
           <span class="tc-bar__count">1 selected</span><span class="tc-mono tc-mono--muted">412 KB</span>
           <span class="tc-bar__sep"></span>
-          <button class="tc-btn" title="Download" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
-          <button class="tc-btn" title="Rename" type="button"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
-          <button class="tc-btn" title="Move" type="button"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
-          <button class="tc-btn" title="Copy" type="button"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
-          <button class="tc-btn is-danger-solid" title="Delete" type="button"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
+          <button class="tc-btn" title="Download" type="submit" form="files-sel" name="op" value="download"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
+          <button class="tc-btn" title="Rename" type="submit" form="files-sel" name="op" value="rename"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
+          <button class="tc-btn" title="Move" type="submit" form="files-sel" name="op" value="move"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
+          <button class="tc-btn" title="Copy" type="submit" form="files-sel" name="op" value="copy"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
+          <button class="tc-btn is-danger-solid" title="Delete" type="submit" form="files-sel" name="op" value="delete"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
           <span class="tc-bar__right"><button class="tc-btn is-sm" type="button">Clear selection</button></span>
         </div>
         <div class="tc-bar">
@@ -8087,28 +8087,29 @@ Read  2 min ago</div>
           </tr></thead>
           <tbody>
             <tr><td></td><td colspan="5"><span class="tc-table__file"><svg><use href="#i-back"/></svg><a class="tc-table__filename tc-table__filename--accent" href="/app/files/sftpgo/documents/carrel">up one folder</a></span></td></tr>
-            <tr class="is-folder"><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
+            <tr class="is-folder"><td><input class="tc-tickrow__tick is-off" type="checkbox" form="files-sel" name="item" value="2026-07" aria-label="Pick"></td>
               <td><span class="tc-table__file"><svg><use href="#i-file"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/2026-07">2026-07</a></span></td>
               <td class="tc-mono tc-table__n3">—</td><td class="tc-mono is-2nd tc-table__n4">folder</td><td class="tc-mono">2026-07-01 09:12</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
+            <tr><td><input class="tc-tickrow__tick is-off" type="checkbox" form="files-sel" name="item" value="2026-08-04-whiteboard.jpg" aria-label="Pick"></td>
               <td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/2026-08-04-whiteboard.jpg">2026-08-04-whiteboard.jpg</a></span></td>
               <td class="tc-mono tc-table__n3">2.8 MB</td><td class="tc-mono is-2nd tc-table__n4">image/jpeg</td><td class="tc-mono">2026-08-04 17:03</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr class="is-sel"><td><button class="tc-tickrow__tick" type="button"></button></td>
+            <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" form="files-sel" name="item" value="2026-08-10-sync-board.png" aria-label="Pick" checked></td>
               <td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/2026-08-10-sync-board.png">2026-08-10-sync-board.png</a></span></td>
               <td class="tc-mono tc-table__n3">412 KB</td><td class="tc-mono is-2nd tc-table__n4">image/png</td><td class="tc-mono">2026-08-10 11:07</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
+            <tr><td><input class="tc-tickrow__tick is-off" type="checkbox" form="files-sel" name="item" value="release-checklist.md" aria-label="Pick"></td>
               <td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/release-checklist.md">release-checklist.md</a></span></td>
               <td class="tc-mono tc-table__n3">3 KB</td><td class="tc-mono is-2nd tc-table__n4">text/markdown</td><td class="tc-mono">2026-08-09 18:44</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
+            <tr><td><input class="tc-tickrow__tick is-off" type="checkbox" form="files-sel" name="item" value="смета-подрядчик.pdf" aria-label="Pick"></td>
               <td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td>
               <td class="tc-mono tc-table__n3">1.2 MB</td><td class="tc-mono is-2nd tc-table__n4">application/pdf</td><td class="tc-mono">2026-08-05 14:20</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
           </tbody>
         </table>
+        <form class="tc-post" id="files-sel" action="/app/files/sftpgo/documents/op/carrel/attachments" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
         <div class="tc-msg">Drop files onto the window, or onto a folder in the list. A name that is already taken is refused rather than overwritten, and the queue says so.</div>
       </div>
 
@@ -8553,11 +8554,11 @@ Read  2 min ago</div>
         <div class="tc-bar tc-bar--sel">
           <span class="tc-bar__count">3 selected</span><span class="tc-mono tc-mono--muted">4.4 MB</span>
           <span class="tc-bar__sep"></span>
-          <button class="tc-btn" title="Download" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
-          <button class="tc-btn is-off" title="Rename" type="button"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
-          <button class="tc-btn" title="Move" type="button"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
-          <button class="tc-btn" title="Copy" type="button"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
-          <button class="tc-btn is-danger-solid" title="Delete" type="button"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
+          <button class="tc-btn" title="Download" type="submit" form="files-sel" name="op" value="download"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
+          <button class="tc-btn is-off" title="Rename" type="submit" form="files-sel" name="op" value="rename"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
+          <button class="tc-btn" title="Move" type="submit" form="files-sel" name="op" value="move"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
+          <button class="tc-btn" title="Copy" type="submit" form="files-sel" name="op" value="copy"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
+          <button class="tc-btn is-danger-solid" title="Delete" type="submit" form="files-sel" name="op" value="delete"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
           <span class="tc-bar__right"><button class="tc-btn is-sm" type="button">Clear selection</button></span>
         </div>
         <div class="tc-bar">
@@ -8576,28 +8577,29 @@ Read  2 min ago</div>
           </tr></thead>
           <tbody>
             <tr><td></td><td colspan="5"><span class="tc-table__file"><svg><use href="#i-back"/></svg><a class="tc-table__filename tc-table__filename--accent" href="/app/files/sftpgo/documents/carrel">up one folder</a></span></td></tr>
-            <tr class="is-folder"><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
+            <tr class="is-folder"><td><input class="tc-tickrow__tick is-off" type="checkbox" form="files-sel" name="item" value="2026-07" aria-label="Pick"></td>
               <td><span class="tc-table__file"><svg><use href="#i-file"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/2026-07">2026-07</a></span></td>
               <td class="tc-mono tc-table__n3">—</td><td class="tc-mono is-2nd tc-table__n4">folder</td><td class="tc-mono">2026-07-01 09:12</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr class="is-sel"><td><button class="tc-tickrow__tick" type="button"></button></td>
+            <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" form="files-sel" name="item" value="2026-08-04-whiteboard.jpg" aria-label="Pick" checked></td>
               <td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/2026-08-04-whiteboard.jpg">2026-08-04-whiteboard.jpg</a></span></td>
               <td class="tc-mono tc-table__n3">2.8 MB</td><td class="tc-mono is-2nd tc-table__n4">image/jpeg</td><td class="tc-mono">2026-08-04 17:03</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr class="is-sel"><td><button class="tc-tickrow__tick" type="button"></button></td>
+            <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" form="files-sel" name="item" value="2026-08-10-sync-board.png" aria-label="Pick" checked></td>
               <td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/2026-08-10-sync-board.png">2026-08-10-sync-board.png</a></span></td>
               <td class="tc-mono tc-table__n3">412 KB</td><td class="tc-mono is-2nd tc-table__n4">image/png</td><td class="tc-mono">2026-08-10 11:07</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr class="is-sel"><td><button class="tc-tickrow__tick" type="button"></button></td>
+            <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" form="files-sel" name="item" value="release-checklist.md" aria-label="Pick" checked></td>
               <td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/release-checklist.md">release-checklist.md</a></span></td>
               <td class="tc-mono tc-table__n3">3 KB</td><td class="tc-mono is-2nd tc-table__n4">text/markdown</td><td class="tc-mono">2026-08-09 18:44</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
+            <tr><td><input class="tc-tickrow__tick is-off" type="checkbox" form="files-sel" name="item" value="смета-подрядчик.pdf" aria-label="Pick"></td>
               <td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td>
               <td class="tc-mono tc-table__n3">1.2 MB</td><td class="tc-mono is-2nd tc-table__n4">application/pdf</td><td class="tc-mono">2026-08-05 14:20</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
           </tbody>
         </table>
+        <form class="tc-post" id="files-sel" action="/app/files/sftpgo/documents/op/carrel/attachments" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
         <div class="tc-queue">
           <div class="tc-queue__head"><b>Uploading 2 of 3</b><span class="tc-mono tc-push tc-mono--dusty">12.4 MB</span><button class="tc-btn is-sm" type="button">Hide</button></div>
           <ul class="tc-queue__list">
@@ -8698,11 +8700,11 @@ Read  2 min ago</div>
         <div class="tc-bar tc-bar--sel">
               <span class="tc-bar__count">3 selected</span><span class="tc-mono tc-mono--muted">4.4 MB</span>
               <span class="tc-bar__sep"></span>
-              <button class="tc-btn" title="Download" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
-              <button class="tc-btn is-off" title="Rename" type="button"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
-              <button class="tc-btn" title="Move" type="button"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
-              <button class="tc-btn" title="Copy" type="button"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
-              <button class="tc-btn is-danger-solid" title="Delete" type="button"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
+              <button class="tc-btn" title="Download" type="submit" form="files-sel" name="op" value="download"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
+              <button class="tc-btn is-off" title="Rename" type="submit" form="files-sel" name="op" value="rename"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
+              <button class="tc-btn" title="Move" type="submit" form="files-sel" name="op" value="move"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
+              <button class="tc-btn" title="Copy" type="submit" form="files-sel" name="op" value="copy"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
+              <button class="tc-btn is-danger-solid" title="Delete" type="submit" form="files-sel" name="op" value="delete"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
               <span class="tc-bar__right"><button class="tc-btn is-sm" type="button">Clear selection</button></span>
             </div>
             <div class="tc-bar">
@@ -8721,28 +8723,29 @@ Read  2 min ago</div>
           </tr></thead>
           <tbody>
             <tr><td></td><td colspan="5"><span class="tc-table__file"><svg><use href="#i-back"/></svg><a class="tc-table__filename tc-table__filename--accent" href="/app/files/sftpgo/documents/carrel">up one folder</a></span></td></tr>
-            <tr class="is-folder"><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
+            <tr class="is-folder"><td><input class="tc-tickrow__tick is-off" type="checkbox" form="files-sel" name="item" value="2026-07" aria-label="Pick"></td>
               <td><span class="tc-table__file"><svg><use href="#i-file"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/2026-07">2026-07</a></span></td>
               <td class="tc-mono tc-table__n3">—</td><td class="tc-mono is-2nd tc-table__n4">folder</td><td class="tc-mono">2026-07-01 09:12</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr class="is-sel"><td><button class="tc-tickrow__tick" type="button"></button></td>
+            <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" form="files-sel" name="item" value="2026-08-04-whiteboard.jpg" aria-label="Pick" checked></td>
               <td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/2026-08-04-whiteboard.jpg">2026-08-04-whiteboard.jpg</a></span></td>
               <td class="tc-mono tc-table__n3">2.8 MB</td><td class="tc-mono is-2nd tc-table__n4">image/jpeg</td><td class="tc-mono">2026-08-04 17:03</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr class="is-sel"><td><button class="tc-tickrow__tick" type="button"></button></td>
+            <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" form="files-sel" name="item" value="2026-08-10-sync-board.png" aria-label="Pick" checked></td>
               <td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/2026-08-10-sync-board.png">2026-08-10-sync-board.png</a></span></td>
               <td class="tc-mono tc-table__n3">412 KB</td><td class="tc-mono is-2nd tc-table__n4">image/png</td><td class="tc-mono">2026-08-10 11:07</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr class="is-sel"><td><button class="tc-tickrow__tick" type="button"></button></td>
+            <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" form="files-sel" name="item" value="release-checklist.md" aria-label="Pick" checked></td>
               <td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/release-checklist.md">release-checklist.md</a></span></td>
               <td class="tc-mono tc-table__n3">3 KB</td><td class="tc-mono is-2nd tc-table__n4">text/markdown</td><td class="tc-mono">2026-08-09 18:44</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
-            <tr><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
+            <tr><td><input class="tc-tickrow__tick is-off" type="checkbox" form="files-sel" name="item" value="смета-подрядчик.pdf" aria-label="Pick"></td>
               <td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td>
               <td class="tc-mono tc-table__n3">1.2 MB</td><td class="tc-mono is-2nd tc-table__n4">application/pdf</td><td class="tc-mono">2026-08-05 14:20</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
           </tbody>
         </table>
+        <form class="tc-post" id="files-sel" action="/app/files/sftpgo/documents/op/carrel/attachments" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
           </div>
         </div>
         <div class="tc-scrim tc-scrim--padt26">
@@ -8841,11 +8844,11 @@ Read  2 min ago</div>
         <div class="tc-bar tc-bar--sel">
           <span class="tc-bar__count">1 selected</span><span class="tc-mono tc-mono--muted">2.8 MB</span>
           <span class="tc-bar__sep"></span>
-          <button class="tc-btn" title="Download" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
-          <button class="tc-btn" title="Rename" type="button"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
-          <button class="tc-btn" title="Move" type="button"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
-          <button class="tc-btn" title="Copy" type="button"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
-          <button class="tc-btn is-danger-solid" title="Delete" type="button"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
+          <button class="tc-btn" title="Download" type="submit" form="files-sel" name="op" value="download"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
+          <button class="tc-btn" title="Rename" type="submit" form="files-sel" name="op" value="rename"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
+          <button class="tc-btn" title="Move" type="submit" form="files-sel" name="op" value="move"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
+          <button class="tc-btn" title="Copy" type="submit" form="files-sel" name="op" value="copy"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
+          <button class="tc-btn is-danger-solid" title="Delete" type="submit" form="files-sel" name="op" value="delete"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
         </div>
         <div class="tc-bar">
           <label class="tc-in is-ph tc-in--h26-w190"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Filter this folder" aria-label="Filter this folder"></label>
@@ -8855,14 +8858,15 @@ Read  2 min ago</div>
           <span class="tc-bar__right is-2nd"><span class="tc-mono">7 items · 89.4 MB</span></span>
         </div>
         <div class="tc-grid">
-          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" name="item" value="архив" aria-label="Pick архив"><div class="tc-thumb tc-thumb--folder"><svg><use href="#i-file"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/архив">архив</a><span class="tc-tile__meta"></span></div>
-          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" name="item" value="черновики" aria-label="Pick черновики"><div class="tc-thumb tc-thumb--folder"><svg><use href="#i-file"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/черновики">черновики</a><span class="tc-tile__meta">0 items</span></div>
-          <div class="tc-tile is-sel"><input class="tc-tile__box" type="checkbox" name="item" value="whiteboard.jpg" aria-label="Pick whiteboard.jpg" checked><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/whiteboard.jpg">whiteboard.jpg</a><span class="tc-tile__meta">2.8 MB · 4032×3024</span></div>
-          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" name="item" value="панорама.tif" aria-label="Pick панорама.tif"><div class="tc-thumb tc-thumb--on-card"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/панорама.tif">панорама.tif</a><span class="tc-tile__meta">84 MB · too large</span></div>
-          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" name="item" value="смета.pdf" aria-label="Pick смета.pdf"><div class="tc-thumb tc-thumb--on-card"><svg><use href="#i-doc"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/смета.pdf">смета.pdf</a><span class="tc-tile__meta">1.2 MB</span></div>
-          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" name="item" value="схема-1.png" aria-label="Pick схема-1.png"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/схема-1.png">схема-1.png</a><span class="tc-tile__meta">640 KB</span></div>
-          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" name="item" value="схема-2.png" aria-label="Pick схема-2.png"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/схема-2.png">схема-2.png</a><span class="tc-tile__meta">712 KB</span></div>
+          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="архив" aria-label="Pick архив"><div class="tc-thumb tc-thumb--folder"><svg><use href="#i-file"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/архив">архив</a><span class="tc-tile__meta"></span></div>
+          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="черновики" aria-label="Pick черновики"><div class="tc-thumb tc-thumb--folder"><svg><use href="#i-file"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/черновики">черновики</a><span class="tc-tile__meta">0 items</span></div>
+          <div class="tc-tile is-sel"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="whiteboard.jpg" aria-label="Pick whiteboard.jpg" checked><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/whiteboard.jpg">whiteboard.jpg</a><span class="tc-tile__meta">2.8 MB · 4032×3024</span></div>
+          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="панорама.tif" aria-label="Pick панорама.tif"><div class="tc-thumb tc-thumb--on-card"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/панорама.tif">панорама.tif</a><span class="tc-tile__meta">84 MB · too large</span></div>
+          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="смета.pdf" aria-label="Pick смета.pdf"><div class="tc-thumb tc-thumb--on-card"><svg><use href="#i-doc"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/смета.pdf">смета.pdf</a><span class="tc-tile__meta">1.2 MB</span></div>
+          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="схема-1.png" aria-label="Pick схема-1.png"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/схема-1.png">схема-1.png</a><span class="tc-tile__meta">640 KB</span></div>
+          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="схема-2.png" aria-label="Pick схема-2.png"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/схема-2.png">схема-2.png</a><span class="tc-tile__meta">712 KB</span></div>
         </div>
+        <form class="tc-post" id="files-sel" action="/app/files/sftpgo/documents/op/carrel/attachments/2026-07" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
       </div></div>
     </div>
   </div>
@@ -10980,7 +10984,7 @@ Read  2 min ago</div>
         <div class="tc-rubric">Settings</div>
         <div class="tc-nav">
           <a class="is-on tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-          <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
           <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
           <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
           <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -11065,7 +11069,7 @@ Read  2 min ago</div>
             <div class="tc-rubric">Settings</div>
             <div class="tc-nav">
               <a class="is-on tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
               <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -11133,7 +11137,7 @@ Read  2 min ago</div>
             <div class="tc-rubric">Settings</div>
             <div class="tc-nav">
               <a class="is-on tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
               <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -11336,7 +11340,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="is-on tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -11387,7 +11391,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="is-on tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -11756,7 +11760,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -11773,14 +11777,14 @@ Read  2 min ago</div>
       </div>
       <div class="tc-main">
         <div class="tc-head">
-          <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">Signed in as <b>mix</b> · 3 servers · 12 collections · 2 subscriptions</div></div>
+          <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">Signed in as <b>mix</b> · 4 servers · 15 collections · 2 subscriptions</div></div>
           <div class="tc-acts">
             <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg>Subscribe to a feed</button>
           </div>
         </div>
         <div class="tc-stack tc-stack--gap-10 tc-main__results">
-          <div class="tc-rubric tc-rubric--split tc-rubric--nudge">DAV servers<span class="tc-mono tc-mono--ls0">3</span></div>
+          <div class="tc-rubric tc-rubric--split tc-rubric--nudge">DAV servers<span class="tc-mono tc-mono--ls0">4</span></div>
 
           <div class="tc-card">
             <div class="tc-rubric">nextcloud
@@ -11842,6 +11846,30 @@ Read  2 min ago</div>
                 <tr class="is-off"><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#9A9280"></span><span class="tc-table__filename">Public</span></span></td>
                   <td class="tc-mono tc-table__n3">files <span class="tc-badge">ro</span></td><td class="tc-mono tc-table__n4">96</td><td class="tc-mono">3 d ago</td>
+                  <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tc-card">
+            <div class="tc-rubric">radicale · vps
+              <span class="tc-line tc-line--gap-6"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New collection</button><button class="tc-btn is-sm" type="button">Show password</button><button class="tc-btn is-sm" type="button">Test</button><button class="tc-btn is-sm" type="button">Edit</button><button class="tc-btn is-sm is-danger" type="button">Disconnect</button></span>
+            </div>
+            <div class="tc-mono tc-mono--t11-5-dusty">https://dav.vps.example/radicale/ · mix · last answer 4 min ago</div>
+            <table class="tc-table">
+              <thead><tr><th class="tc-table__col--tick-sm"></th><th>Collection</th><th class="tc-table__n3">What is in it</th><th class="tc-table__n4 tc-table__col--num">Objects</th><th class="tc-table__col--changed">Changed on the server</th><th class="tc-table__col--menu"></th></tr></thead>
+              <tbody>
+                <tr><td><button class="tc-tickrow__tick" type="button"></button></td>
+                  <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Проекты</span></span></td>
+                  <td class="tc-mono tc-table__n3">calendar</td><td class="tc-mono tc-table__n4">42</td><td class="tc-mono">1 h ago</td>
+                  <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+                <tr><td><button class="tc-tickrow__tick" type="button"></button></td>
+                  <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#8C6239"></span><span class="tc-table__filename">Дежурства</span></span></td>
+                  <td class="tc-mono tc-table__n3">calendar</td><td class="tc-mono tc-table__n4">18</td><td class="tc-mono">yesterday</td>
+                  <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+                <tr><td><button class="tc-tickrow__tick" type="button"></button></td>
+                  <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Команда</span></span></td>
+                  <td class="tc-mono tc-table__n3">address book</td><td class="tc-mono tc-table__n4">36</td><td class="tc-mono">6 d ago</td>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
               </tbody>
             </table>
@@ -11941,7 +11969,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -11992,7 +12020,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -12057,7 +12085,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -12218,7 +12246,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -12271,7 +12299,7 @@ Read  2 min ago</div>
               <div class="tc-rubric">Settings</div>
               <div class="tc-nav">
                 <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-                <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+                <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
                 <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -12288,7 +12316,7 @@ Read  2 min ago</div>
           </div>
           <div class="tc-main">
           <div class="tc-head tc-head--snug">
-            <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t19">Connections</div><div class="tc-head__sub">3 servers · 12 collections · 2 subscriptions</div></div>
+            <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t19">Connections</div><div class="tc-head__sub">4 servers · 15 collections · 2 subscriptions</div></div>
           </div>
           <div class="tc-pad">
             <div class="tc-card">
@@ -12343,7 +12371,7 @@ Read  2 min ago</div>
             <div class="tc-rubric">Settings</div>
             <div class="tc-nav">
               <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-              <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+              <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
               <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -12360,7 +12388,7 @@ Read  2 min ago</div>
         </div>
         <div class="tc-main">
         <div class="tc-head tc-head--snug">
-          <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t19">Connections</div><div class="tc-head__sub">3 servers · 12 collections · 2 subscriptions</div></div>
+          <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t19">Connections</div><div class="tc-head__sub">4 servers · 15 collections · 2 subscriptions</div></div>
           <div class="tc-acts"><span class="tc-badge tc-badge--edge-accent-accent">credentials unlocked · 4:12</span><button class="tc-btn is-sm" type="button">Lock now</button></div>
         </div>
         <div class="tc-pad">
@@ -12751,7 +12779,7 @@ Read  2 min ago</div>
               <div class="tc-rubric">Settings</div>
               <div class="tc-nav">
                 <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-                <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+                <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
                 <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -12768,7 +12796,7 @@ Read  2 min ago</div>
           </div>
           <div class="tc-main">
             <div class="tc-head tc-head--snug">
-              <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">3 servers · 12 collections · 2 subscriptions</div></div>
+              <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">4 servers · 15 collections · 2 subscriptions</div></div>
               <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</button></div>
             </div>
             <div class="tc-pad">
@@ -12846,7 +12874,7 @@ Read  2 min ago</div>
               <div class="tc-rubric">Settings</div>
               <div class="tc-nav">
                 <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-                <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+                <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
                 <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -12863,7 +12891,7 @@ Read  2 min ago</div>
           </div>
           <div class="tc-main">
             <div class="tc-head tc-head--snug">
-              <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">3 servers · 12 collections · 2 subscriptions</div></div>
+              <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">4 servers · 15 collections · 2 subscriptions</div></div>
               <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</button></div>
             </div>
             <div class="tc-pad">
@@ -12936,7 +12964,7 @@ Read  2 min ago</div>
               <div class="tc-rubric">Settings</div>
               <div class="tc-nav">
                 <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-                <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+                <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
                 <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -12953,7 +12981,7 @@ Read  2 min ago</div>
           </div>
           <div class="tc-main">
             <div class="tc-head tc-head--snug">
-              <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">3 servers · 12 collections · 2 subscriptions</div></div>
+              <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">4 servers · 15 collections · 2 subscriptions</div></div>
               <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</button></div>
             </div>
             <div class="tc-pad">
@@ -13039,7 +13067,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -13056,14 +13084,14 @@ Read  2 min ago</div>
       </div>
       <div class="tc-main">
         <div class="tc-head">
-          <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">Signed in as <b>mix</b> · 3 servers · 12 collections · 2 subscriptions</div></div>
+          <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">Signed in as <b>mix</b> · 4 servers · 15 collections · 2 subscriptions</div></div>
           <div class="tc-acts">
             <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg>Subscribe to a feed</button>
           </div>
         </div>
         <div class="tc-stack tc-stack--gap-10 tc-main__results">
-          <div class="tc-rubric tc-rubric--split tc-rubric--nudge">DAV servers<span class="tc-mono tc-mono--ls0">3</span></div>
+          <div class="tc-rubric tc-rubric--split tc-rubric--nudge">DAV servers<span class="tc-mono tc-mono--ls0">4</span></div>
 
           <div class="tc-card">
             <div class="tc-rubric">nextcloud
@@ -13116,6 +13144,30 @@ Read  2 min ago</div>
                 <tr class="is-off"><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
                   <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#9A9280"></span><span class="tc-table__filename">Public</span></span></td>
                   <td class="tc-mono tc-table__n3">files <span class="tc-badge">ro</span></td><td class="tc-mono tc-table__n4 is-2nd">96</td><td class="tc-mono">3 d ago</td>
+                  <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tc-card">
+            <div class="tc-rubric">radicale · vps
+              <span class="tc-line tc-line--gap-6"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New collection</button><button class="tc-btn is-sm" type="button">Show password</button><button class="tc-btn is-sm" type="button">Test</button><button class="tc-btn is-sm" type="button">Edit</button><button class="tc-btn is-sm is-danger" type="button">Disconnect</button></span>
+            </div>
+            <div class="tc-mono tc-mono--t11-5-dusty">https://dav.vps.example/radicale/ · mix · last answer 4 min ago</div>
+            <table class="tc-table">
+              <thead><tr><th class="tc-table__col--tick-sm"></th><th>Collection</th><th class="tc-table__n3">What is in it</th><th class="tc-table__n4 tc-table__col--num is-2nd">Objects</th><th class="tc-table__col--changed">Changed on the server</th><th class="tc-table__col--menu"></th></tr></thead>
+              <tbody>
+                <tr><td><button class="tc-tickrow__tick" type="button"></button></td>
+                  <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Проекты</span></span></td>
+                  <td class="tc-mono tc-table__n3">calendar</td><td class="tc-mono tc-table__n4 is-2nd">42</td><td class="tc-mono">1 h ago</td>
+                  <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+                <tr><td><button class="tc-tickrow__tick" type="button"></button></td>
+                  <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#8C6239"></span><span class="tc-table__filename">Дежурства</span></span></td>
+                  <td class="tc-mono tc-table__n3">calendar</td><td class="tc-mono tc-table__n4 is-2nd">18</td><td class="tc-mono">yesterday</td>
+                  <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+                <tr><td><button class="tc-tickrow__tick" type="button"></button></td>
+                  <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">Команда</span></span></td>
+                  <td class="tc-mono tc-table__n3">address book</td><td class="tc-mono tc-table__n4 is-2nd">36</td><td class="tc-mono">6 d ago</td>
                   <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
               </tbody>
             </table>
@@ -13240,7 +13292,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="is-on tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -13382,7 +13434,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="is-on tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -13464,7 +13516,7 @@ Read  2 min ago</div>
             <div class="tc-rubric">Settings</div>
             <div class="tc-nav">
               <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
               <a class="is-on tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
               <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -13558,7 +13610,7 @@ Read  2 min ago</div>
               <div class="tc-rubric">Settings</div>
               <div class="tc-nav">
                 <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-                <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+                <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
                 <a class="is-on tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
                 <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -13635,7 +13687,7 @@ Read  2 min ago</div>
             <div class="tc-rubric">Settings</div>
             <div class="tc-nav">
               <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
               <a class="is-on tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
               <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -13692,7 +13744,7 @@ Read  2 min ago</div>
             <div class="tc-rubric">Settings</div>
             <div class="tc-nav">
               <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
               <a class="is-on tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
               <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -13755,7 +13807,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="is-on tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -13785,7 +13837,7 @@ Read  2 min ago</div>
             <span class="tc-field__hint">In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.</span></div>
         </div>
         <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it.</div>
-        <div class="tc-list__group"><span class="tc-rubric">Devices</span><span class="tc-num">2</span></div>
+        <div class="tc-list__group"><span class="tc-rubric">Devices</span><span class="tc-num">3</span></div>
         <table class="tc-table tc-table--fit">
           <thead><tr><th>Device</th><th>What it can see and do</th><th class="is-2nd tc-table__n4">Created</th><th class="is-2nd">Last request</th><th class="tc-table__col--w90"></th></tr></thead>
           <tbody>
@@ -13805,6 +13857,15 @@ Read  2 min ago</div>
                 <button class="tc-btn is-sm" type="button">12 collections · Change</button>
                 <span class="tc-seg tc-seg--h22 tc-push"><button class="is-on tc-seg__opt" type="button">read only</button><button class="tc-seg__opt" type="button">read and write</button></span></span></td>
               <td class="tc-mono is-2nd tc-table__n4">2026-06-02</td><td class="tc-mono is-2nd">2026-08-15 08:02</td>
+              <td class="tc-acts"><button class="tc-btn is-sm is-danger" type="button">Revoke</button></td></tr>
+            <tr><td><span class="tc-table__file"><svg><use href="#i-device"/></svg><span class="tc-table__filename">Планшет · Календарь iOS</span></span></td>
+              <td><span class="tc-table__wrap">
+                <span class="tc-line tc-line--gap-3">
+                  <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-mark" data-tc-colour="#8C6239"></span></span>
+                <span class="tc-mono tc-mono--t11">Calendars</span>
+                <button class="tc-btn is-sm" type="button">3 collections · Change</button>
+                <span class="tc-seg tc-seg--h22 tc-push"><button class="is-on tc-seg__opt" type="button">read only</button><button class="tc-seg__opt" type="button">read and write</button></span></span></td>
+              <td class="tc-mono is-2nd tc-table__n4">2026-07-19</td><td class="tc-mono is-2nd">2026-08-14 21:15</td>
               <td class="tc-acts"><button class="tc-btn is-sm is-danger" type="button">Revoke</button></td></tr>
           </tbody>
         </table>
@@ -13853,7 +13914,7 @@ Read  2 min ago</div>
             <div class="tc-rubric">Settings</div>
             <div class="tc-nav">
               <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
               <a class="is-on tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -13928,7 +13989,7 @@ Read  2 min ago</div>
             <div class="tc-rubric">Settings</div>
             <div class="tc-nav">
               <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
               <a class="is-on tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -14021,7 +14082,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -14119,7 +14180,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -14254,7 +14315,7 @@ Read  2 min ago</div>
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -14461,7 +14522,7 @@ jobs:
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -14513,7 +14574,7 @@ jobs:
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -14579,7 +14640,7 @@ jobs:
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -14663,7 +14724,7 @@ jobs:
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -14718,7 +14779,7 @@ jobs:
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -15637,7 +15698,7 @@ jobs:
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -15910,7 +15971,7 @@ jobs:
               <div class="tc-rubric">Settings</div>
               <div class="tc-nav">
                 <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-                <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+                <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
                 <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -19295,7 +19356,7 @@ DATA                → 550 5.7.1 Daily sending limit reached
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">5</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">6</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -19398,7 +19459,7 @@ SMTP  smtp.yandex.ru:465  TLS
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">5</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">6</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -19458,7 +19519,7 @@ SMTP  smtp.yandex.ru:465  TLS
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">5</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">6</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -19475,7 +19536,7 @@ SMTP  smtp.yandex.ru:465  TLS
       </div>
       <div class="tc-main">
         <div class="tc-head">
-          <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">Signed in as <b>mix</b> · 3 servers · 2 mailboxes · 12 collections · 2 subscriptions</div></div>
+          <div class="tc-head__titles"><div class="tc-head__title">Connections</div><div class="tc-head__sub">Signed in as <b>mix</b> · 4 servers · 2 mailboxes · 15 collections · 2 subscriptions</div></div>
           <div class="tc-acts">
             <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg>Connect a mailbox</button>
@@ -19483,7 +19544,7 @@ SMTP  smtp.yandex.ru:465  TLS
           </div>
         </div>
         <div class="tc-stack tc-stack--gap-10 tc-main__results">
-          <div class="tc-rubric tc-rubric--split tc-rubric--nudge">DAV servers<span class="tc-mono tc-mono--ls0">3</span></div>
+          <div class="tc-rubric tc-rubric--split tc-rubric--nudge">DAV servers<span class="tc-mono tc-mono--ls0">4</span></div>
           <div class="tc-card">
             <div class="tc-rubric">nextcloud
               <span class="tc-line tc-line--gap-6"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New collection</button><button class="tc-btn is-sm" type="button">Show password</button><button class="tc-btn is-sm" type="button">Test</button><button class="tc-btn is-sm" type="button">Edit</button><button class="tc-btn is-sm is-danger" type="button">Disconnect</button></span>
@@ -19556,7 +19617,7 @@ SMTP  smtp.yandex.ru:465  TLS
           <div class="tc-rubric">Settings</div>
           <div class="tc-nav">
             <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
-            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">5</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">6</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
             <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
@@ -22345,6 +22406,12 @@ dav: HTTP 503: the server is busy</div></div>
             <button class="tc-btn" title="Details" type="button"><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></button>
           </div>
         </div>
+        <div class="tc-bar tc-bar--sel tc-nojs">
+          <span class="tc-bar__count">With the ticked</span>
+          <span class="tc-bar__sep"></span>
+          <button class="tc-btn" title="Download" type="submit" form="files-sel" name="op" value="download"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
+          <button class="tc-btn" title="Copy" type="submit" form="files-sel" name="op" value="copy"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
+        </div>
         <div class="tc-bar">
           <label class="tc-in is-ph tc-in--h26-w190"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Filter this folder" aria-label="Filter this folder"></label>
           <span class="tc-seg is-2nd"><a class="is-on tc-seg__opt" href="/app/files/sftpgo/public?sort=name">Name</a><a class="tc-seg__opt" href="/app/files/sftpgo/public?sort=size">Size</a><a class="tc-seg__opt" href="/app/files/sftpgo/public?sort=changed">Changed</a></span>
@@ -22359,16 +22426,17 @@ dav: HTTP 503: the server is busy</div></div>
             <th>Name</th><th class="tc-table__n3 tc-table__col--size">Size</th><th class="is-2nd tc-table__n4 tc-table__col--type">Type</th><th class="tc-table__col--time">Changed</th><th class="tc-table__col--num"></th>
           </tr></thead>
           <tbody>
-            <tr><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
+            <tr><td><input class="tc-tickrow__tick is-off" type="checkbox" form="files-sel" name="item" value="прайс-2026.pdf" aria-label="Pick"></td>
               <td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/public/прайс-2026.pdf">прайс-2026.pdf</a></span></td>
               <td class="tc-mono tc-table__n3">1.1 MB</td><td class="tc-mono is-2nd tc-table__n4">application/pdf</td><td class="tc-mono">2026-07-28 10:15</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button></td></tr>
-            <tr><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
+            <tr><td><input class="tc-tickrow__tick is-off" type="checkbox" form="files-sel" name="item" value="схема-проезда.png" aria-label="Pick"></td>
               <td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/public/схема-проезда.png">схема-проезда.png</a></span></td>
               <td class="tc-mono tc-table__n3">4.2 MB</td><td class="tc-mono is-2nd tc-table__n4">image/png</td><td class="tc-mono">2026-06-02 16:40</td>
               <td class="tc-acts"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button></td></tr>
           </tbody>
         </table>
+        <form class="tc-post" id="files-sel" action="/app/files/sftpgo/public/op" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
       </div>
     </div>
   </div>

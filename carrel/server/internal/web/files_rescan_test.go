@@ -157,7 +157,7 @@ func TestRowNameHasItsAddress(t *testing.T) {
 // it. So the bar's operations are there with nothing selected too, and
 // what is ticked travels with the one pressed.
 func TestSelectionIsTheOperationsForm(t *testing.T) {
-	field := frameOne(t, regexp.MustCompile(`<input class="tc-tile__box" type="checkbox" name="([^"]+)" value="[^"]+"`), mockupFrame(t, "s-files-5"), "tick of a tile")[1]
+	field := frameOne(t, regexp.MustCompile(`<input class="tc-tile__box" type="checkbox"(?: form="[^"]*")? name="([^"]+)" value="[^"]+"`), mockupFrame(t, "s-files-5"), "tick of a tile")[1]
 
 	f := filesFixture(t, true)
 	for _, name := range []string{"a.txt", "b.txt", "c.md"} {

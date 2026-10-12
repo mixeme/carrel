@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.214 — 2026-10-12
+
+Typecase `22f594a` (Typecase's note 49), client `v0.4.16`. The copy of the
+mockup is `22f594a` byte for byte (429 frames). Nothing in the running
+server changed: the rail of the settings already counted davloom's devices
+and the backup jobs, as the frames now draw them.
+
+### Not done
+
+- The selection bar of the files with nothing ticked: the server sends its
+  operations always, and its words still carry a count — the note asks for
+  words without one ([server.md](../../docs/plan/server.md), «Переход на
+  Typecase `22f594a`»).
+
 ## v0.2.213 — 2026-10-12
 
 An event relates to other records as a task and a note do, and «New event»

@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.16 — 2026-10-12
+
+Typecase `22f594a` (Typecase's note 49), server `v0.2.214`. The copy of the
+mockup is `22f594a` byte for byte (429 frames). No screen and no guard
+changed: what the note brings — a tick that belongs to a form it does not
+stand in (`Send.Of`), a `PostForm` in `Main`, the selection bar of a page
+without scripts (`Bar.NoScript`) — is for the files section, which is not
+built.
+
 ## v0.4.15 — 2026-10-12
 
 Server `v0.2.213`.
