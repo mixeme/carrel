@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.212 — 2026-10-12
+
+### Changed
+
+- **A task marked done closes its open subtasks with it** (А9 of the audit
+  of 11.10.2026; the owner's decision of 12.10.2026: without a question).
+  They used to stay open under a done task, and nothing said so. Every
+  level under the task is closed, each subtask as «Mark done» would close
+  it. A subtask that repeats goes on to its next time and stays open, as a
+  repeating task marked done does, and what is under it is left alone.
+  Taking the mark off the parent opens nothing again.
+- Nothing is said when all of them closed. A subtask the server would not
+  take is named in a notice on the task: «The task is done, 1 subtask still
+  open».
+
+### For developers
+
+- `closeSubtasks`, `subtaskParents`: a subtask is a task of the same list
+  whose `RELATED-TO` names the parent with no `RELTYPE` or with `PARENT`.
+  One more read of the list after the parent's write.
+- The words of the two notices are the developer's, not the owner's.
+
+### Not done
+
+- Subtasks in another list than the parent's are not looked for.
+- A parent closed from the conflict screen closes no subtask.
+
 ## v0.2.211 — 2026-10-12
 
 An import asks what to do with the records the collection already holds

@@ -3350,6 +3350,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 
 	// The patch is applied to the record read: what it held is taken first.
 	wasEmails := cardEmails(obj)
+	wasDone := c.spec.kind == view.KindTask && taskDone(obj)
 	sent, fault, err := s.applyChecked(c, obj, ch, have, want)
 	if err != nil {
 		st.notices = []view.Notice{s.writeFailure(c, "PUT", obj.Path, err)}
@@ -3389,11 +3390,122 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	if markDone {
 		back = doneBack(c, uid, r.FormValue("from"))
 	}
+	// A task that became done closes its open subtasks with it (the owner's
+	// decision of 12.10.2026, А9 of the audit of 11.10.2026): nobody is
+	// asked, and only what could not be closed is said.
+	if c.spec.kind == view.KindTask && !wasDone && taskDone(sent) {
+		if left := s.closeSubtasks(r.Context(), c, uid); left != nil {
+			got, err := c.find(r.Context(), uid)
+			if err != nil {
+				got = nil
+			} else {
+				c.noteWrite(got.Path, got)
+			}
+			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, got, *left))
+			return
+		}
+	}
 	if moving {
 		s.saveAndMove(w, r, c, s.notebookTarget(c, st.notebook), uid, sent, back)
 		return
 	}
 	s.finishCardWrite(w, r, c, uid, wasEmails, sent, back)
+}
+
+// subtaskParents are the tasks a task names as its parents: RELATED-TO
+// without a RELTYPE, which is PARENT by default (RFC 5545 §3.2.15), or with
+// that one. A sibling and a child are not what it is a subtask of.
+func subtaskParents(obj *model.Object) []string {
+	var out []string
+	for _, v := range obj.Props()["RELATED-TO"] {
+		if t := v.Params["RELTYPE"]; t != "" && !strings.EqualFold(t, "PARENT") {
+			continue
+		}
+		if uid := strings.TrimSpace(v.Text); uid != "" {
+			out = append(out, uid)
+		}
+	}
+	return out
+}
+
+// closeSubtasks marks done the open tasks under parent in its collection,
+// every level of them, each as Mark done would: the same patch, with the
+// version read here. A subtask that repeats goes on to its next time and
+// stays open (А2), and what is under it is then left alone. The answer is
+// nil when all of them closed, and a notice naming those that did not.
+func (s *Server) closeSubtasks(ctx context.Context, c *collectionCtx, parent string) *view.Notice {
+	objs, _, err := c.cal.Query(ctx, c.col.Path, "VTODO", nil, nil)
+	if err != nil {
+		return &view.Notice{Role: view.NoticeAlert, Title: "The task is done, its subtasks were not looked at",
+			Body: "The list could not be read again, so subtasks that are still open stayed open."}
+	}
+	under := map[string][]*model.Object{}
+	for _, o := range objs {
+		for _, p := range subtaskParents(o) {
+			under[p] = append(under[p], o)
+		}
+	}
+	var left []view.Text
+	seen := map[string]bool{parent: true}
+	queue := []string{parent}
+	for len(queue) > 0 {
+		at := queue[0]
+		queue = queue[1:]
+		for _, kid := range under[at] {
+			uid := cal.UID(kid)
+			if seen[uid] {
+				continue
+			}
+			seen[uid] = true
+			if taskDone(kid) {
+				queue = append(queue, uid)
+				continue
+			}
+			title := text(titleOr(cal.Text(kid, "SUMMARY"), "Untitled task"))
+			have, alarms, err := s.currentValues(c, kid)
+			if err != nil {
+				left = append(left, title)
+				continue
+			}
+			want := formValues{}
+			for k, v := range have {
+				want[k] = append([]string(nil), v...)
+			}
+			want["done"] = []string{"on"}
+			ch := s.buildChange(c, kid, alarms, have, want, time.Now())
+			if len(ch.errors) > 0 {
+				left = append(left, title)
+				continue
+			}
+			if len(ch.ops) == 0 && !ch.alarmsChanged {
+				continue
+			}
+			etag := kid.ETag
+			sent, fault, err := s.applyChecked(c, kid, ch, have, want)
+			if err != nil || fault != nil {
+				left = append(left, title)
+				continue
+			}
+			sent.ETag = etag
+			if err := c.update(ctx, sent); err != nil {
+				left = append(left, title)
+				continue
+			}
+			closed := taskDone(sent)
+			sent.ETag = ""
+			c.noteWrite(sent.Path, sent)
+			if closed {
+				queue = append(queue, uid)
+			}
+		}
+	}
+	if len(left) == 0 {
+		return nil
+	}
+	return &view.Notice{Role: view.NoticeAlert,
+		Title:   text(fmt.Sprintf("The task is done, %s still open", plural(len(left), "subtask"))),
+		Body:    "They could not be marked done with it. Open them and mark them yourself.",
+		Details: &view.Diagnostic{Summary: "Still open", Lines: left}}
 }
 
 // finishCardWrite is finishWrite for a save that may have replaced an
