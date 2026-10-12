@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/discover"
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/provider/card"
@@ -184,6 +185,13 @@ func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, c
 			sheet.Warning = join("Carrel creates a "+noun+" there, copies ", records, ", then deletes this one on "+here+". "+
 				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path.")
 		}
+	}
+	// A calendar that leaves a server which schedules takes its meetings
+	// off it, and that server may tell their attendees of a cancellation
+	// (the owner's decision of 12.10.2026, А12): said in «may», and nothing
+	// of what the server it goes to will send.
+	if !copying && col.Has(view.KindEvent) && conn.Scheduling == discover.SchedulingYes {
+		sheet.Cancels = text(here + " may tell the attendees of its meetings that they are cancelled.")
 	}
 	sheet.Actions = []view.Action{confirm, s.sheetCancel(back, collectionList(conn, col))}
 	return sheet

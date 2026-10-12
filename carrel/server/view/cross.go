@@ -214,8 +214,15 @@ type MoveSheet struct {
 	Title   Text         `json:"title"`   // «Move contact», «Copy event» (s-contacts-2)
 	Subject Text         `json:"subject"` // что и откуда: «Анна Ковалёва · from nextcloud · Контакты»
 	Target  TargetPicker `json:"target"`
-	Warning Runs         `json:"warning"` // что сделает перенос: на одном сервере MOVE (моноширинно, s-contacts-2), на другой аккаунт — копия и удаление исходника
-	Actions []Action     `json:"actions"`
+	// Cancels — строка листа о людях записи (решение владельца 12.10.2026):
+	// перенос уносит событие с участниками с сервера, который планирует
+	// (RFC 6638), и тот может сообщить им об отмене — «nextcloud may tell
+	// its attendees that the event is cancelled.»; пусто — сказать нечего:
+	// копия, участников нет, сервер не планирует или неизвестно, перенос
+	// внутри подключения. О приглашениях лист не говорит
+	Cancels Text     `json:"cancels"`
+	Warning Runs     `json:"warning"` // что сделает перенос: на одном сервере MOVE (моноширинно, s-contacts-2), на другой аккаунт — копия и удаление исходника
+	Actions []Action `json:"actions"`
 }
 
 // Четыре листа коллекции (C-5.6). Родов записей они не различают: заголовок
@@ -251,8 +258,12 @@ type CollectionMoveSheet struct {
 	Title   Text         `json:"title"`   // «Move calendar», «Copy address book», «Move folder» (s-profile-8)
 	Subject Text         `json:"subject"` // что переносят: «Дни рождения · nextcloud»
 	Target  TargetPicker `json:"target"`  // цель — подключение, а не коллекция (S-12.3)
-	Warning Runs         `json:"warning"` // завести там, перенести записи, удалить здесь — до начала; число записей жирным (s-profile-8)
-	Actions []Action     `json:"actions"`
+	// Cancels — как у MoveSheet: календарь уходит с сервера, который
+	// планирует, и участникам его встреч тот может сообщить об отмене;
+	// пусто — копия, не календарь, сервер не планирует или неизвестно
+	Cancels Text     `json:"cancels"`
+	Warning Runs     `json:"warning"` // завести там, перенести записи, удалить здесь — до начала; число записей жирным (s-profile-8)
+	Actions []Action `json:"actions"`
 }
 
 type CollectionDeleteSheet struct {

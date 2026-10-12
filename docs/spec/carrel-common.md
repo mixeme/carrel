@@ -1795,6 +1795,7 @@ type MoveSheet struct {
     Title   Text
     Subject Text
     Target  TargetPicker
+    Cancels Text // событие с участниками уходит с сервера, который планирует (S-6), на другое подключение: «nextcloud may tell its attendees that the event is cancelled.»; иначе пусто. О приглашениях лист не говорит (решение владельца 12.10.2026)
     Warning Runs // что сделает перенос; на одном сервере `MOVE` моноширинно (s-contacts-2)
     Actions []Action
 }
@@ -1873,6 +1874,7 @@ type CollectionMoveSheet struct {
     Title   Text         // «Move calendar», «Copy address book», «Move folder» (s-profile-8)
     Subject Text         // что переносят: «nextcloud · Дни рождения»
     Target  TargetPicker // цель — подключение, а не коллекция (S-12.3)
+    Cancels Text // календарь уходит с сервера, который планирует: «nextcloud may tell the attendees of its meetings that they are cancelled.»; у копии, не календаря и сервера без планирования пусто
     Warning Runs // число записей жирным: «copies all ‹51› events» (s-profile-8)
     Actions []Action
 }

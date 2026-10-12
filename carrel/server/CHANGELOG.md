@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.217 — 2026-10-12
+
+### Changed
+
+- **A move that takes a meeting off a server which schedules says its
+  attendees may hear of a cancellation** (А12 of the audit of 11.10.2026;
+  the owner's decision of 12.10.2026: say this, and take on nothing more).
+  The sheet of a record's move says it when the event has attendees and
+  goes to another account; the sheet of a calendar's move, when the
+  calendar leaves such a server. `MoveSheet.cancels`,
+  `CollectionMoveSheet.cancels`. «May»: Carrel knows that the server
+  announced scheduling (RFC 6638), not whether a letter goes out.
+- A copy, an event without attendees, a server that does not schedule or
+  did not say, and a move inside one account say nothing. Nothing is said
+  of invitations anywhere: where the record goes is the person's choice.
+
+### Not done
+
+- A record's deletion has no sheet to say it in yet (А8).
+- The words are the developer's, not the owner's; no frame draws the line.
+
 ## v0.2.216 — 2026-10-12
 
 ### Changed

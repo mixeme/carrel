@@ -9,7 +9,9 @@ import (
 	"strings"
 
 	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/discover"
 	"carrel.dev/carrel/server/internal/model"
+	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/provider/card"
 	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
@@ -75,7 +77,7 @@ var moveCollectionNouns = map[view.Kind]string{
 // another connection a copy and a delete (S-18). An option's ID is the sheet
 // with that option chosen. title is the record's, "" when it could not be
 // read.
-func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, dest *collectionCtx) view.MoveSheet {
+func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, dest *collectionCtx, invited bool) view.MoveSheet {
 	address := c.recordPath(uid) + "/move"
 	blob := s.catalogOf(c.sess)
 	verb := "Move "
@@ -134,6 +136,16 @@ func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, de
 		sheet.Warning = join("Inside one server this is ", monoRun("MOVE"), ": instant, no traffic. To another "+where+" the "+record+
 			" is copied and then deleted — Carrel says so before it starts, not after.")
 	}
+	// What the person may not have thought of (the owner's decision of
+	// 12.10.2026, А12 of the audit of 11.10.2026): the record leaves a
+	// server that schedules, and that server may tell its attendees the
+	// event is cancelled. «May»: whether a letter goes out is the server's
+	// setting, which Carrel does not see. Whether the place it goes to
+	// invites them is the person's own choice of a collection, and is not
+	// said.
+	if invited && !copying && dest != nil && dest.conn.ID != c.conn.ID && c.conn.Scheduling == discover.SchedulingYes {
+		sheet.Cancels = text(connLabel(c.conn) + " may tell its attendees that the " + c.spec.noun + " is cancelled.")
+	}
 	cancel := view.Action{ID: "record.move.cancel", Label: "Cancel", Href: s.route(c.recordPath(uid)), Method: "GET", Enabled: true}
 	sheet.Actions = []view.Action{confirm, cancel}
 	return sheet
@@ -155,11 +167,12 @@ func (s *Server) getKindMove(w http.ResponseWriter, r *http.Request, kind string
 	uid := r.PathValue("uid")
 	// The head names the record (s-contacts-2); a record that cannot be read
 	// now is still offered the sheet, named by where it lives.
-	title := ""
+	title, invited := "", false
 	if obj, err := c.find(r.Context(), uid); err == nil {
 		title = recordTitle(c.spec.kind, obj)
+		invited = c.cal != nil && len(cal.Attendees(obj)) > 0
 	}
-	sheet := s.moveSheet(c, uid, title, copying, s.moveTarget(c, q.Get("to"), q.Get("into")))
+	sheet := s.moveSheet(c, uid, title, copying, s.moveTarget(c, q.Get("to"), q.Get("into")), invited)
 	if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return

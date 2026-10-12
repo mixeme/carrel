@@ -17,6 +17,7 @@
       "method": "GET"
     }
   ],
+  "cancels": "",
   "copy": false,
   "kind": "contact",
   "subject": "Анна Ковалёва · from nextcloud · Контакты",
