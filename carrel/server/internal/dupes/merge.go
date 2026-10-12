@@ -13,8 +13,9 @@ import (
 // the base, and from the others comes what it lacks. Every property of every
 // member is kept — this assembly does not know what a foreign property means,
 // so it drops none — and where names collide the kept record wins. The only
-// question is a single-valued property whose values differ; its answer is an
-// Option index, and without an answer the kept record's value stays.
+// questions are a single-valued property whose values differ and the time,
+// when the members' times differ (When); an answer is an Option index, and
+// without an answer the kept record's value stays.
 
 // singleValued are the properties a record holds once (RFC 6350 cardinality
 // 1 and *1, RFC 5545 "MUST NOT occur more than once"), plus PHOTO and ORG,
@@ -31,17 +32,25 @@ var singleValued = map[string]bool{
 	"COMPLETED": true,
 }
 
-// ownOnly are taken from the kept record and nowhere else. The identity and
-// the stamps are its own. Time is one piece — DTSTART with its TZID, DTEND or
-// DURATION, DUE and the repetition — and taking a part of it from another
+// ownOnly are not merged property by property. The identity and the stamps
+// are the kept record's own. Time is one piece — DTSTART with its TZID, DTEND
+// or DURATION, DUE and the repetition — and taking a part of it from another
 // record would pair a time with a zone that record's document defines and
-// the kept one may not: the choice of the kept record is the choice of time.
+// the kept one may not: it is asked about as one question (When) and taken
+// whole from the member chosen, with its zones and its rewritten occurrences
+// (cal.TakeTime).
 var ownOnly = map[string]bool{
 	"UID": true, "VERSION": true, "PRODID": true, "REV": true,
 	"DTSTAMP": true, "LAST-MODIFIED": true, "CREATED": true, "SEQUENCE": true,
 	"DTSTART": true, "DTEND": true, "DURATION": true, "DUE": true,
 	"RRULE": true, "RDATE": true, "EXDATE": true, "RECURRENCE-ID": true,
 }
+
+// When is the name of the question about time (А6 of the audit of
+// 11.10.2026; the owner's decision of 12.10.2026: the person decides what to
+// take from where). It is no property: an option's Value is the member's
+// time as written (cal.TimeKey), and the screen says it in words.
+const When = "WHEN"
 
 // Option is one value offered for a single-valued property. From is the
 // member it comes from: 0 is the kept record, i is others[i-1].
@@ -77,8 +86,14 @@ type Plan struct {
 	Alarms int
 	// Instances counts, per other member, the rewritten occurrences
 	// (RECURRENCE-ID) that go with it when it is deleted: they belong to that
-	// member's series, not to the kept one.
+	// member's series, not to the kept one. The member whose time was chosen
+	// is not counted: its occurrences come with its time.
 	Instances map[int]int
+	// Time is the member whose time the merged record has: 0, the kept one,
+	// unless When was answered otherwise. Dropped counts the kept record's
+	// own rewritten occurrences that went with the time it gave up.
+	Time    int
+	Dropped int
 }
 
 // Merge builds the merged record from the kept one and the others, with
@@ -185,6 +200,25 @@ func Merge(target *model.Object, others []*model.Object, choices map[string]int)
 		return merged, plan, nil
 	}
 
+	// The time: one question when it differs, the kept record's without an
+	// answer.
+	times := []Option{{From: 0, Value: model.RawValue{Text: cal.TimeKey(target)}}}
+	for i, o := range others {
+		if v := (model.RawValue{Text: cal.TimeKey(o)}); !hasOption(times, v) {
+			times = append(times, Option{From: i + 1, Value: v})
+		}
+	}
+	if len(times) > 1 {
+		plan.Questions = append(plan.Questions, Question{Prop: When, Options: times})
+		if i, ok := choices[When]; ok && i > 0 && i < len(times) {
+			plan.Time = times[i].From
+			var err error
+			if merged, plan.Dropped, err = cal.TakeTime(merged, others[plan.Time-1]); err != nil {
+				return nil, plan, err
+			}
+		}
+	}
+
 	kept, err := cal.Alarms(merged)
 	if err != nil {
 		return nil, plan, err
@@ -208,6 +242,9 @@ func Merge(target *model.Object, others []*model.Object, choices map[string]int)
 		}
 	}
 	for i, o := range others {
+		if i+1 == plan.Time {
+			continue
+		}
 		inst, err := cal.Overrides(o, time.UTC)
 		if err != nil {
 			return nil, plan, err

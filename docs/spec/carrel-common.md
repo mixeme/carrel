@@ -1753,7 +1753,10 @@ type DuplicatesMergePage struct {
 // множеством (Union). Property — подпись по-человечески: «Display name»,
 // «Organisation», «Photo», «Title», «Location»; Name — поле вопроса,
 // choice.<свойство> («choice.FN»), вариант уходит своим номером в Options;
-// у Union Name пусто.
+// у Union Name пусто. На экране слияния события и задачи с разным временем —
+// ещё строка «When», choice.WHEN: варианты — время каждого участника словами
+// («Monday, 10 August 2026, 10:00 – 11:00, Weekly on Monday (from nextcloud ·
+// Work)»), выбранное берётся целиком (S-16).
 type MergeRow struct { Property Text; Name string; Options []Text; Chosen int; Union bool }
 
 type TargetPicker struct { // «куда» в шапке листа

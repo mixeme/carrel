@@ -160,7 +160,9 @@ type DuplicatesMergePage struct {
 }
 
 // MergeRow — свойство, о котором спрашивают (s-dup-1: поле с радио), или
-// объединяемое множеством (Union).
+// объединяемое множеством (Union). На экране слияния события и задачи с
+// разным временем — ещё строка «When» (choice.WHEN): время каждого участника
+// словами, выбранное берётся целиком (S-16).
 type MergeRow struct {
 	// Property — подпись поля по-человечески: «Display name», «Organisation»,
 	// «Photo», «Title», «Location»

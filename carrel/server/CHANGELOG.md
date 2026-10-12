@@ -17,6 +17,41 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.210 — 2026-10-12
+
+A merge of duplicates asks whose time to keep (А6 of the audit of
+11.10.2026; the owner's decision of 12.10.2026: the person decides what to
+take from where).
+
+### Changed
+
+- **The merge screen of two events or tasks whose time differs has a row
+  «When»** (`choice.WHEN`). The time, the length, the due date, the
+  repetition and the days left out used to come from the kept record only,
+  and the screen said nothing of the other's. Now each member's time is an
+  option, said in words and with where it comes from; without an answer the
+  kept record's stays, as before.
+- **The chosen time is taken whole**: the start with its zone and the
+  zone's definition, the end or the length, the rule, the days added and
+  left out, and the occurrences rewritten by hand — they become the kept
+  record's. The kept record's own rewritten occurrences go with the time it
+  gives up; «What changes» says how many.
+
+### For developers
+
+- `dupes.When`, `Plan.Time`, `Plan.Dropped`; `cal.TimeProps`, `cal.TimeKey`,
+  `cal.TakeTime` — a document edit, like `cal.SetAlarms`.
+- A time written differently is another time: `…T100000Z` and the same
+  moment with a `TZID` are two options.
+- The words of the row and of the two lines of «What changes» are the
+  developer's, not the owner's.
+
+### Not done
+
+- The duplicates screen's own questions of a linked group («Keep these
+  values») do not ask about time.
+- No frame draws the row: the merge screen of the client is not built.
+
 ## v0.2.209 — 2026-10-12
 
 ### Changed

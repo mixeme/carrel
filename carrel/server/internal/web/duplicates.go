@@ -359,6 +359,7 @@ var choiceLabels = map[string]string{
 	"SUMMARY": "Title", "DESCRIPTION": "Description", "LOCATION": "Location", "STATUS": "Status",
 	"PRIORITY": "Priority", "PERCENT-COMPLETE": "Percent complete", "COMPLETED": "Completed",
 	"ORGANIZER": "Organiser", "ATTENDEE": "Attendees", "CLASS": "Class", "TRANSP": "Busy", "COLOR": "Colour",
+	dupes.When: "When",
 }
 
 func choiceLabel(prop string) string {

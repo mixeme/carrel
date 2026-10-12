@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/dupes"
@@ -210,6 +211,43 @@ func valueText(calendar bool, prop string, v model.RawValue, from mergeMember) s
 	return t
 }
 
+// whenText is the time of a member as the question «When» offers it (А6 of
+// the audit of 11.10.2026): the day and the hours, the zone when it is not
+// the instance's, the repetition in words, how many occurrences were
+// rewritten by hand — and whose it is, which also tells apart two times
+// that read the same.
+func whenText(tf timeFmt, m mergeMember) string {
+	var parts []string
+	start := time.Time{}
+	if m.c.spec.kind == view.KindTask {
+		if due, err := cal.DueOf(m.obj, tf.tz); err == nil && !due.Start.IsZero() {
+			parts = append(parts, "Due "+tf.timeOrDate(due))
+			start = due.Start
+		}
+		if tm, err := cal.TimingOf(m.obj, tf.tz); err == nil && !tm.Start.IsZero() {
+			parts = append(parts, "starts "+tf.timeOrDate(tm))
+			start = tm.Start
+		}
+	} else if tm, err := cal.TimingOf(m.obj, tf.tz); err == nil && !tm.Start.IsZero() {
+		when := tf.when(tm)
+		if z := tf.zone(tm.Zone); z != "" {
+			when += " (" + z + ")"
+		}
+		parts = append(parts, when)
+		start = tm.Start
+	}
+	if len(parts) == 0 {
+		parts = append(parts, "No time")
+	}
+	if raw := cal.RawRRULE(m.obj); raw != "" {
+		parts = append(parts, tf.recurrence(raw, start))
+	}
+	if over, err := cal.Overrides(m.obj, tf.tz); err == nil && len(over) > 0 {
+		parts = append(parts, plural(len(over), "rewritten occurrence"))
+	}
+	return strings.Join(parts, ", ") + " (from " + string(m.c.stamp()) + ")"
+}
+
 func gainLine(calendar bool, g dupes.Gain, from mergeMember) string {
 	v := valueText(calendar, g.Prop, g.Value, from)
 	if strings.HasPrefix(v, g.Prop+" (") {
@@ -282,6 +320,7 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 		return nil, page
 	}
 	calendar := target.obj.IsCalendar()
+	tf := s.timeFor(sess)
 	from := func(i int) mergeMember {
 		if i == 0 {
 			return target
@@ -297,6 +336,10 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 			chosen = n
 		}
 		for _, o := range qn.Options {
+			if qn.Prop == dupes.When {
+				row.Options = append(row.Options, text(whenText(tf, from(o.From))))
+				continue
+			}
 			row.Options = append(row.Options, text(valueText(calendar, qn.Prop, o.Value, from(o.From))))
 		}
 		row.Chosen = chosen
@@ -320,6 +363,12 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 	}
 	for _, g := range plan.Gains {
 		lines = append(lines, text("The kept record gains "+gainLine(calendar, g, from(g.From))))
+	}
+	if plan.Time > 0 {
+		lines = append(lines, text("The kept record takes the time of "+from(plan.Time).label()+": its start and end, its repetition and its rewritten occurrences"))
+	}
+	if plan.Dropped > 0 {
+		lines = append(lines, text(fmt.Sprintf("Not kept: %s of the kept record, which belong to the time it gives up", plural(plan.Dropped, "rewritten occurrence"))))
 	}
 	if plan.Alarms > 0 {
 		lines = append(lines, text("The kept record gains "+plural(plan.Alarms, "reminder")+" from the others"))
