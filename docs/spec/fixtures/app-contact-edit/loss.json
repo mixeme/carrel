@@ -717,7 +717,8 @@
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e21\u0026op=upload",
         "id": "photo.add",
         "label": "Add",
-        "method": "POST"
+        "method": "POST",
+        "submits": true
       }
     ],
     "editable": true,

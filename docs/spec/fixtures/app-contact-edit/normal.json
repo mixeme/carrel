@@ -708,7 +708,8 @@
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e21\u0026op=upload",
         "id": "photo.replace",
         "label": "Replace",
-        "method": "POST"
+        "method": "POST",
+        "submits": true
       },
       {
         "csrf": "csrf",
@@ -716,7 +717,8 @@
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e21\u0026op=crop",
         "id": "photo.crop",
         "label": "Crop",
-        "method": "POST"
+        "method": "POST",
+        "submits": true
       },
       {
         "csrf": "csrf",
@@ -725,7 +727,8 @@
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e21\u0026op=remove",
         "id": "photo.remove",
         "label": "Remove",
-        "method": "POST"
+        "method": "POST",
+        "submits": true
       }
     ],
     "editable": true,

@@ -159,10 +159,11 @@ func Screen(p *view.ContactEditPage) w.Shell {
 	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail, p.UID == ""), Main: w.Main{Items: main}}}
 }
 
-// Forms are the forms of the photo's actions, which post with none of their
-// own, each under its action's ID — not a new card's, which send the form
-// they stand in (Submits) —, of the notices' buttons and of the menus' items
-// that post (Sign out).
+// Forms are the forms of the photo's actions that post with none of their
+// own, each under its action's ID — none since the server's v0.2.208: the
+// photo's buttons send the form they stand in (Submits), a card's as a new
+// card's —, of the notices' buttons and of the menus' items that post (Sign
+// out).
 func Forms(p *view.ContactEditPage) []w.PostForm {
 	out := append(bind.TopForms(p.Top), bind.NoticeForms(p.Notices)...)
 	for _, a := range p.Photo.Actions {
@@ -185,9 +186,10 @@ func visible(rows []view.FormRow) []view.FormRow {
 }
 
 // photo is the photo's field: the picture or the initials, and beside it
-// what can be done to it and what was done to it (Note). A new card's
-// photo sends the form it stands in, the typing with the file (Submits,
-// Typecase's task 122).
+// what can be done to it and what was done to it (Note). The photo's
+// buttons send the form they stand in, the typing with the file (Submits,
+// Typecase's task 122) — a new card's, and a card's own since the server's
+// v0.2.208.
 func photo(b view.PhotoBlock) w.Field {
 	var side []w.FieldPart
 	var line []w.LinePart

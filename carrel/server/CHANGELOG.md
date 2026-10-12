@@ -17,6 +17,41 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.208 — 2026-10-12
+
+A photo changed on a card no longer loses what was typed into its form (Б9
+of the audit of 11.10.2026). Client `v0.4.14`.
+
+### Fixed
+
+- **Add, Replace, Crop and Remove of a card's edit form send the form.**
+  They posted on their own, the frame screen came back to the card as the
+  server holds it, and a name or a phone typed before pressing them was
+  gone without a word. Now the buttons are the form's (`Action.Submits`),
+  as on a new card: the typing waits with the photo and is back in the
+  form after Save photo, after Cancel and after Remove. The step writes the
+  photo only; Save of the form writes the typing.
+- **A file too large sent with the form** is still called «The photo is
+  too large», not «could not be read».
+
+### Changed
+
+- `PhotoBlock.Actions` of an existing card carry `submits: true`. A client
+  that gave each of them a form of its own must send the edit form to the
+  action's address instead (with the file, for Add and Replace).
+- The form a photo step comes back to names the version it was typed at.
+  A photo written over that same version moves it; a card changed elsewhere
+  in between does not, so Save of the form then meets the conflict screen.
+
+### Not done
+
+- The typing is shown once: the form a photo step returns to. A loss report
+  after Save photo shows the card as the server holds it, and the typing
+  comes back with the next opening of the form.
+- A new form's photo sent by a script and too large for the body's cap is
+  probably still not called too large (read in the code, not run): the new
+  form's steps parse the body the old way.
+
 ## v0.2.207 — 2026-10-12
 
 Typecase `f30d992` (Typecase's note 48), client `v0.4.13`. The copy of the

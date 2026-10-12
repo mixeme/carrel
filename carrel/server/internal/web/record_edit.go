@@ -3201,8 +3201,16 @@ func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string
 		return
 	}
 	s.rememberBody(c, obj)
+	etag := obj.ETag
+	if c.card != nil {
+		// The form a photo step comes back to, as it was typed when a photo
+		// button sent it (photo.go, Б9): shown once.
+		if t, ok := takeCardTyping(c, uid); ok {
+			vals, etag = typedOver(t, vals, etag)
+		}
+	}
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
-		obj: obj, uid: uid, values: vals, alarms: alarms, etag: obj.ETag, readAt: s.now(),
+		obj: obj, uid: uid, values: vals, alarms: alarms, etag: etag, readAt: s.now(),
 		linked: s.noteLinked(r.Context(), c, uid, obj), unfold: r.URL.Query().Get("fields") == "all",
 	}))
 }

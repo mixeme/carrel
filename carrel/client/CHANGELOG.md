@@ -4,6 +4,19 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.14 — 2026-10-12
+
+Server `v0.2.208`.
+
+### Changed
+
+- **The photo buttons of a card's edit form send the form** (`s-contacts-3`,
+  `s-contacts-4`): the server marks them `Submits` now, as a new card's, and
+  the screen draws them buttons of the form with their own address — what
+  was typed goes with the photo and comes back. The screen's code did not
+  change: it already drew a button by what its action says; the page prints
+  no separate forms for them any more.
+
 ## v0.4.13 — 2026-10-12
 
 Typecase `f30d992` (Typecase's note 48), server `v0.2.207`. The copy of the

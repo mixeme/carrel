@@ -357,8 +357,66 @@ type photoDraft struct {
 	// Values: what was typed into the new form when one of its photo
 	// buttons sent it (Action.Submits) — the form comes back with it. A
 	// draft of a new form with values and no Data is the typing alone: the
-	// photo was cancelled or removed
+	// photo was cancelled or removed. A card's edit form sends itself the
+	// same way (Б9 of the audit of 11.10.2026), and its typing waits here
+	// for the form to be shown again (takeCardTyping)
 	Values map[string][]string
+	// TypedAt: the version of the card the Values were typed at. A photo
+	// step that writes over that very version moves it to the version the
+	// write left; a card changed elsewhere in between does not, and the form
+	// comes back naming the old one — its Save meets the conflict screen
+	TypedAt string
+}
+
+// cardTyping is what was typed into a card's edit form when one of its photo
+// buttons sent it, and the version it was typed at.
+type cardTyping struct {
+	values formValues
+	at     string
+}
+
+func (d photoDraft) typing() cardTyping { return cardTyping{values: d.Values, at: d.TypedAt} }
+
+// loadFrame is the draft of this card when it holds a photo to frame: the
+// typing alone is no frame.
+func loadFrame(c *collectionCtx, uid string) (photoDraft, bool) {
+	d, ok := loadPhotoDraft(c, uid)
+	return d, ok && len(d.Data) > 0
+}
+
+// keepCardTyping ends the photo of a card's draft and leaves the typing
+// alone under the card's UID, for its edit form. Nothing typed — nothing
+// kept.
+func keepCardTyping(c *collectionCtx, uid string, t cardTyping) {
+	if t.values == nil {
+		clearPhotoDraft(c, uid)
+		return
+	}
+	savePhotoDraft(c, photoDraft{Account: c.conn.ID, Col: c.col.Path, UID: uid, Values: t.values, TypedAt: t.at})
+}
+
+// takeCardTyping is the typing kept for this card's edit form, taken: it is
+// shown once, with the form a photo step comes back to. A form opened later
+// is the card's.
+func takeCardTyping(c *collectionCtx, uid string) (cardTyping, bool) {
+	d, ok := loadPhotoDraft(c, uid)
+	if !ok || d.New || len(d.Data) != 0 || d.Values == nil {
+		return cardTyping{}, false
+	}
+	clearPhotoDraft(c, uid)
+	return d.typing(), true
+}
+
+// typedOver puts the typing over what the card holds: the form's values, and
+// the version the form names.
+func typedOver(t cardTyping, vals formValues, etag string) (formValues, string) {
+	if t.values == nil {
+		return vals, etag
+	}
+	if t.at != "" {
+		etag = t.at
+	}
+	return t.values, etag
 }
 
 func loadPhotoDraft(c *collectionCtx, uid string) (photoDraft, bool) {
@@ -393,7 +451,9 @@ func clearPhotoDraft(c *collectionCtx, uid string) {
 // photoBlock is the photo column of the contact edit page: Add when the card
 // keeps no photo; Replace, Crop and Remove when it keeps one; Replace and
 // Remove when the one it keeps cannot be shown; nothing to do with a photo it
-// only links to. Every step names the version of the edit form.
+// only links to. Every step names the version of the edit form and sends the
+// form itself (Action.Submits), as the new form's do: what was typed rides
+// with the step and comes back with the form (Б9).
 func (s *Server) photoBlock(c *collectionCtx, st editState) view.PhotoBlock {
 	b := view.PhotoBlock{Initials: text(initials(first(st.values["fn"])))}
 	if st.isNew {
@@ -405,7 +465,7 @@ func (s *Server) photoBlock(c *collectionCtx, st editState) view.PhotoBlock {
 	o, uid, here := c.origin(), st.uid, photoAddress(c, st.uid)
 	step := func(id, label, op string, danger bool) view.Action {
 		a := view.Action{
-			ID: id, Label: text(label), Method: "POST", Danger: danger, Enabled: true,
+			ID: id, Label: text(label), Method: "POST", Danger: danger, Enabled: true, Submits: true,
 			Href: s.postQuery(here, url.Values{"op": {op}, "etag": {st.etag}}),
 		}
 		if op == "upload" {
@@ -498,7 +558,7 @@ func (s *Server) getPhotoPreview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	uid := r.PathValue("uid")
-	d, ok := loadPhotoDraft(c, uid)
+	d, ok := loadFrame(c, uid)
 	if !ok {
 		s.redirect(w, r, c.recordPath(uid)+"/edit")
 		return
@@ -506,8 +566,9 @@ func (s *Server) getPhotoPreview(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, s.photoPreviewPage(c, uid, d))
 }
 
-// postPhotoPreview takes one step, named by op in the address. Nothing here
-// reads the body before op says it is an upload.
+// postPhotoPreview takes one step, named by op in the address. A step of the
+// edit form — upload, crop, remove — brings the form with it (Action.Submits);
+// a step of the frame's own page brings the frame's numbers only.
 func (s *Server) postPhotoPreview(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if r.MultipartForm != nil {
@@ -523,13 +584,34 @@ func (s *Server) postPhotoPreview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	uid := r.PathValue("uid")
+	// The form as it was typed, at the version its step names.
+	// A form that does not fit the body's cap is its photo, too large: the
+	// form's own fields are a few lines.
+	tooLarge := false
+	typing := func() cardTyping {
+		if r.MultipartForm == nil && strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
+			var over *http.MaxBytesError
+			tooLarge = errors.As(r.ParseMultipartForm(conf.MaxFormBodyBytes), &over)
+		}
+		if typed, sent := s.postedNewForm(c, r); sent {
+			return cardTyping{values: typed, at: strings.TrimSpace(r.URL.Query().Get("etag"))}
+		}
+		return cardTyping{}
+	}
 	switch r.URL.Query().Get("op") {
 	case "upload":
-		s.photoUpload(w, r, c, uid)
+		t := typing()
+		if tooLarge {
+			if obj, ok := s.photoCard(w, r, c, uid); ok {
+				s.photoEditPage(w, r, c, uid, obj, t, s.photoRefusal(photo.ErrTooLarge))
+			}
+			return
+		}
+		s.photoUpload(w, r, c, uid, t)
 	case "crop":
-		s.photoCrop(w, r, c, uid)
+		s.photoCrop(w, r, c, uid, typing())
 	case "frame":
-		d, ok := loadPhotoDraft(c, uid)
+		d, ok := loadFrame(c, uid)
 		if !ok {
 			s.redirect(w, r, c.recordPath(uid)+"/edit")
 			return
@@ -543,10 +625,12 @@ func (s *Server) postPhotoPreview(w http.ResponseWriter, r *http.Request) {
 	case "legacy":
 		s.photoSave(w, r, c, uid, true)
 	case "cancel":
-		clearPhotoDraft(c, uid)
+		if d, ok := loadPhotoDraft(c, uid); ok {
+			keepCardTyping(c, uid, d.typing())
+		}
 		s.redirect(w, r, c.recordPath(uid)+"/edit")
 	case "remove":
-		s.photoRemove(w, r, c, uid)
+		s.photoRemove(w, r, c, uid, typing())
 	default:
 		s.notFound(w, r)
 	}
@@ -572,28 +656,31 @@ func (s *Server) photoCard(w http.ResponseWriter, r *http.Request, c *collection
 }
 
 // photoEditPage is the edit page of the card as the server holds it, with
-// what the photo step has to say.
-func (s *Server) photoEditPage(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, obj *model.Object, notices ...view.Notice) {
+// what the photo step has to say — and as it was typed, when the step brought
+// the form.
+func (s *Server) photoEditPage(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, obj *model.Object, t cardTyping, notices ...view.Notice) {
 	vals, alarms, err := s.currentValues(c, obj)
 	if err != nil {
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, append(notices, readNotice(obj.Path, err))...))
 		return
 	}
 	s.rememberBody(c, obj)
+	vals, etag := typedOver(t, vals, obj.ETag)
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
-		obj: obj, uid: uid, values: vals, alarms: alarms, etag: obj.ETag, readAt: time.Now(), notices: notices,
+		obj: obj, uid: uid, values: vals, alarms: alarms, etag: etag, readAt: time.Now(), notices: notices,
 	}))
 }
 
 // photoEditAfter reads the card again for its edit page: a refused write
 // leaves the object in hand patched.
-func (s *Server) photoEditAfter(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, notice view.Notice) {
+func (s *Server) photoEditAfter(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, t cardTyping, notice view.Notice) {
 	obj, err := c.find(r.Context(), uid)
 	if err != nil {
+		keepCardTyping(c, uid, t)
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, notice, s.unavailableNotice(c, c.recordPath(uid)+"/edit", err)))
 		return
 	}
-	s.photoEditPage(w, r, c, uid, obj, notice)
+	s.photoEditPage(w, r, c, uid, obj, t, notice)
 }
 
 var noVersionNotice = view.Notice{
@@ -656,38 +743,38 @@ func (s *Server) photoRefusal(err error) view.Notice {
 
 // photoUpload takes a file for the frame screen. The card is read first: a
 // link cannot be replaced, and the version the page named must be there to
-// hold the draft to.
-func (s *Server) photoUpload(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
+// hold the draft to. A refused file leaves the form as it was typed.
+func (s *Server) photoUpload(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, t cardTyping) {
 	obj, ok := s.photoCard(w, r, c, uid)
 	if !ok {
 		return
 	}
 	etag := strings.TrimSpace(r.URL.Query().Get("etag"))
 	if etag == "" {
-		s.photoEditPage(w, r, c, uid, obj, noVersionNotice)
+		s.photoEditPage(w, r, c, uid, obj, t, noVersionNotice)
 		return
 	}
 	file, err := uploadedPhoto(r)
 	if err != nil {
-		s.photoEditPage(w, r, c, uid, obj, s.photoRefusal(err))
+		s.photoEditPage(w, r, c, uid, obj, t, s.photoRefusal(err))
 		return
 	}
 	src, err := photo.Load(file, s.cfg.PhotoMaxUploadBytes, s.cfg.PhotoMaxPixels)
 	file.Close()
 	if err != nil {
-		s.photoEditPage(w, r, c, uid, obj, s.photoRefusal(err))
+		s.photoEditPage(w, r, c, uid, obj, t, s.photoRefusal(err))
 		return
 	}
 	savePhotoDraft(c, photoDraft{
 		Account: c.conn.ID, Col: c.col.Path, UID: uid, ETag: etag,
 		Data: src.Data, MediaType: src.MediaType, Crop: photo.DefaultCrop,
-		HadPhoto: photoOf(obj) == keptPhoto, Step: 1,
+		HadPhoto: photoOf(obj) == keptPhoto, Step: 1, Values: t.values, TypedAt: t.at,
 	})
 	s.redirect(w, r, photoAddress(c, uid))
 }
 
 // photoCrop frames again the photo the card keeps.
-func (s *Server) photoCrop(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
+func (s *Server) photoCrop(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, t cardTyping) {
 	obj, ok := s.photoCard(w, r, c, uid)
 	if !ok {
 		return
@@ -695,15 +782,16 @@ func (s *Server) photoCrop(w http.ResponseWriter, r *http.Request, c *collection
 	etag := strings.TrimSpace(r.URL.Query().Get("etag"))
 	switch {
 	case photoOf(obj) != keptPhoto:
+		keepCardTyping(c, uid, t)
 		s.redirect(w, r, c.recordPath(uid)+"/edit")
 		return
 	case etag == "":
-		s.photoEditPage(w, r, c, uid, obj, noVersionNotice)
+		s.photoEditPage(w, r, c, uid, obj, t, noVersionNotice)
 		return
 	}
 	src, err := s.cardPhotoSource(obj)
 	if err != nil {
-		s.photoEditPage(w, r, c, uid, obj, view.Notice{
+		s.photoEditPage(w, r, c, uid, obj, t, view.Notice{
 			Role: view.NoticeAlert, Title: "This photo cannot be framed",
 			Body: "The photo in this card is not a JPEG, PNG, GIF or WebP image Carrel can read. Replace it or remove it.",
 		})
@@ -712,6 +800,7 @@ func (s *Server) photoCrop(w http.ResponseWriter, r *http.Request, c *collection
 	savePhotoDraft(c, photoDraft{
 		Account: c.conn.ID, Col: c.col.Path, UID: uid, ETag: etag,
 		Data: src.Data, MediaType: src.MediaType, Crop: photo.DefaultCrop, HadPhoto: true, Step: 1,
+		Values: t.values, TypedAt: t.at,
 	})
 	s.redirect(w, r, photoAddress(c, uid))
 }
@@ -742,7 +831,7 @@ func submittedCrop(r *http.Request, crop photo.Crop) photo.Crop {
 // base64 with ENCODING, whatever the card's version: the answer to a loss
 // report after a server cut the data: URI (S-13).
 func (s *Server) photoSave(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, older bool) {
-	d, ok := loadPhotoDraft(c, uid)
+	d, ok := loadFrame(c, uid)
 	if !ok {
 		s.redirect(w, r, c.recordPath(uid)+"/edit")
 		return
@@ -755,10 +844,13 @@ func (s *Server) photoSave(w http.ResponseWriter, r *http.Request, c *collection
 	jpeg, err := s.renderDraft(d)
 	if err != nil {
 		clearPhotoDraft(c, uid)
-		s.photoEditPage(w, r, c, uid, obj, s.photoRefusal(err))
+		s.photoEditPage(w, r, c, uid, obj, d.typing(), s.photoRefusal(err))
 		return
 	}
 	current, had := obj.ETag, photoOf(obj) == keptPhoto
+	// The write goes over the version the photo was chosen for. When that
+	// is the version the form was typed at, the typing moves with it.
+	own := d.Values != nil && d.TypedAt == d.ETag
 	ops := card.PhotoOps(obj, jpeg)
 	if older {
 		ops = card.PhotoOpsBase64(obj, jpeg)
@@ -792,8 +884,14 @@ func (s *Server) photoSave(w http.ResponseWriter, r *http.Request, c *collection
 	// frame waits in the draft, at the version this write left
 	// (docs/servers.md, SV-4).
 	s.finishWriteWith(w, r, c, uid, obj, c.recordPath(uid)+"/edit", func(loss *model.Loss, got *model.Object) ([]view.Action, []view.Notice) {
+		if own {
+			d.TypedAt = ""
+			if got != nil {
+				d.TypedAt = got.ETag
+			}
+		}
 		if older || got == nil || !lostProp(loss, "PHOTO") || !card.PhotoIsDataURI(obj) {
-			clearPhotoDraft(c, uid)
+			keepCardTyping(c, uid, d.typing())
 			return nil, nil
 		}
 		d.ETag, d.HadPhoto = got.ETag, photoOf(got) == keptPhoto
@@ -827,19 +925,24 @@ func lostProp(loss *model.Loss, prop string) bool {
 
 // photoRemove removes PHOTO from the card: the property, not an empty value
 // (S-7), with the If-Match of the version the page showed.
-func (s *Server) photoRemove(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
+func (s *Server) photoRemove(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, t cardTyping) {
 	obj, ok := s.photoCard(w, r, c, uid)
 	if !ok {
 		return
 	}
+	// Remove photo of the frame's page brings no form: the typing is the
+	// draft's.
+	if d, held := loadPhotoDraft(c, uid); held && t.values == nil {
+		t = d.typing()
+	}
 	etag := strings.TrimSpace(r.URL.Query().Get("etag"))
 	switch {
 	case photoOf(obj) == noPhoto:
-		clearPhotoDraft(c, uid)
+		keepCardTyping(c, uid, t)
 		s.redirect(w, r, c.recordPath(uid)+"/edit")
 		return
 	case etag == "":
-		s.photoEditPage(w, r, c, uid, obj, noVersionNotice)
+		s.photoEditPage(w, r, c, uid, obj, t, noVersionNotice)
 		return
 	}
 	patch, err := model.NewPatch(model.RemoveProp{Prop: "PHOTO"})
@@ -852,16 +955,25 @@ func (s *Server) photoRemove(w http.ResponseWriter, r *http.Request, c *collecti
 	}
 	switch {
 	case dav.IsStatus(err, http.StatusPreconditionFailed):
-		s.photoEditAfter(w, r, c, uid, view.Notice{
+		s.photoEditAfter(w, r, c, uid, t, view.Notice{
 			Role:  view.NoticeAlert,
 			Title: "Changed elsewhere, so the photo was not removed",
 			Body:  "This contact changed after you opened it. Check the current version below and remove the photo again if you still mean to.",
 		})
 		return
 	case err != nil:
-		s.photoEditAfter(w, r, c, uid, s.writeFailure(c, "PUT", obj.Path, err))
+		s.photoEditAfter(w, r, c, uid, t, s.writeFailure(c, "PUT", obj.Path, err))
 		return
 	}
-	clearPhotoDraft(c, uid)
-	s.finishWrite(w, r, c, uid, obj, c.recordPath(uid)+"/edit")
+	own := t.values != nil && t.at == etag
+	s.finishWriteWith(w, r, c, uid, obj, c.recordPath(uid)+"/edit", func(_ *model.Loss, got *model.Object) ([]view.Action, []view.Notice) {
+		if own {
+			t.at = ""
+			if got != nil {
+				t.at = got.ETag
+			}
+		}
+		keepCardTyping(c, uid, t)
+		return nil, nil
+	})
 }

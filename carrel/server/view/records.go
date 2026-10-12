@@ -85,7 +85,8 @@ type ContactEditPage struct {
 
 // PhotoBlock — фотография формы контакта. У новой формы (s-contacts-27) — как
 // у карточки без фото: Add и строка форматов; когда кадр выбран
-// (…/new/photo-preview, C-5.4) — он сам, Replace, Crop, Remove.
+// (…/new/photo-preview, C-5.4) — он сам, Replace, Crop, Remove. Кнопки фото и
+// новой, и существующей карточки шлют форму, в которой стоят (Action.Submits).
 type PhotoBlock struct {
 	Href     string   `json:"href"`
 	Initials Text     `json:"initials"`
