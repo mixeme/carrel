@@ -17,6 +17,47 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.211 — 2026-10-12
+
+An import asks what to do with the records the collection already holds
+(А7 of the audit of 11.10.2026; the owner's decision of 12.10.2026).
+
+### Changed
+
+- **Records of a file that are already in the collection are skipped unless
+  you say otherwise.** An import used to create a second record under a
+  fresh UID for each of them — a file exported from a calendar and imported
+  back doubled it. The preview now says how many there are («38 of 40
+  records of this file are already in Work.») and offers three answers:
+  «Skip them», which is what happens without one; «Replace them with the
+  file's version»; «Import as copies», which is what every import did
+  before. A record is «already there» by its UID.
+- **«Replace» writes over a record** — the first thing an import overwrites.
+  It goes to the record's own address with the version read just before:
+  one that changed in between is refused and named in the report. The
+  report counts replaced records apart (`ImportReport.replaced`) and no
+  longer says «Nothing there was overwritten» when there were any.
+- The button counts what the press writes («Import 2 contacts» of a file of
+  40 when 38 are skipped) and is off, with why, when that is nothing.
+
+### For developers
+
+- `ImportPage.existing` (`ImportExisting`: `note`, `options` — GET links to
+  the same preview with `existing=skip|replace|copies`);
+  `ImportReport.replaced`. The answer lives in the draft of the session.
+- Tests that pinned «an import always creates» answer «Import as copies»
+  first (`asCopies`).
+- The words of the question, of its answers and of the rows are the
+  developer's, not the owner's. No frame draws the question: Typecase's
+  task 159.
+
+### Not done
+
+- A restore from a backup copy is not an import of this wizard and asks
+  nothing.
+- Records with another UID and the same content are still created: the
+  duplicates screen finds them afterwards.
+
 ## v0.2.210 — 2026-10-12
 
 A merge of duplicates asks whose time to keep (А6 of the audit of

@@ -52,6 +52,69 @@ type importDraft struct {
 	Size   int64
 	Format string
 	Files  int
+	// Existing is what the person chose to do with the records of the file
+	// the destination already holds (existingSkip, …Replace, …Copies)
+	Existing string
+}
+
+// What an import does with a record whose identity the destination already
+// holds (А7 of the audit of 11.10.2026; the owner's decision of 12.10.2026):
+// skips it, which is what happens without an answer; writes the file's
+// version over the one there; or creates a copy under a fresh identity, as
+// every import did before.
+const (
+	existingSkip    = ""
+	existingReplace = "replace"
+	existingCopies  = "copies"
+)
+
+// existingChoice reads the answer of an address: a word that is none of the
+// three is no answer.
+func existingChoice(v string) (string, bool) {
+	switch v {
+	case "skip":
+		return existingSkip, true
+	case existingReplace, existingCopies:
+		return v, true
+	}
+	return "", false
+}
+
+// collides counts the records of the draft whose identity taken holds.
+func collides(d *importDraft, taken map[string]bool) int {
+	n := 0
+	for _, rec := range d.Records {
+		if taken[rec.UID] {
+			n++
+		}
+	}
+	return n
+}
+
+// importExisting is the question of the preview about the records already
+// there: how many, and the three answers as links to the same preview.
+func (s *Server) importExisting(c *collectionCtx, st importState) *view.ImportExisting {
+	n := collides(st.draft, st.taken)
+	if n == 0 || st.dest == nil {
+		return nil
+	}
+	verb := "are"
+	if n == 1 {
+		verb = "is"
+	}
+	out := &view.ImportExisting{Note: text(fmt.Sprintf("%d of %s of this file %s already in %s.",
+		n, plural(len(st.draft.Records), "record"), verb, collectionLabel(st.dest.col)))}
+	for _, o := range []struct{ id, word, label string }{
+		{"skip", existingSkip, "Skip them"},
+		{"replace", existingReplace, "Replace them with the file's version"},
+		{"copies", existingCopies, "Import as copies"},
+	} {
+		q := importQuery("", st.dest.conn.ID, st.dest.col.Path)
+		q.Set("existing", o.id)
+		out.Options = append(out.Options, view.Action{ID: "import.existing." + o.id, Label: text(o.label), Method: "GET", Enabled: true,
+			Href: s.postQuery(c.listPath()+"/import", q), On: st.draft.Existing == o.word})
+	}
+	return out
 }
 
 // importRecord is one record of the file as its own document, with what its
@@ -366,17 +429,37 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 		page.Step = view.ImportStepPreview
 		page.Subtitle = importSubtitle(st.draft)
 		page.Counts = importCounts(st.draft, st.taken)
+		page.Existing = s.importExisting(c, st)
 		page.Source.Note = importNotes[c.spec.kind]
+		// «Import always creates» is the frames' line (s-io-5, s-io-6) and
+		// true of a file that brings nothing the collection holds, and of
+		// copies. With records already there skipped or replaced, the line
+		// says that instead.
+		if page.Existing != nil && (c.spec.kind == view.KindContact || c.spec.kind == view.KindEvent) {
+			switch st.draft.Existing {
+			case existingSkip:
+				page.Source.Note = line("Records already there are skipped: only what the collection does not hold is created.")
+			case existingReplace:
+				page.Source.Note = line("Records already there are replaced with the file's version, and the others are created.")
+			}
+		}
 		if st.draft.Note != "" {
 			page.Source.Note = join(page.Source.Note, " "+st.draft.Note)
 		}
-		// «Import 122 contacts» (s-io-5…8): what the press creates.
-		run := view.Action{ID: "import.run", Label: text("Import " + plural(len(st.draft.Records), c.spec.noun)), Method: "POST", Primary: true, Enabled: true}
+		// «Import 122 contacts» (s-io-5…8): what the press writes — the
+		// records already there are not among them while they are skipped.
+		writes := len(st.draft.Records)
+		if st.draft.Existing == existingSkip {
+			writes -= collides(st.draft, st.taken)
+		}
+		run := view.Action{ID: "import.run", Label: text("Import " + plural(writes, c.spec.noun)), Method: "POST", Primary: true, Enabled: true}
 		switch {
 		case st.dest == nil:
 			run.Enabled, run.Reason = false, "Choose a collection that can be written."
 		case len(st.draft.Records) == 0:
 			run.Enabled, run.Reason = false, "This file holds no record of this kind."
+		case writes == 0:
+			run.Enabled, run.Reason = false, "Every record of this file is already there. Choose above what to do with them."
 		default:
 			run.Href = s.importHref(c, "run", st.dest.conn.ID, st.dest.col.Path)
 		}
@@ -553,6 +636,9 @@ func (s *Server) getKindImport(w http.ResponseWriter, r *http.Request, kind stri
 			st.dest = s.importTarget(c, d.To, d.Into)
 		}
 		st.draft.To, st.draft.Into = targetOf(st.dest)
+		if choice, ok := existingChoice(q.Get("existing")); ok {
+			st.draft.Existing = choice
+		}
 		saveImportDraft(c, st.draft)
 		st.preview, st.taken, st.notices = s.importPreview(r.Context(), c, st.draft, st.dest)
 	}
@@ -960,6 +1046,10 @@ func previewTable(k view.Kind, d *importDraft, taken map[string]bool) view.Impor
 	for _, rec := range d.Records {
 		result := "Ready"
 		switch {
+		case taken[rec.UID] && d.Existing == existingSkip:
+			result = "Already here — skipped"
+		case taken[rec.UID] && d.Existing == existingReplace:
+			result = "Replaces the one here"
 		case taken[rec.UID]:
 			result = "New UID will be assigned"
 		case rec.Ready != "":
@@ -1068,9 +1158,11 @@ func destRecords(ctx context.Context, dest *collectionCtx) (map[string]*model.Ob
 	return out, nil
 }
 
-// runImport writes the draft. Every record is created: an identity the
-// collection already holds is replaced by a fresh one before the write, and
-// the row says so (S-19). Nothing is overwritten, and nothing is deleted.
+// runImport writes the draft. A record whose identity the collection
+// already holds is skipped, written over the one there, or created under a
+// fresh identity, as the person chose on the preview (importDraft.Existing;
+// S-19) — and the row says which. Every other record is created. Nothing is
+// overwritten that the person did not ask to replace, and nothing is deleted.
 func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collectionCtx, dest *collectionCtx) {
 	d, has := loadImportDraft(c)
 	if !has {
@@ -1096,8 +1188,42 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		return
 	}
 
+	// The records already there, by what was chosen for them: skipped ones
+	// leave the list before any identity is settled; replaced ones keep
+	// theirs, and are written at the address and over the version there.
+	var here map[string]*model.Object
+	records := d.Records
+	skipped := d.Skipped
+	switch d.Existing {
+	case existingSkip:
+		records = nil
+		for _, rec := range d.Records {
+			if taken[rec.UID] {
+				skipped = append(skipped, importSkip{What: rec.Title, Reason: "Already in " + collectionLabel(dest.col) + "."})
+				continue
+			}
+			records = append(records, rec)
+		}
+	case existingReplace:
+		if here, err = destRecords(ctx, dest); err != nil {
+			st := importState{draft: d, dest: dest}
+			st.preview = []view.ImportTable{}
+			st.notices = []view.Notice{s.unavailableNotice(dest, s.importHref(c, "", dest.conn.ID, dest.col.Path), err)}
+			s.writePage(w, r, http.StatusOK, s.importPage(c, st))
+			return
+		}
+		// An identity about to be replaced is not taken: its record keeps it.
+		free := make(map[string]bool, len(taken))
+		for uid := range taken {
+			if here[uid] == nil {
+				free[uid] = true
+			}
+		}
+		taken = free
+	}
+
 	report := &view.ImportReport{}
-	for _, sk := range d.Skipped {
+	for _, sk := range skipped {
 		if sk.Failed {
 			report.Failed++
 			report.Failures = append(report.Failures, text(sk.What+": "+sk.Reason))
@@ -1110,10 +1236,10 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 	// Every identity is settled before the first write, so that a record
 	// linking to another of the file names the identity that one will have
 	// (S-19): links inside the file travel with it.
-	uids, errs, moved := planImportUIDs(d.Records, taken)
+	uids, errs, moved := planImportUIDs(records, taken)
 	props := linkProps(dest)
 	var made []importMade
-	for i, rec := range d.Records {
+	for i, rec := range records {
 		obj, err := dest.parse("", "", rec.Doc)
 		if err == nil {
 			err = errs[i]
@@ -1131,7 +1257,19 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 				}
 			}
 		}
-		if err == nil {
+		// The file's version over the one there, with the version read a
+		// moment ago: a record changed since is refused, not overwritten.
+		over := here[uid]
+		if over != nil && renamed {
+			over = nil
+		}
+		if err == nil && over != nil {
+			obj.Path, obj.ETag = over.Path, over.ETag
+			if err = dest.update(ctx, obj); err == nil {
+				note = "Replaced the one here with the file's version"
+				here[uid] = nil // a second record of the file under this identity is a copy
+			}
+		} else if err == nil {
 			err = s.createImported(ctx, dest, obj, uid)
 		}
 		was := ""
@@ -1156,7 +1294,11 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 			report.Failures = append(report.Failures, text(rec.Title+": "+err.Error()))
 			continue
 		}
-		report.Created++
+		if over != nil {
+			report.Replaced++
+		} else {
+			report.Created++
+		}
 		if renamed {
 			report.Renamed++
 		}
@@ -1170,13 +1312,16 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 			report.Renames = append(report.Renames, text(m.from+" → "+m.held))
 		}
 	}
-	written.Count = report.Created
+	written.Count = report.Created + report.Replaced
+	if report.Replaced > 0 {
+		written.Rubric = text("Written to " + collectionLabel(dest.col))
+	}
 	report.Rows = append(report.Rows, written)
 	if len(refused.Rows) > 0 {
 		refused.Count = len(refused.Rows)
 		report.Rows = append(report.Rows, refused)
 	}
-	if t, ok := skippedTable(d.Skipped); ok {
+	if t, ok := skippedTable(skipped); ok {
 		report.Rows = append(report.Rows, t)
 	}
 	report.Note = text(importNote(report, len(refused.Rows), lossy, d.Source))
@@ -1187,6 +1332,9 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 
 func importNote(report *view.ImportReport, refused, lossy int, source string) string {
 	parts := []string{fmt.Sprintf("%s created from %s", plural(report.Created, "record"), source)}
+	if report.Replaced > 0 {
+		parts = append(parts, fmt.Sprintf("%s there replaced with the file's version", plural(report.Replaced, "record")))
+	}
 	if report.Renamed > 0 {
 		parts = append(parts, fmt.Sprintf("%s under a new identity", plural(report.Renamed, "record")))
 	}
@@ -1198,6 +1346,9 @@ func importNote(report *view.ImportReport, refused, lossy int, source string) st
 	}
 	if lossy > 0 {
 		parts = append(parts, fmt.Sprintf("%s not kept whole by the server", plural(lossy, "record")))
+	}
+	if report.Replaced > 0 {
+		return strings.Join(parts, " · ") + ". Nothing else there was overwritten."
 	}
 	return strings.Join(parts, " · ") + ". Nothing there was overwritten."
 }

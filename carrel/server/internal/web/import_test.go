@@ -113,6 +113,7 @@ func TestImportPreviewCountsAgainstTheChosenCollection(t *testing.T) {
 	}
 
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "cards.vcf", []byte(importedCards))))
+	page = asCopies(t, f, page)
 	if page.Step != view.ImportStepPreview {
 		t.Fatalf("step = %q", page.Step)
 	}
@@ -146,6 +147,7 @@ func TestImportAlwaysCreates(t *testing.T) {
 	f := importFixture(t)
 	page := decode[view.ImportPage](t, f.h.do(get(f.path("contacts")+"/import", f.sess)))
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "cards.vcf", []byte(importedCards))))
+	page = asCopies(t, f, page)
 	page = decode[view.ImportPage](t, f.h.do(postForm(actionHref(t, page.Actions, "import.run"), f.sess, url.Values{})))
 
 	if page.Step != view.ImportStepReport || page.Report == nil {
@@ -183,6 +185,7 @@ func TestImportNamesTheIdentityTheServerGave(t *testing.T) {
 		t.Helper()
 		page := decode[view.ImportPage](t, f.h.do(get(f.path("contacts")+"/import", f.sess)))
 		page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "cards.vcf", []byte(importedCards))))
+		page = asCopies(t, f, page)
 		return decode[view.ImportPage](t, f.h.do(postForm(actionHref(t, page.Actions, "import.run"), f.sess, url.Values{})))
 	}
 	t.Run("rewritten", func(t *testing.T) {
@@ -228,6 +231,7 @@ func TestImportRunsOnce(t *testing.T) {
 	page := decode[view.ImportPage](t, f.h.do(get(f.path("contacts")+"/import", f.sess)))
 	run := actionHref(t, page.Actions, "import.choose")
 	page = decode[view.ImportPage](t, f.h.do(importRequest(run, f.sess, true, "cards.vcf", []byte(importedCards))))
+	page = asCopies(t, f, page)
 	run = actionHref(t, page.Actions, "import.run")
 	if page = decode[view.ImportPage](t, f.h.do(postForm(run, f.sess, url.Values{}))); page.Report.Created != 2 {
 		t.Fatalf("report = %+v", page.Report)

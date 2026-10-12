@@ -1906,11 +1906,13 @@ type ImportPage struct {
     Source   ImportSource
     Into     TargetPicker
     Counts   []ImportCount // над таблицей предпросмотра (s-io-5…8): ready всегда; with errors (Error), UID collisions, skipped — когда не ноль
+    Existing *ImportExisting // вопрос о записях файла, которые коллекция уже держит под тем же UID (S-19); nil — таких нет или коллекция не выбрана
     // Предпросмотр — одна таблица (s-io-5…8): столбцы рода и Result
     // последним — контакты: Source, Name, UID; события: Source, Summary,
     // When; задачи: Source, Summary, Due; заметки: File, Title, Date. Сначала
-    // записи («Ready», «Ready — the series as one record», «New UID will be
-    // assigned»), за ними то, что файл несёт и импорт не пишет: «Skipped: a
+    // записи («Ready», «Ready — the series as one record»; у записи, которая
+    // уже есть, по выбору Existing — «Already here — skipped», «Replaces the
+    // one here», «New UID will be assigned»), за ними то, что файл несёт и импорт не пишет: «Skipped: a
     // calendar takes events — import it into a list of tasks», ошибка
     // разбора — её словами. Rubric пуст, Count — строки
     Preview  []ImportTable
@@ -1925,12 +1927,20 @@ type ImportSource struct {
     FolderHint Runs          // строка под деревом: «Every ‹.md› directly in that folder …» (s-io-4)
     Note       Runs          // сообщение шага: на первом — «Nothing is written until the preview has been read …» (s-io-3), у заметок — front matter и ‹X-›свойства (s-io-4); на предпросмотре — что импорт делает с записями рода (s-io-5…8)
 }
+// Что сделать с записями файла, которые уже есть в коллекции. Note — «38 of
+// 40 records of this file are already in Work.»; Options — три ссылки на
+// этот же предпросмотр (GET, existing=skip|replace|copies):
+// import.existing.skip «Skip them» — без ответа выбрана она, .replace
+// «Replace them with the file's version», .copies «Import as copies»;
+// выбранная — On. Подпись кнопки импорта считает, что запишет нажатие
+type ImportExisting struct { Note Text; Options []Action }
 type ImportCount struct { Count int; Label Text; Error bool } // «‹122› ready», «‹3› with errors» (s-io-5)
 type ImportTable struct { Rubric Text; Columns []Text; Rows [][]Text; Count int }
 // Отчёт числами (s-io-9): Created; UID collisions — Renames, «1a77-… → 9c02-…»;
 // Failed — не записано (запись не прочлась или сервер отказал), Failures —
-// почему, строка на запись. Rows — те же записи таблицами.
-type ImportReport struct { Created, Skipped, Renamed, Failed int; Failures, Renames []Text; Rows []ImportTable; Note Text }
+// почему, строка на запись. Rows — те же записи таблицами. Replaced — записи
+// коллекции, заменённые версией файла; в Created не входят.
+type ImportReport struct { Created, Skipped, Renamed, Replaced, Failed int; Failures, Renames []Text; Rows []ImportTable; Note Text }
 
 type PublishSheet struct {
     Kind    Kind

@@ -14,6 +14,7 @@ func runImportOf(t *testing.T, f davFixture, segment, name, body string) view.Im
 	t.Helper()
 	page := decode[view.ImportPage](t, f.h.do(get(f.path(segment)+"/import", f.sess)))
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, name, []byte(body))))
+	page = asCopies(t, f, page)
 	page = decode[view.ImportPage](t, f.h.do(postForm(actionHref(t, page.Actions, "import.run"), f.sess, url.Values{})))
 	if page.Report == nil {
 		t.Fatalf("no report: %+v", page)

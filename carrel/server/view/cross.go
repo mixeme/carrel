@@ -323,10 +323,25 @@ type ImportPage struct {
 	Into     TargetPicker `json:"into"`
 	// Counts — счёт над таблицей предпросмотра (s-io-5…8): ready всегда,
 	// with errors (Error), UID collisions, skipped — когда не ноль
-	Counts  []ImportCount `json:"counts"`
-	Preview []ImportTable `json:"preview"`
-	Report  *ImportReport `json:"report"`
-	Actions []Action      `json:"actions"`
+	Counts []ImportCount `json:"counts"`
+	// Existing — вопрос предпросмотра о записях файла, которые коллекция уже
+	// держит под тем же UID (решение владельца 12.10.2026): сколько их и что
+	// с ними сделать; nil — таких нет или коллекция не выбрана
+	Existing *ImportExisting `json:"existing"`
+	Preview  []ImportTable   `json:"preview"`
+	Report   *ImportReport   `json:"report"`
+	Actions  []Action        `json:"actions"`
+}
+
+// ImportExisting — что сделать с записями файла, которые уже есть в
+// коллекции. Note — «‹38› of ‹40› records of this file are already in
+// Work.»; Options — три ссылки на этот же предпросмотр (GET, existing=):
+// «Skip them» — без ответа выбрана она, «Replace them with the file's
+// version», «Import as copies»; выбранная — On. Строки предпросмотра и
+// кнопка импорта говорят, что сделает нажатие
+type ImportExisting struct {
+	Note    Text     `json:"note"`
+	Options []Action `json:"options"`
 }
 type ImportSource struct {
 	Kinds []Text `json:"kinds"`
@@ -366,6 +381,9 @@ type ImportReport struct {
 	Created int `json:"created"`
 	Skipped int `json:"skipped"`
 	Renamed int `json:"renamed"`
+	// Replaced — записи коллекции, заменённые версией файла (выбор
+	// ImportExisting «Replace them…»); в Created не входят
+	Replaced int `json:"replaced"`
 	// Failed — не записано: запись файла не прочлась или сервер отказал
 	// (s-io-9, «Failed»); Failures — почему, строка на запись
 	Failed   int    `json:"failed"`

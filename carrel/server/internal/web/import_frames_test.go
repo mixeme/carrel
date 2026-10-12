@@ -66,6 +66,7 @@ func TestImportWizardByFrames(t *testing.T) {
 	}
 
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "Разное (mix).vcf", []byte(importedCards))))
+	page = asCopies(t, f, page)
 	if got := saidRuns(page.Subtitle); got != "⟨mono:Разное (mix).vcf⟩ · "+strconv.Itoa(len(importedCards))+" B · vCard 3.0" {
 		t.Errorf("preview subtitle = %q", got)
 	}

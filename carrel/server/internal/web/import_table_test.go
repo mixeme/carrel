@@ -41,6 +41,7 @@ func TestImportPreviewIsOneTableWithAResult(t *testing.T) {
 	f := importFixture(t)
 	page := decode[view.ImportPage](t, f.h.do(get(f.path("contacts")+"/import", f.sess)))
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "cards.vcf", []byte(importedCards))))
+	page = asCopies(t, f, page)
 	if len(page.Preview) != 1 || columnsSaid(page.Preview[0].Columns) != "Source · Name · UID · Result" {
 		t.Fatalf("contacts: %d tables, columns %v", len(page.Preview), page.Preview)
 	}

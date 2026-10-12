@@ -13,6 +13,7 @@
   ],
   "counts": [],
   "details": null,
+  "existing": null,
   "into": {
     "chosen": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
     "new": {
