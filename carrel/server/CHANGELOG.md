@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.201 — 2026-10-12
+
+The matrix «every field × a hard record» for tasks, notes and events of
+other clients, and the one loss it found (Б11 of the audit of 11.10.2026).
+
+### Fixed
+
+- **A tag with a comma of its own stays one tag.** `CATEGORIES:Smith\, John`
+  is shown in the tag field as «Smith, John», and any edit of the tags
+  wrote it back as two tags, «Smith» and «John». Now the items that stand
+  side by side as a tag of the record does are that tag. So for events,
+  tasks and notes; a tag with a comma still cannot be typed anew in the
+  field, and the tags of a contact are as they were.
+
+### For developers
+
+- `keptTags` in `internal/web/record_edit.go`.
+- `field_matrix_test.go`, `field_matrix_note_test.go`: one field changed in
+  a task, an event and a note another client wrote, and the lines that
+  change. Nothing else was found: the place, the times, the status, the
+  priority, the percent, a relation taken away (the ones kept keep
+  `RELTYPE`), the title and the text of a note with two `DESCRIPTION`
+  lines change their own lines only.
+- Not in the matrix: the contact beyond the seed of `v0.2.188` (the test
+  server respells every line of a card it hands out, so «only this line
+  changed» cannot be told there), attendees, the fields of a new record.
+
 ## v0.2.200 — 2026-10-12
 
 A backup and a letter no longer leave out, without a word, a record Carrel

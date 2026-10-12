@@ -1435,8 +1435,12 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			}
 			ch.ops = append(ch.ops, multiOps(f.prop, cur, rows, labels)...)
 		case fieldList:
-			items := listItems(first(w))
-			if sameRows(items, listItems(first(h))) {
+			var held []string
+			if escape {
+				held = categoriesOf(c.spec.kind, obj)
+			}
+			items := keptTags(listItems(first(w)), held)
+			if sameRows(items, keptTags(listItems(first(h)), held)) {
 				continue
 			}
 			if !escape {
@@ -1900,6 +1904,27 @@ func listItems(v string) []string {
 		}
 	}
 	return out
+}
+
+// keptTags are the items of a tag field with the tags the record holds put
+// back together: the field shows the tags joined by commas, so a tag with a
+// comma of its own — «Smith, John», CATEGORIES:Smith\, John — comes back from
+// it as two items. Where the items stand side by side as such a tag does,
+// they are that tag (Б11 of the audit of 11.10.2026: any edit of the tags cut
+// it in two). A tag with a comma cannot be typed anew in this field.
+func keptTags(items, held []string) []string {
+	for _, tag := range held {
+		parts := listItems(tag)
+		if len(parts) < 2 {
+			continue
+		}
+		for i := 0; i+len(parts) <= len(items); i++ {
+			if slices.Equal(items[i:i+len(parts)], parts) {
+				items = append(append(append([]string(nil), items[:i]...), strings.TrimSpace(tag)), items[i+len(parts):]...)
+			}
+		}
+	}
+	return items
 }
 
 // birthdayShown is BDAY as the form shows it: YYYY-MM-DD, or --MM-DD for a
