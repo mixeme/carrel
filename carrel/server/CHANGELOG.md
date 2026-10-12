@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.216 — 2026-10-12
+
+### Changed
+
+- **A task marked done is 100 per cent done** (Б17 of the audit of
+  11.10.2026; the owner's decision of 12.10.2026). The mark used to leave
+  the percent as it was. With the mark taken off nothing is brought back,
+  because what the task was before was kept nowhere: Needs action, no
+  percent, no date of completion. A percent given in the same form stands.
+- **A contact's display name follows its given and family names** while the
+  person has not made it their own (Б30; the owner's decision of
+  12.10.2026). «Anna Kovaleva» of Anna and Kovaleva, with the family name
+  changed to Belova, becomes «Anna Belova» — in the order it stood in;
+  every list shows the display name, and it used to stay as it was. A
+  display name written by hand («Anya (the printer's)») is left alone.
+
+### Not done
+
+- Of Б30: «Acme Trading Ltd» typed as a display name is still cut into a
+  given and a family name, and a birthday without a year on a vCard 3.0
+  card is still written in a form 3.0 does not have.
+
 ## v0.2.215 — 2026-10-12
 
 A relation made in Carrel is «see also», not subordination (Б29 of the

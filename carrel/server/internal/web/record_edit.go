@@ -1729,6 +1729,16 @@ func doneAndStatus(have, want formValues) string {
 	case status != held:
 		done = status == "COMPLETED"
 	}
+	// Done is a hundred per cent (the owner's decision of 12.10.2026, Б17 of
+	// the audit of 11.10.2026). A task that stops being done gets nothing
+	// back — what it was before the mark was kept nowhere —: its percent
+	// goes, unless the same form gives it another.
+	switch {
+	case done && !was:
+		want["percent"] = []string{"100"}
+	case !done && was && strings.TrimSpace(first(want["percent"])) == strings.TrimSpace(first(have["percent"])):
+		want["percent"] = []string{""}
+	}
 	want["status"], want["done"], have["status"] = []string{status}, tick(done), []string{held}
 	return ""
 }
@@ -1830,6 +1840,24 @@ func fillNames(kind view.Kind, have, want formValues) {
 				given, family = fn[:i], strings.TrimSpace(fn[i+1:])
 			}
 			want["n"] = []string{given, family}
+		case fn != "" && fn == strings.TrimSpace(first(have["fn"])):
+			// The parts changed and the display name was not touched: it
+			// follows them while it is what they made (the owner's decision
+			// of 12.10.2026, Б30 of the audit of 11.10.2026) — «Anna
+			// Kovaleva» of Anna and Kovaleva becomes «Anna Belova», in the
+			// order it stood in. A display name written by hand is nobody's
+			// to rewrite.
+			was := pair(have["n"])
+			wasGiven, wasFamily := strings.TrimSpace(was[0]), strings.TrimSpace(was[1])
+			if given == wasGiven && family == wasFamily {
+				break
+			}
+			switch fn {
+			case strings.TrimSpace(wasGiven + " " + wasFamily):
+				want["fn"] = []string{strings.TrimSpace(given + " " + family)}
+			case strings.TrimSpace(wasFamily + " " + wasGiven):
+				want["fn"] = []string{strings.TrimSpace(family + " " + given)}
+			}
 		}
 	}
 }

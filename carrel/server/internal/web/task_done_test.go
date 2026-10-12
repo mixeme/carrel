@@ -56,7 +56,12 @@ func TestMarkDoneFromTheCardAndTheRow(t *testing.T) {
 	if strings.Contains(got, "STATUS:COMPLETED") || strings.Contains(got, "\nCOMPLETED:") {
 		t.Errorf("still done:\n%s", got)
 	}
-	mustContain(t, got, "SUMMARY:Slides", "PERCENT-COMPLETE:40", "X-KEEP:yes")
+	// Done was a hundred per cent, and the mark taken off brings nothing
+	// back (the owner's decision of 12.10.2026, Б17): the percent goes.
+	mustContain(t, got, "SUMMARY:Slides", "X-KEEP:yes")
+	if strings.Contains(got, "PERCENT-COMPLETE") {
+		t.Errorf("the mark taken off left a percent:\n%s", got)
+	}
 
 	// The version moved meanwhile: the conflict screen, nothing written.
 	page = decode[view.TaskPage](t, f.h.do(get(rec, f.sess)))
