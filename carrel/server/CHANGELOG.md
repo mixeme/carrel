@@ -17,6 +17,30 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.202 — 2026-10-12
+
+A wrong number on the duplicates screen is said (Б45 of the audit of
+11.10.2026).
+
+### Fixed
+
+- **A threshold or a weight that is not a number in range is not dropped
+  without a word.** The screen came back showing the old value as if it
+  were the one typed. Now it comes back with a notice — «The threshold was
+  not changed», «1 weight not changed» — and says the range; the weights
+  that were right are saved.
+
+### Changed — contract
+
+- `POST /app/duplicates/decide` with `do=threshold` or `do=weights` and a
+  number out of range answers with the page and a notice instead of a
+  redirect.
+
+### For developers
+
+- `duplicatesRefused` in `internal/web/duplicates.go`. The words of the
+  notices are the developer's, not the owner's.
+
 ## v0.2.201 — 2026-10-12
 
 The matrix «every field × a hard record» for tasks, notes and events of

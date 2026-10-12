@@ -281,7 +281,11 @@ func TestWeightsAreThePersons(t *testing.T) {
 			t.Errorf("email = %+v", w)
 		}
 	}
-	set("-3")
+	// Out of range, it is not saved and the screen says so
+	// (TestAWrongNumberOnTheDuplicatesScreenIsSaid).
+	if rec := f.h.do(postForm("/app/duplicates/decide", f.sess, url.Values{"do": {"weights"}, "weight.email": {"-3"}})); rec.Code != http.StatusOK {
+		t.Fatalf("a weight out of range: %d", rec.Code)
+	}
 	if f.decisions(t).Weights["email"] != 0 {
 		t.Error("a weight out of range was saved")
 	}

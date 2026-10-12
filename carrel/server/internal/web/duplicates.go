@@ -559,12 +559,18 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 		if raw == "" {
 			n, err = 0, nil
 		}
-		if err == nil && n >= 0 && n <= conf.MaxDuplicatesPoints {
-			_ = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.threshold", strconv.Itoa(n), func(d *sealed.Duplicates) error {
-				d.Threshold = n
-				return nil
-			})
+		if err != nil || n < 0 || n > conf.MaxDuplicatesPoints {
+			// A number that is not one is said, not dropped (Б45 of the
+			// audit of 11.10.2026): the screen showed the old threshold as
+			// if it were the one just typed.
+			s.duplicatesRefused(w, r, sess, "The threshold was not changed",
+				fmt.Sprintf("«%s» is not a number from 0 to %d.", raw, conf.MaxDuplicatesPoints))
+			return
 		}
+		_ = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.threshold", strconv.Itoa(n), func(d *sealed.Duplicates) error {
+			d.Threshold = n
+			return nil
+		})
 		s.redirect(w, r, "/app/duplicates")
 		return
 	}
@@ -577,6 +583,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if do == "weights" {
+		var refused []string
 		if r.ParseForm() == nil {
 			_ = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.weights", "", func(d *sealed.Duplicates) error {
 				for _, sig := range dupes.Signals {
@@ -591,6 +598,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 					}
 					n, err := strconv.Atoi(raw)
 					if err != nil || n < 0 || n > conf.MaxDuplicatesPoints {
+						refused = append(refused, "«"+raw+"»")
 						continue
 					}
 					if d.Weights == nil {
@@ -600,6 +608,11 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 				}
 				return nil
 			})
+		}
+		if len(refused) > 0 {
+			s.duplicatesRefused(w, r, sess, text(plural(len(refused), "weight")+" not changed"),
+				fmt.Sprintf("%s: a weight is a number from 0 to %d. The other weights were saved.", strings.Join(refused, ", "), conf.MaxDuplicatesPoints))
+			return
 		}
 		s.redirect(w, r, "/app/duplicates")
 		return
@@ -675,6 +688,14 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 	if notice != nil {
 		page.Notices = append(page.Notices, *notice)
 	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+// duplicatesRefused answers a setting of the duplicates screen that was not
+// taken: the screen as it stands, and why.
+func (s *Server) duplicatesRefused(w http.ResponseWriter, r *http.Request, sess *session.Session, title view.Text, body string) {
+	page := s.duplicatesPage(sess, s.readDuplicates(sess, false), kindFilter(r))
+	page.Notices = append(page.Notices, view.Notice{Role: view.NoticeAlert, Title: title, Body: text(body)})
 	s.writePage(w, r, http.StatusOK, page)
 }
 
