@@ -247,7 +247,7 @@ func TestNewFolderSheetIsTheFrame(t *testing.T) {
 func TestNewCollectionWhenNoServerAnswers(t *testing.T) {
 	frame := mockupFrame(t, "s-profile-21")
 	msg := frameOne(t, frameSheetMsg, frame, "message")[1]
-	off := regexp.MustCompile(`<button class="tc-btn is-primary" type="button" title="([^"]*)" disabled>Create</button>`).FindStringSubmatch(frame)
+	off := regexp.MustCompile(`<button class="tc-btn is-primary" type="submit" title="([^"]*)" disabled>Create</button>`).FindStringSubmatch(frame)
 	if off == nil || html.UnescapeString(off[1]) != msg || !strings.Contains(msg, "baikal") || strings.Contains(frame, "<label>On which server</label>") {
 		t.Fatalf("s-profile-21 message %q, Create %q: read it again", msg, off)
 	}

@@ -151,6 +151,14 @@ func (s *Server) plainForm(action, method string, rows ...view.FormRow) view.For
 	}
 }
 
+// discard is Discard beside the Save of a settings page that is one form
+// (the owner's decision of 12.10.2026, Typecase's Р-57; appearance-1,
+// attachments-1): a link to the page itself, which drops what was typed and
+// not saved. Cancel stays where a screen is left — an edit, a sheet.
+func (s *Server) discard(id, page string) view.Action {
+	return view.Action{ID: id, Label: "Discard", Href: s.route(page), Method: "GET", Enabled: true}
+}
+
 func csrfField(sess *session.Session) view.FormRow {
 	if sess == nil {
 		return view.FormRow{Name: csrfFormField, Kind: view.InputHidden, Value: ""}

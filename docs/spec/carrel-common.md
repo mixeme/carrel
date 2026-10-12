@@ -2568,7 +2568,8 @@ type SubscriptionCard struct {
 // `/app/files/picker?for=attachments`), A subfolder per month (отметка);
 // «File name» — Written as; у сохранённой папки — «In this folder now»:
 // Files, Oldest, Path только для чтения. Дерева на странице нет: его
-// открывает Browse
+// открывает Browse. Actions — Discard (GET, адрес этой же страницы:
+// несохранённое сбрасывается) и Save, основная (Р-57, attachments-1)
 type AttachmentsPage struct { Shell; Form Form; Note Text }
 
 type DevicesPage struct {
@@ -2728,7 +2729,7 @@ type RestoreRow struct {
 type AppearancePage struct {
     Shell
     Browser  Form // тема, плотность, колонки — живут в этом браузере
-    Account  Form // первый день недели, 12/24 — на сервере
+    Account  Form // первый день недели, 12/24 — на сервере; Actions — Discard (GET, эта же страница) и Save, основная (Р-57, appearance-1)
     Instance Form // часовой пояс — ставит администратор
     Notes    []Text
 }

@@ -255,7 +255,8 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 	name := view.FieldSet{Legend: "File name", Rows: []view.FormRow{written}}
 	page.Form = view.Form{
 		Action: s.route("/app/settings/attachments"), Method: "POST", Sets: []view.FieldSet{small, folder, name},
-		Actions: []view.Action{{ID: "attachments.save", Label: "Save", Method: "POST", Enabled: true}},
+		Actions: []view.Action{s.discard("attachments.discard", "/app/settings/attachments"),
+			{ID: "attachments.save", Label: "Save", Method: "POST", Primary: true, Enabled: true}},
 	}
 	if saved := s.savedFolder(sess, blob); saved != nil {
 		page.Form.Sets = append(page.Form.Sets, s.folderNow(ctx, sess, saved))

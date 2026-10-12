@@ -22,13 +22,13 @@ import (
 // frames.
 
 var (
-	frameCardStart = `<div class="tc-card">`
+	frameCardStart = `<form class="tc-card"`
 	frameCardPlain = regexp.MustCompile(`(?s)<span class="tc-plain">(.*?)</span>`)
 	frameCardLede  = regexp.MustCompile(`(?s)<div class="tc-card__lede">(.*?)</div>`)
 	frameCardAlert = regexp.MustCompile(`(?s)<div class="tc-msg is-alert[^"]*">(.*?)</div>`)
 	frameCardBtn   = regexp.MustCompile(`(?s)<button class="tc-btn[^"]*"[^>]*>(.*?)</button>`)
-	frameCardCheck = regexp.MustCompile(`(?s)<button class="tc-check"[^>]*>(.*?)</button>`)
-	frameCardPick  = regexp.MustCompile(`(?s)<button class="tc-in is-pick"[^>]*>(.*?)</button>`)
+	frameCardCheck = regexp.MustCompile(`(?s)<label class="tc-check">(?:<input[^>]*>)?(.*?)</label>`)
+	frameCardPick  = regexp.MustCompile(`(?s)<span class="tc-in is-pick[^"]*"><select[^>]*>.*?<option[^>]*selected>(.*?)</option>`)
 	frameMsgAside  = regexp.MustCompile(`(?s)<span class="tc-msg__aside">(.*?)</span>`)
 	frameRoleItem  = regexp.MustCompile(`(?s)<button class="[^"]*tc-menu__item[^"]*"[^>]*>(.*?)</button>`)
 	frameAnyHint   = regexp.MustCompile(`(?s)<span class="tc-field__hint">(.*?)</span>`)

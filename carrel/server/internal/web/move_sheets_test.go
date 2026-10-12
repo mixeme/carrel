@@ -25,7 +25,7 @@ var (
 	frameSheetMsg  = regexp.MustCompile(`(?s)<div class="tc-sheet__body">.*?<div class="tc-msg[^"]*">(.*?)</div>`)
 	frameSheetMain = regexp.MustCompile(`(?s)<div class="tc-sheet__foot"><button class="tc-btn is-primary"[^>]*>(.*?)</button>`)
 	frameTreeNew   = regexp.MustCompile(`(?s)<div class="tc-rubric">([^<]*?)\s*<button class="tc-btn is-sm"[^>]*>(.*?)</button></div>\s*<div class="tc-tree">`)
-	frameClosedRow = regexp.MustCompile(`(?s)<div class="tc-tree__row tc-tree__row--op-55">(?:<span class="tc-mark"[^>]*></span>|<svg>.*?</svg>)?([^<]*?)\s*<span class="[^"]*">(.*?)</span></div>`)
+	frameClosedRow = regexp.MustCompile(`(?s)<label class="tc-tree__row tc-tree__row--op-55"><input[^>]*>(?:<span class="tc-mark"[^>]*></span>|<svg>.*?</svg>)?([^<]*?)\s*<span class="[^"]*">(.*?)</span></label>`)
 )
 
 // frameInline is a piece of a frame as it reads: inline tags go without a
@@ -210,7 +210,7 @@ func TestCollectionMoveSheetIsTheFrame(t *testing.T) {
 	msg := frameOne(t, frameSheetMsg, frame, "message")[1]
 	confirm := frameOne(t, frameSheetMain, frame, "main button")[1]
 	here := frameOne(t, frameClosedRow, frame, "the current server")[2]
-	holds := frameOne(t, regexp.MustCompile(`(?s)<div class="is-on tc-tree__row">(?:<svg>.*?</svg>)?[^<]*<span class="[^"]*">(.*?)</span>`), frame, "the chosen server")[1]
+	holds := frameOne(t, regexp.MustCompile(`(?s)<label class="is-on tc-tree__row"><input[^>]*>(?:<svg>.*?</svg>)?[^<]*<span class="[^"]*">(.*?)</span>`), frame, "the chosen server")[1]
 	host, _, ok := strings.Cut(subject, " · ")
 	count := regexp.MustCompile(`all (\d+) events`).FindStringSubmatch(msg)
 	if !ok || count == nil || !strings.Contains(msg, "on "+host+".") {

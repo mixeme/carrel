@@ -4,6 +4,28 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.13 — 2026-10-12
+
+Typecase `f30d992` (Typecase's note 48), server `v0.2.207`. The copy of the
+mockup is `f30d992` byte for byte (429 frames). No screen changed.
+
+### Changed
+
+- **The guard of meaning knows a group of fields that is a form**
+  (`FieldSet.Action`, Typecase's task 149): what stands in such a group
+  stands in a form that sends, as in a card or a field with an address;
+  without the address the group is a group. Red before the change: every
+  edit screen (`TestScreensHaveMeaning` — «FieldSet carries meaning the
+  guard's contract does not know») and the two new cases of
+  `TestMeaningRules`.
+
+### Not done
+
+The screens the note changes are not built yet: a folder's tile
+(`ThumbFolder`) and a thumbnail's icon under its picture belong to the files
+section (`wip/client-files`), the forms of task 149 to the settings and the
+sheets.
+
 ## v0.4.12 — 2026-10-12
 
 Server `v0.2.195`. No screen changed.

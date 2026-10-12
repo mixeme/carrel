@@ -26,7 +26,7 @@ type connectDialog struct {
 func readConnectDialog(t *testing.T, id string) connectDialog {
 	t.Helper()
 	frame := mockupFrame(t, id)
-	at := strings.Index(frame, `<div class="tc-form`)
+	at := strings.Index(frame, `<form class="tc-form `)
 	end := strings.Index(frame, `<div class="tc-formfoot`)
 	if at < 0 || end < at {
 		t.Fatalf("%s draws no form", id)
@@ -36,7 +36,7 @@ func readConnectDialog(t *testing.T, id string) connectDialog {
 	for _, m := range regexp.MustCompile(`<label>([^<]+)</label>`).FindAllStringSubmatch(form, -1) {
 		f.labels = append(f.labels, m[1])
 	}
-	check := regexp.MustCompile(`<button class="tc-check" type="button"><span class="tc-tickrow__tick( is-off)?"></span>([^<]+)</button>`).FindStringSubmatch(form)
+	check := regexp.MustCompile(`<label class="tc-check"><input[^>]*><span class="tc-tickrow__tick( is-off)?"></span>([^<]+)</label>`).FindStringSubmatch(form)
 	if check == nil {
 		t.Fatalf("%s draws no check in the form", id)
 	}
@@ -111,7 +111,7 @@ func TestConnectFormNoPasswordCheckIsTheFrames(t *testing.T) {
 // sheet over the screen, so its Cancel is the server's (C-7.2).
 func TestConnectDialogFieldsAndFootAreTheFrames(t *testing.T) {
 	frame := mockupFrame(t, "s-profile-14")
-	at := strings.Index(frame, `<div class="tc-form`)
+	at := strings.Index(frame, `<form class="tc-form `)
 	foot := strings.Index(frame, `<div class="tc-formfoot`)
 	if at < 0 || foot < at {
 		t.Fatal("s-profile-14 draws no form")
@@ -134,7 +134,7 @@ func TestConnectDialogFieldsAndFootAreTheFrames(t *testing.T) {
 		fields[label[1]] = d
 	}
 	var buttons []string
-	for _, m := range regexp.MustCompile(`<button class="tc-btn[^"]*" type="button">([^<]+)</button>`).FindAllStringSubmatch(frame[foot:], -1) {
+	for _, m := range regexp.MustCompile(`<button class="tc-btn[^"]*" type="(?:button|submit)"[^>]*>([^<]+)</button>`).FindAllStringSubmatch(frame[foot:], -1) {
 		buttons = append(buttons, m[1])
 	}
 	if fields["Server URL"].hint == "" || fields["Label"].placeholder == "" || len(buttons) == 0 {

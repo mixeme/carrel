@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.207 — 2026-10-12
+
+Typecase `f30d992` (Typecase's note 48), client `v0.4.13`. The copy of the
+mockup is `f30d992` byte for byte (429 frames).
+
+### Changed
+
+- **«Appearance» and «Attachments» have Discard beside Save** (the owner's
+  decision of 12.10.2026, Typecase's Р-57; `appearance-1`, `attachments-1`).
+  `AppearancePage.Account.Actions` and `AttachmentsPage.Form.Actions` start
+  with `appearance.discard` and `attachments.discard` — a GET of the page
+  itself, which drops what was typed and not saved — and their Save is the
+  primary button now, as the frames draw it. A client that drew the first
+  action of these forms as Save must find it by its ID.
+
+### Not done
+
+What else the note asks of the server is listed in
+[server.md](../../docs/plan/server.md), «Переход на Typecase `f30d992`»: the
+administrator's settings as one form with Discard, the tree of the move
+sheet (a node that cannot be the target is off with its reason, Move does
+not depend on the chosen node), the empty list of published links.
+
 ## v0.2.206 — 2026-10-12
 
 An edit written from the conflict screen is the edit the person made (Б8 of

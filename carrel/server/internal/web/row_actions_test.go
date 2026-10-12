@@ -239,7 +239,7 @@ func TestBackupRowsAndJobPageAreTheFrame(t *testing.T) {
 func TestTriggerIsTurnedOffByItsTick(t *testing.T) {
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
-	tick := regexp.MustCompile(`(?s)<button class="tc-check"[^>]*>(?:<span[^>]*></span>)?(On a clock of your own.*?)</button>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
+	tick := regexp.MustCompile(`(?s)<label class="tc-check">(?:<input[^>]*>)?(?:<span[^>]*></span>)?(On a clock of your own.*?)</label>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
 	if tick == nil {
 		t.Fatal("s-backup-2 draws no «On a clock of your own»: read the frame again")
 	}

@@ -464,7 +464,7 @@ type RestoreRow struct {
 type AppearancePage struct {
 	Shell
 	Browser  Form   `json:"browser"`  // тема, плотность, колонки — живут в этом браузере
-	Account  Form   `json:"account"`  // первый день недели, 12/24 — на сервере
+	Account  Form   `json:"account"`  // первый день недели, 12/24 — на сервере; Actions — Discard (GET, эта же страница) и Save, основная (Р-57)
 	Instance Form   `json:"instance"` // часовой пояс — ставит администратор
 	Notes    []Text `json:"notes"`
 }

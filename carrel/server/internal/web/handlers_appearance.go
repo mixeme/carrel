@@ -66,7 +66,8 @@ func (s *Server) appearancePage(sess *session.Session, weekErr, clockErr view.Te
 		view.FormRow{Name: "clock", Label: "Time", Kind: view.InputSelect, Value: text(clock), Error: clockErr,
 			Options: []view.Option{option("24", "24-hour", clock), option("12", "12-hour", clock)}},
 	)
-	account.Actions = []view.Action{{ID: "appearance.save", Label: "Save", Method: "POST", Enabled: true}}
+	account.Actions = []view.Action{s.discard("appearance.discard", "/app/settings/appearance"),
+		{ID: "appearance.save", Label: "Save", Method: "POST", Primary: true, Enabled: true}}
 	return view.AppearancePage{
 		Shell:   s.withRail(s.buildShell(sess, "Appearance"), s.settingsRail(sess, "/app/settings/appearance")),
 		Account: account,

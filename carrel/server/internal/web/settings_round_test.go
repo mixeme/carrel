@@ -334,7 +334,7 @@ func TestAttachmentsFolderIsTheFrame(t *testing.T) {
 	for _, m := range frameFieldPart.FindAllStringSubmatch(fset[1], -1) {
 		label := regexp.MustCompile(`<label>([^<]+)</label>`).FindStringSubmatch(m[1])
 		if label == nil {
-			label = regexp.MustCompile(`class="tc-check"[^>]*><span[^>]*></span>([^<]+)</button>`).FindStringSubmatch(m[1])
+			label = regexp.MustCompile(`class="tc-check">(?:<input[^>]*>)?<span[^>]*></span>([^<]+)</label>`).FindStringSubmatch(m[1])
 		}
 		if label == nil {
 			t.Fatalf("a field of attachments-1 without a label: %s", m[1])

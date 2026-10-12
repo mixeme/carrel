@@ -26,9 +26,9 @@ var (
 	frameLabel    = regexp.MustCompile(`(?s)<label>(.*?)</label>`)
 	frameMsg      = regexp.MustCompile(`(?s)<div class="tc-msg is-(\w+)[^"]*">(.*?)(?:<button[^>]*>(.*?)</button>)?</div>`)
 	frameBadge    = regexp.MustCompile(`(?s)<span class="tc-badge(?: is-(\w+))?">(.*?)</span>`)
-	frameChange   = regexp.MustCompile(`(?s)<input class="tc-in tc-in--fill" type="text" value="([^"]*)"><button class="tc-btn" type="button">(.*?)</button>`)
-	frameNameSave = regexp.MustCompile(`(?s)<input class="tc-in tc-in--fill" type="text" value="[^"]*" aria-label="Display name"><button class="tc-btn" type="button">(.*?)</button>`)
-	frameFieldBt  = regexp.MustCompile(`(?s)<div class="tc-field"><button class="tc-btn[^"]*" type="button">(.*?)</button></div>`)
+	frameChange   = regexp.MustCompile(`(?s)<input class="tc-in tc-in--fill" type="text"(?: name="[^"]*")? value="([^"]*)"[^>]*><button class="tc-btn" type="(?:button|submit)">(.*?)</button>`)
+	frameNameSave = regexp.MustCompile(`(?s)<input class="tc-in tc-in--fill" type="text"(?: name="[^"]*")? value="[^"]*" aria-label="Display name"><button class="tc-btn" type="(?:button|submit)">(.*?)</button>`)
+	frameFieldBt  = regexp.MustCompile(`(?s)<div class="tc-field"><button class="tc-btn[^"]*" type="(?:button|submit)">(.*?)</button></div>`)
 	framePair     = regexp.MustCompile(`(?s)<dt>(.*?)</dt><dd[^>]*>(.*?)</dd>`)
 	frameFootDim  = regexp.MustCompile(`(?s)<span class="tc-dim[^"]*tc-dim--wrap">(.*?)</span>`)
 	frameSheetT   = regexp.MustCompile(`(?s)<b class="tc-sheet__title">(.*?)</b>`)
@@ -51,7 +51,7 @@ func frameBlock(t *testing.T, frame, rubric string) string {
 		t.Fatalf("the frame has no rubric %q", rubric)
 	}
 	rest := frame[at+1:]
-	if end := strings.Index(rest, `<div class="tc-fset`); end >= 0 {
+	if end := strings.Index(rest, ` class="tc-fset`); end >= 0 {
 		rest = rest[:end]
 	}
 	return rest
@@ -394,7 +394,7 @@ func TestAccountEscrowIsTheFrames(t *testing.T) {
 
 	// account-2: the sheet over Account.
 	sheetFrame := mockupFrame(t, "account-2")
-	sheetAt := strings.Index(sheetFrame, `<div class="tc-sheet `)
+	sheetAt := strings.Index(sheetFrame, ` class="tc-sheet `)
 	sheetPart := sheetFrame[sheetAt:]
 	sheet := decode[view.UnlockSheet](t, h.do(get(page.Escrow.Actions[0].Href, mix)))
 	if m := frameSheetT.FindStringSubmatch(sheetPart); m == nil || string(sheet.Purpose) != frameText(m[1]) {
@@ -476,7 +476,7 @@ func TestAccountEscrowIsTheFrames(t *testing.T) {
 	// account-11: Withdraw opens a sheet; only its button takes the copy
 	// away.
 	wFrame := mockupFrame(t, "account-11")
-	wPart := wFrame[strings.Index(wFrame, `<div class="tc-sheet `):]
+	wPart := wFrame[strings.Index(wFrame, ` class="tc-sheet `):]
 	ws := decode[view.EscrowWithdrawSheet](t, h.do(get(ep.Status.Actions[0].Href, mix)))
 	if snap := h.st.Snapshot(); !store.UserDeposited(snap.UserByLogin("mix")) {
 		t.Fatal("opening the sheet withdrew the key")
@@ -547,7 +547,7 @@ func TestFixturesAreTheAccountFrames(t *testing.T) {
 		t.Errorf("escrow fixture = active %v, actions %v", escrow.Status.Active, labels(escrow.Status.Actions))
 	}
 	admin := fixtureAs[view.AdminEscrowPage](t, "admin-escrow/normal.json")
-	policy := regexp.MustCompile(`<span class="tc-tickrow__tick"></span>(.*?)</button>`).FindStringSubmatch(mockupFrame(t, "s-admin-6"))
+	policy := regexp.MustCompile(`<span class="tc-tickrow__tick"></span>(.*?)</label>`).FindStringSubmatch(mockupFrame(t, "s-admin-6"))
 	if !admin.Enabled || policy == nil || string(profileRow(admin.Form, "coverNew").Label) != frameText(policy[1]) {
 		t.Errorf("admin escrow fixture: enabled %v, policy row %+v, the frame draws %v", admin.Enabled, profileRow(admin.Form, "coverNew"), policy)
 	}

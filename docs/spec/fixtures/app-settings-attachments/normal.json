@@ -4,11 +4,19 @@
     "action": "/app/settings/attachments",
     "actions": [
       {
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "id": "attachments.discard",
+        "label": "Discard",
+        "method": "GET"
+      },
+      {
         "csrf": "csrf",
         "enabled": true,
         "id": "attachments.save",
         "label": "Save",
-        "method": "POST"
+        "method": "POST",
+        "primary": true
       },
       {
         "enabled": true,

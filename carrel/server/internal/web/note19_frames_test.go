@@ -284,7 +284,7 @@ func TestInvitePageIsTheFrame(t *testing.T) {
 // address of a private network; off for a public one.
 func TestLocalInstanceIsTheShells(t *testing.T) {
 	badge := regexp.MustCompile(`<span class="tc-badge is-local"[^>]*>local</span>`)
-	tick := regexp.MustCompile(`(?s)<button class="tc-check"[^>]*>(?:<span[^>]*></span>)?On a clock of your own(.*?)</button>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
+	tick := regexp.MustCompile(`(?s)<label class="tc-check">(?:<input[^>]*>)?(?:<span[^>]*></span>)?On a clock of your own(.*?)</label>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
 	if tick == nil || !badge.MatchString(tick[1]) {
 		t.Fatalf("s-backup-2 draws no «local» at the tick: read the frame again")
 	}
@@ -328,7 +328,7 @@ func TestLocalInstanceIsTheShells(t *testing.T) {
 // under «On a clock of your own», ticked or not (s-backup-2, S-24.4) — and
 // so not a second time in the card of the line.
 func TestClockTickSaysItsPrice(t *testing.T) {
-	m := regexp.MustCompile(`(?s)On a clock of your own.*?</button>\s*<span class="tc-field__hint">(.*?)</span>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
+	m := regexp.MustCompile(`(?s)On a clock of your own.*?</label>\s*<span class="tc-field__hint">(.*?)</span>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
 	if m == nil {
 		t.Fatal("s-backup-2 draws no hint under «On a clock of your own»: read the frame again")
 	}
@@ -536,7 +536,7 @@ func TestUploadSheetNewFolderRefusalIsTheFrame(t *testing.T) {
 	// picked stand by name in the sheet, the button counts nothing) —;
 	// Choose this folder, which the frame does not draw, is not (s-notes-11,
 	// s-files-19).
-	primary := regexp.MustCompile(`<button class="tc-btn is-primary" type="button">([^<]+)</button>`)
+	primary := regexp.MustCompile(`<button class="tc-btn is-primary" type="submit">([^<]+)</button>`)
 	word := frameOne(t, primary, mockupFrame(t, "s-notes-11"), "primary upload")[1]
 	if again := frameOne(t, primary, frame, "primary upload")[1]; again != word {
 		t.Fatalf("s-notes-11 uploads with %q, s-files-19 with %q: read the frames again", word, again)

@@ -281,6 +281,11 @@ func TestMeaningRules(t *testing.T) {
 		"a field that is no form":           {w.Field{Parts: []w.FieldPart{w.Input{Name: "threshold"}}}, []string{"(Input): a field outside a form"}},
 		"a card that is a form":             {w.Card{Action: "/app/duplicates/merge", Items: []w.CardPart{w.Line{Items: []w.LinePart{w.Button{Label: "Merge", Submit: true}}}}}, nil},
 		"a card that is no form":            {w.Card{Items: []w.CardPart{w.Line{Items: []w.LinePart{w.Button{Label: "Merge", Submit: true}}}}}, []string{"(Button): a submit button outside a form"}},
+		// Typecase's task 149 (f30d992): a group of fields with Action is a
+		// form of its own the same way — a settings page's name with its Save.
+		"a group that is a form": {w.FieldSet{Action: "/settings/account", Items: []w.FieldSetPart{w.Field{Parts: []w.FieldPart{w.Input{Name: "name"}, w.Button{Label: "Save", Submit: true}}}}}, nil},
+		"a group that is no form": {w.FieldSet{Items: []w.FieldSetPart{w.Field{Parts: []w.FieldPart{w.Input{Name: "name"}, w.Button{Label: "Save", Submit: true}}}}},
+			[]string{"(Input): a field outside a form", "(Button): a submit button outside a form"}},
 		"items that send no form they stand in": {w.Menu{Items: []w.MenuPart{
 			w.MenuItem{Label: "From this computer", File: &w.FileField{Name: "file", To: "/new?op=attach"}},
 			w.MenuItem{Label: "From Files", To: "/new?op=pickfile"},

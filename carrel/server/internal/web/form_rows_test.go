@@ -327,8 +327,8 @@ func TestAddPhoneIsAButton(t *testing.T) {
 
 var (
 	frameSheetLabel = regexp.MustCompile(`<label>([^<]*)</label>`)
-	frameSheetField = regexp.MustCompile(`<label>([^<]*)</label>(?:<input(?:[^>]*?placeholder="([^"]*)")?[^>]*>|<button class="tc-check"[^>]*>(.*?)</button>)?`)
-	framePickLabel  = regexp.MustCompile(`<label>([^<]*)</label><button class="tc-in is-pick"`)
+	frameSheetField = regexp.MustCompile(`<label>([^<]*)</label>(?:<input(?:[^>]*?placeholder="([^"]*)")?[^>]*>|<label class="tc-check">(?:<input[^>]*>)?(.*?)</label>)?`)
+	framePickLabel  = regexp.MustCompile(`<label>([^<]*)</label><span class="tc-in is-pick`)
 )
 
 // sheetFields are the fields of a quick sheet, «label [placeholder]»: the

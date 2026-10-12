@@ -331,6 +331,10 @@ var contract = map[string]rule{
 	// (a group of duplicates sends its choices and the button pressed).
 	"Field": func(control) string { return "" },
 	"Card":  func(control) string { return "" },
+	// A group of fields with Action is a form of its own too (a settings
+	// page's name with its Save, Typecase's task 149, f30d992); without it
+	// the group is a group, and its fields say where they stand.
+	"FieldSet": func(control) string { return "" },
 	// A document is a form in its edit (Typecase's task 98): with Action it
 	// sends its fields, which the edit bar's Save names by its ID; read,
 	// it has none and sends nothing.
@@ -377,7 +381,7 @@ func picksFile(c control) bool {
 // opensForm says whether the widget is a form that sends, for its parts.
 func opensForm(c control) bool {
 	switch c.v.Type().Name() {
-	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc", "Field", "Card":
+	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc", "Field", "Card", "FieldSet":
 		return c.str("Action") != ""
 	}
 	return false
