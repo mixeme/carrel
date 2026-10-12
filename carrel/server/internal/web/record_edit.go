@@ -3333,10 +3333,10 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	// What the person changed is measured against the version the form was
 	// read at. Without it in the cache, against the server's version — then
 	// the conflict screen may also offer what only the server changed.
-	base := have
+	base, baseKnown := have, false
 	if read, ok := s.readVersion(c, obj.Path, etag); ok {
 		if rv, _, err := s.currentValues(c, read); err == nil {
-			base = rv
+			base, baseKnown = rv, true
 		}
 	}
 
@@ -3369,7 +3369,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		// or a display name renamed elsewhere would put an N in the draft
 		// nobody typed.
 		fillNames(c.spec.kind, base, typed)
-		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed), st.notebook)
+		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed), st.notebook, !baseKnown)
 		s.redirect(w, r, c.recordPath(uid)+"/conflict")
 		return
 	case err != nil:
@@ -3385,17 +3385,31 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		s.saveAndMove(w, r, c, s.notebookTarget(c, st.notebook), uid, sent, back)
 		return
 	}
+	s.finishCardWrite(w, r, c, uid, wasEmails, sent, back)
+}
+
+// finishCardWrite is finishWrite for a save that may have replaced an
+// address of a card — the edit and the write of the conflict screen alike
+// (Б44: on that path the question was not asked at all). wasEmails are the
+// card's addresses before the save.
+func (s *Server) finishCardWrite(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, wasEmails []string, sent *model.Object, back string) {
 	// An address replaced on a card is asked about before the card is shown
 	// again (S-15.4): records that named the old one drop out of the
-	// person's timeline. What the save lost comes first, as always, and the
-	// question is then not asked.
+	// person's timeline. What the save lost comes first, as always — and
+	// the question stands beside the report, not dropped with it (Б44 of
+	// the audit of 11.10.2026: after a loss report it was never asked).
 	if c.spec.kind == view.KindContact {
-		if sheet, token := s.offerRewrite(c, uid, wasEmails, sent); sheet != "" {
+		if sheet, _ := s.offerRewrite(c, uid, wasEmails, sent); sheet != "" {
 			s.finishWriteWith(w, r, c, uid, sent, sheet, func(loss *model.Loss, _ *model.Object) ([]view.Action, []view.Notice) {
-				if loss != nil {
-					dropRewritePlan(c.sess, token)
+				if loss == nil {
+					return nil, nil
 				}
-				return nil, nil
+				return nil, []view.Notice{{
+					Role:    view.NoticeInfo,
+					Title:   "An address on this card was replaced",
+					Body:    "Events and tasks that name the old address have not been looked at yet. They can be rewritten to the new one.",
+					Actions: []view.Action{{ID: "contact.rewrite", Label: "Review those records", Href: s.route(sheet), Method: "GET", Enabled: true}},
+				}}
 			})
 			return
 		}

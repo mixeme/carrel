@@ -17,6 +17,40 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.204 — 2026-10-12
+
+The question about a replaced address is not lost, and the conflict screen
+says when it cannot tell whose change a field is (Б44 and Б43 of the audit
+of 11.10.2026).
+
+### Fixed
+
+- **The question about a replaced address survives a loss report.** When
+  the save of a card came back with «the server did not keep…», the
+  question — rewrite the old address in the events and tasks that name it?
+  — was dropped and never asked. Now the report comes with a notice, «An
+  address on this card was replaced», and its action opens the question.
+- **The same question is asked after the conflict screen.** A card that
+  changed elsewhere, written from that screen with a new address, went
+  back to the card without the question.
+- **The conflict screen says when it lists more than the person's
+  changes.** A refused edit is measured against the version the form was
+  opened with; when Carrel no longer holds it, every field that differs
+  from the server's is listed — also what only the other client changed,
+  and «Use only my edit» would put the old value back. A notice now says
+  so.
+
+### For developers
+
+- `finishCardWrite`; `editDraft.Unsure`. The action of the new notice is
+  `contact.rewrite`.
+- S-15.4 said «the report comes first, and the question is then not asked»
+  since `v0.2.64`; the rule is changed there, and the owner has not seen
+  the change.
+- An address only taken away still asks nothing (the decision of
+  24.09.2026).
+- The words of both notices are the developer's, not the owner's.
+
 ## v0.2.203 — 2026-10-12
 
 An import is read back, and a record put where it was not made keeps its

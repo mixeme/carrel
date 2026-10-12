@@ -330,7 +330,9 @@ func TestTheConnectionKeepsWhetherItSchedules(t *testing.T) {
 }
 
 // A save the server did not keep whole is reported first, where the change
-// was made (C-9); the question about the address is then not asked.
+// was made (C-9); the question about the address waits beside the report
+// (TestTheAddressQuestionSurvivesALossReport) — until v0.2.204 it was
+// dropped there and never asked (Б44 of the audit of 11.10.2026).
 func TestALossComesBeforeTheQuestion(t *testing.T) {
 	s := newRewriteStand(t)
 	s.srv.Seed(peopleBook+"ada.vcf", strings.Replace(rewriteCard, "END:VCARD", "X-KEPT-HERE:yes\r\nEND:VCARD", 1))
@@ -341,7 +343,7 @@ func TestALossComesBeforeTheQuestion(t *testing.T) {
 	if page.Loss == nil {
 		t.Fatal("no loss report")
 	}
-	if s.sess.Draft(session.DraftRewrite) != nil {
-		t.Error("a plan was kept for a save that ended in a loss report")
+	if s.sess.Draft(session.DraftRewrite) == nil {
+		t.Error("the question was dropped with the loss report")
 	}
 }

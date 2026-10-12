@@ -30,12 +30,17 @@ type editDraft struct {
 	// (s-notes-20): part of the edit, so the move waits with it and happens
 	// once the person's edit is written (S-18).
 	Notebook string `json:"notebook,omitempty"`
+	// Unsure: the version the form was opened with was no longer held when
+	// the edit was refused, so Mine was measured against the server's
+	// version — and holds also what only the server changed (Б43 of the
+	// audit of 11.10.2026). The conflict screen says so.
+	Unsure bool `json:"unsure,omitempty"`
 }
 
-func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time, mine formValues, notebook string) {
+func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time, mine formValues, notebook string, unsure bool) {
 	data, err := json.Marshal(editDraft{
 		Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, UID: uid, ETag: etag, ReadAt: readAt, Mine: mine,
-		Notebook: notebook,
+		Notebook: notebook, Unsure: unsure,
 	})
 	if err == nil {
 		c.sess.SetDraft(session.DraftRejectedEdit, data)
@@ -162,6 +167,11 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 			Choice:   view.ChoiceMine,
 			Name:     choiceField(i),
 		})
+	}
+	if d.Unsure && len(page.Rows) > 0 {
+		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: "Some of these may not be your changes",
+			Body: "Carrel no longer holds the version you opened, so it cannot tell what you changed from what only the other client changed: " +
+				"every field that differs is listed. Where you changed nothing, choose the server's value — «Use only my edit» would put the old one back."})
 	}
 	op := func(name string) string {
 		return s.postQuery(path, url.Values{"op": {name}, "etag": {obj.ETag}})
@@ -323,6 +333,8 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 		s.redirect(w, r, c.recordPath(uid))
 		return
 	}
+	// The patch is applied to the record read: what it held is taken first.
+	wasEmails := cardEmails(obj)
 	sent, fault, err := s.applyChecked(c, obj, ch, theirs, want)
 	if err == nil && fault != nil {
 		// Not what was chosen (S-7.3): nothing is sent, and the choice is
@@ -351,5 +363,5 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 		s.saveAndMove(w, r, c, s.notebookTarget(c, d.Notebook), uid, sent, c.recordPath(uid))
 		return
 	}
-	s.finishWrite(w, r, c, uid, sent, c.recordPath(uid))
+	s.finishCardWrite(w, r, c, uid, wasEmails, sent, c.recordPath(uid))
 }
