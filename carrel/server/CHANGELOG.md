@@ -17,6 +17,53 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.198 — 2026-10-12
+
+A series goes with its start, and so does what is written by the start's
+clock (Б21, Б22, Б24, Б27, parts of Б25 and Б28 of the audit of 11.10.2026,
+`docs/plan/scans/silent-choices.md`); S-11 has the table «an edit of the
+time → what is written».
+
+### Fixed
+
+- **A series whose `UNTIL` is the start of its last occurrence can be moved
+  later again.** Most clients write `UNTIL` so. Moved an hour later — or to
+  another zone — the series would have lost its last day, the check of
+  `v0.2.188` saw it, and the answer was «Carrel could not save this edit»:
+  such a series could not be moved at all. Now the last day stays the day
+  the form shows: `UNTIL` is left alone while the rule still reads as that
+  day, and is otherwise written as the form writes it, the end of that day.
+- **A whole day given a time can be saved in an instance that is not in
+  UTC, and is written in the instance's zone.** It was written as an
+  instant in UTC — a series would keep that instant through the change of
+  the clocks — and outside UTC the same check refused the save. It is now
+  written as a new event is: `TZID` and its `VTIMEZONE`.
+- **`UNTIL` is a date exactly when the start is one** (RFC 5545 §3.3.10):
+  «All day» ticked or unticked rewrites it with the start.
+- **The days added to a series (`RDATE`) go with it** as the days left out
+  do: another time, another zone, a whole day.
+- **A reminder whose time is changed stays the reminder it was** — its
+  action, sound, text and recipients. It came back as a plain display one.
+
+### Changed — behaviour
+
+- **A start past the last day of the series is an error of the form**
+  («The series would end before it starts…» under Repeats) and writes
+  nothing. Before, the series was saved with its start after its `UNTIL`.
+- **«Until» is a day of the form's zone** — the event's own, as the form's
+  start and end are; it was read and written in the instance's.
+
+### For developers
+
+- `untilKept`, `rowAt` in `internal/web/record_edit.go`; `cal.Alarm.At`;
+  `cal.RetimeExceptions` moves `RDATE`; `editAlso` names `RDATE` and
+  `RRULE` among what a start and a zone take with them (S-7.3).
+- Left as they were, for the owner to decide (S-11 lists them): `BYDAY`
+  of a series moved to another weekday, the parts of a rule the simple
+  fields do not show when the frequency changes, the end's own zone when
+  the zone changes, relative reminders when «All day» changes.
+- The words of the new error are the developer's, not the owner's.
+
 ## v0.2.197 — 2026-10-12
 
 An export no longer leaves out, without a word, a record Carrel could not

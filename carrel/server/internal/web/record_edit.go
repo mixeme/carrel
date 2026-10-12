@@ -501,6 +501,48 @@ func repeatValues(raw string, tz *time.Location, start time.Time) []string {
 	return out
 }
 
+// rowAt is the i-th value of a field's row, "" past its end.
+func rowAt(row []string, i int) string {
+	if i < len(row) {
+		return row[i]
+	}
+	return ""
+}
+
+// untilKept is rule with its UNTIL saying the last day the form shows, last
+// (YYYY-MM-DD in tz), for the start the save writes (S-11; Б22, Б25 and Б27
+// of the audit of 11.10.2026). UNTIL bounds the start of an occurrence, and
+// another client writes it as the start of the last one: a series moved an
+// hour later would lose its last day, unseen. So when the rule would no
+// longer read as that day, UNTIL is written as the form writes it — the end
+// of that day in tz —, and it is a date exactly when the start is one
+// (RFC 5545 §3.3.10). A start past the last day is an error of the form:
+// the series would end before it begins. A rule without UNTIL, or one whose
+// last day the form could not show, is handed back as it is.
+func untilKept(rule, last string, startRow [3]string, start time.Time, tz *time.Location) (string, error) {
+	r := parseRule(rule)
+	u := r.get("UNTIL")
+	day, err := time.ParseInLocation("2006-01-02", last, tz)
+	if u == "" || last == "" || err != nil {
+		return rule, nil
+	}
+	allDay := startRow[2] == "on"
+	first := start.In(tz).Format("2006-01-02")
+	if allDay {
+		first = startRow[0]
+	}
+	if first > last {
+		return "", errors.New("The series would end before it starts: its last day is before the start. Change Until or the start.")
+	}
+	if allDay {
+		return r.set("UNTIL", day.Format("20060102")).String(), nil
+	}
+	if got, ok := ruleUntil(rule, start, tz); ok && len(u) != len("20060102") && got.Format("2006-01-02") == last {
+		return rule, nil
+	}
+	return r.set("UNTIL", day.AddDate(0, 0, 1).Add(-time.Second).UTC().Format("20060102T150405Z")).String(), nil
+}
+
 // repeatRule is the RRULE a changed form asks for; "" is none. A changed raw
 // rule wins and is written as typed. Otherwise only the simple parts that
 // changed are written into the rule as it was, in their places, so what the
@@ -918,7 +960,9 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			if tm, err := cal.TimingOf(obj, tz); err == nil {
 				start = tm.Start
 			}
-			vals[f.name] = repeatValues(firstValue(obj, f.prop), tz, start)
+			// The last day is a date of the form, and the form's dates are
+			// in the event's own zone (formZone).
+			vals[f.name] = repeatValues(firstValue(obj, f.prop), formZone(zoneOf(props["DTSTART"]), tz), start)
 		case fieldRelated:
 			vals[f.name] = cal.RelatedTo(obj)
 		case fieldAttendee:
@@ -1262,10 +1306,13 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	// zone, even when neither row changed: the form is in the event's own
 	// zone (formZone), and what it shows is what is written. A new event is
 	// written in the zone chosen — the instance's unless another was (the
-	// quick sheet chooses none) — the same way (from-typecase note 19).
+	// quick sheet chooses none) — the same way (from-typecase note 19). So is
+	// a whole day given a time: it had no zone, and its form drew none to
+	// choose (Б21 of the audit of 11.10.2026: it was written as an instant in
+	// UTC, and a series kept that instant through the change of the clocks).
 	var zone string
 	held, chosen := first(have["tz"]), first(want["tz"])
-	fresh := hasField(c.spec.kind, "tz") && len(props["DTSTART"]) == 0
+	fresh := hasField(c.spec.kind, "tz") && (len(props["DTSTART"]) == 0 || zoneOf(props["DTSTART"]) == "")
 	if fresh {
 		held = ""
 		if chosen == "" {
@@ -1308,7 +1355,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 		// (checkEdit). The times, the zone, Done, the attendees and the
 		// reminders depend on one another and say so themselves below.
 		switch f.typ {
-		case fieldTime, fieldZone, fieldDone, fieldAttendee, fieldReminders:
+		case fieldTime, fieldZone, fieldDone, fieldAttendee, fieldReminders, fieldRepeat:
 		default:
 			if readsAs(f, have, want, have, "", "", false) {
 				continue
@@ -1361,12 +1408,25 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			}
 			ch.ops = append(ch.ops, wholeOps(f.prop, props[f.prop], strings.Join(items, ","))...)
 		case fieldRepeat:
-			if sameRows(w, h) {
-				continue
+			held := strings.TrimSpace(rowAt(h, repRule))
+			rule, typed := held, rowAt(w, repRule) != rowAt(h, repRule)
+			if !sameRows(w, h) {
+				var err error
+				if rule, err = repeatRule(w, h, zoneOf(props["DTSTART"]) == "" && len(props["DTSTART"]) > 0, clock); err != nil {
+					ch.errors[f.name] = err.Error()
+					continue
+				}
 			}
-			rule, err := repeatRule(w, h, zoneOf(props["DTSTART"]) == "" && len(props["DTSTART"]) > 0, tz)
-			if err != nil {
-				ch.errors[f.name] = err.Error()
+			// The last day goes with the start (S-11): a rule typed whole is
+			// written as typed, and one nothing moved is left as it stands.
+			if !typed && !startAt.IsZero() && (startChanged || zone != "" || !sameRows(w, h)) {
+				var err error
+				if rule, err = untilKept(rule, rowAt(w, repUntil), startRow, startAt, clock); err != nil {
+					ch.errors[f.name] = err.Error()
+					continue
+				}
+			}
+			if rule == held {
 				continue
 			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], rule, false)...)
@@ -1542,9 +1602,14 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 					ch.errors[f.name] = "Choose a reminder from the list."
 					break
 				}
-				if i < len(cur) && cur[i].Trigger == v {
+				switch {
+				case i < len(cur) && cur[i].Trigger == v:
 					next = append(next, cur[i])
-				} else {
+				case i < len(cur):
+					// The row of a reminder the record has: the person
+					// changed when, not what it does (S-11).
+					next = append(next, cur[i].At(v))
+				default:
 					next = append(next, cal.NewAlarm(v))
 				}
 			}

@@ -46,6 +46,27 @@ func NewAlarm(trigger string) Alarm {
 	return Alarm{Trigger: trigger, Description: "Reminder", comp: c}
 }
 
+// At is the reminder at another time, counted from the start: what it does
+// — its action, its sound, its text, whom it writes to — stays (Б28 of the
+// audit of 11.10.2026: a reminder whose time was changed came back as a
+// plain display one). That it was acknowledged does not: it was, at the
+// time it had.
+func (a Alarm) At(trigger string) Alarm {
+	if a.comp == nil {
+		return NewAlarm(trigger)
+	}
+	c := &ical.Component{Name: a.comp.Name, Props: ical.Props{}, Children: a.comp.Children}
+	for name, props := range a.comp.Props {
+		if name != "ACKNOWLEDGED" {
+			c.Props[name] = append([]ical.Prop(nil), props...)
+		}
+	}
+	trig := ical.NewProp(ical.PropTrigger)
+	trig.Value = trigger
+	c.Props.Set(trig)
+	return Alarm{Trigger: trigger, Description: a.Description, comp: c}
+}
+
 // Alarms reads the VALARM set of the main component.
 func Alarms(obj *model.Object) ([]Alarm, error) {
 	main, err := mainComponent(obj)

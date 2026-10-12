@@ -131,9 +131,9 @@ func (r retimer) move(p *ical.Prop) int {
 
 // RetimeExceptions takes the exceptions of a series to the start it was just
 // given. obj is the record with its new DTSTART already patched, was — the
-// DTSTART it had. Every EXDATE of the series and the RECURRENCE-ID of every
-// occurrence changed apart is moved as the start was and written the way the
-// start now is; the times an occurrence was moved to are the person's own
+// DTSTART it had. Every EXDATE and RDATE of the series and the RECURRENCE-ID
+// of every occurrence changed apart is moved as the start was and written
+// the way the start now is; the times an occurrence was moved to are the person's own
 // and stay. Like SetAlarms it is a document edit. n is how many exceptions
 // were moved; 0 hands obj back — the start did not change, or there is
 // nothing to move.
@@ -161,6 +161,12 @@ func RetimeExceptions(obj *model.Object, was model.RawValue) (*model.Object, int
 	n := 0
 	for i := range main.Props[ical.PropExceptionDates] {
 		n += r.move(&main.Props[ical.PropExceptionDates][i])
+	}
+	// A day added to the series is written by the series' clock as a day
+	// left out is, and goes with it the same way (Б24 of the audit of
+	// 11.10.2026); a period (VALUE=PERIOD) is not a start and stays.
+	for i := range main.Props[ical.PropRecurrenceDates] {
+		n += r.move(&main.Props[ical.PropRecurrenceDates][i])
 	}
 	for _, c := range doc.Children {
 		if c == main || c.Name != main.Name {

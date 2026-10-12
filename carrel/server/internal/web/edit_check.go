@@ -48,9 +48,11 @@ var editAlso = map[view.Kind]map[string][]string{
 		// A series takes its exceptions with it (S-7.1); a start that moved
 		// keeps the length of an event that is written by its length.
 		// and an event is always written with an end (S-11).
-		"start":    {"EXDATE", "DURATION", "DTEND"},
+		// The days added go as the days left out do, and the last day of the
+		// series stays the day the form shows (S-11): UNTIL is in the rule.
+		"start":    {"EXDATE", "RDATE", "RRULE", "DURATION", "DTEND"},
 		"end":      {"DURATION"},
-		"tz":       {"DTEND", "EXDATE"},
+		"tz":       {"DTEND", "EXDATE", "RDATE", "RRULE"},
 		"attendee": {"ORGANIZER"},
 	},
 	view.KindTask: {
