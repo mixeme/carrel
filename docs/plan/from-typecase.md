@@ -1425,6 +1425,60 @@ Typecase, который она описывает, — `d6d24db`** (431 кад�
      Не проверено: весь набор браузерных тестов Typecase не гоняли с 09.10.
    - Открыты: 151, 153 — следующая работа; 83–85, 87–92 — после них.
 
+Записка 56 от 13.10.2026 (Typecase `4a3dfc3`; задача 151; приёмка
+владельца 13.10). По порядку обмена `4cd37cf`: записка одна, копию макета
+переносит переход клиента. **Последний коммит Typecase, который она
+описывает, — `4a3dfc3`** (438 кадров); переход — с него или с более
+позднего чистого.
+
+56. **Лист вопроса перед сохранением.**
+   - **Кадры** — три фрагмента, лист-форма по образцу «Rewrite the address
+     in their records?» (`Sheet` с `Action`, блоки `SheetBlock`), новых
+     блоков нет. Полного кадра «лист поверх правки `s-agenda-3`» нет —
+     варианты листа нарисованы фрагментами, как `s-contacts-19`, `-20`;
+     лист стоит поверх правки так же, как `s-contacts-15`.
+   - **`s-agenda-22`, несколько встреч.** Заголовок-вопрос «Keep the
+     meetings that were moved by hand?»; справа в шапке — серия и «not
+     saved yet». Блок «What you changed»: что сделали с серией («The series
+     ends on 19 January — it ran weekly until 28 December»; для правила —
+     «The series repeats every two weeks — it repeated weekly»). Блок «Left
+     without their day · 3»: строка на встречу — «26 January, 12:00 — Duty
+     moved» и после тире, чем она отличается от серии («it was the meeting
+     of 26 January, 09:00», «its title was changed»). Под блоками строка:
+     «Kept, each becomes an event of its own, with what was changed in it.
+     Removed, they go with the rest of the series after 19 January.»
+   - **Ответы** — кнопки одной формы с именем и значением (в кадре
+     `left=keep`, `left=remove`): «Keep as events» — главная, по умолчанию;
+     «Remove»; «Cancel» (Esc) возвращает в правку, ничего не записав.
+     Подписи короткие намеренно: три ответа должны помещаться в подвал
+     листа на телефоне; счёт стоит в рубрике списка.
+   - **`s-agenda-23`, одна встреча**: единственное число — «Keep the meeting
+     that was moved by hand?», «Left without its day · 1», «Keep as an
+     event», «Kept, it becomes an event of its own… Removed, it goes: the
+     series no longer has that day.»
+   - **`s-agenda-24`, отказ**: тот же лист, в шапке «saved in part». Блок
+     «Written» — серия и сколько отдельных событий записано, с их днями;
+     блок «Not written · 1» — встреча и ответ сервера; сообщение тревоги:
+     «The meeting of 2 February was not made a separate event: it stays in
+     the series, with its change, as it was before you saved.»; строка
+     «Nothing is lost: what could not be written apart is still in the
+     series.» Ответы: «Try again» (главная) и «Leave it in the series»
+     (Esc).
+   - **Лист общий** — для остальных случаев группы А ревизии: вопрос, блок
+     «что изменили», блок затронутого со счётом, от двух до трёх ответов,
+     один по умолчанию, третий всегда «Cancel». Слова для них придут с
+     решениями владельца.
+   - **Метки коллекции у строк нет** — строки называют встречи одной серии,
+     а не разные записи; серия названа в шапке. Владельцу сказано, он
+     принял.
+   - **Не сделано, вопрос открыт:** кадр отчёта о потере (`states-24`), где
+     о пропавшем пропуске и переносе сказано словами вместо `EXDATE` и
+     `RECURRENCE-ID`, — ответа владельца нет, не рисовал.
+   - Проверено: всё без браузера; лесенки трёх кадров; `TestMockupStrays`.
+     Не проверено: весь набор браузерных тестов Typecase не гоняли с 09.10;
+     слова придумал исполнитель, владелец кадры принял.
+   - Открыты: 153 — следующая работа; 83–85, 87–92 — после неё.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
