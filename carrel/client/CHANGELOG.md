@@ -4,6 +4,12 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.21 — 2026-10-14
+
+Typecase `5c13336` (Typecase's note 65). The copy of the mockup is `5c13336`
+byte for byte; no screen changed: the sheet whose button counts on its own
+(`s-contacts-29`) is not built.
+
 ## v0.4.20 — 2026-10-14
 
 Typecase `8b407a5` (Typecase's note 64; task 161 closed). The guard compares
