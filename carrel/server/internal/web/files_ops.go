@@ -968,7 +968,11 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		}
 		confirm = writeAction(c, confirm)
 		sheet.Alert = deletionAlert(items, connLabel(c.conn))
-		sheet.Warning = line("Carrel keeps no index of what points at these files. They may be attached to a note or an event — check before deleting.")
+		warning := "Carrel keeps no index of what points at these files. They may be attached to a note or an event — check before deleting."
+		if notes := s.deletionNotes(c, items); len(notes) > 0 {
+			warning += " " + strings.Join(notes, " ")
+		}
+		sheet.Warning = line(warning)
 	default:
 		// «Move» and «Copy», not «Move here» (the owner's word of
 		// 09.10.2026; the frames still say «here» — Typecase's task 147).
@@ -1340,6 +1344,7 @@ func (s *Server) startItem(ctx context.Context, c, dest *fileCtx, kind string, e
 		t.state, t.was = view.OpIdle, there.ETag
 	case file.NotFound(err):
 		s.finish(t, s.place(ctx, c.sess, dest, t, name, false))
+		s.afterPlaced(c.sess, t)
 	default:
 		t.state, t.note = view.OpFailed, sentenceEnd(fileReason(err))
 	}
@@ -1583,6 +1588,7 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 			next.state, next.note = view.OpFailed, "the new name was taken as well; nothing was overwritten"
 		}
 	}
+	s.afterPlaced(c.sess, &next)
 	c.sess.KeepTransfer(&next)
 	folder, _ := c.path(c.segs, true)
 	forgetFolder(c.sess, c.conn.ID, folder)

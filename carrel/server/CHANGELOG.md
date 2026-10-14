@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.228 — 2026-10-14
+
+### Changed
+
+- **The folder of attachments goes with its folder** (Б42 of the audit of
+  11.10.2026). Renamed or moved in Files — itself or a folder above it —, it
+  stays the folder of attachments: the setting names its new place, and the
+  next large attachment no longer makes a folder at the old path.
+- **The sheet of a deletion says what is lost**: a folder that holds the
+  folder of attachments, and how many published links stop opening.
+
+### Not done
+
+- Links to files and folders do not follow a move in Files.
+- The words are the developer's.
+
 ## v0.2.227 — 2026-10-14
 
 ### Changed
