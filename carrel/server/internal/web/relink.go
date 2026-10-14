@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/emersion/go-ical"
 
@@ -106,6 +107,10 @@ func (s *Server) relink(ctx context.Context, sess *session.Session, blob sealed.
 			continue
 		}
 		for _, k := range c.kinds {
+			if k == view.KindContact {
+				s.relinkCards(ctx, sess, c, label, old, to, &rep)
+				continue
+			}
 			if k != view.KindEvent && k != view.KindTask && k != view.KindNote {
 				continue
 			}
@@ -189,4 +194,102 @@ func relinkPatch(obj *model.Object, old map[string]bool, to string) (*model.Patc
 		return nil, false
 	}
 	return p, true
+}
+
+// relinkCards mends the links of the cards of a ticked book the way relink
+// mends RELATED-TO (Б33 of the audit of 11.10.2026): RELATED of a person
+// and MEMBER of a group that named an old UID — bare or as urn:uuid: — name
+// the kept one, written the same way and with their parameters; a card that
+// already names it loses the old line instead of gaining a second.
+func (s *Server) relinkCards(ctx context.Context, sess *session.Session, c *collectionSource, label string, old map[string]bool, to string, rep *relinkReport) {
+	items, err := c.contacts(ctx, fanout.Query{})
+	if err != nil && !errors.Is(err, fanout.ErrIncomplete) {
+		rep.unread = append(rep.unread, label+" — "+err.Error())
+		return
+	}
+	for _, it := range items {
+		obj := it.Object
+		if obj == nil {
+			continue
+		}
+		var ops []model.PatchOp
+		for _, prop := range []string{"RELATED", "MEMBER"} {
+			ops = append(ops, cardRelinkOps(obj, prop, old, to)...)
+		}
+		if len(ops) == 0 {
+			continue
+		}
+		what := contactName(obj) + " · " + label
+		if c.col.ReadOnly || c.feed != nil || c.card == nil {
+			rep.skipped = append(rep.skipped, what+" — the book is read-only")
+			continue
+		}
+		patch, err := model.NewPatch(ops...)
+		if err == nil {
+			err = patch.Apply(obj)
+		}
+		if err != nil {
+			rep.skipped = append(rep.skipped, what+" — "+err.Error())
+			continue
+		}
+		if _, err := c.card.Update(ctx, obj); err != nil {
+			why := err.Error()
+			if dav.IsStatus(err, http.StatusPreconditionFailed) {
+				why = "it changed on its server after Carrel read it"
+			}
+			rep.skipped = append(rep.skipped, what+" — "+why)
+			continue
+		}
+		sess.Cache().InvalidatePath(c.conn.ID, obj.Path)
+		dropWholeReads(sess, c.conn.ID, c.col.Path)
+		rep.changed++
+	}
+}
+
+// cardRelinkOps are the patch of one property of a card that names an old
+// UID — «urn:uuid:<uid>» or the UID alone —, pointed at to and written the
+// same way; nil when it names none.
+func cardRelinkOps(obj *model.Object, prop string, old map[string]bool, to string) []model.PatchOp {
+	vals := obj.Props()[prop]
+	const urn = "urn:uuid:"
+	target := func(v string) (string, bool) {
+		bare := strings.TrimPrefix(v, urn)
+		if !old[bare] {
+			return v, false
+		}
+		if strings.HasPrefix(v, urn) {
+			return urn + to, true
+		}
+		return to, true
+	}
+	names := func(v string) bool { return strings.TrimPrefix(v, urn) == to }
+	has := false
+	for _, v := range vals {
+		has = has || names(v.Text)
+	}
+	var texts []string
+	var keep []map[string]string
+	changed := false
+	for _, v := range vals {
+		next, moved := target(v.Text)
+		switch {
+		case moved && has:
+			changed = true
+		case moved:
+			texts, keep = append(texts, next), append(keep, v.Params)
+			changed, has = true, true
+		default:
+			texts, keep = append(texts, v.Text), append(keep, v.Params)
+		}
+	}
+	if !changed {
+		return nil
+	}
+	ops := []model.PatchOp{model.SetValues{Prop: prop, Values: texts}}
+	for i, params := range keep {
+		for name, value := range params {
+			ops = append(ops, model.SetParam{Prop: prop, Index: i, Param: name, Value: value})
+		}
+	}
+	return ops
 }

@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.225 — 2026-10-14
+
+### Changed
+
+- **A merge, and a move that changes a UID, mend the links of cards too**
+  (Б33 of the audit of 11.10.2026). RELATED of a person and MEMBER of a
+  group in the ticked books that named the card that went name the one that
+  stays — written as before, `urn:uuid:` or the bare UID, with their
+  parameters; a group that named both names the kept one once. Events,
+  tasks and notes were mended already.
+
 ## v0.2.224 — 2026-10-14
 
 ### Changed
