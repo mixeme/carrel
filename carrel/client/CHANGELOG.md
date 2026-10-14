@@ -4,6 +4,13 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.22 — 2026-10-14
+
+Typecase `f47752a` (Typecase's note 66). The mockup is `5c13336`'s. The
+library's script the client serves no longer sends a form twice: a form
+other than GET sent by the live layer is not sent again the plain way when
+an answer came — a redirect is followed, any other answer is shown whole.
+
 ## v0.4.21 — 2026-10-14
 
 Typecase `5c13336` (Typecase's note 65). The copy of the mockup is `5c13336`
