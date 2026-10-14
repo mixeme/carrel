@@ -2522,7 +2522,13 @@ type ConnectionsPage struct {
     Accounts      []ConnectionCard
     Subscriptions []SubscriptionCard
     // Диалог подключения (`?op=add`, s-profile-2), его правка (`?op=edit`)
-    // или подписка (`?op=feed`); nil на списке: список формы не несёт
+    // или подписка (`?op=feed`); nil на списке: список формы не несёт.
+    // Правка, давшая подключению другой сервер или логин, когда через него
+    // открываются опубликованные ссылки, возвращается со строкой `links`
+    // (InputRadio «Published links», подсказка «N published links use this
+    // connection.», варианты `keep` и `revoke`, ни один не выбран, причина
+    // у строки) и ничего не сохраняет, пока не ответят (Б40, решение
+    // владельца 12.10.2026; кадра нет); другой пароль ссылки переносит молча
     Add           *Form
     // Шапка диалога поверх страницы; страница под ним — как есть, со своими
     // Title и Subtitle: «Connect account» (s-profile-2), «Edit connection»

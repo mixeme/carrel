@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.222 — 2026-10-14
+
+### Changed
+
+- **An edit that gives a connection another server or login asks what
+  becomes of its published links** (Б40 of the audit of 11.10.2026; the
+  owner's decision of 12.10.2026). The first Save saves nothing and brings
+  the dialog back with «Published links»: keep them — they open on what the
+  connection points at now — or revoke them, neither chosen. Another
+  password, label or fingerprint moves the links along without a word.
+
+### Not done
+
+- No frame draws the question (Typecase's task 164); the words are the
+  developer's.
+
 ## v0.2.221 — 2026-10-14
 
 ### Changed

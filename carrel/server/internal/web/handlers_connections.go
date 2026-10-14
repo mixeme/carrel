@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,6 +25,12 @@ type connectionForm struct {
 	NoPassword                            bool
 	// Editing is the connection the form edits; empty for a new one.
 	Editing string
+	// Links is the question of an edit that gives the connection another
+	// server or login while published links use it (Б40): how many, the
+	// answer sent (keep, revoke) and why it came back. Zero — not asked.
+	Links    int
+	LinksAns string
+	LinksErr view.Text
 	// Open asks for the dialog without anything typed yet: Connect account
 	// (s-profile-2). A form with anything in it is the dialog anyway.
 	Open bool
@@ -267,6 +274,21 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
 		return
 	}
+	// Another server or another login — the links of the connection would
+	// open on something else: asked before anything is tried (Б40; the
+	// owner's decision of 12.10.2026). Another password moves them along.
+	links := s.linksOf(sess.AccountID(), conn.ID)
+	f.LinksAns = r.FormValue("links")
+	if len(links) > 0 && (strings.TrimRight(f.Server, "/") != strings.TrimRight(conn.Server, "/") || f.Login != conn.Login) {
+		f.Links = len(links)
+		if f.LinksAns != "keep" && f.LinksAns != "revoke" {
+			f.LinksErr = "Choose what becomes of them before saving."
+			s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
+			return
+		}
+	} else {
+		f.LinksAns = ""
+	}
 	password := r.FormValue("password")
 	switch {
 	case f.NoPassword:
@@ -304,6 +326,14 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 	if err := s.users.UpdateConnection(sess.AccountID(), key, edited); err != nil {
 		http.Error(w, "could not save the connection", http.StatusInternalServerError)
 		return
+	}
+	if f.LinksAns == "revoke" {
+		for _, l := range links {
+			if err := s.users.RevokePublished(sess.AccountID(), l.ID); err != nil {
+				http.Error(w, "could not revoke a link", http.StatusInternalServerError)
+				return
+			}
+		}
 	}
 	sess.Cache().InvalidateConnection(conn.ID)
 	sess.NoteCheck(conn.ID, trace)
@@ -485,6 +515,15 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 		view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint", LabelAside: "SHA-256 · optional", Kind: view.InputText, Value: text(f.CertFingerprint), Mono: true,
 			Placeholder: "only for a certificate the system does not trust"},
 	)
+	if f.Links > 0 {
+		// What becomes of the published links of a connection given
+		// another server or login (Б40): no answer chosen beforehand.
+		form.Sets[0].Rows = append(form.Sets[0].Rows, view.FormRow{Name: "links", Label: "Published links", Kind: view.InputRadio,
+			Value: text(f.LinksAns), Error: f.LinksErr, Hint: text(linksUse(f.Links)), Options: []view.Option{
+				{Value: "keep", Label: "Keep them: they open on what the connection points at now", Selected: f.LinksAns == "keep"},
+				{Value: "revoke", Label: "Revoke them", Selected: f.LinksAns == "revoke"},
+			}})
+	}
 	// The caret is in Server URL: Label is optional (s-profile-2).
 	form = focused(form, "server")
 	if f.Editing != "" {
@@ -860,4 +899,25 @@ func isHex(s string) bool {
 		}
 	}
 	return s != ""
+}
+
+// linksOf are the live published links of the viewer that open through the
+// connection.
+func (s *Server) linksOf(viewerID, connID string) []user.PublishedLink {
+	var out []user.PublishedLink
+	for _, l := range s.users.PublishedLinks(viewerID) {
+		if l.Target.AccountID == connID {
+			out = append(out, l)
+		}
+	}
+	return out
+}
+
+// linksUse says how many links a connection's edit touches: «2 published
+// links use this connection.»
+func linksUse(n int) string {
+	if n == 1 {
+		return "1 published link uses this connection."
+	}
+	return strconv.Itoa(n) + " published links use this connection."
 }
