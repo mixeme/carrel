@@ -23,6 +23,7 @@ require (
 require (
 	carrel.dev/typecase v0.0.0-00010101000000-000000000000 // indirect
 	filippo.io/hpke v0.4.0 // indirect
+	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 )
 

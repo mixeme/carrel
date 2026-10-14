@@ -327,8 +327,11 @@ func TestAttachFromFilesHasNoIcon(t *testing.T) {
 // ФН21: the queue hides and shows (s-files-2: Hide; s-files-3: the head
 // alone, with Show). Without scripts the button is an address — the folder
 // with the queue hidden, or shown again —, and the model says which it is.
+//
+// With a script the library folds the queue in place (Queue.Fold, Typecase's
+// note 68): its words ride on the queue as data-tc-fold-….
 func TestQueueHidesAndShows(t *testing.T) {
-	head := regexp.MustCompile(`(?s)<div class="tc-queue([^"]*)">\s*<div class="tc-queue__head">.*?<button class="tc-btn is-sm" type="button">([^<]+)</button>`)
+	head := regexp.MustCompile(`(?s)<div class="tc-queue([^"]*)"[^>]*>\s*<div class="tc-queue__head">.*?<button class="tc-btn is-sm" type="button">([^<]+)</button>`)
 	shown, hidden := frameOne(t, head, mockupFrame(t, "s-files-2"), "queue"), frameOne(t, head, mockupFrame(t, "s-files-3"), "queue")
 	if strings.Contains(shown[1], "is-min") || !strings.Contains(hidden[1], "is-min") || shown[2] == hidden[2] {
 		t.Fatalf("queues %q, %q: read the frames again", shown, hidden)
