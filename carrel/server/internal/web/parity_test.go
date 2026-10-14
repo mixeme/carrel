@@ -52,3 +52,13 @@ func TestATaskFormShowsWhatIsKeptAsSent(t *testing.T) {
 		t.Errorf("kept as sent = %v", names)
 	}
 }
+
+// Р18 of scans/kinds-parity.md: the form of an event says where the event
+// is and when it was read, as the task's form does.
+func TestAnEventFormHasItsSource(t *testing.T) {
+	f := calendarFixture(t, nil, "e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nSUMMARY:Review\nEND:VEVENT"))
+	page := decode[view.EventEditPage](t, f.h.do(get(f.path("calendar")+"/e1/edit", f.sess)))
+	if !strings.HasSuffix(string(page.Source.Path), "e1.ics") || page.Source.Stamp == "" {
+		t.Errorf("source = %+v", page.Source)
+	}
+}

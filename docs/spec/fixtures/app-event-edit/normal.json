@@ -3690,6 +3690,17 @@
     "tags": [],
     "ticks": null
   },
+  "source": {
+    "changed": "",
+    "colour": "#4a6b52",
+    "compared": "changed on server 3 days ago",
+    "lastRead": "2 min ago",
+    "objects": null,
+    "path": "/alice/calendars/lichnyj/8f1c-4a02-b7d3.ics",
+    "readOnly": false,
+    "stamp": "nextcloud · Личный",
+    "uid": ""
+  },
   "subtitle": "nextcloud · Личный",
   "title": "Edit event",
   "top": {

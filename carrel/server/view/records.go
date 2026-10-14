@@ -148,6 +148,9 @@ type EventEditPage struct {
 	Loss       *LossReport `json:"loss"`
 	Delete     *Action     `json:"delete"`     // внизу формы; nil — у новой записи
 	DeleteNote Text        `json:"deleteNote"` // строка под удалением: «Series is edited and deleted whole.»
+	// Source — рубрика Source формы, как у задачи (s-tasks-3): Path, Read и
+	// сравнение с сервером; у новой — без пути (Р18 списка равенства родов)
+	Source SourceBlock `json:"source"`
 }
 
 type RecurrenceBlock struct {

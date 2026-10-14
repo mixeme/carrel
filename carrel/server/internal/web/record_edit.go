@@ -2646,7 +2646,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 			name = "New event"
 		}
 		page := view.EventEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: view.Text(c.stamp()), Form: form, Loss: st.loss, Delete: del,
-			Attendees: s.attendeeField(c, st)}
+			Attendees: s.attendeeField(c, st), Source: c.source()}
 		if newAttach {
 			page.Attach = s.draftRows(c, draft)
 		}
@@ -2656,6 +2656,8 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 				page.DeleteNote = seriesNote
 			}
 			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
+			// Source, as the task's form (Р18 of scans/kinds-parity.md).
+			page.Source.Path, page.Source.Compared = text(st.obj.Path), s.eventCompared(c, st.uid, st.obj)
 			// «Kept as the server sent them» (s-agenda-3): what Carrel does
 			// not know, as it came.
 			for _, name := range cal.EventForeign(st.obj) {

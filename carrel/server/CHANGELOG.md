@@ -17,6 +17,15 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.234 — 2026-10-14
+
+### Changed
+
+- **An event's form says where the event is and when it was read**
+  (`EventEditPage.source`; Р18 of docs/plan/scans/kinds-parity.md), as a
+  task's form does. A new event has none. No frame draws it yet
+  (Typecase's task 169).
+
 ## v0.2.233 — 2026-10-14
 
 ### Changed

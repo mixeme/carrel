@@ -55,6 +55,10 @@ const (
 	people   = "Attendees"
 	files    = "Attachments"
 	kept     = "Kept as the server sent them"
+	source   = "Source"
+	path     = "Path"
+	read     = "Read"
+	sep      = " · "
 	inside   = "in the event"
 	nothing  = "Nothing attached"
 	attachID = "attach.add"
@@ -186,6 +190,11 @@ func Screen(p *view.EventEditPage) w.Shell {
 			lines += string(f.Label) + "  " + string(f.Value)
 		}
 		form.Items = append(form.Items, w.FieldSet{Rubric: w.Rubric{Text: kept}, Items: []w.FieldSetPart{w.Diag{Text: lines, Place: w.Grown}}})
+	}
+	if p.UID != "" {
+		// Source, as the task's form has it (s-tasks-3; Р18 of the
+		// server's kinds-parity list).
+		form.Items = append(form.Items, sourceSet(p.Source))
 	}
 	main = append(main, form)
 	if p.Delete != nil {
@@ -414,3 +423,20 @@ func railParts(r view.Rail, list bool) []w.RailPart {
 // upload is the screen's word (U-1.3) for the item after Attach's arrow that
 // sends the file picked on a page without a script (Typecase's task 109).
 const upload = "Upload"
+
+// sourceSet is the rubric Source of the form: where the event is and when it
+// was read, and whether it changed on its server since — the task's set.
+func sourceSet(s view.SourceBlock) w.FieldSet {
+	lines := w.Fields{Place: w.Grown}
+	if s.Path != "" {
+		lines.Items = append(lines.Items, w.FieldsItem{Term: path, Value: []w.ValuePart{w.Text(s.Path)}, Face: w.ValueMono})
+	}
+	when := string(s.LastRead)
+	if s.Compared != "" {
+		when += sep + string(s.Compared)
+	}
+	if when != "" {
+		lines.Items = append(lines.Items, w.FieldsItem{Term: read, Value: []w.ValuePart{w.Text(when)}})
+	}
+	return w.FieldSet{Rubric: w.Rubric{Text: source}, Items: []w.FieldSetPart{lines}}
+}

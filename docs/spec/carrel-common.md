@@ -1424,6 +1424,7 @@ type EventEditPage struct { // правка: та же запись формой
     Loss      *LossReport
     Delete    *Action // внизу формы (s-agenda-3); nil — у новой записи
     DeleteNote Text   // строка под удалением: у серии «Series is edited and deleted whole.»
+    Source    SourceBlock // рубрика Source формы, как у задачи (s-tasks-3): Path, Read и сравнение с сервером; у новой — без пути (Р18 списка равенства родов; кадра нет)
 }
 
 type RecurrenceBlock struct {
