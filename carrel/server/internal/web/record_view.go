@@ -519,15 +519,17 @@ func contactFieldsOf(obj *model.Object) []propField {
 			if f.shape != nil {
 				field.Value = text(f.shape(v.Text))
 			}
-			if f.prop == "BDAY" {
+			day := f.prop == "BDAY" || f.prop == "ANNIVERSARY"
+			if day {
 				field.Value = text(birthdayShown(v.Text, v.Params)) // Apple's day without a year too
 			}
 			if f.href != nil {
 				field.Href = f.href(v.Text)
 			}
 			// A number and a day are read digit by digit: the frames set
-			// them in mono (s-contacts-1, -6, -7).
-			field.Mono = f.prop == "TEL" || f.prop == "BDAY"
+			// them in mono (s-contacts-1, -6, -7); an anniversary is a day
+			// as the birthday is (Р26).
+			field.Mono = f.prop == "TEL" || day
 			out = append(out, propField{Field: field, prop: f.prop})
 		}
 	}

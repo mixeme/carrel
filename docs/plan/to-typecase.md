@@ -1212,3 +1212,17 @@ loaded ones»), если кадр так решит.
 последним, выключенным (`TaskRow.Where`); клиент `v0.4.27` рисует его
 ячейкой `ColumnDetail`, как агенда. Нужно: пункт в кадре `s-tasks-12` и,
 может быть, своя ширина столбца у задач.
+
+## 171. Правка контакта: «Websites» и «Anniversary»
+
+Правило «роды равны» (scans/kinds-parity.md, Р26): карточка
+(`s-contacts-1`) показывает Website и Anniversary, а форма (`s-contacts-3`)
+их не правила. Сервер `v0.2.236`: рубрика «Websites» после «Addresses» —
+строки, как у почты (Label — выбор home, work, other; Address; Remove),
+кнопка «Add website»; «Anniversary» — текстовое поле, как Birthday (образец
+`DD.MM.YYYY`, подсказка та же, моноширинно). Пустые уходят в «Show N empty
+fields»: Anniversary — перед «Add address», «Add website» — после. Клиент
+`v0.4.28` даёт им ширины Birthday и почты. На карточке годовщина теперь
+датой и моноширинно, как день рождения. Нужно: кадры `s-contacts-3` и
+`s-contacts-27` (новый контакт) с ними и, если надо, место Anniversary в
+голове формы рядом с Birthday.

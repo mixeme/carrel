@@ -1106,9 +1106,12 @@ Carrel пишет его сам и тем же смыслом: `DTEND`, равн
 Nickname и Birthday стоят и пустыми, `s-contacts-4`), Phone numbers и Email
 addresses (у строки Label, потом Number или Address), Addresses (у строки
 Label — выбор home, work, other, пишется `TYPE`, — потом Street, City,
-Region, Postcode, Country; PO box и extended остаются как были), Other (Tags,
-Note). Пустые Organisation, Title, адреса (кнопкой «Add address»), Tags и Note
-уходят в «Show N empty fields» — своя строка в конце формы, после всех
+Region, Postcode, Country; PO box и extended остаются как были), Websites
+(`URL`, у строки Label — home, work, other — и Address; Р26 списка равенства
+родов, кадра нет), Other (Tags, Note). Anniversary (`ANNIVERSARY`) стоит
+после Birthday и набирается так же; маркер года Apple пишется только у
+`BDAY`. Пустые Organisation, Title, Anniversary, адреса (кнопкой «Add
+address»), сайты («Add website»), Tags и Note уходят в «Show N empty fields» — своя строка в конце формы, после всех
 рубрик, N — сколько полей свёрнуто; рубрика, у которой ушло всё, не рисуется.
 Подпись `CATEGORIES` в формах — «Tags» (`s-contacts-3`, `s-agenda-3`,
 `s-tasks-3`). Второе и следующие напоминания подписаны «Reminder»

@@ -536,7 +536,7 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
   отправить), Print (`?print=1`), удаление внизу карточки. Под «⋯» — `Menu`:
   Move, Copy, Export .vcf, Publish a link (s-contacts-6, s-contacts-10).
   Переход к хронологии человека — `More`; число в рубрике врезки —
-  `TimelineCount`. Поля: телефоны и день рождения моноширинно
+  `TimelineCount`. Поля: телефоны, день рождения и годовщина моноширинно
   (`Field.Mono`), у дня рождения — `Field.Aside` («in 7 months»), категории —
   строка «Tags» между Birthday и Note (`Field.Tags`). «Kept as the server
   sent them» свёрнуто, кнопка — `ForeignShow` («Show 3», без сценариев — её
@@ -596,7 +596,9 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
 - **Контролы.** Шапка — `Name` (у новой — «New contact») и `Subtitle` (книга);
   Cancel и Save — действия формы. Форма рубриками `FieldSet.Legend` в порядке s-contacts-3:
   голова (Display name, Given, Family, Nickname, Organisation, Title,
-  Birthday), Phone numbers, Email addresses, Addresses, Other (Tags, Note),
+  Birthday, Anniversary), Phone numbers, Email addresses, Addresses,
+  Websites, Other (Tags, Note) — Anniversary и Websites кадра пока не имеют,
+  ширины у них Birthday и почты,
   и в конце формы, после всех рубрик, своей строкой — «Show N empty fields»
   (последний `FieldSet`, `Folded`: легенда — кнопка, строки свёрнуты, без
   сценариев — ссылка `Unfold`; у карточки без адресов в нём и «Add address»). Ширина поля — раскладка

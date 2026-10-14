@@ -766,11 +766,18 @@ var editFields = map[view.Kind][]editField{
 		{name: "title", label: "Title", prop: "TITLE", typ: fieldText, optional: true},
 		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday,
 			hint: "Type it: 14.03.1987, or 14.03 without the year."},
+		// The card shows an anniversary and a website (s-contacts-1); each
+		// has its field, as the birthday and the phones (Р26 of
+		// scans/kinds-parity.md). The day is typed as the birthday is, and
+		// folded away when the card has none.
+		{name: "anniversary", label: "Anniversary", prop: "ANNIVERSARY", typ: fieldBirthday, optional: true,
+			hint: "Type it: 14.03.1987, or 14.03 without the year."},
 		{name: "tel", label: "Number", prop: "TEL", typ: fieldMulti, typed: true, mono: true, set: "Phone numbers", add: "Add phone", newRow: "cell", quick: "Phone", quickSample: "+7 …"},
 		{name: "email", label: "Address", prop: "EMAIL", typ: fieldMulti, typed: true, set: "Email addresses", add: "Add email", quick: "Email", quickSample: "name@example.org"},
 		// Addresses after the e-mail (s-contacts-3), folded away with their
 		// button when the card has none.
 		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress, typed: true, set: "Addresses", optional: true, add: "Add address"},
+		{name: "url", label: "Address", prop: "URL", typ: fieldMulti, typed: true, set: "Websites", optional: true, add: "Add website"},
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, optional: true, set: "Other"},
 		{name: "note", label: "Note", prop: "NOTE", typ: fieldArea, optional: true, set: "Other"},
 	},
@@ -877,6 +884,7 @@ var rowLabels = map[string][]fieldOption{
 		{value: "main", label: "main"}, {value: "fax", label: "fax"}, {value: "other", label: "other"}},
 	"EMAIL": {{value: "work", label: "work"}, {value: "home", label: "home"}, {value: "other", label: "other"}},
 	"ADR":   {{value: "home", label: "home"}, {value: "work", label: "work"}, {value: "other", label: "other"}},
+	"URL":   {{value: "home", label: "home"}, {value: "work", label: "work"}, {value: "other", label: "other"}},
 }
 
 // addressParts are the inputs of an address row: ADR components 2 to 6
@@ -1542,7 +1550,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			if v == first(h) || sameBirthday(v, first(h)) {
 				continue
 			}
-			written, err := birthdayWritten(v, props[f.prop], firstValue(obj, "VERSION"))
+			written, err := birthdayWritten(f.prop, v, props[f.prop], firstValue(obj, "VERSION"))
 			if err != nil {
 				ch.errors[f.name] = err.Error()
 				continue
@@ -1553,7 +1561,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			case written != "" && !yearless && len(props[f.prop]) > 0 && props[f.prop][0].Params[appleOmitYear] != "":
 				// A full date: the marker would hide the year typed.
 				ch.ops = append(ch.ops, model.RemoveParam{Prop: f.prop, Index: 0, Param: appleOmitYear})
-			case yearless && apple3(props[f.prop], firstValue(obj, "VERSION")):
+			case yearless && apple3(f.prop, props[f.prop], firstValue(obj, "VERSION")):
 				// Apple's day without a year names the year it stands for.
 				ch.ops = append(ch.ops, model.SetParam{Prop: f.prop, Index: 0, Param: appleOmitYear, Value: appleYear})
 			}
@@ -2098,9 +2106,10 @@ const appleYear = "1604"
 
 // apple3 says whether a birthday without a year goes as Apple writes it: a
 // vCard 3.0 card that does not hold --MMDD of another client already, nor a
-// marker of its own year.
-func apple3(cur []model.RawValue, version string) bool {
-	if strings.TrimSpace(version) != "3.0" {
+// marker of its own year. Apple writes so BDAY alone: ANNIVERSARY is a
+// property of vCard 4.0, and its day without a year is --MMDD everywhere.
+func apple3(prop string, cur []model.RawValue, version string) bool {
+	if prop != "BDAY" || strings.TrimSpace(version) != "3.0" {
 		return false
 	}
 	if len(cur) == 0 {
@@ -2109,10 +2118,11 @@ func apple3(cur []model.RawValue, version string) bool {
 	return !strings.HasPrefix(strings.TrimSpace(cur[0].Text), "--") && len(cur[0].Params[appleOmitYear]) != 4
 }
 
-// birthdayWritten turns what was typed into BDAY in the form the stored one
-// has: basic (18151210, --0412) or extended (1815-12-10, --04-12). Without a
-// stored one, vCard 3 gets extended and vCard 4 basic, as each writes it.
-func birthdayWritten(typed string, cur []model.RawValue, version string) (string, error) {
+// birthdayWritten turns what was typed into BDAY or ANNIVERSARY (prop) in the
+// form the stored one has: basic (18151210, --0412) or extended (1815-12-10,
+// --04-12). Without a stored one, vCard 3 gets extended and vCard 4 basic, as
+// each writes it.
+func birthdayWritten(prop, typed string, cur []model.RawValue, version string) (string, error) {
 	if typed == "" {
 		return "", nil
 	}
@@ -2136,7 +2146,7 @@ func birthdayWritten(typed string, cur []model.RawValue, version string) (string
 			out = digits[:4] + "-" + digits[4:6] + "-" + digits[6:]
 		}
 	}
-	if yearless && apple3(cur, version) {
+	if yearless && apple3(prop, cur, version) {
 		// vCard 3.0 has no date without a year (RFC 2426): the day goes the
 		// way Apple writes it, which Baikal and Nextcloud read (Б30) —
 		// unless the card holds --MMDD of another client already.

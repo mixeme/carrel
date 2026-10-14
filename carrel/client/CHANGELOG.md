@@ -4,6 +4,11 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.28 — 2026-10-14
+
+Server `v0.2.236`. A contact's form gives the anniversary the birthday's
+width and a website an e-mail's.
+
 ## v0.4.27 — 2026-10-14
 
 Server `v0.2.235`. A task's row draws the chosen Where in the agenda's

@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.236 — 2026-10-14
+
+### Changed
+
+- **A contact's form edits its websites and its anniversary** (Р26 of
+  docs/plan/scans/kinds-parity.md), which the card showed and nothing could
+  change: «Websites» is a rubric of rows after Addresses, each labelled
+  home, work or other (`TYPE`), with «Add website»; «Anniversary» is a day
+  typed as the birthday is, `DD.MM.YYYY` or `DD.MM`, written in the form
+  `ANNIVERSARY` came in (never Apple's year marker — that is the
+  birthday's). Empty, both fold under «Show N empty fields». The card shows
+  the anniversary as it shows the birthday: a date, monospaced. No frame
+  draws either yet (Typecase's task 171).
+
 ## v0.2.235 — 2026-10-14
 
 ### Changed

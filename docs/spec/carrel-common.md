@@ -896,7 +896,7 @@ type Field struct {
     Label  Text
     Value  Text
     Href   string // значение ведёт (FieldsItem.Href, s-contacts-6): телефон — tel: из цифр и плюса, «+7 912 445-10-88» → tel:+79124451088; почта — mailto:; другая книга — карточка там
-    Mono   bool   // путь, идентификатор, диагностика; у контакта — телефоны и день рождения (s-contacts-6)
+    Mono   bool   // путь, идентификатор, диагностика; у контакта — телефоны, день рождения и годовщина (s-contacts-6)
     Aside  Text   // приглушённо после значения: «in 7 months» у дня рождения (s-contacts-6)
     Tags   []Tag  // строка категорий — метками, Value пуст (s-contacts-6, панели всех родов)
     Colour Colour // метка коллекции у строки другой книги или календаря (Books, Linked; s-contacts-6)

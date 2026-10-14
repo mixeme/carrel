@@ -53,11 +53,13 @@ var (
 
 // widths are the widths of the form's fields by the last part of their name
 // (C-6.1: the view model carries no widths; the layout is the screen's, from
-// its frame): «tel.0.type» is a type, «adr.0.street» a street.
+// its frame): «tel.0.type» is a type, «adr.0.street» a street. The
+// anniversary and a website, which no frame draws yet (Typecase's task 171),
+// are as wide as the birthday and an e-mail.
 var widths = map[string]w.FieldWidth{
 	"fn": w.FieldXL, "given": w.FieldSM, "family": w.FieldSM, "nickname": w.FieldSM,
-	"org": w.FieldMD, "title": w.FieldMD, "bday": w.FieldSM,
-	"type": w.FieldXS, "tel": w.FieldMD, "email": w.FieldLG,
+	"org": w.FieldMD, "title": w.FieldMD, "bday": w.FieldSM, "anniversary": w.FieldSM,
+	"type": w.FieldXS, "tel": w.FieldMD, "email": w.FieldLG, "url": w.FieldLG,
 	"street": w.FieldLG, "city": w.FieldSM, "region": w.FieldSM, "code": w.FieldXS, "country": w.FieldSM,
 	"categories": w.FieldLG, "note": w.FieldFull,
 }

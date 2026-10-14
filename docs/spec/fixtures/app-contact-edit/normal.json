@@ -560,8 +560,23 @@
       },
       {
         "folded": true,
-        "legend": "Show 1 empty field",
+        "legend": "Show 3 empty fields",
         "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "Type it: 14.03.1987, or 14.03 without the year.",
+            "kind": "text",
+            "label": "Anniversary",
+            "mono": true,
+            "name": "anniversary",
+            "options": [],
+            "placeholder": "DD.MM.YYYY",
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
           {
             "add": null,
             "error": "",
@@ -684,13 +699,83 @@
               }
             ],
             "value": "adr"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "add",
+            "label": "Add website",
+            "name": "add",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "template": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "select",
+                "label": "Label",
+                "name": "url.{n}.type",
+                "options": [
+                  {
+                    "label": "home",
+                    "selected": false,
+                    "value": "home"
+                  },
+                  {
+                    "label": "work",
+                    "selected": false,
+                    "value": "work"
+                  },
+                  {
+                    "label": "other",
+                    "selected": false,
+                    "value": "other"
+                  }
+                ],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "Address",
+                "name": "url.{n}",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "remove",
+                "label": "Remove",
+                "name": "remove",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "url.{n}"
+              }
+            ],
+            "value": "url"
           }
         ],
         "unfold": {
           "enabled": true,
           "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit?fields=all",
           "id": "form.unfold",
-          "label": "Show 1 empty field",
+          "label": "Show 3 empty fields",
           "method": "GET"
         }
       }
