@@ -290,6 +290,10 @@ type TaskEditPage struct {
 	Source SourceBlock `json:"source"`
 	Loss   *LossReport `json:"loss"`
 	Delete *Action     `json:"delete"` // внизу формы, одна кнопка без строки под ней; nil — у новой записи
+	// Foreign — «Kept as the server sent them», как у события (s-agenda-3):
+	// свойства задачи, которых Carrel не знает, имя и значение как есть,
+	// моноширинно; пусто — нет (Р17 списка равенства родов)
+	Foreign []Field `json:"foreign"`
 }
 
 type NotePage struct {

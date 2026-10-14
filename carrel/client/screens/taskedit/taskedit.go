@@ -57,6 +57,7 @@ const (
 	source  = "Source"
 	inside  = "in the task"
 	nothing = "Nothing attached"
+	keptAs  = "Kept as the server sent them"
 	path    = "Path"
 	read    = "Read"
 	sep     = " · "
@@ -177,6 +178,18 @@ func Screen(p *view.TaskEditPage) w.Shell {
 		form.Items = append(form.Items, fieldSet(set.Legend, rows))
 	}
 	form.Items = append(form.Items, attachments(attach, p.Attach))
+	if len(p.Foreign) > 0 {
+		// What Carrel does not know of the task, as it came — the event's
+		// set (s-agenda-3; Р17 of the server's kinds-parity list).
+		var lines string
+		for i, f := range p.Foreign {
+			if i > 0 {
+				lines += "\n"
+			}
+			lines += string(f.Label) + "  " + string(f.Value)
+		}
+		form.Items = append(form.Items, w.FieldSet{Rubric: w.Rubric{Text: keptAs}, Items: []w.FieldSetPart{w.Diag{Text: lines, Place: w.Grown}}})
+	}
 	if p.UID != "" {
 		form.Items = append(form.Items, sourceSet(p.Source))
 	}

@@ -38,3 +38,17 @@ func TestANoteHasNewTask(t *testing.T) {
 		t.Errorf("New task = %+v", task)
 	}
 }
+
+// Р17 of scans/kinds-parity.md: what Carrel does not know of a task is
+// shown in its form as it came, as an event's is — it was shown nowhere.
+func TestATaskFormShowsWhatIsKeptAsSent(t *testing.T) {
+	f := calendarFixture(t, nil, "t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260101T000000Z\nSUMMARY:Slides\nPRIORITY:1\nX-OC-HIDESUBTASKS:1\nCLASS:PRIVATE\nEND:VTODO"))
+	page := decode[view.TaskEditPage](t, f.h.do(get(f.path("tasks")+"/t1/edit", f.sess)))
+	var names []string
+	for _, fl := range page.Foreign {
+		names = append(names, string(fl.Label)+"="+string(fl.Value))
+	}
+	if strings.Join(names, ",") != "CLASS=PRIVATE,X-OC-HIDESUBTASKS=1" {
+		t.Errorf("kept as sent = %v", names)
+	}
+}

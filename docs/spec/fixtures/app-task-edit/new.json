@@ -2,6 +2,7 @@
   "attach": [],
   "delete": null,
   "details": null,
+  "foreign": [],
   "form": {
     "action": "/app/tasks/a-nc-home/dela/new",
     "actions": [

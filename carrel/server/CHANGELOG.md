@@ -17,6 +17,15 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.233 — 2026-10-14
+
+### Changed
+
+- **A task's form shows what Carrel does not know of it, as it came**
+  (`TaskEditPage.foreign`; Р17 of docs/plan/scans/kinds-parity.md), as an
+  event's form does — a task showed it nowhere. No frame draws it yet
+  (Typecase's task 169).
+
 ## v0.2.232 — 2026-10-14
 
 ### Changed

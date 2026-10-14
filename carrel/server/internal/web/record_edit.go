@@ -2674,6 +2674,10 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		if st.obj != nil && !st.isNew {
 			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
 			page.Source.Path, page.Source.Compared = text(st.obj.Path), s.eventCompared(c, st.uid, st.obj)
+			// «Kept as the server sent them», as the event's form (Р17).
+			for _, name := range cal.TaskForeign(st.obj) {
+				page.Foreign = append(page.Foreign, view.Field{Label: text(name), Value: text(strings.Join(st.obj.PropText(name), ", ")), Mono: true})
+			}
 		}
 		if newAttach {
 			page.Attach = s.draftRows(c, draft)

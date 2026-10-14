@@ -1542,6 +1542,7 @@ type TaskEditPage struct { // правка
     Source    SourceBlock // рубрика Source формы: Path, Read и сравнение с сервером (s-tasks-3); у новой — без пути
     Loss      *LossReport
     Delete    *Action // внизу формы (s-tasks-3), одна кнопка без строки под ней; nil — у новой записи
+    Foreign   []Field // «Kept as the server sent them», как у события (s-agenda-3): свойства задачи, которых Carrel не знает, имя и значение как есть; пусто — нет (Р17 списка равенства родов; кадра нет)
 }
 
 type NotePage struct {

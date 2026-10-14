@@ -64,3 +64,34 @@ func EventForeign(obj *model.Object) []string {
 	sort.Strings(out)
 	return out
 }
+
+// taskKnown are the properties of a task its card and its form show or keep
+// by themselves: the fields, the times, the progress, the rule it repeats
+// by, the organiser its card names, the attachments and links, and the
+// bookkeeping every calendar object carries. SEQUENCE is shown as kept, as
+// an event's is.
+var taskKnown = map[string]bool{
+	"UID": true, "DTSTAMP": true, "CREATED": true, "LAST-MODIFIED": true,
+	"SUMMARY": true, "DESCRIPTION": true, "LOCATION": true, "CATEGORIES": true, "URL": true,
+	"DTSTART": true, "DUE": true, "DURATION": true, "RRULE": true, "RDATE": true, "EXDATE": true, "RECURRENCE-ID": true,
+	"STATUS": true, "PRIORITY": true, "PERCENT-COMPLETE": true, "COMPLETED": true,
+	"ORGANIZER": true, "ATTACH": true, "RELATED-TO": true,
+}
+
+// TaskForeign are the names of the properties of a task Carrel does not
+// know, each once, in the order of their names: «Kept as the server sent
+// them» of its form, as an event's (Р17 of the kinds-parity list: a task
+// showed them nowhere).
+func TaskForeign(obj *model.Object) []string {
+	if obj == nil {
+		return nil
+	}
+	var out []string
+	for name := range obj.Props() {
+		if upper := strings.ToUpper(name); !taskKnown[upper] && !slices.Contains(out, upper) {
+			out = append(out, upper)
+		}
+	}
+	sort.Strings(out)
+	return out
+}
