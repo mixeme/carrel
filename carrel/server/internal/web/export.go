@@ -353,6 +353,12 @@ func (s *Server) exportRecord(w http.ResponseWriter, r *http.Request, c *collect
 		return
 	}
 	f := exportFormats[c.spec.kind]
+	// as=ics: a record of a calendar as the server holds it, whatever its
+	// kind — a note's journal beside its Markdown (Р20).
+	whole := c.card == nil && r.URL.Query().Get("as") == "ics"
+	if whole {
+		f = exportFormats[view.KindEvent]
+	}
 	h := w.Header()
 	h.Set("Content-Type", f.media)
 	name := collectionSlug(recordTitle(c.spec.kind, obj)) + f.ext
@@ -365,5 +371,9 @@ func (s *Server) exportRecord(w http.ResponseWriter, r *http.Request, c *collect
 	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
 	h.Set("Cache-Control", "private, no-store")
 	w.WriteHeader(http.StatusOK)
+	if whole {
+		writeCalendar(w, []*model.Object{obj}, nil)
+		return
+	}
 	writeExport(w, c, []*model.Object{obj}, nil)
 }

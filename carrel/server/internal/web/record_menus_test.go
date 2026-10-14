@@ -221,7 +221,14 @@ func TestCalendarMenusAreTheFrames(t *testing.T) {
 	}
 
 	note := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1", f.sess)))
-	sameMenu(t, "note page", note.Meta.Menu, "s-notes-14")
+	// «Export .ics» after Copy, beside the frame (Р20 of
+	// scans/kinds-parity.md: the journal whole, as an event's and a task's;
+	// Typecase's task 174): the frame's items around it, and it required.
+	if g := serverMenu(note.Meta.Menu); len(g) != 4 || g[2] != "Export .ics [i-down]" {
+		t.Errorf("note page «⋯» = %q, want Export .ics third", g)
+	} else {
+		sameMenu(t, "note page", append(append([]view.MenuItem(nil), note.Meta.Menu[:2]...), note.Meta.Menu[3:]...), "s-notes-14")
+	}
 	// Print over the text since the client's scan of the notes (НГ2); New
 	// task before it, every kind's (Р15 of scans/kinds-parity.md) — the
 	// frame does not draw it yet, Typecase's task 168.

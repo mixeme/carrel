@@ -819,7 +819,8 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
   читательской ширины — клиентский, выбор запоминается.
   Панель над текстом — `Doc.Bar`: Edit, Export Markdown; Print и Source —
   клиентские (исходник — `Doc.Body`). Её «⋯» — `Meta.Menu`: Move, Copy,
-  Publish a link (s-notes-14). В колонке — `Meta.Actions`: Attach и удаление;
+  Export .ics (запись целиком, как у события и задачи; кадра нет), Publish a
+  link (s-notes-14). В колонке — `Meta.Actions`: Attach и удаление;
   ссылка заметки — `Meta.Link`, рубрикой «Link» после Tags, ссылкой, как
   Related рисует свои (кадра нет).
 - **Особое.** Размеченный текст приходит **деревом**, а не готовой разметкой

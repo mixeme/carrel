@@ -313,12 +313,17 @@ func (ops recordOps) rowMenu() []view.MenuItem {
 }
 
 // menuWithout is the menu with one item left out.
-func menuWithout(menu []view.MenuItem, id string) []view.MenuItem {
+// noteMenu is the «⋯» of a note: its Export is the journal as the server
+// holds it, .ics, as an event's and a task's (Р20 of scans/kinds-parity.md) —
+// the bar's Export Markdown hands over its text.
+func noteMenu(menu []view.MenuItem) []view.MenuItem {
 	out := []view.MenuItem{}
 	for _, it := range menu {
-		if it.ID != id {
-			out = append(out, it)
+		if it.ID == "record.export" {
+			it.Label = text("Export " + exportFormats[view.KindEvent].ext)
+			it.Href += "&as=ics"
 		}
+		out = append(out, it)
 	}
 	return out
 }
@@ -717,7 +722,7 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 		s.newTaskFor(c, uid, "note.task"), s.sendFor(c, uid),
 		&view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true})
 	page.Meta.Actions = shown(s.attachOf(c, uid, obj.ETag), ops.del)
-	page.Meta.Menu = menuWithout(ops.menu, "record.export")
+	page.Meta.Menu = noteMenu(ops.menu)
 	// The day, and the time when the note has one (s-notes-2).
 	page.Meta.Date = text(noteWhen(obj, tf))
 	page.Meta.Tags = s.recordTags(c, obj)

@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.239 — 2026-10-15
+
+### Changed
+
+- **A note exports as .ics too** (Р20 of docs/plan/scans/kinds-parity.md).
+  An event and a task hand over one record whole; a note gave only its
+  text, as Markdown, and its other properties had no way out. Its «⋯» now
+  has «Export .ics» after Copy: the journal as the server holds it
+  (`…/export?uid=…&as=ics`). The bar's Export Markdown is unchanged. No
+  frame draws the item yet (Typecase's task 174).
+
 ## v0.2.238 — 2026-10-15
 
 ### Changed

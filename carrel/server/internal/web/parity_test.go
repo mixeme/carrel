@@ -76,3 +76,32 @@ func TestTasksHaveAWhereColumn(t *testing.T) {
 		t.Errorf("columns %+v, groups %+v", page.Bar.Columns.Items, page.Groups)
 	}
 }
+
+// Р20 of scans/kinds-parity.md: an event and a task hand over one record
+// whole, as .ics; a note gave only its text, as Markdown, and its other
+// properties had no way out. Its menu now has «Export .ics» too: the
+// journal as the server holds it.
+func TestANoteExportsAsCalendar(t *testing.T) {
+	f := calendarFixture(t, nil, "n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nSUMMARY:Plan\nDESCRIPTION:Steps\nX-KEEP:1\nEND:VJOURNAL"))
+	page := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1", f.sess)))
+	var href string
+	for _, a := range menuActions(page.Meta.Menu) {
+		if string(a.Label) == "Export .ics" {
+			href = a.Href
+		}
+	}
+	if href == "" {
+		t.Fatalf("menu = %+v, want Export .ics", menuActions(page.Meta.Menu))
+	}
+	resp := f.h.do(get(href, f.sess))
+	got := strings.ReplaceAll(resp.Body.String(), "\r\n", "\n")
+	if resp.Code != 200 || !strings.HasPrefix(resp.Header().Get("Content-Type"), "text/calendar") ||
+		!strings.Contains(resp.Header().Get("Content-Disposition"), ".ics") ||
+		!strings.Contains(got, "BEGIN:VJOURNAL") || !strings.Contains(got, "X-KEEP:1") {
+		t.Errorf("%d %v\n%s", resp.Code, resp.Header(), got)
+	}
+	// The bar's Export Markdown stays what it was.
+	if a := actionByID(page.Doc.Bar, "note.export"); a == nil || strings.Contains(a.Href, "as=ics") {
+		t.Errorf("Export Markdown = %+v", a)
+	}
+}

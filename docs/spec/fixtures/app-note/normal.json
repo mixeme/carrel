@@ -212,6 +212,14 @@
       },
       {
         "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/export?uid=5c81-77aa-0d64\u0026as=ics",
+        "icon": "i-down",
+        "id": "record.export",
+        "label": "Export .ics",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
         "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
         "icon": "i-link",
         "id": "publish",
