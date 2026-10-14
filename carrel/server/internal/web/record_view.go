@@ -749,6 +749,11 @@ func calendarFields(obj *model.Object) []view.Field {
 	if v := cal.Text(obj, "STATUS"); v != "" {
 		out = append(out, view.Field{Label: "Status", Value: text(statusLabel(v))})
 	}
+	// An event's priority, as the task's card shows its own (Р7); a task's
+	// stands among its own fields (taskFields).
+	if p := priorityOf(obj); p <= 9 && obj.MainComponent() == "VEVENT" {
+		out = append(out, view.Field{Label: "Priority", Value: text(strconv.Itoa(p)), Mono: true})
+	}
 	// An event's organiser is the first of its people (eventPeople,
 	// s-agenda-2), not a field.
 	for _, v := range obj.Props()["ORGANIZER"] {

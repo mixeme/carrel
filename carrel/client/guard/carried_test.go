@@ -76,6 +76,10 @@ func TestAnEventChoosesItsCalendar(t *testing.T) {
 		if got := strings.Contains(html, `name="notebook"`); got != c.drawn {
 			t.Errorf("%s: the collection drawn %v, want %v", c.fixture, got, c.drawn)
 		}
+		// The event's Priority stands after its Status (Р7).
+		if c.drawn && !strings.Contains(html, `name="priority"`) {
+			t.Errorf("%s: no Priority drawn", c.fixture)
+		}
 	}
 }
 

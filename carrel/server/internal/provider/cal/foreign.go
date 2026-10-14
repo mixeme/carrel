@@ -43,7 +43,7 @@ func NoteForeign(obj *model.Object) []string {
 // it as kept (s-agenda-3).
 var eventKnown = map[string]bool{
 	"UID": true, "DTSTAMP": true, "CREATED": true, "LAST-MODIFIED": true,
-	"SUMMARY": true, "LOCATION": true, "STATUS": true, "CATEGORIES": true, "DESCRIPTION": true, "URL": true,
+	"SUMMARY": true, "LOCATION": true, "STATUS": true, "PRIORITY": true, "CATEGORIES": true, "DESCRIPTION": true, "URL": true,
 	"DTSTART": true, "DTEND": true, "DURATION": true, "RRULE": true, "RDATE": true, "EXDATE": true, "RECURRENCE-ID": true,
 	"ORGANIZER": true, "ATTENDEE": true, "ATTACH": true, "RELATED-TO": true,
 }

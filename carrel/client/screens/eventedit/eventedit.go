@@ -69,6 +69,9 @@ const (
 // the screen's, from its frame): «reminder.1» is a reminder.
 var widths = map[string]w.FieldWidth{
 	"summary": w.FieldXL, "location": w.FieldLG, "status": w.FieldSM, "categories": w.FieldMD, "description": w.FieldFull,
+	// The priority after Status, as wide (Р7 of the server's kinds-parity
+	// list; no frame draws it yet — Typecase's task 177).
+	"priority": w.FieldSM,
 	// Related to in «Other», as the task's (s-agenda-3, -15; Typecase's task 160).
 	"related":    w.FieldLG,
 	"start.date": w.FieldSM, "start.time": w.FieldXS, "end.date": w.FieldSM, "end.time": w.FieldXS, "tz": w.FieldMD,

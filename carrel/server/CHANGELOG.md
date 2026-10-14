@@ -17,6 +17,16 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.242 — 2026-10-15
+
+### Changed
+
+- **An event has a priority** (Р7 of docs/plan/scans/kinds-parity.md), as
+  a task does — RFC 5545 gives VEVENT one too. Its form chooses it after
+  Status, from the task's list; its card shows «Priority» after Status,
+  monospaced. `PRIORITY` is no longer foreign to an event. No frame draws
+  either yet (Typecase's task 177).
+
 ## v0.2.241 — 2026-10-15
 
 ### Changed

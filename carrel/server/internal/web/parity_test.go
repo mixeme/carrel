@@ -137,3 +137,32 @@ func TestANoteHasAStatus(t *testing.T) {
 		t.Errorf("No status left a line:\n%s", got)
 	}
 }
+
+// Р7 of scans/kinds-parity.md: a task's priority is edited and shown; an
+// event's was neither, though RFC 5545 gives VEVENT one too. Now the event's
+// form chooses it after Status, from the task's list, and its card shows it
+// as the task's does.
+func TestAnEventHasAPriority(t *testing.T) {
+	f := calendarFixture(t, nil, "e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nDTEND:20260115T110000Z\nSUMMARY:Review\nPRIORITY:5\nX-KEEP:1\nEND:VEVENT"))
+	rec := f.path("calendar") + "/e1"
+	form := formFields(decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	if form.Get("priority") != "5" {
+		t.Fatalf("form = %v", form)
+	}
+	card := decode[view.EventPage](t, f.h.do(get(rec, f.sess)))
+	found := false
+	for _, fl := range card.Fields {
+		found = found || (fl.Label == "Priority" && fl.Value == "5" && fl.Mono)
+	}
+	if !found {
+		t.Errorf("the card shows no Priority: %+v", card.Fields)
+	}
+	form.Set("priority", "1")
+	if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != 303 {
+		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
+	}
+	got := strings.ReplaceAll(body(t, f, "e1.ics"), "\r\n", "\n")
+	if !strings.Contains(got, "\nPRIORITY:1\n") || !strings.Contains(got, "\nX-KEEP:1\n") {
+		t.Errorf("after Save:\n%s", got)
+	}
+}

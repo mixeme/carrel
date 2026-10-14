@@ -790,6 +790,10 @@ var editFields = map[view.Kind][]editField{
 		{name: "summary", label: "Summary", prop: "SUMMARY", typ: fieldText, quick: "Title"},
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText},
 		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: eventStatuses},
+		// An event's priority, as a task's (Р7 of scans/kinds-parity.md:
+		// RFC 5545 gives VEVENT one too; no frame draws it yet — Typecase's
+		// task 177).
+		{name: "priority", label: "Priority", prop: "PRIORITY", typ: fieldChoice, choices: priorities},
 		// No hint under Tags (s-agenda-3).
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
