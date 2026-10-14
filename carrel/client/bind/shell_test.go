@@ -386,9 +386,15 @@ func TestRepeating(t *testing.T) {
 	btn, tmpl := bind.Add(add, func(r view.FormRow) []w.FieldSetPart { return []w.FieldSetPart{w.Field{Label: r.Name}} })
 	same(t, "Add", btn, w.Button{Label: "Add phone", Adds: "add.tel"})
 	same(t, "its template", tmpl, w.Template{ID: "add.tel", Items: []w.FieldSetPart{w.Field{Label: "tel.{n}"}, w.Field{Label: "remove"}}})
-	loss := view.LossReport{Note: "The change was saved, but:", Properties: []view.Text{"X-A", "X-B"}}
-	// A notice in the plain tone, not an alert: the record is written (states-12).
-	same(t, "a loss", bind.Loss(loss, w.MsgFlush), w.Msg{Parts: []w.MsgPart{w.Text("The change was saved, but:"), w.Text(" "), w.Mono{Text: "X-A"}, w.Text(", "), w.Mono{Text: "X-B"}}, Space: w.MsgFlush})
+	loss := view.LossReport{Title: "Not kept.", Note: "They are gone:", Properties: []view.Text{"X-A", "X-B"}}
+	// A notice in the plain tone, not an alert: the record is written; what
+	// was lost in bold, the properties after, a full stop (states-12).
+	same(t, "a loss", bind.Loss(loss, w.MsgFlush), []w.MainPart{w.Msg{Parts: []w.MsgPart{w.Strong("Not kept."), w.Text(" "), w.Text("They are gone:"),
+		w.Text(" "), w.Mono{Text: "X-A"}, w.Text(", "), w.Mono{Text: "X-B"}, w.Text(".")}, Space: w.MsgFlush}})
+	// The days of a series in a message of their own; no properties, no
+	// message of them (states-36).
+	days := view.LossReport{Title: "Not kept.", Note: "They are gone:", Days: &view.Notice{Title: "Two days.", Body: "Back."}}
+	same(t, "lost days", bind.Loss(days, w.MsgFlush), []w.MainPart{bind.Msg(*days.Days, w.MsgFlush)})
 }
 
 func TestNoticeDiagAndEmpty(t *testing.T) {

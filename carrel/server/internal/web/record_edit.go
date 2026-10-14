@@ -3755,14 +3755,20 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 		return
 	}
 	s.rememberBody(c, got)
+	// The frame's message (states-17): what was lost in bold, then the
+	// properties; the days of a series as days, in a message of their own
+	// (states-36).
 	report := &view.LossReport{
-		Note:       "The change was saved, but the server did not keep these properties. Other clients will not see them either.",
+		Title:      "The change was saved, but the server did not keep these properties.",
+		Note:       "Other clients will not see them either:",
 		Aggregated: loss.Aggregated,
 		Actions:    actions,
 	}
-	for _, p := range loss.Properties {
+	props := lossProperties(loss)
+	for _, p := range props {
 		report.Properties = append(report.Properties, text(p))
 	}
+	report.Days = lostDaysNotice(loss.Days, c.spec.kind, c.tf, len(props) > 0)
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
 		obj: got, uid: uid, values: vals, alarms: alarms, etag: got.ETag, readAt: s.now(), loss: report, notices: notices,
 	}))
@@ -4298,12 +4304,14 @@ func withExceptions(loss *model.Loss, sent, got *model.Object) *model.Loss {
 		before = loss.Properties
 	}
 	after := cal.AlarmLoss(cal.ExceptionLoss(before, sent, got), sent, got)
+	days := cal.LostDays(sent, got)
 	switch {
 	case len(after) == 0:
 		return nil
 	case loss == nil:
-		return &model.Loss{Properties: after}
+		return &model.Loss{Properties: after, Days: days}
 	}
+	loss.Days = days
 	if len(after) > len(before) {
 		// Something new to say: the report is not one already seen.
 		loss.Aggregated = false

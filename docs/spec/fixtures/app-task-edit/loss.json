@@ -660,10 +660,12 @@
   "loss": {
     "actions": [],
     "aggregated": false,
-    "note": "The change was saved, but the server did not keep these properties. Other clients will not see them either.",
+    "days": null,
+    "note": "Other clients will not see them either:",
     "properties": [
       "CATEGORIES"
-    ]
+    ],
+    "title": "The change was saved, but the server did not keep these properties."
   },
   "name": "Отправить документы в МФЦ ·",
   "notices": [],

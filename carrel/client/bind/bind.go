@@ -355,18 +355,32 @@ func Add(r view.FormRow, line func(view.FormRow) []w.FieldSetPart) (w.Button, w.
 	return w.Button{Label: string(r.Label), Adds: id}, t
 }
 
-// Loss is what the server did not keep of a save (C-9 LossReport) as a
-// notice in the plain tone, as its frame draws it (states-12): what it means
-// (Note), then the properties lost, monospaced, a comma between them. A
-// notice, not a lock and not an alarm: the record is written.
-func Loss(l view.LossReport, space w.MsgSpace) w.Msg {
-	parts := []w.MsgPart{w.Text(l.Note)}
-	for i, p := range l.Properties {
-		sep := ", "
-		if i == 0 {
-			sep = " "
+// Loss is what the server did not keep of a save (C-9 LossReport) as
+// notices in the plain tone, as its frames draw them: what was lost in bold
+// (Title), what it means (Note), then the properties, monospaced, a comma
+// between them and a full stop after (states-12, -17, -24, -31); the days
+// of a series the server did not keep in a message of their own (Days,
+// states-36). A notice, not a lock and not an alarm: the record is written.
+// No properties lost — no message of them.
+func Loss(l view.LossReport, space w.MsgSpace) []w.MainPart {
+	var out []w.MainPart
+	if len(l.Properties) > 0 {
+		var parts []w.MsgPart
+		if l.Title != "" {
+			parts = append(parts, w.Strong(l.Title), w.Text(" "))
 		}
-		parts = append(parts, w.Text(sep), w.Mono{Text: string(p)})
+		parts = append(parts, w.Text(l.Note))
+		for i, p := range l.Properties {
+			sep := ", "
+			if i == 0 {
+				sep = " "
+			}
+			parts = append(parts, w.Text(sep), w.Mono{Text: string(p)})
+		}
+		out = append(out, w.Msg{Parts: append(parts, w.Text(".")), Space: space})
 	}
-	return w.Msg{Parts: parts, Space: space}
+	if l.Days != nil {
+		out = append(out, Msg(*l.Days, space))
+	}
+	return out
 }

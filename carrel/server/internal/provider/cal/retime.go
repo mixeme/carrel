@@ -2,6 +2,7 @@ package cal
 
 import (
 	"bytes"
+	"sort"
 	"strings"
 	"time"
 
@@ -195,10 +196,45 @@ func RetimeExceptions(obj *model.Object, was model.RawValue) (*model.Object, int
 	return out, n, nil
 }
 
-// exceptionInstants are the starts a record's exceptions name: the days left
-// out of the series and the occurrences changed apart.
-func exceptionInstants(obj *model.Object) (days, moved map[time.Time]bool) {
-	days, moved = map[time.Time]bool{}, map[time.Time]bool{}
+// LostDays are the exceptions of sent that got no longer has, each by its
+// day (Typecase's Р-60, states-36): a day left out that came back, and an
+// occurrence changed apart that is gone or no longer tied to its day — with
+// where it had been moved, when its start was another. In the order of the
+// series.
+func LostDays(sent, got *model.Object) []model.LostDay {
+	sd, sm := exceptionStamps(sent)
+	gd, gm := exceptionStamps(got)
+	var out []model.LostDay
+	for at, s := range sd {
+		if _, ok := gd[at]; !ok {
+			out = append(out, model.LostDay{At: at, Day: s.at.day})
+		}
+	}
+	for at, m := range sm {
+		if _, ok := gm[at]; ok {
+			continue
+		}
+		d := model.LostDay{At: at, Day: m.at.day, Moved: true}
+		if m.moved && m.to.instant() != at {
+			d.To, d.ToDay = m.to.instant(), m.to.day
+		}
+		out = append(out, d)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].At.Before(out[j].At) })
+	return out
+}
+
+// exception is an exception of a series: the start it names, and for an
+// occurrence changed apart the start it has now (to; moved — it has one).
+type exception struct {
+	at, to stamp
+	moved  bool
+}
+
+// exceptionStamps are a record's exceptions by the instant each names: the
+// days left out and the occurrences changed apart.
+func exceptionStamps(obj *model.Object) (days, moved map[time.Time]exception) {
+	days, moved = map[time.Time]exception{}, map[time.Time]exception{}
 	if obj == nil || !obj.IsCalendar() {
 		return
 	}
@@ -210,22 +246,36 @@ func exceptionInstants(obj *model.Object) (days, moved map[time.Time]bool) {
 	if main == nil {
 		return
 	}
-	read := func(p *ical.Prop, into map[time.Time]bool) {
+	stamps := func(p *ical.Prop) []stamp {
+		var out []stamp
 		for _, one := range strings.Split(p.Value, ",") {
 			if s, ok := readStamp(one, map[string]string{"TZID": p.Params.Get(ical.ParamTimezoneID)}); ok {
-				into[s.instant()] = true
+				out = append(out, s)
 			}
 		}
+		return out
 	}
 	for i := range main.Props[ical.PropExceptionDates] {
-		read(&main.Props[ical.PropExceptionDates][i], days)
+		for _, s := range stamps(&main.Props[ical.PropExceptionDates][i]) {
+			days[s.instant()] = exception{at: s}
+		}
 	}
 	for _, c := range doc.Children {
 		if c == main || c.Name != main.Name {
 			continue
 		}
-		if rid := c.Props.Get(ical.PropRecurrenceID); rid != nil {
-			read(rid, moved)
+		rid := c.Props.Get(ical.PropRecurrenceID)
+		if rid == nil {
+			continue
+		}
+		for _, s := range stamps(rid) {
+			e := exception{at: s}
+			if start := c.Props.Get(ical.PropDateTimeStart); start != nil {
+				if to := stamps(start); len(to) == 1 {
+					e.to, e.moved = to[0], true
+				}
+			}
+			moved[s.instant()] = e
 		}
 	}
 	return
@@ -238,16 +288,11 @@ func exceptionInstants(obj *model.Object) (days, moved map[time.Time]bool) {
 // RECURRENCE-ID that ties it to its series is missing: nothing says any more
 // which day it stands for.
 func MissingExceptions(sent, got *model.Object) (days, moved int) {
-	sd, sm := exceptionInstants(sent)
-	gd, gm := exceptionInstants(got)
-	for at := range sd {
-		if !gd[at] {
-			days++
-		}
-	}
-	for at := range sm {
-		if !gm[at] {
+	for _, d := range LostDays(sent, got) {
+		if d.Moved {
 			moved++
+		} else {
+			days++
 		}
 	}
 	return

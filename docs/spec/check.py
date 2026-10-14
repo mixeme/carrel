@@ -125,7 +125,7 @@ undefined = sorted(p for p, files in seen.items()
 check("6b. названные правила введены заголовком", undefined)
 
 # 7. Фикстуры разбираются и лежат по правилам имён
-states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","unavailable","outcome","refused",
+states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
           "tiles","copy","elsewhere","rename","delete","attach"}
 badfix = []
@@ -315,6 +315,9 @@ STATE_FRAME = {
     # Подсказки поля участников (Typecase de3f083, задача 77): «ве» — Вера.
     "app-contacts-suggest/normal": "s-agenda-12",
     "app-event-edit/loss": "states-17",
+    # Дни серии, которых сервер не сохранил, — словами (Typecase 14fa0c2,
+    # записка 62, Р-60).
+    "app-event-edit/loss-days": "states-36",
     # Папка (скан файлов, ФБ5): выделено три с очередью загрузки — s-files-2,
     # плитки — s-files-5. Листы операции и выбора — кадры-фрагменты своих
     # состояний (рейла у листа нет, SHEETS): копия s-files-11, другое

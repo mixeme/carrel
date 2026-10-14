@@ -83,7 +83,7 @@ func Screen(p *view.EventPage) w.Shell {
 	main := []w.MainPart{h}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
 	if p.Loss != nil {
-		main = append(main, bind.Loss(*p.Loss, w.MsgSpacePage))
+		main = append(main, bind.Loss(*p.Loss, w.MsgSpacePage)...)
 	}
 	main = append(main, fields(p.Fields))
 	if p.Body != "" {

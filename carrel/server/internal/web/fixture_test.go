@@ -2413,18 +2413,54 @@ func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 	})
 }
 
+// seriesExceptions gives «Синк-ап по релизу» a day left out and a meeting
+// moved, as states-36 names them: 24 August skipped, 31 August at 1
+// September, 15:00. The set's file holds neither: no other frame draws them.
+func seriesExceptions(t *testing.T, app *mockupApp) {
+	t.Helper()
+	nc := app.servers["nextcloud"]
+	p := davtest.CalendarHome + "lichnyj/8f1c-4a02-b7d3.ics"
+	body, _, ok := nc.Object(p)
+	if !ok {
+		t.Fatal("the event is not on the stand")
+	}
+	rule := "RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z"
+	if !strings.Contains(body, rule) {
+		t.Fatal("the series is not the set's: read the set again")
+	}
+	moved := strings.Join([]string{"BEGIN:VEVENT", "UID:8f1c-4a02-b7d3", "DTSTAMP:20260807T121500Z",
+		"RECURRENCE-ID;TZID=Asia/Yekaterinburg:20260831T120000", "DTSTART;TZID=Asia/Yekaterinburg:20260901T150000",
+		"DTEND;TZID=Asia/Yekaterinburg:20260901T160000", "SUMMARY:Синк-ап по релизу", "END:VEVENT", "END:VCALENDAR"}, "\r\n")
+	body = strings.Replace(body, rule, rule+"\r\nEXDATE;TZID=Asia/Yekaterinburg:20260824T120000", 1)
+	body = strings.Replace(body, "END:VCALENDAR", moved, 1)
+	nc.Seed(p, body)
+}
+
 // C-14.3: what a server drops, on the forms of the other kinds, and the
 // combined views while their poll is still running.
 func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 	for _, one := range []struct {
 		dir, segment, slug, uid string
 		drop                    []string
+		state                   string                             // the fixture's state: loss, unless named
+		prep                    func(t *testing.T, app *mockupApp) // what the record holds beyond the set
 	}{
-		{"app-event-edit", "calendar", "lichnyj", "8f1c-4a02-b7d3", []string{"CATEGORIES", "ORGANIZER"}},
-		{"app-task-edit", "tasks", "dela", "aa10-77bc-0e31", []string{"CATEGORIES"}},
+		{"app-event-edit", "calendar", "lichnyj", "8f1c-4a02-b7d3", []string{"CATEGORIES", "ORGANIZER"}, "", nil},
+		{"app-task-edit", "tasks", "dela", "aa10-77bc-0e31", []string{"CATEGORIES"}, "", nil},
+		// The days of a series the server did not keep, said as days
+		// (states-36, from-typecase note 62): the meeting of 24 August left
+		// out, the one of 31 August moved to 1 September, 15:00.
+		{"app-event-edit", "calendar", "lichnyj", "8f1c-4a02-b7d3", []string{"EXDATE", "RECURRENCE-ID"}, "loss-days", seriesExceptions},
 	} {
-		t.Run(one.dir+"-loss", func(t *testing.T) {
+		state := "loss"
+		if one.state != "" {
+			state = one.state
+		}
+		t.Run(one.dir+"-"+state, func(t *testing.T) {
 			app := newMockupApp(t)
+			if one.prep != nil {
+				one.prep(t, app)
+			}
 			rec := app.listPath(t, one.segment, one.slug) + "/" + one.uid
 			form := formFields(decode[struct {
 				Form view.Form `json:"form"`
@@ -2432,7 +2468,7 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 			app.servers["nextcloud"].Drop = one.drop
 			form.Set("summary", string(form.Get("summary"))+" ·")
 			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-			app.compare(t, one.dir+"/loss.json", app.h.do(postForm(rec+"/edit", app.sess, form)))
+			app.compare(t, one.dir+"/"+state+".json", app.h.do(postForm(rec+"/edit", app.sess, form)))
 		})
 	}
 	// Only the calendar: its collections stand on both stands, so one can

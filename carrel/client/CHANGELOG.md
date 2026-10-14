@@ -4,6 +4,23 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.18 — 2026-10-14
+
+Typecase `14fa0c2` (Typecase's note 62), server `v0.2.219`. The copy of the
+mockup is `14fa0c2` byte for byte (443 frames).
+
+- A loss report is drawn as its frames draw it: what was lost in bold, the
+  properties after, a full stop; the days of a series in a message of their
+  own (`bind.Loss` gives the messages, `states-36`). The edits of a contact
+  and of an event draw no line of Save on it, as their frames (`states-12`,
+  `-17`, `-36`); the task's and the note's frames draw one (Typecase's task
+  161).
+- An event's edit gives «Related to» the frame's width and puts the
+  attachments after its set (`s-agenda-3`: Reminders, Attendees, Other,
+  Attachments, Repeats).
+- `app-event-edit/loss-days` waits with U-5.5 row 26, as the loss of an
+  event does: the attendees of the set are not the frame's.
+
 ## v0.4.17 — 2026-10-14
 
 Typecase `629c31e` (Typecase's notes 50–61), server `v0.2.218`. The copy of

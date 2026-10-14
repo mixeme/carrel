@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.219 — 2026-10-14
+
+Typecase `14fa0c2` (Typecase's note 62), client `v0.4.18`.
+
+### Changed
+
+- **The days of a series a server did not keep are said as days** (Typecase's
+  Р-60, the owner's answer of 14.10.2026; `states-36`). The report of an
+  edit names each by its start in the series and what became of it — «the
+  meeting of 24 August, which was skipped, is back», «the meeting of 31
+  August, which was moved to 1 September, 15:00, is back on its day at
+  12:00» — in a message of its own (`LossReport.days`); EXDATE and
+  RECURRENCE-ID are no longer among its properties.
+- **The report's first sentence is its own field** (`LossReport.title`), bold
+  as the frames draw it; `note` is the words before the properties.
+
+### Not done
+
+- The reports of a move, a merge, an import and an address rewritten still
+  name the exceptions EXDATE and RECURRENCE-ID.
+- «Nor did it keep …» — properties and days lost at once — is the
+  developer's wording; no frame draws it.
+
 ## v0.2.218 — 2026-10-14
 
 Typecase `629c31e` (Typecase's notes 50–61), client `v0.4.17`.

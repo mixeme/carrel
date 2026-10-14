@@ -219,7 +219,7 @@ func read(p *view.NotePage) []w.MainPart {
 func notices(p *view.NotePage) []w.MainPart {
 	out := bind.Notices(p.Notices, w.MsgSpacePage)
 	if p.Loss != nil {
-		out = append(out, bind.Loss(*p.Loss, w.MsgSpacePage))
+		out = append(out, bind.Loss(*p.Loss, w.MsgSpacePage)...)
 	}
 	return out
 }

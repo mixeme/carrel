@@ -163,7 +163,7 @@ func Screen(p *view.TaskEditPage) w.Shell {
 	main := []w.MainPart{h, w.Runbar{Progress: formID, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}}}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
 	if p.Loss != nil {
-		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2))
+		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2)...)
 	}
 	form := bind.Form(p.Form, formID)
 	for _, set := range p.Form.Sets {

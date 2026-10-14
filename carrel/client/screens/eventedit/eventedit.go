@@ -65,6 +65,8 @@ const (
 // the screen's, from its frame): «reminder.1» is a reminder.
 var widths = map[string]w.FieldWidth{
 	"summary": w.FieldXL, "location": w.FieldLG, "status": w.FieldSM, "categories": w.FieldMD, "description": w.FieldFull,
+	// Related to in «Other», as the task's (s-agenda-3, -15; Typecase's task 160).
+	"related":    w.FieldLG,
 	"start.date": w.FieldSM, "start.time": w.FieldXS, "end.date": w.FieldSM, "end.time": w.FieldXS, "tz": w.FieldMD,
 	"reminder": w.FieldMD,
 	// The numbers «Custom…» of a reminder opens (s-agenda-19).
@@ -140,13 +142,22 @@ func Screen(p *view.EventEditPage) w.Shell {
 	if p.Subtitle != "" {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}
-	main := []w.MainPart{h, w.Runbar{Progress: id, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}}}
+	main := []w.MainPart{h}
+	// No line of Save on the report of a loss: its frames draw none
+	// (states-17, -36, as states-12 of a contact; the loss frames of a task
+	// and a note draw one — Typecase's task 161).
+	if p.Loss == nil {
+		main = append(main, w.Runbar{Progress: id, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}})
+	}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
 	if p.Loss != nil {
-		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2))
+		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2)...)
 	}
 	form := bind.Form(p.Form, id)
-	after := reminders(p.Form)
+	after, related := reminders(p.Form), setOf(p.Form, relatedRow)
+	if related <= after {
+		related = after
+	}
 	for i, set := range p.Form.Sets {
 		rows := visible(set.Rows)
 		if set.Legend == "" {
@@ -156,8 +167,14 @@ func Screen(p *view.EventEditPage) w.Shell {
 		} else {
 			form.Items = append(form.Items, fieldSet(set.Legend, rows))
 		}
+		// The attendees after the reminders, the attachments after the set
+		// of «Related to» (s-agenda-3: When, Reminders, Attendees, Other,
+		// Attachments, Repeats); without one, right after the attendees.
 		if i == after {
-			form.Items = append(form.Items, attendees(p.Attendees), attachments(attach, p.Attach))
+			form.Items = append(form.Items, attendees(p.Attendees))
+		}
+		if i == related {
+			form.Items = append(form.Items, attachments(attach, p.Attach))
 		}
 	}
 	if len(p.Foreign) > 0 {
@@ -220,6 +237,7 @@ func removeID(a view.Action) string {
 const (
 	reminderRow = "reminder"
 	repeatRow   = "repeat."
+	relatedRow  = "related"
 )
 
 // reminders is the index of the form's set of reminders — the set with the
@@ -246,6 +264,18 @@ func reminders(f view.Form) int {
 		}
 	}
 	return len(f.Sets) - 1
+}
+
+// setOf is the index of the form's set holding the row name; -1 — none.
+func setOf(f view.Form, name string) int {
+	for i, set := range f.Sets {
+		for _, r := range set.Rows {
+			if r.Name == name {
+				return i
+			}
+		}
+	}
+	return -1
 }
 
 // starts tells whether a row's name starts with a prefix.

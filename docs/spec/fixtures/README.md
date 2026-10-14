@@ -31,7 +31,8 @@ spec/fixtures/<screen>/<state>.json
 | мёртвый секрет любого адреса с токеном (rest-1, C-5.2) | `dead-link` |
 
 `<state>` — из таблицы C-14.3: `normal`, `empty`, `readonly`, `source-error`,
-`partial`, `long`, `conflict`, `narrow`, `loss`, `unavailable`, `outcome`,
+`partial`, `long`, `conflict`, `narrow`, `loss`, `loss-days` (дни серии,
+которых сервер не сохранил, states-36), `unavailable`, `outcome`,
 `refused`, и шаги страниц вне оболочки по `data-part` их кадров — `sent`,
 `options`, `no-mail`, `wipe-sent`, `asked`, `password`; `link` — приглашение
 ссылкой, поле адреса пустое (s-auth-14; у `invite/normal` — приглашение

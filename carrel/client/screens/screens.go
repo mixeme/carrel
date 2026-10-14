@@ -212,14 +212,15 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.EventEditPage) },
-		Frames: []string{"s-agenda-3", "s-agenda-15", "states-17"},
+		Frames: []string{"s-agenda-3", "s-agenda-15", "states-17", "states-36"},
 		Draw:   func(model any) Root { return eventedit.Screen(model.(*view.EventEditPage)) },
 		Title:  func(model any) string { return string(model.(*view.EventEditPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return eventedit.Forms(model.(*view.EventEditPage)) },
 		Waits: []Wait{
-			{Row: 26, Fixture: "app-event-edit/normal"}, // ждёт библиотеку: U-5.5 #26
-			{Row: 26, Fixture: "app-event-edit/loss"},   // ждёт библиотеку: U-5.5 #26
-			{Row: 44, Fixture: "app-event-new/normal"},  // ждёт библиотеку: U-5.5 #44
+			{Row: 26, Fixture: "app-event-edit/normal"},    // ждёт библиотеку: U-5.5 #26
+			{Row: 26, Fixture: "app-event-edit/loss"},      // ждёт библиотеку: U-5.5 #26
+			{Row: 26, Fixture: "app-event-edit/loss-days"}, // ждёт библиотеку: U-5.5 #26
+			{Row: 44, Fixture: "app-event-new/normal"},     // ждёт библиотеку: U-5.5 #44
 		},
 	},
 	{

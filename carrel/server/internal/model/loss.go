@@ -17,6 +17,23 @@ type LossAggregator interface {
 type Loss struct {
 	Properties []string
 	Aggregated bool // true when every loss was already noted for this server
+	// Days are the exceptions of a series the server did not keep, each by
+	// its day (Typecase's Р-60, states-36): the report says them as days,
+	// not as EXDATE and RECURRENCE-ID, which then are not in Properties.
+	Days []LostDay
+}
+
+// LostDay is an exception of a series a server did not keep: the start the
+// occurrence has in the series (At — an instant; a whole day's date in UTC
+// when Day), and, for an occurrence changed apart (Moved), where it had been
+// moved (To, ToDay; zero when it stood on its own start). A day left out
+// that came back is not Moved.
+type LostDay struct {
+	At    time.Time
+	Day   bool
+	Moved bool
+	To    time.Time
+	ToDay bool
 }
 
 // CompareAfterPut compares sent with got after a successful PUT (S-7.1).
