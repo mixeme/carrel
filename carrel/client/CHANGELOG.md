@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.24 — 2026-10-14
+
+Server `v0.2.232`. Send — the record into a letter, a POST — stands on the
+event's and the task's head and over the note's text as on the contact's
+card: each such button submits a form of the page of its own («send»), so it
+works without a script. New task on the note's bar and the card's head
+(server `v0.2.231`) is a link and needed nothing.
+
 ## v0.4.23 — 2026-10-14
 
 The agenda in the columns a person chose (Typecase's task 154, notes 55 and

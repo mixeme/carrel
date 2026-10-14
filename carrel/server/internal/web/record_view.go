@@ -453,13 +453,7 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 		page.PhotoNote = externalPhotoNote
 	}
 	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
-	var send *view.Action
-	if s.canSendLetters(c.sess) && c.feed == nil {
-		// Send (s-contacts-6): the card goes into a letter by the attach
-		// sheet's own POST, and the letter opens (S-26.2).
-		send = &view.Action{ID: "record.send", Label: "Send", Icon: "i-mail", Method: "POST", Enabled: true,
-			Href: s.postQuery("/app/mail/attach", url.Values{"what": {"contact"}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}})}
-	}
+	send := s.sendFor(c, uid)
 	// Edit, Send and Print stand in the head, the deletion at the foot; the
 	// rest is the «⋯» (s-contacts-6, s-contacts-10). Print is the card with
 	// print=1 (the client's plan, decision 4).
@@ -576,8 +570,21 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 		edit.Icon = "i-pencil"
 	}
 	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
-	page.Actions, page.Menu = shown(edit, s.attachOf(c, uid, obj.ETag), task, print, ops.del), ops.menu
+	page.Actions, page.Menu = shown(edit, s.attachOf(c, uid, obj.ETag), task, s.sendFor(c, uid), print, ops.del), ops.menu
 	return page
+}
+
+// sendFor is Send of a record (s-contacts-6): it goes into a letter by the
+// attach sheet's own POST, and the letter opens (S-26.2). Every kind has it
+// (Р23 of scans/kinds-parity.md: a card had it, an event, a task and a note
+// went into a letter only from the letter's own Attach). nil — no letters
+// on this instance, or a subscription's record.
+func (s *Server) sendFor(c *collectionCtx, uid string) *view.Action {
+	if !s.canSendLetters(c.sess) || c.feed != nil {
+		return nil
+	}
+	return &view.Action{ID: "record.send", Label: "Send", Icon: "i-mail", Method: "POST", Enabled: true,
+		Href: s.postQuery("/app/mail/attach", url.Values{"what": {string(c.spec.kind)}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}})}
 }
 
 // newTaskFor is New task of a record (s-agenda-2): the quick sheet of a task
@@ -674,7 +681,7 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 		edit.Icon = "i-pencil"
 	}
 	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
-	page.Actions, page.Menu = shown(edit, done, s.attachOf(c, uid, obj.ETag), print, ops.del), ops.menu
+	page.Actions, page.Menu = shown(edit, done, s.attachOf(c, uid, obj.ETag), s.sendFor(c, uid), print, ops.del), ops.menu
 	return page
 }
 
@@ -705,7 +712,7 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	}
 	page.Doc.Bar = shown(edit, &view.Action{ID: "note.export", Label: "Export Markdown", Method: "GET", Enabled: true,
 		Href: s.postQuery(c.listPath()+"/export", url.Values{"uid": {uid}})},
-		s.newTaskFor(c, uid, "note.task"),
+		s.newTaskFor(c, uid, "note.task"), s.sendFor(c, uid),
 		&view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true})
 	page.Meta.Actions = shown(s.attachOf(c, uid, obj.ETag), ops.del)
 	page.Meta.Menu = menuWithout(ops.menu, "record.export")

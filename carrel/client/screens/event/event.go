@@ -14,7 +14,12 @@ import (
 )
 
 // The IDs of the page's forms: the deletion posts with no form of its own.
-const formDelete = "delete"
+// The IDs of the page's forms: the deletion's, and Send's — the record into
+// a letter by a POST of its own (Р23 of the server's kinds-parity list).
+const (
+	formDelete = "delete"
+	formSend   = "send"
+)
 
 // The screen's words (U-1.3) for the shell: the mark, the search, the rail.
 var (
@@ -69,6 +74,8 @@ func Screen(p *view.EventPage) w.Shell {
 			attach = &a
 		case a.Danger:
 			danger = append(danger, bind.Button(a, formDelete))
+		case a.Method == "POST":
+			acts = append(acts, bind.Button(a, formSend))
 		default:
 			acts = append(acts, bind.Button(a, ""))
 		}
@@ -160,6 +167,8 @@ func Forms(p *view.EventPage) []w.PostForm {
 			out = append(out, bind.MenuForms(a.Arrow)...)
 		case a.Danger && a.Method == "POST" && a.Enabled:
 			out = append(out, bind.ActionForm(a, formDelete))
+		case a.Method == "POST" && a.Enabled:
+			out = append(out, bind.ActionForm(a, formSend))
 		}
 	}
 	return out

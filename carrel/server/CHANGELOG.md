@@ -17,6 +17,15 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.232 — 2026-10-14
+
+### Changed
+
+- **Send from an event, a task and a note** (Р23 of
+  docs/plan/scans/kinds-parity.md): the record goes into a letter from its
+  own page, as a contact's card does. The frames do not draw it yet
+  (Typecase's task 168).
+
 ## v0.2.231 — 2026-10-14
 
 ### Changed

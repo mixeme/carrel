@@ -49,6 +49,16 @@
       "method": "POST"
     },
     {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/mail/attach?a=a-nc-home\u0026c=dela\u0026uid=aa11-2d09-5f84\u0026what=task",
+      "icon": "i-mail",
+      "id": "record.send",
+      "label": "Send",
+      "method": "POST",
+      "target": "sheet"
+    },
+    {
       "enabled": true,
       "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84?print=1",
       "icon": "i-print",

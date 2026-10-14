@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/emersion/go-webdav/caldav"
+
 	"carrel.dev/carrel/server/view"
 )
 
@@ -106,6 +108,44 @@ func TestQuickSheetWithNowhereToWrite(t *testing.T) {
 		}
 		if a := actionByID(sheet.Actions, "connection.add"); a == nil || a.Href != "/app/settings/connections?op=add" {
 			t.Errorf("%s: actions = %+v, want Connect account", kind, sheet.Actions)
+		}
+	}
+}
+
+// Р23 of scans/kinds-parity.md: Send is every kind's — an event, a task and
+// a note go into a letter from their own page, as a card does.
+func TestSendAnyRecordFromItsPage(t *testing.T) {
+	srv := searchServer(t)
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work"})
+	srv.Seed(searchWork+"e9.ics", ics("BEGIN:VEVENT\nUID:e9\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nSUMMARY:Review\nEND:VEVENT"))
+	srv.Seed(searchWork+"t9.ics", ics("BEGIN:VTODO\nUID:t9\nDTSTAMP:20260101T000000Z\nSUMMARY:Slides\nEND:VTODO"))
+	srv.Seed(searchWork+"n9.ics", ics("BEGIN:VJOURNAL\nUID:n9\nDTSTAMP:20260101T000000Z\nSUMMARY:Plan\nEND:VJOURNAL"))
+	f := connectFixture(t, srv, searchWork, func(h *harness) { h.cfg.MailEnabled = true })
+	f.h.relayed()
+	at := func(segment, uid string) string {
+		return "/app/" + segment + "/" + f.id + "/" + url.PathEscape(searchWork) + "/" + uid
+	}
+	sends := map[string]*view.Action{
+		"Review": actionByID(decode[view.EventPage](t, f.h.do(get(at("calendar", "e9"), f.sess))).Actions, "record.send"),
+		"Slides": actionByID(decode[view.TaskPage](t, f.h.do(get(at("tasks", "t9"), f.sess))).Actions, "record.send"),
+		"Plan":   actionByID(decode[view.NotePage](t, f.h.do(get(at("notes", "n9"), f.sess))).Doc.Bar, "record.send"),
+	}
+	for title, send := range sends {
+		if send == nil || send.Method != "POST" {
+			t.Fatalf("%s: no Send", title)
+		}
+		if resp := f.h.do(postHref(f, send.Href)); resp.Code != 303 || resp.Header().Get("Location") != "/app/mail/compose" {
+			t.Fatalf("%s: Send %d %s", title, resp.Code, resp.Body.String())
+		}
+	}
+	sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
+	var titles []string
+	for _, a := range sheet.Attach {
+		titles = append(titles, string(a.Title))
+	}
+	for title := range sends {
+		if !strings.Contains(strings.Join(titles, "|"), title) {
+			t.Errorf("letter attachments = %v, want %s", titles, title)
 		}
 	}
 }

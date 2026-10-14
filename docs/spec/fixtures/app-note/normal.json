@@ -28,6 +28,16 @@
         "target": "sheet"
       },
       {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/mail/attach?a=a-nc-home\u0026c=zapisi\u0026uid=5c81-77aa-0d64\u0026what=note",
+        "icon": "i-mail",
+        "id": "record.send",
+        "label": "Send",
+        "method": "POST",
+        "target": "sheet"
+      },
+      {
         "enabled": true,
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?print=1",
         "icon": "i-print",

@@ -21,9 +21,11 @@ import (
 // column's Attach has the same items, and a file input each.
 const (
 	formDelete = "delete"
-	formEdit   = "note-edit"
-	formNew    = "note-new"
-	barSuffix  = ".bar"
+	// formSend is Send's: the note into a letter by a POST of its own.
+	formSend  = "send"
+	formEdit  = "note-edit"
+	formNew   = "note-new"
+	barSuffix = ".bar"
 )
 
 // formOf is the ID of the document that is the form of the note's edit: a
@@ -113,6 +115,11 @@ func Forms(p *view.NotePage) []w.PostForm {
 			out = append(out, bind.ActionForm(a, formDelete))
 		}
 	}
+	for _, a := range p.Doc.Bar {
+		if p.Doc.Mode != view.NoteEditing && a.Method == "POST" && a.Enabled {
+			out = append(out, bind.ActionForm(a, formSend))
+		}
+	}
 	if p.Doc.Mode == view.NoteEditing {
 		for _, a := range p.Doc.Bar {
 			if a.ID == attachID {
@@ -164,7 +171,11 @@ func railParts(r view.Rail) []w.RailPart {
 func read(p *view.NotePage) []w.MainPart {
 	var acts []w.ActsPart
 	for _, a := range p.Doc.Bar {
-		acts = append(acts, bind.Button(a, ""))
+		form := ""
+		if a.Method == "POST" {
+			form = formSend
+		}
+		acts = append(acts, bind.Button(a, form))
 	}
 	// ждёт библиотеку: U-5.5 #41 — the client's Source, width and side
 	// column do nothing without a script (Typecase's task 104)
