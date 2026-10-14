@@ -740,6 +740,156 @@
           }
         ],
         "unfold": null
+      },
+      {
+        "legend": "Repeats",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "Repeats from the start date, or from the due date when there is none.",
+            "kind": "select",
+            "label": "Frequency",
+            "name": "repeat.freq",
+            "options": [
+              {
+                "label": "Does not repeat",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "Daily",
+                "selected": false,
+                "separator": true,
+                "value": "DAILY"
+              },
+              {
+                "label": "Weekly",
+                "selected": false,
+                "value": "WEEKLY"
+              },
+              {
+                "label": "Monthly",
+                "selected": false,
+                "value": "MONTHLY"
+              },
+              {
+                "label": "Yearly",
+                "selected": false,
+                "value": "YEARLY"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Every",
+            "mono": true,
+            "name": "repeat.interval",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "On",
+            "name": "repeat.on",
+            "options": [
+              {
+                "label": "MO",
+                "selected": false,
+                "value": "MO"
+              },
+              {
+                "label": "TU",
+                "selected": false,
+                "value": "TU"
+              },
+              {
+                "label": "WE",
+                "selected": false,
+                "value": "WE"
+              },
+              {
+                "label": "TH",
+                "selected": false,
+                "value": "TH"
+              },
+              {
+                "label": "FR",
+                "selected": false,
+                "value": "FR"
+              },
+              {
+                "label": "SA",
+                "selected": false,
+                "value": "SA"
+              },
+              {
+                "label": "SU",
+                "selected": false,
+                "value": "SU"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "date",
+            "label": "Until",
+            "mono": true,
+            "name": "repeat.until",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Count",
+            "name": "repeat.count",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "The advanced value takes precedence when set.",
+            "kind": "text",
+            "label": "Advanced RRULE",
+            "mono": true,
+            "name": "repeat.rule",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
       }
     ]
   },

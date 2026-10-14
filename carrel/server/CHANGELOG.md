@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.238 — 2026-10-15
+
+### Changed
+
+- **A task repeats as an event does** (Р1 of
+  docs/plan/scans/kinds-parity.md). The task's form ends with the event's
+  «Repeats» rubric, the rule edited whole (S-11). The series counts from
+  the start, or from the due date when there is none — the way the server
+  already read a repeating task and moved it on when it was done. A task
+  with neither date gets no rule: Repeats comes back with «Set a start or a
+  due date: the task repeats from it.», and the hint under Frequency says
+  so before. A save that Done moves on writes the rule itself, and the
+  form's count is the one left. No frame draws the rubric yet (Typecase's
+  task 173).
+
 ## v0.2.237 — 2026-10-15
 
 ### Changed

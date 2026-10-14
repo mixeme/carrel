@@ -683,7 +683,7 @@ func repeatSet(f editField, vals []string, held string, errText view.Text) view.
 		freqs = append(freqs, view.Option{Value: v[repFreq], Label: text(v[repFreq]), Selected: true})
 	}
 	set := view.FieldSet{Legend: text(f.label), Rows: []view.FormRow{
-		{Name: f.name + ".freq", Label: "Frequency", Kind: view.InputSelect, Value: text(v[repFreq]), Options: freqs, Error: errText},
+		{Name: f.name + ".freq", Label: "Frequency", Kind: view.InputSelect, Value: text(v[repFreq]), Options: freqs, Hint: text(f.hint), Error: errText},
 		{Name: f.name + ".interval", Label: "Every", Kind: view.InputNumber, Value: text(v[repInterval]), Mono: true},
 	}}
 	// On is one row of the days, MO to SU, as the frame draws it: each day
@@ -821,6 +821,12 @@ var editFields = map[view.Kind][]editField{
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, set: "Other"},
 		{name: "url", label: "Link", prop: "URL", typ: fieldText, set: "Other"},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated, set: "Other"},
+		// A task repeats as an event does (Р1 of scans/kinds-parity.md), from
+		// its start, or from its due date when it has none — as the server
+		// reads it and moves it on when it is done (cal.NextTime, А2). No
+		// frame draws it yet (Typecase's task 173).
+		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat, set: "Repeats",
+			hint: "Repeats from the start date, or from the due date when there is none."},
 	},
 	view.KindNote: {
 		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
@@ -999,12 +1005,16 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			vals[f.name] = []string{zoneOf(props[f.prop])}
 		case fieldRepeat:
 			var start time.Time
-			if tm, err := cal.TimingOf(obj, tz); err == nil {
+			if tm, err := cal.TimingOf(obj, tz); err == nil && !tm.Start.IsZero() {
+				start = tm.Start
+			} else if tm, err := cal.DueOf(obj, tz); err == nil && c.spec.kind == view.KindTask {
+				// A task without a start repeats from its due date.
 				start = tm.Start
 			}
 			// The last day is a date of the form, and the form's dates are
-			// in the event's own zone (formZone).
-			vals[f.name] = repeatValues(firstValue(obj, f.prop), formZone(zoneOf(props["DTSTART"]), tz), start)
+			// in the record's zone: an event's own (formZone), a task's the
+			// instance's.
+			vals[f.name] = repeatValues(firstValue(obj, f.prop), at, start)
 		case fieldRelated:
 			vals[f.name] = cal.RelatedTo(obj)
 		case fieldAttendee:
@@ -1349,6 +1359,13 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			// has moved one on.
 			rule := parseRule(cal.RawRRULE(obj)).set("COUNT", count)
 			ch.ops = append(ch.ops, textOps("RRULE", props["RRULE"], rule.String(), false)...)
+			// The form's Repeats says the count left, as the record will
+			// read back (Р1: a task's form holds its rule now).
+			if r := want["repeat"]; len(r) > repCount {
+				r = append([]string(nil), r...)
+				r[repCount] = count
+				want["repeat"] = r
+			}
 		}
 	}
 	startRow := triple(want["start"])
@@ -1391,7 +1408,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			clock = formZone(zone, tz)
 		}
 	}
-	var startAt, endAt time.Time
+	var startAt, endAt, dueAt time.Time
 
 	if c.spec.kind == view.KindEvent && len(props["DTSTART"]) > 0 && triple(want["start"])[2] == "on" && triple(have["start"])[2] != "on" {
 		// An event that becomes a whole day starts at midnight, and «15
@@ -1477,20 +1494,37 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			}
 			ch.ops = append(ch.ops, wholeOps(f.prop, props[f.prop], strings.Join(items, ","))...)
 		case fieldRepeat:
+			if first(want[taskNext]) == "on" {
+				// Done moves the series on and writes its rule itself (goOn).
+				continue
+			}
 			held := strings.TrimSpace(rowAt(h, repRule))
 			rule, typed := held, rowAt(w, repRule) != rowAt(h, repRule)
+			// What the series counts from: the start; a task without one,
+			// its due date (cal.NextTime reads it so).
+			anchor, anchorRow, anchorAt, anchorMoved := "DTSTART", startRow, startAt, startChanged
+			if c.spec.kind == view.KindTask && startRow[0] == "" {
+				anchor, anchorRow, anchorAt, anchorMoved = "DUE", triple(want["due"]), dueAt, !sameRows(want["due"], have["due"])
+			}
 			if !sameRows(w, h) {
 				var err error
-				if rule, err = repeatRule(w, h, zoneOf(props["DTSTART"]) == "" && len(props["DTSTART"]) > 0, clock); err != nil {
+				if rule, err = repeatRule(w, h, zoneOf(props[anchor]) == "" && len(props[anchor]) > 0, clock); err != nil {
 					ch.errors[f.name] = err.Error()
 					continue
 				}
 			}
+			if rule != "" && anchorRow[0] == "" {
+				// A task with no date has nothing to repeat from: an RRULE
+				// without DTSTART or DUE names no first time (RFC 5545
+				// §3.8.5.3), and the hint under Frequency said so.
+				ch.errors[f.name] = "Set a start or a due date: the task repeats from it."
+				continue
+			}
 			// The last day goes with the start (S-11): a rule typed whole is
 			// written as typed, and one nothing moved is left as it stands.
-			if !typed && !startAt.IsZero() && (startChanged || zone != "" || !sameRows(w, h)) {
+			if !typed && !anchorAt.IsZero() && (anchorMoved || zone != "" || !sameRows(w, h)) {
 				var err error
-				if rule, err = untilKept(rule, rowAt(w, repUntil), startRow, startAt, clock); err != nil {
+				if rule, err = untilKept(rule, rowAt(w, repUntil), anchorRow, anchorAt, clock); err != nil {
 					ch.errors[f.name] = err.Error()
 					continue
 				}
@@ -1606,6 +1640,8 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				startAt = at
 			case "end":
 				endAt = at
+			case "due":
+				dueAt = at
 			}
 			if f.name == "end" && len(props["DURATION"]) > 0 && row[0] != "" {
 				// An event written by its length stays so (S-11): the length

@@ -77,8 +77,10 @@ func TestTaskFormIsTheFramesRubrics(t *testing.T) {
 	// One «All day» for the whole task, the start time in When, Done last in
 	// Progress, the reminders a rubric of their own (to-typecase task 13).
 	// What the frame does not draw: the UID typed by hand under Related to,
-	// and the link (Р8 of scans/kinds-parity.md; Typecase's task 172).
-	kept := []string{"Other / Or enter a UID by hand", "Other / Link"}
+	// the link (Р8 of scans/kinds-parity.md; Typecase's task 172) and the
+	// rubric Repeats, as the event's (Р1; Typecase's task 173).
+	kept := []string{"Other / Or enter a UID by hand", "Other / Link", "Repeats / Frequency", "Repeats / Every", "Repeats / On",
+		"Repeats / Until", "Repeats / Count", "Repeats / Advanced RRULE"}
 	if !hasRow(page.Form, "url") {
 		t.Error("the task form has no Link")
 	}
@@ -89,7 +91,7 @@ func TestTaskFormIsTheFramesRubrics(t *testing.T) {
 	for _, set := range page.Form.Sets {
 		legends = append(legends, string(set.Legend))
 	}
-	if want := []string{"", "When", "Progress", "Reminders", "Other"}; !equalStrings(legends, want) {
+	if want := []string{"", "When", "Progress", "Reminders", "Other", "Repeats"}; !equalStrings(legends, want) {
 		t.Errorf("task rubrics = %q, want %q", legends, want)
 	}
 }

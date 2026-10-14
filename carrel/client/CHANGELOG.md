@@ -4,6 +4,13 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.31 — 2026-10-15
+
+Server `v0.2.238`. A task's form now holds its Repeats; no frame draws
+the rubric yet (Typecase's task 173), so the screen draws none and sends
+its values back as they came — a save keeps the task's rule instead of
+reading as «Does not repeat».
+
 ## v0.4.30 — 2026-10-15
 
 Typecase `95453f6` (note 68), server `v0.2.237`. The mockup is Typecase's,

@@ -172,6 +172,15 @@ func Screen(p *view.TaskEditPage) w.Shell {
 	form := bind.Form(p.Form, formID)
 	for _, set := range p.Form.Sets {
 		rows := visible(set.Rows)
+		if repeats(rows) {
+			// ждёт кадра: задача Typecase 173 — the task's Repeats (Р1 of
+			// the server's kinds-parity list) has no frame yet, and the
+			// screen draws none. Its values go with the form as they came,
+			// so a save keeps the task's rule: a rubric left out would read
+			// as «Does not repeat» and take the rule away.
+			form.Fields = append(form.Fields, carried(rows)...)
+			continue
+		}
 		if set.Legend == "" {
 			for i, r := range rows {
 				form.Items = append(form.Items, field(r, i))
@@ -252,6 +261,33 @@ func fieldSet(legend view.Text, rows []view.FormRow) w.FieldSet {
 		fs.Items = append(fs.Items, field(r, i))
 	}
 	return fs
+}
+
+// repeatRow is the start of the names of the repetition's rows (C-6.8:
+// repeat.freq…).
+const repeatRow = "repeat."
+
+// repeats tells whether a set is the repetition's: its rows are repeat.….
+func repeats(rows []view.FormRow) bool {
+	return len(rows) > 0 && len(rows[0].Name) > len(repeatRow) && rows[0].Name[:len(repeatRow)] == repeatRow
+}
+
+// carried are the rows of a set as the hidden fields that send what they
+// hold: a row of days, each day ticked; any other row, its value.
+func carried(rows []view.FormRow) []w.Hidden {
+	var out []w.Hidden
+	for _, r := range rows {
+		if r.Kind == view.InputCheck && len(r.Options) > 0 {
+			for _, o := range r.Options {
+				if o.Selected {
+					out = append(out, w.Hidden{Name: r.Name, Value: o.Value})
+				}
+			}
+			continue
+		}
+		out = append(out, w.Hidden{Name: r.Name, Value: string(r.Value)})
+	}
+	return out
 }
 
 // visible are the rows of a set a person sees: all but the hidden ones.
