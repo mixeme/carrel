@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.223 — 2026-10-14
+
+### Changed
+
+- **«Replace» of a folder moved or copied onto a taken name merges** (А11 of
+  the audit of 11.10.2026; the owner's decision of 12.10.2026). Nothing that
+  stood there is deleted any more: each member goes in under a free name at
+  once, and each name taken there is a question of its own in the queue — a
+  folder among them merges the same way when it is answered «Replace». A
+  move takes away the folder it came from once nothing is left in it.
+
+### Not done
+
+- A source folder emptied later, by the answers, stays where it was.
+- «merged with the folder there» is the developer's wording.
+
 ## v0.2.222 — 2026-10-14
 
 ### Changed

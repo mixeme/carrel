@@ -880,11 +880,11 @@ func TestFolderUploadRefusesAWayOut(t *testing.T) {
 	}
 }
 
-// Overwriting a folder is the one answer that removes what was there. The
-// copy is written beside it first, under a name of its own, and the old
-// folder goes only when the new one is whole: a copy that fails half way
-// leaves the destination as it was, instead of deleted and half-filled.
-func TestOverwritingAFolderKeepsItUntilTheCopyIsWhole(t *testing.T) {
+// «Replace» of a folder merges (А11, the owner's decision of 12.10.2026):
+// what stood there stays, whether the copy into it fails half way or goes
+// through, and no temporary folder is left. (Until v0.2.223 the answer
+// replaced the folder whole, keeping the old one until the copy was whole.)
+func TestReplacingAFolderKeepsWhatStoodThere(t *testing.T) {
 	f := filesFixture(t, true)
 	f.srv.SeedFile(filesDocs+"sub/inner.txt", "new")
 	f.srv.SeedFile(filesDocs+"dest/sub/keep.txt", "old")
@@ -906,8 +906,8 @@ func TestOverwritingAFolderKeepsItUntilTheCopyIsWhole(t *testing.T) {
 	if got, _ := f.srv.File(filesDocs + "dest/sub/inner.txt"); got != "new" {
 		t.Errorf("the overwrite: inner.txt %q", got)
 	}
-	if _, ok := f.srv.File(filesDocs + "dest/sub/keep.txt"); ok {
-		t.Error("an overwritten folder kept what the new one does not hold")
+	if got, ok := f.srv.File(filesDocs + "dest/sub/keep.txt"); !ok || got != "old" {
+		t.Errorf("the merge took what stood there: keep.txt %q, %v", got, ok)
 	}
 	for _, n := range f.srv.Names(filesDocs + "dest/") {
 		if strings.Contains(n, "carrel") {

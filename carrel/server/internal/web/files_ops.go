@@ -1544,6 +1544,16 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 	case "skip":
 		next.state, next.note = view.OpCancelled, ""
 	case "overwrite":
+		if t.dir && t.kind != "upload" {
+			// «Replace» of a folder merges (А11): nothing that stood there
+			// goes, and each name taken there is a question of its own.
+			if err := s.mergeFolder(ctx, c, t); err != nil {
+				next.state, next.note = view.OpFailed, sentenceEnd(fileReason(err))
+				break
+			}
+			next.state, next.note = view.OpDone, "merged with the folder there"
+			break
+		}
 		// «Replace» was said of what stood there when the question was
 		// asked. Whatever stands there now is looked at first: another
 		// version, or nothing at all, is not what the person agreed to
@@ -1591,6 +1601,47 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 		return
 	}
 	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetQueue, s.transferQueue(c.sess), nil)
+}
+
+// mergeFolder answers «Replace» of a folder moved or copied onto a folder of
+// its name (А11 of the audit of 11.10.2026; the owner's decision of
+// 12.10.2026: «the usual behaviour of a file manager: merge the contents; on
+// a conflict — a question»). Each member of the folder goes into the one
+// standing there the way a member of the open folder goes into another:
+// under a free name at once, under a taken one as a question of its own in
+// the queue — a folder answered «Replace» there merges in its turn. Nothing
+// that stood there is deleted. A move takes the folder it came from away
+// once nothing is left in it; what waits for an answer keeps it.
+func (s *Server) mergeFolder(ctx context.Context, c *fileCtx, t *transfer) error {
+	src, ok := s.fileCollection(c.sess, t.srcAccount, t.srcCol)
+	if !ok {
+		return errors.New("the storage it came from is no longer in the catalog")
+	}
+	srcPath, err := src.path(t.src, true)
+	if err != nil {
+		return err
+	}
+	entries, err := src.files.List(ctx, srcPath)
+	if err != nil {
+		return err
+	}
+	from, into := *src, *c
+	from.segs = slices.Clone(t.src)
+	into.segs = append(append(slices.Clone(t.folder), t.rel...), t.name)
+	for _, e := range entries {
+		if err := s.startItem(ctx, &from, &into, t.kind, e, e.Name); err != nil {
+			return err
+		}
+	}
+	if t.kind == "move" {
+		if left, err := src.files.List(ctx, srcPath); err == nil && len(left) == 0 {
+			_ = src.files.Delete(ctx, srcPath, "")
+		}
+		forgetFolder(c.sess, src.conn.ID, srcPath)
+	}
+	dst, _ := into.path(into.segs, true)
+	forgetFolder(c.sess, c.conn.ID, dst)
+	return nil
 }
 
 // freeName is the first name with a number the folder does not hold, read
