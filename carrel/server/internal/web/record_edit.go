@@ -735,10 +735,15 @@ var priorities = []fieldOption{{value: "", label: "No priority"}, {value: "1", l
 var eventStatuses = []fieldOption{{value: "", label: "No status"}, {value: "TENTATIVE", label: "Tentative", sep: true},
 	{value: "CONFIRMED", label: "Confirmed"}, {value: "CANCELLED", label: "Cancelled"}}
 
+// noteStatuses are the STATUS of a journal (RFC 5545 §3.8.1.11), as the
+// event's list offers its own (Р4 of scans/kinds-parity.md).
+var noteStatuses = []fieldOption{{value: "", label: "No status"}, {value: "DRAFT", label: "Draft", sep: true},
+	{value: "FINAL", label: "Final"}, {value: "CANCELLED", label: "Cancelled"}}
+
 // statusLabel is a STATUS as its list names it; a value no list offers is
 // shown as written.
 func statusLabel(v string) string {
-	for _, c := range append(append([]fieldOption(nil), taskStatuses...), eventStatuses...) {
+	for _, c := range append(append(append([]fieldOption(nil), taskStatuses...), eventStatuses...), noteStatuses...) {
 		if c.value != "" && strings.EqualFold(c.value, v) {
 			return c.label
 		}
@@ -834,6 +839,9 @@ var editFields = map[view.Kind][]editField{
 		{name: "start", label: "Date", prop: "DTSTART", typ: fieldTime, timeOptional: true},
 		// No hint under Tags (s-notes-20), as the event's.
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList},
+		// A journal's status, as an event's and a task's (Р4; no frame draws
+		// it yet — Typecase's task 176).
+		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: noteStatuses},
 		{name: "url", label: "Link", prop: "URL", typ: fieldText},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated},
 	},

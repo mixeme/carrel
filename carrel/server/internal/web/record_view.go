@@ -726,6 +726,10 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	// The day, and the time when the note has one (s-notes-2).
 	page.Meta.Date = text(noteWhen(obj, tf))
 	page.Meta.Tags = s.recordTags(c, obj)
+	// The status, as an event's and a task's card names it (Р4).
+	if v := cal.Text(obj, "STATUS"); v != "" {
+		page.Meta.Status = text(statusLabel(v))
+	}
 	// The link, as an event's and a task's card shows it (Р8 of
 	// scans/kinds-parity.md; no frame draws it yet).
 	if v := firstValue(obj, "URL"); v != "" {

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"carrel.dev/carrel/client/screens/eventedit"
+	"carrel.dev/carrel/client/screens/note"
 	"carrel.dev/carrel/client/screens/taskedit"
 	"carrel.dev/carrel/server/view"
 )
@@ -75,5 +76,37 @@ func TestAnEventChoosesItsCalendar(t *testing.T) {
 		if got := strings.Contains(html, `name="notebook"`); got != c.drawn {
 			t.Errorf("%s: the collection drawn %v, want %v", c.fixture, got, c.drawn)
 		}
+	}
+}
+
+// A note's Status (Р4) has no frame yet (Typecase's task 176): its edit
+// carries the value as it came — a form without it would take the status
+// away — and its page names it in the column, as the event's card does.
+func TestANoteKeepsItsStatus(t *testing.T) {
+	read := func(fixture string) view.NotePage {
+		t.Helper()
+		raw, err := os.ReadFile(filepath.Join("..", "..", "..", "docs", "spec", "fixtures", filepath.FromSlash(fixture)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var p view.NotePage
+		if err := json.Unmarshal(raw, &p); err != nil {
+			t.Fatal(err)
+		}
+		return p
+	}
+	edit := read("app-note-edit/normal.json")
+	for i, r := range edit.Doc.Fields {
+		if r.Name == "status" {
+			edit.Doc.Fields[i].Value = "FINAL"
+		}
+	}
+	if html := note.Screen(&edit).Render(); !strings.Contains(html, `name="status" value="FINAL"`) {
+		t.Error("the edit does not carry the status")
+	}
+	page := read("app-note/normal.json")
+	page.Meta.Status = "Final"
+	if html := note.Screen(&page).Render(); !strings.Contains(html, ">Status<") || !strings.Contains(html, "Final") {
+		t.Error("the page does not name the status")
 	}
 }

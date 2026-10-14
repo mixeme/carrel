@@ -9,13 +9,13 @@ import (
 )
 
 // noteKnown are the properties of a note that its page shows or keeps by
-// itself: the form (title, text, date, tags, link, relation), the
+// itself: the form (title, text, date, tags, status, link, relation), the
 // attachments, and the bookkeeping every calendar object carries. Anything
 // else is the property of another client, kept as it is (S-7) and named under
 // the text of the edit (s-notes-20).
 var noteKnown = map[string]bool{
 	"UID": true, "DTSTAMP": true, "CREATED": true, "LAST-MODIFIED": true, "SEQUENCE": true,
-	"SUMMARY": true, "DESCRIPTION": true, "DTSTART": true, "CATEGORIES": true, "URL": true,
+	"SUMMARY": true, "DESCRIPTION": true, "DTSTART": true, "CATEGORIES": true, "URL": true, "STATUS": true,
 	"RELATED-TO": true, "ATTACH": true,
 }
 

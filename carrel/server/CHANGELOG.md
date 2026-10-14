@@ -17,6 +17,16 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.241 — 2026-10-15
+
+### Changed
+
+- **A note has a status** (Р4 of docs/plan/scans/kinds-parity.md), as an
+  event and a task do: a journal's STATUS (Draft, Final, Cancelled). Its
+  edit chooses it after Tags, «No status» writing none; its page names it
+  (`NoteMeta.status`); `STATUS` is no longer foreign to a note. No frame
+  draws either yet (Typecase's task 176).
+
 ## v0.2.240 — 2026-10-15
 
 ### Changed

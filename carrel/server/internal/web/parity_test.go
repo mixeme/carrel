@@ -105,3 +105,35 @@ func TestANoteExportsAsCalendar(t *testing.T) {
 		t.Errorf("Export Markdown = %+v", a)
 	}
 }
+
+// Р4 of scans/kinds-parity.md: an event and a task have a status their form
+// edits and their card shows; a note had none, though a journal has one
+// (RFC 5545 §3.8.1.11: DRAFT, FINAL, CANCELLED). Now its edit chooses it,
+// «No status» writing none, and its page names it.
+func TestANoteHasAStatus(t *testing.T) {
+	f := calendarFixture(t, nil, "n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nSUMMARY:Plan\nSTATUS:DRAFT\nX-KEEP:1\nEND:VJOURNAL"))
+	form := noteFormOf(t, f, "n1")
+	if form.Get("status") != "DRAFT" {
+		t.Fatalf("form = %v", form)
+	}
+	page := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1", f.sess)))
+	if page.Meta.Status != "Draft" {
+		t.Errorf("the page says %q, want Draft", page.Meta.Status)
+	}
+	form.Set("status", "FINAL")
+	if resp := f.h.do(postForm(f.path("notes")+"/n1/edit", f.sess, form)); resp.Code != 303 {
+		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
+	}
+	got := strings.ReplaceAll(body(t, f, "n1.ics"), "\r\n", "\n")
+	if !strings.Contains(got, "\nSTATUS:FINAL\n") || !strings.Contains(got, "\nX-KEEP:1\n") {
+		t.Errorf("after Save:\n%s", got)
+	}
+	form = noteFormOf(t, f, "n1")
+	form.Set("status", "")
+	if resp := f.h.do(postForm(f.path("notes")+"/n1/edit", f.sess, form)); resp.Code != 303 {
+		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
+	}
+	if got := body(t, f, "n1.ics"); strings.Contains(got, "STATUS") {
+		t.Errorf("No status left a line:\n%s", got)
+	}
+}

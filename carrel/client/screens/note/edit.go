@@ -32,13 +32,14 @@ const (
 )
 
 // The names of the contract the edit places by (C-6.8, C-7.5): the title and
-// the text of the document's form, Save of its bar, and the notebook among
-// its fields.
+// the text of the document's form, Save of its bar, and the notebook and the
+// status among its fields.
 const (
-	titleName = "summary"
-	textName  = "description"
-	saveID    = "record.save"
-	notebook  = "notebook"
+	titleName  = "summary"
+	textName   = "description"
+	saveID     = "record.save"
+	notebook   = "notebook"
+	statusName = "status"
 )
 
 // widths are the widths of the edit's fields by their names, as the frame
@@ -159,6 +160,14 @@ func edit(p *view.NotePage) []w.MainPart {
 	}
 	fields := w.DocFields{}
 	for _, r := range p.Doc.Fields {
+		if r.Name == statusName {
+			// ждёт кадра: задача Typecase 176 — the note's Status (Р4 of
+			// the server's kinds-parity list) has no frame yet, and the
+			// screen draws none. Its value goes with the form as it came: a
+			// form without it would read as «No status» and take it away.
+			doc.Fields = append(doc.Fields, w.Hidden{Name: r.Name, Value: string(r.Value)})
+			continue
+		}
 		fields.Items = append(fields.Items, field(r))
 	}
 	doc.Items = []w.DocPart{title, fields, body}
