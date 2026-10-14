@@ -65,6 +65,13 @@ type FormRow struct {
 	// собой. У прочих пусто. Клиент отдаёт обе строки библиотеке как есть
 	Follows string `json:"follows,omitempty"`
 	Day     string `json:"day,omitempty"`
+	// Поле, которого нет на экране, пока вариант выбора той же формы, что
+	// его называет (Option.Shows), не выбран: «How long», «Unit» и «At»
+	// строки напоминания, пока выбран готовый шаг (s-agenda-19). Клиент
+	// отдаёт его библиотеке как есть: со сценарием скрытое поле не
+	// отправляется, без него сервер не читает его, если вариант не выбран;
+	// у прочих false
+	Hidden bool `json:"hidden,omitempty"`
 	// У InputAdd — строки, которые добавляет одно нажатие, пустые; «{n}» в
 	// их Name клиент заменяет наименьшим числом, под которым строки этого
 	// поля в форме ещё нет (s-contacts-3 «Add phone», s-agenda-3 «Add
@@ -97,6 +104,11 @@ type Option struct {
 	Meta      Text   `json:"meta,omitempty"`      // подпись справа: род и день записи, «event · 12 August» (s-tasks-10); у прочих пусто
 	Typed     bool   `json:"typed,omitempty"`     // «By UID…» (s-tasks-10): выбор открывает строку, где значение набирают руками под тем же Name; Value пуст; образец строки — Placeholder поля
 	Hint      Text   `json:"hint,omitempty"`      // у Typed — строка под строкой набора: «By UID: a record that is not among the loaded ones.» (s-tasks-11); у прочих пусто
+	// Shows — Name полей той же формы через пробел, которые видны, только
+	// пока выбран этот вариант (FormRow.Hidden у них, пока не выбран):
+	// «Custom…» напоминания — «reminder.0.count reminder.0.unit», у записи
+	// на весь день ещё «reminder.0.at» (s-agenda-19); у прочих пусто
+	Shows string `json:"shows,omitempty"`
 }
 type FieldError struct {
 	Name    string `json:"name"`

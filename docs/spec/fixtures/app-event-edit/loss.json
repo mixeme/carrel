@@ -281,52 +281,6 @@
             "readOnly": false,
             "required": false,
             "value": "Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям."
-          },
-          {
-            "add": {
-              "add": null,
-              "error": "",
-              "extra": null,
-              "hint": "",
-              "kind": "text",
-              "label": "Add a link",
-              "mono": true,
-              "name": "related.add",
-              "options": [],
-              "placeholder": "Title or UID",
-              "readOnly": false,
-              "required": false,
-              "suggest": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/related",
-              "value": ""
-            },
-            "error": "",
-            "extra": null,
-            "hint": "A record that is not loaded here: its UID.",
-            "kind": "select",
-            "label": "Related to",
-            "mono": true,
-            "multiple": true,
-            "name": "related",
-            "options": [
-              {
-                "label": "5c81-77aa-0d64",
-                "selected": true,
-                "value": "5c81-77aa-0d64"
-              },
-              {
-                "hint": "By UID: a record that is not among the loaded ones.",
-                "label": "By UID…",
-                "selected": false,
-                "separator": true,
-                "typed": true,
-                "value": ""
-              }
-            ],
-            "placeholder": "UID of the record",
-            "readOnly": false,
-            "required": false,
-            "suggest": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/related",
-            "value": "5c81-77aa-0d64"
           }
         ],
         "unfold": null
@@ -2926,6 +2880,12 @@
                 "value": "-P1D"
               },
               {
+                "label": "Custom…",
+                "selected": false,
+                "shows": "reminder.0.count reminder.0.unit",
+                "value": "custom"
+              },
+              {
                 "label": "No reminder",
                 "selected": false,
                 "separator": true,
@@ -2935,6 +2895,56 @@
             "readOnly": false,
             "required": false,
             "value": "-PT10M"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hidden": true,
+            "hint": "",
+            "kind": "number",
+            "label": "How long",
+            "mono": true,
+            "name": "reminder.0.count",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hidden": true,
+            "hint": "",
+            "kind": "select",
+            "label": "Unit",
+            "name": "reminder.0.unit",
+            "options": [
+              {
+                "label": "minutes before",
+                "selected": true,
+                "value": "minutes"
+              },
+              {
+                "label": "hours before",
+                "selected": false,
+                "value": "hours"
+              },
+              {
+                "label": "days before",
+                "selected": false,
+                "value": "days"
+              },
+              {
+                "label": "weeks before",
+                "selected": false,
+                "value": "weeks"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "minutes"
           },
           {
             "add": null,
@@ -2976,6 +2986,12 @@
                 "value": "-P1D"
               },
               {
+                "label": "Custom…",
+                "selected": false,
+                "shows": "reminder.1.count reminder.1.unit",
+                "value": "custom"
+              },
+              {
                 "label": "No reminder",
                 "selected": false,
                 "separator": true,
@@ -2985,6 +3001,56 @@
             "readOnly": false,
             "required": false,
             "value": "-P1D"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hidden": true,
+            "hint": "",
+            "kind": "number",
+            "label": "How long",
+            "mono": true,
+            "name": "reminder.1.count",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hidden": true,
+            "hint": "",
+            "kind": "select",
+            "label": "Unit",
+            "name": "reminder.1.unit",
+            "options": [
+              {
+                "label": "minutes before",
+                "selected": true,
+                "value": "minutes"
+              },
+              {
+                "label": "hours before",
+                "selected": false,
+                "value": "hours"
+              },
+              {
+                "label": "days before",
+                "selected": false,
+                "value": "days"
+              },
+              {
+                "label": "weeks before",
+                "selected": false,
+                "value": "weeks"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "minutes"
           },
           {
             "add": null,
@@ -3038,6 +3104,12 @@
                     "value": "-P1D"
                   },
                   {
+                    "label": "Custom…",
+                    "selected": false,
+                    "shows": "reminder.{n}.count reminder.{n}.unit",
+                    "value": "custom"
+                  },
+                  {
                     "label": "No reminder",
                     "selected": true,
                     "separator": true,
@@ -3047,9 +3119,111 @@
                 "readOnly": false,
                 "required": false,
                 "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hidden": true,
+                "hint": "",
+                "kind": "number",
+                "label": "How long",
+                "mono": true,
+                "name": "reminder.{n}.count",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hidden": true,
+                "hint": "",
+                "kind": "select",
+                "label": "Unit",
+                "name": "reminder.{n}.unit",
+                "options": [
+                  {
+                    "label": "minutes before",
+                    "selected": true,
+                    "value": "minutes"
+                  },
+                  {
+                    "label": "hours before",
+                    "selected": false,
+                    "value": "hours"
+                  },
+                  {
+                    "label": "days before",
+                    "selected": false,
+                    "value": "days"
+                  },
+                  {
+                    "label": "weeks before",
+                    "selected": false,
+                    "value": "weeks"
+                  }
+                ],
+                "readOnly": false,
+                "required": false,
+                "value": "minutes"
               }
             ],
             "value": "reminder"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Other",
+        "rows": [
+          {
+            "add": {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Add a link",
+              "mono": true,
+              "name": "related.add",
+              "options": [],
+              "placeholder": "Title or UID",
+              "readOnly": false,
+              "required": false,
+              "suggest": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/related",
+              "value": ""
+            },
+            "error": "",
+            "extra": null,
+            "hint": "A record that is not loaded here: its UID.",
+            "kind": "select",
+            "label": "Related to",
+            "mono": true,
+            "multiple": true,
+            "name": "related",
+            "options": [
+              {
+                "label": "5c81-77aa-0d64",
+                "selected": true,
+                "value": "5c81-77aa-0d64"
+              },
+              {
+                "hint": "By UID: a record that is not among the loaded ones.",
+                "label": "By UID…",
+                "selected": false,
+                "separator": true,
+                "typed": true,
+                "value": ""
+              }
+            ],
+            "placeholder": "UID of the record",
+            "readOnly": false,
+            "required": false,
+            "suggest": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/related",
+            "value": "5c81-77aa-0d64"
           }
         ],
         "unfold": null

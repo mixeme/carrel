@@ -17,6 +17,41 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.218 — 2026-10-14
+
+Typecase `629c31e` (Typecase's notes 50–61), client `v0.4.17`.
+
+### Changed
+
+- **A reminder of one's own** (Typecase's task 156, `s-agenda-19`). A
+  reminder's list has «Custom…» after the steps; each row carries «How
+  long» and «Unit» — a record of a whole day also «At» —, hidden while a
+  step is chosen (`FormRow.hidden`, `Option.shows`). The numbers are read
+  only while «Custom…» is chosen; chosen without them, the form comes back
+  with them open and a reason, and nothing is written. A reminder another
+  client wrote at an offset none of the steps is comes in as «Custom…» with
+  its numbers, not as one more item of the list. A whole day's card says
+  «1 day before, 09:00».
+- **«Related to» of an event stands in «Other»**, before the attachments,
+  as the task's (Typecase's task 160, `s-agenda-3`, `-15`).
+- **The card of a linked record opened from its collection is that copy**
+  (Typecase's Р-58, note 57): its own values, and the badge «linked» on a
+  field another copy holds otherwise (`Field.badge`; a note's tags —
+  `NoteMeta.tagsBadge`). It no longer takes the other copies' title, place
+  and fields. The rows of the copies say «where», «priority», «tags differ».
+  A note's edit no longer shows the same note in other notebooks.
+
+### Not done
+
+- The sheets «Which copy to edit?» and «Which copy to mark done?», and the
+  card of the entity at an address of its own (`s-contacts-31`…`-33`,
+  `s-tasks-16`): until then nothing shows the values a person chose.
+- The live layer of notes 58–61, the sheets of notes 53 and 56, the
+  agenda's columns (note 55), the import's question (note 52), the files of
+  notes 50, 60 and 61, «Appearance» keeping its ticks — docs/plan/server.md,
+  «Переход на Typecase `629c31e`».
+- The reasons of «Custom…» are the developer's words.
+
 ## v0.2.217 — 2026-10-12
 
 ### Changed

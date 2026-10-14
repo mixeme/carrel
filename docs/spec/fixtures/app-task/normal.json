@@ -89,6 +89,10 @@
       "value": "Needs action"
     },
     {
+      "badge": {
+        "label": "linked",
+        "role": "linked"
+      },
       "href": "",
       "label": "Due",
       "mono": false,
@@ -107,6 +111,10 @@
       "value": "0%"
     },
     {
+      "badge": {
+        "label": "linked",
+        "role": "linked"
+      },
       "href": "",
       "label": "Priority",
       "mono": true,
@@ -138,7 +146,7 @@
       "href": "/app/tasks/a-nc-home/rabota/cc11-5a20-7e94",
       "label": "nextcloud · Работа",
       "mono": false,
-      "value": "Time differ"
+      "value": "Time, priority differ"
     }
   ],
   "loss": null,

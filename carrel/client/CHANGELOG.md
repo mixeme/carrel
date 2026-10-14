@@ -4,6 +4,24 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.17 — 2026-10-14
+
+Typecase `629c31e` (Typecase's notes 50–61), server `v0.2.218`. The copy of
+the mockup is `629c31e` byte for byte (442 frames).
+
+- A dialog with `Action` is a form for the guard of meaning (`s-backup-7`,
+  note 54).
+- A field the model hides (`FormRow.hidden`) is a hidden field, an option
+  that shows fields names them (`Option.shows`): the numbers of a
+  reminder's «Custom…» (`s-agenda-19`); the edits of an event and of a task
+  give them the frame's widths.
+- A note's «Tags» carries «linked» when another copy holds other tags
+  (`NoteMeta.tagsBadge`, `s-notes-2`).
+- The guard compares a screen with its frame by what it shows: a field
+  printed `hidden` is left out of the frame comparison and of kinship
+  (`guard.Drawn`) until Typecase's shape does it itself (task 161).
+- U-5.5 row 40 is gone: the note's edit is its frame now.
+
 ## v0.4.16 — 2026-10-12
 
 Typecase `22f594a` (Typecase's note 49), server `v0.2.214`. The copy of the

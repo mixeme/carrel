@@ -163,9 +163,11 @@ func TestEventListsAreTheFrames(t *testing.T) {
 		t.Errorf("zones = %+v, want %q for a floating event", rowNamed(t, page.Form, "tz").Options, floating)
 	}
 
-	// A reminder no step of the list names stays a choice.
+	// A reminder no step of the list names comes as «Custom…» with its
+	// numbers, not as one more item (Typecase's task 156, s-agenda-19).
 	odd := decode[view.EventEditPage](t, f.h.do(get(f.path("calendar")+"/e2/edit", f.sess)))
-	if sel := selectedOf(rowNamed(t, odd.Form, "reminder.0").Options); len(sel) != 1 || sel[0] != "-PT7M" {
+	if sel := selectedOf(rowNamed(t, odd.Form, "reminder.0").Options); len(sel) != 1 || sel[0] != "custom" ||
+		rowNamed(t, odd.Form, "reminder.0.count").Value != "7" || rowNamed(t, odd.Form, "reminder.0.unit").Value != "minutes" {
 		t.Errorf("a held 7 minutes selects %q", sel)
 	}
 

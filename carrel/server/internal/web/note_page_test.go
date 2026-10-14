@@ -364,9 +364,10 @@ func TestNoteMoveSurvivesAConflict(t *testing.T) {
 }
 
 // S-7.1, S-16: the loss report of a note's edit is its edit page again, and
-// the column keeps the same note in other notebooks as it does on a plain
-// render.
-func TestNoteLossReportKeepsLinked(t *testing.T) {
+// its column is the edit's: since Typecase's Р-58 (from-typecase note 57,
+// s-notes-20) neither names the same note in other notebooks — the edit
+// writes this copy alone. (Until 14.10.2026 both kept that block.)
+func TestNoteLossReportIsTheEdit(t *testing.T) {
 	f := newNoteShelf(t)
 	f.srv.Seed(f.diary+"n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nSUMMARY:First\nEND:VJOURNAL"))
 	key, _ := f.sess.DataKey()
@@ -379,16 +380,16 @@ func TestNoteLossReportKeepsLinked(t *testing.T) {
 	}
 	list := f.path("notes")
 	p := decode[view.NotePage](t, f.h.do(get(list+"/n1/edit", f.sess)))
-	if len(p.Meta.Linked) == 0 {
-		t.Fatalf("the edit shows no linked note: %+v", p.Meta)
+	if len(p.Meta.Linked) != 0 {
+		t.Errorf("the edit names the other copies: %+v", p.Meta.Linked)
 	}
 	f.srv.Drop = []string{"X-OTHER"}
 	lost := decode[view.NotePage](t, shelfSave(t, f, p, url.Values{"summary": {"First, renamed"}}))
 	if lost.Loss == nil {
 		t.Fatalf("no loss report: %+v", lost.Notices)
 	}
-	if len(lost.Meta.Linked) != len(p.Meta.Linked) {
-		t.Errorf("linked on the loss report = %+v, want %+v", lost.Meta.Linked, p.Meta.Linked)
+	if len(lost.Meta.Linked) != 0 || len(lost.Meta.Attach) != len(p.Meta.Attach) {
+		t.Errorf("the loss report's column = %+v, the edit's %+v", lost.Meta, p.Meta)
 	}
 }
 

@@ -2,24 +2,24 @@ package web
 
 import (
 	"context"
+	"slices"
 	"sort"
 	"strings"
 
 	"carrel.dev/carrel/server/internal/dupes"
 	"carrel.dev/carrel/server/internal/model"
-	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/view"
 )
 
-// The card of a linked record (S-16) is the card of the entity: the record
-// opened, and what the other members of its group add. The others are read
-// from their servers when the card is opened — the card is a read of the
-// entity, as the card of one record is a read of it; finding duplicates is
-// what asks nobody. Each member is a row under the card with where it lives
-// and what it holds differently, one link away. A member its server says is
-// not there leaves the group silently; a server that does not answer is said
-// in its row, and its member stays.
+// The card of a linked record (S-16) opened from its collection is that
+// copy, with what the other members of its group hold differently marked
+// and each member a row under it — where it lives and what it holds
+// differently, one link away (Typecase's Р-58). The others are read from
+// their servers when the card is opened — the card is a read, as the card of
+// one record is; finding duplicates is what asks nobody. A member its server
+// says is not there leaves the group silently; a server that does not answer
+// is said in its row, and its member stays.
 
 // linkedMember is another member of the opened record's group.
 type linkedMember struct {
@@ -71,63 +71,6 @@ func (s *Server) linkedOf(ctx context.Context, c *collectionCtx, uid string) (li
 	return lc, len(lc.others) > 0
 }
 
-// preferred is the record whose single-valued prop the card shows: the
-// member the person chose when linking, when it answered; else the opened
-// one if it holds the property; else the first other that does — a field
-// only one member has is taken from it (S-16).
-func (lc linkedCard) preferred(prop string, own *model.Object) *model.Object {
-	if ref, ok := lc.group.Prefs[prop]; ok {
-		if ref == lc.self {
-			return own
-		}
-		for _, m := range lc.others {
-			if m.ref == ref && m.obj != nil {
-				return m.obj
-			}
-		}
-	}
-	if len(own.PropText(prop)) > 0 {
-		return own
-	}
-	for _, o := range lc.answered() {
-		if len(o.PropText(prop)) > 0 {
-			return o
-		}
-	}
-	return own
-}
-
-// answered are the others that answered.
-func (lc linkedCard) answered() []*model.Object {
-	var out []*model.Object
-	for _, m := range lc.others {
-		if m.obj != nil {
-			out = append(out, m.obj)
-		}
-	}
-	return out
-}
-
-// mergeFields adds to own the fields of the others it does not show: the
-// union without exact repeats, as linking promises (S-16).
-func mergeFields(own []view.Field, others [][]view.Field) []view.Field {
-	seen := map[string]bool{}
-	for _, f := range own {
-		seen[string(f.Label)+"\x00"+string(f.Value)] = true
-	}
-	out := append([]view.Field(nil), own...)
-	for _, fs := range others {
-		for _, f := range fs {
-			key := string(f.Label) + "\x00" + string(f.Value)
-			if !seen[key] {
-				seen[key] = true
-				out = append(out, f)
-			}
-		}
-	}
-	return out
-}
-
 // memberRows are the rows under the card: every other member with where it
 // lives and what it holds differently, or that its server did not answer.
 func (s *Server) memberRows(lc linkedCard, own *model.Object, differ func(a, b *model.Object) []string) []view.Field {
@@ -176,7 +119,8 @@ var contactDiffers = []differProp{
 
 var calendarDiffers = []differProp{
 	{"title", []string{"SUMMARY"}}, {"time", []string{"DTSTART", "DTEND", "DURATION", "DUE", "RRULE"}},
-	{"location", []string{"LOCATION"}}, {"text", []string{"DESCRIPTION"}}, {"categories", []string{"CATEGORIES"}},
+	{"where", []string{"LOCATION"}}, {"priority", []string{"PRIORITY"}}, {"text", []string{"DESCRIPTION"}},
+	{"tags", []string{"CATEGORIES"}},
 }
 
 func differs(table []differProp) func(a, b *model.Object) []string {
@@ -194,77 +138,125 @@ func differs(table []differProp) func(a, b *model.Object) []string {
 	}
 }
 
-// linkedContact is the card of a linked contact: the chosen name and
-// organisation, the fields of all members, the chosen photo, and the rows of
-// the others.
+// The card a collection opens (Typecase's Р-58, task 153; the owner's
+// decisions of 13.10.2026) shows that collection's copy — what its edit
+// opens —, never the values of another: a field where a choice could be
+// made, one another copy holds differently, carries the badge «linked»
+// (s-contacts-6, s-agenda-2, s-tasks-2, s-notes-2). The card of the entity —
+// the values the person chose and where each came from (s-contacts-33) — is
+// another address, opened from the combined list.
+
+// linkedMark is the badge of a field another copy holds differently.
+var linkedMark = view.Badge{Label: "linked", Role: view.BadgeLinked}
+
+// fieldKey is what a field shows, for comparing copies: its words, not
+// where its tags lead — each copy's tags lead into its own collection.
+func fieldKey(f view.Field) string {
+	parts := []string{string(f.Value)}
+	for _, r := range f.Runs {
+		parts = append(parts, string(r.Text))
+	}
+	for _, t := range f.Tags {
+		parts = append(parts, string(t.Label))
+	}
+	return strings.Join(parts, "\x00")
+}
+
+// markDiffering gives the badge to each field of own that another copy
+// holds under the same label with other values. A field another copy does
+// not have is no choice — linking takes it as it is (S-16) —, and a field
+// with a badge of its own (the zone it was made in, the end of a series)
+// keeps it.
+func markDiffering(own []view.Field, others [][]view.Field) []view.Field {
+	out := append([]view.Field(nil), own...)
+	for i, f := range out {
+		if f.Badge.Label != "" {
+			continue
+		}
+		key := fieldKey(f)
+		for _, fs := range others {
+			var held []string
+			for _, o := range fs {
+				if o.Label == f.Label {
+					held = append(held, fieldKey(o))
+				}
+			}
+			if len(held) > 0 && !slices.Contains(held, key) {
+				out[i].Badge = linkedMark
+				break
+			}
+		}
+	}
+	return out
+}
+
+// otherPages are the reading pages of the copies that answered, as their
+// collections show them.
+func (s *Server) otherPages(lc linkedCard) []any {
+	var out []any
+	for _, m := range lc.others {
+		if m.obj != nil {
+			out = append(out, s.recordPage(m.c, m.ref.UID, m.obj))
+		}
+	}
+	return out
+}
+
+// linkedContact is the card of a linked contact opened from its book: its
+// own fields, the badge where another copy differs, and the rows of the
+// others.
 func (s *Server) linkedContact(ctx context.Context, c *collectionCtx, uid string, obj *model.Object, page *view.ContactPage) {
 	lc, ok := s.linkedOf(ctx, c, uid)
 	if !ok {
 		return
 	}
-	name := contactName(lc.preferred("FN", obj))
-	page.Shell.Title, page.Name = text(name), text(name)
-	page.Avatar.Initials = avatarFor(uid, name).Initials
-	if p := lc.preferred("PHOTO", obj); p != obj {
-		for _, m := range lc.others {
-			if m.obj == p {
-				page.Avatar.Href, page.PhotoHref = s.cardPhoto(m.c, m.ref.UID, m.obj)
-			}
+	var others [][]view.Field
+	for _, p := range s.otherPages(lc) {
+		if o, ok := p.(view.ContactPage); ok {
+			others = append(others, o.Fields)
 		}
 	}
-	// Where the person works and as what is the head of the card, and each
-	// half comes from the member the person chose (s-contacts-6, S-16).
-	page.Subtitle = text(contactSubtitleOf(lc.preferred("ORG", obj), lc.preferred("TITLE", obj)))
-	fieldsOf := func(o *model.Object) []view.Field {
-		var out []view.Field
-		for _, f := range contactFieldsOf(o) {
-			if f.prop == "ORG" || f.prop == "TITLE" {
-				continue
-			}
-			out = append(out, f.Field)
-		}
-		return out
-	}
-	var more [][]view.Field
-	for _, o := range lc.answered() {
-		more = append(more, fieldsOf(o))
-	}
-	page.Fields = withBirthdayAside(withTagLinks(mergeFields(fieldsOf(obj), more), s.recordTags(c, obj)), c.tf)
+	page.Fields = markDiffering(page.Fields, others)
 	page.Books = s.memberRows(lc, obj, differs(contactDiffers))
 }
 
-// linkedCalendar is what a linked event, task or note shows of its group:
-// the chosen title and place, the fields of all members, the rows of the
-// others. Time, repetition and reminders are the opened record's own.
-func (s *Server) linkedCalendar(ctx context.Context, c *collectionCtx, uid string, obj *model.Object) (title string, fields func(own []view.Field) []view.Field, rows []view.Field, ok bool) {
+// linkedCalendar is what a linked event, task or note opened from its
+// collection shows of its group: the badge on the fields another copy holds
+// differently (fields), whether another copy holds other tags than a note's
+// own (tags) — a note's tags are its column's, not a field —, the rows of
+// the others.
+func (s *Server) linkedCalendar(ctx context.Context, c *collectionCtx, uid string, obj *model.Object) (fields func(own []view.Field) []view.Field, tags func(own []view.Tag) bool, rows []view.Field, ok bool) {
 	lc, ok := s.linkedOf(ctx, c, uid)
 	if !ok {
-		return "", nil, nil, false
+		return nil, nil, nil, false
 	}
-	title = cal.Text(lc.preferred("SUMMARY", obj), "SUMMARY")
-	place := lc.preferred("LOCATION", obj)
-	fields = func(own []view.Field) []view.Field {
-		keep := func(o *model.Object, fs []view.Field) []view.Field {
-			var out []view.Field
-			for _, f := range fs {
-				if f.Label == "Where" && o != place {
-					continue
-				}
-				out = append(out, f)
-			}
-			return out
-		}
-		base := keep(obj, own)
-		if place != obj {
-			if v := cal.Text(place, "LOCATION"); v != "" {
-				base = append(base, view.Field{Label: "Where", Value: text(v)})
+	var others [][]view.Field
+	var held []string
+	for _, p := range s.otherPages(lc) {
+		switch o := p.(type) {
+		case view.EventPage:
+			others = append(others, o.Fields)
+		case view.TaskPage:
+			others = append(others, o.Fields)
+		case view.NotePage:
+			if len(o.Meta.Tags) > 0 {
+				held = append(held, tagSet(o.Meta.Tags))
 			}
 		}
-		var more [][]view.Field
-		for _, o := range lc.answered() {
-			more = append(more, keep(o, calendarFields(o)))
-		}
-		return mergeFields(base, more)
 	}
-	return title, fields, s.memberRows(lc, obj, differs(calendarDiffers)), true
+	fields = func(own []view.Field) []view.Field { return markDiffering(own, others) }
+	tags = func(own []view.Tag) bool {
+		return len(own) > 0 && slices.ContainsFunc(held, func(h string) bool { return h != tagSet(own) })
+	}
+	return fields, tags, s.memberRows(lc, obj, differs(calendarDiffers)), true
+}
+
+// tagSet is the labels of the tags, sorted, for comparing copies.
+func tagSet(tags []view.Tag) string {
+	labels := make([]string, 0, len(tags))
+	for _, t := range tags {
+		labels = append(labels, string(t.Label))
+	}
+	sort.Strings(labels)
+	return strings.Join(labels, "\x00")
 }

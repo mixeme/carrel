@@ -168,7 +168,7 @@
         "href": "/app/notes/a-nc-home/dnevnik/9e31-40b7-c012",
         "label": "nextcloud · Дневник",
         "mono": false,
-        "value": "Text differ"
+        "value": "Text, tags differ"
       }
     ],
     "menu": [
@@ -231,7 +231,11 @@
         "label": "релиз",
         "on": false
       }
-    ]
+    ],
+    "tagsBadge": {
+      "label": "linked",
+      "role": "linked"
+    }
   },
   "notices": [],
   "print": {

@@ -148,6 +148,10 @@
       "value": "10 minutes before · 1 day before"
     },
     {
+      "badge": {
+        "label": "linked",
+        "role": "linked"
+      },
       "href": "",
       "label": "Where",
       "mono": false,
@@ -185,6 +189,13 @@
       "label": "radicale · vps · Проекты",
       "mono": false,
       "value": "Holds the same"
+    },
+    {
+      "colour": "#9a9280",
+      "href": "/app/calendar/a-baikal/obshchij/6a7d-2c51-e930",
+      "label": "baikal · Общий",
+      "mono": false,
+      "value": "Where differ"
     }
   ],
   "loss": null,

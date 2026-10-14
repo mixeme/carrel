@@ -363,6 +363,12 @@
                     "value": "-P1D"
                   },
                   {
+                    "label": "Custom…",
+                    "selected": false,
+                    "shows": "reminder.{n}.count reminder.{n}.unit",
+                    "value": "custom"
+                  },
+                  {
                     "label": "No reminder",
                     "selected": true,
                     "separator": true,
@@ -372,6 +378,56 @@
                 "readOnly": false,
                 "required": false,
                 "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hidden": true,
+                "hint": "",
+                "kind": "number",
+                "label": "How long",
+                "mono": true,
+                "name": "reminder.{n}.count",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hidden": true,
+                "hint": "",
+                "kind": "select",
+                "label": "Unit",
+                "name": "reminder.{n}.unit",
+                "options": [
+                  {
+                    "label": "minutes before",
+                    "selected": true,
+                    "value": "minutes"
+                  },
+                  {
+                    "label": "hours before",
+                    "selected": false,
+                    "value": "hours"
+                  },
+                  {
+                    "label": "days before",
+                    "selected": false,
+                    "value": "days"
+                  },
+                  {
+                    "label": "weeks before",
+                    "selected": false,
+                    "value": "weeks"
+                  }
+                ],
+                "readOnly": false,
+                "required": false,
+                "value": "minutes"
               }
             ],
             "value": "reminder"

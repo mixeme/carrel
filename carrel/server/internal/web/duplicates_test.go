@@ -519,11 +519,13 @@ func TestLinkRemembersTheAnswer(t *testing.T) {
 	}
 }
 
-// S-16: the card of a linked record is the card of the entity — the chosen
-// name, the fields of every member without repeats, a field only another
-// member holds, and a row per other member with what it holds differently.
-// A server that does not answer is said in its row and takes nobody out.
-func TestLinkedCardShowsTheEntity(t *testing.T) {
+// S-16, Typecase's Р-58 (from-typecase note 57): the card of a linked record
+// opened from its book is that copy — its own name, head and fields, none
+// of another's —, and a row per other member with what it holds
+// differently. A server that does not answer is said in its row and takes
+// nobody out. (Until 14.10.2026 this card was the entity's — the chosen
+// name, the fields of every member —; that card gets an address of its own.)
+func TestLinkedCardIsItsCopy(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
@@ -531,20 +533,22 @@ func TestLinkedCardShowsTheEntity(t *testing.T) {
 	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{"choice.FN": {strconv.Itoa(pick)}}))
 
 	card := decode[view.ContactPage](t, f.h.do(get(f.record(f.id, peopleBook, "ada-here"), f.sess)))
-	if card.Name != "LOVELACE Ada" {
-		t.Errorf("name = %q, want the chosen one", card.Name)
+	if card.Name != "Ada Lovelace" {
+		t.Errorf("name = %q, want its own", card.Name)
 	}
 	fields := map[string]int{}
 	for _, fl := range card.Fields {
 		fields[string(fl.Label)+" "+string(fl.Value)]++
+		if fl.Badge.Label != "" {
+			t.Errorf("%s has a badge, and no other copy holds it otherwise", fl.Label)
+		}
 	}
-	if card.Subtitle != "Analytical Engines" {
-		t.Errorf("the head of the card = %q", card.Subtitle)
+	if card.Subtitle != "" {
+		t.Errorf("the head of the card = %q, the other copy's", card.Subtitle)
 	}
-	for _, want := range []string{"Email · home ada@example.com", "Email · work ada@engines.example",
-		"Phone +44 20 7946 0000"} {
-		if fields[want] != 1 {
-			t.Errorf("field %q shown %d times in %+v", want, fields[want], card.Fields)
+	for want, n := range map[string]int{"Email · home ada@example.com": 1, "Phone +44 20 7946 0000": 1, "Email · work ada@engines.example": 0} {
+		if fields[want] != n {
+			t.Errorf("field %q shown %d times in %+v, want %d", want, fields[want], card.Fields, n)
 		}
 	}
 	if len(card.Books) != 1 || !strings.HasSuffix(string(card.Books[0].Label), "Work") ||
@@ -571,14 +575,15 @@ func TestLinkedCardShowsTheEntity(t *testing.T) {
 }
 
 // The same card for the calendar kinds: a linked event names the other
-// calendar and takes the place only the other holds.
+// calendar; the place both hold otherwise carries «linked» (s-agenda-2), and
+// a description only the other holds is not shown — it is the other copy's.
 func TestLinkedEventCard(t *testing.T) {
 	srv := searchServer(t)
 	duty := davtest.CalendarHome + "duty/"
 	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work"})
 	srv.AddCalendar(caldav.Calendar{Path: duty, Name: "Duty"})
-	srv.Seed(searchWork+"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260801T000000Z\nSUMMARY:On duty\nDTSTART;VALUE=DATE:20260810\nEND:VEVENT"))
-	srv.Seed(duty+"e2.ics", ics("BEGIN:VEVENT\nUID:e2\nDTSTAMP:20260801T000000Z\nSUMMARY:On duty\nDTSTART;VALUE=DATE:20260810\nLOCATION:Room 4\nEND:VEVENT"))
+	srv.Seed(searchWork+"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260801T000000Z\nSUMMARY:On duty\nDTSTART;VALUE=DATE:20260810\nLOCATION:Room 2\nEND:VEVENT"))
+	srv.Seed(duty+"e2.ics", ics("BEGIN:VEVENT\nUID:e2\nDTSTAMP:20260801T000000Z\nSUMMARY:On duty\nDTSTART;VALUE=DATE:20260810\nLOCATION:Room 4\nDESCRIPTION:Bring the keys\nEND:VEVENT"))
 	f := connectFixture(t, srv, searchWork, nil)
 	cal := func(col string) string { return "/app/calendar/" + f.id + "/" + url.PathEscape(col) }
 	for _, col := range []string{searchWork, duty} {
@@ -596,12 +601,15 @@ func TestLinkedEventCard(t *testing.T) {
 	}
 	found := false
 	for _, fl := range page.Fields {
-		if fl.Label == "Where" && fl.Value == "Room 4" {
-			found = true
+		if fl.Label == "Where" {
+			found = fl.Value == "Room 2" && fl.Badge.Label == "linked"
+		}
+		if strings.Contains(string(fl.Value), "keys") || fl.Value == "Room 4" {
+			t.Errorf("the other copy's %s is shown: %+v", fl.Label, fl)
 		}
 	}
-	if !found {
-		t.Errorf("the place only the other holds is not shown: %+v", page.Fields)
+	if !found || page.Body != "" {
+		t.Errorf("the place is not its own with «linked», or the body is the other's: %+v, %q", page.Fields, page.Body)
 	}
 }
 

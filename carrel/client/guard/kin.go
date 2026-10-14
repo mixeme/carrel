@@ -94,7 +94,19 @@ func deref(v reflect.Value) reflect.Value {
 }
 
 func isWidget(v reflect.Value, pkg string) bool {
-	return v.IsValid() && v.Kind() == reflect.Struct && v.Type().PkgPath() == pkg && !meaning[v.Type().Name()]
+	return v.IsValid() && v.Kind() == reflect.Struct && v.Type().PkgPath() == pkg && !meaning[v.Type().Name()] && !unseen(v)
+}
+
+// unseen says whether a widget is a field the page does not show
+// (Field.Hidden: the numbers «Custom…» of a reminder opens, s-agenda-19): the
+// frames of the edits draw no such field, as the comparison of the frame
+// does not see it (Drawn).
+func unseen(v reflect.Value) bool {
+	if v.Type().Name() != "Field" {
+		return false
+	}
+	h := v.FieldByName("Hidden")
+	return h.IsValid() && h.Kind() == reflect.Bool && h.Bool()
 }
 
 // menus are the widgets of a button with its menu (Typecase's Drop and

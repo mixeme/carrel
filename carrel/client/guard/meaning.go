@@ -335,6 +335,12 @@ var contract = map[string]rule{
 	// page's name with its Save, Typecase's task 149, f30d992); without it
 	// the group is a group, and its fields say where they stand.
 	"FieldSet": func(control) string { return "" },
+	// A dialog with Action is a form too (a wizard's step whose fields stand
+	// in several cards, s-backup-7, Typecase's task 149, bd321d8); without it
+	// the dialog is a frame, and its parts say where they stand. A dialog one
+	// of whose parts is a form is printed plain by the library, and that part
+	// sends — its own Action is judged on it.
+	"Dialog": func(control) string { return "" },
 	// A document is a form in its edit (Typecase's task 98): with Action it
 	// sends its fields, which the edit bar's Save names by its ID; read,
 	// it has none and sends nothing.
@@ -381,7 +387,7 @@ func picksFile(c control) bool {
 // opensForm says whether the widget is a form that sends, for its parts.
 func opensForm(c control) bool {
 	switch c.v.Type().Name() {
-	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc", "Field", "Card", "FieldSet":
+	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc", "Field", "Card", "FieldSet", "Dialog":
 		return c.str("Action") != ""
 	}
 	return false

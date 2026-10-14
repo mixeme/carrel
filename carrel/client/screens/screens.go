@@ -264,7 +264,6 @@ var All = []Screen{
 		Title:  func(model any) string { return string(model.(*view.NotePage).Title) },
 		Forms:  func(model any) []widget.PostForm { return note.Forms(model.(*view.NotePage)) },
 		Waits: []Wait{
-			{Row: 40, Fixture: "app-note-edit/normal"},                                  // ждёт библиотеку: U-5.5 #40
 			{Row: 42, Fixture: "app-note-edit/new"},                                     // ждёт библиотеку: U-5.5 #42
 			{Row: 36, Control: ".Title(Rubric).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #36
 			{Row: 36, Control: ".Items(Docbar).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #36

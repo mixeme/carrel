@@ -357,6 +357,12 @@
                 "value": "-P1D"
               },
               {
+                "label": "Custom…",
+                "selected": false,
+                "shows": "reminder.0.count reminder.0.unit reminder.0.at",
+                "value": "custom"
+              },
+              {
                 "label": "No reminder",
                 "selected": false,
                 "separator": true,
@@ -366,6 +372,71 @@
             "readOnly": false,
             "required": false,
             "value": "-P1D"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hidden": true,
+            "hint": "",
+            "kind": "number",
+            "label": "How long",
+            "mono": true,
+            "name": "reminder.0.count",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hidden": true,
+            "hint": "",
+            "kind": "select",
+            "label": "Unit",
+            "name": "reminder.0.unit",
+            "options": [
+              {
+                "label": "minutes before",
+                "selected": false,
+                "value": "minutes"
+              },
+              {
+                "label": "hours before",
+                "selected": false,
+                "value": "hours"
+              },
+              {
+                "label": "days before",
+                "selected": true,
+                "value": "days"
+              },
+              {
+                "label": "weeks before",
+                "selected": false,
+                "value": "weeks"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "days"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hidden": true,
+            "hint": "",
+            "kind": "time",
+            "label": "At",
+            "mono": true,
+            "name": "reminder.0.at",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
           },
           {
             "add": null,
@@ -419,12 +490,83 @@
                     "value": "-P1D"
                   },
                   {
+                    "label": "Custom…",
+                    "selected": false,
+                    "shows": "reminder.{n}.count reminder.{n}.unit reminder.{n}.at",
+                    "value": "custom"
+                  },
+                  {
                     "label": "No reminder",
                     "selected": true,
                     "separator": true,
                     "value": ""
                   }
                 ],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hidden": true,
+                "hint": "",
+                "kind": "number",
+                "label": "How long",
+                "mono": true,
+                "name": "reminder.{n}.count",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hidden": true,
+                "hint": "",
+                "kind": "select",
+                "label": "Unit",
+                "name": "reminder.{n}.unit",
+                "options": [
+                  {
+                    "label": "minutes before",
+                    "selected": false,
+                    "value": "minutes"
+                  },
+                  {
+                    "label": "hours before",
+                    "selected": false,
+                    "value": "hours"
+                  },
+                  {
+                    "label": "days before",
+                    "selected": true,
+                    "value": "days"
+                  },
+                  {
+                    "label": "weeks before",
+                    "selected": false,
+                    "value": "weeks"
+                  }
+                ],
+                "readOnly": false,
+                "required": false,
+                "value": "days"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hidden": true,
+                "hint": "",
+                "kind": "time",
+                "label": "At",
+                "mono": true,
+                "name": "reminder.{n}.at",
+                "options": [],
                 "readOnly": false,
                 "required": false,
                 "value": ""

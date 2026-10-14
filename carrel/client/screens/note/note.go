@@ -192,7 +192,12 @@ func read(p *view.NotePage) []w.MainPart {
 		for _, t := range bind.Tags(p.Meta.Tags) {
 			tags = append(tags, t)
 		}
-		secs = append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Tags"}, Items: []w.DocmetaPart{w.Line{Block: true, Gap: w.LineGap4, Items: tags}}})
+		// «linked» at the rubric: another copy holds other tags (s-notes-2).
+		title := w.Rubric{Text: "Tags"}
+		if b := p.Meta.TagsBadge; b != nil {
+			title.Items = []w.RubricPart{bind.Badge(*b)}
+		}
+		secs = append(secs, w.DocmetaSec{Title: title, Items: []w.DocmetaPart{w.Line{Block: true, Gap: w.LineGap4, Items: tags}}})
 	}
 	if len(p.Meta.Related) > 0 {
 		refs := w.DocRefs{}

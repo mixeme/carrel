@@ -519,18 +519,11 @@
       }
     ],
     "date": "",
-    "linked": [
-      {
-        "colour": "#6b4e7a",
-        "href": "/app/notes/a-nc-home/dnevnik/9e31-40b7-c012",
-        "label": "nextcloud · Дневник",
-        "mono": false,
-        "value": "Text differ"
-      }
-    ],
+    "linked": [],
     "menu": [],
     "related": [],
-    "tags": []
+    "tags": [],
+    "tagsBadge": null
   },
   "notices": [],
   "print": {

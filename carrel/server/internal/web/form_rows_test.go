@@ -259,7 +259,9 @@ func TestAddReminderIsAButton(t *testing.T) {
 		t.Errorf("an empty reminder row is drawn: %+v", page.Form)
 	}
 	add := addRow(t, page.Form, "reminder")
-	if add.Name != "add" || add.Label != "Add reminder" || len(add.Template) != 1 || add.Template[0].Name != "reminder.{n}" {
+	// The row and the fields «Custom…» opens, hidden (s-agenda-19).
+	if add.Name != "add" || add.Label != "Add reminder" || len(add.Template) != 3 || add.Template[0].Name != "reminder.{n}" ||
+		!add.Template[1].Hidden || !add.Template[2].Hidden {
 		t.Fatalf("Add reminder = %+v", add)
 	}
 	sameList(t, "added reminder", add.Template[0].Options, "s-agenda-9")
@@ -347,11 +349,13 @@ func frameSheetFields(t *testing.T, id string) []string {
 	return out
 }
 
+// sheetFields are the rows a sheet shows: not its hidden fields, nor the
+// numbers of «Custom…» while a step is chosen (FormRow.Hidden, s-agenda-19).
 func sheetFields(f view.Form) []string {
 	out := []string{}
 	for _, set := range f.Sets {
 		for _, row := range set.Rows {
-			if row.Kind != view.InputHidden {
+			if row.Kind != view.InputHidden && !row.Hidden {
 				ph := string(row.Placeholder)
 				if row.Kind == view.InputSelect {
 					ph = "" // a list's placeholder is its search (C-6.8)

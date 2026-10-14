@@ -9,6 +9,8 @@
 package taskedit
 
 import (
+	"strconv"
+
 	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
@@ -72,6 +74,8 @@ var widths = map[string]w.FieldWidth{
 	"start.date": w.FieldSM, "start.time": w.FieldXS, "due.date": w.FieldSM, "due.time": w.FieldXS,
 	"status": w.FieldSM, "priority": w.FieldSM, "percent": w.FieldSM,
 	"reminder": w.FieldMD,
+	// The numbers «Custom…» of a reminder opens (s-agenda-19).
+	"reminder.count": w.FieldXS, "reminder.unit": w.FieldSM, "reminder.at": w.FieldXS,
 	"location": w.FieldMD, "categories": w.FieldMD, "related": w.FieldLG,
 }
 
@@ -84,16 +88,29 @@ var patterns = map[string]string{
 	"location": "optional",
 }
 
-// width is the width of a field by its name: the whole name, else its first
-// part when the rest is a number («reminder.0»).
+// width is the width of a field by its name: the whole name, else the name
+// without its parts that are a number or the template's «{n}» («reminder.0»
+// is a reminder, «reminder.0.count» the number of its «Custom…»).
 func width(name string) w.FieldWidth {
 	if fw, ok := widths[name]; ok {
 		return fw
 	}
-	for i := 0; i < len(name); i++ {
-		if name[i] == '.' {
-			return widths[name[:i]]
+	kept, part := "", ""
+	for i := 0; i <= len(name); i++ {
+		if i < len(name) && name[i] != '.' {
+			part += name[i : i+1]
+			continue
 		}
+		if _, err := strconv.Atoi(part); err != nil && part != "{n}" {
+			if kept != "" {
+				kept += "."
+			}
+			kept += part
+		}
+		part = ""
+	}
+	if fw, ok := widths[kept]; ok {
+		return fw
 	}
 	return w.FieldAuto
 }

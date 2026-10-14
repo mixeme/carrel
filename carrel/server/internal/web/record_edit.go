@@ -782,16 +782,16 @@ var editFields = map[view.Kind][]editField{
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
 		{name: "attendee", label: "Attendees", prop: "ATTENDEE", typ: fieldAttendee},
-		// An event relates to other records as a task and a note do (the
-		// owner's word of 12.10.2026: a relation is every kind's, by the
-		// equality of collections). The frames of the event do not draw the
-		// field yet — Typecase's task 160.
-		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated},
 		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, required: true, allDay: true, set: "When",
 			quick: "Date", quickTime: "Start"},
 		{name: "end", label: "End date", timeLabel: "End time", prop: "DTEND", typ: fieldTime, set: "When", quickTime: "End", quickNoDate: true, follows: "start"},
 		{name: "tz", label: "Time zone", prop: "DTSTART", typ: fieldZone, set: "When"},
 		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders", add: "Add reminder", quick: "Remind"},
+		// An event relates to other records as a task and a note do (the
+		// owner's word of 12.10.2026: a relation is every kind's, by the
+		// equality of collections), in the group «Other» before the
+		// attachments, as the task's (s-agenda-3, -15; Typecase's task 160).
+		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated, set: "Other"},
 		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat, set: "Repeats"},
 	},
 	view.KindTask: {
@@ -1222,6 +1222,9 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name + ".given")), strings.TrimSpace(r.FormValue(f.name + ".family"))}
 		case fieldMulti, fieldReminders:
 			vals[f.name] = indexedRows(r, f.name)
+			if f.typ == fieldReminders {
+				customRead(vals, f.name, r, formAllDay(c.spec.kind, vals))
+			}
 			if f.typed {
 				var labels []string
 				for i := 0; i < len(vals[f.name])-1; i++ {
@@ -1662,11 +1665,24 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				allowed[a.Trigger] = true
 			}
 			var next []cal.Alarm
+			custom := want[f.name+".custom"]
 			for i, v := range w {
 				if v == "" {
 					continue
 				}
-				if !allowed[v] {
+				if v == reminderCustom {
+					// «Custom…» whose numbers make no trigger: the form
+					// comes back with them open and says what is wrong —
+					// and so does the path without scripts, where the
+					// numbers were hidden when «Custom…» was chosen.
+					count, unit, at, _ := customNumbers(v, rowAt(custom, i), false)
+					_, bad := customTrigger(count, unit, at, formAllDay(c.spec.kind, want))
+					ch.errors[f.name] = bad
+					break
+				}
+				// A step, a reminder the record has, or one the numbers of
+				// «Custom…» made (s-agenda-19).
+				if !allowed[v] && !slices.Contains(want[f.name+".made"], v) {
 					ch.errors[f.name] = "Choose a reminder from the list."
 					break
 				}
@@ -2503,9 +2519,6 @@ type editState struct {
 	// notebook is the Notebook a note's edit chose (s-notes-20): the list
 	// address of the notebook; empty is its own.
 	notebook string
-	// linked is the same note in other notebooks (S-16), for the column of
-	// its edit.
-	linked []view.Field
 	// unfold: the form came with ?fields=all — «Show N empty fields»
 	// without scripts — and folds nothing; its posts keep it so.
 	unfold bool
@@ -2698,7 +2711,6 @@ func (s *Server) noteEditPage(c *collectionCtx, st editState, sh view.Shell, for
 		page.Rail.Neighbours = s.noteNeighbours(c, st.uid)
 		page.Doc.Foreign = foreignLine(cal.NoteForeign(st.obj))
 		page.Meta.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
-		page.Meta.Linked = st.linked
 		page.Meta.Actions = shown(attach, del)
 	}
 	return page
@@ -3023,19 +3035,33 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			// The first reminder, then the others, then the button that adds
 			// one (s-agenda-3: First, Add reminder). The quick sheet has one
 			// row and no button (s-notes-9: Remind).
+			// Each row has the fields of «Custom…» after it, hidden while a
+			// step is chosen (s-agenda-19).
 			rows := shownRows(vals, full)
+			allDay := formAllDay(c.spec.kind, st.values)
 			for i, v := range rows {
-				row := view.FormRow{Name: fmt.Sprintf("%s.%d", f.name, i), Label: text(reminderLabel(i)), Kind: view.InputSelect, Value: text(v), Options: reminderOptions(v, st.alarms, i, tf)}
+				name := fmt.Sprintf("%s.%d", f.name, i)
+				count, unit, at, custom := customNumbers(v, rowAt(st.values[f.name+".custom"], i), allDay)
+				more := customRows(name, count, unit, at, allDay, custom)
+				row := view.FormRow{Name: name, Label: text(reminderLabel(i)), Kind: view.InputSelect, Value: text(v),
+					Options: reminderOptions(v, custom, customShows(more), st.alarms, i, tf)}
+				if custom {
+					row.Value = reminderCustom
+				}
 				if !full {
 					row.Label = text(f.quick)
 				}
 				if i == 0 {
 					row.Error = errText
 				}
-				set.Rows = append(set.Rows, row)
+				set.Rows = append(append(set.Rows, row), more...)
 			}
 			if full {
-				add := addButton(f, view.FormRow{Name: f.name + ".{n}", Label: text(reminderLabel(len(rows))), Kind: view.InputSelect, Options: reminderOptions("", nil, -1, tf)})
+				name := f.name + ".{n}"
+				_, unit, _, _ := customNumbers("", "", allDay)
+				more := customRows(name, "", unit, "", allDay, false)
+				tpl := view.FormRow{Name: name, Label: text(reminderLabel(len(rows))), Kind: view.InputSelect, Options: reminderOptions("", false, customShows(more), nil, -1, tf)}
+				add := addButton(f, append([]view.FormRow{tpl}, more...)...)
 				if len(rows) == 0 {
 					add.Error = errText
 				}
@@ -3085,16 +3111,18 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 	return focused(form, caretField[c.spec.kind])
 }
 
-// reminderOptions are the steps of s-agenda-9, a reminder another client
-// wrote after them when it is none of the steps, and «No reminder» under a
-// line.
-func reminderOptions(selected string, alarms []cal.Alarm, row int, tf timeFmt) []view.Option {
+// reminderOptions are the steps of s-agenda-9, «Custom…» — chosen when the
+// row is a reminder of its own (custom), and showing its numbers (shows) —,
+// a reminder another client wrote that «Custom…» cannot hold (one at a set
+// moment, one after the start) after them, and «No reminder» under a line.
+func reminderOptions(selected string, custom bool, shows string, alarms []cal.Alarm, row int, tf timeFmt) []view.Option {
 	var opts []view.Option
-	seen := false
+	seen := custom
 	for _, p := range reminderPresets {
 		opts = append(opts, view.Option{Value: p.value, Label: text(p.label), Selected: p.value == selected})
 		seen = seen || p.value == selected
 	}
+	opts = append(opts, view.Option{Value: reminderCustom, Label: "Custom…", Selected: custom, Shows: shows})
 	if selected != "" && !seen {
 		label := selected
 		if row < len(alarms) && alarms[row].Trigger == selected {
@@ -3254,20 +3282,8 @@ func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string
 	}
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
 		obj: obj, uid: uid, values: vals, alarms: alarms, etag: etag, readAt: s.now(),
-		linked: s.noteLinked(r.Context(), c, uid, obj), unfold: r.URL.Query().Get("fields") == "all",
+		unfold: r.URL.Query().Get("fields") == "all",
 	}))
-}
-
-// noteLinked is the same note in other notebooks (S-16) — the column of its
-// edit keeps it (s-notes-20). Other kinds show it on the card only.
-func (s *Server) noteLinked(ctx context.Context, c *collectionCtx, uid string, obj *model.Object) []view.Field {
-	if c.spec.kind != view.KindNote {
-		return nil
-	}
-	if _, _, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
-		return rows
-	}
-	return nil
 }
 
 // postKindEdit writes a patch with If-Match of the version the form was read
@@ -3333,7 +3349,6 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	st.obj, st.alarms = obj, alarms
-	st.linked = s.noteLinked(r.Context(), c, uid, obj)
 	markDone := r.URL.Query().Get("op") == "done" || r.URL.Query().Get("op") == "" && r.FormValue("op") == "done"
 	if add := r.FormValue("add"); add != "" && !markDone {
 		// «Add …» pressed without scripts (C-6.8 InputAdd): the form as
@@ -3750,7 +3765,6 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 	}
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
 		obj: got, uid: uid, values: vals, alarms: alarms, etag: got.ETag, readAt: s.now(), loss: report, notices: notices,
-		linked: s.noteLinked(r.Context(), c, uid, got),
 	}))
 }
 

@@ -197,7 +197,7 @@ func taskFields(tf timeFmt, obj *model.Object, panel bool, tags []view.Tag) ([]v
 	out = append(append(out, complete), priority...)
 	if !panel {
 		alarms, _ := cal.Alarms(obj)
-		if rows := reminderRows(alarms, tf); len(rows) > 0 {
+		if rows := reminderRows(alarms, due.AllDay, tf); len(rows) > 0 {
 			labels := make([]string, 0, len(rows))
 			for _, r := range rows {
 				labels = append(labels, string(r.Label))

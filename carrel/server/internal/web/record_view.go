@@ -177,35 +177,32 @@ func shown(actions ...*view.Action) []view.Action {
 	return out
 }
 
-// withLinked is the reading page of a record in a linked group: the card of
-// the entity (S-16). A record in no group is its page as it is.
+// withLinked is the reading page of a record in a linked group, opened from
+// its collection: that copy, the badge «linked» where another copy holds a
+// value differently, and the others under it (S-16; Typecase's Р-58). A
+// record in no group is its page as it is.
 func (s *Server) withLinked(ctx context.Context, c *collectionCtx, uid string, obj *model.Object, page any) any {
 	switch p := page.(type) {
 	case view.ContactPage:
 		s.linkedContact(ctx, c, uid, obj, &p)
 		return p
 	case view.EventPage:
-		if title, fields, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
-			if title != "" {
-				p.Shell.Title, p.Summary = text(title), text(title)
-			}
+		if fields, _, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
 			p.Fields, p.Linked = fields(p.Fields), rows
 		}
 		return p
 	case view.TaskPage:
-		if title, fields, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
-			if title != "" {
-				p.Shell.Title, p.Summary = text(title), text(title)
-			}
+		if fields, _, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
 			p.Fields, p.Linked = fields(p.Fields), rows
 		}
 		return p
 	case view.NotePage:
-		if title, _, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
-			if title != "" {
-				p.Shell.Title, p.Doc.Title = text(title), text(title)
-			}
+		if _, tags, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
 			p.Meta.Linked = rows
+			if tags(p.Meta.Tags) {
+				badge := linkedMark
+				p.Meta.TagsBadge = &badge
+			}
 		}
 		return p
 	}
@@ -594,7 +591,7 @@ func eventHead(tf timeFmt, obj *model.Object, tm cal.Timing) []view.Field {
 		out = append(out, view.Field{Label: "Repeats", Value: text(words), Badge: end})
 	}
 	alarms, _ := cal.Alarms(obj)
-	if rows := reminderRows(alarms, tf); len(rows) > 0 {
+	if rows := reminderRows(alarms, tm.AllDay, tf); len(rows) > 0 {
 		labels := make([]string, 0, len(rows))
 		for _, r := range rows {
 			labels = append(labels, string(r.Label))
@@ -786,10 +783,10 @@ func (s *Server) relatedRows(c *collectionCtx, obj *model.Object) []view.Timelin
 	return rows
 }
 
-func reminderRows(alarms []cal.Alarm, tf timeFmt) []view.ReminderRow {
+func reminderRows(alarms []cal.Alarm, allDay bool, tf timeFmt) []view.ReminderRow {
 	var rows []view.ReminderRow
 	for _, a := range alarms {
-		rows = append(rows, view.ReminderRow{Label: text(tf.reminder(a))})
+		rows = append(rows, view.ReminderRow{Label: text(tf.reminderWords(a, allDay))})
 	}
 	return rows
 }

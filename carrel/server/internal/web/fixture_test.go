@@ -1281,32 +1281,42 @@ func TestFixtureEventCard(t *testing.T) {
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"?from=2026-08-10", app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	// The rail draws «Общий» refusing, as the poll found it; the copy there
+	// is read when the card opens, and the frame draws it answered — «Where
+	// differ» (s-agenda-2).
+	app.servers["baikal"].Accept("REPORT")
 	rec := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3"
 	app.compare(t, "app-event/normal.json", app.h.do(get(rec, app.sess)))
 }
 
-// linkMockupEvent puts a copy of «Синк-ап по релизу» in radicale · vps ·
-// Проекты and links the two (S-16): «The same event in other calendars ·
-// radicale · vps · Проекты · Holds the same» of s-agenda-2 (the client's
-// scan Г9). The copy lives in this test alone: the agenda frames draw no
-// such row in Проекты.
+// linkMockupEvent puts two copies of «Синк-ап по релизу» — in radicale ·
+// vps · Проекты the same, in baikal · Общий in another room — and links the
+// three (S-16): «The same event in other calendars · radicale · vps ·
+// Проекты · Holds the same · baikal · Общий · Where differ», and «linked»
+// at Where (s-agenda-2, from-typecase note 57; the client's scan Г9). The
+// copies live in this test alone: the agenda frames draw no such rows.
 func linkMockupEvent(t *testing.T, app *mockupApp) {
 	t.Helper()
-	linkMockupCopy(t, app, view.KindEvent, "g-sinkap", mockupRecord{"nextcloud", "lichnyj", "8f1c-4a02-b7d3", "nextcloud-home/lichnyj.ics"},
-		mockupRecord{"radicale · vps", "proekty", "4b2e-9d10-8f1c", ""}, nil)
+	linkMockupCopies(t, app, view.KindEvent, "g-sinkap", mockupRecord{"nextcloud", "lichnyj", "8f1c-4a02-b7d3", "nextcloud-home/lichnyj.ics"},
+		mockupCopy{rec: mockupRecord{"radicale · vps", "proekty", "4b2e-9d10-8f1c", ""}},
+		mockupCopy{rec: mockupRecord{"baikal", "obshchij", "6a7d-2c51-e930", ""}, edit: func(rec string) string {
+			return strings.Replace(rec, "LOCATION:Переговорная 2", "LOCATION:Переговорная 5", 1)
+		}})
 }
 
-// linkMockupTask puts a copy of «Собрать чемодан», due an hour later, in
-// nextcloud · Работа and links the two (S-16): «linked ×2», «2 sources»
-// (s-tasks-1) and «The same task in other lists · … · Time differ»
-// (s-tasks-2; the client's scan ЗБ6, ЗГ5). The frames put the copy in
-// radicale · vps · Личное, a list no rail of theirs draws (task 105); here
-// it is a list the rails hold. The copy lives in the tests alone.
+// linkMockupTask puts a copy of «Собрать чемодан», due an hour later and of
+// another priority, in nextcloud · Работа and links the two (S-16): «linked
+// ×2», «2 sources» (s-tasks-1), «The same task in other lists · … · Time,
+// priority differ» and «linked» at Due and Priority (s-tasks-2,
+// from-typecase note 57; the client's scan ЗБ6, ЗГ5). The frames put the
+// copy in radicale · vps · Личное, a list no rail of theirs draws (task
+// 105); here it is a list the rails hold. The copy lives in the tests alone.
 func linkMockupTask(t *testing.T, app *mockupApp) {
 	t.Helper()
 	linkMockupCopy(t, app, view.KindTask, "g-chemodan", mockupRecord{"nextcloud", "dela", "aa11-2d09-5f84", "nextcloud-home/dela.ics"},
 		mockupRecord{"nextcloud", "rabota", "cc11-5a20-7e94", ""}, func(rec string) string {
-			return strings.Replace(rec, "DUE;TZID=Europe/Moscow:20260812T180000", "DUE;TZID=Europe/Moscow:20260812T190000", 1)
+			rec = strings.Replace(rec, "DUE;TZID=Europe/Moscow:20260812T180000", "DUE;TZID=Europe/Moscow:20260812T190000", 1)
+			return strings.Replace(rec, "PRIORITY:5", "PRIORITY:1", 1)
 		})
 }
 
@@ -1323,14 +1333,16 @@ func linkMockupNote(t *testing.T, app *mockupApp) {
 		})
 }
 
-// linkMockupMeeting puts a copy of «Заметка со встречи 10.08», its text
-// another, in nextcloud · Дневник and links the two (S-16): «The same note
-// in other notebooks · nextcloud · Дневник · Text differ» (s-notes-2, -20;
-// the client's scan НГ5). The copy lives in the tests alone.
+// linkMockupMeeting puts a copy of «Заметка со встречи 10.08», its text and
+// its tags other, in nextcloud · Дневник and links the two (S-16): «linked
+// ×2» (s-notes-1), «The same note in other notebooks · nextcloud · Дневник ·
+// Text, tags differ» and «linked» at Tags (s-notes-2; from-typecase notes 54
+// and 57; the client's scan НГ5). The copy lives in the tests alone.
 func linkMockupMeeting(t *testing.T, app *mockupApp) {
 	t.Helper()
 	linkMockupCopy(t, app, view.KindNote, "g-vstrecha", mockupRecord{"nextcloud", "zapisi", "5c81-77aa-0d64", "nextcloud-home/zapisi.ics"},
 		mockupRecord{"nextcloud", "dnevnik", "9e31-40b7-c012", ""}, func(rec string) string {
+			rec = strings.Replace(rec, "CATEGORIES:встречи,релиз", "CATEGORIES:встречи", 1)
 			return strings.Replace(rec, "DESCRIPTION:", "DESCRIPTION:Черновик. ", 1)
 		})
 }
@@ -1360,32 +1372,52 @@ func attachMockupRecording(t *testing.T, app *mockupApp) {
 // the set; a copy has no file.
 type mockupRecord struct{ account, slug, uid, file string }
 
+// mockupCopy is a copy of a record of the set: where it lies, and how it
+// differs from the record (edit; nil — it holds the same).
+type mockupCopy struct {
+	rec  mockupRecord
+	edit func(string) string
+}
+
 // linkMockupCopy puts a copy of a record of the set, changed by edit, under
 // another UID into another collection, and links the two as the person
 // would (S-16).
 func linkMockupCopy(t *testing.T, app *mockupApp, kind view.Kind, group string, of, copy mockupRecord, edit func(string) string) {
 	t.Helper()
+	linkMockupCopies(t, app, kind, group, of, mockupCopy{rec: copy, edit: edit})
+}
+
+// linkMockupCopies puts copies of a record of the set, each changed by its
+// edit, under other UIDs into other collections, and links them all with it
+// as the person would (S-16).
+func linkMockupCopies(t *testing.T, app *mockupApp, kind view.Kind, group string, of mockupRecord, copies ...mockupCopy) {
+	t.Helper()
 	body, err := os.ReadFile(filepath.Join(mockupRoot(t), filepath.FromSlash(of.file)))
 	if err != nil {
 		t.Fatal(err)
 	}
-	var rec string
+	var orig string
 	for _, one := range splitRecords(string(body)) {
 		if strings.Contains(one, "UID:"+of.uid) {
-			rec = strings.Replace(one, "UID:"+of.uid, "UID:"+copy.uid, 1)
+			orig = one
 		}
 	}
-	if rec == "" {
+	if orig == "" {
 		t.Fatalf("%s is not in %s", of.uid, of.file)
 	}
-	if edit != nil {
-		rec = edit(rec)
+	all := []mockupRecord{of}
+	for _, cp := range copies {
+		rec := strings.Replace(orig, "UID:"+of.uid, "UID:"+cp.rec.uid, 1)
+		if cp.edit != nil {
+			rec = cp.edit(rec)
+		}
+		app.servers[cp.rec.account].Seed(davtest.CalendarHome+cp.rec.slug+"/"+cp.rec.uid+".ics", rec)
+		all = append(all, cp.rec)
 	}
-	app.servers[copy.account].Seed(davtest.CalendarHome+copy.slug+"/"+copy.uid+".ics", rec)
 	key, _ := app.sess.DataKey()
 	blob, _ := app.h.users.Catalog(app.sess.AccountID(), key)
 	var members []sealed.RecordRef
-	for _, one := range []mockupRecord{of, copy} {
+	for _, one := range all {
 		for _, c := range blob.Collections {
 			conn, _ := blob.Connection(c.AccountID)
 			if collectionSlugOf(c.Path) == one.slug && connLabelOf(conn) == one.account {
@@ -1393,8 +1425,8 @@ func linkMockupCopy(t *testing.T, app *mockupApp, kind view.Kind, group string, 
 			}
 		}
 	}
-	if len(members) != 2 {
-		t.Fatalf("the two collections are not in the catalog: %+v", members)
+	if len(members) != len(all) {
+		t.Fatalf("the collections are not in the catalog: %+v", members)
 	}
 	if err := app.h.users.EditDuplicates(app.sess.AccountID(), key, "duplicates.link", "", func(d *sealed.Duplicates) error {
 		d.Linked = append(d.Linked, sealed.LinkedGroup{ID: group, Kind: kind, Members: members})
@@ -1494,6 +1526,7 @@ func TestFixtureNoteList(t *testing.T) {
 func TestFixtureCombinedNotes(t *testing.T) {
 	app := newMockupApp(t)
 	linkMockupNote(t, app)
+	linkMockupMeeting(t, app) // «linked ×2» on its row too (from-typecase note 54)
 	attachMockupRecording(t, app)
 	app.lastUsed(t, "zapisi", view.KindNote)
 	openList(t, app, "/app/calendar?from=2026-08-10")

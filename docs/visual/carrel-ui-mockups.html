@@ -256,6 +256,7 @@ body[data-tc-root]{margin:0;background:var(--tc-bg);color:var(--tc-ink);font-fam
 .tc-num{margin-left:auto;font-family:var(--tc-font-mono);font-size:11px;color:var(--tc-dusty)}
 .tc-num.is-alert{color:var(--tc-danger)}
 .tc-rubric{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--tc-dusty);font-weight:600}
+.tc-rubric:has(> .tc-btn),.tc-rubric:has(> .tc-drop){display:flex;align-items:center;gap:4px}
 .tc-railsec{display:flex;flex-direction:column;gap:3px}
 .tc-railsec > .tc-rubric{padding:0 16px;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
 /* Три фиксированные колонки, хвост (ro, Retry) раскладывается сам. */
@@ -731,6 +732,9 @@ label.tc-tree__row{cursor:pointer}
 .tc-empty > .tc-line{color:var(--tc-ink)}
 .tc-empty > .tc-line:empty{display:none}
 :root:not([data-tc-noscript]) .tc-nojs{display:none}
+/* Обратное: то, что работает только со сценарием (бросок, вставка, живая очередь), пока страница без сценария не показывается —
+   вместо него стоит сказанное словами (tc-nojs): недоступное названо на экране, а не замолчано (задача 90). */
+[data-tc-noscript] .tc-js{display:none}
 /* Полоса опроса с отказом и своей кнопкой (поиск: «1 failed» и Search again) на телефоне переносится: строкам — зазор, чтобы зоны нажатия не налезали. */
 @container tcbox (max-width:460px){
   .tc-runbar:has(> .tc-drop):has(> .tc-push .tc-btn){row-gap:22px}
@@ -742,7 +746,7 @@ label.tc-tree__row{cursor:pointer}
 /* Полоса правки без сценария (задача 104, решения 02.10): правка не перезагружается — остаются Save (submit) и Cancel (ссылка); разметка, автосохранение, ширина, фокус и «⋯» живут сценарием. */
 [data-tc-noscript] .tc-docbar--edit > :not(button[type="submit"]):not(a.tc-btn){display:none}
 /* Файл правки уходит по Save (решение 02.10): выбранный — строкой списка; «Nothing attached» прячется, пока она стоит; полоса Save ждёт отправки с файлами. */
-.tc-runbar[hidden],[data-tc-empty][hidden],.tc-fset > [hidden]{display:none}
+.tc-runbar[hidden],[data-tc-empty][hidden],.tc-fset > [hidden],.tc-field[hidden]{display:none}
 /* Строка имени файла импорта (задача 133): без сценария имя показывает само поле файла рядом с Browse — строка не нужна. */
 [data-tc-noscript] [data-tc-filename]{display:none}
 [data-tc-noscript] .tc-file{position:static;opacity:1;width:auto;height:auto;max-width:200px;font-size:11px;pointer-events:auto}
@@ -1279,6 +1283,9 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-dialog--max520.tc-dialog--max520{max-width:520px}
 .tc-dialog--max560.tc-dialog--max560{max-width:560px}
 .tc-dialog--max540.tc-dialog--max540{max-width:540px}
+.tc-dialog--step520 > *{max-width:calc(520px - 2*var(--tc-page-gutter))}
+.tc-dialog--step560 > *{max-width:calc(560px - 2*var(--tc-page-gutter))}
+.tc-dialog--step760 > *{max-width:calc(760px - 2*var(--tc-page-gutter))}
 .tc-dialog--padt0-padb0.tc-dialog--padt0-padb0{padding-top:0;padding-bottom:0}
 .tc-dialog--max440-padt0-padb0.tc-dialog--max440-padt0-padb0{max-width:440px;padding-top:0;padding-bottom:0}
 .tc-zone.tc-zone{text-align:center}
@@ -3926,9 +3933,9 @@ Read  2 min ago</div>
         </div>
         <dl class="tc-fields">
           <dt>Phone · mobile</dt><dd class="tc-mono"><a class="tc-fields__link" href="tel:+79124451088">+7 912 445-10-88</a></dd>
-          <dt>Phone · work</dt><dd class="tc-mono"><a class="tc-fields__link" href="tel:+74951204500">+7 495 120-45-00</a></dd>
+          <dt>Phone · work</dt><dd class="tc-mono"><a class="tc-fields__link" href="tel:+74951204500">+7 495 120-45-00</a> <span class="tc-badge is-linked">linked</span></dd>
           <dt>Email · work</dt><dd><a class="tc-fields__link" href="mailto:a.kovaleva@example.org">a.kovaleva@example.org</a></dd>
-          <dt>Email · second</dt><dd><a class="tc-fields__link" href="mailto:anna.kovaleva@slovo.example">anna.kovaleva@slovo.example</a></dd>
+          <dt>Email · second</dt><dd><a class="tc-fields__link" href="mailto:anna.kovaleva@slovo.example">anna.kovaleva@slovo.example</a> <span class="tc-badge is-linked">linked</span></dd>
           <dt>Address · work</dt><dd>Москва, Тверская 12, стр. 3</dd>
           <dt>Birthday</dt><dd class="tc-mono">1987-03-14 <span class="tc-dim">· in 7 months</span></dd>
           <dt>Tags</dt><dd><span class="tc-tag">работа</span> <span class="tc-tag">издательство</span></dd>
@@ -3965,7 +3972,7 @@ Read  2 min ago · not changed on server</div>
   </div>
 </div>
 <figcaption><b>Карточке нужен свой экран, и хронология его не заменяет.</b> Раньше по этому адресу открывалась хронология записей о человеке, а сама карточка стояла в панели справа — той, которую закрывают крестиком. Получалось, что у единственной записи из пяти родов нет места, где её просто читают: чтобы посмотреть второй телефон, надо было держать открытой панель на экране, который вообще про другое. Теперь <b>карточка — это содержимое</b>: телефоны с метками, адреса, день рождения, чужие свойства, тот же человек в других книгах.
-<br><br><b>Хронология стоит здесь врезкой, а не словом-ссылкой.</b> Рубрика с числом, три последние записи со столбцом «почему совпало» и кнопка <b>Open the timeline</b> — потому что ради этой хронологии четыре раздела и стоят рядом, и человек, который на неё не перейдёт, обязан увидеть, что она есть. Врезка не заменяет хронологию: там свой диапазон дат, свои столбцы и свой адрес. Каждый телефон и каждый адрес — ссылка: <code>tel:</code> из цифр и плюса, <code>mailto:</code>; вид — значения, подчёркивание при наведении.</figcaption>
+<br><br><b>Хронология стоит здесь врезкой, а не словом-ссылкой.</b> Рубрика с числом, три последние записи со столбцом «почему совпало» и кнопка <b>Open the timeline</b> — потому что ради этой хронологии четыре раздела и стоят рядом, и человек, который на неё не перейдёт, обязан увидеть, что она есть. Врезка не заменяет хронологию: там свой диапазон дат, свои столбцы и свой адрес. Каждый телефон и каждый адрес — ссылка: <code>tel:</code> из цифр и плюса, <code>mailto:</code>; вид — значения, подчёркивание при наведении. <b>Карточка, открытая из коллекции, показывает данные своей коллекции</b> (решение владельца 13.10, задача 153, Р-58): то же, что откроет её правка. У поля, где при объединении дубликатов был выбор, — где у другой копии своё значение, — стоит значок «linked»: рабочий телефон и второй адрес здесь разнятся с «Командой». Какие копии и чем разнятся, называет блок «The same person in other books». Запись целиком, с выбранными значениями, — карточка из объединённого вида (кадр ниже).</figcaption>
 </figure>
 
 <figure>
@@ -4288,6 +4295,130 @@ Read  2 min ago · not changed on server</div>
     </div>
   </div>
   <figcaption>Все записи со старым адресом только для чтения или не прочитались — переписывать нечего: кнопка «Rewrite 0 records» выключена, причина — сообщением над ней.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-contacts-29">
+    <div class="frame-label"><span>Переписать · несколько замен, группы по отметке</span><span class="frag">фрагмент</span><i>лист после Save</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/rewrite" method="post">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-refresh"/></svg>
+        <b class="tc-sheet__title">Rewrite the addresses in their records?</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Анна Ковалёва · saved</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-rubric">The addresses</div>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mono">a.kovaleva@example.org</span><span class="tc-dim tc-dim--t11-5">14 records name it</span></div>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mono">→</span><span class="tc-in is-pick tc-in--t12-w240"><select class="tc-in__list" name="to.1" aria-label="Rewrite a.kovaleva@example.org to"><option value="a.kovaleva@slovo.example" selected>a.kovaleva@slovo.example</option><option value="anna@home.example">anna@home.example</option><option value="">Do not rewrite</option></select></span></div>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mono">anna@oldfirm.example</span><span class="tc-dim tc-dim--t11-5">3 records name it; they keep it</span></div>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mono">→</span><span class="tc-in is-pick tc-in--t12-w240"><select class="tc-in__list" name="to.2" aria-label="Rewrite anna@oldfirm.example to"><option value="a.kovaleva@slovo.example">a.kovaleva@slovo.example</option><option value="anna@home.example">anna@home.example</option><option value="" selected>Do not rewrite</option></select></span></div>
+          <div class="tc-rubric">What rewriting can set off</div>
+          <div class="tc-line tc-line--gap-8"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="group" value="scheduling" checked><span class="tc-tickrow__tick"></span>On servers that schedule</label><details class="tc-drop"><summary class="tc-btn is-sm">9 records<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w290"><a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa01" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Синк-ап по релизу <span class="tc-mono tc-mono--t11">10 Aug</span></a><a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa02" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Ретро спринта <span class="tc-mono tc-mono--t11">14 Aug</span></a><a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa03" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Планирование Q4 <span class="tc-mono tc-mono--t11">2 Sep</span></a></div></details></div>
+          <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">The server may send a cancellation to the old address, an invitation to the new one and an update to the other attendees.</span>
+          <div class="tc-line tc-line--gap-8"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="group" value="unknown" checked><span class="tc-tickrow__tick"></span>On baikal</label><details class="tc-drop"><summary class="tc-btn is-sm">2 records<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w290"><a class="tc-menu__item" href="/app/calendar/baikal/obshchiy/bb01" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>Общий созвон <span class="tc-mono tc-mono--t11">12 Aug</span></a><a class="tc-menu__item" href="/app/calendar/baikal/obshchiy/bb02" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>Демо для заказчика <span class="tc-mono tc-mono--t11">21 Aug</span></a></div></details></div>
+          <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">The server did not say whether it schedules.</span>
+          <div class="tc-line tc-line--gap-8"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="group" value="others"><span class="tc-tickrow__tick is-off"></span>Meetings organised by others</label><details class="tc-drop"><summary class="tc-btn is-sm">3 records<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w290"><a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa02" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Ретро спринта <span class="tc-mono tc-mono--t11">14 Aug</span></a><a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/cc01" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Встреча с подрядчиком <span class="tc-mono tc-mono--t11">18 Aug</span></a><a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/cc02" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Юбилей отдела <span class="tc-mono tc-mono--t11">5 Sep</span></a></div></details></div>
+          <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Not ticked: these stay as they are. The organiser’s server may refuse the change, and its next update may undo it.</span>
+          <div class="tc-line tc-line--gap-8"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="group" value="past" checked><span class="tc-tickrow__tick"></span>Past meetings</label><details class="tc-drop"><summary class="tc-btn is-sm">5 records<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w290"><a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/dd01" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Синк-ап по релизу <span class="tc-mono tc-mono--t11">3 Aug</span></a><a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/dd02" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Синк-ап по релизу <span class="tc-mono tc-mono--t11">27 Jul</span></a></div></details></div>
+          <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">They will show the new address, as if the person had been invited at it.</span>
+          <div class="tc-msg tc-msg--flush">A record that stands in two groups is rewritten only when both are ticked: «Ретро спринта» is on a server that schedules and is organised by another, so it stays.</div>
+          <span class="tc-dim--muted tc-dim--t11-5 tc-dim--lh1-55 tc-dim--wrap">2 records in Shared are read-only and keep the old address. Collections that are not ticked were not looked in.</span>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Rewrite 9 records</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Leave as is</button><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption><b>Несколько замен в одной правке и группы, которые можно исключить</b> (решения владельца 12.10, задача 157). Каждая замена — строка «старый адрес → выбор»: в выборе нынешние адреса карточки и «Do not rewrite»; сервер предлагает адрес, набранный в той же строке формы, иначе «Do not rewrite». Группы риска — отметки: снятая исключает группу, и кнопка считает остаток. Счёт группы — кнопка: под ней список её записей — метка коллекции, название и дата, каждая — ссылка. <b>Запись в двух группах переписывается, только когда отмечены обе</b>: снять одну отметку значит «этих не трогать», и запись остаётся, в какой бы ещё группе она ни стояла; лист говорит это и называет такую запись. Одна замена и ни одной снятой отметки — прежний лист (кадр выше).</figcaption>
+  </figure>
+  <figure style="flex:0 1 330px">
+  <div class="frame" data-frame="s-contacts-30">
+    <div class="frame-label"><span>Переписать · записи группы</span><span class="frag">список</span><i>кнопка «9 records»</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa01" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Синк-ап по релизу <span class="tc-mono tc-mono--t11">10 Aug</span></a>
+        <a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa02" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Ретро спринта <span class="tc-mono tc-mono--t11">14 Aug</span></a>
+        <a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa04" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Синк-ап по релизу <span class="tc-mono tc-mono--t11">17 Aug</span></a>
+        <a class="tc-menu__item" href="/app/calendar/radicale/proekty/aa05" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>Демо для команды <span class="tc-mono tc-mono--t11">19 Aug</span></a>
+        <a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa06" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Синк-ап по релизу <span class="tc-mono tc-mono--t11">24 Aug</span></a>
+        <a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa07" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Разбор инцидента <span class="tc-mono tc-mono--t11">26 Aug</span></a>
+        <a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa08" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Синк-ап по релизу <span class="tc-mono tc-mono--t11">31 Aug</span></a>
+        <a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa03" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Планирование Q4 <span class="tc-mono tc-mono--t11">2 Sep</span></a>
+        <a class="tc-menu__item" href="/app/tasks/nextcloud/dela/aa09" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>Подготовить отчёт · task <span class="tc-mono tc-mono--t11">4 Sep</span></a>
+      </div>
+    </div>
+  </div>
+  <figcaption>Список под счётом группы: записи, которых коснётся переписывание, — метка коллекции, название и дата, по дате; строка — ссылка на запись. У задачи после названия стоит «· task».</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-contacts-31">
+    <div class="frame-label"><span>Связанная запись · форма выбранной копии</span><span class="frag">фрагмент</span><i>после листа «какую копию»</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-head">
+          <div class="tc-head__titles"><div class="tc-head__title">Вера Лебедева</div><div class="tc-head__sub">nextcloud · Архив</div></div>
+          <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Save</button></div>
+        </div>
+        <div class="tc-msg">Saving changes this copy only — nextcloud · Архив. The others stay as they are.</div>
+        <div class="tc-form">
+          <div class="tc-field tc-field--lg"><label>Name</label><input class="tc-in" type="text" name="name" value="Вера Лебедева" aria-label="Name"></div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Email addresses</div>
+            <div class="tc-field tc-field--lg"><label>Email</label><input class="tc-in" type="text" name="email" value="vera@arhiv.example" aria-label="Email"></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Форма после листа — обычная форма копии, которую выбрали: под шапкой, до полей, одна строка о том, куда пишется правка. Блока других копий в форме нет — выбор уже сделан в листе. Поля — поля этой копии, а не слитые: адрес почты здесь тот, что в «Архиве».</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-contacts-32">
+    <div class="frame-label"><span>Связанная запись · какую копию править</span><span class="frag">фрагмент</span><i>лист перед правкой</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/contacts/linked/8d21-55ce-0b17/edit" method="get">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-pencil"/></svg>
+        <b class="tc-sheet__title">Which copy to edit?</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Вера Лебедева · 3 copies</span>
+        </div>
+        <div class="tc-sheet__body">
+          <span class="tc-dim--muted tc-dim--t11-5 tc-dim--lh1-55 tc-dim--wrap">This person stands in three books. Saving changes one copy only; the others stay as they are.</span>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mark tc-mark--h11" data-tc-colour="#A05A2C"></span><label class="tc-check"><input class="tc-check__box" type="radio" name="copy" value="nextcloud/arhiv" checked><span class="tc-tickrow__tick is-off"></span>nextcloud · Архив</label><span class="tc-dim tc-dim--t11-5">the copy you opened · vera@arhiv.example</span></div>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span><label class="tc-check"><input class="tc-check__box" type="radio" name="copy" value="nextcloud/kontakty"><span class="tc-tickrow__tick is-off"></span>nextcloud · Контакты</label><span class="tc-dim tc-dim--t11-5">Email differ · v.lebedeva@example.org</span></div>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mark tc-mark--h11" data-tc-colour="#9A9280"></span><span class="tc-dim">baikal · Общий</span><span class="tc-dim tc-dim--t11-5">Phone differ · read-only: it cannot be edited</span></div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Edit this copy</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption><b>Правка связанной записи пишется в одну копию, и человек выбирает какую — до формы</b> (решения владельца 11.10 и 13.10, задача 153, Р-58). Edit у записи со связанными копиями сначала открывает этот лист: строка на копию — метка, отметка выбора с источником и чем копия разнится. <b>Копии — отметки, не кнопки:</b> нажатие на копию только выбирает её, форму открывает главная кнопка «Edit this copy». Отмечена та копия, которую открыли. Копия только для чтения стоит строкой без отметки, с причиной. Лист один для всех родов: у события, задачи и заметки те же строки. У записи без связанных копий листа нет: Edit открывает форму сразу. Вариант, где форма открывалась сразу и сама называла копию и соседние, отвергнут как слишком сложный для понимания.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-contacts-33">
+    <div class="frame-label"><span>Связанная запись · карточка из объединённого вида</span><span class="frag">фрагмент</span><i>выбранные значения, метка — откуда взято</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Анна Ковалёва</div><div class="tc-head__sub">All address books · in 2 books</div></div></div>
+        <dl class="tc-fields">
+          <dt>Phone · mobile</dt><dd class="tc-mono"><a class="tc-fields__link" href="tel:+79124451088">+7 912 445-10-88</a></dd>
+          <dt>Phone · work</dt><dd class="tc-mono"><a class="tc-fields__link" href="tel:+74951204577">+7 495 120-45-77</a> <span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <span class="tc-dim">Команда</span></dd>
+          <dt>Email · work</dt><dd><a class="tc-fields__link" href="mailto:a.kovaleva@example.org">a.kovaleva@example.org</a></dd>
+          <dt>Email · second</dt><dd><a class="tc-fields__link" href="mailto:anna.kovaleva@slovo.example">anna.kovaleva@slovo.example</a> <span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <span class="tc-dim">Контакты</span></dd>
+          <dt>Address · work</dt><dd>Москва, Тверская 12, стр. 3</dd>
+          <dt>Note</dt><dd>Пишет по вторникам, отвечает в тот же день.</dd>
+        </dl>
+        <div class="tc-sec">
+          <div class="tc-rubric">Where this person is kept <span class="tc-badge is-linked">2</span></div>
+          <ul class="tc-stack tc-stack--gap-5 tc-sec__list">
+            <li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="/app/contacts/nextcloud/kontakty/2b7e">nextcloud · Контакты</a></li>
+            <li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="/app/contacts/radicale/komanda/2b7e">radicale · vps · Команда</a> <span class="tc-dim">· Phone, email differ</span></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption><b>Карточка, открытая из объединённого вида, показывает то, что человек сам выбрал</b> (решение владельца 13.10, задача 153, Р-58): значения, выбранные в разделе дубликатов при связывании. У значения, где был выбор, после него стоят метка и название коллекции, из которой оно взято: рабочий телефон здесь из «Команды», второй адрес — из «Контактов». У значений, где выбирать было не из чего, метки нет. Связанной запись становится только после такого выбора; пока его нет, это кандидат в дубликаты, а не связанная запись. Блок внизу называет копии — каждая ведёт на карточку своей коллекции, где показаны её собственные данные и значок «linked» у полей с выбором.</figcaption>
   </figure>
 
 <figure style="flex:1 1 330px">
@@ -4739,6 +4870,153 @@ Read  2 min ago · changed on server 3 days ago</div>
   </div>
   <figcaption>Набросок. Отмечено то, что стоит в ленте по умолчанию: время, название, место, значок участников или статуса, источник; Tags и Changed добавляют. Time и Title стоят всегда.</figcaption>
   </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-agenda-20">
+    <div class="frame-label"><span>Календарь · свои столбцы</span><span class="frag">фрагмент</span><i>лента столбцами: набор по умолчанию</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-bar">
+          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</button>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Monday · 10 August</span><span class="tc-num">4</span></div>
+        <div class="tc-list">
+          <div class="tc-row tc-row--cols is-on"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">10:00</span><span class="tc-row__title is-strong tc-col--name">Синк-ап по релизу</span><span class="tc-row__excerpt tc-col--detail">Переговорная 2</span><span class="tc-row__cell tc-col--status">4 attendees</span><span class="tc-row__cell tc-col--source">nextcloud · Личный</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__excerpt tc-col--detail">—</span><span class="tc-row__cell tc-col--status">repeats weekly</span><span class="tc-row__cell tc-col--source">nextcloud · Работа</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__excerpt tc-col--detail">—</span><span class="tc-row__cell tc-col--status">repeats weekly</span><span class="tc-row__cell tc-col--source">radicale · vps · Дежурства</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">15:00</span><span class="tc-row__title tc-col--name">Созвон с подрядчиком</span><span class="tc-row__excerpt tc-col--detail">Jitsi</span><span class="tc-row__cell tc-col--status">tentative</span><span class="tc-row__cell tc-col--source">nextcloud · Работа</span></div>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Tuesday · 11 August</span><span class="tc-num">2</span></div>
+        <div class="tc-list">
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-row__cell tc-mono tc-col--date">09:30</span><span class="tc-row__title tc-col--name">Ревью архитектуры</span><span class="tc-row__excerpt tc-col--detail">Переговорная 1</span><span class="tc-row__cell tc-col--status">2 attendees</span><span class="tc-row__cell tc-col--source">radicale · vps · Проекты</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">18:00</span><span class="tc-row__title tc-col--name">Забрать документы</span><span class="tc-row__excerpt tc-col--detail">МФЦ, Мясницкая 13</span><span class="tc-row__cell tc-col--status">—</span><span class="tc-row__cell tc-col--source">nextcloud · Личный</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption><b>Лента в столбцах, которые выбрал человек</b> (задача 154): та же строка со столбцами, что у задач, заметок и контактов. Кадр рисует набор по умолчанию — Time, Title, Where, «Attendees and status», Source (решение владельца 13.10): время стоит первым, перед названием, и остаётся всегда, как само название; Where — растягивающийся столбец сразу после названия, прочерк, когда места нет; «Attendees and status» в столбцах — слова, а не значок: «4 attendees», «repeats weekly», «tentative», прочерк, когда сказать нечего; Source — последним. Группы по дням остаются. <b>Tags и Changed в ленте по умолчанию нет</b> (Р-53): это столбцы, которые включают, — тогда они встают перед Source, как в остальных списках: тег — первым и счётом остальных, Changed — датой и временем. На узкой ширине статус уходит с 620 px, Source — с 460; время, название и место остаются.</figcaption>
+  </figure>
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-agenda-21">
+    <div class="frame-label"><span>Календарь · свои столбцы, другой выбор</span><span class="frag">фрагмент</span><i>не умолчание: Where и Source сняты, Tags и Changed включены</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-bar">
+          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</button>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Monday · 10 August</span><span class="tc-num">4</span></div>
+        <div class="tc-list">
+          <div class="tc-row tc-row--cols is-on"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">10:00</span><span class="tc-row__title is-strong tc-col--name">Синк-ап по релизу</span><span class="tc-row__cell tc-col--status">4 attendees</span><span class="tc-row__cell tc-row__tags tc-col--tags" title="release, team"><span class="tc-tag">release</span><span class="tc-row__more">+1</span></span><span class="tc-row__cell tc-mono tc-col--changed">10 Aug 08:41</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__cell tc-col--status">repeats weekly</span><span class="tc-row__cell tc-row__tags tc-col--tags"><span class="tc-tag">дежурство</span></span><span class="tc-row__cell tc-mono tc-col--changed">3 Aug 12:10</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__cell tc-col--status">repeats weekly</span><span class="tc-row__cell tc-row__tags tc-col--tags"></span><span class="tc-row__cell tc-mono tc-col--changed">3 Aug 12:10</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">15:00</span><span class="tc-row__title tc-col--name">Созвон с подрядчиком</span><span class="tc-row__cell tc-col--status">tentative</span><span class="tc-row__cell tc-row__tags tc-col--tags"><span class="tc-tag">смета</span></span><span class="tc-row__cell tc-mono tc-col--changed">9 Aug 18:02</span></div>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Tuesday · 11 August</span><span class="tc-num">2</span></div>
+        <div class="tc-list">
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-row__cell tc-mono tc-col--date">09:30</span><span class="tc-row__title tc-col--name">Ревью архитектуры</span><span class="tc-row__cell tc-col--status">2 attendees</span><span class="tc-row__cell tc-row__tags tc-col--tags"><span class="tc-tag">release</span></span><span class="tc-row__cell tc-mono tc-col--changed">7 Aug 16:55</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">18:00</span><span class="tc-row__title tc-col--name">Забрать документы</span><span class="tc-row__cell tc-col--status">—</span><span class="tc-row__cell tc-row__tags tc-col--tags"></span><span class="tc-row__cell tc-mono tc-col--changed">11 Aug 09:03</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption><b>Тот же список после выбора в «Columns» — пример, а не умолчание</b> (задача 154, набор из просьбы Carrel; владелец 13.10: дополнительным кадром). Человек снял Where и Source и включил Tags и Changed: Tags — первым тегом и счётом остальных («release +1»), все — в подсказке ячейки; пустая ячейка у события без тегов; Changed — датой и временем. Время и название остаются всегда. На узкой ширине Tags и Changed уходят с 800 px, статус — с 620.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-agenda-22">
+    <div class="frame-label"><span>Событие · вопрос перед сохранением</span><span class="frag">фрагмент</span><i>лист после Save, несколько встреч</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/calendar/nextcloud/rabota/7c1e-22ab-90f4/edit" method="post">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-refresh"/></svg>
+        <b class="tc-sheet__title">Keep the meetings that were moved by hand?</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Дежурство: первая линия · not saved yet</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-sheet__block">
+            <div class="tc-rubric tc-rubric--bot7">What you changed</div>
+            <div class="tc-stack tc-stack--gap-6 tc-line__text">
+              <span class="tc-stack__item"><b>The series ends on 19 January</b> <span class="tc-dim">— it ran weekly until 28 December</span></span>
+            </div>
+          </div>
+          <div class="tc-sheet__block">
+            <div class="tc-rubric tc-rubric--bot7">Left without their day · 3</div>
+            <div class="tc-stack tc-stack--gap-6 tc-line__text">
+              <span class="tc-stack__item"><b>26 January, 12:00 — Duty moved</b> <span class="tc-dim">— it was the meeting of 26 January, 09:00</span></span>
+              <span class="tc-stack__item"><b>2 February, 09:00 — Дежурство: вторая линия</b> <span class="tc-dim">— its title was changed</span></span>
+              <span class="tc-stack__item"><b>16 February, 14:30 — Duty moved</b> <span class="tc-dim">— it was the meeting of 16 February, 09:00</span></span>
+            </div>
+          </div>
+          <span class="tc-dim--muted tc-dim--t11-5 tc-dim--lh1-55 tc-dim--wrap">Kept, each becomes an event of its own, with what was changed in it. Removed, they go with the rest of the series after 19 January.</span>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit" name="left" value="keep">Keep as events</button><button class="tc-btn" type="submit" name="left" value="remove">Remove</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption><b>Где из правки не видно, чего человек хотел, а неверная догадка теряет его данные, Carrel спрашивает перед записью</b> — одним листом на всё сохранение (решение владельца 11.10, задача 151). Первый случай: серию укоротили, сменили ей правило или сняли повтор, и встречи, изменённые в ней вручную, остались без своего дня. Лист называет, что изменили, и каждую такую встречу — когда она стоит и чем отличается; главная кнопка — «Keep as events», оставить отдельными событиями; вторая — «Remove», убрать; «Cancel» возвращает в правку, ничего не записав. Подписи короткие, чтобы три ответа помещались в подвал листа на телефоне; счёт стоит в рубрике списка. <b>Лист общий</b>: заголовок-вопрос, что изменили, список затронутого со счётом, от двух до трёх ответов, один по умолчанию — так же спрашивают и другие случаи, где выбор молчаливый. Образец — «Rewrite the address in their records?».</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-agenda-23">
+    <div class="frame-label"><span>Вопрос перед сохранением · одна встреча</span><span class="frag">фрагмент</span><i>лист после Save</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/calendar/nextcloud/rabota/7c1e-22ab-90f4/edit" method="post">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-refresh"/></svg>
+        <b class="tc-sheet__title">Keep the meeting that was moved by hand?</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Дежурство: первая линия · not saved yet</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-sheet__block">
+            <div class="tc-rubric tc-rubric--bot7">What you changed</div>
+            <div class="tc-stack tc-stack--gap-6 tc-line__text">
+              <span class="tc-stack__item"><b>The series repeats every two weeks</b> <span class="tc-dim">— it repeated weekly</span></span>
+            </div>
+          </div>
+          <div class="tc-sheet__block">
+            <div class="tc-rubric tc-rubric--bot7">Left without its day · 1</div>
+            <div class="tc-stack tc-stack--gap-6 tc-line__text">
+              <span class="tc-stack__item"><b>26 January, 12:00 — Duty moved</b> <span class="tc-dim">— it was the meeting of 26 January, 09:00</span></span>
+            </div>
+          </div>
+          <span class="tc-dim--muted tc-dim--t11-5 tc-dim--lh1-55 tc-dim--wrap">Kept, it becomes an event of its own, with what was changed in it. Removed, it goes: the series no longer has that day.</span>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit" name="left" value="keep">Keep as an event</button><button class="tc-btn" type="submit" name="left" value="remove">Remove</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Одна встреча — единственное число во всех строках и на кнопках.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-agenda-24">
+    <div class="frame-label"><span>Вопрос перед сохранением · отдельное событие не записалось</span><span class="frag">фрагмент</span><i>лист после отказа сервера</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/calendar/nextcloud/rabota/7c1e-22ab-90f4/edit" method="post">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-refresh"/></svg>
+        <b class="tc-sheet__title">Keep the meetings that were moved by hand?</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Дежурство: первая линия · saved in part</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-sheet__block">
+            <div class="tc-rubric tc-rubric--bot7">Written</div>
+            <div class="tc-stack tc-stack--gap-6 tc-line__text">
+              <span class="tc-stack__item"><b>The series ends on 19 January</b> <span class="tc-dim">— saved</span></span>
+              <span class="tc-stack__item"><b>2 separate events</b> <span class="tc-dim">— 26 January, 12:00 and 16 February, 14:30</span></span>
+            </div>
+          </div>
+          <div class="tc-sheet__block">
+            <div class="tc-rubric tc-rubric--bot7">Not written · 1</div>
+            <div class="tc-stack tc-stack--gap-6 tc-line__text">
+              <span class="tc-stack__item"><b>2 February, 09:00 — Дежурство: вторая линия</b> <span class="tc-dim">— the server answered 507 Insufficient Storage</span></span>
+            </div>
+          </div>
+          <div class="tc-msg is-alert tc-msg--flush">The meeting of 2 February was not made a separate event: it stays in the series, with its change, as it was before you saved.</div>
+          <span class="tc-dim--muted tc-dim--t11-5 tc-dim--lh1-55 tc-dim--wrap">Nothing is lost: what could not be written apart is still in the series.</span>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit" name="left" value="keep">Try again</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Leave it in the series</button><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Отказ: отдельное событие не записалось — перенос остался в серии. Лист остаётся и говорит, что записано, что нет и почему; сообщение называет встречу и то, где она теперь. Ответы — повторить или оставить как есть; ничего не потеряно ни в том, ни в другом случае.</figcaption>
+  </figure>
 
 
 <figure>
@@ -4909,7 +5187,7 @@ Read  2 min ago · changed on server 3 days ago</div>
           <dt>When</dt><dd><span class="tc-mono">10:00 – 11:00</span>, Monday 10 August <span class="tc-badge" title="Created in another time zone">created 12:00 Asia/Yekaterinburg</span></dd>
           <dt>Repeats</dt><dd>Weekly on Mon <span class="tc-badge">until 2026-12-28</span></dd>
           <dt>Reminders</dt><dd>10 minutes before · 1 day before</dd>
-          <dt>Where</dt><dd>Переговорная 2</dd>
+          <dt>Where</dt><dd>Переговорная 2 <span class="tc-badge is-linked">linked</span></dd>
           <dt>Status</dt><dd>Confirmed</dd>
           <dt>Tags</dt><dd><span class="tc-tag">релиз</span> <span class="tc-tag">работа</span></dd>
         </dl>
@@ -4932,9 +5210,10 @@ Read  2 min ago · changed on server 3 days ago</div>
           <ul class="tc-sec__list"><li><span class="tc-dim--accent">Заметка со встречи 10.08</span> <span class="tc-dim">· note</span></li></ul>
         </div>
         <div class="tc-sec">
-          <div class="tc-rubric">The same event in other calendars <span class="tc-badge is-linked">1</span></div>
+          <div class="tc-rubric">The same event in other calendars <span class="tc-badge is-linked">2</span></div>
           <ul class="tc-stack tc-stack--gap-5 tc-sec__list">
             <li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="#">radicale · vps · Проекты</a> <span class="tc-dim">· Holds the same</span></li>
+            <li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#9A9280"></span> <a class="tc-dim--accent" href="#">baikal · Общий</a> <span class="tc-dim">· Where differ</span></li>
           </ul>
         </div>
         <div class="tc-sec">
@@ -5028,6 +5307,13 @@ Read  2 min ago · changed on server 3 days ago</div>
             <div class="tc-field tc-field--full"><span class="tc-drop"><span class="tc-in tc-in--tags tc-in--cols" data-tc-suggest="/app/contacts/suggest"> <span class="tc-tag tc-tag--pill" title="m.lebedeva@example.org"><input type="hidden" name="attendee" value="mailto:m.lebedeva@example.org"><span class="tc-mark tc-mark--h11" data-tc-colour="#6B4E7A"></span>Мария Лебедева <span class="tc-dim">· organiser</span></span> <label class="tc-tag tc-tag--pill" title="a.kovaleva@example.org"><input class="tc-check__box" type="checkbox" name="attendee" value="mailto:a.kovaleva@example.org" checked><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>Анна Ковалёва <span class="tc-dim">· accepted</span> <svg width="9" height="9" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" fill="none"><use href="#i-close"/></svg></label> <label class="tc-tag tc-tag--pill" title="a.belov@example.org"><input class="tc-check__box" type="checkbox" name="attendee" value="mailto:a.belov@example.org" checked><span class="tc-mark tc-mark--h11" data-tc-colour="#6B4E7A"></span>Артём Белов <span class="tc-dim">· tentative</span> <svg width="9" height="9" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" fill="none"><use href="#i-close"/></svg></label> <label class="tc-tag tc-tag--pill" title="v@example.org"><input class="tc-check__box" type="checkbox" name="attendee" value="mailto:v@example.org" checked><span class="tc-mono">v@example.org</span> <span class="tc-dim">· no reply</span> <svg width="9" height="9" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" fill="none"><use href="#i-close"/></svg></label> <input class="tc-in__add" type="text" name="attendee.add" placeholder="Name or address" aria-label="Add attendee" autocomplete="off"> </span><div class="tc-menu is-pop tc-menu--w420" role="menu" hidden></div></span><span class="tc-field__hint">A name or an address: the ticked address books are searched. On save, nextcloud sends the invitations and their changes — Carrel sends no mail itself.</span></div>
           </div>
           <div class="tc-fset">
+            <div class="tc-rubric">Other</div>
+            <div class="tc-field tc-field--lg"><label>Related to</label>
+              <span class="tc-in tc-in--tags">
+                <span class="tc-tag tc-tag--pill"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>Заметка со встречи 10.08
+                  <svg width="9" height="9" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" fill="none"><use href="#i-close"/></svg></span> <input class="tc-in__add" type="text" name="related.add" placeholder="Title or UID" aria-label="Add a link" autocomplete="off"> </span></div>
+          </div>
+          <div class="tc-fset">
             <div class="tc-rubric">Attachments</div>
             <div class="tc-grow tc-line tc-line--gap-8" id="event-attachments">
               <details class="tc-drop"><summary class="tc-btn"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" aria-label="From this computer" data-tc-list="event-attachments"><template data-tc-row><span class="tc-line tc-line--gap-8"><span class="tc-dim--t12-5">{name} <span class="tc-dim">{size}</span></span><button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></span></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
@@ -5117,6 +5403,10 @@ SEQUENCE  2</div>
           <div class="tc-fset">
             <div class="tc-rubric">Attendees</div>
             <div class="tc-field tc-field--full"><span class="tc-drop"><span class="tc-in tc-in--tags tc-in--cols" data-tc-suggest="/app/contacts/suggest"> <input class="tc-in__add" type="text" name="attendee.add" placeholder="Name or address" aria-label="Add attendee" autocomplete="off"> </span><div class="tc-menu is-pop tc-menu--w420" role="menu" hidden></div></span><span class="tc-field__hint">A name or an address: the ticked address books are searched. On save, nextcloud sends the invitations and their changes — Carrel sends no mail itself.</span></div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Other</div>
+            <div class="tc-field tc-field--lg"><label>Related to</label><span class="tc-in tc-in--tags"> <input class="tc-in__add" type="text" name="related.add" placeholder="Title or UID" aria-label="Add a link" autocomplete="off"> </span></div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Attachments</div>
@@ -5218,12 +5508,13 @@ SEQUENCE  2</div>
         <button class="tc-menu__item" type="button" role="menuitem">30 minutes before</button>
         <button class="tc-menu__item" type="button" role="menuitem">1 hour before</button>
         <button class="tc-menu__item" type="button" role="menuitem">1 day before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Custom…</button>
         <span class="tc-menu__sep"></span>
         <button class="tc-menu__item" type="button" role="menuitem">No reminder</button>
       </div>
     </div>
   </div>
-  <figcaption>Шаги, которыми напоминания задают почти все клиенты. Своё число минут приходит с сервера как есть и встаёт в этот список строкой.</figcaption>
+  <figcaption>Шаги, которыми напоминания задают почти все клиенты, и <b>«Custom…»</b> — свой отступ (решение владельца 12.10, задача 156): он открывает в строке напоминания число и единицу, кадр ниже.</figcaption>
   </figure>
   <figure style="flex:0 1 250px">
   <div class="frame" data-frame="s-agenda-10">
@@ -5240,6 +5531,34 @@ SEQUENCE  2</div>
     </div>
   </div>
   <figcaption>Частота; всё тоньше — дни недели, «до» и «сколько раз» — рядом полями, а редкие правила — в Advanced RRULE.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-agenda-19">
+    <div class="frame-label"><span>Напоминание · свой отступ</span><span class="frag">фрагмент</span><i>группа Reminders правки события</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-form tc-form--pad0">
+          <div class="tc-fset">
+            <div class="tc-rubric">Reminders</div>
+            <div class="tc-field tc-field--md"><label>First</label><span class="tc-in is-pick"><select class="tc-in__list" name="reminder.1" aria-label="First"><option value="at.the.time">At the time</option><option value="5.minutes.before">5 minutes before</option><option value="10.minutes.before" selected>10 minutes before</option><option value="30.minutes.before">30 minutes before</option><option value="1.hour.before">1 hour before</option><option value="1.day.before">1 day before</option><option value="custom" data-tc-shows="reminder.1.count reminder.1.unit">Custom…</option><option value="none">No reminder</option></select></span></div>
+            <div class="tc-field tc-field--xs" hidden><label>How long</label><input class="tc-in is-mono" type="text" inputmode="numeric" name="reminder.1.count" value="1" aria-label="How long"></div>
+            <div class="tc-field tc-field--sm" hidden><label>Unit</label><span class="tc-in is-pick"><select class="tc-in__list" name="reminder.1.unit" aria-label="Unit"><option value="minutes">minutes before</option><option value="hours">hours before</option><option value="days" selected>days before</option><option value="weeks">weeks before</option></select></span></div>
+            <div class="tc-field tc-field--md"><label>Reminder</label><span class="tc-in is-pick"><select class="tc-in__list" name="reminder.2" aria-label="Reminder"><option value="at.the.time">At the time</option><option value="5.minutes.before">5 minutes before</option><option value="10.minutes.before">10 minutes before</option><option value="30.minutes.before">30 minutes before</option><option value="1.hour.before">1 hour before</option><option value="1.day.before">1 day before</option><option value="custom" selected data-tc-shows="reminder.2.count reminder.2.unit">Custom…</option><option value="none">No reminder</option></select></span></div>
+            <div class="tc-field tc-field--xs"><label>How long</label><input class="tc-in is-mono" type="text" inputmode="numeric" name="reminder.2.count" value="2" aria-label="How long"></div>
+            <div class="tc-field tc-field--sm"><label>Unit</label><span class="tc-in is-pick"><select class="tc-in__list" name="reminder.2.unit" aria-label="Unit"><option value="minutes">minutes before</option><option value="hours">hours before</option><option value="days" selected>days before</option><option value="weeks">weeks before</option></select></span></div>
+            <div class="tc-field"><label>&nbsp;</label><button class="tc-btn" type="button">Add reminder</button></div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Reminders</div>
+            <div class="tc-field tc-field--md"><label>First</label><span class="tc-in is-pick"><select class="tc-in__list" name="reminder.1" aria-label="First"><option value="at.the.time">At the time</option><option value="5.minutes.before">5 minutes before</option><option value="10.minutes.before">10 minutes before</option><option value="30.minutes.before">30 minutes before</option><option value="1.hour.before">1 hour before</option><option value="1.day.before">1 day before</option><option value="custom" selected data-tc-shows="reminder.1.count reminder.1.unit reminder.1.at">Custom…</option><option value="none">No reminder</option></select></span></div>
+            <div class="tc-field tc-field--xs"><label>How long</label><input class="tc-in is-mono" type="text" inputmode="numeric" name="reminder.1.count" value="1" aria-label="How long"></div>
+            <div class="tc-field tc-field--sm"><label>Unit</label><span class="tc-in is-pick"><select class="tc-in__list" name="reminder.1.unit" aria-label="Unit"><option value="minutes">minutes before</option><option value="hours">hours before</option><option value="days" selected>days before</option><option value="weeks">weeks before</option></select></span></div>
+            <div class="tc-field tc-field--xs"><label>At</label><input class="tc-in is-mono" type="time" name="reminder.1.at" value="09:00" aria-label="At"></div>
+            <div class="tc-field"><label>&nbsp;</label><button class="tc-btn" type="button">Add reminder</button></div>
+          </div>
+      </div>
+    </div>
+  </div>
+  <figcaption><b>Свой отступ — «Custom…» в списке напоминания</b> (решение владельца 12.10, задача 156): строка остаётся строкой напоминания, рядом с выбором встают число и единица — minutes, hours, days, weeks before. Наверху — событие со временем: «за 2 дня». Внизу — событие на весь день: у него ещё и час, «накануне в 09:00» — это «1 day before» и «At 09:00». Напоминание с отступом не из шести шагов, записанное другим клиентом, приходит в форму этой же строкой, а не лишним пунктом списка. На карточке и в панели такое напоминание — словами: «2 days before», «1 day before, 09:00». Быстрый лист держит тот же список с «Custom…» и те же поля в своей строке. Поля числа и единицы есть у каждой строки и скрыты, пока выбран готовый шаг: со сценарием их открывает сам выбор «Custom…», без сценариев «Custom…» выбирают и жмут «Add reminder» или «Save» — сервер отвечает формой с открытыми полями. Со сценарием скрытое поле не отправляется; без него сервер скрытых полей не читает.</figcaption>
   </figure>
 
 <figure style="flex:1 1 100%">
@@ -5388,9 +5707,9 @@ SEQUENCE  2</div>
         </div>
         <dl class="tc-fields">
           <dt>Status</dt><dd>Needs action</dd>
-          <dt>Due</dt><dd class="tc-mono">12 August 2026, 18:00</dd>
+          <dt>Due</dt><dd class="tc-mono">12 August 2026, 18:00 <span class="tc-badge is-linked">linked</span></dd>
           <dt>Complete</dt><dd class="tc-mono">0%</dd>
-          <dt>Priority</dt><dd class="tc-mono">5</dd>
+          <dt>Priority</dt><dd class="tc-mono">5 <span class="tc-badge is-linked">linked</span></dd>
           <dt>Tags</dt><dd><span class="tc-tag">дом</span></dd>
         </dl>
         <div class="tc-sec"><div class="tc-rubric">Description</div><div class="tc-prose tc-prose--t13">Зарядки, переходник, распечатать посадочный.</div></div>
@@ -5619,9 +5938,9 @@ Read  2 min ago · not changed on server</div>
         </div>
         <dl class="tc-fields">
           <dt>Status</dt><dd>Needs action</dd>
-          <dt>Due</dt><dd class="tc-mono">12 August 2026, 18:00</dd>
+          <dt>Due</dt><dd class="tc-mono">12 August 2026, 18:00 <span class="tc-badge is-linked">linked</span></dd>
           <dt>Complete</dt><dd class="tc-mono">0%</dd>
-          <dt>Priority</dt><dd class="tc-mono">5</dd>
+          <dt>Priority</dt><dd class="tc-mono">5 <span class="tc-badge is-linked">linked</span></dd>
           <dt>Reminders</dt><dd>1 day before</dd>
           <dt>Tags</dt><dd><span class="tc-tag">дом</span></dd>
         </dl>
@@ -5642,7 +5961,7 @@ Read  2 min ago · not changed on server</div>
         <div class="tc-sec">
           <div class="tc-rubric">The same task in other lists <span class="tc-badge is-linked">1</span></div>
           <ul class="tc-stack tc-stack--gap-5 tc-sec__list">
-            <li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="#">nextcloud · Работа</a> <span class="tc-dim">· Time differ</span></li>
+            <li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="#">nextcloud · Работа</a> <span class="tc-dim">· Time, priority differ</span></li>
           </ul>
         </div>
         <div class="tc-sec">
@@ -5930,6 +6249,27 @@ Read  2 min ago · not changed on server</div>
   </div>
   <figcaption>Связей у записи сколько угодно (RFC 5545, <code>RELATED-TO</code>): поле держит все пилюлями, у каждой свой крестик, строка ввода стоит после последней и добавляет ещё одну; пилюли переносятся, строка уходит на новую строку, когда ей тесно. Пилюля называет запись, а не род связи — <code>RELTYPE</code> сервер хранит как есть. Запись, которой нет среди загруженных, — пилюля с её UID; карточка (заметка, заведённая из хронологии человека) — имя и «contact». «By UID…» открывает на месте поля строку для UID. У события поля нет.</figcaption>
   </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-tasks-16">
+    <div class="frame-label"><span>Связанная задача · какую копию отметить</span><span class="frag">фрагмент</span><i>лист по галке в списке</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/tasks/done" method="post">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-task"/></svg>
+        <b class="tc-sheet__title">Which copy to mark done?</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Собрать чемодан · 2 copies</span>
+        </div>
+        <div class="tc-sheet__body">
+          <span class="tc-dim--muted tc-dim--t11-5 tc-dim--lh1-55 tc-dim--wrap">This task stands in two lists. Tick the copy that is done; a copy that is not ticked stays as it is.</span>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span><label class="tc-check"><input class="tc-check__box" type="checkbox" name="copy" value="nextcloud/dela" checked><span class="tc-tickrow__tick"></span>nextcloud · Дела</label><span class="tc-dim tc-dim--t11-5">due 12 Aug 18:00</span></div>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mark tc-mark--h11" data-tc-colour="#3F6E8C"></span><label class="tc-check"><input class="tc-check__box" type="checkbox" name="copy" value="nextcloud/rabota"><span class="tc-tickrow__tick is-off"></span>nextcloud · Работа</label><span class="tc-dim tc-dim--t11-5">Due differ · due 13 Aug</span></div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Mark done</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption><b>Галка у связанной задачи в списке открывает лист «какую копию отметить»</b> (решения владельца 13.10, задача 153, Р-58): строка задачи в списке одна на все копии, а отметка пишется в ту, которую выбрали. Копии — отметки выбора, не кнопки: нажатие на копию ничего не делает, пока не нажата главная кнопка «Mark done». По умолчанию отмечена первая копия; можно отметить и обе. «Cancel» закрывает лист, ничего не записав. У задачи без связанных копий листа нет — галка в списке отмечает сразу.</figcaption>
+  </figure>
 </div>
 
 <h2 id="s-notes">7.4 Заметки</h2>
@@ -5997,7 +6337,7 @@ Read  2 min ago · not changed on server</div>
         <div class="tc-list">
           <div class="tc-row tc-row--excerpt is-on">
             <span class="tc-mark" data-tc-colour="#4A6B52"></span>
-            <span class="tc-row__title is-strong">Заметка со встречи 10.08</span>
+            <span class="tc-row__title is-strong">Заметка со встречи 10.08 <span class="tc-badge is-linked">linked ×2</span></span>
             <span class="tc-row__excerpt">Договорились заморозить ветку в среду; письмо пользователям пишет Анна…</span>
 
             <span class="tc-mono tc-row__date">10 Aug</span>
@@ -6274,7 +6614,7 @@ Read  2 min ago · not changed on server</div>
           </div>
           <div class="tc-docmeta">
             <div class="tc-docmeta__sec">
-              <div class="tc-rubric">Tags</div>
+              <div class="tc-rubric">Tags <span class="tc-badge is-linked">linked</span></div>
               <div class="tc-line tc-line--gap-4"><span class="tc-tag">встречи</span><span class="tc-tag">релиз</span></div>
             </div>
             <div class="tc-docmeta__sec">
@@ -6292,7 +6632,7 @@ Read  2 min ago · not changed on server</div>
             <div class="tc-docmeta__sec">
               <div class="tc-rubric">The same note in other notebooks <span class="tc-badge is-linked">1</span></div>
               <div class="tc-stack tc-stack--gap-5 tc-line__text">
-                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text differ</span></span>
+                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text, tags differ</span></span>
               </div>
             </div>
             <div class="tc-docmeta__sec">
@@ -6370,7 +6710,7 @@ Read  2 min ago</div>
           </div>
           <div class="tc-docmeta">
             <div class="tc-docmeta__sec">
-              <div class="tc-rubric">Tags</div>
+              <div class="tc-rubric">Tags <span class="tc-badge is-linked">linked</span></div>
               <div class="tc-line tc-line--gap-4"><span class="tc-tag">встречи</span><span class="tc-tag">релиз</span></div>
             </div>
             <div class="tc-docmeta__sec">
@@ -6388,7 +6728,7 @@ Read  2 min ago</div>
             <div class="tc-docmeta__sec">
               <div class="tc-rubric">The same note in other notebooks <span class="tc-badge is-linked">1</span></div>
               <div class="tc-stack tc-stack--gap-5 tc-line__text">
-                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text differ</span></span>
+                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text, tags differ</span></span>
               </div>
             </div>
             <div class="tc-docmeta__sec">
@@ -6572,7 +6912,7 @@ Read  2 min ago</div>
           </div>
           <div class="tc-docmeta">
             <div class="tc-docmeta__sec">
-              <div class="tc-rubric">Tags</div>
+              <div class="tc-rubric">Tags <span class="tc-badge is-linked">linked</span></div>
               <div class="tc-line tc-line--gap-4"><span class="tc-tag">встречи</span><span class="tc-tag">релиз</span></div>
             </div>
             <div class="tc-docmeta__sec">
@@ -6590,7 +6930,7 @@ Read  2 min ago</div>
             <div class="tc-docmeta__sec">
               <div class="tc-rubric">The same note in other notebooks <span class="tc-badge is-linked">1</span></div>
               <div class="tc-stack tc-stack--gap-5 tc-line__text">
-                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text differ</span></span>
+                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text, tags differ</span></span>
               </div>
             </div>
             <div class="tc-docmeta__sec">
@@ -6693,13 +7033,7 @@ Read  2 min ago</div>
             <div class="tc-docmeta__sec" id="note-attachments">
               <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="note-edit" aria-label="From this computer" data-tc-list="note-attachments"><template data-tc-row><div class="tc-line__text">{name} <span class="tc-dim">· {size}</span> <button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></div></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
               <div class="tc-line__text"><a class="tc-dim--accent" href="#">2026-08-10-sync-board.png</a> <span class="tc-dim">· 412 KB</span> <span class="tc-badge">in the note</span> <button class="tc-btn is-sm is-danger" type="button">Remove</button></div>
-              <div class="tc-line__text"><a class="tc-dim--accent" href="#">запись-встречи.m4a</a> <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span> <button class="tc-btn is-sm is-danger" type="button">Remove</button></div>
-            </div>
-            <div class="tc-docmeta__sec">
-              <div class="tc-rubric">The same note in other notebooks <span class="tc-badge is-linked">1</span></div>
-              <div class="tc-stack tc-stack--gap-5 tc-line__text">
-                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text differ</span></span>
-              </div>
+              <div class="tc-line__text"><a class="tc-dim--accent" href="#">запись-встречи.m4a</a> <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span> <button class="tc-btn is-sm" type="button" title="Remove the link; the file stays in Documents / carrel">Unlink</button></div>
             </div>
             <div class="tc-docmeta__sec">
               <div class="tc-rubric">Source</div>
@@ -6713,7 +7047,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>Правка там же, где чтение.</b> Edit — в панели над текстом или в панели заметки у списка — открывает эту страницу в правке: рейл с соседними заметками и колонка справа остаются на месте, меняется только колонка текста — вместо прочитанного поле заголовка, поля «когда» и «куда» и поле текста. <b>Tags и Related из колонки на время правки уходят</b>: они стали полями под заголовком, и два места для одного значения заставили бы гадать, какое из них настоящее. В колонке остаётся то, что правкой не меняется: вложения, та же заметка в других тетрадях, источник и удаление. Save и Cancel возвращают к чтению. <b>Focus</b> — кнопка справа в панели — убирает рейл и колонку, когда писать долго; этот режим — кадр следом. <b>У Focus свой значок — рамка видоискателя.</b> Стрелки наружу во всём макете значат одно: «открыть крупнее» — страницу заметки из панели, карточку из листа «New …»; одним значком для двух действий было бы не понять, что откроется.</figcaption>
+<figcaption><b>Правка там же, где чтение.</b> Edit — в панели над текстом или в панели заметки у списка — открывает эту страницу в правке: рейл с соседними заметками и колонка справа остаются на месте, меняется только колонка текста — вместо прочитанного поле заголовка, поля «когда» и «куда» и поле текста. <b>Tags и Related из колонки на время правки уходят</b>: они стали полями под заголовком, и два места для одного значения заставили бы гадать, какое из них настоящее. В колонке остаётся то, что правкой не меняется: вложения, источник и удаление. Блока «та же заметка в других тетрадях» в правке нет (решение владельца 13.10, Р-58): копию выбирают в листе до формы, и форма — форма одной копии; блок стоит в чтении. <b>У вложения, которое лежит в папке Files, кнопка другая</b> (задача 155): не тревожная «Remove», а простая «Unlink» (в подсказке — «Remove the link; the file stays in …») — уходит связь, файл остаётся там, где лежит, и значок рядом называет это место; «Remove» цветом тревоги — у вложения, записанного в саму заметку: оно удаляется вместе с ней. Save и Cancel возвращают к чтению. <b>Focus</b> — кнопка справа в панели — убирает рейл и колонку, когда писать долго; этот режим — кадр следом. <b>У Focus свой значок — рамка видоискателя.</b> Стрелки наружу во всём макете значат одно: «открыть крупнее» — страницу заметки из панели, карточку из листа «New …»; одним значком для двух действий было бы не понять, что откроется.</figcaption>
 </figure>
 <figure>
 <div class="frame" data-frame="s-notes-30" data-screen="/app/notes/{account}/{col}/new">
@@ -6872,14 +7206,8 @@ Read  2 min ago</div>
             <div class="tc-docmeta__sec" id="saving-attachments">
               <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="note-edit" aria-label="From this computer" data-tc-list="saving-attachments"><template data-tc-row><div class="tc-line__text">{name} <span class="tc-dim">· {size}</span> <button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></div></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
               <div class="tc-line__text"><a class="tc-dim--accent" href="#">2026-08-10-sync-board.png</a> <span class="tc-dim">· 412 KB</span> <span class="tc-badge">in the note</span> <button class="tc-btn is-sm is-danger" type="button">Remove</button></div>
-              <div class="tc-line__text"><a class="tc-dim--accent" href="#">запись-встречи.m4a</a> <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span> <button class="tc-btn is-sm is-danger" type="button">Remove</button></div>
+              <div class="tc-line__text"><a class="tc-dim--accent" href="#">запись-встречи.m4a</a> <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span> <button class="tc-btn is-sm" type="button" title="Remove the link; the file stays in Documents / carrel">Unlink</button></div>
               <div class="tc-line__text">план-поездки.pdf <span class="tc-dim">· 24 MB</span> <button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></div>
-            </div>
-            <div class="tc-docmeta__sec">
-              <div class="tc-rubric">The same note in other notebooks <span class="tc-badge is-linked">1</span></div>
-              <div class="tc-stack tc-stack--gap-5 tc-line__text">
-                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text differ</span></span>
-              </div>
             </div>
             <div class="tc-docmeta__sec">
               <div class="tc-rubric">Source</div>
@@ -7687,6 +8015,7 @@ Read  2 min ago</div>
         <button class="tc-menu__item" type="button" role="menuitem">30 minutes before</button>
         <button class="tc-menu__item" type="button" role="menuitem">1 hour before</button>
         <button class="tc-menu__item" type="button" role="menuitem">1 day before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Custom…</button>
         <span class="tc-menu__sep"></span>
         <button class="tc-menu__item" type="button" role="menuitem">No reminder</button>
       </div>
@@ -7745,7 +8074,7 @@ Read  2 min ago</div>
         <div class="tc-list">
           <div class="tc-row tc-row--excerpt is-on">
             <span class="tc-mark" data-tc-colour="#4A6B52"></span>
-            <span class="tc-row__title is-strong">Заметка со встречи 10.08</span>
+            <span class="tc-row__title is-strong">Заметка со встречи 10.08 <span class="tc-badge is-linked">linked ×2</span></span>
             <span class="tc-row__excerpt">Договорились заморозить ветку в среду; письмо пользователям пишет Анна…</span>
 
             <span class="tc-mono tc-row__date">10 Aug</span>
@@ -8110,7 +8439,8 @@ Read  2 min ago</div>
           </tbody>
         </table>
         <form class="tc-post" id="files-sel" action="/app/files/sftpgo/documents/op/carrel/attachments" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
-        <div class="tc-msg">Drop files onto the window, or onto a folder in the list. A name that is already taken is refused rather than overwritten, and the queue says so.</div>
+        <div class="tc-msg tc-js">Drop files onto the window to upload them into this folder. A name that is already taken is refused rather than overwritten, and the queue says so.</div>
+        <div class="tc-msg tc-nojs">Dropping files onto the window and the upload queue need scripts, and this page runs none. Upload sends the files; a name that is already taken is refused rather than overwritten.</div>
       </div>
 
       <div class="tc-side">
@@ -8141,7 +8471,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>Два ярлыка в рейле — не «умные папки», а два ответа на вопрос «где это лежало».</b> <b>Attachments</b> — та самая папка, которую выбрали один раз в настройках вложений: Carrel складывает туда вложения заметок и событий, не поместившиеся в саму запись (<a href="#attachments">7.12</a>), и знает её адрес, поэтому ярлык просто открывает её, где бы она ни была. Если папка ещё не выбрана, ярлык ведёт на страницу, где её выбирают. <b>Published</b> — файлы и папки с действующей секретной ссылкой: список известен Carrel из его же токенов, ходить за ним на сервер не нужно. Ярлыка «недавние» здесь нет намеренно: WebDAV не умеет спрашивать «что изменилось», и такой список пришлось бы собирать обходом всего дерева на каждый заход.<br><br><b>Из таблицы получился менеджер.</b> Колонка флажков и выделение строки; у каждой строки — скачивание и меню; операции над одним файлом собраны справа, а не разбросаны по формам внизу страницы. Хлебные крошки стали навигацией, а не подписью. Тип файла несёт иконку тонкой линией — единственное место в редизайне, где иконки появляются в содержимом, а не в хроме: в файловом списке тип узнаётся быстрее по значку, чем по строке <code>image/png</code>, и колонка типа при этом остаётся. Панель свойств честно говорит то, чего Carrel не знает: указателя ссылок на файл у него нет, и удаление ничего не проверяет.</figcaption>
+<figcaption><b>Два ярлыка в рейле — не «умные папки», а два ответа на вопрос «где это лежало».</b> <b>Attachments</b> — та самая папка, которую выбрали один раз в настройках вложений: Carrel складывает туда вложения заметок и событий, не поместившиеся в саму запись (<a href="#attachments">7.12</a>), и знает её адрес, поэтому ярлык просто открывает её, где бы она ни была. Если папка ещё не выбрана, ярлык ведёт на страницу, где её выбирают. <b>Published</b> — файлы и папки с действующей секретной ссылкой: список известен Carrel из его же токенов, ходить за ним на сервер не нужно. Ярлыка «недавние» здесь нет намеренно: WebDAV не умеет спрашивать «что изменилось», и такой список пришлось бы собирать обходом всего дерева на каждый заход.<br><br><b>Из таблицы получился менеджер.</b> Колонка флажков и выделение строки; у каждой строки — скачивание и меню; операции над одним файлом собраны справа, а не разбросаны по формам внизу страницы. Хлебные крошки стали навигацией, а не подписью. Тип файла несёт иконку тонкой линией — единственное место в редизайне, где иконки появляются в содержимом, а не в хроме: в файловом списке тип узнаётся быстрее по значку, чем по строке <code>image/png</code>, и колонка типа при этом остаётся. Панель свойств честно говорит то, чего Carrel не знает: указателя ссылок на файл у него нет, и удаление ничего не проверяет.<br><br><b>Без сценариев строка под списком другая.</b> Про бросок на окно и очередь сказано только там, где они работают; на странице без сценария на том же месте стоит «Dropping files onto the window and the upload queue need scripts, and this page runs none. Upload sends the files; a name that is already taken is refused rather than overwritten.» — недоступное названо, а не замолчано. В кадре вторая строка есть, но не видна: кадр нарисован со сценарием.</figcaption>
 </figure>
 
 <figure style="flex:0 1 300px">
@@ -8266,7 +8596,7 @@ Read  2 min ago</div>
   <div class="frame" data-frame="s-files-13">
     <div class="frame-label"><span>New folder · имя и отказ</span><span class="frag">фрагмент</span><i>в листе переноса</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <form class="tc-sheet tc-sheet--w520" action="/app/files/sftpgo/documents/op/carrel/attachments?op=move" method="post">
+      <form class="tc-sheet tc-sheet--w520" id="move-sheet" action="/app/files/sftpgo/documents/op/carrel/attachments?op=move" method="post">
         <div class="tc-sheet__head">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-move"/></svg>
         <b class="tc-sheet__title">Move 3 items</b>
@@ -8278,18 +8608,46 @@ Read  2 min ago</div>
           <div class="tc-line tc-line--gap-8"><input class="tc-in is-focus tc-in--fill" type="text" name="name" value="2026-07" aria-label="Name of the new folder"><button class="tc-btn is-sm is-primary" type="submit" formaction="/app/files/sftpgo/documents/mkcol/carrel/attachments">Create</button><button class="tc-btn is-sm" type="button">Cancel</button></div>
           <div class="tc-msg is-alert tc-msg--flush-top2">There is a folder called «2026-07» in attachments already. Choose another name.</div>
           <div class="tc-tree">
-            <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents"><svg><use href="#i-file"/></svg>Documents</label>
-            <label data-part="children" class="tc-tree__row tc-tree__row--padl22"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel"><svg><use href="#i-file"/></svg>carrel</label>
-            <label class="is-on tc-tree__row tc-tree__row--padl40" data-part="children"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments" checked><svg><use href="#i-file"/></svg>attachments</label>
-            <label data-part="children" class="tc-tree__row tc-tree__row--padl58"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07"><svg><use href="#i-file"/></svg>2026-07</label>
+            <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>Documents</label>
+            <label data-part="children" class="tc-tree__row tc-tree__row--padl22"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>carrel</label>
+            <label class="is-on tc-tree__row tc-tree__row--padl40" data-part="children"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments" checked data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel/attachments" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>attachments</label>
+            <label data-part="children" class="tc-tree__row tc-tree__row--padl58"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>2026-07</label>
             <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/public" disabled><svg><use href="#i-file"/></svg>Public <span class="tc-badge tc-push">read-only</span></label>
           </div>
         </div>
-        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><button class="tc-btn tc-nojs" type="submit" name="open" value="1">Open the folder</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
     </div>
   </div>
   <figcaption>«New folder» в листе спрашивает имя строкой над деревом, в той папке, что выбрана в дереве; «Create» заводит её и сразу выбирает. Отказ — сообщением под строкой: имя занято или папка только для чтения.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-files-25">
+    <div class="frame-label"><span>Перенос · лист сразу после открытия</span><span class="frag">фрагмент</span><i>выбрана папка, где вещи лежат</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" id="move-sheet" action="/app/files/sftpgo/documents/op/carrel/attachments?op=move" method="post">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-move"/></svg>
+        <b class="tc-sheet__title">Move 3 items</b>
+        <button class="tc-in is-pick tc-push tc-in--t12-w240" type="button" aria-label="Server">sftpgo · vps</button>
+        <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">from Documents / carrel / attachments</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-rubric">Where to put it <button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button></div>
+          <div class="tc-tree">
+            <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>Documents</label>
+            <label data-part="children" class="tc-tree__row tc-tree__row--padl22"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>carrel</label>
+            <label class="is-on tc-tree__row tc-tree__row--padl40" data-part="children"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments" checked data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel/attachments" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>attachments <span class="tc-tickrow__meta tc-push tc-tickrow__meta--dusty">the items are here</span></label>
+            <label data-part="children" class="tc-tree__row tc-tree__row--padl58"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>2026-07</label>
+            <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/public" disabled><svg><use href="#i-file"/></svg>Public <span class="tc-badge tc-push">read-only</span></label>
+          </div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit" disabled>Move</button><span class="tc-dim tc-dim--t11-5">These items are already here.</span><button class="tc-btn tc-nojs" type="submit" name="open" value="1">Open the folder</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption><b>Лист открывается с папкой, где вещи лежат, выбранной</b> (задача 158): отсюда «New folder» заводит папку рядом и сразу выбирает её. Целью эта папка быть не может, и об этом сказано дважды — пометкой у самой папки и причиной у выключенной «Move» (правило владельца 09.10: чего нельзя сделать, то выключено). Отметить её можно: она остаётся местом для новой папки. Выбор другой папки включает «Move». <b>Без сценариев</b> у листа есть вторая кнопка формы, «Open the folder» (на странице со сценарием её нет): отметил папку, нажал — сервер отвечает тем же листом с этой папкой выбранной и раскрытой, и «Move» стоит так, как для неё положено. Со сценарием то же делает выбор узла.</figcaption>
   </figure>
 
 <figure style="flex:1 1 330px">
@@ -8454,7 +8812,7 @@ Read  2 min ago</div>
   <div class="frame" data-frame="s-files-19">
     <div class="frame-label"><span>Upload · New folder, отказ</span><span class="frag">фрагмент</span><i>лист загрузки</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <form class="tc-sheet" action="/app/files/sftpgo/documents/upload/carrel/attachments" method="post">
+      <form class="tc-sheet" id="upload-sheet" action="/app/files/sftpgo/documents/upload/carrel/attachments" method="post">
         <div class="tc-sheet__head">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-up"/></svg>
         <b class="tc-sheet__title">Upload files</b>
@@ -8467,15 +8825,15 @@ Read  2 min ago</div>
             <div class="tc-line tc-line--gap-8"><input class="tc-in is-focus tc-in--fill" type="text" name="name" value="2026-07" aria-label="Name of the new folder"><button class="tc-btn is-sm is-primary" type="submit" formaction="/app/files/sftpgo/documents/mkcol/carrel/attachments">Create</button><button class="tc-btn is-sm" type="button">Cancel</button></div>
             <div class="tc-msg is-alert tc-msg--flush-top2">There is a folder called «2026-07» in attachments already. Choose another name.</div>
             <div class="tc-tree">
-              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents"><svg><use href="#i-file"/></svg>Documents</label>
-              <label class="tc-tree__row tc-tree__row--padl22"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel"><svg><use href="#i-file"/></svg>carrel</label>
-              <label class="is-on tc-tree__row tc-tree__row--padl40"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments" checked><svg><use href="#i-file"/></svg>attachments</label>
-              <label class="tc-tree__row tc-tree__row--padl58"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07"><svg><use href="#i-file"/></svg>2026-07</label>
+              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents" data-tc-href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>Documents</label>
+              <label class="tc-tree__row tc-tree__row--padl22"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel" data-tc-href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents/carrel" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>carrel</label>
+              <label class="is-on tc-tree__row tc-tree__row--padl40"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments" checked data-tc-href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents/carrel/attachments" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>attachments</label>
+              <label class="tc-tree__row tc-tree__row--padl58"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07" data-tc-href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>2026-07</label>
             </div>
           </div>
           <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">The folder is the attachment folder from Settings → Attachments, named once and remembered — unless you make a new one here.</span>
         </div>
-        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Upload</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Upload</button><kbd class="tc-kbd">Enter</kbd><button class="tc-btn tc-nojs" type="submit" name="open" value="1">Open the folder</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
     </div>
   </div>
@@ -8749,7 +9107,7 @@ Read  2 min ago</div>
           </div>
         </div>
         <div class="tc-scrim tc-scrim--padt26">
-          <form class="tc-sheet tc-sheet--w520" action="/app/files/sftpgo/documents/op/carrel/attachments?op=move" method="post">
+          <form class="tc-sheet tc-sheet--w520" id="move-sheet" action="/app/files/sftpgo/documents/op/carrel/attachments?op=move" method="post">
             <div class="tc-sheet__head">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-move"/></svg>
               <b class="tc-sheet__title">Move 3 items</b>
@@ -8759,15 +9117,15 @@ Read  2 min ago</div>
             <div class="tc-sheet__body">
               <div class="tc-rubric">Where to put it <button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button></div>
               <div class="tc-tree">
-            <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents"><svg><use href="#i-file"/></svg>Documents</label>
-            <label data-part="children" class="tc-tree__row tc-tree__row--padl22"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel"><svg><use href="#i-file"/></svg>carrel</label>
-            <label data-part="children" class="tc-tree__row tc-tree__row--padl40"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments"><svg><use href="#i-file"/></svg>attachments</label>
-            <label class="is-on tc-tree__row tc-tree__row--padl58" data-part="children"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07" checked><svg><use href="#i-file"/></svg>2026-07</label>
+            <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>Documents</label>
+            <label data-part="children" class="tc-tree__row tc-tree__row--padl22"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>carrel</label>
+            <label data-part="children" class="tc-tree__row tc-tree__row--padl40"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel/attachments" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>attachments</label>
+            <label class="is-on tc-tree__row tc-tree__row--padl58" data-part="children"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07" checked data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>2026-07</label>
             <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/public" disabled><svg><use href="#i-file"/></svg>Public <span class="tc-badge tc-push">read-only</span></label>
           </div>
               <div class="tc-msg tc-msg--flush-top2">Inside one server this is <code class="tc-mono">MOVE</code>: instant, no traffic. To another storage the file has to be downloaded and uploaded again — Carrel says so before it starts, not after.</div>
             </div>
-            <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
+            <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><button class="tc-btn tc-nojs" type="submit" name="open" value="1">Open the folder</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
           </form>
         </div>
       </div>
@@ -10477,7 +10835,7 @@ Read  2 min ago</div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
       </div>
       <div class="tc-main">
-        <div class="tc-dialog tc-dialog--max560">
+        <div class="tc-dialog is-wide tc-dialog--step560">
           <div class="tc-steps"><span class="is-on tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import contacts</div></div></div>
           <div class="tc-form is-tight tc-form--padb12">
@@ -10546,7 +10904,7 @@ Read  2 min ago</div>
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
       </div>
-      <div class="tc-main"><div class="tc-dialog tc-dialog--max560">
+      <div class="tc-main"><div class="tc-dialog is-wide tc-dialog--step560">
       <div class="tc-steps"><span class="is-on tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import notes</div></div></div>
       <div class="tc-form is-tight tc-form--padb12">
@@ -10629,32 +10987,34 @@ Read  2 min ago</div>
         <div class="tc-dialog is-wide">
           <div class="tc-steps"><span class="tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import contacts</div><div class="tc-head__sub"><span class="tc-mono">Разное (mix).vcf</span> · 84 KB · vCard 3.0</div></div>
-            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 122 contacts</button></div>
+            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 117 contacts</button></div>
           </div>
           <div class="tc-form is-tight">
             <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button">nextcloud · Контакты</button>
-              <span class="tc-field__hint">Any address book you may write to. The UID collisions below are counted against it.</span></div>
+              <span class="tc-field__hint">Any address book you may write to. What is already here is counted against it.</span></div>
+            <div class="tc-field is-own-line"><label>5 records of this file are already in Контакты</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/contacts/nextcloud/kontakty/import?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/import?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/import?existing=copy">Import as copies</a></span>
+              <span class="tc-field__hint">They stay as they are here; the file's version is not written.</span></div>
           </div>
           <div class="tc-stats">
-            <span class="tc-stat"><b>122</b> ready</span>
+            <span class="tc-stat"><b>117</b> ready</span>
             <span class="tc-stat is-error"><b>3</b> with errors</span>
-            <span class="tc-stat"><b>5</b> UID collisions</span>
+            <span class="tc-stat"><b>5</b> already here</span>
           </div>
           <table class="tc-table">
             <thead><tr><th>Source</th><th>Name</th><th class="tc-table__n3">UID</th><th class="tc-table__n4">Result</th></tr></thead>
             <tbody>
               <tr><td class="tc-mono">Разное (mix).vcf</td><td>Анна Ковалёва</td><td class="tc-mono tc-table__n3">4f2b-9c31-a0e7</td><td class="tc-table__n4">Ready</td></tr>
-              <tr><td class="tc-mono">Разное (mix).vcf</td><td>Артём Белов</td><td class="tc-mono tc-table__n3">1a77-40de-bb02</td><td class="tc-table__n4">New UID will be assigned</td></tr>
+              <tr><td class="tc-mono">Разное (mix).vcf</td><td>Артём Белов</td><td class="tc-mono tc-table__n3">1a77-40de-bb02</td><td class="tc-table__n4">Already here — skipped</td></tr>
               <tr><td class="tc-mono">Разное (mix).vcf</td><td class="tc-dim">— (no FN)</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">vCard 2.1 quoted-printable: cannot decode line 12</td></tr>
             </tbody>
           </table>
-          <div class="tc-msg">Import always creates. A UID that already exists gets a new one and is listed in the report.</div>
+          <div class="tc-msg">What is skipped is listed in the report, and so is what could not be read.</div>
         </div>
       </div>
     </div>
   </div>
 </div>
-<figcaption>Импорт — мастер: файл → предпросмотр → отчёт. Первая из четырёх таблиц: у карточки читают <b>имя</b>, колонки — источник, имя, UID, результат; ломается по-своему — <code>quoted-printable</code> из vCard&nbsp;2.1, который нечем разобрать.<br><br><b>Коллекция назначения — поле, а не надпись.</b> Предпросмотр даёт повод её сменить: счёт совпадений UID считается по ней. «Into» стоит над счётом, списком (<code>is-pick</code>) — все книги, куда разрешено писать, со всех подключённых серверов, — и его смена перестраивает таблицу. Шапка держит то, что не меняется: файл, размер и разобранный формат.</figcaption>
+<figcaption><b>Записи, которые уже есть, — вопрос, а не молчаливая копия</b> (решение владельца 12.10, задача 159). Вопрос стоит рядом с «Into»: «уже есть» считается относительно выбранной коллекции. Ответ — сегмент ссылок на тот же предпросмотр; кадр рисует «Skip them», ответ по умолчанию. При «Replace them» подсказка — «The ones here are overwritten with the file's version.», строка записи — «Replaces the one here», кнопка считает и их: «Import 122 contacts». При «Import as copies» подсказка — «Each gets a new UID and stands beside the one here.», строка — «New UID will be assigned», кнопка — «Import 122 contacts». Когда писать нечего — всё, что прочиталось, уже есть, и выбран «Skip», — кнопка выключена, причина рядом: «Nothing to import: every record is already here.» Счёт «already here» от ответа не зависит.<br><br>Импорт — мастер: файл → предпросмотр → отчёт. Первая из четырёх таблиц: у карточки читают <b>имя</b>, колонки — источник, имя, UID, результат; ломается по-своему — <code>quoted-printable</code> из vCard&nbsp;2.1, который нечем разобрать.<br><br><b>Коллекция назначения — поле, а не надпись.</b> Предпросмотр даёт повод её сменить: счёт совпадений UID считается по ней. «Into» стоит над счётом, списком (<code>is-pick</code>) — все книги, куда разрешено писать, со всех подключённых серверов, — и его смена перестраивает таблицу. Шапка держит то, что не меняется: файл, размер и разобранный формат.</figcaption>
 </figure>
 
 <figure>
@@ -10684,16 +11044,18 @@ Read  2 min ago</div>
         <div class="tc-dialog is-wide">
           <div class="tc-steps"><span class="tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import events</div><div class="tc-head__sub"><span class="tc-mono">Личный 2026.ics</span> · 210 KB · iCalendar 2.0</div></div>
-            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 84 events</button></div>
+            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 81 events</button></div>
           </div>
           <div class="tc-form is-tight">
             <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button">nextcloud · Личный</button>
               <span class="tc-field__hint">Calendars only. A list of tasks is a different collection and takes different components.</span></div>
+            <div class="tc-field is-own-line"><label>3 events of this file are already in Личный</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/calendar/nextcloud/lichny/import?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/calendar/nextcloud/lichny/import?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/calendar/nextcloud/lichny/import?existing=copy">Import as copies</a></span>
+              <span class="tc-field__hint">They stay as they are here; the file's version is not written.</span></div>
           </div>
           <div class="tc-stats">
-            <span class="tc-stat"><b>84</b> ready</span>
+            <span class="tc-stat"><b>81</b> ready</span>
             <span class="tc-stat is-error"><b>2</b> with errors</span>
-            <span class="tc-stat"><b>3</b> UID collisions</span>
+            <span class="tc-stat"><b>3</b> already here</span>
             <span class="tc-stat"><b>6</b> skipped</span>
           </div>
           <table class="tc-table">
@@ -10706,7 +11068,7 @@ Read  2 min ago</div>
               <tr><td class="tc-mono">Личный 2026.ics</td><td class="tc-dim">— (no SUMMARY)</td><td class="tc-mono tc-table__n3">2026-05-04</td><td class="tc-table__n4 tc-table__n4--danger">DTSTART without DTEND or DURATION: cannot tell how long it lasts</td></tr>
             </tbody>
           </table>
-          <div class="tc-msg">Import always creates. A repeating event keeps its rule: the series is one record, not fifty-two.</div>
+          <div class="tc-msg">A repeating event keeps its rule: the series is one record, not fifty-two.</div>
         </div>
       </div>
     </div>
@@ -10763,16 +11125,18 @@ Read  2 min ago</div>
         <div class="tc-dialog is-wide">
           <div class="tc-steps"><span class="tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import tasks</div><div class="tc-head__sub"><span class="tc-mono">Дела.ics</span> · 12 KB · iCalendar 2.0</div></div>
-            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 29 tasks</button></div>
+            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 27 tasks</button></div>
           </div>
           <div class="tc-form is-tight">
             <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button">nextcloud · Дела</button>
               <span class="tc-field__hint">Lists of tasks only. A calendar is a different collection: events go there, not here.</span></div>
+            <div class="tc-field is-own-line"><label>2 tasks of this file are already in Дела</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=copy">Import as copies</a></span>
+              <span class="tc-field__hint">They stay as they are here; the file's version is not written.</span></div>
           </div>
           <div class="tc-stats">
-            <span class="tc-stat"><b>29</b> ready</span>
+            <span class="tc-stat"><b>27</b> ready</span>
             <span class="tc-stat is-error"><b>1</b> with errors</span>
-            <span class="tc-stat"><b>2</b> UID collisions</span>
+            <span class="tc-stat"><b>2</b> already here</span>
             <span class="tc-stat"><b>5</b> skipped</span>
           </div>
           <table class="tc-table">
@@ -10839,16 +11203,18 @@ Read  2 min ago</div>
         <div class="tc-dialog is-wide">
           <div class="tc-steps"><span class="tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import notes</div><div class="tc-head__sub"><span class="tc-mono">заметки-2026.zip</span> · 1.2 MB · 64 files</div></div>
-            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 61 notes</button></div>
+            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 60 notes</button></div>
           </div>
           <div class="tc-form is-tight">
             <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button">nextcloud · Записи</button>
               <span class="tc-field__hint">Any notebook you may write to. A WebDAV folder from the step before lands in this same table.</span></div>
+            <div class="tc-field is-own-line"><label>1 note of this file is already in Записи</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/notes/nextcloud/zapisi/import?existing=skip">Skip it</a><a class="tc-seg__opt" href="/app/notes/nextcloud/zapisi/import?existing=replace">Replace it</a><a class="tc-seg__opt" href="/app/notes/nextcloud/zapisi/import?existing=copy">Import as a copy</a></span>
+              <span class="tc-field__hint">It stays as it is here; the file's version is not written.</span></div>
           </div>
           <div class="tc-stats">
-            <span class="tc-stat"><b>61</b> ready</span>
+            <span class="tc-stat"><b>60</b> ready</span>
             <span class="tc-stat is-error"><b>2</b> with errors</span>
-            <span class="tc-stat"><b>1</b> UID collision</span>
+            <span class="tc-stat"><b>1</b> already here</span>
             <span class="tc-stat"><b>1</b> skipped</span>
           </div>
           <table class="tc-table">
@@ -10856,7 +11222,7 @@ Read  2 min ago</div>
             <tbody>
               <tr><td class="tc-mono">2026-03-11-podryadchik.md</td><td>Встреча с подрядчиком</td><td class="tc-mono tc-table__n3">2026-03-11</td><td class="tc-table__n4">Ready — title, date and tags from front matter</td></tr>
               <tr><td class="tc-mono">idei/crdt.md</td><td>Что почитать про CRDT</td><td class="tc-mono tc-table__n3">2026-08-04</td><td class="tc-table__n4">Ready — no front matter: title from the first heading, date from the file</td></tr>
-              <tr><td class="tc-mono">doroga.md</td><td>Про дорогу до дачи</td><td class="tc-mono tc-table__n3">2026-06-30</td><td class="tc-table__n4">New UID will be assigned</td></tr>
+              <tr><td class="tc-mono">doroga.md</td><td>Про дорогу до дачи</td><td class="tc-mono tc-table__n3">2026-06-30</td><td class="tc-table__n4">Already here — skipped</td></tr>
               <tr><td class="tc-mono">skan.pdf</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--dusty">Skipped: not Markdown</td></tr>
               <tr><td class="tc-mono">pustoj.md</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">Empty file: nothing to store and nothing to name it by</td></tr>
             </tbody>
@@ -10898,13 +11264,13 @@ Read  2 min ago</div>
           <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
         </div>
         <div class="tc-main">
-          <div class="tc-dialog tc-dialog--max520">
+          <div class="tc-dialog is-wide tc-dialog--step520">
             <div class="tc-steps"><span class="tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">3 · Report</span></div>
             <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import report</div><div class="tc-head__sub">nextcloud · Контакты</div></div></div>
-            <div class="tc-card"><div class="tc-rubric">Created</div><div class="tc-card__num">122</div></div>
-            <div class="tc-card"><div class="tc-rubric">UID collisions <span class="tc-mono tc-mono--ls0">5</span></div>
-              <div class="tc-diag">1a77-40de-bb02 → 9c02-4411-7ee1
-33b0-9ffa-1120 → 55da-8e10-02cc</div></div>
+            <div class="tc-card"><div class="tc-rubric">Created</div><div class="tc-card__num">117</div></div>
+            <div class="tc-card"><div class="tc-rubric">Already here, skipped <span class="tc-mono tc-mono--ls0">5</span></div>
+              <div class="tc-diag">Артём Белов · 1a77-40de-bb02
+Ирина Соколова · 33b0-9ffa-1120</div></div>
             <div class="tc-card"><div class="tc-rubric">Failed <span class="tc-mono tc-mono--ls0">3</span></div>
               <div class="tc-diag tc-diag--danger">line 12: cannot decode quoted-printable</div></div>
             <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="button">Back to list</button></div>
@@ -10913,7 +11279,7 @@ Read  2 min ago</div>
       </div>
     </div>
   </div>
-  <figcaption>Числа набраны крупно антиквой: отчёт читают ради них. Таблицы созданного здесь нет — созданное лежит в списке, куда ведёт «Back to list». Пропущенное (чужой род в файле, <code>s-io-6</code>) — четвёртая карточка «Skipped» того же вида, что «Failed»; когда пропущенного нет, нет и карточки.</figcaption>
+  <figcaption>Числа набраны крупно антиквой: отчёт читают ради них. Таблицы созданного здесь нет — созданное лежит в списке, куда ведёт «Back to list». Пропущенное (чужой род в файле, <code>s-io-6</code>) — четвёртая карточка «Skipped» того же вида, что «Failed»; когда пропущенного нет, нет и карточки. <b>Вторая карточка — про записи, которые в коллекции уже были</b> (задача 159), и называется по ответу предпросмотра: «Already here, skipped» — имя и UID оставленных как есть; «Replaced» — имя и UID переписанных версией файла; «Imported as copies» — старый UID → новый, как было раньше. Когда таких записей в файле не было, нет и карточки.</figcaption>
   </figure>
   <figure style="flex:1 1 100%">
   <div class="frame" data-frame="s-io-14" data-screen="/app/calendar/{account}/{col}/import" data-part="report-skipped">
@@ -10940,13 +11306,13 @@ Read  2 min ago</div>
           <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
         </div>
         <div class="tc-main">
-          <div class="tc-dialog tc-dialog--max520">
+          <div class="tc-dialog is-wide tc-dialog--step520">
             <div class="tc-steps"><span class="tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">3 · Report</span></div>
             <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import report</div><div class="tc-head__sub">nextcloud · Личный</div></div></div>
-            <div class="tc-card"><div class="tc-rubric">Created</div><div class="tc-card__num">84</div></div>
-            <div class="tc-card"><div class="tc-rubric">UID collisions <span class="tc-mono tc-mono--ls0">3</span></div>
-              <div class="tc-diag">7c1e-22ab-90f4 → e410-5b7d-3a96
-0d5a-b8c3-41e7 → 2f96-c07a-88d1</div></div>
+            <div class="tc-card"><div class="tc-rubric">Created</div><div class="tc-card__num">81</div></div>
+            <div class="tc-card"><div class="tc-rubric">Already here, skipped <span class="tc-mono tc-mono--ls0">3</span></div>
+              <div class="tc-diag">Синк-ап по релизу · 7c1e-22ab-90f4
+Поездка в Казань · 0d5a-b8c3-41e7</div></div>
             <div class="tc-card"><div class="tc-rubric">Failed <span class="tc-mono tc-mono--ls0">2</span></div>
               <div class="tc-diag tc-diag--danger">— (no SUMMARY): DTSTART without DTEND or DURATION</div></div>
             <div class="tc-card"><div class="tc-rubric">Skipped <span class="tc-mono tc-mono--ls0">6</span></div>
@@ -11155,11 +11521,13 @@ Read  2 min ago</div>
         <div class="tc-main">
         <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Account</div><div class="tc-head__sub">mix · created 11 February 2026</div></div></div>
         <div class="tc-form">
-          <div class="tc-fset tc-fset--lead">
-            <div class="tc-rubric">Name</div>
-            <div class="tc-field tc-field--lg"><label>Display name</label><input class="tc-in" type="text" value="Михаил Енученко" aria-label="Display name">
-              <span class="tc-field__hint">Shown as the sender and used as the signature in letters you send. Blank means your login.</span></div>
-          </div>
+          <form class="tc-fset tc-fset--lead" action="/app/settings/account/name" method="post">
+          <div class="tc-rubric">Name</div>
+          <div class="tc-field tc-field--lg"><label>Display name</label>
+            <span class="tc-line tc-line--gap-8">
+              <input class="tc-in tc-in--fill" type="text" name="display.name" value="Михаил Енученко" aria-label="Display name"><button class="tc-btn" type="submit">Save</button></span>
+            <span class="tc-field__hint">Shown as the sender and used as the signature in letters you send. Blank means your login.</span></div>
+        </form>
           <form class="tc-fset" action="/app/settings/account/email" method="post">
             <div class="tc-rubric">Email</div>
             <div class="tc-field tc-field--lg"><label>Address</label>
@@ -14589,32 +14957,32 @@ jobs:
           <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
-      <div class="tc-main"><div class="tc-dialog">
+      <div class="tc-main"><form class="tc-dialog is-wide tc-dialog--step760" action="/app/settings/backup/restore" method="post">
       <div class="tc-steps"><span class="is-on tc-steps__item">1 · Archive</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Match</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Restore</div><div class="tc-head__sub">Nothing is written until you have seen what goes where</div></div></div>
       <div class="tc-field is-own-line">
         <label>Where the archive is</label>
-        <span class="tc-seg tc-seg--start"><button class="is-on tc-seg__opt" type="button">From a job</button><button class="tc-seg__opt" type="button">From a server</button><button class="tc-seg__opt" type="button">From this computer</button></span>
+        <span class="tc-seg tc-seg--start"><a class="is-on tc-seg__opt" href="/app/settings/backup/restore?from=job">From a job</a><a class="tc-seg__opt" href="/app/settings/backup/restore?from=server">From a server</a><a class="tc-seg__opt" href="/app/settings/backup/restore?from=file">From this computer</a></span>
         <span class="tc-field__hint">One archive, one of three. The other two stay empty until you switch.</span>
       </div>
       <div class="tc-card">
         <div class="tc-rubric">From a job</div>
         <table class="tc-table">
           <tbody>
-            <tr class="is-sel"><td class="tc-table__col--tick"><button class="tc-tickrow__tick" type="button"></button></td><td>Личное на домашний диск</td><td class="tc-mono tc-table__n3">2026-08-14 09:12</td><td class="tc-mono tc-table__n4">2.1 GB</td><td class="tc-mono">4 collections</td></tr>
-            <tr><td><button class="tc-tickrow__tick is-off" type="button"></button></td><td>Рабочее, ежедневно</td><td class="tc-mono tc-table__n3">2026-08-16 03:10</td><td class="tc-mono tc-table__n4">18.4 MB</td><td class="tc-mono">3 collections</td></tr>
+            <tr class="is-sel"><td class="tc-table__col--tick"><input class="tc-tickrow__tick" type="radio" name="archive" value="lichnoe-na-domashniy-disk" aria-label="Pick" checked></td><td>Личное на домашний диск</td><td class="tc-mono tc-table__n3">2026-08-14 09:12</td><td class="tc-mono tc-table__n4">2.1 GB</td><td class="tc-mono">4 collections</td></tr>
+            <tr><td><input class="tc-tickrow__tick is-off" type="radio" name="archive" value="rabochee-ezhednevno" aria-label="Pick"></td><td>Рабочее, ежедневно</td><td class="tc-mono tc-table__n3">2026-08-16 03:10</td><td class="tc-mono tc-table__n4">18.4 MB</td><td class="tc-mono">3 collections</td></tr>
           </tbody>
         </table>
       </div>
       <div class="tc-card">
         <div class="tc-rubric">Archive password</div>
         <div class="tc-card__fields">
-          <div class="tc-field tc-field--lg"><input class="tc-in is-focus" type="text" value="••••••••••••"></div>
+          <div class="tc-field tc-field--lg"><input class="tc-in is-focus" type="password" name="password" value="••••••••••••" aria-label="Archive password"></div>
           <span class="tc-dim--muted tc-dim--t12">The one set in the job, not your sign-in password. Without it the manifest cannot be read — Carrel will not even see the list of collections.</span>
         </div>
       </div>
-      <div class="tc-formfoot"><button class="tc-btn is-primary" type="button">Open the manifest</button><button class="tc-btn" type="button">Cancel</button></div>
-    </div></div></div>
+      <div class="tc-formfoot"><button class="tc-btn is-primary" type="submit">Open the manifest</button><button class="tc-btn" type="button">Cancel</button></div>
+    </form></div></div>
   </div>
 </div>
 <figcaption>Восстановиться можно не только там, где уже есть задания, — иначе пропадает случай, ради которого копия и делалась. <b>Источник один.</b> Переключатель сверху — задание, сервер или этот компьютер; в примере выбрано задание, и других полей нет, чтобы не казалось, что архив берётся сразу из трёх мест. Пароль архива спрашивается здесь же и первым делом: без него нельзя прочитать даже манифест, и узнать об этом лучше до того, как человек выбрал коллекции.</figcaption>
@@ -15241,7 +15609,7 @@ jobs:
         <div class="tc-list">
           <div class="tc-row tc-row--excerpt is-on">
             <span class="tc-mark" data-tc-colour="#4A6B52"></span>
-            <span class="tc-row__title is-strong">Заметка со встречи 10.08</span>
+            <span class="tc-row__title is-strong">Заметка со встречи 10.08 <span class="tc-badge is-linked">linked ×2</span></span>
             <span class="tc-row__excerpt">Договорились заморозить ветку в среду; письмо пользователям пишет Анна…</span>
 
             <span class="tc-mono tc-row__date">10 Aug</span>
@@ -15747,7 +16115,7 @@ jobs:
     </div></div>
   </div>
 </div>
-<figcaption>Последний пункт рейла. <b>Два места хранения, и они не смешиваются.</b> Тема, плотность и колонки списка — этот браузер, <code>localStorage</code>: заводить поле на сервере ради переключателя темы значит писать в базу при каждом клике. Первый день недели и 12/24 часа — <b>аккаунт</b>: время собирается на сервере, и другой браузер должен увидеть те же часы. Часовой пояс — одно на экземпляр, его ставит администратор. Подзаголовок не говорит «Kept in this browser» про весь экран: для часов это неверно.</figcaption>
+<figcaption>Последний пункт рейла. <b>Два места хранения, и они не смешиваются.</b> Тема, плотность и колонки списка — этот браузер: форма шлёт их серверу вместе с остальным, и он кладёт их в куку этого браузера, а не в аккаунт (задача 158) — другой браузер их не видит, и в базу ради переключателя темы ничего не пишется. Первый день недели и 12/24 часа — <b>аккаунт</b>: время собирается на сервере, и другой браузер должен увидеть те же часы. Часовой пояс — одно на экземпляр, его ставит администратор. Подзаголовок не говорит «Kept in this browser» про весь экран: для часов это неверно.</figcaption>
 </figure>
 
 <div class="frames">
@@ -16707,14 +17075,14 @@ password  4c1-tide-oven</div>
           <div class="tc-fset">
             <div class="tc-rubric">Test</div>
             <div class="tc-field tc-field--md"><label>Send test message to</label>
-              <span class="tc-line tc-line--gap-8"><input class="tc-in is-ph tc-in--fill" type="text" name="send.test.message.to" placeholder="you@example.org" aria-label="Send test message to"><button class="tc-btn" type="button" disabled>Send test</button></span>
+              <span class="tc-line tc-line--gap-8"><input class="tc-in is-ph tc-in--fill" type="text" name="send.test.message.to" placeholder="you@example.org" aria-label="Send test message to"><button class="tc-btn" type="submit" formaction="/admin/settings/mail/test" disabled>Send test</button></span>
               <span class="tc-field__hint">Mail is not configured: there is nothing to send through yet.</span></div>
           </div>
         </form>
       </div></div>
     </div>
   </div>
-  <figcaption>Две формы становятся двумя блоками одной формы с рубрикаторами. Пароль SMTP стоит здесь же, рядом с узлом и портом: это один релей, а не отдельный экран. Порт — 96&nbsp;px, а не во всю ширину. «Letters from users» — отдельный блок под Mail: сначала завести релей, потом решать, пускать ли жильцов писать через него. Проверка сервера DAV уехала на свою страницу — она про чужой сервер, а не про настройки этого. <b>Проба письма — своя форма</b> со своей кнопкой: она ничего не сохраняет, и «Save» остальных блоков её не задевает; пока почта не настроена, кнопка выключена и говорит почему. <b>Public address</b> только читается: его задаёт <code>CARREL_PUBLIC_URL</code>, и от него строятся ссылки в письмах.</figcaption>
+  <figcaption>Две формы становятся двумя блоками одной формы с рубрикаторами. Пароль SMTP стоит здесь же, рядом с узлом и портом: это один релей, а не отдельный экран. Порт — 96&nbsp;px, а не во всю ширину. «Letters from users» — отдельный блок под Mail: сначала завести релей, потом решать, пускать ли жильцов писать через него. Проверка сервера DAV уехала на свою страницу — она про чужой сервер, а не про настройки этого. <b>Проба письма — кнопка той же формы со своим адресом</b> (форма не держит форму; задача 158): она шлёт то, что набрано в полях почты сейчас, сохранено оно или нет, — так релей проверяют до «Save» — и сама ничего не сохраняет; пока почта не настроена, кнопка выключена и говорит почему. <b>Public address</b> только читается: его задаёт <code>CARREL_PUBLIC_URL</code>, и от него строятся ссылки в письмах.</figcaption>
   </figure>
 
 <div class="frames">
@@ -22178,13 +22546,7 @@ dav: HTTP 503: the server is busy</div></div>
             <div class="tc-docmeta__sec" id="note-loss-attachments">
               <div class="tc-rubric">Attachments <details class="tc-drop"><summary class="tc-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-up"/></svg>From this computer<input class="tc-file" type="file" name="file" form="note-loss" aria-label="From this computer" data-tc-list="note-loss-attachments"><template data-tc-row><div class="tc-line__text">{name} <span class="tc-dim">· {size}</span> <button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></div></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details></div>
               <div class="tc-line__text"><a class="tc-dim--accent" href="#">2026-08-10-sync-board.png</a> <span class="tc-dim">· 412 KB</span> <span class="tc-badge">in the note</span> <button class="tc-btn is-sm is-danger" type="button">Remove</button></div>
-              <div class="tc-line__text"><a class="tc-dim--accent" href="#">запись-встречи.m4a</a> <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span> <button class="tc-btn is-sm is-danger" type="button">Remove</button></div>
-            </div>
-            <div class="tc-docmeta__sec">
-              <div class="tc-rubric">The same note in other notebooks <span class="tc-badge is-linked">1</span></div>
-              <div class="tc-stack tc-stack--gap-5 tc-line__text">
-                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text differ</span></span>
-              </div>
+              <div class="tc-line__text"><a class="tc-dim--accent" href="#">запись-встречи.m4a</a> <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span> <button class="tc-btn is-sm" type="button" title="Remove the link; the file stays in Documents / carrel">Unlink</button></div>
             </div>
             <div class="tc-docmeta__sec">
               <div class="tc-rubric">Source</div>
@@ -23950,6 +24312,7 @@ dav: HTTP 503: the server is busy</div></div>
         <button class="tc-menu__item" type="button" role="menuitem">30 minutes before</button>
         <button class="tc-menu__item" type="button" role="menuitem">1 hour before</button>
         <button class="tc-menu__item" type="button" role="menuitem">1 day before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Custom…</button>
         <span class="tc-menu__sep"></span>
         <button class="tc-menu__item" type="button" role="menuitem">No reminder</button>
       </div>

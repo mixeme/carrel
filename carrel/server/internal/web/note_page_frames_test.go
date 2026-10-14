@@ -57,13 +57,16 @@ func TestNotePageIsTheFrame(t *testing.T) {
 		}
 	}
 	checkAttach(page.Meta.Attach)
-	if len(page.Meta.Linked) != 1 || page.Meta.Linked[0].Value != "Text differ" {
-		t.Errorf("linked = %+v", page.Meta.Linked)
+	// The copy in «Дневник» holds another text and other tags: its row says
+	// so, and «Tags» carries «linked» (s-notes-2, from-typecase note 57).
+	if len(page.Meta.Linked) != 1 || page.Meta.Linked[0].Value != "Text, tags differ" || page.Meta.TagsBadge == nil || page.Meta.TagsBadge.Label != "linked" {
+		t.Errorf("linked = %+v, tags badge %+v", page.Meta.Linked, page.Meta.TagsBadge)
 	}
 
+	// The edit names no other copy (s-notes-20, Р-58: the block is gone).
 	ed := decode[view.NotePage](t, app.h.do(get(rec+"/edit", app.sess)))
 	checkAttach(ed.Meta.Attach)
-	if len(ed.Meta.Linked) != 1 || !strings.Contains(runsText(ed.Doc.Foreign), "X-JTX-COLOR and two more") || ed.Source.UID != "5c81-77aa-0d64" {
+	if len(ed.Meta.Linked) != 0 || !strings.Contains(runsText(ed.Doc.Foreign), "X-JTX-COLOR and two more") || ed.Source.UID != "5c81-77aa-0d64" {
 		t.Errorf("edit = linked %+v, foreign %q, source %+v", ed.Meta.Linked, ed.Doc.Foreign, ed.Source)
 	}
 

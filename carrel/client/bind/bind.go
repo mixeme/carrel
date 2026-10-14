@@ -250,7 +250,7 @@ func Pick(r view.FormRow) w.Pick {
 func Options(os []view.Option) []w.PickOption {
 	out := make([]w.PickOption, 0, len(os))
 	for _, o := range os {
-		out = append(out, w.PickOption{Value: o.Value, Label: string(o.Label), On: o.Selected, Unavailable: o.Disabled})
+		out = append(out, w.PickOption{Value: o.Value, Label: string(o.Label), On: o.Selected, Unavailable: o.Disabled, Shows: o.Shows})
 	}
 	return out
 }
@@ -293,7 +293,7 @@ func Hint(r view.FormRow) []w.FieldPart {
 // (LabelAside: «(optional)»), its control (Control) and the line under it
 // (Hint). The width is the frame's, from the screen's draft.
 func Field(r view.FormRow, width w.FieldWidth) w.Field {
-	f := w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{Control(r)}, Hint(r)...), Width: width}
+	f := w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{Control(r)}, Hint(r)...), Width: width, Hidden: r.Hidden}
 	if r.LabelAside != "" {
 		f.LabelAside = w.Dim{Parts: []w.Inline{w.Text(r.LabelAside)}}
 	}
