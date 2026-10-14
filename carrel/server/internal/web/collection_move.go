@@ -18,6 +18,7 @@ import (
 	"carrel.dev/carrel/server/internal/provider/card"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -426,6 +427,9 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 		n.Details = davRefusal(moveCollectionRefusal("", label), m.conn, "DELETE", m.col.Path, err).Details
 		return "", n
 	}
+	// Its links, and the links of its records, open the new one (Б41).
+	_, _ = m.s.users.FollowPublished(m.sess.AccountID(), user.Place{AccountID: m.conn.ID, Col: m.col.Path},
+		user.Place{AccountID: m.dest.ID, Col: m.placed.Path}, m.dest)
 	if err := m.place(true); err != nil {
 		return "", m.kept("Moved, but the list of collections still names the original",
 			"The "+noun+" was moved and the original deleted; run re-discovery on its connection to take it out.", nil)

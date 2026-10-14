@@ -361,8 +361,9 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 		// Moved, under an identity the other server gave it. What pointed at
 		// the old one is pointed at the new, the way a SoGo move is mended
 		// (relink.go): otherwise a task made from this person's timeline would
-		// drop out of it without a word.
+		// drop out of it without a word. Its links go with it (Б41).
 		c.noteWrite(obj.Path, nil)
+		s.followLinks(c.sess, placeOf(c, uid), dest, landed)
 		rep := s.relink(ctx, c.sess, s.catalogOf(c.sess), []string{uid}, landed)
 		n := view.Notice{
 			Role:  view.NoticeAlert,
@@ -377,6 +378,7 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, n))
 	default:
 		c.noteWrite(obj.Path, nil)
+		s.followLinks(c.sess, placeOf(c, uid), dest, uid)
 		s.redirect(w, r, dest.recordPath(uid))
 	}
 }
@@ -426,6 +428,7 @@ func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *c
 		dest.noteWrite(dst, obj)
 		if moved := arrived(ctx, dest, before); moved != nil {
 			if renamed := card.UID(moved); renamed != "" {
+				s.followLinks(c.sess, placeOf(c, uid), dest, renamed)
 				rep := s.relink(ctx, c.sess, s.catalogOf(c.sess), []string{uid}, renamed)
 				n := view.Notice{
 					Role:  view.NoticeAlert,
@@ -441,6 +444,9 @@ func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *c
 				return true
 			}
 		}
+		// Where it went under which UID is not known: its links cannot
+		// follow it (Б41).
+		s.linksGone(c.sess, placeOf(c, uid))
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, view.Notice{
 			Role:  view.NoticeAlert,
 			Title: "Moved, but the server gave it another identity",
@@ -454,6 +460,7 @@ func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *c
 		return true
 	}
 	dest.noteWrite(got.Path, got)
+	s.followLinks(c.sess, placeOf(c, uid), dest, uid)
 	s.redirect(w, r, dest.recordPath(uid))
 	return true
 }

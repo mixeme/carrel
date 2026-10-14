@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.227 — 2026-10-14
+
+### Changed
+
+- **A published link goes where Carrel takes what it opens** (Б41 of the
+  audit of 11.10.2026). A record moved — as a copy or by MOVE, under its UID
+  or a new one —, merged into another, a collection moved: the link opens
+  it in its new place, on another connection with that connection's own
+  credentials. Where Carrel cannot follow — the record deleted, a UID the
+  server did not say, the collection removed, a guest who found nothing —
+  the owner's list says the link is dead (`PublishedRow.gone`), and the
+  guest reads «No longer there», not «Try again later».
+- The test stand answers a listing of a calendar or an address book that is
+  not there with 404, as Radicale and Nextcloud do.
+
+### Not done
+
+- The words of the dead row are the developer's.
+
 ## v0.2.226 — 2026-10-14
 
 ### Changed

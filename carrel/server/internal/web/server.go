@@ -112,6 +112,9 @@ type Users interface {
 	OpenPublished(token string) (user.OpenLink, bool)
 	PublishedLinks(viewerID string) []user.PublishedLink
 	RevokePublished(viewerID, id string) error
+	FollowPublished(viewerID string, from, to user.Place, conn sealed.Connection) (int, error)
+	MarkPublishedGone(viewerID string, at user.Place) error
+	MarkLinkGone(id string) error
 	// Subscriptions (S-25.2): feeds in the blob, renamed only here.
 	Subscribe(viewerID string, dataKey [32]byte, f sealed.Subscription) (string, error)
 	Unsubscribe(viewerID string, dataKey [32]byte, id string) error

@@ -1423,6 +1423,9 @@ func (b calBackend) GetCalendarObject(_ context.Context, p string, _ *caldav.Cal
 }
 
 func (b calBackend) ListCalendarObjects(_ context.Context, p string, _ *caldav.CalendarCompRequest) ([]caldav.CalendarObject, error) {
+	if !b.s.hasCollection(p) {
+		return nil, webdav.NewHTTPError(http.StatusNotFound, fmt.Errorf("no calendar at %s", p))
+	}
 	var out []caldav.CalendarObject
 	for op, o := range b.s.objectsIn(p) {
 		co, err := calendarObject(op, o)
@@ -1668,6 +1671,9 @@ func converted(ctx context.Context, o object) object {
 }
 
 func (b cardBackend) ListAddressObjects(ctx context.Context, p string, _ *carddav.AddressDataRequest) ([]carddav.AddressObject, error) {
+	if !b.s.hasCollection(p) {
+		return nil, webdav.NewHTTPError(http.StatusNotFound, fmt.Errorf("no address book at %s", p))
+	}
 	var out []carddav.AddressObject
 	for op, o := range b.s.objectsIn(p) {
 		ao, err := addressObject(op, converted(ctx, o))

@@ -213,6 +213,8 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 		}, conn, "DELETE", col.Path, err)))
 		return
 	}
+	// Its links, and the links of its records, open nothing now (Б41).
+	s.linksGone(sess, user.Place{AccountID: conn.ID, Col: col.Path})
 	if err := s.users.RemoveCollection(sess.AccountID(), key, conn.ID, col.Path); err != nil {
 		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, &view.Notice{
 			Role: view.NoticeAlert, Title: text("Deleted, but the list of collections still names it"),

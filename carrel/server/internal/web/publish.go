@@ -483,6 +483,11 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		if l.LastSeen != nil {
 			row.LastSeen, row.Unopened = tf.numStamp(*l.LastSeen), false
 		}
+		if l.Gone {
+			// What it opened is no longer there and Carrel could not follow
+			// it (Б41): the link lives on until it is revoked or expires.
+			row.Gone = "No longer there: deleted, or moved where Carrel could not follow it"
+		}
 		copyLink := view.Action{ID: "publish.copy", Label: "Copy", Method: "GET", Enabled: true}
 		send := view.Action{ID: "publish.mail", Label: "Send", Method: "POST", Enabled: true,
 			Href: s.postQuery("/app/mail/compose", url.Values{"op": {"link"}, "id": {l.ID}})}
@@ -591,6 +596,7 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case notFoundErr(err):
 			page.Notices, page.Actions = []view.Notice{publicGone()}, nil
+			_ = s.users.MarkLinkGone(link.ID) // the owner's list says so (Б41)
 		case err != nil:
 			page.Notices, page.Actions = []view.Notice{publicTrouble()}, nil
 		default:
@@ -613,6 +619,12 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := s.publicCollection(r, c, link, token, &page); err != nil {
 		page.Notices, page.Actions = []view.Notice{publicTrouble()}, nil
+		if goneErr(err) {
+			// A collection removed is gone, not a server that did not
+			// answer (Б41): the guest is not told to try later forever.
+			page.Notices = []view.Notice{publicGone()}
+			_ = s.users.MarkLinkGone(link.ID)
+		}
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
@@ -784,8 +796,9 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		page := view.PublishedPage{Plain: view.Plain{Title: text(link.Target.Title), Notices: []view.Notice{publicTrouble()}}, Kind: c.spec.kind, ReadOnly: true}
-		if notFoundErr(err) {
+		if goneErr(err) {
 			page.Notices = []view.Notice{publicGone()}
+			_ = s.users.MarkLinkGone(link.ID)
 		}
 		s.writePage(w, r, http.StatusOK, page)
 		return

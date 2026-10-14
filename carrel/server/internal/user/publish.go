@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"slices"
 	"sync"
 	"time"
@@ -47,6 +48,7 @@ type PublishedLink struct {
 	ExpiresAt *time.Time
 	LastSeen  *time.Time
 	Opens     int // how many times it was opened: stored, and since in memory
+	Gone      bool
 }
 
 // OpenLink is a live link opened for a reader without a session.
@@ -237,7 +239,7 @@ func (s *Service) PublishedLinks(viewerID string) []PublishedLink {
 		}
 		id := publish.ID(l.Hash)
 		out = append(out, PublishedLink{ID: id, Target: targetOf(l), CreatedAt: l.CreatedAt, ExpiresAt: l.ExpiresAt, LastSeen: l.LastSeen,
-			Opens: l.Opens + s.opens.peek(id)})
+			Opens: l.Opens + s.opens.peek(id), Gone: l.Gone})
 	}
 	return out
 }
@@ -302,4 +304,104 @@ func (s *Service) LinkOf(viewerID string, dataKey [crypt.KeyLen]byte, id string)
 		}
 	}
 	return ""
+}
+
+// Place is where a published thing is: a collection of a connection, and a
+// record of it (UID; empty — the collection itself).
+type Place struct {
+	AccountID, Col, UID string
+}
+
+// matches says whether a link points at the place: the record, or for a
+// collection the collection and every record of it.
+func (p Place) matches(l *store.PublishedLink) bool {
+	return l.AccountID == p.AccountID && l.Col == p.Col && (p.UID == "" || l.UID == p.UID)
+}
+
+// FollowPublished points the viewer's links at from to to: a record moved,
+// merged into another or given another UID, a collection moved (Б41 of the
+// audit of 11.10.2026: the link kept its old place and the guest read «no
+// longer there»). A link that goes to another connection gets its envelope
+// sealed again with that connection's address and credentials (conn), as an
+// edit of a connection does. It is no longer gone. The number of links
+// followed is returned and journalled.
+func (s *Service) FollowPublished(viewerID string, from, to Place, conn sealed.Connection) (int, error) {
+	if from == to {
+		return 0, nil
+	}
+	now := s.now()
+	n := 0
+	err := s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := st.UserByID(viewerID)
+		if u == nil {
+			return nil, ErrNotFound
+		}
+		var plain []byte
+		for i := range st.Published {
+			l := &st.Published[i]
+			if l.UserID != viewerID || !from.matches(l) {
+				continue
+			}
+			if to.AccountID != l.AccountID {
+				if plain == nil {
+					var err error
+					if plain, err = (publish.Envelope{Server: conn.Server, Login: conn.Login, Password: conn.Password, CertFingerprint: conn.CertFingerprint}).Marshal(); err != nil {
+						return nil, err
+					}
+					defer crypt.Wipe(plain)
+				}
+				env, err := s.st.SealLink(l.Hash, plain)
+				if err != nil {
+					return nil, err
+				}
+				crypt.Wipe(l.Envelope)
+				l.Envelope = env
+			}
+			l.AccountID, l.Col = to.AccountID, to.Col
+			if from.UID != "" {
+				l.UID = to.UID
+			}
+			l.Gone = false
+			n++
+		}
+		if n == 0 {
+			return nil, nil
+		}
+		return []store.AuditEntry{{When: now, Who: u.Login, What: "publish.follow", Whom: u.Login, Detail: fmt.Sprintf("%s links %d", to.AccountID, n)}}, nil
+	})
+	return n, err
+}
+
+// MarkPublishedGone says of the viewer's links at the place that what they
+// open is no longer there (Б41): the owner's list shows them dead.
+func (s *Service) MarkPublishedGone(viewerID string, at Place) error {
+	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		for i := range st.Published {
+			l := &st.Published[i]
+			if l.UserID == viewerID && at.matches(l) {
+				l.Gone = true
+			}
+		}
+		return nil, nil
+	})
+}
+
+// MarkLinkGone says of one link, by its ID, that what it opens is no
+// longer there — a guest found it so (Б41).
+func (s *Service) MarkLinkGone(id string) error {
+	// Read first: a guest opening a dead link again writes nothing.
+	for _, l := range s.st.Snapshot().Published {
+		if publish.ID(l.Hash) == id && l.Gone {
+			return nil
+		}
+	}
+	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		for i := range st.Published {
+			l := &st.Published[i]
+			if publish.ID(l.Hash) == id && !l.Gone {
+				l.Gone = true
+			}
+		}
+		return nil, nil
+	})
 }

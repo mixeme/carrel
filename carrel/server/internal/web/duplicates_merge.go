@@ -509,6 +509,8 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		o.c.noteWrite(o.obj.Path, nil)
+		// A link to a record merged away opens the kept one (Б41).
+		s.followLinks(sess, placeOf(o.c, o.ref.UID), kept, uid)
 		deleted = append(deleted, o)
 	}
 	s.forgetDeleted(sess, mr.g.kind, deleted)

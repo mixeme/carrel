@@ -108,6 +108,11 @@ type PublishedLink struct {
 	// LastSeen was written: the one way to see that a link went further than
 	// it was meant to (s-publish-1). The opens since are in memory.
 	Opens int `json:"opens,omitempty"`
+	// Gone says that what the link opens is no longer there and Carrel could
+	// not follow it: a record deleted, one moved where its new place is not
+	// known, a collection removed (Б41). The link stays until it expires or
+	// is revoked; the owner's list says it is dead.
+	Gone bool `json:"gone,omitempty"`
 	// Envelope holds the connection's address and credentials, sealed again
 	// under the server key and bound to Hash (crypt.SealLink).
 	Envelope []byte `json:"envelope"`

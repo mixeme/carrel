@@ -287,7 +287,11 @@ type PublishedRow struct {
 	Expires  Text `json:"expires"`
 	LastSeen When `json:"lastSeen"`
 	// Unopened — ссылку ни разу не открывали: LastSeen приглушён
-	Unopened bool     `json:"unopened"`
-	Opens    int      `json:"opens"`
-	Actions  []Action `json:"actions"` // Copy · Send (с почтой) · Revoke (s-publish-1)
+	Unopened bool `json:"unopened"`
+	// Gone — то, что ссылка открывала, ушло, и Carrel не смог за ним
+	// последовать (Б41): запись удалена, перенесена под неизвестным UID,
+	// коллекция удалена; строка словами; пусто — ссылка жива
+	Gone    Text     `json:"gone,omitempty"`
+	Opens   int      `json:"opens"`
+	Actions []Action `json:"actions"` // Copy · Send (с почтой) · Revoke (s-publish-1)
 }

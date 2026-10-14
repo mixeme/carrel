@@ -4287,6 +4287,8 @@ func (s *Server) postKindDelete(w http.ResponseWriter, r *http.Request, kind str
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.writeFailure(c, "DELETE", obj.Path, err)))
 	default:
 		c.noteWrite(obj.Path, nil)
+		// Its links open nothing now (Б41).
+		s.linksGone(c.sess, placeOf(c, uid))
 		s.redirect(w, r, c.listPath())
 	}
 }
