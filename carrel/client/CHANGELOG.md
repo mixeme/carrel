@@ -4,6 +4,11 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.27 — 2026-10-14
+
+Server `v0.2.235`. A task's row draws the chosen Where in the agenda's
+Where cell.
+
 ## v0.4.26 — 2026-10-14
 
 Server `v0.2.234`. An event's edit ends with «Source» — the path, when it

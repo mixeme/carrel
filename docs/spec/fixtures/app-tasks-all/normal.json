@@ -152,6 +152,12 @@
           "id": "changed",
           "label": "Changed",
           "on": false
+        },
+        {
+          "fixed": false,
+          "id": "where",
+          "label": "Where",
+          "on": false
         }
       ],
       "label": "Columns"
@@ -503,7 +509,8 @@
             "label": "Mark done",
             "method": "POST"
           },
-          "uid": "aa10-77bc-0e31"
+          "uid": "aa10-77bc-0e31",
+          "where": ""
         },
         {
           "badges": [],
@@ -601,7 +608,8 @@
             "label": "Mark done",
             "method": "POST"
           },
-          "uid": "bb20-4c17-8a52"
+          "uid": "bb20-4c17-8a52",
+          "where": ""
         }
       ],
       "rubric": "Overdue"
@@ -714,7 +722,8 @@
             "label": "Mark done",
             "method": "POST"
           },
-          "uid": "aa11-2d09-5f84"
+          "uid": "aa11-2d09-5f84",
+          "where": ""
         },
         {
           "badges": [],
@@ -812,7 +821,8 @@
             "label": "Mark done",
             "method": "POST"
           },
-          "uid": "bb21-0fa8-3d66"
+          "uid": "bb21-0fa8-3d66",
+          "where": ""
         }
       ],
       "rubric": "This week"
@@ -911,7 +921,8 @@
             "label": "Mark done",
             "method": "POST"
           },
-          "uid": "aa12-9e44-c703"
+          "uid": "aa12-9e44-c703",
+          "where": ""
         }
       ],
       "rubric": "No due date"

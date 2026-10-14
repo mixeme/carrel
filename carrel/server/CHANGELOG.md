@@ -17,6 +17,14 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.235 — 2026-10-14
+
+### Changed
+
+- **A list of tasks offers Where** (`TaskRow.where`; Р10 of
+  docs/plan/scans/kinds-parity.md), as the agenda does: the task's
+  location, off until chosen. No frame draws it yet (Typecase's task 170).
+
 ## v0.2.234 — 2026-10-14
 
 ### Changed

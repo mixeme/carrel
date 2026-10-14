@@ -187,10 +187,13 @@ type TaskRow struct {
 	// Столбцы, которые человек может выбрать (s-tasks-12, -13): приоритет
 	// числом, «5»; статус словом списка, «In process» (без STATUS — «Needs
 	// action»); последняя правка коротко с временем, «10 Aug 11:02» (C-10)
-	Priority Text    `json:"priority"`
-	Status   Text    `json:"status"`
-	Changed  Text    `json:"changed"`
-	Badges   []Badge `json:"badges"` // «linked ×2» у связанной задачи
+	Priority Text `json:"priority"`
+	Status   Text `json:"status"`
+	Changed  Text `json:"changed"`
+	// Where — место задачи (LOCATION), столбец «Where», как у агенды (Р10
+	// списка равенства родов; кадра нет); пусто — нет
+	Where  Text    `json:"where"`
+	Badges []Badge `json:"badges"` // «linked ×2» у связанной задачи
 	// Sources — источники связанной группы (подсказка столбца источника);
 	// Stamp такой строки в едином виде — их счёт, «2 sources» (s-tasks-1)
 	Sources []Stamp     `json:"sources"`

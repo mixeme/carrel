@@ -1188,6 +1188,7 @@ type TaskRow struct {
     Priority  Text     // приоритет числом, «5»; пусто — нет (s-tasks-13)
     Status    Text     // статус словом списка, «In process»; без STATUS — «Needs action» (s-tasks-13)
     Changed   Text     // последняя правка коротко с временем, «10 Aug 11:02» (s-tasks-13, C-10)
+    Where     Text     // место задачи (LOCATION) — столбец «Where», как у агенды (Р10 списка равенства родов; кадра нет); пусто — нет
     Badges    []Badge  // «linked ×2» у связанной задачи — и в списке одной коллекции, когда прочие члены группы лежат в других (s-tasks-15)
     Sources   []Stamp  // источники связанной группы — подсказка столбца источника; Stamp такой строки в едином виде — их счёт, «2 sources» (s-tasks-1)
     Tick      *Action  // отметка выполнения в строке (task.done); nil — только чтение

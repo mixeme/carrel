@@ -125,6 +125,12 @@
           "id": "changed",
           "label": "Changed",
           "on": false
+        },
+        {
+          "fixed": false,
+          "id": "where",
+          "label": "Where",
+          "on": false
         }
       ],
       "label": "Columns"

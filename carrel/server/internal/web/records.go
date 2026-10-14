@@ -1670,6 +1670,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 		if !changed.IsZero() {
 			row.Changed = text(tf.shortStamp(changed))
 		}
+		row.Where = text(strings.TrimSpace(firstValue(o, "LOCATION")))
 		rows = append(rows, item{row: row, due: due.Start, priority: priorityOf(o), changed: changed, order: it.from.listPath(segment)})
 	}
 	sort.SliceStable(rows, func(i, j int) bool {

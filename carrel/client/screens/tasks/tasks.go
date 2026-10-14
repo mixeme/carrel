@@ -63,6 +63,9 @@ var (
 	cells      = map[string]w.Column{
 		"title": w.ColumnName, "tags": w.ColumnTags, "due": w.ColumnDue, "complete": w.ColumnComplete,
 		"source": w.ColumnSource, "priority": w.ColumnPriority, "status": w.ColumnStatus, "changed": w.ColumnChanged,
+		// where the task is, the cell of the agenda's Where (Р10 of the
+		// kinds' parity; no frame draws it)
+		"where": w.ColumnDetail,
 	}
 )
 
@@ -361,6 +364,8 @@ func columnRow(r view.TaskRow, shown []string) w.ColumnRow {
 			cell.Text = or(r.Status)
 		case w.ColumnChanged:
 			cell.Text = or(r.Changed)
+		case w.ColumnDetail:
+			cell.Text = or(r.Where)
 		}
 		c.Cells = append(c.Cells, cell)
 	}

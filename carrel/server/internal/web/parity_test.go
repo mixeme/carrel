@@ -62,3 +62,17 @@ func TestAnEventFormHasItsSource(t *testing.T) {
 		t.Errorf("source = %+v", page.Source)
 	}
 }
+
+// Р10 of scans/kinds-parity.md: a task's list offers Where, as the agenda
+// does, and a row carries the task's LOCATION.
+func TestTasksHaveAWhereColumn(t *testing.T) {
+	f := calendarFixture(t, nil, "t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260101T000000Z\nSUMMARY:Slides\nLOCATION:Room 4\nEND:VTODO"))
+	page := decode[view.TasksPage](t, f.h.do(get(f.path("tasks")+"?seg=all", f.sess)))
+	offered := false
+	for _, it := range page.Bar.Columns.Items {
+		offered = offered || it.ID == "where"
+	}
+	if !offered || len(page.Groups) == 0 || page.Groups[0].Rows[0].Where != "Room 4" {
+		t.Errorf("columns %+v, groups %+v", page.Bar.Columns.Items, page.Groups)
+	}
+}

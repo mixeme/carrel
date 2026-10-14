@@ -84,6 +84,7 @@ func sameColumnsMenu(t *testing.T, what string, got *view.Columns, frame string,
 		t.Fatalf("%s: no Columns (%s draws them)", what, frame)
 	}
 	head, _, items, foot := frameColumnsMenuOf(t, frame)
+	got = beyondFrame(t, what, got, frame)
 	want := []frameColumn{}
 	for _, it := range items {
 		if dropSource && it.ID == "source" {
@@ -517,4 +518,29 @@ func TestTimelineColumnsAreTheFrame(t *testing.T) {
 	if got := columnsOn(barOf(t, f.h, f.sess, card+"/timeline", cookie...).Bar.Columns); strings.Join(got, " ") != strings.Join(want, " ") {
 		t.Errorf("columns on = %q, want (s-contacts-26) %q", got, want)
 	}
+}
+
+// beyondFrames are the columns a menu offers that its frame does not draw
+// yet: what one kind's list had and another's lacked (scans/kinds-parity.md).
+// Each is asked of the frame — Р10: Typecase's task 170.
+var beyondFrames = map[string][]string{"s-tasks-12": {"where"}}
+
+// beyondFrame is the menu without the columns beyondFrames adds, each of
+// which it must offer.
+func beyondFrame(t *testing.T, what string, got *view.Columns, frame string) *view.Columns {
+	t.Helper()
+	if got == nil || len(beyondFrames[frame]) == 0 {
+		return got
+	}
+	out := *got
+	out.Items = nil
+	for _, it := range got.Items {
+		if !slices.Contains(beyondFrames[frame], it.ID) {
+			out.Items = append(out.Items, it)
+		}
+	}
+	if len(got.Items)-len(out.Items) != len(beyondFrames[frame]) {
+		t.Errorf("%s: columns %+v, want %v beside the frame's", what, got.Items, beyondFrames[frame])
+	}
+	return &out
 }

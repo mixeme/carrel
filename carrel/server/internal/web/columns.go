@@ -44,6 +44,9 @@ var listColumns = map[string][]listColumn{
 	"tasks": {
 		{"title", "Title", true}, {"due", "Due", true}, {"complete", "Complete", true}, {"source", "Source", true},
 		{"tags", "Tags", false}, {"priority", "Priority", false}, {"status", "Status", false}, {"changed", "Changed", false},
+		// Where a task is (Р10 of scans/kinds-parity.md): the agenda has the
+		// column, a task has LOCATION; no frame draws it — Typecase's task 170.
+		{"where", "Where", false},
 	},
 	"notes": {
 		{"title", "Title", true}, {"excerpt", "Excerpt", true}, {"date", "Date", true}, {"source", "Source", true},
