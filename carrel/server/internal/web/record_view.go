@@ -721,6 +721,11 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	// The day, and the time when the note has one (s-notes-2).
 	page.Meta.Date = text(noteWhen(obj, tf))
 	page.Meta.Tags = s.recordTags(c, obj)
+	// The link, as an event's and a task's card shows it (Р8 of
+	// scans/kinds-parity.md; no frame draws it yet).
+	if v := firstValue(obj, "URL"); v != "" {
+		page.Meta.Link = &view.Field{Label: "Link", Value: text(v), Href: webHref(v)}
+	}
 	page.Meta.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Meta.Related = s.relatedRows(c, obj)
 	return page

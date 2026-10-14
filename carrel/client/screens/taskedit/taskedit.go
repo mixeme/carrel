@@ -78,6 +78,9 @@ var widths = map[string]w.FieldWidth{
 	// The numbers «Custom…» of a reminder opens (s-agenda-19).
 	"reminder.count": w.FieldXS, "reminder.unit": w.FieldSM, "reminder.at": w.FieldXS,
 	"location": w.FieldMD, "categories": w.FieldMD, "related": w.FieldLG,
+	// The link, which no frame draws yet (Typecase's task 172): as wide as
+	// the tags before it.
+	"url": w.FieldMD,
 }
 
 // patterns are the patterns of the form's empty fields by their name, as

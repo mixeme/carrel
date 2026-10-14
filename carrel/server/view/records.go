@@ -341,12 +341,15 @@ type NoteMeta struct {
 	// TagsBadge — бейдж у рубрики Tags: «linked», когда другая копия
 	// связанной заметки держит другие теги — здесь мог быть выбор (s-notes-2,
 	// -3, -27; Р-58 Typecase); nil — бейджа нет
-	TagsBadge *Badge        `json:"tagsBadge"`
-	Related   []TimelineRow `json:"related"`
-	Linked    []Field       `json:"linked"` // та же заметка в других тетрадях (S-16)
-	Attach    []AttachRow   `json:"attach"`
-	Actions   []Action      `json:"actions"` // колонка: вложение, удаление
-	Menu      []MenuItem    `json:"menu"`    // «⋯» над текстом: Move, Copy, Publish a link
+	TagsBadge *Badge `json:"tagsBadge"`
+	// Link — ссылка заметки (URL): «Link», значение и Href, как у карточки
+	// события и задачи (Р8 списка равенства родов; кадра нет); nil — нет
+	Link    *Field        `json:"link"`
+	Related []TimelineRow `json:"related"`
+	Linked  []Field       `json:"linked"` // та же заметка в других тетрадях (S-16)
+	Attach  []AttachRow   `json:"attach"`
+	Actions []Action      `json:"actions"` // колонка: вложение, удаление
+	Menu    []MenuItem    `json:"menu"`    // «⋯» над текстом: Move, Copy, Publish a link
 }
 
 type ConflictPage struct {

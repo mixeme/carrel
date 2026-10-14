@@ -798,6 +798,10 @@ var editFields = map[view.Kind][]editField{
 		// owner's word of 12.10.2026: a relation is every kind's, by the
 		// equality of collections), in the group «Other» before the
 		// attachments, as the task's (s-agenda-3, -15; Typecase's task 160).
+		// The link the card shows (URL, «Link») is edited by every kind, before
+		// the relation (Р8 of scans/kinds-parity.md; no frame draws it yet —
+		// Typecase's task 172). A task's and a note's stand after Tags.
+		{name: "url", label: "Link", prop: "URL", typ: fieldText, set: "Other"},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated, set: "Other"},
 		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat, set: "Repeats"},
 	},
@@ -815,6 +819,7 @@ var editFields = map[view.Kind][]editField{
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText, set: "Other"},
 		// No hint under Tags (s-tasks-3), as the event's and the note's.
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, set: "Other"},
+		{name: "url", label: "Link", prop: "URL", typ: fieldText, set: "Other"},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated, set: "Other"},
 	},
 	view.KindNote: {
@@ -823,6 +828,7 @@ var editFields = map[view.Kind][]editField{
 		{name: "start", label: "Date", prop: "DTSTART", typ: fieldTime, timeOptional: true},
 		// No hint under Tags (s-notes-20), as the event's.
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList},
+		{name: "url", label: "Link", prop: "URL", typ: fieldText},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated},
 	},
 }

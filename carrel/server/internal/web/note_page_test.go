@@ -191,8 +191,18 @@ func TestNoteEditIsThePage(t *testing.T) {
 		for _, m := range frameFieldLabel.FindAllStringSubmatch(frame, -1) {
 			want = append(want, m[1])
 		}
+		// The link is beside the frame (Р8 of scans/kinds-parity.md;
+		// Typecase's task 172): required, and left out of the comparison.
+		link := false
 		for _, r := range p.Doc.Fields {
+			if r.Name == "url" {
+				link = true
+				continue
+			}
 			got = append(got, string(r.Label))
+		}
+		if !link {
+			t.Errorf("%s: no Link among %+v", req.what, p.Doc.Fields)
 		}
 		if !equalStrings(got, want) {
 			t.Errorf("%s: fields = %q, want the frame's %q", req.what, got, want)

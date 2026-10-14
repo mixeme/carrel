@@ -1592,6 +1592,9 @@ type NoteMeta struct {
     // держит другие теги, здесь мог быть выбор (s-notes-2, Р-58 Typecase);
     // nil — бейджа нет
     TagsBadge *Badge
+    // Link — ссылка заметки (URL): «Link», значение и Href, как у карточки
+    // события и задачи (Р8 списка равенства родов; кадра нет); nil — нет
+    Link    *Field
     Related []TimelineRow
     Linked  []Field // та же заметка в других тетрадях (S-16)
     Attach  []AttachRow

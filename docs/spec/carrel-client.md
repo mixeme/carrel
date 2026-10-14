@@ -767,7 +767,8 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
   Рубрики — `FieldSet.Legend` в порядке s-tasks-3: голова (Summary,
   Description), When (All day, Start date, Start time, Due date, Due time),
   Progress (Status, Priority, Percent complete, Done — последним), Reminders
-  (First, Add reminder), Other (Location, Tags, Related to); вложения —
+  (First, Add reminder), Other (Location, Tags, Link — `URL`, кадра нет,
+  ширина Tags, — Related to); вложения —
   после. Related to (s-tasks-10) — пилюля выбранной записи с крестиком
   (крестик опустошает поле) и список `Options`: загруженные записи с меткой
   коллекции (`Colour`) и подписью `Meta` («event · 12 Aug»), за чертой
@@ -818,7 +819,9 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
   читательской ширины — клиентский, выбор запоминается.
   Панель над текстом — `Doc.Bar`: Edit, Export Markdown; Print и Source —
   клиентские (исходник — `Doc.Body`). Её «⋯» — `Meta.Menu`: Move, Copy,
-  Publish a link (s-notes-14). В колонке — `Meta.Actions`: Attach и удаление.
+  Publish a link (s-notes-14). В колонке — `Meta.Actions`: Attach и удаление;
+  ссылка заметки — `Meta.Link`, рубрикой «Link» после Tags, ссылкой, как
+  Related рисует свои (кадра нет).
 - **Особое.** Размеченный текст приходит **деревом**, а не готовой разметкой
   (C-6.9): `tc-prose` собирает из него узлы. Сырой текст со сценарием выводится
   текстом. Таблица (`table` → `row` → `cell`, C-6.9) — таблицей: строка с
@@ -832,7 +835,8 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
 - **Вью-модель.** `NotePage` в правке (s-notes-20): оболочка та же, что у
   чтения, — «Back to list», тетради, соседи; колонка текста — `Doc` в режиме
   правки: заголовок, поля `Doc.Fields` в порядке кадра (Notebook, Date,
-  Time, Tags, Related to) и тело; уходят одним сохранением. Под текстом —
+  Time, Tags, Link — `URL`, кадра нет: ширина Tags, пустое без прочерка, —
+  Related to) и тело; уходят одним сохранением. Под текстом —
   строка о свойствах, которых Carrel не знает (`Doc.Foreign` — готовая фраза
   сервера: первое по имени и сколько ещё, клиент ничего не считает); они
   хранятся как есть. Related to — то же поле, что у задачи (s-tasks-10). Колонка справа — `Meta` без Tags и

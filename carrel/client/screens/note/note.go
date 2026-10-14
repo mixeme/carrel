@@ -210,6 +210,13 @@ func read(p *view.NotePage) []w.MainPart {
 		}
 		secs = append(secs, w.DocmetaSec{Title: title, Items: []w.DocmetaPart{w.Line{Block: true, Gap: w.LineGap4, Items: tags}}})
 	}
+	// The note's link, as an event's and a task's card shows it (Р8 of the
+	// kinds-parity list): a reference the note points at, drawn as Related
+	// draws its own. No frame draws it yet (Typecase's task 172).
+	if l := p.Meta.Link; l != nil {
+		secs = append(secs, w.DocmetaSec{Title: w.Rubric{Text: string(l.Label)},
+			Items: []w.DocmetaPart{w.DocRefs{Items: []w.DocRef{{Name: string(l.Value), Href: l.Href}}}}})
+	}
 	if len(p.Meta.Related) > 0 {
 		refs := w.DocRefs{}
 		for _, r := range p.Meta.Related {

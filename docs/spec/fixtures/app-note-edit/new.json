@@ -99,6 +99,19 @@
         "value": ""
       },
       {
+        "add": null,
+        "error": "",
+        "extra": null,
+        "hint": "",
+        "kind": "text",
+        "label": "Link",
+        "name": "url",
+        "options": [],
+        "readOnly": false,
+        "required": false,
+        "value": ""
+      },
+      {
         "add": {
           "add": null,
           "error": "",
@@ -378,6 +391,7 @@
     ],
     "attach": [],
     "date": "",
+    "link": null,
     "linked": [],
     "menu": [],
     "related": [],

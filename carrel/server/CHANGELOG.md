@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.237 — 2026-10-15
+
+### Changed
+
+- **Every kind edits its link** (Р8 of docs/plan/scans/kinds-parity.md).
+  An event's and a task's card showed `URL` as «Link» and no form could
+  change it; a note neither showed nor edited it and named it among the
+  properties kept as sent. Now the forms of all three have «Link» before
+  «Related to» (an event's and a task's in «Other», a note's after Tags);
+  a change writes that one line. A note's column shows the link
+  (`NoteMeta.link`), and `URL` is no longer foreign to a note. No frame
+  draws either yet (Typecase's task 172).
+
 ## v0.2.236 — 2026-10-14
 
 ### Changed

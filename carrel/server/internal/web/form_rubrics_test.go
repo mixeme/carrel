@@ -76,8 +76,12 @@ func TestTaskFormIsTheFramesRubrics(t *testing.T) {
 	page := decode[view.TaskEditPage](t, f.h.do(get(f.path("tasks")+"/t1/edit", f.sess)))
 	// One «All day» for the whole task, the start time in When, Done last in
 	// Progress, the reminders a rubric of their own (to-typecase task 13).
-	// What the frame does not draw: the UID typed by hand under Related to.
-	kept := []string{"Other / Or enter a UID by hand"}
+	// What the frame does not draw: the UID typed by hand under Related to,
+	// and the link (Р8 of scans/kinds-parity.md; Typecase's task 172).
+	kept := []string{"Other / Or enter a UID by hand", "Other / Link"}
+	if !hasRow(page.Form, "url") {
+		t.Error("the task form has no Link")
+	}
 	if got, want := serverForm(page.Form, kept...), frameForm(t, "s-tasks-3"); !equalStrings(got, want) {
 		t.Errorf("task form =\n%q,\nwant (s-tasks-3)\n%q", got, want)
 	}
@@ -100,9 +104,13 @@ func TestEventFormIsTheFramesRubrics(t *testing.T) {
 	page := decode[view.EventEditPage](t, f.h.do(get(f.path("calendar")+"/e1/edit", f.sess)))
 	// «Related to» is every kind's (the owner's word of 12.10.2026): in the
 	// group «Other» before the attachments, as the task's (Typecase's task
-	// 160). What the frame does not draw: the UID typed by hand under it.
+	// 160). What the frame does not draw: the UID typed by hand under it,
+	// and the link (Р8 of scans/kinds-parity.md; Typecase's task 172).
 	want := frameForm(t, "s-agenda-3")
-	if got := serverForm(page.Form, "Other / Or enter a UID by hand"); !equalStrings(got, want) {
+	if !hasRow(page.Form, "url") {
+		t.Error("the event form has no Link")
+	}
+	if got := serverForm(page.Form, "Other / Or enter a UID by hand", "Other / Link"); !equalStrings(got, want) {
 		t.Errorf("event form =\n%q,\nwant (s-agenda-3)\n%q", got, want)
 	}
 
