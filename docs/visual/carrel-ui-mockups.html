@@ -2820,7 +2820,7 @@ label.tc-field__swatch{position:relative;cursor:pointer}
 <div class="frame cap360" data-frame="components-26">
   <div class="frame-label"><span>Очередь загрузок</span><span class="frag">компонент</span><i>развёрнута</i></div>
   <div class="tc-root tc-root--on-bg tc-root--pad14 tc-root--col">
-  <div class="tc-queue tc-queue--flush-full">
+  <div class="tc-queue tc-queue--flush-full" data-tc-fold-hide="Hide" data-tc-fold-show="Show" data-tc-fold-total="{percent}%">
     <div class="tc-queue__head"><b>Uploading 2 of 3</b><span class="tc-mono tc-push tc-mono--dusty">12.4 MB</span><button class="tc-btn is-sm" type="button">Hide</button></div>
     <ul class="tc-queue__list">
       <li><div class="tc-queue__row"><span class="tc-queue__name">отчёт-июль.pdf</span><span class="tc-queue__meta">4.1 MB · done</span></div><span class="tc-meter" data-tc-width="100%"><i class="tc-meter__bar" data-tc-width="100%"></i></span></li>
@@ -2837,7 +2837,7 @@ label.tc-field__swatch{position:relative;cursor:pointer}
 <div class="frame cap280" data-frame="components-27">
   <div class="frame-label"><span>Очередь загрузок</span><span class="frag">компонент</span><i>свёрнута</i></div>
   <div class="tc-root tc-root--on-bg tc-root--pad14 tc-root--col">
-  <div class="tc-queue is-min tc-queue--flush-wauto">
+  <div class="tc-queue is-min tc-queue--flush-wauto" data-tc-fold-hide="Hide" data-tc-fold-show="Show" data-tc-fold-total="{percent}%">
     <div class="tc-queue__head"><b>Uploading 2 of 3</b><span class="tc-mono tc-push tc-mono--dusty">62%</span><button class="tc-btn is-sm" type="button">Show</button></div>
   </div>
 </div>
@@ -5021,6 +5021,33 @@ Read  2 min ago · changed on server 3 days ago</div>
   </div>
   <figcaption>Отказ: отдельное событие не записалось — перенос остался в серии. Лист остаётся и говорит, что записано, что нет и почему; сообщение называет встречу и то, где она теперь. Ответы — повторить или оставить как есть; ничего не потеряно ни в том, ни в другом случае.</figcaption>
   </figure>
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-agenda-25">
+    <div class="frame-label"><span>Связанная запись · событие из объединённого вида</span><span class="frag">фрагмент</span><i>выбранные значения, метка — откуда взято</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Синк-ап по релизу</div><div class="tc-head__sub">Combined calendar · in 3 calendars</div></div></div>
+        <dl class="tc-fields">
+          <dt>When</dt><dd><span class="tc-mono">10:00 – 11:00</span>, Monday 10 August</dd>
+          <dt>Repeats</dt><dd>Weekly on Mon</dd>
+          <dt>Reminders</dt><dd>10 minutes before · 1 day before</dd>
+          <dt>Where</dt><dd>Переговорная 2 <span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <span class="tc-dim">Личный</span></dd>
+          <dt>Status</dt><dd>Confirmed</dd>
+          <dt>Tags</dt><dd><span class="tc-tag">релиз</span> <span class="tc-tag">работа</span></dd>
+        </dl>
+        <div class="tc-sec">
+          <div class="tc-rubric">Where this event is kept <span class="tc-badge is-linked">3</span></div>
+          <ul class="tc-stack tc-stack--gap-5 tc-sec__list">
+            <li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="/app/calendar/nextcloud/lichnyy/8f1c">nextcloud · Личный</a></li>
+            <li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="/app/calendar/radicale/proekty/8f1c">radicale · vps · Проекты</a></li>
+            <li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#9A9280"></span> <a class="tc-dim--accent" href="/app/calendar/baikal/obshchiy/8f1c">baikal · Общий</a> <span class="tc-dim">· Where differ</span></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption><b>Событие, открытое из объединённого вида</b> — как контакт (кадр «Связанная запись · карточка из объединённого вида», Р-58): значения, выбранные в разделе дубликатов. У места встречи выбор был — копия в «Общем» держит другое место, — поэтому после него стоят метка и название календаря, откуда оно взято. Блок внизу называет все три копии; каждая ведёт на карточку своего календаря, где показаны её данные и значок «linked» у поля с выбором (кадр «Карточка события»).</figcaption>
+  </figure>
 
 
 <figure>
@@ -6274,6 +6301,32 @@ Read  2 min ago · not changed on server</div>
   </div>
   <figcaption><b>Галка у связанной задачи в списке открывает лист «какую копию отметить»</b> (решения владельца 13.10, задача 153, Р-58): строка задачи в списке одна на все копии, а отметка пишется в ту, которую выбрали. Копии — отметки выбора, не кнопки: нажатие на копию ничего не делает, пока не нажата главная кнопка «Mark done». По умолчанию отмечена первая копия; можно отметить и обе. «Cancel» закрывает лист, ничего не записав. У задачи без связанных копий листа нет — галка в списке отмечает сразу.</figcaption>
   </figure>
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-tasks-17">
+    <div class="frame-label"><span>Связанная запись · дело из объединённого вида</span><span class="frag">фрагмент</span><i>выбранные значения, метка — откуда взято</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Собрать чемодан</div><div class="tc-head__sub">All lists · in 2 lists</div></div></div>
+        <dl class="tc-fields">
+          <dt>Status</dt><dd>Needs action</dd>
+          <dt>Due</dt><dd class="tc-mono">12 August 2026, 18:00 <span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <span class="tc-dim">Дела</span></dd>
+          <dt>Complete</dt><dd class="tc-mono">0%</dd>
+          <dt>Priority</dt><dd class="tc-mono">3 <span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#3F6E8C"></span> <span class="tc-dim">Работа</span></dd>
+          <dt>Reminders</dt><dd>1 day before</dd>
+          <dt>Tags</dt><dd><span class="tc-tag">дом</span></dd>
+        </dl>
+        <div class="tc-sec">
+          <div class="tc-rubric">Where this task is kept <span class="tc-badge is-linked">2</span></div>
+          <ul class="tc-stack tc-stack--gap-5 tc-sec__list">
+            <li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="/app/tasks/nextcloud/dela/c41a">nextcloud · Дела</a></li>
+            <li><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#3F6E8C"></span> <a class="tc-dim--accent" href="/app/tasks/nextcloud/rabota/c41a">nextcloud · Работа</a> <span class="tc-dim">· Due, priority differ</span></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption><b>Дело, открытое из объединённого вида</b> — как контакт (Р-58): выбранные значения, у каждого, где был выбор, — метка и название списка, откуда оно взято. Здесь выбор был у двух полей, и они взяты из разных копий: срок — из «Дел», приоритет — из «Работы». Галку такого дела в списке ставят через лист «Which copy to mark done?».</figcaption>
+  </figure>
 </div>
 
 <h2 id="s-notes">7.4 Заметки</h2>
@@ -6486,6 +6539,40 @@ Read  2 min ago · not changed on server</div>
 </div>
 <figcaption><b>Одна тетрадь</b> — тот же экран, что общая тетрадь, с адресом тетради: в рейле открыта её строка, в шапке — её метка, имя и счёт. New note без стрелки: писать некуда, кроме неё.</figcaption>
 </figure>
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-notes-32">
+    <div class="frame-label"><span>Связанная запись · заметка из объединённого вида</span><span class="frag">фрагмент</span><i>выбранные значения, метка — откуда взято</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-head tc-head--rule">
+          <div class="tc-head__sub tc-head__sub--top0">All notebooks · in 2 notebooks · text from <span class="tc-mark tc-mark--h12" data-tc-colour="#4A6B52"></span>Записи</div>
+        </div>
+        <div class="tc-doc__layout">
+          <div class="tc-doc">
+            <div class="tc-doc__title">Заметка со встречи 10.08</div>
+            <div class="tc-prose tc-prose--lead tc-prose--top14">Договорились заморозить ветку в среду.
+
+Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.</div>
+          </div>
+          <div class="tc-docmeta">
+            <div class="tc-docmeta__sec">
+              <div class="tc-rubric">Tags</div>
+              <div class="tc-line tc-line--gap-4"><span class="tc-tag">встречи</span><span class="tc-tag">релиз</span> <span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <span class="tc-dim">Дневник</span></div>
+            </div>
+            <div class="tc-docmeta__sec">
+              <div class="tc-rubric">Where this note is kept <span class="tc-badge is-linked">2</span></div>
+              <div class="tc-stack tc-stack--gap-5 tc-line__text">
+                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="/app/notes/nextcloud/zapisi/9e31">nextcloud · Записи</a></span>
+                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="/app/notes/nextcloud/dnevnik/9e31">nextcloud · Дневник</a> <span class="tc-dim">· Text, tags differ</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption><b>Заметка, открытая из объединённого вида</b> — как контакт (Р-58): выбранные значения. У заметки выбор бывает у текста и у тегов: текст взят из «Записей» — это сказано в подзаголовке, — теги из «Дневника», метка и название стоят после них. Кнопок правки в шапке нет: правят копию — из её карточки, после листа «Which copy to edit?».</figcaption>
+  </figure>
 
 <figure style="flex:0 1 300px">
   <div class="frame" data-frame="s-notes-23">
@@ -6636,7 +6723,7 @@ Read  2 min ago · not changed on server</div>
             <div class="tc-docmeta__sec">
               <div class="tc-rubric">The same note in other notebooks <span class="tc-badge is-linked">1</span></div>
               <div class="tc-stack tc-stack--gap-5 tc-line__text">
-                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text, tags differ</span></span>
+                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text, tags differ</span></span>
               </div>
             </div>
             <div class="tc-docmeta__sec">
@@ -6732,7 +6819,7 @@ Read  2 min ago</div>
             <div class="tc-docmeta__sec">
               <div class="tc-rubric">The same note in other notebooks <span class="tc-badge is-linked">1</span></div>
               <div class="tc-stack tc-stack--gap-5 tc-line__text">
-                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text, tags differ</span></span>
+                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text, tags differ</span></span>
               </div>
             </div>
             <div class="tc-docmeta__sec">
@@ -6934,7 +7021,7 @@ Read  2 min ago</div>
             <div class="tc-docmeta__sec">
               <div class="tc-rubric">The same note in other notebooks <span class="tc-badge is-linked">1</span></div>
               <div class="tc-stack tc-stack--gap-5 tc-line__text">
-                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#4A6B52"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text, tags differ</span></span>
+                <span class="tc-stack__item"><span class="tc-mark tc-mark--h11 tc-mark--inline" data-tc-colour="#6B4E7A"></span> <a class="tc-dim--accent" href="#">nextcloud · Дневник</a> <span class="tc-dim">· Text, tags differ</span></span>
               </div>
             </div>
             <div class="tc-docmeta__sec">
@@ -8722,7 +8809,7 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Очередь · сервер отказал</span><span class="frag">фрагмент</span><i>тот же угол колонки</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
-        <div class="tc-queue">
+        <div class="tc-queue" data-tc-fold-hide="Hide" data-tc-fold-show="Show" data-tc-fold-total="{percent}%">
           <div class="tc-queue__head"><b>Uploaded 1 of 2</b><span class="tc-mono tc-push tc-mono--dusty">4.1 MB</span><button class="tc-btn is-sm" type="button">Hide</button></div>
           <ul class="tc-queue__list">
             <li><div class="tc-queue__row"><span class="tc-queue__name">отчёт-июль.pdf</span><span class="tc-queue__meta">4.1 MB · done</span></div><span class="tc-meter" data-tc-width="100%"><i class="tc-meter__bar" data-tc-width="100%"></i></span></li>
@@ -8962,7 +9049,7 @@ Read  2 min ago</div>
           </tbody>
         </table>
         <form class="tc-post" id="files-sel" action="/app/files/sftpgo/documents/op/carrel/attachments" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
-        <div class="tc-queue">
+        <div class="tc-queue" data-tc-fold-hide="Hide" data-tc-fold-show="Show" data-tc-fold-total="{percent}%">
           <div class="tc-queue__head"><b>Uploading 2 of 3</b><span class="tc-mono tc-push tc-mono--dusty">12.4 MB</span><button class="tc-btn is-sm" type="button">Hide</button></div>
           <ul class="tc-queue__list">
             <li><div class="tc-queue__row"><span class="tc-queue__name">отчёт-июль.pdf</span><span class="tc-queue__meta">4.1 MB · done</span></div><span class="tc-meter" data-tc-width="100%"><i class="tc-meter__bar" data-tc-width="100%"></i></span></li>
@@ -8983,7 +9070,7 @@ Read  2 min ago</div>
   <div class="frame-label"><span>Файлы · очередь спрятана</span><span class="frag">фрагмент</span><i>тот же угол колонки</i></div>
   <div class="tc-root tc-root--minh88">
     <div class="tc-main tc-main--minh88">
-      <div class="tc-queue is-min">
+      <div class="tc-queue is-min" data-tc-fold-hide="Hide" data-tc-fold-show="Show" data-tc-fold-total="{percent}%">
         <div class="tc-queue__head"><b>Uploading 2 of 3</b><span class="tc-mono tc-push tc-mono--dusty">62%</span><button class="tc-btn is-sm" type="button">Show</button></div>
       </div>
     </div>
@@ -15027,25 +15114,25 @@ jobs:
           <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
-      <div class="tc-main"><div class="tc-dialog is-wide">
+      <div class="tc-main"><form class="tc-dialog is-wide" action="/app/settings/backup/restore/match" method="post">
       <div class="tc-steps"><span class="tc-steps__item">1 · Archive</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">2 · Match</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Restore from 2026-08-14</div><div class="tc-head__sub">Job «Личное на домашний диск» · manifest read · 4 collections · 1 214 records · <span class="tc-mono">carrel-backup/2026-08-14T09-12.zip</span></div></div>
-        <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Restore 3 collections</button></div>
+        <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="submit" name="op" value="restore">Restore 3 collections</button></div>
       </div>
       <div class="tc-bar tc-bar--sel">
         <span class="tc-bar__count">3 selected</span>
         <span class="tc-bar__sep"></span>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg>Restore into</button>
-        <button class="tc-btn" type="button">Skip</button>
-        <span class="tc-bar__right"><button class="tc-btn is-sm" type="button">Select all</button></span>
+        <button class="tc-btn" type="submit" name="op" value="into"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg>Restore into</button>
+        <button class="tc-btn" type="submit" name="op" value="skip">Skip</button>
+        <span class="tc-bar__right"><button class="tc-btn is-sm tc-js" type="button">Select all</button></span>
       </div>
       <table class="tc-table tc-table--fit">
         <thead><tr><th class="tc-table__col--tick"><button class="tc-tickrow__tick is-part" type="button"></button></th><th>In the archive</th><th class="tc-table__n3 is-2nd">Records</th><th class="tc-table__n4 tc-table__col--w26">Restore into</th><th>What will happen</th></tr></thead>
         <tbody>
-          <tr class="is-sel"><td><button class="tc-tickrow__tick" type="button"></button></td>
+          <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" name="collection" value="nextcloud/personal" aria-label="Pick" checked></td>
             <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">nextcloud / personal</span></span></td><td class="tc-mono tc-table__n3 is-2nd">312</td>
             <td class="tc-mono tc-table__n4">nextcloud · Личный</td><td>matched by path — 4 records missing, will be created</td></tr>
-          <tr class="is-sel"><td><button class="tc-tickrow__tick" type="button"></button></td>
+          <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" name="collection" value="radicale/projects" aria-label="Pick" checked></td>
             <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#6B4E7A"></span><span class="tc-table__filename">radicale / projects</span></span></td><td class="tc-mono tc-table__n3 is-2nd">86</td>
             <td class="tc-table__n4 tc-table__n4--pos-relative">
               <span class="tc-drop"><button class="tc-in is-focus is-pick" type="button">radicale · vps · Проекты</button><div class="tc-menu is-pop">
@@ -15057,17 +15144,17 @@ jobs:
                 <button class="tc-menu__item tc-menu__item--dusty" type="button" role="menuitem">Skip this one</button>
               </div></span>
             </td><td>matched by path — no differences</td></tr>
-          <tr class="is-sel"><td><button class="tc-tickrow__tick" type="button"></button></td>
+          <tr class="is-sel"><td><input class="tc-tickrow__tick" type="checkbox" name="collection" value="baikal/shared" aria-label="Pick" checked></td>
             <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#9A9280"></span><span class="tc-table__filename">baikal / shared</span></span></td><td class="tc-mono tc-table__n3 is-2nd">140</td>
             <td class="tc-mono tc-table__n4">nextcloud · Личный <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none" class="tc-ico--inline"><use href="#i-chev"/></svg></td>
             <td class="tc-dim--danger">that server is gone — another collection chosen</td></tr>
-          <tr><td><button class="tc-tickrow__tick is-off" type="button"></button></td>
+          <tr><td><input class="tc-tickrow__tick is-off" type="checkbox" name="collection" value="nextcloud/birthdays" aria-label="Pick"></td>
             <td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#A05A2C"></span><span class="tc-table__filename">nextcloud / birthdays</span></span></td><td class="tc-mono tc-table__n3 is-2nd">51</td>
             <td class="tc-mono is-ph tc-table__n4 tc-table__n4--dusty">—</td><td class="tc-dim">skip</td></tr>
         </tbody>
       </table>
       <div class="tc-msg is-alert">Restoring <b>creates</b> records, the way import does: a colliding UID gets a fresh one and a line in the report. Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes.</div>
-    </div></div></div>
+    </form></div></div>
   </div>
 </div>
 <figcaption><b>Как выбирают.</b> Флажок в строке — что восстанавливать; колонка «Restore into» — куда, и это обычный выпадающий список коллекций с полосками, а не угадывание по имени. Carrel заранее подставляет совпавшую по пути коллекцию, поэтому в обычном случае трогать её не нужно вовсе. Несколько строк отмечаются флажками (с <kbd class="tc-kbd" style="font-family:var(--tc-font-mono)">Shift</kbd> — диапазон), и тогда «Restore into» в панели сверху назначает цель всем сразу — иначе при двадцати коллекциях выбор пришлось бы повторять двадцать раз. Последний пункт списка — «Skip this one», потому что «не восстанавливать эту» — такой же выбор цели, как и остальные.<br><br>Главный экран всей функции: не «восстановить», а <b>что именно и куда</b>. Коллекция, чей сервер исчез, не блокирует восстановление — ей назначают другую цель прямо в строке. Обещание сформулировано так, чтобы его можно было выполнить: восстановление — это импорт, а не откат.</figcaption>
@@ -23281,11 +23368,11 @@ dav: HTTP 503: the server is busy</div></div>
         <div class="tc-bar tc-bar--sel">
           <span class="tc-bar__count">1 selected</span><span class="tc-mono tc-mono--muted">2.8 MB</span>
           <span class="tc-bar__sep"></span>
-          <button class="tc-btn" title="Download" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
-          <button class="tc-btn" title="Rename" type="button"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
-          <button class="tc-btn" title="Move" type="button"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
-          <button class="tc-btn" title="Copy" type="button"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
-          <button class="tc-btn is-danger-solid" title="Delete" type="button"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
+          <button class="tc-btn" title="Download" type="submit" form="files-sel" name="op" value="download"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
+          <button class="tc-btn" title="Rename" type="submit" form="files-sel" name="op" value="rename"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
+          <button class="tc-btn" title="Move" type="submit" form="files-sel" name="op" value="move"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
+          <button class="tc-btn" title="Copy" type="submit" form="files-sel" name="op" value="copy"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
+          <button class="tc-btn is-danger-solid" title="Delete" type="submit" form="files-sel" name="op" value="delete"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
         </div>
         <div class="tc-bar">
           <label class="tc-in is-ph tc-in--h26-w190"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Filter this folder" aria-label="Filter this folder"></label>
@@ -23295,13 +23382,14 @@ dav: HTTP 503: the server is busy</div></div>
           <span class="tc-bar__right is-2nd"><span class="tc-mono">6 items · 89.4 MB</span></span>
         </div>
         <div class="tc-grid">
-          <div class="tc-tile"><div class="tc-thumb tc-thumb--folder"><svg><use href="#i-file"/></svg></div><span class="tc-tile__name">архив</span><span class="tc-tile__meta">12 items</span></div>
-          <div class="tc-tile is-sel"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><span class="tc-tile__name">whiteboard.jpg</span><span class="tc-tile__meta">2.8 MB · 4032×3024</span></div>
-          <div class="tc-tile"><div class="tc-thumb tc-thumb--on-card"><svg><use href="#i-img"/></svg></div><span class="tc-tile__name">панорама.tif</span><span class="tc-tile__meta">84 MB · too large</span></div>
-          <div class="tc-tile"><div class="tc-thumb tc-thumb--on-card"><svg><use href="#i-doc"/></svg></div><span class="tc-tile__name">смета.pdf</span><span class="tc-tile__meta">1.2 MB</span></div>
-          <div class="tc-tile"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><span class="tc-tile__name">схема-1.png</span><span class="tc-tile__meta">640 KB · 1920×1080</span></div>
-          <div class="tc-tile"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><span class="tc-tile__name">схема-2.png</span><span class="tc-tile__meta">712 KB · 1920×1080</span></div>
+          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="архив" aria-label="Pick архив"><div class="tc-thumb tc-thumb--folder"><svg><use href="#i-file"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/архив">архив</a><span class="tc-tile__meta">12 items</span></div>
+          <div class="tc-tile is-sel"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="whiteboard.jpg" aria-label="Pick whiteboard.jpg" checked><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/whiteboard.jpg">whiteboard.jpg</a><span class="tc-tile__meta">2.8 MB · 4032×3024</span></div>
+          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="панорама.tif" aria-label="Pick панорама.tif"><div class="tc-thumb tc-thumb--on-card"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/панорама.tif">панорама.tif</a><span class="tc-tile__meta">84 MB · too large</span></div>
+          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="смета.pdf" aria-label="Pick смета.pdf"><div class="tc-thumb tc-thumb--on-card"><svg><use href="#i-doc"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/смета.pdf">смета.pdf</a><span class="tc-tile__meta">1.2 MB</span></div>
+          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="схема-1.png" aria-label="Pick схема-1.png"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/схема-1.png">схема-1.png</a><span class="tc-tile__meta">640 KB · 1920×1080</span></div>
+          <div class="tc-tile"><input class="tc-tile__box" type="checkbox" form="files-sel" name="item" value="схема-2.png" aria-label="Pick схема-2.png"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><a class="tc-tile__name" href="/app/files/sftpgo/documents/carrel/attachments/2026-07/схема-2.png">схема-2.png</a><span class="tc-tile__meta">712 KB · 1920×1080</span></div>
         </div>
+        <form class="tc-post" id="files-sel" action="/app/files/sftpgo/documents/op/carrel/attachments" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
       </div></div>
     </div>
   </div>
@@ -23581,14 +23669,14 @@ dav: HTTP 503: the server is busy</div></div>
       <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
         <div class="tc-bar tc-bar--sel">
           <span class="tc-bar__count tc-bar__count--t12-5">2 selected</span>
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button>
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg></button>
-          <button class="tc-btn is-danger-solid" title="Delete" type="button"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg></button>
-          <button class="tc-btn tc-push" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
+          <button class="tc-btn" title="Download" type="submit" form="files-sel" name="op" value="download"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></button>
+          <button class="tc-btn" title="Move" type="submit" form="files-sel" name="op" value="move"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg></button>
+          <button class="tc-btn is-danger-solid" title="Delete" type="submit" form="files-sel" name="op" value="delete"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg></button>
+          <button class="tc-btn tc-push tc-js" title="Clear selection" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
         </div>
         <div class="tc-list">
           <div class="tc-row tc-row--phone is-on">
-            <button class="tc-tickrow__tick tc-tickrow__tick--ml2" type="button"></button>
+            <input class="tc-tickrow__tick tc-tickrow__tick--ml2" type="checkbox" form="files-sel" name="item" value="2026-08-10-sync-board.png" aria-label="Pick" checked>
             <span class="tc-row__text tc-row__text--row">
               <svg width="17" height="17" viewBox="0 0 24 24" stroke-width="1.3" fill="none" class="tc-ico--muted"><use href="#i-img"/></svg>
               <span class="tc-row__text"><span class="tc-row__title">2026-08-10-sync-board.png</span><span class="tc-row__cell tc-mono">412 KB · image/png</span></span>
@@ -23596,7 +23684,7 @@ dav: HTTP 503: the server is busy</div></div>
             <button class="tc-btn tc-btn--padx4" type="button"><svg viewBox="0 0 24 24" class="tc-ico--sq16"><use href="#i-dots"/></svg></button>
           </div>
           <div class="tc-row tc-row--phone is-on">
-            <button class="tc-tickrow__tick tc-tickrow__tick--ml2" type="button"></button>
+            <input class="tc-tickrow__tick tc-tickrow__tick--ml2" type="checkbox" form="files-sel" name="item" value="release-checklist.md" aria-label="Pick" checked>
             <span class="tc-row__text tc-row__text--row">
               <svg width="17" height="17" viewBox="0 0 24 24" stroke-width="1.3" fill="none" class="tc-ico--muted"><use href="#i-doc"/></svg>
               <span class="tc-row__text"><span class="tc-row__title">release-checklist.md</span><span class="tc-row__cell tc-mono">3 KB · text/markdown</span></span>
@@ -23604,7 +23692,7 @@ dav: HTTP 503: the server is busy</div></div>
             <button class="tc-btn tc-btn--padx4" type="button"><svg viewBox="0 0 24 24" class="tc-ico--sq16"><use href="#i-dots"/></svg></button>
           </div>
           <div class="tc-row tc-row--phone">
-            <button class="tc-tickrow__tick is-off tc-tickrow__tick--ml2" type="button"></button>
+            <input class="tc-tickrow__tick is-off tc-tickrow__tick--ml2" type="checkbox" form="files-sel" name="item" value="2026-07" aria-label="Pick">
             <span class="tc-row__text tc-row__text--row">
               <svg width="17" height="17" viewBox="0 0 24 24" stroke-width="1.3" fill="none" class="tc-ico--muted"><use href="#i-file"/></svg>
               <span class="tc-row__text"><span class="tc-row__title">2026-07</span><span class="tc-row__cell tc-mono">34 items</span></span>
@@ -23612,6 +23700,7 @@ dav: HTTP 503: the server is busy</div></div>
             <button class="tc-btn tc-btn--padx4" type="button"><svg viewBox="0 0 24 24" class="tc-ico--sq16"><use href="#i-dots"/></svg></button>
           </div>
         </div>
+        <form class="tc-post" id="files-sel" action="/app/files/sftpgo/documents/op/carrel/attachments" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
         <div class="tc-nav--bottom">
           <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Contacts</a>
           <a class="tc-nav__item" href="#"><svg><use href="#i-cal"/></svg>Calendar</a>

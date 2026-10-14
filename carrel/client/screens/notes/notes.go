@@ -413,7 +413,13 @@ func side(d view.Details) *w.Side {
 		}
 		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines, Gap: 6}}})
 	}
-	return &w.Side{Items: items}
+	// A file dropped on the open card goes with Attach «From this computer»
+	// (Side.Drop, Typecase's note 68; s-io-2).
+	side := &w.Side{Items: items}
+	if attach != nil {
+		side.Drop = bind.UploadForm(attach.Arrow)
+	}
+	return side
 }
 
 // attachments are the lines of a note's attachments: the name, a link where

@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.30 — 2026-10-15
+
+Typecase `95453f6` (note 68), server `v0.2.237`. The mockup is Typecase's,
+byte for byte (446 frames). The open card of the agenda, a task and a note
+takes a file dropped on it into its Attach (`Side.Drop`, s-io-2); without
+a script nothing is dropped and Attach stays. The guard reads every page
+it prints for names that point at nothing (`page.Check`): none.
+
 ## v0.4.29 — 2026-10-15
 
 Server `v0.2.237`. A note's column draws its link under «Link», as Related

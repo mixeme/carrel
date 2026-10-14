@@ -492,7 +492,13 @@ func side(d view.Details) *w.Side {
 	for _, b := range danger {
 		items = append(items, w.Danger{Button: b, Note: string(d.DeleteNote)})
 	}
-	return &w.Side{Items: items}
+	// A file dropped on the open card goes with Attach «From this computer»
+	// (Side.Drop, Typecase's note 68; s-io-2).
+	side := &w.Side{Items: items}
+	if attach != nil {
+		side.Drop = bind.UploadForm(attach.Arrow)
+	}
+	return side
 }
 
 // fields are a record's fields as the lines of a card: When in its pieces,

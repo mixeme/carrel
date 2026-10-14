@@ -160,6 +160,19 @@ func Uploads(items []view.MenuItem, word string) []w.MenuPart {
 	return out
 }
 
+// UploadForm is the ID of the form a file goes with from a menu's file item —
+// Attach «From this computer» — that a panel names as its drop (Side.Drop,
+// Typecase's note 68): a file dropped on the open card is sent with it. Empty
+// — no such item, or it sends the form it stands in, and nothing is dropped.
+func UploadForm(items []view.MenuItem) string {
+	for _, it := range items {
+		if it.Method == "POST" && it.Enabled && it.File != "" && !it.Submits {
+			return it.ID
+		}
+	}
+	return ""
+}
+
 // MenuForms are the forms of a menu's items that post (MenuItems), by their
 // IDs, for the page's end; an item that sends the form it stands in
 // (Submits) has none of its own.
