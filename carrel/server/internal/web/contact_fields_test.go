@@ -132,4 +132,26 @@ func TestAppleBirthdayWithoutAYear(t *testing.T) {
 	if strings.Contains(got, "X-APPLE-OMIT-YEAR") {
 		t.Errorf("a full date kept the marker that hides its year:\n%s", got)
 	}
+	// The year taken away again: vCard 3.0 has no date without a year (RFC
+	// 2426 BDAY is a full date), so it goes the way Apple writes it, which
+	// Baikal and Nextcloud read (Б30 of the audit of 11.10.2026: it went as
+	// --04-13, a form 3.0 has not).
+	mustContain(t, save("13.04"), "BDAY;X-APPLE-OMIT-YEAR=1604:1604-04-13")
+}
+
+// The same on a 3.0 card that had no birthday; one a 4.0 card holds goes as
+// 4.0 writes it.
+func TestABirthdayWithoutAYearOnVCard3(t *testing.T) {
+	f := contactsFixture(t, false,
+		"BEGIN:VCARD\nVERSION:3.0\nUID:vera\nFN:Vera\nEND:VCARD\n",
+		"BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada\nEND:VCARD\n")
+	for uid, want := range map[string]string{"vera": "BDAY;X-APPLE-OMIT-YEAR=1604:1604-04-12", "ada": "BDAY:--0412"} {
+		rec := f.path("contacts") + "/" + uid
+		form := formFields(decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+		form.Set("bday", "12.04")
+		if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
+			t.Fatalf("%s: %d %s", uid, resp.Code, resp.Body.String())
+		}
+		mustContain(t, body(t, f, uid+".vcf"), want)
+	}
 }

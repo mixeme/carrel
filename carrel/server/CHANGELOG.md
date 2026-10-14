@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.229 — 2026-10-14
+
+### Changed
+
+- **A birthday without a year on a vCard 3.0 card is written as Apple writes
+  it** — `BDAY;X-APPLE-OMIT-YEAR=1604:1604-04-12`, which Baikal and Nextcloud
+  read — where the card does not hold another client's `--0412` already:
+  vCard 3.0 has no date without a year (Б30 of the audit of 11.10.2026).
+- **A display name that is the organisation typed beside it is not cut into
+  a given and a family name** (Б30): it is an organisation's card.
+
 ## v0.2.228 — 2026-10-14
 
 ### Changed

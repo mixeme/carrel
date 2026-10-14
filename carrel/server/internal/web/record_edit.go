@@ -1545,9 +1545,14 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				continue
 			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], written, false)...)
-			if _, yearless, _ := birthdayDigits(v); written != "" && !yearless && len(props[f.prop]) > 0 && props[f.prop][0].Params[appleOmitYear] != "" {
+			_, yearless, _ := birthdayDigits(v)
+			switch {
+			case written != "" && !yearless && len(props[f.prop]) > 0 && props[f.prop][0].Params[appleOmitYear] != "":
 				// A full date: the marker would hide the year typed.
 				ch.ops = append(ch.ops, model.RemoveParam{Prop: f.prop, Index: 0, Param: appleOmitYear})
+			case yearless && apple3(props[f.prop], firstValue(obj, "VERSION")):
+				// Apple's day without a year names the year it stands for.
+				ch.ops = append(ch.ops, model.SetParam{Prop: f.prop, Index: 0, Param: appleOmitYear, Value: appleYear})
 			}
 		case fieldName:
 			if sameRows(w, h) {
@@ -1845,6 +1850,11 @@ func fillNames(kind view.Kind, have, want formValues) {
 		switch {
 		case fn == "" && given+family != "":
 			want["fn"] = []string{strings.TrimSpace(given + " " + family)}
+		case fn != "" && given == "" && family == "" && fn != strings.TrimSpace(first(have["fn"])) && isOrganisation(fn, first(want["org"])):
+			// A display name that is the organisation of the same form is an
+			// organisation's card: no given and no family name to cut it into
+			// (Б30 of the audit of 11.10.2026: «Издательство «Слово»» became
+			// Издательство and «Слово»).
 		case fn != "" && given == "" && family == "" && fn != strings.TrimSpace(first(have["fn"])):
 			// Only when the display name itself was changed. Editing a phone
 			// on a card that carries no N must not quietly grow one: what the
@@ -1876,6 +1886,13 @@ func fillNames(kind view.Kind, have, want formValues) {
 			}
 		}
 	}
+}
+
+// isOrganisation says whether a display name is the organisation typed
+// beside it — its first part, as ORG holds the company before its units.
+func isOrganisation(fn, org string) bool {
+	org, _, _ = strings.Cut(strings.TrimSpace(org), ";")
+	return org != "" && strings.EqualFold(strings.TrimSpace(fn), strings.TrimSpace(org))
 }
 
 // endless reports an event the form would write without an end, when the end
@@ -2072,6 +2089,23 @@ func birthdayDigits(typed string) (digits string, yearless, ok bool) {
 // without a year so, and Baikal and Nextcloud (sabre) store --MMDD that way.
 const appleOmitYear = "X-APPLE-OMIT-YEAR"
 
+// appleYear is the year Apple writes a birthday without a year under, with
+// X-APPLE-OMIT-YEAR naming it.
+const appleYear = "1604"
+
+// apple3 says whether a birthday without a year goes as Apple writes it: a
+// vCard 3.0 card that does not hold --MMDD of another client already, nor a
+// marker of its own year.
+func apple3(cur []model.RawValue, version string) bool {
+	if strings.TrimSpace(version) != "3.0" {
+		return false
+	}
+	if len(cur) == 0 {
+		return true
+	}
+	return !strings.HasPrefix(strings.TrimSpace(cur[0].Text), "--") && len(cur[0].Params[appleOmitYear]) != 4
+}
+
 // birthdayWritten turns what was typed into BDAY in the form the stored one
 // has: basic (18151210, --0412) or extended (1815-12-10, --04-12). Without a
 // stored one, vCard 3 gets extended and vCard 4 basic, as each writes it.
@@ -2098,6 +2132,12 @@ func birthdayWritten(typed string, cur []model.RawValue, version string) (string
 		} else {
 			out = digits[:4] + "-" + digits[4:6] + "-" + digits[6:]
 		}
+	}
+	if yearless && apple3(cur, version) {
+		// vCard 3.0 has no date without a year (RFC 2426): the day goes the
+		// way Apple writes it, which Baikal and Nextcloud read (Б30) —
+		// unless the card holds --MMDD of another client already.
+		return appleYear + "-" + digits[:2] + "-" + digits[2:], nil
 	}
 	if yearless {
 		out = "--" + out

@@ -62,3 +62,28 @@ func TestTheDisplayNameFollowsTheParts(t *testing.T) {
 	mustContain(t, save("turned", "Belova"), "FN:Belova Anna", "N:Belova;Anna")
 	mustContain(t, save("own", "Belova"), "FN:Anya (the printer's)", "N:Belova;Anna")
 }
+
+// Б30, the rest: a display name that is the organisation typed beside it is
+// an organisation's card — it is not cut into a given and a family name.
+// A person's name with an organisation is cut as before.
+func TestAnOrganisationIsNotCutIntoNames(t *testing.T) {
+	f := bookFixture(t, nil,
+		"BEGIN:VCARD\nVERSION:4.0\nUID:co\nFN:Old name\nEND:VCARD\n",
+		"BEGIN:VCARD\nVERSION:4.0\nUID:pe\nFN:Old name\nEND:VCARD\n")
+	save := func(uid, fn, org string) string {
+		t.Helper()
+		page := decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/"+uid+"/edit", f.sess)))
+		fields := formFields(page.Form)
+		fields.Set("fn", fn)
+		fields.Set("org", org)
+		u, _ := url.Parse(page.Form.Action)
+		if rec := f.h.do(postForm(u.EscapedPath()+"?"+u.RawQuery, f.sess, fields)); rec.Code != http.StatusSeeOther {
+			t.Fatalf("save %s: %d %s", uid, rec.Code, rec.Body.String())
+		}
+		return body(t, f, uid+".vcf")
+	}
+	if got := save("co", "Slovo Publishing", "Slovo Publishing"); strings.Contains(got, "N:Publishing;Slovo") {
+		t.Errorf("the organisation was cut into names:\n%s", got)
+	}
+	mustContain(t, save("pe", "Anna Kovaleva", "Slovo Publishing"), "N:Kovaleva;Anna")
+}
