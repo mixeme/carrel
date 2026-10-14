@@ -183,6 +183,12 @@ func Screen(p *view.TaskEditPage) w.Shell {
 		}
 		if set.Legend == "" {
 			for i, r := range rows {
+				if r.Name == listRow {
+					// ждёт кадра: задача Typecase 175 — the List the task
+					// lies in (Р19) has no frame yet. Left out, the form
+					// keeps the task where it is.
+					continue
+				}
 				form.Items = append(form.Items, field(r, i))
 			}
 			continue
@@ -264,8 +270,11 @@ func fieldSet(legend view.Text, rows []view.FormRow) w.FieldSet {
 }
 
 // repeatRow is the start of the names of the repetition's rows (C-6.8:
-// repeat.freq…).
-const repeatRow = "repeat."
+// repeat.freq…); listRow is the name of the List the task lies in.
+const (
+	repeatRow = "repeat."
+	listRow   = "notebook"
+)
 
 // repeats tells whether a set is the repetition's: its rows are repeat.….
 func repeats(rows []view.FormRow) bool {

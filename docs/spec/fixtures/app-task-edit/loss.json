@@ -133,6 +133,32 @@
             "readOnly": false,
             "required": false,
             "value": "Опись, копия паспорта и заявление. Приём до 18:00, окно 4."
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "List",
+            "name": "notebook",
+            "options": [
+              {
+                "colour": "#4a6b52",
+                "label": "nextcloud · Дела",
+                "selected": true,
+                "value": "/app/tasks/a-nc-home/dela"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "nextcloud · Работа",
+                "selected": false,
+                "value": "/app/tasks/a-nc-home/rabota"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "/app/tasks/a-nc-home/dela"
           }
         ],
         "unfold": null

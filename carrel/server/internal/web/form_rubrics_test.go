@@ -79,7 +79,11 @@ func TestTaskFormIsTheFramesRubrics(t *testing.T) {
 	// What the frame does not draw: the UID typed by hand under Related to,
 	// the link (Р8 of scans/kinds-parity.md; Typecase's task 172) and the
 	// rubric Repeats, as the event's (Р1; Typecase's task 173).
-	kept := []string{"Other / Or enter a UID by hand", "Other / Link", "Repeats / Frequency", "Repeats / Every", "Repeats / On",
+	// The list it lies in, last in the head (Р19; Typecase's task 175).
+	if r := formRowOf(page.Form, "notebook"); r == nil || r.Label != "List" {
+		t.Error("the task form chooses no List")
+	}
+	kept := []string{" / List", "Other / Or enter a UID by hand", "Other / Link", "Repeats / Frequency", "Repeats / Every", "Repeats / On",
 		"Repeats / Until", "Repeats / Count", "Repeats / Advanced RRULE"}
 	if !hasRow(page.Form, "url") {
 		t.Error("the task form has no Link")
@@ -112,7 +116,11 @@ func TestEventFormIsTheFramesRubrics(t *testing.T) {
 	if !hasRow(page.Form, "url") {
 		t.Error("the event form has no Link")
 	}
-	if got := serverForm(page.Form, "Other / Or enter a UID by hand", "Other / Link"); !equalStrings(got, want) {
+	// The calendar it lies in, last in the head (Р19; Typecase's task 175).
+	if r := formRowOf(page.Form, "notebook"); r == nil || r.Label != "Calendar" {
+		t.Error("the event form chooses no Calendar")
+	}
+	if got := serverForm(page.Form, " / Calendar", "Other / Or enter a UID by hand", "Other / Link"); !equalStrings(got, want) {
 		t.Errorf("event form =\n%q,\nwant (s-agenda-3)\n%q", got, want)
 	}
 

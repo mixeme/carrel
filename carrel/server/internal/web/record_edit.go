@@ -2666,6 +2666,13 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 	if attaching && c.spec.kind != view.KindNote {
 		form.Actions = append(form.Actions, s.attachAction(c, st.uid, st.etag, "edit"))
 	}
+	// Where an event or a task lies is chosen in its edit too, last in the
+	// head, as a note's notebook is (Р19 of scans/kinds-parity.md): saving
+	// into another collection moves it there (S-18). No frame draws it yet
+	// (Typecase's task 175).
+	if st.obj != nil && !st.isNew && c.spec.kind != view.KindNote && c.cal != nil && len(form.Sets) > 0 {
+		form.Sets[0].Rows = append(form.Sets[0].Rows, s.notebookRow(c, st.notebook))
+	}
 	if newAttach && c.spec.kind != view.KindNote {
 		form.Actions = append(form.Actions, s.newAttachAction(c, st.formUID))
 	}
@@ -2835,11 +2842,15 @@ func foreignLine(names []string) view.Runs {
 // every live notebook, the note's own chosen until another is; one that
 // cannot be written is shown closed with the reason. A value is the
 // notebook's list address.
+// collectionWord names the collection a record of the kind lies in, in its
+// edit (s-notes-20 names a note's).
+var collectionWord = map[view.Kind]string{view.KindEvent: "Calendar", view.KindTask: "List", view.KindNote: "Notebook"}
+
 func (s *Server) notebookRow(c *collectionCtx, chosen string) view.FormRow {
 	if chosen == "" {
 		chosen = c.listPath()
 	}
-	row := view.FormRow{Name: "notebook", Label: "Notebook", Kind: view.InputSelect, Value: text(chosen)}
+	row := view.FormRow{Name: "notebook", Label: text(collectionWord[c.spec.kind]), Kind: view.InputSelect, Value: text(chosen)}
 	blob := s.catalogOf(c.sess)
 	for _, conn := range blob.Connections {
 		for _, col := range blob.CollectionsOf(conn.ID) {
@@ -3426,10 +3437,11 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	readAt := unixForm(r.FormValue("readat"))
 	want := s.submittedValues(c, r)
 	st := editState{uid: uid, values: want, etag: etag, readAt: readAt, unfold: r.URL.Query().Get("fields") == "all"}
-	// A note's Notebook other than its own: the edit is saved, then the
-	// note moves there (s-notes-20, S-18).
+	// A note's Notebook, an event's Calendar, a task's List other than its
+	// own: the edit is saved, then the record moves there (s-notes-20, S-18;
+	// Р19).
 	moving := false
-	if c.spec.kind == view.KindNote {
+	if c.cal != nil {
 		st.notebook = strings.TrimSpace(r.FormValue("notebook"))
 		moving = st.notebook != "" && st.notebook != c.listPath()
 	}

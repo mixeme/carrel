@@ -4,6 +4,13 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.32 — 2026-10-15
+
+Server `v0.2.240`. An event's edit offers its Calendar last in the head; a
+save into another calendar moves the event. A task's List waits for its
+frame (Typecase's task 175): the screen leaves it out, and the task stays
+where it is.
+
 ## v0.4.31 — 2026-10-15
 
 Server `v0.2.238`. A task's form now holds its Repeats; no frame draws

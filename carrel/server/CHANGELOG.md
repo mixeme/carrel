@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.240 — 2026-10-15
+
+### Changed
+
+- **An event and a task choose their collection in their edit** (Р19 of
+  docs/plan/scans/kinds-parity.md), as a note chooses its notebook:
+  «Calendar» and «List» last in the head of the form, the same choice as
+  Notebook (the collection's mark, a read-only one off with its reason).
+  Saving into another collection writes the change and moves the record
+  there (S-18); a form without the field leaves it where it is. No frame
+  draws the field yet (Typecase's task 175).
+
 ## v0.2.239 — 2026-10-15
 
 ### Changed
