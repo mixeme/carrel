@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.23 — 2026-10-14
+
+The agenda in the columns a person chose (Typecase's task 154, notes 55 and
+63; `s-agenda-21`): a choice other than the default draws each event as a
+row of those columns — the time first, the title, the place (the dash when
+there is none), the badges of attendees and repetition (an empty cell when
+there are none), the tags, when it changed, the source; the default set
+still draws the time row of `s-agenda-1`. One calendar has no source
+column. No fixture carries a choice, so the guard does not compare these
+rows with their frame.
+
 ## v0.4.22 — 2026-10-14
 
 Typecase `f47752a` (Typecase's note 66). The mockup is `5c13336`'s. The

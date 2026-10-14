@@ -9,6 +9,7 @@
 package agenda
 
 import (
+	"slices"
 	"strconv"
 
 	"carrel.dev/carrel/client/bind"
@@ -32,6 +33,15 @@ var (
 	}
 	rail    = bind.RailWords{Form: formRail, Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
 	columns = bind.ColumnWords{Name: "col", Reset: "default", Drag: "drag"}
+	// The agenda's columns by their IDs (C-11, s-agenda-20, -21; Typecase's
+	// notes 55 and 63): the time first, the title, the place, the badges of
+	// attendees and repetition, the tags, when it changed, the source. The
+	// default set draws the row of s-agenda-1.
+	defaultColumns = []string{"time", "title", "where", "attendees", "source"}
+	cells          = map[string]w.Column{
+		"time": w.ColumnDate, "title": w.ColumnName, "where": w.ColumnDetail, "attendees": w.ColumnBadges,
+		"tags": w.ColumnTags, "changed": w.ColumnChanged, "source": w.ColumnSource,
+	}
 )
 
 // The screen's words (U-1.3): the dash of a row with no place, the lead of a
@@ -99,9 +109,14 @@ func Screen(p *view.AgendaPage) w.Shell {
 	}
 	compact := bind.Checked(p.Bar.Compact)
 	single := bind.Single(p.Rail)
+	shown := chosen(p.Bar.Columns, single)
 	for _, d := range p.Days {
 		rows := make([]w.ListRow, 0, len(d.Rows))
 		for _, r := range d.Rows {
+			if shown != nil {
+				rows = append(rows, columnRow(r, shown))
+				continue
+			}
 			rows = append(rows, row(r, single))
 		}
 		main = append(main,
@@ -325,6 +340,76 @@ func row(r view.AgendaRow, single bool) w.TimeRow {
 		t.Source, t.Single = "", true
 	}
 	return t
+}
+
+// chosen are the columns a person chose for the agenda, by ID in their
+// order (Columns.Items on); nil where they are the default set, drawn as the
+// row of s-agenda-1 (the owner left which of the two the default draws open;
+// until he says, the time row — Typecase's note 55). One calendar has no
+// source column.
+func chosen(c *view.Columns, single bool) []string {
+	if c == nil {
+		return nil
+	}
+	var on []string
+	for _, it := range c.Items {
+		if it.On && !(single && it.ID == "source") {
+			on = append(on, it.ID)
+		}
+	}
+	def := defaultColumns
+	if single {
+		def = def[:len(def)-1]
+	}
+	if slices.Equal(on, def) {
+		return nil
+	}
+	return on
+}
+
+// columnRow is an event in the columns a person chose (s-agenda-21): the
+// calendar's mark, a cell for each column in their order — the dash where
+// the event has nothing but for the badges, whose cell is empty then
+// (Typecase's note 63) —, leading to the event.
+func columnRow(r view.AgendaRow, shown []string) w.ColumnRow {
+	c := w.ColumnRow{Mark: w.Mark{Colour: string(r.Colour)}, Strong: r.On, On: r.On, Href: r.Href}
+	for _, id := range shown {
+		col, ok := cells[id]
+		if !ok {
+			continue
+		}
+		cell := w.ColumnCell{Column: col}
+		switch col {
+		case w.ColumnDate:
+			cell.Text = string(r.Time)
+		case w.ColumnName:
+			cell.Text = string(r.Summary)
+		case w.ColumnDetail:
+			cell.Text = or(r.Location)
+		case w.ColumnBadges:
+			for _, b := range r.Badges {
+				cell.Badges = append(cell.Badges, bind.Badge(b))
+			}
+		case w.ColumnTags:
+			for _, tag := range bind.Tags(r.Tags) {
+				cell.Tags = append(cell.Tags, tag)
+			}
+		case w.ColumnChanged:
+			cell.Text = or(r.Changed)
+		case w.ColumnSource:
+			cell.Text = string(r.Stamp)
+		}
+		c.Cells = append(c.Cells, cell)
+	}
+	return c
+}
+
+// or is a cell's words, the dash when the event has none.
+func or(t view.Text) string {
+	if t == "" {
+		return none
+	}
+	return string(t)
 }
 
 // side is the panel of the event opened (Details).
