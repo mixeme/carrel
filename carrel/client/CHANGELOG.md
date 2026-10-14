@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.19 — 2026-10-14
+
+Typecase `f136966` (Typecase's note 63), server `v0.2.220`. The copy of the
+mockup is `f136966` byte for byte. A row of the agenda gives the library
+every badge of the row, in the server's order (`TimeRow.Badges`, which took
+the place of `Caption`); the library draws those that fit, side by side
+(«4 attendees» «repeats weekly», `s-agenda-1`).
+
 ## v0.4.18 — 2026-10-14
 
 Typecase `14fa0c2` (Typecase's note 62), server `v0.2.219`. The copy of the

@@ -137,7 +137,8 @@ type AgendaRow struct {
 	// Badges — по важности: «Due» задачи, «Cancelled» отменённого
 	// вхождения, «tentative» (тревога) и «cancelled» статуса, «linked ×2»,
 	// «4 attendees» (участники с организатором), «repeats weekly»; строка
-	// кадра рисует первый (s-agenda-1)
+	// кадра рисует все, что умещаются целыми, рядом (s-agenda-1, записка
+	// Typecase 63)
 	Badges  []Badge `json:"badges"`
 	Sources []Stamp `json:"sources"`
 	// Tags и Changed — столбцы, которые добавляет меню Columns агенды

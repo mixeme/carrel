@@ -553,6 +553,9 @@ a.tc-row__title:hover{text-decoration:underline}
 .tc-row--cols > .tc-col--due{width:96px}
 .tc-row--cols > :is(.tc-col--complete,.tc-col--priority){width:48px}
 .tc-row--cols > .tc-col--status{width:112px}
+.tc-row--cols > .tc-col--badges{width:168px}
+/* Плашки события по важности: стоят те, что умещаются целыми, — следующая уходит на вторую строку ячейки и не видна, а не обрезается; подсказка ячейки называет все. */
+.tc-row--timecols > .tc-row__caption,.tc-row--cols > .tc-col--badges{white-space:normal;max-height:18px}
 .tc-row--cols > .tc-col--excerpt{flex:1.6 1 160px;min-width:0}
 .tc-row--cols > .tc-col--date{width:62px}
 .tc-row--cols > .tc-col--detail{flex:1 1 120px;min-width:0}
@@ -564,12 +567,12 @@ a.tc-row__title:hover{text-decoration:underline}
 .tc-fields__link:hover{text-decoration:underline}
 /* Упоминание карточки, которой в отмеченных книгах нет: имя, не ссылка. */
 .tc-mention.is-lost{color:var(--tc-dusty);text-decoration:underline dotted;text-underline-offset:2px}
-.tc-row--timecols{grid-template-columns:3px 62px minmax(168px,2fr) minmax(110px,1fr) 96px 140px}
+.tc-row--timecols{grid-template-columns:3px 62px minmax(168px,2fr) minmax(110px,1fr) 168px 140px}
 .tc-row--tickmarkcols{grid-template-columns:14px 3px minmax(178px,2fr) 84px 44px 140px}
 .tc-row--excerpt{grid-template-columns:3px minmax(118px,1.2fr) minmax(170px,2fr) 80px 140px}
 /* Список одной коллекции: источника у строки нет — нет и его столбца. */
 .tc-row--avatarcols.tc-row--single{grid-template-columns:3px 28px minmax(130px,1.4fr) 142px minmax(150px,1.1fr) minmax(110px,.9fr)}
-.tc-row--timecols.tc-row--single{grid-template-columns:3px 62px minmax(168px,2fr) minmax(110px,1fr) 96px}
+.tc-row--timecols.tc-row--single{grid-template-columns:3px 62px minmax(168px,2fr) minmax(110px,1fr) 168px}
 .tc-row--tickmarkcols.tc-row--single{grid-template-columns:14px 3px minmax(178px,2fr) 84px 44px}
 .tc-row--excerpt.tc-row--single{grid-template-columns:3px minmax(118px,1.2fr) minmax(170px,2fr) 80px}
 .tc-row--find{grid-template-columns:3px 76px minmax(208px,2.4fr) minmax(120px,1fr) 74px 140px}
@@ -927,7 +930,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-row--cols > :is(.tc-col--org,.tc-col--birthday,.tc-col--tags,.tc-col--changed,.tc-col--complete,.tc-col--priority){display:none}
   .tc-row--avatarcols{grid-template-columns:3px 28px minmax(100px,1.4fr) 130px minmax(120px,1fr) 140px}
   .tc-row--avatarcols .tc-row__caption{display:none}
-  .tc-row--timecols{grid-template-columns:3px 60px minmax(116px,2fr) 88px 140px}
+  .tc-row--timecols{grid-template-columns:3px 60px minmax(116px,2fr) 168px 140px}
   .tc-row--timecols .tc-row__detail{display:none}
   .tc-row--find{grid-template-columns:3px 70px minmax(136px,2.4fr) 66px 140px}
   .tc-row--find .tc-row__detail{display:none}
@@ -953,7 +956,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-row--excerpt{grid-template-columns:3px minmax(116px,1.4fr) 80px 140px}
   .tc-row--excerpt > :nth-child(3){display:none}
   .tc-row--avatarcols.tc-row--single{grid-template-columns:3px 28px minmax(100px,1.4fr) 130px minmax(120px,1fr)}
-  .tc-row--timecols.tc-row--single{grid-template-columns:3px 60px minmax(116px,2fr) 88px}
+  .tc-row--timecols.tc-row--single{grid-template-columns:3px 60px minmax(116px,2fr) 168px}
   .tc-row--tickmarkcols.tc-row--single{grid-template-columns:14px 3px minmax(112px,2fr) 74px}
   .tc-row--excerpt.tc-row--single{grid-template-columns:3px minmax(116px,1.4fr) 80px}
 }
@@ -961,7 +964,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-row{padding-left:12px;padding-right:12px}
   /* Тесная шапка: набор кнопок переносится, а не выдавливает панель. */
   .tc-head .tc-acts{flex:0 1 auto;min-width:0}
-  .tc-row--cols > :is(.tc-col--email,.tc-col--status,.tc-col--excerpt){display:none}
+  .tc-row--cols > :is(.tc-col--email,.tc-col--status,.tc-col--badges,.tc-col--excerpt){display:none}
   .tc-row--cols > .tc-col--phone{width:118px}
   .tc-row--avatarcols{grid-template-columns:3px 28px minmax(100px,1.6fr) 118px 130px}
   .tc-row--avatarcols .tc-row__detail{display:none}
@@ -1618,9 +1621,9 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-row--tickmarkcols--padl14-padr14.tc-row--tickmarkcols--padl14-padr14{padding-left:14px;padding-right:14px}
 .tc-row--timecols--padl14-padr14.tc-row--timecols--padl14-padr14{padding-left:14px;padding-right:14px}
 .tc-row--timecols--op-7.tc-row--timecols--op-7{opacity:.7}
-.tc-row--timecols--time.tc-row--timecols--time{grid-template-columns:3px 37px minmax(168px,2fr) minmax(110px,1fr) 96px 140px}
+.tc-row--timecols--time.tc-row--timecols--time{grid-template-columns:3px 37px minmax(168px,2fr) minmax(110px,1fr) 168px 140px}
 @container tcbox (max-width:800px){
-  .tc-row--timecols--time.tc-row--timecols--time{grid-template-columns:3px 37px minmax(116px,2fr) 88px 140px}
+  .tc-row--timecols--time.tc-row--timecols--time{grid-template-columns:3px 37px minmax(116px,2fr) 168px 140px}
 }
 @container tcbox (max-width:620px){
   .tc-row--timecols--time.tc-row--timecols--time{grid-template-columns:3px 37px minmax(110px,1fr) 130px}
@@ -4750,7 +4753,7 @@ Read  2 min ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title is-strong">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -4880,20 +4883,20 @@ Read  2 min ago · changed on server 3 days ago</div>
         </div>
         <div class="tc-list__group"><span class="tc-rubric">Monday · 10 August</span><span class="tc-num">4</span></div>
         <div class="tc-list">
-          <div class="tc-row tc-row--cols is-on"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">10:00</span><span class="tc-row__title is-strong tc-col--name">Синк-ап по релизу</span><span class="tc-row__excerpt tc-col--detail">Переговорная 2</span><span class="tc-row__cell tc-col--status">4 attendees</span><span class="tc-row__cell tc-col--source">nextcloud · Личный</span></div>
-          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__excerpt tc-col--detail">—</span><span class="tc-row__cell tc-col--status">repeats weekly</span><span class="tc-row__cell tc-col--source">nextcloud · Работа</span></div>
-          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__excerpt tc-col--detail">—</span><span class="tc-row__cell tc-col--status">repeats weekly</span><span class="tc-row__cell tc-col--source">radicale · vps · Дежурства</span></div>
-          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">15:00</span><span class="tc-row__title tc-col--name">Созвон с подрядчиком</span><span class="tc-row__excerpt tc-col--detail">Jitsi</span><span class="tc-row__cell tc-col--status">tentative</span><span class="tc-row__cell tc-col--source">nextcloud · Работа</span></div>
+          <div class="tc-row tc-row--cols is-on"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">10:00</span><span class="tc-row__title is-strong tc-col--name">Синк-ап по релизу</span><span class="tc-row__excerpt tc-col--detail">Переговорная 2</span><span class="tc-row__cell tc-col--badges" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span><span class="tc-row__cell tc-col--source">nextcloud · Личный</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__excerpt tc-col--detail">—</span><span class="tc-row__cell tc-col--badges"><span class="tc-badge">repeats weekly</span></span><span class="tc-row__cell tc-col--source">nextcloud · Работа</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__excerpt tc-col--detail">—</span><span class="tc-row__cell tc-col--badges"><span class="tc-badge">repeats weekly</span></span><span class="tc-row__cell tc-col--source">radicale · vps · Дежурства</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">15:00</span><span class="tc-row__title tc-col--name">Созвон с подрядчиком</span><span class="tc-row__excerpt tc-col--detail">Jitsi</span><span class="tc-row__cell tc-col--badges"><span class="tc-badge is-alert">tentative</span></span><span class="tc-row__cell tc-col--source">nextcloud · Работа</span></div>
         </div>
         <div class="tc-list__group"><span class="tc-rubric">Tuesday · 11 August</span><span class="tc-num">2</span></div>
         <div class="tc-list">
-          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-row__cell tc-mono tc-col--date">09:30</span><span class="tc-row__title tc-col--name">Ревью архитектуры</span><span class="tc-row__excerpt tc-col--detail">Переговорная 1</span><span class="tc-row__cell tc-col--status">2 attendees</span><span class="tc-row__cell tc-col--source">radicale · vps · Проекты</span></div>
-          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">18:00</span><span class="tc-row__title tc-col--name">Забрать документы</span><span class="tc-row__excerpt tc-col--detail">МФЦ, Мясницкая 13</span><span class="tc-row__cell tc-col--status">—</span><span class="tc-row__cell tc-col--source">nextcloud · Личный</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-row__cell tc-mono tc-col--date">09:30</span><span class="tc-row__title tc-col--name">Ревью архитектуры</span><span class="tc-row__excerpt tc-col--detail">Переговорная 1</span><span class="tc-row__cell tc-col--badges"><span class="tc-badge">2 attendees</span></span><span class="tc-row__cell tc-col--source">radicale · vps · Проекты</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">18:00</span><span class="tc-row__title tc-col--name">Забрать документы</span><span class="tc-row__excerpt tc-col--detail">МФЦ, Мясницкая 13</span><span class="tc-row__cell tc-col--badges"></span><span class="tc-row__cell tc-col--source">nextcloud · Личный</span></div>
         </div>
       </div></div>
     </div>
   </div>
-  <figcaption><b>Лента в столбцах, которые выбрал человек</b> (задача 154): та же строка со столбцами, что у задач, заметок и контактов. Кадр рисует набор по умолчанию — Time, Title, Where, «Attendees and status», Source (решение владельца 13.10): время стоит первым, перед названием, и остаётся всегда, как само название; Where — растягивающийся столбец сразу после названия, прочерк, когда места нет; «Attendees and status» в столбцах — слова, а не значок: «4 attendees», «repeats weekly», «tentative», прочерк, когда сказать нечего; Source — последним. Группы по дням остаются. <b>Tags и Changed в ленте по умолчанию нет</b> (Р-53): это столбцы, которые включают, — тогда они встают перед Source, как в остальных списках: тег — первым и счётом остальных, Changed — датой и временем. На узкой ширине статус уходит с 620 px, Source — с 460; время, название и место остаются.</figcaption>
+  <figcaption><b>Лента в столбцах, которые выбрал человек</b> (задача 154): та же строка со столбцами, что у задач, заметок и контактов. Кадр рисует набор по умолчанию — Time, Title, Where, «Attendees and status», Source (решение владельца 13.10): время стоит первым, перед названием, и остаётся всегда, как само название; Where — растягивающийся столбец сразу после названия, прочерк, когда места нет; «Attendees and status» — плашки, как в ленте по умолчанию: другие столбцы их не убирают (решение владельца 14.10). Плашки идут по важности — статус, участники, повтор; стоят те, что умещаются целыми, две рядом — «4 attendees» и «repeats weekly»; пустая ячейка, когда сказать нечего; Source — последним. Группы по дням остаются. <b>Tags и Changed в ленте по умолчанию нет</b> (Р-53): это столбцы, которые включают, — тогда они встают перед Source, как в остальных списках: тег — первым и счётом остальных, Changed — датой и временем. На узкой ширине статус уходит с 620 px, Source — с 460; время, название и место остаются.</figcaption>
   </figure>
 <figure style="flex:1 1 100%">
   <div class="frame" data-frame="s-agenda-21">
@@ -4905,15 +4908,15 @@ Read  2 min ago · changed on server 3 days ago</div>
         </div>
         <div class="tc-list__group"><span class="tc-rubric">Monday · 10 August</span><span class="tc-num">4</span></div>
         <div class="tc-list">
-          <div class="tc-row tc-row--cols is-on"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">10:00</span><span class="tc-row__title is-strong tc-col--name">Синк-ап по релизу</span><span class="tc-row__cell tc-col--status">4 attendees</span><span class="tc-row__cell tc-row__tags tc-col--tags" title="release, team"><span class="tc-tag">release</span><span class="tc-row__more">+1</span></span><span class="tc-row__cell tc-mono tc-col--changed">10 Aug 08:41</span></div>
-          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__cell tc-col--status">repeats weekly</span><span class="tc-row__cell tc-row__tags tc-col--tags"><span class="tc-tag">дежурство</span></span><span class="tc-row__cell tc-mono tc-col--changed">3 Aug 12:10</span></div>
-          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__cell tc-col--status">repeats weekly</span><span class="tc-row__cell tc-row__tags tc-col--tags"></span><span class="tc-row__cell tc-mono tc-col--changed">3 Aug 12:10</span></div>
-          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">15:00</span><span class="tc-row__title tc-col--name">Созвон с подрядчиком</span><span class="tc-row__cell tc-col--status">tentative</span><span class="tc-row__cell tc-row__tags tc-col--tags"><span class="tc-tag">смета</span></span><span class="tc-row__cell tc-mono tc-col--changed">9 Aug 18:02</span></div>
+          <div class="tc-row tc-row--cols is-on"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">10:00</span><span class="tc-row__title is-strong tc-col--name">Синк-ап по релизу</span><span class="tc-row__cell tc-col--badges" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span><span class="tc-row__cell tc-row__tags tc-col--tags" title="release, team"><span class="tc-tag">release</span><span class="tc-row__more">+1</span></span><span class="tc-row__cell tc-mono tc-col--changed">10 Aug 08:41</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__cell tc-col--badges"><span class="tc-badge">repeats weekly</span></span><span class="tc-row__cell tc-row__tags tc-col--tags"><span class="tc-tag">дежурство</span></span><span class="tc-row__cell tc-mono tc-col--changed">3 Aug 12:10</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-row__cell tc-mono tc-col--date">all day</span><span class="tc-row__title tc-col--name">Дежурство: первая линия</span><span class="tc-row__cell tc-col--badges"><span class="tc-badge">repeats weekly</span></span><span class="tc-row__cell tc-row__tags tc-col--tags"></span><span class="tc-row__cell tc-mono tc-col--changed">3 Aug 12:10</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__cell tc-mono tc-col--date">15:00</span><span class="tc-row__title tc-col--name">Созвон с подрядчиком</span><span class="tc-row__cell tc-col--badges"><span class="tc-badge is-alert">tentative</span></span><span class="tc-row__cell tc-row__tags tc-col--tags"><span class="tc-tag">смета</span></span><span class="tc-row__cell tc-mono tc-col--changed">9 Aug 18:02</span></div>
         </div>
         <div class="tc-list__group"><span class="tc-rubric">Tuesday · 11 August</span><span class="tc-num">2</span></div>
         <div class="tc-list">
-          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-row__cell tc-mono tc-col--date">09:30</span><span class="tc-row__title tc-col--name">Ревью архитектуры</span><span class="tc-row__cell tc-col--status">2 attendees</span><span class="tc-row__cell tc-row__tags tc-col--tags"><span class="tc-tag">release</span></span><span class="tc-row__cell tc-mono tc-col--changed">7 Aug 16:55</span></div>
-          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">18:00</span><span class="tc-row__title tc-col--name">Забрать документы</span><span class="tc-row__cell tc-col--status">—</span><span class="tc-row__cell tc-row__tags tc-col--tags"></span><span class="tc-row__cell tc-mono tc-col--changed">11 Aug 09:03</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-row__cell tc-mono tc-col--date">09:30</span><span class="tc-row__title tc-col--name">Ревью архитектуры</span><span class="tc-row__cell tc-col--badges"><span class="tc-badge">2 attendees</span></span><span class="tc-row__cell tc-row__tags tc-col--tags"><span class="tc-tag">release</span></span><span class="tc-row__cell tc-mono tc-col--changed">7 Aug 16:55</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__cell tc-mono tc-col--date">18:00</span><span class="tc-row__title tc-col--name">Забрать документы</span><span class="tc-row__cell tc-col--badges"></span><span class="tc-row__cell tc-row__tags tc-col--tags"></span><span class="tc-row__cell tc-mono tc-col--changed">11 Aug 09:03</span></div>
         </div>
       </div></div>
     </div>
@@ -5109,7 +5112,7 @@ Read  2 min ago · changed on server 3 days ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
           </div>
         </div>
         <div class="tc-list__group"><span class="tc-rubric">Tuesday · 11 August</span><span class="tc-num">1</span></div>
@@ -7388,7 +7391,7 @@ Read  2 min ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -7613,7 +7616,7 @@ Read  2 min ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -7754,7 +7757,7 @@ Read  2 min ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -8214,7 +8217,7 @@ Read  2 min ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -9657,7 +9660,7 @@ Read  2 min ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -10725,7 +10728,7 @@ Read  2 min ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title is-strong">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -11895,7 +11898,7 @@ Read  2 min ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -12020,7 +12023,7 @@ Read  2 min ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -12875,7 +12878,7 @@ Read  2 min ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -13051,7 +13054,7 @@ Read  2 min ago</div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -20602,7 +20605,7 @@ SMTP  mail.home.example:465  TLS
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -21407,7 +21410,7 @@ dav: HTTP 503: the server is busy</div></div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -23029,7 +23032,7 @@ dav: HTTP 503: the server is busy</div></div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title is-strong">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
@@ -23965,7 +23968,7 @@ dav: HTTP 503: the server is busy</div></div>
             <span class="tc-mono tc-row__lead">10:00</span>
             <span class="tc-row__title is-strong">Синк-ап по релизу</span>
             <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
-            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">4 attendees</span></span>
+            <span class="tc-row__cell tc-row__caption" title="4 attendees, repeats weekly"><span class="tc-badge">4 attendees</span> <span class="tc-badge">repeats weekly</span></span>
             <span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">

@@ -79,7 +79,7 @@ const (
 //   - The days with events only (a day without one is not printed), each
 //     with its count, a row for each record: its calendar's mark, the time
 //     monospaced, the title (bold while open in the panel), the place (the
-//     dash where there is none), the first badge, where it lives; the row
+//     dash where there is none), the badges, where it lives; the row
 //     leads to the record.
 //   - Nothing to show (Empty): what, bold, why, and the button that helps.
 //   - The panel (Shell.Details), for the row opened with ?open=: the
@@ -315,9 +315,11 @@ func row(r view.AgendaRow, single bool) w.TimeRow {
 	if t.Detail == "" {
 		t.Detail = none
 	}
-	if len(r.Badges) > 0 {
-		b := bind.Badge(r.Badges[0])
-		t.Caption = &b
+	// Every badge, in the server's order: the row shows those that fit
+	// whole, two side by side (s-agenda-1: «4 attendees» «repeats weekly»;
+	// Typecase's note 63).
+	for _, b := range r.Badges {
+		t.Badges = append(t.Badges, bind.Badge(b))
 	}
 	if single {
 		t.Source, t.Single = "", true

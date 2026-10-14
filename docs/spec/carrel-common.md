@@ -1144,7 +1144,7 @@ type AgendaRow struct {
     // По важности: «Cancelled» отменённого вхождения, статус
     // «tentative» или «cancelled» (тревога), «linked ×2», «4 attendees» —
     // участники вместе с организатором, «repeats weekly» («repeats every 2
-    // weeks», «repeats»); строка кадра рисует первый (s-agenda-1)
+    // weeks», «repeats»); строка кадра рисует все — те, что умещаются целыми, рядом (s-agenda-1, записка Typecase 63)
     Badges    []Badge
     Sources   []Stamp
     // Столбцы, которые добавляет меню Columns агенды (s-agenda-18):
@@ -1239,7 +1239,7 @@ type NoteRow struct {
 | Список, меню | Столбцы (`ColumnItem.ID`) и поля строки |
 |---|---|
 | контакты (components-21, -42) | `name` — `Name`, `phone` — `Phone`, `email` — `Email`, `org` — `Org`, `birthday` — `Birthday`, `tags` — `Tags`, `changed` — `Changed`, `source` — `Stamp` |
-| агенда (s-agenda-18) | `time` — `Time`, `title` — `Summary` (оба стоят всегда), `where` — `Location`, `attendees` — первый из `Badges` («Attendees and status»), `source` — `Stamp`, `tags` — `Tags`, `changed` — `Changed` (`AgendaRow`) |
+| агенда (s-agenda-18) | `time` — `Time`, `title` — `Summary` (оба стоят всегда), `where` — `Location`, `attendees` — все `Badges` («Attendees and status», плашками; у события без них ячейка пуста), `source` — `Stamp`, `tags` — `Tags`, `changed` — `Changed` (`AgendaRow`) |
 | задачи (s-tasks-12, -13) | `title` — `Summary`, `tags` — `Tags`, `due` — `Due` (тревожным — только срок, `Overdue`), `complete` — `Percent` (`70%`), `source` — `Stamp`, `priority` — `Priority`, `status` — `Status`, `changed` — `Changed`; галка дела `Tick` стоит перед меткой в любом наборе |
 | заметки (s-notes-23, -24) | `title` — `Title`, `excerpt` — `Excerpt`, `tags` — `Tags`, `date` — `Date`, `source` — `Stamp`, `changed` — `Changed` |
 | файлы (s-files-20) | `name` — `Name`, `size` — `Size`, `type` — `Type`, `changed` — `Modified` (`FileRow`, C-6.7) |

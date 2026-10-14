@@ -17,6 +17,13 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.220 — 2026-10-14
+
+Typecase `f136966` (Typecase's note 63), client `v0.4.19`. Nothing changed in
+the running server: a row of the agenda already carries every badge
+(`AgendaRow.badges`); C-11 now says the row draws all that fit, not the
+first.
+
 ## v0.2.219 — 2026-10-14
 
 Typecase `14fa0c2` (Typecase's note 62), client `v0.4.18`.
