@@ -3920,6 +3920,7 @@ func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind stri
 	}
 	want := s.submittedValues(c, r)
 	quickTaskDay(c.spec.kind, want)
+	quickEventHour(c.spec.kind, want)
 	if r.URL.Query().Get("op") == "open" {
 		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now()}))
 		return
@@ -3951,6 +3952,26 @@ func sameDayEnds(kind view.Kind, vals formValues) {
 		}
 		prev = row
 	}
+}
+
+// quickEventHour gives an event of the quick sheet with a start and no end
+// an hour, as the full form gives a new event (Б31 of the audit of
+// 11.10.2026: it was written lasting no time). An end typed stays; a whole
+// day is a day.
+func quickEventHour(kind view.Kind, vals formValues) {
+	if kind != view.KindEvent {
+		return
+	}
+	start, end := triple(vals["start"]), triple(vals["end"])
+	if start[0] == "" || start[1] == "" || start[2] == "on" || end[0] != "" || end[1] != "" {
+		return
+	}
+	at, err := time.Parse("2006-01-02 15:04", start[0]+" "+start[1])
+	if err != nil {
+		return
+	}
+	next := at.Add(time.Hour)
+	vals["end"] = []string{next.Format("2006-01-02"), next.Format("15:04"), ""}
 }
 
 // quickTaskDay is the task's box the quick sheet does not draw (s-notes-10,

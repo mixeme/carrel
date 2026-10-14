@@ -102,8 +102,11 @@ func TestAnEventWithoutAnEndIsWrittenWithOne(t *testing.T) {
 		map[string]string{"summary": "Holiday", "start.date": "2031-03-11", "start.allday": "on", "end.date": "", "end.time": ""}),
 		"DTSTART;VALUE=DATE:20310311", "DTEND;VALUE=DATE:20310312")
 	quick := f.path("calendar") + "/new/quick"
-	sameEnd("timed, quick sheet", made("timed, quick sheet", quick,
-		map[string]string{"summary": "Call", "start.date": "2031-03-12", "start.time": "09:30"}))
+	// The quick sheet gives a timed event without an end an hour (Б31):
+	// it is written with an end all the same.
+	mustContain(t, made("timed, quick sheet", quick,
+		map[string]string{"summary": "Call", "start.date": "2031-03-12", "start.time": "09:30"}),
+		"DTSTART:20310312T093000Z", "DTEND:20310312T103000Z")
 	mustContain(t, made("all day, quick sheet", quick,
 		map[string]string{"summary": "Holiday", "start.date": "2031-03-12", "start.allday": "on"}),
 		"DTSTART;VALUE=DATE:20310312", "DTEND;VALUE=DATE:20310313")

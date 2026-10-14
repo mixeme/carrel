@@ -17,6 +17,15 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.224 — 2026-10-14
+
+### Changed
+
+- **An event made on the quick sheet with a time and no end lasts an hour**
+  (Б31 of the audit of 11.10.2026), as a new event of the full form does. It
+  used to be written lasting no time. An end typed stays; a whole day stays
+  a day.
+
 ## v0.2.223 — 2026-10-14
 
 ### Changed

@@ -55,8 +55,12 @@ func TestAnEndTheServerKeepsAsNoEndIsNotALoss(t *testing.T) {
 
 	noEnd("timed, full form", made("timed, full form", f.path("calendar")+"/new",
 		map[string]string{"summary": "Call", "start.date": "2031-03-11", "start.time": "09:30", "end.date": "", "end.time": ""}))
-	noEnd("timed, quick sheet", made("timed, quick sheet", f.path("calendar")+"/new/quick",
-		map[string]string{"summary": "Call", "start.date": "2031-03-12", "start.time": "09:30"}))
+	// The quick sheet gives an event without an end an hour, as the full
+	// form does (Б31): it has an end to keep.
+	if got := made("timed, quick sheet", f.path("calendar")+"/new/quick",
+		map[string]string{"summary": "Call", "start.date": "2031-03-12", "start.time": "09:30"}); lineOf(got, "DTEND") == "" {
+		t.Errorf("timed, quick sheet: no end of an hour\n%s", got)
+	}
 
 	rec := f.path("calendar") + "/meet"
 	form := formFields(decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
