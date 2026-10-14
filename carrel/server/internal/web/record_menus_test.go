@@ -222,11 +222,13 @@ func TestCalendarMenusAreTheFrames(t *testing.T) {
 
 	note := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1", f.sess)))
 	sameMenu(t, "note page", note.Meta.Menu, "s-notes-14")
-	// Print over the text since the client's scan of the notes (НГ2).
-	if got := ids(note.Doc.Bar); !equalStrings(got, []string{"record.edit", "note.export", "record.print"}) {
+	// Print over the text since the client's scan of the notes (НГ2); New
+	// task before it, every kind's (Р15 of scans/kinds-parity.md) — the
+	// frame does not draw it yet, Typecase's task 168.
+	if got := ids(note.Doc.Bar); !equalStrings(got, []string{"record.edit", "note.export", "note.task", "record.print"}) {
 		t.Errorf("note bar = %v", got)
 	}
-	drawn(t, "note bar", note.Doc.Bar, "s-notes-2")
+	drawn(t, "note bar", note.Doc.Bar, "s-notes-2", "note.task")
 	if got := ids(note.Meta.Actions); !equalStrings(got, []string{"attach.add", "record.delete"}) {
 		t.Errorf("note column = %v", got)
 	}

@@ -27,3 +27,14 @@ func TestDuplicateTasksAreAskedTheirPlace(t *testing.T) {
 		t.Errorf("choices = %v, want the place asked", props)
 	}
 }
+
+// Р15 of scans/kinds-parity.md: New task related to the record is every
+// kind's — an event and a person's timeline had it, a note did not.
+func TestANoteHasNewTask(t *testing.T) {
+	f := calendarFixture(t, nil, "n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nSUMMARY:Plan\nEND:VJOURNAL"))
+	page := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1", f.sess)))
+	task := actionByID(page.Doc.Bar, "note.task")
+	if task == nil || !strings.Contains(task.Href, "/new/quick") || !strings.Contains(task.Href, "related=n1") {
+		t.Errorf("New task = %+v", task)
+	}
+}

@@ -17,6 +17,15 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.231 — 2026-10-14
+
+### Changed
+
+- **New task from a note and from a contact's card** (Р15 of
+  docs/plan/scans/kinds-parity.md): the quick sheet of a task related to the
+  record, as an event and a person's timeline have it. The frames do not
+  draw it yet (Typecase's task 168).
+
 ## v0.2.230 — 2026-10-14
 
 ### Changed

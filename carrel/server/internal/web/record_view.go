@@ -468,7 +468,7 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 		edit.Icon = "i-pencil"
 	}
 	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
-	page.Actions, page.Menu = shown(edit, send, print, ops.del), ops.menu
+	page.Actions, page.Menu = shown(edit, send, s.newTaskFor(c, uid, "contact.task"), print, ops.del), ops.menu
 	return page
 }
 
@@ -567,18 +567,7 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	page.Source.Path, page.Source.Compared = text(obj.Path), s.eventCompared(c, uid, obj)
 	page.Related = s.relatedRows(c, obj)
 	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
-	var task *view.Action
-	// New task (s-agenda-2): the quick sheet of a task related to the
-	// event — in this calendar when it holds tasks, else in the task list
-	// a new task goes to (the sheet lets another be chosen).
-	tasks, ok := c.origin(), c.feed == nil && !c.col.ReadOnly && c.col.Has(view.KindTask)
-	if !ok && c.feed == nil && !c.col.ReadOnly {
-		tasks, ok = firstWritable(s.catalogOf(c.sess), view.KindTask)
-	}
-	if ok {
-		task = &view.Action{ID: "event.task", Label: "New task", Icon: "i-task", Method: "GET", Enabled: true,
-			Href: s.postQuery(tasks.listPath(segmentOf(view.KindTask))+"/new/quick", url.Values{"related": {uid}})}
-	}
+	task := s.newTaskFor(c, uid, "event.task")
 	// Edit, New task and Print in the head, Attach in its block (by its
 	// name, attach.add), the deletion at the foot; the rest is the «⋯»
 	// (s-agenda-2, s-agenda-5). Print is the card with print=1 (U-10).
@@ -589,6 +578,23 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
 	page.Actions, page.Menu = shown(edit, s.attachOf(c, uid, obj.ETag), task, print, ops.del), ops.menu
 	return page
+}
+
+// newTaskFor is New task of a record (s-agenda-2): the quick sheet of a task
+// related to it — in its collection when that holds tasks, else in the task
+// list a new task goes to (the sheet lets another be chosen). Every kind has
+// it (Р15 of scans/kinds-parity.md: an event and a person's timeline had it,
+// a note and a card did not). nil — nowhere to write one.
+func (s *Server) newTaskFor(c *collectionCtx, uid, id string) *view.Action {
+	tasks, ok := c.origin(), c.feed == nil && !c.col.ReadOnly && c.col.Has(view.KindTask)
+	if !ok && c.feed == nil && !c.col.ReadOnly {
+		tasks, ok = firstWritable(s.catalogOf(c.sess), view.KindTask)
+	}
+	if !ok {
+		return nil
+	}
+	return &view.Action{ID: id, Label: "New task", Icon: "i-task", Method: "GET", Enabled: true,
+		Href: s.postQuery(tasks.listPath(segmentOf(view.KindTask))+"/new/quick", url.Values{"related": {uid}})}
 }
 
 // eventHead are the first fields of an event, in the order of its card
@@ -699,6 +705,7 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	}
 	page.Doc.Bar = shown(edit, &view.Action{ID: "note.export", Label: "Export Markdown", Method: "GET", Enabled: true,
 		Href: s.postQuery(c.listPath()+"/export", url.Values{"uid": {uid}})},
+		s.newTaskFor(c, uid, "note.task"),
 		&view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true})
 	page.Meta.Actions = shown(s.attachOf(c, uid, obj.ETag), ops.del)
 	page.Meta.Menu = menuWithout(ops.menu, "record.export")

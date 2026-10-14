@@ -64,12 +64,17 @@ func TestContactCardIsTheFrames(t *testing.T) {
 		}
 	}
 	for _, a := range page.Actions {
-		if !a.Danger {
+		// New task is every kind's (Р15 of scans/kinds-parity.md); the
+		// frame does not draw it yet — Typecase's task 168.
+		if !a.Danger && a.ID != "contact.task" {
 			got = append(got, string(a.Label)+" ["+a.Icon+"]")
 		}
 	}
 	if strings.Join(got, " | ") != strings.Join(want, " | ") {
 		t.Errorf("head = %q, the frame %q", got, want)
+	}
+	if actionByID(page.Actions, "contact.task") == nil {
+		t.Error("the card has no New task")
 	}
 	if p := actionByID(page.Actions, "record.print"); p == nil || p.Href != card+"?print=1" {
 		t.Errorf("Print = %+v, want the card with print=1", p)

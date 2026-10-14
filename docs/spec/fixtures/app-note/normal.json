@@ -20,6 +20,15 @@
       },
       {
         "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela/new/quick?related=5c81-77aa-0d64",
+        "icon": "i-task",
+        "id": "note.task",
+        "label": "New task",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?print=1",
         "icon": "i-print",
         "id": "record.print",
