@@ -197,6 +197,13 @@
         "id": "sort.title",
         "label": "Title",
         "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes?sort=changed",
+        "id": "sort.changed",
+        "label": "Recently changed",
+        "method": "GET"
       }
     ],
     "selected": 0,

@@ -827,8 +827,11 @@ var editFields = map[view.Kind][]editField{
 var quickFieldNames = map[view.Kind][]string{
 	view.KindContact: {"fn", "tel", "email"},
 	view.KindEvent:   {"summary", "start", "end", "reminder"},
-	view.KindTask:    {"summary", "due"},
-	view.KindNote:    {"description"},
+	// A task is reminded as an event is (Р9 of scans/kinds-parity.md: the
+	// field carried the quick sheet's label and the sheet did not hold it;
+	// s-notes-10 draws no Remind yet — Typecase's task 167).
+	view.KindTask: {"summary", "due", "reminder"},
+	view.KindNote: {"description"},
 }
 
 // quickNotes are the lines under the quick sheet's fields: what it does not

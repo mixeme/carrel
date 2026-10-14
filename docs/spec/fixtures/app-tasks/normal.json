@@ -177,6 +177,13 @@
       },
       {
         "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela?sort=title",
+        "id": "sort.title",
+        "label": "Title",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
         "href": "/app/tasks/a-nc-home/dela?sort=changed",
         "id": "sort.changed",
         "label": "Recently changed",

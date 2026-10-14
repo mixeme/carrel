@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.230 — 2026-10-14
+
+### Changed
+
+- **Kinds are equal — the first gaps closed** (the owner's rule of
+  12.10.2026; docs/plan/scans/kinds-parity.md): tasks sort by «Title» and
+  their quick sheet has «Remind», as the event's has; notes sort by
+  «Recently changed», one list; duplicate tasks are asked which place
+  stays, as events are.
+
+### Not done
+
+- The frames draw none of these yet (Typecase's task 167).
+
 ## v0.2.229 — 2026-10-14
 
 ### Changed

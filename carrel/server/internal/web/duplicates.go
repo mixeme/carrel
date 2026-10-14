@@ -871,8 +871,10 @@ func linkedState(it listed) view.RecordState {
 var choiceProps = map[view.Kind][]string{
 	view.KindContact: {"FN", "ORG", "PHOTO"},
 	view.KindEvent:   {"SUMMARY", "LOCATION"},
-	view.KindTask:    {"SUMMARY"},
-	view.KindNote:    {"SUMMARY"},
+	// A task holds a place as an event does, and is asked about it the same
+	// way (Р21 of scans/kinds-parity.md).
+	view.KindTask: {"SUMMARY", "LOCATION"},
+	view.KindNote: {"SUMMARY"},
 }
 
 // choiceFields are the values of choiceProps as the record holds them; a

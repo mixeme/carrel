@@ -461,8 +461,10 @@ func TestQuickTaskSheetIsTheFrame(t *testing.T) {
 	}
 	quick := c.path("tasks") + "/new/quick"
 	tasks := decode[view.NewSheet](t, c.h.do(get(quick, c.sess)))
-	if got, want := sheetFields(tasks.Form), frameSheetFields(t, "s-notes-10"); !equalStrings(got, want) {
-		t.Errorf("task quick sheet = %q, want (s-notes-10) %q", got, want)
+	// The frame's rows and «Remind», as the event's sheet holds it (Р9 of
+	// scans/kinds-parity.md; the frame — Typecase's task 167).
+	if got, want := sheetFields(tasks.Form), append(frameSheetFields(t, "s-notes-10"), "Remind []"); !equalStrings(got, want) {
+		t.Errorf("task quick sheet = %q, want (s-notes-10 and Remind) %q", got, want)
 	}
 	saved := func(set map[string]string) string {
 		t.Helper()

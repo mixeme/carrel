@@ -842,10 +842,13 @@ type listSort struct{ id, label, value, column string }
 
 var listSorts = map[view.Kind][]listSort{
 	view.KindContact: {{"sort.az", "A–Z", "az", "name"}, {"sort.changed", "Recently changed", "changed", "changed"}},
+	// Every kind sorts by title and by when it changed, as its columns show
+	// both (the rule of 12.10.2026 «kinds are equal»; Р11, Р12 of
+	// scans/kinds-parity.md).
 	view.KindNote: {{"sort.newest", "Newest", "newest", "date"}, {"sort.oldest", "Oldest", "oldest", "date"},
-		{"sort.title", "Title", "title", "title"}},
+		{"sort.title", "Title", "title", "title"}, {"sort.changed", "Recently changed", "changed", "changed"}},
 	view.KindTask: {{"sort.due", "By due", "due", "due"}, {"sort.priority", "By priority", "priority", "priority"},
-		{"sort.changed", "Recently changed", "changed", "changed"}},
+		{"sort.title", "Title", "title", "title"}, {"sort.changed", "Recently changed", "changed", "changed"}},
 	view.KindFile: {{"files.sort.name", "Name", "name", "name"}, {"files.sort.size", "Size", "size", "size"},
 		{"files.sort.changed", "Changed", "changed", "changed"}},
 }
@@ -1684,6 +1687,10 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 			if !a.changed.Equal(b.changed) {
 				return a.changed.After(b.changed)
 			}
+		case "title":
+			if x, y := strings.ToLower(string(a.row.Summary)), strings.ToLower(string(b.row.Summary)); x != y {
+				return x < y
+			}
 		default:
 			if a.due.IsZero() != b.due.IsZero() {
 				return !a.due.IsZero()
@@ -1790,9 +1797,10 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 // filtered to each.
 func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark bool, filter tagFilter, by string) ([]view.NoteGroup, int, []unreadable) {
 	type item struct {
-		row   view.NoteRow
-		at    time.Time
-		order string
+		row     view.NoteRow
+		at      time.Time
+		changed time.Time
+		order   string
 	}
 	rows := make([]item, 0, len(items))
 	for _, it := range items {
@@ -1820,13 +1828,17 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		if changed := changedAt(o, tf.tz); !changed.IsZero() {
 			row.Changed = text(tf.shortStamp(changed))
 		}
-		rows = append(rows, item{row: row, at: at, order: it.from.listPath(segment)})
+		rows = append(rows, item{row: row, at: at, changed: changedAt(o, tf.tz), order: it.from.listPath(segment)})
 	}
 	sort.SliceStable(rows, func(i, j int) bool {
 		switch {
 		case by == "title":
 			if x, y := strings.ToLower(string(rows[i].row.Title)), strings.ToLower(string(rows[j].row.Title)); x != y {
 				return x < y
+			}
+		case by == "changed":
+			if !rows[i].changed.Equal(rows[j].changed) {
+				return rows[i].changed.After(rows[j].changed)
 			}
 		case !rows[i].at.Equal(rows[j].at):
 			if by == "oldest" {
@@ -1840,11 +1852,12 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		return rows[i].order < rows[j].order
 	})
 	// Under the month of their date, newest or oldest first (s-notes-1:
-	// «August 2026» and its count); without a date last; by title one list.
+	// «August 2026» and its count); without a date last; by title and by
+	// change one list.
 	var groups []view.NoteGroup
 	for _, it := range rows {
 		rubric := ""
-		if by != "title" {
+		if by != "title" && by != "changed" {
 			rubric = "No date"
 			if !it.at.IsZero() {
 				rubric = it.at.In(tf.tz).Format("January 2006")
