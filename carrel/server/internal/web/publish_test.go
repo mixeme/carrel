@@ -115,11 +115,11 @@ func TestPublishedBookIsReadLive(t *testing.T) {
 	}
 }
 
-// One record, three kinds: an event with its fields and body, a note as a
-// document, a contact with its fields.
+// One record, three kinds: an event with its fields and body — the place
+// ticked (Б39) —, a note as a document, a contact with its fields.
 func TestPublishedRecords(t *testing.T) {
 	f := publishFixture(t)
-	ev := publicPage(t, f, publishLink(t, f, f.publishHref("calendar", searchWork, "e1"), false))
+	ev := publicPage(t, f, publishWith(t, f, f.publishHref("calendar", searchWork, "e1"), "title", "location"))
 	if ev.Title != "Standup" || ev.Kind != view.KindEvent {
 		t.Fatalf("event = %+v", ev)
 	}

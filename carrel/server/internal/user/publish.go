@@ -28,7 +28,11 @@ type PublishTarget struct {
 	NoDownload       bool
 	HideDescriptions bool
 	// Shows is what of a contact the visitor sees beside its name and
-	// organisation: "phones", "emails", "photo", "note" (S-25.1).
+	// organisation: "phones", "emails", "photo", "note" (S-25.1); of a
+	// calendar, an event, a task list and a task — "time", always, then
+	// "title", "location", "description", "attendees", "attachments",
+	// "tags" (Б39). A link of a calendar kind without "time" was made before
+	// that rule and shows what it did then.
 	Shows []string
 	// HideOrganisation leaves the name alone: the organisation and the
 	// title of a contact are not shown.

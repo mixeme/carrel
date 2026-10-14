@@ -108,8 +108,9 @@ func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, titl
 // the sheet says nothing of it before the link exists. A whole calendar is
 // also asked how much of it the link shows — a date range, the days only
 // then, or the whole calendar — whether its .ics may be downloaded and
-// subscribed to, and whether the text of its events goes with the times,
-// off unless ticked (s-publish-2).
+// subscribed to (s-publish-2). A calendar, an event, a task list and a task
+// are asked what the visitor sees — the time always, the title unless taken
+// off, the rest when ticked (Б39) —, as a contact is (s-publish-3).
 func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title string, where view.Stamp, q url.Values, cancel, how string) view.PublishSheet {
 	tf := s.timeFor(sess)
 	create := view.Action{ID: "publish.create", Label: "Create link", Href: s.postQuery("/app/publish", q), Method: "POST", Primary: true, Enabled: true}
@@ -149,8 +150,7 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 	}})
 	if kind == view.KindEvent && q.Get("uid") == "" {
 		rows = append(rows,
-			view.FormRow{Name: "download", Label: "Allow .ics download and subscription", Kind: view.InputCheck, Value: "on"},
-			view.FormRow{Name: "descriptions", Label: "Show event descriptions", Kind: view.InputCheck})
+			view.FormRow{Name: "download", Label: "Allow .ics download and subscription", Kind: view.InputCheck, Value: "on"})
 	}
 	sheet.Form = s.plainForm("/app/publish", "POST", rows...)
 	if kind == view.KindContact {
@@ -167,6 +167,9 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 			sees.Rows = append(sees.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck})
 		}
 		sheet.Form.Sets = append([]view.FieldSet{sees}, sheet.Form.Sets...)
+	}
+	if isCalendarKind(kind) {
+		sheet.Form.Sets = append([]view.FieldSet{calendarSees()}, sheet.Form.Sets...)
 	}
 	sheet.Form.Action = s.postQuery("/app/publish", q)
 	sheet.Form.Actions = sheet.Actions
@@ -348,7 +351,17 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		}
 		if r.FormValue("how") != "" {
 			target.NoDownload = checkbox(r, "download") != "on"
-			target.HideDescriptions = checkbox(r, "descriptions") != "on"
+		}
+	}
+	if isCalendarKind(c.spec.kind) {
+		// What the visitor sees (Б39): the time always, and what is
+		// ticked. A post without the sheet's form — a plain POST — gives
+		// what the sheet ticks before anyone does: the time and the title.
+		target.Shows = []string{calendarSeesTime}
+		for _, f := range calendarVisitorFields {
+			if r.Form.Has("lives") && checkbox(r, f.name) == "on" || !r.Form.Has("lives") && f.on {
+				target.Shows = append(target.Shows, f.name)
+			}
 		}
 	}
 	if c.spec.kind == view.KindContact {
@@ -584,6 +597,15 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 			if c.card != nil {
 				obj = visitorCard(obj, link.Target)
 			}
+			if isCalendarKind(c.spec.kind) {
+				obj = visitorRecord(obj, link.Target)
+			}
+			if obj == nil {
+				// Built of what the link allows it could not be: nothing
+				// of it goes out.
+				page.Notices, page.Actions = []view.Notice{publicTrouble()}, nil
+				break
+			}
 			s.publicRecord(c, obj, &page)
 		}
 		s.writePage(w, r, http.StatusOK, page)
@@ -673,6 +695,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 		if err != nil {
 			return err
 		}
+		objs = visitorRecords(objs, link.Target)
 		page.Days, _, _ = s.agendaDays(tf, kindedAll(c.listed(objs), view.KindEvent), from, to, c.spec.segment, false, nil)
 		for i := range page.Days {
 			for j := range page.Days[i].Rows {
@@ -700,6 +723,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 		if err != nil {
 			return err
 		}
+		objs = visitorRecords(objs, link.Target)
 		for _, o := range objs {
 			row := view.TaskRow{UID: cal.UID(o), Done: taskDone(o), Summary: text(recordTitle(view.KindTask, o)), Percent: percentOf(o), State: view.RecordOK}
 			if due, err := cal.DueOf(o, tf.tz); err == nil && !due.Start.IsZero() {
@@ -777,8 +801,9 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 	h.Set("X-Content-Type-Options", "nosniff")
 	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
 	w.WriteHeader(http.StatusOK)
-	if link.Target.HideDescriptions {
-		objs = withoutDescriptions(objs)
+	if isCalendarKind(c.spec.kind) {
+		// The file obeys what the page does (Б39).
+		objs = visitorRecords(objs, link.Target)
 	}
 	if c.card != nil {
 		// The file obeys the ticks the page does, or it would go round them.

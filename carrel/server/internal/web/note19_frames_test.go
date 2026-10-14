@@ -584,7 +584,9 @@ func TestPublicRecordHeadIsTheFrame(t *testing.T) {
 		t.Fatalf("s-publish-16 = %q: read the frame again", sub)
 	}
 	f := publishFixture(t)
-	page := publicPage(t, f, publishLink(t, f, f.publishHref("calendar", searchWork, "e1"), false))
+	// The frame's link shows the place: it was ticked (Б39, the owner's
+	// decision of 12.10.2026 — the guest sees what is ticked).
+	page := publicPage(t, f, publishWith(t, f, f.publishHref("calendar", searchWork, "e1"), "title", "location"))
 	if saidRuns(page.Lede) != "Monday, 10 August 2026, 09:00 · Room 4" || !page.ReadOnly {
 		t.Errorf("lede = %q, read-only %v; want «Monday, 10 August 2026, 09:00 · Room 4» as the frame writes it", page.Lede, page.ReadOnly)
 	}

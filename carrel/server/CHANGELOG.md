@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.221 — 2026-10-14
+
+### Changed
+
+- **A published calendar, event, task list and task show the visitor the
+  time and only what is ticked** (Б39 of the audit of 11.10.2026; the owner's
+  decision of 12.10.2026). The publish sheet of these kinds has «What the
+  visitor sees»: Time, always; Title, ticked; Location, Description,
+  Attendees, Attachments, Tags, not. The page, the rows of a calendar and of
+  a list, and the `.ics` are made of a record built of what is allowed: a
+  reminder, the class of access, a property Carrel does not know never go.
+  Without the title the visitor reads «Busy». A plain POST gives the time
+  and the title. «Show event descriptions» became «Description».
+- A link made before is what it was: everything, the descriptions taken out
+  if they were.
+
+### Not done
+
+- No frame draws the ticks (Typecase's task 163); «Busy» and «Always shown.»
+  are the developer's words.
+- The rows of a published calendar still carry «linked ×2».
+
 ## v0.2.220 — 2026-10-14
 
 Typecase `f136966` (Typecase's note 63), client `v0.4.19`. Nothing changed in

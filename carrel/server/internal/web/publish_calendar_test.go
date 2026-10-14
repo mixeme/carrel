@@ -10,21 +10,22 @@ import (
 )
 
 // review Р-12 (s-publish-2): a published calendar is asked how much of it
-// the link shows, whether its .ics may be downloaded and subscribed to, and
-// whether the text of its events goes with the times.
+// the link shows and whether its .ics may be downloaded and subscribed to;
+// what of its events the visitor sees is the ticks of Б39 (the text of the
+// events among them: «Show event descriptions» became «Description»).
 func TestPublishCalendarOptions(t *testing.T) {
 	f := publishFixture(t)
 	href := f.publishHref("calendar", searchWork, "")
 
 	sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
-	for _, name := range []string{"how", "from", "to", "lives", "download", "descriptions"} {
+	for _, name := range []string{"how", "from", "to", "lives", "download", "time", "title", "description"} {
 		if rowNamed(t, sheet.Form, name).Name != name {
 			t.Fatalf("the sheet has no %q: %+v", name, sheet.Form)
 		}
 	}
 	// A date range is where it opens; the file is allowed and the text of the
 	// events is not, unless ticked (owner's decision 24.09.2026).
-	if rowNamed(t, sheet.Form, "how").Value != "range" || rowNamed(t, sheet.Form, "download").Value != "on" || rowNamed(t, sheet.Form, "descriptions").Value != "" {
+	if rowNamed(t, sheet.Form, "how").Value != "range" || rowNamed(t, sheet.Form, "download").Value != "on" || rowNamed(t, sheet.Form, "description").Value != "" {
 		t.Errorf("the sheet does not start as drawn: %+v", sheet.Form)
 	}
 	// The whole calendar asks for no days.
