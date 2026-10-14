@@ -33,6 +33,9 @@ type linkedCard struct {
 	group  sealed.LinkedGroup
 	self   sealed.RecordRef
 	others []linkedMember
+	// apart is the notice of a group found come apart as the card opened:
+	// every other member gone (Б16). nil — it did not come apart now.
+	apart *view.Notice
 }
 
 // linkedOf reads the other members of the group holding the opened record.
@@ -67,8 +70,31 @@ func (s *Server) linkedOf(ctx context.Context, c *collectionCtx, uid string) (li
 	}
 	if len(gone) > 0 {
 		s.forgetMembers(c.sess, "", gone)
+		if len(lc.others) == 0 {
+			lc.apart = apartNotice(s.catalogOf(c.sess), gone)
+		}
 	}
 	return lc, len(lc.others) > 0
+}
+
+// apartNotice says that a record's linked group came apart because its
+// other members are gone (Б16 of the audit of 11.10.2026: it used to come
+// apart without a word): where they were, and that the record stands on its
+// own now.
+func apartNotice(blob sealed.Blob, gone []sealed.RecordRef) *view.Notice {
+	var where []string
+	for _, ref := range gone {
+		conn, okConn := blob.Connection(ref.AccountID)
+		col, okCol := blob.Collection(ref.AccountID, ref.Col)
+		if okConn && okCol {
+			where = append(where, connLabel(conn)+" · "+collectionLabel(col))
+		}
+	}
+	body := "Its other copy is no longer where it was linked; this record stands on its own."
+	if len(where) > 0 {
+		body = "Its other copy in " + strings.Join(where, ", ") + " is no longer there; this record stands on its own."
+	}
+	return &view.Notice{Role: view.NoticeInfo, Title: "No longer linked", Body: text(body)}
 }
 
 // memberRows are the rows under the card: every other member with where it
@@ -207,6 +233,9 @@ func (s *Server) otherPages(lc linkedCard) []any {
 // others.
 func (s *Server) linkedContact(ctx context.Context, c *collectionCtx, uid string, obj *model.Object, page *view.ContactPage) {
 	lc, ok := s.linkedOf(ctx, c, uid)
+	if lc.apart != nil {
+		page.Shell.Notices = append(page.Shell.Notices, *lc.apart)
+	}
 	if !ok {
 		return
 	}
@@ -225,10 +254,10 @@ func (s *Server) linkedContact(ctx context.Context, c *collectionCtx, uid string
 // differently (fields), whether another copy holds other tags than a note's
 // own (tags) — a note's tags are its column's, not a field —, the rows of
 // the others.
-func (s *Server) linkedCalendar(ctx context.Context, c *collectionCtx, uid string, obj *model.Object) (fields func(own []view.Field) []view.Field, tags func(own []view.Tag) bool, rows []view.Field, ok bool) {
+func (s *Server) linkedCalendar(ctx context.Context, c *collectionCtx, uid string, obj *model.Object) (fields func(own []view.Field) []view.Field, tags func(own []view.Tag) bool, rows []view.Field, apart *view.Notice, ok bool) {
 	lc, ok := s.linkedOf(ctx, c, uid)
 	if !ok {
-		return nil, nil, nil, false
+		return nil, nil, nil, lc.apart, false
 	}
 	var others [][]view.Field
 	var held []string
@@ -248,7 +277,7 @@ func (s *Server) linkedCalendar(ctx context.Context, c *collectionCtx, uid strin
 	tags = func(own []view.Tag) bool {
 		return len(own) > 0 && slices.ContainsFunc(held, func(h string) bool { return h != tagSet(own) })
 	}
-	return fields, tags, s.memberRows(lc, obj, differs(calendarDiffers)), true
+	return fields, tags, s.memberRows(lc, obj, differs(calendarDiffers)), nil, true
 }
 
 // tagSet is the labels of the tags, sorted, for comparing copies.

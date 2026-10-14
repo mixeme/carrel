@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.226 — 2026-10-14
+
+### Changed
+
+- **A linked group that came apart says so** (Б16 of the audit of
+  11.10.2026). When the other copies of a linked record are gone —
+  deleted, moved, their collection removed —, the card of the one left says
+  «No longer linked» and where the other was, once; the screen of
+  duplicates says how many groups came apart. A collection that could not
+  be read loses no members, as before.
+
+### Not done
+
+- The words are the developer's; the timeline of a person says nothing of
+  it.
+
 ## v0.2.225 — 2026-10-14
 
 ### Changed

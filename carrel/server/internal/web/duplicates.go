@@ -44,6 +44,9 @@ type dupState struct {
 	compared  int
 	threshold int
 	found     []dupes.Group
+	// apart is how many linked groups this read found come apart, their
+	// other members gone (Б16): the screen says so.
+	apart int
 }
 
 // dupThreshold is the person's number of points, else the instance's.
@@ -133,8 +136,10 @@ func (s *Server) loadedRecords(sess *session.Session, blob sealed.Blob) ([]loade
 func (s *Server) readDuplicates(sess *session.Session, prune bool) dupState {
 	blob := s.catalogOf(sess)
 	loaded, present := s.loadedRecords(sess, blob)
+	apart := 0
 	if prune {
 		if kept, changed := dupes.Prune(blob.Duplicates.Linked, present); changed {
+			apart = len(blob.Duplicates.Linked) - len(kept)
 			key, _ := sess.DataKey()
 			err := s.users.EditDuplicates(sess.AccountID(), key, "", "", func(d *sealed.Duplicates) error {
 				d.Linked, _ = dupes.Prune(d.Linked, present)
@@ -145,7 +150,7 @@ func (s *Server) readDuplicates(sess *session.Session, prune bool) dupState {
 			}
 		}
 	}
-	st := dupState{blob: blob, records: map[sealed.RecordRef]loadedRecord{}, threshold: s.dupThreshold(blob)}
+	st := dupState{blob: blob, records: map[sealed.RecordRef]loadedRecord{}, threshold: s.dupThreshold(blob), apart: apart}
 	recs := make([]dupes.Record, 0, len(loaded))
 	for _, l := range loaded {
 		if _, seen := st.records[l.rec.Ref]; seen {
@@ -509,6 +514,16 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 		page.Threshold.Note = text(fmt.Sprintf("Your own number, kept with your decisions. The instance uses %d.", s.cfg.DuplicatesThreshold))
 	} else {
 		page.Threshold.Note = "The instance's number. Set your own to change what is offered."
+	}
+	if st.apart > 0 {
+		// Groups whose other members are gone came apart as the screen was
+		// read (Б16): said, not left to be noticed.
+		title := strconv.Itoa(st.apart) + " linked groups came apart"
+		if st.apart == 1 {
+			title = "1 linked group came apart"
+		}
+		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: text(title),
+			Body: "Their other records are no longer where they were linked; each record that is left stands on its own."})
 	}
 	page.Notices = append(page.Notices, view.Notice{
 		Role: view.NoticeAccent,

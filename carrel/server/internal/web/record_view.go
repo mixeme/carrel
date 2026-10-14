@@ -187,17 +187,23 @@ func (s *Server) withLinked(ctx context.Context, c *collectionCtx, uid string, o
 		s.linkedContact(ctx, c, uid, obj, &p)
 		return p
 	case view.EventPage:
-		if fields, _, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
+		fields, _, rows, apart, ok := s.linkedCalendar(ctx, c, uid, obj)
+		if ok {
 			p.Fields, p.Linked = fields(p.Fields), rows
 		}
+		p.Shell.Notices = withNotice(p.Shell.Notices, apart)
 		return p
 	case view.TaskPage:
-		if fields, _, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
+		fields, _, rows, apart, ok := s.linkedCalendar(ctx, c, uid, obj)
+		if ok {
 			p.Fields, p.Linked = fields(p.Fields), rows
 		}
+		p.Shell.Notices = withNotice(p.Shell.Notices, apart)
 		return p
 	case view.NotePage:
-		if _, tags, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
+		_, tags, rows, apart, ok := s.linkedCalendar(ctx, c, uid, obj)
+		p.Shell.Notices = withNotice(p.Shell.Notices, apart)
+		if ok {
 			p.Meta.Linked = rows
 			if tags(p.Meta.Tags) {
 				badge := linkedMark
@@ -207,6 +213,14 @@ func (s *Server) withLinked(ctx context.Context, c *collectionCtx, uid string, o
 		return p
 	}
 	return page
+}
+
+// withNotice is notices with n after them, when there is one.
+func withNotice(notices []view.Notice, n *view.Notice) []view.Notice {
+	if n == nil {
+		return notices
+	}
+	return append(notices, *n)
 }
 
 // recordPage builds the reading page of the collection's kind. A nil obj is
