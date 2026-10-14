@@ -367,7 +367,7 @@ func frameFindings(l lib, all []screens.Screen) []string {
 			}
 			if w, ok := waits(scr, key(path)); ok {
 				out = append(out, classFindings(l, at+" on "+fx, root.Render())...)
-				if l.shape.Check(frame, guard.Drawn(root.Render())) == nil {
+				if l.shape.Check(frame, root.Render()) == nil {
 					out = append(out, fmt.Sprintf("%s on %s: waits (U-5.5 #%d) and matches its frame", at, fx, w.Row))
 				}
 				continue
@@ -384,11 +384,10 @@ func frameFindings(l lib, all []screens.Screen) []string {
 }
 
 // htmlFindings holds a screen's printed HTML against its frame: the frame's
-// make-up (shape.Check) of what the screen shows (guard.Drawn) and no class
-// Typecase's CSS does not have.
+// make-up (shape.Check) and no class Typecase's CSS does not have.
 func htmlFindings(l lib, frame, at, html string) []string {
 	var out []string
-	if err := l.shape.Check(frame, guard.Drawn(html)); err != nil {
+	if err := l.shape.Check(frame, html); err != nil {
 		out = append(out, fmt.Sprintf("%s: %v", at, err))
 	}
 	return append(out, classFindings(l, at, html)...)

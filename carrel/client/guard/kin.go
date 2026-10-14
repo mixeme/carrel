@@ -99,8 +99,8 @@ func isWidget(v reflect.Value, pkg string) bool {
 
 // unseen says whether a widget is a field the page does not show
 // (Field.Hidden: the numbers «Custom…» of a reminder opens, s-agenda-19): the
-// frames of the edits draw no such field, as the comparison of the frame
-// does not see it (Drawn).
+// frames of the edits draw no such field, and Typecase's shape does not see
+// it either (Typecase's note 64, task 161).
 func unseen(v reflect.Value) bool {
 	if v.Type().Name() != "Field" {
 		return false
