@@ -16,7 +16,7 @@
 
 - [ ] **Круг сервера по публикации и почте** (U-6.12; сырой отчёт —
       [scans/publish-mail.md](scans/publish-mail.md), публичные страницы —
-      [scans/public-pages.md](scans/public-pages.md)). **Сделано `v0.2.180`**
+      [scans/admin-public.md](scans/admin-public.md)). **Сделано `v0.2.180`**
       — что видит гость у контакта и книги (Пс11, Пб2; слово владельца
       10.10.2026: раньше экранов файлов): отметки листа `s-publish-3`,
       `PublishTarget.Shows` на ссылке, страница, строки книги и `.vcf` — из
