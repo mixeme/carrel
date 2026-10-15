@@ -398,14 +398,28 @@ type CollectionMoveSheet struct {
 	Under *Under `json:"under"`
 }
 
+// Reference — то, что ссылается на коллекцию, и что с ним станет
+// (s-profile-9: «1 published link» жирным, «— answers “not found” from that
+// moment» приглушённо; тире — экрана)
+type Reference struct {
+	What Text `json:"what"`
+	Then Text `json:"then"`
+}
+
 type CollectionDeleteSheet struct {
-	Kind       Kind     `json:"kind"`
-	Title      Text     `json:"title"` // «Delete on the server» (s-profile-9, -19)
-	Subject    Text     `json:"subject"`
-	Warning    Runs     `json:"warning"`    // что именно исчезнет и что копии у Carrel нет; число жирным (s-profile-9, -19)
-	References []Text   `json:"references"` // что на неё ссылается: ссылки и устройства счётом, задания по имени
-	Archive    Runs     `json:"archive"`    // когда попадала в архив (день моноширинно) и чего восстановление не сделает («new» жирным; s-profile-9, -19)
-	Export     *Action  `json:"export"`     // «сначала скачать»; nil — экспортировать нечем
+	Kind    Kind `json:"kind"`
+	Title   Text `json:"title"` // «Delete on the server» (s-profile-9, -19)
+	Subject Text `json:"subject"`
+	Warning Runs `json:"warning"` // что именно исчезнет и что копии у Carrel нет; число жирным (s-profile-9, -19)
+	// References — что на неё ссылается и что с ним станет (s-profile-9,
+	// -19; Кл16): ссылки и устройства счётом, задания по имени
+	References []Reference `json:"references"`
+	// Cancels — как у CollectionMoveSheet: календарь уходит с сервера,
+	// который планирует, и участникам его встреч тот может сообщить об
+	// отмене (решение владельца А12, Кл18); пусто — сказать нечего
+	Cancels    Text     `json:"cancels"`
+	Archive    Runs     `json:"archive"` // когда попадала в архив (день моноширинно) и чего восстановление не сделает («new» жирным; s-profile-9, -19)
+	Export     *Action  `json:"export"`  // «сначала скачать»; nil — экспортировать нечем
 	ExportNote Text     `json:"exportNote"`
 	Form       Form     `json:"form"` // подтверждение набором имени
 	Actions    []Action `json:"actions"`

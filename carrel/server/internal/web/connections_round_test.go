@@ -189,7 +189,7 @@ func TestFolderDeleteSheetIsTheFrame(t *testing.T) {
 	if plainText(sheet.Warning) != want {
 		t.Errorf("warning = %q\nwant      %q", sheet.Warning, want)
 	}
-	if !equalStrings(texts(sheet.References), refs) {
+	if !equalStrings(refLines(sheet.References), refs) {
 		t.Errorf("references = %q, the frame %q", sheet.References, refs)
 	}
 	if plainText(sheet.Archive) != archive {
@@ -211,6 +211,16 @@ func texts(v []view.Text) []string {
 	out := []string{}
 	for _, t := range v {
 		out = append(out, string(t))
+	}
+	return out
+}
+
+// refLines are the references as the frames read them: what, the screen's
+// dash, what becomes of it (s-profile-9, Кл16).
+func refLines(v []view.Reference) []string {
+	out := []string{}
+	for _, r := range v {
+		out = append(out, string(r.What)+" — "+string(r.Then))
 	}
 	return out
 }

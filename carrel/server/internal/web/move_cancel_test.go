@@ -96,6 +96,15 @@ func TestAMoveSaysTheAttendeesMayHearOfACancellation(t *testing.T) {
 	if said := calendar(f, true).Cancels; said != "" {
 		t.Errorf("a calendar's copy says %q, want nothing", said)
 	}
+	// Deleting the calendar takes its meetings off the server as moving it
+	// does (Кл18).
+	deleting := func(f davFixture) view.CollectionDeleteSheet {
+		t.Helper()
+		return decode[view.CollectionDeleteSheet](t, f.h.do(get("/app/collections/delete?"+url.Values{"a": {f.id}, "c": {searchWork}}.Encode(), f.sess)))
+	}
+	if said := deleting(f).Cancels; said != calendar(f, false).Cancels {
+		t.Errorf("a calendar's delete off a server that schedules says %q, its move %q", said, calendar(f, false).Cancels)
+	}
 
 	plain, away, _ := build(false)
 	if s := sheet(plain, "meet", away, false); s.Cancels != "" {
@@ -103,5 +112,8 @@ func TestAMoveSaysTheAttendeesMayHearOfACancellation(t *testing.T) {
 	}
 	if said := calendar(plain, false).Cancels; said != "" {
 		t.Errorf("a calendar's move off a server that does not schedule says %q, want nothing", said)
+	}
+	if said := deleting(plain).Cancels; said != "" {
+		t.Errorf("a calendar's delete off a server that does not schedule says %q, want nothing", said)
 	}
 }

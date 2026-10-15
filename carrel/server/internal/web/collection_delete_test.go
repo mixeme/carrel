@@ -276,7 +276,7 @@ func TestCollectionDeleteSheetIsTheFrame(t *testing.T) {
 	if !strings.Contains(plainText(sheet.Warning), "deleted on "+host+".") {
 		t.Errorf("head %q, warning %q: the server named as in the head", sheet.Subject, sheet.Warning)
 	}
-	if !equalStrings(texts(sheet.References), refs) {
+	if !equalStrings(refLines(sheet.References), refs) {
 		t.Errorf("references = %q,\nthe frame    %q", sheet.References, refs)
 	}
 	if plainText(sheet.Archive) != archive {
@@ -327,7 +327,7 @@ func TestCollectionDeleteSheetCaptionCases(t *testing.T) {
 	if !strings.HasPrefix(plainText(got.Archive), notWhole) {
 		t.Errorf("a job copies it, none whole yet: archive = %q,\nthe caption %q…", got.Archive, notWhole)
 	}
-	refs := texts(got.References)
+	refs := refLines(got.References)
 	if want := strings.Replace(writesHere, "«…»", "«Сюда»", 1); !slices.Contains(refs, want) {
 		t.Errorf("references = %q, want %q", refs, want)
 	}

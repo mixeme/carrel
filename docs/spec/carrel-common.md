@@ -2096,12 +2096,18 @@ type CollectionMoveSheet struct {
     Under   *Under // экран под листом, пришедшим страницей (Кл1): откуда открыт (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у фрагмента
 }
 
+type Reference struct { // строка «что ссылается» листа удаления (s-profile-9): What жирным, Then приглушённо после тире экрана
+    What Text // «1 published link», «Backup job «Личное на домашний диск»», «3 devices through davloom»
+    Then Text // «answers “not found” from that moment»
+}
+
 type CollectionDeleteSheet struct {
     Kind       Kind
     Title      Text // «Delete on the server» (s-profile-9, -19)
     Subject    Text
     Warning    Runs    // что именно исчезнет и что копии у Carrel нет; число жирным (s-profile-9, -19)
-    References []Text  // что на неё ссылается: ссылки и устройства счётом, задания по имени
+    References []Reference // что на неё ссылается и что с ним станет: ссылки и устройства счётом, задания по имени
+    Cancels    Text    // как у CollectionMoveSheet: календарь с записями уходит с сервера, который планирует, — «nextcloud may tell the attendees of its meetings that they are cancelled.» (А12); иначе пусто
     Archive    Runs    // когда попадала в архив — день моноширинно — и чего восстановление не сделает, «new» жирным (s-profile-9, -19)
     Export     *Action // «сначала скачать»; nil — экспортировать нечем
     ExportNote Text

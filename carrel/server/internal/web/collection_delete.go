@@ -12,6 +12,7 @@ import (
 	"golang.org/x/text/unicode/norm"
 
 	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/discover"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
@@ -123,6 +124,12 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 			s.sheetCancel(back, collectionList(conn, col)),
 		},
 	}
+	// A calendar deleted on a server which schedules takes its meetings
+	// off it, as a move does, and that server may tell their attendees of
+	// a cancellation (the owner's decision of 12.10.2026, А12; Кл18).
+	if col.Has(view.KindEvent) && conn.Scheduling == discover.SchedulingYes && count != 0 {
+		sheet.Cancels = text(host + " may tell the attendees of its meetings that they are cancelled.")
+	}
 	if count == 0 {
 		sheet.Warning = line(fmt.Sprintf("The %s is deleted on %s. It holds nothing now; Carrel keeps no copy of it either.", noun, host))
 		sheet.ExportNote = "There is nothing in it to download."
@@ -230,12 +237,12 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 // collectionReferences is what of the person points at the collection: the
 // attachment folder, the published links and the davloom devices counted, the
 // copy jobs by name (s-profile-9, s-profile-19).
-func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connection, col sealed.Collection) []view.Text {
-	refs := []view.Text{}
+func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connection, col sealed.Collection) []view.Reference {
+	refs := []view.Reference{}
 	blob := s.catalogOf(sess)
 	// The attachment folder in a folder of a storage (s-profile-19).
 	if a := blob.Attachments; a != nil && a.AccountID == conn.ID && a.Path == col.Path {
-		refs = append(refs, "Attachments — the attachment folder is in it; new attachments will have nowhere to go")
+		refs = append(refs, view.Reference{What: "Attachments", Then: "the attachment folder is in it; new attachments will have nowhere to go"})
 	}
 	// Links and devices are counted, a job is named (s-profile-9): a line
 	// for each link and device is longer than it helps.
@@ -246,7 +253,7 @@ func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connect
 		}
 	}
 	if links > 0 {
-		refs = append(refs, text(plural(links, "published link")+" — answers “not found” from that moment"))
+		refs = append(refs, view.Reference{What: text(plural(links, "published link")), Then: "answers “not found” from that moment"})
 	}
 	what := "collection"
 	if col.Has(view.KindFile) {
@@ -255,12 +262,12 @@ func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connect
 	for _, j := range blob.BackupJobs {
 		for _, src := range j.Sources {
 			if src.AccountID == conn.ID && src.Path == col.Path {
-				refs = append(refs, text("Backup job «"+j.Name+"» — copies this "+what+"; it will run one short and say so"))
+				refs = append(refs, view.Reference{What: text("Backup job «" + j.Name + "»"), Then: text("copies this " + what + "; it will run one short and say so")})
 				break
 			}
 		}
 		if j.DestAccount == conn.ID && j.DestPath == col.Path {
-			refs = append(refs, text("Backup job «"+j.Name+"» — its copies are written here"))
+			refs = append(refs, view.Reference{What: text("Backup job «" + j.Name + "»"), Then: "its copies are written here"})
 		}
 	}
 	devices := 0
@@ -271,9 +278,9 @@ func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connect
 	}
 	switch {
 	case devices == 1:
-		refs = append(refs, "1 device through davloom — it disappears for it at the next sync")
+		refs = append(refs, view.Reference{What: "1 device through davloom", Then: "it disappears for it at the next sync"})
 	case devices > 1:
-		refs = append(refs, text(fmt.Sprintf("%d devices through davloom — it disappears for them at the next sync", devices)))
+		refs = append(refs, view.Reference{What: text(fmt.Sprintf("%d devices through davloom", devices)), Then: "it disappears for them at the next sync"})
 	}
 	return refs
 }

@@ -357,7 +357,7 @@ U-6.8 (см. «Спеке»). `ReadAt`/`ServerAt` кадры не рисуют �
 
 ### Удаление (`CollectionDeleteSheet`)
 
-- **Кл16 (КД1, держится). «What is pointing at it now» — пары.** Кадр `-9`:
+- **Кл16 (КД1, держится). «What is pointing at it now» — пары.** (**закрыто сервером `v0.2.275`**: `References []Reference` — `What`, `Then`; тире — экрана) Кадр `-9`:
   строка на ссылку, задание, устройства — `<b>1 published link</b>
   <span class="tc-dim">— answers “not found” from that moment</span>`
   (так же «Backup job «Личное на домашний диск»», «3 devices through
@@ -371,7 +371,7 @@ U-6.8 (см. «Спеке»). `ReadAt`/`ServerAt` кадры не рисуют �
   `collection_delete.go:139`). Нужно: расширение отдельно (как у меню «Export ‹.ics›»,
   `s-profile-1`).
 
-- **Кл18 (новый). Строка об отмене у удаления календаря.** Решение А12
+- **Кл18 (новый). Строка об отмене у удаления календаря.** (**закрыто сервером `v0.2.275`**: `CollectionDeleteSheet.Cancels`, как у переноса; где её рисовать — Т10) Решение А12
   (`scans/silent-choices.md:44`): предупреждать об отмене, когда
   «переносит, удаляет или импортирует событие с участниками, календарь таких
   событий»; сделано для переноса (`CollectionMoveSheet.Cancels`,

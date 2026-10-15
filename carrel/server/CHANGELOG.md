@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.275 — 2026-10-15
+
+### Changed
+
+- **What points at a collection is said in pairs** (Кл16; `s-profile-9`,
+  `-19`): `CollectionDeleteSheet.References` is `[]Reference` — `What`
+  («1 published link», «Backup job «Личное на домашний диск»», «3 devices
+  through davloom», «Attachments») and `Then` («answers “not found” from
+  that moment»); the dash between them is the screen's.
+- **Deleting a calendar says its attendees may hear of a cancellation**
+  (Кл18; the owner's decision А12): `CollectionDeleteSheet.Cancels`, as the
+  move of a calendar says it, when the calendar holds anything and its
+  server schedules.
+
+### For consumers
+
+Read `References[i].What` and `.Then` instead of one line. Fixture
+`app-collections-delete` gains `cancels` (empty: an address book).
+
 ## v0.2.274 — 2026-10-15
 
 ### Changed

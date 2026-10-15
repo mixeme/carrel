@@ -92,7 +92,7 @@ func TestDavloomDevices(t *testing.T) {
 	}
 
 	sheet := decode[view.CollectionDeleteSheet](t, h.do(get("/app/collections/delete?"+url.Values{"a": {"a1"}, "c": {seedBook}}.Encode(), alice)))
-	if len(sheet.References) != 1 || !strings.HasPrefix(string(sheet.References[0]), "1 device through davloom — ") {
+	if len(sheet.References) != 1 || sheet.References[0].What != "1 device through davloom" {
 		t.Errorf("references = %v", sheet.References)
 	}
 

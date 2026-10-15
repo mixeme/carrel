@@ -23,6 +23,7 @@
       "text": "No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new address book at a new address — not into this one, and not to this address."
     }
   ],
+  "cancels": "",
   "export": {
     "enabled": true,
     "href": "/app/contacts/a-nc-home/kontakty/export",
