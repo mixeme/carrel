@@ -484,6 +484,15 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 		page.Bar.Segments = append(page.Bar.Segments, segment(k, dupSegmentLabels[k], counts[k]))
 	}
 	page.Bar.Loaded = st.compared
+	// What was compared and how many groups wait (s-dup-1, -6; Дб1): the
+	// groups of the kind shown.
+	page.Subtitle = text(plural(st.compared, "record") + " compared")
+	if wait := counts[only]; only == "" && total > 0 || only != "" && wait > 0 {
+		if only == "" {
+			wait = total
+		}
+		page.Subtitle += text(fmt.Sprintf(" · %d to look at", wait))
+	}
 	page.Threshold = view.ThresholdControl{Value: st.threshold, Default: s.cfg.DuplicatesThreshold}
 	// The threshold is a form of its own (U-8, s-dup-1): the field goes by
 	// Enter, as the frame draws no button beside it.
@@ -952,9 +961,10 @@ func (st dupState) choices(g dupGroup) []choice {
 			seen[v] = true
 			label := v
 			if prop == "PHOTO" {
-				// A photo is told by where it lives: the server, as the
-				// frame names it (s-dup-1, «nextcloud», «radicale · vps»).
-				label = connLabel(l.from.conn)
+				// A photo is told by where its record lives, the source
+				// whole (s-dup-1, «nextcloud · Архив», «radicale · vps ·
+				// Команда»; Дб8).
+				label = string(l.from.stamp())
 			}
 			c.opts = append(c.opts, choiceOption{label: label, ref: ref})
 		}

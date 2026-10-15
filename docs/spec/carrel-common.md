@@ -1736,6 +1736,7 @@ type SourceProgress struct {
 
 type DuplicatesPage struct {
     Shell
+    Subtitle  Text // «27 records compared · 2 to look at» (s-dup-1), «0 records compared» (s-dup-6): ждать нечего — только сравнённое
     Groups    []DuplicateGroup
     Threshold ThresholdControl
     Bar       ListBar
@@ -1798,6 +1799,7 @@ type WeightControl struct {
 
 type DuplicatesMergePage struct {
     Shell
+    Subtitle Text // «Вера Лебедева · 2 records» (s-dup-2, -4); пусто, когда оставляемой записи нет
     GroupID string
     Target  DuplicateMember
     Rows    []MergeRow

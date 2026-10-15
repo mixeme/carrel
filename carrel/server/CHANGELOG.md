@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.279 — 2026-10-16
+
+### Changed
+
+- **The duplicates say what they compared** (Дб1, Дб13 of the scan of
+  15.10.2026): `DuplicatesPage.Subtitle` — «7 records compared · 1 to look
+  at» (`s-dup-1`; with a kind chosen, its groups), «0 records compared»
+  when nothing waits; `DuplicatesMergePage.Subtitle` — «Вера Лебедева · 2
+  records» (`s-dup-2`).
+- **The plan of a merge is said, not alarmed** (Дб16): its notice is
+  `info`; the button that deletes stays the alarm.
+- **A photo is told by its source whole** (Дб8): «nextcloud · Архив», not
+  the server alone.
+- **The verb agrees with the count** (Дб18): «1 rewritten occurrence of …,
+  which belongs to its series and goes with it»; so the line «Not kept».
+
+### For consumers
+
+Fixtures `app-duplicates` and `app-duplicates-merge` gain their subtitles;
+the merge's warning is `info`.
+
 ## v0.2.278 — 2026-10-16
 
 ### Changed

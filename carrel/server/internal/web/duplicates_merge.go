@@ -299,6 +299,8 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 		t := mr.members[mr.target]
 		page.Target = s.member(mr.st, mr.g.kind, t.ref)
 		page.Target.Title = text(mergeTitle(t.c, t.obj))
+		// Whom the merge is of, and how many records (s-dup-2, Дб13).
+		page.Subtitle = page.Target.Title + text(" · "+plural(len(mr.members), "record"))
 	}
 	if reason := mr.mergeBlocked(); reason != "" {
 		confirm.Reason = text(reason)
@@ -393,19 +395,23 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 		lines = append(lines, text("The kept record takes the time of "+from(plan.Time).label()+": its start and end, its repetition and its rewritten occurrences"))
 	}
 	if plan.Dropped > 0 {
-		lines = append(lines, text(fmt.Sprintf("Not kept: %s of the kept record, which belong to the time it gives up", plural(plan.Dropped, "rewritten occurrence"))))
+		lines = append(lines, text(fmt.Sprintf("Not kept: %s of the kept record, which %s to the time it gives up", plural(plan.Dropped, "rewritten occurrence"), verbs(plan.Dropped, "belongs", "belong"))))
 	}
 	if plan.Alarms > 0 {
 		lines = append(lines, text("The kept record gains "+plural(plan.Alarms, "reminder")+" from the others"))
 	}
 	for i := 1; i <= len(others); i++ {
 		if n := plan.Instances[i]; n > 0 {
-			lines = append(lines, text(fmt.Sprintf("Not carried over: %s of %s, which belong to its series and go with it",
-				plural(n, "rewritten occurrence"), others[i-1].label())))
+			// The verb agrees with the count (s-dup-4, Дб18): «1 rewritten
+			// occurrence …, which belongs to its series and goes with it».
+			lines = append(lines, text(fmt.Sprintf("Not carried over: %s of %s, which %s to its series and %s with it",
+				plural(n, "rewritten occurrence"), others[i-1].label(), verbs(n, "belongs", "belong"), verbs(n, "goes", "go"))))
 		}
 	}
+	// The plan is said, not alarmed (s-dup-2, -4; Дб16): the button that
+	// deletes is the alarm.
 	page.Warning = view.Notice{
-		Role:  view.NoticeAlert,
+		Role:  view.NoticeInfo,
 		Title: text(fmt.Sprintf("One record is rewritten and %s deleted.", plural(len(others), "other"))),
 		Body: "The kept record is rewritten with the values you chose, and only once the server has kept it are the others deleted. " +
 			"This cannot be undone from here.",

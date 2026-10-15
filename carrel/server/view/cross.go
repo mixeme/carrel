@@ -88,6 +88,10 @@ type SourceProgress struct {
 
 type DuplicatesPage struct {
 	Shell
+	// Subtitle — под заголовком: «27 records compared · 2 to look at»
+	// (s-dup-1), «0 records compared» (s-dup-6); групп ждать нечего —
+	// только сравнённое
+	Subtitle  Text             `json:"subtitle"`
 	Groups    []DuplicateGroup `json:"groups"`
 	Threshold ThresholdControl `json:"threshold"`
 	Bar       ListBar          `json:"bar"`
@@ -153,11 +157,14 @@ type WeightControl struct {
 
 type DuplicatesMergePage struct {
 	Shell
-	GroupID string          `json:"groupID"`
-	Target  DuplicateMember `json:"target"`
-	Rows    []MergeRow      `json:"rows"`
-	Warning Notice          `json:"warning"` // что будет записано, что удалено
-	Actions []Action        `json:"actions"`
+	// Subtitle — под заголовком: кто и сколько записей — «Вера Лебедева ·
+	// 2 records» (s-dup-2, -4); пусто, когда оставляемой записи нет
+	Subtitle Text            `json:"subtitle"`
+	GroupID  string          `json:"groupID"`
+	Target   DuplicateMember `json:"target"`
+	Rows     []MergeRow      `json:"rows"`
+	Warning  Notice          `json:"warning"` // что будет записано, что удалено
+	Actions  []Action        `json:"actions"`
 }
 
 // MergeRow — свойство, о котором спрашивают (s-dup-1: поле с радио), или

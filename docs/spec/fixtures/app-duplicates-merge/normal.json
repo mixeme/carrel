@@ -193,6 +193,7 @@
       "union": true
     }
   ],
+  "subtitle": "Вера Лебедева · 2 records",
   "target": {
     "colour": "#a05a2c",
     "detail": "+7 905 331-09-42 · vera@example.net",
@@ -339,7 +340,7 @@
       ],
       "summary": "What changes"
     },
-    "role": "alert",
+    "role": "info",
     "title": "One record is rewritten and 1 other deleted."
   }
 }

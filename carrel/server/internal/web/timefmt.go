@@ -274,6 +274,14 @@ func plural(n int, unit string) string {
 	return fmt.Sprintf("%d %ss", n, unit)
 }
 
+// verbs is the verb that agrees with a count: one for 1, many for the rest.
+func verbs(n int, one, many string) string {
+	if n == 1 {
+		return one
+	}
+	return many
+}
+
 func humanDuration(d time.Duration) string {
 	const day = 24 * time.Hour
 	switch {
