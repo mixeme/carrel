@@ -387,6 +387,27 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 	s.writeSheet(w, r, s.madeSheet(sess, s.publishSheet(sess, c, uid, title, ""), token, expires))
 }
 
+// sheetDefaults puts into a link of a kind what the sheet of publishing it
+// chooses before anyone touches it (s-publish-2, -3; Б39): a calendar's,
+// an event's, a task's — the time and the title, the .ics allowed; a
+// contact's and a book's — the name and the organisation, no phone, address,
+// photo or note, and no .vcf. A link made without that sheet — by a letter
+// that sends a record as a link (Пб38; the owner's decision Б38) — gives the
+// guest no more than the sheet would have.
+func sheetDefaults(kind view.Kind, target *user.PublishTarget) {
+	switch {
+	case isCalendarKind(kind):
+		target.Shows = []string{calendarSeesTime}
+		for _, f := range calendarVisitorFields {
+			if f.on {
+				target.Shows = append(target.Shows, f.name)
+			}
+		}
+	case kind == view.KindContact:
+		target.Shows, target.HideOrganisation, target.NoDownload = nil, false, true
+	}
+}
+
 // publishedTitle is what a link opens: a calendar given out for some days
 // says which, «Личный · 10–31 August» (s-publish-1) — two links to one
 // calendar are told apart by them.

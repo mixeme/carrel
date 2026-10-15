@@ -451,3 +451,48 @@ func TestSendingALinkKeepsTheLetterBeingWritten(t *testing.T) {
 		t.Errorf("a letter begun by a link: to %+v, subject %q, attached %+v", sheet.To, sheet.Subject, sheet.Attach)
 	}
 }
+
+// Пб38 (the owner's decision Б38): a link a letter makes gives the guest no
+// more than the sheet of publishing it gives untouched — a calendar its
+// times and titles, the .ics allowed; a contact its name and organisation,
+// no .vcf. Before, it gave the whole of the record: attendees, addresses,
+// descriptions.
+func TestLetterLinksGiveWhatThePublishSheetGives(t *testing.T) {
+	f, _ := letterFixture(t)
+	f.srv.Seed(searchBook+"big.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:big\nFN:Big Card\nTEL:+1 555 0100\nEMAIL:big@example.com\nNOTE:"+strings.Repeat("n", 2000)+"\nEND:VCARD\n")
+	card := attachOne(t, f, url.Values{"what": {"contact"}, "a": {f.id}, "c": {searchBook}, "uid": {"big"}})
+	if !card.Preview[0].AsLink {
+		t.Fatalf("the big card does not go as a link: %+v", card.Preview[0])
+	}
+	if rec := f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Card"}, "body": {"x"}})); rec.Code != 303 {
+		t.Fatalf("send: %d %s", rec.Code, rec.Body)
+	}
+	links := f.h.users.PublishedLinks(f.sess.AccountID())
+	if len(links) != 1 {
+		t.Fatalf("links = %+v", links)
+	}
+	if got := links[0].Target; len(got.Shows) != 0 || got.HideOrganisation || !got.NoDownload {
+		t.Errorf("the card's link = %+v, want the name and organisation, no .vcf", got)
+	}
+
+	cal := calendarFixture(t, func(h *harness) {
+		h.cfg.MailEnabled = true
+		h.cfg.MailMaxAttachBytes = 10
+	}, "meet.ics", ics("BEGIN:VEVENT\nUID:meet\nDTSTAMP:20260101T000000Z\nDTSTART:20261005T100000Z\nDTEND:20261005T110000Z\nSUMMARY:Meet\n"+
+		"DESCRIPTION:Secret plan\nATTENDEE:mailto:ann@example.org\nEND:VEVENT"))
+	cal.h.relayed()
+	whole := attachOne(t, cal, url.Values{"what": {"calendar"}, "a": {cal.id}, "c": {cal.col}})
+	if !whole.Preview[0].AsLink {
+		t.Fatalf("the calendar does not go as a link: %+v", whole.Preview[0])
+	}
+	if rec := cal.h.do(postForm("/app/mail/compose?op=send", cal.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Cal"}, "body": {"x"}})); rec.Code != 303 {
+		t.Fatalf("send: %d %s", rec.Code, rec.Body)
+	}
+	links = cal.h.users.PublishedLinks(cal.sess.AccountID())
+	if len(links) != 1 {
+		t.Fatalf("links = %+v", links)
+	}
+	if got := links[0].Target; strings.Join(got.Shows, ",") != "time,title" || got.NoDownload {
+		t.Errorf("the calendar's link = %+v, want the time and the title, the .ics allowed", got)
+	}
+}

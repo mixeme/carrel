@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.257 — 2026-10-15
+
+### Fixed
+
+- **A link a letter makes gives the guest no more than the publish sheet
+  gives untouched** (Пб38 of the scan of 15.10.2026): a calendar, an event,
+  a task — the time and the title, the `.ics` allowed; a contact, a book —
+  the name and the organisation, no phones, addresses, photo, note, no
+  `.vcf`. Before, such a link — a record or a calendar too big to go as a
+  file — gave the whole of it: attendees with their addresses, descriptions,
+  places. Links made before keep what they were made with.
+
 ## v0.2.256 — 2026-10-15
 
 ### Changed

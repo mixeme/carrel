@@ -650,6 +650,9 @@ func (s *Server) partLink(sess *session.Session, p mailPart) (string, error) {
 	} else {
 		target.UID = p.UID // empty for a book or a calendar: the whole of it
 	}
+	// The letter has no sheet of what the guest sees: the link gives what
+	// that sheet gives untouched (Пб38).
+	sheetDefaults(p.Kind, &target)
 	key, _ := sess.DataKey()
 	token, err := s.users.Publish(sess.AccountID(), key, conn, target, &expires)
 	if err != nil {
