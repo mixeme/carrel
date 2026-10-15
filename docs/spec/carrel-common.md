@@ -1665,7 +1665,7 @@ type ConflictRow struct { // карточка расхождения, вариа
     Property Text           // свойство, как его зовёт запись: FN; строки одной метки — TEL;work, EMAIL;work; свойство, которого нет в форме, — своим именем, X-EVOLUTION-FILE-AS (s-conflict-1)
     Mine     Text
     Theirs   Text
-    Choice   ConflictChoice // C-8: что выбрано заранее (радио отмечено); его же сервер берёт, когда поле строки не пришло
+    Choice   ConflictChoice // C-8: что выбрано заранее (радио отмечено); его же сервер берёт, когда поле строки не пришло. Пусто — ничего (версии, с которой открыли форму, нет; решение владельца 16.10.2026): «Write this combination» выключена «Choose a side for every property.», пока у всех строк не выбрана сторона, и форма без выбора ничего не пишет
     Name     string         // поле строки в Form: choice.<номер строки>; радио «Your edit» — mine, «Server» — theirs
     Diff     ConflictDiff   // C-8: both — изменили обе стороны, mine — только правка, theirs — только сервер (Mine — что было открыто); пусто — версии, с которой открыли форму, уже нет
 }

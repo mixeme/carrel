@@ -150,13 +150,23 @@ func (cr conflictRow) name() string {
 }
 
 // choice is what a card has chosen before the person does (Рв4; s-conflict-1,
-// -4): the person's edit, but the server's where only the server changed.
+// -4): the person's edit, but the server's where only the server changed;
+// nothing where Carrel cannot tell whose the change is (the owner's decision
+// of 16.10.2026, Т1) — a guess there would put back what the other client
+// wrote.
 func (cr conflictRow) choice() view.ConflictChoice {
-	if cr.diff == view.DiffTheirs {
+	switch cr.diff {
+	case view.DiffTheirs:
 		return view.ChoiceTheirs
+	case view.DiffUnknown:
+		return view.ChoiceUnset
 	}
 	return view.ChoiceMine
 }
+
+// chooseEvery is why the combination is not written yet: a card has no side
+// chosen (Т1).
+const chooseEvery view.Text = "Choose a side for every property."
 
 // byLabel: the field's rows are told apart by their labels, and a conflict
 // is about the rows of one (Рв6: TEL;work and TEL;cell apart).
@@ -519,6 +529,11 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 		{ID: "conflict.theirs", Label: "Use only the server version", Href: op("theirs"), Method: "POST", Enabled: true},
 		cancel,
 	}
+	// Where nothing is chosen beforehand, the combination waits for a side
+	// of every card; «Use only my edit» needs none.
+	if writable && slices.ContainsFunc(page.Rows, func(r view.ConflictRow) bool { return r.Choice == view.ChoiceUnset }) {
+		combine.Enabled, combine.Reason = false, chooseEvery
+	}
 	if !writable && !moving {
 		combine.Reason, page.Actions[0].Reason = "The server version already has your change.", "The server version already has your change."
 		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: "Nothing differs", Body: "The server version already holds everything you changed."})
@@ -618,6 +633,18 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 		want[k] = v
 	}
 	rows, _ := conflictCards(c.spec.kind, d, theirs, obj.Props())
+	if op == "combine" {
+		for i, cr := range rows {
+			if chosenSide(r, i, cr.choice()) == view.ChoiceUnset {
+				// A card with no side: nothing is written, and the choice is
+				// shown again (Т1).
+				s.writePage(w, r, http.StatusOK, s.conflictPage(c, d, obj, theirs, alarms, []view.Notice{{
+					Role: view.NoticeAlert, Title: "Nothing was written", Body: chooseEvery,
+				}}))
+				return
+			}
+		}
+	}
 	restored := map[string][]model.RawValue{}
 	for i, cr := range rows {
 		f := cr.field
@@ -638,7 +665,7 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 			}
 			continue
 		}
-		if op != "mine" && chosenSide(r, i, view.ChoiceMine) != view.ChoiceMine {
+		if op != "mine" && chosenSide(r, i, cr.choice()) != view.ChoiceMine {
 			continue
 		}
 		if cr.byLabel {

@@ -99,8 +99,10 @@ func card(r view.ConflictRow) w.DiffItem {
 	case view.DiffTheirs:
 		theirsWord = server + include
 	}
+	// A card whose change Carrel cannot tell as anyone's has neither on
+	// (ChoiceUnset, the owner's decision of 16.10.2026).
 	return w.DiffItem{Title: t, Options: []w.Check{
-		version(r.Name, string(view.ChoiceMine), r.Choice != view.ChoiceTheirs, mineWord, r.Mine),
+		version(r.Name, string(view.ChoiceMine), r.Choice == view.ChoiceMine, mineWord, r.Mine),
 		version(r.Name, string(view.ChoiceTheirs), r.Choice == view.ChoiceTheirs, theirsWord, r.Theirs),
 	}}
 }

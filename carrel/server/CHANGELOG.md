@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.278 — 2026-10-16
+
+### Changed
+
+- **A conflict Carrel cannot read chooses nothing beforehand** (the owner's
+  decision of 16.10.2026; Т1 of the scan of 15.10.2026). When the version
+  the form was opened with is no longer held, every card has no side chosen
+  (`ConflictRow.Choice` empty) — before, «Your edit» everywhere, and writing
+  the combination without a look put back what only the other client
+  changed. «Write this combination» is off with «Choose a side for every
+  property.» until every card has a side; a combination that comes with a
+  card unanswered writes nothing and the screen comes back with «Nothing
+  was written». «Use only my edit» stays available, with the notice «Some of
+  these may not be your changes» above the cards. A card not sent with the
+  form takes what was chosen beforehand, not the person's edit.
+
+### For consumers
+
+`ConflictChoice` can be empty (`ChoiceUnset`): neither radio on. Typecase's
+task 198 asks how the combination is drawn without scripts until every side
+is chosen.
+
 ## v0.2.277 — 2026-10-15
 
 ### Changed

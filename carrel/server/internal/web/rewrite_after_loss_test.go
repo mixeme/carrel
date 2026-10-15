@@ -83,6 +83,40 @@ func TestTheConflictScreenSaysWhenItCannotTellWhoseChange(t *testing.T) {
 	if !hasNotice(page.Notices, "Some of these may not be your changes") {
 		t.Errorf("notices = %+v", page.Notices)
 	}
+	// Nothing is chosen beforehand, and the combination is not written until
+	// a side is chosen for every property; «Use only my edit» stays (the
+	// owner's decision of 16.10.2026, Т1).
+	if len(page.Rows) == 0 {
+		t.Fatal("no rows")
+	}
+	for _, row := range page.Rows {
+		if row.Choice != view.ChoiceUnset || row.Diff != view.DiffUnknown {
+			t.Errorf("row %s chosen %q beforehand, diff %q", row.Property, row.Choice, row.Diff)
+		}
+	}
+	if c := page.Form.Actions[0]; c.ID != "conflict.combine" || c.Enabled || c.Reason != "Choose a side for every property." {
+		t.Errorf("combine = %+v", c)
+	}
+	if mine := actionByID(page.Actions, "conflict.mine"); mine == nil || !mine.Enabled {
+		t.Errorf("Use only my edit = %+v", mine)
+	}
+	ada := func() string {
+		b, _, _ := f.srv.Object(peopleBook + "ada.vcf")
+		return unfolded(b)
+	}
+	before := ada()
+	again := decode[view.ConflictPage](t, f.h.do(postForm(page.Form.Action, f.sess, formFields(*page.Form))))
+	if ada() != before || !hasNotice(again.Notices, "Nothing was written") {
+		t.Errorf("a combination with no side chosen: notices %+v", again.Notices)
+	}
+	chosen := formFields(*page.Form)
+	for _, row := range page.Rows {
+		chosen.Set(row.Name, string(view.ChoiceMine))
+	}
+	if resp := f.h.do(postForm(page.Form.Action, f.sess, chosen)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("every side chosen: %d %s", resp.Code, resp.Body.String())
+	}
+	mustContain(t, ada(), "NICKNAME:Countess")
 
 	// With the version held, nothing of the kind is said.
 	g := newRewriteStand(t)

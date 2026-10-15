@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.46 — 2026-10-16
+
+Server `v0.2.278`. A conflict card is on only at the side chosen
+beforehand: where the server chose nothing (Carrel cannot tell whose the
+change is), neither radio is on — before, «Your edit» was. «Write this
+combination» comes off with its reason, as the server sends it; how it
+comes on without scripts once every side is chosen is Typecase's task 198.
+
 ## v0.4.45 — 2026-10-15
 
 Server `v0.2.273`. **The conflict screen** (`ConflictPage`, frames
