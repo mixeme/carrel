@@ -3,13 +3,12 @@
     "action": "/app/settings/davloom",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
-        "href": "/app/settings/unlock",
         "id": "davloom.issue",
         "label": "Create password",
-        "method": "GET",
-        "primary": true,
-        "target": "sheet"
+        "method": "POST",
+        "primary": true
       }
     ],
     "errors": [],

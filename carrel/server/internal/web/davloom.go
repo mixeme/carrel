@@ -106,8 +106,26 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 		}
 	case "issue":
 		if sess.UnlockUntil(time.Now()) == nil {
-			s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, nil, errors.New("Confirm your password first: Create password asks for it."), ""))
-			return
+			// The person's own password first (S-10.7), asked in the same
+			// dialog, what was typed kept (Нс73): before, Create password
+			// was a link to the password's sheet and the dialog came back
+			// empty.
+			password := r.FormValue("password")
+			if password == "" {
+				s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, nil, askPassword("Confirm your Carrel password: a password that opens your data is handed out only after yours."), ""))
+				return
+			}
+			start := time.Now()
+			if !s.limit.allowLogin(sess.Login(), s.clientIP(r), start) {
+				s.writePage(w, r, http.StatusTooManyRequests, s.davloomPage(r, sess, nil, askPassword(tooManyAttempts), ""))
+				return
+			}
+			if !s.users.Unlock(r.Context(), sess.AccountID(), password) {
+				constantTimeDelay(start, 300*time.Millisecond)
+				s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, nil, askPassword("Password is wrong."), ""))
+				return
+			}
+			sess.SetUnlockUntil(time.Now().Add(s.cfg.UnlockTTL))
 		}
 		name := r.FormValue("name")
 		id, password, err := s.users.IssueDevice(r.Context(), sess.AccountID(), key, name, scopeFromForm(r))
@@ -209,6 +227,12 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 
 // deviceForm is Add device, the scope of one device being changed, or —
 // right after an issue — the password, shown this once.
+// askPassword is the dialog's own question for the person's password before
+// a device's password is handed out (S-10.7, Нс73): its words.
+type askPassword string
+
+func (a askPassword) Error() string { return string(a) }
+
 func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.Blob, issued *issuedDevice, edited *store.ProxyDevice, formErr error) view.Form {
 	form := view.Form{Action: s.route("/app/settings/davloom"), Method: "POST"}
 	if issued != nil {
@@ -293,7 +317,14 @@ func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.
 				Value: on(name, edited == nil || cols[conn.ID+"|"+col.Path])})
 		}
 	}
-	if formErr != nil {
+	var ask askPassword
+	switch {
+	case errors.As(formErr, &ask):
+		// The dialog again with what was typed, and the person's password
+		// asked under it (Нс73).
+		rows = append(rows, view.FormRow{Name: "password", Label: "Your Carrel password", Kind: view.InputPassword, Required: true, Error: text(string(ask))})
+		form.Errors = []view.FieldError{{Name: "password", Message: text(string(ask))}}
+	case formErr != nil:
 		rows[len(rows)-1].Error = text(formErr.Error())
 		form.Errors = []view.FieldError{{Name: "scope", Message: text(formErr.Error())}}
 	}
@@ -303,10 +334,6 @@ func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.
 	case edited != nil:
 		form.Actions = []view.Action{{ID: "davloom.scope.save", Label: "Save", Method: "POST", Enabled: true},
 			{ID: "davloom.cancel", Label: "Cancel", Href: s.route("/app/settings/davloom"), Method: "GET", Enabled: true}}
-	case sess.UnlockUntil(time.Now()) == nil:
-		// The fourth place of the one unlock sheet (S-10.7): a password that
-		// opens the data key is handed out only after the person's own.
-		form.Actions = []view.Action{{ID: "davloom.issue", Label: "Create password", Href: s.route("/app/settings/unlock"), Method: "GET", Primary: true, Enabled: true}}
 	default:
 		form.Actions = []view.Action{{ID: "davloom.issue", Label: "Create password", Method: "POST", Primary: true, Enabled: true}}
 	}

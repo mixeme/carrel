@@ -26,16 +26,30 @@ func TestDavloomDevices(t *testing.T) {
 	if !page.Enabled || page.Address != "http://127.0.0.1:8081/" {
 		t.Errorf("enabled %v, address %q", page.Enabled, page.Address)
 	}
-	if a := page.Add.Actions[0]; a.Method != "GET" || !strings.HasSuffix(a.Href, "/app/settings/unlock") {
+	// Create password sends the dialog (Нс73; until v0.2.268 it was a link to
+	// the password's sheet, and what was typed was lost): without the
+	// person's password the dialog comes back with what was typed and asks
+	// for it there.
+	if a := page.Add.Actions[0]; a.Method != "POST" || a.Href != "" {
 		t.Fatalf("issue before unlock = %+v", a)
 	}
 	form := url.Values{"op": {"issue"}, "name": {"Телефон · DAVx5"}, "kind.event": {"on"}, "kind.contact": {"on"},
 		"col.a1|" + seedBook: {"on"}}
-	if rec := h.do(postForm("/app/settings/davloom", alice, form)); rec.Code != 200 {
-		t.Fatalf("issued without the password: %d", rec.Code)
-	}
+	asked := decode[view.DavloomPage](t, h.do(postForm("/app/settings/davloom", alice, form)))
 	if len(h.users.Devices(alice.AccountID())) != 0 {
-		t.Fatal("a device was made without the unlock sheet")
+		t.Fatal("a device was made without the person's password")
+	}
+	if formRow(asked.Add, "name") == nil || formRow(asked.Add, "name").Value != "Телефон · DAVx5" || formRow(asked.Add, "password") == nil ||
+		formRow(asked.Add, "password").Error == "" || formRow(asked.Add, "kind.note").Value != "" || formRow(asked.Add, "kind.event").Value == "" {
+		t.Fatalf("the dialog asked for the password lost what was typed: %+v", asked.Add)
+	}
+	wrong := url.Values{"password": {"nope"}}
+	for k, v := range form {
+		wrong[k] = v
+	}
+	if page := decode[view.DavloomPage](t, h.do(postForm("/app/settings/davloom", alice, wrong))); formRow(page.Add, "password") == nil ||
+		formRow(page.Add, "password").Error != "Password is wrong." || len(h.users.Devices(alice.AccountID())) != 0 {
+		t.Fatalf("a wrong password: %+v", page.Add)
 	}
 
 	h.do(fragment(postForm("/app/settings/unlock", alice, url.Values{"password": {"password123"}}), "sheet"))
@@ -140,5 +154,24 @@ func TestDavloomDeviceAccess(t *testing.T) {
 	}
 	if d := h.users.Devices(alice.AccountID())[0]; d.ReadOnly || string(d.WrappedKey) != string(devices[0].WrappedKey) {
 		t.Error("the switch did not take, or it made a new password")
+	}
+}
+
+// Нс73: the person's password typed in the dialog itself opens the window
+// and the device's password is made at once — one step, nothing typed lost.
+func TestDavloomPasswordInTheDialog(t *testing.T) {
+	h := newHarness(t)
+	h.cfg.DAVloomPort = 8081
+	h.rebuild()
+	h.admin("alice", "password123")
+	alice := h.login("alice", "password123")
+	key, _ := alice.DataKey()
+	h.putConnections("alice", key, "a1")
+	form := url.Values{"op": {"issue"}, "name": {"Ноутбук"}, "kind.contact": {"on"}, "col.a1|" + seedBook: {"on"}, "password": {"password123"}}
+	if rec := h.do(postForm("/app/settings/davloom", alice, form)); rec.Code != 303 {
+		t.Fatalf("issue with the password: %d %s", rec.Code, rec.Body)
+	}
+	if d := h.users.Devices(alice.AccountID()); len(d) != 1 || d[0].Name != "Ноутбук" {
+		t.Errorf("devices = %+v", d)
 	}
 }

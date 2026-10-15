@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.268 — 2026-10-15
+
+### Fixed
+
+- **Create password of davloom keeps what was typed** (Нс73 of the scan of
+  15.10.2026): it sends the dialog; outside the unlock window the dialog
+  comes back with the name, the access, the kinds and the collections as
+  typed, and asks for the person's own password under them («Your Carrel
+  password»); with it, the window opens and the device's password is made
+  in one step. Before, Create password was a link to the password's sheet,
+  and the dialog came back empty after it. How the step looks is the
+  frames' (Typecase's task 193, item 3).
+
+### For consumers
+
+Fixture `app-settings-davloom/normal` re-shot: Create password is a POST of
+the dialog.
+
 ## v0.2.267 — 2026-10-15
 
 ### Changed
