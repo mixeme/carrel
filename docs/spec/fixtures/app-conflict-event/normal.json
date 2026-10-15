@@ -352,6 +352,7 @@
   "rows": [
     {
       "choice": "mine",
+      "diff": "both",
       "mine": "Синк-ап по релизу и демо",
       "name": "choice.0",
       "property": "SUMMARY",

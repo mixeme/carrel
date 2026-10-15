@@ -555,11 +555,13 @@ func TestConflictScreenAndCombination(t *testing.T) {
 	// The name was changed, so N is part of that change and the screen says so
 	// (U-6.1): the card on the server carries none, and this one now would.
 	want := []view.ConflictRow{
-		{Property: "FN", Mine: "Ada King", Theirs: "Ada Byron", Choice: view.ChoiceMine, Name: "choice.0"},
+		// FN was changed on both sides; N and TITLE only in the edit (Рв2:
+		// «both changed», «only in your edit»).
+		{Property: "FN", Mine: "Ada King", Theirs: "Ada Byron", Choice: view.ChoiceMine, Name: "choice.0", Diff: view.DiffBoth},
 		// Nothing is said by the screen's dash (s-conflict-1, Рв3; until
 		// v0.2.265 the word «Empty»).
-		{Property: "N", Mine: "Ada, King", Theirs: "", Choice: view.ChoiceMine, Name: "choice.1"},
-		{Property: "TITLE", Mine: "Countess", Theirs: "", Choice: view.ChoiceMine, Name: "choice.2"},
+		{Property: "N", Mine: "Ada, King", Theirs: "", Choice: view.ChoiceMine, Name: "choice.1", Diff: view.DiffMine},
+		{Property: "TITLE", Mine: "Countess", Theirs: "", Choice: view.ChoiceMine, Name: "choice.2", Diff: view.DiffMine},
 	}
 	if len(page.Rows) != len(want) || page.Rows[0] != want[0] || page.Rows[1] != want[1] || page.Rows[2] != want[2] {
 		t.Fatalf("rows = %+v", page.Rows)

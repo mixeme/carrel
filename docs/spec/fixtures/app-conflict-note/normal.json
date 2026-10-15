@@ -342,6 +342,7 @@
   "rows": [
     {
       "choice": "mine",
+      "diff": "both",
       "mine": "Заметка со встречи 10.08 — дополнено",
       "name": "choice.0",
       "property": "SUMMARY",

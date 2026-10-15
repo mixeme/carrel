@@ -408,4 +408,9 @@ type ConflictRow struct {
 	// Name — поле формы строки, choice.<номер строки>: радио «Your edit» —
 	// значение mine, «Server» — theirs (ConflictPage.Form)
 	Name string `json:"name"`
+	// Diff — вид расхождения (C-8): both — изменили обе стороны, mine —
+	// только правка (сервер держит то, что было открыто); пусто — версии,
+	// с которой открыли форму, уже нет (s-conflict-1…-5: «both changed»,
+	// «only in your edit»)
+	Diff ConflictDiff `json:"diff"`
 }

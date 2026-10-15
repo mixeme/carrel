@@ -91,6 +91,18 @@ const (
 	ChoiceUnset  ConflictChoice = ""
 )
 
+// ConflictDiff — вид расхождения у свойства (s-conflict-1…-5): изменили обе
+// стороны, только правка, только сервер; пусто — не известно (версии, с
+// которой открыли форму, уже нет).
+type ConflictDiff string
+
+const (
+	DiffBoth    ConflictDiff = "both"
+	DiffMine    ConflictDiff = "mine"
+	DiffTheirs  ConflictDiff = "theirs"
+	DiffUnknown ConflictDiff = ""
+)
+
 type DuplicateDecision string
 
 const (

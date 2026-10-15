@@ -1667,6 +1667,7 @@ type ConflictRow struct { // карточка расхождения, вариа
     Theirs   Text
     Choice   ConflictChoice // C-8: что выбрано заранее (радио отмечено); его же сервер берёт, когда поле строки не пришло
     Name     string         // поле строки в Form: choice.<номер строки>; радио «Your edit» — mine, «Server» — theirs
+    Diff     ConflictDiff   // C-8: both — изменили обе стороны, mine — только правка; пусто — версии, с которой открыли форму, уже нет
 }
 ```
 
@@ -3558,6 +3559,9 @@ const ( ImportStepSource ImportStep = "source"; ImportStepPreview = "preview"
 
 type ConflictChoice string
 const ( ChoiceMine ConflictChoice = "mine"; ChoiceTheirs = "theirs"; ChoiceUnset = "" )
+
+type ConflictDiff string // вид расхождения (s-conflict-1…-5): «both changed», «only in your edit», «only on the server» — слова экрана; пусто — не известно
+const ( DiffBoth ConflictDiff = "both"; DiffMine = "mine"; DiffTheirs = "theirs"; DiffUnknown = "" )
 
 type DuplicateDecision string
 const (

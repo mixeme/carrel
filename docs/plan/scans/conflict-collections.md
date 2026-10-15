@@ -66,7 +66,7 @@ U-6.8 (см. «Спеке»). `ReadAt`/`ServerAt` кадры не рисуют �
   «Conflict» — слово экрана (`Shell.Title` «Changed elsewhere» — заголовок
   документа, не шапки).
 
-- **Рв2 (РБ3, держится). Вид различия у свойства.** Кадры: справа от
+- **Рв2 (РБ3, держится). Вид различия у свойства.** (**частью закрыто сервером `v0.2.267`**: `ConflictRow.Diff` — `both`, `mine` по версии, с которой открыли форму, `Base` черновика; «only on the server» — со строками чужих свойств, Рв6) Кадры: справа от
   свойства `tc-rubric__aside` — «both changed», «only in your edit», «only
   on the server», и от него подписи вариантов — «Your edit» / «Server»,
   «Your edit · include» / «Leave it out», «Your edit» / «Server · include»

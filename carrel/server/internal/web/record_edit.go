@@ -3654,7 +3654,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		// or a display name renamed elsewhere would put an N in the draft
 		// nobody typed.
 		fillNames(c.spec.kind, base, typed)
-		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed), st.notebook, !baseKnown)
+		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed), base, st.notebook, !baseKnown)
 		s.redirect(w, r, c.recordPath(uid)+"/conflict")
 		return
 	case err != nil:

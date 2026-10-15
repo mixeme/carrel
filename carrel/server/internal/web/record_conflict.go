@@ -26,6 +26,11 @@ type editDraft struct {
 	ETag    string     `json:"etag"`
 	ReadAt  time.Time  `json:"readAt"`
 	Mine    formValues `json:"mine"`
+	// Base is what the version the form was opened with held of the fields
+	// changed (Mine's keys): with it the conflict screen tells a field both
+	// changed from one only the person did (s-conflict-1, Рв2). Empty when
+	// that version was no longer held (Unsure).
+	Base formValues `json:"base,omitempty"`
 	// Notebook is the notebook a note's edit chose other than its own
 	// (s-notes-20): part of the edit, so the move waits with it and happens
 	// once the person's edit is written (S-18).
@@ -37,9 +42,18 @@ type editDraft struct {
 	Unsure bool `json:"unsure,omitempty"`
 }
 
-func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time, mine formValues, notebook string, unsure bool) {
+func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time, mine, base formValues, notebook string, unsure bool) {
+	held := formValues{}
+	if !unsure {
+		for k := range mine {
+			held[k] = base[k]
+			if v, ok := base[k+".type"]; ok {
+				held[k+".type"] = v
+			}
+		}
+	}
 	data, err := json.Marshal(editDraft{
-		Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, UID: uid, ETag: etag, ReadAt: readAt, Mine: mine,
+		Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, UID: uid, ETag: etag, ReadAt: readAt, Mine: mine, Base: held,
 		Notebook: notebook, Unsure: unsure,
 	})
 	if err == nil {
@@ -74,6 +88,22 @@ func conflictFields(kind view.Kind, d editDraft, theirs formValues) []editField 
 		}
 	}
 	return out
+}
+
+// conflictDiff is how a field differs (Рв2): both sides changed it, or only
+// the person did — the server holds what the form was opened with;
+// unknown without that version.
+func conflictDiff(f editField, d editDraft, theirs formValues) view.ConflictDiff {
+	if d.Unsure || d.Base == nil {
+		return view.DiffUnknown
+	}
+	if _, held := d.Base[f.name]; !held {
+		return view.DiffUnknown
+	}
+	if sameRows(d.Base[f.name], theirs[f.name]) && (!f.typed || sameLabels(d.Base[f.name+".type"], theirs[f.name+".type"])) {
+		return view.DiffMine
+	}
+	return view.DiffBoth
 }
 
 // agreeing are the properties the person changed to what the server version
@@ -183,6 +213,7 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 			Theirs:   text(s.showValues(c, f, theirs[f.name], theirs[f.name+".type"], alarms)),
 			Choice:   view.ChoiceMine,
 			Name:     choiceField(i),
+			Diff:     conflictDiff(f, d, theirs),
 		})
 	}
 	if d.Unsure && len(page.Rows) > 0 {

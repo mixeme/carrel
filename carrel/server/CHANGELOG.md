@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.267 — 2026-10-15
+
+### Changed
+
+- **Each card of the conflict screen says how the property differs**
+  (`ConflictRow.Diff`, C-8 `ConflictDiff`; Рв2 of the scan of 15.10.2026;
+  `s-conflict-1`…`-5`): `both` — the server changed it too; `mine` — the
+  server holds what the form was opened with, the change is the person's
+  alone. The refused edit keeps what that version held of the fields
+  changed (`Base`); without that version (`Unsure`) the kind is not known
+  and is empty. «only on the server» comes with the properties outside the
+  form (Рв6). The words — «both changed», «only in your edit» — are the
+  screen's.
+
+### For consumers
+
+C-6 `ConflictRow.Diff`, C-8 `ConflictDiff`. Fixtures `app-conflict`, `-event`,
+`-task`, `-note` re-shot.
+
 ## v0.2.266 — 2026-10-15
 
 ### Fixed
