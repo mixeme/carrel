@@ -18,7 +18,7 @@ import (
 // An attendee is an address; the address books only say who it is (Typecase
 // task 77, the owner's decisions of 01–02.10.2026). The card draws the people
 // of an event by their addresses, a known one by the mark of their book and a
-// link (eventPeople). The organiser edits the list (s-agenda-3): the form
+// link (recordPeople). The organiser edits the list (s-agenda-3): the form
 // posts the organiser hidden and each other a ticked box under one name, and
 // a line typed in; the suggestions of that line are asked at
 // /app/contacts/suggest (s-agenda-12, -13). An invited person sees the list
@@ -136,7 +136,7 @@ func (s *Server) attendeeField(c *collectionCtx, st editState) view.AttendeeFiel
 	known := s.knownPeople(c.sess)
 	people := map[string]view.AttendeeRow{}
 	if st.obj != nil {
-		for _, p := range eventPeople(st.obj, known) {
+		for _, p := range recordPeople(st.obj, known) {
 			people[dupes.NormEmail(string(p.Email))] = p
 		}
 	}

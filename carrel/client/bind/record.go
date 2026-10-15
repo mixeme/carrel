@@ -136,6 +136,24 @@ func Attendee(a view.AttendeeRow, lead string) []w.SecItemPart {
 	return out
 }
 
+// Person is a person of a task or a note (C-6.5 AttendeeRow; Р3 of the
+// server's kinds-parity list) as a line drawn the way Related draws a
+// record — no frame draws a task's or a note's people yet (Typecase's task
+// 179), and a rubric beside the frame's own passes only in their shape: the
+// name in the accent, leading to the card when the ticked books know it,
+// else the address; what the person said muted after lead, the screen's.
+func Person(a view.AttendeeRow, lead string) []w.SecItemPart {
+	name := string(a.Name)
+	if a.Href == "" {
+		name = string(a.Email)
+	}
+	return []w.SecItemPart{
+		w.Span{Face: w.FaceAccent, Text: name, Href: a.Href},
+		w.Text(" "),
+		w.Dim{Parts: []w.Inline{w.Text(lead + string(a.Status))}},
+	}
+}
+
 // Attendees is the field of the attendees of an event's form (C-6.8
 // AttendeeField, s-agenda-3, -12 … -15) as a field of tags in columns: a tag
 // for each person — one the ticked books know by its name and the mark of

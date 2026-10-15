@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -200,5 +201,86 @@ func TestStatusAndPriorityColumnsForEveryKind(t *testing.T) {
 	notes := decode[view.NotesPage](t, f.h.do(get(f.path("notes"), f.sess)))
 	if notes.Bar.Columns == nil || !offers(notes.Bar.Columns, "status") || len(notes.Groups) == 0 || notes.Groups[0].Rows[0].Status != "Final" {
 		t.Errorf("notes: columns %+v, groups %+v", notes.Bar.Columns, notes.Groups)
+	}
+}
+
+// Р3 of scans/kinds-parity.md: an event's people are edited and shown; a
+// task's and a note's were neither, though VTODO and VJOURNAL hold ATTENDEE
+// as VEVENT does (RFC 5545 §3.6.2, §3.6.3) — the task's card named its
+// organiser in a field, and ATTENDEE was kept as foreign. Now a task's and a
+// note's edit carry the field of attendees, their cards name the people,
+// the organiser first, as an event's, and a form that does not draw the
+// field leaves them be.
+func TestTasksAndNotesHaveAttendees(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260101T000000Z\nSUMMARY:Slides\nATTENDEE;CN=Bob;PARTSTAT=ACCEPTED:mailto:bob@example.org\nX-KEEP:1\nEND:VTODO"),
+		"t2.ics", ics("BEGIN:VTODO\nUID:t2\nDTSTAMP:20260101T000000Z\nSUMMARY:Review\nORGANIZER;CN=Anna:mailto:anna@example.org\nATTENDEE:mailto:bob@example.org\nEND:VTODO"),
+		"n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nSUMMARY:Minutes\nATTENDEE;CN=Bob:mailto:bob@example.org\nX-KEEP:1\nEND:VJOURNAL"))
+	people := func(rows []view.AttendeeRow) string {
+		var out []string
+		for _, r := range rows {
+			out = append(out, string(r.Name)+"/"+string(r.Status))
+		}
+		return strings.Join(out, ",")
+	}
+	tasks := f.path("tasks")
+
+	card := decode[view.TaskPage](t, f.h.do(get(tasks+"/t1", f.sess)))
+	if got := people(card.Attendees); got != "Bob/accepted" {
+		t.Errorf("the task's card names %q", got)
+	}
+	other := decode[view.TaskPage](t, f.h.do(get(tasks+"/t2", f.sess)))
+	if got := people(other.Attendees); got != "Anna/organiser,bob@example.org/no reply" {
+		t.Errorf("an organised task's card names %q", got)
+	}
+	for _, fl := range other.Fields {
+		if fl.Label == "Organiser" {
+			t.Errorf("the organiser is a field still, as well as the first of the people: %+v", other.Fields)
+		}
+	}
+	edit := decode[view.TaskEditPage](t, f.h.do(get(tasks+"/t1/edit", f.sess)))
+	if got := pageTags(edit.Attendees); !slices.Equal(got, []string{"attendee=mailto:bob@example.org"}) || edit.Attendees.Add == nil {
+		t.Errorf("the task's field = %q, %+v", got, edit.Attendees)
+	}
+	for _, fl := range edit.Foreign {
+		if fl.Label == "ATTENDEE" {
+			t.Errorf("ATTENDEE is kept as foreign: %+v", edit.Foreign)
+		}
+	}
+	form := formFields(edit.Form)
+	if resp := f.h.do(postForm(tasks+"/t1/edit", f.sess, form)); resp.Code != 303 {
+		t.Fatalf("POST without the field: %d %s", resp.Code, resp.Body.String())
+	}
+	if got := unfolded(body(t, f, "t1.ics")); !strings.Contains(got, "mailto:bob@example.org") {
+		t.Fatalf("a form without the field took Bob away:\n%s", got)
+	}
+	form = formFields(decode[view.TaskEditPage](t, f.h.do(get(tasks+"/t1/edit", f.sess))).Form)
+	form["attendee"] = []string{"mailto:bob@example.org"}
+	form.Set("attendee.add", "carol@example.org")
+	if resp := f.h.do(postForm(tasks+"/t1/edit", f.sess, form)); resp.Code != 303 {
+		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
+	}
+	got := unfolded(body(t, f, "t1.ics"))
+	mustContain(t, got, "ATTENDEE;CN=Bob;PARTSTAT=ACCEPTED:mailto:bob@example.org", "ATTENDEE;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:carol@example.org", "X-KEEP:1")
+
+	page := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1", f.sess)))
+	if got := people(page.Meta.Attendees); got != "Bob/no reply" {
+		t.Errorf("the note's page names %q", got)
+	}
+	nedit := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1/edit", f.sess)))
+	if nedit.Doc.Attendees == nil || !slices.Equal(pageTags(*nedit.Doc.Attendees), []string{"attendee=mailto:bob@example.org"}) {
+		t.Errorf("the note's field = %+v", nedit.Doc.Attendees)
+	}
+	if strings.Contains(fmt.Sprint(nedit.Doc.Foreign), "ATTENDEE") {
+		t.Errorf("ATTENDEE is kept as foreign: %v", nedit.Doc.Foreign)
+	}
+	nform := noteFormOf(t, f, "n1")
+	nform["attendee"] = []string{}
+	nform.Set("attendee.add", "")
+	if resp := f.h.do(postForm(f.path("notes")+"/n1/edit", f.sess, nform)); resp.Code != 303 {
+		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
+	}
+	if got := body(t, f, "n1.ics"); strings.Contains(got, "ATTENDEE") || !strings.Contains(got, "X-KEEP:1") {
+		t.Errorf("Bob unticked is still there:\n%s", got)
 	}
 }

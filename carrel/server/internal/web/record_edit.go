@@ -75,9 +75,11 @@ const (
 	// «related.add» (S-11, s-tasks-3, -10).
 	fieldRelated
 	// fieldAttendee is the attendees of an event (Typecase task 77,
-	// s-agenda-3): their addresses, «mailto:…», the organiser first. The full
-	// form draws them as EventEditPage.Attendees and posts each kept one and
-	// the line typed in (attendee.add); the quick sheet carries the person a
+	// s-agenda-3), and of a task and a note (Р3 of scans/kinds-parity.md):
+	// their addresses, «mailto:…», the organiser first. The full form draws
+	// them as EventEditPage.Attendees (TaskEditPage.Attendees,
+	// NoteDoc.Attendees) and posts each kept one and the line typed in
+	// (attendee.add); the quick sheet carries the person a
 	// timeline creates the event for (S-15.4) hidden. See attendees.go.
 	fieldAttendee
 )
@@ -825,6 +827,9 @@ var editFields = map[view.Kind][]editField{
 		{name: "percent", label: "Percent complete", prop: "PERCENT-COMPLETE", typ: fieldPercent, set: "Progress"},
 		{name: "done", label: "Done", prop: "STATUS", typ: fieldDone, set: "Progress"},
 		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders", add: "Add reminder", quick: "Remind"},
+		// A task's people, as an event's (Р3 of scans/kinds-parity.md: VTODO
+		// holds ATTENDEE; no frame draws them yet — Typecase's task 179).
+		{name: "attendee", label: "Attendees", prop: "ATTENDEE", typ: fieldAttendee},
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText, set: "Other"},
 		// No hint under Tags (s-tasks-3), as the event's and the note's.
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, set: "Other"},
@@ -848,6 +853,9 @@ var editFields = map[view.Kind][]editField{
 		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: noteStatuses},
 		{name: "url", label: "Link", prop: "URL", typ: fieldText},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated},
+		// A journal's people, as an event's and a task's (Р3: VJOURNAL holds
+		// ATTENDEE; no frame draws them yet — Typecase's task 179).
+		{name: "attendee", label: "Attendees", prop: "ATTENDEE", typ: fieldAttendee},
 	},
 }
 
@@ -2743,7 +2751,8 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		if st.isNew || name == "" {
 			name = "New task"
 		}
-		page := view.TaskEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: taskSubtitle(c, st.obj), Form: form, Source: c.source(), Loss: st.loss, Delete: del}
+		page := view.TaskEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: taskSubtitle(c, st.obj), Form: form, Source: c.source(), Loss: st.loss, Delete: del,
+			Attendees: s.attendeeField(c, st)}
 		if st.obj != nil && !st.isNew {
 			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
 			page.Source.Path, page.Source.Compared = text(st.obj.Path), s.eventCompared(c, st.uid, st.obj)
@@ -2827,6 +2836,9 @@ func (s *Server) noteEditPage(c *collectionCtx, st editState, sh view.Shell, for
 	}
 	doc.Sets[0].Rows = append(append(doc.Sets[0].Rows, title...), texts...)
 	page.Doc.Form = &doc
+	// The people, as an event's and a task's edit holds them (Р3).
+	people := s.attendeeField(c, st)
+	page.Doc.Attendees = &people
 	if exists {
 		page.Rail.Neighbours = s.noteNeighbours(c, st.uid)
 		page.Doc.Foreign = foreignLine(cal.NoteForeign(st.obj))

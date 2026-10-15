@@ -873,7 +873,7 @@ type Details struct {
     Fields     []Field       // категории — строкой «Tags» с Field.Tags там, где её рисует кадр
     Body       Text          // описание события и задачи, как есть
     Rendered   []Block       // текст заметки, разобранный (C-6.9): абзацы, задачи с отметками
-    Attendees  []AttendeeRow // участники события, только чтение
+    Attendees  []AttendeeRow // люди записи календаря — события, задачи, заметки (Р3) —, только чтение
     Attach     []AttachRow
     AttachHint Text          // строка под вложениями задачи (s-tasks-1): «The same block events and notes have: up to 2 MB the file is written into the task itself, above that it goes to the attachments folder and the task keeps a link. …» — порог, настройка экземпляра (S-20); у прочих родов пусто, ключа нет
     Related    []TimelineRow
@@ -1523,6 +1523,7 @@ type TaskPage struct { // чтение
     Fields    []Field
     Body      Text
     Done      bool       // выполнена: Mark done (task.done) снимает отметку
+    Attendees []AttendeeRow // люди задачи, как у события: организатор первым (Status «organiser»), за ним участники; только чтение (Р3 списка равенства родов; кадра нет). Организатора среди Fields нет
     Attach    []AttachRow
     Related   []TimelineRow
     Linked    []Field // та же задача в других списках (S-16)
@@ -1546,6 +1547,7 @@ type TaskEditPage struct { // правка
     // подсказки), Related to (Suggest — подсказки по мере набора). Attach —
     // по имени (attach.add), клиент ставит его в набор «Attachments»
     Form      Form
+    Attendees AttendeeField // поле участников, как у правки события (Р3 списка равенства родов; кадра нет); форма без строки набора участников не меняет
     Attach    []AttachRow
     Source    SourceBlock // рубрика Source формы: Path, Read и сравнение с сервером (s-tasks-3); у новой — без пути
     Loss      *LossReport
@@ -1579,6 +1581,7 @@ type NoteDoc struct { // колонка текста страницы замет
     // (Action.Submits). nil — чтение
     Form     *Form
     Fields   []FormRow // правка: тетрадь, дата и время, теги, связь; уходят с тем же сохранением
+    Attendees *AttendeeField // правка: поле участников, как у события и задачи (Р3 списка равенства родов; кадра нет), уходит тем же сохранением; форма без строки набора участников не меняет. nil — чтение
     // Правка: строка под текстом о свойствах, которых Carrel не знает, —
     // первое по имени и сколько ещё словом, готовой фразой сервера:
     // «Properties Carrel does not know — X-JTX-COLOR and two more — are kept
@@ -1605,6 +1608,9 @@ type NoteMeta struct {
     // Link — ссылка заметки (URL): «Link», значение и Href, как у карточки
     // события и задачи (Р8 списка равенства родов; кадра нет); nil — нет
     Link    *Field
+    // Attendees — люди заметки, как у события и задачи: организатор первым,
+    // за ним участники; только чтение (Р3 списка равенства родов; кадра нет)
+    Attendees []AttendeeRow
     Related []TimelineRow
     Linked  []Field // та же заметка в других тетрадях (S-16)
     Attach  []AttachRow

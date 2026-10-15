@@ -418,6 +418,16 @@ func side(d view.Details) *w.Side {
 		}
 		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines, Gap: 6}}})
 	}
+	// The note's people, as the agenda's panel names an event's (Р3 of the
+	// server's kinds-parity list; no frame draws them yet — Typecase's task
+	// 179), drawn as Related draws its records (bind.Person).
+	if len(d.Attendees) > 0 {
+		var lines [][]w.SecItemPart
+		for _, a := range d.Attendees {
+			lines = append(lines, bind.Person(a, lead))
+		}
+		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Attendees"}, w.SecList{Items: lines, Gap: 6}}})
+	}
 	// A file dropped on the open card goes with Attach «From this computer»
 	// (Side.Drop, Typecase's note 68; s-io-2).
 	side := &w.Side{Items: items}

@@ -261,14 +261,18 @@ type TaskPage struct {
 	// action»), Due (Runs: срок моноширинно, просрочка тревогой), Starts,
 	// Complete («0%», моноширинно), Priority (моноширинно), Reminders, Where,
 	// Link, Tags
-	Fields  []Field       `json:"fields"`
-	Body    Text          `json:"body"`
-	Done    bool          `json:"done"`
-	Attach  []AttachRow   `json:"attach"`
-	Related []TimelineRow `json:"related"`
-	Linked  []Field       `json:"linked"` // та же задача в других списках (S-16)
-	Source  SourceBlock   `json:"source"`
-	Loss    *LossReport   `json:"loss"`
+	Fields []Field `json:"fields"`
+	Body   Text    `json:"body"`
+	Done   bool    `json:"done"`
+	// Attendees — люди задачи, как у события: организатор первым (Status
+	// «organiser»), за ним участники; только чтение (Р3 списка равенства
+	// родов; кадра нет). Организатор — не строка Fields
+	Attendees []AttendeeRow `json:"attendees"`
+	Attach    []AttachRow   `json:"attach"`
+	Related   []TimelineRow `json:"related"`
+	Linked    []Field       `json:"linked"` // та же задача в других списках (S-16)
+	Source    SourceBlock   `json:"source"`
+	Loss      *LossReport   `json:"loss"`
 	// Actions — на виду: Edit (i-pencil), Mark done, Attach, Print
 	// (record.print); удаление — Danger, внизу
 	Actions  []Action   `json:"actions"`
@@ -286,8 +290,11 @@ type TaskEditPage struct {
 	Subtitle Runs `json:"subtitle"`
 	// Form — поля в рубриках кадра: выполнение (Done, Percent complete) и
 	// напоминания (reminder.N) — его строки
-	Form   Form        `json:"form"`
-	Attach []AttachRow `json:"attach"`
+	Form Form `json:"form"`
+	// Attendees — поле участников, как у правки события (Р3 списка равенства
+	// родов; кадра нет): форма без строки набора участников не меняет
+	Attendees AttendeeField `json:"attendees"`
+	Attach    []AttachRow   `json:"attach"`
 	// Source — рубрика Source формы (s-tasks-3): Path, Read и сравнение с
 	// сервером; у новой — без пути
 	Source SourceBlock `json:"source"`
@@ -327,6 +334,10 @@ type NoteDoc struct {
 	// (s-notes-20). Только в режиме правки; уходят тем же сохранением, что
 	// заголовок и тело.
 	Fields []FormRow `json:"fields"`
+	// Attendees — поле участников, как у правки события и задачи (Р3 списка
+	// равенства родов; кадра нет): уходит тем же сохранением; форма без
+	// строки набора участников не меняет. nil — чтение
+	Attendees *AttendeeField `json:"attendees"`
 	// Foreign — строка под текстом правки о свойствах, которых Carrel не
 	// знает: первое по имени и сколько ещё, готовой фразой — «Properties
 	// Carrel does not know — X-JTX-COLOR and two more — are kept unchanged
@@ -348,12 +359,15 @@ type NoteMeta struct {
 	Status Text `json:"status"`
 	// Link — ссылка заметки (URL): «Link», значение и Href, как у карточки
 	// события и задачи (Р8 списка равенства родов; кадра нет); nil — нет
-	Link    *Field        `json:"link"`
-	Related []TimelineRow `json:"related"`
-	Linked  []Field       `json:"linked"` // та же заметка в других тетрадях (S-16)
-	Attach  []AttachRow   `json:"attach"`
-	Actions []Action      `json:"actions"` // колонка: вложение, удаление
-	Menu    []MenuItem    `json:"menu"`    // «⋯» над текстом: Move, Copy, Publish a link
+	Link *Field `json:"link"`
+	// Attendees — люди заметки, как у события и задачи: организатор первым,
+	// за ним участники; только чтение (Р3 списка равенства родов; кадра нет)
+	Attendees []AttendeeRow `json:"attendees"`
+	Related   []TimelineRow `json:"related"`
+	Linked    []Field       `json:"linked"` // та же заметка в других тетрадях (S-16)
+	Attach    []AttachRow   `json:"attach"`
+	Actions   []Action      `json:"actions"` // колонка: вложение, удаление
+	Menu      []MenuItem    `json:"menu"`    // «⋯» над текстом: Move, Copy, Publish a link
 }
 
 type ConflictPage struct {

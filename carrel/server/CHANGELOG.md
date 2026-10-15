@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.244 — 2026-10-15
+
+### Changed
+
+- **A task and a note have attendees** (Р3 of
+  docs/plan/scans/kinds-parity.md), as an event does — VTODO and VJOURNAL
+  hold ATTENDEE too: their edits carry the field of attendees
+  (`TaskEditPage.attendees`, `NoteDoc.attendees`; a form without its line
+  changes no one), their cards and panels name the people, the organiser
+  first (`TaskPage.attendees`, `NoteMeta.attendees`, `Details.attendees`),
+  and `ATTENDEE` — a note's `ORGANIZER` too — is no longer kept as foreign.
+  No frame draws them yet (Typecase's task 179).
+
 ## v0.2.243 — 2026-10-15
 
 ### Changed

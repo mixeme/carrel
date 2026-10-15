@@ -167,7 +167,7 @@ type Details struct {
 	Fields    []Field       `json:"fields"`    // категории — строкой «Tags» с Field.Tags
 	Body      Text          `json:"body"`      // описание события и задачи, как есть
 	Rendered  []Block       `json:"rendered"`  // текст заметки, разобранный (C-6.9)
-	Attendees []AttendeeRow `json:"attendees"` // участники события, только чтение
+	Attendees []AttendeeRow `json:"attendees"` // люди события, задачи, заметки (Р3), только чтение
 	Attach    []AttachRow   `json:"attach"`
 	// AttachHint — строка под вложениями задачи (s-tasks-1): до какого
 	// объёма файл пишется в саму запись, а больше — в папку вложений, «…up

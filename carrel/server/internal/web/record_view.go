@@ -95,7 +95,7 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		// Priority, Tags — the card's order, monospaced where the frame
 		// sets them; and where the task lies, as its card says it.
 		d.Fields, _ = taskFields(c.tf, obj, true, s.recordTags(c, obj))
-		d.Body, d.Attach, d.Related = page.Body, page.Attach, page.Related
+		d.Body, d.Attendees, d.Attach, d.Related = page.Body, page.Attendees, page.Attach, page.Related
 		d.Source.Path, d.Source.Compared = page.Source.Path, page.Source.Compared
 		d.Actions = shown(ops.edit, attach, ops.del)
 		if attach != nil {
@@ -106,7 +106,7 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		// Where the note lies and when it was written, in one line under
 		// its title (s-notes-1); no field repeats the date.
 		d.Date = text(noteWhen(obj, c.tf))
-		d.Rendered, d.Attach, d.Related = page.Doc.Rendered, page.Meta.Attach, page.Meta.Related
+		d.Rendered, d.Attendees, d.Attach, d.Related = page.Doc.Rendered, page.Meta.Attendees, page.Meta.Attach, page.Meta.Related
 		d.Fields = tagsField(s.recordTags(c, obj))
 		// The page of the note is a bare icon beside Edit; the deletion is
 		// the last item of the menu (s-notes-12), not the foot of the panel.
@@ -563,7 +563,7 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	if cal.HasRecurrence(obj) {
 		page.Recurrence = s.recurrenceBlock(obj, tf)
 	}
-	page.Attendees = eventPeople(obj, s.knownPeople(c.sess))
+	page.Attendees = recordPeople(obj, s.knownPeople(c.sess))
 	page.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Source.Path, page.Source.Compared = text(obj.Path), s.eventCompared(c, uid, obj)
 	page.Related = s.relatedRows(c, obj)
@@ -670,6 +670,9 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 	page.Fields = fields
 	page.Body = text(cal.Description(obj))
 	page.Done = taskDone(obj)
+	// The people, as an event's card names them (Р3; no frame draws them
+	// yet — Typecase's task 179).
+	page.Attendees = recordPeople(obj, s.knownPeople(c.sess))
 	page.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Related = s.relatedRows(c, obj)
 	page.Source.Path, page.Source.Compared = text(obj.Path), s.eventCompared(c, uid, obj)
@@ -735,6 +738,8 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	if v := firstValue(obj, "URL"); v != "" {
 		page.Meta.Link = &view.Field{Label: "Link", Value: text(v), Href: webHref(v)}
 	}
+	// The people, as an event's and a task's card names them (Р3).
+	page.Meta.Attendees = recordPeople(obj, s.knownPeople(c.sess))
 	page.Meta.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Meta.Related = s.relatedRows(c, obj)
 	return page
@@ -754,7 +759,7 @@ func calendarFields(obj *model.Object) []view.Field {
 	if p := priorityOf(obj); p <= 9 && obj.MainComponent() == "VEVENT" {
 		out = append(out, view.Field{Label: "Priority", Value: text(strconv.Itoa(p)), Mono: true})
 	}
-	// An event's organiser is the first of its people (eventPeople,
+	// An event's organiser is the first of its people (recordPeople,
 	// s-agenda-2), not a field.
 	for _, v := range obj.Props()["ORGANIZER"] {
 		if obj.MainComponent() == "VEVENT" {

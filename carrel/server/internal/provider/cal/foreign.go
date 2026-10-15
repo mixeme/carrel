@@ -9,14 +9,14 @@ import (
 )
 
 // noteKnown are the properties of a note that its page shows or keeps by
-// itself: the form (title, text, date, tags, status, link, relation), the
-// attachments, and the bookkeeping every calendar object carries. Anything
+// itself: the form (title, text, date, tags, status, link, relation, the
+// people), the attachments, and the bookkeeping every calendar object carries. Anything
 // else is the property of another client, kept as it is (S-7) and named under
 // the text of the edit (s-notes-20).
 var noteKnown = map[string]bool{
 	"UID": true, "DTSTAMP": true, "CREATED": true, "LAST-MODIFIED": true, "SEQUENCE": true,
 	"SUMMARY": true, "DESCRIPTION": true, "DTSTART": true, "CATEGORIES": true, "URL": true, "STATUS": true,
-	"RELATED-TO": true, "ATTACH": true,
+	"RELATED-TO": true, "ATTACH": true, "ORGANIZER": true, "ATTENDEE": true,
 }
 
 // NoteForeign are the names of the properties of a note Carrel does not
@@ -67,7 +67,7 @@ func EventForeign(obj *model.Object) []string {
 
 // taskKnown are the properties of a task its card and its form show or keep
 // by themselves: the fields, the times, the progress, the rule it repeats
-// by, the organiser its card names, the attachments and links, and the
+// by, the people, the attachments and links, and the
 // bookkeeping every calendar object carries. SEQUENCE is shown as kept, as
 // an event's is.
 var taskKnown = map[string]bool{
@@ -75,7 +75,7 @@ var taskKnown = map[string]bool{
 	"SUMMARY": true, "DESCRIPTION": true, "LOCATION": true, "CATEGORIES": true, "URL": true,
 	"DTSTART": true, "DUE": true, "DURATION": true, "RRULE": true, "RDATE": true, "EXDATE": true, "RECURRENCE-ID": true,
 	"STATUS": true, "PRIORITY": true, "PERCENT-COMPLETE": true, "COMPLETED": true,
-	"ORGANIZER": true, "ATTACH": true, "RELATED-TO": true,
+	"ORGANIZER": true, "ATTENDEE": true, "ATTACH": true, "RELATED-TO": true,
 }
 
 // TaskForeign are the names of the properties of a task Carrel does not

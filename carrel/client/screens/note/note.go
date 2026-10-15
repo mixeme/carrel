@@ -234,6 +234,23 @@ func read(p *view.NotePage) []w.MainPart {
 		}
 		secs = append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Related"}, Items: []w.DocmetaPart{refs}})
 	}
+	// The note's people, as an event's and a task's card names them — the
+	// organiser first —, drawn as Related draws its records: the frame lets
+	// a section stand beside its own only in their shape. The name leads to
+	// the card when the books know it, else the address; what each said
+	// muted (Р3 of the kinds-parity list; no frame draws them yet —
+	// Typecase's task 179).
+	if len(p.Meta.Attendees) > 0 {
+		refs := w.DocRefs{}
+		for _, a := range p.Meta.Attendees {
+			name := string(a.Name)
+			if a.Href == "" {
+				name = string(a.Email)
+			}
+			refs.Items = append(refs.Items, w.DocRef{Name: name, Href: a.Href, What: w.Dim{Parts: []w.Inline{w.Text(lead + string(a.Status))}}})
+		}
+		secs = append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Attendees"}, Items: []w.DocmetaPart{refs}})
+	}
 	secs = append(secs, column(p)...)
 	return append(main, w.DocLayout{Items: []w.DocLayoutPart{doc, w.Docmeta{Sections: secs, Danger: danger(p.Meta.Actions)}}})
 }

@@ -457,6 +457,16 @@ func side(d view.Details) *w.Side {
 		}
 		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
 	}
+	// The task's people, as the agenda's panel names an event's (Р3 of the
+	// server's kinds-parity list; no frame draws them yet — Typecase's task
+	// 179), drawn as Related draws its records (bind.Person).
+	if len(d.Attendees) > 0 {
+		var lines [][]w.SecItemPart
+		for _, a := range d.Attendees {
+			lines = append(lines, bind.Person(a, lead))
+		}
+		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Attendees"}, w.SecList{Items: lines}}})
+	}
 	if d.Source.Path != "" {
 		// Where the task lies and how it compares with the server, as its
 		// card says it (s-tasks-1).

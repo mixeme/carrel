@@ -57,8 +57,10 @@ const (
 //   - The fields: Status, Due (overdue in alarm), Starts, Complete and
 //     Priority monospaced, Reminders, Where, Link, the tags.
 //   - The description; the attachments with Attach and its arrow, each where
-//     it is kept; the related records with their kind and day; the same task
-//     in other lists; the source.
+//     it is kept; the related records with their kind and day; the people,
+//     the organiser first, as an event's card names them (Р3 of the server's
+//     kinds-parity list; no frame draws them yet — Typecase's task 179); the
+//     same task in other lists; the source.
 //   - The deletion at the foot.
 func Screen(p *view.TaskPage) w.Shell {
 	h := w.Head{Title: &w.HeadTitle{Text: string(p.Summary)}, Subs: bind.Sub(p.Subtitle)}
@@ -128,6 +130,14 @@ func Screen(p *view.TaskPage) w.Shell {
 			})
 		}
 		main = append(main, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
+	}
+	// The people, drawn as Related draws its records (bind.Person).
+	if len(p.Attendees) > 0 {
+		var lines [][]w.SecItemPart
+		for _, a := range p.Attendees {
+			lines = append(lines, bind.Person(a, lead))
+		}
+		main = append(main, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Attendees"}, w.SecList{Items: lines}}})
 	}
 	if len(p.Linked) > 0 {
 		var lines [][]w.SecItemPart

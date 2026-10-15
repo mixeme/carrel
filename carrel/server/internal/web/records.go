@@ -1480,7 +1480,7 @@ func agendaBadges(o *model.Object, it listed) []view.Badge {
 		out = append(out, view.Badge{Label: "cancelled", Role: view.BadgeAlert})
 	}
 	out = append(out, linkedBadge(it)...)
-	if n := len(eventPeople(o, nil)); n > 0 {
+	if n := len(recordPeople(o, nil)); n > 0 {
 		out = append(out, view.Badge{Label: text(plural(n, "attendee")), Role: view.BadgeNeutral})
 	}
 	if cal.HasRecurrence(o) {
@@ -1506,11 +1506,12 @@ func repeatsWord(raw string) string {
 	return "repeats " + w[0]
 }
 
-// eventPeople are the people of an event as its card lists them
-// (s-agenda-1, s-agenda-2): the organiser first, as one of them («4
+// recordPeople are the people of an event as its card lists them
+// (s-agenda-1, s-agenda-2), and of a task and a note as theirs do (Р3 of
+// scans/kinds-parity.md): the organiser first, as one of them («4
 // attendees» of three ATTENDEE and the ORGANIZER), then the attendees. An
 // organiser who is an attendee too is listed once, as the organiser.
-func eventPeople(o *model.Object, known map[string]knownPerson) []view.AttendeeRow {
+func recordPeople(o *model.Object, known map[string]knownPerson) []view.AttendeeRow {
 	var out []view.AttendeeRow
 	row := func(name, email, status string) view.AttendeeRow {
 		p, ok := known[dupes.NormEmail(email)]
