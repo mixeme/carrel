@@ -1364,6 +1364,10 @@ type change struct {
 	zone     *time.Location
 	zoneYear int
 	errors   map[string]string
+	// restored are the properties outside the form a conflict puts back as
+	// the version opened held them (model.SetRaw; Рв6): the save may change
+	// them, and they must read back so.
+	restored map[string][]model.RawValue
 }
 
 // buildChange turns the fields that differ between have and want into patch
@@ -3571,9 +3575,10 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	// read at. Without it in the cache, against the server's version — then
 	// the conflict screen may also offer what only the server changed.
 	base, baseKnown := have, false
+	var opened *model.Object
 	if read, ok := s.readVersion(c, obj.Path, etag); ok {
 		if rv, _, err := s.currentValues(c, read); err == nil {
-			base, baseKnown = rv, true
+			base, baseKnown, opened = rv, true, read
 		}
 	}
 
@@ -3654,7 +3659,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		// or a display name renamed elsewhere would put an N in the draft
 		// nobody typed.
 		fillNames(c.spec.kind, base, typed)
-		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed), base, st.notebook, !baseKnown)
+		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed), base, opened, st.notebook, !baseKnown)
 		s.redirect(w, r, c.recordPath(uid)+"/conflict")
 		return
 	case err != nil:

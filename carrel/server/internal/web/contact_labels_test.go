@@ -84,7 +84,7 @@ func TestContactRowLabelsAndAddresses(t *testing.T) {
 }
 
 // A label changed alone is a change too: when the card moved on the server
-// meanwhile (S-8), the conflict screen names the phone with its label, and
+// meanwhile (S-8), the conflict screen names the phone under each label, and
 // "Use only my edit" writes the label.
 func TestRowLabelSurvivesTheConflictScreen(t *testing.T) {
 	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nTEL;TYPE=work:+44 20 1\nEND:VCARD\n")
@@ -98,9 +98,16 @@ func TestRowLabelSurvivesTheConflictScreen(t *testing.T) {
 	}
 	page := decode[view.ConflictPage](t, f.h.do(get(rec+"/conflict", f.sess)))
 	// FN, which only the server changed, is a card of its own, the server's
-	// chosen (Рв2, Рв4; until v0.2.271 it was not shown).
-	if len(page.Rows) != 2 || page.Rows[0].Property != "FN" || page.Rows[0].Diff != view.DiffTheirs || page.Rows[0].Choice != view.ChoiceTheirs ||
-		page.Rows[1].Property != "TEL" || page.Rows[1].Mine != "+44 20 1 · cell" || page.Rows[1].Theirs != "+44 20 1 · work" {
+	// chosen (Рв2, Рв4; until v0.2.271 it was not shown). The phone is a
+	// card per label (Рв6, s-conflict-1: TEL;work): the number came under
+	// cell and left work; until v0.2.273 one card «TEL» with the label after
+	// each number.
+	want := []view.ConflictRow{
+		{Property: "FN", Mine: "Ada Lovelace", Theirs: "Ada Byron", Choice: view.ChoiceTheirs, Name: "choice.0", Diff: view.DiffTheirs},
+		{Property: "TEL;cell", Mine: "+44 20 1", Theirs: "", Choice: view.ChoiceMine, Name: "choice.1", Diff: view.DiffMine},
+		{Property: "TEL;work", Mine: "", Theirs: "+44 20 1", Choice: view.ChoiceMine, Name: "choice.2", Diff: view.DiffMine},
+	}
+	if len(page.Rows) != len(want) || page.Rows[0] != want[0] || page.Rows[1] != want[1] || page.Rows[2] != want[2] {
 		t.Fatalf("rows = %+v", page.Rows)
 	}
 	if resp := f.h.do(postForm(actionHref(t, page.Actions, "conflict.mine"), f.sess, url.Values{})); resp.Code != 303 {

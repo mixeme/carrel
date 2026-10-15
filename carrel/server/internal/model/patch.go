@@ -82,6 +82,19 @@ type SetValues struct {
 func (SetValues) patchOp()       {}
 func (o SetValues) prop() string { return o.Prop }
 
+// SetRaw puts a property back as another version of the record held it:
+// every value with its parameters, its group and the line it arrived in
+// (Props of that version). No values removes the property. It is how a
+// property the form does not show is restored (S-8, the conflict screen's
+// «only on the server»), not a way to build one.
+type SetRaw struct {
+	Prop   string
+	Values []RawValue
+}
+
+func (SetRaw) patchOp()       {}
+func (o SetRaw) prop() string { return o.Prop }
+
 // RemoveProp deletes a property entirely. Empty value is not removal (S-7).
 type RemoveProp struct {
 	Prop string
@@ -345,6 +358,13 @@ func applyOp(p payload, op PatchOp) error {
 			}
 		}
 		p.props[key] = propState{values: vals}
+	case SetRaw:
+		key := strings.ToUpper(o.Prop)
+		if len(o.Values) == 0 {
+			delete(p.props, key)
+			break
+		}
+		p.props[key] = ingest(map[string][]RawValue{key: o.Values})[key]
 	case RemoveProp:
 		delete(p.props, strings.ToUpper(o.Prop))
 	case SetParam:

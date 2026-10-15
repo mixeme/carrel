@@ -190,3 +190,33 @@ func TestRemoveValueTakesOneValue(t *testing.T) {
 		t.Errorf("no error for a value that is not there")
 	}
 }
+
+// S-8: a property the form does not show is put back as the version the
+// form was opened with held it — its values, parameters, group and lines —
+// and with no values it goes.
+func TestSetRawPutsAPropertyBack(t *testing.T) {
+	obj := NewObject("/c/u.vcf", `"2"`, map[string][]RawValue{
+		"X-EVOLUTION-FILE-AS": {{Text: "Ковалёва, Анна", Wire: `X-EVOLUTION-FILE-AS:Ковалёва\, Анна`}},
+		"X-ABLABEL":           {{Text: "new", Group: "item1"}},
+	})
+	held := []RawValue{{Text: "old", Params: map[string]string{"x-kind": "a"}, Group: "item2", Wire: "item2.X-ABLABEL;X-KIND=a:old"}}
+	p, err := NewPatch(SetRaw{Prop: "x-ablabel", Values: held}, SetRaw{Prop: "X-EVOLUTION-FILE-AS"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Apply(obj); err != nil {
+		t.Fatal(err)
+	}
+	got := obj.Props()
+	if v := got["X-ABLABEL"]; len(v) != 1 || v[0].Text != "old" || v[0].Group != "item2" || v[0].Params["X-KIND"] != "a" || v[0].Wire != held[0].Wire {
+		t.Errorf("X-ABLABEL = %+v", v)
+	}
+	if _, ok := got["X-EVOLUTION-FILE-AS"]; ok {
+		t.Errorf("a property put back with no values is still there")
+	}
+	// The values handed in are the caller's: the record holds its own.
+	held[0].Params["x-kind"] = "b"
+	if obj.Props()["X-ABLABEL"][0].Params["X-KIND"] != "a" {
+		t.Errorf("the record shares its parameters with the caller")
+	}
+}

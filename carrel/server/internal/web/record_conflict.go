@@ -3,10 +3,14 @@ package web
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
+
+	"github.com/emersion/go-ical"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/model"
@@ -32,6 +36,12 @@ type editDraft struct {
 	// (s-conflict-1, -4; Рв2). Empty when that version was no longer held
 	// (Unsure).
 	Base formValues `json:"base,omitempty"`
+	// BaseProps are the properties of that version no field of the form
+	// shows (outsideForm), as it held them: one the server alone changed is
+	// a card of its own (s-conflict-1: X-EVOLUTION-FILE-AS «only on the
+	// server»), and «Your edit» puts it back as it was (Рв6). Empty with
+	// Base.
+	BaseProps map[string][]model.RawValue `json:"baseProps,omitempty"`
 	// Notebook is the notebook a note's edit chose other than its own
 	// (s-notes-20): part of the edit, so the move waits with it and happens
 	// once the person's edit is written (S-18).
@@ -43,8 +53,11 @@ type editDraft struct {
 	Unsure bool `json:"unsure,omitempty"`
 }
 
-func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time, mine, base formValues, notebook string, unsure bool) {
+// saveDraft keeps a refused edit; opened is the version the form was opened
+// with, nil when it was no longer held (unsure).
+func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time, mine, base formValues, opened *model.Object, notebook string, unsure bool) {
 	held := formValues{}
+	var props map[string][]model.RawValue
 	if !unsure {
 		for _, f := range editFields[c.spec.kind] {
 			held[f.name] = base[f.name]
@@ -52,10 +65,18 @@ func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time,
 				held[f.name+".type"] = v
 			}
 		}
+		for name, vals := range opened.Props() {
+			if outsideForm(c.spec.kind, name) {
+				if props == nil {
+					props = map[string][]model.RawValue{}
+				}
+				props[name] = vals
+			}
+		}
 	}
 	data, err := json.Marshal(editDraft{
 		Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, UID: uid, ETag: etag, ReadAt: readAt, Mine: mine, Base: held,
-		Notebook: notebook, Unsure: unsure,
+		BaseProps: props, Notebook: notebook, Unsure: unsure,
 	})
 	if err == nil {
 		c.sess.SetDraft(session.DraftRejectedEdit, data)
@@ -75,27 +96,57 @@ func clearDraft(c *collectionCtx) {
 	c.sess.SetDraft(session.DraftRejectedEdit, nil)
 }
 
-// conflictFields are the fields the person changed that the server version
-// does not already hold, in form order. Row N of the conflict page is field N
-// here; its choice comes back as choice.N.
-func conflictFields(kind view.Kind, d editDraft, theirs formValues) []editField {
-	var out []editField
-	for _, f := range editFields[kind] {
-		mine, changed := d.Mine[f.name]
-		relabelled := f.typed && !sameLabels(d.Mine[f.name+".type"], theirs[f.name+".type"])
-		typed := strings.TrimSpace(first(d.Mine[f.name+".add"])) != ""
-		if changed && (!sameRows(mine, theirs[f.name]) || relabelled || typed) {
-			out = append(out, f)
-		}
-	}
-	return out
+// notCompared are the properties outside the form a conflict does not ask
+// about: what names the record and its format, what every write stamps,
+// and what another page of Carrel writes — the photo, the files.
+var notCompared = map[string]bool{
+	"UID": true, "VERSION": true, "PRODID": true, "SEQUENCE": true, "CREATED": true,
+	"RECURRENCE-ID": true, "PHOTO": true, "ATTACH": true,
 }
 
-// conflictRow is a card of the conflict screen: the field and how it
-// differs.
+// outsideForm: no field of the form shows the property, nor writes it
+// beside one (editAlso), and the conflict screen compares it (Рв6).
+func outsideForm(kind view.Kind, name string) bool {
+	if notCompared[name] || isEditStamp(name) {
+		return false
+	}
+	for _, f := range editFields[kind] {
+		if f.prop == name {
+			return false
+		}
+	}
+	for _, props := range editAlso[kind] {
+		if slices.Contains(props, name) {
+			return false
+		}
+	}
+	return true
+}
+
+// conflictRow is a card of the conflict screen: what it is of and how it
+// differs. A field of the form is a card; a field whose rows have labels is
+// a card per label (s-conflict-1: TEL;work), and a property the form does
+// not show is one of its own (X-EVOLUTION-FILE-AS; Рв6).
 type conflictRow struct {
 	field editField
 	diff  view.ConflictDiff
+	// byLabel: the card holds the rows of field under one label, label its
+	// key (labelKey); empty is the rows with none.
+	byLabel bool
+	label   string
+	// prop is the property outside the form the card is of.
+	prop string
+}
+
+// name is the card's property as the record names it (s-conflict-1).
+func (cr conflictRow) name() string {
+	switch {
+	case cr.prop != "":
+		return cr.prop
+	case cr.byLabel && cr.label != "":
+		return cr.field.prop + ";" + cr.label
+	}
+	return cr.field.prop
 }
 
 // choice is what a card has chosen before the person does (Рв4; s-conflict-1,
@@ -107,36 +158,171 @@ func (cr conflictRow) choice() view.ConflictChoice {
 	return view.ChoiceMine
 }
 
-// conflictRows are the cards of the conflict screen in form order: each field
-// the person changed that the server does not already hold (conflictFields),
-// and — when the version the form was opened with is known — each the
-// server alone changed (s-conflict-4: «DUE · only on the server»). Row N's
-// choice comes back as choice.N.
-func conflictRows(kind view.Kind, d editDraft, theirs formValues) []conflictRow {
-	mine := map[string]bool{}
-	for _, f := range conflictFields(kind, d, theirs) {
-		mine[f.name] = true
+// byLabel: the field's rows are told apart by their labels, and a conflict
+// is about the rows of one (Рв6: TEL;work and TEL;cell apart).
+func byLabel(f editField) bool {
+	return f.typed && (f.typ == fieldMulti || f.typ == fieldAddress)
+}
+
+// labelKey is the label a row is filed under: the one it shows (shownLabel),
+// whatever its case — TYPE=WORK,PREF and the «work» a form posts are one.
+func labelKey(prop, raw string) string {
+	shown, _ := shownLabel(prop, raw)
+	return strings.ToLower(shown)
+}
+
+// emptyRow: the row holds nothing — the empty one a form ends with.
+func emptyRow(f editField, v string) bool {
+	if f.typ == fieldAddress {
+		return addressRowParts(v) == [5]string{}
 	}
-	var out []conflictRow
-	for _, f := range editFields[kind] {
-		switch {
-		case mine[f.name]:
-			out = append(out, conflictRow{f, conflictDiff(f, d, theirs)})
-		case d.Unsure || d.Base == nil:
-		default:
-			if _, changed := d.Mine[f.name]; changed {
-				continue // the person's, and the server agrees (Agree)
-			}
-			if f.typ == fieldZone {
-				continue // the zone goes with the time it is of (s-conflict-4: DUE alone)
-			}
-			base, held := d.Base[f.name]
-			if held && !sameRows(base, theirs[f.name]) {
-				out = append(out, conflictRow{f, view.DiffTheirs})
-			}
+	return strings.TrimSpace(v) == ""
+}
+
+// rowsUnder are the rows of f in vals filed under key, in order.
+func rowsUnder(f editField, vals formValues, key string) []string {
+	var out []string
+	labels := vals[f.name+".type"]
+	for i, v := range vals[f.name] {
+		if !emptyRow(f, v) && labelKey(f.prop, rowAt(labels, i)) == key {
+			out = append(out, v)
 		}
 	}
 	return out
+}
+
+// conflictCards are the cards of the conflict screen and the properties that
+// agree (Рв5), in form order and then the properties outside it by name:
+// each field the person changed that the server does not already hold and,
+// when the version the form was opened with is known, each the server alone
+// changed (s-conflict-4: «DUE · only on the server»; s-conflict-1:
+// X-EVOLUTION-FILE-AS). theirs and held are the server version, as the form
+// reads it and as it is. Card N's choice comes back as choice.N.
+func conflictCards(kind view.Kind, d editDraft, theirs formValues, held map[string][]model.RawValue) ([]conflictRow, []view.Text) {
+	known := !d.Unsure && d.Base != nil
+	var rows []conflictRow
+	var agree []view.Text
+	for _, f := range editFields[kind] {
+		if byLabel(f) {
+			r, a := labelCards(f, d, theirs, known)
+			rows, agree = append(rows, r...), append(agree, a...)
+			continue
+		}
+		mine, changed := d.Mine[f.name]
+		typed := strings.TrimSpace(first(d.Mine[f.name+".add"])) != ""
+		switch {
+		case changed && (!sameRows(mine, theirs[f.name]) || typed):
+			rows = append(rows, conflictRow{field: f, diff: conflictDiff(f, d, theirs)})
+		case changed:
+			agree = append(agree, text(f.prop))
+		case !known || f.typ == fieldZone:
+			// Unknown without the version opened; the zone goes with the
+			// time it is of (s-conflict-4: DUE alone).
+		default:
+			if base, ok := d.Base[f.name]; ok && !sameRows(base, theirs[f.name]) {
+				rows = append(rows, conflictRow{field: f, diff: view.DiffTheirs})
+			}
+		}
+	}
+	if !known {
+		return rows, agree
+	}
+	var names []string
+	for name := range d.BaseProps {
+		names = append(names, name)
+	}
+	for name := range held {
+		if _, ok := d.BaseProps[name]; !ok && outsideForm(kind, name) {
+			names = append(names, name)
+		}
+	}
+	slices.Sort(names)
+	for _, name := range names {
+		if !sameRaw(d.BaseProps[name], held[name]) {
+			rows = append(rows, conflictRow{prop: name, diff: view.DiffTheirs})
+		}
+	}
+	return rows, agree
+}
+
+// labelCards are the cards of a field whose rows have labels: one per label
+// whose rows differ (Рв6), in the order the labels come in the edit, the
+// server version and the version opened; and the labels whose rows the
+// person changed to what the server holds.
+func labelCards(f editField, d editDraft, theirs formValues, known bool) ([]conflictRow, []view.Text) {
+	_, changed := d.Mine[f.name]
+	mine := d.Mine
+	if !changed {
+		mine = d.Base
+	}
+	var keys []string
+	for _, vals := range []formValues{mine, theirs, d.Base} {
+		labels := vals[f.name+".type"]
+		for i, v := range vals[f.name] {
+			if key := labelKey(f.prop, rowAt(labels, i)); !emptyRow(f, v) && !slices.Contains(keys, key) {
+				keys = append(keys, key)
+			}
+		}
+	}
+	var rows []conflictRow
+	var agree []view.Text
+	for _, key := range keys {
+		m, t := rowsUnder(f, mine, key), rowsUnder(f, theirs, key)
+		b := rowsUnder(f, d.Base, key)
+		card := conflictRow{field: f, byLabel: true, label: key}
+		switch {
+		case changed && !known:
+			// Without the version opened the person's rows are told from
+			// the server's only where they differ.
+			if !slices.Equal(m, t) {
+				card.diff = view.DiffUnknown
+				rows = append(rows, card)
+			}
+		case changed && !slices.Equal(m, b):
+			switch {
+			case slices.Equal(m, t):
+				agree = append(agree, text(card.name()))
+				continue
+			case slices.Equal(t, b):
+				card.diff = view.DiffMine
+			default:
+				card.diff = view.DiffBoth
+			}
+			rows = append(rows, card)
+		case known && !slices.Equal(t, b):
+			card.diff = view.DiffTheirs
+			rows = append(rows, card)
+		}
+	}
+	return rows, agree
+}
+
+// sameRaw: two versions hold a property alike — the same values with the
+// same parameters, however each is spelt on its line or grouped.
+func sameRaw(a, b []model.RawValue) bool {
+	return slices.EqualFunc(a, b, func(x, y model.RawValue) bool {
+		return x.Text == y.Text && maps.Equal(x.Params, y.Params)
+	})
+}
+
+// rawShown is a property outside the form as the screen shows it: its
+// values as text, a calendar's unescaped as its own texts are.
+func (c *collectionCtx) rawShown(name string, vals []model.RawValue) string {
+	var parts []string
+	for _, v := range vals {
+		t := v.Text
+		if c.card == nil {
+			p := ical.NewProp(name)
+			p.Value = t
+			if s, err := p.Text(); err == nil {
+				t = s
+			}
+		}
+		if strings.TrimSpace(t) != "" {
+			parts = append(parts, t)
+		}
+	}
+	return strings.Join(parts, ", ")
 }
 
 // conflictDiff is how a field differs (Рв2): both sides changed it, or only
@@ -149,26 +335,43 @@ func conflictDiff(f editField, d editDraft, theirs formValues) view.ConflictDiff
 	if _, held := d.Base[f.name]; !held {
 		return view.DiffUnknown
 	}
-	if sameRows(d.Base[f.name], theirs[f.name]) && (!f.typed || sameLabels(d.Base[f.name+".type"], theirs[f.name+".type"])) {
+	if sameRows(d.Base[f.name], theirs[f.name]) {
 		return view.DiffMine
 	}
 	return view.DiffBoth
 }
 
-// agreeing are the properties the person changed to what the server version
-// already holds (s-conflict-3, Рв5): said above the cards, kept as they are.
-func agreeing(kind view.Kind, d editDraft, theirs formValues) []view.Text {
-	var out []view.Text
-	for _, f := range editFields[kind] {
-		mine, changed := d.Mine[f.name]
-		if changed && sameRows(mine, theirs[f.name]) && (!f.typed || sameLabels(d.Mine[f.name+".type"], theirs[f.name+".type"])) {
-			out = append(out, text(f.prop))
+// putUnder gives want's rows of f under key the rows src holds under it, where
+// the first of them stood, or after the rest; what is under the other labels
+// stays as it is. Each row keeps its label as src spells it.
+func putUnder(f editField, want, src formValues, key string) {
+	var rows, labels []string
+	var put, putLabels []string
+	srcLabels := src[f.name+".type"]
+	for i, v := range src[f.name] {
+		if !emptyRow(f, v) && labelKey(f.prop, rowAt(srcLabels, i)) == key {
+			put, putLabels = append(put, v), append(putLabels, rowAt(srcLabels, i))
 		}
 	}
-	return out
+	placed := false
+	have := want[f.name+".type"]
+	for i, v := range want[f.name] {
+		switch l := rowAt(have, i); {
+		case emptyRow(f, v):
+		case labelKey(f.prop, l) != key:
+			rows, labels = append(rows, v), append(labels, l)
+		case !placed:
+			rows, labels = append(rows, put...), append(labels, putLabels...)
+			placed = true
+		}
+	}
+	if !placed {
+		rows, labels = append(rows, put...), append(labels, putLabels...)
+	}
+	want[f.name], want[f.name+".type"] = append(rows, ""), append(labels, "")
 }
 
-func (s *Server) showValues(c *collectionCtx, f editField, vals, labels []string, alarms []cal.Alarm) string {
+func (s *Server) showValues(c *collectionCtx, f editField, vals []string, alarms []cal.Alarm) string {
 	var parts []string
 	switch f.typ {
 	case fieldTime:
@@ -211,14 +414,11 @@ func (s *Server) showValues(c *collectionCtx, f editField, vals, labels []string
 			}
 		}
 	default:
-		for i, v := range vals {
-			if strings.TrimSpace(v) == "" {
-				continue
+		// A row's label is in the card's name (TEL;work), not after it.
+		for _, v := range vals {
+			if strings.TrimSpace(v) != "" {
+				parts = append(parts, v)
 			}
-			if i < len(labels) && labels[i] != "" {
-				v += " · " + labels[i]
-			}
-			parts = append(parts, v)
 		}
 	}
 	if len(parts) == 0 {
@@ -251,20 +451,32 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 	// written.
 	page.Subtitle = text("Another client changed this " + string(c.spec.kind) +
 		" while you were editing it. Nothing has been overwritten.")
-	page.Agree = agreeing(c.spec.kind, d, theirs)
-	for i, cr := range conflictRows(c.spec.kind, d, theirs) {
+	held := obj.Props()
+	rows, agree := conflictCards(c.spec.kind, d, theirs, held)
+	page.Agree = agree
+	for i, cr := range rows {
 		f, mine := cr.field, d.Mine
 		if cr.diff == view.DiffTheirs {
 			// The person did not touch it: «Your edit» is what was opened.
 			mine = d.Base
 		}
+		var shownMine, shownTheirs string
+		switch {
+		case cr.prop != "":
+			shownMine, shownTheirs = c.rawShown(cr.prop, d.BaseProps[cr.prop]), c.rawShown(cr.prop, held[cr.prop])
+		case cr.byLabel:
+			shownMine = s.showValues(c, f, rowsUnder(f, mine, cr.label), alarms)
+			shownTheirs = s.showValues(c, f, rowsUnder(f, theirs, cr.label), alarms)
+		default:
+			shownMine, shownTheirs = s.showValues(c, f, mine[f.name], alarms), s.showValues(c, f, theirs[f.name], alarms)
+		}
 		page.Rows = append(page.Rows, view.ConflictRow{
 			// The record's own name for the property, not a label of ours
 			// (s-conflict-1): a conflict is read against the file, and a
 			// property Carrel does not model has no label to invent.
-			Property: text(f.prop),
-			Mine:     text(s.showValues(c, f, mine[f.name], mine[f.name+".type"], alarms)),
-			Theirs:   text(s.showValues(c, f, theirs[f.name], theirs[f.name+".type"], alarms)),
+			Property: text(cr.name()),
+			Mine:     text(shownMine),
+			Theirs:   text(shownTheirs),
 			Choice:   cr.choice(),
 			Name:     choiceField(i),
 			Diff:     cr.diff,
@@ -405,36 +617,49 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 	for k, v := range theirs {
 		want[k] = v
 	}
-	for i, cr := range conflictRows(c.spec.kind, d, theirs) {
+	rows, _ := conflictCards(c.spec.kind, d, theirs, obj.Props())
+	restored := map[string][]model.RawValue{}
+	for i, cr := range rows {
 		f := cr.field
 		if cr.diff == view.DiffTheirs {
 			// A field only the server changed: kept as the server holds it,
 			// unless «Your edit» — what was opened — was chosen for it. «Use
 			// only my edit» writes the person's changes, not this.
-			if op != "mine" && chosenSide(r, i, cr.choice()) == view.ChoiceMine {
+			if op == "mine" || chosenSide(r, i, cr.choice()) != view.ChoiceMine {
+				continue
+			}
+			switch {
+			case cr.prop != "":
+				restored[cr.prop] = d.BaseProps[cr.prop]
+			case cr.byLabel:
+				putUnder(f, want, d.Base, cr.label)
+			default:
 				want[f.name] = d.Base[f.name]
-				if f.typed {
-					want[f.name+".type"] = d.Base[f.name+".type"]
-				}
 			}
 			continue
 		}
-		if op == "mine" || chosenSide(r, i, view.ChoiceMine) == view.ChoiceMine {
-			want[f.name] = d.Mine[f.name]
-			if f.typed {
-				want[f.name+".type"] = d.Mine[f.name+".type"]
-			}
-			// What the form sent beside the field goes with it
-			// (changedValues).
-			if line, ok := d.Mine[f.name+".add"]; ok {
-				want[f.name+".add"] = line
-			}
-			if box, ok := d.Mine[taskDayBox]; ok && f.taskDay {
-				want[taskDayBox] = box
-			}
+		if op != "mine" && chosenSide(r, i, view.ChoiceMine) != view.ChoiceMine {
+			continue
+		}
+		if cr.byLabel {
+			putUnder(f, want, d.Mine, cr.label)
+			continue
+		}
+		want[f.name] = d.Mine[f.name]
+		// What the form sent beside the field goes with it (changedValues).
+		if line, ok := d.Mine[f.name+".add"]; ok {
+			want[f.name+".add"] = line
+		}
+		if box, ok := d.Mine[taskDayBox]; ok && f.taskDay {
+			want[taskDayBox] = box
 		}
 	}
 	ch := s.buildChange(c, obj, alarms, theirs, want, time.Now())
+	// A property outside the form goes back as the version opened held it.
+	for _, name := range slices.Sorted(maps.Keys(restored)) {
+		ch.ops = append(ch.ops, model.SetRaw{Prop: name, Values: restored[name]})
+	}
+	ch.restored = restored
 	if len(ch.errors) > 0 {
 		var lines []view.Text
 		for name, msg := range ch.errors {

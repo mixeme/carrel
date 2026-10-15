@@ -1141,18 +1141,33 @@ func TestFixtureContactConflict(t *testing.T) {
 	// card after it. That is also where the counts in the rail come from.
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 
+	// As s-conflict-1 (Рв6, Рв11): the card was opened without its work
+	// phone, its note and its file-as line, under another display name and
+	// address. The person gives it the name, the work phone, a new address
+	// and the note of the set; meanwhile the other client gave it the same
+	// name, an address of its own and the file-as line — FN agrees, TEL;work
+	// and NOTE are only in the edit, EMAIL;work both changed, and
+	// X-EVOLUTION-FILE-AS, which the form does not show, only the server.
+	at := davtest.AddressBookHome + "kontakty/" + uid + ".vcf"
+	set := setRecord(t, "nextcloud-home/kontakty.vcf", uid)
+	base := strings.Replace(set, "FN:Анна Ковалёва\n", "FN:Ковалёва Анна\n", 1)
+	base = strings.Replace(base, "TEL;TYPE=WORK:+7 495 120-45-00\n", "", 1)
+	base = strings.Replace(base, "EMAIL;TYPE=WORK:a.kovaleva@example.org\n", "EMAIL;TYPE=WORK:anna@slovo.example\n", 1)
+	base = regexp.MustCompile(`(?m)^NOTE:.*\n( .*\n)*`).ReplaceAllString(base, "")
+	base = strings.Replace(base, "X-EVOLUTION-FILE-AS:Ковалёва\\, Анна\n", "", 1)
+	app.servers["nextcloud"].Seed(at, base)
+
 	form := formFields(decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
-	// The other client saved a different address and a file-as line Carrel
-	// does not model; it keeps the rest of the card as the set holds it.
-	app.servers["nextcloud"].Seed(davtest.AddressBookHome+"kontakty/"+uid+".vcf",
-		"BEGIN:VCARD\nVERSION:3.0\nUID:"+uid+"\nN:Ковалёва;Анна;;;\nFN:Анна Ковалёва\n"+
-			"ORG:Издательство «Слово»\nTITLE:Выпускающий редактор\n"+
-			"TEL;TYPE=CELL:+7 912 445-10-88\nEMAIL;TYPE=WORK:anna.kovaleva@slovo.example\n"+
-			"BDAY:1987-03-14\nCATEGORIES:работа,издательство\n"+
-			"X-EVOLUTION-FILE-AS:Ковалёва\\, Анна\nREV:20260810T140200Z\nEND:VCARD\n")
-	form.Set("email", "anna@slovo.example")
-	form.Set("title", "Главный редактор")
-	form.Set("note", "Пишет по вторникам, отвечает в тот же день. Просила писать на рабочий адрес.")
+	server := strings.Replace(base, "FN:Ковалёва Анна\n", "FN:Анна Ковалёва\n", 1)
+	server = strings.Replace(server, "EMAIL;TYPE=WORK:anna@slovo.example\n", "EMAIL;TYPE=WORK:anna.kovaleva@slovo.example\n", 1)
+	server = strings.Replace(server, "X-ABLABEL:", "X-EVOLUTION-FILE-AS:Ковалёва\\, Анна\nX-ABLABEL:", 1)
+	server = strings.Replace(server, "REV:20260814T090412Z\n", "REV:20260810T140200Z\n", 1)
+	app.servers["nextcloud"].Seed(at, server)
+	form.Set("fn", "Анна Ковалёва")
+	form.Set("tel.1", "+7 495 120-45-00")
+	form.Set("tel.1.type", "work")
+	form.Set("email.0", "a.kovaleva@example.org")
+	form.Set("note", "Пишет по вторникам, отвечает в тот же день.")
 	if resp := app.h.do(postForm(rec+"/edit", app.sess, form)); resp.Code != 303 {
 		t.Fatalf("POST over a moved version: %d %s", resp.Code, resp.Body.String())
 	}

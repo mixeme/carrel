@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict?etag=e21\u0026op=mine",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict?etag=e22\u0026op=mine",
       "id": "conflict.mine",
       "label": "Use only my edit",
       "method": "POST"
@@ -11,7 +11,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict?etag=e21\u0026op=theirs",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict?etag=e22\u0026op=theirs",
       "id": "conflict.theirs",
       "label": "Use only the server version",
       "method": "POST"
@@ -24,7 +24,9 @@
       "method": "GET"
     }
   ],
-  "agree": [],
+  "agree": [
+    "FN"
+  ],
   "details": null,
   "form": {
     "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict",
@@ -68,7 +70,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e21"
+            "value": "e22"
           },
           {
             "add": null,
@@ -282,34 +284,34 @@
     {
       "choice": "mine",
       "diff": "mine",
-      "mine": "Главный редактор",
+      "mine": "+7 495 120-45-00",
       "name": "choice.0",
-      "property": "TITLE",
-      "theirs": "Выпускающий редактор"
-    },
-    {
-      "choice": "theirs",
-      "diff": "theirs",
-      "mine": "+7 912 445-10-88 · CELL, +7 495 120-45-00 · WORK",
-      "name": "choice.1",
-      "property": "TEL",
-      "theirs": "+7 912 445-10-88 · CELL"
-    },
-    {
-      "choice": "theirs",
-      "diff": "theirs",
-      "mine": "a.kovaleva@example.org · WORK",
-      "name": "choice.2",
-      "property": "EMAIL",
-      "theirs": "anna.kovaleva@slovo.example · WORK"
+      "property": "TEL;work",
+      "theirs": ""
     },
     {
       "choice": "mine",
       "diff": "both",
-      "mine": "Пишет по вторникам, отвечает в тот же день. Просила писать на рабочий адрес.",
-      "name": "choice.3",
+      "mine": "a.kovaleva@example.org",
+      "name": "choice.1",
+      "property": "EMAIL;work",
+      "theirs": "anna.kovaleva@slovo.example"
+    },
+    {
+      "choice": "mine",
+      "diff": "mine",
+      "mine": "Пишет по вторникам, отвечает в тот же день.",
+      "name": "choice.2",
       "property": "NOTE",
       "theirs": ""
+    },
+    {
+      "choice": "theirs",
+      "diff": "theirs",
+      "mine": "",
+      "name": "choice.3",
+      "property": "X-EVOLUTION-FILE-AS",
+      "theirs": "Ковалёва, Анна"
     }
   ],
   "serverAt": "10 August, 17:02",

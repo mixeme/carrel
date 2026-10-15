@@ -3,6 +3,7 @@ package web
 import (
 	"bytes"
 	"log/slog"
+	"maps"
 	"slices"
 	"sort"
 	"strings"
@@ -245,7 +246,7 @@ func shows(f editField, l wireLine) bool {
 // the record as it stood, on the wire; sent is the record patched; have the
 // form was was read into, want the form the person sent, as buildChange left
 // it. nil is a save that is the edit.
-func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, have, want formValues) *editFault {
+func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, have, want formValues, restored map[string][]model.RawValue) *editFault {
 	fault := &editFault{}
 	whole := func() *editFault {
 		fault.fields = append(fault.fields, "the record as a whole")
@@ -321,6 +322,15 @@ func (s *Server) checkEdit(c *collectionCtx, was []byte, sent *model.Object, hav
 			for _, p := range props {
 				also[p] = true
 			}
+		}
+	}
+	// A property a conflict puts back may change, and reads back as the
+	// version opened held it (Рв6).
+	props := read.Props()
+	for _, name := range slices.Sorted(maps.Keys(restored)) {
+		also[name] = true
+		if !sameRaw(props[name], restored[name]) {
+			fault.fields = append(fault.fields, name)
 		}
 	}
 	if first(want[taskNext]) == "on" {
@@ -588,7 +598,7 @@ func (s *Server) applyChecked(c *collectionCtx, obj *model.Object, ch change, ha
 	if err != nil {
 		return nil, nil, err
 	}
-	fault := s.checkEdit(c, was, sent, have, want)
+	fault := s.checkEdit(c, was, sent, have, want, ch.restored)
 	if fault != nil {
 		// Carrel's own fault, and the one place it is known: the log names
 		// the fields and properties, never what they hold.

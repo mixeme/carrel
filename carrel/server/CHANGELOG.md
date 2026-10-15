@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.273 — 2026-10-15
+
+### Changed
+
+- **The conflict screen is a card per label and per property outside the
+  form** (Рв6 of the scan of 15.10.2026; `s-conflict-1`). A field whose rows
+  have labels — phones, e-mails, addresses, websites — is a card for the
+  rows of each label that differ, named as the record names them:
+  `TEL;work`, `EMAIL;work`; a value no longer carries « · work» after it. A
+  relabelled row is two cards, the label it came to and the one it left.
+  Writing a card replaces the rows of that label in the server version and
+  leaves the rest as the server holds them.
+- **A property the form does not show that only the server changed is a
+  card of its own** — `X-EVOLUTION-FILE-AS`, «only on the server», the
+  server's chosen. «Your edit» puts it back exactly as the version opened
+  held it (its line, parameters and group; none — removed); «Use only my
+  edit» leaves it. The record's identity and stamps, its photo and its files
+  are not compared. Without the version opened (the «Some of these may not
+  be your changes» notice) there are no such cards.
+
+### For consumers
+
+`ConflictRow.Property` can be `TEL;work` and a property Carrel does not
+model (C-6.5). Fixture `app-conflict` re-shot with the data of
+`s-conflict-1`: FN agrees; TEL;work and NOTE only in the edit; EMAIL;work
+both changed; X-EVOLUTION-FILE-AS only on the server.
+
 ## v0.2.272 — 2026-10-15
 
 ### Changed

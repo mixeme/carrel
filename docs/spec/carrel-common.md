@@ -1662,12 +1662,12 @@ type ConflictPage struct {
 }
 
 type ConflictRow struct { // карточка расхождения, варианты столбиком
-    Property Text
+    Property Text           // свойство, как его зовёт запись: FN; строки одной метки — TEL;work, EMAIL;work; свойство, которого нет в форме, — своим именем, X-EVOLUTION-FILE-AS (s-conflict-1)
     Mine     Text
     Theirs   Text
     Choice   ConflictChoice // C-8: что выбрано заранее (радио отмечено); его же сервер берёт, когда поле строки не пришло
     Name     string         // поле строки в Form: choice.<номер строки>; радио «Your edit» — mine, «Server» — theirs
-    Diff     ConflictDiff   // C-8: both — изменили обе стороны, mine — только правка; пусто — версии, с которой открыли форму, уже нет
+    Diff     ConflictDiff   // C-8: both — изменили обе стороны, mine — только правка, theirs — только сервер (Mine — что было открыто); пусто — версии, с которой открыли форму, уже нет
 }
 ```
 
