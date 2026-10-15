@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.259 — 2026-10-15
+
+### Fixed
+
+- **Send is off, with the reason, for a letter that cannot go** (Пб39 of the
+  scan of 15.10.2026; Б36, Б37): a link in it revoked or run out since it was
+  put in, or days of a calendar that would have to go as a link — a link
+  opens the whole calendar. Before, Send stood on and refused after the
+  press; the refusal is still there, and the words are the same.
+- **Delete of an account in Administration is off, with the reason**
+  (Ад7): the item sent no login, and the account is deleted only once its
+  login is typed, so it was refused every time. It waits for its dialogue
+  (Typecase's task 195); the last administrator's item keeps its own
+  reason.
+
 ## v0.2.258 — 2026-10-15
 
 ### Changed
@@ -45,7 +60,7 @@ answers `AskSheet` in a row of its own.
   the name and the organisation, no phones, addresses, photo, note, no
   `.vcf`. Before, such a link — a record or a calendar too big to go as a
   file — gave the whole of it: attendees with their addresses, descriptions,
-  places. Links made before keep what they were made with.
+  places.
 
 ## v0.2.256 — 2026-10-15
 

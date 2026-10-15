@@ -118,7 +118,7 @@ Typecase `0fe0244` и серверу `v0.2.174` (main `6a62d8a`).
 | Ад4 (данные) | держится | счёт рейла 0/1 против 2/6; «Last sent …», «Checks passed» в коде есть (`rail_status.go:133`, `:138`), ни одна фикстура не несёт |
 | Ад5 | держится | подзаголовка «6 accounts · 2 administrators · 4 covered by escrow» нет |
 | Ад6 | держится | «Filter by login», сегменты All · Administrators · Disabled — `filterForm` null, `segments` пусты |
-| Ад7 | **держится, перепроверено по коду** | `handlers_admin.go:159` — пункт `admin.user.delete` POST `op("delete")` без `login`; `:49` — `DeleteUser(actorID, target, r.FormValue("login"))` → всегда `ErrLoginConfirm`; пункт **включён** (кроме последнего администратора), а исполниться не может — нарушает правило «чего нельзя, то выключено»; диалога нет (client.md, «С чего продолжить», п. б) |
+| Ад7 | **держится, перепроверено по коду; правило соблюдено `v0.2.259`** — пункт выключен с причиной до диалога (задача 195 п. 6) | `handlers_admin.go:159` — пункт `admin.user.delete` POST `op("delete")` без `login`; `:49` — `DeleteUser(actorID, target, r.FormValue("login"))` → всегда `ErrLoginConfirm`; пункт **включён** (кроме последнего администратора), а исполниться не может — нарушает правило «чего нельзя, то выключено»; диалога нет (client.md, «С чего продолжить», п. б) |
 | Ад8 | держится | у листа сброса ни одной фикстуры |
 | Ад9 | держится | `confirm` без `Placeholder` (кадр `s-admin-13`: «anna») |
 | Ад10 | держится | `IssuedPassword.Copy` без `Icon`, кадры `-14`, `-17` — `i-dup` |

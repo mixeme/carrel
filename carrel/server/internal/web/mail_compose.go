@@ -315,6 +315,10 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 		send.Enabled, send.Reason = false, text(fmt.Sprintf("A letter goes to %d recipients at most.", s.mailPolicy().Recipients))
 	case left == 0:
 		send.Enabled, send.Reason = false, text(user.ErrLetterLimit.Error())
+	default:
+		if err := s.givesTooMuch(sess, s.reckonLinks(slices.Clone(d.Parts))); err != nil {
+			send.Enabled, send.Reason = false, text(err.Error())
+		}
 	}
 	sheet.Actions = append(sheet.Actions, send,
 		view.Action{ID: "mail.discard", Label: "Discard", Method: "POST", Enabled: true, Danger: true,
@@ -390,6 +394,25 @@ func (s *Server) suggestRecipients(ctx context.Context, sess *session.Session, q
 		notAsked = append(notAsked, origin)
 	}
 	return out, notAsked
+}
+
+// givesTooMuch is what a letter must never give out more of than the person
+// chose, said before anything is read or made — and on the sheet before Send
+// is pressed (Б36, Б37; Пб39): Send is off with it as its reason.
+func (s *Server) givesTooMuch(sess *session.Session, parts []mailPart) error {
+	for _, p := range parts {
+		switch {
+		case p.LinkID != "" && s.linkToken(sess, p.LinkID) == "":
+			// A link the person revoked, or one that has run out, is not
+			// published again behind their back.
+			return fmt.Errorf("The link to «%s» was revoked or has expired since it was put into the letter. Remove it, or publish it again.", p.Title)
+		case p.AsLink && p.From != "":
+			// A link is the calendar whole; the person chose some of its
+			// days.
+			return fmt.Errorf("«%s» does not fit the letter, and a link would open the whole calendar, not these days. Remove it, or attach fewer days.", p.Title)
+		}
+	}
+	return nil
 }
 
 // reckonLinks decides again what goes as a link: a folder always; a file
@@ -536,19 +559,8 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 		return 0, fmt.Errorf("A letter goes to %d recipients at most.", s.mailPolicy().Recipients)
 	}
 	d.Parts = s.reckonLinks(d.Parts)
-	// What a letter must never give out more of than the person chose, said
-	// before anything is read or made.
-	for _, p := range d.Parts {
-		switch {
-		case p.LinkID != "" && s.linkToken(sess, p.LinkID) == "":
-			// A link the person revoked, or one that has run out, is not
-			// published again behind their back.
-			return 0, fmt.Errorf("The link to «%s» was revoked or has expired since it was put into the letter. Remove it, or publish it again.", p.Title)
-		case p.AsLink && p.From != "":
-			// A link is the calendar whole; the person chose some of its
-			// days.
-			return 0, fmt.Errorf("«%s» does not fit the letter, and a link would open the whole calendar, not these days. Remove it, or attach fewer days.", p.Title)
-		}
+	if err := s.givesTooMuch(sess, d.Parts); err != nil {
+		return 0, err
 	}
 
 	var files []cmail.Attachment

@@ -158,6 +158,11 @@ func (s *Server) adminUserMenu(snap store.State, u *store.User) []view.MenuItem 
 	}
 	del := off(view.Action{ID: "admin.user.delete", Label: "Delete", Icon: "i-trash", Href: op("delete"), Method: "POST", Danger: true, Enabled: true},
 		lastAdmin, "Cannot delete the last administrator.")
+	// The account is deleted once its login is typed in a dialogue of its
+	// own (s-admin-2); that dialogue has no frame yet (Typecase's task 195),
+	// and the item alone sends no login — the store refuses it every time
+	// (Ад7). Off, with the reason, until the dialogue is drawn.
+	del = off(del, del.Enabled, "Deleting an account needs its own dialogue, which is not here yet.")
 	return []view.MenuItem{{Action: role}, {Action: sessions}, {Action: toggle}, {Separator: true, Action: del}}
 }
 

@@ -11,7 +11,8 @@ import (
 // Б36 of the audit of 11.10.2026: a link put into a letter and revoked
 // before the letter went was published again by Send — for thirty days,
 // under a new address, without what the person had set on it. What a person
-// took back is not given out again: the letter does not go, and says why.
+// took back is not given out again: the letter does not go, and says why —
+// and Send stands off with the reason before it is pressed (Пб39).
 func TestALetterDoesNotPublishARevokedLinkAgain(t *testing.T) {
 	f, relay := letterFixture(t)
 	decode[view.PublishSheet](t, f.h.do(postForm("/app/publish?"+url.Values{"k": {"contacts"}, "a": {f.id}, "c": {searchBook}, "uid": {"ada"}}.Encode(), f.sess, url.Values{})))
@@ -35,6 +36,10 @@ func TestALetterDoesNotPublishARevokedLinkAgain(t *testing.T) {
 	sheet := decode[view.MailSheet](t, rec)
 	if said := saidRuns(sheet.Limits); !strings.Contains(said, "revoked") {
 		t.Errorf("the sheet does not say why: %q", said)
+	}
+	// What cannot go is off before the press, with its reason (Пб39).
+	if send := actionByID(sheet.Actions, "mail.send"); send == nil || send.Enabled || !strings.Contains(string(send.Reason), "revoked") {
+		t.Errorf("Send = %+v, want off: the link was revoked", send)
 	}
 	if n := len(relay.Letters()); n != 0 {
 		t.Errorf("letters = %d", n)
@@ -63,6 +68,9 @@ func TestALetterDoesNotTurnARangeOfDaysIntoTheWholeCalendar(t *testing.T) {
 	sheet := decode[view.MailSheet](t, rec)
 	if said := saidRuns(sheet.Limits); !strings.Contains(said, "whole calendar") {
 		t.Errorf("the sheet does not say why: %q", said)
+	}
+	if send := actionByID(sheet.Actions, "mail.send"); send == nil || send.Enabled || !strings.Contains(string(send.Reason), "whole calendar") {
+		t.Errorf("Send = %+v, want off: a link would open the whole calendar", send)
 	}
 	if n := len(f.h.users.PublishedLinks(f.sess.AccountID())); n != 0 {
 		t.Errorf("the calendar was published: %d links", n)
