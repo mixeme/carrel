@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.251 — 2026-10-15
+
+### Changed
+
+- **The rewrite sheet chooses per address and per group** (the owner's
+  decisions of 12.10.2026, А4 and А5; Typecase's task 157, `s-contacts-29`,
+  note 65): each replaced address is a choice `to.N` — the card's addresses
+  and «Do not rewrite» —, offered the one typed in its own line of the form,
+  else «Do not rewrite» (until now each went to the card's default
+  address); each group of risk — on servers that schedule, on a server that
+  did not say, organised by others, past — is a tick `group` with its count
+  and its records, and a group not ticked keeps its records; a record in two
+  groups is rewritten only when both are ticked. The sheet carries
+  `Tally` and the button's words by count for the script to count again
+  (`RewriteSheet.groups`, `.both`, `.tally`, `.count`, `.countOne`;
+  `RewritePair.choice`). A form without the ticks rewrites what was offered.
+  Questions to the frames — Typecase's task 185.
+
 ## v0.2.250 — 2026-10-15
 
 ### Added

@@ -1973,20 +1973,55 @@ type MoveSheet struct {
 // records» (N — сколько записей будет переписано; ноль — выключена с
 // причиной, которую клиент ставит сообщением над ней, s-contacts-20) и
 // «Leave as is»; обе отправляют Form, «Leave as is» — с `op=leave` в адресе.
+//
+// Несколько замен и группы, которые можно исключить (решения владельца
+// 12.10.2026, А4 и А5; s-contacts-29, записка 65). Title у нескольких замен
+// — «Rewrite the addresses in their records?». У каждой пары Choice — выбор
+// «to.N»: нынешние адреса карточки и «Do not rewrite» (пустое значение); по
+// умолчанию — адрес, набранный в той же строке формы (у одной пары — её
+// адрес), иначе «Do not rewrite»; To — выбранный по умолчанию. Groups — те
+// же группы, что Effects, отметками «group» со значениями `scheduling`,
+// `unknown.N` (по серверу, который не сказал), `others`, `past`: подпись
+// «On servers that schedule» («On a server that schedules», «On baikal»,
+// «Meetings organised by others», «Past meetings»), Count — «9 records»,
+// кнопка со списком записей (Records: название, день, метка коллекции,
+// ссылка), Note — что это может вызвать; по умолчанию отмечены все. Запись
+// в двух группах переписывается, только когда отмечены обе — Both говорит
+// это и называет такую запись. Форма несёт `groups=1`: отметки пришли;
+// форма без него переписывает всё, что лист предложил. Tally — по строке на
+// запись, которую можно переписать: условия через пробел (`to.1|to.2`,
+// `group=others`); Count и CountOne — слова кнопки по счёту («Rewrite {n}
+// records», «Rewrite 1 record»), Label кнопки — счёт сервера при том, что
+// предложено. Ноль выбранного — кнопка выключена с причиной.
 type RewriteSheet struct {
-    Title   Text
-    Subject Text
-    Pairs   []RewritePair
-    Effects []Field
-    Kept    []Field
-    Note    Text
-    Form    Form
-    Actions []Action
+    Title    Text
+    Subject  Text
+    Pairs    []RewritePair
+    Effects  []Field
+    Groups   []RewriteGroup
+    Both     Text
+    Kept     []Field
+    Note     Text
+    Form     Form
+    Tally    []string
+    Count    Text
+    CountOne Text
+    Actions  []Action
 }
 type RewritePair struct {
-    From Text
-    To   Text
-    Note Text
+    From   Text
+    To     Text    // выбранный по умолчанию; пусто — «Do not rewrite»
+    Note   Text
+    Choice FormRow // выбор «to.N» (s-contacts-29)
+}
+type RewriteGroup struct {
+    Name    string  // «group»
+    Value   string  // scheduling, unknown.N, others, past
+    Label   Text
+    On      bool
+    Count   Text    // «9 records»
+    Records []Field // Label — название, Value — день, Colour, Href
+    Note    Text
 }
 
 // Четыре листа коллекции (C-5.6). Родов записей они не различают: заголовок

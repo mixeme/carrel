@@ -403,19 +403,56 @@ type ConnectionRemoveSheet struct {
 // нажатия: рубрики «The address», «What rewriting can set off» и «What will
 // not change» — постоянные подписи клиента, строки под ними — данные.
 type RewriteSheet struct {
-	Title   Text          `json:"title"`   // «Rewrite the address in their records?»
+	Title   Text          `json:"title"`   // «Rewrite the address in their records?», у нескольких замен — «… addresses …» (s-contacts-29)
 	Subject Text          `json:"subject"` // «Анна Ковалёва · saved»
 	Pairs   []RewritePair `json:"pairs"`   // какой адрес на какой и сколько записей называют старый
-	Effects []Field       `json:"effects"` // Label — «9 records on servers that schedule», Value — что это может вызвать
-	Kept    []Field       `json:"kept"`    // Label — «2 records in Shared», Value — «read-only; they keep the old address»
-	Note    Text          `json:"note"`    // строка под блоками: «Collections that are not ticked were not looked in.» (s-contacts-19)
-	Form    Form          `json:"form"`    // план в адресе и CSRF
-	Actions []Action      `json:"actions"` // Rewrite N records · Leave as is
+	// Effects — «What rewriting can set off» строками, как одну замену
+	// рисуют s-contacts-15, -19, -20: Label — «9 records on servers that
+	// schedule», Value — что это может вызвать
+	Effects []Field `json:"effects"`
+	// Groups — те же группы отметками, как s-contacts-29 (решения владельца
+	// 12.10.2026, А5): снятая исключает группу; форма шлёт отметки всегда
+	Groups []RewriteGroup `json:"groups"`
+	// Both — строка о записи, что стоит в двух группах: переписывается, только
+	// когда отмечены обе, — с её названием (s-contacts-29); пусто — таких нет
+	Both Text    `json:"both"`
+	Kept []Field `json:"kept"` // Label — «2 records in Shared», Value — «read-only; they keep the old address»
+	Note Text    `json:"note"` // строка под блоками: «Collections that are not ticked were not looked in.» (s-contacts-19)
+	Form Form    `json:"form"` // план в адресе, CSRF и groups=1 — форма несёт отметки групп
+	// Tally — по строке на запись, которую можно переписать: условия, при
+	// которых она переписывается, через пробел (записка 65): «to.1» — выбор
+	// адреса не пуст, «to.1|to.2» — любой из двух, «group=others» — группа
+	// отмечена; клиент считает выполненные при каждом изменении формы
+	Tally []string `json:"tally"`
+	// Count, CountOne — слова основной кнопки по счёту: «Rewrite {n}
+	// records», «Rewrite 1 record»; без сценария — Label кнопки, счёт сервера
+	Count    Text     `json:"count"`
+	CountOne Text     `json:"countOne"`
+	Actions  []Action `json:"actions"` // Rewrite N records · Leave as is
 }
 type RewritePair struct {
 	From Text `json:"from"`
-	To   Text `json:"to"`
-	Note Text `json:"note"` // «14 events and tasks name the old one; …»
+	To   Text `json:"to"`   // выбранный по умолчанию; пусто — «Do not rewrite»
+	Note Text `json:"note"` // «22 records name it», «3 records name it; they keep it»
+	// Choice — выбор, на какой адрес переписать (s-contacts-29): поле
+	// «to.N», варианты — нынешние адреса карточки и «Do not rewrite»
+	// (пустое значение); по умолчанию — адрес, набранный в той же строке
+	// формы, иначе «Do not rewrite» (решение владельца 12.10.2026, А4)
+	Choice FormRow `json:"choice"`
+}
+
+// RewriteGroup — группа риска листа «переписать адрес» (s-contacts-29):
+// отметка «group» со своим значением, снятая исключает записи группы.
+type RewriteGroup struct {
+	Name  string `json:"name"`  // «group»
+	Value string `json:"value"` // scheduling, unknown.N (сервер не сказал), others, past
+	Label Text   `json:"label"` // «On servers that schedule», «On baikal», «Meetings organised by others», «Past meetings»
+	On    bool   `json:"on"`    // отмечена
+	Count Text   `json:"count"` // «9 records» — кнопка со списком записей
+	// Records — записи группы: Label — название, Value — день (моноширинно),
+	// Colour — метка коллекции, Href — запись
+	Records []Field `json:"records"`
+	Note    Text    `json:"note"` // что это может вызвать
 }
 
 // ExportSheet — «из какой коллекции отдать»: вход в экспорт из сведённого

@@ -217,9 +217,11 @@ func TestRemovedAddressAsksNothingAndLeaveKeepsAll(t *testing.T) {
 	}
 }
 
-// Several replaced at once: each removed address goes to the card's default
-// one — the preferred, else the first — and the sheet names every pair.
-func TestSeveralReplacedGoToTheDefaultAddress(t *testing.T) {
+// Several replaced at once: each removed address is offered the one typed
+// in its own line, else «Do not rewrite» (the owner's decision of
+// 12.10.2026, А4 — until then each went to the card's default address), and
+// the sheet names every pair.
+func TestSeveralReplacedAreOfferedTheirOwnLine(t *testing.T) {
 	s := newRewriteStand(t)
 	s.srv.Seed(peopleBook+"ada.vcf", strings.Replace(rewriteCard, "END:VCARD", "EMAIL;TYPE=home:ada@home.example\r\nEND:VCARD", 1))
 	resp := s.save(t, func(f url.Values) {
@@ -232,7 +234,7 @@ func TestSeveralReplacedGoToTheDefaultAddress(t *testing.T) {
 	for _, p := range sheet.Pairs {
 		pairs = append(pairs, string(p.From)+" → "+string(p.To))
 	}
-	if strings.Join(pairs, "; ") != "ada@home.example → ada@new.example; ada@old.example → ada@new.example" {
+	if strings.Join(pairs, "; ") != "ada@home.example → ; ada@old.example → ada@new.example" {
 		t.Errorf("pairs = %q", pairs)
 	}
 }

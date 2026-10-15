@@ -18,6 +18,9 @@
       "method": "POST"
     }
   ],
+  "both": "",
+  "count": "Rewrite {n} records",
+  "countOne": "Rewrite 1 record",
   "effects": [
     {
       "href": "",
@@ -47,12 +50,44 @@
             "readOnly": false,
             "required": false,
             "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "groups",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "1"
           }
         ],
         "unfold": null
       }
     ]
   },
+  "groups": [
+    {
+      "count": "1 record",
+      "label": "On a server that schedules",
+      "name": "group",
+      "note": "The server may send a cancellation to the old address, an invitation to the new one and an update to the other attendees.",
+      "on": true,
+      "records": [
+        {
+          "colour": "#4a6b52",
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+          "label": "Синк-ап по релизу",
+          "mono": false,
+          "value": "10 Aug"
+        }
+      ],
+      "value": "scheduling"
+    }
+  ],
   "kept": [
     {
       "href": "",
@@ -64,11 +99,39 @@
   "note": "Collections that are not ticked were not looked in.",
   "pairs": [
     {
+      "choice": {
+        "add": null,
+        "error": "",
+        "extra": null,
+        "hint": "",
+        "kind": "select",
+        "label": "Rewrite a.kovaleva@example.org to",
+        "name": "to.1",
+        "options": [
+          {
+            "label": "a.kovaleva@slovo.example",
+            "selected": true,
+            "value": "a.kovaleva@slovo.example"
+          },
+          {
+            "label": "Do not rewrite",
+            "selected": false,
+            "separator": true,
+            "value": ""
+          }
+        ],
+        "readOnly": false,
+        "required": false,
+        "value": "a.kovaleva@slovo.example"
+      },
       "from": "a.kovaleva@example.org",
       "note": "1 event or task names the old one; it drops out of the person’s timeline",
       "to": "a.kovaleva@slovo.example"
     }
   ],
   "subject": "Анна Ковалёва · saved",
+  "tally": [
+    "to.1 group=scheduling"
+  ],
   "title": "Rewrite the address in their records?"
 }

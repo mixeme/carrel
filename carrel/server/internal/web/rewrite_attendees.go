@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"strconv"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -60,7 +62,10 @@ type rewritePlan struct {
 	Pairs   []rewritePair
 	// Card is every address the card had before the save and has after
 	// it: a meeting organised at one of them is the person's own.
-	Card    []string
+	Card []string
+	// Now is the card's addresses as saved: what each old one may be
+	// rewritten to (s-contacts-29).
+	Now     []string
 	Scanned bool
 	Records []rewriteRecord
 	Unread  []rewriteUnread
@@ -68,7 +73,7 @@ type rewritePlan struct {
 
 type rewritePair struct {
 	From string // as the card held it
-	To   string
+	To   string // the one offered; "" — «Do not rewrite»
 }
 
 // rewriteRecord is one event or task that names an old address.
@@ -81,10 +86,13 @@ type rewriteRecord struct {
 	Where      string // the collection's label
 	Server     string // the connection's label
 	ReadOnly   bool
-	Scheduling string   // the connection's: discover.Scheduling…
-	Others     bool     // organised by neither the person on the card nor the one who saves
-	Past       bool     // every occurrence behind
-	Names      []string // the old addresses it names, lower-cased
+	Scheduling string    // the connection's: discover.Scheduling…
+	Others     bool      // organised by neither the person on the card nor the one who saves
+	Past       bool      // every occurrence behind
+	Names      []string  // the old addresses it names, lower-cased
+	Href       string    // the record's page
+	Start      time.Time // when it is, for the lists of the groups
+	Colour     string    // the collection's mark
 }
 
 // rewriteUnread is a ticked collection that could not be read.
@@ -99,6 +107,118 @@ func (p *rewritePlan) old() map[string]string {
 		out[strings.ToLower(pr.From)] = pr.To
 	}
 	return out
+}
+
+// rewriteAnswer is what the sheet's form chose: the address each old one
+// goes to — "" leaves it — and the groups ticked (s-contacts-29).
+type rewriteAnswer struct {
+	to     map[string]string // old address, lower-cased → new one or ""
+	groups map[string]bool
+}
+
+// defaultAnswer is the sheet as offered: each pair's address, every group
+// ticked.
+func (p *rewritePlan) defaultAnswer() rewriteAnswer {
+	a := rewriteAnswer{to: p.old(), groups: map[string]bool{}}
+	for _, g := range p.groups() {
+		a.groups[g.value] = true
+	}
+	return a
+}
+
+// rewriteGroupOf is one group of risk (s-contacts-29) and its records.
+type rewriteGroupOf struct {
+	value, label, note string
+	records            []int // indexes into the plan's records
+}
+
+// groups are the groups of risk of the records that can be written, in the
+// sheet's order: on servers that schedule, on each server that did not say
+// whether it does, organised by others, past.
+func (p *rewritePlan) groups() []rewriteGroupOf {
+	var scheduling, others, past rewriteGroupOf
+	scheduling = rewriteGroupOf{value: "scheduling", label: "On servers that schedule",
+		note: "The server may send a cancellation to the old address, an invitation to the new one and an update to the other attendees."}
+	others = rewriteGroupOf{value: "others", label: "Meetings organised by others",
+		note: "The organiser’s server may refuse the change, and its next update may undo it."}
+	past = rewriteGroupOf{value: "past", label: "Past meetings",
+		note: "They will show the new address, as if the person had been invited at it."}
+	var unknown []rewriteGroupOf
+	at := map[string]int{}
+	for i, r := range p.Records {
+		if r.ReadOnly {
+			continue
+		}
+		switch r.Scheduling {
+		case discover.SchedulingYes:
+			scheduling.records = append(scheduling.records, i)
+		case discover.SchedulingUnknown:
+			j, ok := at[r.Server]
+			if !ok {
+				j = len(unknown)
+				at[r.Server] = j
+				unknown = append(unknown, rewriteGroupOf{value: "unknown." + strconv.Itoa(j+1), label: "On " + r.Server,
+					note: "The server did not say whether it schedules."})
+			}
+			unknown[j].records = append(unknown[j].records, i)
+		}
+		if r.Others {
+			others.records = append(others.records, i)
+		}
+		if r.Past {
+			past.records = append(past.records, i)
+		}
+	}
+	if len(scheduling.records) == 1 {
+		scheduling.label = "On a server that schedules" // s-contacts-19
+	}
+	var out []rewriteGroupOf
+	for _, g := range append(append([]rewriteGroupOf{scheduling}, unknown...), others, past) {
+		if len(g.records) > 0 {
+			out = append(out, g)
+		}
+	}
+	return out
+}
+
+// inGroups are the groups of a record by its index.
+func inGroups(groups []rewriteGroupOf, i int) []string {
+	var out []string
+	for _, g := range groups {
+		if slices.Contains(g.records, i) {
+			out = append(out, g.value)
+		}
+	}
+	return out
+}
+
+// written tells whether the answer rewrites the record: it names an old
+// address the answer sends somewhere, and every group it stands in is
+// ticked — a record in two groups is rewritten only when both are
+// (s-contacts-29).
+func (p *rewritePlan) written(a rewriteAnswer, groups []rewriteGroupOf, i int) bool {
+	r := p.Records[i]
+	if r.ReadOnly || !slices.ContainsFunc(r.Names, func(n string) bool { return a.to[n] != "" }) {
+		return false
+	}
+	for _, g := range inGroups(groups, i) {
+		if !a.groups[g] {
+			return false
+		}
+	}
+	return true
+}
+
+// count is how many records the answer rewrites.
+func (p *rewritePlan) count(a rewriteAnswer) int {
+	groups := p.groups()
+	n := 0
+	for i := range p.Records {
+		if p.written(a, groups, i) {
+			n++
+		}
+	}
+	return n
 }
 
 func (p *rewritePlan) writable() int {
@@ -165,10 +285,13 @@ func dropRewritePlan(sess *session.Session, token string) {
 
 // replacedAddresses compares the addresses a card had before a save with the
 // card as saved (decision of 24.09.2026). Removed only — nothing. One
-// removed and one added — that pair. Otherwise each removed address goes to
-// the default address of the card as saved. Case does not make an address
+// removed and one added — that pair. Otherwise each removed address is
+// offered the one typed in its line of the form — typed are the form's rows
+// of addresses, in the card's order, the old ones first —, else nothing:
+// «Do not rewrite» (the owner's decision of 12.10.2026, А4; until then each
+// went to the card's default address). Case does not make an address
 // another one.
-func replacedAddresses(was []string, after *model.Object) []rewritePair {
+func replacedAddresses(was, typed []string, after *model.Object) []rewritePair {
 	now := cardEmails(after)
 	in := func(list []string, a string) bool {
 		return slices.ContainsFunc(list, func(b string) bool { return strings.EqualFold(a, b) })
@@ -190,9 +313,14 @@ func replacedAddresses(was []string, after *model.Object) []rewritePair {
 	if len(removed) == 1 && len(added) == 1 {
 		return []rewritePair{{From: removed[0], To: added[0]}}
 	}
-	to := defaultEmail(after)
 	var out []rewritePair
 	for _, a := range removed {
+		to := ""
+		if i := slices.IndexFunc(was, func(b string) bool { return strings.EqualFold(a, b) }); i < len(typed) {
+			if t := strings.TrimSpace(typed[i]); t != "" && in(added, t) {
+				to = t
+			}
+		}
 		out = append(out, rewritePair{From: a, To: to})
 	}
 	slices.SortFunc(out, func(a, b rewritePair) int { return strings.Compare(strings.ToLower(a.From), strings.ToLower(b.From)) })
@@ -237,8 +365,8 @@ func defaultEmail(obj *model.Object) string {
 // offerRewrite keeps a new plan for a saved card, was being its addresses
 // before the edit. It answers where the save goes next — the sheet, or ""
 // when no address was replaced — and the plan's token.
-func (s *Server) offerRewrite(c *collectionCtx, uid string, was []string, after *model.Object) (string, string) {
-	pairs := replacedAddresses(was, after)
+func (s *Server) offerRewrite(c *collectionCtx, uid string, was, typed []string, after *model.Object) (string, string) {
+	pairs := replacedAddresses(was, typed, after)
 	if len(pairs) == 0 {
 		return "", ""
 	}
@@ -247,7 +375,7 @@ func (s *Server) offerRewrite(c *collectionCtx, uid string, was []string, after 
 		return "", ""
 	}
 	saveRewritePlan(c.sess, &rewritePlan{Token: token, Account: c.conn.ID, Col: c.col.Path, UID: uid, Name: contactName(after),
-		Pairs: pairs, Card: append(append([]string(nil), was...), cardEmails(after)...)})
+		Pairs: pairs, Card: append(append([]string(nil), was...), cardEmails(after)...), Now: cardEmails(after)})
 	return s.rewriteAddress(c, uid, token, ""), token
 }
 
@@ -353,11 +481,25 @@ func (s *Server) scanRewrite(ctx context.Context, sess *session.Session, p *rewr
 					Others:     organiser != "" && !mine[organiser] && !ownAddress(c.conn, organiser),
 					Past:       cal.Ended(obj, now),
 					Names:      names,
+					Href:       origin{conn: c.conn, col: c.col}.recordPath(segmentOf(k), cal.UID(obj)),
+					Start:      recordStart(obj),
+					Colour:     string(catalogColour(c.col)),
 				})
 			}
 		}
 	}
 	p.Scanned = true
+}
+
+// recordStart is when an event or a task is: its start, else its due date.
+func recordStart(obj *model.Object) time.Time {
+	if tm, err := cal.TimingOf(obj, time.UTC); err == nil && !tm.Start.IsZero() {
+		return tm.Start
+	}
+	if due, err := cal.DueOf(obj, time.UTC); err == nil {
+		return due.Start
+	}
+	return time.Time{}
 }
 
 // namesOf are the old addresses a record names anywhere a person is named.
@@ -391,21 +533,33 @@ func ownAddress(conn sealed.Connection, a string) bool {
 	return strings.Contains(conn.Login, "@") && strings.EqualFold(conn.Login, a)
 }
 
-// rewriteSheet draws the plan as the frame does (s-contacts-15). The server
-// does not know the person's gender: where the frame says «her» and «she»
-// the sheet says «their» and «the person» (to-typecase 25).
+// rewriteSheet draws the plan as the frames do (s-contacts-15, -29). The
+// server does not know the person's gender: where the frame says «her» and
+// «she» the sheet says «their» and «the person» (to-typecase 25). Each old
+// address has its choice (А4), each group of risk its tick (А5), and the
+// button counts what the form as offered rewrites; the script counts again
+// at every change (Tally, from-typecase note 65).
 func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteSheet {
 	sheet := view.RewriteSheet{
 		Title:   "Rewrite the address in their records?",
 		Subject: text(titleOr(p.Name, "Contact") + " · saved"),
 		Pairs:   []view.RewritePair{},
-		Effects: []view.Field{},
+		Groups:  []view.RewriteGroup{},
 		Kept:    []view.Field{},
+		Tally:   []string{},
 		// Only the ticked collections were read, as relink reads them
 		// (owner's decision, s-contacts-19).
-		Note: "Collections that are not ticked were not looked in.",
+		Note:     "Collections that are not ticked were not looked in.",
+		Count:    "Rewrite {n} records",
+		CountOne: "Rewrite 1 record",
 	}
-	for _, pr := range p.Pairs {
+	if len(p.Pairs) > 1 {
+		sheet.Title = "Rewrite the addresses in their records?"
+	}
+	field := map[string]string{} // old address, lower-cased → its choice's name
+	for k, pr := range p.Pairs {
+		name := "to." + strconv.Itoa(k+1)
+		field[strings.ToLower(pr.From)] = name
 		n, writable := 0, 0
 		for _, r := range p.Records {
 			if slices.Contains(r.Names, strings.ToLower(pr.From)) {
@@ -428,49 +582,61 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 		case n > 1:
 			note = fmt.Sprintf("%d events and tasks name the old one", n)
 		}
-		sheet.Pairs = append(sheet.Pairs, view.RewritePair{From: text(pr.From), To: text(pr.To), Note: text(note)})
+		choice := view.FormRow{Name: name, Label: text("Rewrite " + pr.From + " to"), Kind: view.InputSelect, Value: text(pr.To)}
+		for _, a := range p.Now {
+			choice.Options = append(choice.Options, view.Option{Value: a, Label: text(a), Selected: strings.EqualFold(a, pr.To)})
+		}
+		choice.Options = append(choice.Options, view.Option{Value: "", Label: "Do not rewrite", Selected: pr.To == "", Separator: true})
+		sheet.Pairs = append(sheet.Pairs, view.RewritePair{From: text(pr.From), To: text(pr.To), Note: text(note), Choice: choice})
 	}
-	var scheduling, others int
-	past := false
-	var unknown []string
-	unknownN := map[string]int{}
-	for _, r := range p.Records {
+	groups := p.groups()
+	answer := p.defaultAnswer()
+	sheet.Effects = effectsOf(groups)
+	for _, g := range groups {
+		rg := view.RewriteGroup{Name: "group", Value: g.value, Label: text(g.label), On: answer.groups[g.value],
+			Count: text(plural(len(g.records), "record")), Note: text(g.note)}
+		for _, i := range g.records {
+			r := p.Records[i]
+			row := view.Field{Label: text(r.Title), Colour: view.Colour(r.Colour), Href: s.route(r.Href)}
+			if !r.Start.IsZero() {
+				row.Value = text(c.tf.shortDay(r.Start))
+			}
+			rg.Records = append(rg.Records, row)
+		}
+		sheet.Groups = append(sheet.Groups, rg)
+	}
+	// A record in two groups is rewritten only when both are ticked: the
+	// sheet names one such (s-contacts-29).
+	for i, r := range p.Records {
+		if in := inGroups(groups, i); len(in) > 1 && !r.ReadOnly {
+			var labels []string
+			for _, v := range in {
+				for _, g := range groups {
+					if g.value == v {
+						labels = append(labels, "«"+g.label+"»")
+					}
+				}
+			}
+			sheet.Both = text("A record that stands in two groups is rewritten only when both are ticked: «" + r.Title + "» stands in both " +
+				strings.Join(labels, " and ") + ".")
+			break
+		}
+	}
+	for i, r := range p.Records {
 		if r.ReadOnly {
 			continue
 		}
-		switch r.Scheduling {
-		case discover.SchedulingYes:
-			scheduling++
-		case discover.SchedulingUnknown:
-			if unknownN[r.Server] == 0 {
-				unknown = append(unknown, r.Server)
+		var names []string
+		for _, n := range r.Names {
+			if f := field[n]; f != "" {
+				names = append(names, f)
 			}
-			unknownN[r.Server]++
 		}
-		if r.Others {
-			others++
+		cond := strings.Join(names, "|")
+		for _, g := range inGroups(groups, i) {
+			cond += " group=" + g
 		}
-		past = past || r.Past
-	}
-	if scheduling > 0 {
-		where := " on servers that schedule"
-		if scheduling == 1 {
-			where = " on a server that schedules" // s-contacts-19
-		}
-		sheet.Effects = append(sheet.Effects, view.Field{Label: text(plural(scheduling, "record") + where),
-			Value: "the server may send a cancellation to the old address, an invitation to the new one and an update to the other attendees"})
-	}
-	for _, server := range unknown {
-		sheet.Effects = append(sheet.Effects, view.Field{Label: text(plural(unknownN[server], "record") + " on " + server),
-			Value: "the server did not say whether it schedules"})
-	}
-	if others > 0 {
-		sheet.Effects = append(sheet.Effects, view.Field{Label: text(plural(others, "meeting") + " organised by others"),
-			Value: "the organiser’s server may refuse the change, and its next update may undo it"})
-	}
-	if past {
-		sheet.Effects = append(sheet.Effects, view.Field{Label: "Past meetings",
-			Value: "will show the new address, as if the person had been invited at it"})
+		sheet.Tally = append(sheet.Tally, cond)
 	}
 	for _, g := range p.kept() {
 		note := "read-only; they keep the old address"
@@ -483,21 +649,77 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 		sheet.Kept = append(sheet.Kept, view.Field{Label: text(u.Label), Value: text("could not be read: " + lowerClause(u.Why) + " What it holds keeps the old address.")})
 	}
 	action := s.rewriteAddress(c, p.UID, p.Token, "")
-	sheet.Form = s.plainForm(action, "POST", csrfField(c.sess))
-	confirm := view.Action{ID: "contact.rewrite.confirm", Label: text("Rewrite " + plural(p.writable(), "record")),
+	sheet.Form = s.plainForm(action, "POST", csrfField(c.sess), view.FormRow{Name: "groups", Kind: view.InputHidden, Value: "1"})
+	n := p.count(answer)
+	confirm := view.Action{ID: "contact.rewrite.confirm", Label: text("Rewrite " + plural(n, "record")),
 		Href: s.route(action), Method: "POST", Primary: true, Enabled: true}
-	if p.writable() == 0 {
+	switch {
+	case p.writable() == 0:
 		confirm.Enabled, confirm.Href = false, ""
 		confirm.Reason = "Nothing here can be rewritten: every record that names the old address is read-only or could not be read."
+	case n == 0:
+		confirm.Enabled, confirm.Href = false, ""
+		confirm.Reason = "Nothing is chosen to be rewritten: choose an address, or tick a group."
 	}
 	sheet.Actions = []view.Action{confirm,
 		{ID: "contact.rewrite.leave", Label: "Leave as is", Href: s.route(s.rewriteAddress(c, p.UID, p.Token, "leave")), Method: "POST", Enabled: true}}
 	return sheet
 }
 
+// effectsOf are the groups as the lines of one replacement draw them
+// (s-contacts-15, -19, -20): how many and where, and what it can set off.
+func effectsOf(groups []rewriteGroupOf) []view.Field {
+	out := []view.Field{}
+	for _, g := range groups {
+		n := len(g.records)
+		f := view.Field{Value: text(strings.TrimSuffix(strings.ToLower(g.note[:1])+g.note[1:], "."))}
+		switch {
+		case g.value == "scheduling" && n == 1:
+			f.Label = "1 record on a server that schedules" // s-contacts-19
+		case g.value == "scheduling":
+			f.Label = text(plural(n, "record") + " on servers that schedule")
+		case strings.HasPrefix(g.value, "unknown."):
+			f.Label = text(plural(n, "record") + " o" + g.label[1:])
+		case g.value == "others":
+			f.Label = text(plural(n, "meeting") + " organised by others")
+		case g.value == "past":
+			f.Label = "Past meetings"
+			f.Value = "will show the new address, as if the person had been invited at it"
+		}
+		out = append(out, f)
+	}
+	return out
+}
+
+// rewriteAnswerOf is the answer the sheet's form sent: each old address's
+// choice — one of the card's addresses or «Do not rewrite» —, and the groups
+// ticked. A form without them (one that posts the plan alone) answers as the
+// sheet offered.
+func (p *rewritePlan) rewriteAnswerOf(r *http.Request) rewriteAnswer {
+	a := p.defaultAnswer()
+	for k, pr := range p.Pairs {
+		name := "to." + strconv.Itoa(k+1)
+		if _, sent := r.Form[name]; !sent {
+			continue
+		}
+		v := strings.TrimSpace(r.FormValue(name))
+		if v != "" && !slices.ContainsFunc(p.Now, func(b string) bool { return strings.EqualFold(b, v) }) {
+			continue // not an address of the card: the offer stands
+		}
+		a.to[strings.ToLower(pr.From)] = v
+	}
+	if r.FormValue("groups") != "" {
+		ticked := r.Form["group"]
+		for g := range a.groups {
+			a.groups[g] = slices.Contains(ticked, g)
+		}
+	}
+	return a
+}
+
 // postContactRewrite answers the sheet: «Leave as is» drops the plan;
-// «Rewrite N records» writes it and says on the card what came of it
-// (s-contacts-16).
+// «Rewrite N records» writes what the form chose and says on the card what
+// came of it (s-contacts-16).
 func (s *Server) postContactRewrite(w http.ResponseWriter, r *http.Request) {
 	c, p, ok := s.rewritePlanOf(w, r)
 	if !ok {
@@ -508,13 +730,15 @@ func (s *Server) postContactRewrite(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, c.recordPath(p.UID))
 		return
 	}
-	out := s.applyRewrite(r.Context(), c.sess, p)
-	s.users.Journal(c.sess.AccountID(), "contact.rewrite", fmt.Sprintf("%d of %d", out.written, p.writable()))
+	r.FormValue("groups") // parses the form
+	answer := p.rewriteAnswerOf(r)
+	out := s.applyRewrite(r.Context(), c.sess, p, answer)
+	s.users.Journal(c.sess.AccountID(), "contact.rewrite", fmt.Sprintf("%d of %d", out.written, p.count(answer)))
 	card, err := c.find(r.Context(), p.UID)
 	if err != nil {
 		card = nil
 	}
-	s.writePage(w, r, http.StatusOK, s.recordPage(c, p.UID, card, out.notice(p)))
+	s.writePage(w, r, http.StatusOK, s.recordPage(c, p.UID, card, out.notice(p, answer)))
 }
 
 // rewriteOutcome is what answering the sheet did.
@@ -524,12 +748,13 @@ type rewriteOutcome struct {
 	lost    []string // detail lines: written, but the server did not keep all
 }
 
-func (o rewriteOutcome) notice(p *rewritePlan) view.Notice {
-	// Every writable record written counts them alone (s-contacts-21); a
+func (o rewriteOutcome) notice(p *rewritePlan, a rewriteAnswer) view.Notice {
+	// Every record chosen and written counts them alone (s-contacts-21); a
 	// shortfall says of how many.
+	chosen := p.count(a)
 	n := view.Notice{Role: view.NoticeInfo, Title: text("Rewritten in " + plural(o.written, "record") + ".")}
-	if o.written != p.writable() {
-		n.Title = text(fmt.Sprintf("Rewritten in %d of %s.", o.written, plural(p.writable(), "record")))
+	if o.written != chosen {
+		n.Title = text(fmt.Sprintf("Rewritten in %d of %s.", o.written, plural(chosen, "record")))
 	}
 	parts := append([]string(nil), o.refused...)
 	for _, g := range p.kept() {
@@ -558,13 +783,22 @@ func (o rewriteOutcome) notice(p *rewritePlan) view.Notice {
 // applyRewrite writes every record of the plan that can be written: read
 // again, still the version the sheet was drawn from, rewritten in every
 // component, put with If-Match (S-8) and read back (S-7.1).
-func (s *Server) applyRewrite(ctx context.Context, sess *session.Session, p *rewritePlan) rewriteOutcome {
+func (s *Server) applyRewrite(ctx context.Context, sess *session.Session, p *rewritePlan, a rewriteAnswer) rewriteOutcome {
 	var out rewriteOutcome
 	blob := s.catalogOf(sess)
-	pairs := p.old()
+	// Only the addresses the answer sends somewhere are rewritten; the
+	// records it leaves — a group not ticked, no address chosen — are not
+	// read again (А4, А5).
+	pairs := map[string]string{}
+	for from, to := range a.to {
+		if to != "" {
+			pairs[from] = to
+		}
+	}
+	groups := p.groups()
 	sources := map[string]*collectionSource{}
-	for _, rec := range p.Records {
-		if rec.ReadOnly {
+	for i, rec := range p.Records {
+		if !p.written(a, groups, i) {
 			continue
 		}
 		name := "«" + rec.Title + "»"

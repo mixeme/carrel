@@ -3697,7 +3697,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		s.saveAndMove(w, r, c, s.notebookTarget(c, st.notebook), uid, sent, back)
 		return
 	}
-	s.finishCardWrite(w, r, c, uid, wasEmails, sent, back)
+	s.finishCardWrite(w, r, c, uid, wasEmails, typed["email"], sent, back)
 }
 
 // subtaskParents are the tasks a task names as its parents: RELATED-TO
@@ -3772,14 +3772,14 @@ func (s *Server) closeSubtasks(ctx context.Context, c *collectionCtx, parent str
 // address of a card — the edit and the write of the conflict screen alike
 // (Б44: on that path the question was not asked at all). wasEmails are the
 // card's addresses before the save.
-func (s *Server) finishCardWrite(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, wasEmails []string, sent *model.Object, back string) {
+func (s *Server) finishCardWrite(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, wasEmails, typedEmails []string, sent *model.Object, back string) {
 	// An address replaced on a card is asked about before the card is shown
 	// again (S-15.4): records that named the old one drop out of the
 	// person's timeline. What the save lost comes first, as always — and
 	// the question stands beside the report, not dropped with it (Б44 of
 	// the audit of 11.10.2026: after a loss report it was never asked).
 	if c.spec.kind == view.KindContact {
-		if sheet, _ := s.offerRewrite(c, uid, wasEmails, sent); sheet != "" {
+		if sheet, _ := s.offerRewrite(c, uid, wasEmails, typedEmails, sent); sheet != "" {
 			s.finishWriteWith(w, r, c, uid, sent, sheet, func(loss *model.Loss, _ *model.Object) ([]view.Action, []view.Notice) {
 				if loss == nil {
 					return nil, nil

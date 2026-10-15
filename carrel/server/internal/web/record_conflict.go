@@ -372,5 +372,7 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 		s.saveAndMove(w, r, c, s.notebookTarget(c, d.Notebook), uid, sent, c.recordPath(uid))
 		return
 	}
-	s.finishCardWrite(w, r, c, uid, wasEmails, sent, c.recordPath(uid))
+	// The conflict's form has no lines of addresses: a replaced one is
+	// offered nothing but «Do not rewrite» unless it is the one pair.
+	s.finishCardWrite(w, r, c, uid, wasEmails, nil, sent, c.recordPath(uid))
 }
