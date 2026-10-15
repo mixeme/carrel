@@ -74,3 +74,40 @@ func TestTasksAndNotesNameTheirPeople(t *testing.T) {
 		}
 	}
 }
+
+// The column «Attendees» of a task's and a notebook's list (after Р3; no
+// frame draws it yet — Typecase's task 181): chosen, a row draws how many
+// people it has as a plain badge, as the agenda's column draws an event's.
+func TestTasksAndNotesHaveAnAttendeesColumn(t *testing.T) {
+	for _, c := range []struct {
+		fixture, model string
+		give           func(model any)
+	}{
+		{"app-tasks/normal.json", "TasksPage", func(m any) {
+			p := m.(*view.TasksPage)
+			p.Bar.Columns.Items = append(p.Bar.Columns.Items, view.ColumnItem{ID: "attendees", Label: "Attendees", On: true})
+			p.Groups[0].Rows[0].Attendees = "2 attendees"
+		}},
+		{"app-notes/normal.json", "NotesPage", func(m any) {
+			p := m.(*view.NotesPage)
+			p.Bar.Columns.Items = append(p.Bar.Columns.Items, view.ColumnItem{ID: "attendees", Label: "Attendees", On: true})
+			p.Groups[0].Rows[0].Attendees = "2 attendees"
+		}},
+	} {
+		path := filepath.Join("..", "..", "..", "docs", "spec", "fixtures", filepath.FromSlash(c.fixture))
+		var scr screens.Screen
+		for _, s := range screens.All {
+			if modelName(s) == c.model {
+				scr = s
+			}
+		}
+		model, err := decode(scr, path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		c.give(model)
+		if html := scr.Draw(model).Render(); !strings.Contains(html, ">2 attendees<") {
+			t.Errorf("%s: the column draws no people", c.fixture)
+		}
+	}
+}

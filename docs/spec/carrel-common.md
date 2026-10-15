@@ -1194,6 +1194,7 @@ type TaskRow struct {
     Status    Text     // статус словом списка, «In process»; без STATUS — «Needs action» (s-tasks-13)
     Changed   Text     // последняя правка коротко с временем, «10 Aug 11:02» (s-tasks-13, C-10)
     Where     Text     // место задачи (LOCATION) — столбец «Where», как у агенды (Р10 списка равенства родов; кадра нет); пусто — нет
+    Attendees Text     // столбец «Attendees»: сколько людей у задачи, организатор среди них, как плашка агенды — «2 attendees» (вслед за Р3; кадра нет); пусто — людей нет
     Badges    []Badge  // «linked ×2» у связанной задачи — и в списке одной коллекции, когда прочие члены группы лежат в других (s-tasks-15)
     Sources   []Stamp  // источники связанной группы — подсказка столбца источника; Stamp такой строки в едином виде — их счёт, «2 sources» (s-tasks-1)
     Tick      *Action  // отметка выполнения в строке (task.done); nil — только чтение
@@ -1230,6 +1231,7 @@ type NoteRow struct {
     Tags      []Tag
     Changed   Text     // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
     Status    Text     // столбец «Status», как у задач: статус заметки словом (Р13; кадра нет); пусто — нет
+    Attendees Text     // столбец «Attendees», как у задач: «1 attendee» (вслед за Р3; кадра нет); пусто — людей нет
     Badges    []Badge  // «linked ×2» у связанной заметки — и в списке одной тетради, когда прочие члены группы лежат в других (s-notes-31)
     Sources   []Stamp  // источники связанной группы — подсказка столбца источника; Stamp такой строки в едином виде — их счёт, «2 sources» (s-notes-1)
     Menu      []MenuItem
@@ -1247,8 +1249,8 @@ type NoteRow struct {
 |---|---|
 | контакты (components-21, -42) | `name` — `Name`, `phone` — `Phone`, `email` — `Email`, `org` — `Org`, `birthday` — `Birthday`, `tags` — `Tags`, `changed` — `Changed`, `source` — `Stamp` |
 | агенда (s-agenda-18) | `time` — `Time`, `title` — `Summary` (оба стоят всегда), `where` — `Location`, `attendees` — все `Badges` («Attendees and status», плашками; у события без них ячейка пуста), `source` — `Stamp`, `tags` — `Tags`, `changed` — `Changed`, `status` — `Status`, `priority` — `Priority` (`AgendaRow`; два последних — Р13, кадра нет) |
-| задачи (s-tasks-12, -13) | `title` — `Summary`, `tags` — `Tags`, `due` — `Due` (тревожным — только срок, `Overdue`), `complete` — `Percent` (`70%`), `source` — `Stamp`, `priority` — `Priority`, `status` — `Status`, `changed` — `Changed`; галка дела `Tick` стоит перед меткой в любом наборе |
-| заметки (s-notes-23, -24) | `title` — `Title`, `excerpt` — `Excerpt`, `tags` — `Tags`, `date` — `Date`, `source` — `Stamp`, `changed` — `Changed`, `status` — `Status` (Р13, кадра нет) |
+| задачи (s-tasks-12, -13) | `title` — `Summary`, `tags` — `Tags`, `due` — `Due` (тревожным — только срок, `Overdue`), `complete` — `Percent` (`70%`), `source` — `Stamp`, `priority` — `Priority`, `status` — `Status`, `changed` — `Changed`, `where` — `Where` (Р10, кадра нет), `attendees` — `Attendees` (одной плашкой, как у агенды; вслед за Р3, кадра нет); галка дела `Tick` стоит перед меткой в любом наборе |
+| заметки (s-notes-23, -24) | `title` — `Title`, `excerpt` — `Excerpt`, `tags` — `Tags`, `date` — `Date`, `source` — `Stamp`, `changed` — `Changed`, `status` — `Status` (Р13, кадра нет), `attendees` — `Attendees` (одной плашкой; вслед за Р3, кадра нет) |
 | файлы (s-files-20) | `name` — `Name`, `size` — `Size`, `type` — `Type`, `changed` — `Modified` (`FileRow`, C-6.7) |
 | хронология (s-contacts-25, -26) | `title` — `Title`, за ним всегда `Why` (в меню не входит), `date` — `When`, `kind` — `Kind`, `source` — `Stamp` (`TimelineRow`, C-6.5) |
 | пользователи (s-admin-21, -22) | `login` — `Login`, `role` — `Role`, `created` — `Created`, `last-login` — `LastLogin`, `dav` — `Accounts`, `sessions` — `Sessions`, `escrow` — `Escrowed`, `address` — `Address`; «⋯» в меню не входит (`AdminUserRow`, C-6.8) |

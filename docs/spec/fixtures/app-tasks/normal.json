@@ -131,6 +131,12 @@
           "id": "where",
           "label": "Where",
           "on": false
+        },
+        {
+          "fixed": false,
+          "id": "attendees",
+          "label": "Attendees",
+          "on": false
         }
       ],
       "label": "Columns"
@@ -207,6 +213,7 @@
       "overdue": true,
       "rows": [
         {
+          "attendees": "",
           "badges": [],
           "changed": "10 Aug 09:00",
           "colour": "",
@@ -313,6 +320,7 @@
       "overdue": false,
       "rows": [
         {
+          "attendees": "",
           "badges": [
             {
               "label": "linked ×2",
@@ -427,6 +435,7 @@
       "overdue": false,
       "rows": [
         {
+          "attendees": "",
           "badges": [],
           "changed": "10 Aug 09:00",
           "colour": "",

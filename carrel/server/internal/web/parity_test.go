@@ -346,3 +346,30 @@ func TestATaskChoosesItsZone(t *testing.T) {
 		t.Errorf("errors = %+v, want tz refused", bad.Form.Errors)
 	}
 }
+
+// Following Р3 of scans/kinds-parity.md, as Р13 followed Р4 and Р7: the
+// agenda offers its people as a column; a task's and a notebook's list
+// offered none, now that a task and a note have attendees. Each offers
+// «Attendees», off until chosen, and a row carries how many — the
+// organiser one of them, as the agenda's badge counts.
+func TestAttendeesColumnForEveryKind(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260101T000000Z\nSUMMARY:Slides\nORGANIZER:mailto:anna@example.org\nATTENDEE:mailto:bob@example.org\nEND:VTODO"),
+		"n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nSUMMARY:Minutes\nATTENDEE:mailto:bob@example.org\nEND:VJOURNAL"))
+	offered := func(cols *view.Columns) bool {
+		for _, it := range cols.Items {
+			if it.ID == "attendees" {
+				return !it.On
+			}
+		}
+		return false
+	}
+	tasks := decode[view.TasksPage](t, f.h.do(get(f.path("tasks")+"?seg=all", f.sess)))
+	if tasks.Bar.Columns == nil || !offered(tasks.Bar.Columns) || len(tasks.Groups) == 0 || tasks.Groups[0].Rows[0].Attendees != "2 attendees" {
+		t.Errorf("tasks: columns %+v, groups %+v", tasks.Bar.Columns, tasks.Groups)
+	}
+	notes := decode[view.NotesPage](t, f.h.do(get(f.path("notes"), f.sess)))
+	if notes.Bar.Columns == nil || !offered(notes.Bar.Columns) || len(notes.Groups) == 0 || notes.Groups[0].Rows[0].Attendees != "1 attendee" {
+		t.Errorf("notes: columns %+v, groups %+v", notes.Bar.Columns, notes.Groups)
+	}
+}

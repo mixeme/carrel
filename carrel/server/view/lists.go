@@ -197,8 +197,12 @@ type TaskRow struct {
 	Changed  Text `json:"changed"`
 	// Where — место задачи (LOCATION), столбец «Where», как у агенды (Р10
 	// списка равенства родов; кадра нет); пусто — нет
-	Where  Text    `json:"where"`
-	Badges []Badge `json:"badges"` // «linked ×2» у связанной задачи
+	Where Text `json:"where"`
+	// Attendees — столбец «Attendees»: сколько людей у задачи, организатор
+	// среди них, как плашка агенды, «2 attendees» (вслед за Р3 списка
+	// равенства родов; кадра нет); пусто — людей нет
+	Attendees Text    `json:"attendees"`
+	Badges    []Badge `json:"badges"` // «linked ×2» у связанной задачи
 	// Sources — источники связанной группы (подсказка столбца источника);
 	// Stamp такой строки в едином виде — их счёт, «2 sources» (s-tasks-1)
 	Sources []Stamp     `json:"sources"`
@@ -244,8 +248,11 @@ type NoteRow struct {
 	Changed Text   `json:"changed"` // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
 	// Status — столбец «Status», как у задач: статус заметки словом списка
 	// (Р13 списка равенства родов; кадра нет); пусто — статуса нет
-	Status Text    `json:"status"`
-	Badges []Badge `json:"badges"` // «linked ×2» у связанной заметки
+	Status Text `json:"status"`
+	// Attendees — столбец «Attendees», как у задач: сколько людей у
+	// заметки, «1 attendee» (вслед за Р3; кадра нет); пусто — людей нет
+	Attendees Text    `json:"attendees"`
+	Badges    []Badge `json:"badges"` // «linked ×2» у связанной заметки
 	// Sources — источники связанной группы (подсказка столбца источника);
 	// Stamp такой строки в едином виде — их счёт, «2 sources» (s-notes-1)
 	Sources []Stamp     `json:"sources"`

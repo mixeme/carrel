@@ -66,6 +66,9 @@ var (
 		// where the task is, the cell of the agenda's Where (Р10 of the
 		// kinds' parity; no frame draws it)
 		"where": w.ColumnDetail,
+		// how many people the task has, a plain badge as the agenda's
+		// column draws an event's (after Р3; no frame draws it)
+		"attendees": w.ColumnBadges,
 	}
 )
 
@@ -366,6 +369,10 @@ func columnRow(r view.TaskRow, shown []string) w.ColumnRow {
 			cell.Text = or(r.Changed)
 		case w.ColumnDetail:
 			cell.Text = or(r.Where)
+		case w.ColumnBadges:
+			if r.Attendees != "" {
+				cell.Badges = []w.Badge{{Label: string(r.Attendees)}}
+			}
 		}
 		c.Cells = append(c.Cells, cell)
 	}

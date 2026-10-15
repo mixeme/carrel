@@ -111,6 +111,12 @@
           "id": "status",
           "label": "Status",
           "on": false
+        },
+        {
+          "fixed": false,
+          "id": "attendees",
+          "label": "Attendees",
+          "on": false
         }
       ],
       "label": "Columns"
@@ -187,6 +193,7 @@
       "count": 2,
       "rows": [
         {
+          "attendees": "",
           "badges": [],
           "changed": "10 Aug 11:05",
           "colour": "",
@@ -279,6 +286,7 @@
           "uid": "5c81-77aa-0d64"
         },
         {
+          "attendees": "",
           "badges": [
             {
               "label": "linked ×2",

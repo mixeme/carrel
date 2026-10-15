@@ -111,6 +111,12 @@
           "id": "status",
           "label": "Status",
           "on": false
+        },
+        {
+          "fixed": false,
+          "id": "attendees",
+          "label": "Attendees",
+          "on": false
         }
       ],
       "label": "Columns"

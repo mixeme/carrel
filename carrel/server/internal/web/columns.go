@@ -51,6 +51,9 @@ var listColumns = map[string][]listColumn{
 		// Where a task is (Р10 of scans/kinds-parity.md): the agenda has the
 		// column, a task has LOCATION; no frame draws it — Typecase's task 170.
 		{"where", "Where", false},
+		// A task's people, as the agenda's column (after Р3); no frame draws
+		// it — Typecase's task 181.
+		{"attendees", "Attendees", false},
 	},
 	"notes": {
 		{"title", "Title", true}, {"excerpt", "Excerpt", true}, {"date", "Date", true}, {"source", "Source", true},
@@ -58,6 +61,8 @@ var listColumns = map[string][]listColumn{
 		// A note's status, as a task's list offers its own (Р13); no frame
 		// draws it — Typecase's task 178.
 		{"status", "Status", false},
+		// A note's people, as a task's (after Р3); Typecase's task 181.
+		{"attendees", "Attendees", false},
 	},
 	"files": {
 		{"name", "Name", true}, {"size", "Size", true}, {"type", "Type", true}, {"changed", "Changed", true},

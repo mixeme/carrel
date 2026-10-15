@@ -522,8 +522,9 @@ func TestTimelineColumnsAreTheFrame(t *testing.T) {
 
 // beyondFrames are the columns a menu offers that its frame does not draw
 // yet: what one kind's list had and another's lacked (scans/kinds-parity.md).
-// Each is asked of the frame — Р10: Typecase's task 170; Р13: task 178.
-var beyondFrames = map[string][]string{"s-tasks-12": {"where"}, "s-notes-23": {"status"}}
+// Each is asked of the frame — Р10: Typecase's task 170; Р13: task 178;
+// Attendees after Р3: task 181.
+var beyondFrames = map[string][]string{"s-tasks-12": {"where", "attendees"}, "s-notes-23": {"status", "attendees"}}
 
 // beyondFrame is the menu without the columns beyondFrames adds, each of
 // which it must offer.

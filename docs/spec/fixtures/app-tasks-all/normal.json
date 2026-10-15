@@ -158,6 +158,12 @@
           "id": "where",
           "label": "Where",
           "on": false
+        },
+        {
+          "fixed": false,
+          "id": "attendees",
+          "label": "Attendees",
+          "on": false
         }
       ],
       "label": "Columns"
@@ -414,6 +420,7 @@
       "overdue": true,
       "rows": [
         {
+          "attendees": "",
           "badges": [],
           "changed": "10 Aug 09:00",
           "colour": "#4a6b52",
@@ -513,6 +520,7 @@
           "where": ""
         },
         {
+          "attendees": "",
           "badges": [],
           "changed": "10 Aug 09:00",
           "colour": "#3f6e8c",
@@ -619,6 +627,7 @@
       "overdue": false,
       "rows": [
         {
+          "attendees": "",
           "badges": [
             {
               "label": "linked ×2",
@@ -726,6 +735,7 @@
           "where": ""
         },
         {
+          "attendees": "",
           "badges": [],
           "changed": "10 Aug 09:00",
           "colour": "#3f6e8c",
@@ -832,6 +842,7 @@
       "overdue": false,
       "rows": [
         {
+          "attendees": "",
           "badges": [],
           "changed": "10 Aug 09:00",
           "colour": "#4a6b52",

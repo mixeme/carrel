@@ -1506,6 +1506,17 @@ func repeatsWord(raw string) string {
 	return "repeats " + w[0]
 }
 
+// peopleCount is the column «Attendees» of a task's and a note's row, as
+// the agenda's badge counts an event's people (after Р3 of
+// scans/kinds-parity.md): «2 attendees», the organiser one of them; ""
+// without people.
+func peopleCount(o *model.Object) view.Text {
+	if n := len(recordPeople(o, nil)); n > 0 {
+		return text(plural(n, "attendee"))
+	}
+	return ""
+}
+
 // recordPeople are the people of an event as its card lists them
 // (s-agenda-1, s-agenda-2), and of a task and a note as theirs do (Р3 of
 // scans/kinds-parity.md): the organiser first, as one of them («4
@@ -1674,6 +1685,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 			row.Changed = text(tf.shortStamp(changed))
 		}
 		row.Where = text(strings.TrimSpace(firstValue(o, "LOCATION")))
+		row.Attendees = peopleCount(o)
 		rows = append(rows, item{row: row, due: due.Start, priority: priorityOf(o), changed: changed, order: it.from.listPath(segment)})
 	}
 	sort.SliceStable(rows, func(i, j int) bool {
@@ -1851,6 +1863,7 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 			row.Changed = text(tf.shortStamp(changed))
 		}
 		row.Status = text(statusLabelOf(o))
+		row.Attendees = peopleCount(o)
 		rows = append(rows, item{row: row, at: at, changed: changedAt(o, tf.tz), order: it.from.listPath(segment)})
 	}
 	sort.SliceStable(rows, func(i, j int) bool {

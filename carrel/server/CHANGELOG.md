@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.246 — 2026-10-15
+
+### Changed
+
+- **The tasks and the notes offer an Attendees column**, as the agenda
+  does, now that a task and a note have people (after Р3 of
+  docs/plan/scans/kinds-parity.md): the Columns of each end with
+  Attendees, off until chosen, and a row carries how many
+  (`TaskRow.attendees`, `NoteRow.attendees`: «2 attendees», the organiser
+  one of them). No frame draws it yet (Typecase's task 181).
+
 ## v0.2.245 — 2026-10-15
 
 ### Changed

@@ -62,6 +62,9 @@ var (
 		// a note's status, the cell of the tasks' (Р13 of the server's
 		// kinds-parity list; no frame draws it)
 		"status": w.ColumnStatus,
+		// how many people the note has, a plain badge as the agenda's
+		// column draws an event's (after Р3; no frame draws it)
+		"attendees": w.ColumnBadges,
 	}
 )
 
@@ -332,6 +335,10 @@ func columnRow(r view.NoteRow, shown []string) w.ColumnRow {
 			cell.Text = or(r.Changed)
 		case w.ColumnStatus:
 			cell.Text = or(r.Status)
+		case w.ColumnBadges:
+			if r.Attendees != "" {
+				cell.Badges = []w.Badge{{Label: string(r.Attendees)}}
+			}
 		}
 		c.Cells = append(c.Cells, cell)
 	}
