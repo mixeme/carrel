@@ -1,0 +1,671 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/calendar/a-nc-home/rabota/7c1e-22ab-90f4/edit?op=apart",
+      "id": "series.retry",
+      "label": "Try again",
+      "method": "POST",
+      "primary": true,
+      "submits": true
+    },
+    {
+      "enabled": true,
+      "href": "/app/calendar/a-nc-home/rabota/7c1e-22ab-90f4",
+      "id": "series.leave",
+      "label": "Leave it in the series",
+      "method": "GET"
+    }
+  ],
+  "alert": "The meeting of 2 February was not made a separate event: it stays in the series, with its change, as it was before you saved.",
+  "blocks": [
+    {
+      "lines": [
+        {
+          "aside": "— saved",
+          "text": "The series"
+        },
+        {
+          "aside": "— 26 January, 12:00 and 16 February, 14:30",
+          "text": "2 separate events"
+        }
+      ],
+      "title": "Written"
+    },
+    {
+      "lines": [
+        {
+          "aside": "— the server answered 507 Insufficient Storage",
+          "text": "2 February, 09:00 — Дежурство: вторая линия"
+        }
+      ],
+      "title": "Not written · 1"
+    }
+  ],
+  "form": {
+    "action": "/app/calendar/a-nc-home/rabota/7c1e-22ab-90f4/edit",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "etag",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "e24"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "day",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "2026-02-02T06:00:00Z"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "icon": "i-refresh",
+  "kind": "event",
+  "note": "Nothing is lost: what could not be written apart is still in the series.",
+  "subject": "Дежурство: первая линия · saved in part",
+  "title": "Keep the meetings that were moved by hand?",
+  "under": {
+    "agenda": null,
+    "contact": null,
+    "contacts": null,
+    "event": {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/rabota/7c1e-22ab-90f4/edit",
+          "icon": "i-pencil",
+          "id": "record.edit",
+          "label": "Edit",
+          "method": "GET",
+          "primary": true
+        },
+        {
+          "arrow": [
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "file": "file",
+              "href": "/app/calendar/a-nc-home/rabota/7c1e-22ab-90f4/edit?etag=e24\u0026op=attach",
+              "icon": "i-up",
+              "id": "attach.add",
+              "label": "From this computer",
+              "method": "POST"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/picker?a=a-nc-home\u0026c=rabota\u0026etag=e24\u0026for=attach\u0026k=calendar\u0026uid=7c1e-22ab-90f4",
+              "icon": "i-file",
+              "id": "attach.files",
+              "label": "From Files",
+              "method": "GET",
+              "target": "sheet"
+            }
+          ],
+          "csrf": "csrf",
+          "enabled": true,
+          "file": "file",
+          "href": "/app/calendar/a-nc-home/rabota/7c1e-22ab-90f4/edit?etag=e24\u0026op=attach",
+          "icon": "i-up",
+          "id": "attach.add",
+          "label": "Attach",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/a-nc-home/rabota/new/quick?related=7c1e-22ab-90f4",
+          "icon": "i-task",
+          "id": "event.task",
+          "label": "New task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/mail/attach?a=a-nc-home\u0026c=rabota\u0026uid=7c1e-22ab-90f4\u0026what=event",
+          "icon": "i-mail",
+          "id": "record.send",
+          "label": "Send",
+          "method": "POST",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/rabota/7c1e-22ab-90f4?print=1",
+          "icon": "i-print",
+          "id": "record.print",
+          "label": "Print",
+          "method": "GET"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/rabota/7c1e-22ab-90f4/delete?etag=e24",
+          "icon": "i-trash",
+          "id": "record.delete",
+          "label": "Delete event",
+          "method": "POST"
+        }
+      ],
+      "attach": [],
+      "attendees": [],
+      "body": "",
+      "details": null,
+      "fields": [
+        {
+          "href": "",
+          "label": "When",
+          "mono": false,
+          "runs": [
+            {
+              "mark": "mono",
+              "text": "09:00 – 10:00"
+            },
+            {
+              "text": ", Monday 5 January"
+            }
+          ],
+          "value": ""
+        },
+        {
+          "badge": {
+            "label": "until 2026-01-19",
+            "role": "neutral"
+          },
+          "href": "",
+          "label": "Repeats",
+          "mono": false,
+          "value": "Weekly on Mon"
+        }
+      ],
+      "linked": [],
+      "look": {
+        "compact": false,
+        "panel": true,
+        "source": true,
+        "theme": "auto",
+        "wide": false
+      },
+      "loss": null,
+      "menu": [
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/rabota/7c1e-22ab-90f4/move",
+          "icon": "i-move",
+          "id": "record.move",
+          "label": "Move",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/rabota/7c1e-22ab-90f4/move?copy=1",
+          "icon": "i-dup",
+          "id": "record.copy",
+          "label": "Copy",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/rabota/export?uid=7c1e-22ab-90f4",
+          "icon": "i-down",
+          "id": "record.export",
+          "label": "Export .ics",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/publish?a=a-nc-home\u0026c=rabota\u0026k=calendar\u0026uid=7c1e-22ab-90f4",
+          "icon": "i-link",
+          "id": "publish",
+          "label": "Publish a link",
+          "method": "GET",
+          "target": "sheet"
+        }
+      ],
+      "notices": [],
+      "print": {
+        "range": "nextcloud · Работа",
+        "taken": "10 August 2026, 17:06",
+        "title": "Дежурство: первая линия"
+      },
+      "rail": {
+        "about": {
+          "build": "0.0.1 · 786949a",
+          "enabled": true,
+          "href": "/about",
+          "id": "about",
+          "label": "Carrel",
+          "method": "GET"
+        },
+        "davloom": "davloom · running · 0 devices",
+        "foot": [],
+        "nav": [
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/rabota",
+            "icon": "i-back",
+            "id": "nav.back",
+            "label": "Back to list",
+            "method": "GET"
+          }
+        ],
+        "neighbours": [],
+        "note": "",
+        "sections": [
+          {
+            "account": "nextcloud",
+            "accountID": "a-nc-home",
+            "rows": [
+              {
+                "colour": "#a05a2c",
+                "count": null,
+                "detail": "",
+                "feed": false,
+                "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+                "label": "Дни рождения",
+                "menu": [
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
+                    "icon": "i-pencil",
+                    "id": "collection.rename",
+                    "label": "Rename",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
+                    "icon": "i-move",
+                    "id": "collection.move",
+                    "label": "Move to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026copy=1",
+                    "icon": "i-dup",
+                    "id": "collection.copy",
+                    "label": "Copy to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
+                    "icon": "i-up",
+                    "id": "collection.import",
+                    "label": "Import",
+                    "method": "GET",
+                    "separator": true
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export",
+                    "icon": "i-down",
+                    "id": "collection.export",
+                    "label": "Export",
+                    "method": "GET"
+                  },
+                  {
+                    "danger": true,
+                    "enabled": true,
+                    "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
+                    "icon": "i-trash",
+                    "id": "collection.delete",
+                    "label": "Delete on the server…",
+                    "method": "GET",
+                    "separator": true,
+                    "target": "sheet"
+                  }
+                ],
+                "on": false,
+                "readOnly": false,
+                "state": "ok",
+                "tick": "off"
+              },
+              {
+                "colour": "#4a6b52",
+                "count": 2,
+                "detail": "",
+                "feed": false,
+                "href": "/app/calendar/a-nc-home/lichnyj",
+                "label": "Личный",
+                "menu": [
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/rename?a=a-nc-home\u0026c=lichnyj",
+                    "icon": "i-pencil",
+                    "id": "collection.rename",
+                    "label": "Rename",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj",
+                    "icon": "i-move",
+                    "id": "collection.move",
+                    "label": "Move to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj\u0026copy=1",
+                    "icon": "i-dup",
+                    "id": "collection.copy",
+                    "label": "Copy to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/lichnyj/import",
+                    "icon": "i-up",
+                    "id": "collection.import",
+                    "label": "Import",
+                    "method": "GET",
+                    "separator": true
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/lichnyj/export",
+                    "icon": "i-down",
+                    "id": "collection.export",
+                    "label": "Export",
+                    "method": "GET"
+                  },
+                  {
+                    "danger": true,
+                    "enabled": true,
+                    "href": "/app/collections/delete?a=a-nc-home\u0026c=lichnyj",
+                    "icon": "i-trash",
+                    "id": "collection.delete",
+                    "label": "Delete on the server…",
+                    "method": "GET",
+                    "separator": true,
+                    "target": "sheet"
+                  }
+                ],
+                "on": false,
+                "readOnly": false,
+                "state": "ok",
+                "tick": "on"
+              },
+              {
+                "colour": "#3f6e8c",
+                "count": 3,
+                "detail": "",
+                "feed": false,
+                "href": "/app/calendar/a-nc-home/rabota",
+                "label": "Работа",
+                "menu": [
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
+                    "icon": "i-pencil",
+                    "id": "collection.rename",
+                    "label": "Rename",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
+                    "icon": "i-move",
+                    "id": "collection.move",
+                    "label": "Move to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=rabota\u0026copy=1",
+                    "icon": "i-dup",
+                    "id": "collection.copy",
+                    "label": "Copy to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/rabota/import",
+                    "icon": "i-up",
+                    "id": "collection.import",
+                    "label": "Import",
+                    "method": "GET",
+                    "separator": true
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/rabota/export",
+                    "icon": "i-down",
+                    "id": "collection.export",
+                    "label": "Export",
+                    "method": "GET"
+                  },
+                  {
+                    "danger": true,
+                    "enabled": true,
+                    "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
+                    "icon": "i-trash",
+                    "id": "collection.delete",
+                    "label": "Delete on the server…",
+                    "method": "GET",
+                    "separator": true,
+                    "target": "sheet"
+                  }
+                ],
+                "on": true,
+                "readOnly": false,
+                "state": "ok",
+                "tick": "on"
+              }
+            ],
+            "state": "ok"
+          }
+        ],
+        "shortcuts": [],
+        "tags": [],
+        "ticks": null
+      },
+      "readOnly": false,
+      "recurrence": {
+        "fields": [],
+        "note": "Series is edited and deleted whole.",
+        "raw": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20260119T205959Z",
+        "summary": "Weekly on Monday, until 19 January 2026"
+      },
+      "related": [],
+      "source": {
+        "changed": "",
+        "colour": "#3f6e8c",
+        "compared": "changed on server since",
+        "lastRead": "2 min ago",
+        "objects": null,
+        "path": "/alice/calendars/rabota/7c1e-22ab-90f4.ics",
+        "readOnly": false,
+        "stamp": "nextcloud · Работа",
+        "uid": ""
+      },
+      "summary": "Дежурство: первая линия",
+      "title": "Дежурство: первая линия",
+      "top": {
+        "lock": null,
+        "new": {
+          "arrow": [
+            {
+              "enabled": true,
+              "href": "/app/notes/quick",
+              "icon": "i-quill",
+              "id": "new.notes",
+              "label": "Note",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/quick",
+              "icon": "i-con",
+              "id": "new.contacts",
+              "label": "Contact",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/quick",
+              "icon": "i-cal",
+              "id": "new.calendar",
+              "label": "Event",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/tasks/quick",
+              "icon": "i-task",
+              "id": "new.tasks",
+              "label": "Task",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/picker?for=upload",
+              "icon": "i-up",
+              "id": "new.upload",
+              "label": "Upload file",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/mail/compose",
+              "icon": "i-mail",
+              "id": "new.letter",
+              "label": "Letter",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "New note",
+          "method": "GET",
+          "primary": true,
+          "target": "sheet"
+        },
+        "refresh": {
+          "action": {
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/rabota/7c1e-22ab-90f4",
+            "icon": "i-refresh",
+            "id": "record.refresh",
+            "label": "Refresh",
+            "method": "GET"
+          },
+          "answered": "2 min ago",
+          "running": false
+        },
+        "search": {
+          "action": "/app/search",
+          "history": [],
+          "jump": [],
+          "name": "q",
+          "query": "",
+          "whole": null
+        },
+        "signed": {
+          "instance": "carrel.example",
+          "local": true,
+          "login": "mix"
+        },
+        "unlocked": null,
+        "user": [
+          {
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-gear",
+            "id": "user.settings",
+            "label": "Settings",
+            "method": "GET"
+          },
+          {
+            "enabled": true,
+            "href": "/admin/",
+            "icon": "i-adm",
+            "id": "user.admin",
+            "label": "Administration",
+            "method": "GET"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/logout",
+            "id": "user.logout",
+            "label": "Sign out",
+            "method": "POST",
+            "separator": true
+          }
+        ],
+        "userHref": "/app/settings/account"
+      },
+      "uid": "7c1e-22ab-90f4"
+    },
+    "eventEdit": null,
+    "note": null,
+    "notes": null,
+    "task": null,
+    "taskEdit": null,
+    "tasks": null
+  }
+}

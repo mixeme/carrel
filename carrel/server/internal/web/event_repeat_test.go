@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"carrel.dev/carrel/server/internal/web"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -78,7 +77,6 @@ func TestEventRepeats(t *testing.T) {
 		}
 	}
 
-	t.Cleanup(web.DrawSheets())
 	// The raw rule wins when it is what changed. Monthly on the 15th, the
 	// meeting moved on 29 January has no day: Save asks first (А1,
 	// s-agenda-23; until 15.10.2026 it was kept loose in the series), and

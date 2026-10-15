@@ -82,6 +82,7 @@ var sheets = map[reflect.Type]bool{
 	reflect.TypeFor[view.MailAttachSheet]():       true,
 	reflect.TypeFor[view.MoveSheet]():             true,
 	reflect.TypeFor[view.CopiesSheet]():           true,
+	reflect.TypeFor[view.AskSheet]():              true,
 	reflect.TypeFor[view.RewriteSheet]():          true,
 	reflect.TypeFor[view.ExportSheet]():           true,
 	reflect.TypeFor[view.NewSheet]():              true,

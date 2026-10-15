@@ -3605,13 +3605,12 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	// A series whose occurrences changed by hand the edit leaves without
 	// their day asks what becomes of them before anything is written (А1,
 	// s-agenda-22); kept, each is written as an event of its own first, and
-	// taken back if the series then is not written. Until the client draws
-	// the question (askOnPages) the save writes them as before, loose in the
-	// series.
+	// taken back if the series then is not written.
 	var made []string
 	var failed []apartFailed
 	var kept []time.Time
-	if left := leftByEdit(series, sent, c.tf.tz); len(left) > 0 && askOnPages {
+	var left []cal.Left
+	if left = leftByEdit(series, sent, c.tf.tz); len(left) > 0 {
 		answer := r.FormValue(leftField)
 		if answer != "keep" && answer != "remove" {
 			// The form is drawn again over the record read again: the one
@@ -3690,7 +3689,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		if got, err := c.find(r.Context(), uid); err == nil {
 			sent = got
 		}
-		s.writePage(w, r, http.StatusOK, s.askFailed(r, c, uid, sent, kept, failed))
+		s.writePage(w, r, http.StatusOK, s.askFailed(r, c, uid, sent, kept, failed, left))
 		return
 	}
 	if moving {

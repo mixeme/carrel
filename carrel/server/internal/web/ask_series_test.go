@@ -51,7 +51,6 @@ func askAnswer(t *testing.T, sheet view.AskSheet, id string) view.Action {
 // without them and without the day left out it no longer has; Keep writes
 // each as an event of its own first.
 func TestASeriesAsksBeforeItLeavesMeetingsWithoutTheirDay(t *testing.T) {
-	t.Cleanup(web.DrawSheets())
 	f, form, rec := cutSeries(t)
 	before := body(t, f, "duty.ics")
 	sheet := decode[view.AskSheet](t, f.h.do(postForm(rec+"/edit", f.sess, form)))
@@ -114,7 +113,6 @@ func TestASeriesAsksBeforeItLeavesMeetingsWithoutTheirDay(t *testing.T) {
 // the series as it was; the sheet says what was written, what was not and
 // why. Try again writes it apart now.
 func TestASeriesSavedInPart(t *testing.T) {
-	t.Cleanup(web.DrawSheets())
 	f, form, rec := cutSeries(t)
 	sheet := decode[view.AskSheet](t, f.h.do(postForm(rec+"/edit", f.sess, form)))
 	msk, _ := time.LoadLocation("Europe/Moscow")
@@ -125,6 +123,11 @@ func TestASeriesSavedInPart(t *testing.T) {
 		!strings.Contains(string(part.Blocks[1].Lines[0].Aside), "507 Insufficient Storage") ||
 		part.Alert != "The meeting of 2 February was not made a separate event: it stays in the series, with its change, as it was before you saved." {
 		t.Fatalf("saved in part = %+v", part)
+	}
+	// The event written apart is named where it stands, not by the day of
+	// the series it stood for (s-agenda-24).
+	if w := part.Blocks[0].Lines; len(w) != 2 || w[1].Text != "1 separate event" || w[1].Aside != "— 26 January, 12:00" {
+		t.Errorf("written = %+v", w)
 	}
 	got := unfolded(body(t, f, "duty.ics"))
 	if !strings.Contains(got, "RECURRENCE-ID;TZID=Europe/Moscow:20260202T100000") || strings.Contains(got, "20260126T100000") || !strings.Contains(got, "COUNT=1") {
@@ -139,19 +142,5 @@ func TestASeriesSavedInPart(t *testing.T) {
 	}
 	if got := unfolded(body(t, f, "duty.ics")); strings.Contains(got, "RECURRENCE-ID") {
 		t.Errorf("after Try again the series still holds it:\n%s", got)
-	}
-}
-
-// Until the client draws sheets (the owner's decision of 15.10.2026) Save
-// writes the series as before: the meetings changed by hand stay in it
-// loose, and only the day left out it no longer has goes.
-func TestASeriesSavesAsBeforeUntilTheClientDrawsSheets(t *testing.T) {
-	f, form, rec := cutSeries(t)
-	if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != 303 {
-		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
-	}
-	got := unfolded(body(t, f, "duty.ics"))
-	if !strings.Contains(got, "RECURRENCE-ID;TZID=Europe/Moscow:20260126T100000") || strings.Contains(got, "EXDATE") || !strings.Contains(got, "COUNT=1") {
-		t.Errorf("saved:\n%s", got)
 	}
 }

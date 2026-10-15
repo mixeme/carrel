@@ -171,6 +171,7 @@ func TestSheetsAreTheSheetsOfC5(t *testing.T) {
 func allSheets() []any {
 	return []any{
 		view.PublishSheet{}, view.MailSheet{}, view.MailAttachSheet{}, view.MoveSheet{}, view.CopiesSheet{},
+		view.AskSheet{},
 		view.RewriteSheet{}, view.ExportSheet{}, view.NewSheet{}, view.FileOpSheet{},
 		view.FilePickerSheet{}, view.CollectionNewSheet{}, view.CollectionRenameSheet{},
 		view.CollectionMoveSheet{}, view.CollectionDeleteSheet{}, view.UnlockSheet{},

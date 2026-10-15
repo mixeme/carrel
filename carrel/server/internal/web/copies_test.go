@@ -82,8 +82,7 @@ func TestWhichCopyToMarkDone(t *testing.T) {
 	if tick == nil || tick.Method != "POST" {
 		t.Fatalf("the linked row's tick = %+v in %+v", tick, all.Groups)
 	}
-	// The client draws the sheet since v0.4.42 (copiesOnPages): the tick
-	// posts to it.
+	// The tick posts to the sheet.
 	if !strings.Contains(tick.Href, "/done?") {
 		t.Errorf("the linked row's tick does not ask which copy: %+v", tick)
 	}
@@ -129,8 +128,7 @@ func TestWhichCopyToEdit(t *testing.T) {
 	f, record := linkedTasks(t)
 	home := davtest.CalendarHome + "home/"
 	page := decode[view.TaskPage](t, f.h.do(get(record(searchWork, "t1"), f.sess)))
-	// The client draws the sheet since v0.4.42 (copiesOnPages): Edit leads
-	// to it.
+	// Edit leads to the sheet.
 	edit := actionByID(page.Actions, "record.edit")
 	if edit == nil || !strings.HasSuffix(edit.Href, "/t1/copies") {
 		t.Fatalf("Edit = %+v", edit)

@@ -255,8 +255,8 @@ type CopiesSheet struct {
 // и почему (s-agenda-24), ответы — «Try again» и «Leave it in the series».
 type AskSheet struct {
 	Kind Kind `json:"kind"`
-	// Icon — значок шапки, «i-refresh» (s-agenda-22); пусто — без значка
-	// (лист отказа, s-agenda-24)
+	// Icon — значок шапки, «i-refresh» (s-agenda-22, и у листа отказа,
+	// s-agenda-24); пусто — без значка
 	Icon    string `json:"icon"`
 	Title   Text   `json:"title"`   // вопрос: «Keep the meetings that were moved by hand?»
 	Subject Text   `json:"subject"` // что и в каком состоянии: «Дежурство: первая линия · not saved yet» («· saved in part»)

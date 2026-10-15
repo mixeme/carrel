@@ -4,6 +4,7 @@ import (
 	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/client/screens/about"
 	"carrel.dev/carrel/client/screens/agenda"
+	"carrel.dev/carrel/client/screens/ask"
 	"carrel.dev/carrel/client/screens/confirm"
 	"carrel.dev/carrel/client/screens/contact"
 	"carrel.dev/carrel/client/screens/contactedit"
@@ -114,6 +115,16 @@ var All = []Screen{
 		},
 		Title: func(model any) string { return string(model.(*view.CopiesSheet).Title) },
 		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.CopiesSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.AskSheet) },
+		Frames: []string{"s-agenda-22", "s-agenda-23", "s-agenda-24"},
+		Draw: func(model any) Root {
+			p := model.(*view.AskSheet)
+			return over(p.Under, ask.Sheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.AskSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.AskSheet).Under) },
 	},
 	{
 		Model:  func() any { return new(view.LoginPage) },

@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.258 — 2026-10-15
+
+### Changed
+
+- **Save of a series that leaves meetings changed by hand without their day
+  asks first again** (`AskSheet`, А1): the client draws the question since
+  `v0.4.43`. The switches that held the pages off the sheets
+  (`copiesOnPages`, `askOnPages`, `v0.2.249`) are gone.
+- **The sheet «saved in part» names the events written apart where they
+  stand** — «26 January, 12:00 and 16 February, 14:30» (`s-agenda-24`), not
+  the days of the series they stood for — and carries its icon, as the
+  frame draws it.
+
+### For consumers
+
+Fixtures `app-event-ask/normal`, `single`, `in-part` are new (two states
+`single` and `in-part` added to C-14); C-5 names the POST of an edit that
+answers `AskSheet` in a row of its own.
 ## v0.2.257 — 2026-10-15
 
 ### Fixed

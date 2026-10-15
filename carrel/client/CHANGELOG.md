@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.43 — 2026-10-15
+
+Server `v0.2.258`. **The question before a series is saved** (`AskSheet`,
+fragments `s-agenda-22`, `-23`, `-24`): over the edit as typed, or over the
+series' card once it is written in part. Each block a rubric and its lines,
+the alarm, the line about the answers; the answers in their order — the
+first the primary (with Enter when there are two), the last pushed right
+with Esc — each sending the form to its own address or leading where it
+says. With it the server asks again before such a save (`askOnPages`
+gone).
+
 ## v0.4.42 — 2026-10-15
 
 Server `v0.2.256`. **The sheet «which copy»** of a linked record

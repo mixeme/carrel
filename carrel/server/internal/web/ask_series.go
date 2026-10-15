@@ -257,17 +257,29 @@ func (s *Server) takeBack(ctx context.Context, c *collectionCtx, made []string) 
 // askFailed is the sheet after the answer «keep» where some occurrence could
 // not be written apart (s-agenda-24): what was written, what was not and
 // why; Try again writes those again, Leave it in the series leaves them as
-// they were.
-func (s *Server) askFailed(r *http.Request, c *collectionCtx, uid string, sent *model.Object, kept []time.Time, failed []apartFailed) view.AskSheet {
+// they were. The events written apart are named where they stand — their
+// own time, not the day of the series they stood for (s-agenda-24: «26
+// January, 12:00 and 16 February, 14:30»); left are the occurrences asked
+// about.
+func (s *Server) askFailed(r *http.Request, c *collectionCtx, uid string, sent *model.Object, kept []time.Time, failed []apartFailed, left []cal.Left) view.AskSheet {
 	title := titleOr(cal.Text(sent, "SUMMARY"), "Untitled "+c.spec.noun)
 	nouns := leftNouns[c.spec.kind]
 	tf := seriesClock(c, sent)
-	sheet := view.AskSheet{Kind: c.spec.kind, Title: text("Keep the " + nouns[1] + " that were moved by hand?"), Subject: text(title + " · saved in part")}
+	sheet := view.AskSheet{Kind: c.spec.kind, Icon: "i-refresh", Title: text("Keep the " + nouns[1] + " that were moved by hand?"), Subject: text(title + " · saved in part")}
 	written := []view.AskLine{{Text: "The series", Aside: "— saved"}}
 	if len(kept) > 0 {
 		var days []string
 		for _, at := range kept {
-			days = append(days, leftWhen(tf, at, false))
+			where, allDay := at, false
+			for _, l := range left {
+				if l.At.Equal(at) {
+					allDay = l.AllDay
+					if !l.Start.IsZero() {
+						where = l.Start
+					}
+				}
+			}
+			days = append(days, leftWhen(tf, where, allDay))
 		}
 		word := "separate events"
 		if c.spec.kind == view.KindTask {
@@ -370,7 +382,7 @@ func (s *Server) postApart(w http.ResponseWriter, r *http.Request, c *collection
 		obj = sent
 	}
 	if len(failed) > 0 {
-		s.writePage(w, r, http.StatusOK, s.askFailed(r, c, uid, obj, kept, failed))
+		s.writePage(w, r, http.StatusOK, s.askFailed(r, c, uid, obj, kept, failed, left))
 		return
 	}
 	s.redirect(w, r, c.recordPath(uid))

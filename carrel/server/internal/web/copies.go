@@ -435,28 +435,12 @@ func (s *Server) linkedTick(from origin, segment, uid string) view.Action {
 		Href: s.postQuery(from.recordPath(segment, uid)+"/done", url.Values{"from": {"all"}})}
 }
 
-// The pages lead to a sheet only once the client draws it (the owner's
-// decision of 15.10.2026: the client answered the sheets with JSON, where
-// Edit had opened the form, the tick marked the first copy and Save wrote):
-// until then the sheet and its address stand, and the page does what it did
-// before v0.2.247.
-//
-// copiesOnPages: Edit of a linked record leads to «Which copy to edit?»,
-// the tick of a linked row to «Which copy to mark done?» — the client draws
-// them since v0.4.42. askOnPages: Save of a series that leaves meetings
-// without their day asks first (ask_series.go) — off until the client draws
-// AskSheet; a test turns it on (DrawSheets).
-var (
-	copiesOnPages = true
-	askOnPages    = false
-)
-
 // editViaCopies sends Edit of a linked record's page to «Which copy to
-// edit?» (s-contacts-32) instead of its form — while copiesOnPages.
+// edit?» (s-contacts-32) instead of its form. (From v0.2.249 to v0.2.255
+// the pages led past the sheets, which the client did not draw yet — the
+// owner's decision of 15.10.2026; the client draws them since v0.4.42 and
+// v0.4.43.)
 func (s *Server) editViaCopies(c *collectionCtx, uid string, actions []view.Action) {
-	if !copiesOnPages {
-		return
-	}
 	for i := range actions {
 		if actions[i].ID == "record.edit" {
 			actions[i].Href = s.route(c.recordPath(uid) + "/copies")
