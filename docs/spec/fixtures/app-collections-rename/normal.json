@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+      "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
       "id": "collection.save",
       "label": "Save",
       "method": "POST",
@@ -12,16 +12,16 @@
     },
     {
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty",
+      "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
       "id": "collection.cancel",
       "label": "Cancel",
       "method": "GET"
     }
   ],
-  "address": "…/alice/contacts/kontakty/",
+  "address": "…/alice/calendars/dni-rozhdeniya/",
   "failure": null,
   "form": {
-    "action": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+    "action": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -54,7 +54,51 @@
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": "Контакты"
+            "value": "Дни рождения"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "radio",
+            "label": "Colour",
+            "name": "colour",
+            "options": [
+              {
+                "label": "#4a6b52",
+                "selected": false,
+                "value": "#4a6b52"
+              },
+              {
+                "label": "#3f6e8c",
+                "selected": false,
+                "value": "#3f6e8c"
+              },
+              {
+                "label": "#6b4e7a",
+                "selected": false,
+                "value": "#6b4e7a"
+              },
+              {
+                "label": "#a05a2c",
+                "selected": true,
+                "value": "#a05a2c"
+              },
+              {
+                "label": "#8c6239",
+                "selected": false,
+                "value": "#8c6239"
+              },
+              {
+                "label": "#9a9280",
+                "selected": false,
+                "value": "#9a9280"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "#a05a2c"
           }
         ],
         "unfold": null
@@ -62,10 +106,10 @@
     ],
     "target": "sheet"
   },
-  "kind": "contact",
-  "note": "Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. The new name is written to the server — other clients will show it at their next sync.",
+  "kind": "event",
+  "note": "Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. The new name and colour are written to the server — other clients will show them at their next sync.",
   "stamp": "nextcloud",
-  "title": "Rename",
+  "title": "Rename and colour",
   "under": {
     "agenda": null,
     "connections": {
@@ -116,7 +160,7 @@
               "target": "sheet"
             }
           ],
-          "answered": "2 min ago",
+          "answered": "just now",
           "collections": [
             {
               "changed": "",
@@ -332,7 +376,7 @@
                 "event"
               ],
               "label": "Личный",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -402,7 +446,7 @@
                 "task"
               ],
               "label": "Работа",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -867,7 +911,7 @@
               "target": "sheet"
             }
           ],
-          "answered": "2 min ago",
+          "answered": "just now",
           "collections": [
             {
               "changed": "",
@@ -876,7 +920,7 @@
                 "event"
               ],
               "label": "Дежурства",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -945,7 +989,7 @@
                 "event"
               ],
               "label": "Проекты",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -1671,7 +1715,7 @@
               "method": "POST"
             }
           ],
-          "checked": "",
+          "checked": "just now",
           "colour": "#8c6239",
           "kinds": [
             "event",

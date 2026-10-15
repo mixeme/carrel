@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.276 — 2026-10-15
+
+### For consumers
+
+Nothing in the running server. Fixtures `app-collections-rename` and
+`app-collections-delete` re-shot over the calendar «Дни рождения», as
+`s-profile-7` and `-9` draw them (Кл10, Кл20): its colour `#a05a2c`
+chosen, «Rename and colour»; the delete says the calendar and its one
+event, and that nextcloud may tell the attendees of its meetings they are
+cancelled. The set holds no published link, backup job or davloom device
+of it, so the delete's references are empty (the frame draws three).
+
 ## v0.2.275 — 2026-10-15
 
 ### Changed

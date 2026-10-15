@@ -4,7 +4,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+      "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
       "id": "collection.delete.confirm",
       "label": "Delete on the server",
       "method": "POST",
@@ -12,7 +12,7 @@
     },
     {
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty",
+      "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
       "id": "collection.cancel",
       "label": "Cancel",
       "method": "GET"
@@ -20,21 +20,21 @@
   ],
   "archive": [
     {
-      "text": "No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new address book at a new address — not into this one, and not to this address."
+      "text": "No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new calendar at a new address — not into this one, and not to this address."
     }
   ],
-  "cancels": "",
+  "cancels": "nextcloud may tell the attendees of its meetings that they are cancelled.",
   "export": {
     "enabled": true,
-    "href": "/app/contacts/a-nc-home/kontakty/export",
+    "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export?whole=1",
     "icon": "i-down",
     "id": "collection.export",
-    "label": "Download .vcf first",
+    "label": "Download .ics first",
     "method": "GET"
   },
-  "exportNote": "5 contacts, one file, straight to you",
+  "exportNote": "1 event, one file, straight to you",
   "form": {
-    "action": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+    "action": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -65,7 +65,7 @@
             "label": "Type the name to confirm",
             "name": "name",
             "options": [],
-            "placeholder": "Контакты",
+            "placeholder": "Дни рождения",
             "readOnly": false,
             "required": true,
             "value": ""
@@ -76,9 +76,9 @@
     ],
     "target": "sheet"
   },
-  "kind": "contact",
+  "kind": "event",
   "references": [],
-  "subject": "nextcloud · Контакты",
+  "subject": "nextcloud · Дни рождения",
   "title": "Delete on the server",
   "under": {
     "agenda": null,
@@ -130,7 +130,7 @@
               "target": "sheet"
             }
           ],
-          "answered": "2 min ago",
+          "answered": "just now",
           "collections": [
             {
               "changed": "",
@@ -346,7 +346,7 @@
                 "event"
               ],
               "label": "Личный",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -416,7 +416,7 @@
                 "task"
               ],
               "label": "Работа",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -881,7 +881,7 @@
               "target": "sheet"
             }
           ],
-          "answered": "2 min ago",
+          "answered": "just now",
           "collections": [
             {
               "changed": "",
@@ -890,7 +890,7 @@
                 "event"
               ],
               "label": "Дежурства",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -959,7 +959,7 @@
                 "event"
               ],
               "label": "Проекты",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -1685,7 +1685,7 @@
               "method": "POST"
             }
           ],
-          "checked": "",
+          "checked": "just now",
           "colour": "#8c6239",
           "kinds": [
             "event",
@@ -1895,14 +1895,14 @@
   },
   "warning": [
     {
-      "text": "The address book and all "
+      "text": "The calendar and all "
     },
     {
       "mark": "strong",
-      "text": "5"
+      "text": "1"
     },
     {
-      "text": " contacts in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+      "text": " event in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
     }
   ]
 }

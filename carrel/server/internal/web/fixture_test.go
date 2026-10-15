@@ -1813,8 +1813,6 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 		app.compare(t, "app-search/normal.json", app.h.do(get("/app/search?q=Ковалёва", app.sess)))
 	})
 	for _, one := range []struct{ dir, route string }{
-		{"app-collections-rename", "/app/collections/rename?a=a-nc-home&c=kontakty"},
-		{"app-collections-delete", "/app/collections/delete?a=a-nc-home&c=kontakty"},
 		{"app-publish", "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=4f2b-9c31-a0e7"},
 		{"app-password", "/app/password"},
 	} {
@@ -1824,15 +1822,18 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(route, app.sess)))
 		})
 	}
-	// Move of «Дни рождения» over Connections, as s-profile-8 draws it
-	// (Кл15): the calendar was read, so its count is known and «baikal»
-	// refused the saved password — closed, «password · 401»; radicale, the
-	// one server that suits, chosen.
-	t.Run("app-collections-move", func(t *testing.T) {
-		combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
-		q := url.Values{"a": {app.realAccount(t, "dni-rozhdeniya")}, "c": {app.realPath(t, "dni-rozhdeniya")}}
-		app.compare(t, "app-collections-move/normal.json", app.h.do(get("/app/collections/move?"+q.Encode(), app.sess)))
-	})
+	// The sheets of «Дни рождения» over Connections, as s-profile-7, -8, -9
+	// draw them (Кл10, Кл15, Кл20): the calendar was read first, so its
+	// count is known and «baikal» refused the saved password — the move
+	// closes it, «password · 401», and chooses radicale, the one server that
+	// suits.
+	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+	for _, sheet := range []string{"rename", "move", "delete"} {
+		t.Run("app-collections-"+sheet, func(t *testing.T) {
+			q := url.Values{"a": {app.realAccount(t, "dni-rozhdeniya")}, "c": {app.realPath(t, "dni-rozhdeniya")}}
+			app.compare(t, "app-collections-"+sheet+"/normal.json", app.h.do(get("/app/collections/"+sheet+"?"+q.Encode(), app.sess)))
+		})
+	}
 	_ = anna
 }
 
