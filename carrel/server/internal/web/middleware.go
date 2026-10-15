@@ -139,6 +139,9 @@ func needsCSRF(r *http.Request) bool {
 }
 
 func (s *Server) writePage(w http.ResponseWriter, r *http.Request, status int, body any) {
+	if catchPage(r, status, body) {
+		return // asked only for its page: the screen under a sheet (under.go)
+	}
 	if render.WantsFragment(r) {
 		_ = s.render.Fragment(w, r, status, render.FragmentTarget(r), body, nil)
 		return

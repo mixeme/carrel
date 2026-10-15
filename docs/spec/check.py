@@ -565,7 +565,9 @@ def walk(x, acts, rows):
             acts.append(x)
         if "name" in x and "kind" in x and "label" in x and x.get("kind") != "hidden":
             rows.append(x)
-        for v in x.values():
+        for k, v in x.items():
+            if k == "under":
+                continue              # экран под листом держат его фикстуры (C-6 Under)
             walk(v, acts, rows)
     elif isinstance(x, list):
         for v in x:

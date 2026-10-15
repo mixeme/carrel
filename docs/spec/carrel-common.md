@@ -407,7 +407,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/contacts/{account}/{col}/new/photo-preview` | GET, POST | вход | страница, редирект | `PhotoPreviewPage` — фотография новой карточки (s-contacts-27, S-13): шаги те же, `?op=` — `upload` (multipart, потолки и типы карточки), `frame`, `save`, `cancel`, `crop`, `remove`; `uid` — черновик формы: его выдаёт первая загрузка, Replace его хранит. Кнопки фотографии новой формы шлют саму форму (`Action.Submits`): набранное хранится с черновиком под тем же `uid` и возвращается с формой. Ничего не пишет: Save photo отмечает кадр выбранным и ведёт на `/new?uid=`; Cancel первой загрузки и Remove — на `/new?uid=` с одним набранным (ничего не набрано — на `/new` без черновика); кадр показывает `/c/{account}/{col}/{uid}/photo?preview=` |
 | `/c/{account}/{col}/{uid}/photo` | GET | вход | поток | — |
 | `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage`; POST: `op=combine` («Write this combination», форма `ConflictPage.Form` с `choice.<n>=mine` или `theirs` на строку — `ConflictRow.Name`; строка без поля — выбранное заранее, `ConflictRow.Choice`), `op=mine`, `op=theirs`, `op=cancel`; у всех, кроме `cancel`, `etag=` — версия, против которой показан выбор: сервер ушёл дальше — страница строится заново |
-| `/app/{kind}/{account}/{col}/{uid}/move` | GET, POST | вход | лист | `MoveSheet` |
+| `/app/{kind}/{account}/{col}/{uid}/move` | GET, POST | вход | лист | `MoveSheet`; `?back=` — страница, откуда лист открыт: страницей лист несёт её экраном под собой (`Under`); POST — форма листа (`to` — «подключение/коллекция», `warned`) или прежние `to` и `into` |
 | `/app/{kind}/{account}/{col}/{uid}/copies` | GET | вход | лист, редирект | `CopiesSheet` «Which copy to edit?» (s-contacts-32): Edit записи связанной группы; у записи без группы — редирект на `…/edit`. Форма листа — GET `…/edit?copy=…`: редирект на форму выбранной копии |
 | `/app/tasks/{account}/{col}/{uid}/done` | GET, POST | вход | лист, редирект | `CopiesSheet` «Which copy to mark done?» (s-tasks-16). POST без `copy` у связанной задачи — лист, у прочей — отметка; с `copy` (сколько угодно) — каждая названная копия отмечена, как Mark done, и редирект туда, откуда пришли (`from`: `all`, `list`, иначе карточка) |
 | `/app/contacts/{account}/{col}/{uid}/rewrite` | GET, POST | вход | лист (GET); страница, редирект (POST) | `RewriteSheet`; `?plan=` — план, выданный сохранением карточки (S-15.4). POST переписывает и отвечает карточкой (`ContactPage`) с итогом (s-contacts-16); с `op=leave` — редирект на карточку, ничего не переписав; без живого плана GET и POST — редирект на карточку |
@@ -1796,6 +1796,7 @@ type MergeRow struct { Property Text; Name string; Options []Text; Chosen int; U
 type TargetPicker struct { // «куда» в шапке листа
     Options []TargetOption
     Chosen  string
+    Field   string  // поле формы листа, под которым уходит Value выбранного варианта: «to» у листа переноса (s-contacts-2); пусто — выбор ссылками
     New     *Action // строка под чертой: новая коллекция прямо отсюда (s-io-10…13); nil — её нет
 }
 type TargetOption struct {
@@ -1807,6 +1808,8 @@ type TargetOption struct {
     ReadOnly bool // показывается и недоступна
     Reason   Text // почему недоступна: «уже здесь», «пароль · 401», «только файлы»
     Last     bool // последний использованный
+    Value    string // значение под Field формы листа: «подключение/коллекция» сегментами адреса у листа переноса; пусто, где выбор — ссылкой
+    Here     bool   // недоступна потому, что запись уже там («already there»), а не потому, что только для чтения: одно словами, другое плашкой (s-contacts-2)
 }
 
 type NewSheet struct {
@@ -1845,6 +1848,29 @@ type CopiesSheet struct {
     Note    Text
     Form    Form
     Actions []Action // главная — кнопка формы (Submits): «Edit this copy», «Mark done»; Cancel — назад
+    Under   *Under   // экран под листом, открытым переходом: страница записи (у галки — список, откуда пришли); nil у фрагмента
+}
+
+// Экран под листом, пришедшим страницей — переходом без сценариев (решение
+// владельца 15.10.2026; Overlay Typecase: «под затемнением то же тело
+// оболочки», кадр s-contacts-2). Это страница, откуда лист открыли: адрес
+// `back` листа (только адрес приложения, `/app/…`), без него — страница
+// записи или списка, к которой лист относится; сервер берёт её тем же
+// обработчиком, что и её адрес, и отдаёт той же вью-моделью. Ровно одно
+// поле не nil. Лист, пришедший фрагментом (C-7.2), экрана не несёт — экран
+// остаётся у клиента; nil и тогда, когда страницу построить не вышло
+// (адрес отвечает переходом или ошибкой) — клиент рисует лист без экрана.
+// Поле есть у листов, которые клиент рисует: MoveSheet, CopiesSheet;
+// у прочих — когда дойдут их экраны.
+type Under struct {
+    Contacts *ContactsListPage
+    Contact  *ContactPage
+    Agenda   *AgendaPage
+    Event    *EventPage
+    Tasks    *TasksPage
+    Task     *TaskPage
+    Notes    *NotesPage
+    Note     *NotePage
 }
 
 // Лист переноса и копии записи (s-contacts-2): Title — «Move contact»,
@@ -1861,7 +1887,17 @@ type MoveSheet struct {
     Target  TargetPicker
     Cancels Text // событие с участниками уходит с сервера, который планирует (S-6), на другое подключение: «nextcloud may tell its attendees that the event is cancelled.»; иначе пусто. О приглашениях лист не говорит (решение владельца 12.10.2026)
     Warning Runs // что сделает перенос; на одном сервере `MOVE` моноширинно (s-contacts-2)
+    // Лист — форма, как кадр (s-contacts-2): POST на адрес переноса, скрытые
+    // `_csrf`, `copy` у копии, `back`, `warned` — о каком переносе сказал
+    // Warning (`server`, `account`, `copy`, `copy-uid`). Выбранная коллекция
+    // уходит под `Target.Field` («to») своим `Value`; ничего не выбрано —
+    // выбрана первая, куда можно (кадр отмечает «Архив»). Коллекция, которой
+    // нужны другие слова, чем сказанные, не переносится: ответ — лист снова,
+    // с ней выбранной и её словами (S-18: Carrel говорит до начала).
+    // Основная кнопка — Actions[0], кнопка формы (Submits)
+    Form    Form
     Actions []Action
+    Under   *Under // экран под листом, открытым переходом: `?back=` — откуда открыли (s-contacts-2 — объединённая книга), без него — страница записи; nil у фрагмента
 }
 
 // Лист «переписать адрес» (s-contacts-15, S-15.4): после сохранения

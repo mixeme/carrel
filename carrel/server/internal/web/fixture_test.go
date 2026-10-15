@@ -1713,7 +1713,6 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 		{"app-duplicates", "/app/duplicates?kind=contact"},
 		{"app-contact-new", book + "/new"},
 		{"app-contact-import", book + "/import"},
-		{"app-contact-move", anna + "/move"},
 		{"app-quick", "/app/notes/quick"},
 		{"app-settings-unlock", "/app/settings/unlock"},
 	} {
@@ -1721,6 +1720,13 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
 		})
 	}
+	// Move over the combined book it was opened from, as s-contacts-2 draws
+	// it: the book as its poll answered.
+	t.Run("app-contact-move", func(t *testing.T) {
+		book := combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+		back := url.QueryEscape("/app/contacts?task=" + book.Poll.TaskID)
+		app.compare(t, "app-contact-move/normal.json", app.h.do(get(anna+"/move?back="+back, app.sess)))
+	})
 	// New calendar from the rail of the calendar (s-profile-5): the calendar
 	// has been read, «baikal» refused it, and the sheet leaves it out with
 	// the hint under «On which server».

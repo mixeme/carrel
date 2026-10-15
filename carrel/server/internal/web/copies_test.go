@@ -176,3 +176,30 @@ func TestWhichCopyToEdit(t *testing.T) {
 		t.Errorf("an unlinked task's Edit = %+v", e)
 	}
 }
+
+// A sheet opened by its address without scripts stands over the screen it
+// was opened from (the owner's decision of 15.10.2026; s-contacts-2, the
+// Overlay of Typecase): its answer carries that page — back's, else the
+// record's or the list's it belongs to. A sheet asked for as a fragment
+// carries none.
+func TestASheetPageCarriesTheScreenUnderIt(t *testing.T) {
+	f, record := linkedTasks(t)
+	copies := decode[view.CopiesSheet](t, f.h.do(get(record(searchWork, "t1")+"/copies", f.sess)))
+	if copies.Under == nil || copies.Under.Task == nil || copies.Under.Task.Summary != "Pack" {
+		t.Errorf("under the copies sheet: %+v", copies.Under)
+	}
+	move := decode[view.MoveSheet](t, f.h.do(get(record(searchWork, "t1")+"/move?back="+url.QueryEscape("/app/tasks/"+f.id+"/"+url.PathEscape(searchWork)), f.sess)))
+	if move.Under == nil || move.Under.Tasks == nil {
+		t.Errorf("under the move sheet opened from the list: %+v", move.Under)
+	}
+	odd := decode[view.MoveSheet](t, f.h.do(get(record(searchWork, "t1")+"/move?back="+url.QueryEscape("https://elsewhere.example/app/x"), f.sess)))
+	if odd.Under == nil || odd.Under.Task == nil {
+		t.Errorf("a back that is no address of the app is not the record's page: %+v", odd.Under)
+	}
+	req := get(record(searchWork, "t1")+"/copies", f.sess)
+	req.Header.Set("Carrel-View", "fragment")
+	req.Header.Set("Carrel-Target", "sheet")
+	if frag := decode[view.CopiesSheet](t, f.h.do(req)); frag.Under != nil {
+		t.Errorf("a fragment carries a screen under it: %+v", frag.Under)
+	}
+}

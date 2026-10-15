@@ -179,7 +179,10 @@ type MergeRow struct {
 type TargetPicker struct {
 	Options []TargetOption `json:"options"`
 	Chosen  string         `json:"chosen"`
-	New     *Action        `json:"new"` // строка под чертой: новая коллекция прямо отсюда (s-io-10…13)
+	// Field — поле формы листа, под которым уходит выбранный вариант (его
+	// Value): «to» у листа переноса (s-contacts-2); пусто — выбор ссылками
+	Field string  `json:"field,omitempty"`
+	New   *Action `json:"new"` // строка под чертой: новая коллекция прямо отсюда (s-io-10…13)
 }
 type TargetOption struct {
 	ID string `json:"id"`
@@ -193,6 +196,14 @@ type TargetOption struct {
 	ReadOnly bool   `json:"readOnly"` // показывается и недоступна
 	Reason   Text   `json:"reason"`   // почему недоступна: «уже здесь», «пароль · 401», «только файлы»
 	Last     bool   `json:"last"`     // последний использованный
+	// Value — значение варианта под Field формы листа: «подключение/
+	// коллекция» сегментами адреса у листа переноса; пусто, где выбор —
+	// ссылкой (Href)
+	Value string `json:"value,omitempty"`
+	// Here — вариант недоступен потому, что запись уже там («already
+	// there»), а не потому, что коллекция только для чтения (s-contacts-2:
+	// одно — словами, другое — плашкой)
+	Here bool `json:"here,omitempty"`
 }
 
 type NewSheet struct {
@@ -229,6 +240,26 @@ type CopiesSheet struct {
 	Note    Text     `json:"note"`
 	Form    Form     `json:"form"`
 	Actions []Action `json:"actions"` // главная — кнопка формы (Submits): «Edit this copy», «Mark done»; Cancel — назад
+	// Under — экран под листом, открытым переходом (Under); nil у фрагмента
+	Under *Under `json:"under"`
+}
+
+// Under — экран, над которым открыт лист, пришедший страницей: переходом
+// без сценариев (решение владельца 15.10.2026; Overlay Typecase — «под
+// затемнением то же тело оболочки», кадр s-contacts-2). Это страница, откуда
+// лист открыли (back листа; без него — страница записи или списка, к которой
+// лист относится), как её отдаёт свой адрес; ровно одно поле не nil. Лист,
+// пришедший фрагментом (C-7.2), экрана под собой не несёт — он остаётся у
+// клиента: Under nil, как и у страницы, которую сервер построить не смог.
+type Under struct {
+	Contacts *ContactsListPage `json:"contacts"`
+	Contact  *ContactPage      `json:"contact"`
+	Agenda   *AgendaPage       `json:"agenda"`
+	Event    *EventPage        `json:"event"`
+	Tasks    *TasksPage        `json:"tasks"`
+	Task     *TaskPage         `json:"task"`
+	Notes    *NotesPage        `json:"notes"`
+	Note     *NotePage         `json:"note"`
 }
 
 type MoveSheet struct {
@@ -243,9 +274,17 @@ type MoveSheet struct {
 	// its attendees that the event is cancelled.»; пусто — сказать нечего:
 	// копия, участников нет, сервер не планирует или неизвестно, перенос
 	// внутри подключения. О приглашениях лист не говорит
-	Cancels Text     `json:"cancels"`
-	Warning Runs     `json:"warning"` // что сделает перенос: на одном сервере MOVE (моноширинно, s-contacts-2), на другой аккаунт — копия и удаление исходника
+	Cancels Text `json:"cancels"`
+	Warning Runs `json:"warning"` // что сделает перенос: на одном сервере MOVE (моноширинно, s-contacts-2), на другой аккаунт — копия и удаление исходника
+	// Form — лист как форма (s-contacts-2): POST на адрес переноса, скрытые
+	// _csrf, copy у копии, warned — о каком переносе сказал Warning;
+	// выбранная коллекция уходит под Target.Field. Основная кнопка —
+	// Actions[0] (Submits)
+	Form    Form     `json:"form"`
 	Actions []Action `json:"actions"`
+	// Under — экран под листом, открытым переходом (Under; s-contacts-2 —
+	// объединённая книга); nil у фрагмента
+	Under *Under `json:"under"`
 }
 
 // Четыре листа коллекции (C-5.6). Родов записей они не различают: заголовок

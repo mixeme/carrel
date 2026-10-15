@@ -259,6 +259,7 @@ func (s *Server) getKindCopies(w http.ResponseWriter, r *http.Request, kind stri
 		s.redirect(w, r, c.recordPath(uid)+"/edit")
 		return
 	}
+	sheet.Under = s.underOf(r, r.URL.Query().Get("back"), c.recordPath(uid))
 	s.writeCopies(w, r, sheet)
 }
 
@@ -289,11 +290,13 @@ func (s *Server) getTaskDone(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/done", err)))
 		return
 	}
-	sheet, ok := s.copiesSheet(r.Context(), c, uid, obj, true, r.URL.Query().Get("from"))
+	from := r.URL.Query().Get("from")
+	sheet, ok := s.copiesSheet(r.Context(), c, uid, obj, true, from)
 	if !ok {
 		s.redirect(w, r, c.recordPath(uid))
 		return
 	}
+	sheet.Under = s.underOf(r, "", doneBack(c, uid, from))
 	s.writeCopies(w, r, sheet)
 }
 
@@ -327,6 +330,7 @@ func (s *Server) postTaskDone(w http.ResponseWriter, r *http.Request) {
 	if len(chosen) == 0 {
 		if linked {
 			sheet, _ := s.copiesSheet(r.Context(), c, uid, obj, true, from)
+			sheet.Under = s.underOf(r, "", doneBack(c, uid, from))
 			s.writeCopies(w, r, sheet)
 			return
 		}

@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.248 — 2026-10-15
+
+### Added
+
+- **A sheet opened by its address carries the screen under it** (the
+  owner's decision of 15.10.2026; Typecase's Overlay, `s-contacts-2`): the
+  page it was opened from — its `back`, else the record's or the list's
+  page —, asked of the same handler its address has (`view.Under`;
+  `MoveSheet.under`, `CopiesSheet.under`). A sheet asked for as a fragment
+  carries none.
+
+### Changed
+
+- **The move sheet is a form, as `s-contacts-2` draws it**: the collection
+  is a radio under `Target.field` («to», `TargetOption.value`
+  «connection/collection»), Move the form's button; nothing chosen, the
+  first collection it can go to is. A collection whose move needs other
+  words than the sheet said (another account) is not moved: the sheet comes
+  back with it chosen and its words (S-18). The links of the sheet and
+  `to` + `into` keep working. Questions to the frames — Typecase's task 183.
+
 ## v0.2.247 — 2026-10-15
 
 ### Added

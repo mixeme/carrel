@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"slices"
 	"strings"
 
 	"carrel.dev/carrel/server/internal/dav"
@@ -25,6 +26,15 @@ import (
 // moveTarget is the collection a move or a copy goes to, or nil when the
 // request names none the catalog holds for this kind.
 func (s *Server) moveTarget(c *collectionCtx, to, into string) *collectionCtx {
+	// The sheet's form names the collection in one value (s-contacts-2:
+	// «connection/collection», TargetOption.Value); its links in two.
+	if account, col, ok := strings.Cut(to, "/"); ok {
+		unescaped, err := url.PathUnescape(col)
+		if err != nil {
+			return nil
+		}
+		to, into = account, unescaped
+	}
 	if to == "" || into == "" {
 		return nil
 	}
@@ -48,6 +58,29 @@ func recordMoveBlock(c, dest *collectionCtx, copying bool) string {
 		return "This collection is read-only, so the " + c.spec.noun + " cannot leave it. It can be copied."
 	}
 	return ""
+}
+
+// moveValue is how the sheet's form names a collection (TargetOption.Value).
+func moveValue(account, col string) string {
+	return account + "/" + url.PathEscape(col)
+}
+
+// moveWarned names what the sheet's Warning says will happen: a move inside
+// one server, one to another account, a copy, a copy with a UID of its own
+// (moveSheet). A form whose collection needs another word than the one it
+// was shown is answered with the sheet again, that collection chosen and its
+// word said, before anything is written (S-18: Carrel says it before it
+// starts).
+func moveWarned(c, dest *collectionCtx, copying bool) string {
+	switch {
+	case copying && dest != nil && knownOneUIDPerAccount(c, dest):
+		return "copy-uid"
+	case copying:
+		return "copy"
+	case dest != nil && dest.conn.ID != c.conn.ID:
+		return "account"
+	}
+	return "server"
 }
 
 func moveQuery(copying bool, account, col string) url.Values {
@@ -98,10 +131,11 @@ func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, de
 			opt := view.TargetOption{
 				ID:    s.postQuery(address, moveQuery(copying, conn.ID, col.Path)),
 				Label: text(collectionLabel(col)), Stamp: o.stamp(), Colour: catalogColour(col),
+				Value: moveValue(conn.ID, col.Path),
 			}
 			switch {
 			case conn.ID == c.conn.ID && col.Path == c.col.Path:
-				opt.ReadOnly, opt.Reason = true, "already there"
+				opt.ReadOnly, opt.Reason, opt.Here = true, "already there", true
 			case col.ReadOnly:
 				opt.ReadOnly, opt.Reason = true, "read-only"
 			default:
@@ -110,17 +144,36 @@ func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, de
 			sheet.Target.Options = append(sheet.Target.Options, opt)
 		}
 	}
-	confirm := view.Action{ID: "record.move.confirm", Label: "Move", Method: "POST", Primary: true, Enabled: true}
+	// The sheet is a form (s-contacts-2): the collection is chosen in it and
+	// goes under Field; Move is its button. A collection chosen by its link
+	// is chosen in the form as well.
+	sheet.Target.Field = "to"
+	confirm := view.Action{ID: "record.move.confirm", Label: "Move", Method: "POST", Primary: true, Enabled: true, Submits: true}
 	if copying {
 		confirm.ID, confirm.Label = "record.copy.confirm", "Copy"
 	}
+	// Nothing chosen yet, the first collection it can go to is (s-contacts-2
+	// draws «Архив» chosen): the form always names one, and Move is never a
+	// press refused after the fact.
+	if dest == nil {
+		if i := slices.IndexFunc(sheet.Target.Options, func(o view.TargetOption) bool { return !o.ReadOnly }); i >= 0 {
+			dest = s.moveTarget(c, sheet.Target.Options[i].Value, "")
+		}
+	}
 	if reason := recordMoveBlock(c, dest, copying); reason != "" {
+		// Nothing it can go to, or a closed one chosen by its address: the
+		// button says why before it is pressed.
 		confirm.Enabled, confirm.Reason = false, text(reason)
 	} else {
 		chosen := moveQuery(copying, dest.conn.ID, dest.col.Path)
 		sheet.Target.Chosen = s.postQuery(address, chosen)
 		confirm.Href = s.postQuery(address, chosen)
 	}
+	hidden := []view.FormRow{csrfField(c.sess), {Name: "warned", Kind: view.InputHidden, Value: text(moveWarned(c, dest, copying))}}
+	if copying {
+		hidden = append(hidden, view.FormRow{Name: "copy", Kind: view.InputHidden, Value: "1"})
+	}
+	sheet.Form = view.Form{Action: s.route(address), Method: "POST", Sets: []view.FieldSet{{Rows: hidden}}}
 	record, where := recordNouns[c.spec.kind], moveCollectionNouns[c.spec.kind]
 	switch {
 	case copying && dest != nil && knownOneUIDPerAccount(c, dest):
@@ -173,6 +226,18 @@ func (s *Server) getKindMove(w http.ResponseWriter, r *http.Request, kind string
 		invited = c.cal != nil && len(cal.Attendees(obj)) > 0
 	}
 	sheet := s.moveSheet(c, uid, title, copying, s.moveTarget(c, q.Get("to"), q.Get("into")), invited)
+	// Opened by its address, the sheet stands over the screen it came from
+	// (s-contacts-2), else over the record's page.
+	sheet.Under = s.underOf(r, q.Get("back"), c.recordPath(uid))
+	if back := q.Get("back"); back != "" {
+		sheet.Form.Sets[0].Rows = append(sheet.Form.Sets[0].Rows, view.FormRow{Name: "back", Kind: view.InputHidden, Value: text(back)})
+	}
+	s.writeSheetOf(w, r, sheet)
+}
+
+// writeSheetOf answers the move sheet: the zone of the sheet to a fragment
+// request for it, else the page.
+func (s *Server) writeSheetOf(w http.ResponseWriter, r *http.Request, sheet view.MoveSheet) {
 	if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
@@ -197,6 +262,19 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 	}
 	uid := r.PathValue("uid")
 	dest := s.moveTarget(c, r.FormValue("to"), r.FormValue("into"))
+	// The sheet's form said another word than this collection needs: the
+	// sheet again, with it chosen and said (S-18).
+	if warned := r.FormValue("warned"); warned != "" && dest != nil && warned != moveWarned(c, dest, copying) {
+		title, invited := "", false
+		if obj, err := c.find(r.Context(), uid); err == nil {
+			title = recordTitle(c.spec.kind, obj)
+			invited = c.cal != nil && len(cal.Attendees(obj)) > 0
+		}
+		sheet := s.moveSheet(c, uid, title, copying, dest, invited)
+		sheet.Under = s.underOf(r, r.FormValue("back"), c.recordPath(uid))
+		s.writeSheetOf(w, r, sheet)
+		return
+	}
 	nothing := "Nothing was moved"
 	if copying {
 		nothing = "Nothing was copied"

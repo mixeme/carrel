@@ -119,8 +119,17 @@ func TestMoveSheetSaysBeforeItStarts(t *testing.T) {
 			t.Errorf("%s: readOnly %v reason %q", label, o.ReadOnly, o.Reason)
 		}
 	}
-	if c := confirmOf(t, sheet); c.Enabled || c.Reason == "" || sheet.Target.Chosen != "" {
-		t.Errorf("nothing chosen, confirm = %+v chosen %q", c, sheet.Target.Chosen)
+	// Nothing chosen yet, the first collection it can go to is, as
+	// s-contacts-2 draws it: the sheet is a form, and Move is never refused
+	// after the press (until 15.10.2026 nothing was chosen and Move was off).
+	first := ""
+	for _, o := range sheet.Target.Options {
+		if !o.ReadOnly && first == "" {
+			first = o.ID
+		}
+	}
+	if c := confirmOf(t, sheet); !c.Enabled || !c.Submits || sheet.Target.Chosen != first || sheet.Target.Field != "to" || sheet.Form.Method != "POST" {
+		t.Errorf("nothing chosen, confirm = %+v chosen %q, want %q", c, sheet.Target.Chosen, first)
 	}
 
 	friends := moveOption(t, sheet, "Friends").ID
