@@ -13,6 +13,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/davtest"
 	"carrel.dev/carrel/server/internal/sealed"
+	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -329,6 +330,25 @@ func mergePage(t *testing.T, f dupFixture, href string) view.DuplicatesMergePage
 	return decode[view.DuplicatesMergePage](t, f.h.do(get(href, f.sess)))
 }
 
+// openMerge presses a group's Merge on the server: a link, or — on a card
+// with something to choose — a button of the card's form sent with form,
+// which leads to the merge (Дб9).
+func openMerge(t *testing.T, h *harness, sess *session.Session, a view.Action, form url.Values) view.DuplicatesMergePage {
+	t.Helper()
+	href := a.Href
+	if a.Method == http.MethodPost {
+		if form == nil {
+			form = url.Values{}
+		}
+		rec := h.do(postForm(a.Href, sess, form))
+		if rec.Code != http.StatusSeeOther {
+			t.Fatalf("Merge on the server: %d %s", rec.Code, rec.Body.String())
+		}
+		href = rec.Header().Get("Location")
+	}
+	return decode[view.DuplicatesMergePage](t, h.do(get(href, sess)))
+}
+
 func mergeAction(t *testing.T, p view.DuplicatesMergePage, id string) view.Action {
 	t.Helper()
 	for _, a := range p.Actions {
@@ -347,7 +367,7 @@ func TestMergeWritesThenDeletes(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
-	p := mergePage(t, f, actionOf(t, g, "duplicates.merge").Href)
+	p := openMerge(t, f.h, f.sess, actionOf(t, g, "duplicates.merge"), nil)
 	if strings.HasSuffix(string(p.Target.Stamp), "Work") {
 		// Keep the card in People: the other one is chosen from the page.
 		p = mergePage(t, f, mergeAction(t, p, "duplicates.merge.into").Href)
@@ -405,7 +425,7 @@ func TestMergeWritesThenDeletes(t *testing.T) {
 func TestMergeRefusesWhatChangedSinceShown(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
-	p := mergePage(t, f, actionOf(t, onlyGroup(t, f.page(t)), "duplicates.merge").Href)
+	p := openMerge(t, f.h, f.sess, actionOf(t, onlyGroup(t, f.page(t)), "duplicates.merge"), nil)
 	confirm := mergeAction(t, p, "duplicates.merge.confirm")
 	f.other.Seed(workBook+"ada-there.vcf", strings.Replace(adaThere, "X-THERE:theirs", "X-THERE:edited elsewhere", 1))
 	f.srv.Seed(peopleBook+"ada-here.vcf", strings.Replace(adaHere, "X-HERE:kept", "X-HERE:edited elsewhere", 1))
@@ -424,7 +444,7 @@ func TestMergeRefusesWhatChangedSinceShown(t *testing.T) {
 func TestMergeStopsAtTheFirstRefusedDelete(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
-	p := mergePage(t, f, actionOf(t, onlyGroup(t, f.page(t)), "duplicates.merge").Href)
+	p := openMerge(t, f.h, f.sess, actionOf(t, onlyGroup(t, f.page(t)), "duplicates.merge"), nil)
 	f.srv.Refuse(http.MethodDelete, http.StatusForbidden, "no")
 	f.other.Refuse(http.MethodDelete, http.StatusForbidden, "no")
 	got := decode[view.DuplicatesMergePage](t, f.h.do(postForm(mergeAction(t, p, "duplicates.merge.confirm").Href, f.sess, url.Values{})))
@@ -511,11 +531,41 @@ func TestLinkRemembersTheAnswer(t *testing.T) {
 		t.Fatal("no linked row")
 	}
 
-	p := mergePage(t, f, actionOf(t, linked, "duplicates.merge").Href)
+	p := openMerge(t, f.h, f.sess, actionOf(t, linked, "duplicates.merge"), url.Values{"choice.FN": {strconv.Itoa(optionIndex(t, linked.Choices[0], "LOVELACE Ada"))}})
 	for _, row := range p.Rows {
 		if row.Name == "choice.FN" && string(row.Options[row.Chosen]) != "LOVELACE Ada" {
 			t.Errorf("merge does not start from the answer: %+v", row)
 		}
+	}
+}
+
+// Дб9 of the scan of 15.10.2026 (s-dup-1: «Merge on the server» is a button
+// of the card's form): the value chosen on a candidate's card goes to the
+// merge, which opens with it chosen — whichever is the other's default.
+// Before, Merge was a link without the card's answers, and the choice was
+// lost.
+func TestMergeTakesTheChoiceOfTheCard(t *testing.T) {
+	f := newDupFixture(t)
+	f.load(t)
+	g := onlyGroup(t, f.page(t))
+	merge := actionOf(t, g, "duplicates.merge")
+	if merge.Method != http.MethodPost || !merge.Submits {
+		t.Fatalf("Merge = %+v, want a button of the card's form", merge)
+	}
+	for _, name := range []string{"LOVELACE Ada", "Ada Lovelace"} {
+		p := openMerge(t, f.h, f.sess, merge, url.Values{"choice.FN": {strconv.Itoa(optionIndex(t, g.Choices[0], name))}})
+		got := ""
+		for _, row := range p.Rows {
+			if row.Name == "choice.FN" {
+				got = string(row.Options[row.Chosen])
+			}
+		}
+		if got != name {
+			t.Errorf("chose %q on the card, the merge starts from %q", name, got)
+		}
+	}
+	if n := f.writes(); n != 0 {
+		t.Errorf("opening the merge wrote %d times", n)
 	}
 }
 

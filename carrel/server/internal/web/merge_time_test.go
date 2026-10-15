@@ -29,7 +29,7 @@ func TestMergeAsksWhen(t *testing.T) {
 		f.h.do(get(cal(col)+"?from=2026-08-10", f.sess))
 	}
 	g := onlyGroup(t, decode[view.DuplicatesPage](t, f.h.do(get("/app/duplicates", f.sess))))
-	page := decode[view.DuplicatesMergePage](t, f.h.do(get(actionOf(t, g, "duplicates.merge").Href, f.sess)))
+	page := openMerge(t, f.h, f.sess, actionOf(t, g, "duplicates.merge"), nil)
 	if !strings.HasSuffix(string(page.Target.Stamp), "Work") {
 		page = decode[view.DuplicatesMergePage](t, f.h.do(get(mergeAction(t, page, "duplicates.merge.into").Href, f.sess)))
 	}

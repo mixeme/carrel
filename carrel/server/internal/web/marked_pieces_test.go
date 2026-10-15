@@ -156,7 +156,7 @@ func TestNoticeTitlesAreTheFramesBoldSentence(t *testing.T) {
 		t.Errorf("nothing loaded: titles %q, the frame %v", titles, b)
 	}
 	f.load(t)
-	p := mergePage(t, f, actionOf(t, onlyGroup(t, f.page(t)), "duplicates.merge").Href)
+	p := openMerge(t, f.h, f.sess, actionOf(t, onlyGroup(t, f.page(t)), "duplicates.merge"), nil)
 	if b := bold("s-dup-4"); !b[string(p.Warning.Title)] {
 		t.Errorf("merge: title %q, the frame %v", p.Warning.Title, b)
 	}

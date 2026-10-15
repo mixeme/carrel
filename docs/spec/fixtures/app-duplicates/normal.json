@@ -77,12 +77,14 @@
           "submits": true
         },
         {
+          "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/duplicates/merge?group=group",
+          "href": "/app/duplicates/decide?do=merge\u0026group=group",
           "id": "duplicates.merge",
           "label": "Merge on the server",
-          "method": "GET"
+          "method": "POST",
+          "submits": true
         }
       ],
       "choices": [

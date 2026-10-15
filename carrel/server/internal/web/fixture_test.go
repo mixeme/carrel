@@ -2205,6 +2205,11 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 			for _, a := range g.Actions {
 				if a.ID == "duplicates.merge" && a.Enabled && strings.Contains(string(g.Rows[0].Title)+string(g.Rows[1].Title), "Лебедева") {
 					merge = a.Href
+					if a.Method == http.MethodPost {
+						// A button of the card's form (Дб9): it leads to the
+						// merge with what the card chose — nothing here.
+						merge = app.h.do(postForm(a.Href, app.sess, url.Values{})).Header().Get("Location")
+					}
 				}
 			}
 		}

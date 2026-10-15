@@ -156,7 +156,7 @@ func TestGroupChoiceWithoutScripts(t *testing.T) {
 		t.Fatalf("choices = %+v", g.Choices)
 	}
 	link := actionOf(t, g, "duplicates.link")
-	if !link.Submits || actionOf(t, g, "duplicates.ignore").Submits != true || actionOf(t, g, "duplicates.merge").Submits {
+	if !link.Submits || actionOf(t, g, "duplicates.ignore").Submits != true || !actionOf(t, g, "duplicates.merge").Submits {
 		t.Fatalf("the decisions are not the form's buttons: %+v", g.Actions)
 	}
 	pick := optionIndex(t, g.Choices[0], "LOVELACE Ada")

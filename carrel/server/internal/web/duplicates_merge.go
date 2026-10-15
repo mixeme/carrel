@@ -154,6 +154,23 @@ func (s *Server) mergeHref(group string, into int, extra url.Values) string {
 	return s.postQuery("/app/duplicates/merge", q)
 }
 
+// picksOf are the values chosen on the card a merge came from: each
+// property's member by its place in the group (pick.<PROP>=; Дб9).
+func picksOf(r *http.Request, mr mergeRead) map[string]sealed.RecordRef {
+	out := map[string]sealed.RecordRef{}
+	_ = r.ParseForm()
+	for k, v := range r.Form {
+		prop, ok := strings.CutPrefix(k, "pick.")
+		if !ok || len(v) == 0 {
+			continue
+		}
+		if n, err := strconv.Atoi(v[0]); err == nil && n >= 0 && n < len(mr.g.refs) {
+			out[strings.ToUpper(prop)] = mr.g.refs[n]
+		}
+	}
+	return out
+}
+
 func choicesOf(r *http.Request) map[string]int {
 	out := map[string]int{}
 	_ = r.ParseForm()
@@ -269,7 +286,7 @@ func gainLine(calendar bool, g dupes.Gain, from mergeMember) string {
 }
 
 // mergePlan is the merged record and the page that shows it.
-func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[string]int) (*model.Object, view.DuplicatesMergePage) {
+func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[string]int, picks map[string]sealed.RecordRef) (*model.Object, view.DuplicatesMergePage) {
 	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge on the server"), GroupID: mr.g.id}
 	page.Rail = view.Rail{Nav: s.navRows(sess, mr.st.blob, "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess)}
 	// The merge stands on the same ground as the screen it came from: the
@@ -295,8 +312,16 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 	for i, o := range others {
 		objs[i] = o.obj
 	}
-	// A linked group's answers are the merge's defaults: asked once (S-16).
-	if prefs := mr.st.linkedPrefs(mr.g.id); len(prefs) > 0 {
+	// A linked group's answers are the merge's defaults: asked once (S-16);
+	// what was chosen on the card the merge came from goes over them (Дб9).
+	prefs := map[string]sealed.RecordRef{}
+	for p, ref := range mr.st.linkedPrefs(mr.g.id) {
+		prefs[p] = ref
+	}
+	for p, ref := range picks {
+		prefs[p] = ref
+	}
+	if len(prefs) > 0 {
 		if _, probe, err := dupes.Merge(target.obj, objs, nil); err == nil {
 			all := append([]mergeMember{target}, others...)
 			for _, qn := range probe.Questions {
@@ -410,7 +435,7 @@ func (s *Server) getDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.lostGroupPage(sess, mr, *missing))
 		return
 	}
-	_, page := s.mergePlan(sess, mr, choicesOf(r))
+	_, page := s.mergePlan(sess, mr, choicesOf(r), picksOf(r, mr))
 	s.writePage(w, r, http.StatusOK, page)
 }
 
@@ -432,7 +457,7 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.lostGroupPage(sess, mr, *missing))
 		return
 	}
-	merged, page := s.mergePlan(sess, mr, choicesOf(r))
+	merged, page := s.mergePlan(sess, mr, choicesOf(r), nil)
 	if merged == nil {
 		s.writePage(w, r, http.StatusOK, page)
 		return

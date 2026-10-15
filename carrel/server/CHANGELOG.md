@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.261 — 2026-10-15
+
+### Fixed
+
+- **Merge on the server takes what the card chose** (Дб9 of the scan of
+  15.10.2026; `s-dup-1`: the button is one of the card's form): on a card
+  with something to choose, Merge sends the card's answers (`do=merge`) and
+  the merge page opens with them chosen (`pick.<PROP>=` the member's place
+  in the group, over a linked group's own answers). Before, Merge was a link
+  without them, and a value chosen on a candidate's card was lost.
+
+### For consumers
+
+C-5: `/app/duplicates/decide` takes `do=merge` (a redirect to the merge),
+`/app/duplicates/merge` takes `pick.<PROP>=`. Fixture `app-duplicates/normal`
+re-shot: Merge is a POST button of the card's form.
+
 ## v0.2.260 — 2026-10-15
 
 ### Fixed

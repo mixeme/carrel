@@ -338,8 +338,17 @@ func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.
 	// With something to choose, the card is a form (U-8, s-dup-1): its
 	// radios stand in it, and every decision is a button of it sent to its
 	// own address — a decision of its own form inside it would be a form
-	// in a form. Merge on the server stays a link.
+	// in a form. Merge on the server is one of them too (Дб9): it carries
+	// the values chosen on the card to the merge (do=merge), which opens
+	// with them chosen.
 	if len(cs) > 0 {
+		for i := range out.Actions {
+			if out.Actions[i].ID == "duplicates.merge" {
+				m := s.decideAction("duplicates.merge", "Merge on the server", g.id, "merge")
+				m.Danger, m.Enabled, m.Reason = true, out.Actions[i].Enabled, out.Actions[i].Reason
+				out.Actions[i] = m
+			}
+		}
 		out.Form = &view.Form{Action: s.route("/app/duplicates/decide"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
 			csrfField(sess),
 			{Name: "group", Kind: view.InputHidden, Value: text(g.id)},
@@ -643,6 +652,20 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 			Role: view.NoticeAlert, Title: "This group is not among the loaded records",
 			Body: "The lists it came from are no longer loaded, or a record in it changed. Nothing was decided. Open the lists again, then the duplicates.",
 		}
+	case do == "merge":
+		// The card's answers go to the merge as the members they chose
+		// (pick.<PROP>=the member's place in the group): the merge's own
+		// questions are numbered otherwise (Дб9).
+		q := url.Values{"group": {g.id}}
+		for prop, ref := range answers(r, st.choices(g)) {
+			for place, m := range g.refs {
+				if m == ref {
+					q.Set("pick."+prop, strconv.Itoa(place))
+				}
+			}
+		}
+		s.redirect(w, r, "/app/duplicates/merge?"+q.Encode())
+		return
 	case do == "link" && g.decision != view.DecisionLinked:
 		prefs := answers(r, st.choices(g))
 		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.link", string(g.kind), func(d *sealed.Duplicates) error {
