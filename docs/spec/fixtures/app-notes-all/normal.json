@@ -755,6 +755,13 @@
       "rubric": "August 2026"
     }
   ],
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "poll": {
     "actions": [

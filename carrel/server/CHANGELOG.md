@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.253 — 2026-10-15
+
+### Added
+
+- **Appearance keeps the theme, the density and the lists' habits in this
+  browser** (appearance-1; from-typecase note 50): one form — Theme (Auto,
+  Light, Dark), Density (Comfortable, Compact), Lists (keep the details
+  panel open, show the source column, open notes in full width), Dates and
+  times —, the first three in a cookie of this browser (`carrel_look`), the
+  week and the clock in the account as before. Every page carries them
+  (`Shell.look`, put in as the page is drawn); «Reset remembered view
+  settings» forgets them and the columns every section remembered.
+  `AppearancePage` is one `form` with `reset` now.
+
 ## v0.2.252 — 2026-10-15
 
 ### Changed

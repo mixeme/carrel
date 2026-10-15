@@ -356,6 +356,13 @@
     }
   ],
   "jobs": [],
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "print": {
     "range": "",

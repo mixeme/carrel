@@ -389,6 +389,13 @@
     "role": "info",
     "title": "No calendars are ticked"
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "poll": null,
   "print": {

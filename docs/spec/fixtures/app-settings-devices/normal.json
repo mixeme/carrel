@@ -316,6 +316,13 @@
     }
   ],
   "details": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "note": "Confirm your password first: the profile hands out the credentials of every included account.",
   "notices": [],
   "print": {

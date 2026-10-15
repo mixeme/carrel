@@ -1,13 +1,13 @@
 {
   "actions": [
     {
+      "csrf": "csrf",
       "enabled": true,
       "href": "/admin/dav?op=test",
       "id": "admin.dav.test",
       "label": "Test discovery",
       "method": "POST",
-      "primary": true,
-      "csrf": "csrf"
+      "primary": true
     }
   ],
   "details": null,
@@ -40,12 +40,12 @@
             "hint": "",
             "kind": "url",
             "label": "Server URL",
+            "mono": true,
             "name": "server",
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": "",
-            "mono": true
+            "value": ""
           },
           {
             "add": null,
@@ -80,12 +80,12 @@
             "hint": "Only for a server whose certificate is not trusted: its SHA-256, as the trace shows it.",
             "kind": "text",
             "label": "Certificate fingerprint",
+            "mono": true,
             "name": "certFingerprint",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "",
-            "mono": true
+            "value": ""
           }
         ],
         "unfold": null
@@ -93,6 +93,13 @@
     ]
   },
   "full": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "print": {
     "range": "",
@@ -101,13 +108,14 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
       "label": "Carrel",
-      "method": "GET",
-      "build": "0.0.1 · 786949a"
+      "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [],
     "nav": [
       {
@@ -177,13 +185,10 @@
         "method": "GET"
       }
     ],
+    "neighbours": [],
     "note": "",
     "sections": [],
-    "tags": [],
-    "neighbours": [],
     "shortcuts": [],
-    "davloom": "davloom · running · 0 devices",
-    "ticks": null,
     "status": [
       {
         "line": [
@@ -203,61 +208,13 @@
         "title": "Not checked since the start",
         "tone": "off"
       }
-    ]
+    ],
+    "tags": [],
+    "ticks": null
   },
   "title": "DAV validator",
   "top": {
-    "refresh": {
-      "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "answered": "",
-      "running": false
-    },
-    "search": {
-      "action": "/app/search",
-      "history": [],
-      "jump": [],
-      "query": "",
-      "whole": null,
-      "name": "q"
-    },
-    "signed": {
-      "instance": "carrel.example",
-      "login": "mix",
-      "local": true
-    },
-    "unlocked": null,
-    "user": [
-      {
-        "enabled": true,
-        "href": "/app/settings/account",
-        "icon": "i-gear",
-        "id": "user.settings",
-        "label": "Settings",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/admin/",
-        "icon": "i-adm",
-        "id": "user.admin",
-        "label": "Administration",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/logout",
-        "id": "user.logout",
-        "label": "Sign out",
-        "method": "POST",
-        "separator": true,
-        "csrf": "csrf"
-      }
-    ],
+    "lock": null,
     "new": {
       "arrow": [
         {
@@ -327,8 +284,58 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account",
-    "lock": null
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
   },
   "trace": null
 }

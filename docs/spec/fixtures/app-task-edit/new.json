@@ -3250,6 +3250,13 @@
       }
     ]
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "loss": null,
   "name": "New task",
   "notices": [],

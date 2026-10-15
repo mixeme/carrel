@@ -13,12 +13,12 @@
     "action": "/admin/escrow",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/admin/escrow",
         "id": "escrow.policy.save",
         "label": "Save",
-        "method": "POST",
-        "csrf": "csrf"
+        "method": "POST"
       }
     ],
     "errors": [],
@@ -72,16 +72,23 @@
     ]
   },
   "history": [],
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "master": {
     "action": "/admin/escrow",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "href": "/admin/escrow",
         "id": "escrow.master.change",
         "label": "Change",
-        "method": "POST",
-        "csrf": "csrf"
+        "method": "POST"
       }
     ],
     "errors": [],
@@ -161,6 +168,7 @@
     ]
   },
   "notices": [],
+  "opens": 0,
   "print": {
     "range": "",
     "taken": "",
@@ -168,13 +176,14 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
       "label": "Carrel",
-      "method": "GET",
-      "build": "0.0.1 · 786949a"
+      "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [],
     "nav": [
       {
@@ -244,13 +253,10 @@
         "method": "GET"
       }
     ],
+    "neighbours": [],
     "note": "",
     "sections": [],
-    "tags": [],
-    "neighbours": [],
     "shortcuts": [],
-    "davloom": "davloom · running · 0 devices",
-    "ticks": null,
     "status": [
       {
         "line": [
@@ -270,19 +276,21 @@
         "title": "Not checked since the start",
         "tone": "off"
       }
-    ]
+    ],
+    "tags": [],
+    "ticks": null
   },
   "recover": {
     "action": "/admin/escrow",
     "actions": [
       {
+        "csrf": "csrf",
+        "danger": true,
         "enabled": true,
         "href": "/admin/escrow",
         "id": "escrow.recover",
         "label": "Recover",
-        "method": "POST",
-        "danger": true,
-        "csrf": "csrf"
+        "method": "POST"
       }
     ],
     "errors": [],
@@ -350,12 +358,12 @@
             "hint": "Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user is mailed about it — always, not at the administrator’s discretion.",
             "kind": "text",
             "label": "Temporary password for the user",
+            "mono": true,
             "name": "temp",
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": "temp-password",
-            "mono": true
+            "value": "temp-password"
           }
         ],
         "unfold": null
@@ -363,59 +371,10 @@
     ]
   },
   "result": null,
+  "subtitle": "0 of 1 account open with the master password",
   "title": "Key escrow",
   "top": {
-    "refresh": {
-      "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "answered": "",
-      "running": false
-    },
-    "search": {
-      "action": "/app/search",
-      "history": [],
-      "jump": [],
-      "query": "",
-      "whole": null,
-      "name": "q"
-    },
-    "signed": {
-      "instance": "carrel.example",
-      "login": "mix",
-      "local": true
-    },
-    "unlocked": null,
-    "user": [
-      {
-        "enabled": true,
-        "href": "/app/settings/account",
-        "icon": "i-gear",
-        "id": "user.settings",
-        "label": "Settings",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/admin/",
-        "icon": "i-adm",
-        "id": "user.admin",
-        "label": "Administration",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/logout",
-        "id": "user.logout",
-        "label": "Sign out",
-        "method": "POST",
-        "separator": true,
-        "csrf": "csrf"
-      }
-    ],
+    "lock": null,
     "new": {
       "arrow": [
         {
@@ -485,8 +444,58 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account",
-    "lock": null
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
   },
   "warning": {
     "actions": [],
@@ -494,7 +503,5 @@
     "details": null,
     "role": "alert",
     "title": ""
-  },
-  "opens": 0,
-  "subtitle": "0 of 1 account open with the master password"
+  }
 }

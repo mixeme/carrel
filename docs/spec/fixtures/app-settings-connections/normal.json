@@ -1446,6 +1446,13 @@
   "details": null,
   "dialogSubtitle": "",
   "dialogTitle": "",
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "note": [],
   "notices": [],
   "print": {

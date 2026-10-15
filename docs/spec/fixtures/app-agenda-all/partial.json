@@ -840,6 +840,13 @@
   ],
   "details": null,
   "empty": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "poll": {
     "actions": [

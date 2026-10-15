@@ -19,8 +19,22 @@
       "target": "sheet"
     }
   ],
+  "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it.",
   "details": null,
+  "email": {
+    "badge": {
+      "label": "pending: new@example.org",
+      "role": "neutral"
+    },
+    "confirmedAt": "14 February",
+    "message": null,
+    "pending": "new@example.org",
+    "sentAt": "11:42",
+    "sentTo": "new@example.org",
+    "state": "pending"
+  },
   "escrow": {
+    "actionNote": "",
     "actions": [
       {
         "enabled": true,
@@ -32,15 +46,22 @@
       }
     ],
     "active": true,
+    "badge": null,
     "by": "",
     "covered": false,
-    "note": "No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at.",
-    "actionNote": "",
-    "badge": null,
     "deposited": "",
-    "lastRecovery": ""
+    "lastRecovery": "",
+    "note": "No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at."
+  },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
   },
   "notices": [],
+  "passwordNote": "Changing your password re-wraps your data key only; saved connections stay readable.",
   "print": {
     "range": "",
     "taken": "",
@@ -72,12 +93,12 @@
             "add": null,
             "error": "",
             "extra": {
+              "csrf": "csrf",
               "enabled": true,
               "href": "/app/settings/account?op=name",
               "id": "account.name.save",
               "label": "Save",
-              "method": "POST",
-              "csrf": "csrf"
+              "method": "POST"
             },
             "hint": "Shown as the sender and used as the signature in letters you send. Blank means your login.",
             "kind": "text",
@@ -98,12 +119,12 @@
             "add": null,
             "error": "",
             "extra": {
+              "csrf": "csrf",
               "enabled": true,
               "href": "/app/settings/account?op=email",
               "id": "account.email.change",
               "label": "Change",
-              "method": "POST",
-              "csrf": "csrf"
+              "method": "POST"
             },
             "hint": "Used for service notices, and as Reply-To on letters you send.",
             "kind": "email",
@@ -121,13 +142,14 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
       "label": "Carrel",
-      "method": "GET",
-      "build": "0.0.1 · 786949a"
+      "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [],
     "nav": [
       {
@@ -143,38 +165,38 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/account",
+        "icon": "i-user",
         "id": "settings.account",
         "label": "Account",
         "method": "GET",
-        "on": true,
-        "icon": "i-user"
+        "on": true
       },
       {
         "count": 4,
         "enabled": true,
         "href": "/app/settings/connections",
+        "icon": "i-server",
         "id": "settings.connections",
         "label": "Connections",
-        "method": "GET",
-        "icon": "i-server"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/attachments",
+        "icon": "i-file",
         "id": "settings.attachments",
         "label": "Attachments",
-        "method": "GET",
-        "icon": "i-file"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/devices",
+        "icon": "i-device",
         "id": "settings.devices",
         "label": "New device",
-        "method": "GET",
-        "icon": "i-device"
+        "method": "GET"
       },
       {
         "count": 0,
@@ -188,37 +210,34 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/backup",
+        "icon": "i-archive",
         "id": "settings.backup",
         "label": "Backup",
-        "method": "GET",
-        "icon": "i-archive"
+        "method": "GET"
       },
       {
         "count": 2,
         "enabled": true,
         "href": "/app/files/published",
+        "icon": "i-link",
         "id": "settings.published",
         "label": "Published links",
-        "method": "GET",
-        "icon": "i-link"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/appearance",
+        "icon": "i-theme",
         "id": "settings.appearance",
         "label": "Appearance",
-        "method": "GET",
-        "icon": "i-theme"
+        "method": "GET"
       }
     ],
+    "neighbours": [],
     "note": "",
     "sections": [],
-    "tags": [],
-    "neighbours": [],
     "shortcuts": [],
-    "davloom": "davloom · running · 0 devices",
-    "ticks": null,
     "status": [
       {
         "line": [
@@ -229,7 +248,9 @@
         "title": "davloom · running · 0 devices",
         "tone": "on"
       }
-    ]
+    ],
+    "tags": [],
+    "ticks": null
   },
   "sessions": [
     {
@@ -237,70 +258,21 @@
       "agent": "",
       "current": true,
       "end": {
+        "csrf": "csrf",
         "enabled": false,
         "id": "account.session.end",
         "label": "End",
         "method": "POST",
-        "reason": "This is the session you are in: sign out to end it.",
-        "csrf": "csrf"
+        "reason": "This is the session you are in: sign out to end it."
       },
       "lastSeen": "just now",
       "started": "10 August 2026, 17:04"
     }
   ],
+  "subtitle": "mix · created 11 February 2026",
   "title": "Account",
   "top": {
-    "refresh": {
-      "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "answered": "",
-      "running": false
-    },
-    "search": {
-      "action": "/app/search",
-      "history": [],
-      "jump": [],
-      "query": "",
-      "whole": null,
-      "name": "q"
-    },
-    "signed": {
-      "instance": "carrel.example",
-      "login": "mix",
-      "local": true
-    },
-    "unlocked": null,
-    "user": [
-      {
-        "enabled": true,
-        "href": "/app/settings/account",
-        "icon": "i-gear",
-        "id": "user.settings",
-        "label": "Settings",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/admin/",
-        "icon": "i-adm",
-        "id": "user.admin",
-        "label": "Administration",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/logout",
-        "id": "user.logout",
-        "label": "Sign out",
-        "method": "POST",
-        "separator": true,
-        "csrf": "csrf"
-      }
-    ],
+    "lock": null,
     "new": {
       "arrow": [
         {
@@ -370,22 +342,57 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account",
-    "lock": null
-  },
-  "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it.",
-  "email": {
-    "badge": {
-      "label": "pending: new@example.org",
-      "role": "neutral"
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
     },
-    "confirmedAt": "14 February",
-    "message": null,
-    "pending": "new@example.org",
-    "sentAt": "11:42",
-    "sentTo": "new@example.org",
-    "state": "pending"
-  },
-  "passwordNote": "Changing your password re-wraps your data key only; saved connections stay readable.",
-  "subtitle": "mix · created 11 February 2026"
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
 }

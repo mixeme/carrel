@@ -35,10 +35,10 @@ func TestAccountWeekStartAndClock(t *testing.T) {
 	const settings = "/app/settings/appearance"
 
 	page := decode[view.AppearancePage](t, f.h.do(get(settings, f.sess)))
-	if v := rowNamed(t, page.Account, "weekStart").Value; v != "monday" {
+	if v := rowNamed(t, page.Form, "weekStart").Value; v != "monday" {
 		t.Errorf("weekStart = %q, want Monday before anything is chosen", v)
 	}
-	if v := rowNamed(t, page.Account, "clock").Value; v != "24" {
+	if v := rowNamed(t, page.Form, "clock").Value; v != "24" {
 		t.Errorf("clock = %q", v)
 	}
 	if zone := rowNamed(t, page.Instance, "timezone"); zone.Value != "Europe/Berlin" || !zone.ReadOnly {
@@ -47,7 +47,7 @@ func TestAccountWeekStartAndClock(t *testing.T) {
 
 	rec := f.h.do(postForm(settings, f.sess, url.Values{"weekStart": {"friday"}, "clock": {"24"}}))
 	page = decode[view.AppearancePage](t, rec)
-	if rowNamed(t, page.Account, "weekStart").Error == "" {
+	if rowNamed(t, page.Form, "weekStart").Error == "" {
 		t.Error("a day outside the list was not refused")
 	}
 	snap := f.h.st.Snapshot()
@@ -108,7 +108,7 @@ func TestAccountWeekStartAndClock(t *testing.T) {
 	f.h.invite(snap.UserByID(f.sess.AccountID()).ID, "bob", "password456")
 	bob := f.h.login("bob", "password456")
 	page = decode[view.AppearancePage](t, f.h.do(get(settings, bob)))
-	if rowNamed(t, page.Account, "weekStart").Value != "monday" || rowNamed(t, page.Account, "clock").Value != "24" {
-		t.Errorf("bob's settings = %+v", page.Account)
+	if rowNamed(t, page.Form, "weekStart").Value != "monday" || rowNamed(t, page.Form, "clock").Value != "24" {
+		t.Errorf("bob's settings = %+v", page.Form)
 	}
 }

@@ -1,5 +1,12 @@
 {
   "details": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "print": {
     "range": "",
@@ -31,37 +38,37 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/account",
+        "icon": "i-user",
         "id": "settings.account",
         "label": "Account",
-        "method": "GET",
-        "icon": "i-user"
+        "method": "GET"
       },
       {
         "count": 4,
         "enabled": true,
         "href": "/app/settings/connections",
+        "icon": "i-server",
         "id": "settings.connections",
         "label": "Connections",
-        "method": "GET",
-        "icon": "i-server"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/attachments",
+        "icon": "i-file",
         "id": "settings.attachments",
         "label": "Attachments",
-        "method": "GET",
-        "icon": "i-file"
+        "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/devices",
+        "icon": "i-device",
         "id": "settings.devices",
         "label": "New device",
-        "method": "GET",
-        "icon": "i-device"
+        "method": "GET"
       },
       {
         "count": 0,
@@ -75,29 +82,29 @@
         "count": null,
         "enabled": true,
         "href": "/app/settings/backup",
+        "icon": "i-archive",
         "id": "settings.backup",
         "label": "Backup",
-        "method": "GET",
-        "icon": "i-archive"
+        "method": "GET"
       },
       {
         "count": 0,
         "enabled": true,
         "href": "/app/files/published",
+        "icon": "i-link",
         "id": "settings.published",
         "label": "Published links",
         "method": "GET",
-        "on": true,
-        "icon": "i-link"
+        "on": true
       },
       {
         "count": null,
         "enabled": true,
         "href": "/app/settings/appearance",
+        "icon": "i-theme",
         "id": "settings.appearance",
         "label": "Appearance",
-        "method": "GET",
-        "icon": "i-theme"
+        "method": "GET"
       }
     ],
     "neighbours": [],
@@ -119,6 +126,18 @@
     "ticks": null
   },
   "rows": [],
+  "subtitle": [
+    {
+      "text": "Read-only, one object or one collection per link"
+    },
+    {
+      "text": " · "
+    },
+    {
+      "mark": "danger",
+      "text": "this instance is local: the link opens only from your network"
+    }
+  ],
   "title": "Published links",
   "top": {
     "lock": null,
@@ -194,11 +213,11 @@
     "refresh": {
       "action": {
         "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-refresh",
         "id": "published.refresh",
         "label": "Refresh",
-        "method": "GET",
-        "href": "/app/files/published",
-        "icon": "i-refresh"
+        "method": "GET"
       },
       "answered": "",
       "running": false
@@ -245,17 +264,5 @@
       }
     ],
     "userHref": "/app/settings/account"
-  },
-  "subtitle": [
-    {
-      "text": "Read-only, one object or one collection per link"
-    },
-    {
-      "text": " · "
-    },
-    {
-      "mark": "danger",
-      "text": "this instance is local: the link opens only from your network"
-    }
-  ]
+  }
 }

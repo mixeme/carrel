@@ -19,6 +19,13 @@
     "role": "info",
     "title": "No storages are ticked"
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "note": [],
   "notices": [],
   "print": {

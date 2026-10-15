@@ -475,8 +475,16 @@ type RestoreRow struct {
 
 type AppearancePage struct {
 	Shell
-	Browser  Form   `json:"browser"`  // тема, плотность, колонки — живут в этом браузере
-	Account  Form   `json:"account"`  // первый день недели, 12/24 — на сервере; Actions — Discard (GET, эта же страница) и Save, основная (Р-57)
+	// Form — одна форма кадра (appearance-1): рубрики Theme (theme: auto,
+	// light, dark — радио сегментом), Density (density: comfortable,
+	// compact), Lists (отметки panel, source, wide), Dates and times
+	// (weekStart, clock) — первые три живут в куке этого браузера, последняя
+	// — в аккаунте; Actions — Discard (GET, эта же страница) и Save, основная
+	// (Р-57)
+	Form Form `json:"form"`
+	// Reset — «Reset remembered view settings» под Lists: POST, забывает
+	// выбор столбцов каждого раздела и вид этого браузера
+	Reset    Action `json:"reset"`
 	Instance Form   `json:"instance"` // часовой пояс — ставит администратор
 	Notes    []Text `json:"notes"`
 }

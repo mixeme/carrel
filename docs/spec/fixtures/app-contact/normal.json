@@ -132,6 +132,13 @@
     "label": "Show 3",
     "method": "GET"
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "menu": [
     {
       "enabled": true,

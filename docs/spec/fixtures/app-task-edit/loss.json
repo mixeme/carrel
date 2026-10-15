@@ -868,6 +868,13 @@
       }
     ]
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "loss": {
     "actions": [],
     "aggregated": false,

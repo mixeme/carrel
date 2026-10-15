@@ -402,6 +402,13 @@
     "title": "2026-08-10-sync-board.png"
   },
   "empty": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "print": {
     "range": "sftpgo · vps · Documents · 5 items",

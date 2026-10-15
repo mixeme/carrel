@@ -1,5 +1,6 @@
 {
-  "account": {
+  "details": null,
+  "form": {
     "action": "/app/settings/appearance",
     "actions": [
       {
@@ -36,7 +37,123 @@
             "readOnly": false,
             "required": false,
             "value": "csrf"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Theme",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "“Auto” follows the system. Kept in this browser — another device does not see it.",
+            "kind": "radio",
+            "label": "Theme",
+            "name": "theme",
+            "options": [
+              {
+                "label": "Auto",
+                "selected": true,
+                "value": "auto"
+              },
+              {
+                "label": "Light",
+                "selected": false,
+                "value": "light"
+              },
+              {
+                "label": "Dark",
+                "selected": false,
+                "value": "dark"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "auto"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Density",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "List row height: 38 or 32 px. On a phone always 52. This browser.",
+            "kind": "radio",
+            "label": "Density",
+            "name": "density",
+            "options": [
+              {
+                "label": "Comfortable",
+                "selected": true,
+                "value": "comfortable"
+              },
+              {
+                "label": "Compact",
+                "selected": false,
+                "value": "compact"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "comfortable"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Lists",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Keep the details panel open",
+            "name": "panel",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "on"
           },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Show the source column",
+            "name": "source",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "on"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Open notes in full width",
+            "name": "wide",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Dates and times",
+        "rows": [
           {
             "add": null,
             "error": "",
@@ -95,14 +212,6 @@
       }
     ]
   },
-  "browser": {
-    "action": "",
-    "actions": [],
-    "errors": [],
-    "method": "",
-    "sets": []
-  },
-  "details": null,
   "instance": {
     "action": "",
     "actions": [],
@@ -130,7 +239,15 @@
       }
     ]
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notes": [
+    "Column sets are remembered per section, in this browser — the button below resets them.",
     "Week start and 12/24-hour clock live in the account: time is assembled on the server, so another browser sees the same.",
     "Time zone is one per instance, set by the administrator."
   ],
@@ -251,6 +368,14 @@
     ],
     "tags": [],
     "ticks": null
+  },
+  "reset": {
+    "csrf": "csrf",
+    "enabled": true,
+    "href": "/app/settings/appearance?op=reset",
+    "id": "appearance.reset",
+    "label": "Reset remembered view settings",
+    "method": "POST"
   },
   "title": "Appearance",
   "top": {

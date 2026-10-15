@@ -23,6 +23,13 @@
   ],
   "details": null,
   "empty": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "note": [
     {
       "text": "This is where the section starts: the storages you ticked in the rail, as top-level folders. Open one and its own tree opens — contents of different servers are never mixed in one folder, because a file has one path and belongs to its own storage."

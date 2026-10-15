@@ -3536,6 +3536,13 @@
       }
     ]
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "loss": null,
   "name": "Синк-ап по релизу",
   "notices": [],

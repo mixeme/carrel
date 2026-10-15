@@ -1171,6 +1171,13 @@
     "title": "Синк-ап по релизу"
   },
   "empty": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "poll": {
     "actions": [

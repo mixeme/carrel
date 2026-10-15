@@ -53,6 +53,13 @@
   ],
   "details": null,
   "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?preview=1",
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "offsetX": 0,
   "offsetY": 0,

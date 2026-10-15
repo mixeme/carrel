@@ -377,6 +377,13 @@
   "details": null,
   "devices": [],
   "enabled": true,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "note": [
     {
       "text": "Changing your Carrel password does "

@@ -4,12 +4,12 @@
     "action": "/admin/settings",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "id": "admin.settings.instance",
         "label": "Save",
         "method": "POST",
-        "primary": true,
-        "csrf": "csrf"
+        "primary": true
       }
     ],
     "errors": [],
@@ -51,12 +51,12 @@
             "hint": "From 1 to 720. A new invitation, and one extended, live this long.",
             "kind": "number",
             "label": "Invite lifetime, h",
+            "mono": true,
             "name": "inviteTTL",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "24",
-            "mono": true
+            "value": "24"
           },
           {
             "add": null,
@@ -65,12 +65,12 @@
             "hint": "From 1 to 168. Applies to sessions already open.",
             "kind": "number",
             "label": "Idle timeout, h",
+            "mono": true,
             "name": "idle",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "2",
-            "mono": true
+            "value": "2"
           },
           {
             "add": null,
@@ -79,12 +79,12 @@
             "hint": "From 1 to 365. Applies to sessions started from now on.",
             "kind": "number",
             "label": "Session life, d",
+            "mono": true,
             "name": "session",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "7",
-            "mono": true
+            "value": "7"
           },
           {
             "add": null,
@@ -106,12 +106,12 @@
             "hint": "Links in letters start with it. Set with CARREL_PUBLIC_URL.",
             "kind": "text",
             "label": "Public address",
+            "mono": true,
             "name": "publicURL",
             "options": [],
             "readOnly": true,
             "required": false,
-            "value": "the address each request comes to",
-            "mono": true
+            "value": "the address each request comes to"
           }
         ],
         "unfold": null
@@ -122,12 +122,12 @@
     "action": "/admin/settings",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "id": "admin.settings.limits",
         "label": "Save",
         "method": "POST",
-        "primary": true,
-        "csrf": "csrf"
+        "primary": true
       }
     ],
     "errors": [],
@@ -182,12 +182,12 @@
             "hint": "From 1 to 100. A larger file goes as a published link, shown as such before sending.",
             "kind": "number",
             "label": "Attachment, MB",
+            "mono": true,
             "name": "attach",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "10",
-            "mono": true
+            "value": "10"
           },
           {
             "add": null,
@@ -196,12 +196,12 @@
             "hint": "From 1 to 100, and not less than an attachment.",
             "kind": "number",
             "label": "Letter, MB",
+            "mono": true,
             "name": "letter",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "25",
-            "mono": true
+            "value": "25"
           },
           {
             "add": null,
@@ -210,12 +210,12 @@
             "hint": "From 1 to 100.",
             "kind": "number",
             "label": "Recipients",
+            "mono": true,
             "name": "recipients",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "20",
-            "mono": true
+            "value": "20"
           },
           {
             "add": null,
@@ -224,27 +224,34 @@
             "hint": "From 1 to 1000, per person, per UTC day.",
             "kind": "number",
             "label": "Letters a day",
+            "mono": true,
             "name": "perDay",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "100",
-            "mono": true
+            "value": "100"
           }
         ],
         "unfold": null
       }
     ]
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "mail": {
     "action": "/admin/settings/mail-test",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "id": "admin.settings.mailtest",
         "label": "Send test",
-        "method": "POST",
-        "csrf": "csrf"
+        "method": "POST"
       }
     ],
     "errors": [],
@@ -292,13 +299,14 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
       "label": "Carrel",
-      "method": "GET",
-      "build": "0.0.1 · 786949a"
+      "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [],
     "nav": [
       {
@@ -368,13 +376,10 @@
         "method": "GET"
       }
     ],
+    "neighbours": [],
     "note": "",
     "sections": [],
-    "tags": [],
-    "neighbours": [],
     "shortcuts": [],
-    "davloom": "davloom · running · 0 devices",
-    "ticks": null,
     "status": [
       {
         "line": [
@@ -394,18 +399,20 @@
         "title": "Not checked since the start",
         "tone": "off"
       }
-    ]
+    ],
+    "tags": [],
+    "ticks": null
   },
   "smtp": {
     "action": "/admin/settings",
     "actions": [
       {
+        "csrf": "csrf",
         "enabled": true,
         "id": "admin.settings.save",
         "label": "Save",
         "method": "POST",
-        "primary": true,
-        "csrf": "csrf"
+        "primary": true
       }
     ],
     "errors": [],
@@ -434,12 +441,12 @@
             "hint": "Empty turns mail off: invitations and links are then handed over in person.",
             "kind": "text",
             "label": "Host",
+            "mono": true,
             "name": "host",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "127.0.0.1",
-            "mono": true
+            "value": "127.0.0.1"
           },
           {
             "add": null,
@@ -448,12 +455,12 @@
             "hint": "",
             "kind": "number",
             "label": "Port",
+            "mono": true,
             "name": "port",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "25",
-            "mono": true
+            "value": "25"
           },
           {
             "add": null,
@@ -477,8 +484,8 @@
               {
                 "label": "None",
                 "selected": true,
-                "value": "none",
-                "separator": true
+                "separator": true,
+                "value": "none"
               }
             ],
             "readOnly": false,
@@ -569,57 +576,7 @@
   "test": null,
   "title": "Instance settings",
   "top": {
-    "refresh": {
-      "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "answered": "",
-      "running": false
-    },
-    "search": {
-      "action": "/app/search",
-      "history": [],
-      "jump": [],
-      "query": "",
-      "whole": null,
-      "name": "q"
-    },
-    "signed": {
-      "instance": "carrel.example",
-      "login": "mix",
-      "local": true
-    },
-    "unlocked": null,
-    "user": [
-      {
-        "enabled": true,
-        "href": "/app/settings/account",
-        "icon": "i-gear",
-        "id": "user.settings",
-        "label": "Settings",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/admin/",
-        "icon": "i-adm",
-        "id": "user.admin",
-        "label": "Administration",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/logout",
-        "id": "user.logout",
-        "label": "Sign out",
-        "method": "POST",
-        "separator": true,
-        "csrf": "csrf"
-      }
-    ],
+    "lock": null,
     "new": {
       "arrow": [
         {
@@ -689,7 +646,57 @@
       "primary": true,
       "target": "sheet"
     },
-    "userHref": "/app/settings/account",
-    "lock": null
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
   }
 }

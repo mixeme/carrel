@@ -24,15 +24,15 @@ type stampingRenderer struct {
 }
 
 func (sr stampingRenderer) Page(w http.ResponseWriter, r *http.Request, status int, body any) error {
-	return sr.Renderer.Page(w, r, status, stampView(body, sr.token(r), sr.base))
+	return sr.Renderer.Page(w, r, status, stampLook(stampView(body, sr.token(r), sr.base), lookOf(r)))
 }
 
 func (sr stampingRenderer) Fragment(w http.ResponseWriter, r *http.Request, status int, target string, body any, extra []render.OOB) error {
 	token := sr.token(r)
 	for i := range extra {
-		extra[i].Body = stampView(extra[i].Body, token, sr.base)
+		extra[i].Body = stampLook(stampView(extra[i].Body, token, sr.base), lookOf(r))
 	}
-	return sr.Renderer.Fragment(w, r, status, target, stampView(body, token, sr.base), extra)
+	return sr.Renderer.Fragment(w, r, status, target, stampLook(stampView(body, token, sr.base), lookOf(r)), extra)
 }
 
 // sessionToken is the CSRF token of the request's session; empty without
@@ -47,6 +47,7 @@ func (s *Server) sessionToken(r *http.Request) string {
 var (
 	actionType = reflect.TypeOf(view.Action{})
 	formType   = reflect.TypeOf(view.Form{})
+	shellType  = reflect.TypeOf(view.Shell{})
 )
 
 // stampView returns body with token in every POST Action, the items of an arrow
@@ -132,4 +133,49 @@ func stampValue(v reflect.Value, token stamper) reflect.Value {
 		return fresh
 	}
 	return v
+}
+
+// stampLook gives every shell of what is drawn this browser's Look
+// (Appearance, appearance-1): the page and the screen under a sheet alike.
+// stampView has already made the value its own, so it is changed in place.
+func stampLook(body any, look view.Look) any {
+	if body == nil {
+		return body
+	}
+	v := reflect.ValueOf(body)
+	out := reflect.New(v.Type()).Elem()
+	out.Set(v)
+	putLook(out, look)
+	return out.Interface()
+}
+
+func putLook(v reflect.Value, look view.Look) {
+	switch v.Kind() {
+	case reflect.Pointer, reflect.Interface:
+		if !v.IsNil() {
+			if v.Kind() == reflect.Interface {
+				inner := reflect.New(v.Elem().Type()).Elem()
+				inner.Set(v.Elem())
+				putLook(inner, look)
+				if v.CanSet() {
+					v.Set(inner)
+				}
+				return
+			}
+			putLook(v.Elem(), look)
+		}
+	case reflect.Struct:
+		if v.Type() == shellType {
+			v.FieldByName("Look").Set(reflect.ValueOf(look))
+			return
+		}
+		for i := 0; i < v.NumField(); i++ {
+			if f := v.Field(i); v.Type().Field(i).IsExported() && f.CanSet() {
+				switch f.Kind() {
+				case reflect.Struct, reflect.Pointer, reflect.Interface:
+					putLook(f, look)
+				}
+			}
+		}
+	}
 }

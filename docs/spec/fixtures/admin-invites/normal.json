@@ -1,243 +1,5 @@
 {
   "details": null,
-  "notices": [],
-  "print": {
-    "range": "",
-    "taken": "",
-    "title": ""
-  },
-  "rail": {
-    "about": {
-      "enabled": true,
-      "href": "/about",
-      "id": "about",
-      "label": "Carrel",
-      "method": "GET",
-      "build": "0.0.1 · 786949a"
-    },
-    "foot": [],
-    "nav": [
-      {
-        "count": null,
-        "enabled": true,
-        "href": "/app/contacts",
-        "icon": "i-back",
-        "id": "admin.back",
-        "label": "Back to app",
-        "method": "GET"
-      },
-      {
-        "count": 0,
-        "enabled": true,
-        "href": "/admin/invites",
-        "id": "admin.invites",
-        "label": "Add users",
-        "method": "GET",
-        "on": true
-      },
-      {
-        "count": 1,
-        "enabled": true,
-        "href": "/admin/",
-        "id": "admin.users",
-        "label": "Users",
-        "method": "GET"
-      },
-      {
-        "count": null,
-        "enabled": true,
-        "href": "/admin/settings",
-        "id": "admin.settings",
-        "label": "Settings",
-        "method": "GET"
-      },
-      {
-        "count": null,
-        "enabled": true,
-        "href": "/admin/install",
-        "id": "admin.install",
-        "label": "Installation",
-        "method": "GET"
-      },
-      {
-        "count": null,
-        "enabled": true,
-        "href": "/admin/dav",
-        "id": "admin.dav",
-        "label": "DAV validator",
-        "method": "GET"
-      },
-      {
-        "count": null,
-        "enabled": true,
-        "href": "/admin/escrow",
-        "id": "admin.escrow",
-        "label": "Key escrow",
-        "method": "GET"
-      },
-      {
-        "count": null,
-        "enabled": true,
-        "href": "/admin/audit",
-        "id": "admin.audit",
-        "label": "Audit log",
-        "method": "GET"
-      }
-    ],
-    "note": "",
-    "sections": [],
-    "tags": [],
-    "neighbours": [],
-    "shortcuts": [],
-    "davloom": "davloom · running · 0 devices",
-    "ticks": null,
-    "status": [
-      {
-        "line": [
-          {
-            "text": "No letter since the start."
-          }
-        ],
-        "title": "Mail is going out",
-        "tone": "on"
-      },
-      {
-        "line": [
-          {
-            "text": "Run the installation check."
-          }
-        ],
-        "title": "Not checked since the start",
-        "tone": "off"
-      }
-    ]
-  },
-  "rows": [],
-  "title": "Add users",
-  "top": {
-    "refresh": {
-      "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "answered": "",
-      "running": false
-    },
-    "search": {
-      "action": "/app/search",
-      "history": [],
-      "jump": [],
-      "query": "",
-      "whole": null,
-      "name": "q"
-    },
-    "signed": {
-      "instance": "carrel.example",
-      "login": "mix",
-      "local": true
-    },
-    "unlocked": null,
-    "user": [
-      {
-        "enabled": true,
-        "href": "/app/settings/account",
-        "icon": "i-gear",
-        "id": "user.settings",
-        "label": "Settings",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/admin/",
-        "icon": "i-adm",
-        "id": "user.admin",
-        "label": "Administration",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/logout",
-        "id": "user.logout",
-        "label": "Sign out",
-        "method": "POST",
-        "separator": true,
-        "csrf": "csrf"
-      }
-    ],
-    "new": {
-      "arrow": [
-        {
-          "enabled": true,
-          "href": "/app/notes/quick",
-          "icon": "i-quill",
-          "id": "new.notes",
-          "label": "Note",
-          "method": "GET",
-          "target": "sheet"
-        },
-        {
-          "enabled": true,
-          "href": "/app/contacts/quick",
-          "icon": "i-con",
-          "id": "new.contacts",
-          "label": "Contact",
-          "method": "GET",
-          "separator": true,
-          "target": "sheet"
-        },
-        {
-          "enabled": true,
-          "href": "/app/calendar/quick",
-          "icon": "i-cal",
-          "id": "new.calendar",
-          "label": "Event",
-          "method": "GET",
-          "target": "sheet"
-        },
-        {
-          "enabled": true,
-          "href": "/app/tasks/quick",
-          "icon": "i-task",
-          "id": "new.tasks",
-          "label": "Task",
-          "method": "GET",
-          "target": "sheet"
-        },
-        {
-          "enabled": true,
-          "href": "/app/files/picker?for=upload",
-          "icon": "i-up",
-          "id": "new.upload",
-          "label": "Upload file",
-          "method": "GET",
-          "separator": true,
-          "target": "sheet"
-        },
-        {
-          "enabled": true,
-          "href": "/app/mail/compose",
-          "icon": "i-mail",
-          "id": "new.letter",
-          "label": "Letter",
-          "method": "GET",
-          "separator": true,
-          "target": "sheet"
-        }
-      ],
-      "enabled": true,
-      "href": "/app/notes/quick",
-      "icon": "i-quill",
-      "id": "new.notes",
-      "label": "New note",
-      "method": "GET",
-      "primary": true,
-      "target": "sheet"
-    },
-    "userHref": "/app/settings/account",
-    "lock": null
-  },
   "invite": {
     "aside": "chooses their own password",
     "badge": null,
@@ -246,21 +8,21 @@
       "action": "/admin/invites?action=link",
       "actions": [
         {
+          "csrf": "csrf",
           "enabled": true,
           "href": "/admin/invites?action=link",
           "id": "admin.invite.create",
           "label": "Create link",
           "method": "POST",
-          "primary": true,
-          "csrf": "csrf"
+          "primary": true
         },
         {
+          "csrf": "csrf",
           "enabled": true,
           "href": "/admin/invites?action=send",
           "id": "admin.invite.send",
           "label": "Send invitation",
-          "method": "POST",
-          "csrf": "csrf"
+          "method": "POST"
         }
       ],
       "errors": [],
@@ -331,6 +93,126 @@
     "title": "Invitation",
     "warning": null
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "admin.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/admin/invites",
+        "id": "admin.invites",
+        "label": "Add users",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": 1,
+        "enabled": true,
+        "href": "/admin/",
+        "id": "admin.users",
+        "label": "Users",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/settings",
+        "id": "admin.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/install",
+        "id": "admin.install",
+        "label": "Installation",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/dav",
+        "id": "admin.dav",
+        "label": "DAV validator",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/escrow",
+        "id": "admin.escrow",
+        "label": "Key escrow",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/audit",
+        "id": "admin.audit",
+        "label": "Audit log",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "No letter since the start."
+          }
+        ],
+        "title": "Mail is going out",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Run the installation check."
+          }
+        ],
+        "title": "Not checked since the start",
+        "tone": "off"
+      }
+    ],
+    "tags": [],
+    "ticks": null
+  },
+  "rows": [],
   "selfReg": {
     "aside": "",
     "badge": null,
@@ -339,12 +221,12 @@
       "action": "/admin/invites",
       "actions": [
         {
+          "csrf": "csrf",
           "enabled": true,
           "href": "/admin/invites",
           "id": "admin.selfreg.save",
           "label": "Save",
-          "method": "POST",
-          "csrf": "csrf"
+          "method": "POST"
         }
       ],
       "errors": [],
@@ -415,13 +297,13 @@
       "action": "/admin/invites",
       "actions": [
         {
+          "csrf": "csrf",
           "enabled": true,
           "href": "/admin/invites",
           "id": "admin.user.create",
           "label": "Create user",
           "method": "POST",
-          "primary": true,
-          "csrf": "csrf"
+          "primary": true
         }
       ],
       "errors": [],
@@ -500,13 +382,13 @@
               "hint": "",
               "kind": "email",
               "label": "Email",
+              "labelAside": "(optional)",
               "name": "email",
               "options": [],
               "placeholder": "—",
               "readOnly": false,
               "required": false,
-              "value": "",
-              "labelAside": "(optional)"
+              "value": ""
             },
             {
               "add": null,
@@ -515,12 +397,12 @@
               "hint": "",
               "kind": "text",
               "label": "Temporary password",
+              "mono": true,
               "name": "password",
               "options": [],
               "readOnly": false,
               "required": true,
-              "value": "temp-password",
-              "mono": true
+              "value": "temp-password"
             }
           ],
           "unfold": null
@@ -538,5 +420,130 @@
       "role": "alert",
       "title": ""
     }
+  },
+  "title": "Add users",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-up",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
   }
 }

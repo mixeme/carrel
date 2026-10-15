@@ -56,6 +56,13 @@
     "total": 1
   },
   "details": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "note": "Files are searched by name only. Carrel does not look inside files, so “nothing found” does not mean the files do not contain it.",
   "notices": [],
   "poll": {

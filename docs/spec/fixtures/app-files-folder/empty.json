@@ -283,6 +283,13 @@
     "role": "info",
     "title": "This folder is empty."
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "print": {
     "range": "nextcloud · Files · 0 items",

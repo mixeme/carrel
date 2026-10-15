@@ -208,6 +208,13 @@
       "value": "Where differ"
     }
   ],
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "loss": null,
   "menu": [
     {

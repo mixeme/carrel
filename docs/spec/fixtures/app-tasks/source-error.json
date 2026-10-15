@@ -153,6 +153,13 @@
   "details": null,
   "empty": null,
   "groups": [],
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [
     {
       "actions": [

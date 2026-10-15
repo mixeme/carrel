@@ -115,6 +115,13 @@
     ],
     "title": "Заметка со встречи 10.08"
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "loss": null,
   "meta": {
     "actions": [

@@ -250,6 +250,13 @@
     "title": "No lists are ticked"
   },
   "groups": [],
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "poll": null,
   "print": {

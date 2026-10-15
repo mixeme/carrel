@@ -956,6 +956,13 @@
           "rubric": "Л"
         }
       ],
+      "look": {
+        "compact": false,
+        "panel": true,
+        "source": true,
+        "theme": "auto",
+        "wide": false
+      },
       "notices": [],
       "poll": {
         "actions": [

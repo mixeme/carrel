@@ -9,6 +9,21 @@ type Shell struct {
 	Notices []Notice `json:"notices"` // над содержимым, не поверх него
 	Details *Details `json:"details"` // панель подробностей; nil — панели на экране нет
 	Print   Print    `json:"print"`
+	// Look — вид, который помнит этот браузер (Appearance, appearance-1;
+	// записка 50): страница печатается по нему
+	Look Look `json:"look"`
+}
+
+// Look — вид страниц в этом браузере: его кука, не аккаунт (решение
+// владельца, записка Typecase 50, ответ на остаток задачи 89; appearance-1).
+// Без куки — умолчания кадра: Auto, Comfortable, панель открыта, столбец
+// источника есть, заметки — шириной чтения.
+type Look struct {
+	Theme   string `json:"theme"`   // auto (как система), light, dark
+	Compact bool   `json:"compact"` // плотность Compact: строка списка 32 px вместо 38 (на телефоне всегда 52)
+	Panel   bool   `json:"panel"`   // «Keep the details panel open»
+	Source  bool   `json:"source"`  // «Show the source column» — в объединённом виде
+	Wide    bool   `json:"wide"`    // «Open notes in full width»
 }
 
 type TopBar struct {

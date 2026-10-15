@@ -68,6 +68,13 @@
     ]
   },
   "kind": "contact",
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "preview": [],
   "print": {

@@ -333,6 +333,13 @@
     }
   ],
   "linked": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "name": "Анна Ковалёва",
   "note": "Nothing was looked for before 10 August 2025. Widen the range if you need it.",
   "notices": [],

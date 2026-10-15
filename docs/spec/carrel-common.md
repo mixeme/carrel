@@ -496,7 +496,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/settings/devices/profile` | GET | вход | файл | — |
 | `/app/settings/davloom` | GET, POST | вход | страница | `DavloomPage` |
 | `/app/settings/backup` | GET, POST | вход | страница | `BackupPage` |
-| `/app/settings/appearance` | GET, POST | вход | страница | `AppearancePage` |
+| `/app/settings/appearance` | GET, POST | вход | страница, редирект | `AppearancePage`; POST — форма страницы: Look в куку этого браузера, неделя и часы — в аккаунт; `?op=reset` — забыть столбцы разделов и Look |
 | `/app/settings/unlock` | GET, POST | вход | лист, редирект | `UnlockSheet`; без сценариев — страница (U-8): скрытое `back` — страница, над которой открыт лист (`?back=` или откуда пришли по ссылке, только `/app/` и `/admin/` этого адреса); POST с верным паролем — редирект туда (иначе Connections), с неверным — лист страницей с ошибкой у поля |
 | `/app/settings/lock` | POST | вход | редирект | — ; Lock now (`TopBar.Lock`, s-profile-4, s-plan-1…5): выдача учётных данных этого сеанса закрывается до срока, вход остаётся (S-10.7); ответ — страница, где нажали (`Referer` этого же адреса), иначе Connections |
 
@@ -725,6 +725,23 @@ type Shell struct {
     Notices []Notice // над содержимым, не поверх него
     Details *Details // панель подробностей; nil — панели на экране нет
     Print   Print
+    Look    Look     // вид, который помнит этот браузер (Appearance, appearance-1): страница печатается по нему
+}
+
+// Вид страниц в этом браузере — его кука `carrel_look`, не аккаунт (решение
+// владельца, записка Typecase 50; appearance-1): форма «Appearance» шлёт его
+// вместе с неделей и часами, сервер кладёт в куку и ставит в Shell каждой
+// страницы (и экрана под листом), когда её рисуют. Без куки — умолчания
+// кадра: Auto, Comfortable, панель открыта, столбец источника есть, заметки
+// — шириной чтения. Что из этого делать — клиента: тема документа,
+// плотность строк, держать ли панель, столбец источника в объединённом виде,
+// ширина заметки.
+type Look struct {
+    Theme   string // auto (как система), light, dark
+    Compact bool   // плотность Compact: строка списка 32 px вместо 38 (на телефоне всегда 52)
+    Panel   bool   // «Keep the details panel open»
+    Source  bool   // «Show the source column»
+    Wide    bool   // «Open notes in full width»
 }
 
 type TopBar struct {
@@ -2982,9 +2999,15 @@ type RestoreRow struct {
 
 type AppearancePage struct {
     Shell
-    Browser  Form // тема, плотность, колонки — живут в этом браузере
-    Account  Form // первый день недели, 12/24 — на сервере; Actions — Discard (GET, эта же страница) и Save, основная (Р-57, appearance-1)
-    Instance Form // часовой пояс — ставит администратор
+    // Одна форма кадра (appearance-1): Theme (theme: auto, light, dark —
+    // радио сегментом, подсказка — «Kept in this browser…»), Density
+    // (density: comfortable, compact), Lists (отметки panel, source, wide),
+    // Dates and times (weekStart, clock). Первые три — Look этого браузера
+    // (его кука), последняя — аккаунт. Actions — Discard (GET, эта же
+    // страница) и Save, основная (Р-57)
+    Form     Form
+    Reset    Action // «Reset remembered view settings» под Lists: POST ?op=reset — забыть выбор столбцов каждого раздела и Look этого браузера
+    Instance Form   // часовой пояс — ставит администратор
     Notes    []Text
 }
 

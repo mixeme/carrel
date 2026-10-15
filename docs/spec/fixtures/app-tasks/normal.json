@@ -532,6 +532,13 @@
       "rubric": "No due date"
     }
   ],
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "poll": null,
   "print": {

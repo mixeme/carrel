@@ -361,6 +361,13 @@
       }
     ]
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "note": "Changing the folder moves nothing. Records already written carry the old path and keep working; only new attachments go to the new place.",
   "notices": [],
   "print": {

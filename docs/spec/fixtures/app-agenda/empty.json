@@ -332,6 +332,13 @@
     "role": "info",
     "title": "No events this week"
   },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
   "notices": [],
   "poll": null,
   "print": {

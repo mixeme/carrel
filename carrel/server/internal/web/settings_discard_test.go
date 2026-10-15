@@ -25,7 +25,7 @@ func TestASettingsPageHasDiscardBesideSave(t *testing.T) {
 		}
 	}
 	appearance := decode[view.AppearancePage](t, f.h.do(get("/app/settings/appearance", f.sess)))
-	check("appearance", appearance.Account.Actions, "appearance.save", "appearance.discard", "/app/settings/appearance")
+	check("appearance", appearance.Form.Actions, "appearance.save", "appearance.discard", "/app/settings/appearance")
 	attachments := decode[view.AttachmentsPage](t, f.h.do(get("/app/settings/attachments", f.sess)))
 	check("attachments", attachments.Form.Actions, "attachments.save", "attachments.discard", "/app/settings/attachments")
 }
