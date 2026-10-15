@@ -647,7 +647,29 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 			_ = s.users.MarkLinkGone(link.ID)
 		}
 	}
+	guestRows(&page)
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// guestRows takes the owner's own marks off the rows a guest sees (Пс23;
+// s-publish-6 draws the caption empty): «linked ×2», «2 sources» and the
+// like are how the owner keeps their records, and tell the guest nothing
+// but about the owner.
+func guestRows(page *view.PublishedPage) {
+	for i := range page.Contacts {
+		page.Contacts[i].Badges = nil
+	}
+	for i := range page.Days {
+		for j := range page.Days[i].Rows {
+			page.Days[i].Rows[j].Badges = nil
+		}
+	}
+	for i := range page.Tasks {
+		page.Tasks[i].Badges = nil
+	}
+	for i := range page.Notes {
+		page.Notes[i].Badges = nil
+	}
 }
 
 // publicRecord fills the page with one record — its own fields, nothing that

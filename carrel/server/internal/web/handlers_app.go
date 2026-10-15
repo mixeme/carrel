@@ -37,7 +37,7 @@ func (s *Server) postPassword(w http.ResponseWriter, r *http.Request) {
 	mustChange := s.mustChangePassword(sess.AccountID())
 	start := time.Now()
 	if !s.limit.allowLogin(sess.Login(), s.clientIP(r), start) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		s.writePage(w, r, http.StatusTooManyRequests, s.passwordPage(sess, mustChange, errTooManyAttempts))
 		return
 	}
 	err := s.users.ChangePassword(r.Context(), sess.AccountID(), sess.ID(),
@@ -56,6 +56,13 @@ func (s *Server) postPassword(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/app/settings/account")
 }
 
+// tooManyAttempts is what a form that takes a password says past the
+// ceiling of attempts: the form again, the words at its field — not a bare
+// «too many requests» (Ад39).
+const tooManyAttempts = "Too many attempts just now. Wait a few minutes and try again."
+
+var errTooManyAttempts = errors.New(tooManyAttempts)
+
 func (s *Server) mustChangePassword(accountID string) bool {
 	snap := s.store.Snapshot()
 	u := snap.UserByID(accountID)
@@ -65,6 +72,8 @@ func (s *Server) mustChangePassword(accountID string) bool {
 func (s *Server) passwordPage(sess *session.Session, mustChange bool, err error) view.PasswordPage {
 	var currentErr, passErr, pass2Err view.Text
 	switch {
+	case errors.Is(err, errTooManyAttempts):
+		currentErr = text(tooManyAttempts)
 	case errors.Is(err, user.ErrWrongPassword):
 		currentErr = text("Password is wrong.")
 	case errors.Is(err, user.ErrPasswordShort):
@@ -249,7 +258,7 @@ func (s *Server) postSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 	back, backOK := s.returnPath(r, r.FormValue("back"))
 	start := time.Now()
 	if !s.limit.allowLogin(sess.Login(), s.clientIP(r), start) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		s.writePage(w, r, http.StatusTooManyRequests, s.unlockSheet(sess, text(tooManyAttempts), back))
 		return
 	}
 	if !s.users.Unlock(r.Context(), sess.AccountID(), r.FormValue("password")) {

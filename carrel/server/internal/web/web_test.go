@@ -605,12 +605,25 @@ func TestUnlockGuessesShareLoginBucket(t *testing.T) {
 	h := newHarness(t)
 	h.admin("alice", "password123")
 	sess := h.login("alice", "password123")
-	var last int
+	var last *httptest.ResponseRecorder
 	for i := 0; i <= conf.LoginRatePerAccount; i++ {
-		last = h.do(fragment(postForm("/app/settings/unlock", sess, url.Values{"password": {"guess"}}), "sheet")).Code
+		last = h.do(fragment(postForm("/app/settings/unlock", sess, url.Values{"password": {"guess"}}), "sheet"))
 	}
-	if last != http.StatusTooManyRequests {
-		t.Fatalf("guess %d: status = %d, want 429", conf.LoginRatePerAccount+1, last)
+	if last.Code != http.StatusTooManyRequests {
+		t.Fatalf("guess %d: status = %d, want 429", conf.LoginRatePerAccount+1, last.Code)
+	}
+	// The sheet again, the words at its field — not a bare «too many
+	// requests» (as Ад39).
+	if !strings.Contains(last.Body.String(), "Too many attempts just now") {
+		t.Errorf("past the ceiling: %s", last.Body.String())
+	}
+	// Sign-in says so too.
+	var in *httptest.ResponseRecorder
+	for i := 0; i <= conf.LoginRatePerAccount; i++ {
+		in = h.do(h.anonPostForm("/login", "/login", url.Values{"login": {"alice"}, "password": {"guess"}}))
+	}
+	if in.Code != http.StatusTooManyRequests || !strings.Contains(in.Body.String(), "Too many attempts just now") {
+		t.Errorf("sign-in past the ceiling: %d %s", in.Code, in.Body.String())
 	}
 }
 

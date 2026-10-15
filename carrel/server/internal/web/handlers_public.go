@@ -172,7 +172,8 @@ func (s *Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	ip := s.clientIP(r)
 	login := r.FormValue("login")
 	if !s.limit.allowLogin(login, ip, start) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		// Said on the page, not a bare 429 (as Ад39): the form again.
+		s.writePage(w, r, http.StatusTooManyRequests, s.loginPage(w, r, login, text(tooManyAttempts)))
 		return
 	}
 	password := r.FormValue("password")

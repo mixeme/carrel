@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -243,8 +244,15 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 		}
 		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
 	})
-	if len(entries) > s.cfg.FilesMaxEntries {
+	if n := len(entries); n > s.cfg.FilesMaxEntries {
+		// Said, not cut silently (Пс22): the same words as the owner's own
+		// folder (files.go), without the way out the guest does not have.
 		entries = entries[:s.cfg.FilesMaxEntries]
+		page.Notices = append(page.Notices, view.Notice{
+			Role:  view.NoticeInfo,
+			Title: text(fmt.Sprintf("Showing %d of %d", s.cfg.FilesMaxEntries, n)),
+			Body:  "This folder holds more than one page shows: the first ones by name are listed.",
+		})
 	}
 	now := time.Now()
 	for _, e := range entries {

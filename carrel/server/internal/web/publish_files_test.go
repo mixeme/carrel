@@ -63,6 +63,13 @@ func TestPublishedFolder(t *testing.T) {
 	if got := f.h.do(anon(file)); got.Code != http.StatusOK || got.Body.String() != "hello from share" || !strings.Contains(got.Header().Get("Content-Security-Policy"), "sandbox") {
 		t.Errorf("file: %d %q", got.Code, got.Body.String())
 	}
+	// A folder over the ceiling says so (Пс22), as the owner's own does.
+	f.h.cfg.FilesMaxEntries = 1
+	cut := publicPage(t, f, link)
+	f.h.cfg.FilesMaxEntries = 2000
+	if len(cut.Folder.Rows) != 1 || len(cut.Notices) != 1 || cut.Notices[0].Title != "Showing 1 of 2" {
+		t.Errorf("a folder cut at its ceiling: %d rows, notices %+v", len(cut.Folder.Rows), cut.Notices)
+	}
 	deeper := publicPage(t, f, sub)
 	if deeper.Folder == nil || len(deeper.Folder.Rows) != 1 || len(deeper.Folder.Crumbs) != 2 {
 		t.Errorf("sub folder = %+v", deeper.Folder)

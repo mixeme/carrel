@@ -27,7 +27,9 @@ func TestPublishedCalendarNamesNoServer(t *testing.T) {
 	for _, d := range page.Days {
 		for _, r := range d.Rows {
 			rows++
-			if r.Stamp != "" || len(r.Sources) != 0 || r.Href != "" || len(r.Menu) != 0 {
+			// Nor the owner's own marks — «linked ×2» (Пс23; s-publish-6
+			// draws the caption empty).
+			if r.Stamp != "" || len(r.Sources) != 0 || r.Href != "" || len(r.Menu) != 0 || len(r.Badges) != 0 {
 				t.Errorf("row leads back: %+v", r)
 			}
 		}

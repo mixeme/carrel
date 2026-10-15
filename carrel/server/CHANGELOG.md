@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.266 — 2026-10-15
+
+### Fixed
+
+- **A guest sees no marks of the owner's** (Пс23 of the scan of 15.10.2026;
+  `s-publish-6` draws the caption empty): «linked ×2», «2 sources» and the
+  like are taken off the rows of a published calendar, book, list and
+  notebook.
+- **A published folder cut at its ceiling says so** (Пс22): «Showing N of
+  M», as the owner's own folder does.
+- **Past the ceiling of attempts a form that takes a password answers the
+  form again, the words at its field** (Ад39): sign-in, the password's
+  sheet, the change of password, the deposit of the key and Recover in Key
+  escrow — «Too many attempts just now. Wait a few minutes and try again.»,
+  status 429 as before; before, a bare «too many requests». Registration and
+  the first setup still answer as before.
+
 ## v0.2.265 — 2026-10-15
 
 ### Changed

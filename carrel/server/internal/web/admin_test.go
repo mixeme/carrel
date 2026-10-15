@@ -3,7 +3,9 @@ package web_test
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 
 	"carrel.dev/carrel/server/internal/store"
@@ -382,4 +384,37 @@ func TestAdminInviteActionsNameTheInvite(t *testing.T) {
 		}
 	}
 	_ = adminID
+}
+
+// Ад39: Recover past the ceiling of attempts answers the page again, the
+// refusal at its field — not a bare «too many requests».
+func TestEscrowRecoverPastTheCeilingSaysSo(t *testing.T) {
+	h := newHarness(t)
+	const master = "sixteen-char-pass!"
+	h.enableEscrow("alice", "password123", master)
+	alice := h.login("alice", "password123")
+	snap := h.st.Snapshot()
+	h.invite(snap.UserByLogin("alice").ID, "bob", "bobpass123")
+	form := url.Values{"action": {"recover"}, "login": {"bob"}, "master": {"not-the-master-pass"}}
+	for i := 0; i < 60; i++ {
+		rec := h.do(postForm("/admin/escrow", alice, form))
+		if rec.Code != http.StatusTooManyRequests {
+			continue
+		}
+		var page view.AdminEscrowPage
+		if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
+			t.Fatalf("past the ceiling: %v\n%s", err, rec.Body.String())
+		}
+		said := false
+		for _, set := range page.Recover.Sets {
+			for _, r := range set.Rows {
+				said = said || strings.Contains(string(r.Error), "Too many attempts")
+			}
+		}
+		if !said {
+			t.Errorf("the refusal is not at the field: %+v", page.Recover)
+		}
+		return
+	}
+	t.Fatal("no ceiling reached")
 }

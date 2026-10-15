@@ -44,7 +44,7 @@ func (s *Server) postSettingsEscrow(w http.ResponseWriter, r *http.Request) {
 		if password := r.FormValue("password"); password != "" {
 			start := time.Now()
 			if !s.limit.allowLogin(sess.Login(), s.clientIP(r), start) {
-				http.Error(w, "too many requests", http.StatusTooManyRequests)
+				s.depositRefused(w, r, sess, tooManyAttempts)
 				return
 			}
 			if !s.users.Unlock(r.Context(), sess.AccountID(), password) {
@@ -266,7 +266,10 @@ func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
 	case "recover":
 		login := r.FormValue("login")
 		if !s.limit.allowLogin(login, s.clientIP(r), time.Now()) {
-			http.Error(w, "too many requests", http.StatusTooManyRequests)
+			// The page again with the refusal at the master password (Ад39),
+			// not a bare 429: nothing was recovered, and why.
+			flash.recoverErr = "Nothing was recovered. " + tooManyAttempts
+			s.writePage(w, r, http.StatusTooManyRequests, s.buildAdminEscrowPage(sess, flash))
 			return
 		}
 		temp, err := s.users.RecoverEscrow(ctx, sess.AccountID(), login, r.FormValue("master"), r.FormValue("temp"))
