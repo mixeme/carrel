@@ -1152,6 +1152,11 @@ type AgendaRow struct {
     // у события их нет или сервер не сказал
     Tags      []Tag
     Changed   Text
+    // Status и Priority — столбцы «Status» и «Priority», как у задач: статус
+    // события словом списка, приоритет числом (Р13 списка равенства родов;
+    // кадра нет); пусто — у события их нет
+    Status    Text
+    Priority  Text
     Menu      []MenuItem
     State     RecordState
     On        bool // строка записи, открытой в панели (?open=, is-on; s-agenda-1); у серии — каждое её вхождение
@@ -1224,6 +1229,7 @@ type NoteRow struct {
     Date      Text
     Tags      []Tag
     Changed   Text     // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
+    Status    Text     // столбец «Status», как у задач: статус заметки словом (Р13; кадра нет); пусто — нет
     Badges    []Badge  // «linked ×2» у связанной заметки — и в списке одной тетради, когда прочие члены группы лежат в других (s-notes-31)
     Sources   []Stamp  // источники связанной группы — подсказка столбца источника; Stamp такой строки в едином виде — их счёт, «2 sources» (s-notes-1)
     Menu      []MenuItem
@@ -1240,9 +1246,9 @@ type NoteRow struct {
 | Список, меню | Столбцы (`ColumnItem.ID`) и поля строки |
 |---|---|
 | контакты (components-21, -42) | `name` — `Name`, `phone` — `Phone`, `email` — `Email`, `org` — `Org`, `birthday` — `Birthday`, `tags` — `Tags`, `changed` — `Changed`, `source` — `Stamp` |
-| агенда (s-agenda-18) | `time` — `Time`, `title` — `Summary` (оба стоят всегда), `where` — `Location`, `attendees` — все `Badges` («Attendees and status», плашками; у события без них ячейка пуста), `source` — `Stamp`, `tags` — `Tags`, `changed` — `Changed` (`AgendaRow`) |
+| агенда (s-agenda-18) | `time` — `Time`, `title` — `Summary` (оба стоят всегда), `where` — `Location`, `attendees` — все `Badges` («Attendees and status», плашками; у события без них ячейка пуста), `source` — `Stamp`, `tags` — `Tags`, `changed` — `Changed`, `status` — `Status`, `priority` — `Priority` (`AgendaRow`; два последних — Р13, кадра нет) |
 | задачи (s-tasks-12, -13) | `title` — `Summary`, `tags` — `Tags`, `due` — `Due` (тревожным — только срок, `Overdue`), `complete` — `Percent` (`70%`), `source` — `Stamp`, `priority` — `Priority`, `status` — `Status`, `changed` — `Changed`; галка дела `Tick` стоит перед меткой в любом наборе |
-| заметки (s-notes-23, -24) | `title` — `Title`, `excerpt` — `Excerpt`, `tags` — `Tags`, `date` — `Date`, `source` — `Stamp`, `changed` — `Changed` |
+| заметки (s-notes-23, -24) | `title` — `Title`, `excerpt` — `Excerpt`, `tags` — `Tags`, `date` — `Date`, `source` — `Stamp`, `changed` — `Changed`, `status` — `Status` (Р13, кадра нет) |
 | файлы (s-files-20) | `name` — `Name`, `size` — `Size`, `type` — `Type`, `changed` — `Modified` (`FileRow`, C-6.7) |
 | хронология (s-contacts-25, -26) | `title` — `Title`, за ним всегда `Why` (в меню не входит), `date` — `When`, `kind` — `Kind`, `source` — `Stamp` (`TimelineRow`, C-6.5) |
 | пользователи (s-admin-21, -22) | `login` — `Login`, `role` — `Role`, `created` — `Created`, `last-login` — `LastLogin`, `dav` — `Accounts`, `sessions` — `Sessions`, `escrow` — `Escrowed`, `address` — `Address`; «⋯» в меню не входит (`AdminUserRow`, C-6.8) |

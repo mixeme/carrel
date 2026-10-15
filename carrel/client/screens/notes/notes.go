@@ -59,6 +59,9 @@ var (
 	cells          = map[string]w.Column{
 		"title": w.ColumnName, "excerpt": w.ColumnExcerpt, "tags": w.ColumnTags, "date": w.ColumnDate,
 		"source": w.ColumnSource, "changed": w.ColumnChanged,
+		// a note's status, the cell of the tasks' (Р13 of the server's
+		// kinds-parity list; no frame draws it)
+		"status": w.ColumnStatus,
 	}
 )
 
@@ -327,6 +330,8 @@ func columnRow(r view.NoteRow, shown []string) w.ColumnRow {
 			cell.Text = string(r.Stamp)
 		case w.ColumnChanged:
 			cell.Text = or(r.Changed)
+		case w.ColumnStatus:
+			cell.Text = or(r.Status)
 		}
 		c.Cells = append(c.Cells, cell)
 	}

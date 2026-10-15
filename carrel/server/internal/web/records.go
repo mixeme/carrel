@@ -1405,6 +1405,8 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 				Sources:  linkedSources(it.listed),
 				Tags:     rowTags,
 				Changed:  changed,
+				Status:   text(statusLabelOf(o)),
+				Priority: text(priorityText(o)),
 				Menu:     menu,
 			}}
 			if mark {
@@ -1722,6 +1724,24 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 
 // priorityOf is PRIORITY as a number to sort by; 0 — none — sorts last, so
 // it answers 10 (RFC 5545 §3.8.1.9: 1 is the highest, 9 the lowest).
+// statusLabelOf is a record's STATUS as its list names it, or nothing: the
+// cell of the Status column of an agenda and a notebook (Р13).
+func statusLabelOf(obj *model.Object) string {
+	if v := strings.TrimSpace(firstValue(obj, "STATUS")); v != "" {
+		return statusLabel(v)
+	}
+	return ""
+}
+
+// priorityText is PRIORITY as the Priority column writes it, its number,
+// or nothing when the record has none (Р13).
+func priorityText(obj *model.Object) string {
+	if p := priorityOf(obj); p <= 9 {
+		return strconv.Itoa(p)
+	}
+	return ""
+}
+
 func priorityOf(obj *model.Object) int {
 	n, err := strconv.Atoi(strings.TrimSpace(firstValue(obj, "PRIORITY")))
 	if err != nil || n < 1 || n > 9 {
@@ -1829,6 +1849,7 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		if changed := changedAt(o, tf.tz); !changed.IsZero() {
 			row.Changed = text(tf.shortStamp(changed))
 		}
+		row.Status = text(statusLabelOf(o))
 		rows = append(rows, item{row: row, at: at, changed: changedAt(o, tf.tz), order: it.from.listPath(segment)})
 	}
 	sort.SliceStable(rows, func(i, j int) bool {

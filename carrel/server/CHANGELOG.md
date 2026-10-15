@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.243 — 2026-10-15
+
+### Changed
+
+- **The agenda and the notes offer Status and Priority columns** (Р13 of
+  docs/plan/scans/kinds-parity.md), as a task's list does, now that an
+  event has both and a note a status: the agenda's Columns ends with
+  Status and Priority (`AgendaRow.status`, `.priority`), the notes' with
+  Status (`NoteRow.status`; a journal has no priority), off until chosen.
+  No frame draws them yet (Typecase's task 178).
+
 ## v0.2.242 — 2026-10-15
 
 ### Changed

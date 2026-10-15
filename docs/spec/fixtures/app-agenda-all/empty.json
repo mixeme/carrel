@@ -179,6 +179,18 @@
           "id": "changed",
           "label": "Changed",
           "on": false
+        },
+        {
+          "fixed": false,
+          "id": "status",
+          "label": "Status",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "priority",
+          "label": "Priority",
+          "on": false
         }
       ],
       "label": "Columns"

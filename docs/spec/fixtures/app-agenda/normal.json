@@ -120,6 +120,18 @@
           "id": "changed",
           "label": "Changed",
           "on": false
+        },
+        {
+          "fixed": false,
+          "id": "status",
+          "label": "Status",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "priority",
+          "label": "Priority",
+          "on": false
         }
       ],
       "label": "Columns"
@@ -396,9 +408,11 @@
             }
           ],
           "on": false,
+          "priority": "",
           "sources": [],
           "stamp": "",
           "state": "ok",
+          "status": "Confirmed",
           "summary": "Синк-ап по релизу",
           "tags": [
             {
@@ -494,9 +508,11 @@
             }
           ],
           "on": false,
+          "priority": "",
           "sources": [],
           "stamp": "",
           "state": "ok",
+          "status": "",
           "summary": "Забрать документы",
           "tags": [],
           "target": "details",

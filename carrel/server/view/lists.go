@@ -144,11 +144,16 @@ type AgendaRow struct {
 	// Tags и Changed — столбцы, которые добавляет меню Columns агенды
 	// (s-agenda-18): категории события и когда оно менялось («2 Aug»,
 	// C-10); пусто — у события их нет или сервер не сказал
-	Tags    []Tag       `json:"tags"`
-	Changed Text        `json:"changed"`
-	Menu    []MenuItem  `json:"menu"`
-	State   RecordState `json:"state"`
-	On      bool        `json:"on"` // строка открыта в панели подробностей (is-on, s-agenda-1)
+	Tags    []Tag `json:"tags"`
+	Changed Text  `json:"changed"`
+	// Status и Priority — столбцы «Status» и «Priority», как у задач:
+	// статус события словом списка, приоритет числом (Р13 списка равенства
+	// родов; кадра нет); пусто — у события их нет
+	Status   Text        `json:"status"`
+	Priority Text        `json:"priority"`
+	Menu     []MenuItem  `json:"menu"`
+	State    RecordState `json:"state"`
+	On       bool        `json:"on"` // строка открыта в панели подробностей (is-on, s-agenda-1)
 }
 
 type TasksPage struct {
@@ -228,16 +233,19 @@ type NoteRow struct {
 	Href string `json:"href"`
 	// Target — details: строка открывает запись в панели подробностей —
 	// фрагмент по адресу записи (C-5.4, C-7.2); пусто — строка без адреса
-	Target  string  `json:"target,omitempty"`
-	UID     string  `json:"uid"`
-	Colour  Colour  `json:"colour"`
-	Stamp   Stamp   `json:"stamp"`
-	Title   Text    `json:"title"`
-	Excerpt Text    `json:"excerpt"`
-	Date    Text    `json:"date"`
-	Tags    []Tag   `json:"tags"`
-	Changed Text    `json:"changed"` // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
-	Badges  []Badge `json:"badges"`  // «linked ×2» у связанной заметки
+	Target  string `json:"target,omitempty"`
+	UID     string `json:"uid"`
+	Colour  Colour `json:"colour"`
+	Stamp   Stamp  `json:"stamp"`
+	Title   Text   `json:"title"`
+	Excerpt Text   `json:"excerpt"`
+	Date    Text   `json:"date"`
+	Tags    []Tag  `json:"tags"`
+	Changed Text   `json:"changed"` // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
+	// Status — столбец «Status», как у задач: статус заметки словом списка
+	// (Р13 списка равенства родов; кадра нет); пусто — статуса нет
+	Status Text    `json:"status"`
+	Badges []Badge `json:"badges"` // «linked ×2» у связанной заметки
 	// Sources — источники связанной группы (подсказка столбца источника);
 	// Stamp такой строки в едином виде — их счёт, «2 sources» (s-notes-1)
 	Sources []Stamp     `json:"sources"`

@@ -82,7 +82,9 @@ func TestAgendaByItsFrame(t *testing.T) {
 		}
 		drawn = append(drawn, mark+string(it.Label))
 	}
-	if got := strings.Join(drawn, " "); got != "=Time =Title +Where +Attendees and status +Source -Tags -Changed" {
+	// Status and Priority after the frame's, off (Р13 of
+	// scans/kinds-parity.md; Typecase's task 178).
+	if got := strings.Join(drawn, " "); got != "=Time =Title +Where +Attendees and status +Source -Tags -Changed -Status -Priority" {
 		t.Errorf("the items of Columns = %q", got)
 	}
 	if len(page.Bar.Segments) != 0 {

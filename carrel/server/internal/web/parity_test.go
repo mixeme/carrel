@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -164,5 +165,40 @@ func TestAnEventHasAPriority(t *testing.T) {
 	got := strings.ReplaceAll(body(t, f, "e1.ics"), "\r\n", "\n")
 	if !strings.Contains(got, "\nPRIORITY:1\n") || !strings.Contains(got, "\nX-KEEP:1\n") {
 		t.Errorf("after Save:\n%s", got)
+	}
+}
+
+// Р13 of scans/kinds-parity.md: a task's list offers Status and Priority;
+// an agenda and a notebook offered neither, now that an event has both and
+// a note a status (Р4, Р7). Each list offers what its kind has, off until
+// chosen, and a row carries it.
+func TestStatusAndPriorityColumnsForEveryKind(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nDTEND:20260115T110000Z\nSUMMARY:Review\nSTATUS:TENTATIVE\nPRIORITY:1\nEND:VEVENT"),
+		"n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nSUMMARY:Plan\nSTATUS:FINAL\nEND:VJOURNAL"))
+	offers := func(cols *view.Columns, ids ...string) bool {
+		n := 0
+		for _, it := range cols.Items {
+			if slices.Contains(ids, it.ID) {
+				n++
+			}
+		}
+		return n == len(ids)
+	}
+	agenda := decode[view.AgendaPage](t, f.h.do(get(f.path("calendar")+"?from=2026-01-12", f.sess)))
+	var row *view.AgendaRow
+	for _, d := range agenda.Days {
+		for i := range d.Rows {
+			if d.Rows[i].UID == "e1" {
+				row = &d.Rows[i]
+			}
+		}
+	}
+	if agenda.Bar.Columns == nil || !offers(agenda.Bar.Columns, "status", "priority") || row == nil || row.Status != "Tentative" || row.Priority != "1" {
+		t.Errorf("agenda: columns %+v, row %+v", agenda.Bar.Columns, row)
+	}
+	notes := decode[view.NotesPage](t, f.h.do(get(f.path("notes"), f.sess)))
+	if notes.Bar.Columns == nil || !offers(notes.Bar.Columns, "status") || len(notes.Groups) == 0 || notes.Groups[0].Rows[0].Status != "Final" {
+		t.Errorf("notes: columns %+v, groups %+v", notes.Bar.Columns, notes.Groups)
 	}
 }
