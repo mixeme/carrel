@@ -33,6 +33,8 @@ var fragmentRoutes = []fragmentRoute{
 	{"", "/app/mail/attach", render.TargetSheet},
 	// C-5.4
 	{"", "/app/{kind}/{account}/{col}/{uid}/move", render.TargetSheet},
+	{"GET", "/app/{kind}/{account}/{col}/{uid}/copies", render.TargetSheet},
+	{"", "/app/tasks/{account}/{col}/{uid}/done", render.TargetSheet},
 	{"GET", "/app/contacts/{account}/{col}/{uid}/rewrite", render.TargetSheet},
 	{"GET", "/app/{kind}/export", render.TargetSheet},
 	{"", "/app/{kind}/{account}/{col}/new/quick", render.TargetSheet},

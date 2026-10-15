@@ -247,6 +247,7 @@ func (s *Server) linkedContact(ctx context.Context, c *collectionCtx, uid string
 	}
 	page.Fields = markDiffering(page.Fields, others)
 	page.Books = s.memberRows(lc, obj, differs(contactDiffers))
+	s.editViaCopies(c, uid, page.Actions)
 }
 
 // linkedCalendar is what a linked event, task or note opened from its

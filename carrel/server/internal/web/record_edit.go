@@ -3411,6 +3411,12 @@ func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string
 		return
 	}
 	uid := r.PathValue("uid")
+	// Edit this copy of «Which copy to edit?»: the form of the copy chosen
+	// (s-contacts-32).
+	if to := s.copyEditTo(r, c, uid); to != "" {
+		s.redirect(w, r, to)
+		return
+	}
 	obj, err := c.find(r.Context(), uid)
 	switch {
 	case notFoundErr(err):
@@ -3434,10 +3440,16 @@ func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string
 			vals, etag = typedOver(t, vals, etag)
 		}
 	}
-	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
+	st := editState{
 		obj: obj, uid: uid, values: vals, alarms: alarms, etag: etag, readAt: s.now(),
 		unfold: r.URL.Query().Get("fields") == "all",
-	}))
+	}
+	// The form of a linked record's copy chosen on the sheet says it saves
+	// this copy only (s-contacts-31).
+	if n := s.copyNotice(r, c, uid); n != nil {
+		st.notices = append(st.notices, *n)
+	}
+	s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 }
 
 // postKindEdit writes a patch with If-Match of the version the form was read
@@ -3674,39 +3686,11 @@ func (s *Server) closeSubtasks(ctx context.Context, c *collectionCtx, parent str
 				queue = append(queue, uid)
 				continue
 			}
-			title := text(titleOr(cal.Text(kid, "SUMMARY"), "Untitled task"))
-			have, alarms, err := s.currentValues(c, kid)
+			closed, err := s.markTaskDone(ctx, c, kid)
 			if err != nil {
-				left = append(left, title)
+				left = append(left, text(titleOr(cal.Text(kid, "SUMMARY"), "Untitled task")))
 				continue
 			}
-			want := formValues{}
-			for k, v := range have {
-				want[k] = append([]string(nil), v...)
-			}
-			want["done"] = []string{"on"}
-			ch := s.buildChange(c, kid, alarms, have, want, time.Now())
-			if len(ch.errors) > 0 {
-				left = append(left, title)
-				continue
-			}
-			if len(ch.ops) == 0 && !ch.alarmsChanged {
-				continue
-			}
-			etag := kid.ETag
-			sent, fault, err := s.applyChecked(c, kid, ch, have, want)
-			if err != nil || fault != nil {
-				left = append(left, title)
-				continue
-			}
-			sent.ETag = etag
-			if err := c.update(ctx, sent); err != nil {
-				left = append(left, title)
-				continue
-			}
-			closed := taskDone(sent)
-			sent.ETag = ""
-			c.noteWrite(sent.Path, sent)
 			if closed {
 				queue = append(queue, uid)
 			}

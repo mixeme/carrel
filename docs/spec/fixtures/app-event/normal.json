@@ -2,12 +2,13 @@
   "actions": [
     {
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit",
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/copies",
       "icon": "i-pencil",
       "id": "record.edit",
       "label": "Edit",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     },
     {
       "arrow": [

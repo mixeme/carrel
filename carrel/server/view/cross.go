@@ -208,6 +208,29 @@ type NewSheet struct {
 	Actions []Action `json:"actions"`
 }
 
+// CopiesSheet — лист «какую копию» у записи связанной группы (записка 57,
+// Р-58 Typecase): Edit записи из коллекции — «Which copy to edit?»
+// (s-contacts-32, один лист у всех родов) — и галка связанной задачи в
+// списке — «Which copy to mark done?» (s-tasks-16). Лист — форма Form с
+// одной строкой copy: у правки InputRadio (одна копия; GET на адрес правки
+// открытой, сервер ведёт на правку выбранной), у галки InputCheck (сколько
+// угодно; POST на …/{uid}/done). Варианты — копии: метка коллекции
+// (Colour), «nextcloud · Архив» (Label), чем копия разнится (Meta: «the
+// copy you opened», «Priority differ»); копия только для чтения — Disabled
+// с Reason. Отмечена открытая копия.
+type CopiesSheet struct {
+	Kind    Kind `json:"kind"`
+	Title   Text `json:"title"`   // «Which copy to edit?», «Which copy to mark done?»
+	Subject Text `json:"subject"` // что и сколько копий: «Вера Лебедева · 3 copies»
+	// Note — строка под шапкой: «This person stands in three books. Saving
+	// changes one copy only; the others stay as they are.» (s-contacts-32),
+	// «This task stands in two lists. Tick the copy that is done; a copy that
+	// is not ticked stays as it is.» (s-tasks-16)
+	Note    Text     `json:"note"`
+	Form    Form     `json:"form"`
+	Actions []Action `json:"actions"` // главная — кнопка формы (Submits): «Edit this copy», «Mark done»; Cancel — назад
+}
+
 type MoveSheet struct {
 	Kind    Kind         `json:"kind"`
 	Copy    bool         `json:"copy"`

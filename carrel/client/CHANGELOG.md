@@ -4,6 +4,12 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.39 — 2026-10-15
+
+Server `v0.2.247`. `CopiesSheet` — «Which copy to edit?» and «Which copy
+to mark done?» — is a sheet to the zones (`zone.KindOf`); no screen draws it
+yet, so it answers JSON, as Move does.
+
 ## v0.4.38 — 2026-10-15
 
 Server `v0.2.246`. A chosen Attendees is drawn in the tasks' and the notes'

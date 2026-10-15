@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.247 — 2026-10-15
+
+### Added
+
+- **Which copy of a linked record** (from-typecase note 57, Typecase's
+  Р-58): Edit of a linked record's page opens «Which copy to edit?»
+  (`s-contacts-32`, `GET …/{uid}/copies`), its radios the copies — what each
+  holds otherwise and what it holds of it, a read-only copy off with its
+  reason —, and Edit this copy opens the form of the copy chosen, which
+  says before its fields that it saves that copy only (`s-contacts-31`).
+  The tick of a linked task in the combined list posts to
+  `…/{uid}/done` and is answered by «Which copy to mark done?»
+  (`s-tasks-16`): the copies as boxes, the opened one ticked; Mark done
+  marks the ticked ones as Mark done does, subtasks with them. One view
+  model, `CopiesSheet`. The client draws no sheet yet, so these answer JSON
+  there, as Move does. Questions to the frames — Typecase's task 182.
+
 ## v0.2.246 — 2026-10-15
 
 ### Changed

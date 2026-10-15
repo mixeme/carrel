@@ -408,6 +408,8 @@ spec/fixtures/<screen>/<state>.json
 | `/c/{account}/{col}/{uid}/photo` | GET | вход | поток | — |
 | `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage`; POST: `op=combine` («Write this combination», форма `ConflictPage.Form` с `choice.<n>=mine` или `theirs` на строку — `ConflictRow.Name`; строка без поля — выбранное заранее, `ConflictRow.Choice`), `op=mine`, `op=theirs`, `op=cancel`; у всех, кроме `cancel`, `etag=` — версия, против которой показан выбор: сервер ушёл дальше — страница строится заново |
 | `/app/{kind}/{account}/{col}/{uid}/move` | GET, POST | вход | лист | `MoveSheet` |
+| `/app/{kind}/{account}/{col}/{uid}/copies` | GET | вход | лист, редирект | `CopiesSheet` «Which copy to edit?» (s-contacts-32): Edit записи связанной группы; у записи без группы — редирект на `…/edit`. Форма листа — GET `…/edit?copy=…`: редирект на форму выбранной копии |
+| `/app/tasks/{account}/{col}/{uid}/done` | GET, POST | вход | лист, редирект | `CopiesSheet` «Which copy to mark done?» (s-tasks-16). POST без `copy` у связанной задачи — лист, у прочей — отметка; с `copy` (сколько угодно) — каждая названная копия отмечена, как Mark done, и редирект туда, откуда пришли (`from`: `all`, `list`, иначе карточка) |
 | `/app/contacts/{account}/{col}/{uid}/rewrite` | GET, POST | вход | лист (GET); страница, редирект (POST) | `RewriteSheet`; `?plan=` — план, выданный сохранением карточки (S-15.4). POST переписывает и отвечает карточкой (`ContactPage`) с итогом (s-contacts-16); с `op=leave` — редирект на карточку, ничего не переписав; без живого плана GET и POST — редирект на карточку |
 | `/app/{kind}/{account}/{col}/{uid}/delete` | POST | вход | редирект | — |
 | `/app/{kind}/import` | GET | вход | страница | `ImportPage` — вход из сведённого вида: мастер спрашивает «Into» |
@@ -1197,7 +1199,7 @@ type TaskRow struct {
     Attendees Text     // столбец «Attendees»: сколько людей у задачи, организатор среди них, как плашка агенды — «2 attendees» (вслед за Р3; кадра нет); пусто — людей нет
     Badges    []Badge  // «linked ×2» у связанной задачи — и в списке одной коллекции, когда прочие члены группы лежат в других (s-tasks-15)
     Sources   []Stamp  // источники связанной группы — подсказка столбца источника; Stamp такой строки в едином виде — их счёт, «2 sources» (s-tasks-1)
-    Tick      *Action  // отметка выполнения в строке (task.done); nil — только чтение
+    Tick      *Action  // отметка выполнения в строке (task.done); у связанной строки объединённого списка — POST на `…/{uid}/done` без копий, ответ — лист `CopiesSheet` (s-tasks-16); nil — только чтение
     Menu      []MenuItem
     State     RecordState
     On        bool     // строка открыта в панели подробностей (?open=, is-on; s-tasks-1)
@@ -1813,6 +1815,36 @@ type NewSheet struct {
     Form    Form
     Note    Text // строка под полями: «No time means the whole day…» у задачи (s-notes-10), у контакта и события — s-notes-8, s-notes-9; пусто, когда полей нет
     Actions []Action
+}
+
+// Лист «какую копию» у записи связанной группы (записка 57, Р-58 Typecase):
+// Edit записи из коллекции — «Which copy to edit?» (s-contacts-32, один лист
+// у всех родов; у записи без группы Edit ведёт сразу в форму) — и галка
+// связанной задачи в объединённом списке — «Which copy to mark done?»
+// (s-tasks-16; строка одна на все копии). Form — одна строка `copy`: у правки
+// InputRadio, форма GET на `…/{uid}/edit` — сервер ведёт на форму выбранной
+// копии с тем же `copy`, и форма, открытая с листа, говорит до полей «Saving
+// changes this copy only — nextcloud · Архив. The others stay as they are.»
+// (Notice info, s-contacts-31); у галки InputCheck, форма POST на
+// `…/{uid}/done` со скрытыми `_csrf` и `from`. Варианты — копии: Value —
+// «подключение/коллекция» сегментами адреса, Label — «nextcloud · Архив»,
+// Colour — метка коллекции, Meta — чем другая копия разнится и, после «·»,
+// что она держит первого из этого («Email differ · v.lebedeva@example.org»;
+// у задачи «Due differ · due 13 Aug»), у открытой (она отмечена) — что она
+// держит того же, у правки после «the copy you opened» («the copy you
+// opened · vera@arhiv.example»); копия только для чтения — Disabled с
+// Reason «read-only: it cannot be edited» («… marked done»): клиент ставит
+// его после Meta, как «Phone differ · read-only: …» кадра. Note — «This person stands in three books. Saving changes one copy
+// only; the others stay as they are.» (у события — calendars, у задачи —
+// lists, у заметки — notebooks), у галки — «This task stands in two lists.
+// Tick the copy that is done; a copy that is not ticked stays as it is.»
+type CopiesSheet struct {
+    Kind    Kind
+    Title   Text     // «Which copy to edit?», «Which copy to mark done?»
+    Subject Text     // «Вера Лебедева · 3 copies»
+    Note    Text
+    Form    Form
+    Actions []Action // главная — кнопка формы (Submits): «Edit this copy», «Mark done»; Cancel — назад
 }
 
 // Лист переноса и копии записи (s-contacts-2): Title — «Move contact»,

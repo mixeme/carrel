@@ -190,6 +190,7 @@ func (s *Server) withLinked(ctx context.Context, c *collectionCtx, uid string, o
 		fields, _, rows, apart, ok := s.linkedCalendar(ctx, c, uid, obj)
 		if ok {
 			p.Fields, p.Linked = fields(p.Fields), rows
+			s.editViaCopies(c, uid, p.Actions)
 		}
 		p.Shell.Notices = withNotice(p.Shell.Notices, apart)
 		return p
@@ -197,6 +198,7 @@ func (s *Server) withLinked(ctx context.Context, c *collectionCtx, uid string, o
 		fields, _, rows, apart, ok := s.linkedCalendar(ctx, c, uid, obj)
 		if ok {
 			p.Fields, p.Linked = fields(p.Fields), rows
+			s.editViaCopies(c, uid, p.Actions)
 		}
 		p.Shell.Notices = withNotice(p.Shell.Notices, apart)
 		return p
@@ -205,6 +207,7 @@ func (s *Server) withLinked(ctx context.Context, c *collectionCtx, uid string, o
 		p.Shell.Notices = withNotice(p.Shell.Notices, apart)
 		if ok {
 			p.Meta.Linked = rows
+			s.editViaCopies(c, uid, p.Doc.Bar)
 			if tags(p.Meta.Tags) {
 				badge := linkedMark
 				p.Meta.TagsBadge = &badge

@@ -1664,6 +1664,11 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 				from = "all"
 			}
 			tick := s.doneAction(it.from.recordPath(segment, uid)+"/edit", o.ETag, isDone, from)
+			if len(it.also) > 0 && !isDone {
+				// One row for every copy: its tick asks which copy is done
+				// (s-tasks-16).
+				tick = s.linkedTick(it.from, segment, uid)
+			}
 			row.Tick = &tick
 		}
 		if !due.Start.IsZero() {

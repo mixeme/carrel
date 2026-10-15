@@ -72,6 +72,8 @@ func (s *Server) registerRoutes() {
 		s.handle("GET /app/"+kind+"/{account}/{col}/{uid}/related", relatedSuggestHandler(kind))
 	}
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/timeline", (*Server).getContactTimeline)
+	s.handle("GET /app/tasks/{account}/{col}/{uid}/done", (*Server).getTaskDone)
+	s.handle("POST /app/tasks/{account}/{col}/{uid}/done", (*Server).postTaskDone)
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/rewrite", (*Server).getContactRewrite)
 	s.handle("POST /app/contacts/{account}/{col}/{uid}/rewrite", (*Server).postContactRewrite)
 	s.handle("GET /app/contacts/{account}/{col}/new/photo-preview", (*Server).getNewPhotoPreview)
@@ -161,6 +163,7 @@ func registerKindRoutes(s *Server, kind string) {
 	s.handle("GET /app/"+kind+"/{account}/{col}/{uid}/conflict", kindConflictGetHandler(kind))
 	s.handle("POST /app/"+kind+"/{account}/{col}/{uid}/conflict", kindConflictPostHandler(kind))
 	s.handle("GET /app/"+kind+"/{account}/{col}/{uid}/move", kindMoveGetHandler(kind))
+	s.handle("GET /app/"+kind+"/{account}/{col}/{uid}/copies", kindCopiesHandler(kind))
 	s.handle("POST /app/"+kind+"/{account}/{col}/{uid}/move", kindMovePostHandler(kind))
 	s.handle("POST /app/"+kind+"/{account}/{col}/{uid}/delete", kindDeleteHandler(kind))
 	s.handle("GET /app/"+kind+"/import", kindImportEntryHandler(kind))
@@ -220,6 +223,12 @@ func kindConflictGetHandler(kind string) handler {
 func kindConflictPostHandler(kind string) handler {
 	return func(s *Server, w http.ResponseWriter, r *http.Request) {
 		s.postKindConflict(w, r, kind)
+	}
+}
+
+func kindCopiesHandler(kind string) handler {
+	return func(s *Server, w http.ResponseWriter, r *http.Request) {
+		s.getKindCopies(w, r, kind)
 	}
 }
 
