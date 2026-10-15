@@ -68,14 +68,17 @@ const (
 	existingCopies  = "copies"
 )
 
-// existingChoice reads the answer of an address: a word that is none of the
-// three is no answer.
+// existingChoice reads the answer of an address — the frames' words
+// (s-io-5…-8: existing=skip|replace|copy; Им7), «copies» as before: a word
+// that is none of them is no answer.
 func existingChoice(v string) (string, bool) {
 	switch v {
 	case "skip":
 		return existingSkip, true
-	case existingReplace, existingCopies:
+	case existingReplace:
 		return v, true
+	case "copy", existingCopies:
+		return existingCopies, true
 	}
 	return "", false
 }
@@ -108,14 +111,14 @@ func (s *Server) importExisting(c *collectionCtx, st importState) *view.ImportEx
 	options := []struct{ id, word, label, hint string }{
 		{"skip", existingSkip, "Skip them", "They stay as they are here; the file's version is not written."},
 		{"replace", existingReplace, "Replace them", "The ones here are overwritten with the file's version."},
-		{"copies", existingCopies, "Import as copies", "Each gets a new UID and stands beside the one here."},
+		{"copy", existingCopies, "Import as copies", "Each gets a new UID and stands beside the one here."},
 	}
 	if n == 1 {
 		out.Note = text(fmt.Sprintf("1 %s of this file is already in %s", noun, collectionLabel(st.dest.col)))
 		options = []struct{ id, word, label, hint string }{
 			{"skip", existingSkip, "Skip it", "It stays as it is here; the file's version is not written."},
 			{"replace", existingReplace, "Replace it", "The one here is overwritten with the file's version."},
-			{"copies", existingCopies, "Import as a copy", "It gets a new UID and stands beside the one here."},
+			{"copy", existingCopies, "Import as a copy", "It gets a new UID and stands beside the one here."},
 		}
 	}
 	for _, o := range options {
@@ -152,6 +155,36 @@ type importSkip struct {
 	Where  string // the section it belongs in; empty when Carrel keeps no such record
 	Reason string
 	Failed bool // could not be read at all: counted «with errors», not «skipped»
+}
+
+// named is how a line of the report begins (Им16; s-io-9, -14): the
+// record's title; a record without one — «— (no SUMMARY)», «— (no FN)»; a
+// file of a set — its name.
+func (sk importSkip) named() string {
+	switch {
+	case sk.Title != "":
+		return sk.Title
+	case sk.What == "VCARD":
+		return "— (no FN)"
+	case strings.HasPrefix(sk.What, "V"):
+		return "— (no SUMMARY)"
+	}
+	return sk.What
+}
+
+// line is a record left out as the report names it (Им15; s-io-14): «Купить
+// билеты · VTODO: a calendar takes events — import it into a list of
+// tasks»; a file of a set — «skan.pdf: not Markdown».
+func (sk importSkip) line() string {
+	what := sk.What
+	if sk.Title != "" {
+		what = sk.Title + " · " + sk.What
+	}
+	out := what + ": " + lowerFirst(strings.TrimSuffix(sk.Reason, "."))
+	if sk.Where != "" {
+		out += " — import it into " + sk.Where
+	}
+	return out
 }
 
 func loadImportDraft(c *collectionCtx) (*importDraft, bool) {
@@ -1267,9 +1300,10 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 	for _, sk := range skipped {
 		if sk.Failed {
 			report.Failed++
-			report.Failures = append(report.Failures, text(sk.What+": "+sk.Reason))
+			report.Failures = append(report.Failures, text(sk.named()+": "+sk.Reason))
 		} else {
 			report.Skipped++
+			report.Skips = append(report.Skips, text(sk.line()))
 		}
 	}
 	written := view.ImportTable{Rubric: text("Created in " + collectionLabel(dest.col)), Columns: importColumns(c.spec.kind)}

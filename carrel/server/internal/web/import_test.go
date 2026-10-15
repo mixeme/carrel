@@ -294,6 +294,10 @@ func TestImportNamesWhatItDoesNotWrite(t *testing.T) {
 	if page.Report.Created != 1 || page.Report.Skipped != 1 {
 		t.Fatalf("report = %+v", page.Report)
 	}
+	// Им15 (s-io-14): the report names what it left out, title first.
+	if sk := page.Report.Skips; len(sk) != 1 || sk[0] != "Купить уголь · VTODO: a calendar takes events — import it into a list of tasks" {
+		t.Errorf("skips = %q", sk)
+	}
 	if paths := f.srv.Paths(davtest.CalendarHome + "work/"); len(paths) != 1 {
 		t.Fatalf("the calendar holds %v", paths)
 	}

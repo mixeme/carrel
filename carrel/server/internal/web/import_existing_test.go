@@ -31,7 +31,7 @@ func asCopies(t *testing.T, f davFixture, page view.ImportPage) view.ImportPage 
 	if page.Existing == nil {
 		return page
 	}
-	return decode[view.ImportPage](t, f.h.do(get(existingOption(t, page, "import.existing.copies").Href, f.sess)))
+	return decode[view.ImportPage](t, f.h.do(get(existingOption(t, page, "import.existing.copy").Href, f.sess)))
 }
 
 // А7 of the audit of 11.10.2026 (the owner's decision of 12.10.2026): a file
@@ -54,7 +54,7 @@ func TestImportAsksAboutRecordsAlreadyThere(t *testing.T) {
 		t.Errorf("the question = %q, %q", page.Existing.Note, page.Existing.Hint)
 	}
 	skip := existingOption(t, page, "import.existing.skip")
-	if !skip.On || skip.Method != "GET" || existingOption(t, page, "import.existing.replace").On || existingOption(t, page, "import.existing.copies").On {
+	if !skip.On || skip.Method != "GET" || existingOption(t, page, "import.existing.replace").On || existingOption(t, page, "import.existing.copy").On {
 		t.Errorf("options = %+v, want Skip chosen", page.Existing.Options)
 	}
 	if row := previewRow(t, page.Preview, "Ада"); !strings.Contains(string(row[3]), "Already here") {
@@ -107,7 +107,7 @@ func TestImportAsksAboutRecordsAlreadyThere(t *testing.T) {
 
 	// Copies: as an import always did.
 	f, page = preview(t)
-	page = decode[view.ImportPage](t, f.h.do(get(existingOption(t, page, "import.existing.copies").Href, f.sess)))
+	page = decode[view.ImportPage](t, f.h.do(get(existingOption(t, page, "import.existing.copy").Href, f.sess)))
 	if row := previewRow(t, page.Preview, "Ада"); row[3] != "New UID will be assigned" {
 		t.Errorf("Ada, as a copy = %q", row[3])
 	}

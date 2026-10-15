@@ -414,7 +414,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/contacts/{account}/{col}/{uid}/rewrite` | GET, POST | вход | лист (GET); страница, редирект (POST) | `RewriteSheet`; `?plan=` — план, выданный сохранением карточки (S-15.4). POST переписывает и отвечает карточкой (`ContactPage`) с итогом (s-contacts-16); с `op=leave` — редирект на карточку, ничего не переписав; без живого плана GET и POST — редирект на карточку |
 | `/app/{kind}/{account}/{col}/{uid}/delete` | POST | вход | редирект | — |
 | `/app/{kind}/import` | GET | вход | страница | `ImportPage` — вход из сведённого вида: мастер спрашивает «Into» |
-| `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage`; `to=` и `into=` — подключение и коллекция «Into» (адрес варианта `TargetOption.Href`); POST без `op` — файл: multipart, поле `file` (`Action.File` у Preview file); у заметок полей `file` может быть несколько — один набор, как zip (s-io-1), у прочих родов несколько — отказ; `op=run` — записать предпросмотр, `op=cancel` — бросить файл; у заметок `folder=` (подключение), `path=` (хранилище) и `in=` (папка внутри него, сегменты через «/») — папка дерева (`FileTreeNode.Href`, GET), `op=folder` с ними — «Preview folder» |
+| `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage`; `to=` и `into=` — подключение и коллекция «Into» (адрес варианта `TargetOption.Href`); POST без `op` — файл: multipart, поле `file` (`Action.File` у Preview file); у заметок полей `file` может быть несколько — один набор, как zip (s-io-1), у прочих родов несколько — отказ; `op=run` — записать предпросмотр, `op=cancel` — бросить файл; `existing=` (`skip`, `replace`, `copy`) — что делать с записями файла, которые уже есть в коллекции (`ImportExisting`, s-io-5…-8); у заметок `folder=` (подключение), `path=` (хранилище) и `in=` (папка внутри него, сегменты через «/») — папка дерева (`FileTreeNode.Href`, GET), `op=folder` с ними — «Preview folder» |
 | `/app/{kind}/export` | GET | вход | лист | `ExportSheet` — вход из сведённого вида: из какой коллекции |
 | `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — ; с `?uid=` — одна запись (S-19); когда в файл не попали бы записи, которых Carrel не разобрал, — экран коллекции с уведомлением и действием `collection.export.without` («Export without them», тот же адрес с `&without=1`) |
 | `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage`; у контакта `?uid=` — форма с выбранной фотографией (`…/new/photo-preview`): её кадр в `Photo`, скрытое поле `uid`, Save создаёт карточку под этим UID с фотографией; UID, чьего кадра сеанс не держит, не берётся, а форма с таким `uid` не сохраняется молча без фотографии. У события, задачи и заметки — вложения до записи (s-agenda-15, S-20): POST с `?op=` — `attach` (multipart: вся форма и файл `file`, кнопка Attach шлёт саму форму — `Action.Submits`), `pickfile` (форма; редирект в дерево Files `?for=attach&new=`), `attachfile&file=` (файл Files), `detach&n=` (форма); первый шаг выдаёт UID записи, файлы ждут под ним с набранным, ответ — `/new?uid=` (форма как набрана, файлы в `Attach`, скрытое `uid`). До Save ничего не пишется: внутрь записи — до порога вместе, больший файл с этого компьютера не берётся (запись сначала сохраняют), больший файл Files — ссылка; Save создаёт запись под этим UID с файлами |
@@ -2142,8 +2142,9 @@ type ImportSource struct {
 // s-io-5…8): вопрос стоит у поля Into. Note — подпись поля, сам вопрос: «5
 // records of this file are already in Контакты» (у одной — «1 note of this
 // file is already in Записи»); Options — три ссылки на этот же
-// предпросмотр (GET, existing=skip|replace|copies): import.existing.skip
-// «Skip them» — без ответа выбрана она, .replace «Replace them», .copies
+// предпросмотр (GET, existing=skip|replace|copy — слова кадров; прежнее
+// copies тоже понимается): import.existing.skip
+// «Skip them» — без ответа выбрана она, .replace «Replace them», .copy
 // «Import as copies» («Skip it», «Replace it», «Import as a copy»);
 // выбранная — On. Hint — подсказка о выбранном: «They stay as they are
 // here; the file's version is not written.» / «The ones here are
@@ -2168,6 +2169,7 @@ type ImportReport struct {
     Here     int
     Heres    []Text
     Skipped  int
+    Skips    []Text // какие пропущены и почему, строка на запись: «Купить билеты · VTODO: a calendar takes events — import it into a list of tasks» (s-io-14)
     Renamed  int
     Replaced int
     Replaces []Text

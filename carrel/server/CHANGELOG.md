@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.264 — 2026-10-15
+
+### Changed
+
+- **The import report names what it left out and what failed as the
+  frames do** (Им15, Им16 of the scan of 15.10.2026; `s-io-9`, `-14`): a line
+  for each record skipped, «Купить билеты · VTODO: a calendar takes events —
+  import it into a list of tasks» (`ImportReport.Skips`); a failure begins
+  with the record's title, or «— (no FN)», «— (no SUMMARY)» without one, not
+  with «VCARD».
+- **The answer about records already here is `existing=copy`**, the frames'
+  word (Им7); `copies` is still understood. C-5 names `existing=`.
+
 ## v0.2.263 — 2026-10-15
 
 ### Fixed

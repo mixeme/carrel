@@ -549,6 +549,10 @@ type ImportReport struct {
 	Here    int    `json:"here"`
 	Heres   []Text `json:"heres"`
 	Skipped int    `json:"skipped"`
+	// Skips — какие пропущены и почему, строка на запись (s-io-14): «Купить
+	// билеты · VTODO: a calendar takes events — import it into a list of
+	// tasks»
+	Skips   []Text `json:"skips"`
 	Renamed int    `json:"renamed"`
 	// Replaced — записи коллекции, заменённые версией файла (выбор
 	// ImportExisting «Replace them…»); в Created не входят

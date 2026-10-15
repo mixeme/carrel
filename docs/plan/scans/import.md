@@ -100,7 +100,7 @@ errors · already here · skipped» в порядке кадров, «Import 117
 сообщение шага каждого рода, причина «Nothing to import: …» — **совпадают**
 (`import.go:96-139`, `:509-543`, `:441-470`). Расходится:
 
-- **Им7. Слово ответа в адресе.** Кадры `s-io-5` … `-8`:
+- **Им7. Слово ответа в адресе.** (**закрыто сервером `v0.2.264`**: `copy`, прежнее `copies` понимается; строка C-5) Кадры `s-io-5` … `-8`:
   `?existing=skip|replace|copy`; сервер читает `copies`
   (`import.go:68`, `:73-82`) — адрес кадра «copy» сервер не поймёт (клиент
   ходит по `Href` сервера, так что вред — у набранного руками адреса). И
@@ -158,13 +158,13 @@ errors · already here · skipped» в порядке кадров, «Import 117
 as copies» (`Renames`), «Failed N», подзаголовок «nextcloud · Контакты»,
 одна кнопка «Back to list» — есть в модели.
 
-- **Им15. Строки пропущенного** (`s-io-14`, карточка «Skipped 6»: «Купить
+- **Им15. Строки пропущенного** (**закрыто `v0.2.264`**: `ImportReport.Skips`) (`s-io-14`, карточка «Skipped 6»: «Купить
   билеты · VTODO: a calendar takes events — import it into a list of
   tasks»). Модель: `ImportReport.Skipped` — только число; строки — лишь в
   таблице `Rows` «Skipped» со столбцами What / Why / Where, и What там —
   «VTODO · Купить билеты», наоборот (`skippedTable`, `import.go:1108`).
   Нужно: строки, как `Failures` (`Skips []Text`), словами кадра.
-- **Им16. Строки отказа.** Кадры: «line 12: cannot decode quoted-printable»
+- **Им16. Строки отказа.** (**закрыто `v0.2.264`**: название записи, без него — «— (no FN)», «— (no SUMMARY)»; одна ли фраза на отказ — В7) Кадры: «line 12: cannot decode quoted-printable»
   (`s-io-9`), «— (no SUMMARY): DTSTART without DTEND or DURATION»
   (`s-io-14`) — название записи или заглушка, затем причина. Модель:
   `sk.What + ": " + sk.Reason` (`import.go:1242`) — у карточки «VCARD: …»,
