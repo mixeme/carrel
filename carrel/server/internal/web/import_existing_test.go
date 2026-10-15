@@ -48,8 +48,10 @@ func TestImportAsksAboutRecordsAlreadyThere(t *testing.T) {
 
 	// Without an answer: skipped.
 	f, page := preview(t)
-	if !strings.Contains(string(page.Existing.Note), "1 of 2") {
-		t.Errorf("the question = %q, want it to count 1 of 2", page.Existing.Note)
+	// The question is the label of Into (from-typecase note 52, s-io-5).
+	if page.Existing.Note != "1 record of this file is already in People" ||
+		page.Existing.Hint != "It stays as it is here; the file's version is not written." {
+		t.Errorf("the question = %q, %q", page.Existing.Note, page.Existing.Hint)
 	}
 	skip := existingOption(t, page, "import.existing.skip")
 	if !skip.On || skip.Method != "GET" || existingOption(t, page, "import.existing.replace").On || existingOption(t, page, "import.existing.copies").On {
@@ -63,7 +65,10 @@ func TestImportAsksAboutRecordsAlreadyThere(t *testing.T) {
 		t.Errorf("the button = %+v, want it to count what it writes", run)
 	}
 	report := decode[view.ImportPage](t, f.h.do(postForm(run.Href, f.sess, url.Values{}))).Report
-	if report == nil || report.Created != 1 || report.Renamed != 0 || report.Skipped != 1 || report.Replaced != 0 {
+	// «Already here, skipped» is a card of its own (s-io-9), not among
+	// what the file held of another kind.
+	if report == nil || report.Created != 1 || report.Renamed != 0 || report.Here != 1 || report.Skipped != 0 || report.Replaced != 0 ||
+		len(report.Heres) != 1 || !strings.HasSuffix(string(report.Heres[0]), " · ada") {
 		t.Fatalf("report = %+v", report)
 	}
 	if paths := f.srv.Paths(peopleBook); len(paths) != 2 {
@@ -87,7 +92,7 @@ func TestImportAsksAboutRecordsAlreadyThere(t *testing.T) {
 		t.Errorf("the button = %q", run.Label)
 	}
 	report = decode[view.ImportPage](t, f.h.do(postForm(run.Href, f.sess, url.Values{}))).Report
-	if report == nil || report.Created != 1 || report.Replaced != 1 || report.Renamed != 0 || report.Skipped != 0 {
+	if report == nil || report.Created != 1 || report.Replaced != 1 || report.Renamed != 0 || report.Skipped != 0 || len(report.Replaces) != 1 || !strings.HasSuffix(string(report.Replaces[0]), " · ada") {
 		t.Fatalf("report = %+v", report)
 	}
 	if strings.Contains(string(report.Note), "Nothing there was overwritten") || !strings.Contains(string(report.Note), "replaced") {

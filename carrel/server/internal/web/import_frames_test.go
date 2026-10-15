@@ -70,7 +70,7 @@ func TestImportWizardByFrames(t *testing.T) {
 	if got := saidRuns(page.Subtitle); got != "⟨mono:Разное (mix).vcf⟩ · "+strconv.Itoa(len(importedCards))+" B · vCard 3.0" {
 		t.Errorf("preview subtitle = %q", got)
 	}
-	if got := importCounts(page); got != "2 ready, 1 UID collision" {
+	if got := importCounts(page); got != "2 ready, 1 already here" {
 		t.Errorf("counts = %q", got)
 	}
 

@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.252 — 2026-10-15
+
+### Changed
+
+- **The import's question about records already here, as the frames ask
+  it** (from-typecase note 52, `s-io-5`…`-9`, `-14`): the question is the
+  label of Into — «5 records of this file are already in Контакты» —, the
+  answers «Skip them» · «Replace them» · «Import as copies» («… it», «…
+  a copy» for one) with a hint under them (`ImportExisting.hint`); «ready»
+  counts what the press writes and «already here» replaces «UID
+  collisions»; nothing to write says «Nothing to import: every record is
+  already here.»; the step's message no longer says «Import always
+  creates». The report keeps the records skipped as already here apart from
+  those of another kind (`ImportReport.here`, `.heres`) and names those
+  replaced (`.replaces`).
+
 ## v0.2.251 — 2026-10-15
 
 ### Changed

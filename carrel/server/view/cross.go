@@ -490,14 +490,17 @@ type ImportPage struct {
 }
 
 // ImportExisting — что сделать с записями файла, которые уже есть в
-// коллекции. Note — «‹38› of ‹40› records of this file are already in
-// Work.»; Options — три ссылки на этот же предпросмотр (GET, existing=):
-// «Skip them» — без ответа выбрана она, «Replace them with the file's
-// version», «Import as copies»; выбранная — On. Строки предпросмотра и
-// кнопка импорта говорят, что сделает нажатие
+// коллекции (записка 52, s-io-5…8): вопрос стоит у поля Into. Note — подпись
+// поля, сам вопрос: «5 records of this file are already in Контакты» («1
+// note of this file is already in Записи»); Options — три ссылки на этот же
+// предпросмотр (GET, existing=): «Skip them» — без ответа выбрана она,
+// «Replace them», «Import as copies» («Skip it», «Replace it», «Import as a
+// copy»); выбранная — On. Hint — подсказка о выбранном под ссылками.
+// Строки предпросмотра и кнопка импорта говорят, что сделает нажатие
 type ImportExisting struct {
 	Note    Text     `json:"note"`
 	Options []Action `json:"options"`
+	Hint    Text     `json:"hint"` // «They stay as they are here; the file's version is not written.»
 }
 type ImportSource struct {
 	Kinds []Text `json:"kinds"`
@@ -535,11 +538,18 @@ type ImportTable struct {
 }
 type ImportReport struct {
 	Created int `json:"created"`
-	Skipped int `json:"skipped"`
-	Renamed int `json:"renamed"`
+	// Here — записи, что уже были в коллекции и пропущены по ответу «Skip»
+	// (записка 52, s-io-9: «Already here, skipped»); Heres — какие: «Артём
+	// Белов · 1a77-40de-bb02». В Skipped не входят
+	Here    int    `json:"here"`
+	Heres   []Text `json:"heres"`
+	Skipped int    `json:"skipped"`
+	Renamed int    `json:"renamed"`
 	// Replaced — записи коллекции, заменённые версией файла (выбор
 	// ImportExisting «Replace them…»); в Created не входят
 	Replaced int `json:"replaced"`
+	// Replaces — какие заменены: «Анна Ковалёва · 4f2b-9c31-a0e7»
+	Replaces []Text `json:"replaces"`
 	// Failed — не записано: запись файла не прочлась или сервер отказал
 	// (s-io-9, «Failed»); Failures — почему, строка на запись
 	Failed   int    `json:"failed"`

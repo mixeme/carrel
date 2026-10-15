@@ -98,17 +98,30 @@ func (s *Server) importExisting(c *collectionCtx, st importState) *view.ImportEx
 	if n == 0 || st.dest == nil {
 		return nil
 	}
-	verb := "are"
-	if n == 1 {
-		verb = "is"
+	// The question is the label of the field Into (from-typecase note 52):
+	// what is already here is counted against the collection chosen.
+	noun := c.spec.noun
+	if c.spec.kind == view.KindContact {
+		noun = "record" // s-io-5
 	}
-	out := &view.ImportExisting{Note: text(fmt.Sprintf("%d of %s of this file %s already in %s.",
-		n, plural(len(st.draft.Records), "record"), verb, collectionLabel(st.dest.col)))}
-	for _, o := range []struct{ id, word, label string }{
-		{"skip", existingSkip, "Skip them"},
-		{"replace", existingReplace, "Replace them with the file's version"},
-		{"copies", existingCopies, "Import as copies"},
-	} {
+	out := &view.ImportExisting{Note: text(fmt.Sprintf("%s of this file are already in %s", plural(n, noun), collectionLabel(st.dest.col)))}
+	options := []struct{ id, word, label, hint string }{
+		{"skip", existingSkip, "Skip them", "They stay as they are here; the file's version is not written."},
+		{"replace", existingReplace, "Replace them", "The ones here are overwritten with the file's version."},
+		{"copies", existingCopies, "Import as copies", "Each gets a new UID and stands beside the one here."},
+	}
+	if n == 1 {
+		out.Note = text(fmt.Sprintf("1 %s of this file is already in %s", noun, collectionLabel(st.dest.col)))
+		options = []struct{ id, word, label, hint string }{
+			{"skip", existingSkip, "Skip it", "It stays as it is here; the file's version is not written."},
+			{"replace", existingReplace, "Replace it", "The one here is overwritten with the file's version."},
+			{"copies", existingCopies, "Import as a copy", "It gets a new UID and stands beside the one here."},
+		}
+	}
+	for _, o := range options {
+		if st.draft.Existing == o.word {
+			out.Hint = text(o.hint)
+		}
 		q := importQuery("", st.dest.conn.ID, st.dest.col.Path)
 		q.Set("existing", o.id)
 		out.Options = append(out.Options, view.Action{ID: "import.existing." + o.id, Label: text(o.label), Method: "GET", Enabled: true,
@@ -391,8 +404,8 @@ var (
 	importFirstNote = line("Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.")
 	importNoteFirst = join("Front matter is read when present: title, date, tags, UID and ", monoRun("X-"), "properties exported earlier. A file without it becomes a note dated by its own timestamp.")
 	importNotes     = map[view.Kind]view.Runs{
-		view.KindContact: line("Import always creates. A UID that already exists gets a new one and is listed in the report."),
-		view.KindEvent:   line("Import always creates. A repeating event keeps its rule: the series is one record, not fifty-two."),
+		view.KindContact: line("What is skipped is listed in the report, and so is what could not be read."),
+		view.KindEvent:   line("A repeating event keeps its rule: the series is one record, not fifty-two."),
 		view.KindTask:    line("STATUS, PERCENT-COMPLETE and PRIORITY come across as they are: a task that was half done arrives half done."),
 		view.KindNote:    line("Markdown is stored as it was written — nothing is reformatted — and front matter Carrel exported earlier comes back: UID, tags, X-properties."),
 	}
@@ -430,19 +443,10 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 		page.Subtitle = importSubtitle(st.draft)
 		page.Counts = importCounts(st.draft, st.taken)
 		page.Existing = s.importExisting(c, st)
+		// The message of the step is the frames' (from-typecase note 52: no
+		// longer «Import always creates» — the records already here go as
+		// the question above says).
 		page.Source.Note = importNotes[c.spec.kind]
-		// «Import always creates» is the frames' line (s-io-5, s-io-6) and
-		// true of a file that brings nothing the collection holds, and of
-		// copies. With records already there skipped or replaced, the line
-		// says that instead.
-		if page.Existing != nil && (c.spec.kind == view.KindContact || c.spec.kind == view.KindEvent) {
-			switch st.draft.Existing {
-			case existingSkip:
-				page.Source.Note = line("Records already there are skipped: only what the collection does not hold is created.")
-			case existingReplace:
-				page.Source.Note = line("Records already there are replaced with the file's version, and the others are created.")
-			}
-		}
 		if st.draft.Note != "" {
 			page.Source.Note = join(page.Source.Note, " "+st.draft.Note)
 		}
@@ -459,7 +463,7 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 		case len(st.draft.Records) == 0:
 			run.Enabled, run.Reason = false, "This file holds no record of this kind."
 		case writes == 0:
-			run.Enabled, run.Reason = false, "Every record of this file is already there. Choose above what to do with them."
+			run.Enabled, run.Reason = false, "Nothing to import: every record is already here."
 		default:
 			run.Href = s.importHref(c, "run", st.dest.conn.ID, st.dest.col.Path)
 		}
@@ -516,16 +520,19 @@ func importCounts(d *importDraft, taken map[string]bool) []view.ImportCount {
 			collisions++
 		}
 	}
-	out := []view.ImportCount{{Count: len(d.Records), Label: "ready"}}
+	// «ready» is what the press writes: the records already here are not
+	// among them while they are skipped; «already here» counts them whatever
+	// the answer (from-typecase note 52).
+	ready := len(d.Records)
+	if d.Existing == existingSkip {
+		ready -= collisions
+	}
+	out := []view.ImportCount{{Count: ready, Label: "ready"}}
 	if failed > 0 {
 		out = append(out, view.ImportCount{Count: failed, Label: "with errors", Error: true})
 	}
 	if collisions > 0 {
-		label := "UID collisions"
-		if collisions == 1 {
-			label = "UID collision"
-		}
-		out = append(out, view.ImportCount{Count: collisions, Label: text(label)})
+		out = append(out, view.ImportCount{Count: collisions, Label: "already here"})
 	}
 	if skipped > 0 {
 		out = append(out, view.ImportCount{Count: skipped, Label: "skipped"})
@@ -1191,7 +1198,8 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 	// The records already there, by what was chosen for them: skipped ones
 	// leave the list before any identity is settled; replaced ones keep
 	// theirs, and are written at the address and over the version there.
-	var here map[string]*model.Object
+	var held map[string]*model.Object
+	var here []importRecord
 	records := d.Records
 	skipped := d.Skipped
 	switch d.Existing {
@@ -1199,13 +1207,15 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		records = nil
 		for _, rec := range d.Records {
 			if taken[rec.UID] {
-				skipped = append(skipped, importSkip{What: rec.Title, Reason: "Already in " + collectionLabel(dest.col) + "."})
+				// «Already here, skipped» of the report (s-io-9), apart from
+				// what the file held of another kind.
+				here = append(here, rec)
 				continue
 			}
 			records = append(records, rec)
 		}
 	case existingReplace:
-		if here, err = destRecords(ctx, dest); err != nil {
+		if held, err = destRecords(ctx, dest); err != nil {
 			st := importState{draft: d, dest: dest}
 			st.preview = []view.ImportTable{}
 			st.notices = []view.Notice{s.unavailableNotice(dest, s.importHref(c, "", dest.conn.ID, dest.col.Path), err)}
@@ -1215,14 +1225,17 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		// An identity about to be replaced is not taken: its record keeps it.
 		free := make(map[string]bool, len(taken))
 		for uid := range taken {
-			if here[uid] == nil {
+			if held[uid] == nil {
 				free[uid] = true
 			}
 		}
 		taken = free
 	}
 
-	report := &view.ImportReport{}
+	report := &view.ImportReport{Here: len(here)}
+	for _, rec := range here {
+		report.Heres = append(report.Heres, text(rec.Title+" · "+rec.UID))
+	}
 	for _, sk := range skipped {
 		if sk.Failed {
 			report.Failed++
@@ -1259,7 +1272,7 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		}
 		// The file's version over the one there, with the version read a
 		// moment ago: a record changed since is refused, not overwritten.
-		over := here[uid]
+		over := held[uid]
 		if over != nil && renamed {
 			over = nil
 		}
@@ -1267,7 +1280,7 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 			obj.Path, obj.ETag = over.Path, over.ETag
 			if err = dest.update(ctx, obj); err == nil {
 				note = "Replaced the one here with the file's version"
-				here[uid] = nil // a second record of the file under this identity is a copy
+				held[uid] = nil // a second record of the file under this identity is a copy
 			}
 		} else if err == nil {
 			err = s.createImported(ctx, dest, obj, uid)
@@ -1296,6 +1309,7 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		}
 		if over != nil {
 			report.Replaced++
+			report.Replaces = append(report.Replaces, text(rec.Title+" · "+uid))
 		} else {
 			report.Created++
 		}
@@ -1337,6 +1351,9 @@ func importNote(report *view.ImportReport, refused, lossy int, source string) st
 	}
 	if report.Renamed > 0 {
 		parts = append(parts, fmt.Sprintf("%s under a new identity", plural(report.Renamed, "record")))
+	}
+	if report.Here > 0 {
+		parts = append(parts, fmt.Sprintf("%s already there, skipped", plural(report.Here, "record")))
 	}
 	if report.Skipped > 0 {
 		parts = append(parts, fmt.Sprintf("%s skipped", plural(report.Skipped, "record")))
