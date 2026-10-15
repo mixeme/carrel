@@ -154,7 +154,7 @@ func TestSearchAcrossTickedSources(t *testing.T) {
 			t.Errorf("%s = %+v", name, sp)
 		}
 	}
-	if bar.Percent != 100 || bar.AnsweredAt == "" || !strings.Contains(saidRuns(bar.Summary), "3 of 3 sources answered · 7 found") {
+	if bar.Percent != 100 || bar.AnsweredAt == "" || saidRuns(bar.Summary) != "Done · 3 of 3 sources answered" || bar.Failed != "" || bar.Aside == "" {
 		t.Errorf("bar = %+v", bar)
 	}
 	if action(bar, "poll.stop").Enabled || !action(bar, "poll.again").Enabled {
@@ -372,8 +372,10 @@ func TestSearchRefusalRetriesOneSource(t *testing.T) {
 	if work.State != view.SourceError || work.Retry == nil || work.Count != nil || !strings.Contains(string(work.Message), "403") {
 		t.Fatalf("work = %+v", work)
 	}
-	if !strings.Contains(saidRuns(bar.Summary), "1 of 2 sources answered · 1 found · 1 refused") {
-		t.Errorf("summary = %q", bar.Summary)
+	// s-find-1 (Пк7): what did not answer is the red «1 failed» with its
+	// menu, not words of the bar.
+	if saidRuns(bar.Summary) != "Done · 1 of 2 sources answered" || bar.Failed != "1 failed" {
+		t.Errorf("summary = %q, failed %q", bar.Summary, bar.Failed)
 	}
 	if h := search(t, f.h, f.sess, "q=Ada"); len(h.Results) != 1 || h.Top.Search.History[0].Outcome != "1 found" {
 		t.Errorf("results %+v, history %+v", h.Results, h.Top.Search.History)
@@ -426,7 +428,8 @@ func TestSearchStopAndCeiling(t *testing.T) {
 
 	again := search(t, f.h, f.sess, "q=Ada&again=1")
 	bar = waitPoll(t, f.h, f.sess, again.Poll.TaskID, nil)
-	if sourceNamed(t, bar, "Docs").State != view.SourceTimeout || !strings.Contains(saidRuns(bar.Summary), "1 timed out") {
+	if sourceNamed(t, bar, "Docs").State != view.SourceTimeout || bar.Failed != "1 failed" ||
+		!strings.HasSuffix(string(sourceNamed(t, bar, "Docs").Answer), "→ no answer in 10 s; the search went on without it.") {
 		t.Fatalf("after the ceiling: %+v", bar)
 	}
 	if h := search(t, f.h, f.sess, "q=Ada").Top.Search.History; len(h) != 1 || h[0].Outcome != "1 found" {

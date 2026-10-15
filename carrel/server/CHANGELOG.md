@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.262 — 2026-10-15
+
+### Changed
+
+- **The bar of a search done speaks as `s-find-1`** (Пк7–Пк10 of the scan
+  of 15.10.2026): «Done · 13 of 14 sources answered»; what did not answer is
+  the red «1 failed» whose menu names each source with its answer and
+  Retry, and «Retry all» when there are more (`PollBar.Failed`,
+  `RetryAll` — the search had neither); a source that did not answer in
+  time — «… → no answer in 10 s; the search went on without it.»; the right
+  of the bar — how long the pass took, «1.8 s», and when it answered, today
+  the clock alone, «11:42». The count of what was found is the page's, not
+  the bar's.
+
+### For consumers
+
+C-6 `PollBar`: `Failed`, `RetryAll`, `Aside`, `AnsweredAt` of the search.
+Fixture `app-search/normal` re-shot.
+
 ## v0.2.261 — 2026-10-15
 
 ### Fixed

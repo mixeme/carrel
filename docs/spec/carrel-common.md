@@ -1708,15 +1708,15 @@ type PollBar struct {
     Stream      string
     Poll        string
     Every       int
-    Summary     Runs // кусками: над списком и хронологией — «Polled 5 of 6 sources · 14 events», у хронологии адреса моноширинно (s-agenda-1, s-contacts-7); не ответивших не называет — это Failed, остановленные — «1 stopped»; у поиска — «13 of 14 sources answered · 12 found · 1 timed out»
-    AnsweredAt  When // когда собрана показанная выдача
-    Aside       Text // справа на полосе моноширинно, когда опрос кончен: «2 min ago», с «from cache · » перед ним, когда источник ответил тем, что сеанс уже держал (s-agenda-1); пока опрос идёт — сколько он длится, «0.8 s», за минутой «1 min 20 s», у всех разделов (решение владельца 07.10.2026; states-3, -8, -13, -19, -26)
+    Summary     Runs // кусками: над списком и хронологией — «Polled 5 of 6 sources · 14 events», у хронологии адреса моноширинно (s-agenda-1, s-contacts-7); не ответивших не называет — это Failed, остановленные — «1 stopped»; у поиска законченного — «Done · 13 of 14 sources answered» (s-find-1), отказы — Failed
+    AnsweredAt  When // когда собрана показанная выдача; у поиска сегодня — одни часы, «11:42» (s-find-1)
+    Aside       Text // справа на полосе моноширинно, когда опрос кончен: «2 min ago», с «from cache · » перед ним, когда источник ответил тем, что сеанс уже держал (s-agenda-1); пока опрос идёт — сколько он длится, «0.8 s», за минутой «1 min 20 s», у всех разделов (решение владельца 07.10.2026; states-3, -8, -13, -19, -26); у законченного поиска — сколько шёл обход, «1.8 s» (s-find-1)
     Note        Text // под строками, когда опрос кончен и источник не ответил: «What arrived in time is shown. Records from the unavailable source are missing — not “there are none”, but “we have not seen them”.» (states-6; у контактов — «Cards … book», states-9); пусто — ответили все
     Running     bool
     Percent     int
     Sources     []SourceProgress
     Actions     []Action // Stop · Search again
-    Failed      Text     // красная кнопка «1 failed» полосы над списком и хронологией (решение владельца 02.10.2026, states-16): закрытое меню отказов — строка на источник с Answer, его Retry; пусто — не ответили все или полоса этих слов не пишет (поиск, s-find-1)
+    Failed      Text     // красная кнопка «1 failed» полосы над списком и хронологией (решение владельца 02.10.2026, states-16): закрытое меню отказов — строка на источник с Answer, его Retry; у поиска так же (s-find-1; Answer не ответившего вовремя — «… → no answer in 10 s; the search went on without it.»); пусто — ответили все
     RetryAll    *Action  // «Retry all» внизу того же меню, когда отказов больше одного: POST /app/search/progress/{task}/retry без source; nil — отказ один или нет
 }
 

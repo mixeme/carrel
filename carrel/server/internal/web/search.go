@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -427,6 +428,11 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 			}
 		}
 		sp.Answer = text(refusalAnswer(st.State, st.Err, path))
+		if st.State == view.SourceTimeout && owner.what == "search" {
+			// How long it was given, and that the search did not wait
+			// (s-find-1, Пк8).
+			sp.Answer = text(fmt.Sprintf("%s → no answer in %s; the search went on without it.", path, strconv.Itoa(int(s.cfg.ProgressSourceTimeout.Seconds()))+" s"))
+		}
 		bar.Sources = append(bar.Sources, sp)
 	}
 	failed := refused + timedOut + unreachable
@@ -484,12 +490,27 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 	case snap.Running:
 		bar.Summary = line(fmt.Sprintf("Asking %s · %d answered · %s", plural(total, "source"), answered, owner.found(owner.count(snap))))
 	default:
-		parts := []string{
-			fmt.Sprintf("%d of %s answered", answered, plural(total, "source")),
-			owner.found(owner.count(snap)),
+		// The search done (s-find-1): «Done · 13 of 14 sources answered»;
+		// what did not answer is the red «N failed», whose menu names each
+		// with its answer and Retry, and Retry all when there are more
+		// (Пк7); a source stopped by hand is still said. The right: how long
+		// the pass took (Пк9), and when it answered — today the clock alone
+		// (Пк10).
+		parts := []string{fmt.Sprintf("Done · %d of %s answered", answered, plural(total, "source"))}
+		bar.Summary = line(strings.Join(append(parts, pollTroubles(0, 0, 0, stopped)...), " · "))
+		if failed > 0 {
+			bar.Failed = text(fmt.Sprintf("%d failed", failed))
 		}
-		bar.Summary = line(strings.Join(append(parts, pollTroubles(refused, unreachable, timedOut, stopped)...), " · "))
+		if failed > 1 {
+			bar.RetryAll = &view.Action{ID: "poll.retry", Label: "Retry all", Method: "POST", Enabled: true, Href: s.route(base + "/retry")}
+		}
 		bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)
+		if tf.dayKey(snap.Finished) == tf.dayKey(now) {
+			bar.AnsweredAt = view.When(tf.clock(snap.Finished))
+		}
+		if !snap.Started.IsZero() && !snap.Finished.IsZero() {
+			bar.Aside = text(runningFor(snap.Finished.Sub(snap.Started)))
+		}
 	}
 	stop := view.Action{ID: "poll.stop", Label: "Stop", Href: s.route(base + "/cancel"), Method: "POST", Enabled: snap.Running}
 	again := view.Action{ID: "poll.again", Label: owner.againLabel, Href: s.route(owner.again), Method: "GET", Enabled: !snap.Running}
