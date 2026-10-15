@@ -294,10 +294,36 @@
             "readOnly": false,
             "state": "ok",
             "tick": "off"
+          },
+          {
+            "colour": "#8c6239",
+            "count": 3,
+            "detail": "",
+            "feed": true,
+            "href": "",
+            "label": "Праздники РФ",
+            "menu": [],
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "detail": "",
+            "feed": true,
+            "href": "",
+            "label": "Расписание лиги",
+            "menu": [],
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "off"
           }
         ],
         "state": "ok",
-        "tally": "10 / 14"
+        "tally": "11 / 16"
       }
     ],
     "shortcuts": [],

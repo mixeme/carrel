@@ -5,7 +5,7 @@
     "compact": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 22,
+    "loaded": 25,
     "range": null,
     "segments": [
       {
@@ -225,19 +225,19 @@
       ],
       "rows": [
         {
-          "colour": "#8c6239",
-          "detail": "10 Aug",
-          "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
-          "readOnly": false,
-          "stamp": "radicale · vps · Дежурства",
-          "title": "Дежурство: первая линия"
-        },
-        {
           "colour": "#3f6e8c",
           "detail": "10 Aug",
           "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
           "readOnly": false,
           "stamp": "nextcloud · Работа",
+          "title": "Дежурство: первая линия"
+        },
+        {
+          "colour": "#8c6239",
+          "detail": "10 Aug",
+          "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
+          "readOnly": false,
+          "stamp": "radicale · vps · Дежурства",
           "title": "Дежурство: первая линия"
         }
       ],
@@ -278,11 +278,11 @@
       ],
       "choices": [
         {
-          "chosen": 0,
+          "chosen": 1,
           "name": "choice.PHOTO",
           "options": [
-            "radicale · vps · Команда",
-            "nextcloud · Контакты"
+            "nextcloud · Контакты",
+            "radicale · vps · Команда"
           ],
           "property": "Photo",
           "union": false
@@ -338,19 +338,19 @@
       ],
       "rows": [
         {
-          "colour": "#6b4e7a",
-          "detail": "+7 903 118-22-04 · a.belov@example.org",
-          "href": "/app/contacts/a-rad-vps/komanda/d41a-6f30-92be",
-          "readOnly": true,
-          "stamp": "radicale · vps · Команда",
-          "title": "Артём Белов"
-        },
-        {
           "colour": "#4a6b52",
           "detail": "+7 903 118-22-04 · a.belov@example.org",
           "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
           "readOnly": false,
           "stamp": "nextcloud · Контакты",
+          "title": "Артём Белов"
+        },
+        {
+          "colour": "#6b4e7a",
+          "detail": "+7 903 118-22-04 · a.belov@example.org",
+          "href": "/app/contacts/a-rad-vps/komanda/d41a-6f30-92be",
+          "readOnly": true,
+          "stamp": "radicale · vps · Команда",
           "title": "Артём Белов"
         }
       ],
@@ -374,7 +374,7 @@
     }
   ],
   "print": {
-    "range": "22 records compared · 60 points and above",
+    "range": "25 records compared · 60 points and above",
     "taken": "",
     "title": "Duplicates"
   },
@@ -634,17 +634,43 @@
             "readOnly": false,
             "state": "ok",
             "tick": "off"
+          },
+          {
+            "colour": "#8c6239",
+            "count": 3,
+            "detail": "",
+            "feed": true,
+            "href": "",
+            "label": "Праздники РФ",
+            "menu": [],
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "detail": "",
+            "feed": true,
+            "href": "",
+            "label": "Расписание лиги",
+            "menu": [],
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "off"
           }
         ],
         "state": "ok",
-        "tally": "10 / 14"
+        "tally": "11 / 16"
       }
     ],
     "shortcuts": [],
     "tags": [],
     "ticks": null
   },
-  "subtitle": "22 records compared · 2 to look at",
+  "subtitle": "25 records compared · 2 to look at",
   "threshold": {
     "default": 60,
     "form": {

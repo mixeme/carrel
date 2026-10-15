@@ -4,7 +4,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/duplicates/merge?group=group\u0026into=0\u0026v.0=e3\u0026v.1=e10",
+      "href": "/app/duplicates/merge?group=group\u0026into=0\u0026v.0=e10\u0026v.1=e3",
       "id": "duplicates.merge.confirm",
       "label": "Write the merge and delete the rest",
       "method": "POST"
@@ -19,11 +19,11 @@
   ],
   "deleted": [
     {
-      "colour": "#3f6e8c",
+      "colour": "#8c6239",
       "detail": "10 Aug",
-      "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
+      "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
       "readOnly": false,
-      "stamp": "nextcloud · Работа",
+      "stamp": "radicale · vps · Дежурства",
       "title": "Дежурство: первая линия"
     }
   ],
@@ -301,10 +301,36 @@
             "readOnly": false,
             "state": "ok",
             "tick": "off"
+          },
+          {
+            "colour": "#8c6239",
+            "count": 3,
+            "detail": "",
+            "feed": true,
+            "href": "",
+            "label": "Праздники РФ",
+            "menu": [],
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "detail": "",
+            "feed": true,
+            "href": "",
+            "label": "Расписание лиги",
+            "menu": [],
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "off"
           }
         ],
         "state": "ok",
-        "tally": "10 / 14"
+        "tally": "11 / 16"
       }
     ],
     "shortcuts": [],
@@ -316,7 +342,7 @@
     {
       "enabled": true,
       "id": "duplicates.merge.into",
-      "label": "radicale · vps · Дежурства",
+      "label": "nextcloud · Работа",
       "method": "GET",
       "on": true
     },
@@ -324,18 +350,18 @@
       "enabled": true,
       "href": "/app/duplicates/merge?group=group\u0026into=1",
       "id": "duplicates.merge.into",
-      "label": "nextcloud · Работа",
+      "label": "radicale · vps · Дежурства",
       "method": "GET"
     }
   ],
   "staysNote": "Дежурство: первая линия there is rewritten with the values you chose.",
   "subtitle": "Дежурство: первая линия · 2 records",
   "target": {
-    "colour": "#8c6239",
+    "colour": "#3f6e8c",
     "detail": "10 Aug",
-    "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
+    "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
     "readOnly": false,
-    "stamp": "radicale · vps · Дежурства",
+    "stamp": "nextcloud · Работа",
     "title": "Дежурство: первая линия"
   },
   "title": "Merge on the server",

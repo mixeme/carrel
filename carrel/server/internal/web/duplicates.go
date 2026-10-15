@@ -85,7 +85,7 @@ var dupKinds = []view.Kind{view.KindContact, view.KindEvent, view.KindTask, view
 func (s *Server) loadedRecords(sess *session.Session, blob sealed.Blob) ([]loadedRecord, map[dupes.CollectionRef]map[string]bool) {
 	var out []loadedRecord
 	present := map[dupes.CollectionRef]map[string]bool{}
-	for _, col := range blob.Collections {
+	for _, col := range dupCollections(blob) {
 		conn, ok := blob.Connection(col.AccountID)
 		if !ok || col.Gone {
 			continue
@@ -219,7 +219,36 @@ func (st dupState) groups() []dupGroup {
 		}
 		linked = append(linked, dg)
 	}
-	return append(append(todo, linked...), ignored...)
+	out := append(append(todo, linked...), ignored...)
+	for i := range out {
+		out[i].refs = st.inCatalogOrder(out[i].refs)
+	}
+	return out
+}
+
+// inCatalogOrder is the members of a group in the order the catalog lists
+// their connections — the rail's —, then by collection and UID: the rows of
+// a card and the merge's «Where the merged record stays» read the same way
+// every time (an account's ID is random, and ordering by it is not).
+func (st dupState) inCatalogOrder(refs []sealed.RecordRef) []sealed.RecordRef {
+	rank := map[string]int{}
+	for i, c := range st.blob.Connections {
+		rank[c.ID] = i
+	}
+	for i, f := range st.blob.Subscriptions {
+		rank[f.ID] = len(st.blob.Connections) + i
+	}
+	out := slices.Clone(refs)
+	slices.SortStableFunc(out, func(a, b sealed.RecordRef) int {
+		if ra, rb := rank[a.AccountID], rank[b.AccountID]; ra != rb {
+			return ra - rb
+		}
+		if a.Col != b.Col {
+			return strings.Compare(a.Col, b.Col)
+		}
+		return strings.Compare(a.UID, b.UID)
+	})
+	return out
 }
 
 func (st dupState) group(id string) (dupGroup, bool) {
@@ -441,7 +470,7 @@ func dupSources(st dupState, only view.Kind) []view.RailSection {
 	}
 	sec := view.RailSection{State: view.CollectionOK}
 	loaded, live := 0, 0
-	for _, col := range st.blob.Collections {
+	for _, col := range dupCollections(st.blob) {
 		if col.Gone || !holdsRecords(col) {
 			continue
 		}
@@ -457,7 +486,7 @@ func dupSources(st dupState, only view.Kind) []view.RailSection {
 		ref := dupes.CollectionRef{AccountID: col.AccountID, Col: col.Path}
 		row := view.SourceRow{
 			Label: text(collectionLabel(col)), Colour: catalogColour(col),
-			Tick: view.TickOff, ReadOnly: col.ReadOnly, State: view.CollectionOK,
+			Tick: view.TickOff, ReadOnly: col.ReadOnly, State: view.CollectionOK, Feed: col.Feed,
 		}
 		if n, ok := held[ref]; ok {
 			loaded++
@@ -471,6 +500,18 @@ func dupSources(st dupState, only view.Kind) []view.RailSection {
 	// The count apart, monospaced (s-dup-1; Дб2).
 	sec.Account, sec.Tally = "Sources", text(fmt.Sprintf("%d / %d", loaded, live))
 	return []view.RailSection{sec}
+}
+
+// dupCollections are the collections the duplicates compare: those of the
+// catalog and the feeds subscribed to (Дб3; s-dup-1: «Праздники РФ», is-ext)
+// — read, never written, so a group with one can be linked, not merged
+// (mergeBlock: a feed is read-only).
+func dupCollections(blob sealed.Blob) []sealed.Collection {
+	cols := slices.Clone(blob.Collections)
+	for _, f := range blob.Subscriptions {
+		cols = append(cols, f.FeedCollection())
+	}
+	return cols
 }
 
 // holdsRecords: a folder of files holds no records to compare.

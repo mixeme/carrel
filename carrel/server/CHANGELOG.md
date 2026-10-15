@@ -17,6 +17,26 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.285 — 2026-10-16
+
+### Changed
+
+- **A feed is a source of the duplicates** (Дб3 of the scan of 15.10.2026;
+  `s-dup-1`: «Праздники РФ» in the rail, `is-ext`). The records of a feed
+  read in this session are compared with the rest, and its row stands in
+  the rail with `Feed`. A group with a feed's record can be linked, never
+  merged: a feed is read, not written (Merge is off with the read-only
+  reason).
+- **A group's records read in the catalog's order** — its connections as
+  the rail lists them, then collection and UID — not by the account's ID,
+  which is random: the card's rows and the merge's «Where the merged
+  record stays» read the same way every time (`s-dup-4`: «nextcloud ·
+  Работа», then «radicale · vps · Дежурства»).
+
+### For consumers
+
+The duplicates fixtures' rails gain the set's feeds.
+
 ## v0.2.284 — 2026-10-16
 
 ### Changed
