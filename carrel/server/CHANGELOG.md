@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.260 — 2026-10-15
+
+### Fixed
+
+- **Notes take every file of a drop** (Им5 of the scan of 15.10.2026;
+  `s-io-1`): several Markdown files sent at once are one set, as a zip is —
+  each a row of the preview, a file that is not Markdown or is empty named
+  with why. Before, the first file alone was read and the others were lost
+  without a word. Contacts, events and tasks refuse several files whole:
+  «Only notes are imported several files at once.»
+- **An empty Markdown file is no note by every way in** (Им14): a folder of
+  notes skips it as a zip does («Empty file: nothing to store and nothing to
+  name it by»); an empty file alone is refused with those words, not «No
+  file was chosen».
+
+### For consumers
+
+C-5: the import form may carry several `file` fields for notes.
+
 ## v0.2.259 — 2026-10-15
 
 ### Fixed

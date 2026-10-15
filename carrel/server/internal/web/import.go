@@ -683,12 +683,25 @@ func (s *Server) postKindImport(w http.ResponseWriter, r *http.Request, kind str
 // takeFile reads the uploaded file into a draft. Nothing is written yet: the
 // preview says what the import would do, and against which collection.
 func (s *Server) takeFile(w http.ResponseWriter, r *http.Request, c *collectionCtx, dest *collectionCtx) {
-	body, name, err := uploadedImport(r, s.cfg.ImportMaxBytes)
-	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.importPage(c, importState{dest: dest, notices: []view.Notice{s.importRefusal(err)}}))
-		return
+	files, err := uploadedImports(r, s.cfg.ImportMaxBytes)
+	var d *importDraft
+	switch {
+	case err != nil:
+	case len(files) > 1 && c.spec.kind != view.KindNote:
+		// Only notes are taken several files at once (s-io-1); the others
+		// are refused whole rather than read by their first file (Им5).
+		err = errOneFileOnly
+	case len(files) > s.cfg.ImportMaxRecords:
+		err = errTooManyRecords{len(files), s.cfg.ImportMaxRecords}
+	case len(files) > 1:
+		d = s.readNoteFiles(c, files)
+	case len(bytes.TrimSpace(files[0].body)) == 0:
+		// An empty file is no file to read (Им14): said so, not «no file
+		// was chosen».
+		err = errEmptyImport
+	default:
+		d, err = s.readImport(c, files[0].name, files[0].body)
 	}
-	d, err := s.readImport(c, name, body)
 	if err != nil {
 		s.writePage(w, r, http.StatusOK, s.importPage(c, importState{dest: dest, notices: []view.Notice{s.importRefusal(err)}}))
 		return
@@ -804,6 +817,32 @@ func (d *importDraft) add(c *collectionCtx, obj *model.Object) error {
 }
 
 // addFrom keeps one record read from file, a file of a folder or a zip.
+// takeMarkdown adds a Markdown file of a set — a zip, a folder, several
+// files dropped at once — as a note, or names it among the skipped with
+// why. One rule for the three ways in (Им14; s-io-8): an empty file is
+// skipped, «nothing to store and nothing to name it by». A file without
+// front matter is dated by stamp; none — now.
+func (d *importDraft) takeMarkdown(c *collectionCtx, label string, body []byte, stamp time.Time) {
+	if len(bytes.TrimSpace(body)) == 0 {
+		d.Skipped = append(d.Skipped, importSkip{What: label, Reason: emptyMarkdown, Failed: true})
+		return
+	}
+	if stamp.IsZero() {
+		stamp = time.Now()
+	}
+	obj, err := cal.ParseNote(path.Base(label), body, stamp)
+	if err != nil {
+		d.Skipped = append(d.Skipped, importSkip{What: label, Reason: err.Error(), Failed: true})
+		return
+	}
+	if err := d.addFrom(c, obj, label); err != nil {
+		d.Skipped = append(d.Skipped, importSkip{What: label, Reason: err.Error(), Failed: true})
+	}
+}
+
+// emptyMarkdown is why an empty Markdown file is not a note (s-io-8).
+const emptyMarkdown = "Empty file: nothing to store and nothing to name it by"
+
 func (d *importDraft) addFrom(c *collectionCtx, obj *model.Object, file string) error {
 	doc, err := c.body(obj)
 	if err != nil {
@@ -967,18 +1006,7 @@ func (s *Server) takeFolder(w http.ResponseWriter, r *http.Request, c *collectio
 		d.Size += int64(len(body))
 		// A file without front matter is dated by its own timestamp
 		// (s-io-4): the time the server says it was last changed.
-		stamp := e.Modified
-		if stamp.IsZero() {
-			stamp = time.Now()
-		}
-		obj, err := cal.ParseNote(e.Name, body, stamp)
-		if err != nil {
-			d.Skipped = append(d.Skipped, importSkip{What: e.Name, Reason: err.Error(), Failed: true})
-			continue
-		}
-		if err := d.addFrom(c, obj, e.Name); err != nil {
-			d.Skipped = append(d.Skipped, importSkip{What: e.Name, Reason: err.Error(), Failed: true})
-		}
+		d.takeMarkdown(c, e.Name, body, e.Modified)
 	}
 	if markdown == 0 {
 		d.Note = "The folder holds no Markdown file."
@@ -1495,53 +1523,91 @@ func (e errTooManyRecords) Error() string {
 
 var errNoImportFile = errors.New("no file in the form")
 
-// uploadedImport is the file part of the form. A body the middleware parsed
-// for its _csrf is read from that form; one sent with X-CSRF-Token is read as
-// it arrives. Either way no more than the ceiling is kept.
-func uploadedImport(r *http.Request, max int64) ([]byte, string, error) {
-	part, name, err := importPart(r)
-	if err != nil {
-		return nil, "", err
+// uploadedImports are the files the import form sent, in their order (the
+// field «file»; several when notes are dropped at once): read here, so a
+// file over the ceiling is refused before it is taken apart. No more than
+// the ceiling is kept, the files together.
+func uploadedImports(r *http.Request, max int64) ([]importFile, error) {
+	var out []importFile
+	left := max
+	take := func(part io.Reader, name string) error {
+		body, err := io.ReadAll(io.LimitReader(part, left+1))
+		if err != nil {
+			return err
+		}
+		if int64(len(body)) > left {
+			return &http.MaxBytesError{Limit: max}
+		}
+		left -= int64(len(body))
+		out = append(out, importFile{name: path.Base(name), body: body})
+		return nil
 	}
-	defer part.Close()
-	body, err := io.ReadAll(io.LimitReader(part, max+1))
-	if err != nil {
-		return nil, "", err
+	if r.MultipartForm != nil {
+		for _, fh := range r.MultipartForm.File["file"] {
+			f, err := fh.Open()
+			if err != nil {
+				return nil, err
+			}
+			err = take(f, fh.Filename)
+			f.Close()
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else if mr, err := r.MultipartReader(); err == nil {
+		for {
+			part, err := mr.NextPart()
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			if err != nil {
+				return nil, err
+			}
+			if part.FormName() == "file" && part.FileName() != "" {
+				if err := take(part, part.FileName()); err != nil {
+					return nil, err
+				}
+			}
+		}
 	}
-	if int64(len(body)) > max {
-		return nil, "", &http.MaxBytesError{Limit: max}
+	if len(out) == 0 {
+		return nil, errNoImportFile
 	}
-	if len(bytes.TrimSpace(body)) == 0 {
-		return nil, "", errNoImportFile
-	}
-	return body, name, nil
+	return out, nil
 }
 
-func importPart(r *http.Request) (io.ReadCloser, string, error) {
-	if r.MultipartForm != nil {
-		files := r.MultipartForm.File["file"]
-		if len(files) == 0 {
-			return nil, "", errNoImportFile
+// importFile is a file the import form sent.
+type importFile struct {
+	name string
+	body []byte
+}
+
+// errOneFileOnly refuses several files where one is taken: contacts, events
+// and tasks come in one file each (s-io-1).
+var errOneFileOnly = errors.New("several files at once")
+
+// errEmptyImport refuses a file with nothing in it.
+var errEmptyImport = errors.New("an empty file")
+
+// readNoteFiles takes Markdown files dropped at once as one set (s-io-1),
+// each as a file of a zip is: a note, or named among the skipped with why.
+func (s *Server) readNoteFiles(c *collectionCtx, files []importFile) *importDraft {
+	d := &importDraft{Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, Source: plural(len(files), "file"), Format: "Markdown"}
+	markdown := 0
+	for _, f := range files {
+		d.Files++
+		d.Size += int64(len(f.body))
+		if !isMarkdown(f.name) {
+			d.Skipped = append(d.Skipped, importSkip{What: f.name, Reason: "Not Markdown."})
+			continue
 		}
-		f, err := files[0].Open()
-		return f, path.Base(files[0].Filename), err
+		markdown++
+		d.takeMarkdown(c, f.name, f.body, time.Time{})
 	}
-	mr, err := r.MultipartReader()
-	if err != nil {
-		return nil, "", errNoImportFile
+	if markdown == 0 {
+		d.Note = "None of these files is Markdown."
 	}
-	for {
-		part, err := mr.NextPart()
-		if errors.Is(err, io.EOF) {
-			return nil, "", errNoImportFile
-		}
-		if err != nil {
-			return nil, "", err
-		}
-		if part.FormName() == "file" && part.FileName() != "" {
-			return part, path.Base(part.FileName()), nil
-		}
-	}
+	return d
 }
 
 // importRefusal says why a file was not taken. Nothing was written, and no
@@ -1552,6 +1618,10 @@ func (s *Server) importRefusal(err error) view.Notice {
 	switch {
 	case errors.Is(err, errNoImportFile):
 		n.Title, n.Body = "No file was chosen", "Choose the file to import and send the form again."
+	case errors.Is(err, errOneFileOnly):
+		n.Body = "Only notes are imported several files at once. Choose one file and send the form again."
+	case errors.Is(err, errEmptyImport):
+		n.Body = emptyMarkdown + "."
 	case tooLarge(err):
 		n.Body = text("A file of up to " + string(formatSize(s.cfg.ImportMaxBytes)) + " can be imported.")
 	case errors.As(err, &many):

@@ -6,11 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"path"
 	"strings"
-	"time"
-
-	"carrel.dev/carrel/server/internal/provider/cal"
 )
 
 // A zip of Markdown files is the notes' other file (s-io-8): every .md in
@@ -90,24 +86,9 @@ func (s *Server) readZipNotes(c *collectionCtx, name string, body []byte) (*impo
 			return nil, &http.MaxBytesError{Limit: s.cfg.ImportMaxBytes}
 		}
 		left -= int64(len(text))
-		if len(bytes.TrimSpace(text)) == 0 {
-			d.Skipped = append(d.Skipped, importSkip{What: label, Reason: "Empty file: nothing to store and nothing to name it by", Failed: true})
-			continue
-		}
 		// A file without front matter is dated by its own time in the
 		// archive, as a file of a folder is (s-io-4).
-		stamp := zf.Modified
-		if stamp.IsZero() {
-			stamp = time.Now()
-		}
-		obj, err := cal.ParseNote(path.Base(label), text, stamp)
-		if err != nil {
-			d.Skipped = append(d.Skipped, importSkip{What: label, Reason: err.Error(), Failed: true})
-			continue
-		}
-		if err := d.addFrom(c, obj, label); err != nil {
-			d.Skipped = append(d.Skipped, importSkip{What: label, Reason: err.Error(), Failed: true})
-		}
+		d.takeMarkdown(c, label, text, zf.Modified)
 	}
 	if markdown == 0 {
 		d.Note = "The archive holds no Markdown file."
