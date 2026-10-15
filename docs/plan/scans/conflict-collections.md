@@ -66,7 +66,7 @@ U-6.8 (см. «Спеке»). `ReadAt`/`ServerAt` кадры не рисуют �
   «Conflict» — слово экрана (`Shell.Title` «Changed elsewhere» — заголовок
   документа, не шапки).
 
-- **Рв2 (РБ3, держится). Вид различия у свойства.** (**частью закрыто сервером `v0.2.267`**: `ConflictRow.Diff` — `both`, `mine` по версии, с которой открыли форму, `Base` черновика; «only on the server» — со строками чужих свойств, Рв6) Кадры: справа от
+- **Рв2 (РБ3, держится). Вид различия у свойства.** (**закрыто сервером `v0.2.267`, `v0.2.271`**: `ConflictRow.Diff` — `both`, `mine`, `theirs`; черновик держит всю исходную версию; поле, которое изменил только сервер, — своя карточка; чужие свойства и строки по параметру — Рв6) Кадры: справа от
   свойства `tc-rubric__aside` — «both changed», «only in your edit», «only
   on the server», и от него подписи вариантов — «Your edit» / «Server»,
   «Your edit · include» / «Leave it out», «Your edit» / «Server · include»
@@ -85,7 +85,7 @@ U-6.8 (см. «Спеке»). `ReadAt`/`ServerAt` кадры не рисуют �
   фикстура `app-conflict`: `rows[1].theirs = "Empty"`. Нужно: пусто — пустая
   строка (слово «—» — экрана).
 
-- **Рв4 (РБ4, держится). Что выбрано заранее.** Кадры: своё — у «both
+- **Рв4 (РБ4, держится). Что выбрано заранее.** (**закрыто сервером `v0.2.271`**: у `theirs` — серверное; при `Unsure` — вопрос Т1) Кадры: своё — у «both
   changed» и «only in your edit», серверное — у «only on the server»
   (`s-conflict-1` choice.4 `value="server" checked`, `s-conflict-4` DUE
   `checked` у Server). Модель: `Choice: view.ChoiceMine` у каждой строки
@@ -151,7 +151,7 @@ U-6.8 (см. «Спеке»). `ReadAt`/`ServerAt` кадры не рисуют �
   not be your changes» (`Unsure`, `:172–176`). Фикстур нет ни у одного,
   строк `STATE_FRAME` нет. Кадров — вопросы Т1, Т2.
 
-- **Рв11 (РБ7, данные).** Строки: `app-conflict` — TITLE, NOTE против TEL;work,
+- **Рв11 (РБ7, данные).** (**событие, задача, заметка — закрыто `v0.2.271`**: фикстуры сняты с данными кадров; контакт ждёт Рв6) Строки: `app-conflict` — TITLE, NOTE против TEL;work,
   EMAIL;work, NOTE, X-EVOLUTION-FILE-AS кадра; у события, задачи, заметки —
   по одной строке SUMMARY против двух (`-3` + LOCATION, `-4` + DUE, `-5` +
   DESCRIPTION). Рейл: у задачи «Работа 2» против «Работа 3» (`s-conflict-4`),

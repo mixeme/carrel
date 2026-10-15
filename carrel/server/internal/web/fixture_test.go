@@ -2329,11 +2329,30 @@ func openList(t *testing.T, app *mockupApp, path string) {
 // C-14.2: the conflict of an event and of a task. The screen is one for
 // every kind (C-2.1), and each is checked on its own record.
 func TestFixtureConflictsOfEveryKind(t *testing.T) {
-	for _, one := range []struct{ dir, segment, list, slug, uid, now, body string }{
-		{"app-conflict-event", "calendar", "/app/calendar?from=2026-08-10", "lichnyj", "8f1c-4a02-b7d3", "Синк-ап по релизу и демо",
-			"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//set//EN\nBEGIN:VEVENT\nUID:8f1c-4a02-b7d3\nDTSTAMP:20260801T000000Z\nSUMMARY:Синк-ап перенесён\nDTSTART:20260810T090000Z\nDTEND:20260810T100000Z\nEND:VEVENT\nEND:VCALENDAR\n"},
-		{"app-conflict-task", "tasks", "/app/tasks", "dela", "aa10-77bc-0e31", "Отправить документы в МФЦ до пятницы",
-			"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//set//EN\nBEGIN:VTODO\nUID:aa10-77bc-0e31\nDTSTAMP:20260801T000000Z\nSUMMARY:Документы в МФЦ\nEND:VTODO\nEND:VCALENDAR\n"},
+	// Each as its frame (Рв11): the record of the set, opened, edited, and
+	// meanwhile changed on the server — s-conflict-3: SUMMARY both changed,
+	// LOCATION only in the edit, DTSTART moved alike on both sides;
+	// s-conflict-4: SUMMARY both changed, DUE only on the server, STATUS
+	// alike.
+	for _, one := range []struct {
+		dir, segment, list, slug, uid, file string
+		base, server                        func(string) string
+		edit                                map[string]string
+	}{
+		{"app-conflict-event", "calendar", "/app/calendar?from=2026-08-10", "lichnyj", "8f1c-4a02-b7d3", "nextcloud-home/lichnyj.ics",
+			func(r string) string { return strings.Replace(r, "LOCATION:Переговорная 2\n", "", 1) },
+			func(r string) string {
+				r = strings.Replace(r, "SUMMARY:Синк-ап по релизу\n", "SUMMARY:Синк-ап перенесён\n", 1)
+				return strings.Replace(r, ":20260810T120000\n", ":20260810T123000\n", 1)
+			},
+			map[string]string{"summary": "Синк-ап по релизу и демо", "location": "Переговорная 2", "start.time": "12:30"}},
+		{"app-conflict-task", "tasks", "/app/tasks", "dela", "aa10-77bc-0e31", "nextcloud-home/dela.ics",
+			func(r string) string { return strings.Replace(r, "DUE;VALUE=DATE:20260807\n", "", 1) },
+			func(r string) string {
+				r = strings.Replace(r, "SUMMARY:Отправить документы в МФЦ\n", "SUMMARY:Документы в МФЦ\nDUE:20260814T180000\nSTATUS:IN-PROCESS\n", 1)
+				return r
+			},
+			map[string]string{"summary": "Отправить документы в МФЦ до пятницы", "status": "IN-PROCESS"}},
 	} {
 		t.Run(one.dir, func(t *testing.T) {
 			app := newMockupApp(t)
@@ -2341,19 +2360,48 @@ func TestFixtureConflictsOfEveryKind(t *testing.T) {
 			// opened first, and that is where the counts of the rail come
 			// from (s-conflict-3, s-conflict-4), as for a contact.
 			openList(t, app, one.list)
+			at := davtest.CalendarHome + one.slug + "/" + one.uid + ".ics"
+			base := one.base(setRecord(t, one.file, one.uid))
+			app.servers["nextcloud"].Seed(at, base)
 			rec := app.listPath(t, one.segment, one.slug) + "/" + one.uid
-			form := formFields(decode[struct {
-				Form view.Form `json:"form"`
-			}](t, app.h.do(get(rec+"/edit", app.sess))).Form)
-			app.servers["nextcloud"].Seed(davtest.CalendarHome+one.slug+"/"+one.uid+".ics", one.body)
-			form.Set("summary", one.now)
+			page := decode[struct {
+				Form      view.Form           `json:"form"`
+				Attendees *view.AttendeeField `json:"attendees"`
+			}](t, app.h.do(get(rec+"/edit", app.sess)))
+			form := formFields(page.Form)
+			// The people go back as a client sends them, each ticked.
+			if a := page.Attendees; a != nil {
+				for _, row := range a.Rows {
+					form.Add(a.Name, row.Value)
+				}
+			}
+			app.servers["nextcloud"].Seed(at, one.server(base))
+			for k, v := range one.edit {
+				form.Set(k, v)
+			}
 			if resp := app.h.do(postForm(rec+"/edit", app.sess, form)); resp.Code != 303 {
-				t.Fatalf("POST over a moved version: %d", resp.Code)
+				t.Fatalf("POST over a moved version: %d %s", resp.Code, resp.Body.String())
 			}
 			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(rec+"/conflict", app.sess)))
 		})
 	}
+}
+
+// setRecord is a record of the set as its own document, by its UID.
+func setRecord(t *testing.T, file, uid string) string {
+	t.Helper()
+	body, err := os.ReadFile(filepath.Join(mockupRoot(t), filepath.FromSlash(file)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, one := range splitRecords(string(body)) {
+		if strings.Contains(one, "UID:"+uid+"\n") {
+			return one
+		}
+	}
+	t.Fatalf("%s is not in %s", uid, file)
+	return ""
 }
 
 // C-14.2: the preview a photo is cropped in (s-contacts-5). It exists only
@@ -2433,13 +2481,16 @@ func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 		// Everything the form holds goes back, as a client sends it: a
 		// field left out is a field cleared, and the conflict would then
 		// be about a date nobody touched.
+		// As s-conflict-5 (Рв11): the title and the text both changed on
+		// both sides, the tags alike.
 		form := url.Values{
 			"summary":     {"Заметка со встречи 10.08 — дополнено"},
-			"description": {string(doc.Body)},
+			"description": {"Договорились: демо в пятницу, релиз в понедельник."},
+			"categories":  {"встречи, релиз, итоги"},
 		}
 		for _, row := range doc.Fields {
 			switch {
-			case row.Name == "" || row.Name == "summary" || row.Name == "description":
+			case row.Name == "" || row.Name == "summary" || row.Name == "description" || row.Name == "categories":
 			case row.Multiple:
 				// Every relation chosen is a value (C-6.8).
 				for _, o := range row.Options {
@@ -2454,8 +2505,11 @@ func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 		for k, v := range save.Query() {
 			form[k] = v
 		}
-		app.servers["nextcloud"].Seed(davtest.CalendarHome+"zapisi/5c81-77aa-0d64.ics",
-			"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//set//EN\nBEGIN:VJOURNAL\nUID:5c81-77aa-0d64\nDTSTAMP:20260801T000000Z\nSUMMARY:Встреча 10.08\nDESCRIPTION:Правка с другого клиента\nDTSTART:20260810T080500Z\nEND:VJOURNAL\nEND:VCALENDAR\n")
+		server := setRecord(t, "nextcloud-home/zapisi.ics", "5c81-77aa-0d64")
+		server = strings.Replace(server, "SUMMARY:Заметка со встречи 10.08\n", "SUMMARY:Встреча 10.08\n", 1)
+		server = strings.Replace(server, "CATEGORIES:встречи,релиз\n", "CATEGORIES:встречи,релиз,итоги\n", 1)
+		server = regexp.MustCompile(`(?m)^DESCRIPTION:.*\n( .*\n)*`).ReplaceAllString(server, "DESCRIPTION:Договорились: демо в пятницу.\n")
+		app.servers["nextcloud"].Seed(davtest.CalendarHome+"zapisi/5c81-77aa-0d64.ics", server)
 		if resp := app.h.do(postForm(save.EscapedPath(), app.sess, form)); resp.Code != 303 {
 			t.Fatalf("POST over a moved version: %d %s", resp.Code, resp.Body.String())
 		}

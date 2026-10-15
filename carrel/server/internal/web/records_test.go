@@ -562,8 +562,11 @@ func TestConflictScreenAndCombination(t *testing.T) {
 		// v0.2.265 the word «Empty»).
 		{Property: "N", Mine: "Ada, King", Theirs: "", Choice: view.ChoiceMine, Name: "choice.1", Diff: view.DiffMine},
 		{Property: "TITLE", Mine: "Countess", Theirs: "", Choice: view.ChoiceMine, Name: "choice.2", Diff: view.DiffMine},
+		// Only the server changed the note: «Your edit» is what was opened,
+		// the server's chosen (Рв2, Рв4).
+		{Property: "NOTE", Mine: "first note", Theirs: "server note", Choice: view.ChoiceTheirs, Name: "choice.3", Diff: view.DiffTheirs},
 	}
-	if len(page.Rows) != len(want) || page.Rows[0] != want[0] || page.Rows[1] != want[1] || page.Rows[2] != want[2] {
+	if len(page.Rows) != len(want) || page.Rows[0] != want[0] || page.Rows[1] != want[1] || page.Rows[2] != want[2] || page.Rows[3] != want[3] {
 		t.Fatalf("rows = %+v", page.Rows)
 	}
 	if page.ReadAt == "" || page.Kind != view.KindContact {

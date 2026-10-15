@@ -24,7 +24,9 @@
       "method": "GET"
     }
   ],
-  "agree": [],
+  "agree": [
+    "CATEGORIES"
+  ],
   "details": null,
   "form": {
     "action": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict",
@@ -347,9 +349,17 @@
       "name": "choice.0",
       "property": "SUMMARY",
       "theirs": "Встреча 10.08"
+    },
+    {
+      "choice": "mine",
+      "diff": "both",
+      "mine": "Договорились: демо в пятницу, релиз в понедельник.",
+      "name": "choice.1",
+      "property": "DESCRIPTION",
+      "theirs": "Договорились: демо в пятницу."
     }
   ],
-  "serverAt": "1 August, 03:00",
+  "serverAt": "10 August, 11:05",
   "subtitle": "Another client changed this note while you were editing it. Nothing has been overwritten.",
   "title": "Changed elsewhere",
   "top": {

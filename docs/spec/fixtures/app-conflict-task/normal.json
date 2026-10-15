@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/conflict?etag=e21\u0026op=mine",
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/conflict?etag=e22\u0026op=mine",
       "id": "conflict.mine",
       "label": "Use only my edit",
       "method": "POST"
@@ -11,7 +11,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/conflict?etag=e21\u0026op=theirs",
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/conflict?etag=e22\u0026op=theirs",
       "id": "conflict.theirs",
       "label": "Use only the server version",
       "method": "POST"
@@ -24,7 +24,9 @@
       "method": "GET"
     }
   ],
-  "agree": [],
+  "agree": [
+    "STATUS"
+  ],
   "details": null,
   "form": {
     "action": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/conflict",
@@ -68,7 +70,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e21"
+            "value": "e22"
           },
           {
             "add": null,
@@ -286,9 +288,17 @@
       "name": "choice.0",
       "property": "SUMMARY",
       "theirs": "Документы в МФЦ"
+    },
+    {
+      "choice": "theirs",
+      "diff": "theirs",
+      "mine": "",
+      "name": "choice.1",
+      "property": "DUE",
+      "theirs": "2026-08-14 18:00"
     }
   ],
-  "serverAt": "1 August, 03:00",
+  "serverAt": "10 August, 09:00",
   "subtitle": "Another client changed this task while you were editing it. Nothing has been overwritten.",
   "title": "Changed elsewhere",
   "top": {

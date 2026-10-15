@@ -288,10 +288,26 @@
       "theirs": "Выпускающий редактор"
     },
     {
+      "choice": "theirs",
+      "diff": "theirs",
+      "mine": "+7 912 445-10-88 · CELL, +7 495 120-45-00 · WORK",
+      "name": "choice.1",
+      "property": "TEL",
+      "theirs": "+7 912 445-10-88 · CELL"
+    },
+    {
+      "choice": "theirs",
+      "diff": "theirs",
+      "mine": "a.kovaleva@example.org · WORK",
+      "name": "choice.2",
+      "property": "EMAIL",
+      "theirs": "anna.kovaleva@slovo.example · WORK"
+    },
+    {
       "choice": "mine",
       "diff": "both",
       "mine": "Пишет по вторникам, отвечает в тот же день. Просила писать на рабочий адрес.",
-      "name": "choice.1",
+      "name": "choice.3",
       "property": "NOTE",
       "theirs": ""
     }

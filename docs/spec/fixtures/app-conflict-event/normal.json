@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e21\u0026op=mine",
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e22\u0026op=mine",
       "id": "conflict.mine",
       "label": "Use only my edit",
       "method": "POST"
@@ -11,7 +11,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e21\u0026op=theirs",
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e22\u0026op=theirs",
       "id": "conflict.theirs",
       "label": "Use only the server version",
       "method": "POST"
@@ -25,7 +25,7 @@
     }
   ],
   "agree": [
-    "ATTENDEE"
+    "DTSTART"
   ],
   "details": null,
   "form": {
@@ -70,7 +70,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e21"
+            "value": "e22"
           },
           {
             "add": null,
@@ -357,9 +357,17 @@
       "name": "choice.0",
       "property": "SUMMARY",
       "theirs": "Синк-ап перенесён"
+    },
+    {
+      "choice": "mine",
+      "diff": "mine",
+      "mine": "Переговорная 2",
+      "name": "choice.1",
+      "property": "LOCATION",
+      "theirs": ""
     }
   ],
-  "serverAt": "1 August, 03:00",
+  "serverAt": "7 August, 15:15",
   "subtitle": "Another client changed this event while you were editing it. Nothing has been overwritten.",
   "title": "Changed elsewhere",
   "top": {

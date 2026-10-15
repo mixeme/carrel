@@ -97,7 +97,10 @@ func TestRowLabelSurvivesTheConflictScreen(t *testing.T) {
 		t.Fatalf("POST over a moved version: %d %q", resp.Code, resp.Header().Get("Location"))
 	}
 	page := decode[view.ConflictPage](t, f.h.do(get(rec+"/conflict", f.sess)))
-	if len(page.Rows) != 1 || page.Rows[0].Property != "TEL" || page.Rows[0].Mine != "+44 20 1 · cell" || page.Rows[0].Theirs != "+44 20 1 · work" {
+	// FN, which only the server changed, is a card of its own, the server's
+	// chosen (Рв2, Рв4; until v0.2.271 it was not shown).
+	if len(page.Rows) != 2 || page.Rows[0].Property != "FN" || page.Rows[0].Diff != view.DiffTheirs || page.Rows[0].Choice != view.ChoiceTheirs ||
+		page.Rows[1].Property != "TEL" || page.Rows[1].Mine != "+44 20 1 · cell" || page.Rows[1].Theirs != "+44 20 1 · work" {
 		t.Fatalf("rows = %+v", page.Rows)
 	}
 	if resp := f.h.do(postForm(actionHref(t, page.Actions, "conflict.mine"), f.sess, url.Values{})); resp.Code != 303 {

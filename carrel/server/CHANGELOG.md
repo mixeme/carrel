@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.271 — 2026-10-15
+
+### Changed
+
+- **A field only the server changed is a card of the conflict screen**
+  (Рв2, Рв4 of the scan of 15.10.2026; `s-conflict-4`: «DUE · only on the
+  server»): `Diff` `theirs`, the server's chosen; «Your edit» is what was
+  opened, and choosing it writes that back. The refused edit keeps the whole
+  version the form was opened with; a time zone goes with its time, not as
+  a card of its own. Before, such a change was kept without a word. «Use only
+  my edit» writes the person's changes and leaves these as the server has
+  them.
+- **The fixtures of the conflict of an event, a task and a note are their
+  frames' data** (Рв11): `s-conflict-3` — SUMMARY both, LOCATION only in the
+  edit, DTSTART agrees; `-4` — SUMMARY both, DUE only on the server, STATUS
+  agrees; `-5` — SUMMARY and DESCRIPTION both, CATEGORIES agree. The
+  contact's waits for the rows by parameter (Рв6).
+
 ## v0.2.270 — 2026-10-15
 
 ### Changed

@@ -72,7 +72,9 @@ func TestAConflictNamesThePropertiesAsTheRecordDoes(t *testing.T) {
 	for _, r := range page.Rows {
 		named = append(named, string(r.Property))
 	}
-	if want := []string{"FN", "N"}; !equalStrings(named, want) {
+	// NOTE, which only the server changed, is named too (Рв2; until v0.2.271
+	// it was kept unsaid).
+	if want := []string{"FN", "N", "NOTE"}; !equalStrings(named, want) {
 		t.Errorf("the conflict names %v, want %v", named, want)
 	}
 }

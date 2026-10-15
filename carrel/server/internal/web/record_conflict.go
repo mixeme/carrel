@@ -26,10 +26,11 @@ type editDraft struct {
 	ETag    string     `json:"etag"`
 	ReadAt  time.Time  `json:"readAt"`
 	Mine    formValues `json:"mine"`
-	// Base is what the version the form was opened with held of the fields
-	// changed (Mine's keys): with it the conflict screen tells a field both
-	// changed from one only the person did (s-conflict-1, Рв2). Empty when
-	// that version was no longer held (Unsure).
+	// Base is what the version the form was opened with held of every field
+	// of the form: with it the conflict screen tells a field both changed
+	// from one only the person did, and finds the ones only the server did
+	// (s-conflict-1, -4; Рв2). Empty when that version was no longer held
+	// (Unsure).
 	Base formValues `json:"base,omitempty"`
 	// Notebook is the notebook a note's edit chose other than its own
 	// (s-notes-20): part of the edit, so the move waits with it and happens
@@ -45,10 +46,10 @@ type editDraft struct {
 func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time, mine, base formValues, notebook string, unsure bool) {
 	held := formValues{}
 	if !unsure {
-		for k := range mine {
-			held[k] = base[k]
-			if v, ok := base[k+".type"]; ok {
-				held[k+".type"] = v
+		for _, f := range editFields[c.spec.kind] {
+			held[f.name] = base[f.name]
+			if v, ok := base[f.name+".type"]; ok {
+				held[f.name+".type"] = v
 			}
 		}
 	}
@@ -85,6 +86,54 @@ func conflictFields(kind view.Kind, d editDraft, theirs formValues) []editField 
 		typed := strings.TrimSpace(first(d.Mine[f.name+".add"])) != ""
 		if changed && (!sameRows(mine, theirs[f.name]) || relabelled || typed) {
 			out = append(out, f)
+		}
+	}
+	return out
+}
+
+// conflictRow is a card of the conflict screen: the field and how it
+// differs.
+type conflictRow struct {
+	field editField
+	diff  view.ConflictDiff
+}
+
+// choice is what a card has chosen before the person does (Рв4; s-conflict-1,
+// -4): the person's edit, but the server's where only the server changed.
+func (cr conflictRow) choice() view.ConflictChoice {
+	if cr.diff == view.DiffTheirs {
+		return view.ChoiceTheirs
+	}
+	return view.ChoiceMine
+}
+
+// conflictRows are the cards of the conflict screen in form order: each field
+// the person changed that the server does not already hold (conflictFields),
+// and — when the version the form was opened with is known — each the
+// server alone changed (s-conflict-4: «DUE · only on the server»). Row N's
+// choice comes back as choice.N.
+func conflictRows(kind view.Kind, d editDraft, theirs formValues) []conflictRow {
+	mine := map[string]bool{}
+	for _, f := range conflictFields(kind, d, theirs) {
+		mine[f.name] = true
+	}
+	var out []conflictRow
+	for _, f := range editFields[kind] {
+		switch {
+		case mine[f.name]:
+			out = append(out, conflictRow{f, conflictDiff(f, d, theirs)})
+		case d.Unsure || d.Base == nil:
+		default:
+			if _, changed := d.Mine[f.name]; changed {
+				continue // the person's, and the server agrees (Agree)
+			}
+			if f.typ == fieldZone {
+				continue // the zone goes with the time it is of (s-conflict-4: DUE alone)
+			}
+			base, held := d.Base[f.name]
+			if held && !sameRows(base, theirs[f.name]) {
+				out = append(out, conflictRow{f, view.DiffTheirs})
+			}
 		}
 	}
 	return out
@@ -203,17 +252,22 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 	page.Subtitle = text("Another client changed this " + string(c.spec.kind) +
 		" while you were editing it. Nothing has been overwritten.")
 	page.Agree = agreeing(c.spec.kind, d, theirs)
-	for i, f := range conflictFields(c.spec.kind, d, theirs) {
+	for i, cr := range conflictRows(c.spec.kind, d, theirs) {
+		f, mine := cr.field, d.Mine
+		if cr.diff == view.DiffTheirs {
+			// The person did not touch it: «Your edit» is what was opened.
+			mine = d.Base
+		}
 		page.Rows = append(page.Rows, view.ConflictRow{
 			// The record's own name for the property, not a label of ours
 			// (s-conflict-1): a conflict is read against the file, and a
 			// property Carrel does not model has no label to invent.
 			Property: text(f.prop),
-			Mine:     text(s.showValues(c, f, d.Mine[f.name], d.Mine[f.name+".type"], alarms)),
+			Mine:     text(s.showValues(c, f, mine[f.name], mine[f.name+".type"], alarms)),
 			Theirs:   text(s.showValues(c, f, theirs[f.name], theirs[f.name+".type"], alarms)),
-			Choice:   view.ChoiceMine,
+			Choice:   cr.choice(),
 			Name:     choiceField(i),
-			Diff:     conflictDiff(f, d, theirs),
+			Diff:     cr.diff,
 		})
 	}
 	if d.Unsure && len(page.Rows) > 0 {
@@ -351,7 +405,20 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 	for k, v := range theirs {
 		want[k] = v
 	}
-	for i, f := range conflictFields(c.spec.kind, d, theirs) {
+	for i, cr := range conflictRows(c.spec.kind, d, theirs) {
+		f := cr.field
+		if cr.diff == view.DiffTheirs {
+			// A field only the server changed: kept as the server holds it,
+			// unless «Your edit» — what was opened — was chosen for it. «Use
+			// only my edit» writes the person's changes, not this.
+			if op != "mine" && chosenSide(r, i, cr.choice()) == view.ChoiceMine {
+				want[f.name] = d.Base[f.name]
+				if f.typed {
+					want[f.name+".type"] = d.Base[f.name+".type"]
+				}
+			}
+			continue
+		}
 		if op == "mine" || chosenSide(r, i, view.ChoiceMine) == view.ChoiceMine {
 			want[f.name] = d.Mine[f.name]
 			if f.typed {
