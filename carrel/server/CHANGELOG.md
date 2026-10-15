@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.245 — 2026-10-15
+
+### Changed
+
+- **A task chooses its time zone** (Р6 of
+  docs/plan/scans/kinds-parity.md), as an event does: its edit's When ends
+  with Time zone (`tz`) — the zone of its start, else of its due date, «as
+  sent»; the form's times are in it, no longer in the instance zone, and
+  another zone rewrites the start and the due date at the clock the form
+  names, with its VTIMEZONE. A new task with a time is written in the
+  instance zone, as a new event is. No frame draws it yet (Typecase's task
+  180).
+
 ## v0.2.244 — 2026-10-15
 
 ### Changed

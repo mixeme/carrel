@@ -193,7 +193,19 @@ func Screen(p *view.TaskEditPage) w.Shell {
 			}
 			continue
 		}
-		form.Items = append(form.Items, fieldSet(set.Legend, rows))
+		var shown []view.FormRow
+		for _, r := range rows {
+			if r.Name == zoneRow {
+				// ждёт кадра: задача Typecase 180 — the zone of the task's
+				// times (Р6) has no frame yet, and When takes no select. It
+				// goes as it came: the times are shown and read in it, and a
+				// zone left out would be the instance's.
+				form.Fields = append(form.Fields, carried([]view.FormRow{r})...)
+				continue
+			}
+			shown = append(shown, r)
+		}
+		form.Items = append(form.Items, fieldSet(set.Legend, shown))
 	}
 	form.Items = append(form.Items, attachments(attach, p.Attach))
 	if len(p.Foreign) > 0 {
@@ -270,10 +282,12 @@ func fieldSet(legend view.Text, rows []view.FormRow) w.FieldSet {
 }
 
 // repeatRow is the start of the names of the repetition's rows (C-6.8:
-// repeat.freq…); listRow is the name of the List the task lies in.
+// repeat.freq…); listRow is the name of the List the task lies in; zoneRow
+// the zone its times are written in.
 const (
 	repeatRow = "repeat."
 	listRow   = "notebook"
+	zoneRow   = "tz"
 )
 
 // repeats tells whether a set is the repetition's: its rows are repeat.….

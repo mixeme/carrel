@@ -58,6 +58,9 @@ var editAlso = map[view.Kind]map[string][]string{
 	view.KindTask: {
 		"done":   {"COMPLETED"},
 		"status": {"COMPLETED"},
+		// The zone rewrites the due date with the start (Р6), and a series
+		// as an event's.
+		"tz": {"DUE", "EXDATE", "RDATE", "RRULE"},
 	},
 }
 
@@ -419,9 +422,10 @@ func readsAs(f editField, have, want, after formValues, typed, organiser string,
 		}
 		return wv == av
 	case fieldZone:
-		// A day has no zone, and the form of one that had none offers the
-		// instance's without asking for it.
-		if triple(after["start"])[2] == "on" || first(w) == "" || first(w) == first(have[f.name]) {
+		// A day has no zone — an event's start, a task's one box —, and the
+		// form of one that had none offers the instance's without asking
+		// for it.
+		if triple(after["start"])[2] == "on" || first(after[taskDayBox]) == "on" || first(w) == "" || first(w) == first(have[f.name]) {
 			return true
 		}
 		return first(w) == first(a)

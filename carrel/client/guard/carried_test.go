@@ -114,3 +114,27 @@ func TestANoteKeepsItsStatus(t *testing.T) {
 		t.Error("the page does not name the status")
 	}
 }
+
+// A task's Time zone (Р6) has no frame yet (Typecase's task 180), and When
+// takes no select: the screen draws none, and the zone goes with the form
+// as it came — the times are shown and read in it, and a form without it
+// would rewrite them in the instance zone.
+func TestATaskFormCarriesItsZone(t *testing.T) {
+	p := &view.TaskEditPage{Form: view.Form{Action: "/app/tasks/a/c/t1/edit", Method: "POST", Sets: []view.FieldSet{
+		{Rows: []view.FormRow{{Name: "summary", Label: "Summary", Kind: view.InputText, Value: "Call"}}},
+		{Legend: "When", Rows: []view.FormRow{
+			{Name: "allday", Label: "All day", Kind: view.InputCheck},
+			{Name: "due.date", Label: "Due date", Kind: view.InputDate, Value: "2026-08-15"},
+			{Name: "due.time", Label: "Due time", Kind: view.InputTime, Value: "12:00"},
+			{Name: "tz", Label: "Time zone", Kind: view.InputSelect, Value: "Asia/Yekaterinburg",
+				Options: []view.Option{{Value: "Asia/Yekaterinburg", Selected: true}, {Value: "Europe/London"}}},
+		}},
+	}}}
+	html := taskedit.Screen(p).Render()
+	if !strings.Contains(html, `name="tz" value="Asia/Yekaterinburg"`) {
+		t.Error("the form does not carry the zone")
+	}
+	if strings.Contains(html, "Time zone") || strings.Contains(html, "Europe/London") {
+		t.Error("the form draws the zone the frames do not")
+	}
+}

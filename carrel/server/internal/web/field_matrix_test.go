@@ -34,7 +34,9 @@ func TestATaskSaveIsTheEdit(t *testing.T) {
 	}{
 		{"the summary", url.Values{"summary": {"Ship it"}}, []string{"SUMMARY"}, []string{"SUMMARY:Ship it", "X-APPLE-SORT-ORDER:12"}},
 		{"the place", url.Values{"location": {"Dock, gate 5"}}, []string{"LOCATION"}, []string{"LOCATION:Dock\\, gate 5"}},
-		{"the due time", url.Values{"due.time": {"16:00"}}, []string{"DUE"}, []string{"DUE;TZID=Europe/Moscow:20260112T190000", "DTSTART;TZID=Europe/Moscow:20260110T090000"}},
+		// The form shows the task's times in its own zone (Р6): 16:00 typed
+		// is 16:00 in Moscow, no longer the instance zone's clock.
+		{"the due time", url.Values{"due.time": {"16:00"}}, []string{"DUE"}, []string{"DUE;TZID=Europe/Moscow:20260112T160000", "DTSTART;TZID=Europe/Moscow:20260110T090000"}},
 		// Б11: a tag with a comma of its own is one tag before and after.
 		{"one more tag", url.Values{"categories": {"Smith, John, urgent, q1, later"}}, []string{"CATEGORIES"},
 			[]string{"CATEGORIES:Smith\\, John,urgent,q1,later"}},

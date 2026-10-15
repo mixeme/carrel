@@ -284,3 +284,65 @@ func TestTasksAndNotesHaveAttendees(t *testing.T) {
 		t.Errorf("Bob unticked is still there:\n%s", got)
 	}
 }
+
+// Р6 of scans/kinds-parity.md: an event's form chooses the zone its times
+// are written in and shows them in it (s-agenda-3, -8); a task's showed its
+// times in the instance zone and had none to choose, though they are written
+// with TZID as an event's are. Now a task's When ends with Time zone, as the
+// event's: the zone its times came in — its start's, else its due date's —
+// «as sent», its times shown in it; another rewrites the start and the due
+// date at the clock the form names, in that zone, with its VTIMEZONE.
+func TestATaskChoosesItsZone(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260101T000000Z\nSUMMARY:Call\n"+
+			"DTSTART;TZID=Asia/Yekaterinburg:20260814T090000\nDUE;TZID=Asia/Yekaterinburg:20260815T120000\nX-KEEP:1\nEND:VTODO"),
+		"t2.ics", ics("BEGIN:VTODO\nUID:t2\nDTSTAMP:20260101T000000Z\nSUMMARY:Pay\nDUE;TZID=Europe/Moscow:20260815T180000\nEND:VTODO"))
+	tasks := f.path("tasks")
+	edit := func(uid string) view.TaskEditPage {
+		t.Helper()
+		return decode[view.TaskEditPage](t, f.h.do(get(tasks+"/"+uid+"/edit", f.sess)))
+	}
+	save := func(uid string, set map[string]string) string {
+		t.Helper()
+		form := formFields(edit(uid).Form)
+		for k, v := range set {
+			form.Set(k, v)
+		}
+		if resp := f.h.do(postForm(tasks+"/"+uid+"/edit", f.sess, form)); resp.Code != 303 {
+			t.Fatalf("POST %v: %d %s", set, resp.Code, resp.Body.String())
+		}
+		return unfolded(body(t, f, uid+".ics"))
+	}
+
+	page := edit("t1")
+	zone := rowNamed(t, page.Form, "tz")
+	if zone.Value != "Asia/Yekaterinburg" || zone.ValueAside != "as sent" || len(zone.Options) < 3 ||
+		zone.Options[0].Value != "Asia/Yekaterinburg" || zone.Options[0].Group != "As sent" {
+		t.Fatalf("zone row = %+v", zone)
+	}
+	if form := formFields(page.Form); form.Get("start.time") != "09:00" || form.Get("due.time") != "12:00" {
+		t.Errorf("times shown at %s and %s, want the task zone's 09:00 and 12:00", form.Get("start.time"), form.Get("due.time"))
+	}
+	got := save("t1", map[string]string{"summary": "Call again"})
+	mustContain(t, got, "DTSTART;TZID=Asia/Yekaterinburg:20260814T090000", "DUE;TZID=Asia/Yekaterinburg:20260815T120000")
+	got = save("t1", map[string]string{"tz": "Europe/London"})
+	mustContain(t, got, "DTSTART;TZID=Europe/London:20260814T090000", "DUE;TZID=Europe/London:20260815T120000",
+		"BEGIN:VTIMEZONE", "TZID:Europe/London", "SUMMARY:Call again", "X-KEEP:1")
+
+	// A task with a due date and no start: the due date's zone.
+	page = edit("t2")
+	if zone := rowNamed(t, page.Form, "tz"); zone.Value != "Europe/Moscow" {
+		t.Errorf("a due date's zone = %+v", zone)
+	}
+	if form := formFields(page.Form); form.Get("due.time") != "18:00" {
+		t.Errorf("due shown at %s, want 18:00", form.Get("due.time"))
+	}
+	mustContain(t, save("t2", map[string]string{"tz": "UTC"}), "DUE:20260815T180000Z")
+
+	form := formFields(edit("t1").Form)
+	form.Set("tz", "Mars/Olympus")
+	bad := decode[view.TaskEditPage](t, f.h.do(postForm(tasks+"/t1/edit", f.sess, form)))
+	if len(bad.Form.Errors) == 0 || bad.Form.Errors[0].Name != "tz" {
+		t.Errorf("errors = %+v, want tz refused", bad.Form.Errors)
+	}
+}

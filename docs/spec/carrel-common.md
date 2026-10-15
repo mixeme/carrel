@@ -1540,7 +1540,11 @@ type TaskEditPage struct { // правка
     Name      Text // заголовок: название задачи, у новой — «New task» (s-tasks-3)
     Subtitle  Runs // список и просрочка тревогой: «nextcloud · Дела · ‹overdue by 3 days›» (s-tasks-3 рисует её бейджем тревоги)
     // Поля в рубриках кадра (s-tasks-3): When — All day (Disables: оба
-    // времени; пока стоит — времена ReadOnly и не читаются), даты и времена;
+    // времени; пока стоит — времена ReadOnly и не читаются), даты и времена
+    // в поясе задачи, Time zone (`tz`, как у события: пояс начала, а без
+    // него — срока, «as sent»; другой переписывает оба времени по часам
+    // формы; у задачи без времени и целого дня строки нет; Р6 списка
+    // равенства родов, кадра нет);
     // Progress — Status, Priority, Percent complete («0» без
     // PERCENT-COMPLETE: сохранённое как есть ничего не пишет), Done;
     // Reminders — reminder.N и Add reminder; Other — Location, Tags (без

@@ -4,6 +4,12 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.37 — 2026-10-15
+
+Server `v0.2.245`. A task's edit carries its Time zone hidden, as it came:
+no frame draws it yet (Typecase's task 180), and the times are shown and
+read in it.
+
 ## v0.4.36 — 2026-10-15
 
 Server `v0.2.244`. A task's card and panel and a note's column and panel

@@ -61,9 +61,11 @@ const (
 	// fieldChoice is one value of a fixed list, written as it is: STATUS.
 	// A value another client wrote is kept as a choice.
 	fieldChoice
-	// fieldZone is the zone DTSTART and DTEND are written in: their TZID,
-	// "UTC" or "floating". The form's times are in it (formZone): an event
-	// is edited in its own zone (s-agenda-3, the owner's decision of
+	// fieldZone is the zone DTSTART and DTEND are written in — a task's
+	// DTSTART and DUE (Р6 of scans/kinds-parity.md) —: their TZID, "UTC" or
+	// "floating", read from the start, or from a task's due date when it has
+	// none (zoneProp). The form's times are in it (formZone): a record is
+	// edited in its own zone (s-agenda-3, the owner's decision of
 	// 02.10.2026), and the clock typed is the clock in the zone chosen.
 	fieldZone
 	// fieldRepeat is RRULE, edited as a whole series (S-11): Frequency,
@@ -170,6 +172,15 @@ func zoneOf(cur []model.RawValue) string {
 		return "UTC"
 	}
 	return "floating"
+}
+
+// zoneProp is the time a record's zone is read from: its start, or a task's
+// due date when it has no start (Р6).
+func zoneProp(props map[string][]model.RawValue) string {
+	if len(props["DTSTART"]) == 0 && len(props["DUE"]) > 0 {
+		return "DUE"
+	}
+	return "DTSTART"
 }
 
 // formZone is the zone an event's form shows and reads its times in: the
@@ -822,6 +833,10 @@ var editFields = map[view.Kind][]editField{
 		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, taskDay: true, set: "When"},
 		{name: "due", label: "Due date", timeLabel: "Due time", prop: "DUE", typ: fieldTime, taskDay: true, set: "When",
 			quickSample: "YYYY-MM-DD", quickTimeSample: "--:--"},
+		// The zone the task's times are written in, as an event's (Р6 of
+		// scans/kinds-parity.md: they are written with TZID, and were shown
+		// in the instance zone; no frame draws it yet — Typecase's task 180).
+		{name: "tz", label: "Time zone", prop: "DTSTART", typ: fieldZone, set: "When"},
 		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: taskStatuses, blank: "NEEDS-ACTION", set: "Progress"},
 		{name: "priority", label: "Priority", prop: "PRIORITY", typ: fieldChoice, choices: priorities, set: "Progress"},
 		{name: "percent", label: "Percent complete", prop: "PERCENT-COMPLETE", typ: fieldPercent, set: "Progress"},
@@ -1004,11 +1019,10 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 	tz := s.tz()
 	vals := formValues{}
 	props := obj.Props()
-	// An event's times are shown in its own zone; a task's in the
-	// instance's: it has no zone to choose.
+	// An event's and a task's times are shown in their own zone (Р6).
 	at := tz
 	if hasField(c.spec.kind, "tz") {
-		at = formZone(zoneOf(props["DTSTART"]), tz)
+		at = formZone(zoneOf(props[zoneProp(props)]), tz)
 	}
 	var alarms []cal.Alarm
 	for _, f := range editFields[c.spec.kind] {
@@ -1022,7 +1036,7 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			}
 			vals[f.name] = []string{v}
 		case fieldZone:
-			vals[f.name] = []string{zoneOf(props[f.prop])}
+			vals[f.name] = []string{zoneOf(props[zoneProp(props)])}
 		case fieldRepeat:
 			var start time.Time
 			if tm, err := cal.TimingOf(obj, tz); err == nil && !tm.Start.IsZero() {
@@ -1400,14 +1414,18 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	// UTC, and a series kept that instant through the change of the clocks).
 	var zone string
 	held, chosen := first(have["tz"]), first(want["tz"])
-	fresh := hasField(c.spec.kind, "tz") && (len(props["DTSTART"]) == 0 || zoneOf(props["DTSTART"]) == "")
+	zp := zoneProp(props)
+	fresh := hasField(c.spec.kind, "tz") && (len(props[zp]) == 0 || zoneOf(props[zp]) == "")
 	if fresh {
 		held = ""
 		if chosen == "" {
 			chosen = s.instanceZone()
 		}
 	}
-	if (fresh || (held != "" && chosen != held)) && startRow[2] != "on" {
+	// A task with no time at all has no zone to write (Р6): an event's
+	// start is required.
+	timed := triple(want["start"])[0] != "" || triple(want["due"])[0] != ""
+	if (fresh || (held != "" && chosen != held)) && !formAllDay(c.spec.kind, want) && timed {
 		loc, ok := zoneOffered(chosen, held)
 		switch {
 		case !ok || chosen == "":
@@ -1420,7 +1438,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 		}
 	}
 	// The rows are read in the zone they are written in: the one chosen,
-	// else the one held. A task has no zone and reads the instance's.
+	// else the one held.
 	clock := tz
 	if hasField(c.spec.kind, "tz") {
 		clock = formZone(held, tz)
@@ -1695,7 +1713,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				written = ""
 			}
 			ops := timeOps(f.prop, props[f.prop], row, allDay, shift, clock, written)
-			if f.name == "start" && ch.zone != nil {
+			if (f.name == "start" || ch.zoneYear == 0) && ch.zone != nil {
 				ch.zoneYear = at.Year()
 			}
 			ch.ops = append(ch.ops, ops...)
@@ -3007,7 +3025,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				Placeholder: "Title or UID", Suggest: s.relatedSuggest(c, st), Mono: true}
 			set.Rows = append(set.Rows, row)
 		case fieldZone:
-			held, chosen := zoneOf(props[f.prop]), first(vals)
+			held, chosen := zoneOf(props[zoneProp(props)]), first(vals)
 			switch {
 			case st.obj == nil:
 				// A new event: the instance zone chosen — also when the

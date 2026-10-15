@@ -768,7 +768,9 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
 - **Виджеты.** Те же, что у правки события.
 - **Контролы.** Поля задачи, срок, доля выполнения, напоминания, вложения, связи.
   Рубрики — `FieldSet.Legend` в порядке s-tasks-3: голова (Summary,
-  Description), When (All day, Start date, Start time, Due date, Due time),
+  Description), When (All day, Start date, Start time, Due date, Due time;
+  Time zone — `tz`, кадра нет: не рисуется, значение едет скрытым — времена
+  показаны и читаются в нём),
   Progress (Status, Priority, Percent complete, Done — последним), Reminders
   (First, Add reminder), Other (Location, Tags, Link — `URL`, кадра нет,
   ширина Tags, — Related to); вложения —
