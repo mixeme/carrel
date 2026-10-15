@@ -142,11 +142,27 @@ func TestCompactRowsIsACheck(t *testing.T) {
 	if on == nil || !on.Sets[len(on.Sets)-1].Rows[len(on.Sets[len(on.Sets)-1].Rows)-1].Options[0].Selected {
 		t.Errorf("after the choice = %+v", on)
 	}
+	// Unticked, the section keeps comfortable rows — a 0, not a cookie
+	// dropped: a browser whose density is Compact would otherwise tick it
+	// again (Appearance; until 15.10.2026 the cookie was dropped).
 	rec = app.h.do(get(list+"?"+sent.Encode(), app.sess))
+	var off *http.Cookie
 	for _, k := range rec.Result().Cookies() {
-		if k.Name == "carrel_compact_contacts" && k.MaxAge >= 0 {
-			t.Errorf("unticked: cookie %+v, want it dropped", k)
+		if k.Name == "carrel_compact_contacts" {
+			off = k
 		}
+	}
+	if off == nil || off.Value != "0" {
+		t.Errorf("unticked: cookie %+v, want 0", off)
+	}
+	dense := get(list, app.sess)
+	dense.AddCookie(&http.Cookie{Name: "carrel_look", Value: "density=compact&theme=auto"})
+	if c := decode[view.ContactsListPage](t, app.h.do(dense)).Bar.Compact; c == nil || !c.Sets[len(c.Sets)-1].Rows[len(c.Sets[len(c.Sets)-1].Rows)-1].Options[0].Selected {
+		t.Errorf("a browser of Compact density: %+v", c)
+	}
+	dense.AddCookie(off)
+	if c := decode[view.ContactsListPage](t, app.h.do(dense)).Bar.Compact; c == nil || c.Sets[len(c.Sets)-1].Rows[len(c.Sets[len(c.Sets)-1].Rows)-1].Options[0].Selected {
+		t.Errorf("a section unticked under Compact density: %+v", c)
 	}
 }
 

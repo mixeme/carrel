@@ -17,6 +17,16 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.254 — 2026-10-15
+
+### Changed
+
+- **The density of Appearance is the default of «Compact rows»**: a
+  section this browser chose nothing for draws compact rows when the
+  density is Compact. A section's own choice is kept as 1 or 0 (until now
+  unticking dropped the cookie, and the density would tick it again), and
+  «Reset remembered view settings» forgets those too.
+
 ## v0.2.253 — 2026-10-15
 
 ### Added

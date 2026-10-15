@@ -105,7 +105,8 @@ func Screen(p *view.NotesPage) w.Shell {
 		main = append(main, *r)
 	}
 	shown := chosen(p.Bar.Columns)
-	single := bind.Single(p.Rail)
+	// One collection, or a browser that hides the source column (Appearance).
+	single := bind.Sourceless(p.Rail, p.Look)
 	for _, g := range p.Groups {
 		rows := make([]w.ListRow, 0, len(g.Rows))
 		for _, r := range g.Rows {

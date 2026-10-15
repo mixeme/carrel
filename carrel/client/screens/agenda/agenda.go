@@ -111,7 +111,8 @@ func Screen(p *view.AgendaPage) w.Shell {
 		main = append(main, *r)
 	}
 	compact := bind.Checked(p.Bar.Compact)
-	single := bind.Single(p.Rail)
+	// One collection, or a browser that hides the source column (Appearance).
+	single := bind.Sourceless(p.Rail, p.Look)
 	shown := chosen(p.Bar.Columns, single)
 	for _, d := range p.Days {
 		rows := make([]w.ListRow, 0, len(d.Rows))

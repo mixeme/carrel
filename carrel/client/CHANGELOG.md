@@ -4,6 +4,14 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.40 — 2026-10-15
+
+Server `v0.2.254`. The combined lists of contacts, the agenda, tasks and
+notes draw no source column when the browser chose not to see it
+(`Shell.Look.Source`, Appearance): their rows as the list of one collection
+draws them (`bind.Sourceless`). The theme and the width of a note wait for
+the library (Typecase's task 186).
+
 ## v0.4.39 — 2026-10-15
 
 Server `v0.2.247`. `CopiesSheet` — «Which copy to edit?» and «Which copy

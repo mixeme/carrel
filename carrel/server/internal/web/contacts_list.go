@@ -56,9 +56,11 @@ func withoutOpen(r *http.Request) *http.Request {
 func compactCookie(segment string) string { return "carrel_compact_" + segment }
 
 // compactChoice takes «Compact rows» (?compact=1 or 0): the choice is this
-// browser's, kept by a cookie of the section, and the list comes back
-// without the mark. The form of the bar sends the hidden 0 and, ticked, the
-// 1 after it: the last value is the choice. It reports whether it answered.
+// browser's, kept by a cookie of the section — 1 or 0, so that a section
+// keeps comfortable rows where the browser's density is Compact —, and the
+// list comes back without the mark. The form of the bar sends the hidden 0
+// and, ticked, the 1 after it: the last value is the choice. It reports
+// whether it answered.
 func (s *Server) compactChoice(w http.ResponseWriter, r *http.Request, segment, back string) bool {
 	q := r.URL.Query()
 	v, ok := q["compact"]
@@ -66,9 +68,9 @@ func (s *Server) compactChoice(w http.ResponseWriter, r *http.Request, segment, 
 		return false
 	}
 	cookie := &http.Cookie{Name: compactCookie(segment), Path: s.cookiePath(), HttpOnly: true,
-		SameSite: http.SameSiteLaxMode, Secure: s.secureCookies(r), MaxAge: -1}
+		SameSite: http.SameSiteLaxMode, Secure: s.secureCookies(r), Value: "0", MaxAge: int(conf.ColumnsChoiceAge.Seconds())}
 	if len(v) > 0 && v[len(v)-1] == "1" {
-		cookie.Value, cookie.MaxAge = "1", int(conf.ColumnsChoiceAge.Seconds())
+		cookie.Value = "1"
 	}
 	http.SetCookie(w, cookie)
 	q.Del("compact")
@@ -82,11 +84,12 @@ func (s *Server) compactChoice(w http.ResponseWriter, r *http.Request, segment, 
 // compactForm is «Compact rows» of the bar (s-contacts-1, components-38): a
 // check of a GET form on the list — the list's query hidden, so the choice
 // comes back to the same list, the hidden compact=0, and the check whose one
-// value is 1, ticked when this browser chose dense rows.
+// value is 1, ticked when this browser chose dense rows for the section —
+// else when its density is Compact (Appearance, appearance-1).
 func (s *Server) compactForm(r *http.Request, segment, base string) *view.Form {
-	on := false
-	if c, err := r.Cookie(compactCookie(segment)); err == nil && c.Value == "1" {
-		on = true
+	on := lookOf(r).Compact
+	if c, err := r.Cookie(compactCookie(segment)); err == nil {
+		on = c.Value == "1"
 	}
 	q := r.URL.Query()
 	var rows []view.FormRow

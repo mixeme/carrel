@@ -289,6 +289,13 @@ func Single(r view.Rail) bool {
 	return false
 }
 
+// Sourceless tells whether the rows of a list draw no source and no column
+// for it: one collection's list (Single), or a browser that chose not to see
+// the source column (Look.Source, Appearance — appearance-1).
+func Sourceless(r view.Rail, look view.Look) bool {
+	return Single(r) || !look.Source
+}
+
 // LinkedBadge is the badge of a row's title in the list of one collection:
 // the sources of a linked record are its hint — «nextcloud · Дела,
 // nextcloud · Работа» under «linked ×2» (Badge.Title; s-tasks-15,

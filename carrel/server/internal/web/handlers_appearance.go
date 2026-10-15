@@ -85,10 +85,10 @@ func (s *Server) postSettingsAppearance(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	if r.URL.Query().Get("op") == "reset" {
-		// «Reset remembered view settings»: the columns of every section and
-		// this browser's look are forgotten.
+		// «Reset remembered view settings»: the columns and the rows of
+		// every section and this browser's look are forgotten.
 		for _, c := range r.Cookies() {
-			if strings.HasPrefix(c.Name, "carrel_cols_") || c.Name == lookCookie {
+			if strings.HasPrefix(c.Name, "carrel_cols_") || strings.HasPrefix(c.Name, "carrel_compact_") || c.Name == lookCookie {
 				http.SetCookie(w, &http.Cookie{Name: c.Name, Value: "", Path: s.cookiePath(), MaxAge: -1,
 					HttpOnly: true, Secure: s.secureCookies(r), SameSite: http.SameSiteLaxMode})
 			}
