@@ -1648,9 +1648,11 @@ type ConflictPage struct {
     Shell
     Kind     Kind
     UID      string
+    Subtitle Text   // что случилось, под заголовком: «Another client changed this contact while you were editing it. Nothing has been overwritten.» (s-conflict-1; у события, задачи, заметки — их слово); пусто — записи на сервере нет
     ReadAt   When
     ServerAt When
     Rows     []ConflictRow
+    Agree    []Text // свойства, что изменены так же, как на сервере: «‹DTSTART› agrees — kept as it is.» (s-conflict-3, -4, -5; слова — экрана)
     // Выбор по строкам без сценариев (U-8, s-conflict-1): POST …/conflict,
     // скрытые _csrf, etag показанной версии и op=combine; радио строк —
     // ConflictRow.Name; Actions — «Write this combination», её отправка.

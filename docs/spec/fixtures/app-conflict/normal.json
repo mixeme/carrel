@@ -17,14 +17,14 @@
       "method": "POST"
     },
     {
-      "csrf": "csrf",
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict?op=cancel",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
       "id": "conflict.cancel",
       "label": "Cancel",
-      "method": "POST"
+      "method": "GET"
     }
   ],
+  "agree": [],
   "details": null,
   "form": {
     "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict",
@@ -96,15 +96,7 @@
     "theme": "auto",
     "wide": false
   },
-  "notices": [
-    {
-      "actions": [],
-      "body": "Another client changed this contact while you were editing it. Nothing has been overwritten.",
-      "details": null,
-      "role": "alert",
-      "title": "Conflict"
-    }
-  ],
+  "notices": [],
   "print": {
     "range": "",
     "taken": "",
@@ -299,10 +291,11 @@
       "mine": "Пишет по вторникам, отвечает в тот же день. Просила писать на рабочий адрес.",
       "name": "choice.1",
       "property": "NOTE",
-      "theirs": "Empty"
+      "theirs": ""
     }
   ],
   "serverAt": "10 August, 17:02",
+  "subtitle": "Another client changed this contact while you were editing it. Nothing has been overwritten.",
   "title": "Changed elsewhere",
   "top": {
     "lock": null,
@@ -377,12 +370,14 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict",
+        "icon": "i-refresh",
+        "id": "record.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

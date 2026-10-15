@@ -556,8 +556,10 @@ func TestConflictScreenAndCombination(t *testing.T) {
 	// (U-6.1): the card on the server carries none, and this one now would.
 	want := []view.ConflictRow{
 		{Property: "FN", Mine: "Ada King", Theirs: "Ada Byron", Choice: view.ChoiceMine, Name: "choice.0"},
-		{Property: "N", Mine: "Ada, King", Theirs: "Empty", Choice: view.ChoiceMine, Name: "choice.1"},
-		{Property: "TITLE", Mine: "Countess", Theirs: "Empty", Choice: view.ChoiceMine, Name: "choice.2"},
+		// Nothing is said by the screen's dash (s-conflict-1, Рв3; until
+		// v0.2.265 the word «Empty»).
+		{Property: "N", Mine: "Ada, King", Theirs: "", Choice: view.ChoiceMine, Name: "choice.1"},
+		{Property: "TITLE", Mine: "Countess", Theirs: "", Choice: view.ChoiceMine, Name: "choice.2"},
 	}
 	if len(page.Rows) != len(want) || page.Rows[0] != want[0] || page.Rows[1] != want[1] || page.Rows[2] != want[2] {
 		t.Fatalf("rows = %+v", page.Rows)

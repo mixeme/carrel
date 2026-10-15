@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.265 — 2026-10-15
+
+### Changed
+
+- **The conflict screen speaks as `s-conflict-1`…`-5`** (Рв1, Рв3, Рв5, Рв7,
+  Рв8 of the scan of 15.10.2026): what happened is the line under the title
+  (`ConflictPage.Subtitle`: «Another client changed this contact while you
+  were editing it. Nothing has been overwritten.»), not an alarm «Conflict»
+  over the cards; a property the person changed to what the server already
+  holds is named above the cards (`Agree`, «‹DTSTART› agrees — kept as it
+  is.»); an empty value is empty — the screen draws its dash, not «Empty»;
+  Cancel is a link to the record; the head's refresh reads the page again.
+
+### For consumers
+
+C-6 `ConflictPage`: `Subtitle`, `Agree`. Fixtures `app-conflict`,
+`app-conflict-event`, `-task`, `-note` re-shot.
+
 ## v0.2.264 — 2026-10-15
 
 ### Changed

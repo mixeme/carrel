@@ -17,14 +17,14 @@
       "method": "POST"
     },
     {
-      "csrf": "csrf",
       "enabled": true,
-      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/conflict?op=cancel",
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31",
       "id": "conflict.cancel",
       "label": "Cancel",
-      "method": "POST"
+      "method": "GET"
     }
   ],
+  "agree": [],
   "details": null,
   "form": {
     "action": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/conflict",
@@ -96,15 +96,7 @@
     "theme": "auto",
     "wide": false
   },
-  "notices": [
-    {
-      "actions": [],
-      "body": "Another client changed this task while you were editing it. Nothing has been overwritten.",
-      "details": null,
-      "role": "alert",
-      "title": "Conflict"
-    }
-  ],
+  "notices": [],
   "print": {
     "range": "",
     "taken": "",
@@ -296,6 +288,7 @@
     }
   ],
   "serverAt": "1 August, 03:00",
+  "subtitle": "Another client changed this task while you were editing it. Nothing has been overwritten.",
   "title": "Changed elsewhere",
   "top": {
     "lock": null,
@@ -370,12 +363,14 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/conflict",
+        "icon": "i-refresh",
+        "id": "record.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

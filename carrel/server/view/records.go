@@ -372,11 +372,19 @@ type NoteMeta struct {
 
 type ConflictPage struct {
 	Shell
-	Kind     Kind          `json:"kind"`
-	UID      string        `json:"uid"`
+	Kind Kind   `json:"kind"`
+	UID  string `json:"uid"`
+	// Subtitle — что случилось, строкой под заголовком (s-conflict-1):
+	// «Another client changed this contact while you were editing it.
+	// Nothing has been overwritten.»; пусто — записи на сервере нет
+	Subtitle Text          `json:"subtitle"`
 	ReadAt   When          `json:"readAt"`
 	ServerAt When          `json:"serverAt"`
 	Rows     []ConflictRow `json:"rows"`
+	// Agree — свойства, что человек изменил так же, как сервер: «‹DTSTART›
+	// agrees — kept as it is.» над карточками (s-conflict-3, -4, -5; слова —
+	// экрана)
+	Agree []Text `json:"agree"`
 	// Form — выбор по строкам без сценариев (U-8, s-conflict-1): POST
 	// …/conflict, скрытые _csrf, etag показанной версии и op=combine;
 	// строки шлют Name своей ConflictRow со значением mine или theirs (C-8

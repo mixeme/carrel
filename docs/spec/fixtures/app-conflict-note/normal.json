@@ -17,14 +17,14 @@
       "method": "POST"
     },
     {
-      "csrf": "csrf",
       "enabled": true,
-      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?op=cancel",
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
       "id": "conflict.cancel",
       "label": "Cancel",
-      "method": "POST"
+      "method": "GET"
     }
   ],
+  "agree": [],
   "details": null,
   "form": {
     "action": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict",
@@ -96,15 +96,7 @@
     "theme": "auto",
     "wide": false
   },
-  "notices": [
-    {
-      "actions": [],
-      "body": "Another client changed this note while you were editing it. Nothing has been overwritten.",
-      "details": null,
-      "role": "alert",
-      "title": "Conflict"
-    }
-  ],
+  "notices": [],
   "print": {
     "range": "",
     "taken": "",
@@ -357,6 +349,7 @@
     }
   ],
   "serverAt": "1 August, 03:00",
+  "subtitle": "Another client changed this note while you were editing it. Nothing has been overwritten.",
   "title": "Changed elsewhere",
   "top": {
     "lock": null,
@@ -431,12 +424,14 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict",
+        "icon": "i-refresh",
+        "id": "record.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

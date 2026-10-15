@@ -17,13 +17,15 @@
       "method": "POST"
     },
     {
-      "csrf": "csrf",
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?op=cancel",
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
       "id": "conflict.cancel",
       "label": "Cancel",
-      "method": "POST"
+      "method": "GET"
     }
+  ],
+  "agree": [
+    "ATTENDEE"
   ],
   "details": null,
   "form": {
@@ -96,15 +98,7 @@
     "theme": "auto",
     "wide": false
   },
-  "notices": [
-    {
-      "actions": [],
-      "body": "Another client changed this event while you were editing it. Nothing has been overwritten.",
-      "details": null,
-      "role": "alert",
-      "title": "Conflict"
-    }
-  ],
+  "notices": [],
   "print": {
     "range": "",
     "taken": "",
@@ -365,6 +359,7 @@
     }
   ],
   "serverAt": "1 August, 03:00",
+  "subtitle": "Another client changed this event while you were editing it. Nothing has been overwritten.",
   "title": "Changed elsewhere",
   "top": {
     "lock": null,
@@ -439,12 +434,14 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict",
+        "icon": "i-refresh",
+        "id": "record.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

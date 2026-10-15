@@ -76,6 +76,19 @@ func conflictFields(kind view.Kind, d editDraft, theirs formValues) []editField 
 	return out
 }
 
+// agreeing are the properties the person changed to what the server version
+// already holds (s-conflict-3, Рв5): said above the cards, kept as they are.
+func agreeing(kind view.Kind, d editDraft, theirs formValues) []view.Text {
+	var out []view.Text
+	for _, f := range editFields[kind] {
+		mine, changed := d.Mine[f.name]
+		if changed && sameRows(mine, theirs[f.name]) && (!f.typed || sameLabels(d.Mine[f.name+".type"], theirs[f.name+".type"])) {
+			out = append(out, text(f.prop))
+		}
+	}
+	return out
+}
+
 func (s *Server) showValues(c *collectionCtx, f editField, vals, labels []string, alarms []cal.Alarm) string {
 	var parts []string
 	switch f.typ {
@@ -130,7 +143,8 @@ func (s *Server) showValues(c *collectionCtx, f editField, vals, labels []string
 		}
 	}
 	if len(parts) == 0 {
-		return "Empty"
+		// Nothing: the screen draws its dash (s-conflict-1, Рв3).
+		return ""
 	}
 	return strings.Join(parts, ", ")
 }
@@ -142,21 +156,23 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 	sh.Notices = append(sh.Notices, notices...)
 	page := view.ConflictPage{Shell: sh, Kind: c.spec.kind, UID: d.UID, ReadAt: c.tf.formatWhen(d.ReadAt, false, now)}
 	path := c.recordPath(d.UID) + "/conflict"
-	cancel := view.Action{ID: "conflict.cancel", Label: "Cancel", Href: s.postQuery(path, url.Values{"op": {"cancel"}}), Method: "POST", Enabled: true}
+	// Cancel leads back to the record (s-conflict-1, Рв8): the refused edit
+	// kept in the session is overwritten by the next one, and goes with it.
+	cancel := view.Action{ID: "conflict.cancel", Label: "Cancel", Href: s.route(c.recordPath(d.UID)), Method: "GET", Enabled: true}
+	sh.Top.Refresh = s.recordRefresh(c, path)
+	page.Shell = sh
 	if obj == nil {
 		page.Actions = []view.Action{cancel}
 		return page
 	}
 	page.ServerAt = s.serverStamp(c, obj)
-	// The screen says what happened before it asks anything (s-conflict-1):
-	// two columns of values do not by themselves tell a person that their
-	// save was refused and that nothing was written.
-	page.Notices = append(page.Notices, view.Notice{
-		Role:  view.NoticeAlert,
-		Title: "Conflict",
-		Body: text("Another client changed this " + string(c.spec.kind) +
-			" while you were editing it. Nothing has been overwritten."),
-	})
+	// The screen says what happened before it asks anything, under its
+	// title (s-conflict-1, Рв1): two columns of values do not by themselves
+	// tell a person that their save was refused and that nothing was
+	// written.
+	page.Subtitle = text("Another client changed this " + string(c.spec.kind) +
+		" while you were editing it. Nothing has been overwritten.")
+	page.Agree = agreeing(c.spec.kind, d, theirs)
 	for i, f := range conflictFields(c.spec.kind, d, theirs) {
 		page.Rows = append(page.Rows, view.ConflictRow{
 			// The record's own name for the property, not a label of ours

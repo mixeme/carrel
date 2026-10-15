@@ -79,7 +79,9 @@ func TestAConflictNamesThePropertiesAsTheRecordDoes(t *testing.T) {
 
 // The conflict screen always says what happened, in the words of the frame
 // (s-conflict-1): a record read and then saved by someone else is not a
-// state a person is expected to infer from a table of two columns.
+// state a person is expected to infer from a table of two columns. It says
+// it under its title, not as an alarm over the cards (Рв1; until v0.2.265 a
+// notice «Conflict»).
 func TestTheConflictScreenSaysWhatHappened(t *testing.T) {
 	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEND:VCARD\n")
 	rec := f.path("contacts") + "/ada"
@@ -90,12 +92,16 @@ func TestTheConflictScreenSaysWhatHappened(t *testing.T) {
 	f.h.do(postForm(rec+"/edit", f.sess, form))
 
 	page := decode[view.ConflictPage](t, f.h.do(get(rec+"/conflict", f.sess)))
-	if len(page.Notices) != 1 {
-		t.Fatalf("notices = %+v", page.Notices)
+	if len(page.Notices) != 0 || page.Subtitle != "Another client changed this contact while you were editing it. Nothing has been overwritten." {
+		t.Errorf("notices = %+v, subtitle %q", page.Notices, page.Subtitle)
 	}
-	n := page.Notices[0]
-	if n.Title != "Conflict" || n.Body != "Another client changed this contact while you were editing it. Nothing has been overwritten." {
-		t.Errorf("notice = %+v", n)
+	// Cancel leads back to the record (Рв8), and the page is refreshed by
+	// reading it again (Рв7).
+	if c := actionByID(page.Actions, "conflict.cancel"); c == nil || c.Method != "GET" || c.Href != rec {
+		t.Errorf("Cancel = %+v", c)
+	}
+	if page.Top.Refresh.Action.Href != rec+"/conflict" {
+		t.Errorf("refresh = %+v", page.Top.Refresh)
 	}
 }
 
