@@ -218,7 +218,8 @@ func TestRemoveIsOnEveryRow(t *testing.T) {
 	}
 	card := body(t, f, "ada.vcf")
 	mustContain(t, card, "TEL;PREF=1;TYPE=work:+1 555 0101", "EMAIL;TYPE=work:ada@example.org")
-	if strings.Contains(card, "0100") || strings.Contains(card, "ADR") {
+	// The number whole: REV is a time, and one written at 00:10 holds «0100».
+	if strings.Contains(card, "+1 555 0100") || strings.Contains(card, "ADR") {
 		t.Errorf("the removed rows are still there:\n%s", card)
 	}
 }
