@@ -383,6 +383,7 @@
   "title": "Keep the meeting that was moved by hand?",
   "under": {
     "agenda": null,
+    "connections": null,
     "contact": null,
     "contacts": null,
     "event": null,

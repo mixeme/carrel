@@ -1899,6 +1899,7 @@ type Under struct {
     // правка под листом вопроса перед записью (AskSheet) — с набранным
     EventEdit *EventEditPage
     TaskEdit  *TaskEditPage
+    Connections *ConnectionsPage // под листами коллекций (Кл1; s-profile-7…-9)
 }
 
 // Вопрос перед записью (записка Typecase 56, s-agenda-22…-24; решение
@@ -2056,6 +2057,7 @@ type CollectionNewSheet struct {
     Form    Form         // имя, цвет, набор компонентов, адрес с подсказкой
     Failure *Notice      // отказ сервера: метод, адрес, код, тело (S-12.2); nil — отказа не было
     Actions []Action     // Create; после отказа (s-profile-6) — «Back to the form» (основная, POST с op=back: та же форма, без отказа, серверу ничего не шлётся) и «Try again» (та же форма ещё раз); обе шлют Form; последней — Cancel (collection.cancel, GET: ?back= листа, иначе экран рода)
+    Under   *Under // экран под листом, пришедшим страницей (Кл1): откуда открыт (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у фрагмента
 }
 
 type CollectionRenameSheet struct {
@@ -2067,6 +2069,7 @@ type CollectionRenameSheet struct {
     Note    Text    // «переименование — не перенос»: адрес остаётся прежним
     Failure *Notice // отказ сервера; форма хранит введённое
     Actions []Action // Save (у папки — Rename) и Cancel
+    Under   *Under // экран под листом, пришедшим страницей (Кл1): откуда открыт (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у фрагмента
 }
 
 // Лист переноса коллекции (s-profile-8): у подключения справа — что оно
@@ -2089,6 +2092,7 @@ type CollectionMoveSheet struct {
     Cancels Text // календарь уходит с сервера, который планирует: «nextcloud may tell the attendees of its meetings that they are cancelled.»; у копии, не календаря и сервера без планирования пусто
     Warning Runs // число записей жирным: «copies all ‹51› events» (s-profile-8)
     Actions []Action
+    Under   *Under // экран под листом, пришедшим страницей (Кл1): откуда открыт (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у фрагмента
 }
 
 type CollectionDeleteSheet struct {
@@ -2102,6 +2106,7 @@ type CollectionDeleteSheet struct {
     ExportNote Text
     Form       Form    // подтверждение набором имени
     Actions    []Action // Delete on the server и Cancel
+    Under   *Under // экран под листом, пришедшим страницей (Кл1): откуда открыт (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у фрагмента
 }
 
 // Лист «из какой коллекции отдать» — вход в экспорт из сведённого вида.

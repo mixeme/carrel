@@ -130,6 +130,7 @@
   "title": "Move contact",
   "under": {
     "agenda": null,
+    "connections": null,
     "contact": null,
     "contacts": {
       "bar": {

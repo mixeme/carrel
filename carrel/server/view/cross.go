@@ -311,6 +311,8 @@ type Under struct {
 	// правка под листом вопроса перед записью (AskSheet) — с набранным
 	EventEdit *EventEditPage `json:"eventEdit"`
 	TaskEdit  *TaskEditPage  `json:"taskEdit"`
+	// страница подключений под листами коллекций (Кл1; s-profile-7…-9)
+	Connections *ConnectionsPage `json:"connections"`
 }
 
 type MoveSheet struct {
@@ -350,6 +352,10 @@ type CollectionNewSheet struct {
 	Form    Form         `json:"form"`    // имя, цвет, набор компонентов, адрес с подсказкой
 	Failure *Notice      `json:"failure"` // отказ сервера: метод, адрес, код, тело (S-12.2); nil — отказа не было
 	Actions []Action     `json:"actions"`
+	// Under — экран под листом, пришедшим страницей (Кл1): откуда открыт
+	// (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у
+	// фрагмента
+	Under *Under `json:"under"`
 }
 
 type CollectionRenameSheet struct {
@@ -363,6 +369,10 @@ type CollectionRenameSheet struct {
 	Note    Text     `json:"note"`    // «переименование — не перенос»: адрес остаётся прежним
 	Failure *Notice  `json:"failure"` // отказ сервера; форма хранит введённое
 	Actions []Action `json:"actions"`
+	// Under — экран под листом, пришедшим страницей (Кл1): откуда открыт
+	// (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у
+	// фрагмента
+	Under *Under `json:"under"`
 }
 
 type CollectionMoveSheet struct {
@@ -377,6 +387,10 @@ type CollectionMoveSheet struct {
 	Cancels Text     `json:"cancels"`
 	Warning Runs     `json:"warning"` // завести там, перенести записи, удалить здесь — до начала; число записей жирным (s-profile-8)
 	Actions []Action `json:"actions"`
+	// Under — экран под листом, пришедшим страницей (Кл1): откуда открыт
+	// (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у
+	// фрагмента
+	Under *Under `json:"under"`
 }
 
 type CollectionDeleteSheet struct {
@@ -390,6 +404,10 @@ type CollectionDeleteSheet struct {
 	ExportNote Text     `json:"exportNote"`
 	Form       Form     `json:"form"` // подтверждение набором имени
 	Actions    []Action `json:"actions"`
+	// Under — экран под листом, пришедшим страницей (Кл1): откуда открыт
+	// (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у
+	// фрагмента
+	Under *Under `json:"under"`
 }
 
 // ConnectionRemoveSheet — лист «Disconnect»: подключение уходит из Carrel, на

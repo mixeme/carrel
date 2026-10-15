@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.270 — 2026-10-15
+
+### Changed
+
+- **The sheets of a collection carry the screen under them** (Кл1 of the
+  scan of 15.10.2026; the owner's decision of 15.10.2026): New, Rename,
+  Move and Delete of a collection answered as a page stand over the page
+  they were opened from — `back`, else the Referer —, else over Connections
+  (`s-profile-7`…`-9`); `Under.Connections` is new.
+
+### For consumers
+
+C-6: `Under` of `CollectionNewSheet`, `CollectionRenameSheet`,
+`CollectionMoveSheet`, `CollectionDeleteSheet`; `Under.Connections`.
+Fixtures of the four sheets re-shot, and every sheet's with `under` (a new
+empty key).
+
 ## v0.2.269 — 2026-10-15
 
 ### Changed

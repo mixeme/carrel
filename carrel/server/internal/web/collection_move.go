@@ -213,7 +213,9 @@ func (s *Server) getCollectionMove(w http.ResponseWriter, r *http.Request) {
 	if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
 		count = collectionCount(sess, conn.ID, col, spec)
 	}
-	s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(blob, conn, col, q.Get("copy") != "", q.Get("to"), count, sheetBack(q.Get("back"))))
+	sheet := s.collectionMoveSheet(blob, conn, col, q.Get("copy") != "", q.Get("to"), count, sheetBack(q.Get("back")))
+	sheet.Under = s.collectionUnder(r)
+	s.writePage(w, r, http.StatusOK, sheet)
 }
 
 // postCollectionMove runs a confirmed move or copy. What happens is on the

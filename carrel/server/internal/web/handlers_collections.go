@@ -224,7 +224,17 @@ func (s *Server) getCollectionNew(w http.ResponseWriter, r *http.Request) {
 			f.components = asked
 		}
 	}
-	s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, nil))
+	sheet := s.collectionNewSheet(sess, blob, f, nil)
+	sheet.Under = s.collectionUnder(r)
+	s.writePage(w, r, http.StatusOK, sheet)
+}
+
+// collectionUnder is the screen under a collection's sheet answered as a
+// page (Кл1; the owner's decision of 15.10.2026): the page it was opened
+// from — back, else the Referer —, else Connections (s-profile-7…-9; -5
+// and -6 draw the sheet over the agenda it was opened from).
+func (s *Server) collectionUnder(r *http.Request) *view.Under {
+	return s.underOf(r, s.sheetBack(r, r.URL.Query().Get("back"), true), "/app/settings/connections")
 }
 
 // postCollectionNew makes the collection (S-12.1): the address from the name
@@ -915,7 +925,9 @@ func (s *Server) getCollectionRename(w http.ResponseWriter, r *http.Request) {
 	if !inPalette(colour) {
 		colour = ""
 	}
-	s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, col.Name, colour, nil, nil, sheetBack(r.URL.Query().Get("back"))))
+	sheet := s.collectionRenameSheet(sess, conn, col, col.Name, colour, nil, nil, sheetBack(r.URL.Query().Get("back")))
+	sheet.Under = s.collectionUnder(r)
+	s.writePage(w, r, http.StatusOK, sheet)
 }
 
 // postCollectionRename writes the name, and the colour of a calendar, in one

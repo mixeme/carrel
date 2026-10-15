@@ -175,7 +175,9 @@ func (s *Server) getCollectionDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	count := s.countMembers(r.Context(), conn, col)
-	s.writePage(w, r, http.StatusOK, s.collectionDeleteSheet(sess, conn, col, count, "", "", sheetBack(r.URL.Query().Get("back"))))
+	sheet := s.collectionDeleteSheet(sess, conn, col, count, "", "", sheetBack(r.URL.Query().Get("back")))
+	sheet.Under = s.collectionUnder(r)
+	s.writePage(w, r, http.StatusOK, sheet)
 }
 
 // postCollectionDelete deletes a collection whose name was typed. A name that
