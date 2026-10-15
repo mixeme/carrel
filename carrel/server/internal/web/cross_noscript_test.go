@@ -152,7 +152,9 @@ func TestGroupChoiceWithoutScripts(t *testing.T) {
 		formRow(*g.Form, "group").Value != view.Text(g.ID) || formRow(*g.Form, "_csrf") == nil {
 		t.Fatalf("group form = %+v", g.Form)
 	}
-	if len(g.Choices) != 1 || g.Choices[0].Name != "choice.FN" || g.Choices[0].Property != "Display name" {
+	// The organisation only one of them has is a question too (Дб7,
+	// v0.2.283; until then the name was the only one).
+	if len(g.Choices) != 2 || g.Choices[0].Name != "choice.FN" || g.Choices[0].Property != "Display name" {
 		t.Fatalf("choices = %+v", g.Choices)
 	}
 	link := actionOf(t, g, "duplicates.link")

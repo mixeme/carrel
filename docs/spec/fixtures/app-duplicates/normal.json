@@ -5,7 +5,7 @@
     "compact": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 7,
+    "loaded": 22,
     "range": null,
     "segments": [
       {
@@ -14,7 +14,8 @@
         "id": "duplicates.kind.all",
         "label": "All",
         "method": "GET",
-        "tally": "1"
+        "on": true,
+        "tally": "2"
       },
       {
         "enabled": true,
@@ -22,7 +23,6 @@
         "id": "duplicates.kind.contact",
         "label": "Contacts",
         "method": "GET",
-        "on": true,
         "tally": "1"
       },
       {
@@ -31,7 +31,7 @@
         "id": "duplicates.kind.event",
         "label": "Events",
         "method": "GET",
-        "tally": "0"
+        "tally": "1"
       },
       {
         "enabled": true,
@@ -191,6 +191,63 @@
         {
           "csrf": "csrf",
           "enabled": true,
+          "href": "/app/duplicates/decide?do=link\u0026group=group",
+          "id": "duplicates.link",
+          "label": "Link them",
+          "method": "POST",
+          "primary": true
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/duplicates/decide?do=ignore\u0026group=group",
+          "id": "duplicates.ignore",
+          "label": "Not duplicates",
+          "method": "POST"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/duplicates/merge?group=group",
+          "id": "duplicates.merge",
+          "label": "Merge on the server",
+          "method": "GET"
+        }
+      ],
+      "choices": [],
+      "decision": "",
+      "form": null,
+      "hint": "The same event in two calendars, different UIDs. Agenda shows it twice; here you decide whether to keep both or write one and delete the other.",
+      "id": "group",
+      "kind": "event",
+      "reasons": [
+        "same title, same start"
+      ],
+      "rows": [
+        {
+          "colour": "#8c6239",
+          "detail": "10 Aug",
+          "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
+          "readOnly": false,
+          "stamp": "radicale · vps · Дежурства",
+          "title": "Дежурство: первая линия"
+        },
+        {
+          "colour": "#3f6e8c",
+          "detail": "10 Aug",
+          "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
+          "readOnly": false,
+          "stamp": "nextcloud · Работа",
+          "title": "Дежурство: первая линия"
+        }
+      ],
+      "score": 70
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
           "href": "/app/duplicates/decide?do=choose\u0026group=g-artem",
           "id": "duplicates.choose",
           "label": "Keep these values",
@@ -317,7 +374,7 @@
     }
   ],
   "print": {
-    "range": "7 records compared · 60 points and above",
+    "range": "22 records compared · 60 points and above",
     "taken": "",
     "title": "Duplicates"
   },
@@ -343,7 +400,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 6,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -352,7 +409,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 2,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -361,7 +418,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 3,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -379,7 +436,7 @@
         "method": "GET"
       },
       {
-        "count": 1,
+        "count": 2,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",
@@ -396,6 +453,97 @@
         "account": "Sources",
         "accountID": "",
         "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 4,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дела",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дневник",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дни рождения",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "off"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Личный",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 4,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Работа",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Записи",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Общие с семьёй",
+            "menu": [],
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "off"
+          },
           {
             "colour": "#a05a2c",
             "count": 1,
@@ -423,6 +571,32 @@
             "tick": "on"
           },
           {
+            "colour": "#8c6239",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дежурства",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Проекты",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
             "colour": "#6b4e7a",
             "count": 1,
             "detail": "",
@@ -434,17 +608,43 @@
             "readOnly": true,
             "state": "ok",
             "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Рассылки",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "off"
+          },
+          {
+            "colour": "#9a9280",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Общий",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "off"
           }
         ],
         "state": "ok",
-        "tally": "3 / 3"
+        "tally": "10 / 14"
       }
     ],
     "shortcuts": [],
     "tags": [],
     "ticks": null
   },
-  "subtitle": "7 records compared · 1 to look at",
+  "subtitle": "22 records compared · 2 to look at",
   "threshold": {
     "default": 60,
     "form": {

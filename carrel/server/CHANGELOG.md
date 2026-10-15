@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.284 — 2026-10-16
+
+### Changed
+
+- **The duplicates with nothing read are the empty screen of `s-dup-6`**
+  (Дб10 of the scan of 15.10.2026): no segments and no cards — the head
+  with the threshold and the two notices. A linked group is no longer
+  shown with «Not loaded in this session» before its lists are read: the
+  decision is kept and comes back with them.
+
+### For consumers
+
+New fixtures: `app-duplicates/empty` (`s-dup-6`), `app-duplicates-merge-event/normal`
+(the merge of an event, `s-dup-4`), `app-duplicates-merge/in-part` (a
+merge whose delete the server refused, `s-dup-5`); `app-duplicates/normal`
+is now All, in a session that read the four sections (Дб12). The rail of
+the event's merge waits for Дб3 (a feed as a source) in `SERVER_TODO`.
+
 ## v0.2.283 — 2026-10-16
 
 ### Changed

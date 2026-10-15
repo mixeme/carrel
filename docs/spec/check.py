@@ -197,6 +197,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "about": "/about",
     "app-duplicates": "/app/duplicates",
     "app-duplicates-merge": "/app/duplicates/merge",
+    "app-duplicates-merge-event": "/app/duplicates/merge",
     "app-mail-compose": "/app/mail/compose",
     "app-search": "/app/search",
     "app-files": "/app/files",
@@ -277,12 +278,23 @@ SERVER_TODO = {
         "записка 38 (from-typecase.md), ДбЖ4 — круг сервера по дубликатам (plan/server.md)",
     "app-duplicates-merge: коллекции рейла":
         "записка 38 (from-typecase.md), ДбЖ4 — круг сервера по дубликатам (plan/server.md)",
+    # Набор держит три коллекции, которых кадры не рисуют, и ленту, которую
+    # сервер не сравнивает (Дб3).
+    "app-duplicates-merge-event: коллекции рейла":
+        "Дб3 (лента — источник), данные набора против s-dup-4 (scans/duplicates.md)",
 }
 
 # Состояние, которое рисует свой кадр маршрута — часть (data-part), а не
 # кадр экрана целиком: отказ входа — s-auth-13, не s-auth-1. Шаги страниц
 # вне оболочки названы по data-part своего кадра (C-14.3).
 STATE_FRAME = {
+    # Дубликаты (Дб10, Дб21): ничего не прочитано — s-dup-6; слияние
+    # события — s-dup-4; слияние, которому сервер отказал в удалении, —
+    # s-dup-5 (части маршрута по data-part; событие — своим каталогом, как
+    # расхождение события).
+    "app-duplicates/empty": "s-dup-6",
+    "app-duplicates-merge-event/normal": "s-dup-4",
+    "app-duplicates-merge/in-part": "s-dup-5",
     "login/refused": "s-auth-13",
     "register/sent": "s-auth-3",
     "forgot/options": "s-auth-6",

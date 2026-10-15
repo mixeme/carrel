@@ -516,6 +516,11 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 	for _, k := range dupKinds {
 		page.Bar.Segments = append(page.Bar.Segments, segment(k, dupSegmentLabels[k], counts[k]))
 	}
+	if st.compared == 0 {
+		// Nothing read, nothing compared (s-dup-6, Дб10): no segments and
+		// no cards — the decisions are kept and come back with the lists.
+		page.Bar.Segments, page.Groups = nil, nil
+	}
 	page.Bar.Loaded = st.compared
 	// What was compared and how many groups wait (s-dup-1, -6; Дб1): the
 	// groups of the kind shown.

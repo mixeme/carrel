@@ -1768,7 +1768,6 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 		app.compare(t, "app-contact-timeline/normal.json", app.h.do(get(anna+"/timeline", app.sess)))
 	})
 	for _, one := range []struct{ dir, route string }{
-		{"app-duplicates", "/app/duplicates?kind=contact"},
 		{"app-contact-new", book + "/new"},
 		{"app-contact-import", book + "/import"},
 		{"app-quick", "/app/notes/quick"},
@@ -2214,6 +2213,68 @@ func TestFixtureBeforeAnyone(t *testing.T) {
 		open.compare(t, "register/normal.json", open.h.do(get("/register", nil)))
 	})
 	_ = admin
+}
+
+// C-14.2 and C-14.3: the duplicates as s-dup-1, -4, -5, -6 draw them (Дб10,
+// Дб12, Дб21): nothing read yet; every section read, the groups of four
+// kinds; the merge of an event; a merge whose delete the server refused.
+func TestFixtureDuplicatesStates(t *testing.T) {
+	t.Run("app-duplicates-empty", func(t *testing.T) {
+		app := newMockupApp(t)
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		app.compare(t, "app-duplicates/empty.json", app.h.do(get("/app/duplicates", app.sess)))
+	})
+	app := newMockupApp(t)
+	for _, list := range []string{"/app/contacts", "/app/calendar?from=2026-08-10", "/app/tasks", "/app/notes"} {
+		openList(t, app, list)
+	}
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	t.Run("app-duplicates", func(t *testing.T) {
+		app.compare(t, "app-duplicates/normal.json", app.h.do(get("/app/duplicates", app.sess)))
+	})
+	// The merge of a group: its Merge, a button of the card's form when there
+	// is something to choose (Дб9), sent as the card stands.
+	mergeOf := func(t *testing.T, kind view.Kind) string {
+		t.Helper()
+		page := decode[view.DuplicatesPage](t, app.h.do(get("/app/duplicates", app.sess)))
+		for _, g := range page.Groups {
+			if g.Kind != kind || g.Decision != view.DecisionNone {
+				continue
+			}
+			for _, a := range g.Actions {
+				if a.ID != "duplicates.merge" || !a.Enabled {
+					continue
+				}
+				if a.Method != http.MethodPost {
+					return a.Href
+				}
+				form := url.Values{}
+				if g.Form != nil {
+					form = formFields(*g.Form)
+				}
+				for _, c := range g.Choices {
+					form.Set(c.Name, strconv.Itoa(c.Chosen))
+				}
+				return app.h.do(postForm(a.Href, app.sess, form)).Header().Get("Location")
+			}
+		}
+		t.Fatalf("no %s group to merge among %d", kind, len(page.Groups))
+		return ""
+	}
+	t.Run("app-duplicates-merge-event", func(t *testing.T) {
+		app.compare(t, "app-duplicates-merge-event/normal.json", app.h.do(get(mergeOf(t, view.KindEvent), app.sess)))
+	})
+	t.Run("app-duplicates-merge-in-part", func(t *testing.T) {
+		merge := decode[view.DuplicatesMergePage](t, app.h.do(get(mergeOf(t, view.KindContact), app.sess)))
+		var confirm string
+		for _, a := range merge.Actions {
+			if a.ID == "duplicates.merge.confirm" {
+				confirm = a.Href
+			}
+		}
+		app.servers["nextcloud"].Refuse(http.MethodDelete, http.StatusForbidden, "<error/>")
+		app.compare(t, "app-duplicates-merge/in-part.json", app.h.do(postForm(confirm, app.sess, url.Values{})))
+	})
 }
 
 // C-14.2: the merge of two records, the letter, and the link a forgotten

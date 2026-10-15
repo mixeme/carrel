@@ -122,6 +122,10 @@ func TestDuplicatesNeedWhatIsLoaded(t *testing.T) {
 	if len(p.Groups) != 0 || p.Bar.Loaded != 0 || !hasNotice(p.Notices, "Nothing is loaded yet.") {
 		t.Errorf("empty cache: %+v", p)
 	}
+	// No segments either: nothing was compared (s-dup-6, Дб10).
+	if len(p.Bar.Segments) != 0 {
+		t.Errorf("segments with nothing compared: %+v", p.Bar.Segments)
+	}
 	if n := f.requests() - before; n != 0 {
 		t.Errorf("the duplicates screen asked the servers %d times", n)
 	}
