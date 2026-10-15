@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.272 — 2026-10-15
+
+### Changed
+
+- **The sheets of a collection speak as their frames** (Кл2, Кл3, Кл9, Кл14
+  of the scan of 15.10.2026): the address is the path from the host's root,
+  its start an ellipsis — «…/remote.php/dav/calendars/mix/birthdays/»
+  (`s-profile-7`), and so is the example under a new collection's address
+  (`-5`); the colour of a new calendar says «Written to the server as
+  calendar-color — DAVx5 and Thunderbird will show the same one.», of a
+  renamed one nothing; the move of an address book says «an address book».
+
+### For consumers
+
+Fixtures `app-collections-new`, `app-collections-rename` re-shot. A feed's
+reading time in a fixture is set to «0 ms» (the machine's otherwise; the
+Connections page under a collection's sheet carries it since `v0.2.270`).
+
 ## v0.2.271 — 2026-10-15
 
 ### Changed

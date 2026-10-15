@@ -18,7 +18,7 @@
       "method": "GET"
     }
   ],
-  "address": "https://nextcloud.example/dav.php/alice/contacts/kontakty/",
+  "address": "…/alice/contacts/kontakty/",
   "failure": null,
   "form": {
     "action": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",

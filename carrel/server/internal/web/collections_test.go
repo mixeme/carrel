@@ -240,6 +240,11 @@ func TestRenameWritesTheLabelNotTheAddress(t *testing.T) {
 	if !strings.HasSuffix(string(sheet.Address), f.col) || rowNamed(t, sheet.Form, "name").Value != "Work" || sheet.Kind != view.KindEvent {
 		t.Fatalf("sheet = %+v", sheet)
 	}
+	// The address from the server's root, its start an ellipsis; nothing
+	// under the colour (s-profile-7; Кл2, Кл9).
+	if string(sheet.Address) != "…"+f.col || rowNamed(t, sheet.Form, "colour").Hint != "" {
+		t.Errorf("address %q, colour's hint %q", sheet.Address, rowNamed(t, sheet.Form, "colour").Hint)
+	}
 
 	u, _ := url.Parse(href)
 	rec := f.h.do(postForm(u.Path+"?"+u.RawQuery, f.sess, url.Values{"name": {"Office"}, "colour": {"#3f6e8c"}}))

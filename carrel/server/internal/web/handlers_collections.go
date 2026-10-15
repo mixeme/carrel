@@ -237,6 +237,17 @@ func (s *Server) collectionUnder(r *http.Request) *view.Under {
 	return s.underOf(r, s.sheetBack(r, r.URL.Query().Get("back"), true), "/app/settings/connections")
 }
 
+// shortAddress is a collection's address as the sheets show it (s-profile-5,
+// -7; Кл2): the path from the host's root, its start an ellipsis — the
+// host is the server's name above.
+func shortAddress(server, path string) string {
+	full := serverOrigin(server) + path
+	if u, err := url.Parse(full); err == nil && u.Path != "" {
+		return "…" + u.Path
+	}
+	return full
+}
+
 // postCollectionNew makes the collection (S-12.1): the address from the name
 // unless one was typed, a numeric suffix where the server already holds that
 // address, and one MKCALENDAR or MKCOL carrying name, colour and component
@@ -828,7 +839,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	}
 	if f.kind != view.KindContact {
 		rows = append(rows, paletteRow(f.colour, errs["colour"],
-			"Written to the server as calendar-color: other clients show the same one. Left unchosen, the colour follows from the address."))
+			"Written to the server as calendar-color — DAVx5 and Thunderbird will show the same one.")) // s-profile-5 (Кл3)
 		parts := view.FormRow{Name: "components", Label: "What goes in it", Kind: view.InputCheck, Error: errs["components"],
 			Hint: text("Most servers settle this when the collection is made and do not change it afterwards. The collection appears under Calendar, Tasks or Notes by what it holds, not by where it was made.")}
 		for _, p := range calendarParts {
@@ -843,7 +854,9 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	address := view.FormRow{Name: "address", Label: "Address", Kind: view.InputText, Value: text(f.address), Error: errs["address"], Mono: true,
 		Hint: text("Taken from the name when left empty; yours to change. Other clients and restore by path go by the address, and it does not change later; the name they only show.")}
 	if home := homeFor(chosen, f.kind); home != "" {
-		address.Hint = text(serverOrigin(chosen.Server) + strings.TrimSuffix(home, "/") + "/…/ — " + string(address.Hint))
+		// The path from the server's root, its start an ellipsis (s-profile-5,
+		// Кл2): the host is the server's name above.
+		address.Hint = text(shortAddress(chosen.Server, strings.TrimSuffix(home, "/")) + "/…/ — " + string(address.Hint))
 	}
 	rows = append(rows, address)
 	sheet.Form = focused(s.plainForm(action, "POST", rows...), "name")
@@ -997,7 +1010,7 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 		{Name: "name", Label: "Name", Kind: view.InputText, Value: text(name), Required: true, Error: errs["name"]},
 	}
 	if !col.Has(view.KindContact) && !col.Has(view.KindFile) {
-		rows = append(rows, paletteRow(colour, errs["colour"], "Written to the server as calendar-color. Left unchosen, the colour stays as it is."))
+		rows = append(rows, paletteRow(colour, errs["colour"], "")) // s-profile-7 says nothing under it (Кл9)
 	}
 	if conn.Feed {
 		if !col.Has(view.KindContact) {
@@ -1034,7 +1047,7 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 		Title:   title,
 		Stamp:   view.Stamp(connLabel(conn)),
 		Form:    focused(s.plainForm(action, "POST", rows...), "name"),
-		Address: text(serverOrigin(conn.Server) + col.Path),
+		Address: text(shortAddress(conn.Server, col.Path)), // s-profile-7, Кл2
 		Note:    text(note),
 		Failure: failure,
 		Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Primary: true, Enabled: true}, cancel},

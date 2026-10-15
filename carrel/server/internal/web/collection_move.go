@@ -181,9 +181,9 @@ func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, c
 			sheet.Warning = line(fmt.Sprintf("Carrel creates a folder there, copies everything in it — each file downloaded and uploaded again — then deletes this one on %s. "+
 				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the files live on.", here))
 		case copying:
-			sheet.Warning = join("Carrel creates a "+noun+" there and copies ", records, "; this one on "+here+" stays as it is.")
+			sheet.Warning = join("Carrel creates "+article(noun)+" there and copies ", records, "; this one on "+here+" stays as it is.")
 		default:
-			sheet.Warning = join("Carrel creates a "+noun+" there, copies ", records, ", then deletes this one on "+here+". "+
+			sheet.Warning = join("Carrel creates "+article(noun)+" there, copies ", records, ", then deletes this one on "+here+". "+
 				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path.")
 		}
 	}
@@ -663,4 +663,13 @@ func uidOf(c *collectionCtx, obj *model.Object) string {
 		return card.UID(obj)
 	}
 	return cal.UID(obj)
+}
+
+// article puts «a» or «an» before a noun of the screen's English: «an
+// address book», «a calendar» (Кл14).
+func article(noun string) string {
+	if noun != "" && strings.ContainsRune("aeiouAEIOU", rune(noun[0])) {
+		return "an " + noun
+	}
+	return "a " + noun
 }

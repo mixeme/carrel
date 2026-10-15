@@ -903,6 +903,9 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 			s = strings.ReplaceAll(s, srv.URL, name)
 		}
 	}
+	// How long a feed took to read is the machine's (0 ms, 1 ms): the frames
+	// draw a number, any one.
+	s = regexp.MustCompile(`"took":"\d+ ms"`).ReplaceAllString(s, `"took":"0 ms"`)
 	for frame, feed := range a.feeds {
 		u, _ := url.Parse(frame)
 		s = strings.ReplaceAll(s, feed.URL, u.Scheme+"://"+u.Host)
