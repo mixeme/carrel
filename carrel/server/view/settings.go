@@ -176,6 +176,8 @@ type EscrowWithdrawSheet struct {
 	Warning Text     `json:"warning"` // что кончается и что остаётся
 	Form    Form     `json:"form"`    // скрытое action=withdraw и CSRF
 	Actions []Action `json:"actions"` // Withdraw my deposited key · Cancel
+	// Under — экран под листом, пришедшим страницей (Лс29): Account (account-11); nil у фрагмента
+	Under *Under `json:"under"`
 }
 
 // PasswordPage — смена пароля (account-3), обычная и вынужденная.
@@ -192,6 +194,8 @@ type UnlockSheet struct {
 	Warning Text  `json:"warning"`
 	Form    Form  `json:"form"`
 	Until   *When `json:"until"` // до какого времени будет открыто
+	// Under — экран под листом, пришедшим страницей (Лс29): откуда открыт (back, иначе Referer) — «Set up a new device» (s-plan-3), Connections (s-profile-3); у депонирования — Account (account-2); nil у фрагмента
+	Under *Under `json:"under"`
 }
 
 type ConnectionsPage struct {
@@ -517,6 +521,8 @@ type PasswordResetSheet struct {
 	Warning Text            `json:"warning"` // что уничтожается: сохранённые пароли DAV-серверов и всё, что ими открывалось; записи на серверах остаются; в ответе на сброс пусто
 	Issued  *IssuedPassword `json:"issued"`  // временный пароль — один раз, в ответе на сброс (s-admin-14); nil — нет
 	Actions []Action        `json:"actions"` // Reset password (danger) · Cancel; в ответе на сброс пусто — подвал листа держит Issued.Done
+	// Under — экран под листом, пришедшим страницей (Лс29): Users (s-admin-13); nil у фрагмента
+	Under *Under `json:"under"`
 }
 
 // AdminInvitesPage — «Add users» (s-admin-1): три способа завести человека

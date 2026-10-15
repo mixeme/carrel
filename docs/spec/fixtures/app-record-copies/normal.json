@@ -72,6 +72,8 @@
   "subject": "Вера Лебедева · 3 copies",
   "title": "Which copy to edit?",
   "under": {
+    "account": null,
+    "adminUsers": null,
     "agenda": null,
     "connections": null,
     "contact": {
@@ -557,6 +559,7 @@
       "uid": "e7c2-3b95-6a14"
     },
     "contacts": null,
+    "devices": null,
     "event": null,
     "eventEdit": null,
     "note": null,

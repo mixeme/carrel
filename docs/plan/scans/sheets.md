@@ -104,7 +104,7 @@
   `getKindQuick`, `getContactRewrite`). Вход из шапки ещё и редиректит на
   `…/new/quick` без `back`. Нужно: `Under` (и `back` в форме) у `NewSheet` и
   `RewriteSheet`, как у `MoveSheet`.
-- **Лс29. То же у листов U-6.17.** `UnlockSheet` (`s-plan-3` — над «Set up a
+- **Лс29. То же у листов U-6.17.** (**закрыто сервером `v0.2.277`**: `Under` у `UnlockSheet` и депонирования, `EscrowWithdrawSheet`, `PasswordResetSheet`, `ConnectionRemoveSheet`, `ExportSheet`; `Under.Account`, `Devices`, `AdminUsers`) `UnlockSheet` (`s-plan-3` — над «Set up a
   new device», `s-profile-3` — над Connections; `back` у сервера есть, а
   экрана нет), депонирование (`account-2` — над Account), `EscrowWithdrawSheet`
   (`account-11` «лист поверх Account»), `PasswordResetSheet` (`s-admin-13`

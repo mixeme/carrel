@@ -659,6 +659,8 @@ func (s *Server) getKindExportEntry(w http.ResponseWriter, r *http.Request, kind
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
+	// Over the list it was opened from, else the kind's combined one (Лс29).
+	sheet.Under = s.underOf(r, s.sheetBack(r, r.URL.Query().Get("back"), true), "/app/"+spec.segment)
 	s.writePage(w, r, http.StatusOK, sheet)
 }
 

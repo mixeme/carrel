@@ -51,6 +51,7 @@ func (s *Server) getConnectionDisconnect(w http.ResponseWriter, r *http.Request)
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
+	sheet.Under = s.underOf(r, "", "/app/settings/connections") // Лс29
 	s.writePage(w, r, http.StatusOK, sheet)
 }
 

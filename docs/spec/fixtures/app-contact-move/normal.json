@@ -129,6 +129,8 @@
   },
   "title": "Move contact",
   "under": {
+    "account": null,
+    "adminUsers": null,
     "agenda": null,
     "connections": null,
     "contact": null,
@@ -1625,6 +1627,7 @@
         "userHref": "/app/settings/account"
       }
     },
+    "devices": null,
     "event": null,
     "eventEdit": null,
     "note": null,

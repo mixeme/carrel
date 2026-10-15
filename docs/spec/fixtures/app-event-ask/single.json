@@ -382,10 +382,13 @@
   "subject": "Дежурство: первая линия · not saved yet",
   "title": "Keep the meeting that was moved by hand?",
   "under": {
+    "account": null,
+    "adminUsers": null,
     "agenda": null,
     "connections": null,
     "contact": null,
     "contacts": null,
+    "devices": null,
     "event": null,
     "eventEdit": {
       "attach": [],

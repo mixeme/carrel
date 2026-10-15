@@ -1899,7 +1899,13 @@ type Under struct {
     // правка под листом вопроса перед записью (AskSheet) — с набранным
     EventEdit *EventEditPage
     TaskEdit  *TaskEditPage
-    Connections *ConnectionsPage // под листами коллекций (Кл1; s-profile-7…-9)
+    Connections *ConnectionsPage // под листами коллекций (Кл1; s-profile-7…-9), пароля (s-profile-3), отключения
+    // под листами U-6.17 (Лс29): Account — депонирование и отзыв (account-2,
+    // -11), Devices — пароль у «Set up a new device» (s-plan-3), AdminUsers —
+    // сброс пароля (s-admin-13)
+    Account    *AccountPage
+    Devices    *DevicesPage
+    AdminUsers *AdminUsersPage
 }
 
 // Вопрос перед записью (записка Typecase 56, s-agenda-22…-24; решение
@@ -2121,6 +2127,7 @@ type ExportSheet struct {
     Kind    Kind
     Target  TargetPicker // варианты — адреса выдачи каждой коллекции
     Actions []Action
+    Under   *Under // экран под листом, пришедшим страницей (Лс29): откуда открыт (back, иначе Referer), иначе сведённый список рода; nil у фрагмента
 }
 
 type ImportPage struct {
@@ -2742,6 +2749,7 @@ type EscrowWithdrawSheet struct {
     Warning Text
     Form    Form     // скрытое action=withdraw и CSRF
     Actions []Action // Withdraw my deposited key · Cancel
+    Under   *Under // экран под листом, пришедшим страницей (Лс29): Account (account-11); nil у фрагмента
 }
 
 type PasswordPage struct { // account-3: обычная смена и вынужденная
@@ -2757,6 +2765,7 @@ type UnlockSheet struct {
     Warning Text
     Form    Form
     Until   *When // до какого времени будет открыто
+    Under   *Under // экран под листом, пришедшим страницей (Лс29): откуда открыт (back, иначе Referer), иначе Connections — «Set up a new device» (s-plan-3), Connections (s-profile-3); у депонирования — Account (account-2); nil у фрагмента
 }
 
 type ConnectionsPage struct {
@@ -2813,6 +2822,7 @@ type ConnectionRemoveSheet struct {
     References []Text   // коллекции, ссылки, задания копии, устройства davloom
     Form       Form     // подтверждение: скрытое подключение и CSRF
     Actions    []Action // Disconnect · Cancel
+    Under   *Under // экран под листом, пришедшим страницей (Лс29): Connections; nil у фрагмента
 }
 
 type SecretField struct {
@@ -3057,6 +3067,7 @@ type PasswordResetSheet struct {
     Warning Text            // что уничтожается: сохранённые пароли DAV-серверов и всё, что ими открывалось; записи на серверах остаются; в ответе на сброс пусто
     Issued  *IssuedPassword // временный пароль — один раз, в ответе на сброс (s-admin-14); nil — нет
     Actions []Action        // Reset password (danger) · Cancel; в ответе на сброс пусто — подвал листа держит Issued.Done
+    Under   *Under // экран под листом, пришедшим страницей (Лс29): Users (s-admin-13); nil у фрагмента
 }
 
 // «Add users» (s-admin-1): три способа завести человека карточками в ряд,

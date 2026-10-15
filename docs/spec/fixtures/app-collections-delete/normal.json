@@ -81,6 +81,8 @@
   "subject": "nextcloud · Дни рождения",
   "title": "Delete on the server",
   "under": {
+    "account": null,
+    "adminUsers": null,
     "agenda": null,
     "connections": {
       "accounts": [
@@ -1885,6 +1887,7 @@
     },
     "contact": null,
     "contacts": null,
+    "devices": null,
     "event": null,
     "eventEdit": null,
     "note": null,

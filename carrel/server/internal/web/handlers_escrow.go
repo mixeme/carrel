@@ -100,6 +100,7 @@ func (s *Server) getEscrowDeposit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sheet := s.depositSheet(sess, "")
+	sheet.Under = s.underOf(r, "", "/app/settings/account") // account-2 (Лс29)
 	if render.WantsFragment(r) {
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
@@ -132,6 +133,7 @@ func (s *Server) getEscrowWithdraw(w http.ResponseWriter, r *http.Request) {
 				Href: s.postQuery("/app/settings/escrow", url.Values{"action": {"withdraw"}})},
 			{ID: "escrow.withdraw.cancel", Label: "Cancel", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true},
 		},
+		Under: s.underOf(r, "", "/app/settings/account"), // account-11 (Лс29)
 	}
 	if render.WantsFragment(r) {
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)

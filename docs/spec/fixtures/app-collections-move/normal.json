@@ -101,6 +101,8 @@
   },
   "title": "Move calendar",
   "under": {
+    "account": null,
+    "adminUsers": null,
     "agenda": null,
     "connections": {
       "accounts": [
@@ -1905,6 +1907,7 @@
     },
     "contact": null,
     "contacts": null,
+    "devices": null,
     "event": null,
     "eventEdit": null,
     "note": null,

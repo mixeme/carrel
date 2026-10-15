@@ -311,8 +311,16 @@ type Under struct {
 	// правка под листом вопроса перед записью (AskSheet) — с набранным
 	EventEdit *EventEditPage `json:"eventEdit"`
 	TaskEdit  *TaskEditPage  `json:"taskEdit"`
-	// страница подключений под листами коллекций (Кл1; s-profile-7…-9)
+	// страница подключений под листами коллекций (Кл1; s-profile-7…-9),
+	// пароля (s-profile-3) и отключения
 	Connections *ConnectionsPage `json:"connections"`
+	// страницы настроек и администрирования под листами U-6.17 (Лс29):
+	// Account — депонирование и отзыв (account-2, -11), Devices — пароль
+	// у «Set up a new device» (s-plan-3), AdminUsers — сброс пароля
+	// (s-admin-13)
+	Account    *AccountPage    `json:"account"`
+	Devices    *DevicesPage    `json:"devices"`
+	AdminUsers *AdminUsersPage `json:"adminUsers"`
 }
 
 type MoveSheet struct {
@@ -438,6 +446,8 @@ type ConnectionRemoveSheet struct {
 	References []Text   `json:"references"` // коллекции, ссылки, задания копии, устройства davloom
 	Form       Form     `json:"form"`       // подтверждение: скрытое подключение и CSRF
 	Actions    []Action `json:"actions"`    // Disconnect · Cancel
+	// Under — экран под листом, пришедшим страницей (Лс29): Connections; nil у фрагмента
+	Under *Under `json:"under"`
 }
 
 // RewriteSheet — «переписать адрес в записях?» после сохранения карточки, где
@@ -503,6 +513,8 @@ type ExportSheet struct {
 	Kind    Kind         `json:"kind"`
 	Target  TargetPicker `json:"target"` // варианты — адреса выдачи каждой коллекции
 	Actions []Action     `json:"actions"`
+	// Under — экран под листом, пришедшим страницей (Лс29): откуда открыт (back, иначе Referer), иначе сведённый список рода; nil у фрагмента
+	Under *Under `json:"under"`
 }
 
 type ImportPage struct {

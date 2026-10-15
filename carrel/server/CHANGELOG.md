@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.277 — 2026-10-15
+
+### Changed
+
+- **The sheets of settings and administration carry the screen under
+  them** (Лс29 of the scan of 15.10.2026; the owner's decision of
+  15.10.2026): opened by their address, the password sheet stands over the
+  page it was opened from (`back`, else `Referer`, else Connections —
+  «Set up a new device» in `s-plan-3`, Connections in `s-profile-3`), the
+  deposit and the withdrawal of the key over Account (`account-2`, `-11`),
+  the reset of a password over Users (`s-admin-13`), Disconnect over
+  Connections, the export's choice of a collection over the list it was
+  opened from. `Under` knows `Account`, `Devices` and `AdminUsers`.
+
+### For consumers
+
+`UnlockSheet`, `EscrowWithdrawSheet`, `PasswordResetSheet`,
+`ConnectionRemoveSheet`, `ExportSheet` gain `Under` (C-6). Every fixture
+that carries an `under` gains its three new keys, empty; `app-settings-unlock`
+carries Connections under it.
+
 ## v0.2.276 — 2026-10-15
 
 ### For consumers

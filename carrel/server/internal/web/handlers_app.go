@@ -199,7 +199,11 @@ func (s *Server) getSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 	}
 	// Without scripts a sheet is a page of its own (U-8): "Show password" is
 	// a plain link here, and a 404 behind it left no way to the password.
-	s.writePage(w, r, http.StatusOK, s.unlockSheet(sess, "", back))
+	sheet := s.unlockSheet(sess, "", back)
+	// Over the page it was opened from (Лс29: s-plan-3 over «Set up a new
+	// device», s-profile-3 over Connections).
+	sheet.Under = s.underOf(r, back, "/app/settings/connections")
+	s.writePage(w, r, http.StatusOK, sheet)
 }
 
 // returnPath reads a page of this instance to come back to, from an address

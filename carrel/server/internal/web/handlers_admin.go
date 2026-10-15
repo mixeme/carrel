@@ -293,6 +293,7 @@ func (s *Server) writeResetSheet(w http.ResponseWriter, r *http.Request, sheet v
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
+	sheet.Under = s.underOf(r, "", "/admin/") // over Users, s-admin-13 (Лс29)
 	s.writePage(w, r, http.StatusOK, sheet)
 }
 

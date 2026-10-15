@@ -72,6 +72,7 @@
       ]
     },
     "purpose": "Deposit my key",
+    "under": null,
     "until": null,
     "warning": "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account."
   },

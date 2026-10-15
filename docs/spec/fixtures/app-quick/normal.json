@@ -52,10 +52,13 @@
     ]
   },
   "under": {
+    "account": null,
+    "adminUsers": null,
     "agenda": null,
     "connections": null,
     "contact": null,
     "contacts": null,
+    "devices": null,
     "event": null,
     "eventEdit": null,
     "note": null,

@@ -390,10 +390,13 @@
   "subject": "Дежурство: первая линия · not saved yet",
   "title": "Keep the meetings that were moved by hand?",
   "under": {
+    "account": null,
+    "adminUsers": null,
     "agenda": null,
     "connections": null,
     "contact": null,
     "contacts": null,
+    "devices": null,
     "event": null,
     "eventEdit": {
       "attach": [],

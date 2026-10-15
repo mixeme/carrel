@@ -135,6 +135,12 @@ func underPage(body any) *view.Under {
 		return &view.Under{Note: &p}
 	case view.ConnectionsPage:
 		return &view.Under{Connections: &p}
+	case view.AccountPage:
+		return &view.Under{Account: &p}
+	case view.DevicesPage:
+		return &view.Under{Devices: &p}
+	case view.AdminUsersPage:
+		return &view.Under{AdminUsers: &p}
 	}
 	return nil
 }

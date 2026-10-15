@@ -102,10 +102,13 @@
   "subject": "Дежурство: первая линия · saved in part",
   "title": "Keep the meetings that were moved by hand?",
   "under": {
+    "account": null,
+    "adminUsers": null,
     "agenda": null,
     "connections": null,
     "contact": null,
     "contacts": null,
+    "devices": null,
     "event": {
       "actions": [
         {
