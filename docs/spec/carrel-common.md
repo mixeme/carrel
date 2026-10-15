@@ -1803,8 +1803,15 @@ type DuplicatesMergePage struct {
     GroupID string
     Target  DuplicateMember
     Rows    []MergeRow
-    Warning Notice // что будет записано, что удалено
-    Actions []Action
+    Warning Notice // что будет записано, что удалено: заголовок и тело (info); у итога — тревога, Details — что ответил сервер
+    // План полями (s-dup-2, -4; Дб14, Дб15), рубрики — слова экрана:
+    Stays      []Action          // «Where the merged record stays»: источник каждой записи, оставляемая — On; другая — этот же экран с ней (GET); только для чтения — выключена с причиной
+    StaysNote  Text              // «Вера Лебедева there is rewritten with the values you chose.»
+    Deleted    []DuplicateMember // «Deleted afterwards»: Title и приглушённо Stamp
+    Gains      []Text            // «The record that stays gains»: «EMAIL;TYPE=work: v.lebedeva@example.org», «PHOTO (from nextcloud · Контакты)», «2 reminders from the others»
+    NotCarried []Text            // «Not carried over» (s-dup-4)
+    Happened   []Text            // «What happened» у итога не одной записью (s-dup-5): «Kept and rewritten: …», «Deleted: …», «Still there: …»
+    Actions []Action // Write the merge and delete the rest · Cancel; у итога — Open the kept record · Back to duplicates
 }
 // Свойство, о котором спрашивают (s-dup-1: поле с радио), или объединяемое
 // множеством (Union). Property — подпись по-человечески: «Display name»,

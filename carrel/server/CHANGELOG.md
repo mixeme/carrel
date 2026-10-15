@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.280 — 2026-10-16
+
+### Changed
+
+- **The plan of a merge comes as fields, each under its rubric** (Дб14,
+  Дб15, Дб19 of the scan of 15.10.2026; `s-dup-2`, `-4`, `-5`).
+  `DuplicatesMergePage.Stays` is the segment «Where the merged record
+  stays» — every record's source, the kept one on, another the same page
+  with it kept, a read-only one off with its reason — and `StaysNote` the
+  line under it («Вера Лебедева there is rewritten with the values you
+  chose.»); the actions «Keep … instead» are gone from `Actions`.
+  `Deleted` names the records deleted afterwards (title and source),
+  `Gains` what the kept one gains («EMAIL;TYPE=work: …», «PHOTO (from
+  nextcloud · Контакты)», «2 reminders from the others», the time taken),
+  `NotCarried` the rewritten occurrences that go. «(from …)» stands only
+  where a value does not show itself — the photo. The warning keeps its
+  title and body; its `Details` no longer carries the plan.
+- **A merge that did not end in one record says what happened as a list**
+  (`Happened`): «Kept and rewritten: …», «Deleted: …», «Still there: …»;
+  what the server answered stays in `Details`. The refusal names the record
+  by its title («Лебедева Вера refused»), as `s-dup-5`.
+
+### For consumers
+
+Read the plan from `Stays`, `StaysNote`, `Deleted`, `Gains`, `NotCarried`
+and the outcome from `Happened`; choose where the record stays from
+`Stays`. Fixture `app-duplicates-merge` re-shot.
+
 ## v0.2.279 — 2026-10-16
 
 ### Changed

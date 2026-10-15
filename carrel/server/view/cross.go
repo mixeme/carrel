@@ -164,7 +164,28 @@ type DuplicatesMergePage struct {
 	Target   DuplicateMember `json:"target"`
 	Rows     []MergeRow      `json:"rows"`
 	Warning  Notice          `json:"warning"` // что будет записано, что удалено
-	Actions  []Action        `json:"actions"`
+	// План слияния полями (s-dup-2, -4; Дб14, Дб15) — рубрики экрана:
+	// Stays — «Where the merged record stays»: источник каждой записи
+	// группы, оставляемая — On; другая — этот же экран с ней оставляемой
+	// (GET); только для чтения — выключена с причиной
+	Stays []Action `json:"stays"`
+	// StaysNote — под ним: «Вера Лебедева there is rewritten with the
+	// values you chose.»
+	StaysNote Text `json:"staysNote"`
+	// Deleted — «Deleted afterwards»: название и приглушённо источник
+	Deleted []DuplicateMember `json:"deleted"`
+	// Gains — «The record that stays gains»: «EMAIL;TYPE=work:
+	// v.lebedeva@example.org», «PHOTO (from nextcloud · Контакты)», «2
+	// reminders from the others»
+	Gains []Text `json:"gains"`
+	// NotCarried — «Not carried over» (s-dup-4): переписанные экземпляры
+	// удаляемых, время, от которого оставляемая отказывается
+	NotCarried []Text `json:"notCarried"`
+	// Happened — «What happened» у слияния, не кончившегося одной записью
+	// (s-dup-5): «Kept and rewritten: …», «Deleted: …», «Still there: …»;
+	// что ответил сервер — Warning.Details
+	Happened []Text   `json:"happened"`
+	Actions  []Action `json:"actions"`
 }
 
 // MergeRow — свойство, о котором спрашивают (s-dup-1: поле с радио), или

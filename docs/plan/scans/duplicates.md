@@ -167,7 +167,7 @@ CHANGELOG сервера и server.md: что закрыто — ниже, в «
 
 - **Дб13. Подзаголовок.** (**закрыто `v0.2.279`**: `DuplicatesMergePage.Subtitle`) Кадры: «Вера Лебедева · 2 records»,
   «Дежурство: первая линия · 2 records». Поля нет. Был ДбВ1, открыт.
-- **Дб14. «Where the merged record stays».** Кадры `s-dup-2`, `-4`:
+- **Дб14. «Where the merged record stays».** (**закрыто сервером `v0.2.280`**: `Stays` — сегмент источников, `StaysNote`; «Keep … instead» ушли из `Actions`) Кадры `s-dup-2`, `-4`:
   - первая карточка — сегмент ссылок из коллекций группы на этот же экран,
     выбранная отмечена («nextcloud · Архив» | «nextcloud · Контакты»);
   - коллекция только для чтения — выключена с причиной (подпись
@@ -178,7 +178,7 @@ CHANGELOG сервера и server.md: что закрыто — ниже, в «
   Модель: `Target` и действия «Keep Лебедева Вера · nextcloud · Контакты
   instead» (`duplicates_merge.go:396`); члена только для чтения в них нет
   вовсе, а не выключен с причиной. Р-54, записка 38; server.md: открыт.
-- **Дб15. План полями.** Кадры — карточки:
+- **Дб15. План полями.** (**закрыто `v0.2.280`**: `Deleted`, `Gains`, `NotCarried`; «(from …)» — только у фото) Кадры — карточки:
   - «Deleted afterwards»: название и приглушённо источник;
   - «The record that stays gains»: список — «EMAIL;TYPE=work:
     v.lebedeva@example.org», «PHOTO (from nextcloud · Контакты)», «2
@@ -205,7 +205,7 @@ CHANGELOG сервера и server.md: что закрыто — ниже, в «
   which belongs to its series and goes with it». Сервер: «… which belong
   to its series and go with it» при любом числе
   (`duplicates_merge.go:378`).
-- **Дб19. Неполный итог** (`s-dup-5`, по коду).
+- **Дб19. Неполный итог** (`s-dup-5`, по коду). (**закрыто `v0.2.280`**: `Happened` с «Kept and rewritten», диагностика — в `Details`; в теле — имя записи без источника)
   - Тело кадра: «… Лебедева Вера refused …»; сервер — «Лебедева Вера ·
     nextcloud · Контакты refused» (`label()` с источником,
     `duplicates_merge.go:42`, `:500`).

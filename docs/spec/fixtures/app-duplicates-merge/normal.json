@@ -15,17 +15,26 @@
       "id": "duplicates.merge.cancel",
       "label": "Cancel",
       "method": "GET"
-    },
+    }
+  ],
+  "deleted": [
     {
-      "enabled": true,
-      "href": "/app/duplicates/merge?group=group\u0026into=1",
-      "id": "duplicates.merge.into",
-      "label": "Keep Лебедева Вера · nextcloud · Контакты instead",
-      "method": "GET"
+      "colour": "#4a6b52",
+      "detail": "+7 905 331-09-42 · v.lebedeva@example.org",
+      "href": "/app/contacts/a-nc-home/kontakty/b52e-7d08-c6f1",
+      "readOnly": false,
+      "stamp": "nextcloud · Контакты",
+      "title": "Лебедева Вера"
     }
   ],
   "details": null,
+  "gains": [
+    "EMAIL;TYPE=WORK: v.lebedeva@example.org",
+    "ORG: Библиотека №4",
+    "PHOTO (from nextcloud · Контакты)"
+  ],
   "groupID": "group",
+  "happened": [],
   "look": {
     "compact": false,
     "panel": true,
@@ -33,6 +42,7 @@
     "theme": "auto",
     "wide": false
   },
+  "notCarried": [],
   "notices": [],
   "print": {
     "range": "",
@@ -193,6 +203,23 @@
       "union": true
     }
   ],
+  "stays": [
+    {
+      "enabled": true,
+      "id": "duplicates.merge.into",
+      "label": "nextcloud · Архив",
+      "method": "GET",
+      "on": true
+    },
+    {
+      "enabled": true,
+      "href": "/app/duplicates/merge?group=group\u0026into=1",
+      "id": "duplicates.merge.into",
+      "label": "nextcloud · Контакты",
+      "method": "GET"
+    }
+  ],
+  "staysNote": "Вера Лебедева there is rewritten with the values you chose.",
   "subtitle": "Вера Лебедева · 2 records",
   "target": {
     "colour": "#a05a2c",
@@ -330,16 +357,7 @@
   "warning": {
     "actions": [],
     "body": "The kept record is rewritten with the values you chose, and only once the server has kept it are the others deleted. This cannot be undone from here.",
-    "details": {
-      "lines": [
-        "Kept and rewritten: Вера Лебедева · nextcloud · Архив",
-        "Deleted afterwards: Лебедева Вера · nextcloud · Контакты",
-        "The kept record gains EMAIL;TYPE=WORK: v.lebedeva@example.org (from nextcloud · Контакты)",
-        "The kept record gains ORG: Библиотека №4 (from nextcloud · Контакты)",
-        "The kept record gains PHOTO (from nextcloud · Контакты)"
-      ],
-      "summary": "What changes"
-    },
+    "details": null,
     "role": "info",
     "title": "One record is rewritten and 1 other deleted."
   }

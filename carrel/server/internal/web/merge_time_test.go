@@ -57,13 +57,12 @@ func TestMergeAsksWhen(t *testing.T) {
 	q := u.Query()
 	q.Set("choice.WHEN", "1")
 	chosen := decode[view.DuplicatesMergePage](t, f.h.do(get("/app/duplicates/merge?"+url.Values{"group": q["group"], "into": q["into"], "choice.WHEN": {"1"}}.Encode(), f.sess)))
+	// Whose time is taken is a gain of the kept record (s-dup-4, Дб15).
 	lines := ""
-	if chosen.Warning.Details != nil {
-		for _, l := range chosen.Warning.Details.Lines {
-			lines += string(l) + "\n"
-		}
+	for _, l := range chosen.Gains {
+		lines += string(l) + "\n"
 	}
-	if !strings.Contains(lines, "takes the time of") {
+	if !strings.Contains(lines, "the time of ") {
 		t.Errorf("the page does not say whose time is taken:\n%s", lines)
 	}
 	confirm = mergeAction(t, chosen, "duplicates.merge.confirm")

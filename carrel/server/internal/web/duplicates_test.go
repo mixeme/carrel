@@ -3,6 +3,7 @@ package web_test
 import (
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -351,12 +352,14 @@ func openMerge(t *testing.T, h *harness, sess *session.Session, a view.Action, f
 
 func mergeAction(t *testing.T, p view.DuplicatesMergePage, id string) view.Action {
 	t.Helper()
-	for _, a := range p.Actions {
-		if a.ID == id {
+	// The other sources are the segment «Where the merged record stays»
+	// (Stays, s-dup-2).
+	for _, a := range append(p.Actions, p.Stays...) {
+		if a.ID == id && !a.On {
 			return a
 		}
 	}
-	t.Fatalf("no action %q in %+v", id, p.Actions)
+	t.Fatalf("no action %q in %+v %+v", id, p.Actions, p.Stays)
 	return view.Action{}
 }
 
@@ -372,17 +375,24 @@ func TestMergeWritesThenDeletes(t *testing.T) {
 		// Keep the card in People: the other one is chosen from the page.
 		p = mergePage(t, f, mergeAction(t, p, "duplicates.merge.into").Href)
 	}
-	if !strings.HasSuffix(string(p.Target.Stamp), "People") || p.Warning.Details == nil {
+	if !strings.HasSuffix(string(p.Target.Stamp), "People") {
 		t.Fatalf("merge page = %+v", p)
 	}
-	lines := make([]string, len(p.Warning.Details.Lines))
-	for i, l := range p.Warning.Details.Lines {
-		lines[i] = string(l)
+	// The plan under its rubrics (s-dup-2; Дб14, Дб15): where it stays, the
+	// one deleted, what the kept one gains — a value says itself.
+	if len(p.Stays) != 2 || !p.Stays[0].On && !p.Stays[1].On || !strings.HasSuffix(string(p.StaysNote), " there is rewritten with the values you chose.") {
+		t.Errorf("stays %+v, note %q", p.Stays, p.StaysNote)
 	}
-	joined := strings.Join(lines, "\n")
-	for _, want := range []string{"Kept and rewritten: ", "Deleted afterwards: ", "EMAIL;TYPE=work: ada@engines.example", "X-THERE: theirs"} {
-		if !strings.Contains(joined, want) {
-			t.Errorf("warning lacks %q:\n%s", want, joined)
+	if len(p.Deleted) != 1 || !strings.HasSuffix(string(p.Deleted[0].Stamp), "Work") {
+		t.Errorf("deleted = %+v", p.Deleted)
+	}
+	gains := make([]string, len(p.Gains))
+	for i, l := range p.Gains {
+		gains[i] = string(l)
+	}
+	for _, want := range []string{"EMAIL;TYPE=work: ada@engines.example", "X-THERE: theirs"} {
+		if !slices.Contains(gains, want) {
+			t.Errorf("gains lack %q: %q", want, gains)
 		}
 	}
 	var fn *view.MergeRow
@@ -451,8 +461,10 @@ func TestMergeStopsAtTheFirstRefusedDelete(t *testing.T) {
 	if got.Warning.Title != "Written, but not every other record was deleted." || got.Warning.Details == nil {
 		t.Fatalf("result = %+v", got.Warning)
 	}
-	if !strings.Contains(string(got.Warning.Details.Lines[0]), "Still there: ") {
-		t.Errorf("lines = %v", got.Warning.Details.Lines)
+	// What happened under its rubric (s-dup-5, Дб19); the server's answer
+	// stays in Details.
+	if len(got.Happened) != 2 || !strings.HasPrefix(string(got.Happened[0]), "Kept and rewritten: ") || !strings.HasPrefix(string(got.Happened[1]), "Still there: ") {
+		t.Errorf("what happened = %q", got.Happened)
 	}
 	if f.srv.CountRequests(http.MethodPut, "")+f.other.CountRequests(http.MethodPut, "") != 1 {
 		t.Error("the kept record was not written, or was written back")

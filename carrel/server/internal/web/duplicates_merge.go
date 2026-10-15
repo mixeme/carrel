@@ -282,7 +282,9 @@ func gainLine(calendar bool, g dupes.Gain, from mergeMember) string {
 		}
 		name += ";" + k + "=" + g.Value.Params[k]
 	}
-	return name + ": " + v + " (from " + string(from.c.stamp()) + ")"
+	// The value says itself; only what shows no value (a photo) is told by
+	// where it comes from (s-dup-2, Дб15).
+	return name + ": " + v
 }
 
 // mergePlan is the merged record and the page that shows it.
@@ -384,27 +386,31 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 		q.Set("v."+strconv.Itoa(m.place), m.obj.ETag)
 	}
 
-	lines := []view.Text{text("Kept and rewritten: " + target.label())}
+	// The plan, each part under its rubric (s-dup-2, -4; Дб14, Дб15).
+	page.StaysNote = text(mergeTitle(target.c, target.obj) + " there is rewritten with the values you chose.")
 	for _, o := range others {
-		lines = append(lines, text("Deleted afterwards: "+o.label()))
+		d := s.member(mr.st, mr.g.kind, o.ref)
+		d.Title = text(mergeTitle(o.c, o.obj))
+		page.Deleted = append(page.Deleted, d)
 	}
 	for _, g := range plan.Gains {
-		lines = append(lines, text("The kept record gains "+gainLine(calendar, g, from(g.From))))
+		page.Gains = append(page.Gains, text(gainLine(calendar, g, from(g.From))))
 	}
 	if plan.Time > 0 {
-		lines = append(lines, text("The kept record takes the time of "+from(plan.Time).label()+": its start and end, its repetition and its rewritten occurrences"))
-	}
-	if plan.Dropped > 0 {
-		lines = append(lines, text(fmt.Sprintf("Not kept: %s of the kept record, which %s to the time it gives up", plural(plan.Dropped, "rewritten occurrence"), verbs(plan.Dropped, "belongs", "belong"))))
+		page.Gains = append(page.Gains, text("the time of "+from(plan.Time).label()+": its start and end, its repetition and its rewritten occurrences"))
 	}
 	if plan.Alarms > 0 {
-		lines = append(lines, text("The kept record gains "+plural(plan.Alarms, "reminder")+" from the others"))
+		page.Gains = append(page.Gains, text(plural(plan.Alarms, "reminder")+" from the others"))
+	}
+	if plan.Dropped > 0 {
+		page.NotCarried = append(page.NotCarried, text(fmt.Sprintf("%s of the kept record, which %s to the time it gives up",
+			plural(plan.Dropped, "rewritten occurrence"), verbs(plan.Dropped, "belongs", "belong"))))
 	}
 	for i := 1; i <= len(others); i++ {
 		if n := plan.Instances[i]; n > 0 {
 			// The verb agrees with the count (s-dup-4, Дб18): «1 rewritten
 			// occurrence …, which belongs to its series and goes with it».
-			lines = append(lines, text(fmt.Sprintf("Not carried over: %s of %s, which %s to its series and %s with it",
+			page.NotCarried = append(page.NotCarried, text(fmt.Sprintf("%s of %s, which %s to its series and %s with it",
 				plural(n, "rewritten occurrence"), others[i-1].label(), verbs(n, "belongs", "belong"), verbs(n, "goes", "go"))))
 		}
 	}
@@ -415,18 +421,22 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 		Title: text(fmt.Sprintf("One record is rewritten and %s deleted.", plural(len(others), "other"))),
 		Body: "The kept record is rewritten with the values you chose, and only once the server has kept it are the others deleted. " +
 			"This cannot be undone from here.",
-		Details: &view.Diagnostic{Summary: "What changes", Lines: lines},
 	}
 	confirm.Enabled, confirm.Href = true, s.mergeHref(mr.g.id, target.place, q)
 	page.Actions = []view.Action{confirm, back}
+	// Where it stays: a segment of the sources (s-dup-2), the kept one on,
+	// another the same page with it kept; a read-only one cannot be
+	// rewritten, and says so.
 	for _, m := range mr.members {
-		if m.place == target.place || m.c.col.ReadOnly {
-			continue
+		a := view.Action{ID: "duplicates.merge.into", Label: text(string(m.c.stamp())), Method: "GET", Enabled: true, On: m.place == target.place}
+		switch {
+		case a.On:
+		case m.c.col.ReadOnly:
+			a.Enabled, a.Reason = false, text(collectionLabel(m.c.col)+" is read-only here, so the merged record cannot be written there.")
+		default:
+			a.Href = s.mergeHref(mr.g.id, m.place, nil)
 		}
-		page.Actions = append(page.Actions, view.Action{
-			ID: "duplicates.merge.into", Label: text("Keep " + m.label() + " instead"),
-			Href: s.mergeHref(mr.g.id, m.place, nil), Method: "GET", Enabled: true,
-		})
+		page.Stays = append(page.Stays, a)
 	}
 	return merged, page
 }
@@ -529,7 +539,7 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 		if err := o.c.remove(ctx, o.obj.Path, o.obj.ETag); err != nil {
 			n := moveFailure(o.c, "Written, but not every other record was deleted.", "DELETE", o.obj.Path, err)
 			n.Body = text(fmt.Sprintf("The merge was written and %s deleted; %s refused, and the rest were not tried. Nothing is undone.",
-				plural(len(deleted), "record"), o.label()))
+				plural(len(deleted), "record"), mergeTitle(o.c, o.obj)))
 			if dav.IsStatus(err, http.StatusPreconditionFailed) {
 				n.Body = text(o.label() + " changed after it was read, so it was kept, and the rest were not tried. The merge was written; nothing is undone.")
 			}
@@ -578,18 +588,17 @@ func (s *Server) forgetDeleted(sess *session.Session, kind view.Kind, deleted []
 func (s *Server) mergeResult(w http.ResponseWriter, r *http.Request, sess *session.Session, mr mergeRead, deleted, left []mergeMember, n view.Notice) {
 	s.forgetDeleted(sess, mr.g.kind, deleted)
 	target := mr.members[mr.target]
-	var lines []view.Text
+	// What happened, under its rubric (s-dup-5, Дб19): the kept record, what
+	// went, what is still there; what the server answered stays in Details.
+	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge on the server"), GroupID: mr.g.id, Warning: n}
+	page.Happened = append(page.Happened, text("Kept and rewritten: "+target.label()))
 	for _, d := range deleted {
-		lines = append(lines, text("Deleted: "+d.label()))
+		page.Happened = append(page.Happened, text("Deleted: "+d.label()))
 	}
 	for _, l := range left {
-		lines = append(lines, text("Still there: "+l.label()))
+		page.Happened = append(page.Happened, text("Still there: "+l.label()))
 	}
-	if n.Details == nil {
-		n.Details = &view.Diagnostic{Summary: "What happened"}
-	}
-	n.Details.Lines = append(lines, n.Details.Lines...)
-	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge on the server"), GroupID: mr.g.id, Warning: n}
+	page.Subtitle = text(mergeTitle(target.c, target.obj) + " · " + plural(len(mr.members), "record"))
 	page.Rail = view.Rail{Nav: s.navRows(sess, s.catalogOf(sess), "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess)}
 	page.Target = s.member(mr.st, mr.g.kind, target.ref)
 	kept := s.openThere(target.c, target.ref.UID, "Open the kept record")
