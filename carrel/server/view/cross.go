@@ -105,6 +105,11 @@ type DuplicateGroup struct {
 	Rows     []DuplicateMember `json:"rows"`
 	Actions  []Action          `json:"actions"`  // Link · Not duplicates · Merge on the server
 	Decision DuplicateDecision `json:"decision"` // C-8
+	// Hint — под строками группы: что значит такая пара (s-dup-1, Дб6) —
+	// у событий с разными UID «The same event in two calendars, different
+	// UIDs. …», у заметок «Same title and the same date: a note copied into
+	// a second notebook. …»; пусто — сказать нечего
+	Hint Text `json:"hint,omitempty"`
 	// Расхождения в однозначных полях: ответ уходит с Link как
 	// MergeRow.Name=<номер варианта> и запоминается при связанной группе
 	Choices []MergeRow `json:"choices"`

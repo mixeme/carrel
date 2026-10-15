@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -253,6 +254,37 @@ func reasonText(k view.Kind, r dupes.Reason) string {
 	}
 }
 
+// groupHint is what a group means, said under its rows (s-dup-1, Дб6): an
+// event under different UIDs in several calendars, which the agenda shows
+// as many times, while it waits for a decision; a note copied into another
+// notebook. A group marked «not duplicates», and one of contacts or tasks,
+// says nothing.
+func groupHint(g dupGroup) view.Text {
+	if g.decision == view.DecisionIgnored || slices.Contains(g.reasons, dupes.SameUID) {
+		return ""
+	}
+	n := len(g.refs)
+	two := n == 2
+	pick := func(a, b string) string {
+		if two {
+			return a
+		}
+		return b
+	}
+	switch g.kind {
+	case view.KindEvent:
+		if g.decision == view.DecisionLinked {
+			return ""
+		}
+		return text(fmt.Sprintf("The same event in %s calendars, different UIDs. Agenda shows it %s; here you decide whether to keep %s or write one and delete the %s.",
+			countWord(n), pick("twice", strconv.Itoa(n)+" times"), pick("both", "them all"), pick("other", "others")))
+	case view.KindNote:
+		return text(fmt.Sprintf("Same title and the same date: a note copied into %s. Linked, the %s are shown as one row; merging writes one and deletes the %s.",
+			pick("a second notebook", "other notebooks"), countWord(n), pick("other", "others")))
+	}
+	return ""
+}
+
 // member is one row of a group: the record as its list left it, or — for a
 // linked member whose list this session has not read — its address alone.
 func (s *Server) member(st dupState, kind view.Kind, ref sealed.RecordRef) view.DuplicateMember {
@@ -295,7 +327,7 @@ func (s *Server) decideAction(id, label, group, do string) view.Action {
 }
 
 func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.DuplicateGroup {
-	out := view.DuplicateGroup{ID: g.id, Kind: g.kind, Score: g.score, Decision: g.decision}
+	out := view.DuplicateGroup{ID: g.id, Kind: g.kind, Score: g.score, Decision: g.decision, Hint: groupHint(g)}
 	for _, r := range g.reasons {
 		out.Reasons = append(out.Reasons, text(reasonText(g.kind, r)))
 	}

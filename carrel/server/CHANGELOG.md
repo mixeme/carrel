@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.282 — 2026-10-16
+
+### Changed
+
+- **A group says what such a pair means** (Дб6 of the scan of 15.10.2026;
+  `s-dup-1`): `DuplicateGroup.Hint` under its rows — for events under
+  different UIDs not yet decided, «The same event in two calendars,
+  different UIDs. Agenda shows it twice; here you decide whether to keep
+  both or write one and delete the other.»; for notes, «Same title and the
+  same date: a note copied into a second notebook. Linked, the two are
+  shown as one row; merging writes one and deletes the other.». A group
+  marked «not duplicates», of contacts or of tasks says nothing.
+
 ## v0.2.281 — 2026-10-16
 
 ### Changed

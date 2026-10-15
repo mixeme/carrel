@@ -91,7 +91,7 @@ CHANGELOG сервера и server.md: что закрыто — ниже, в «
   («+7 905 331-09-42 · vera@example.net»), `Stamp`, `Colour`, `ReadOnly`
   (`view/cross.go:114-121`). Нужно: поля строки по роду — те же, что у
   строк списков. Был ДбБ5, открыт (server.md, «Круг по сканам…»).
-- **Дб6. Пояснение под строками группы.** Кадр `s-dup-1`, «Дежурство»:
+- **Дб6. Пояснение под строками группы.** (**закрыто сервером `v0.2.282`**: `DuplicateGroup.Hint`; «duty» кадра — слово данных, у сервера «event») Кадр `s-dup-1`, «Дежурство»:
   «The same duty in two calendars, different UIDs. Agenda shows it twice;
   here you decide whether to keep both or write one and delete the
   other.» У «Что почитать про CRDT»: «Same title and the same date: a note

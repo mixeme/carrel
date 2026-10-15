@@ -1751,6 +1751,7 @@ type DuplicateGroup struct {
     Rows    []DuplicateMember
     Actions []Action // Link · Not duplicates · Merge on the server
     Decision DuplicateDecision // C-8
+    Hint     Text // под строками: что значит пара (s-dup-1) — у событий с разными UID, пока не решено, «The same event in two calendars, different UIDs. Agenda shows it twice; …», у заметок «Same title and the same date: a note copied into a second notebook. …»; у «not duplicates», контактов и задач пусто
     // Расхождения в однозначных полях: ответ уходит с Link как
     // MergeRow.Name=<номер варианта> и запоминается при связанной группе
     Choices []MergeRow

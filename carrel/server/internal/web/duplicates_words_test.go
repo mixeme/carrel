@@ -1,9 +1,13 @@
 package web_test
 
 import (
+	"net/url"
 	"strings"
 	"testing"
 
+	"github.com/emersion/go-webdav/caldav"
+
+	"carrel.dev/carrel/server/internal/davtest"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -50,4 +54,30 @@ func TestAPhotoIsToldByItsSource(t *testing.T) {
 		return
 	}
 	t.Fatalf("no photo question in %+v", g.Choices)
+}
+
+// Under the rows of a group of events with different UIDs the screen says
+// what that means (s-dup-1, «Дежурство»; Дб6): the agenda shows it twice,
+// and here the person decides. A group of contacts says nothing.
+func TestAGroupOfEventsSaysWhatItMeans(t *testing.T) {
+	srv := searchServer(t)
+	duty := davtest.CalendarHome + "duty/"
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work"})
+	srv.AddCalendar(caldav.Calendar{Path: duty, Name: "Duty"})
+	srv.Seed(searchWork+"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260801T000000Z\nSUMMARY:Standup\nDTSTART:20260810T070000Z\nDTEND:20260810T080000Z\nEND:VEVENT"))
+	srv.Seed(duty+"e2.ics", ics("BEGIN:VEVENT\nUID:e2\nDTSTAMP:20260801T000000Z\nSUMMARY:Standup\nDTSTART:20260810T070000Z\nDTEND:20260810T080000Z\nEND:VEVENT"))
+	f := connectFixture(t, srv, searchWork, nil)
+	for _, col := range []string{searchWork, duty} {
+		f.h.do(get("/app/calendar/"+f.id+"/"+url.PathEscape(col)+"?from=2026-08-10", f.sess))
+	}
+	g := onlyGroup(t, decode[view.DuplicatesPage](t, f.h.do(get("/app/duplicates", f.sess))))
+	if g.Hint != "The same event in two calendars, different UIDs. Agenda shows it twice; here you decide whether to keep both or write one and delete the other." {
+		t.Errorf("hint %q", g.Hint)
+	}
+
+	d := newDupFixture(t)
+	d.load(t)
+	if g := onlyGroup(t, d.page(t)); g.Hint != "" {
+		t.Errorf("a group of contacts says %q", g.Hint)
+	}
 }
