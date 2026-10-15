@@ -2091,7 +2091,8 @@ type CollectionMoveSheet struct {
     Target  TargetPicker // цель — подключение, а не коллекция (S-12.3)
     Cancels Text // календарь уходит с сервера, который планирует: «nextcloud may tell the attendees of its meetings that they are cancelled.»; у копии, не календаря и сервера без планирования пусто
     Warning Runs // число записей жирным: «copies all ‹51› events» (s-profile-8)
-    Actions []Action
+    Form    Form // лист — форма (s-profile-8): POST на адрес переноса (a, c, back в адресе), скрытые _csrf и copy у копии; выбранный сервер — под Target.Field «to» (TargetOption.Value — подключение); без выбора выбран первый подходящий; закрытый — с причиной: «already there», «files only», «not answering», «password · 401»
+    Actions []Action // Move или Copy — Submits, кнопка формы; Cancel
     Under   *Under // экран под листом, пришедшим страницей (Кл1): откуда открыт (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у фрагмента
 }
 

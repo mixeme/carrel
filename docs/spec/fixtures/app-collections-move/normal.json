@@ -2,70 +2,104 @@
   "actions": [
     {
       "csrf": "csrf",
-      "enabled": false,
+      "enabled": true,
+      "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-rad-vps",
       "id": "collection.move.confirm",
       "label": "Move",
       "method": "POST",
       "primary": true,
-      "reason": "Choose a server."
+      "submits": true,
+      "target": "sheet"
     },
     {
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty",
+      "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
       "id": "collection.cancel",
       "label": "Cancel",
       "method": "GET"
     }
   ],
-  "cancels": "",
+  "cancels": "nextcloud may tell the attendees of its meetings that they are cancelled.",
   "copy": false,
-  "kind": "contact",
-  "subject": "nextcloud · Контакты",
+  "form": {
+    "action": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          }
+        ],
+        "unfold": null
+      }
+    ],
+    "target": "sheet"
+  },
+  "kind": "event",
+  "subject": "nextcloud · Дни рождения",
   "target": {
-    "chosen": "",
+    "chosen": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-rad-vps",
+    "field": "to",
     "new": null,
     "options": [
       {
         "colour": "",
-        "id": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-nc-home",
+        "id": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-nc-home",
         "label": "nextcloud",
         "last": false,
         "readOnly": true,
         "reason": "already there",
-        "stamp": ""
+        "stamp": "",
+        "value": "a-nc-home"
       },
       {
         "colour": "",
-        "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-rad-vps",
-        "id": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-rad-vps",
+        "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-rad-vps",
+        "id": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-rad-vps",
         "label": "radicale · vps",
         "last": false,
         "readOnly": false,
         "reason": "",
-        "stamp": "address books"
+        "stamp": "calendars",
+        "value": "a-rad-vps"
       },
       {
         "colour": "",
-        "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-baikal",
-        "id": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-baikal",
+        "id": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-baikal",
         "label": "baikal",
         "last": false,
-        "readOnly": false,
-        "reason": "",
-        "stamp": "address books"
+        "readOnly": true,
+        "reason": "password · 401",
+        "stamp": "",
+        "value": "a-baikal"
       },
       {
         "colour": "",
-        "id": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-sftp-vps",
+        "id": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-sftp-vps",
         "label": "sftpgo · vps",
         "last": false,
         "readOnly": true,
         "reason": "files only",
-        "stamp": ""
+        "stamp": "",
+        "value": "a-sftp-vps"
       }
     ]
   },
-  "title": "Move address book",
+  "title": "Move calendar",
   "under": {
     "agenda": null,
     "connections": {
@@ -116,7 +150,7 @@
               "target": "sheet"
             }
           ],
-          "answered": "2 min ago",
+          "answered": "just now",
           "collections": [
             {
               "changed": "",
@@ -332,7 +366,7 @@
                 "event"
               ],
               "label": "Личный",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -402,7 +436,7 @@
                 "task"
               ],
               "label": "Работа",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -867,7 +901,7 @@
               "target": "sheet"
             }
           ],
-          "answered": "2 min ago",
+          "answered": "just now",
           "collections": [
             {
               "changed": "",
@@ -876,7 +910,7 @@
                 "event"
               ],
               "label": "Дежурства",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -945,7 +979,7 @@
                 "event"
               ],
               "label": "Проекты",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -1671,7 +1705,7 @@
               "method": "POST"
             }
           ],
-          "checked": "",
+          "checked": "just now",
           "colour": "#8c6239",
           "kinds": [
             "event",
@@ -1879,5 +1913,9 @@
     "taskEdit": null,
     "tasks": null
   },
-  "warning": []
+  "warning": [
+    {
+      "text": "Carrel creates a calendar there, copies all its events, then deletes this one on nextcloud. Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path."
+    }
+  ]
 }

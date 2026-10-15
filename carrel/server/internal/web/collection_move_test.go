@@ -50,12 +50,16 @@ func colSheetHref(f davFixture, to string, copying bool) string {
 
 func confirmCollection(t *testing.T, f colMoveFixture, copying bool) *http.Request {
 	t.Helper()
-	sheet := decode[view.CollectionMoveSheet](t, f.h.do(get(colSheetHref(f.davFixture, f.otherID, copying), f.sess)))
+	// The sheet's form as a browser sends it (Кл11): its hidden fields and
+	// the server chosen under Target.Field.
+	sheet := decode[view.CollectionMoveSheet](t, f.h.do(get(colSheetHref(f.davFixture, "", copying), f.sess)))
 	c := sheet.Actions[0]
-	if !c.Enabled || c.Method != "POST" {
+	if !c.Enabled || c.Method != "POST" || !c.Submits {
 		t.Fatalf("confirm = %+v", c)
 	}
-	return postForm(c.Href, f.sess, url.Values{})
+	form := formFields(sheet.Form)
+	form.Set(sheet.Target.Field, f.otherID)
+	return postForm(sheet.Form.Action, f.sess, form)
 }
 
 func connectionRow(t *testing.T, page view.ConnectionsPage, account, path string) view.CollectionRow {
@@ -111,12 +115,21 @@ func TestCollectionMoveSheetSaysBeforeItStarts(t *testing.T) {
 	if o := sheet.Target.Options[0]; !o.ReadOnly || o.Reason != "already there" {
 		t.Errorf("current connection = %+v", o)
 	}
-	if c := sheet.Actions[0]; c.Enabled || c.Reason == "" || len(sheet.Warning) != 0 {
-		t.Errorf("nothing chosen: confirm %+v, warning %q", c, sheet.Warning)
+	// Opened with nothing chosen, the server it can go to is (Кл12,
+	// s-profile-8; until v0.2.274 Move was off, «Choose a server.»), and the
+	// sheet is a form whose radio names it (Кл11).
+	if c := sheet.Actions[0]; !c.Enabled || !c.Submits || !strings.Contains(plainText(sheet.Warning), "old address") ||
+		sheet.Target.Chosen != sheet.Target.Options[1].ID || sheet.Target.Field != "to" || sheet.Target.Options[1].Value != f.otherID {
+		t.Errorf("opened: confirm %+v, target %+v, warning %q", c, sheet.Target, sheet.Warning)
 	}
 	chosen := decode[view.CollectionMoveSheet](t, f.h.do(get(sheet.Target.Options[1].ID, f.sess)))
 	if !chosen.Actions[0].Enabled || !strings.Contains(plainText(chosen.Warning), "old address") || chosen.Target.Chosen != sheet.Target.Options[1].ID {
 		t.Errorf("chosen = %+v", chosen)
+	}
+	// A server chosen by its address that is no target says so on Move.
+	here := decode[view.CollectionMoveSheet](t, f.h.do(get(sheet.Target.Options[0].ID, f.sess)))
+	if c := here.Actions[0]; c.Enabled || c.Reason == "" {
+		t.Errorf("the current server chosen: confirm %+v", c)
 	}
 	copySheet := decode[view.CollectionMoveSheet](t, f.h.do(get(colSheetHref(f.davFixture, f.otherID, true), f.sess)))
 	if !copySheet.Copy || copySheet.Actions[0].ID != "collection.copy.confirm" || strings.Contains(plainText(copySheet.Warning), "deletes") {

@@ -714,6 +714,28 @@ func silentNow(sess *session.Session, conn sealed.Connection) bool {
 	return failed && !answered
 }
 
+// silentWhy is why the session knows the connection does not answer now
+// (silentNow), as a closed target says it: «password · 401» when the last
+// polls were refused the saved password (s-profile-8: «Сломанный пароль —
+// тоже»), else «not answering»; "" — it answers, as far as the session knows.
+func silentWhy(sess *session.Session, conn sealed.Connection) string {
+	if !silentNow(sess, conn) {
+		return ""
+	}
+	for _, k := range []view.Kind{view.KindContact, view.KindEvent, view.KindTask, view.KindNote} {
+		snap := lastPoll(sess, k)
+		if snap == nil {
+			continue
+		}
+		for _, st := range snap.Sources {
+			if strings.HasPrefix(st.ID, conn.ID+":") && st.State == view.SourceError && dav.IsStatus(st.Err, http.StatusUnauthorized) {
+				return "password · 401"
+			}
+		}
+	}
+	return "not answering"
+}
+
 // countWord is a small count as the frames write it in a sentence: «Two of
 // three are listed» (s-profile-5).
 func countWord(n int) string {

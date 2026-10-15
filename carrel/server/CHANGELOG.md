@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.274 — 2026-10-15
+
+### Changed
+
+- **The move sheet of a collection is a form, as `s-profile-8` draws it**
+  (Кл11, Кл12, Кл13 of the scan of 15.10.2026). `CollectionMoveSheet.Form`
+  posts to the move's address with `_csrf` (and `copy` for a copy); the
+  server chosen goes under `Target.Field` «to», each option's `Value` its
+  connection; Move (Copy) submits it. Opened with nothing chosen, the first
+  server that suits is chosen and the sheet says what will happen — Move is
+  no longer off with «Choose a server.». A server the session knows does not
+  answer is closed: «password · 401» when the last polls were refused the
+  saved password, else «not answering»; chosen by its address, Move is off
+  with the reason.
+
+### For consumers
+
+Fixture `app-collections-move` re-shot as `s-profile-8`: «Дни рождения»
+over Connections, the calendar read first; radicale chosen, baikal closed
+«password · 401». The count stays «all its events» (the set's calendar
+holds one event; the frame draws 51).
+
 ## v0.2.273 — 2026-10-15
 
 ### Changed

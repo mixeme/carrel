@@ -384,8 +384,13 @@ type CollectionMoveSheet struct {
 	// Cancels — как у MoveSheet: календарь уходит с сервера, который
 	// планирует, и участникам его встреч тот может сообщить об отмене;
 	// пусто — копия, не календарь, сервер не планирует или неизвестно
-	Cancels Text     `json:"cancels"`
-	Warning Runs     `json:"warning"` // завести там, перенести записи, удалить здесь — до начала; число записей жирным (s-profile-8)
+	Cancels Text `json:"cancels"`
+	Warning Runs `json:"warning"` // завести там, перенести записи, удалить здесь — до начала; число записей жирным (s-profile-8)
+	// Form — лист как форма (s-profile-8, Кл11): POST на адрес переноса
+	// (a, c, back в адресе), скрытые _csrf и copy у копии; выбранный сервер
+	// уходит под Target.Field («to», TargetOption.Value — подключение).
+	// Основная кнопка — Actions[0] (Submits)
+	Form    Form     `json:"form"`
 	Actions []Action `json:"actions"`
 	// Under — экран под листом, пришедшим страницей (Кл1): откуда открыт
 	// (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у

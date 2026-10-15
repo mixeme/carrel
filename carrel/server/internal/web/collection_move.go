@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"slices"
 	"strings"
 
 	"carrel.dev/carrel/server/internal/dav"
@@ -60,14 +61,20 @@ func collectionMoveQuery(conn sealed.Connection, col sealed.Collection, to strin
 
 // collectionMoveTargets are every connection, the current one and those that
 // cannot hold the kind shown and closed with the reason; eligible counts the
-// others.
-func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, back string) (opts []view.TargetOption, eligible int) {
+// others. With the session, one it knows does not answer now is closed too
+// (s-profile-8: «password · 401»); the menu asks without it.
+func (s *Server) collectionMoveTargets(sess *session.Session, blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, back string) (opts []view.TargetOption, eligible int) {
 	for _, c := range blob.Connections {
 		// Beside a server the sheet says what it takes, or why not
 		// (s-profile-8): «calendars», «already there», «files only».
 		opt := view.TargetOption{
 			ID:    s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, c.ID, copying, back)),
 			Label: text(connLabel(c)),
+			Value: c.ID,
+		}
+		why := ""
+		if sess != nil {
+			why = silentWhy(sess, c)
 		}
 		switch {
 		case c.ID == conn.ID:
@@ -78,6 +85,8 @@ func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection,
 			opt.ReadOnly, opt.Reason = true, "files only"
 		case collectionHome(blob, c, col) == "":
 			opt.ReadOnly, opt.Reason = true, text("no "+collectionNoun(col)+"s")
+		case why != "":
+			opt.ReadOnly, opt.Reason = true, text(why)
 		default:
 			opt.Stamp = view.Stamp(collectionNoun(col) + "s")
 			opt.Href = opt.ID // the sheet with it chosen (U-8)
@@ -96,7 +105,7 @@ func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, c
 	if col.Gone || col.Feed || len(col.Kinds) == 0 {
 		return nil
 	}
-	if _, eligible := s.collectionMoveTargets(blob, conn, col, false, ""); eligible == 0 {
+	if _, eligible := s.collectionMoveTargets(nil, blob, conn, col, false, ""); eligible == 0 {
 		return nil
 	}
 	copying := view.MenuItem{Action: view.Action{
@@ -143,20 +152,46 @@ func collectionMoveBlock(blob sealed.Blob, conn sealed.Connection, col sealed.Co
 // it goes, that the address changes, and when the original is deleted.
 // count is the records the collection holds as the session last learnt it,
 // nil when it does not know.
-func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, to string, count *int, back string) view.CollectionMoveSheet {
+func (s *Server) collectionMoveSheet(sess *session.Session, blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, to string, count *int, back string) view.CollectionMoveSheet {
 	noun, label, here := collectionNoun(col), collectionLabel(col), connLabel(conn)
 	verb := "Move "
 	if copying {
 		verb = "Copy "
 	}
 	sheet := view.CollectionMoveSheet{Kind: col.Kinds[0], Copy: copying, Title: text(verb + noun), Subject: text(here + " · " + label)}
-	sheet.Target.Options, _ = s.collectionMoveTargets(blob, conn, col, copying, back)
+	sheet.Target.Options, _ = s.collectionMoveTargets(sess, blob, conn, col, copying, back)
+	// Nothing chosen yet, the first server it can go to is (s-profile-8
+	// draws the one that suits chosen): the form always names one, and
+	// Move is never a press refused after the fact.
+	if to == "" {
+		if i := slices.IndexFunc(sheet.Target.Options, func(o view.TargetOption) bool { return !o.ReadOnly }); i >= 0 {
+			to = sheet.Target.Options[i].Value
+		}
+	}
 	dest, known := blob.Connection(to)
-	confirm := view.Action{ID: "collection.move.confirm", Label: "Move", Method: "POST", Primary: true, Enabled: true}
+	// The sheet is a form (s-profile-8): the server is a radio under Field,
+	// Move its button.
+	sheet.Target.Field = "to"
+	q := url.Values{"a": {conn.ID}, "c": {col.Path}}
+	if back != "" {
+		q.Set("back", back)
+	}
+	hidden := []view.FormRow{csrfField(sess)}
+	if copying {
+		hidden = append(hidden, view.FormRow{Name: "copy", Kind: view.InputHidden, Value: "1"})
+	}
+	sheet.Form = s.plainForm("/app/collections/move?"+q.Encode(), "POST", hidden...)
+	confirm := view.Action{ID: "collection.move.confirm", Label: "Move", Method: "POST", Primary: true, Enabled: true, Submits: true}
 	if copying {
 		confirm.ID, confirm.Label = "collection.copy.confirm", "Copy"
 	}
-	if reason := collectionMoveBlock(blob, conn, col, dest, known, copying); reason != "" {
+	reason := collectionMoveBlock(blob, conn, col, dest, known, copying)
+	if why := silentWhy(sess, dest); reason == "" && known && why != "" {
+		// Chosen by its address, a server the session knows does not
+		// answer: said on the button before it is pressed.
+		reason = "That server is not answering (" + why + ")."
+	}
+	if reason != "" {
 		confirm.Enabled, confirm.Reason = false, text(reason)
 	} else {
 		chosen := s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, dest.ID, copying, back))
@@ -213,7 +248,7 @@ func (s *Server) getCollectionMove(w http.ResponseWriter, r *http.Request) {
 	if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
 		count = collectionCount(sess, conn.ID, col, spec)
 	}
-	sheet := s.collectionMoveSheet(blob, conn, col, q.Get("copy") != "", q.Get("to"), count, sheetBack(q.Get("back")))
+	sheet := s.collectionMoveSheet(sess, blob, conn, col, q.Get("copy") != "", q.Get("to"), count, sheetBack(q.Get("back")))
 	sheet.Under = s.collectionUnder(r)
 	s.writePage(w, r, http.StatusOK, sheet)
 }
@@ -238,7 +273,7 @@ func (s *Server) postCollectionMove(w http.ResponseWriter, r *http.Request) {
 		if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
 			count = collectionCount(sess, conn.ID, col, spec)
 		}
-		s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(blob, conn, col, copying, to, count, sheetBack(r.URL.Query().Get("back"))))
+		s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(sess, blob, conn, col, copying, to, count, sheetBack(r.URL.Query().Get("back"))))
 		return
 	}
 	m := &collectionMove{s: s, sess: sess, key: key, conn: conn, col: col, dest: dest, copying: copying, home: collectionHome(blob, dest, col)}
