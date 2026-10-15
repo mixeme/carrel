@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.256 — 2026-10-15
+
+### Changed
+
+- **Edit of a linked record and the tick of its row lead to the sheet of
+  copies again** (`/copies`, `/done`): the client draws `CopiesSheet` since
+  `v0.4.42` (the owner's decision of 15.10.2026 held them off until then).
+  The series question (`AskSheet`) still waits for its screen: Save writes
+  as before `v0.2.247`.
+- **A copy names the value it differs by** (`s-contacts-32`): of a phone or an
+  address, the first one the other copy does not hold — «Email differ ·
+  v.lebedeva@example.org», not the first address both share.
+- `/app/tasks/…/{uid}/done` takes `back`: the sheet stands over that page.
+
+### For consumers
+
+Fixtures `app-record-copies/normal` (Вера Лебедева in three books, one read
+only) and `app-task-done/normal` are new; `app-event`, `app-task`,
+`app-note`, `app-tasks-all` re-shot — Edit leads to `/copies`, the linked
+tick to `/done`.
+
 ## v0.2.255 — 2026-10-15
 
 ### Changed

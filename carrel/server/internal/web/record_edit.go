@@ -3606,12 +3606,12 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	// their day asks what becomes of them before anything is written (А1,
 	// s-agenda-22); kept, each is written as an event of its own first, and
 	// taken back if the series then is not written. Until the client draws
-	// sheets (sheetsOnPages) the save writes them as before, loose in the
+	// the question (askOnPages) the save writes them as before, loose in the
 	// series.
 	var made []string
 	var failed []apartFailed
 	var kept []time.Time
-	if left := leftByEdit(series, sent, c.tf.tz); len(left) > 0 && sheetsOnPages {
+	if left := leftByEdit(series, sent, c.tf.tz); len(left) > 0 && askOnPages {
 		answer := r.FormValue(leftField)
 		if answer != "keep" && answer != "remove" {
 			// The form is drawn again over the record read again: the one

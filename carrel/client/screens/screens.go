@@ -8,6 +8,7 @@ import (
 	"carrel.dev/carrel/client/screens/contact"
 	"carrel.dev/carrel/client/screens/contactedit"
 	"carrel.dev/carrel/client/screens/contacts"
+	"carrel.dev/carrel/client/screens/copies"
 	"carrel.dev/carrel/client/screens/deadlink"
 	"carrel.dev/carrel/client/screens/event"
 	"carrel.dev/carrel/client/screens/eventedit"
@@ -103,6 +104,16 @@ var All = []Screen{
 		},
 		Title: func(model any) string { return string(model.(*view.MoveSheet).Title) },
 		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.MoveSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.CopiesSheet) },
+		Frames: []string{"s-contacts-32", "s-tasks-16"},
+		Draw: func(model any) Root {
+			p := model.(*view.CopiesSheet)
+			return over(p.Under, copies.Sheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.CopiesSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.CopiesSheet).Under) },
 	},
 	{
 		Model:  func() any { return new(view.LoginPage) },

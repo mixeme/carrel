@@ -5,12 +5,13 @@
     "bar": [
       {
         "enabled": true,
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/copies",
         "icon": "i-pencil",
         "id": "record.edit",
         "label": "Edit",
         "method": "GET",
-        "primary": true
+        "primary": true,
+        "target": "sheet"
       },
       {
         "enabled": true,

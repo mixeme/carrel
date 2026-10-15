@@ -1320,6 +1320,22 @@ func linkMockupTask(t *testing.T, app *mockupApp) {
 		})
 }
 
+// linkMockupVera puts copies of Вера Лебедева of «Архив» in nextcloud ·
+// Контакты, her work address another, and in radicale · vps · Команда, read
+// only, her mobile another, and links the three (S-16): the sheet «Which
+// copy to edit?» draws three copies, the last without a tick (s-contacts-32).
+// The copies live in the tests alone.
+func linkMockupVera(t *testing.T, app *mockupApp) {
+	t.Helper()
+	linkMockupCopies(t, app, view.KindContact, "g-vera", mockupRecord{"nextcloud", "arhiv", "e7c2-3b95-6a14", "nextcloud-home/arhiv.vcf"},
+		mockupCopy{rec: mockupRecord{"nextcloud", "kontakty", "e7c2-41d0-9b37", ""}, edit: func(rec string) string {
+			return strings.Replace(rec, "EMAIL;TYPE=WORK:vera.l@work.example", "EMAIL;TYPE=WORK:v.lebedeva@example.org", 1)
+		}},
+		mockupCopy{rec: mockupRecord{"radicale · vps", "komanda", "e7c2-8a64-1f05", ""}, edit: func(rec string) string {
+			return strings.Replace(rec, "TEL;TYPE=CELL:+7 905 331-09-42", "TEL;TYPE=CELL:+7 905 331-09-48", 1)
+		}})
+}
+
 // linkMockupNote puts a copy of «Что почитать про CRDT», its text longer,
 // in nextcloud · Дневник and links the two (S-16): «linked ×2», «2 sources»
 // (s-notes-1; the client's scan НБ6). The frame puts the copy in radicale ·
@@ -1411,7 +1427,11 @@ func linkMockupCopies(t *testing.T, app *mockupApp, kind view.Kind, group string
 		if cp.edit != nil {
 			rec = cp.edit(rec)
 		}
-		app.servers[cp.rec.account].Seed(davtest.CalendarHome+cp.rec.slug+"/"+cp.rec.uid+".ics", rec)
+		at := davtest.CalendarHome + cp.rec.slug + "/" + cp.rec.uid + ".ics"
+		if kind == view.KindContact {
+			at = davtest.AddressBookHome + cp.rec.slug + "/" + cp.rec.uid + ".vcf"
+		}
+		app.servers[cp.rec.account].Seed(at, rec)
 		all = append(all, cp.rec)
 	}
 	key, _ := app.sess.DataKey()
@@ -1552,6 +1572,26 @@ func TestFixtureTaskCard(t *testing.T) {
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "tasks", "dela") + "/aa11-2d09-5f84"
 	app.compare(t, "app-task/normal.json", app.h.do(get(rec, app.sess)))
+}
+
+// C-14.2: the sheets of a linked record's copies — «Which copy to edit?»
+// over the card of Вера Лебедева in three books, one read only
+// (s-contacts-32, one sheet for every kind) and «Which copy to mark done?» over the combined list of tasks it
+// was opened from (s-tasks-16).
+func TestFixtureCopiesSheets(t *testing.T) {
+	app := newMockupApp(t)
+	linkMockupTask(t, app)
+	linkMockupVera(t, app)
+	seedMockupTrip(t, app)
+	openList(t, app, "/app/calendar?from=2026-08-10")
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	list := combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	vera := app.listPath(t, "contacts", "arhiv") + "/e7c2-3b95-6a14"
+	app.compare(t, "app-record-copies/normal.json", app.h.do(get(vera+"/copies", app.sess)))
+	rec := app.listPath(t, "tasks", "dela") + "/aa11-2d09-5f84"
+	back := url.QueryEscape("/app/tasks?task=" + list.Poll.TaskID)
+	app.compare(t, "app-task-done/normal.json", app.h.do(get(rec+"/done?from=all&back="+back, app.sess)))
 }
 
 // C-14.2: one note, read (s-notes-2): its copy in «Дневник», the recording

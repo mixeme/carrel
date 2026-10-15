@@ -35,6 +35,8 @@ var Models = map[string]func() any{
 	"app-contact-edit":         func() any { return &view.ContactEditPage{} },
 	"app-contact-import":       func() any { return &view.ImportPage{} },
 	"app-contact-move":         func() any { return &view.MoveSheet{} },
+	"app-record-copies":        func() any { return &view.CopiesSheet{} },
+	"app-task-done":            func() any { return &view.CopiesSheet{} },
 	"app-contact-new":          func() any { return &view.ContactEditPage{} },
 	"app-contact-rewrite":      func() any { return &view.RewriteSheet{} },
 	"app-contact-timeline":     func() any { return &view.ContactTimelinePage{} },

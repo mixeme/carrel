@@ -74,7 +74,10 @@ func Kind(a view.Action) w.ButtonKind {
 // submits the form named form — the Form it stands under, or a PostForm of
 // the page (Button.Form), or — one that sends the form it stands in
 // (Submits, without a file) — submits that form to its own Href
-// (formaction: Remove of a new record's attachment); an action switched off
+// (formaction: Remove of a new record's attachment); one that goes
+// somewhere with the form it stands in (GET, Submits: «Edit this copy» of
+// the sheet of copies, s-contacts-32) submits that form, to its own Href
+// when it has one; an action switched off
 // is drawn disabled and says why (Reason), and leads nowhere. The label,
 // the icon and the kind are the action's.
 func Button(a view.Action, form string) w.Button {
@@ -83,7 +86,7 @@ func Button(a view.Action, form string) w.Button {
 	case !a.Enabled:
 		b.State = w.ButtonDisabled
 		b.Reason = string(a.Reason)
-	case a.Method == "POST" && a.Submits && a.File == "":
+	case a.Submits && a.File == "":
 		b.Submit, b.To = true, a.Href
 	case a.Method == "POST":
 		b.Form = form

@@ -230,6 +230,10 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-event-new": "/app/calendar/{account}/{col}/new",
     "app-contact-import": "/app/contacts/{account}/{col}/import",
     "app-contact-move": "/app/contacts/{account}/{col}/{uid}/move",
+    # Листы копий связанной записи: кадров со своим адресом у них нет —
+    # фрагменты s-contacts-32 и s-tasks-16 (STATE_FRAME; задача Typecase 183).
+    "app-record-copies": "/app/{kind}/{account}/{col}/{uid}/copies",
+    "app-task-done": "/app/tasks/{account}/{col}/{uid}/done",
     "app-contact-rewrite": "/app/contacts/{account}/{col}/{uid}/rewrite",
     "app-quick": "/app/notes/quick",
     "app-collections-new": "/app/collections/new",
@@ -250,7 +254,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
           "app-publish", "app-files-picker", "app-files-op", "app-mail-compose",
-          "app-contact-rewrite"}
+          "app-contact-rewrite", "app-record-copies", "app-task-done"}
 
 FRAME_TODO = {
     # Полная форма нового события — свой кадр s-agenda-15 (Typecase 9e69804,
@@ -346,6 +350,8 @@ STATE_FRAME = {
     "app-files-folder/readonly": "states-34",
     "app-files-folder/long": "s-files-2",
     "app-files-folder/tiles": "s-files-5",
+    "app-record-copies/normal": "s-contacts-32",
+    "app-task-done/normal": "s-tasks-16",
     "app-files-op/copy": "s-files-11",
     "app-files-op/elsewhere": "s-files-12",
     "app-files-op/refused": "s-files-13",

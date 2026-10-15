@@ -18,9 +18,9 @@ func RefuseApart(at time.Time, why string) (restore func()) {
 }
 
 // DrawSheets turns on the pages' way to the sheets the client does not draw
-// yet (sheetsOnPages) until the function it returns is called.
+// yet (askOnPages) until the function it returns is called.
 func DrawSheets() (restore func()) {
-	was := sheetsOnPages
-	sheetsOnPages = true
-	return func() { sheetsOnPages = was }
+	was := askOnPages
+	askOnPages = true
+	return func() { askOnPages = was }
 }

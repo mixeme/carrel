@@ -63,7 +63,7 @@ func (s *Server) copiesSheet(ctx context.Context, c *collectionCtx, uid string, 
 	opened := ""
 	for _, m := range lc.others {
 		if d := differ(obj, m.obj); m.obj != nil && len(d) > 0 {
-			opened = copyHolds(c, obj, d[0])
+			opened = copyHolds(c, obj, m.obj, d[0])
 			break
 		}
 	}
@@ -95,7 +95,7 @@ func (s *Server) copiesSheet(ctx context.Context, c *collectionCtx, uid string, 
 			// A copy that cannot be chosen says why after «·» instead
 			// (s-contacts-32: «Phone differ · read-only: …»).
 			opt.Meta = text(strings.Join(d, ", ") + " differ")
-			if v := copyHolds(m.c, m.obj, d[0]); v != "" && !opt.Disabled {
+			if v := copyHolds(m.c, m.obj, obj, d[0]); v != "" && !opt.Disabled {
 				opt.Meta += text(" · " + v)
 			}
 		}
@@ -149,16 +149,35 @@ var taskDiffers = func() []differProp {
 
 // copyHolds is what a copy holds of a thing it is compared by, as a sheet
 // names it after «·»: the address, the number, the place, the due date
-// («due 13 Aug»); "" for what has no short words — a photo, a text.
-func copyHolds(c *collectionCtx, obj *model.Object, label string) string {
+// («due 13 Aug»); of a phone or an address, the first one than — the copy
+// it is compared with — does not hold; "" for what has no short words — a
+// photo, a text.
+func copyHolds(c *collectionCtx, obj, than *model.Object, label string) string {
 	first := func(prop string) string { return strings.TrimSpace(firstValue(obj, prop)) }
+	// own is the first value of a property of several that than does not
+	// hold: the one the copies differ by (s-contacts-32: «Email differ ·
+	// v.lebedeva@example.org», the address the other copy has not).
+	own := func(prop string) string {
+		held := map[string]bool{}
+		if than != nil {
+			for _, v := range than.PropText(prop) {
+				held[strings.TrimSpace(v)] = true
+			}
+		}
+		for _, v := range obj.PropText(prop) {
+			if v = strings.TrimSpace(v); v != "" && !held[v] {
+				return v
+			}
+		}
+		return first(prop)
+	}
 	switch strings.ToLower(label) {
 	case "name":
 		return first("FN")
 	case "phone":
-		return first("TEL")
+		return own("TEL")
 	case "email":
-		return first("EMAIL")
+		return own("EMAIL")
 	case "organisation":
 		return structured(first("ORG"))
 	case "title":
@@ -296,7 +315,7 @@ func (s *Server) getTaskDone(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, c.recordPath(uid))
 		return
 	}
-	sheet.Under = s.underOf(r, "", doneBack(c, uid, from))
+	sheet.Under = s.underOf(r, r.URL.Query().Get("back"), doneBack(c, uid, from))
 	s.writeCopies(w, r, sheet)
 }
 
@@ -416,21 +435,26 @@ func (s *Server) linkedTick(from origin, segment, uid string) view.Action {
 		Href: s.postQuery(from.recordPath(segment, uid)+"/done", url.Values{"from": {"all"}})}
 }
 
-// sheetsOnPages says whether the pages lead to sheets: Edit of a linked
-// record to «Which copy to edit?», the tick of a linked row to «Which copy
-// to mark done?», Save of a series that leaves meetings without their day
-// to its question (ask_series.go). Off until the client draws sheets (the
-// owner's decision of 15.10.2026: the client answered them with JSON, where
-// Edit had opened the form, the tick marked the first copy and Save wrote;
-// the sheets wait for Typecase's task 183): the sheets and their addresses
-// stand, and the pages do what they did before v0.2.247. A test turns it on
-// (DrawSheets).
-var sheetsOnPages = false
+// The pages lead to a sheet only once the client draws it (the owner's
+// decision of 15.10.2026: the client answered the sheets with JSON, where
+// Edit had opened the form, the tick marked the first copy and Save wrote):
+// until then the sheet and its address stand, and the page does what it did
+// before v0.2.247.
+//
+// copiesOnPages: Edit of a linked record leads to «Which copy to edit?»,
+// the tick of a linked row to «Which copy to mark done?» — the client draws
+// them since v0.4.42. askOnPages: Save of a series that leaves meetings
+// without their day asks first (ask_series.go) — off until the client draws
+// AskSheet; a test turns it on (DrawSheets).
+var (
+	copiesOnPages = true
+	askOnPages    = false
+)
 
 // editViaCopies sends Edit of a linked record's page to «Which copy to
-// edit?» (s-contacts-32) instead of its form — while sheetsOnPages.
+// edit?» (s-contacts-32) instead of its form — while copiesOnPages.
 func (s *Server) editViaCopies(c *collectionCtx, uid string, actions []view.Action) {
-	if !sheetsOnPages {
+	if !copiesOnPages {
 		return
 	}
 	for i := range actions {

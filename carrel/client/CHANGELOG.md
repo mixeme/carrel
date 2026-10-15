@@ -4,6 +4,20 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.42 — 2026-10-15
+
+Server `v0.2.256`. **The sheet «which copy»** of a linked record
+(`CopiesSheet`): «Which copy to edit?» (`s-contacts-32`) and «Which copy to
+mark done?» (`s-tasks-16`), over the screen it was opened from, as the move
+sheet. A line a copy: the mark of its collection, a radio (Edit) or a box
+(Mark done) with its source, and how it differs, muted; a copy that cannot
+be chosen — its source muted and why. The sheet is a form of its method
+(GET for Edit); a button that sends the form it stands in goes by GET too
+(`bind.Button`). No frame draws the sheet at its address yet (Typecase's
+task 183): the guards hold it by the two fragments. With it the server's
+pages lead to the sheet again: Edit of a linked record and the tick of its
+row in a combined list.
+
 ## v0.4.41 — 2026-10-15
 
 Server `v0.2.255`. **The first sheet: Move and Copy of a record**
