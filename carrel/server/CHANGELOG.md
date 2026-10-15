@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.269 — 2026-10-15
+
+### Changed
+
+- **Registration and the first setup past the ceiling of attempts answer
+  their form**, the words at the login, as the other forms that take a
+  password do since `v0.2.266`; status 429 as before.
+- **The rail of the search lists its sources by kind** (Пк4 of the scan of
+  15.10.2026; `s-find-1`): address books, calendars, lists of tasks,
+  notebooks, storages — within a kind as the section's rail orders them,
+  subscriptions last; before, in the order they were ticked.
+- **The history of the search says when beyond a day as `s-find-2`** (Пк20):
+  «yesterday», the day of the week within the week, then the day.
+
 ## v0.2.268 — 2026-10-15
 
 ### Fixed

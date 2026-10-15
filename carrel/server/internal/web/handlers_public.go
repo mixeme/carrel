@@ -17,6 +17,9 @@ import (
 // errors a person can act on are named; anything else (a failed write, a
 // path in an os error) stays out of the response.
 func formError(err error) view.Text {
+	if errors.Is(err, errTooManyAttempts) {
+		return text(tooManyAttempts)
+	}
 	for _, known := range []error{
 		user.ErrPasswordShort, user.ErrPasswordMismatch, user.ErrLoginTaken, user.ErrLastAdmin, user.ErrLoginConfirm,
 		user.ErrLoginEmpty, user.ErrSelfRegNeedsMail, user.ErrBadAddress,
@@ -256,7 +259,11 @@ func (s *Server) setupPage(w http.ResponseWriter, r *http.Request, login, email 
 func (s *Server) postSetup(w http.ResponseWriter, r *http.Request) {
 	login := r.FormValue("login")
 	if !s.limit.allowLogin(login, s.clientIP(r), time.Now()) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		if !s.users.FirstRun() {
+			s.notFound(w, r)
+			return
+		}
+		s.writePage(w, r, http.StatusTooManyRequests, s.setupPage(w, r, login, r.FormValue("email"), errTooManyAttempts, nil))
 		return
 	}
 	if !s.users.FirstRun() {
@@ -322,7 +329,12 @@ func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	ip := s.clientIP(r)
 	if !s.limit.allowAnon(ip, start) || !s.limit.allowLogin(r.FormValue("login"), ip, start) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		if !s.users.RegisterOpen() {
+			s.notFound(w, r)
+			return
+		}
+		// The form again, the words at the login (as Ад39).
+		s.writePage(w, r, http.StatusTooManyRequests, s.registerPage(w, r, r.FormValue("login"), strings.TrimSpace(r.FormValue("email")), errTooManyAttempts, nil))
 		return
 	}
 	if !s.users.RegisterOpen() {

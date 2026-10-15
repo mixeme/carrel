@@ -230,6 +230,31 @@ func (f timeFmt) formatWhen(t time.Time, relative bool, now time.Time) view.When
 	return view.When(t.In(f.tz).Format("2 January") + ", " + f.clock(t))
 }
 
+// historyWhen is when a search of the history was made (s-find-2, Пк20):
+// today as a relative time, «2 hours ago»; yesterday — «yesterday»; within
+// the week — its day, «Monday»; before — the day, «9 August».
+func (f timeFmt) historyWhen(t, now time.Time) view.When {
+	if t.IsZero() {
+		return ""
+	}
+	day := func(x time.Time) time.Time {
+		x = x.In(f.tz)
+		return time.Date(x.Year(), x.Month(), x.Day(), 0, 0, 0, 0, f.tz)
+	}
+	days := int(day(now).Sub(day(t)).Hours()/24 + 0.5)
+	switch {
+	case days <= 0:
+		return f.formatWhen(t, true, now)
+	case days == 1:
+		return "yesterday"
+	case days < 7:
+		return view.When(t.In(f.tz).Format("Monday"))
+	case t.In(f.tz).Year() == now.In(f.tz).Year():
+		return view.When(t.In(f.tz).Format("2 January"))
+	}
+	return view.When(f.date(t))
+}
+
 // ago is a past moment the way a head says it: «just now», «5 min ago»,
 // «2 hours ago», «2 days ago» up to a month, then the day.
 func (f timeFmt) ago(t, now time.Time) string {

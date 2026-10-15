@@ -698,7 +698,31 @@ func (s *Server) searchRail(sess *session.Session, blob sealed.Blob, snap *fanou
 	seen := map[string]bool{}
 	sec := view.RailSection{State: view.CollectionOK}
 	asked := 0
-	for _, pick := range blob.Selected {
+	// By kind, as s-find-1 lists them (Пк4): books, calendars, lists of
+	// tasks, notebooks, storages; within a kind as the section's rail
+	// orders them — by connection, then as the catalog holds them.
+	at := map[string]int{}
+	for _, conn := range blob.Connections {
+		for _, col := range blob.CollectionsOf(conn.ID) {
+			at[conn.ID+":"+col.Path] = len(at)
+		}
+	}
+	// A subscription's collection is not in the catalog's lists: it comes
+	// last, as its section does in the rail.
+	place := func(p sealed.Selection) int {
+		if v, ok := at[p.AccountID+":"+p.Path]; ok {
+			return v
+		}
+		return len(at)
+	}
+	picks := slices.Clone(blob.Selected)
+	slices.SortStableFunc(picks, func(a, b sealed.Selection) int {
+		if d := kindRank(a.Kind) - kindRank(b.Kind); d != 0 {
+			return d
+		}
+		return place(a) - place(b)
+	})
+	for _, pick := range picks {
 		id := pick.AccountID + ":" + pick.Path
 		col, ok := blob.Collection(pick.AccountID, pick.Path)
 		if _, conn := blob.Connection(pick.AccountID); !ok || !conn || !col.Has(pick.Kind) || seen[id] {
@@ -730,6 +754,21 @@ func (s *Server) searchRail(sess *session.Session, blob sealed.Blob, snap *fanou
 	sec.Account = text(fmt.Sprintf("Sources %d / %d", asked, len(sec.Rows)))
 	rail.Sections = []view.RailSection{sec}
 	return rail
+}
+
+// kindRank is the place of a kind in a list of every kind (s-find-1).
+func kindRank(k view.Kind) int {
+	switch k {
+	case view.KindContact:
+		return 0
+	case view.KindEvent:
+		return 1
+	case view.KindTask:
+		return 2
+	case view.KindNote:
+		return 3
+	}
+	return 4
 }
 
 // sourceOrigin is the stamp and colour of a source's rows and of its line in

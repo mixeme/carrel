@@ -1,11 +1,13 @@
 package web_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"testing"
 
 	"carrel.dev/carrel/server/internal/conf"
+	"carrel.dev/carrel/server/view"
 )
 
 // S-29.3: every route without a session has a bucket. /setup had none, and
@@ -28,6 +30,15 @@ func TestSetupIsRateLimited(t *testing.T) {
 	}
 	if code := post("admin"); code != http.StatusTooManyRequests {
 		t.Fatalf("attempt %d on one login: %d, want 429", conf.LoginRatePerAccount+1, code)
+	}
+	// The form again, the words at the login — not a bare «too many
+	// requests» (as Ад39).
+	again := h.anonPostForm("/setup", "/setup", url.Values{"login": {"admin"}, "password": {"password123"}, "password2": {"nope"}})
+	again.RemoteAddr = "198.51.100.7:4000"
+	var page view.SetupPage
+	if err := json.Unmarshal(h.do(again).Body.Bytes(), &page); err != nil || formRow(page.Form, "login") == nil ||
+		formRow(page.Form, "login").Error != "Too many attempts just now. Wait a few minutes and try again." {
+		t.Errorf("past the ceiling: %v %+v", err, page.Form)
 	}
 	if code := post("other"); code != http.StatusOK {
 		t.Fatalf("another login from the same address: %d, want 200", code)

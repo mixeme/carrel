@@ -43,7 +43,7 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 				sh.Top.Search.History = append(sh.Top.Search.History, view.SearchHistoryRow{
 					Query:   text(e.Query),
 					Outcome: text(historyOutcome(e)),
-					When:    tf.formatWhen(e.At, true, now),
+					When:    tf.historyWhen(e.At, now),
 					Href:    s.route(searchHref(e.Query)),
 				})
 			}
