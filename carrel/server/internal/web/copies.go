@@ -105,7 +105,10 @@ func (s *Server) copiesSheet(ctx context.Context, c *collectionCtx, uid string, 
 		sheet.Title = "Which copy to mark done?"
 		sheet.Note = text(stands + "Tick the copy that is done; a copy that is not ticked stays as it is.")
 		sheet.Form = view.Form{Action: s.route(c.recordPath(uid) + "/done"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
-			csrfField(c.sess), {Name: "from", Kind: view.InputHidden, Value: text(from)}, row,
+			csrfField(c.sess), {Name: "from", Kind: view.InputHidden, Value: text(from)},
+			// The sheet's own post, told from the tick's: nothing ticked here
+			// is said, not taken for the tick again (Лс34).
+			{Name: "sheet", Kind: view.InputHidden, Value: "1"}, row,
 		}}}}
 		sheet.Actions = []view.Action{
 			{ID: "copies.done", Label: "Mark done", Method: "POST", Primary: true, Enabled: true, Submits: true},
@@ -278,7 +281,9 @@ func (s *Server) getKindCopies(w http.ResponseWriter, r *http.Request, kind stri
 		s.redirect(w, r, c.recordPath(uid)+"/edit")
 		return
 	}
-	sheet.Under = s.underOf(r, r.URL.Query().Get("back"), c.recordPath(uid))
+	back := s.sheetBack(r, r.URL.Query().Get("back"), true)
+	sheet.Under = s.underOf(r, back, c.recordPath(uid))
+	s.cancelTo(r, back, sheet.Actions, "copies.cancel")
 	s.writeCopies(w, r, sheet)
 }
 
@@ -315,7 +320,9 @@ func (s *Server) getTaskDone(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, c.recordPath(uid))
 		return
 	}
-	sheet.Under = s.underOf(r, r.URL.Query().Get("back"), doneBack(c, uid, from))
+	back := s.sheetBack(r, r.URL.Query().Get("back"), true)
+	sheet.Under = s.underOf(r, back, doneBack(c, uid, from))
+	s.cancelTo(r, back, sheet.Actions, "copies.cancel")
 	s.writeCopies(w, r, sheet)
 }
 
@@ -349,6 +356,20 @@ func (s *Server) postTaskDone(w http.ResponseWriter, r *http.Request) {
 	if len(chosen) == 0 {
 		if linked {
 			sheet, _ := s.copiesSheet(r.Context(), c, uid, obj, true, from)
+			if r.FormValue("sheet") != "" {
+				// Mark done with no copy ticked (Лс34): the sheet again, as
+				// sent — nothing ticked — and why nothing was written.
+				for i := range sheet.Form.Sets {
+					for j := range sheet.Form.Sets[i].Rows {
+						if row := &sheet.Form.Sets[i].Rows[j]; row.Name == copyField {
+							for k := range row.Options {
+								row.Options[k].Selected = false
+							}
+						}
+					}
+				}
+				sheet.Form.Errors = []view.FieldError{{Name: copyField, Message: "Tick the copy that is done: nothing was marked."}}
+			}
 			sheet.Under = s.underOf(r, "", doneBack(c, uid, from))
 			s.writeCopies(w, r, sheet)
 			return

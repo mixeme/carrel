@@ -59,8 +59,8 @@ func (s *Server) underOf(r *http.Request, back, fallback string) *view.Under {
 	if render.WantsFragment(r) {
 		return nil
 	}
-	path := strings.TrimPrefix(back, s.basePath)
-	if !strings.HasPrefix(path, "/app/") || strings.Contains(path, "//") || strings.Contains(path, "..") {
+	path := s.sheetBack(r, back, false)
+	if path == "" {
 		path = fallback
 	}
 	u, err := url.Parse(path)
@@ -78,6 +78,39 @@ func (s *Server) underOf(r *http.Request, back, fallback string) *view.Under {
 		return nil
 	}
 	return underPage(caught.body)
+}
+
+// sheetBack is the page a sheet was opened from, to stand over and to go
+// back to with Cancel (Лс30, Лс31): back, else the page the link was
+// followed from when referer (its Referer, as the password's sheet reads
+// it: a sheet opened by a link — not one that answers a form, whose Referer
+// is the form); "" — none of this instance's pages. A path of the app
+// without the base path is taken as back too.
+func (s *Server) sheetBack(r *http.Request, back string, referer bool) string {
+	if p, ok := s.returnPath(r, back); ok {
+		return p
+	}
+	if p := strings.TrimPrefix(back, s.basePath); strings.HasPrefix(p, "/app/") && !strings.Contains(p, "//") && !strings.Contains(p, "..") && !strings.Contains(p, "\\") {
+		return p
+	}
+	if p, ok := s.returnPath(r, r.Referer()); ok && referer {
+		return p
+	}
+	return ""
+}
+
+// cancelTo sends a sheet's Cancel (id) to the page it was opened from, when
+// that is known (Лс30): the screen under it, not the record's page.
+func (s *Server) cancelTo(r *http.Request, back string, actions []view.Action, id string) {
+	p := s.sheetBack(r, back, false)
+	if p == "" {
+		return
+	}
+	for i := range actions {
+		if actions[i].ID == id {
+			actions[i].Href = s.route(p)
+		}
+	}
 }
 
 // underPage is a page as the screen under a sheet; nil — a page no sheet is

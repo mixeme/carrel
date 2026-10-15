@@ -246,9 +246,23 @@ func (s *Server) getKindMove(w http.ResponseWriter, r *http.Request, kind string
 	sheet := s.moveSheet(c, uid, title, copying, s.moveTarget(c, q.Get("to"), q.Get("into")), invited)
 	// Opened by its address, the sheet stands over the screen it came from
 	// (s-contacts-2), else over the record's page.
-	sheet.Under = s.underOf(r, q.Get("back"), c.recordPath(uid))
-	if back := q.Get("back"); back != "" {
+	back := s.sheetBack(r, q.Get("back"), true)
+	sheet.Under = s.underOf(r, back, c.recordPath(uid))
+	s.cancelTo(r, back, sheet.Actions, "record.move.cancel")
+	if back != "" {
 		sheet.Form.Sets[0].Rows = append(sheet.Form.Sets[0].Rows, view.FormRow{Name: "back", Kind: view.InputHidden, Value: text(back)})
+		// The sheet with another collection chosen stands over the same
+		// page (U-8).
+		for i, o := range sheet.Target.Options {
+			if o.Href == "" {
+				continue
+			}
+			sep := "?"
+			if strings.Contains(o.Href, "?") {
+				sep = "&"
+			}
+			sheet.Target.Options[i].Href += sep + "back=" + url.QueryEscape(back)
+		}
 	}
 	s.writeSheetOf(w, r, sheet)
 }
@@ -290,6 +304,7 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 		}
 		sheet := s.moveSheet(c, uid, title, copying, dest, invited)
 		sheet.Under = s.underOf(r, r.FormValue("back"), c.recordPath(uid))
+		s.cancelTo(r, r.FormValue("back"), sheet.Actions, "record.move.cancel")
 		s.writeSheetOf(w, r, sheet)
 		return
 	}

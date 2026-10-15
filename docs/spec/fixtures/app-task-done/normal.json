@@ -11,7 +11,7 @@
     },
     {
       "enabled": true,
-      "href": "/app/tasks",
+      "href": "/app/tasks?task=t-task",
       "id": "copies.cancel",
       "label": "Cancel",
       "method": "GET"
@@ -51,6 +51,19 @@
             "readOnly": false,
             "required": false,
             "value": "all"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "sheet",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "1"
           },
           {
             "add": null,

@@ -651,8 +651,10 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 	action := s.rewriteAddress(c, p.UID, p.Token, "")
 	sheet.Form = s.plainForm(action, "POST", csrfField(c.sess), view.FormRow{Name: "groups", Kind: view.InputHidden, Value: "1"})
 	n := p.count(answer)
+	// The sheet's button: it sends the choices and the ticks of its form
+	// (Лс32; s-contacts-19, -20, -29).
 	confirm := view.Action{ID: "contact.rewrite.confirm", Label: text("Rewrite " + plural(n, "record")),
-		Href: s.route(action), Method: "POST", Primary: true, Enabled: true}
+		Href: s.route(action), Method: "POST", Primary: true, Enabled: true, Submits: true}
 	switch {
 	case p.writable() == 0:
 		confirm.Enabled, confirm.Href = false, ""

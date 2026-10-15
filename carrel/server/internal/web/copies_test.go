@@ -204,10 +204,58 @@ func TestASheetPageCarriesTheScreenUnderIt(t *testing.T) {
 	if odd.Under == nil || odd.Under.Task == nil {
 		t.Errorf("a back that is no address of the app is not the record's page: %+v", odd.Under)
 	}
+	// Cancel goes back to the page under the sheet, not to the record's
+	// (Лс30); a link without back is followed from its Referer (Лс31), and
+	// the sheet with another collection chosen keeps it.
+	list := "/app/tasks/" + f.id + "/" + url.PathEscape(searchWork)
+	if c := actionByID(move.Actions, "record.move.cancel"); c == nil || c.Href != list {
+		t.Errorf("Cancel of the move sheet opened from the list = %+v", c)
+	}
+	for _, o := range move.Target.Options {
+		if o.Href != "" && !strings.Contains(o.Href, "back="+url.QueryEscape(list)) {
+			t.Errorf("the sheet with %s chosen forgets where it was opened: %s", o.Label, o.Href)
+		}
+	}
+	followed := get(record(searchWork, "t1")+"/copies", f.sess)
+	followed.Header.Set("Referer", "http://"+followed.Host+list)
+	fromList := decode[view.CopiesSheet](t, f.h.do(followed))
+	if fromList.Under == nil || fromList.Under.Tasks == nil {
+		t.Errorf("a sheet followed from the list stands over: %+v", fromList.Under)
+	}
+	if c := actionByID(fromList.Actions, "copies.cancel"); c == nil || c.Href != list {
+		t.Errorf("Cancel of the copies sheet followed from the list = %+v", c)
+	}
+	// The quick sheet too (Лс28): over the page New was pressed on.
+	quick := decode[view.NewSheet](t, f.h.do(get(list+"/new/quick?back="+url.QueryEscape(list), f.sess)))
+	if quick.Under == nil || quick.Under.Tasks == nil {
+		t.Errorf("under the quick sheet: %+v", quick.Under)
+	}
 	req := get(record(searchWork, "t1")+"/copies", f.sess)
 	req.Header.Set("Carrel-View", "fragment")
 	req.Header.Set("Carrel-Target", "sheet")
 	if frag := decode[view.CopiesSheet](t, f.h.do(req)); frag.Under != nil {
 		t.Errorf("a fragment carries a screen under it: %+v", frag.Under)
+	}
+}
+
+// Лс34: Mark done of the sheet with no copy ticked marks nothing and says
+// so — the sheet again, nothing ticked, and why — rather than the sheet
+// again with the opened copy ticked, as if the tick had been pressed.
+func TestMarkDoneWithNoCopyTickedSaysSo(t *testing.T) {
+	f, record := linkedTasks(t)
+	sheet := decode[view.CopiesSheet](t, f.h.do(postForm(record(searchWork, "t1")+"/done?from=all", f.sess, url.Values{})))
+	form := formFields(sheet.Form)
+	form.Del("copy")
+	again := decode[view.CopiesSheet](t, f.h.do(postForm(sheet.Form.Action, f.sess, form)))
+	if len(again.Form.Errors) != 1 || again.Form.Errors[0].Name != "copy" {
+		t.Fatalf("errors = %+v", again.Form.Errors)
+	}
+	for _, o := range copyRow(t, again).Options {
+		if o.Selected {
+			t.Errorf("%s ticked again", o.Label)
+		}
+	}
+	if b, _, _ := f.srv.Object(searchWork + "t1.ics"); strings.Contains(b, "STATUS:COMPLETED") {
+		t.Error("a copy was marked")
 	}
 }

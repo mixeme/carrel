@@ -218,6 +218,10 @@ type NewSheet struct {
 	// s-notes-8, s-notes-9; пусто, когда полей нет
 	Note    Text     `json:"note,omitempty"`
 	Actions []Action `json:"actions"`
+	// Under — экран, над которым открыт лист, пришедший страницей: откуда
+	// нажали New (back, иначе Referer), иначе список рода или коллекции
+	// (s-notes-5, -8, -9, -10); nil у фрагмента
+	Under *Under `json:"under"`
 }
 
 // CopiesSheet — лист «какую копию» у записи связанной группы (записка 57,

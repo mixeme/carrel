@@ -28,6 +28,12 @@ func TestRewriteChoosesAddressesAndGroups(t *testing.T) {
 	if sheet.Title != "Rewrite the addresses in their records?" || len(sheet.Pairs) != 2 {
 		t.Fatalf("sheet = %+v", sheet)
 	}
+	// The sheet's button sends its form — the choices and the ticks
+	// (Лс32; s-contacts-29): a post of its own would rewrite what was
+	// offered, not what was chosen.
+	if c := rewriteAction(t, sheet.Actions, "contact.rewrite.confirm"); !c.Submits {
+		t.Errorf("Rewrite = %+v, want the button of the sheet's form", c)
+	}
 	old, two := sheet.Pairs[0], sheet.Pairs[1]
 	if old.From != "ada@old.example" || old.To != "ada@new.example" || old.Choice.Name != "to.1" || old.Choice.Value != "ada@new.example" {
 		t.Errorf("the replaced line = %+v", old)

@@ -4041,10 +4041,21 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 	writable := func(col sealed.Collection) bool {
 		return !col.Gone && !col.ReadOnly && col.Has(spec.kind)
 	}
+	// The page New was pressed on: the sheet stands over it (Лс28; s-notes-5
+	// over the calendar, -6 over an empty shell).
+	back := s.sheetBack(r, r.URL.Query().Get("back"), true)
 	if last, remembered := blob.LastFor(spec.kind); remembered {
 		if col, found := blob.Collection(last.AccountID, last.Path); found && writable(col) {
 			if c, made := s.collectionOf(sess, spec, last.AccountID, last.Path); made {
-				s.redirect(w, r, c.listPath()+"/new/quick"+carriedQuery(r))
+				to := c.listPath() + "/new/quick" + carriedQuery(r)
+				if back != "" {
+					sep := "?"
+					if strings.Contains(to, "?") {
+						sep = "&"
+					}
+					to += sep + "back=" + url.QueryEscape(back)
+				}
+				s.redirect(w, r, to)
 				return
 			}
 		}
@@ -4066,6 +4077,7 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 				_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 				return
 			}
+			sheet.Under = s.underOf(r, back, "/app/"+kind)
 			s.writePage(w, r, http.StatusOK, sheet)
 			return
 		}
@@ -4081,6 +4093,7 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
+	sheet.Under = s.underOf(r, back, "/app/"+kind)
 	s.writePage(w, r, http.StatusOK, sheet)
 }
 
@@ -4103,6 +4116,11 @@ func (s *Server) getKindQuick(w http.ResponseWriter, r *http.Request, kind strin
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
+	// Over the page it was opened from, else over the list it writes to
+	// (Лс28; s-notes-8 over the book, -9 over the agenda).
+	back := s.sheetBack(r, r.URL.Query().Get("back"), true)
+	sheet.Under = s.underOf(r, back, c.listPath())
+	s.cancelTo(r, back, sheet.Actions, "record.cancel")
 	s.writePage(w, r, http.StatusOK, sheet)
 }
 

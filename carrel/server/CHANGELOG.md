@@ -17,6 +17,35 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.263 — 2026-10-15
+
+### Fixed
+
+- **A sheet stands over the page it was opened from, and Cancel goes back
+  there** (Лс30, Лс31 of the scan of 15.10.2026): the move sheet and the
+  sheets of copies read `back`, else the page the link was followed from
+  (its Referer), and Cancel leads there, not to the record's page; the move
+  sheet's collections carry `back` on. A sheet that answers a form (the
+  series question) does not read the Referer — that is the form.
+- **The quick sheet carries the screen under it** (`NewSheet.Under`, Лс28;
+  `s-notes-5`, `-8`, `-9`, `-10`): where New was pressed, else the list it
+  writes to; New of a section carries `back` to the sheet it leads to.
+- **Rewrite N records sends the sheet's form** (Лс32; `s-contacts-19`,
+  `-20`, `-29`): the choices `to.N` and the ticks `group` went nowhere — the
+  button posted on its own, and what was offered was rewritten, not what was
+  chosen.
+- **Mark done with no copy ticked says so** (Лс34): the sheet again,
+  nothing ticked, an error at `copy` («Tick the copy that is done: nothing
+  was marked.»), rather than the sheet again with the opened copy ticked, as
+  if the tick had been pressed.
+
+### For consumers
+
+C-6: `NewSheet.Under`; `CopiesSheet` errors in `Form.Errors`; the done
+sheet's form carries `sheet=1`. C-5: `back` and `Referer` of the move and
+copies sheets. Fixtures `app-quick`, `app-contact-move`,
+`app-contact-rewrite`, `app-task-done` re-shot.
+
 ## v0.2.262 — 2026-10-15
 
 ### Changed

@@ -28,7 +28,9 @@ const (
 //
 //   - The head: the icon — a pencil for Edit, a task for Mark done —, the
 //     title, and what and how many copies, muted, pushed right (Subject).
-//   - The note: what the action does to the copies (Note).
+//   - The note: what the action does to the copies (Note); then why the
+//     sheet came back, an alarm (Form.Errors: Mark done with no copy
+//     ticked — no frame draws it yet, Typecase's task 197).
 //   - A line for each copy (the row «copy»): its collection's mark, its
 //     tick — a radio for Edit, a box for Mark done —, the copy's
 //     source as its words, and, muted, how it differs (Option.Meta). A copy
@@ -40,6 +42,9 @@ func Sheet(p *view.CopiesSheet) w.Sheet {
 	var body []w.SheetPart
 	if p.Note != "" {
 		body = append(body, w.SheetNote{Text: string(p.Note)})
+	}
+	for _, e := range p.Form.Errors {
+		body = append(body, w.Msg{Parts: []w.MsgPart{w.Text(e.Message)}, Tone: w.MsgAlert, Space: w.MsgFlush})
 	}
 	for _, set := range p.Form.Sets {
 		for _, r := range set.Rows {
