@@ -17,6 +17,14 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.255 — 2026-10-15
+
+### Changed
+
+- **The collections of the move sheet stand as `s-contacts-2` draws them**:
+  within a server the one the record is in first, then those it can go to,
+  then the read-only ones.
+
 ## v0.2.254 — 2026-10-15
 
 ### Changed

@@ -83,17 +83,6 @@
     "new": null,
     "options": [
       {
-        "colour": "#a05a2c",
-        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=arhiv\u0026to=a-nc-home",
-        "id": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=arhiv\u0026to=a-nc-home",
-        "label": "Архив",
-        "last": false,
-        "readOnly": false,
-        "reason": "",
-        "stamp": "nextcloud · Архив",
-        "value": "a-nc-home/arhiv"
-      },
-      {
         "colour": "#4a6b52",
         "here": true,
         "id": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=kontakty\u0026to=a-nc-home",
@@ -105,14 +94,15 @@
         "value": "a-nc-home/kontakty"
       },
       {
-        "colour": "#6b4e7a",
-        "id": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=komanda\u0026to=a-rad-vps",
-        "label": "Команда",
+        "colour": "#a05a2c",
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=arhiv\u0026to=a-nc-home",
+        "id": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=arhiv\u0026to=a-nc-home",
+        "label": "Архив",
         "last": false,
-        "readOnly": true,
-        "reason": "read-only",
-        "stamp": "radicale · vps · Команда",
-        "value": "a-rad-vps/komanda"
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · Архив",
+        "value": "a-nc-home/arhiv"
       },
       {
         "colour": "#6b4e7a",
@@ -124,6 +114,16 @@
         "reason": "",
         "stamp": "radicale · vps · Рассылки",
         "value": "a-rad-vps/rassylki"
+      },
+      {
+        "colour": "#6b4e7a",
+        "id": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=komanda\u0026to=a-rad-vps",
+        "label": "Команда",
+        "last": false,
+        "readOnly": true,
+        "reason": "read-only",
+        "stamp": "radicale · vps · Команда",
+        "value": "a-rad-vps/komanda"
       }
     ]
   },

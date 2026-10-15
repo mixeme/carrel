@@ -94,7 +94,8 @@ func served(l lib, scr screens.Screen, path, frame, at, html string) []string {
 // document, text/html, with the server's status, whose root — the screen as
 // served — passes the frame comparison against the fixture's frame; under a
 // base path the library's files are named under it. A fragment of main of a
-// page outside the shell is the root and the forms, and passes it too.
+// page outside the shell, and of sheet of a sheet, is the root and the
+// forms, and passes it too.
 func TestRendererDrawsBuiltScreens(t *testing.T) {
 	l := load(t)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -140,15 +141,20 @@ func TestRendererDrawsBuiltScreens(t *testing.T) {
 					t.Error(f)
 				}
 			}
-			if zone.KindOf(model) != zone.PlainPage {
+			target := render.TargetMain
+			switch zone.KindOf(model) {
+			case zone.PlainPage:
+			case zone.Sheet:
+				target = render.TargetSheet
+			default:
 				continue
 			}
 			code, ctype, body := answer(t, renderer.New(""), func(rd render.Renderer, w http.ResponseWriter) error {
-				return rd.Fragment(w, req, http.StatusOK, render.TargetMain, byValue(model), nil)
+				return rd.Fragment(w, req, http.StatusOK, target, byValue(model), nil)
 			})
 			root, forms := scr.Draw(model).Render(), formsOf(scr, model)
 			if code != http.StatusOK || ctype != htmlType || body != root+forms {
-				t.Errorf("%s: fragment of main %d %q, not the root and the forms", at, code, ctype)
+				t.Errorf("%s: fragment of %s %d %q, not the root and the forms", at, target, code, ctype)
 				continue
 			}
 			for _, f := range served(l, scr, path, frame, fmt.Sprintf("%s (%s, fragment)", at, frame), strings.TrimSuffix(body, forms)) {
@@ -225,9 +231,6 @@ func TestRendererFallsBackOnBuiltScreens(t *testing.T) {
 		}
 		at := label(scr)
 		cases := map[string]writing{
-			"sheet": func(rd render.Renderer, w http.ResponseWriter) error {
-				return rd.Fragment(w, req, http.StatusOK, render.TargetSheet, byValue(model), nil)
-			},
 			"main with notices out of band": func(rd render.Renderer, w http.ResponseWriter) error {
 				return rd.Fragment(w, req, http.StatusOK, render.TargetMain, byValue(model), []render.OOB{{Target: render.TargetNotices, Body: []string{}}})
 			},
@@ -236,7 +239,14 @@ func TestRendererFallsBackOnBuiltScreens(t *testing.T) {
 			},
 		}
 		// A page outside the shell has no rail; a page in the shell has a
-		// queue and a top bar no screen draws alone.
+		// queue and a top bar no screen draws alone. A sheet that is a page
+		// has no sheet of its own to answer: the sheet is the screen
+		// (TestRendererDrawsBuiltScreens).
+		if zone.KindOf(model) != zone.Sheet {
+			cases["sheet"] = func(rd render.Renderer, w http.ResponseWriter) error {
+				return rd.Fragment(w, req, http.StatusOK, render.TargetSheet, byValue(model), nil)
+			}
+		}
 		others := []string{render.TargetRail}
 		if zone.KindOf(model) == zone.ShellPage {
 			others = []string{render.TargetQueue, render.TargetTopbar}

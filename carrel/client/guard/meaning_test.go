@@ -239,7 +239,7 @@ func TestMeaningRules(t *testing.T) {
 			Main: w.Main{Items: []w.MainPart{w.List{Rows: []w.ListRow{w.ExcerptRow{Href: "/n"}}}}}}}, nil},
 		"a note's row and a neighbour that lead nowhere": {w.Shell{Body: w.ShellBody{
 			Rail: []w.RailPart{w.RailSec{Items: []w.RailSecPart{w.Tree{Rows: []w.TreeRow{{Label: "Что почитать"}}}}}},
-			Main: w.Main{Items: []w.MainPart{w.List{Rows: []w.ListRow{w.ExcerptRow{}}}}}}}, []string{"(TreeRow): no Href", "(ExcerptRow): no Href"}},
+			Main: w.Main{Items: []w.MainPart{w.List{Rows: []w.ListRow{w.ExcerptRow{}}}}}}}, []string{"(TreeRow): a node that leads nowhere (Href) and sends nothing (Send in a form)", "(ExcerptRow): no Href"}},
 		"a task's tick in a text":                 {w.Sec{Items: []w.SecPart{w.SecTasks{Items: []w.DocTask{{Tick: w.Tick{Sign: true}, Text: "проверить"}}}}}, nil},
 		"a task's tick in a text that is no sign": {w.Sec{Items: []w.SecPart{w.SecTasks{Items: []w.DocTask{{Tick: w.Tick{}, Text: "проверить"}}}}}, []string{"(Tick): a tick box that sends nothing"}},
 		"records and files of a column": {w.Docmeta{Sections: []w.DocmetaSec{{Items: []w.DocmetaPart{

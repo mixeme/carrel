@@ -1,6 +1,7 @@
 package screens
 
 import (
+	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/client/screens/about"
 	"carrel.dev/carrel/client/screens/agenda"
 	"carrel.dev/carrel/client/screens/confirm"
@@ -13,6 +14,7 @@ import (
 	"carrel.dev/carrel/client/screens/forgot"
 	"carrel.dev/carrel/client/screens/invite"
 	"carrel.dev/carrel/client/screens/login"
+	"carrel.dev/carrel/client/screens/move"
 	"carrel.dev/carrel/client/screens/note"
 	"carrel.dev/carrel/client/screens/notes"
 	"carrel.dev/carrel/client/screens/register"
@@ -92,6 +94,16 @@ type Root = widget.Root
 // C-5 is built when each view model it answers with is here, and is either
 // built or in the list «ждёт библиотеку» of U-5.5, not both (U-15.2, 5).
 var All = []Screen{
+	{
+		Model:  func() any { return new(view.MoveSheet) },
+		Frames: []string{"s-contacts-2"},
+		Draw: func(model any) Root {
+			p := model.(*view.MoveSheet)
+			return over(p.Under, move.Sheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.MoveSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.MoveSheet).Under) },
+	},
 	{
 		Model:  func() any { return new(view.LoginPage) },
 		Frames: []string{"s-auth-1", "s-auth-13"},
@@ -272,4 +284,67 @@ var All = []Screen{
 			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Seg)"},                    // ждёт библиотеку: U-5.5 #41
 		},
 	},
+}
+
+// over is a sheet opened by its address over the screen it was opened from
+// (C-6 Under, the owner's decision of 15.10.2026; Typecase's Overlay,
+// s-contacts-2): that page drawn by its own screen, under the scrim, the
+// sheet on it. A sheet that came without the screen stands alone.
+func over(u *view.Under, sheet widget.Sheet) Root {
+	var shell widget.Shell
+	switch {
+	case u == nil:
+		return bind.Alone(sheet)
+	case u.Contacts != nil:
+		shell = contacts.Screen(u.Contacts)
+	case u.Contact != nil:
+		shell = contact.Screen(u.Contact)
+	case u.Agenda != nil:
+		shell = agenda.Screen(u.Agenda)
+	case u.Event != nil:
+		shell = event.Screen(u.Event)
+	case u.Tasks != nil:
+		shell = tasks.Screen(u.Tasks)
+	case u.Task != nil:
+		shell = task.Screen(u.Task)
+	case u.Notes != nil:
+		shell = notes.Screen(u.Notes)
+	case u.Note != nil:
+		shell = note.Screen(u.Note)
+	case u.EventEdit != nil:
+		shell = eventedit.Screen(u.EventEdit)
+	case u.TaskEdit != nil:
+		shell = taskedit.Screen(u.TaskEdit)
+	}
+	return bind.Over(shell, sheet)
+}
+
+// underForms are the forms the screen under a sheet prints at its end: what
+// its top's menu submits (Sign out) stands under the scrim as well.
+func underForms(u *view.Under) []widget.PostForm {
+	switch {
+	case u == nil:
+		return nil
+	case u.Contacts != nil:
+		return contacts.Forms(u.Contacts)
+	case u.Contact != nil:
+		return contact.Forms(u.Contact)
+	case u.Agenda != nil:
+		return agenda.Forms(u.Agenda)
+	case u.Event != nil:
+		return event.Forms(u.Event)
+	case u.Tasks != nil:
+		return tasks.Forms(u.Tasks)
+	case u.Task != nil:
+		return task.Forms(u.Task)
+	case u.Notes != nil:
+		return notes.Forms(u.Notes)
+	case u.EventEdit != nil:
+		return eventedit.Forms(u.EventEdit)
+	case u.TaskEdit != nil:
+		return taskedit.Forms(u.TaskEdit)
+	case u.Note != nil:
+		return note.Forms(u.Note)
+	}
+	return nil
 }

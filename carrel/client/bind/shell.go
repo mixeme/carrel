@@ -757,3 +757,28 @@ func NoticeForms(ns []view.Notice) []w.PostForm {
 	}
 	return out
 }
+
+// Alone is a sheet that came without the screen under it (Under nil): an
+// overlay over nothing (C-7.2).
+func Alone(sheet w.Sheet) w.Overlay {
+	return w.Overlay{Scrim: w.Scrim{Content: sheet, Pad: w.ScrimPad26}}
+}
+
+// Over is the screen under a sheet with the sheet over it (C-6 Under, the
+// owner's decision of 15.10.2026; Typecase's Overlay, s-contacts-2): the same
+// top, rail and main under the scrim, the sheet on it. Nothing under a sheet
+// is pressed, so the rail's form and the panel stay out; the body is as tall
+// as a sheet needs (s-contacts-2).
+func Over(under w.Shell, sheet w.Sheet) w.Shell {
+	body, _ := under.Body.(w.ShellBody)
+	var rail []w.OverlayRailPart
+	for _, p := range body.Rail {
+		if o, ok := p.(w.OverlayRailPart); ok {
+			rail = append(rail, o)
+		}
+	}
+	return w.Shell{Top: under.Top, Body: w.Overlay{
+		Body:  w.OverlayBody{Rail: rail, Main: body.Main, Height: w.ShellHeight560},
+		Scrim: w.Scrim{Content: sheet, Pad: w.ScrimPad26},
+	}}
+}

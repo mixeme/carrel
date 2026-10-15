@@ -17,6 +17,7 @@ import (
 	"carrel.dev/carrel/client/fixtures"
 	"carrel.dev/carrel/client/guard"
 	"carrel.dev/carrel/client/screens"
+	"carrel.dev/carrel/client/zone"
 	"carrel.dev/carrel/server/view"
 	"carrel.dev/typecase"
 	"carrel.dev/typecase/shape"
@@ -360,9 +361,14 @@ func frameFindings(l lib, all []screens.Screen) []string {
 			drawn[frame] = true
 			sameCopies(frame)
 			fx += " (" + frame + ")"
-			root, err := draw(scr, path)
+			model, err := decode(scr, path)
 			if err != nil {
 				out = append(out, fmt.Sprintf("%s on %s: %v", at, fx, err))
+				continue
+			}
+			root := scr.Draw(model)
+			if zone.KindOf(model) == zone.Sheet && !overlaid(root) {
+				out = append(out, fmt.Sprintf("%s on %s: a sheet's screen draws its sheet over the screen it was opened from, or alone (Overlay)", at, fx))
 				continue
 			}
 			if w, ok := waits(scr, key(path)); ok {
@@ -384,10 +390,13 @@ func frameFindings(l lib, all []screens.Screen) []string {
 }
 
 // htmlFindings holds a screen's printed HTML against its frame: the frame's
-// make-up (shape.Check) and no class Typecase's CSS does not have.
+// make-up (shape.Check) — a sheet drawn over nothing, by its sheet
+// (sheetFindings) — and no class Typecase's CSS does not have.
 func htmlFindings(l lib, frame, at, html string) []string {
 	var out []string
-	if err := l.shape.Check(frame, html); err != nil {
+	if strings.Contains(html, overlayOpen) {
+		out = sheetFindings(l, frame, at, html)
+	} else if err := l.shape.Check(frame, html); err != nil {
 		out = append(out, fmt.Sprintf("%s: %v", at, err))
 	}
 	return append(out, classFindings(l, at, html)...)
@@ -410,14 +419,17 @@ func classFindings(l lib, at, html string) []string {
 // kinFindings is the kinship with the draft (U-15.2, 3): the screen drawn
 // on each normal fixture of its view model, and on each fixture whose state
 // has a frame of its own (STATE_FRAME), against the draft of that fixture's
-// frame — each frame the screen names has its draft. A state that waits for
-// the library (screens.Wait) is not held against a draft.
+// frame — each frame the screen names has its draft, but a fragment, which
+// prints none (Р-16): its state is held by the frame comparison alone. A
+// state that waits for the library (screens.Wait) is not held against a
+// draft. A sheet's screen is held by its Sheet against the draft's
+// (sheets_test.go).
 func kinFindings(l lib, drafts map[string]*guard.Node, all []screens.Screen) []string {
 	var out []string
 	for _, scr := range all {
 		at := label(scr)
 		for _, f := range scr.Frames {
-			if d, ok := drafts[f]; !ok || d == nil {
+			if d, ok := drafts[f]; (!ok || d == nil) && !fragment(l.mock, f) {
 				out = append(out, fmt.Sprintf("%s: no draft of %s", at, f))
 			}
 		}
@@ -433,18 +445,25 @@ func kinFindings(l lib, drafts map[string]*guard.Node, all []screens.Screen) []s
 				continue
 			}
 			frame := l.frameOf(path)
+			if fragment(l.mock, frame) {
+				continue
+			}
 			fx := filepath.Base(filepath.Dir(path)) + "/" + filepath.Base(path) + " (" + frame + ")"
 			d, ok := drafts[frame]
 			if !ok || d == nil {
 				out = append(out, fmt.Sprintf("%s on %s: no draft", at, fx))
 				continue
 			}
-			root, err := draw(scr, path)
+			model, err := decode(scr, path)
 			if err != nil {
 				out = append(out, fmt.Sprintf("%s: %v", at, err))
 				continue
 			}
-			if err := guard.Kin(d, guard.Skeleton(root)); err != nil {
+			sk := guard.Skeleton(scr.Draw(model))
+			if zone.KindOf(model) == zone.Sheet {
+				d, sk = sheetOf(d), sheetOf(sk)
+			}
+			if err := guard.Kin(d, sk); err != nil {
 				out = append(out, fmt.Sprintf("%s on %s: %v", at, fx, err))
 			}
 		}
@@ -456,11 +475,12 @@ func kinFindings(l lib, drafts map[string]*guard.Node, all []screens.Screen) []s
 }
 
 // frames are the frames the screens are held against: those each screen
-// names, and the frames of its fixtures.
+// names, and the frames of its fixtures — but fragments, which print no
+// draft (Р-16).
 func frames(l lib, all []screens.Screen) []string {
 	var out []string
 	add := func(f string) {
-		if f != "" && !slices.Contains(out, f) {
+		if f != "" && !slices.Contains(out, f) && !fragment(l.mock, f) {
 			out = append(out, f)
 		}
 	}

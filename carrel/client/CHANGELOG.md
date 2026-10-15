@@ -4,6 +4,21 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.41 — 2026-10-15
+
+Server `v0.2.255`. **The first sheet: Move and Copy of a record**
+(`MoveSheet`, frame `s-contacts-2`). Opened by its address, the sheet is
+drawn over the screen it came from (`MoveSheet.Under`, the owner's decision
+of 15.10.2026) — that page by its own screen under the scrim
+(`bind.Over`, `screens.over`) —, else alone (`bind.Alone`). The sheet is a
+form: the collections a tree of radios under `to`, each with the address of
+the sheet with it chosen; the one it is in says «already there», a
+read-only one its badge; what the move does under them; Move and Cancel.
+The guards hold a sheet by its part of the frame and its draft's Sheet
+(`guard/sheets_test.go`, brought from the files section's branch and
+widened to a sheet over a screen); the meaning guard knows `Sheet` and a
+tree's radio node.
+
 ## v0.4.40 — 2026-10-15
 
 Server `v0.2.254`. The combined lists of contacts, the agenda, tasks and

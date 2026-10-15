@@ -253,7 +253,19 @@ var contract = map[string]rule{
 	// A note's row (s-notes-1) and a neighbour of the rail's tree (s-notes-2):
 	// links to the note, as the other rows of a list.
 	"ExcerptRow": needs("Href"),
-	"TreeRow":    needs("Href"),
+	// A node of a tree: a link (a neighbour of the rail, a folder that
+	// opens), or a radio of the form it stands in — where to put a thing
+	// (Typecase's task 116; the move sheet, s-contacts-2) —, whose Href, if
+	// any, is the page with it chosen; a node that cannot be chosen is words.
+	"TreeRow": func(c control) string {
+		if c.str("Href") != "" || c.flag("Unavailable") {
+			return ""
+		}
+		if form, name := c.send(); name != "" && (form != "" || c.inForm) {
+			return ""
+		}
+		return "a node that leads nowhere (Href) and sends nothing (Send in a form)"
+	},
 	// A record a document's column points at (Related, the same note in
 	// other notebooks) and an attachment there: a link where the model gives
 	// an address — a record not loaded, a file that has none, are words —, as
@@ -341,6 +353,10 @@ var contract = map[string]rule{
 	// of whose parts is a form is printed plain by the library, and that part
 	// sends — its own Action is judged on it.
 	"Dialog": func(control) string { return "" },
+	// A sheet with Action is a form too (Typecase's task 134; the move
+	// sheet, s-contacts-2): its parts are judged in it; without Action it
+	// is a frame, and its buttons say where they send.
+	"Sheet": func(control) string { return "" },
 	// A document is a form in its edit (Typecase's task 98): with Action it
 	// sends its fields, which the edit bar's Save names by its ID; read,
 	// it has none and sends nothing.
@@ -387,7 +403,7 @@ func picksFile(c control) bool {
 // opensForm says whether the widget is a form that sends, for its parts.
 func opensForm(c control) bool {
 	switch c.v.Type().Name() {
-	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc", "Field", "Card", "FieldSet", "Dialog":
+	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc", "Field", "Card", "FieldSet", "Dialog", "Sheet":
 		return c.str("Action") != ""
 	}
 	return false
@@ -451,7 +467,7 @@ func Meaning(v any, forms ...string) []string {
 			out = append(out, fmt.Sprintf("%s: %s carries meaning the guard's contract does not know", c.path, name))
 		}
 		switch name {
-		case "Form", "PostForm", "Doc":
+		case "Form", "PostForm", "Doc", "Sheet":
 			if id := c.str("ID"); id != "" && (name == "PostForm" || c.str("Action") != "") {
 				ids = append(ids, id)
 			}
