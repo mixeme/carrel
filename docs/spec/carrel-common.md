@@ -860,6 +860,7 @@ type Shortcut struct {
 
 type RailSection struct {
     Account   Text
+    Tally     Text // счёт рубрики отдельно, моноширинно: «Sources» и «12 / 12» (s-dup-1, s-find-1); пусто — счёта нет
     AccountID string
     State     CollectionState // недоступен — помечается здесь, C-8
     Feeds     bool            // секция подписок «Subscriptions»: ленты, прочитанные снаружи; у рубрики — бейдж «external», слово экрана (s-agenda-1, s-contacts-7); в ответе только true

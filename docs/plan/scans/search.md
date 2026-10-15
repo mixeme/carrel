@@ -77,7 +77,7 @@
   (`app-search/normal`). Нужно: что обновление значит на выдаче
   (`Refresh.Action` — тот же обход заново? `Answered` — время обхода?) —
   или кадру убрать (вопрос В13). Было ПА1.
-- **Пк2. Рубрика рейла** (`s-find-1`): «Sources» и отдельно моноширинно
+- **Пк2. Рубрика рейла** (`s-find-1`; **закрыто сервером `v0.2.281`**: `RailSection.Tally`): «Sources» и отдельно моноширинно
   «14 / 14» (черновик: `w.Rubric{Text: "Sources", Items: […w.Mono{Text:
   "14 / 14", Variant: w.MonoTight}]}`). Модель — одна строка
   `RailSection.Account` «Sources 14 / 14» (`search.go:709`; у дубликатов

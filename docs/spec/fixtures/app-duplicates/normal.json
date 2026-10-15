@@ -310,7 +310,7 @@
     "note": "",
     "sections": [
       {
-        "account": "Sources 3 / 3",
+        "account": "Sources",
         "accountID": "",
         "rows": [
           {
@@ -353,7 +353,8 @@
             "tick": "on"
           }
         ],
-        "state": "ok"
+        "state": "ok",
+        "tally": "3 / 3"
       }
     ],
     "shortcuts": [],

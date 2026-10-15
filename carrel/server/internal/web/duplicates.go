@@ -436,7 +436,8 @@ func dupSources(st dupState, only view.Kind) []view.RailSection {
 	if len(sec.Rows) == 0 {
 		return nil
 	}
-	sec.Account = text(fmt.Sprintf("Sources %d / %d", loaded, live))
+	// The count apart, monospaced (s-dup-1; Дб2).
+	sec.Account, sec.Tally = "Sources", text(fmt.Sprintf("%d / %d", loaded, live))
 	return []view.RailSection{sec}
 }
 

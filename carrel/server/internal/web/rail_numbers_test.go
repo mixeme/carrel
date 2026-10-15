@@ -120,9 +120,10 @@ func TestSearchRailCountsWhatEachSourceFound(t *testing.T) {
 	tickAll(t, f.h, f.sess)
 	bad.Refuse("REPORT", http.StatusForbidden, "<error/>")
 
-	want := fmt.Sprintf("Sources %d / %d", 2, 2)
+	// The count apart (Пк2, v0.2.281; until then «Sources 2 / 2» one line).
+	want := fmt.Sprintf("%d / %d", 2, 2)
 	empty := search(t, f.h, f.sess, "")
-	if len(empty.Rail.Sections) != 1 || empty.Rail.Sections[0].Account != view.Text(want) {
+	if len(empty.Rail.Sections) != 1 || empty.Rail.Sections[0].Account != "Sources" || empty.Rail.Sections[0].Tally != view.Text(want) {
 		t.Fatalf("rail without a query = %+v, want the rubric %q", empty.Rail.Sections, want)
 	}
 	for _, r := range empty.Rail.Sections[0].Rows {
@@ -134,7 +135,7 @@ func TestSearchRailCountsWhatEachSourceFound(t *testing.T) {
 	page := search(t, f.h, f.sess, "q=Ada")
 	waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
 	page = search(t, f.h, f.sess, "q=Ada")
-	if len(page.Rail.Sections) != 1 || page.Rail.Sections[0].Account != view.Text(want) {
+	if len(page.Rail.Sections) != 1 || page.Rail.Sections[0].Account != "Sources" || page.Rail.Sections[0].Tally != view.Text(want) {
 		t.Fatalf("rail = %+v, want the rubric %q", page.Rail.Sections, want)
 	}
 	_, people := railRow(t, page.Rail, "People")
@@ -266,7 +267,7 @@ func TestSearchRailListsAGoneCollectionUnasked(t *testing.T) {
 	if len(page.Poll.Sources) != 1 {
 		t.Errorf("sources asked = %+v, want People alone", page.Poll.Sources)
 	}
-	if len(page.Rail.Sections) != 1 || page.Rail.Sections[0].Account != "Sources 1 / 2" {
+	if len(page.Rail.Sections) != 1 || page.Rail.Sections[0].Account != "Sources" || page.Rail.Sections[0].Tally != "1 / 2" {
 		t.Fatalf("rail = %+v, want the rubric «Sources 1 / 2»", page.Rail.Sections)
 	}
 	if _, team := railRow(t, page.Rail, "Team"); team.State != view.CollectionGone || team.Count != nil || team.Detail != "" {

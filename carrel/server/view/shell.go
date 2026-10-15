@@ -135,7 +135,10 @@ type Shortcut struct {
 }
 
 type RailSection struct {
-	Account   Text            `json:"account"`
+	Account Text `json:"account"`
+	// Tally — счёт рубрики отдельно, моноширинно: «Sources» и «12 / 12»
+	// (s-dup-1, s-find-1; Дб2, Пк2); пусто — счёта нет
+	Tally     Text            `json:"tally,omitempty"`
 	AccountID string          `json:"accountID"`
 	State     CollectionState `json:"state"` // недоступен — помечается здесь, C-8
 	// Feeds — секция подписок: ленты, прочитанные снаружи; кадр ставит у

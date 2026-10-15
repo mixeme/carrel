@@ -751,7 +751,8 @@ func (s *Server) searchRail(sess *session.Session, blob sealed.Blob, snap *fanou
 	if len(sec.Rows) == 0 {
 		return rail
 	}
-	sec.Account = text(fmt.Sprintf("Sources %d / %d", asked, len(sec.Rows)))
+	// The count apart, monospaced (s-find-1; Пк2).
+	sec.Account, sec.Tally = "Sources", text(fmt.Sprintf("%d / %d", asked, len(sec.Rows)))
 	rail.Sections = []view.RailSection{sec}
 	return rail
 }

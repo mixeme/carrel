@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.281 — 2026-10-16
+
+### Changed
+
+- **The sources' rubric counts apart** (Дб2, Пк2 of the scan of
+  15.10.2026; `s-dup-1`, `s-find-1`): `RailSection.Account` is «Sources»
+  and `RailSection.Tally` the count, monospaced — «3 / 3», «14 / 14» —
+  on the duplicates and on a search.
+- **The merge stands on every source compared** (Дб20; `s-dup-2`, `-4`,
+  `-5`): its rail, the outcome's and a lost group's, carries every
+  collection the duplicates compare, not only those of the group's kind.
+
+### For consumers
+
+Read the rubric's count from `Tally`. Fixtures `app-duplicates`,
+`app-duplicates-merge` and `app-search` re-shot.
+
 ## v0.2.280 — 2026-10-16
 
 ### Changed

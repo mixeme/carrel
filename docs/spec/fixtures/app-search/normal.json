@@ -316,7 +316,7 @@
     "note": "",
     "sections": [
       {
-        "account": "Sources 14 / 14",
+        "account": "Sources",
         "accountID": "",
         "rows": [
           {
@@ -502,7 +502,8 @@
             "tick": "on"
           }
         ],
-        "state": "ok"
+        "state": "ok",
+        "tally": "14 / 14"
       }
     ],
     "shortcuts": [],

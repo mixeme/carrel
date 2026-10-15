@@ -291,9 +291,9 @@ func gainLine(calendar bool, g dupes.Gain, from mergeMember) string {
 func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[string]int, picks map[string]sealed.RecordRef) (*model.Object, view.DuplicatesMergePage) {
 	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge on the server"), GroupID: mr.g.id}
 	page.Rail = view.Rail{Nav: s.navRows(sess, mr.st.blob, "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess)}
-	// The merge stands on the same ground as the screen it came from: the
-	// collections compared, of the kind being merged (s-dup-2).
-	page.Rail.Sections = dupSources(mr.st, mr.g.kind)
+	// The merge stands on the same ground as the screen it came from: every
+	// collection compared (s-dup-2, -4, -5: «12 / 12»; Дб20).
+	page.Rail.Sections = dupSources(mr.st, "")
 	page.Notices = append(page.Notices, mr.down...)
 	back := view.Action{ID: "duplicates.merge.cancel", Label: "Cancel", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true}
 	confirm := view.Action{ID: "duplicates.merge.confirm", Label: "Write the merge and delete the rest", Method: "POST", Danger: true}
@@ -457,7 +457,8 @@ func (s *Server) getDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) lostGroupPage(sess *session.Session, mr mergeRead, n view.Notice) view.DuplicatesMergePage {
 	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge on the server"), Warning: n}
-	page.Rail = view.Rail{Nav: s.navRows(sess, mr.st.blob, "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess)}
+	page.Rail = view.Rail{Nav: s.navRows(sess, mr.st.blob, "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess),
+		Sections: dupSources(mr.st, "")}
 	page.Actions = []view.Action{{ID: "duplicates.back", Label: "Back to duplicates", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true}}
 	return page
 }
@@ -599,7 +600,8 @@ func (s *Server) mergeResult(w http.ResponseWriter, r *http.Request, sess *sessi
 		page.Happened = append(page.Happened, text("Still there: "+l.label()))
 	}
 	page.Subtitle = text(mergeTitle(target.c, target.obj) + " · " + plural(len(mr.members), "record"))
-	page.Rail = view.Rail{Nav: s.navRows(sess, s.catalogOf(sess), "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess)}
+	page.Rail = view.Rail{Nav: s.navRows(sess, s.catalogOf(sess), "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess),
+		Sections: dupSources(mr.st, "")}
 	page.Target = s.member(mr.st, mr.g.kind, target.ref)
 	kept := s.openThere(target.c, target.ref.UID, "Open the kept record")
 	kept.Primary = true // s-dup-5
