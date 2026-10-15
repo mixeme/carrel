@@ -79,10 +79,17 @@ func TestWhichCopyToMarkDone(t *testing.T) {
 			}
 		}
 	}
-	if tick == nil || tick.Method != "POST" || !strings.Contains(tick.Href, "/done") {
+	if tick == nil || tick.Method != "POST" {
 		t.Fatalf("the linked row's tick = %+v in %+v", tick, all.Groups)
 	}
-	sheet := decode[view.CopiesSheet](t, f.h.do(postForm(tick.Href, f.sess, url.Values{})))
+	// Until the client draws sheets the tick marks the copy the row opens,
+	// as before (the owner's decision of 15.10.2026; sheetsOnPages); the
+	// sheet answers its own address, the POST the tick will make.
+	if strings.Contains(tick.Href, "/done") {
+		t.Errorf("the tick leads to the sheet the client does not draw yet: %+v", tick)
+	}
+	at := strings.Replace(strings.SplitN(tick.Href, "?", 2)[0], "/edit", "/done", 1) + "?from=all"
+	sheet := decode[view.CopiesSheet](t, f.h.do(postForm(at, f.sess, url.Values{})))
 	title, note, primary := frameSheet(t, "s-tasks-16")
 	if string(sheet.Title) != title || string(sheet.Note) != "This task stands in two lists. Tick the copy that is done; a copy that is not ticked stays as it is." ||
 		!strings.HasPrefix(string(sheet.Subject), "Pack · 2 copies") {
@@ -124,11 +131,14 @@ func TestWhichCopyToEdit(t *testing.T) {
 	f, record := linkedTasks(t)
 	home := davtest.CalendarHome + "home/"
 	page := decode[view.TaskPage](t, f.h.do(get(record(searchWork, "t1"), f.sess)))
+	// Until the client draws sheets Edit opens the copy's form, as before
+	// (the owner's decision of 15.10.2026; sheetsOnPages); the sheet
+	// answers its own address.
 	edit := actionByID(page.Actions, "record.edit")
-	if edit == nil || !strings.HasSuffix(edit.Href, "/t1/copies") {
+	if edit == nil || !strings.HasSuffix(edit.Href, "/t1/edit") {
 		t.Fatalf("Edit = %+v", edit)
 	}
-	sheet := decode[view.CopiesSheet](t, f.h.do(get(edit.Href, f.sess)))
+	sheet := decode[view.CopiesSheet](t, f.h.do(get(record(searchWork, "t1")+"/copies", f.sess)))
 	title, _, primary := frameSheet(t, "s-contacts-32")
 	if string(sheet.Title) != title || string(sheet.Note) != "This task stands in two lists. Saving changes one copy only; the others stay as they are." {
 		t.Errorf("sheet = %+v, want s-contacts-32's %q", sheet, title)
@@ -174,6 +184,9 @@ func TestWhichCopyToEdit(t *testing.T) {
 	alone := decode[view.TaskPage](t, f.h.do(get(record(searchWork, "t3"), f.sess)))
 	if e := actionByID(alone.Actions, "record.edit"); e == nil || !strings.HasSuffix(e.Href, "/t3/edit") {
 		t.Errorf("an unlinked task's Edit = %+v", e)
+	}
+	if resp := f.h.do(get(record(searchWork, "t3")+"/copies", f.sess)); resp.Code != 303 || !strings.HasSuffix(resp.Header().Get("Location"), "/t3/edit") {
+		t.Errorf("the sheet of a task in no group: %d %s", resp.Code, resp.Header().Get("Location"))
 	}
 }
 

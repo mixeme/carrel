@@ -2,13 +2,12 @@
   "actions": [
     {
       "enabled": true,
-      "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/copies",
+      "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit",
       "icon": "i-pencil",
       "id": "record.edit",
       "label": "Edit",
       "method": "GET",
-      "primary": true,
-      "target": "sheet"
+      "primary": true
     },
     {
       "csrf": "csrf",

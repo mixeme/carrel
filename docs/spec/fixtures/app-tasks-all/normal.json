@@ -726,11 +726,10 @@
           "tick": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/done?from=all",
+            "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit?done=on\u0026etag=e15\u0026from=all\u0026op=done",
             "id": "task.done",
             "label": "Mark done",
-            "method": "POST",
-            "target": "sheet"
+            "method": "POST"
           },
           "uid": "aa11-2d09-5f84",
           "where": ""

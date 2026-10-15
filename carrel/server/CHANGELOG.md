@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.249 — 2026-10-15
+
+### Changed
+
+- **The pages do not lead to the sheets of copies yet** (the owner's
+  decision of 15.10.2026): the client draws no sheet, and answered Edit of a
+  linked record and the tick of a linked task with JSON, where before
+  `v0.2.247` Edit opened the copy's form and the tick marked the first copy.
+  They do so again until the client draws sheets (`sheetsOnPages`); «Which
+  copy to edit?» and «Which copy to mark done?» answer their own addresses
+  as before. The frames wait for Typecase's task 183.
+
 ## v0.2.248 — 2026-10-15
 
 ### Added
