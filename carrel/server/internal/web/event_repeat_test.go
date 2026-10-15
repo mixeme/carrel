@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"carrel.dev/carrel/server/internal/web"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -47,10 +48,16 @@ func TestEventRepeats(t *testing.T) {
 	mustContain(t, got, "RRULE:FREQ=WEEKLY;BYDAY=TH;WKST=MO;COUNT=5")
 	mustContain(t, got, kept...)
 
-	// Every two weeks on Tuesday and Thursday, ten times: WKST stays.
+	// Every two weeks on Tuesday and Thursday, ten times: WKST stays. The
+	// meeting moved on 29 January still has its day; the day left out on 22
+	// January is no day of the series any more, and goes without a word
+	// (А1, the owner's decision of 11.10.2026 — until 15.10.2026 it stayed).
 	got = save(map[string]string{"repeat.interval": "2", "repeat.on": "TU,TH", "repeat.count": "10"})
 	mustContain(t, got, "RRULE:FREQ=WEEKLY;BYDAY=TU,TH;WKST=MO;COUNT=10;INTERVAL=2")
-	mustContain(t, got, kept...)
+	mustContain(t, got, kept[1:]...)
+	if strings.Contains(got, "EXDATE") {
+		t.Errorf("a day left out the series no longer has stayed:\n%s", got)
+	}
 
 	// Until a day instead of a count: the end of that day, in UTC.
 	got = save(map[string]string{"repeat.count": "", "repeat.until": "2026-03-31"})
@@ -71,10 +78,25 @@ func TestEventRepeats(t *testing.T) {
 		}
 	}
 
-	// The raw rule wins when it is what changed.
-	got = save(map[string]string{"repeat.rule": "FREQ=MONTHLY;BYMONTHDAY=15"})
+	t.Cleanup(web.DrawSheets())
+	// The raw rule wins when it is what changed. Monthly on the 15th, the
+	// meeting moved on 29 January has no day: Save asks first (А1,
+	// s-agenda-23; until 15.10.2026 it was kept loose in the series), and
+	// kept, it is an event of its own.
+	form = formFields(decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	form.Set("repeat.rule", "FREQ=MONTHLY;BYMONTHDAY=15")
+	sheet := decode[view.AskSheet](t, f.h.do(postForm(rec+"/edit", f.sess, form)))
+	if len(sheet.Blocks) != 2 || sheet.Blocks[1].Title != "Left without its day · 1" {
+		t.Fatalf("sheet = %+v", sheet)
+	}
+	if resp := f.h.do(postForm(askAnswer(t, sheet, "series.keep").Href, f.sess, formFields(sheet.Form))); resp.Code != 303 {
+		t.Fatalf("keep: %d %s", resp.Code, resp.Body.String())
+	}
+	got = body(t, f, "meet.ics")
 	mustContain(t, got, "RRULE:FREQ=MONTHLY;BYMONTHDAY=15")
-	mustContain(t, got, kept...)
+	if strings.Contains(got, "RECURRENCE-ID") {
+		t.Errorf("the meeting without its day stayed in the series:\n%s", got)
+	}
 
 	// Does not repeat: the rule goes, the exceptions are the server's to keep.
 	got = save(map[string]string{"repeat.freq": ""})

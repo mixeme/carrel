@@ -3477,6 +3477,10 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	case op == "detach" && c.cal != nil:
 		s.postDetach(w, r, c, uid)
 		return
+	case op == "apart" && c.cal != nil:
+		// Try again of a series saved in part (s-agenda-24).
+		s.postApart(w, r, c, uid)
+		return
 	case op == "done" && c.spec.kind == view.KindTask:
 		// Mark done (review Р-10): the Done box alone, the rest of the
 		// record as the server holds it; below, want is have with it. A
@@ -3576,6 +3580,10 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	// The patch is applied to the record read: what it held is taken first.
 	wasEmails := cardEmails(obj)
 	wasDone := c.spec.kind == view.KindTask && taskDone(obj)
+	var series seriesBefore
+	if c.cal != nil && !markDone {
+		series = readSeries(obj, c.tf.tz)
+	}
 	sent, fault, err := s.applyChecked(c, obj, ch, have, want)
 	if err != nil {
 		st.notices = []view.Notice{s.writeFailure(c, "PUT", obj.Path, err)}
@@ -3594,8 +3602,52 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
+	// A series whose occurrences changed by hand the edit leaves without
+	// their day asks what becomes of them before anything is written (А1,
+	// s-agenda-22); kept, each is written as an event of its own first, and
+	// taken back if the series then is not written. Until the client draws
+	// sheets (sheetsOnPages) the save writes them as before, loose in the
+	// series.
+	var made []string
+	var failed []apartFailed
+	var kept []time.Time
+	if left := leftByEdit(series, sent, c.tf.tz); len(left) > 0 && sheetsOnPages {
+		answer := r.FormValue(leftField)
+		if answer != "keep" && answer != "remove" {
+			// The form is drawn again over the record read again: the one
+			// read was patched in memory.
+			st.values = typed
+			if got, err := c.find(r.Context(), uid); err == nil {
+				st.obj = got
+			}
+		}
+		switch answer {
+		case "keep":
+			kept, made, failed = s.writeApart(r.Context(), c, sent, left)
+		case "remove":
+			for _, l := range left {
+				kept = append(kept, l.At)
+			}
+		case "cancel":
+			s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+			return
+		default:
+			s.writePage(w, r, http.StatusOK, s.askSeries(r, c, uid, series, sent, left, st))
+			return
+		}
+	}
+	if c.cal != nil && cal.RawRRULE(sent) != series.rule {
+		// A day left out that the series no longer has goes with the
+		// occurrences taken out (А1): nothing would show it.
+		if dropped, err := cal.DropLeft(sent, kept, c.tf.tz); err == nil {
+			sent = dropped
+		}
+	}
 	sent.ETag = etag
 	err = c.update(r.Context(), sent)
+	if err != nil {
+		s.takeBack(r.Context(), c, made)
+	}
 	switch {
 	case dav.IsStatus(err, http.StatusPreconditionFailed):
 		// The draft is what the person changed against what they read: the
@@ -3629,6 +3681,17 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, got, *left))
 			return
 		}
+	}
+	if len(failed) > 0 {
+		// Saved in part (s-agenda-24): the series is written, some
+		// occurrences stay in it as they were.
+		sent.ETag = ""
+		c.noteWrite(sent.Path, sent)
+		if got, err := c.find(r.Context(), uid); err == nil {
+			sent = got
+		}
+		s.writePage(w, r, http.StatusOK, s.askFailed(r, c, uid, sent, kept, failed))
+		return
 	}
 	if moving {
 		s.saveAndMove(w, r, c, s.notebookTarget(c, st.notebook), uid, sent, back)

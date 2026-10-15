@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.250 — 2026-10-15
+
+### Added
+
+- **The question before the save of a series** (the owner's decision of
+  11.10.2026, А1; Typecase's note 56, `s-agenda-22`…`-24`): an edit that
+  shortens a series, gives it another rule or stops it repeating, and so
+  leaves meetings changed by hand without their day, is answered with
+  «Keep the meetings that were moved by hand?» (`view.AskSheet`) over the
+  edit as typed — Keep writes each as an event of its own first, Remove
+  takes them out, Cancel goes back to the edit; nothing is written before
+  the answer. A meeting that cannot be written apart stays in the series
+  as it was, and the sheet says so (`saved in part`, Try again —
+  `?op=apart`). Held off with the other sheets until the client draws them
+  (`sheetsOnPages`): until then Save writes as before. A day left out the
+  series no longer has goes without a word, sheets or not.
+
 ## v0.2.249 — 2026-10-15
 
 ### Changed

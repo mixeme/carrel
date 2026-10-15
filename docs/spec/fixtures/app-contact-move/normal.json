@@ -1618,9 +1618,11 @@
       }
     },
     "event": null,
+    "eventEdit": null,
     "note": null,
     "notes": null,
     "task": null,
+    "taskEdit": null,
     "tasks": null
   },
   "warning": [

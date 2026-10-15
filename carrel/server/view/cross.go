@@ -244,6 +244,49 @@ type CopiesSheet struct {
 	Under *Under `json:"under"`
 }
 
+// AskSheet — вопрос перед записью (записка Typecase 56, s-agenda-22…-24;
+// решение владельца 11.10.2026, А1): там, где из правки не видно, чего
+// человек хотел, а неверная догадка теряет данные, Save сначала спрашивает
+// — одним листом на всё сохранение, поверх правки. Первый случай — серия,
+// у которой встречи, изменённые вручную, остались без своего дня. Лист —
+// форма: POST на адрес правки со всем, что прислала правка, скрытым;
+// ответы — кнопки этой формы (Submits) со своими адресами (?left=keep,
+// remove, cancel). Отказ после ответа — тот же лист: что записано, что нет
+// и почему (s-agenda-24), ответы — «Try again» и «Leave it in the series».
+type AskSheet struct {
+	Kind Kind `json:"kind"`
+	// Icon — значок шапки, «i-refresh» (s-agenda-22); пусто — без значка
+	// (лист отказа, s-agenda-24)
+	Icon    string `json:"icon"`
+	Title   Text   `json:"title"`   // вопрос: «Keep the meetings that were moved by hand?»
+	Subject Text   `json:"subject"` // что и в каком состоянии: «Дежурство: первая линия · not saved yet» («· saved in part»)
+	// Blocks — блоки листа: рубрика и строки — «What you changed», «Left
+	// without their day · 3» (s-agenda-22); «Written», «Not written · 1»
+	// (s-agenda-24)
+	Blocks []AskBlock `json:"blocks"`
+	Alert  Text       `json:"alert"` // сообщение тревоги под блоками (s-agenda-24); пусто — нет
+	Note   Text       `json:"note"`  // строка под блоками: что сделает каждый ответ
+	Form   Form       `json:"form"`
+	// Actions — ответы: главный первым (по умолчанию), последним — отказ
+	// (Cancel, «Leave it in the series»)
+	Actions []Action `json:"actions"`
+	// Under — правка под листом (Under.EventEdit, .TaskEdit) с тем, что
+	// набрано; nil у фрагмента
+	Under *Under `json:"under"`
+}
+
+// AskBlock — блок листа вопроса: рубрика со счётом, где он есть, и строки.
+type AskBlock struct {
+	Title Text      `json:"title"` // «Left without their day · 3»
+	Lines []AskLine `json:"lines"`
+}
+
+// AskLine — строка блока: жирное и, приглушённо после тире, пояснение.
+type AskLine struct {
+	Text  Text `json:"text"`  // «26 January, 12:00 — Duty moved»
+	Aside Text `json:"aside"` // «— it was the meeting of 26 January, 09:00»
+}
+
 // Under — экран, над которым открыт лист, пришедший страницей: переходом
 // без сценариев (решение владельца 15.10.2026; Overlay Typecase — «под
 // затемнением то же тело оболочки», кадр s-contacts-2). Это страница, откуда
@@ -260,6 +303,9 @@ type Under struct {
 	Task     *TaskPage         `json:"task"`
 	Notes    *NotesPage        `json:"notes"`
 	Note     *NotePage         `json:"note"`
+	// правка под листом вопроса перед записью (AskSheet) — с набранным
+	EventEdit *EventEditPage `json:"eventEdit"`
+	TaskEdit  *TaskEditPage  `json:"taskEdit"`
 }
 
 type MoveSheet struct {

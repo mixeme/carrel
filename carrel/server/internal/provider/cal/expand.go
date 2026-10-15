@@ -71,6 +71,12 @@ func startOf(comp *ical.Component, loc *time.Location) (time.Time, bool) {
 // seriesOf is the recurrence set of a component — RRULE, RDATE and EXDATE
 // from its DTSTART — or nil when it neither repeats nor names extra dates.
 func seriesOf(comp *ical.Component, loc *time.Location) (*rrule.Set, error) {
+	return series(comp, loc, true)
+}
+
+// series is seriesOf, with the days left out subtracted or not: the days a
+// series has whatever it leaves out are the days its exceptions may name.
+func series(comp *ical.Component, loc *time.Location, leaveOut bool) (*rrule.Set, error) {
 	var start time.Time
 	if p := comp.Props.Get(ical.PropDateTimeStart); p != nil {
 		var err error
@@ -105,6 +111,9 @@ func seriesOf(comp *ical.Component, loc *time.Location) (*rrule.Set, error) {
 	}
 
 	for _, p := range comp.Props[ical.PropExceptionDates] {
+		if !leaveOut {
+			break
+		}
 		ex, err := propTime(&p, loc)
 		if err != nil {
 			return nil, err

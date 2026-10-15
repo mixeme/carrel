@@ -416,14 +416,16 @@ func (s *Server) linkedTick(from origin, segment, uid string) view.Action {
 		Href: s.postQuery(from.recordPath(segment, uid)+"/done", url.Values{"from": {"all"}})}
 }
 
-// sheetsOnPages says whether the pages lead to the sheets of copies: Edit of
-// a linked record to «Which copy to edit?», the tick of a linked row to
-// «Which copy to mark done?». Off until the client draws sheets (the owner's
-// decision of 15.10.2026: the client answered them with JSON, where Edit had
-// opened the form and the tick marked the first copy; the sheets wait for
-// Typecase's task 183): the sheets and their addresses stand, and the pages
-// lead where they did before v0.2.247.
-const sheetsOnPages = false
+// sheetsOnPages says whether the pages lead to sheets: Edit of a linked
+// record to «Which copy to edit?», the tick of a linked row to «Which copy
+// to mark done?», Save of a series that leaves meetings without their day
+// to its question (ask_series.go). Off until the client draws sheets (the
+// owner's decision of 15.10.2026: the client answered them with JSON, where
+// Edit had opened the form, the tick marked the first copy and Save wrote;
+// the sheets wait for Typecase's task 183): the sheets and their addresses
+// stand, and the pages do what they did before v0.2.247. A test turns it on
+// (DrawSheets).
+var sheetsOnPages = false
 
 // editViaCopies sends Edit of a linked record's page to «Which copy to
 // edit?» (s-contacts-32) instead of its form — while sheetsOnPages.

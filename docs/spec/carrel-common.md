@@ -398,7 +398,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1); у заметок (и у `/app/notes`): `?open={адрес строки}` и `?filter=` — «Filter by word» без сценариев, по названию и тексту (s-notes-1) |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `calendar`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта, события и задачи, у заметки — в полосе над текстом, `Doc.Bar`); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
-| `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
+| `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у события и задачи `?op=apart` с `day` — «Try again» вопроса перед записью серии (AskSheet, C-6); у всех `etag` показанной версии; POST правки серии, оставляющей встречи без дня, отвечает листом вопроса AskSheet (C-6), когда клиент рисует листы; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
 | `/app/contacts/suggest` | GET | вход | фрагмент | `SuggestList` — подсказки поля участников правки события (`AttendeeField.Suggest`, s-agenda-12, -13): `?q=` — набранное; ищутся отмеченные книги, чьи списки сеанс читал (сервер DAV не спрашивается), по имени и по адресу; строка на каждый адрес человека; набранный адрес не из книг — первым «Add» и `Note`. Ставит ответ в меню поля живой слой Typecase (`tc-live.js`, L-1); без сценариев набранное уходит с формой правки |
 | `/app/{kind}/{account}/{col}/{uid}/related` | GET | вход | фрагмент | `SuggestList` — подсказки поля Related to (`FormRow.Suggest`, s-tasks-10, s-notes-20); `{kind}` — `tasks`, `notes`; `{uid}` — запись формы, `new` у новой: она в подсказки не входит; `?q=` — набранное. Записи, загруженные сеансом, — события, задачи и заметки всех коллекций (сервер DAV не спрашивается), в чьём названии набранное: начинающиеся с него первыми, затем новые; строка — название с найденным жирным, метка коллекции, «event · 12 Aug» (`Meta`), UID — значение. Ставит ответ в меню поля живой слой Typecase; без сценариев — варианты поля (U-6.3) |
 | `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage`; `?print=1` — та же хронология для печати (U-10); `?kind=` — фильтр по роду: `event`, `task`, `note` или `file` (сегменты-ссылки, s-contacts-7), без него — All; `?from=&to=` — окно, форма GET диапазона (`Range.Form`) |
@@ -1874,6 +1874,58 @@ type Under struct {
     Task     *TaskPage
     Notes    *NotesPage
     Note     *NotePage
+    // правка под листом вопроса перед записью (AskSheet) — с набранным
+    EventEdit *EventEditPage
+    TaskEdit  *TaskEditPage
+}
+
+// Вопрос перед записью (записка Typecase 56, s-agenda-22…-24; решение
+// владельца 11.10.2026, А1): там, где из правки не видно, чего человек
+// хотел, а неверная догадка теряет данные, Save сначала спрашивает — одним
+// листом на всё сохранение, поверх правки (Under.EventEdit, .TaskEdit — с
+// набранным). Первый случай — правка серии (правило, конец, снятый повтор)
+// оставляет встречи, изменённые вручную, без своего дня: «Keep the meetings
+// that were moved by hand?» («… the meeting … was …» у одной), подзаголовок —
+// «Дежурство: первая линия · not saved yet», блоки «What you changed» и
+// «Left without their day · 3» («its day · 1»), строка на встречу — где она
+// стоит и её название жирным, приглушённо — «— it was the meeting of 26
+// January, 09:00» (перенесена), «— its title was changed»; времена — в поясе
+// серии, как в её правке. Лист — форма: POST на адрес правки, скрытыми —
+// всё, что прислала правка; ответы — кнопки этой формы (Submits) со своими
+// адресами: `?left=keep` («Keep as events» / «Keep as an event», главная —
+// каждая встреча пишется отдельным событием, потом серия без них), `remove`
+// («Remove»), `cancel` («Cancel» — правка с набранным, ничего не записано).
+// День пропуска, которого у серии больше нет, уходит без вопроса. Отказ после
+// «keep» (s-agenda-24): серия записана, неписавшиеся встречи остались в ней
+// как были; лист — «· saved in part», блоки «Written» и «Not written · 1»
+// (почему — ответ сервера), Alert «The meeting of 2 February was not made a
+// separate event: it stays in the series, with its change, as it was before
+// you saved.», Note «Nothing is lost: …»; ответы — «Try again» (POST
+// `?op=apart` с `etag` и днями `day`, RFC 3339) и «Leave it in the series»
+// (карточка). **До экранов листов у клиента** (решение владельца
+// 15.10.2026) вопрос не задаётся: Save пишет серию, как прежде, встречи
+// остаются в ней без дня; уходит только день пропуска без дня.
+type AskSheet struct {
+    Kind    Kind
+    Icon    string     // «i-refresh» (s-agenda-22); пусто — без значка (s-agenda-24)
+    Title   Text
+    Subject Text
+    Blocks  []AskBlock
+    Alert   Text       // сообщение тревоги под блоками (s-agenda-24); пусто — нет
+    Note    Text       // строка под блоками: что сделает каждый ответ
+    Form    Form
+    Actions []Action   // ответы: главный первым, отказ — последним
+    Under   *Under     // правка под листом с набранным; у отказа — карточка; nil у фрагмента
+}
+
+type AskBlock struct {
+    Title Text // рубрика со счётом, где он есть: «Left without their day · 3»
+    Lines []AskLine
+}
+
+type AskLine struct {
+    Text  Text // жирным: «26 January, 12:00 — Duty moved»
+    Aside Text // приглушённо: «— it was the meeting of 26 January, 09:00»
 }
 
 // Лист переноса и копии записи (s-contacts-2): Title — «Move contact»,
