@@ -1753,7 +1753,11 @@ type DuplicateGroup struct {
     Decision DuplicateDecision // C-8
     Hint     Text // под строками: что значит пара (s-dup-1) — у событий с разными UID, пока не решено, «The same event in two calendars, different UIDs. Agenda shows it twice; …», у заметок «Same title and the same date: a note copied into a second notebook. …»; у «not duplicates», контактов и задач пусто
     // Расхождения в однозначных полях: ответ уходит с Link как
-    // MergeRow.Name=<номер варианта> и запоминается при связанной группе
+    // MergeRow.Name=<номер варианта> и запоминается при связанной группе.
+    // Запись без значения — тоже вариант (s-dup-1: «Organisation» — «—» или
+    // «Библиотека №4»): Options пустая строка (прочерк — экрана), у фото —
+    // источник записи; заранее выбрано первое значение; выбранное «—»
+    // оставляет свойство без значения и при слиянии
     Choices []MergeRow
     // Карточка группы формой, когда выбирать есть что (U-8, s-dup-1): POST
     // /app/duplicates/decide, скрытые _csrf и group; радио Choices стоят в

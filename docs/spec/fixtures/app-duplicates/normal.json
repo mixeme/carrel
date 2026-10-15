@@ -97,6 +97,26 @@
           ],
           "property": "Display name",
           "union": false
+        },
+        {
+          "chosen": 1,
+          "name": "choice.ORG",
+          "options": [
+            "",
+            "Библиотека №4"
+          ],
+          "property": "Organisation",
+          "union": false
+        },
+        {
+          "chosen": 1,
+          "name": "choice.PHOTO",
+          "options": [
+            "nextcloud · Архив",
+            "nextcloud · Контакты"
+          ],
+          "property": "Photo",
+          "union": false
         }
       ],
       "decision": "",
@@ -171,24 +191,87 @@
         {
           "csrf": "csrf",
           "enabled": true,
+          "href": "/app/duplicates/decide?do=choose\u0026group=g-artem",
+          "id": "duplicates.choose",
+          "label": "Keep these values",
+          "method": "POST",
+          "primary": true,
+          "submits": true
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
           "href": "/app/duplicates/decide?do=unlink\u0026group=g-artem",
           "id": "duplicates.unlink",
           "label": "Unlink",
-          "method": "POST"
+          "method": "POST",
+          "submits": true
         },
         {
+          "csrf": "csrf",
           "danger": true,
           "enabled": false,
-          "href": "/app/duplicates/merge?group=g-artem",
+          "href": "/app/duplicates/decide?do=merge\u0026group=g-artem",
           "id": "duplicates.merge",
           "label": "Merge on the server",
-          "method": "GET",
-          "reason": "Команда is read-only: its record could be neither rewritten nor deleted."
+          "method": "POST",
+          "reason": "Команда is read-only: its record could be neither rewritten nor deleted.",
+          "submits": true
         }
       ],
-      "choices": [],
+      "choices": [
+        {
+          "chosen": 0,
+          "name": "choice.PHOTO",
+          "options": [
+            "radicale · vps · Команда",
+            "nextcloud · Контакты"
+          ],
+          "property": "Photo",
+          "union": false
+        }
+      ],
       "decision": "linked",
-      "form": null,
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-artem"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
       "id": "g-artem",
       "kind": "contact",
       "reasons": [

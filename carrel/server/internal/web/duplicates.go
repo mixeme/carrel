@@ -973,22 +973,30 @@ type choice struct {
 type choiceOption struct {
 	label string
 	ref   sealed.RecordRef
+	// none: the member holds no value — choosing it leaves the property
+	// out (dupes.Leave)
+	none bool
 }
 
 // choices are the single-valued properties the loaded members of g hold
-// differently. A member whose list is not loaded has nothing to offer.
+// differently. A member whose list is not loaded has nothing to offer; one
+// that holds no value offers «none» (Дб7, s-dup-1: Вера's «Organisation» —
+// «—» or «Библиотека №4»), its label empty — the screen's dash —, a
+// photo's its source.
 func (st dupState) choices(g dupGroup) []choice {
 	var out []choice
 	for _, prop := range choiceProps[g.kind] {
 		c := choice{prop: prop}
 		seen := map[string]bool{}
+		held := false
 		for _, ref := range g.refs {
 			l, ok := st.records[ref]
 			if !ok {
 				continue
 			}
-			v, ok := l.entry.Fields[prop]
-			if !ok || seen[v] {
+			v, has := l.entry.Fields[prop]
+			held = held || has
+			if seen[v] {
 				continue
 			}
 			seen[v] = true
@@ -999,22 +1007,28 @@ func (st dupState) choices(g dupGroup) []choice {
 				// Команда»; Дб8).
 				label = string(l.from.stamp())
 			}
-			c.opts = append(c.opts, choiceOption{label: label, ref: ref})
+			c.opts = append(c.opts, choiceOption{label: label, ref: ref, none: !has})
 		}
-		if len(c.opts) > 1 {
+		if held && len(c.opts) > 1 {
 			out = append(out, c)
 		}
 	}
 	return out
 }
 
-// chosen is the option the linked group's answer names, else the first.
+// chosen is the option the linked group's answer names, else the first
+// that holds a value: nothing is left out unless the person says so.
 func chosen(c choice, prefs map[string]sealed.RecordRef) int {
 	if ref, ok := prefs[c.prop]; ok {
 		for i, o := range c.opts {
 			if o.ref == ref {
 				return i
 			}
+		}
+	}
+	for i, o := range c.opts {
+		if !o.none {
+			return i
 		}
 	}
 	return 0

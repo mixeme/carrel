@@ -322,3 +322,23 @@ func TestMergeEvents(t *testing.T) {
 		t.Errorf("alarms = %+v %v", alarms, err)
 	}
 }
+
+// Дб7: a single value answered Leave is not in the merged record, and the
+// plan says which value of the kept record went.
+func TestMergeLeavesOutWhatWasChosenEmpty(t *testing.T) {
+	kept := vcard(t, "UID:keep", "FN:Вера Лебедева", "ORG:Библиотека №4")
+	other := vcard(t, "UID:other", "FN:Вера Лебедева")
+	merged, plan, err := Merge(kept, []*model.Object{other}, map[string]int{"ORG": Leave})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := encodeCard(t, merged); strings.Contains(got, "ORG") {
+		t.Errorf("ORG left out, and still there:\n%s", got)
+	}
+	if len(plan.Left) != 1 || plan.Left[0].Prop != "ORG" || plan.Left[0].Value.Text != "Библиотека №4" {
+		t.Errorf("left = %+v", plan.Left)
+	}
+	if kept.PropText("ORG")[0] != "Библиотека №4" {
+		t.Error("the kept input changed")
+	}
+}

@@ -503,7 +503,9 @@ func TestLinkRemembersTheAnswer(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
-	if len(g.Choices) != 1 || g.Choices[0].Name != "choice.FN" || len(g.Choices[0].Options) != 2 {
+	// The organisation only one of them has is a question too (Дб7,
+	// v0.2.283; until then the name was the only one).
+	if len(g.Choices) != 2 || g.Choices[0].Name != "choice.FN" || len(g.Choices[0].Options) != 2 || g.Choices[1].Name != "choice.ORG" {
 		t.Fatalf("choices = %+v", g.Choices)
 	}
 	pick := optionIndex(t, g.Choices[0], "LOVELACE Ada")

@@ -328,6 +328,18 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 	if len(prefs) > 0 {
 		if _, probe, err := dupes.Merge(target.obj, objs, nil); err == nil {
 			all := append([]mergeMember{target}, others...)
+			// The member chosen holds no value: the property is left out
+			// (Дб7).
+			for p, ref := range prefs {
+				if _, answered := choices[p]; answered {
+					continue
+				}
+				for _, m := range all {
+					if m.ref == ref && len(m.obj.PropText(p)) == 0 {
+						choices[p] = dupes.Leave
+					}
+				}
+			}
 			for _, qn := range probe.Questions {
 				ref, ok := prefs[qn.Prop]
 				if _, answered := choices[qn.Prop]; answered || !ok {
@@ -375,6 +387,12 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 		page.Rows = append(page.Rows, row)
 		q.Set("choice."+qn.Prop, strconv.Itoa(chosen))
 	}
+	// A property left out goes with the confirmation too (Дб7).
+	for p, n := range choices {
+		if n == dupes.Leave {
+			q.Set("choice."+p, strconv.Itoa(n))
+		}
+	}
 	for _, prop := range plan.Union {
 		row := view.MergeRow{Property: text(choiceLabel(prop)), Union: true}
 		for _, v := range merged.Props()[prop] {
@@ -401,6 +419,9 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 	}
 	if plan.Alarms > 0 {
 		page.Gains = append(page.Gains, text(plural(plan.Alarms, "reminder")+" from the others"))
+	}
+	for _, l := range plan.Left {
+		page.NotCarried = append(page.NotCarried, text(gainLine(calendar, dupes.Gain{Prop: l.Prop, Value: l.Value}, target)+" — left out, as you chose"))
 	}
 	if plan.Dropped > 0 {
 		page.NotCarried = append(page.NotCarried, text(fmt.Sprintf("%s of the kept record, which %s to the time it gives up",

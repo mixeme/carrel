@@ -1,7 +1,9 @@
 package web_test
 
 import (
+	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -79,5 +81,40 @@ func TestAGroupOfEventsSaysWhatItMeans(t *testing.T) {
 	d.load(t)
 	if g := onlyGroup(t, d.page(t)); g.Hint != "" {
 		t.Errorf("a group of contacts says %q", g.Hint)
+	}
+}
+
+// A single value one record has and the other has not is a choice too
+// (Дб7; s-dup-1: Вера's «Organisation» — «—» or «Библиотека №4», the second
+// chosen): the value is chosen beforehand, and «—» chosen leaves the
+// property out of the merged record.
+func TestAnEmptyValueIsAChoice(t *testing.T) {
+	f := newDupFixture(t)
+	f.load(t)
+	g := onlyGroup(t, f.page(t))
+	var org *view.MergeRow
+	for i := range g.Choices {
+		if g.Choices[i].Name == "choice.ORG" {
+			org = &g.Choices[i]
+		}
+	}
+	if org == nil || len(org.Options) != 2 || org.Property != "Organisation" {
+		t.Fatalf("no question about the organisation: %+v", g.Choices)
+	}
+	empty := optionIndex(t, *org, "")
+	if org.Chosen == empty || org.Options[org.Chosen] != "Analytical Engines" {
+		t.Errorf("chosen beforehand %d of %q, want the value", org.Chosen, org.Options)
+	}
+	p := openMerge(t, f.h, f.sess, actionOf(t, g, "duplicates.merge"), url.Values{"choice.ORG": {strconv.Itoa(empty)}})
+	confirm := mergeAction(t, p, "duplicates.merge.confirm")
+	if rec := f.h.do(postForm(confirm.Href, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("merge: %d %s", rec.Code, rec.Body.String())
+	}
+	kept, _, ok := f.srv.Object(peopleBook + "ada-here.vcf")
+	if !ok {
+		kept, _, _ = f.other.Object(workBook + "ada-there.vcf")
+	}
+	if strings.Contains(unfolded(kept), "ORG") {
+		t.Errorf("«—» was chosen, and the merged record holds an organisation:\n%s", kept)
 	}
 }

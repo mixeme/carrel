@@ -52,6 +52,11 @@ var ownOnly = map[string]bool{
 // time as written (cal.TimeKey), and the screen says it in words.
 const When = "WHEN"
 
+// Leave is the answer to a single-valued property that leaves it out of the
+// merged record: the person chose the member that holds none (Дб7, s-dup-1:
+// «Organisation» — «—»).
+const Leave = -1
+
 // Option is one value offered for a single-valued property. From is the
 // member it comes from: 0 is the kept record, i is others[i-1].
 type Option struct {
@@ -94,6 +99,9 @@ type Plan struct {
 	// own rewritten occurrences that went with the time it gave up.
 	Time    int
 	Dropped int
+	// Left are the kept record's values of the properties answered Leave:
+	// they are not in the merged record.
+	Left []Gain
 }
 
 // Merge builds the merged record from the kept one and the others, with
@@ -134,6 +142,15 @@ func Merge(target *model.Object, others []*model.Object, choices map[string]int)
 			continue
 		}
 		mine := base[name]
+		if singleValued[name] && choices[name] == Leave {
+			if _, answered := choices[name]; answered {
+				if len(mine) > 0 {
+					ops = append(ops, model.RemoveProp{Prop: name})
+					plan.Left = append(plan.Left, Gain{Prop: name, From: 0, Value: mine[0]})
+				}
+				continue
+			}
+		}
 		if singleValued[name] {
 			var opts []Option
 			for from, m := range members {

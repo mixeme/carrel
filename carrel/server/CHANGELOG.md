@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.283 — 2026-10-16
+
+### Changed
+
+- **A record without a value is a choice too** (Дб7 of the scan of
+  15.10.2026; `s-dup-1`: Вера's «Organisation» — «—» or «Библиотека №4»,
+  her «Photo» — «nextcloud · Архив» or «nextcloud · Контакты»). Where one
+  member of a group holds a single value another does not, the group asks:
+  the option of the member without it is an empty label (the screen's
+  dash; a photo's is its source), and the value is chosen beforehand, so
+  nothing changes unless the person says so. «—» chosen leaves the
+  property out of the linked record and of the merge: the merge removes
+  it from the kept record (`dupes.Leave`) and says so under «Not carried
+  over» («ORG: … — left out, as you chose»). The written rule S-16 — «a
+  field only one record has is taken» — gains this choice.
+
+### For consumers
+
+`MergeRow.Options` may hold an empty label: draw it as «—». Fixture
+`app-duplicates` re-shot: Вера's group asks Organisation and Photo, the
+linked Артём's Photo.
+
 ## v0.2.282 — 2026-10-16
 
 ### Changed
