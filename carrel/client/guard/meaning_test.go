@@ -198,17 +198,27 @@ func TestMeaningRules(t *testing.T) {
 		"a bar's ticks that are no form":       {w.Bar{Items: []w.BarPart{w.CheckForm{Checks: []w.Check{{Name: "compact", Value: "1"}}, Apply: w.Button{Submit: true}}}}, []string{"(CheckForm): no Action", "(Check): a field outside", "(Button): a submit button outside"}},
 		"the columns' menu, a form":            {w.Menu{Action: "/cols", Items: []w.MenuPart{w.MenuItem{Label: "Tags", Name: "col", Value: "tags", Tick: &w.TickBox{}}, w.MenuFoot{Items: []w.Button{{Label: "Apply", Submit: true}}}}}, nil},
 		"a row's pick that sends nothing":      {w.PhoneRow{Pick: &w.TickBox{}}, []string{"(TickBox): a tick box that sends nothing"}},
-		"a table's pick":                       {w.TableRow{Cells: []w.TableCell{{Pick: &picked, Send: w.Send{Form: "post", Name: "uid", Value: "a"}}, {Parts: []w.CellPart{w.Text("x")}}}}, nil},
-		"a table's pick that sends nothing":    {w.TableRow{Cells: []w.TableCell{{Pick: &picked}}}, []string{"(TableCell): a tick box that sends nothing"}},
-		"the build line":                       {w.RailFoot{About: &w.About{Name: "Carrel"}}, []string{"(About): no Href"}},
-		"a tick of the rail's form":            {w.RailSec{Items: []w.RailSecPart{w.TickRow{Send: w.Send{Form: "post", Name: "toggle", Value: "/x"}}}}, nil},
-		"a tick of the rail of return":         {w.RailSec{Items: []w.RailSecPart{w.TickRow{}}}, nil},
-		"a tick that names no form":            {w.RailSec{Items: []w.RailSecPart{w.TickRow{Send: w.Send{Name: "toggle"}}}}, []string{"(TickRow): a tick box with Send.Name outside a form"}},
-		"a switch of links":                    {w.Bar{Items: []w.BarPart{w.Seg{Options: []w.SegOption{{Label: "A–Z", Href: "/a"}, {Label: "Changed", Href: "/c"}}}}}, nil},
-		"a switch with an option of no link":   {w.Bar{Items: []w.BarPart{w.Seg{Options: []w.SegOption{{Label: "A–Z", Href: "/a"}, {Label: "Changed"}}}}}, []string{"(Seg): a field without Name"}},
-		"a range that sends":                   {w.Bar{Items: []w.BarPart{w.Range{Action: "/t", From: w.Input{Name: "from"}, To: w.Input{Name: "to"}, Show: w.Button{Submit: true}}}}, nil},
-		"a range that is no form":              {w.Bar{Items: []w.BarPart{w.Range{From: w.Input{Name: "from"}, To: w.Input{Name: "to"}, Show: w.Button{Submit: true}}}}, []string{"(Range): no Action", "(Input): a field outside", "(Input): a field outside", "(Button): a submit button outside"}},
-		"a value that goes, and one not":       {w.Fields{Items: []w.FieldsItem{{Term: "Phone", Href: "tel:+7"}, {Term: "Note"}}}, nil},
+		// The conflict's cards (s-conflict-1): a comparison with Action is a
+		// form its radios stand in and its foot's button names.
+		"a comparison that is a form": {w.Dialog{Items: []w.DialogPart{
+			w.Diff{ID: "conflict", Action: "/c", Items: []w.DiffItem{{Options: []w.Check{{Name: "choice.0", Value: "mine", Radio: true}}}}},
+			w.FormFoot{Items: []w.FormFootPart{w.Button{Label: "Write", Form: "conflict"}}},
+		}}, nil},
+		"a comparison that is no form": {w.Dialog{Items: []w.DialogPart{
+			w.Diff{ID: "conflict", Items: []w.DiffItem{{Options: []w.Check{{Name: "choice.0", Value: "mine", Radio: true}}}}},
+			w.FormFoot{Items: []w.FormFootPart{w.Button{Label: "Write", Form: "conflict"}}},
+		}}, []string{"(Check): a field outside", `(Button): submits form "conflict", which is not on the page`}},
+		"a table's pick":                     {w.TableRow{Cells: []w.TableCell{{Pick: &picked, Send: w.Send{Form: "post", Name: "uid", Value: "a"}}, {Parts: []w.CellPart{w.Text("x")}}}}, nil},
+		"a table's pick that sends nothing":  {w.TableRow{Cells: []w.TableCell{{Pick: &picked}}}, []string{"(TableCell): a tick box that sends nothing"}},
+		"the build line":                     {w.RailFoot{About: &w.About{Name: "Carrel"}}, []string{"(About): no Href"}},
+		"a tick of the rail's form":          {w.RailSec{Items: []w.RailSecPart{w.TickRow{Send: w.Send{Form: "post", Name: "toggle", Value: "/x"}}}}, nil},
+		"a tick of the rail of return":       {w.RailSec{Items: []w.RailSecPart{w.TickRow{}}}, nil},
+		"a tick that names no form":          {w.RailSec{Items: []w.RailSecPart{w.TickRow{Send: w.Send{Name: "toggle"}}}}, []string{"(TickRow): a tick box with Send.Name outside a form"}},
+		"a switch of links":                  {w.Bar{Items: []w.BarPart{w.Seg{Options: []w.SegOption{{Label: "A–Z", Href: "/a"}, {Label: "Changed", Href: "/c"}}}}}, nil},
+		"a switch with an option of no link": {w.Bar{Items: []w.BarPart{w.Seg{Options: []w.SegOption{{Label: "A–Z", Href: "/a"}, {Label: "Changed"}}}}}, []string{"(Seg): a field without Name"}},
+		"a range that sends":                 {w.Bar{Items: []w.BarPart{w.Range{Action: "/t", From: w.Input{Name: "from"}, To: w.Input{Name: "to"}, Show: w.Button{Submit: true}}}}, nil},
+		"a range that is no form":            {w.Bar{Items: []w.BarPart{w.Range{From: w.Input{Name: "from"}, To: w.Input{Name: "to"}, Show: w.Button{Submit: true}}}}, []string{"(Range): no Action", "(Input): a field outside", "(Input): a field outside", "(Button): a submit button outside"}},
+		"a value that goes, and one not":     {w.Fields{Items: []w.FieldsItem{{Term: "Phone", Href: "tel:+7"}, {Term: "Note"}}}, nil},
 		// The calendar (Typecase's task 73): a choice whose menu is the radio
 		// items of the form it stands in — the time zone —, its menu's line
 		// that finds an option.

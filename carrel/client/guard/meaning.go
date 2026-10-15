@@ -357,6 +357,11 @@ var contract = map[string]rule{
 	// sheet, s-contacts-2): its parts are judged in it; without Action it
 	// is a frame, and its buttons say where they send.
 	"Sheet": func(control) string { return "" },
+	// A comparison with Action is a form too (Carrel's task 132; the
+	// conflict, s-conflict-1): each card's versions are radios of its name,
+	// and «Write this combination» names it by its ID; without Action it
+	// shows and sends nothing.
+	"Diff": func(control) string { return "" },
 	// A document is a form in its edit (Typecase's task 98): with Action it
 	// sends its fields, which the edit bar's Save names by its ID; read,
 	// it has none and sends nothing.
@@ -403,7 +408,7 @@ func picksFile(c control) bool {
 // opensForm says whether the widget is a form that sends, for its parts.
 func opensForm(c control) bool {
 	switch c.v.Type().Name() {
-	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc", "Field", "Card", "FieldSet", "Dialog", "Sheet":
+	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc", "Field", "Card", "FieldSet", "Dialog", "Sheet", "Diff":
 		return c.str("Action") != ""
 	}
 	return false
@@ -467,7 +472,7 @@ func Meaning(v any, forms ...string) []string {
 			out = append(out, fmt.Sprintf("%s: %s carries meaning the guard's contract does not know", c.path, name))
 		}
 		switch name {
-		case "Form", "PostForm", "Doc", "Sheet":
+		case "Form", "PostForm", "Doc", "Sheet", "Diff":
 			if id := c.str("ID"); id != "" && (name == "PostForm" || c.str("Action") != "") {
 				ids = append(ids, id)
 			}

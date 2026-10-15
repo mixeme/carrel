@@ -6,6 +6,7 @@ import (
 	"carrel.dev/carrel/client/screens/agenda"
 	"carrel.dev/carrel/client/screens/ask"
 	"carrel.dev/carrel/client/screens/confirm"
+	"carrel.dev/carrel/client/screens/conflict"
 	"carrel.dev/carrel/client/screens/contact"
 	"carrel.dev/carrel/client/screens/contactedit"
 	"carrel.dev/carrel/client/screens/contacts"
@@ -305,6 +306,13 @@ var All = []Screen{
 			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Button)"},                 // ждёт библиотеку: U-5.5 #41
 			{Row: 41, Control: ".Items(Head).Acts(Acts).Items(Seg)"},                    // ждёт библиотеку: U-5.5 #41
 		},
+	},
+	{
+		Model:  func() any { return new(view.ConflictPage) },
+		Frames: []string{"s-conflict-1", "s-conflict-3", "s-conflict-4", "s-conflict-5"},
+		Draw:   func(model any) Root { return conflict.Screen(model.(*view.ConflictPage)) },
+		Title:  func(model any) string { return string(model.(*view.ConflictPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return conflict.Forms(model.(*view.ConflictPage)) },
 	},
 }
 

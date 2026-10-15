@@ -4,6 +4,20 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.45 — 2026-10-15
+
+Server `v0.2.273`. **The conflict screen** (`ConflictPage`, frames
+`s-conflict-1`, `-3`, `-4`, `-5`; U-6.8): «Conflict» and what happened
+under it, the page's notices, a line for each property that agrees, then a
+card a property — its name as the record has it, monospaced (`TEL;work`,
+`X-EVOLUTION-FILE-AS`), how it differs, and its two versions as radios of
+the card's row: «Your edit» and «Server», «Your edit · include» against
+«Leave it out» where only the edit has it, «Server · include» where only
+the server; nothing is a dash. The foot: Write this combination (the cards'
+form), Use only my edit and Use only the server version (forms of their
+own), Cancel. The meaning guard knows a comparison with `Action` as a form
+(`Diff`, as `Form` and `Sheet`). One screen for every kind.
+
 ## v0.4.44 — 2026-10-15
 
 Server `v0.2.263`. The sheet of copies says why it came back — Mark done
