@@ -82,7 +82,7 @@
   "14 / 14", Variant: w.MonoTight}]}`). Модель — одна строка
   `RailSection.Account` «Sources 14 / 14» (`search.go:709`; у дубликатов
   то же, `duplicates.go:430`). Нужен счёт отдельным полем. Было ПА2.
-- **Пк3. Подписка в рейле** (`s-find-1`): «Праздники РФ» — строка ленты
+- **Пк3. Подписка в рейле** (`s-find-1`; **закрыто сервером `v0.2.286`**: `Feed`): «Праздники РФ» — строка ленты
   (`w.TickRow{Kind: w.TickRowExternal, …}`). Фикстура: `"feed": false`;
   `searchRail` поле `SourceRow.Feed` (`view/shell.go:158`) не ставит
   (`search.go:687-690`). Нужно `Feed` = true у ленты. Было ПА3.
@@ -97,11 +97,11 @@
 
 ### Выдача (`SearchPage`, `s-find-1`)
 
-- **Пк5. Подзаголовок** (`tc-head__sub`): «14 of 14 collections · 7 records
+- **Пк5. Подзаголовок** (`tc-head__sub`; **закрыто `v0.2.286`**: `SearchPage.Subtitle`; у набора «1 record · 1 source refused» — данные): «14 of 14 collections · 7 records
   · 1 source timed out». Поля нет (у `SearchPage` — `Query`, `Bar`, `Poll`,
   `Results`, `Note`; `view/cross.go:3-10`). Нужно `SearchPage.Subtitle`
   (слова зависят от данных). Было ПБ1.
-- **Пк6. Сводка полосы**: кадр — «Done · 13 of 14 sources answered · »
+- **Пк6. Сводка полосы** (**закрыто сервером `v0.2.262`**, отмечено при сверке 16.10): кадр — «Done · 13 of 14 sources answered · »
   (дальше кнопка «1 failed»). Модель — `Summary` «13 of 14 sources answered
   · 1 found · 1 refused» (`search.go:486-491`, ветка не `polled`): нет
   «Done ·», лишние «1 found» (число стоит в подзаголовке, Пк5) и «1 refused»
@@ -134,7 +134,7 @@
   «10 August, 17:06» (`formatWhen(…, false, …)`, `timefmt.go:207-231`;
   фикстура). Нужно: сегодня — одни часы, как `sentAt` (`timefmt.go`),
   раньше — с днём; «answered» — слово экрана. Было ПБ2.
-- **Пк11. Группы по роду со счётом**: «Contacts 2», «Events 1», «Tasks 1»,
+- **Пк11. Группы по роду со счётом** (**закрыто правилом `v0.2.286`**, C-6.6: группы рода собирает экран, счёт — строк этого рода): «Contacts 2», «Events 1», «Tasks 1»,
   «Notes 1», «Files 2» (`w.ListGroup{Title: …, Count: &w.Num{…}}`). Модель —
   плоский `Results` с `Kind` (`search.go:172-181`), ни групп, ни счёта.
   Нужно — группы с числом (как рубрики прочих списков: счёт рубрики —
@@ -170,7 +170,7 @@
   ё/е, «сервер не различает регистр в кириллице», `search.go:988-990`) — у
   сервера. Нужно `Title` кусками (`Runs`, кусок совпадения отмечен). Было
   ПБ5.
-- **Пк14. Сообщение о файлах**: «Files are searched by name: ‹PROPFIND›
+- **Пк14. Сообщение о файлах** (**закрыто `v0.2.286`**: слова кадра, `Note` кусками, PROPFIND моноширинно): «Files are searched by name: ‹PROPFIND›
   returns names anyway, and walking a folder costs one request per folder.
   Carrel does not look inside files — and says so here, so that “nothing
   found” is not read as “not in the files”.» (`PROPFIND` моноширинно,
@@ -223,7 +223,7 @@
 
 ### Тексты контракта
 
-- **Пк21. Устаревшие слова спецификации**:
+- **Пк21. Устаревшие слова спецификации** (**закрыто `v0.2.286`**: U-6.6 виджеты и контролы, S-15.2; C-6.6 исправлен раньше):
   - U-6.6, «Виджеты» — `tc-list` + `tc-row--find` (`carrel-client.md:974`):
     кадр выдачи рисует строки родов (`FaceRow`, `TimeRow`, `DueRow`,
     `ExcerptRow`, `SizeRow`); `tc-row--find` — только в отложенных

@@ -35,8 +35,8 @@ import (
 // it. A query already in the session opens from memory.
 
 const (
-	searchFilesNote = "Files are searched by name only. Carrel does not look inside files, so “nothing found” does not mean the files do not contain it."
-	searchNoTicks   = "No collections are ticked, so there is nothing to search. Tick collections in the rail of Contacts, Calendar, Tasks, Notes or Files."
+	searchFilesNoteTail = " returns names anyway, and walking a folder costs one request per folder. Carrel does not look inside files — and says so here, so that “nothing found” is not read as “not in the files”."
+	searchNoTicks       = "No collections are ticked, so there is nothing to search. Tick collections in the rail of Contacts, Calendar, Tasks, Notes or Files."
 	// sseKeepAlive is how often a waiting stream says it is alive, so a proxy
 	// does not close it as idle.
 	sseKeepAlive = 15 * time.Second
@@ -99,6 +99,7 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 	snap := task.Snapshot()
 	s.fillResults(&page, sess, blob, snap, r)
 	page.Rail = s.searchRail(sess, blob, &snap)
+	page.Subtitle = searchSubtitle(page.Rail, snap)
 	s.writePage(w, r, http.StatusOK, page)
 }
 
@@ -206,7 +207,8 @@ func (s *Server) fillResults(page *view.SearchPage, sess *session.Session, blob 
 	for _, st := range snap.Sources {
 		account, path, _ := strings.Cut(st.ID, ":")
 		if col, ok := blob.Collection(account, path); ok && col.Has(view.KindFile) {
-			page.Note = searchFilesNote
+			// The words of s-find-1, PROPFIND monospaced (Пк14).
+			page.Note = join("Files are searched by name: ", monoRun("PROPFIND"), searchFilesNoteTail)
 			break
 		}
 	}
@@ -537,6 +539,31 @@ func runningFor(d time.Duration) string {
 
 // pollTroubles names what went wrong, each kind of trouble once and only
 // when there is any: «1 unavailable».
+// searchSubtitle is what a search asked, found and missed, under its title
+// (s-find-1, Пк5): «14 of 14 collections · 7 records · 1 source timed out».
+// The collections are the rail's — those ticked —, the records every one
+// found, whatever the segment or the filter shows.
+func searchSubtitle(rail view.Rail, snap fanout.Snapshot) view.Text {
+	ticked := 0
+	for _, sec := range rail.Sections {
+		ticked += len(sec.Rows)
+	}
+	parts := []string{fmt.Sprintf("%d of %s", len(snap.Sources), plural(ticked, "collection")), plural(len(snap.Items), "record")}
+	troubles := map[view.SourceState]int{}
+	for _, st := range snap.Sources {
+		troubles[st.State]++
+	}
+	for _, c := range []struct {
+		state view.SourceState
+		what  string
+	}{{view.SourceError, "refused"}, {view.SourceUnavailable, "unavailable"}, {view.SourceTimeout, "timed out"}} {
+		if n := troubles[c.state]; n > 0 {
+			parts = append(parts, plural(n, "source")+" "+c.what)
+		}
+	}
+	return text(strings.Join(parts, " · "))
+}
+
 func pollTroubles(refused, unreachable, timedOut, stopped int) []string {
 	var out []string
 	for _, c := range []struct {
@@ -729,9 +756,10 @@ func (s *Server) searchRail(sess *session.Session, blob sealed.Blob, snap *fanou
 			continue // what tickedCollections would not ask either
 		}
 		seen[id] = true
+		// A feed is said as one (s-find-1: «Праздники РФ», is-ext; Пк3).
 		row := view.SourceRow{
 			Label: text(collectionLabel(col)), Colour: catalogColour(col),
-			Tick: view.TickOn, ReadOnly: col.ReadOnly, State: view.CollectionOK,
+			Tick: view.TickOn, ReadOnly: col.ReadOnly, State: view.CollectionOK, Feed: col.Feed,
 		}
 		if col.Gone {
 			row.State = view.CollectionGone

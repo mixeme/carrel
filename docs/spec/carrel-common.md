@@ -1677,11 +1677,12 @@ type ConflictRow struct { // карточка расхождения, вариа
 ```go
 type SearchPage struct {
     Shell
-    Query   Text
-    Bar     ListBar // сегменты All / Contacts / Events / Tasks / Notes / Files
-    Poll    PollBar
-    Results []FindRow
-    Note    Text // «содержимое файлов не ищется» — говорится в выдаче
+    Query    Text
+    Subtitle Text    // «14 of 14 collections · 7 records · 1 source timed out» (s-find-1): отмеченные — из рейла, находки — все, кто не ответил — по виду отказа; пусто без запроса
+    Bar      ListBar // сегменты All / Contacts / Events / Tasks / Notes / Files
+    Poll     PollBar
+    Results  []FindRow // строка — находка с её Kind; группы рода со счётом («Contacts 2») собирает экран: число — строк этого рода
+    Note     Runs    // «Files are searched by name: ‹PROPFIND› returns names anyway, …» — PROPFIND моноширинно (s-find-1); пусто, когда файлы не спрошены
 }
 
 type FindRow struct {

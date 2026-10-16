@@ -63,7 +63,18 @@
     "theme": "auto",
     "wide": false
   },
-  "note": "Files are searched by name only. Carrel does not look inside files, so “nothing found” does not mean the files do not contain it.",
+  "note": [
+    {
+      "text": "Files are searched by name: "
+    },
+    {
+      "mark": "mono",
+      "text": "PROPFIND"
+    },
+    {
+      "text": " returns names anyway, and walking a folder costs one request per folder. Carrel does not look inside files — and says so here, so that “nothing found” is not read as “not in the files”."
+    }
+  ],
   "notices": [],
   "poll": {
     "actions": [
@@ -427,7 +438,7 @@
             "colour": "#8c6239",
             "count": 0,
             "detail": "",
-            "feed": false,
+            "feed": true,
             "href": "",
             "label": "Праздники РФ",
             "menu": [],
@@ -521,6 +532,7 @@
       "when": ""
     }
   ],
+  "subtitle": "14 of 14 collections · 1 record · 1 source refused",
   "title": "Ковалёва · Search",
   "top": {
     "lock": null,

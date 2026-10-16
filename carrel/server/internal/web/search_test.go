@@ -191,7 +191,7 @@ func TestSearchAcrossTickedSources(t *testing.T) {
 	if page.Results[6].Href != "/app/files/"+f.id+"/"+url.PathEscape(searchDocs)+"/old/Ada.md" {
 		t.Errorf("deep file = %+v", page.Results[6])
 	}
-	if !strings.Contains(string(page.Note), "by name") {
+	if !strings.Contains(plainText(page.Note), "by name") {
 		t.Errorf("note = %q", page.Note)
 	}
 	if page.Bar.Total == nil || *page.Bar.Total != 7 || len(page.Bar.Segments) != 6 {

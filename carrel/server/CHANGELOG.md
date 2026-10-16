@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.286 — 2026-10-16
+
+### Changed
+
+- **The search says what it asked** (Пк5 of the scan of 15.10.2026;
+  `s-find-1`): `SearchPage.Subtitle` — «14 of 14 collections · 7 records ·
+  1 source timed out»: the collections asked of those ticked, everything
+  found, and what did not answer by its kind (refused, unavailable, timed
+  out).
+- **The line about files speaks as the frame** (Пк14): `SearchPage.Note`
+  is `Runs` — «Files are searched by name: ‹PROPFIND› returns names anyway,
+  and walking a folder costs one request per folder. Carrel does not look
+  inside files — and says so here, so that “nothing found” is not read as
+  “not in the files”.», PROPFIND monospaced.
+- **A feed in the search's rail is said as one** (Пк3): `SourceRow.Feed`.
+- The groups of a kind with their count are the screen's (Пк11, C-6.6);
+  U-6.6 and S-15.2 no longer say the search has no Retry of one source
+  (Пк21).
+
+### For consumers
+
+`SearchPage.Note` is `Runs` now. Fixture `app-search` re-shot.
+
 ## v0.2.285 — 2026-10-16
 
 ### Changed

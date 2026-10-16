@@ -2,11 +2,17 @@ package view
 
 type SearchPage struct {
 	Shell
-	Query   Text      `json:"query"`
-	Bar     ListBar   `json:"bar"` // сегменты All / Contacts / Events / Tasks / Notes / Files
-	Poll    PollBar   `json:"poll"`
-	Results []FindRow `json:"results"`
-	Note    Text      `json:"note"` // «содержимое файлов не ищется» — говорится в выдаче
+	Query Text `json:"query"`
+	// Subtitle — под заголовком: что спрошено, сколько найдено, кто не
+	// ответил — «14 of 14 collections · 7 records · 1 source timed out»
+	// (s-find-1, Пк5); пусто без запроса
+	Subtitle Text      `json:"subtitle"`
+	Bar      ListBar   `json:"bar"` // сегменты All / Contacts / Events / Tasks / Notes / Files
+	Poll     PollBar   `json:"poll"`
+	Results  []FindRow `json:"results"`
+	// Note — «содержимое файлов не ищется», кусками: PROPFIND моноширинно
+	// (s-find-1, Пк14); пусто, когда файлы не спрошены
+	Note Runs `json:"note"`
 }
 
 type FindRow struct {
