@@ -426,7 +426,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": null,
+              "objects": 2,
               "path": "/alice/calendars/lichnyj/",
               "readOnly": false
             },
@@ -496,7 +496,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": null,
+              "objects": 2,
               "path": "/alice/calendars/rabota/",
               "readOnly": false
             },
@@ -703,7 +703,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": null,
+              "objects": 1,
               "path": "/alice/contacts/arhiv/",
               "readOnly": false
             },
@@ -772,7 +772,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": null,
+              "objects": 5,
               "path": "/alice/contacts/kontakty/",
               "readOnly": false
             },
@@ -970,7 +970,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": null,
+              "objects": 1,
               "path": "/alice/calendars/dezhurstva/",
               "readOnly": false
             },
@@ -1039,7 +1039,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": null,
+              "objects": 1,
               "path": "/alice/calendars/proekty/",
               "readOnly": false
             },
@@ -1108,7 +1108,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": null,
+              "objects": 1,
               "path": "/alice/contacts/komanda/",
               "readOnly": true
             },

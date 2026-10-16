@@ -617,6 +617,7 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			ReadOnly: col.ReadOnly,
 		}
 		row.LastRead, row.Changed = readingOf(sess, tf, c.ID, col.Path)
+		row.Objects = objectsOf(sess, c.ID, col)
 		row.Menu = s.collectionRowMenu(blob, c, col)
 		card.Collections = append(card.Collections, row)
 		if r, ok := sess.ReadingOf(c.ID, col.Path); ok && r.At.After(answered) {
@@ -921,4 +922,24 @@ func linksUse(n int) string {
 		return "1 published link uses this connection."
 	}
 	return strconv.Itoa(n) + " published links use this connection."
+}
+
+// objectsOf is how many records the collection holds as this session last
+// read it, every kind it holds counted (s-profile-1: «Objects» — «128»; Нс22);
+// nil — none of its lists was read yet, or it holds files.
+func objectsOf(sess *session.Session, accountID string, col sealed.Collection) *int {
+	total, known := 0, false
+	for _, k := range col.Kinds {
+		spec, ok := recordKinds[segmentOf(k)]
+		if !ok {
+			continue
+		}
+		if n := collectionCount(sess, accountID, col, spec); n != nil {
+			total, known = total+*n, true
+		}
+	}
+	if !known {
+		return nil
+	}
+	return &total
 }

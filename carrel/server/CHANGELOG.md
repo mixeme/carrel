@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.293 — 2026-10-16
+
+### Changed
+
+- **A collection's row counts its objects** (Нс22 of the scan of
+  15.10.2026; `s-profile-1`: «Objects» — «128»): `CollectionRow.Objects`
+  is how many records it held when this session last read it, every kind
+  it holds together; before any read, and for a folder of files, a dash.
+
+### For consumers
+
+The collection sheets' fixtures (Connections under them) re-shot.
+
+
 ## v0.2.292 — 2026-10-16
 
 ### Changed

@@ -2858,7 +2858,7 @@ type CollectionRow struct {
     ReadOnly bool
     LastRead When
     Changed  When
-    Objects  *int
+    Objects  *int // сколько записей держит, как сеанс её последний раз прочитал, все роды вместе («128», s-profile-1); nil — не читана или папка файлов: прочерк
     // Календарь, книга (s-profile-1): Rename and colour · Move to another
     // server · Copy to another server · Export .ics|.vcf · Publish a link ·
     // черта · Delete on the server…; папка хранилища (s-profile-12) — то же
