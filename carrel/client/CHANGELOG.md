@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.49 — 2026-10-16
+
+Typecase `ad18c91` (its note 70). The mockup copied byte for byte; the
+client is green on it without a change: the screens the note redraws —
+the publish sheet, the letter, the connection's dialog — are not the
+client's yet, and a radio check keeps its markup (only its look is a
+circle now). The dates' fields take the width of their value in the
+library itself.
+
 ## v0.4.48 — 2026-10-16
 
 Server `v0.2.300`, Typecase `22f0506` (its note 69). The mockup copied
