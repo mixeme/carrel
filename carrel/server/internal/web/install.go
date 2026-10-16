@@ -126,7 +126,9 @@ func (s *Server) postAdminInstall(w http.ResponseWriter, r *http.Request) {
 		s.cfg.PublicURL = origin
 	}
 	cookie, _ := r.Cookie(cookieName)
+	start := time.Now()
 	rows := s.runInstallCheck(r.Context(), sess, origin, cookie)
+	took := time.Since(start)
 	s.markChecked(rows)
 	bad := 0
 	for _, row := range rows {
@@ -135,12 +137,18 @@ func (s *Server) postAdminInstall(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	s.users.Journal(sess.AccountID(), "install.check", fmt.Sprintf("%s: %d of %d broken", origin, bad, len(rows)))
-	s.writePage(w, r, http.StatusOK, s.installPage(sess, origin, rows, note))
+	page := s.installPage(sess, origin, rows, note)
+	page.Took = text(tookText(took)) // how long it ran, «4.2 s» (Ад30; s-admin-4)
+	s.writePage(w, r, http.StatusOK, page)
 }
 
+// installPage is the page of the check: in its head the address it asks
+// and Run the check, one form (Ад29; s-admin-4).
 func (s *Server) installPage(sess *session.Session, publicURL string, rows []view.InstallRow, note string) view.AdminInstallPage {
-	page := view.AdminInstallPage{Shell: s.withRail(s.buildShell(sess, "Installation check"), s.adminRail(sess, "/admin/install")), PublicURL: text(publicURL), Rows: rows,
-		Actions: []view.Action{{ID: "admin.install.run", Label: "Run the check", Href: s.route("/admin/install"), Method: "POST", Primary: true, Enabled: true}}}
+	form := withPrimary(s.plainForm("/admin/install", "POST", csrfField(sess),
+		view.FormRow{Name: "url", Label: "Base address", Kind: view.InputURL, Value: text(publicURL), Mono: true}),
+		"admin.install.run", "Run the check")
+	page := view.AdminInstallPage{Shell: s.withRail(s.buildShell(sess, "Installation check"), s.adminRail(sess, "/admin/install")), Form: form, Rows: rows}
 	if note != "" {
 		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeAlert, Title: text(note)})
 	}

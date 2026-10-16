@@ -24,8 +24,8 @@ func TestInstallationCheck(t *testing.T) {
 	defer live.Close()
 
 	page := decode[view.AdminInstallPage](t, h.do(postForm("/admin/install", alice, url.Values{"url": {live.URL}})))
-	if len(page.Rows) != 11 || page.PublicURL != view.Text(live.URL) {
-		t.Fatalf("rows = %d, url %q", len(page.Rows), page.PublicURL)
+	if len(page.Rows) != 11 || rowValue(page.Form, "url") != live.URL || page.Took == "" {
+		t.Fatalf("rows = %d, url %q, took %q", len(page.Rows), rowValue(page.Form, "url"), page.Took)
 	}
 	state := map[string]view.CheckState{}
 	var order []string

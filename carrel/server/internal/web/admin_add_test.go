@@ -321,7 +321,13 @@ func TestTemporaryPasswordMakesTheAccount(t *testing.T) {
 		t.Errorf("issued = %+v, want (s-admin-17) %q with Done", issued, msg)
 	}
 	sameActionMarks(t, "s-admin-17", "created", []view.Action{issued.Copy, issued.Done}, nil)
-	if next := rowValue(page.Temporary.Form, "password"); next == temp || next == "" {
+	// The answer is the card alone (Ад13); after Done the form offers a
+	// new password for the next person.
+	if len(page.Temporary.Form.Sets) != 0 || page.Temporary.Badge != nil || page.Temporary.Warning != nil {
+		t.Errorf("the answer carries the form beside the card: %+v", page.Temporary)
+	}
+	after := decode[view.AdminInvitesPage](t, h.do(get(issued.Done.Href, alice)))
+	if next := rowValue(after.Temporary.Form, "password"); next == temp || next == "" {
 		t.Errorf("the form offers %q again for the next person", next)
 	}
 	snap := h.st.Snapshot()
@@ -474,5 +480,24 @@ func TestAdminEscrowIsTheFrame(t *testing.T) {
 		if strings.Contains(e.Detail, temp) {
 			t.Errorf("journal line %+v carries the password", e)
 		}
+	}
+}
+
+// Ад12 of the scan of 15.10.2026 (s-admin-19): the form of a temporary
+// password answers every refusal at its field at once — a login taken, an
+// address that is no address, a password too short —, not one per Send.
+func TestTemporaryPasswordFormRefusesAllAtOnce(t *testing.T) {
+	h := newHarness(t)
+	h.admin("alice", "password123")
+	alice := h.login("alice", "password123")
+	rec := h.do(postForm("/admin/invites?action=user", alice, url.Values{"role": {"user"}, "login": {"alice"}, "email": {"not an address"}, "password": {"short"}}))
+	page := decode[view.AdminInvitesPage](t, rec)
+	for _, field := range []string{"login", "email", "password"} {
+		if r := formRow(page.Temporary.Form, field); r == nil || r.Error == "" {
+			t.Errorf("%s = %+v, want its refusal", field, r)
+		}
+	}
+	if snap := h.st.Snapshot(); len(snap.Users) != 1 {
+		t.Errorf("users = %d, want nobody made", len(snap.Users))
 	}
 }

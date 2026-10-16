@@ -3261,9 +3261,9 @@ type ExerciseRow struct { Operation Text; Result Text; Detail Text }
 
 type AdminInstallPage struct {
     Shell
-    PublicURL Text
-    Rows      []InstallRow
-    Actions   []Action
+    Form Form         // шапка s-admin-4: адрес проверки (url, моноширинно) и «Run the check»
+    Rows []InstallRow
+    Took Text         // сколько шла проверка, «4.2 s»; пусто — её не было
 }
 type InstallRow struct {
     Check   Text

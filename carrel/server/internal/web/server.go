@@ -154,6 +154,7 @@ type Users interface {
 	Invite(actorID, email string, role store.Role) (secret string, err error)
 	ResendInvite(actorID, inviteID string) (secret, email string, err error)
 	CreateUser(ctx context.Context, actorID, login, email, password string, role store.Role) error
+	CheckNewUser(login, email, password string) map[string]error
 	SuggestPassword() string
 	RevokeInvite(actorID, inviteID string) error
 	ExtendInvite(actorID, inviteID string) error

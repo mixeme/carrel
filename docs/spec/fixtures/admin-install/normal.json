@@ -1,16 +1,56 @@
 {
-  "actions": [
-    {
-      "csrf": "csrf",
-      "enabled": true,
-      "href": "/admin/install",
-      "id": "admin.install.run",
-      "label": "Run the check",
-      "method": "POST",
-      "primary": true
-    }
-  ],
   "details": null,
+  "form": {
+    "action": "/admin/install",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/admin/install",
+        "id": "admin.install.run",
+        "label": "Run the check",
+        "method": "POST",
+        "primary": true
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "url",
+            "label": "Base address",
+            "mono": true,
+            "name": "url",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
   "look": {
     "compact": false,
     "panel": true,
@@ -24,7 +64,6 @@
     "taken": "",
     "title": ""
   },
-  "publicURL": "",
   "rail": {
     "about": {
       "build": "0.0.1 · 786949a",
@@ -140,6 +179,7 @@
   },
   "rows": [],
   "title": "Installation check",
+  "took": "",
   "top": {
     "lock": null,
     "new": {

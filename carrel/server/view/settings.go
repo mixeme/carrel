@@ -730,9 +730,12 @@ type ExerciseRow struct {
 
 type AdminInstallPage struct {
 	Shell
-	PublicURL Text         `json:"publicURL"`
-	Rows      []InstallRow `json:"rows"`
-	Actions   []Action     `json:"actions"`
+	// Form — шапка s-admin-4: адрес, по которому проверять (url,
+	// моноширинно), и «Run the check» (Ад29)
+	Form Form         `json:"form"`
+	Rows []InstallRow `json:"rows"`
+	// Took — сколько шла проверка, «4.2 s»; пусто — её не было (Ад30)
+	Took Text `json:"took"`
 }
 type InstallRow struct {
 	Check  Text       `json:"check"`

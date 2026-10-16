@@ -322,6 +322,30 @@ func (s *Service) ResendInvite(actorID, inviteID string) (secret, email string, 
 // in as the person, and the card says so. The password goes into the key
 // derivation and nowhere else: not into the state, not into the journal.
 // An address typed here is the administrator's word and waits unconfirmed.
+// CheckNewUser is every refusal CreateUser would give, by the field it
+// stands at — login, email, password —, all at once (Ад12; s-admin-19): a
+// form answered one refusal at a time is sent again for each. Empty — none.
+func (s *Service) CheckNewUser(login, email, password string) map[string]error {
+	out := map[string]error{}
+	login = normalizeLogin(login)
+	snap := s.st.Snapshot()
+	switch {
+	case login == "":
+		out["login"] = ErrLoginEmpty
+	case snap.UserByLogin(login) != nil || hasLiveInvite(&snap, login, s.now()):
+		out["login"] = ErrLoginTaken
+	}
+	if email = strings.TrimSpace(email); email != "" {
+		if addrs, err := cmail.Addresses([]string{email}); err != nil || len(addrs) != 1 {
+			out["email"] = ErrBadAddress
+		}
+	}
+	if err := validatePassword(password); err != nil {
+		out["password"] = err
+	}
+	return out
+}
+
 func (s *Service) CreateUser(ctx context.Context, actorID, login, email, password string, role store.Role) error {
 	if role != store.RoleAdmin && role != store.RoleUser {
 		return ErrNotFound

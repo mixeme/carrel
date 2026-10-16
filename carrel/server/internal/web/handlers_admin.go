@@ -349,8 +349,7 @@ func (s *Server) writeResetSheet(w http.ResponseWriter, r *http.Request, sheet v
 type adminInvitesFlash struct {
 	errText    string // not a field's: a notice over the page
 	inviteErr  view.Text
-	userErr    view.Text
-	userField  string // the temporary form's row the error stands on
+	userErrs   map[string]view.Text // the temporary form's refusals, by the row each stands at
 	selfRegErr view.Text
 	typed      url.Values
 	issued     *view.IssuedPassword
@@ -410,17 +409,25 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 	case "user":
 		password := r.FormValue("password")
 		login := normalizeLogin(r.FormValue("login"))
+		// Every refusal at its field at once (Ад12; s-admin-19).
+		if errs := s.users.CheckNewUser(login, r.FormValue("email"), password); len(errs) > 0 {
+			flash.userErrs = map[string]view.Text{}
+			for field, e := range errs {
+				flash.userErrs[field] = formError(e)
+			}
+			err = errs["login"]
+			break
+		}
 		err = s.users.CreateUser(r.Context(), actorID, login, r.FormValue("email"), password, formRole(r))
 		if err != nil {
-			flash.userErr = formError(err)
+			field := "login"
 			switch {
 			case errors.Is(err, user.ErrPasswordShort):
-				flash.userField = "password"
+				field = "password"
 			case errors.Is(err, user.ErrBadAddress):
-				flash.userField = "email"
-			default:
-				flash.userField = "login"
+				field = "email"
 			}
+			flash.userErrs = map[string]view.Text{field: formError(err)}
 			break
 		}
 		// Shown this once (s-admin-17): the answer to the POST, not a page
@@ -458,10 +465,10 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 	default:
 		flash.errText = "Unknown action."
 	}
-	if err != nil && flash.inviteErr == "" && flash.userErr == "" && flash.selfRegErr == "" {
+	if err != nil && flash.inviteErr == "" && len(flash.userErrs) == 0 && flash.selfRegErr == "" {
 		flash.errText = string(formError(err))
 	}
-	if flash.errText == "" && flash.inviteErr == "" && flash.userErr == "" && flash.selfRegErr == "" && flash.issued == nil {
+	if flash.errText == "" && flash.inviteErr == "" && len(flash.userErrs) == 0 && flash.selfRegErr == "" && flash.issued == nil {
 		s.redirect(w, r, "/admin/invites")
 		return
 	}
@@ -555,8 +562,8 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 		temp,
 	}
 	for i := range rows {
-		if flash.userErr != "" && rows[i].Name == flash.userField {
-			rows[i].Error = flash.userErr
+		if e, ok := flash.userErrs[rows[i].Name]; ok {
+			rows[i].Error = e
 		}
 	}
 	page.Temporary = view.AddUserCard{
@@ -566,6 +573,11 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 			Body: "Until the user changes this password, you can sign in as them."},
 		Form:   withPrimary(s.plainForm("/admin/invites", "POST", rows...), "admin.user.create", "Create user"),
 		Issued: flash.issued,
+	}
+	if flash.issued != nil {
+		// The answer to Create user is the password card alone (Ад13;
+		// s-admin-17): no form, no badge, no warning beside it.
+		page.Temporary.Badge, page.Temporary.Warning, page.Temporary.Form = nil, nil, view.Form{}
 	}
 
 	// Self-registration: a public form, only while mail works.

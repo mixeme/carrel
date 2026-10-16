@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.310 — 2026-10-16
+
+### Changed
+
+- **A person added with a temporary password, and the installation check,
+  by their frames** (Ад12, Ад13, Ад29, Ад30 of the scan of 15.10.2026;
+  `s-admin-4`, `-17`, `-19`): the form refuses every field at once — login,
+  email, password each at its row (`user.CheckNewUser`), not one refusal a
+  sending; the answer that issues the password is its card alone, without
+  the form, the badge and the warning around it; the installation check has
+  its form in its head — the address it asks (`url`, monospace) and «Run the
+  check» — and says how long it ran, «4.2 s».
+
+### For consumers
+
+`AdminInstallPage` in C-6: `PublicURL` and `Actions` give way to `Form`;
+`Took` is new. Fixture `admin-install/normal` re-shot.
+
 ## v0.2.309 — 2026-10-16
 
 ### Changed
