@@ -715,10 +715,6 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	// The day, and the time when the note has one (s-notes-2).
 	page.Meta.Date = text(noteWhen(obj, tf))
 	page.Meta.Tags = s.recordTags(c, obj)
-	// The status, as an event's and a task's card names it (Р4).
-	if v := cal.Text(obj, "STATUS"); v != "" {
-		page.Meta.Status = text(statusLabel(v))
-	}
 	// The link, as an event's and a task's card shows it (Р8 of
 	// scans/kinds-parity.md; no frame draws it yet).
 	if v := firstValue(obj, "URL"); v != "" {
@@ -739,11 +735,6 @@ func calendarFields(obj *model.Object) []view.Field {
 	}
 	if v := cal.Text(obj, "STATUS"); v != "" {
 		out = append(out, view.Field{Label: "Status", Value: text(statusLabel(v))})
-	}
-	// An event's priority, as the task's card shows its own (Р7); a task's
-	// stands among its own fields (taskFields).
-	if p := priorityOf(obj); p <= 9 && obj.MainComponent() == "VEVENT" {
-		out = append(out, view.Field{Label: "Priority", Value: text(strconv.Itoa(p)), Mono: true})
 	}
 	// An event's organiser is the first of its people (recordPeople,
 	// s-agenda-2), not a field.

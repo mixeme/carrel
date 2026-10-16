@@ -144,16 +144,11 @@ type AgendaRow struct {
 	// Tags и Changed — столбцы, которые добавляет меню Columns агенды
 	// (s-agenda-18): категории события и когда оно менялось («2 Aug»,
 	// C-10); пусто — у события их нет или сервер не сказал
-	Tags    []Tag `json:"tags"`
-	Changed Text  `json:"changed"`
-	// Status и Priority — столбцы «Status» и «Priority», как у задач:
-	// статус события словом списка, приоритет числом (Р13 списка равенства
-	// родов; кадра нет); пусто — у события их нет
-	Status   Text        `json:"status"`
-	Priority Text        `json:"priority"`
-	Menu     []MenuItem  `json:"menu"`
-	State    RecordState `json:"state"`
-	On       bool        `json:"on"` // строка открыта в панели подробностей (is-on, s-agenda-1)
+	Tags    []Tag       `json:"tags"`
+	Changed Text        `json:"changed"`
+	Menu    []MenuItem  `json:"menu"`
+	State   RecordState `json:"state"`
+	On      bool        `json:"on"` // строка открыта в панели подробностей (is-on, s-agenda-1)
 }
 
 type TasksPage struct {
@@ -246,9 +241,6 @@ type NoteRow struct {
 	Date    Text   `json:"date"`
 	Tags    []Tag  `json:"tags"`
 	Changed Text   `json:"changed"` // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
-	// Status — столбец «Status», как у задач: статус заметки словом списка
-	// (Р13 списка равенства родов; кадра нет); пусто — статуса нет
-	Status Text `json:"status"`
 	// Attendees — столбец «Attendees», как у задач: сколько людей у
 	// заметки, «1 attendee» (вслед за Р3; кадра нет); пусто — людей нет
 	Attendees Text    `json:"attendees"`

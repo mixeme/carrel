@@ -178,19 +178,6 @@
             "hint": "",
             "kind": "hidden",
             "label": "",
-            "name": "priority",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "hidden",
-            "label": "",
             "name": "readat",
             "options": [],
             "readOnly": false,
@@ -585,41 +572,6 @@
                     "label": "Cancelled",
                     "selected": false,
                     "value": "CANCELLED"
-                  }
-                ],
-                "readOnly": false,
-                "required": false,
-                "value": ""
-              },
-              {
-                "add": null,
-                "error": "",
-                "extra": null,
-                "hint": "",
-                "kind": "select",
-                "label": "Priority",
-                "name": "priority",
-                "options": [
-                  {
-                    "label": "No priority",
-                    "selected": true,
-                    "value": ""
-                  },
-                  {
-                    "label": "High · 1",
-                    "selected": false,
-                    "separator": true,
-                    "value": "1"
-                  },
-                  {
-                    "label": "Medium · 5",
-                    "selected": false,
-                    "value": "5"
-                  },
-                  {
-                    "label": "Low · 9",
-                    "selected": false,
-                    "value": "9"
                   }
                 ],
                 "readOnly": false,

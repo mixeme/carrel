@@ -9,13 +9,15 @@ import (
 )
 
 // noteKnown are the properties of a note that its page shows or keeps by
-// itself: the form (title, text, date, tags, status, link, relation, the
-// people), the attachments, and the bookkeeping every calendar object carries. Anything
+// itself: the form (title, text, date, tags, link, relation, the people),
+// the attachments, and the bookkeeping every calendar object carries. A
+// note's STATUS is content of the kind Carrel does not show (note 69 of
+// Typecase, task 176): it is kept as it came. Anything
 // else is the property of another client, kept as it is (S-7) and named under
 // the text of the edit (s-notes-20).
 var noteKnown = map[string]bool{
 	"UID": true, "DTSTAMP": true, "CREATED": true, "LAST-MODIFIED": true, "SEQUENCE": true,
-	"SUMMARY": true, "DESCRIPTION": true, "DTSTART": true, "CATEGORIES": true, "URL": true, "STATUS": true,
+	"SUMMARY": true, "DESCRIPTION": true, "DTSTART": true, "CATEGORIES": true, "URL": true,
 	"RELATED-TO": true, "ATTACH": true, "ORGANIZER": true, "ATTENDEE": true,
 }
 
@@ -43,7 +45,7 @@ func NoteForeign(obj *model.Object) []string {
 // it as kept (s-agenda-3).
 var eventKnown = map[string]bool{
 	"UID": true, "DTSTAMP": true, "CREATED": true, "LAST-MODIFIED": true,
-	"SUMMARY": true, "LOCATION": true, "STATUS": true, "PRIORITY": true, "CATEGORIES": true, "DESCRIPTION": true, "URL": true,
+	"SUMMARY": true, "LOCATION": true, "STATUS": true, "CATEGORIES": true, "DESCRIPTION": true, "URL": true,
 	"DTSTART": true, "DTEND": true, "DURATION": true, "RRULE": true, "RDATE": true, "EXDATE": true, "RECURRENCE-ID": true,
 	"ORGANIZER": true, "ATTENDEE": true, "ATTACH": true, "RELATED-TO": true,
 }

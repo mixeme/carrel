@@ -155,41 +155,6 @@
         "error": "",
         "extra": null,
         "hint": "",
-        "kind": "select",
-        "label": "Status",
-        "name": "status",
-        "options": [
-          {
-            "label": "No status",
-            "selected": true,
-            "value": ""
-          },
-          {
-            "label": "Draft",
-            "selected": false,
-            "separator": true,
-            "value": "DRAFT"
-          },
-          {
-            "label": "Final",
-            "selected": false,
-            "value": "FINAL"
-          },
-          {
-            "label": "Cancelled",
-            "selected": false,
-            "value": "CANCELLED"
-          }
-        ],
-        "readOnly": false,
-        "required": false,
-        "value": ""
-      },
-      {
-        "add": null,
-        "error": "",
-        "extra": null,
-        "hint": "",
         "kind": "text",
         "label": "Link",
         "name": "url",
@@ -600,7 +565,6 @@
     "linked": [],
     "menu": [],
     "related": [],
-    "status": "",
     "tags": [],
     "tagsBadge": null
   },

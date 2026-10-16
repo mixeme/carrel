@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.304 — 2026-10-16
+
+### Removed
+
+- **A note's status and an event's priority** (note 69 of Typecase, tasks
+  176–178; the owner's Р-63: kinds are equal in what is common, not in
+  their content): no Status field in a note's edit nor `NoteMeta.Status`, no
+  Priority field in an event's edit nor line on its card, no Status and
+  Priority columns of the agenda (`AgendaRow.Status`, `.Priority`) nor
+  Status of the notes (`NoteRow.Status`). What came from the server stays:
+  a note's STATUS and an event's PRIORITY are kept as sent — shown under
+  «Kept as the server sent them», written back untouched.
+
+### For consumers
+
+C-6 without those fields; fixtures of the agenda, the notes and the edits
+re-shot.
+
 ## v0.2.303 — 2026-10-16
 
 ### Changed

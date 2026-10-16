@@ -353,10 +353,6 @@ type NoteMeta struct {
 	// связанной заметки держит другие теги — здесь мог быть выбор (s-notes-2,
 	// -3, -27; Р-58 Typecase); nil — бейджа нет
 	TagsBadge *Badge `json:"tagsBadge"`
-	// Status — статус заметки словом списка (STATUS журнала: Draft, Final,
-	// Cancelled), как у карточки события и задачи (Р4 списка равенства
-	// родов; кадра нет); пусто — статуса нет
-	Status Text `json:"status"`
 	// Link — ссылка заметки (URL): «Link», значение и Href, как у карточки
 	// события и задачи (Р8 списка равенства родов; кадра нет); nil — нет
 	Link *Field `json:"link"`

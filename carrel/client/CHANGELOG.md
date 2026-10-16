@@ -4,6 +4,13 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.50 — 2026-10-16
+
+Server `v0.2.304`. A note's status and an event's priority are gone from
+the screens (note 69 of Typecase, tasks 176–178): the reading column names
+no status, the note's edit carries none hidden, the event's edit draws no
+Priority, the agenda and the notes have no such columns.
+
 ## v0.4.49 — 2026-10-16
 
 Typecase `ad18c91` (its note 70). The mockup copied byte for byte; the

@@ -40,10 +40,6 @@ var listColumns = map[string][]listColumn{
 	"calendar": {
 		{"time", "Time", true}, {"title", "Title", true}, {"where", "Where", true}, {"attendees", "Attendees and status", true},
 		{"source", "Source", true}, {"tags", "Tags", false}, {"changed", "Changed", false},
-		// What a task's list offers of an event's (Р13 of
-		// scans/kinds-parity.md, after Р4 and Р7); no frame draws them —
-		// Typecase's task 178.
-		{"status", "Status", false}, {"priority", "Priority", false},
 	},
 	"tasks": {
 		{"title", "Title", true}, {"due", "Due", true}, {"complete", "Complete", true}, {"source", "Source", true},
@@ -58,9 +54,6 @@ var listColumns = map[string][]listColumn{
 	"notes": {
 		{"title", "Title", true}, {"excerpt", "Excerpt", true}, {"date", "Date", true}, {"source", "Source", true},
 		{"tags", "Tags", false}, {"changed", "Changed", false},
-		// A note's status, as a task's list offers its own (Р13); no frame
-		// draws it — Typecase's task 178.
-		{"status", "Status", false},
 		// A note's people, as a task's (after Р3); Typecase's task 181.
 		{"attendees", "Attendees", false},
 	},

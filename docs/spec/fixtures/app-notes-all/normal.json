@@ -135,12 +135,6 @@
         },
         {
           "fixed": false,
-          "id": "status",
-          "label": "Status",
-          "on": false
-        },
-        {
-          "fixed": false,
           "id": "attendees",
           "label": "Attendees",
           "on": false
@@ -556,7 +550,6 @@
           ],
           "stamp": "2 sources",
           "state": "linked",
-          "status": "",
           "tags": [
             {
               "href": "/app/notes?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8\u0026task=t-task",
@@ -657,7 +650,6 @@
           ],
           "stamp": "2 sources",
           "state": "linked",
-          "status": "",
           "tags": [
             {
               "href": "/app/notes?tag=%D0%BA%D0%BD%D0%B8%D0%B3%D0%B8\u0026task=t-task",
@@ -745,7 +737,6 @@
           "sources": [],
           "stamp": "nextcloud · Дневник",
           "state": "ok",
-          "status": "",
           "tags": [],
           "target": "details",
           "title": "Про дорогу до дачи",

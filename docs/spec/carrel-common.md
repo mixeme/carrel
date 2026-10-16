@@ -1176,11 +1176,6 @@ type AgendaRow struct {
     // у события их нет или сервер не сказал
     Tags      []Tag
     Changed   Text
-    // Status и Priority — столбцы «Status» и «Priority», как у задач: статус
-    // события словом списка, приоритет числом (Р13 списка равенства родов;
-    // кадра нет); пусто — у события их нет
-    Status    Text
-    Priority  Text
     Menu      []MenuItem
     State     RecordState
     On        bool // строка записи, открытой в панели (?open=, is-on; s-agenda-1); у серии — каждое её вхождение
@@ -1254,7 +1249,6 @@ type NoteRow struct {
     Date      Text
     Tags      []Tag
     Changed   Text     // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
-    Status    Text     // столбец «Status», как у задач: статус заметки словом (Р13; кадра нет); пусто — нет
     Attendees Text     // столбец «Attendees», как у задач: «1 attendee» (вслед за Р3; кадра нет); пусто — людей нет
     Badges    []Badge  // «linked ×2» у связанной заметки — и в списке одной тетради, когда прочие члены группы лежат в других (s-notes-31)
     Sources   []Stamp  // источники связанной группы — подсказка столбца источника; Stamp такой строки в едином виде — их счёт, «2 sources» (s-notes-1)
@@ -1631,10 +1625,6 @@ type NoteMeta struct {
     // держит другие теги, здесь мог быть выбор (s-notes-2, Р-58 Typecase);
     // nil — бейджа нет
     TagsBadge *Badge
-    // Status — статус заметки словом списка (STATUS журнала: Draft, Final,
-    // Cancelled), как у карточки события и задачи (Р4 списка равенства
-    // родов; кадра нет); пусто — статуса нет
-    Status  Text
     // Link — ссылка заметки (URL): «Link», значение и Href, как у карточки
     // события и задачи (Р8 списка равенства родов; кадра нет); nil — нет
     Link    *Field

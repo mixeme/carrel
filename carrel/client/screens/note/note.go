@@ -218,12 +218,6 @@ func read(p *view.NotePage) []w.MainPart {
 		}
 		secs = append(secs, w.DocmetaSec{Title: title, Items: []w.DocmetaPart{w.Line{Block: true, Gap: w.LineGap4, Items: tags}}})
 	}
-	// The note's status, as an event's and a task's card names it (Р4 of
-	// the kinds-parity list; no frame draws it yet — Typecase's task 176).
-	if p.Meta.Status != "" {
-		secs = append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Status"},
-			Items: []w.DocmetaPart{w.Line{Block: true, Items: []w.LinePart{w.Text(p.Meta.Status)}}}})
-	}
 	// The note's link, as an event's and a task's card shows it (Р8 of the
 	// kinds-parity list): a reference the note points at, drawn as Related
 	// draws its own. No frame draws it yet (Typecase's task 172).

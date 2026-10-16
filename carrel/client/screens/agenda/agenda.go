@@ -41,9 +41,6 @@ var (
 	cells          = map[string]w.Column{
 		"time": w.ColumnDate, "title": w.ColumnName, "where": w.ColumnDetail, "attendees": w.ColumnBadges,
 		"tags": w.ColumnTags, "changed": w.ColumnChanged, "source": w.ColumnSource,
-		// An event's status and priority, the cells of the tasks' (Р13 of
-		// the server's kinds-parity list; no frame draws them)
-		"status": w.ColumnStatus, "priority": w.ColumnPriority,
 	}
 )
 
@@ -402,10 +399,6 @@ func columnRow(r view.AgendaRow, shown []string) w.ColumnRow {
 			cell.Text = or(r.Changed)
 		case w.ColumnSource:
 			cell.Text = string(r.Stamp)
-		case w.ColumnStatus:
-			cell.Text = or(r.Status)
-		case w.ColumnPriority:
-			cell.Text = or(r.Priority)
 		}
 		c.Cells = append(c.Cells, cell)
 	}
