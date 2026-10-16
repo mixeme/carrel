@@ -209,7 +209,7 @@ func TestPublishedContactShowsWhatWasTicked(t *testing.T) {
 	}
 	open := publishWith(t, f, book, "emails", "download")
 	var grace view.ContactRow
-	for _, r := range publicPage(t, f, open).Contacts {
+	for _, r := range publicRows(publicPage(t, f, open)) {
 		if r.Name == "Grace Hopper" {
 			grace = r
 		}
@@ -218,7 +218,7 @@ func TestPublishedContactShowsWhatWasTicked(t *testing.T) {
 		t.Errorf("a book with addresses ticked: Grace's row is %+v", grace)
 	}
 	// Taken off for a book, no row of it names an organisation.
-	for _, r := range publicPage(t, f, publishWith(t, f, book, "-name")).Contacts {
+	for _, r := range publicRows(publicPage(t, f, publishWith(t, f, book, "-name"))) {
 		if r.Name == "" || r.Org != "" {
 			t.Errorf("a book published without organisations: row %+v", r)
 		}

@@ -1,15 +1,19 @@
 package web
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"slices"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/provider/file"
 	"carrel.dev/carrel/server/internal/publish"
 	"carrel.dev/carrel/server/internal/sealed"
@@ -162,11 +166,17 @@ func inside(c *fileCtx, base []string, rel string, dir bool) (string, []string, 
 func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link user.OpenLink) {
 	token := r.PathValue("token")
 	page := view.PublishedPage{
-		Plain:    view.Plain{Title: text(link.Target.Title), Lede: line("Read-only. Published from Carrel.")},
+		Plain:    view.Plain{Title: text(link.Target.Title)},
 		Kind:     view.KindFile,
 		ReadOnly: true,
 	}
 	c, base, err := s.publicFiles(link)
+	if c != nil {
+		page.Foot = publicFoot(c.tf, link, "")
+		if link.Target.Folder {
+			page.Foot = publicFoot(c.tf, link, "the contents are read from the server on every visit")
+		}
+	}
 	if err != nil {
 		page.Notices = []view.Notice{publicTrouble()}
 		s.writePage(w, r, http.StatusOK, page)
@@ -198,6 +208,11 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 			if inlineTypes[mt] {
 				page.File.Preview, page.File.Href = view.PreviewImage, download+"?inline=1"
 			}
+			// Text and Markdown are the body of the page (Пс14;
+			// s-publish-10): the one kind read without a program.
+			if s.publicText(ctx, c, p, e, mt, page.File) {
+				page.Foot = publicFoot(c.tf, link, "the file is read from the server on every visit")
+			}
 			// The one door of the page (s-publish-9); a file the browser is
 			// not shown carries its size on it, before anyone presses it
 			// (s-publish-11).
@@ -205,7 +220,10 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 			if page.File.Preview == view.PreviewNone {
 				label += " " + view.Text(page.File.Size)
 			}
-			page.Actions = []view.Action{{ID: "published.download", Label: label, Icon: "i-download", Href: download, Method: "GET", Primary: true, Enabled: true}}
+			// Under a text read on the page the button is a second door,
+			// not the main one (s-publish-10).
+			reading := page.File.Preview == view.PreviewText || page.File.Preview == view.PreviewMarkdown
+			page.Actions = []view.Action{{ID: "published.download", Label: label, Icon: "i-download", Href: download, Method: "GET", Primary: !reading, Enabled: true}}
 		}
 		s.writePage(w, r, http.StatusOK, page)
 		return
@@ -254,10 +272,18 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 			Body:  "This folder holds more than one page shows: the first ones by name are listed.",
 		})
 	}
-	now := time.Now()
+	// After the crumb of where the guest is: how many and how much
+	// (Пс16; s-publish-12).
+	var bytes int64
+	for _, e := range entries {
+		bytes += max(e.Size, 0)
+	}
+	folder.Total = text(plural(len(entries), "file") + " · " + string(formatSize(bytes)))
 	for _, e := range entries {
 		rel := strings.Join(append(slices.Clone(more), e.Name), "/")
-		row := view.FileRow{Name: text(e.Name), IsDir: e.Dir, Modified: c.tf.formatWhen(e.Modified, false, now)}
+		// The moment in figures and the icon by type, as the owner's own
+		// folder (Пс19, Пс20).
+		row := view.FileRow{Name: text(e.Name), IsDir: e.Dir, Modified: c.tf.numStamp(e.Modified), Icon: fileIcon(e)}
 		if e.Dir {
 			row.Type, row.Href = "folder", s.postQuery("/p/"+token, url.Values{"in": {rel}})
 		} else {
@@ -434,4 +460,35 @@ func (s *Server) publishedDAV(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
 	w.WriteHeader(http.StatusMultiStatus)
 	_, _ = w.Write(publish.Multistatus(entries))
+}
+
+// publicTextMax is the largest text a public page shows as its body; a
+// larger one is offered to download, as any file (s-publish-10).
+const publicTextMax = 256 << 10
+
+// publicText reads a text or Markdown file into the page: its words, or its
+// blocks parsed. False — not text, too large, not UTF-8 or holding a NUL
+// (binary under a text name), or not read: the page offers the file to
+// download.
+func (s *Server) publicText(ctx context.Context, c *fileCtx, p string, e file.Entry, mt string, f *view.PublishedFile) bool {
+	kind := map[string]view.PreviewKind{"text/plain": view.PreviewText, "text/markdown": view.PreviewMarkdown}[mt]
+	if kind == "" || e.Size > publicTextMax {
+		return false
+	}
+	body, _, err := c.files.Get(ctx, p, nil)
+	if err != nil {
+		return false
+	}
+	defer body.Close()
+	data, err := io.ReadAll(io.LimitReader(body, publicTextMax+1))
+	if err != nil || len(data) > publicTextMax || !utf8.Valid(data) || slices.Contains(data, 0) {
+		return false
+	}
+	f.Preview = kind
+	if kind == view.PreviewMarkdown {
+		f.Blocks = cal.RenderMarkdown(string(data))
+	} else {
+		f.Body = text(string(data))
+	}
+	return true
 }

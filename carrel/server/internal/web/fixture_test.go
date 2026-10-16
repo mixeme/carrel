@@ -207,7 +207,9 @@ var mockupFileShapes = []struct {
 	{slug: "Public", rel: "прайс-2026.pdf", size: 1153434, at: "2026-07-28 10:15"},
 	{slug: "Public", rel: "схема-проезда.png", size: 4404019, at: "2026-06-02 16:40"},
 	{slug: "Documents", rel: "carrel/attachments/2026-08-10-sync-board.png", size: 412 << 10, at: "2026-08-10 11:07", head: pngHead(1920, 1080)},
-	{slug: "Documents", rel: "carrel/attachments/release-checklist.md", size: 3 << 10, at: "2026-08-09 18:44"},
+	// The checklist is the frame's Markdown in the set, 3 KB as it stands
+	// (s-publish-10): a public page reads it as its body.
+	{slug: "Documents", rel: "carrel/attachments/release-checklist.md", at: "2026-08-09 18:44"},
 	{slug: "Documents", rel: "carrel/attachments/смета-подрядчик.pdf", size: 1258291, at: "2026-08-05 14:20"},
 	{slug: "Documents", rel: "carrel/attachments/2026-08-04-whiteboard.jpg", size: 2936013, at: "2026-08-04 17:03", head: jpegHead4032x3024},
 	{slug: "Documents", rel: "carrel/attachments/2026-07", at: "2026-07-01 09:12"},

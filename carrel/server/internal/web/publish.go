@@ -455,6 +455,7 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 	key, _ := sess.DataKey()
 	target := user.PublishTarget{
 		AccountID: c.conn.ID, Kind: string(c.spec.kind), Col: c.col.Path, UID: uid, Title: title,
+		Colour: string(catalogColour(c.col)),
 	}
 	if c.spec.kind == view.KindEvent && uid == "" && r.FormValue("how") == "range" {
 		// The sheet of a whole calendar (s-publish-2).
@@ -698,9 +699,12 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 	}
 	token := r.PathValue("token")
 	page := view.PublishedPage{
-		Plain:    view.Plain{Title: text(link.Target.Title), Lede: line("Read-only. Published from Carrel.")},
+		Plain:    view.Plain{Title: text(link.Target.Title)},
 		Kind:     c.spec.kind,
 		ReadOnly: true,
+		// A list says the owner can take it back (s-publish-6, -7); one
+		// record says its day only (s-publish-8).
+		Foot: publicFoot(c.tf, link, footRevoke),
 		// The button names the file it gives (s-publish-6, -7, -8): a note
 		// goes as Markdown, never as its raw iCalendar.
 		Actions: []view.Action{{ID: "published.download", Label: text("Download " + exportFormats[c.spec.kind].ext), Icon: "i-download", Href: s.route("/p/" + token + "/download"), Method: "GET", Enabled: true}},
@@ -734,6 +738,7 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 			}
 			s.publicRecord(c, obj, &page)
 		}
+		page.Foot = publicFoot(c.tf, link, "")
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
@@ -756,7 +761,9 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 // but about the owner.
 func guestRows(page *view.PublishedPage) {
 	for i := range page.Contacts {
-		page.Contacts[i].Badges = nil
+		for j := range page.Contacts[i].Rows {
+			page.Contacts[i].Rows[j].Badges = nil
+		}
 	}
 	for i := range page.Days {
 		for j := range page.Days[i].Rows {
@@ -830,15 +837,24 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 		sort.SliceStable(objs, func(i, j int) bool {
 			return strings.ToLower(contactName(objs[i])) < strings.ToLower(contactName(objs[j]))
 		})
+		// By letter, as the book in Carrel (Пс10; s-publish-7), each row
+		// marked with the book's colour (Пс12).
 		for _, o := range objs {
 			o = visitorCard(o, link.Target)
 			name := contactName(o)
-			page.Contacts = append(page.Contacts, view.ContactRow{
+			row := view.ContactRow{
 				UID: card.UID(o), Avatar: view.Avatar{Initials: text(initials(name)), Colour: collectionColour(card.UID(o))},
 				Name: text(name), Phone: text(firstValue(o, "TEL")), Email: text(firstValue(o, "EMAIL")),
-				Org: text(structured(firstValue(o, "ORG"))), State: view.RecordOK,
-			})
+				Org: text(structured(firstValue(o, "ORG"))), State: view.RecordOK, Colour: linkColour(link.Target),
+			}
+			rubric := rubricOf(name)
+			if n := len(page.Contacts); n == 0 || string(page.Contacts[n-1].Rubric) != rubric {
+				page.Contacts = append(page.Contacts, view.ContactGroup{Rubric: text(rubric)})
+			}
+			g := &page.Contacts[len(page.Contacts)-1]
+			g.Rows, g.Count = append(g.Rows, row), g.Count+1
 		}
+		page.Lede = line(plural(len(objs), "contact") + listReadNow)
 	case view.KindEvent:
 		from, to := weekWindow(tf, r.URL.Query().Get("from"))
 		fixed := publishedWindow(tf, link)
@@ -857,8 +873,11 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 				// and nothing for it to aim at (C-5).
 				row := &page.Days[i].Rows[j]
 				row.Href, row.Menu, row.Target = "", nil, ""
+				row.Colour = linkColour(link.Target) // the calendar's (Пс7)
 			}
 		}
+		// The days in one phrase (Пс5; s-publish-6).
+		page.Lede = line(tf.window(from, to) + " · the page is read from the server on every visit")
 		week := func(t time.Time) string {
 			return s.postQuery("/p/"+token, url.Values{"from": {t.Format("2006-01-02")}})
 		}
@@ -889,6 +908,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 			page.Tasks = append(page.Tasks, row)
 		}
 		sort.SliceStable(page.Tasks, func(i, j int) bool { return !page.Tasks[i].Done && page.Tasks[j].Done })
+		page.Lede = line(plural(len(page.Tasks), "task") + listReadNow)
 	default:
 		objs, _, err := c.calQuery(ctx, c.spec.component, nil, nil)
 		if err != nil {
@@ -904,8 +924,45 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 			}
 			page.Notes = append(page.Notes, row)
 		}
+		page.Lede = line(plural(len(page.Notes), "note") + listReadNow)
 	}
 	return nil
+}
+
+// listReadNow follows the count under the title of a published list
+// (s-publish-7): what the guest sees is not a copy.
+const listReadNow = " · the list is read from the server on every visit"
+
+// footRevoke is the foot of a published list after its day (s-publish-6,
+// -7).
+const footRevoke = "revoke"
+
+// publicFoot is the foot of a public page (Пс2): until when the link works,
+// then what the frames say after it — that the owner can take a list back
+// (footRevoke), or how the page is read («the file is read from the server
+// on every visit», s-publish-10); nothing more for one record or a file.
+func publicFoot(tf timeFmt, link user.OpenLink, after string) view.Runs {
+	until := "This link does not expire"
+	if link.Expires != nil {
+		until = "This link works until " + tf.date(*link.Expires)
+	}
+	switch after {
+	case "":
+		return line(until + ".")
+	case footRevoke:
+		return line(until + ". The owner can revoke it at any moment.")
+	}
+	return line(until + " · " + after)
+}
+
+// linkColour is the colour of the published collection as it stood when
+// the link was made (Пс7, Пс12); a link made before that wears the one its
+// path gives.
+func linkColour(t user.PublishTarget) view.Colour {
+	if v := hexColour(t.Colour); v != "" {
+		return view.Colour(v)
+	}
+	return collectionColour(t.Col)
 }
 
 // getPublishedDownload hands the thing over as a file, as it is now: the

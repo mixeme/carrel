@@ -5,9 +5,8 @@
       "href": "/p/link-checklist-token/download",
       "icon": "i-download",
       "id": "published.download",
-      "label": "Download 3 KB",
-      "method": "GET",
-      "primary": true
+      "label": "Download",
+      "method": "GET"
     }
   ],
   "body": "",
@@ -15,16 +14,96 @@
   "days": [],
   "fields": [],
   "file": {
-    "blocks": [],
+    "blocks": [
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "heading",
+        "level": 2,
+        "text": "Перед заморозкой"
+      },
+      {
+        "checked": false,
+        "children": [
+          {
+            "checked": false,
+            "children": [
+              {
+                "checked": false,
+                "children": [],
+                "href": "",
+                "kind": "para",
+                "level": 0,
+                "text": "прогнать "
+              },
+              {
+                "checked": false,
+                "children": [],
+                "href": "",
+                "kind": "code",
+                "level": 0,
+                "text": "go test -race ./..."
+              }
+            ],
+            "href": "",
+            "kind": "item",
+            "level": 0,
+            "text": ""
+          },
+          {
+            "checked": false,
+            "children": [],
+            "href": "",
+            "kind": "item",
+            "level": 0,
+            "text": "проверить changelog"
+          },
+          {
+            "checked": false,
+            "children": [],
+            "href": "",
+            "kind": "item",
+            "level": 0,
+            "text": "письмо пользователям — черновик у Анны"
+          }
+        ],
+        "href": "",
+        "kind": "list",
+        "level": 0,
+        "text": ""
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "heading",
+        "level": 2,
+        "text": "После"
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Тег ставит Виктор. Образ собирается вручную до появления CI."
+      }
+    ],
     "body": "",
     "changed": "2026-08-09",
     "href": "/p/link-checklist-token/download",
     "name": "release-checklist.md",
-    "preview": "none",
+    "preview": "markdown",
     "size": "3 KB",
     "type": "text/markdown"
   },
   "folder": null,
+  "foot": [
+    {
+      "text": "This link works until 9 September 2026 · the file is read from the server on every visit"
+    }
+  ],
   "kind": "file",
   "lede": [
     {
@@ -35,7 +114,6 @@
   "note": null,
   "notes": [],
   "notices": [],
-  "owner": "",
   "range": null,
   "readOnly": true,
   "tasks": [],

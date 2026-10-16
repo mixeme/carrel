@@ -170,25 +170,25 @@ Typecase `0fe0244` и серверу `v0.2.174` (main `6a62d8a`).
 | № | Состояние | Одной строкой |
 |---|---|---|
 | Пс1 | **закрыто сервером `v0.2.327`**: каталог `p-token` — семь состояний по кадрам `s-publish-6`…`-12` (`normal` — календарь «Личный» 10–31 August, `addressbook` «Команда», `note`, `image`, `text`, `download`, `folder`), ссылки выданы листом, страница — без сессии; `FIXTURE_SCREEN`, `STATE_FRAME`, реестры сервера и клиента. Съёмка показала строки календаря с целью `details` без адреса — снята (было: держится) | фикстур `/p/{token}` нет ни одной; каталога `p-token`, строки `FIXTURE_SCREEN`, регистрации в `fixtures_test.go` нет |
-| Пс2 | держится | подвала «This link works until …» нет; `user.OpenLink` по-прежнему `ID`, `Target`, `Conn` — срока нет |
-| Пс3 | держится | `Lede` «Read-only. Published from Carrel.» у календаря, книги, задач, тетради, папки (`publish.go:581`, `publish_files.go:164`) |
-| Пс4 | держится | `PublishedPage.Owner` нигде не заполняется |
-| Пс5 | держится | диапазон двумя полями `Range.From`/`.To`, фразы «10 – 31 August 2026» нет |
+| Пс2 | **закрыто сервером `v0.2.328`**: подвал `Foot` — «This link works until …», у списка «The owner can revoke it at any moment.», у текста и папки — «· … read from the server on every visit»; срок — `user.OpenLink.Expires` (было: держится) | подвала «This link works until …» нет; `user.OpenLink` по-прежнему `ID`, `Target`, `Conn` — срока нет |
+| Пс3 | **закрыто сервером `v0.2.328`**: «Read-only. Published from Carrel.» снята; под заголовком — фразы Пс5, Пс8, у папки — ничего (итог в крошках) (было: держится) | `Lede` «Read-only. Published from Carrel.» у календаря, книги, задач, тетради, папки (`publish.go:581`, `publish_files.go:164`) |
+| Пс4 | **закрыто сервером `v0.2.328`**: `Owner` снят с контракта (было: держится) | `PublishedPage.Owner` нигде не заполняется |
+| Пс5 | **закрыто сервером `v0.2.328`**: `Lede` — «10 – 31 August 2026 · the page is read from the server on every visit» (`tf.window`) (было: держится) | диапазон двумя полями `Range.From`/`.To`, фразы «10 – 31 August 2026» нет |
 | Пс6 | держится, **усилилось** | маршрута `.ics` для подписки нет (`routes.go:25–28` — только страница, `download`, `file`, `dav`), а отметка листа у сервера теперь сама называется «Allow .ics download **and subscription**» (`publish.go:153`) — лист обещает подписку, которой нет |
-| Пс7 | держится | `agendaDays(…, false, …)` — `Colour` строк пуст |
-| Пс8 | держится | счёт «13 contacts» фразой не приходит |
+| Пс7 | **закрыто сервером `v0.2.328`**: `Colour` строк — цвет календаря при выдаче ссылки (`PublishTarget.Colour`) (было: держится) | `agendaDays(…, false, …)` — `Colour` строк пуст |
+| Пс8 | **закрыто сервером `v0.2.328`**: «N contacts · the list is read from the server on every visit»; у списка задач и тетради — так же (было: держится) | счёт «13 contacts» фразой не приходит |
 | Пс9 | держится, усилилось | то же для книги: «Allow .vcf download and subscription» (`publish.go:143`), адреса и маршрута нет; подпись `s-publish-3` теперь прямо: «тот же адрес другой Carrel берёт как ленту» |
-| Пс10 | держится | `Contacts` плоский, групп по букве нет |
+| Пс10 | **закрыто сервером `v0.2.328`**: `Contacts []ContactGroup` по букве (было: держится) | `Contacts` плоский, групп по букве нет |
 | Пс11 | **закрыто сервером `v0.2.180`** | (CHANGELOG `v0.2.180`: «A published contact shows what its owner ticked, and no more»; `v0.2.183` — «Name and organisation» снимается) — `visitorCard` для страницы, книги и `.vcf`; кадр `s-publish-3` уточнён: «Photo» — только фото в `.vcf`, страница — инициалы; с сервером сходится |
-| Пс12 | держится | `ContactRow.Colour` не ставится (`Avatar.Colour` — от UID) |
+| Пс12 | **закрыто сервером `v0.2.328`**: `ContactRow.Colour` — цвет книги (было: держится) | `ContactRow.Colour` не ставится (`Avatar.Colour` — от UID) |
 | Пс13 | держится | вложений заметки на странице нет; server.md «Осталось: вложения опубликованной заметки (Пб3, Пс13)» |
-| Пс14 | держится | `Preview` — только `image` или `none`; `Body`, `Blocks` не заполняются; `.md` получает экран `s-publish-11` |
+| Пс14 | **закрыто сервером `v0.2.328`**: текст — `Preview text` и `Body`, Markdown — `Preview markdown` и `Blocks`, до 256 KB, без NUL; «Download» тогда не главная; в наборе `release-checklist.md` — Markdown кадра (было: держится) | `Preview` — только `image` или `none`; `Body`, `Blocks` не заполняются; `.md` получает экран `s-publish-11` |
 | Пс15 | держится | `PreviewPDF` не ставится |
-| Пс16 | держится | итога «· 4 files · 6.6 MB» нет |
+| Пс16 | **закрыто сервером `v0.2.328`**: `PublishedFolder.Total` «N files · размер» (было: держится) | итога «· 4 files · 6.6 MB» нет |
 | Пс17 | держится | `Folder.DAV` — путь без схемы и хоста (`s.route`) |
 | Пс18 | держится | `FileRow.Items` у папки не ставится («folder · 6 files») |
-| Пс19 | держится | `Modified` словами (`formatWhen`), кадр числами |
-| Пс20 | держится | `FileRow.Icon` не ставится |
+| Пс19 | **закрыто сервером `v0.2.328`**: `Modified` числами (`numStamp`) (было: держится) | `Modified` словами (`formatWhen`), кадр числами |
+| Пс20 | **закрыто сервером `v0.2.328`**: `Icon` по типу (`fileIcon`) (было: держится) | `FileRow.Icon` не ставится |
 | Пс21 | держится | страницы файла внутри ссылки на папку нет; строка файла — поток |
 
 **Итог перепроверки Пс:** 20 держатся, 1 закрыт сервером (`v0.2.180`).

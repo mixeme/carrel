@@ -17,6 +17,38 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.328 — 2026-10-17
+
+### Changed
+
+- **The public pages say what their frames say** (Пс2–Пс5, Пс7, Пс8,
+  Пс10, Пс12, Пс14, Пс16, Пс19, Пс20; `s-publish-6` to `-12`). The line
+  under the title is no longer «Read-only. Published from Carrel.»: a
+  calendar gives its days in one phrase, a book, a task list and a notebook
+  their count, each with «· the … is read from the server on every visit»;
+  a folder has none, its total («5 files · 4.4 MB») follows the crumbs. A
+  foot says until when the link works — a list adds that the owner can
+  revoke it, a text and a folder how they are read. The rows of a calendar
+  and a book wear the collection's colour as it stood when the link was
+  made; a book comes by letter. A text or Markdown file up to 256 KB is the
+  body of its page (blocks parsed for Markdown), its Download no longer the
+  main button. A folder's rows give their moment in figures and an icon by
+  type. A file under a text name that holds a NUL is offered to download.
+
+### Tests
+
+- **The live checks follow the owner's decisions**: the forms run no longer
+  asks a series changed to every other week to keep a day left out it no
+  longer has (gone without a word since `v0.2.250`), and the import run
+  sees a record already there skipped by default before it takes the file
+  in as copies (the decision of 12.10.2026). Found by the first full live
+  run since `v0.2.184`.
+
+### For consumers
+
+- `PublishedPage.Owner` is gone; `PublishedPage.Contacts` is
+  `[]ContactGroup`; new `PublishedPage.Foot` and `PublishedFolder.Total`.
+
 ## v0.2.327 — 2026-10-17
 
 ### Fixtures

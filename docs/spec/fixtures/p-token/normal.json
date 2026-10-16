@@ -18,7 +18,7 @@
         {
           "badges": [],
           "changed": "7 Aug 15:15",
-          "colour": "",
+          "colour": "#4a6b52",
           "href": "",
           "kind": "event",
           "location": "",
@@ -41,7 +41,7 @@
         {
           "badges": [],
           "changed": "9 Aug 20:30",
-          "colour": "",
+          "colour": "#4a6b52",
           "href": "",
           "kind": "event",
           "location": "",
@@ -64,7 +64,7 @@
         {
           "badges": [],
           "changed": "7 Aug 15:15",
-          "colour": "",
+          "colour": "#4a6b52",
           "href": "",
           "kind": "event",
           "location": "",
@@ -87,7 +87,7 @@
         {
           "badges": [],
           "changed": "7 Aug 15:15",
-          "colour": "",
+          "colour": "#4a6b52",
           "href": "",
           "kind": "event",
           "location": "",
@@ -110,7 +110,7 @@
         {
           "badges": [],
           "changed": "7 Aug 15:15",
-          "colour": "",
+          "colour": "#4a6b52",
           "href": "",
           "kind": "event",
           "location": "",
@@ -131,16 +131,20 @@
   "fields": [],
   "file": null,
   "folder": null,
+  "foot": [
+    {
+      "text": "This link works until 8 September 2026. The owner can revoke it at any moment."
+    }
+  ],
   "kind": "event",
   "lede": [
     {
-      "text": "Read-only. Published from Carrel."
+      "text": "10 – 31 August 2026 · the page is read from the server on every visit"
     }
   ],
   "note": null,
   "notes": [],
   "notices": [],
-  "owner": "",
   "range": {
     "form": null,
     "from": "10 August 2026",

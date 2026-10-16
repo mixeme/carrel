@@ -424,6 +424,11 @@ func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *da
 	})
 	got, _ = rawBody(ctx, t, client, file)
 	mustHave(t, "repeat", got, exceptions...)
+	// Every other week from the 12th, the 19th is no day of the series any
+	// more, and a day left out that the series no longer has goes without a
+	// word (v0.2.250): from here on it is not asked for. The 26th still is
+	// one, and stays moved.
+	series = strings.Replace(series, "EXDATE;TZID=Europe/Moscow:20260119T100000\n", "", 1)
 	held("repeat", series, got)
 	if !rewrites {
 		mustRule(t, "repeat", got, "FREQ=WEEKLY", "BYDAY=MO", "WKST=MO", "COUNT=8", "INTERVAL=2")
@@ -445,23 +450,13 @@ func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *da
 			"DTEND;TZID=Asia/Yekaterinburg:20260112T110000", "TZID:Asia/Yekaterinburg", "BEGIN:VTIMEZONE"}, exceptions...)...)
 	}
 	// The exceptions went with the series (the owner's decision of
-	// 11.10.2026): the 19th is still left out and the 26th still the day that
-	// was moved, at ten in Yekaterinburg now — whatever zone the server
-	// writes that instant in. Before, Carrel left them at ten in Moscow,
-	// where the series no longer was: eleven servers of twelve kept them
-	// hanging, and Mail.ru threw them away (SV-59).
-	//
-	// What the server did not keep and Carrel said so is not asked of the
-	// file: Mail.ru drops a day left out that is no day of the series — and
-	// the 19th is none since the series went to every other week above — and
-	// the report of the save names EXDATE.
+	// 11.10.2026): the 26th is still the day that was moved, at ten in
+	// Yekaterinburg now — whatever zone the server writes that instant in.
+	// Before, Carrel left it at ten in Moscow, where the series no longer
+	// was: eleven servers of twelve kept it hanging, and Mail.ru threw it
+	// away (SV-59). The 19th went with the change to every other week above.
 	moved := strings.NewReplacer(
-		"EXDATE;TZID=Europe/Moscow:20260119T100000", "EXDATE;TZID=Asia/Yekaterinburg:20260119T100000",
 		"RECURRENCE-ID;TZID=Europe/Moscow:20260126T100000", "RECURRENCE-ID;TZID=Asia/Yekaterinburg:20260126T100000").Replace(series)
-	if contains(movedTimes, "EXDATE") {
-		t.Log("the server dropped the day left out and Carrel said so: it is not asked for")
-		moved = strings.Replace(moved, "EXDATE;TZID=Asia/Yekaterinburg:20260119T100000\n", "", 1)
-	}
 	if contains(movedTimes, "RECURRENCE-ID") {
 		t.Log("the server dropped the day moved and Carrel said so: it is not asked for")
 	} else {

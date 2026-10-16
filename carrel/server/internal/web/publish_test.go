@@ -57,6 +57,15 @@ func publishLink(t *testing.T, f davFixture, href string, forever bool) string {
 // anon is a request from someone with no session at all.
 func anon(path string) *http.Request { return httptest.NewRequest(http.MethodGet, path, nil) }
 
+// publicRows are the rows of a published book, its letters put aside.
+func publicRows(page view.PublishedPage) []view.ContactRow {
+	var rows []view.ContactRow
+	for _, g := range page.Contacts {
+		rows = append(rows, g.Rows...)
+	}
+	return rows
+}
+
 func publicPage(t *testing.T, f davFixture, link string) view.PublishedPage {
 	t.Helper()
 	return decode[view.PublishedPage](t, f.h.do(anon(link)))
@@ -99,7 +108,7 @@ func TestPublishedBookIsReadLive(t *testing.T) {
 	f.srv.Seed(searchBook+"cy.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:cy\nFN:Cy Twombly\nEND:VCARD\n")
 	rec := f.h.do(anon(link))
 	page := decode[view.PublishedPage](t, rec)
-	if !page.ReadOnly || page.Kind != view.KindContact || len(page.Contacts) != 3 {
+	if !page.ReadOnly || page.Kind != view.KindContact || len(publicRows(page)) != 3 {
 		t.Fatalf("page = %+v", page)
 	}
 	if rec.Header().Get("Referrer-Policy") != "no-referrer" || !strings.Contains(rec.Header().Get("Cache-Control"), "no-store") {

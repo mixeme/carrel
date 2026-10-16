@@ -91,8 +91,15 @@ func runImportExport(t *testing.T, endpoint, user, pass string) {
 		if page.Step != view.ImportStepPreview || len(page.Notices) > 0 {
 			t.Fatalf("preview: step %q, notices %+v", page.Step, page.Notices)
 		}
+		// What the calendar already holds is skipped unless the person says
+		// otherwise (the owner's decision of 12.10.2026); this run takes the
+		// series in as a copy, under a new identity.
+		if row := livePreviewRow(t, page.Preview, "Standup imported"); row[3] != "Already here — skipped" {
+			t.Errorf("the taken series in the preview, by default = %q", row)
+		}
+		page = liveExistingCopies(t, app, page)
 		if row := livePreviewRow(t, page.Preview, "Standup imported"); row[3] != "New UID will be assigned" {
-			t.Errorf("the taken series in the preview = %q", row)
+			t.Errorf("the taken series in the preview, as a copy = %q", row)
 		}
 		if row := livePreviewRow(t, page.Preview, "Ковка"); row[3] != "Ready" {
 			t.Errorf("the new event in the preview = %q", row)
@@ -144,6 +151,7 @@ func runImportExport(t *testing.T, endpoint, user, pass string) {
 			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:" + grace + "\r\nFN:Grace Hopper\r\nX-CUSTOM:keep-me\r\nEND:VCARD\r\n"
 		page := liveDecode[view.ImportPage](t, "book wizard", app.get(contacts+"/import"))
 		page = liveDecode[view.ImportPage](t, "book file", app.importFile(liveAction(t, page.Actions, "import.choose"), "cards.vcf", []byte(file)))
+		page = liveExistingCopies(t, app, page)
 		page = liveDecode[view.ImportPage](t, "book run", app.post(liveAction(t, page.Actions, "import.run"), url.Values{}))
 		if r := page.Report; r == nil || r.Created != 2 || r.Renamed != 1 {
 			t.Fatalf("report = %+v, notices %+v", page.Report, page.Notices)
@@ -161,6 +169,17 @@ func runImportExport(t *testing.T, endpoint, user, pass string) {
 		}
 		mustHave(t, "book export", body, "UID:"+ada, "UID:"+grace, "FN:Ada Imported", "X-CUSTOM:keep-me")
 	})
+}
+
+// liveExistingCopies answers the preview's question about the records the
+// collection already holds with «Import as copies» and returns the preview
+// again.
+func liveExistingCopies(t *testing.T, app *liveApp, page view.ImportPage) view.ImportPage {
+	t.Helper()
+	if page.Existing == nil {
+		t.Fatalf("the preview asks nothing about what is already there: %+v", page.Preview)
+	}
+	return liveDecode[view.ImportPage](t, "as copies", app.get(liveAction(t, page.Existing.Options, "import.existing.copy")))
 }
 
 // S-19: notes have a second source — a folder of Markdown files on another

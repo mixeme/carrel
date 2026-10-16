@@ -3393,16 +3393,21 @@ type AboutPage struct { // rest-3: Title «Carrel», Lede — первая ст�
     Back    Action // без сеанса «Back to sign in»; из оболочки — туда, где были
 }
 
-// Plain.Lede публичной страницы: у файла — одна моноширинная строка «тип ·
-// размер · changed день» (s-publish-9…11), у заметки — её день моноширинно
-// (s-publish-8), у события — когда и где (s-publish-16).
+// Plain.Lede публичной страницы — строка под заголовком готовой фразой: у
+// календаря дни одной фразой и «the page is read from the server on every
+// visit» (s-publish-6), у книги, списка задач, тетради — счёт и «the list is
+// read from the server on every visit» (s-publish-7), у файла — одна
+// моноширинная строка «тип · размер · changed день» (s-publish-9…11), у
+// заметки — её день моноширинно (s-publish-8), у события — когда и где
+// (s-publish-16); у папки строки нет — итог в крошках (Folder.Total).
+// Владельца страница не называет (S-25.1). Строки календаря и книги несут
+// цвет опубликованной коллекции (Colour), какой он был при выдаче ссылки.
 type PublishedPage struct {
     Plain
     Kind     Kind
-    Owner    Text
     ReadOnly bool // метка read-only рядом с логотипом
     Range    *Range
-    Contacts []ContactRow
+    Contacts []ContactGroup // по букве, как книга в приложении (s-publish-7)
     Days     []AgendaDay
     Tasks    []TaskRow  // опубликованный список задач
     Notes    []NoteRow  // опубликованная тетрадь
@@ -3411,7 +3416,13 @@ type PublishedPage struct {
     Note     *NoteDoc
     File     *PublishedFile
     Folder   *PublishedFolder
-    Actions  []Action // Download · Download folder; у файла без предпросмотра — с размером: «Download 84.2 MB» (s-publish-11)
+    Actions  []Action // Download · Download folder; у файла без предпросмотра — с размером: «Download 84.2 MB» (s-publish-11); под текстом, прочитанным на странице, — не главная (s-publish-10)
+    // Foot — подвал: «This link works until 8 September 2026.», у списка —
+    // и «The owner can revoke it at any moment.» (s-publish-6, -7), у
+    // текста и папки — «· the file (the contents) is read from the server
+    // on every visit» (s-publish-10, -12); без срока — «This link does not
+    // expire».
+    Foot     Runs
 }
 type PublishedFile struct {
     Name    Text
@@ -3419,14 +3430,15 @@ type PublishedFile struct {
     Type    Text
     Preview PreviewKind // C-8: изображение, PDF, текст, разметка, ничего
     Changed When        // день последней правки, «2026-08-10» после слова экрана «changed» (s-publish-9)
-    Body    Text
-    Blocks  []Block
+    Body    Text        // текст телом страницы (Preview text)
+    Blocks  []Block     // Markdown разобранный (Preview markdown, s-publish-10); текст больше 256 KB — не телом, а скачать
     Href    string
 }
 type PublishedFolder struct {
     Crumbs []Crumb
     Rows   []FileRow
     DAV    Text // тот же секрет монтируется как диск
+    Total  Text // итог после текущей крошки: «4 files · 6.6 MB» (s-publish-12)
 }
 
 // Разобранная разметка: заголовки, списки, задачи с отметкой, выделение,

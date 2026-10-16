@@ -107,13 +107,17 @@ type AboutPage struct {
 	Back Action `json:"back"`
 }
 
+// PublishedPage — страница ссылки (U-6.15). Lede — строка под заголовком
+// готовой фразой: у календаря диапазон дней, у книги счёт, у записи — её
+// время, у файла — тип, размер и день правки; у папки её нет (итог — в
+// крошках, Folder.Total). Foot — подвал: до какого дня ссылка действует
+// (Пс2). Владельца страница не называет (S-25.1).
 type PublishedPage struct {
 	Plain
 	Kind     Kind             `json:"kind"`
-	Owner    Text             `json:"owner"`
 	ReadOnly bool             `json:"readOnly"` // метка read-only рядом с логотипом
 	Range    *Range           `json:"range"`
-	Contacts []ContactRow     `json:"contacts"`
+	Contacts []ContactGroup   `json:"contacts"` // по букве, как в приложении (s-publish-7)
 	Days     []AgendaDay      `json:"days"`
 	Tasks    []TaskRow        `json:"tasks"`  // опубликованный список задач
 	Notes    []NoteRow        `json:"notes"`  // опубликованная тетрадь
@@ -123,6 +127,7 @@ type PublishedPage struct {
 	File     *PublishedFile   `json:"file"`
 	Folder   *PublishedFolder `json:"folder"`
 	Actions  []Action         `json:"actions"` // Download · Download folder
+	Foot     Runs             `json:"foot"`
 }
 type PublishedFile struct {
 	Name    Text        `json:"name"`
@@ -138,6 +143,8 @@ type PublishedFolder struct {
 	Crumbs []Crumb   `json:"crumbs"`
 	Rows   []FileRow `json:"rows"`
 	DAV    Text      `json:"dav"` // тот же секрет монтируется как диск
+	// Total — итог после текущей крошки: «4 files · 6.6 MB» (s-publish-12)
+	Total Text `json:"total"`
 }
 
 // Block — разобранная разметка: заголовки, списки, задачи с отметкой,

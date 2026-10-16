@@ -38,6 +38,9 @@ type PublishTarget struct {
 	// HideOrganisation leaves the name alone: the organisation and the
 	// title of a contact are not shown.
 	HideOrganisation bool
+	// Colour is the collection's colour (#rrggbb) as it stood: the rows of
+	// the page wear it (s-publish-6, -7).
+	Colour string
 }
 
 // PublishedLink is a link as its owner's screens show it: no secret.
@@ -56,6 +59,9 @@ type OpenLink struct {
 	ID     string // publish.ID of the link: its rate bucket, never its secret
 	Target PublishTarget
 	Conn   sealed.Connection
+	// Expires is when the link stops working; nil — never (the page's foot
+	// says so, Пс2).
+	Expires *time.Time
 }
 
 // lastSeenEvery keeps a busy link from rewriting the state on every view.
@@ -124,7 +130,7 @@ func (s *Service) Publish(viewerID string, dataKey [crypt.KeyLen]byte, conn seal
 			Hash: hash, UserID: u.ID, AccountID: target.AccountID, Kind: target.Kind, Col: target.Col,
 			UID: target.UID, Path: target.Path, Folder: target.Folder, Title: target.Title,
 			From: target.From, To: target.To, NoDownload: target.NoDownload, HideDescriptions: target.HideDescriptions,
-			Shows: slices.Clone(target.Shows), HideOrganisation: target.HideOrganisation,
+			Shows: slices.Clone(target.Shows), HideOrganisation: target.HideOrganisation, Colour: target.Colour,
 			CreatedAt: now, ExpiresAt: expires, Envelope: env,
 		})
 		return []store.AuditEntry{{
@@ -198,7 +204,7 @@ func (s *Service) openPublished(token string, count bool) (OpenLink, bool) {
 		return OpenLink{}, false
 	}
 	if !count {
-		return OpenLink{ID: publish.ID(found.Hash), Target: targetOf(*found)}, true
+		return OpenLink{ID: publish.ID(found.Hash), Target: targetOf(*found), Expires: found.ExpiresAt}, true
 	}
 	id := publish.ID(found.Hash)
 	s.opens.add(id)
@@ -215,9 +221,10 @@ func (s *Service) openPublished(token string, count bool) (OpenLink, bool) {
 		})
 	}
 	return OpenLink{
-		ID:     publish.ID(found.Hash),
-		Target: targetOf(*found),
-		Conn:   sealed.Connection{ID: found.AccountID, Server: env.Server, Login: env.Login, Password: env.Password, CertFingerprint: env.CertFingerprint},
+		ID:      publish.ID(found.Hash),
+		Target:  targetOf(*found),
+		Expires: found.ExpiresAt,
+		Conn:    sealed.Connection{ID: found.AccountID, Server: env.Server, Login: env.Login, Password: env.Password, CertFingerprint: env.CertFingerprint},
 	}, true
 }
 
@@ -288,7 +295,7 @@ func prunePublished(st *store.State, now time.Time) {
 func targetOf(l store.PublishedLink) PublishTarget {
 	return PublishTarget{AccountID: l.AccountID, Kind: l.Kind, Col: l.Col, UID: l.UID, Path: l.Path, Folder: l.Folder,
 		Title: l.Title, From: l.From, To: l.To, NoDownload: l.NoDownload, HideDescriptions: l.HideDescriptions,
-		Shows: slices.Clone(l.Shows), HideOrganisation: l.HideOrganisation}
+		Shows: slices.Clone(l.Shows), HideOrganisation: l.HideOrganisation, Colour: l.Colour}
 }
 
 // LinkOf is the whole link of one of the viewer's live links, from the

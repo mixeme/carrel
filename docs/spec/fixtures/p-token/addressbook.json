@@ -3,43 +3,53 @@
   "body": "",
   "contacts": [
     {
-      "avatar": {
-        "colour": "#a05a2c",
-        "href": "",
-        "initials": "АБ"
-      },
-      "badges": [],
-      "birthday": "",
-      "changed": "",
-      "colour": "",
-      "email": "",
-      "href": "",
-      "menu": [],
-      "name": "Артём Белов",
-      "on": false,
-      "org": "Тензор",
-      "phone": "",
-      "sources": [],
-      "stamp": "",
-      "state": "ok",
-      "tags": [],
-      "uid": "d41a-6f30-92be"
+      "count": 1,
+      "rows": [
+        {
+          "avatar": {
+            "colour": "#a05a2c",
+            "href": "",
+            "initials": "АБ"
+          },
+          "badges": [],
+          "birthday": "",
+          "changed": "",
+          "colour": "#6b4e7a",
+          "email": "",
+          "href": "",
+          "menu": [],
+          "name": "Артём Белов",
+          "on": false,
+          "org": "Тензор",
+          "phone": "",
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "tags": [],
+          "uid": "d41a-6f30-92be"
+        }
+      ],
+      "rubric": "А"
     }
   ],
   "days": [],
   "fields": [],
   "file": null,
   "folder": null,
+  "foot": [
+    {
+      "text": "This link works until 17 August 2026. The owner can revoke it at any moment."
+    }
+  ],
   "kind": "contact",
   "lede": [
     {
-      "text": "Read-only. Published from Carrel."
+      "text": "1 contact · the list is read from the server on every visit"
     }
   ],
   "note": null,
   "notes": [],
   "notices": [],
-  "owner": "",
   "range": null,
   "readOnly": true,
   "tasks": [],

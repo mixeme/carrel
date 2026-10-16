@@ -98,6 +98,9 @@ type PublishedLink struct {
 	// HideOrganisation leaves the visitor of a contact or a book the name
 	// alone: «Name and organisation» of the sheet was taken off.
 	HideOrganisation bool `json:"hideOrganisation,omitempty"`
+	// Colour is the collection's colour as it stood when the link was made:
+	// the mark of each row of its page (Пс7, Пс12).
+	Colour string `json:"colour,omitempty"`
 	// Title is the label the link was made under: the collection's name or
 	// the record's title as it stood. The page shows the live one.
 	Title     string     `json:"title"`

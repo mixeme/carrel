@@ -25,7 +25,7 @@
     "rows": [
       {
         "href": "/p/link-attachments-token?in=2026-07",
-        "icon": "",
+        "icon": "i-file",
         "isDir": true,
         "menu": [],
         "modified": "",
@@ -39,10 +39,10 @@
       },
       {
         "href": "/p/link-attachments-token/file/2026-08-04-whiteboard.jpg",
-        "icon": "",
+        "icon": "i-img",
         "isDir": false,
         "menu": [],
-        "modified": "4 August, 17:03",
+        "modified": "2026-08-04 17:03",
         "name": "2026-08-04-whiteboard.jpg",
         "open": "",
         "selected": false,
@@ -53,10 +53,10 @@
       },
       {
         "href": "/p/link-attachments-token/file/2026-08-10-sync-board.png",
-        "icon": "",
+        "icon": "i-img",
         "isDir": false,
         "menu": [],
-        "modified": "10 August, 11:07",
+        "modified": "2026-08-10 11:07",
         "name": "2026-08-10-sync-board.png",
         "open": "",
         "selected": false,
@@ -67,10 +67,10 @@
       },
       {
         "href": "/p/link-attachments-token/file/release-checklist.md",
-        "icon": "",
+        "icon": "i-doc",
         "isDir": false,
         "menu": [],
-        "modified": "9 August, 18:44",
+        "modified": "2026-08-09 18:44",
         "name": "release-checklist.md",
         "open": "",
         "selected": false,
@@ -81,10 +81,10 @@
       },
       {
         "href": "/p/link-attachments-token/file/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
-        "icon": "",
+        "icon": "i-doc",
         "isDir": false,
         "menu": [],
-        "modified": "5 August, 14:20",
+        "modified": "2026-08-05 14:20",
         "name": "смета-подрядчик.pdf",
         "open": "",
         "selected": false,
@@ -93,18 +93,19 @@
         "type": "application/pdf",
         "upload": null
       }
-    ]
+    ],
+    "total": "5 files · 4.4 MB"
   },
-  "kind": "file",
-  "lede": [
+  "foot": [
     {
-      "text": "Read-only. Published from Carrel."
+      "text": "This link works until 24 August 2026 · the contents are read from the server on every visit"
     }
   ],
+  "kind": "file",
+  "lede": [],
   "note": null,
   "notes": [],
   "notices": [],
-  "owner": "",
   "range": null,
   "readOnly": true,
   "tasks": [],

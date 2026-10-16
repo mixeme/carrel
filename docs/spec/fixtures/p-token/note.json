@@ -15,6 +15,11 @@
   "fields": [],
   "file": null,
   "folder": null,
+  "foot": [
+    {
+      "text": "This link works until 9 September 2026."
+    }
+  ],
   "kind": "note",
   "lede": [
     {
@@ -94,7 +99,6 @@
   },
   "notes": [],
   "notices": [],
-  "owner": "",
   "range": null,
   "readOnly": true,
   "tasks": [],
