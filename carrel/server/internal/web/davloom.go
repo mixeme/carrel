@@ -190,7 +190,7 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 		page.Note = join("davloom is off on this instance: the administrator turns it on with CARREL_DAVLOOM_PORT. ", []view.Run(page.Note))
 	}
 	blob := s.catalogOf(sess)
-	tf, now := s.timeFor(sess), s.now()
+	tf := s.timeFor(sess)
 	devices := s.users.Devices(sess.AccountID())
 	var edited *store.ProxyDevice
 	if editing == "" {
@@ -198,9 +198,9 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 	}
 	for i := range devices {
 		d := devices[i]
-		row := view.ProxyDevice{Name: text(d.Name), Created: tf.formatWhen(d.Created, false, now), ReadOnly: d.ReadOnly}
+		row := view.ProxyDevice{Name: text(d.Name), Created: view.When(tf.numDate(d.Created)), ReadOnly: d.ReadOnly}
 		if seen := s.users.DeviceLastSeen(d.ID); !seen.IsZero() {
-			row.LastSeen = tf.formatWhen(seen, true, now)
+			row.LastSeen = tf.numStamp(seen)
 		}
 		for _, k := range d.ScopeKinds {
 			row.Scope = append(row.Scope, view.Kind(k))

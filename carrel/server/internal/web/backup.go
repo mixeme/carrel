@@ -422,7 +422,7 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 					})
 				}
 			}
-			run := view.BackupRun{ID: text(r.ID), Started: tf.formatWhen(r.Started, false, now), State: runStates[r.State], Size: formatSize(r.Size)}
+			run := view.BackupRun{ID: text(r.ID), Started: tf.numStamp(r.Started), State: runStates[r.State], Size: formatSize(r.Size)}
 			if r.File != "" && r.Mode != sealed.BackupToDownload && r.Verified {
 				run.Download = &view.Action{ID: "backup.get", Label: "Download", Icon: "i-down", Method: "GET", Enabled: true,
 					Href: s.postQuery("/app/settings/backup", url.Values{"op": {"get"}, "job": {job.ID}, "run": {r.ID}})}

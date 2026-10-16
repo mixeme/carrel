@@ -72,7 +72,6 @@ func (s *Server) postAdminUsers(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) buildAdminUsersPage(r *http.Request, sess *session.Session, flash adminUsersFlash) view.AdminUsersPage {
 	snap := s.store.Snapshot()
-	now := s.now()
 	page := view.AdminUsersPage{
 		Shell: s.withRail(s.buildShell(sess, "Users"), s.adminRail(sess, "/admin/")),
 		Add: []view.Action{
@@ -95,7 +94,7 @@ func (s *Server) buildAdminUsersPage(r *http.Request, sess *session.Session, fla
 		row := view.AdminUserRow{
 			Login:    text(u.Login),
 			Role:     roleLabels[u.Role],
-			Created:  view.When(tf.date(u.CreatedAt)),
+			Created:  view.When(tf.numDate(u.CreatedAt)),
 			Accounts: u.ConnCount,
 			Sessions: s.sessions.LiveCount(u.ID),
 			Disabled: u.Disabled,
@@ -103,7 +102,7 @@ func (s *Server) buildAdminUsersPage(r *http.Request, sess *session.Session, fla
 			Menu:     s.adminUserMenu(snap, &u),
 		}
 		if u.LastLogin != nil {
-			row.LastLogin = tf.formatWhen(*u.LastLogin, false, now)
+			row.LastLogin = tf.numStamp(*u.LastLogin)
 		}
 		// Address is the confirmed address; one waiting for its link is
 		// not the account's yet (s-admin-22).

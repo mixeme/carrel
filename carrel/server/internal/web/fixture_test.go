@@ -965,6 +965,11 @@ var dateLike = regexp.MustCompile(
 
 const mockupStamp = "10 August 2026, 17:04"
 
+// numLike is a moment in numbers, as the tables of the settings write it
+// (Нс2: «2026-08-16 09:02»); a run's is the day of the frames in the same
+// shape, mockupDay.
+var numLike = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$`)
+
 func steadyStamps(v any) {
 	switch t := v.(type) {
 	case map[string]any:
@@ -977,6 +982,10 @@ func steadyStamps(v any) {
 			}
 			if s, ok := x.(string); ok && runStamps[k] && dateLike.MatchString(s) {
 				t[k] = mockupStamp
+				continue
+			}
+			if s, ok := x.(string); ok && runStamps[k] && numLike.MatchString(s) {
+				t[k] = mockupDay
 				continue
 			}
 			steadyStamps(x)

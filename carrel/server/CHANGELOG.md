@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.291 — 2026-10-16
+
+### Changed
+
+- **The tables of the settings and the administration write a moment in
+  numbers** (Нс2 of the scan of 15.10.2026; `account-1`, `s-davloom-1`,
+  `s-backup-1`, `s-admin-2`): a session's start, a davloom device's last
+  request, a backup run's start and a person's last sign-in are
+  «2026-08-16 09:02»; a device's and a person's creation «2026-06-02».
+  When a session was last seen stays in words («just now»).
+
+### For consumers
+
+Fixtures `app-settings-account` and `admin-users` re-shot; a fixture's
+moment of the run in numbers is the day of the frames, «2026-08-10 17:04».
+
 ## v0.2.290 — 2026-10-16
 
 ### Changed

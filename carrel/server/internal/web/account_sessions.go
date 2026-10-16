@@ -52,7 +52,7 @@ func (s *Server) sessionRows(sess *session.Session) []view.SessionRow {
 	for _, in := range s.sessions.SessionsOf(sess.AccountID()) {
 		row := view.SessionRow{
 			Agent: text(in.Agent), Address: text(in.Address),
-			Started: tf.formatWhen(in.Started, false, now), LastSeen: tf.formatWhen(in.LastSeen, true, now),
+			Started: tf.numStamp(in.Started), LastSeen: tf.formatWhen(in.LastSeen, true, now),
 			Current: in.PublicID == sess.PublicID(),
 		}
 		if row.Current {

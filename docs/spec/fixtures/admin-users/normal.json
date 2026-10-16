@@ -253,10 +253,10 @@
     {
       "accounts": 4,
       "address": "mix@example.org",
-      "created": "11 February 2026",
+      "created": "2026-02-11",
       "disabled": false,
       "escrowed": false,
-      "lastLogin": "10 August 2026, 17:04",
+      "lastLogin": "2026-08-10 17:04",
       "login": "mix",
       "menu": [
         {
