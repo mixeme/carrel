@@ -187,7 +187,10 @@ func (s *Server) unlockSheet(sess *session.Session, errText view.Text, back, for
 			view.Action{ID: "unlock.cancel", Label: "Cancel", Href: s.route(cancelTo), Method: "GET", Enabled: true}), "password"),
 	}
 	// Opened from a connection's Show password, the sheet says whose (s-profile-3, Нс18).
-	if conn, ok := s.catalogOf(sess).Connection(forID); ok && forID != "" {
+	if f, ok := s.catalogOf(sess).Subscription(forID); ok && forID != "" {
+		// A feed's password (Нс25): the sheet names the feed.
+		sheet.Purpose, sheet.Subject = "Show password", text(collectionLabel(f.FeedCollection()))
+	} else if conn, ok := s.catalogOf(sess).Connection(forID); ok && forID != "" {
 		sheet.Purpose, sheet.Subject = "Show password", text(connLabel(conn))
 	}
 	if until := sess.UnlockUntil(time.Now()); until != nil {

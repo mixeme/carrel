@@ -137,7 +137,7 @@ func Fetch(ctx context.Context, client *http.Client, raw, login, password string
 	f := Feed{Status: resp.StatusCode, Type: resp.Header.Get("Content-Type")}
 	if resp.StatusCode != http.StatusOK {
 		f.Took = time.Since(start)
-		return f, fmt.Errorf("GET %s → %s", req.URL.Path, resp.Status)
+		return f, &StatusError{Code: resp.StatusCode, Path: req.URL.Path, Status: resp.Status}
 	}
 	doc, err := io.ReadAll(io.LimitReader(resp.Body, max+1))
 	f.Took, f.Size = time.Since(start), int64(len(doc))
@@ -204,3 +204,13 @@ func Parse(doc []byte, now time.Time) (Parsed, error) {
 	}
 	return p, nil
 }
+
+// StatusError is a feed's answer other than 200: the card of the
+// subscription tells a password that stopped fitting (401) from the rest
+// (Нс25).
+type StatusError struct {
+	Code         int
+	Path, Status string
+}
+
+func (e *StatusError) Error() string { return fmt.Sprintf("GET %s → %s", e.Path, e.Status) }

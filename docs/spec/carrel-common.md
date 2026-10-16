@@ -2872,6 +2872,7 @@ type CollectionRow struct {
     Menu     []MenuItem
 }
 type SubscriptionCard struct {
+    ID       string // «f-…» — {account} её адресов
     Title    Text
     URL      Text
     Colour   Colour
@@ -2884,7 +2885,24 @@ type SubscriptionCard struct {
     // 2 min ago · 34 KB · 0.4 s»
     Size     Text
     Took     Text
+    Access   Text          // «no password» или «password saved» в строке адреса (s-profile-1)
+    Password *SecretField  // Show password у ленты с сохранённым паролем, тем же окном, что у подключения; nil — пароля нет
+    Lands    []FeedKindRow // таблица «Lands in»: строка на род ленты
+    Changed  When          // «Changed on the server» — одна на все строки («yesterday»); пусто — не читалась
+    State    CollectionState // unavailable — последнее чтение вернулось отказом; Check тогда «Check again», Checked — последнее удачное чтение
+    Note     Text          // строка под карточкой у отказавшей: «The feed asks for a password and the saved one no longer fits. A feed that stopped answering must not look like a feed with nothing in it.»
     Actions  []Action // Check · Edit · Unsubscribe
+}
+
+// Строка «Lands in» (s-profile-1): род словом экрана, отмечен ли он в своём
+// разделе, сколько записей рода при последнем чтении (nil — не читалась),
+// флажок — POST /app/settings/connections?op=tick&kind=…
+type FeedKindRow struct {
+    Kind    Kind
+    Label   Text // «Calendar», «Tasks», «Notes»
+    Tick    TickState
+    Objects *int
+    Toggle  Action
 }
 
 // Form (attachments-1): набор «Folder» — Collection (список файловых

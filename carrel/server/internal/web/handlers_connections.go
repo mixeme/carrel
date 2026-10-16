@@ -606,8 +606,8 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			Method: "GET", Enabled: true,
 		})
 	}
-	var answered, refused time.Time
-	var why string
+	var answered time.Time
+	var refused session.Reading
 	for _, col := range blob.CollectionsOf(c.ID) {
 		if col.Gone {
 			continue // named by goneNotice: a row has no state to carry it
@@ -630,8 +630,8 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			if r.At.After(answered) {
 				answered = r.At
 			}
-			if r.Refused.After(refused) {
-				refused, why = r.Refused, r.Why
+			if r.Refused.After(refused.Refused) {
+				refused = r
 			}
 		}
 	}
@@ -644,8 +644,12 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 	card.Answered = tf.formatWhen(answered, true, tf.now)
 	// The last answer was a refusal (Нс23, s-profile-1): the card is an
 	// alarm, says so instead of a time, and what the refusal means.
-	if refused.After(answered) {
-		card.Refused, card.Answered, card.Note = true, "", text(why)
+	if refused.Refused.After(answered) {
+		note := refused.Reason
+		if refused.Unauthorized {
+			note = "The server refused the password. It may have been changed on the server: the one Carrel saved no longer fits."
+		}
+		card.Refused, card.Answered, card.Note = true, "", text(note)
 		card.State = view.CollectionUnavailable
 		card.Actions[0].Label = "Test again"
 	}
@@ -692,12 +696,27 @@ func (s *Server) tickCollection(w http.ResponseWriter, r *http.Request) {
 			col, found = c, true
 		}
 	}
-	if !opened || !found {
+	// A feed's row of Lands in (Нс26): its kinds are the feed's.
+	if f, ok := blob.Subscription(account); ok && path == sealed.FeedPath {
+		col, found = f.FeedCollection(), true
+	}
+	kinds := col.Kinds
+	// One kind of it, when the row names one.
+	if k := view.Kind(r.FormValue("kind")); k != "" {
+		kinds = nil
+		if col.Has(k) {
+			kinds = []view.Kind{k}
+		}
+	}
+	if !opened || !found || len(kinds) == 0 {
 		s.notFound(w, r)
 		return
 	}
-	on := tickOf(blob, account, col) != view.TickOn
-	for _, k := range col.Kinds {
+	on := false
+	for _, k := range kinds {
+		on = on || !isTicked(blob, k, account, path)
+	}
+	for _, k := range kinds {
 		var picks []sealed.Selection
 		for _, p := range blob.Selected {
 			if p.Kind == k && (p.AccountID != account || p.Path != path) {
@@ -772,14 +791,31 @@ func (s *Server) revealPassword(sess *session.Session, page *view.ConnectionsPag
 		if err != nil {
 			return false
 		}
-		page.Accounts[i].Password = &view.SecretField{
-			Shown:  true,
-			Value:  text(password),
-			Reveal: view.Action{ID: "connection.password", Label: "Hide", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+		page.Accounts[i].Password = s.shownPassword(password)
+		return true
+	}
+	// A feed's password, behind the same window (Нс25).
+	for i := range page.Subscriptions {
+		if page.Subscriptions[i].ID != id || page.Subscriptions[i].Password == nil {
+			continue
 		}
+		password, err := s.users.RevealConnectionPassword(sess.AccountID(), key, id)
+		if err != nil {
+			return false
+		}
+		page.Subscriptions[i].Password = s.shownPassword(password)
 		return true
 	}
 	return false
+}
+
+// shownPassword is a saved password let out, with Hide (s-profile-4).
+func (s *Server) shownPassword(password string) *view.SecretField {
+	return &view.SecretField{
+		Shown:  true,
+		Value:  text(password),
+		Reveal: view.Action{ID: "connection.password", Label: "Hide", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+	}
 }
 
 // goneNotice names catalog entries the server no longer holds (S-6.1). They

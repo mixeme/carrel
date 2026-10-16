@@ -1851,6 +1851,7 @@
       },
       "subscriptions": [
         {
+          "access": "no password",
           "actions": [
             {
               "csrf": "csrf",
@@ -1878,19 +1879,55 @@
               "method": "POST"
             }
           ],
+          "changed": "",
           "checked": "just now",
           "colour": "#8c6239",
+          "id": "f-ru-holidays",
           "kinds": [
             "event",
             "task"
           ],
+          "lands": [
+            {
+              "kind": "event",
+              "label": "Calendar",
+              "objects": 3,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=f-ru-holidays\u0026kind=event\u0026op=tick\u0026path=feed",
+                "id": "feed.tick",
+                "label": "Calendar",
+                "method": "POST"
+              }
+            },
+            {
+              "kind": "task",
+              "label": "Tasks",
+              "objects": null,
+              "tick": "off",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=f-ru-holidays\u0026kind=task\u0026op=tick\u0026path=feed",
+                "id": "feed.tick",
+                "label": "Tasks",
+                "method": "POST"
+              }
+            }
+          ],
+          "note": "",
+          "password": null,
           "size": "793 B",
           "stale": false,
+          "state": "ok",
           "title": "Праздники РФ",
           "took": "0 ms",
           "url": "https://feeds.example/ru-holidays.ics"
         },
         {
+          "access": "password saved",
           "actions": [
             {
               "csrf": "csrf",
@@ -1918,13 +1955,45 @@
               "method": "POST"
             }
           ],
+          "changed": "",
           "checked": "",
           "colour": "#6b4e7a",
+          "id": "f-league",
           "kinds": [
             "event"
           ],
+          "lands": [
+            {
+              "kind": "event",
+              "label": "Calendar",
+              "objects": null,
+              "tick": "off",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=f-league\u0026kind=event\u0026op=tick\u0026path=feed",
+                "id": "feed.tick",
+                "label": "Calendar",
+                "method": "POST"
+              }
+            }
+          ],
+          "note": "",
+          "password": {
+            "reveal": {
+              "enabled": true,
+              "href": "/app/settings/unlock?for=f-league",
+              "id": "connection.password",
+              "label": "Show password",
+              "method": "GET",
+              "target": "sheet"
+            },
+            "shown": false,
+            "value": ""
+          },
           "size": "",
           "stale": false,
+          "state": "ok",
           "title": "Расписание лиги",
           "took": "",
           "url": "https://league.example/season.ics"

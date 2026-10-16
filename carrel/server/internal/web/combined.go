@@ -15,6 +15,7 @@ import (
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/fanout"
 	"carrel.dev/carrel/server/internal/provider/cal"
+	"carrel.dev/carrel/server/internal/publish"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
@@ -603,19 +604,16 @@ func (s *Server) indexAnswered(sess *session.Session, blob sealed.Blob, spec kin
 	for _, st := range snap.Sources {
 		if st.State == view.SourceError && !snap.Finished.IsZero() {
 			account, path, _ := strings.Cut(st.ID, ":")
-			sess.NoteReading(account, path, session.Reading{Refused: snap.Finished, Why: refusedNote(st.Err)})
+			sess.NoteReading(account, path, session.Reading{Refused: snap.Finished,
+				Unauthorized: passwordRefused(st.Err), Reason: refusalReason(st.Err)})
 		}
 	}
 }
 
-// refusedNote is the line under the card of a connection whose server
-// refused the last read (s-profile-1): for a password that stopped fitting,
-// that it was likely changed on the server; else the refusal itself.
-func refusedNote(err error) string {
-	if dav.IsStatus(err, http.StatusUnauthorized) {
-		return "The server refused the password. It may have been changed on the server: the one Carrel saved no longer fits."
-	}
-	return refusalReason(err)
+// passwordRefused is whether a server or a feed refused the saved password.
+func passwordRefused(err error) bool {
+	var fe *publish.StatusError
+	return dav.IsStatus(err, http.StatusUnauthorized) || errors.As(err, &fe) && fe.Code == http.StatusUnauthorized
 }
 
 // collectionCount is the rail's number for one ticked collection (C-6.3): how

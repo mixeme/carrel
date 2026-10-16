@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.299 — 2026-10-16
+
+### Added
+
+- **The card of a subscription is the frame's** (Нс25, Нс26 of the scan of
+  15.10.2026; `s-profile-1`). `SubscriptionCard.ID`; `Access` — «no
+  password» or «password saved»; `Password` — Show password of a link with
+  a saved one, behind the unlock window a connection's is (the sheet names
+  the feed; the journal says `connection.password.reveal`); `Lands` — the
+  table «Lands in», a row a kind of the feed (`FeedKindRow`: the kind, its
+  word, its tick, how many the last read held, its tick as POST
+  `?op=tick&kind=…`) and `Changed`, one for the rows; `State`
+  unavailable with `Note` and «Check again» when the last fetch came back
+  refused — «The feed asks for a password and the saved one no longer
+  fits. A feed that stopped answering must not look like a feed with
+  nothing in it.» for a saved password that stopped fitting —, while
+  `Checked` keeps when it was last read.
+- `op=tick` of Connections takes `kind`: one kind of a collection or of a
+  feed. A feed answering other than 200 is `publish.StatusError` (its words
+  are as before), so a refused password is told from the rest.
+
+### For consumers
+
+`SubscriptionCard.ID`, `.Access`, `.Password`, `.Lands`, `.Changed`,
+`.State`, `.Note` and `FeedKindRow` in C-6; fixtures of Connections and of
+the sheets over it re-shot.
+
 ## v0.2.298 — 2026-10-16
 
 ### Added

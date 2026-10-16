@@ -281,6 +281,7 @@ type CollectionRow struct {
 	Menu   []MenuItem `json:"menu"` // Rename · Delete · Move
 }
 type SubscriptionCard struct {
+	ID      string `json:"id"` // «f-…», {account} её адресов
 	Title   Text   `json:"title"`
 	URL     Text   `json:"url"`
 	Colour  Colour `json:"colour"`
@@ -289,9 +290,39 @@ type SubscriptionCard struct {
 	Checked When   `json:"checked"`
 	// Size и Took — сколько весил и сколько читался последний ответ ленты в
 	// этом сеансе: «34 KB», «0.4 s» (s-profile-1, -10); не читалась — пусто
-	Size    Text     `json:"size"`
-	Took    Text     `json:"took"`
-	Actions []Action `json:"actions"` // Check · Edit · Unsubscribe
+	Size Text `json:"size"`
+	Took Text `json:"took"`
+	// Access — «no password» или «password saved» в строке адреса
+	// (s-profile-1; Нс25)
+	Access Text `json:"access"`
+	// Password — Show password у ленты с сохранённым паролем, тем же окном,
+	// что у подключения; nil — пароля нет
+	Password *SecretField `json:"password"`
+	// Lands — таблица «Lands in»: строка на род ленты (Нс26); Changed —
+	// «Changed on the server», одна на все строки («yesterday»); пусто —
+	// не читалась
+	Lands   []FeedKindRow `json:"lands"`
+	Changed When          `json:"changed"`
+	// State — unavailable, когда последнее чтение ленты вернулось отказом;
+	// Note — строка под карточкой, что значит отказ (s-profile-1:
+	// «The feed asks for a password and the saved one no longer fits. …»);
+	// Check тогда — «Check again», Checked — когда лента читалась последний
+	// раз
+	State   CollectionState `json:"state"`
+	Note    Text            `json:"note"`
+	Actions []Action        `json:"actions"` // Check · Edit · Unsubscribe
+}
+
+// FeedKindRow — строка «Lands in» карточки подписки (s-profile-1): род
+// ленты словом экрана («Calendar», «Tasks», «Notes»), отмечен ли он в своём
+// разделе, сколько записей рода лента держала при последнем чтении (nil —
+// не читалась) и флажок строки — POST ?op=tick&kind=…
+type FeedKindRow struct {
+	Kind    Kind      `json:"kind"`
+	Label   Text      `json:"label"`
+	Tick    TickState `json:"tick"`
+	Objects *int      `json:"objects"`
+	Toggle  Action    `json:"toggle"`
 }
 
 // AttachmentsPage — Settings → Attachments (attachments-1): коллекция

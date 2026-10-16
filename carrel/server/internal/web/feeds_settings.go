@@ -317,9 +317,11 @@ func (s *Server) unsubscribe(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) subscriptionCard(sess *session.Session, tf timeFmt, f sealed.Subscription) view.SubscriptionCard {
 	col := f.FeedCollection()
-	card := view.SubscriptionCard{Title: text(collectionLabel(col)), URL: text(f.URL), Colour: catalogColour(col), Kinds: f.Kinds}
-	card.Checked, _ = readingOf(sess, tf, f.ID, sealed.FeedPath)
-	if r, ok := sess.ReadingOf(f.ID, sealed.FeedPath); ok && r.Fetched {
+	card := view.SubscriptionCard{ID: f.ID, Title: text(collectionLabel(col)), URL: text(f.URL), Colour: catalogColour(col), Kinds: f.Kinds,
+		State: view.CollectionOK, Lands: []view.FeedKindRow{}}
+	card.Checked, card.Changed = readingOf(sess, tf, f.ID, sealed.FeedPath)
+	r, read := sess.ReadingOf(f.ID, sealed.FeedPath)
+	if read && r.Fetched {
 		card.Size, card.Took = text(roughSize(r.Size)), text(tookText(r.Took))
 	}
 	q := func(op string) string {
@@ -329,6 +331,47 @@ func (s *Server) subscriptionCard(sess *session.Session, tf timeFmt, f sealed.Su
 		{ID: "feed.recheck", Label: "Check", Href: q("feed.recheck"), Method: "POST", Enabled: true},
 		{ID: "feed.edit", Label: "Edit", Href: s.postQuery("/app/collections/rename", url.Values{"a": {f.ID}, "c": {sealed.FeedPath}}), Method: "GET", Enabled: len(f.Kinds) > 0},
 		{ID: "feed.unsubscribe", Label: "Unsubscribe", Href: q("feed.unsubscribe"), Method: "POST", Danger: true, Enabled: true},
+	}
+	// The address line says whether a password is saved for the link, and
+	// a saved one is shown behind the window a connection's is (Нс25).
+	card.Access = "no password"
+	if f.Password != "" {
+		card.Access = "password saved"
+		reveal := view.Action{ID: "connection.password", Label: "Show password", Href: s.route("/app/settings/unlock?" + url.Values{"for": {f.ID}}.Encode()), Method: "GET", Enabled: true}
+		if sess.UnlockUntil(time.Now()) != nil {
+			reveal.Href = s.postQuery("/app/settings/connections", url.Values{"reveal": {f.ID}})
+		}
+		card.Password = &view.SecretField{Reveal: reveal}
+	}
+	// Lands in: a row a kind of the feed, in the order of the sections
+	// (Нс26).
+	blob := s.catalogOf(sess)
+	for _, k := range []view.Kind{view.KindEvent, view.KindTask, view.KindNote, view.KindContact} {
+		if !col.Has(k) {
+			continue
+		}
+		seg := segmentOf(k)
+		row := view.FeedKindRow{Kind: k, Label: text(kindTitle(seg)), Tick: view.TickOff,
+			Objects: collectionCount(sess, f.ID, col, recordKinds[seg]),
+			Toggle: view.Action{ID: "feed.tick", Label: text(kindTitle(seg)), Method: "POST", Enabled: true,
+				Href: s.postQuery("/app/settings/connections", url.Values{"op": {"tick"}, "account": {f.ID}, "path": {sealed.FeedPath}, "kind": {string(k)}})}}
+		if isTicked(blob, k, f.ID, sealed.FeedPath) {
+			row.Tick = view.TickOn
+		}
+		card.Lands = append(card.Lands, row)
+	}
+	// The last fetch was refused (Нс25, s-profile-1): an alarm with what it
+	// means, Check again; the time it was last read stays.
+	if read && r.Refused.After(r.At) {
+		card.State = view.CollectionUnavailable
+		card.Actions[0].Label = "Check again"
+		card.Note = text(r.Reason)
+		if r.Unauthorized {
+			card.Note = "The feed asks for a password, and none is saved for it."
+			if f.Password != "" {
+				card.Note = "The feed asks for a password and the saved one no longer fits. A feed that stopped answering must not look like a feed with nothing in it."
+			}
+		}
 	}
 	return card
 }

@@ -17,10 +17,12 @@ type Reading struct {
 	Size    int64
 	Took    time.Duration
 	// Refused is when a poll of the collection last came back refused by
-	// its server, and Why what that refusal means (Нс23): the card of the
-	// connection says so while it is newer than every read.
-	Refused time.Time
-	Why     string
+	// its server — Unauthorized when it refused the password, Reason the
+	// refusal in words (Нс23, Нс25): the card of the connection or of the
+	// feed says so while it is newer than every read.
+	Refused      time.Time
+	Unauthorized bool
+	Reason       string
 }
 
 func readingKey(accountID, path string) string { return accountID + "\x00" + path }
@@ -50,7 +52,7 @@ func (s *Session) NoteReading(accountID, path string, r Reading) {
 		r.Changed = old.Changed
 	}
 	if r.Refused.Before(old.Refused) {
-		r.Refused, r.Why = old.Refused, old.Why
+		r.Refused, r.Unauthorized, r.Reason = old.Refused, old.Unauthorized, old.Reason
 	}
 	s.readings[k] = r
 }
