@@ -377,8 +377,17 @@ func liveContacts(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 	if loc := redirected(t, "stale edit", app.post(rec+"/edit", form)); loc != rec+"/conflict" {
 		t.Fatalf("stale edit went to %q, want the conflict screen", loc)
 	}
+	// Two cards: the title is the person's alone, the note the server's
+	// alone — a field only the server changed is a card of its own, the
+	// server's chosen (v0.2.267; s-conflict-4).
 	conflict := liveDecode[view.ConflictPage](t, "conflict", app.get(rec+"/conflict"))
-	if len(conflict.Rows) != 1 || conflict.Rows[0].Property != "TITLE" || conflict.Rows[0].Mine != "Countess" {
+	rows := map[view.Text]view.ConflictRow{}
+	for _, row := range conflict.Rows {
+		rows[row.Property] = row
+	}
+	if title, note := rows["TITLE"], rows["NOTE"]; len(conflict.Rows) != 2 ||
+		title.Mine != "Countess" || title.Diff != view.DiffMine ||
+		note.Theirs != "server note" || note.Diff != view.DiffTheirs || note.Choice != "theirs" {
 		t.Fatalf("conflict rows = %+v", conflict.Rows)
 	}
 	// «Write this combination» sends the conflict's form with each row as
