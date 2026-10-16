@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.287 — 2026-10-16
+
+### Changed
+
+- **What matched the query is marked in a result's title** (Пк13 of the
+  scan of 15.10.2026; `s-find-1`: «**Ковал**ёва Анна»): `FindRow.Marked`
+  is the title in pieces, the first match of the query strong, whatever
+  the case; empty when the result was found by another field.
+
+### For consumers
+
+Draw `Marked` where it is set, else `Title`. Fixture `app-search`
+re-shot.
+
 ## v0.2.286 — 2026-10-16
 
 ### Changed

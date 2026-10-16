@@ -21,8 +21,12 @@ type FindRow struct {
 	Colour Colour `json:"colour"`
 	Stamp  Stamp  `json:"stamp"`
 	Title  Text   `json:"title"`
-	Detail Text   `json:"detail"`
-	When   Text   `json:"when"`
+	// Marked — Title кусками в выдаче поиска: совпавшее с запросом — strong,
+	// без учёта регистра (s-find-1: «**Ковал**ёва Анна»; Пк13); пусто —
+	// найдено не по названию
+	Marked Runs `json:"marked,omitempty"`
+	Detail Text `json:"detail"`
+	When   Text `json:"when"`
 }
 
 type SearchHistoryRow struct {

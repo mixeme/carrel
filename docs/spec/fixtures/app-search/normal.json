@@ -527,6 +527,15 @@
       "detail": "a.kovaleva@example.org",
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
       "kind": "contact",
+      "marked": [
+        {
+          "text": "Анна "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковалёва"
+        }
+      ],
       "stamp": "nextcloud · Контакты",
       "title": "Анна Ковалёва",
       "when": ""

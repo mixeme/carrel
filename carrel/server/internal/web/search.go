@@ -176,6 +176,7 @@ func (s *Server) fillResults(page *view.SearchPage, sess *session.Session, blob 
 			continue
 		}
 		row := s.findRow(tf, blob, it)
+		row.Marked = markedTitle(string(row.Title), q)
 		if needle != "" && !strings.Contains(strings.ToLower(string(row.Title)+"\n"+string(row.Detail)), needle) {
 			continue
 		}
@@ -212,6 +213,35 @@ func (s *Server) fillResults(page *view.SearchPage, sess *session.Session, blob 
 			break
 		}
 	}
+}
+
+// markedTitle is a title in pieces, the first piece that matches the query
+// strong, whatever the case of either (s-find-1, Пк13); nil — the title does
+// not hold it (found by another field).
+func markedTitle(title, q string) view.Runs {
+	rs, needle := []rune(title), []rune(strings.ToLower(strings.TrimSpace(q)))
+	if len(needle) == 0 || len(needle) > len(rs) {
+		return nil
+	}
+	low := []rune(strings.ToLower(title))
+	if len(low) != len(rs) {
+		return nil // a letter whose lower case is longer: no piece is cut wrong
+	}
+	for i := 0; i+len(needle) <= len(low); i++ {
+		if string(low[i:i+len(needle)]) != string(needle) {
+			continue
+		}
+		var out view.Runs
+		if i > 0 {
+			out = append(out, plainRun(string(rs[:i])))
+		}
+		out = append(out, strongRun(string(rs[i:i+len(needle)])))
+		if j := i + len(needle); j < len(rs) {
+			out = append(out, plainRun(string(rs[j:])))
+		}
+		return out
+	}
+	return nil
 }
 
 // findRow is one result in the look of its kind, with its origin (C-10).

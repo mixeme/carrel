@@ -1691,6 +1691,7 @@ type FindRow struct {
     Colour Colour
     Stamp  Stamp
     Title  Text
+    Marked Runs // Title кусками в выдаче поиска: совпавшее с запросом — strong, без учёта регистра (s-find-1: «**Ковал**ёва Анна»); пусто — найдено не по названию
     Detail Text
     When   Text
 }
