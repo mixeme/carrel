@@ -16,7 +16,7 @@ type adminEscrowFlash struct {
 	formErr    string
 	masterErr  string
 	recoverErr string
-	result     *view.EscrowRecoveryResult
+	result     *view.IssuedPassword
 }
 
 func (s *Server) getSettingsEscrow(w http.ResponseWriter, r *http.Request) {
@@ -285,13 +285,15 @@ func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
 			flash.recoverErr = string(formError(err))
 		} else {
 			mailed := s.sendEscrowRecoveryMail(r, login, sess.Login())
-			flash.result = &view.EscrowRecoveryResult{
+			// The temporary password as a reset issues it (Ад34; s-admin-14),
+			// and whether the person was told.
+			flash.result = &view.IssuedPassword{
 				Login:    text(login),
 				Password: text(temp),
-				Copy: view.Action{
-					ID: "admin.escrow.copy", Label: "Copy", Method: "GET", Enabled: true,
-				},
-				Mailed: s.escrowRecoveryMailedStatus(login, mailed),
+				Copy:     view.Action{ID: "admin.escrow.copy", Label: "Copy", Icon: "i-dup", Method: "GET", Primary: true, Enabled: true},
+				Message:  join("The account of ", strongRun(login), " is recovered."),
+				Note:     s.escrowRecoveryMailedStatus(login, mailed),
+				Done:     view.Action{ID: "admin.escrow.done", Label: "Done", Href: s.route("/admin/escrow"), Method: "GET", Primary: true, Enabled: true},
 			}
 			page := s.buildAdminEscrowPage(sess, flash)
 			s.writePage(w, r, http.StatusOK, page)
@@ -308,16 +310,18 @@ func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/admin/escrow")
 }
 
+// escrowRecoveryMailedStatus is the line beside Copy: whether the person was
+// told by letter, and when not, why.
 func (s *Server) escrowRecoveryMailedStatus(login string, sent bool) view.Text {
 	switch {
 	case sent:
-		return text("sent")
+		return text("They are told by letter; hand the password over yourself.")
 	case !s.mailConfigured():
-		return text("SMTP not configured")
+		return text("No letter went: mail is not configured. Tell them yourself.")
 	case s.users.ConfirmedAddress(login) == "":
-		return text("no confirmed address")
+		return text("No letter went: they have no confirmed address. Tell them yourself.")
 	}
-	return text("failed")
+	return text("The letter did not go. Tell them yourself.")
 }
 
 func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFlash) view.AdminEscrowPage {
@@ -408,6 +412,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 				row.Deposited = view.When(tf.dayKey(*u.EscrowDepositedAt))
 			}
 			if u.EscrowLastRecovery != nil {
+				row.Recovered = true
 				row.LastRecovery = view.When(tf.dayKey(*u.EscrowLastRecovery) + " " + tf.clock(*u.EscrowLastRecovery))
 			}
 		}

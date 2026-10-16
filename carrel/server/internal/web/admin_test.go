@@ -49,8 +49,9 @@ func TestPostAdminEscrowRecoverShowsTempPassword(t *testing.T) {
 	if page.Result == nil || page.Result.Password == "" {
 		t.Fatal("recovery result missing temporary password")
 	}
-	if page.Result.Mailed != "SMTP not configured" {
-		t.Fatalf("mailed = %q, want SMTP not configured", page.Result.Mailed)
+	// Issued as a reset issues a password (Ад34), with why no letter went.
+	if page.Result.Note != "No letter went: mail is not configured. Tell them yourself." || page.Result.Copy.Icon != "i-dup" || page.Result.Done.Href != "/admin/escrow" {
+		t.Fatalf("result = %+v", page.Result)
 	}
 	temp := string(page.Result.Password)
 	if _, _, ok, _ := h.users.Authenticate(context.Background(), "bob", temp); !ok {

@@ -207,6 +207,20 @@
             "readOnly": false,
             "required": false,
             "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "date",
+            "label": "Since",
+            "mono": true,
+            "name": "since",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
           }
         ],
         "unfold": null
@@ -342,6 +356,7 @@
   "rows": [
     {
       "detail": "file a-sftp-vps",
+      "failure": false,
       "what": "publish.create",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -349,6 +364,7 @@
     },
     {
       "detail": "event a-nc-home",
+      "failure": false,
       "what": "publish.create",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -356,6 +372,7 @@
     },
     {
       "detail": "a-sftp-vps",
+      "failure": false,
       "what": "attachments.folder",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -363,6 +380,7 @@
     },
     {
       "detail": "file",
+      "failure": false,
       "what": "sources.select",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -370,6 +388,7 @@
     },
     {
       "detail": "a-sftp-vps",
+      "failure": false,
       "what": "connection.add",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -377,6 +396,7 @@
     },
     {
       "detail": "f-league",
+      "failure": false,
       "what": "feed.edit",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -384,6 +404,7 @@
     },
     {
       "detail": "f-league",
+      "failure": false,
       "what": "feed.subscribe",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -391,6 +412,7 @@
     },
     {
       "detail": "event",
+      "failure": false,
       "what": "sources.select",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -398,6 +420,7 @@
     },
     {
       "detail": "f-ru-holidays",
+      "failure": false,
       "what": "feed.edit",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -405,6 +428,7 @@
     },
     {
       "detail": "f-ru-holidays",
+      "failure": false,
       "what": "feed.subscribe",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -412,6 +436,7 @@
     },
     {
       "detail": "",
+      "failure": false,
       "what": "duplicates.link",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -419,6 +444,7 @@
     },
     {
       "detail": "note",
+      "failure": false,
       "what": "sources.select",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -426,6 +452,7 @@
     },
     {
       "detail": "task",
+      "failure": false,
       "what": "sources.select",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -433,6 +460,7 @@
     },
     {
       "detail": "event",
+      "failure": false,
       "what": "sources.select",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -440,6 +468,7 @@
     },
     {
       "detail": "contact",
+      "failure": false,
       "what": "sources.select",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -447,6 +476,7 @@
     },
     {
       "detail": "a-baikal",
+      "failure": false,
       "what": "connection.add",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -454,6 +484,7 @@
     },
     {
       "detail": "a-rad-vps",
+      "failure": false,
       "what": "connection.add",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -461,6 +492,7 @@
     },
     {
       "detail": "a-nc-home",
+      "failure": false,
       "what": "connection.add",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -468,6 +500,7 @@
     },
     {
       "detail": "new accounts covered",
+      "failure": false,
       "what": "escrow.enable",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -475,6 +508,7 @@
     },
     {
       "detail": "inviteTTL, idle, session, name",
+      "failure": false,
       "what": "settings.instance",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -482,6 +516,7 @@
     },
     {
       "detail": "",
+      "failure": false,
       "what": "login.ok",
       "when": "2026-08-10 17:04",
       "who": "mix",
@@ -489,6 +524,7 @@
     },
     {
       "detail": "",
+      "failure": false,
       "what": "setup.first_admin",
       "when": "2026-08-10 17:04",
       "who": "system",

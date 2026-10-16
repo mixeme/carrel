@@ -618,7 +618,9 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 			Delivery: "link",
 			Status:   "pending",
 			Sent:     inviteSentStatus(inv, mail),
-			Expires:  tf.formatWhen(inv.ExpiresAt, false, now),
+			// The letter that did not go, in alarm (Ад14; s-admin-1).
+			SentFailed: inv.Email != "" && inv.Mailed == "failed",
+			Expires:    tf.formatWhen(inv.ExpiresAt, false, now),
 			// The rare rest is under «⋯» (s-admin-11): Extend when the
 			// person did not make it in time, Revoke under the line.
 			Menu: []view.MenuItem{
@@ -715,6 +717,16 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	// The action is the code the journal writes (s-admin-10): login.ok,
 	// login.fail, … — the same the Action column shows.
 	action := r.URL.Query().Get("action")
+	tf := s.timeFor(sess)
+	// The day the journal is read from, in the person's zone (Ад24;
+	// s-admin-7): the lines of that day and after it.
+	since := strings.TrimSpace(r.URL.Query().Get("since"))
+	var from time.Time
+	if day, err := time.ParseInLocation("2006-01-02", since, tf.tz); err == nil {
+		from = day
+	} else {
+		since = ""
+	}
 	inShow := func(what string) bool {
 		switch show {
 		case "security":
@@ -724,8 +736,8 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 		}
 		return true
 	}
-	keep := func(what string) bool {
-		return inShow(what) && (action == "" || what == action)
+	keep := func(e store.AuditEntry) bool {
+		return inShow(e.What) && (action == "" || e.What == action) && !e.When.Before(from)
 	}
 	if r.URL.Query().Get("format") == "csv" {
 		s.writeAuditCSV(w, snap.Audit, keep)
@@ -733,10 +745,9 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	}
 	page := view.AdminAuditPage{Shell: s.buildShell(sess, "Audit log")}
 	page.Rail = s.adminRail(sess, "/admin/audit")
-	tf := s.timeFor(sess)
 	for i := len(snap.Audit) - 1; i >= 0; i-- {
 		e := snap.Audit[i]
-		if !keep(e.What) {
+		if !keep(e) {
 			continue
 		}
 		// The moment in numbers, as the frame writes it (Ад3; s-admin-7);
@@ -751,12 +762,15 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 			What:   text(e.What),
 			Whom:   text(whom),
 			Detail: text(e.Detail),
+			// A line that says something did not happen (Ад25): the frame
+			// sets its action in alarm.
+			Failure: auditIsFailure(e.What),
 		})
 	}
 	page.Bar.Loaded = len(page.Rows)
 	total := len(snap.Audit)
 	page.Bar.Total = &total
-	page.Filter = s.auditActionFilter(sess, snap.Audit, show, action, inShow)
+	page.Filter = s.auditActionFilter(sess, snap.Audit, show, action, since, inShow)
 	// s-admin-7 writes the segments without counts.
 	for _, seg := range []struct{ id, label, value string }{
 		{"audit.all", "All", "all"},
@@ -770,6 +784,9 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 		if action != "" {
 			q.Set("action", action)
 		}
+		if since != "" {
+			q.Set("since", since)
+		}
 		page.Bar.Segments = append(page.Bar.Segments, view.Action{
 			ID: seg.id, Label: text(seg.label), Method: "GET",
 			Enabled: true, On: seg.value == show, Href: s.postQuery("/admin/audit", q),
@@ -781,6 +798,9 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	}
 	if action != "" {
 		csv.Set("action", action)
+	}
+	if since != "" {
+		csv.Set("since", since)
 	}
 	page.Bar.Actions = []view.Action{{ID: "audit.export", Label: "Export CSV", Method: "GET", Enabled: true,
 		Href: s.postQuery("/admin/audit", csv)}}
@@ -794,7 +814,7 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 // actions, a line, then the actions of the lines the chosen segment shows, in
 // the order of their names. A chosen action the segment does not show stays
 // in the list, so the choice is never lost from sight.
-func (s *Server) auditActionFilter(sess *session.Session, entries []store.AuditEntry, show, action string, inShow func(string) bool) view.Form {
+func (s *Server) auditActionFilter(sess *session.Session, entries []store.AuditEntry, show, action, since string, inShow func(string) bool) view.Form {
 	seen := map[string]bool{}
 	var codes []string
 	for _, e := range entries {
@@ -812,7 +832,9 @@ func (s *Server) auditActionFilter(sess *session.Session, entries []store.AuditE
 	for i, code := range codes {
 		row.Options = append(row.Options, view.Option{Value: code, Label: text(code), Selected: code == action, Separator: i == 0})
 	}
-	rows := []view.FormRow{row}
+	// The day it is read from, after the action (Ад24; s-admin-7): sent
+	// with the form as the action is.
+	rows := []view.FormRow{row, {Name: "since", Label: "Since", Kind: view.InputDate, Value: text(since), Mono: true}}
 	if show != "all" {
 		rows = append(rows, view.FormRow{Name: "show", Kind: view.InputHidden, Value: text(show)})
 	}
@@ -822,7 +844,7 @@ func (s *Server) auditActionFilter(sess *session.Session, entries []store.AuditE
 // writeAuditCSV hands over what the screen shows, oldest first, as the
 // journal holds it: the times in RFC 3339 and no zone of the reader's, so
 // two exports can be compared.
-func (s *Server) writeAuditCSV(w http.ResponseWriter, entries []store.AuditEntry, keep func(string) bool) {
+func (s *Server) writeAuditCSV(w http.ResponseWriter, entries []store.AuditEntry, keep func(store.AuditEntry) bool) {
 	h := w.Header()
 	h.Set("Content-Type", "text/csv; charset=utf-8")
 	if v := mime.FormatMediaType("attachment", map[string]string{"filename": "carrel-audit.csv"}); v != "" {
@@ -837,7 +859,7 @@ func (s *Server) writeAuditCSV(w http.ResponseWriter, entries []store.AuditEntry
 	out := csv.NewWriter(w)
 	_ = out.Write([]string{"when", "who", "what", "whom", "detail"})
 	for _, e := range entries {
-		if !keep(e.What) {
+		if !keep(e) {
 			continue
 		}
 		if out.Write([]string{e.When.UTC().Format(time.RFC3339), e.Who, e.What, e.Whom, e.Detail}) != nil {

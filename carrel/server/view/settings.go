@@ -645,14 +645,16 @@ type IssuedPassword struct {
 // InviteRow — ожидающее приглашение (s-admin-1). Логина у него нет: его
 // выбирает приглашённый.
 type InviteRow struct {
-	Address  Text       `json:"address"`  // первая колонка: адрес письма; «—» у ссылки
-	Link     Text       `json:"link"`     // видна всегда, независимо от отправки
-	Delivery Text       `json:"delivery"` // «link» или «email»: как приглашение передано
-	Status   Text       `json:"status"`   // «pending»: в списке только действующие
-	Sent     Text       `json:"sent"`     // «sent», «failed — 550 mailbox unavailable» (ответ реле), «SMTP not configured»; «—» у ссылки
-	Expires  When       `json:"expires"`
-	Actions  []Action   `json:"actions"` // Resend (у приглашения письмом) · Copy link
-	Menu     []MenuItem `json:"menu"`    // «⋯»: Extend, черта, Revoke
+	Address  Text `json:"address"`  // первая колонка: адрес письма; «—» у ссылки
+	Link     Text `json:"link"`     // видна всегда, независимо от отправки
+	Delivery Text `json:"delivery"` // «link» или «email»: как приглашение передано
+	Status   Text `json:"status"`   // «pending»: в списке только действующие
+	Sent     Text `json:"sent"`     // «sent», «failed — 550 mailbox unavailable» (ответ реле), «SMTP not configured»; «—» у ссылки
+	// SentFailed — письмо не ушло: Sent тревогой (s-admin-1, Ад14)
+	SentFailed bool       `json:"sentFailed"`
+	Expires    When       `json:"expires"`
+	Actions    []Action   `json:"actions"` // Resend (у приглашения письмом) · Copy link
+	Menu       []MenuItem `json:"menu"`    // «⋯»: Extend, черта, Revoke
 }
 
 type AdminSettingsPage struct {
@@ -676,25 +678,19 @@ type MailTestResult struct {
 	Reply Text `json:"reply"`
 }
 
-type EscrowRecoveryResult struct {
-	Login    Text   `json:"login"`
-	Password Text   `json:"password"` // shown once; not stored in state
-	Copy     Action `json:"copy"`
-	Mailed   Text   `json:"mailed"` // «отправлено», «SMTP не настроен»
-}
-
 type AdminEscrowPage struct {
 	Shell
-	Subtitle Text                  `json:"subtitle"` // «4 of 6 accounts open with the master password»; пусто, пока схема не включена
-	Enabled  bool                  `json:"enabled"`
-	Warning  Notice                `json:"warning"`
-	Form     Form                  `json:"form"`   // Policy: New accounts are covered; до включения — мастер-пароль и Turn on key escrow
-	Master   Form                  `json:"master"` // Current, New, Repeat; Change
-	Opens    int                   `json:"opens"`  // число у «Whom the master password opens»: депонировавшие
-	Covered  []EscrowCoverRow      `json:"covered"`
-	Recover  Form                  `json:"recover"` // Account, Master password, Temporary password for the user; Recover
-	Result   *EscrowRecoveryResult `json:"result"`
-	History  []AuditRow            `json:"history"`
+	Subtitle Text             `json:"subtitle"` // «4 of 6 accounts open with the master password»; пусто, пока схема не включена
+	Enabled  bool             `json:"enabled"`
+	Warning  Notice           `json:"warning"`
+	Form     Form             `json:"form"`   // Policy: New accounts are covered; до включения — мастер-пароль и Turn on key escrow
+	Master   Form             `json:"master"` // Current, New, Repeat; Change
+	Opens    int              `json:"opens"`  // число у «Whom the master password opens»: депонировавшие
+	Covered  []EscrowCoverRow `json:"covered"`
+	Recover  Form             `json:"recover"` // Account, Master password, Temporary password for the user; Recover
+	// Result — ответ на Recover: временный пароль, как его выдаёт сброс
+	// (s-admin-14, Ад34); Note — ушло ли письмо человеку
+	Result *IssuedPassword `json:"result"`
 }
 
 // EscrowCoverRow — строка «Whom the master password opens» (s-admin-6):
@@ -704,12 +700,15 @@ type EscrowCoverRow struct {
 	Covered      bool `json:"covered"`      // копия депонирована
 	Deposited    When `json:"deposited"`    // «2026-03-02» или «not deposited»
 	LastRecovery When `json:"lastRecovery"` // «never», «2026-08-14 18:40» или «—» у недепонировавшей
+	// Recovered — LastRecovery — момент; false у «never» и «—»: слово
+	// приглушено (s-admin-6, Ад35), как «not deposited» у !Covered
+	Recovered bool `json:"recovered"`
 }
 
 type AdminAuditPage struct {
 	Shell
 	Bar    ListBar    `json:"bar"`
-	Filter Form       `json:"filter"` // выбор действия (s-admin-10): GET, уходит при выборе
+	Filter Form       `json:"filter"` // выбор действия (s-admin-10) и день, с которого читать (since, s-admin-7): GET, уходит при выборе
 	Rows   []AuditRow `json:"rows"`
 }
 type AuditRow struct {
@@ -718,6 +717,9 @@ type AuditRow struct {
 	What   Text `json:"what"`
 	Whom   Text `json:"whom"`
 	Detail Text `json:"detail"`
+	// Failure — строка о том, что не случилось (login.fail, …): действие
+	// тревогой (s-admin-7, Ад25)
+	Failure bool `json:"failure"`
 }
 
 type AdminDavPage struct {

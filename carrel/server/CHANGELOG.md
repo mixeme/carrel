@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.313 — 2026-10-16
+
+### Changed
+
+- **The journal, the invitations and key escrow by their frames** (Ад14,
+  Ад24, Ад25, Ад34, Ад35 of the scan of 15.10.2026; `s-admin-1`, `-6`,
+  `-7`): the journal is read from a day — a date in the bar's form,
+  `?since=`, kept by the segments and by Export CSV — and a line that says
+  something did not happen is marked (`AuditRow.Failure`); an invitation
+  whose letter did not go says so in its own field (`InviteRow.SentFailed`);
+  a recovery answers with the temporary password as a reset issues it
+  (`IssuedPassword`: the message, Copy with its icon, whether the person was
+  told by letter, Done), and the page no longer carries an empty `History`;
+  a covered row says whether its last recovery is a moment
+  (`EscrowCoverRow.Recovered`), so «never» is dimmed.
+
+### For consumers
+
+C-5: `/admin/audit?since=`. C-6: `AuditRow.Failure`, `InviteRow.SentFailed`,
+`EscrowCoverRow.Recovered`; `AdminEscrowPage.Result` is an `IssuedPassword`,
+`History` and `EscrowRecoveryResult` are gone. Fixtures `admin-audit`,
+`admin-escrow` re-shot.
+
 ## v0.2.312 — 2026-10-16
 
 ### Changed

@@ -193,6 +193,12 @@ func TestInvitationIsMailed(t *testing.T) {
 	if sent["bob@example.org"] != "sent" || sent["carol@example.org"] != "failed — 550 no such mailbox" {
 		t.Errorf("sent = %v", sent)
 	}
+	// The letter that did not go is said in alarm (Ад14; s-admin-1).
+	for _, row := range page.Rows {
+		if row.SentFailed != (row.Address == "carol@example.org") {
+			t.Errorf("%s: failed %v", row.Address, row.SentFailed)
+		}
+	}
 }
 
 // The wipe link goes to the confirmed address and nowhere else, and the
@@ -235,7 +241,7 @@ func TestEscrowRecoveryIsMailedWithoutThePassword(t *testing.T) {
 	relay := h.relayed()
 
 	page := decode[view.AdminEscrowPage](t, h.do(postForm("/admin/escrow", alice, url.Values{"action": {"recover"}, "login": {"bob"}, "master": {master}})))
-	if page.Result == nil || page.Result.Mailed != "sent" {
+	if page.Result == nil || page.Result.Note != "They are told by letter; hand the password over yourself." {
 		t.Fatalf("result = %+v", page.Result)
 	}
 	letters := relay.Letters()

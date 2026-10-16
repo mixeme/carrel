@@ -520,7 +520,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/admin/settings` | GET, POST | админ | страница | `AdminSettingsPage` |
 | `/admin/settings/mail-test` | POST | админ | страница | `AdminSettingsPage` — пробное письмо: итог в `Test` |
 | `/admin/escrow` | GET, POST | админ | страница | `AdminEscrowPage` |
-| `/admin/audit` | GET | админ | страница, файл (`?format=csv`); `?show=`, `?action=` — фильтры | `AdminAuditPage` |
+| `/admin/audit` | GET | админ | страница, файл (`?format=csv`); `?show=`, `?action=`, `?since=YYYY-MM-DD` (строки этого дня и позже, в поясе человека) — фильтры | `AdminAuditPage` |
 | `/admin/columns`, `/admin/audit/columns` | POST | админ | редирект | — ; меню Columns пользователей (s-admin-21) и журнала (s-admin-23), как у списков (S-9.6) |
 | `/admin/dav` | GET, POST | админ | страница | `AdminDavPage` |
 | `/admin/install` | GET, POST | админ | страница | `AdminInstallPage` |
@@ -3197,6 +3197,7 @@ type InviteRow struct {
     Delivery Text // «link» или «email»: как приглашение передано (s-admin-1)
     Status   Text // «pending»: в списке только действующие
     Sent     Text // «sent», «failed — 550 mailbox unavailable» (ответ реле), «SMTP not configured»; «—» у ссылки
+    SentFailed bool // письмо не ушло: Sent тревогой (s-admin-1, Ад14)
     Expires  When
     Actions  []Action   // Resend (у приглашения письмом) · Copy link (s-admin-1)
     Menu     []MenuItem // «⋯»: Extend, черта, Revoke (s-admin-11)
@@ -3219,13 +3220,6 @@ type AdminSettingsPage struct {
 }
 type MailTestResult struct { OK bool; Reply Text } // полный ответ сервера, без пароля реле
 
-type EscrowRecoveryResult struct {
-    Login    Text
-    Password Text // shown once; not stored in state
-    Copy     Action
-    Mailed   Text // «отправлено», «SMTP не настроен»
-}
-
 type AdminEscrowPage struct {
     Shell
     Subtitle Text // «4 of 6 accounts open with the master password»; пусто, пока схема не включена
@@ -3236,8 +3230,7 @@ type AdminEscrowPage struct {
     Opens    int    // число у «Whom the master password opens»: депонировавшие
     Covered  []EscrowCoverRow
     Recover  Form   // Recover an account: Account, Master password, Temporary password for the user (предложен сервером) и подсказка; Recover (Danger)
-    Result   *EscrowRecoveryResult
-    History  []AuditRow
+    Result   *IssuedPassword // ответ на Recover — временный пароль, как его выдаёт сброс (s-admin-14, Ад34): Message «The account of bob is recovered.», Note — ушло ли письмо человеку, Done — к странице
 }
 // Строка «Whom the master password opens» (s-admin-6): каждая учётная
 // запись списка пользователей, депонировала она или нет.
@@ -3246,15 +3239,16 @@ type EscrowCoverRow struct {
     Covered      bool // копия депонирована
     Deposited    When // «2026-03-02» или «not deposited»
     LastRecovery When // «never», «2026-08-14 18:40» или «—» у недепонировавшей
+    Recovered    bool // LastRecovery — момент; false у «never» и «—»: слово приглушено (s-admin-6, Ад35), как «not deposited» у !Covered
 }
 
 type AdminAuditPage struct {
     Shell
     Bar    ListBar
-    Filter Form // выбор действия (s-admin-10): GET /admin/audit?action=…, уходит при выборе
+    Filter Form // выбор действия (s-admin-10) и день, с которого читать — since, дата (s-admin-7, Ад24): GET /admin/audit?action=…&since=…, уходит при выборе
     Rows   []AuditRow
 }
-type AuditRow struct { When When; Who Text; What Text; Whom Text; Detail Text }
+type AuditRow struct { When When; Who Text; What Text; Whom Text; Detail Text; Failure bool } // Failure — строка о том, что не случилось (login.fail, …): действие тревогой (s-admin-7, Ад25)
 
 type AdminDavPage struct {
     Shell

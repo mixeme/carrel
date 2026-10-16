@@ -4,7 +4,8 @@
       "covered": false,
       "deposited": "not deposited",
       "lastRecovery": "—",
-      "login": "mix"
+      "login": "mix",
+      "recovered": false
     }
   ],
   "details": null,
@@ -71,7 +72,6 @@
       }
     ]
   },
-  "history": [],
   "look": {
     "compact": false,
     "panel": true,
