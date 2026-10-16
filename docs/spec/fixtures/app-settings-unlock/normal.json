@@ -11,6 +11,13 @@
         "method": "POST",
         "primary": true,
         "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "id": "unlock.cancel",
+        "label": "Cancel",
+        "method": "GET"
       }
     ],
     "errors": [],
@@ -49,6 +56,19 @@
             "add": null,
             "error": "",
             "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "for",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
             "focus": true,
             "hint": "",
             "kind": "password",
@@ -66,6 +86,7 @@
     "target": "sheet"
   },
   "purpose": "Confirm your password to reveal stored credentials, download a device profile, issue a davloom device password, change key escrow, or delete your account.",
+  "subject": "",
   "under": {
     "account": null,
     "adminUsers": null,
@@ -808,7 +829,7 @@
           "password": {
             "reveal": {
               "enabled": true,
-              "href": "/app/settings/unlock",
+              "href": "/app/settings/unlock?for=a-nc-home",
               "id": "connection.password",
               "label": "Show password",
               "method": "GET",
@@ -1152,7 +1173,7 @@
           "password": {
             "reveal": {
               "enabled": true,
-              "href": "/app/settings/unlock",
+              "href": "/app/settings/unlock?for=a-rad-vps",
               "id": "connection.password",
               "label": "Show password",
               "method": "GET",
@@ -1289,7 +1310,7 @@
           "password": {
             "reveal": {
               "enabled": true,
-              "href": "/app/settings/unlock",
+              "href": "/app/settings/unlock?for=a-baikal",
               "id": "connection.password",
               "label": "Show password",
               "method": "GET",
@@ -1479,7 +1500,7 @@
           "password": {
             "reveal": {
               "enabled": true,
-              "href": "/app/settings/unlock",
+              "href": "/app/settings/unlock?for=a-sftp-vps",
               "id": "connection.password",
               "label": "Show password",
               "method": "GET",
@@ -1876,5 +1897,5 @@
     "tasks": null
   },
   "until": null,
-  "warning": "Everything revealed in this window is written to the audit log."
+  "warning": "Unlocks credentials everywhere for five minutes: passwords, device profiles, key escrow — anything handed out or handed over."
 }

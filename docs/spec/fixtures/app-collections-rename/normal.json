@@ -852,7 +852,7 @@
           "password": {
             "reveal": {
               "enabled": true,
-              "href": "/app/settings/unlock",
+              "href": "/app/settings/unlock?for=a-nc-home",
               "id": "connection.password",
               "label": "Show password",
               "method": "GET",
@@ -1196,7 +1196,7 @@
           "password": {
             "reveal": {
               "enabled": true,
-              "href": "/app/settings/unlock",
+              "href": "/app/settings/unlock?for=a-rad-vps",
               "id": "connection.password",
               "label": "Show password",
               "method": "GET",
@@ -1333,7 +1333,7 @@
           "password": {
             "reveal": {
               "enabled": true,
-              "href": "/app/settings/unlock",
+              "href": "/app/settings/unlock?for=a-baikal",
               "id": "connection.password",
               "label": "Show password",
               "method": "GET",
@@ -1523,7 +1523,7 @@
           "password": {
             "reveal": {
               "enabled": true,
-              "href": "/app/settings/unlock",
+              "href": "/app/settings/unlock?for=a-sftp-vps",
               "id": "connection.password",
               "label": "Show password",
               "method": "GET",

@@ -240,7 +240,9 @@ func TestConnectionPasswordOnlyInsideUnlockWindow(t *testing.T) {
 		t.Fatal("password shown without the unlock sheet")
 	}
 	page := decode[view.ConnectionsPage](t, rec)
-	if pw := page.Accounts[0].Password; pw.Shown || pw.Reveal.Href != "/app/settings/unlock" {
+	// The sheet names the connection (Нс18, v0.2.292; until then a bare
+	// /app/settings/unlock).
+	if pw := page.Accounts[0].Password; pw.Shown || pw.Reveal.Href != "/app/settings/unlock?for="+f.id {
 		t.Errorf("password = %+v, want the sheet", pw)
 	}
 

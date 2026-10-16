@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.292 — 2026-10-16
+
+### Changed
+
+- **The password sheet says whose password it asks for** (Нс18–Нс20 of the
+  scan of 15.10.2026; `s-profile-3`). Show password of a connection opens
+  `/app/settings/unlock?for=<connection>`: the sheet's head is «Show
+  password» with the connection beside it (`UnlockSheet.Subject`), so two
+  cards in a row cannot be confused. Under the field one line, what the
+  window opens and for how long — «Unlocks credentials everywhere for five
+  minutes: passwords, device profiles, key escrow — anything handed out or
+  handed over.» (the time from `CARREL_UNLOCK_TTL`); the line about the
+  audit log is gone. The form has Show and Cancel, Cancel back where it was
+  opened.
+
+### For consumers
+
+The connection's `Reveal.Href` carries `for=`. Fixtures
+`app-settings-unlock`, `app-settings-connections`, `app-settings-escrow`
+and the collection sheets (their Connections under) re-shot.
+
+
 ## v0.2.291 — 2026-10-16
 
 ### Changed

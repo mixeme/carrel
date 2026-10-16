@@ -190,7 +190,11 @@ type PasswordPage struct {
 }
 
 type UnlockSheet struct {
-	Purpose Text  `json:"purpose"` // ради чего спрашивают пароль
+	Purpose Text `json:"purpose"` // ради чего спрашивают пароль; у пароля подключения — заголовок «Show password» (s-profile-3)
+	// Subject — справа приглушённо: чей пароль просят, «nextcloud»
+	// (s-profile-3, Нс18) — чтобы «Show password» двух карточек подряд не
+	// спутать; пусто — выдача вообще
+	Subject Text  `json:"subject"`
 	Warning Text  `json:"warning"`
 	Form    Form  `json:"form"`
 	Until   *When `json:"until"` // до какого времени будет открыто

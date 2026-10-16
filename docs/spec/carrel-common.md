@@ -2780,9 +2780,10 @@ type PasswordPage struct { // account-3: обычная смена и вынуж
 }
 
 type UnlockSheet struct {
-    Purpose Text  // ради чего спрашивают пароль
-    Warning Text
-    Form    Form
+    Purpose Text  // ради чего спрашивают пароль; у пароля подключения — заголовок «Show password» (s-profile-3)
+    Subject Text  // справа приглушённо — чей пароль: «nextcloud» (s-profile-3; адрес листа — /app/settings/unlock?for=<подключение>); пусто — выдача вообще
+    Warning Text  // строка под полем: «Unlocks credentials everywhere for five minutes: passwords, device profiles, key escrow — anything handed out or handed over.»
+    Form    Form  // Show (основная) и Cancel — назад, откуда открыт
     Until   *When // до какого времени будет открыто
     Under   *Under // экран под листом, пришедшим страницей (Лс29): откуда открыт (back, иначе Referer), иначе Connections — «Set up a new device» (s-plan-3), Connections (s-profile-3); у депонирования — Account (account-2); nil у фрагмента
 }

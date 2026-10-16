@@ -571,7 +571,8 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 	if c.NoPassword || c.Password == "" {
 		card.Access = "no password"
 	} else {
-		reveal := view.Action{ID: "connection.password", Label: "Show password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}
+		// The sheet names whose password it asks for (s-profile-3, Нс18).
+		reveal := view.Action{ID: "connection.password", Label: "Show password", Href: s.route("/app/settings/unlock?" + url.Values{"for": {c.ID}}.Encode()), Method: "GET", Enabled: true}
 		if unlocked {
 			reveal.Href = s.postQuery("/app/settings/connections", url.Values{"reveal": {c.ID}})
 		}
