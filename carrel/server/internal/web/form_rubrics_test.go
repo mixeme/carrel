@@ -120,11 +120,11 @@ func TestEventFormIsTheFramesRubrics(t *testing.T) {
 	if r := formRowOf(page.Form, "notebook"); r == nil || r.Label != "Calendar" {
 		t.Error("the event form chooses no Calendar")
 	}
-	// The priority after Status (Р7; Typecase's task 177).
-	if r := formRowOf(page.Form, "priority"); r == nil {
-		t.Error("the event form has no Priority")
+	// No priority: content of the kind (note 69 of Typecase, task 177).
+	if r := formRowOf(page.Form, "priority"); r != nil {
+		t.Error("the event form has Priority")
 	}
-	if got := serverForm(page.Form, " / Priority", " / Calendar", "Other / Or enter a UID by hand", "Other / Link"); !equalStrings(got, want) {
+	if got := serverForm(page.Form, " / Calendar", "Other / Or enter a UID by hand", "Other / Link"); !equalStrings(got, want) {
 		t.Errorf("event form =\n%q,\nwant (s-agenda-3)\n%q", got, want)
 	}
 
