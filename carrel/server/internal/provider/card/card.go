@@ -164,12 +164,22 @@ func Foreign(obj *model.Object) []view.Field {
 		return nil
 	}
 	var out []view.Field
-	for name, values := range obj.Props() {
+	props := obj.Props()
+	// The label of a date is the words of its row of Dates; a label of
+	// another group (a phone's) is not shown by Carrel and stays foreign.
+	dated := map[string]bool{}
+	for _, v := range props["X-ABDATE"] {
+		dated[strings.ToUpper(v.Group)] = v.Group != ""
+	}
+	for name, values := range props {
 		upper := strings.ToUpper(name)
 		if skipForeign[upper] || knownProps[upper] {
 			continue
 		}
 		for _, v := range values {
+			if upper == "X-ABLABEL" && dated[strings.ToUpper(v.Group)] {
+				continue
+			}
 			out = append(out, view.Field{
 				Label: view.Text(upper),
 				Value: view.Text(v.Text),

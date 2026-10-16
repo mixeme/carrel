@@ -351,6 +351,8 @@ var contactFields = []displayField{
 	{prop: "URL", label: "Website", href: webHref},
 	{prop: "IMPP", label: "Messaging"},
 	{prop: "BDAY", label: "Birthday"},
+	// The dates, each with its words (contact_dates.go): ANNIVERSARY stands
+	// for all of them.
 	{prop: "ANNIVERSARY", label: "Anniversary"},
 	{prop: "NICKNAME", label: "Nickname"},
 	{prop: "RELATED", label: "Related"},
@@ -519,6 +521,18 @@ func contactFieldsOf(obj *model.Object) []propField {
 			// filter on them (withTagLinks).
 			if tags := plainTags(categoriesOf(view.KindContact, obj)); len(tags) > 0 {
 				out = append(out, propField{Field: view.Field{Label: "Tags", Tags: tags}, prop: f.prop})
+			}
+			continue
+		}
+		if f.prop == "ANNIVERSARY" {
+			// A day read digit by digit, as the birthday (s-contacts-34):
+			// «Свадьба 12.06.2015»; a date without words is a Date.
+			for _, d := range contactDates(props) {
+				label := d.mark
+				if label == "" {
+					label = "Date"
+				}
+				out = append(out, propField{Field: view.Field{Label: text(label), Value: text(birthdayShown(d.value.Text, d.value.Params)), Mono: true}, prop: f.prop})
 			}
 			continue
 		}

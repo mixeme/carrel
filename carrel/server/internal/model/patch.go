@@ -95,6 +95,18 @@ type SetRaw struct {
 func (SetRaw) patchOp()       {}
 func (o SetRaw) prop() string { return o.Prop }
 
+// SetGroup ties a value of a vCard property to a group (item1.X-ABDATE):
+// Apple names a value's label, X-ABLabel, by the group they share. A value
+// in its group already is left as it is.
+type SetGroup struct {
+	Prop  string
+	Index int
+	Group string
+}
+
+func (SetGroup) patchOp()       {}
+func (o SetGroup) prop() string { return o.Prop }
+
 // RemoveProp deletes a property entirely. Empty value is not removal (S-7).
 type RemoveProp struct {
 	Prop string
@@ -365,6 +377,17 @@ func applyOp(p payload, op PatchOp) error {
 			break
 		}
 		p.props[key] = ingest(map[string][]RawValue{key: o.Values})[key]
+	case SetGroup:
+		key := strings.ToUpper(o.Prop)
+		st, ok := p.props[key]
+		if !ok || o.Index < 0 || o.Index >= len(st.values) {
+			return fmt.Errorf("model: %s[%d]: no such value", key, o.Index)
+		}
+		if st.values[o.Index].group != o.Group {
+			st.values[o.Index].group = o.Group
+			st.values[o.Index].wire = ""
+		}
+		p.props[key] = st
 	case RemoveProp:
 		delete(p.props, strings.ToUpper(o.Prop))
 	case SetParam:

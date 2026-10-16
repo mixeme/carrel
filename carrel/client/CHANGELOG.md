@@ -4,6 +4,12 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.52 — 2026-10-16
+
+Server `v0.2.311`. A contact's edit draws its «Dates» as the frame does
+(`s-contacts-34`): each row's words as wide as Organisation, its day as
+the birthday; the field «Anniversary» of the head is gone.
+
 ## v0.4.51 — 2026-10-16
 
 Server `v0.2.309`, Typecase `49412c3` (its note 71). The mockup copied

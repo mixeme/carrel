@@ -220,3 +220,32 @@ func TestSetRawPutsAPropertyBack(t *testing.T) {
 		t.Errorf("the record shares its parameters with the caller")
 	}
 }
+
+// SetGroup ties a value to its group (item1.X-ABDATE): a value moved into
+// another is written fresh, one left in its own keeps its line.
+func TestSetGroupTiesAValueToItsGroup(t *testing.T) {
+	obj := NewObject("/c/u.vcf", `"1"`, map[string][]RawValue{
+		"X-ABDATE": {
+			{Text: "2015-06-12", Group: "item1", Wire: "item1.X-ABDATE:2015-06-12"},
+			{Text: "2019-09-01"},
+		},
+	})
+	p, err := NewPatch(SetGroup{Prop: "x-abdate", Index: 0, Group: "item1"}, SetGroup{Prop: "X-ABDATE", Index: 1, Group: "item2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Apply(obj); err != nil {
+		t.Fatal(err)
+	}
+	got := obj.Props()["X-ABDATE"]
+	if got[0].Group != "item1" || got[0].Wire != "item1.X-ABDATE:2015-06-12" {
+		t.Errorf("a value left in its group = %+v", got[0])
+	}
+	if got[1].Group != "item2" || got[1].Wire != "" {
+		t.Errorf("a value put in a group = %+v", got[1])
+	}
+	bad, _ := NewPatch(SetGroup{Prop: "X-ABDATE", Index: 5, Group: "item3"})
+	if err := bad.Apply(obj); err == nil {
+		t.Error("no error for a value that is not there")
+	}
+}

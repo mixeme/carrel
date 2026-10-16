@@ -596,9 +596,9 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
 - **Контролы.** Шапка — `Name` (у новой — «New contact») и `Subtitle` (книга);
   Cancel и Save — действия формы. Форма рубриками `FieldSet.Legend` в порядке s-contacts-3:
   голова (Display name, Given, Family, Nickname, Organisation, Title,
-  Birthday, Anniversary), Phone numbers, Email addresses, Addresses,
-  Websites, Other (Tags, Note) — Anniversary и Websites кадра пока не имеют,
-  ширины у них Birthday и почты,
+  Birthday), Phone numbers, Email addresses, Addresses, Websites (ширина
+  почты), Dates (строка — «What it marks» шириной Organisation и «Date»
+  шириной Birthday, Remove, «Add date»; `s-contacts-34`), Other (Tags, Note),
   и в конце формы, после всех рубрик, своей строкой — «Show N empty fields»
   (последний `FieldSet`, `Folded`: легенда — кнопка, строки свёрнуты, без
   сценариев — ссылка `Unfold`; у карточки без адресов в нём и «Add address»). Ширина поля — раскладка

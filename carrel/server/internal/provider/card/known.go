@@ -8,6 +8,8 @@ var knownProps = map[string]bool{
 	"NOTE": true, "BDAY": true, "ANNIVERSARY": true, "IMPP": true,
 	"CATEGORIES": true, "LANG": true, "TZ": true, "GEO": true,
 	"RELATED": true, "GENDER": true,
+	// A person's dates as Apple writes them (Dates; Typecase's task 171).
+	"X-ABDATE": true,
 }
 
 var skipForeign = map[string]bool{

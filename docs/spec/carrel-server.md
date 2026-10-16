@@ -1118,10 +1118,16 @@ addresses (у строки Label, потом Number или Address), Addresses (
 Label — выбор home, work, other, пишется `TYPE`, — потом Street, City,
 Region, Postcode, Country; PO box и extended остаются как были), Websites
 (`URL`, у строки Label — home, work, other — и Address; Р26 списка равенства
-родов, кадра нет), Other (Tags, Note). Anniversary (`ANNIVERSARY`) стоит
-после Birthday и набирается так же; маркер года Apple пишется только у
-`BDAY`. Пустые Organisation, Title, Anniversary, адреса (кнопкой «Add
-address»), сайты («Add website»), Tags и Note уходят в «Show N empty fields» — своя строка в конце формы, после всех
+родов), Dates (`s-contacts-34`, решение владельца 16.10.2026: строка —
+«What it marks», свободные слова, и «Date», набирается как Birthday;
+пишется, как пишет Apple, — `itemN.X-ABDATE` и `itemN.X-ABLabel` одной
+группы, своё слово Apple — `_$!<Anniversary>!$_`, `_$!<Other>!$_`; новая
+строка берёт следующую `itemN` карточки; пришедшая `ANNIVERSARY` — строка
+«Anniversary» и остаётся этой строкой, пока так подписана; маркер года
+Apple — у `BDAY` и `X-ABDATE` vCard 3.0; подписи других групп, телефона,
+не трогаются), Other (Tags, Note). Пустые Organisation, Title, адреса
+(кнопкой «Add address»), сайты («Add website»), даты («Add date»), Tags и
+Note уходят в «Show N empty fields» — своя строка в конце формы, после всех
 рубрик, N — сколько полей свёрнуто; рубрика, у которой ушло всё, не рисуется.
 Подпись `CATEGORIES` в формах — «Tags» (`s-contacts-3`, `s-agenda-3`,
 `s-tasks-3`). Второе и следующие напоминания подписаны «Reminder»

@@ -56,6 +56,11 @@ var editAlso = map[view.Kind]map[string][]string{
 		"tz":       {"DTEND", "EXDATE", "RDATE", "RRULE"},
 		"attendee": {"ORGANIZER"},
 	},
+	view.KindContact: {
+		// A date that is no longer the anniversary, and the words of each
+		// (contact_dates.go).
+		"date": {"ANNIVERSARY", "X-ABLABEL"},
+	},
 	view.KindTask: {
 		"done":   {"COMPLETED"},
 		"status": {"COMPLETED"},
@@ -225,7 +230,7 @@ func wireDiff(before, after []wireLine) (gone, come []wireLine) {
 // others show the first, and a save by them may touch no other.
 func wholeField(f editField) bool {
 	switch f.typ {
-	case fieldMulti, fieldAddress, fieldList, fieldRelated, fieldAttendee:
+	case fieldMulti, fieldAddress, fieldList, fieldRelated, fieldAttendee, fieldDates:
 		return true
 	}
 	return false
@@ -473,6 +478,8 @@ func readsAs(f editField, have, want, after formValues, typed, organiser string,
 		return slices.Equal(listItems(first(w)), listItems(first(a)))
 	case fieldBirthday:
 		return first(w) == first(a) || sameBirthday(first(w), first(a))
+	case fieldDates:
+		return sameDates(w, want[f.name+".type"], a, after[f.name+".type"])
 	case fieldName:
 		wp, ap := pair(w), pair(a)
 		clean := func(v string) string { return strings.TrimSpace(strings.ReplaceAll(v, ";", "")) }

@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.311 — 2026-10-16
+
+### Changed
+
+- **A person's dates are a rubric of rows** (Typecase's note 71, task 171;
+  `s-contacts-34`, the owner's decision of 16.10.2026): «Dates» after
+  «Websites», each row what it marks — free words — and the day, typed as
+  the birthday is, with Remove and «Add date»; folded away with the other
+  empty fields when the card has none. A row is written as Apple writes it,
+  `itemN.X-ABDATE` with `itemN.X-ABLabel` in one group, a new one in the
+  card's next group; Apple's own words are its marks (`_$!<Anniversary>!$_`).
+  A card's `ANNIVERSARY` is a row marked «Anniversary» and stays that line
+  while it is so marked. The card shows each date with its words, in mono;
+  a date's label is no longer a foreign property, a phone's still is.
+  The field «Anniversary» of the form's head is gone.
+
+### For consumers
+
+The contact's form: rows `date.N.mark` and `date.N` in the set «Dates»
+instead of `anniversary`. A patch has `model.SetGroup`. Fixtures of the
+contact's edit re-shot.
+
 ## v0.2.310 — 2026-10-16
 
 ### Changed

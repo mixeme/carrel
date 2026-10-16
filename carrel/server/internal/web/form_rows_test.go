@@ -128,9 +128,9 @@ func TestContactFormIsTheFramesRubrics(t *testing.T) {
 		t.Errorf("head of a card without a nickname and a birthday = %q, want (s-contacts-4) %q", headOf(got), want)
 	}
 	// The fold is the last thing of the form, after every rubric, and counts
-	// the fields folded: the address (its button), Tags and Note — and, beside
-	// the frame, the anniversary and the websites' button (Р26 of
-	// scans/kinds-parity.md; the frame waits for Typecase's task 171).
+	// the fields folded: the address, the websites and the dates (their
+	// buttons), Tags and Note (s-contacts-3; Р26 of scans/kinds-parity.md,
+	// Typecase's task 171).
 	show := regexp.MustCompile(`<button class="tc-btn" type="button">(Show \d+ empty fields)</button>`).FindStringSubmatch(mockupFrame(t, "s-contacts-3"))
 	if show == nil {
 		t.Fatal("s-contacts-3 draws no «Show N empty fields»: read it again")
@@ -141,8 +141,8 @@ func TestContactFormIsTheFramesRubrics(t *testing.T) {
 		folded = append(folded, string(r.Label))
 	}
 	if want := regexp.MustCompile(`\d+`).ReplaceAllString(show[1], "5"); string(fold.Legend) != want ||
-		!equalStrings(folded, []string{"Anniversary", "Add address", "Add website", "Tags", "Note"}) || fold.Rows[1].Kind != view.InputAdd {
-		t.Errorf("fold = %q %q, want %q with Anniversary, Add address, Add website, Tags, Note", fold.Legend, folded, want)
+		!equalStrings(folded, []string{"Add address", "Add website", "Add date", "Tags", "Note"}) || fold.Rows[0].Kind != view.InputAdd {
+		t.Errorf("fold = %q %q, want %q with Add address, Add website, Add date, Tags, Note", fold.Legend, folded, want)
 	}
 }
 

@@ -157,21 +157,6 @@
             "readOnly": false,
             "required": false,
             "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "Type it: 14.03.1987, or 14.03 without the year.",
-            "kind": "text",
-            "label": "Anniversary",
-            "mono": true,
-            "name": "anniversary",
-            "options": [],
-            "placeholder": "DD.MM.YYYY",
-            "readOnly": false,
-            "required": false,
-            "value": ""
           }
         ],
         "unfold": null
@@ -616,6 +601,68 @@
               }
             ],
             "value": "url"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Dates",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "add",
+            "label": "Add date",
+            "name": "add",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "template": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "What it marks",
+                "name": "date.{n}.mark",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "Date",
+                "mono": true,
+                "name": "date.{n}",
+                "options": [],
+                "placeholder": "DD.MM.YYYY",
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "remove",
+                "label": "Remove",
+                "name": "remove",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "date.{n}"
+              }
+            ],
+            "value": "date"
           }
         ],
         "unfold": null

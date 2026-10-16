@@ -53,12 +53,12 @@ var (
 
 // widths are the widths of the form's fields by the last part of their name
 // (C-6.1: the view model carries no widths; the layout is the screen's, from
-// its frame): «tel.0.type» is a type, «adr.0.street» a street. The
-// anniversary and a website, which no frame draws yet (Typecase's task 171),
-// are as wide as the birthday and an e-mail.
+// its frame): «tel.0.type» is a type, «adr.0.street» a street. A website is
+// as wide as an e-mail; a date's words as an organisation, its day as the
+// birthday (s-contacts-34).
 var widths = map[string]w.FieldWidth{
 	"fn": w.FieldXL, "given": w.FieldSM, "family": w.FieldSM, "nickname": w.FieldSM,
-	"org": w.FieldMD, "title": w.FieldMD, "bday": w.FieldSM, "anniversary": w.FieldSM,
+	"org": w.FieldMD, "title": w.FieldMD, "bday": w.FieldSM, "mark": w.FieldMD, "date": w.FieldSM,
 	"type": w.FieldXS, "tel": w.FieldMD, "email": w.FieldLG, "url": w.FieldLG,
 	"street": w.FieldLG, "city": w.FieldSM, "region": w.FieldSM, "code": w.FieldXS, "country": w.FieldSM,
 	"categories": w.FieldLG, "note": w.FieldFull,
@@ -98,7 +98,8 @@ func width(name string) w.FieldWidth {
 //     to it (Note); the head of the card side by side — Display name with
 //     the cursor, Given, Family, Nickname, Organisation, Title, Birthday
 //     typed and monospaced with its pattern; then the rubrics — phones,
-//     emails, addresses, other —, their labels over the first line only,
+//     emails, addresses, websites, dates (what each marks and its day),
+//     other —, their labels over the first line only,
 //     each line closed by Remove (it sends remove=<line> without scripts),
 //     «Add …» adding the lines of its template in place; the folded rubric
 //     as its button «Show N empty fields», which unfolds them (Unfold).

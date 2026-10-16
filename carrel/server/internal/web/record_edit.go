@@ -58,6 +58,9 @@ const (
 	// fieldAddress is ADR as five inputs a row: street, city, region,
 	// postcode, country. PO box and extended are kept as they were.
 	fieldAddress
+	// fieldDates is a person's dates (contact_dates.go): rows of what each
+	// marks and the day, typed as the birthday is.
+	fieldDates
 	// fieldChoice is one value of a fixed list, written as it is: STATUS.
 	// A value another client wrote is kept as a choice.
 	fieldChoice
@@ -788,18 +791,17 @@ var editFields = map[view.Kind][]editField{
 		{name: "title", label: "Title", prop: "TITLE", typ: fieldText, optional: true},
 		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday,
 			hint: "Type it: 14.03.1987, or 14.03 without the year."},
-		// The card shows an anniversary and a website (s-contacts-1); each
-		// has its field, as the birthday and the phones (Р26 of
-		// scans/kinds-parity.md). The day is typed as the birthday is, and
-		// folded away when the card has none.
-		{name: "anniversary", label: "Anniversary", prop: "ANNIVERSARY", typ: fieldBirthday, optional: true,
-			hint: "Type it: 14.03.1987, or 14.03 without the year."},
 		{name: "tel", label: "Number", prop: "TEL", typ: fieldMulti, typed: true, mono: true, set: "Phone numbers", add: "Add phone", newRow: "cell", quick: "Phone", quickSample: "+7 …"},
 		{name: "email", label: "Address", prop: "EMAIL", typ: fieldMulti, typed: true, set: "Email addresses", add: "Add email", quick: "Email", quickSample: "name@example.org"},
 		// Addresses after the e-mail (s-contacts-3), folded away with their
 		// button when the card has none.
 		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress, typed: true, set: "Addresses", optional: true, add: "Add address"},
 		{name: "url", label: "Address", prop: "URL", typ: fieldMulti, typed: true, set: "Websites", optional: true, add: "Add website"},
+		// The dates, after the websites (s-contacts-34): an anniversary and
+		// any other, each with the words of what it marks (Р26 of
+		// scans/kinds-parity.md; Typecase's task 171). Folded away when the
+		// card has none (s-contacts-3).
+		{name: "date", label: "Date", prop: abDate, typ: fieldDates, typed: true, set: "Dates", optional: true, add: "Add date"},
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, optional: true, set: "Other"},
 		{name: "note", label: "Note", prop: "NOTE", typ: fieldArea, optional: true, set: "Other"},
 	},
@@ -1073,6 +1075,8 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			if f.typed {
 				vals[f.name+".type"] = append(labels, "")
 			}
+		case fieldDates:
+			vals[f.name], vals[f.name+".type"] = datesValues(props)
 		case fieldAddress:
 			var rows, labels []string
 			for _, v := range props[f.prop] {
@@ -1280,6 +1284,13 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 			vals[f.name] = []string{strings.TrimRight(strings.ReplaceAll(r.FormValue(f.name), "\r\n", "\n"), "\n ")}
 		case fieldName:
 			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name + ".given")), strings.TrimSpace(r.FormValue(f.name + ".family"))}
+		case fieldDates:
+			vals[f.name] = indexedRows(r, f.name)
+			var marks []string
+			for i := 0; i < len(vals[f.name])-1; i++ {
+				marks = append(marks, strings.TrimSpace(r.FormValue(fmt.Sprintf("%s.%d.mark", f.name, i))))
+			}
+			vals[f.name+".type"] = append(marks, "")
 		case fieldMulti, fieldReminders:
 			vals[f.name] = indexedRows(r, f.name)
 			if f.typ == fieldReminders {
@@ -1496,6 +1507,13 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				continue
 			}
 			ch.ops = append(ch.ops, multiOps(f.prop, props[f.prop], w, labels)...)
+		case fieldDates:
+			ops, err := datesOps(props, w, want[f.name+".type"], firstValue(obj, "VERSION"))
+			if err != nil {
+				ch.errors[f.name] = err.Error()
+				continue
+			}
+			ch.ops = append(ch.ops, ops...)
 		case fieldAddress:
 			labels := want[f.name+".type"]
 			if sameRows(w, h) && sameLabels(labels, have[f.name+".type"]) {
@@ -2192,7 +2210,7 @@ const appleYear = "1604"
 // marker of its own year. Apple writes so BDAY alone: ANNIVERSARY is a
 // property of vCard 4.0, and its day without a year is --MMDD everywhere.
 func apple3(prop string, cur []model.RawValue, version string) bool {
-	if prop != "BDAY" || strings.TrimSpace(version) != "3.0" {
+	if prop != "BDAY" && prop != abDate || strings.TrimSpace(version) != "3.0" {
 		return false
 	}
 	if len(cur) == 0 {
@@ -3114,6 +3132,8 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				}
 				set.Rows = append(set.Rows, add)
 			}
+		case fieldDates:
+			set.Rows = append(set.Rows, datesRows(f, vals, st.values[f.name+".type"], removed, errText)...)
 		case fieldAddress:
 			// Each row is its label, picked as a phone's is, the five parts
 			// and Remove (s-contacts-3).
@@ -3337,7 +3357,10 @@ func removeButton(name string) view.FormRow {
 // removedRows are the inputs of a removed row, empty and hidden.
 func removedRows(f editField, name string) []view.FormRow {
 	var names []string
-	if f.typed {
+	switch {
+	case f.typ == fieldDates:
+		names = append(names, name+".mark")
+	case f.typed:
 		names = append(names, name+".type")
 	}
 	if f.typ == fieldAddress {

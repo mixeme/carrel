@@ -12,8 +12,8 @@ import (
 // how many; the client folds it. Filled ones stay where they are, and a new
 // contact shows them all. The nickname and the birthday stand in the head
 // empty too (s-contacts-4); an address without any is its «Add address».
-// The anniversary and the websites (Р26 of scans/kinds-parity.md) fold
-// away the same way: the frame draws neither, so they go with the rest.
+// The websites and the dates (Р26 of scans/kinds-parity.md; s-contacts-3,
+// -34) fold away the same way, each its button.
 func TestContactEmptyFieldsInTheirOwnSet(t *testing.T) {
 	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nORG:Analytical\nEND:VCARD\n")
 	edit := decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/ada/edit", f.sess)))
@@ -30,7 +30,7 @@ func TestContactEmptyFieldsInTheirOwnSet(t *testing.T) {
 	for _, r := range empty.Rows {
 		names = append(names, r.Name)
 	}
-	if got := strings.Join(names, " "); got != "title anniversary add add categories note" || empty.Legend != "Show 6 empty fields" {
+	if got := strings.Join(names, " "); got != "title add add add categories note" || empty.Legend != "Show 6 empty fields" {
 		t.Errorf("empty set %q = %s", empty.Legend, got)
 	}
 	var head []string
