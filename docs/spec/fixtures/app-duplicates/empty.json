@@ -563,9 +563,12 @@
     "refresh": {
       "action": {
         "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "href": "/app/duplicates",
+        "icon": "i-refresh",
+        "id": "duplicates.refresh",
+        "label": "Refresh",
+        "method": "GET",
+        "reason": "Nothing is loaded yet: open a list first."
       },
       "answered": "",
       "running": false

@@ -899,12 +899,15 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "hint": "Compares again what this session has read; open a list to read it anew.",
+        "href": "/app/duplicates",
+        "icon": "i-refresh",
+        "id": "duplicates.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

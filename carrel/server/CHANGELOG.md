@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.326 — 2026-10-16
+
+### Changed
+
+- **Duplicates have their refresh in the head** (Дб11; `s-dup-1`, `-2`,
+  `-6`): the screen compares only what the session has read — no server is
+  asked there —, so «2 min ago» says how fresh the records compared are, the
+  oldest of the lists they came from, and the circle compares them again,
+  its hint saying a list is read anew where it is opened; with nothing read
+  it is off and says why.
+
 ## v0.2.325 — 2026-10-16
 
 ### Added

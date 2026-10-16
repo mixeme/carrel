@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dupes"
@@ -526,6 +527,7 @@ func holdsRecords(col sealed.Collection) bool {
 
 func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Kind) view.DuplicatesPage {
 	page := view.DuplicatesPage{Shell: s.buildShell(sess, "Duplicates")}
+	page.Top.Refresh = s.duplicatesRefresh(sess, only)
 	page.Rail = view.Rail{Nav: s.navRows(sess, st.blob, "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess)}
 	page.Rail.Sections = dupSources(st, only)
 	all := st.groups()
@@ -1100,4 +1102,35 @@ func (st dupState) linkedPrefs(id string) map[string]sealed.RecordRef {
 		}
 	}
 	return nil
+}
+
+// duplicatesRefresh is the circle of the top bar (Дб11; s-dup-1, -2, -6):
+// the screen compares only what this session has read — no server is asked
+// here —, so «2 min ago» is how fresh the records compared are, the oldest
+// of the lists they came from, and the circle compares them again; a list
+// is read anew where it is opened, as its hint says.
+func (s *Server) duplicatesRefresh(sess *session.Session, only view.Kind) view.Refresh {
+	q := url.Values{}
+	if only != "" {
+		q.Set("kind", string(only))
+	}
+	a := view.Action{ID: "duplicates.refresh", Label: "Refresh", Icon: "i-refresh", Href: s.postQuery("/app/duplicates", q), Method: "GET",
+		Enabled: true, Hint: "Compares again what this session has read; open a list to read it anew."}
+	var oldest time.Time
+	for _, k := range dupKinds {
+		if only != "" && k != only {
+			continue
+		}
+		if snap := lastPoll(sess, k); snap != nil && !snap.Finished.IsZero() && (oldest.IsZero() || snap.Finished.Before(oldest)) {
+			oldest = snap.Finished
+		}
+	}
+	r := view.Refresh{Action: a}
+	if oldest.IsZero() {
+		r.Action.Enabled, r.Action.Hint, r.Action.Reason = false, "", "Nothing is loaded yet: open a list first."
+		return r
+	}
+	tf := s.timeFor(sess)
+	r.Answered = tf.formatWhen(oldest, true, tf.now)
+	return r
 }
