@@ -1061,25 +1061,9 @@ func TestFixtureCombinedContacts(t *testing.T) {
 			}
 		}
 	}
-	rec := app.h.do(get("/app/contacts?task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess))
-	got := app.normalise(t, rec.Body.Bytes())
-	want := loadFixture(t, "app-contacts/normal.json")
-	if out := os.Getenv("CARREL_FIXTURE_WRITE"); out != "" {
-		// The answer of the screen, normalised, for reading beside the frame
-		// while a fixture is written. It is not the fixture: one written
-		// from the answer would only agree with itself (review Р-13).
-		body, err := json.MarshalIndent(got, "", "  ")
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := os.WriteFile(out, append(body, '\n'), 0o600); err != nil {
-			t.Fatal(err)
-		}
-		t.Logf("the screen is written to %s", out)
-	}
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("the screen differs from its fixture (-fixture +screen):\n%s", diff)
-	}
+	// Written into the directory of CARREL_FIXTURE_WRITE as every fixture
+	// is (compare): one shot of all the fixtures, none by hand.
+	app.compare(t, "app-contacts/normal.json", app.h.do(get("/app/contacts?task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
 }
 
 // C-14.2, the partial state of the same screen: the poll has not finished.
@@ -1123,21 +1107,7 @@ func TestFixtureCombinedContactsPartial(t *testing.T) {
 		}
 		return done == 2
 	})
-	rec := app.h.do(get("/app/contacts?task="+first.Poll.TaskID, app.sess))
-	got := app.normalise(t, rec.Body.Bytes())
-	if out := os.Getenv("CARREL_FIXTURE_WRITE"); out != "" {
-		body, err := json.MarshalIndent(got, "", "  ")
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := os.WriteFile(out, append(body, '\n'), 0o600); err != nil {
-			t.Fatal(err)
-		}
-		t.Logf("the screen is written to %s", out)
-	}
-	if diff := cmp.Diff(loadFixture(t, "app-contacts/partial.json"), got); diff != "" {
-		t.Errorf("the screen differs from its fixture (-fixture +screen):\n%s", diff)
-	}
+	app.compare(t, "app-contacts/partial.json", app.h.do(get("/app/contacts?task="+first.Poll.TaskID, app.sess)))
 }
 
 // C-14.2: the conflict screen (S-8). The person edits Анна Ковалёва, the
@@ -1182,20 +1152,7 @@ func TestFixtureContactConflict(t *testing.T) {
 	}
 
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-	got := app.normalise(t, app.h.do(get(rec+"/conflict", app.sess)).Body.Bytes())
-	if out := os.Getenv("CARREL_FIXTURE_WRITE"); out != "" {
-		body, err := json.MarshalIndent(got, "", "  ")
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := os.WriteFile(out, append(body, '\n'), 0o600); err != nil {
-			t.Fatal(err)
-		}
-		t.Logf("the screen is written to %s", out)
-	}
-	if diff := cmp.Diff(loadFixture(t, "app-conflict/normal.json"), got); diff != "" {
-		t.Errorf("the screen differs from its fixture (-fixture +screen):\n%s", diff)
-	}
+	app.compare(t, "app-conflict/normal.json", app.h.do(get(rec+"/conflict", app.sess)))
 }
 
 // mockupAnnaPhoto gives Анна Ковалёва the photograph the frames of her card
