@@ -939,6 +939,7 @@
             }
           ],
           "login": "alice",
+          "note": "",
           "password": {
             "reveal": {
               "enabled": true,
@@ -952,6 +953,7 @@
             "value": ""
           },
           "plain": "",
+          "refused": false,
           "server": "https://nextcloud.example/dav.php",
           "state": "ok",
           "title": "nextcloud",
@@ -1319,6 +1321,7 @@
             }
           ],
           "login": "alice",
+          "note": "",
           "password": {
             "reveal": {
               "enabled": true,
@@ -1332,6 +1335,7 @@
             "value": ""
           },
           "plain": "",
+          "refused": false,
           "server": "https://radicale.example",
           "state": "ok",
           "title": "radicale · vps",
@@ -1346,7 +1350,7 @@
               "enabled": true,
               "href": "/app/settings/connections?account=a-baikal\u0026op=test",
               "id": "connection.test",
-              "label": "Test",
+              "label": "Test again",
               "method": "POST"
             },
             {
@@ -1465,6 +1469,7 @@
             }
           ],
           "login": "alice",
+          "note": "The server refused the password. It may have been changed on the server: the one Carrel saved no longer fits.",
           "password": {
             "reveal": {
               "enabled": true,
@@ -1478,8 +1483,9 @@
             "value": ""
           },
           "plain": "",
+          "refused": true,
           "server": "https://baikal.example/dav.php",
-          "state": "ok",
+          "state": "unavailable",
           "title": "baikal",
           "trace": null
         },
@@ -1673,6 +1679,7 @@
             }
           ],
           "login": "alice",
+          "note": "",
           "password": {
             "reveal": {
               "enabled": true,
@@ -1686,6 +1693,7 @@
             "value": ""
           },
           "plain": "plain WebDAV, no principal",
+          "refused": false,
           "server": "https://files.example.org/dav",
           "state": "ok",
           "title": "sftpgo · vps",

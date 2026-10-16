@@ -606,7 +606,8 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			Method: "GET", Enabled: true,
 		})
 	}
-	var answered time.Time
+	var answered, refused time.Time
+	var why string
 	for _, col := range blob.CollectionsOf(c.ID) {
 		if col.Gone {
 			continue // named by goneNotice: a row has no state to carry it
@@ -625,8 +626,13 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			Href: s.postQuery("/app/settings/connections", url.Values{"op": {"tick"}, "account": {c.ID}, "path": {col.Path}})}
 		row.Menu = s.collectionRowMenu(blob, c, col)
 		card.Collections = append(card.Collections, row)
-		if r, ok := sess.ReadingOf(c.ID, col.Path); ok && r.At.After(answered) {
-			answered = r.At
+		if r, ok := sess.ReadingOf(c.ID, col.Path); ok {
+			if r.At.After(answered) {
+				answered = r.At
+			}
+			if r.Refused.After(refused) {
+				refused, why = r.Refused, r.Why
+			}
 		}
 	}
 	// The address line (s-profile-1): a storage whose server named no
@@ -636,6 +642,13 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 		card.Plain = "plain WebDAV, no principal"
 	}
 	card.Answered = tf.formatWhen(answered, true, tf.now)
+	// The last answer was a refusal (Нс23, s-profile-1): the card is an
+	// alarm, says so instead of a time, and what the refusal means.
+	if refused.After(answered) {
+		card.Refused, card.Answered, card.Note = true, "", text(why)
+		card.State = view.CollectionUnavailable
+		card.Actions[0].Label = "Test again"
+	}
 	return card
 }
 

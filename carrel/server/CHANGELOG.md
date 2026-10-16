@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.298 — 2026-10-16
+
+### Added
+
+- **A connection whose server refused the last read says so** (Нс23 of
+  the scan of 15.10.2026; `s-profile-1`, the card of baikal): a poll that
+  comes back refused is kept in the session as an answer too, and while it
+  is newer than every read of the connection's collections its card is an
+  alarm — `ConnectionCard.Refused` («last answer refused» instead of a
+  time; `Answered` empty), `Test again`, and `ConnectionCard.Note`, the
+  line under it: «The server refused the password. It may have been
+  changed on the server: the one Carrel saved no longer fits.» for a 401,
+  the refusal itself for any other. A read that answers after it puts the
+  card back.
+
+### For consumers
+
+`ConnectionCard.Refused`, `.Note` in C-6. Fixture
+`app-settings-connections/normal` is taken after the lists were read, as
+`s-profile-1` draws it (times, counts, baikal refused); the fixtures of
+the collection sheets over it re-shot.
+
 ## v0.2.297 — 2026-10-16
 
 ### Added

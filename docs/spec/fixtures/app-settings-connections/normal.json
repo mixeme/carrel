@@ -46,16 +46,16 @@
           "target": "sheet"
         }
       ],
-      "answered": "",
+      "answered": "2 min ago",
       "collections": [
         {
-          "changed": "",
+          "changed": "10 August 2026, 17:04",
           "colour": "#4a6b52",
           "kinds": [
             "task"
           ],
           "label": "Дела",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -113,7 +113,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 4,
           "path": "/alice/calendars/dela/",
           "readOnly": false,
           "tick": "on",
@@ -127,13 +127,13 @@
           }
         },
         {
-          "changed": "",
+          "changed": "10 August 2026, 17:04",
           "colour": "#6b4e7a",
           "kinds": [
             "note"
           ],
           "label": "Дневник",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -191,7 +191,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 1,
           "path": "/alice/calendars/dnevnik/",
           "readOnly": false,
           "tick": "on",
@@ -289,7 +289,7 @@
             "event"
           ],
           "label": "Личный",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -347,7 +347,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 2,
           "path": "/alice/calendars/lichnyj/",
           "readOnly": false,
           "tick": "on",
@@ -361,14 +361,14 @@
           }
         },
         {
-          "changed": "",
+          "changed": "10 August 2026, 17:04",
           "colour": "#3f6e8c",
           "kinds": [
             "event",
             "task"
           ],
           "label": "Работа",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -426,7 +426,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 4,
           "path": "/alice/calendars/rabota/",
           "readOnly": false,
           "tick": "on",
@@ -440,13 +440,13 @@
           }
         },
         {
-          "changed": "",
+          "changed": "10 August 2026, 17:04",
           "colour": "#4a6b52",
           "kinds": [
             "note"
           ],
           "label": "Записи",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -504,7 +504,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 2,
           "path": "/alice/calendars/zapisi/",
           "readOnly": false,
           "tick": "on",
@@ -596,13 +596,13 @@
           }
         },
         {
-          "changed": "",
+          "changed": "10 August 2026, 17:04",
           "colour": "#a05a2c",
           "kinds": [
             "contact"
           ],
           "label": "Архив",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -660,7 +660,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 1,
           "path": "/alice/contacts/arhiv/",
           "readOnly": false,
           "tick": "on",
@@ -674,13 +674,13 @@
           }
         },
         {
-          "changed": "",
+          "changed": "10 August 2026, 17:04",
           "colour": "#4a6b52",
           "kinds": [
             "contact"
           ],
           "label": "Контакты",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -738,7 +738,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 5,
           "path": "/alice/contacts/kontakty/",
           "readOnly": false,
           "tick": "on",
@@ -823,6 +823,7 @@
         }
       ],
       "login": "alice",
+      "note": "",
       "password": {
         "reveal": {
           "enabled": true,
@@ -836,6 +837,7 @@
         "value": ""
       },
       "plain": "",
+      "refused": false,
       "server": "https://nextcloud.example/dav.php",
       "state": "ok",
       "title": "nextcloud",
@@ -887,7 +889,7 @@
           "target": "sheet"
         }
       ],
-      "answered": "",
+      "answered": "2 min ago",
       "collections": [
         {
           "changed": "",
@@ -896,7 +898,7 @@
             "event"
           ],
           "label": "Дежурства",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -954,7 +956,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 1,
           "path": "/alice/calendars/dezhurstva/",
           "readOnly": false,
           "tick": "on",
@@ -974,7 +976,7 @@
             "event"
           ],
           "label": "Проекты",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -1032,7 +1034,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 1,
           "path": "/alice/calendars/proekty/",
           "readOnly": false,
           "tick": "on",
@@ -1046,13 +1048,13 @@
           }
         },
         {
-          "changed": "",
+          "changed": "10 August 2026, 17:04",
           "colour": "#6b4e7a",
           "kinds": [
             "contact"
           ],
           "label": "Команда",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -1110,7 +1112,7 @@
               "target": "sheet"
             }
           ],
-          "objects": null,
+          "objects": 1,
           "path": "/alice/contacts/komanda/",
           "readOnly": true,
           "tick": "on",
@@ -1203,6 +1205,7 @@
         }
       ],
       "login": "alice",
+      "note": "",
       "password": {
         "reveal": {
           "enabled": true,
@@ -1216,6 +1219,7 @@
         "value": ""
       },
       "plain": "",
+      "refused": false,
       "server": "https://radicale.example",
       "state": "ok",
       "title": "radicale · vps",
@@ -1230,7 +1234,7 @@
           "enabled": true,
           "href": "/app/settings/connections?account=a-baikal\u0026op=test",
           "id": "connection.test",
-          "label": "Test",
+          "label": "Test again",
           "method": "POST"
         },
         {
@@ -1349,6 +1353,7 @@
         }
       ],
       "login": "alice",
+      "note": "The server refused the password. It may have been changed on the server: the one Carrel saved no longer fits.",
       "password": {
         "reveal": {
           "enabled": true,
@@ -1362,8 +1367,9 @@
         "value": ""
       },
       "plain": "",
+      "refused": true,
       "server": "https://baikal.example/dav.php",
-      "state": "ok",
+      "state": "unavailable",
       "title": "baikal",
       "trace": null
     },
@@ -1557,6 +1563,7 @@
         }
       ],
       "login": "alice",
+      "note": "",
       "password": {
         "reveal": {
           "enabled": true,
@@ -1570,6 +1577,7 @@
         "value": ""
       },
       "plain": "plain WebDAV, no principal",
+      "refused": false,
       "server": "https://files.example.org/dav",
       "state": "ok",
       "title": "sftpgo · vps",
@@ -1754,16 +1762,16 @@
           "method": "POST"
         }
       ],
-      "checked": "",
+      "checked": "2 min ago",
       "colour": "#8c6239",
       "kinds": [
         "event",
         "task"
       ],
-      "size": "",
+      "size": "793 B",
       "stale": false,
       "title": "Праздники РФ",
-      "took": "",
+      "took": "0 ms",
       "url": "https://feeds.example/ru-holidays.ics"
     },
     {

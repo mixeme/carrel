@@ -2829,7 +2829,9 @@ type ConnectionCard struct {
     Password    *SecretField // Show password; nil у сервера, который пароля не спрашивает (s-profile-15)
     Access      Text         // «no password» в строке адреса у такого сервера; у прочих пусто
     Plain       Text         // «plain WebDAV, no principal» в строке адреса у хранилища без принципала (s-profile-1); у прочих пусто
-    Answered    When         // когда сервер последним ответил сеансу — новейшее чтение его коллекций: «5 min ago» после слов экрана «last answer» (s-profile-1); пусто — не читал
+    Answered    When         // когда сервер последним ответил сеансу — новейшее чтение его коллекций: «5 min ago» после слов экрана «last answer» (s-profile-1); пусто — не читал или последний ответ — отказ
+    Refused     bool         // последний ответ сервера сеансу — отказ: «last answer refused» вместо времени, карточка тревожная, Test again (s-profile-1, baikal)
+    Note        Text         // строка под следом у отказавшего — что значит отказ: «The server refused the password. It may have been changed on the server: the one Carrel saved no longer fits.»; у прочих пусто
     State       CollectionState
     Collections []CollectionRow
     Trace       *DiagnosticTrace // след последней проверки

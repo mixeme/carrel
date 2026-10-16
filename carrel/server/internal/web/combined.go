@@ -598,6 +598,24 @@ func (s *Server) indexAnswered(sess *session.Session, blob sealed.Blob, spec kin
 			noteRead(sess, account, path, snap.Finished, part, spec.kind != view.KindEvent)
 		}
 	}
+	// A refusal is an answer too: the card of the connection says the last
+	// one was a refusal, and what it means (Нс23, s-profile-1).
+	for _, st := range snap.Sources {
+		if st.State == view.SourceError && !snap.Finished.IsZero() {
+			account, path, _ := strings.Cut(st.ID, ":")
+			sess.NoteReading(account, path, session.Reading{Refused: snap.Finished, Why: refusedNote(st.Err)})
+		}
+	}
+}
+
+// refusedNote is the line under the card of a connection whose server
+// refused the last read (s-profile-1): for a password that stopped fitting,
+// that it was likely changed on the server; else the refusal itself.
+func refusedNote(err error) string {
+	if dav.IsStatus(err, http.StatusUnauthorized) {
+		return "The server refused the password. It may have been changed on the server: the one Carrel saved no longer fits."
+	}
+	return refusalReason(err)
 }
 
 // collectionCount is the rail's number for one ticked collection (C-6.3): how

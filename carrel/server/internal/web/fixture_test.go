@@ -1714,7 +1714,7 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	for _, one := range []struct{ dir, route string }{
 		{"app-settings-account", "/app/settings/account"},
-		{"app-settings-connections", "/app/settings/connections"},
+		// Connections after the lists were read: TestFixtureConnections.
 		{"app-settings-appearance", "/app/settings/appearance"},
 		{"app-settings-attachments", "/app/settings/attachments"},
 		{"app-settings-devices", "/app/settings/devices"},
@@ -1733,6 +1733,20 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
 		})
 	}
+}
+
+// C-14.2: Connections as s-profile-1 draws it — after the lists were read
+// two minutes ago: each card says when its server last answered, a
+// collection its count, and «baikal», whose saved password stopped fitting,
+// that its last answer was a refusal (Нс23).
+func TestFixtureConnections(t *testing.T) {
+	app := newMockupApp(t)
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	openList(t, app, "/app/calendar?from=2026-08-10")
+	openList(t, app, "/app/tasks")
+	openList(t, app, "/app/notes")
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	app.compare(t, "app-settings-connections/normal.json", app.h.do(get("/app/settings/connections", app.sess)))
 }
 
 // C-14.3: the states of the account, of its key escrow and of the password

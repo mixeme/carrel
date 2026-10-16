@@ -242,7 +242,15 @@ type ConnectionCard struct {
 	// Answered — когда сервер ответил сеансу последним: «5 min ago» после
 	// слов экрана «last answer» (s-profile-1); пусто — сеанс ещё не читал ни
 	// одной его коллекции
-	Answered    When             `json:"answered"`
+	Answered When `json:"answered"`
+	// Refused — последний ответ сервера сеансу — отказ: «last answer
+	// refused» вместо времени, карточка тревожная (s-profile-1, baikal;
+	// Нс23); Answered тогда пуст
+	Refused bool `json:"refused"`
+	// Note — строка под следом у отказавшего: что значит отказ, «The server
+	// refused the password. It may have been changed on the server: the one
+	// Carrel saved no longer fits.» (s-profile-1); у прочих пусто
+	Note        Text             `json:"note"`
 	State       CollectionState  `json:"state"`
 	Collections []CollectionRow  `json:"collections"`
 	Trace       *DiagnosticTrace `json:"trace"`   // след последней проверки

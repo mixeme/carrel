@@ -916,6 +916,7 @@
             }
           ],
           "login": "alice",
+          "note": "",
           "password": {
             "reveal": {
               "enabled": true,
@@ -929,6 +930,7 @@
             "value": ""
           },
           "plain": "",
+          "refused": false,
           "server": "https://nextcloud.example/dav.php",
           "state": "ok",
           "title": "nextcloud",
@@ -1296,6 +1298,7 @@
             }
           ],
           "login": "alice",
+          "note": "",
           "password": {
             "reveal": {
               "enabled": true,
@@ -1309,6 +1312,7 @@
             "value": ""
           },
           "plain": "",
+          "refused": false,
           "server": "https://radicale.example",
           "state": "ok",
           "title": "radicale · vps",
@@ -1442,6 +1446,7 @@
             }
           ],
           "login": "alice",
+          "note": "",
           "password": {
             "reveal": {
               "enabled": true,
@@ -1455,6 +1460,7 @@
             "value": ""
           },
           "plain": "",
+          "refused": false,
           "server": "https://baikal.example/dav.php",
           "state": "ok",
           "title": "baikal",
@@ -1650,6 +1656,7 @@
             }
           ],
           "login": "alice",
+          "note": "",
           "password": {
             "reveal": {
               "enabled": true,
@@ -1663,6 +1670,7 @@
             "value": ""
           },
           "plain": "plain WebDAV, no principal",
+          "refused": false,
           "server": "https://files.example.org/dav",
           "state": "ok",
           "title": "sftpgo · vps",
