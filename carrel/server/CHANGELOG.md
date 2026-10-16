@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.295 — 2026-10-16
+
+### Added
+
+- **Fixtures of the account's states** (Нс9, Нс11, Нс13, Нс16, Нс17 of
+  the scan of 15.10.2026), each against the frame that draws it
+  (`STATE_FRAME` of `check.py`): Email — `email-confirmed` (`account-8`),
+  `email-sent` (`account-9`), `email-unsent` (`account-10`),
+  `email-unconfirmed` (`s-mail-9`); Key escrow on the account —
+  `escrow-deposited` (`account-7`), `escrow-off` (`account-13`); the
+  escrow page — `normal` is now the copy deposited (`account-4`, the
+  route's frame), `no-copy` (`account-12`), `escrow-off` (`account-14`);
+  the deposit and withdraw sheets — their own `app-settings-escrow-deposit`
+  (`account-2`) and `app-settings-escrow-withdraw` (`account-11`); the
+  password change after a temporary password — `app-password/forced`
+  (`account-3`). Nothing in the running server changed. Check:
+  `TestFixtureAccountStates`.
+
+### For consumers
+
+`app-settings-escrow/normal` is the deposited copy now; what it was is
+`no-copy`. Eight new state names in C-14.3.
+
 ## v0.2.294 — 2026-10-16
 
 ### Changed

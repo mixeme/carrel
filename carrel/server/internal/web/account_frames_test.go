@@ -542,9 +542,15 @@ func TestFixturesAreTheAccountFrames(t *testing.T) {
 	if string(account.Escrow.Note) != want.hint || len(account.Escrow.Actions) != 1 || string(account.Escrow.Actions[0].Label) != want.button {
 		t.Errorf("account fixture escrow = %q %v, the frame draws %q and %q", account.Escrow.Note, labels(account.Escrow.Actions), want.hint, want.button)
 	}
-	escrow := fixtureAs[view.EscrowPage](t, "app-settings-escrow/normal.json")
+	// The escrow page without a copy is account-12; its normal is the copy
+	// deposited, account-4 (Нс13).
+	escrow := fixtureAs[view.EscrowPage](t, "app-settings-escrow/no-copy.json")
 	if !escrow.Status.Active || len(escrow.Status.Actions) != 1 || string(escrow.Status.Actions[0].Label) != want.button {
-		t.Errorf("escrow fixture = active %v, actions %v", escrow.Status.Active, labels(escrow.Status.Actions))
+		t.Errorf("escrow fixture without a copy = active %v, actions %v", escrow.Status.Active, labels(escrow.Status.Actions))
+	}
+	deposited := fixtureAs[view.EscrowPage](t, "app-settings-escrow/normal.json")
+	if m := frameHeadSub.FindStringSubmatch(mockupFrame(t, "account-4")); m == nil || string(deposited.Subtitle) != frameText(m[1]) || !deposited.Status.Covered {
+		t.Errorf("escrow fixture = %q covered %v, account-4 draws %v", deposited.Subtitle, deposited.Status.Covered, m)
 	}
 	admin := fixtureAs[view.AdminEscrowPage](t, "admin-escrow/normal.json")
 	policy := regexp.MustCompile(`<span class="tc-tickrow__tick"></span>(.*?)</label>`).FindStringSubmatch(mockupFrame(t, "s-admin-6"))

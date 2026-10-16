@@ -127,28 +127,32 @@
     "tags": [],
     "ticks": null
   },
-  "rubric": "What a deposit does",
+  "rubric": "",
   "status": {
-    "actionNote": "",
+    "actionNote": "After withdrawal nobody can recover this account, including you.",
     "actions": [
       {
+        "danger": true,
         "enabled": true,
-        "href": "/app/settings/escrow/deposit",
-        "id": "escrow.deposit",
-        "label": "Deposit my key",
+        "href": "/app/settings/escrow/withdraw",
+        "id": "escrow.withdraw",
+        "label": "Withdraw my deposited key",
         "method": "GET",
         "target": "sheet"
       }
     ],
     "active": true,
-    "badge": null,
-    "by": "",
-    "covered": false,
-    "deposited": "",
-    "lastRecovery": "",
-    "note": "A deposited copy lets an administrator who holds the escrow master password recover this account if you lose your password — and, with it, read the DAV credentials you save here. You can withdraw it at any time."
+    "badge": {
+      "label": "deposited 2026-03-02",
+      "role": "alert"
+    },
+    "by": "administrator with master password",
+    "covered": true,
+    "deposited": "2026-03-02",
+    "lastRecovery": "never",
+    "note": "A copy of your data key is deposited on this server. An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars."
   },
-  "subtitle": "No copy of your data key is deposited",
+  "subtitle": "A copy of your key on this server",
   "title": "Key escrow",
   "top": {
     "lock": null,

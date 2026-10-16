@@ -127,7 +127,9 @@ check("6b. названные правила введены заголовком
 # 7. Фикстуры разбираются и лежат по правилам имён
 states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
-          "tiles","copy","elsewhere","rename","delete","attach","single","in-part"}
+          "tiles","copy","elsewhere","rename","delete","attach","single","in-part",
+          "email-confirmed","email-sent","email-unsent","email-unconfirmed",
+          "escrow-deposited","escrow-off","no-copy","forced"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -185,6 +187,11 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-settings-backup": "/app/settings/backup",
     "app-settings-davloom": "/app/settings/davloom",
     "app-settings-escrow": "/app/settings/escrow",
+    # Листы депонирования и отзыва — поверх Account; кадров со своим адресом
+    # у них нет: account-2 (data-screen учётной записи, часть deposit) и
+    # фрагмент account-11 (STATE_FRAME).
+    "app-settings-escrow-deposit": "/app/settings/escrow/deposit",
+    "app-settings-escrow-withdraw": "/app/settings/escrow/withdraw",
     "admin-users": "/admin/",
     "admin-invites": "/admin/invites",
     "admin-settings": "/admin/settings",
@@ -258,7 +265,8 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
           "app-publish", "app-files-picker", "app-files-op", "app-mail-compose",
-          "app-contact-rewrite", "app-record-copies", "app-task-done", "app-event-ask"}
+          "app-contact-rewrite", "app-record-copies", "app-task-done", "app-event-ask",
+          "app-settings-escrow-deposit", "app-settings-escrow-withdraw"}
 
 FRAME_TODO = {
     # Полная форма нового события — свой кадр s-agenda-15 (Typecase 9e69804,
@@ -380,6 +388,22 @@ STATE_FRAME = {
     "app-files-published/no-mail": "s-publish-17",
     "app-files-picker/attach": "s-files-16",
     "app-files-picker/refused": "s-files-19",
+    # Учётная запись (Нс9, Нс11, Нс13, Нс16): состояния блоков Email и Key
+    # escrow — фрагменты account-7 … -10, -13 и s-mail-9; страница
+    # депонирования без копии — account-12, со схемой выключенной —
+    # account-14 (normal — копия есть, кадр маршрута account-4); листы
+    # депонирования и отзыва — account-2 и account-11. Вынужденная смена
+    # пароля (Нс17) — в кадре маршрута account-3 вместе с обычной.
+    "app-settings-account/email-confirmed": "account-8",
+    "app-settings-account/email-sent": "account-9",
+    "app-settings-account/email-unsent": "account-10",
+    "app-settings-account/email-unconfirmed": "s-mail-9",
+    "app-settings-account/escrow-deposited": "account-7",
+    "app-settings-account/escrow-off": "account-13",
+    "app-settings-escrow/no-copy": "account-12",
+    "app-settings-escrow/escrow-off": "account-14",
+    "app-settings-escrow-deposit/normal": "account-2",
+    "app-settings-escrow-withdraw/normal": "account-11",
 }
 # Без строки: app-contact-new/normal и app-event-new/normal — полные формы
 # создания (`/new`) — свои кадры маршрута, s-contacts-27 (Typecase 4af7ad7,

@@ -1720,7 +1720,8 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 		{"app-settings-devices", "/app/settings/devices"},
 		{"app-settings-backup", "/app/settings/backup"},
 		{"app-settings-davloom", "/app/settings/davloom"},
-		{"app-settings-escrow", "/app/settings/escrow"},
+		// The escrow page's normal is the deposited copy (account-4):
+		// TestFixtureAccountStates deposits it.
 		{"admin-users", "/admin/"},
 		{"admin-invites", "/admin/invites"},
 		{"admin-settings", "/admin/settings"},
@@ -1732,6 +1733,122 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
 		})
 	}
+}
+
+// C-14.3: the states of the account, of its key escrow and of the password
+// change beside their normal ones (Нс9, Нс11, Нс13, Нс16, Нс17 of the scan
+// of 15.10.2026). Each is a state the frames draw — a fragment of the Email
+// or Key escrow block, the escrow page, a sheet over Account — and each is
+// written straight into the record, as the account of the frames is: the
+// journal of the frames (admin-audit) has none of it. One instance, in
+// order: the states of the address first, then the escrow switched off and
+// on, the deposit, and last the temporary password, after which the
+// instance lets mix nowhere else.
+func TestFixtureAccountStates(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	mutate := func(t *testing.T, change func(st *store.State, u *store.User)) {
+		t.Helper()
+		if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+			change(st, st.UserByLogin("mix"))
+			return nil, nil
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// letter is a link to confirm that went to the address at mailed, and
+	// lives for two days.
+	letter := func(st *store.State, u *store.User, to, mailedAt string) {
+		mailed := mockupDayAt(t, mailedAt)
+		st.Tokens = append(st.Tokens, store.SecretToken{
+			Kind: "email_confirm", Hash: make([]byte, 32), UserID: u.ID, Email: to,
+			CreatedAt: mailed, ExpiresAt: mailed.Add(48 * time.Hour), MailedAt: &mailed,
+		})
+	}
+	noLetters := func(st *store.State) {
+		var kept []store.SecretToken
+		for _, tok := range st.Tokens {
+			if tok.Kind != "email_confirm" {
+				kept = append(kept, tok)
+			}
+		}
+		st.Tokens = kept
+	}
+	account := func(t *testing.T, state string) {
+		t.Helper()
+		app.compare(t, "app-settings-account/"+state+".json", app.h.do(get("/app/settings/account", app.sess)))
+	}
+
+	// account-8: the address confirmed on 14 February, nothing waits.
+	t.Run("email-confirmed", func(t *testing.T) {
+		mutate(t, func(st *store.State, u *store.User) { u.PendingEmail = ""; noLetters(st) })
+		account(t, "email-confirmed")
+	})
+	// account-10: a new address waits, and no link went to it.
+	t.Run("email-unsent", func(t *testing.T) {
+		mutate(t, func(st *store.State, u *store.User) { u.PendingEmail = "new@example.org"; noLetters(st) })
+		account(t, "email-unsent")
+	})
+	// s-mail-9: the address was never confirmed, and nothing went to it.
+	t.Run("email-unconfirmed", func(t *testing.T) {
+		mutate(t, func(st *store.State, u *store.User) {
+			u.PendingEmail, u.EmailConfirmed, u.EmailConfirmedAt = "", false, nil
+			noLetters(st)
+		})
+		account(t, "email-unconfirmed")
+	})
+	// account-9: the link went to it the day before, and lives.
+	t.Run("email-sent", func(t *testing.T) {
+		mutate(t, func(st *store.State, u *store.User) { letter(st, u, u.Email, "2026-08-09 11:42") })
+		account(t, "email-sent")
+	})
+	// The address of the frames again: confirmed, the new one waiting for
+	// its letter of that morning (account-1, newMockupApp).
+	confirmed := mockupDayAt(t, "2026-02-14 11:42")
+	mutate(t, func(st *store.State, u *store.User) {
+		noLetters(st)
+		u.EmailConfirmed, u.EmailConfirmedAt, u.PendingEmail = true, &confirmed, "new@example.org"
+		letter(st, u, u.PendingEmail, "2026-08-10 11:42")
+	})
+
+	// account-13 and account-14: the administrator switched the scheme
+	// off — the block says so alone, the page says nothing else.
+	t.Run("escrow-off", func(t *testing.T) {
+		mutate(t, func(st *store.State, _ *store.User) { st.Settings.EscrowEnabled = false })
+		defer mutate(t, func(st *store.State, _ *store.User) { st.Settings.EscrowEnabled = true })
+		account(t, "escrow-off")
+		app.compare(t, "app-settings-escrow/escrow-off.json", app.h.do(get("/app/settings/escrow", app.sess)))
+	})
+	// account-12: the page without a copy, and account-2: the deposit
+	// sheet over Account.
+	t.Run("escrow-no-copy", func(t *testing.T) {
+		app.compare(t, "app-settings-escrow/no-copy.json", app.h.do(get("/app/settings/escrow", app.sess)))
+		app.compare(t, "app-settings-escrow-deposit/normal.json", app.h.do(get("/app/settings/escrow/deposit", app.sess)))
+	})
+	// account-4, account-7, account-11: the copy deposited on 2 March.
+	// Deposited by the service, not by the sheet: the sheet opens the
+	// unlock window, and its time left (TopBar.UnlockLeft) is measured by
+	// the real clock.
+	t.Run("escrow-deposited", func(t *testing.T) {
+		key, ok := app.sess.DataKey()
+		if !ok {
+			t.Fatal("no data key in the session")
+		}
+		app.h.users.SetClock(mockupDayAt(t, "2026-03-02 10:00"))
+		if err := app.h.users.DepositEscrow(app.sess.AccountID(), key); err != nil {
+			t.Fatal(err)
+		}
+		app.h.users.SetClock(mockupNow(t))
+		app.compare(t, "app-settings-escrow/normal.json", app.h.do(get("/app/settings/escrow", app.sess)))
+		account(t, "escrow-deposited")
+		app.compare(t, "app-settings-escrow-withdraw/normal.json", app.h.do(get("/app/settings/escrow/withdraw", app.sess)))
+	})
+	// account-3, the forced case: signed in with a temporary password, the
+	// red line on top and no way back.
+	t.Run("password-forced", func(t *testing.T) {
+		mutate(t, func(_ *store.State, u *store.User) { u.MustChangePassword = true })
+		app.compare(t, "app-password/forced.json", app.h.do(get("/app/password", app.sess)))
+	})
 }
 
 // C-14.2: the screens outside the shell. A person who has not signed in
