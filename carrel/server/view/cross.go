@@ -27,6 +27,17 @@ type FindRow struct {
 	Marked Runs `json:"marked,omitempty"`
 	Detail Text `json:"detail"`
 	When   Text `json:"when"`
+	// Строка по роду (s-find-1, Пк12). Контакт: Avatar — инициалы и цвет,
+	// Subtitle — телефон (моноширинно), Detail — почта, Caption —
+	// организация. Файл: Icon — значок по типу, Size, Changed — изменён
+	// числами «2026-08-04 11:20», Access — «rw» или «ro». У прочих пусто
+	Avatar   *Avatar `json:"avatar"`
+	Subtitle Text    `json:"subtitle,omitempty"`
+	Caption  Text    `json:"caption,omitempty"`
+	Icon     string  `json:"icon,omitempty"`
+	Size     Size    `json:"size,omitempty"`
+	Changed  Text    `json:"changed,omitempty"`
+	Access   Text    `json:"access,omitempty"`
 }
 
 type SearchHistoryRow struct {

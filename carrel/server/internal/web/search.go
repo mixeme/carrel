@@ -251,17 +251,29 @@ func (s *Server) findRow(tf timeFmt, blob sealed.Blob, it fanout.Item) view.Find
 	o := it.Object
 	switch it.Kind {
 	case view.KindFile:
+		// A file's row (s-find-1, Пк12): its icon by type, its size, when it
+		// changed in numbers, and whether it can be written.
 		row.Title = text(it.FileName)
-		row.Detail = text(string(formatSize(it.FileSize)))
+		row.Icon, row.Size = fileIcon(file.Entry{Name: it.FileName}), formatSize(it.FileSize)
+		if !it.FileModified.IsZero() {
+			row.Changed = text(string(tf.numStamp(it.FileModified)))
+		}
+		row.Access = "rw"
+		if col, ok := blob.Collection(it.AccountID, it.Col); ok && col.ReadOnly {
+			row.Access = "ro"
+		}
 		row.Href = s.route(foundFileHref(it))
 		return row
 	case view.KindContact:
-		row.Title = text(contactName(o))
-		detail := firstValue(o, "EMAIL")
-		if detail == "" {
-			detail = firstValue(o, "TEL")
-		}
-		row.Detail = text(detail)
+		// A contact's row (s-find-1, Пк12): the face, the phone, the address,
+		// the organisation.
+		name := contactName(o)
+		row.Title = text(name)
+		avatar := avatarFor(card.UID(o), name)
+		row.Avatar = &avatar
+		row.Subtitle = text(firstValue(o, "TEL"))
+		row.Detail = text(firstValue(o, "EMAIL"))
+		row.Caption = text(structured(firstValue(o, "ORG")))
 	case view.KindEvent:
 		row.Title = text(titleOr(cal.Text(o, "SUMMARY"), "Untitled event"))
 		row.Detail = text(cal.Text(o, "LOCATION"))

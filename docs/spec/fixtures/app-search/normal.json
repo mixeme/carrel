@@ -523,6 +523,12 @@
   },
   "results": [
     {
+      "avatar": {
+        "colour": "#8c6239",
+        "href": "",
+        "initials": "АК"
+      },
+      "caption": "Издательство «Слово»",
       "colour": "#4a6b52",
       "detail": "a.kovaleva@example.org",
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
@@ -537,6 +543,7 @@
         }
       ],
       "stamp": "nextcloud · Контакты",
+      "subtitle": "+7 912 445-10-88",
       "title": "Анна Ковалёва",
       "when": ""
     }

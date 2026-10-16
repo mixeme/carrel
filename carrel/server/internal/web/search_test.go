@@ -185,7 +185,7 @@ func TestSearchAcrossTickedSources(t *testing.T) {
 	if event.Detail != "Zoom" || event.When == "" || !strings.HasSuffix(string(event.Stamp), " · Work") {
 		t.Errorf("event = %+v", event)
 	}
-	if doc.Detail != "10 B" || doc.Href != "/app/files/"+f.id+"/"+url.PathEscape(searchDocs)+"/Ada%20contract.pdf" {
+	if doc.Size != "10 B" || doc.Detail != "" || doc.Href != "/app/files/"+f.id+"/"+url.PathEscape(searchDocs)+"/Ada%20contract.pdf" {
 		t.Errorf("file = %+v", doc)
 	}
 	if page.Results[6].Href != "/app/files/"+f.id+"/"+url.PathEscape(searchDocs)+"/old/Ada.md" {

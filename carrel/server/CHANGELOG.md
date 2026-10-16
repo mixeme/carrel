@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.307 — 2026-10-16
+
+### Added
+
+- **A found contact and a found file are rows of their kind** (Пк12 of
+  the scan of 15.10.2026, in part; `s-find-1`): `FindRow.Avatar`
+  (initials and colour), `Subtitle` (the phone, mono), `Detail` (the
+  address), `Caption` (the organisation) of a contact; `Icon`, `Size`,
+  `Changed` (in numbers), `Access` («rw», «ro») of a file. An event's and
+  a task's rows wait for the frames' answers (В1, В2 of the scan).
+- Fixtures of Connections' states (Нс30, in part): `add` (`s-profile-2`),
+  `label-taken` (`s-profile-11`), `feed` (`s-profile-10`).
+
+### For consumers
+
+`FindRow.Avatar`, `.Subtitle`, `.Caption`, `.Icon`, `.Size`, `.Changed`,
+`.Access` in C-6; a contact's `Detail` is its address only now (it was
+the phone when there was none). Three state names in C-14.3.
+
 ## v0.2.306 — 2026-10-16
 
 ### Changed

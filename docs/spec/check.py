@@ -129,7 +129,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
           "tiles","copy","elsewhere","rename","delete","attach","single","in-part",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
-          "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links"}
+          "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -413,6 +413,11 @@ STATE_FRAME = {
     "app-record-delete/normal": "s-agenda-26",
     "app-record-delete/single": "s-tasks-18",
     "app-settings-connections/edit": "s-profile-16",
+    # Нс30: диалог Connect account (s-profile-2), занятая подпись
+    # (s-profile-11), панель подписки (s-profile-10, часть subscribe).
+    "app-settings-connections/add": "s-profile-2",
+    "app-settings-connections/label-taken": "s-profile-11",
+    "app-settings-connections/feed": "s-profile-10",
     "app-settings-connections/edit-links": "s-profile-23",
 }
 # Без строки: app-contact-new/normal и app-event-new/normal — полные формы

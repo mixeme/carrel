@@ -1748,6 +1748,18 @@ func TestFixtureConnections(t *testing.T) {
 	t.Run("edit", func(t *testing.T) {
 		app.compare(t, "app-settings-connections/edit.json", app.h.do(get("/app/settings/connections?"+q.Encode(), app.sess)))
 	})
+	// Нс30: Connect account (s-profile-2); its label taken — «nextcloud»
+	// is (s-profile-11); the panel of a subscription (s-profile-10).
+	t.Run("add", func(t *testing.T) {
+		app.compare(t, "app-settings-connections/add.json", app.h.do(get("/app/settings/connections?op=add", app.sess)))
+	})
+	t.Run("label-taken", func(t *testing.T) {
+		app.compare(t, "app-settings-connections/label-taken.json", app.h.do(postForm("/app/settings/connections", app.sess, url.Values{
+			"label": {"nextcloud"}, "server": {app.servers["nextcloud"].URL}, "login": {"alice"}, "password": {"secret"}})))
+	})
+	t.Run("feed", func(t *testing.T) {
+		app.compare(t, "app-settings-connections/feed.json", app.h.do(get("/app/settings/connections?op=feed", app.sess)))
+	})
 	t.Run("edit-links", func(t *testing.T) {
 		page := decode[view.ConnectionsPage](t, app.h.do(get("/app/settings/connections?"+q.Encode(), app.sess)))
 		form := formFields(*page.Add)
