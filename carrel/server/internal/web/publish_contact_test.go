@@ -35,6 +35,11 @@ func publishWith(t *testing.T, f davFixture, href string, ticks ...string) strin
 	t.Helper()
 	sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
 	form := url.Values{"name": {"on"}}
+	// The .ics of a calendar kind is ticked as the sheet opens, and a
+	// browser sends it so (s-publish-2, -19).
+	if r := formRow(sheet.Form, "download"); r != nil && r.Value == "on" {
+		form.Set("download", "on")
+	}
 	for _, o := range rowNamed(t, sheet.Form, "lives").Options {
 		if o.Selected {
 			form.Set("lives", o.Value)

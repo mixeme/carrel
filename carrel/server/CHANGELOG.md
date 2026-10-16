@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.303 — 2026-10-16
+
+### Changed
+
+- **The publish sheet of a calendar kind is the frame's** (note 70 of
+  Typecase, task 163; `s-publish-2`, `-19`): how much of it (a calendar),
+  then «What the visitor sees» — Time with «always shown» beside it
+  (`LabelAside`, not a hint), the title on, the rest off, and under the set
+  `FieldSet.Hint`: «Without the title an event shows as “Busy”.» («the
+  event» of one) —, then «Allow .ics download and subscription», then «Link
+  lives for». One event or task asks of its .ics too, ticked at first, and
+  the sheet's post says of the .ics of any calendar kind.
+
+### For consumers
+
+`FieldSet.Hint` in C-6.
+
 ## v0.2.302 — 2026-10-16
 
 ### Added

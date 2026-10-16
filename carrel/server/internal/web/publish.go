@@ -139,19 +139,25 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 		}
 	}
 	lives := livesOf(kind, what == "folder")
-	if kind == view.KindContact {
+	var terms []view.FormRow
+	switch {
+	case kind == view.KindContact:
 		// The .vcf is off until asked for, like the fields it would carry.
-		rows = append(rows, view.FormRow{Name: "download", Label: "Allow .vcf download and subscription", Kind: view.InputCheck})
+		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .vcf download and subscription", Kind: view.InputCheck})
+	case isCalendarKind(kind):
+		// The .ics goes unless taken off — a calendar's and one event's
+		// alike (s-publish-2, -19) —, after what the visitor sees: it obeys
+		// the same ticks.
+		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .ics download and subscription", Kind: view.InputCheck, Value: "on"})
 	}
-	rows = append(rows, view.FormRow{Name: "lives", Label: "Link lives for", Kind: view.InputSelect, Value: text(lives), Options: []view.Option{
+	terms = append(terms, view.FormRow{Name: "lives", Label: "Link lives for", Kind: view.InputSelect, Value: text(lives), Options: []view.Option{
 		{Value: "7", Label: "7 days", Selected: lives == "7"},
 		{Value: "14", Label: "14 days", Selected: lives == "14"},
 		{Value: "30", Label: "30 days", Selected: lives == "30"},
 		{Value: "never", Label: "No expiry", Separator: true}, // s-publish-14: only Revoke closes it
 	}})
-	if kind == view.KindEvent && q.Get("uid") == "" {
-		rows = append(rows,
-			view.FormRow{Name: "download", Label: "Allow .ics download and subscription", Kind: view.InputCheck, Value: "on"})
+	if !isCalendarKind(kind) {
+		rows, terms = append(rows, terms...), nil
 	}
 	sheet.Form = s.plainForm("/app/publish", "POST", rows...)
 	if kind == view.KindContact {
@@ -170,7 +176,20 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 		sheet.Form.Sets = append([]view.FieldSet{sees}, sheet.Form.Sets...)
 	}
 	if isCalendarKind(kind) {
-		sheet.Form.Sets = append([]view.FieldSet{calendarSees()}, sheet.Form.Sets...)
+		// How much of it, what of each record, then its terms (s-publish-2,
+		// -19): first what from the calendar, then what from each event.
+		noun := "the " + what
+		if q.Get("uid") == "" {
+			noun = article(recordKinds[segmentOf(kind)].noun)
+		}
+		sheet.Form.Sets = append(sheet.Form.Sets, calendarSees(noun), view.FieldSet{Rows: terms})
+		if len(rows) == 1 {
+			// One record asks nothing before what the visitor sees
+			// (s-publish-19): its CSRF goes with the terms.
+			last := len(sheet.Form.Sets) - 1
+			sheet.Form.Sets[last].Rows = append(rows, terms...)
+			sheet.Form.Sets = sheet.Form.Sets[1:]
+		}
 	}
 	sheet.Form.Action = s.postQuery("/app/publish", q)
 	sheet.Form.Actions = sheet.Actions
@@ -290,6 +309,11 @@ func publishChoices(form url.Values, kind view.Kind, uid string, target *user.Pu
 		if form.Get("how") != "" {
 			target.NoDownload = formCheck(form, "download") != "on"
 		}
+	}
+	if isCalendarKind(kind) && form.Has("lives") {
+		// The sheet's post says of the .ics of any calendar kind, a
+		// calendar's and one record's alike (s-publish-19).
+		target.NoDownload = formCheck(form, "download") != "on"
 	}
 	if isCalendarKind(kind) {
 		// The time always, and what is ticked. A post without the sheet's

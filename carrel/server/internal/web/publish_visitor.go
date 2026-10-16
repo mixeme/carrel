@@ -110,10 +110,13 @@ func visitorRecords(objs []*model.Object, t user.PublishTarget) []*model.Object 
 
 // calendarSees is the set «What the visitor sees» of the sheet of a
 // calendar, an event, a task list or a task: the time, which always stands
-// and cannot be taken off, then the ticks, the title on.
-func calendarSees() view.FieldSet {
-	sees := view.FieldSet{Legend: "What the visitor sees", Rows: []view.FormRow{
-		{Name: calendarSeesTime, Label: "Time", Kind: view.InputCheck, Value: "on", ReadOnly: true, Hint: "Always shown."}}}
+// and cannot be taken off — «always shown» beside it —, then the ticks, the
+// title on, and under them what the visitor sees without the title
+// (s-publish-2, -19). noun is what the visitor sees one of, «an event» of a
+// calendar, «the event» of one.
+func calendarSees(noun string) view.FieldSet {
+	sees := view.FieldSet{Legend: "What the visitor sees", Hint: text("Without the title " + noun + " shows as “Busy”."), Rows: []view.FormRow{
+		{Name: calendarSeesTime, Label: "Time", LabelAside: "always shown", Kind: view.InputCheck, Value: "on", ReadOnly: true}}}
 	for _, f := range calendarVisitorFields {
 		row := view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck}
 		if f.on {

@@ -2551,7 +2551,7 @@ type Form struct { // общая форма: поля, ошибки, кнопк�
 // ту же форму с ?fields=all, где свёрнутого нет и каждое поле стоит в своей
 // рубрике; набранное до неё не переносится — со сценариями клиент раскрывает
 // набор на месте. nil у несвёрнутого
-type FieldSet struct { Legend Text; Folded bool; Unfold *Action; Rows []FormRow }
+type FieldSet struct { Legend Text; Folded bool; Unfold *Action; Rows []FormRow; Hint Text } // Hint — строка под набором: «Without the title an event shows as “Busy”.» у «What the visitor sees» (s-publish-2, -19); у прочих пусто
 type FormRow struct {
     Name     string
     Label    Text

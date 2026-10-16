@@ -20,6 +20,9 @@ type FieldSet struct {
 	// где каждое поле в своей рубрике; nil у несвёрнутого набора
 	Unfold *Action   `json:"unfold"`
 	Rows   []FormRow `json:"rows"`
+	// Hint — строка под набором: «Without the title an event shows as
+	// “Busy”.» у «What the visitor sees» (s-publish-2, -19); у прочих пусто
+	Hint Text `json:"hint,omitempty"`
 }
 type FormRow struct {
 	Name  string `json:"name"`
