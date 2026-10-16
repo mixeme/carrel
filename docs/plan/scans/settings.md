@@ -76,7 +76,7 @@ radicale · vps), третьего устройства davloom, «Save»/«Disc
 - Нс4 → **закрыто сервером `v0.2.288`** (рейл Key escrow отмечает Account); было **держится**: `handlers_escrow.go` зовёт `settingsRail(sess,
   "/app/settings/escrow")` — такой строки в рейле нет, `on` не стоит ни у
   какой; кадр `account-4` отмечает Account.
-- Нс5 → **держится**: `rail_status.go` — `join(last, " · verified")`, у куска
+- Нс5 → **закрыто сервером `v0.2.289`** (`Run.Hint`); было **держится**: `rail_status.go` — `join(last, " · verified")`, у куска
   подсказки нет.
 - Нс6 → **данные**, частично **закрыто кадром** (записка 49): «Connections 4»
   теперь сходится; «davloom 3», «Backup 3» и подвал с копиями — набору

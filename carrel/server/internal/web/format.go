@@ -71,7 +71,8 @@ func join(parts ...any) view.Runs {
 	// come, and a sentence split for nothing is harder to read back.
 	var merged view.Runs
 	for _, r := range runs(out...) {
-		if n := len(merged); n > 0 && merged[n-1].Mark == view.RunPlain && r.Mark == view.RunPlain {
+		// A piece with a hint of its own stays a piece (Нс5).
+		if n := len(merged); n > 0 && merged[n-1].Mark == view.RunPlain && r.Mark == view.RunPlain && merged[n-1].Hint == "" && r.Hint == "" {
 			merged[n-1].Text += r.Text
 			continue
 		}

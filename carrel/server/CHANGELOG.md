@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.289 — 2026-10-16
+
+### Changed
+
+- **A piece of a phrase can carry a hint** (Нс5 of the scan of 15.10.2026;
+  `account-*`): `Run.Hint`. «verified» in the rail's backup line says
+  «The archive was read back from the destination and the checksum
+  matched». A piece with a hint is not run together with its plain
+  neighbours.
+
+
 ## v0.2.288 — 2026-10-16
 
 ### Changed

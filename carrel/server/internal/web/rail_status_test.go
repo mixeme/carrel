@@ -44,6 +44,10 @@ func TestRailStatusBlock(t *testing.T) {
 	if len(got) != 2 || !regexp.MustCompile(`^on: Backups are running / Last backup `+stamp+` · verified$`).MatchString(got[1]) {
 		t.Errorf("settings rail with a copy = %q", got)
 	}
+	// «verified» carries what it means (Нс5).
+	if line := rail.Status[len(rail.Status)-1].Line; line[len(line)-1].Text != "verified" || line[len(line)-1].Hint == "" {
+		t.Errorf("the verified piece = %+v", line)
+	}
 
 	// davloom on: running, its devices, and when one was last answered.
 	h := newHarness(t)

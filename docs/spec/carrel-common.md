@@ -606,6 +606,7 @@ type Runs []Run
 type Run struct {
     Text Text
     Mark RunMark // C-8; пусто — обычный текст
+    Hint Text    // подсказка куска (title): «verified» подвала рейла — «The archive was read back from the destination and the checksum matched» (account-*); пусто — нет
 }
 
 // Действие. Кнопка, пункт меню и строка панели — одно и то же.

@@ -18,6 +18,10 @@ type Runs []Run
 type Run struct {
 	Text Text    `json:"text"`
 	Mark RunMark `json:"mark,omitempty"` // C-8; пусто — обычный текст
+	// Hint — подсказка куска (title): «verified» подвала рейла — «The archive
+	// was read back from the destination and the checksum matched»
+	// (account-*, Нс5); пусто — подсказки нет
+	Hint Text `json:"hint,omitempty"`
 }
 
 // Action — кнопка, пункт меню и строка панели — одно и то же.

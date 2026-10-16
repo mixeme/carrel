@@ -116,7 +116,9 @@ func (s *Server) backupStatus(sess *session.Session) (view.RailStatus, bool) {
 	case age > staleBackup:
 		return view.RailStatus{Tone: view.StatusAlert, Title: text("No backup for " + plural(int(age/(24*time.Hour)), "day")), Line: last}, true
 	case newest.verified:
-		return view.RailStatus{Tone: view.StatusOn, Title: "Backups are running", Line: join(last, " · verified")}, true
+		// «verified» says what it means beside it (account-*, Нс5).
+		verified := view.Run{Text: "verified", Hint: "The archive was read back from the destination and the checksum matched"}
+		return view.RailStatus{Tone: view.StatusOn, Title: "Backups are running", Line: join(last, " · ", verified)}, true
 	}
 	return view.RailStatus{Tone: view.StatusOn, Title: "Backups are running", Line: last}, true
 }
