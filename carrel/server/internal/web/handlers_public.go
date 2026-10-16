@@ -175,12 +175,14 @@ func (s *Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	ip := s.clientIP(r)
 	login := r.FormValue("login")
 	if !s.limit.allowLogin(login, ip, start) {
-		// Said on the page, not a bare 429 (as Ад39): the form again.
+		// Journaled with its address (Ад38), and said on the page, not a
+		// bare 429 (as Ад39): the form again.
+		s.users.LoginLimited(login, ip)
 		s.writePage(w, r, http.StatusTooManyRequests, s.loginPage(w, r, login, text(tooManyAttempts)))
 		return
 	}
 	password := r.FormValue("password")
-	accountID, dataKey, mustChange, ok := s.users.Authenticate(r.Context(), login, password)
+	accountID, dataKey, mustChange, ok := s.users.Authenticate(user.WithClientIP(r.Context(), ip), login, password)
 	if !ok {
 		constantTimeDelay(start, 300*time.Millisecond)
 		page := s.loginPage(w, r, login, text("Login or password is wrong."))

@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.324 — 2026-10-16
+
+### Changed
+
+- **Refused sign-ins in the journal** (Ад38; the owner's decision of
+  16.10.2026; `s-admin-7`): a refused sign-in has no actor («—») and its
+  address goes in; the attempts in a row on one account are one line,
+  counted — «3rd attempt · ip 203.0.113.9 · rate-limited» — moved to the end
+  at each attempt, so a stream of guesses cannot flush the journal; a sign-in
+  refused for too many attempts is journaled too; a successful sign-in, or
+  an hour without attempts, starts a new line. A successful sign-in keeps no
+  address.
+
 ## v0.2.323 — 2026-10-16
 
 ### Changed

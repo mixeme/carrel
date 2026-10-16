@@ -32,6 +32,8 @@ type Users interface {
 	// SetupFirstAdminWith is the same with an address (s-auth-4: optional).
 	SetupFirstAdminWith(ctx context.Context, login, password, email string) error
 	Authenticate(ctx context.Context, login, password string) (accountID string, dataKey [32]byte, mustChange bool, ok bool)
+	// LoginLimited journals a sign-in refused for too many attempts (Ад38).
+	LoginLimited(login, ip string)
 	LoginExists(login string) bool
 	RegisterOpen() bool
 

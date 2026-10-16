@@ -12,8 +12,10 @@ import (
 // An unknown login writes nothing — the journal never keeps what somebody
 // typed — and neither does a disabled account: the answer to the client is
 // one for all three (S-29.1), the journal names accounts, not attempts at
-// names. No address goes in: the journal is kept for good, and the sessions
-// list already shows where a live session came from (audit №3, Ф3-7).
+// names. By the owner's decision of 16.10.2026 (Ад38; s-admin-7) a refused
+// sign-in has no actor («—»), its address goes in, and the attempts in a
+// row on one account are one line with their count — a successful one
+// keeps no address: where a person usually is is nobody's business.
 func TestSignInIsJournaled(t *testing.T) {
 	f := newFixture(t)
 	id := f.setupAdmin(t)
@@ -34,8 +36,25 @@ func TestSignInIsJournaled(t *testing.T) {
 	if _, _, _, ok := f.svc.Authenticate(ctx, "admin", "wrong"); ok {
 		t.Fatal("a wrong password signed in")
 	}
-	if e := last(); count() != n+1 || e.What != "login.fail" || e.Who != "admin" || e.Whom != "admin" || e.Detail != "" {
+	if e := last(); count() != n+1 || e.What != "login.fail" || e.Who != "—" || e.Whom != "admin" || e.Detail != "1st attempt" {
 		t.Errorf("after a wrong password: %+v (entries %d → %d)", e, n, count())
+	}
+	// The next ones in a row, from an address: the same line, counted.
+	from := WithClientIP(ctx, "203.0.113.9")
+	f.svc.Authenticate(from, "admin", "wrong")
+	f.svc.Authenticate(from, "admin", "wrong")
+	if e := last(); count() != n+1 || e.Detail != "3rd attempt · ip 203.0.113.9" {
+		t.Errorf("a series: %+v (entries %d → %d)", e, n, count())
+	}
+	f.svc.LoginLimited("admin", "203.0.113.9")
+	if e := last(); count() != n+1 || e.Detail != "4th attempt · ip 203.0.113.9 · rate-limited" {
+		t.Errorf("over the limit: %+v", e)
+	}
+	// A successful sign-in ends the series.
+	f.svc.Authenticate(ctx, "admin", "password123")
+	f.svc.Authenticate(ctx, "admin", "wrong")
+	if e := last(); e.Detail != "1st attempt" {
+		t.Errorf("after a sign-in, a new series: %+v", e)
 	}
 	n = count()
 	f.svc.Authenticate(ctx, "nobody' OR 1=1", "wrong")
