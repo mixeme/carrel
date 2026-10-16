@@ -261,7 +261,8 @@ func TestConnectionPasswordOnlyInsideUnlockWindow(t *testing.T) {
 
 	rec = f.h.do(get(reveal, f.sess))
 	page = decode[view.ConnectionsPage](t, rec)
-	if pw := page.Accounts[0].Password; !pw.Shown || pw.Value != "davpass" {
+	if pw := page.Accounts[0].Password; !pw.Shown || pw.Value != "davpass" || pw.Reveal.Label != "Hide" {
+		// s-profile-4: the shown password's button is «Hide» (Нс29).
 		t.Errorf("password = %+v", pw)
 	}
 	if cc := rec.Header().Get("Cache-Control"); cc != "no-store" {

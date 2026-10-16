@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.288 — 2026-10-16
+
+### Changed
+
+- **Key escrow stands under Account in the rail** (Нс4 of the scan of
+  15.10.2026; `account-4`): the rail has no row of its own for it, and
+  Account is the one on — before, none was.
+- **A shown password's button is «Hide»** (Нс29; `s-profile-4`), not
+  «Hide password».
+
+### For consumers
+
+Fixture `app-settings-escrow` re-shot.
+
 ## v0.2.287 — 2026-10-16
 
 ### Changed

@@ -692,7 +692,7 @@ func (s *Server) revealPassword(sess *session.Session, page *view.ConnectionsPag
 		page.Accounts[i].Password = &view.SecretField{
 			Shown:  true,
 			Value:  text(password),
-			Reveal: view.Action{ID: "connection.password", Label: "Hide password", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+			Reveal: view.Action{ID: "connection.password", Label: "Hide", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
 		}
 		return true
 	}

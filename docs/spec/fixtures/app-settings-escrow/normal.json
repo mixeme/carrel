@@ -119,7 +119,8 @@
         "icon": "i-user",
         "id": "settings.account",
         "label": "Account",
-        "method": "GET"
+        "method": "GET",
+        "on": true
       },
       {
         "count": 4,

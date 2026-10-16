@@ -216,7 +216,7 @@ func (s *Server) buildEscrowPage(sess *session.Session, errText string) view.Esc
 	snap := s.store.Snapshot()
 	u := snap.UserByID(sess.AccountID())
 	page := view.EscrowPage{
-		Shell:  s.withRail(s.buildShell(sess, "Key escrow"), s.settingsRail(sess, "/app/settings/escrow")),
+		Shell:  s.withRail(s.buildShell(sess, "Key escrow"), s.settingsRail(sess, "/app/settings/account")),
 		Status: s.escrowStatus(sess, u, false),
 	}
 	if u != nil && store.UserDeposited(u) {

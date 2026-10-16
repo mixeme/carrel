@@ -80,3 +80,21 @@ func TestTheDuplicatesSayWhereTheyLooked(t *testing.T) {
 		t.Errorf("loaded = %v, want the two books that were opened", loaded)
 	}
 }
+
+// Key escrow is a page of the account (account-4 marks Account in the rail;
+// Нс4): the rail has no row of its own for it, and Account is the one on.
+func TestKeyEscrowStandsUnderAccount(t *testing.T) {
+	h := newHarness(t)
+	h.admin("mix", "password123")
+	sess := h.login("mix", "password123")
+	page := decode[struct{ view.Shell }](t, h.do(get("/app/settings/escrow", sess)))
+	var on []string
+	for _, r := range page.Rail.Nav {
+		if r.On {
+			on = append(on, string(r.Label))
+		}
+	}
+	if !equalStrings(on, []string{"Account"}) {
+		t.Errorf("on in the rail of Key escrow: %v", on)
+	}
+}
