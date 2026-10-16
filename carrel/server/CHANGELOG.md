@@ -17,6 +17,15 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.322 — 2026-10-16
+
+### Changed
+
+- **The import wizard has its refresh in the head** (Им1 of the scan of
+  import; `s-io-3`…`-9`): «2 min ago» — when the collection the records go
+  into was last read — and the circle reads the wizard again, the preview
+  counted anew against it; after the report, the list it went into.
+
 ## v0.2.321 — 2026-10-16
 
 ### Added

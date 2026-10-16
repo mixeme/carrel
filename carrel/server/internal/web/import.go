@@ -463,6 +463,21 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 	}
 	page.Rail = s.recordRail(c, s.listBack(c))
 	page.Notices = append(page.Notices, st.notices...)
+	// «2 min ago» in the head (Им1; s-io-3…9): when the collection the
+	// records go into was last read, and the wizard read again — the
+	// preview counted anew against it; after the report, its list.
+	{
+		read, here := c, c.listPath()+"/import"
+		if st.dest != nil {
+			read = st.dest
+			to, into := targetOf(st.dest)
+			here += "?" + importQuery("", to, into).Encode()
+		}
+		if st.report != nil && st.dest != nil {
+			here = st.dest.listPath()
+		}
+		page.Top.Refresh = s.recordRefresh(read, here)
+	}
 	page.Into = s.importTargets(c, st.dest)
 	page.Source = view.ImportSource{Kinds: importFormats(c.spec.kind), Hint: importHints[c.spec.kind], Note: importFirstNote}
 	if c.spec.kind == view.KindNote {

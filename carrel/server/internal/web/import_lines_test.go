@@ -100,3 +100,13 @@ func TestOneMarkdownFileSaysWhereItsTitleComesFrom(t *testing.T) {
 		t.Errorf("row = %q", cells)
 	}
 }
+
+// Им1 (s-io-3…9): the wizard's head says when the collection the records go
+// into was last read, and reads the wizard again.
+func TestTheImportWizardHasItsRefresh(t *testing.T) {
+	f := calendarFixture(t, nil)
+	page := decode[view.ImportPage](t, f.h.do(get(f.path("tasks")+"/import", f.sess)))
+	if r := page.Top.Refresh; r.Action.Href == "" || !r.Action.Enabled || !strings.Contains(r.Action.Href, "/import") {
+		t.Errorf("refresh = %+v", r)
+	}
+}
