@@ -1,0 +1,43 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/p/link-panorama-token/download",
+      "icon": "i-download",
+      "id": "published.download",
+      "label": "Download 84 MB",
+      "method": "GET",
+      "primary": true
+    }
+  ],
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "fields": [],
+  "file": {
+    "blocks": [],
+    "body": "",
+    "changed": "2026-07-20",
+    "href": "/p/link-panorama-token/download",
+    "name": "панорама.tif",
+    "preview": "none",
+    "size": "84 MB",
+    "type": "image/tiff"
+  },
+  "folder": null,
+  "kind": "file",
+  "lede": [
+    {
+      "mark": "mono",
+      "text": "image/tiff · 84 MB · changed 2026-07-20"
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "owner": "",
+  "range": null,
+  "readOnly": true,
+  "tasks": [],
+  "title": "панорама.tif"
+}

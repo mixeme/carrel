@@ -1,0 +1,43 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/p/link-sync-board-token/download",
+      "icon": "i-download",
+      "id": "published.download",
+      "label": "Download",
+      "method": "GET",
+      "primary": true
+    }
+  ],
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "fields": [],
+  "file": {
+    "blocks": [],
+    "body": "",
+    "changed": "2026-08-10",
+    "href": "/p/link-sync-board-token/download?inline=1",
+    "name": "2026-08-10-sync-board.png",
+    "preview": "image",
+    "size": "412 KB",
+    "type": "image/png"
+  },
+  "folder": null,
+  "kind": "file",
+  "lede": [
+    {
+      "mark": "mono",
+      "text": "image/png · 412 KB · changed 2026-08-10"
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "owner": "",
+  "range": null,
+  "readOnly": true,
+  "tasks": [],
+  "title": "2026-08-10-sync-board.png"
+}

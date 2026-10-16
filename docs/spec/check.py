@@ -130,7 +130,8 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "tiles","copy","elsewhere","rename","delete","attach","single","in-part",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
-          "issued","mismatch","folder","preview","report","silent"}
+          "issued","mismatch","folder","preview","report","silent",
+          "addressbook","note","image","text","download"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -223,6 +224,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     # токеном. Кадр rest-1 — часть (data-part), и сверяется он с кадром
     # приглашения — оба без рейла, так что проверке 8 сравнивать нечего.
     "dead-link": "/invite/{token}",
+    "p-token": "/p/{token}",
     # Подтверждение адреса — свой адрес C-5, но кадра экрана у него нет: оба
     # его кадра — части (rest-1 invalid, rest-2 confirmed). Мёртвый токен —
     # фикстура dead-link; normal — подтверждённый адрес, и он сверяется с
@@ -443,6 +445,19 @@ STATE_FRAME = {
     "admin-reset/issued": "s-admin-14",
     "admin-reset/refused": "s-admin-16",
     "admin-reset/mismatch": "s-admin-20",
+    # Прогоны, которые кадры и рисуют (Ад31, Ад33): проверка установки и
+    # след обнаружения. До прогона своего кадра нет (В7, В8).
+    "admin-install/report": "s-admin-4",
+    "admin-dav/report": "s-admin-5",
+    # Публичные страницы (Пс1): все кадры маршрута — части (data-part),
+    # у каждого вида страницы свой.
+    "p-token/normal": "s-publish-6",
+    "p-token/addressbook": "s-publish-7",
+    "p-token/note": "s-publish-8",
+    "p-token/image": "s-publish-9",
+    "p-token/text": "s-publish-10",
+    "p-token/download": "s-publish-11",
+    "p-token/folder": "s-publish-12",
     "app-record-delete/single": "s-tasks-18",
     "app-settings-connections/edit": "s-profile-16",
     # Нс30: диалог Connect account (s-profile-2), занятая подпись
@@ -457,11 +472,13 @@ STATE_FRAME = {
 # задача 59) и s-agenda-15 (Typecase 9e69804, задача 77).
 
 def frame_by_id(fid):
-    m = re.search(r'<div class="frame" data-frame="%s"[^>]*>' % re.escape(fid), mock)
+    # Кадр шире обычного несёт второй класс (`frame cap900`, публичные
+    # страницы s-publish-6, -12).
+    m = re.search(r'<div class="frame(?: [^"]*)?" data-frame="%s"[^>]*>' % re.escape(fid), mock)
     if not m:
         return None
-    nxt = mock.find('<div class="frame"', m.end())
-    return mock[m.end():nxt if nxt > 0 else len(mock)]
+    nxt = re.compile(r'<div class="frame[ "]').search(mock, m.end())
+    return mock[m.end():nxt.start() if nxt else len(mock)]
 
 def as_kind(x):
     """Кадр рода пишет свой маршрут, карта — шаблон: сводим к шаблону."""

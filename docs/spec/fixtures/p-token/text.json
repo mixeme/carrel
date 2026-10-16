@@ -1,0 +1,43 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/p/link-checklist-token/download",
+      "icon": "i-download",
+      "id": "published.download",
+      "label": "Download 3 KB",
+      "method": "GET",
+      "primary": true
+    }
+  ],
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "fields": [],
+  "file": {
+    "blocks": [],
+    "body": "",
+    "changed": "2026-08-09",
+    "href": "/p/link-checklist-token/download",
+    "name": "release-checklist.md",
+    "preview": "none",
+    "size": "3 KB",
+    "type": "text/markdown"
+  },
+  "folder": null,
+  "kind": "file",
+  "lede": [
+    {
+      "mark": "mono",
+      "text": "text/markdown · 3 KB · changed 2026-08-09"
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "owner": "",
+  "range": null,
+  "readOnly": true,
+  "tasks": [],
+  "title": "release-checklist.md"
+}

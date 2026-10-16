@@ -1,0 +1,112 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/p/link-attachments-token/download",
+      "icon": "i-download",
+      "id": "published.download",
+      "label": "Download folder",
+      "method": "GET"
+    }
+  ],
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "fields": [],
+  "file": null,
+  "folder": {
+    "crumbs": [
+      {
+        "href": "",
+        "label": "attachments"
+      }
+    ],
+    "dav": "/p/link-attachments-token/dav/",
+    "rows": [
+      {
+        "href": "/p/link-attachments-token?in=2026-07",
+        "icon": "",
+        "isDir": true,
+        "menu": [],
+        "modified": "",
+        "name": "2026-07",
+        "open": "",
+        "selected": false,
+        "size": "",
+        "thumb": "",
+        "type": "folder",
+        "upload": null
+      },
+      {
+        "href": "/p/link-attachments-token/file/2026-08-04-whiteboard.jpg",
+        "icon": "",
+        "isDir": false,
+        "menu": [],
+        "modified": "4 August, 17:03",
+        "name": "2026-08-04-whiteboard.jpg",
+        "open": "",
+        "selected": false,
+        "size": "2.8 MB",
+        "thumb": "",
+        "type": "image/jpeg",
+        "upload": null
+      },
+      {
+        "href": "/p/link-attachments-token/file/2026-08-10-sync-board.png",
+        "icon": "",
+        "isDir": false,
+        "menu": [],
+        "modified": "10 August, 11:07",
+        "name": "2026-08-10-sync-board.png",
+        "open": "",
+        "selected": false,
+        "size": "412 KB",
+        "thumb": "",
+        "type": "image/png",
+        "upload": null
+      },
+      {
+        "href": "/p/link-attachments-token/file/release-checklist.md",
+        "icon": "",
+        "isDir": false,
+        "menu": [],
+        "modified": "9 August, 18:44",
+        "name": "release-checklist.md",
+        "open": "",
+        "selected": false,
+        "size": "3 KB",
+        "thumb": "",
+        "type": "text/markdown",
+        "upload": null
+      },
+      {
+        "href": "/p/link-attachments-token/file/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
+        "icon": "",
+        "isDir": false,
+        "menu": [],
+        "modified": "5 August, 14:20",
+        "name": "смета-подрядчик.pdf",
+        "open": "",
+        "selected": false,
+        "size": "1.2 MB",
+        "thumb": "",
+        "type": "application/pdf",
+        "upload": null
+      }
+    ]
+  },
+  "kind": "file",
+  "lede": [
+    {
+      "text": "Read-only. Published from Carrel."
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "owner": "",
+  "range": null,
+  "readOnly": true,
+  "tasks": [],
+  "title": "attachments"
+}

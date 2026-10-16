@@ -1,0 +1,153 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/p/link-lichnyj-token/download",
+      "icon": "i-download",
+      "id": "published.download",
+      "label": "Download .ics",
+      "method": "GET"
+    }
+  ],
+  "body": "",
+  "contacts": [],
+  "days": [
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "7 Aug 15:15",
+          "colour": "",
+          "href": "",
+          "kind": "event",
+          "location": "",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "summary": "Синк-ап по релизу",
+          "tags": [],
+          "time": "10:00",
+          "uid": "8f1c-4a02-b7d3"
+        }
+      ],
+      "rubric": "Monday · 10 August"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "9 Aug 20:30",
+          "colour": "",
+          "href": "",
+          "kind": "event",
+          "location": "",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "summary": "Забрать документы",
+          "tags": [],
+          "time": "18:00",
+          "uid": "1d55-90fe-3c27"
+        }
+      ],
+      "rubric": "Tuesday · 11 August"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "7 Aug 15:15",
+          "colour": "",
+          "href": "",
+          "kind": "event",
+          "location": "",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "summary": "Синк-ап по релизу",
+          "tags": [],
+          "time": "10:00",
+          "uid": "8f1c-4a02-b7d3"
+        }
+      ],
+      "rubric": "Monday · 17 August"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "7 Aug 15:15",
+          "colour": "",
+          "href": "",
+          "kind": "event",
+          "location": "",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "summary": "Синк-ап по релизу",
+          "tags": [],
+          "time": "10:00",
+          "uid": "8f1c-4a02-b7d3"
+        }
+      ],
+      "rubric": "Monday · 24 August"
+    },
+    {
+      "count": 1,
+      "rows": [
+        {
+          "badges": [],
+          "changed": "7 Aug 15:15",
+          "colour": "",
+          "href": "",
+          "kind": "event",
+          "location": "",
+          "menu": [],
+          "on": false,
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "summary": "Синк-ап по релизу",
+          "tags": [],
+          "time": "10:00",
+          "uid": "8f1c-4a02-b7d3"
+        }
+      ],
+      "rubric": "Monday · 31 August"
+    }
+  ],
+  "fields": [],
+  "file": null,
+  "folder": null,
+  "kind": "event",
+  "lede": [
+    {
+      "text": "Read-only. Published from Carrel."
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "owner": "",
+  "range": {
+    "form": null,
+    "from": "10 August 2026",
+    "presets": [],
+    "to": "31 August 2026"
+  },
+  "readOnly": true,
+  "tasks": [],
+  "title": "Личный"
+}

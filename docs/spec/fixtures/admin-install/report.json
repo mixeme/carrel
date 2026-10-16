@@ -1,0 +1,378 @@
+{
+  "details": null,
+  "form": {
+    "action": "/admin/install",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/admin/install",
+        "id": "admin.install.run",
+        "label": "Run the check",
+        "method": "POST",
+        "primary": true
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "url",
+            "label": "Base address",
+            "mono": true,
+            "name": "url",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "http://carrel.example"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "admin.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/admin/invites",
+        "icon": "i-plus",
+        "id": "admin.invites",
+        "label": "Add users",
+        "method": "GET"
+      },
+      {
+        "count": 1,
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-con",
+        "id": "admin.users",
+        "label": "Users",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/settings",
+        "icon": "i-adm",
+        "id": "admin.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/install",
+        "icon": "i-shield",
+        "id": "admin.install",
+        "label": "Installation",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/dav",
+        "icon": "i-search",
+        "id": "admin.dav",
+        "label": "DAV validator",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/escrow",
+        "icon": "i-dup",
+        "id": "admin.escrow",
+        "label": "Key escrow",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/audit",
+        "icon": "i-clock",
+        "id": "admin.audit",
+        "label": "Audit log",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "No letter since the start."
+          }
+        ],
+        "title": "Mail is going out",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last check "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-10 17:06"
+          }
+        ],
+        "title": "2 checks failed",
+        "tone": "alert"
+      }
+    ],
+    "tags": [],
+    "ticks": null
+  },
+  "rows": [
+    {
+      "advice": "",
+      "check": "Reachable from outside",
+      "state": "ok",
+      "value": "GET http://carrel.example/healthz → 200 · 41 ms"
+    },
+    {
+      "advice": "Serve Carrel over https at the proxy.",
+      "check": "Certificate",
+      "state": "bad",
+      "value": "plain http: passwords and data cross the network in clear"
+    },
+    {
+      "advice": "",
+      "check": "Base address",
+      "state": "ok",
+      "value": "Host carrel.example · X-Forwarded-Host — match the address"
+    },
+    {
+      "advice": "",
+      "check": "Scheme behind the proxy",
+      "state": "ok",
+      "value": "X-Forwarded-Proto: — · links are built as http"
+    },
+    {
+      "advice": "Set X-Forwarded-For at the proxy.",
+      "check": "Client address",
+      "state": "bad",
+      "value": "no X-Forwarded-For · limits count 127.0.0.1, every visitor alike"
+    },
+    {
+      "advice": "",
+      "check": "Event stream (SSE)",
+      "state": "ok",
+      "value": "first byte after 2 ms"
+    },
+    {
+      "advice": "",
+      "check": "Upload size",
+      "state": "ok",
+      "value": "21 MB probe → 405 from Carrel · the proxy let the body through"
+    },
+    {
+      "advice": "proxy_read_timeout ≥ 60s",
+      "check": "Long request timeout",
+      "state": "unknown",
+      "value": "a fanout may take up to 30s; the proxy's ceiling cannot be measured from outside"
+    },
+    {
+      "advice": "",
+      "check": "Cookie",
+      "state": "ok",
+      "value": "HttpOnly, SameSite=Lax · came back"
+    },
+    {
+      "advice": "",
+      "check": "Clock",
+      "state": "ok",
+      "value": "0s between the proxy's Date and this clock · TZ Europe/Moscow"
+    },
+    {
+      "advice": "",
+      "check": "Data folder",
+      "state": "ok",
+      "value": "/var/lib/carrel · writable · 41 GB free"
+    }
+  ],
+  "title": "Installation check",
+  "took": "4.2 s",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

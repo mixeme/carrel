@@ -1733,6 +1733,13 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
 		})
 	}
+	// Test discovery against a stand (Ад33; s-admin-5): the trace step by
+	// step, with what the server answered at each.
+	t.Run("admin-dav-report", func(t *testing.T) {
+		app.compare(t, "admin-dav/report.json", app.h.do(postForm("/admin/dav", app.sess, url.Values{
+			"server": {app.servers["nextcloud"].URL}, "login": {"alice"}, "password": {"secret"},
+		})))
+	})
 	// The sheet that resets a password (Ад8): anna chosen (s-admin-13), the
 	// password issued (s-admin-14), a password too short (s-admin-16) and
 	// a login typed that is not hers (s-admin-20).
@@ -1972,6 +1979,35 @@ func TestFixtureOutsideTheShell(t *testing.T) {
 	t.Run("admin-install", func(t *testing.T) {
 		app.compare(t, "admin-install/normal.json", app.h.do(get("/admin/install", app.sess)))
 	})
+	// The check run (Ад31; s-admin-4): Carrel asks itself at a listener of
+	// the stand, bare http with no proxy — the certificate and the client
+	// address broken, the timeout unknown, as the frame counts them. Last:
+	// the run keeps the address it was given.
+	t.Run("admin-install-report", func(t *testing.T) {
+		live := httptest.NewServer(app.h.srv.Handler())
+		defer live.Close()
+		rec := app.h.do(postForm("/admin/install", app.sess, url.Values{"url": {live.URL}}))
+		steadyInstall(rec, live.URL, app.h.cfg.DataDir)
+		app.compare(t, "admin-install/report.json", rec)
+	})
+}
+
+// steadyInstall gives the run of the installation check the frame's values
+// where they are the machine's: the port the listener had free, how many
+// milliseconds an answer took, the clocks' skew, the data folder and the
+// room on its disk. What each row says stays the server's.
+func steadyInstall(rec *httptest.ResponseRecorder, live, dataDir string) {
+	s := rec.Body.String()
+	s = strings.ReplaceAll(s, strings.TrimPrefix(live, "http://"), "carrel.example")
+	dir, _ := json.Marshal(dataDir)
+	s = strings.ReplaceAll(s, strings.Trim(string(dir), `"`), "/var/lib/carrel")
+	s = regexp.MustCompile(`· \d+ ms`).ReplaceAllString(s, "· 41 ms")
+	s = regexp.MustCompile(`after \d+ ms`).ReplaceAllString(s, "after 2 ms")
+	s = regexp.MustCompile(`"took": ?"[^"]*"`).ReplaceAllString(s, `"took":"4.2 s"`)
+	s = regexp.MustCompile(`[0-9.]+[µm]?s between the proxy`).ReplaceAllString(s, "0s between the proxy")
+	s = regexp.MustCompile(` · writable · [^"]* free`).ReplaceAllString(s, " · writable · 41 GB free")
+	rec.Body.Reset()
+	rec.Body.WriteString(s)
 }
 
 // C-14.2: the screens of one record that are neither its card nor its form,

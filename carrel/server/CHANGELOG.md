@@ -17,6 +17,30 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.327 — 2026-10-17
+
+### Fixtures
+
+- **The runs the administration frames draw** (Ад31, Ад33): the
+  installation check run (`admin-install/report`, `s-admin-4`) — Carrel
+  asking itself at a listener of the stand, bare http, so the certificate
+  and the client address broken and the timeout unknown, 8 · 2 · 1 as the
+  frame counts them, and the rail's «Last check» after it; the port, the
+  milliseconds, the clocks' skew, the data folder and its free room are the
+  frame's values. Test discovery against a stand (`admin-dav/report`,
+  `s-admin-5`): the trace step by step.
+- **The public pages have fixtures** (Пс1; `p-token`): one state for each
+  kind of page the frames draw — the calendar «Личный» for 10–31 August
+  (`normal`, `s-publish-6`), the book «Команда» (`addressbook`), a note, an
+  image, a Markdown file, a file with no preview (`download`) and a folder
+  (`s-publish-7` to `-12`); the links are given out through the sheet and
+  the page is asked without a session.
+
+### Fixed
+
+- **A row of a published calendar aims at nothing**: it had no address
+  but still aimed at the details pane (C-5).
+
 ## v0.2.326 — 2026-10-16
 
 ### Changed

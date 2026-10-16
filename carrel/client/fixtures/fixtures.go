@@ -88,6 +88,7 @@ var Models = map[string]func() any{
 	"forgot":                       func() any { return &view.ForgotPage{} },
 	"forgot-token":                 func() any { return &view.ForgotWipePage{} },
 	"dead-link":                    func() any { return &view.DeadLinkPage{} },
+	"p-token":                      func() any { return &view.PublishedPage{} },
 	"confirm-email":                func() any { return &view.ConfirmEmailPage{} },
 	"invite":                       func() any { return &view.InvitePage{} },
 	"login":                        func() any { return &view.LoginPage{} },

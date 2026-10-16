@@ -1,0 +1,47 @@
+{
+  "actions": [],
+  "body": "",
+  "contacts": [
+    {
+      "avatar": {
+        "colour": "#a05a2c",
+        "href": "",
+        "initials": "АБ"
+      },
+      "badges": [],
+      "birthday": "",
+      "changed": "",
+      "colour": "",
+      "email": "",
+      "href": "",
+      "menu": [],
+      "name": "Артём Белов",
+      "on": false,
+      "org": "Тензор",
+      "phone": "",
+      "sources": [],
+      "stamp": "",
+      "state": "ok",
+      "tags": [],
+      "uid": "d41a-6f30-92be"
+    }
+  ],
+  "days": [],
+  "fields": [],
+  "file": null,
+  "folder": null,
+  "kind": "contact",
+  "lede": [
+    {
+      "text": "Read-only. Published from Carrel."
+    }
+  ],
+  "note": null,
+  "notes": [],
+  "notices": [],
+  "owner": "",
+  "range": null,
+  "readOnly": true,
+  "tasks": [],
+  "title": "Команда"
+}

@@ -853,7 +853,10 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 		page.Days, _, _ = s.agendaDays(tf, kindedAll(c.listed(objs), view.KindEvent), from, to, c.spec.segment, false, nil)
 		for i := range page.Days {
 			for j := range page.Days[i].Rows {
-				page.Days[i].Rows[j].Href, page.Days[i].Rows[j].Menu = "", nil
+				// A row of the visitor's page opens nothing: no address,
+				// and nothing for it to aim at (C-5).
+				row := &page.Days[i].Rows[j]
+				row.Href, row.Menu, row.Target = "", nil, ""
 			}
 		}
 		week := func(t time.Time) string {
