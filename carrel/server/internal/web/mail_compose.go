@@ -60,6 +60,11 @@ type mailPart struct {
 	Size    int64
 	AsLink  bool
 	LinkID  string // one of the person's live links, kept in the blob
+	// Terms are the publish sheet's form the person applied over the letter
+	// to a link it will make (note 70 of Typecase): how long it lives and
+	// what the visitor sees. Nil — the letter's own: thirty days, what the
+	// sheet gives untouched.
+	Terms url.Values
 }
 
 // attachKind is one line of the attach menu, in rail order.
@@ -207,6 +212,24 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 		saveMailDraft(sess, d)
 		s.redirect(w, r, "/app/mail/attach?what="+url.QueryEscape(r.FormValue("what")))
 		return
+	case "terms":
+		// Apply of the publish sheet over the letter (s-mail-1): the terms
+		// of a link the letter makes when it goes; nothing is made now.
+		i, err := strconv.Atoi(r.FormValue("i"))
+		if err != nil || i < 0 || i >= len(d.Parts) || !d.Parts[i].AsLink || d.Parts[i].LinkID != "" {
+			s.notFound(w, r)
+			return
+		}
+		terms := url.Values{}
+		for k, v := range r.PostForm {
+			if k != csrfFormField && k != "op" && k != "i" {
+				terms[k] = v
+			}
+		}
+		d.Parts[i].Terms = terms
+		saveMailDraft(sess, d)
+		s.redirect(w, r, "/app/mail/compose")
+		return
 	case "remove":
 		if i, err := strconv.Atoi(r.FormValue("i")); err == nil && i >= 0 && i < len(d.Parts) {
 			d.Parts = append(d.Parts[:i], d.Parts[i+1:]...)
@@ -267,6 +290,7 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 		sheet.Suggest, sheet.NotAsked = s.suggestRecipients(ctx, sess, q)
 	}
 	links := 0
+	var why []string
 	for i, p := range d.Parts {
 		row := view.MailAttachRow{Kind: p.Kind, Title: text(p.Title), AsLink: p.AsLink,
 			Remove: view.Action{ID: "mail.attach.remove", Label: "Remove", Method: "POST", Enabled: true,
@@ -280,9 +304,18 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 		}
 		if p.AsLink {
 			links++
+			why = append(why, s.linkReason(p))
+		}
+		// A link the letter makes says its terms, and «Change…» opens the
+		// publish sheet over the letter with them (note 70 of Typecase).
+		if p.AsLink && p.LinkID == "" {
+			row.Terms = text(livesWords(partLives(p)))
+			row.Change = &view.Action{ID: "mail.link.terms", Label: "Change…", Method: "GET", Enabled: true,
+				Href: s.route("/app/publish?" + partPublishQuery(p, i).Encode())}
 		}
 		sheet.Attach = append(sheet.Attach, row)
 	}
+	sheet.Links = linksLine(why)
 
 	left := s.users.LettersLeft(u.ID, s.mailPolicy().PerDay)
 	limits := []string{
@@ -290,9 +323,6 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 		fmt.Sprintf("An attachment up to %s, the letter up to %s; a folder, and anything larger, goes as a link that lives 30 days and can be revoked in %s.",
 			formatSize(s.mailPolicy().Attach), formatSize(s.mailPolicy().Letter), publishedLinksMark),
 		fmt.Sprintf("%s left today.", plural(left, "letter")),
-	}
-	if links > 0 {
-		limits = append(limits, fmt.Sprintf("%s of these go as links; they are made when the letter goes.", plural(links, "attachment")))
 	}
 	if note != "" {
 		limits = append([]string{note}, limits...)
@@ -656,19 +686,95 @@ func (s *Server) partLink(sess *session.Session, p mailPart) (string, error) {
 		return "", errors.New("not the person's connection")
 	}
 	expires := time.Now().Add(publish.DefaultTTL)
+	expiry := &expires
 	target := user.PublishTarget{AccountID: p.Account, Kind: string(p.Kind), Col: p.Col, Title: p.Title}
 	if p.Kind == view.KindFile {
 		target.Path, target.Folder = p.Path, p.Folder
 	} else {
 		target.UID = p.UID // empty for a book or a calendar: the whole of it
 	}
-	// The letter has no sheet of what the guest sees: the link gives what
-	// that sheet gives untouched (Пб38).
-	sheetDefaults(p.Kind, &target)
+	if p.Terms != nil {
+		// The terms applied over the letter (note 70 of Typecase).
+		expiry = s.expiryOf(p.Terms, "30")
+		publishChoices(p.Terms, p.Kind, p.UID, &target)
+	} else {
+		// Left as they are, the link gives what the publish sheet gives
+		// untouched (Пб38).
+		sheetDefaults(p.Kind, &target)
+	}
 	key, _ := sess.DataKey()
-	token, err := s.users.Publish(sess.AccountID(), key, conn, target, &expires)
+	token, err := s.users.Publish(sess.AccountID(), key, conn, target, expiry)
 	if err != nil {
 		return "", err
 	}
 	return token, nil
+}
+
+// partLives is how long the link of a letter's part lives: what was applied
+// over the letter, else the letter's thirty days.
+func partLives(p mailPart) string {
+	if v := p.Terms.Get("lives"); v != "" {
+		return v
+	}
+	return "30"
+}
+
+// partPublishQuery is the publish sheet of a part the letter sends as a
+// link, over the letter: mail names the part (note 70 of Typecase).
+func partPublishQuery(p mailPart, i int) url.Values {
+	var q url.Values
+	if p.Kind == view.KindFile {
+		q = url.Values{"k": {filesSpec.segment}, "a": {p.Account}, "c": {p.Col}, "f": {p.Path}}
+		if p.Folder {
+			q.Set("dir", "1")
+		}
+	} else {
+		q = publishQuery(segmentOf(p.Kind), p.Account, p.Col, p.UID)
+	}
+	q.Set("mail", strconv.Itoa(i))
+	return q
+}
+
+// linkReason is why a part goes as a link, as the line under the list says
+// it (s-mail-1): a folder always; a file over the attachment's ceiling; one
+// the letter has no room left for; a link published before.
+func (s *Server) linkReason(p mailPart) string {
+	switch {
+	case p.LinkID != "":
+		return "«" + p.Title + "» is a link published before"
+	case p.Folder:
+		return "a folder always goes as a link"
+	case p.Size > s.mailPolicy().Attach:
+		what := "«" + p.Title + "»"
+		if i := strings.LastIndex(p.Name, "."); i >= 0 && i < len(p.Name)-1 {
+			what = "the " + strings.ToUpper(p.Name[i+1:])
+		}
+		return what + " is over the " + string(formatSize(s.mailPolicy().Attach)) + " ceiling"
+	}
+	return "«" + p.Title + "» would take the letter over " + string(formatSize(s.mailPolicy().Letter))
+}
+
+// linksLine is the line under the list when something goes as a link
+// (s-mail-1): how many and why, and where they are revoked — «Published
+// links» in bold. Nil without links.
+func linksLine(why []string) view.Runs {
+	if len(why) == 0 {
+		return nil
+	}
+	var reasons []string
+	for _, w := range why {
+		if !slices.Contains(reasons, w) {
+			reasons = append(reasons, w)
+		}
+	}
+	said := reasons[0]
+	if n := len(reasons); n > 1 {
+		said = strings.Join(reasons[:n-1], ", ") + ", and " + reasons[n-1]
+	}
+	n := countWord(len(why))
+	head := strings.ToUpper(n[:1]) + n[1:] + " of these go as links, not as files: " + said + ". Each link can be revoked in "
+	if len(why) == 1 {
+		head = "One of these goes as a link, not as a file: " + said + ". The link can be revoked in "
+	}
+	return join(head, strongRun("Published links"), " — including for the people in this letter.")
 }

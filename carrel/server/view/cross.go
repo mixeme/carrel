@@ -692,7 +692,11 @@ type MailSheet struct {
 	Attach    []MailAttachRow `json:"attach"`
 	NotAsked  []Stamp         `json:"notAsked"` // книги, которые не ответили, названы прямо
 	Limits    Runs            `json:"limits"`   // «Published links» — жирным (s-mail-1)
-	Actions   []Action        `json:"actions"`
+	// Links — строка под вложениями, когда что-то уходит ссылкой: сколько и
+	// почему, и где их отозвать, «Published links» жирным (s-mail-1); пусто
+	// — ссылок нет
+	Links   Runs     `json:"links,omitempty"`
+	Actions []Action `json:"actions"`
 }
 type Recipient struct {
 	Address Text `json:"address"`
@@ -700,12 +704,18 @@ type Recipient struct {
 	Name    Text `json:"name"`
 }
 type MailAttachRow struct {
-	Kind   Kind   `json:"kind"`
-	Title  Text   `json:"title"`
-	Format Text   `json:"format"`
-	Size   Size   `json:"size"`
-	AsLink bool   `json:"asLink"` // уйдёт ссылкой, а не вложением — видно до отправки
-	Remove Action `json:"remove"`
+	Kind   Kind `json:"kind"`
+	Title  Text `json:"title"`
+	Format Text `json:"format"`
+	Size   Size `json:"size"`
+	AsLink bool `json:"asLink"` // уйдёт ссылкой, а не вложением — видно до отправки
+	// Terms — условия ссылки словами, как их говорит список ссылок: «30
+	// days», «No expiry»; Change — «Change…», лист публикации поверх письма
+	// с ними, главная кнопка «Apply» (s-mail-1, записка Typecase 70). У
+	// вложения и у ссылки, сделанной раньше письма, пусто и nil
+	Terms  Text    `json:"terms,omitempty"`
+	Change *Action `json:"change,omitempty"`
+	Remove Action  `json:"remove"`
 }
 type MailAttachSheet struct {
 	Rail    Rail            `json:"rail"`

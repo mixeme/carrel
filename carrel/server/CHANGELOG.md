@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.302 — 2026-10-16
+
+### Added
+
+- **A link a letter makes says its terms, and they can be changed** (note
+  70 of Typecase, task 165; `s-mail-1`; the owner's decision Б38):
+  `MailAttachRow.Terms` — how long it lives, as the list of links says it
+  («30 days», «No expiry») — and `MailAttachRow.Change` — «Change…», the
+  publish sheet over the letter (`/app/publish?…&mail=<part>`) with the
+  part's terms, its main button «Apply» (`publish.apply`, POST
+  `/app/mail/compose?op=terms`): the terms stay in the letter, nothing is
+  made, and the link is made when the letter goes — living as long and
+  showing what the terms say. A link published before the letter has
+  neither.
+- `MailSheet.Links` — the line under the attachments when some go as links
+  (`s-mail-1`): how many and why — a folder always, a file over the
+  attachment's ceiling, one the letter has no room for, a link published
+  before — and that each can be revoked in **Published links**, «including
+  for the people in this letter». The sentence of the limits that counted
+  them is gone.
+- What the publish sheet chooses is one function for the sheet and the
+  letter (`publishChoices`).
+
+### For consumers
+
+`MailAttachRow.Terms`, `.Change`, `MailSheet.Links` in C-6.
+
 ## v0.2.301 — 2026-10-16
 
 ### Changed

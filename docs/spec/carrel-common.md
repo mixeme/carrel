@@ -2245,6 +2245,7 @@ type MailSheet struct {
     Attach     []MailAttachRow
     NotAsked   []Stamp // книги, которые не ответили, названы прямо
     Limits     Runs    // «Published links» жирным (s-mail-1)
+    Links      Runs    // строка под вложениями, когда что-то уходит ссылкой: сколько и почему, и где их отозвать — «Published links» жирным (s-mail-1); пусто — ссылок нет
     Actions    []Action
 }
 type Recipient struct { Address Text; Label Text; Name Text }
@@ -2254,6 +2255,13 @@ type MailAttachRow struct {
     Format Text
     Size   Size
     AsLink bool // уйдёт ссылкой, а не вложением — видно до отправки
+    // У ссылки — её условия словами, как их говорит список ссылок: «30
+    // days», «No expiry» (s-mail-1), и «Change…» — лист публикации поверх
+    // письма с этими условиями, главная кнопка «Apply»: ссылка делается,
+    // когда письмо уходит. У вложения и у ссылки, сделанной раньше письма,
+    // пусто и nil
+    Terms  Text
+    Change *Action
     Remove Action
 }
 type MailAttachSheet struct {

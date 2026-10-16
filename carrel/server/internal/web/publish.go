@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -179,8 +180,8 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 // publishWindow is the range a published calendar shows: both days or
 // neither. A range that ends before it starts is no range at all — the whole
 // calendar, as the sheet says by default.
-func publishWindow(r *http.Request) (from, to string) {
-	from, to = strings.TrimSpace(r.FormValue("from")), strings.TrimSpace(r.FormValue("to"))
+func publishWindow(form url.Values) (from, to string) {
+	from, to = strings.TrimSpace(form.Get("from")), strings.TrimSpace(form.Get("to"))
 	f, errFrom := time.Parse("2006-01-02", from)
 	t, errTo := time.Parse("2006-01-02", to)
 	if errFrom != nil || errTo != nil || t.Before(f) {
@@ -230,8 +231,14 @@ func livesOf(kind view.Kind, folder bool) string {
 // of its kind stands at (livesOf). «expires=never» is how the sheet asked
 // for no expiry before «Link lives for» (24.09.2026), and still means it.
 func (s *Server) publishExpiry(r *http.Request, standing string) *time.Time {
+	return s.expiryOf(r.Form, standing)
+}
+
+// expiryOf is publishExpiry of a sheet's form kept elsewhere: the terms a
+// letter keeps for a link it will make (note 70 of Typecase).
+func (s *Server) expiryOf(form url.Values, standing string) *time.Time {
 	ttl := publish.DefaultTTL
-	lives := r.FormValue("lives")
+	lives := form.Get("lives")
 	if lives == "" {
 		lives = standing
 	}
@@ -243,11 +250,70 @@ func (s *Server) publishExpiry(r *http.Request, standing string) *time.Time {
 	case "14":
 		ttl = 14 * 24 * time.Hour
 	}
-	if r.FormValue("expires") == "never" {
+	if form.Get("expires") == "never" {
 		return nil
 	}
 	t := s.now().Add(ttl)
 	return &t
+}
+
+// livesWords are the terms of a link as the list of links says them: «30
+// days», «No expiry» (s-mail-1).
+func livesWords(lives string) string {
+	if lives == "never" {
+		return "No expiry"
+	}
+	return lives + " days"
+}
+
+// formCheck is checkbox of a form kept apart from its request.
+func formCheck(form url.Values, name string) string {
+	if v := form.Get(name); v != "" && v != "off" {
+		return "on"
+	}
+	return ""
+}
+
+// publishChoices puts into a link what the sheet's form chose (s-publish-2,
+// -3; Б39) — the sheet's own post, or the terms a letter keeps for a link it
+// makes when it goes (note 70 of Typecase). A whole calendar: how much of
+// it and whether its .ics goes; a calendar's kinds: what the visitor sees,
+// the time always; a contact: its fields and its .vcf.
+func publishChoices(form url.Values, kind view.Kind, uid string, target *user.PublishTarget) {
+	if kind == view.KindEvent && uid == "" {
+		// «how» is always sent by the sheet. A post without it — an old
+		// client, a plain POST — publishes as before: the whole calendar,
+		// downloadable, with its descriptions.
+		if form.Get("how") == "range" {
+			target.From, target.To = publishWindow(form)
+		}
+		if form.Get("how") != "" {
+			target.NoDownload = formCheck(form, "download") != "on"
+		}
+	}
+	if isCalendarKind(kind) {
+		// The time always, and what is ticked. A post without the sheet's
+		// form gives what the sheet ticks before anyone does.
+		target.Shows = []string{calendarSeesTime}
+		for _, f := range calendarVisitorFields {
+			if form.Has("lives") && formCheck(form, f.name) == "on" || !form.Has("lives") && f.on {
+				target.Shows = append(target.Shows, f.name)
+			}
+		}
+	}
+	if kind == view.KindContact {
+		// What is not ticked is not shown, and the file is one of the
+		// things asked for. «Name and organisation» stands on the sheet, so
+		// only a post of the sheet takes it off: one that says how long the
+		// link lives, as the sheet's form always does.
+		target.HideOrganisation = form.Has("lives") && formCheck(form, "name") != "on"
+		for _, f := range visitorFields {
+			if formCheck(form, f.name) == "on" {
+				target.Shows = append(target.Shows, f.name)
+			}
+		}
+		target.NoDownload = formCheck(form, "download") != "on"
+	}
 }
 
 // getPublish is the sheet: what will be published and for how long, before
@@ -263,7 +329,7 @@ func (s *Server) getPublish(w http.ResponseWriter, r *http.Request) {
 			s.notFound(w, r)
 			return
 		}
-		s.writeSheet(w, r, s.fileSheet(sess, fc, segs, dir))
+		s.writeLetterSheet(w, r, sess, s.fileSheet(sess, fc, segs, dir))
 		return
 	}
 	c, uid, ok := s.publishTarget(r, sess)
@@ -280,7 +346,51 @@ func (s *Server) getPublish(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.listPath(), err)))
 		return
 	}
-	s.writeSheet(w, r, s.publishSheet(sess, c, uid, title, r.FormValue("how")))
+	s.writeLetterSheet(w, r, sess, s.publishSheet(sess, c, uid, title, r.FormValue("how")))
+}
+
+// writeLetterSheet writes the sheet, or, asked from a letter (mail= names
+// the part; note 70 of Typecase, s-mail-1), the sheet over the letter: the
+// terms the part keeps, «Apply» that keeps the ones chosen in the letter —
+// the link is made when the letter goes —, and Cancel back to it.
+func (s *Server) writeLetterSheet(w http.ResponseWriter, r *http.Request, sess *session.Session, sheet view.PublishSheet) {
+	m := r.FormValue("mail")
+	if m == "" {
+		s.writeSheet(w, r, sheet)
+		return
+	}
+	i, err := strconv.Atoi(m)
+	d := loadMailDraft(sess)
+	if err != nil || i < 0 || i >= len(d.Parts) || !d.Parts[i].AsLink || d.Parts[i].LinkID != "" {
+		s.notFound(w, r)
+		return
+	}
+	p := d.Parts[i]
+	apply := s.postQuery("/app/mail/compose", url.Values{"op": {"terms"}, "i": {m}})
+	for j := range sheet.Form.Sets {
+		for k := range sheet.Form.Sets[j].Rows {
+			row := &sheet.Form.Sets[j].Rows[k]
+			switch {
+			case row.Name == "lives":
+				row.Value = text(partLives(p))
+			case p.Terms == nil || row.Name == csrfFormField:
+				continue
+			case row.Kind == view.InputCheck:
+				row.Value = text(formCheck(p.Terms, row.Name))
+			default:
+				row.Value = text(p.Terms.Get(row.Name))
+			}
+			for o := range row.Options {
+				row.Options[o].Selected = row.Options[o].Value == string(row.Value)
+			}
+		}
+	}
+	sheet.Actions = []view.Action{
+		{ID: "publish.apply", Label: "Apply", Href: apply, Method: "POST", Primary: true, Enabled: true},
+		{ID: "publish.cancel", Label: "Cancel", Href: s.route("/app/mail/compose"), Method: "GET", Enabled: true},
+	}
+	sheet.Form.Action, sheet.Form.Actions = apply, sheet.Actions
+	s.writeSheet(w, r, sheet)
 }
 
 // postPublish makes the link and shows it once, or with op=revoke and id=
@@ -322,63 +432,28 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 	target := user.PublishTarget{
 		AccountID: c.conn.ID, Kind: string(c.spec.kind), Col: c.col.Path, UID: uid, Title: title,
 	}
-	if c.spec.kind == view.KindEvent && uid == "" {
-		// The sheet of a whole calendar (s-publish-2): «how» is always sent
-		// by it. A post without it — an old client, a plain POST — publishes
-		// as before: the whole calendar, downloadable, with its descriptions.
-		switch r.FormValue("how") {
-		case "whole":
-		case "range":
-			target.From, target.To = publishWindow(r)
-			if target.From == "" {
-				// A range was chosen and its days were not given: the sheet
-				// again, with the days asked for, rather than a guess.
-				sheet := s.publishSheet(sess, c, uid, title, "range")
-				for i := range sheet.Form.Sets {
-					for j := range sheet.Form.Sets[i].Rows {
-						row := &sheet.Form.Sets[i].Rows[j]
-						switch row.Name {
-						case "from":
-							row.Value, row.Error = text(r.FormValue("from")), "Give both days, or publish the whole calendar."
-						case "to":
-							row.Value = text(r.FormValue("to"))
-						}
+	if c.spec.kind == view.KindEvent && uid == "" && r.FormValue("how") == "range" {
+		// The sheet of a whole calendar (s-publish-2).
+		if from, _ := publishWindow(r.Form); from == "" {
+			// A range was chosen and its days were not given: the sheet
+			// again, with the days asked for, rather than a guess.
+			sheet := s.publishSheet(sess, c, uid, title, "range")
+			for i := range sheet.Form.Sets {
+				for j := range sheet.Form.Sets[i].Rows {
+					row := &sheet.Form.Sets[i].Rows[j]
+					switch row.Name {
+					case "from":
+						row.Value, row.Error = text(r.FormValue("from")), "Give both days, or publish the whole calendar."
+					case "to":
+						row.Value = text(r.FormValue("to"))
 					}
 				}
-				s.writeSheet(w, r, sheet)
-				return
 			}
-		}
-		if r.FormValue("how") != "" {
-			target.NoDownload = checkbox(r, "download") != "on"
+			s.writeSheet(w, r, sheet)
+			return
 		}
 	}
-	if isCalendarKind(c.spec.kind) {
-		// What the visitor sees (Б39): the time always, and what is
-		// ticked. A post without the sheet's form — a plain POST — gives
-		// what the sheet ticks before anyone does: the time and the title.
-		target.Shows = []string{calendarSeesTime}
-		for _, f := range calendarVisitorFields {
-			if r.Form.Has("lives") && checkbox(r, f.name) == "on" || !r.Form.Has("lives") && f.on {
-				target.Shows = append(target.Shows, f.name)
-			}
-		}
-	}
-	if c.spec.kind == view.KindContact {
-		// The sheet of a contact and of a book (s-publish-3): what is not
-		// ticked is not shown, and the file is one of the things asked for.
-		// A post without the ticks — a plain POST — publishes the name and
-		// the organisation and no file. «Name and organisation» stands on
-		// the sheet, so only a post of the sheet takes it off: one that says
-		// how long the link lives, as the sheet's form always does.
-		target.HideOrganisation = r.Form.Has("lives") && checkbox(r, "name") != "on"
-		for _, f := range visitorFields {
-			if checkbox(r, f.name) == "on" {
-				target.Shows = append(target.Shows, f.name)
-			}
-		}
-		target.NoDownload = checkbox(r, "download") != "on"
-	}
+	publishChoices(r.Form, c.spec.kind, uid, &target)
 	token, err := s.users.Publish(sess.AccountID(), key, c.conn, target, expires)
 	if err != nil {
 		http.Error(w, "could not publish", http.StatusInternalServerError)
