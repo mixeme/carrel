@@ -165,7 +165,7 @@ type EscrowPage struct {
 	Subtitle Text         `json:"subtitle"` // «A copy of your key on this server» (account-4), «No copy of your data key is deposited» (account-12)
 	Rubric   Text         `json:"rubric"`   // над словами без копии: «What a deposit does» (account-12); с копией и при выключенной схеме пусто
 	Status   EscrowStatus `json:"status"`
-	Confirm  *UnlockSheet `json:"confirm"` // лист подтверждения перед депонированием
+	Confirm  *UnlockSheet `json:"confirm"` // лист депонирования — только в ответе с отказом без сценариев (неверный пароль); открытый лист — свой ответ, …/escrow/deposit (account-2); nil — его нет
 	History  []AuditRow   `json:"history"`
 }
 

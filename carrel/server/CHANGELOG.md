@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.294 — 2026-10-16
+
+### Changed
+
+- **The escrow page carries the deposit sheet only when a deposit came
+  back refused** (Нс14 of the scan of 15.10.2026; `account-12`): opened,
+  the sheet is its own answer (`…/escrow/deposit`, `account-2`), and the
+  page without a copy draws no sheet. `EscrowPage.Confirm` is set only in
+  the answer to a refused deposit without scripts.
+
+### For consumers
+
+Fixture `app-settings-escrow` re-shot: no `confirm`.
+
 ## v0.2.293 — 2026-10-16
 
 ### Changed

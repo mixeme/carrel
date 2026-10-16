@@ -224,8 +224,14 @@ func (s *Server) buildEscrowPage(sess *session.Session, errText string) view.Esc
 	}
 	if store.EscrowActive(&snap) && u != nil && !store.UserDeposited(u) {
 		page.Subtitle, page.Rubric = "No copy of your data key is deposited", "What a deposit does"
-		sheet := s.depositSheet(sess, text(errText))
-		page.Confirm = &sheet
+		// The sheet stands on the page only when a deposit came back
+		// refused without scripts (Нс14): opened, it is its own answer
+		// (account-2, …/escrow/deposit), and account-12 draws the page
+		// without it.
+		if errText != "" {
+			sheet := s.depositSheet(sess, text(errText))
+			page.Confirm = &sheet
+		}
 	}
 	return page
 }
