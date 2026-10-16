@@ -338,10 +338,18 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, "home", "PROPFIND", home, err)))
 		return
 	}
+	// The address is the one typed, or the one the name gives; a taken one
+	// is refused, never given a number of its own (the owner's decision of
+	// 16.10.2026, Кл5): the person sees the address before the save, and
+	// the save makes that one or none.
 	segment := f.address
 	switch {
+	case segment == "" && taken[strings.ToLower(collectionSlug(f.name))]:
+		f.errs["name"] = text("Something already lives at " + collectionSlug(f.name) + "/ on this server. Give it another name.")
+		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, nil))
+		return
 	case segment == "":
-		segment = uniqueSlug(collectionSlug(f.name), taken)
+		segment = collectionSlug(f.name)
 	case taken[strings.ToLower(segment)]:
 		f.errs["address"] = text("Something already lives at this address on the server.")
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, nil))
@@ -931,7 +939,14 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		}
 		rows = append(rows, parts)
 	}
-	address := view.FormRow{Name: "address", Label: "Address", Kind: view.InputText, Value: text(f.address), Error: errs["address"], Mono: true}
+	// The address follows the name as it is typed (Кл5): the client derives
+	// it by the rule of architecture.md and shows it as the field's sample;
+	// a typed one wins. Without scripts the sample is the name sent.
+	address := view.FormRow{Name: "address", Label: "Address", Kind: view.InputText, Value: text(f.address), Error: errs["address"], Mono: true,
+		From: "name"}
+	if strings.TrimSpace(f.name) != "" {
+		address.Placeholder = text(collectionSlug(f.name))
+	}
 	said := " — taken from the name, yours to change. Other clients and restore-by-path go by the address; the name they only show."
 	address.HintRuns = join(strings.TrimPrefix(said, " — "))
 	if home := homeFor(chosen, f.kind); home != "" {

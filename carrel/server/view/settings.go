@@ -50,6 +50,11 @@ type FormRow struct {
 	// после выбранных, есть ли они или нет (s-tasks-3, -14). nil — строки нет
 	Add  *FormRow `json:"add"`
 	Hint Text     `json:"hint"`
+	// From — имя строки, из которой значение выводится на лету: адрес новой
+	// коллекции — из Name, по правилу architecture.md (транслитерация,
+	// дефисы, [a-z0-9-], пустое — col); клиент ставит выведенное образцом
+	// поля и в путь подсказки, набранное руками главнее (Кл5); пусто — нет
+	From string `json:"from,omitempty"`
 	// HintRuns — Hint кусками, когда кадр выделяет часть: имя сервера и
 	// адрес моноширинно, «Tasks» жирно (s-profile-5, Кл3); Hint тогда пуст
 	HintRuns Runs    `json:"hintRuns,omitempty"`

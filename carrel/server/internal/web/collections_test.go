@@ -77,9 +77,18 @@ func TestNewCalendarTakesItsAddressFromTheName(t *testing.T) {
 	}
 	decode[view.AgendaPage](t, f.h.do(get(rec.Header().Get("Location"), f.sess)))
 
-	rec = f.h.do(postForm("/app/collections/new?kind=event", f.sess, form))
-	if loc := rec.Header().Get("Location"); !strings.HasSuffix(loc, url.PathEscape(davtest.CalendarHome+"dni-rozhdeniya-2/")) {
-		t.Errorf("same name again went to %q, want the -2 address", loc)
+	// The same name again: its address is taken, and the save is refused
+	// at the name — no address of its own is made up (the owner's decision
+	// of 16.10.2026, Кл5).
+	again := decode[view.CollectionNewSheet](t, f.h.do(postForm("/app/collections/new?kind=event", f.sess, form)))
+	if row := rowNamed(t, again.Form, "name"); row.Error != "Something already lives at dni-rozhdeniya/ on this server. Give it another name." || row.Value != "Дни рождения" {
+		t.Errorf("same name again: %+v", row)
+	}
+	if _, ok := f.srv.Calendar(davtest.CalendarHome + "dni-rozhdeniya-2/"); ok {
+		t.Error("an address of its own was made up")
+	}
+	if a := rowNamed(t, again.Form, "address"); a.From != "name" || a.Placeholder != "dni-rozhdeniya" {
+		t.Errorf("address = %+v, want it to follow the name", a)
 	}
 
 	if noticeTitled(rediscoverPage(t, f).Notices, "Nothing appeared or disappeared") == nil {

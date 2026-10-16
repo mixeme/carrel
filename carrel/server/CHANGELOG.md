@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.323 — 2026-10-16
+
+### Changed
+
+- **A new collection's address is seen before the save, and a taken one is
+  refused** (Кл5; the owner's decision of 16.10.2026; `s-profile-5`): the
+  field Address follows Name (`FormRow.From`), the client deriving it as it
+  is typed by the rule of `architecture.md`, and after a refusal its sample
+  is the address the name gives; the save checks it on the server, and an
+  address already there is refused at Name — «Something already lives at
+  ‹slug›/ on this server. Give it another name.» — with nothing made. No
+  address gets a number of its own any more.
+
+### For consumers
+
+`FormRow.From` in C-6; S-12.2 rewritten.
+
 ## v0.2.322 — 2026-10-16
 
 ### Changed
