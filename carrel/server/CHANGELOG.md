@@ -42,6 +42,7 @@ current mockup; fonts are in `docs/visual/fonts/`.
 
 `ConnectionsPage.AddNote`, `RestoreBlock.From`, `.FromHint` in C-6;
 fixtures of Connections, Backup and the sheets over Connections re-shot.
+
 ## v0.2.305 — 2026-10-16
 
 ### Added
