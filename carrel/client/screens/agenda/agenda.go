@@ -476,7 +476,7 @@ func side(d view.Details) *w.Side {
 		rubric := w.Rubric{Text: "Attachments"}
 		if attach != nil {
 			b := bind.Button(*attach, "")
-			b.Icon, b.Menu, b.Small = "", true, true
+			b.Menu, b.Small = true, true
 			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
 		}
 		sec := []w.SecPart{rubric}

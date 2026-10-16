@@ -14,6 +14,10 @@ import (
 	w "carrel.dev/typecase/widget"
 )
 
+// printID is Print of the card (U-10): a button of the third rank in the
+// head, its twin first in «⋯» on a phone (note 69 of Typecase).
+const printID = "record.print"
+
 // The IDs of the page's forms: the deletion posts with no form of its own;
 // the edit is a document that is a form, which Save of its bar submits — as
 // the frames name it, an edit's (s-notes-20) and a new note's (s-notes-30);
@@ -175,19 +179,23 @@ func read(p *view.NotePage) []w.MainPart {
 		if a.Method == "POST" {
 			form = formSend
 		}
-		acts = append(acts, bind.Button(a, form))
+		b := bind.Button(a, form)
+		b.Tertiary = a.ID == printID
+		acts = append(acts, b)
 	}
 	// ждёт библиотеку: U-5.5 #41 — the client's Source, width and side
 	// column do nothing without a script (Typecase's task 104)
+	// Source is its icon, the word its hint; the width is of the third rank:
+	// on a phone it means nothing (note 69 of Typecase).
 	acts = append(acts,
-		w.Button{Label: source},
-		w.Seg{Options: []w.SegOption{{Label: fullWidth, On: true}, {Label: readWidth}}},
+		w.Button{Icon: "code", Title: source},
+		w.Seg{Options: []w.SegOption{{Label: fullWidth, On: true}, {Label: readWidth}}, Tertiary: true},
 		w.Button{Icon: "panel", Title: hideColumn},
 	)
 	if len(p.Meta.Menu) > 0 {
 		acts = append(acts, w.Drop{
 			Trigger: w.Button{Icon: "dots", Title: "More"},
-			Menu:    w.Menu{Items: bind.MenuItems(p.Meta.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
+			Menu:    w.Menu{Items: append(bind.Twins(p.Doc.Bar, printID), bind.MenuItems(p.Meta.Menu, rail.ReadOnly)...), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
 		})
 	}
 	meta := []w.HeadSubPart{w.Mark{Colour: string(p.Source.Colour), Size: w.MarkH12}, w.Text(p.Source.Stamp)}
@@ -285,7 +293,7 @@ func column(p *view.NotePage) []w.DocmetaSec {
 			// of the edit that goes with Save (FileField.List); it goes by
 			// its own form, as the contract has it, until Save takes files
 			b := bind.Button(*attach, "")
-			b.Icon, b.Menu, b.Small = "", true, true
+			b.Menu, b.Small = true, true
 			items := append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...)
 			for _, it := range items {
 				// A new note's file sends the document it is typed in (Submits,

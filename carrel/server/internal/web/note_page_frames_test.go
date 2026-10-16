@@ -36,8 +36,11 @@ func TestNotePageIsTheFrame(t *testing.T) {
 	page := decode[view.NotePage](t, app.h.do(get(rec, app.sess)))
 	edit := actionByID(page.Doc.Bar, "record.edit")
 	export := actionByID(page.Doc.Bar, "note.export")
-	if edit == nil || edit.Icon != "i-pencil" || export == nil || export.Icon != "" || actionByID(page.Doc.Bar, "record.print") == nil {
-		t.Errorf("bar = %+v, want Edit with its pencil, Export Markdown bare, Print (s-notes-2)", page.Doc.Bar)
+	// Export Markdown is its icon and «.md», the whole name its hint (note
+	// 69 of Typecase).
+	if edit == nil || edit.Icon != "i-pencil" || export == nil || export.Icon != "i-export" || export.Label != ".md" || export.Hint != "Export Markdown" ||
+		actionByID(page.Doc.Bar, "record.print") == nil {
+		t.Errorf("bar = %+v, want Edit with its pencil, .md with the export icon, Print (s-notes-2)", page.Doc.Bar)
 	}
 	if page.Source.UID != "5c81-77aa-0d64" {
 		t.Errorf("source = %+v, want the note's UID (s-notes-2)", page.Source)

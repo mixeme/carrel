@@ -32,7 +32,7 @@
         "enabled": true,
         "file": "file",
         "href": "/app/files/a-nc-home/Files/upload/",
-        "icon": "i-up",
+        "icon": "i-upload",
         "id": "file.upload",
         "label": "Upload",
         "method": "POST",
@@ -576,7 +576,7 @@
         {
           "enabled": true,
           "href": "/app/files/picker?for=upload",
-          "icon": "i-up",
+          "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",

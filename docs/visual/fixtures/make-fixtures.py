@@ -320,7 +320,7 @@ write(u'radicale-vps/dezhurstva.ics', cal(u'Дежурства', duty_radicale))
 # Задачи (VTODO). «Сегодня» в макетах — неделя 10–16 августа 2026,
 # поэтому 7 и 8 августа попадают в «Overdue».
 def todo(uid, summary, due=None, cats=(), percent=None, stamp=u'20260810T060000Z',
-         desc=None, priority=None, alarm=None, related=None, attach=()):
+         desc=None, priority=None, alarm=None, related=None, attach=(), extra=()):
     L = [u'BEGIN:VTODO', u'UID:%s' % uid, u'DTSTAMP:%s' % stamp,
          u'SUMMARY:%s' % esc(summary)]
     if due:
@@ -335,6 +335,7 @@ def todo(uid, summary, due=None, cats=(), percent=None, stamp=u'20260810T060000Z
         L.append(u'PERCENT-COMPLETE:%d' % percent)
     if related:
         L.append(u'RELATED-TO;RELTYPE=SIBLING:%s' % related)
+    L.extend(extra)
     L.extend(attach)
     if alarm:
         L.extend([u'BEGIN:VALARM', u'ACTION:DISPLAY',
@@ -369,11 +370,14 @@ write(u'nextcloud-home/lichnyj-poezdka.ics', cal(u'Личный', [
 
 write(u'nextcloud-home/dela.ics', cal(u'Дела',
       # Правка задачи (s-tasks-3): описание, приоритет «High · 1»,
-      # напоминание за день, связь с событием «Забрать документы».
+      # напоминание за день, связь с событием «Забрать документы» и три
+      # свойства, которых Carrel не знает, — рубрика «Kept as the server sent
+      # them» (записка Typecase 69, задача 169).
       todo(u'aa10-77bc-0e31', u'Отправить документы в МФЦ',
            due=u';VALUE=DATE:20260807', cats=[u'дом'],
            desc=u'Опись, копия паспорта и заявление. Приём до 18:00, окно 4.',
-           priority=1, alarm=u'-P1D', related=u'1d55-90fe-3c27') +
+           priority=1, alarm=u'-P1D', related=u'1d55-90fe-3c27',
+           extra=[u'X-APPLE-SORT-ORDER:712', u'X-OC-HIDESUBTASKS:0', u'SEQUENCE:1']) +
       # Карточка и панель задачи (s-tasks-1, -2): описание, приоритет 5,
       # напоминание за день, посадочный внутри, связь с поездкой.
       todo(u'aa11-2d09-5f84', u'Собрать чемодан',

@@ -56,6 +56,12 @@ func frameMenuIn(t *testing.T, id, part string) []string {
 		if open, _, _ := strings.Cut(m[0], ">"); strings.Contains(open, "tc-nojs") {
 			continue
 		}
+		// An item of the third rank is the head's button of that rank, put
+		// into «⋯» on a phone (note 69: Print, s-contacts-6): the client
+		// draws it from the head, no item of the model's menu.
+		if open, _, _ := strings.Cut(m[0], ">"); strings.Contains(open, " is-3rd") {
+			continue
+		}
 		body := m[1] + m[2]
 		icon := ""
 		if i := frameIcon.FindStringSubmatch(body); i != nil {
@@ -221,21 +227,16 @@ func TestCalendarMenusAreTheFrames(t *testing.T) {
 	}
 
 	note := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1", f.sess)))
-	// «Export .ics» after Copy, beside the frame (Р20 of
-	// scans/kinds-parity.md: the journal whole, as an event's and a task's;
-	// Typecase's task 174): the frame's items around it, and it required.
-	if g := serverMenu(note.Meta.Menu); len(g) != 4 || g[2] != "Export .ics [i-down]" {
-		t.Errorf("note page «⋯» = %q, want Export .ics third", g)
-	} else {
-		sameMenu(t, "note page", append(append([]view.MenuItem(nil), note.Meta.Menu[:2]...), note.Meta.Menu[3:]...), "s-notes-14")
-	}
-	// Print over the text since the client's scan of the notes (НГ2); New
-	// task before it, every kind's (Р15 of scans/kinds-parity.md) — the
-	// frame does not draw it yet, Typecase's task 168.
-	if got := ids(note.Doc.Bar); !equalStrings(got, []string{"record.edit", "note.export", "note.task", "record.print"}) {
+	// «Export .ics» after Copy (Р20 of scans/kinds-parity.md: the journal
+	// whole, as an event's and a task's), drawn since Typecase's task 174
+	// (note 69, s-notes-14).
+	sameMenu(t, "note page", note.Meta.Menu, "s-notes-14")
+	// Print over the text since the client's scan of the notes (НГ2); no
+	// New task — a task is made in the tasks (note 69, task 168).
+	if got := ids(note.Doc.Bar); !equalStrings(got, []string{"record.edit", "note.export", "record.print"}) {
 		t.Errorf("note bar = %v", got)
 	}
-	drawn(t, "note bar", note.Doc.Bar, "s-notes-2", "note.task")
+	drawn(t, "note bar", note.Doc.Bar, "s-notes-2")
 	if got := ids(note.Meta.Actions); !equalStrings(got, []string{"attach.add", "record.delete"}) {
 		t.Errorf("note column = %v", got)
 	}

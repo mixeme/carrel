@@ -238,7 +238,7 @@ func TestFromFilesSheetIsTheFrame(t *testing.T) {
 	title := frameOne(t, frameSheetT, frame, "title")[1]
 	to := regexp.MustCompile(`^to «.*»$`)
 	subject := frameOne(t, frameSheetSub, frame, "subject")[1]
-	reason := frameOne(t, regexp.MustCompile(`(?s)<button class="tc-btn is-primary" type="button" disabled>[^<]*</button><span class="tc-dim[^"]*">(.*?)</span>`), frame, "reason")[1]
+	reason := frameOne(t, regexp.MustCompile(`(?s)<button class="tc-btn is-primary" type="button" disabled>(?:<svg.*?</svg>)?[^<]*</button><span class="tc-dim[^"]*">(.*?)</span>`), frame, "reason")[1]
 	words := map[string]bool{}
 	for _, m := range regexp.MustCompile(`<div class="tc-tree__row[^"]*">(?:<svg>.*?</svg>)?[^<]* <span class="tc-push tc-dim tc-dim--t11">([^<]*) · (\w+)</span></div>`).FindAllStringSubmatch(frame, -1) {
 		words[m[2]] = true

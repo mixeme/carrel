@@ -73,9 +73,10 @@ func noteRowsOn(groups []view.NoteGroup) func(string) {
 	}
 }
 
-// filterNotes keeps the notes whose title or text holds the word (s-notes-1,
-// «Filter by word»), as the client sifts them with scripts.
-func filterNotes(items []listed, filter string) []listed {
+// filterByWord keeps the notes or the tasks whose title or text holds the
+// word («Filter by word»: s-notes-1, s-tasks-1), as the client sifts them
+// with scripts.
+func filterByWord(items []listed, filter string) []listed {
 	needle := strings.ToLower(strings.TrimSpace(filter))
 	if needle == "" {
 		return items

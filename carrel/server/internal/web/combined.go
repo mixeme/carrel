@@ -435,8 +435,13 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		var open, done int
 		var bad []unreadable
 		by := sortOf(r, view.KindTask)
-		page.Groups, open, done, page.Bar.Loaded, bad = s.taskGroups(tf, show, shown, spec.segment, true, filter, tf.now, by)
-		page.Details = s.openRow(r, sess, base, spec, shown, taskRowsOn(page.Groups))
+		// «Filter by word» first in the bar, as the notes' (s-tasks-1; note
+		// 69 of Typecase, task 167).
+		sift := strings.TrimSpace(r.URL.Query().Get("filter"))
+		kept := filterByWord(shown, sift)
+		page.Groups, open, done, page.Bar.Loaded, bad = s.taskGroups(tf, show, kept, spec.segment, true, filter, tf.now, by)
+		page.Details = s.openRow(r, sess, base, spec, kept, taskRowsOn(page.Groups))
+		page.Bar.Filter, page.Bar.FilterForm = text(sift), s.listFilter(base, query, sift)
 		page.Bar.Segments = append(s.taskSegments(base, filter.tag, show, open, done),
 			s.sortSegments(base, view.KindTask, by, r.URL.Query())...)
 		page.Bar.Actions = append(actions, s.printAction(base))
@@ -455,7 +460,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		by := sortOf(r, view.KindNote)
 		// «Filter by word» without scripts (s-notes-1).
 		sift := strings.TrimSpace(r.URL.Query().Get("filter"))
-		kept := filterNotes(shown, sift)
+		kept := filterByWord(shown, sift)
 		page.Groups, page.Bar.Loaded, bad = s.noteGroups(tf, kept, spec.segment, true, filter, by)
 		page.Details = s.openRow(r, sess, base, spec, kept, noteRowsOn(page.Groups))
 		page.Bar.Filter, page.Bar.FilterForm = text(sift), s.listFilter(base, query, sift)
@@ -482,9 +487,9 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 // import opens on the first writable collection with its "Into" picker; the
 // export opens a sheet of the collections to hand over.
 func (s *Server) combinedIOActions(blob sealed.Blob, spec kindSpec) []view.Action {
-	imp := view.Action{ID: "collection.import", Label: "Import", Icon: "i-up", Method: "GET",
+	imp := view.Action{ID: "collection.import", Label: "Import", Icon: "i-import", Method: "GET",
 		Href: s.route("/app/" + spec.segment + "/import")}
-	exp := view.Action{ID: "collection.export", Label: "Export", Icon: "i-down", Method: "GET",
+	exp := view.Action{ID: "collection.export", Label: "Export", Icon: "i-export", Method: "GET",
 		Href: s.route("/app/" + spec.segment + "/export")}
 	for _, col := range blob.Collections {
 		conn, ok := blob.Connection(col.AccountID)
@@ -1005,11 +1010,11 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 				list := origin{conn: conn, col: col}.listPath(spec.segment)
 				if !col.ReadOnly {
 					row.Menu = append(row.Menu, view.MenuItem{Separator: true, Action: view.Action{
-						ID: "collection.import", Label: "Import", Icon: "i-up",
+						ID: "collection.import", Label: "Import", Icon: "i-import",
 						Href: s.route(list + "/import"), Method: "GET", Enabled: true}})
 				}
 				row.Menu = append(row.Menu, view.MenuItem{Separator: col.ReadOnly, Action: view.Action{
-					ID: "collection.export", Label: "Export", Icon: "i-down",
+					ID: "collection.export", Label: "Export", Icon: "i-export",
 					Href: s.route(list + "/export"), Method: "GET", Enabled: true}})
 				if item, ok := s.collectionDeleteItem(conn, col, ""); ok {
 					row.Menu = append(row.Menu, item)
@@ -1050,7 +1055,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 			{Action: view.Action{ID: "feed.edit", Label: "Rename", Href: s.postQuery("/app/collections/rename", url.Values{"a": {f.ID}, "c": {col.Path}}), Method: "GET", Enabled: true}},
 		}
 		if spec.kind != view.KindFile {
-			row.Menu = append(row.Menu, view.MenuItem{Action: view.Action{ID: "collection.export", Label: "Export", Icon: "i-down", Href: s.route(origin{conn: conn, col: col}.listPath(spec.segment) + "/export"), Method: "GET", Enabled: true}})
+			row.Menu = append(row.Menu, view.MenuItem{Action: view.Action{ID: "collection.export", Label: "Export", Icon: "i-export", Href: s.route(origin{conn: conn, col: col}.listPath(spec.segment) + "/export"), Method: "GET", Enabled: true}})
 		}
 		live++
 		if tick {

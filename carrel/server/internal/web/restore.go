@@ -149,7 +149,7 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob) view.Rest
 	)
 	b.Source.Actions = []view.Action{
 		{ID: "restore.open", Label: "Open the manifest", Primary: true, Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}}), Method: "POST", Enabled: true},
-		{ID: "restore.upload", Label: "Open a file from this computer", Icon: "i-up", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}, "source": {"upload"}}), Method: "POST", Enabled: true},
+		{ID: "restore.upload", Label: "Open a file from this computer", Icon: "i-upload", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}, "source": {"upload"}}), Method: "POST", Enabled: true},
 	}
 	if t := restoreOf(sess); t != nil {
 		b.Open = true

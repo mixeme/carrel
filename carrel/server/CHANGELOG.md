@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.300 — 2026-10-16
+
+Typecase `22f0506` (its note 69).
+
+### Changed
+
+- **Icons of the frames**: Attach `i-clip`, «From this computer» and
+  Upload `i-upload`, Export `i-export`, Import `i-import`, Download and
+  «Download … first» `i-download`, Restore `i-restore`; «Export CSV» of the
+  journal has none, as its frame.
+- **No «New task» on the cards** of an event, a note and a contact (the
+  owner, task 168): a task is made in the tasks; a person's timeline keeps
+  its own.
+- **A note's export is «.md»** with the export icon, «Export Markdown» its
+  hint (`Action.Hint`).
+- **A task list has no order «Title»** (task 167: a task's date matters)
+  and has **«Filter by word»** — `ListBar.FilterForm`, a GET to the list
+  that keeps the tasks whose title or text holds the word —, combined and
+  of one collection.
+
+### For consumers
+
+Fixtures re-shot (icons, the cards' actions, the task lists' bar, the set:
+the task «Отправить документы в МФЦ» carries three properties Carrel does
+not know — `s-tasks-3`, «Kept as the server sent them»).
+
 ## v0.2.299 — 2026-10-16
 
 ### Added

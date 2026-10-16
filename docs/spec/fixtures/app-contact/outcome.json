@@ -21,15 +21,6 @@
     },
     {
       "enabled": true,
-      "href": "/app/tasks/a-nc-home/dela/new/quick?related=4f2b-9c31-a0e7",
-      "icon": "i-task",
-      "id": "contact.task",
-      "label": "New task",
-      "method": "GET",
-      "target": "sheet"
-    },
-    {
-      "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7?print=1",
       "icon": "i-print",
       "id": "record.print",
@@ -161,7 +152,7 @@
     {
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/export?uid=4f2b-9c31-a0e7",
-      "icon": "i-down",
+      "icon": "i-export",
       "id": "record.export",
       "label": "Export .vcf",
       "method": "GET"
@@ -268,7 +259,7 @@
               {
                 "enabled": true,
                 "href": "/app/contacts/a-nc-home/arhiv/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -277,7 +268,7 @@
               {
                 "enabled": true,
                 "href": "/app/contacts/a-nc-home/arhiv/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -337,7 +328,7 @@
               {
                 "enabled": true,
                 "href": "/app/contacts/a-nc-home/kontakty/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -346,7 +337,7 @@
               {
                 "enabled": true,
                 "href": "/app/contacts/a-nc-home/kontakty/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -436,7 +427,7 @@
         {
           "enabled": true,
           "href": "/app/files/picker?for=upload",
-          "icon": "i-up",
+          "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",

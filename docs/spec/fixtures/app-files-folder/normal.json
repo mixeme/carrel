@@ -32,7 +32,7 @@
         "enabled": true,
         "file": "file",
         "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/",
-        "icon": "i-up",
+        "icon": "i-upload",
         "id": "file.upload",
         "label": "Upload",
         "method": "POST",
@@ -52,7 +52,7 @@
       {
         "enabled": true,
         "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",
-        "icon": "i-down",
+        "icon": "i-download",
         "id": "file.download",
         "label": "Download",
         "method": "GET"
@@ -293,7 +293,7 @@
       {
         "enabled": true,
         "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",
-        "icon": "i-down",
+        "icon": "i-download",
         "id": "file.download",
         "label": "Download",
         "method": "GET",
@@ -672,7 +672,7 @@
         {
           "enabled": true,
           "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-07/?zip=1",
-          "icon": "i-down",
+          "icon": "i-download",
           "id": "file.download.zip",
           "label": "Download as .zip",
           "method": "GET"
@@ -741,7 +741,7 @@
         "enabled": true,
         "file": "file",
         "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-07/",
-        "icon": "i-up",
+        "icon": "i-upload",
         "id": "folder.upload",
         "label": "Upload into 2026-07",
         "method": "POST",
@@ -764,7 +764,7 @@
         {
           "enabled": true,
           "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-04-whiteboard.jpg",
-          "icon": "i-down",
+          "icon": "i-download",
           "id": "file.download",
           "label": "Download",
           "method": "GET"
@@ -847,7 +847,7 @@
         {
           "enabled": true,
           "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",
-          "icon": "i-down",
+          "icon": "i-download",
           "id": "file.download",
           "label": "Download",
           "method": "GET"
@@ -929,7 +929,7 @@
         {
           "enabled": true,
           "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/release-checklist.md",
-          "icon": "i-down",
+          "icon": "i-download",
           "id": "file.download",
           "label": "Download",
           "method": "GET"
@@ -1011,7 +1011,7 @@
         {
           "enabled": true,
           "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
-          "icon": "i-down",
+          "icon": "i-download",
           "id": "file.download",
           "label": "Download",
           "method": "GET"
@@ -1161,7 +1161,7 @@
         {
           "enabled": true,
           "href": "/app/files/picker?for=upload",
-          "icon": "i-up",
+          "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",

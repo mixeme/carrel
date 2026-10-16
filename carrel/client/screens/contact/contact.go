@@ -13,6 +13,10 @@ import (
 	w "carrel.dev/typecase/widget"
 )
 
+// printID is Print of the card (U-10): a button of the third rank in the
+// head, its twin first in «⋯» on a phone (note 69 of Typecase).
+const printID = "record.print"
+
 // The IDs of the page's forms: Send and the deletion post with no form of
 // their own.
 const (
@@ -78,6 +82,7 @@ func Screen(p *view.ContactPage) w.Shell {
 			form = formDelete
 		}
 		b := bind.Button(a, form)
+		b.Tertiary = a.ID == printID
 		if a.Danger {
 			danger = append(danger, b)
 			continue
@@ -87,7 +92,7 @@ func Screen(p *view.ContactPage) w.Shell {
 	if len(p.Menu) > 0 {
 		acts = append(acts, w.Drop{
 			Trigger: w.Button{Icon: "dots", Title: "More"},
-			Menu:    w.Menu{Items: bind.MenuItems(p.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
+			Menu:    w.Menu{Items: append(bind.Twins(p.Actions, printID), bind.MenuItems(p.Menu, rail.ReadOnly)...), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
 		})
 	}
 	h.Acts = &w.Acts{Items: acts}

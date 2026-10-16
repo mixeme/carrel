@@ -464,10 +464,16 @@ func TestQuickTaskSheetIsTheFrame(t *testing.T) {
 	}
 	quick := c.path("tasks") + "/new/quick"
 	tasks := decode[view.NewSheet](t, c.h.do(get(quick, c.sess)))
-	// The frame's rows and «Remind», as the event's sheet holds it (Р9 of
-	// scans/kinds-parity.md; the frame — Typecase's task 167).
-	if got, want := sheetFields(tasks.Form), append(frameSheetFields(t, "s-notes-10"), "Remind []"); !equalStrings(got, want) {
-		t.Errorf("task quick sheet = %q, want (s-notes-10 and Remind) %q", got, want)
+	// The frame's rows, «Remind» among them, as the event's sheet holds it
+	// (Р9 of scans/kinds-parity.md; drawn since note 69, task 167).
+	if got, want := sheetFields(tasks.Form), frameSheetFields(t, "s-notes-10"); !equalStrings(got, want) {
+		t.Errorf("task quick sheet = %q, want (s-notes-10) %q", got, want)
+	}
+	// «No reminder» chosen at first (note 69).
+	for _, o := range rowNamed(t, tasks.Form, "reminder.0").Options {
+		if o.Selected && o.Label != "No reminder" {
+			t.Errorf("task quick sheet reminds %q at first, the frame «No reminder»", o.Label)
+		}
 	}
 	saved := func(set map[string]string) string {
 		t.Helper()

@@ -32,7 +32,26 @@
     "method": "POST"
   },
   "details": null,
-  "foreign": [],
+  "foreign": [
+    {
+      "href": "",
+      "label": "SEQUENCE",
+      "mono": true,
+      "value": "1"
+    },
+    {
+      "href": "",
+      "label": "X-APPLE-SORT-ORDER",
+      "mono": true,
+      "value": "712"
+    },
+    {
+      "href": "",
+      "label": "X-OC-HIDESUBTASKS",
+      "mono": true,
+      "value": "0"
+    }
+  ],
   "form": {
     "action": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit",
     "actions": [
@@ -58,7 +77,7 @@
             "enabled": true,
             "file": "file",
             "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e14\u0026from=edit\u0026op=attach",
-            "icon": "i-up",
+            "icon": "i-upload",
             "id": "attach.add",
             "label": "From this computer",
             "method": "POST"
@@ -77,7 +96,7 @@
         "enabled": true,
         "file": "file",
         "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e14\u0026from=edit\u0026op=attach",
-        "icon": "i-up",
+        "icon": "i-clip",
         "id": "attach.add",
         "label": "Attach",
         "method": "POST"
@@ -1022,7 +1041,7 @@
               {
                 "enabled": true,
                 "href": "/app/tasks/a-nc-home/dela/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -1031,7 +1050,7 @@
               {
                 "enabled": true,
                 "href": "/app/tasks/a-nc-home/dela/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -1091,7 +1110,7 @@
               {
                 "enabled": true,
                 "href": "/app/tasks/a-nc-home/rabota/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -1100,7 +1119,7 @@
               {
                 "enabled": true,
                 "href": "/app/tasks/a-nc-home/rabota/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -1195,7 +1214,7 @@
         {
           "enabled": true,
           "href": "/app/files/picker?for=upload",
-          "icon": "i-up",
+          "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",

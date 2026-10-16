@@ -424,7 +424,7 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 			}
 			run := view.BackupRun{ID: text(r.ID), Started: tf.numStamp(r.Started), State: runStates[r.State], Size: formatSize(r.Size)}
 			if r.File != "" && r.Mode != sealed.BackupToDownload && r.Verified {
-				run.Download = &view.Action{ID: "backup.get", Label: "Download", Icon: "i-down", Method: "GET", Enabled: true,
+				run.Download = &view.Action{ID: "backup.get", Label: "Download", Icon: "i-download", Method: "GET", Enabled: true,
 					Href: s.postQuery("/app/settings/backup", url.Values{"op": {"get"}, "job": {job.ID}, "run": {r.ID}})}
 			}
 			row.Runs = append(row.Runs, run)
@@ -472,7 +472,7 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 		backupHead(&page, len(blob.BackupJobs))
 		page.Actions = []view.Action{
 			{ID: "backup.new", Label: "New job", Icon: "i-plus", Href: s.postQuery("/app/settings/backup", url.Values{"job": {"new"}}), Method: "GET", Primary: true, Enabled: true},
-			{ID: "restore.start", Label: "Restore", Icon: "i-back", Href: s.postQuery("/app/settings/backup", url.Values{"restore": {"1"}}), Method: "GET", Enabled: true},
+			{ID: "restore.start", Label: "Restore", Icon: "i-restore", Href: s.postQuery("/app/settings/backup", url.Values{"restore": {"1"}}), Method: "GET", Enabled: true},
 		}
 	}
 	return page

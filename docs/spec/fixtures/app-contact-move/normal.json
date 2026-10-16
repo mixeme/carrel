@@ -179,7 +179,7 @@
           {
             "enabled": true,
             "href": "/app/contacts/import",
-            "icon": "i-up",
+            "icon": "i-import",
             "id": "collection.import",
             "label": "Import",
             "method": "GET"
@@ -187,7 +187,7 @@
           {
             "enabled": true,
             "href": "/app/contacts/export",
-            "icon": "i-down",
+            "icon": "i-export",
             "id": "collection.export",
             "label": "Export",
             "method": "GET",
@@ -480,7 +480,7 @@
                 {
                   "enabled": true,
                   "href": "/app/contacts/a-nc-home/kontakty/export?uid=6b18-2d40-77c5",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .vcf",
                   "method": "GET"
@@ -567,7 +567,7 @@
                 {
                   "enabled": true,
                   "href": "/app/contacts/a-nc-home/kontakty/export?uid=4f2b-9c31-a0e7",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .vcf",
                   "method": "GET"
@@ -653,7 +653,7 @@
                 {
                   "enabled": true,
                   "href": "/app/contacts/a-rad-vps/komanda/export?uid=d41a-6f30-92be",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .vcf",
                   "method": "GET"
@@ -738,7 +738,7 @@
                 {
                   "enabled": true,
                   "href": "/app/contacts/a-nc-home/arhiv/export?uid=e7c2-3b95-6a14",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .vcf",
                   "method": "GET"
@@ -825,7 +825,7 @@
                 {
                   "enabled": true,
                   "href": "/app/contacts/a-nc-home/kontakty/export?uid=a90d-5512-4e83",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .vcf",
                   "method": "GET"
@@ -918,7 +918,7 @@
                 {
                   "enabled": true,
                   "href": "/app/contacts/a-nc-home/kontakty/export?uid=b52e-7d08-c6f1",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .vcf",
                   "method": "GET"
@@ -1196,7 +1196,7 @@
                   {
                     "enabled": true,
                     "href": "/app/contacts/a-nc-home/arhiv/import",
-                    "icon": "i-up",
+                    "icon": "i-import",
                     "id": "collection.import",
                     "label": "Import",
                     "method": "GET",
@@ -1205,7 +1205,7 @@
                   {
                     "enabled": true,
                     "href": "/app/contacts/a-nc-home/arhiv/export",
-                    "icon": "i-down",
+                    "icon": "i-export",
                     "id": "collection.export",
                     "label": "Export",
                     "method": "GET"
@@ -1265,7 +1265,7 @@
                   {
                     "enabled": true,
                     "href": "/app/contacts/a-nc-home/kontakty/import",
-                    "icon": "i-up",
+                    "icon": "i-import",
                     "id": "collection.import",
                     "label": "Import",
                     "method": "GET",
@@ -1274,7 +1274,7 @@
                   {
                     "enabled": true,
                     "href": "/app/contacts/a-nc-home/kontakty/export",
-                    "icon": "i-down",
+                    "icon": "i-export",
                     "id": "collection.export",
                     "label": "Export",
                     "method": "GET"
@@ -1341,7 +1341,7 @@
                   {
                     "enabled": true,
                     "href": "/app/contacts/a-rad-vps/komanda/export",
-                    "icon": "i-down",
+                    "icon": "i-export",
                     "id": "collection.export",
                     "label": "Export",
                     "method": "GET",
@@ -1402,7 +1402,7 @@
                   {
                     "enabled": true,
                     "href": "/app/contacts/a-rad-vps/rassylki/import",
-                    "icon": "i-up",
+                    "icon": "i-import",
                     "id": "collection.import",
                     "label": "Import",
                     "method": "GET",
@@ -1411,7 +1411,7 @@
                   {
                     "enabled": true,
                     "href": "/app/contacts/a-rad-vps/rassylki/export",
-                    "icon": "i-down",
+                    "icon": "i-export",
                     "id": "collection.export",
                     "label": "Export",
                     "method": "GET"
@@ -1544,7 +1544,7 @@
             {
               "enabled": true,
               "href": "/app/files/picker?for=upload",
-              "icon": "i-up",
+              "icon": "i-upload",
               "id": "new.upload",
               "label": "Upload file",
               "method": "GET",

@@ -842,13 +842,14 @@ type listSort struct{ id, label, value, column string }
 
 var listSorts = map[view.Kind][]listSort{
 	view.KindContact: {{"sort.az", "A–Z", "az", "name"}, {"sort.changed", "Recently changed", "changed", "changed"}},
-	// Every kind sorts by title and by when it changed, as its columns show
-	// both (the rule of 12.10.2026 «kinds are equal»; Р11, Р12 of
-	// scans/kinds-parity.md).
+	// Every kind sorts by when it changed, as its columns show it (the rule
+	// of 12.10.2026 «kinds are equal»; Р11 of scans/kinds-parity.md). A task
+	// has no order by title: its date matters (the owner, note 69, task
+	// 167 — Р12 undone).
 	view.KindNote: {{"sort.newest", "Newest", "newest", "date"}, {"sort.oldest", "Oldest", "oldest", "date"},
 		{"sort.title", "Title", "title", "title"}, {"sort.changed", "Recently changed", "changed", "changed"}},
 	view.KindTask: {{"sort.due", "By due", "due", "due"}, {"sort.priority", "By priority", "priority", "priority"},
-		{"sort.title", "Title", "title", "title"}, {"sort.changed", "Recently changed", "changed", "changed"}},
+		{"sort.changed", "Recently changed", "changed", "changed"}},
 	view.KindFile: {{"files.sort.name", "Name", "name", "name"}, {"files.sort.size", "Size", "size", "size"},
 		{"files.sort.changed", "Changed", "changed", "changed"}},
 }
@@ -1591,7 +1592,10 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	var open, done int
 	var more []unreadable
 	by := sortOf(r, view.KindTask)
-	shown := linkedElsewhere(s.catalogOf(c.sess), view.KindTask, s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items)))
+	// «Filter by word», as the notes' (s-tasks-15; note 69, task 167).
+	sift := strings.TrimSpace(r.URL.Query().Get("filter"))
+	page.Bar.Filter, page.Bar.FilterForm = text(sift), s.listFilter(c.listPath(), r.URL.Query(), sift)
+	shown := filterByWord(linkedElsewhere(s.catalogOf(c.sess), view.KindTask, s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items))), sift)
 	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, shown, c.spec.segment, false, filter, c.tf.now, by)
 	page.Subtitle = text(bookSubtitle(c, len(objs), true))
 	page.Details = s.openRow(r, c.sess, c.listPath(), c.spec, shown, taskRowsOn(page.Groups))
@@ -1818,7 +1822,7 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	items := c.listed(objs)
 	var more []unreadable
 	by := sortOf(r, view.KindNote)
-	shown := filterNotes(linkedElsewhere(s.catalogOf(c.sess), view.KindNote, s.foldLinked(s.catalogOf(c.sess), view.KindNote, filter.keep(view.KindNote, items))), sift)
+	shown := filterByWord(linkedElsewhere(s.catalogOf(c.sess), view.KindNote, s.foldLinked(s.catalogOf(c.sess), view.KindNote, filter.keep(view.KindNote, items))), sift)
 	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, shown, c.spec.segment, false, filter, by)
 	page.Subtitle = text(oneNotebookSubtitle(c, len(objs), true))
 	page.Details = s.openRow(r, c.sess, c.listPath(), c.spec, shown, noteRowsOn(page.Groups))

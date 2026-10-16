@@ -72,8 +72,12 @@ func TestEventByItsFrames(t *testing.T) {
 	if got := strings.Join(people, ", "); got != "Михаил Енученко · organiser, Анна Ковалёва · accepted, Артём Белов · tentative, Виктор Гончаров · no reply" {
 		t.Errorf("attendees = %s", got)
 	}
-	// Г1: Edit with its icon, New task, Print; Attach by its name.
-	for id, icon := range map[string]string{"record.edit": "i-pencil", "event.task": "i-task", "record.print": "i-print", "attach.add": "i-up"} {
+	// Г1: Edit with its icon, Print; Attach by its name, its paperclip
+	// (note 69). No New task: a task is made in the tasks (task 168).
+	if actionByID(page.Actions, "event.task") != nil {
+		t.Error("the card has New task")
+	}
+	for id, icon := range map[string]string{"record.edit": "i-pencil", "record.print": "i-print", "attach.add": "i-clip"} {
 		if a := actionByID(page.Actions, id); a == nil || a.Icon != icon {
 			t.Errorf("%s = %+v, want icon %s", id, a, icon)
 		}

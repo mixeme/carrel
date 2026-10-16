@@ -149,10 +149,10 @@ func (s *Server) newAttachStep(c *collectionCtx, op, uid string, more url.Values
 // file (Submits, File), its arrow the same and From Files, which sends the
 // form and opens the tree of Files for this draft (s-agenda-15).
 func (s *Server) newAttachAction(c *collectionCtx, uid string) view.Action {
-	a := view.Action{ID: "attach.add", Label: "Attach", Icon: "i-up", Href: s.newAttachStep(c, "attach", uid, nil), Method: "POST", Enabled: true,
+	a := view.Action{ID: "attach.add", Label: "Attach", Icon: "i-clip", Href: s.newAttachStep(c, "attach", uid, nil), Method: "POST", Enabled: true,
 		File: "file", Submits: true}
 	here := a
-	here.Label = "From this computer"
+	here.Label, here.Icon = "From this computer", "i-upload"
 	a.Arrow = []view.MenuItem{
 		{Action: here},
 		{Action: view.Action{ID: "attach.files", Label: "From Files", Icon: "i-file", Href: s.newAttachStep(c, "pickfile", uid, nil), Method: "POST", Enabled: true, Submits: true}},

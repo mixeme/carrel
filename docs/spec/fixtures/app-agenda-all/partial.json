@@ -57,7 +57,7 @@
       {
         "enabled": true,
         "href": "/app/calendar/import",
-        "icon": "i-up",
+        "icon": "i-import",
         "id": "collection.import",
         "label": "Import",
         "method": "GET"
@@ -65,7 +65,7 @@
       {
         "enabled": true,
         "href": "/app/calendar/export",
-        "icon": "i-down",
+        "icon": "i-export",
         "id": "collection.export",
         "label": "Export",
         "method": "GET",
@@ -428,7 +428,7 @@
             {
               "enabled": true,
               "href": "/app/calendar/a-nc-home/rabota/export?uid=2f04-8b71-e39a",
-              "icon": "i-down",
+              "icon": "i-export",
               "id": "record.export",
               "label": "Export .ics",
               "method": "GET"
@@ -516,7 +516,7 @@
             {
               "enabled": true,
               "href": "/app/calendar/a-rad-vps/dezhurstva/export?uid=5e90-33c1-a8d2",
-              "icon": "i-down",
+              "icon": "i-export",
               "id": "record.export",
               "label": "Export .ics",
               "method": "GET"
@@ -608,7 +608,7 @@
             {
               "enabled": true,
               "href": "/app/calendar/a-nc-home/lichnyj/export?uid=8f1c-4a02-b7d3",
-              "icon": "i-down",
+              "icon": "i-export",
               "id": "record.export",
               "label": "Export .ics",
               "method": "GET"
@@ -707,7 +707,7 @@
             {
               "enabled": true,
               "href": "/app/calendar/a-nc-home/rabota/export?uid=7ae3-1c48-55b0",
-              "icon": "i-down",
+              "icon": "i-export",
               "id": "record.export",
               "label": "Export .ics",
               "method": "GET"
@@ -796,7 +796,7 @@
             {
               "enabled": true,
               "href": "/app/calendar/a-nc-home/lichnyj/export?uid=1d55-90fe-3c27",
-              "icon": "i-down",
+              "icon": "i-export",
               "id": "record.export",
               "label": "Export .ics",
               "method": "GET"
@@ -1114,7 +1114,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -1123,7 +1123,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -1183,7 +1183,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-nc-home/lichnyj/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -1192,7 +1192,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-nc-home/lichnyj/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -1252,7 +1252,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-nc-home/rabota/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -1261,7 +1261,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-nc-home/rabota/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -1328,7 +1328,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-rad-vps/dezhurstva/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -1337,7 +1337,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-rad-vps/dezhurstva/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -1397,7 +1397,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-rad-vps/proekty/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -1406,7 +1406,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-rad-vps/proekty/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -1473,7 +1473,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-baikal/obshchij/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -1482,7 +1482,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/a-baikal/obshchij/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -1531,7 +1531,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/f-ru-holidays/feed/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -1561,7 +1561,7 @@
               {
                 "enabled": true,
                 "href": "/app/calendar/f-league/feed/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -1690,7 +1690,7 @@
         {
           "enabled": true,
           "href": "/app/files/picker?for=upload",
-          "icon": "i-up",
+          "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",

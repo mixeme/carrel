@@ -47,7 +47,7 @@
             "enabled": true,
             "file": "file",
             "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e22\u0026from=edit\u0026op=attach",
-            "icon": "i-up",
+            "icon": "i-upload",
             "id": "attach.add",
             "label": "From this computer",
             "method": "POST"
@@ -66,7 +66,7 @@
         "enabled": true,
         "file": "file",
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e22\u0026from=edit\u0026op=attach",
-        "icon": "i-up",
+        "icon": "i-clip",
         "id": "attach.add",
         "label": "Attach",
         "method": "POST"
@@ -517,7 +517,7 @@
             "enabled": true,
             "file": "file",
             "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e22\u0026from=edit\u0026op=attach",
-            "icon": "i-up",
+            "icon": "i-upload",
             "id": "attach.add",
             "label": "From this computer",
             "method": "POST"
@@ -536,7 +536,7 @@
         "enabled": true,
         "file": "file",
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e22\u0026from=edit\u0026op=attach",
-        "icon": "i-up",
+        "icon": "i-clip",
         "id": "attach.add",
         "label": "Attach",
         "method": "POST"
@@ -695,7 +695,7 @@
               {
                 "enabled": true,
                 "href": "/app/notes/a-nc-home/dnevnik/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -704,7 +704,7 @@
               {
                 "enabled": true,
                 "href": "/app/notes/a-nc-home/dnevnik/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -764,7 +764,7 @@
               {
                 "enabled": true,
                 "href": "/app/notes/a-nc-home/zapisi/import",
-                "icon": "i-up",
+                "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
                 "method": "GET",
@@ -773,7 +773,7 @@
               {
                 "enabled": true,
                 "href": "/app/notes/a-nc-home/zapisi/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET"
@@ -833,7 +833,7 @@
               {
                 "enabled": true,
                 "href": "/app/notes/a-nc-home/zapiski-obshchie/export",
-                "icon": "i-down",
+                "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
                 "method": "GET",
@@ -920,7 +920,7 @@
         {
           "enabled": true,
           "href": "/app/files/picker?for=upload",
-          "icon": "i-up",
+          "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",

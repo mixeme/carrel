@@ -328,10 +328,10 @@ func (s *Server) opQuery(op, etag, from string) url.Values {
 func (s *Server) attachAction(c *collectionCtx, uid, etag, from string) view.Action {
 	// File names the field of the file without scripts; every file of the
 	// form is taken, whatever its field is called (nextFile).
-	a := view.Action{ID: "attach.add", Label: "Attach", Icon: "i-up", Href: s.postQuery(c.recordPath(uid)+"/edit", s.opQuery("attach", etag, from)), Method: "POST", Enabled: true,
+	a := view.Action{ID: "attach.add", Label: "Attach", Icon: "i-clip", Href: s.postQuery(c.recordPath(uid)+"/edit", s.opQuery("attach", etag, from)), Method: "POST", Enabled: true,
 		File: "file"}
 	here := a
-	here.Label = "From this computer"
+	here.Label, here.Icon = "From this computer", "i-upload"
 	q := url.Values{"for": {"attach"}, "k": {c.spec.segment}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}, "etag": {etag}}
 	if from != "" {
 		q.Set("from", from)

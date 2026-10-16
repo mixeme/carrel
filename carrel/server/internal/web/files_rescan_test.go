@@ -311,16 +311,17 @@ func TestFilesRootWithNothingTickedIsTheFrame(t *testing.T) {
 	}
 }
 
-// ФН15: Attach of From Files is drawn without an icon (s-files-16).
-func TestAttachFromFilesHasNoIcon(t *testing.T) {
-	if !strings.Contains(mockupFrame(t, "s-files-16"), `<button class="tc-btn is-primary" type="button" disabled>Attach</button>`) {
+// ФН15: Attach of From Files was drawn without an icon (s-files-16); since
+// note 69 every Attach has the paperclip.
+func TestAttachFromFilesHasThePaperclip(t *testing.T) {
+	if !strings.Contains(mockupFrame(t, "s-files-16"), `<button class="tc-btn is-primary" type="button" disabled><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg>Attach</button>`) {
 		t.Fatal("s-files-16 draws Attach otherwise: read the frame again")
 	}
 	f := attachFixture(t, 1024, []string{"carrel"}, "e1.ics", attachEvent("e1", "Sync-up", ""))
 	from := menuAction(actionByID(eventAt(t, f, "e1").Actions, "attach.add").Arrow, "attach.files")
 	sheet := decode[view.FilePickerSheet](t, f.h.do(get(from.Href, f.sess)))
-	if a := actionByID(sheet.Actions, "files.picker.attach"); a == nil || a.Icon != "" || !a.Primary {
-		t.Errorf("Attach = %+v, want it primary and without an icon", a)
+	if a := actionByID(sheet.Actions, "files.picker.attach"); a == nil || a.Icon != "i-clip" || !a.Primary {
+		t.Errorf("Attach = %+v, want it primary with the paperclip", a)
 	}
 }
 

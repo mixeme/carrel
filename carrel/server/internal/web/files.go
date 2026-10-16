@@ -713,7 +713,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 			row.Open = row.Href
 			row.Items = s.folderItems(c, rowSegs, e)
 			// A drop on the row goes into it (U-15.3, s-files-1).
-			into := writeAction(c, view.Action{ID: "folder.upload", Label: text("Upload into " + e.Name), Icon: "i-up",
+			into := writeAction(c, view.Action{ID: "folder.upload", Label: text("Upload into " + e.Name), Icon: "i-upload",
 				Href: s.route(c.href("upload", rowSegs, true)), Method: "POST", Enabled: true, File: uploadField})
 			row.Upload = &into
 		} else {
@@ -925,7 +925,7 @@ func (s *Server) filePanel(c *fileCtx, segs []string, e file.Entry, here string,
 		open.Reason = "Carrel shows only an image in place: download the file to open it."
 	}
 	d.Actions = []view.Action{
-		{ID: "file.download", Label: "Download", Icon: "i-down", Href: download, Method: "GET", Enabled: true, Primary: true},
+		{ID: "file.download", Label: "Download", Icon: "i-download", Href: download, Method: "GET", Enabled: true, Primary: true},
 		open,
 		writeAction(c, view.Action{ID: "file.rename", Label: "Rename", Icon: "i-pencil", Href: s.opHref(c, segs, view.FileRename, e.Name), Method: "POST", Enabled: true}),
 		writeAction(c, view.Action{ID: "file.move", Label: "Move", Icon: "i-move", Href: s.opHref(c, segs, view.FileMove, e.Name), Method: "POST", Enabled: true}),
@@ -1016,7 +1016,7 @@ func (s *Server) fileMenu(c *fileCtx, segs []string, e file.Entry) []view.MenuIt
 	if e.Dir {
 		open.Icon, open.Href = "i-file", s.route(c.href("", at, true))
 	}
-	download := view.Action{ID: "file.download", Label: "Download", Icon: "i-down", Method: "GET", Enabled: true, Href: s.route(c.href("download", at, false))}
+	download := view.Action{ID: "file.download", Label: "Download", Icon: "i-download", Method: "GET", Enabled: true, Href: s.route(c.href("download", at, false))}
 	if e.Dir {
 		download.ID, download.Label = "file.download.zip", "Download as .zip"
 		download.Href = s.postQuery(c.href("download", at, true), url.Values{"zip": {"1"}})
@@ -1042,7 +1042,7 @@ func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry, b
 	// only the dialog of the system differs, and that is the client's.
 	// Each carries the file field it sends (Action.File): without scripts
 	// the client sends it as a form of its own with that field (U-8).
-	upload := writeAction(c, view.Action{ID: "file.upload", Label: "Upload", Icon: "i-up", Href: s.route(c.href("upload", segs, true)), Method: "POST", Enabled: true, File: uploadField})
+	upload := writeAction(c, view.Action{ID: "file.upload", Label: "Upload", Icon: "i-upload", Href: s.route(c.href("upload", segs, true)), Method: "POST", Enabled: true, File: uploadField})
 	files, folder := upload, upload
 	files.Label, files.Icon = "Files", "i-doc"
 	folder.ID, folder.Label, folder.Icon = "file.upload.folder", "Folder", "i-file"
@@ -1062,7 +1062,7 @@ func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry, b
 	// scripts the bar is always there (the owner's decision of 09.10.2026).
 	// Download is a link, and has one only for the one file the address
 	// selects.
-	download := view.Action{ID: "file.download", Label: "Download", Icon: "i-down", Method: "GET", Enabled: len(picked) == 1 && !picked[0].Dir}
+	download := view.Action{ID: "file.download", Label: "Download", Icon: "i-download", Method: "GET", Enabled: len(picked) == 1 && !picked[0].Dir}
 	if download.Enabled {
 		download.Href = s.route(c.href("download", append(slices.Clone(segs), picked[0].Name), false))
 	} else {

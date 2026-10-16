@@ -71,7 +71,7 @@ func (s *Server) collectionExport(conn sealed.Connection, col sealed.Collection)
 	if !col.Has(view.KindContact) {
 		q.Set("whole", "1")
 	}
-	return view.Action{ID: "collection.export", Label: text("Export " + collectionExportExt(col)), Icon: "i-down",
+	return view.Action{ID: "collection.export", Label: text("Export " + collectionExportExt(col)), Icon: "i-export",
 		Href: s.postQuery(list, q), Method: "GET", Enabled: true}
 }
 
@@ -143,7 +143,7 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 		return sheet
 	}
 	export := s.collectionExport(conn, col)
-	export.Label = text("Download " + collectionExportExt(col) + " first")
+	export.Label, export.Icon = text("Download "+collectionExportExt(col)+" first"), "i-download"
 	sheet.Export = &export
 	if count > 0 {
 		sheet.ExportNote = text(plural(count, recordNoun(col)) + ", one file, straight to you")

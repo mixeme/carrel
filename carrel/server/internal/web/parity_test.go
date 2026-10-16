@@ -30,14 +30,19 @@ func TestDuplicateTasksAreAskedTheirPlace(t *testing.T) {
 	}
 }
 
-// Р15 of scans/kinds-parity.md: New task related to the record is every
-// kind's — an event and a person's timeline had it, a note did not.
-func TestANoteHasNewTask(t *testing.T) {
-	f := calendarFixture(t, nil, "n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nSUMMARY:Plan\nEND:VJOURNAL"))
-	page := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1", f.sess)))
-	task := actionByID(page.Doc.Bar, "note.task")
-	if task == nil || !strings.Contains(task.Href, "/new/quick") || !strings.Contains(task.Href, "related=n1") {
-		t.Errorf("New task = %+v", task)
+// Note 69 (task 168): the owner took New task off the cards — a task is
+// made in the tasks. Р15 of scans/kinds-parity.md had given it to every
+// kind; equal now is that none of the cards has it.
+func TestNoCardHasNewTask(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nSUMMARY:Plan\nEND:VJOURNAL"),
+		"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nSUMMARY:Review\nEND:VEVENT"))
+	note := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1", f.sess)))
+	event := decode[view.EventPage](t, f.h.do(get(f.path("calendar")+"/e1", f.sess)))
+	for _, a := range append(append([]view.Action(nil), note.Doc.Bar...), event.Actions...) {
+		if a.Label == "New task" {
+			t.Errorf("a card has New task: %+v", a)
+		}
 	}
 }
 

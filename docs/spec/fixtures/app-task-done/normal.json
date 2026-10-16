@@ -150,7 +150,7 @@
           {
             "enabled": true,
             "href": "/app/tasks/import",
-            "icon": "i-up",
+            "icon": "i-import",
             "id": "collection.import",
             "label": "Import",
             "method": "GET"
@@ -158,7 +158,7 @@
           {
             "enabled": true,
             "href": "/app/tasks/export",
-            "icon": "i-down",
+            "icon": "i-export",
             "id": "collection.export",
             "label": "Export",
             "method": "GET",
@@ -287,7 +287,46 @@
         },
         "compact": null,
         "filter": "",
-        "filterForm": null,
+        "filterForm": {
+          "action": "/app/tasks",
+          "actions": [],
+          "errors": [],
+          "method": "GET",
+          "sets": [
+            {
+              "legend": "",
+              "rows": [
+                {
+                  "add": null,
+                  "error": "",
+                  "extra": null,
+                  "hint": "",
+                  "kind": "hidden",
+                  "label": "",
+                  "name": "task",
+                  "options": [],
+                  "readOnly": false,
+                  "required": false,
+                  "value": "t-task"
+                },
+                {
+                  "add": null,
+                  "error": "",
+                  "extra": null,
+                  "hint": "",
+                  "kind": "text",
+                  "label": "Filter",
+                  "name": "filter",
+                  "options": [],
+                  "readOnly": false,
+                  "required": false,
+                  "value": ""
+                }
+              ],
+              "unfold": null
+            }
+          ]
+        },
         "loaded": 5,
         "range": null,
         "segments": [
@@ -329,13 +368,6 @@
             "href": "/app/tasks?sort=priority",
             "id": "sort.priority",
             "label": "By priority",
-            "method": "GET"
-          },
-          {
-            "enabled": true,
-            "href": "/app/tasks?sort=title",
-            "id": "sort.title",
-            "label": "Title",
             "method": "GET"
           },
           {
@@ -402,7 +434,7 @@
                 {
                   "enabled": true,
                   "href": "/app/tasks/a-nc-home/dela/export?uid=aa10-77bc-0e31",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -502,7 +534,7 @@
                 {
                   "enabled": true,
                   "href": "/app/tasks/a-nc-home/rabota/export?uid=bb20-4c17-8a52",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -614,7 +646,7 @@
                 {
                   "enabled": true,
                   "href": "/app/tasks/a-nc-home/dela/export?uid=aa11-2d09-5f84",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -718,7 +750,7 @@
                 {
                   "enabled": true,
                   "href": "/app/tasks/a-nc-home/rabota/export?uid=bb21-0fa8-3d66",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -825,7 +857,7 @@
                 {
                   "enabled": true,
                   "href": "/app/tasks/a-nc-home/dela/export?uid=aa12-9e44-c703",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -1105,7 +1137,7 @@
                   {
                     "enabled": true,
                     "href": "/app/tasks/a-nc-home/dela/import",
-                    "icon": "i-up",
+                    "icon": "i-import",
                     "id": "collection.import",
                     "label": "Import",
                     "method": "GET",
@@ -1114,7 +1146,7 @@
                   {
                     "enabled": true,
                     "href": "/app/tasks/a-nc-home/dela/export",
-                    "icon": "i-down",
+                    "icon": "i-export",
                     "id": "collection.export",
                     "label": "Export",
                     "method": "GET"
@@ -1174,7 +1206,7 @@
                   {
                     "enabled": true,
                     "href": "/app/tasks/a-nc-home/rabota/import",
-                    "icon": "i-up",
+                    "icon": "i-import",
                     "id": "collection.import",
                     "label": "Import",
                     "method": "GET",
@@ -1183,7 +1215,7 @@
                   {
                     "enabled": true,
                     "href": "/app/tasks/a-nc-home/rabota/export",
-                    "icon": "i-down",
+                    "icon": "i-export",
                     "id": "collection.export",
                     "label": "Export",
                     "method": "GET"
@@ -1232,7 +1264,7 @@
                   {
                     "enabled": true,
                     "href": "/app/tasks/f-ru-holidays/feed/export",
-                    "icon": "i-down",
+                    "icon": "i-export",
                     "id": "collection.export",
                     "label": "Export",
                     "method": "GET"
@@ -1358,7 +1390,7 @@
             {
               "enabled": true,
               "href": "/app/files/picker?for=upload",
-              "icon": "i-up",
+              "icon": "i-upload",
               "id": "new.upload",
               "label": "Upload file",
               "method": "GET",

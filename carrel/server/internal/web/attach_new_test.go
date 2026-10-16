@@ -47,7 +47,7 @@ func TestNewEventAttachIsTheFrame(t *testing.T) {
 	// of 02.10, note 34): Save takes no file yet — the server's debt C26
 	// (plan/client.md) —, and the file goes by its own step, as below.
 	items := strings.Join(frameMenu(t, "s-agenda-15"), "\n")
-	if !strings.Contains(items, "From this computer [i-up]") || !strings.Contains(items, "From Files [i-file]") {
+	if !strings.Contains(items, "From this computer [i-upload]") || !strings.Contains(items, "From Files [i-file]") {
 		t.Fatal("s-agenda-15 draws no Attach with its arrow: read the frame again")
 	}
 	f := attachFixture(t, 0, []string{"carrel"})

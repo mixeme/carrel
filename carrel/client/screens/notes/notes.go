@@ -231,8 +231,9 @@ func head(p *view.NotesPage) w.Head {
 	return h
 }
 
-// bar is the bar over the notes: the filter by word, the order, Columns;
-// on its right how many notes are loaded.
+// bar is the bar over the notes: the filter by word, the order — of the
+// second rank, hidden under «⋯» on a narrow column as the tasks' (note 69
+// of Typecase) —, Columns; on its right how many notes are loaded.
 func bar(b view.ListBar) w.Bar {
 	var items []w.BarPart
 	if b.FilterForm != nil {
@@ -241,7 +242,7 @@ func bar(b view.ListBar) w.Bar {
 		items = append(items, f)
 	}
 	if len(b.Segments) > 0 {
-		seg := w.Seg{}
+		seg := w.Seg{Secondary: true}
 		for _, a := range b.Segments {
 			seg.Options = append(seg.Options, bind.SegOption(a))
 		}
@@ -402,7 +403,7 @@ func side(d view.Details) *w.Side {
 		rubric := w.Rubric{Text: "Attachments"}
 		if attach != nil {
 			b := bind.Button(*attach, "")
-			b.Icon, b.Menu, b.Small = "", true, true
+			b.Menu, b.Small = true, true
 			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
 		}
 		sec := []w.SecPart{rubric}

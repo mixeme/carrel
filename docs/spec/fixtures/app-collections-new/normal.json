@@ -310,7 +310,7 @@
                 {
                   "enabled": true,
                   "href": "/app/tasks/a-nc-home/dela/export?whole=1",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -388,7 +388,7 @@
                 {
                   "enabled": true,
                   "href": "/app/notes/a-nc-home/dnevnik/export?whole=1",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -466,7 +466,7 @@
                 {
                   "enabled": true,
                   "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export?whole=1",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -544,7 +544,7 @@
                 {
                   "enabled": true,
                   "href": "/app/calendar/a-nc-home/lichnyj/export?whole=1",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -623,7 +623,7 @@
                 {
                   "enabled": true,
                   "href": "/app/calendar/a-nc-home/rabota/export?whole=1",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -701,7 +701,7 @@
                 {
                   "enabled": true,
                   "href": "/app/notes/a-nc-home/zapisi/export?whole=1",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -779,7 +779,7 @@
                 {
                   "enabled": true,
                   "href": "/app/notes/a-nc-home/zapiski-obshchie/export?whole=1",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -857,7 +857,7 @@
                 {
                   "enabled": true,
                   "href": "/app/contacts/a-nc-home/arhiv/export",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .vcf",
                   "method": "GET"
@@ -935,7 +935,7 @@
                 {
                   "enabled": true,
                   "href": "/app/contacts/a-nc-home/kontakty/export",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .vcf",
                   "method": "GET"
@@ -1153,7 +1153,7 @@
                 {
                   "enabled": true,
                   "href": "/app/calendar/a-rad-vps/dezhurstva/export?whole=1",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -1231,7 +1231,7 @@
                 {
                   "enabled": true,
                   "href": "/app/calendar/a-rad-vps/proekty/export?whole=1",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -1309,7 +1309,7 @@
                 {
                   "enabled": true,
                   "href": "/app/contacts/a-rad-vps/komanda/export",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .vcf",
                   "method": "GET"
@@ -1387,7 +1387,7 @@
                 {
                   "enabled": true,
                   "href": "/app/contacts/a-rad-vps/rassylki/export",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .vcf",
                   "method": "GET"
@@ -1535,7 +1535,7 @@
                 {
                   "enabled": true,
                   "href": "/app/calendar/a-baikal/obshchij/export?whole=1",
-                  "icon": "i-down",
+                  "icon": "i-export",
                   "id": "collection.export",
                   "label": "Export .ics",
                   "method": "GET"
@@ -2163,7 +2163,7 @@
             {
               "enabled": true,
               "href": "/app/files/picker?for=upload",
-              "icon": "i-up",
+              "icon": "i-upload",
               "id": "new.upload",
               "label": "Upload file",
               "method": "GET",

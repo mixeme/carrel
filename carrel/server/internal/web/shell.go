@@ -205,7 +205,7 @@ func (s *Server) newAction(sess *session.Session) view.Action {
 	// stand last, past the line (U-6.4). The upload asks where on its sheet;
 	// without mail on the instance the letter is not offered.
 	out = append(out, view.MenuItem{Separator: true, Action: view.Action{
-		ID: "new.upload", Label: "Upload file", Icon: "i-up", Href: s.postQuery("/app/files/picker", url.Values{"for": {"upload"}}), Method: "GET", Enabled: true,
+		ID: "new.upload", Label: "Upload file", Icon: "i-upload", Href: s.postQuery("/app/files/picker", url.Values{"for": {"upload"}}), Method: "GET", Enabled: true,
 	}})
 	if s.canSendLetters(sess) {
 		out = append(out, view.MenuItem{Separator: true, Action: view.Action{

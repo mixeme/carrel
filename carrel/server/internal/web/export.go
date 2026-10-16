@@ -48,12 +48,12 @@ func (s *Server) exportHref(c *collectionCtx, q url.Values) string {
 // record: the format is named in the item, and it hands the file over at
 // once (the mockup's rule of the ellipsis, §6).
 func (s *Server) recordExportAction(o origin, spec kindSpec, uid string) view.Action {
-	return view.Action{ID: "record.export", Label: text("Export " + exportFormats[spec.kind].ext), Icon: "i-down", Method: "GET", Enabled: true,
+	return view.Action{ID: "record.export", Label: text("Export " + exportFormats[spec.kind].ext), Icon: "i-export", Method: "GET", Enabled: true,
 		Href: s.postQuery(o.listPath(spec.segment)+"/export", url.Values{"uid": {uid}})}
 }
 
 func (s *Server) exportAction(c *collectionCtx, q url.Values) view.Action {
-	return view.Action{ID: "collection.export", Label: "Export", Icon: "i-down", Href: s.exportHref(c, q), Method: "GET", Enabled: true}
+	return view.Action{ID: "collection.export", Label: "Export", Icon: "i-export", Href: s.exportHref(c, q), Method: "GET", Enabled: true}
 }
 
 // exportWindow is the range an address names, both ends or neither. Only a
@@ -195,7 +195,7 @@ func (s *Server) exportLacks(c *collectionCtx, r *http.Request, lost []cal.Unrea
 		Body: text("The server returned them, but Carrel could not read them and cannot put them into the file as they are. " +
 			"Nothing was handed over. They are left on the server as they are; other clients may still open them."),
 		Details: &view.Diagnostic{Summary: text("Unreadable records")},
-		Actions: []view.Action{{ID: "collection.export.without", Label: "Export without them", Icon: "i-down", Href: s.exportHref(c, q), Method: "GET", Enabled: true}},
+		Actions: []view.Action{{ID: "collection.export.without", Label: "Export without them", Icon: "i-export", Href: s.exportHref(c, q), Method: "GET", Enabled: true}},
 	}
 	for _, b := range lost {
 		n.Details.Lines = append(n.Details.Lines, text(b.Path+" · "+b.Err.Error()))

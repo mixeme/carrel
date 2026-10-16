@@ -39,6 +39,7 @@ var (
 // linked row in its hint.
 const (
 	none    = "—"
+	filter  = "Filter by word"
 	percent = "%"
 	done    = "Done"
 	lead    = "· "
@@ -247,10 +248,16 @@ func head(p *view.TasksPage) w.Head {
 	return h
 }
 
-// bar is the bar over the list: what is shown (Open, Done, All, each with
-// its count), the order, Columns; false when it has none of them.
+// bar is the bar over the list: the filter by word first, as the notes'
+// (s-tasks-1; note 69 of Typecase), what is shown (Open, Done, All, each
+// with its count), the order, Columns; false when it has none of them.
 func bar(b view.ListBar) (w.Bar, bool) {
 	var items []w.BarPart
+	if b.FilterForm != nil {
+		f := bind.Filter(b, filter)
+		f.Variant = w.FilterH26W200
+		items = append(items, f)
+	}
 	shown, order := w.Seg{}, w.Seg{Secondary: true}
 	for _, a := range b.Segments {
 		if len(a.ID) >= len(sortID) && a.ID[:len(sortID)] == sortID {
@@ -442,7 +449,7 @@ func side(d view.Details) *w.Side {
 		rubric := w.Rubric{Text: "Attachments"}
 		if attach != nil {
 			b := bind.Button(*attach, "")
-			b.Icon, b.Menu, b.Small = "", true, true
+			b.Menu, b.Small = true, true
 			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
 		}
 		sec := []w.SecPart{rubric}

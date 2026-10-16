@@ -13,6 +13,10 @@ import (
 	w "carrel.dev/typecase/widget"
 )
 
+// printID is Print of the card (U-10): a button of the third rank in the
+// head, its twin first in «⋯» on a phone (note 69 of Typecase).
+const printID = "record.print"
+
 // The IDs of the page's forms: the deletion posts with no form of its own.
 // The IDs of the page's forms: the deletion's, and Send's — the record into
 // a letter by a POST of its own (Р23 of the server's kinds-parity list).
@@ -80,13 +84,15 @@ func Screen(p *view.TaskPage) w.Shell {
 		case a.Method == "POST":
 			acts = append(acts, bind.Button(a, formSend))
 		default:
-			acts = append(acts, bind.Button(a, ""))
+			b := bind.Button(a, "")
+			b.Tertiary = a.ID == printID
+			acts = append(acts, b)
 		}
 	}
 	if len(p.Menu) > 0 {
 		acts = append(acts, w.Drop{
 			Trigger: w.Button{Icon: "dots", Title: "More"},
-			Menu:    w.Menu{Items: bind.MenuItems(p.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
+			Menu:    w.Menu{Items: append(bind.Twins(p.Actions, printID), bind.MenuItems(p.Menu, rail.ReadOnly)...), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
 		})
 	}
 	h.Acts = &w.Acts{Items: acts}
@@ -107,7 +113,7 @@ func Screen(p *view.TaskPage) w.Shell {
 		rubric := w.Rubric{Text: "Attachments"}
 		if attach != nil {
 			b := bind.Button(*attach, "")
-			b.Icon, b.Menu, b.Small = "", true, true
+			b.Menu, b.Small = true, true
 			rubric.Items = []w.RubricPart{w.Drop{Trigger: b, Menu: w.Menu{Items: append(bind.MenuItems(attach.Arrow, ""), bind.Uploads(attach.Arrow, upload)...), Width: w.MenuWidth212, Pop: w.MenuUnder}}}
 		}
 		sec := []w.SecPart{rubric}

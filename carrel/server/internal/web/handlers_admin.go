@@ -718,7 +718,7 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	if action != "" {
 		csv.Set("action", action)
 	}
-	page.Bar.Actions = []view.Action{{ID: "audit.export", Label: "Export CSV", Icon: "i-down", Method: "GET", Enabled: true,
+	page.Bar.Actions = []view.Action{{ID: "audit.export", Label: "Export CSV", Method: "GET", Enabled: true,
 		Href: s.postQuery("/admin/audit", csv)}}
 	// Columns (s-admin-23), in the bar of s-admin-7 too; Export CSV hands
 	// over every column whatever is shown.

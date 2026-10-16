@@ -470,7 +470,7 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 		edit.Icon = "i-pencil"
 	}
 	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
-	page.Actions, page.Menu = shown(edit, send, s.newTaskFor(c, uid, "contact.task"), print, ops.del), ops.menu
+	page.Actions, page.Menu = shown(edit, send, print, ops.del), ops.menu
 	return page
 }
 
@@ -571,16 +571,16 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	page.Source.Path, page.Source.Compared = text(obj.Path), s.eventCompared(c, uid, obj)
 	page.Related = s.relatedRows(c, obj)
 	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
-	task := s.newTaskFor(c, uid, "event.task")
-	// Edit, New task and Print in the head, Attach in its block (by its
-	// name, attach.add), the deletion at the foot; the rest is the «⋯»
-	// (s-agenda-2, s-agenda-5). Print is the card with print=1 (U-10).
+	// Edit, Send and Print in the head, Attach in its block (by its name,
+	// attach.add), the deletion at the foot; the rest is the «⋯»
+	// (s-agenda-2, s-agenda-5). Print is the card with print=1 (U-10). A
+	// task is made in the tasks, not from a card (note 69, task 168).
 	edit := primary(ops.edit)
 	if edit != nil {
 		edit.Icon = "i-pencil"
 	}
 	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true}
-	page.Actions, page.Menu = shown(edit, s.attachOf(c, uid, obj.ETag), task, s.sendFor(c, uid), print, ops.del), ops.menu
+	page.Actions, page.Menu = shown(edit, s.attachOf(c, uid, obj.ETag), s.sendFor(c, uid), print, ops.del), ops.menu
 	return page
 }
 
@@ -595,23 +595,6 @@ func (s *Server) sendFor(c *collectionCtx, uid string) *view.Action {
 	}
 	return &view.Action{ID: "record.send", Label: "Send", Icon: "i-mail", Method: "POST", Enabled: true,
 		Href: s.postQuery("/app/mail/attach", url.Values{"what": {string(c.spec.kind)}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}})}
-}
-
-// newTaskFor is New task of a record (s-agenda-2): the quick sheet of a task
-// related to it — in its collection when that holds tasks, else in the task
-// list a new task goes to (the sheet lets another be chosen). Every kind has
-// it (Р15 of scans/kinds-parity.md: an event and a person's timeline had it,
-// a note and a card did not). nil — nowhere to write one.
-func (s *Server) newTaskFor(c *collectionCtx, uid, id string) *view.Action {
-	tasks, ok := c.origin(), c.feed == nil && !c.col.ReadOnly && c.col.Has(view.KindTask)
-	if !ok && c.feed == nil && !c.col.ReadOnly {
-		tasks, ok = firstWritable(s.catalogOf(c.sess), view.KindTask)
-	}
-	if !ok {
-		return nil
-	}
-	return &view.Action{ID: id, Label: "New task", Icon: "i-task", Method: "GET", Enabled: true,
-		Href: s.postQuery(tasks.listPath(segmentOf(view.KindTask))+"/new/quick", url.Values{"related": {uid}})}
 }
 
 // eventHead are the first fields of an event, in the order of its card
@@ -713,19 +696,19 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	page.Print = s.recordPrint(c, text(title))
 	page.Rail.Neighbours = s.noteNeighbours(c, uid)
 	page.Doc.Title, page.Doc.Body, page.Doc.Rendered = text(title), text(body), cal.RenderMarkdown(body)
-	// Edit with its pencil, Export Markdown and Print sit in the bar over
-	// the text, Attach and the deletion in the column beside it; what the
-	// bar has no room for is its «⋯» (s-notes-2, s-notes-14). Print is the
-	// note with print=1 (U-10); Source is the client's: the source is
-	// Doc.Body.
+	// Edit with its pencil, Export Markdown — its icon and «.md», the whole
+	// name its hint (note 69) —, Send and Print sit in the bar over the
+	// text, Attach and the deletion in the column beside it; what the bar
+	// has no room for is its «⋯» (s-notes-2, s-notes-14). Print is the note
+	// with print=1 (U-10); Source is the client's: the source is Doc.Body.
 	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
 	edit := primary(ops.edit)
 	if edit != nil {
 		edit.Icon = "i-pencil"
 	}
-	page.Doc.Bar = shown(edit, &view.Action{ID: "note.export", Label: "Export Markdown", Method: "GET", Enabled: true,
+	page.Doc.Bar = shown(edit, &view.Action{ID: "note.export", Label: ".md", Hint: "Export Markdown", Icon: "i-export", Method: "GET", Enabled: true,
 		Href: s.postQuery(c.listPath()+"/export", url.Values{"uid": {uid}})},
-		s.newTaskFor(c, uid, "note.task"), s.sendFor(c, uid),
+		s.sendFor(c, uid),
 		&view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + printQuery), Method: "GET", Enabled: true})
 	page.Meta.Actions = shown(s.attachOf(c, uid, obj.ETag), ops.del)
 	page.Meta.Menu = noteMenu(ops.menu)

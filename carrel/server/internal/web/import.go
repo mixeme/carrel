@@ -243,7 +243,7 @@ func (s *Server) importHref(c *collectionCtx, op, to, into string) string {
 }
 
 func (s *Server) importAction(c *collectionCtx) view.Action {
-	return view.Action{ID: "collection.import", Label: "Import", Icon: "i-up",
+	return view.Action{ID: "collection.import", Label: "Import", Icon: "i-import",
 		Href: s.importHref(c, "", "", ""), Method: "GET", Enabled: true}
 }
 

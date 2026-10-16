@@ -205,7 +205,7 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 			if page.File.Preview == view.PreviewNone {
 				label += " " + view.Text(page.File.Size)
 			}
-			page.Actions = []view.Action{{ID: "published.download", Label: label, Icon: "i-down", Href: download, Method: "GET", Primary: true, Enabled: true}}
+			page.Actions = []view.Action{{ID: "published.download", Label: label, Icon: "i-download", Href: download, Method: "GET", Primary: true, Enabled: true}}
 		}
 		s.writePage(w, r, http.StatusOK, page)
 		return
@@ -272,7 +272,7 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 	if in != "" {
 		dl = s.postQuery("/p/"+token+"/download", url.Values{"in": {strings.Join(more, "/")}})
 	}
-	page.Actions = []view.Action{{ID: "published.download", Label: "Download folder", Icon: "i-down", Href: dl, Method: "GET", Enabled: true}}
+	page.Actions = []view.Action{{ID: "published.download", Label: "Download folder", Icon: "i-download", Href: dl, Method: "GET", Enabled: true}}
 	s.writePage(w, r, http.StatusOK, page)
 }
 

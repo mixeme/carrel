@@ -76,12 +76,12 @@ func TestContactAndNoteOrders(t *testing.T) {
 		"n2.ics", ics("BEGIN:VJOURNAL\nUID:n2\nDTSTAMP:20260101T000000Z\nDTSTART:20260310T090000Z\nSUMMARY:Apple\nEND:VJOURNAL"))
 	notes := n.path("notes")
 	np := decode[view.NotesPage](t, n.h.do(get(notes, n.sess)))
-	// The frame's three orders and «Recently changed», which every kind
-	// has (Р11 of scans/kinds-parity.md; the frame — Typecase's task 167).
+	// The frame's four orders, «Recently changed» last, which every kind
+	// has (Р11 of scans/kinds-parity.md; drawn since note 69, task 167).
 	if got := segmentLabels(np.Bar); got != "Newest|Oldest|Title|Recently changed" {
 		t.Fatalf("note segments = %q", got)
 	}
-	sameSegments(t, "note orders", withoutSegment(np.Bar.Segments, "sort.changed"), "s-notes-1", 0)
+	sameSegments(t, "note orders", np.Bar.Segments, "s-notes-1", 0)
 	titles := func(p view.NotesPage) string {
 		var out []string
 		for _, g := range p.Groups {
@@ -133,7 +133,7 @@ func TestTaskGroupsAndOrders(t *testing.T) {
 	list := f.path("tasks")
 
 	page := decode[view.TasksPage](t, f.h.do(get(list, f.sess)))
-	if got := segmentLabels(page.Bar); !strings.Contains(got, "By due|By priority|Title|Recently changed") {
+	if got := segmentLabels(page.Bar); !strings.Contains(got, "By due|By priority|Recently changed") {
 		t.Fatalf("task segments = %q", got)
 	}
 	var rubrics []string
@@ -156,19 +156,11 @@ func TestTaskGroupsAndOrders(t *testing.T) {
 	if strings.Join(order, ",") != "Soon,Next month,Late one,Someday" {
 		t.Errorf("By priority = %v", order)
 	}
-	// By title (Р12 of scans/kinds-parity.md): one list, A to Z.
-	byTitle := decode[view.TasksPage](t, f.h.do(get(sortHref(t, page.Bar, "sort.title"), f.sess)))
-	order = nil
-	for _, g := range byTitle.Groups {
-		if g.Rubric != "" {
-			t.Errorf("Title still groups: %q", g.Rubric)
+	// No order by title: a task's date matters (note 69, task 167).
+	for _, s := range page.Bar.Segments {
+		if s.ID == "sort.title" {
+			t.Error("a task list orders by title")
 		}
-		for _, r := range g.Rows {
-			order = append(order, string(r.Summary))
-		}
-	}
-	if strings.Join(order, ",") != "Late one,Next month,Someday,Soon" {
-		t.Errorf("Title = %v", order)
 	}
 }
 

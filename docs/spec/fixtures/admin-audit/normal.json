@@ -4,7 +4,6 @@
       {
         "enabled": true,
         "href": "/admin/audit?format=csv",
-        "icon": "i-down",
         "id": "audit.export",
         "label": "Export CSV",
         "method": "GET"
@@ -534,7 +533,7 @@
         {
           "enabled": true,
           "href": "/app/files/picker?for=upload",
-          "icon": "i-up",
+          "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",

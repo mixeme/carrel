@@ -55,6 +55,19 @@ func Words(r view.Runs) string {
 	return s
 }
 
+// Twins are the menu's twins of a head's actions of the third rank, named
+// by their ID (note 69 of Typecase, Р-65: a card's Print): shown on a phone
+// only, first in «⋯», where the buttons themselves are not.
+func Twins(actions []view.Action, third string) []w.MenuPart {
+	var out []w.MenuPart
+	for _, a := range actions {
+		if a.ID == third && a.Enabled && a.Method == "GET" {
+			out = append(out, w.MenuItem{Icon: Icon(a.Icon), Label: string(a.Label), Href: a.Href, Tertiary: true})
+		}
+	}
+	return out
+}
+
 // Kind is how an action is drawn as a button (C-6.2): the primary action of
 // the frame (Primary, is-primary), a destructive one (Danger — delete,
 // reset, merge: it destroys, is-danger-solid), else a plain one. Primary
@@ -81,7 +94,7 @@ func Kind(a view.Action) w.ButtonKind {
 // is drawn disabled and says why (Reason), and leads nowhere. The label,
 // the icon and the kind are the action's.
 func Button(a view.Action, form string) w.Button {
-	b := w.Button{Label: string(a.Label), Icon: Icon(a.Icon), Kind: Kind(a)}
+	b := w.Button{Label: string(a.Label), Icon: Icon(a.Icon), Kind: Kind(a), Title: string(a.Hint)}
 	switch {
 	case !a.Enabled:
 		b.State = w.ButtonDisabled

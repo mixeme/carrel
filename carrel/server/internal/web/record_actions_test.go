@@ -38,17 +38,12 @@ func TestSendAContactFromItsCard(t *testing.T) {
 	}
 }
 
-// New task on the event card (s-agenda-2) is the quick sheet of a task in
-// the same calendar, carrying RELATED-TO the event.
-func TestNewTaskFromAnEvent(t *testing.T) {
+// The quick sheet of a task related to a record (a person's timeline opens
+// it; the cards no longer do — note 69, task 168) is a task in the same
+// calendar, carrying RELATED-TO the record.
+func TestNewTaskRelatedToAnEvent(t *testing.T) {
 	f := calendarFixture(t, nil, "meet.ics", ics("BEGIN:VEVENT\nUID:meet\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nSUMMARY:Review\nEND:VEVENT"))
-	page := decode[view.EventPage](t, f.h.do(get(f.path("calendar")+"/meet", f.sess)))
-	act := actionByID(page.Actions, "event.task")
-	if act == nil || act.Method != "GET" {
-		t.Fatalf("event actions = %+v, want New task", page.Actions)
-	}
-	u, _ := url.Parse(act.Href)
-	sheet := decode[view.NewSheet](t, f.h.do(get(u.RequestURI(), f.sess)))
+	sheet := decode[view.NewSheet](t, f.h.do(get(f.path("tasks")+"/new/quick?related=meet", f.sess)))
 	form := formFields(sheet.Form)
 	if form.Get("related") != "meet" {
 		t.Fatalf("quick sheet form = %v, want related to the event", form)

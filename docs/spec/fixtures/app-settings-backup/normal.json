@@ -12,7 +12,7 @@
     {
       "enabled": true,
       "href": "/app/settings/backup?restore=1",
-      "icon": "i-back",
+      "icon": "i-restore",
       "id": "restore.start",
       "label": "Restore",
       "method": "GET"
@@ -513,7 +513,7 @@
           "csrf": "csrf",
           "enabled": true,
           "href": "/app/settings/backup?op=restore-open\u0026source=upload",
-          "icon": "i-up",
+          "icon": "i-upload",
           "id": "restore.upload",
           "label": "Open a file from this computer",
           "method": "POST"
@@ -692,7 +692,7 @@
         {
           "enabled": true,
           "href": "/app/files/picker?for=upload",
-          "icon": "i-up",
+          "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
           "method": "GET",
