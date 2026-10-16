@@ -1,15 +1,31 @@
 {
   "details": null,
-  "instance": {
+  "discard": {
+    "enabled": true,
+    "href": "/admin/settings",
+    "id": "admin.settings.discard",
+    "label": "Discard",
+    "method": "GET"
+  },
+  "form": {
     "action": "/admin/settings",
     "actions": [
       {
         "csrf": "csrf",
         "enabled": true,
-        "id": "admin.settings.instance",
+        "id": "admin.settings.save",
         "label": "Save",
         "method": "POST",
         "primary": true
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/admin/settings/mail-test",
+        "id": "admin.settings.mailtest",
+        "label": "Send test",
+        "method": "POST",
+        "submits": true
       }
     ],
     "errors": [],
@@ -36,19 +52,6 @@
             "error": "",
             "extra": null,
             "hint": "",
-            "kind": "hidden",
-            "label": "",
-            "name": "op",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "instance"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "From 1 to 720. A new invitation, and one extended, live this long.",
             "kind": "number",
             "label": "Invite lifetime, h",
             "mono": true,
@@ -62,7 +65,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "From 1 to 168. Applies to sessions already open.",
+            "hint": "",
             "kind": "number",
             "label": "Idle timeout, h",
             "mono": true,
@@ -76,7 +79,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "From 1 to 365. Applies to sessions started from now on.",
+            "hint": "",
             "kind": "number",
             "label": "Session life, d",
             "mono": true,
@@ -90,7 +93,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "On the sign-in screen and in the letters this instance sends.",
+            "hint": "",
             "kind": "text",
             "label": "Instance name",
             "name": "name",
@@ -115,53 +118,130 @@
           }
         ],
         "unfold": null
-      }
-    ]
-  },
-  "limits": {
-    "action": "/admin/settings",
-    "actions": [
+      },
       {
-        "csrf": "csrf",
-        "enabled": true,
-        "id": "admin.settings.limits",
-        "label": "Save",
-        "method": "POST",
-        "primary": true
-      }
-    ],
-    "errors": [],
-    "method": "POST",
-    "sets": [
-      {
-        "legend": "Letters from users",
+        "legend": "Mail",
         "rows": [
           {
             "add": null,
             "error": "",
             "extra": null,
             "hint": "",
-            "kind": "hidden",
-            "label": "",
-            "name": "_csrf",
+            "kind": "text",
+            "label": "Host",
+            "mono": true,
+            "name": "host",
             "options": [],
+            "placeholder": "smtp.example.org",
             "readOnly": false,
             "required": false,
-            "value": "csrf"
+            "value": "127.0.0.1"
           },
           {
             "add": null,
             "error": "",
             "extra": null,
             "hint": "",
-            "kind": "hidden",
-            "label": "",
-            "name": "op",
+            "kind": "number",
+            "label": "Port",
+            "mono": true,
+            "name": "port",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "limits"
+            "value": "25"
           },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Encryption",
+            "name": "security",
+            "options": [
+              {
+                "label": "STARTTLS",
+                "selected": false,
+                "value": "starttls"
+              },
+              {
+                "label": "TLS",
+                "selected": false,
+                "value": "tls"
+              },
+              {
+                "label": "None",
+                "selected": true,
+                "separator": true,
+                "value": "none"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "none"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Username",
+            "name": "username",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "relay"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Password",
+            "name": "password",
+            "options": [],
+            "placeholder": "leave blank to keep the current one",
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "email",
+            "label": "From address",
+            "name": "from",
+            "options": [],
+            "placeholder": "carrel@example.org",
+            "readOnly": false,
+            "required": false,
+            "value": "noreply@carrel.example"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "From name",
+            "name": "fromName",
+            "options": [],
+            "placeholder": "carrel.example",
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Letters from users",
+        "rows": [
           {
             "add": null,
             "error": "",
@@ -179,7 +259,31 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "From 1 to 100. A larger file goes as a published link, shown as such before sending.",
+            "hint": "Your relay decides which of the two it will let out. The envelope sender stays noreply@carrel.example either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.",
+            "kind": "radio",
+            "label": "Sender address",
+            "name": "sender",
+            "options": [
+              {
+                "label": "noreply@carrel.example",
+                "selected": false,
+                "value": "noreply"
+              },
+              {
+                "label": "login@carrel.example",
+                "selected": true,
+                "value": "login"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
             "kind": "number",
             "label": "Attachment, MB",
             "mono": true,
@@ -193,7 +297,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "From 1 to 100, and not less than an attachment.",
+            "hint": "",
             "kind": "number",
             "label": "Letter, MB",
             "mono": true,
@@ -207,7 +311,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "From 1 to 100.",
+            "hint": "",
             "kind": "number",
             "label": "Recipients",
             "mono": true,
@@ -221,7 +325,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "From 1 to 1000, per person, per UTC day.",
+            "hint": "",
             "kind": "number",
             "label": "Letters a day",
             "mono": true,
@@ -230,6 +334,26 @@
             "readOnly": false,
             "required": false,
             "value": "100"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Test",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "email",
+            "label": "Send test message to",
+            "name": "to",
+            "options": [],
+            "placeholder": "you@example.org",
+            "readOnly": false,
+            "required": false,
+            "value": ""
           }
         ],
         "unfold": null
@@ -242,54 +366,6 @@
     "source": true,
     "theme": "auto",
     "wide": false
-  },
-  "mail": {
-    "action": "/admin/settings/mail-test",
-    "actions": [
-      {
-        "csrf": "csrf",
-        "enabled": true,
-        "id": "admin.settings.mailtest",
-        "label": "Send test",
-        "method": "POST"
-      }
-    ],
-    "errors": [],
-    "method": "POST",
-    "sets": [
-      {
-        "legend": "Test",
-        "rows": [
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "hidden",
-            "label": "",
-            "name": "_csrf",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "csrf"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "email",
-            "label": "Send test message to",
-            "name": "to",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          }
-        ],
-        "unfold": null
-      }
-    ]
   },
   "notices": [],
   "print": {
@@ -410,176 +486,7 @@
     "tags": [],
     "ticks": null
   },
-  "smtp": {
-    "action": "/admin/settings",
-    "actions": [
-      {
-        "csrf": "csrf",
-        "enabled": true,
-        "id": "admin.settings.save",
-        "label": "Save",
-        "method": "POST",
-        "primary": true
-      }
-    ],
-    "errors": [],
-    "method": "POST",
-    "sets": [
-      {
-        "legend": "Mail",
-        "rows": [
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "hidden",
-            "label": "",
-            "name": "_csrf",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "csrf"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "Empty turns mail off: invitations and links are then handed over in person.",
-            "kind": "text",
-            "label": "Host",
-            "mono": true,
-            "name": "host",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "127.0.0.1"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "number",
-            "label": "Port",
-            "mono": true,
-            "name": "port",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "25"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "STARTTLS on 587 and TLS on 465 are the usual pairs. None only for a relay on this host or network: the password then goes unencrypted.",
-            "kind": "select",
-            "label": "Encryption",
-            "name": "security",
-            "options": [
-              {
-                "label": "STARTTLS",
-                "selected": false,
-                "value": "starttls"
-              },
-              {
-                "label": "TLS",
-                "selected": false,
-                "value": "tls"
-              },
-              {
-                "label": "None",
-                "selected": true,
-                "separator": true,
-                "value": "none"
-              }
-            ],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "Username",
-            "name": "username",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "relay"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "Leave blank to keep the current one.",
-            "kind": "password",
-            "label": "Password",
-            "name": "password",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "The instance's own letters go from it, and it is the envelope sender of every letter. A person's letter never goes from their own domain: the relay vouches for this one.",
-            "kind": "email",
-            "label": "From address",
-            "name": "from",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "noreply@carrel.example"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "From name",
-            "name": "fromName",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "Of people's letters. Your relay decides which of the two it will let out. The envelope sender stays the From address either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here. Replies go to the person's confirmed address in both cases.",
-            "kind": "radio",
-            "label": "Sender address",
-            "name": "sender",
-            "options": [
-              {
-                "label": "noreply@carrel.example",
-                "selected": false,
-                "value": "noreply"
-              },
-              {
-                "label": "login@carrel.example",
-                "selected": true,
-                "value": "login"
-              }
-            ],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          }
-        ],
-        "unfold": null
-      }
-    ]
-  },
+  "subtitle": "Global settings and mail",
   "test": null,
   "title": "Settings",
   "top": {

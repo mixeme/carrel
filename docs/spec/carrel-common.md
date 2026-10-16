@@ -2567,7 +2567,7 @@ type Form struct { // общая форма: поля, ошибки, кнопк�
 // ту же форму с ?fields=all, где свёрнутого нет и каждое поле стоит в своей
 // рубрике; набранное до неё не переносится — со сценариями клиент раскрывает
 // набор на месте. nil у несвёрнутого
-type FieldSet struct { Legend Text; Folded bool; Unfold *Action; Rows []FormRow; Hint Text } // Hint — строка под набором: «Without the title an event shows as “Busy”.» у «What the visitor sees» (s-publish-2, -19); у прочих пусто
+type FieldSet struct { Legend Text; Folded bool; Unfold *Action; Rows []FormRow; Badges []Badge; Hint Text } // Badges — плашки рубрики после Legend: «not configured» тревогой у Mail, «off» у Letters from users (s-admin-3); пусто — без плашек. Hint — строка под набором: «Without the title an event shows as “Busy”.» у «What the visitor sees» (s-publish-2, -19); у прочих пусто
 type FormRow struct {
     Name     string
     Label    Text
@@ -3204,11 +3204,18 @@ type InviteRow struct {
 
 type AdminSettingsPage struct {
     Shell
-    Instance Form
-    SMTP     Form
-    Mail     Form // форма адреса отправителя, отправка письмом
-    Test     *MailTestResult
-    Limits   Form
+    Subtitle Text   // «Global settings and mail» (s-admin-3)
+    Discard  Action // «Discard» шапки: GET настроек, набранное не сохраняется
+    // Одна форма кадра (Ад17): рубрики Global, Mail, Letters from users
+    // (адрес отправителя писем людей — здесь), Test; Actions — Save (в
+    // шапке, form=) и Send test (Submits: шлёт набранное в рубрике Mail на
+    // свой Href, ничего не сохраняя, Ад37; выключена с причиной «Mail is not
+    // configured: there is nothing to send through yet.», пока релея нет ни
+    // сохранённого, ни набранного). Save хранит всё или ничего, отказы —
+    // у своих строк разом; журнал — одна запись settings.instance с именами
+    // изменённых строк
+    Form Form
+    Test *MailTestResult
 }
 type MailTestResult struct { OK bool; Reply Text } // полный ответ сервера, без пароля реле
 

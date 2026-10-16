@@ -68,7 +68,12 @@ func (s *Server) mailConfigured() bool {
 // instance's address, with no person's name and no Reply-To. The relay's
 // answer goes to the log without the address: it is somebody's mailbox.
 func (s *Server) sendSystemMail(ctx context.Context, to, subject, body string) (string, error) {
-	relay := s.relay()
+	return s.sendWith(ctx, s.relay(), to, subject, body)
+}
+
+// sendWith sends one of the instance's own letters through relay: the stored
+// one, or the one typed in the settings for the test letter (Ад37).
+func (s *Server) sendWith(ctx context.Context, relay cmail.Relay, to, subject, body string) (string, error) {
 	data, err := cmail.Build(relay, cmail.Message{To: []string{to}, Subject: subject, Text: body}, time.Now())
 	if err == nil {
 		ctx, cancel := context.WithTimeout(ctx, 30*time.Second)

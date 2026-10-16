@@ -20,6 +20,9 @@ type FieldSet struct {
 	// где каждое поле в своей рубрике; nil у несвёрнутого набора
 	Unfold *Action   `json:"unfold"`
 	Rows   []FormRow `json:"rows"`
+	// Badges — плашки рубрики после Legend: «not configured» тревогой у
+	// Mail, «off» у Letters from users (s-admin-3); пусто — без плашек
+	Badges []Badge `json:"badges,omitempty"`
 	// Hint — строка под набором: «Without the title an event shows as
 	// “Busy”.» у «What the visitor sees» (s-publish-2, -19); у прочих пусто
 	Hint Text `json:"hint,omitempty"`
@@ -654,11 +657,17 @@ type InviteRow struct {
 
 type AdminSettingsPage struct {
 	Shell
-	Instance Form            `json:"instance"`
-	SMTP     Form            `json:"smtp"`
-	Mail     Form            `json:"mail"` // форма адреса отправителя, отправка письмом
-	Test     *MailTestResult `json:"test"`
-	Limits   Form            `json:"limits"`
+	// Subtitle — «Global settings and mail» (s-admin-3)
+	Subtitle Text `json:"subtitle"`
+	// Discard — «Discard» шапки: GET настроек, набранное не сохраняется
+	Discard Action `json:"discard"`
+	// Form — одна форма кадра (Ад17): рубрики Global, Mail, Letters from
+	// users, Test; Actions — Save (в шапке, form=) и Send test (Submits:
+	// шлёт набранное на свой Href, ничего не сохраняя, Ад37; выключена с
+	// причиной, пока релея нет ни сохранённого, ни набранного)
+	Form Form `json:"form"`
+	// Test — ответ релея на пробу, полностью, без пароля; nil — пробы не было
+	Test *MailTestResult `json:"test"`
 }
 
 // MailTestResult — полный ответ сервера, без пароля реле.

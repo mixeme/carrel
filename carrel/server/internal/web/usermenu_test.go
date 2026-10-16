@@ -1,7 +1,6 @@
 package web_test
 
 import (
-	"net/url"
 	"testing"
 
 	"carrel.dev/carrel/server/view"
@@ -14,10 +13,9 @@ func TestTheAccountMenuSaysWhoIsSignedInAndWhere(t *testing.T) {
 	h := newHarness(t)
 	h.admin("mix", "password123")
 	sess := h.login("mix", "password123")
-	h.do(postForm("/admin/settings", sess, url.Values{
-		"op": {"instance"}, "name": {"carrel.example"},
-		"inviteTTL": {"24"}, "idle": {"2"}, "session": {"7"},
-	}))
+	h.do(postForm("/admin/settings", sess, settingsForm(t, h, sess, map[string]string{
+		"name": "carrel.example", "inviteTTL": "24", "idle": "2", "session": "7",
+	})))
 
 	page := decode[view.AccountPage](t, h.do(get("/app/settings/account", sess)))
 	if got := page.Top.Signed; string(got.Login) != "mix" || string(got.Instance) != "carrel.example" {

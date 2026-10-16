@@ -61,7 +61,8 @@ func letterBody(t *testing.T, l mailtest.Letter) (mail.Header, string) {
 
 // S-26: the relay is an administrator's setting. The password is written
 // and never shown back; an empty field keeps it; the journal names the
-// relay and not the password. The test letter shows the relay's answer.
+// rows changed and not the password. The test letter shows the relay's
+// answer. The relay is a rubric of the one form of the settings (Ад17).
 func TestAdminSetsRelayAndSendsATestLetter(t *testing.T) {
 	h := newHarness(t)
 	h.admin("alice", "password123")
@@ -69,8 +70,8 @@ func TestAdminSetsRelayAndSendsATestLetter(t *testing.T) {
 	relay := mailtest.New(t)
 	relay.NeedAuth = "carrel"
 
-	form := url.Values{"host": {relay.Host}, "port": {strconv.Itoa(relay.Port)}, "security": {"none"},
-		"username": {"carrel"}, "password": {"relay-secret"}, "from": {"noreply@carrel.example"}, "fromName": {"Carrel"}}
+	form := settingsForm(t, h, alice, map[string]string{"host": relay.Host, "port": strconv.Itoa(relay.Port), "security": "none",
+		"username": "carrel", "password": "relay-secret", "from": "noreply@carrel.example", "fromName": "Carrel"})
 	if rec := h.do(postForm("/admin/settings", alice, form)); rec.Code != 303 {
 		t.Fatalf("save: %d %s", rec.Code, rec.Body)
 	}
@@ -92,11 +93,11 @@ func TestAdminSetsRelayAndSendsATestLetter(t *testing.T) {
 		}
 	}
 	page := decode[view.AdminSettingsPage](t, rec)
-	if page.SMTP.Sets[0].Legend != "Mail" || formFields(page.SMTP).Get("host") != relay.Host {
-		t.Errorf("SMTP form = %+v", page.SMTP)
+	if page.Form.Sets[1].Legend != "Mail" || len(page.Form.Sets[1].Badges) != 0 || formFields(page.Form).Get("host") != relay.Host {
+		t.Errorf("the relay's rubric = %+v", page.Form.Sets[1])
 	}
 	var senders []string
-	for _, row := range page.SMTP.Sets[0].Rows {
+	for _, row := range page.Form.Sets[2].Rows {
 		if row.Name == "sender" {
 			for _, o := range row.Options {
 				senders = append(senders, string(o.Label))
@@ -114,7 +115,7 @@ func TestAdminSetsRelayAndSendsATestLetter(t *testing.T) {
 		t.Errorf("sender = %q", snap.Settings.SMTP.Sender)
 	}
 
-	result := decode[testFragment](t, h.do(fragment(postForm("/admin/settings/mail-test", alice, url.Values{"to": {"alice@example.org"}}), "main"))).Body.Test
+	result := decode[testFragment](t, h.do(fragment(postForm("/admin/settings/mail-test", alice, settingsForm(t, h, alice, map[string]string{"to": "alice@example.org"})), "main"))).Body.Test
 	if !result.OK || !strings.HasPrefix(string(result.Reply), "250") || strings.Contains(string(result.Reply), "relay-secret") {
 		t.Errorf("test = %+v", result)
 	}
@@ -123,7 +124,7 @@ func TestAdminSetsRelayAndSendsATestLetter(t *testing.T) {
 	}
 
 	relay.Refuse = "nobody@example.org"
-	result = decode[testFragment](t, h.do(fragment(postForm("/admin/settings/mail-test", alice, url.Values{"to": {"nobody@example.org"}}), "main"))).Body.Test
+	result = decode[testFragment](t, h.do(fragment(postForm("/admin/settings/mail-test", alice, settingsForm(t, h, alice, map[string]string{"to": "nobody@example.org"})), "main"))).Body.Test
 	if result.OK || !strings.Contains(string(result.Reply), "550") {
 		t.Errorf("a refusal = %+v", result)
 	}
@@ -133,14 +134,14 @@ func TestAdminRelaySettingsAreChecked(t *testing.T) {
 	h := newHarness(t)
 	h.admin("alice", "password123")
 	alice := h.login("alice", "password123")
-	for field, form := range map[string]url.Values{
-		"host": {"host": {"smtp://mail.example.org"}, "port": {"587"}, "security": {"starttls"}, "from": {"a@example.org"}},
-		"port": {"host": {"mail.example.org"}, "port": {"0"}, "security": {"starttls"}, "from": {"a@example.org"}},
-		"from": {"host": {"mail.example.org"}, "port": {"587"}, "security": {"starttls"}, "from": {"Carrel <a@example.org>"}},
+	for field, set := range map[string]map[string]string{
+		"host": {"host": "smtp://mail.example.org", "port": "587", "security": "starttls", "from": "a@example.org"},
+		"port": {"host": "mail.example.org", "port": "0", "security": "starttls", "from": "a@example.org"},
+		"from": {"host": "mail.example.org", "port": "587", "security": "starttls", "from": "Carrel <a@example.org>"},
 	} {
-		page := decode[view.AdminSettingsPage](t, h.do(postForm("/admin/settings", alice, form)))
+		page := decode[view.AdminSettingsPage](t, h.do(postForm("/admin/settings", alice, settingsForm(t, h, alice, set))))
 		found := false
-		for _, row := range page.SMTP.Sets[0].Rows {
+		for _, row := range page.Form.Sets[1].Rows {
 			if row.Name == field && row.Error != "" {
 				found = true
 			}
@@ -243,5 +244,30 @@ func TestEscrowRecoveryIsMailedWithoutThePassword(t *testing.T) {
 	}
 	if _, body := letterBody(t, letters[0]); strings.Contains(body, string(page.Result.Password)) || !strings.Contains(body, "alice") {
 		t.Errorf("letter:\n%s", body)
+	}
+}
+
+// Ад37 of the scan of 15.10.2026 (s-admin-3): Send test sends what is typed
+// in the relay's rubric — saved or not, so a relay is tried before Save —
+// and stores nothing.
+func TestTheTestLetterGoesThroughWhatIsTyped(t *testing.T) {
+	h := newHarness(t)
+	h.admin("alice", "password123")
+	alice := h.login("alice", "password123")
+	relay := mailtest.New(t)
+	form := settingsForm(t, h, alice, map[string]string{"host": relay.Host, "port": strconv.Itoa(relay.Port), "security": "none",
+		"from": "noreply@carrel.example", "to": "alice@example.org"})
+	page := decode[view.AdminSettingsPage](t, h.do(postForm("/admin/settings/mail-test", alice, form)))
+	if page.Test == nil || !page.Test.OK {
+		t.Fatalf("test = %+v", page.Test)
+	}
+	if got := relay.Letters(); len(got) != 1 || got[0].To[0] != "alice@example.org" {
+		t.Errorf("letters = %+v", got)
+	}
+	if h.users.SMTP().Configured() {
+		t.Error("the test letter stored the relay")
+	}
+	if f := formFields(page.Form); f.Get("host") != relay.Host || f.Get("to") != "alice@example.org" {
+		t.Errorf("the form came back without what was typed: %v", f)
 	}
 }

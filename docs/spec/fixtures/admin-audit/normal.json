@@ -474,7 +474,7 @@
       "whom": ""
     },
     {
-      "detail": "name \"carrel.example\", idle 2h, session 7d, invite 24h, people's mail false, attachment 0 MB, letter 0 MB, 0 recipients, 0 a day (0 = default)",
+      "detail": "inviteTTL, idle, session, name",
       "what": "settings.instance",
       "when": "2026-08-10 17:04",
       "who": "mix",

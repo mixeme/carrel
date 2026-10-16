@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.312 — 2026-10-16
+
+### Changed
+
+- **The instance's settings are one form** (Ад17–Ад22, Ад37 and a part of
+  Ад38 of the scan of 15.10.2026; `s-admin-3`): «Global settings and mail»
+  under the title, Discard and Save in the head; the rubrics Global, Mail
+  («not configured» while there is no relay), Letters from users («off»
+  while people do not send; the sender of their letters stands here now)
+  and Test. Save stores all of it or nothing, every refusal at its row at
+  once (`user.SaveSettings`), and the journal has one entry naming the rows
+  changed — «inviteTTL, idle, session, name»; a value the default shows is
+  kept as the default. The relay's fields have the frame's samples; the
+  ranges and the relay's rules are said when a value is refused, not beside
+  the fields. Send test is a button of the same form: it sends through the
+  relay as typed — saved or not — and stores nothing; off, with «Mail is not
+  configured: there is nothing to send through yet.», while there is no
+  relay saved or typed.
+
+### For consumers
+
+`AdminSettingsPage` in C-6: `Instance`, `SMTP`, `Mail` and `Limits` give way
+to `Subtitle`, `Discard` and one `Form`; `FieldSet.Badges` is new. The
+settings are posted whole. Fixtures `admin-settings`, `admin-audit`
+re-shot.
+
 ## v0.2.311 — 2026-10-16
 
 ### Changed

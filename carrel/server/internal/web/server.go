@@ -168,7 +168,6 @@ type Users interface {
 
 	// S-26: the relay and the letters' bookkeeping.
 	SMTP() store.SMTPSettings
-	SetSMTP(actorID string, in store.SMTPSettings) error
 	MarkInviteMailed(secret string, sent bool, reply string) error
 	ConfirmedAddress(loginOrEmail string) string
 	SetDisplayName(userID, name string) error
@@ -188,7 +187,9 @@ type Users interface {
 	DeviceLastSeen(id string) time.Time
 	SetUploadFolder(viewerID string, dataKey [32]byte, folder sealed.AttachmentFolder) error
 	Settings() store.InstanceSettings
-	SetInstance(actorID string, in user.InstanceUpdate) error
+	// SaveSettings stores the one form of the instance's settings, or
+	// nothing and every refusal at its row (Ад17).
+	SaveSettings(actorID string, in user.InstanceUpdate, relay store.SMTPSettings) ([]*user.ErrSetting, error)
 	InviteTTL() time.Duration
 	ReserveLetter(userID string, perDay int) error
 	ReleaseLetter(userID string)

@@ -224,7 +224,7 @@ func TestDebugLogHoldsNoSecrets(t *testing.T) {
 	device := decode[view.DavloomPage](t, f.h.do(get("/app/settings/davloom", f.sess)))
 	devicePassword := string(profileRow(device.Add, "password").Value)
 	f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {secretRecord}, "body": {secretRecord}}))
-	f.h.do(postForm("/admin/settings", f.sess, url.Values{"host": {"127.0.0.1"}, "port": {"25"}, "security": {"none"}, "username": {"relay"}, "password": {"relay-password-xyz"}, "from": {"noreply@carrel.example"}}))
+	f.h.do(postForm("/admin/settings", f.sess, settingsForm(t, f.h, f.sess, map[string]string{"host": "127.0.0.1", "port": "25", "security": "none", "username": "relay", "password": "relay-password-xyz", "from": "noreply@carrel.example"})))
 	f.h.do(get("/app/files/"+f.id+"/"+url.PathEscape(filesDocs)+"/..%2F..%2Fetc/", f.sess))
 
 	out := buf.String()

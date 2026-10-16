@@ -684,10 +684,9 @@ func newMockupApp(t *testing.T) *mockupApp {
 	sess := h.login("mix", "password123")
 	// The instance the frames sign into: the account menu names it, and
 	// «Carrel» — the name of an instance nobody named — would say nothing.
-	if rec := h.do(postForm("/admin/settings", sess, url.Values{
-		"op": {"instance"}, "name": {mockupInstance},
-		"inviteTTL": {"24"}, "idle": {"2"}, "session": {"7"},
-	})); rec.Code != 303 {
+	if rec := h.do(postForm("/admin/settings", sess, settingsForm(t, h, sess, map[string]string{
+		"name": mockupInstance, "inviteTTL": "24", "idle": "2", "session": "7",
+	}))); rec.Code != 303 {
 		t.Fatalf("name the instance: %d %s", rec.Code, rec.Body.String())
 	}
 	// Key escrow is on, as account-1 (Deposit my key) and s-admin-6 draw
@@ -2361,10 +2360,10 @@ func TestFixtureBeforeAnyone(t *testing.T) {
 	sess := open.h.login("mix", "password123")
 	// Registration needs a relay: without one the letter that confirms an
 	// address never goes, and nobody who registered could sign in (S-26).
-	open.h.do(postForm("/admin/settings", sess, url.Values{
-		"host": {"127.0.0.1"}, "port": {"25"}, "security": {"none"},
-		"username": {"relay"}, "password": {"relay-password-xyz"}, "from": {"noreply@carrel.example"},
-	}))
+	open.h.do(postForm("/admin/settings", sess, settingsForm(t, open.h, sess, map[string]string{
+		"host": "127.0.0.1", "port": "25", "security": "none",
+		"username": "relay", "password": "relay-password-xyz", "from": "noreply@carrel.example",
+	})))
 	if rec := open.h.do(postForm("/admin/invites", sess, url.Values{"action": {"selfreg"}, "selfReg": {"on"}})); rec.Code != 303 {
 		t.Fatalf("open the registration: %d %s", rec.Code, rec.Body.String())
 	}

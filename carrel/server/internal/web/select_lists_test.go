@@ -392,11 +392,9 @@ func optionValue(t *testing.T, opts []view.Option, label string) string {
 func TestSettingsListsAreTheFrames(t *testing.T) {
 	f := bookFixture(t, nil, adaCard())
 	page := decode[view.AdminSettingsPage](t, f.h.do(get("/admin/settings", f.sess)))
-	enc := rowNamed(t, page.SMTP, "security")
+	// No hint under it: s-admin-3 and s-admin-9 draw none (Ад19).
+	enc := rowNamed(t, page.Form, "security")
 	sameList(t, "encryption", enc.Options, "s-admin-9")
-	if !strings.Contains(string(enc.Hint), "relay on this host or network") {
-		t.Errorf("encryption hint = %q, want what None is for", enc.Hint)
-	}
 
 	q := url.Values{"k": {"contacts"}, "a": {f.id}, "c": {f.col}}
 	sheet := decode[view.PublishSheet](t, f.h.do(get("/app/publish?"+q.Encode(), f.sess)))

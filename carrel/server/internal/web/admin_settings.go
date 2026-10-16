@@ -1,7 +1,6 @@
 package web
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -14,25 +13,28 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// settingsFlash is what one POST leaves on the page.
+// The instance's settings are one form (s-admin-3, Ад17): Global, Mail,
+// Letters from users and the test letter, Save and Discard in the head. A
+// save stores all of it or nothing; the test letter is a button of the same
+// form that sends what is typed and stores nothing (Ад37).
+
+// settingsFlash is what one POST leaves on the page: the form as typed and
+// the refusals at their rows, or the test letter's result.
 type settingsFlash struct {
-	form     *store.SMTPSettings // what was typed, when it was refused
-	errField string
-	errText  string
-	testTo   string
-	test     *view.MailTestResult
-	set      *store.InstanceSettings // the Global or letters form as typed, when refused
+	typed   *typedSettings
+	refused map[string]string
+	testTo  string
+	test    *view.MailTestResult
 }
 
-// postInstanceSettings saves the Global form or the letters form; the
-// values of the other stay as they are.
-func (s *Server) postInstanceSettings(w http.ResponseWriter, r *http.Request, sess *session.Session, op string) {
-	cur := s.users.Settings()
-	in := user.InstanceUpdate{
-		Name: cur.Name, IdleHours: cur.IdleHours, SessionDays: cur.SessionDays, InviteHours: cur.InviteHours,
-		PeopleMail: s.mailPolicy().People, MailMaxAttachMB: cur.MailMaxAttachMB, MailMaxMessageMB: cur.MailMaxMessageMB,
-		MailMaxRecipients: cur.MailMaxRecipients, MailMaxPerDay: cur.MailMaxPerDay,
-	}
+// typedSettings is the form as it was sent.
+type typedSettings struct {
+	set   user.InstanceUpdate
+	relay store.SMTPSettings
+}
+
+// settingsTyped reads the whole form.
+func settingsTyped(r *http.Request) typedSettings {
 	atoi := func(name string) int {
 		n, err := strconv.Atoi(strings.TrimSpace(r.FormValue(name)))
 		if err != nil {
@@ -40,33 +42,40 @@ func (s *Server) postInstanceSettings(w http.ResponseWriter, r *http.Request, se
 		}
 		return n
 	}
-	if op == "instance" {
-		in.Name = r.FormValue("name")
-		if strings.TrimSpace(in.Name) == "Carrel" {
-			in.Name = ""
-		}
-		in.InviteHours, in.IdleHours, in.SessionDays = atoi("inviteTTL"), atoi("idle"), atoi("session")
-	} else {
-		v := r.FormValue("people")
-		in.PeopleMail = v == "on" || v == "true"
-		in.MailMaxAttachMB, in.MailMaxMessageMB = atoi("attach"), atoi("letter")
-		in.MailMaxRecipients, in.MailMaxPerDay = atoi("recipients"), atoi("perDay")
+	in := user.InstanceUpdate{Name: r.FormValue("name")}
+	if strings.TrimSpace(in.Name) == "Carrel" {
+		in.Name = ""
 	}
-	if err := s.users.SetInstance(sess.AccountID(), in); err != nil {
-		typed := cur
-		typed.Name, typed.IdleHours, typed.SessionDays, typed.InviteHours = in.Name, in.IdleHours, in.SessionDays, in.InviteHours
-		typed.PeopleMail = &in.PeopleMail
-		typed.MailMaxAttachMB, typed.MailMaxMessageMB = in.MailMaxAttachMB, in.MailMaxMessageMB
-		typed.MailMaxRecipients, typed.MailMaxPerDay = in.MailMaxRecipients, in.MailMaxPerDay
-		flash := settingsFlash{set: &typed, errField: "name", errText: string(formError(err))}
-		var bad *user.ErrSetting
-		if errors.As(err, &bad) {
-			flash.errField, flash.errText = bad.Field, bad.Msg
-		}
-		s.writePage(w, r, http.StatusOK, s.adminSettingsPage(sess, flash))
-		return
+	in.InviteHours, in.IdleHours, in.SessionDays = atoi("inviteTTL"), atoi("idle"), atoi("session")
+	v := r.FormValue("people")
+	in.PeopleMail = v == "on" || v == "true"
+	in.MailMaxAttachMB, in.MailMaxMessageMB = atoi("attach"), atoi("letter")
+	in.MailMaxRecipients, in.MailMaxPerDay = atoi("recipients"), atoi("perDay")
+	port, _ := strconv.Atoi(strings.TrimSpace(r.FormValue("port")))
+	relay := store.SMTPSettings{
+		Host: r.FormValue("host"), Port: port, Security: r.FormValue("security"),
+		Username: r.FormValue("username"), Password: r.FormValue("password"),
+		From: r.FormValue("from"), FromName: r.FormValue("fromName"), Sender: r.FormValue("sender"),
 	}
-	s.redirect(w, r, "/admin/settings")
+	return typedSettings{set: in, relay: relay}
+}
+
+// keepDefaults is the form with each value the default shows as zero:
+// zero keeps the default, and a form saved as shown changes nothing.
+func (s *Server) keepDefaults(in user.InstanceUpdate) user.InstanceUpdate {
+	zero := func(v *int, def int) {
+		if *v == def {
+			*v = 0
+		}
+	}
+	zero(&in.InviteHours, int(conf.InviteTTL.Hours()))
+	zero(&in.IdleHours, int(conf.SessionIdleTimeout.Hours()))
+	zero(&in.SessionDays, int(conf.SessionAbsoluteTimeout.Hours()/24))
+	zero(&in.MailMaxAttachMB, int(s.cfg.MailMaxAttachBytes>>20))
+	zero(&in.MailMaxMessageMB, int(s.cfg.MailMaxMessageBytes>>20))
+	zero(&in.MailMaxRecipients, s.cfg.MailMaxRecipients)
+	zero(&in.MailMaxPerDay, s.cfg.MailMaxPerDay)
+	return in
 }
 
 func (s *Server) getAdminSettings(w http.ResponseWriter, r *http.Request) {
@@ -77,29 +86,25 @@ func (s *Server) getAdminSettings(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, s.adminSettingsPage(sess, settingsFlash{}))
 }
 
-// postAdminSettings stores the relay (S-26). The password field is never
-// filled in: empty keeps the stored one.
+// postAdminSettings stores the whole form (S-26 for the relay). The
+// password field is never filled in: empty keeps the stored one.
 func (s *Server) postAdminSettings(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireAdmin(w, r)
 	if !ok {
 		return
 	}
-	if op := r.FormValue("op"); op == "instance" || op == "limits" {
-		s.postInstanceSettings(w, r, sess, op)
-		return
+	typed := settingsTyped(r)
+	refused, err := s.users.SaveSettings(sess.AccountID(), s.keepDefaults(typed.set), typed.relay)
+	if err != nil {
+		refused = []*user.ErrSetting{{Field: "name", Msg: string(formError(err))}}
 	}
-	port, _ := strconv.Atoi(strings.TrimSpace(r.FormValue("port")))
-	in := store.SMTPSettings{
-		Host: r.FormValue("host"), Port: port, Security: r.FormValue("security"),
-		Username: r.FormValue("username"), Password: r.FormValue("password"),
-		From: r.FormValue("from"), FromName: r.FormValue("fromName"), Sender: r.FormValue("sender"),
-	}
-	if err := s.users.SetSMTP(sess.AccountID(), in); err != nil {
-		in.Password = ""
-		flash := settingsFlash{form: &in, errField: "host", errText: string(formError(err))}
-		var bad *user.ErrSMTP
-		if errors.As(err, &bad) {
-			flash.errField, flash.errText = bad.Field, bad.Msg
+	if len(refused) > 0 {
+		typed.relay.Password = ""
+		flash := settingsFlash{typed: &typed, refused: map[string]string{}}
+		for _, e := range refused {
+			if _, ok := flash.refused[e.Field]; !ok {
+				flash.refused[e.Field] = e.Msg
+			}
 		}
 		s.writePage(w, r, http.StatusOK, s.adminSettingsPage(sess, flash))
 		return
@@ -107,24 +112,47 @@ func (s *Server) postAdminSettings(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/admin/settings")
 }
 
-// postAdminMailTest sends a test letter and shows the relay's whole answer,
-// or its whole refusal — never the relay's password, which is in neither —
-// on the settings page (AdminSettingsPage.Test).
+// postAdminMailTest sends a test letter through the relay as typed in the
+// form — saved or not, so the relay is tried before Save — and stores
+// nothing (Ад37; s-admin-3). An empty password is the stored one. The page
+// comes back with what was typed and the relay's whole answer, or its whole
+// refusal — never the relay's password, which is in neither
+// (AdminSettingsPage.Test).
 func (s *Server) postAdminMailTest(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireAdmin(w, r)
 	if !ok {
 		return
 	}
+	typed := settingsTyped(r)
+	relay := typed.relay
+	refused := user.CheckSMTP(&relay)
+	stored := s.users.SMTP()
+	if relay.Password == "" && relay.Username != "" && relay.Username == stored.Username {
+		relay.Password = stored.Password
+	}
+	typed.relay.Password = ""
 	to := strings.TrimSpace(r.FormValue("to"))
+	flash := settingsFlash{typed: &typed, testTo: to, refused: map[string]string{}}
 	var result view.MailTestResult
 	addrs, err := cmail.Addresses([]string{to})
 	switch {
-	case !s.mailConfigured():
-		result.Reply = text("SMTP is not configured.")
+	case relay.Host == "":
+		result.Reply = text(mailNotConfigured)
+	case len(refused) > 0:
+		for _, e := range refused {
+			if _, ok := flash.refused[e.Field]; !ok {
+				flash.refused[e.Field] = e.Msg
+			}
+		}
+		result.Reply = text("The relay as typed cannot be used: see the marked fields.")
 	case err != nil || len(addrs) != 1:
 		result.Reply = text("Enter one address to send the test letter to.")
 	default:
-		reply, err := s.sendSystemMail(r.Context(), addrs[0], "A test letter from Carrel",
+		via := relayOf(relay)
+		if via.FromName == "" {
+			via.FromName = s.users.Settings().InstanceName()
+		}
+		reply, err := s.sendWith(r.Context(), via, addrs[0], "A test letter from Carrel",
 			s.letter(r, "This is a test letter. The relay took it, and it reached you: letters from this instance work."))
 		if err != nil {
 			result.Reply = text(err.Error())
@@ -132,54 +160,61 @@ func (s *Server) postAdminMailTest(w http.ResponseWriter, r *http.Request) {
 			result.OK, result.Reply = true, text(reply)
 		}
 	}
+	flash.test = &result
 	// The page, with scripts or without: a result is no zone of C-7.2 (the
 	// lead's decision П2, 02.10.2026).
-	s.writePage(w, r, http.StatusOK, s.adminSettingsPage(sess, settingsFlash{testTo: to, test: &result}))
+	s.writePage(w, r, http.StatusOK, s.adminSettingsPage(sess, flash))
 }
+
+// mailNotConfigured is why the test letter cannot go (s-admin-3).
+const mailNotConfigured = "Mail is not configured: there is nothing to send through yet."
 
 func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) view.AdminSettingsPage {
 	cur := s.users.SMTP()
 	shown := cur
-	if flash.form != nil {
-		shown = *flash.form
+	set := s.users.Settings()
+	people := s.mailPolicy().People
+	if t := flash.typed; t != nil {
+		shown = t.relay
+		set.Name, set.IdleHours, set.SessionDays, set.InviteHours = t.set.Name, t.set.IdleHours, t.set.SessionDays, t.set.InviteHours
+		set.MailMaxAttachMB, set.MailMaxMessageMB = t.set.MailMaxAttachMB, t.set.MailMaxMessageMB
+		set.MailMaxRecipients, set.MailMaxPerDay = t.set.MailMaxRecipients, t.set.MailMaxPerDay
+		people = t.set.PeopleMail
 	}
-	// «Settings», as the rail and the frame name it (Ад16; s-admin-3).
-	page := view.AdminSettingsPage{Shell: s.buildShell(sess, "Settings"), Test: flash.test}
+	// «Settings», as the rail and the frame name it (Ад16; s-admin-3), with
+	// what it holds under it.
+	page := view.AdminSettingsPage{Shell: s.buildShell(sess, "Settings"), Subtitle: "Global settings and mail", Test: flash.test,
+		Discard: view.Action{ID: "admin.settings.discard", Label: "Discard", Href: s.route("/admin/settings"), Method: "GET", Enabled: true}}
 	page.Rail = s.adminRail(sess, "/admin/settings")
 	num := func(n int) view.Text { return text(strconv.Itoa(n)) }
-
-	origin := s.cfg.PublicURL
-	if origin == "" {
-		origin = "the address each request comes to"
-	}
-	set := s.users.Settings()
-	if flash.set != nil {
-		set = *flash.set
-	}
 	orDefault := func(v, def int) view.Text {
 		if v != 0 {
 			return num(v)
 		}
 		return num(def)
 	}
-	page.Instance = view.Form{
-		Action: s.route("/admin/settings"), Method: "POST",
-		Sets: []view.FieldSet{{Legend: "Global", Rows: []view.FormRow{
-			csrfField(sess),
-			{Name: "op", Kind: view.InputHidden, Value: "instance"},
-			{Name: "inviteTTL", Label: "Invite lifetime, h", Kind: view.InputNumber, Mono: true, Value: orDefault(set.InviteHours, int(conf.InviteTTL.Hours())),
-				Hint: "From 1 to 720. A new invitation, and one extended, live this long."},
-			{Name: "idle", Label: "Idle timeout, h", Kind: view.InputNumber, Mono: true, Value: orDefault(set.IdleHours, int(conf.SessionIdleTimeout.Hours())),
-				Hint: "From 1 to 168. Applies to sessions already open."},
-			{Name: "session", Label: "Session life, d", Kind: view.InputNumber, Mono: true, Value: orDefault(set.SessionDays, int(conf.SessionAbsoluteTimeout.Hours()/24)),
-				Hint: "From 1 to 365. Applies to sessions started from now on."},
-			{Name: "name", Label: "Instance name", Kind: view.InputText, Value: text(set.InstanceName()),
-				Hint: "On the sign-in screen and in the letters this instance sends."},
-			{Name: "publicURL", Label: "Public address", Kind: view.InputText, Mono: true, Value: text(origin), ReadOnly: true,
-				Hint: "Links in letters start with it. Set with CARREL_PUBLIC_URL."},
-		}}},
-		Actions: []view.Action{{ID: "admin.settings.instance", Label: "Save", Method: "POST", Primary: true, Enabled: true}},
+	mb := func(v int, bytes int64) view.Text {
+		if v != 0 {
+			return num(v)
+		}
+		return num(int(bytes >> 20))
 	}
+
+	origin := s.cfg.PublicURL
+	if origin == "" {
+		origin = "the address each request comes to"
+	}
+	// The ranges are not said beside the fields (Ад19): a value out of one
+	// is refused at its row with it.
+	global := view.FieldSet{Legend: "Global", Rows: []view.FormRow{
+		csrfField(sess),
+		{Name: "inviteTTL", Label: "Invite lifetime, h", Kind: view.InputNumber, Mono: true, Value: orDefault(set.InviteHours, int(conf.InviteTTL.Hours()))},
+		{Name: "idle", Label: "Idle timeout, h", Kind: view.InputNumber, Mono: true, Value: orDefault(set.IdleHours, int(conf.SessionIdleTimeout.Hours()))},
+		{Name: "session", Label: "Session life, d", Kind: view.InputNumber, Mono: true, Value: orDefault(set.SessionDays, int(conf.SessionAbsoluteTimeout.Hours()/24))},
+		{Name: "name", Label: "Instance name", Kind: view.InputText, Value: text(set.InstanceName())},
+		{Name: "publicURL", Label: "Public address", Kind: view.InputText, Mono: true, Value: text(origin), ReadOnly: true,
+			Hint: "Links in letters start with it. Set with CARREL_PUBLIC_URL."},
+	}}
 
 	port := ""
 	if shown.Port > 0 {
@@ -194,86 +229,64 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 	option := func(v, label string) view.Option {
 		return view.Option{Value: v, Label: text(label), Selected: security == v, Separator: v == cmail.None}
 	}
-	var pwHint view.Text
-	if cur.Password != "" {
-		pwHint = "Leave blank to keep the current one."
-	}
-	legend := view.Text("Mail — not configured")
-	if cur.Configured() {
-		legend = "Mail"
-	}
-	page.SMTP = view.Form{
-		Action: s.route("/admin/settings"), Method: "POST",
-		Sets: []view.FieldSet{{Legend: legend, Rows: []view.FormRow{
-			csrfField(sess),
-			{Name: "host", Label: "Host", Kind: view.InputText, Mono: true, Value: text(shown.Host),
-				Hint: "Empty turns mail off: invitations and links are then handed over in person."},
-			{Name: "port", Label: "Port", Kind: view.InputNumber, Value: text(port), Mono: true},
-			// The list of s-admin-9: None under a line, what it is for in the
-			// hint.
-			{Name: "security", Label: "Encryption", Kind: view.InputSelect, Options: []view.Option{
-				option(cmail.StartTLS, "STARTTLS"), option(cmail.TLS, "TLS"), option(cmail.None, "None"),
-			}, Hint: "STARTTLS on 587 and TLS on 465 are the usual pairs. None only for a relay on this host or network: the password then goes unencrypted."},
-			{Name: "username", Label: "Username", Kind: view.InputText, Value: text(shown.Username)},
-			{Name: "password", Label: "Password", Kind: view.InputPassword, Hint: pwHint},
-			{Name: "from", Label: "From address", Kind: view.InputEmail, Value: text(shown.From),
-				Hint: "The instance's own letters go from it, and it is the envelope sender of every letter. A person's letter never goes from their own domain: the relay vouches for this one."},
-			{Name: "fromName", Label: "From name", Kind: view.InputText, Value: text(shown.FromName)},
-			{Name: "sender", Label: "Sender address", Kind: view.InputRadio, Options: senderOptions(shown),
-				Hint: "Of people's letters. Your relay decides which of the two it will let out. The envelope sender stays the From address either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here. Replies go to the person's confirmed address in both cases."},
-		}}},
-		Actions: []view.Action{{ID: "admin.settings.save", Label: "Save", Method: "POST", Primary: true, Enabled: true}},
-	}
-	for i := range page.SMTP.Sets[0].Rows {
-		if flash.errText != "" && page.SMTP.Sets[0].Rows[i].Name == flash.errField {
-			page.SMTP.Sets[0].Rows[i].Error = text(flash.errText)
-		}
-	}
-
-	page.Mail = view.Form{
-		Action: s.route("/admin/settings/mail-test"), Method: "POST",
-		Sets: []view.FieldSet{{Legend: "Test", Rows: []view.FormRow{
-			csrfField(sess),
-			{Name: "to", Label: "Send test message to", Kind: view.InputEmail, Value: text(flash.testTo)},
-		}}},
-		Actions: []view.Action{{ID: "admin.settings.mailtest", Label: "Send test", Method: "POST", Enabled: cur.Configured()}},
-	}
+	// The relay's fields with the samples of the frame (Ад20); its rubric
+	// says when there is none (Ад18).
+	relay := view.FieldSet{Legend: "Mail", Rows: []view.FormRow{
+		{Name: "host", Label: "Host", Kind: view.InputText, Mono: true, Value: text(shown.Host), Placeholder: "smtp.example.org"},
+		{Name: "port", Label: "Port", Kind: view.InputNumber, Value: text(port), Mono: true},
+		// The list of s-admin-9: None under a line.
+		{Name: "security", Label: "Encryption", Kind: view.InputSelect, Value: text(security), Options: []view.Option{
+			option(cmail.StartTLS, "STARTTLS"), option(cmail.TLS, "TLS"), option(cmail.None, "None"),
+		}},
+		{Name: "username", Label: "Username", Kind: view.InputText, Value: text(shown.Username)},
+		{Name: "password", Label: "Password", Kind: view.InputPassword, Placeholder: "leave blank to keep the current one"},
+		{Name: "from", Label: "From address", Kind: view.InputEmail, Value: text(shown.From), Placeholder: "carrel@example.org"},
+		{Name: "fromName", Label: "From name", Kind: view.InputText, Value: text(shown.FromName), Placeholder: text(s.users.Settings().InstanceName())},
+	}}
 	if !cur.Configured() {
-		page.Mail.Actions[0].Reason = "Set the relay up and save it first."
+		relay.Badges = []view.Badge{{Label: "not configured", Role: view.BadgeAlert}}
 	}
 
-	people := s.mailPolicy().People
-	if flash.set != nil && flash.set.PeopleMail != nil {
-		people = *flash.set.PeopleMail
+	// People's letters: whether they go, from which address (Ад21: the
+	// sender, after the relay is set up), and their ceilings.
+	envelope := shown.From
+	if envelope == "" {
+		envelope = "the From address"
 	}
-	mb := func(v int, bytes int64) view.Text {
-		if v != 0 {
-			return num(v)
-		}
-		return num(int(bytes >> 20))
+	letters := view.FieldSet{Legend: "Letters from users", Rows: []view.FormRow{
+		{Name: "people", Label: "Let users send letters and links from Carrel", Kind: view.InputCheck, Value: text(boolStr(people)),
+			Hint: "Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form."},
+		{Name: "sender", Label: "Sender address", Kind: view.InputRadio, Options: senderOptions(shown),
+			Hint: text("Your relay decides which of the two it will let out. The envelope sender stays " + envelope + " either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.")},
+		{Name: "attach", Label: "Attachment, MB", Kind: view.InputNumber, Mono: true, Value: mb(set.MailMaxAttachMB, s.cfg.MailMaxAttachBytes)},
+		{Name: "letter", Label: "Letter, MB", Kind: view.InputNumber, Mono: true, Value: mb(set.MailMaxMessageMB, s.cfg.MailMaxMessageBytes)},
+		{Name: "recipients", Label: "Recipients", Kind: view.InputNumber, Mono: true, Value: orDefault(set.MailMaxRecipients, s.cfg.MailMaxRecipients)},
+		{Name: "perDay", Label: "Letters a day", Kind: view.InputNumber, Mono: true, Value: orDefault(set.MailMaxPerDay, s.cfg.MailMaxPerDay)},
+	}}
+	if !people {
+		letters.Badges = []view.Badge{{Label: "off", Role: view.BadgeNeutral}}
 	}
-	page.Limits = view.Form{
+
+	test := view.FieldSet{Legend: "Test", Rows: []view.FormRow{
+		{Name: "to", Label: "Send test message to", Kind: view.InputEmail, Value: text(flash.testTo), Placeholder: "you@example.org"},
+	}}
+	// The test letter sends what is typed (Ад37): off only while there is
+	// no relay, saved or typed (Ад22).
+	send := view.Action{ID: "admin.settings.mailtest", Label: "Send test", Href: s.route("/admin/settings/mail-test"), Method: "POST", Submits: true,
+		Enabled: cur.Configured() || strings.TrimSpace(shown.Host) != ""}
+	if !send.Enabled {
+		send.Reason = mailNotConfigured
+	}
+
+	page.Form = view.Form{
 		Action: s.route("/admin/settings"), Method: "POST",
-		Sets: []view.FieldSet{{Legend: "Letters from users", Rows: []view.FormRow{
-			csrfField(sess),
-			{Name: "op", Kind: view.InputHidden, Value: "limits"},
-			{Name: "people", Label: "Let users send letters and links from Carrel", Kind: view.InputCheck, Value: text(boolStr(people)),
-				Hint: "Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form."},
-			{Name: "attach", Label: "Attachment, MB", Kind: view.InputNumber, Mono: true, Value: mb(set.MailMaxAttachMB, s.cfg.MailMaxAttachBytes),
-				Hint: "From 1 to 100. A larger file goes as a published link, shown as such before sending."},
-			{Name: "letter", Label: "Letter, MB", Kind: view.InputNumber, Mono: true, Value: mb(set.MailMaxMessageMB, s.cfg.MailMaxMessageBytes),
-				Hint: "From 1 to 100, and not less than an attachment."},
-			{Name: "recipients", Label: "Recipients", Kind: view.InputNumber, Mono: true, Value: orDefault(set.MailMaxRecipients, s.cfg.MailMaxRecipients),
-				Hint: "From 1 to 100."},
-			{Name: "perDay", Label: "Letters a day", Kind: view.InputNumber, Mono: true, Value: orDefault(set.MailMaxPerDay, s.cfg.MailMaxPerDay),
-				Hint: "From 1 to 1000, per person, per UTC day."},
-		}}},
-		Actions: []view.Action{{ID: "admin.settings.limits", Label: "Save", Method: "POST", Primary: true, Enabled: true}},
+		Sets:    []view.FieldSet{global, relay, letters, test},
+		Actions: []view.Action{{ID: "admin.settings.save", Label: "Save", Method: "POST", Primary: true, Enabled: true}, send},
 	}
-	for _, f := range []*view.Form{&page.Instance, &page.Limits} {
-		for i := range f.Sets[0].Rows {
-			if flash.errText != "" && f.Sets[0].Rows[i].Name == flash.errField {
-				f.Sets[0].Rows[i].Error = text(flash.errText)
+	for i := range page.Form.Sets {
+		for j := range page.Form.Sets[i].Rows {
+			if msg, ok := flash.refused[page.Form.Sets[i].Rows[j].Name]; ok {
+				page.Form.Sets[i].Rows[j].Error = text(msg)
 			}
 		}
 	}

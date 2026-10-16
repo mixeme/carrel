@@ -67,7 +67,7 @@ func TestRailStatusBlock(t *testing.T) {
 	}
 	relay := h.relayed()
 	_ = relay
-	_ = h.do(fragment(postForm("/admin/settings/mail-test", mix, url.Values{"to": {"mix@example.org"}}), "main"))
+	_ = h.do(fragment(postForm("/admin/settings/mail-test", mix, settingsForm(t, h, mix, map[string]string{"to": "mix@example.org"})), "main"))
 	live := httptest.NewServer(h.srv.Handler())
 	defer live.Close()
 	_ = h.do(postForm("/admin/install", mix, url.Values{"url": {live.URL}}))

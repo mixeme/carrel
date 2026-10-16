@@ -69,9 +69,10 @@ func TestAnswersOutsideTheZonesArePages(t *testing.T) {
 		h := newHarness(t)
 		h.admin("alice", "password123")
 		alice := h.login("alice", "password123")
-		raw := h.do(fragment(postForm("/admin/settings/mail-test", alice, url.Values{"to": {"alice@example.org"}}), "main")).Body.Bytes()
+		// The test letter sends the form as typed (Ад37).
+		raw := h.do(fragment(postForm("/admin/settings/mail-test", alice, settingsForm(t, h, alice, map[string]string{"to": "alice@example.org"})), "main")).Body.Bytes()
 		keys := bodyKeys(t, raw)
-		if _, ok := keys["smtp"]; !ok {
+		if _, ok := keys["form"]; !ok {
 			t.Errorf("the test letter as a fragment answers %s, want the settings page", raw)
 		}
 		if _, ok := keys["test"]; !ok {
