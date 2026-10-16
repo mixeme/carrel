@@ -40,6 +40,8 @@ var (
 		Search: "Search everything…",
 	}
 	rail = bind.RailWords{Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
+	// ro is the badge of a list read only in the choice of the List.
+	ro = w.Badge{Label: "ro", Place: w.Pushed}
 )
 
 // The screen's words (U-1.3): the dash in an empty field the screen has no
@@ -48,8 +50,10 @@ var (
 // Done, «Add reminder»), the rubrics of the attachments and the source, the
 // attachment kept inside the task, a form with nothing attached, the names
 // of the source's lines and what joins when it was read and whether it
-// changed.
+// changed; the rubric of the attendees and the lead of a person's status.
 const (
+	people  = "Attendees"
+	lead    = "· "
 	none    = "—"
 	text    = "Text"
 	blank   = " "
@@ -71,16 +75,15 @@ const attachID = "attach.add"
 // that is no number (C-6.1: the view model carries no widths; the layout is
 // the screen's, from its frame): «reminder.1» is a reminder.
 var widths = map[string]w.FieldWidth{
-	"summary": w.FieldFull, "description": w.FieldFull,
-	"start.date": w.FieldSM, "start.time": w.FieldXS, "due.date": w.FieldSM, "due.time": w.FieldXS,
+	// Summary and the List beside it (s-tasks-3, -14).
+	"summary": w.FieldXL, listRow: w.FieldMD, "description": w.FieldFull,
+	"start.date": w.FieldSM, "start.time": w.FieldXS, "due.date": w.FieldSM, "due.time": w.FieldXS, zoneRow: w.FieldMD,
 	"status": w.FieldSM, "priority": w.FieldSM, "percent": w.FieldSM,
 	"reminder": w.FieldMD,
 	// The numbers «Custom…» of a reminder opens (s-agenda-19).
 	"reminder.count": w.FieldXS, "reminder.unit": w.FieldSM, "reminder.at": w.FieldXS,
-	"location": w.FieldMD, "categories": w.FieldMD, "related": w.FieldLG,
-	// The link, which no frame draws yet (Typecase's task 172): as wide as
-	// the tags before it.
-	"url": w.FieldMD,
+	"location": w.FieldMD, "categories": w.FieldMD, "url": w.FieldMD, "related": w.FieldLG,
+	"repeat.freq": w.FieldSM, "repeat.interval": w.FieldXS, "repeat.until": w.FieldSM, "repeat.count": w.FieldXS, "repeat.rule": w.FieldXL,
 }
 
 // patterns are the patterns of the form's empty fields by their name, as
@@ -130,15 +133,18 @@ func width(name string) w.FieldWidth {
 //   - The line of Save that sends files (Runbar.Progress), hidden until the
 //     library's live layer moves it.
 //   - What the server lost of the last save (Loss): a notice over the form.
-//   - The form: Summary with the cursor and the description; When — All
-//     day, which makes the start and the due days, the dates and the times
-//     monospaced; Progress — Status, Priority, Percent complete, Done;
-//     Reminders — each a choice, «Add reminder» adding one in place; Other
-//     — Location, Tags, Related to as the record chosen; Attachments —
+//   - The form: Summary with the cursor, the List beside it with the
+//     lists' marks, the description; When — All day, which makes the start
+//     and the due days, the dates and the times monospaced, the time zone a
+//     choice with its menu (none for a task of days); Progress — Status,
+//     Priority, Percent complete, Done; Reminders — each a choice, «Add
+//     reminder» adding one in place; Attendees, as an event's; Other —
+//     Location, Tags, Link, Related to as the record chosen; Attachments —
 //     Attach with its arrow, each attachment where it is kept and its
-//     Remove, or «Nothing attached»; the source — its path, when it was
-//     read and whether it changed on the server —, none for a new task,
-//     which has no record yet (s-tasks-14).
+//     Remove, or «Nothing attached»; Repeats — as an event's, the rule said
+//     under Advanced RRULE; the source — its path, when it was read and
+//     whether it changed on the server —, none for a new task, which has no
+//     record yet (s-tasks-14).
 //   - Under the form the deletion.
 func Screen(p *view.TaskEditPage) w.Shell {
 	formID := formEdit
@@ -170,44 +176,30 @@ func Screen(p *view.TaskEditPage) w.Shell {
 		main = append(main, bind.Loss(*p.Loss, w.MsgFlushTop2)...)
 	}
 	form := bind.Form(p.Form, formID)
-	for _, set := range p.Form.Sets {
+	var repeat *view.FieldSet
+	for i, set := range p.Form.Sets {
 		rows := visible(set.Rows)
 		if repeats(rows) {
-			// ждёт кадра: задача Typecase 173 — the task's Repeats (Р1 of
-			// the server's kinds-parity list) has no frame yet, and the
-			// screen draws none. Its values go with the form as they came,
-			// so a save keeps the task's rule: a rubric left out would read
-			// as «Does not repeat» and take the rule away.
-			form.Fields = append(form.Fields, carried(rows)...)
+			// Repeats after the attachments (s-tasks-3, -14).
+			repeat = &p.Form.Sets[i]
 			continue
 		}
 		if set.Legend == "" {
 			for i, r := range rows {
-				if r.Name == listRow {
-					// ждёт кадра: задача Typecase 175 — the List the task
-					// lies in (Р19) has no frame yet. Left out, the form
-					// keeps the task where it is.
-					continue
-				}
 				form.Items = append(form.Items, field(r, i))
 			}
 			continue
 		}
-		var shown []view.FormRow
-		for _, r := range rows {
-			if r.Name == zoneRow {
-				// ждёт кадра: задача Typecase 180 — the zone of the task's
-				// times (Р6) has no frame yet, and When takes no select. It
-				// goes as it came: the times are shown and read in it, and a
-				// zone left out would be the instance's.
-				form.Fields = append(form.Fields, carried([]view.FormRow{r})...)
-				continue
-			}
-			shown = append(shown, r)
+		form.Items = append(form.Items, fieldSet(set.Legend, rows))
+		if reminders(rows) {
+			// The attendees after the reminders, as an event's (s-tasks-3).
+			form.Items = append(form.Items, attendees(p.Attendees))
 		}
-		form.Items = append(form.Items, fieldSet(set.Legend, shown))
 	}
 	form.Items = append(form.Items, attachments(attach, p.Attach))
+	if repeat != nil {
+		form.Items = append(form.Items, fieldSet(repeat.Legend, visible(repeat.Rows)))
+	}
 	if len(p.Foreign) > 0 {
 		// What Carrel does not know of the task, as it came — the event's
 		// set (s-agenda-3; Р17 of the server's kinds-parity list).
@@ -282,35 +274,61 @@ func fieldSet(legend view.Text, rows []view.FormRow) w.FieldSet {
 }
 
 // repeatRow is the start of the names of the repetition's rows (C-6.8:
-// repeat.freq…); listRow is the name of the List the task lies in; zoneRow
-// the zone its times are written in.
+// repeat.freq…), reminderRow of the reminders'; listRow is the name of the
+// List the task lies in; zoneRow the zone its times are written in.
 const (
-	repeatRow = "repeat."
-	listRow   = "notebook"
-	zoneRow   = "tz"
+	repeatRow   = "repeat."
+	reminderRow = "reminder"
+	listRow     = "notebook"
+	zoneRow     = "tz"
 )
+
+// starts tells whether a row's name starts with a prefix.
+func starts(name, prefix string) bool {
+	return len(name) >= len(prefix) && name[:len(prefix)] == prefix
+}
 
 // repeats tells whether a set is the repetition's: its rows are repeat.….
 func repeats(rows []view.FormRow) bool {
-	return len(rows) > 0 && len(rows[0].Name) > len(repeatRow) && rows[0].Name[:len(repeatRow)] == repeatRow
+	return len(rows) > 0 && starts(rows[0].Name, repeatRow)
 }
 
-// carried are the rows of a set as the hidden fields that send what they
-// hold: a row of days, each day ticked; any other row, its value.
-func carried(rows []view.FormRow) []w.Hidden {
-	var out []w.Hidden
+// reminders tells whether a set is the reminders': a row of it, or the one
+// «Add reminder» adds when there is none, is reminder.….
+func reminders(rows []view.FormRow) bool {
 	for _, r := range rows {
-		if r.Kind == view.InputCheck && len(r.Options) > 0 {
-			for _, o := range r.Options {
-				if o.Selected {
-					out = append(out, w.Hidden{Name: r.Name, Value: o.Value})
-				}
-			}
-			continue
+		if starts(r.Name, reminderRow) {
+			return true
 		}
-		out = append(out, w.Hidden{Name: r.Name, Value: string(r.Value)})
+		for _, t := range r.Template {
+			if starts(t.Name, reminderRow) {
+				return true
+			}
+		}
 	}
-	return out
+	return false
+}
+
+// attendees is the set of the attendees (AttendeeField), as an event's form
+// has it: the people as tags in columns with the line the next is typed in
+// — a field whose suggestions are a menu under it —, and under them who
+// sends the invitations; invited, the tags alone and why the list is read
+// only.
+func attendees(f view.AttendeeField) w.FieldSet {
+	in := bind.Attendees(f, lead)
+	var parts []w.FieldPart
+	if f.ReadOnly {
+		parts = append(parts, in)
+	} else {
+		parts = append(parts, w.Drop{Trigger: in, Menu: w.Menu{Items: []w.MenuPart{}, Width: w.MenuWidth420, Pop: w.MenuUnder}})
+	}
+	if f.Hint != "" {
+		parts = append(parts, w.FieldHint{Parts: []w.Inline{w.Text(f.Hint)}})
+	}
+	if f.Add != nil && f.Add.Error != "" {
+		parts = append(parts, w.FieldHint{Parts: []w.Inline{w.Text(f.Add.Error)}, Variant: w.HintDanger})
+	}
+	return w.FieldSet{Rubric: w.Rubric{Text: people}, Items: []w.FieldSetPart{w.Field{Parts: parts, Width: w.FieldFull}}}
 }
 
 // visible are the rows of a set a person sees: all but the hidden ones.
@@ -331,6 +349,20 @@ func visible(rows []view.FormRow) []view.FormRow {
 // an empty one showing the frame's pattern for it, or the dash.
 func field(r view.FormRow, at int) w.Field {
 	switch {
+	case r.Name == listRow:
+		// The List with the lists' marks, as a note's Notebook (s-tasks-3).
+		d := bind.Marks(r, ro)
+		d.Menu.Width, d.Menu.Pop = w.MenuWidth290, w.MenuUnder
+		return w.Field{Label: string(r.Label), Parts: []w.FieldPart{d}, Width: width(r.Name)}
+	case r.Kind == view.InputSelect && r.Placeholder != "" && r.Suggest == "":
+		// A choice with a line that finds an option: the time zone
+		// (s-tasks-14), as an event's.
+		d := bind.PickMenu(r)
+		d.Menu.Width, d.Menu.Pop = w.MenuWidth290, w.MenuUnder
+		return w.Field{Label: string(r.Label), Parts: append([]w.FieldPart{d}, bind.Hint(r)...), Width: width(r.Name)}
+	case r.Kind == view.InputCheck && len(r.Options) > 0:
+		// The days a series repeats on, one row (s-tasks-3).
+		return w.Field{Label: string(r.Label), Parts: []w.FieldPart{bind.Days(r)}}
 	case r.Kind == view.InputCheck:
 		c := w.Field{Parts: []w.FieldPart{bind.Check(r)}}
 		if at > 0 {
@@ -346,9 +378,12 @@ func field(r view.FormRow, at int) w.Field {
 	}
 	f := bind.Field(r, width(r.Name))
 	if in, ok := f.Parts[0].(w.Input); ok && in.Placeholder == "" && in.Value == "" {
-		in.Placeholder = none
+		// The frame's pattern; else the dash, but in a date or a time the
+		// frame draws bare (Until, s-tasks-3).
 		if p, ok := patterns[r.Name]; ok {
 			in.Placeholder = p
+		} else if in.Kind != w.InputDate && in.Kind != w.InputTime {
+			in.Placeholder = none
 		}
 		f.Parts[0] = in
 	}

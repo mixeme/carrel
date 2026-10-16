@@ -1212,8 +1212,8 @@ type TaskRow struct {
     Priority  Text     // приоритет числом, «5»; пусто — нет (s-tasks-13)
     Status    Text     // статус словом списка, «In process»; без STATUS — «Needs action» (s-tasks-13)
     Changed   Text     // последняя правка коротко с временем, «10 Aug 11:02» (s-tasks-13, C-10)
-    Where     Text     // место задачи (LOCATION) — столбец «Where», как у агенды (Р10 списка равенства родов; кадра нет); пусто — нет
-    Attendees Text     // столбец «Attendees»: сколько людей у задачи, организатор среди них, как плашка агенды — «2 attendees» (вслед за Р3; кадра нет); пусто — людей нет
+    Where     Text     // место задачи (LOCATION) — столбец «Where», как у агенды (Р10 списка равенства родов; s-tasks-12); пусто — нет
+    Attendees Text     // столбец «Attendees»: сколько людей у задачи, организатор среди них, как плашка агенды — «2 attendees» (вслед за Р3; s-tasks-12); пусто — людей нет
     Badges    []Badge  // «linked ×2» у связанной задачи — и в списке одной коллекции, когда прочие члены группы лежат в других (s-tasks-15)
     Sources   []Stamp  // источники связанной группы — подсказка столбца источника; Stamp такой строки в едином виде — их счёт, «2 sources» (s-tasks-1)
     Tick      *Action  // отметка выполнения в строке (task.done); у связанной строки объединённого списка — POST на `…/{uid}/done` без копий, ответ — лист `CopiesSheet` (s-tasks-16), когда клиент нарисует листы (решение владельца 15.10.2026; до тех пор — отметка первой копии, как прежде); nil — только чтение
@@ -1249,7 +1249,6 @@ type NoteRow struct {
     Date      Text
     Tags      []Tag
     Changed   Text     // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
-    Attendees Text     // столбец «Attendees», как у задач: «1 attendee» (вслед за Р3; кадра нет); пусто — людей нет
     Badges    []Badge  // «linked ×2» у связанной заметки — и в списке одной тетради, когда прочие члены группы лежат в других (s-notes-31)
     Sources   []Stamp  // источники связанной группы — подсказка столбца источника; Stamp такой строки в едином виде — их счёт, «2 sources» (s-notes-1)
     Menu      []MenuItem
@@ -1267,8 +1266,8 @@ type NoteRow struct {
 |---|---|
 | контакты (components-21, -42) | `name` — `Name`, `phone` — `Phone`, `email` — `Email`, `org` — `Org`, `birthday` — `Birthday`, `tags` — `Tags`, `changed` — `Changed`, `source` — `Stamp` |
 | агенда (s-agenda-18) | `time` — `Time`, `title` — `Summary` (оба стоят всегда), `where` — `Location`, `attendees` — все `Badges` («Attendees and status», плашками; у события без них ячейка пуста), `source` — `Stamp`, `tags` — `Tags`, `changed` — `Changed`, `status` — `Status`, `priority` — `Priority` (`AgendaRow`; два последних — Р13, кадра нет) |
-| задачи (s-tasks-12, -13) | `title` — `Summary`, `tags` — `Tags`, `due` — `Due` (тревожным — только срок, `Overdue`), `complete` — `Percent` (`70%`), `source` — `Stamp`, `priority` — `Priority`, `status` — `Status`, `changed` — `Changed`, `where` — `Where` (Р10, кадра нет), `attendees` — `Attendees` (одной плашкой, как у агенды; вслед за Р3, кадра нет); галка дела `Tick` стоит перед меткой в любом наборе |
-| заметки (s-notes-23, -24) | `title` — `Title`, `excerpt` — `Excerpt`, `tags` — `Tags`, `date` — `Date`, `source` — `Stamp`, `changed` — `Changed`, `status` — `Status` (Р13, кадра нет), `attendees` — `Attendees` (одной плашкой; вслед за Р3, кадра нет) |
+| задачи (s-tasks-12, -13) | `title` — `Summary`, `tags` — `Tags`, `due` — `Due` (тревожным — только срок, `Overdue`), `complete` — `Percent` (`70%`), `source` — `Stamp`, `priority` — `Priority`, `status` — `Status`, `changed` — `Changed`, `where` — `Where` (Р10), `attendees` — `Attendees` (одной плашкой, как у агенды; вслед за Р3) — оба последними и выключенными (s-tasks-12); галка дела `Tick` стоит перед меткой в любом наборе |
+| заметки (s-notes-23, -24) | `title` — `Title`, `excerpt` — `Excerpt`, `tags` — `Tags`, `date` — `Date`, `source` — `Stamp`, `changed` — `Changed`, `status` — `Status` (Р13, кадра нет) |
 | файлы (s-files-20) | `name` — `Name`, `size` — `Size`, `type` — `Type`, `changed` — `Modified` (`FileRow`, C-6.7) |
 | хронология (s-contacts-25, -26) | `title` — `Title`, за ним всегда `Why` (в меню не входит), `date` — `When`, `kind` — `Kind`, `source` — `Stamp` (`TimelineRow`, C-6.5) |
 | пользователи (s-admin-21, -22) | `login` — `Login`, `role` — `Role`, `created` — `Created`, `last-login` — `LastLogin`, `dav` — `Accounts`, `sessions` — `Sessions`, `escrow` — `Escrowed`, `address` — `Address`; «⋯» в меню не входит (`AdminUserRow`, C-6.8) |
@@ -1571,7 +1570,7 @@ type TaskEditPage struct { // правка
     // подсказки), Related to (Suggest — подсказки по мере набора). Attach —
     // по имени (attach.add), клиент ставит его в набор «Attachments»
     Form      Form
-    Attendees AttendeeField // поле участников, как у правки события (Р3 списка равенства родов; кадра нет); форма без строки набора участников не меняет
+    Attendees AttendeeField // поле участников, как у правки события (Р3 списка равенства родов): клиент ставит его набором «Attendees» после Reminders (s-tasks-3, -14); форма без строки набора участников не меняет
     Attach    []AttachRow
     Source    SourceBlock // рубрика Source формы: Path, Read и сравнение с сервером (s-tasks-3); у новой — без пути
     Loss      *LossReport
@@ -1605,7 +1604,6 @@ type NoteDoc struct { // колонка текста страницы замет
     // (Action.Submits). nil — чтение
     Form     *Form
     Fields   []FormRow // правка: тетрадь, дата и время, теги, связь; уходят с тем же сохранением
-    Attendees *AttendeeField // правка: поле участников, как у события и задачи (Р3 списка равенства родов; кадра нет), уходит тем же сохранением; форма без строки набора участников не меняет. nil — чтение
     // Правка: строка под текстом о свойствах, которых Carrel не знает, —
     // первое по имени и сколько ещё словом, готовой фразой сервера:
     // «Properties Carrel does not know — X-JTX-COLOR and two more — are kept

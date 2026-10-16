@@ -589,19 +589,6 @@
                 "error": "",
                 "extra": null,
                 "hint": "",
-                "kind": "area",
-                "label": "Description",
-                "name": "description",
-                "options": [],
-                "readOnly": false,
-                "required": false,
-                "value": ""
-              },
-              {
-                "add": null,
-                "error": "",
-                "extra": null,
-                "hint": "",
                 "kind": "select",
                 "label": "Calendar",
                 "name": "notebook",
@@ -646,6 +633,19 @@
                 "readOnly": false,
                 "required": false,
                 "value": "/app/calendar/a-nc-home/rabota"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "area",
+                "label": "Description",
+                "name": "description",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
               }
             ],
             "unfold": null
@@ -3341,6 +3341,7 @@
                 "label": "Link",
                 "name": "url",
                 "options": [],
+                "placeholder": "optional",
                 "readOnly": false,
                 "required": false,
                 "value": ""

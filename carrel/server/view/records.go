@@ -334,10 +334,6 @@ type NoteDoc struct {
 	// (s-notes-20). Только в режиме правки; уходят тем же сохранением, что
 	// заголовок и тело.
 	Fields []FormRow `json:"fields"`
-	// Attendees — поле участников, как у правки события и задачи (Р3 списка
-	// равенства родов; кадра нет): уходит тем же сохранением; форма без
-	// строки набора участников не меняет. nil — чтение
-	Attendees *AttendeeField `json:"attendees"`
 	// Foreign — строка под текстом правки о свойствах, которых Carrel не
 	// знает: первое по имени и сколько ещё, готовой фразой — «Properties
 	// Carrel does not know — X-JTX-COLOR and two more — are kept unchanged

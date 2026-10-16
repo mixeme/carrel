@@ -203,6 +203,56 @@
             "error": "",
             "extra": null,
             "hint": "",
+            "kind": "select",
+            "label": "Calendar",
+            "name": "notebook",
+            "options": [
+              {
+                "colour": "#a05a2c",
+                "label": "nextcloud · Дни рождения",
+                "selected": false,
+                "value": "/app/calendar/a-nc-home/dni-rozhdeniya"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "nextcloud · Личный",
+                "selected": true,
+                "value": "/app/calendar/a-nc-home/lichnyj"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "nextcloud · Работа",
+                "selected": false,
+                "value": "/app/calendar/a-nc-home/rabota"
+              },
+              {
+                "colour": "#8c6239",
+                "label": "radicale · vps · Дежурства",
+                "selected": false,
+                "value": "/app/calendar/a-rad-vps/dezhurstva"
+              },
+              {
+                "colour": "#6b4e7a",
+                "label": "radicale · vps · Проекты",
+                "selected": false,
+                "value": "/app/calendar/a-rad-vps/proekty"
+              },
+              {
+                "colour": "#9a9280",
+                "label": "baikal · Общий",
+                "selected": false,
+                "value": "/app/calendar/a-baikal/obshchij"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "/app/calendar/a-nc-home/lichnyj"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
             "kind": "area",
             "label": "Description",
             "name": "description",
@@ -3008,6 +3058,7 @@
             "label": "Link",
             "name": "url",
             "options": [],
+            "placeholder": "optional",
             "readOnly": false,
             "required": false,
             "value": ""

@@ -167,19 +167,6 @@
             "error": "",
             "extra": null,
             "hint": "",
-            "kind": "area",
-            "label": "Description",
-            "name": "description",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "Опись, копия паспорта и заявление. Приём до 18:00, окно 4."
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
             "kind": "select",
             "label": "List",
             "name": "notebook",
@@ -200,6 +187,19 @@
             "readOnly": false,
             "required": false,
             "value": "/app/tasks/a-nc-home/dela"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "area",
+            "label": "Description",
+            "name": "description",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Опись, копия паспорта и заявление. Приём до 18:00, окно 4."
           }
         ],
         "unfold": null
@@ -657,6 +657,7 @@
             "label": "Location",
             "name": "location",
             "options": [],
+            "placeholder": "optional",
             "readOnly": false,
             "required": false,
             "value": ""
@@ -683,6 +684,7 @@
             "label": "Link",
             "name": "url",
             "options": [],
+            "placeholder": "optional",
             "readOnly": false,
             "required": false,
             "value": ""
@@ -743,7 +745,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Repeats from the start date, or from the due date when there is none.",
+            "hint": "",
             "kind": "select",
             "label": "Frequency",
             "name": "repeat.freq",
@@ -791,7 +793,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "1"
           },
           {
             "add": null,
@@ -873,7 +875,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "The advanced value takes precedence when set.",
+            "hint": "The advanced value takes precedence when set. A task repeats from its start date, or from the due date if it has none.",
             "kind": "text",
             "label": "Advanced RRULE",
             "mono": true,

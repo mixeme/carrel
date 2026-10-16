@@ -132,12 +132,6 @@
           "id": "changed",
           "label": "Changed",
           "on": false
-        },
-        {
-          "fixed": false,
-          "id": "attendees",
-          "label": "Attendees",
-          "on": false
         }
       ],
       "label": "Columns"
@@ -468,7 +462,6 @@
       "count": 3,
       "rows": [
         {
-          "attendees": "",
           "badges": [
             {
               "label": "linked ×2",
@@ -569,7 +562,6 @@
           "uid": "5c81-77aa-0d64"
         },
         {
-          "attendees": "",
           "badges": [
             {
               "label": "linked ×2",
@@ -665,7 +657,6 @@
           "uid": "6d92-13ef-b408"
         },
         {
-          "attendees": "",
           "badges": [],
           "changed": "3 Aug 19:00",
           "colour": "#6b4e7a",

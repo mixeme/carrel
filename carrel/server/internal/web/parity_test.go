@@ -116,10 +116,10 @@ func TestANoteExportsAsCalendar(t *testing.T) {
 // Р3 of scans/kinds-parity.md: an event's people are edited and shown; a
 // task's and a note's were neither, though VTODO and VJOURNAL hold ATTENDEE
 // as VEVENT does (RFC 5545 §3.6.2, §3.6.3) — the task's card named its
-// organiser in a field, and ATTENDEE was kept as foreign. Now a task's and a
-// note's edit carry the field of attendees, their cards name the people,
-// the organiser first, as an event's, and a form that does not draw the
-// field leaves them be.
+// organiser in a field, and ATTENDEE was kept as foreign. Now a task's edit
+// carries the field of attendees, a task's and a note's cards name the
+// people, the organiser first, as an event's, and a form that does not draw
+// the field leaves them be; a note's edit has none (Typecase's Р-64).
 func TestTasksAndNotesHaveAttendees(t *testing.T) {
 	f := calendarFixture(t, nil,
 		"t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260101T000000Z\nSUMMARY:Slides\nATTENDEE;CN=Bob;PARTSTAT=ACCEPTED:mailto:bob@example.org\nX-KEEP:1\nEND:VTODO"),
@@ -176,21 +176,22 @@ func TestTasksAndNotesHaveAttendees(t *testing.T) {
 	if got := people(page.Meta.Attendees); got != "Bob/no reply" {
 		t.Errorf("the note's page names %q", got)
 	}
+	// A note's people are read, not edited (Typecase's Р-64, note 71): its
+	// edit has no field of them, and a save keeps them.
 	nedit := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1/edit", f.sess)))
-	if nedit.Doc.Attendees == nil || !slices.Equal(pageTags(*nedit.Doc.Attendees), []string{"attendee=mailto:bob@example.org"}) {
-		t.Errorf("the note's field = %+v", nedit.Doc.Attendees)
-	}
 	if strings.Contains(fmt.Sprint(nedit.Doc.Foreign), "ATTENDEE") {
 		t.Errorf("ATTENDEE is kept as foreign: %v", nedit.Doc.Foreign)
 	}
 	nform := noteFormOf(t, f, "n1")
-	nform["attendee"] = []string{}
-	nform.Set("attendee.add", "")
+	if _, ok := nform["attendee.add"]; ok {
+		t.Errorf("the note's edit has a field of people: %v", nform)
+	}
+	nform.Set("summary", "Minutes of the call")
 	if resp := f.h.do(postForm(f.path("notes")+"/n1/edit", f.sess, nform)); resp.Code != 303 {
 		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
 	}
-	if got := body(t, f, "n1.ics"); strings.Contains(got, "ATTENDEE") || !strings.Contains(got, "X-KEEP:1") {
-		t.Errorf("Bob unticked is still there:\n%s", got)
+	if got := unfolded(body(t, f, "n1.ics")); !strings.Contains(got, "mailto:bob@example.org") || !strings.Contains(got, "X-KEEP:1") {
+		t.Errorf("a save of the note took Bob away:\n%s", got)
 	}
 }
 
@@ -258,9 +259,10 @@ func TestATaskChoosesItsZone(t *testing.T) {
 
 // Following Р3 of scans/kinds-parity.md, as Р13 followed Р4 and Р7: the
 // agenda offers its people as a column; a task's and a notebook's list
-// offered none, now that a task and a note have attendees. Each offers
-// «Attendees», off until chosen, and a row carries how many — the
-// organiser one of them, as the agenda's badge counts.
+// offered none, now that a task has attendees. It offers «Attendees», last
+// and off until chosen (s-tasks-12), and a row carries how many — the
+// organiser one of them, as the agenda's badge counts. A notebook's offers
+// none: a note's people are not edited (Typecase's Р-64).
 func TestAttendeesColumnForEveryKind(t *testing.T) {
 	f := calendarFixture(t, nil,
 		"t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260101T000000Z\nSUMMARY:Slides\nORGANIZER:mailto:anna@example.org\nATTENDEE:mailto:bob@example.org\nEND:VTODO"),
@@ -278,7 +280,7 @@ func TestAttendeesColumnForEveryKind(t *testing.T) {
 		t.Errorf("tasks: columns %+v, groups %+v", tasks.Bar.Columns, tasks.Groups)
 	}
 	notes := decode[view.NotesPage](t, f.h.do(get(f.path("notes"), f.sess)))
-	if notes.Bar.Columns == nil || !offered(notes.Bar.Columns) || len(notes.Groups) == 0 || notes.Groups[0].Rows[0].Attendees != "1 attendee" {
-		t.Errorf("notes: columns %+v, groups %+v", notes.Bar.Columns, notes.Groups)
+	if notes.Bar.Columns == nil || offered(notes.Bar.Columns) {
+		t.Errorf("notes: columns %+v", notes.Bar.Columns)
 	}
 }

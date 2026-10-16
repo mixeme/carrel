@@ -42,14 +42,14 @@ const (
 )
 
 // widths are the widths of the edit's fields by their names, as the frame
-// lays them out (C-6.1: the layout is the screen's). The link, which no
-// frame draws yet (Typecase's task 172), is as wide as the tags.
+// lays them out (C-6.1: the layout is the screen's): the link after the
+// tags, as wide as the notebook (s-notes-20; Typecase's task 172).
 var widths = map[string]w.FieldWidth{
 	notebook:     w.FieldFlex2_280,
 	"start.date": w.FieldFix150,
 	"start.time": w.FieldFix130,
 	"categories": w.FieldFlex3_320,
-	"url":        w.FieldFlex3_320,
+	"url":        w.FieldFlex2_280,
 	"related":    w.FieldFlex3_340,
 }
 
@@ -197,9 +197,9 @@ func field(r view.FormRow) w.Field {
 		f.Parts = append([]w.FieldPart{bind.Related(r)}, bind.Hint(r)...)
 	default:
 		c := bind.Control(r)
-		// An empty link has no dash: no frame draws the field yet (Typecase's
-		// task 172), and it stands as the tags before it do — filled or bare.
-		if in, ok := c.(w.Input); ok && r.Kind == view.InputText && in.Placeholder == "" && in.Value == "" && r.Name != "url" {
+		// An empty line shows the dash where the model gives no pattern of
+		// its own: the link's is «optional» (s-notes-20).
+		if in, ok := c.(w.Input); ok && r.Kind == view.InputText && in.Placeholder == "" && in.Value == "" {
 			in.Placeholder = none
 			c = in
 		}

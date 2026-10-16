@@ -63,3 +63,54 @@ func TestEventsAndTasksMoveOnSave(t *testing.T) {
 		}
 	}
 }
+
+// Note 71 of Typecase (task 175): a new event's and a new task's form has
+// its Calendar and its List too (s-agenda-15, s-tasks-14), the one it was
+// opened in chosen; another chosen, the record is made there.
+func TestANewRecordIsMadeWhereItsFormChose(t *testing.T) {
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "secret"
+	work := davtest.CalendarHome + "work/"
+	home := davtest.CalendarHome + "home/"
+	srv.AddCalendar(caldav.Calendar{Path: work, Name: "Work"})
+	srv.AddCalendar(caldav.Calendar{Path: home, Name: "Home"})
+	f := connectFixture(t, srv, work, nil)
+
+	for _, c := range []struct{ list, label, title string }{
+		{"calendar", "Calendar", "Planning"},
+		{"tasks", "List", "Buy stamps"},
+	} {
+		page := decode[struct {
+			Form view.Form `json:"form"`
+		}](t, f.h.do(get(f.path(c.list)+"/new", f.sess)))
+		row := formRowOf(page.Form, "notebook")
+		if row == nil || string(row.Label) != c.label || string(row.Value) != f.path(c.list) {
+			t.Fatalf("%s: the collection = %+v, want %s on %s", c.list, row, c.label, f.path(c.list))
+		}
+		var there string
+		for _, o := range row.Options {
+			if !o.Selected {
+				there = o.Value
+			}
+		}
+		form := formFields(page.Form)
+		form.Set("summary", c.title)
+		form.Set("notebook", there)
+		resp := f.h.do(postForm(f.path(c.list)+"/new", f.sess, form))
+		at := resp.Header().Get("Location")
+		if resp.Code != 303 || !strings.HasPrefix(at, there+"/") {
+			t.Fatalf("%s: %d %s %s", c.list, resp.Code, at, resp.Body.String())
+		}
+		uid := strings.TrimPrefix(at, there+"/")
+		if i := strings.IndexAny(uid, "/?"); i >= 0 {
+			uid = uid[:i]
+		}
+		made, _, ok := srv.Object(home + uid + ".ics")
+		if !ok || !strings.Contains(unfolded(made), "SUMMARY:"+c.title) {
+			t.Errorf("%s: not made in Home: %q", c.list, made)
+		}
+		if _, _, in := srv.Object(work + uid + ".ics"); in {
+			t.Errorf("%s: made in Work as well", c.list)
+		}
+	}
+}

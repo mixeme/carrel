@@ -1851,7 +1851,6 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		if changed := changedAt(o, tf.tz); !changed.IsZero() {
 			row.Changed = text(tf.shortStamp(changed))
 		}
-		row.Attendees = peopleCount(o)
 		rows = append(rows, item{row: row, at: at, changed: changedAt(o, tf.tz), order: it.from.listPath(segment)})
 	}
 	sort.SliceStable(rows, func(i, j int) bool {

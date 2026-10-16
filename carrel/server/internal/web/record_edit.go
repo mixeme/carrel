@@ -109,6 +109,9 @@ type editField struct {
 	timeOptional bool
 	choices      []fieldOption
 	hint         string // shown under the field, when the rule needs saying
+	// placeholder is the sample of an empty text field: «optional» under
+	// Link and a task's Location (s-tasks-3, s-agenda-3, s-notes-20).
+	placeholder string
 	// set is the rubric the field stands in on the full form (s-tasks-3,
 	// s-agenda-3): FieldSet.Legend; empty is the head of the form.
 	set string
@@ -491,11 +494,11 @@ func repeatValues(raw string, tz *time.Location, start time.Time) []string {
 	r := parseRule(raw)
 	out := make([]string, 6)
 	out[repFreq], out[repCount], out[repRule] = r.get("FREQ"), r.get("COUNT"), strings.TrimSpace(raw)
-	if out[repFreq] != "" {
-		out[repInterval] = r.get("INTERVAL")
-		if out[repInterval] == "" {
-			out[repInterval] = "1"
-		}
+	// Every is 1 until another is typed, a record that does not repeat too
+	// (s-tasks-3, s-agenda-15): without a frequency it writes nothing.
+	out[repInterval] = r.get("INTERVAL")
+	if out[repInterval] == "" {
+		out[repInterval] = "1"
 	}
 	days := map[string]bool{}
 	for _, d := range strings.Split(r.get("BYDAY"), ",") {
@@ -696,7 +699,7 @@ func repeatSet(f editField, vals []string, held string, errText view.Text) view.
 		freqs = append(freqs, view.Option{Value: v[repFreq], Label: text(v[repFreq]), Selected: true})
 	}
 	set := view.FieldSet{Legend: text(f.label), Rows: []view.FormRow{
-		{Name: f.name + ".freq", Label: "Frequency", Kind: view.InputSelect, Value: text(v[repFreq]), Options: freqs, Hint: text(f.hint), Error: errText},
+		{Name: f.name + ".freq", Label: "Frequency", Kind: view.InputSelect, Value: text(v[repFreq]), Options: freqs, Error: errText},
 		{Name: f.name + ".interval", Label: "Every", Kind: view.InputNumber, Value: text(v[repInterval]), Mono: true},
 	}}
 	// On is one row of the days, MO to SU, as the frame draws it: each day
@@ -717,11 +720,17 @@ func repeatSet(f editField, vals []string, held string, errText view.Text) view.
 	if typed == held {
 		typed = ""
 	}
+	// What a kind's rule needs said follows the rule's own line, under
+	// Advanced RRULE (s-tasks-3).
+	ruleHint := "The advanced value takes precedence when set."
+	if f.hint != "" {
+		ruleHint += " " + f.hint
+	}
 	set.Rows = append(set.Rows, days,
 		view.FormRow{Name: f.name + ".until", Label: "Until", Kind: view.InputDate, Value: text(v[repUntil]), Mono: true},
 		view.FormRow{Name: f.name + ".count", Label: "Count", Kind: view.InputNumber, Value: text(v[repCount])},
 		view.FormRow{Name: f.name + ".rule", Label: "Advanced RRULE", Kind: view.InputText, Mono: true, Value: text(typed), Placeholder: text(held),
-			Hint: "The advanced value takes precedence when set."},
+			Hint: text(ruleHint)},
 	)
 	if held != "" {
 		set.Rows = append(set.Rows, view.FormRow{Name: f.name + ".base", Kind: view.InputHidden, Value: text(held)})
@@ -812,9 +821,9 @@ var editFields = map[view.Kind][]editField{
 		// equality of collections), in the group «Other» before the
 		// attachments, as the task's (s-agenda-3, -15; Typecase's task 160).
 		// The link the card shows (URL, «Link») is edited by every kind, before
-		// the relation (Р8 of scans/kinds-parity.md; no frame draws it yet —
-		// Typecase's task 172). A task's and a note's stand after Tags.
-		{name: "url", label: "Link", prop: "URL", typ: fieldText, set: "Other"},
+		// the relation, «optional» while empty (Р8 of scans/kinds-parity.md;
+		// s-agenda-3, -15). A task's stands so too, a note's after Tags.
+		{name: "url", label: "Link", prop: "URL", typ: fieldText, set: "Other", placeholder: "optional"},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated, set: "Other"},
 		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat, set: "Repeats"},
 	},
@@ -825,28 +834,29 @@ var editFields = map[view.Kind][]editField{
 		{name: "due", label: "Due date", timeLabel: "Due time", prop: "DUE", typ: fieldTime, taskDay: true, set: "When",
 			quickSample: "YYYY-MM-DD", quickTimeSample: "--:--"},
 		// The zone the task's times are written in, as an event's (Р6 of
-		// scans/kinds-parity.md: they are written with TZID, and were shown
-		// in the instance zone; no frame draws it yet — Typecase's task 180).
+		// scans/kinds-parity.md): a new task's is the instance zone
+		// (s-tasks-14); a task of days has none (s-tasks-3).
 		{name: "tz", label: "Time zone", prop: "DTSTART", typ: fieldZone, set: "When"},
 		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: taskStatuses, blank: "NEEDS-ACTION", set: "Progress"},
 		{name: "priority", label: "Priority", prop: "PRIORITY", typ: fieldChoice, choices: priorities, set: "Progress"},
 		{name: "percent", label: "Percent complete", prop: "PERCENT-COMPLETE", typ: fieldPercent, set: "Progress"},
 		{name: "done", label: "Done", prop: "STATUS", typ: fieldDone, set: "Progress"},
 		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders", add: "Add reminder", quick: "Remind"},
-		// A task's people, as an event's (Р3 of scans/kinds-parity.md: VTODO
-		// holds ATTENDEE; no frame draws them yet — Typecase's task 179).
+		// A task's people, as an event's, after the reminders (Р3 of
+		// scans/kinds-parity.md: VTODO holds ATTENDEE; s-tasks-3, -14).
 		{name: "attendee", label: "Attendees", prop: "ATTENDEE", typ: fieldAttendee},
-		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText, set: "Other"},
+		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText, set: "Other", placeholder: "optional"},
 		// No hint under Tags (s-tasks-3), as the event's and the note's.
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, set: "Other"},
-		{name: "url", label: "Link", prop: "URL", typ: fieldText, set: "Other"},
+		{name: "url", label: "Link", prop: "URL", typ: fieldText, set: "Other", placeholder: "optional"},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated, set: "Other"},
 		// A task repeats as an event does (Р1 of scans/kinds-parity.md), from
 		// its start, or from its due date when it has none — as the server
-		// reads it and moves it on when it is done (cal.NextTime, А2). No
-		// frame draws it yet (Typecase's task 173).
+		// reads it and moves it on when it is done (cal.NextTime, А2); the
+		// rubric stands after the attachments, the rule said under Advanced
+		// RRULE (s-tasks-3, -14).
 		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat, set: "Repeats",
-			hint: "Repeats from the start date, or from the due date when there is none."},
+			hint: "A task repeats from its start date, or from the due date if it has none."},
 	},
 	view.KindNote: {
 		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
@@ -854,11 +864,12 @@ var editFields = map[view.Kind][]editField{
 		{name: "start", label: "Date", prop: "DTSTART", typ: fieldTime, timeOptional: true},
 		// No hint under Tags (s-notes-20), as the event's.
 		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList},
-		{name: "url", label: "Link", prop: "URL", typ: fieldText},
+		{name: "url", label: "Link", prop: "URL", typ: fieldText, placeholder: "optional"},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated},
-		// A journal's people, as an event's and a task's (Р3: VJOURNAL holds
-		// ATTENDEE; no frame draws them yet — Typecase's task 179).
-		{name: "attendee", label: "Attendees", prop: "ATTENDEE", typ: fieldAttendee},
+		// A journal's people are not edited (Typecase's Р-64): the standard
+		// has no invitation to a note, only a copy, and an attendee would be a
+		// mark on it — decided after real tests on servers. ATTENDEE a note
+		// holds is kept and read on its card.
 	},
 }
 
@@ -2696,12 +2707,21 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 	if attaching && c.spec.kind != view.KindNote {
 		form.Actions = append(form.Actions, s.attachAction(c, st.uid, st.etag, "edit"))
 	}
-	// Where an event or a task lies is chosen in its edit too, last in the
-	// head, as a note's notebook is (Р19 of scans/kinds-parity.md): saving
-	// into another collection moves it there (S-18). No frame draws it yet
-	// (Typecase's task 175).
-	if st.obj != nil && !st.isNew && c.spec.kind != view.KindNote && c.cal != nil && len(form.Sets) > 0 {
-		form.Sets[0].Rows = append(form.Sets[0].Rows, s.notebookRow(c, st.notebook))
+	// Where an event or a task lies is chosen in its edit, a new one's too,
+	// as a note's notebook is (Р19 of scans/kinds-parity.md): a task's List
+	// beside its Summary (s-tasks-3, -14), an event's Calendar last in the
+	// head, after Tags (s-agenda-3, -15). Saving into another collection
+	// moves the record there (S-18); a new one is made there.
+	if c.spec.kind != view.KindNote && c.cal != nil && len(form.Sets) > 0 {
+		row := s.notebookRow(c, st.notebook)
+		row.Error = text(st.errors["notebook"])
+		after := map[view.Kind]string{view.KindTask: "summary", view.KindEvent: "categories"}[c.spec.kind]
+		rows := form.Sets[0].Rows
+		at := slices.IndexFunc(rows, func(r view.FormRow) bool { return r.Name == after }) + 1
+		if at == 0 {
+			at = len(rows)
+		}
+		form.Sets[0].Rows = slices.Insert(rows, at, row)
 	}
 	if newAttach && c.spec.kind != view.KindNote {
 		form.Actions = append(form.Actions, s.newAttachAction(c, st.formUID))
@@ -2846,9 +2866,6 @@ func (s *Server) noteEditPage(c *collectionCtx, st editState, sh view.Shell, for
 	}
 	doc.Sets[0].Rows = append(append(doc.Sets[0].Rows, title...), texts...)
 	page.Doc.Form = &doc
-	// The people, as an event's and a task's edit holds them (Р3).
-	people := s.attendeeField(c, st)
-	page.Doc.Attendees = &people
 	if exists {
 		page.Rail.Neighbours = s.noteNeighbours(c, st.uid)
 		page.Doc.Foreign = foreignLine(cal.NoteForeign(st.obj))
@@ -2981,7 +2998,8 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			if !full && f.quick != "" {
 				label = f.quick
 			}
-			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText, Required: f.required})
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText, Required: f.required,
+				Placeholder: text(f.placeholder)})
 		case fieldArea:
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputArea, Value: text(first(vals)), Error: errText})
 		case fieldList:
@@ -4300,12 +4318,12 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		// «Add …» without scripts: the form back with one row more, and no
 		// record until Save (C-6.8 InputAdd).
 		addedRow(c.spec.kind, want, add)
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), formUID: formUID}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), formUID: formUID, notebook: newNotebook(c, r)}))
 		return
 	}
 	if remove := r.FormValue("remove"); remove != "" {
 		removeRow(c.spec.kind, want, remove)
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), formUID: formUID}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now(), formUID: formUID, notebook: newNotebook(c, r)}))
 		return
 	}
 	if c.card != nil && formUID == "" && r.FormValue("uid") != "" {
@@ -4322,7 +4340,7 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 // a photo chosen names its UID (formUID): the card is created under it, with
 // the photo in it, and the draft goes (S-13, photo_new.go).
 func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collectionCtx, want formValues, formUID string) {
-	st := editState{values: want, isNew: true, readAt: s.now(), formUID: formUID}
+	st := editState{values: want, isNew: true, readAt: s.now(), formUID: formUID, notebook: newNotebook(c, r)}
 	uid, err := formUID, error(nil)
 	if uid == "" {
 		uid, err = model.NewUID()
@@ -4358,7 +4376,19 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
-	path := strings.TrimSuffix(c.col.Path, "/") + "/" + uid + c.spec.ext
+	// The List or the Calendar the form chose: the record is made there
+	// (s-tasks-14, s-agenda-15). Its files were put by in this one's draft.
+	at := c
+	if st.notebook != "" && st.notebook != c.listPath() {
+		dest := s.notebookTarget(c, st.notebook)
+		if dest == nil || dest.col.ReadOnly || dest.feed != nil {
+			st.errors = map[string]string{"notebook": "Choose a " + strings.ToLower(collectionWord[c.spec.kind]) + " that can be written."}
+			s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+			return
+		}
+		at = dest
+	}
+	path := strings.TrimSuffix(at.col.Path, "/") + "/" + uid + c.spec.ext
 	sent, fault, err := s.applyChecked(c, obj, ch, empty, want)
 	if err == nil && fault != nil {
 		// Not the record the person described (S-7.3): none is made.
@@ -4383,7 +4413,7 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 	}
 	if err == nil {
 		sent.Path = path
-		err = c.create(r.Context(), path, sent)
+		err = at.create(r.Context(), path, sent)
 		// Refused because it is already there, on a write the guard had
 		// sent once before: that is this record, arriving twice.
 		// finishCreate reads the address back, so nothing is claimed that
@@ -4393,7 +4423,7 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 		}
 	}
 	if err != nil {
-		st.notices = []view.Notice{s.writeFailure(c, "PUT", path, err)}
+		st.notices = []view.Notice{s.writeFailure(at, "PUT", path, err)}
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
@@ -4402,13 +4432,13 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 	// to save: the record is written either way.
 	if key, unlocked := c.sess.DataKey(); unlocked {
 		_ = s.users.SetLastUsed(c.sess.AccountID(), key,
-			sealed.Selection{Kind: c.spec.kind, AccountID: c.col.AccountID, Path: c.col.Path})
+			sealed.Selection{Kind: c.spec.kind, AccountID: at.col.AccountID, Path: at.col.Path})
 	}
 	if formUID != "" {
 		clearPhotoDraft(c, formUID)
 		clearAttachDraft(c, formUID)
 	}
-	s.finishCreate(w, r, c, uid, sent)
+	s.finishCreate(w, r, at, uid, sent)
 }
 
 // finishCreate reads a new record back and sends the person to it. A server
@@ -4572,4 +4602,13 @@ func withExceptions(loss *model.Loss, sent, got *model.Object) *model.Loss {
 	}
 	loss.Properties = after
 	return loss
+}
+
+// newNotebook is the List or the Calendar a new event's or task's form chose
+// (s-tasks-14, s-agenda-15); empty is the one it was opened in.
+func newNotebook(c *collectionCtx, r *http.Request) string {
+	if c.cal == nil || c.spec.kind == view.KindNote {
+		return ""
+	}
+	return strings.TrimSpace(r.FormValue("notebook"))
 }

@@ -49,10 +49,11 @@ func TestATaskRepeats(t *testing.T) {
 		t.Errorf("the rule read back = %v", form)
 	}
 
-	// Nothing to repeat from: said before, refused after.
+	// Nothing to repeat from: said before — under Advanced RRULE, after the
+	// rule's own line (s-tasks-3) —, refused after.
 	bare := decode[view.TaskEditPage](t, f.h.do(get(f.path("tasks")+"/bare/edit", f.sess)))
-	if r := formRowOf(bare.Form, "repeat.freq"); r == nil || r.Hint == "" {
-		t.Errorf("a task without dates: Repeats = %+v, want a hint", r)
+	if r := formRowOf(bare.Form, "repeat.rule"); r == nil || r.Hint != "The advanced value takes precedence when set. A task repeats from its start date, or from the due date if it has none." {
+		t.Errorf("a task without dates: Advanced RRULE = %+v, want the task's hint", r)
 	}
 	puts := f.srv.CountRequests("PUT", f.col)
 	refused, got := save("bare", map[string]string{"repeat.freq": "DAILY"})

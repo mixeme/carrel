@@ -59,9 +59,6 @@ var (
 	cells          = map[string]w.Column{
 		"title": w.ColumnName, "excerpt": w.ColumnExcerpt, "tags": w.ColumnTags, "date": w.ColumnDate,
 		"source": w.ColumnSource, "changed": w.ColumnChanged,
-		// how many people the note has, a plain badge as the agenda's
-		// column draws an event's (after Р3; no frame draws it)
-		"attendees": w.ColumnBadges,
 	}
 )
 
@@ -332,10 +329,6 @@ func columnRow(r view.NoteRow, shown []string) w.ColumnRow {
 			cell.Text = string(r.Stamp)
 		case w.ColumnChanged:
 			cell.Text = or(r.Changed)
-		case w.ColumnBadges:
-			if r.Attendees != "" {
-				cell.Badges = []w.Badge{{Label: string(r.Attendees)}}
-			}
 		}
 		c.Cells = append(c.Cells, cell)
 	}

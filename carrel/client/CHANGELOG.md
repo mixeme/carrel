@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.51 — 2026-10-16
+
+Server `v0.2.309`, Typecase `49412c3` (its note 71). The mockup copied
+byte for byte. The task's edit draws what waited for its frames: the List
+beside Summary with the lists' marks, the time zone of When as an event's,
+Attendees after Reminders, Repeats after the attachments; the event's edit
+its Calendar after Tags; a note's Link as wide as its notebook. The
+notebook's list has no column «Attendees».
+
 ## v0.4.50 — 2026-10-16
 
 Server `v0.2.304`. A note's status and an event's priority are gone from

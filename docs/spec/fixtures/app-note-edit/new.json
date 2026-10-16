@@ -1,27 +1,6 @@
 {
   "details": null,
   "doc": {
-    "attendees": {
-      "add": {
-        "add": null,
-        "error": "",
-        "extra": null,
-        "hint": "",
-        "kind": "text",
-        "label": "Add attendee",
-        "name": "attendee.add",
-        "options": [],
-        "placeholder": "Name or address",
-        "readOnly": false,
-        "required": false,
-        "value": ""
-      },
-      "hint": "A name or an address: the ticked address books are searched. On save, nextcloud sends the invitations and their changes — Carrel sends no mail itself.",
-      "name": "attendee",
-      "readOnly": false,
-      "rows": [],
-      "suggest": "/app/contacts/suggest"
-    },
     "bar": [
       {
         "csrf": "csrf",
@@ -128,6 +107,7 @@
         "label": "Link",
         "name": "url",
         "options": [],
+        "placeholder": "optional",
         "readOnly": false,
         "required": false,
         "value": ""

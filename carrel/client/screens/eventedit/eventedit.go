@@ -69,8 +69,9 @@ const (
 // the screen's, from its frame): «reminder.1» is a reminder.
 var widths = map[string]w.FieldWidth{
 	"summary": w.FieldXL, "location": w.FieldLG, "status": w.FieldSM, "categories": w.FieldMD, "description": w.FieldFull,
-	// Related to in «Other», as the task's (s-agenda-3, -15; Typecase's task 160).
-	"related":    w.FieldLG,
+	// Link and Related to in «Other», as the task's (s-agenda-3, -15;
+	// Typecase's tasks 160, 172); the Calendar last in the head (task 175).
+	"url": w.FieldMD, "related": w.FieldLG, calendarRow: w.FieldMD,
 	"start.date": w.FieldSM, "start.time": w.FieldXS, "end.date": w.FieldSM, "end.time": w.FieldXS, "tz": w.FieldMD,
 	"reminder": w.FieldMD,
 	// The numbers «Custom…» of a reminder opens (s-agenda-19).
@@ -204,6 +205,12 @@ func Screen(p *view.EventEditPage) w.Shell {
 	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail, p.UID == ""), Main: w.Main{Items: main}}}
 }
 
+// calendarRow is the name of the Calendar the event lies in (C-6.8); ro the
+// badge of one read only in its choice.
+const calendarRow = "notebook"
+
+var ro = w.Badge{Label: "ro", Place: w.Pushed}
+
 // formID is the ID of the event's form: a new event's, or the edit's.
 func formID(p *view.EventEditPage) string {
 	if p.UID == "" {
@@ -325,6 +332,12 @@ func visible(rows []view.FormRow) []view.FormRow {
 // text showing the dash where the model gives no pattern of its own.
 func field(r view.FormRow) w.Field {
 	switch {
+	case r.Name == calendarRow:
+		// The Calendar with the calendars' marks, as a note's Notebook
+		// (s-agenda-3, -15).
+		d := bind.Marks(r, ro)
+		d.Menu.Width, d.Menu.Pop = w.MenuWidth290, w.MenuUnder
+		return w.Field{Label: string(r.Label), Parts: []w.FieldPart{d}, Width: width(r.Name)}
 	case r.Kind == view.InputCheck && len(r.Options) > 0:
 		return w.Field{Label: string(r.Label), Parts: []w.FieldPart{bind.Days(r)}}
 	case r.Kind == view.InputCheck:

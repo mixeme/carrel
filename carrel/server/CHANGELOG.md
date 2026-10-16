@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.309 — 2026-10-16
+
+### Changed
+
+- **The edit forms of a task, an event and a note by Typecase `49412c3`**
+  (its note 71; tasks 172, 173, 175, 179–181): a task's List stands beside
+  its Summary, an event's Calendar after Tags — in a new record's form too,
+  which is made in the collection chosen (`s-tasks-14`, `s-agenda-15`); a
+  Link left empty says «optional», as a task's Location does; a task's
+  Repeats says its rule under Advanced RRULE — «A task repeats from its
+  start date, or from the due date if it has none.» —, and Every reads 1
+  until another is typed, a record that does not repeat too.
+- **A note's people are not edited** (Typecase's Р-64: the standard has no
+  invitation to a note, only a copy): its edit has no field of them and a
+  save keeps them; the notebook's list has no column «Attendees». A task's
+  stands last and off in its menu (`s-tasks-12`).
+
+### For consumers
+
+`NoteRow.Attendees` and `NoteDoc.Attendees` are gone from C-6. Fixtures of
+the edits of a task, an event and a note, of the notes' lists re-shot.
+
 ## v0.2.308 — 2026-10-16
 
 ### Changed

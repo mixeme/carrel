@@ -194,12 +194,6 @@
               "id": "changed",
               "label": "Changed",
               "on": false
-            },
-            {
-              "fixed": false,
-              "id": "attendees",
-              "label": "Attendees",
-              "on": false
             }
           ],
           "label": "Columns"

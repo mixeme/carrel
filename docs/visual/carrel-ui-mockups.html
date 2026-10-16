@@ -3604,14 +3604,14 @@ Read  2 min ago</div>
             <div class="tc-field tc-field--lg"><label>Tags</label><input class="tc-in" type="text" value="работа, издательство" aria-label="Tags"></div>
             <div class="tc-field tc-field--full"><label>Note</label><textarea class="tc-in is-area">Пишет по вторникам, отвечает в тот же день.</textarea></div>
           </div>
-          <div class="tc-field"><button class="tc-btn" type="button">Show 6 empty fields</button></div>
+          <div class="tc-field"><button class="tc-btn" type="button">Show 7 empty fields</button></div>
         </div>
         <div class="tc-formfoot"><span class="tc-dim tc-dim--t11-5">Properties Carrel does not know are kept unchanged.</span></div>
       </div>
     </div>
   </div>
 </div>
-<figcaption><b>День рождения набирают, а не листают.</b> Поле текстовое, не выбор даты: до 1987 года в календаре сорок лет прокрутки, а набрать восемь цифр — секунда. Год можно не писать — vCard это допускает, а выбор даты нет. Телефоны, почта и адреса — повторяющиеся строки с кнопкой «Add», а не заранее насыпанные пустые поля; подписи — над первой строкой, у каждой строки свой Remove. Пустые поля свёрнуты в одну кнопку в конце формы: «Show 6 empty fields» — сколько их у этой карточки, и у карточки без адресов туда же уходит «Add address». Кадрирование фотографии — отдельный слой с перетаскиванием; числа остаются запасным путём на клавиатуре (и единственным на узком экране, где U-9 просит центральный кроп). Формат даты — плейсхолдер пустого поля; набранное значение само его показывает. ETag из шапки убран — человеку с ним делать нечего; конфликт сам покажет, что разошлось.</figcaption>
+<figcaption><b>День рождения набирают, а не листают.</b> Поле текстовое, не выбор даты: до 1987 года в календаре сорок лет прокрутки, а набрать восемь цифр — секунда. Год можно не писать — vCard это допускает, а выбор даты нет. Телефоны, почта и адреса — повторяющиеся строки с кнопкой «Add», а не заранее насыпанные пустые поля; подписи — над первой строкой, у каждой строки свой Remove. Пустые поля свёрнуты в одну кнопку в конце формы: «Show 7 empty fields» — сколько их у этой карточки, и у карточки без адресов туда же уходит «Add address», без сайтов — «Add website» (задача Carrel 171): «Websites» — строки, как у почты, после адресов; «Dates» — годовщина и другие даты строками, с тем, что дата отмечает (s-contacts-34); у этой карточки их нет — тоже среди свёрнутых. В новой карточке (s-contacts-27) «Websites» и «Dates» видны сразу. Кадрирование фотографии — отдельный слой с перетаскиванием; числа остаются запасным путём на клавиатуре (и единственным на узком экране, где U-9 просит центральный кроп). Формат даты — плейсхолдер пустого поля; набранное значение само его показывает. ETag из шапки убран — человеку с ним делать нечего; конфликт сам покажет, что разошлось.</figcaption>
 </figure>
 
 <div class="frames">
@@ -3808,7 +3808,7 @@ Read  2 min ago</div>
             <div class="tc-field tc-field--lg"><label>Tags</label><input class="tc-in" type="text" value="работа, издательство" aria-label="Tags"></div>
             <div class="tc-field tc-field--full"><label>Note</label><textarea class="tc-in is-area">Пишет по вторникам, отвечает в тот же день.</textarea></div>
           </div>
-          <div class="tc-field"><button class="tc-btn" type="button">Show 6 empty fields</button></div>
+          <div class="tc-field"><button class="tc-btn" type="button">Show 7 empty fields</button></div>
         </div>
         <div class="tc-formfoot"><span class="tc-dim tc-dim--t11-5">Properties Carrel does not know are kept unchanged.</span></div>
       </div>
@@ -3816,6 +3816,31 @@ Read  2 min ago</div>
   </div>
 </div>
 <figcaption>Тот же экран, фотографии не было. Квадрат — заглушка с инициалами, как в списке. Кнопка одна, <b>Add</b>, в той же колонке, где при живой фотографии стоят Replace / Crop / Remove: открывает выбор файла, затем кадрирование. Crop и Remove здесь нечего делать. Подсказка называет форматы, а не EXIF: вырезать ориентацию ещё не из чего.</figcaption>
+</figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-contacts-34">
+    <div class="frame-label"><span>Контакт · правка, даты</span><span class="frag">фрагмент</span><i>дополнительный кадр: рубрика формы, когда даты есть</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-form">
+          <div class="tc-fset">
+            <div class="tc-rubric">Dates</div>
+            <div class="tc-field tc-field--md"><label>What it marks</label><input class="tc-in" type="text" value="Свадьба" aria-label="What it marks"></div>
+            <div class="tc-field tc-field--sm"><label>Date</label><input class="tc-in is-mono" type="text" inputmode="numeric" value="12.06.2015" aria-label="Date"></div>
+            <button class="tc-btn is-danger" type="button">Remove</button>
+            <div class="tc-grow"></div>
+            <div class="tc-field tc-field--md"><input class="tc-in" type="text" value="Пришла в «Слово»" aria-label="What it marks"></div>
+            <div class="tc-field tc-field--sm"><input class="tc-in is-mono" type="text" inputmode="numeric" value="01.09.2019" aria-label="Date"></div>
+            <button class="tc-btn is-danger" type="button">Remove</button>
+            <div class="tc-grow"></div>
+            <button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add date</button>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption><b>Даты человека — своей рубрикой, строками</b> (задача Carrel 171; решения владельца 16.10). Годовщина редка и часто не самого человека, а одна дата без слов ничего не говорит, поэтому не поле в голове формы, а строки, как у телефонов: что дата отмечает — свободным текстом, сама дата — набором цифр, как день рождения, Remove у каждой, «Add date» в конце. Рубрика — после «Websites», перед «Other»; пустая у существующей карточки — среди свёрнутых «Show N empty fields», в новой — видна с одной кнопкой. vCard даёт одну <code>ANNIVERSARY</code> и без подписи, поэтому строки с подписью сервер пишет так, как их пишут Apple (<code>item1.X-ABDATE</code> и <code>item1.X-ABLabel</code>), — их читают и другие клиенты; пришедшая <code>ANNIVERSARY</code> — одна из строк, подпись «Anniversary». На карточке — строками «Свадьба» с датой, моноширинно.</figcaption>
 </figure>
 
 <figure>
@@ -3891,11 +3916,21 @@ Read  2 min ago</div>
           </div>
 
           <div class="tc-fset">
+            <div class="tc-rubric">Websites</div>
+            <button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add website</button>
+          </div>
+
+          <div class="tc-fset">
+            <div class="tc-rubric">Dates</div>
+            <button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add date</button>
+          </div>
+
+          <div class="tc-fset">
             <div class="tc-rubric">Other</div>
             <div class="tc-field tc-field--lg"><label>Tags</label><input class="tc-in is-ph" type="text" placeholder="—" aria-label="Tags"></div>
             <div class="tc-field tc-field--full"><label>Note</label><textarea class="tc-in is-area"></textarea></div>
           </div>
-          <div class="tc-field"><button class="tc-btn" type="button">Show 6 empty fields</button></div>
+          <div class="tc-field"><button class="tc-btn" type="button">Show 5 empty fields</button></div>
         </div>
       </div>
     </div>
@@ -4124,7 +4159,7 @@ Read  2 min ago · not changed on server</div>
             <div class="tc-rubric">Other</div>
             <div class="tc-field tc-field--lg"><label>Tags</label><input class="tc-in" type="text" name="tags" value="работа, издательство" aria-label="Tags"></div>
             <div class="tc-field tc-field--full"><label>Note</label><textarea class="tc-in is-area" name="note">Пишет по вторникам, отвечает в тот же день.</textarea></div>
-            <div class="tc-field"><button class="tc-btn" type="button">Show 6 empty fields</button></div>
+            <div class="tc-field"><button class="tc-btn" type="button">Show 7 empty fields</button></div>
           </div>
         </form>
         <div class="tc-formfoot"><span class="tc-dim tc-dim--t11-5">Properties Carrel does not know are kept unchanged.</span></div>
@@ -5425,6 +5460,7 @@ Read  2 min ago · changed on server 3 days ago</div>
           <div class="tc-field tc-field--lg"><label>Location</label><input class="tc-in" type="text" value="Переговорная 2" aria-label="Location"></div>
           <div class="tc-field tc-field--sm"><label>Status</label><button class="tc-in is-pick" type="button">Confirmed</button></div>
           <div class="tc-field tc-field--md"><label>Tags</label><input class="tc-in" type="text" value="release, team" aria-label="Tags"></div>
+          <div class="tc-field tc-field--md"><label>Calendar</label><details class="tc-drop"><summary class="tc-in is-pick"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="calendar" value="nextcloud/lichnyy" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="calendar" value="nextcloud/rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label></div></details></div>
           <div class="tc-field tc-field--full"><label>Description</label><textarea class="tc-in is-area">Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям.</textarea></div>
 
           <div class="tc-fset">
@@ -5450,6 +5486,7 @@ Read  2 min ago · changed on server 3 days ago</div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Other</div>
+            <div class="tc-field tc-field--md"><label>Link</label><input class="tc-in is-ph" type="text" placeholder="optional" aria-label="Link"></div>
             <div class="tc-field tc-field--lg"><label>Related to</label>
               <span class="tc-in tc-in--tags">
                 <span class="tc-tag tc-tag--pill"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>Заметка со встречи 10.08
@@ -5531,6 +5568,7 @@ SEQUENCE  2</div>
           <div class="tc-field tc-field--lg"><label>Location</label><input class="tc-in is-ph" type="text" placeholder="—" aria-label="Location"></div>
           <div class="tc-field tc-field--sm"><label>Status</label><button class="tc-in is-pick" type="button">No status</button></div>
           <div class="tc-field tc-field--md"><label>Tags</label><input class="tc-in is-ph" type="text" placeholder="—" aria-label="Tags"></div>
+          <div class="tc-field tc-field--md"><label>Calendar</label><details class="tc-drop"><summary class="tc-in is-pick"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="calendar" value="nextcloud/lichnyy" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="calendar" value="nextcloud/rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label></div></details></div>
           <div class="tc-field tc-field--full"><label>Description</label><textarea class="tc-in is-area"></textarea></div>
 
           <div class="tc-fset">
@@ -5555,6 +5593,7 @@ SEQUENCE  2</div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Other</div>
+            <div class="tc-field tc-field--md"><label>Link</label><input class="tc-in is-ph" type="text" placeholder="optional" aria-label="Link"></div>
             <div class="tc-field tc-field--lg"><label>Related to</label><span class="tc-in tc-in--tags"> <input class="tc-in__add" type="text" name="related.add" placeholder="Title or UID" aria-label="Add a link" autocomplete="off"> </span></div>
           </div>
           <div class="tc-fset">
@@ -5992,11 +6031,12 @@ Read  2 min ago · not changed on server</div>
         <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="status"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Status</label>
         <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="changed"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Changed</label>
         <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="where"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Where</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="attendees"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Attendees</label>
         <div class="tc-menu__foot"><button class="tc-btn is-sm is-primary" type="submit">Apply</button><button class="tc-btn is-sm" type="submit" name="col" value="default">Reset to defaults</button></div>
       </form>
     </div>
   </div>
-  <figcaption>Отмечено то, что стоит в списке задач по умолчанию, в том же порядке; Tags, Priority, Status, Changed и Where добавляют. Where — место задачи (LOCATION), как у агенды (<code>s-agenda-18</code>): та же ячейка и та же ширина, что у столбца Where ленты. Тегов в строке по умолчанию нет ни у одного рода: они в панели записи и в рейле; включённый столбец показывает первый тег и счётчик остальных («работа +1»), все — в подсказке. Title стоит всегда — за него дело открывают. <b>Source — только в едином виде</b> («Combined list»): у одного списка источник один и назван в заголовке, и пункта Source в его меню нет.</figcaption>
+  <figcaption>Отмечено то, что стоит в списке задач по умолчанию, в том же порядке; Tags, Priority, Status, Changed, Where и Attendees добавляют. Attendees — сколько людей у задачи, одной плашкой «2 attendees» (задача Carrel 181; люди у задачи — Р-64), как у агенды. Where — место задачи (LOCATION), как у агенды (<code>s-agenda-18</code>): та же ячейка и та же ширина, что у столбца Where ленты. Тегов в строке по умолчанию нет ни у одного рода: они в панели записи и в рейле; включённый столбец показывает первый тег и счётчик остальных («работа +1»), все — в подсказке. Title стоит всегда — за него дело открывают. <b>Source — только в едином виде</b> («Combined list»): у одного списка источник один и назван в заголовке, и пункта Source в его меню нет.</figcaption>
   </figure>
 
 <figure style="flex:1 1 100%">
@@ -6208,7 +6248,8 @@ Read  2 min ago · not changed on server</div>
         </div>
         <div class="tc-runbar" data-tc-progress="task-edit" hidden><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="0%"></i></span>Saving · <span class="tc-mono">0 of 0 MB</span></div>
         <div class="tc-form">
-          <div class="tc-field tc-field--full"><label>Summary</label><input class="tc-in is-focus" type="text" value="Отправить документы в МФЦ" aria-label="Summary"></div>
+          <div class="tc-field tc-field--xl"><label>Summary</label><input class="tc-in is-focus" type="text" value="Отправить документы в МФЦ" aria-label="Summary"></div>
+          <div class="tc-field tc-field--md"><label>List</label><details class="tc-drop"><summary class="tc-in is-pick"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="list" value="nextcloud/dela" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="list" value="nextcloud/rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label></div></details></div>
           <div class="tc-field tc-field--full"><label>Description</label><textarea class="tc-in is-area">Опись, копия паспорта и заявление. Приём до 18:00, окно 4.</textarea></div>
           <div class="tc-fset">
             <div class="tc-rubric">When</div>
@@ -6231,9 +6272,14 @@ Read  2 min ago · not changed on server</div>
             <div class="tc-field"><label>&nbsp;</label><button class="tc-btn" type="button">Add reminder</button></div>
           </div>
           <div class="tc-fset">
+            <div class="tc-rubric">Attendees</div>
+            <div class="tc-field tc-field--full"><span class="tc-drop"><span class="tc-in tc-in--tags tc-in--cols" data-tc-suggest="/app/contacts/suggest"> <input class="tc-in__add" type="text" name="attendee.add" placeholder="Name or address" aria-label="Add attendee" autocomplete="off"> </span><div class="tc-menu is-pop tc-menu--w420" role="menu" hidden></div></span><span class="tc-field__hint">A name or an address: the ticked address books are searched. On save, nextcloud sends the invitations and their changes — Carrel sends no mail itself.</span></div>
+          </div>
+          <div class="tc-fset">
             <div class="tc-rubric">Other</div>
             <div class="tc-field tc-field--md"><label>Location</label><input class="tc-in is-ph" type="text" placeholder="optional" aria-label="Location"></div>
             <div class="tc-field tc-field--md"><label>Tags</label><input class="tc-in" type="text" value="дом" aria-label="Tags"></div>
+            <div class="tc-field tc-field--md"><label>Link</label><input class="tc-in is-ph" type="text" placeholder="optional" aria-label="Link"></div>
             <div class="tc-field tc-field--lg"><label>Related to</label>
               <span class="tc-in tc-in--tags">
                 <span class="tc-tag tc-tag--pill"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>Забрать документы
@@ -6245,6 +6291,15 @@ Read  2 min ago · not changed on server</div>
               <details class="tc-drop"><summary class="tc-btn"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-upload"/></svg>From this computer<input class="tc-file" type="file" name="file" aria-label="From this computer" data-tc-list="task-attachments"><template data-tc-row><span class="tc-line tc-line--gap-8"><span class="tc-dim--t12-5">{name} <span class="tc-dim">{size}</span></span><button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></span></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
               <span class="tc-dim tc-dim--t11-5 tc-dim--wrap" data-tc-empty>Nothing attached</span>
             </div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Repeats</div>
+            <div class="tc-field tc-field--sm"><label>Frequency</label><button class="tc-in is-pick" type="button">Does not repeat</button></div>
+            <div class="tc-field tc-field--xs"><label>Every</label><input class="tc-in is-mono" type="text" value="1" aria-label="Every"></div>
+            <div class="tc-field"><label>On</label><span class="tc-seg"><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="MO">MO</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="TU">TU</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="WE">WE</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="TH">TH</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="FR">FR</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="SA">SA</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="SU">SU</label></span></div>
+            <div class="tc-field tc-field--sm"><label>Until</label><input class="tc-in is-mono" type="date" aria-label="Until"></div>
+            <div class="tc-field tc-field--xs"><label>Count</label><input class="tc-in is-ph" type="text" placeholder="—" aria-label="Count"></div>
+            <div class="tc-field tc-field--xl"><label>Advanced RRULE</label><input class="tc-in is-mono is-ph" type="text" placeholder="—" aria-label="Advanced RRULE"><span class="tc-field__hint">The advanced value takes precedence when set. A task repeats from its start date, or from the due date if it has none.</span></div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Kept as the server sent them</div>
@@ -6301,7 +6356,8 @@ SEQUENCE  1</div>
         </div>
         <div class="tc-runbar" data-tc-progress="task-new" hidden><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="0%"></i></span>Saving · <span class="tc-mono">0 of 0 MB</span></div>
         <div class="tc-form">
-          <div class="tc-field tc-field--full"><label>Summary</label><input class="tc-in is-focus is-ph" type="text" placeholder="—" aria-label="Summary"></div>
+          <div class="tc-field tc-field--xl"><label>Summary</label><input class="tc-in is-focus is-ph" type="text" placeholder="—" aria-label="Summary"></div>
+          <div class="tc-field tc-field--md"><label>List</label><details class="tc-drop"><summary class="tc-in is-pick"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="list" value="nextcloud/dela" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="list" value="nextcloud/rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label></div></details></div>
           <div class="tc-field tc-field--full"><label>Description</label><textarea class="tc-in is-area"></textarea></div>
           <div class="tc-fset">
             <div class="tc-rubric">When</div>
@@ -6310,6 +6366,7 @@ SEQUENCE  1</div>
             <div class="tc-field tc-field--xs"><label>Start time</label><input class="tc-in is-mono is-ph" type="time" placeholder="--:--" aria-label="Start time"></div>
             <div class="tc-field tc-field--sm"><label>Due date</label><input class="tc-in is-mono is-ph" type="date" placeholder="YYYY-MM-DD" aria-label="Due date"></div>
             <div class="tc-field tc-field--xs"><label>Due time</label><input class="tc-in is-mono is-ph" type="time" placeholder="--:--" aria-label="Due time"></div>
+            <div class="tc-field tc-field--md"><label>Time zone</label><details class="tc-drop"><summary class="tc-in is-pick">Europe/Moscow</summary><div class="tc-menu is-pop tc-menu--w290"><input class="tc-in is-ph" type="search" placeholder="Find a zone" aria-label="Find a zone"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="tz" value="Europe/Moscow" checked>Europe/Moscow</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="tz" value="Asia/Yekaterinburg">Asia/Yekaterinburg</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="tz" value="UTC">UTC</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="tz" value="floating">Floating — the same clock time anywhere</label></div></details></div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Progress</div>
@@ -6323,9 +6380,14 @@ SEQUENCE  1</div>
             <div class="tc-field"><button class="tc-btn" type="button">Add reminder</button></div>
           </div>
           <div class="tc-fset">
+            <div class="tc-rubric">Attendees</div>
+            <div class="tc-field tc-field--full"><span class="tc-drop"><span class="tc-in tc-in--tags tc-in--cols" data-tc-suggest="/app/contacts/suggest"> <input class="tc-in__add" type="text" name="attendee.add" placeholder="Name or address" aria-label="Add attendee" autocomplete="off"> </span><div class="tc-menu is-pop tc-menu--w420" role="menu" hidden></div></span><span class="tc-field__hint">A name or an address: the ticked address books are searched. On save, nextcloud sends the invitations and their changes — Carrel sends no mail itself.</span></div>
+          </div>
+          <div class="tc-fset">
             <div class="tc-rubric">Other</div>
             <div class="tc-field tc-field--md"><label>Location</label><input class="tc-in is-ph" type="text" placeholder="optional" aria-label="Location"></div>
             <div class="tc-field tc-field--md"><label>Tags</label><input class="tc-in is-ph" type="text" placeholder="—" aria-label="Tags"></div>
+            <div class="tc-field tc-field--md"><label>Link</label><input class="tc-in is-ph" type="text" placeholder="optional" aria-label="Link"></div>
             <div class="tc-field tc-field--lg"><label>Related to</label><span class="tc-in tc-in--tags"> <input class="tc-in__add" type="text" name="related.add" placeholder="Title or UID" aria-label="Add a link" autocomplete="off"> </span></div>
           </div>
           <div class="tc-fset">
@@ -6334,6 +6396,15 @@ SEQUENCE  1</div>
               <details class="tc-drop"><summary class="tc-btn"><svg viewBox="0 0 24 24"><use href="#i-clip"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item" role="menuitem"><svg><use href="#i-upload"/></svg>From this computer<input class="tc-file" type="file" name="file" aria-label="From this computer" data-tc-list="task-new-attachments"><template data-tc-row><span class="tc-line tc-line--gap-8"><span class="tc-dim--t12-5">{name} <span class="tc-dim">{size}</span></span><button class="tc-btn is-sm is-danger" type="button" data-tc-remove>Remove</button></span></template></label><button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg>From Files</button></div></details>
               <span class="tc-dim tc-dim--t11-5 tc-dim--wrap" data-tc-empty>Nothing attached</span>
             </div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Repeats</div>
+            <div class="tc-field tc-field--sm"><label>Frequency</label><button class="tc-in is-pick" type="button">Does not repeat</button></div>
+            <div class="tc-field tc-field--xs"><label>Every</label><input class="tc-in is-mono" type="text" value="1" aria-label="Every"></div>
+            <div class="tc-field"><label>On</label><span class="tc-seg"><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="MO">MO</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="TU">TU</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="WE">WE</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="TH">TH</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="FR">FR</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="SA">SA</label><label class="tc-seg__opt"><input class="tc-seg__box" type="checkbox" name="byday" value="SU">SU</label></span></div>
+            <div class="tc-field tc-field--sm"><label>Until</label><input class="tc-in is-mono" type="date" aria-label="Until"></div>
+            <div class="tc-field tc-field--xs"><label>Count</label><input class="tc-in is-ph" type="text" placeholder="—" aria-label="Count"></div>
+            <div class="tc-field tc-field--xl"><label>Advanced RRULE</label><input class="tc-in is-mono is-ph" type="text" placeholder="—" aria-label="Advanced RRULE"><span class="tc-field__hint">The advanced value takes precedence when set. A task repeats from its start date, or from the due date if it has none.</span></div>
           </div>
         </div>
       </div>
@@ -7259,6 +7330,7 @@ Read  2 min ago</div>
               <div class="tc-field tc-field--fix150"><label>Date</label><input class="tc-in is-mono" type="date" value="2026-08-10" name="dtstart.date" aria-label="Date"></div>
               <div class="tc-field tc-field--fix130"><label>Time</label><input class="tc-in is-mono" type="time" value="11:05" name="dtstart.time" aria-label="Time"></div>
               <div class="tc-field tc-field--flex3-320"><label>Tags</label><input class="tc-in" type="text" value="встречи, релиз" name="categories" aria-label="Tags"></div>
+              <div class="tc-field tc-field--flex2-280"><label>Link</label><input class="tc-in is-ph" type="text" name="url" placeholder="optional" aria-label="Link"></div>
               <div class="tc-field tc-field--flex3-340">
                 <label>Related to</label>
                 <span class="tc-in tc-in--tags">
@@ -7352,6 +7424,7 @@ Read  2 min ago</div>
               <div class="tc-field tc-field--fix150"><label>Date</label><input class="tc-in is-mono" type="date" value="2026-08-10" name="dtstart.date" aria-label="Date"></div>
               <div class="tc-field tc-field--fix130"><label>Time</label><input class="tc-in is-mono" type="time" value="11:05" name="dtstart.time" aria-label="Time"></div>
               <div class="tc-field tc-field--flex3-320"><label>Tags</label><input class="tc-in is-ph" type="text" placeholder="—" name="categories" aria-label="Tags"></div>
+              <div class="tc-field tc-field--flex2-280"><label>Link</label><input class="tc-in is-ph" type="text" name="url" placeholder="optional" aria-label="Link"></div>
               <div class="tc-field tc-field--flex3-340">
                 <label>Related to</label>
                 <span class="tc-in tc-in--tags"> <input class="tc-in__add" type="text" name="related.add" placeholder="Title or UID" aria-label="Add a link" autocomplete="off"> </span>
@@ -7432,6 +7505,7 @@ Read  2 min ago</div>
               <div class="tc-field tc-field--fix150"><label>Date</label><input class="tc-in is-mono" type="date" value="2026-08-10" name="dtstart.date" aria-label="Date"></div>
               <div class="tc-field tc-field--fix130"><label>Time</label><input class="tc-in is-mono" type="time" value="11:05" name="dtstart.time" aria-label="Time"></div>
               <div class="tc-field tc-field--flex3-320"><label>Tags</label><input class="tc-in" type="text" value="встречи, релиз" name="categories" aria-label="Tags"></div>
+              <div class="tc-field tc-field--flex2-280"><label>Link</label><input class="tc-in is-ph" type="text" name="url" placeholder="optional" aria-label="Link"></div>
               <div class="tc-field tc-field--flex3-340">
                 <label>Related to</label>
                 <span class="tc-in tc-in--tags">
@@ -7517,6 +7591,7 @@ Read  2 min ago</div>
               <div class="tc-field tc-field--fix150"><label>Date</label><input class="tc-in is-mono" type="date" value="2026-08-10" name="dtstart.date" aria-label="Date"></div>
               <div class="tc-field tc-field--fix130"><label>Time</label><input class="tc-in is-mono" type="time" value="11:05" name="dtstart.time" aria-label="Time"></div>
               <div class="tc-field tc-field--flex3-320"><label>Tags</label><input class="tc-in" type="text" value="встречи, релиз" name="categories" aria-label="Tags"></div>
+              <div class="tc-field tc-field--flex2-280"><label>Link</label><input class="tc-in is-ph" type="text" name="url" placeholder="optional" aria-label="Link"></div>
               <div class="tc-field tc-field--flex3-340">
                 <label>Related to</label>
                 <span class="tc-drop"><span class="tc-in is-focus tc-in--tags">
@@ -18621,7 +18696,6 @@ Read  2 min ago · not changed on server</div>
           </div>
           <div class="tc-line tc-form__cols">
             <div class="tc-field tc-field--sm"><label>Nickname</label><input class="tc-in" type="text" value="Аня" aria-label="Nickname"></div>
-            <div class="tc-field tc-field--sm"><label>Anniversary</label><input class="tc-in is-mono is-ph" type="text" inputmode="numeric" placeholder="—" aria-label="Anniversary"></div>
             <div class="tc-field tc-field--xs"><label>Gender</label><button class="tc-in is-pick is-ph" type="button">—</button></div>
             <div class="tc-field tc-field--sm"><label>Language</label><input class="tc-in is-ph" type="text" placeholder="—" aria-label="Language"></div>
             <div class="tc-field tc-field--md"><label>Time zone</label><button class="tc-in is-pick is-ph" type="button">—</button></div>
@@ -21784,7 +21858,7 @@ dav: HTTP 503: the server is busy</div></div>
             <div class="tc-field tc-field--lg"><label>Tags</label><input class="tc-in" type="text" value="работа, издательство" aria-label="Tags"></div>
             <div class="tc-field tc-field--full"><label>Note</label><textarea class="tc-in is-area">Пишет по вторникам, отвечает в тот же день.</textarea></div>
           </div>
-          <div class="tc-field"><button class="tc-btn" type="button">Show 6 empty fields</button></div>
+          <div class="tc-field"><button class="tc-btn" type="button">Show 7 empty fields</button></div>
         </div>
         <div class="tc-formfoot"><span class="tc-dim tc-dim--t11-5">Properties Carrel does not know are kept unchanged.</span></div>
       </div>
@@ -23084,6 +23158,7 @@ dav: HTTP 503: the server is busy</div></div>
               <div class="tc-field tc-field--fix150"><label>Date</label><input class="tc-in is-mono" type="date" value="2026-08-10" name="dtstart.date" aria-label="Date"></div>
               <div class="tc-field tc-field--fix130"><label>Time</label><input class="tc-in is-mono" type="time" value="11:05" name="dtstart.time" aria-label="Time"></div>
               <div class="tc-field tc-field--flex3-320"><label>Tags</label><input class="tc-in" type="text" value="встречи, релиз" name="categories" aria-label="Tags"></div>
+              <div class="tc-field tc-field--flex2-280"><label>Link</label><input class="tc-in is-ph" type="text" name="url" placeholder="optional" aria-label="Link"></div>
               <div class="tc-field tc-field--flex3-340">
                 <label>Related to</label>
                 <span class="tc-in tc-in--tags">

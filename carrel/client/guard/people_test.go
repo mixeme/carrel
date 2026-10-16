@@ -75,21 +75,17 @@ func TestTasksAndNotesNameTheirPeople(t *testing.T) {
 	}
 }
 
-// The column «Attendees» of a task's and a notebook's list (after Р3; no
-// frame draws it yet — Typecase's task 181): chosen, a row draws how many
-// people it has as a plain badge, as the agenda's column draws an event's.
-func TestTasksAndNotesHaveAnAttendeesColumn(t *testing.T) {
+// The column «Attendees» of a task's list (after Р3; s-tasks-12, last and
+// off): chosen, a row draws how many people it has as a plain badge, as the
+// agenda's column draws an event's. A notebook's list has none (Typecase's
+// Р-64).
+func TestTasksHaveAnAttendeesColumn(t *testing.T) {
 	for _, c := range []struct {
 		fixture, model string
 		give           func(model any)
 	}{
 		{"app-tasks/normal.json", "TasksPage", func(m any) {
 			p := m.(*view.TasksPage)
-			p.Bar.Columns.Items = append(p.Bar.Columns.Items, view.ColumnItem{ID: "attendees", Label: "Attendees", On: true})
-			p.Groups[0].Rows[0].Attendees = "2 attendees"
-		}},
-		{"app-notes/normal.json", "NotesPage", func(m any) {
-			p := m.(*view.NotesPage)
 			p.Bar.Columns.Items = append(p.Bar.Columns.Items, view.ColumnItem{ID: "attendees", Label: "Attendees", On: true})
 			p.Groups[0].Rows[0].Attendees = "2 attendees"
 		}},
