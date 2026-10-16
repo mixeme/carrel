@@ -18,11 +18,12 @@
         },
         {
           "csrf": "csrf",
-          "enabled": true,
+          "enabled": false,
           "href": "/admin/invites?action=send",
           "id": "admin.invite.send",
           "label": "Send invitation",
-          "method": "POST"
+          "method": "POST",
+          "reason": "SMTP is not configured: no letter can go."
         }
       ],
       "errors": [],
@@ -128,7 +129,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 2,
         "enabled": true,
         "href": "/admin/invites",
         "icon": "i-plus",
@@ -138,7 +139,7 @@
         "on": true
       },
       {
-        "count": 1,
+        "count": 3,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -200,11 +201,11 @@
       {
         "line": [
           {
-            "text": "No letter since the start."
+            "text": "No mail is going out."
           }
         ],
-        "title": "Mail is going out",
-        "tone": "on"
+        "title": "SMTP not configured",
+        "tone": "alert"
       },
       {
         "line": [
@@ -219,11 +220,106 @@
     "tags": [],
     "ticks": null
   },
-  "rows": [],
+  "rows": [
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/invite/invite-token",
+          "id": "admin.invite.copy",
+          "label": "Copy link",
+          "method": "GET"
+        }
+      ],
+      "address": "—",
+      "delivery": "link",
+      "expires": "10 August 2026, 17:04",
+      "link": "/invite/invite-token",
+      "menu": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/admin/invites?action=extend\u0026invite=i-0000000001",
+          "id": "admin.invite.extend",
+          "label": "Extend",
+          "method": "POST"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "href": "/admin/invites?action=revoke\u0026invite=i-0000000001",
+          "id": "admin.invite.revoke",
+          "label": "Revoke",
+          "method": "POST",
+          "separator": true
+        }
+      ],
+      "sent": "—",
+      "sentFailed": false,
+      "status": "pending"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": false,
+          "href": "/admin/invites?action=resend\u0026invite=i-0000000002",
+          "id": "admin.invite.resend",
+          "label": "Resend",
+          "method": "POST",
+          "reason": "SMTP is not configured: no letter can go."
+        },
+        {
+          "enabled": true,
+          "href": "/invite/invite-token",
+          "id": "admin.invite.copy",
+          "label": "Copy link",
+          "method": "GET"
+        }
+      ],
+      "address": "oleg@example.org",
+      "delivery": "email",
+      "expires": "10 August 2026, 17:04",
+      "link": "/invite/invite-token",
+      "menu": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/admin/invites?action=extend\u0026invite=i-0000000002",
+          "id": "admin.invite.extend",
+          "label": "Extend",
+          "method": "POST"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "href": "/admin/invites?action=revoke\u0026invite=i-0000000002",
+          "id": "admin.invite.revoke",
+          "label": "Revoke",
+          "method": "POST",
+          "separator": true
+        }
+      ],
+      "sent": "failed — 550 mailbox unavailable",
+      "sentFailed": true,
+      "status": "pending"
+    }
+  ],
   "selfReg": {
     "aside": "",
-    "badge": null,
-    "copy": null,
+    "badge": {
+      "label": "open",
+      "role": "neutral"
+    },
+    "copy": {
+      "enabled": true,
+      "href": "/register",
+      "id": "admin.selfreg.copy",
+      "label": "Copy",
+      "method": "GET"
+    },
     "form": {
       "action": "/admin/invites",
       "actions": [
@@ -279,7 +375,7 @@
               "options": [],
               "readOnly": false,
               "required": false,
-              "value": ""
+              "value": "true"
             }
           ],
           "unfold": null
@@ -288,7 +384,7 @@
     },
     "issued": null,
     "lede": "A visitor creates an account and confirms the address by email. Cannot be turned on until mail works.",
-    "link": "",
+    "link": "/register",
     "title": "Self-registration",
     "warning": null
   },
@@ -476,16 +572,6 @@
           "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
-          "method": "GET",
-          "separator": true,
-          "target": "sheet"
-        },
-        {
-          "enabled": true,
-          "href": "/app/mail/compose",
-          "icon": "i-mail",
-          "id": "new.letter",
-          "label": "Letter",
           "method": "GET",
           "separator": true,
           "target": "sheet"

@@ -230,7 +230,7 @@ func (s *Server) getAdminReset(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	s.writeResetSheet(w, r, s.resetSheet(sess, r.URL.Query().Get("target"), s.users.SuggestPassword(), nil))
+	s.writeResetSheet(w, r, s.resetSheet(sess, r.URL.Query().Get("target"), s.users.SuggestPassword(), "", nil))
 }
 
 // postAdminReset resets the chosen person's password to the temporary one
@@ -245,13 +245,13 @@ func (s *Server) postAdminReset(w http.ResponseWriter, r *http.Request) {
 	snap := s.store.Snapshot()
 	u := snap.UserByID(target)
 	if why := resetRefusal(sess, u); why != "" {
-		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, map[string]view.Text{"target": why}))
+		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, r.FormValue("confirm"), map[string]view.Text{"target": why}))
 		return
 	}
 	// The login typed is the confirmation (owner's decision 28.09.2026): a
 	// reset destroys what the person had, and a slip of the list must not.
 	if strings.TrimSpace(r.FormValue("confirm")) != u.Login {
-		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp,
+		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, r.FormValue("confirm"),
 			map[string]view.Text{"confirm": text("Type " + u.Login + " to confirm whose password is reset.")}))
 		return
 	}
@@ -260,7 +260,7 @@ func (s *Server) postAdminReset(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, user.ErrPasswordShort) {
 			field = "password"
 		}
-		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, map[string]view.Text{field: formError(err)}))
+		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, r.FormValue("confirm"), map[string]view.Text{field: formError(err)}))
 		return
 	}
 	// Shown this once (s-admin-14): the answer to the POST, not a page to
@@ -297,7 +297,9 @@ func resetRefusal(sess *session.Session, u *store.User) view.Text {
 // resetSheet is s-admin-13: Whose — the people of the list by login and
 // role, those who cannot be reset here off with the reason — the warning,
 // the temporary password, Reset password and Cancel.
-func (s *Server) resetSheet(sess *session.Session, target, temp string, errs map[string]view.Text) view.PasswordResetSheet {
+// confirm is the login typed to confirm, kept when the sheet comes back
+// with a refusal (s-admin-20: «ana» stands in the field with its reason).
+func (s *Server) resetSheet(sess *session.Session, target, temp, confirm string, errs map[string]view.Text) view.PasswordResetSheet {
 	snap := s.store.Snapshot()
 	var people []view.Option
 	for i := range snap.Users {
@@ -317,7 +319,7 @@ func (s *Server) resetSheet(sess *session.Session, target, temp string, errs map
 		view.FormRow{Name: "password", Label: "Temporary password", Kind: view.InputText, Required: true, Value: text(temp), Mono: true,
 			Hint: resetHint, Error: errs["password"]},
 		view.FormRow{Name: "confirm", Label: "Type the login to confirm", Kind: view.InputText, Required: true,
-			Error: errs["confirm"], Placeholder: text(chosenLogin(people))},
+			Value: text(confirm), Error: errs["confirm"], Placeholder: text(chosenLogin(people))},
 	)
 	// The caret is in the login typed to confirm, the one field left to
 	// fill (s-admin-13).

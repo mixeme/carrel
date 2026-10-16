@@ -6,6 +6,20 @@
       "lastRecovery": "—",
       "login": "mix",
       "recovered": false
+    },
+    {
+      "covered": true,
+      "deposited": "2026-08-10",
+      "lastRecovery": "never",
+      "login": "anna",
+      "recovered": false
+    },
+    {
+      "covered": true,
+      "deposited": "2026-08-10",
+      "lastRecovery": "never",
+      "login": "viktor",
+      "recovered": false
     }
   ],
   "details": null,
@@ -168,7 +182,7 @@
     ]
   },
   "notices": [],
-  "opens": 0,
+  "opens": 2,
   "print": {
     "range": "",
     "taken": "",
@@ -196,7 +210,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 2,
         "enabled": true,
         "href": "/admin/invites",
         "icon": "i-plus",
@@ -205,7 +219,7 @@
         "method": "GET"
       },
       {
-        "count": 1,
+        "count": 3,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -268,11 +282,11 @@
       {
         "line": [
           {
-            "text": "No letter since the start."
+            "text": "No mail is going out."
           }
         ],
-        "title": "Mail is going out",
-        "tone": "on"
+        "title": "SMTP not configured",
+        "tone": "alert"
       },
       {
         "line": [
@@ -378,7 +392,7 @@
     ]
   },
   "result": null,
-  "subtitle": "0 of 1 account open with the master password",
+  "subtitle": "2 of 3 accounts open with the master password",
   "title": "Key escrow",
   "top": {
     "lock": null,
@@ -427,16 +441,6 @@
           "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
-          "method": "GET",
-          "separator": true,
-          "target": "sheet"
-        },
-        {
-          "enabled": true,
-          "href": "/app/mail/compose",
-          "icon": "i-mail",
-          "id": "new.letter",
-          "label": "Letter",
           "method": "GET",
           "separator": true,
           "target": "sheet"

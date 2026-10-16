@@ -149,7 +149,7 @@
         }
       ]
     },
-    "loaded": 1,
+    "loaded": 3,
     "range": null,
     "segments": [
       {
@@ -176,7 +176,7 @@
       }
     ],
     "selected": 0,
-    "total": 1
+    "total": 3
   },
   "details": null,
   "look": {
@@ -214,7 +214,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 2,
         "enabled": true,
         "href": "/admin/invites",
         "icon": "i-plus",
@@ -223,7 +223,7 @@
         "method": "GET"
       },
       {
-        "count": 1,
+        "count": 3,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -286,11 +286,11 @@
       {
         "line": [
           {
-            "text": "No letter since the start."
+            "text": "No mail is going out."
           }
         ],
-        "title": "Mail is going out",
-        "tone": "on"
+        "title": "SMTP not configured",
+        "tone": "alert"
       },
       {
         "line": [
@@ -356,9 +356,109 @@
       ],
       "role": "Administrator",
       "sessions": 1
+    },
+    {
+      "accounts": 0,
+      "address": "",
+      "created": "2026-08-10",
+      "disabled": false,
+      "escrowed": true,
+      "lastLogin": "",
+      "login": "anna",
+      "menu": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/admin/?action=role\u0026role=admin\u0026target=u-mix",
+          "id": "admin.user.role",
+          "label": "Make administrator",
+          "method": "POST"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": false,
+          "href": "/admin/?action=sessions\u0026target=u-mix",
+          "id": "admin.user.sessions",
+          "label": "Kill sessions",
+          "method": "POST",
+          "reason": "No live sessions."
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/admin/?action=disable\u0026target=u-mix",
+          "id": "admin.user.disable",
+          "label": "Disable",
+          "method": "POST"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": false,
+          "href": "/admin/?action=delete\u0026target=u-mix",
+          "icon": "i-trash",
+          "id": "admin.user.delete",
+          "label": "Delete",
+          "method": "POST",
+          "reason": "Deleting an account needs its own dialogue, which is not here yet.",
+          "separator": true
+        }
+      ],
+      "role": "User",
+      "sessions": 0
+    },
+    {
+      "accounts": 0,
+      "address": "",
+      "created": "2026-08-10",
+      "disabled": true,
+      "escrowed": true,
+      "lastLogin": "",
+      "login": "viktor",
+      "menu": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/admin/?action=role\u0026role=admin\u0026target=u-mix",
+          "id": "admin.user.role",
+          "label": "Make administrator",
+          "method": "POST"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": false,
+          "href": "/admin/?action=sessions\u0026target=u-mix",
+          "id": "admin.user.sessions",
+          "label": "Kill sessions",
+          "method": "POST",
+          "reason": "No live sessions."
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/admin/?action=enable\u0026target=u-mix",
+          "id": "admin.user.enable",
+          "label": "Enable",
+          "method": "POST"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": false,
+          "href": "/admin/?action=delete\u0026target=u-mix",
+          "icon": "i-trash",
+          "id": "admin.user.delete",
+          "label": "Delete",
+          "method": "POST",
+          "reason": "Deleting an account needs its own dialogue, which is not here yet.",
+          "separator": true
+        }
+      ],
+      "role": "User",
+      "sessions": 0
     }
   ],
-  "subtitle": "1 account · 1 administrator · 0 covered by escrow",
+  "subtitle": "3 accounts · 1 administrator · 2 covered by escrow",
   "title": "Users",
   "top": {
     "lock": null,
@@ -407,16 +507,6 @@
           "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
-          "method": "GET",
-          "separator": true,
-          "target": "sheet"
-        },
-        {
-          "enabled": true,
-          "href": "/app/mail/compose",
-          "icon": "i-mail",
-          "id": "new.letter",
-          "label": "Letter",
           "method": "GET",
           "separator": true,
           "target": "sheet"

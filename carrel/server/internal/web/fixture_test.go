@@ -1714,6 +1714,13 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 		{"app-settings-davloom", "/app/settings/davloom"},
 		// The escrow page's normal is the deposited copy (account-4):
 		// TestFixtureAccountStates deposits it.
+	} {
+		t.Run(one.dir, func(t *testing.T) {
+			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
+		})
+	}
+	adminState(t, app)
+	for _, one := range []struct{ dir, route string }{
 		{"admin-users", "/admin/"},
 		{"admin-invites", "/admin/invites"},
 		{"admin-settings", "/admin/settings"},
@@ -1724,6 +1731,65 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 		t.Run(one.dir, func(t *testing.T) {
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
 		})
+	}
+	// The sheet that resets a password (Ад8): anna chosen (s-admin-13), the
+	// password issued (s-admin-14), a password too short (s-admin-16) and
+	// a login typed that is not hers (s-admin-20).
+	snap := app.h.st.Snapshot()
+	anna := snap.UserByLogin("anna").ID
+	reset := func(password, confirm string) *httptest.ResponseRecorder {
+		return app.h.do(postForm("/admin/reset", app.sess, url.Values{"target": {anna}, "password": {password}, "confirm": {confirm}}))
+	}
+	t.Run("admin-reset", func(t *testing.T) {
+		app.compare(t, "admin-reset/normal.json", app.h.do(get("/admin/reset?target="+anna, app.sess)))
+		app.compare(t, "admin-reset/refused.json", reset("short", "anna"))
+		app.compare(t, "admin-reset/mismatch.json", reset("long-enough-temp", "ana"))
+		app.compare(t, "admin-reset/issued.json", reset("long-enough-temp", "anna"))
+	})
+}
+
+// adminState is the instance the administration's frames draw (Ад11, Ад15,
+// Ад23, Ад36 of the scan of 15.10.2026): beside mix, anna, whose key is in
+// escrow, and viktor, disabled (s-admin-2, -6); an invitation by link and
+// one by letter the relay refused, and the registration open (s-admin-1);
+// no relay, and people's letters off (s-admin-3). The settings' own screens
+// were taken before it: they draw the relay the app's letters go through.
+func adminState(t *testing.T, app *mockupApp) {
+	t.Helper()
+	h := app.h
+	snap := h.st.Snapshot()
+	mixID := snap.UserByLogin("mix").ID
+	// Invited after escrow was turned on: their accounts are covered.
+	h.invite(mixID, "anna", "annapass123")
+	viktor := h.invite(mixID, "viktor", "viktorpass123")
+	if err := h.users.DisableUser(mixID, viktor); err != nil {
+		t.Fatalf("disable viktor: %v", err)
+	}
+	if _, err := h.users.Invite(mixID, "", store.RoleUser); err != nil {
+		t.Fatalf("invite by link: %v", err)
+	}
+	if _, err := h.users.Invite(mixID, "oleg@example.org", store.RoleUser); err != nil {
+		t.Fatalf("invite by letter: %v", err)
+	}
+	if err := h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		// Their IDs fixed: the rows' links name them, and a fixture is the
+		// same each run.
+		for i := range st.Invites {
+			switch {
+			case st.Invites[i].Email == "oleg@example.org":
+				st.Invites[i].ID = "i-0000000002"
+				st.Invites[i].Mailed, st.Invites[i].MailReply = "failed", "550 mailbox unavailable"
+			case st.Invites[i].Login == "" && !st.Invites[i].Used:
+				st.Invites[i].ID = "i-0000000001"
+			}
+		}
+		st.Settings.SelfRegEnabled = true
+		st.Settings.SMTP = store.SMTPSettings{}
+		people := false
+		st.Settings.PeopleMail = &people
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
 	}
 }
 

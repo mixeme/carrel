@@ -753,8 +753,8 @@ func TestFrameComparisonBite(t *testing.T) {
 	}
 	// A view model with no fixture is held against nothing, and says so.
 	bare := signIn(nil)
-	bare.Model = func() any { return new(view.PasswordResetSheet) }
-	if found := frameFindings(l, []screens.Screen{bare}); !has(found, "PasswordResetSheet", "no fixture of its view model") {
+	bare.Model = func() any { return new(view.ExportSheet) }
+	if found := frameFindings(l, []screens.Screen{bare}); !has(found, "ExportSheet", "no fixture of its view model") {
 		t.Errorf("a screen of a view model without fixtures: %q", found)
 	}
 	// A state is held against its own frame (STATE_FRAME of check.py): the

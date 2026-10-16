@@ -129,7 +129,8 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
           "tiles","copy","elsewhere","rename","delete","attach","single","in-part",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
-          "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed"}
+          "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
+          "issued","mismatch"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -249,6 +250,9 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     # кадров со своим адресом нет, фрагменты s-agenda-26 и s-tasks-18
     # (задача Typecase 166, записка 69).
     "app-record-delete": "/app/{kind}/{account}/{col}/{uid}/delete",
+    # Лист сброса пароля из шапки Users (Ад8): кадров со своим адресом нет,
+    # фрагменты s-admin-13, -14, -16, -20.
+    "admin-reset": "/admin/reset",
     "app-contact-rewrite": "/app/contacts/{account}/{col}/{uid}/rewrite",
     "app-quick": "/app/notes/quick",
     "app-collections-new": "/app/collections/new",
@@ -270,7 +274,8 @@ SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-
           "app-collections-rename", "app-collections-move", "app-collections-delete",
           "app-publish", "app-files-picker", "app-files-op", "app-mail-compose",
           "app-contact-rewrite", "app-record-copies", "app-task-done", "app-event-ask",
-          "app-settings-escrow-deposit", "app-settings-escrow-withdraw", "app-record-delete"}
+          "app-settings-escrow-deposit", "app-settings-escrow-withdraw", "app-record-delete",
+          "admin-reset"}
 
 FRAME_TODO = {
     # Полная форма нового события — свой кадр s-agenda-15 (Typecase 9e69804,
@@ -411,6 +416,10 @@ STATE_FRAME = {
     # Диалог правки подключения (Нс76): вопрос о ссылках ждёт скрытым —
     # s-profile-16; Save без ответа — s-profile-23 (Typecase ad18c91).
     "app-record-delete/normal": "s-agenda-26",
+    "admin-reset/normal": "s-admin-13",
+    "admin-reset/issued": "s-admin-14",
+    "admin-reset/refused": "s-admin-16",
+    "admin-reset/mismatch": "s-admin-20",
     "app-record-delete/single": "s-tasks-18",
     "app-settings-connections/edit": "s-profile-16",
     # Нс30: диалог Connect account (s-profile-2), занятая подпись

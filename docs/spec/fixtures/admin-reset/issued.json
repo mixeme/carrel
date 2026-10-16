@@ -1,0 +1,637 @@
+{
+  "actions": [],
+  "form": {
+    "action": "",
+    "actions": [],
+    "errors": [],
+    "method": "",
+    "sets": []
+  },
+  "issued": {
+    "copy": {
+      "enabled": true,
+      "icon": "i-dup",
+      "id": "admin.reset.copy",
+      "label": "Copy",
+      "method": "GET",
+      "primary": true
+    },
+    "done": {
+      "enabled": true,
+      "href": "/admin/",
+      "id": "admin.reset.done",
+      "label": "Done",
+      "method": "GET",
+      "primary": true
+    },
+    "login": "anna",
+    "message": [
+      {
+        "text": "The password of "
+      },
+      {
+        "mark": "strong",
+        "text": "anna"
+      },
+      {
+        "text": " is reset."
+      }
+    ],
+    "note": "Hand it over yourself; they choose their own at the next sign-in.",
+    "password": "long-enough-temp"
+  },
+  "title": "Reset a password",
+  "under": {
+    "account": null,
+    "adminUsers": {
+      "add": [
+        {
+          "enabled": true,
+          "href": "/admin/invites",
+          "icon": "i-plus",
+          "id": "admin.invite",
+          "label": "Add user",
+          "method": "GET",
+          "primary": true
+        },
+        {
+          "enabled": true,
+          "href": "/admin/reset",
+          "id": "admin.reset",
+          "label": "Reset a password",
+          "method": "GET",
+          "target": "sheet"
+        }
+      ],
+      "bar": {
+        "actions": [],
+        "columns": {
+          "form": {
+            "action": "/admin/columns",
+            "actions": [
+              {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/admin/columns",
+                "id": "columns.apply",
+                "label": "Apply",
+                "method": "POST",
+                "primary": true
+              },
+              {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/admin/columns",
+                "id": "columns.default",
+                "label": "Reset to defaults",
+                "method": "POST"
+              }
+            ],
+            "errors": [],
+            "method": "POST",
+            "sets": [
+              {
+                "legend": "",
+                "rows": [
+                  {
+                    "add": null,
+                    "error": "",
+                    "extra": null,
+                    "hint": "",
+                    "kind": "hidden",
+                    "label": "",
+                    "name": "_csrf",
+                    "options": [],
+                    "readOnly": false,
+                    "required": false,
+                    "value": "csrf"
+                  }
+                ],
+                "unfold": null
+              }
+            ]
+          },
+          "icon": "i-cols",
+          "items": [
+            {
+              "aside": "always",
+              "fixed": true,
+              "id": "login",
+              "label": "Login",
+              "on": true
+            },
+            {
+              "fixed": false,
+              "id": "role",
+              "label": "Role",
+              "on": true
+            },
+            {
+              "fixed": false,
+              "id": "created",
+              "label": "Created",
+              "on": true
+            },
+            {
+              "fixed": false,
+              "id": "last-login",
+              "label": "Last login",
+              "on": true
+            },
+            {
+              "fixed": false,
+              "id": "dav",
+              "label": "DAV",
+              "on": true
+            },
+            {
+              "fixed": false,
+              "id": "sessions",
+              "label": "Sessions",
+              "on": true
+            },
+            {
+              "fixed": false,
+              "id": "escrow",
+              "label": "Escrow",
+              "on": true
+            },
+            {
+              "fixed": false,
+              "id": "address",
+              "label": "Address",
+              "on": false
+            }
+          ],
+          "label": "Columns"
+        },
+        "compact": null,
+        "filter": "",
+        "filterForm": {
+          "action": "/admin/",
+          "actions": [],
+          "errors": [],
+          "method": "GET",
+          "sets": [
+            {
+              "legend": "",
+              "rows": [
+                {
+                  "add": null,
+                  "error": "",
+                  "extra": null,
+                  "hint": "",
+                  "kind": "text",
+                  "label": "Filter",
+                  "name": "filter",
+                  "options": [],
+                  "readOnly": false,
+                  "required": false,
+                  "value": ""
+                }
+              ],
+              "unfold": null
+            }
+          ]
+        },
+        "loaded": 3,
+        "range": null,
+        "segments": [
+          {
+            "enabled": true,
+            "href": "/admin/",
+            "id": "admin.users.all",
+            "label": "All",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "enabled": true,
+            "href": "/admin/?show=admins",
+            "id": "admin.users.admins",
+            "label": "Administrators",
+            "method": "GET"
+          },
+          {
+            "enabled": true,
+            "href": "/admin/?show=disabled",
+            "id": "admin.users.disabled",
+            "label": "Disabled",
+            "method": "GET"
+          }
+        ],
+        "selected": 0,
+        "total": 3
+      },
+      "details": null,
+      "look": {
+        "compact": false,
+        "panel": true,
+        "source": true,
+        "theme": "auto",
+        "wide": false
+      },
+      "notices": [],
+      "print": {
+        "range": "",
+        "taken": "",
+        "title": ""
+      },
+      "rail": {
+        "about": {
+          "build": "0.0.1 · 786949a",
+          "enabled": true,
+          "href": "/about",
+          "id": "about",
+          "label": "Carrel",
+          "method": "GET"
+        },
+        "davloom": "",
+        "foot": [],
+        "nav": [
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/contacts",
+            "icon": "i-back",
+            "id": "admin.back",
+            "label": "Back to app",
+            "method": "GET"
+          },
+          {
+            "count": 2,
+            "enabled": true,
+            "href": "/admin/invites",
+            "icon": "i-plus",
+            "id": "admin.invites",
+            "label": "Add users",
+            "method": "GET"
+          },
+          {
+            "count": 3,
+            "enabled": true,
+            "href": "/admin/",
+            "icon": "i-con",
+            "id": "admin.users",
+            "label": "Users",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/admin/settings",
+            "icon": "i-adm",
+            "id": "admin.settings",
+            "label": "Settings",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/admin/install",
+            "icon": "i-shield",
+            "id": "admin.install",
+            "label": "Installation",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/admin/dav",
+            "icon": "i-search",
+            "id": "admin.dav",
+            "label": "DAV validator",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/admin/escrow",
+            "icon": "i-dup",
+            "id": "admin.escrow",
+            "label": "Key escrow",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/admin/audit",
+            "icon": "i-clock",
+            "id": "admin.audit",
+            "label": "Audit log",
+            "method": "GET"
+          }
+        ],
+        "neighbours": [],
+        "note": "",
+        "sections": [],
+        "shortcuts": [],
+        "status": [
+          {
+            "line": [
+              {
+                "text": "No mail is going out."
+              }
+            ],
+            "title": "SMTP not configured",
+            "tone": "alert"
+          },
+          {
+            "line": [
+              {
+                "text": "Run the installation check."
+              }
+            ],
+            "title": "Not checked since the start",
+            "tone": "off"
+          }
+        ],
+        "tags": [],
+        "ticks": null
+      },
+      "rows": [
+        {
+          "accounts": 4,
+          "address": "mix@example.org",
+          "created": "2026-02-11",
+          "disabled": false,
+          "escrowed": false,
+          "lastLogin": "2026-08-10 17:04",
+          "login": "mix",
+          "menu": [
+            {
+              "csrf": "csrf",
+              "enabled": false,
+              "href": "/admin/?action=role\u0026role=user\u0026target=u-mix",
+              "id": "admin.user.role",
+              "label": "Make user",
+              "method": "POST",
+              "reason": "Someone has to stay an administrator."
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/admin/?action=sessions\u0026target=u-mix",
+              "id": "admin.user.sessions",
+              "label": "Kill sessions",
+              "method": "POST"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": false,
+              "href": "/admin/?action=disable\u0026target=u-mix",
+              "id": "admin.user.disable",
+              "label": "Disable",
+              "method": "POST",
+              "reason": "Cannot disable the last administrator."
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": false,
+              "href": "/admin/?action=delete\u0026target=u-mix",
+              "icon": "i-trash",
+              "id": "admin.user.delete",
+              "label": "Delete",
+              "method": "POST",
+              "reason": "Cannot delete the last administrator.",
+              "separator": true
+            }
+          ],
+          "role": "Administrator",
+          "sessions": 1
+        },
+        {
+          "accounts": 0,
+          "address": "",
+          "created": "2026-08-10",
+          "disabled": false,
+          "escrowed": true,
+          "lastLogin": "",
+          "login": "anna",
+          "menu": [
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/admin/?action=role\u0026role=admin\u0026target=u-mix",
+              "id": "admin.user.role",
+              "label": "Make administrator",
+              "method": "POST"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": false,
+              "href": "/admin/?action=sessions\u0026target=u-mix",
+              "id": "admin.user.sessions",
+              "label": "Kill sessions",
+              "method": "POST",
+              "reason": "No live sessions."
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/admin/?action=disable\u0026target=u-mix",
+              "id": "admin.user.disable",
+              "label": "Disable",
+              "method": "POST"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": false,
+              "href": "/admin/?action=delete\u0026target=u-mix",
+              "icon": "i-trash",
+              "id": "admin.user.delete",
+              "label": "Delete",
+              "method": "POST",
+              "reason": "Deleting an account needs its own dialogue, which is not here yet.",
+              "separator": true
+            }
+          ],
+          "role": "User",
+          "sessions": 0
+        },
+        {
+          "accounts": 0,
+          "address": "",
+          "created": "2026-08-10",
+          "disabled": true,
+          "escrowed": true,
+          "lastLogin": "",
+          "login": "viktor",
+          "menu": [
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/admin/?action=role\u0026role=admin\u0026target=u-mix",
+              "id": "admin.user.role",
+              "label": "Make administrator",
+              "method": "POST"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": false,
+              "href": "/admin/?action=sessions\u0026target=u-mix",
+              "id": "admin.user.sessions",
+              "label": "Kill sessions",
+              "method": "POST",
+              "reason": "No live sessions."
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/admin/?action=enable\u0026target=u-mix",
+              "id": "admin.user.enable",
+              "label": "Enable",
+              "method": "POST"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": false,
+              "href": "/admin/?action=delete\u0026target=u-mix",
+              "icon": "i-trash",
+              "id": "admin.user.delete",
+              "label": "Delete",
+              "method": "POST",
+              "reason": "Deleting an account needs its own dialogue, which is not here yet.",
+              "separator": true
+            }
+          ],
+          "role": "User",
+          "sessions": 0
+        }
+      ],
+      "subtitle": "3 accounts · 1 administrator · 2 covered by escrow",
+      "title": "Users",
+      "top": {
+        "lock": null,
+        "new": {
+          "arrow": [
+            {
+              "enabled": true,
+              "href": "/app/notes/quick",
+              "icon": "i-quill",
+              "id": "new.notes",
+              "label": "Note",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/quick",
+              "icon": "i-con",
+              "id": "new.contacts",
+              "label": "Contact",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/quick",
+              "icon": "i-cal",
+              "id": "new.calendar",
+              "label": "Event",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/tasks/quick",
+              "icon": "i-task",
+              "id": "new.tasks",
+              "label": "Task",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/picker?for=upload",
+              "icon": "i-upload",
+              "id": "new.upload",
+              "label": "Upload file",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "New note",
+          "method": "GET",
+          "primary": true,
+          "target": "sheet"
+        },
+        "refresh": {
+          "action": {
+            "enabled": false,
+            "id": "",
+            "label": "",
+            "method": ""
+          },
+          "answered": "",
+          "running": false
+        },
+        "search": {
+          "action": "/app/search",
+          "history": [],
+          "jump": [],
+          "name": "q",
+          "query": "",
+          "whole": null
+        },
+        "signed": {
+          "instance": "carrel.example",
+          "local": true,
+          "login": "mix"
+        },
+        "unlocked": null,
+        "user": [
+          {
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-gear",
+            "id": "user.settings",
+            "label": "Settings",
+            "method": "GET"
+          },
+          {
+            "enabled": true,
+            "href": "/admin/",
+            "icon": "i-adm",
+            "id": "user.admin",
+            "label": "Administration",
+            "method": "GET"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/logout",
+            "id": "user.logout",
+            "label": "Sign out",
+            "method": "POST",
+            "separator": true
+          }
+        ],
+        "userHref": "/app/settings/account"
+      }
+    },
+    "agenda": null,
+    "connections": null,
+    "contact": null,
+    "contacts": null,
+    "devices": null,
+    "event": null,
+    "eventEdit": null,
+    "note": null,
+    "notes": null,
+    "task": null,
+    "taskEdit": null,
+    "tasks": null
+  },
+  "warning": ""
+}

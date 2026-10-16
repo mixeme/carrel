@@ -17,6 +17,30 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.314 — 2026-10-16
+
+### Changed
+
+- **The administration's fixtures hold what its frames draw** (Ад4, Ад8,
+  Ад11, Ад15, Ад23, Ад36 of the scan of 15.10.2026): beside mix, anna, whose
+  key is in escrow, and viktor, disabled (`s-admin-2`, `-6`); an invitation
+  by link and one by letter the relay refused, and the registration open
+  (`s-admin-1`); no relay and people's letters off (`s-admin-3`). The sheet
+  that resets a password has its fixtures (`admin-reset`): anna chosen,
+  the password issued, a password too short, a login that is not hers
+  (`s-admin-13`, `-14`, `-16`, `-20`).
+
+### Fixed
+
+- The reset sheet answered a refusal with the confirmation field emptied;
+  it keeps the login typed, with its reason (`s-admin-20`).
+
+### For consumers
+
+New fixture directory `admin-reset` (states `normal`, `issued`, `refused`,
+`mismatch`; C-14.3 has `issued` and `mismatch`). Fixtures of the
+administration re-shot.
+
 ## v0.2.313 — 2026-10-16
 
 ### Changed

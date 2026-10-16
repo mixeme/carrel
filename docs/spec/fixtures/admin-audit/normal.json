@@ -94,7 +94,7 @@
     "compact": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 22,
+    "loaded": 29,
     "range": null,
     "segments": [
       {
@@ -121,7 +121,7 @@
       }
     ],
     "selected": 0,
-    "total": 22
+    "total": 29
   },
   "details": null,
   "filter": {
@@ -202,6 +202,21 @@
                 "label": "sources.select",
                 "selected": false,
                 "value": "sources.select"
+              },
+              {
+                "label": "user.disable",
+                "selected": false,
+                "value": "user.disable"
+              },
+              {
+                "label": "user.invite.complete",
+                "selected": false,
+                "value": "user.invite.complete"
+              },
+              {
+                "label": "user.invite.create",
+                "selected": false,
+                "value": "user.invite.create"
               }
             ],
             "readOnly": false,
@@ -262,7 +277,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 2,
         "enabled": true,
         "href": "/admin/invites",
         "icon": "i-plus",
@@ -271,7 +286,7 @@
         "method": "GET"
       },
       {
-        "count": 1,
+        "count": 3,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -334,11 +349,11 @@
       {
         "line": [
           {
-            "text": "No letter since the start."
+            "text": "No mail is going out."
           }
         ],
-        "title": "Mail is going out",
-        "tone": "on"
+        "title": "SMTP not configured",
+        "tone": "alert"
       },
       {
         "line": [
@@ -354,6 +369,62 @@
     "ticks": null
   },
   "rows": [
+    {
+      "detail": "role=user",
+      "failure": false,
+      "what": "user.invite.create",
+      "when": "2026-08-10 17:04",
+      "who": "mix",
+      "whom": ""
+    },
+    {
+      "detail": "role=user",
+      "failure": false,
+      "what": "user.invite.create",
+      "when": "2026-08-10 17:04",
+      "who": "mix",
+      "whom": ""
+    },
+    {
+      "detail": "",
+      "failure": false,
+      "what": "user.disable",
+      "when": "2026-08-10 17:04",
+      "who": "mix",
+      "whom": "viktor"
+    },
+    {
+      "detail": "role=user",
+      "failure": false,
+      "what": "user.invite.complete",
+      "when": "2026-08-10 17:04",
+      "who": "viktor",
+      "whom": "—"
+    },
+    {
+      "detail": "role=user",
+      "failure": false,
+      "what": "user.invite.create",
+      "when": "2026-08-10 17:04",
+      "who": "mix",
+      "whom": "viktor"
+    },
+    {
+      "detail": "role=user",
+      "failure": false,
+      "what": "user.invite.complete",
+      "when": "2026-08-10 17:04",
+      "who": "anna",
+      "whom": "—"
+    },
+    {
+      "detail": "role=user",
+      "failure": false,
+      "what": "user.invite.create",
+      "when": "2026-08-10 17:04",
+      "who": "mix",
+      "whom": "anna"
+    },
     {
       "detail": "file a-sftp-vps",
       "failure": false,
@@ -579,16 +650,6 @@
           "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
-          "method": "GET",
-          "separator": true,
-          "target": "sheet"
-        },
-        {
-          "enabled": true,
-          "href": "/app/mail/compose",
-          "icon": "i-mail",
-          "id": "new.letter",
-          "label": "Letter",
           "method": "GET",
           "separator": true,
           "target": "sheet"

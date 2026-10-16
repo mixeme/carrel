@@ -20,11 +20,12 @@
       },
       {
         "csrf": "csrf",
-        "enabled": true,
+        "enabled": false,
         "href": "/admin/settings/mail-test",
         "id": "admin.settings.mailtest",
         "label": "Send test",
         "method": "POST",
+        "reason": "Mail is not configured: there is nothing to send through yet.",
         "submits": true
       }
     ],
@@ -120,6 +121,12 @@
         "unfold": null
       },
       {
+        "badges": [
+          {
+            "label": "not configured",
+            "role": "alert"
+          }
+        ],
         "legend": "Mail",
         "rows": [
           {
@@ -135,7 +142,7 @@
             "placeholder": "smtp.example.org",
             "readOnly": false,
             "required": false,
-            "value": "127.0.0.1"
+            "value": ""
           },
           {
             "add": null,
@@ -149,7 +156,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "25"
+            "value": "587"
           },
           {
             "add": null,
@@ -162,7 +169,7 @@
             "options": [
               {
                 "label": "STARTTLS",
-                "selected": false,
+                "selected": true,
                 "value": "starttls"
               },
               {
@@ -172,14 +179,14 @@
               },
               {
                 "label": "None",
-                "selected": true,
+                "selected": false,
                 "separator": true,
                 "value": "none"
               }
             ],
             "readOnly": false,
             "required": false,
-            "value": "none"
+            "value": "starttls"
           },
           {
             "add": null,
@@ -192,7 +199,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "relay"
+            "value": ""
           },
           {
             "add": null,
@@ -220,7 +227,7 @@
             "placeholder": "carrel@example.org",
             "readOnly": false,
             "required": false,
-            "value": "noreply@carrel.example"
+            "value": ""
           },
           {
             "add": null,
@@ -240,6 +247,12 @@
         "unfold": null
       },
       {
+        "badges": [
+          {
+            "label": "off",
+            "role": "neutral"
+          }
+        ],
         "legend": "Letters from users",
         "rows": [
           {
@@ -253,25 +266,25 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "true"
+            "value": ""
           },
           {
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Your relay decides which of the two it will let out. The envelope sender stays noreply@carrel.example either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.",
+            "hint": "Your relay decides which of the two it will let out. The envelope sender stays the From address either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.",
             "kind": "radio",
             "label": "Sender address",
             "name": "sender",
             "options": [
               {
-                "label": "noreply@carrel.example",
-                "selected": false,
+                "label": "the From address",
+                "selected": true,
                 "value": "noreply"
               },
               {
-                "label": "login@carrel.example",
-                "selected": true,
+                "label": "login@…",
+                "selected": false,
                 "value": "login"
               }
             ],
@@ -395,7 +408,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 2,
         "enabled": true,
         "href": "/admin/invites",
         "icon": "i-plus",
@@ -404,7 +417,7 @@
         "method": "GET"
       },
       {
-        "count": 1,
+        "count": 3,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -467,11 +480,11 @@
       {
         "line": [
           {
-            "text": "No letter since the start."
+            "text": "No mail is going out."
           }
         ],
-        "title": "Mail is going out",
-        "tone": "on"
+        "title": "SMTP not configured",
+        "tone": "alert"
       },
       {
         "line": [
@@ -536,16 +549,6 @@
           "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
-          "method": "GET",
-          "separator": true,
-          "target": "sheet"
-        },
-        {
-          "enabled": true,
-          "href": "/app/mail/compose",
-          "icon": "i-mail",
-          "id": "new.letter",
-          "label": "Letter",
           "method": "GET",
           "separator": true,
           "target": "sheet"
