@@ -426,6 +426,12 @@ func TestAdminEscrowIsTheFrame(t *testing.T) {
 	}
 	// The rubrics and their hints, in the frame's order.
 	hints := frameAll(frameAnyHint, frame, 1)
+	// Recover's last sentence is the owner's of 16.10.2026, not the frame's
+	// «mailed — always» (Ад40; Typecase's task 202 redraws it).
+	if len(hints) > 2 {
+		hints[2] = strings.Replace(hints[2], "The user is mailed about it — always, not at the administrator’s discretion.",
+			"The user can always see what was done to their password: the link they were given when the key was deposited shows it. A letter goes too when mail can reach them.", 1)
+	}
 	for i, f := range []view.Form{page.Form, page.Master, page.Recover} {
 		legend := []string{"Policy", "Master password", "Recover an account"}[i]
 		if len(f.Sets) == 0 || string(f.Sets[0].Legend) != legend {

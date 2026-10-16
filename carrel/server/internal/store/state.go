@@ -286,6 +286,13 @@ type User struct {
 	EscrowDepositedAt   *time.Time `json:"escrowDepositedAt,omitempty"`
 	EscrowLastRecovery  *time.Time `json:"escrowLastRecovery,omitempty"`
 	EscrowNoticePending bool       `json:"escrowNoticePending,omitempty"`
+	// PasswordLog is the token of the link to this account's password
+	// history (the owner's decision of 16.10.2026, Ад40): made at the first
+	// deposit, shown in Key escrow, never changed or revoked — by nobody.
+	// PasswordEvents are what that page shows: kept here, not read from the
+	// journal, which is trimmed.
+	PasswordLog    string          `json:"passwordLog,omitempty"`
+	PasswordEvents []PasswordEvent `json:"passwordEvents,omitempty"`
 
 	LoginSalt  []byte     `json:"loginSalt,omitempty"`
 	LoginHash  []byte     `json:"loginHash,omitempty"`

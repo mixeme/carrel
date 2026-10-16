@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/base32"
 	"errors"
 	"fmt"
@@ -220,6 +221,7 @@ func (s *Service) RecoverEscrow(ctx context.Context, actorID, login, masterPassw
 		burnWipeTokens(st, x.ID)
 		pruneTokens(st, now)
 		x.EscrowLastRecovery = &now
+		store.NotePassword(x, now, "escrow.recover", actorLogin(st, actorID))
 		s.mgr.EndAccount(x.ID)
 		return []store.AuditEntry{{
 			When: now, Who: actorLogin(st, actorID), What: "escrow.recover", Whom: login,
@@ -272,4 +274,22 @@ func newTempPassword() (string, error) {
 		groups = append(groups, enc[i:i+4])
 	}
 	return strings.Join(groups, "-"), nil
+}
+
+// PasswordHistory is the account whose password-history link token is: its
+// login, when its key was first deposited, and what was done to its
+// password (Ад40). The token is compared in constant time; false — no such
+// link.
+func (s *Service) PasswordHistory(token string) (login string, events []store.PasswordEvent, ok bool) {
+	if token == "" {
+		return "", nil, false
+	}
+	snap := s.st.Snapshot()
+	for i := range snap.Users {
+		u := &snap.Users[i]
+		if u.PasswordLog != "" && subtle.ConstantTimeCompare([]byte(u.PasswordLog), []byte(token)) == 1 {
+			return u.Login, append([]store.PasswordEvent(nil), u.PasswordEvents...), true
+		}
+	}
+	return "", nil, false
 }

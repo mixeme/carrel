@@ -153,3 +153,22 @@ type Block struct {
 	Align    CellAlign `json:"align,omitempty"`  // выравнивание столбца; только у BlockCell, пусто — не задано
 	Children []Block   `json:"children"`
 }
+
+// PasswordHistoryPage — история пароля учётной записи по её постоянной
+// ссылке (решение владельца 16.10.2026, Ад40): без входа, и только то, что
+// делали с паролем, — открытие ключа мастер-паролем, сброс администратором,
+// смена пароля, сброс учётной записи по ссылке «Forgot password»: когда и
+// кем. Title — «Password history of anna»; Lede — с какого дня история
+// ведётся. Empty — слова пустой истории; у непустой пусто
+type PasswordHistoryPage struct {
+	Plain
+	Rows  []PasswordHistoryRow `json:"rows"`
+	Empty Text                 `json:"empty"`
+}
+
+// PasswordHistoryRow — одно событие: момент числами, что сделано, кем.
+type PasswordHistoryRow struct {
+	When When `json:"when"`
+	What Text `json:"what"`
+	Who  Text `json:"who"`
+}

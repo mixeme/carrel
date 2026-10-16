@@ -24,7 +24,7 @@ func (s *Server) getSettingsEscrow(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	page := s.buildEscrowPage(sess, "")
+	page := s.buildEscrowPage(r, sess, "")
 	s.writePage(w, r, http.StatusOK, page)
 }
 
@@ -69,7 +69,7 @@ func (s *Server) postSettingsEscrow(w http.ResponseWriter, r *http.Request) {
 		}
 	case "withdraw":
 		if err := s.users.WithdrawEscrow(sess.AccountID()); err != nil {
-			page := s.buildEscrowPage(sess, string(formError(err)))
+			page := s.buildEscrowPage(r, sess, string(formError(err)))
 			s.writePage(w, r, http.StatusOK, page)
 			return
 		}
@@ -84,7 +84,7 @@ func (s *Server) depositRefused(w http.ResponseWriter, r *http.Request, sess *se
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.depositSheet(sess, text(errText)), nil)
 		return
 	}
-	s.writePage(w, r, http.StatusOK, s.buildEscrowPage(sess, errText))
+	s.writePage(w, r, http.StatusOK, s.buildEscrowPage(r, sess, errText))
 }
 
 // getEscrowDeposit is «Deposit my key» over Account (account-2): what
@@ -212,7 +212,7 @@ func (s *Server) escrowStatus(sess *session.Session, u *store.User, onAccount bo
 	return status
 }
 
-func (s *Server) buildEscrowPage(sess *session.Session, errText string) view.EscrowPage {
+func (s *Server) buildEscrowPage(r *http.Request, sess *session.Session, errText string) view.EscrowPage {
 	snap := s.store.Snapshot()
 	u := snap.UserByID(sess.AccountID())
 	page := view.EscrowPage{
@@ -221,6 +221,15 @@ func (s *Server) buildEscrowPage(sess *session.Session, errText string) view.Esc
 	}
 	if u != nil && store.UserDeposited(u) {
 		page.Subtitle = "A copy of your key on this server"
+	}
+	// The link to the password's history, always shown once it was given
+	// (Ад40): withdrawing the copy does not take it away.
+	if u != nil && u.PasswordLog != "" {
+		page.PasswordLink = &view.PasswordLink{
+			Address: text(s.absURL(r, "/password-history/"+u.PasswordLog)),
+			Copy:    view.Action{ID: "escrow.history.copy", Label: "Copy", Icon: "i-dup", Method: "GET", Enabled: true},
+			Note:    "Keep this link. It shows what was done to your password and by whom — a recovery with the master password, a reset, a change — also when you cannot sign in. It never changes, and nobody can take it away.",
+		}
 	}
 	if store.EscrowActive(&snap) && u != nil && !store.UserDeposited(u) {
 		page.Subtitle, page.Rubric = "No copy of your data key is deposited", "What a deposit does"
@@ -376,7 +385,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 			view.FormRow{Name: "master", Label: "Master password", Kind: view.InputPassword, Required: true},
 			view.FormRow{Name: "temp", Label: "Temporary password for the user", Kind: view.InputText, Required: true, Mono: true,
 				Value: text(s.users.SuggestPassword()),
-				Hint:  "Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user is mailed about it — always, not at the administrator’s discretion."},
+				Hint:  "Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user can always see what was done to their password: the link they were given when the key was deposited shows it. A letter goes too when mail can reach them."},
 		), "escrow.recover", "Recover")
 		page.Recover.Actions[0].Danger = true
 		legend(&page.Recover, "Recover an account")
@@ -431,4 +440,41 @@ func boolStr(v bool) string {
 		return "true"
 	}
 	return ""
+}
+
+// passwordWords are what the history of a password says of each thing done
+// to it (Ад40).
+var passwordWords = map[string]string{
+	"escrow.recover":    "Opened with the master password; a temporary password set",
+	"user.reset":        "Reset by an administrator: the account emptied, a temporary password set",
+	"password.change":   "Password changed",
+	"user.wipe":         "Account reset by the Forgot password link: everything in it erased",
+	"user.password.set": "New password set after that reset",
+}
+
+// getPasswordHistory is the history of one account's password by its
+// permanent link (the owner's decision of 16.10.2026, Ад40): no sign-in,
+// nothing but what was done to the password, when and by whom.
+func (s *Server) getPasswordHistory(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(s.clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	login, events, ok := s.users.PasswordHistory(r.PathValue("token"))
+	if !ok {
+		s.tokenNotFound(w, r, start)
+		return
+	}
+	tf := timeFmt{now: s.now(), tz: s.tz()}
+	page := view.PasswordHistoryPage{Plain: view.Plain{Title: text("Password history of " + login),
+		Lede: line("What was done to the password of this account, and by whom. Times are " + s.tz().String() + ".")}}
+	for i := len(events) - 1; i >= 0; i-- {
+		e := events[i]
+		page.Rows = append(page.Rows, view.PasswordHistoryRow{When: tf.numStamp(e.When), What: text(passwordWords[e.What]), Who: text(e.Who)})
+	}
+	if len(page.Rows) == 0 {
+		page.Empty = "Nothing has been done to this password."
+	}
+	s.writePage(w, r, http.StatusOK, page)
 }

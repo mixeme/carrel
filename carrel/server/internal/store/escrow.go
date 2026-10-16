@@ -1,6 +1,8 @@
 package store
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"time"
 
 	"carrel.dev/carrel/server/internal/crypt"
@@ -41,7 +43,34 @@ func TryDepositEscrow(st *State, u *User, dataKey [crypt.KeyLen]byte, now time.T
 	}
 	u.EscrowDeposited = deposited
 	u.EscrowDepositedAt = &now
+	if u.PasswordLog == "" {
+		var raw [32]byte
+		if _, err := rand.Read(raw[:]); err != nil {
+			return err
+		}
+		u.PasswordLog = base64.RawURLEncoding.EncodeToString(raw[:])
+	}
 	return nil
+}
+
+// PasswordEvent is one thing done to an account's password: what, when, by
+// whom (Ад40).
+type PasswordEvent struct {
+	When time.Time `json:"when"`
+	What string    `json:"what"` // the journal's code: escrow.recover, user.reset, password.change, user.wipe, user.password.set
+	Who  string    `json:"who"`
+}
+
+// maxPasswordEvents bounds an account's password history; the oldest go
+// first.
+const maxPasswordEvents = 200
+
+// NotePassword adds what was done to u's password to its history.
+func NotePassword(u *User, when time.Time, what, who string) {
+	u.PasswordEvents = append(u.PasswordEvents, PasswordEvent{When: when, What: what, Who: who})
+	if n := len(u.PasswordEvents); n > maxPasswordEvents {
+		u.PasswordEvents = append([]PasswordEvent(nil), u.PasswordEvents[n-maxPasswordEvents:]...)
+	}
 }
 
 // ClearEscrowDeposit removes a deposited key copy.

@@ -917,6 +917,7 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	// hold a run that looks like an identifier below.
 	s = regexp.MustCompile(`/invite/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/invite/invite-token")
 	s = regexp.MustCompile(`/forgot/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/forgot/reset-token")
+	s = regexp.MustCompile(`/password-history/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/password-history/history-token")
 	s = regexp.MustCompile(`"[A-Za-z0-9_-]{43}"`).ReplaceAllString(s, `"csrf"`)
 	// A temporary password a form offers (s-admin-1, s-admin-6) is made for
 	// each answer.

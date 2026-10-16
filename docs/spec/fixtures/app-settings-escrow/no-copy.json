@@ -1,7 +1,6 @@
 {
   "confirm": null,
   "details": null,
-  "history": [],
   "look": {
     "compact": false,
     "panel": true,
@@ -10,6 +9,7 @@
     "wide": false
   },
   "notices": [],
+  "passwordLink": null,
   "print": {
     "range": "",
     "taken": "",

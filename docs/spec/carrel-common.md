@@ -338,6 +338,7 @@ spec/fixtures/<screen>/<state>.json
 | `/setup` | GET, POST | — | страница | `SetupPage` |
 | `/register` | GET, POST | — | страница | `RegisterPage` |
 | `/invite/{token}` | GET, POST | токен | страница | `InvitePage`; мёртвый секрет — `DeadLinkPage` |
+| `/password-history/{token}` | GET | токен | страница | `PasswordHistoryPage` — история пароля учётной записи по её постоянной ссылке (решение владельца 16.10.2026, Ад40): без входа, только что делали с паролем, когда и кем; неизвестный токен — `DeadLinkPage` |
 | `/confirm-email/{token}` | GET | токен | страница | `ConfirmEmailPage`; мёртвый секрет — `DeadLinkPage` |
 | `/forgot` | GET, POST | — | страница | `ForgotPage` |
 | `/forgot/{token}` | GET, POST | токен | страница | `ForgotWipePage`; мёртвый секрет — `DeadLinkPage` |
@@ -2815,8 +2816,10 @@ type EscrowPage struct {
     Rubric   Text // над словами без копии: «What a deposit does» (account-12); с копией и при выключенной схеме пусто
     Status   EscrowStatus
     Confirm  *UnlockSheet // лист депонирования — только в ответе с отказом без сценариев (неверный пароль); открытый лист — свой ответ, …/escrow/deposit (account-2); account-12 рисует страницу без него
-    History  []AuditRow
+    PasswordLink *PasswordLink // постоянная ссылка на историю пароля (Ад40): выдана при депонировании, видна всегда, не меняется и не гасится; nil — ключ не депонировали
 }
+// Ссылка на историю пароля: адрес моноширинно, Copy, слова — зачем хранить.
+type PasswordLink struct { Address Text; Copy Action; Note Text }
 
 // Лист перед отзывом депонированного ключа (account-11): копия уничтожается.
 // Заголовок — то, что нажимают; одно предупреждение — чего больше не будет и
@@ -3328,6 +3331,15 @@ type RegisterPage struct { // s-auth-2, после отправки s-auth-3
     Sent   bool
     SignIn Action // «Already have an account? Sign in» у формы, «Back to sign in» после отправки
 }
+// История пароля по постоянной ссылке (Ад40): Title «Password history of
+// anna», Lede — что это и в каком поясе время; строки — новые сверху:
+// момент числами, что сделано («Opened with the master password; a
+// temporary password set», «Reset by an administrator: …», «Password
+// changed», «Account reset by the Forgot password link: …», «New password
+// set after that reset»), кем. Empty — у пустой истории.
+type PasswordHistoryPage struct { Plain; Rows []PasswordHistoryRow; Empty Text }
+type PasswordHistoryRow struct { When When; What Text; Who Text }
+
 type InvitePage   struct { // s-auth-12 (письмом), s-auth-14 (ссылкой)
     Plain
     // Login, Email, Password, Repeat password. Email показан и правится

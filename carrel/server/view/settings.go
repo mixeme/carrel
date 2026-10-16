@@ -186,7 +186,18 @@ type EscrowPage struct {
 	Rubric   Text         `json:"rubric"`   // над словами без копии: «What a deposit does» (account-12); с копией и при выключенной схеме пусто
 	Status   EscrowStatus `json:"status"`
 	Confirm  *UnlockSheet `json:"confirm"` // лист депонирования — только в ответе с отказом без сценариев (неверный пароль); открытый лист — свой ответ, …/escrow/deposit (account-2); nil — его нет
-	History  []AuditRow   `json:"history"`
+	// PasswordLink — постоянная ссылка на историю пароля этой учётной записи
+	// (решение владельца 16.10.2026, Ад40): выдана при депонировании, видна
+	// всегда, не меняется и не гасится; nil — ключ не депонировали
+	PasswordLink *PasswordLink `json:"passwordLink"`
+}
+
+// PasswordLink — ссылка на историю пароля: адрес моноширинно, Copy и
+// слова, зачем её хранить.
+type PasswordLink struct {
+	Address Text   `json:"address"`
+	Copy    Action `json:"copy"`
+	Note    Text   `json:"note"`
 }
 
 // EscrowWithdrawSheet — лист перед отзывом депонированного ключа: копия

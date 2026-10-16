@@ -644,6 +644,7 @@ func (s *Service) ForgotConfirmWipe(ctx context.Context, token string) error {
 				continue
 			}
 			store.WipeAccount(st, u)
+			store.NotePassword(u, now, "user.wipe", u.Login)
 			wiped = u.ID
 			t.Step = string(view.WipePassword)
 			s.mgr.EndAccount(u.ID)
@@ -686,6 +687,7 @@ func (s *Service) ForgotSetPassword(ctx context.Context, token, password string)
 			}
 			burnWipeTokens(st, u.ID)
 			pruneTokens(st, now)
+			store.NotePassword(u, now, "user.password.set", u.Login)
 			return []store.AuditEntry{{
 				When: now, Who: u.Login, What: "user.password.set", Whom: u.Login,
 			}}, nil

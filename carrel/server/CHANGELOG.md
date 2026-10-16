@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.325 — 2026-10-16
+
+### Added
+
+- **The history of an account's password, by a permanent link** (Ад40;
+  the owner's decision of 16.10.2026). A letter about a recovery is no
+  guarantee — the administrator runs the relay —, so a deposit gives the
+  account one link, `/password-history/{token}`: always shown in Key escrow
+  (`EscrowPage.PasswordLink`, with Copy), never changed or revoked by
+  anybody, kept after a withdrawal. By it, without signing in, the account's
+  person sees what was done to the password and by whom — a recovery with
+  the master password, a reset by an administrator, a change, a reset by the
+  Forgot password link and the password set after it
+  (`PasswordHistoryPage`). The history is the account's own, not read from
+  the journal, which is trimmed. The line under Recover says so instead of
+  «mailed — always».
+
+### For consumers
+
+C-5: `/password-history/{token}`; C-6: `EscrowPage.PasswordLink`
+(`History` gone), `PasswordLink`, `PasswordHistoryPage`. Fixtures of key
+escrow re-shot.
+
 ## v0.2.324 — 2026-10-16
 
 ### Changed

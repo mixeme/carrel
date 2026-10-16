@@ -151,6 +151,7 @@ func (s *Service) AdminResetPassword(ctx context.Context, actorID, targetID, tem
 		pruneTokens(st, now)
 		s.mgr.EndAccount(u.ID)
 		wiped = u.ID
+		store.NotePassword(u, now, "user.reset", actorLogin(st, actorID))
 		return []store.AuditEntry{{
 			When: now, Who: actorLogin(st, actorID), What: "user.reset", Whom: u.Login,
 		}}, nil

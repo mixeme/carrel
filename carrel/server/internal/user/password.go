@@ -40,6 +40,7 @@ func (s *Service) ChangePassword(ctx context.Context, accountID, exceptSID, curr
 		}
 		burnWipeTokens(st, x.ID)
 		pruneTokens(st, now)
+		store.NotePassword(x, now, "password.change", x.Login)
 		return []store.AuditEntry{{
 			When: now, Who: x.Login, What: "password.change", Whom: x.Login,
 		}}, nil

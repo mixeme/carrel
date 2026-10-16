@@ -34,6 +34,8 @@ type Users interface {
 	Authenticate(ctx context.Context, login, password string) (accountID string, dataKey [32]byte, mustChange bool, ok bool)
 	// LoginLimited journals a sign-in refused for too many attempts (Ад38).
 	LoginLimited(login, ip string)
+	// PasswordHistory is the account of a password-history link (Ад40).
+	PasswordHistory(token string) (login string, events []store.PasswordEvent, ok bool)
 	LoginExists(login string) bool
 	RegisterOpen() bool
 

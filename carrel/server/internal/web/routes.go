@@ -12,6 +12,7 @@ func (s *Server) registerRoutes() {
 	s.handle("GET /register", (*Server).getRegister)
 	s.handle("POST /register", (*Server).postRegister)
 	s.handle("GET /invite/{token}", (*Server).getInvite)
+	s.handle("GET /password-history/{token}", (*Server).getPasswordHistory)
 	s.handle("POST /invite/{token}", (*Server).postInvite)
 	s.handle("GET /confirm-email/{token}", (*Server).getConfirmEmail)
 	s.handle("GET /forgot", (*Server).getForgot)

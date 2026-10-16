@@ -1,7 +1,6 @@
 {
   "confirm": null,
   "details": null,
-  "history": [],
   "look": {
     "compact": false,
     "panel": true,
@@ -10,6 +9,17 @@
     "wide": false
   },
   "notices": [],
+  "passwordLink": {
+    "address": "http://example.com/password-history/history-token",
+    "copy": {
+      "enabled": true,
+      "icon": "i-dup",
+      "id": "escrow.history.copy",
+      "label": "Copy",
+      "method": "GET"
+    },
+    "note": "Keep this link. It shows what was done to your password and by whom — a recovery with the master password, a reset, a change — also when you cannot sign in. It never changes, and nobody can take it away."
+  },
   "print": {
     "range": "",
     "taken": "",

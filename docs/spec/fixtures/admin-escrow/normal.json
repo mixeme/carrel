@@ -376,7 +376,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user is mailed about it — always, not at the administrator’s discretion.",
+            "hint": "Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user can always see what was done to their password: the link they were given when the key was deposited shows it. A letter goes too when mail can reach them.",
             "kind": "text",
             "label": "Temporary password for the user",
             "mono": true,
