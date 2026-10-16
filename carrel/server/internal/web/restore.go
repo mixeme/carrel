@@ -25,6 +25,7 @@ import (
 	"carrel.dev/carrel/server/internal/provider/file"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
 )
@@ -115,17 +116,24 @@ func (t *restoreTask) open() (*zip.Reader, *os.File, error) {
 
 // restoreBlock is the restore part of the Backup screen: which archive, then
 // each of its collections and where it goes (s-backup-8).
-func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob) view.RestoreBlock {
+func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from string) view.RestoreBlock {
 	b := view.RestoreBlock{Note: join("Restoring ", strongRun("creates"), " records, the way import does: a colliding UID gets a fresh one and a line in the report. "+
 		"Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes.")}
+	// A job's copies: one row a job, its newest verified copy — its day, its
+	// size, how many collections (s-backup-7, Нс74).
 	var runs, stores []view.Option
 	byJob := s.users.BackupRuns(sess.AccountID())
-	tf, now := s.timeFor(sess), s.now()
+	tf := s.timeFor(sess)
 	for _, job := range blob.BackupJobs {
-		for _, r := range byJob[job.ID] {
-			if r.File != "" && r.Verified {
-				runs = append(runs, view.Option{Value: job.ID + "|" + r.ID, Label: text(job.Name + " · " + string(tf.formatWhen(r.Started, true, now)))})
+		var newest *store.BackupRun
+		for i, r := range byJob[job.ID] {
+			if r.File != "" && r.Verified && (newest == nil || r.Started.After(newest.Started)) {
+				newest = &byJob[job.ID][i]
 			}
+		}
+		if newest != nil {
+			runs = append(runs, view.Option{Value: job.ID + "|" + newest.ID, Label: text(job.Name),
+				Meta: text(string(tf.numStamp(newest.Started)) + " · " + string(formatSize(newest.Size)) + " · " + plural(newest.Collections, "collection"))})
 		}
 	}
 	for _, conn := range blob.Connections {
@@ -135,22 +143,45 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob) view.Rest
 			}
 		}
 	}
-	b.Source = s.plainForm("/app/settings/backup?op=restore-open", "POST",
-		csrfField(sess),
-		view.FormRow{Name: "source", Label: "Which archive", Kind: view.InputRadio, Options: []view.Option{
-			{Value: "run", Label: "From a job's history", Selected: len(runs) > 0},
-			{Value: "webdav", Label: "From a storage (WebDAV)", Selected: len(runs) == 0},
-			{Value: "upload", Label: "From this computer"},
-		}},
-		view.FormRow{Name: "run", Label: "Copy", Kind: view.InputSelect, Options: runs},
-		view.FormRow{Name: "store", Label: "Storage", Kind: view.InputSelect, Options: stores},
-		view.FormRow{Name: "file", Label: "File in it", Kind: view.InputText, Hint: "The path of the archive under the storage's root, such as backups/carrel-work-2026-08-16T031000Z.zip.age."},
-		view.FormRow{Name: "password", Label: "Archive password", Kind: view.InputPassword, Hint: "The job's own password. An archive that is not encrypted needs none."},
-	)
-	b.Source.Actions = []view.Action{
-		{ID: "restore.open", Label: "Open the manifest", Primary: true, Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}}), Method: "POST", Enabled: true},
-		{ID: "restore.upload", Label: "Open a file from this computer", Icon: "i-upload", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}, "source": {"upload"}}), Method: "POST", Enabled: true},
+	// Where the archive is: one of three, an address each (s-backup-7,
+	// Нс74) — a job's copy when there is one, else a server.
+	switch from {
+	case "job", "server", "file":
+	default:
+		from = "server"
+		if len(runs) > 0 {
+			from = "job"
+		}
 	}
+	for _, f := range []struct{ id, label string }{{"job", "From a job"}, {"server", "From a server"}, {"file", "From this computer"}} {
+		b.From = append(b.From, view.Action{ID: "restore.from." + f.id, Label: text(f.label), Method: "GET", Enabled: true, On: f.id == from,
+			Href: s.route("/app/settings/backup?" + url.Values{"restore": {"1"}, "from": {f.id}}.Encode())})
+	}
+	b.FromHint = "One archive, one of three. The other two stay empty until you switch."
+	source := map[string]string{"job": "run", "server": "webdav", "file": "upload"}[from]
+	rows := []view.FormRow{csrfField(sess), {Name: "source", Kind: view.InputHidden, Value: text(source)}}
+	switch from {
+	case "job":
+		for i := range runs {
+			runs[i].Selected = i == 0
+		}
+		rows = append(rows, view.FormRow{Name: "run", Label: "From a job", Kind: view.InputRadio, Options: runs})
+	case "server":
+		rows = append(rows,
+			view.FormRow{Name: "store", Label: "Storage", Kind: view.InputSelect, Options: stores},
+			view.FormRow{Name: "file", Label: "File in it", Kind: view.InputText, Hint: "The path of the archive under the storage's root, such as backups/carrel-work-2026-08-16T031000Z.zip.age."})
+	}
+	rows = append(rows, view.FormRow{Name: "password", Label: "Archive password", Kind: view.InputPassword,
+		Hint: "The one set in the job, not your sign-in password. Without it the manifest cannot be read — Carrel will not even see the list of collections."})
+	b.Source = s.plainForm("/app/settings/backup?op=restore-open", "POST", rows...)
+	open := view.Action{ID: "restore.open", Label: "Open the manifest", Primary: true, Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}}), Method: "POST", Enabled: true}
+	if from == "file" {
+		// The archive comes with the form, from this computer.
+		open.ID, open.Icon, open.File = "restore.upload", "i-upload", "archive"
+		open.Href = s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}, "source": {"upload"}})
+	}
+	b.Source.Actions = []view.Action{open,
+		{ID: "restore.close", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true}}
 	if t := restoreOf(sess); t != nil {
 		b.Open = true
 		b.Subtitle = archiveLine(t)

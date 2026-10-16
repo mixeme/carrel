@@ -1761,6 +1761,7 @@
       }
     ]
   },
+  "addNote": "",
   "details": null,
   "dialogSubtitle": "One connection gives calendars and address books alike.",
   "dialogTitle": "Edit connection",

@@ -69,7 +69,7 @@ func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) 
 	}
 	page := s.connectionsPage(sess, f, nil)
 	if r.URL.Query().Get("op") == "feed" {
-		page.Add, page.Note = s.feedForm(sess, feedForm{Folder: r.URL.Query().Get("kind") == "folder"}), feedPanelNote
+		s.feedPanel(&page, sess, feedForm{Folder: r.URL.Query().Get("kind") == "folder"})
 	}
 	if id := r.URL.Query().Get("reveal"); id != "" && s.revealPassword(sess, &page, id) {
 		w.Header().Set("Cache-Control", "no-store")
@@ -143,7 +143,7 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 			Body: "An account is an address with its login and password: that is what Carrel writes to. A collection reached by a link — " +
 				"a calendar's secret address, a shared folder, another Carrel's published link — is a subscription: read-only, and the link's own password, if it has one, is kept with it. The form below subscribes to this address.",
 		})
-		page.Add, page.Note = s.feedForm(sess, feedForm{URL: f.Server, Folder: !looksLikeFeed(f.Server)}), feedPanelNote
+		s.feedPanel(&page, sess, feedForm{URL: f.Server, Folder: !looksLikeFeed(f.Server)})
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}

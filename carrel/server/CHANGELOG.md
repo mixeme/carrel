@@ -17,6 +17,31 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.306 — 2026-10-16
+
+### Changed
+
+- **The panel of a subscription is the frame's** (Нс27 of the scan of
+  15.10.2026; `s-profile-10`): the address and the name with the frame's
+  hints; «Label colour» — the palette, the one derived from the address
+  chosen and said so («derived from the address»), kept with the
+  subscription; «This feed asks for a password» — a tick, the login and the
+  password hidden until it is ticked (`FormRow.Changed`: `asks`) and read
+  only with it; «Sections» after a check — what the feed carries, not a
+  choice; `ConnectionsPage.AddNote` — the warning under the form that the
+  server, not the browser, reads the feed; Cancel beside Subscribe.
+- **The source of a restore is an address of its step** (Нс74;
+  `s-backup-7`): `RestoreBlock.From` — From a job · From a server · From
+  this computer, links to `?restore=1&from=…`, `FromHint` under them — and
+  the step's form holds the fields of the one chosen alone: a job's copies
+  one row a job (its newest verified copy; its day, size and collections in
+  `Meta`), a server's storage and path, this computer's file; the archive's
+  password with the frame's words; Cancel.
+
+### For consumers
+
+`ConnectionsPage.AddNote`, `RestoreBlock.From`, `.FromHint` in C-6;
+fixtures of Connections, Backup and the sheets over Connections re-shot.
 ## v0.2.305 — 2026-10-16
 
 ### Added

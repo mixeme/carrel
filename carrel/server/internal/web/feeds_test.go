@@ -95,7 +95,8 @@ func TestSubscribeChecksThenKeepsNoRecords(t *testing.T) {
 	f := feedHarness(t)
 	feed := newFeedServer(t, holidays, "")
 	form := decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections?op=feed", f.sess)))
-	if len(form.Add.Actions) != 2 {
+	// Check, Subscribe and Cancel (s-profile-10, Нс27).
+	if len(form.Add.Actions) != 3 || actionByID(form.Add.Actions, "feed.cancel") == nil {
 		t.Fatalf("subscribe form = %+v", form.Add)
 	}
 	checked := decode[view.ConnectionsPage](t, f.h.do(postForm("/app/settings/connections?op=feed.check", f.sess, url.Values{"url": {feed.URL + "/ru.ics"}})))

@@ -467,7 +467,7 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 			Href: s.postQuery("/app/settings/backup", url.Values{"op": {"delete"}, "job": {job.ID}})}
 		page.DeleteNote = "Archives already made stay where they are: the schedule is deleted, not the copies."
 	}
-	page.Restore = s.restoreBlock(sess, blob)
+	page.Restore = s.restoreBlock(sess, blob, "")
 	if editing == nil {
 		backupHead(&page, len(blob.BackupJobs))
 		page.Actions = []view.Action{
@@ -679,6 +679,8 @@ func (s *Server) getSettingsBackup(w http.ResponseWriter, r *http.Request) {
 		page.Add.Actions = append(page.Add.Actions,
 			view.Action{ID: "backup.cancel", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true})
 	case q.Get("restore") != "":
+		// The step of the source the address names (s-backup-7, Нс74).
+		page.Restore = s.restoreBlock(sess, s.catalogOf(sess), q.Get("from"))
 		page.Restore.Open = true
 	}
 	s.writePage(w, r, http.StatusOK, page)

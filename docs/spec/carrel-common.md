@@ -2842,6 +2842,7 @@ type ConnectionsPage struct {
     Trace         *DiagnosticTrace
     Actions       []Action // Connect account (→ `?op=add`) · Subscribe to a feed
     Note          Runs     // с открытой панелью подписки — «A feed is read again on every visit … **Check** asks whether the address still replies.» (s-profile-10); без панели пусто
+    AddNote       Text     // тревожное сообщение под формой панели подписки: ленту читает сервер Carrel, не браузер (s-profile-10); без панели пусто
 }
 type ConnectionCard struct {
     AccountID   string
@@ -3054,6 +3055,14 @@ type BackupRun struct { ID Text; Started When; State OpState; Size Size; Downloa
 type RestoreBlock struct {
     Open    bool // восстановление открыто: Restore в шапке (?restore=1) или архив уже открыт
     Subtitle Runs // открытый архив (s-backup-8): «Job «Личное» · manifest read · 4 collections · 1 214 records · ‹carrel-backup/2026-08-14T09-12.zip›»; не открыт — пусто
+    // From — «Where the archive is»: From a job · From a server · From this
+    // computer, ссылки на тот же шаг (?restore=1&from=job|server|file),
+    // выбранная On; FromHint — подсказка под ними (s-backup-7). Source —
+    // только поля выбранного: у задания — строка на задание (имя; день,
+    // размер, счёт коллекций — Meta), у сервера — хранилище и путь, у
+    // компьютера — файл кнопкой; и пароль архива
+    From     []Action
+    FromHint Text
     Source  Form
     Match   *RestoreMatch // шаг сопоставления (s-backup-8); nil — архив не открыт
     Note    Runs // восстановление создаёт, как импорт, а не откатывает: «creates» жирным (s-backup-8)

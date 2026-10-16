@@ -237,6 +237,10 @@ type ConnectionsPage struct {
 	// — что ленту читают на каждом визите и что делает **Check**
 	// (s-profile-10); без панели пусто
 	Note Runs `json:"note"`
+	// AddNote — тревожное сообщение под формой панели подписки: ленту
+	// читает сервер Carrel, не браузер (s-profile-10, Нс27); без панели
+	// пусто
+	AddNote Text `json:"addNote"`
 }
 type ConnectionCard struct {
 	AccountID string       `json:"accountID"`
@@ -497,7 +501,15 @@ type RestoreBlock struct {
 	// «Личное» · manifest read · 4 collections · 1 214 records ·
 	// ‹carrel-backup/2026-08-14T09-12.zip›»; архив не открыт — пусто
 	Subtitle Runs `json:"subtitle"`
-	Source   Form `json:"source"`
+	// From — «Where the archive is»: From a job · From a server · From this
+	// computer, ссылки на тот же шаг (?restore=1&from=…), выбранная On;
+	// FromHint — подсказка под ними (s-backup-7, Нс74)
+	From     []Action `json:"from"`
+	FromHint Text     `json:"fromHint"`
+	// Source — форма шага: только поля выбранного источника и пароль
+	// архива; у копий задания — строка на задание (имя, день, размер,
+	// счёт коллекций в Meta)
+	Source Form `json:"source"`
 	// Match — шаг сопоставления (s-backup-8); nil — архив не открыт
 	Match   *RestoreMatch `json:"match"`
 	Note    Runs          `json:"note"`    // восстановление создаёт, как импорт, а не откатывает; «creates» — жирным (s-backup-8)

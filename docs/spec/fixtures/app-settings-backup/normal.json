@@ -483,6 +483,31 @@
   },
   "restore": {
     "actions": [],
+    "from": [
+      {
+        "enabled": true,
+        "href": "/app/settings/backup?from=job\u0026restore=1",
+        "id": "restore.from.job",
+        "label": "From a job",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/backup?from=server\u0026restore=1",
+        "id": "restore.from.server",
+        "label": "From a server",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/backup?from=file\u0026restore=1",
+        "id": "restore.from.file",
+        "label": "From this computer",
+        "method": "GET"
+      }
+    ],
+    "fromHint": "One archive, one of three. The other two stay empty until you switch.",
     "match": null,
     "note": [
       {
@@ -510,13 +535,11 @@
           "primary": true
         },
         {
-          "csrf": "csrf",
           "enabled": true,
-          "href": "/app/settings/backup?op=restore-open\u0026source=upload",
-          "icon": "i-upload",
-          "id": "restore.upload",
-          "label": "Open a file from this computer",
-          "method": "POST"
+          "href": "/app/settings/backup",
+          "id": "restore.close",
+          "label": "Cancel",
+          "method": "GET"
         }
       ],
       "errors": [],
@@ -543,42 +566,13 @@
               "error": "",
               "extra": null,
               "hint": "",
-              "kind": "radio",
-              "label": "Which archive",
+              "kind": "hidden",
+              "label": "",
               "name": "source",
-              "options": [
-                {
-                  "label": "From a job's history",
-                  "selected": false,
-                  "value": "run"
-                },
-                {
-                  "label": "From a storage (WebDAV)",
-                  "selected": true,
-                  "value": "webdav"
-                },
-                {
-                  "label": "From this computer",
-                  "selected": false,
-                  "value": "upload"
-                }
-              ],
-              "readOnly": false,
-              "required": false,
-              "value": ""
-            },
-            {
-              "add": null,
-              "error": "",
-              "extra": null,
-              "hint": "",
-              "kind": "select",
-              "label": "Copy",
-              "name": "run",
               "options": [],
               "readOnly": false,
               "required": false,
-              "value": ""
+              "value": "webdav"
             },
             {
               "add": null,
@@ -626,7 +620,7 @@
               "add": null,
               "error": "",
               "extra": null,
-              "hint": "The job's own password. An archive that is not encrypted needs none.",
+              "hint": "The one set in the job, not your sign-in password. Without it the manifest cannot be read — Carrel will not even see the list of collections.",
               "kind": "password",
               "label": "Archive password",
               "name": "password",
