@@ -75,7 +75,8 @@
       "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete task",
-      "method": "POST"
+      "method": "POST",
+      "target": "sheet"
     }
   ],
   "attach": [

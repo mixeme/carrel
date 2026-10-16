@@ -457,6 +457,36 @@ type Reference struct {
 	Then Text `json:"then"`
 }
 
+// RecordDeleteSheet — лист удаления записи (s-agenda-26, s-tasks-18;
+// решения владельца А8, А3, А12; задача Typecase 166): ответ POST
+// …/{uid}/delete, когда есть что терять; простая запись удаляется сразу.
+// Каждая часть — только когда ей есть что назвать.
+type RecordDeleteSheet struct {
+	Kind    Kind `json:"kind"`
+	Title   Text `json:"title"`   // «Delete event», «Delete task»
+	Subject Text `json:"subject"` // название записи
+	// Warning — где удаляется и что копии у Carrel нет: «The event is
+	// deleted on nextcloud · Личный. Carrel holds no copy — …»
+	Warning Text `json:"warning"`
+	// References — «What is pointing at it now»: опубликованные ссылки и
+	// записи, связанные с ней, среди загруженных; What жирным, Then — что с
+	// ними станет
+	References []Reference `json:"references"`
+	// Cancels — участникам сервер может сообщить об отмене («may», как у
+	// листов переноса); пусто — сказать нечего
+	Cancels Text `json:"cancels"`
+	// Attachments — имя жирным; записанное в запись уходит с ней, ссылка в
+	// папку вложений остаётся (её файл можно удалить отметкой формы)
+	Attachments []Reference `json:"attachments"`
+	// Form — CSRF, etag, sheet=1; отметки attachment (удалить файл ссылки
+	// тоже, сняты) и copy (копии связанной записи, открытая отмечена)
+	Form    Form     `json:"form"`
+	Actions []Action `json:"actions"` // Delete (тревожная, кнопка формы) · Cancel
+	// Under — экран под листом, пришедшим страницей: карточка; nil у
+	// фрагмента
+	Under *Under `json:"under"`
+}
+
 type CollectionDeleteSheet struct {
 	Kind    Kind `json:"kind"`
 	Title   Text `json:"title"` // «Delete on the server» (s-profile-9, -19)

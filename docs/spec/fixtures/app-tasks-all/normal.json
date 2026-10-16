@@ -312,7 +312,8 @@
         "icon": "i-trash",
         "id": "record.delete",
         "label": "Delete task",
-        "method": "POST"
+        "method": "POST",
+        "target": "sheet"
       }
     ],
     "attach": [
@@ -520,7 +521,8 @@
               "id": "record.delete",
               "label": "Delete task",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,
@@ -620,7 +622,8 @@
               "id": "record.delete",
               "label": "Delete task",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,
@@ -732,7 +735,8 @@
               "id": "record.delete",
               "label": "Delete task",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": true,
@@ -836,7 +840,8 @@
               "id": "record.delete",
               "label": "Delete task",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,
@@ -943,7 +948,8 @@
               "id": "record.delete",
               "label": "Delete task",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,

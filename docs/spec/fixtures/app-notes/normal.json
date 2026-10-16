@@ -255,7 +255,8 @@
               "id": "record.delete",
               "label": "Delete note",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,
@@ -352,7 +353,8 @@
               "id": "record.delete",
               "label": "Delete note",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,

@@ -4487,6 +4487,25 @@ func (s *Server) postKindDelete(w http.ResponseWriter, r *http.Request, kind str
 		}))
 		return
 	}
+	// Something to lose: the sheet first (note 69 of Typecase, task 166);
+	// its own post says sheet=1 and what it chose.
+	if r.FormValue("sheet") != "1" {
+		if sheet, loses := s.recordDeleteSheet(r.Context(), c, uid, obj); loses {
+			s.writeDeleteSheet(w, r, c, uid, sheet)
+			return
+		}
+	} else {
+		self, err := s.deleteChosen(r.Context(), r, c, uid, obj)
+		if err != nil {
+			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.writeFailure(c, "DELETE", obj.Path, err)))
+			return
+		}
+		if !self {
+			// Its own copy unticked: the others went, this one stays.
+			s.redirect(w, r, c.recordPath(uid))
+			return
+		}
+	}
 	err = c.remove(r.Context(), obj.Path, etag)
 	switch {
 	case dav.IsStatus(err, http.StatusPreconditionFailed):

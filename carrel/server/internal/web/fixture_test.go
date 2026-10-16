@@ -1273,6 +1273,42 @@ func TestFixtureEventCard(t *testing.T) {
 	app.compare(t, "app-event/normal.json", app.h.do(get(rec, app.sess)))
 }
 
+// C-14.2: the sheet of deleting a record (note 69 of Typecase, task 166).
+// normal — «Синк-ап по релизу» with its copies, its attendees on nextcloud,
+// which schedules, its attachment, and the note related to it (s-agenda-26);
+// single — the task «Отправить документы в МФЦ», a published link alone
+// pointing at it (s-tasks-18).
+func TestFixtureRecordDelete(t *testing.T) {
+	app := newMockupApp(t)
+	linkMockupEvent(t, app)
+	attachMockupRecording(t, app)
+	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+	openList(t, app, "/app/notes")
+	openList(t, app, "/app/tasks")
+	app.servers["baikal"].Accept("REPORT")
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	del := func(t *testing.T, kind, col, uid string) *httptest.ResponseRecorder {
+		t.Helper()
+		page := app.h.do(get(app.listPath(t, kind, col)+"/"+uid, app.sess))
+		var p struct {
+			Actions []view.Action `json:"actions"`
+		}
+		if err := json.Unmarshal(page.Body.Bytes(), &p); err != nil {
+			t.Fatal(err)
+		}
+		return app.h.do(postForm(actionHref(t, p.Actions, "record.delete"), app.sess, url.Values{}))
+	}
+	t.Run("normal", func(t *testing.T) {
+		app.compare(t, "app-record-delete/normal.json", del(t, "calendar", "lichnyj", "8f1c-4a02-b7d3"))
+	})
+	t.Run("single", func(t *testing.T) {
+		q := url.Values{"k": {"tasks"}, "a": {app.realAccount(t, "dela")}, "c": {app.realPath(t, "dela")}, "uid": {"aa10-77bc-0e31"}}
+		sheet := decode[view.PublishSheet](t, app.h.do(get("/app/publish?"+q.Encode(), app.sess)))
+		app.h.do(postForm(actionHref(t, sheet.Actions, "publish.create"), app.sess, url.Values{}))
+		app.compare(t, "app-record-delete/single.json", del(t, "tasks", "dela", "aa10-77bc-0e31"))
+	})
+}
+
 // linkMockupEvent puts two copies of «Синк-ап по релизу» — in radicale ·
 // vps · Проекты the same, in baikal · Общий in another room — and links the
 // three (S-16): «The same event in other calendars · radicale · vps ·

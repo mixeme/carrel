@@ -312,7 +312,8 @@
         "icon": "i-trash",
         "id": "record.delete",
         "label": "Delete contact",
-        "method": "POST"
+        "method": "POST",
+        "target": "sheet"
       }
     ],
     "attach": [],
@@ -549,7 +550,8 @@
               "id": "record.delete",
               "label": "Delete contact",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "name": "Алексей Смирнов",
@@ -636,7 +638,8 @@
               "id": "record.delete",
               "label": "Delete contact",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "name": "Анна Ковалёва",
@@ -807,7 +810,8 @@
               "id": "record.delete",
               "label": "Delete contact",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "name": "Вера Лебедева",
@@ -894,7 +898,8 @@
               "id": "record.delete",
               "label": "Delete contact",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "name": "Виктор Гончаров",
@@ -987,7 +992,8 @@
               "id": "record.delete",
               "label": "Delete contact",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "name": "Лебедева Вера",

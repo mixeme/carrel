@@ -1,0 +1,630 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "danger": true,
+      "enabled": true,
+      "id": "record.delete",
+      "label": "Delete",
+      "method": "POST",
+      "submits": true
+    },
+    {
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31",
+      "id": "record.delete.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "attachments": [],
+  "cancels": "",
+  "form": {
+    "action": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "etag",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "e14"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "sheet",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "1"
+          }
+        ],
+        "unfold": null
+      }
+    ],
+    "target": "sheet"
+  },
+  "kind": "task",
+  "references": [
+    {
+      "then": "answers “not found” from that moment",
+      "what": "1 published link"
+    }
+  ],
+  "subject": "Отправить документы в МФЦ",
+  "title": "Delete task",
+  "under": {
+    "account": null,
+    "adminUsers": null,
+    "agenda": null,
+    "connections": null,
+    "contact": null,
+    "contacts": null,
+    "devices": null,
+    "event": null,
+    "eventEdit": null,
+    "note": null,
+    "notes": null,
+    "task": {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit",
+          "icon": "i-pencil",
+          "id": "record.edit",
+          "label": "Edit",
+          "method": "GET",
+          "primary": true
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e14\u0026op=done",
+          "id": "task.done",
+          "label": "Mark done",
+          "method": "POST"
+        },
+        {
+          "arrow": [
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "file": "file",
+              "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e14\u0026op=attach",
+              "icon": "i-upload",
+              "id": "attach.add",
+              "label": "From this computer",
+              "method": "POST"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/picker?a=a-nc-home\u0026c=dela\u0026etag=e14\u0026for=attach\u0026k=tasks\u0026uid=aa10-77bc-0e31",
+              "icon": "i-file",
+              "id": "attach.files",
+              "label": "From Files",
+              "method": "GET",
+              "target": "sheet"
+            }
+          ],
+          "csrf": "csrf",
+          "enabled": true,
+          "file": "file",
+          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e14\u0026op=attach",
+          "icon": "i-clip",
+          "id": "attach.add",
+          "label": "Attach",
+          "method": "POST"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/mail/attach?a=a-nc-home\u0026c=dela\u0026uid=aa10-77bc-0e31\u0026what=task",
+          "icon": "i-mail",
+          "id": "record.send",
+          "label": "Send",
+          "method": "POST",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31?print=1",
+          "icon": "i-print",
+          "id": "record.print",
+          "label": "Print",
+          "method": "GET"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e14",
+          "icon": "i-trash",
+          "id": "record.delete",
+          "label": "Delete task",
+          "method": "POST",
+          "target": "sheet"
+        }
+      ],
+      "attach": [],
+      "attendees": [],
+      "body": "Опись, копия паспорта и заявление. Приём до 18:00, окно 4.",
+      "details": null,
+      "done": false,
+      "fields": [
+        {
+          "href": "",
+          "label": "Status",
+          "mono": false,
+          "value": "Needs action"
+        },
+        {
+          "href": "",
+          "label": "Due",
+          "mono": false,
+          "runs": [
+            {
+              "mark": "mono",
+              "text": "7 August 2026"
+            },
+            {
+              "mark": "danger",
+              "text": " · overdue by 3 days"
+            }
+          ],
+          "value": ""
+        },
+        {
+          "href": "",
+          "label": "Complete",
+          "mono": true,
+          "value": "0%"
+        },
+        {
+          "href": "",
+          "label": "Priority",
+          "mono": true,
+          "value": "1"
+        },
+        {
+          "href": "",
+          "label": "Reminders",
+          "mono": false,
+          "value": "1 day before"
+        },
+        {
+          "href": "",
+          "label": "Tags",
+          "mono": false,
+          "tags": [
+            {
+              "href": "/app/tasks/a-nc-home/dela?tag=%D0%B4%D0%BE%D0%BC",
+              "label": "дом",
+              "on": false
+            }
+          ],
+          "value": ""
+        }
+      ],
+      "linked": [],
+      "look": {
+        "compact": false,
+        "panel": true,
+        "source": true,
+        "theme": "auto",
+        "wide": false
+      },
+      "loss": null,
+      "menu": [
+        {
+          "enabled": true,
+          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/move",
+          "icon": "i-move",
+          "id": "record.move",
+          "label": "Move",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/move?copy=1",
+          "icon": "i-dup",
+          "id": "record.copy",
+          "label": "Copy",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/a-nc-home/dela/export?uid=aa10-77bc-0e31",
+          "icon": "i-export",
+          "id": "record.export",
+          "label": "Export .ics",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/publish?a=a-nc-home\u0026c=dela\u0026k=tasks\u0026uid=aa10-77bc-0e31",
+          "icon": "i-link",
+          "id": "publish",
+          "label": "Publish a link",
+          "method": "GET",
+          "target": "sheet"
+        }
+      ],
+      "notices": [],
+      "print": {
+        "range": "nextcloud · Дела",
+        "taken": "10 August 2026, 17:06",
+        "title": "Отправить документы в МФЦ"
+      },
+      "rail": {
+        "about": {
+          "build": "0.0.1 · 786949a",
+          "enabled": true,
+          "href": "/about",
+          "id": "about",
+          "label": "Carrel",
+          "method": "GET"
+        },
+        "davloom": "davloom · running · 0 devices",
+        "foot": [],
+        "nav": [
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/tasks/a-nc-home/dela",
+            "icon": "i-back",
+            "id": "nav.back",
+            "label": "Back to list",
+            "method": "GET"
+          }
+        ],
+        "neighbours": [],
+        "note": "",
+        "sections": [
+          {
+            "account": "nextcloud",
+            "accountID": "a-nc-home",
+            "rows": [
+              {
+                "colour": "#4a6b52",
+                "count": 4,
+                "detail": "",
+                "feed": false,
+                "href": "/app/tasks/a-nc-home/dela",
+                "label": "Дела",
+                "menu": [
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/rename?a=a-nc-home\u0026c=dela",
+                    "icon": "i-pencil",
+                    "id": "collection.rename",
+                    "label": "Rename",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=dela",
+                    "icon": "i-move",
+                    "id": "collection.move",
+                    "label": "Move to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=dela\u0026copy=1",
+                    "icon": "i-dup",
+                    "id": "collection.copy",
+                    "label": "Copy to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/tasks/a-nc-home/dela/import",
+                    "icon": "i-import",
+                    "id": "collection.import",
+                    "label": "Import",
+                    "method": "GET",
+                    "separator": true
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/tasks/a-nc-home/dela/export",
+                    "icon": "i-export",
+                    "id": "collection.export",
+                    "label": "Export",
+                    "method": "GET"
+                  },
+                  {
+                    "danger": true,
+                    "enabled": true,
+                    "href": "/app/collections/delete?a=a-nc-home\u0026c=dela",
+                    "icon": "i-trash",
+                    "id": "collection.delete",
+                    "label": "Delete on the server…",
+                    "method": "GET",
+                    "separator": true,
+                    "target": "sheet"
+                  }
+                ],
+                "on": true,
+                "readOnly": false,
+                "state": "ok",
+                "tick": "on"
+              },
+              {
+                "colour": "#3f6e8c",
+                "count": 2,
+                "detail": "",
+                "feed": false,
+                "href": "/app/tasks/a-nc-home/rabota",
+                "label": "Работа",
+                "menu": [
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
+                    "icon": "i-pencil",
+                    "id": "collection.rename",
+                    "label": "Rename",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
+                    "icon": "i-move",
+                    "id": "collection.move",
+                    "label": "Move to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=rabota\u0026copy=1",
+                    "icon": "i-dup",
+                    "id": "collection.copy",
+                    "label": "Copy to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/tasks/a-nc-home/rabota/import",
+                    "icon": "i-import",
+                    "id": "collection.import",
+                    "label": "Import",
+                    "method": "GET",
+                    "separator": true
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/tasks/a-nc-home/rabota/export",
+                    "icon": "i-export",
+                    "id": "collection.export",
+                    "label": "Export",
+                    "method": "GET"
+                  },
+                  {
+                    "danger": true,
+                    "enabled": true,
+                    "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
+                    "icon": "i-trash",
+                    "id": "collection.delete",
+                    "label": "Delete on the server…",
+                    "method": "GET",
+                    "separator": true,
+                    "target": "sheet"
+                  }
+                ],
+                "on": false,
+                "readOnly": false,
+                "state": "ok",
+                "tick": "on"
+              }
+            ],
+            "state": "ok"
+          }
+        ],
+        "shortcuts": [],
+        "tags": [],
+        "ticks": null
+      },
+      "readOnly": false,
+      "related": [
+        {
+          "colour": "",
+          "href": "",
+          "kind": "event",
+          "stamp": "",
+          "title": "Забрать документы",
+          "when": "11 Aug",
+          "why": "Related to · in another collection"
+        }
+      ],
+      "source": {
+        "changed": "10 August 2026, 17:04",
+        "colour": "#4a6b52",
+        "compared": "not changed on server",
+        "lastRead": "2 min ago",
+        "objects": null,
+        "path": "/alice/calendars/dela/aa10-77bc-0e31.ics",
+        "readOnly": false,
+        "stamp": "nextcloud · Дела",
+        "uid": ""
+      },
+      "subtitle": [
+        {
+          "text": "nextcloud · Дела · "
+        },
+        {
+          "mark": "danger",
+          "text": "overdue by 3 days"
+        }
+      ],
+      "summary": "Отправить документы в МФЦ",
+      "title": "Отправить документы в МФЦ",
+      "top": {
+        "lock": null,
+        "new": {
+          "arrow": [
+            {
+              "enabled": true,
+              "href": "/app/notes/quick",
+              "icon": "i-quill",
+              "id": "new.notes",
+              "label": "Note",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/quick",
+              "icon": "i-con",
+              "id": "new.contacts",
+              "label": "Contact",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/quick",
+              "icon": "i-cal",
+              "id": "new.calendar",
+              "label": "Event",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/tasks/quick",
+              "icon": "i-task",
+              "id": "new.tasks",
+              "label": "Task",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/picker?for=upload",
+              "icon": "i-upload",
+              "id": "new.upload",
+              "label": "Upload file",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/mail/compose",
+              "icon": "i-mail",
+              "id": "new.letter",
+              "label": "Letter",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "New note",
+          "method": "GET",
+          "primary": true,
+          "target": "sheet"
+        },
+        "refresh": {
+          "action": {
+            "enabled": true,
+            "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31",
+            "icon": "i-refresh",
+            "id": "record.refresh",
+            "label": "Refresh",
+            "method": "GET"
+          },
+          "answered": "2 min ago",
+          "running": false
+        },
+        "search": {
+          "action": "/app/search",
+          "history": [],
+          "jump": [],
+          "name": "q",
+          "query": "",
+          "whole": null
+        },
+        "signed": {
+          "instance": "carrel.example",
+          "local": true,
+          "login": "mix"
+        },
+        "unlocked": null,
+        "user": [
+          {
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-gear",
+            "id": "user.settings",
+            "label": "Settings",
+            "method": "GET"
+          },
+          {
+            "enabled": true,
+            "href": "/admin/",
+            "icon": "i-adm",
+            "id": "user.admin",
+            "label": "Administration",
+            "method": "GET"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/logout",
+            "id": "user.logout",
+            "label": "Sign out",
+            "method": "POST",
+            "separator": true
+          }
+        ],
+        "userHref": "/app/settings/account"
+      },
+      "uid": "aa10-77bc-0e31"
+    },
+    "taskEdit": null,
+    "tasks": null
+  },
+  "warning": "The task is deleted on nextcloud · Дела. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+}

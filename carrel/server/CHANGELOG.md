@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.305 — 2026-10-16
+
+### Added
+
+- **The sheet of deleting a record** (note 69 of Typecase, task 166;
+  `s-agenda-26`, `s-tasks-18`; the owner's decisions А8, А3, А12): Delete
+  posts as before, and a record that has something to lose answers with
+  `RecordDeleteSheet` instead of going — where it is deleted and that
+  Carrel keeps no copy; «What is pointing at it now» (its published links,
+  the records related to it among the loaded ones); that the server, which
+  sends invitations itself, may tell its attendees; its attachments —
+  written into it, going with it, or a link that stays, the file of one in
+  the attachment folder deletable with it by a tick (`attachment`); its
+  copies, the one opened ticked (`copy`). The sheet's Delete (`sheet=1`)
+  deletes the ticked files, the ticked copies and the record, unless its
+  own copy was unticked. A record with nothing to lose is deleted at once.
+  Delete is aimed at the sheet zone now (C-5: «redirect or sheet»).
+
+### Changed
+
+- The three fixture tests that wrote one file each compare through
+  `compare`: one run with `CARREL_FIXTURE_WRITE` writes every fixture.
+
+### For consumers
+
+`RecordDeleteSheet` in C-6, its row in C-5; fixtures `app-record-delete`
+(`normal`, `single`); `target: sheet` on every Delete of a record.
+
 ## v0.2.304 — 2026-10-16
 
 ### Removed

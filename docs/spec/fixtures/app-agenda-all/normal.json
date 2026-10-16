@@ -452,7 +452,8 @@
               "id": "record.delete",
               "label": "Delete event",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,
@@ -538,7 +539,8 @@
               "id": "record.delete",
               "label": "Delete event",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,
@@ -628,7 +630,8 @@
               "id": "record.delete",
               "label": "Delete event",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": true,
@@ -725,7 +728,8 @@
               "id": "record.delete",
               "label": "Delete event",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,
@@ -817,7 +821,8 @@
               "id": "record.delete",
               "label": "Delete event",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,
@@ -898,7 +903,8 @@
               "id": "record.delete",
               "label": "Delete event",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,
@@ -963,7 +969,8 @@
         "icon": "i-trash",
         "id": "record.delete",
         "label": "Delete event",
-        "method": "POST"
+        "method": "POST",
+        "target": "sheet"
       }
     ],
     "attach": [

@@ -245,6 +245,10 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     # Вопрос перед сохранением серии — ответ POST правки (AskSheet): кадров со
     # своим адресом нет, только фрагменты s-agenda-22…-24 (задача Typecase 184).
     "app-event-ask": "/app/calendar/{account}/{col}/{uid}/edit",
+    # Лист удаления записи — ответ POST …/delete, когда есть что терять:
+    # кадров со своим адресом нет, фрагменты s-agenda-26 и s-tasks-18
+    # (задача Typecase 166, записка 69).
+    "app-record-delete": "/app/{kind}/{account}/{col}/{uid}/delete",
     "app-contact-rewrite": "/app/contacts/{account}/{col}/{uid}/rewrite",
     "app-quick": "/app/notes/quick",
     "app-collections-new": "/app/collections/new",
@@ -266,7 +270,7 @@ SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-
           "app-collections-rename", "app-collections-move", "app-collections-delete",
           "app-publish", "app-files-picker", "app-files-op", "app-mail-compose",
           "app-contact-rewrite", "app-record-copies", "app-task-done", "app-event-ask",
-          "app-settings-escrow-deposit", "app-settings-escrow-withdraw"}
+          "app-settings-escrow-deposit", "app-settings-escrow-withdraw", "app-record-delete"}
 
 FRAME_TODO = {
     # Полная форма нового события — свой кадр s-agenda-15 (Typecase 9e69804,
@@ -406,6 +410,8 @@ STATE_FRAME = {
     "app-settings-escrow-withdraw/normal": "account-11",
     # Диалог правки подключения (Нс76): вопрос о ссылках ждёт скрытым —
     # s-profile-16; Save без ответа — s-profile-23 (Typecase ad18c91).
+    "app-record-delete/normal": "s-agenda-26",
+    "app-record-delete/single": "s-tasks-18",
     "app-settings-connections/edit": "s-profile-16",
     "app-settings-connections/edit-links": "s-profile-23",
 }

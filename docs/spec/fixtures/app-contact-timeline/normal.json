@@ -190,7 +190,8 @@
         "icon": "i-trash",
         "id": "record.delete",
         "label": "Delete contact",
-        "method": "POST"
+        "method": "POST",
+        "target": "sheet"
       }
     ],
     "attach": [],

@@ -392,7 +392,8 @@
               "id": "record.delete",
               "label": "Delete event",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,
@@ -490,7 +491,8 @@
               "id": "record.delete",
               "label": "Delete event",
               "method": "POST",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "on": false,

@@ -25,7 +25,7 @@ func TestALinkedGroupThatCameApartSaysSo(t *testing.T) {
 
 	// The other copy is deleted where it lives.
 	_, etag, _ := f.other.Object(workBook + "ada-there.vcf")
-	f.h.do(postForm(f.record(f.otherID, workBook, "ada-there")+"/delete", f.sess, url.Values{"etag": {etag}}))
+	f.h.do(postForm(f.record(f.otherID, workBook, "ada-there")+"/delete", f.sess, url.Values{"etag": {etag}, "sheet": {"1"}, "copy": {f.otherID + "/" + url.PathEscape(workBook)}}))
 	if _, _, ok := f.other.Object(workBook + "ada-there.vcf"); ok {
 		t.Fatal("the other copy was not deleted")
 	}
@@ -55,7 +55,7 @@ func TestTheDuplicatesScreenSaysGroupsCameApart(t *testing.T) {
 	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{"choice.FN": {strconv.Itoa(pick)}}))
 
 	_, etag, _ := f.other.Object(workBook + "ada-there.vcf")
-	f.h.do(postForm(f.record(f.otherID, workBook, "ada-there")+"/delete", f.sess, url.Values{"etag": {etag}}))
+	f.h.do(postForm(f.record(f.otherID, workBook, "ada-there")+"/delete", f.sess, url.Values{"etag": {etag}, "sheet": {"1"}, "copy": {f.otherID + "/" + url.PathEscape(workBook)}}))
 	f.load(t)
 	page := f.page(t)
 	if n := noticeTitled(page.Shell.Notices, "1 linked group came apart"); n == nil {

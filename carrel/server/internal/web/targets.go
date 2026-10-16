@@ -34,6 +34,9 @@ var fragmentRoutes = []fragmentRoute{
 	// C-5.4
 	{"", "/app/{kind}/{account}/{col}/{uid}/move", render.TargetSheet},
 	{"GET", "/app/{kind}/{account}/{col}/{uid}/copies", render.TargetSheet},
+	// Delete answers with its sheet when the record has something to lose
+	// (note 69 of Typecase, task 166), else moves to the list.
+	{"POST", "/app/{kind}/{account}/{col}/{uid}/delete", render.TargetSheet},
 	{"", "/app/tasks/{account}/{col}/{uid}/done", render.TargetSheet},
 	{"GET", "/app/contacts/{account}/{col}/{uid}/rewrite", render.TargetSheet},
 	{"GET", "/app/{kind}/export", render.TargetSheet},

@@ -412,7 +412,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}/{uid}/copies` | GET | вход | лист, редирект | `CopiesSheet` «Which copy to edit?» (s-contacts-32): Edit записи связанной группы; у записи без группы — редирект на `…/edit`. `?back=` — страница, откуда открыт (без него — `Referer`): лист стоит над ней, Cancel ведёт на неё. Форма листа — GET `…/edit?copy=…`: редирект на форму выбранной копии |
 | `/app/tasks/{account}/{col}/{uid}/done` | GET, POST | вход | лист, редирект | `CopiesSheet` «Which copy to mark done?» (s-tasks-16). POST без `copy` у связанной задачи — лист, у прочей — отметка; форма листа без отмеченной копии (`sheet=1`) — лист снова, ничего не отмечено, ошибка у `copy` (`Form.Errors`); с `copy` (сколько угодно) — каждая названная копия отмечена, как Mark done, и редирект туда, откуда пришли (`from`: `all`, `list`, иначе карточка) |
 | `/app/contacts/{account}/{col}/{uid}/rewrite` | GET, POST | вход | лист (GET); страница, редирект (POST) | `RewriteSheet`; `?plan=` — план, выданный сохранением карточки (S-15.4). POST переписывает и отвечает карточкой (`ContactPage`) с итогом (s-contacts-16); с `op=leave` — редирект на карточку, ничего не переписав; без живого плана GET и POST — редирект на карточку |
-| `/app/{kind}/{account}/{col}/{uid}/delete` | POST | вход | редирект | — |
+| `/app/{kind}/{account}/{col}/{uid}/delete` | POST | вход | редирект или лист | `RecordDeleteSheet` |
 | `/app/{kind}/import` | GET | вход | страница | `ImportPage` — вход из сведённого вида: мастер спрашивает «Into» |
 | `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage`; `to=` и `into=` — подключение и коллекция «Into» (адрес варианта `TargetOption.Href`); POST без `op` — файл: multipart, поле `file` (`Action.File` у Preview file); у заметок полей `file` может быть несколько — один набор, как zip (s-io-1), у прочих родов несколько — отказ; `op=run` — записать предпросмотр, `op=cancel` — бросить файл; `existing=` (`skip`, `replace`, `copy`) — что делать с записями файла, которые уже есть в коллекции (`ImportExisting`, s-io-5…-8); у заметок `folder=` (подключение), `path=` (хранилище) и `in=` (папка внутри него, сегменты через «/») — папка дерева (`FileTreeNode.Href`, GET), `op=folder` с ними — «Preview folder» |
 | `/app/{kind}/export` | GET | вход | лист | `ExportSheet` — вход из сведённого вида: из какой коллекции |
@@ -2115,6 +2115,23 @@ type CollectionMoveSheet struct {
 type Reference struct { // строка «что ссылается» листа удаления (s-profile-9): What жирным, Then приглушённо после тире экрана
     What Text // «1 published link», «Backup job «Личное на домашний диск»», «3 devices through davloom»
     Then Text // «answers “not found” from that moment»
+}
+
+// Лист удаления записи (s-agenda-26, s-tasks-18; решения владельца А8, А3,
+// А12; задача Typecase 166) — ответ POST …/{uid}/delete, когда есть что
+// терять; простая запись удаляется сразу. Каждая часть — только когда ей
+// есть что назвать.
+type RecordDeleteSheet struct {
+    Kind        Kind
+    Title       Text        // «Delete event», «Delete task»
+    Subject     Text        // название записи
+    Warning     Text        // где удаляется и что копии у Carrel нет — тревожным сообщением
+    References  []Reference // «What is pointing at it now»: опубликованные ссылки, связанные записи среди загруженных — счёт жирным, что с ними станет
+    Cancels     Text        // участникам сервер может сообщить об отмене («may»); пусто — сказать нечего
+    Attachments []Reference // имя жирным: записанное в запись уходит с ней, ссылка в папку вложений остаётся
+    Form        Form        // CSRF, etag, sheet=1; отметки attachment (удалить файл ссылки тоже) и copy (копии связанной записи, открытая отмечена)
+    Actions     []Action    // Delete (тревожная, кнопка формы) · Cancel
+    Under       *Under      // экран под листом, пришедшим страницей: карточка; nil у фрагмента
 }
 
 type CollectionDeleteSheet struct {
@@ -3983,7 +4000,7 @@ type LossReport struct { // сервер принял запись, но что-
 | `rename` | Лист переименования: поле нового имени | Лист операции над файлами (своего кадра нет — задача Typecase 121) |
 | `delete` | Лист удаления: что уйдёт и что не проверяется | Лист операции над файлами (своего кадра нет — задача Typecase 121) |
 | `attach` | Дерево From Files у Attach: файлы с размером и тем, как лягут в запись | Лист выбора (`app-files-picker`, s-files-16) |
-| `single` | Лист вопроса об одном: то же, что `normal`, но спрошено об одной вещи, и слова в единственном числе | Вопрос перед сохранением серии (`app-event-ask`, s-agenda-23; `normal` — о трёх встречах, s-agenda-22) |
+| `single` | Лист вопроса об одном: то же, что `normal`, но спрошено об одной вещи, и слова в единственном числе | Вопрос перед сохранением серии (`app-event-ask`, s-agenda-23; `normal` — о трёх встречах, s-agenda-22); лист удаления записи с одной строкой (`app-record-delete`, s-tasks-18; `normal` — полный набор, s-agenda-26) |
 | `in-part` | Сделано не всё: что записано, что нет и почему, и дверь сделать остальное | Вопрос серии после ответа, когда одна встреча не записалась отдельно (`app-event-ask`, s-agenda-24) |
 | `new` | Полная форма новой записи (`/new`): пустая, с тем, с чего запись начинается, без удаления | Правка задачи и заметки (`app-task-edit`, `app-note-edit`): своего кадра у формы нет (задача Typecase 97) — сверяется с кадром правки; у контакта и события — свои каталоги `app-contact-new`, `app-event-new` |
 | `email-confirmed` | Адрес подтверждён, ничего не ждёт: зелёный значок с днём | Учётная запись (фрагмент account-8; `normal` — новый адрес ждёт ушедшей ссылки, account-1) |

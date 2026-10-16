@@ -42,7 +42,7 @@ func TestAPublishedRecordFollowsItsMove(t *testing.T) {
 	// Deleted: nothing to follow. The owner's list says so; the guest reads
 	// that it is gone.
 	_, etag, _ := f.other.Object(workBook + "ada.vcf")
-	f.h.do(postForm(f.record(f.otherID, workBook, "ada")+"/delete", f.sess, url.Values{"etag": {etag}}))
+	f.h.do(postForm(f.record(f.otherID, workBook, "ada")+"/delete", f.sess, url.Values{"etag": {etag}, "sheet": {"1"}, "copy": {f.otherID + "/" + url.PathEscape(workBook)}}))
 	if r := row(); r.Gone == "" {
 		t.Error("a link to a deleted record is called alive")
 	}

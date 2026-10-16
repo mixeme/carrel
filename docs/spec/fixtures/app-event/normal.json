@@ -67,7 +67,8 @@
       "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete event",
-      "method": "POST"
+      "method": "POST",
+      "target": "sheet"
     }
   ],
   "attach": [
