@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.321 — 2026-10-16
+
+### Added
+
+- **The sheets of a collection have the fixtures their frames draw** (Кл7,
+  Кл10, Кл20 of the scan of 15.10.2026): a folder of the storage renamed
+  (`s-profile-18`) and deleted with «Open in Files» (`s-profile-19`), and a
+  new calendar when no server that holds calendars answers (`s-profile-21`:
+  the sheet says which, Create off with the same words) — states `folder`
+  and `silent`.
+
+### For consumers
+
+C-14.3: state `silent`, `folder` widened to the rename and the deletion.
+
 ## v0.2.320 — 2026-10-16
 
 ### Added

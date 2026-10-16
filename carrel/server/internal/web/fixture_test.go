@@ -2065,6 +2065,31 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 			app.compare(t, "app-collections-"+sheet+"/normal.json", app.h.do(get("/app/collections/"+sheet+"?"+q.Encode(), app.sess)))
 		})
 	}
+	// A folder of the storage renamed (s-profile-18) and deleted
+	// (s-profile-19, «Open in Files») — Кл10, Кл20.
+	for _, sheet := range []string{"rename", "delete"} {
+		t.Run("app-collections-"+sheet+"-folder", func(t *testing.T) {
+			q := url.Values{"a": {app.realAccount(t, "Documents")}, "c": {app.realPath(t, "Documents")}}
+			app.compare(t, "app-collections-"+sheet+"/folder.json", app.h.do(get("/app/collections/"+sheet+"?"+q.Encode(), app.sess)))
+		})
+	}
+	// Nobody that holds calendars answers (s-profile-21, Кл7): the sheet
+	// says so, and Create is off with the same words.
+	t.Run("app-collections-new-silent", func(t *testing.T) {
+		// A poll asks the collection's tag first and reads what it has kept
+		// when the tag is the same: both go unanswered.
+		for _, name := range []string{"nextcloud", "radicale · vps"} {
+			app.servers[name].Refuse("REPORT", 503, "the server is busy")
+			app.servers[name].Refuse("PROPFIND", 503, "the server is busy")
+		}
+		// Every kind asked again: a server that answered for one kind
+		// answers (silentNow).
+		combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+		combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+		combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
+		combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
+		app.compare(t, "app-collections-new/silent.json", app.h.do(get("/app/collections/new?kind=event", app.sess)))
+	})
 	_ = anna
 }
 
