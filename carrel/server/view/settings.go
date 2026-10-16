@@ -254,15 +254,23 @@ type SecretField struct {
 	Reveal Action `json:"reveal"`
 }
 type CollectionRow struct {
-	Label    Text       `json:"label"`
-	Path     Text       `json:"path"`
-	Colour   Colour     `json:"colour"`
-	Kinds    []Kind     `json:"kinds"`
-	ReadOnly bool       `json:"readOnly"`
-	LastRead When       `json:"lastRead"`
-	Changed  When       `json:"changed"`
-	Objects  *int       `json:"objects"`
-	Menu     []MenuItem `json:"menu"` // Rename · Delete · Move
+	Label    Text   `json:"label"`
+	Path     Text   `json:"path"`
+	Colour   Colour `json:"colour"`
+	Kinds    []Kind `json:"kinds"`
+	ReadOnly bool   `json:"readOnly"`
+	LastRead When   `json:"lastRead"`
+	Changed  When   `json:"changed"`
+	Objects  *int   `json:"objects"`
+	// Tick — опрашивается ли коллекция: on — во всех её родах, part — в
+	// части, off — ни в одном (s-profile-1: снятая — снятым флажком, её не
+	// опрашивают; Нс21)
+	Tick TickState `json:"tick"`
+	// Toggle — флажок строки: отмечает коллекцию во всех её родах, а
+	// отмеченную всюду снимает всюду, и страница возвращается; подпись — имя
+	// коллекции
+	Toggle Action     `json:"toggle"`
+	Menu   []MenuItem `json:"menu"` // Rename · Delete · Move
 }
 type SubscriptionCard struct {
 	Title   Text   `json:"title"`

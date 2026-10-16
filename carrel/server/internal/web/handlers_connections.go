@@ -81,6 +81,8 @@ func (s *Server) postSettingsConnections(w http.ResponseWriter, r *http.Request)
 	switch r.FormValue("op") {
 	case "":
 		s.addConnection(w, r)
+	case "tick":
+		s.tickCollection(w, r)
 	case "rediscover":
 		s.rediscover(w, r, false)
 	case "apply":
@@ -618,6 +620,9 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 		}
 		row.LastRead, row.Changed = readingOf(sess, tf, c.ID, col.Path)
 		row.Objects = objectsOf(sess, c.ID, col)
+		row.Tick = tickOf(blob, c.ID, col)
+		row.Toggle = view.Action{ID: "collection.tick", Label: row.Label, Method: "POST", Enabled: true,
+			Href: s.postQuery("/app/settings/connections", url.Values{"op": {"tick"}, "account": {c.ID}, "path": {col.Path}})}
 		row.Menu = s.collectionRowMenu(blob, c, col)
 		card.Collections = append(card.Collections, row)
 		if r, ok := sess.ReadingOf(c.ID, col.Path); ok && r.At.After(answered) {
@@ -632,6 +637,69 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 	}
 	card.Answered = tf.formatWhen(answered, true, tf.now)
 	return card
+}
+
+// tickOf is whether a collection is polled (Нс21; s-profile-1): in every
+// kind it holds, in some, or in none.
+func tickOf(blob sealed.Blob, accountID string, col sealed.Collection) view.TickState {
+	on := 0
+	for _, k := range col.Kinds {
+		if isTicked(blob, k, accountID, col.Path) {
+			on++
+		}
+	}
+	switch {
+	case on == 0:
+		return view.TickOff
+	case on < len(col.Kinds):
+		return view.TickPart
+	}
+	return view.TickOn
+}
+
+// tickCollection is the tick of a collection's row (Нс21): a collection
+// polled in every kind it holds is unticked in all of them, any other is
+// ticked in all of them, and the page comes back.
+func (s *Server) tickCollection(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	key, live := sess.DataKey()
+	if !live {
+		s.notFound(w, r)
+		return
+	}
+	blob, opened := s.users.Catalog(sess.AccountID(), key)
+	account, path := r.FormValue("account"), r.FormValue("path")
+	var col sealed.Collection
+	found := false
+	for _, c := range blob.CollectionsOf(account) {
+		if !c.Gone && c.Path == path {
+			col, found = c, true
+		}
+	}
+	if !opened || !found {
+		s.notFound(w, r)
+		return
+	}
+	on := tickOf(blob, account, col) != view.TickOn
+	for _, k := range col.Kinds {
+		var picks []sealed.Selection
+		for _, p := range blob.Selected {
+			if p.Kind == k && (p.AccountID != account || p.Path != path) {
+				picks = append(picks, p)
+			}
+		}
+		if on {
+			picks = append(picks, sealed.Selection{Kind: k, AccountID: account, Path: path})
+		}
+		if err := s.users.SetSelection(sess.AccountID(), key, k, picks); err != nil {
+			http.Error(w, "could not save the selection", http.StatusInternalServerError)
+			return
+		}
+	}
+	s.redirect(w, r, "/app/settings/connections")
 }
 
 // collectionRowMenu is the «⋯» of a collection in its connection's card. A

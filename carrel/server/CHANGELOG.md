@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.297 — 2026-10-16
+
+### Added
+
+- **A collection's row carries its tick** (Нс21 of the scan of
+  15.10.2026; `s-profile-1`, `-10`: «a collection unticked shows an
+  unticked box: it is not polled»). `CollectionRow.Tick` — on when it is
+  polled in every kind it holds, part in some, off in none;
+  `CollectionRow.Toggle` — POST `/app/settings/connections?op=tick`: a
+  collection ticked everywhere is unticked everywhere, any other ticked
+  everywhere, and the page comes back. Its label is the collection's name.
+  How the frame sends it without scripts is Typecase's task 193, item 7.
+
+### For consumers
+
+`CollectionRow.Tick`, `.Toggle` in C-6; fixtures of Connections and of
+the collection sheets over it re-shot.
+
 ## v0.2.296 — 2026-10-16
 
 ### Changed

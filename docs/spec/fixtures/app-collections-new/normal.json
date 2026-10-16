@@ -338,7 +338,16 @@
               ],
               "objects": null,
               "path": "/alice/calendars/dela/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=dela",
+                "id": "collection.tick",
+                "label": "Дела",
+                "method": "POST"
+              }
             },
             {
               "changed": "",
@@ -407,7 +416,16 @@
               ],
               "objects": null,
               "path": "/alice/calendars/dnevnik/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=dnevnik",
+                "id": "collection.tick",
+                "label": "Дневник",
+                "method": "POST"
+              }
             },
             {
               "changed": "",
@@ -476,7 +494,16 @@
               ],
               "objects": null,
               "path": "/alice/calendars/dni-rozhdeniya/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "off",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=dni-rozhdeniya",
+                "id": "collection.tick",
+                "label": "Дни рождения",
+                "method": "POST"
+              }
             },
             {
               "changed": "",
@@ -545,7 +572,16 @@
               ],
               "objects": 2,
               "path": "/alice/calendars/lichnyj/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=lichnyj",
+                "id": "collection.tick",
+                "label": "Личный",
+                "method": "POST"
+              }
             },
             {
               "changed": "",
@@ -615,7 +651,16 @@
               ],
               "objects": 2,
               "path": "/alice/calendars/rabota/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=rabota",
+                "id": "collection.tick",
+                "label": "Работа",
+                "method": "POST"
+              }
             },
             {
               "changed": "",
@@ -684,7 +729,16 @@
               ],
               "objects": null,
               "path": "/alice/calendars/zapisi/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=zapisi",
+                "id": "collection.tick",
+                "label": "Записи",
+                "method": "POST"
+              }
             },
             {
               "changed": "",
@@ -753,7 +807,16 @@
               ],
               "objects": null,
               "path": "/alice/calendars/zapiski-obshchie/",
-              "readOnly": true
+              "readOnly": true,
+              "tick": "off",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=zapiski-obshchie",
+                "id": "collection.tick",
+                "label": "Общие с семьёй",
+                "method": "POST"
+              }
             },
             {
               "changed": "10 August 2026, 17:04",
@@ -822,7 +885,16 @@
               ],
               "objects": 1,
               "path": "/alice/contacts/arhiv/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=arhiv",
+                "id": "collection.tick",
+                "label": "Архив",
+                "method": "POST"
+              }
             },
             {
               "changed": "10 August 2026, 17:04",
@@ -891,7 +963,16 @@
               ],
               "objects": 5,
               "path": "/alice/contacts/kontakty/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=kontakty",
+                "id": "collection.tick",
+                "label": "Контакты",
+                "method": "POST"
+              }
             },
             {
               "changed": "",
@@ -952,7 +1033,16 @@
               ],
               "objects": null,
               "path": "/alice/files/Files/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=Files",
+                "id": "collection.tick",
+                "label": "Files",
+                "method": "POST"
+              }
             }
           ],
           "login": "alice",
@@ -1089,7 +1179,16 @@
               ],
               "objects": 1,
               "path": "/alice/calendars/dezhurstva/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=dezhurstva",
+                "id": "collection.tick",
+                "label": "Дежурства",
+                "method": "POST"
+              }
             },
             {
               "changed": "",
@@ -1158,7 +1257,16 @@
               ],
               "objects": 1,
               "path": "/alice/calendars/proekty/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=proekty",
+                "id": "collection.tick",
+                "label": "Проекты",
+                "method": "POST"
+              }
             },
             {
               "changed": "10 August 2026, 17:04",
@@ -1227,7 +1335,16 @@
               ],
               "objects": 1,
               "path": "/alice/contacts/komanda/",
-              "readOnly": true
+              "readOnly": true,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=komanda",
+                "id": "collection.tick",
+                "label": "Команда",
+                "method": "POST"
+              }
             },
             {
               "changed": "",
@@ -1296,7 +1413,16 @@
               ],
               "objects": null,
               "path": "/alice/contacts/rassylki/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "off",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=rassylki",
+                "id": "collection.tick",
+                "label": "Рассылки",
+                "method": "POST"
+              }
             }
           ],
           "login": "alice",
@@ -1433,7 +1559,16 @@
               ],
               "objects": null,
               "path": "/alice/calendars/obshchij/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-baikal\u0026op=tick\u0026path=obshchij",
+                "id": "collection.tick",
+                "label": "Общий",
+                "method": "POST"
+              }
             }
           ],
           "login": "alice",
@@ -1562,7 +1697,16 @@
               ],
               "objects": null,
               "path": "/alice/files/Documents/",
-              "readOnly": false
+              "readOnly": false,
+              "tick": "on",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-sftp-vps\u0026op=tick\u0026path=Documents",
+                "id": "collection.tick",
+                "label": "Documents",
+                "method": "POST"
+              }
             },
             {
               "changed": "",
@@ -1623,7 +1767,16 @@
               ],
               "objects": null,
               "path": "/alice/files/Public/",
-              "readOnly": true
+              "readOnly": true,
+              "tick": "off",
+              "toggle": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/connections?account=a-sftp-vps\u0026op=tick\u0026path=Public",
+                "id": "collection.tick",
+                "label": "Public",
+                "method": "POST"
+              }
             }
           ],
           "login": "alice",
