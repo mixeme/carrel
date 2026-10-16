@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -33,6 +34,9 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 		now := s.now()
 		if until := sess.UnlockUntil(now); until != nil {
 			sh.Top.Unlocked = ptrWhen(s.timeFor(sess).formatWhen(*until, false, now))
+			// What is left, as the mark says it (s-profile-4: «4:12»; Нс7).
+			left := max(until.Sub(now).Round(time.Second), 0)
+			sh.Top.UnlockLeft = text(fmt.Sprintf("%d:%02d", int(left/time.Minute), int(left%time.Minute/time.Second)))
 			// Lock now beside the mark (s-profile-4, s-plan-1…5): the window
 			// ends before its time, the sign-in stays (S-10.7).
 			sh.Top.Lock = &view.Action{ID: "unlock.lock", Label: "Lock now", Href: s.route("/app/settings/lock"), Method: "POST", Enabled: true}

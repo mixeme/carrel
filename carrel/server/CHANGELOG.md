@@ -17,6 +17,16 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.290 — 2026-10-16
+
+### Changed
+
+- **The unlock mark says what is left** (Нс7 of the scan of 15.10.2026;
+  `s-profile-4`: «credentials unlocked · 4:12»): `TopBar.UnlockLeft` —
+  minutes and seconds left of the window when the page was made, beside
+  `Unlocked`, the moment it ends.
+
+
 ## v0.2.289 — 2026-10-16
 
 ### Changed

@@ -38,6 +38,10 @@ type TopBar struct {
 	// учётной записи
 	UserHref string `json:"userHref"`
 	Unlocked *When  `json:"unlocked"` // до какого времени открыта выдача учётных данных
+	// UnlockLeft — сколько выдаче осталось на момент страницы, минуты и
+	// секунды: «credentials unlocked · 4:12» (s-profile-4, Нс7); пусто —
+	// выдача закрыта
+	UnlockLeft Text `json:"unlockLeft,omitempty"`
 	// Lock — Lock now рядом с меткой «credentials unlocked · 4:12»
 	// (s-profile-4, s-plan-1, -2, -4, -5): запирает выдачу этого сеанса до
 	// срока, вход остаётся (S-10.7); nil — выдача закрыта

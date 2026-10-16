@@ -3,6 +3,7 @@ package web_test
 import (
 	"net/http"
 	"net/url"
+	"regexp"
 	"testing"
 	"time"
 
@@ -24,6 +25,10 @@ func TestLockNowEndsTheUnlockNotTheSignIn(t *testing.T) {
 	unlock(t, f)
 	page = decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess)))
 	lock := page.Top.Lock
+	// What is left of the window, as the mark says it (Нс7: «4:12»).
+	if !regexp.MustCompile(`^\d+:\d{2}$`).MatchString(string(page.Top.UnlockLeft)) {
+		t.Errorf("left = %q", page.Top.UnlockLeft)
+	}
 	if page.Top.Unlocked == nil || lock == nil || lock.ID != "unlock.lock" || lock.Label != "Lock now" || lock.Method != "POST" || lock.Href != "/app/settings/lock" || !lock.Enabled {
 		t.Fatalf("unlocked: until %v, Lock %+v", page.Top.Unlocked, lock)
 	}

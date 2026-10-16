@@ -756,6 +756,7 @@ type TopBar struct {
     User     []MenuItem // меню учётной записи
     UserHref string     // куда ведёт кнопка учётной записи без сценариев: страница учётной записи
     Unlocked *When      // до какого времени открыта выдача учётных данных
+    UnlockLeft Text     // сколько выдаче осталось на момент страницы: «credentials unlocked · 4:12» (s-profile-4); пусто — закрыта
     Lock     *Action    // Lock now рядом с меткой «credentials unlocked · 4:12» (s-profile-4, s-plan-1, -2, -4, -5): запирает выдачу этого сеанса до срока, вход остаётся (S-10.7); nil — выдача закрыта
     Refresh  Refresh    // круговая стрелка (Action.Icon i-refresh) и «2 min ago»
 }
