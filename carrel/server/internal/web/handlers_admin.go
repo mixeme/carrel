@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -85,8 +86,36 @@ func (s *Server) buildAdminUsersPage(r *http.Request, sess *session.Session, fla
 		page.Shell.Notices = append(page.Shell.Notices, view.Notice{Role: view.NoticeAlert, Body: text(flash.errText)})
 	}
 	tf := s.timeFor(sess)
+	// What the list holds, above it (Ад5; s-admin-2), and the filter by
+	// login and the segments All · Administrators · Disabled (Ад6): a GET
+	// of the list, as a list of records sifts.
+	q := r.URL.Query()
+	sift := strings.ToLower(strings.TrimSpace(q.Get("filter")))
+	show := q.Get("show")
+	accounts, admins, covered := 0, 0, 0
 	for _, u := range snap.Users {
 		if len(u.LoginHash) == 0 && u.Disabled {
+			continue
+		}
+		accounts++
+		if u.Role == store.RoleAdmin {
+			admins++
+		}
+		if store.UserDeposited(&u) {
+			covered++
+		}
+	}
+	page.Subtitle = text(plural(accounts, "account") + " · " + plural(admins, "administrator") + " · " + strconv.Itoa(covered) + " covered by escrow")
+	for _, u := range snap.Users {
+		if len(u.LoginHash) == 0 && u.Disabled {
+			continue
+		}
+		switch {
+		case sift != "" && !strings.Contains(strings.ToLower(u.Login), sift):
+			continue
+		case show == "admins" && u.Role != store.RoleAdmin:
+			continue
+		case show == "disabled" && !u.Disabled:
 			continue
 		}
 		// The frame writes the role by its word and both days absolute
@@ -116,6 +145,24 @@ func (s *Server) buildAdminUsersPage(r *http.Request, sess *session.Session, fla
 	total := len(page.Rows)
 	page.Bar = view.ListBar{Loaded: total, Total: &total,
 		Columns: s.columnsMenu(r, csrfField(sess), "users", "/admin/columns", nil, false)}
+	page.Bar.Filter, page.Bar.FilterForm = text(q.Get("filter")), s.listFilter("/admin/", url.Values{"show": {show}}, q.Get("filter"))
+	if show != "" && page.Bar.FilterForm != nil {
+		page.Bar.FilterForm.Sets[0].Rows = append([]view.FormRow{{Name: "show", Kind: view.InputHidden, Value: text(show)}}, page.Bar.FilterForm.Sets[0].Rows...)
+	}
+	for _, sg := range []struct{ id, label, show string }{{"admin.users.all", "All", ""}, {"admin.users.admins", "Administrators", "admins"}, {"admin.users.disabled", "Disabled", "disabled"}} {
+		v := url.Values{}
+		if sg.show != "" {
+			v.Set("show", sg.show)
+		}
+		if f := q.Get("filter"); f != "" {
+			v.Set("filter", f)
+		}
+		href := "/admin/"
+		if len(v) > 0 {
+			href += "?" + v.Encode()
+		}
+		page.Bar.Segments = append(page.Bar.Segments, view.Action{ID: sg.id, Label: text(sg.label), Href: s.route(href), Method: "GET", Enabled: true, On: sg.show == show})
+	}
 	return page
 }
 
@@ -224,7 +271,7 @@ func (s *Server) postAdminReset(w http.ResponseWriter, r *http.Request) {
 		Issued: &view.IssuedPassword{
 			Login:    text(u.Login),
 			Password: text(temp),
-			Copy:     view.Action{ID: "admin.reset.copy", Label: "Copy", Method: "GET", Primary: true, Enabled: true},
+			Copy:     view.Action{ID: "admin.reset.copy", Label: "Copy", Icon: "i-dup", Method: "GET", Primary: true, Enabled: true},
 			Message:  join("The password of ", strongRun(u.Login), " is reset."),
 			Note:     "Hand it over yourself; they choose their own at the next sign-in.",
 			Done:     view.Action{ID: "admin.reset.done", Label: "Done", Href: s.route("/admin/"), Method: "GET", Primary: true, Enabled: true},
@@ -270,7 +317,7 @@ func (s *Server) resetSheet(sess *session.Session, target, temp string, errs map
 		view.FormRow{Name: "password", Label: "Temporary password", Kind: view.InputText, Required: true, Value: text(temp), Mono: true,
 			Hint: resetHint, Error: errs["password"]},
 		view.FormRow{Name: "confirm", Label: "Type the login to confirm", Kind: view.InputText, Required: true,
-			Error: errs["confirm"]},
+			Error: errs["confirm"], Placeholder: text(chosenLogin(people))},
 	)
 	// The caret is in the login typed to confirm, the one field left to
 	// fill (s-admin-13).
@@ -383,7 +430,7 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 		flash.issued = &view.IssuedPassword{
 			Login:    text(login),
 			Password: text(password),
-			Copy:     view.Action{ID: "admin.user.password.copy", Label: "Copy", Method: "GET", Primary: true, Enabled: true},
+			Copy:     view.Action{ID: "admin.user.password.copy", Label: "Copy", Icon: "i-dup", Method: "GET", Primary: true, Enabled: true},
 			Message:  join("The user ", strongRun(login), " is created. Hand this over; until they change it, you can sign in as them."),
 			Done:     view.Action{ID: "admin.user.password.done", Label: "Done", Href: s.route("/admin/invites"), Method: "GET", Enabled: true},
 		}
@@ -649,7 +696,6 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	snap := s.store.Snapshot()
-	now := s.now()
 	show := r.URL.Query().Get("show")
 	if show != "security" && show != "failures" {
 		show = "all"
@@ -681,11 +727,17 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 		if !keep(e.What) {
 			continue
 		}
+		// The moment in numbers, as the frame writes it (Ад3; s-admin-7);
+		// an action on oneself has no target but a dash (Ад26).
+		whom := e.Whom
+		if whom == e.Who {
+			whom = "—"
+		}
 		page.Rows = append(page.Rows, view.AuditRow{
-			When:   tf.formatWhen(e.When, false, now),
+			When:   tf.numStamp(e.When),
 			Who:    text(e.Who),
 			What:   text(e.What),
-			Whom:   text(e.Whom),
+			Whom:   text(whom),
 			Detail: text(e.Detail),
 		})
 	}
@@ -781,4 +833,16 @@ func (s *Server) writeAuditCSV(w http.ResponseWriter, entries []store.AuditEntry
 		}
 	}
 	out.Flush()
+}
+
+// chosenLogin is the login of the person a reset sheet has chosen: what the
+// field that confirms it shows before anything is typed (Ад9; s-admin-13).
+func chosenLogin(people []view.Option) string {
+	for _, o := range people {
+		if o.Selected {
+			login, _, _ := strings.Cut(string(o.Label), " · ") // «anna · User · …»
+			return login
+		}
+	}
+	return ""
 }

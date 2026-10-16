@@ -122,10 +122,59 @@
     },
     "compact": null,
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/admin/",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 1,
     "range": null,
-    "segments": [],
+    "segments": [
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "id": "admin.users.all",
+        "label": "All",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/admin/?show=admins",
+        "id": "admin.users.admins",
+        "label": "Administrators",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/?show=disabled",
+        "id": "admin.users.disabled",
+        "label": "Disabled",
+        "method": "GET"
+      }
+    ],
     "selected": 0,
     "total": 1
   },
@@ -152,7 +201,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "",
     "foot": [],
     "nav": [
       {
@@ -168,6 +217,7 @@
         "count": 0,
         "enabled": true,
         "href": "/admin/invites",
+        "icon": "i-plus",
         "id": "admin.invites",
         "label": "Add users",
         "method": "GET"
@@ -176,6 +226,7 @@
         "count": 1,
         "enabled": true,
         "href": "/admin/",
+        "icon": "i-con",
         "id": "admin.users",
         "label": "Users",
         "method": "GET",
@@ -185,6 +236,7 @@
         "count": null,
         "enabled": true,
         "href": "/admin/settings",
+        "icon": "i-adm",
         "id": "admin.settings",
         "label": "Settings",
         "method": "GET"
@@ -193,6 +245,7 @@
         "count": null,
         "enabled": true,
         "href": "/admin/install",
+        "icon": "i-shield",
         "id": "admin.install",
         "label": "Installation",
         "method": "GET"
@@ -201,6 +254,7 @@
         "count": null,
         "enabled": true,
         "href": "/admin/dav",
+        "icon": "i-search",
         "id": "admin.dav",
         "label": "DAV validator",
         "method": "GET"
@@ -209,6 +263,7 @@
         "count": null,
         "enabled": true,
         "href": "/admin/escrow",
+        "icon": "i-dup",
         "id": "admin.escrow",
         "label": "Key escrow",
         "method": "GET"
@@ -217,6 +272,7 @@
         "count": null,
         "enabled": true,
         "href": "/admin/audit",
+        "icon": "i-clock",
         "id": "admin.audit",
         "label": "Audit log",
         "method": "GET"
@@ -302,6 +358,7 @@
       "sessions": 1
     }
   ],
+  "subtitle": "1 account · 1 administrator · 0 covered by escrow",
   "title": "Users",
   "top": {
     "lock": null,

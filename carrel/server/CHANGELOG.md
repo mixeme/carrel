@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.308 — 2026-10-16
+
+### Changed
+
+- **Administration by its frames** (Ад1, Ад2, Ад3, Ад5, Ад6, Ад9, Ад10,
+  Ад16, Ад26 of the scan of 15.10.2026; `s-admin-2`, `-3`, `-7`, `-13`,
+  `-14`, `-17`): the rail's rows have their icons and the rail no line of
+  davloom; the list of people says what it holds above it
+  (`AdminUsersPage.Subtitle`: «6 accounts · 2 administrators · 4 covered
+  by escrow») and sifts by login (`Bar.FilterForm`) and by All ·
+  Administrators · Disabled (`Bar.Segments`, `?show=`); the journal writes
+  its moments in numbers and a dash for the target of an action on oneself;
+  the field that confirms a reset shows the login chosen; Copy of a
+  password issued has its icon; the instance's settings are «Settings».
+- A moment in numbers (`numStamp`) keeps the person's clock: «2026-08-10
+  8:41 AM» on twelve hours.
+
+### For consumers
+
+`AdminUsersPage.Subtitle` in C-6; fixtures of administration re-shot.
+
 ## v0.2.307 — 2026-10-16
 
 ### Added

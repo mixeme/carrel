@@ -3127,7 +3127,12 @@ type AppearancePage struct {
 
 type AdminUsersPage struct {
     Shell
-    Bar  ListBar // полоса s-admin-2: пока только Columns (s-admin-21)
+    // Subtitle — «6 accounts · 2 administrators · 4 covered by escrow»
+    // (s-admin-2). Bar — «Filter by login» (FilterForm, GET списка),
+    // сегменты All · Administrators · Disabled (?show=admins|disabled),
+    // Columns (s-admin-21)
+    Subtitle Text
+    Bar  ListBar
     Rows []AdminUserRow
     Add  []Action // шапка (s-admin-2): Add user — на «Add users»; Reset a password — лист PasswordResetSheet
 }

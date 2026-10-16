@@ -567,7 +567,12 @@ type AppearancePage struct {
 
 type AdminUsersPage struct {
 	Shell
-	Bar  ListBar        `json:"bar"` // полоса s-admin-2: пока только Columns (s-admin-21)
+	// Subtitle — «6 accounts · 2 administrators · 4 covered by escrow»
+	// (s-admin-2, Ад5)
+	Subtitle Text `json:"subtitle"`
+	// Bar — полоса s-admin-2: «Filter by login» (FilterForm, GET списка),
+	// сегменты All · Administrators · Disabled (?show=), Columns (s-admin-21)
+	Bar  ListBar        `json:"bar"`
 	Rows []AdminUserRow `json:"rows"`
 	Add  []Action       `json:"add"` // шапка (s-admin-2): Add user — на «Add users», Reset a password — лист PasswordResetSheet
 }

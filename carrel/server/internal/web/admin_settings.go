@@ -143,7 +143,8 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 	if flash.form != nil {
 		shown = *flash.form
 	}
-	page := view.AdminSettingsPage{Shell: s.buildShell(sess, "Instance settings"), Test: flash.test}
+	// «Settings», as the rail and the frame name it (Ад16; s-admin-3).
+	page := view.AdminSettingsPage{Shell: s.buildShell(sess, "Settings"), Test: flash.test}
 	page.Rail = s.adminRail(sess, "/admin/settings")
 	num := func(n int) view.Text { return text(strconv.Itoa(n)) }
 

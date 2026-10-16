@@ -24,7 +24,8 @@ func formsWithoutButtons(t *testing.T, rec *httptest.ResponseRecorder) []string 
 		case map[string]any:
 			if _, ok := x["sets"]; ok {
 				acts, _ := x["actions"].([]any)
-				if action, _ := x["action"].(string); action != "" && len(acts) == 0 {
+				// A form that posts; a filter (GET) goes by Enter (Ад6).
+				if action, _ := x["action"].(string); action != "" && len(acts) == 0 && x["method"] == "POST" {
 					out = append(out, path+" → "+action)
 				}
 			}

@@ -66,7 +66,9 @@ func (f timeFmt) numStamp(t time.Time) view.When {
 	if t.IsZero() {
 		return ""
 	}
-	return view.When(t.In(f.tz).Format("2006-01-02 15:04"))
+	// The day in numbers, the clock the person's: «2026-08-10 8:41 AM» on
+	// twelve hours (Appearance).
+	return view.When(f.numDate(t) + " " + f.clock(t))
 }
 
 // dayOfYear is a day without its year when it is this year's: «14

@@ -65,25 +65,27 @@ func (s *Server) adminRail(sess *session.Session, open string) view.Rail {
 		}
 		people++
 	}
-	rail := view.Rail{About: s.aboutAction(), Davloom: s.davloomMark(sess), Nav: []view.NavRow{
+	// The rail of administration draws no line of davloom (Ад2; s-admin-*).
+	rail := view.Rail{About: s.aboutAction(), Nav: []view.NavRow{
 		{Action: view.Action{ID: "admin.back", Label: "Back to app", Icon: "i-back",
 			Href: s.route("/app/contacts"), Method: "GET", Enabled: true}},
 	}}
 	rows := []struct {
-		id, label, route string
-		count            *int
+		id, label, icon, route string
+		count                  *int
 	}{
-		{"admin.invites", "Add users", "/admin/invites", count(live)},
-		{"admin.users", "Users", "/admin/", count(people)},
-		{"admin.settings", "Settings", "/admin/settings", nil},
-		{"admin.install", "Installation", "/admin/install", nil},
-		{"admin.dav", "DAV validator", "/admin/dav", nil},
-		{"admin.escrow", "Key escrow", "/admin/escrow", nil},
-		{"admin.audit", "Audit log", "/admin/audit", nil},
+		// Each with its icon, as the frames draw them (Ад1; s-admin-*).
+		{"admin.invites", "Add users", "i-plus", "/admin/invites", count(live)},
+		{"admin.users", "Users", "i-con", "/admin/", count(people)},
+		{"admin.settings", "Settings", "i-adm", "/admin/settings", nil},
+		{"admin.install", "Installation", "i-shield", "/admin/install", nil},
+		{"admin.dav", "DAV validator", "i-search", "/admin/dav", nil},
+		{"admin.escrow", "Key escrow", "i-dup", "/admin/escrow", nil},
+		{"admin.audit", "Audit log", "i-clock", "/admin/audit", nil},
 	}
 	for _, r := range rows {
 		rail.Nav = append(rail.Nav, view.NavRow{
-			Action: view.Action{ID: r.id, Label: text(r.label), Href: s.route(r.route), Method: "GET",
+			Action: view.Action{ID: r.id, Label: text(r.label), Icon: r.icon, Href: s.route(r.route), Method: "GET",
 				Enabled: true, On: r.route == open},
 			Count: r.count,
 		})

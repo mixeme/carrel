@@ -235,7 +235,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "",
     "foot": [],
     "nav": [
       {
@@ -251,6 +251,7 @@
         "count": 0,
         "enabled": true,
         "href": "/admin/invites",
+        "icon": "i-plus",
         "id": "admin.invites",
         "label": "Add users",
         "method": "GET"
@@ -259,6 +260,7 @@
         "count": 1,
         "enabled": true,
         "href": "/admin/",
+        "icon": "i-con",
         "id": "admin.users",
         "label": "Users",
         "method": "GET"
@@ -267,6 +269,7 @@
         "count": null,
         "enabled": true,
         "href": "/admin/settings",
+        "icon": "i-adm",
         "id": "admin.settings",
         "label": "Settings",
         "method": "GET"
@@ -275,6 +278,7 @@
         "count": null,
         "enabled": true,
         "href": "/admin/install",
+        "icon": "i-shield",
         "id": "admin.install",
         "label": "Installation",
         "method": "GET"
@@ -283,6 +287,7 @@
         "count": null,
         "enabled": true,
         "href": "/admin/dav",
+        "icon": "i-search",
         "id": "admin.dav",
         "label": "DAV validator",
         "method": "GET"
@@ -291,6 +296,7 @@
         "count": null,
         "enabled": true,
         "href": "/admin/escrow",
+        "icon": "i-dup",
         "id": "admin.escrow",
         "label": "Key escrow",
         "method": "GET"
@@ -299,6 +305,7 @@
         "count": null,
         "enabled": true,
         "href": "/admin/audit",
+        "icon": "i-clock",
         "id": "admin.audit",
         "label": "Audit log",
         "method": "GET",
@@ -336,154 +343,154 @@
     {
       "detail": "file a-sftp-vps",
       "what": "publish.create",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "event a-nc-home",
       "what": "publish.create",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "a-sftp-vps",
       "what": "attachments.folder",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "file",
       "what": "sources.select",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "a-sftp-vps",
       "what": "connection.add",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "f-league",
       "what": "feed.edit",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "f-league",
       "what": "feed.subscribe",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "event",
       "what": "sources.select",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "f-ru-holidays",
       "what": "feed.edit",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "f-ru-holidays",
       "what": "feed.subscribe",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "",
       "what": "duplicates.link",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "note",
       "what": "sources.select",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "task",
       "what": "sources.select",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "event",
       "what": "sources.select",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "contact",
       "what": "sources.select",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "a-baikal",
       "what": "connection.add",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "a-rad-vps",
       "what": "connection.add",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "a-nc-home",
       "what": "connection.add",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "new accounts covered",
       "what": "escrow.enable",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
       "whom": ""
     },
     {
       "detail": "name \"carrel.example\", idle 2h, session 7d, invite 24h, people's mail false, attachment 0 MB, letter 0 MB, 0 recipients, 0 a day (0 = default)",
       "what": "settings.instance",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
       "whom": ""
     },
     {
       "detail": "",
       "what": "login.ok",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": "mix"
+      "whom": "—"
     },
     {
       "detail": "",
       "what": "setup.first_admin",
-      "when": "10 August 2026, 17:04",
+      "when": "2026-08-10 17:04",
       "who": "system",
       "whom": "mix"
     }
