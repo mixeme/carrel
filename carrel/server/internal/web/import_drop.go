@@ -3,6 +3,8 @@ package web
 import (
 	"strings"
 
+	"carrel.dev/carrel/server/internal/sealed"
+
 	"carrel.dev/carrel/server/view"
 )
 
@@ -18,21 +20,39 @@ func (s *Server) importDrop(c *collectionCtx) *view.ImportDrop {
 	if c.col.ReadOnly {
 		return nil
 	}
-	accept := importFormats(c.spec.kind)
+	return dropOf(c.spec.kind, s.importHref(c, "", "", ""), " into ", strongRun(string(c.origin().stamp())))
+}
+
+// combinedDrop is the drop of a combined view (Им4; s-io-1): nothing is
+// chosen there, so the file opens the first step with «Into» empty — where
+// it goes is asked. nil — no collection of the kind takes records.
+func (s *Server) combinedDrop(blob sealed.Blob, spec kindSpec) *view.ImportDrop {
+	if _, ok := firstWritable(blob, spec.kind); !ok {
+		return nil
+	}
+	return dropOf(spec.kind, s.route("/app/"+spec.segment+"/import"), " — where it goes is asked next", "")
+}
+
+// dropOf is the drop that sends the file to href: what the kind takes, and
+// the overlay's line — the files, then where to (into, a run or words).
+func dropOf(k view.Kind, href, how string, into any) *view.ImportDrop {
+	accept := importFormats(k)
 	d := &view.ImportDrop{
-		Action: view.Action{ID: "import.drop", Label: "Import", Href: s.importHref(c, "", "", ""), Method: "POST", File: "file",
-			Enabled: true},
+		Action: view.Action{ID: "import.drop", Label: "Import", Href: href, Method: "POST", File: "file", Enabled: true},
 		Accept: accept,
-		Many:   c.spec.kind == view.KindNote,
+		Many:   k == view.KindNote,
 		Lead:   "Drop to import",
 		Note:   "The preview opens first: nothing is written until it has been read",
 	}
-	into := strongRun(string(c.origin().stamp()))
+	tail := []any{how}
+	if into != "" {
+		tail = append(tail, into)
+	}
 	if d.Many {
 		// Notes take several files at once, as a zip and a folder (s-io-1).
-		d.Line = join(monoRun(".md"), " files, a ", monoRun(".zip"), " or an ", monoRun(".ics"), " file into ", into)
+		d.Line = join(append([]any{monoRun(".md"), " files, a ", monoRun(".zip"), " or an ", monoRun(".ics"), " file"}, tail...)...)
 	} else {
-		d.Line = join("One ", monoRun(string(accept[0])), " file into ", into)
+		d.Line = join(append([]any{"One ", monoRun(string(accept[0])), " file"}, tail...)...)
 	}
 	for _, other := range []struct {
 		ext   string
@@ -51,10 +71,10 @@ func (s *Server) importDrop(c *collectionCtx) *view.ImportDrop {
 			where = append(where, dropHolder[k])
 		}
 		takes := "takes"
-		if c.spec.kind == view.KindContact {
+		if k == view.KindContact {
 			takes = "take"
 		}
-		says := join(dropTaker[c.spec.kind]+" "+takes+" ", formatsRuns(accept), " — "+joinAnd(where)+" "+takesFor(where)+" this one")
+		says := join(dropTaker[k]+" "+takes+" ", formatsRuns(accept), " — "+joinAnd(where)+" "+takesFor(where)+" this one")
 		d.Elsewhere = append(d.Elsewhere, view.ImportElsewhere{Ext: text(other.ext), Says: says})
 	}
 	return d

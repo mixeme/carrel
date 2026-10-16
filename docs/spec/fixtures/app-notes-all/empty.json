@@ -145,7 +145,79 @@
       "label": "Columns"
     },
     "compact": null,
-    "drop": null,
+    "drop": {
+      "accept": [
+        ".ics",
+        ".md",
+        ".zip"
+      ],
+      "action": {
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/notes/import",
+        "id": "import.drop",
+        "label": "Import",
+        "method": "POST"
+      },
+      "elsewhere": [
+        {
+          "ext": ".vcf",
+          "says": [
+            {
+              "text": "A notebook takes "
+            },
+            {
+              "mark": "mono",
+              "text": ".ics"
+            },
+            {
+              "text": ", "
+            },
+            {
+              "mark": "mono",
+              "text": ".md"
+            },
+            {
+              "text": " and "
+            },
+            {
+              "mark": "mono",
+              "text": ".zip"
+            },
+            {
+              "text": " — contacts take this one"
+            }
+          ]
+        }
+      ],
+      "lead": "Drop to import",
+      "line": [
+        {
+          "mark": "mono",
+          "text": ".md"
+        },
+        {
+          "text": " files, a "
+        },
+        {
+          "mark": "mono",
+          "text": ".zip"
+        },
+        {
+          "text": " or an "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " file — where it goes is asked next"
+        }
+      ],
+      "many": true,
+      "note": "The preview opens first: nothing is written until it has been read"
+    },
     "filter": "",
     "filterForm": {
       "action": "/app/notes",

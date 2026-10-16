@@ -167,6 +167,7 @@ func registerKindRoutes(s *Server, kind string) {
 	s.handle("POST /app/"+kind+"/{account}/{col}/{uid}/move", kindMovePostHandler(kind))
 	s.handle("POST /app/"+kind+"/{account}/{col}/{uid}/delete", kindDeleteHandler(kind))
 	s.handle("GET /app/"+kind+"/import", kindImportEntryHandler(kind))
+	s.handle("POST /app/"+kind+"/import", kindImportEntryPostHandler(kind))
 	s.handle("GET /app/"+kind+"/export", kindExportEntryHandler(kind))
 	s.handle("GET /app/"+kind+"/{account}/{col}/import", kindImportGetHandler(kind))
 	s.handle("POST /app/"+kind+"/{account}/{col}/import", kindImportPostHandler(kind))
@@ -253,6 +254,12 @@ func kindDeleteHandler(kind string) handler {
 func kindImportEntryHandler(kind string) handler {
 	return func(s *Server, w http.ResponseWriter, r *http.Request) {
 		s.getKindImportEntry(w, r, kind)
+	}
+}
+
+func kindImportEntryPostHandler(kind string) handler {
+	return func(s *Server, w http.ResponseWriter, r *http.Request) {
+		s.postKindImportEntry(w, r, kind)
 	}
 }
 

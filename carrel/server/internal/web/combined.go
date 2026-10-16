@@ -331,6 +331,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	}
 	tf, base := s.timeFor(sess), "/app/"+spec.segment
 	actions := append([]view.Action{s.combinedNewAction(blob, spec)}, s.combinedIOActions(blob, spec)...)
+	drop := s.combinedDrop(blob, spec) // a file dropped here asks where it goes (Им4; s-io-1)
 	// The filter's links name the task, so choosing a category reads the
 	// records already polled instead of asking the servers again.
 	query := r.URL.Query()
@@ -376,7 +377,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		countGroups(page.Groups)
 		page.Details = s.openInPanel(r, sess, base, kept, page.Groups)
 		total := len(st.items)
-		page.Bar = view.ListBar{Filter: text(sift), Loaded: len(kept), Total: &total, Actions: append(actions, s.printAction(base)),
+		page.Bar = view.ListBar{Filter: text(sift), Loaded: len(kept), Total: &total, Actions: append(actions, s.printAction(base)), Drop: drop,
 			FilterForm: s.listFilter(base, query, sift), Compact: s.compactForm(r, spec.segment, base),
 			Segments: s.sortSegments(base, view.KindContact, by, r.URL.Query()),
 			Columns:  columns()}
@@ -416,6 +417,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Bar.Compact = s.compactForm(r, spec.segment, base)
 		page.Bar.Columns = columns()
 		page.Bar.Actions = append(actions, s.agendaPrintAction(base, query))
+		page.Bar.Drop = drop
 		page.Notices = appendUnreadable(page.Notices, bad)
 		switch {
 		case st.task == nil && len(page.Notices) == 0:
@@ -445,6 +447,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Bar.Segments = append(s.taskSegments(base, filter.tag, show, open, done),
 			s.sortSegments(base, view.KindTask, by, r.URL.Query())...)
 		page.Bar.Actions = append(actions, s.printAction(base))
+		page.Bar.Drop = drop
 		page.Bar.Columns = columns()
 		page.Notices = appendUnreadable(page.Notices, bad)
 		page.Subtitle = text(combinedSubtitle(page.Rail, spec, st.counted()))
@@ -466,6 +469,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Bar.Filter, page.Bar.FilterForm = text(sift), s.listFilter(base, query, sift)
 		page.Bar.Segments = s.sortSegments(base, view.KindNote, by, r.URL.Query())
 		page.Bar.Actions = actions
+		page.Bar.Drop = drop
 		page.Bar.Columns = columns()
 		page.Notices = appendUnreadable(page.Notices, bad)
 		page.Subtitle = text(notebookSubtitle(combinedNotebooks(page.Rail, spec, st.counted())))

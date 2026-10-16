@@ -364,7 +364,8 @@
         "text": "What is skipped is listed in the report, and so is what could not be read."
       }
     ],
-    "preview": null
+    "preview": null,
+    "taken": []
   },
   "step": "preview",
   "steps": [

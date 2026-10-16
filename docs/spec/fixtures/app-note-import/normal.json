@@ -383,7 +383,8 @@
       "method": "POST",
       "primary": true,
       "reason": "Choose a folder in the tree first."
-    }
+    },
+    "taken": []
   },
   "step": "source",
   "steps": [

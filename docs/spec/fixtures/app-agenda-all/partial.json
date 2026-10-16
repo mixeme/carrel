@@ -234,7 +234,82 @@
         }
       ]
     },
-    "drop": null,
+    "drop": {
+      "accept": [
+        ".ics"
+      ],
+      "action": {
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/calendar/import",
+        "id": "import.drop",
+        "label": "Import",
+        "method": "POST"
+      },
+      "elsewhere": [
+        {
+          "ext": ".vcf",
+          "says": [
+            {
+              "text": "A calendar takes "
+            },
+            {
+              "mark": "mono",
+              "text": ".ics"
+            },
+            {
+              "text": " — contacts take this one"
+            }
+          ]
+        },
+        {
+          "ext": ".md",
+          "says": [
+            {
+              "text": "A calendar takes "
+            },
+            {
+              "mark": "mono",
+              "text": ".ics"
+            },
+            {
+              "text": " — a notebook takes this one"
+            }
+          ]
+        },
+        {
+          "ext": ".zip",
+          "says": [
+            {
+              "text": "A calendar takes "
+            },
+            {
+              "mark": "mono",
+              "text": ".ics"
+            },
+            {
+              "text": " — a notebook takes this one"
+            }
+          ]
+        }
+      ],
+      "lead": "Drop to import",
+      "line": [
+        {
+          "text": "One "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " file — where it goes is asked next"
+        }
+      ],
+      "many": false,
+      "note": "The preview opens first: nothing is written until it has been read"
+    },
     "filter": "",
     "filterForm": null,
     "loaded": 5,

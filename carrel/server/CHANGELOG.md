@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.320 — 2026-10-16
+
+### Added
+
+- **A file dropped on a combined view** (Им4 of the scan of import;
+  `s-io-1`): the combined lists carry their drop too, its line saying where
+  the file goes is asked next; `POST /app/{kind}/import` takes the file and
+  opens the first step with it in hand (`ImportSource.Taken`: the file in
+  mono, its size and format) and «Into» empty — the records are not laid
+  into the first collection that comes —; choosing «Into» opens the preview
+  of this file. The file stays in hand when the page is opened again.
+
+### For consumers
+
+C-5: `POST /app/{kind}/import`; C-6: `ImportSource.Taken`; fixtures of the
+combined lists re-shot (`drop`).
+
 ## v0.2.319 — 2026-10-16
 
 ### Added

@@ -418,6 +418,9 @@ type importState struct {
 	// entry: the wizard was opened from a combined view, and nothing is
 	// chosen under «Into» until the person chooses it (C-5, U-6.9).
 	entry bool
+	// held is the file dropped on a combined view (Им4; s-io-1): taken,
+	// waiting for «Into»; the first step says which.
+	held *importDraft
 	// folderAcc, folderPath and folderIn are the folder chosen in the tree
 	// of notes (s-io-4) — the storage and the folder below its root —,
 	// before «Preview folder» takes it.
@@ -515,6 +518,9 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 		page.Actions = []view.Action{run, {ID: "import.cancel", Label: "Cancel",
 			Href: s.importHref(c, "cancel", "", ""), Method: "POST", Enabled: true}}
 	default:
+		if st.held != nil {
+			page.Source.Taken = importSubtitle(st.held)
+		}
 		to, into := targetOf(st.dest)
 		// The first step has one button; the rail is the way out (s-io-3,
 		// s-io-4).
@@ -610,6 +616,25 @@ func (s *Server) getKindImportEntry(w http.ResponseWriter, r *http.Request, kind
 		s.notFound(w, r)
 		return
 	}
+	c := s.importHost(sess, spec)
+	if c == nil {
+		s.notFound(w, r)
+		return
+	}
+	st := importState{entry: true}
+	// A file dropped here and not yet sent anywhere (Им4) is still in hand.
+	if d, has := loadImportDraft(c); has && d.To == "" {
+		st.held = d
+	}
+	page := s.importPage(c, st)
+	page.Rail = s.combinedBackRail(c)
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+// importHost is the collection the wizard of a combined view stands on: the
+// first that takes records of the kind. Its address carries the wizard
+// only; «Into» is the person's to choose. nil — none takes any.
+func (s *Server) importHost(sess *session.Session, spec kindSpec) *collectionCtx {
 	blob := s.catalogOf(sess)
 	for _, conn := range blob.Connections {
 		for _, col := range blob.CollectionsOf(conn.ID) {
@@ -617,14 +642,49 @@ func (s *Server) getKindImportEntry(w http.ResponseWriter, r *http.Request, kind
 				continue
 			}
 			if c, made := s.collectionOf(sess, spec, conn.ID, col.Path); made {
-				page := s.importPage(c, importState{entry: true})
-				page.Rail = s.combinedBackRail(c)
-				s.writePage(w, r, http.StatusOK, page)
-				return
+				return c
 			}
 		}
 	}
-	s.notFound(w, r)
+	return nil
+}
+
+// postKindImportEntry takes a file dropped on a combined view (Им4; s-io-1):
+// nothing is chosen there, so the first step opens with the file in hand and
+// «Into» empty — the cards are not laid into the first book that comes, a
+// server of somebody's. Choosing «Into» opens the preview of this file.
+func (s *Server) postKindImportEntry(w http.ResponseWriter, r *http.Request, kind string) {
+	defer func() {
+		if r.MultipartForm != nil {
+			_ = r.MultipartForm.RemoveAll()
+		}
+	}()
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	spec, known := recordKinds[kind]
+	if !known {
+		s.notFound(w, r)
+		return
+	}
+	c := s.importHost(sess, spec)
+	if c == nil {
+		s.notFound(w, r)
+		return
+	}
+	st := importState{entry: true}
+	d, err := s.readUpload(r, c)
+	if err != nil {
+		st.notices = []view.Notice{s.importRefusal(err)}
+	} else {
+		d.To, d.Into = "", ""
+		saveImportDraft(c, d)
+		st.held = d
+	}
+	page := s.importPage(c, st)
+	page.Rail = s.combinedBackRail(c)
+	s.writePage(w, r, http.StatusOK, page)
 }
 
 // getKindExportEntry is the way into the export from a combined view: which
@@ -728,6 +788,20 @@ func (s *Server) postKindImport(w http.ResponseWriter, r *http.Request, kind str
 // takeFile reads the uploaded file into a draft. Nothing is written yet: the
 // preview says what the import would do, and against which collection.
 func (s *Server) takeFile(w http.ResponseWriter, r *http.Request, c *collectionCtx, dest *collectionCtx) {
+	d, err := s.readUpload(r, c)
+	if err != nil {
+		s.writePage(w, r, http.StatusOK, s.importPage(c, importState{dest: dest, notices: []view.Notice{s.importRefusal(err)}}))
+		return
+	}
+	d.To, d.Into = targetOf(dest)
+	saveImportDraft(c, d)
+	st := importState{draft: d, dest: dest}
+	st.preview, st.taken, st.notices = s.importPreview(r.Context(), c, d, dest)
+	s.writePage(w, r, http.StatusOK, s.importPage(c, st))
+}
+
+// readUpload reads the files of the request as the wizard of c takes them.
+func (s *Server) readUpload(r *http.Request, c *collectionCtx) (*importDraft, error) {
 	files, err := uploadedImports(r, s.cfg.ImportMaxBytes)
 	var d *importDraft
 	switch {
@@ -747,15 +821,7 @@ func (s *Server) takeFile(w http.ResponseWriter, r *http.Request, c *collectionC
 	default:
 		d, err = s.readImport(c, files[0].name, files[0].body)
 	}
-	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.importPage(c, importState{dest: dest, notices: []view.Notice{s.importRefusal(err)}}))
-		return
-	}
-	d.To, d.Into = targetOf(dest)
-	saveImportDraft(c, d)
-	st := importState{draft: d, dest: dest}
-	st.preview, st.taken, st.notices = s.importPreview(r.Context(), c, d, dest)
-	s.writePage(w, r, http.StatusOK, s.importPage(c, st))
+	return d, err
 }
 
 // readImport takes a file apart by its kind. A calendar file holds records of

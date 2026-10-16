@@ -329,7 +329,8 @@
         "text": "STATUS, PERCENT-COMPLETE and PRIORITY come across as they are: a task that was half done arrives half done."
       }
     ],
-    "preview": null
+    "preview": null,
+    "taken": []
   },
   "step": "preview",
   "steps": [

@@ -437,7 +437,8 @@
         "text": "A repeating event keeps its rule: the series is one record, not fifty-two."
       }
     ],
-    "preview": null
+    "preview": null,
+    "taken": []
   },
   "step": "preview",
   "steps": [
