@@ -1747,6 +1747,20 @@ func TestFixtureConnections(t *testing.T) {
 	openList(t, app, "/app/notes")
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	app.compare(t, "app-settings-connections/normal.json", app.h.do(get("/app/settings/connections", app.sess)))
+	// Edit of nextcloud, through which «Личный» is published (Нс76): the
+	// question about the links waits hidden for a change of Server URL or
+	// Username (s-profile-16, -22); Save with another login and no answer
+	// brings the dialog back with the reason (s-profile-23).
+	q := url.Values{"op": {"edit"}, "account": {app.realAccount(t, "lichnyj")}}
+	t.Run("edit", func(t *testing.T) {
+		app.compare(t, "app-settings-connections/edit.json", app.h.do(get("/app/settings/connections?"+q.Encode(), app.sess)))
+	})
+	t.Run("edit-links", func(t *testing.T) {
+		page := decode[view.ConnectionsPage](t, app.h.do(get("/app/settings/connections?"+q.Encode(), app.sess)))
+		form := formFields(*page.Add)
+		form.Set("login", "mix")
+		app.compare(t, "app-settings-connections/edit-links.json", app.h.do(postForm("/app/settings/connections?"+q.Encode(), app.sess, form)))
+	})
 }
 
 // C-14.3: the states of the account, of its key escrow and of the password

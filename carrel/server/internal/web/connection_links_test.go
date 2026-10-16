@@ -97,3 +97,31 @@ func addForm(t *testing.T, p view.ConnectionsPage) *view.Form {
 	}
 	return p.Add
 }
+
+// Note 70 of Typecase (task 164; s-profile-22, -23): the question waits in
+// the dialog of a connection that has links — hidden, named by the fields
+// whose change asks it (FormRow.Changed: Server URL and Username). With a
+// script it shows while one of them differs from what came, without one it
+// comes after the first Save, as before.
+func TestTheLinksQuestionWaitsHidden(t *testing.T) {
+	work := davtest.CalendarHome + "work/"
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "davpass"
+	srv.AddCalendar(caldav.Calendar{Path: work, Name: "Work"})
+	f := connectFixture(t, srv, work, nil)
+	q := url.Values{"op": {"edit"}, "account": {f.id}}
+	if row := formRow(*addForm(t, decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections?"+q.Encode(), f.sess)))), "links"); row != nil {
+		t.Fatalf("a connection without links has the question: %+v", row)
+	}
+	publishLink(t, f, f.publishHref("calendar", work, ""), false)
+	row := formRow(*addForm(t, decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections?"+q.Encode(), f.sess)))), "links")
+	if row == nil || !row.Hidden || !reflect.DeepEqual(row.Changed, []string{"server", "login"}) || row.Error != "" || len(row.Options) != 2 {
+		t.Fatalf("the question in waiting = %+v", row)
+	}
+	// Asked after Save, it shows; a field that came shown stays so.
+	page := decode[view.ConnectionsPage](t, f.h.do(postForm("/app/settings/connections?"+q.Encode(), f.sess,
+		url.Values{"server": {catalogOf(t, f).Connections[0].Server}, "login": {"bob"}, "password": {""}})))
+	if row := formRow(*addForm(t, page), "links"); row == nil || row.Hidden || row.Error == "" {
+		t.Errorf("the question asked = %+v", row)
+	}
+}

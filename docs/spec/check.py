@@ -129,7 +129,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
           "tiles","copy","elsewhere","rename","delete","attach","single","in-part",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
-          "escrow-deposited","escrow-off","no-copy","forced"}
+          "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -404,6 +404,10 @@ STATE_FRAME = {
     "app-settings-escrow/escrow-off": "account-14",
     "app-settings-escrow-deposit/normal": "account-2",
     "app-settings-escrow-withdraw/normal": "account-11",
+    # Диалог правки подключения (Нс76): вопрос о ссылках ждёт скрытым —
+    # s-profile-16; Save без ответа — s-profile-23 (Typecase ad18c91).
+    "app-settings-connections/edit": "s-profile-16",
+    "app-settings-connections/edit-links": "s-profile-23",
 }
 # Без строки: app-contact-new/normal и app-event-new/normal — полные формы
 # создания (`/new`) — свои кадры маршрута, s-contacts-27 (Typecase 4af7ad7,

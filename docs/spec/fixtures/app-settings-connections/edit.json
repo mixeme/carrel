@@ -1,0 +1,2189 @@
+{
+  "accounts": [
+    {
+      "access": "",
+      "accountID": "a-nc-home",
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-nc-home\u0026op=test",
+          "id": "connection.test",
+          "label": "Test",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-nc-home\u0026op=edit",
+          "id": "connection.edit",
+          "label": "Edit",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections/disconnect?account=a-nc-home",
+          "id": "connection.disconnect",
+          "label": "Disconnect",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-nc-home\u0026op=rediscover",
+          "id": "connection.rediscover",
+          "label": "Look for changes",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/new?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections",
+          "icon": "i-plus",
+          "id": "collection.new",
+          "label": "New collection",
+          "method": "GET",
+          "target": "sheet"
+        }
+      ],
+      "answered": "2 min ago",
+      "collections": [
+        {
+          "changed": "10 August 2026, 17:04",
+          "colour": "#4a6b52",
+          "kinds": [
+            "task"
+          ],
+          "label": "Дела",
+          "lastRead": "2 min ago",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dela",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dela",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dela\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/tasks/a-nc-home/dela/export?whole=1",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=dela\u0026k=tasks",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dela",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": 4,
+          "path": "/alice/calendars/dela/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=dela",
+            "id": "collection.tick",
+            "label": "Дела",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "10 August 2026, 17:04",
+          "colour": "#6b4e7a",
+          "kinds": [
+            "note"
+          ],
+          "label": "Дневник",
+          "lastRead": "2 min ago",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dnevnik",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dnevnik",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dnevnik\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/dnevnik/export?whole=1",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=dnevnik\u0026k=notes",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dnevnik",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": 1,
+          "path": "/alice/calendars/dnevnik/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=dnevnik",
+            "id": "collection.tick",
+            "label": "Дневник",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "",
+          "colour": "#a05a2c",
+          "kinds": [
+            "event"
+          ],
+          "label": "Дни рождения",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dni-rozhdeniya",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dni-rozhdeniya",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dni-rozhdeniya\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export?whole=1",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=dni-rozhdeniya\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dni-rozhdeniya",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/dni-rozhdeniya/",
+          "readOnly": false,
+          "tick": "off",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=dni-rozhdeniya",
+            "id": "collection.tick",
+            "label": "Дни рождения",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "",
+          "colour": "#4a6b52",
+          "kinds": [
+            "event"
+          ],
+          "label": "Личный",
+          "lastRead": "2 min ago",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/export?whole=1",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": 2,
+          "path": "/alice/calendars/lichnyj/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=lichnyj",
+            "id": "collection.tick",
+            "label": "Личный",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "10 August 2026, 17:04",
+          "colour": "#3f6e8c",
+          "kinds": [
+            "event",
+            "task"
+          ],
+          "label": "Работа",
+          "lastRead": "2 min ago",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=rabota",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=rabota",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=rabota\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/export?whole=1",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=rabota\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=rabota",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": 4,
+          "path": "/alice/calendars/rabota/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=rabota",
+            "id": "collection.tick",
+            "label": "Работа",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "10 August 2026, 17:04",
+          "colour": "#4a6b52",
+          "kinds": [
+            "note"
+          ],
+          "label": "Записи",
+          "lastRead": "2 min ago",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapisi",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapisi",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapisi\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?whole=1",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapisi",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": 2,
+          "path": "/alice/calendars/zapisi/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=zapisi",
+            "id": "collection.tick",
+            "label": "Записи",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "",
+          "colour": "#3f6e8c",
+          "kinds": [
+            "note"
+          ],
+          "label": "Общие с семьёй",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapiski-obshchie",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapiski-obshchie",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapiski-obshchie\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapiski-obshchie/export?whole=1",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapiski-obshchie\u0026k=notes",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=zapiski-obshchie",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/zapiski-obshchie/",
+          "readOnly": true,
+          "tick": "off",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=zapiski-obshchie",
+            "id": "collection.tick",
+            "label": "Общие с семьёй",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "10 August 2026, 17:04",
+          "colour": "#a05a2c",
+          "kinds": [
+            "contact"
+          ],
+          "label": "Архив",
+          "lastRead": "2 min ago",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=arhiv",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=arhiv",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=arhiv\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/arhiv/export",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=arhiv\u0026k=contacts",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=arhiv",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": 1,
+          "path": "/alice/contacts/arhiv/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=arhiv",
+            "id": "collection.tick",
+            "label": "Архив",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "10 August 2026, 17:04",
+          "colour": "#4a6b52",
+          "kinds": [
+            "contact"
+          ],
+          "label": "Контакты",
+          "lastRead": "2 min ago",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=kontakty",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=kontakty",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=kontakty\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/export",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=kontakty",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": 5,
+          "path": "/alice/contacts/kontakty/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=kontakty",
+            "id": "collection.tick",
+            "label": "Контакты",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "",
+          "colour": "#9a9280",
+          "kinds": [
+            "file"
+          ],
+          "label": "Files",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Files",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Files",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Files\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=Files\u0026dir=1\u0026f=\u0026k=files",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Files",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": null,
+          "path": "/alice/files/Files/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=Files",
+            "id": "collection.tick",
+            "label": "Files",
+            "method": "POST"
+          }
+        }
+      ],
+      "login": "alice",
+      "note": "",
+      "password": {
+        "reveal": {
+          "enabled": true,
+          "href": "/app/settings/unlock?for=a-nc-home",
+          "id": "connection.password",
+          "label": "Show password",
+          "method": "GET",
+          "target": "sheet"
+        },
+        "shown": false,
+        "value": ""
+      },
+      "plain": "",
+      "refused": false,
+      "server": "https://nextcloud.example/dav.php",
+      "state": "ok",
+      "title": "nextcloud",
+      "trace": null
+    },
+    {
+      "access": "",
+      "accountID": "a-rad-vps",
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-rad-vps\u0026op=test",
+          "id": "connection.test",
+          "label": "Test",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-rad-vps\u0026op=edit",
+          "id": "connection.edit",
+          "label": "Edit",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections/disconnect?account=a-rad-vps",
+          "id": "connection.disconnect",
+          "label": "Disconnect",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-rad-vps\u0026op=rediscover",
+          "id": "connection.rediscover",
+          "label": "Look for changes",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/new?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections",
+          "icon": "i-plus",
+          "id": "collection.new",
+          "label": "New collection",
+          "method": "GET",
+          "target": "sheet"
+        }
+      ],
+      "answered": "2 min ago",
+      "collections": [
+        {
+          "changed": "",
+          "colour": "#8c6239",
+          "kinds": [
+            "event"
+          ],
+          "label": "Дежурства",
+          "lastRead": "2 min ago",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dezhurstva",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dezhurstva",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dezhurstva\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/export?whole=1",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-rad-vps\u0026c=dezhurstva\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dezhurstva",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": 1,
+          "path": "/alice/calendars/dezhurstva/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=dezhurstva",
+            "id": "collection.tick",
+            "label": "Дежурства",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "",
+          "colour": "#6b4e7a",
+          "kinds": [
+            "event"
+          ],
+          "label": "Проекты",
+          "lastRead": "2 min ago",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=proekty",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=proekty",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=proekty\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/proekty/export?whole=1",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-rad-vps\u0026c=proekty\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=proekty",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": 1,
+          "path": "/alice/calendars/proekty/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=proekty",
+            "id": "collection.tick",
+            "label": "Проекты",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "10 August 2026, 17:04",
+          "colour": "#6b4e7a",
+          "kinds": [
+            "contact"
+          ],
+          "label": "Команда",
+          "lastRead": "2 min ago",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=komanda",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=komanda",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=komanda\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-rad-vps/komanda/export",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-rad-vps\u0026c=komanda\u0026k=contacts",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=komanda",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": 1,
+          "path": "/alice/contacts/komanda/",
+          "readOnly": true,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=komanda",
+            "id": "collection.tick",
+            "label": "Команда",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "",
+          "colour": "#6b4e7a",
+          "kinds": [
+            "contact"
+          ],
+          "label": "Рассылки",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=rassylki",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=rassylki",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=rassylki\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-rad-vps/rassylki/export",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-rad-vps\u0026c=rassylki\u0026k=contacts",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-rad-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=rassylki",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": null,
+          "path": "/alice/contacts/rassylki/",
+          "readOnly": false,
+          "tick": "off",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=rassylki",
+            "id": "collection.tick",
+            "label": "Рассылки",
+            "method": "POST"
+          }
+        }
+      ],
+      "login": "alice",
+      "note": "",
+      "password": {
+        "reveal": {
+          "enabled": true,
+          "href": "/app/settings/unlock?for=a-rad-vps",
+          "id": "connection.password",
+          "label": "Show password",
+          "method": "GET",
+          "target": "sheet"
+        },
+        "shown": false,
+        "value": ""
+      },
+      "plain": "",
+      "refused": false,
+      "server": "https://radicale.example",
+      "state": "ok",
+      "title": "radicale · vps",
+      "trace": null
+    },
+    {
+      "access": "",
+      "accountID": "a-baikal",
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-baikal\u0026op=test",
+          "id": "connection.test",
+          "label": "Test again",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-baikal\u0026op=edit",
+          "id": "connection.edit",
+          "label": "Edit",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections/disconnect?account=a-baikal",
+          "id": "connection.disconnect",
+          "label": "Disconnect",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-baikal\u0026op=rediscover",
+          "id": "connection.rediscover",
+          "label": "Look for changes",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/new?a=a-baikal\u0026back=%2Fapp%2Fsettings%2Fconnections",
+          "icon": "i-plus",
+          "id": "collection.new",
+          "label": "New collection",
+          "method": "GET",
+          "target": "sheet"
+        }
+      ],
+      "answered": "",
+      "collections": [
+        {
+          "changed": "",
+          "colour": "#9a9280",
+          "kinds": [
+            "event"
+          ],
+          "label": "Общий",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-baikal\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=obshchij",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename and colour",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-baikal\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=obshchij",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-baikal\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=obshchij\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-baikal/obshchij/export?whole=1",
+              "icon": "i-export",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-baikal\u0026c=obshchij\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-baikal\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=obshchij",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/obshchij/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-baikal\u0026op=tick\u0026path=obshchij",
+            "id": "collection.tick",
+            "label": "Общий",
+            "method": "POST"
+          }
+        }
+      ],
+      "login": "alice",
+      "note": "The server refused the password. It may have been changed on the server: the one Carrel saved no longer fits.",
+      "password": {
+        "reveal": {
+          "enabled": true,
+          "href": "/app/settings/unlock?for=a-baikal",
+          "id": "connection.password",
+          "label": "Show password",
+          "method": "GET",
+          "target": "sheet"
+        },
+        "shown": false,
+        "value": ""
+      },
+      "plain": "",
+      "refused": true,
+      "server": "https://baikal.example/dav.php",
+      "state": "unavailable",
+      "title": "baikal",
+      "trace": null
+    },
+    {
+      "access": "",
+      "accountID": "a-sftp-vps",
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-sftp-vps\u0026op=test",
+          "id": "connection.test",
+          "label": "Test",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-sftp-vps\u0026op=edit",
+          "id": "connection.edit",
+          "label": "Edit",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections/disconnect?account=a-sftp-vps",
+          "id": "connection.disconnect",
+          "label": "Disconnect",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-sftp-vps\u0026op=rediscover",
+          "id": "connection.rediscover",
+          "label": "Look for changes",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/new?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026kind=file",
+          "icon": "i-plus",
+          "id": "folder.new",
+          "label": "New folder",
+          "method": "GET",
+          "target": "sheet"
+        }
+      ],
+      "answered": "",
+      "collections": [
+        {
+          "changed": "",
+          "colour": "#a05a2c",
+          "kinds": [
+            "file"
+          ],
+          "label": "Documents",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Documents",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Documents",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Documents\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026dir=1\u0026f=\u0026k=files",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Documents",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": null,
+          "path": "/alice/files/Documents/",
+          "readOnly": false,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-sftp-vps\u0026op=tick\u0026path=Documents",
+            "id": "collection.tick",
+            "label": "Documents",
+            "method": "POST"
+          }
+        },
+        {
+          "changed": "",
+          "colour": "#a05a2c",
+          "kinds": [
+            "file"
+          ],
+          "label": "Public",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Public",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Public",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Public\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-sftp-vps\u0026c=Public\u0026dir=1\u0026f=\u0026k=files",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Public",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "objects": null,
+          "path": "/alice/files/Public/",
+          "readOnly": true,
+          "tick": "off",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=a-sftp-vps\u0026op=tick\u0026path=Public",
+            "id": "collection.tick",
+            "label": "Public",
+            "method": "POST"
+          }
+        }
+      ],
+      "login": "alice",
+      "note": "",
+      "password": {
+        "reveal": {
+          "enabled": true,
+          "href": "/app/settings/unlock?for=a-sftp-vps",
+          "id": "connection.password",
+          "label": "Show password",
+          "method": "GET",
+          "target": "sheet"
+        },
+        "shown": false,
+        "value": ""
+      },
+      "plain": "plain WebDAV, no principal",
+      "refused": false,
+      "server": "https://files.example.org/dav",
+      "state": "ok",
+      "title": "sftpgo · vps",
+      "trace": null
+    }
+  ],
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/settings/connections?op=add",
+      "icon": "i-plus",
+      "id": "connection.add",
+      "label": "Connect account",
+      "method": "GET",
+      "primary": true
+    },
+    {
+      "enabled": true,
+      "href": "/app/settings/connections?op=feed",
+      "icon": "i-link",
+      "id": "feed.subscribe",
+      "label": "Subscribe to a feed",
+      "method": "GET"
+    }
+  ],
+  "add": {
+    "action": "/app/settings/connections?account=a-nc-home\u0026op=edit",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/settings/connections?account=a-nc-home\u0026op=edit",
+        "id": "connection.edit.save",
+        "label": "Save",
+        "method": "POST",
+        "primary": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "id": "connection.edit.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Label",
+            "name": "label",
+            "options": [],
+            "placeholder": "optional",
+            "readOnly": false,
+            "required": false,
+            "value": "nextcloud"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "focus": true,
+            "hint": ".well-known is tried first, then the URL exactly as typed.",
+            "kind": "url",
+            "label": "Server URL",
+            "mono": true,
+            "name": "server",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": "https://nextcloud.example/dav.php"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Username",
+            "name": "login",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "alice"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "Leave it empty to keep the stored one.",
+            "kind": "password",
+            "label": "Password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "disables": "password",
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "The server asks no password",
+            "name": "noPassword",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Certificate fingerprint",
+            "labelAside": "SHA-256 · optional",
+            "mono": true,
+            "name": "certFingerprint",
+            "options": [],
+            "placeholder": "only for a certificate the system does not trust",
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "changed": [
+              "server",
+              "login"
+            ],
+            "error": "",
+            "extra": null,
+            "hidden": true,
+            "hint": "1 published link uses this connection.",
+            "kind": "radio",
+            "label": "Published links",
+            "name": "links",
+            "options": [
+              {
+                "label": "Keep them: they open on what the connection points at now",
+                "selected": false,
+                "value": "keep"
+              },
+              {
+                "label": "Revoke them",
+                "selected": false,
+                "value": "revoke"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "details": null,
+  "dialogSubtitle": "One connection gives calendars and address books alike.",
+  "dialogTitle": "Edit connection",
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "note": [],
+  "notices": [
+    {
+      "actions": [],
+      "body": "Credentials will be sent in clear text. Continue only if you accept this risk.",
+      "details": null,
+      "role": "alert",
+      "title": "Unencrypted connection"
+    }
+  ],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-user",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET"
+      },
+      {
+        "count": 4,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-server",
+        "id": "settings.connections",
+        "label": "Connections",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "icon": "i-file",
+        "id": "settings.attachments",
+        "label": "Attachments",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "icon": "i-device",
+        "id": "settings.devices",
+        "label": "New device",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-archive",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-link",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "icon": "i-theme",
+        "id": "settings.appearance",
+        "label": "Appearance",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "No device has connected since the start."
+          }
+        ],
+        "title": "davloom · running · 0 devices",
+        "tone": "on"
+      }
+    ],
+    "tags": [],
+    "ticks": null
+  },
+  "subscriptions": [
+    {
+      "access": "no password",
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/connections?feed=f-ru-holidays\u0026op=feed.recheck",
+          "id": "feed.recheck",
+          "label": "Check",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
+          "id": "feed.edit",
+          "label": "Edit",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections?feed=f-ru-holidays\u0026op=feed.unsubscribe",
+          "id": "feed.unsubscribe",
+          "label": "Unsubscribe",
+          "method": "POST"
+        }
+      ],
+      "changed": "",
+      "checked": "2 min ago",
+      "colour": "#8c6239",
+      "id": "f-ru-holidays",
+      "kinds": [
+        "event",
+        "task"
+      ],
+      "lands": [
+        {
+          "kind": "event",
+          "label": "Calendar",
+          "objects": 3,
+          "tick": "on",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=f-ru-holidays\u0026kind=event\u0026op=tick\u0026path=feed",
+            "id": "feed.tick",
+            "label": "Calendar",
+            "method": "POST"
+          }
+        },
+        {
+          "kind": "task",
+          "label": "Tasks",
+          "objects": null,
+          "tick": "off",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=f-ru-holidays\u0026kind=task\u0026op=tick\u0026path=feed",
+            "id": "feed.tick",
+            "label": "Tasks",
+            "method": "POST"
+          }
+        }
+      ],
+      "note": "",
+      "password": null,
+      "size": "793 B",
+      "stale": false,
+      "state": "ok",
+      "title": "Праздники РФ",
+      "took": "0 ms",
+      "url": "https://feeds.example/ru-holidays.ics"
+    },
+    {
+      "access": "password saved",
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/connections?feed=f-league\u0026op=feed.recheck",
+          "id": "feed.recheck",
+          "label": "Check",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/rename?a=f-league\u0026c=feed",
+          "id": "feed.edit",
+          "label": "Edit",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections?feed=f-league\u0026op=feed.unsubscribe",
+          "id": "feed.unsubscribe",
+          "label": "Unsubscribe",
+          "method": "POST"
+        }
+      ],
+      "changed": "",
+      "checked": "",
+      "colour": "#6b4e7a",
+      "id": "f-league",
+      "kinds": [
+        "event"
+      ],
+      "lands": [
+        {
+          "kind": "event",
+          "label": "Calendar",
+          "objects": null,
+          "tick": "off",
+          "toggle": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/connections?account=f-league\u0026kind=event\u0026op=tick\u0026path=feed",
+            "id": "feed.tick",
+            "label": "Calendar",
+            "method": "POST"
+          }
+        }
+      ],
+      "note": "",
+      "password": {
+        "reveal": {
+          "enabled": true,
+          "href": "/app/settings/unlock?for=f-league",
+          "id": "connection.password",
+          "label": "Show password",
+          "method": "GET",
+          "target": "sheet"
+        },
+        "shown": false,
+        "value": ""
+      },
+      "size": "",
+      "stale": false,
+      "state": "ok",
+      "title": "Расписание лиги",
+      "took": "",
+      "url": "https://league.example/season.ics"
+    }
+  ],
+  "subtitle": [
+    {
+      "text": "Signed in as "
+    },
+    {
+      "mark": "strong",
+      "text": "mix"
+    },
+    {
+      "text": " · 4 servers · 17 collections · 2 subscriptions"
+    }
+  ],
+  "title": "Connections",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "trace": null
+}

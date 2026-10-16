@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.301 — 2026-10-16
+
+### Changed
+
+- **The question about a connection's links waits in its dialog** (note
+  70 of Typecase, task 164; `s-profile-22`, `-23`): the edit of a
+  connection that published links use carries «Published links» at once,
+  hidden, with `FormRow.Changed` — `server`, `login`: with a script it
+  shows while one of them differs from what came; without one it comes
+  after the first Save, as before (Б40). A label, a password, a
+  fingerprint move the links along without a word.
+
+### Added
+
+- Fixtures of the edit dialog (Нс76): `app-settings-connections/edit`
+  (`s-profile-16`) and `edit-links` (`s-profile-23`).
+
+### For consumers
+
+`FormRow.Changed` in C-6; two state names in C-14.3.
+
 ## v0.2.300 — 2026-10-16
 
 Typecase `22f0506` (its note 69).

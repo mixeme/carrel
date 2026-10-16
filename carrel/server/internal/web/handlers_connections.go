@@ -25,10 +25,12 @@ type connectionForm struct {
 	NoPassword                            bool
 	// Editing is the connection the form edits; empty for a new one.
 	Editing string
-	// Links is the question of an edit that gives the connection another
-	// server or login while published links use it (Б40): how many, the
-	// answer sent (keep, revoke) and why it came back. Zero — not asked.
+	// Links is the question of an edit while published links use the
+	// connection (Б40): how many, whether another server or login asks it
+	// (Asked; else it waits hidden for that change, note 70 of Typecase),
+	// the answer sent (keep, revoke) and why it came back. Zero — no links.
 	Links    int
+	Asked    bool
 	LinksAns string
 	LinksErr view.Text
 	// Open asks for the dialog without anything typed yet: Connect account
@@ -63,7 +65,7 @@ func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) 
 		// A connection stored with an empty password asks none, whether it was
 		// said by the mark or before the mark existed.
 		f = connectionForm{Label: conn.Label, Server: conn.Server, Login: conn.Login, CertFingerprint: conn.CertFingerprint,
-			NoPassword: conn.NoPassword || conn.Password == "", Editing: conn.ID}
+			NoPassword: conn.NoPassword || conn.Password == "", Editing: conn.ID, Links: len(s.linksOf(sess.AccountID(), conn.ID))}
 	}
 	page := s.connectionsPage(sess, f, nil)
 	if r.URL.Query().Get("op") == "feed" {
@@ -266,6 +268,8 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 		NoPassword:      noPasswordMark(r),
 		Editing:         conn.ID,
 	}
+	links := s.linksOf(sess.AccountID(), conn.ID)
+	f.Links = len(links)
 	if !validServerURL(f.Server) {
 		f.ServerErr = text("Enter the full address, starting with https:// or http://.")
 		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
@@ -279,10 +283,9 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 	// Another server or another login — the links of the connection would
 	// open on something else: asked before anything is tried (Б40; the
 	// owner's decision of 12.10.2026). Another password moves them along.
-	links := s.linksOf(sess.AccountID(), conn.ID)
 	f.LinksAns = r.FormValue("links")
 	if len(links) > 0 && (strings.TrimRight(f.Server, "/") != strings.TrimRight(conn.Server, "/") || f.Login != conn.Login) {
-		f.Links = len(links)
+		f.Asked = true
 		if f.LinksAns != "keep" && f.LinksAns != "revoke" {
 			f.LinksErr = "Choose what becomes of them before saving."
 			s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
@@ -517,10 +520,14 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 		view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint", LabelAside: "SHA-256 · optional", Kind: view.InputText, Value: text(f.CertFingerprint), Mono: true,
 			Placeholder: "only for a certificate the system does not trust"},
 	)
-	if f.Links > 0 {
+	if f.Links > 0 && f.Editing != "" {
 		// What becomes of the published links of a connection given
-		// another server or login (Б40): no answer chosen beforehand.
+		// another server or login (Б40): no answer chosen beforehand. Not
+		// asked yet, it waits hidden for that change (note 70 of Typecase,
+		// s-profile-22): a script shows it while Server URL or Username
+		// differs from what came.
 		form.Sets[0].Rows = append(form.Sets[0].Rows, view.FormRow{Name: "links", Label: "Published links", Kind: view.InputRadio,
+			Hidden: !f.Asked, Changed: []string{"server", "login"},
 			Value: text(f.LinksAns), Error: f.LinksErr, Hint: text(linksUse(f.Links)), Options: []view.Option{
 				{Value: "keep", Label: "Keep them: they open on what the connection points at now", Selected: f.LinksAns == "keep"},
 				{Value: "revoke", Label: "Revoke them", Selected: f.LinksAns == "revoke"},
