@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.319 — 2026-10-16
+
+### Added
+
+- **The import wizard has its fixtures** (Им19 of the scan of import): the
+  preview of contacts, events, tasks and notes (`s-io-5`…`-8`), the report
+  and the report with what was skipped (`s-io-9`, `-14`), the first step of
+  notes with its tree (`s-io-4`) — new directories `app-event-import`,
+  `app-task-import`, `app-note-import`, states `preview` and `report`.
+
+### Fixed
+
+- A task was called overdue by the real clock, not the server's.
+- A single Markdown file did not say where its title and date come from,
+  as a file of a set does.
+- A date written by hand in a note's front matter — «date: 2026-03-11»,
+  with a time or without — was not the note's date; it is now.
+
+### For consumers
+
+C-14.3: states `preview`, `report`. `check.py`: a row of the rail's nav is
+no button (check 9).
+
 ## v0.2.318 — 2026-10-16
 
 ### Changed

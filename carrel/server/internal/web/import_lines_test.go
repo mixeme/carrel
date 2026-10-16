@@ -79,3 +79,24 @@ func TestImportTreeRootSaysItsConnection(t *testing.T) {
 		t.Errorf("root = %q · %q, want the collection and its connection alone", root.Label, root.Stamp)
 	}
 }
+
+// Им12 of the scan of import (s-io-8): a single Markdown file says where its
+// title and date come from, as a file of a set does; a date written by hand
+// in its front matter is its date.
+func TestOneMarkdownFileSaysWhereItsTitleComesFrom(t *testing.T) {
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "secret"
+	notebook := davtest.CalendarHome + "notes/"
+	srv.AddCalendar(caldav.Calendar{Path: notebook, Name: "Notebook", SupportedComponentSet: []string{"VJOURNAL"}})
+	f := connectFixture(t, srv, notebook, nil)
+	page := decode[view.ImportPage](t, f.h.do(get(f.path("notes")+"/import", f.sess)))
+	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "vstrecha.md",
+		[]byte("---\ntitle: Встреча с подрядчиком\ndate: 2026-03-11\ncategories: работа\n---\n\nОбсудили смету.\n"))))
+	if len(page.Preview) != 1 || len(page.Preview[0].Lines) != 1 {
+		t.Fatalf("preview = %+v, notices %+v", page.Preview, page.Notices)
+	}
+	cells := page.Preview[0].Lines[0].Cells
+	if cells[3] != "Ready — title, date and tags from front matter" || !strings.Contains(string(cells[2]), "March 2026") {
+		t.Errorf("row = %q", cells)
+	}
+}

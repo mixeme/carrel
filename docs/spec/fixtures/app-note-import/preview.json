@@ -1,0 +1,555 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/import?into=zapisi\u0026op=run\u0026to=a-nc-home",
+      "id": "import.run",
+      "label": "Import 1 note",
+      "method": "POST",
+      "primary": true
+    },
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/import?op=cancel",
+      "id": "import.cancel",
+      "label": "Cancel",
+      "method": "POST"
+    }
+  ],
+  "counts": [
+    {
+      "count": 1,
+      "label": "ready"
+    }
+  ],
+  "details": null,
+  "existing": null,
+  "into": {
+    "chosen": "/app/notes/a-nc-home/zapisi/import?into=zapisi\u0026to=a-nc-home",
+    "new": {
+      "enabled": true,
+      "href": "/app/collections/new?back=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2Fimport\u0026kind=note",
+      "icon": "i-plus",
+      "id": "import.collection.new",
+      "label": "New notebook",
+      "method": "GET",
+      "target": "sheet"
+    },
+    "options": [
+      {
+        "colour": "#6b4e7a",
+        "href": "/app/notes/a-nc-home/zapisi/import?into=dnevnik\u0026to=a-nc-home",
+        "id": "/app/notes/a-nc-home/zapisi/import?into=dnevnik\u0026to=a-nc-home",
+        "label": "Дневник",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · Дневник"
+      },
+      {
+        "colour": "#4a6b52",
+        "href": "/app/notes/a-nc-home/zapisi/import?into=zapisi\u0026to=a-nc-home",
+        "id": "/app/notes/a-nc-home/zapisi/import?into=zapisi\u0026to=a-nc-home",
+        "label": "Записи",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · Записи"
+      },
+      {
+        "colour": "#3f6e8c",
+        "id": "/app/notes/a-nc-home/zapisi/import?into=zapiski-obshchie\u0026to=a-nc-home",
+        "label": "Общие с семьёй",
+        "last": false,
+        "readOnly": true,
+        "reason": "Read-only",
+        "stamp": "nextcloud · Общие с семьёй"
+      }
+    ]
+  },
+  "kind": "note",
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "preview": [
+    {
+      "columns": [
+        "File",
+        "Title",
+        "Date",
+        "Result"
+      ],
+      "count": 1,
+      "lines": [
+        {
+          "cells": [
+            "2026-03-11-podryadchik.md",
+            "Встреча с подрядчиком",
+            "11 March 2026",
+            "Ready — title, date and tags from front matter"
+          ],
+          "result": "ready"
+        }
+      ],
+      "rubric": ""
+    }
+  ],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#6b4e7a",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/dnevnik",
+            "label": "Дневник",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/dnevnik/import",
+                "icon": "i-import",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/dnevnik/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/zapisi",
+            "label": "Записи",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=zapisi",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/zapisi/import",
+                "icon": "i-import",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/zapisi/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/zapiski-obshchie",
+            "label": "Общие с семьёй",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=zapiski-obshchie",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=zapiski-obshchie",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=zapiski-obshchie\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/zapiski-obshchie/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=zapiski-obshchie",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": false,
+            "readOnly": true,
+            "state": "read-only",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "report": null,
+  "source": {
+    "folder": {
+      "chosen": "",
+      "field": "",
+      "name": null,
+      "new": null,
+      "nodes": [
+        {
+          "children": [],
+          "expanded": false,
+          "href": "/app/notes/a-nc-home/zapisi/import?folder=a-nc-home\u0026into=zapisi\u0026path=Files\u0026to=a-nc-home",
+          "id": "/app/notes/a-nc-home/zapisi/import?folder=a-nc-home\u0026into=zapisi\u0026path=Files\u0026to=a-nc-home",
+          "label": "Files",
+          "readOnly": false,
+          "stamp": "nextcloud"
+        },
+        {
+          "children": [],
+          "expanded": false,
+          "href": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026into=zapisi\u0026path=Documents\u0026to=a-nc-home",
+          "id": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026into=zapisi\u0026path=Documents\u0026to=a-nc-home",
+          "label": "Documents",
+          "readOnly": false,
+          "stamp": "sftpgo · vps"
+        },
+        {
+          "children": [],
+          "expanded": false,
+          "href": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026into=zapisi\u0026path=Public\u0026to=a-nc-home",
+          "id": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026into=zapisi\u0026path=Public\u0026to=a-nc-home",
+          "label": "Public",
+          "readOnly": false,
+          "stamp": "sftpgo · vps"
+        }
+      ]
+    },
+    "folderHint": [
+      {
+        "text": "Every "
+      },
+      {
+        "mark": "mono",
+        "text": ".md"
+      },
+      {
+        "text": " directly in that folder. Subfolders are not walked, nothing on the server is moved or deleted — the files stay where they were."
+      }
+    ],
+    "hint": [],
+    "kinds": [
+      ".ics",
+      ".md",
+      ".zip"
+    ],
+    "note": [
+      {
+        "text": "Markdown is stored as it was written — nothing is reformatted — and front matter Carrel exported earlier comes back: UID, tags, X-properties."
+      }
+    ],
+    "preview": {
+      "csrf": "csrf",
+      "enabled": false,
+      "id": "import.folder",
+      "label": "Preview folder",
+      "method": "POST",
+      "primary": true,
+      "reason": "Choose a folder in the tree first."
+    }
+  },
+  "step": "preview",
+  "steps": [
+    "1 · Source",
+    "2 · Preview",
+    "3 · Report"
+  ],
+  "subtitle": [
+    {
+      "mark": "mono",
+      "text": "2026-03-11-podryadchik.md"
+    },
+    {
+      "text": " · 149 B · Markdown"
+    }
+  ],
+  "title": "Import notes",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

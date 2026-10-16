@@ -130,7 +130,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "tiles","copy","elsewhere","rename","delete","attach","single","in-part",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
-          "issued","mismatch","folder"}
+          "issued","mismatch","folder","preview","report"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -238,6 +238,11 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-contact-new": "/app/contacts/{account}/{col}/new",
     "app-event-new": "/app/calendar/{account}/{col}/new",
     "app-contact-import": "/app/contacts/{account}/{col}/import",
+    # Мастер импорта прочих родов (Им19): шаг 1 заметок с деревом папок,
+    # предпросмотры и отчёт — каждое состояние со своим кадром (STATE_FRAME).
+    "app-event-import": "/app/calendar/{account}/{col}/import",
+    "app-task-import": "/app/tasks/{account}/{col}/import",
+    "app-note-import": "/app/notes/{account}/{col}/import",
     "app-contact-move": "/app/contacts/{account}/{col}/{uid}/move",
     # Листы копий связанной записи: кадров со своим адресом у них нет —
     # фрагменты s-contacts-32 и s-tasks-16 (STATE_FRAME; задача Typecase 183).
@@ -280,6 +285,11 @@ SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-
 FRAME_TODO = {
     # Полная форма нового события — свой кадр s-agenda-15 (Typecase 9e69804,
     # задача 77): строки больше нет.
+    # Рейл предпросмотра событий (s-io-6) без «Дни рождения» — снятой
+    # отметкой коллекции; кадр карточки того же календаря (s-agenda-2) её
+    # рисует, и фикстуры карточки с ним сходятся (Им19).
+    "app-event-import: коллекции рейла":
+        "задача Typecase 199 п. 1 (to-typecase.md): s-io-6 не рисует «Дни рождения», s-agenda-2 рисует",
 }
 
 # Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
@@ -416,6 +426,13 @@ STATE_FRAME = {
     # Диалог правки подключения (Нс76): вопрос о ссылках ждёт скрытым —
     # s-profile-16; Save без ответа — s-profile-23 (Typecase ad18c91).
     "app-contact-import/normal": "s-io-3",  # шаг 1 — свой кадр, не s-io-5 (Им20)
+    "app-contact-import/preview": "s-io-5",
+    "app-contact-import/report": "s-io-9",
+    "app-event-import/preview": "s-io-6",
+    "app-event-import/report": "s-io-14",
+    "app-task-import/preview": "s-io-7",
+    "app-note-import/normal": "s-io-4",
+    "app-note-import/preview": "s-io-8",
     "app-record-delete/normal": "s-agenda-26",
     "admin-reset/normal": "s-admin-13",
     "app-collections-new/folder": "s-profile-20",
@@ -636,7 +653,11 @@ def frame_inputs(frame):
 
 def walk(x, acts, rows):
     if isinstance(x, dict):
-        if "label" in x and "method" in x and "id" in x and "enabled" in x:
+        # A row of the rail's nav (nav.*) is a link of the rail, not a
+        # button: the frame draws it tc-nav__item, and a screen whose button
+        # has the same words («Back to list» of the import's report) is not
+        # its double.
+        if "label" in x and "method" in x and "id" in x and "enabled" in x and not str(x.get("id", "")).startswith("nav."):
             acts.append(x)
         if "name" in x and "kind" in x and "label" in x and x.get("kind") != "hidden":
             rows.append(x)

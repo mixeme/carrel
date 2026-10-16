@@ -110,3 +110,26 @@ func TestParseNoteOfAnEmptyFile(t *testing.T) {
 		t.Errorf("the note does not encode: %v", err)
 	}
 }
+
+// A date written by hand in the header block — as Markdown tools write it —
+// is the note's date (s-io-8: «title, date and tags from front matter»); a
+// date as the wire writes it stays as it is, and words that are no date are
+// kept as written.
+func TestParseNoteReadsADateWrittenByHand(t *testing.T) {
+	for _, c := range []struct{ date, want, param string }{
+		{"2026-03-11", "20260311", "DATE"},
+		{"2026-03-11 10:15", "20260311T101500", ""},
+		{"2026-03-11T10:15:30Z", "20260311T101530Z", ""},
+		{"20260311T101500Z", "20260311T101500Z", ""},
+		{"in March", "in March", ""},
+	} {
+		back, err := ParseNote("n.md", []byte("---\ntitle: Встреча\ndate: "+c.date+"\n---\n\nТекст\n"), importStamp)
+		if err != nil {
+			t.Fatal(err)
+		}
+		v := back.Props()["DTSTART"]
+		if len(v) != 1 || v[0].Text != c.want || v[0].Params["VALUE"] != c.param {
+			t.Errorf("%q: DTSTART = %+v, want %q VALUE=%q", c.date, v, c.want, c.param)
+		}
+	}
+}

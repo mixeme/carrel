@@ -140,6 +140,18 @@ func ParseNote(name string, doc []byte, now time.Time) (*model.Object, error) {
 		if prop == ical.PropDescription {
 			continue // the body is the description; a block cannot hold it too
 		}
+		// A date as Markdown writes it by hand — «date: 2026-03-11», or
+		// with a time — is the note's date (s-io-8: «title, date and tags
+		// from front matter»); the block Carrel exports writes it as the wire
+		// does, and that stays as it is.
+		if prop == ical.PropDateTimeStart && params == "" {
+			if day, ok := handDate(strings.TrimSpace(value)); ok {
+				if len(day) == 8 {
+					params = "VALUE=DATE"
+				}
+				value = day
+			}
+		}
 		if params != "" {
 			prop += ";" + params
 		}
@@ -203,4 +215,47 @@ func cutNoteHeader(lines []string) (header, body []string) {
 		return lines[1:i], body
 	}
 	return nil, lines
+}
+
+// handDate is a date written by hand in a header block as iCalendar writes
+// it: «2026-03-11» a day (20260311), «2026-03-11 10:15» or
+// «2026-03-11T10:15:00Z» a time (20260311T101500, Z kept). Anything else is
+// not one.
+func handDate(v string) (string, bool) {
+	if len(v) < 10 || v[4] != '-' || v[7] != '-' {
+		return "", false
+	}
+	day := v[:4] + v[5:7] + v[8:10]
+	for _, r := range day {
+		if r < '0' || r > '9' {
+			return "", false
+		}
+	}
+	rest := v[10:]
+	if rest == "" {
+		return day, true
+	}
+	if rest[0] != 'T' && rest[0] != ' ' {
+		return "", false
+	}
+	clock := strings.TrimSuffix(rest[1:], "Z")
+	zulu := strings.HasSuffix(rest, "Z")
+	parts := strings.Split(clock, ":")
+	if len(parts) < 2 || len(parts) > 3 {
+		return "", false
+	}
+	for len(parts) < 3 {
+		parts = append(parts, "00")
+	}
+	out := day + "T"
+	for _, p := range parts {
+		if len(p) != 2 || p[0] < '0' || p[0] > '9' || p[1] < '0' || p[1] > '9' {
+			return "", false
+		}
+		out += p
+	}
+	if zulu {
+		out += "Z"
+	}
+	return out, true
 }

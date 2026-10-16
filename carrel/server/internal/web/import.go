@@ -772,7 +772,13 @@ func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*import
 		if err != nil {
 			return nil, err
 		}
-		return d, d.add(c, obj)
+		if err := d.add(c, obj); err != nil {
+			return nil, err
+		}
+		// Where its title and date come from, as a file of a set says it
+		// (Им12; s-io-8).
+		d.Records[len(d.Records)-1].Ready = noteReady(body)
+		return d, nil
 	}
 	if c.card != nil {
 		objs, broken, err := card.Split(body)
@@ -886,11 +892,15 @@ func (d *importDraft) takeMarkdown(c *collectionCtx, label string, body []byte, 
 		return
 	}
 	// Where the note's title and date come from (Им12; s-io-8).
-	ready := "no front matter: title from the first heading, date from the file"
+	d.Records[len(d.Records)-1].Ready = noteReady(body)
+}
+
+// noteReady says where a Markdown note's title and date come from (s-io-8).
+func noteReady(body []byte) string {
 	if cal.HasNoteHeader(body) {
-		ready = "title, date and tags from front matter"
+		return "title, date and tags from front matter"
 	}
-	d.Records[len(d.Records)-1].Ready = ready
+	return "no front matter: title from the first heading, date from the file"
 }
 
 // emptyMarkdown is why an empty Markdown file is not a note (s-io-8).
@@ -935,7 +945,7 @@ func readyNote(c *collectionCtx, obj *model.Object) string {
 		due, derr := cal.DueOf(obj, c.tf.tz)
 		start, serr := cal.TimingOf(obj, c.tf.tz)
 		switch {
-		case derr == nil && !due.Start.IsZero() && due.Start.Before(time.Now()) && !taskDone(obj):
+		case derr == nil && !due.Start.IsZero() && due.Start.Before(c.now()) && !taskDone(obj):
 			parts = append(parts, "overdue, and stays overdue")
 		case (derr != nil || due.Start.IsZero()) && (serr != nil || start.Start.IsZero()):
 			parts = append(parts, "a task without a date is a task")

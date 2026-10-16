@@ -1,0 +1,462 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty",
+      "id": "import.done",
+      "label": "Back to list",
+      "method": "GET",
+      "primary": true
+    }
+  ],
+  "counts": [],
+  "details": null,
+  "existing": null,
+  "into": {
+    "chosen": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
+    "new": {
+      "enabled": true,
+      "href": "/app/collections/new?back=%2Fapp%2Fcontacts%2Fa-nc-home%2Fkontakty%2Fimport\u0026kind=contact",
+      "icon": "i-plus",
+      "id": "import.collection.new",
+      "label": "New address book",
+      "method": "GET",
+      "target": "sheet"
+    },
+    "options": [
+      {
+        "colour": "#a05a2c",
+        "href": "/app/contacts/a-nc-home/kontakty/import?into=arhiv\u0026to=a-nc-home",
+        "id": "/app/contacts/a-nc-home/kontakty/import?into=arhiv\u0026to=a-nc-home",
+        "label": "Архив",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · Архив"
+      },
+      {
+        "colour": "#4a6b52",
+        "href": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
+        "id": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
+        "label": "Контакты",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · Контакты"
+      },
+      {
+        "colour": "#6b4e7a",
+        "id": "/app/contacts/a-nc-home/kontakty/import?into=komanda\u0026to=a-rad-vps",
+        "label": "Команда",
+        "last": false,
+        "readOnly": true,
+        "reason": "Read-only",
+        "stamp": "radicale · vps · Команда"
+      },
+      {
+        "colour": "#6b4e7a",
+        "href": "/app/contacts/a-nc-home/kontakty/import?into=rassylki\u0026to=a-rad-vps",
+        "id": "/app/contacts/a-nc-home/kontakty/import?into=rassylki\u0026to=a-rad-vps",
+        "label": "Рассылки",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "radicale · vps · Рассылки"
+      }
+    ]
+  },
+  "kind": "contact",
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "preview": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#a05a2c",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "/app/contacts/a-nc-home/arhiv",
+            "label": "Архив",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/import",
+                "icon": "i-import",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 7,
+            "detail": "",
+            "feed": false,
+            "href": "/app/contacts/a-nc-home/kontakty",
+            "label": "Контакты",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/import",
+                "icon": "i-import",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "report": {
+    "created": 2,
+    "failed": 0,
+    "failures": [],
+    "here": 1,
+    "heres": [
+      "Анна Ковалева · 4f2b-9c31-a0e7"
+    ],
+    "note": "2 records created from Разное (mix).vcf · 1 record already there, skipped. Nothing there was overwritten.",
+    "renamed": 0,
+    "renames": [],
+    "replaced": 0,
+    "replaces": [],
+    "rows": [
+      {
+        "columns": [
+          "Name",
+          "Email",
+          "Identity"
+        ],
+        "count": 2,
+        "lines": [
+          {
+            "cells": [
+              "Ирина Соколова",
+              "",
+              "Created"
+            ]
+          },
+          {
+            "cells": [
+              "press@example.org",
+              "press@example.org",
+              "Created"
+            ]
+          }
+        ],
+        "rubric": "Created in Контакты"
+      }
+    ],
+    "skipped": 0,
+    "skips": []
+  },
+  "source": {
+    "folder": null,
+    "folderHint": [],
+    "hint": [
+      {
+        "text": "vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take "
+      },
+      {
+        "mark": "mono",
+        "text": ".ics"
+      },
+      {
+        "text": " here instead."
+      }
+    ],
+    "kinds": [
+      ".vcf"
+    ],
+    "note": [
+      {
+        "text": "Nothing is written until the preview has been read: the next step counts what was parsed and names what failed."
+      }
+    ],
+    "preview": null
+  },
+  "step": "report",
+  "steps": [
+    "1 · Source",
+    "2 · Preview",
+    "3 · Report"
+  ],
+  "subtitle": [
+    {
+      "text": "nextcloud · Контакты"
+    }
+  ],
+  "title": "Import report",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

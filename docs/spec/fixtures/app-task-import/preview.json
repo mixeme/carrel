@@ -1,0 +1,474 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/import?into=dela\u0026op=run\u0026to=a-nc-home",
+      "id": "import.run",
+      "label": "Import 3 tasks",
+      "method": "POST",
+      "primary": true
+    },
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/import?op=cancel",
+      "id": "import.cancel",
+      "label": "Cancel",
+      "method": "POST"
+    }
+  ],
+  "counts": [
+    {
+      "count": 3,
+      "label": "ready"
+    },
+    {
+      "count": 1,
+      "label": "skipped"
+    }
+  ],
+  "details": null,
+  "existing": null,
+  "into": {
+    "chosen": "/app/tasks/a-nc-home/dela/import?into=dela\u0026to=a-nc-home",
+    "new": {
+      "enabled": true,
+      "href": "/app/collections/new?back=%2Fapp%2Ftasks%2Fa-nc-home%2Fdela%2Fimport\u0026kind=task",
+      "icon": "i-plus",
+      "id": "import.collection.new",
+      "label": "New task list",
+      "method": "GET",
+      "target": "sheet"
+    },
+    "options": [
+      {
+        "colour": "#4a6b52",
+        "href": "/app/tasks/a-nc-home/dela/import?into=dela\u0026to=a-nc-home",
+        "id": "/app/tasks/a-nc-home/dela/import?into=dela\u0026to=a-nc-home",
+        "label": "Дела",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · Дела"
+      },
+      {
+        "colour": "#3f6e8c",
+        "href": "/app/tasks/a-nc-home/dela/import?into=rabota\u0026to=a-nc-home",
+        "id": "/app/tasks/a-nc-home/dela/import?into=rabota\u0026to=a-nc-home",
+        "label": "Работа",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · Работа"
+      }
+    ]
+  },
+  "kind": "task",
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "preview": [
+    {
+      "columns": [
+        "Source",
+        "Summary",
+        "Due",
+        "Result"
+      ],
+      "count": 4,
+      "lines": [
+        {
+          "cells": [
+            "tasks.ics",
+            "Отправить документы в МФЦ",
+            "7 August 2026",
+            "Ready — overdue, and stays overdue"
+          ],
+          "result": "ready"
+        },
+        {
+          "cells": [
+            "tasks.ics",
+            "Дочитать книгу",
+            "",
+            "Ready — 40 % done, priority 5, a task without a date is a task"
+          ],
+          "result": "ready"
+        },
+        {
+          "cells": [
+            "tasks.ics",
+            "— (no SUMMARY)",
+            "28 August 2026",
+            "Ready"
+          ],
+          "result": "ready",
+          "untitled": true
+        },
+        {
+          "cells": [
+            "tasks.ics",
+            "Созвон с подрядчиком",
+            "17 August 2026",
+            "Skipped: a list of tasks takes tasks — import it into a calendar"
+          ],
+          "component": "VEVENT",
+          "result": "skipped"
+        }
+      ],
+      "rubric": ""
+    }
+  ],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/tasks/a-nc-home/dela",
+            "label": "Дела",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dela",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dela",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dela\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/dela/import",
+                "icon": "i-import",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/dela/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dela",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/tasks/a-nc-home/rabota",
+            "label": "Работа",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/rabota/import",
+                "icon": "i-import",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/rabota/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "report": null,
+  "source": {
+    "folder": null,
+    "folderHint": [],
+    "hint": [
+      {
+        "text": "iCalendar 2.0. One file holds any number of tasks; events and notes in it are named and left out. An address book takes "
+      },
+      {
+        "mark": "mono",
+        "text": ".vcf"
+      },
+      {
+        "text": " here instead."
+      }
+    ],
+    "kinds": [
+      ".ics"
+    ],
+    "note": [
+      {
+        "text": "STATUS, PERCENT-COMPLETE and PRIORITY come across as they are: a task that was half done arrives half done."
+      }
+    ],
+    "preview": null
+  },
+  "step": "preview",
+  "steps": [
+    "1 · Source",
+    "2 · Preview",
+    "3 · Report"
+  ],
+  "subtitle": [
+    {
+      "mark": "mono",
+      "text": "tasks.ics"
+    },
+    {
+      "text": " · 597 B · iCalendar 2.0"
+    }
+  ],
+  "title": "Import tasks",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

@@ -3010,3 +3010,63 @@ func TestNormaliseFoldsASecretBeforeItsInsides(t *testing.T) {
 		t.Errorf("normalised = %v", got)
 	}
 }
+
+// C-14.2 and C-14.3 (Им19 of the scan of import): the wizard on each of its
+// steps, by kind — the preview of contacts (s-io-5), of events (s-io-6),
+// of tasks (s-io-7) and of notes (s-io-8), the report (s-io-9) and the
+// report with what was skipped (s-io-14), the first step of notes with its
+// tree (s-io-4). Each kind's file holds what its frame draws: a record
+// already here, one that cannot be read, one of another kind.
+func TestFixtureImport(t *testing.T) {
+	app := newMockupApp(t)
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	run := func(t *testing.T, preview *httptest.ResponseRecorder) *httptest.ResponseRecorder {
+		t.Helper()
+		var p view.ImportPage
+		if err := json.Unmarshal(preview.Body.Bytes(), &p); err != nil {
+			t.Fatal(err)
+		}
+		return app.h.do(postForm(actionHref(t, p.Actions, "import.run"), app.sess, url.Values{}))
+	}
+
+	t.Run("app-contact-import", func(t *testing.T) {
+		book := app.listPath(t, "contacts", "kontakty")
+		const vcf = "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:7c1e-2b40-9a11\r\nFN:Ирина Соколова\r\nN:Соколова;Ирина;;;\r\nTEL;TYPE=cell:+7 921 300-11-22\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:4f2b-9c31-a0e7\r\nFN:Анна Ковалева\r\nN:Ковалева;Анна;;;\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:5d02-77aa-31c4\r\nN:;;;;\r\nEMAIL:press@example.org\r\nEND:VCARD\r\n"
+		preview := app.h.do(importRequest(book+"/import", app.sess, false, "Разное (mix).vcf", []byte(vcf)))
+		app.compare(t, "app-contact-import/preview.json", preview)
+		app.compare(t, "app-contact-import/report.json", run(t, preview))
+	})
+	t.Run("app-event-import", func(t *testing.T) {
+		cal := app.listPath(t, "calendar", "lichnyj")
+		const ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other client//EN\r\n" +
+			"BEGIN:VEVENT\r\nUID:e7a1-standup\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Планёрка\r\nDTSTART;TZID=Europe/Moscow:20260810T090000\r\nDTEND;TZID=Europe/Moscow:20260810T093000\r\nRRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z\r\nEND:VEVENT\r\n" +
+			"BEGIN:VEVENT\r\nUID:e7a1-otpusk\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Отпуск\r\nDTSTART;VALUE=DATE:20260713\r\nDTEND;VALUE=DATE:20260728\r\nEND:VEVENT\r\n" +
+			"BEGIN:VEVENT\r\nUID:e7a1-ekb\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Созвон с Екатеринбургом\r\nDTSTART;TZID=Asia/Yekaterinburg:20260817T100000\r\nDTEND;TZID=Asia/Yekaterinburg:20260817T110000\r\nEND:VEVENT\r\n" +
+			"BEGIN:VTODO\r\nUID:e7a1-bilety\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Купить билеты\r\nEND:VTODO\r\n" +
+			"END:VCALENDAR\r\n"
+		preview := app.h.do(importRequest(cal+"/import", app.sess, false, "calendar.ics", []byte(ics)))
+		app.compare(t, "app-event-import/preview.json", preview)
+		app.compare(t, "app-event-import/report.json", run(t, preview))
+	})
+	t.Run("app-task-import", func(t *testing.T) {
+		tasks := app.listPath(t, "tasks", "dela")
+		const ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other client//EN\r\n" +
+			"BEGIN:VTODO\r\nUID:t9b2-mfc\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Отправить документы в МФЦ\r\nDUE;VALUE=DATE:20260807\r\nEND:VTODO\r\n" +
+			"BEGIN:VTODO\r\nUID:t9b2-kniga\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Дочитать книгу\r\nPERCENT-COMPLETE:40\r\nPRIORITY:5\r\nEND:VTODO\r\n" +
+			"BEGIN:VTODO\r\nUID:t9b2-pusto\r\nDTSTAMP:20260801T000000Z\r\nDUE;VALUE=DATE:20260828\r\nEND:VTODO\r\n" +
+			"BEGIN:VEVENT\r\nUID:t9b2-podryadchik\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Созвон с подрядчиком\r\nDTSTART;VALUE=DATE:20260817\r\nEND:VEVENT\r\n" +
+			"END:VCALENDAR\r\n"
+		app.compare(t, "app-task-import/preview.json", app.h.do(importRequest(tasks+"/import", app.sess, false, "tasks.ics", []byte(ics))))
+	})
+	t.Run("app-note-import", func(t *testing.T) {
+		// The notebooks were read, as s-io-4 counts their notes.
+		openList(t, app, "/app/notes")
+		notes := app.listPath(t, "notes", "zapisi")
+		app.compare(t, "app-note-import/normal.json", app.h.do(get(notes+"/import", app.sess)))
+		const md = "---\r\ntitle: Встреча с подрядчиком\r\ndate: 2026-03-11\r\ncategories: работа\r\n---\r\n\r\nОбсудили смету и сроки.\r\n"
+		app.compare(t, "app-note-import/preview.json", app.h.do(importRequest(notes+"/import", app.sess, false, "2026-03-11-podryadchik.md", []byte(md))))
+	})
+}
