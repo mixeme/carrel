@@ -54,7 +54,7 @@
 
 ### Бросок и вход
 
-- **Им3. Бросок на список** (`s-io-1`): накладка «Drop to import» · «One
+- **Им3. Бросок на список** (**закрыто сервером `v0.2.316`**: `ListBar.Drop` — `ImportDrop`) (`s-io-1`): накладка «Drop to import» · «One
   ‹.vcf› file into **nextcloud · Контакты**» · «The preview opens first:
   nothing is written until it has been read»; бросок уходит скрытой формой
   `post-import` (макет, строка 2997: `action=…/kontakty/import`, multipart,

@@ -229,6 +229,7 @@
         }
       ]
     },
+    "drop": null,
     "filter": "",
     "filterForm": null,
     "loaded": 0,

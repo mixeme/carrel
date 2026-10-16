@@ -158,6 +158,7 @@
         }
       ]
     },
+    "drop": null,
     "filter": "",
     "filterForm": {
       "action": "/app/contacts/a-rad-vps/komanda",

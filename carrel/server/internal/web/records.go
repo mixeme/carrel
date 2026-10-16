@@ -895,6 +895,7 @@ func changedAt(obj *model.Object, tz *time.Location) time.Time {
 
 func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsListPage {
 	page := view.ContactsListPage{Shell: s.buildShell(c.sess, collectionLabel(c.col)), ReadOnly: c.col.ReadOnly}
+	page.Bar.Drop = s.importDrop(c) // s-io-1 (Им3)
 	page.Bar.Actions = append(s.listActions(c, nil), s.printAction(c.listPath()))
 	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 	sift := strings.TrimSpace(r.URL.Query().Get("filter"))
@@ -1292,6 +1293,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	page.Bar.Actions = append(s.listActions(c, url.Values{
 		"from": {from.Format("2006-01-02")}, "to": {to.AddDate(0, 0, -1).Format("2006-01-02")},
 	}), s.agendaPrintAction(c.listPath(), r.URL.Query()))
+	page.Bar.Drop = s.importDrop(c) // s-io-1 (Им3)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	page.Bar.Range = s.agendaRange(tf, c.listPath(), filter.tag, kind, from, to, r.URL.Query())
 	page.Bar.Segments = []view.Action{}
@@ -1577,6 +1579,7 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	page := view.TasksPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	// New task, Import, Export and Print (s-tasks-1): Print is the list
 	// with print=1 (U-10).
+	page.Bar.Drop = s.importDrop(c) // s-io-1 (Им3)
 	page.Bar.Actions = append(s.listActions(c, nil), s.printAction(c.listPath()))
 	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
@@ -1787,6 +1790,7 @@ func (s *Server) taskSegments(base, tag, show string, open, done int) []view.Act
 
 func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	page := view.NotesPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
+	page.Bar.Drop = s.importDrop(c) // s-io-1 (Им3)
 	page.Bar.Actions = s.listActions(c, nil)
 	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 	// «Filter by word» without scripts (s-notes-1): a GET to the list.

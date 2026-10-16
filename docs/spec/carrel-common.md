@@ -1070,7 +1070,19 @@ type ListBar struct {
     Size         Size
     SelectedSize Size
     Columns  *Columns // кнопка Columns и её меню-форма (components-42); nil — у списка выбора столбцов нет
+    Drop     *ImportDrop // бросок файла на список одной коллекции (s-io-1, Им3); nil — у списка, куда не пишут, и у прочих
 }
+// Бросок файла на список (s-io-1). Action — POST мастера импорта этой
+// коллекции с полем File: открывается предпросмотр (шаг 2) с ней в Into.
+// Accept — расширения рода; Many — берёт ли несколько файлов разом
+// (заметки). Lead, Line, Note — слова накладки: «Drop to import»; «One
+// ‹.vcf› file into ‹nextcloud · Контакты›»; «The preview opens first:
+// nothing is written until it has been read» — имени файла нет: пока файл
+// тащат, браузер его не отдаёт. Elsewhere — файл другого рода: бросок не
+// принимается, накладка говорит Says — «Contacts take ‹.vcf› — the
+// calendar, the list of tasks and a notebook take this one»
+type ImportDrop struct { Action Action; Accept []Text; Many bool; Lead Text; Line Runs; Note Text; Elsewhere []ImportElsewhere }
+type ImportElsewhere struct { Ext Text; Says Runs }
 
 // Выбор столбцов (components-21, components-42; S-9.6). Меню — форма:
 // отмеченные пункты уходят полем col в том порядке, в каком стоят, — порядок

@@ -3,6 +3,7 @@
     "actions": [],
     "columns": null,
     "compact": null,
+    "drop": null,
     "filter": "",
     "filterForm": null,
     "loaded": 1,

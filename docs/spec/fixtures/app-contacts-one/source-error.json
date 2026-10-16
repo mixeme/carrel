@@ -175,6 +175,86 @@
         }
       ]
     },
+    "drop": {
+      "accept": [
+        ".vcf"
+      ],
+      "action": {
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/contacts/a-nc-home/kontakty/import",
+        "id": "import.drop",
+        "label": "Import",
+        "method": "POST"
+      },
+      "elsewhere": [
+        {
+          "ext": ".ics",
+          "says": [
+            {
+              "text": "Contacts take "
+            },
+            {
+              "mark": "mono",
+              "text": ".vcf"
+            },
+            {
+              "text": " — the calendar, the list of tasks and a notebook take this one"
+            }
+          ]
+        },
+        {
+          "ext": ".md",
+          "says": [
+            {
+              "text": "Contacts take "
+            },
+            {
+              "mark": "mono",
+              "text": ".vcf"
+            },
+            {
+              "text": " — a notebook takes this one"
+            }
+          ]
+        },
+        {
+          "ext": ".zip",
+          "says": [
+            {
+              "text": "Contacts take "
+            },
+            {
+              "mark": "mono",
+              "text": ".vcf"
+            },
+            {
+              "text": " — a notebook takes this one"
+            }
+          ]
+        }
+      ],
+      "lead": "Drop to import",
+      "line": [
+        {
+          "text": "One "
+        },
+        {
+          "mark": "mono",
+          "text": ".vcf"
+        },
+        {
+          "text": " file into "
+        },
+        {
+          "mark": "strong",
+          "text": "nextcloud · Контакты"
+        }
+      ],
+      "many": false,
+      "note": "The preview opens first: nothing is written until it has been read"
+    },
     "filter": "",
     "filterForm": {
       "action": "/app/contacts/a-nc-home/kontakty",

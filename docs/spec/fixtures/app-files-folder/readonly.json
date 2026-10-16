@@ -203,6 +203,7 @@
       "label": "Columns"
     },
     "compact": null,
+    "drop": null,
     "filter": "",
     "filterForm": {
       "action": "/app/files/a-sftp-vps/Public/",

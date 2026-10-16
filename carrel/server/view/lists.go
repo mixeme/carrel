@@ -27,6 +27,34 @@ type ListBar struct {
 	// Columns — кнопка Columns полосы и её меню-форма (components-42 и
 	// меню записки 25); nil — у списка выбора столбцов нет
 	Columns *Columns `json:"columns"`
+	// Drop — бросок файла на список одной коллекции (s-io-1, Им3); nil —
+	// списка, куда не пишут, и прочих
+	Drop *ImportDrop `json:"drop"`
+}
+
+// ImportDrop — бросок файла на список (s-io-1): накладка и куда уходит
+// файл. Action — POST мастера импорта с полем File: предпросмотр в эту
+// коллекцию, шаг 2 (шагу 1 нечего спросить). Accept — расширения рода;
+// Many — берёт ли несколько файлов разом (заметки). Lead, Line, Note — слова
+// накладки: «Drop to import»; «One ‹.vcf› file into ‹nextcloud ·
+// Контакты›»; «The preview opens first: nothing is written until it has
+// been read». Elsewhere — отказ файлу другого рода, бросок не принимается:
+// «Contacts take ‹.vcf› — the calendar and the list of tasks take this one».
+// Имени файла в накладке нет: пока файл тащат, браузер его не отдаёт
+type ImportDrop struct {
+	Action    Action            `json:"action"`
+	Accept    []Text            `json:"accept"`
+	Many      bool              `json:"many"`
+	Lead      Text              `json:"lead"`
+	Line      Runs              `json:"line"`
+	Note      Text              `json:"note"`
+	Elsewhere []ImportElsewhere `json:"elsewhere"`
+}
+
+// ImportElsewhere — файл чужого рода у броска: расширение и почему не сюда.
+type ImportElsewhere struct {
+	Ext  Text `json:"ext"`
+	Says Runs `json:"says"`
 }
 
 // Columns — выбор столбцов списка (components-21, components-42, S-9.6).

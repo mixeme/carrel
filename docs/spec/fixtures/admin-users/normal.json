@@ -121,6 +121,7 @@
       "label": "Columns"
     },
     "compact": null,
+    "drop": null,
     "filter": "",
     "filterForm": {
       "action": "/admin/",

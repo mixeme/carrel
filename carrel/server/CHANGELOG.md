@@ -17,6 +17,26 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.316 — 2026-10-16
+
+### Added
+
+- **A file dropped on a collection's list** (Им3 of the scan of import;
+  `s-io-1`): the bar of one collection's list carries its drop
+  (`ListBar.Drop`, `ImportDrop`) — the POST of the wizard with the file,
+  which opens the preview with the collection chosen; the kinds of file it
+  takes, whether several at once (notes); the overlay's words — «Drop to
+  import», «One ‹.vcf› file into ‹nextcloud · Контакты›», «The preview opens
+  first: nothing is written until it has been read» —; and, for a file of
+  another kind, where it belongs: «Contacts take ‹.vcf› — the calendar, the
+  list of tasks and a notebook take this one». A list nobody writes into
+  takes no drop.
+
+### For consumers
+
+`ListBar.Drop`, `ImportDrop`, `ImportElsewhere` in C-6; every list's
+fixture re-shot (`drop`).
+
 ## v0.2.315 — 2026-10-16
 
 ### Changed

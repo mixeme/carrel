@@ -92,6 +92,7 @@
       "label": "Columns"
     },
     "compact": null,
+    "drop": null,
     "filter": "",
     "filterForm": null,
     "loaded": 29,

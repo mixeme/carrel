@@ -225,6 +225,7 @@
         }
       ]
     },
+    "drop": null,
     "filter": "",
     "filterForm": {
       "action": "/app/contacts",
