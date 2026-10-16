@@ -209,8 +209,12 @@ func TestRefusedCreateLeavesNothing(t *testing.T) {
 
 	sheet := decode[view.CollectionNewSheet](t, f.h.do(postForm("/app/collections/new?kind=event", f.sess,
 		url.Values{"account": {f.id}, "name": {"Trips"}, "components": {"VEVENT"}})))
+	// As s-profile-6 draws it (Кл6): one line, the block of C-9.1 — the
+	// step, the method, the address and the code, the body, what the code
+	// means —, what it means for the person under it, the server in the
+	// head; the form travels hidden with Back to the form and Try again.
 	n := sheet.Failure
-	if n == nil || n.Title != "This account can read here but not create" || n.Details == nil ||
+	if n == nil || n.Title != "" || n.Body != "The server would not make it. Nothing was created, and the form is as you left it." || n.Details == nil ||
 		!strings.HasPrefix(string(n.Details.Summary), "MKCALENDAR "+davtest.CalendarHome+"trips/") {
 		t.Fatalf("failure = %+v", n)
 	}
@@ -218,9 +222,21 @@ func TestRefusedCreateLeavesNothing(t *testing.T) {
 	for _, l := range n.Details.Lines {
 		lines = append(lines, string(l))
 	}
-	mustContain(t, strings.Join(lines, "\n"), "→ 403", "need-privileges")
-	if rowNamed(t, sheet.Form, "name").Value != "Trips" {
-		t.Error("the form lost what was entered")
+	if len(lines) != 3 || lines[0] != "[create]  MKCALENDAR "+davtest.CalendarHome+"trips/ → 403" || !strings.Contains(lines[1], "need-privileges") || lines[2] != "no DAV:bind on the calendar home-set" {
+		t.Errorf("block = %q", lines)
+	}
+	if !strings.HasPrefix(string(sheet.Explain), "This account may sign in and read, but not create.") || sheet.Stamp == "" {
+		t.Errorf("explain %q, stamp %q", sheet.Explain, sheet.Stamp)
+	}
+	for _, set := range sheet.Form.Sets {
+		for _, r := range set.Rows {
+			if r.Kind != view.InputHidden {
+				t.Errorf("a field shown over the refusal: %s", r.Name)
+			}
+		}
+	}
+	if formFields(sheet.Form).Get("name") != "Trips" || len(sheet.Actions) != 3 || sheet.Actions[0].Label != "Back to the form" {
+		t.Errorf("the form lost what was entered, or the way on: %v %+v", formFields(sheet.Form), sheet.Actions)
 	}
 	if got := len(catalogOf(t, f).Collections); got != before || auditCount(f.h, "collection.create") != 0 {
 		t.Errorf("catalog %d → %d entries, create lines %d", before, got, auditCount(f.h, "collection.create"))

@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -61,6 +62,9 @@ type collectionForm struct {
 	// wizard or any other: where Cancel leads. Empty — the kind's screen.
 	ret  string
 	errs map[string]view.Text
+	// explain is the line under a refusal that says what it means
+	// (s-profile-6, Кл6): set with the refusal itself
+	explain string
 }
 
 // importBack is the address of an import wizard of this kind, the only place
@@ -326,12 +330,12 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 
 	client, err := dav.NewClient(s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, davRefusal(createRefusal, conn, "PROPFIND", home, err)))
+		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, "home", "PROPFIND", home, err)))
 		return
 	}
 	taken, err := childSegments(r.Context(), client, home)
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, davRefusal(createRefusal, conn, "PROPFIND", home, err)))
+		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, "home", "PROPFIND", home, err)))
 		return
 	}
 	segment := f.address
@@ -350,7 +354,7 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	// settlePath below reads the home back, so a wrong guess here ends as
 	// «it is not in the list», never as a collection that is not there.
 	if err := client.MkColProps(r.Context(), method, path, props); err != nil && !landedOnTheFirstTry(err) {
-		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, davRefusal(createRefusal, conn, method, path, err)))
+		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, "create", method, path, err)))
 		return
 	}
 	settled, err := settlePath(r.Context(), client, home, path, taken)
@@ -603,6 +607,42 @@ func newChildren(ctx context.Context, client *dav.Client, home string, before ma
 // catalog is not filled in with a guess. Re-discovery on the connection offers
 // what the server holds (S-12.1), which is how a collection made elsewhere
 // enters the catalog anyway.
+// createRefused is the server's refusal to make a collection as s-profile-6
+// draws it (Кл6): one line — nothing was made, the form is as left —, and
+// the block of C-9.1: the step, the method, the address and the code, the
+// body the server answered, what the code means there; what it means for
+// the person is the sheet's line under it (f.explain).
+func createRefused(f *collectionForm, step, method, path string, err error) *view.Notice {
+	code := dav.StatusCode(err)
+	head := "[" + step + "]  " + method + " " + path
+	if code != 0 {
+		head += fmt.Sprintf(" → %d", code)
+	}
+	lines := []view.Text{text(head)}
+	var se *dav.StatusError
+	switch {
+	case errors.As(err, &se) && se.Msg != "":
+		lines = append(lines, text(se.Msg))
+	case code == 0:
+		lines = append(lines, text(err.Error()))
+	}
+	if code == http.StatusForbidden && step == "create" {
+		lines = append(lines, "no DAV:bind on the calendar home-set")
+		if f.kind == view.KindContact {
+			lines[len(lines)-1] = "no DAV:bind on the address book home-set"
+		}
+		f.explain = "This account may sign in and read, but not create. Either the user has no such right on the server, or the account was connected with a password issued read-only. Neither is something Carrel can fix from here."
+	}
+	if code == 0 {
+		f.explain = "The server did not answer: nothing was sent that it could refuse."
+	}
+	return &view.Notice{
+		Role:    view.NoticeAlert,
+		Body:    text(createRefusal.title + ". " + createRefusal.nothing),
+		Details: &view.Diagnostic{Summary: text(method + " " + path), Lines: lines},
+	}
+}
+
 func lostCollection(conn sealed.Connection, method, path string, err error, tail string) *view.Notice {
 	return &view.Notice{
 		Role:  view.NoticeAlert,
@@ -748,7 +788,7 @@ func countWord(n int) string {
 
 func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f collectionForm, failure *view.Notice) view.CollectionNewSheet {
 	noun := newCollectionTitle(f.kind)
-	sheet := view.CollectionNewSheet{Kind: f.kind, Title: newCollectionHeads[f.kind], Failure: failure}
+	sheet := view.CollectionNewSheet{Kind: f.kind, Title: newCollectionHeads[f.kind], Failure: failure, Explain: text(f.explain)}
 	if f.kindChoice {
 		sheet.Title = "New collection"
 	}
@@ -944,6 +984,22 @@ func newCollectionDefault(k view.Kind) string {
 func (s *Server) afterRefusal(sheet *view.CollectionNewSheet, action string) {
 	if sheet.Failure == nil || len(sheet.Actions) == 0 || !sheet.Actions[0].Enabled {
 		return
+	}
+	// The answer is the sheet's content (s-profile-6, Кл6): what was typed
+	// travels hidden with both buttons, and the head names the server.
+	for i := range sheet.Form.Sets {
+		var rows []view.FormRow
+		for _, r := range sheet.Form.Sets[i].Rows {
+			if r.Name == "account" {
+				for _, o := range r.Options {
+					if o.Selected {
+						sheet.Stamp = view.Stamp(o.Label)
+					}
+				}
+			}
+			rows = append(rows, hiddenRows(r)...)
+		}
+		sheet.Form.Sets[i].Rows = rows
 	}
 	back := action + "?op=back"
 	if strings.Contains(action, "?") {
@@ -1189,4 +1245,22 @@ func davRefusal(rt refusalText, conn sealed.Connection, method, path string, err
 	}
 	n.Details.Lines = append(n.Details.Lines, text(err.Error()))
 	return n
+}
+
+// hiddenRows are a row as the hidden fields that send what it holds: a row
+// of boxes, each one ticked; any other row, its value.
+func hiddenRows(r view.FormRow) []view.FormRow {
+	if r.Kind == view.InputHidden {
+		return []view.FormRow{r}
+	}
+	if r.Kind == view.InputCheck && len(r.Options) > 0 {
+		var out []view.FormRow
+		for _, o := range r.Options {
+			if o.Selected {
+				out = append(out, view.FormRow{Name: r.Name, Kind: view.InputHidden, Value: text(o.Value)})
+			}
+		}
+		return out
+	}
+	return []view.FormRow{{Name: r.Name, Kind: view.InputHidden, Value: r.Value}}
 }

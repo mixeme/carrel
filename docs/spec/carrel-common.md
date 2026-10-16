@@ -2092,7 +2092,9 @@ type CollectionNewSheet struct {
     Target  TargetPicker // «на каком сервере»; неотвечающий виден с причиной
     Note    Text         // почему в списке не все подключения
     Form    Form         // имя, цвет, набор компонентов, адрес с подсказкой
-    Failure *Notice      // отказ сервера: метод, адрес, код, тело (S-12.2); nil — отказа не было
+    Failure *Notice      // отказ сервера (s-profile-6, Кл6): строка «The server would not make it. Nothing was created, and the form is as you left it.» и блок C-9.1 — «[create]  MKCALENDAR путь → 403», тело ответа, что код значит («no DAV:bind on the calendar home-set»); nil — отказа не было
+    Stamp   Stamp        // сервер в шапке, когда отказ занял место формы (s-profile-6); форма тогда скрытыми полями едет с кнопками; пусто — без отказа
+    Explain Text         // что отказ значит для человека, строкой под блоком: «This account may sign in and read, but not create. …»; пусто — сказать нечего
     Actions []Action     // Create; после отказа (s-profile-6) — «Back to the form» (основная, POST с op=back: та же форма, без отказа, серверу ничего не шлётся) и «Try again» (та же форма ещё раз); обе шлют Form; последней — Cancel (collection.cancel, GET: ?back= листа, иначе экран рода)
     Under   *Under // экран под листом, пришедшим страницей (Кл1): откуда открыт (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у фрагмента
 }

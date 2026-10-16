@@ -18,6 +18,7 @@
       "method": "GET"
     }
   ],
+  "explain": "",
   "failure": null,
   "form": {
     "action": "/app/collections/new?kind=event",
@@ -219,6 +220,7 @@
   },
   "kind": "event",
   "note": "",
+  "stamp": "",
   "target": {
     "chosen": "a-nc-home",
     "new": null,

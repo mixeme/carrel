@@ -17,6 +17,25 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.318 — 2026-10-16
+
+### Changed
+
+- **The server's refusal to make a collection, as `s-profile-6` draws it**
+  (Кл6 of the scan of 15.10.2026): one line — «The server would not make
+  it. Nothing was created, and the form is as you left it.» —, the block of
+  C-9.1 — «[create]  MKCALENDAR … → 403», the body the server answered,
+  what the code means there («no DAV:bind on the calendar home-set») —,
+  what it means for the person under it (`CollectionNewSheet.Explain`), and
+  the server in the sheet's head (`Stamp`); the form travels hidden with
+  «Back to the form» and «Try again». The frame's last words — that Carrel
+  can say which of the two it is — are not taken: it cannot.
+
+### For consumers
+
+`CollectionNewSheet.Stamp`, `Explain` in C-6; fixtures of the new
+collection's sheet re-shot.
+
 ## v0.2.317 — 2026-10-16
 
 ### Changed

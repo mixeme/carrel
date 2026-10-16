@@ -412,8 +412,15 @@ type CollectionNewSheet struct {
 	Target  TargetPicker `json:"target"`  // «на каком сервере»; неотвечающий виден с причиной
 	Note    Text         `json:"note"`    // почему в списке не все подключения
 	Form    Form         `json:"form"`    // имя, цвет, набор компонентов, адрес с подсказкой
-	Failure *Notice      `json:"failure"` // отказ сервера: метод, адрес, код, тело (S-12.2); nil — отказа не было
-	Actions []Action     `json:"actions"`
+	Failure *Notice      `json:"failure"` // отказ сервера: одна строка и блок C-9.1 — шаг, метод, адрес, код, тело, что код значит (S-12.2, s-profile-6); nil — отказа не было
+	// Stamp — сервер в шапке листа, когда отказ занял его место (s-profile-6,
+	// Кл6): форма тогда скрыта и едет с кнопками; пусто — без отказа
+	Stamp Stamp `json:"stamp"`
+	// Explain — что отказ значит для человека, строкой под блоком
+	// (s-profile-6): «This account may sign in and read, but not create. …»;
+	// пусто — сказать нечего
+	Explain Text     `json:"explain"`
+	Actions []Action `json:"actions"`
 	// Under — экран под листом, пришедшим страницей (Кл1): откуда открыт
 	// (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у
 	// фрагмента
