@@ -714,7 +714,7 @@ type MailAttachRow struct {
 	// с ними, главная кнопка «Apply» (s-mail-1, записка Typecase 70). У
 	// вложения и у ссылки, сделанной раньше письма, пусто и nil
 	Terms  Text    `json:"terms,omitempty"`
-	Change *Action `json:"change,omitempty"`
+	Change *Action `json:"change"`
 	Remove Action  `json:"remove"`
 }
 type MailAttachSheet struct {
