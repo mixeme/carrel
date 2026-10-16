@@ -67,7 +67,9 @@ func TestKindContentIsKeptAsSent(t *testing.T) {
 		{"calendar", func() *view.Columns {
 			return decode[view.AgendaPage](t, f.h.do(get(f.path("calendar")+"?from=2026-01-12", f.sess))).Bar.Columns
 		}},
-		{"notes", func() *view.Columns { return decode[view.NotesPage](t, f.h.do(get(f.path("notes"), f.sess))).Bar.Columns }},
+		{"notes", func() *view.Columns {
+			return decode[view.NotesPage](t, f.h.do(get(f.path("notes"), f.sess))).Bar.Columns
+		}},
 	} {
 		cols := c.cols()
 		if cols == nil {
