@@ -180,6 +180,13 @@ func ParseNote(name string, doc []byte, now time.Time) (*model.Object, error) {
 // cutNoteHeader takes the header block off the front of a file: it opens on
 // the first line and closes on the next fence. A file that does not open with
 // one is all body.
+// HasNoteHeader reports whether a Markdown file begins with a header block
+// (front matter) a note is read from.
+func HasNoteHeader(doc []byte) bool {
+	header, _ := cutNoteHeader(rawLines(doc))
+	return len(header) > 0
+}
+
 func cutNoteHeader(lines []string) (header, body []string) {
 	if len(lines) == 0 || strings.TrimSpace(lines[0]) != noteFence {
 		return nil, lines

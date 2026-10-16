@@ -117,7 +117,7 @@ func linkPatch(obj *model.Object, props []string, moved map[string]string) (*mod
 // a record was written under to the one it has. Only records whose links
 // name one of them are read again and written, with If-Match; the row says
 // what became of it.
-func followTheirs(ctx context.Context, dest *collectionCtx, written [][]view.Text, made []importMade, theirs map[string]string) {
+func followTheirs(ctx context.Context, dest *collectionCtx, written []view.ImportLine, made []importMade, theirs map[string]string) {
 	if len(theirs) == 0 {
 		return
 	}
@@ -145,10 +145,10 @@ func followTheirs(ctx context.Context, dest *collectionCtx, written [][]view.Tex
 			if dav.IsStatus(err, http.StatusPreconditionFailed) {
 				why = "it changed on its server after Carrel read it"
 			}
-			written[m.row][2] += view.Text(". Its links to records of this file still name the identities they were sent under: " + why)
+			written[m.row].Cells[2] += view.Text(". Its links to records of this file still name the identities they were sent under: " + why)
 			continue
 		}
 		dest.noteWrite(cur.Path, cur)
-		written[m.row][2] += view.Text(". Its links to records of this file follow the identities the server gave them")
+		written[m.row].Cells[2] += view.Text(". Its links to records of this file follow the identities the server gave them")
 	}
 }

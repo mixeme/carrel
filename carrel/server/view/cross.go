@@ -616,7 +616,7 @@ type ImportPage struct {
 	Source   ImportSource `json:"source"`
 	Into     TargetPicker `json:"into"`
 	// Counts — счёт над таблицей предпросмотра (s-io-5…8): ready всегда,
-	// with errors (Error), UID collisions, skipped — когда не ноль
+	// with errors (Error), already here, skipped — когда не ноль
 	Counts []ImportCount `json:"counts"`
 	// Existing — вопрос предпросмотра о записях файла, которые коллекция уже
 	// держит под тем же UID (решение владельца 12.10.2026): сколько их и что
@@ -665,14 +665,28 @@ type ImportSource struct {
 // ImportCount — один счёт предпросмотра: «‹122› ready» (s-io-5…8)
 type ImportCount struct {
 	Count int  `json:"count"`
-	Label Text `json:"label"` // «ready», «with errors», «UID collisions», «skipped»
+	Label Text `json:"label"` // «ready», «with errors», «already here», «skipped»
 	Error bool `json:"error,omitempty"`
 }
 type ImportTable struct {
-	Rubric  Text     `json:"rubric"`
-	Columns []Text   `json:"columns"`
-	Rows    [][]Text `json:"rows"`
-	Count   int      `json:"count"`
+	Rubric  Text         `json:"rubric"`
+	Columns []Text       `json:"columns"`
+	Lines   []ImportLine `json:"lines"`
+	Count   int          `json:"count"`
+}
+
+// ImportLine — строка таблицы импорта (s-io-5…8, Им8): ячейки по Columns
+// и то, как кадр их метит. Result — что будет с записью: ready — ляжет,
+// failed — не прочтена (итог тревогой), skipped — пропущена (итог
+// приглушённо); Untitled — у записи нет названия, во второй ячейке заглушка
+// «— (no FN)», «— (no SUMMARY)», «—» (блёкло); Component — чужой род
+// записи бейджем у названия, «VTODO»; пустая ячейка — «—» приглушённо.
+// В таблицах отчёта — только Cells
+type ImportLine struct {
+	Cells     []Text       `json:"cells"`
+	Result    ImportResult `json:"result,omitempty"`
+	Untitled  bool         `json:"untitled,omitempty"`
+	Component Text         `json:"component,omitempty"`
 }
 type ImportReport struct {
 	Created int `json:"created"`
@@ -697,7 +711,7 @@ type ImportReport struct {
 	Failed   int    `json:"failed"`
 	Failures []Text `json:"failures"`
 	// Renames — UID, что сменились: «1a77-40de-bb02 → 9c02-4411-7ee1»
-	// (s-io-9, «UID collisions»)
+	// (s-io-9, «Imported as copies»)
 	Renames []Text        `json:"renames"`
 	Rows    []ImportTable `json:"rows"`
 	Note    Text          `json:"note"`

@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.315 — 2026-10-16
+
+### Changed
+
+- **The import wizard by its frames** (Им2, Им6, Им8–Им10, Им12, Им18, Им20
+  of the scan of 15.10.2026; `s-io-3`…`-9`): titled by its kind — «Import
+  contacts», «Import events», «Import tasks», «Import notes» —, the report
+  «Import report»; a row of the preview is an `ImportLine` that says what
+  becomes of its record (`Result`: ready, failed, skipped), whether it has
+  no title (`Untitled`: «— (no FN)», «— (no SUMMARY)», «—») and, for a
+  record of another kind, its component as a badge (`Component`) with its
+  own date in the third column; «Ready — …» says what is kept: an event's
+  zone written in, a task overdue that stays so, a task without a date, a
+  note's title and date from front matter or from its heading and file;
+  the root of the folders notes are read from says its connection alone.
+
+### For consumers
+
+`ImportTable.Rows` gives way to `Lines` (`ImportLine`, `ImportResult` in
+C-8). The fixture of the first step is held against its own frame,
+`s-io-3`.
+
 ## v0.2.314 — 2026-10-16
 
 ### Changed

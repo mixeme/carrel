@@ -83,7 +83,8 @@ func tableRow(t *testing.T, tables []view.ImportTable, rubric, what string) []vi
 		if !strings.Contains(string(tb.Rubric), rubric) {
 			continue
 		}
-		for _, row := range tb.Rows {
+		for _, row := range tb.Lines {
+			row := row.Cells
 			if strings.Contains(string(row[0]), what) {
 				return row
 			}
@@ -354,10 +355,10 @@ func TestImportNotesFromAFolder(t *testing.T) {
 	if page.Step != view.ImportStepPreview {
 		t.Fatalf("step = %q notices = %+v", page.Step, page.Notices)
 	}
-	if row := previewRow(t, page.Preview, "Ковка"); row[0] != "kovka.md" || row[3] != "Ready" {
+	if row := previewRow(t, page.Preview, "Ковка"); row[0] != "kovka.md" || row[3] != "Ready — title, date and tags from front matter" {
 		t.Errorf("Ковка = %q", row)
 	}
-	if row := previewRow(t, page.Preview, "Уголь"); row[0] != "plain.md" || row[3] != "Ready" {
+	if row := previewRow(t, page.Preview, "Уголь"); row[0] != "plain.md" || row[3] != "Ready — no front matter: title from the first heading, date from the file" {
 		t.Errorf("Уголь = %q", row)
 	}
 	if row := previewRow(t, page.Preview, "photo.jpg"); row[3] != "Skipped: not Markdown" {

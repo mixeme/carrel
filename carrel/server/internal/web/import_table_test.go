@@ -13,14 +13,18 @@ func previewRow(t *testing.T, tables []view.ImportTable, what string) []view.Tex
 	if len(tables) != 1 {
 		t.Fatalf("the preview is %d tables, the frames draw one", len(tables))
 	}
-	for _, row := range tables[0].Rows {
-		for _, cell := range row {
+	for _, line := range tables[0].Lines {
+		// The component of a stray record is a badge at its title (Им8).
+		if line.Component == view.Text(what) {
+			return line.Cells
+		}
+		for _, cell := range line.Cells {
 			if strings.Contains(string(cell), what) {
-				return row
+				return line.Cells
 			}
 		}
 	}
-	t.Fatalf("no row with %q in %+v", what, tables[0].Rows)
+	t.Fatalf("no row with %q in %+v", what, tables[0].Lines)
 	return nil
 }
 
@@ -64,7 +68,7 @@ func TestImportPreviewIsOneTableWithAResult(t *testing.T) {
 	if row := previewRow(t, page.Preview, "Ковка"); row[3] != "Ready" || !strings.Contains(string(row[2]), "January") {
 		t.Errorf("event = %q", row)
 	}
-	if n := page.Preview[0].Count; n != len(page.Preview[0].Rows) {
-		t.Errorf("count %d of %d rows", n, len(page.Preview[0].Rows))
+	if n := page.Preview[0].Count; n != len(page.Preview[0].Lines) {
+		t.Errorf("count %d of %d rows", n, len(page.Preview[0].Lines))
 	}
 }

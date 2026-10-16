@@ -31,7 +31,8 @@ func TestImportSaysWhatTheServerDidNotKeep(t *testing.T) {
 	}
 	var lossy, whole string
 	for _, table := range page.Report.Rows {
-		for _, row := range table.Rows {
+		for _, row := range table.Lines {
+			row := row.Cells
 			switch {
 			case len(row) < 3:
 			case row[0] == "With a place":

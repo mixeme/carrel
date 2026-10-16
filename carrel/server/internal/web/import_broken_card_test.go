@@ -31,7 +31,8 @@ func TestImportNamesACardItCannotRead(t *testing.T) {
 	}
 	said := false
 	for _, table := range page.Preview {
-		for _, row := range table.Rows {
+		for _, row := range table.Lines {
+			row := row.Cells
 			line := ""
 			for _, cell := range row {
 				line += string(cell) + " "

@@ -415,6 +415,7 @@ STATE_FRAME = {
     "app-settings-escrow-withdraw/normal": "account-11",
     # Диалог правки подключения (Нс76): вопрос о ссылках ждёт скрытым —
     # s-profile-16; Save без ответа — s-profile-23 (Typecase ad18c91).
+    "app-contact-import/normal": "s-io-3",  # шаг 1 — свой кадр, не s-io-5 (Им20)
     "app-record-delete/normal": "s-agenda-26",
     "admin-reset/normal": "s-admin-13",
     "admin-reset/issued": "s-admin-14",

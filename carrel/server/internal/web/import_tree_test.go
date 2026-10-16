@@ -57,7 +57,7 @@ func TestImportNotesFolderIsChosenInATree(t *testing.T) {
 	if got := saidRuns(page.Subtitle); !strings.HasPrefix(got, "⟨mono:Docs › notes⟩ · ") {
 		t.Errorf("subtitle = %q", got)
 	}
-	if len(page.Preview) != 1 || len(page.Preview[0].Rows) != 1 || page.Preview[0].Rows[0][0] != "kovka.md" {
+	if len(page.Preview) != 1 || len(page.Preview[0].Lines) != 1 || page.Preview[0].Lines[0].Cells[0] != "kovka.md" {
 		t.Errorf("the preview of notes/ = %+v", page.Preview)
 	}
 

@@ -154,6 +154,15 @@ const (
 	BadgePlan    BadgeRole = "plan"
 )
 
+// ImportResult — что будет с записью предпросмотра импорта (ImportLine).
+type ImportResult string
+
+const (
+	ImportReady   ImportResult = "ready"
+	ImportFailed  ImportResult = "failed"
+	ImportSkipped ImportResult = "skipped"
+)
+
 type InputKind string
 
 const (

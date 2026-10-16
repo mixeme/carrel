@@ -82,10 +82,10 @@ func TestImportNotesFromAZip(t *testing.T) {
 	if got := saidRuns(page.Subtitle); !strings.Contains(got, "заметки-2026.zip") || !strings.Contains(got, "5 files") {
 		t.Errorf("subtitle = %q", got)
 	}
-	if row := previewRow(t, page.Preview, "Встреча с подрядчиком"); row[0] != "2026-03-11-podryadchik.md" || row[3] != "Ready" {
+	if row := previewRow(t, page.Preview, "Встреча с подрядчиком"); row[0] != "2026-03-11-podryadchik.md" || row[3] != "Ready — title, date and tags from front matter" {
 		t.Errorf("first = %q", row)
 	}
-	if row := previewRow(t, page.Preview, "Что почитать про CRDT"); row[0] != "idei/crdt.md" || row[3] != "Ready" {
+	if row := previewRow(t, page.Preview, "Что почитать про CRDT"); row[0] != "idei/crdt.md" || row[3] != "Ready — no front matter: title from the first heading, date from the file" {
 		t.Errorf("in a folder = %q", row)
 	}
 	if row := previewRow(t, page.Preview, "skan.pdf"); row[3] != "Skipped: not Markdown" {

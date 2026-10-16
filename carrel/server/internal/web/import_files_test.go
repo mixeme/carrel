@@ -51,8 +51,9 @@ func TestImportTakesEveryFileOfADrop(t *testing.T) {
 		t.Errorf("subtitle = %q", got)
 	}
 	for title, want := range map[string]string{
-		"Встреча с подрядчиком": "Ready",
-		"Что почитать про CRDT": "Ready",
+		// Where the title and the date come from (Им12; s-io-8).
+		"Встреча с подрядчиком": "Ready — title, date and tags from front matter",
+		"Что почитать про CRDT": "Ready — no front matter: title from the first heading, date from the file",
 		"skan.pdf":              "Skipped: not Markdown",
 		"pustoj.md":             "Empty file: nothing to store and nothing to name it by",
 	} {

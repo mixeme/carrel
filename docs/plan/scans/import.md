@@ -45,7 +45,7 @@
 - **Им1. Обновление в шапке** (`s-io-3` … `-9`, `-14`: кнопка «2 min ago»);
   фикстура — `top.refresh.action` выключено с пустой подписью. Общее с ПА1
   (открыт: `server.md:1036`); ИА1 старого скана — открыт.
-- **Им2. Заголовок по роду и шагу.** Кадры: «Import contacts» (`s-io-3`,
+- **Им2. Заголовок по роду и шагу.** (**закрыто сервером `v0.2.315`**: «Import contacts|events|tasks|notes», отчёт — «Import report») Кадры: «Import contacts» (`s-io-3`,
   `-5`), «Import events» (`-6`), «Import tasks» (`-7`), «Import notes»
   (`-4`, `-8`), «Import report» (`-9`, `-14`). Модель: `Shell.Title` «Import»
   на всех шагах и родах (`import.go:416`; фикстура `"title": "Import"`).
@@ -82,7 +82,7 @@
 
 ### Шаг 1
 
-- **Им6. Хвост корня дерева папок** (`s-io-4`: строка «Documents» и
+- **Им6. Хвост корня дерева папок** (**закрыто сервером `v0.2.315`**: у корня — имя подключения) (`s-io-4`: строка «Documents» и
   приглушённо «sftpgo»; «Files» — «nextcloud»). Модель: `FileTreeNode.Stamp`
   = `origin.stamp()` — «sftpgo · Documents», повтор подписи
   (`import.go:300`, `records.go:69`), хотя комментарий `FileTreeNode.Stamp`
@@ -107,7 +107,7 @@ errors · already here · skipped» в порядке кадров, «Import 117
   C-5 (`carrel-common.md:416`) параметра `existing=` не называет вовсе;
   назван только в комментарии C-6 (`:2143`). Нужно: слово кадра (или оба) и
   строка в C-5.
-- **Им8. Метки ячеек и строк.** Кадры: результат отказа — тревогой
+- **Им8. Метки ячеек и строк.** (**закрыто сервером `v0.2.315`**: `ImportTable.Lines` — `ImportLine` с `Result`, `Untitled`, `Component`) Кадры: результат отказа — тревогой
   (`tc-table__n4--danger`: «vCard 2.1 quoted-printable: cannot decode line
   12», `s-io-5`), пропущенное — приглушённо (`--dusty`: «Skipped: …»,
   `s-io-6`, `-7`, `-8`), заглушка названия — блёкло (`tc-dim`: «— (no FN)»,
@@ -116,13 +116,13 @@ errors · already here · skipped» в порядке кадров, «Import 117
   «Созвон с подрядчиком ‹VEVENT›»). Модель: `ImportTable.Rows [][]Text`
   (`view/cross.go:533`) — ни состояния строки, ни метки ячейки, ни бейджа.
   ИБ7 — открыт.
-- **Им9. Что стоит в третьем столбце у пропущенного и сломанного.** Кадры:
+- **Им9. Что стоит в третьем столбце у пропущенного и сломанного.** (**закрыто сервером `v0.2.315`**: своя дата записи, компонент — бейджем) Кадры:
   у чужого рода — его собственный срок («2026-08-17» у VEVENT в `s-io-7`)
   или «—» (`s-io-6`); у сломанной карточки UID — «—» (`s-io-5`). Модель
   кладёт туда слово компонента — «VTODO», «VEVENT», «VCARD»
   (`import.go:1083`, `what = sk.What`). Нужно: срок записи (или пусто), а
   компонент — бейджем у названия (Им8).
-- **Им10. Заглушки названия.** Кадры: «— (no FN)», «— (no SUMMARY)», «—»
+- **Им10. Заглушки названия.** (**закрыто сервером `v0.2.315`**: «— (no FN)», «— (no SUMMARY)», «—») Кадры: «— (no FN)», «— (no SUMMARY)», «—»
   (у файла заметки). Модель: «Unnamed contact», «Untitled event», «Untitled
   task» (`import.go:897-911`), у сломанной карточки — что нашлось
   (`card/split.go:37,48`). Слова зависят от данных — пробел.
@@ -132,7 +132,7 @@ errors · already here · skipped» в порядке кадров, «Import 117
   `import.go:886`): день и время в поясе человека, у целого дня — только
   первый день; ни правила повтора, ни конца, ни чужого пояса. ИБ8 (вопрос
   C-10) — открыт.
-- **Им12. Пометки «Ready — …».** Кадры: «time zone kept as sent» (`s-io-6`),
+- **Им12. Пометки «Ready — …».** (**закрыто сервером `v0.2.315`**: пояс события, просроченная задача, задача без даты, заметки с front matter и без) Кадры: «time zone kept as sent» (`s-io-6`),
   «overdue, and stays overdue», «a task without a date is a task» (`-7`),
   «title, date and tags from front matter», «no front matter: title from
   the first heading, date from the file» (`-8`). Модель (`readyNote`,
@@ -178,7 +178,7 @@ as copies» (`Renames`), «Failed N», подзаголовок «nextcloud · �
 
 ### Контракт и фикстуры
 
-- **Им18. Устаревшие слова спецификации.** C-6 `ImportPage.Counts`
+- **Им18. Устаревшие слова спецификации.** (**закрыто `v0.2.315`**: C-6, `view/cross.go`, U-6.9) C-6 `ImportPage.Counts`
   (`carrel-common.md:2117`) и комментарии `view/cross.go:481`, `:530`, `:558`
   — «UID collisions» (с `v0.2.252` — «already here»; в отчёте —
   «Imported as copies»). U-6.9 (`carrel-client.md:1058`): «Кадры `s-io-5`…`-8`
@@ -189,7 +189,7 @@ as copies» (`Renames`), «Failed N», подзаголовок «nextcloud · �
   (`-5` … `-8`), отчёта (`-9`, `-14`), входа из сведённого вида, отказов
   («No file was chosen», файл больше потолка, «There is no file to
   import»). ИБ1 — открыт (`server.md:1038`).
-- **Им20. Фикстура сверяется с чужим кадром.** `app-contact-import/normal`
+- **Им20. Фикстура сверяется с чужим кадром.** (**закрыто `v0.2.315`**: `STATE_FRAME` → `s-io-3`) `app-contact-import/normal`
   (шаг 1) идёт к `s-io-5` (шаг 2), потому что `STATE_FRAME` строки
   `app-contact-import/normal` → `s-io-3` не имеет (`check.py:231`, `:375`).
   Проверки 8 и 9 зелёные только потому, что сверяют рейл и основную кнопку.

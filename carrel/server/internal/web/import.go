@@ -146,12 +146,19 @@ type importRecord struct {
 	// Ready is what its row says after «Ready» (s-io-6, s-io-7): «the series
 	// as one record»; empty — Ready alone
 	Ready string
+	// Untitled: the record has no title, and Title is the frame's
+	// placeholder (Им10)
+	Untitled bool
 }
 
 // importSkip is what the file held and this import does not write.
 type importSkip struct {
-	What   string // the component, or the kind of record it is
-	Title  string
+	What  string // the component, or the kind of record it is
+	Title string
+	// Detail is the record's own date, in the third column of the
+	// preview (Им9; s-io-7: «2026-08-17» of an event in a list of tasks);
+	// empty — «—»
+	Detail string
 	Where  string // the section it belongs in; empty when Carrel keeps no such record
 	Reason string
 	Failed bool // could not be read at all: counted «with errors», not «skipped»
@@ -330,7 +337,9 @@ func (s *Server) noteFolders(c *collectionCtx, st importState) (*view.FileTree, 
 			if col.Gone || !col.Has(view.KindFile) {
 				continue
 			}
-			node := view.FileTreeNode{ID: link(conn.ID, col.Path, nil, ""), Label: collectionLabel(col), Stamp: origin{conn: conn, col: col}.stamp()}
+			// The root says its connection only (Им6; s-io-4: «Documents»,
+			// dimmed «sftpgo»).
+			node := view.FileTreeNode{ID: link(conn.ID, col.Path, nil, ""), Label: collectionLabel(col), Stamp: view.Stamp(connLabel(conn))}
 			node.Href = node.ID // a node chooses by a link, as the trees of Files (U-8)
 			if conn.ID == st.folderAcc && col.Path == st.folderPath {
 				if prov, err := s.filesOf(conn); err == nil {
@@ -446,7 +455,7 @@ var (
 
 func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 	page := view.ImportPage{
-		Shell: s.buildShell(c.sess, "Import"), Kind: c.spec.kind,
+		Shell: s.buildShell(c.sess, "Import "+c.spec.noun+"s"), Kind: c.spec.kind,
 		Step: view.ImportStepSource, Steps: importSteps, Preview: st.preview, Report: st.report,
 	}
 	page.Rail = s.recordRail(c, s.listBack(c))
@@ -464,6 +473,7 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 	case st.report != nil:
 		// The report's one door, to the list the records went into (s-io-9).
 		page.Step = view.ImportStepReport
+		page.Title = "Import report" // s-io-9, -14 (Им2)
 		done := view.Action{ID: "import.done", Label: "Back to list", Method: "GET", Primary: true, Enabled: true,
 			Href: s.route(c.listPath())}
 		if st.dest != nil {
@@ -800,8 +810,9 @@ func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*import
 	}
 	for _, obj := range objs {
 		if k := cal.Kind(obj); k != c.spec.kind {
+			title, _ := importTitle(k, obj)
 			d.Skipped = append(d.Skipped, importSkip{
-				What: obj.MainComponent(), Title: titleOf(k, obj), Where: kindHolders[k][0],
+				What: obj.MainComponent(), Title: title, Detail: c.detailOf(k, obj), Where: kindHolders[k][0],
 				Reason: kindHolders[c.spec.kind][0] + " takes " + kindHolders[c.spec.kind][1],
 			})
 			continue
@@ -872,7 +883,14 @@ func (d *importDraft) takeMarkdown(c *collectionCtx, label string, body []byte, 
 	}
 	if err := d.addFrom(c, obj, label); err != nil {
 		d.Skipped = append(d.Skipped, importSkip{What: label, Reason: err.Error(), Failed: true})
+		return
 	}
+	// Where the note's title and date come from (Им12; s-io-8).
+	ready := "no front matter: title from the first heading, date from the file"
+	if cal.HasNoteHeader(body) {
+		ready = "title, date and tags from front matter"
+	}
+	d.Records[len(d.Records)-1].Ready = ready
 }
 
 // emptyMarkdown is why an empty Markdown file is not a note (s-io-8).
@@ -883,33 +901,47 @@ func (d *importDraft) addFrom(c *collectionCtx, obj *model.Object, file string) 
 	if err != nil {
 		return err
 	}
+	title, untitled := importTitle(c.spec.kind, obj)
 	d.Records = append(d.Records, importRecord{
-		UID: uidOf(c, obj), Title: titleOf(c.spec.kind, obj), Detail: c.importDetail(obj), Doc: doc,
-		File: file, Ready: readyNote(c.spec.kind, obj),
+		UID: uidOf(c, obj), Title: title, Untitled: untitled, Detail: c.detailOf(c.spec.kind, obj), Doc: doc,
+		File: file, Ready: readyNote(c, obj),
 	})
 	return nil
 }
 
 // readyNote is what a row says after «Ready» when the record is not plain
-// (s-io-6, s-io-7): a repeating event comes as its series, a task keeps how
-// far it got and its priority.
-func readyNote(k view.Kind, obj *model.Object) string {
-	switch k {
+// (s-io-6, s-io-7; Им12): a repeating event comes as its series, an event
+// written in another zone keeps it; a task keeps how far it got and its
+// priority, an overdue one stays overdue, and one without a date is a task
+// all the same. A note's is said where it is read (takeMarkdown).
+func readyNote(c *collectionCtx, obj *model.Object) string {
+	var parts []string
+	switch c.spec.kind {
 	case view.KindEvent:
 		if len(obj.PropText("RRULE")) > 0 {
-			return "the series as one record"
+			parts = append(parts, "the series as one record")
+		}
+		props := obj.Props()
+		if z := zoneOf(props[zoneProp(props)]); z != "" && z != c.tf.tz.String() {
+			parts = append(parts, "time zone kept as sent")
 		}
 	case view.KindTask:
-		var parts []string
 		if p := percentOf(obj); p != nil && *p > 0 && *p < 100 {
 			parts = append(parts, strconv.Itoa(*p)+" % done")
 		}
 		if v := obj.PropText("PRIORITY"); len(v) > 0 && strings.TrimSpace(v[0]) != "" && strings.TrimSpace(v[0]) != "0" {
 			parts = append(parts, "priority "+strings.TrimSpace(v[0]))
 		}
-		return strings.Join(parts, ", ")
+		due, derr := cal.DueOf(obj, c.tf.tz)
+		start, serr := cal.TimingOf(obj, c.tf.tz)
+		switch {
+		case derr == nil && !due.Start.IsZero() && due.Start.Before(time.Now()) && !taskDone(obj):
+			parts = append(parts, "overdue, and stays overdue")
+		case (derr != nil || due.Start.IsZero()) && (serr != nil || start.Start.IsZero()):
+			parts = append(parts, "a task without a date is a task")
+		}
 	}
-	return ""
+	return strings.Join(parts, ", ")
 }
 
 // kindHolders are what holds a kind, as the preview says where a stray
@@ -937,8 +969,10 @@ func importColumns(k view.Kind) []view.Text {
 
 // importDetail is the middle column: what tells one record of this kind from
 // another before either is written.
-func (c *collectionCtx) importDetail(obj *model.Object) string {
-	switch c.spec.kind {
+// detailOf is the third column of a record of kind k: a contact's address,
+// an event's time, a task's due date, a note's date.
+func (c *collectionCtx) detailOf(k view.Kind, obj *model.Object) string {
+	switch k {
 	case view.KindContact:
 		return firstValue(obj, "EMAIL")
 	case view.KindEvent:
@@ -968,6 +1002,28 @@ func (c *collectionCtx) whenOf(t cal.Timing) string {
 }
 
 // titleOf is what one record is called in the preview and the report.
+// importTitle is a record's title as the preview names it, and whether it
+// has none: then the frame's placeholder, «— (no FN)», «— (no SUMMARY)»,
+// «—» of a note (Им10; s-io-5…8).
+func importTitle(k view.Kind, obj *model.Object) (string, bool) {
+	switch k {
+	case view.KindContact:
+		if name := strings.TrimSpace(contactName(obj)); name != "" {
+			return name, false
+		}
+		return "— (no FN)", true
+	case view.KindNote:
+		if t := noteTitle(cal.Text(obj, "SUMMARY"), cal.Description(obj)); t != "Untitled note" {
+			return t, false
+		}
+		return "—", true
+	}
+	if t := strings.TrimSpace(cal.Text(obj, "SUMMARY")); t != "" {
+		return t, false
+	}
+	return "— (no SUMMARY)", true
+}
+
 func titleOf(k view.Kind, obj *model.Object) string {
 	switch k {
 	case view.KindContact:
@@ -1106,7 +1162,7 @@ func (s *Server) importPreview(ctx context.Context, c *collectionCtx, d *importD
 // the columns of the kind and Result last; the records first, what the file
 // holds and this import does not write after them, each with why.
 func previewTable(k view.Kind, d *importDraft, taken map[string]bool) view.ImportTable {
-	t := view.ImportTable{Columns: previewColumns[k]}
+	t := view.ImportTable{Columns: previewColumns[k], Lines: []view.ImportLine{}}
 	source := func(file string) view.Text {
 		if file != "" {
 			return text(file)
@@ -1129,7 +1185,12 @@ func previewTable(k view.Kind, d *importDraft, taken map[string]bool) view.Impor
 		if k == view.KindContact {
 			third = rec.UID
 		}
-		t.Rows = append(t.Rows, []view.Text{source(rec.File), text(rec.Title), text(third), text(result)})
+		res := view.ImportReady
+		if taken[rec.UID] && d.Existing == existingSkip {
+			res = view.ImportSkipped
+		}
+		t.Lines = append(t.Lines, view.ImportLine{Cells: []view.Text{source(rec.File), text(rec.Title), text(third), text(result)},
+			Result: res, Untitled: rec.Untitled})
 	}
 	for _, sk := range d.Skipped {
 		result := sk.Reason
@@ -1139,13 +1200,29 @@ func previewTable(k view.Kind, d *importDraft, taken map[string]bool) view.Impor
 				result += " — import it into " + sk.Where
 			}
 		}
-		file, what := "", sk.What
-		if k == view.KindNote {
-			file, what = sk.What, ""
+		// The third column is the record's own date, its component a badge
+		// at its title (Им8, Им9); a file of a set is in the first column.
+		line := view.ImportLine{Result: view.ImportSkipped}
+		if sk.Failed {
+			line.Result = view.ImportFailed
 		}
-		t.Rows = append(t.Rows, []view.Text{source(file), text(sk.Title), text(what), text(result)})
+		file, title := "", sk.Title
+		switch {
+		case k == view.KindNote:
+			file = sk.What
+		case !sk.Failed:
+			line.Component = text(sk.What)
+		}
+		if title == "" {
+			title, line.Untitled = sk.named(), true
+			if k == view.KindNote {
+				title = "—"
+			}
+		}
+		line.Cells = []view.Text{source(file), text(title), text(sk.Detail), text(result)}
+		t.Lines = append(t.Lines, line)
 	}
-	t.Count = len(t.Rows)
+	t.Count = len(t.Lines)
 	return t
 }
 
@@ -1182,7 +1259,7 @@ func skippedTable(skipped []importSkip) (view.ImportTable, bool) {
 		if sk.Title != "" {
 			what += " · " + sk.Title
 		}
-		t.Rows = append(t.Rows, []view.Text{text(what), text(sk.Reason), text(sk.Where)})
+		t.Lines = append(t.Lines, view.ImportLine{Cells: []view.Text{text(what), text(sk.Reason), text(sk.Where)}})
 	}
 	return t, true
 }
@@ -1366,7 +1443,7 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 			}
 		}
 		if err != nil {
-			refused.Rows = append(refused.Rows, []view.Text{text(rec.Title), text(err.Error())})
+			refused.Lines = append(refused.Lines, view.ImportLine{Cells: []view.Text{text(rec.Title), text(err.Error())}})
 			report.Failed++
 			report.Failures = append(report.Failures, text(rec.Title+": "+err.Error()))
 			continue
@@ -1380,8 +1457,8 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		if renamed {
 			report.Renamed++
 		}
-		made = append(made, importMade{row: len(written.Rows), uid: uid, from: rec.UID, was: was, path: obj.Path, renamed: renamed, obj: obj})
-		written.Rows = append(written.Rows, []view.Text{text(rec.Title), text(rec.Detail), text(note)})
+		made = append(made, importMade{row: len(written.Lines), uid: uid, from: rec.UID, was: was, path: obj.Path, renamed: renamed, obj: obj})
+		written.Lines = append(written.Lines, view.ImportLine{Cells: []view.Text{text(rec.Title), text(rec.Detail), text(note)}})
 	}
 	lossy := s.importLanded(ctx, dest, report, &written, made)
 	// The identities that changed, as the report's card lists them (s-io-9).
@@ -1395,14 +1472,14 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		written.Rubric = text("Written to " + collectionLabel(dest.col))
 	}
 	report.Rows = append(report.Rows, written)
-	if len(refused.Rows) > 0 {
-		refused.Count = len(refused.Rows)
+	if len(refused.Lines) > 0 {
+		refused.Count = len(refused.Lines)
 		report.Rows = append(report.Rows, refused)
 	}
 	if t, ok := skippedTable(skipped); ok {
 		report.Rows = append(report.Rows, t)
 	}
-	report.Note = text(importNote(report, len(refused.Rows), lossy, d.Source))
+	report.Note = text(importNote(report, len(refused.Lines), lossy, d.Source))
 
 	clearImportDraft(c)
 	s.writePage(w, r, http.StatusOK, s.importPage(c, importState{dest: dest, report: report}))
@@ -1480,7 +1557,7 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 			return
 		}
 		if loss := writeLoss(dest.conn.ID, m.obj, got, nil, true); loss != nil && len(loss.Properties) > 0 {
-			written.Rows[m.row][2] = text(string(written.Rows[m.row][2]) + ". The server did not keep " + strings.Join(loss.Properties, ", "))
+			written.Lines[m.row].Cells[2] = text(string(written.Lines[m.row].Cells[2]) + ". The server did not keep " + strings.Join(loss.Properties, ", "))
 			lossy++
 		}
 	}
@@ -1496,7 +1573,7 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 		}
 		at, err := dest.fetch(ctx, m.path)
 		if err != nil {
-			written.Rows[m.row][2] = text("Created, but the server does not show it under this identity or at the address it was written to")
+			written.Lines[m.row].Cells[2] = text("Created, but the server does not show it under this identity or at the address it was written to")
 			continue
 		}
 		theirs := uidOf(dest, at)
@@ -1504,7 +1581,7 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 			kept(m, at)
 			continue // there under its own identity; the listing missed it
 		}
-		written.Rows[m.row][2] = text("Created under " + theirs + ": the server gave it an identity of its own")
+		written.Lines[m.row].Cells[2] = text("Created under " + theirs + ": the server gave it an identity of its own")
 		kept(m, at)
 		gave[m.uid] = theirs
 		m.held = theirs
@@ -1513,7 +1590,7 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 			report.Renamed++
 		}
 	}
-	followTheirs(ctx, dest, written.Rows, made, gave)
+	followTheirs(ctx, dest, written.Lines, made, gave)
 	return lossy
 }
 

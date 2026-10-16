@@ -2174,7 +2174,7 @@ type ImportPage struct {
     Subtitle Runs       // под заголовком: на предпросмотре файл моноширинно, размер и формат — «‹Разное (mix).vcf› · 84 KB · vCard 3.0» (s-io-5…8), у папки — имя, размер и число файлов; в отчёте — куда легло, «nextcloud · Контакты» (s-io-9); на первом шаге пусто
     Source   ImportSource
     Into     TargetPicker
-    Counts   []ImportCount // над таблицей предпросмотра (s-io-5…8): ready всегда; with errors (Error), UID collisions, skipped — когда не ноль
+    Counts   []ImportCount // над таблицей предпросмотра (s-io-5…8): ready всегда; with errors (Error), already here, skipped — когда не ноль
     Existing *ImportExisting // вопрос о записях файла, которые коллекция уже держит под тем же UID (S-19); nil — таких нет или коллекция не выбрана
     // Предпросмотр — одна таблица (s-io-5…8): столбцы рода и Result
     // последним — контакты: Source, Name, UID; события: Source, Summary,
@@ -2213,7 +2213,15 @@ type ImportSource struct {
 // here.»
 type ImportExisting struct { Note Text; Options []Action; Hint Text }
 type ImportCount struct { Count int; Label Text; Error bool } // «‹122› ready», «‹3› with errors» (s-io-5)
-type ImportTable struct { Rubric Text; Columns []Text; Rows [][]Text; Count int }
+type ImportTable struct { Rubric Text; Columns []Text; Lines []ImportLine; Count int }
+// Строка таблицы импорта (s-io-5…8, Им8): ячейки по Columns и метки кадра.
+// Result — что будет с записью (C-8): ready — ляжет, failed — не прочтена
+// (итог тревогой), skipped — пропущена (итог приглушённо); Untitled —
+// названия нет, во второй ячейке заглушка «— (no FN)», «— (no SUMMARY)», «—»
+// (блёкло); Component — чужой род бейджем у названия, «VTODO», а в третьей
+// ячейке — её собственная дата (Им9); пустая ячейка — «—» приглушённо.
+// В таблицах отчёта — только Cells
+type ImportLine struct { Cells []Text; Result ImportResult; Untitled bool; Component Text }
 // Отчёт числами (s-io-9, s-io-14): Created; Here — уже были и пропущены
 // по ответу «Skip» («Already here, skipped»), Heres — «Артём Белов ·
 // 1a77-40de-bb02», в Skipped не входят; Skipped — чужого рода; Replaced —
@@ -3668,6 +3676,8 @@ const ( FileRename FileOp = "rename"; FileMove = "move"
 type ImportStep string
 const ( ImportStepSource ImportStep = "source"; ImportStepPreview = "preview"
         ImportStepReport = "report" )
+type ImportResult string
+const ( ImportReady ImportResult = "ready"; ImportFailed = "failed"; ImportSkipped = "skipped" )
 
 type ConflictChoice string
 const ( ChoiceMine ConflictChoice = "mine"; ChoiceTheirs = "theirs"; ChoiceUnset = "" )

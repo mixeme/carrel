@@ -227,7 +227,8 @@ func TestBaikalSFTPGoNotesFromFolder(t *testing.T) {
 	page = liveDecode[view.ImportPage](t, "folder", app.post(page.Source.Preview.Href, url.Values{}))
 	ready := 0
 	if len(page.Preview) == 1 {
-		for _, row := range page.Preview[0].Rows {
+		for _, line := range page.Preview[0].Lines {
+			row := line.Cells
 			if strings.HasPrefix(string(row[len(row)-1]), "Ready") {
 				ready++
 			}
@@ -269,9 +270,9 @@ func liveRow(t *testing.T, tables []view.ImportTable, rubric, what string) []vie
 		if !strings.Contains(string(tb.Rubric), rubric) {
 			continue
 		}
-		for _, row := range tb.Rows {
-			if strings.Contains(string(row[0]), what) {
-				return row
+		for _, line := range tb.Lines {
+			if strings.Contains(string(line.Cells[0]), what) {
+				return line.Cells
 			}
 		}
 	}
@@ -284,10 +285,14 @@ func liveRow(t *testing.T, tables []view.ImportTable, rubric, what string) []vie
 func livePreviewRow(t *testing.T, tables []view.ImportTable, what string) []view.Text {
 	t.Helper()
 	for _, tb := range tables {
-		for _, row := range tb.Rows {
-			for _, cell := range row {
+		for _, line := range tb.Lines {
+			// The component of a stray record is a badge at its title (Им8).
+			if line.Component == view.Text(what) {
+				return line.Cells
+			}
+			for _, cell := range line.Cells {
 				if strings.Contains(string(cell), what) {
-					return row
+					return line.Cells
 				}
 			}
 		}
