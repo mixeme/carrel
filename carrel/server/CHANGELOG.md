@@ -17,6 +17,26 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.317 — 2026-10-16
+
+### Changed
+
+- **The sheets of a collection by their frames** (Кл3, Кл4, Кл7 of the scan
+  of 15.10.2026; `s-profile-5`, `-6`, `-20`): a hint the frame marks comes
+  in pieces (`FormRow.HintRuns`) — the server not answering and the address
+  in mono, «Tasks» in bold — in the frame's words, the address with the
+  name the typed one gives; a rename goes back where its sheet was opened,
+  else to the collection's list, and a deletion too, unless that was the
+  collection itself — then to its section —, not to the settings; a
+  refusal to delete is the sheet's (`CollectionDeleteSheet.Failure`), the
+  name typed kept. The sheet of a new collection has fixtures of a new
+  folder and of the server's refusal.
+
+### For consumers
+
+`FormRow.HintRuns`, `CollectionDeleteSheet.Failure` in C-6; state `folder`
+in C-14.3; fixtures `app-collections-new/folder`, `/refused`.
+
 ## v0.2.316 — 2026-10-16
 
 ### Added

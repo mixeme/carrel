@@ -824,19 +824,29 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	// says so (s-profile-5): a row whose choice would end in an error ten
 	// seconds later is no choice.
 	if len(silent) > 0 && len(eligible) > 0 {
-		verb, who := "are", strings.Join(silent, ", ")+" are"
+		verb := "are"
 		if len(eligible) == 1 {
 			verb = "is"
 		}
-		if len(silent) == 1 {
-			who = silent[0] + " is"
-		}
 		listed := countWord(len(eligible))
-		server.Hint = text(fmt.Sprintf("%s of %s %s listed: %s not answering, and until it does there is nothing to create there.",
-			strings.ToUpper(listed[:1])+listed[1:], countWord(holding), verb, who))
-		if len(silent) > 1 {
-			server.Hint = text(strings.Replace(string(server.Hint), "until it does", "until they do", 1))
+		// The servers' names in mono, as the frame sets them (Кл3).
+		parts := []any{fmt.Sprintf("%s of %s %s listed: ", strings.ToUpper(listed[:1])+listed[1:], countWord(holding), verb)}
+		for i, name := range silent {
+			switch {
+			case i == 0:
+			case i == len(silent)-1:
+				parts = append(parts, " and ")
+			default:
+				parts = append(parts, ", ")
+			}
+			parts = append(parts, monoRun(name))
 		}
+		tail := " is not answering, and until it does there is nothing to create there."
+		if len(silent) > 1 {
+			tail = " are not answering, and until they do there is nothing to create there."
+		}
+		parts = append(parts, tail)
+		server.HintRuns = join(parts...)
 	}
 	// Nothing to choose is no field (s-profile-21): the sheet's message says
 	// why, and Create is off with it.
@@ -860,10 +870,18 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		return sheet
 	}
 	if f.kind != view.KindContact {
-		rows = append(rows, paletteRow(f.colour, errs["colour"],
-			"Written to the server as calendar-color — DAVx5 and Thunderbird will show the same one.")) // s-profile-5 (Кл3)
+		colour := paletteRow(f.colour, errs["colour"], "")
+		colour.HintRuns = join("Written to the server as ", monoRun("calendar-color"), " — DAVx5 and Thunderbird will show the same one.") // s-profile-5 (Кл3)
+		rows = append(rows, colour)
+		// Where a collection of one kind shows, in the frame's words: the
+		// other section, in bold (s-profile-5, Кл3).
+		elsewhere, section := "tasks", "Tasks"
+		if f.kind != view.KindEvent {
+			elsewhere, section = "events", "Calendar"
+		}
 		parts := view.FormRow{Name: "components", Label: "What goes in it", Kind: view.InputCheck, Error: errs["components"],
-			Hint: text("Most servers settle this when the collection is made and do not change it afterwards. The collection appears under Calendar, Tasks or Notes by what it holds, not by where it was made.")}
+			HintRuns: join("Most servers settle this when the collection is made and will not change it afterwards. A collection holding only "+elsewhere+" appears in ",
+				strongRun(section), ", not here — the rail follows what is inside, not where it was made.")}
 		for _, p := range calendarParts {
 			sel := false
 			for _, c := range f.components {
@@ -873,12 +891,21 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		}
 		rows = append(rows, parts)
 	}
-	address := view.FormRow{Name: "address", Label: "Address", Kind: view.InputText, Value: text(f.address), Error: errs["address"], Mono: true,
-		Hint: text("Taken from the name when left empty; yours to change. Other clients and restore by path go by the address, and it does not change later; the name they only show.")}
+	address := view.FormRow{Name: "address", Label: "Address", Kind: view.InputText, Value: text(f.address), Error: errs["address"], Mono: true}
+	said := " — taken from the name, yours to change. Other clients and restore-by-path go by the address; the name they only show."
+	address.HintRuns = join(strings.TrimPrefix(said, " — "))
 	if home := homeFor(chosen, f.kind); home != "" {
 		// The path from the server's root, its start an ellipsis (s-profile-5,
-		// Кл2): the host is the server's name above.
-		address.Hint = text(shortAddress(chosen.Server, strings.TrimSuffix(home, "/")) + "/…/ — " + string(address.Hint))
+		// Кл2): the host is the server's name above. Its last part is the
+		// address typed, or the one the name gives, or an ellipsis.
+		slug := "…"
+		switch {
+		case f.address != "":
+			slug = f.address
+		case strings.TrimSpace(f.name) != "":
+			slug = collectionSlug(f.name)
+		}
+		address.HintRuns = join(monoRun(shortAddress(chosen.Server, strings.TrimSuffix(home, "/"))+"/"+slug+"/"), said)
 	}
 	rows = append(rows, address)
 	sheet.Form = focused(s.plainForm(action, "POST", rows...), "name")
@@ -993,7 +1020,7 @@ func (s *Server) postCollectionRename(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "could not save the subscription", http.StatusInternalServerError)
 			return
 		}
-		s.redirect(w, r, "/app/settings/connections")
+		s.redirect(w, r, afterSheet(r, collectionList(conn, col)))
 		return
 	}
 	if col.Has(view.KindFile) {
@@ -1017,7 +1044,17 @@ func (s *Server) postCollectionRename(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not save the collection", http.StatusInternalServerError)
 		return
 	}
-	s.redirect(w, r, "/app/settings/connections")
+	s.redirect(w, r, afterSheet(r, collectionList(conn, col)))
+}
+
+// afterSheet is where a collection sheet leads once its work is done (Кл4):
+// where it was opened (back), else def — not the settings a sheet opened
+// from a list never came from.
+func afterSheet(r *http.Request, def string) string {
+	if back := sheetBack(r.URL.Query().Get("back")); back != "" {
+		return back
+	}
+	return def
 }
 
 func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connection, col sealed.Collection, name, colour string, errs map[string]view.Text, failure *view.Notice, back string) view.CollectionRenameSheet {

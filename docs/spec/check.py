@@ -130,7 +130,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "tiles","copy","elsewhere","rename","delete","attach","single","in-part",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
-          "issued","mismatch"}
+          "issued","mismatch","folder"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -418,6 +418,8 @@ STATE_FRAME = {
     "app-contact-import/normal": "s-io-3",  # шаг 1 — свой кадр, не s-io-5 (Им20)
     "app-record-delete/normal": "s-agenda-26",
     "admin-reset/normal": "s-admin-13",
+    "app-collections-new/folder": "s-profile-20",
+    "app-collections-new/refused": "s-profile-6",
     "admin-reset/issued": "s-admin-14",
     "admin-reset/refused": "s-admin-16",
     "admin-reset/mismatch": "s-admin-20",

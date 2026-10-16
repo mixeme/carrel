@@ -2014,6 +2014,14 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 	t.Run("app-collections-new", func(t *testing.T) {
 		combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 		app.compare(t, "app-collections-new/normal.json", app.h.do(get("/app/collections/new?kind=event", app.sess)))
+		// Кл7: a new folder on the storage (s-profile-20) — its name is
+		// its address, nothing else to ask —, and the server refusing to
+		// make a calendar (s-profile-6): the sheet stays, the form as left.
+		app.compare(t, "app-collections-new/folder.json", app.h.do(get("/app/collections/new?kind=file&a="+app.realAccount(t, "Documents"), app.sess)))
+		app.servers["nextcloud"].Refuse("MKCALENDAR", http.StatusForbidden, "<D:error xmlns:D=\"DAV:\"><D:need-privileges/></D:error>")
+		app.compare(t, "app-collections-new/refused.json", app.h.do(postForm("/app/collections/new?kind=event", app.sess, url.Values{
+			"account": {app.realAccount(t, "lichnyj")}, "name": {"Поездки"}, "colour": {"#6b4e7a"}, "components": {"VEVENT", "VTODO"},
+		})))
 	})
 }
 

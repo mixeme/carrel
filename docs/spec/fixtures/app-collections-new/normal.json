@@ -45,7 +45,19 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Two of three are listed: baikal is not answering, and until it does there is nothing to create there.",
+            "hint": "",
+            "hintRuns": [
+              {
+                "text": "Two of three are listed: "
+              },
+              {
+                "mark": "mono",
+                "text": "baikal"
+              },
+              {
+                "text": " is not answering, and until it does there is nothing to create there."
+              }
+            ],
             "kind": "select",
             "label": "On which server",
             "name": "account",
@@ -83,7 +95,19 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Written to the server as calendar-color — DAVx5 and Thunderbird will show the same one.",
+            "hint": "",
+            "hintRuns": [
+              {
+                "text": "Written to the server as "
+              },
+              {
+                "mark": "mono",
+                "text": "calendar-color"
+              },
+              {
+                "text": " — DAVx5 and Thunderbird will show the same one."
+              }
+            ],
             "kind": "radio",
             "label": "Colour",
             "name": "colour",
@@ -127,7 +151,19 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Most servers settle this when the collection is made and do not change it afterwards. The collection appears under Calendar, Tasks or Notes by what it holds, not by where it was made.",
+            "hint": "",
+            "hintRuns": [
+              {
+                "text": "Most servers settle this when the collection is made and will not change it afterwards. A collection holding only tasks appears in "
+              },
+              {
+                "mark": "strong",
+                "text": "Tasks"
+              },
+              {
+                "text": ", not here — the rail follows what is inside, not where it was made."
+              }
+            ],
             "kind": "check",
             "label": "What goes in it",
             "name": "components",
@@ -156,7 +192,16 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "…/alice/calendars/…/ — Taken from the name when left empty; yours to change. Other clients and restore by path go by the address, and it does not change later; the name they only show.",
+            "hint": "",
+            "hintRuns": [
+              {
+                "mark": "mono",
+                "text": "…/alice/calendars/…/"
+              },
+              {
+                "text": " — taken from the name, yours to change. Other clients and restore-by-path go by the address; the name they only show."
+              }
+            ],
             "kind": "text",
             "label": "Address",
             "mono": true,

@@ -215,11 +215,17 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 		err = client.Delete(r.Context(), col.Path, "")
 	}
 	if err != nil && !dav.IsStatus(err, http.StatusNotFound) {
-		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, davRefusal(refusalText{
+		// The refusal is the sheet's (Кл4, as s-profile-6 of a new one): the
+		// person stays where they were, the name they typed in its field.
+		count := s.countMembers(r.Context(), conn, col)
+		sheet := s.collectionDeleteSheet(sess, conn, col, count, typed, "", sheetBack(r.URL.Query().Get("back")))
+		sheet.Failure = davRefusal(refusalText{
 			title:     "The server would not delete it",
 			forbidden: "This account can read here but not delete",
 			nothing:   label + " is as it was.",
-		}, conn, "DELETE", col.Path, err)))
+		}, conn, "DELETE", col.Path, err)
+		sheet.Under = s.collectionUnder(r)
+		s.writePage(w, r, http.StatusOK, sheet)
 		return
 	}
 	// Its links, and the links of its records, open nothing now (Б41).
@@ -231,7 +237,13 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 		}))
 		return
 	}
-	s.redirect(w, r, "/app/settings/connections")
+	// Where it was opened, unless that was the collection itself: it is no
+	// more, and its section is what is left (Кл4).
+	where := afterSheet(r, "/app/settings/connections")
+	if gone := collectionList(conn, col); where == gone || strings.HasPrefix(where, gone+"/") {
+		where = newCollectionDefault(col.Kinds[0])
+	}
+	s.redirect(w, r, where)
 }
 
 // collectionReferences is what of the person points at the collection: the

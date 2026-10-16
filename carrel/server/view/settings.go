@@ -48,12 +48,15 @@ type FormRow struct {
 	// своим именем («related.add»), подсказкой («Title or UID»), доступным
 	// именем («Add a link») и адресом подсказок (Suggest); стоит в поле
 	// после выбранных, есть ли они или нет (s-tasks-3, -14). nil — строки нет
-	Add      *FormRow `json:"add"`
-	Hint     Text     `json:"hint"`
-	Error    Text     `json:"error"`
-	Extra    *Action  `json:"extra"` // кнопка, принадлежащая полю
-	ReadOnly bool     `json:"readOnly"`
-	Required bool     `json:"required"`
+	Add  *FormRow `json:"add"`
+	Hint Text     `json:"hint"`
+	// HintRuns — Hint кусками, когда кадр выделяет часть: имя сервера и
+	// адрес моноширинно, «Tasks» жирно (s-profile-5, Кл3); Hint тогда пуст
+	HintRuns Runs    `json:"hintRuns,omitempty"`
+	Error    Text    `json:"error"`
+	Extra    *Action `json:"extra"` // кнопка, принадлежащая полю
+	ReadOnly bool    `json:"readOnly"`
+	Required bool    `json:"required"`
 	// Образец в пустом поле, как его рисует кадр: «DD.MM.YYYY» у дня
 	// рождения (s-contacts-4); у прочих полей пусто
 	Placeholder Text `json:"placeholder,omitempty"`

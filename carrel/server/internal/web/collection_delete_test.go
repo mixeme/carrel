@@ -168,10 +168,11 @@ func TestCollectionDeleteNameInAnyUnicodeForm(t *testing.T) {
 func TestCollectionDeleteRefusedKeepsIt(t *testing.T) {
 	f := calendarFixture(t, nil, "report.ics", workTask)
 	f.srv.Refuse(http.MethodDelete, http.StatusForbidden, "no")
-	page := decode[view.ConnectionsPage](t, f.h.do(confirmDelete(f, "Work")))
-	n := noticeTitled(page.Notices, "This account can read here but not delete")
-	if n == nil || n.Details == nil || !strings.Contains(string(n.Details.Summary), "DELETE") {
-		t.Fatalf("notices = %+v", page.Notices)
+	// The refusal is the sheet's (Кл4): the person stays where they were.
+	sheet := decode[view.CollectionDeleteSheet](t, f.h.do(confirmDelete(f, "Work")))
+	n := sheet.Failure
+	if n == nil || n.Title != "This account can read here but not delete" || n.Details == nil || !strings.Contains(string(n.Details.Summary), "DELETE") {
+		t.Fatalf("failure = %+v", n)
 	}
 	if _, ok := catalogOf(t, f).Collection(f.id, f.col); !ok {
 		t.Error("the catalog lost it")
@@ -333,5 +334,32 @@ func TestCollectionDeleteSheetCaptionCases(t *testing.T) {
 	}
 	if !slices.Contains(refs, oneDevice) {
 		t.Errorf("references = %q, want %q", refs, oneDevice)
+	}
+}
+
+// Кл4 of the scan of collections: a sheet opened from a list goes back
+// there once its work is done — a rename to where it was opened, else to
+// the collection's list; a deletion to where it was opened unless that was
+// the collection itself, then to its section — not to the settings it was
+// never opened from.
+func TestCollectionSheetsGoBackWhereTheyCameFrom(t *testing.T) {
+	f := calendarFixture(t, nil, "report.ics", workTask)
+	q := url.Values{"a": {f.id}, "c": {f.col}}
+	from := "/app/tasks"
+	q.Set("back", from)
+	rec := f.h.do(postForm("/app/collections/rename?"+q.Encode(), f.sess, url.Values{"name": {"Работа"}}))
+	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != from {
+		t.Errorf("rename: %d → %q, want %q", rec.Code, rec.Header().Get("Location"), from)
+	}
+	q.Del("back")
+	rec = f.h.do(postForm("/app/collections/rename?"+q.Encode(), f.sess, url.Values{"name": {"Работа"}}))
+	if loc := rec.Header().Get("Location"); rec.Code != http.StatusSeeOther || strings.Contains(loc, "/settings/") {
+		t.Errorf("rename without back: %d → %q, want the collection's list", rec.Code, loc)
+	}
+	// Opened from its own list, which goes with it.
+	q.Set("back", f.path("calendar"))
+	rec = f.h.do(postForm("/app/collections/delete?"+q.Encode(), f.sess, url.Values{"name": {"Работа"}}))
+	if l := rec.Header().Get("Location"); rec.Code != http.StatusSeeOther || l == q.Get("back") || strings.Contains(l, "/settings/") {
+		t.Errorf("delete from its own list: %d → %q", rec.Code, l)
 	}
 }

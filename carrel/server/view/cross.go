@@ -519,6 +519,9 @@ type CollectionDeleteSheet struct {
 	// (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у
 	// фрагмента
 	Under *Under `json:"under"`
+	// Failure — отказ сервера удалить (Кл4): лист остаётся, набранное имя в
+	// поле; nil — отказа не было
+	Failure *Notice `json:"failure"`
 }
 
 // ConnectionRemoveSheet — лист «Disconnect»: подключение уходит из Carrel, на

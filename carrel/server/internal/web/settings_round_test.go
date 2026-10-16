@@ -168,14 +168,19 @@ func TestNewCollectionListsOnlyServersThatAnswer(t *testing.T) {
 	}
 	row, ids := servers()
 	want := strings.Replace(strings.Replace(frameText(hint[1]), "Two of three are", "One of two is", 1), "baikal", "office", 1)
-	if !equalStrings(ids, []string{f.id}) || string(row.Hint) != want {
-		t.Errorf("silent office: options %v, hint %q\nwant %v, %q", ids, row.Hint, []string{f.id}, want)
+	// In pieces, the server's name in mono (Кл3): read as the frame's words.
+	said := ""
+	for _, r := range row.HintRuns {
+		said += string(r.Text)
+	}
+	if !equalStrings(ids, []string{f.id}) || said != want || len(row.HintRuns) != 3 || row.HintRuns[1].Mark != view.RunMono {
+		t.Errorf("silent office: options %v, hint %+v\nwant %v, %q", ids, row.HintRuns, []string{f.id}, want)
 	}
 
 	office.Accept("REPORT")
 	combined(t, f.h, f.sess, "/app/contacts", contactsPoll)
-	if row, ids = servers(); len(ids) != 2 || row.Hint != "" {
-		t.Errorf("office answers again: options %v, hint %q", ids, row.Hint)
+	if row, ids = servers(); len(ids) != 2 || row.Hint != "" || len(row.HintRuns) != 0 {
+		t.Errorf("office answers again: options %v, hint %q %+v", ids, row.Hint, row.HintRuns)
 	}
 }
 

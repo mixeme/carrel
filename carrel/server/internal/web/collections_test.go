@@ -49,8 +49,10 @@ func TestNewCalendarTakesItsAddressFromTheName(t *testing.T) {
 	if n := len(rowNamed(t, sheet.Form, "colour").Options); n != 6 {
 		t.Errorf("palette = %d tones, want the six of C-10", n)
 	}
-	if hint := string(rowNamed(t, sheet.Form, "address").Hint); !strings.Contains(hint, davtest.CalendarHome) {
-		t.Errorf("address hint = %q, want the home it goes into", hint)
+	// The hint in pieces since Кл3, the address in mono.
+	address := rowNamed(t, sheet.Form, "address")
+	if len(address.HintRuns) == 0 || address.HintRuns[0].Mark != view.RunMono || !strings.Contains(string(address.HintRuns[0].Text), davtest.CalendarHome) {
+		t.Errorf("address hint = %+v, want the home it goes into, in mono", address.HintRuns)
 	}
 
 	form := url.Values{"account": {f.id}, "name": {"Дни рождения"}, "colour": {"#6B4E7A"}, "components": {"VTODO", "VEVENT"}}

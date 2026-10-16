@@ -33,6 +33,7 @@
     "method": "GET"
   },
   "exportNote": "1 event, one file, straight to you",
+  "failure": null,
   "form": {
     "action": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
     "actions": [],
