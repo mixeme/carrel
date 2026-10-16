@@ -33,6 +33,7 @@ var (
 	frameFootDim  = regexp.MustCompile(`(?s)<span class="tc-dim[^"]*tc-dim--wrap">(.*?)</span>`)
 	frameSheetT   = regexp.MustCompile(`(?s)<b class="tc-sheet__title">(.*?)</b>`)
 	frameSheetF   = regexp.MustCompile(`(?s)<div class="tc-sheet__foot">(.*?)</div>`)
+	frameMono     = regexp.MustCompile(`(?s)<span class="tc-mono">(.*?)</span>`)
 )
 
 func frameAll(re *regexp.Regexp, s string, group int) []string {
@@ -61,6 +62,9 @@ type frameEmail struct {
 	label, value, change, hint string
 	badge, badgeRole           string
 	msg, msgRole, button       string
+	// mono is what the message sets in mono: the addresses (account-9, -10;
+	// Нс10)
+	mono []string
 }
 
 func readFrameEmail(t *testing.T, id string) frameEmail {
@@ -83,6 +87,7 @@ func readFrameEmail(t *testing.T, id string) frameEmail {
 		// An address is set in mono inside the sentence: its closing tag is
 		// not a word break («new@example.org: until…», account-10).
 		f.msgRole, f.msg, f.button = m[1], frameText(strings.ReplaceAll(m[2], "</span>", "")), frameText(m[3])
+		f.mono = frameAll(frameMono, m[2], 1)
 	}
 	if f.label == "" || f.value == "" || f.hint == "" {
 		t.Fatalf("%s: the Email block did not read: %+v", id, f)
@@ -126,8 +131,26 @@ func checkEmailBlock(t *testing.T, id string, page view.AccountPage, state view.
 			t.Errorf("%s: no message, the frame draws %q", id, want.msg)
 			break
 		}
-		if string(got.Message.Body) != want.msg || got.Message.Role != view.NoticeRole(want.msgRole) || got.Message.Title != "" {
-			t.Errorf("%s: message = %q (%s, title %q), the frame draws %q (%s)", id, got.Message.Body, got.Message.Role, got.Message.Title, want.msg, want.msgRole)
+		// The message is said in runs when the frame marks a piece of it,
+		// and then its Body is empty (C-6 Notice.Runs).
+		body := string(got.Message.Body)
+		if len(got.Message.Runs) > 0 {
+			if body != "" {
+				t.Errorf("%s: the message has both a Body %q and Runs", id, body)
+			}
+			body = runsText(got.Message.Runs)
+		}
+		var mono []string
+		for _, r := range got.Message.Runs {
+			if r.Mark == view.RunMono {
+				mono = append(mono, string(r.Text))
+			}
+		}
+		if strings.Join(mono, "|") != strings.Join(want.mono, "|") {
+			t.Errorf("%s: mono in the message = %q, the frame sets %q", id, mono, want.mono)
+		}
+		if body != want.msg || got.Message.Role != view.NoticeRole(want.msgRole) || got.Message.Title != "" {
+			t.Errorf("%s: message = %q (%s, title %q), the frame draws %q (%s)", id, body, got.Message.Role, got.Message.Title, want.msg, want.msgRole)
 		}
 		if len(got.Message.Actions) != 1 || string(got.Message.Actions[0].Label) != want.button {
 			t.Errorf("%s: message buttons = %v, the frame draws %q", id, labels(got.Message.Actions), want.button)
@@ -245,7 +268,7 @@ func TestAccountEmailBlockIsTheFrames(t *testing.T) {
 	setDay(t, h, "2026-02-12 11:42")
 	h.do(postForm(actionHref(t, page.Email.Message.Actions, "account.confirm"), mix, url.Values{}))
 	if today := decode[view.AccountPage](t, h.do(get("/app/settings/account", mix))); today.Email.SentAt != "11:42" ||
-		today.Email.Message == nil || !strings.HasSuffix(string(today.Email.Message.Body), " at 11:42.") {
+		today.Email.Message == nil || !strings.HasSuffix(runsText(today.Email.Message.Runs), " at 11:42.") {
 		t.Errorf("sent today = %q, %+v", today.Email.SentAt, today.Email.Message)
 	}
 	setDay(t, h, "2026-02-13 09:00")

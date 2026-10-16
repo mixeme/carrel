@@ -685,6 +685,7 @@ type Notice struct {
     Role    NoticeRole // C-8
     Title   Text
     Body    Text
+    Runs    Runs        // Body кусками, когда кадр выделяет часть: адреса моноширинно в сообщении Email (account-9, -10); Body тогда пуст; нет — поля нет в JSON
     Details *Diagnostic // технический блок; nil — его нет, C-9
     Actions []Action    // кнопки уведомления: «New calendar» у календаря, в который сервер взял не всё (s-agenda-11, SV-52)
 }

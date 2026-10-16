@@ -35,9 +35,21 @@
           "method": "POST"
         }
       ],
-      "body": "Nobody can reply to letters you send until you open the link we sent to mix@example.org on 9 August at 11:42.",
+      "body": "",
       "details": null,
       "role": "alert",
+      "runs": [
+        {
+          "text": "Nobody can reply to letters you send until you open the link we sent to "
+        },
+        {
+          "mark": "mono",
+          "text": "mix@example.org"
+        },
+        {
+          "text": " on 9 August at 11:42."
+        }
+      ],
       "title": ""
     },
     "pending": "",

@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.296 — 2026-10-16
+
+### Changed
+
+- **The Email message sets its addresses in mono** (Нс10 of the scan of
+  15.10.2026; `account-9`, `-10`): `Notice.Runs` — the body in pieces when
+  the frame marks a part of it, `Body` then empty. «…the link we sent to
+  ‹mix@example.org› on …» and «No link has gone to ‹new@example.org›: until
+  one is opened, ‹mix@example.org› stays in use.»; the message without an
+  address (`s-mail-9`) stays `Body`. Every other notice is as it was: the
+  field is left out of the JSON when empty.
+
+### For consumers
+
+`Notice.Runs` in C-6; fixtures `app-settings-account/email-sent`,
+`email-unsent` re-shot. The client draws it from `v0.4.47`.
+
 ## v0.2.295 — 2026-10-16
 
 ### Added

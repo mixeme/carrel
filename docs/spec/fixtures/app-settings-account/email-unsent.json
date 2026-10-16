@@ -38,9 +38,28 @@
           "method": "POST"
         }
       ],
-      "body": "No link has gone to new@example.org: until one is opened, mix@example.org stays in use.",
+      "body": "",
       "details": null,
       "role": "alert",
+      "runs": [
+        {
+          "text": "No link has gone to "
+        },
+        {
+          "mark": "mono",
+          "text": "new@example.org"
+        },
+        {
+          "text": ": until one is opened, "
+        },
+        {
+          "mark": "mono",
+          "text": "mix@example.org"
+        },
+        {
+          "text": " stays in use."
+        }
+      ],
       "title": ""
     },
     "pending": "new@example.org",

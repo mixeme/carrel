@@ -258,7 +258,7 @@ func (s *Server) emailStatus(u *store.User, tf timeFmt) view.EmailStatus {
 				// The frame draws the badge alone (to-typecase task 21).
 				send := s.confirmAction("Send again")
 				st.Message = &view.Notice{Role: view.NoticeAlert, Actions: []view.Action{send},
-					Body: text("No link has gone to " + u.PendingEmail + ": until one is opened, " + u.Email + " stays in use.")}
+					Runs: join("No link has gone to ", monoRun(u.PendingEmail), ": until one is opened, ", monoRun(u.Email), " stays in use.")}
 			}
 		}
 		return st
@@ -268,13 +268,15 @@ func (s *Server) emailStatus(u *store.User, tf timeFmt) view.EmailStatus {
 	}
 	send := s.confirmAction("Send confirmation")
 	// The message says the consequence, not the status (s-mail-9).
-	body := "Nobody can reply to letters you send: until this address is confirmed, they go out without a reply address and say so at the foot."
 	st.State = view.EmailUnconfirmed
+	st.Message = &view.Notice{Role: view.NoticeAlert, Actions: []view.Action{send},
+		Body: "Nobody can reply to letters you send: until this address is confirmed, they go out without a reply address and say so at the foot."}
 	if st.SentTo != "" {
+		// The address in mono, as the frame sets it (account-9; Нс10).
 		st.State, send.Label = view.EmailSent, "Send again"
-		body = "Nobody can reply to letters you send until you open the link we sent to " + string(st.SentTo) + " " + sentPhrase + "."
+		st.Message = &view.Notice{Role: view.NoticeAlert, Actions: []view.Action{send},
+			Runs: join("Nobody can reply to letters you send until you open the link we sent to ", monoRun(string(st.SentTo)), " "+sentPhrase+".")}
 	}
-	st.Message = &view.Notice{Role: view.NoticeAlert, Body: text(body), Actions: []view.Action{send}}
 	return st
 }
 

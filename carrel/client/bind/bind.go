@@ -317,7 +317,8 @@ func Tone(r view.NoticeRole) w.MsgTone {
 }
 
 // Msg is a notice as a message (C-6.2 Notice): its tone by its role, its
-// title bold and its body after it, a space between them. The spacing is the
+// title bold and its body after it, a space between them; a body in pieces
+// (Runs) keeps each piece's face. The spacing is the
 // frame's (space). The notice's actions and its technical block are drawn by
 // the screen where its frame draws them; a notice that has them is not all
 // here.
@@ -325,12 +326,15 @@ func Msg(n view.Notice, space w.MsgSpace) w.Msg {
 	var parts []w.MsgPart
 	if n.Title != "" {
 		parts = append(parts, w.Strong(n.Title))
-		if n.Body != "" {
+		if n.Body != "" || len(n.Runs) > 0 {
 			parts = append(parts, w.Text(" "))
 		}
 	}
 	if n.Body != "" {
 		parts = append(parts, w.Text(n.Body))
+	}
+	for _, p := range Inlines(n.Runs) {
+		parts = append(parts, p.(w.MsgPart))
 	}
 	return w.Msg{Parts: parts, Tone: Tone(n.Role), Space: space}
 }

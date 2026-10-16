@@ -209,6 +209,12 @@ func TestMsg(t *testing.T) {
 			view.Notice{Role: view.NoticeInfo, Title: "Rewritten in 12 records.", Body: "Nothing else changed."},
 			w.Msg{Parts: []w.MsgPart{w.Strong("Rewritten in 12 records."), w.Text(" "), w.Text("Nothing else changed.")}, Space: w.MsgFlushBottom12},
 		},
+		// The body in pieces (C-6.2 Notice.Runs): the addresses in mono
+		// (account-10).
+		"a body in runs": {
+			view.Notice{Role: view.NoticeAlert, Runs: view.Runs{{Text: "No link has gone to "}, {Text: "new@example.org", Mark: view.RunMono}, {Text: ": until one is opened, "}, {Text: "mix@example.org", Mark: view.RunMono}, {Text: " stays in use."}}},
+			w.Msg{Parts: []w.MsgPart{w.Text("No link has gone to "), w.Mono{Text: "new@example.org"}, w.Text(": until one is opened, "), w.Mono{Text: "mix@example.org"}, w.Text(" stays in use.")}, Tone: w.MsgAlert, Space: w.MsgFlushBottom12},
+		},
 		"a title alone": {
 			view.Notice{Role: view.NoticeAccent, Title: "Saved."},
 			w.Msg{Parts: []w.MsgPart{w.Strong("Saved.")}, Tone: w.MsgAccent, Space: w.MsgFlushBottom12},

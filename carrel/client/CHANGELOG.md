@@ -4,6 +4,13 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.47 — 2026-10-16
+
+Server `v0.2.296`. A message keeps the faces of its body when the server
+says it in pieces (`Notice.Runs`): the addresses of the Email message are
+monospaced (`account-9`, `-10`). `bind.Msg` draws the pieces after the
+title, as it draws `Body`.
+
 ## v0.4.46 — 2026-10-16
 
 Server `v0.2.278`. A conflict card is on only at the side chosen
