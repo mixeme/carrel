@@ -315,6 +315,23 @@ func SubmitForm(a view.Action, form string) w.Button {
 	return b
 }
 
+// SavedIn is where a record is saved, in the head of its edit left of
+// Cancel (Typecase 434ac87, note 72): the collection's choice (Marks) as a
+// field with no label — the row's name is the choice's title —, its menu
+// 290 wide under it; it stands outside the edit's form, so each radio names
+// it (MenuItem.Of, Typecase 96b9973, note 76).
+func SavedIn(r view.FormRow, ro w.Badge, form string) w.Field {
+	d := Marks(r, ro)
+	d.Menu.Width, d.Menu.Pop = w.MenuWidth290, w.MenuUnder
+	for i, p := range d.Menu.Items {
+		if it, ok := p.(w.MenuItem); ok {
+			it.Of = form
+			d.Menu.Items[i] = it
+		}
+	}
+	return w.Field{Parts: []w.FieldPart{d}, Width: w.FieldMD}
+}
+
 // Marks is a choice of a collection (C-6.8 InputSelect whose options carry
 // their colour: a note's notebook, s-notes-15, -20; Typecase's task 103) as a
 // choice that opens its menu: the chosen one's words after its mark; the

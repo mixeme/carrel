@@ -52,7 +52,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e14"
+            "value": "e9"
           },
           {
             "add": null,
@@ -108,7 +108,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e14\u0026op=done",
+          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e9\u0026op=done",
           "id": "task.done",
           "label": "Mark done",
           "method": "POST"
@@ -119,7 +119,7 @@
               "csrf": "csrf",
               "enabled": true,
               "file": "file",
-              "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e14\u0026op=attach",
+              "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e9\u0026op=attach",
               "icon": "i-upload",
               "id": "attach.add",
               "label": "From this computer",
@@ -127,7 +127,7 @@
             },
             {
               "enabled": true,
-              "href": "/app/files/picker?a=a-nc-home\u0026c=dela\u0026etag=e14\u0026for=attach\u0026k=tasks\u0026uid=aa10-77bc-0e31",
+              "href": "/app/files/picker?a=a-nc-home\u0026c=dela\u0026etag=e9\u0026for=attach\u0026k=tasks\u0026uid=aa10-77bc-0e31",
               "icon": "i-file",
               "id": "attach.files",
               "label": "From Files",
@@ -138,7 +138,7 @@
           "csrf": "csrf",
           "enabled": true,
           "file": "file",
-          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e14\u0026op=attach",
+          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e9\u0026op=attach",
           "icon": "i-clip",
           "id": "attach.add",
           "label": "Attach",
@@ -166,7 +166,7 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e14",
+          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e9",
           "icon": "i-trash",
           "id": "record.delete",
           "label": "Delete task",

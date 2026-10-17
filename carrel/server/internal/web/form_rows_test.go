@@ -50,6 +50,9 @@ func shownForm(f view.Form) (fields, adds []string) {
 			item := string(set.Legend) + " / " + string(row.Label)
 			switch {
 			case row.Kind == view.InputHidden, row.Kind == view.InputRemove:
+			case row.Name == "notebook":
+				// Where the record is saved: drawn in the head, left of Cancel,
+				// with no label (Typecase's note 72) — not a field of the body.
 			case row.Kind == view.InputAdd:
 				adds = append(adds, item)
 			case !slices.Contains(fields, item):

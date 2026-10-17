@@ -201,6 +201,11 @@ func TestNoteEditIsThePage(t *testing.T) {
 			if r.Name == "url" && r.Value == "" && r.Placeholder != "optional" {
 				t.Errorf("%s: the empty link's sample = %q, want «optional»", req.what, r.Placeholder)
 			}
+			if r.Name == "notebook" {
+				// The Notebook is drawn in the bar, right of Cancel
+				// (Typecase's note 72): not a field under the title.
+				continue
+			}
 			got = append(got, string(r.Label))
 		}
 		if !equalStrings(got, want) {

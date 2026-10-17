@@ -96,6 +96,13 @@ func edit(p *view.NotePage) []w.MainPart {
 			items = append(items, bind.Button(a, ""))
 		}
 	}
+	// The notebook it is saved in, right of Cancel (Typecase 434ac87, note
+	// 72): no longer a field under the title.
+	for _, r := range p.Doc.Fields {
+		if r.Name == notebook {
+			items = append(items, bind.SavedIn(r, ro, formEdit))
+		}
+	}
 	// The client's buttons of the markup, «⋯», Auto-save, the draft in this
 	// window, the width and Focus are the page's script's: an edit's bar draws
 	// none of them without it (Docbar.Edit).
@@ -159,6 +166,9 @@ func edit(p *view.NotePage) []w.MainPart {
 	}
 	fields := w.DocFields{}
 	for _, r := range p.Doc.Fields {
+		if r.Name == notebook {
+			continue // in the bar
+		}
 		fields.Items = append(fields.Items, field(r))
 	}
 	doc.Items = []w.DocPart{title, fields, body}
@@ -189,10 +199,6 @@ func blank(p *view.NotePage) bool {
 func field(r view.FormRow) w.Field {
 	f := w.Field{Label: string(r.Label), Width: widths[r.Name]}
 	switch {
-	case r.Name == notebook:
-		d := bind.Marks(r, ro)
-		d.Menu.Width, d.Menu.Pop = w.MenuWidth290, w.MenuUnder
-		f.Parts = []w.FieldPart{d}
 	case r.Kind == view.InputSelect && r.Suggest != "":
 		f.Parts = append([]w.FieldPart{bind.Related(r)}, bind.Hint(r)...)
 	default:

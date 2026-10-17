@@ -101,7 +101,7 @@ func TestEventByItsFrames(t *testing.T) {
 	for _, d := range agenda.Days {
 		for _, r := range d.Rows {
 			if r.UID == "8f1c-4a02-b7d3" {
-				open = r.Href
+				open = recordHref(r.Href)
 			}
 		}
 	}
@@ -121,7 +121,7 @@ func TestEventByItsFrames(t *testing.T) {
 		for _, r := range day.Rows {
 			if r.On {
 				on++
-				if r.Href != open {
+				if recordHref(r.Href) != open {
 					t.Errorf("row %s is on, the panel is %s", r.Href, open)
 				}
 			}

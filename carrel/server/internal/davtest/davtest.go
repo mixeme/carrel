@@ -53,6 +53,11 @@ type Server struct {
 	// wall clock; a fixture freezes it so «changed» holds tomorrow.
 	Clock func() time.Time
 
+	// Ranked are collection paths the home lists first, in this order — a
+	// set's own order, as a real server keeps the order it was given —, the
+	// others after them by path.
+	Ranked []string
+
 	// Drop names properties the server silently discards on PUT, in every
 	// component, the way lossy servers do (S-7.1). Without it a PUT is kept
 	// byte for byte as sent, as Radicale and Baikal keep it; with it the object
@@ -956,7 +961,7 @@ func (s *Server) homeProps(w http.ResponseWriter, home string) {
 			paths = append(paths, p)
 		}
 	}
-	sort.Strings(paths)
+	sort.SliceStable(paths, func(i, j int) bool { return s.listedBefore(paths[i], paths[j]) })
 	var b strings.Builder
 	for _, p := range paths {
 		readOnly := s.calendars[p].ReadOnly || s.books[p].ReadOnly
@@ -1366,6 +1371,19 @@ func escape(s string) string {
 	return b.String()
 }
 
+// listedBefore is the order a home lists its collections in: the Ranked
+// ones first, in their order, the others after them by path.
+func (s *Server) listedBefore(a, b string) bool {
+	ra, rb := slices.Index(s.Ranked, a), slices.Index(s.Ranked, b)
+	switch {
+	case ra >= 0 && rb >= 0:
+		return ra < rb
+	case ra >= 0 || rb >= 0:
+		return ra >= 0
+	}
+	return a < b
+}
+
 type calBackend struct{ s *Server }
 
 func (b calBackend) CurrentUserPrincipal(context.Context) (string, error) { return Principal, nil }
@@ -1383,7 +1401,7 @@ func (b calBackend) ListCalendars(context.Context) ([]caldav.Calendar, error) {
 	for _, c := range b.s.calendars {
 		out = append(out, c)
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Path < out[j].Path })
+	sort.Slice(out, func(i, j int) bool { return b.s.listedBefore(out[i].Path, out[j].Path) })
 	return out, nil
 }
 
@@ -1582,7 +1600,7 @@ func (b cardBackend) ListAddressBooks(context.Context) ([]carddav.AddressBook, e
 	for _, ab := range b.s.books {
 		out = append(out, ab)
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Path < out[j].Path })
+	sort.Slice(out, func(i, j int) bool { return b.s.listedBefore(out[i].Path, out[j].Path) })
 	return out, nil
 }
 

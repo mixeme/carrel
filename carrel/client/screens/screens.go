@@ -109,7 +109,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.CopiesSheet) },
-		Frames: []string{"s-contacts-32", "s-tasks-16"},
+		Frames: []string{"s-contacts-35", "s-tasks-19"},
 		Draw: func(model any) Root {
 			p := model.(*view.CopiesSheet)
 			return over(p.Under, copies.Sheet(p))
@@ -119,7 +119,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.AskSheet) },
-		Frames: []string{"s-agenda-22", "s-agenda-23", "s-agenda-24"},
+		Frames: []string{"s-agenda-27", "s-agenda-23", "s-agenda-28"},
 		Draw: func(model any) Root {
 			p := model.(*view.AskSheet)
 			return over(p.Under, ask.Sheet(p))

@@ -166,7 +166,7 @@ func TestCombinedContactsFollowTheTicks(t *testing.T) {
 		t.Fatalf("rows = %s", got)
 	}
 	ann := page.Groups[0].Rows[1]
-	if ann.Href != teamPath+"/ann" || ann.Colour == "" {
+	if recordHref(ann.Href) != teamPath+"/ann" || ann.Colour == "" {
 		t.Errorf("ann = %+v", ann)
 	}
 	if page.Bar.Total == nil || *page.Bar.Total != 3 || len(page.Poll.Sources) != 2 || page.Poll.Running {
@@ -279,7 +279,7 @@ func TestCombinedAgendaTasksAndNotesMerge(t *testing.T) {
 	tasks := combined(t, f.h, f.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
 	if len(tasks.Groups) != 1 || len(tasks.Groups[0].Rows) != 2 ||
 		tasks.Groups[0].Rows[0].Summary != "Groceries" || !strings.HasSuffix(string(tasks.Groups[0].Rows[0].Stamp), " · Home") ||
-		tasks.Groups[0].Rows[1].Href != "/app/tasks/"+f.id+"/"+work+"/report" {
+		recordHref(tasks.Groups[0].Rows[1].Href) != "/app/tasks/"+f.id+"/"+work+"/report" {
 		t.Errorf("tasks = %+v", tasks.Groups)
 	}
 	if actionHref(t, tasks.Bar.Segments, "tasks.done") != "/app/tasks?show=done" {

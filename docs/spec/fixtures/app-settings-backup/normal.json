@@ -93,24 +93,14 @@
             "name": "src",
             "options": [
               {
-                "label": "nextcloud · Дела",
-                "selected": false,
-                "value": "a-nc-home|/alice/calendars/dela/"
-              },
-              {
-                "label": "nextcloud · Дневник",
-                "selected": false,
-                "value": "a-nc-home|/alice/calendars/dnevnik/"
-              },
-              {
-                "label": "nextcloud · Дни рождения",
-                "selected": false,
-                "value": "a-nc-home|/alice/calendars/dni-rozhdeniya/"
-              },
-              {
                 "label": "nextcloud · Личный",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/lichnyj/"
+              },
+              {
+                "label": "nextcloud · Дела",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/dela/"
               },
               {
                 "label": "nextcloud · Работа",
@@ -118,9 +108,19 @@
                 "value": "a-nc-home|/alice/calendars/rabota/"
               },
               {
+                "label": "nextcloud · Дни рождения",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/dni-rozhdeniya/"
+              },
+              {
                 "label": "nextcloud · Записи",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/zapisi/"
+              },
+              {
+                "label": "nextcloud · Дневник",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/dnevnik/"
               },
               {
                 "label": "nextcloud · Общие с семьёй",
@@ -128,14 +128,14 @@
                 "value": "a-nc-home|/alice/calendars/zapiski-obshchie/"
               },
               {
-                "label": "nextcloud · Архив",
-                "selected": false,
-                "value": "a-nc-home|/alice/contacts/arhiv/"
-              },
-              {
                 "label": "nextcloud · Контакты",
                 "selected": false,
                 "value": "a-nc-home|/alice/contacts/kontakty/"
+              },
+              {
+                "label": "nextcloud · Архив",
+                "selected": false,
+                "value": "a-nc-home|/alice/contacts/arhiv/"
               },
               {
                 "label": "nextcloud · Files",
@@ -143,14 +143,14 @@
                 "value": "a-nc-home|/alice/files/Files/"
               },
               {
-                "label": "radicale · vps · Дежурства",
-                "selected": false,
-                "value": "a-rad-vps|/alice/calendars/dezhurstva/"
-              },
-              {
                 "label": "radicale · vps · Проекты",
                 "selected": false,
                 "value": "a-rad-vps|/alice/calendars/proekty/"
+              },
+              {
+                "label": "radicale · vps · Дежурства",
+                "selected": false,
+                "value": "a-rad-vps|/alice/calendars/dezhurstva/"
               },
               {
                 "label": "radicale · vps · Команда",

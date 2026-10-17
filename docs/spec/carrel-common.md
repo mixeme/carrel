@@ -411,6 +411,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage`; POST: `op=combine` («Write this combination», форма `ConflictPage.Form` с `choice.<n>=mine` или `theirs` на строку — `ConflictRow.Name`; строка без поля — выбранное заранее, `ConflictRow.Choice`), `op=mine`, `op=theirs`, `op=cancel`; у всех, кроме `cancel`, `etag=` — версия, против которой показан выбор: сервер ушёл дальше — страница строится заново |
 | `/app/{kind}/{account}/{col}/{uid}/move` | GET, POST | вход | лист | `MoveSheet`; `?back=` — страница, откуда лист открыт (без него — `Referer`): страницей лист несёт её экраном под собой (`Under`), Cancel ведёт на неё, варианты листа несут её дальше; POST — форма листа (`to` — «подключение/коллекция», `warned`) или прежние `to` и `into` |
 | `/app/{kind}/{account}/{col}/{uid}/copies` | GET | вход | лист, редирект | `CopiesSheet` «Which copy to edit?» (s-contacts-32): Edit записи связанной группы; у записи без группы — редирект на `…/edit`. `?back=` — страница, откуда открыт (без него — `Referer`): лист стоит над ней, Cancel ведёт на неё. Форма листа — GET `…/edit?copy=…`: редирект на форму выбранной копии |
+| `/app/{kind}/linked/{uid}/copies` | GET | вход | лист | `CopiesSheet` связанной группы по UID любой её копии (s-contacts-35 — над объединённой книгой): тот же лист, что у адреса этой копии; UID вне группы рода — 404 |
 | `/app/tasks/{account}/{col}/{uid}/done` | GET, POST | вход | лист, редирект | `CopiesSheet` «Which copy to mark done?» (s-tasks-16). POST без `copy` у связанной задачи — лист, у прочей — отметка; форма листа без отмеченной копии (`sheet=1`) — лист снова, ничего не отмечено, ошибка у `copy` (`Form.Errors`); с `copy` (сколько угодно) — каждая названная копия отмечена, как Mark done, и редирект туда, откуда пришли (`from`: `all`, `list`, иначе карточка) |
 | `/app/contacts/{account}/{col}/{uid}/rewrite` | GET, POST | вход | лист (GET); страница, редирект (POST) | `RewriteSheet`; `?plan=` — план, выданный сохранением карточки (S-15.4). POST переписывает и отвечает карточкой (`ContactPage`) с итогом (s-contacts-16); с `op=leave` — редирект на карточку, ничего не переписав; без живого плана GET и POST — редирект на карточку |
 | `/app/{kind}/{account}/{col}/{uid}/delete` | POST | вход | редирект или лист | `RecordDeleteSheet` |
@@ -743,7 +744,7 @@ type Shell struct {
 type Look struct {
     Theme   string // auto (как система), light, dark
     Compact bool   // плотность Compact: строка списка 32 px вместо 38 (на телефоне всегда 52)
-    Panel   bool   // «Keep the details panel open»
+    Panel   bool   // «Keep the details panel open»: стоит — строка книги, агенды, задач, заметок ведёт на тот же список с ?open=‹адрес записи› (запись в панели, со сценарием и без); снята — на страницу записи (записка 75 Typecase, 186 п. 3)
     Source  bool   // «Show the source column»
     Wide    bool   // «Open notes in full width»
 }
@@ -3797,7 +3798,8 @@ const ( AlignLeft CellAlign = "left"; AlignCenter = "center"; AlignRight = "righ
 // Выделение куска фразы (Run): слова те же, что у Field.Mono и BlockStrong
 type RunMark string
 const ( RunPlain RunMark = ""; RunMono = "mono"; RunStrong = "strong"
-        RunDanger = "danger" ) // тревога: источник, который не ответил (tc-dim--danger, s-contacts-7)
+        RunDanger = "danger" // тревога: источник, который не ответил (tc-dim--danger, s-contacts-7)
+        RunSlug = "slug" )   // часть пути, которую даёт поле с From (адрес новой коллекции, s-profile-5): моноширинно, клиент держит её в ногу с полем (SlugOf)
 ```
 
 `CheckUnknown` — серый флажок проверки установки: то, что снаружи не измерить.

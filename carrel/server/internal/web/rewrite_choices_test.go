@@ -52,7 +52,9 @@ func TestRewriteChoosesAddressesAndGroups(t *testing.T) {
 	if !slices.Equal(values, []string{"scheduling", "others", "past"}) {
 		t.Errorf("groups = %v", values)
 	}
-	if !strings.Contains(string(sheet.Both), "«old» stands in both «On servers that schedule» and «Past meetings»") {
+	// Every group ticked, as the sheet opens: nothing stays because of a
+	// group left out, and no line says so (Typecase's note 74, 185 p. 3).
+	if sheet.Both != "" {
 		t.Errorf("both = %q", sheet.Both)
 	}
 	if !slices.Contains(sheet.Tally, "to.1 group=scheduling group=others") || !slices.Contains(sheet.Tally, "to.2 group=scheduling") {

@@ -24,7 +24,8 @@ type stampingRenderer struct {
 }
 
 func (sr stampingRenderer) Page(w http.ResponseWriter, r *http.Request, status int, body any) error {
-	return sr.Renderer.Page(w, r, status, stampLook(stampView(body, sr.token(r), sr.base), lookOf(r)))
+	look := lookOf(r)
+	return sr.Renderer.Page(w, r, status, stampPanel(r, stampLook(stampView(body, sr.token(r), sr.base), look), look))
 }
 
 func (sr stampingRenderer) Fragment(w http.ResponseWriter, r *http.Request, status int, target string, body any, extra []render.OOB) error {
@@ -32,7 +33,8 @@ func (sr stampingRenderer) Fragment(w http.ResponseWriter, r *http.Request, stat
 	for i := range extra {
 		extra[i].Body = stampLook(stampView(extra[i].Body, token, sr.base), lookOf(r))
 	}
-	return sr.Renderer.Fragment(w, r, status, target, stampLook(stampView(body, token, sr.base), lookOf(r)), extra)
+	look := lookOf(r)
+	return sr.Renderer.Fragment(w, r, status, target, stampPanel(r, stampLook(stampView(body, token, sr.base), look), look), extra)
 }
 
 // sessionToken is the CSRF token of the request's session; empty without

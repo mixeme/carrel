@@ -355,7 +355,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit?etag=e15\u0026op=attach",
+            "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit?etag=e10\u0026op=attach",
             "icon": "i-upload",
             "id": "attach.add",
             "label": "From this computer",
@@ -363,7 +363,7 @@
           },
           {
             "enabled": true,
-            "href": "/app/files/picker?a=a-nc-home\u0026c=dela\u0026etag=e15\u0026for=attach\u0026k=tasks\u0026uid=aa11-2d09-5f84",
+            "href": "/app/files/picker?a=a-nc-home\u0026c=dela\u0026etag=e10\u0026for=attach\u0026k=tasks\u0026uid=aa11-2d09-5f84",
             "icon": "i-file",
             "id": "attach.files",
             "label": "From Files",
@@ -374,7 +374,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "file",
-        "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit?etag=e15\u0026op=attach",
+        "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit?etag=e10\u0026op=attach",
         "icon": "i-clip",
         "id": "attach.add",
         "label": "Attach",
@@ -384,7 +384,7 @@
         "csrf": "csrf",
         "danger": true,
         "enabled": true,
-        "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/delete?etag=e15",
+        "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/delete?etag=e10",
         "icon": "i-trash",
         "id": "record.delete",
         "label": "Delete task",
@@ -535,7 +535,7 @@
           "colour": "#4a6b52",
           "done": false,
           "due": "7 Aug",
-          "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31",
+          "href": "/app/tasks?open=%2Fapp%2Ftasks%2Fa-nc-home%2Fdela%2Faa10-77bc-0e31\u0026task=t-task",
           "menu": [
             {
               "enabled": true,
@@ -592,7 +592,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e14",
+              "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e9",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete task",
@@ -621,7 +621,7 @@
           "tick": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e14\u0026from=all\u0026op=done",
+            "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e9\u0026from=all\u0026op=done",
             "id": "task.done",
             "label": "Mark done",
             "method": "POST"
@@ -636,7 +636,7 @@
           "colour": "#3f6e8c",
           "done": false,
           "due": "8 Aug",
-          "href": "/app/tasks/a-nc-home/rabota/bb20-4c17-8a52",
+          "href": "/app/tasks?open=%2Fapp%2Ftasks%2Fa-nc-home%2Frabota%2Fbb20-4c17-8a52\u0026task=t-task",
           "menu": [
             {
               "enabled": true,
@@ -693,7 +693,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/tasks/a-nc-home/rabota/bb20-4c17-8a52/delete?etag=e11",
+              "href": "/app/tasks/a-nc-home/rabota/bb20-4c17-8a52/delete?etag=e15",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete task",
@@ -722,7 +722,7 @@
           "tick": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/tasks/a-nc-home/rabota/bb20-4c17-8a52/edit?done=on\u0026etag=e11\u0026from=all\u0026op=done",
+            "href": "/app/tasks/a-nc-home/rabota/bb20-4c17-8a52/edit?done=on\u0026etag=e15\u0026from=all\u0026op=done",
             "id": "task.done",
             "label": "Mark done",
             "method": "POST"
@@ -749,7 +749,7 @@
           "colour": "#4a6b52",
           "done": false,
           "due": "12 Aug 18:00",
-          "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84",
+          "href": "/app/tasks?open=%2Fapp%2Ftasks%2Fa-nc-home%2Fdela%2Faa11-2d09-5f84\u0026task=t-task",
           "menu": [
             {
               "enabled": true,
@@ -806,7 +806,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/delete?etag=e15",
+              "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/delete?etag=e10",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete task",
@@ -854,7 +854,7 @@
           "colour": "#3f6e8c",
           "done": false,
           "due": "14 Aug",
-          "href": "/app/tasks/a-nc-home/rabota/bb21-0fa8-3d66",
+          "href": "/app/tasks?open=%2Fapp%2Ftasks%2Fa-nc-home%2Frabota%2Fbb21-0fa8-3d66\u0026task=t-task",
           "menu": [
             {
               "enabled": true,
@@ -911,7 +911,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/tasks/a-nc-home/rabota/bb21-0fa8-3d66/delete?etag=e12",
+              "href": "/app/tasks/a-nc-home/rabota/bb21-0fa8-3d66/delete?etag=e16",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete task",
@@ -940,7 +940,7 @@
           "tick": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/tasks/a-nc-home/rabota/bb21-0fa8-3d66/edit?done=on\u0026etag=e12\u0026from=all\u0026op=done",
+            "href": "/app/tasks/a-nc-home/rabota/bb21-0fa8-3d66/edit?done=on\u0026etag=e16\u0026from=all\u0026op=done",
             "id": "task.done",
             "label": "Mark done",
             "method": "POST"
@@ -962,7 +962,7 @@
           "colour": "#4a6b52",
           "done": false,
           "due": "",
-          "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703",
+          "href": "/app/tasks?open=%2Fapp%2Ftasks%2Fa-nc-home%2Fdela%2Faa12-9e44-c703\u0026task=t-task",
           "menu": [
             {
               "enabled": true,
@@ -1019,7 +1019,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/delete?etag=e16",
+              "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/delete?etag=e11",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete task",
@@ -1042,7 +1042,7 @@
           "tick": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/edit?done=on\u0026etag=e16\u0026from=all\u0026op=done",
+            "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/edit?done=on\u0026etag=e11\u0026from=all\u0026op=done",
             "id": "task.done",
             "label": "Mark done",
             "method": "POST"

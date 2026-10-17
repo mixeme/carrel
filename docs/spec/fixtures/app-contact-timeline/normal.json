@@ -376,21 +376,21 @@
     "running": false,
     "sources": [
       {
-        "colour": "#a05a2c",
-        "count": 0,
-        "fromCache": false,
-        "message": "",
-        "retry": null,
-        "stamp": "nextcloud · Архив",
-        "state": "empty"
-      },
-      {
         "colour": "#4a6b52",
         "count": 0,
         "fromCache": false,
         "message": "",
         "retry": null,
         "stamp": "nextcloud · Контакты",
+        "state": "empty"
+      },
+      {
+        "colour": "#a05a2c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Архив",
         "state": "empty"
       },
       {
@@ -421,21 +421,21 @@
         "state": "empty"
       },
       {
-        "colour": "#6b4e7a",
-        "count": 0,
-        "fromCache": false,
-        "message": "",
-        "retry": null,
-        "stamp": "nextcloud · Дневник",
-        "state": "empty"
-      },
-      {
         "colour": "#4a6b52",
         "count": 0,
         "fromCache": false,
         "message": "",
         "retry": null,
         "stamp": "nextcloud · Записи",
+        "state": "empty"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Дневник",
         "state": "empty"
       },
       {
@@ -448,21 +448,21 @@
         "state": "done"
       },
       {
-        "colour": "#8c6239",
-        "count": 0,
-        "fromCache": false,
-        "message": "",
-        "retry": null,
-        "stamp": "radicale · vps · Дежурства",
-        "state": "empty"
-      },
-      {
         "colour": "#6b4e7a",
         "count": 0,
         "fromCache": false,
         "message": "",
         "retry": null,
         "stamp": "radicale · vps · Проекты",
+        "state": "empty"
+      },
+      {
+        "colour": "#8c6239",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Дежурства",
         "state": "empty"
       },
       {
@@ -629,19 +629,6 @@
             "tick": "part"
           },
           {
-            "colour": "#a05a2c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
-            "label": "Дни рождения",
-            "menu": [],
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
             "colour": "#4a6b52",
             "count": 1,
             "detail": "",
@@ -668,17 +655,17 @@
             "tick": "on"
           },
           {
-            "colour": "#8c6239",
-            "count": 0,
+            "colour": "#a05a2c",
+            "count": null,
             "detail": "",
             "feed": false,
-            "href": "/app/calendar/a-rad-vps/dezhurstva",
-            "label": "Дежурства",
+            "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+            "label": "Дни рождения",
             "menu": [],
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "on"
+            "tick": "off"
           },
           {
             "colour": "#6b4e7a",
@@ -687,6 +674,19 @@
             "feed": false,
             "href": "/app/calendar/a-rad-vps/proekty",
             "label": "Проекты",
+            "menu": [],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#8c6239",
+            "count": 0,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar/a-rad-vps/dezhurstva",
+            "label": "Дежурства",
             "menu": [],
             "on": false,
             "readOnly": false,

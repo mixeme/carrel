@@ -278,7 +278,9 @@ func (s *Server) linkedCalendar(ctx context.Context, c *collectionCtx, uid strin
 	tags = func(own []view.Tag) bool {
 		return len(own) > 0 && slices.ContainsFunc(held, func(h string) bool { return h != tagSet(own) })
 	}
-	return fields, tags, s.memberRows(lc, obj, differs(calendarDiffers)), nil, true
+	// One word for a task's time, its due date — the card's rows as the
+	// sheets (Typecase's note 72: «Due, priority differ», s-tasks-2).
+	return fields, tags, s.memberRows(lc, obj, differs(differTable(c.spec.kind))), nil, true
 }
 
 // tagSet is the labels of the tags, sorted, for comparing copies.

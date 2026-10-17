@@ -161,7 +161,7 @@ func TestContactsListIsTheFrames(t *testing.T) {
 	for _, g := range page.Groups {
 		for _, r := range g.Rows {
 			if string(r.Name) == frameText(open[1]) {
-				href = r.Href
+				href = recordHref(r.Href)
 			}
 		}
 	}

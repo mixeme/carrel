@@ -10,6 +10,7 @@ import (
 
 	"carrel.dev/carrel/client/document"
 	"carrel.dev/carrel/client/screens"
+	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
 )
 
@@ -182,5 +183,22 @@ func TestNoPageLoadsTheLiveLayer(t *testing.T) {
 		if live := document.Assets("").Live; strings.Contains(html, live) {
 			t.Errorf("%T: the page loads %s", scr.Model(), live)
 		}
+	}
+}
+
+// The theme the server chose for this browser goes to the document (note 75
+// of Typecase, task 186 p. 1): a page of the shell carries its Look, a page
+// outside it none.
+func TestThemeComesFromTheLook(t *testing.T) {
+	page := &view.ContactsListPage{}
+	page.Look.Theme = "dark"
+	if look, ok := document.LookOf(page); !ok || look.Theme != "dark" {
+		t.Errorf("look of a shell page = %+v %v", look, ok)
+	}
+	if _, ok := document.LookOf(&view.LoginPage{}); ok {
+		t.Error("a page outside the shell has a look")
+	}
+	if _, ok := document.LookOf((*view.ContactsListPage)(nil)); ok {
+		t.Error("a nil page has a look")
 	}
 }

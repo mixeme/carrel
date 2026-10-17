@@ -394,11 +394,14 @@ STATE_FRAME = {
     "app-files-folder/readonly": "states-34",
     "app-files-folder/long": "s-files-2",
     "app-files-folder/tiles": "s-files-5",
-    "app-record-copies/normal": "s-contacts-32",
-    "app-task-done/normal": "s-tasks-16",
-    "app-event-ask/normal": "s-agenda-22",
+    # Кадры маршрута (записка 73, 183 п. 1): над книгой и над объединённым списком.
+    "app-record-copies/normal": "s-contacts-35",
+    "app-task-done/normal": "s-tasks-19",
+    # Кадры маршрута (записка 74, 184 п. 1): вопрос поверх правки — s-agenda-27,
+    # отказ поверх карточки серии — s-agenda-28; одна встреча — фрагмент s-agenda-23.
+    "app-event-ask/normal": "s-agenda-27",
     "app-event-ask/single": "s-agenda-23",
-    "app-event-ask/in-part": "s-agenda-24",
+    "app-event-ask/in-part": "s-agenda-28",
     "app-files-op/copy": "s-files-11",
     "app-files-op/elsewhere": "s-files-12",
     "app-files-op/refused": "s-files-13",

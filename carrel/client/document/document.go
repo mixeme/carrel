@@ -21,11 +21,13 @@ import (
 	"maps"
 	"net/http"
 	"path"
+	"reflect"
 	"slices"
 	"strings"
 	"sync"
 
 	"carrel.dev/carrel/client/screens"
+	"carrel.dev/carrel/server/view"
 	"carrel.dev/typecase"
 	"carrel.dev/typecase/page"
 )
@@ -177,5 +179,32 @@ func Of(scr screens.Screen, model any, base string) page.Document {
 	if scr.Forms != nil {
 		doc.Forms = scr.Forms(model)
 	}
+	// The theme the server chose for this browser (Look.Theme, the cookie
+	// of Appearance): printed in <html>, seen without a script (Typecase's
+	// note 75, task 186 p. 1). A page outside the shell has none.
+	if look, ok := lookOf(model); ok {
+		doc.Theme = look.Theme
+	}
 	return doc
+}
+
+// lookOf is the Look of a page of the shell (Shell.Look), false for a model
+// that carries none.
+func lookOf(model any) (view.Look, bool) {
+	v := reflect.ValueOf(model)
+	for v.Kind() == reflect.Pointer {
+		if v.IsNil() {
+			return view.Look{}, false
+		}
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return view.Look{}, false
+	}
+	f := v.FieldByName("Look")
+	if !f.IsValid() {
+		return view.Look{}, false
+	}
+	look, ok := f.Interface().(view.Look)
+	return look, ok
 }

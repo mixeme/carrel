@@ -4,14 +4,6 @@
       {
         "arrow": [
           {
-            "colour": "#6b4e7a",
-            "enabled": true,
-            "href": "/app/notes/a-nc-home/dnevnik/new",
-            "id": "record.new",
-            "label": "Дневник",
-            "method": "GET"
-          },
-          {
             "aside": "last used",
             "colour": "#4a6b52",
             "enabled": true,
@@ -20,6 +12,14 @@
             "label": "Записи",
             "method": "GET",
             "on": true
+          },
+          {
+            "colour": "#6b4e7a",
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/dnevnik/new",
+            "id": "record.new",
+            "label": "Дневник",
+            "method": "GET"
           }
         ],
         "enabled": true,
@@ -545,7 +545,7 @@
           "colour": "#4a6b52",
           "date": "10 Aug",
           "excerpt": "Договорились заморозить ветку в среду.",
-          "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F5c81-77aa-0d64\u0026task=t-task",
           "menu": [
             {
               "enabled": true,
@@ -645,7 +645,7 @@
           "colour": "#4a6b52",
           "date": "8 Aug",
           "excerpt": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",
-          "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F6d92-13ef-b408\u0026task=t-task",
           "menu": [
             {
               "enabled": true,
@@ -735,7 +735,7 @@
           "colour": "#6b4e7a",
           "date": "3 Aug",
           "excerpt": "Съезд после заправки, потом грунтовка два километра — в дождь лучше в объезд через посёлок.",
-          "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19",
+          "href": "/app/notes?open=%2Fapp%2Fnotes%2Fa-nc-home%2Fdnevnik%2F7f03-5b26-cc19\u0026task=t-task",
           "menu": [
             {
               "enabled": true,
@@ -852,21 +852,21 @@
     "running": false,
     "sources": [
       {
-        "colour": "#6b4e7a",
-        "count": 3,
-        "fromCache": false,
-        "message": "",
-        "retry": null,
-        "stamp": "nextcloud · Дневник",
-        "state": "done"
-      },
-      {
         "colour": "#4a6b52",
         "count": 2,
         "fromCache": false,
         "message": "",
         "retry": null,
         "stamp": "nextcloud · Записи",
+        "state": "done"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 3,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Дневник",
         "state": "done"
       }
     ],
@@ -1005,75 +1005,6 @@
         "accountID": "a-nc-home",
         "rows": [
           {
-            "colour": "#6b4e7a",
-            "count": 3,
-            "detail": "",
-            "feed": false,
-            "href": "/app/notes/a-nc-home/dnevnik",
-            "label": "Дневник",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/notes/a-nc-home/dnevnik/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/notes/a-nc-home/dnevnik/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
             "colour": "#4a6b52",
             "count": 2,
             "detail": "",
@@ -1129,6 +1060,75 @@
                 "danger": true,
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "/app/notes/a-nc-home/dnevnik",
+            "label": "Дневник",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/dnevnik/import",
+                "icon": "i-import",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/dnevnik/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
                 "icon": "i-trash",
                 "id": "collection.delete",
                 "label": "Delete on the server…",

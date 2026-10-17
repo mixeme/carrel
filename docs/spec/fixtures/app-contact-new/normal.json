@@ -157,6 +157,46 @@
             "readOnly": false,
             "required": false,
             "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Address book",
+            "name": "notebook",
+            "options": [
+              {
+                "colour": "#4a6b52",
+                "label": "nextcloud · Контакты",
+                "selected": true,
+                "value": "/app/contacts/a-nc-home/kontakty"
+              },
+              {
+                "colour": "#a05a2c",
+                "label": "nextcloud · Архив",
+                "selected": false,
+                "value": "/app/contacts/a-nc-home/arhiv"
+              },
+              {
+                "colour": "#6b4e7a",
+                "disabled": true,
+                "label": "radicale · vps · Команда",
+                "reason": "Read-only",
+                "selected": false,
+                "value": "/app/contacts/a-rad-vps/komanda"
+              },
+              {
+                "colour": "#6b4e7a",
+                "label": "radicale · vps · Рассылки",
+                "selected": false,
+                "value": "/app/contacts/a-rad-vps/rassylki"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "/app/contacts/a-nc-home/kontakty"
           }
         ],
         "unfold": null
@@ -764,75 +804,6 @@
         "accountID": "a-nc-home",
         "rows": [
           {
-            "colour": "#a05a2c",
-            "count": 1,
-            "detail": "",
-            "feed": false,
-            "href": "/app/contacts/a-nc-home/arhiv",
-            "label": "Архив",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/contacts/a-nc-home/arhiv/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/contacts/a-nc-home/arhiv/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
             "colour": "#4a6b52",
             "count": 5,
             "detail": "",
@@ -900,6 +871,75 @@
             "readOnly": false,
             "state": "ok",
             "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "/app/contacts/a-nc-home/arhiv",
+            "label": "Архив",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/import",
+                "icon": "i-import",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
           }
         ],
         "state": "ok"
@@ -910,7 +950,7 @@
     "ticks": null
   },
   "readOnly": false,
-  "subtitle": "nextcloud · Контакты",
+  "subtitle": "",
   "title": "New contact",
   "top": {
     "lock": null,

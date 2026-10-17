@@ -200,7 +200,7 @@ func TestContactsListAndCard(t *testing.T) {
 		t.Fatalf("groups %v, names %v", rubrics, names)
 	}
 	ada := page.Groups[0].Rows[0]
-	if ada.Href != list+"/ada" || ada.Email != "ada@example.com" || ada.Phone != "+44 20 1" ||
+	if recordHref(ada.Href) != list+"/ada" || ada.Email != "ada@example.com" || ada.Phone != "+44 20 1" ||
 		ada.Org != "Analytical, Engines" || ada.Avatar.Initials != "AL" || ada.Avatar.Colour == "" {
 		t.Errorf("row = %+v", ada)
 	}

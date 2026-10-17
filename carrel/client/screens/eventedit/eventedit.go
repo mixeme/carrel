@@ -143,7 +143,17 @@ func Screen(p *view.EventEditPage) w.Shell {
 			plain = append(plain, b)
 		}
 	}
-	h := w.Head{Title: &w.HeadTitle{Text: string(p.Name)}, Acts: &w.Acts{Items: append(plain, primary...)}}
+	// The calendar it is saved in, in the head left of Cancel (Typecase's
+	// note 72; s-agenda-3, -15).
+	var saved []w.ActsPart
+	for _, set := range p.Form.Sets {
+		for _, r := range set.Rows {
+			if r.Name == calendarRow {
+				saved = append(saved, bind.SavedIn(r, ro, id))
+			}
+		}
+	}
+	h := w.Head{Title: &w.HeadTitle{Text: string(p.Name)}, Acts: &w.Acts{Items: append(append(saved, plain...), primary...)}}
 	if p.Subtitle != "" {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
 	}
@@ -167,6 +177,9 @@ func Screen(p *view.EventEditPage) w.Shell {
 		rows := visible(set.Rows)
 		if set.Legend == "" {
 			for _, r := range rows {
+				if r.Name == calendarRow {
+					continue // in the head
+				}
 				form.Items = append(form.Items, field(r))
 			}
 		} else {
@@ -332,12 +345,6 @@ func visible(rows []view.FormRow) []view.FormRow {
 // text showing the dash where the model gives no pattern of its own.
 func field(r view.FormRow) w.Field {
 	switch {
-	case r.Name == calendarRow:
-		// The Calendar with the calendars' marks, as a note's Notebook
-		// (s-agenda-3, -15).
-		d := bind.Marks(r, ro)
-		d.Menu.Width, d.Menu.Pop = w.MenuWidth290, w.MenuUnder
-		return w.Field{Label: string(r.Label), Parts: []w.FieldPart{d}, Width: width(r.Name)}
 	case r.Kind == view.InputCheck && len(r.Options) > 0:
 		return w.Field{Label: string(r.Label), Parts: []w.FieldPart{bind.Days(r)}}
 	case r.Kind == view.InputCheck:

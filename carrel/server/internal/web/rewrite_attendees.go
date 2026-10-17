@@ -606,9 +606,13 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 		sheet.Groups = append(sheet.Groups, rg)
 	}
 	// A record in two groups is rewritten only when both are ticked: the
-	// sheet names one such (s-contacts-29).
+	// sheet names one such (s-contacts-29) — only when a group of it is not
+	// ticked and it stays as it is; with every group ticked, as the sheet
+	// opens, there is nothing to say (Typecase's note 74, 185 p. 3).
 	for i, r := range p.Records {
-		if in := inGroups(groups, i); len(in) > 1 && !r.ReadOnly {
+		in := inGroups(groups, i)
+		unticked := slices.ContainsFunc(in, func(v string) bool { return !answer.groups[v] })
+		if len(in) > 1 && !r.ReadOnly && unticked {
 			var labels []string
 			for _, v := range in {
 				for _, g := range groups {

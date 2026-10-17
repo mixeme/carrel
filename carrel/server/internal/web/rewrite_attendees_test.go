@@ -239,35 +239,25 @@ func TestSeveralReplacedAreOfferedTheirOwnLine(t *testing.T) {
 	}
 }
 
-// C-10: the rows of the sheet say what the frame says (s-contacts-15),
-// read from the frame — except where the frame writes «she» and «her»: the
-// server does not know the person's gender and says «they» (to-typecase 25).
+// C-10: the sheet says what its frame says (s-contacts-15, the form of
+// Typecase's note 74): each group's note under it, Leave as is and Rewrite
+// with the count, the line of the read-only records.
 func TestRewriteSheetSaysWhatTheFrameSays(t *testing.T) {
 	frame := mockupFrame(t, "s-contacts-15")
-	item := regexp.MustCompile(`<span class="tc-stack__item"><b>([^<]*)</b> <span class="tc-dim">— ([^<]*)</span></span>`)
-	notes := map[string]bool{}
-	for _, m := range item.FindAllStringSubmatch(frame, -1) {
-		notes[html.UnescapeString(m[2])] = true
-	}
+	words := html.UnescapeString(regexp.MustCompile(`\s+`).ReplaceAllString(regexp.MustCompile(`<[^>]+>`).ReplaceAllString(frame, " "), " "))
 	s := newRewriteStand(t)
 	resp := s.save(t, func(f url.Values) { f.Set("email.0", "ada@new.example") })
 	sheet := decode[view.RewriteSheet](t, s.h.do(get(resp.Header.Get("Location"), s.sess)))
-	for _, f := range append(append([]view.Field(nil), sheet.Effects...), sheet.Kept...) {
-		v := string(f.Value)
-		if strings.Contains(v, "the person") || strings.HasPrefix(v, "read-only; it") {
-			continue // the frame's «she», and the frame's plural of the same row
-		}
-		if !notes[v] {
-			t.Errorf("%q: the frame has no such note; it has %v", v, notes)
+	for _, g := range sheet.Groups {
+		if !strings.Contains(words, string(g.Note)) {
+			t.Errorf("%q: the frame has no such note under a group", g.Note)
 		}
 	}
-	for _, label := range []string{"Leave as is", "Rewrite 12 records"} {
-		if !strings.Contains(frame, ">"+label+"<") {
-			t.Errorf("the frame has no %q", label)
-		}
+	if !strings.Contains(words, " Leave as is ") || !regexp.MustCompile(` Rewrite \d+ records `).MatchString(words) {
+		t.Error("the frame's buttons changed")
 	}
-	if !strings.Contains(frame, "read-only; they keep the old address") {
-		t.Error("the frame's read-only row changed")
+	if !strings.Contains(words, "are read-only and keep the old address") || !strings.Contains(words, string(sheet.Note)) {
+		t.Error("the frame's line of the read-only records changed")
 	}
 }
 

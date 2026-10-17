@@ -43,16 +43,6 @@
     },
     "options": [
       {
-        "colour": "#a05a2c",
-        "href": "/app/calendar/a-nc-home/lichnyj/import?into=dni-rozhdeniya\u0026to=a-nc-home",
-        "id": "/app/calendar/a-nc-home/lichnyj/import?into=dni-rozhdeniya\u0026to=a-nc-home",
-        "label": "Дни рождения",
-        "last": false,
-        "readOnly": false,
-        "reason": "",
-        "stamp": "nextcloud · Дни рождения"
-      },
-      {
         "colour": "#4a6b52",
         "href": "/app/calendar/a-nc-home/lichnyj/import?into=lichnyj\u0026to=a-nc-home",
         "id": "/app/calendar/a-nc-home/lichnyj/import?into=lichnyj\u0026to=a-nc-home",
@@ -73,14 +63,14 @@
         "stamp": "nextcloud · Работа"
       },
       {
-        "colour": "#8c6239",
-        "href": "/app/calendar/a-nc-home/lichnyj/import?into=dezhurstva\u0026to=a-rad-vps",
-        "id": "/app/calendar/a-nc-home/lichnyj/import?into=dezhurstva\u0026to=a-rad-vps",
-        "label": "Дежурства",
+        "colour": "#a05a2c",
+        "href": "/app/calendar/a-nc-home/lichnyj/import?into=dni-rozhdeniya\u0026to=a-nc-home",
+        "id": "/app/calendar/a-nc-home/lichnyj/import?into=dni-rozhdeniya\u0026to=a-nc-home",
+        "label": "Дни рождения",
         "last": false,
         "readOnly": false,
         "reason": "",
-        "stamp": "radicale · vps · Дежурства"
+        "stamp": "nextcloud · Дни рождения"
       },
       {
         "colour": "#6b4e7a",
@@ -91,6 +81,16 @@
         "readOnly": false,
         "reason": "",
         "stamp": "radicale · vps · Проекты"
+      },
+      {
+        "colour": "#8c6239",
+        "href": "/app/calendar/a-nc-home/lichnyj/import?into=dezhurstva\u0026to=a-rad-vps",
+        "id": "/app/calendar/a-nc-home/lichnyj/import?into=dezhurstva\u0026to=a-rad-vps",
+        "label": "Дежурства",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "radicale · vps · Дежурства"
       },
       {
         "colour": "#9a9280",
@@ -198,75 +198,6 @@
         "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
-          {
-            "colour": "#a05a2c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
-            "label": "Дни рождения",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
           {
             "colour": "#4a6b52",
             "count": null,
@@ -404,6 +335,75 @@
             "readOnly": false,
             "state": "ok",
             "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+            "label": "Дни рождения",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
+                "icon": "i-import",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "off"
           }
         ],
         "state": "ok"

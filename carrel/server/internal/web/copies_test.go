@@ -88,7 +88,8 @@ func TestWhichCopyToMarkDone(t *testing.T) {
 	}
 	sheet := decode[view.CopiesSheet](t, f.h.do(postForm(tick.Href, f.sess, url.Values{})))
 	title, note, primary := frameSheet(t, "s-tasks-16")
-	if string(sheet.Title) != title || string(sheet.Note) != "This task stands in two lists. Tick the copy that is done; a copy that is not ticked stays as it is." ||
+	// The frame's one sentence (Typecase's note 73).
+	if string(sheet.Title) != title || string(sheet.Note) != note ||
 		!strings.HasPrefix(string(sheet.Subject), "Pack · 2 copies") {
 		t.Errorf("sheet = %+v, want s-tasks-16's %q, %q", sheet, title, note)
 	}
@@ -135,8 +136,20 @@ func TestWhichCopyToEdit(t *testing.T) {
 	}
 	sheet := decode[view.CopiesSheet](t, f.h.do(get(edit.Href, f.sess)))
 	title, _, primary := frameSheet(t, "s-contacts-32")
-	if string(sheet.Title) != title || string(sheet.Note) != "This task stands in two lists. Saving changes one copy only; the others stay as they are." {
+	// One sentence, as the owner shortened it (Typecase's note 73); how many
+	// copies, the head says.
+	if string(sheet.Title) != title || string(sheet.Note) != "Saving changes one copy only; the others stay as they are." {
 		t.Errorf("sheet = %+v, want s-contacts-32's %q", sheet, title)
+	}
+	// The same sheet by the group's address, the UID of a copy of it
+	// (s-contacts-35: /app/{kind}/linked/{uid}/copies); a UID in no group is
+	// not found.
+	byUID := f.h.do(get("/app/tasks/linked/t1/copies", f.sess))
+	if byUID.Code != 200 || decode[view.CopiesSheet](t, byUID).Subject != sheet.Subject {
+		t.Errorf("the sheet by the group's address: %d %s", byUID.Code, byUID.Body)
+	}
+	if rec := f.h.do(get("/app/tasks/linked/nobody/copies", f.sess)); rec.Code != 404 {
+		t.Errorf("a UID in no group: %d", rec.Code)
 	}
 	row := copyRow(t, sheet)
 	if row.Kind != view.InputRadio || len(row.Options) != 2 || !row.Options[0].Selected ||
@@ -158,20 +171,24 @@ func TestWhichCopyToEdit(t *testing.T) {
 	if resp.Code != 303 || !strings.HasPrefix(to, record(home, "t2")+"/edit?copy=") {
 		t.Fatalf("Edit this copy: %d %s", resp.Code, to)
 	}
+	// The form says which copy it saves by its List — the chosen copy's —,
+	// and no line «Saving changes this copy only…» (the owner's decision,
+	// Typecase's note 72).
 	form := decode[view.TaskEditPage](t, f.h.do(get(to, f.sess)))
-	said := false
-	for _, n := range form.Notices {
-		said = said || (n.Role == view.NoticeInfo && strings.HasPrefix(string(n.Body), "Saving changes this copy only — ") &&
-			strings.HasSuffix(string(n.Body), "Home. The others stay as they are."))
+	chosen := ""
+	if r := formRowOf(form.Form, "notebook"); r != nil {
+		for _, o := range r.Options {
+			if o.Selected {
+				chosen = string(o.Label)
+			}
+		}
 	}
-	if !said {
-		t.Errorf("the form does not say which copy it saves: %+v", form.Notices)
+	if !strings.HasSuffix(chosen, "Home") || len(form.Notices) != 0 {
+		t.Errorf("the form of the chosen copy: List %q, notices %+v", chosen, form.Notices)
 	}
-	// The same copy chosen opens its own form, which says it as well; the
-	// form opened without the sheet does not (s-notes-20).
 	own := decode[view.TaskEditPage](t, f.h.do(get(sheet.Form.Action+"?copy="+url.QueryEscape(row.Options[0].Value), f.sess)))
 	plain := decode[view.TaskEditPage](t, f.h.do(get(sheet.Form.Action, f.sess)))
-	if len(own.Notices) != 1 || len(plain.Notices) != 0 {
+	if len(own.Notices) != 0 || len(plain.Notices) != 0 {
 		t.Errorf("notices: chosen %+v, plain %+v", own.Notices, plain.Notices)
 	}
 	// A record in no group opens its form at once.

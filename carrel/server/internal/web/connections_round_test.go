@@ -94,7 +94,9 @@ var (
 	frameSheetInput  = regexp.MustCompile(`(?s)<div class="tc-field[^"]*"><label>([^<]*)</label><input(?:[^>]*?placeholder="([^"]*)")?[^>]*>(?:<span class="tc-field__hint[^"]*">(.*?)</span>)?</div>`)
 	frameSheetButton = regexp.MustCompile(`(?s)<div class="tc-sheet__foot"><button class="tc-btn is-(?:primary|danger-solid)"[^>]*>(.*?)</button>`)
 	frameRefItem     = regexp.MustCompile(`(?s)<span class="tc-stack__item">(.*?)</span></span>`)
-	frameOpenIn      = regexp.MustCompile(`(?s)<div class="tc-line tc-line--gap-8">\s*<button class="tc-btn"[^>]*>(.*?)</button>\s*<span[^>]*>(.*?)</span>`)
+	// «Open in Files» is a link since note 73 (task 187): a button that only
+	// goes somewhere is an <a>.
+	frameOpenIn = regexp.MustCompile(`(?s)<div class="tc-line tc-line--gap-8">\s*<(?:button|a) class="tc-btn"[^>]*>(.*?)</(?:button|a)>\s*<span[^>]*>(.*?)</span>`)
 )
 
 // storageFolder is a plain file storage «vps» with a folder Docs of one file.

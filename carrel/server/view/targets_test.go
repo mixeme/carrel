@@ -192,11 +192,19 @@ func TestFixtureTargetsAreC5(t *testing.T) {
 		if target != render.TargetDetails {
 			t.Errorf("%s %s: a row of a list aims at %q, want details", screen, at, target)
 		}
-		row, route, ok := c5Of(rows, "GET", href)
+		// With «Keep the details panel open» a row leads to its own list
+		// with the record in ?open= (Typecase's note 75, 186 p. 3): the
+		// list is an address of C-5, and what it opens is a record's card.
+		if u, err := url.Parse(href); err == nil && u.Query().Get("open") != "" {
+			if _, _, ok := c5Of(rows, "GET", u.Path); !ok {
+				t.Errorf("%s %s: a row opening in the panel leads to %s, no list of C-5", screen, at, u.Path)
+			}
+			href = u.Query().Get("open")
+		}
+		_, route, ok := c5Of(rows, "GET", href)
 		if !ok || route != "/app/{kind}/{account}/{col}/{uid}" {
 			t.Errorf("%s %s: a row opening in the panel leads to %s (%s), not to a record's card", screen, at, href, route)
 		}
-		_ = row
 	}
 	for _, typ := range []reflect.Type{reflect.TypeOf(ContactRow{}), reflect.TypeOf(AgendaRow{}), reflect.TypeOf(TaskRow{}), reflect.TypeOf(NoteRow{})} {
 		eachFixtureValue(t, typ, func(screen, at string, v reflect.Value) {

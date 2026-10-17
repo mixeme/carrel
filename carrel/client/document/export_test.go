@@ -5,4 +5,5 @@ package document
 var (
 	Scripts   = scripts
 	VersionOf = versionOf
+	LookOf    = lookOf
 )

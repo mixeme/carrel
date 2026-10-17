@@ -1102,9 +1102,6 @@
   },
   "subtitle": [
     {
-      "text": "nextcloud · Дела · "
-    },
-    {
       "mark": "danger",
       "text": "overdue by 3 days"
     }

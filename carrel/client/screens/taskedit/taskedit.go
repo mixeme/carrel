@@ -165,11 +165,19 @@ func Screen(p *view.TaskEditPage) w.Shell {
 			plain = append(plain, b)
 		}
 	}
-	title := &w.HeadTitle{Text: string(p.Name)}
-	if p.Source.Colour != "" {
-		title.Mark = &w.Mark{Colour: string(p.Source.Colour), Size: w.MarkH20}
+	// Where the task is saved is chosen in the head, left of Cancel — a
+	// field with no label (Typecase 434ac87, note 72); under the title only
+	// what the fields do not say, «overdue by 3 days» (s-tasks-3).
+	var acts []w.ActsPart
+	for _, set := range p.Form.Sets {
+		for _, r := range set.Rows {
+			if r.Name == listRow {
+				acts = append(acts, bind.SavedIn(r, ro, formID))
+			}
+		}
 	}
-	h := w.Head{Title: title, Subs: bind.SubAlert(p.Subtitle), Acts: &w.Acts{Items: append(plain, primary...)}}
+	title := &w.HeadTitle{Text: string(p.Name)}
+	h := w.Head{Title: title, Subs: bind.SubAlert(p.Subtitle), Acts: &w.Acts{Items: append(append(acts, plain...), primary...)}}
 	main := []w.MainPart{h, w.Runbar{Progress: formID, Parts: []w.RunbarPart{w.Text(saving), w.Mono{Text: noBytes}}}}
 	main = append(main, bind.Notices(p.Notices, w.MsgSpacePage)...)
 	if p.Loss != nil {
@@ -186,6 +194,9 @@ func Screen(p *view.TaskEditPage) w.Shell {
 		}
 		if set.Legend == "" {
 			for i, r := range rows {
+				if r.Name == listRow {
+					continue // in the head
+				}
 				form.Items = append(form.Items, field(r, i))
 			}
 			continue

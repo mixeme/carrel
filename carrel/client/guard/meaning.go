@@ -304,6 +304,8 @@ var contract = map[string]rule{
 			return "a menu item with To outside a form that sends"
 		case c.str("Name") != "" && c.inForm:
 			return ""
+		case c.str("Name") != "" && c.str("Of") != "": // a radio that names its form (Typecase's task 203)
+			return ""
 		case c.str("Name") != "":
 			return "a menu item with Name in a menu that is no form (Menu.Action)"
 		}

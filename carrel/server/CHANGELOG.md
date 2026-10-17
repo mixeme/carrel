@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.335 — 2026-10-17
+
+Typecase notes 72–76 (`96b9973`): the mockup copied byte for byte.
+
+### Changed
+
+- **An edit says where it saves in its head, not under its title** (note
+  72): the choice of the list, calendar, address book or notebook stands
+  left of Cancel; a contact's edit has «Address book», and moving a card
+  goes as the other kinds' do. «Saving changes this copy only…» is gone;
+  a task card's copies say «Due».
+- **The sheets of copies have an address of their own** (note 73): the
+  group's sheet — `/app/{kind}/linked/{uid}/copies`; the move sheet's tree
+  in the catalogue's order, an unavailable collection in its place; the
+  sheets' intros are one sentence each; Mark done with nothing ticked says
+  «Tick the copy that is done.».
+- **The series question says what changed** (note 74): «The series ends on
+  18 January — it ran weekly until 28 December», «… repeats every two
+  weeks — it repeated weekly», «… no longer repeats». The line about a
+  record in two groups stands only when an unticked group keeps it.
+- **«Keep the details panel open»** (note 75): ticked, a row of the book,
+  the agenda, the tasks and the notes leads to the same list with
+  `?open=`; unticked, to the record's page. A new collection's address
+  hint names the path, the address that follows the name, and «/».
+
+### For consumers
+
+- New route `GET /app/{kind}/linked/{uid}/copies`; new `view.RunSlug`;
+  `Look.Theme` is the page's theme (C-6, C-8).
+
 ## v0.2.334 — 2026-10-17
 
 ### Changed

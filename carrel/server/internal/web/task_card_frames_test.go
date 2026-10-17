@@ -194,9 +194,10 @@ func TestTaskEditIsTheFrame(t *testing.T) {
 		t.Errorf("the task suggests itself: %+v", self)
 	}
 
-	// A new task: the same form, «New task», the list in the head.
+	// A new task: the same form, «New task», nothing under the title — the
+	// list is the choice in the head (s-tasks-14, Typecase's note 72).
 	fresh := decode[view.TaskEditPage](t, app.h.do(get(list+"/new", app.sess)))
-	if fresh.Name != "New task" || len(fresh.Subtitle) != 1 || fresh.Delete != nil || fresh.Source.Path != "" {
+	if fresh.Name != "New task" || len(fresh.Subtitle) != 0 || fresh.Delete != nil || fresh.Source.Path != "" {
 		t.Errorf("new task = %q %+v %+v %+v", fresh.Name, fresh.Subtitle, fresh.Delete, fresh.Source)
 	}
 }

@@ -20,6 +20,30 @@ func Sub(r view.Runs) []w.HeadSub {
 	return sub(r, func(t view.Text) w.HeadSubPart { return w.Span{Face: w.FaceDanger, Text: string(t)} })
 }
 
+// SourceSub is the line under a record's title that names where it lives:
+// the collection's mark beside the collection's name, «▍nextcloud · Личный»
+// (Typecase 434ac87, note 72) — the mark is the collection's, so it stands
+// at its name, not at the record's title.
+func SourceSub(colour view.Colour, stamp view.Text) w.HeadSub {
+	var parts []w.HeadSubPart
+	if colour != "" {
+		parts = append(parts, w.Mark{Colour: string(colour), Size: w.MarkH11})
+	}
+	return w.HeadSub{Parts: append(parts, w.Text(stamp))}
+}
+
+// Marked puts the collection's mark in front of the first line under a
+// record's title, the line that begins with where the record lives
+// (s-tasks-2: «▍nextcloud · Дела · overdue by 3 days»).
+func Marked(colour view.Colour, subs []w.HeadSub) []w.HeadSub {
+	if colour == "" || len(subs) == 0 {
+		return subs
+	}
+	out := append([]w.HeadSub(nil), subs...)
+	out[0].Parts = append([]w.HeadSubPart{w.Mark{Colour: string(colour), Size: w.MarkH11}}, out[0].Parts...)
+	return out
+}
+
 // SubAlert is a sentence of the model in its pieces as the line under a
 // head, as Sub, whose alarm (RunDanger) is a badge in the alert's tone: the
 // edit's «overdue by 3 days» (s-tasks-3).

@@ -13,10 +13,22 @@ import (
 	w "carrel.dev/typecase/widget"
 )
 
-// formID names the card's form for Save, which stands in the head, outside
-// it (Button.Form), and for the line of Save (Runbar.Progress) — as the
-// frames name it (s-contacts-3, -4).
-const formID = "contact-edit"
+// formEdit and formNew name the card's form for Save, which stands in the
+// head, outside it (Button.Form), and for the line of Save (Runbar.Progress)
+// — as the frames name it: a card's edit (s-contacts-3, -4), a new card
+// (s-contacts-27).
+const (
+	formEdit = "contact-edit"
+	formNew  = "contact-new"
+)
+
+// formOf is the ID of the card's form: a new card's, or the edit's.
+func formOf(p *view.ContactEditPage) string {
+	if p.UID == "" {
+		return formNew
+	}
+	return formEdit
+}
 
 // The screen's words (U-1.3) of the line of Save that sends files
 // (Typecase ac658b0): what it says before the library's script moves it.
@@ -32,6 +44,12 @@ const none = "—"
 
 // field is a row of the form as a field of the width of its name, an empty
 // line showing the dash where the model gives no pattern of its own — but
+// bookRow is the name of the Address book the contact lies in (C-6.8, as an
+// event's Calendar); ro the badge of one that cannot be written.
+const bookRow = "notebook"
+
+var ro = w.Badge{Label: "ro", Place: w.Pushed}
+
 // the one with the cursor, which the frames draw bare (s-contacts-27).
 func field(r view.FormRow) w.Field {
 	f := bind.Field(r, width(r.Name))
@@ -106,6 +124,7 @@ func width(name string) w.FieldWidth {
 //   - Under the form of a card that exists: properties Carrel does not know
 //     are kept (U-6.1); a new card has none (s-contacts-27).
 func Screen(p *view.ContactEditPage) w.Shell {
+	formID := formOf(p)
 	var plain, primary []w.ActsPart
 	for _, a := range p.Form.Actions {
 		b := bind.Button(a, formID)
@@ -115,9 +134,20 @@ func Screen(p *view.ContactEditPage) w.Shell {
 			plain = append(plain, b)
 		}
 	}
+	// The address book it is saved in, in the head left of Cancel — a
+	// contact moves as any record does (Typecase's note 72, Р-63;
+	// s-contacts-3, -31).
+	var saved []w.ActsPart
+	for _, set := range p.Form.Sets {
+		for _, r := range set.Rows {
+			if r.Name == bookRow {
+				saved = append(saved, bind.SavedIn(r, ro, formID))
+			}
+		}
+	}
 	h := w.Head{
 		Title: &w.HeadTitle{Text: string(p.Name)},
-		Acts:  &w.Acts{Items: append(plain, primary...)},
+		Acts:  &w.Acts{Items: append(append(saved, plain...), primary...)},
 	}
 	if p.Subtitle != "" {
 		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
@@ -148,6 +178,9 @@ func Screen(p *view.ContactEditPage) w.Shell {
 		case i == 0 && set.Legend == "":
 			cols := w.FormCols{}
 			for _, r := range rows {
+				if r.Name == bookRow {
+					continue // in the head
+				}
 				cols.Items = append(cols.Items, field(r))
 			}
 			form.Items = append(form.Items, cols)

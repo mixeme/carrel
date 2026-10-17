@@ -83,7 +83,9 @@ func TestTaskFormIsTheFramesRubrics(t *testing.T) {
 	if r := formRowOf(page.Form, "notebook"); r == nil || r.Label != "List" {
 		t.Error("the task form chooses no List")
 	}
-	kept := []string{"Other / Or enter a UID by hand"}
+	// The List is drawn in the head, left of Cancel, with no label
+	// (Typecase's note 72): not a field of the form's body.
+	kept := []string{"Other / Or enter a UID by hand", " / List"}
 	if got, want := serverForm(page.Form, kept...), frameForm(t, "s-tasks-3"); !equalStrings(got, want) {
 		t.Errorf("task form =\n%q,\nwant (s-tasks-3)\n%q", got, want)
 	}
@@ -117,7 +119,8 @@ func TestEventFormIsTheFramesRubrics(t *testing.T) {
 	if r := formRowOf(page.Form, "priority"); r != nil {
 		t.Error("the event form has Priority")
 	}
-	if got := serverForm(page.Form, "Other / Or enter a UID by hand"); !equalStrings(got, want) {
+	// The Calendar is drawn in the head (Typecase's note 72).
+	if got := serverForm(page.Form, "Other / Or enter a UID by hand", " / Calendar"); !equalStrings(got, want) {
 		t.Errorf("event form =\n%q,\nwant (s-agenda-3)\n%q", got, want)
 	}
 

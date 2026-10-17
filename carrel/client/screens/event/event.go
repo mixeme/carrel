@@ -65,10 +65,7 @@ const attachID = "attach.add"
 //   - The deletion at the foot, and under it the line of a series.
 func Screen(p *view.EventPage) w.Shell {
 	title := &w.HeadTitle{Text: string(p.Summary)}
-	if p.Source.Colour != "" {
-		title.Mark = &w.Mark{Colour: string(p.Source.Colour), Size: w.MarkH19}
-	}
-	h := w.Head{Title: title, Subs: []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Source.Stamp)}}}}
+	h := w.Head{Title: title, Subs: []w.HeadSub{bind.SourceSub(p.Source.Colour, view.Text(p.Source.Stamp))}}
 	var acts []w.ActsPart
 	var attach *view.Action
 	var danger []w.Button

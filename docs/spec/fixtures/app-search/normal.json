@@ -108,15 +108,6 @@
     "running": false,
     "sources": [
       {
-        "colour": "#a05a2c",
-        "count": 0,
-        "fromCache": false,
-        "message": "",
-        "retry": null,
-        "stamp": "nextcloud · Архив",
-        "state": "empty"
-      },
-      {
         "colour": "#4a6b52",
         "count": 1,
         "fromCache": false,
@@ -124,6 +115,15 @@
         "retry": null,
         "stamp": "nextcloud · Контакты",
         "state": "done"
+      },
+      {
+        "colour": "#a05a2c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Архив",
+        "state": "empty"
       },
       {
         "colour": "#6b4e7a",
@@ -153,6 +153,15 @@
         "state": "empty"
       },
       {
+        "colour": "#4a6b52",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Записи",
+        "state": "empty"
+      },
+      {
         "colour": "#6b4e7a",
         "count": 0,
         "fromCache": false,
@@ -167,25 +176,7 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · Записи",
-        "state": "empty"
-      },
-      {
-        "colour": "#4a6b52",
-        "count": 0,
-        "fromCache": false,
-        "message": "",
-        "retry": null,
         "stamp": "nextcloud · Личный",
-        "state": "empty"
-      },
-      {
-        "colour": "#8c6239",
-        "count": 0,
-        "fromCache": false,
-        "message": "",
-        "retry": null,
-        "stamp": "radicale · vps · Дежурства",
         "state": "empty"
       },
       {
@@ -195,6 +186,15 @@
         "message": "",
         "retry": null,
         "stamp": "radicale · vps · Проекты",
+        "state": "empty"
+      },
+      {
+        "colour": "#8c6239",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Дежурства",
         "state": "empty"
       },
       {
@@ -332,12 +332,12 @@
         "accountID": "",
         "rows": [
           {
-            "colour": "#a05a2c",
-            "count": 0,
+            "colour": "#4a6b52",
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "",
-            "label": "Архив",
+            "label": "Контакты",
             "menu": [],
             "on": false,
             "readOnly": false,
@@ -345,12 +345,12 @@
             "tick": "on"
           },
           {
-            "colour": "#4a6b52",
-            "count": 1,
+            "colour": "#a05a2c",
+            "count": 0,
             "detail": "",
             "feed": false,
             "href": "",
-            "label": "Контакты",
+            "label": "Архив",
             "menu": [],
             "on": false,
             "readOnly": false,
@@ -397,12 +397,12 @@
             "tick": "on"
           },
           {
-            "colour": "#8c6239",
+            "colour": "#6b4e7a",
             "count": 0,
             "detail": "",
             "feed": false,
             "href": "",
-            "label": "Дежурства",
+            "label": "Проекты",
             "menu": [],
             "on": false,
             "readOnly": false,
@@ -410,12 +410,12 @@
             "tick": "on"
           },
           {
-            "colour": "#6b4e7a",
+            "colour": "#8c6239",
             "count": 0,
             "detail": "",
             "feed": false,
             "href": "",
-            "label": "Проекты",
+            "label": "Дежурства",
             "menu": [],
             "on": false,
             "readOnly": false,
@@ -462,12 +462,12 @@
             "tick": "on"
           },
           {
-            "colour": "#6b4e7a",
+            "colour": "#4a6b52",
             "count": 0,
             "detail": "",
             "feed": false,
             "href": "",
-            "label": "Дневник",
+            "label": "Записи",
             "menu": [],
             "on": false,
             "readOnly": false,
@@ -475,12 +475,12 @@
             "tick": "on"
           },
           {
-            "colour": "#4a6b52",
+            "colour": "#6b4e7a",
             "count": 0,
             "detail": "",
             "feed": false,
             "href": "",
-            "label": "Записи",
+            "label": "Дневник",
             "menu": [],
             "on": false,
             "readOnly": false,

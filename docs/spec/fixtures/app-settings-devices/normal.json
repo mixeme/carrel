@@ -18,48 +18,6 @@
         {
           "copy": {
             "enabled": true,
-            "href": "https://nextcloud.example/dav.php/alice/calendars/dela/",
-            "id": "device.copy",
-            "label": "Copy",
-            "method": "GET"
-          },
-          "included": true,
-          "kind": "task",
-          "label": "Дела",
-          "type": "CalDAV",
-          "url": "https://nextcloud.example/dav.php/alice/calendars/dela/"
-        },
-        {
-          "copy": {
-            "enabled": true,
-            "href": "https://nextcloud.example/dav.php/alice/calendars/dnevnik/",
-            "id": "device.copy",
-            "label": "Copy",
-            "method": "GET"
-          },
-          "included": true,
-          "kind": "note",
-          "label": "Дневник",
-          "type": "CalDAV",
-          "url": "https://nextcloud.example/dav.php/alice/calendars/dnevnik/"
-        },
-        {
-          "copy": {
-            "enabled": true,
-            "href": "https://nextcloud.example/dav.php/alice/calendars/dni-rozhdeniya/",
-            "id": "device.copy",
-            "label": "Copy",
-            "method": "GET"
-          },
-          "included": true,
-          "kind": "event",
-          "label": "Дни рождения",
-          "type": "CalDAV",
-          "url": "https://nextcloud.example/dav.php/alice/calendars/dni-rozhdeniya/"
-        },
-        {
-          "copy": {
-            "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/calendars/lichnyj/",
             "id": "device.copy",
             "label": "Copy",
@@ -70,6 +28,20 @@
           "label": "Личный",
           "type": "CalDAV",
           "url": "https://nextcloud.example/dav.php/alice/calendars/lichnyj/"
+        },
+        {
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/calendars/dela/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "task",
+          "label": "Дела",
+          "type": "CalDAV",
+          "url": "https://nextcloud.example/dav.php/alice/calendars/dela/"
         },
         {
           "copy": {
@@ -88,6 +60,20 @@
         {
           "copy": {
             "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/calendars/dni-rozhdeniya/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "event",
+          "label": "Дни рождения",
+          "type": "CalDAV",
+          "url": "https://nextcloud.example/dav.php/alice/calendars/dni-rozhdeniya/"
+        },
+        {
+          "copy": {
+            "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/calendars/zapisi/",
             "id": "device.copy",
             "label": "Copy",
@@ -98,6 +84,20 @@
           "label": "Записи",
           "type": "CalDAV",
           "url": "https://nextcloud.example/dav.php/alice/calendars/zapisi/"
+        },
+        {
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/calendars/dnevnik/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "note",
+          "label": "Дневник",
+          "type": "CalDAV",
+          "url": "https://nextcloud.example/dav.php/alice/calendars/dnevnik/"
         },
         {
           "copy": {
@@ -116,20 +116,6 @@
         {
           "copy": {
             "enabled": true,
-            "href": "https://nextcloud.example/dav.php/alice/contacts/arhiv/",
-            "id": "device.copy",
-            "label": "Copy",
-            "method": "GET"
-          },
-          "included": true,
-          "kind": "contact",
-          "label": "Архив",
-          "type": "CardDAV",
-          "url": "https://nextcloud.example/dav.php/alice/contacts/arhiv/"
-        },
-        {
-          "copy": {
-            "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/contacts/kontakty/",
             "id": "device.copy",
             "label": "Copy",
@@ -140,6 +126,20 @@
           "label": "Контакты",
           "type": "CardDAV",
           "url": "https://nextcloud.example/dav.php/alice/contacts/kontakty/"
+        },
+        {
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/contacts/arhiv/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "contact",
+          "label": "Архив",
+          "type": "CardDAV",
+          "url": "https://nextcloud.example/dav.php/alice/contacts/arhiv/"
         }
       ],
       "title": "nextcloud · alice"
@@ -162,20 +162,6 @@
         {
           "copy": {
             "enabled": true,
-            "href": "https://radicale.example/alice/calendars/dezhurstva/",
-            "id": "device.copy",
-            "label": "Copy",
-            "method": "GET"
-          },
-          "included": true,
-          "kind": "event",
-          "label": "Дежурства",
-          "type": "CalDAV",
-          "url": "https://radicale.example/alice/calendars/dezhurstva/"
-        },
-        {
-          "copy": {
-            "enabled": true,
             "href": "https://radicale.example/alice/calendars/proekty/",
             "id": "device.copy",
             "label": "Copy",
@@ -186,6 +172,20 @@
           "label": "Проекты",
           "type": "CalDAV",
           "url": "https://radicale.example/alice/calendars/proekty/"
+        },
+        {
+          "copy": {
+            "enabled": true,
+            "href": "https://radicale.example/alice/calendars/dezhurstva/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "event",
+          "label": "Дежурства",
+          "type": "CalDAV",
+          "url": "https://radicale.example/alice/calendars/dezhurstva/"
         },
         {
           "copy": {

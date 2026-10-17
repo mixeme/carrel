@@ -4,6 +4,16 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.53 — 2026-10-17
+
+Server `v0.2.335`, Typecase `96b9973` (its notes 72–76); needs
+`golang.org/x/text`. The mockup copied byte for byte. A collection's mark
+stands by its name; the edits choose where they save in the head (a
+note's notebook in its bar), each radio naming the edit's form
+(`MenuItem.Of`); the theme the server chose is the page's
+(`page.Document.Theme`); the address of a new collection follows its
+name as it is typed (`SlugOf`).
+
 ## v0.4.52 — 2026-10-16
 
 Server `v0.2.311`. A contact's edit draws its «Dates» as the frame does

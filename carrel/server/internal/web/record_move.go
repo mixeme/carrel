@@ -60,18 +60,6 @@ func recordMoveBlock(c, dest *collectionCtx, copying bool) string {
 	return ""
 }
 
-// moveRank is where a collection stands among its server's in the move
-// sheet: the one the record is in, the writable ones, the read-only ones.
-func moveRank(o view.TargetOption) int {
-	switch {
-	case o.Here:
-		return 0
-	case o.ReadOnly:
-		return 2
-	}
-	return 1
-}
-
 // moveValue is how the sheet's form names a collection (TargetOption.Value).
 func moveValue(account, col string) string {
 	return account + "/" + url.PathEscape(col)
@@ -134,8 +122,9 @@ func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, de
 		from = title + " · " + from
 	}
 	sheet := view.MoveSheet{Kind: c.spec.kind, Copy: copying, Title: text(verb + c.spec.noun), Subject: text(from)}
+	// In the order of the catalog, as the rail (Typecase's note 73, 183 p. 3):
+	// one that cannot take it stays in its place, closed.
 	for _, conn := range blob.Connections {
-		from := len(sheet.Target.Options)
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Gone || !col.Has(c.spec.kind) {
 				continue
@@ -156,11 +145,6 @@ func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, de
 			}
 			sheet.Target.Options = append(sheet.Target.Options, opt)
 		}
-		// Within a server, the one it is in first, then where it can go,
-		// then the read-only ones (s-contacts-2).
-		slices.SortStableFunc(sheet.Target.Options[from:], func(a, b view.TargetOption) int {
-			return moveRank(a) - moveRank(b)
-		})
 	}
 	// The sheet is a form (s-contacts-2): the collection is chosen in it and
 	// goes under Field; Move is its button. A collection chosen by its link

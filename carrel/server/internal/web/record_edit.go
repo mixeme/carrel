@@ -2725,12 +2725,13 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 	if attaching && c.spec.kind != view.KindNote {
 		form.Actions = append(form.Actions, s.attachAction(c, st.uid, st.etag, "edit"))
 	}
-	// Where an event or a task lies is chosen in its edit, a new one's too,
-	// as a note's notebook is (Р19 of scans/kinds-parity.md): a task's List
-	// beside its Summary (s-tasks-3, -14), an event's Calendar last in the
-	// head, after Tags (s-agenda-3, -15). Saving into another collection
-	// moves the record there (S-18); a new one is made there.
-	if c.spec.kind != view.KindNote && c.cal != nil && len(form.Sets) > 0 {
+	// Where a record lies is chosen in its edit, a new one's too, as a note's
+	// notebook is (Р19 of scans/kinds-parity.md; Р-63 of Typecase): a task's
+	// List, an event's Calendar, a contact's Address book — the client draws
+	// the choice in the head, left of Cancel (Typecase's note 72; s-tasks-3,
+	// s-agenda-3, s-contacts-3). Saving into another collection moves the
+	// record there (S-18); a new one is made there.
+	if c.spec.kind != view.KindNote && (c.cal != nil || c.card != nil) && len(form.Sets) > 0 {
 		row := s.notebookRow(c, st.notebook)
 		row.Error = text(st.errors["notebook"])
 		after := map[view.Kind]string{view.KindTask: "summary", view.KindEvent: "categories"}[c.spec.kind]
@@ -2761,7 +2762,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		if st.isNew && st.formUID != "" && len(form.Sets) > 0 {
 			form.Sets[0].Rows = append(form.Sets[0].Rows, view.FormRow{Name: "uid", Kind: view.InputHidden, Value: text(st.formUID)})
 		}
-		page := view.ContactEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: view.Text(c.stamp()), Form: form, Loss: st.loss, ReadOnly: c.col.ReadOnly}
+		page := view.ContactEditPage{Shell: sh, UID: st.uid, Name: text(name), Form: form, Loss: st.loss, ReadOnly: c.col.ReadOnly}
 		page.Photo = s.photoBlock(c, st)
 		return page
 	case view.KindEvent:
@@ -2772,7 +2773,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		if st.isNew || name == "" {
 			name = "New event"
 		}
-		page := view.EventEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: view.Text(c.stamp()), Form: form, Loss: st.loss, Delete: del,
+		page := view.EventEditPage{Shell: sh, UID: st.uid, Name: text(name), Form: form, Loss: st.loss, Delete: del,
 			Attendees: s.attendeeField(c, st), Source: c.source()}
 		if newAttach {
 			page.Attach = s.draftRows(c, draft)
@@ -2799,7 +2800,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		if st.isNew || name == "" {
 			name = "New task"
 		}
-		page := view.TaskEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: taskSubtitle(c, st.obj), Form: form, Source: c.source(), Loss: st.loss, Delete: del,
+		page := view.TaskEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: taskEditSubtitle(c, st.obj), Form: form, Source: c.source(), Loss: st.loss, Delete: del,
 			Attendees: s.attendeeField(c, st)}
 		if st.obj != nil && !st.isNew {
 			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
@@ -2913,7 +2914,7 @@ func foreignLine(names []string) view.Runs {
 // notebook's list address.
 // collectionWord names the collection a record of the kind lies in, in its
 // edit (s-notes-20 names a note's).
-var collectionWord = map[view.Kind]string{view.KindEvent: "Calendar", view.KindTask: "List", view.KindNote: "Notebook"}
+var collectionWord = map[view.Kind]string{view.KindEvent: "Calendar", view.KindTask: "List", view.KindNote: "Notebook", view.KindContact: "Address book"}
 
 func (s *Server) notebookRow(c *collectionCtx, chosen string) view.FormRow {
 	if chosen == "" {
@@ -3477,11 +3478,9 @@ func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string
 		obj: obj, uid: uid, values: vals, alarms: alarms, etag: etag, readAt: s.now(),
 		unfold: r.URL.Query().Get("fields") == "all",
 	}
-	// The form of a linked record's copy chosen on the sheet says it saves
-	// this copy only (s-contacts-31).
-	if n := s.copyNotice(r, c, uid); n != nil {
-		st.notices = append(st.notices, *n)
-	}
+	// Which copy is edited is said by the choice of the collection in the
+	// head (s-contacts-31): no line «Saving changes this copy only…» (the
+	// owner's decision, Typecase's note 72).
 	s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 }
 

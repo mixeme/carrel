@@ -51,9 +51,7 @@ func (s *Server) copiesSheet(ctx context.Context, c *collectionCtx, uid string, 
 		return view.CopiesSheet{}, false
 	}
 	n := len(lc.others) + 1
-	holders := copyHolders[c.spec.kind]
 	sheet := view.CopiesSheet{Kind: c.spec.kind, Subject: text(recordTitle(c.spec.kind, obj) + " · " + strconv.Itoa(n) + " copies")}
-	stands := "This " + holders[0] + " stands in " + countWord(n) + " " + holders[1] + ". "
 	// Each copy says what it holds otherwise and, after «·», what it holds
 	// of the first such thing (s-contacts-32: «Email differ ·
 	// v.lebedeva@example.org»; s-tasks-16: «Due differ · due 13 Aug»); the
@@ -103,7 +101,9 @@ func (s *Server) copiesSheet(ctx context.Context, c *collectionCtx, uid string, 
 	}
 	if done {
 		sheet.Title = "Which copy to mark done?"
-		sheet.Note = text(stands + "Tick the copy that is done; a copy that is not ticked stays as it is.")
+		// One sentence, as the owner shortened it (Typecase's note 73): how
+		// many copies there are, the head already says.
+		sheet.Note = "A copy that is not ticked stays as it is."
 		sheet.Form = view.Form{Action: s.route(c.recordPath(uid) + "/done"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
 			csrfField(c.sess), {Name: "from", Kind: view.InputHidden, Value: text(from)},
 			// The sheet's own post, told from the tick's: nothing ticked here
@@ -117,7 +117,7 @@ func (s *Server) copiesSheet(ctx context.Context, c *collectionCtx, uid string, 
 		return sheet, true
 	}
 	sheet.Title = "Which copy to edit?"
-	sheet.Note = text(stands + "Saving changes one copy only; the others stay as they are.")
+	sheet.Note = "Saving changes one copy only; the others stay as they are."
 	sheet.Form = view.Form{Action: s.route(c.recordPath(uid) + "/edit"), Method: "GET", Sets: []view.FieldSet{{Rows: []view.FormRow{row}}}}
 	sheet.Actions = []view.Action{
 		{ID: "copies.edit", Label: "Edit this copy", Method: "GET", Primary: true, Enabled: true, Submits: true},
@@ -126,9 +126,9 @@ func (s *Server) copiesSheet(ctx context.Context, c *collectionCtx, uid string, 
 	return sheet, true
 }
 
-// differTable is what the copies of a kind are compared by on a sheet: a
-// task's time is its due date (s-tasks-16: «Due differ»; the card's rows
-// keep «Time», as s-tasks-2 draws them).
+// differTable is what the copies of a kind are compared by, on a sheet and
+// in the card's rows: a task's time is its due date (s-tasks-16, s-tasks-2:
+// «Due differ»).
 func differTable(k view.Kind) []differProp {
 	switch k {
 	case view.KindContact:
@@ -238,25 +238,40 @@ func (s *Server) copyEditTo(r *http.Request, c *collectionCtx, uid string) strin
 	return mc.recordPath(muid) + "/edit?" + url.Values{copyField: {value}}.Encode()
 }
 
-// copyNotice is the line of the form of a linked record's copy opened from
-// «Which copy to edit?», before its fields (s-contacts-31: «after the
-// sheet»): the save goes to this copy only. nil — the form was not opened
-// from the sheet, or the record is in no group (s-notes-20 draws the form
-// of a linked note without it).
-func (s *Server) copyNotice(r *http.Request, c *collectionCtx, uid string) *view.Notice {
-	value := r.URL.Query().Get(copyField)
-	if value == "" {
-		return nil
-	}
-	lc, ok := s.linkedOf(r.Context(), c, uid)
-	if !ok || value != copyValue(lc.self) {
-		return nil
-	}
-	return &view.Notice{Role: view.NoticeInfo, Body: text("Saving changes this copy only — " + string(c.stamp()) + ". The others stay as they are.")}
-}
-
 // getKindCopies is «Which copy to edit?» (s-contacts-32). A record in no
 // group goes to its form.
+// getLinkedCopies is «Which copy to edit?» of a linked group named by the
+// UID of a record of it (s-contacts-35, Typecase's note 73: over the combined
+// book, /app/contacts/linked/{uid}/copies): the sheet of the first copy that
+// carries the UID, as that copy's own address answers it. A UID in no group
+// of the kind is not found.
+func (s *Server) getLinkedCopies(w http.ResponseWriter, r *http.Request, kind string) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	spec, ok := recordKinds[kind]
+	if !ok {
+		s.notFound(w, r)
+		return
+	}
+	uid := r.PathValue("uid")
+	for _, g := range s.catalogOf(sess).Duplicates.Linked {
+		if g.Kind != spec.kind {
+			continue
+		}
+		for _, m := range g.Members {
+			if m.UID == uid {
+				r.SetPathValue("account", m.AccountID)
+				r.SetPathValue("col", m.Col)
+				s.getKindCopies(w, r, kind)
+				return
+			}
+		}
+	}
+	s.notFound(w, r)
+}
+
 func (s *Server) getKindCopies(w http.ResponseWriter, r *http.Request, kind string) {
 	c, ok := s.openCollection(w, r, kind, true)
 	if !ok {
@@ -368,7 +383,7 @@ func (s *Server) postTaskDone(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				}
-				sheet.Form.Errors = []view.FieldError{{Name: copyField, Message: "Tick the copy that is done: nothing was marked."}}
+				sheet.Form.Errors = []view.FieldError{{Name: copyField, Message: "Tick the copy that is done."}} // under the rows (197 p. 4)
 			}
 			sheet.Under = s.underOf(r, "", doneBack(c, uid, from))
 			s.writeCopies(w, r, sheet)

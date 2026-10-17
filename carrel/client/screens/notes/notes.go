@@ -370,6 +370,10 @@ func side(d view.Details) *w.Side {
 	if d.Date != "" {
 		sub = []w.HeadSubPart{w.Text(string(d.Subtitle) + sep), w.Mono{Text: string(d.Date)}}
 	}
+	if d.Source.Colour != "" {
+		// The notebook's mark at its name (Typecase 434ac87, note 72).
+		sub = append([]w.HeadSubPart{w.Mark{Colour: string(d.Source.Colour), Size: w.MarkH11}}, sub...)
+	}
 	items := []w.SidePart{w.Head{
 		Title:  &w.HeadTitle{Text: string(d.Title), Size: w.HeadTitle19},
 		Tools:  tools,

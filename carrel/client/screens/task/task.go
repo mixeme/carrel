@@ -67,7 +67,7 @@ const (
 //     same task in other lists; the source.
 //   - The deletion at the foot.
 func Screen(p *view.TaskPage) w.Shell {
-	h := w.Head{Title: &w.HeadTitle{Text: string(p.Summary)}, Subs: bind.Sub(p.Subtitle)}
+	h := w.Head{Title: &w.HeadTitle{Text: string(p.Summary)}, Subs: bind.Marked(p.Source.Colour, bind.Sub(p.Subtitle))}
 	var acts []w.ActsPart
 	var attach *view.Action
 	var danger []w.Button

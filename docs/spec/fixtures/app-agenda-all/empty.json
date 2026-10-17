@@ -4,14 +4,6 @@
       {
         "arrow": [
           {
-            "colour": "#a05a2c",
-            "enabled": true,
-            "href": "/app/calendar/a-nc-home/dni-rozhdeniya/new",
-            "id": "record.new",
-            "label": "Дни рождения",
-            "method": "GET"
-          },
-          {
             "aside": "last used",
             "colour": "#4a6b52",
             "enabled": true,
@@ -30,11 +22,11 @@
             "method": "GET"
           },
           {
-            "colour": "#8c6239",
+            "colour": "#a05a2c",
             "enabled": true,
-            "href": "/app/calendar/a-rad-vps/dezhurstva/new",
+            "href": "/app/calendar/a-nc-home/dni-rozhdeniya/new",
             "id": "record.new",
-            "label": "Дежурства",
+            "label": "Дни рождения",
             "method": "GET"
           },
           {
@@ -43,6 +35,14 @@
             "href": "/app/calendar/a-rad-vps/proekty/new",
             "id": "record.new",
             "label": "Проекты",
+            "method": "GET"
+          },
+          {
+            "colour": "#8c6239",
+            "enabled": true,
+            "href": "/app/calendar/a-rad-vps/dezhurstva/new",
+            "id": "record.new",
+            "label": "Дежурства",
             "method": "GET"
           },
           {
@@ -589,75 +589,6 @@
         "accountID": "a-nc-home",
         "rows": [
           {
-            "colour": "#a05a2c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
-            "label": "Дни рождения",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
             "colour": "#4a6b52",
             "count": null,
             "detail": "",
@@ -794,25 +725,18 @@
             "readOnly": false,
             "state": "ok",
             "tick": "off"
-          }
-        ],
-        "state": "ok"
-      },
-      {
-        "account": "radicale · vps",
-        "accountID": "a-rad-vps",
-        "rows": [
+          },
           {
-            "colour": "#8c6239",
+            "colour": "#a05a2c",
             "count": null,
             "detail": "",
             "feed": false,
-            "href": "/app/calendar/a-rad-vps/dezhurstva",
-            "label": "Дежурства",
+            "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+            "label": "Дни рождения",
             "menu": [
               {
                 "enabled": true,
-                "href": "/app/collections/rename?a=a-rad-vps\u0026c=dezhurstva",
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
                 "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
@@ -821,7 +745,7 @@
               },
               {
                 "enabled": true,
-                "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva",
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
                 "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
@@ -830,7 +754,7 @@
               },
               {
                 "enabled": true,
-                "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva\u0026copy=1",
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026copy=1",
                 "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
@@ -839,7 +763,7 @@
               },
               {
                 "enabled": true,
-                "href": "/app/calendar/a-rad-vps/dezhurstva/import",
+                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
                 "icon": "i-import",
                 "id": "collection.import",
                 "label": "Import",
@@ -848,7 +772,7 @@
               },
               {
                 "enabled": true,
-                "href": "/app/calendar/a-rad-vps/dezhurstva/export",
+                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export",
                 "icon": "i-export",
                 "id": "collection.export",
                 "label": "Export",
@@ -857,7 +781,7 @@
               {
                 "danger": true,
                 "enabled": true,
-                "href": "/app/collections/delete?a=a-rad-vps\u0026c=dezhurstva",
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
                 "icon": "i-trash",
                 "id": "collection.delete",
                 "label": "Delete on the server…",
@@ -870,7 +794,14 @@
             "readOnly": false,
             "state": "ok",
             "tick": "off"
-          },
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "radicale · vps",
+        "accountID": "a-rad-vps",
+        "rows": [
           {
             "colour": "#6b4e7a",
             "count": null,
@@ -927,6 +858,75 @@
                 "danger": true,
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-rad-vps\u0026c=proekty",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "off"
+          },
+          {
+            "colour": "#8c6239",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar/a-rad-vps/dezhurstva",
+            "label": "Дежурства",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-rad-vps\u0026c=dezhurstva",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-rad-vps/dezhurstva/import",
+                "icon": "i-import",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-rad-vps/dezhurstva/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-rad-vps\u0026c=dezhurstva",
                 "icon": "i-trash",
                 "id": "collection.delete",
                 "label": "Delete on the server…",

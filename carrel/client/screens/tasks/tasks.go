@@ -431,7 +431,7 @@ func side(d view.Details) *w.Side {
 	acts = append(acts, w.Close{Label: "Close the panel", Href: d.Close})
 	items := []w.SidePart{w.Head{
 		Title: &w.HeadTitle{Text: string(d.Title), Size: w.HeadTitle19},
-		Subs:  []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(d.Subtitle)}}},
+		Subs:  []w.HeadSub{bind.SourceSub(d.Source.Colour, d.Subtitle)},
 		Acts:  &w.Acts{Items: acts},
 	}}
 	fields := w.Fields{}

@@ -116,28 +116,87 @@ func leftLines(tf timeFmt, kind view.Kind, title string, left []cal.Left) []view
 	return out
 }
 
-// seriesChange is the line «What you changed»: the rule the series has now,
-// and the one it had.
+// seriesChange is the line «What you changed», in the fewest words that say
+// it (Typecase's note 74, 184 p. 3): an end that moved — «The series ends on
+// 18 January — it ran weekly until 28 December» —, another pace — «The
+// series repeats every two weeks — it repeated weekly» —, or «The series no
+// longer repeats».
 func seriesChange(tf timeFmt, was seriesBefore, sent *model.Object) view.AskLine {
-	now, before := "", ""
-	if raw := cal.RawRRULE(sent); raw != "" {
-		var start time.Time
-		if tm, err := cal.TimingOf(sent, tf.tz); err == nil {
-			start = tm.Start
-		}
-		now = tf.recurrence(raw, start)
+	raw := cal.RawRRULE(sent)
+	var start time.Time
+	if tm, err := cal.TimingOf(sent, tf.tz); err == nil {
+		start = tm.Start
 	}
+	before := ""
 	if was.rule != "" {
-		before = tf.recurrence(was.rule, was.start)
+		before = seriesPace(was.rule) + seriesEnd(tf, was.rule, was.start)
 	}
-	line := view.AskLine{Text: text("The series repeats: " + now)}
-	if now == "" {
+	var line view.AskLine
+	switch {
+	case raw == "":
 		line.Text = "The series no longer repeats"
-	}
-	if before != "" {
-		line.Aside = text("— it repeated: " + before)
+		if before != "" {
+			line.Aside = text("— it repeated " + before)
+		}
+	case was.rule != "" && withoutEnd(raw) == withoutEnd(was.rule):
+		line.Text = "The series no longer ends"
+		if until, ok := ruleUntil(raw, start, tf.tz); ok {
+			line.Text = text("The series ends on " + until.Format("2 January"))
+		} else if n := parseRule(raw).get("COUNT"); n != "" {
+			line.Text = text("The series ends after " + n + " times")
+		}
+		line.Aside = text("— it ran " + before)
+	default:
+		line.Text = text("The series repeats " + seriesPace(raw))
+		if before != "" {
+			line.Aside = text("— it repeated " + seriesPace(was.rule))
+		}
 	}
 	return line
+}
+
+// seriesPace is how often a rule repeats, in the words of the question:
+// «weekly», «every two weeks».
+func seriesPace(raw string) string {
+	r := parseRule(raw)
+	units := map[string]string{"YEARLY": "year", "MONTHLY": "month", "WEEKLY": "week", "DAILY": "day", "HOURLY": "hour"}
+	unit, ok := units[r.get("FREQ")]
+	if !ok {
+		return "by its own rule"
+	}
+	n, _ := strconv.Atoi(r.get("INTERVAL"))
+	if n <= 1 {
+		if unit == "day" {
+			return "daily"
+		}
+		return unit + "ly"
+	}
+	return "every " + countWord(n) + " " + unit + "s"
+}
+
+// seriesEnd is a rule's end after its pace: « until 28 December», « 8
+// times», "" for none.
+func seriesEnd(tf timeFmt, raw string, start time.Time) string {
+	if until, ok := ruleUntil(raw, start, tf.tz); ok {
+		return " until " + until.Format("2 January")
+	}
+	if n := parseRule(raw).get("COUNT"); n != "" {
+		return ", " + n + " times"
+	}
+	return ""
+}
+
+// withoutEnd is a rule with its end taken out, to tell a moved end from
+// another pace.
+func withoutEnd(raw string) string {
+	var keep []string
+	for _, p := range parseRule(raw) {
+		if p[0] != "UNTIL" && p[0] != "COUNT" {
+			keep = append(keep, p[0]+"="+p[1])
+		}
+	}
+	sort.Strings(keep)
+	return strings.Join(keep, ";")
 }
 
 // askSeries is the question of an edit that leaves left without their day

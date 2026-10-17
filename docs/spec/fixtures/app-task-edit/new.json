@@ -3479,11 +3479,7 @@
     "stamp": "nextcloud · Дела",
     "uid": ""
   },
-  "subtitle": [
-    {
-      "text": "nextcloud · Дела"
-    }
-  ],
+  "subtitle": [],
   "title": "New task",
   "top": {
     "lock": null,

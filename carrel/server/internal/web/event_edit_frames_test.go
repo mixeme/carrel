@@ -33,7 +33,9 @@ func TestEventEditByItsFrame(t *testing.T) {
 	rec := list + "/8f1c-4a02-b7d3"
 	page := decode[view.EventEditPage](t, app.h.do(get(rec+"/edit", app.sess)))
 
-	if page.Name != "Синк-ап по релизу" || page.Subtitle != "nextcloud · Личный" {
+	// The edit does not name its calendar under the title: the choice is in
+	// the head (Typecase's note 72, s-agenda-3).
+	if page.Name != "Синк-ап по релизу" || page.Subtitle != "" {
 		t.Errorf("head = %q, %q", page.Name, page.Subtitle)
 	}
 	for _, name := range []string{"categories", "repeat.count"} {
@@ -73,7 +75,7 @@ func TestEventEditByItsFrame(t *testing.T) {
 	}
 
 	fresh := decode[view.EventEditPage](t, app.h.do(get(list+"/new", app.sess)))
-	if fresh.Name != "New event" || fresh.Subtitle != "nextcloud · Личный" || fresh.Delete != nil {
+	if fresh.Name != "New event" || fresh.Subtitle != "" || fresh.Delete != nil {
 		t.Errorf("new event head = %q, %q, delete %v", fresh.Name, fresh.Subtitle, fresh.Delete)
 	}
 }

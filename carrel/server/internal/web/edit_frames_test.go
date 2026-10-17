@@ -15,7 +15,7 @@ import (
 // fields folded under «Show N empty fields».
 
 var (
-	frameEditHead  = regexp.MustCompile(`(?s)<div class="tc-main">\s*<div class="tc-head">\s*<div class="tc-head__titles">\s*<div class="tc-head__title">([^<]*)</div>\s*<div class="tc-head__sub">([^<]*)</div>`)
+	frameEditHead  = regexp.MustCompile(`(?s)<div class="tc-main">\s*<div class="tc-head">\s*<div class="tc-head__titles">\s*<div class="tc-head__title">([^<]*)</div>(?:\s*<div class="tc-head__sub">([^<]*)</div>)?`)
 	framePhotoSide = regexp.MustCompile(`(?s)<div class="tc-stack[^"]*tc-field__photo-side">(.*?)<span class="tc-field__hint[^"]*">([^<]*)</span>`)
 	frameEditField = regexp.MustCompile(`(?s)<div class="tc-field[^"]*">\s*<label>([^<]*)</label>(.*?)</div>`)
 	frameShowEmpty = regexp.MustCompile(`<div class="tc-field">\s*<button class="tc-btn" type="button">(Show \d+ empty fields?)</button>\s*</div>`)

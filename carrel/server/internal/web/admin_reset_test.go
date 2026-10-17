@@ -14,11 +14,12 @@ import (
 // s-admin-13 read part by part: the title, the labels of the fields, the
 // hint under the temporary password, and the buttons of the foot.
 var (
-	frameSheetTitle = regexp.MustCompile(`(?s)<b class="tc-sheet__title">(.*?)</b>`)
-	frameSheetHint  = regexp.MustCompile(`(?s)<span class="tc-field__hint">(.*?)</span>`)
-	frameSheetFoot  = regexp.MustCompile(`(?s)<div class="tc-sheet__foot">(.*?)</div>`)
-	frameErrHint    = regexp.MustCompile(`(?s)<span class="tc-field__hint tc-dim--danger">(.*?)</span>`)
-	frameIssuedMsg  = regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush[^"]*">(.*?)</div>`)
+	frameSheetTitle   = regexp.MustCompile(`(?s)<b class="tc-sheet__title">(.*?)</b>`)
+	frameSheetHint    = regexp.MustCompile(`(?s)<span class="tc-field__hint">(.*?)</span>`)
+	frameSheetFoot    = regexp.MustCompile(`(?s)<div class="tc-sheet__foot">(.*?)</div>`)
+	frameButtonOrLink = regexp.MustCompile(`(?s)<(?:button\b[^>]*|a class="tc-btn[^"]*"[^>]*)>(.*?)</(?:button|a)>`)
+	frameErrHint      = regexp.MustCompile(`(?s)<span class="tc-field__hint tc-dim--danger">(.*?)</span>`)
+	frameIssuedMsg    = regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush[^"]*">(.*?)</div>`)
 )
 
 // from-typecase note 18, to-typecase task 16: «Reset a password» stands in
@@ -84,7 +85,9 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 		t.Errorf("warning = %q: what a reset destroys is said before the button", sheet.Warning)
 	}
 	var foot []string
-	for _, m := range frameButton.FindAllStringSubmatch(frameSheetFoot.FindStringSubmatch(frame)[1], -1) {
+	// Buttons and the links drawn as buttons — Cancel is a link to the screen
+	// under the sheet since note 73 (task 187).
+	for _, m := range frameButtonOrLink.FindAllStringSubmatch(frameSheetFoot.FindStringSubmatch(frame)[1], -1) {
 		foot = append(foot, frameText(m[1]))
 	}
 	if got := labels(sheet.Actions); !equalStrings(got, foot) {

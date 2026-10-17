@@ -235,6 +235,21 @@ func taskSubtitle(c *collectionCtx, obj *model.Object) view.Runs {
 	return out
 }
 
+// taskEditSubtitle is the line under the title of a task's edit
+// (s-tasks-3, -14): only what its fields do not say — how late it is, in
+// alarm. Where it lies is the choice in the head (Typecase's note 72).
+func taskEditSubtitle(c *collectionCtx, obj *model.Object) view.Runs {
+	if obj == nil {
+		return nil
+	}
+	if due, err := cal.DueOf(obj, c.tf.tz); err == nil {
+		if late := overdueBy(c.tf, due, taskDone(obj)); late != "" {
+			return view.Runs{{Text: text(late), Mark: view.RunDanger}}
+		}
+	}
+	return nil
+}
+
 // taskAttachHint is the line under the attachments of a task's panel
 // (s-tasks-1): up to the limit the file goes into the task, above it into
 // the attachment folder (S-20) — the limit is the instance's.

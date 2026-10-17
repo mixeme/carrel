@@ -101,14 +101,17 @@ var mockupSet = []mockupCollection{
 		kinds: []view.Kind{view.KindContact}, file: "nextcloud-home/arhiv.vcf"},
 	{account: "nextcloud", slug: "lichnyj", name: "Личный", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "nextcloud-home/lichnyj.ics"},
+	// «Дела» before «Работа»: the order of the catalog is the frames' — the
+	// tasks' rail «Дела, Работа» (s-tasks-3), the calendar's «Личный,
+	// Работа, Дни рождения» (s-agenda-1) — one order for both.
+	{account: "nextcloud", slug: "dela", name: "Дела", colour: "#4A6B52",
+		kinds: []view.Kind{view.KindTask}, comps: []string{"VTODO"}, file: "nextcloud-home/dela.ics"},
 	{account: "nextcloud", slug: "rabota", name: "Работа", colour: "#3F6E8C",
 		kinds: []view.Kind{view.KindEvent, view.KindTask}, comps: []string{"VEVENT", "VTODO"}, file: "nextcloud-home/rabota.ics", more: "nextcloud-home/rabota-zadachi.ics"},
 	// «Дни рождения» stands with its tick off, as every calendar frame draws
 	// it and the set's README says (s-agenda-1…3).
 	{account: "nextcloud", slug: "dni-rozhdeniya", name: "Дни рождения", colour: "#A05A2C",
 		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "nextcloud-home/dni-rozhdeniya.ics", unticked: true},
-	{account: "nextcloud", slug: "dela", name: "Дела", colour: "#4A6B52",
-		kinds: []view.Kind{view.KindTask}, comps: []string{"VTODO"}, file: "nextcloud-home/dela.ics"},
 	{account: "nextcloud", slug: "zapisi", name: "Записи", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/zapisi.ics"},
 	// «Дневник» is ticked, as the frames of the notes draw it since the
@@ -617,6 +620,11 @@ func newMockupApp(t *testing.T) *mockupApp {
 		} else {
 			srv.AddCalendar(caldav.Calendar{Path: path, Name: col.name, SupportedComponentSet: col.comps, ReadOnly: col.readOnly})
 		}
+		// The set's order is the frames' (Контакты before Архив, Личный
+		// before Дни рождения): the stand lists its collections so, as a
+		// server keeps the order they were made in (183 p. 3 of Typecase:
+		// the catalog's order is what the screens show).
+		srv.Ranked = append(srv.Ranked, path)
 		srv.SetColour(path, col.colour)
 		paths[col.slug] = path
 		var records []string
@@ -1062,7 +1070,7 @@ func TestFixtureCombinedContacts(t *testing.T) {
 	for _, g := range page.Groups {
 		for _, r := range g.Rows {
 			if r.Name == "Анна Ковалёва" {
-				open = r.Href
+				open = recordHref(r.Href)
 			}
 		}
 	}

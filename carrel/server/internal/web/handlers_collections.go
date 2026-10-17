@@ -960,7 +960,11 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		case strings.TrimSpace(f.name) != "":
 			slug = collectionSlug(f.name)
 		}
-		address.HintRuns = join(monoRun(shortAddress(chosen.Server, strings.TrimSuffix(home, "/"))+"/"+slug+"/"), said)
+		// In three pieces (Typecase's note 75, task 200): the path, the part
+		// the address gives — kept in step with it as it is typed —, the
+		// closing slash.
+		address.HintRuns = join(monoRun(shortAddress(chosen.Server, strings.TrimSuffix(home, "/"))+"/"),
+			view.Run{Text: text(slug), Mark: view.RunSlug}, monoRun("/"), said)
 	}
 	rows = append(rows, address)
 	sheet.Form = focused(s.plainForm(action, "POST", rows...), "name")

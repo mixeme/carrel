@@ -70,16 +70,6 @@
     },
     "options": [
       {
-        "colour": "#a05a2c",
-        "href": "/app/contacts/a-nc-home/kontakty/import?into=arhiv\u0026to=a-nc-home",
-        "id": "/app/contacts/a-nc-home/kontakty/import?into=arhiv\u0026to=a-nc-home",
-        "label": "Архив",
-        "last": false,
-        "readOnly": false,
-        "reason": "",
-        "stamp": "nextcloud · Архив"
-      },
-      {
         "colour": "#4a6b52",
         "href": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
         "id": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
@@ -88,6 +78,16 @@
         "readOnly": false,
         "reason": "",
         "stamp": "nextcloud · Контакты"
+      },
+      {
+        "colour": "#a05a2c",
+        "href": "/app/contacts/a-nc-home/kontakty/import?into=arhiv\u0026to=a-nc-home",
+        "id": "/app/contacts/a-nc-home/kontakty/import?into=arhiv\u0026to=a-nc-home",
+        "label": "Архив",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · Архив"
       },
       {
         "colour": "#6b4e7a",
@@ -195,75 +195,6 @@
         "accountID": "a-nc-home",
         "rows": [
           {
-            "colour": "#a05a2c",
-            "count": 1,
-            "detail": "",
-            "feed": false,
-            "href": "/app/contacts/a-nc-home/arhiv",
-            "label": "Архив",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/contacts/a-nc-home/arhiv/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/contacts/a-nc-home/arhiv/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
             "colour": "#4a6b52",
             "count": 5,
             "detail": "",
@@ -328,6 +259,75 @@
               }
             ],
             "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "/app/contacts/a-nc-home/arhiv",
+            "label": "Архив",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-pencil",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-move",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
+                "icon": "i-dup",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET",
+                "target": "sheet"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/import",
+                "icon": "i-import",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/export",
+                "icon": "i-export",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-trash",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true,
+                "target": "sheet"
+              }
+            ],
+            "on": false,
             "readOnly": false,
             "state": "ok",
             "tick": "on"
