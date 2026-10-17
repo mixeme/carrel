@@ -674,6 +674,11 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 	if to := r.PostFormValue("to"); to != "" {
 		q.Set("to", to)
 	}
+	// «Open the folder» of a sheet without scripts (note 61 of Typecase):
+	// the same sheet with the folder ticked chosen and open, nothing done.
+	if r.Method == http.MethodPost && r.PostFormValue("open") != "" {
+		q.Del("go")
+	}
 	if id := q.Get("transfer"); id != "" {
 		s.answerTransfer(w, r, c, "op", id)
 		return
@@ -1049,7 +1054,14 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		form = focused(form, "name")
 		sheet.Form = &form
 	}
-	sheet.Actions = []view.Action{confirm, {ID: "file.op.cancel", Label: "Cancel", Href: s.route(c.href("", c.segs, true)), Method: "GET", Enabled: true}}
+	sheet.Actions = []view.Action{confirm}
+	if op == view.FileMove || op == view.FileCopy {
+		// The second button of the form on a page without scripts
+		// (s-files-4, -13): it sends the folder ticked and asks for the
+		// sheet with it open. With a script a node opens by itself.
+		sheet.Actions = append(sheet.Actions, view.Action{ID: "file.op.open", Label: "Open the folder", Method: "POST", Submits: true, Enabled: true})
+	}
+	sheet.Actions = append(sheet.Actions, view.Action{ID: "file.op.cancel", Label: "Cancel", Href: s.route(c.href("", c.segs, true)), Method: "GET", Enabled: true})
 	return sheet
 }
 

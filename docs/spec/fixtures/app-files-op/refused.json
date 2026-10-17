@@ -11,6 +11,14 @@
       "submits": true
     },
     {
+      "csrf": "csrf",
+      "enabled": true,
+      "id": "file.op.open",
+      "label": "Open the folder",
+      "method": "POST",
+      "submits": true
+    },
+    {
       "enabled": true,
       "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
       "id": "file.op.cancel",

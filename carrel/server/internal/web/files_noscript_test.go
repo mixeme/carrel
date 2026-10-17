@@ -133,3 +133,30 @@ func TestFolderRowsTakeADrop(t *testing.T) {
 		t.Errorf("a file takes a drop: %+v", a.Upload)
 	}
 }
+
+// Note 61 of Typecase (s-files-4, -13): without scripts the sheet of a move
+// has a second button of its form, «Open the folder», which sends the folder
+// ticked and answers the same sheet with it chosen and open — nothing is
+// moved.
+func TestOpenTheFolderWithoutScripts(t *testing.T) {
+	f := filesFixture(t, true)
+	f.srv.SeedFile(filesDocs+"a.txt", "alpha")
+	f.srv.SeedFolder(filesDocs + "sub/")
+	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
+	move := opSheet(t, f, rowMenu(t, fileRow(t, page, "a.txt"), "file.move"), url.Values{})
+	open := actionByID(move.Actions, "file.op.open")
+	if open == nil || !open.Submits || !open.Enabled || open.Method != "POST" {
+		t.Fatalf("Open the folder = %+v", open)
+	}
+	sub := move.Target.Nodes[0].Children[0]
+	form := formFields(*move.Form)
+	form.Set("to", sub.ID)
+	form.Set("open", "1")
+	sheet := decode[view.FileOpSheet](t, f.h.do(postForm(move.Form.Action, f.sess, form)))
+	if sheet.Target == nil || sheet.Target.Chosen != sub.ID {
+		t.Fatalf("Open the folder answered %+v", sheet.Target)
+	}
+	if _, ok := f.srv.File(filesDocs + "a.txt"); !ok {
+		t.Fatal("Open the folder moved the file")
+	}
+}

@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.339 — 2026-10-18
+
+### Changed
+
+- **The sheet of a move or a copy opens a folder without scripts** (note 61
+  of Typecase; `s-files-4`, `-13`): its form has a second button, «Open the
+  folder» (`file.op.open`), which sends the folder ticked with `open=1`;
+  the answer is the same sheet with that folder chosen and open, nothing
+  moved.
+
+### For consumers
+
+- New action `file.op.open` of `FileOpSheet` (move, copy); C-5 says what
+  `open=1` does.
+
 ## v0.2.338 — 2026-10-18
 
 ### Changed
