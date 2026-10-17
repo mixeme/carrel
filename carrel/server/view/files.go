@@ -263,6 +263,9 @@ type PublishedLinksPage struct {
 	// local: the link opens only from your network» тревогой
 	Subtitle Runs           `json:"subtitle"`
 	Rows     []PublishedRow `json:"rows"`
+	// Empty — ни одной выданной ссылки (s-publish-18): «No links are
+	// published.» и где ссылку делают; nil — ссылки есть
+	Empty *Notice `json:"empty"`
 }
 type PublishedRow struct {
 	Title Text `json:"title"`

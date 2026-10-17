@@ -2561,6 +2561,7 @@ type PublishedLinksPage struct {
     Shell
     Subtitle Runs
     Rows     []PublishedRow
+    Empty    *Notice // ни одной выданной ссылки (s-publish-18): «No links are published.» и где ссылку делают; nil — ссылки есть
 }
 type PublishedRow struct {
     Title    Text

@@ -1,5 +1,12 @@
 {
   "details": null,
+  "empty": {
+    "actions": [],
+    "body": "A link is made where the thing lies: «Publish a link» in the ⋯ menu of a row, a card or a collection.",
+    "details": null,
+    "role": "",
+    "title": "No links are published."
+  },
   "look": {
     "compact": false,
     "panel": true,

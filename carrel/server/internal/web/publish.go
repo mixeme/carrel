@@ -641,6 +641,10 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 			Href: s.postQuery("/app/publish", url.Values{"op": {"revoke"}, "id": {l.ID}})})
 		page.Rows = append(page.Rows, row)
 	}
+	if len(page.Rows) == 0 {
+		// No link out (s-publish-18): where one is made.
+		page.Empty = &view.Notice{Title: "No links are published.", Body: "A link is made where the thing lies: «Publish a link» in the ⋯ menu of a row, a card or a collection."}
+	}
 	s.writePage(w, r, http.StatusOK, page)
 }
 

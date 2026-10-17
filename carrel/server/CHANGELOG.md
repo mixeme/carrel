@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.340 — 2026-10-18
+
+### Changed
+
+- **No link out, the list says so** (`s-publish-18`): «No links are
+  published.» and where a link is made — «Publish a link» in the ⋯ menu of
+  a row, a card or a collection (`PublishedLinksPage.Empty`).
+
+### For consumers
+
+- New `PublishedLinksPage.Empty` (C-6).
+
 ## v0.2.339 — 2026-10-18
 
 ### Changed
