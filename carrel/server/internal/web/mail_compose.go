@@ -64,11 +64,15 @@ type mailPart struct {
 	To      string
 	Format  string // "md" or "ics" for a note
 	Title   string
-	Name    string // the file name in the letter
-	Media   string
-	Size    int64
-	AsLink  bool
-	LinkID  string // one of the person's live links, kept in the blob
+	// Detail tells this one from another after its title on the sheet's row
+	// (Пб21): an event's day and hour, a contact's organisation, a folder's
+	// count. The title alone names a link the letter makes.
+	Detail string
+	Name   string // the file name in the letter
+	Media  string
+	Size   int64
+	AsLink bool
+	LinkID string // one of the person's live links, kept in the blob
 	// Terms are the publish sheet's form the person applied over the letter
 	// to a link it will make (note 70 of Typecase): how long it lives and
 	// what the visitor sees. Nil — the letter's own: thirty days, what the
@@ -314,14 +318,22 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 	links := 0
 	var why []string
 	for i, p := range d.Parts {
-		row := view.MailAttachRow{Kind: p.Kind, Title: text(p.Title), AsLink: p.AsLink,
+		title := p.Title
+		if p.Detail != "" {
+			title += " · " + p.Detail
+		}
+		row := view.MailAttachRow{Kind: p.Kind, Title: text(title), AsLink: p.AsLink,
 			Remove: view.Action{ID: "mail.attach.remove", Label: "Remove", Method: "POST", Enabled: true,
 				Href: s.postQuery("/app/mail/compose", url.Values{"op": {"remove"}, "i": {strconv.Itoa(i)}})}}
 		switch {
 		case p.Folder:
 			row.Format = "folder"
 		case p.Name != "":
-			row.Format = text(p.Name[strings.LastIndex(p.Name, ".")+1:])
+			// A file's format is in its name (s-mail-1: «смета-подрядчик.pdf ·
+			// 4.2 MB»); a record says the format it goes in («.vcf · 3 KB»).
+			if p.Kind != view.KindFile {
+				row.Format = text(p.Name[strings.LastIndex(p.Name, ".")+1:])
+			}
 			row.Size = formatSize(p.Size)
 		}
 		if p.AsLink {

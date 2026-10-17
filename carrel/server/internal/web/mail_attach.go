@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"carrel.dev/carrel/server/internal/fanout"
+	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
@@ -304,6 +305,13 @@ func (s *Server) chosenPart(r *http.Request, sess *session.Session, k attachKind
 		if k.What == "folder" {
 			p.Folder, p.AsLink, p.Path = true, true, strings.Join(segs, "/")
 			p.Title = fileTitle(fc, segs)
+			// How much is in it, after its name (Пб21; s-mail-1: «Договор
+			// подряда · 9 files»); unread, its name alone.
+			if dir, err := fc.path(segs, true); err == nil {
+				if entries, err := fc.files.List(ctx, dir); err == nil {
+					p.Detail = plural(len(entries), "file")
+				}
+			}
 			return p, nil
 		}
 		name := r.FormValue("file")
@@ -368,6 +376,10 @@ func (s *Server) chosenPart(r *http.Request, sess *session.Session, k attachKind
 			return mailPart{}, errors.New("It is not there any more.")
 		}
 		p.Title = recordTitle(k.Kind, obj)
+		// The row says which one (Пб21; s-mail-1): an event its day and
+		// hour, «Встреча на объекте · 18 August 10:00»; a contact where they
+		// work, «Пётр Смирнов · подрядчик».
+		p.Detail = partDetail(s.timeFor(sess), k.Kind, obj)
 		p.Format = r.FormValue("format")
 		switch {
 		case k.What == "contact":
@@ -385,6 +397,28 @@ func (s *Server) chosenPart(r *http.Request, sess *session.Session, k attachKind
 	}
 	p.Size = int64(len(data))
 	return p, nil
+}
+
+// partDetail is what tells one record attached from another after its
+// title: an event's day and hour, a contact's organisation or title.
+func partDetail(tf timeFmt, k view.Kind, obj *model.Object) string {
+	switch k {
+	case view.KindEvent:
+		tm, err := cal.TimingOf(obj, tf.tz)
+		if err != nil || tm.Start.IsZero() {
+			return ""
+		}
+		if tm.AllDay {
+			return tm.Start.In(tf.tz).Format("2 January")
+		}
+		return tm.Start.In(tf.tz).Format("2 January ") + tf.clock(tm.Start)
+	case view.KindContact:
+		if org := structured(firstValue(obj, "ORG")); org != "" {
+			return org
+		}
+		return strings.TrimSpace(firstValue(obj, "TITLE"))
+	}
+	return ""
 }
 
 // spanOf is what of a calendar a part carries: "dates" when it names its

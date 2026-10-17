@@ -17,6 +17,16 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.333 — 2026-10-17
+
+### Changed
+
+- **A letter's rows say which one** (Пб21; `s-mail-1`): an event attached
+  gives its day and hour after its title («Встреча на объекте · 18 August
+  10:00»), a contact where they work, a folder how much is in it («· 9
+  files»); a file's row writes no format beside the name that has it. The
+  link a part goes as is still named by its title alone.
+
 ## v0.2.332 — 2026-10-17
 
 ### Changed
