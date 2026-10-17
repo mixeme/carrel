@@ -2421,6 +2421,65 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      `case c.str("Name") != "" && c.str("Of") != "": return ""` перед
      «a menu item with Name in a menu that is no form».
 
+Записка 77 от 17.10.2026 (Typecase `8e09917`; задачи 191, 198; решения
+владельца Р-67, Р-69). По порядку обмена `4cd37cf`: записка одна, копию
+макета переносит переход клиента. **Последний коммит Typecase, который она
+описывает, — `8e09917`** (463 кадра).
+
+77. **Экран расхождения: имена формы и состояния.**
+   - **191 п. 3 — имена по C-5.** Кадры `s-conflict-1`…`-5`: радио
+     `choice.0…` (с нуля), значения `mine` / `theirs`; «Leave it out» —
+     `theirs`, «Your edit» у свойства только на сервере — `mine`. В форме —
+     скрытые `csrf`, `etag`, `op=combine`. «Use only my edit» и «Use only
+     the server version» — кнопки своих форм `form="conflict.mine"` /
+     `"conflict.theirs"` (ваши `ActionForm` с ID действия); Cancel —
+     ссылка. Вид тот же. Отдельного кадра телефона не нужно: экраны
+     расхождения проходят лестницу ширин, на 460 — тот же вид столбиком.
+   - **198 — чья правка не известна** (`s-conflict-6`, `data-part="unknown"`).
+     Вид различия у карточек пуст; вариант подписан **«Your form»**, кнопка —
+     **«Use only my form»** (владелец, 17.10: в форме могут быть поля,
+     которых человек не трогал). **Плашки «Some of these may not be your
+     changes» нет** — подпись говорит то же. Ничего не выбрано; под
+     подзаголовком вторая строка **«Choose a side for every property.»**
+     (не у кнопки — владелец: сначала что делать, потом карточки).
+   - **198 п. 2 — без сценариев:** радио `required` (`Check.Required`);
+     «Write this combination» — **`State: w.ButtonWaits`, `Reason`** (не
+     `disabled`): бледная, пока в форме, диалоге или листе вокруг пусто
+     обязательное поле, причина — в подсказке; нажатую браузер не
+     отправит и назовёт поле; выбраны все — готова, без сценария тоже
+     (`:has(:invalid)`). Вашему `combine.Enabled = false` с причиной
+     соответствует `ButtonWaits`, когда у строк нет `Choice`; поле для
+     радио — например `FormRow.Required`. «Nothing was written» остаётся
+     ответом на форму без выбора (браузер до него обычно не допустит);
+     кадра не рисовал — это `s-conflict-6` с вашим сообщением сверху.
+   - **Р-67 — удалено на сервере** (`s-conflict-7`, `data-part="deleted"`).
+     Подзаголовок «Another client deleted this contact while you were
+     editing it. Nothing has been written.», вторая строка «Choose a side.»
+     Одна карточка — рубрика с именем записи; радио `choice.0`: `mine` —
+     «Your edit · write it back» (значение — имя и изменённые поля через
+     « · »), `theirs` — «Server · leave it deleted» («—»); ничего не
+     выбрано, `required`. Главная — **«Write this choice»** (`ButtonWaits`,
+     «Choose a side.»), и Cancel. Сейчас у вас «Deleted elsewhere» и один
+     Cancel — нужна форма: `mine` пишет запись заново с правкой, `theirs`
+     сбрасывает черновик.
+   - **Р-69 — ничего не расходится: экрана нет.** Правка уже на сервере:
+     ничего не писать, черновик сбросить, вести на карточку записи (как
+     после сохранения). «Nothing differs» и две выключенные кнопки уходят.
+   - **Состояния** (данные — ваши, слова короче по слову владельца):
+     `s-conflict-8` (`refused`, событие) — красное «This combination cannot
+     be written.» без второй фразы, под ним `Diag` «Fields» и строки
+     (`end: The end is before the start.`), выбор остаётся; `-9`
+     (`write-refused`) — «The server refused the change. Nothing was
+     written.» и `Diag` запроса и ответа, карточки на месте; `-10`
+     (`unavailable`) — без подзаголовка, «Контакты is unavailable. …» с
+     Try again (ссылка `…/conflict`), `Diag`, только Cancel; `-11`
+     (`moving`, заметка) — «Not moved yet. Your edit also moves this note
+     to [метка] nextcloud · Дневник.» — с меткой тетради, без второй фразы.
+     Сообщения в диалоге — `Msg{Space: w.MsgFlushSides}`; `Diag` теперь
+     `DialogPart`, `Mark` — часть `Msg`.
+   - **Красным — только беда** (Р-69): подзаголовок расхождения остаётся
+     обычным.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
