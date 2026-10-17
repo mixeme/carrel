@@ -620,6 +620,8 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 			// What it opened is no longer there and Carrel could not follow
 			// it (Б41): the link lives on until it is revoked or expires.
 			row.Gone = "No longer there: deleted, or moved where Carrel could not follow it"
+		} else {
+			row.Href = s.publishedHref(sess, l.Target) // Пб41
 		}
 		copyLink := view.Action{ID: "publish.copy", Label: "Copy", Method: "GET", Enabled: true}
 		send := view.Action{ID: "publish.mail", Label: "Send", Method: "POST", Enabled: true,
@@ -640,6 +642,38 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		page.Rows = append(page.Rows, row)
 	}
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// publishedHref is where in Carrel a link's thing is (Пб41; s-publish-1:
+// the title leads there): the record, the list — a calendar's agenda from
+// the link's first day —, the file or the folder; "" when Carrel cannot say.
+func (s *Server) publishedHref(sess *session.Session, t user.PublishTarget) string {
+	if t.Kind == string(view.KindFile) {
+		fc, ok := s.fileCollection(sess, t.AccountID, t.Col)
+		if !ok {
+			return ""
+		}
+		segs, ok := relSegs(t.Path)
+		if !ok {
+			return ""
+		}
+		return s.route(fc.href("", segs, t.Folder || len(segs) == 0))
+	}
+	spec, ok := recordKinds[segmentOf(view.Kind(t.Kind))]
+	if !ok {
+		return ""
+	}
+	c, ok := s.collectionOf(sess, spec, t.AccountID, t.Col)
+	if !ok {
+		return ""
+	}
+	switch {
+	case t.UID != "":
+		return s.route(c.recordPath(t.UID))
+	case t.From != "":
+		return s.postQuery(c.listPath(), url.Values{"from": {t.From}})
+	}
+	return s.route(c.listPath())
 }
 
 // openLink opens the link a public request names, or answers the one "no"

@@ -88,7 +88,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": null,
         "enabled": true,
         "href": "/app/files/published",
         "icon": "i-link",

@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.334 — 2026-10-17
+
+### Changed
+
+- **A published link's title leads to what it publishes** (Пб41;
+  `s-publish-1`): `PublishedRow.Href` — the record, the list, a calendar's
+  agenda from the link's first day, the file, the folder; none for a link
+  whose thing is gone.
+- **No links, no number** (Пб42): «Published links» in the settings' rail
+  counts nothing when there is none; the empty list is held against its own
+  frame (`s-publish-18`).
+
+### For consumers
+
+- New `PublishedRow.Href`. `PublishSheet.Range` is gone: it was filled
+  nowhere (Пб8); a calendar's days are fields of the sheet's form. C-5 says
+  what `/app/publish` takes (Пб40).
+
 ## v0.2.333 — 2026-10-17
 
 ### Changed

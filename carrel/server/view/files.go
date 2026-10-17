@@ -266,6 +266,10 @@ type PublishedLinksPage struct {
 }
 type PublishedRow struct {
 	Title Text `json:"title"`
+	// Href — где опубликованное в Carrel: название ведёт туда (s-publish-1:
+	// «смета-подрядчик.pdf» — к файлу, «Личный · 10–31 August» — к агенде с
+	// первого дня ссылки); у мёртвой и у того, чего Carrel не нашёл, пусто
+	Href string `json:"href"`
 	// Kind — что за ссылка словом (s-publish-1): у коллекции — её род,
 	// «calendar», «address book», «task list», «notebook»; у записи — род
 	// записи, «event», «contact», «task», «note»; «file», «folder»

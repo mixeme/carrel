@@ -34,7 +34,8 @@ func (s *Server) settingsRail(sess *session.Session, open string) view.Rail {
 		{"settings.devices", "New device", "i-device", "/app/settings/devices", nil},
 		{"settings.davloom", "davloom", "", "/app/settings/davloom", count(len(s.users.Devices(sess.AccountID())))},
 		{"settings.backup", "Backup", "i-archive", "/app/settings/backup", countSome(len(blob.BackupJobs))},
-		{"settings.published", "Published links", "i-link", "/app/files/published", count(len(s.users.PublishedLinks(sess.AccountID())))},
+		// No links, no number (Пб42; s-publish-18 writes no zero).
+		{"settings.published", "Published links", "i-link", "/app/files/published", countSome(len(s.users.PublishedLinks(sess.AccountID())))},
 		{"settings.appearance", "Appearance", "i-theme", "/app/settings/appearance", nil},
 	}
 	for _, r := range rows {
