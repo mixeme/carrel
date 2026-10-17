@@ -96,11 +96,14 @@ func (s *Server) writeSheet(w http.ResponseWriter, r *http.Request, sheet view.P
 }
 
 func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, title, how string) view.PublishSheet {
-	what := collectionNouns[c.spec.kind]
+	// The head names what is published and, at its end, which (Пб1;
+	// s-publish-2, -3, -19): a collection by where it lies, a record by its
+	// title.
+	what, subject := collectionNouns[c.spec.kind], string(c.stamp())
 	if uid != "" {
-		what = c.spec.noun
+		what, subject = c.spec.noun, title
 	}
-	return s.sheetFor(sess, c.spec.kind, what, title, c.stamp(), publishQuery(c.spec.segment, c.conn.ID, c.col.Path, uid), c.listPath(), how)
+	return s.sheetFor(sess, c.spec.kind, what, subject, publishQuery(c.spec.segment, c.conn.ID, c.col.Path, uid), c.listPath(), how)
 }
 
 // sheetFor is the sheet of any target: what, where, how long the link lives,
@@ -112,13 +115,14 @@ func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, titl
 // subscribed to (s-publish-2). A calendar, an event, a task list and a task
 // are asked what the visitor sees — the time always, the title unless taken
 // off, the rest when ticked (Б39) —, as a contact is (s-publish-3).
-func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title string, where view.Stamp, q url.Values, cancel, how string) view.PublishSheet {
+func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, subject string, q url.Values, cancel, how string) view.PublishSheet {
 	tf := s.timeFor(sess)
 	create := view.Action{ID: "publish.create", Label: "Create link", Href: s.postQuery("/app/publish", q), Method: "POST", Primary: true, Enabled: true}
 	back := view.Action{ID: "publish.cancel", Label: "Cancel", Href: s.route(cancel), Method: "GET", Enabled: true}
 	sheet := view.PublishSheet{
 		Kind:    kind,
-		Target:  text(strings.ToUpper(what[:1]) + what[1:] + " «" + title + "» · " + string(where)),
+		Title:   text("Publish " + article(what)),
+		Target:  text(subject),
 		Local:   s.instanceLocal(),
 		Actions: []view.Action{create, back},
 	}
@@ -361,7 +365,7 @@ func (s *Server) getPublish(w http.ResponseWriter, r *http.Request) {
 			s.notFound(w, r)
 			return
 		}
-		s.writeLetterSheet(w, r, sess, s.fileSheet(sess, fc, segs, dir))
+		s.writeLetterSheet(w, r, sess, s.fileSheet(r.Context(), sess, fc, segs, dir))
 		return
 	}
 	c, uid, ok := s.publishTarget(r, sess)

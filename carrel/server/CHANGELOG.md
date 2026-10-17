@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.330 — 2026-10-17
+
+### Changed
+
+- **The head of a publish sheet is a title and a subject** (Пб1;
+  `s-publish-2`…`-5`, `-19`): `PublishSheet.Title` «Publish a calendar»,
+  «Publish an event», «Publish a folder»…, and `Target` at the head's end —
+  where a collection lies («nextcloud · Личный»), a record's or a file's
+  title, a folder's name with how much is in it («· 12 files»). Before, one
+  line «Calendar «Личный» · nextcloud · Личный».
+
+### For consumers
+
+- New `PublishSheet.Title`; `PublishSheet.Target` is the subject only.
+
+### Fixtures
+
+- The link made has a set of its own (`TestFixturePublishLinkMade`): a new
+  link counts in every rail after it. A link's identifier in «Send by
+  letter» is normalised as a secret is.
+
 ## v0.2.329 — 2026-10-17
 
 ### Changed

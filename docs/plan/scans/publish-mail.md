@@ -47,7 +47,7 @@ Typecase `95453f6` рядом в черновой папке (Typecase в `D:\Lo
 
 | Пункт | Статус | Одной строкой |
 |---|---|---|
-| Пб1 | держится | `Target` — одна строка «Contact «Анна Ковалёва» · nextcloud · Контакты»; кадры — «Publish a contact» и предмет «Анна Ковалёва» порознь; у папки нет «· 12 files»; «a calendar»/«an event» по `Kind` не различить |
+| Пб1 | **закрыто сервером `v0.2.330`**: `PublishSheet.Title` «Publish a calendar / an event / a folder…», `Target` — предмет в конце шапки: место коллекции, название записи или файла, у папки «· N files» (было: держится) | `Target` — одна строка «Contact «Анна Ковалёва» · nextcloud · Контакты»; кадры — «Publish a contact» и предмет «Анна Ковалёва» порознь; у папки нет «· 12 files»; «a calendar»/«an event» по `Kind` не различить |
 | Пб2 | **закрыто сервером `v0.2.180`** (и `v0.2.183`) | отметки «What the visitor sees» и «Allow .vcf…» в листе, `PublishTarget.Shows`/`HideOrganisation`, страница, книга и `.vcf` — из разрешённого; фикстура несёт их |
 | Пб3 | держится | лист заметки (`KindNote`) — только `lives`: ни «Attachments · 2 files · 3.2 MB», ни «Publish them too», ни «Allow .md download» (по коду `.md` отдаётся всегда — `NoDownload` у заметки не ставится); CHANGELOG `v0.2.180`: «вложения заметки — не в этом выпуске» |
 | Пб4 | **закрыто сервером `v0.2.181`** | `PublishSheet.Note` словами кадра, `Expires` — только срок |

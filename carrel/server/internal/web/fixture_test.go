@@ -921,6 +921,8 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`/forgot/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/forgot/reset-token")
 	s = regexp.MustCompile(`/password-history/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/password-history/history-token")
 	s = regexp.MustCompile(`/p/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/p/link-token")
+	// A link's identifier is a digest of its secret (Send by letter names it).
+	s = regexp.MustCompile(`compose\?id=[0-9a-f]{16}`).ReplaceAllString(s, "compose?id=link-id")
 	s = regexp.MustCompile(`"[A-Za-z0-9_-]{43}"`).ReplaceAllString(s, `"csrf"`)
 	// A temporary password a form offers (s-admin-1, s-admin-6) is made for
 	// each answer.
@@ -2065,6 +2067,20 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 	})
 }
 
+// The link made (Пб13; s-publish-13): «Личный» for 10–31 August with its
+// .ics — the sheet then shows the link whole in its one field and its day in
+// figures. A set of its own: a new link counts in every rail after it.
+func TestFixturePublishLinkMade(t *testing.T) {
+	app := newMockupApp(t)
+	// The link lives 30 days from the set's day, as the frame's.
+	app.h.srv.SetClock(mockupNow(t))
+	app.h.users.SetClock(mockupNow(t))
+	app.compare(t, "app-publish/link.json", app.h.do(postForm("/app/publish", app.sess, url.Values{
+		"k": {"calendar"}, "a": {app.realAccount(t, "lichnyj")}, "c": {app.realPath(t, "lichnyj")},
+		"how": {"range"}, "from": {"2026-08-10"}, "to": {"2026-08-31"}, "download": {"on"},
+	})))
+}
+
 // C-14.2: the search, and the sheets a collection and a record open.
 func TestFixtureSearchAndSheets(t *testing.T) {
 	app := newMockupApp(t)
@@ -2093,15 +2109,6 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(route, app.sess)))
 		})
 	}
-	// The link made (Пб13; s-publish-13): «Личный» for 10–31 August with its
-	// .ics — the sheet then shows the link whole in its one field and its
-	// day in figures.
-	t.Run("app-publish-link", func(t *testing.T) {
-		app.compare(t, "app-publish/link.json", app.h.do(postForm("/app/publish", app.sess, url.Values{
-			"k": {"calendar"}, "a": {app.realAccount(t, "lichnyj")}, "c": {app.realPath(t, "lichnyj")},
-			"how": {"range"}, "from": {"2026-08-10"}, "to": {"2026-08-31"}, "download": {"on"},
-		})))
-	})
 	// The sheets of «Дни рождения» over Connections, as s-profile-7, -8, -9
 	// draw them (Кл10, Кл15, Кл20): the calendar was read first, so its
 	// count is known and «baikal» refused the saved password — the move

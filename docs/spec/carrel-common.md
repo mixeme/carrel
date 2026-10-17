@@ -2265,7 +2265,8 @@ type ImportReport struct {
 
 type PublishSheet struct {
     Kind    Kind
-    Target  Text     // что публикуется — написано в шапке, не переспрашивается
+    Title   Text     // заголовок шапки: «Publish a calendar», «Publish an event», «Publish a folder» (s-publish-2…5, -19)
+    Target  Text     // что именно, в конце шапки, не переспрашивается: у коллекции — где она («nextcloud · Личный»), у записи и файла — название, у папки — и сколько в ней («Материалы к релизу · 12 files»)
     Local   bool     // значок «local» в шапке (s-publish-2): тот же признак, что SignedIn.Local, — у листа оболочки нет, и он несёт его сам
     Range   *Range   // только у календаря
     Form    Form     // сколько показывать, разрешить ли .ics; что видит гость — у контакта и книги (s-publish-3), у календаря, события, списка задач и задачи (Б39: Time стоит всегда и выключен для правки, Title отмечен, Location, Description, Attendees, Attachments, Tags — нет; рубрика «What the visitor sees», кадра нет)

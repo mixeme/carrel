@@ -85,16 +85,23 @@ func fileTitle(c *fileCtx, segs []string) string {
 	return segs[len(segs)-1]
 }
 
-func (s *Server) fileSheet(sess *session.Session, c *fileCtx, segs []string, dir bool) view.PublishSheet {
-	what := "file"
+func (s *Server) fileSheet(ctx context.Context, sess *session.Session, c *fileCtx, segs []string, dir bool) view.PublishSheet {
+	what, subject := "file", fileTitle(c, segs)
 	if dir {
 		what = "folder"
+		// A folder says how much is in it (Пб1; s-publish-5: «Материалы к
+		// релизу · 12 files»); unread, its name alone.
+		if p, err := c.path(segs, true); err == nil {
+			if entries, err := c.files.List(ctx, p); err == nil {
+				subject += " · " + plural(len(entries), "file")
+			}
+		}
 	}
 	back := c.href("", nil, true)
 	if len(segs) > 0 {
 		back = c.href("", segs[:len(segs)-1], true)
 	}
-	sheet := s.sheetFor(sess, view.KindFile, what, fileTitle(c, segs), c.stamp(), filePublishQuery(c, segs, dir), back, "")
+	sheet := s.sheetFor(sess, view.KindFile, what, subject, filePublishQuery(c, segs, dir), back, "")
 	if dir {
 		// What the visitor gets, said on the sheet before the link and after
 		// it (s-publish-5): the same secret mounts the folder (S-25.1).
@@ -132,7 +139,7 @@ func (s *Server) postPublishFile(w http.ResponseWriter, r *http.Request, sess *s
 		http.Error(w, "could not publish", http.StatusInternalServerError)
 		return
 	}
-	s.writeSheet(w, r, s.madeSheet(r, sess, s.fileSheet(sess, c, segs, dir), token, expires))
+	s.writeSheet(w, r, s.madeSheet(r, sess, s.fileSheet(r.Context(), sess, c, segs, dir), token, expires))
 }
 
 // publicFiles is the file collection of a link, at the published thing.

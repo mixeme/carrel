@@ -732,11 +732,17 @@ type ImportReport struct {
 }
 
 type PublishSheet struct {
-	Kind    Kind   `json:"kind"`
-	Target  Text   `json:"target"` // что публикуется — написано в шапке, не переспрашивается
-	Local   bool   `json:"local"`  // значок «local» в шапке (s-publish-2): SignedIn.Local, у листа оболочки нет
-	Range   *Range `json:"range"`  // только у календаря
-	Form    Form   `json:"form"`   // сколько показывать, разрешить ли .ics, показывать ли описания
+	Kind Kind `json:"kind"`
+	// Title — заголовок шапки: «Publish a calendar», «Publish an event»,
+	// «Publish a folder» (s-publish-2…5, -19)
+	Title Text `json:"title"`
+	// Target — что именно, в конце шапки, не переспрашивается: у коллекции —
+	// где она («nextcloud · Личный»), у записи и файла — название, у папки —
+	// и сколько в ней: «Материалы к релизу · 12 files»
+	Target  Text   `json:"target"`
+	Local   bool   `json:"local"` // значок «local» в шапке (s-publish-2): SignedIn.Local, у листа оболочки нет
+	Range   *Range `json:"range"` // только у календаря
+	Form    Form   `json:"form"`  // сколько показывать, разрешить ли .ics, показывать ли описания
 	Expires Text   `json:"expires"`
 	// Note — сообщение, которое стоит на листе всегда, до ссылки и после: у
 	// папки — что получает гость («The visitor gets the folder with
