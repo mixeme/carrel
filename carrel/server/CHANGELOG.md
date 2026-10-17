@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.338 — 2026-10-18
+
+### Changed
+
+- **A storage that did not answer says so in the rail** (`states-33`): the
+  row of the storage open is unavailable, its reason the row's hint, as a
+  collection's is; the technical block's second line is the connection
+  alone.
+- **The folder's fixtures hold their frames' data**: the empty folder is
+  August's under the attachments (`states-32`), the storage not read is
+  Documents at its root (`states-33`), the queue has three rows
+  (`s-files-2`), and the refused upload stands under the three chosen.
+
 ## v0.2.337 — 2026-10-18
 
 Typecase note 78 (`69f0f71`): the journal's bar. The mockup copied byte

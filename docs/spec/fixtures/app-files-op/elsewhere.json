@@ -83,17 +83,7 @@
     },
     "nodes": [
       {
-        "children": [
-          {
-            "children": [],
-            "expanded": false,
-            "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2FScans%2F",
-            "id": "/app/files/a-nc-home/Files/Scans/",
-            "label": "Scans",
-            "readOnly": false,
-            "stamp": ""
-          }
-        ],
+        "children": [],
         "expanded": true,
         "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?item=2026-08-10-sync-board.png\u0026item=release-checklist.md\u0026item=2026-08-04-whiteboard.jpg\u0026op=move\u0026to=%2Fapp%2Ffiles%2Fa-nc-home%2FFiles%2F",
         "id": "/app/files/a-nc-home/Files/",

@@ -2322,9 +2322,13 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		var buf bytes.Buffer
 		w := multipart.NewWriter(&buf)
 		_ = w.WriteField("_csrf", app.sess.CSRFToken())
+		poster := strings.Repeat(".", 8700000)
 		_ = w.WriteField("size.отчёт-июль.pdf", strconv.Itoa(len(report)))
+		_ = w.WriteField("size.плакат.png", strconv.Itoa(len(poster)))
 		part, _ := w.CreateFormFile("file", "отчёт-июль.pdf")
 		_, _ = part.Write([]byte(report))
+		part, _ = w.CreateFormFile("file", "плакат.png")
+		_, _ = part.Write([]byte(poster))
 		part, _ = w.CreateFormFile("file", "архив-2025.zip")
 		_, _ = part.Write([]byte("zip"))
 		_ = w.Close()
@@ -2334,8 +2338,13 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		if rec := app.h.do(req); rec.Code >= 400 {
 			t.Fatalf("upload: %d %s", rec.Code, rec.Body)
 		}
-		srv.SetModified(app.realPath(t, "Documents")+"carrel/attachments/отчёт-июль.pdf", mockupNow(t))
-		app.compare(t, "app-files-folder/refused.json", app.h.do(get(app.filesAt(t, "Documents", "", "carrel", "attachments"), app.sess)))
+		for _, name := range []string{"отчёт-июль.pdf", "плакат.png"} {
+			srv.SetModified(app.realPath(t, "Documents")+"carrel/attachments/"+name, mockupNow(t))
+		}
+		// Over the three chosen of s-files-2, the frame of the queue under a
+		// selection (its refused row is the fragment s-files-24).
+		three := []string{"2026-08-10-sync-board.png", "release-checklist.md", "2026-08-04-whiteboard.jpg"}
+		app.compare(t, "app-files-folder/refused.json", app.h.do(get(app.filesAt(t, "Documents", "", "carrel", "attachments")+"?"+url.Values{"select": three}.Encode(), app.sess)))
 	})
 	t.Run("app-files-picker", func(t *testing.T) {
 		// «Upload files» of the menu (s-notes-11) with the folder New folder
@@ -2413,8 +2422,6 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	app.tickFiles(t, "Documents", "Public", "Files")
 	app.compare(t, "app-files-folder/readonly.json", app.h.do(get(app.filesAt(t, "Public", ""), app.sess)))
 	app.tickFiles(t, "Documents", "Files")
-	app.servers["nextcloud"].SeedFolder(davtest.FileRoot + "Files/Scans/")
-	app.compare(t, "app-files-folder/empty.json", app.h.do(get(app.filesAt(t, "Files", "", "Scans"), app.sess)))
 
 	july := app.filesAt(t, "Documents", "", "carrel", "attachments", "2026-07")
 	sheet("normal", url.Values{"op": {"move"}, "item": three, "to": {july}})
@@ -2435,18 +2442,38 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	app.compare(t, "app-files-picker/refused.json", app.h.do(postForm("/app/files/picker?"+url.Values{"for": {"upload"}, "mkcol": {"1"},
 		"to": {attachments}}.Encode(), app.sess, url.Values{"name": {"2026-07"}})))
 
-	// The queue (s-files-2): a report uploaded, a name already taken.
+	// The queue (s-files-2): a report and a poster uploaded, a name already
+	// taken — three rows, as the frame draws them (its poster is still on
+	// its way there; an answer of the server has every file's end).
 	rec := app.h.do(uploadForm(app.filesAt(t, "Documents", "upload", "carrel", "attachments"), app.sess, false,
-		upload{"отчёт-июль.pdf", strings.Repeat(".", 4300000)}, upload{"release-checklist.md", "# again"}))
+		upload{"отчёт-июль.pdf", strings.Repeat(".", 4300000)}, upload{"плакат.png", strings.Repeat(".", 8700000)},
+		upload{"release-checklist.md", "# again"}))
 	if rec.Code >= 400 {
 		t.Fatalf("upload: %d %s", rec.Code, rec.Body)
 	}
 	// The stand stamps what arrives with the wall clock; the set's day stands.
-	app.servers["sftpgo · vps"].SetModified(app.realPath(t, "Documents")+"carrel/attachments/отчёт-июль.pdf", mockupNow(t))
+	for _, name := range []string{"отчёт-июль.pdf", "плакат.png"} {
+		app.servers["sftpgo · vps"].SetModified(app.realPath(t, "Documents")+"carrel/attachments/"+name, mockupNow(t))
+	}
 	app.compare(t, "app-files-folder/long.json", app.h.do(get(attachments+"?"+url.Values{"select": three}.Encode(), app.sess)))
 
-	app.servers["nextcloud"].Refuse("PROPFIND", http.StatusServiceUnavailable, "")
-	app.compare(t, "app-files-folder/source-error.json", app.h.do(get(app.filesAt(t, "Files", ""), app.sess)))
+	// An empty folder (states-32): August's, under the attachments — on a
+	// stand of its own: the frames of the attachments do not draw it, and
+	// the uploads' queue is not its.
+	t.Run("empty", func(t *testing.T) {
+		app := newMockupApp(t)
+		openSections(t, app)
+		readFolders(t, app)
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		app.servers["sftpgo · vps"].SeedFolder(app.realPath(t, "Documents") + "carrel/attachments/2026-08/")
+		app.compare(t, "app-files-folder/empty.json", app.h.do(get(app.filesAt(t, "Documents", "", "carrel", "attachments", "2026-08"), app.sess)))
+	})
+
+	// A storage that did not answer (states-33): Documents, opened at its
+	// root.
+	app.servers["sftpgo · vps"].Refuse("PROPFIND", http.StatusServiceUnavailable, "the server is busy")
+	app.compare(t, "app-files-folder/source-error.json", app.h.do(get(app.filesAt(t, "Documents", ""), app.sess)))
+	app.servers["sftpgo · vps"].Accept("PROPFIND")
 
 	// No storage ticked (states-35): the root says so and offers them all.
 	if rec := app.h.do(postForm("/app/sources/files", app.sess, url.Values{})); rec.Code >= 400 {

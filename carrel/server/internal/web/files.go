@@ -560,7 +560,7 @@ func (s *Server) writeFolderWith(w http.ResponseWriter, r *http.Request, c *file
 			Body:  text("The server did not answer as expected, so nothing on this screen comes from it."),
 			Details: &view.Diagnostic{
 				Summary: text("PROPFIND " + folder),
-				Lines:   []view.Text{text(connLabel(c.conn) + folder), text(err.Error())},
+				Lines:   []view.Text{text(connLabel(c.conn)), text(err.Error())},
 			},
 			Actions: []view.Action{{ID: "source.retry", Label: "Try again", Href: s.route(retry), Method: "GET", Enabled: true}},
 		})
@@ -580,8 +580,11 @@ func (s *Server) writeFolderWith(w http.ResponseWriter, r *http.Request, c *file
 	}
 	page := s.folderPage(r, c, segs, entries, q, notices)
 	if err != nil {
-		// Nothing was read (states-33): the head and the message alone.
+		// Nothing was read (states-33): the head and the message alone, and
+		// the storage's row of the rail says it did not answer, its reason
+		// the row's hint (as a collection's, states-11).
 		page.Unread, page.Count, page.Empty, page.Queue = true, "", nil, nil
+		markUnavailable(page.Rail.Sections, s.route(fileHref(c.conn.ID, c.col.Path, "", nil, true)), err)
 	}
 	if edit != nil {
 		edit(&page)
@@ -591,6 +594,18 @@ func (s *Server) writeFolderWith(w http.ResponseWriter, r *http.Request, c *file
 		return
 	}
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// markUnavailable marks the rail's row of the address as a source that did
+// not answer, the error its detail.
+func markUnavailable(sections []view.RailSection, href string, err error) {
+	for i := range sections {
+		for j := range sections[i].Rows {
+			if row := &sections[i].Rows[j]; row.Href == href {
+				row.State, row.Detail = view.CollectionUnavailable, text(err.Error())
+			}
+		}
+	}
 }
 
 // querySuffix is "?" and the query, or nothing for an empty one.

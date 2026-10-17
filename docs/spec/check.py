@@ -404,6 +404,9 @@ STATE_FRAME = {
     "app-files-folder/source-error": "states-33",
     "app-files-folder/readonly": "states-34",
     "app-files-folder/long": "s-files-2",
+    # Загрузка, которой отказали, — очередь под тремя выделенными, как
+    # s-files-2 (строка отказа — фрагмент s-files-24).
+    "app-files-folder/refused": "s-files-2",
     "app-files-folder/tiles": "s-files-5",
     # Кадры маршрута (записка 73, 183 п. 1): над книгой и над объединённым списком.
     "app-record-copies/normal": "s-contacts-35",

@@ -9,7 +9,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/files/a-nc-home/Files/upload/Scans/",
+            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
             "icon": "i-doc",
             "id": "file.upload",
             "label": "Files",
@@ -20,7 +20,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/files/a-nc-home/Files/upload/Scans/",
+            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
             "icon": "i-file",
             "id": "file.upload.folder",
             "label": "Folder",
@@ -31,7 +31,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "file",
-        "href": "/app/files/a-nc-home/Files/upload/Scans/",
+        "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
         "icon": "i-upload",
         "id": "file.upload",
         "label": "Upload",
@@ -42,7 +42,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/mkcol/Scans/",
+        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/2026-08/",
         "icon": "i-plus",
         "id": "folder.new",
         "label": "New folder",
@@ -59,7 +59,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/Scans/?print=1",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?print=1",
         "icon": "i-print",
         "id": "list.print",
         "label": "Print",
@@ -68,12 +68,12 @@
     ],
     "columns": {
       "form": {
-        "action": "/app/files/a-nc-home/Files/columns/Scans/",
+        "action": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-08/",
         "actions": [
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/files/a-nc-home/Files/columns/Scans/",
+            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-08/",
             "id": "columns.apply",
             "label": "Apply",
             "method": "POST",
@@ -82,7 +82,7 @@
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/files/a-nc-home/Files/columns/Scans/",
+            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-08/",
             "id": "columns.default",
             "label": "Reset to defaults",
             "method": "POST"
@@ -146,7 +146,7 @@
     "drop": null,
     "filter": "",
     "filterForm": {
-      "action": "/app/files/a-nc-home/Files/Scans/",
+      "action": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
       "actions": [],
       "errors": [],
       "method": "GET",
@@ -177,7 +177,7 @@
     "segments": [
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/Scans/?view=list",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?view=list",
         "icon": "i-menu",
         "id": "files.view.list",
         "label": "List",
@@ -186,7 +186,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/Scans/?view=tiles",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?view=tiles",
         "icon": "i-grid",
         "id": "files.view.tiles",
         "label": "Tiles",
@@ -194,7 +194,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/Scans/?sort=name",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?sort=name",
         "id": "files.sort.name",
         "label": "Name",
         "method": "GET",
@@ -202,14 +202,14 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/Scans/?sort=size",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?sort=size",
         "id": "files.sort.size",
         "label": "Size",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/Scans/?sort=changed",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/?sort=changed",
         "id": "files.sort.changed",
         "label": "Changed",
         "method": "GET"
@@ -221,12 +221,20 @@
   "count": "0 items",
   "crumbs": [
     {
-      "href": "/app/files/a-nc-home/Files/",
-      "label": "Files"
+      "href": "/app/files/a-sftp-vps/Documents/",
+      "label": "Documents"
+    },
+    {
+      "href": "/app/files/a-sftp-vps/Documents/carrel/",
+      "label": "carrel"
+    },
+    {
+      "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+      "label": "attachments"
     },
     {
       "href": "",
-      "label": "Scans"
+      "label": "2026-08"
     }
   ],
   "details": null,
@@ -238,7 +246,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/files/a-nc-home/Files/upload/Scans/",
+            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
             "icon": "i-doc",
             "id": "file.upload",
             "label": "Files",
@@ -249,7 +257,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/files/a-nc-home/Files/upload/Scans/",
+            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
             "icon": "i-file",
             "id": "file.upload.folder",
             "label": "Folder",
@@ -260,7 +268,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "file",
-        "href": "/app/files/a-nc-home/Files/upload/Scans/",
+        "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
         "icon": "i-upload",
         "id": "file.upload",
         "label": "Upload",
@@ -271,7 +279,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/mkcol/Scans/",
+        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/2026-08/",
         "icon": "i-plus",
         "id": "folder.new",
         "label": "New folder",
@@ -293,9 +301,9 @@
   },
   "notices": [],
   "print": {
-    "range": "nextcloud · Files · 0 items",
+    "range": "sftpgo · vps · Documents · 0 items",
     "taken": "10 August 2026, 17:06",
-    "title": "Scans"
+    "title": "2026-08"
   },
   "queue": null,
   "rail": {
@@ -312,7 +320,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/mkcol/Scans/",
+        "href": "/app/files/a-sftp-vps/Documents/mkcol/carrel/attachments/2026-08/",
         "icon": "i-plus",
         "id": "rail.folder.new",
         "label": "New folder",
@@ -429,7 +437,7 @@
             "href": "/app/files/a-nc-home/Files/",
             "label": "Files",
             "menu": [],
-            "on": true,
+            "on": false,
             "readOnly": false,
             "state": "ok",
             "tick": "on"
@@ -449,7 +457,7 @@
             "href": "/app/files/a-sftp-vps/Documents/",
             "label": "Documents",
             "menu": [],
-            "on": false,
+            "on": true,
             "readOnly": false,
             "state": "ok",
             "tick": "on"
@@ -527,7 +535,7 @@
               "options": [],
               "readOnly": false,
               "required": false,
-              "value": "/app/files/a-nc-home/Files/Scans/"
+              "value": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/"
             }
           ],
           "unfold": null
@@ -538,7 +546,7 @@
   },
   "rows": [],
   "select": {
-    "action": "/app/files/a-nc-home/Files/op/Scans/",
+    "action": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/2026-08/",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -566,8 +574,8 @@
     "target": "sheet"
   },
   "selectField": "item",
-  "subtitle": "nextcloud",
-  "title": "Scans",
+  "subtitle": "sftpgo · vps",
+  "title": "2026-08",
   "top": {
     "lock": null,
     "new": {
@@ -642,7 +650,7 @@
     "refresh": {
       "action": {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/Scans/",
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/",
         "icon": "i-refresh",
         "id": "folder.refresh",
         "label": "Refresh",

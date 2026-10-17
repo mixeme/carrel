@@ -9,7 +9,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/files/a-nc-home/Files/upload/",
+            "href": "/app/files/a-sftp-vps/Documents/upload/",
             "icon": "i-doc",
             "id": "file.upload",
             "label": "Files",
@@ -20,7 +20,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "file",
-            "href": "/app/files/a-nc-home/Files/upload/",
+            "href": "/app/files/a-sftp-vps/Documents/upload/",
             "icon": "i-file",
             "id": "file.upload.folder",
             "label": "Folder",
@@ -31,7 +31,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "file",
-        "href": "/app/files/a-nc-home/Files/upload/",
+        "href": "/app/files/a-sftp-vps/Documents/upload/",
         "icon": "i-upload",
         "id": "file.upload",
         "label": "Upload",
@@ -42,7 +42,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/mkcol/",
+        "href": "/app/files/a-sftp-vps/Documents/mkcol/",
         "icon": "i-plus",
         "id": "folder.new",
         "label": "New folder",
@@ -59,7 +59,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/?print=1",
+        "href": "/app/files/a-sftp-vps/Documents/?print=1",
         "icon": "i-print",
         "id": "list.print",
         "label": "Print",
@@ -68,12 +68,12 @@
     ],
     "columns": {
       "form": {
-        "action": "/app/files/a-nc-home/Files/columns/",
+        "action": "/app/files/a-sftp-vps/Documents/columns/",
         "actions": [
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/files/a-nc-home/Files/columns/",
+            "href": "/app/files/a-sftp-vps/Documents/columns/",
             "id": "columns.apply",
             "label": "Apply",
             "method": "POST",
@@ -82,7 +82,7 @@
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/files/a-nc-home/Files/columns/",
+            "href": "/app/files/a-sftp-vps/Documents/columns/",
             "id": "columns.default",
             "label": "Reset to defaults",
             "method": "POST"
@@ -146,7 +146,7 @@
     "drop": null,
     "filter": "",
     "filterForm": {
-      "action": "/app/files/a-nc-home/Files/",
+      "action": "/app/files/a-sftp-vps/Documents/",
       "actions": [],
       "errors": [],
       "method": "GET",
@@ -177,7 +177,7 @@
     "segments": [
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/?view=list",
+        "href": "/app/files/a-sftp-vps/Documents/?view=list",
         "icon": "i-menu",
         "id": "files.view.list",
         "label": "List",
@@ -186,7 +186,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/?view=tiles",
+        "href": "/app/files/a-sftp-vps/Documents/?view=tiles",
         "icon": "i-grid",
         "id": "files.view.tiles",
         "label": "Tiles",
@@ -194,7 +194,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/?sort=name",
+        "href": "/app/files/a-sftp-vps/Documents/?sort=name",
         "id": "files.sort.name",
         "label": "Name",
         "method": "GET",
@@ -202,14 +202,14 @@
       },
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/?sort=size",
+        "href": "/app/files/a-sftp-vps/Documents/?sort=size",
         "id": "files.sort.size",
         "label": "Size",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/?sort=changed",
+        "href": "/app/files/a-sftp-vps/Documents/?sort=changed",
         "id": "files.sort.changed",
         "label": "Changed",
         "method": "GET"
@@ -222,7 +222,7 @@
   "crumbs": [
     {
       "href": "",
-      "label": "Files"
+      "label": "Documents"
     }
   ],
   "details": null,
@@ -239,7 +239,7 @@
       "actions": [
         {
           "enabled": true,
-          "href": "/app/files/a-nc-home/Files/",
+          "href": "/app/files/a-sftp-vps/Documents/",
           "id": "source.retry",
           "label": "Try again",
           "method": "GET"
@@ -248,19 +248,19 @@
       "body": "The server did not answer as expected, so nothing on this screen comes from it.",
       "details": {
         "lines": [
-          "nextcloud/alice/files/Files/",
-          "dav: HTTP 503: 503 Service Unavailable"
+          "sftpgo · vps",
+          "dav: HTTP 503: the server is busy"
         ],
-        "summary": "PROPFIND /alice/files/Files/"
+        "summary": "PROPFIND /alice/files/Documents/"
       },
       "role": "alert",
-      "title": "Files is unavailable"
+      "title": "Documents is unavailable"
     }
   ],
   "print": {
-    "range": "nextcloud · Files · 0 items",
+    "range": "sftpgo · vps · Documents · 0 items",
     "taken": "10 August 2026, 17:06",
-    "title": "Files"
+    "title": "Documents"
   },
   "queue": null,
   "rail": {
@@ -277,7 +277,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/mkcol/",
+        "href": "/app/files/a-sftp-vps/Documents/mkcol/",
         "icon": "i-plus",
         "id": "rail.folder.new",
         "label": "New folder",
@@ -394,7 +394,7 @@
             "href": "/app/files/a-nc-home/Files/",
             "label": "Files",
             "menu": [],
-            "on": true,
+            "on": false,
             "readOnly": false,
             "state": "ok",
             "tick": "on"
@@ -409,14 +409,14 @@
           {
             "colour": "#a05a2c",
             "count": null,
-            "detail": "",
+            "detail": "dav: HTTP 503: the server is busy",
             "feed": false,
             "href": "/app/files/a-sftp-vps/Documents/",
             "label": "Documents",
             "menu": [],
-            "on": false,
+            "on": true,
             "readOnly": false,
-            "state": "ok",
+            "state": "unavailable",
             "tick": "on"
           },
           {
@@ -492,7 +492,7 @@
               "options": [],
               "readOnly": false,
               "required": false,
-              "value": "/app/files/a-nc-home/Files/"
+              "value": "/app/files/a-sftp-vps/Documents/"
             }
           ],
           "unfold": null
@@ -503,7 +503,7 @@
   },
   "rows": [],
   "select": {
-    "action": "/app/files/a-nc-home/Files/op/",
+    "action": "/app/files/a-sftp-vps/Documents/op/",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -531,8 +531,8 @@
     "target": "sheet"
   },
   "selectField": "item",
-  "subtitle": "nextcloud",
-  "title": "Files",
+  "subtitle": "sftpgo · vps",
+  "title": "Documents",
   "top": {
     "lock": null,
     "new": {
@@ -607,7 +607,7 @@
     "refresh": {
       "action": {
         "enabled": true,
-        "href": "/app/files/a-nc-home/Files/",
+        "href": "/app/files/a-sftp-vps/Documents/",
         "icon": "i-refresh",
         "id": "folder.refresh",
         "label": "Refresh",
