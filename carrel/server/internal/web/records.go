@@ -669,7 +669,7 @@ func (s *Server) writeFailure(c *collectionCtx, method, path string, err error) 
 		Body:  text("Nothing was saved. The form keeps what you entered."),
 		Details: &view.Diagnostic{
 			Summary: text(method + " " + path),
-			Lines:   []view.Text{text(connLabel(c.conn) + path), text(err.Error())},
+			Lines:   []view.Text{text(connLabel(c.conn) + " " + path), text(err.Error())},
 		},
 	}
 	if dav.IsStatus(err, http.StatusForbidden) {

@@ -385,6 +385,11 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-btn:disabled{opacity:.45;cursor:default}
 /* Кнопка-ссылка — та же кнопка: адрес вместо действия. Недоступная — без адреса. */
 a.tc-btn[aria-disabled=true]{opacity:.45;cursor:default}
+/* Кнопка ждёт свою форму: пока в форме, диалоге или листе вокруг пусто
+   обязательное поле, она бледнеет, как недоступная, причина — в подсказке;
+   нажатую браузер не отправит и назовёт поле. Заполнили — готова; решает
+   :has(), сценарий не нужен. Что выбрать, экран говорит над полями. */
+:is(form,.tc-dialog,.tc-sheet):has(:invalid) .tc-btn.is-wait{opacity:.45;cursor:default}
 /* Заливка — уничтожение; рамка — отвязать. Подпись на заливке — --tc-surface:
    в тёмной теме белое на --tc-danger даёт 3.9, бумага — 5.5. */
 .tc-btn.is-danger-solid{background:var(--tc-danger);border-color:var(--tc-danger);color:var(--tc-surface)}
@@ -11095,39 +11100,40 @@ Read  2 min ago</div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Conflict</div><div class="tc-head__sub">Another client changed this contact while you were editing it. Nothing has been overwritten.</div></div></div>
           <div class="tc-diff__agree"><span class="tc-mono">FN</span> agrees — kept as it is.</div>
           <form class="tc-diff" id="conflict" action="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/conflict" method="post">
+            <input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="etag" value="3-a7c1"><input type="hidden" name="op" value="combine">
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">TEL;work</span> <span class="tc-rubric__aside">only in your edit</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>+7 495 120-45-00</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="none"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>+7 495 120-45-00</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
               </div>
             </div>
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">EMAIL;work</span> <span class="tc-rubric__aside">both changed</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>a.kovaleva@example.org</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="server"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>anna.kovaleva@slovo.example</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>a.kovaleva@example.org</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>anna.kovaleva@slovo.example</span></label>
               </div>
             </div>
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">NOTE</span> <span class="tc-rubric__aside">only in your edit</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.3" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>Пишет по вторникам, отвечает в тот же день.</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.3" value="none"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>Пишет по вторникам, отвечает в тот же день.</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
               </div>
             </div>
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">X-EVOLUTION-FILE-AS</span> <span class="tc-rubric__aside">only on the server</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.4" value="mine"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>—</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.4" value="server" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server · include</span>Ковалёва, Анна</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.3" value="mine"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>—</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.3" value="theirs" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server · include</span>Ковалёва, Анна</span></label>
               </div>
             </div>
           </form>
           <div class="tc-formfoot tc-formfoot--wrap">
             <button class="tc-btn is-primary" type="submit" form="conflict">Write this combination</button>
-            <button class="tc-btn" type="submit" form="conflict" name="all" value="mine">Use only my edit</button>
-            <button class="tc-btn" type="submit" form="conflict" name="all" value="server">Use only the server version</button>
+            <button class="tc-btn" type="submit" form="conflict.mine">Use only my edit</button>
+            <button class="tc-btn" type="submit" form="conflict.theirs">Use only the server version</button>
             <a class="tc-btn" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7">Cancel</a>
           </div>
         </div>
@@ -11167,25 +11173,26 @@ Read  2 min ago</div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Conflict</div><div class="tc-head__sub">Another client changed this event while you were editing it. Nothing has been overwritten.</div></div></div>
           <div class="tc-diff__agree"><span class="tc-mono">DTSTART</span> agrees — kept as it is.</div>
           <form class="tc-diff" id="conflict" action="/app/calendar/nextcloud/lichnyy/5d1a-77c0/conflict" method="post">
+            <input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="etag" value="3-a7c1"><input type="hidden" name="op" value="combine">
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">SUMMARY</span> <span class="tc-rubric__aside">both changed</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>Синк-ап по релизу и демо</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="server"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>Синк-ап перенесён</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>Синк-ап по релизу и демо</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>Синк-ап перенесён</span></label>
               </div>
             </div>
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">LOCATION</span> <span class="tc-rubric__aside">only in your edit</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>Переговорная 2</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="none"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>Переговорная 2</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
               </div>
             </div>
           </form>
           <div class="tc-formfoot tc-formfoot--wrap">
             <button class="tc-btn is-primary" type="submit" form="conflict">Write this combination</button>
-            <button class="tc-btn" type="submit" form="conflict" name="all" value="mine">Use only my edit</button>
-            <button class="tc-btn" type="submit" form="conflict" name="all" value="server">Use only the server version</button>
+            <button class="tc-btn" type="submit" form="conflict.mine">Use only my edit</button>
+            <button class="tc-btn" type="submit" form="conflict.theirs">Use only the server version</button>
             <a class="tc-btn" href="/app/calendar/nextcloud/lichnyy/5d1a-77c0">Cancel</a>
           </div>
         </div>
@@ -11224,25 +11231,26 @@ Read  2 min ago</div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Conflict</div><div class="tc-head__sub">Another client changed this task while you were editing it. Nothing has been overwritten.</div></div></div>
           <div class="tc-diff__agree"><span class="tc-mono">STATUS</span> agrees — kept as it is.</div>
           <form class="tc-diff" id="conflict" action="/app/tasks/nextcloud/dela/4c1d-8e20-71fa/conflict" method="post">
+            <input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="etag" value="3-a7c1"><input type="hidden" name="op" value="combine">
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">SUMMARY</span> <span class="tc-rubric__aside">both changed</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>Отправить документы в МФЦ до пятницы</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="server"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>Документы в МФЦ</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>Отправить документы в МФЦ до пятницы</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>Документы в МФЦ</span></label>
               </div>
             </div>
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">DUE</span> <span class="tc-rubric__aside">only on the server</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="mine"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>—</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="server" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server · include</span>2026-08-14 18:00</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>—</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="theirs" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server · include</span>2026-08-14 18:00</span></label>
               </div>
             </div>
           </form>
           <div class="tc-formfoot tc-formfoot--wrap">
             <button class="tc-btn is-primary" type="submit" form="conflict">Write this combination</button>
-            <button class="tc-btn" type="submit" form="conflict" name="all" value="mine">Use only my edit</button>
-            <button class="tc-btn" type="submit" form="conflict" name="all" value="server">Use only the server version</button>
+            <button class="tc-btn" type="submit" form="conflict.mine">Use only my edit</button>
+            <button class="tc-btn" type="submit" form="conflict.theirs">Use only the server version</button>
             <a class="tc-btn" href="/app/tasks/nextcloud/dela/4c1d-8e20-71fa">Cancel</a>
           </div>
         </div>
@@ -11282,25 +11290,26 @@ Read  2 min ago</div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Conflict</div><div class="tc-head__sub">Another client changed this note while you were editing it. Nothing has been overwritten.</div></div></div>
           <div class="tc-diff__agree"><span class="tc-mono">CATEGORIES</span> agrees — kept as it is.</div>
           <form class="tc-diff" id="conflict" action="/app/notes/nextcloud/zapisi/9e31-40b7-c012/conflict" method="post">
+            <input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="etag" value="3-a7c1"><input type="hidden" name="op" value="combine">
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">SUMMARY</span> <span class="tc-rubric__aside">both changed</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>Заметка со встречи 10.08 — дополнено</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="server"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>Встреча 10.08</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>Заметка со встречи 10.08 — дополнено</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>Встреча 10.08</span></label>
               </div>
             </div>
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">DESCRIPTION</span> <span class="tc-rubric__aside">both changed</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>Договорились: демо в пятницу, релиз в понедельник.</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="server"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>Договорились: демо в пятницу.</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>Договорились: демо в пятницу, релиз в понедельник.</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>Договорились: демо в пятницу.</span></label>
               </div>
             </div>
           </form>
           <div class="tc-formfoot tc-formfoot--wrap">
             <button class="tc-btn is-primary" type="submit" form="conflict">Write this combination</button>
-            <button class="tc-btn" type="submit" form="conflict" name="all" value="mine">Use only my edit</button>
-            <button class="tc-btn" type="submit" form="conflict" name="all" value="server">Use only the server version</button>
+            <button class="tc-btn" type="submit" form="conflict.mine">Use only my edit</button>
+            <button class="tc-btn" type="submit" form="conflict.theirs">Use only the server version</button>
             <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012">Cancel</a>
           </div>
         </div>
@@ -11335,39 +11344,40 @@ Read  2 min ago</div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Conflict</div><div class="tc-head__sub">Another client changed this contact while you were editing it. Nothing has been overwritten.</div></div></div>
           <div class="tc-diff__agree"><span class="tc-mono">FN</span> agrees — kept as it is.</div>
           <form class="tc-diff" id="conflict" action="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/conflict" method="post">
+            <input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="etag" value="3-a7c1"><input type="hidden" name="op" value="combine">
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">TEL;work</span> <span class="tc-rubric__aside">only in your edit</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>+7 495 120-45-00</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="none"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>+7 495 120-45-00</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
               </div>
             </div>
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">EMAIL;work</span> <span class="tc-rubric__aside">both changed</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>a.kovaleva@example.org</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="server"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>anna.kovaleva@slovo.example</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>a.kovaleva@example.org</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>anna.kovaleva@slovo.example</span></label>
               </div>
             </div>
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">NOTE</span> <span class="tc-rubric__aside">only in your edit</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.3" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>Пишет по вторникам, отвечает в тот же день.</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.3" value="none"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>Пишет по вторникам, отвечает в тот же день.</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
               </div>
             </div>
             <div class="tc-diff__item">
               <div class="tc-rubric"><span class="tc-mono">X-EVOLUTION-FILE-AS</span> <span class="tc-rubric__aside">only on the server</span></div>
               <div class="tc-diff__options">
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.4" value="mine"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>—</span></label>
-                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.4" value="server" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server · include</span>Ковалёва, Анна</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.3" value="mine"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>—</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.3" value="theirs" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server · include</span>Ковалёва, Анна</span></label>
               </div>
             </div>
           </form>
           <div class="tc-formfoot tc-formfoot--wrap">
             <button class="tc-btn is-primary" type="submit" form="conflict">Write this combination</button>
-            <button class="tc-btn" type="submit" form="conflict" name="all" value="mine">Use only my edit</button>
-            <button class="tc-btn" type="submit" form="conflict" name="all" value="server">Use only the server version</button>
+            <button class="tc-btn" type="submit" form="conflict.mine">Use only my edit</button>
+            <button class="tc-btn" type="submit" form="conflict.theirs">Use only the server version</button>
             <a class="tc-btn" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7">Cancel</a>
           </div>
         </div>
@@ -11376,6 +11386,357 @@ Read  2 min ago</div>
   </div>
 </div>
 <figcaption>На 768 px серверная сторона не уезжает за край: варианты стоят столбиком внутри карточки свойства. Кнопки переносятся, а не обрезаются. Расхождение — то же, что на кадре выше: те же четыре свойства и те же четыре кнопки.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-conflict-6" data-screen="/app/contacts/{account}/{col}/{uid}/conflict" data-part="unknown">
+  <div class="frame-label"><span>Конфликт · чья правка — не известно</span><i>дополнительный кадр: unknown · /app/contacts/{account}/{col}/{uid}/conflict</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">5</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">1</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog">
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Conflict</div><div class="tc-head__sub">Another client changed this contact while you were editing it. Nothing has been overwritten.</div><div class="tc-head__sub">Choose a side for every property.</div></div></div>
+          <form class="tc-diff" id="conflict" action="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/conflict" method="post">
+            <input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="etag" value="3-a7c1"><input type="hidden" name="op" value="combine">
+            <div class="tc-diff__item">
+              <div class="tc-rubric"><span class="tc-mono">TEL;work</span></div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="mine" required><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your form</span>+7 495 120-45-00</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="theirs" required><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>—</span></label>
+              </div>
+            </div>
+            <div class="tc-diff__item">
+              <div class="tc-rubric"><span class="tc-mono">EMAIL;work</span></div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" required><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your form</span>a.kovaleva@example.org</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="theirs" required><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>anna.kovaleva@slovo.example</span></label>
+              </div>
+            </div>
+            <div class="tc-diff__item">
+              <div class="tc-rubric"><span class="tc-mono">NOTE</span></div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="mine" required><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your form</span>Пишет по вторникам, отвечает в тот же день.</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="theirs" required><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>—</span></label>
+              </div>
+            </div>
+          </form>
+          <div class="tc-formfoot tc-formfoot--wrap">
+            <button class="tc-btn is-primary is-wait" type="submit" form="conflict" title="Choose a side for every property.">Write this combination</button>
+            <button class="tc-btn" type="submit" form="conflict.mine">Use only my form</button>
+            <button class="tc-btn" type="submit" form="conflict.theirs">Use only the server version</button>
+            <a class="tc-btn" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Версии, с которой открыли форму, у Carrel уже нет</b> (решение владельца 16.10, задача 198): среди карточек могут быть поля, которых человек не трогал. Поэтому вариант подписан «Your form» — что было в форме, — а не «Your edit», вида различия у карточек нет, и ничего не выбрано заранее: радио обязательны. «Write this combination» бледная, пока сторона не выбрана у каждой карточки, что делать — под заголовком, над карточками; нажатую браузер не отправит. Выбраны все — кнопка готова, причина уходит, без сценария тоже (<code>:has(:invalid)</code>). Плашки нет: что сказала бы она, говорит подпись (владелец, 17.10).</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-conflict-7" data-screen="/app/contacts/{account}/{col}/{uid}/conflict" data-part="deleted">
+  <div class="frame-label"><span>Конфликт · запись удалили на сервере</span><i>дополнительный кадр: deleted · /app/contacts/{account}/{col}/{uid}/conflict</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">5</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">1</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog">
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Conflict</div><div class="tc-head__sub">Another client deleted this contact while you were editing it. Nothing has been written.</div><div class="tc-head__sub">Choose a side.</div></div></div>
+          <form class="tc-diff" id="conflict" action="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/conflict" method="post">
+            <input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="etag" value="3-a7c1"><input type="hidden" name="op" value="combine">
+            <div class="tc-diff__item">
+              <div class="tc-rubric">Анна Ковалёва</div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="mine" required><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · write it back</span>Анна Ковалёва · +7 495 120-45-00 · a.kovaleva@example.org</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="theirs" required><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server · leave it deleted</span>—</span></label>
+              </div>
+            </div>
+          </form>
+          <div class="tc-formfoot tc-formfoot--wrap">
+            <button class="tc-btn is-primary is-wait" type="submit" form="conflict" title="Choose a side.">Write this choice</button>
+            <a class="tc-btn" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Запись удалили на сервере, пока её правили</b> (Р-67). Тот же экран: с одной стороны правка, с другой — удалённая запись. Заранее ничего не выбрано: вернуть запись с правкой или оставить удалённой решает человек, и «Write this choice» ждёт выбора.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-conflict-8" data-screen="/app/calendar/{account}/{col}/{uid}/conflict" data-part="refused">
+  <div class="frame-label"><span>Конфликт · такое сочетание не записать</span><i>дополнительный кадр: refused · /app/calendar/{account}/{col}/{uid}/conflict</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Личный</span><span class="tc-tickrow__meta">2</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Работа</span><span class="tc-tickrow__meta">2</span></div>
+          <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Дни рождения</span><span class="tc-tickrow__meta">—</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog">
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Conflict</div><div class="tc-head__sub">Another client changed this event while you were editing it. Nothing has been overwritten.</div></div></div>
+          <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>This combination cannot be written.</b></div>
+          <div class="tc-diag">Fields
+end: The end is before the start.</div>
+          <div class="tc-diff__agree"><span class="tc-mono">SUMMARY</span> agrees — kept as it is.</div>
+          <form class="tc-diff" id="conflict" action="/app/calendar/nextcloud/lichnyy/5d1a-77c0/conflict" method="post">
+            <input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="etag" value="3-a7c1"><input type="hidden" name="op" value="combine">
+            <div class="tc-diff__item">
+              <div class="tc-rubric"><span class="tc-mono">DTSTART</span> <span class="tc-rubric__aside">both changed</span></div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>2026-08-12 11:00</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>2026-08-12 10:15</span></label>
+              </div>
+            </div>
+            <div class="tc-diff__item">
+              <div class="tc-rubric"><span class="tc-mono">DTEND</span> <span class="tc-rubric__aside">both changed</span></div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>2026-08-12 12:00</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="theirs" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>2026-08-12 10:30</span></label>
+              </div>
+            </div>
+          </form>
+          <div class="tc-formfoot tc-formfoot--wrap">
+            <button class="tc-btn is-primary" type="submit" form="conflict">Write this combination</button>
+            <button class="tc-btn" type="submit" form="conflict.mine">Use only my edit</button>
+            <button class="tc-btn" type="submit" form="conflict.theirs">Use only the server version</button>
+            <a class="tc-btn" href="/app/calendar/nextcloud/lichnyy/5d1a-77c0">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Выбранное не складывается в запись: начало из правки, конец с сервера — конец раньше начала. Ничего не записано; выбор остался, под сообщением — поля и что с ними.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-conflict-9" data-screen="/app/contacts/{account}/{col}/{uid}/conflict" data-part="write-refused">
+  <div class="frame-label"><span>Конфликт · сервер отказал при записи</span><i>дополнительный кадр: write-refused · /app/contacts/{account}/{col}/{uid}/conflict</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">5</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">1</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog">
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Conflict</div><div class="tc-head__sub">Another client changed this contact while you were editing it. Nothing has been overwritten.</div></div></div>
+          <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>The server refused the change.</b> Nothing was written.</div>
+          <div class="tc-diag">PUT /alice/contacts/kontakty/4f2b-9c31-a0e7.vcf
+nextcloud /alice/contacts/kontakty/4f2b-9c31-a0e7.vcf
+dav: HTTP 507: insufficient storage</div>
+          <div class="tc-diff__agree"><span class="tc-mono">FN</span> agrees — kept as it is.</div>
+          <form class="tc-diff" id="conflict" action="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/conflict" method="post">
+            <input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="etag" value="3-a7c1"><input type="hidden" name="op" value="combine">
+            <div class="tc-diff__item">
+              <div class="tc-rubric"><span class="tc-mono">TEL;work</span> <span class="tc-rubric__aside">only in your edit</span></div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>+7 495 120-45-00</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
+              </div>
+            </div>
+            <div class="tc-diff__item">
+              <div class="tc-rubric"><span class="tc-mono">EMAIL;work</span> <span class="tc-rubric__aside">both changed</span></div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>a.kovaleva@example.org</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>anna.kovaleva@slovo.example</span></label>
+              </div>
+            </div>
+            <div class="tc-diff__item">
+              <div class="tc-rubric"><span class="tc-mono">NOTE</span> <span class="tc-rubric__aside">only in your edit</span></div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit · include</span>Пишет по вторникам, отвечает в тот же день.</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.2" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Leave it out</span>—</span></label>
+              </div>
+            </div>
+            <div class="tc-diff__item">
+              <div class="tc-rubric"><span class="tc-mono">X-EVOLUTION-FILE-AS</span> <span class="tc-rubric__aside">only on the server</span></div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.3" value="mine"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>—</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.3" value="theirs" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server · include</span>Ковалёва, Анна</span></label>
+              </div>
+            </div>
+          </form>
+          <div class="tc-formfoot tc-formfoot--wrap">
+            <button class="tc-btn is-primary" type="submit" form="conflict">Write this combination</button>
+            <button class="tc-btn" type="submit" form="conflict.mine">Use only my edit</button>
+            <button class="tc-btn" type="submit" form="conflict.theirs">Use only the server version</button>
+            <a class="tc-btn" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Сочетание ушло, сервер его не принял. Ничего не записано, выбор остался; под сообщением — запрос и ответ сервера.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-conflict-10" data-screen="/app/contacts/{account}/{col}/{uid}/conflict" data-part="unavailable">
+  <div class="frame-label"><span>Конфликт · сервер не ответил</span><i>дополнительный кадр: unavailable · /app/contacts/{account}/{col}/{uid}/conflict</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">5</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">1</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog">
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Conflict</div></div></div>
+          <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>Контакты is unavailable.</b> The server did not answer as expected, so nothing on this screen comes from it. <a class="tc-btn is-sm" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/conflict">Try again</a></div>
+          <div class="tc-diag">REPORT /alice/contacts/kontakty/
+nextcloud
+dav: HTTP 503: the server is busy</div>
+          <div class="tc-formfoot tc-formfoot--wrap">
+            <a class="tc-btn" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Версию сервера прочесть не удалось — сравнивать не с чем: ни карточек, ни выбора, только Try again и Cancel.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-conflict-11" data-screen="/app/notes/{account}/{col}/{uid}/conflict" data-part="moving">
+  <div class="frame-label"><span>Конфликт · заметка ещё не перенесена</span><i>дополнительный кадр: moving · /app/notes/{account}/{col}/{uid}/conflict</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">2</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">2</span></div>
+          <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Общие с семьёй</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog">
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Conflict</div><div class="tc-head__sub">Another client changed this note while you were editing it. Nothing has been overwritten.</div></div></div>
+          <div class="tc-msg tc-msg--mr0-ml0"><b>Not moved yet.</b> Your edit also moves this note to <span class="tc-mark" data-tc-colour="#6B4E7A"></span> nextcloud · Дневник.</div>
+          <div class="tc-diff__agree"><span class="tc-mono">CATEGORIES</span> agrees — kept as it is.</div>
+          <form class="tc-diff" id="conflict" action="/app/notes/nextcloud/zapisi/9e31-40b7-c012/conflict" method="post">
+            <input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="etag" value="3-a7c1"><input type="hidden" name="op" value="combine">
+            <div class="tc-diff__item">
+              <div class="tc-rubric"><span class="tc-mono">SUMMARY</span> <span class="tc-rubric__aside">both changed</span></div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>Заметка со встречи 10.08 — дополнено</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.0" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>Встреча 10.08</span></label>
+              </div>
+            </div>
+            <div class="tc-diff__item">
+              <div class="tc-rubric"><span class="tc-mono">DESCRIPTION</span> <span class="tc-rubric__aside">both changed</span></div>
+              <div class="tc-diff__options">
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="mine" checked><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Your edit</span>Договорились: демо в пятницу, релиз в понедельник.</span></label>
+                <label class="tc-check"><input class="tc-check__box" type="radio" name="choice.1" value="theirs"><span class="tc-tickrow__tick is-off"></span><span class="tc-diff__value"><span class="tc-diff__source">Server</span>Договорились: демо в пятницу.</span></label>
+              </div>
+            </div>
+          </form>
+          <div class="tc-formfoot tc-formfoot--wrap">
+            <button class="tc-btn is-primary" type="submit" form="conflict">Write this combination</button>
+            <button class="tc-btn" type="submit" form="conflict.mine">Use only my edit</button>
+            <button class="tc-btn" type="submit" form="conflict.theirs">Use only the server version</button>
+            <a class="tc-btn" href="/app/notes/nextcloud/zapisi/9e31-40b7-c012">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Правка заметки выбрала и другую тетрадь. Перенос — часть правки: пишется с ней или с сочетанием; серверная версия и Cancel оставляют заметку на месте.</figcaption>
 </figure>
 
 <h2 id="s-io">7.9 Импорт и экспорт</h2>

@@ -27,6 +27,8 @@
   "agree": [
     "FN"
   ],
+  "ask": "",
+  "deleted": false,
   "details": null,
   "form": {
     "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/conflict",

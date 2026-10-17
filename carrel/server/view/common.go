@@ -22,6 +22,10 @@ type Run struct {
 	// was read back from the destination and the checksum matched»
 	// (account-*, Нс5); пусто — подсказки нет
 	Hint Text `json:"hint,omitempty"`
+	// Colour — метка коллекции перед куском, его слова — её имя: «Your edit
+	// also moves this note to ▍nextcloud · Дневник.» (s-conflict-11);
+	// пусто — метки нет
+	Colour Colour `json:"colour,omitempty"`
 }
 
 // Action — кнопка, пункт меню и строка панели — одно и то же.
@@ -38,6 +42,12 @@ type Action struct {
 	Enabled bool `json:"enabled"`
 	On      bool `json:"on,omitempty"`     // включённый переключатель: флажок ленты, сегмент «сейчас показано»
 	Reason  Text `json:"reason,omitempty"` // почему выключено; пусто, если включено
+	// Waits — кнопка формы ждёт её обязательных полей (задача Typecase 198):
+	// включена, но бледная, пока в форме пусто обязательное поле, и
+	// браузер её не отправит; Reason — чего она ждёт (подсказка). «Write
+	// this combination», пока у карточки не выбрана сторона (s-conflict-6,
+	// -7)
+	Waits bool `json:"waits,omitempty"`
 	// Hint — подсказка у включённого действия (title кнопки): чем оно
 	// обернётся — у New password внешнего запуска «The old password stops
 	// working; …» (s-backup-2, -3, -10, -11); пусто — подсказки нет

@@ -189,7 +189,7 @@ func TestFixtureActionsSayWhyTheyAreOff(t *testing.T) {
 		switch {
 		case a.ID == "":
 			// an empty place: no action at all
-		case a.Enabled && a.Reason != "":
+		case a.Enabled && !a.Waits && a.Reason != "": // a button that waits says what for
 			t.Errorf("%s %s: %s «%s» can be taken and carries a reason %q", screen, at, a.ID, a.Label, a.Reason)
 		case !a.Enabled && a.Reason == "":
 			t.Errorf("%s %s: %s «%s» is off without a reason", screen, at, a.ID, a.Label)

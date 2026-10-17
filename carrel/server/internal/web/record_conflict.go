@@ -15,6 +15,7 @@ import (
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/cal"
+	"carrel.dev/carrel/server/internal/provider/card"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
 )
@@ -165,8 +166,12 @@ func (cr conflictRow) choice() view.ConflictChoice {
 }
 
 // chooseEvery is why the combination is not written yet: a card has no side
-// chosen (Т1).
-const chooseEvery view.Text = "Choose a side for every property."
+// chosen (Т1); chooseOne the same of the one card of a record deleted on the
+// server (s-conflict-7). Each is also what the screen asks under its title.
+const (
+	chooseEvery view.Text = "Choose a side for every property."
+	chooseOne   view.Text = "Choose a side."
+)
 
 // byLabel: the field's rows are told apart by their labels, and a conflict
 // is about the rows of one (Рв6: TEL;work and TEL;cell apart).
@@ -492,10 +497,14 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 			Diff:     cr.diff,
 		})
 	}
-	if d.Unsure && len(page.Rows) > 0 {
-		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: "Some of these may not be your changes",
-			Body: "Carrel no longer holds the version you opened, so it cannot tell what you changed from what only the other client changed: " +
-				"every field that differs is listed. Where you changed nothing, choose the server's value — «Use only my edit» would put the old one back."})
+	// When Carrel no longer holds the version the form was opened with, it
+	// cannot tell what the person changed from what only the other client
+	// did: every field that differs is a card, «Your form» against the
+	// server's, nothing chosen (s-conflict-6, Typecase's 198). The words say
+	// it; no notice besides (the owner, 17.10.2026).
+	mineLabel := view.Text("Use only my edit")
+	if d.Unsure {
+		mineLabel = "Use only my form"
 	}
 	op := func(name string) string {
 		return s.postQuery(path, url.Values{"op": {name}, "etag": {obj.ETag}})
@@ -506,14 +515,18 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 	// Cancel leave it where it is.
 	moving := d.Notebook != "" && d.Notebook != c.listPath()
 	if moving {
-		where := d.Notebook
+		// The notebook by its mark and name (s-conflict-11); what the
+		// buttons do with the move their words say.
+		where := view.Run{Text: text(d.Notebook)}
 		if dest := s.notebookTarget(c, d.Notebook); dest != nil {
-			where = string(dest.stamp())
+			where = view.Run{Text: text(string(dest.stamp())), Colour: catalogColour(dest.col)}
 		}
-		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: "Not moved yet",
-			Body: text("Your edit also moves this " + c.spec.noun + " to " + where + ". Writing your edit or this combination moves it; " +
-				"«Use only the server version» and Cancel leave it where it is.")})
+		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: "Not moved yet", Runs: view.Runs{
+			{Text: text("Your edit also moves this " + c.spec.noun + " to ")}, where, {Text: "."},
+		}})
 	}
+	// Nothing to choose (Р-69) is no screen: the GET leads to the card
+	// (getKindConflict). What is drawn here has a card or a move.
 	writable := len(page.Rows) > 0 || moving
 	// Without scripts the choice of every row is a form (U-8): its radios
 	// carry their rows' names, and «Write this combination» sends it. The
@@ -525,20 +538,182 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 		{Name: "op", Kind: view.InputHidden, Value: "combine"},
 	}}}}
 	page.Actions = []view.Action{
-		{ID: "conflict.mine", Label: "Use only my edit", Href: op("mine"), Method: "POST", Enabled: writable},
+		{ID: "conflict.mine", Label: mineLabel, Href: op("mine"), Method: "POST", Enabled: writable},
 		{ID: "conflict.theirs", Label: "Use only the server version", Href: op("theirs"), Method: "POST", Enabled: true},
 		cancel,
 	}
 	// Where nothing is chosen beforehand, the combination waits for a side
-	// of every card; «Use only my edit» needs none.
+	// of every card — on, pale, the browser refusing it until every card has
+	// one (Action.Waits, Typecase's 198); the screen asks for it under its
+	// title. «Use only my edit» needs none.
 	if writable && slices.ContainsFunc(page.Rows, func(r view.ConflictRow) bool { return r.Choice == view.ChoiceUnset }) {
-		combine.Enabled, combine.Reason = false, chooseEvery
-	}
-	if !writable && !moving {
-		combine.Reason, page.Actions[0].Reason = "The server version already has your change.", "The server version already has your change."
-		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: "Nothing differs", Body: "The server version already holds everything you changed."})
+		combine.Waits, combine.Reason = true, chooseEvery
+		page.Ask = chooseEvery
 	}
 	page.Form.Actions = []view.Action{combine}
+	return page
+}
+
+// deletedPage is the conflict of a record deleted on the server while it
+// was edited (Р-67, s-conflict-7): what happened under the title and what
+// to do; one card — the record by its name, «Your edit · write it back» its
+// name and what the edit changed, «Server · leave it deleted» nothing —, no
+// side chosen; «Write this choice» waits for one; Cancel.
+func (s *Server) deletedPage(c *collectionCtx, d editDraft, notices []view.Notice) view.ConflictPage {
+	page := s.conflictPage(c, d, nil, nil, nil, notices)
+	page.Deleted = true
+	page.Subtitle = text("Another client deleted this " + string(c.spec.kind) + " while you were editing it. Nothing has been written.")
+	page.Ask = chooseOne
+	name, shown := s.editSummary(c, d)
+	page.Rows = []view.ConflictRow{{Property: text(name), Mine: text(shown), Choice: view.ChoiceUnset, Name: choiceField(0)}}
+	page.Form = &view.Form{Action: s.route(c.recordPath(d.UID) + "/conflict"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
+		csrfField(c.sess),
+		{Name: "etag", Kind: view.InputHidden, Value: text(d.ETag)},
+		{Name: "op", Kind: view.InputHidden, Value: "combine"},
+	}}}}
+	page.Form.Actions = []view.Action{{ID: "conflict.combine", Label: "Write this choice", Method: "POST", Primary: true, Enabled: true, Waits: true, Reason: chooseOne}}
+	return page
+}
+
+// keepDeletedEdit keeps the edit of a record the server no longer has, as a
+// refused one (Р-67): measured against the version the form was opened with
+// where it is still held — at the address the record had —, else against an
+// empty form (Unsure). The conflict screen asks what to do with it.
+func (s *Server) keepDeletedEdit(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid, etag string, readAt time.Time, typed formValues, notebook string) {
+	path := strings.TrimSuffix(c.col.Path, "/") + "/" + uid + c.spec.ext
+	base, known := s.emptyValues(c), false
+	var opened *model.Object
+	if read, ok := s.readVersion(c, path, etag); ok {
+		if rv, _, err := s.currentValues(c, read); err == nil {
+			base, known, opened = rv, true, read
+		}
+	}
+	fillNames(c.spec.kind, base, typed)
+	s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed), base, opened, notebook, !known)
+	s.redirect(w, r, c.recordPath(uid)+"/conflict")
+}
+
+// rewritten is what the edit of a record deleted meanwhile writes back: the
+// version opened, every field of it, with the edit over it. When that
+// version was no longer held (Unsure) the edit is all there is.
+func rewritten(d editDraft) formValues {
+	want := formValues{}
+	for k, v := range d.Base {
+		want[k] = v
+	}
+	for k, v := range d.Mine {
+		want[k] = v
+	}
+	return want
+}
+
+// editSummary is the record's name in the edit, and that name with what the
+// edit changed after it, « · » between (s-conflict-7): of a field of many
+// values only those the version opened did not hold.
+func (s *Server) editSummary(c *collectionCtx, d editDraft) (string, string) {
+	nameField := "summary"
+	if c.spec.kind == view.KindContact {
+		nameField = "fn"
+	}
+	want := rewritten(d)
+	name := strings.TrimSpace(strings.Join(want[nameField], " "))
+	parts := []string{name}
+	for _, f := range editFields[c.spec.kind] {
+		vals, ok := d.Mine[f.name]
+		if !ok || f.name == nameField {
+			continue
+		}
+		if held := d.Base[f.name]; len(vals) > 1 && len(held) > 0 {
+			vals = slices.DeleteFunc(slices.Clone(vals), func(v string) bool { return slices.Contains(held, v) })
+		}
+		if v := s.showValues(c, f, vals, nil); v != "" {
+			parts = append(parts, v)
+		}
+	}
+	return name, strings.Join(parts, " · ")
+}
+
+// writeBack writes the edit of a record deleted on the server as the record
+// anew, under its UID where it was (Р-67: «Your edit · write it back»): the
+// fields as rewritten has them, the properties no field shows as the version
+// opened held them. A server that refuses says so over the same choice.
+func (s *Server) writeBack(w http.ResponseWriter, r *http.Request, c *collectionCtx, d editDraft) {
+	now := time.Now()
+	var obj *model.Object
+	if c.card != nil {
+		obj = card.NewObject(d.UID)
+	} else {
+		var err error
+		if obj, err = cal.NewObject(c.spec.component, d.UID, now); err != nil {
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
+	}
+	want, empty := rewritten(d), s.emptyValues(c)
+	ch := s.buildChange(c, obj, nil, empty, want, now)
+	if len(ch.errors) > 0 {
+		s.writePage(w, r, http.StatusOK, s.deletedPage(c, d, []view.Notice{refusedCombination(ch.errors)}))
+		return
+	}
+	for _, name := range slices.Sorted(maps.Keys(d.BaseProps)) {
+		ch.ops = append(ch.ops, model.SetRaw{Prop: name, Values: d.BaseProps[name]})
+	}
+	ch.restored = d.BaseProps
+	sent, fault, err := s.applyChecked(c, obj, ch, empty, want)
+	if err == nil && fault != nil {
+		s.writePage(w, r, http.StatusOK, s.deletedPage(c, d, []view.Notice{faultNotice(fault)}))
+		return
+	}
+	path := strings.TrimSuffix(c.col.Path, "/") + "/" + d.UID + c.spec.ext
+	if err == nil {
+		sent.Path = path
+		if err = c.create(r.Context(), path, sent); landedOnTheFirstTry(err) {
+			err = nil
+		}
+	}
+	if err != nil {
+		s.writePage(w, r, http.StatusOK, s.deletedPage(c, d, []view.Notice{conflictWriteFailure(s.writeFailure(c, "PUT", path, err))}))
+		return
+	}
+	clearDraft(c)
+	s.finishCreate(w, r, c, d.UID, sent)
+}
+
+// refusedCombination is a combination the record cannot hold (s-conflict-8):
+// said in one line, the fields and why under it; the choice stays.
+func refusedCombination(errs map[string]string) view.Notice {
+	var lines []view.Text
+	for _, name := range slices.Sorted(maps.Keys(errs)) {
+		lines = append(lines, text(name+": "+errs[name]))
+	}
+	return view.Notice{Role: view.NoticeAlert, Title: "This combination cannot be written",
+		Details: &view.Diagnostic{Summary: "Fields", Lines: lines}}
+}
+
+// conflictWriteFailure is a refused write on the conflict screen
+// (s-conflict-9): there is no form to keep what was typed — the cards stay —,
+// so it says only that nothing was written.
+func conflictWriteFailure(n view.Notice) view.Notice {
+	n.Body = "Nothing was written."
+	return n
+}
+
+// chosenAgain is the screen drawn again over what the person chose (the
+// answer to a combination refused, s-conflict-8, -9): each card on at the
+// side the form sent, else as before; with a side for every card the
+// combination no longer waits, and nothing is asked.
+func chosenAgain(r *http.Request, page view.ConflictPage) view.ConflictPage {
+	open := false
+	for i := range page.Rows {
+		page.Rows[i].Choice = chosenSide(r, i, page.Rows[i].Choice)
+		open = open || page.Rows[i].Choice == view.ChoiceUnset
+	}
+	if !open && page.Form != nil {
+		page.Ask = ""
+		for i := range page.Form.Actions {
+			page.Form.Actions[i].Waits, page.Form.Actions[i].Reason = false, ""
+		}
+	}
 	return page
 }
 
@@ -571,9 +746,7 @@ func (s *Server) getKindConflict(w http.ResponseWriter, r *http.Request, kind st
 	obj, err := c.find(r.Context(), uid)
 	switch {
 	case notFoundErr(err):
-		s.writePage(w, r, http.StatusOK, s.conflictPage(c, d, nil, nil, nil, []view.Notice{{
-			Role: view.NoticeAlert, Title: "Deleted elsewhere", Body: "The record was deleted on the server while you edited it. Your edit cannot be written to it.",
-		}}))
+		s.writePage(w, r, http.StatusOK, s.deletedPage(c, d, nil))
 		return
 	case err != nil:
 		s.writePage(w, r, http.StatusOK, s.conflictPage(c, d, nil, nil, nil, []view.Notice{s.unavailableNotice(c, c.recordPath(uid)+"/conflict", err)}))
@@ -584,7 +757,15 @@ func (s *Server) getKindConflict(w http.ResponseWriter, r *http.Request, kind st
 		s.writePage(w, r, http.StatusOK, s.conflictPage(c, d, nil, nil, nil, []view.Notice{readNotice(obj.Path, err)}))
 		return
 	}
-	s.writePage(w, r, http.StatusOK, s.conflictPage(c, d, obj, theirs, alarms, nil))
+	page := s.conflictPage(c, d, obj, theirs, alarms, nil)
+	if len(page.Rows) == 0 && (d.Notebook == "" || d.Notebook == c.listPath()) {
+		// Nothing differs (Р-69): the edit is on the server already. Nothing
+		// is written, the draft goes, and the person is where a save leads.
+		clearDraft(c)
+		s.redirect(w, r, c.recordPath(uid))
+		return
+	}
+	s.writePage(w, r, http.StatusOK, page)
 }
 
 // postKindConflict writes the chosen combination onto the server version the
@@ -619,6 +800,20 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 	}
 	etag := r.FormValue("etag")
 	obj, err := c.find(r.Context(), uid)
+	if notFoundErr(err) && op == "combine" {
+		// Deleted on the server meanwhile (Р-67, s-conflict-7): the one card
+		// writes the edit back or leaves the record deleted.
+		switch view.ConflictChoice(r.FormValue(choiceField(0))) {
+		case view.ChoiceMine:
+			s.writeBack(w, r, c, d)
+		case view.ChoiceTheirs:
+			clearDraft(c)
+			s.redirect(w, r, c.listPath())
+		default:
+			s.writePage(w, r, http.StatusOK, s.deletedPage(c, d, []view.Notice{{Role: view.NoticeAlert, Title: "Nothing was written", Body: chooseOne}}))
+		}
+		return
+	}
 	if err != nil || obj.ETag != etag {
 		s.redirect(w, r, here)
 		return
@@ -638,9 +833,9 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 			if chosenSide(r, i, cr.choice()) == view.ChoiceUnset {
 				// A card with no side: nothing is written, and the choice is
 				// shown again (Т1).
-				s.writePage(w, r, http.StatusOK, s.conflictPage(c, d, obj, theirs, alarms, []view.Notice{{
+				s.writePage(w, r, http.StatusOK, chosenAgain(r, s.conflictPage(c, d, obj, theirs, alarms, []view.Notice{{
 					Role: view.NoticeAlert, Title: "Nothing was written", Body: chooseEvery,
-				}}))
+				}})))
 				return
 			}
 		}
@@ -688,14 +883,7 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 	}
 	ch.restored = restored
 	if len(ch.errors) > 0 {
-		var lines []view.Text
-		for name, msg := range ch.errors {
-			lines = append(lines, text(name+": "+msg))
-		}
-		s.writePage(w, r, http.StatusOK, s.conflictPage(c, d, obj, theirs, alarms, []view.Notice{{
-			Role: view.NoticeAlert, Title: "This combination cannot be written", Body: "Choose differently or cancel.",
-			Details: &view.Diagnostic{Summary: "Fields", Lines: lines},
-		}}))
+		s.writePage(w, r, http.StatusOK, chosenAgain(r, s.conflictPage(c, d, obj, theirs, alarms, []view.Notice{refusedCombination(ch.errors)})))
 		return
 	}
 	moving := d.Notebook != "" && d.Notebook != c.listPath()
@@ -718,7 +906,7 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 			s.redirect(w, r, here)
 			return
 		}
-		s.writePage(w, r, http.StatusOK, s.conflictPage(c, d, obj, theirs, alarms, []view.Notice{faultNotice(fault)}))
+		s.writePage(w, r, http.StatusOK, chosenAgain(r, s.conflictPage(c, d, obj, theirs, alarms, []view.Notice{faultNotice(fault)})))
 		return
 	}
 	if err == nil {
@@ -730,7 +918,14 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 		s.redirect(w, r, here)
 		return
 	case err != nil:
-		s.writePage(w, r, http.StatusOK, s.conflictPage(c, d, obj, theirs, alarms, []view.Notice{s.writeFailure(c, "PUT", obj.Path, err)}))
+		// The record read was patched in memory: the choice is shown again
+		// over the record as the server still holds it (s-conflict-9).
+		failure := conflictWriteFailure(s.writeFailure(c, "PUT", obj.Path, err))
+		if obj, err = c.find(r.Context(), uid); err != nil {
+			s.redirect(w, r, here)
+			return
+		}
+		s.writePage(w, r, http.StatusOK, chosenAgain(r, s.conflictPage(c, d, obj, theirs, alarms, []view.Notice{failure})))
 		return
 	}
 	clearDraft(c)

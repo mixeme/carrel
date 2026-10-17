@@ -14,10 +14,15 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// hasNoticeBody reports a notice whose body holds part.
+// hasNoticeBody reports a notice whose body — or its sentence in pieces
+// (Runs) — holds part.
 func hasNoticeBody(notices []view.Notice, part string) bool {
 	for _, n := range notices {
-		if strings.Contains(string(n.Body), part) {
+		body := string(n.Body)
+		for _, r := range n.Runs {
+			body += string(r.Text)
+		}
+		if strings.Contains(body, part) {
 			return true
 		}
 	}

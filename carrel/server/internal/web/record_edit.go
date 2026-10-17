@@ -3538,6 +3538,12 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 
 	obj, err := c.find(r.Context(), uid)
 	switch {
+	case notFoundErr(err) && etag != "" && r.FormValue("op") != "done" && r.URL.Query().Get("op") != "done" &&
+		r.FormValue("add") == "" && r.FormValue("remove") == "":
+		// Deleted on the server while it was edited (Р-67): the edit is kept,
+		// and the conflict screen offers to write it back (s-conflict-7).
+		s.keepDeletedEdit(w, r, c, uid, etag, readAt, want, st.notebook)
+		return
 	case notFoundErr(err):
 		s.notFound(w, r)
 		return

@@ -399,7 +399,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи (с `&foreign=1` — чужие свойства панели раскрыты), `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6); значений несколько — выбор последнее (форма `ListBar.Compact` шлёт скрытое `0`, отмеченная — и `1` за ним); у календаря (и у `/app/calendar`): `?view=` (`day`, `month`, `range`), `?from=`, `?to=` — окно (без `view` — неделя), `?with=` (`events`, `tasks`, `notes`) — роды на ленте, значений несколько, пустое `with` — форма `ListBar.Show` сказала (без `with` — одни события), `?compact=`, `?print=1` и `?open={адрес строки}` (панель записи, её строки `On`) — как у контактов; у задач (и у `/app/tasks`): `?print=1` и `?open={адрес строки}` — как у контактов (s-tasks-1); у заметок (и у `/app/notes`): `?open={адрес строки}` и `?filter=` — «Filter by word» без сценариев, по названию и тексту (s-notes-1) |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `calendar`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10; Print в шапке — у контакта, события и задачи, у заметки — в полосе над текстом, `Doc.Bar`); у контакта `?foreign=1` — чужие свойства раскрыты («Show 3» без сценариев) |
-| `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у события и задачи `?op=apart` с `day` — «Try again» вопроса перед записью серии (AskSheet, C-6); у всех `etag` показанной версии; POST правки серии, оставляющей встречи без дня, отвечает листом вопроса `AskSheet` (C-6; s-agenda-22…-24) поверх правки с набранным; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же |
+| `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у события и задачи `?op=apart` с `day` — «Try again» вопроса перед записью серии (AskSheet, C-6); у всех `etag` показанной версии; POST правки серии, оставляющей встречи без дня, отвечает листом вопроса `AskSheet` (C-6; s-agenda-22…-24) поверх правки с набранным; `?fields=all` — свёрнутых пустых полей нет, каждое в своей рубрике («Show N empty fields» без сценариев), форма шлёт POST туда же; правка записи, которую удалили на сервере (Р-67), хранится, как отказанная, и POST ведёт на `…/conflict` |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | POST | вход | лист | `AskSheet` — ответ POST правки серии (события, задачи), которая оставляет встречи, изменённые вручную, без их дня: вопрос до записи, поверх правки с набранным (`Under`; s-agenda-22, -23); после ответа `left=keep`, если не всё записалось, — что записано и что нет, поверх карточки серии (s-agenda-24) |
 | `/app/contacts/suggest` | GET | вход | фрагмент | `SuggestList` — подсказки поля участников правки события (`AttendeeField.Suggest`, s-agenda-12, -13): `?q=` — набранное; ищутся отмеченные книги, чьи списки сеанс читал (сервер DAV не спрашивается), по имени и по адресу; строка на каждый адрес человека; набранный адрес не из книг — первым «Add» и `Note`. Ставит ответ в меню поля живой слой Typecase (`tc-live.js`, L-1); без сценариев набранное уходит с формой правки |
 | `/app/{kind}/{account}/{col}/{uid}/related` | GET | вход | фрагмент | `SuggestList` — подсказки поля Related to (`FormRow.Suggest`, s-tasks-10, s-notes-20); `{kind}` — `tasks`, `notes`; `{uid}` — запись формы, `new` у новой: она в подсказки не входит; `?q=` — набранное. Записи, загруженные сеансом, — события, задачи и заметки всех коллекций (сервер DAV не спрашивается), в чьём названии набранное: начинающиеся с него первыми, затем новые; строка — название с найденным жирным, метка коллекции, «event · 12 Aug» (`Meta`), UID — значение. Ставит ответ в меню поля живой слой Typecase; без сценариев — варианты поля (U-6.3) |
@@ -408,7 +408,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage`; шаги `?op=` — `upload`, `crop`, `remove` с `etag` шлёт форма правки целиком (`Action.Submits`): набранное держится с черновиком и возвращается в форму один раз — после Save photo, Cancel и Remove; шаг пишет только фото. Форма возвращается с версией, на которой набрано: её двигает запись фото поверх этой же версии, а карточка, изменённая в другом месте, — нет |
 | `/app/contacts/{account}/{col}/new/photo-preview` | GET, POST | вход | страница, редирект | `PhotoPreviewPage` — фотография новой карточки (s-contacts-27, S-13): шаги те же, `?op=` — `upload` (multipart, потолки и типы карточки), `frame`, `save`, `cancel`, `crop`, `remove`; `uid` — черновик формы: его выдаёт первая загрузка, Replace его хранит. Кнопки фотографии новой формы шлют саму форму (`Action.Submits`): набранное хранится с черновиком под тем же `uid` и возвращается с формой. Ничего не пишет: Save photo отмечает кадр выбранным и ведёт на `/new?uid=`; Cancel первой загрузки и Remove — на `/new?uid=` с одним набранным (ничего не набрано — на `/new` без черновика); кадр показывает `/c/{account}/{col}/{uid}/photo?preview=` |
 | `/c/{account}/{col}/{uid}/photo` | GET | вход | поток | — |
-| `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage`; POST: `op=combine` («Write this combination», форма `ConflictPage.Form` с `choice.<n>=mine` или `theirs` на строку — `ConflictRow.Name`; строка без поля — выбранное заранее, `ConflictRow.Choice`), `op=mine`, `op=theirs`, `op=cancel`; у всех, кроме `cancel`, `etag=` — версия, против которой показан выбор: сервер ушёл дальше — страница строится заново |
+| `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage`; POST: `op=combine` («Write this combination», форма `ConflictPage.Form` с `choice.<n>=mine` или `theirs` на строку — `ConflictRow.Name`; строка без поля — выбранное заранее, `ConflictRow.Choice`), `op=mine`, `op=theirs`, `op=cancel`; у всех, кроме `cancel`, `etag=` — версия, против которой показан выбор: сервер ушёл дальше — страница строится заново. Запись удалена на сервере (Р-67, `ConflictPage.Deleted`): `op=combine` с `choice.0=mine` пишет её заново с правкой и ведёт на карточку, `theirs` сбрасывает правку и ведёт на список; без выбора — тот же экран. Расходиться нечему (Р-69): GET сбрасывает правку и ведёт на карточку записи |
 | `/app/{kind}/{account}/{col}/{uid}/move` | GET, POST | вход | лист | `MoveSheet`; `?back=` — страница, откуда лист открыт (без него — `Referer`): страницей лист несёт её экраном под собой (`Under`), Cancel ведёт на неё, варианты листа несут её дальше; POST — форма листа (`to` — «подключение/коллекция», `warned`) или прежние `to` и `into` |
 | `/app/{kind}/{account}/{col}/{uid}/copies` | GET | вход | лист, редирект | `CopiesSheet` «Which copy to edit?» (s-contacts-32): Edit записи связанной группы; у записи без группы — редирект на `…/edit`. `?back=` — страница, откуда открыт (без него — `Referer`): лист стоит над ней, Cancel ведёт на неё. Форма листа — GET `…/edit?copy=…`: редирект на форму выбранной копии |
 | `/app/{kind}/linked/{uid}/copies` | GET | вход | лист | `CopiesSheet` связанной группы по UID любой её копии (s-contacts-35 — над объединённой книгой): тот же лист, что у адреса этой копии; UID вне группы рода — 404 |
@@ -609,6 +609,7 @@ type Run struct {
     Text Text
     Mark RunMark // C-8; пусто — обычный текст
     Hint Text    // подсказка куска (title): «verified» подвала рейла — «The archive was read back from the destination and the checksum matched» (account-*); пусто — нет
+    Colour Colour // метка коллекции перед куском, его слова — её имя: «Your edit also moves this note to ▍nextcloud · Дневник.» (s-conflict-11); пусто — метки нет
 }
 
 // Действие. Кнопка, пункт меню и строка панели — одно и то же.
@@ -623,6 +624,7 @@ type Action struct {
     Enabled bool
     On      bool    // включено: открытый раздел рейла, выбранный сегмент, включённый флажок ленты
     Reason  Text    // почему выключено; пусто, если включено
+    Waits   bool    // кнопка формы ждёт её обязательных полей (задача Typecase 198): включена, бледная, пока поле пусто, браузер её не отправит; Reason — чего ждёт. «Write this combination» / «Write this choice», пока у карточки расхождения не выбрана сторона (s-conflict-6, -7)
     Hint    Text    // подсказка у включённого действия (title кнопки), когда её рисует кадр: чем оно обернётся — New password внешнего запуска, «The old password stops working; whatever runs this job has to be given the new one.» (s-backup-2, -3, -10, -11); пусто — подсказки нет
     Tally   Text    // счёт сегмента отдельно от подписи: Label «All», Tally «24» (SegOption.Count); пусто — кадр счёта не пишет
     Arrow   []MenuItem // стрелка кнопки (.m-split): пункты её меню; пусто — без стрелки
@@ -1654,26 +1656,30 @@ type ConflictPage struct {
     Shell
     Kind     Kind
     UID      string
-    Subtitle Text   // что случилось, под заголовком: «Another client changed this contact while you were editing it. Nothing has been overwritten.» (s-conflict-1; у события, задачи, заметки — их слово); пусто — записи на сервере нет
+    Subtitle Text   // что случилось, под заголовком: «Another client changed this contact while you were editing it. Nothing has been overwritten.» (s-conflict-1; у события, задачи, заметки — их слово); у удалённой — «Another client deleted this contact while you were editing it. Nothing has been written.» (s-conflict-7); пусто — сервер не ответил (s-conflict-10)
+    Ask      Text   // что сделать, второй строкой под заголовком, когда заранее не выбрано ничего: «Choose a side for every property.» (s-conflict-6), «Choose a side.» (-7); пусто — выбор сделан заранее
+    Deleted  bool   // запись удалили на сервере, пока её правили (Р-67, s-conflict-7): одна карточка — имя записи, Mine — имя и изменённое правкой через « · », Theirs пуст; mine пишет запись заново с правкой, theirs оставляет удалённой; варианты «Your edit · write it back», «Server · leave it deleted» — слова экрана
     ReadAt   When
     ServerAt When
     Rows     []ConflictRow
     Agree    []Text // свойства, что изменены так же, как на сервере: «‹DTSTART› agrees — kept as it is.» (s-conflict-3, -4, -5; слова — экрана)
     // Выбор по строкам без сценариев (U-8, s-conflict-1): POST …/conflict,
     // скрытые _csrf, etag показанной версии и op=combine; радио строк —
-    // ConflictRow.Name; Actions — «Write this combination», её отправка.
-    // nil — писать нечего: запись удалена на сервере или не прочлась
+    // ConflictRow.Name; Actions — «Write this combination» («Write this
+    // choice» у удалённой), её отправка; ждёт (Action.Waits), пока у
+    // карточки без выбора заранее не выбрана сторона. nil — писать нечего:
+    // запись не прочлась. Ответ на отказ рисует выбор, который пришёл.
     Form    *Form
-    Actions []Action // Use only my edit · Use only the server version · Cancel — каждая своей формой; «Write this combination» — кнопка Form, рисуется первой
+    Actions []Action // Use only my edit (Use only my form, когда чья правка не известна, s-conflict-6) · Use only the server version · Cancel — каждая своей формой; «Write this combination» — кнопка Form, рисуется первой. У удалённой и непрочтённой — только Cancel. Расходиться нечему (Р-69) — экрана нет: черновик сброшен, GET ведёт на карточку
 }
 
 type ConflictRow struct { // карточка расхождения, варианты столбиком
     Property Text           // свойство, как его зовёт запись: FN; строки одной метки — TEL;work, EMAIL;work; свойство, которого нет в форме, — своим именем, X-EVOLUTION-FILE-AS (s-conflict-1)
     Mine     Text
     Theirs   Text
-    Choice   ConflictChoice // C-8: что выбрано заранее (радио отмечено); его же сервер берёт, когда поле строки не пришло. Пусто — ничего (версии, с которой открыли форму, нет; решение владельца 16.10.2026): «Write this combination» выключена «Choose a side for every property.», пока у всех строк не выбрана сторона, и форма без выбора ничего не пишет
+    Choice   ConflictChoice // C-8: что выбрано заранее (радио отмечено); его же сервер берёт, когда поле строки не пришло. Пусто — ничего (версии, с которой открыли форму, нет; решение владельца 16.10.2026): радио строки обязательны, «Write this combination» ждёт (Action.Waits, «Choose a side for every property.»), пока у всех строк не выбрана сторона, и форма без выбора ничего не пишет
     Name     string         // поле строки в Form: choice.<номер строки>; радио «Your edit» — mine, «Server» — theirs
-    Diff     ConflictDiff   // C-8: both — изменили обе стороны, mine — только правка, theirs — только сервер (Mine — что было открыто); пусто — версии, с которой открыли форму, уже нет
+    Diff     ConflictDiff   // C-8: both — изменили обе стороны, mine — только правка, theirs — только сервер (Mine — что было открыто); пусто — версии, с которой открыли форму, уже нет: вида нет, вариант правки — «Your form» (s-conflict-6)
 }
 ```
 

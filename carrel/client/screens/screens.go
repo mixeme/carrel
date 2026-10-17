@@ -62,6 +62,10 @@ type Screen struct {
 	// the forgotten password (s-auth-6), the wipe's confirmation (s-auth-10).
 	// nil — the screen has none.
 	Forms func(model any) []widget.PostForm
+	// Notices is the space the screen keeps around the shell's notices: the
+	// page's gutters (zero), but flush with the sides of a dialog on the
+	// conflict screen (s-conflict-8…-11). The zone notices is drawn so too.
+	Notices widget.MsgSpace
 	// Waits are what of the screen waits for the library (U-5.5, the
 	// owner's decision of 01.10.2026): each a row of the list «ждёт
 	// библиотеку», and the row's mark stands at the line here and at the
@@ -308,11 +312,13 @@ var All = []Screen{
 		},
 	},
 	{
-		Model:  func() any { return new(view.ConflictPage) },
-		Frames: []string{"s-conflict-1", "s-conflict-3", "s-conflict-4", "s-conflict-5"},
-		Draw:   func(model any) Root { return conflict.Screen(model.(*view.ConflictPage)) },
-		Title:  func(model any) string { return string(model.(*view.ConflictPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return conflict.Forms(model.(*view.ConflictPage)) },
+		Model: func() any { return new(view.ConflictPage) },
+		Frames: []string{"s-conflict-1", "s-conflict-3", "s-conflict-4", "s-conflict-5", "s-conflict-6", "s-conflict-7",
+			"s-conflict-8", "s-conflict-9", "s-conflict-10", "s-conflict-11"},
+		Draw:    func(model any) Root { return conflict.Screen(model.(*view.ConflictPage)) },
+		Title:   func(model any) string { return string(model.(*view.ConflictPage).Title) },
+		Forms:   func(model any) []widget.PostForm { return conflict.Forms(model.(*view.ConflictPage)) },
+		Notices: conflict.NoticeSpace,
 	},
 }
 

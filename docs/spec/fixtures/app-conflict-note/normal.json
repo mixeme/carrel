@@ -27,6 +27,8 @@
   "agree": [
     "CATEGORIES"
   ],
+  "ask": "",
+  "deleted": false,
   "details": null,
   "form": {
     "action": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict",

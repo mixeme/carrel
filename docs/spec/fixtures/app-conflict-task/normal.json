@@ -27,6 +27,8 @@
   "agree": [
     "STATUS"
   ],
+  "ask": "",
+  "deleted": false,
   "details": null,
   "form": {
     "action": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/conflict",

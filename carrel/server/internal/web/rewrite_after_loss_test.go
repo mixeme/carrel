@@ -69,7 +69,9 @@ func TestTheAddressQuestionIsAskedAfterAConflict(t *testing.T) {
 // version the form was opened with. When Carrel no longer holds that
 // version, every field that differs from the server's is listed as the
 // person's change — also what only the other client changed, and «Use only
-// my edit» would put the old value back. The screen says so.
+// my edit» would put the old value back. The screen says so by its words
+// (s-conflict-6, Typecase's 198): «Your form», «Use only my form», «Choose
+// a side for every property.» under the title — no notice besides.
 func TestTheConflictScreenSaysWhenItCannotTellWhoseChange(t *testing.T) {
 	f := newRewriteStand(t)
 	rec := f.path("contacts") + "/ada"
@@ -80,12 +82,12 @@ func TestTheConflictScreenSaysWhenItCannotTellWhoseChange(t *testing.T) {
 		t.Fatalf("save: %d %s, want the conflict screen", resp.Code, resp.Header().Get("Location"))
 	}
 	page := decode[view.ConflictPage](t, f.h.do(get(rec+"/conflict", f.sess)))
-	if !hasNotice(page.Notices, "Some of these may not be your changes") {
-		t.Errorf("notices = %+v", page.Notices)
+	if len(page.Notices) != 0 || page.Ask != "Choose a side for every property." {
+		t.Errorf("notices = %+v, ask %q", page.Notices, page.Ask)
 	}
-	// Nothing is chosen beforehand, and the combination is not written until
-	// a side is chosen for every property; «Use only my edit» stays (the
-	// owner's decision of 16.10.2026, Т1).
+	// Nothing is chosen beforehand, and the combination waits until a side
+	// is chosen for every property; «Use only my form» stays (the owner's
+	// decision of 16.10.2026, Т1).
 	if len(page.Rows) == 0 {
 		t.Fatal("no rows")
 	}
@@ -94,10 +96,10 @@ func TestTheConflictScreenSaysWhenItCannotTellWhoseChange(t *testing.T) {
 			t.Errorf("row %s chosen %q beforehand, diff %q", row.Property, row.Choice, row.Diff)
 		}
 	}
-	if c := page.Form.Actions[0]; c.ID != "conflict.combine" || c.Enabled || c.Reason != "Choose a side for every property." {
+	if c := page.Form.Actions[0]; c.ID != "conflict.combine" || !c.Enabled || !c.Waits || c.Reason != "Choose a side for every property." {
 		t.Errorf("combine = %+v", c)
 	}
-	if mine := actionByID(page.Actions, "conflict.mine"); mine == nil || !mine.Enabled {
+	if mine := actionByID(page.Actions, "conflict.mine"); mine == nil || !mine.Enabled || mine.Label != "Use only my form" {
 		t.Errorf("Use only my edit = %+v", mine)
 	}
 	ada := func() string {
@@ -126,7 +128,7 @@ func TestTheConflictScreenSaysWhenItCannotTellWhoseChange(t *testing.T) {
 	if resp := g.h.do(postForm(g.path("contacts")+"/ada/edit", g.sess, form)); resp.Code != http.StatusSeeOther {
 		t.Fatalf("save: %d", resp.Code)
 	}
-	if page := decode[view.ConflictPage](t, g.h.do(get(g.path("contacts")+"/ada/conflict", g.sess))); hasNotice(page.Notices, "Some of these may not be your changes") {
-		t.Errorf("the version was held, and the screen doubts all the same: %+v", page.Notices)
+	if page := decode[view.ConflictPage](t, g.h.do(get(g.path("contacts")+"/ada/conflict", g.sess))); page.Ask != "" || actionByID(page.Actions, "conflict.mine").Label != "Use only my edit" {
+		t.Errorf("the version was held, and the screen doubts all the same: ask %q, actions %+v", page.Ask, page.Actions)
 	}
 }

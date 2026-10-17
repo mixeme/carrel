@@ -2,7 +2,9 @@
 // changed on the server meanwhile, /app/{kind}/{account}/{col}/{uid}/conflict
 // (ConflictPage), drawn by frames «Конфликт версий» of a contact, an event, a
 // task and a note (s-conflict-1, -3, -4, -5; U-6.8): one card a property,
-// its versions a column of radios — not a table of three columns.
+// its versions a column of radios — not a table of three columns; and by
+// its states (s-conflict-6…-11: whose edit is not known, deleted on the
+// server, refused, the write refused, unavailable, a note still to move).
 package conflict
 
 import (
@@ -23,16 +25,23 @@ var (
 // sides is, how a property differs and what its versions are called, and
 // what stands for nothing.
 const (
-	title   = "Conflict"
-	agrees  = "agrees — kept as it is."
-	yours   = "Your edit"
-	server  = "Server"
-	include = " · include"
-	leave   = "Leave it out"
-	nothing = "—"
-	formID  = "conflict"
-	back    = "Back"
+	title    = "Conflict"
+	agrees   = "agrees — kept as it is."
+	yours    = "Your edit"
+	yourForm = "Your form"
+	server   = "Server"
+	include  = " · include"
+	leave    = "Leave it out"
+	writeIt  = " · write it back"
+	leaveIt  = " · leave it deleted"
+	nothing  = "—"
+	formID   = "conflict"
+	back     = "Back"
 )
+
+// NoticeSpace is where the screen's notices stand: messages of its dialog,
+// flush with its sides (s-conflict-8…-11).
+const NoticeSpace = w.MsgFlushSides
 
 // asides are the words of a kind of difference (C-8 ConflictDiff,
 // s-conflict-1…-5); an unknown kind has none.
@@ -44,23 +53,31 @@ var asides = map[view.ConflictDiff]string{
 
 // Screen draws the conflict:
 //
-//   - the head: «Conflict» and what happened under it (Subtitle);
-//   - the notices of the page (the edit that cannot be told from the
-//     server's, a combination that cannot be written);
+//   - the head: «Conflict», what happened under it (Subtitle) and, where
+//     nothing is chosen beforehand, what to do (Ask);
+//   - the notices of the page as messages of the dialog, flush with its
+//     sides, each with its technical block under it (a combination that
+//     cannot be written, the write refused, the source unavailable, a note
+//     still to move with its notebook's mark);
 //   - each property the person changed as the server holds it already, a
 //     line (Agree);
 //   - the cards, a form (Form): the property by its own name, monospaced,
 //     how it differs, and its two versions as radios of its row's name —
-//     «mine» the edit, «theirs» the server's —, the chosen one on (Choice).
-//     A version only one side holds is «… · include» against «Leave it out»;
-//     nothing is a dash;
-//   - the foot: Write this combination (the form's), Use only my edit and
-//     Use only the server version (each a form of its own), Cancel.
+//     «mine» the edit, «theirs» the server's —, the chosen one on (Choice);
+//     a card with nothing chosen is required. A version only one side holds
+//     is «… · include» against «Leave it out»; where whose edit it is cannot
+//     be told, the edit is «Your form»; a record deleted on the server is
+//     one card by its name, «Your edit · write it back» against «Server ·
+//     leave it deleted»; nothing is a dash;
+//   - the foot: Write this combination (the form's; waiting while a card
+//     has no side), Use only my edit and Use only the server version (each
+//     a form of its own), Cancel.
 func Screen(p *view.ConflictPage) w.Shell {
-	items := []w.DialogPart{w.Head{Title: &w.HeadTitle{Text: title}, Subs: subs(p.Subtitle)}}
-	for _, n := range bind.Notices(p.Notices, w.MsgSpacePage) {
-		if d, ok := n.(w.DialogPart); ok {
-			items = append(items, d)
+	items := []w.DialogPart{w.Head{Title: &w.HeadTitle{Text: title}, Subs: subs(p.Subtitle, p.Ask)}}
+	for _, n := range p.Notices {
+		items = append(items, bind.Notice(n, NoticeSpace))
+		if d := bind.NoticeDiag(n); d != nil {
+			items = append(items, d.Diag)
 		}
 	}
 	for _, a := range p.Agree {
@@ -69,7 +86,7 @@ func Screen(p *view.ConflictPage) w.Shell {
 	if p.Form != nil {
 		diff := w.Diff{Action: p.Form.Action, Method: p.Form.Method, Fields: bind.Hidden(*p.Form), ID: formID}
 		for _, r := range p.Rows {
-			diff.Items = append(diff.Items, card(r))
+			diff.Items = append(diff.Items, card(r, p.Deleted))
 		}
 		items = append(items, diff)
 	}
@@ -78,42 +95,56 @@ func Screen(p *view.ConflictPage) w.Shell {
 	return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: []w.MainPart{w.Dialog{Items: items}}}}}
 }
 
-// subs is the line under the title; none when nothing is said.
-func subs(t view.Text) []w.HeadSub {
-	if t == "" {
-		return nil
+// subs are the lines under the title — what happened, then what to do —;
+// none for what is not said.
+func subs(lines ...view.Text) []w.HeadSub {
+	var out []w.HeadSub
+	for _, t := range lines {
+		if t != "" {
+			out = append(out, w.HeadSub{Parts: []w.HeadSubPart{w.Text(t)}})
+		}
 	}
-	return []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(t)}}}
+	return out
 }
 
-// card is a property's card: its name, how it differs, its two versions.
-func card(r view.ConflictRow) w.DiffItem {
+// card is a property's card: its name, how it differs, its two versions; of
+// a record deleted on the server (deleted), the record by its name.
+func card(r view.ConflictRow, deleted bool) w.DiffItem {
 	t := w.Rubric{Lead: &w.Mono{Text: string(r.Property)}}
 	if a := asides[r.Diff]; a != "" {
 		t.Items = []w.RubricPart{w.RubricAside{Text: a}}
 	}
 	mineWord, theirsWord := yours, server
-	switch r.Diff {
-	case view.DiffMine:
+	switch {
+	case deleted:
+		t = w.Rubric{Text: string(r.Property)}
+		mineWord, theirsWord = yours+writeIt, server+leaveIt
+	case r.Diff == view.DiffMine:
 		mineWord, theirsWord = yours+include, leave
-	case view.DiffTheirs:
+	case r.Diff == view.DiffTheirs:
 		theirsWord = server + include
+	case r.Diff == view.DiffUnknown:
+		// Whose change it is Carrel cannot tell: the form may hold fields
+		// the person did not touch (s-conflict-6; the owner, 17.10.2026).
+		mineWord = yourForm
 	}
 	// A card whose change Carrel cannot tell as anyone's has neither on
-	// (ChoiceUnset, the owner's decision of 16.10.2026).
+	// (ChoiceUnset, the owner's decision of 16.10.2026), and the form is not
+	// sent without its side (Check.Required, Typecase's 198).
+	need := r.Choice == view.ChoiceUnset
 	return w.DiffItem{Title: t, Options: []w.Check{
-		version(r.Name, string(view.ChoiceMine), r.Choice == view.ChoiceMine, mineWord, r.Mine),
-		version(r.Name, string(view.ChoiceTheirs), r.Choice == view.ChoiceTheirs, theirsWord, r.Theirs),
+		version(r.Name, string(view.ChoiceMine), r.Choice == view.ChoiceMine, need, mineWord, r.Mine),
+		version(r.Name, string(view.ChoiceTheirs), r.Choice == view.ChoiceTheirs, need, theirsWord, r.Theirs),
 	}}
 }
 
 // version is one side of a card: a radio of the row's name.
-func version(name, value string, on bool, source string, v view.Text) w.Check {
+func version(name, value string, on, required bool, source string, v view.Text) w.Check {
 	shown := string(v)
 	if shown == "" {
 		shown = nothing
 	}
-	return w.Check{Name: name, Value: value, Radio: true, On: on, Parts: []w.CheckPart{w.Choice{Source: source, Value: shown}}}
+	return w.Check{Name: name, Value: value, Radio: true, On: on, Required: required, Parts: []w.CheckPart{w.Choice{Source: source, Value: shown}}}
 }
 
 // foot is the row of answers: the form's own first, then each action — a

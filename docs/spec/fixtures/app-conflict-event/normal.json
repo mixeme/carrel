@@ -27,6 +27,8 @@
   "agree": [
     "DTSTART"
   ],
+  "ask": "",
+  "deleted": false,
   "details": null,
   "form": {
     "action": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict",

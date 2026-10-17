@@ -131,7 +131,8 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
           "issued","mismatch","folder","preview","report","silent",
-          "addressbook","note","image","text","download"}
+          "addressbook","note","image","text","download",
+          "unknown","deleted","write-refused","moving"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -317,6 +318,16 @@ SERVER_TODO = {
 # кадр экрана целиком: отказ входа — s-auth-13, не s-auth-1. Шаги страниц
 # вне оболочки названы по data-part своего кадра (C-14.3).
 STATE_FRAME = {
+    # Состояния экрана расхождения (записка Typecase 77): чья правка не
+    # известна, удалено на сервере, комбинация не пишется, сервер отказал в
+    # записи, источник недоступен, заметка ещё не перенесена — части
+    # маршрута по data-part.
+    "app-conflict/unknown": "s-conflict-6",
+    "app-conflict/deleted": "s-conflict-7",
+    "app-conflict-event/refused": "s-conflict-8",
+    "app-conflict/write-refused": "s-conflict-9",
+    "app-conflict/unavailable": "s-conflict-10",
+    "app-conflict-note/moving": "s-conflict-11",
     # Дубликаты (Дб10, Дб21): ничего не прочитано — s-dup-6; слияние
     # события — s-dup-4; слияние, которому сервер отказал в удалении, —
     # s-dup-5 (части маршрута по data-part; событие — своим каталогом, как

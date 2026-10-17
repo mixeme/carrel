@@ -17,6 +17,39 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.336 — 2026-10-17
+
+Typecase note 77 (`8e09917`): the conflict screen's states and its form by
+C-5. The mockup copied byte for byte.
+
+### Changed
+
+- **A record deleted on the server while it was edited is a choice**
+  (Р-67; `s-conflict-7`): the save keeps the edit and leads to the conflict
+  screen — one card by the record's name, «Your edit · write it back»
+  against «Server · leave it deleted», nothing chosen, «Write this
+  choice». Writing it back makes the record anew with the edit; leaving it
+  deleted drops the edit and leads to the list. Before, the save answered
+  «not found» and the screen had only Cancel.
+- **Nothing to choose, no screen** (Р-69): when the server already holds
+  the edit, nothing is written and the person is at the card.
+  «Nothing differs» and its two buttons switched off are gone.
+- **Whose edit is not known** (`s-conflict-6`): the screen asks «Choose a
+  side for every property.» under its title; «Use only my form»; the
+  notice «Some of these may not be your changes» is gone. «Write this
+  combination» waits, on and pale, until every card has a side.
+- **States in fewer words** (`s-conflict-8`…`-11`): «This combination
+  cannot be written» with the fields under it, and the person's choice
+  kept; the write refused says «Nothing was written.»; a note still to
+  move names its notebook by its mark.
+- The technical line of a refused write puts a space between the
+  connection and the path.
+
+### For consumers
+
+- New `ConflictPage.Ask`, `ConflictPage.Deleted`, `Action.Waits`,
+  `Run.Colour` (C-6); C-5 says what `/conflict` does with a deleted record.
+
 ## v0.2.335 — 2026-10-17
 
 Typecase notes 72–76 (`96b9973`): the mockup copied byte for byte.

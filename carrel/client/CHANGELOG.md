@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.54 — 2026-10-17
+
+Server `v0.2.336`, Typecase `8e09917` (its note 77). The mockup copied
+byte for byte. The conflict screen draws its states (`s-conflict-6`…`-11`):
+a second line under the title, the notices as the dialog's messages with
+their technical block apart, a notebook's mark in a message, «Your form»,
+a deleted record's one card; a card with nothing chosen is required, and
+the button waiting for it is pale (`ButtonWaits`).
+
 ## v0.4.53 — 2026-10-17
 
 Server `v0.2.335`, Typecase `96b9973` (its notes 72–76); needs

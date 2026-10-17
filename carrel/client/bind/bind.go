@@ -91,7 +91,9 @@ func Kind(a view.Action) w.ButtonKind {
 // somewhere with the form it stands in (GET, Submits: «Edit this copy» of
 // the sheet of copies, s-contacts-32) submits that form, to its own Href
 // when it has one; an action switched off
-// is drawn disabled and says why (Reason), and leads nowhere. The label,
+// is drawn disabled and says why (Reason), and leads nowhere; one that waits
+// for its form's required fields (Waits) is on and pale, and says what it
+// waits for (Reason). The label,
 // the icon and the kind are the action's.
 func Button(a view.Action, form string) w.Button {
 	b := w.Button{Label: string(a.Label), Icon: Icon(a.Icon), Kind: Kind(a), Title: string(a.Hint)}
@@ -105,6 +107,11 @@ func Button(a view.Action, form string) w.Button {
 		b.Form = form
 	default:
 		b.Href = a.Href
+	}
+	// One that waits for the required fields of its form (Typecase's task
+	// 198): on, pale until they are filled, what it waits for its title.
+	if a.Enabled && a.Waits {
+		b.State, b.Reason = w.ButtonWaits, string(a.Reason)
 	}
 	return b
 }
@@ -346,8 +353,15 @@ func Msg(n view.Notice, space w.MsgSpace) w.Msg {
 	if n.Body != "" {
 		parts = append(parts, w.Text(n.Body))
 	}
-	for _, p := range Inlines(n.Runs) {
-		parts = append(parts, p.(w.MsgPart))
+	for _, r := range n.Runs {
+		if r.Colour != "" {
+			// A collection by its mark and name (s-conflict-11).
+			parts = append(parts, w.Mark{Colour: string(r.Colour)}, w.Text(" "+string(r.Text)))
+			continue
+		}
+		for _, p := range Inlines(view.Runs{r}) {
+			parts = append(parts, p.(w.MsgPart))
+		}
 	}
 	return w.Msg{Parts: parts, Tone: Tone(n.Role), Space: space}
 }

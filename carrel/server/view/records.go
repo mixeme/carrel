@@ -368,8 +368,19 @@ type ConflictPage struct {
 	UID  string `json:"uid"`
 	// Subtitle — что случилось, строкой под заголовком (s-conflict-1):
 	// «Another client changed this contact while you were editing it.
-	// Nothing has been overwritten.»; пусто — записи на сервере нет
-	Subtitle Text          `json:"subtitle"`
+	// Nothing has been overwritten.»; у удалённой — «Another client deleted
+	// this contact while you were editing it. Nothing has been written.»
+	// (s-conflict-7); пусто — сервер не ответил (s-conflict-10)
+	Subtitle Text `json:"subtitle"`
+	// Ask — что сделать, второй строкой под заголовком, когда заранее не
+	// выбрано ничего: «Choose a side for every property.» (s-conflict-6),
+	// «Choose a side.» (-7); пусто — выбор сделан заранее
+	Ask Text `json:"ask"`
+	// Deleted — запись удалили на сервере, пока её правили (Р-67,
+	// s-conflict-7): одна карточка — имя записи; mine пишет её заново с
+	// правкой, theirs оставляет удалённой; варианты «Your edit · write it
+	// back» и «Server · leave it deleted» — слова экрана
+	Deleted  bool          `json:"deleted"`
 	ReadAt   When          `json:"readAt"`
 	ServerAt When          `json:"serverAt"`
 	Rows     []ConflictRow `json:"rows"`
@@ -380,12 +391,17 @@ type ConflictPage struct {
 	// Form — выбор по строкам без сценариев (U-8, s-conflict-1): POST
 	// …/conflict, скрытые _csrf, etag показанной версии и op=combine;
 	// строки шлют Name своей ConflictRow со значением mine или theirs (C-8
-	// ConflictChoice), а Actions — «Write this combination», её отправка.
-	// nil — писать нечего: запись удалена на сервере или не прочлась
+	// ConflictChoice), а Actions — «Write this combination» («Write this
+	// choice» у удалённой), её отправка; ждёт (Action.Waits), пока у
+	// карточки без выбора заранее не выбрана сторона. nil — писать нечего:
+	// запись не прочлась
 	Form *Form `json:"form"`
-	// Actions — Use only my edit · Use only the server version · Cancel:
+	// Actions — Use only my edit (Use only my form, когда чья правка не
+	// известна, s-conflict-6) · Use only the server version · Cancel:
 	// каждая своей формой (POST с op и etag в адресе); «Write this
-	// combination» — кнопка Form, рисуется первой (s-conflict-1)
+	// combination» — кнопка Form, рисуется первой (s-conflict-1). У
+	// удалённой и непрочтённой — только Cancel. Расходиться нечему (Р-69) —
+	// экрана нет: черновик сброшен, GET ведёт на карточку
 	Actions []Action `json:"actions"`
 }
 
@@ -403,6 +419,8 @@ type ConflictRow struct {
 	// Diff — вид расхождения (C-8): both — изменили обе стороны, mine —
 	// только правка (сервер держит то, что было открыто); пусто — версии,
 	// с которой открыли форму, уже нет (s-conflict-1…-5: «both changed»,
-	// «only in your edit»)
+	// «only in your edit»; s-conflict-6: вида нет, вариант — «Your form»).
+	// Карточка без выбора заранее (Choice пуст) обязательна: форму без
+	// её стороны браузер не отправит (Check.Required)
 	Diff ConflictDiff `json:"diff"`
 }

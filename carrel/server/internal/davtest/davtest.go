@@ -527,6 +527,15 @@ func (s *Server) Seed(p, body string) string {
 	return s.storeLocked(p, []byte(body))
 }
 
+// Unseed deletes a resource as another client would have: what was there
+// is gone, and its collection has changed.
+func (s *Server) Unseed(p string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.objects, p)
+	s.ctags[parent(p)]++
+}
+
 // Object returns the stored body and ETag of a resource.
 func (s *Server) Object(p string) (body, etag string, ok bool) {
 	s.mu.Lock()
