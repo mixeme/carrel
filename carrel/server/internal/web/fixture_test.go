@@ -1738,7 +1738,8 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 		{"admin-users", "/admin/"},
 		{"admin-invites", "/admin/invites"},
 		{"admin-settings", "/admin/settings"},
-		{"admin-audit", "/admin/audit"},
+		// Read from the day its frame chose (s-admin-7: since 2026-08-01).
+		{"admin-audit", "/admin/audit?since=2026-08-01"},
 		{"admin-dav", "/admin/dav"},
 		{"admin-escrow", "/admin/escrow"},
 	} {

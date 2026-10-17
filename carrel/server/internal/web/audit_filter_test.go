@@ -19,7 +19,9 @@ func TestAuditFiltersAndExport(t *testing.T) {
 	// wrote login.ok, and the setup wrote setup.first_admin.
 	h.do(h.anonPostForm("/login", "/login", url.Values{"login": {"owner"}, "password": {"nope"}}))
 
-	page := decode[view.AdminAuditPage](t, h.do(get("/admin/audit", sess)))
+	// Read from the day the frame chose (s-admin-7, since 2026-08-01): the
+	// segments keep it.
+	page := decode[view.AdminAuditPage](t, h.do(get("/admin/audit?since=2026-08-01", sess)))
 	seg := func(p view.AdminAuditPage, id string) *view.Action { return actionByID(p.Bar.Segments, id) }
 	all, security, failures := seg(page, "audit.all"), seg(page, "audit.security"), seg(page, "audit.failures")
 	if all == nil || security == nil || failures == nil {

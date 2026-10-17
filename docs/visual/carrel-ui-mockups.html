@@ -751,6 +751,12 @@ label.tc-tree__row{cursor:pointer}
 .tc-checkform{display:inline-flex;align-items:center;gap:6px}
 .tc-checkform__apply{display:none}
 [data-tc-noscript] .tc-checkform__apply{display:contents}
+/* Фильтр полосы формой (действие и день журнала): форма не рисуется — её поля стоят в полосе; Show — только пока страница без сценария. */
+.tc-barform{display:contents}
+.tc-barform__show{display:none}
+[data-tc-noscript] .tc-barform__show{display:contents}
+/* Полоса с такой формой переносит, что не влезло, на любой ширине: ряд, пока влезает. */
+.tc-bar:has(> .tc-barform){flex-wrap:wrap}
 /* «Save as» показанного текста (задача 94): файл собирает сценарий страницы — без него кнопки нет. */
 [data-tc-noscript] [data-tc-save]{display:none}
 [data-tc-noscript] button[data-tc-copy],[data-tc-noscript] button[data-tc-copy-from]{display:none}
@@ -1215,7 +1221,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-bar .tc-seg,.tc-docbar .tc-seg,.tc-head .tc-acts .tc-seg{height:38px}
   /* поле полосы — той же высоты, что полоса, поверх своего класса размера (tc-in--h26-…) */
   .tc-bar .tc-in.tc-in,.tc-docbar .tc-in.tc-in,.tc-head .tc-acts .tc-in.tc-in{height:38px}
-  .tc-seg,.tc-bar > .tc-in,.tc-in{overflow:visible}
+  .tc-seg,.tc-bar > .tc-in,.tc-barform > .tc-in,.tc-in{overflow:visible}
   button,.tc-in,.tc-seg__opt,.tc-check,.tc-nav__item,.tc-tick,.tc-tickrow__tick,.tc-tag,a[href]{
     position:relative;overflow:visible;z-index:1;appearance:none}
   button:not(.is-pick)::after,a[href]::after,input:not(.is-pick)::after,textarea::after,select::after,
@@ -18855,16 +18861,15 @@ password  4c1-tide-oven</div>
         <div class="tc-main">
         <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Audit log</div><div class="tc-head__sub">1 240 records</div></div><div class="tc-acts"><button class="tc-btn" type="button">Export CSV</button></div></div>
         <div class="tc-bar">
-          <button class="tc-in is-ph is-pick tc-in--h26-w190" type="button">All actions</button>
-          <input class="tc-in is-mono tc-in--h26-w120" type="date" value="2026-08-01">
-          <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All</button><button class="tc-seg__opt" type="button">Security</button><button class="tc-seg__opt" type="button">Failures</button></span>
+          <form class="tc-barform" action="/admin/audit" method="get"><details class="tc-drop"><summary class="tc-in is-ph is-pick tc-in--h26-w190" title="Action">All actions</summary><div class="tc-menu is-pop tc-menu--w290"><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="action" value="" checked>All actions</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="action" value="login.ok">login.ok</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="action" value="login.fail">login.fail</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="action" value="escrow.recover">escrow.recover</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="action" value="settings.instance">settings.instance</label></div></details><span class="tc-dim">since</span><input class="tc-in is-mono tc-in--h26-w120" type="date" value="2026-08-01" name="since" aria-label="Since"><span class="tc-barform__show"><button class="tc-btn" type="submit">Show</button></span></form>
+          <span class="tc-seg"><a class="is-on tc-seg__opt" href="/admin/audit?since=2026-08-01">All</a><a class="tc-seg__opt" href="/admin/audit?show=security&amp;since=2026-08-01">Security</a><a class="tc-seg__opt" href="/admin/audit?show=failures&amp;since=2026-08-01">Failures</a></span>
           <button class="tc-btn" title="Columns" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg><span class="tc-btn__label">Columns</span></button>
         </div>
         <table class="tc-table">
           <thead><tr><th>When</th><th>Action</th><th class="tc-table__n3">Actor</th><th class="tc-table__n4">Target</th><th>Detail</th></tr></thead>
           <tbody>
-            <tr><td class="tc-mono">2026-08-15 09:20</td><td class="tc-mono">login.ok</td><td class="tc-table__n3">mix</td><td class="tc-table__n4">—</td><td class="tc-mono">ip 10.0.0.4</td></tr>
-            <tr><td class="tc-mono">2026-08-14 22:07</td><td class="tc-mono tc-mono--danger">login.fail</td><td class="tc-table__n3">—</td><td class="tc-table__n4">anna</td><td class="tc-mono">3rd attempt · rate-limited</td></tr>
+            <tr><td class="tc-mono">2026-08-15 09:20</td><td class="tc-mono">login.ok</td><td class="tc-table__n3">mix</td><td class="tc-table__n4">—</td><td class="tc-mono">—</td></tr>
+            <tr><td class="tc-mono">2026-08-14 22:07</td><td class="tc-mono tc-mono--danger">login.fail</td><td class="tc-table__n3">—</td><td class="tc-table__n4">anna</td><td class="tc-mono">3rd attempt · ip 203.0.113.9 · rate-limited</td></tr>
             <tr><td class="tc-mono">2026-08-14 18:40</td><td class="tc-mono">escrow.recover</td><td class="tc-table__n3">mix</td><td class="tc-table__n4">viktor</td><td class="tc-mono">notice mailed</td></tr>
             <tr><td class="tc-mono">2026-08-12 10:02</td><td class="tc-mono">settings.instance</td><td class="tc-table__n3">mix</td><td class="tc-table__n4">—</td><td class="tc-mono">smtp_host, smtp_port</td></tr>
           </tbody>
@@ -18872,7 +18877,7 @@ password  4c1-tide-oven</div>
       </div></div>
     </div>
   </div>
-  <figcaption>Журнал — таблица во всю ширину; действие и подробности моноширинным, потому что это данные, а не текст. Неудачный вход — единственная тревожная строка.</figcaption>
+  <figcaption>Журнал — таблица во всю ширину; действие и подробности моноширинным, потому что это данные, а не текст. Неудачный вход — единственная тревожная строка. Адрес пишется только у отказанного входа; отказы подряд по одной учётной записи — одна строка со счётом (решение владельца 16.10). Действие и день — GET-форма: со сценарием уходит при выборе, без сценария — кнопкой Show в конце (её в кадре не видно); день — «с этого дня». Сегменты — ссылки.</figcaption>
   </figure>
 
 <figure style="flex:0 1 300px">
@@ -18899,12 +18904,12 @@ password  4c1-tide-oven</div>
     <div class="frame-label"><span>Действие</span><span class="frag">список</span><i>фильтр журнала</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w290">
-        <button class="is-on tc-menu__item" type="button" role="menuitem">All actions</button>
+        <label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="action" value="" checked>All actions</label>
         <span class="tc-menu__sep"></span>
-        <button class="tc-menu__item" type="button" role="menuitem">login.ok</button>
-        <button class="tc-menu__item" type="button" role="menuitem">login.fail</button>
-        <button class="tc-menu__item" type="button" role="menuitem">escrow.recover</button>
-        <button class="tc-menu__item" type="button" role="menuitem">settings.instance</button>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="action" value="login.ok">login.ok</label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="action" value="login.fail">login.fail</label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="action" value="escrow.recover">escrow.recover</label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="action" value="settings.instance">settings.instance</label>
       </div>
     </div>
   </div>

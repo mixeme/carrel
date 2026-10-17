@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.337 — 2026-10-18
+
+Typecase note 78 (`69f0f71`): the journal's bar. The mockup copied byte
+for byte.
+
+### Changed
+
+- **The journal's filter has Show** (`s-admin-7`): the form of the action
+  and the day carries «Show», which sends it on a page without a script;
+  with one it goes as a field changes.
+- **A dash where there is nothing** (`s-admin-7`): a line with no target
+  or no detail — a sign-in, the instance's settings — writes «—».
+
+### For consumers
+
+- `AdminAuditPage.Filter.Actions` holds `audit.show` (C-6).
+
 ## v0.2.336 — 2026-10-17
 
 Typecase note 77 (`8e09917`): the conflict screen's states and its form by

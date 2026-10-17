@@ -727,7 +727,7 @@ type EscrowCoverRow struct {
 type AdminAuditPage struct {
 	Shell
 	Bar    ListBar    `json:"bar"`
-	Filter Form       `json:"filter"` // выбор действия (s-admin-10) и день, с которого читать (since, s-admin-7): GET, уходит при выборе
+	Filter Form       `json:"filter"` // выбор действия (s-admin-10) и день, с которого читать (since, s-admin-7): GET, уходит при выборе; без сценария — Actions: Show
 	Rows   []AuditRow `json:"rows"`
 }
 type AuditRow struct {

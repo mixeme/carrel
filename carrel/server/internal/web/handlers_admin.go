@@ -753,17 +753,22 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		// The moment in numbers, as the frame writes it (Ад3; s-admin-7);
-		// an action on oneself has no target but a dash (Ад26).
-		whom := e.Whom
-		if whom == e.Who {
+		// an action on oneself, or on nobody, has no target but a dash
+		// (Ад26), and a line that says nothing more has a dash for its
+		// detail (login.ok, Typecase's note 78).
+		whom, detail := e.Whom, e.Detail
+		if whom == e.Who || whom == "" {
 			whom = "—"
+		}
+		if detail == "" {
+			detail = "—"
 		}
 		page.Rows = append(page.Rows, view.AuditRow{
 			When:   tf.numStamp(e.When),
 			Who:    text(e.Who),
 			What:   text(e.What),
 			Whom:   text(whom),
-			Detail: text(e.Detail),
+			Detail: text(detail),
 			// A line that says something did not happen (Ад25): the frame
 			// sets its action in alarm.
 			Failure: auditIsFailure(e.What),
@@ -840,7 +845,10 @@ func (s *Server) auditActionFilter(sess *session.Session, entries []store.AuditE
 	if show != "all" {
 		rows = append(rows, view.FormRow{Name: "show", Kind: view.InputHidden, Value: text(show)})
 	}
-	return view.Form{Action: s.route("/admin/audit"), Method: "GET", Sets: []view.FieldSet{{Rows: rows}}}
+	// Show sends it on a page without a script (BarForm.Show, Typecase's note
+	// 78); with one the form goes as a field changes.
+	send := view.Action{ID: "audit.show", Label: "Show", Method: "GET", Enabled: true, Submits: true}
+	return view.Form{Action: s.route("/admin/audit"), Method: "GET", Sets: []view.FieldSet{{Rows: rows}}, Actions: []view.Action{send}}
 }
 
 // writeAuditCSV hands over what the screen shows, oldest first, as the

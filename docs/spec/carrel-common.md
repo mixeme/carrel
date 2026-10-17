@@ -3283,10 +3283,10 @@ type EscrowCoverRow struct {
 type AdminAuditPage struct {
     Shell
     Bar    ListBar
-    Filter Form // выбор действия (s-admin-10) и день, с которого читать — since, дата (s-admin-7, Ад24): GET /admin/audit?action=…&since=…, уходит при выборе
+    Filter Form // выбор действия (s-admin-10; «All actions» — пустое значение) и день, с которого читать — since, дата (s-admin-7, Ад24), скрытое show выбранного сегмента: GET /admin/audit?action=…&since=…, со сценарием уходит при выборе, без него — Actions: Show (audit.show, Submits; BarForm.Show Typecase)
     Rows   []AuditRow
 }
-type AuditRow struct { When When; Who Text; What Text; Whom Text; Detail Text; Failure bool } // Failure — строка о том, что не случилось (login.fail, …): действие тревогой (s-admin-7, Ад25)
+type AuditRow struct { When When; Who Text; What Text; Whom Text; Detail Text; Failure bool } // Failure — строка о том, что не случилось (login.fail, …): действие тревогой (s-admin-7, Ад25); Whom без цели и Detail без подробностей — «—» (login.ok, записка Typecase 78)
 
 type AdminDavPage struct {
     Shell

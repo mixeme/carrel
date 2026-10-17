@@ -3,7 +3,7 @@
     "actions": [
       {
         "enabled": true,
-        "href": "/admin/audit?format=csv",
+        "href": "/admin/audit?format=csv\u0026since=2026-08-01",
         "id": "audit.export",
         "label": "Export CSV",
         "method": "GET"
@@ -11,12 +11,12 @@
     ],
     "columns": {
       "form": {
-        "action": "/admin/audit/columns",
+        "action": "/admin/audit/columns?since=2026-08-01",
         "actions": [
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/admin/audit/columns",
+            "href": "/admin/audit/columns?since=2026-08-01",
             "id": "columns.apply",
             "label": "Apply",
             "method": "POST",
@@ -25,7 +25,7 @@
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/admin/audit/columns",
+            "href": "/admin/audit/columns?since=2026-08-01",
             "id": "columns.default",
             "label": "Reset to defaults",
             "method": "POST"
@@ -95,12 +95,12 @@
     "drop": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 29,
+    "loaded": 28,
     "range": null,
     "segments": [
       {
         "enabled": true,
-        "href": "/admin/audit",
+        "href": "/admin/audit?since=2026-08-01",
         "id": "audit.all",
         "label": "All",
         "method": "GET",
@@ -108,14 +108,14 @@
       },
       {
         "enabled": true,
-        "href": "/admin/audit?show=security",
+        "href": "/admin/audit?show=security\u0026since=2026-08-01",
         "id": "audit.security",
         "label": "Security",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/admin/audit?show=failures",
+        "href": "/admin/audit?show=failures\u0026since=2026-08-01",
         "id": "audit.failures",
         "label": "Failures",
         "method": "GET"
@@ -127,7 +127,15 @@
   "details": null,
   "filter": {
     "action": "/admin/audit",
-    "actions": [],
+    "actions": [
+      {
+        "enabled": true,
+        "id": "audit.show",
+        "label": "Show",
+        "method": "GET",
+        "submits": true
+      }
+    ],
     "errors": [],
     "method": "GET",
     "sets": [
@@ -236,7 +244,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "2026-08-01"
           }
         ],
         "unfold": null
@@ -376,7 +384,7 @@
       "what": "user.invite.create",
       "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": ""
+      "whom": "—"
     },
     {
       "detail": "role=user",
@@ -384,10 +392,10 @@
       "what": "user.invite.create",
       "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": ""
+      "whom": "—"
     },
     {
-      "detail": "",
+      "detail": "—",
       "failure": false,
       "what": "user.disable",
       "when": "2026-08-10 17:04",
@@ -507,7 +515,7 @@
       "whom": "—"
     },
     {
-      "detail": "",
+      "detail": "—",
       "failure": false,
       "what": "duplicates.link",
       "when": "2026-08-10 17:04",
@@ -576,7 +584,7 @@
       "what": "escrow.enable",
       "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": ""
+      "whom": "—"
     },
     {
       "detail": "inviteTTL, idle, session, name",
@@ -584,23 +592,15 @@
       "what": "settings.instance",
       "when": "2026-08-10 17:04",
       "who": "mix",
-      "whom": ""
+      "whom": "—"
     },
     {
-      "detail": "",
+      "detail": "—",
       "failure": false,
       "what": "login.ok",
       "when": "2026-08-10 17:04",
       "who": "mix",
       "whom": "—"
-    },
-    {
-      "detail": "",
-      "failure": false,
-      "what": "setup.first_admin",
-      "when": "2026-08-10 17:04",
-      "who": "system",
-      "whom": "mix"
     }
   ],
   "title": "Audit log",
