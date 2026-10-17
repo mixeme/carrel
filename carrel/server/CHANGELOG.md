@@ -17,6 +17,20 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.332 — 2026-10-17
+
+### Changed
+
+- **A recipient chosen from the suggestions is named** (Пб18, part of Пб19;
+  `s-mail-1`, `-3`): a suggestion carries the mark of the book the person
+  came from (`Recipient.Colour`), and a chosen address is drawn with that
+  name and mark — the draft keeps who the suggestions offered. An address
+  typed by hand stays its address.
+
+### For consumers
+
+- New `Recipient.Colour`.
+
 ## v0.2.331 — 2026-10-17
 
 ### Changed

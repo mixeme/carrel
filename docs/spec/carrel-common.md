@@ -2291,7 +2291,7 @@ type MailSheet struct {
     Links      Runs    // строка под вложениями, когда что-то уходит ссылкой: сколько и почему, и где их отозвать — «Published links» жирным (s-mail-1); пусто — ссылок нет
     Actions    []Action
 }
-type Recipient struct { Address Text; Label Text; Name Text }
+type Recipient struct { Address Text; Label Text; Name Text; Colour Colour } // Colour — метка книги (s-mail-1, -3); выбранный из подсказки получатель — с именем и меткой, набранный рукой — один адрес
 type MailAttachRow struct {
     Kind   Kind
     Title  Text

@@ -40,6 +40,15 @@ type mailDraft struct {
 	Subject string
 	Body    string
 	Parts   []mailPart
+	// Known are the people the suggestions offered, by address in lower
+	// case: one chosen from them is drawn with the name and the book's
+	// colour (Пб18; s-mail-1), one typed by hand as its address.
+	Known map[string]knownRecipient
+}
+
+// knownRecipient is who an address is, as a suggestion said it.
+type knownRecipient struct {
+	Name, Colour string
 }
 
 // mailPart is one thing attached.
@@ -283,11 +292,24 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 		Subject: text(d.Subject), Body: text(d.Body),
 		From: text(ls.Address), FromName: text(ls.FromName), ReplyTo: text(ls.ReplyTo), ReplyNote: ls.replyNote(),
 	}
-	for _, a := range d.To {
-		sheet.To = append(sheet.To, view.Recipient{Address: text(a)})
-	}
 	if q != "" {
 		sheet.Suggest, sheet.NotAsked = s.suggestRecipients(ctx, sess, q)
+		if len(sheet.Suggest) > 0 {
+			if d.Known == nil {
+				d.Known = map[string]knownRecipient{}
+			}
+			for _, r := range sheet.Suggest {
+				d.Known[strings.ToLower(string(r.Address))] = knownRecipient{Name: string(r.Name), Colour: string(r.Colour)}
+			}
+			saveMailDraft(sess, d)
+		}
+	}
+	for _, a := range d.To {
+		r := view.Recipient{Address: text(a)}
+		if k, ok := d.Known[strings.ToLower(a)]; ok {
+			r.Name, r.Colour = text(k.Name), view.Colour(k.Colour)
+		}
+		sheet.To = append(sheet.To, r)
 	}
 	links := 0
 	var why []string
@@ -411,7 +433,12 @@ func (s *Server) suggestRecipients(ctx context.Context, sess *session.Session, q
 			// The label the card shows (S-11), not the raw TYPE: INTERNET and
 			// the like are no label.
 			label, _ := shownLabel("EMAIL", v.Params["TYPE"])
-			out = append(out, view.Recipient{Address: text(addr), Name: text(name), Label: text(strings.ToLower(label))})
+			r := view.Recipient{Address: text(addr), Name: text(name), Label: text(strings.ToLower(label))}
+			// The book's mark before the name (s-mail-1, -3).
+			if col, ok := blob.Collection(it.AccountID, it.Col); ok {
+				r.Colour = catalogColour(col)
+			}
+			out = append(out, r)
 		}
 	}
 	var notAsked []view.Stamp

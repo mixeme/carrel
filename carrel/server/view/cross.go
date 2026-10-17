@@ -778,9 +778,10 @@ type MailSheet struct {
 	Actions []Action `json:"actions"`
 }
 type Recipient struct {
-	Address Text `json:"address"`
-	Label   Text `json:"label"`
-	Name    Text `json:"name"`
+	Address Text   `json:"address"`
+	Label   Text   `json:"label"`
+	Name    Text   `json:"name"`
+	Colour  Colour `json:"colour"` // метка книги, откуда человек (s-mail-1, -3); набранный рукой — без неё
 }
 type MailAttachRow struct {
 	Kind   Kind `json:"kind"`
