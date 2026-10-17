@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.329 — 2026-10-17
+
+### Changed
+
+- **A file of a published folder has its own page inside the link** (Пс21;
+  the caption of `s-publish-12`): the row's `Open` is `?file=<path>`, the
+  same page as a file link's — name, type, size and day, the picture or the
+  text in the page —, its Download the file's stream; `Href` streams as
+  before. A path out of the folder is not found.
+- **The address that mounts a published folder is whole**, with the host
+  (Пс17): what goes into «Map network drive».
+- **The sheet of a link made says it as `s-publish-13` draws it** (Пб9–Пб11):
+  its form one read-only monospaced field «Link» with the whole address,
+  «Create link» gone; the day in figures, «Until 2026-09-09.». `Link` stays
+  the page's path, as a published row's beside its `Address`.
+
+### Fixtures
+
+- `app-publish/link` (`s-publish-13`, Пб13): «Личный» for 10–31 August, the
+  link made.
+
 ## v0.2.328 — 2026-10-17
 
 ### Changed

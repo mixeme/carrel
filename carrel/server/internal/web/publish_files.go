@@ -132,7 +132,7 @@ func (s *Server) postPublishFile(w http.ResponseWriter, r *http.Request, sess *s
 		http.Error(w, "could not publish", http.StatusInternalServerError)
 		return
 	}
-	s.writeSheet(w, r, s.madeSheet(sess, s.fileSheet(sess, c, segs, dir), token, expires))
+	s.writeSheet(w, r, s.madeSheet(r, sess, s.fileSheet(sess, c, segs, dir), token, expires))
 }
 
 // publicFiles is the file collection of a link, at the published thing.
@@ -185,46 +185,22 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 	ctx := r.Context()
 	if !link.Target.Folder {
 		p, _ := c.path(base, false)
-		e, err := c.files.Stat(ctx, p)
-		switch {
-		case file.NotFound(err):
-			page.Notices = []view.Notice{publicGone()}
-		case err != nil:
-			page.Notices = []view.Notice{publicTrouble()}
-		default:
-			download := s.route("/p/" + token + "/download")
-			mt := fileType(e.Name, e.Type)
-			page.File = &view.PublishedFile{Name: text(e.Name), Size: formatSize(e.Size), Type: text(mt), Preview: view.PreviewNone, Href: download}
-			if !e.Modified.IsZero() {
-				page.File.Changed = view.When(c.tf.dayKey(e.Modified)) // «changed 2026-08-10» (s-publish-9)
-			}
-			// The line under the name is one monospaced piece (s-publish-9…11):
-			// the type, the size, and when it changed.
-			head := []string{mt, string(page.File.Size)}
-			if page.File.Changed != "" {
-				head = append(head, "changed "+string(page.File.Changed))
-			}
-			page.Lede = runs(monoRun(strings.Join(head, " · ")))
-			if inlineTypes[mt] {
-				page.File.Preview, page.File.Href = view.PreviewImage, download+"?inline=1"
-			}
-			// Text and Markdown are the body of the page (Пс14;
-			// s-publish-10): the one kind read without a program.
-			if s.publicText(ctx, c, p, e, mt, page.File) {
-				page.Foot = publicFoot(c.tf, link, "the file is read from the server on every visit")
-			}
-			// The one door of the page (s-publish-9); a file the browser is
-			// not shown carries its size on it, before anyone presses it
-			// (s-publish-11).
-			label := view.Text("Download")
-			if page.File.Preview == view.PreviewNone {
-				label += " " + view.Text(page.File.Size)
-			}
-			// Under a text read on the page the button is a second door,
-			// not the main one (s-publish-10).
-			reading := page.File.Preview == view.PreviewText || page.File.Preview == view.PreviewMarkdown
-			page.Actions = []view.Action{{ID: "published.download", Label: label, Icon: "i-download", Href: download, Method: "GET", Primary: !reading, Enabled: true}}
+		s.publicFile(ctx, c, link, p, s.route("/p/"+token+"/download"), &page)
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
+	// A file of the folder opens its own page inside the link (Пс21; the
+	// caption of s-publish-12): the page of a file link, its Download the
+	// file's stream.
+	if rel := r.URL.Query().Get("file"); rel != "" {
+		p, more, ok := inside(c, base, rel, false)
+		if !ok || len(more) == 0 {
+			s.tokenNotFound(w, r, time.Now())
+			return
 		}
+		page.Title = text(more[len(more)-1])
+		page.Foot = publicFoot(c.tf, link, "")
+		s.publicFile(ctx, c, link, p, s.route("/p/"+token+"/file/"+escapeSegs(strings.Join(more, "/"))), &page)
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
@@ -247,7 +223,9 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 		return
 	}
 	here := s.route("/p/" + token)
-	folder := &view.PublishedFolder{DAV: text(s.route("/p/" + token + "/dav/"))}
+	// The address that mounts the folder whole, with the host — what goes
+	// into «Map network drive» (Пс17; s-publish-12).
+	folder := &view.PublishedFolder{DAV: text(s.absURL(r, "/p/"+token+"/dav/"))}
 	folder.Crumbs = []view.Crumb{{Label: text(link.Target.Title), Href: here}}
 	for i, seg := range more {
 		folder.Crumbs = append(folder.Crumbs, view.Crumb{Label: text(seg), Href: s.postQuery("/p/"+token, url.Values{"in": {strings.Join(more[:i+1], "/")}})})
@@ -290,6 +268,7 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 			mt := fileType(e.Name, e.Type)
 			row.Type, row.Size = text(mt), formatSize(e.Size)
 			row.Href = s.route("/p/" + token + "/file/" + escapeSegs(rel))
+			row.Open = s.postQuery("/p/"+token, url.Values{"file": {rel}}) // its page (Пс21)
 		}
 		folder.Rows = append(folder.Rows, row)
 	}
@@ -300,6 +279,51 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 	}
 	page.Actions = []view.Action{{ID: "published.download", Label: "Download folder", Icon: "i-download", Href: dl, Method: "GET", Enabled: true}}
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// publicFile fills a public page with one file at p (s-publish-9…11): its
+// name, type, size and day under the title, the picture or the text in the
+// page, Download at download — the link's file, or a file of its folder.
+func (s *Server) publicFile(ctx context.Context, c *fileCtx, link user.OpenLink, p, download string, page *view.PublishedPage) {
+	e, err := c.files.Stat(ctx, p)
+	switch {
+	case file.NotFound(err):
+		page.Notices = []view.Notice{publicGone()}
+		return
+	case err != nil:
+		page.Notices = []view.Notice{publicTrouble()}
+		return
+	}
+	mt := fileType(e.Name, e.Type)
+	page.File = &view.PublishedFile{Name: text(e.Name), Size: formatSize(e.Size), Type: text(mt), Preview: view.PreviewNone, Href: download}
+	if !e.Modified.IsZero() {
+		page.File.Changed = view.When(c.tf.dayKey(e.Modified)) // «changed 2026-08-10» (s-publish-9)
+	}
+	// The line under the name is one monospaced piece (s-publish-9…11):
+	// the type, the size, and when it changed.
+	head := []string{mt, string(page.File.Size)}
+	if page.File.Changed != "" {
+		head = append(head, "changed "+string(page.File.Changed))
+	}
+	page.Lede = runs(monoRun(strings.Join(head, " · ")))
+	if inlineTypes[mt] {
+		page.File.Preview, page.File.Href = view.PreviewImage, download+"?inline=1"
+	}
+	// Text and Markdown are the body of the page (Пс14; s-publish-10): the
+	// one kind read without a program.
+	if s.publicText(ctx, c, p, e, mt, page.File) {
+		page.Foot = publicFoot(c.tf, link, "the file is read from the server on every visit")
+	}
+	// The one door of the page (s-publish-9); a file the browser is not
+	// shown carries its size on it, before anyone presses it (s-publish-11).
+	label := view.Text("Download")
+	if page.File.Preview == view.PreviewNone {
+		label += " " + view.Text(page.File.Size)
+	}
+	// Under a text read on the page the button is a second door, not the
+	// main one (s-publish-10).
+	reading := page.File.Preview == view.PreviewText || page.File.Preview == view.PreviewMarkdown
+	page.Actions = []view.Action{{ID: "published.download", Label: label, Icon: "i-download", Href: download, Method: "GET", Primary: !reading, Enabled: true}}
 }
 
 func escapeSegs(rel string) string {

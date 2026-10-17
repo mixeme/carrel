@@ -1,0 +1,63 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/mail/compose?id=b7e3603ba9f35658\u0026op=link",
+      "id": "publish.mail",
+      "label": "Send by letter",
+      "method": "POST",
+      "primary": true,
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/p/link-token",
+      "id": "publish.open",
+      "label": "Open the link",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/files/published",
+      "id": "publish.list",
+      "label": "All published links",
+      "method": "GET"
+    }
+  ],
+  "expires": "Until 2026-09-09.",
+  "form": {
+    "action": "",
+    "actions": [],
+    "errors": [],
+    "method": "",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Link",
+            "mono": true,
+            "name": "link",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "http://example.com/p/link-token"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "kind": "event",
+  "link": "/p/link-token",
+  "local": true,
+  "note": "",
+  "range": null,
+  "target": "Calendar «Личный» · nextcloud · Личный"
+}

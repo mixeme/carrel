@@ -349,7 +349,7 @@ spec/fixtures/<screen>/<state>.json
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
-| `/p/{token}` | GET | токен | страница | `PublishedPage`; мёртвый секрет — `DeadLinkPage` |
+| `/p/{token}` | GET | токен | страница | `PublishedPage`; у папки `?in=` — папка в ней, `?file=` — страница её файла (`File`, Download — поток файла); мёртвый секрет — `DeadLinkPage` |
 | `/p/{token}/download` | GET | токен | файл, поток | — |
 | `/p/{token}/file/{path…}` | GET | токен | поток | — |
 | `/p/{token}/dav/{path…}` | DAV-методы | токен | DAV | — |
@@ -2271,7 +2271,7 @@ type PublishSheet struct {
     Form    Form     // сколько показывать, разрешить ли .ics; что видит гость — у контакта и книги (s-publish-3), у календаря, события, списка задач и задачи (Б39: Time стоит всегда и выключен для правки, Title отмечен, Location, Description, Attendees, Attachments, Tags — нет; рубрика «What the visitor sees», кадра нет)
     Expires Text     // до какого дня ссылка живёт, когда она создана; до создания пусто
     Note    Text     // сообщение, которое стоит на листе всегда, до ссылки и после: у папки — что получает гость и что адрес монтируется диском (s-publish-5); у прочих пусто
-    Link    Text     // готовая ссылка после создания
+    Link    Text     // готовая ссылка после создания — путь страницы; лист тогда — одно поле «Link» формы, только для чтения, с полным адресом (s-publish-13), Expires — «Until 2026-09-09.»
     Actions []Action
 }
 
@@ -3437,7 +3437,7 @@ type PublishedFile struct {
 type PublishedFolder struct {
     Crumbs []Crumb
     Rows   []FileRow
-    DAV    Text // тот же секрет монтируется как диск
+    DAV    Text // тот же секрет монтируется как диск: полный адрес с хостом (s-publish-12); у строки файла Open — его страница внутри ссылки (?file=)
     Total  Text // итог после текущей крошки: «4 files · 6.6 MB» (s-publish-12)
 }
 

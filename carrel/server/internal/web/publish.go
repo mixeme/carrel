@@ -209,13 +209,21 @@ func publishWindow(form url.Values) (from, to string) {
 	return from, to
 }
 
-// madeSheet is the sheet once the link is made: the link, shown this once.
-func (s *Server) madeSheet(sess *session.Session, sheet view.PublishSheet, token string, expires *time.Time) view.PublishSheet {
+// madeSheet is the sheet once the link is made (s-publish-13): the link,
+// shown this once — the form of the sheet one read-only field «Link» with
+// the whole address a person copies, with the host (Пб9, Пб11; Link stays
+// the page's path, as PublishedRow.Link beside its Address) —, its day in
+// figures, «Until 2026-09-09.» (Пб10).
+func (s *Server) madeSheet(r *http.Request, sess *session.Session, sheet view.PublishSheet, token string, expires *time.Time) view.PublishSheet {
 	link := s.route("/p/" + token)
+	whole := s.absURL(r, "/p/"+token)
 	sheet.Link = text(link)
+	sheet.Form = view.Form{Sets: []view.FieldSet{{Rows: []view.FormRow{
+		{Name: "link", Label: "Link", Kind: view.InputText, Value: text(whole), ReadOnly: true, Mono: true},
+	}}}}
 	sheet.Expires = "No expiry. Revoke it when it is no longer needed."
 	if expires != nil {
-		sheet.Expires = text("Until " + s.timeFor(sess).date(*expires))
+		sheet.Expires = text("Until " + s.timeFor(sess).dayKey(*expires) + ".")
 	}
 	sheet.Actions = []view.Action{
 		{ID: "publish.open", Label: "Open the link", Href: link, Method: "GET", Enabled: true},
@@ -484,7 +492,7 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not publish", http.StatusInternalServerError)
 		return
 	}
-	s.writeSheet(w, r, s.madeSheet(sess, s.publishSheet(sess, c, uid, title, ""), token, expires))
+	s.writeSheet(w, r, s.madeSheet(r, sess, s.publishSheet(sess, c, uid, title, ""), token, expires))
 }
 
 // sheetDefaults puts into a link of a kind what the sheet of publishing it

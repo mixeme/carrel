@@ -451,6 +451,8 @@ STATE_FRAME = {
     "admin-dav/report": "s-admin-5",
     # Публичные страницы (Пс1): все кадры маршрута — части (data-part),
     # у каждого вида страницы свой.
+    # Готовая ссылка (Пб13): тот же лист после Create link.
+    "app-publish/link": "s-publish-13",
     "p-token/normal": "s-publish-6",
     "p-token/addressbook": "s-publish-7",
     "p-token/note": "s-publish-8",

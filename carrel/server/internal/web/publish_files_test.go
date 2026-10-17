@@ -49,7 +49,8 @@ func TestPublishedFolder(t *testing.T) {
 	f := pubDocs(t)
 	link := publishFile(t, f, "share", true)
 	page := publicPage(t, f, link)
-	if page.Folder == nil || len(page.Folder.Rows) != 2 || page.Folder.DAV != text(link+"/dav/") {
+	// The address that mounts it is whole, with the host (Пс17).
+	if page.Folder == nil || len(page.Folder.Rows) != 2 || page.Folder.DAV != text("http://example.com"+link+"/dav/") {
 		t.Fatalf("folder page = %+v", page.Folder)
 	}
 	var file, sub string
