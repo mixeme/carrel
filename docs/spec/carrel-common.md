@@ -2281,7 +2281,8 @@ type MailSheet struct {
     Suggest    []Recipient
     Subject    Text
     Body       Text
-    From       Text   // с какого адреса уйдёт — видно до отправки
+    From       Text   // с какого адреса уйдёт — видно до отправки: шапка «from mix@carrel.example» (s-mail-1)
+    FromName   Text   // имя, каким его увидит получатель: «Михаил Енученко», через общий релей — «… (via Carrel)»
     ReplyTo    Text   // пусто — в письме будет строка «отвечать не нужно»
     ReplyNote  Runs   // подвал: «Signed **Михаил Енученко** · replies go to mix@example.org» (s-mail-1); без подтверждённого адреса — что ответа не будет
     Attach     []MailAttachRow

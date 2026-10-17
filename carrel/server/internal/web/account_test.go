@@ -84,8 +84,9 @@ func TestLetterSaysWhereRepliesGo(t *testing.T) {
 	if sheet.ReplyTo != "" || !strings.Contains(saidRuns(sheet.ReplyNote), "no reply address") {
 		t.Errorf("replyTo = %q, note %q", sheet.ReplyTo, sheet.ReplyNote)
 	}
-	if sheet.From != "bob (via Carrel) <noreply@carrel.example>" {
-		t.Errorf("from = %q", sheet.From)
+	// The name and the address apart (Пб17; s-mail-1: «from …»).
+	if sheet.FromName != "bob (via Carrel)" || sheet.From != "noreply@carrel.example" {
+		t.Errorf("from = %q %q", sheet.FromName, sheet.From)
 	}
 
 	h.confirmAddress("bob", "bob@example.org")
@@ -98,8 +99,8 @@ func TestLetterSaysWhereRepliesGo(t *testing.T) {
 		t.Fatal(err)
 	}
 	sheet = decode[view.MailSheet](t, h.do(get("/app/mail/compose", bob)))
-	if sheet.From != "Боб <bob@carrel.example>" {
-		t.Errorf("from = %q", sheet.From)
+	if sheet.FromName != "Боб" || sheet.From != "bob@carrel.example" {
+		t.Errorf("from = %q %q", sheet.FromName, sheet.From)
 	}
 	if sheet.ReplyTo != "bob@example.org" {
 		t.Errorf("replyTo = %q", sheet.ReplyTo)

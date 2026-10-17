@@ -588,7 +588,8 @@ func TestFixturesAreTheAccountFrames(t *testing.T) {
 		t.Fatal("s-mail-1 changed: no from tag or Signed line")
 	}
 	sheet := fixtureAs[view.MailSheet](t, "app-mail-compose/normal.json")
-	if string(sheet.From) != signed[1]+" <"+from[1]+">" || string(sheet.ReplyTo) != signed[2] {
+	// The address of the head's «from …» and the name apart (Пб17).
+	if string(sheet.From) != from[1] || string(sheet.FromName) != signed[1] || string(sheet.ReplyTo) != signed[2] {
 		t.Errorf("compose fixture from %q reply %q, the frame draws %q as %q, replies to %q", sheet.From, sheet.ReplyTo, from[1], signed[1], signed[2])
 	}
 }

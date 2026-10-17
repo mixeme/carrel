@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.331 — 2026-10-17
+
+### Changed
+
+- **A link sent from the list of links keeps its days** (Пб16; `s-mail-4`):
+  the letter names it as the list does, «Личный · 10–31 August», so two
+  links to one calendar are told apart.
+- **The letter's sender is its name and its address apart** (Пб17;
+  `s-mail-1`): `MailSheet.From` is the address the head writes after
+  «from», `FromName` the name the recipient sees («… (via Carrel)» through
+  the instance's relay). The letter's own From line is as before.
+
+### For consumers
+
+- `MailSheet.From` is the address only; new `MailSheet.FromName`.
+
 ## v0.2.330 — 2026-10-17
 
 ### Changed

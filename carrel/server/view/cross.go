@@ -758,8 +758,12 @@ type MailSheet struct {
 	Suggest []Recipient `json:"suggest"`
 	Subject Text        `json:"subject"`
 	Body    Text        `json:"body"`
-	From    Text        `json:"from"`    // с какого адреса уйдёт — видно до отправки
-	ReplyTo Text        `json:"replyTo"` // пусто — в письме будет строка «отвечать не нужно»
+	// From — с какого адреса уйдёт, видно до отправки: в шапке «from
+	// mix@carrel.example» (s-mail-1); FromName — имя, каким его увидит
+	// получатель («Михаил Енученко», через общий релей — «… (via Carrel)»)
+	From     Text `json:"from"`
+	FromName Text `json:"fromName"`
+	ReplyTo  Text `json:"replyTo"` // пусто — в письме будет строка «отвечать не нужно»
 	// ReplyNote — строка подвала: чем подписано и куда придёт ответ, имя
 	// жирным — «Signed **Михаил Енученко** · replies go to mix@example.org»
 	// (s-mail-1); без подтверждённого адреса — что ответа не будет

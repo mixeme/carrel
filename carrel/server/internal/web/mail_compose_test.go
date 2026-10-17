@@ -94,7 +94,7 @@ func TestLetterCarriesFilesAndLinks(t *testing.T) {
 	if strings.Join(suggested, "|") != "ada@example.com work Ada Lovelace|ada@home.example home Ada Lovelace" || len(sheet.NotAsked) != 0 {
 		t.Errorf("suggest = %v, not asked = %v", suggested, sheet.NotAsked)
 	}
-	if sheet.ReplyTo != "" || !strings.Contains(saidRuns(sheet.ReplyNote), "no reply address") || sheet.From != "owner (via Carrel) <noreply@carrel.example>" {
+	if sheet.ReplyTo != "" || !strings.Contains(saidRuns(sheet.ReplyNote), "no reply address") || sheet.From != "noreply@carrel.example" || sheet.FromName != "owner (via Carrel)" {
 		t.Errorf("from %q reply %q note %q", sheet.From, sheet.ReplyTo, sheet.ReplyNote)
 	}
 

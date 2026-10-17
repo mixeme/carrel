@@ -22,7 +22,10 @@ type letterSender struct {
 	Name      string
 	FromLogin string // set when the instance sends as login@domain
 	From      string // the From line as the recipient sees it
-	ReplyTo   string
+	// FromName and Address are its two halves, said apart on the sheet
+	// (Пб17; s-mail-1: «from mix@carrel.example»)
+	FromName, Address string
+	ReplyTo           string
 }
 
 func (s *Server) senderOf(u *store.User) letterSender {
@@ -38,7 +41,8 @@ func (s *Server) senderOf(u *store.User) letterSender {
 	if relay.Sender == cmail.SenderLogin {
 		if own, err := mail.ParseAddress(u.Login + "@" + domain); err == nil && !strings.ContainsAny(u.Login, "@<> ") {
 			ls.FromLogin = u.Login
-			ls.From = ls.Name + " <" + own.Address + ">"
+			ls.FromName, ls.Address = ls.Name, own.Address
+			ls.From = ls.FromName + " <" + ls.Address + ">"
 			return ls
 		}
 	}
@@ -46,7 +50,8 @@ func (s *Server) senderOf(u *store.User) letterSender {
 	if via == "" {
 		via = s.users.Settings().InstanceName()
 	}
-	ls.From = ls.Name + " (via " + via + ") <" + relay.From + ">"
+	ls.FromName, ls.Address = ls.Name+" (via "+via+")", relay.From
+	ls.From = ls.FromName + " <" + ls.Address + ">"
 	return ls
 }
 

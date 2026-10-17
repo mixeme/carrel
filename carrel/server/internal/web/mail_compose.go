@@ -281,7 +281,7 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 	ls := s.senderOf(u)
 	sheet := view.MailSheet{
 		Subject: text(d.Subject), Body: text(d.Body),
-		From: text(ls.From), ReplyTo: text(ls.ReplyTo), ReplyNote: ls.replyNote(),
+		From: text(ls.Address), FromName: text(ls.FromName), ReplyTo: text(ls.ReplyTo), ReplyNote: ls.replyNote(),
 	}
 	for _, a := range d.To {
 		sheet.To = append(sheet.To, view.Recipient{Address: text(a)})
@@ -471,8 +471,10 @@ func (s *Server) linkPart(sess *session.Session, id string) (mailPart, bool) {
 		if l.ID != id {
 			continue
 		}
+		// Named as the list of links names it, with its days (Пб16; s-mail-4:
+		// «Личный · 10–31 August»): two links to one calendar are told apart.
 		return mailPart{What: "link", Kind: view.Kind(l.Target.Kind), Account: l.Target.AccountID, Col: l.Target.Col,
-			UID: l.Target.UID, Path: l.Target.Path, Folder: l.Target.Folder, Title: l.Target.Title, AsLink: true, LinkID: id}, true
+			UID: l.Target.UID, Path: l.Target.Path, Folder: l.Target.Folder, Title: publishedTitle(l.Target), AsLink: true, LinkID: id}, true
 	}
 	return mailPart{}, false
 }
