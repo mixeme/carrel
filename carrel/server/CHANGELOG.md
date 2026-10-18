@@ -17,6 +17,46 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.347 — 2026-10-19
+
+Typecase's notes 81–83 (`b804598`): key escrow and the password's history,
+mail settings, files against «what cannot be done is off», deleting an
+account.
+
+### Fixed
+
+- **Deleting an account left its published links and its backups'
+  state behind**: a link's envelope holds a connection's credentials, a
+  job's trigger the data key under the server's key. They go with the
+  account now, wiped.
+
+### Added
+
+- **Deleting an account** has its sheet (`/admin/delete?target=`, over
+  Users): what Carrel forgets and what stays on the servers, the login
+  typed to confirm. Delete in a row's «⋯» opens it; a login that is not
+  the account's is the sheet again with the word at its field.
+
+### Changed
+
+- **The menu of connections in a sheet's head**: every server a link to
+  the same sheet over it, the open one too; one that did not answer this
+  session off, with why.
+- **Upload of an empty folder** is the file field alone, without the
+  arrow; the upload sheet says nothing under its tree.
+- **Send test is never off**: it sends what is typed.
+- **Key escrow**: the words of the frames — «shown» to the user, the
+  hints of Recover and of the history link, «Then nobody can recover the
+  account.»; off, the page says «Off»; the password's history says the
+  zone only.
+
+### For consumers
+
+- `AccountDeleteSheet`; `FileServer.Reason` (C-6); `/admin/delete` (C-5).
+  Fixtures `admin-delete`, `admin-escrow/recovered`, `off`,
+  `admin-settings/sent`, `refused`, `password-history/normal`;
+  `app-files-folder/refused` has four rows.
+
 ## v0.2.346 — 2026-10-18
 
 Backup as its frames draw it (Нс54–Нс57, Нс59, Нс61–Нс66; `s-backup-1`,

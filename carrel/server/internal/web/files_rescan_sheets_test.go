@@ -240,7 +240,8 @@ func TestNewFolderIsASheet(t *testing.T) {
 // nothing is ticked yet.
 func TestSheetsChooseTheServer(t *testing.T) {
 	for _, id := range []string{"s-files-4", "s-notes-11", "s-files-16"} {
-		if !regexp.MustCompile(`<button class="tc-in is-pick[^"]*" type="button" aria-label="Server">[^<]+</button>`).MatchString(mockupFrame(t, id)) {
+		// The pick opens a menu of the servers, each a link (s-files-26).
+		if !regexp.MustCompile(`<summary class="tc-in is-pick[^"]*" aria-label="Server">[^<]+</summary>`).MatchString(mockupFrame(t, id)) {
 			t.Fatalf("%s draws no pick of the server: read the frame again", id)
 		}
 	}
@@ -258,8 +259,8 @@ func TestSheetsChooseTheServer(t *testing.T) {
 	check := func(what string, servers []view.FileServer, tree view.FileTree, on int, roots ...string) {
 		t.Helper()
 		if len(servers) != 2 || servers[on].On == servers[1-on].On || !servers[on].On || servers[0].Label == servers[1].Label ||
-			servers[on].Href != "" || servers[1-on].Href == "" {
-			t.Fatalf("%s: servers = %+v, want two, the %d-th chosen and the other an address", what, servers, on)
+			servers[on].Href == "" || servers[1-on].Href == "" {
+			t.Fatalf("%s: servers = %+v, want two, the %d-th chosen, both addresses", what, servers, on)
 		}
 		var got []string
 		for _, n := range tree.Nodes {
@@ -311,7 +312,7 @@ func TestSheetsChooseTheServer(t *testing.T) {
 func TestFolderJustMadeStandsFirst(t *testing.T) {
 	badge := regexp.MustCompile(`<span class="tc-badge tc-push">([^<]*)</span>`)
 	var rows [][2]string // the name, the badge
-	for _, m := range regexp.MustCompile(`(?s)<div class="(?:is-on )?tc-tree__row tc-tree__row--padl58">(.*?)</div>`).FindAllStringSubmatch(mockupFrame(t, "s-notes-11"), -1) {
+	for _, m := range regexp.MustCompile(`(?s)<(?:div|a) class="(?:is-on )?tc-tree__row tc-tree__row--padl58"[^>]*>(.*?)</(?:div|a)>`).FindAllStringSubmatch(mockupFrame(t, "s-notes-11"), -1) {
 		row := [2]string{frameText(badge.ReplaceAllString(m[1], ""))}
 		if b := badge.FindStringSubmatch(m[1]); b != nil {
 			row[1] = b[1]

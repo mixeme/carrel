@@ -155,7 +155,8 @@ func TestInstanceSettingsAreTheFrame(t *testing.T) {
 			send = &page.Form.Actions[i]
 		}
 	}
-	if send == nil || send.Enabled || send.Reason != "Mail is not configured: there is nothing to send through yet." || !send.Submits || send.Href != "/admin/settings/mail-test" {
+	// Never off (Typecase's note 82): it sends what is typed.
+	if send == nil || !send.Enabled || send.Reason != "" || !send.Submits || send.Href != "/admin/settings/mail-test" {
 		t.Errorf("Send test = %+v", send)
 	}
 }

@@ -396,10 +396,9 @@ func TestUserMenuIsTheFrame(t *testing.T) {
 	if a := item(rows["alice"], "admin.user.role"); a.Label != "Make user" || a.Reason != "Someone has to stay an administrator." {
 		t.Errorf("last admin's role = %+v", a)
 	}
-	// Ад7: Delete sends no login, and the store refuses it every time — off
-	// for everyone, with the reason, until its dialogue is drawn (task 195).
-	if a := item(rows["bob"], "admin.user.delete"); a.Enabled || a.Reason == "" {
-		t.Errorf("bob's Delete = %+v, want off with its reason", a)
+	// Delete opens its sheet, where the login is typed (s-admin-34, note 83).
+	if a := item(rows["bob"], "admin.user.delete"); !a.Enabled || a.Method != "GET" || !strings.HasPrefix(a.Href, "/admin/delete?target=") {
+		t.Errorf("bob's Delete = %+v, want the link to its sheet", a)
 	}
 	// Bob has not signed in: nothing to kill.
 	if a := item(rows["bob"], "admin.user.sessions"); a.Enabled || a.Label != "Kill sessions" {

@@ -35,7 +35,7 @@ func TestFileCopyAndOtherStorageAreTheFrames(t *testing.T) {
 	cpTitle := frameOne(t, frameSheetT, cpFrame, "title")[1]
 	cpMsg := frameOne(t, frameSheetMsg, cpFrame, "message")[1]
 	cpConfirm := frameOne(t, frameSheetMain, cpFrame, "main button")[1]
-	farMsg := frameOne(t, regexp.MustCompile(`(?s)<div class="tc-msg">(.*?)</div>`), mockupFrame(t, "s-files-12"), "message")[1]
+	farMsg := frameOne(t, regexp.MustCompile(`(?s)<div class="tc-msg[^"]*">(.*?)</div>`), mockupFrame(t, "s-files-12"), "message")[1]
 	moveTitle := frameOne(t, frameSheetT, mockupFrame(t, "s-files-4"), "title")[1]
 	n := regexp.MustCompile(`^Copy (\d+) items$`).FindStringSubmatch(cpTitle)
 	if n == nil || !strings.HasPrefix(moveTitle, "Move "+n[1]+" items") {

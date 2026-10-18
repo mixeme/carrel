@@ -416,9 +416,11 @@ func TestAdminEscrowIsTheFrame(t *testing.T) {
 	if len(rows) != 2 || page.Opens != 1 {
 		t.Fatalf("covered = %+v, opens %d; want both accounts, one open", page.Covered, page.Opens)
 	}
-	// mix of the frame: not deposited, a dash for the recovery.
-	if a := rows["alice"]; a.Covered || string(a.Deposited) != cells[2][1] || string(a.LastRecovery) != cells[2][2] {
-		t.Errorf("alice = %+v, want %q, %q", a, cells[2][1], cells[2][2])
+	// mix of the frame: not deposited, a dash for the recovery — the last
+	// row of the six (note 81 of Typecase: «4 of 6»).
+	none := cells[len(cells)-1]
+	if a := rows["alice"]; a.Covered || string(a.Deposited) != none[1] || string(a.LastRecovery) != none[2] {
+		t.Errorf("alice = %+v, want %q, %q", a, none[1], none[2])
 	}
 	// anna of the frame: the day of the copy, never recovered.
 	if b := rows["bob"]; !b.Covered || !day.MatchString(string(b.Deposited)) || string(b.LastRecovery) != cells[0][2] {
@@ -426,12 +428,6 @@ func TestAdminEscrowIsTheFrame(t *testing.T) {
 	}
 	// The rubrics and their hints, in the frame's order.
 	hints := frameAll(frameAnyHint, frame, 1)
-	// Recover's last sentence is the owner's of 16.10.2026, not the frame's
-	// «mailed — always» (Ад40; Typecase's task 202 redraws it).
-	if len(hints) > 2 {
-		hints[2] = strings.Replace(hints[2], "The user is mailed about it — always, not at the administrator’s discretion.",
-			"The user can always see what was done to their password: the link they were given when the key was deposited shows it. A letter goes too when mail can reach them.", 1)
-	}
 	for i, f := range []view.Form{page.Form, page.Master, page.Recover} {
 		legend := []string{"Policy", "Master password", "Recover an account"}[i]
 		if len(f.Sets) == 0 || string(f.Sets[0].Legend) != legend {

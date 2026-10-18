@@ -132,7 +132,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
-          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job"}
+          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -201,6 +201,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "admin-audit": "/admin/audit",
     "admin-dav": "/admin/dav",
     "admin-escrow": "/admin/escrow",
+    "password-history": "/password-history/{token}",
     "admin-install": "/admin/install",
     "login": "/login",
     "forgot": "/forgot",
@@ -261,6 +262,8 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     # Лист сброса пароля из шапки Users (Ад8): кадров со своим адресом нет,
     # фрагменты s-admin-13, -14, -16, -20.
     "admin-reset": "/admin/reset",
+    # Лист удаления учётной записи поверх Users (s-admin-34, записка 83).
+    "admin-delete": "/admin/delete",
     "app-contact-rewrite": "/app/contacts/{account}/{col}/{uid}/rewrite",
     "app-quick": "/app/notes/quick",
     "app-collections-new": "/app/collections/new",
@@ -283,7 +286,7 @@ SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-
           "app-publish", "app-files-picker", "app-files-op", "app-mail-compose",
           "app-contact-rewrite", "app-record-copies", "app-task-done", "app-event-ask",
           "app-settings-escrow-deposit", "app-settings-escrow-withdraw", "app-record-delete",
-          "admin-reset"}
+          "admin-reset", "admin-delete"}
 
 FRAME_TODO = {
     # Полная форма нового события — свой кадр s-agenda-15 (Typecase 9e69804,
@@ -431,7 +434,8 @@ STATE_FRAME = {
     "app-files-op/delete": "s-files-22",
     "app-files-op/new": "s-files-23",
     "app-files/empty": "states-35",
-    "app-files-published/no-mail": "s-publish-17",
+    # Список без почты — страница целиком (записка 83 п. 15); s-publish-17 — фрагмент строк.
+    "app-files-published/no-mail": "s-publish-20",
     "app-files-published/empty": "s-publish-18",  # Пб42: пустой список
     "app-files-picker/attach": "s-files-16",
     "app-files-picker/refused": "s-files-19",
@@ -491,6 +495,13 @@ STATE_FRAME = {
     "app-settings-backup/normal": "s-backup-6",
     "app-settings-backup/jobs": "s-backup-1",
     "app-settings-backup/job": "s-backup-2",
+    # Депонирование у администратора и история пароля (записка Typecase 81).
+    "admin-escrow/recovered": "s-admin-30",
+    "admin-escrow/off": "s-admin-31",
+    "admin-delete/normal": "s-admin-34",
+    # Проба почты: ушла и отказ по полю (записка Typecase 82).
+    "admin-settings/sent": "s-admin-32",
+    "admin-settings/refused": "s-admin-33",
     # Публичные страницы (Пс1): все кадры маршрута — части (data-part),
     # у каждого вида страницы свой.
     # Готовая ссылка (Пб13): тот же лист после Create link.

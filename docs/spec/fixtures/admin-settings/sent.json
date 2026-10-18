@@ -1,0 +1,619 @@
+{
+  "details": null,
+  "discard": {
+    "enabled": true,
+    "href": "/admin/settings",
+    "id": "admin.settings.discard",
+    "label": "Discard",
+    "method": "GET"
+  },
+  "form": {
+    "action": "/admin/settings",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "id": "admin.settings.save",
+        "label": "Save",
+        "method": "POST",
+        "primary": true
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/admin/settings/mail-test",
+        "id": "admin.settings.mailtest",
+        "label": "Send test",
+        "method": "POST",
+        "submits": true
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "Global",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Invite lifetime, h",
+            "mono": true,
+            "name": "inviteTTL",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "24"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Idle timeout, h",
+            "mono": true,
+            "name": "idle",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "2"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Session life, d",
+            "mono": true,
+            "name": "session",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "7"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Instance name",
+            "name": "name",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "carrel.example"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "Links in letters start with it. Set with CARREL_PUBLIC_URL.",
+            "kind": "text",
+            "label": "Public address",
+            "mono": true,
+            "name": "publicURL",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "the address each request comes to"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Mail",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Host",
+            "mono": true,
+            "name": "host",
+            "options": [],
+            "placeholder": "smtp.example.org",
+            "readOnly": false,
+            "required": false,
+            "value": "127.0.0.1"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Port",
+            "mono": true,
+            "name": "port",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "587"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Encryption",
+            "name": "security",
+            "options": [
+              {
+                "label": "STARTTLS",
+                "selected": false,
+                "value": "starttls"
+              },
+              {
+                "label": "TLS",
+                "selected": false,
+                "value": "tls"
+              },
+              {
+                "label": "None",
+                "selected": true,
+                "separator": true,
+                "value": "none"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "none"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Username",
+            "name": "username",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Password",
+            "name": "password",
+            "options": [],
+            "placeholder": "leave blank to keep the current one",
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "email",
+            "label": "From address",
+            "name": "from",
+            "options": [],
+            "placeholder": "carrel@example.org",
+            "readOnly": false,
+            "required": false,
+            "value": "noreply@carrel.example"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "From name",
+            "name": "fromName",
+            "options": [],
+            "placeholder": "carrel.example",
+            "readOnly": false,
+            "required": false,
+            "value": "Carrel"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "badges": [
+          {
+            "label": "off",
+            "role": "neutral"
+          }
+        ],
+        "legend": "Letters from users",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form.",
+            "kind": "check",
+            "label": "Let users send letters and links from Carrel",
+            "name": "people",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "Your relay decides which of the two it will let out. The envelope sender stays noreply@carrel.example either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.",
+            "kind": "radio",
+            "label": "Sender address",
+            "name": "sender",
+            "options": [
+              {
+                "label": "noreply@carrel.example",
+                "selected": true,
+                "value": "noreply"
+              },
+              {
+                "label": "login@carrel.example",
+                "selected": false,
+                "value": "login"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Attachment, MB",
+            "mono": true,
+            "name": "attach",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "10"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Letter, MB",
+            "mono": true,
+            "name": "letter",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "25"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Recipients",
+            "mono": true,
+            "name": "recipients",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "20"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Letters a day",
+            "mono": true,
+            "name": "perDay",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "100"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Test",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "email",
+            "label": "Send test message to",
+            "name": "to",
+            "options": [],
+            "placeholder": "you@example.org",
+            "readOnly": false,
+            "required": false,
+            "value": "mix@carrel.example"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "admin.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/admin/invites",
+        "icon": "i-plus",
+        "id": "admin.invites",
+        "label": "Add users",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-con",
+        "id": "admin.users",
+        "label": "Users",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/settings",
+        "icon": "i-adm",
+        "id": "admin.settings",
+        "label": "Settings",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/install",
+        "icon": "i-shield",
+        "id": "admin.install",
+        "label": "Installation",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/dav",
+        "icon": "i-search",
+        "id": "admin.dav",
+        "label": "DAV validator",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/escrow",
+        "icon": "i-dup",
+        "id": "admin.escrow",
+        "label": "Key escrow",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/audit",
+        "icon": "i-clock",
+        "id": "admin.audit",
+        "label": "Audit log",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "Last sent "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-10 17:06"
+          }
+        ],
+        "title": "Mail is going out",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Run the check once Carrel is behind its proxy."
+          }
+        ],
+        "title": "Not checked yet",
+        "tone": "off"
+      }
+    ],
+    "tags": [],
+    "ticks": null
+  },
+  "subtitle": "Global settings and mail",
+  "test": {
+    "ok": true,
+    "reply": "250 accepted for 1 recipient(s)"
+  },
+  "title": "Settings",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

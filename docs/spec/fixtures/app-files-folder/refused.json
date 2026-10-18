@@ -326,6 +326,46 @@
       },
       {
         "actions": [],
+        "name": "release-checklist.md",
+        "percent": 0,
+        "question": {
+          "name": "release-checklist.md",
+          "options": [
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=both\u0026transfer=q-transfer",
+              "id": "transfer.both",
+              "label": "Keep both",
+              "method": "POST",
+              "target": "queue"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=overwrite\u0026transfer=q-transfer",
+              "id": "transfer.overwrite",
+              "label": "Replace",
+              "method": "POST",
+              "target": "queue"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=skip\u0026transfer=q-transfer",
+              "id": "transfer.skip",
+              "label": "Skip",
+              "method": "POST",
+              "target": "queue"
+            }
+          ]
+        },
+        "reason": "",
+        "size": "7 B",
+        "state": "idle"
+      },
+      {
+        "actions": [],
         "name": "архив-2025.zip",
         "percent": 0,
         "question": null,
@@ -334,7 +374,7 @@
         "state": "failed"
       }
     ],
-    "title": "Uploaded 2 of 3",
+    "title": "Uploading 4 of 4",
     "toggle": {
       "enabled": true,
       "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?queue=0\u0026select=2026-08-10-sync-board.png\u0026select=release-checklist.md\u0026select=2026-08-04-whiteboard.jpg",

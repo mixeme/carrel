@@ -376,7 +376,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user can always see what was done to their password: the link they were given when the key was deposited shows it. A letter goes too when mail can reach them.",
+            "hint": "Connections survive a recovery. The user sees it by the password-history link they were given; a letter goes too when mail can reach them.",
             "kind": "text",
             "label": "Temporary password for the user",
             "mono": true,
@@ -510,7 +510,7 @@
   },
   "warning": {
     "actions": [],
-    "body": "Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and mailed to them.",
+    "body": "Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and shown to them.",
     "details": null,
     "role": "alert",
     "title": ""

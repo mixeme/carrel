@@ -33,6 +33,8 @@ var fixtureTypes = map[string]func() any{
 	"admin-audit":                  func() any { return &AdminAuditPage{} },
 	"admin-dav":                    func() any { return &AdminDavPage{} },
 	"admin-escrow":                 func() any { return &AdminEscrowPage{} },
+	"admin-delete":                 func() any { return &AccountDeleteSheet{} },
+	"password-history":             func() any { return &PasswordHistoryPage{} },
 	"admin-install":                func() any { return &AdminInstallPage{} },
 	"admin-invites":                func() any { return &AdminInvitesPage{} },
 	"admin-settings":               func() any { return &AdminSettingsPage{} },

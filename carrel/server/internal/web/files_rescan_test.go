@@ -66,7 +66,7 @@ func TestFolderHeadCountsTheFolder(t *testing.T) {
 // Upload files into it, or drop them onto the window.» with Upload and New
 // folder (states-32); a read-only one has nothing to offer.
 func TestEmptyFolderIsTheFrame(t *testing.T) {
-	m := frameOne(t, regexp.MustCompile(`(?s)<div class="tc-empty"><b>(.*?)</b>(.*?)<button`), mockupFrame(t, "states-32"), "empty folder")
+	m := frameOne(t, regexp.MustCompile(`(?s)<div class="tc-empty"><b>(.*?)</b>(.*?)<(?:button|label)`), mockupFrame(t, "states-32"), "empty folder")
 	title, body := frameText(m[1]), frameText(m[2])
 
 	f := filesFixture(t, true)
@@ -76,8 +76,8 @@ func TestEmptyFolderIsTheFrame(t *testing.T) {
 		t.Fatalf("empty = %+v, want %q %q", page.Empty, title, body)
 	}
 	up, nf := actionByID(page.Empty.Actions, "file.upload"), actionByID(page.Empty.Actions, "folder.new")
-	if up == nil || nf == nil || !up.Primary || len(up.Arrow) != 2 || !up.Enabled || !nf.Enabled || len(page.Empty.Actions) != 2 {
-		t.Errorf("the empty folder's buttons = %+v, want Upload with its arrow and New folder", page.Empty.Actions)
+	if up == nil || nf == nil || !up.Primary || len(up.Arrow) != 0 || up.File == "" || !up.Enabled || !nf.Enabled || len(page.Empty.Actions) != 2 {
+		t.Errorf("the empty folder's buttons = %+v, want Upload a file field without an arrow, and New folder", page.Empty.Actions)
 	}
 	// A folder with something in it, and one whose filter hides everything,
 	// are not empty.

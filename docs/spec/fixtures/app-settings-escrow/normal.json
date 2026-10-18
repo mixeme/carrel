@@ -18,7 +18,7 @@
       "label": "Copy",
       "method": "GET"
     },
-    "note": "Keep this link. It shows what was done to your password and by whom — a recovery with the master password, a reset, a change — also when you cannot sign in. It never changes, and nobody can take it away."
+    "note": "Keep it: it shows what was done to your password, even when you cannot sign in."
   },
   "print": {
     "range": "",
@@ -139,7 +139,7 @@
   },
   "rubric": "",
   "status": {
-    "actionNote": "After withdrawal nobody can recover this account, including you.",
+    "actionNote": "Then nobody can recover the account.",
     "actions": [
       {
         "danger": true,

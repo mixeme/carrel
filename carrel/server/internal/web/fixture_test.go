@@ -1794,6 +1794,58 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 			"server": {app.servers["nextcloud"].URL}, "login": {"alice"}, "password": {"secret"}, "agree": {"on"},
 		})))
 	})
+	// The relay's test (note 82 of Typecase): with the relay set, the letter
+	// gone and the relay's answer under the test (s-admin-32); a port out of
+	// range, refused at its field and under the test (s-admin-33). The relay
+	// listens on a port the machine had free: the frames write 587.
+	t.Run("admin-settings-test", func(t *testing.T) {
+		relay := app.h.relayed()
+		defer func() {
+			_ = app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+				st.Settings.SMTP = store.SMTPSettings{}
+				return nil, nil
+			})
+		}()
+		steady := func(rec *httptest.ResponseRecorder) *httptest.ResponseRecorder {
+			out := httptest.NewRecorder()
+			out.Code = rec.Code
+			out.Body.Write(bytes.ReplaceAll(rec.Body.Bytes(), []byte(`"`+strconv.Itoa(relay.Port)+`"`), []byte(`"587"`)))
+			return out
+		}
+		form := settingsForm(t, app.h, app.sess, map[string]string{"to": "mix@carrel.example"})
+		app.compare(t, "admin-settings/sent.json", steady(app.h.do(postForm("/admin/settings/mail-test", app.sess, form))))
+		form.Set("port", "70000")
+		app.compare(t, "admin-settings/refused.json", steady(app.h.do(postForm("/admin/settings/mail-test", app.sess, form))))
+	})
+	// Deleting an account (s-admin-34, note 83): the sheet over Users, anna
+	// chosen by the item of her row.
+	t.Run("admin-delete", func(t *testing.T) {
+		snap := app.h.st.Snapshot()
+		app.compare(t, "admin-delete/normal.json", app.h.do(get("/admin/delete?target="+snap.UserByLogin("anna").ID, app.sess)))
+	})
+	// Key escrow (note 81 of Typecase): viktor's account recovered with the
+	// master password — the temporary password once, and whether a letter
+	// went (s-admin-30) —; his password's history by its link (s-auth-15);
+	// the scheme off (s-admin-31).
+	t.Run("admin-escrow-states", func(t *testing.T) {
+		app.compare(t, "admin-escrow/recovered.json", app.h.do(postForm("/admin/escrow", app.sess, url.Values{
+			"action": {"recover"}, "login": {"viktor"}, "master": {"sixteen-char-pass!"}, "temp": {"temp-pass-4821"},
+		})))
+		snap := app.h.st.Snapshot()
+		viktor := snap.UserByLogin("viktor")
+		app.compare(t, "password-history/normal.json", app.h.do(anon("/password-history/"+viktor.PasswordLog)))
+		escrow := func(on bool) {
+			if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+				st.Settings.EscrowEnabled = on
+				return nil, nil
+			}); err != nil {
+				t.Fatal(err)
+			}
+		}
+		escrow(false)
+		defer escrow(true)
+		app.compare(t, "admin-escrow/off.json", app.h.do(get("/admin/escrow", app.sess)))
+	})
 	// The sheet that resets a password (Ад8): anna chosen (s-admin-13), the
 	// password issued (s-admin-14), a password too short (s-admin-16) and
 	// a login typed that is not hers (s-admin-20).
@@ -2358,8 +2410,9 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 	})
 	t.Run("queue-refused", func(t *testing.T) {
 		// A storage that writes only what it was told the length of
-		// (s-files-24): the file sent with its size is uploaded, the one
-		// without is refused, and its row says why.
+		// (s-files-24): the files sent with their size are uploaded, a name
+		// taken waits for its choice, the one without a size is refused, and
+		// its row says why — the four rows of s-files-2.
 		srv := app.servers["sftpgo · vps"]
 		srv.RefuseUnsizedPUT = true
 		defer func() { srv.RefuseUnsizedPUT = false }()
@@ -2374,6 +2427,11 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		_, _ = part.Write([]byte(report))
 		part, _ = w.CreateFormFile("file", "плакат.png")
 		_, _ = part.Write([]byte(poster))
+		// A name already taken, as s-files-2 draws it among the four (note
+		// 83 of Typecase): its choice stands in its row.
+		_ = w.WriteField("size.release-checklist.md", "7")
+		part, _ = w.CreateFormFile("file", "release-checklist.md")
+		_, _ = part.Write([]byte("# again"))
 		part, _ = w.CreateFormFile("file", "архив-2025.zip")
 		_, _ = part.Write([]byte("zip"))
 		_ = w.Close()

@@ -48,6 +48,19 @@ func (s *Server) postAdminUsers(w http.ResponseWriter, r *http.Request) {
 		err = s.users.EnableUser(actorID, target)
 	case "delete":
 		err = s.users.DeleteUser(actorID, target, r.FormValue("login"))
+		// A login that is not the account's: the sheet again, the word at
+		// its field (s-admin-34).
+		if errors.Is(err, user.ErrLoginConfirm) || errors.Is(err, user.ErrLastAdmin) {
+			snap := s.store.Snapshot()
+			if u := snap.UserByID(target); u != nil {
+				why := text("Type " + u.Login + " to confirm whose account is deleted.")
+				if errors.Is(err, user.ErrLastAdmin) {
+					why = "Cannot delete the last administrator."
+				}
+				s.writeAccountDeleteSheet(w, r, s.accountDeleteSheet(sess, u, r.FormValue("login"), why))
+				return
+			}
+		}
 	case "role":
 		// The toggle of s-admin-12 names the role it gives: pressing it
 		// twice does not turn it back.
@@ -202,13 +215,10 @@ func (s *Server) adminUserMenu(snap store.State, u *store.User) []view.MenuItem 
 	if u.Disabled {
 		toggle = view.Action{ID: "admin.user.enable", Label: "Enable", Href: op("enable"), Method: "POST", Enabled: true}
 	}
-	del := off(view.Action{ID: "admin.user.delete", Label: "Delete", Icon: "i-trash", Href: op("delete"), Method: "POST", Danger: true, Enabled: true},
+	// The account is deleted on a sheet of its own where its login is typed
+	// (s-admin-34, Typecase's 195 p. 6): the item is a link to it.
+	del := off(view.Action{ID: "admin.user.delete", Label: "Delete", Icon: "i-trash", Href: s.postQuery("/admin/delete", url.Values{"target": {u.ID}}), Method: "GET", Danger: true, Enabled: true},
 		lastAdmin, "Cannot delete the last administrator.")
-	// The account is deleted once its login is typed in a dialogue of its
-	// own (s-admin-2); that dialogue has no frame yet (Typecase's task 195),
-	// and the item alone sends no login — the store refuses it every time
-	// (Ад7). Off, with the reason, until the dialogue is drawn.
-	del = off(del, del.Enabled, "Deleting an account needs its own dialogue, which is not here yet.")
 	return []view.MenuItem{{Action: role}, {Action: sessions}, {Action: toggle}, {Separator: true, Action: del}}
 }
 
@@ -225,6 +235,54 @@ const resetHint = "Hand it over yourself; they choose their own at the next sign
 
 // getAdminReset is the sheet «Reset a password» opens from the head of the
 // people's list (s-admin-13); ?target= chooses the person.
+// getAdminDelete is the sheet that deletes an account (s-admin-34).
+func (s *Server) getAdminDelete(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireAdmin(w, r)
+	if !ok {
+		return
+	}
+	snap := s.store.Snapshot()
+	u := snap.UserByID(r.URL.Query().Get("target"))
+	if u == nil {
+		s.notFound(w, r)
+		return
+	}
+	s.writeAccountDeleteSheet(w, r, s.accountDeleteSheet(sess, u, "", ""))
+}
+
+// accountDeleteSheet says what deleting u forgets and what stays, and asks for its
+// login typed (s-admin-34).
+func (s *Server) accountDeleteSheet(sess *session.Session, u *store.User, typed string, why view.Text) view.AccountDeleteSheet {
+	form := s.plainForm("/admin/", "POST",
+		csrfField(sess),
+		view.FormRow{Name: "action", Kind: view.InputHidden, Value: "delete"},
+		view.FormRow{Name: "target", Kind: view.InputHidden, Value: text(u.ID)},
+		view.FormRow{Name: "login", Label: "Type the login to confirm", Kind: view.InputText, Required: true,
+			Placeholder: text(u.Login), Value: text(typed), Error: why})
+	actions := []view.Action{
+		{ID: "admin.delete", Label: "Delete account", Method: "POST", Danger: true, Enabled: true, Href: s.route("/admin/")},
+		{ID: "admin.delete.cancel", Label: "Cancel", Href: s.route("/admin/"), Method: "GET", Enabled: true},
+	}
+	form.Actions = actions
+	return view.AccountDeleteSheet{
+		Title: text("Delete " + u.Login),
+		Warning: "Carrel forgets this account: its connections and saved passwords, published links, devices, backups and the history of its password. " +
+			"Its records on the servers stay as they are.",
+		Form:    focused(form, "login"),
+		Actions: actions,
+	}
+}
+
+func (s *Server) writeAccountDeleteSheet(w http.ResponseWriter, r *http.Request, sheet view.AccountDeleteSheet) {
+	w.Header().Set("Cache-Control", "no-store")
+	if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
+		return
+	}
+	sheet.Under = s.underOf(r, "", "/admin/") // over Users (Лс29)
+	s.writePage(w, r, http.StatusOK, sheet)
+}
+
 func (s *Server) getAdminReset(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireAdmin(w, r)
 	if !ok {

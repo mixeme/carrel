@@ -59,6 +59,7 @@ var fragmentRoutes = []fragmentRoute{
 	{"", "/app/settings/unlock", render.TargetSheet},
 	// C-5.8
 	{"", "/admin/reset", render.TargetSheet},
+	{"GET", "/admin/delete", render.TargetSheet},
 }
 
 // fragmentRoute is a row of C-5 answered with a fragment or a sheet: the

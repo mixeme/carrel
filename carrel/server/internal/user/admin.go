@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 
+	"carrel.dev/carrel/server/internal/crypt"
 	"carrel.dev/carrel/server/internal/store"
 )
 
@@ -201,4 +202,26 @@ func removeUser(st *store.State, userID, login string) {
 		}
 	}
 	st.Tokens = tok
+	// The account's published links and its backups' state go with it, the
+	// envelopes they hold wiped (s-admin-34: «Carrel forgets … published
+	// links, devices, backups»): a link's carries a connection's
+	// credentials, a job's trigger the data key under the server's key.
+	pub := st.Published[:0]
+	for _, l := range st.Published {
+		if l.UserID == userID {
+			crypt.Wipe(l.Envelope)
+			continue
+		}
+		pub = append(pub, l)
+	}
+	st.Published = pub
+	bk := st.Backups[:0]
+	for _, b := range st.Backups {
+		if b.UserID == userID {
+			crypt.Wipe(b.KeyEnvelope)
+			continue
+		}
+		bk = append(bk, b)
+	}
+	st.Backups = bk
 }

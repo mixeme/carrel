@@ -26,7 +26,7 @@
     "role": "alert",
     "title": ""
   },
-  "purpose": "The folder is the attachment folder from Settings → Attachments, named once and remembered — unless you make a new one here. Change it here and the next upload from this menu goes to the new one.",
+  "purpose": "",
   "servers": [
     {
       "href": "/app/files/picker?for=upload\u0026server=a-nc-home",
@@ -34,7 +34,7 @@
       "on": false
     },
     {
-      "href": "",
+      "href": "/app/files/picker?for=upload\u0026server=a-sftp-vps",
       "label": "sftpgo · vps",
       "on": true
     }

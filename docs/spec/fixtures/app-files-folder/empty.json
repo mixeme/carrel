@@ -241,30 +241,6 @@
   "empty": {
     "actions": [
       {
-        "arrow": [
-          {
-            "csrf": "csrf",
-            "enabled": true,
-            "file": "file",
-            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
-            "icon": "i-doc",
-            "id": "file.upload",
-            "label": "Files",
-            "method": "POST",
-            "target": "queue"
-          },
-          {
-            "csrf": "csrf",
-            "enabled": true,
-            "file": "file",
-            "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/2026-08/",
-            "icon": "i-file",
-            "id": "file.upload.folder",
-            "label": "Folder",
-            "method": "POST",
-            "target": "queue"
-          }
-        ],
         "csrf": "csrf",
         "enabled": true,
         "file": "file",

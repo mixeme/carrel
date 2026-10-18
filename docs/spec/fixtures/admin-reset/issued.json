@@ -388,16 +388,16 @@
               "reason": "Cannot disable the last administrator."
             },
             {
-              "csrf": "csrf",
               "danger": true,
               "enabled": false,
-              "href": "/admin/?action=delete\u0026target=u-mix",
+              "href": "/admin/delete?target=u-mix",
               "icon": "i-trash",
               "id": "admin.user.delete",
               "label": "Delete",
-              "method": "POST",
+              "method": "GET",
               "reason": "Cannot delete the last administrator.",
-              "separator": true
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "role": "Administrator",
@@ -438,16 +438,15 @@
               "method": "POST"
             },
             {
-              "csrf": "csrf",
               "danger": true,
-              "enabled": false,
-              "href": "/admin/?action=delete\u0026target=u-mix",
+              "enabled": true,
+              "href": "/admin/delete?target=u-mix",
               "icon": "i-trash",
               "id": "admin.user.delete",
               "label": "Delete",
-              "method": "POST",
-              "reason": "Deleting an account needs its own dialogue, which is not here yet.",
-              "separator": true
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "role": "User",
@@ -488,16 +487,15 @@
               "method": "POST"
             },
             {
-              "csrf": "csrf",
               "danger": true,
-              "enabled": false,
-              "href": "/admin/?action=delete\u0026target=u-mix",
+              "enabled": true,
+              "href": "/admin/delete?target=u-mix",
               "icon": "i-trash",
               "id": "admin.user.delete",
               "label": "Delete",
-              "method": "POST",
-              "reason": "Deleting an account needs its own dialogue, which is not here yet.",
-              "separator": true
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
             }
           ],
           "role": "User",

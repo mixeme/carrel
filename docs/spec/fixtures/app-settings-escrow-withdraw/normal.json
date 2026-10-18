@@ -95,7 +95,7 @@
         "state": "pending"
       },
       "escrow": {
-        "actionNote": "After withdrawal nobody can recover this account, including you.",
+        "actionNote": "Then nobody can recover the account.",
         "actions": [
           {
             "danger": true,

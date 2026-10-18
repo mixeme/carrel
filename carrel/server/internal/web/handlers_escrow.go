@@ -125,7 +125,7 @@ func (s *Server) getEscrowWithdraw(w http.ResponseWriter, r *http.Request) {
 		// What is pressed is what happens: the title is the button
 		// (account-11), and the one warning says what will be no more.
 		Title:   "Withdraw my deposited key",
-		Warning: escrowWithdrawNote + " The copy of your data key on this server is destroyed; your records and connections stay as they are.",
+		Warning: escrowWithdrawSheetNote + " The copy of your data key on this server is destroyed; your records and connections stay as they are.",
 		Form: s.plainForm("/app/settings/escrow", "POST", csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: "withdraw"}),
 		Actions: []view.Action{
@@ -142,9 +142,13 @@ func (s *Server) getEscrowWithdraw(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, sheet)
 }
 
-// escrowWithdrawNote is the line beside the withdraw button (account-4) and
-// the first sentence of its sheet's warning (account-11).
-const escrowWithdrawNote view.Text = "After withdrawal nobody can recover this account, including you."
+// escrowWithdrawNote is the line beside the withdraw button (account-4, note
+// 81 of Typecase); the sheet's warning keeps the longer sentence
+// (account-11).
+const (
+	escrowWithdrawNote      view.Text = "Then nobody can recover the account."
+	escrowWithdrawSheetNote view.Text = "After withdrawal nobody can recover this account, including you."
+)
 
 // depositSheet is the unlock sheet with the deposit's purpose and button
 // (account-2): the password it asks opens the one window of S-10.7.
@@ -228,7 +232,7 @@ func (s *Server) buildEscrowPage(r *http.Request, sess *session.Session, errText
 		page.PasswordLink = &view.PasswordLink{
 			Address: text(s.absURL(r, "/password-history/"+u.PasswordLog)),
 			Copy:    view.Action{ID: "escrow.history.copy", Label: "Copy", Icon: "i-dup", Method: "GET", Enabled: true},
-			Note:    "Keep this link. It shows what was done to your password and by whom — a recovery with the master password, a reset, a change — also when you cannot sign in. It never changes, and nobody can take it away.",
+			Note:    "Keep it: it shows what was done to your password, even when you cannot sign in.",
 		}
 	}
 	if store.EscrowActive(&snap) && u != nil && !store.UserDeposited(u) {
@@ -302,7 +306,7 @@ func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
 				Copy:     view.Action{ID: "admin.escrow.copy", Label: "Copy", Icon: "i-dup", Method: "GET", Primary: true, Enabled: true},
 				Message:  join("The account of ", strongRun(login), " is recovered."),
 				Note:     s.escrowRecoveryMailedStatus(login, mailed),
-				Done:     view.Action{ID: "admin.escrow.done", Label: "Done", Href: s.route("/admin/escrow"), Method: "GET", Primary: true, Enabled: true},
+				Done:     view.Action{ID: "admin.escrow.done", Label: "Done", Href: s.route("/admin/escrow"), Method: "GET", Enabled: true},
 			}
 			page := s.buildAdminEscrowPage(sess, flash)
 			s.writePage(w, r, http.StatusOK, page)
@@ -342,7 +346,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 		// s-admin-6 writes it as it stands in the product, without a title.
 		Warning: view.Notice{
 			Role: view.NoticeAlert,
-			Body: text("Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and mailed to them."),
+			Body: text("Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and shown to them."),
 		},
 		Result:  flash.result,
 		Covered: []view.EscrowCoverRow{},
@@ -385,7 +389,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 			view.FormRow{Name: "master", Label: "Master password", Kind: view.InputPassword, Required: true},
 			view.FormRow{Name: "temp", Label: "Temporary password for the user", Kind: view.InputText, Required: true, Mono: true,
 				Value: text(s.users.SuggestPassword()),
-				Hint:  "Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user can always see what was done to their password: the link they were given when the key was deposited shows it. A letter goes too when mail can reach them."},
+				Hint:  "Connections survive a recovery. The user sees it by the password-history link they were given; a letter goes too when mail can reach them."},
 		), "escrow.recover", "Recover")
 		page.Recover.Actions[0].Danger = true
 		legend(&page.Recover, "Recover an account")
@@ -400,9 +404,12 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 				Hint: text("If you lose this password, deposited keys cannot be opened. This is not backup.")},
 			view.FormRow{Name: "master2", Label: "Repeat", Kind: view.InputPassword, Required: true},
 		), "escrow.enable", "Turn on key escrow")
+		page.Form.Actions[0].Primary = true // s-admin-31
 		if flash.formErr != "" {
 			page.Form.Sets[0].Rows[len(page.Form.Sets[0].Rows)-1].Error = text(flash.formErr)
 		}
+		// The scheme off says so under the title (s-admin-31).
+		page.Subtitle = "Off"
 		return page
 	}
 	// Whom the master password opens: every account of the Users list,
@@ -468,7 +475,8 @@ func (s *Server) getPasswordHistory(w http.ResponseWriter, r *http.Request) {
 	}
 	tf := timeFmt{now: s.now(), tz: s.tz()}
 	page := view.PasswordHistoryPage{Plain: view.Plain{Title: text("Password history of " + login),
-		Lede: line("What was done to the password of this account, and by whom. Times are " + s.tz().String() + ".")}}
+		// The title says whose and what (s-auth-15): the line says the zone.
+		Lede: line("Times are " + s.tz().String() + ".")}}
 	for i := len(events) - 1; i >= 0; i-- {
 		e := events[i]
 		page.Rows = append(page.Rows, view.PasswordHistoryRow{When: tf.numStamp(e.When), What: text(passwordWords[e.What]), Who: text(e.Who)})

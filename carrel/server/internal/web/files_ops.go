@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
@@ -996,7 +997,7 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		if dest != nil && dest.conn.ID != server {
 			dest = nil
 		}
-		sheet.Servers = s.fileServers(c.blob, server, false, func(id string) string {
+		sheet.Servers = s.fileServers(c.sess, c.blob, server, false, func(id string) string {
 			return s.postQuery(c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "server": {id}})
 		})
 		sheet.Target = s.fileTree(r.Context(), c, dest, server)
@@ -1131,7 +1132,7 @@ func (s *Server) treeServer(blob sealed.Blob, chosen *fileCtx, asked string, fil
 // fileServers are the servers the head of a sheet chooses among: every
 // connection with a storage in the tree, in the catalog's order, the one
 // shown on, the others the sheet's address with them (href).
-func (s *Server) fileServers(blob sealed.Blob, on string, files bool, href func(id string) string) []view.FileServer {
+func (s *Server) fileServers(sess *session.Session, blob sealed.Blob, on string, files bool, href func(id string) string) []view.FileServer {
 	var out []view.FileServer
 	seen := map[string]bool{}
 	for _, col := range blob.Collections {
@@ -1140,13 +1141,36 @@ func (s *Server) fileServers(blob sealed.Blob, on string, files bool, href func(
 		}
 		seen[col.AccountID] = true
 		conn, _ := blob.Connection(col.AccountID)
-		srv := view.FileServer{Label: text(connLabel(conn)), On: conn.ID == on}
-		if !srv.On {
-			srv.Href = href(conn.ID)
+		// Every server is a link to the same sheet over it, the open one
+		// too (s-files-26, note 83 of Typecase); one whose last answer this
+		// session was a refusal is off with why — unless it is the open one.
+		srv := view.FileServer{Label: text(connLabel(conn)), On: conn.ID == on, Href: href(conn.ID)}
+		if !srv.On && lastRefused(sess, blob, conn.ID) {
+			srv.Href, srv.Reason = "", text(connLabel(conn)+" did not answer.")
 		}
 		out = append(out, srv)
 	}
 	return out
+}
+
+// lastRefused is whether the newest answer of a server this session read
+// was a refusal: none of its collections answered after it.
+func lastRefused(sess *session.Session, blob sealed.Blob, account string) bool {
+	if sess == nil {
+		return false
+	}
+	var answered, refused time.Time
+	for _, col := range blob.CollectionsOf(account) {
+		if r, ok := sess.ReadingOf(account, col.Path); ok {
+			if r.At.After(answered) {
+				answered = r.At
+			}
+			if r.Refused.After(refused) {
+				refused = r.Refused
+			}
+		}
+	}
+	return refused.After(answered)
 }
 
 // sourceTree is the tree a file is chosen from (From Files of Attach): the

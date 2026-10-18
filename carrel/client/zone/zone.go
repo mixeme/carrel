@@ -97,6 +97,7 @@ var sheets = map[reflect.Type]bool{
 	reflect.TypeFor[view.EscrowWithdrawSheet]():   true,
 	reflect.TypeFor[view.ConnectionRemoveSheet](): true,
 	reflect.TypeFor[view.PasswordResetSheet]():    true,
+	reflect.TypeFor[view.AccountDeleteSheet]():    true,
 }
 
 // KindOf tells what model is: a page in the shell, a page outside it, a

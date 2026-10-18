@@ -502,25 +502,18 @@ func TestFromFilesReadOnlyStorageIsASource(t *testing.T) {
 func TestUploadSheetNewFolderRefusalIsTheFrame(t *testing.T) {
 	frame := mockupFrame(t, "s-files-19")
 	refusal := frameOne(t, frameAlertMsg, frame, "refusal")[1]
-	// The sheet's own line stands in its body; the head has a line of its
-	// own since Typecase 4b6e096 — the full path of the folder chosen, beside
-	// the pick of the server (note 35, Р-37).
-	ownLine := func(frame string) string {
-		at := strings.Index(frame, `class="tc-sheet__body"`)
-		if at < 0 {
-			t.Fatal("the sheet has no body: read the frame again")
+	// The sheet has no line of its own under the tree since the owner's
+	// word of 18.10.2026 (note 83): the mark of the node says it.
+	for _, id := range []string{"s-files-19", "s-notes-11"} {
+		f := mockupFrame(t, id)
+		if at := strings.Index(f, `class="tc-sheet__body"`); at < 0 || frameFootDim.MatchString(f[at:]) {
+			t.Fatalf("%s: the sheet's body has a line of its own again: read the frame", id)
 		}
-		m := frameFootDim.FindStringSubmatch(frame[at:])
-		if m == nil {
-			t.Fatal("the sheet's body has no line of its own: read the frame again")
-		}
-		return frameText(m[1])
 	}
-	stays := ownLine(frame)
-	purpose := ownLine(mockupFrame(t, "s-notes-11"))
+	const purpose = ""
 	m := regexp.MustCompile(`«([^»]+)» in (\S+) already`).FindStringSubmatch(refusal)
-	if m == nil || !strings.HasPrefix(purpose, stays) {
-		t.Fatalf("s-files-19 refuses %q under %q, s-notes-11 says %q: read the frames again", refusal, stays, purpose)
+	if m == nil {
+		t.Fatalf("s-files-19 refuses %q: read the frame again", refusal)
 	}
 	typed, in := m[1], m[2]
 

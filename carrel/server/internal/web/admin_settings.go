@@ -270,13 +270,11 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 	test := view.FieldSet{Legend: "Test", Rows: []view.FormRow{
 		{Name: "to", Label: "Send test message to", Kind: view.InputEmail, Value: text(flash.testTo), Placeholder: "you@example.org"},
 	}}
-	// The test letter sends what is typed (Ад37): off only while there is
-	// no relay, saved or typed (Ад22).
-	send := view.Action{ID: "admin.settings.mailtest", Label: "Send test", Href: s.route("/admin/settings/mail-test"), Method: "POST", Submits: true,
-		Enabled: cur.Configured() || strings.TrimSpace(shown.Host) != ""}
-	if !send.Enabled {
-		send.Reason = mailNotConfigured
-	}
+	// The test letter sends what is typed (Ад37) and is never off: without
+	// scripts a button off by what was saved would not come on with the
+	// Host typed (Typecase's note 82, 195 p. 5). No relay typed, the answer
+	// says so under the test (mailNotConfigured).
+	send := view.Action{ID: "admin.settings.mailtest", Label: "Send test", Href: s.route("/admin/settings/mail-test"), Method: "POST", Submits: true, Enabled: true}
 
 	page.Form = view.Form{
 		Action: s.route("/admin/settings"), Method: "POST",

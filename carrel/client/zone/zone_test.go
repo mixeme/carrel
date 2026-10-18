@@ -175,7 +175,7 @@ func allSheets() []any {
 		view.RewriteSheet{}, view.ExportSheet{}, view.NewSheet{}, view.FileOpSheet{},
 		view.FilePickerSheet{}, view.CollectionNewSheet{}, view.CollectionRenameSheet{},
 		view.CollectionMoveSheet{}, view.CollectionDeleteSheet{}, view.UnlockSheet{},
-		view.EscrowWithdrawSheet{}, view.ConnectionRemoveSheet{}, view.PasswordResetSheet{},
+		view.EscrowWithdrawSheet{}, view.ConnectionRemoveSheet{}, view.PasswordResetSheet{}, view.AccountDeleteSheet{},
 	}
 }
 

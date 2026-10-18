@@ -417,7 +417,7 @@ a.tc-btn[aria-disabled=true]{opacity:.45;cursor:default}
   font-size:12.5px;display:flex;align-items:center;color:var(--tc-ink);white-space:nowrap;position:relative;list-style:none;cursor:pointer}
 .tc-segfold__current::-webkit-details-marker{display:none}
 .tc-segfold__current::after{content:"";position:absolute;right:9px;top:50%;width:6px;height:6px;
-  margin-top:-4px;border-right:1.3px solid currentColor;border-bottom:1.3px solid currentColor;
+  margin-top:-5.5px;border-right:1.3px solid currentColor;border-bottom:1.3px solid currentColor;
   transform:rotate(45deg);opacity:.5;pointer-events:none}
 .tc-segfold__menu{position:absolute;top:100%;left:0;margin-top:4px;z-index:6;width:180px;
   background:var(--tc-surface);border:.5px solid var(--tc-edge);border-radius:4px;padding:4px}
@@ -447,7 +447,7 @@ label.tc-seg__opt{position:relative;cursor:pointer}
 .tc-in.is-pick::before{content:"";position:absolute;right:0;top:0;bottom:0;width:24px;
   background:var(--tc-surface);pointer-events:none;border-radius:0 3px 3px 0;z-index:1}
 .tc-in.is-pick::after{content:"";position:absolute;right:9px;top:50%;width:6px;height:6px;
-  margin-top:-4px;border-right:1.3px solid currentColor;border-bottom:1.3px solid currentColor;
+  margin-top:-5.5px;border-right:1.3px solid currentColor;border-bottom:1.3px solid currentColor;
   transform:rotate(45deg);opacity:.5;z-index:2;pointer-events:none}
 .tc-in.is-focus{outline:1.5px solid var(--tc-accent);outline-offset:1px;border-color:var(--tc-accent)}
 /* Поле, значение которого сервер не принял: рамка — цвет опасности, причина — подсказкой под ним. */
@@ -793,6 +793,9 @@ label.tc-tree__row{cursor:pointer}
 [data-tc-noscript] .tc-menu > .tc-in[type=search]{display:none}
 /* Закрытая выпадашка — details: меню открывается и без сценария (U-8); кнопка — её summary. */
 details.tc-drop,details.tc-drop__anchor{display:inline-block;position:relative}
+/* Выпадашка в шапке листа сжимается, как поле на её месте: выбор подключения не выталкивает строку пути. */
+.tc-sheet__head > .tc-drop{display:flex;min-width:0;flex:0 1 auto}
+.tc-sheet__head > .tc-drop > .tc-in{flex:1 1 auto}
 .tc-drop > summary,.tc-drop__anchor > summary{list-style:none;cursor:pointer}
 .tc-drop > summary::-webkit-details-marker,.tc-drop__anchor > summary::-webkit-details-marker{display:none}
 .tc-field:has(> .tc-menu.is-pop){position:relative}
@@ -1062,6 +1065,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-bar:has(> .is-3rd) .tc-bar__more + .tc-menu,.tc-docbar:has(.is-3rd) .tc-bar__more + .tc-menu{display:block}
   .tc-bar .tc-btn > .tc-btn__label{display:none}
   .tc-bar:has(> .tc-range,> .tc-in,> .tc-search){flex-wrap:wrap}
+  .tc-bar.tc-bar--sel{flex-wrap:wrap}
   .tc-docbar{flex-wrap:wrap}
   .tc-bar > .tc-range{flex-wrap:wrap}
   .tc-table .tc-acts{flex-wrap:wrap;white-space:normal}
@@ -1188,6 +1192,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-sheet{width:100%;margin:0}
   .tc-sheet__head{flex-wrap:wrap}
   .tc-sheet__head .tc-in{width:auto;max-width:100%;flex:1 1 8em}
+  .tc-sheet__head > .tc-drop{flex:1 1 8em}
   .tc-scrim{padding:12px var(--tc-page-gutter-narrow);align-items:stretch}
   .tc-dialog{padding:16px var(--tc-page-gutter-narrow) 20px;min-width:0;max-width:100%}
   label,.tc-msg,.tc-diag,.tc-field__hint,.tc-rubric,.tc-dim--wrap,.tc-sheet__head,.tc-sheet__title{
@@ -1247,6 +1252,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-sheet{width:100%;max-width:100%;margin:0}
   .tc-sheet__head{flex-wrap:wrap}
   .tc-sheet__head .tc-in{width:auto;max-width:100%;flex:1 1 8em}
+  .tc-sheet__head > .tc-drop{flex:1 1 8em}
   .tc-scrim{padding:12px var(--tc-page-gutter-narrow);align-items:stretch}
   .tc-dialog{padding:16px var(--tc-page-gutter-narrow) 20px;min-width:0;max-width:100%}
   .tc-doc__layout{grid-template-columns:minmax(0,1fr)}
@@ -1653,6 +1659,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-msg--mx20.tc-msg--mx20{margin:0 20px}
 .tc-msg--flush-top4.tc-msg--flush-top4{margin:4px 0 0}
 .tc-msg--flush-top9.tc-msg--flush-top9{margin:9px 0 0}
+.tc-msg--my8.tc-msg--my8{margin:8px 0}
 .tc-nav--top2.tc-nav--top2{margin-top:2px}
 .tc-nav__short{display:none}
 .tc-dialog__lede.tc-dialog__lede{font-size:13px;color:var(--tc-muted);margin:0}
@@ -9123,28 +9130,26 @@ Read  2 min ago</div>
             <div class="tc-sheet__head">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-upload"/></svg>
               <b class="tc-sheet__title">Upload files</b>
-              <button class="tc-in is-pick tc-push tc-in--t12-w240" type="button" aria-label="Server">sftpgo · vps</button>
+              <details class="tc-drop tc-push"><summary class="tc-in is-pick tc-in--t12-w240" aria-label="Server">sftpgo · vps</summary><div class="tc-menu is-pop is-right tc-menu--w290" role="menu"><a class="is-on tc-menu__item" href="/app/files/picker?server=sftpgo" data-tc-swap="upload-sheet" role="menuitem">sftpgo · vps</a><a class="tc-menu__item" href="/app/files/picker?server=nextcloud" data-tc-swap="upload-sheet" role="menuitem">nextcloud</a><a class="tc-menu__item" role="menuitem" title="webdav · nas did not answer." aria-disabled="true">webdav · nas</a></div></details>
               <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Documents / carrel / attachments / 2026-08</span>
-              <button class="tc-btn tc-close" title="Close" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
             </div>
             <div class="tc-sheet__body">
               <div class="tc-empty tc-empty--dashed">
                 Drop files here, or <label class="tc-empty__pick"><b class="tc-dim--accent">choose on the computer</b><input class="tc-file" type="file" name="file" aria-label="Files" data-tc-list="upload-files" data-tc-size="size" multiple><template data-tc-row><span class="tc-grow tc-line tc-line--gap-8"><span class="tc-dim--t12-5">{name} <span class="tc-dim">{size}</span></span><button class="tc-btn is-sm is-danger tc-push" type="button" data-tc-remove>Remove</button></span></template></label>
                 <span class="tc-dim--t12">A name already taken is refused, not overwritten</span>
-                <div class="tc-grow tc-line tc-line--gap-8" id="upload-files"><span class="tc-grow tc-line tc-line--gap-8"><span class="tc-dim--t12-5">договор-аренды.pdf <span class="tc-dim">412 KB</span></span><button class="tc-btn is-sm is-danger tc-push" type="button" data-tc-remove>Remove</button></span><span class="tc-grow tc-line tc-line--gap-8"><span class="tc-dim--t12-5">план-этажа.png <span class="tc-dim">2.1 MB</span></span><button class="tc-btn is-sm is-danger tc-push" type="button" data-tc-remove>Remove</button></span><span class="tc-grow tc-line tc-line--gap-8"><span class="tc-dim--t12-5">сканы/ <span class="tc-dim">14 files, 38 MB</span></span><button class="tc-btn is-sm is-danger tc-push" type="button" data-tc-remove>Remove</button></span></div>
+                <div class="tc-grow tc-line tc-line--gap-8" id="upload-files"></div>
               </div>
               <div class="tc-card tc-card--flush">
                 <div class="tc-rubric">Where to put it <button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button></div>
                 <div class="tc-tree">
-                  <div class="tc-tree__row"><svg><use href="#i-file"/></svg>Documents</div>
-                  <div class="tc-tree__row tc-tree__row--padl22"><svg><use href="#i-file"/></svg>carrel</div>
-                  <div class="tc-tree__row tc-tree__row--padl40"><svg><use href="#i-file"/></svg>attachments <span class="tc-badge tc-push">attachment folder</span></div>
-                  <div class="is-on tc-tree__row tc-tree__row--padl58"><svg><use href="#i-file"/></svg>2026-08 <span class="tc-badge tc-push">just created</span></div>
-                  <div class="tc-tree__row tc-tree__row--padl58"><svg><use href="#i-file"/></svg>2026-07</div>
+                  <a class="tc-tree__row" href="/app/files/picker?to=sftpgo/documents" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>Documents</a>
+                  <a class="tc-tree__row tc-tree__row--padl22" href="/app/files/picker?to=sftpgo/documents/carrel" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>carrel</a>
+                  <a class="tc-tree__row tc-tree__row--padl40" href="/app/files/picker?to=sftpgo/documents/carrel/attachments" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>attachments <span class="tc-badge tc-push">attachment folder</span></a>
+                  <a class="is-on tc-tree__row tc-tree__row--padl58" href="/app/files/picker?to=sftpgo/documents/carrel/attachments/2026-08" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>2026-08 <span class="tc-badge tc-push">just created</span></a>
+                  <a class="tc-tree__row tc-tree__row--padl58" href="/app/files/picker?to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>2026-07</a>
                   <div class="tc-tree__row tc-tree__row--op-55"><svg><use href="#i-file"/></svg>Public <span class="tc-badge tc-push">read-only</span></div>
                 </div>
               </div>
-              <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">The folder is the attachment folder from Settings → Attachments, named once and remembered — unless you make a new one here. Change it here and the next upload from this menu goes to the new one.</span>
             </div>
             <div class="tc-sheet__foot">
               <button class="tc-btn is-primary" type="submit">Upload</button>
@@ -9265,7 +9270,7 @@ Read  2 min ago</div>
 
         <table class="tc-table">
           <thead><tr>
-            <th class="tc-table__col--tick"><button class="tc-tickrow__tick is-off" type="button"></button></th>
+            <th class="tc-table__col--tick"><button class="tc-tickrow__tick is-part" type="button"></button></th>
             <th>Name</th><th class="tc-table__n3 tc-table__col--size">Size</th><th class="is-2nd tc-table__n4 tc-table__col--type">Type</th><th class="tc-table__col--time">Changed</th><th class="tc-table__col--num"></th>
           </tr></thead>
           <tbody>
@@ -9411,26 +9416,26 @@ Read  2 min ago</div>
   <div class="frame" data-frame="s-files-11">
     <div class="frame-label"><span>Копирование файлов · лист</span><span class="frag">фрагмент</span><i>тот же лист с Copy</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <div class="tc-sheet tc-sheet--w520">
+      <form class="tc-sheet tc-sheet--w520" id="copy-sheet" action="/app/files/sftpgo/documents/op/carrel/attachments?op=copy" method="post">
         <div class="tc-sheet__head">
-        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-dup"/></svg>
-        <b class="tc-sheet__title">Copy 3 items</b>
-        <button class="tc-in is-pick tc-push tc-in--t12-w240" type="button" aria-label="Server">sftpgo · vps</button>
-        <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">from Documents / carrel / attachments</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-dup"/></svg>
+          <b class="tc-sheet__title">Copy 3 items</b>
+          <details class="tc-drop tc-push"><summary class="tc-in is-pick tc-in--t12-w240" aria-label="Server">sftpgo · vps</summary><div class="tc-menu is-pop is-right tc-menu--w290" role="menu"><a class="is-on tc-menu__item" href="/app/files/sftpgo/documents/op/carrel/attachments?op=copy&amp;server=sftpgo" data-tc-swap="copy-sheet" role="menuitem">sftpgo · vps</a><a class="tc-menu__item" href="/app/files/sftpgo/documents/op/carrel/attachments?op=copy&amp;server=nextcloud" data-tc-swap="copy-sheet" role="menuitem">nextcloud</a><a class="tc-menu__item" role="menuitem" title="webdav · nas did not answer." aria-disabled="true">webdav · nas</a></div></details>
+          <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">from Documents / carrel / attachments</span>
         </div>
         <div class="tc-sheet__body">
           <div class="tc-rubric">Where to put it <button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button></div>
           <div class="tc-tree">
-            <div class="tc-tree__row"><svg><use href="#i-file"/></svg>Documents</div>
-            <div data-part="children" class="tc-tree__row tc-tree__row--padl22"><svg><use href="#i-file"/></svg>carrel</div>
-            <div data-part="children" class="tc-tree__row tc-tree__row--padl40"><svg><use href="#i-file"/></svg>attachments</div>
-            <div class="is-on tc-tree__row tc-tree__row--padl58" data-part="children"><svg><use href="#i-file"/></svg>2026-07</div>
-            <div class="tc-tree__row tc-tree__row--op-55"><svg><use href="#i-file"/></svg>Public <span class="tc-badge tc-push">read-only</span></div>
-          </div>
+        <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=copy&amp;to=sftpgo/documents" data-tc-swap="copy-sheet"><svg><use href="#i-file"/></svg>Documents</label>
+        <label data-part="children" class="tc-tree__row tc-tree__row--padl22"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=copy&amp;to=sftpgo/documents/carrel" data-tc-swap="copy-sheet"><svg><use href="#i-file"/></svg>carrel</label>
+        <label data-part="children" class="tc-tree__row tc-tree__row--padl40"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=copy&amp;to=sftpgo/documents/carrel/attachments" data-tc-swap="copy-sheet"><svg><use href="#i-file"/></svg>attachments</label>
+        <label class="is-on tc-tree__row tc-tree__row--padl58" data-part="children"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07" checked data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=copy&amp;to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="copy-sheet"><svg><use href="#i-file"/></svg>2026-07</label>
+        <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/public" disabled><svg><use href="#i-file"/></svg>Public <span class="tc-badge tc-push">read-only</span></label>
+      </div>
           <div class="tc-msg tc-msg--flush-top2">A copy travels through Carrel even inside one server: each file is downloaded and uploaded again, one at a time.</div>
         </div>
-        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="button">Copy</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
-      </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Copy</button><kbd class="tc-kbd">Enter</kbd><button class="tc-btn tc-nojs" type="submit" name="open" value="1">Open the folder</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
     </div>
   </div>
   <figcaption>Копия — тот же лист, что перенос, с «Copy». Сообщение другое: копия идёт через Carrel даже внутри одного сервера — каждый файл скачивается и загружается заново, по одному.</figcaption>
@@ -9440,7 +9445,7 @@ Read  2 min ago</div>
   <div class="frame" data-frame="s-files-12">
     <div class="frame-label"><span>Перенос · на другое хранилище</span><span class="frag">фрагмент</span><i>сообщение листа</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <div class="tc-msg">This goes to another storage, so nothing moves on a server: Carrel downloads each file and uploads it there, and deletes the original only once its copy is complete.</div>
+      <div class="tc-msg tc-msg--flush-top2">This goes to another storage, so nothing moves on a server: Carrel downloads each file and uploads it there, and deletes the original only once its copy is complete.</div>
     </div>
   </div>
   <figcaption>Цель на другом хранилище: сообщение листа говорит об этой цели, а не о переносе внутри сервера. Оригинал удаляется, только когда копия цела. У записи — то же про другой аккаунт.</figcaption>
@@ -9454,7 +9459,7 @@ Read  2 min ago</div>
         <div class="tc-sheet__head">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-move"/></svg>
         <b class="tc-sheet__title">Move 3 items</b>
-        <button class="tc-in is-pick tc-push tc-in--t12-w240" type="button" aria-label="Server">sftpgo · vps</button>
+        <details class="tc-drop tc-push"><summary class="tc-in is-pick tc-in--t12-w240" aria-label="Server">sftpgo · vps</summary><div class="tc-menu is-pop is-right tc-menu--w290" role="menu"><a class="is-on tc-menu__item" href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;server=sftpgo" data-tc-swap="move-sheet" role="menuitem">sftpgo · vps</a><a class="tc-menu__item" href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;server=nextcloud" data-tc-swap="move-sheet" role="menuitem">nextcloud</a><a class="tc-menu__item" role="menuitem" title="webdav · nas did not answer." aria-disabled="true">webdav · nas</a></div></details>
         <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">from Documents / carrel / attachments</span>
         </div>
         <div class="tc-sheet__body">
@@ -9468,6 +9473,7 @@ Read  2 min ago</div>
             <label data-part="children" class="tc-tree__row tc-tree__row--padl58"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>2026-07</label>
             <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/public" disabled><svg><use href="#i-file"/></svg>Public <span class="tc-badge tc-push">read-only</span></label>
           </div>
+          <div class="tc-msg tc-msg--flush-top2">Inside one server this is <code class="tc-mono">MOVE</code>: instant, no traffic. To another storage the file has to be downloaded and uploaded again — Carrel says so before it starts, not after.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><button class="tc-btn tc-nojs" type="submit" name="open" value="1">Open the folder</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
@@ -9484,7 +9490,7 @@ Read  2 min ago</div>
         <div class="tc-sheet__head">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-move"/></svg>
         <b class="tc-sheet__title">Move 3 items</b>
-        <button class="tc-in is-pick tc-push tc-in--t12-w240" type="button" aria-label="Server">sftpgo · vps</button>
+        <details class="tc-drop tc-push"><summary class="tc-in is-pick tc-in--t12-w240" aria-label="Server">sftpgo · vps</summary><div class="tc-menu is-pop is-right tc-menu--w290" role="menu"><a class="is-on tc-menu__item" href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;server=sftpgo" data-tc-swap="move-sheet" role="menuitem">sftpgo · vps</a><a class="tc-menu__item" href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;server=nextcloud" data-tc-swap="move-sheet" role="menuitem">nextcloud</a><a class="tc-menu__item" role="menuitem" title="webdav · nas did not answer." aria-disabled="true">webdav · nas</a></div></details>
         <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">from Documents / carrel / attachments</span>
         </div>
         <div class="tc-sheet__body">
@@ -9611,7 +9617,7 @@ Read  2 min ago</div>
         <div class="tc-sheet__head">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-file"/></svg>
         <b class="tc-sheet__title">Attach from Files</b>
-        <button class="tc-in is-pick tc-push tc-in--t12-w240" type="button" aria-label="Server">sftpgo · vps</button>
+        <details class="tc-drop tc-push"><summary class="tc-in is-pick tc-in--t12-w240" aria-label="Server">sftpgo · vps</summary><div class="tc-menu is-pop is-right tc-menu--w290" role="menu"><a class="is-on tc-menu__item" href="/app/files/sftpgo/documents/upload/carrel/attachments?server=sftpgo" data-tc-swap="upload-sheet" role="menuitem">sftpgo · vps</a><a class="tc-menu__item" href="/app/files/sftpgo/documents/upload/carrel/attachments?server=nextcloud" data-tc-swap="upload-sheet" role="menuitem">nextcloud</a><a class="tc-menu__item" role="menuitem" title="webdav · nas did not answer." aria-disabled="true">webdav · nas</a></div></details>
         <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">to «Собрать чемодан»</span>
         </div>
         <div class="tc-sheet__body">
@@ -9670,22 +9676,21 @@ Read  2 min ago</div>
         <div class="tc-sheet__head">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-upload"/></svg>
         <b class="tc-sheet__title">Upload files</b>
-        <button class="tc-in is-pick tc-push tc-in--t12-w240" type="button" aria-label="Server">sftpgo · vps</button>
+        <details class="tc-drop tc-push"><summary class="tc-in is-pick tc-in--t12-w240" aria-label="Server">sftpgo · vps</summary><div class="tc-menu is-pop is-right tc-menu--w290" role="menu"><a class="is-on tc-menu__item" href="/app/files/sftpgo/documents/upload/carrel/attachments?server=sftpgo" data-tc-swap="upload-sheet" role="menuitem">sftpgo · vps</a><a class="tc-menu__item" href="/app/files/sftpgo/documents/upload/carrel/attachments?server=nextcloud" data-tc-swap="upload-sheet" role="menuitem">nextcloud</a><a class="tc-menu__item" role="menuitem" title="webdav · nas did not answer." aria-disabled="true">webdav · nas</a></div></details>
         <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Documents / carrel / attachments</span>
         </div>
         <div class="tc-sheet__body">
           <div class="tc-card tc-card--flush">
             <div class="tc-rubric">Where to put it</div>
             <div class="tc-line tc-line--gap-8"><input class="tc-in is-focus tc-in--fill" type="text" name="name" value="2026-07" aria-label="Name of the new folder"><button class="tc-btn is-sm is-primary" type="submit" formaction="/app/files/sftpgo/documents/mkcol/carrel/attachments">Create</button><button class="tc-btn is-sm" type="button">Cancel</button></div>
-            <div class="tc-msg is-alert tc-msg--flush-top2">There is a folder called «2026-07» in attachments already. Choose another name.</div>
+            <div class="tc-msg is-alert tc-msg--my8">There is a folder called «2026-07» in attachments already. Choose another name.</div>
             <div class="tc-tree">
-              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents" data-tc-href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>Documents</label>
-              <label class="tc-tree__row tc-tree__row--padl22"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel" data-tc-href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents/carrel" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>carrel</label>
-              <label class="is-on tc-tree__row tc-tree__row--padl40"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments" checked data-tc-href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents/carrel/attachments" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>attachments</label>
-              <label class="tc-tree__row tc-tree__row--padl58"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07" data-tc-href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>2026-07</label>
+              <a class="tc-tree__row" href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>Documents</a>
+              <a class="tc-tree__row tc-tree__row--padl22" href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents/carrel" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>carrel</a>
+              <a class="is-on tc-tree__row tc-tree__row--padl40" href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents/carrel/attachments" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>attachments <span class="tc-badge tc-push">attachment folder</span></a>
+              <a class="tc-tree__row tc-tree__row--padl58" href="/app/files/sftpgo/documents/upload/carrel/attachments?to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="upload-sheet"><svg><use href="#i-file"/></svg>2026-07</a>
             </div>
           </div>
-          <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">The folder is the attachment folder from Settings → Attachments, named once and remembered — unless you make a new one here.</span>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Upload</button><kbd class="tc-kbd">Enter</kbd><button class="tc-btn tc-nojs" type="submit" name="open" value="1">Open the folder</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
@@ -9759,7 +9764,7 @@ Read  2 min ago</div>
             <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-upload"/></svg>Upload<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg></button>
-            <button class="tc-btn" title="Details" type="button"><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></button>
+            <button class="tc-btn" title="Choose one file to see its details." type="button" disabled><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           </div>
         </div>
@@ -9813,12 +9818,13 @@ Read  2 min ago</div>
         </table>
         <form class="tc-post" id="files-sel" action="/app/files/sftpgo/documents/op/carrel/attachments" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
         <div class="tc-queue" data-tc-fold-hide="Hide" data-tc-fold-show="Show" data-tc-fold-total="{percent}%">
-          <div class="tc-queue__head"><b>Uploading 2 of 3</b><span class="tc-mono tc-push tc-mono--dusty">12.4 MB</span><button class="tc-btn is-sm" type="button">Hide</button></div>
+          <div class="tc-queue__head"><b>Uploading 2 of 4</b><span class="tc-mono tc-push tc-mono--dusty">12.4 MB</span><button class="tc-btn is-sm" type="button">Hide</button></div>
           <ul class="tc-queue__list">
             <li><div class="tc-queue__row"><span class="tc-queue__name">отчёт-июль.pdf</span><span class="tc-queue__meta">4.1 MB · done</span></div><span class="tc-meter" data-tc-width="100%"><i class="tc-meter__bar" data-tc-width="100%"></i></span></li>
             <li><div class="tc-queue__row"><span class="tc-queue__name">плакат.png</span><span class="tc-queue__meta">8.3 MB · 62%</span></div><span class="tc-meter" data-tc-width="100%"><i class="tc-meter__bar" data-tc-width="62%"></i></span></li>
             <li><div class="tc-queue__row"><span class="tc-dim--danger">release-checklist.md</span><span class="tc-dim--danger">name taken</span></div>
               <div class="tc-line tc-line--gap-6 tc-queue__acts"><button class="tc-btn is-sm" type="button">Keep both</button><button class="tc-btn is-sm" type="button">Replace</button><button class="tc-btn is-sm" type="button">Skip</button></div></li>
+            <li><div class="tc-queue__row"><span class="tc-dim--danger">архив-2025.zip</span><span class="tc-dim--danger">the server needs the size</span></div></li>
           </ul>
         </div>
       </div>
@@ -9965,7 +9971,7 @@ Read  2 min ago</div>
             <div class="tc-sheet__head">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-move"/></svg>
               <b class="tc-sheet__title">Move 3 items</b>
-              <button class="tc-in is-pick tc-push tc-in--t12-w240" type="button" aria-label="Server">sftpgo · vps</button>
+              <details class="tc-drop tc-push"><summary class="tc-in is-pick tc-in--t12-w240" aria-label="Server">sftpgo · vps</summary><div class="tc-menu is-pop is-right tc-menu--w290" role="menu"><a class="is-on tc-menu__item" href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;server=sftpgo" data-tc-swap="move-sheet" role="menuitem">sftpgo · vps</a><a class="tc-menu__item" href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;server=nextcloud" data-tc-swap="move-sheet" role="menuitem">nextcloud</a><a class="tc-menu__item" role="menuitem" title="webdav · nas did not answer." aria-disabled="true">webdav · nas</a></div></details>
               <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">from Documents / carrel / attachments</span>
             </div>
             <div class="tc-sheet__body">
@@ -9986,6 +9992,20 @@ Read  2 min ago</div>
     </div>
   </div>
   <figcaption>Сервер выбирают в шапке листа, остальное — в дереве: оно показывает хранилища выбранного сервера и папки в них. Хранилище только для чтения видно, но целью быть не может. <b>«New folder» стоит в дереве</b>, как в быстрой загрузке: папку заводят в тот момент, когда выбирают куда класть, и сразу кладут туда. Copy открывает этот же лист, с кнопкой Copy.</figcaption>
+  </figure>
+
+<figure style="flex:0 1 330px">
+  <div class="frame" data-frame="s-files-26">
+    <div class="frame-label"><span>Лист · подключение</span><span class="frag">меню</span><i>шапка листа переноса, загрузки, выбора</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290" role="menu">
+        <a class="is-on tc-menu__item" href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;server=sftpgo" data-tc-swap="move-sheet" role="menuitem">sftpgo · vps</a>
+        <a class="tc-menu__item" href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;server=nextcloud" data-tc-swap="move-sheet" role="menuitem">nextcloud</a>
+        <a class="tc-menu__item" role="menuitem" title="webdav · nas did not answer." aria-disabled="true">webdav · nas</a>
+      </div>
+    </div>
+  </div>
+  <figcaption>Подключения с хранилищами; у открытого — отметка. Пункт — ссылка на тот же лист над этим подключением; со сценарием лист ставится на место, как при выборе узла дерева. Подключение, которое не ответило, — выключено, причина в подсказке (задача Carrel 205 п. 8).</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -10061,6 +10081,7 @@ Read  2 min ago</div>
           <button class="tc-btn" title="Move" type="submit" form="files-sel" name="op" value="move"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
           <button class="tc-btn" title="Copy" type="submit" form="files-sel" name="op" value="copy"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
           <button class="tc-btn is-danger-solid" title="Delete" type="submit" form="files-sel" name="op" value="delete"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
+          <span class="tc-bar__right"><button class="tc-btn is-sm" type="button">Clear selection</button></span>
         </div>
         <div class="tc-bar">
           <label class="tc-in is-ph tc-in--h26-w190"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Filter this folder" aria-label="Filter this folder"></label>
@@ -12992,12 +13013,13 @@ dav: HTTP 503: the server is busy</div>
         <dt>Deposited</dt><dd class="tc-mono">2026-03-02</dd>
         <dt>Last recovery</dt><dd class="tc-mono">never</dd>
       </dl>
+      <div class="tc-field tc-field--full"><label>Password history</label><span class="tc-line tc-line--gap-6"><input class="tc-in is-mono tc-in--fill" type="text" value="https://carrel.example/password-history/k7q2-m9xd-41fa" aria-label="Password history" readonly><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/password-history/k7q2-m9xd-41fa" data-tc-copied="Copied"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg>Copy</button></span><span class="tc-field__hint">Keep it: it shows what was done to your password, even when you cannot sign in.</span></div>
       <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-danger-solid" type="button">Withdraw my deposited key</button>
-        <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">After withdrawal nobody can recover this account, including you.</span></div>
+        <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Then nobody can recover the account.</span></div>
     </div></div></div>
   </div>
 </div>
-<figcaption><b>Это уже после.</b> Сюда попадают с листа подтверждения, не с кнопки напрямую. Текст оставлен дословно: он честный и его менять незачем. Меняется только вид — предупреждение отделено от фактов, факты сведены в пары «подпись — значение». Отказ здесь возможен, и кнопка стоит прямо под фактами: это решение владельца ключа.</figcaption>
+<figcaption><b>Это уже после.</b> Сюда попадают с листа подтверждения, не с кнопки напрямую. Текст оставлен дословно: он честный и его менять незачем. Меняется только вид — предупреждение отделено от фактов, факты сведены в пары «подпись — значение». Отказ здесь возможен, и кнопка стоит прямо под фактами: это решение владельца ключа. Ссылка на историю пароля — постоянная, выдана при депонировании и стоит здесь всегда, и после отзыва копии тоже (решение владельца 16.10).</figcaption>
 </figure>
 
 <h3 id="usermenu">Меню в шапке и порядок настроек</h3>
@@ -16443,6 +16465,61 @@ jobs:
 </figure>
 
 <figure>
+<div class="frame" data-frame="s-publish-20" data-screen="/app/files/published" data-part="no-mail">
+  <div class="frame-label"><span>Опубликованное · почта не настроена</span><i>дополнительный кадр: no-mail · /app/files/published</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Settings</div>
+          <div class="tc-nav">
+            <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
+            <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-archive"/></svg>Backup<span class="tc-num">3</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
+          </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railstatus"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railstatus"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-dim__hint">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-head">
+          <div class="tc-head__titles"><div class="tc-head__title">Published links <span class="tc-badge is-local" title="Local instance: may be unreachable from outside">local</span></div><div class="tc-head__sub">Read-only, one object or one collection per link · <span class="tc-dim--danger">this instance is local: the link opens only from your network</span></div></div>
+        </div>
+        <table class="tc-table tc-table--packed">
+          <thead><tr><th>What is published</th><th class="tc-table__n1">Kind</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4">Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th class="tc-table__col--w120"></th></tr></thead>
+          <tbody>
+            <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/app/files/sftpgo/documents/carrel/attachments/смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono tc-table__n1">file</td><td class="tc-mono is-2nd tc-table__n3">2026-08-10</td><td class="tc-mono tc-table__n4">No expiry</td><td class="tc-mono is-2nd tc-mono--dusty">never opened</td><td class="tc-mono">0</td>
+              <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/9c1f4e" data-tc-copied="Copied">Copy</button><button class="tc-btn is-sm is-danger is-2nd" type="button">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><span class="tc-menu__sep"></span><button class="tc-menu__item tc-menu__item--danger" type="button" role="menuitem">Revoke</button></div></details></td></tr>
+            <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><a class="tc-table__filename" href="/app/agenda/nextcloud/lichny?view=range&from=2026-08-10&to=2026-08-31">Личный · 10–31 August</a></span></td><td class="tc-mono tc-table__n1">calendar</td><td class="tc-mono is-2nd tc-table__n3">2026-08-09</td><td class="tc-mono tc-table__n4">2026-09-08</td><td class="tc-mono is-2nd">2026-08-10 08:41</td><td class="tc-mono">12</td>
+              <td class="tc-acts"><button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/7f3ac9/personal.ics" data-tc-copied="Copied">Copy</button><button class="tc-btn is-sm is-danger is-2nd" type="button">Revoke</button><details class="tc-drop"><summary class="tc-btn is-sm tc-btn--padx3 tc-acts__more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w212"><span class="tc-menu__sep"></span><button class="tc-menu__item tc-menu__item--danger" type="button" role="menuitem">Revoke</button></div></details></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Страница списка на экземпляре без почты: у строк Send нет — ни кнопкой, ни в меню (как в строках s-publish-17); остальное как у s-publish-1.</figcaption>
+</figure>
+
+<figure>
 <div class="frame" data-frame="s-publish-18">
   <div class="frame-label"><span>Публикация · ссылок нет</span><i>ни одной выданной ссылки</i></div>
   <div class="tc-root tc-shell">
@@ -18338,7 +18415,7 @@ password  9f2-brick-lamp</div>
         <button class="tc-menu__item" type="button" role="menuitem">Kill sessions</button>
         <button class="tc-menu__item" type="button" role="menuitem">Disable</button>
         <span class="tc-menu__sep"></span>
-        <button class="tc-menu__item tc-menu__item--danger" type="button" role="menuitem"><svg><use href="#i-trash"/></svg>Delete</button>
+        <a class="tc-menu__item tc-menu__item--danger" href="/admin/delete?target=u-anna" role="menuitem"><svg><use href="#i-trash"/></svg>Delete</a>
       </div>
     </div>
   </div>
@@ -18447,6 +18524,84 @@ password  9f2-brick-lamp</div>
 <figcaption><b>Кадр маршрута листа сброса пароля</b> (задача Carrel 197 п. 1): без сценария лист — своя страница <code>/admin/reset</code>, под затемнением — Users (s-admin-2), откуда его открыли. Состояния листа — фрагменты: кого (s-admin-13), список Whose (s-admin-15), готово (s-admin-14). Cancel — ссылка назад на Users.</figcaption>
 </figure>
 
+<figure style="flex:1 1 100%">
+<div class="frame" data-frame="s-admin-34" data-screen="/admin/delete">
+  <div class="frame-label"><span>Удаление учётной записи · лист поверх Users</span><i>/admin/delete</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-overlay">
+      <div class="tc-shell__body tc-shell__body--minh560">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Administration</div>
+          <div class="tc-nav">
+            <a class="tc-nav__item" href="#"><svg><use href="#i-plus"/></svg>Add users<span class="tc-num">2</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Users<span class="tc-num">6</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-adm"/></svg>Settings</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-shield"/></svg>Installation</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-search"/></svg>DAV validator</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Key escrow</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-clock"/></svg>Audit log</a>
+          </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railstatus is-alert"><span class="tc-dot--danger"></span>SMTP not configured<br><span class="tc-dim tc-dim--t11">No mail is going out.</span></div>
+          <div class="tc-railstatus"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-head">
+          <div class="tc-head__titles"><div class="tc-head__title">Users</div><div class="tc-head__sub">6 accounts · 2 administrators · 4 covered by escrow</div></div>
+          <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add user</button><button class="tc-btn" type="button">Reset a password</button></div>
+        </div>
+        <div class="tc-bar">
+          <label class="tc-in is-ph tc-in--h26-w200"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Filter by login" aria-label="Filter by login"></label>
+          <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All</button><button class="tc-seg__opt" type="button">Administrators</button><button class="tc-seg__opt" type="button">Disabled</button></span>
+          <button class="tc-btn" title="Columns" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg><span class="tc-btn__label">Columns</span></button>
+        </div>
+        <table class="tc-table">
+          <thead><tr><th>Login</th><th>Role</th><th class="tc-table__n3 is-2nd">Created</th><th class="tc-table__n4">Last login</th><th>DAV</th><th>Sessions</th><th>Escrow</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="tc-table__name">mix</td><td>Administrator</td><td class="tc-mono tc-table__n3 is-2nd">2026-02-11</td><td class="tc-mono tc-table__n4">2026-08-15 09:20</td><td class="tc-mono">3</td><td class="tc-mono">2</td><td>—</td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr><td>anna</td><td>User</td><td class="tc-mono tc-table__n3 is-2nd">2026-03-02</td><td class="tc-mono tc-table__n4">2026-08-14 18:02</td><td class="tc-mono">1</td><td class="tc-mono">1</td><td><span class="tc-badge">deposited</span></td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr class="tc-table__row--off"><td>viktor <span class="tc-badge">disabled</span></td><td>User</td><td class="tc-mono tc-table__n3 is-2nd">2026-04-19</td><td class="tc-mono tc-table__n4">2026-06-30 11:41</td><td class="tc-mono">2</td><td class="tc-mono">0</td><td><span class="tc-badge">deposited</span></td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+          </tbody>
+        </table>
+        <div class="tc-msg">Deleting an account is confirmed in a dialogue of its own. Reset a password, in the head, sets a temporary password and names what a reset destroys before it is pressed.</div>
+      </div>
+    </div>
+      <div class="tc-scrim tc-scrim--padt26">
+        <form class="tc-sheet tc-sheet--w480" action="/admin/" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="delete"><input type="hidden" name="target" value="u-anna">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.6" fill="none" class="tc-ico--danger"><use href="#i-trash"/></svg>
+        <b class="tc-sheet__title">Delete anna</b>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-msg is-alert tc-msg--flush">Carrel forgets this account: its connections and saved passwords, published links, devices, backups and the history of its password. Its records on the servers stay as they are.</div>
+          <div class="tc-field tc-field--w100"><label>Type the login to confirm</label><input class="tc-in is-focus is-ph" type="text" name="login" placeholder="anna" aria-label="Type the login to confirm" required></div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-danger-solid" type="submit">Delete account</button><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/admin/">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Удаление учётной записи</b> (задача Carrel 195 п. 6) — лист со своим адресом поверх Users, открывается пунктом Delete в «⋯» строки (ссылка <code>/admin/delete?target=</code>). Что уходит — сказано до нажатия; что остаётся на серверах — тоже. Логин набирают, как при сбросе пароля: одно нажатие не удаляет. У последнего администратора пункт выключен с причиной.</figcaption>
+</figure>
+
 <figure style="flex:1 1 330px">
   <div class="frame" data-frame="s-admin-14">
     <div class="frame-label"><span>Сброс пароля · готово</span><span class="frag">фрагмент</span><i>ответ на Reset password</i></div>
@@ -18544,49 +18699,210 @@ password  4c1-tide-oven</div>
         </div>
         <div class="tc-main">
         <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Settings</div><div class="tc-head__sub">Global settings and mail</div></div><div class="tc-acts"><a class="tc-btn" href="/admin/settings">Discard</a><button class="tc-btn is-primary" type="submit" form="admin-settings">Save</button></div></div>
-        <form class="tc-form" id="admin-settings" action="/admin/settings" method="post">
+        <form class="tc-form" id="admin-settings" action="/admin/settings" method="post"><input type="hidden" name="csrf" value="7f3a91de">
           <div class="tc-fset tc-fset--lead">
             <div class="tc-rubric">Global</div>
-            <div class="tc-field tc-field--xs"><label>Invite lifetime, h</label><input class="tc-in is-mono" type="text" name="invite.lifetime.h" value="72" aria-label="Invite lifetime, h"></div>
-            <div class="tc-field tc-field--xs"><label>Idle timeout, h</label><input class="tc-in is-mono" type="text" name="idle.timeout.h" value="12" aria-label="Idle timeout, h"></div>
-            <div class="tc-field tc-field--xs"><label>Session life, d</label><input class="tc-in is-mono" type="text" name="session.life.d" value="30" aria-label="Session life, d"></div>
-            <div class="tc-field tc-field--md"><label>Instance name</label><input class="tc-in" type="text" name="instance.name" value="Carrel" aria-label="Instance name"></div>
-            <div class="tc-field tc-field--lg"><label>Public address</label><input class="tc-in is-mono" type="text" name="public.address" value="https://carrel.example" aria-label="Public address" readonly>
+            <div class="tc-field tc-field--xs"><label>Invite lifetime, h</label><input class="tc-in is-mono" type="text" name="inviteTTL" value="72" aria-label="Invite lifetime, h"></div>
+            <div class="tc-field tc-field--xs"><label>Idle timeout, h</label><input class="tc-in is-mono" type="text" name="idle" value="12" aria-label="Idle timeout, h"></div>
+            <div class="tc-field tc-field--xs"><label>Session life, d</label><input class="tc-in is-mono" type="text" name="session" value="30" aria-label="Session life, d"></div>
+            <div class="tc-field tc-field--md"><label>Instance name</label><input class="tc-in" type="text" name="name" value="Carrel" aria-label="Instance name"></div>
+            <div class="tc-field tc-field--lg"><label>Public address</label><input class="tc-in is-mono" type="text" name="publicURL" value="https://carrel.example" aria-label="Public address" readonly>
               <span class="tc-field__hint">Links in letters start with it. Set with CARREL_PUBLIC_URL.</span></div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Mail <span class="tc-badge is-alert">not configured</span></div>
             <div class="tc-field tc-field--lg"><label>Host</label><input class="tc-in is-mono is-ph" type="text" name="host" placeholder="smtp.example.org" aria-label="Host"></div>
             <div class="tc-field tc-field--xs"><label>Port</label><input class="tc-in is-mono" type="text" name="port" value="587" aria-label="Port"></div>
-            <div class="tc-field tc-field--sm"><label>Encryption</label><span class="tc-in is-pick"><select class="tc-in__list" name="encryption" aria-label="Encryption"><option value="starttls" selected>STARTTLS</option></select></span></div>
+            <div class="tc-field tc-field--sm"><label>Encryption</label><span class="tc-in is-pick"><select class="tc-in__list" name="security" aria-label="Encryption"><option value="starttls" selected>STARTTLS</option></select></span></div>
             <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in is-ph" type="text" name="username" placeholder="—" aria-label="Username"></div>
-            <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in is-ph" type="text" name="password" placeholder="leave blank to keep the current one" aria-label="Password"></div>
-            <div class="tc-field tc-field--md"><label>From address</label><input class="tc-in is-ph" type="text" name="from.address" placeholder="carrel@example.org" aria-label="From address"></div>
-            <div class="tc-field tc-field--md"><label>From name</label><input class="tc-in is-ph" type="text" name="from.name" placeholder="Carrel" aria-label="From name"></div>
+            <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in is-ph" type="password" name="password" placeholder="leave blank to keep the current one" aria-label="Password"></div>
+            <div class="tc-field tc-field--md"><label>From address</label><input class="tc-in is-ph" type="text" name="from" placeholder="carrel@example.org" aria-label="From address"></div>
+            <div class="tc-field tc-field--md"><label>From name</label><input class="tc-in is-ph" type="text" name="fromName" placeholder="Carrel" aria-label="From name"></div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Letters from users <span class="tc-badge">off</span></div>
-            <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="let.users.send.letters.and.links.from.carrel" value="1"><span class="tc-tickrow__tick is-off"></span>Let users send letters and links from Carrel</label>
+            <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="people" value="on"><span class="tc-tickrow__tick is-off"></span>Let users send letters and links from Carrel</label>
               <span class="tc-field__hint">Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form.</span></div>
             <div class="tc-field tc-grow"><label>Sender address</label>
-              <span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="sender.address" value="noreply.carrel.example" checked>noreply@carrel.example</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="sender.address" value="login.carrel.example">login@carrel.example</label></span>
+              <span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="sender" value="noreply" checked>noreply@carrel.example</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="sender" value="login">login@carrel.example</label></span>
               <span class="tc-field__hint">Your relay decides which of the two it will let out. The envelope sender stays <span class="tc-mono">noreply@carrel.example</span> either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.</span></div>
-            <div class="tc-field tc-field--xs"><label>Attachment, MB</label><input class="tc-in is-mono" type="text" name="attachment.mb" value="2" aria-label="Attachment, MB"></div>
-            <div class="tc-field tc-field--xs"><label>Letter, MB</label><input class="tc-in is-mono" type="text" name="letter.mb" value="8" aria-label="Letter, MB"></div>
+            <div class="tc-field tc-field--xs"><label>Attachment, MB</label><input class="tc-in is-mono" type="text" name="attach" value="2" aria-label="Attachment, MB"></div>
+            <div class="tc-field tc-field--xs"><label>Letter, MB</label><input class="tc-in is-mono" type="text" name="letter" value="8" aria-label="Letter, MB"></div>
             <div class="tc-field tc-field--xs"><label>Recipients</label><input class="tc-in is-mono" type="text" name="recipients" value="10" aria-label="Recipients"></div>
-            <div class="tc-field tc-field--xs"><label>Letters a day</label><input class="tc-in is-mono" type="text" name="letters.a.day" value="50" aria-label="Letters a day"></div>
+            <div class="tc-field tc-field--xs"><label>Letters a day</label><input class="tc-in is-mono" type="text" name="perDay" value="50" aria-label="Letters a day"></div>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Test</div>
-            <div class="tc-field tc-field--md"><label>Send test message to</label>
-              <span class="tc-line tc-line--gap-8"><input class="tc-in is-ph tc-in--fill" type="text" name="send.test.message.to" placeholder="you@example.org" aria-label="Send test message to"><button class="tc-btn" type="submit" formaction="/admin/settings/mail/test" disabled>Send test</button></span>
-              <span class="tc-field__hint">Mail is not configured: there is nothing to send through yet.</span></div>
+            <div class="tc-field tc-field--lg"><label>Send test message to</label>
+              <span class="tc-line tc-line--gap-8"><input class="tc-in is-ph tc-in--fill" type="text" name="to" placeholder="you@example.org" aria-label="Send test message to"><button class="tc-btn" type="submit" formaction="/admin/settings/mail-test">Send test</button></span></div>
           </div>
         </form>
       </div></div>
     </div>
   </div>
-  <figcaption>Две формы становятся двумя блоками одной формы с рубрикаторами. Пароль SMTP стоит здесь же, рядом с узлом и портом: это один релей, а не отдельный экран. Порт — 96&nbsp;px, а не во всю ширину. «Letters from users» — отдельный блок под Mail: сначала завести релей, потом решать, пускать ли жильцов писать через него. Проверка сервера DAV уехала на свою страницу — она про чужой сервер, а не про настройки этого. <b>Проба письма — кнопка той же формы со своим адресом</b> (форма не держит форму; задача 158): она шлёт то, что набрано в полях почты сейчас, сохранено оно или нет, — так релей проверяют до «Save» — и сама ничего не сохраняет; пока почта не настроена, кнопка выключена и говорит почему. <b>Public address</b> только читается: его задаёт <code>CARREL_PUBLIC_URL</code>, и от него строятся ссылки в письмах.</figcaption>
+  <figcaption>Две формы становятся двумя блоками одной формы с рубрикаторами. Пароль SMTP стоит здесь же, рядом с узлом и портом: это один релей, а не отдельный экран. Порт — 96&nbsp;px, а не во всю ширину. «Letters from users» — отдельный блок под Mail: сначала завести релей, потом решать, пускать ли жильцов писать через него. Проверка сервера DAV уехала на свою страницу — она про чужой сервер, а не про настройки этого. <b>Проба письма — кнопка той же формы со своим адресом</b> (форма не держит форму; задача 158): она шлёт то, что набрано в полях почты сейчас, сохранено оно или нет, — так релей проверяют до «Save» — и сама ничего не сохраняет; кнопка не выключается никогда: без сервера в поле Host ответ на неё — «Mail is not configured: there is nothing to send through yet.» (кнопка, выключенная по сохранённому, без сценария не включилась бы от набранного; задача 195 п. 5). <b>Public address</b> только читается: его задаёт <code>CARREL_PUBLIC_URL</code>, и от него строятся ссылки в письмах.</figcaption>
+  </figure>
+
+<figure>
+  <div class="frame" data-frame="s-admin-32" data-screen="/admin/settings" data-part="sent">
+    <div class="frame-label"><span>Настройки · почта настроена, проба ушла</span><i>дополнительный кадр: sent · /admin/settings</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-top">
+        <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+        <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+        <div class="tc-top__actions">
+          <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+          <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+        </div>
+      </div>
+      <div class="tc-shell__body">
+        <div class="tc-shell__rail">
+          <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a></div>
+          <div class="tc-railsec">
+            <div class="tc-rubric">Administration</div>
+            <div class="tc-nav">
+              <a class="tc-nav__item" href="#"><svg><use href="#i-plus"/></svg>Add users<span class="tc-num">2</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Users<span class="tc-num">6</span></a>
+              <a class="is-on tc-nav__item" href="#"><svg><use href="#i-adm"/></svg>Settings</a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-shield"/></svg>Installation</a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-search"/></svg>DAV validator</a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Key escrow</a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-clock"/></svg>Audit log</a>
+            </div>
+          </div>
+          <div class="tc-railfoot">
+            <div class="tc-railstatus"><span class="tc-dot--accent"></span>Mail is going out<br><span class="tc-dim tc-dim--t11">Last sent <span class="tc-mono">2026-08-16 09:12</span></span></div>
+            <div class="tc-railstatus"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
+        </div>
+        <div class="tc-main">
+        <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Settings</div><div class="tc-head__sub">Global settings and mail</div></div><div class="tc-acts"><a class="tc-btn" href="/admin/settings">Discard</a><button class="tc-btn is-primary" type="submit" form="admin-settings">Save</button></div></div>
+        <form class="tc-form" id="admin-settings" action="/admin/settings" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+          <div class="tc-fset tc-fset--lead">
+            <div class="tc-rubric">Global</div>
+            <div class="tc-field tc-field--xs"><label>Invite lifetime, h</label><input class="tc-in is-mono" type="text" name="inviteTTL" value="72" aria-label="Invite lifetime, h"></div>
+            <div class="tc-field tc-field--xs"><label>Idle timeout, h</label><input class="tc-in is-mono" type="text" name="idle" value="12" aria-label="Idle timeout, h"></div>
+            <div class="tc-field tc-field--xs"><label>Session life, d</label><input class="tc-in is-mono" type="text" name="session" value="30" aria-label="Session life, d"></div>
+            <div class="tc-field tc-field--md"><label>Instance name</label><input class="tc-in" type="text" name="name" value="Carrel" aria-label="Instance name"></div>
+            <div class="tc-field tc-field--lg"><label>Public address</label><input class="tc-in is-mono" type="text" name="publicURL" value="https://carrel.example" aria-label="Public address" readonly>
+              <span class="tc-field__hint">Links in letters start with it. Set with CARREL_PUBLIC_URL.</span></div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Mail</div>
+            <div class="tc-field tc-field--lg"><label>Host</label><input class="tc-in is-mono" type="text" name="host" value="smtp.slovo.example" aria-label="Host"></div>
+            <div class="tc-field tc-field--xs"><label>Port</label><input class="tc-in is-mono" type="text" name="port" value="587" aria-label="Port"></div>
+            <div class="tc-field tc-field--sm"><label>Encryption</label><span class="tc-in is-pick"><select class="tc-in__list" name="security" aria-label="Encryption"><option value="starttls" selected>STARTTLS</option></select></span></div>
+            <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" name="username" value="carrel" aria-label="Username"></div>
+            <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in is-ph" type="password" name="password" placeholder="leave blank to keep the current one" aria-label="Password"></div>
+            <div class="tc-field tc-field--md"><label>From address</label><input class="tc-in" type="text" name="from" value="carrel@slovo.example" aria-label="From address"></div>
+            <div class="tc-field tc-field--md"><label>From name</label><input class="tc-in is-ph" type="text" name="fromName" placeholder="Carrel" aria-label="From name"></div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Letters from users <span class="tc-badge">off</span></div>
+            <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="people" value="on"><span class="tc-tickrow__tick is-off"></span>Let users send letters and links from Carrel</label>
+              <span class="tc-field__hint">Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form.</span></div>
+            <div class="tc-field tc-grow"><label>Sender address</label>
+              <span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="sender" value="noreply" checked>noreply@carrel.example</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="sender" value="login">login@carrel.example</label></span>
+              <span class="tc-field__hint">Your relay decides which of the two it will let out. The envelope sender stays <span class="tc-mono">noreply@carrel.example</span> either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.</span></div>
+            <div class="tc-field tc-field--xs"><label>Attachment, MB</label><input class="tc-in is-mono" type="text" name="attach" value="2" aria-label="Attachment, MB"></div>
+            <div class="tc-field tc-field--xs"><label>Letter, MB</label><input class="tc-in is-mono" type="text" name="letter" value="8" aria-label="Letter, MB"></div>
+            <div class="tc-field tc-field--xs"><label>Recipients</label><input class="tc-in is-mono" type="text" name="recipients" value="10" aria-label="Recipients"></div>
+            <div class="tc-field tc-field--xs"><label>Letters a day</label><input class="tc-in is-mono" type="text" name="perDay" value="50" aria-label="Letters a day"></div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Test</div>
+            <div class="tc-field tc-field--lg"><label>Send test message to</label>
+              <span class="tc-line tc-line--gap-8"><input class="tc-in tc-in--fill" type="text" name="to" value="mix@slovo.example" aria-label="Send test message to"><button class="tc-btn" type="submit" formaction="/admin/settings/mail-test">Send test</button></span></div>
+            <div class="tc-field tc-field--full"><div class="tc-msg tc-msg--flush"><b>Sent.</b> The relay answered <span class="tc-mono">250 2.0.0 Ok: queued as 4FB1C2</span>.</div></div>
+          </div>
+        </form>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Почта настроена: у рубрики Mail бейджа нет. Проба ушла — под полем ответ релея как есть, моноширинно; ничего не сохранено.</figcaption>
+  </figure>
+
+<figure>
+  <div class="frame" data-frame="s-admin-33" data-screen="/admin/settings" data-part="refused">
+    <div class="frame-label"><span>Настройки · отказ поля</span><i>дополнительный кадр: refused · /admin/settings</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-top">
+        <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+        <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+        <div class="tc-top__actions">
+          <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+          <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+        </div>
+      </div>
+      <div class="tc-shell__body">
+        <div class="tc-shell__rail">
+          <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a></div>
+          <div class="tc-railsec">
+            <div class="tc-rubric">Administration</div>
+            <div class="tc-nav">
+              <a class="tc-nav__item" href="#"><svg><use href="#i-plus"/></svg>Add users<span class="tc-num">2</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Users<span class="tc-num">6</span></a>
+              <a class="is-on tc-nav__item" href="#"><svg><use href="#i-adm"/></svg>Settings</a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-shield"/></svg>Installation</a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-search"/></svg>DAV validator</a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Key escrow</a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-clock"/></svg>Audit log</a>
+            </div>
+          </div>
+          <div class="tc-railfoot">
+            <div class="tc-railstatus"><span class="tc-dot--accent"></span>Mail is going out<br><span class="tc-dim tc-dim--t11">Last sent <span class="tc-mono">2026-08-16 09:12</span></span></div>
+            <div class="tc-railstatus"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
+        </div>
+        <div class="tc-main">
+        <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Settings</div><div class="tc-head__sub">Global settings and mail</div></div><div class="tc-acts"><a class="tc-btn" href="/admin/settings">Discard</a><button class="tc-btn is-primary" type="submit" form="admin-settings">Save</button></div></div>
+        <form class="tc-form" id="admin-settings" action="/admin/settings" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+          <div class="tc-fset tc-fset--lead">
+            <div class="tc-rubric">Global</div>
+            <div class="tc-field tc-field--xs"><label>Invite lifetime, h</label><input class="tc-in is-mono" type="text" name="inviteTTL" value="72" aria-label="Invite lifetime, h"></div>
+            <div class="tc-field tc-field--xs"><label>Idle timeout, h</label><input class="tc-in is-mono" type="text" name="idle" value="12" aria-label="Idle timeout, h"></div>
+            <div class="tc-field tc-field--xs"><label>Session life, d</label><input class="tc-in is-mono" type="text" name="session" value="30" aria-label="Session life, d"></div>
+            <div class="tc-field tc-field--md"><label>Instance name</label><input class="tc-in" type="text" name="name" value="Carrel" aria-label="Instance name"></div>
+            <div class="tc-field tc-field--lg"><label>Public address</label><input class="tc-in is-mono" type="text" name="publicURL" value="https://carrel.example" aria-label="Public address" readonly>
+              <span class="tc-field__hint">Links in letters start with it. Set with CARREL_PUBLIC_URL.</span></div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Mail</div>
+            <div class="tc-field tc-field--lg"><label>Host</label><input class="tc-in is-mono" type="text" name="host" value="smtp.slovo.example" aria-label="Host"></div>
+            <div class="tc-field tc-field--xs"><label>Port</label><input class="tc-in is-mono is-error" type="text" name="port" value="70000" aria-label="Port"><span class="tc-field__hint tc-dim--danger">A port from 1 to 65535.</span></div>
+            <div class="tc-field tc-field--sm"><label>Encryption</label><span class="tc-in is-pick"><select class="tc-in__list" name="security" aria-label="Encryption"><option value="starttls" selected>STARTTLS</option></select></span></div>
+            <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" name="username" value="carrel" aria-label="Username"></div>
+            <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in is-ph" type="password" name="password" placeholder="leave blank to keep the current one" aria-label="Password"></div>
+            <div class="tc-field tc-field--md"><label>From address</label><input class="tc-in" type="text" name="from" value="carrel@slovo.example" aria-label="From address"></div>
+            <div class="tc-field tc-field--md"><label>From name</label><input class="tc-in is-ph" type="text" name="fromName" placeholder="Carrel" aria-label="From name"></div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Letters from users <span class="tc-badge">off</span></div>
+            <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="people" value="on"><span class="tc-tickrow__tick is-off"></span>Let users send letters and links from Carrel</label>
+              <span class="tc-field__hint">Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form.</span></div>
+            <div class="tc-field tc-grow"><label>Sender address</label>
+              <span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="sender" value="noreply" checked>noreply@carrel.example</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="sender" value="login">login@carrel.example</label></span>
+              <span class="tc-field__hint">Your relay decides which of the two it will let out. The envelope sender stays <span class="tc-mono">noreply@carrel.example</span> either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.</span></div>
+            <div class="tc-field tc-field--xs"><label>Attachment, MB</label><input class="tc-in is-mono" type="text" name="attach" value="2" aria-label="Attachment, MB"></div>
+            <div class="tc-field tc-field--xs"><label>Letter, MB</label><input class="tc-in is-mono" type="text" name="letter" value="8" aria-label="Letter, MB"></div>
+            <div class="tc-field tc-field--xs"><label>Recipients</label><input class="tc-in is-mono" type="text" name="recipients" value="10" aria-label="Recipients"></div>
+            <div class="tc-field tc-field--xs"><label>Letters a day</label><input class="tc-in is-mono" type="text" name="perDay" value="50" aria-label="Letters a day"></div>
+          </div>
+          <div class="tc-fset">
+            <div class="tc-rubric">Test</div>
+            <div class="tc-field tc-field--lg"><label>Send test message to</label>
+              <span class="tc-line tc-line--gap-8"><input class="tc-in tc-in--fill" type="text" name="to" value="mix@slovo.example" aria-label="Send test message to"><button class="tc-btn" type="submit" formaction="/admin/settings/mail-test">Send test</button></span></div>
+            <div class="tc-field tc-field--full"><div class="tc-msg is-alert tc-msg--flush">The relay as typed cannot be used: see the marked fields.</div></div>
+          </div>
+        </form>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Набранное не годится: поле с ошибкой, причина под ним — она же граница числа. Проба по такому релею не идёт, ответ под полем пробы называет причину. Save отказывает так же, у тех же полей.</figcaption>
   </figure>
 
 <div class="frames">
@@ -19060,32 +19376,32 @@ password  4c1-tide-oven</div>
         </div>
         <div class="tc-msg is-alert is-row">
           <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-          <span class="tc-msg__aside">Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and mailed to them.</span>
+          <span class="tc-msg__aside">Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and shown to them.</span>
         </div>
         <div class="tc-form">
-          <form class="tc-fset tc-fset--lead" action="/admin/escrow/policy" method="post">
+          <form class="tc-fset tc-fset--lead" action="/admin/escrow" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="policy">
             <div class="tc-rubric">Policy</div>
             <div class="tc-field tc-grow tc-field--gap7">
-              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="new.accounts.are.covered" value="1" checked><span class="tc-tickrow__tick"></span>New accounts are covered</label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="coverNew" value="on" checked><span class="tc-tickrow__tick"></span>New accounts are covered</label>
             </div>
             <div class="tc-field tc-grow"><span class="tc-field__hint">Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision.</span></div>
             <div class="tc-field"><button class="tc-btn" type="submit">Save</button></div>
           </form>
-          <form class="tc-fset" action="/admin/escrow/master" method="post">
+          <form class="tc-fset" action="/admin/escrow" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="master">
             <div class="tc-rubric">Master password</div>
-            <div class="tc-field tc-field--lg"><label>Current</label><input class="tc-in" type="text" name="current" value="••••••••••••••••" aria-label="Current"></div>
-            <div class="tc-field tc-field--lg"><label>New</label><input class="tc-in" type="text" name="new" value="••••••••••••••••" aria-label="New"></div>
-            <div class="tc-field tc-field--lg"><label>Repeat</label><input class="tc-in" type="text" name="repeat" value="••••••••••••••••" aria-label="Repeat"></div>
+            <div class="tc-field tc-field--lg"><label>Current</label><input class="tc-in" type="password" name="current" aria-label="Current" required></div>
+            <div class="tc-field tc-field--lg"><label>New</label><input class="tc-in" type="password" name="master" aria-label="New" required></div>
+            <div class="tc-field tc-field--lg"><label>Repeat</label><input class="tc-in" type="password" name="master2" aria-label="Repeat" required></div>
             <div class="tc-field"><button class="tc-btn" type="submit">Change</button></div>
             <div class="tc-field tc-grow"><span class="tc-field__hint">Only the recovery private key is re-encrypted. The deposited copies are untouched, so nobody has to opt in again.</span></div>
           </form>
-          <form class="tc-fset" action="/admin/escrow/recover" method="post">
+          <form class="tc-fset" action="/admin/escrow" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="recover">
             <div class="tc-rubric">Recover an account</div>
-            <div class="tc-field tc-field--md"><label>Account</label><input class="tc-in" type="text" name="account" value="viktor" aria-label="Account"></div>
-            <div class="tc-field tc-field--lg"><label>Master password</label><input class="tc-in" type="text" name="master.password" value="••••••••••••••••" aria-label="Master password"></div>
-            <div class="tc-field tc-field--md"><label>Temporary password for the user</label><input class="tc-in is-mono" type="text" name="temporary.password.for.the.user" value="9f2-brick-lamp" aria-label="Temporary password for the user"></div>
+            <div class="tc-field tc-field--md"><label>Account</label><input class="tc-in" type="text" name="login" value="viktor" aria-label="Account" required></div>
+            <div class="tc-field tc-field--lg"><label>Master password</label><input class="tc-in" type="password" name="master" aria-label="Master password" required></div>
+            <div class="tc-field tc-field--md"><label>Temporary password for the user</label><input class="tc-in is-mono" type="text" name="temp" value="9f2-brick-lamp" aria-label="Temporary password for the user" required></div>
             <div class="tc-field"><button class="tc-btn is-danger" type="submit">Recover</button></div>
-            <div class="tc-field tc-grow"><span class="tc-field__hint">Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user is mailed about it — always, not at the administrator’s discretion.</span></div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint">Connections survive a recovery. The user sees it by the password-history link they were given; a letter goes too when mail can reach them.</span></div>
           </form>
         </div>
         <div class="tc-list__group"><span class="tc-rubric">Whom the master password opens</span><span class="tc-num">4</span></div>
@@ -19094,6 +19410,9 @@ password  4c1-tide-oven</div>
           <tbody>
             <tr><td>anna</td><td class="tc-mono">2026-03-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
             <tr><td>viktor</td><td class="tc-mono">2026-04-19</td><td class="tc-mono tc-table__n3">2026-08-14 18:40</td></tr>
+            <tr><td>olga</td><td class="tc-mono">2026-05-11</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
+            <tr><td>petr</td><td class="tc-mono">2026-06-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
+            <tr><td>ivan</td><td class="tc-mono tc-mono--dusty">not deposited</td><td class="tc-mono tc-table__n3">—</td></tr>
             <tr><td>mix</td><td class="tc-mono tc-mono--dusty">not deposited</td><td class="tc-mono tc-table__n3">—</td></tr>
           </tbody>
         </table>
@@ -19101,7 +19420,158 @@ password  4c1-tide-oven</div>
     </div>
   </div>
 </div>
-<figcaption>Самый опасный экран во всей администраторской части, и первое, что на нём стоит, — объяснение, чем депонирование <b>не</b> является. Текст взят из продукта дословно: он уже написан правильно и переписыванию не подлежит. Покрытие новых учёток — один флажок в Policy со своей кнопкой Save, не кнопка в шапке и флажок сразу: это одно и то же. Ниже — мастер-пароль, восстановление и таблица, отвечающая на вопрос, который администратор задаёт в первую очередь: <b>кого именно</b> этот мастер-пароль открывает. Строка «mix» с прочерками показывает, что администратор может не быть покрыт собственным механизмом, — это нормально и должно быть видно.</figcaption>
+<figcaption>Самый опасный экран во всей администраторской части, и первое, что на нём стоит, — объяснение, чем депонирование <b>не</b> является. Текст взят из продукта; после решения владельца 16.10 о ссылке на историю пароля восстановление не «mailed», а «shown to them». Покрытие новых учёток — один флажок в Policy со своей кнопкой Save, не кнопка в шапке и флажок сразу: это одно и то же. Ниже — мастер-пароль, восстановление и таблица, отвечающая на вопрос, который администратор задаёт в первую очередь: <b>кого именно</b> этот мастер-пароль открывает. Строка «mix» с прочерками показывает, что администратор может не быть покрыт собственным механизмом, — это нормально и должно быть видно.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-admin-30" data-screen="/admin/escrow" data-part="recovered">
+  <div class="frame-label"><span>Депонирование · учётная запись восстановлена</span><i>дополнительный кадр: recovered · /admin/escrow</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Administration</div>
+          <div class="tc-nav">
+            <a class="tc-nav__item" href="#"><svg><use href="#i-plus"/></svg>Add users<span class="tc-num">2</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Users<span class="tc-num">6</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-adm"/></svg>Settings</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-shield"/></svg>Installation</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-search"/></svg>DAV validator</a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-shield"/></svg>Key escrow</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-clock"/></svg>Audit log</a>
+          </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railstatus"><span class="tc-dot--accent"></span>Mail is going out<br><span class="tc-dim tc-dim--t11">Last sent <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <div class="tc-railstatus"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-head">
+          <div class="tc-head__titles"><div class="tc-head__title">Key escrow</div><div class="tc-head__sub">4 of 6 accounts open with the master password</div></div>
+        </div>
+        <div class="tc-msg is-alert is-row">
+          <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
+          <span class="tc-msg__aside">Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and shown to them.</span>
+        </div>
+        <div class="tc-msg">The account of <b>viktor</b> is recovered.</div>
+        <div class="tc-pad">
+          <div class="tc-card tc-card--edge-accent tc-card--flush">
+            <div class="tc-rubric">Temporary password <span class="tc-mono tc-mono--ls0-danger">visible only now</span></div>
+            <div class="tc-diag tc-diag--top9-ink" id="s-admin-30-secret">login     viktor
+password  9f2-brick-lamp</div>
+            <div class="tc-line tc-line--gap-8 tc-card__top8"><button class="tc-btn is-primary" type="button" data-tc-copy-from="s-admin-30-secret" data-tc-copied="Copied"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg>Copy</button><a class="tc-btn" href="/admin/escrow">Done</a><span class="tc-dim tc-dim--t11-5 tc-dim--wrap">No letter went: viktor has no confirmed address. Tell them yourself.</span></div>
+          </div>
+        </div>
+        <div class="tc-form">
+          <form class="tc-fset tc-fset--lead" action="/admin/escrow" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="policy">
+            <div class="tc-rubric">Policy</div>
+            <div class="tc-field tc-grow tc-field--gap7">
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="coverNew" value="on" checked><span class="tc-tickrow__tick"></span>New accounts are covered</label>
+            </div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint">Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision.</span></div>
+            <div class="tc-field"><button class="tc-btn" type="submit">Save</button></div>
+          </form>
+          <form class="tc-fset" action="/admin/escrow" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="master">
+            <div class="tc-rubric">Master password</div>
+            <div class="tc-field tc-field--lg"><label>Current</label><input class="tc-in" type="password" name="current" aria-label="Current" required></div>
+            <div class="tc-field tc-field--lg"><label>New</label><input class="tc-in" type="password" name="master" aria-label="New" required></div>
+            <div class="tc-field tc-field--lg"><label>Repeat</label><input class="tc-in" type="password" name="master2" aria-label="Repeat" required></div>
+            <div class="tc-field"><button class="tc-btn" type="submit">Change</button></div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint">Only the recovery private key is re-encrypted. The deposited copies are untouched, so nobody has to opt in again.</span></div>
+          </form>
+          <form class="tc-fset" action="/admin/escrow" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="recover">
+            <div class="tc-rubric">Recover an account</div>
+            <div class="tc-field tc-field--md"><label>Account</label><input class="tc-in" type="text" name="login" value="viktor" aria-label="Account" required></div>
+            <div class="tc-field tc-field--lg"><label>Master password</label><input class="tc-in" type="password" name="master" aria-label="Master password" required></div>
+            <div class="tc-field tc-field--md"><label>Temporary password for the user</label><input class="tc-in is-mono" type="text" name="temp" value="9f2-brick-lamp" aria-label="Temporary password for the user" required></div>
+            <div class="tc-field"><button class="tc-btn is-danger" type="submit">Recover</button></div>
+            <div class="tc-field tc-grow"><span class="tc-field__hint">Connections survive a recovery. The user sees it by the password-history link they were given; a letter goes too when mail can reach them.</span></div>
+          </form>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Whom the master password opens</span><span class="tc-num">4</span></div>
+        <table class="tc-table">
+          <thead><tr><th>Account</th><th>Deposited</th><th class="tc-table__n3">Last recovery</th></tr></thead>
+          <tbody>
+            <tr><td>anna</td><td class="tc-mono">2026-03-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
+            <tr><td>viktor</td><td class="tc-mono">2026-04-19</td><td class="tc-mono tc-table__n3">2026-08-14 18:40</td></tr>
+            <tr><td>olga</td><td class="tc-mono">2026-05-11</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
+            <tr><td>petr</td><td class="tc-mono">2026-06-02</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">never</td></tr>
+            <tr><td>ivan</td><td class="tc-mono tc-mono--dusty">not deposited</td><td class="tc-mono tc-table__n3">—</td></tr>
+            <tr><td>mix</td><td class="tc-mono tc-mono--dusty">not deposited</td><td class="tc-mono tc-table__n3">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Ответ на Recover — как ответ на сброс (s-admin-14): временный пароль один раз, логин и пароль вместе, Copy, Done. Рядом — ушло ли письмо и почему нет: здесь у человека нет подтверждённого адреса. Что сделано с паролем, человек увидит по своей ссылке на историю.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-admin-31" data-screen="/admin/escrow" data-part="off">
+  <div class="frame-label"><span>Депонирование · не включено</span><i>дополнительный кадр: off · /admin/escrow</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Administration</div>
+          <div class="tc-nav">
+            <a class="tc-nav__item" href="#"><svg><use href="#i-plus"/></svg>Add users<span class="tc-num">2</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Users<span class="tc-num">6</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-adm"/></svg>Settings</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-shield"/></svg>Installation</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-search"/></svg>DAV validator</a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-shield"/></svg>Key escrow</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-clock"/></svg>Audit log</a>
+          </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railstatus"><span class="tc-dot--accent"></span>Mail is going out<br><span class="tc-dim tc-dim--t11">Last sent <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <div class="tc-railstatus"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-head">
+          <div class="tc-head__titles"><div class="tc-head__title">Key escrow</div><div class="tc-head__sub">Off</div></div>
+        </div>
+        <div class="tc-msg is-alert is-row">
+          <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
+          <span class="tc-msg__aside">Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and shown to them.</span>
+        </div>
+        <form class="tc-form" action="/admin/escrow" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="enable">
+          <div class="tc-field tc-field--lg"><label>Master password</label><input class="tc-in" type="password" name="master" aria-label="Master password" required></div>
+          <div class="tc-field tc-field--lg"><label>Repeat</label><input class="tc-in" type="password" name="master2" aria-label="Repeat" required></div>
+          <div class="tc-field"><button class="tc-btn is-primary" type="submit">Turn on key escrow</button></div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint">If you lose this password, deposited keys cannot be opened. This is not backup.</span></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Схема не включена: предупреждение то же, ниже — мастер-пароль дважды и «Turn on key escrow». Политики, восстановления и таблицы нет, пока включать нечего.</figcaption>
 </figure>
 
 <figure>
@@ -19474,6 +19944,29 @@ If you deposited the encryption key, ask the administrator in person. Otherwise 
     </div>
   </div>
   <figcaption>Запрос не подменяет депонирование: без master password администратор по-прежнему ничего не расшифрует.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-auth-15" data-screen="/password-history/{token}">
+    <div class="frame-label"><span>История пароля</span><i>/password-history/{token}</i></div>
+    <div class="tc-root">
+      <div class="tc-auth">
+        <div class="tc-dialog tc-dialog--max520-padt0-padb0">
+          <div class="tc-head__title tc-head__title--bot8">Password history of viktor</div>
+          <div class="tc-prose tc-prose--muted-flush-bot10">Times are Europe/Moscow.</div>
+          <table class="tc-table">
+            <thead><tr><th>When</th><th>What</th><th>Who</th></tr></thead>
+            <tbody>
+              <tr><td class="tc-mono">2026-08-14 19:02</td><td>Password changed</td><td>viktor</td></tr>
+              <tr><td class="tc-mono">2026-08-14 18:40</td><td>Opened with the master password; a temporary password set</td><td>mix</td></tr>
+              <tr><td class="tc-mono">2026-05-03 10:15</td><td>Password changed</td><td>viktor</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption><b>Страница по постоянной ссылке</b> (решение владельца 16.10): без входа, только события пароля этой учётной записи — когда, что, кто, новые сверху. Ссылку не гасит ни человек, ни администратор. Пусто — «Nothing has been done to this password.»</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -24518,11 +25011,11 @@ Read  2 min ago</div>
             <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-upload"/></svg>Upload<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg></button>
-            <button class="tc-btn" title="Details" type="button"><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></button>
+            <button class="tc-btn" title="Choose one file to see its details." type="button" disabled><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           </div>
         </div>
-        <div class="tc-empty"><b>This folder is empty.</b> Upload files into it, or drop them onto the window. <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-upload"/></svg>Upload<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button> <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button></div>
+        <div class="tc-empty"><b>This folder is empty.</b> Upload files into it, or drop them onto the window. <label class="tc-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-upload"/></svg>Upload<input class="tc-file" type="file" name="file" form="post-upload" aria-label="Files" data-tc-size="size" multiple></label> <button class="tc-btn tc-nojs" type="submit" form="post-upload">Send</button> <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button></div>
       </div>
     </div>
   </div>
@@ -24589,7 +25082,7 @@ Read  2 min ago</div>
             <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-upload"/></svg>Upload<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg></button>
-            <button class="tc-btn" title="Details" type="button"><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></button>
+            <button class="tc-btn" title="Choose one file to see its details." type="button" disabled><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           </div>
         </div>
@@ -24660,14 +25153,17 @@ dav: HTTP 503: the server is busy</div></div>
             <button class="tc-btn is-primary" type="button" disabled><svg viewBox="0 0 24 24"><use href="#i-upload"/></svg>Upload<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
             <button class="tc-btn" type="button" disabled><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</button>
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg></button>
-            <button class="tc-btn" title="Details" type="button"><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></button>
+            <button class="tc-btn" title="Choose one file to see its details." type="button" disabled><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></button>
           </div>
         </div>
         <div class="tc-bar tc-bar--sel tc-nojs">
           <span class="tc-bar__count">With the ticked</span>
           <span class="tc-bar__sep"></span>
           <button class="tc-btn" title="Download" type="submit" form="files-sel" name="op" value="download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg><span class="tc-btn__label">Download</span></button>
+          <button class="tc-btn" title="Public is read-only." type="submit" form="files-sel" name="op" value="rename" disabled><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
+          <button class="tc-btn" title="Public is read-only." type="submit" form="files-sel" name="op" value="move" disabled><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
           <button class="tc-btn" title="Copy" type="submit" form="files-sel" name="op" value="copy"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg><span class="tc-btn__label">Copy</span></button>
+          <button class="tc-btn is-danger-solid" title="Public is read-only." type="submit" form="files-sel" name="op" value="delete" disabled><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
         </div>
         <div class="tc-bar">
           <label class="tc-in is-ph tc-in--h26-w190"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Filter this folder" aria-label="Filter this folder"></label>
@@ -24743,7 +25239,7 @@ dav: HTTP 503: the server is busy</div></div>
           </div>
         </div>
         <div class="tc-railfoot">
-          <button class="tc-btn" title="New folder" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg></button>
+          <button class="tc-btn" title="Open a folder to make one in it." type="button" disabled><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg></button>
           <button class="tc-btn" title="Connect account" type="button"><svg viewBox="0 0 24 24"><use href="#i-server"/></svg></button>
           <button class="tc-btn" title="Subscribe to a feed" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
           <svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>

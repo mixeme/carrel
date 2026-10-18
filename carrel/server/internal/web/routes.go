@@ -139,6 +139,7 @@ func (s *Server) registerRoutes() {
 	s.handle("POST /admin/", (*Server).postAdminUsers)
 	s.handle("GET /admin/invites", (*Server).getAdminInvites)
 	s.handle("POST /admin/invites", (*Server).postAdminInvites)
+	s.handle("GET /admin/delete", (*Server).getAdminDelete)
 	s.handle("GET /admin/reset", (*Server).getAdminReset)
 	s.handle("POST /admin/reset", (*Server).postAdminReset)
 	s.handle("GET /admin/settings", (*Server).getAdminSettings)

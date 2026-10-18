@@ -781,6 +781,10 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		if !c.col.ReadOnly {
 			page.Empty.Body = "Upload files into it, or drop them onto the window."
 			page.Empty.Actions = s.folderActions(c, segs, nil, false)
+			// Upload of an empty folder is the file field alone, without
+			// the arrow (states-32, note 83 of Typecase): folders come by
+			// the head's arrow.
+			page.Empty.Actions[0].Arrow = nil
 		}
 	}
 	// One file chosen opens its panel (s-files-1); Details shows and hides

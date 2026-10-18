@@ -147,10 +147,14 @@ type NameClash struct {
 // s-notes-11, s-files-16: «Server»): подключение, у которого есть
 // хранилища файлов. On — выбранный: дерево листа показывает его хранилища;
 // Href — тот же лист с этим сервером (GET), у выбранного пусто
+// FileServer — пункт меню подключений в шапке листа (s-files-26): ссылка
+// на тот же лист над этим сервером, у открытого тоже (On); не ответивший в
+// этом сеансе — без ссылки, с причиной («webdav · nas did not answer.»)
 type FileServer struct {
-	Label Text   `json:"label"`
-	Href  string `json:"href"`
-	On    bool   `json:"on"`
+	Label  Text   `json:"label"`
+	Href   string `json:"href"`
+	On     bool   `json:"on"`
+	Reason Text   `json:"reason,omitempty"`
 }
 
 type FileTree struct {

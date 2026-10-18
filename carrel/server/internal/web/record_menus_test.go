@@ -16,7 +16,7 @@ var (
 	// task 109): «From this computer» is a label, not a button; «Upload»
 	// after the items (tc-nojs) is shown only without a script and sends the
 	// file the item picked — the same action, no item of the model's menu.
-	frameMenuItem = regexp.MustCompile(`(?s)<span class="tc-menu__sep"></span>|<button class="tc-menu__item[^"]*"[^>]*role="menuitem"[^>]*>(.*?)</button>|<label class="tc-menu__item[^"]*" role="menuitem">(.*?)</label>`)
+	frameMenuItem = regexp.MustCompile(`(?s)<span class="tc-menu__sep"></span>|<button class="tc-menu__item[^"]*"[^>]*role="menuitem"[^>]*>(.*?)</button>|<label class="tc-menu__item[^"]*" role="menuitem">(.*?)</label>|<a class="tc-menu__item[^"]*"[^>]*role="menuitem"[^>]*>(.*?)</a>`)
 	frameButton   = regexp.MustCompile(`(?s)<button\b[^>]*>(.*?)</button>`)
 	// A button with its menu, closed, is the summary of a details (Typecase's
 	// task 60): Attach with its arrow in a rubric (task 71, s-agenda-1).
@@ -62,7 +62,7 @@ func frameMenuIn(t *testing.T, id, part string) []string {
 		if open, _, _ := strings.Cut(m[0], ">"); strings.Contains(open, " is-3rd") {
 			continue
 		}
-		body := m[1] + m[2]
+		body := m[1] + m[2] + m[3]
 		icon := ""
 		if i := frameIcon.FindStringSubmatch(body); i != nil {
 			icon = i[1]

@@ -20,12 +20,11 @@
       },
       {
         "csrf": "csrf",
-        "enabled": false,
+        "enabled": true,
         "href": "/admin/settings/mail-test",
         "id": "admin.settings.mailtest",
         "label": "Send test",
         "method": "POST",
-        "reason": "Mail is not configured: there is nothing to send through yet.",
         "submits": true
       }
     ],

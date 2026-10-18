@@ -516,7 +516,8 @@ Typecase): рейл с соседними заметками и колонка �
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
-| `/admin/` | GET, POST | админ | страница | `AdminUsersPage`; POST `action=` `role` (с `role=admin` или `user` — пункт-переключатель s-admin-12), `sessions`, `disable`, `enable`, `delete` |
+| `/admin/` | GET, POST | админ | страница | `AdminUsersPage`; POST `action=` `role` (с `role=admin` или `user` — пункт-переключатель s-admin-12), `sessions`, `disable`, `enable`, `delete` (`target`, `login` — набранный логин; неверный — лист `AccountDeleteSheet` с ошибкой у поля) |
+| `/admin/delete` | GET | админ | лист | `AccountDeleteSheet` — удаление учётной записи (s-admin-34) поверх Users; `?target=` — чья; открывается пунктом Delete в «⋯» строки |
 | `/admin/reset` | GET, POST | админ | лист | `PasswordResetSheet` — «Reset a password» из шапки (s-admin-13); `?target=` выбирает человека. POST (`target`, `password`) сбрасывает: ответ — лист с `Issued`, не переход; отказ — у своего поля |
 | `/admin/invites` | GET, POST | админ | страница | `AdminInvitesPage`; `?invite=` — ссылку этого приглашения показывает карточка Invitation. POST `action=` `link`, `send`, `user` (временный пароль: ответ — страница с `Issued`, не переход), `selfreg`, `resend`, `extend`, `revoke` |
 | `/admin/settings` | GET, POST | админ | страница | `AdminSettingsPage` |
@@ -2471,7 +2472,10 @@ type FileTree struct { Nodes []FileTreeNode; Chosen string; Field string; New *A
 // выбранный: дерево листа показывает его хранилища, корни сервера не
 // называют; Href — тот же лист с этим сервером (GET, `server=`), у
 // выбранного пусто. С другим сервером в адресе ничего в нём ещё не выбрано.
-type FileServer struct { Label Text; Href string; On bool }
+// Пункт меню подключений шапки листа (s-files-26): ссылка на тот же лист
+// над этим сервером, у открытого (On) тоже; не ответивший в этом сеансе —
+// без ссылки, с Reason «webdav · nas did not answer.».
+type FileServer struct { Label Text; Href string; On bool; Reason Text }
 // Дерево, из которого выбирают файл (From Files у Attach), показывает и
 // файлы: File — узел-файл, он выбирается и не раскрывается; ID — его адрес в
 // разделе файлов без «/» в конце. ReadOnly — узел недоступен для этой цели:
@@ -3240,6 +3244,19 @@ type PasswordResetSheet struct {
     Issued  *IssuedPassword // временный пароль — один раз, в ответе на сброс (s-admin-14); nil — нет
     Actions []Action        // Reset password (danger) · Cancel; в ответе на сброс пусто — подвал листа держит Issued.Done
     Under   *Under // экран под листом, пришедшим страницей (Лс29): Users (s-admin-13); nil у фрагмента
+}
+
+// Удаление учётной записи (s-admin-34): «Delete anna», что Carrel забывает
+// (подключения и сохранённые пароли, опубликованные ссылки, устройства,
+// копии, история пароля) и что остаётся на серверах — тревогой до нажатия;
+// поле «Type the login to confirm» (login, образец — логин). Форма — POST
+// /admin/ со скрытыми action=delete, target.
+type AccountDeleteSheet struct {
+    Title   Text     // «Delete anna»
+    Warning Text
+    Form    Form
+    Actions []Action // Delete account (danger) · Cancel — ссылка на /admin/
+    Under   *Under   // Users под листом (Лс29); nil у фрагмента
 }
 
 // «Add users» (s-admin-1): три способа завести человека карточками в ряд,

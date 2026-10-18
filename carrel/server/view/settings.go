@@ -759,6 +759,20 @@ type PasswordResetSheet struct {
 	Under *Under `json:"under"`
 }
 
+// AccountDeleteSheet — удаление учётной записи (s-admin-34, /admin/delete,
+// поверх Users): «Delete anna», что Carrel забывает и что остаётся на
+// серверах — тревогой до нажатия, поле «Type the login to confirm»
+// (login, образец — логин), «Delete account» (danger) и Cancel. Форма —
+// POST /admin/ со скрытыми action=delete и target; неверный логин —
+// тот же лист с ошибкой у поля.
+type AccountDeleteSheet struct {
+	Title   Text     `json:"title"`
+	Warning Text     `json:"warning"`
+	Form    Form     `json:"form"`
+	Actions []Action `json:"actions"`
+	Under   *Under   `json:"under"` // Users под листом (Лс29); nil у фрагмента
+}
+
 // AdminInvitesPage — «Add users» (s-admin-1): три способа завести человека
 // карточками в ряд, равноправные, и действующие приглашения под ними.
 type AdminInvitesPage struct {
