@@ -181,7 +181,7 @@ Typecase `0fe0244` и серверу `v0.2.174` (main `6a62d8a`).
 | Пс10 | **закрыто сервером `v0.2.328`**: `Contacts []ContactGroup` по букве (было: держится) | `Contacts` плоский, групп по букве нет |
 | Пс11 | **закрыто сервером `v0.2.180`** | (CHANGELOG `v0.2.180`: «A published contact shows what its owner ticked, and no more»; `v0.2.183` — «Name and organisation» снимается) — `visitorCard` для страницы, книги и `.vcf`; кадр `s-publish-3` уточнён: «Photo» — только фото в `.vcf`, страница — инициалы; с сервером сходится |
 | Пс12 | **закрыто сервером `v0.2.328`**: `ContactRow.Colour` — цвет книги (было: держится) | `ContactRow.Colour` не ставится (`Avatar.Colour` — от UID) |
-| Пс13 | держится | вложений заметки на странице нет; server.md «Осталось: вложения опубликованной заметки (Пб3, Пс13)» |
+| Пс13 | **закрыто сервером `v0.2.345`**: `PublishedPage.Attachments` — выданные с заметкой, у каждого своя ссылка; не выданные — `AttachNote` (было: держится) | вложений заметки на странице нет; server.md «Осталось: вложения опубликованной заметки (Пб3, Пс13)» |
 | Пс14 | **закрыто сервером `v0.2.328`**: текст — `Preview text` и `Body`, Markdown — `Preview markdown` и `Blocks`, до 256 KB, без NUL; «Download» тогда не главная; в наборе `release-checklist.md` — Markdown кадра (было: держится) | `Preview` — только `image` или `none`; `Body`, `Blocks` не заполняются; `.md` получает экран `s-publish-11` |
 | Пс15 | держится | `PreviewPDF` не ставится |
 | Пс16 | **закрыто сервером `v0.2.328`**: `PublishedFolder.Total` «N files · размер» (было: держится) | итога «· 4 files · 6.6 MB» нет |

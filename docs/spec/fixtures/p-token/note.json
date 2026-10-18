@@ -9,6 +9,8 @@
       "method": "GET"
     }
   ],
+  "attachNote": "1 file is attached to this note; they are not published with it.",
+  "attachments": [],
   "body": "",
   "contacts": [],
   "days": [],

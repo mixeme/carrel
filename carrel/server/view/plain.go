@@ -114,20 +114,30 @@ type AboutPage struct {
 // (Пс2). Владельца страница не называет (S-25.1).
 type PublishedPage struct {
 	Plain
-	Kind     Kind             `json:"kind"`
-	ReadOnly bool             `json:"readOnly"` // метка read-only рядом с логотипом
-	Range    *Range           `json:"range"`
-	Contacts []ContactGroup   `json:"contacts"` // по букве, как в приложении (s-publish-7)
-	Days     []AgendaDay      `json:"days"`
-	Tasks    []TaskRow        `json:"tasks"`  // опубликованный список задач
-	Notes    []NoteRow        `json:"notes"`  // опубликованная тетрадь
-	Fields   []Field          `json:"fields"` // одна запись: контакт, событие, задача
-	Body     Text             `json:"body"`   // описание события или задачи
-	Note     *NoteDoc         `json:"note"`
-	File     *PublishedFile   `json:"file"`
-	Folder   *PublishedFolder `json:"folder"`
-	Actions  []Action         `json:"actions"` // Download · Download folder
-	Foot     Runs             `json:"foot"`
+	Kind     Kind           `json:"kind"`
+	ReadOnly bool           `json:"readOnly"` // метка read-only рядом с логотипом
+	Range    *Range         `json:"range"`
+	Contacts []ContactGroup `json:"contacts"` // по букве, как в приложении (s-publish-7)
+	Days     []AgendaDay    `json:"days"`
+	Tasks    []TaskRow      `json:"tasks"`  // опубликованный список задач
+	Notes    []NoteRow      `json:"notes"`  // опубликованная тетрадь
+	Fields   []Field        `json:"fields"` // одна запись: контакт, событие, задача
+	Body     Text           `json:"body"`   // описание события или задачи
+	Note     *NoteDoc       `json:"note"`
+	// Attachments — вложения опубликованной заметки, выданные с нею (Пб3,
+	// s-publish-8): имя, размер, своя ссылка; AttachNote — сколько их, когда
+	// с заметкой они не выданы: имена не показываются
+	Attachments []PublishedAttachment `json:"attachments"`
+	AttachNote  Text                  `json:"attachNote"`
+	File        *PublishedFile        `json:"file"`
+	Folder      *PublishedFolder      `json:"folder"`
+	Actions     []Action              `json:"actions"` // Download · Download folder
+	Foot        Runs                  `json:"foot"`
+}
+type PublishedAttachment struct {
+	Name Text   `json:"name"`
+	Size Size   `json:"size"`
+	Href string `json:"href"` // своя ссылка вложения, /p/{token}
 }
 type PublishedFile struct {
 	Name    Text        `json:"name"`

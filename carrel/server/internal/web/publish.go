@@ -146,6 +146,9 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, subject s
 	case kind == view.KindContact:
 		// The .vcf is off until asked for, like the fields it would carry.
 		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .vcf download and subscription", LabelRuns: allowLabel(".vcf", " download and subscription"), Kind: view.InputCheck})
+	case kind == view.KindNote:
+		// The .md goes unless taken off (s-publish-4).
+		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .md download", LabelRuns: allowLabel(".md", " download"), Kind: view.InputCheck, Value: "on"})
 	case isCalendarKind(kind):
 		// The .ics goes unless taken off — a calendar's and one event's
 		// alike (s-publish-2, -19) —, after what the visitor sees: it obeys
@@ -348,6 +351,10 @@ func publishChoices(form url.Values, kind view.Kind, uid string, target *user.Pu
 		}
 		target.NoDownload = formCheck(form, "download") != "on"
 	}
+	if kind == view.KindNote && form.Has("lives") {
+		// The sheet's post says of the .md (s-publish-4).
+		target.NoDownload = formCheck(form, "download") != "on"
+	}
 }
 
 // getPublish is the sheet: what will be published and for how long, before
@@ -380,7 +387,12 @@ func (s *Server) getPublish(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.listPath(), err)))
 		return
 	}
-	s.writeLetterSheet(w, r, sess, s.publishSheet(sess, c, uid, title, r.FormValue("how")))
+	sheet := s.publishSheet(sess, c, uid, title, r.FormValue("how"))
+	if r.FormValue("mail") == "" {
+		// A letter carries the note's link and not its files (Пб3).
+		s.withAttachments(r.Context(), sess, c, uid, &sheet)
+	}
+	s.writeLetterSheet(w, r, sess, sheet)
 }
 
 // writeLetterSheet writes the sheet, or, asked from a letter (mail= names
@@ -489,7 +501,11 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	publishChoices(r.Form, c.spec.kind, uid, &target)
-	token, err := s.users.Publish(sess.AccountID(), key, c.conn, target, expires)
+	var children []user.Child
+	if c.spec.kind == view.KindNote && uid != "" && formCheck(r.Form, "attachments") == "on" {
+		children = s.attachmentChildren(r.Context(), sess, c, uid)
+	}
+	token, err := s.users.PublishWith(sess.AccountID(), key, c.conn, target, expires, children)
 	if err != nil {
 		http.Error(w, "could not publish", http.StatusInternalServerError)
 		return
@@ -741,6 +757,10 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 		s.publishedFilesPage(w, r, link)
 		return
 	}
+	if link.Target.Attach > 0 {
+		s.publishedAttachment(w, r, link, false)
+		return
+	}
 	c, ok := s.openPublished(w, r, link)
 	if !ok {
 		return
@@ -778,6 +798,12 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 			if isCalendarKind(c.spec.kind) {
 				obj = visitorRecord(obj, link.Target)
 			}
+			var files *model.Object
+			if c.spec.kind == view.KindNote {
+				// What of its attachments the page says is read from the
+				// note itself; the guest's note has none (Пб3).
+				files, obj = obj, visitorNote(obj)
+			}
 			if obj == nil {
 				// Built of what the link allows it could not be: nothing
 				// of it goes out.
@@ -785,6 +811,9 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			s.publicRecord(c, obj, &page)
+			if files != nil {
+				s.guestAttachments(r, link, token, files, &page)
+			}
 		}
 		page.Foot = publicFoot(c.tf, link, "")
 		s.writePage(w, r, http.StatusOK, page)
@@ -1028,6 +1057,10 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 		s.publishedFilesDownload(w, r, link)
 		return
 	}
+	if link.Target.Attach > 0 {
+		s.publishedAttachment(w, r, link, true)
+		return
+	}
 	c, ok := s.openPublished(w, r, link)
 	if !ok {
 		return
@@ -1067,6 +1100,11 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 	if isCalendarKind(c.spec.kind) {
 		// The file obeys what the page does (Б39).
 		objs = visitorRecords(objs, link.Target)
+	}
+	if c.spec.kind == view.KindNote {
+		// The guest's .md is the note's title, text and days: not its
+		// tags, not its attachments, not what another client wrote (Пб3).
+		objs = visitorNotes(objs)
 	}
 	if c.card != nil {
 		// The file obeys the ticks the page does, or it would go round them.

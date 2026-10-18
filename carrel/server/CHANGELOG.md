@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.345 — 2026-10-18
+
+The attachments of a published note (Пб3, Пс13; `s-publish-4`, `-8`).
+
+### Fixed
+
+- **A guest's `.md` of a note carried the whole record**: its attachments
+  — a file written into it whole, a link to the owner's file server —, its
+  tags and whatever another client wrote. It is now a note built of its
+  title, text and days only, as a contact's card is built of what its link
+  allows; a published notebook's file too.
+
+### Added
+
+- **The sheet of a note with attachments** says how many and how large,
+  and asks whether they go too — «Publish them too — each gets its own
+  link»; «Allow .md download» is a tick, on.
+- **Ticked, each file has its own link**, made with the note's, expiring
+  and revoked with it, no row of the list. Its secret is derived from the
+  note's, so the note's page names each file with its size and points at
+  it without any secret being kept. A file written into the note is read
+  from it, and only while the file at its place is the one published — the
+  same name and size; a file the note links to in a file collection is
+  published as that file is.
+- **Unticked, the page says how many files there are**, not their names.
+
+### For consumers
+
+- `PublishedPage.Attachments` (`PublishedAttachment`), `AttachNote` (C-6).
+
 ## v0.2.344 — 2026-10-18
 
 The publish sheet's ticks as the frames write them (Пб5, Пб6).

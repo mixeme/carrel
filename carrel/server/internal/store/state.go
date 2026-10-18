@@ -116,6 +116,20 @@ type PublishedLink struct {
 	// known, a collection removed (Б41). The link stays until it expires or
 	// is revoked; the owner's list says it is dead.
 	Gone bool `json:"gone,omitempty"`
+	// Parent is the publish.ID of the link this one was made with: an
+	// attachment of a published note (Пб3, s-publish-4). It expires with
+	// that link, is revoked with it and is not a row of the owner's list;
+	// its secret is derived from the parent's (user.ChildToken).
+	Parent string `json:"parent,omitempty"`
+	// Children is how many links were made with this one, numbered from 0.
+	Children int `json:"children,omitempty"`
+	// Attach is the attachment of the record UID this link opens, its
+	// position among the ATTACH values plus one: a file written into the
+	// note. 0 — the link opens the record itself.
+	Attach int `json:"attach,omitempty"`
+	// AttachSize is the size that attachment was published at: with its
+	// name, what tells it from a file a removal shifted into its place.
+	AttachSize int64 `json:"attachSize,omitempty"`
 	// Envelope holds the connection's address and credentials, sealed again
 	// under the server key and bound to Hash (crypt.SealLink).
 	Envelope []byte `json:"envelope"`

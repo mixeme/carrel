@@ -3451,6 +3451,11 @@ type PublishedPage struct {
     Fields   []Field    // одна запись: контакт, событие, задача
     Body     Text       // описание события или задачи
     Note     *NoteDoc
+    // Вложения опубликованной заметки (s-publish-8): выданные с нею — имя,
+    // размер и своя ссылка каждого; не выданные — AttachNote, сколько их,
+    // без имён (s-publish-4: имя выдаёт больше, чем кажется)
+    Attachments []PublishedAttachment
+    AttachNote  Text
     File     *PublishedFile
     Folder   *PublishedFolder
     Actions  []Action // Download · Download folder; у файла без предпросмотра — с размером: «Download 84.2 MB» (s-publish-11); под текстом, прочитанным на странице, — не главная (s-publish-10)
@@ -3460,6 +3465,11 @@ type PublishedPage struct {
     // on every visit» (s-publish-10, -12); без срока — «This link does not
     // expire».
     Foot     Runs
+}
+type PublishedAttachment struct {
+    Name Text
+    Size Size
+    Href string // своя ссылка вложения, /p/{token}: выдана с заметкой, истекает и отзывается с нею
 }
 type PublishedFile struct {
     Name    Text

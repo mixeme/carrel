@@ -2,6 +2,9 @@ package user
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"slices"
 	"sync"
@@ -41,6 +44,37 @@ type PublishTarget struct {
 	// Colour is the collection's colour (#rrggbb) as it stood: the rows of
 	// the page wear it (s-publish-6, -7).
 	Colour string
+	// Attach is the attachment of the record UID the link opens, its
+	// position among the ATTACH values plus one (Пб3); 0 — the record.
+	// AttachSize is its size as published.
+	Attach     int
+	AttachSize int64
+	// Parent is the link this one was made with (an attachment of a
+	// published note); Children is how many were made with this one.
+	Parent   string
+	Children int
+}
+
+// Child is a link made together with another, to a thing of another place
+// maybe: an attachment of a note lying in a file collection is read with
+// that collection's connection.
+type Child struct {
+	Conn   sealed.Connection
+	Target PublishTarget
+}
+
+// ChildToken is the secret of the n-th link made with the link parent
+// (Пб3): derived from it, so the page the parent opens can point at its
+// attachments without any secret being kept. Who has not the parent's
+// secret cannot work it out; who has it is given the attachments anyway.
+func ChildToken(parent string, n int) string {
+	raw, err := base64.RawURLEncoding.DecodeString(parent)
+	if err != nil {
+		return ""
+	}
+	m := hmac.New(sha256.New, raw)
+	fmt.Fprintf(m, "carrel published attachment %d", n)
+	return base64.RawURLEncoding.EncodeToString(m.Sum(nil))
 }
 
 // PublishedLink is a link as its owner's screens show it: no secret.
@@ -106,36 +140,67 @@ func (o *linkOpens) peek(id string) int {
 // under the server key. The secret is returned once and never kept. The
 // journal names the kind and the connection.
 func (s *Service) Publish(viewerID string, dataKey [crypt.KeyLen]byte, conn sealed.Connection, target PublishTarget, expires *time.Time) (string, error) {
+	return s.PublishWith(viewerID, dataKey, conn, target, expires, nil)
+}
+
+// PublishWith is Publish of a link with the links made together with it
+// (Пб3: the attachments of a note, «Publish them too»), all in one write:
+// each child expires with the link, is revoked with it, and has its secret
+// derived from the link's (ChildToken). The journal names each.
+func (s *Service) PublishWith(viewerID string, dataKey [crypt.KeyLen]byte, conn sealed.Connection, target PublishTarget, expires *time.Time, children []Child) (string, error) {
 	raw, hash, err := newSecret()
 	if err != nil {
 		return "", err
 	}
-	plain, err := publish.Envelope{Server: conn.Server, Login: conn.Login, Password: conn.Password, CertFingerprint: conn.CertFingerprint}.Marshal()
-	if err != nil {
-		return "", err
-	}
-	env, err := s.st.SealLink(hash, plain)
-	crypt.Wipe(plain)
-	if err != nil {
-		return "", err
-	}
 	now := s.now()
+	target.Parent, target.Children = "", len(children)
+	links := []store.PublishedLink{}
+	add := func(hash []byte, conn sealed.Connection, t PublishTarget) error {
+		plain, err := publish.Envelope{Server: conn.Server, Login: conn.Login, Password: conn.Password, CertFingerprint: conn.CertFingerprint}.Marshal()
+		if err != nil {
+			return err
+		}
+		env, err := s.st.SealLink(hash, plain)
+		crypt.Wipe(plain)
+		if err != nil {
+			return err
+		}
+		links = append(links, store.PublishedLink{
+			Hash: hash, AccountID: t.AccountID, Kind: t.Kind, Col: t.Col,
+			UID: t.UID, Path: t.Path, Folder: t.Folder, Title: t.Title,
+			From: t.From, To: t.To, NoDownload: t.NoDownload, HideDescriptions: t.HideDescriptions,
+			Shows: slices.Clone(t.Shows), HideOrganisation: t.HideOrganisation, Colour: t.Colour,
+			Attach: t.Attach, AttachSize: t.AttachSize, Parent: t.Parent, Children: t.Children,
+			CreatedAt: now, ExpiresAt: expires, Envelope: env,
+		})
+		return nil
+	}
+	if err := add(hash, conn, target); err != nil {
+		return "", err
+	}
+	for n, c := range children {
+		childHash, err := hashToken(ChildToken(raw, n))
+		if err != nil {
+			return "", err
+		}
+		c.Target.Parent, c.Target.Children = publish.ID(hash), 0
+		if err := add(childHash, c.Conn, c.Target); err != nil {
+			return "", err
+		}
+	}
 	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		u := st.UserByID(viewerID)
 		if u == nil || u.Disabled {
 			return nil, ErrNotFound
 		}
 		prunePublished(st, now)
-		st.Published = append(st.Published, store.PublishedLink{
-			Hash: hash, UserID: u.ID, AccountID: target.AccountID, Kind: target.Kind, Col: target.Col,
-			UID: target.UID, Path: target.Path, Folder: target.Folder, Title: target.Title,
-			From: target.From, To: target.To, NoDownload: target.NoDownload, HideDescriptions: target.HideDescriptions,
-			Shows: slices.Clone(target.Shows), HideOrganisation: target.HideOrganisation, Colour: target.Colour,
-			CreatedAt: now, ExpiresAt: expires, Envelope: env,
-		})
-		return []store.AuditEntry{{
-			When: now, Who: u.Login, What: "publish.create", Whom: u.Login, Detail: target.Kind + " " + target.AccountID,
-		}}, nil
+		var audit []store.AuditEntry
+		for _, l := range links {
+			l.UserID = u.ID
+			st.Published = append(st.Published, l)
+			audit = append(audit, store.AuditEntry{When: now, Who: u.Login, What: "publish.create", Whom: u.Login, Detail: l.Kind + " " + l.AccountID})
+		}
+		return audit, nil
 	})
 	if err != nil {
 		return "", err
@@ -228,6 +293,13 @@ func (s *Service) openPublished(token string, count bool) (OpenLink, bool) {
 	}, true
 }
 
+// LookPublished is the target of a live link without opening it: no open
+// is counted and no credentials come out (the note's page naming the
+// attachments published with it, Пб3).
+func (s *Service) LookPublished(token string) (OpenLink, bool) {
+	return s.openPublished(token, false)
+}
+
 // PublicLinkValid reports whether a token opens a live link.
 func (s *Service) PublicLinkValid(_ context.Context, token string) bool {
 	_, ok := s.openPublished(token, false)
@@ -241,7 +313,8 @@ func (s *Service) PublishedLinks(viewerID string) []PublishedLink {
 	var out []PublishedLink
 	for i := len(snap.Published) - 1; i >= 0; i-- {
 		l := snap.Published[i]
-		if l.UserID != viewerID || publish.Expired(l.ExpiresAt, now) {
+		// A link made with another is that one's (Пб3): not a row.
+		if l.UserID != viewerID || publish.Expired(l.ExpiresAt, now) || l.Parent != "" {
 			continue
 		}
 		id := publish.ID(l.Hash)
@@ -270,8 +343,16 @@ func (s *Service) RevokePublished(viewerID, id string) error {
 			return nil, ErrNotFound
 		}
 		gone := st.Published[at]
-		crypt.Wipe(st.Published[at].Envelope)
-		st.Published = append(st.Published[:at], st.Published[at+1:]...)
+		// The links made with it go with it (Пб3).
+		kept := st.Published[:0]
+		for i, l := range st.Published {
+			if i == at || l.UserID == viewerID && l.Parent == id {
+				crypt.Wipe(l.Envelope)
+				continue
+			}
+			kept = append(kept, l)
+		}
+		st.Published = kept
 		prunePublished(st, now)
 		return []store.AuditEntry{{
 			When: now, Who: u.Login, What: "publish.revoke", Whom: u.Login, Detail: gone.Kind + " " + gone.AccountID,
@@ -295,7 +376,8 @@ func prunePublished(st *store.State, now time.Time) {
 func targetOf(l store.PublishedLink) PublishTarget {
 	return PublishTarget{AccountID: l.AccountID, Kind: l.Kind, Col: l.Col, UID: l.UID, Path: l.Path, Folder: l.Folder,
 		Title: l.Title, From: l.From, To: l.To, NoDownload: l.NoDownload, HideDescriptions: l.HideDescriptions,
-		Shows: slices.Clone(l.Shows), HideOrganisation: l.HideOrganisation, Colour: l.Colour}
+		Shows: slices.Clone(l.Shows), HideOrganisation: l.HideOrganisation, Colour: l.Colour,
+		Attach: l.Attach, AttachSize: l.AttachSize, Parent: l.Parent, Children: l.Children}
 }
 
 // LinkOf is the whole link of one of the viewer's live links, from the

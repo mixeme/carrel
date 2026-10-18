@@ -113,6 +113,8 @@ type Users interface {
 	// a sealed envelope, opened without a session, listed and revoked by
 	// their owner.
 	Publish(viewerID string, dataKey [32]byte, conn sealed.Connection, target user.PublishTarget, expires *time.Time) (string, error)
+	PublishWith(viewerID string, dataKey [32]byte, conn sealed.Connection, target user.PublishTarget, expires *time.Time, children []user.Child) (string, error)
+	LookPublished(token string) (user.OpenLink, bool)
 	LinkOf(viewerID string, dataKey [32]byte, id string) string
 	OpenPublished(token string) (user.OpenLink, bool)
 	PublishedLinks(viewerID string) []user.PublishedLink
