@@ -2632,6 +2632,41 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
    `exercised` (`s-admin-29`; на стенде нет записываемой папки — строка
    файла «skipped»). Клиент экранов администрирования пока не рисует.
 
+Записка 81 от 18.10.2026 (Typecase `4842601`; задачи 195 п. 4, 202 п. 1).
+По порядку обмена `4cd37cf`: записка одна, копию макета переносит переход
+клиента. **Последний коммит Typecase, который она описывает, — `4842601`**
+(471 кадр).
+
+81. **Депонирование ключей и история пароля.**
+   - **`s-admin-6`:** формы — как у вас: POST `/admin/escrow`, скрытое
+     `action` (`policy`, `master`, `recover`), `coverNew`, `current` /
+     `master` / `master2`, `login` / `master` / `temp`; пароли — пустые
+     поля пароля. В предупреждении — «… every recovery is logged and
+     **shown** to them.» (не mailed). Строка под Recover короче вашей:
+     «Connections survive a recovery. The user sees it by the
+     password-history link they were given; a letter goes too when mail can
+     reach them.» Таблица — шесть строк при «4 of 6».
+   - **195 п. 4 — Recover без почты** не выключается. Ответ — `s-admin-30`
+     (`recovered`): «The account of **viktor** is recovered.», карточка
+     временного пароля как у сброса (`s-admin-14`: «visible only now»,
+     логин и пароль, Copy), Done, рядом ваша строка `escrowRecoveryMailedStatus`
+     (в кадре — «No letter went: viktor has no confirmed address. Tell them
+     yourself.»). **Схема не включена** — `s-admin-31` (`off`): подзаголовок
+     «Off», то же предупреждение, Master password, Repeat, «Turn on key
+     escrow», подсказка «If you lose this password, deposited keys cannot
+     be opened. This is not backup.»
+   - **202 п. 1:** `account-4` — под Deposited / Last recovery поле
+     «Password history»: ссылка `readonly` моноширинно и Copy
+     (`Button.Copy`), подсказка **«Keep it: it shows what was done to your
+     password, even when you cannot sign in.»** (короче вашей — владелец
+     18.10). У Withdraw — **«Then nobody can recover the account.»** (на
+     листе отзыва фраза прежняя). Страница истории — **`s-auth-15`**
+     (`/password-history/{token}`): заголовок «Password history of viktor»,
+     строка «Times are Europe/Moscow.» (вашей вводной фразы нет —
+     заголовок её говорит), таблица When / What / Who, новые сверху. В
+     листе депонирования (`account-2`) ссылки нет: она выдаётся ответом —
+     `account-4` сразу после депонирования.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
