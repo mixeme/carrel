@@ -50,22 +50,26 @@
         "target": "sheet"
       },
       {
-        "enabled": false,
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/",
         "icon": "i-download",
         "id": "file.download",
         "label": "Download",
-        "method": "GET",
-        "reason": "Download takes one file."
+        "method": "POST",
+        "submits": true
       },
       {
         "csrf": "csrf",
-        "enabled": false,
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?op=rename",
         "icon": "i-pencil",
         "id": "file.rename",
         "label": "Rename",
         "method": "POST",
-        "reason": "Rename takes one item.",
-        "submits": true
+        "submits": true,
+        "target": "sheet",
+        "unfit": true
       },
       {
         "csrf": "csrf",
@@ -304,7 +308,7 @@
   },
   "queue": {
     "hidden": false,
-    "note": "",
+    "note": "архив-2025.zip: this server writes a file only when its size is sent first, and the page did not send it. Turn scripts on, or put the file there with another client",
     "rows": [
       {
         "actions": [],
@@ -363,9 +367,18 @@
         "reason": "",
         "size": "7 B",
         "state": "idle"
+      },
+      {
+        "actions": [],
+        "name": "архив-2025.zip",
+        "percent": 0,
+        "question": null,
+        "reason": "the server needs the size",
+        "size": "3 B",
+        "state": "failed"
       }
     ],
-    "title": "Uploading 3 of 3",
+    "title": "Uploading 4 of 4",
     "toggle": {
       "enabled": true,
       "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/?queue=0\u0026select=2026-08-10-sync-board.png\u0026select=release-checklist.md\u0026select=2026-08-04-whiteboard.jpg",

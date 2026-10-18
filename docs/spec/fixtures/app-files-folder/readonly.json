@@ -54,12 +54,14 @@
         "target": "sheet"
       },
       {
-        "enabled": false,
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Public/download/",
         "icon": "i-download",
         "id": "file.download",
         "label": "Download",
-        "method": "GET",
-        "reason": "Download takes one file."
+        "method": "POST",
+        "submits": true
       },
       {
         "csrf": "csrf",

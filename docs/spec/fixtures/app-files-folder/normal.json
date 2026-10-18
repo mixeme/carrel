@@ -50,12 +50,14 @@
         "target": "sheet"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-08-10-sync-board.png",
+        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/",
         "icon": "i-download",
         "id": "file.download",
         "label": "Download",
-        "method": "GET"
+        "method": "POST",
+        "submits": true
       },
       {
         "csrf": "csrf",

@@ -48,6 +48,10 @@ type Action struct {
 	// this combination», пока у карточки не выбрана сторона (s-conflict-6,
 	// -7)
 	Waits bool `json:"waits,omitempty"`
+	// Unfit — кнопка полосы выделения не для этой выборки (s-files-2:
+	// Rename при трёх отмеченных): включена — без сценариев отправит, и
+	// ответ скажет, почему ничего не сделано, — но бледная; Reason пуст
+	Unfit bool `json:"unfit,omitempty"`
 	// Hint — подсказка у включённого действия (title кнопки): чем оно
 	// обернётся — у New password внешнего запуска «The old password stops
 	// working; …» (s-backup-2, -3, -10, -11); пусто — подсказки нет

@@ -737,6 +737,7 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
 	if q.Get("go") == "" {
 		// New folder of the tree: MKCOL into the chosen folder, then the
 		// same sheet with the new one chosen (s-files-4).
@@ -1703,4 +1704,65 @@ func (s *Server) freeName(ctx context.Context, c *fileCtx, rel []string, name st
 			return candidate, nil
 		}
 	}
+}
+
+// postFilesDownload is Download of the selection form (s-files-2): the
+// items ticked in the folder of the address — one file that file, more or a
+// folder a zip named after the folder, written while it is read. Nothing
+// ticked, or a name no longer there, is the folder with why.
+func (s *Server) postFilesDownload(w http.ResponseWriter, r *http.Request) {
+	c, ok := s.openFiles(w, r, "download")
+	if !ok {
+		return
+	}
+	if !c.dir {
+		s.notFound(w, r)
+		return
+	}
+	names := r.PostForm["item"]
+	refuse := func(why string) {
+		s.writeFolder(w, r, c, c.segs, "", url.Values{}, render.TargetMain, view.Notice{Role: view.NoticeAlert, Title: "Nothing was done", Body: text(why)})
+	}
+	if len(names) == 0 {
+		refuse("Tick the files and folders first.")
+		return
+	}
+	folder, _ := c.path(c.segs, true)
+	entries, err := s.readFolder(r.Context(), c, folder, false)
+	switch {
+	case file.NotFound(err):
+		s.notFound(w, r)
+		return
+	case err != nil:
+		s.writeFolder(w, r, c, c.segs, "", url.Values{}, render.TargetMain)
+		return
+	}
+	var items []file.Entry
+	var missing []string
+	for _, name := range names {
+		i := slices.IndexFunc(entries, func(e file.Entry) bool { return e.Name == name })
+		switch {
+		case i < 0:
+			missing = append(missing, name)
+		case !slices.ContainsFunc(items, func(e file.Entry) bool { return e.Name == name }):
+			items = append(items, entries[i])
+		}
+	}
+	if len(missing) > 0 {
+		refuse("No longer in this folder: " + strings.Join(missing, ", ") + ".")
+		return
+	}
+	if len(items) == 1 && !items[0].Dir {
+		if err := s.sendFile(w, r, c, items[0].Path, items[0].Name, false); err != nil {
+			s.writeFolder(w, r, c, c.segs, "", url.Values{}, render.TargetMain, s.fileFailure(c, items[0].Name+" could not be opened", "GET", items[0].Path, err))
+		}
+		return
+	}
+	name := "files"
+	if len(c.segs) > 0 {
+		name = c.segs[len(c.segs)-1]
+	} else if c.col.Name != "" {
+		name = c.col.Name
+	}
+	s.zipOf(w, r, c, items, name)
 }

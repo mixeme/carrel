@@ -182,7 +182,9 @@ func TestSelectionIsTheOperationsForm(t *testing.T) {
 			t.Errorf("%s = %+v, want a button of the selection form", id, a)
 		}
 	}
-	if d := actionByID(page.Bar.Actions, "file.download"); d == nil || d.Enabled || d.Reason == "" {
+	// Download is a button of the form too, to the folder's download: its
+	// answer is a file (s-files-2).
+	if d := actionByID(page.Bar.Actions, "file.download"); d == nil || !d.Enabled || !d.Submits || d.Href != f.at("download") {
 		t.Errorf("Download with nothing selected = %+v", d)
 	}
 	send := func(id string, names ...string) *httptest.ResponseRecorder {
@@ -216,13 +218,14 @@ func TestSelectionIsTheOperationsForm(t *testing.T) {
 		actionHref(t, picked.Select.Actions, "files.select.clear") != here+"?sort=size" {
 		t.Fatalf("selected by the address: bar %d, form %+v", picked.Bar.Selected, picked.Select)
 	}
-	if d := actionByID(picked.Bar.Actions, "file.download"); d == nil || !d.Enabled || d.Submits {
+	if d := actionByID(picked.Bar.Actions, "file.download"); d == nil || !d.Enabled || !d.Submits {
 		t.Errorf("Download of the one selected = %+v", d)
 	}
-	// What cannot be done is off: a rename of the two the address selects.
+	// Not for this selection: a rename of the two the address selects is
+	// pale, and pressed it says why (s-files-2).
 	both := decode[view.FilesPage](t, f.h.do(get(here+"?select=a.txt&select=b.txt", f.sess)))
-	if r := actionByID(both.Bar.Actions, "file.rename"); r == nil || r.Enabled || r.Reason != "Rename takes one item." {
-		t.Errorf("Rename of two selected = %+v, want it off with why", r)
+	if r := actionByID(both.Bar.Actions, "file.rename"); r == nil || !r.Enabled || !r.Unfit || r.Reason != "" {
+		t.Errorf("Rename of two selected = %+v, want it pale, not for this selection", r)
 	}
 	if m := actionByID(both.Bar.Actions, "file.move"); m == nil || !m.Enabled {
 		t.Errorf("Move of two selected = %+v", m)

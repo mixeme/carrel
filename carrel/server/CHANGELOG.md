@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.348 — 2026-10-19
+
+The files section's frames of `b804598`, what they draw and the server did
+not give (the client's section of files; Typecase's task 206).
+
+### Added
+
+- **Download of what is ticked** (`s-files-2`): the selection form's button
+  to the folder's download — one file is that file, more or a folder a
+  zip of them, written while it is read; nothing ticked, or a name no
+  longer there, is the folder with why.
+
+### Changed
+
+- **Rename over more than one ticked** is not off but «not for this
+  selection» (`Action.Unfit`): pale, and pressed without scripts the
+  folder says why.
+- **Tiles have no Columns** (`s-files-5`).
+- **The set**: the list of links stands on the devices and the backup jobs
+  of the frames (its rail's foot, `s-publish-1`, `-18`, `-20`); the upload
+  queue of the long folder is the four rows of `s-files-2`.
+
+### For consumers
+
+- `Action.Unfit`; POST `/app/files/{account}/{col}/download/{path…}` (C-5,
+  C-6).
+
 ## v0.2.347 — 2026-10-19
 
 Typecase's notes 81–83 (`b804598`): key escrow and the password's history,

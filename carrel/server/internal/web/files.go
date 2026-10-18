@@ -751,6 +751,10 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 	if len(picked) > 0 {
 		page.Bar.SelectedSize = sizeOf(picked)
 	}
+	// Tiles have no columns to choose (s-files-5).
+	if page.View == view.FileTiles {
+		page.Bar.Columns = nil
+	}
 	// «Filter this folder» without scripts: a GET of the folder that keeps
 	// its view and order (C-6.4; with scripts the client sifts the rows).
 	var keep []view.FormRow
@@ -1079,23 +1083,21 @@ func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry, b
 	// (FilesPage.Select): what is ticked goes with the one pressed, so they
 	// name no item themselves and stand with nothing selected too — without
 	// scripts the bar is always there (the owner's decision of 09.10.2026).
-	// Download is a link, and has one only for the one file the address
-	// selects.
-	download := view.Action{ID: "file.download", Label: "Download", Icon: "i-download", Method: "GET", Enabled: len(picked) == 1 && !picked[0].Dir}
-	if download.Enabled {
-		download.Href = s.route(c.href("download", append(slices.Clone(segs), picked[0].Name), false))
-	} else {
-		download.Reason = "Download takes one file."
-	}
 	op := func(a view.Action, op view.FileOp) view.Action {
 		a.Href, a.Method, a.Enabled, a.Submits = s.opHref(c, segs, op), "POST", true, true
 		return a
 	}
-	// A rename takes one: more than one selected by the address, and it
-	// stands off with why.
+	// Download takes what is ticked (s-files-2): one file is the file,
+	// more — or a folder — a zip of them, written while it is read. Its
+	// answer is a file, so its address is the folder's download.
+	download := view.Action{ID: "file.download", Label: "Download", Icon: "i-download", Method: "POST", Enabled: true, Submits: true,
+		Href: s.route(c.href("download", segs, true))}
+	// A rename takes one item.
 	rename := writeAction(c, op(view.Action{ID: "file.rename", Label: "Rename", Icon: "i-pencil"}, view.FileRename))
-	if len(picked) > 1 {
-		rename.Enabled, rename.Href, rename.Reason = false, "", "Rename takes one item."
+	// More than one ticked, Rename is not for this selection (s-files-2):
+	// pale, and pressed without scripts the folder says why.
+	if len(picked) > 1 && rename.Enabled {
+		rename.Unfit = true
 	}
 	return append(actions, download, rename,
 		writeAction(c, op(view.Action{ID: "file.move", Label: "Move", Icon: "i-move"}, view.FileMove)),
@@ -1347,11 +1349,18 @@ func (s *Server) sendFile(w http.ResponseWriter, r *http.Request, c *fileCtx, p,
 // zip without its directory: a reader sees a broken archive, never one that
 // silently lacks files. A private folder and a published one share it.
 func (s *Server) sendZip(w http.ResponseWriter, r *http.Request, c *fileCtx, p, name string) error {
-	ctx := r.Context()
-	top, err := c.files.List(ctx, p)
+	top, err := c.files.List(r.Context(), p)
 	if err != nil {
 		return err
 	}
+	s.zipOf(w, r, c, top, name)
+	return nil
+}
+
+// zipOf streams entries — a folder's, or the items ticked in one
+// (s-files-2) — as a zip named name.zip, folders with what is in them.
+func (s *Server) zipOf(w http.ResponseWriter, r *http.Request, c *fileCtx, top []file.Entry, name string) {
+	ctx := r.Context()
 	h := w.Header()
 	h.Set("Content-Type", "application/zip")
 	if v := mime.FormatMediaType("attachment", map[string]string{"filename": name + ".zip"}); v != "" {
@@ -1397,7 +1406,6 @@ func (s *Server) sendZip(w http.ResponseWriter, r *http.Request, c *fileCtx, p, 
 	if walk(top, "") {
 		_ = zw.Close()
 	}
-	return nil
 }
 
 // requestRange is one byte range the browser asked for, passed on to the

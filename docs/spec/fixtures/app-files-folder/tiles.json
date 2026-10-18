@@ -50,12 +50,14 @@
         "target": "sheet"
       },
       {
+        "csrf": "csrf",
         "enabled": true,
-        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-07/whiteboard.jpg",
+        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/2026-07/",
         "icon": "i-download",
         "id": "file.download",
         "label": "Download",
-        "method": "GET"
+        "method": "POST",
+        "submits": true
       },
       {
         "csrf": "csrf",
@@ -119,82 +121,7 @@
         "method": "GET"
       }
     ],
-    "columns": {
-      "form": {
-        "action": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-07/?details=0\u0026select=whiteboard.jpg\u0026view=tiles",
-        "actions": [
-          {
-            "csrf": "csrf",
-            "enabled": true,
-            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-07/?details=0\u0026select=whiteboard.jpg\u0026view=tiles",
-            "id": "columns.apply",
-            "label": "Apply",
-            "method": "POST",
-            "primary": true
-          },
-          {
-            "csrf": "csrf",
-            "enabled": true,
-            "href": "/app/files/a-sftp-vps/Documents/columns/carrel/attachments/2026-07/?details=0\u0026select=whiteboard.jpg\u0026view=tiles",
-            "id": "columns.default",
-            "label": "Reset to defaults",
-            "method": "POST"
-          }
-        ],
-        "errors": [],
-        "method": "POST",
-        "sets": [
-          {
-            "legend": "",
-            "rows": [
-              {
-                "add": null,
-                "error": "",
-                "extra": null,
-                "hint": "",
-                "kind": "hidden",
-                "label": "",
-                "name": "_csrf",
-                "options": [],
-                "readOnly": false,
-                "required": false,
-                "value": "csrf"
-              }
-            ],
-            "unfold": null
-          }
-        ]
-      },
-      "icon": "i-cols",
-      "items": [
-        {
-          "aside": "always",
-          "fixed": true,
-          "id": "name",
-          "label": "Name",
-          "on": true
-        },
-        {
-          "fixed": false,
-          "id": "size",
-          "label": "Size",
-          "on": true
-        },
-        {
-          "fixed": false,
-          "id": "type",
-          "label": "Type",
-          "on": true
-        },
-        {
-          "fixed": false,
-          "id": "changed",
-          "label": "Changed",
-          "on": true
-        }
-      ],
-      "label": "Columns"
-    },
+    "columns": null,
     "compact": null,
     "drop": null,
     "filter": "",

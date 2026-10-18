@@ -203,7 +203,8 @@ func TestFolderPage(t *testing.T) {
 	if len(cut.Rows) != 2 || cut.Rows[0].Name != "big.png" || cut.View != view.FileTiles || !cut.Rows[1].Selected || cut.Bar.Selected != 1 {
 		t.Fatalf("cut = %+v", cut.Rows)
 	}
-	if actionHref(t, cut.Bar.Actions, "file.download") != f.at("download", "a.png") {
+	// Download sends what is ticked to the folder's download (s-files-2).
+	if actionHref(t, cut.Bar.Actions, "file.download") != f.at("download") {
 		t.Errorf("selection actions = %+v", cut.Bar.Actions)
 	}
 	if n := f.srv.CountRequests("PROPFIND", filesDocs); n != listed {
@@ -913,5 +914,34 @@ func TestReplacingAFolderKeepsWhatStoodThere(t *testing.T) {
 		if strings.Contains(n, "carrel") {
 			t.Errorf("a temporary folder was left: %s", n)
 		}
+	}
+}
+
+// s-files-2: Download takes what is ticked — one file is the file, more a
+// zip of them, a folder with what is in it.
+func TestDownloadTakesWhatIsTicked(t *testing.T) {
+	f := filesFixture(t, true)
+	f.srv.SeedFile(filesDocs+"a.txt", "alpha")
+	f.srv.SeedFile(filesDocs+"b.txt", "beta")
+	f.srv.SeedFile(filesDocs+"sub/c.txt", "gamma")
+	op := f.at("download", "")
+	one := f.h.do(postForm(op, f.sess, url.Values{"item": {"a.txt"}}))
+	if one.Code != http.StatusOK || one.Body.String() != "alpha" {
+		t.Fatalf("one file: %d %q", one.Code, one.Body.String())
+	}
+	many := f.h.do(postForm(op, f.sess, url.Values{"item": {"a.txt", "b.txt", "sub"}}))
+	if many.Code != http.StatusOK || many.Header().Get("Content-Type") != "application/zip" {
+		t.Fatalf("several: %d %v", many.Code, many.Header())
+	}
+	zr, err := zip.NewReader(bytes.NewReader(many.Body.Bytes()), int64(many.Body.Len()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, zf := range zr.File {
+		names = append(names, zf.Name)
+	}
+	if strings.Join(names, ",") != "a.txt,b.txt,sub/,sub/c.txt" {
+		t.Errorf("zip = %v", names)
 	}
 }

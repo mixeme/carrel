@@ -2356,6 +2356,14 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 	openSections(t, app)
 	readFolders(t, app)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	// The list of links draws davloom with its three devices, the last
+	// answer the morning of the frames, and «Backups are running» in its
+	// rail's foot (s-publish-1, -18, -20): the devices, jobs and runs of
+	// the set.
+	for _, id := range mockupDevices(t, app) {
+		app.h.users.TouchDevice(id, mockupDayAt(t, "2026-08-16 09:41"))
+	}
+	mockupBackups(t, app)
 	for _, one := range []struct{ dir, state, route string }{
 		{"app-files", "normal", "/app/files"},
 		{"app-files-published", "normal", "/app/files/published"},
@@ -2546,11 +2554,15 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 		"to": {attachments}}.Encode(), app.sess, url.Values{"name": {"2026-07"}})))
 
 	// The queue (s-files-2): a report and a poster uploaded, a name already
-	// taken — three rows, as the frame draws them (its poster is still on
-	// its way there; an answer of the server has every file's end).
-	rec := app.h.do(uploadForm(app.filesAt(t, "Documents", "upload", "carrel", "attachments"), app.sess, false,
+	// taken, and a file the storage would not write without its size — the
+	// four rows of the frame (note 83 of Typecase; its poster is still on
+	// its way there, an answer of the server has every file's end).
+	sftp := app.servers["sftpgo · vps"]
+	sftp.RefuseUnsizedPUT = true
+	rec := app.h.do(sizedUpload(app.filesAt(t, "Documents", "upload", "carrel", "attachments"), app.sess,
 		upload{"отчёт-июль.pdf", strings.Repeat(".", 4300000)}, upload{"плакат.png", strings.Repeat(".", 8700000)},
-		upload{"release-checklist.md", "# again"}))
+		upload{"release-checklist.md", "# again"}, upload{"архив-2025.zip", ""}))
+	sftp.RefuseUnsizedPUT = false
 	if rec.Code >= 400 {
 		t.Fatalf("upload: %d %s", rec.Code, rec.Body)
 	}
@@ -3289,4 +3301,29 @@ func TestFixtureImport(t *testing.T) {
 		const md = "---\r\ntitle: Встреча с подрядчиком\r\ndate: 2026-03-11\r\ncategories: работа\r\n---\r\n\r\nОбсудили смету и сроки.\r\n"
 		app.compare(t, "app-note-import/preview.json", app.h.do(importRequest(notes+"/import", app.sess, false, "2026-03-11-podryadchik.md", []byte(md))))
 	})
+}
+
+// sizedUpload is the upload of a page with scripts: each file's size sent
+// before it (size.‹name›), except a file with no body — it goes as the page
+// without scripts sends it, its size unsaid, and a storage that needs one
+// refuses it (s-files-24).
+func sizedUpload(path string, sess *session.Session, files ...upload) *http.Request {
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	_ = w.WriteField("_csrf", sess.CSRFToken())
+	for _, f := range files {
+		body := f.body
+		if body != "" {
+			_ = w.WriteField("size."+f.name, strconv.Itoa(len(body)))
+		} else {
+			body = "zip"
+		}
+		part, _ := w.CreateFormFile("file", f.name)
+		_, _ = part.Write([]byte(body))
+	}
+	_ = w.Close()
+	req := httptest.NewRequest(http.MethodPost, path, &buf)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: sess.ID()})
+	return req
 }

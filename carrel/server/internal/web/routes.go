@@ -87,6 +87,7 @@ func (s *Server) registerRoutes() {
 	s.handle("GET /app/files", (*Server).getFilesRoot)
 	s.handle("GET /app/files/{account}/{col}/{path...}", (*Server).getFiles)
 	s.handle("GET /app/files/{account}/{col}/download/{path...}", (*Server).getFilesDownload)
+	s.handle("POST /app/files/{account}/{col}/download/{path...}", (*Server).postFilesDownload)
 	s.handle("POST /app/files/{account}/{col}/upload/{path...}", (*Server).postFilesUpload)
 	s.handle("POST /app/files/{account}/{col}/mkcol/{path...}", (*Server).postFilesMkcol)
 	s.handle("POST /app/files/{account}/{col}/op/{path...}", (*Server).postFilesOp)

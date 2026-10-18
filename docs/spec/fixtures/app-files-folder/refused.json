@@ -50,22 +50,26 @@
         "target": "sheet"
       },
       {
-        "enabled": false,
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/download/carrel/attachments/",
         "icon": "i-download",
         "id": "file.download",
         "label": "Download",
-        "method": "GET",
-        "reason": "Download takes one file."
+        "method": "POST",
+        "submits": true
       },
       {
         "csrf": "csrf",
-        "enabled": false,
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/op/carrel/attachments/?op=rename",
         "icon": "i-pencil",
         "id": "file.rename",
         "label": "Rename",
         "method": "POST",
-        "reason": "Rename takes one item.",
-        "submits": true
+        "submits": true,
+        "target": "sheet",
+        "unfit": true
       },
       {
         "csrf": "csrf",
@@ -393,7 +397,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [
       {
         "csrf": "csrf",

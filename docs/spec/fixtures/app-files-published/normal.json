@@ -23,7 +23,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [],
     "nav": [
       {
@@ -72,7 +72,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/davloom",
         "id": "settings.davloom",
@@ -80,7 +80,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/backup",
         "icon": "i-archive",
@@ -116,10 +116,34 @@
       {
         "line": [
           {
-            "text": "No device has connected since the start."
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
           }
         ],
-        "title": "davloom · running · 0 devices",
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
         "tone": "on"
       }
     ],

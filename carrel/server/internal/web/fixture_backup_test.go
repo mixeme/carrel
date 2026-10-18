@@ -18,6 +18,22 @@ import (
 func TestFixtureBackupStates(t *testing.T) {
 	app := newMockupApp(t)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	_, home := mockupBackups(t, app)
+	app.compare(t, "app-settings-backup/jobs.json", app.h.do(get("/app/settings/backup", app.sess)))
+
+	// A job's page the moment its line was issued (s-backup-2, Нс61, Нс62):
+	// the form in its rubrics, the tick on, the card with the line once.
+	now := mockupNow(t).Add(mockupSince)
+	app.sess.SetUnlockUntil(now.Add(4*time.Minute + 12*time.Second))
+	app.compare(t, "app-settings-backup/job.json", app.h.do(postForm("/app/settings/backup?op=trigger&job="+home, app.sess, url.Values{})))
+}
+
+// mockupBackups are the jobs of s-backup-1 and their runs, made through the
+// service on the clock of the frames: every frame that draws «Backups are
+// running» in the rail's foot (s-publish-1) stands on them. It answers the
+// IDs of the work job and the home one.
+func mockupBackups(t *testing.T, app *mockupApp) (string, string) {
+	t.Helper()
 	key, _ := app.sess.DataKey()
 	sel := func(slugs ...string) []sealed.Selection {
 		var out []sealed.Selection
@@ -69,11 +85,5 @@ func TestFixtureBackupStates(t *testing.T) {
 		}
 	}
 	app.h.users.SetClock(mockupNow(t))
-	app.compare(t, "app-settings-backup/jobs.json", app.h.do(get("/app/settings/backup", app.sess)))
-
-	// A job's page the moment its line was issued (s-backup-2, Нс61, Нс62):
-	// the form in its rubrics, the tick on, the card with the line once.
-	now := mockupNow(t).Add(mockupSince)
-	app.sess.SetUnlockUntil(now.Add(4*time.Minute + 12*time.Second))
-	app.compare(t, "app-settings-backup/job.json", app.h.do(postForm("/app/settings/backup?op=trigger&job="+home, app.sess, url.Values{})))
+	return work, home
 }
