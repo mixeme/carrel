@@ -2757,6 +2757,32 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
    - **Стрелка поля-списка** поднята на 1,5 px во всех кадрах (владелец,
      18.10; `35c19c0`) — только вид, коробки те же.
 
+Записка 84 от 18.10.2026 (Typecase `8f2dbd6`; задача 195 п. 8). По порядку
+обмена `4cd37cf`: записка одна, копию макета переносит переход клиента.
+**Последний коммит Typecase, который она описывает, — `8f2dbd6`**.
+
+84. **Администрирование: остаток 195.**
+   - **«2 min ago» в шапке** — нет ни в одном кадре администрирования
+     (19 кадров): опрашивать нечего. `Top.Refresh` у страниц `/admin/…` —
+     пусто.
+   - **Users** (`s-admin-2`, `-24`, `-34`): шесть строк при «6 accounts · 2
+     administrators · 4 covered by escrow» (olga — Administrator,
+     deposited; petr — deposited; ivan — без копии). Строки «Deleting an
+     account is confirmed…» под таблицей нет.
+   - **Add users** (`s-admin-1`): имена — ваши (`role`, `email`; карточка
+     пароля — скрытое `action=user`, `login`, `email`, `password`;
+     регистрация — `action=selfreg`, `selfReg`); приглашение —
+     `/admin/invites?action=link`, Send invitation —
+     `formaction="/admin/invites?action=send"`. Email (optional) — **пустое
+     поле, без «—»** (владелец, 18.10).
+   - **`s-admin-18`** (почта не настроена): карточка приглашения целиком —
+     Role и Create link работают, выключена только Send invitation с
+     причиной; регистрация — Save выключена.
+   - **`s-admin-19`** (отказы полей): карточка целиком — Role и
+     предупреждение «Until the user changes this password, you can sign in
+     as them.»; ряд полей — **`CardFields{Top: true}`** (по верху), Create
+     user — в `Field{Label: " "}` (по линии полей).
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
