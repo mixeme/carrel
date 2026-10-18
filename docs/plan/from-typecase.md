@@ -2810,6 +2810,41 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      as them.»; ряд полей — **`CardFields{Top: true}`** (по верху), Create
      user — в `Field{Label: " "}` (по линии полей).
 
+Записка 85 от 19.10.2026 (Typecase `631f76a`; задача 193 пп. 1, 2). По порядку
+обмена `4cd37cf`: записка одна, копию макета переносит переход клиента.
+**Последний коммит Typecase, который она описывает, — `631f76a`**.
+
+85. **Задание копии: форма (`s-backup-2`, `-3`).**
+   - **п. 1 — «What to copy»:** по колонке на подключение
+     (`FieldGrid{Items: []FieldGridPart{FieldGridColumn{Items: []TickRow}}}`
+     — новое): строка подключения и его коллекции под ней, вместе при любом
+     переносе сетки. Коллекции — флажки формы `src`, значение
+     `«account|path»` (ваш `selValue`), `TickRow{Send: Send{Name: "src",
+     Value: …}}`. **Отметка подключения ничего не шлёт** — показывает счёт
+     («4 of 6»), со сценарием отмечает/снимает его коллекции (`Send` пуст).
+     Порядок — по подключениям, как в рейле. Подпись рубрики — ваша
+     `chosenAside`. Вместо пояснения — одна строка «Files go as files;
+     calendars, tasks and notes as .ics, address books as .vcf.» (прежняя
+     говорила, что задачи и заметки отдельно не выбрать, — неверно).
+   - **Where to:** `mode` = `webdav|download|both`; **Collection — выбор с
+     метками коллекций** (`Drop` + радио `dest`, read-only — `Reason`),
+     как `s-backup-9`; **«Folder in it» + Browse** — `Button{To:
+     "/app/settings/backup?op=browse&job=…"}`: форма уходит целиком,
+     ответ — лист выбора папки поверх задания, набранное держится (как у
+     папки вложений); `keep`. Пароль архива — поле пароля, при заданном —
+     плейсхолдер «••••••••••••».
+   - **п. 2 — «When» (владелец, 19.10):** флажок один — «On sign-in, if the
+     last copy is older than N days» (`signin.on` + `signin`; снят —
+     никогда). Под ним — сообщение-перечень: «**Also started by** • Run now
+     — in the job list • Your own clock — cron, GoSentry, a job in Gitea,
+     curl: the line to paste is on the job's page». **«On demand» и «On a
+     clock of your own» флажками нет**; карточки строки (выдача секрета) на
+     форме нет — она на странице задания (фрагменты `s-backup-4`, `-5`),
+     ваше отдельное действие `backup.trigger.clock` верно. Сегмент
+     crontab · GoSentry · Gitea · curl — ссылки `?trigger=` (вид, не
+     хранится). **Run now в шапке формы нет** (запускал бы сохранённое, не
+     набранное) — только в списке заданий.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
