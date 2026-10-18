@@ -2694,6 +2694,69 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      see the marked fields.» **Границы чисел** — только строкой отказа у
      поля, отдельных подсказок под полями нет.
 
+Записка 83 от 18.10.2026 (Typecase `9453114`, `35c19c0`, `b804598`; задачи
+195 п. 6, 7, 205). По порядку обмена `4cd37cf`: записка одна, копию макета
+переносит переход клиента. **Последний коммит Typecase, который она
+описывает, — `b804598`** (476 кадров).
+
+83. **Файлы против «выключено с причиной», листы, удаление учётной записи.**
+   - **205 п. 1–3 — ваши правила верны, кадры подтянуты:** `states-35` —
+     New folder в подвале рейла корня выключена, «Open a folder to make one
+     in it.»; Details выключена, «Choose one file to see its details.», в
+     `s-files-2`, `states-32`…`-34`; `states-34` — в полосе выделения
+     (без сценария) Rename, Move, Delete выключены, «Public is
+     read-only.» (возьмите вашу причину хранилища).
+   - **п. 4:** да — часть строк выбрана → `is-part` (`s-files-1` поправлен).
+     **п. 5:** да — полоса одна, у плиток с «Clear selection» (`s-files-5`).
+   - **п. 6:** отказ — строкой в очереди страницы `s-files-2` (четвёртая
+     строка, «Uploading 2 of 4»): имя и причина `tc-dim--danger`, без
+     кнопок. Фикстуре очереди — четыре строки с отказом.
+   - **п. 7:** Upload пустой папки (`states-32`) — **подпись поля файла
+     без стрелки** (`Button{File: &FileField{Form: "post-upload", Name:
+     "file", Label: "Files", Size: "size", Multiple}, Label: "Upload", Icon:
+     "upload", Kind: ButtonPrimary}` — как пункт Files стрелки шапки),
+     рядом `NoScript` кнопка «Send» (`Form: "post-upload"`). Папки — из
+     стрелки в шапке.
+   - **п. 8 — `Drop` в шапке листа:** `SheetHeadPart` теперь берёт `Drop`,
+     `Drop.Place = Pushed` ставит его в конец; триггер — `Pick`, меню —
+     ссылки `MenuItem{Href, Swap}` (новое поле **`MenuItem.Swap`**, как у
+     узла дерева), у открытого `On`; не ответившее — `Reason` («webdav ·
+     nas did not answer.») без `Href` в кадре (`Href: "#"` + `Reason` →
+     `aria-disabled`). Кадр меню — **`s-files-26`**; закрытым он стоит в
+     `s-files-4`, `-11`, `-13`, `-16`, `-19`, `-25`, `s-notes-11`. Вид
+     шапки прежний.
+   - **п. 9:** да — `s-files-11` теперь та же форма, что перенос, с Copy и
+     «Open the folder» (`id="copy-sheet"`, `?op=copy`). **п. 10:** да —
+     сообщение о `MOVE` остаётся и при отказе New folder (`s-files-13`).
+     **п. 11:** `s-files-12` — `tc-msg--flush-top2`.
+   - **п. 12:** да — список выбранных файлов `s-notes-11` пуст, строка — в
+     шаблоне. **п. 13:** крестика нет (лист со своим адресом закрывается
+     Cancel) — убран из `s-notes-11`. **п. 14:** узлы дерева листа
+     загрузки — ссылки на лист над этой папкой (`TreeRow{Href, Swap:
+     "upload-sheet"}`; `Swap` у ссылки теперь печатается), в `s-notes-11`
+     и `s-files-19`. Владелец 18.10: **подписи под деревом в листах
+     загрузки нет** («The folder is the attachment folder…») — её говорит
+     метка «attachment folder» узла; отказ New folder в карточке —
+     `Msg{Tone: MsgAlert, Space: MsgFlushY8}` (8 px сверху и снизу).
+   - **п. 15:** страница — **`s-publish-20`** (`data-part="no-mail"`): как
+     `s-publish-1`, у строк нет Send ни кнопкой, ни в меню.
+   - **195 п. 6 — удаление учётной записи:** лист **`s-admin-34`**
+     (`/admin/delete?target=`, поверх Users): «Delete anna», красная плашка
+     «Carrel forgets this account: its connections and saved passwords,
+     published links, devices, backups and the history of its password. Its
+     records on the servers stay as they are.», поле «Type the login to
+     confirm» (`login`, образец — логин), «Delete account» — POST `/admin/`
+     со скрытыми `action=delete`, `target`; Cancel — ссылка на `/admin/`.
+     Delete в «⋯» строки (`s-admin-12`) — ссылка на лист; снимите своё
+     выключение «needs its own dialogue».
+   - **195 п. 7 — Whose без сценариев:** лист перерисовывать не нужно.
+     Образец поля подтверждения — логин выбранного при открытии листа; смена
+     Whose без сценария его не меняет, и это не беда: сервер сверяет
+     набранное с выбранным в Whose. Со сценарием — ваш `?target=` живым
+     слоем.
+   - **Стрелка поля-списка** поднята на 1,5 px во всех кадрах (владелец,
+     18.10; `35c19c0`) — только вид, коробки те же.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
