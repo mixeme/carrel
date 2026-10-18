@@ -2582,6 +2582,38 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      выбрано «Full width») ставят куку полной ширины; переключатель полосы
      показывает выбор из куки.
 
+Записка 80 от 18.10.2026 (Typecase `844ab51`; задачи 201, 195 п. 8 —
+`s-admin-5`). По порядку обмена `4cd37cf`: записка одна, копию макета
+переносит переход клиента. **Последний коммит Typecase, который она
+описывает, — `844ab51`** (468 кадров).
+
+80. **Проверка DAV у администратора.**
+   - **201:** поле «Certificate fingerprint · SHA-256 · optional»
+     (`certFingerprint`, моноширинно, образец «only for a certificate the
+     system does not trust»), как в `s-profile-2`. Подсказка пароля —
+     **«Asked each time, never kept.»** (владелец, 18.10: короче вашей).
+     Пароль — поле пароля, не текст; после проверки пуст.
+   - **Форма** `id="dav"`, POST `/admin/dav`: `server`, `login`,
+     `password`, `certFingerprint`, `csrf`; Test discovery —
+     `formaction="/admin/dav?op=test"`. Порядок: поля → Test discovery →
+     след (`Diag`) → второй этап. Второй этап стоит **под следом**, вне
+     формы, и называет её: отметка `Check{Name: "agree", Value: "on", Of:
+     "dav"}` с вашей подсказкой, «Run the full check» — `Button{Form: "dav",
+     To: "/admin/dav?op=exercise", Kind: ButtonDanger}`. Строку отказа без
+     отметки («Tick the box to agree…») ставьте ошибкой у отметки, как у
+     вас. Плашки «The second, mutating stage … never runs silently» нет —
+     её сказала подсказка отметки.
+   - **Состояния:** `s-admin-27` (`empty`) — адрес пуст с образцом
+     `https://dav.example.org/`, следа и второго этапа нет; `s-admin-28`
+     (`broken`) — красное «Discovery stopped at the principal.» (имя
+     шага), под ним след до этого шага; второго этапа нет; `s-admin-29`
+     (`exercised`) — под вторым этапом таблица `ExerciseReport`: столбцы
+     «Operation», «What happened»; строка — «Create, read back, delete ·
+     event|task|contact|file», отметка-флажок как в `s-admin-4` (`is-done`
+     / красная строка `is-sel` с `tc-dim--danger`), ответ сервера
+     моноширинно («PUT · GET · DELETE … → 201 · 200 · 204», отказ — «PUT …
+     → 403 Forbidden»).
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
