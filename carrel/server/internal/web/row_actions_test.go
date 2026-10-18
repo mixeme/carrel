@@ -180,7 +180,9 @@ func TestBackupRowsAndJobPageAreTheFrame(t *testing.T) {
 		t.Errorf("never run: subtitle %q", saidRuns(page.Subtitle))
 	}
 	drawn(t, "job page", page.Add.Actions, "s-backup-2")
-	if got := ids(page.Add.Actions); !equalStrings(got, []string{"backup.save", "backup.cancel", "backup.run"}) {
+	// Run now is the list's only (note 85 of Typecase): here it would run
+	// what was saved, not what is typed.
+	if got := ids(page.Add.Actions); !equalStrings(got, []string{"backup.save", "backup.cancel"}) {
 		t.Errorf("job page actions = %v", got)
 	}
 	sayWhy(t, "job page", page.Add.Actions...)
@@ -205,6 +207,7 @@ func TestBackupRowsAndJobPageAreTheFrame(t *testing.T) {
 	// A job that is off does not run by itself: not at sign-in.
 	v := jobForm(f, sealed.BackupToWebDAV, "8", "pw")
 	v.Del("on")
+	v.Set("signin.on", "on")
 	v.Set("signin", "1")
 	if rec := f.h.do(postForm(page.Add.Action, f.sess, v)); rec.Code != http.StatusSeeOther {
 		t.Fatalf("save off: %d %s", rec.Code, rec.Body)
@@ -239,13 +242,9 @@ func TestBackupRowsAndJobPageAreTheFrame(t *testing.T) {
 func TestTriggerIsTurnedOffByItsTick(t *testing.T) {
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
-	tick := regexp.MustCompile(`(?s)<label class="tc-check">(?:<input[^>]*>)?(?:<span[^>]*></span>)?(On a clock of your own.*?)</label>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
-	if tick == nil {
-		t.Fatal("s-backup-2 draws no «On a clock of your own»: read the frame again")
-	}
-	// The badge «local» is the instance's, not the tick's; «cron» is set in
-	// mono and followed by its comma.
-	label := strings.ReplaceAll(frameText(regexp.MustCompile(`(?s)<span class="tc-badge[^"]*"[^>]*>.*?</span>`).ReplaceAllString(tick[1], "")), " ,", ",")
+	// The tick left the form (note 85 of Typecase) and no frame draws it
+	// yet (Typecase's task 207): its words are the server's.
+	label := triggerClockWords
 	clock := func() view.Action {
 		page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
 		if a := actionByID(page.Jobs[0].Actions, "backup.trigger.off"); a != nil {

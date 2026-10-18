@@ -296,10 +296,6 @@ FRAME_TODO = {
     # рисует, и фикстуры карточки с ним сходятся (Им19).
     "app-event-import: коллекции рейла":
         "задача Typecase 199 п. 1 (to-typecase.md): s-io-6 не рисует «Дни рождения», s-agenda-2 рисует",
-    # Дерево «What to copy» страницы задания (s-backup-2) — не поля формы:
-    # что шлёт трёхпозиционная отметка аккаунта (Нс58).
-    "app-settings-backup: коллекции рейла":
-        "задача Typecase 193 п. 1 (to-typecase.md): строки дерева без имён, Нс58",
 }
 
 # Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
@@ -563,10 +559,14 @@ def canon_frame(route):
 
 def frame_rail(frame):
     cols = []
+    # Только рейл: он в разметке раньше главной области (tc-main), а строки-отметки
+    # бывают и в формах главной («What to copy» задания копии, s-backup-2).
+    at = frame.find('<div class="tc-main')
+    rail = frame[:at] if at >= 0 else frame
     # Модификаторы стоят в классе с любой стороны: "tc-tickrow is-all is-on".
     # Шаблон — сразу строка рейла: общий <div class="..."> съел бы внешнюю
     # секцию до первого </div> вместе с первой строкой.
-    for m in re.finditer(r'<div class="((?:[^" ]+ )*tc-tickrow(?: [^"]*)?)">(.*?)</div>', frame, re.S):
+    for m in re.finditer(r'<div class="((?:[^" ]+ )*tc-tickrow(?: [^"]*)?)">(.*?)</div>', rail, re.S):
         classes = m.group(1).split()
         lab = re.search(r'<span class="tc-tickrow__label">([^<]*)</span>', m.group(2))
         meta = re.search(r'<span class="tc-tickrow__meta">([^<]*)</span>', m.group(2))

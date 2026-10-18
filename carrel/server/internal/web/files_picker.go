@@ -34,6 +34,9 @@ func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
 	case "attachments":
 		s.writeMailSheet(w, r, s.attachmentsPicker(r, sess))
 		return
+	case "backup":
+		s.writeMailSheet(w, r, s.backupFolderPicker(r, sess))
+		return
 	default:
 		s.notFound(w, r)
 		return
@@ -290,5 +293,51 @@ func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fi
 	s.newFolder(&sheet.Tree, chosen, "/app/files/picker", url.Values{"for": {"upload"}, "mkcol": {"1"}}, "/app/files/picker", back, open)
 	sheet.Actions = []view.Action{upload,
 		{ID: "files.picker.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.route("/app/files")}}
+	return sheet
+}
+
+// backupFolderPicker is Browse of a backup job's «Folder in it» (s-backup-2,
+// Typecase's note 85): the tree of the file collections, the folder typed
+// chosen; Choose takes the job typed back to its page with this folder,
+// Cancel takes it back as it was. job names the job (its ID, «new»).
+func (s *Server) backupFolderPicker(r *http.Request, sess *session.Session) view.FilePickerSheet {
+	blob := s.catalogOf(sess)
+	key := r.FormValue("job")
+	var chosen *fileCtx
+	if to := r.FormValue("to"); to != "" {
+		chosen, _ = s.folderAddress(sess, to)
+	}
+	if chosen != nil && chosen.col.Feed {
+		chosen = nil
+	}
+	server := s.treeServer(blob, chosen, r.FormValue("server"), false)
+	if chosen != nil && chosen.conn.ID != server {
+		chosen = nil
+	}
+	sheet := view.FilePickerSheet{
+		Title:   "Folder of the backup",
+		Purpose: "Where the archives of this job go: a folder of a file collection you can write to. Carrel makes it on first use.",
+		Tree:    *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen, server),
+		Where:   wherePath(chosen),
+		Servers: s.fileServers(sess, blob, server, false, func(id string) string {
+			return s.postQuery("/app/files/picker", url.Values{"for": {"backup"}, "job": {key}, "server": {id}})
+		}),
+	}
+	s.markTree(&sheet.Tree, blob, "")
+	linkTree(&sheet.Tree, func(id string) string {
+		return s.postQuery("/app/files/picker", url.Values{"for": {"backup"}, "job": {key}, "to": {id}})
+	})
+	choose := view.Action{ID: "files.picker.choose", Label: "Choose this folder", Method: "GET", Primary: true}
+	switch {
+	case chosen == nil:
+		choose.Reason = "Choose a folder in the tree."
+	case chosen.col.ReadOnly:
+		choose.Reason = text(readOnlyReason)
+	default:
+		choose.Enabled = true
+		choose.Href = s.postQuery("/app/settings/backup", url.Values{"job": {key}, "op": {"folder"}, "to": {sheet.Tree.Chosen}})
+	}
+	sheet.Actions = []view.Action{choose,
+		{ID: "files.picker.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.postQuery("/app/settings/backup", url.Values{"job": {key}, "held": {"1"}})}}
 	return sheet
 }

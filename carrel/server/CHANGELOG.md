@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.350 — 2026-10-19
+
+Typecase's note 85 (`631f76a`): the backup job's form (193 pp. 1, 2).
+
+### Added
+
+- **Browse of a job's folder**: the form goes as typed, the answer is the
+  chooser of the folder over the job; its choice is the job's page again
+  with what was typed and the folder chosen, Cancel as it was — nothing
+  saved on the way.
+
+### Changed
+
+- **What to copy goes by connection**: each connection's collections under
+  it, with their marks and kinds — cal., tasks, notes, book, files — and
+  the line under them «Files go as files; calendars, tasks and notes as
+  .ics, address books as .vcf.»
+- **The destination** carries the collections' marks; a read-only one says
+  «Read-only: this account cannot write here». «Folder» is «Folder in it».
+- **When is one tick**: on sign-in, if the last copy is older than so many
+  days; what else starts a job is said under it. Run now left the job's
+  page — the list keeps it.
+- **The card of the line** has its tabs as links (`?trigger=`).
+
+### For consumers
+
+- `FieldSet.HintRuns`; `RunBreak`; `TriggerBlock.Tabs` (C-6, C-8); the
+  form's `signin.on`; `?op=browse`, `?op=folder`, `?held=1`,
+  `/app/files/picker?for=backup` (C-5).
+
 ## v0.2.349 — 2026-10-19
 
 Typecase's note 84 (`8f2dbd6`): the rest of the administration (195 p. 8).

@@ -35,6 +35,10 @@ const (
 	// DraftNewAttach is the files of a new event, task or note waiting for
 	// Save under the UID it will have, with what was typed (S-20).
 	DraftNewAttach
+	// DraftBackupJob is a backup job as its form was typed when Browse
+	// opened the folder chooser over it (s-backup-2): the chooser's answer
+	// is the form again with what was typed and the folder chosen.
+	DraftBackupJob
 	// DraftProfileLink is the link to an Apple profile last issued (S-23):
 	// the page keeps its card while the link lives (s-plan-1). The state
 	// has only its hash, so the link is here, in memory, or nowhere.

@@ -2,12 +2,14 @@ package web
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"mime"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -443,12 +445,13 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 			page.Subtitle = join("Job · destination ", strongRun(where), " · "+last)
 		}
 	}
-	// The job's own page (s-backup-2): Cancel and Run now beside Save, the
-	// deletion at its foot with what it does not delete.
-	if saved, ok := blob.BackupJob(job.ID); ok && job.ID != "" {
+	// The job's own page (s-backup-2): Cancel beside Save, the deletion at
+	// its foot with what it does not delete.
+	if _, ok := blob.BackupJob(job.ID); ok && job.ID != "" {
+		// Run now stands in the list only (note 85): here it would run what
+		// was saved, not what is typed.
 		page.Add.Actions = append(page.Add.Actions,
-			view.Action{ID: "backup.cancel", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true},
-			s.backupRunAction(saved, "Run now"))
+			view.Action{ID: "backup.cancel", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true})
 		page.Delete = &view.Action{ID: "backup.delete", Label: "Delete job", Method: "POST", Danger: true, Enabled: true,
 			Href: s.postQuery("/app/settings/backup", url.Values{"op": {"delete"}, "job": {job.ID}})}
 		page.DeleteNote = "Archives already made stay where they are: the schedule is deleted, not the copies."
@@ -512,21 +515,28 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 	}
 	var srcOpts, destOpts []view.Option
 	for _, conn := range blob.Connections {
+		first := true
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Gone {
 				continue
 			}
 			v := selValue(conn.ID, col.Path)
-			label := text(string(stamp(connLabel(conn), collectionLabel(col))))
-			srcOpts = append(srcOpts, view.Option{Value: v, Label: label, Selected: chosen[v]})
+			// What to copy goes by connection (s-backup-2, Typecase's note
+			// 85): its collections under it, each its mark and its kind.
+			o := view.Option{Value: v, Label: text(collectionLabel(col)), Selected: chosen[v], Colour: catalogColour(col), Meta: sourceKind(col)}
+			if first {
+				o.Group, first = text(connLabel(conn)), false
+			}
+			srcOpts = append(srcOpts, o)
 			// A read-only file collection is shown and cannot be taken
 			// (s-backup-9).
 			if col.Has(view.KindFile) {
-				o := view.Option{Value: v, Label: label, Selected: v == selValue(job.DestAccount, job.DestPath) && !col.ReadOnly}
+				d := view.Option{Value: v, Label: text(string(stamp(connLabel(conn), collectionLabel(col)))), Colour: catalogColour(col),
+					Selected: v == selValue(job.DestAccount, job.DestPath) && !col.ReadOnly}
 				if col.ReadOnly {
-					o.Disabled, o.Reason = true, "Read-only"
+					d.Disabled, d.Reason = true, "Read-only: this account cannot write here"
 				}
-				destOpts = append(destOpts, o)
+				destOpts = append(destOpts, d)
 			}
 		}
 	}
@@ -552,6 +562,21 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 		action += "&job=" + url.QueryEscape(job.ID)
 	}
 	form := withPrimary(s.plainForm(action, "POST"), "backup.save", "Save")
+	// Browse sends the form as typed and answers with the folder chooser
+	// over the job (s-backup-2, note 85).
+	browseQ := url.Values{"op": {"browse"}, "job": {job.ID}}
+	if job.ID == "" {
+		browseQ.Set("job", "new")
+	}
+	browse := view.Action{ID: "backup.browse", Label: "Browse", Method: "POST", Enabled: true, Submits: true, Href: s.postQuery("/app/settings/backup", browseQ)}
+	signin := ""
+	if job.OnSignInDays > 0 {
+		signin = "on"
+	}
+	days := job.OnSignInDays
+	if days <= 0 {
+		days = 7
+	}
 	// Name and the switch, then a rubric each (s-backup-2, Нс57).
 	form.Sets = []view.FieldSet{
 		{Rows: []view.FormRow{
@@ -561,8 +586,8 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 				Options: []view.Option{{Value: "1", Label: "Job is on", Selected: !job.Off}}},
 		}},
 		{Legend: "What to copy", LegendAside: s.chosenAside(sess.AccountID(), blob, job),
-			Hint: "A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them — they cannot be picked separately.",
-			Rows: []view.FormRow{{Name: "src", Label: "What to copy", Kind: view.InputCheck, Options: srcOpts, Error: errs["src"]}}},
+			HintRuns: join("Files go as files; calendars, tasks and notes as ", monoRun(".ics"), ", address books as ", monoRun(".vcf"), "."),
+			Rows:     []view.FormRow{{Name: "src", Label: "What to copy", Kind: view.InputCheck, Options: srcOpts, Error: errs["src"]}}},
 		{Legend: "Where to", Rows: []view.FormRow{
 			{Name: "mode", Label: "Where to", Kind: view.InputRadio, Options: modes,
 				HintRuns: join(strongRun("Download"), " streams the archive out and writes nothing to the server: no folder, no retention — the copy is yours to keep. "+
@@ -570,7 +595,7 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 					"a browser is not there at that hour, a machine with a disk is. ", strongRun("Both"), " does the two at once — and then the trigger has ",
 					strongRun("two steps"), ", because the file still has to be taken.")},
 			{Name: "dest", Label: "Collection", Kind: view.InputSelect, Options: destOpts, Error: errs["dest"]},
-			{Name: "folder", Label: "Folder", Kind: view.InputText, Value: text(strings.Join(job.DestFolder, "/")), Error: errs["folder"], Mono: true},
+			{Name: "folder", Label: "Folder in it", Kind: view.InputText, Value: text(strings.Join(job.DestFolder, "/")), Error: errs["folder"], Mono: true, Extra: &browse},
 			{Name: "keep", Label: "Keep copies", Kind: view.InputNumber, Value: text(strconv.Itoa(job.Keep)), Error: errs["keep"], Mono: true,
 				HintRuns: join("Copies past the "+keepOrdinal(job.Keep)+" are deleted ", strongRun("after"),
 					" the new one has been read back and checked, not before. The file is dated and never overwritten.")},
@@ -582,10 +607,17 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 			{Name: "password", Label: "Archive password", Kind: view.InputPassword, Error: errs["password"], Placeholder: passwordSet,
 				Hint: "Separate from the sign-in password: the destination may be somebody else's hosting. Forget it and this job's archives open for nobody, including you."},
 		}},
+		// One tick (the owner, 19.10.2026; note 85): the copy at sign-in when
+		// the last is older than so many days; what else starts it is said
+		// under it — Run now of the list, the line of the job's page.
 		{Legend: "When",
-			Hint: "No time picker here, and that is deliberate: Carrel keeps no clock of its own, so whoever holds the schedule holds the password. What it hands you instead is the line to paste where the clock already is.",
-			Rows: []view.FormRow{{Name: "signin", Label: "On sign-in, if the last copy is older than (days)", Kind: view.InputNumber, Mono: true,
-				Value: text(strconv.Itoa(job.OnSignInDays)), Hint: "0 is never."}}},
+			HintRuns: view.Runs{strongRun("Also started by"), {Mark: view.RunBreak}, {Text: "• Run now — in the job list"}, {Mark: view.RunBreak},
+				{Text: "• Your own clock — "}, monoRun("cron"), {Text: ", GoSentry, a job in Gitea, "}, monoRun("curl"), {Text: ": the line to paste is on the job’s page"}},
+			Rows: []view.FormRow{
+				{Name: "signin.on", Label: "On sign-in, if the last copy is older than", Kind: view.InputCheck, Value: text(signin),
+					Options: []view.Option{{Value: "on", Label: "On sign-in, if the last copy is older than", Selected: signin != ""}}},
+				{Name: "signin", Label: "Days", Kind: view.InputNumber, Mono: true, Value: text(strconv.Itoa(days))},
+			}},
 	}
 	return focused(form, "name")
 }
@@ -697,6 +729,10 @@ func (s *Server) jobFromForm(r *http.Request, blob sealed.Blob, job sealed.Backu
 		errs["password"] = "An encrypted archive needs its own password."
 	}
 	job.OnSignInDays, _ = strconv.Atoi(strings.TrimSpace(r.PostFormValue("signin")))
+	// The tick off is never; the days stay a field of it (note 85).
+	if v := r.PostFormValue("signin.on"); v != "on" && v != "true" {
+		job.OnSignInDays = 0
+	}
 	if job.OnSignInDays < 0 {
 		job.OnSignInDays = 0
 	}
@@ -729,8 +765,24 @@ func (s *Server) getSettingsBackup(w http.ResponseWriter, r *http.Request) {
 	if has {
 		editing = &job
 	}
+	// Back from the folder chooser of Browse (note 85): the job as it was
+	// typed, with the folder chosen — or as it was, Cancel.
+	if held, ok := heldJob(sess, q.Get("job")); ok && (q.Get("held") != "" || q.Get("op") == "folder") {
+		if dest, ok := s.folderAddress(sess, q.Get("to")); ok && q.Get("op") == "folder" && !dest.col.ReadOnly {
+			held.DestAccount, held.DestPath, held.DestFolder = dest.conn.ID, dest.col.Path, slices.Clone(dest.segs)
+		}
+		editing = &held
+	}
 	w.Header().Set("Cache-Control", "no-store")
 	page := s.backupPage(sess, editing, nil)
+	// The tab of the card the address opens (s-backup-3).
+	if t := q.Get("trigger"); page.Job != nil && page.Job.Trigger != nil && editing != nil {
+		for _, tab := range triggerTabNames {
+			if tab.id == t {
+				page.Job.Trigger.Tabs = s.triggerTabLinks(*editing, t)
+			}
+		}
+	}
 	switch {
 	case q.Get("job") == "new":
 		// New job (s-backup-1): the page of a job not made yet — the form,
@@ -799,12 +851,17 @@ func (s *Server) postSettingsBackup(w http.ResponseWriter, r *http.Request) {
 	}
 	blob := s.catalogOf(sess)
 	id := r.URL.Query().Get("job")
+	if id == "new" {
+		id = "" // Browse of a job not made yet (note 85)
+	}
 	job, has := blob.BackupJob(id)
 	if id != "" && !has {
 		s.notFound(w, r)
 		return
 	}
 	switch r.URL.Query().Get("op") {
+	case "browse":
+		s.browseJob(w, r, sess, blob, job)
 	case "save":
 		next, errs := s.jobFromForm(r, blob, job)
 		if len(errs) > 0 {
@@ -1024,3 +1081,65 @@ func (s *Server) backupHistory(tf timeFmt, runs []historyRun) []view.BackupHisto
 
 // runs1 is one piece as a sentence.
 func runs1(r view.Run) view.Runs { return view.Runs{r} }
+
+// sourceKind is what a source of a job is, as the tree of «What to copy»
+// says it beside its name (s-backup-2): cal., tasks, notes, book, files —
+// a read-only storage «files · ro».
+func sourceKind(col sealed.Collection) view.Text {
+	switch {
+	case col.Has(view.KindFile) && col.ReadOnly:
+		return "files · ro"
+	case col.Has(view.KindFile):
+		return "files"
+	case col.Has(view.KindContact):
+		return "book"
+	case col.Has(view.KindEvent):
+		return "cal."
+	case col.Has(view.KindTask):
+		return "tasks"
+	case col.Has(view.KindNote):
+		return "notes"
+	}
+	return ""
+}
+
+// browseJob is Browse of a job's form (s-backup-2, note 85): the job as
+// typed is held in the session, and the answer is the chooser of its
+// folder over it — it opens at the folder typed, or at the collection.
+func (s *Server) browseJob(w http.ResponseWriter, r *http.Request, sess *session.Session, blob sealed.Blob, job sealed.BackupJob) {
+	next, _ := s.jobFromForm(r, blob, job)
+	if next.Password == "" {
+		next.Password = job.Password
+	}
+	raw, err := json.Marshal(next)
+	if err != nil {
+		http.Error(w, "could not hold the form", http.StatusInternalServerError)
+		return
+	}
+	sess.SetDraft(session.DraftBackupJob, raw)
+	q := url.Values{"for": {"backup"}, "job": {jobKey(next)}}
+	if fc, ok := s.fileCollection(sess, next.DestAccount, next.DestPath); ok {
+		if _, err := fc.path(next.DestFolder, true); err == nil {
+			q.Set("to", s.route(fc.href("", next.DestFolder, true)))
+		}
+	}
+	s.redirect(w, r, "/app/files/picker?"+q.Encode())
+}
+
+// jobKey is how the address names a job: its ID, «new» before it is made.
+func jobKey(job sealed.BackupJob) string {
+	if job.ID == "" {
+		return "new"
+	}
+	return job.ID
+}
+
+// heldJob is the job Browse held for the job key, if it is that one.
+func heldJob(sess *session.Session, key string) (sealed.BackupJob, bool) {
+	var job sealed.BackupJob
+	raw := sess.Draft(session.DraftBackupJob)
+	if raw == nil || json.Unmarshal(raw, &job) != nil || jobKey(job) != key {
+		return sealed.BackupJob{}, false
+	}
+	return job, true
+}

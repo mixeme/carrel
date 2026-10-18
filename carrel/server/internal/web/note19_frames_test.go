@@ -284,12 +284,10 @@ func TestInvitePageIsTheFrame(t *testing.T) {
 // address of a private network; off for a public one.
 func TestLocalInstanceIsTheShells(t *testing.T) {
 	badge := regexp.MustCompile(`<span class="tc-badge is-local"[^>]*>local</span>`)
-	tick := regexp.MustCompile(`(?s)<label class="tc-check">(?:<input[^>]*>)?(?:<span[^>]*></span>)?On a clock of your own(.*?)</label>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
-	if tick == nil || !badge.MatchString(tick[1]) {
-		t.Fatalf("s-backup-2 draws no «local» at the tick: read the frame again")
-	}
+	// The tick of the job's page left its form (note 85 of Typecase), and
+	// «local» with it; the other screens still draw it.
 	routes := map[string]string{"s-davloom-1": "/app/settings/davloom", "s-publish-1": "/app/files/published",
-		"s-plan-1": "/app/settings/devices", "s-backup-2": "/app/settings/backup"}
+		"s-plan-1": "/app/settings/devices"}
 	for id := range routes {
 		frame, _, _ := strings.Cut(mockupFrame(t, id), "<figcaption")
 		if !badge.MatchString(frame) {
@@ -328,11 +326,9 @@ func TestLocalInstanceIsTheShells(t *testing.T) {
 // under «On a clock of your own», ticked or not (s-backup-2, S-24.4) — and
 // so not a second time in the card of the line.
 func TestClockTickSaysItsPrice(t *testing.T) {
-	m := regexp.MustCompile(`(?s)On a clock of your own.*?</label>\s*<span class="tc-field__hint">(.*?)</span>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
-	if m == nil {
-		t.Fatal("s-backup-2 draws no hint under «On a clock of your own»: read the frame again")
-	}
-	hint := frameText(m[1])
+	// The tick left the form (note 85 of Typecase); no frame draws it yet
+	// (Typecase's task 207), and its hint is the server's words.
+	hint := triggerPriceWords
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
 	if got := openJob(t, f); string(got.ClockHint) != hint || got.Clock.On {
@@ -668,3 +664,11 @@ func TestNewEventIsWrittenInItsZone(t *testing.T) {
 	loc := rec.Header().Get("Location")
 	mustContain(t, body(t, f, loc[strings.LastIndex(loc, "/")+1:]+".ics"), "DTSTART;TZID=Europe/Berlin:20260316T100000", "BEGIN:VTIMEZONE")
 }
+
+// The words of «On a clock of your own» and of its hint, the server's since
+// the tick left the form of s-backup-2 (note 85 of Typecase): no frame
+// draws them until Typecase's task 207.
+const (
+	triggerClockWords = "On a clock of your own — cron, GoSentry, a job in Gitea"
+	triggerPriceWords = "Turning it on stores this job's data key under the server's key — less protection, for convenience: the job can then read without you signed in."
+)

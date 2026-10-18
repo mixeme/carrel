@@ -18,14 +18,6 @@
         "id": "backup.cancel",
         "label": "Cancel",
         "method": "GET"
-      },
-      {
-        "csrf": "csrf",
-        "enabled": true,
-        "href": "/app/settings/backup?job=j-job\u0026op=run",
-        "id": "backup.run",
-        "label": "Run now",
-        "method": "POST"
       }
     ],
     "errors": [],
@@ -84,7 +76,25 @@
         "unfold": null
       },
       {
-        "hint": "A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them — they cannot be picked separately.",
+        "hintRuns": [
+          {
+            "text": "Files go as files; calendars, tasks and notes as "
+          },
+          {
+            "mark": "mono",
+            "text": ".ics"
+          },
+          {
+            "text": ", address books as "
+          },
+          {
+            "mark": "mono",
+            "text": ".vcf"
+          },
+          {
+            "text": "."
+          }
+        ],
         "legend": "What to copy",
         "legendAside": "2 collections and 1 folder chosen · 2.1 GB last time",
         "rows": [
@@ -98,87 +108,125 @@
             "name": "src",
             "options": [
               {
-                "label": "nextcloud · Личный",
+                "colour": "#4a6b52",
+                "group": "nextcloud",
+                "label": "Личный",
+                "meta": "cal.",
                 "selected": true,
                 "value": "a-nc-home|/alice/calendars/lichnyj/"
               },
               {
-                "label": "nextcloud · Дела",
+                "colour": "#4a6b52",
+                "label": "Дела",
+                "meta": "tasks",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/dela/"
               },
               {
-                "label": "nextcloud · Работа",
+                "colour": "#3f6e8c",
+                "label": "Работа",
+                "meta": "cal.",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/rabota/"
               },
               {
-                "label": "nextcloud · Дни рождения",
+                "colour": "#a05a2c",
+                "label": "Дни рождения",
+                "meta": "cal.",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/dni-rozhdeniya/"
               },
               {
-                "label": "nextcloud · Записи",
+                "colour": "#4a6b52",
+                "label": "Записи",
+                "meta": "notes",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/zapisi/"
               },
               {
-                "label": "nextcloud · Дневник",
+                "colour": "#6b4e7a",
+                "label": "Дневник",
+                "meta": "notes",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/dnevnik/"
               },
               {
-                "label": "nextcloud · Общие с семьёй",
+                "colour": "#3f6e8c",
+                "label": "Общие с семьёй",
+                "meta": "notes",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/zapiski-obshchie/"
               },
               {
-                "label": "nextcloud · Контакты",
+                "colour": "#4a6b52",
+                "label": "Контакты",
+                "meta": "book",
                 "selected": false,
                 "value": "a-nc-home|/alice/contacts/kontakty/"
               },
               {
-                "label": "nextcloud · Архив",
+                "colour": "#a05a2c",
+                "label": "Архив",
+                "meta": "book",
                 "selected": true,
                 "value": "a-nc-home|/alice/contacts/arhiv/"
               },
               {
-                "label": "nextcloud · Files",
+                "colour": "#9a9280",
+                "label": "Files",
+                "meta": "files",
                 "selected": true,
                 "value": "a-nc-home|/alice/files/Files/"
               },
               {
-                "label": "radicale · vps · Проекты",
+                "colour": "#6b4e7a",
+                "group": "radicale · vps",
+                "label": "Проекты",
+                "meta": "cal.",
                 "selected": false,
                 "value": "a-rad-vps|/alice/calendars/proekty/"
               },
               {
-                "label": "radicale · vps · Дежурства",
+                "colour": "#8c6239",
+                "label": "Дежурства",
+                "meta": "cal.",
                 "selected": false,
                 "value": "a-rad-vps|/alice/calendars/dezhurstva/"
               },
               {
-                "label": "radicale · vps · Команда",
+                "colour": "#6b4e7a",
+                "label": "Команда",
+                "meta": "book",
                 "selected": false,
                 "value": "a-rad-vps|/alice/contacts/komanda/"
               },
               {
-                "label": "radicale · vps · Рассылки",
+                "colour": "#6b4e7a",
+                "label": "Рассылки",
+                "meta": "book",
                 "selected": false,
                 "value": "a-rad-vps|/alice/contacts/rassylki/"
               },
               {
-                "label": "baikal · Общий",
+                "colour": "#9a9280",
+                "group": "baikal",
+                "label": "Общий",
+                "meta": "cal.",
                 "selected": false,
                 "value": "a-baikal|/alice/calendars/obshchij/"
               },
               {
-                "label": "sftpgo · vps · Documents",
+                "colour": "#a05a2c",
+                "group": "sftpgo · vps",
+                "label": "Documents",
+                "meta": "files",
                 "selected": false,
                 "value": "a-sftp-vps|/alice/files/Documents/"
               },
               {
-                "label": "sftpgo · vps · Public",
+                "colour": "#a05a2c",
+                "label": "Public",
+                "meta": "files · ro",
                 "selected": false,
                 "value": "a-sftp-vps|/alice/files/Public/"
               }
@@ -255,19 +303,22 @@
             "name": "dest",
             "options": [
               {
+                "colour": "#9a9280",
                 "label": "nextcloud · Files",
                 "selected": true,
                 "value": "a-nc-home|/alice/files/Files/"
               },
               {
+                "colour": "#a05a2c",
                 "label": "sftpgo · vps · Documents",
                 "selected": false,
                 "value": "a-sftp-vps|/alice/files/Documents/"
               },
               {
+                "colour": "#a05a2c",
                 "disabled": true,
                 "label": "sftpgo · vps · Public",
-                "reason": "Read-only",
+                "reason": "Read-only: this account cannot write here",
                 "selected": false,
                 "value": "a-sftp-vps|/alice/files/Public/"
               }
@@ -279,10 +330,18 @@
           {
             "add": null,
             "error": "",
-            "extra": null,
+            "extra": {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/settings/backup?job=j-job\u0026op=browse",
+              "id": "backup.browse",
+              "label": "Browse",
+              "method": "POST",
+              "submits": true
+            },
             "hint": "",
             "kind": "text",
-            "label": "Folder",
+            "label": "Folder in it",
             "mono": true,
             "name": "folder",
             "options": [],
@@ -358,16 +417,68 @@
         "unfold": null
       },
       {
-        "hint": "No time picker here, and that is deliberate: Carrel keeps no clock of its own, so whoever holds the schedule holds the password. What it hands you instead is the line to paste where the clock already is.",
+        "hintRuns": [
+          {
+            "mark": "strong",
+            "text": "Also started by"
+          },
+          {
+            "mark": "break",
+            "text": ""
+          },
+          {
+            "text": "• Run now — in the job list"
+          },
+          {
+            "mark": "break",
+            "text": ""
+          },
+          {
+            "text": "• Your own clock — "
+          },
+          {
+            "mark": "mono",
+            "text": "cron"
+          },
+          {
+            "text": ", GoSentry, a job in Gitea, "
+          },
+          {
+            "mark": "mono",
+            "text": "curl"
+          },
+          {
+            "text": ": the line to paste is on the job’s page"
+          }
+        ],
         "legend": "When",
         "rows": [
           {
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "0 is never.",
+            "hint": "",
+            "kind": "check",
+            "label": "On sign-in, if the last copy is older than",
+            "name": "signin.on",
+            "options": [
+              {
+                "label": "On sign-in, if the last copy is older than",
+                "selected": true,
+                "value": "on"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "on"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
             "kind": "number",
-            "label": "On sign-in, if the last copy is older than (days)",
+            "label": "Days",
             "mono": true,
             "name": "signin",
             "options": [],
@@ -494,7 +605,38 @@
       "script": false,
       "scriptName": "",
       "shown": true,
-      "status": "GET /api/backup/status?job=j-job"
+      "status": "GET /api/backup/status?job=j-job",
+      "tabs": [
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job\u0026trigger=crontab",
+          "id": "backup.trigger.tab.crontab",
+          "label": "crontab",
+          "method": "GET",
+          "on": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job\u0026trigger=gosentry",
+          "id": "backup.trigger.tab.gosentry",
+          "label": "GoSentry",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job\u0026trigger=gitea",
+          "id": "backup.trigger.tab.gitea",
+          "label": "Gitea",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job\u0026trigger=curl",
+          "id": "backup.trigger.tab.curl",
+          "label": "curl",
+          "method": "GET"
+        }
+      ]
     },
     "when": "cron · 03:00",
     "whenNote": "external trigger",

@@ -40,14 +40,15 @@ func TestGiteaAndCurlTabsAreTheFrames(t *testing.T) {
 		t.Fatalf("s-backup-10, -11: read the frames again")
 	}
 	var hints []string
-	for _, id := range []string{"s-backup-2", "s-backup-3", "s-backup-10", "s-backup-11"} {
+	// The card left s-backup-2 with the form's tick (note 85 of Typecase).
+	for _, id := range []string{"s-backup-3", "s-backup-10", "s-backup-11"} {
 		m := frameNewPass.FindStringSubmatch(mockupFrame(t, id))
 		if m == nil || strings.Contains(mockupFrame(t, id), ">Regenerate<") {
 			t.Fatalf("%s draws no «New password» with its hint: read the frame again", id)
 		}
 		hints = append(hints, html.UnescapeString(m[1]))
 	}
-	if hints[0] != hints[1] || hints[1] != hints[2] || hints[2] != hints[3] {
+	if hints[0] != hints[1] || hints[1] != hints[2] {
 		t.Fatalf("the hints of New password differ: %q", hints)
 	}
 

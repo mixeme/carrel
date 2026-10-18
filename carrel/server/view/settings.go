@@ -30,6 +30,10 @@ type FieldSet struct {
 	// Hint — строка под набором: «Without the title an event shows as
 	// “Busy”.» у «What the visitor sees» (s-publish-2, -19); у прочих пусто
 	Hint Text `json:"hint,omitempty"`
+	// HintRuns — Hint кусками, когда кадр выделяет часть: ‹.ics› и ‹.vcf›
+	// моноширинно у «What to copy», «Also started by» жирно и строки
+	// перечня у «When» задания копии (s-backup-2); Hint тогда пуст
+	HintRuns Runs `json:"hintRuns,omitempty"`
 }
 type FormRow struct {
 	Name  string `json:"name"`
@@ -634,6 +638,9 @@ type TriggerBlock struct {
 	// download** — two steps, so this is a file, not a line» (s-backup-3);
 	// у строки пусто
 	Destination Runs `json:"destination"`
+	// Tabs — вкладки crontab · GoSentry · Gitea · curl ссылками на ту же
+	// страницу с ?trigger= (вид, не хранится), открытая — On (s-backup-3)
+	Tabs []Action `json:"tabs"`
 }
 
 // GoSentryJob — поля задания GoSentry (s-backup-4), как они названы в его

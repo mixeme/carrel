@@ -233,6 +233,7 @@ func TestBackupDownloadWritesNothing(t *testing.T) {
 func TestBackupRunsAtSignIn(t *testing.T) {
 	f := backupFixture(t)
 	v := jobForm(f, sealed.BackupToWebDAV, "8", "")
+	v.Set("signin.on", "on")
 	v.Set("signin", "7")
 	job := saveJob(t, f, v)
 	rec := f.h.do(f.h.anonPostForm("/login", "/login", url.Values{"login": {"owner"}, "password": {"password123"}}))
@@ -245,5 +246,63 @@ func TestBackupRunsAtSignIn(t *testing.T) {
 	rec = f.h.do(f.h.anonPostForm("/login", "/login", url.Values{"login": {"owner"}, "password": {"password123"}}))
 	if runs := f.h.users.BackupRuns(f.sess.AccountID())[job.ID]; len(runs) != 1 {
 		t.Errorf("a fresh copy ran again at the next sign-in: %d runs", len(runs))
+	}
+}
+
+// Browse of «Folder in it» (s-backup-2, note 85 of Typecase): the form goes
+// as typed, the answer is the folder chooser over the job, and its choice
+// is the job's page again with what was typed and the folder chosen;
+// Cancel brings it back as it was. Nothing is saved on the way.
+func TestBrowseKeepsWhatWasTyped(t *testing.T) {
+	f := backupFixture(t)
+	f.srv.SeedFolder(filesDocs + "archive/")
+	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", ""))
+	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup?job="+job.ID, f.sess)))
+	var browse *view.Action
+	for _, set := range page.Add.Sets {
+		for _, row := range set.Rows {
+			if row.Name == "folder" {
+				browse = row.Extra
+			}
+		}
+	}
+	if browse == nil || !browse.Submits || browse.Method != "POST" {
+		t.Fatalf("Browse = %+v", browse)
+	}
+	typed := jobForm(f, sealed.BackupToWebDAV, "8", "")
+	typed.Set("name", "Typed, not saved")
+	rec := f.h.do(postForm(browse.Href, f.sess, typed))
+	if rec.Code != http.StatusSeeOther || !strings.Contains(rec.Header().Get("Location"), "for=backup") {
+		t.Fatalf("browse: %d %s", rec.Code, rec.Header().Get("Location"))
+	}
+	picker := decode[view.FilePickerSheet](t, f.h.do(get(rec.Header().Get("Location"), f.sess)))
+	var archive string
+	var walk func(ns []view.FileTreeNode)
+	walk = func(ns []view.FileTreeNode) {
+		for _, n := range ns {
+			if n.Label == "archive" {
+				archive = n.Href
+			}
+			walk(n.Children)
+		}
+	}
+	walk(picker.Tree.Nodes)
+	if archive == "" {
+		t.Fatalf("no folder «archive» in the tree: %+v", picker.Tree.Nodes)
+	}
+	there := decode[view.FilePickerSheet](t, f.h.do(get(archive, f.sess)))
+	back := decode[view.BackupPage](t, f.h.do(get(actionHref(t, there.Actions, "files.picker.choose"), f.sess)))
+	values := formFields(back.Add)
+	if values.Get("name") != "Typed, not saved" || values.Get("folder") != "archive" {
+		t.Errorf("back from the chooser: name %q, folder %q", values.Get("name"), values.Get("folder"))
+	}
+	cancel := decode[view.BackupPage](t, f.h.do(get(actionHref(t, picker.Actions, "files.picker.cancel"), f.sess)))
+	if v := formFields(cancel.Add); v.Get("name") != "Typed, not saved" || v.Get("folder") != "backups/work" {
+		t.Errorf("Cancel: name %q, folder %q", v.Get("name"), v.Get("folder"))
+	}
+	key, _ := f.sess.DataKey()
+	blob, _ := f.h.users.Catalog(f.sess.AccountID(), key)
+	if saved, _ := blob.BackupJob(job.ID); saved.Name != "Рабочее" {
+		t.Errorf("Browse saved the job: %+v", saved)
 	}
 }

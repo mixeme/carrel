@@ -267,6 +267,7 @@ const (
 	RunMono   RunMark = "mono"   // tc-mono: логин, адрес, путь
 	RunStrong RunMark = "strong" // <b>: имя в фразе
 	RunDanger RunMark = "danger" // тревога: источник, который не ответил (s-contacts-7)
+	RunBreak  RunMark = "break"  // перенос строки внутри сообщения: строки перечня (s-backup-2); Text пуст
 	// RunSlug — часть пути, которую даёт поле, выводимое из другого
 	// (FormRow.From): адрес новой коллекции в её пути (s-profile-5);
 	// моноширинно, и клиент держит её в ногу с полем (SlugOf Typecase,

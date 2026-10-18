@@ -147,6 +147,7 @@ func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issue
 		return nil
 	}
 	b := &view.TriggerBlock{
+		Tabs: s.triggerTabLinks(job, "crontab"),
 		Password: view.SecretField{Reveal: view.Action{ID: "backup.trigger", Label: "New password", Method: "POST", Enabled: true,
 			Hint: "The old password stops working; whatever runs this job has to be given the new one.",
 			Href: s.postQuery("/app/settings/backup", url.Values{"op": {"trigger"}, "job": {job.ID}})}},
@@ -232,4 +233,17 @@ func (s *Server) enableTrigger(w http.ResponseWriter, r *http.Request, sess *ses
 	w.Header().Set("Cache-Control", "no-store")
 	page := s.backupPageWith(sess, &job, nil, map[string]string{job.ID: s.publicOrigin(r)}, map[string]string{job.ID: secret})
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// triggerTabs are the tabs of a job's card of the line (s-backup-3): links
+// to its page with ?trigger= — what is shown, not kept —, the one open on.
+var triggerTabNames = []struct{ id, label string }{{"crontab", "crontab"}, {"gosentry", "GoSentry"}, {"gitea", "Gitea"}, {"curl", "curl"}}
+
+func (s *Server) triggerTabLinks(job sealed.BackupJob, open string) []view.Action {
+	var out []view.Action
+	for _, t := range triggerTabNames {
+		out = append(out, view.Action{ID: "backup.trigger.tab." + t.id, Label: text(t.label), Method: "GET", Enabled: true, On: t.id == open,
+			Href: s.postQuery("/app/settings/backup", url.Values{"job": {job.ID}, "trigger": {t.id}})})
+	}
+	return out
 }
