@@ -5,7 +5,6 @@ import (
 	"net/netip"
 	"net/url"
 	"strings"
-	"time"
 
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
@@ -132,7 +131,7 @@ func (s *Server) triggerTick(sess *session.Session, job sealed.BackupJob, issued
 	switch {
 	case s.users.BackupTriggerOn(sess.AccountID(), job.ID) || issued[job.ID] != "":
 		tick.On, tick.Href = true, q("trigger-off")
-	case sess.UnlockUntil(time.Now()) == nil:
+	case sess.UnlockUntil(s.now()) == nil:
 		tick.Method, tick.Href = "GET", s.route("/app/settings/unlock")
 	}
 	return tick
@@ -164,7 +163,7 @@ func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issue
 	// Outside the unlock window New password opens the password sheet; what
 	// it is for is said in the note, not as a reason of a working button
 	// (C-6.2).
-	if sess.UnlockUntil(time.Now()) == nil {
+	if sess.UnlockUntil(s.now()) == nil {
 		b.Password.Reveal.Method, b.Password.Reveal.Href = "GET", s.route("/app/settings/unlock")
 		b.Note = "Confirm your password first: the trigger hands out this job's reading. " + b.Note
 	}
@@ -207,7 +206,7 @@ var sharedAddressSpace = netip.MustParsePrefix("100.64.0.0/10")
 // enableTrigger issues the job's trigger, inside the unlock window only, and
 // shows the page with the command and the secret, once.
 func (s *Server) enableTrigger(w http.ResponseWriter, r *http.Request, sess *session.Session, key [32]byte, job sealed.BackupJob) {
-	if sess.UnlockUntil(time.Now()) == nil {
+	if sess.UnlockUntil(s.now()) == nil {
 		s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, view.Notice{
 			Role: view.NoticeAlert, Title: "Confirm your password first",
 			Body:    "The external trigger lets a job read without you signed in, so it is issued only inside the unlock window.",

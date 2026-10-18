@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
@@ -71,7 +70,7 @@ func (s *Server) sessionRows(sess *session.Session) []view.SessionRow {
 // What it deletes is the line beside it, AccountPage.DangerNote (account-1).
 func (s *Server) deleteAction(sess *session.Session) view.Action {
 	a := view.Action{ID: "account.delete", Label: "Delete account", Danger: true, Enabled: true}
-	if sess.UnlockUntil(time.Now()) == nil {
+	if sess.UnlockUntil(s.now()) == nil {
 		// No ellipsis: that the password is asked first is told by the
 		// unlock state in the top bar, as with Show password (§6 of the
 		// mockup).

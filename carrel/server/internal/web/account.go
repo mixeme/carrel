@@ -6,7 +6,6 @@ import (
 	"net/mail"
 	"net/url"
 	"strings"
-	"time"
 
 	cmail "carrel.dev/carrel/server/internal/mail"
 	"carrel.dev/carrel/server/internal/session"
@@ -94,7 +93,7 @@ func (s *Server) postSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	case "delete":
 		// Only inside the unlock window: the password was asked a moment
 		// ago (S-10.7). The last administrator stays.
-		if sess.UnlockUntil(time.Now()) == nil {
+		if sess.UnlockUntil(s.now()) == nil {
 			flash.notice = &view.Notice{Role: view.NoticeAlert, Title: "Confirm your password first",
 				Body: "Deleting the account asks for your password: open Delete account again."}
 			break

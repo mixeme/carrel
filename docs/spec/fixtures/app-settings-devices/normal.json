@@ -2,6 +2,8 @@
   "accounts": [
     {
       "actions": [],
+      "included": true,
+      "label": "nextcloud",
       "login": "",
       "password": {
         "reveal": {
@@ -16,6 +18,7 @@
       "qr": "",
       "rows": [
         {
+          "colour": "#4a6b52",
           "copy": {
             "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/calendars/lichnyj/",
@@ -30,6 +33,7 @@
           "url": "https://nextcloud.example/dav.php/alice/calendars/lichnyj/"
         },
         {
+          "colour": "#4a6b52",
           "copy": {
             "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/calendars/dela/",
@@ -44,6 +48,7 @@
           "url": "https://nextcloud.example/dav.php/alice/calendars/dela/"
         },
         {
+          "colour": "#3f6e8c",
           "copy": {
             "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/calendars/rabota/",
@@ -58,6 +63,7 @@
           "url": "https://nextcloud.example/dav.php/alice/calendars/rabota/"
         },
         {
+          "colour": "#a05a2c",
           "copy": {
             "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/calendars/dni-rozhdeniya/",
@@ -72,6 +78,7 @@
           "url": "https://nextcloud.example/dav.php/alice/calendars/dni-rozhdeniya/"
         },
         {
+          "colour": "#4a6b52",
           "copy": {
             "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/calendars/zapisi/",
@@ -86,6 +93,7 @@
           "url": "https://nextcloud.example/dav.php/alice/calendars/zapisi/"
         },
         {
+          "colour": "#6b4e7a",
           "copy": {
             "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/calendars/dnevnik/",
@@ -100,6 +108,7 @@
           "url": "https://nextcloud.example/dav.php/alice/calendars/dnevnik/"
         },
         {
+          "colour": "#3f6e8c",
           "copy": {
             "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/calendars/zapiski-obshchie/",
@@ -114,6 +123,7 @@
           "url": "https://nextcloud.example/dav.php/alice/calendars/zapiski-obshchie/"
         },
         {
+          "colour": "#4a6b52",
           "copy": {
             "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/contacts/kontakty/",
@@ -128,6 +138,7 @@
           "url": "https://nextcloud.example/dav.php/alice/contacts/kontakty/"
         },
         {
+          "colour": "#a05a2c",
           "copy": {
             "enabled": true,
             "href": "https://nextcloud.example/dav.php/alice/contacts/arhiv/",
@@ -142,10 +153,20 @@
           "url": "https://nextcloud.example/dav.php/alice/contacts/arhiv/"
         }
       ],
-      "title": "nextcloud · alice"
+      "title": "nextcloud · alice",
+      "toggle": {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/settings/devices?account=a-nc-home\u0026op=exclude\u0026tab=apple",
+        "id": "device.exclude",
+        "label": "Leave out nextcloud",
+        "method": "POST"
+      }
     },
     {
       "actions": [],
+      "included": true,
+      "label": "radicale · vps",
       "login": "",
       "password": {
         "reveal": {
@@ -160,6 +181,7 @@
       "qr": "",
       "rows": [
         {
+          "colour": "#6b4e7a",
           "copy": {
             "enabled": true,
             "href": "https://radicale.example/alice/calendars/proekty/",
@@ -174,6 +196,7 @@
           "url": "https://radicale.example/alice/calendars/proekty/"
         },
         {
+          "colour": "#8c6239",
           "copy": {
             "enabled": true,
             "href": "https://radicale.example/alice/calendars/dezhurstva/",
@@ -188,6 +211,7 @@
           "url": "https://radicale.example/alice/calendars/dezhurstva/"
         },
         {
+          "colour": "#6b4e7a",
           "copy": {
             "enabled": true,
             "href": "https://radicale.example/alice/contacts/komanda/",
@@ -202,6 +226,7 @@
           "url": "https://radicale.example/alice/contacts/komanda/"
         },
         {
+          "colour": "#6b4e7a",
           "copy": {
             "enabled": true,
             "href": "https://radicale.example/alice/contacts/rassylki/",
@@ -216,10 +241,20 @@
           "url": "https://radicale.example/alice/contacts/rassylki/"
         }
       ],
-      "title": "radicale · vps · alice"
+      "title": "radicale · vps · alice",
+      "toggle": {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/settings/devices?account=a-rad-vps\u0026op=exclude\u0026tab=apple",
+        "id": "device.exclude",
+        "label": "Leave out radicale · vps",
+        "method": "POST"
+      }
     },
     {
       "actions": [],
+      "included": true,
+      "label": "baikal",
       "login": "",
       "password": {
         "reveal": {
@@ -234,6 +269,7 @@
       "qr": "",
       "rows": [
         {
+          "colour": "#9a9280",
           "copy": {
             "enabled": true,
             "href": "https://baikal.example/dav.php/alice/calendars/obshchij/",
@@ -248,7 +284,15 @@
           "url": "https://baikal.example/dav.php/alice/calendars/obshchij/"
         }
       ],
-      "title": "baikal · alice"
+      "title": "baikal · alice",
+      "toggle": {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/settings/devices?account=a-baikal\u0026op=exclude\u0026tab=apple",
+        "id": "device.exclude",
+        "label": "Leave out baikal",
+        "method": "POST"
+      }
     }
   ],
   "actions": [
@@ -282,30 +326,6 @@
       "method": "GET"
     },
     {
-      "csrf": "csrf",
-      "enabled": true,
-      "href": "/app/settings/devices?account=a-nc-home\u0026op=exclude\u0026tab=apple",
-      "id": "device.exclude",
-      "label": "Leave out nextcloud",
-      "method": "POST"
-    },
-    {
-      "csrf": "csrf",
-      "enabled": true,
-      "href": "/app/settings/devices?account=a-rad-vps\u0026op=exclude\u0026tab=apple",
-      "id": "device.exclude",
-      "label": "Leave out radicale · vps",
-      "method": "POST"
-    },
-    {
-      "csrf": "csrf",
-      "enabled": true,
-      "href": "/app/settings/devices?account=a-baikal\u0026op=exclude\u0026tab=apple",
-      "id": "device.exclude",
-      "label": "Leave out baikal",
-      "method": "POST"
-    },
-    {
       "danger": true,
       "enabled": true,
       "href": "/app/settings/unlock",
@@ -316,6 +336,7 @@
     }
   ],
   "details": null,
+  "link": null,
   "look": {
     "compact": false,
     "panel": true,

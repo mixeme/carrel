@@ -120,7 +120,7 @@ func qrImage(text string) string {
 func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices ...view.Notice) view.DevicesPage {
 	blob := s.catalogOf(sess)
 	key, live := sess.DataKey()
-	unlocked := live && sess.UnlockUntil(time.Now()) != nil
+	unlocked := live && sess.UnlockUntil(s.now()) != nil
 	page := view.DevicesPage{Shell: s.buildShell(sess, "Set up a new device"), Tab: tab}
 	page.Rail = s.settingsRail(sess, "/app/settings/devices")
 	page.Notices = append(page.Notices, notices...)
@@ -153,7 +153,7 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 	profileAccounts := 0
 	for _, conn := range blob.Connections {
 		included := !blob.IsDeviceExcluded(conn.ID)
-		acct := view.DeviceAccount{Title: text(connLabel(conn) + " · " + conn.Login)}
+		acct := view.DeviceAccount{Title: text(connLabel(conn) + " · " + conn.Login), Label: text(connLabel(conn)), Included: included}
 		dav := false
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Gone || !onTab(tab, col) {
@@ -165,7 +165,7 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 				kind = col.Kinds[0]
 			}
 			acct.Rows = append(acct.Rows, view.DeviceRow{
-				Label: text(collectionLabel(col)), Kind: kind, Type: text(davType(col)), URL: text(u), Included: included,
+				Label: text(collectionLabel(col)), Colour: catalogColour(col), Kind: kind, Type: text(davType(col)), URL: text(u), Included: included,
 				Copy: view.Action{ID: "device.copy", Label: "Copy", Href: u, Method: "GET", Enabled: true},
 			})
 			dav = dav || !col.Has(view.KindFile)
@@ -195,15 +195,20 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 			acct.Password = secret(conn)
 			acct.Actions = []view.Action{copyPassword("Copy password", acct.Password.Shown)}
 		}
-		page.Accounts = append(page.Accounts, acct)
-		op, label := "exclude", "Leave out "+connLabel(conn)
-		if !included {
-			op, label = "include", "Include "+connLabel(conn)
+		// The tick of the account (s-plan-1, -2): the profile and the codes
+		// take an account whole. Thunderbird and anything else hand out
+		// every address and tick nothing.
+		if tab == view.TabApple || tab == view.TabAndroid {
+			op, label := "exclude", "Leave out "+connLabel(conn)
+			if !included {
+				op, label = "include", "Include "+connLabel(conn)
+			}
+			acct.Toggle = &view.Action{
+				ID: "device." + op, Label: text(label), Method: "POST", Enabled: true,
+				Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "op": {op}, "account": {conn.ID}}),
+			}
 		}
-		page.Actions = append(page.Actions, view.Action{
-			ID: "device." + op, Label: text(label), Method: "POST", Enabled: true,
-			Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "op": {op}, "account": {conn.ID}}),
-		})
+		page.Accounts = append(page.Accounts, acct)
 	}
 
 	switch tab {
@@ -229,14 +234,39 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 			page.Note = "Issued inside the unlock window: nothing more is asked."
 		}
 		page.Actions = append(page.Actions, gen)
+		page.Link = s.profileLink(sess, tab)
 	case view.TabAndroid:
 		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "One code for each ticked account. Scan it with the phone: DAVx5 opens with the address and the login filled in, and asks for the password shown under the code."}
 	case view.TabThunderbird:
 		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book, with the login and the password from the account row. There is no import file and none is needed."}
-	default:
-		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "A WebDAV address is for \"Map network drive\" in Windows, \"Connect to server\" in macOS and davfs in Linux."}
 	}
+	// Anything else says nothing under its rows but the window (s-plan-5,
+	// Нс44): a WebDAV address is what the person came for.
 	return page
+}
+
+// profileLink is the card of the link last issued while it is still to be
+// followed (s-plan-1, Нс40): after a reload too, gone once it is followed,
+// revoked or out of time.
+func (s *Server) profileLink(sess *session.Session, tab view.DeviceTab) *view.DeviceLink {
+	token := string(sess.Draft(session.DraftProfileLink))
+	if token == "" {
+		return nil
+	}
+	expires, ok := s.users.DeviceProfileLive(sess.AccountID(), token)
+	if !ok {
+		sess.SetDraft(session.DraftProfileLink, nil)
+		return nil
+	}
+	return &view.DeviceLink{
+		Title: text("Link ready until " + s.timeFor(sess).clock(expires)),
+		Local: s.instanceLocal(),
+		Hint:  "It opens once, for you signed in to Carrel. Open it on the device, install the profile, then delete the file.",
+		Actions: []view.Action{
+			{ID: "device.profile.download", Label: "Download profile", Href: s.postQuery("/app/settings/devices/profile", url.Values{"t": {token}}), Method: "GET", Enabled: true},
+			{ID: "device.profile.revoke", Label: "Revoke", Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "op": {"revoke"}}), Method: "POST", Enabled: true, Danger: true},
+		},
+	}
 }
 
 func (s *Server) getSettingsDevices(w http.ResponseWriter, r *http.Request) {
@@ -277,9 +307,10 @@ func (s *Server) postSettingsDevices(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, "/app/settings/devices?tab="+string(tab))
 	case "revoke":
 		_ = s.users.RevokeDeviceProfiles(sess.AccountID())
+		sess.SetDraft(session.DraftProfileLink, nil)
 		s.writePage(w, r, http.StatusOK, s.devicesPage(sess, tab, view.Notice{Role: view.NoticeInfo, Title: "Profile links revoked", Body: "No link issued before this one opens any more."}))
 	case "profile":
-		if sess.UnlockUntil(time.Now()) == nil {
+		if sess.UnlockUntil(s.now()) == nil {
 			s.writePage(w, r, http.StatusOK, s.devicesPage(sess, tab, view.Notice{
 				Role: view.NoticeAlert, Title: "Confirm your password first",
 				Body:    "The profile hands out the credentials of every included account, so it is issued only inside the unlock window.",
@@ -287,7 +318,7 @@ func (s *Server) postSettingsDevices(w http.ResponseWriter, r *http.Request) {
 			}))
 			return
 		}
-		token, expires, err := s.users.IssueDeviceProfile(sess.AccountID(), profileAccountIDs(s.catalogOf(sess)))
+		token, _, err := s.users.IssueDeviceProfile(sess.AccountID(), profileAccountIDs(s.catalogOf(sess)))
 		if errors.Is(err, user.ErrNothingToIssue) {
 			s.writePage(w, r, http.StatusOK, s.devicesPage(sess, tab, view.Notice{Role: view.NoticeAlert, Title: "Nothing to put in a profile", Body: "No included account has calendars or address books."}))
 			return
@@ -296,16 +327,10 @@ func (s *Server) postSettingsDevices(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "could not issue the link", http.StatusInternalServerError)
 			return
 		}
-		tf := s.timeFor(sess)
-		s.writePage(w, r, http.StatusOK, s.devicesPage(sess, tab, view.Notice{
-			Role:  view.NoticeAccent,
-			Title: text("Link ready until " + tf.clock(expires)),
-			Body:  "It opens once, for you signed in to Carrel. Open it on the device, install the profile, then delete the file.",
-			Actions: []view.Action{
-				{ID: "device.profile.download", Label: "Download profile", Href: s.postQuery("/app/settings/devices/profile", url.Values{"t": {token}}), Method: "GET", Enabled: true},
-				{ID: "device.profile.revoke", Label: "Revoke", Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "op": {"revoke"}}), Method: "POST", Enabled: true},
-			},
-		}))
+		// The card is the page's while the link lives (Нс40): a reload
+		// keeps it.
+		sess.SetDraft(session.DraftProfileLink, []byte(token))
+		s.writePage(w, r, http.StatusOK, s.devicesPage(sess, tab))
 	default:
 		s.redirect(w, r, "/app/settings/devices?tab="+string(tab))
 	}

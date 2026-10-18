@@ -107,7 +107,7 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "issue":
-		if sess.UnlockUntil(time.Now()) == nil {
+		if sess.UnlockUntil(s.now()) == nil {
 			// The person's own password first (S-10.7), asked in the same
 			// dialog, what was typed kept (Нс73): before, Create password
 			// was a link to the password's sheet and the dialog came back
@@ -127,7 +127,7 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 				s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, nil, askPassword("Password is wrong."), ""))
 				return
 			}
-			sess.SetUnlockUntil(time.Now().Add(s.cfg.UnlockTTL))
+			sess.SetUnlockUntil(s.now().Add(s.cfg.UnlockTTL))
 		}
 		name := r.FormValue("name")
 		id, password, err := s.users.IssueDevice(r.Context(), sess.AccountID(), key, name, scopeFromForm(r))

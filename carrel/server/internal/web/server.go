@@ -105,6 +105,7 @@ type Users interface {
 	// A device profile (S-23): the one-time link, followed once by the same
 	// person; the connections left out of every device set-up.
 	IssueDeviceProfile(viewerID string, accounts []string) (string, time.Time, error)
+	DeviceProfileLive(viewerID, token string) (time.Time, bool)
 	TakeDeviceProfile(viewerID, token string) ([]string, bool)
 	RevokeDeviceProfiles(viewerID string) error
 	SetDeviceExcluded(viewerID string, dataKey [32]byte, accountID string, excluded bool) error

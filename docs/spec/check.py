@@ -132,7 +132,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
-          "unknown","deleted","write-refused","moving","broken","exercised"}
+          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -478,6 +478,11 @@ STATE_FRAME = {
     "admin-dav/normal": "s-admin-27",
     "admin-dav/broken": "s-admin-28",
     "admin-dav/exercised": "s-admin-29",
+    # Новое устройство по вкладкам, выдача открыта (Нс43).
+    "app-settings-devices/link": "s-plan-1",
+    "app-settings-devices/android": "s-plan-2",
+    "app-settings-devices/thunderbird": "s-plan-4",
+    "app-settings-devices/other": "s-plan-5",
     # Публичные страницы (Пс1): все кадры маршрута — части (data-part),
     # у каждого вида страницы свой.
     # Готовая ссылка (Пб13): тот же лист после Create link.

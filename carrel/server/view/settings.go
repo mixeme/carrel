@@ -384,17 +384,43 @@ type DevicesPage struct {
 	// (s-plan-5): срок словами, что всё закроется по сроку или по **Lock
 	// now**, и журнал; иначе пусто
 	UnlockNote Runs `json:"unlockNote"`
+	// Link — выданная ссылка на профиль, пока она жива и не открыта
+	// (s-plan-1, Нс40): держится и после перезагрузки страницы; только на
+	// вкладке Apple; nil — ссылки нет
+	Link *DeviceLink `json:"link"`
+}
+
+// DeviceLink — карточка выданной ссылки (s-plan-1): «Link ready until
+// 09:46», значок «local» у локального экземпляра, подсказка, Download
+// profile и Revoke (тревожная)
+type DeviceLink struct {
+	Title   Text     `json:"title"`
+	Local   bool     `json:"local"`
+	Hint    Text     `json:"hint"`
+	Actions []Action `json:"actions"`
 }
 type DeviceAccount struct {
-	Title    Text        `json:"title"`
-	Rows     []DeviceRow `json:"rows"`
+	// Title — подпись и логин, «nextcloud · mix» (Apple, Android); Label —
+	// подпись одна, «nextcloud», жирным перед логином в строке таблицы
+	// (Thunderbird, Anything else; s-plan-4, -5; Нс42)
+	Title Text        `json:"title"`
+	Label Text        `json:"label"`
+	Rows  []DeviceRow `json:"rows"`
+	// Included — аккаунт идёт в профиль и в коды (отметка s-plan-1);
+	// Toggle — её переключатель «Leave out …» / «Include …», POST; профиль
+	// и коды берут аккаунт целиком, потому отметка — у аккаунта (Нс39);
+	// на вкладках без отметки (Thunderbird, Anything else) nil
+	Included bool        `json:"included"`
+	Toggle   *Action     `json:"toggle"`
 	QR       string      `json:"qr"`       // Android: код этого аккаунта, адрес изображения; пусто — кода нет
 	Login    Text        `json:"login"`    // Thunderbird, Anything else: логин в строке аккаунта
 	Password SecretField `json:"password"` // пароль этого подключения; пусто у Apple и у аккаунта без кода
 	Actions  []Action    `json:"actions"`  // Open in DAVx5 · Copy / Copy password
 }
 type DeviceRow struct {
-	Label    Text   `json:"label"`
+	Label Text `json:"label"`
+	// Colour — метка коллекции (s-plan-4, -5; Нс41); пусто — цвета нет
+	Colour   Colour `json:"colour"`
 	Kind     Kind   `json:"kind"`
 	Type     Text   `json:"type"` // CalDAV · CardDAV · WebDAV
 	URL      Text   `json:"url"`

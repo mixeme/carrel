@@ -910,8 +910,13 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	} {
 		if srv := a.servers[label]; srv != nil {
 			s = strings.ReplaceAll(s, srv.URL, name)
+			// The DAVx5 link of a stand (s-plan-2): login@host.
+			s = strings.ReplaceAll(s, "@"+strings.TrimPrefix(srv.URL, "http://"), "@"+strings.TrimPrefix(name, "https://"))
 		}
 	}
+	// A DAVx5 code is the picture of its link (s-plan-2), whose port is the
+	// stand's: the frames draw a code, any one.
+	s = regexp.MustCompile(`"qr":"data:image/png;base64,[A-Za-z0-9+/=]+"`).ReplaceAllString(s, `"qr":"data:image/png;base64,code"`)
 	// How long a feed took to read is the machine's (0 ms, 1 ms): the frames
 	// draw a number, any one.
 	s = regexp.MustCompile(`"took":"\d+ ms"`).ReplaceAllString(s, `"took":"0 ms"`)
@@ -941,6 +946,9 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
 	// A davloom device's ID (NewDeviceID): the frames name no device by it.
 	s = regexp.MustCompile(`\bd-[0-9A-Z]{10}\b`).ReplaceAllString(s, "d-device")
+	// The one-time link to an Apple profile (s-plan-1) is made for each
+	// issue.
+	s = regexp.MustCompile(`profile\?t=[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "profile?t=token")
 	// The test objects of the DAV validator's second stage (s-admin-29).
 	s = regexp.MustCompile(`carrel-check-[0-9a-f]{12}`).ReplaceAllString(s, "carrel-check")
 	// A group of duplicates is named by a digest of the records in it, and

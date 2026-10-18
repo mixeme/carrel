@@ -93,14 +93,10 @@ func TestProfileLinkOpensOnce(t *testing.T) {
 	f, otherID := deviceFixture(t)
 	unlock(t, f)
 	got := decode[view.DevicesPage](t, f.h.do(postForm(deviceAction(t, devicesPage(t, f, "apple").Actions, "device.profile").Href, f.sess, url.Values{})))
-	var link string
-	for _, n := range got.Notices {
-		if strings.HasPrefix(string(n.Title), "Link ready until") {
-			link = deviceAction(t, n.Actions, "device.profile.download").Href
-		}
-	}
-	if link == "" {
-		t.Fatalf("no link: %+v", got.Notices)
+	link := profileLinkOf(t, got)
+	// The card stays the page's after a reload (s-plan-1, Нс40).
+	if again := devicesPage(t, f, "apple"); again.Link == nil || profileLinkOf(t, again) != link {
+		t.Errorf("the reload lost the link: %+v", again.Link)
 	}
 	if j := journaled(f, "device.profile.link"); len(j) != 1 || !strings.Contains(j[0], f.id) || !strings.Contains(j[0], otherID) {
 		t.Errorf("journal = %v", j)
@@ -129,6 +125,18 @@ func TestProfileLinkOpensOnce(t *testing.T) {
 	if again := f.h.do(get(link, f.sess)); again.Code != http.StatusNotFound {
 		t.Errorf("second follow: %d", again.Code)
 	}
+	if p := devicesPage(t, f, "apple"); p.Link != nil {
+		t.Errorf("a followed link keeps its card: %+v", p.Link)
+	}
+}
+
+// profileLinkOf is the download address of the page's link card.
+func profileLinkOf(t *testing.T, p view.DevicesPage) string {
+	t.Helper()
+	if p.Link == nil {
+		t.Fatalf("no link card: %+v", p.Notices)
+	}
+	return deviceAction(t, p.Link.Actions, "device.profile.download").Href
 }
 
 // The link is the person's: another account's session gets the same 404 as
@@ -137,14 +145,7 @@ func TestProfileLinkIsThePersons(t *testing.T) {
 	f, _ := deviceFixture(t)
 	unlock(t, f)
 	got := decode[view.DevicesPage](t, f.h.do(postForm("/app/settings/devices?tab=apple&op=profile", f.sess, url.Values{})))
-	var link string
-	for _, n := range got.Notices {
-		for _, a := range n.Actions {
-			if a.ID == "device.profile.download" {
-				link = a.Href
-			}
-		}
-	}
+	link := profileLinkOf(t, got)
 	snap := f.h.st.Snapshot()
 	adminID := snap.Users[0].ID
 	f.h.invite(adminID, "mallory", "password456")
@@ -165,7 +166,10 @@ func TestProfileLinkIsThePersons(t *testing.T) {
 func TestLeftOutAccountsGoNowhere(t *testing.T) {
 	f, otherID := deviceFixture(t)
 	p := devicesPage(t, f, "apple")
-	rec := f.h.do(postForm(deviceAction(t, p.Actions, "device.exclude").Href, f.sess, url.Values{}))
+	if p.Accounts[0].Toggle == nil || !p.Accounts[0].Included {
+		t.Fatalf("the account has no tick: %+v", p.Accounts[0])
+	}
+	rec := f.h.do(postForm(p.Accounts[0].Toggle.Href, f.sess, url.Values{}))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("exclude: %d", rec.Code)
 	}
@@ -183,15 +187,7 @@ func TestLeftOutAccountsGoNowhere(t *testing.T) {
 	}
 	unlock(t, f)
 	got := decode[view.DevicesPage](t, f.h.do(postForm("/app/settings/devices?tab=apple&op=profile", f.sess, url.Values{})))
-	var link string
-	for _, n := range got.Notices {
-		for _, a := range n.Actions {
-			if a.ID == "device.profile.download" {
-				link = a.Href
-			}
-		}
-	}
-	body := f.h.do(get(link, f.sess)).Body.String()
+	body := f.h.do(get(profileLinkOf(t, got), f.sess)).Body.String()
 	if strings.Contains(body, "<string>alice</string>") || !strings.Contains(body, "<string>bob</string>") {
 		t.Errorf("the left-out account is in the profile:\n%s", body)
 	}

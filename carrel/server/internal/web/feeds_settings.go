@@ -415,7 +415,7 @@ func (s *Server) subscriptionCard(sess *session.Session, tf timeFmt, f sealed.Su
 	if f.Password != "" {
 		card.Access = "password saved"
 		reveal := view.Action{ID: "connection.password", Label: "Show password", Href: s.route("/app/settings/unlock?" + url.Values{"for": {f.ID}}.Encode()), Method: "GET", Enabled: true}
-		if sess.UnlockUntil(time.Now()) != nil {
+		if sess.UnlockUntil(s.now()) != nil {
 			reveal.Href = s.postQuery("/app/settings/connections", url.Values{"reveal": {f.ID}})
 		}
 		card.Password = &view.SecretField{Reveal: reveal}

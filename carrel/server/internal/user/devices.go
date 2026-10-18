@@ -53,6 +53,23 @@ func (s *Service) IssueDeviceProfile(viewerID string, accounts []string) (token 
 	return raw, expires, nil
 }
 
+// DeviceProfileLive is whether the link the viewer was given is still to be
+// followed — not used, not revoked, not expired — and until when. It burns
+// nothing and journals nothing: the page asks it to keep the card (s-plan-1).
+func (s *Service) DeviceProfileLive(viewerID, token string) (time.Time, bool) {
+	hash, err := hashToken(token)
+	if err != nil {
+		return time.Time{}, false
+	}
+	now := s.now()
+	for _, t := range s.st.Snapshot().Tokens {
+		if t.Kind == tokenDeviceProfile && t.UserID == viewerID && !t.Used && now.Before(t.ExpiresAt) && verifyHash(t.Hash, hash) {
+			return t.ExpiresAt, true
+		}
+	}
+	return time.Time{}, false
+}
+
 // TakeDeviceProfile burns the link and returns the connections it carries.
 // Unknown, used, expired and someone else's are one answer: false. The
 // download is journaled with the connections that went in.

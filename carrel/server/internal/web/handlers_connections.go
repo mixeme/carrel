@@ -451,7 +451,7 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 	}
 	if key, live := sess.DataKey(); live {
 		if blob, ok := s.users.Catalog(sess.AccountID(), key); ok {
-			unlocked := sess.UnlockUntil(time.Now()) != nil
+			unlocked := sess.UnlockUntil(s.now()) != nil
 			if unlocked {
 				// Under the cards while the window is open (s-profile-4); the
 				// panel of a feed, open, says its own instead.
@@ -784,7 +784,7 @@ const settingsBack = "/app/settings/connections"
 // the journal.
 func (s *Server) revealPassword(sess *session.Session, page *view.ConnectionsPage, id string) bool {
 	key, live := sess.DataKey()
-	if !live || sess.UnlockUntil(time.Now()) == nil {
+	if !live || sess.UnlockUntil(s.now()) == nil {
 		return false
 	}
 	for i := range page.Accounts {

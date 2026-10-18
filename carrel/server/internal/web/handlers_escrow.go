@@ -52,9 +52,9 @@ func (s *Server) postSettingsEscrow(w http.ResponseWriter, r *http.Request) {
 				s.depositRefused(w, r, sess, "Password is wrong.")
 				return
 			}
-			sess.SetUnlockUntil(time.Now().Add(s.cfg.UnlockTTL))
+			sess.SetUnlockUntil(s.now().Add(s.cfg.UnlockTTL))
 		}
-		if sess.UnlockUntil(time.Now()) == nil {
+		if sess.UnlockUntil(s.now()) == nil {
 			s.depositRefused(w, r, sess, "Confirm your password first.")
 			return
 		}
@@ -160,8 +160,8 @@ func (s *Server) depositSheet(sess *session.Session, errText view.Text) view.Unl
 		), "escrow.deposit", "Deposit my key",
 			view.Action{ID: "escrow.deposit.cancel", Label: "Cancel", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true}), "password"),
 	}
-	if until := sess.UnlockUntil(time.Now()); until != nil {
-		sheet.Until = ptrWhen(s.timeFor(sess).formatWhen(*until, false, time.Now()))
+	if until := sess.UnlockUntil(s.now()); until != nil {
+		sheet.Until = ptrWhen(s.timeFor(sess).formatWhen(*until, false, s.now()))
 	}
 	return sheet
 }

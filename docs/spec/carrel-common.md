@@ -2990,8 +2990,8 @@ type DevicesPage struct {
     Shell
     Tab      DeviceTab // C-8
     Accounts []DeviceAccount
-    Warning  Notice // что содержит профиль и куда он попадает
-    Actions  []Action
+    Warning  Notice // что содержит профиль и куда он попадает; у «Anything else» нет (s-plan-5)
+    Actions  []Action // вкладки, Generate profile
     Note     Text   // строка над Generate profile: как его выдадут (s-plan-1, s-plan-3); пусто вне Apple
     // Под строками «Anything else», пока выдача открыта (s-plan-5):
     // «Credentials are unlocked for five minutes — here and everywhere else
@@ -2999,14 +2999,22 @@ type DevicesPage struct {
     // when you press **Lock now**; every reveal is written to the audit
     // log.» — срок словами из CARREL_UNLOCK_TTL; иначе пусто
     UnlockNote Runs
+    Link       *DeviceLink // выданная ссылка, пока жива и не открыта, и после перезагрузки (s-plan-1); только Apple; nil — нет
 }
+// «Link ready until 09:46», значок «local» у локального экземпляра,
+// подсказка, Download profile и Revoke (тревожная). Ссылка держится в
+// сеансе, в памяти: в состоянии — только её хэш.
+type DeviceLink struct { Title Text; Local bool; Hint Text; Actions []Action }
 // Учётные данные — у своего аккаунта, на этой же странице: за паролем на
 // «Connections» не уходят. Пароль показан внутри общего окна разблокировки
 // (S-10.7), каждый показ пишется в журнал; пока окно закрыто — Reveal «Show»,
 // открывающий тот же лист. У Apple своего поля пароля нет.
 type DeviceAccount struct {
-    Title    Text
+    Title    Text        // «nextcloud · mix» (Apple, Android)
+    Label    Text        // «nextcloud» — жирным перед логином в строке таблицы (Thunderbird, Anything else)
     Rows     []DeviceRow
+    Included bool        // аккаунт идёт в профиль и в коды (отметка s-plan-1)
+    Toggle   *Action     // Leave out … / Include …, POST; профиль и коды берут аккаунт целиком; nil у Thunderbird и Anything else
     QR       string      // Android: код этого аккаунта, адрес изображения; пусто — кода нет
     Login    Text        // Thunderbird, Anything else: логин в строке аккаунта
     Password SecretField // пароль этого подключения; пусто у Apple и у аккаунта без кода
@@ -3014,6 +3022,7 @@ type DeviceAccount struct {
 }
 type DeviceRow struct {
     Label    Text
+    Colour   Colour // метка коллекции (s-plan-4, -5); пусто — цвета нет
     Kind     Kind
     Type     Text // CalDAV · CardDAV · WebDAV
     URL      Text

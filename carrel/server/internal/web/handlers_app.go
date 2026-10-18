@@ -193,8 +193,8 @@ func (s *Server) unlockSheet(sess *session.Session, errText view.Text, back, for
 	} else if conn, ok := s.catalogOf(sess).Connection(forID); ok && forID != "" {
 		sheet.Purpose, sheet.Subject = "Show password", text(connLabel(conn))
 	}
-	if until := sess.UnlockUntil(time.Now()); until != nil {
-		sheet.Until = ptrWhen(s.timeFor(sess).formatWhen(*until, false, time.Now()))
+	if until := sess.UnlockUntil(s.now()); until != nil {
+		sheet.Until = ptrWhen(s.timeFor(sess).formatWhen(*until, false, s.now()))
 	}
 	return sheet
 }
@@ -289,7 +289,7 @@ func (s *Server) postSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.unlockSheet(sess, text("Password is wrong."), back, r.FormValue("for")))
 		return
 	}
-	sess.SetUnlockUntil(time.Now().Add(s.cfg.UnlockTTL))
+	sess.SetUnlockUntil(s.now().Add(s.cfg.UnlockTTL))
 	if !render.WantsFragment(r) {
 		// A plain form goes back to the page the sheet was opened over; it
 		// draws the open window itself.

@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.343 — 2026-10-18
+
+A new device as its frames draw it (Нс39–Нс44; `s-plan-1`, `-2`, `-4`,
+`-5`).
+
+### Changed
+
+- **The tick is the account's**: the profile and the codes take an account
+  whole, so Leave out and Include are the account's own, on Apple and
+  Android only; Thunderbird and anything else hand out every address and
+  tick nothing.
+- **The link issued stays on the page** while it is still to be followed —
+  after a reload too — with «local» on a local instance; Revoke is a
+  danger. Followed, revoked or out of time, the card goes. The link is
+  kept in the session's memory; the state has only its hash.
+- **A collection carries its colour**; an account row of a table names the
+  connection apart from its login.
+- **Anything else** says nothing under its rows but the unlock window.
+- The unlock window is measured by the answer's own clock, like the time
+  left in the top bar.
+
+### For consumers
+
+- `DeviceAccount.Label`, `Included`, `Toggle`; `DeviceRow.Colour`;
+  `DevicesPage.Link` (`DeviceLink`); the `device.exclude` / `device.include`
+  actions left `DevicesPage.Actions`, and the link left `Notices` (C-6).
+  Fixtures `app-settings-devices/link`, `android`, `thunderbird`, `other`.
+
 ## v0.2.342 — 2026-10-18
 
 The installation check and the DAV validator as their frames draw them
