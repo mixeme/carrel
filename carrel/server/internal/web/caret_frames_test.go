@@ -244,6 +244,6 @@ func TestCaretInSettingsIsTheFrames(t *testing.T) {
 	}
 	sameCaret(t, "s-profile-10", "subscribe", *feed.Add)
 
-	sameCaret(t, "s-davloom-2", "add device", decode[view.DavloomPage](t, f.h.do(get("/app/settings/davloom", f.sess))).Add)
+	sameCaret(t, "s-davloom-2", "add device", decode[view.DavloomPage](t, f.h.do(get("/app/settings/davloom?add=1", f.sess))).Dialog.Form)
 	sameCaret(t, "s-backup-2", "backup job", decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess))).Add)
 }

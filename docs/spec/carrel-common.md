@@ -497,7 +497,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/settings/attachments` | GET, POST | вход | страница | `AttachmentsPage` |
 | `/app/settings/devices` | GET, POST | вход | страница | `DevicesPage` |
 | `/app/settings/devices/profile` | GET | вход | файл | — |
-| `/app/settings/davloom` | GET, POST | вход | страница | `DavloomPage` |
+| `/app/settings/davloom` | GET, POST | вход | страница | `DavloomPage`; GET `?add=1` — диалог Add device (`DavloomPage.Dialog`, s-davloom-2), `?edit=‹устройство›` — что оно видит; сразу после выдачи — пароль один раз (s-davloom-3). POST `op=issue` (`name`, `access`, `kind.‹род›`, `col.‹account›` с путём коллекции через вертикальную черту, без открытого окна — `password` человека), `op=scope&id=`, `op=access&id=&access=` (`read` или `write`), `op=revoke&id=` |
 | `/app/settings/backup` | GET, POST | вход | страница | `BackupPage` |
 | `/app/settings/appearance` | GET, POST | вход | страница, редирект | `AppearancePage`; POST — форма страницы: Look в куку этого браузера, неделя и часы — в аккаунт; `?op=reset` — забыть столбцы разделов и Look |
 | `/app/settings/unlock` | GET, POST | вход | лист, редирект | `UnlockSheet`; без сценариев — страница (U-8): скрытое `back` — страница, над которой открыт лист (`?back=` или откуда пришли по ссылке, только `/app/` и `/admin/` этого адреса); POST с верным паролем — редирект туда (иначе Connections), с неверным — лист страницей с ошибкой у поля |
@@ -2602,7 +2602,7 @@ type Form struct { // общая форма: поля, ошибки, кнопк�
 // ту же форму с ?fields=all, где свёрнутого нет и каждое поле стоит в своей
 // рубрике; набранное до неё не переносится — со сценариями клиент раскрывает
 // набор на месте. nil у несвёрнутого
-type FieldSet struct { Legend Text; Folded bool; Unfold *Action; Rows []FormRow; Badges []Badge; Hint Text } // Badges — плашки рубрики после Legend: «not configured» тревогой у Mail, «off» у Letters from users (s-admin-3); пусто — без плашек. Hint — строка под набором: «Without the title an event shows as “Busy”.» у «What the visitor sees» (s-publish-2, -19); у прочих пусто
+type FieldSet struct { Legend Text; LegendAside Text; Folded bool; Unfold *Action; Rows []FormRow; Badges []Badge; Hint Text } // LegendAside — приглушённый хвост подписи набора: «— changed later too, without re-issuing the password» (s-davloom-2). Badges — плашки рубрики после Legend: «not configured» тревогой у Mail, «off» у Letters from users (s-admin-3); пусто — без плашек. Hint — строка под набором: «Without the title an event shows as “Busy”.» у «What the visitor sees» (s-publish-2, -19); у прочих пусто
 type FormRow struct {
     Name     string
     Label    Text
@@ -3022,13 +3022,16 @@ type DeviceRow struct {
 }
 
 type DavloomPage struct {
-    Shell
-    Subtitle Runs // «One address for every device instead of an account for every server»; у локального адреса — и « · ‹danger›a phone on mobile data will not reach a local address» (s-davloom-1)
-    Enabled bool
-    Address Text
-    Devices []ProxyDevice
-    Add     Form
-    Note    Runs // смена основного пароля не отключает устройства; «not» жирным (s-davloom-1)
+    Shell                       // Title «davloom» (s-davloom-1)
+    Subtitle    Runs            // «One address for every device instead of an account for every server»; у локального адреса — и « · ‹danger›a phone on mobile data will not reach a local address» (s-davloom-1)
+    Enabled     bool
+    Address     Text
+    AddressHint Text            // как адрес вводят в DAVx5 и чей пароль (s-davloom-1)
+    Actions     []Action        // шапка: Add device (основная, GET ?add=1); у выключенного davloom — выключена с причиной
+    Devices     []ProxyDevice
+    Tree        []ProxyTreeRow  // «What the client sees»: /dav/, principal/, cal/, card/, files/ и коллекции под ними адресами (s-davloom-1)
+    Dialog      *DeviceDialog   // диалог поверх списка: добавление (s-davloom-2), что видит устройство (?edit=), выданный пароль (s-davloom-3); nil — список
+    Note        Runs            // смена основного пароля не отключает устройства; «not» жирным (s-davloom-1)
 }
 type ProxyDevice struct {
     Name     Text
@@ -3036,8 +3039,18 @@ type ProxyDevice struct {
     LastSeen When
     Scope    []Kind
     ReadOnly bool     // право устройства: только чтение или чтение и запись
-    Actions  []Action // Edit scope · read only | read and write (On — действующее) · Revoke
+    Marks    []Colour // метки коллекций, которые устройство видит, каждая один раз, в порядке каталога (s-davloom-1)
+    Actions  []Action // «N collections · Change» · read only | read and write (On — действующее) · Revoke
 }
+type ProxyTreeRow struct { Path Text; Label Text; Colour Colour; Depth int } // адрес уровнем ниже предыдущего, моноширинно; справа — что это; у коллекции — метка
+type DeviceDialog struct {
+    Title    Text            // «Add device»; у правки и выданного — имя устройства
+    Subtitle Text            // «An app password for one device, with its own key wrapper»; у выданного — «Password created · read and write · 8 collections»
+    Password *DevicePassword // выданный пароль (s-davloom-3); nil — не выдан
+    Form     Form            // добавление: имя, право, «What the device will see» (роды, LegendAside), «Collections», Create password и Cancel; правка: роды и коллекции, Save и Cancel; выданный: адрес и логин только для чтения, Done
+    Warning  Text            // под формой добавления тревогой: пароль показывают один раз
+}
+type DevicePassword struct { Label Text; Value Text; Warning Text; Copy Action }
 
 type BackupPage struct {
     Shell

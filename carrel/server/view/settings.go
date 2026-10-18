@@ -13,6 +13,10 @@ type Form struct {
 }
 type FieldSet struct {
 	Legend Text `json:"legend"`
+	// LegendAside — приглушённый хвост подписи набора: «— changed later
+	// too, without re-issuing the password» у «What the device will see»
+	// (s-davloom-2); пусто — хвоста нет
+	LegendAside Text `json:"legendAside,omitempty"`
 	// Folded — набор свёрнут: Legend — кнопка, раскрывающая строки («Show 6
 	// empty fields», s-contacts-3)
 	Folded bool `json:"folded,omitempty"`
@@ -403,20 +407,71 @@ type DavloomPage struct {
 	// Subtitle — строка под заголовком (s-davloom-1): «One address for every
 	// device instead of an account for every server», у локального адреса —
 	// и « · ‹danger›a phone on mobile data will not reach a local address»
-	Subtitle Runs          `json:"subtitle"`
-	Enabled  bool          `json:"enabled"`
-	Address  Text          `json:"address"`
-	Devices  []ProxyDevice `json:"devices"`
-	Add      Form          `json:"add"`
-	Note     Runs          `json:"note"` // смена основного пароля не отключает устройства; «not» — жирным (s-davloom-1)
+	Subtitle Runs `json:"subtitle"`
+	Enabled  bool `json:"enabled"`
+	// Address — адрес для клиента, AddressHint — подсказка под ним: как его
+	// вводят в DAVx5 и чей пароль (s-davloom-1)
+	Address     Text `json:"address"`
+	AddressHint Text `json:"addressHint"`
+	// Actions — шапка (s-davloom-1): Add device (основная, ?add=1 — диалог
+	// добавления, s-davloom-2); у выключенного davloom — выключена с причиной
+	Actions []Action      `json:"actions"`
+	Devices []ProxyDevice `json:"devices"`
+	// Tree — «What the client sees» (s-davloom-1): синтетические уровни
+	// davloom — /dav/, principal/, cal/, card/, files/ — и коллекции под ними
+	// адресами, как их увидит клиент
+	Tree []ProxyTreeRow `json:"tree"`
+	// Dialog — диалог поверх списка: добавление (?add=1, s-davloom-2), что
+	// видит устройство (?edit=), выданный пароль (s-davloom-3, один раз);
+	// nil — список
+	Dialog *DeviceDialog `json:"dialog"`
+	Note   Runs          `json:"note"` // смена основного пароля не отключает устройства; «not» — жирным (s-davloom-1)
 }
 type ProxyDevice struct {
-	Name     Text     `json:"name"`
-	Created  When     `json:"created"`
-	LastSeen When     `json:"lastSeen"`
-	Scope    []Kind   `json:"scope"`
-	ReadOnly bool     `json:"readOnly"` // право устройства: только чтение или чтение и запись
-	Actions  []Action `json:"actions"`  // Edit scope · read only | read and write (On — действующее) · Revoke
+	Name     Text   `json:"name"`
+	Created  When   `json:"created"`
+	LastSeen When   `json:"lastSeen"`
+	Scope    []Kind `json:"scope"`
+	ReadOnly bool   `json:"readOnly"` // право устройства: только чтение или чтение и запись
+	// Marks — метки коллекций, которые устройство видит, каждая один раз
+	// (s-davloom-1: полоски в строке); у устройства всех родов кадр рисует
+	// одну составную — клиент по Scope
+	Marks   []Colour `json:"marks"`
+	Actions []Action `json:"actions"` // «5 collections · Change» · read only | read and write (On — действующее) · Revoke
+}
+
+// ProxyTreeRow — строка дерева «What the client sees»: адрес уровнем ниже
+// предыдущего (Depth), моноширинно; справа — что это (Label: «root»,
+// «Calendars · events, tasks, notes», имя коллекции); у коллекции — её
+// метка
+type ProxyTreeRow struct {
+	Path   Text   `json:"path"`
+	Label  Text   `json:"label"`
+	Colour Colour `json:"colour,omitempty"`
+	Depth  int    `json:"depth"`
+}
+
+// DeviceDialog — диалог устройства (s-davloom-2, -3): заголовок и
+// подзаголовок; у выданного — карточка пароля (Password); форма — у
+// добавления имя, право, «What the device will see» (роды) и «Collections»,
+// Create password и Cancel; у правки — роды и коллекции, Save и Cancel; у
+// выданного — адрес и логин только для чтения и Done. Warning — тревогой под
+// формой добавления: пароль показывают один раз
+type DeviceDialog struct {
+	Title    Text            `json:"title"`
+	Subtitle Text            `json:"subtitle"`
+	Password *DevicePassword `json:"password"`
+	Form     Form            `json:"form"`
+	Warning  Text            `json:"warning"`
+}
+
+// DevicePassword — выданный пароль устройства (s-davloom-3): подпись,
+// значение, Copy и что его больше не покажут
+type DevicePassword struct {
+	Label   Text   `json:"label"`
+	Value   Text   `json:"value"`
+	Warning Text   `json:"warning"`
+	Copy    Action `json:"copy"`
 }
 
 type BackupPage struct {

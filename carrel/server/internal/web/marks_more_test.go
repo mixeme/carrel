@@ -81,7 +81,10 @@ func TestDeviceMadeMarksAreTheFrame(t *testing.T) {
 		t.Fatalf("issue: %d", rec.Code)
 	}
 	page := decode[view.DavloomPage](t, h.do(get("/app/settings/davloom", alice)))
-	sameActionMarks(t, "s-davloom-3", "device made", page.Add.Actions, nil)
+	if page.Dialog == nil {
+		t.Fatal("no dialog of the password issued")
+	}
+	sameActionMarks(t, "s-davloom-3", "device made", page.Dialog.Form.Actions, nil)
 }
 
 // s-dup-5: a merge that stopped leads to the kept record.

@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.341 — 2026-10-18
+
+davloom as its frames draw it (Нс46–Нс52; `s-davloom-1`…`-3`).
+
+### Changed
+
+- **The page is «davloom»**, with Add device in its head; the list has no
+  form. `?add=1` opens the dialog of a new device, `?edit=` what a device
+  sees; the password issued is a dialog of its own, shown once — the device
+  by its name, what it was given, the password with Copy, the address and
+  the login, Done.
+- **The dialog of a new device** asks what it will see in two groups —
+  the kinds, each with its muted words, and the collections — and says
+  under it that the password is shown once; Cancel closes it. A new device
+  sees calendars, address books and folders; tasks and notes are ticked
+  by the person.
+- **A device's row** carries the marks of its collections, each colour once.
+- **What the client sees**: the synthetic levels of davloom and the
+  collections under them, by the address a client is given.
+
+### For consumers
+
+- `DavloomPage.Add` is gone: `Actions` (Add device), `AddressHint`, `Tree`,
+  `Dialog` (`DeviceDialog`, `DevicePassword`); `ProxyDevice.Marks`;
+  `FieldSet.LegendAside` (C-6). C-5 says what `/app/settings/davloom` takes.
+
 ## v0.2.340 — 2026-10-18
 
 ### Changed

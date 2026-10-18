@@ -939,6 +939,8 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`plan=r-[0-9A-Z]{10}`).ReplaceAllString(s, "plan=r-plan")
 	s = regexp.MustCompile(`transfer=q-[0-9A-Z]{10}`).ReplaceAllString(s, "transfer=q-transfer")
 	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
+	// A davloom device's ID (NewDeviceID): the frames name no device by it.
+	s = regexp.MustCompile(`\bd-[0-9A-Z]{10}\b`).ReplaceAllString(s, "d-device")
 	// A group of duplicates is named by a digest of the records in it, and
 	// those carry the account identifier, which is issued.
 	s = regexp.MustCompile(`g=[0-9a-f]{32}`).ReplaceAllString(s, "g=group")
@@ -1725,7 +1727,7 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 		{"app-settings-attachments", "/app/settings/attachments"},
 		{"app-settings-devices", "/app/settings/devices"},
 		{"app-settings-backup", "/app/settings/backup"},
-		{"app-settings-davloom", "/app/settings/davloom"},
+		// davloom with its devices: TestFixtureDavloomStates.
 		// The escrow page's normal is the deposited copy (account-4):
 		// TestFixtureAccountStates deposits it.
 	} {

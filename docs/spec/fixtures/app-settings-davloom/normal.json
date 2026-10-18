@@ -1,380 +1,176 @@
 {
-  "add": {
-    "action": "/app/settings/davloom",
-    "actions": [
-      {
-        "csrf": "csrf",
-        "enabled": true,
-        "id": "davloom.issue",
-        "label": "Create password",
-        "method": "POST",
-        "primary": true
-      }
-    ],
-    "errors": [],
-    "method": "POST",
-    "sets": [
-      {
-        "legend": "Add device",
-        "rows": [
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "hidden",
-            "label": "",
-            "name": "_csrf",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "csrf"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "hidden",
-            "label": "",
-            "name": "op",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "issue"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "focus": true,
-            "hint": "For you: this is how you will know what you are revoking later.",
-            "kind": "text",
-            "label": "Name",
-            "name": "name",
-            "options": [],
-            "readOnly": false,
-            "required": true,
-            "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "Read only: the device syncs, and whatever it sends back is refused. Changed later in the device’s row, without a new password.",
-            "kind": "radio",
-            "label": "What this device may do",
-            "name": "access",
-            "options": [
-              {
-                "label": "Read only",
-                "selected": false,
-                "value": "read"
-              },
-              {
-                "label": "Read and write",
-                "selected": true,
-                "value": "write"
-              }
-            ],
-            "readOnly": false,
-            "required": false,
-            "value": "write"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "Calendars",
-            "name": "kind.event",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "Address books",
-            "name": "kind.contact",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "Tasks · VTODO — not every client understands them",
-            "name": "kind.task",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "Notes · VJOURNAL — a different subset of clients",
-            "name": "kind.note",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "WebDAV folders · mount as a network drive",
-            "name": "kind.file",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "nextcloud · Личный",
-            "name": "col.a-nc-home|/alice/calendars/lichnyj/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "nextcloud · Дела",
-            "name": "col.a-nc-home|/alice/calendars/dela/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "nextcloud · Работа",
-            "name": "col.a-nc-home|/alice/calendars/rabota/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "nextcloud · Дни рождения",
-            "name": "col.a-nc-home|/alice/calendars/dni-rozhdeniya/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "nextcloud · Записи",
-            "name": "col.a-nc-home|/alice/calendars/zapisi/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "nextcloud · Дневник",
-            "name": "col.a-nc-home|/alice/calendars/dnevnik/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "nextcloud · Общие с семьёй",
-            "name": "col.a-nc-home|/alice/calendars/zapiski-obshchie/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "nextcloud · Контакты",
-            "name": "col.a-nc-home|/alice/contacts/kontakty/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "nextcloud · Архив",
-            "name": "col.a-nc-home|/alice/contacts/arhiv/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "nextcloud · Files",
-            "name": "col.a-nc-home|/alice/files/Files/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "radicale · vps · Проекты",
-            "name": "col.a-rad-vps|/alice/calendars/proekty/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "radicale · vps · Дежурства",
-            "name": "col.a-rad-vps|/alice/calendars/dezhurstva/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "radicale · vps · Команда",
-            "name": "col.a-rad-vps|/alice/contacts/komanda/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "radicale · vps · Рассылки",
-            "name": "col.a-rad-vps|/alice/contacts/rassylki/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "baikal · Общий",
-            "name": "col.a-baikal|/alice/calendars/obshchij/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "sftpgo · vps · Documents",
-            "name": "col.a-sftp-vps|/alice/files/Documents/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "sftpgo · vps · Public",
-            "name": "col.a-sftp-vps|/alice/files/Public/",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "true"
-          }
-        ],
-        "unfold": null
-      }
-    ]
-  },
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/settings/davloom?add=1",
+      "icon": "i-plus",
+      "id": "davloom.add",
+      "label": "Add device",
+      "method": "GET",
+      "primary": true
+    }
+  ],
   "address": "http://127.0.0.1:8081/",
+  "addressHint": "In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.",
   "details": null,
-  "devices": [],
+  "devices": [
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/davloom?edit=d-device",
+          "id": "davloom.scope",
+          "label": "5 collections · Change",
+          "method": "GET"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/davloom?access=read\u0026id=d-device\u0026op=access",
+          "id": "davloom.access.read",
+          "label": "read only",
+          "method": "POST"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/davloom?access=write\u0026id=d-device\u0026op=access",
+          "id": "davloom.access.write",
+          "label": "read and write",
+          "method": "POST",
+          "on": true
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/davloom?id=d-device\u0026op=revoke",
+          "id": "davloom.revoke",
+          "label": "Revoke",
+          "method": "POST"
+        }
+      ],
+      "created": "2026-08-10",
+      "lastSeen": "",
+      "marks": [
+        "#4a6b52",
+        "#3f6e8c",
+        "#a05a2c"
+      ],
+      "name": "Телефон · DAVx5",
+      "readOnly": false,
+      "scope": [
+        "event",
+        "contact"
+      ]
+    },
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/davloom?edit=d-device",
+          "id": "davloom.scope",
+          "label": "14 collections · Change",
+          "method": "GET"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/davloom?access=read\u0026id=d-device\u0026op=access",
+          "id": "davloom.access.read",
+          "label": "read only",
+          "method": "POST",
+          "on": true
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/davloom?access=write\u0026id=d-device\u0026op=access",
+          "id": "davloom.access.write",
+          "label": "read and write",
+          "method": "POST"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/davloom?id=d-device\u0026op=revoke",
+          "id": "davloom.revoke",
+          "label": "Revoke",
+          "method": "POST"
+        }
+      ],
+      "created": "2026-08-10",
+      "lastSeen": "",
+      "marks": [
+        "#4a6b52",
+        "#3f6e8c",
+        "#a05a2c",
+        "#6b4e7a",
+        "#8c6239",
+        "#9a9280"
+      ],
+      "name": "Ноутбук · Thunderbird",
+      "readOnly": true,
+      "scope": [
+        "event",
+        "contact",
+        "task",
+        "note",
+        "file"
+      ]
+    },
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/davloom?edit=d-device",
+          "id": "davloom.scope",
+          "label": "3 collections · Change",
+          "method": "GET"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/davloom?access=read\u0026id=d-device\u0026op=access",
+          "id": "davloom.access.read",
+          "label": "read only",
+          "method": "POST",
+          "on": true
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/davloom?access=write\u0026id=d-device\u0026op=access",
+          "id": "davloom.access.write",
+          "label": "read and write",
+          "method": "POST"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/davloom?id=d-device\u0026op=revoke",
+          "id": "davloom.revoke",
+          "label": "Revoke",
+          "method": "POST"
+        }
+      ],
+      "created": "2026-08-10",
+      "lastSeen": "",
+      "marks": [
+        "#4a6b52",
+        "#3f6e8c",
+        "#a05a2c"
+      ],
+      "name": "Планшет · Календарь iOS",
+      "readOnly": true,
+      "scope": [
+        "event"
+      ]
+    }
+  ],
+  "dialog": null,
   "enabled": true,
   "look": {
     "compact": false,
@@ -410,7 +206,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [],
     "nav": [
       {
@@ -459,7 +255,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/davloom",
         "id": "settings.davloom",
@@ -506,7 +302,7 @@
             "text": "No device has connected since the start."
           }
         ],
-        "title": "davloom · running · 0 devices",
+        "title": "davloom · running · 3 devices",
         "tone": "on"
       }
     ],
@@ -522,7 +318,7 @@
       "text": "a phone on mobile data will not reach a local address"
     }
   ],
-  "title": "DAV proxy",
+  "title": "davloom",
   "top": {
     "lock": null,
     "new": {
@@ -646,5 +442,134 @@
       }
     ],
     "userHref": "/app/settings/account"
-  }
+  },
+  "tree": [
+    {
+      "depth": 0,
+      "label": "root",
+      "path": "/dav/"
+    },
+    {
+      "depth": 1,
+      "label": "",
+      "path": "principal/"
+    },
+    {
+      "depth": 1,
+      "label": "Calendars · events, tasks, notes",
+      "path": "cal/"
+    },
+    {
+      "colour": "#4a6b52",
+      "depth": 2,
+      "label": "Личный",
+      "path": "c/a-nc-home/lichnyj/"
+    },
+    {
+      "colour": "#4a6b52",
+      "depth": 2,
+      "label": "Дела",
+      "path": "c/a-nc-home/dela/"
+    },
+    {
+      "colour": "#3f6e8c",
+      "depth": 2,
+      "label": "Работа",
+      "path": "c/a-nc-home/rabota/"
+    },
+    {
+      "colour": "#a05a2c",
+      "depth": 2,
+      "label": "Дни рождения",
+      "path": "c/a-nc-home/dni-rozhdeniya/"
+    },
+    {
+      "colour": "#4a6b52",
+      "depth": 2,
+      "label": "Записи",
+      "path": "c/a-nc-home/zapisi/"
+    },
+    {
+      "colour": "#6b4e7a",
+      "depth": 2,
+      "label": "Дневник",
+      "path": "c/a-nc-home/dnevnik/"
+    },
+    {
+      "colour": "#3f6e8c",
+      "depth": 2,
+      "label": "Общие с семьёй",
+      "path": "c/a-nc-home/zapiski-obshchie/"
+    },
+    {
+      "colour": "#6b4e7a",
+      "depth": 2,
+      "label": "Проекты",
+      "path": "c/a-rad-vps/proekty/"
+    },
+    {
+      "colour": "#8c6239",
+      "depth": 2,
+      "label": "Дежурства",
+      "path": "c/a-rad-vps/dezhurstva/"
+    },
+    {
+      "colour": "#9a9280",
+      "depth": 2,
+      "label": "Общий",
+      "path": "c/a-baikal/obshchij/"
+    },
+    {
+      "depth": 1,
+      "label": "Address books",
+      "path": "card/"
+    },
+    {
+      "colour": "#4a6b52",
+      "depth": 2,
+      "label": "Контакты",
+      "path": "c/a-nc-home/kontakty/"
+    },
+    {
+      "colour": "#a05a2c",
+      "depth": 2,
+      "label": "Архив",
+      "path": "c/a-nc-home/arhiv/"
+    },
+    {
+      "colour": "#6b4e7a",
+      "depth": 2,
+      "label": "Команда",
+      "path": "c/a-rad-vps/komanda/"
+    },
+    {
+      "colour": "#6b4e7a",
+      "depth": 2,
+      "label": "Рассылки",
+      "path": "c/a-rad-vps/rassylki/"
+    },
+    {
+      "depth": 1,
+      "label": "Files · plain WebDAV",
+      "path": "files/"
+    },
+    {
+      "colour": "#9a9280",
+      "depth": 2,
+      "label": "Files",
+      "path": "c/a-nc-home/Files/"
+    },
+    {
+      "colour": "#a05a2c",
+      "depth": 2,
+      "label": "Documents",
+      "path": "c/a-sftp-vps/Documents/"
+    },
+    {
+      "colour": "#a05a2c",
+      "depth": 2,
+      "label": "Public",
+      "path": "c/a-sftp-vps/Public/"
+    }
+  ]
 }
