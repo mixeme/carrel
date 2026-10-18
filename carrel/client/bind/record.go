@@ -230,8 +230,21 @@ func Attendees(f view.AttendeeField, lead string) w.TagInput {
 // a checkbox: its name, ticked where the row's value is set, its label its
 // words; the field it switches off while ticked (Disables). It sends what a
 // browser sends for a ticked box, which the server reads as on (C-6.8).
+// A label in pieces (LabelRuns: «Allow ‹.ics› download…», s-publish-2) keeps
+// its monospaced piece.
 func Check(r view.FormRow) w.Check {
-	return w.Check{On: r.Value != "", Name: r.Name, Parts: []w.CheckPart{w.Text(r.Label)}, Disables: r.Disables}
+	parts := []w.CheckPart{w.Text(r.Label)}
+	if len(r.LabelRuns) > 0 {
+		parts = parts[:0]
+		for _, p := range r.LabelRuns {
+			if p.Mark == view.RunMono {
+				parts = append(parts, w.Mono{Text: string(p.Text)})
+			} else {
+				parts = append(parts, w.Text(p.Text))
+			}
+		}
+	}
+	return w.Check{On: r.Value != "", Name: r.Name, Parts: parts, Disables: r.Disables}
 }
 
 // Days is a tick of a form with several options (C-6.8 InputCheck with

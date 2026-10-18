@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.344 — 2026-10-18
+
+The publish sheet's ticks as the frames write them (Пб5, Пб6).
+
+### Changed
+
+- **«Allow .ics / .vcf download and subscription»** carries the format as
+  a monospaced piece (`s-publish-2`, `-3`).
+- **«To» of a date range** has no hint of its own: the frame draws none.
+
+### For consumers
+
+- `FormRow.LabelRuns`: the label in pieces where the frame marks one;
+  `Label` keeps the same words as one string (C-6).
+
 ## v0.2.343 — 2026-10-18
 
 A new device as its frames draw it (Нс39–Нс44; `s-plan-1`, `-2`, `-4`,

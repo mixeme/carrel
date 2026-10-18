@@ -133,3 +133,14 @@ func TestPickMenu(t *testing.T) {
 		}},
 	})
 }
+
+// Пб5: the label of a download tick keeps its format monospaced, as
+// s-publish-2 draws it; a plain label stays one piece.
+func TestCheckKeepsItsMonospacedPiece(t *testing.T) {
+	r := view.FormRow{Name: "download", Label: "Allow .ics download and subscription", Value: "on",
+		LabelRuns: view.Runs{{Text: "Allow "}, {Text: ".ics", Mark: view.RunMono}, {Text: " download and subscription"}}}
+	same(t, "in pieces", bind.Check(r), w.Check{On: true, Name: "download",
+		Parts: []w.CheckPart{w.Text("Allow "), w.Mono{Text: ".ics"}, w.Text(" download and subscription")}})
+	r.LabelRuns = nil
+	same(t, "plain", bind.Check(r), w.Check{On: true, Name: "download", Parts: []w.CheckPart{w.Text("Allow .ics download and subscription")}})
+}

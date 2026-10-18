@@ -2625,6 +2625,7 @@ type FormRow struct {
     Hint     Text
     From     string // имя строки, из которой значение выводится на лету: адрес новой коллекции — из Name по правилу architecture.md; клиент ставит выведенное образцом поля и в путь подсказки, набранное главнее (Кл5); пусто — нет
     HintRuns Runs // Hint кусками, когда кадр выделяет часть: имя сервера и адрес моноширинно, «Tasks» жирно (s-profile-5, Кл3); Hint тогда пуст
+    LabelRuns Runs // Label кусками, когда кадр выделяет часть: «Allow ‹.ics› download and subscription» (s-publish-2, Пб5); Label — те же слова строкой
     Error    Text
     Extra    *Action // кнопка, принадлежащая полю
     ReadOnly bool

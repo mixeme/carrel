@@ -137,6 +137,18 @@
             "hint": "",
             "kind": "check",
             "label": "Allow .vcf download and subscription",
+            "labelRuns": [
+              {
+                "text": "Allow "
+              },
+              {
+                "mark": "mono",
+                "text": ".vcf"
+              },
+              {
+                "text": " download and subscription"
+              }
+            ],
             "name": "download",
             "options": [],
             "readOnly": false,

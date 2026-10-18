@@ -116,7 +116,6 @@ func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, titl
 // are asked what the visitor sees — the time always, the title unless taken
 // off, the rest when ticked (Б39) —, as a contact is (s-publish-3).
 func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, subject string, q url.Values, cancel, how string) view.PublishSheet {
-	tf := s.timeFor(sess)
 	create := view.Action{ID: "publish.create", Label: "Create link", Href: s.postQuery("/app/publish", q), Method: "POST", Primary: true, Enabled: true}
 	back := view.Action{ID: "publish.cancel", Label: "Cancel", Href: s.route(cancel), Method: "GET", Enabled: true}
 	sheet := view.PublishSheet{
@@ -136,10 +135,9 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, subject s
 			{Value: "whole", Label: "The whole calendar", Selected: how == "whole"},
 		}})
 		if how == "range" {
-			today := dayOf(tf.now, tf.tz)
 			rows = append(rows,
 				view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Mono: true},
-				view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Mono: true, Hint: text("Both days are in it. " + tf.date(today) + " is today.")})
+				view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Mono: true})
 		}
 	}
 	lives := livesOf(kind, what == "folder")
@@ -147,12 +145,12 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, subject s
 	switch {
 	case kind == view.KindContact:
 		// The .vcf is off until asked for, like the fields it would carry.
-		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .vcf download and subscription", Kind: view.InputCheck})
+		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .vcf download and subscription", LabelRuns: allowLabel(".vcf", " download and subscription"), Kind: view.InputCheck})
 	case isCalendarKind(kind):
 		// The .ics goes unless taken off — a calendar's and one event's
 		// alike (s-publish-2, -19) —, after what the visitor sees: it obeys
 		// the same ticks.
-		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .ics download and subscription", Kind: view.InputCheck, Value: "on"})
+		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .ics download and subscription", LabelRuns: allowLabel(".ics", " download and subscription"), Kind: view.InputCheck, Value: "on"})
 	}
 	terms = append(terms, view.FormRow{Name: "lives", Label: "Link lives for", Kind: view.InputSelect, Value: text(lives), Options: []view.Option{
 		{Value: "7", Label: "7 days", Selected: lives == "7"},
@@ -1177,4 +1175,10 @@ func withoutDescriptions(objs []*model.Object) []*model.Object {
 		out = append(out, o)
 	}
 	return out
+}
+
+// allowLabel is the label of a download tick, the format monospaced
+// (s-publish-2, -3; Пб5).
+func allowLabel(format, rest string) view.Runs {
+	return join("Allow ", monoRun(format), rest)
 }

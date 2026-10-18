@@ -4,6 +4,15 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.4.57 — 2026-10-18
+
+Server `v0.2.344`, Typecase `844ab51`.
+
+### Changed
+
+- **A tick whose label comes in pieces** (`FormRow.LabelRuns`) keeps its
+  monospaced piece: «Allow `.ics` download and subscription».
+
 ## v0.4.56 — 2026-10-18
 
 Server `v0.2.342`, Typecase `844ab51` (its notes 79, 80). The mockup

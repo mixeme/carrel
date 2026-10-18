@@ -61,11 +61,15 @@ type FormRow struct {
 	From string `json:"from,omitempty"`
 	// HintRuns — Hint кусками, когда кадр выделяет часть: имя сервера и
 	// адрес моноширинно, «Tasks» жирно (s-profile-5, Кл3); Hint тогда пуст
-	HintRuns Runs    `json:"hintRuns,omitempty"`
-	Error    Text    `json:"error"`
-	Extra    *Action `json:"extra"` // кнопка, принадлежащая полю
-	ReadOnly bool    `json:"readOnly"`
-	Required bool    `json:"required"`
+	HintRuns Runs `json:"hintRuns,omitempty"`
+	// LabelRuns — Label кусками, когда кадр выделяет часть: «Allow ‹.ics›
+	// download and subscription» (s-publish-2, Пб5); Label тогда — те же
+	// слова одной строкой, для подписи без кусков
+	LabelRuns Runs    `json:"labelRuns,omitempty"`
+	Error     Text    `json:"error"`
+	Extra     *Action `json:"extra"` // кнопка, принадлежащая полю
+	ReadOnly  bool    `json:"readOnly"`
+	Required  bool    `json:"required"`
 	// Образец в пустом поле, как его рисует кадр: «DD.MM.YYYY» у дня
 	// рождения (s-contacts-4); у прочих полей пусто
 	Placeholder Text `json:"placeholder,omitempty"`
