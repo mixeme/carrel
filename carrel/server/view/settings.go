@@ -798,15 +798,24 @@ type AuditRow struct {
 
 type AdminDavPage struct {
 	Shell
-	Form    Form             `json:"form"`
-	Trace   *DiagnosticTrace `json:"trace"`
-	Full    *ExerciseReport  `json:"full"` // второй, изменяющий этап — только по согласию
-	Actions []Action         `json:"actions"`
+	Form  Form             `json:"form"`
+	Trace *DiagnosticTrace `json:"trace"`
+	// Agree — отметка согласия второго этапа (s-admin-5): стоит под следом,
+	// вне полей формы, и уходит с нею; nil — обнаружение не прошло, второго
+	// этапа нет (s-admin-27, -28)
+	Agree   *FormRow        `json:"agree"`
+	Full    *ExerciseReport `json:"full"` // второй, изменяющий этап — только по согласию
+	Actions []Action        `json:"actions"`
 }
 type ExerciseReport struct {
 	Rows []ExerciseRow `json:"rows"`
 	OK   bool          `json:"ok"`
 }
+
+// ExerciseRow — род второго этапа (s-admin-29): Operation «Create, read
+// back, delete · event», Result ok · failed · skipped, Detail — что
+// спросили и что ответил сервер: «PUT · GET · DELETE /path → 201 · 200 ·
+// 204», отказ — «PUT /path → 403 Forbidden»
 type ExerciseRow struct {
 	Operation Text `json:"operation"`
 	Result    Text `json:"result"`
@@ -821,6 +830,10 @@ type AdminInstallPage struct {
 	Rows []InstallRow `json:"rows"`
 	// Took — сколько шла проверка, «4.2 s»; пусто — её не было (Ад30)
 	Took Text `json:"took"`
+	// Note — что делает проверка, пока таблицы нет (s-admin-25, -26):
+	// снаружи внутрь, ничего не меняет и не хранит, кроме строки журнала;
+	// с таблицей пусто
+	Note Text `json:"note"`
 }
 type InstallRow struct {
 	Check  Text       `json:"check"`

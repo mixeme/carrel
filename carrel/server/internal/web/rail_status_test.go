@@ -62,7 +62,7 @@ func TestRailStatusBlock(t *testing.T) {
 
 	// Administration: mail and the check.
 	got = railStates(decode[view.AdminUsersPage](t, h.do(get("/admin/", mix))).Rail)
-	if strings.Join(got, "|") != "alert: SMTP not configured / No mail is going out.|off: Not checked since the start / Run the installation check." {
+	if strings.Join(got, "|") != "alert: SMTP not configured / No mail is going out.|off: Not checked yet / Run the check once Carrel is behind its proxy." {
 		t.Errorf("admin rail before = %q", got)
 	}
 	relay := h.relayed()

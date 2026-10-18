@@ -58,6 +58,7 @@
     "theme": "auto",
     "wide": false
   },
+  "note": "The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. Nothing is changed and nothing is stored, apart from the audit line saying the check was run.",
   "notices": [],
   "print": {
     "range": "",
@@ -167,10 +168,10 @@
       {
         "line": [
           {
-            "text": "Run the installation check."
+            "text": "Run the check once Carrel is behind its proxy."
           }
         ],
-        "title": "Not checked since the start",
+        "title": "Not checked yet",
         "tone": "off"
       }
     ],

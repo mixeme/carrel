@@ -3306,10 +3306,13 @@ type AdminDavPage struct {
     Shell
     Form    Form
     Trace   *DiagnosticTrace
+    Agree   *FormRow        // отметка второго этапа под следом, вне полей формы (s-admin-5); nil — обнаружение не прошло
     Full    *ExerciseReport // второй, изменяющий этап — только по согласию
     Actions []Action
 }
 type ExerciseReport struct { Rows []ExerciseRow; OK bool }
+// строка — род (s-admin-29): «Create, read back, delete · event»; ok · failed · skipped;
+// Detail — «PUT · GET · DELETE /path → 201 · 200 · 204», отказ — «PUT /path → 403 Forbidden»
 type ExerciseRow struct { Operation Text; Result Text; Detail Text }
 
 type AdminInstallPage struct {
@@ -3317,6 +3320,7 @@ type AdminInstallPage struct {
     Form Form         // шапка s-admin-4: адрес проверки (url, моноширинно) и «Run the check»
     Rows []InstallRow
     Took Text         // сколько шла проверка, «4.2 s»; пусто — её не было
+    Note Text         // что делает проверка, пока таблицы нет (s-admin-25, -26)
 }
 type InstallRow struct {
     Check   Text
@@ -3840,8 +3844,9 @@ type Diagnostic struct { // технический блок под челове�
 }
 
 type DiagnosticTrace struct { // след пошаговой операции: подключение, проверка
-    Steps []TraceStep
-    OK    bool
+    Steps   []TraceStep
+    OK      bool
+    Stopped Text // на каком шаге встало, «Discovery stopped at the principal.» (s-admin-28); прошло — пусто
 }
 type TraceStep struct {
     Name   Text // «.well-known», «принципал», «home-set», «коллекции»

@@ -189,7 +189,7 @@ func read(p *view.NotePage) []w.MainPart {
 	// on a phone it means nothing (note 69 of Typecase).
 	acts = append(acts,
 		w.Button{Icon: "code", Title: source},
-		w.Seg{Options: []w.SegOption{{Label: fullWidth, On: true}, {Label: readWidth}}, Tertiary: true},
+		widthSeg(p.Look, true),
 		w.Button{Icon: "panel", Title: hideColumn},
 	)
 	if len(p.Meta.Menu) > 0 {
@@ -254,7 +254,7 @@ func read(p *view.NotePage) []w.MainPart {
 		secs = append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Attendees"}, Items: []w.DocmetaPart{refs}})
 	}
 	secs = append(secs, column(p)...)
-	return append(main, w.DocLayout{Items: []w.DocLayoutPart{doc, w.Docmeta{Sections: secs, Danger: danger(p.Meta.Actions)}}})
+	return append(main, w.DocLayout{View: layoutOf(p.Look), Items: []w.DocLayoutPart{doc, w.Docmeta{Sections: secs, Danger: danger(p.Meta.Actions)}}})
 }
 
 // notices are the notices over the text and what the server did not keep of
@@ -363,4 +363,27 @@ func danger(actions []view.Action) *w.Danger {
 		}
 	}
 	return nil
+}
+
+// layoutOf is how wide the note stands (Typecase's note 79, task 204): the
+// reading measure by default, the page's width where the person chose it
+// (Look.Wide, «Open notes in full width», s-notes-2, -3).
+func layoutOf(look view.Look) w.DocView {
+	if look.Wide {
+		return w.DocViewFull
+	}
+	return w.DocViewMeasure
+}
+
+// widthSeg is the switch of the width in a bar, the width in force on:
+// of the third rank in the reading bar (on a phone it means nothing, note
+// 69 of Typecase), of the second in the edit's.
+func widthSeg(look view.Look, reading bool) w.Seg {
+	s := w.Seg{Options: []w.SegOption{{Label: fullWidth, On: look.Wide}, {Label: readWidth, On: !look.Wide}}}
+	if reading {
+		s.Tertiary = true
+	} else {
+		s.Secondary = true
+	}
+	return s
 }

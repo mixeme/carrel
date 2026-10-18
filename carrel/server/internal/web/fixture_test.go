@@ -941,6 +941,8 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
 	// A davloom device's ID (NewDeviceID): the frames name no device by it.
 	s = regexp.MustCompile(`\bd-[0-9A-Z]{10}\b`).ReplaceAllString(s, "d-device")
+	// The test objects of the DAV validator's second stage (s-admin-29).
+	s = regexp.MustCompile(`carrel-check-[0-9a-f]{12}`).ReplaceAllString(s, "carrel-check")
 	// A group of duplicates is named by a digest of the records in it, and
 	// those carry the account identifier, which is issued.
 	s = regexp.MustCompile(`g=[0-9a-f]{32}`).ReplaceAllString(s, "g=group")
@@ -1642,7 +1644,16 @@ func TestFixtureNoteCard(t *testing.T) {
 	app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64"
-	app.compare(t, "app-note/normal.json", app.h.do(get(rec, app.sess)))
+	// s-notes-2 draws the full width the person chose (Typecase's note 79).
+	app.compare(t, "app-note/normal.json", app.h.do(wideNotes(get(rec, app.sess))))
+}
+
+// wideNotes is a request of a browser that chose «Open notes in full width»
+// (Look.Wide): the note frames that draw the full width chosen are taken so
+// (s-notes-2, -20, -30; Typecase's note 79).
+func wideNotes(r *http.Request) *http.Request {
+	r.AddCookie(&http.Cookie{Name: "carrel_look", Value: "wide=1"})
+	return r
 }
 
 // C-14.2: the full form of a contact (s-contacts-3).
@@ -1709,10 +1720,9 @@ func TestFixtureNoteEdit(t *testing.T) {
 	app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64/edit"
-	app.compare(t, "app-note-edit/normal.json", app.h.do(get(rec, app.sess)))
-	// The full form of a new note in «Записи» (C-5.4 /new; the client's
-	// scan НД6 — no frame draws it yet, task 97).
-	app.compare(t, "app-note-edit/new.json", app.h.do(get(app.listPath(t, "notes", "zapisi")+"/new", app.sess)))
+	app.compare(t, "app-note-edit/normal.json", app.h.do(wideNotes(get(rec, app.sess))))
+	// The full form of a new note in «Записи» (C-5.4 /new; s-notes-30).
+	app.compare(t, "app-note-edit/new.json", app.h.do(wideNotes(get(app.listPath(t, "notes", "zapisi")+"/new", app.sess))))
 }
 
 // C-14.2: the screens of the settings and of the administration. They hold
@@ -1754,6 +1764,20 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 	t.Run("admin-dav-report", func(t *testing.T) {
 		app.compare(t, "admin-dav/report.json", app.h.do(postForm("/admin/dav", app.sess, url.Values{
 			"server": {app.servers["nextcloud"].URL}, "login": {"alice"}, "password": {"secret"},
+		})))
+	})
+	// Discovery that stopped (s-admin-28): a password the stand refuses —
+	// the step named, the trace up to it, no second stage.
+	t.Run("admin-dav-broken", func(t *testing.T) {
+		app.compare(t, "admin-dav/broken.json", app.h.do(postForm("/admin/dav?op=test", app.sess, url.Values{
+			"server": {app.servers["nextcloud"].URL}, "login": {"alice"}, "password": {"wrong-one"},
+		})))
+	})
+	// The second stage agreed to (s-admin-29): one row a kind, what was
+	// asked and what the stand answered; nothing is left on it.
+	t.Run("admin-dav-exercised", func(t *testing.T) {
+		app.compare(t, "admin-dav/exercised.json", app.h.do(postForm("/admin/dav?op=exercise", app.sess, url.Values{
+			"server": {app.servers["nextcloud"].URL}, "login": {"alice"}, "password": {"secret"}, "agree": {"on"},
 		})))
 	})
 	// The sheet that resets a password (Ад8): anna chosen (s-admin-13), the
@@ -1994,6 +2018,11 @@ func TestFixtureOutsideTheShell(t *testing.T) {
 	})
 	t.Run("admin-install", func(t *testing.T) {
 		app.compare(t, "admin-install/normal.json", app.h.do(get("/admin/install", app.sess)))
+	})
+	// An address that is none (s-admin-26): the field in error, why under
+	// the head, no table.
+	t.Run("admin-install-refused", func(t *testing.T) {
+		app.compare(t, "admin-install/refused.json", app.h.do(postForm("/admin/install", app.sess, url.Values{"url": {"carrel.example"}})))
 	})
 	// The check run (Ад31; s-admin-4): Carrel asks itself at a listener of
 	// the stand, bare http with no proxy — the certificate and the client

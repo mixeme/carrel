@@ -59,7 +59,7 @@ func TestAdminDavValidator(t *testing.T) {
 	exercise := actionHref(t, page.Actions, "admin.dav.exercise")
 
 	page = decode[view.AdminDavPage](t, h.do(postForm(exercise, sess, form)))
-	if page.Full != nil || profileRow(page.Form, "agree").Error == "" {
+	if page.Full != nil || page.Agree == nil || page.Agree.Error == "" {
 		t.Fatalf("ran without consent: %+v", page.Full)
 	}
 	form.Set("agree", "on")
@@ -71,7 +71,7 @@ func TestAdminDavValidator(t *testing.T) {
 	for _, row := range page.Full.Rows {
 		done[string(row.Result)]++
 	}
-	if done["ok"] != 9 || done["failed"] != 0 {
+	if done["ok"] != 3 || done["failed"] != 0 {
 		t.Errorf("rows = %+v", page.Full.Rows)
 	}
 	if n := len(srv.Paths(davtest.CalendarHome+"work/")) + len(srv.Paths(davtest.AddressBookHome+"people/")); n != 0 {

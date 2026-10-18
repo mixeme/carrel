@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"net/http"
 	"strings"
 
 	"carrel.dev/carrel/server/internal/dav"
@@ -46,6 +47,7 @@ func Exercise(ctx context.Context, g *dav.Guard, res *Result, username, password
 		{view.KindFile, "a file", ".txt", "Carrel check " + id + "\n", id, "text/plain; charset=utf-8"},
 	}
 	for _, p := range probes {
+		op := view.Text("Create, read back, delete · " + string(p.kind))
 		var col *Collection
 		for i := range res.Collections {
 			c := &res.Collections[i]
@@ -55,49 +57,26 @@ func Exercise(ctx context.Context, g *dav.Guard, res *Result, username, password
 			}
 		}
 		if col == nil {
-			report.Rows = append(report.Rows, view.ExerciseRow{Operation: view.Text("Create " + p.noun), Result: "skipped",
+			report.Rows = append(report.Rows, view.ExerciseRow{Operation: op, Result: "skipped",
 				Detail: "No collection of this kind that can be written to."})
 			continue
 		}
-		name := col.DisplayName
-		if name == "" {
-			name = col.Path
-		}
 		path := strings.TrimSuffix(col.Path, "/") + "/" + id + "-" + string(p.kind) + p.ext
-		row := func(op, result, detail string) {
-			if result != "ok" {
-				report.OK = false
+		r := exercised{path: path}
+		if _, ok := r.step(ctx, client, "PUT", http.Header{"If-None-Match": {"*"}, "Content-Type": {p.media}}, p.body, nil); ok {
+			// The delete names the version read back; after a failed read
+			// it is still tried, the object being there.
+			etag, _ := r.step(ctx, client, "GET", nil, "", func(data string) bool { return strings.Contains(data, p.found) })
+			var h http.Header
+			if etag != "" {
+				h = http.Header{"If-Match": {etag}}
 			}
-			report.Rows = append(report.Rows, view.ExerciseRow{Operation: view.Text(op), Result: view.Text(result), Detail: view.Text(detail)})
+			r.step(ctx, client, "DELETE", h, "", nil)
 		}
-		_, err := client.PutCreate(ctx, path, dav.Typed(strings.NewReader(p.body), p.media))
-		if err != nil {
-			row(fmt.Sprintf("Create %s in «%s»", p.noun, name), "failed", formatErr(err))
-			continue
+		if r.failed || r.stays {
+			report.OK = false
 		}
-		row(fmt.Sprintf("Create %s in «%s»", p.noun, name), "ok", path)
-		// The delete names the version read back, quoted as If-Match wants.
-		etag := ""
-		body, got, err := client.Get(ctx, path, nil)
-		if err == nil && got != "" {
-			etag = `"` + strings.Trim(got, `"`) + `"`
-		}
-		if err != nil {
-			row("Read it back", "failed", formatErr(err))
-		} else {
-			data, _ := io.ReadAll(io.LimitReader(body, 64<<10))
-			body.Close()
-			if strings.Contains(string(data), p.found) {
-				row("Read it back", "ok", fmt.Sprintf("%d bytes, as written", len(data)))
-			} else {
-				row("Read it back", "failed", "the server answered with something else")
-			}
-		}
-		if err := client.Delete(ctx, path, etag); err != nil {
-			row("Delete it", "failed", formatErr(err)+" — the test object stays at "+path)
-		} else {
-			row("Delete it", "ok", "")
-		}
+		report.Rows = append(report.Rows, view.ExerciseRow{Operation: op, Result: r.result(), Detail: view.Text(r.detail())})
 	}
 	return report
 }
@@ -109,4 +88,72 @@ func hasKind(kinds []view.Kind, k view.Kind) bool {
 		}
 	}
 	return false
+}
+
+// exercised is one kind's create, read back and delete (s-admin-29): the
+// methods asked and the codes answered, as the frame writes them —
+// «PUT · GET · DELETE /path → 201 · 200 · 204», a refusal with its words.
+type exercised struct {
+	path           string
+	methods, codes []string
+	failed         bool
+	// stays: the object was written and not deleted yet.
+	stays bool
+	note  string
+}
+
+// step asks the server once; check, when given, judges the body read.
+// It answers the ETag the server gave and whether the step went through.
+func (e *exercised) step(ctx context.Context, client *dav.Client, method string, h http.Header, body string, check func(string) bool) (string, bool) {
+	e.methods = append(e.methods, method)
+	var rd io.Reader
+	length := int64(-1)
+	if body != "" {
+		rd = strings.NewReader(body)
+		length = int64(len(body))
+	}
+	resp, err := client.Forward(ctx, method, e.path, h, rd, length, false)
+	if err != nil {
+		e.codes = append(e.codes, formatErr(err))
+		e.failed = true
+		return "", false
+	}
+	defer resp.Body.Close()
+	data, _ := io.ReadAll(io.LimitReader(resp.Body, 64<<10))
+	if resp.StatusCode/100 != 2 {
+		e.codes = append(e.codes, fmt.Sprintf("%d %s", resp.StatusCode, http.StatusText(resp.StatusCode)))
+		e.failed = true
+		return "", false
+	}
+	e.codes = append(e.codes, fmt.Sprint(resp.StatusCode))
+	switch method {
+	case "PUT":
+		e.stays = true
+	case "DELETE":
+		e.stays = false
+	}
+	if check != nil && !check(string(data)) {
+		e.failed = true
+		e.note = "the server answered with something else"
+		return resp.Header.Get("ETag"), false
+	}
+	return resp.Header.Get("ETag"), true
+}
+
+func (e *exercised) result() view.Text {
+	if e.failed || e.stays {
+		return "failed"
+	}
+	return "ok"
+}
+
+func (e *exercised) detail() string {
+	d := strings.Join(e.methods, " · ") + " " + e.path + " → " + strings.Join(e.codes, " · ")
+	if e.note != "" {
+		d += ", " + e.note
+	}
+	if e.stays {
+		d += " — the test object stays on the server"
+	}
+	return d
 }

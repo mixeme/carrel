@@ -410,10 +410,10 @@
           {
             "line": [
               {
-                "text": "Run the installation check."
+                "text": "Run the check once Carrel is behind its proxy."
               }
             ],
-            "title": "Not checked since the start",
+            "title": "Not checked yet",
             "tone": "off"
           }
         ],

@@ -19,6 +19,19 @@
       "method": "POST"
     }
   ],
+  "agree": {
+    "add": null,
+    "error": "",
+    "extra": null,
+    "hint": "The second stage writes to this server: one event, task, contact and file, each deleted after it is read. It is written to the audit log.",
+    "kind": "check",
+    "label": "Create test objects, read them back and delete them",
+    "name": "agree",
+    "options": [],
+    "readOnly": false,
+    "required": false,
+    "value": ""
+  },
   "details": null,
   "form": {
     "action": "/admin/dav",
@@ -52,6 +65,7 @@
             "mono": true,
             "name": "server",
             "options": [],
+            "placeholder": "https://dav.example.org/",
             "readOnly": false,
             "required": true,
             "value": "https://nextcloud.example/dav.php"
@@ -73,7 +87,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Asked each time: nothing of this page is kept.",
+            "hint": "Asked each time, never kept.",
             "kind": "password",
             "label": "Password",
             "name": "password",
@@ -86,25 +100,14 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Only for a server whose certificate is not trusted: its SHA-256, as the trace shows it.",
+            "hint": "",
             "kind": "text",
             "label": "Certificate fingerprint",
+            "labelAside": "SHA-256 · optional",
             "mono": true,
             "name": "certFingerprint",
             "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "The second stage writes to this server: one event, task, contact and file, each deleted after it is read. It is written to the audit log.",
-            "kind": "check",
-            "label": "Create test objects, read them back and delete them",
-            "name": "agree",
-            "options": [],
+            "placeholder": "only for a certificate the system does not trust",
             "readOnly": false,
             "required": false,
             "value": ""
@@ -231,10 +234,10 @@
       {
         "line": [
           {
-            "text": "Run the installation check."
+            "text": "Run the check once Carrel is behind its proxy."
           }
         ],
-        "title": "Not checked since the start",
+        "title": "Not checked yet",
         "tone": "off"
       }
     ],

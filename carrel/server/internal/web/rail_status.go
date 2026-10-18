@@ -135,7 +135,7 @@ func (s *Server) adminStatus(sess *session.Session) []view.RailStatus {
 			mail.Line = join("Last sent ", s.stampRun(sess, sent))
 		}
 	}
-	check := view.RailStatus{Tone: view.StatusOff, Title: "Not checked since the start", Line: line("Run the installation check.")}
+	check := view.RailStatus{Tone: view.StatusOff, Title: "Not checked yet", Line: line("Run the check once Carrel is behind its proxy.")}
 	if !checked.IsZero() {
 		check = view.RailStatus{Tone: view.StatusOn, Title: "Checks passed", Line: join("Last check ", s.stampRun(sess, checked))}
 		if bad > 0 {

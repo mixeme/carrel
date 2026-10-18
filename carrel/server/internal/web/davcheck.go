@@ -22,7 +22,7 @@ func (s *Server) traceOf(r *http.Request) (*discover.Result, *view.DiagnosticTra
 	server := strings.TrimSpace(r.FormValue("server"))
 	if !validServerURL(server) {
 		return nil, &view.DiagnosticTrace{Steps: []view.TraceStep{{Name: "address", State: view.CheckBad,
-			Detail: "Enter the full address, starting with https:// or http://."}}}
+			Detail: "Enter the full address, starting with https:// or http://."}}, Stopped: "Discovery stopped at the address."}
 	}
 	pin := dav.NormalizeFingerprint(strings.TrimSpace(r.FormValue("certFingerprint")))
 	password := r.FormValue("password")
@@ -36,7 +36,22 @@ func (s *Server) traceOf(r *http.Request) (*discover.Result, *view.DiagnosticTra
 	if err != nil && len(trace.Steps) == 0 {
 		trace.Steps = []view.TraceStep{{Name: "connect", State: view.CheckBad, Detail: text(err.Error())}}
 	}
+	stopped(trace)
 	return res, trace
+}
+
+// stopped names the step discovery did not get past (s-admin-28): the last
+// one that failed.
+func stopped(trace *view.DiagnosticTrace) {
+	if trace.OK {
+		return
+	}
+	for i := len(trace.Steps) - 1; i >= 0; i-- {
+		if trace.Steps[i].State == view.CheckBad {
+			trace.Stopped = "Discovery stopped at the " + trace.Steps[i].Name + "."
+			return
+		}
+	}
 }
 
 // postSettingsConnectionsTest is Test only beside the connection form: the
@@ -101,19 +116,26 @@ func (s *Server) adminDavPage(sess *session.Session, r *http.Request, trace *vie
 	page.Rail = s.adminRail(sess, "/admin/dav")
 	rows := []view.FormRow{
 		csrfField(sess),
-		{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(strings.TrimSpace(r.FormValue("server"))), Required: true, Mono: true},
+		{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(strings.TrimSpace(r.FormValue("server"))), Required: true, Mono: true,
+			Placeholder: "https://dav.example.org/"},
 		{Name: "login", Label: "Username", Kind: view.InputText, Value: text(strings.TrimSpace(r.FormValue("login")))},
-		{Name: "password", Label: "Password", Kind: view.InputPassword,
-			Hint: "Asked each time: nothing of this page is kept."},
-		{Name: "certFingerprint", Label: "Certificate fingerprint", Kind: view.InputText, Value: text(strings.TrimSpace(r.FormValue("certFingerprint"))), Mono: true,
-			Hint: "Only for a server whose certificate is not trusted: its SHA-256, as the trace shows it."},
+		// The password is a password field, empty after the check (Typecase's
+		// note 80).
+		{Name: "password", Label: "Password", Kind: view.InputPassword, Hint: "Asked each time, never kept."},
+		// As at the connection (s-profile-2): for a certificate the system
+		// does not trust (201).
+		{Name: "certFingerprint", Label: "Certificate fingerprint", LabelAside: "SHA-256 · optional", Kind: view.InputText,
+			Value: text(strings.TrimSpace(r.FormValue("certFingerprint"))), Mono: true,
+			Placeholder: "only for a certificate the system does not trust"},
 	}
 	page.Actions = []view.Action{{ID: "admin.dav.test", Label: "Test discovery", Method: "POST", Primary: true, Enabled: true,
 		Href: s.postQuery("/admin/dav", url.Values{"op": {"test"}})}}
+	// The second stage stands under the trace, out of the form and naming it
+	// (s-admin-5): only after discovery went through.
 	if trace != nil && trace.OK {
-		rows = append(rows, view.FormRow{Name: "agree", Label: "Create test objects, read them back and delete them", Kind: view.InputCheck,
+		page.Agree = &view.FormRow{Name: "agree", Label: "Create test objects, read them back and delete them", Kind: view.InputCheck,
 			Error: text(agreeErr),
-			Hint:  "The second stage writes to this server: one event, task, contact and file, each deleted after it is read. It is written to the audit log."})
+			Hint:  "The second stage writes to this server: one event, task, contact and file, each deleted after it is read. It is written to the audit log."}
 		page.Actions = append(page.Actions, view.Action{ID: "admin.dav.exercise", Label: "Run the full check", Method: "POST", Enabled: true, Danger: true,
 			Href: s.postQuery("/admin/dav", url.Values{"op": {"exercise"}})})
 	}

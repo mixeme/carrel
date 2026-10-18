@@ -142,7 +142,7 @@ func edit(p *view.NotePage) []w.MainPart {
 	}
 	end = append(end,
 		w.Kbd{Keys: saveKey, Secondary: true},
-		w.Seg{Options: []w.SegOption{{Label: fullWidth, On: true}, {Label: readWidth}}, Secondary: true},
+		widthSeg(p.Look, false),
 		w.Button{Folds: true, Label: focus, Icon: "focus", Title: focus},
 	)
 	bar := w.Docbar{Items: items, More: &w.Button{Icon: "dots", Title: more}, End: end, Edit: true}
@@ -175,7 +175,7 @@ func edit(p *view.NotePage) []w.MainPart {
 	if len(p.Doc.Foreign) > 0 {
 		doc.Items = append(doc.Items, w.DocNote{Parts: bind.Inlines(p.Doc.Foreign)})
 	}
-	return append(main, w.DocLayout{Items: []w.DocLayoutPart{doc, w.Docmeta{Sections: column(p), Danger: danger(p.Meta.Actions)}}})
+	return append(main, w.DocLayout{View: layoutOf(p.Look), Items: []w.DocLayoutPart{doc, w.Docmeta{Sections: column(p), Danger: danger(p.Meta.Actions)}}})
 }
 
 // blank tells whether the edit is a new note's with nothing written — no

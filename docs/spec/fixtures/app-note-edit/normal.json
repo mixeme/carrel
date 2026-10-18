@@ -450,7 +450,7 @@
     "panel": true,
     "source": true,
     "theme": "auto",
-    "wide": false
+    "wide": true
   },
   "loss": null,
   "meta": {

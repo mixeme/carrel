@@ -132,7 +132,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
-          "unknown","deleted","write-refused","moving"}
+          "unknown","deleted","write-refused","moving","broken","exercised"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -470,7 +470,14 @@ STATE_FRAME = {
     # Прогоны, которые кадры и рисуют (Ад31, Ад33): проверка установки и
     # след обнаружения. До прогона своего кадра нет (В7, В8).
     "admin-install/report": "s-admin-4",
+    # Проверка до первого прогона и отказ адреса (записка Typecase 79).
+    "admin-install/normal": "s-admin-25",
+    "admin-install/refused": "s-admin-26",
     "admin-dav/report": "s-admin-5",
+    # Проверка DAV: пустая, обнаружение встало, второй этап (записка Typecase 80).
+    "admin-dav/normal": "s-admin-27",
+    "admin-dav/broken": "s-admin-28",
+    "admin-dav/exercised": "s-admin-29",
     # Публичные страницы (Пс1): все кадры маршрута — части (data-part),
     # у каждого вида страницы свой.
     # Готовая ссылка (Пб13): тот же лист после Create link.

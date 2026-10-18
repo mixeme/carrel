@@ -112,7 +112,17 @@ func (s *Server) postAdminInstall(w http.ResponseWriter, r *http.Request) {
 	}
 	u, err := url.Parse(raw)
 	if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" || u.RawQuery != "" || u.Fragment != "" {
-		s.writePage(w, r, http.StatusOK, s.installPage(sess, raw, nil, "Give the address people open Carrel at, like https://carrel.example.org."))
+		// Refused (s-admin-26): the field in error, why under the head, no
+		// table of a run before — it was of another address.
+		const why = "Give the address people open Carrel at, like https://carrel.example.org."
+		page := s.installPage(sess, raw, nil, why)
+		page.Form.Errors = []view.FieldError{{Name: "url", Message: why}}
+		for i := range page.Form.Sets[0].Rows {
+			if page.Form.Sets[0].Rows[i].Name == "url" {
+				page.Form.Sets[0].Rows[i].Error = why
+			}
+		}
+		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
 	origin := strings.TrimSuffix(u.Scheme+"://"+u.Host+u.EscapedPath(), "/")
@@ -149,8 +159,15 @@ func (s *Server) installPage(sess *session.Session, publicURL string, rows []vie
 		view.FormRow{Name: "url", Label: "Base address", Kind: view.InputURL, Value: text(publicURL), Mono: true}),
 		"admin.install.run", "Run the check")
 	page := view.AdminInstallPage{Shell: s.withRail(s.buildShell(sess, "Installation check"), s.adminRail(sess, "/admin/install")), Form: form, Rows: rows}
+	// What went wrong with the address, a message under the head
+	// (s-admin-26; settings.env and the environment, Typecase's note 79).
 	if note != "" {
-		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeAlert, Title: text(note)})
+		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeAlert, Body: text(note)})
+	}
+	// Without a table, what the check does (s-admin-25, -26).
+	if len(rows) == 0 {
+		page.Note = "The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. " +
+			"Nothing is changed and nothing is stored, apart from the audit line saying the check was run."
 	}
 	return page
 }

@@ -10,6 +10,9 @@ type Diagnostic struct {
 type DiagnosticTrace struct {
 	Steps []TraceStep `json:"steps"`
 	OK    bool        `json:"ok"`
+	// Stopped — на каком шаге встало обнаружение, «Discovery stopped at
+	// the principal.» (s-admin-28), над следом; прошло — пусто
+	Stopped Text `json:"stopped,omitempty"`
 }
 type TraceStep struct {
 	Name   Text       `json:"name"` // «.well-known», «принципал», «home-set», «коллекции»

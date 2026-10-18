@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.342 — 2026-10-18
+
+The installation check and the DAV validator as their frames draw them
+(Typecase's notes 79, 80; `s-admin-4`, `-5`, `-25`…`-29`).
+
+### Changed
+
+- **The installation check before its first run** says what it does —
+  from outside inwards, nothing changed or stored but the audit line; the
+  rail says «Not checked yet» and when to run it.
+- **An address that is none** marks the field and says why under the head,
+  as a message, not a title; the same holds for the settings.env and
+  environment notes.
+- **The DAV validator**: the certificate fingerprint as at a connection
+  («SHA-256 · optional», only for a certificate the system does not trust);
+  the password is «Asked each time, never kept.» A discovery that stopped
+  names its step («Discovery stopped at the principal.»); the second stage
+  stands under the trace.
+- **The second stage is one row a kind**: «Create, read back, delete ·
+  event», with what was asked and what the server answered — «PUT · GET ·
+  DELETE /path → 201 · 200 · 204», a refusal with its words. A test object
+  the server would not delete is said to stay.
+
+### For consumers
+
+- `AdminInstallPage.Note`; `AdminDavPage.Agree` (the consent is no longer a
+  row of the form); `DiagnosticTrace.Stopped`; `ExerciseRow` is a kind
+  (C-6). Fixtures `admin-install/refused`, `admin-dav/broken`,
+  `admin-dav/exercised`.
+
 ## v0.2.341 — 2026-10-18
 
 davloom as its frames draw it (Нс46–Нс52; `s-davloom-1`…`-3`).
