@@ -82,12 +82,19 @@
             "readOnly": false,
             "required": false,
             "value": "1"
-          },
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "hint": "A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them — they cannot be picked separately.",
+        "legend": "What to copy",
+        "rows": [
           {
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them.",
+            "hint": "",
             "kind": "check",
             "label": "What to copy",
             "name": "src",
@@ -181,12 +188,41 @@
             "readOnly": false,
             "required": false,
             "value": ""
-          },
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Where to",
+        "rows": [
           {
             "add": null,
             "error": "",
             "extra": null,
             "hint": "",
+            "hintRuns": [
+              {
+                "mark": "strong",
+                "text": "Download"
+              },
+              {
+                "text": " streams the archive out and writes nothing to the server: no folder, no retention — the copy is yours to keep. It can still run at three in the morning, but only on an external trigger, because a stream needs somebody at the other end: a browser is not there at that hour, a machine with a disk is. "
+              },
+              {
+                "mark": "strong",
+                "text": "Both"
+              },
+              {
+                "text": " does the two at once — and then the trigger has "
+              },
+              {
+                "mark": "strong",
+                "text": "two steps"
+              },
+              {
+                "text": ", because the file still has to be taken."
+              }
+            ],
             "kind": "radio",
             "label": "Where to",
             "name": "mode",
@@ -246,7 +282,7 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Created on first use.",
+            "hint": "",
             "kind": "text",
             "label": "Folder",
             "mono": true,
@@ -260,7 +296,19 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Copies past this number are deleted after the new one has been read back and checked, not before. An archive is dated and never overwritten.",
+            "hint": "",
+            "hintRuns": [
+              {
+                "text": "Copies past the eighth are deleted "
+              },
+              {
+                "mark": "strong",
+                "text": "after"
+              },
+              {
+                "text": " the new one has been read back and checked, not before. The file is dated and never overwritten."
+              }
+            ],
             "kind": "number",
             "label": "Keep copies",
             "mono": true,
@@ -269,12 +317,18 @@
             "readOnly": false,
             "required": false,
             "value": "8"
-          },
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "How the archive is closed",
+        "rows": [
           {
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it, without Carrel and without a password.",
+            "hint": "On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it.",
             "kind": "check",
             "label": "Encrypt the archive",
             "name": "encrypted",
@@ -301,12 +355,19 @@
             "readOnly": false,
             "required": false,
             "value": ""
-          },
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "hint": "No time picker here, and that is deliberate: Carrel keeps no clock of its own, so whoever holds the schedule holds the password. What it hands you instead is the line to paste where the clock already is.",
+        "legend": "When",
+        "rows": [
           {
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "0 is never. Carrel keeps no clock of its own.",
+            "hint": "0 is never.",
             "kind": "number",
             "label": "On sign-in, if the last copy is older than (days)",
             "mono": true,
@@ -355,6 +416,8 @@
       "text": " takes it from a file — a job is not needed for that."
     }
   ],
+  "history": [],
+  "job": null,
   "jobs": [],
   "look": {
     "compact": false,
@@ -634,7 +697,12 @@
         }
       ]
     },
-    "subtitle": []
+    "subtitle": [
+      {
+        "text": "Nothing is written until you have seen what goes where"
+      }
+    ],
+    "title": "Restore"
   },
   "subtitle": [
     {

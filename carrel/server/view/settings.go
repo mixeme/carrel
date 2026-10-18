@@ -520,22 +520,51 @@ type BackupPage struct {
 	// Empty и EmptyNote — пустое состояние без заданий (s-backup-6): что
 	// делает копия, ‹.ics› и ‹.vcf› моноширинно; и что для восстановления
 	// задание не нужно, **Restore** жирным. С заданиями пусто
-	Empty      Runs         `json:"empty"`
-	EmptyNote  Runs         `json:"emptyNote"`
-	Jobs       []BackupJob  `json:"jobs"`
-	Add        Form         `json:"add"`        // новое задание; на странице задания (s-backup-2) — оно само
-	Delete     *Action      `json:"delete"`     // внизу страницы задания; nil — на списке и у нового
-	DeleteNote Text         `json:"deleteNote"` // строка у удаления: копии остаются, удаляется расписание
-	Restore    RestoreBlock `json:"restore"`
+	Empty     Runs        `json:"empty"`
+	EmptyNote Runs        `json:"emptyNote"`
+	Jobs      []BackupJob `json:"jobs"`
+	// Job — открытое задание на своей странице (s-backup-2, Нс61): его
+	// отметка Clock, подсказка и карточка строки; на списке и у нового nil,
+	// и тогда Jobs — строки списка
+	Job *BackupJob `json:"job"`
+	// History — «History, all jobs» (s-backup-1): прогоны всех заданий,
+	// новые первыми; на странице задания и у нового пусто
+	History    []BackupHistoryRow `json:"history"`
+	Add        Form               `json:"add"`        // новое задание; на странице задания (s-backup-2) — оно само
+	Delete     *Action            `json:"delete"`     // внизу страницы задания; nil — на списке и у нового
+	DeleteNote Text               `json:"deleteNote"` // строка у удаления: копии остаются, удаляется расписание
+	Restore    RestoreBlock       `json:"restore"`
 }
+
+// BackupJob — строка задания (s-backup-1, Нс55).
 type BackupJob struct {
-	Name        Text    `json:"name"`
-	Sources     []Stamp `json:"sources"`
-	Destination Text    `json:"destination"`
-	Keep        int     `json:"keep"`
-	Encrypted   bool    `json:"encrypted"`
-	LastRun     When    `json:"lastRun"`
-	LastState   OpState `json:"lastState"`
+	Name Text `json:"name"`
+	// On — «Job is on»: снятое задание идёт только с экрана, строка
+	// приглушена; Toggle — отметка строки, POST ?op=switch
+	On     bool    `json:"on"`
+	Toggle *Action `json:"toggle"`
+	// Marks — метки коллекций, что копирует, по одной на коллекцию;
+	// Copies — итог: «3 collections», «2 collections + files», «1 book»
+	Marks  []Colour `json:"marks"`
+	Copies Text     `json:"copies"`
+	// Where и WhereNote — «Where to» двумя строками: «sftpgo · vps ·
+	// Documents» / «/backup/work»; у скачивания — «download in browser» /
+	// «nothing is written»
+	Where     Text `json:"where"`
+	WhereNote Text `json:"whereNote"`
+	// When и WhenNote — когда идёт: «cron · 03:00» / «external trigger»,
+	// «on sign-in» / «if older than 7 days», «on demand»
+	When     Text `json:"when"`
+	WhenNote Text `json:"whenNote"`
+	// Keep — сколько копий держать; у скачивания 0 — держать нечего («—»)
+	Keep      int  `json:"keep"`
+	Encrypted bool `json:"encrypted"`
+	// LastRun — последняя копия числами, «2026-08-16 03:10»; пусто — копий
+	// не было («never»); LastNote — строкой ниже размер и проверка:
+	// «18.4 MB · verified», непроверенная — тревогой
+	LastRun   When    `json:"lastRun"`
+	LastNote  Runs    `json:"lastNote"`
+	LastState OpState `json:"lastState"`
 	// Clock — отметка «On a clock of your own — cron, GoSentry, a job in
 	// Gitea» в рубрике When (s-backup-2): On — внешний запуск включён;
 	// снятая выключает его, отдельного выключателя нет
@@ -547,8 +576,25 @@ type BackupJob struct {
 	// Trigger — карточка строки внешнего запуска; nil, пока он выключен:
 	// показывать и обновлять нечего (решение владельца, записка 19)
 	Trigger *TriggerBlock `json:"trigger"`
-	Runs    []BackupRun   `json:"runs"`
 	Actions []Action      `json:"actions"` // Run · Edit (s-backup-1)
+}
+
+// BackupHistoryRow — прогон в «History, all jobs» (s-backup-1, Нс56).
+type BackupHistoryRow struct {
+	ID   Text `json:"id"`
+	At   When `json:"at"` // когда начат: «2026-08-16 03:10»
+	Job  Text `json:"job"`
+	Size Size `json:"size"`
+	// Collections — «3 / 3»: сколько вошло целыми из скольких; Whole —
+	// вошли все, иначе ячейка тревожная
+	Collections Text `json:"collections"`
+	Whole       bool `json:"whole"`
+	// Verified — «read back», у неполной — и «‹danger›1 not copied» с
+	// подсказкой, что не вошло и почему; не прочитанная обратно — тревогой
+	Verified Runs `json:"verified"`
+	// Trigger — чем запущен: «cron», «on sign-in», «by hand»
+	Trigger Text     `json:"trigger"`
+	Actions []Action `json:"actions"` // Restore · Download; нечего — без них
 }
 
 // TriggerBlock — карточка внешнего запуска (s-backup-2…5): вкладки crontab ·
@@ -580,7 +626,14 @@ type TriggerBlock struct {
 	// Endpoints — «What it opens» (s-backup-5): метод и адрес каждого входа
 	Endpoints []Text      `json:"endpoints"`
 	Password  SecretField `json:"password"`
-	Note      Text        `json:"note"`
+	// Note — что делает пароль: «Every use is logged, naming this
+	// password. **New password** replaces it on the spot — and every line
+	// already handed out stops working with it.» (s-backup-5)
+	Note Runs `json:"note"`
+	// Destination — у скрипта, почему не строка: «Destination: **WebDAV and
+	// download** — two steps, so this is a file, not a line» (s-backup-3);
+	// у строки пусто
+	Destination Runs `json:"destination"`
 }
 
 // GoSentryJob — поля задания GoSentry (s-backup-4), как они названы в его
@@ -592,18 +645,15 @@ type GoSentryJob struct {
 	Command   Text   `json:"command"`
 	Arguments []Text `json:"arguments"` // по одному в строке, без кавычек
 }
-type BackupRun struct {
-	ID       Text    `json:"id"`
-	Started  When    `json:"started"`
-	State    OpState `json:"state"`
-	Size     Size    `json:"size"`
-	Download *Action `json:"download"`
-}
 type RestoreBlock struct {
 	// Open — восстановление открыто: Restore в шапке (?restore=1) или
 	// архив уже открыт (шаг сопоставления)
 	Open bool `json:"open"`
-	// Subtitle — строка под заголовком открытого архива (s-backup-8):
+	// Title — заголовок диалога: «Restore» (s-backup-7), у открытого архива
+	// — с его днём, «Restore from 2026-08-14» (s-backup-8; Нс64, Нс65)
+	Title Text `json:"title"`
+	// Subtitle — до архива: «Nothing is written until you have seen what
+	// goes where» (s-backup-7); строка под заголовком открытого архива (s-backup-8):
 	// задание, что в манифесте, и где архив лежит — моноширинно; «Job
 	// «Личное» · manifest read · 4 collections · 1 214 records ·
 	// ‹carrel-backup/2026-08-14T09-12.zip›»; архив не открыт — пусто

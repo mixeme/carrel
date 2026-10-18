@@ -3,6 +3,7 @@ package web_test
 import (
 	"archive/zip"
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -143,10 +144,10 @@ func TestBackupRunWritesVerifiesAndHandsBack(t *testing.T) {
 	}
 
 	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-	if len(page.Jobs) != 1 || page.Jobs[0].LastState != view.OpDone || len(page.Jobs[0].Runs) != 1 || page.Jobs[0].Runs[0].Download == nil {
-		t.Fatalf("page = %+v", page.Jobs)
+	if len(page.Jobs) != 1 || page.Jobs[0].LastState != view.OpDone || len(page.History) != 1 || len(page.History[0].Actions) != 2 {
+		t.Fatalf("page = %+v / %+v", page.Jobs, page.History)
 	}
-	got := f.h.do(get(page.Jobs[0].Runs[0].Download.Href, f.sess))
+	got := f.h.do(get(actionHref(t, page.History[0].Actions, "backup.get"), f.sess))
 	if got.Code != http.StatusOK || got.Body.String() != stored {
 		t.Errorf("history download: %d, %d bytes", got.Code, got.Body.Len())
 	}
@@ -191,8 +192,15 @@ func TestPartialCopyIsRedAndKeepsTheOld(t *testing.T) {
 		t.Error("a partial copy pushed out the whole one")
 	}
 	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-	if page.Jobs[0].LastState != view.OpPartial || !hasNotice(page.Notices, "The last copy of «Рабочее» is not whole") {
-		t.Errorf("page = %+v %+v", page.Jobs[0], page.Notices)
+	// The history's row says it (s-backup-1, Нс56): not whole, red, and
+	// what was not copied with why.
+	if page.Jobs[0].LastState != view.OpPartial || len(page.History) != 2 {
+		t.Fatalf("page = %+v %+v", page.Jobs[0], page.History)
+	}
+	row := page.History[0]
+	last := row.Verified[len(row.Verified)-1]
+	if row.Whole || last.Mark != view.RunDanger || last.Text != view.Text(fmt.Sprintf("%d not copied", part.Collections-part.Whole)) || last.Hint == "" {
+		t.Errorf("history row = %+v", row)
 	}
 }
 

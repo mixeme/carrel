@@ -3068,25 +3068,46 @@ type BackupPage struct {
     Actions    []Action // шапка списка: New job (основная, ?job=new) и Restore (?restore=1 — RestoreBlock.Open); и без заданий (s-backup-1, s-backup-6)
     Empty      Runs    // без заданий (s-backup-6): «Carrel copies raw ‹.ics›, ‹.vcf› and files …»; с заданиями пусто
     EmptyNote  Runs    // «Already have an archive from another instance? **Restore** takes it from a file — a job is not needed for that.»
-    Jobs       []BackupJob
-    Add        Form    // новое задание; на странице задания (?job=, s-backup-2) — оно само: Save · Cancel · Run now
+    Jobs       []BackupJob // строки списка; на странице задания и у нового пусто
+    Job        *BackupJob  // открытое задание на своей странице (s-backup-2, Нс61): его Clock, ClockHint, Trigger; на списке nil
+    History    []BackupHistoryRow // «History, all jobs» (s-backup-1): прогоны всех заданий, новые первыми; на странице задания пусто
+    Add        Form    // новое задание; на странице задания (?job=, s-backup-2) — оно само: Save · Cancel · Run now; наборы по рубрикам — без рубрики Name и «Job is on», «What to copy» (LegendAside — «2 collections and 1 folder chosen · 2.1 GB last time»), «Where to», «How the archive is closed», «When» (Нс57)
     Delete     *Action // внизу страницы задания; nil — на списке и у нового
     DeleteNote Text    // строка у удаления: копии остаются, удаляется расписание
     Restore    RestoreBlock
 }
+// Строка задания (s-backup-1, Нс55).
 type BackupJob struct {
     Name        Text
-    Sources     []Stamp
-    Destination Text
-    Keep        int
+    On          bool     // «Job is on»: снятое идёт только с экрана, строка приглушена
+    Toggle      *Action  // отметка строки, POST ?op=switch&job=
+    Marks       []Colour // метки коллекций, что копирует
+    Copies      Text     // итог: «3 collections», «2 collections + files», «1 book»
+    Where       Text     // «sftpgo · vps · Documents»; у скачивания «download in browser»
+    WhereNote   Text     // строкой ниже: «/backup/work»; у скачивания «nothing is written»
+    When        Text     // «cron · 03:00», «on sign-in», «on demand»
+    WhenNote    Text     // строкой ниже: «external trigger», «if older than 7 days»
+    Keep        int      // у скачивания 0 — держать нечего («—»)
     Encrypted   bool
-    LastRun     When
+    LastRun     When     // последняя копия числами, «2026-08-16 03:10»; пусто — копий не было («never»)
+    LastNote    Runs     // строкой ниже: «18.4 MB · verified» (с подсказкой), непроверенная — тревогой
     LastState   OpState
     Clock       Action        // отметка «On a clock of your own — cron, GoSentry, a job in Gitea» в рубрике When (s-backup-2): On — внешний запуск включён; снятая выключает его, отдельного выключателя нет; «local» рядом — SignedIn.Local
     ClockHint   Text          // подсказка под отметкой, и у снятой тоже: цена включения — ключ задания под ключом сервера (S-24.4)
     Trigger     *TriggerBlock // карточка строки внешнего запуска; nil, пока он выключен: показывать и обновлять нечего
-    Runs        []BackupRun
     Actions     []Action // Run · Edit (s-backup-1); Run задания «Download» — поток архива
+}
+// Прогон в «History, all jobs» (s-backup-1, Нс56).
+type BackupHistoryRow struct {
+    ID          Text
+    At          When   // когда начат: «2026-08-16 03:10»
+    Job         Text
+    Size        Size
+    Collections Text   // «3 / 3» — вошли целыми из скольких
+    Whole       bool   // вошли все; иначе ячейка тревожная
+    Verified    Runs   // «read back», у неполной — и «‹danger›1 not copied» с подсказкой (что не вошло и почему); не прочитанная обратно — тревогой
+    Trigger     Text   // «cron», «on sign-in», «by hand»
+    Actions     []Action // Restore (?restore=1&from=job&run=…) · Download; нечего взять — без них
 }
 // Карточка внешнего запуска (s-backup-2…5): вкладки crontab · GoSentry ·
 // Gitea · curl несут то, что вставить туда, где уже есть часы. Данные —
@@ -3111,7 +3132,8 @@ type TriggerBlock struct {
     Curl       Text   // вкладка curl: один запрос, без расписания
     Endpoints  []Text // «What it opens» (s-backup-5): метод и адрес — запуск, состояние, архив; у задания Download — архив сразу
     Password   SecretField
-    Note       Text
+    Note       Runs   // «Every use is logged, naming this password. **New password** replaces it on the spot — and every line already handed out stops working with it.» (s-backup-5)
+    Destination Runs  // у скрипта — почему не строка: «Destination: **WebDAV and download** — two steps, so this is a file, not a line» (s-backup-3); у строки пусто
 }
 // Поля задания GoSentry (s-backup-4): так они названы в его диалоге.
 // Скрипту — путь к нему в Command и расписание, Arguments пусты.
@@ -3122,10 +3144,10 @@ type GoSentryJob struct {
     Command   Text
     Arguments []Text // по одному аргументу в строке, без кавычек
 }
-type BackupRun struct { ID Text; Started When; State OpState; Size Size; Download *Action }
 type RestoreBlock struct {
     Open    bool // восстановление открыто: Restore в шапке (?restore=1) или архив уже открыт
-    Subtitle Runs // открытый архив (s-backup-8): «Job «Личное» · manifest read · 4 collections · 1 214 records · ‹carrel-backup/2026-08-14T09-12.zip›»; не открыт — пусто
+    Title   Text // заголовок диалога: «Restore» (s-backup-7), открытого архива — «Restore from 2026-08-14» (s-backup-8)
+    Subtitle Runs // до архива — «Nothing is written until you have seen what goes where» (s-backup-7); открытый архив (s-backup-8): «Job «Личное» · manifest read · 4 collections · 1 214 records · ‹carrel-backup/2026-08-14T09-12.zip›»; не открыт — пусто
     // From — «Where the archive is»: From a job · From a server · From this
     // computer, ссылки на тот же шаг (?restore=1&from=job|server|file),
     // выбранная On; FromHint — подсказка под ними (s-backup-7). Source —

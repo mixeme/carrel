@@ -251,9 +251,10 @@ func TestTriggerIsTurnedOffByItsTick(t *testing.T) {
 		if a := actionByID(page.Jobs[0].Actions, "backup.trigger.off"); a != nil {
 			t.Errorf("the row turns the trigger off: %+v", a)
 		}
-		c := page.Jobs[0].Clock
+		j := openJob(t, f)
+		c := j.Clock
 		sayWhy(t, "trigger", c)
-		if tb := page.Jobs[0].Trigger; (tb != nil) != c.On {
+		if tb := j.Trigger; (tb != nil) != c.On {
 			t.Errorf("the tick is on %v, the card %+v", c.On, tb)
 		} else if tb != nil {
 			sayWhy(t, "trigger", tb.Password.Reveal)
@@ -268,8 +269,8 @@ func TestTriggerIsTurnedOffByItsTick(t *testing.T) {
 	if !on.On || !on.Enabled || on.Method != http.MethodPost {
 		t.Fatalf("clock on = %+v", on)
 	}
-	raw := decode[map[string]any](t, f.h.do(get("/app/settings/backup", f.sess)))
-	if trig := raw["jobs"].([]any)[0].(map[string]any)["trigger"].(map[string]any); trig["off"] != nil {
+	raw := decode[map[string]any](t, f.h.do(get("/app/settings/backup?job="+job.ID, f.sess)))
+	if trig := raw["job"].(map[string]any)["trigger"].(map[string]any); trig["off"] != nil {
 		t.Errorf("the trigger card still has a switch of its own: %v", trig["off"])
 	}
 

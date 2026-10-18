@@ -314,7 +314,7 @@ func TestLocalInstanceIsTheShells(t *testing.T) {
 				t.Errorf("%s (%s), CARREL_PUBLIC_URL %q: local = %v, want %v", route, id, c.public, page.Top.Signed.Local, c.local)
 			}
 		}
-		if tb := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess))).Jobs[0].Trigger; tb != nil {
+		if tb := openJob(t, f).Trigger; tb != nil {
 			t.Errorf("the trigger is off, and its card is sent: %+v", tb)
 		}
 	}
@@ -335,14 +335,14 @@ func TestClockTickSaysItsPrice(t *testing.T) {
 	hint := frameText(m[1])
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
-	if got := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess))).Jobs[0]; string(got.ClockHint) != hint || got.Clock.On {
+	if got := openJob(t, f); string(got.ClockHint) != hint || got.Clock.On {
 		t.Errorf("unticked: hint = %q, want (s-backup-2) %q", got.ClockHint, hint)
 	}
 	_, tb := issueTrigger(t, f, job)
-	if strings.Contains(string(tb.Note), "server's key") {
+	if strings.Contains(runsText(tb.Note), "server's key") {
 		t.Errorf("the card says the price again: %q", tb.Note)
 	}
-	if got := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess))).Jobs[0]; string(got.ClockHint) != hint || !got.Clock.On {
+	if got := openJob(t, f); string(got.ClockHint) != hint || !got.Clock.On {
 		t.Errorf("ticked: hint = %q, want (s-backup-2) %q", got.ClockHint, hint)
 	}
 }

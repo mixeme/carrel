@@ -132,7 +132,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
-          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other"}
+          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -293,6 +293,10 @@ FRAME_TODO = {
     # рисует, и фикстуры карточки с ним сходятся (Им19).
     "app-event-import: коллекции рейла":
         "задача Typecase 199 п. 1 (to-typecase.md): s-io-6 не рисует «Дни рождения», s-agenda-2 рисует",
+    # Дерево «What to copy» страницы задания (s-backup-2) — не поля формы:
+    # что шлёт трёхпозиционная отметка аккаунта (Нс58).
+    "app-settings-backup: коллекции рейла":
+        "задача Typecase 193 п. 1 (to-typecase.md): строки дерева без имён, Нс58",
 }
 
 # Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
@@ -483,6 +487,10 @@ STATE_FRAME = {
     "app-settings-devices/android": "s-plan-2",
     "app-settings-devices/thunderbird": "s-plan-4",
     "app-settings-devices/other": "s-plan-5",
+    # Копии: без заданий — s-backup-6, список с заданиями — s-backup-1 (Нс54).
+    "app-settings-backup/normal": "s-backup-6",
+    "app-settings-backup/jobs": "s-backup-1",
+    "app-settings-backup/job": "s-backup-2",
     # Публичные страницы (Пс1): все кадры маршрута — части (data-part),
     # у каждого вида страницы свой.
     # Готовая ссылка (Пб13): тот же лист после Create link.

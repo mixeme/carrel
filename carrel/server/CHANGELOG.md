@@ -17,6 +17,41 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.346 — 2026-10-18
+
+Backup as its frames draw it (Нс54–Нс57, Нс59, Нс61–Нс66; `s-backup-1`,
+`-2`, `-7`, `-8`).
+
+### Changed
+
+- **A job's row** says it as the list does: on or off with its tick
+  (Toggle, `?op=switch`), the marks of what it copies and the sum — «3
+  collections», «2 collections + files», «1 book» —, where to and when,
+  each in two lines, the copies kept («—» for a download), the last copy
+  in numbers with its size and whether it was read back.
+- **«History, all jobs»**: one table of every run, newest first — when,
+  which job, how big, «3 / 3» collections whole, «read back» or what was
+  not copied and why, what started it, Restore and Download. The runs
+  left the jobs, and the notice of an incomplete copy went: the row says
+  it.
+- **A job's page is the job alone** (`BackupPage.Job`): its form in
+  rubrics — what to copy with what is chosen and how big it was last
+  time, where to, how the archive is closed, when — with the words of the
+  frame; turning the trigger on or off answers with this page, where its
+  card stands. The card says what the password does, and a script why it
+  is not a line.
+- **The restore dialog** is titled «Restore», and «Restore from ‹day›»
+  once its archive is open.
+
+### For consumers
+
+- `BackupJob`: `On`, `Toggle`, `Marks`, `Copies`, `Where`, `WhereNote`,
+  `When`, `WhenNote`, `LastNote`; `Sources`, `Destination`, `Runs` gone.
+  `BackupPage.Job`, `History` (`BackupHistoryRow`); `BackupRun` gone.
+  `TriggerBlock.Note` is `Runs`, `Destination`; `RestoreBlock.Title`
+  (C-6). Fixtures `app-settings-backup/jobs` (`s-backup-1`), `job`
+  (`s-backup-2`); `normal` is `s-backup-6`.
+
 ## v0.2.345 — 2026-10-18
 
 The attachments of a published note (Пб3, Пс13; `s-publish-4`, `-8`).

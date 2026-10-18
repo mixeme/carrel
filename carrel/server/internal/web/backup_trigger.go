@@ -155,20 +155,28 @@ func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issue
 		triggerTabs(b, issued[job.ID], job, secrets[job.ID])
 		b.Password.Shown, b.Password.Value = true, text(secrets[job.ID])
 		// What turning it on cost is said under the tick (triggerPrice), not
-		// a second time here.
-		b.Note = "Visible only now. Every use is logged; New password replaces it on the spot, and every line already handed out stops working."
+		// a second time here (s-backup-5).
+		b.Note = join("Every use is logged, naming this password. ", strongRun("New password"),
+			" replaces it on the spot — and every line already handed out stops working with it.")
+		// A script and not a line, and why (s-backup-3).
+		switch job.Mode {
+		case sealed.BackupToBoth:
+			b.Destination = join("Destination: ", strongRun("WebDAV and download"), " — two steps, so this is a file, not a line")
+		case sealed.BackupToDownload:
+			b.Destination = join("Destination: ", strongRun("download"), " — somebody has to take the stream, so this is a file, not a line")
+		}
 	} else {
-		b.Note = "The external trigger is on. The password was shown once; New password issues another, and the old lines stop working."
+		b.Note = join("The external trigger is on. The password was shown once; ", strongRun("New password"), " issues another, and the old lines stop working.")
 	}
 	// Outside the unlock window New password opens the password sheet; what
 	// it is for is said in the note, not as a reason of a working button
 	// (C-6.2).
 	if sess.UnlockUntil(s.now()) == nil {
 		b.Password.Reveal.Method, b.Password.Reveal.Href = "GET", s.route("/app/settings/unlock")
-		b.Note = "Confirm your password first: the trigger hands out this job's reading. " + b.Note
+		b.Note = append(line("Confirm your password first: the trigger hands out this job's reading. "), b.Note...)
 	}
 	if !job.Encrypted {
-		b.Note += " This job's archive is not encrypted: whoever holds the secret can take your data in the clear."
+		b.Note = append(b.Note, view.Run{Text: " This job's archive is not encrypted: whoever holds the secret can take your data in the clear."})
 	}
 	return b
 }
@@ -206,8 +214,10 @@ var sharedAddressSpace = netip.MustParsePrefix("100.64.0.0/10")
 // enableTrigger issues the job's trigger, inside the unlock window only, and
 // shows the page with the command and the secret, once.
 func (s *Server) enableTrigger(w http.ResponseWriter, r *http.Request, sess *session.Session, key [32]byte, job sealed.BackupJob) {
+	// The answer is the job's page, where the card stands (s-backup-2…5,
+	// Нс62), not the list.
 	if sess.UnlockUntil(s.now()) == nil {
-		s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, view.Notice{
+		s.writePage(w, r, http.StatusOK, s.backupPage(sess, &job, nil, view.Notice{
 			Role: view.NoticeAlert, Title: "Confirm your password first",
 			Body:    "The external trigger lets a job read without you signed in, so it is issued only inside the unlock window.",
 			Actions: []view.Action{{ID: "settings.unlock", Label: "Confirm password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}},
@@ -220,6 +230,6 @@ func (s *Server) enableTrigger(w http.ResponseWriter, r *http.Request, sess *ses
 		return
 	}
 	w.Header().Set("Cache-Control", "no-store")
-	page := s.backupPageIssued(sess, map[string]string{job.ID: s.publicOrigin(r)}, map[string]string{job.ID: secret})
+	page := s.backupPageWith(sess, &job, nil, map[string]string{job.ID: s.publicOrigin(r)}, map[string]string{job.ID: secret})
 	s.writePage(w, r, http.StatusOK, page)
 }

@@ -52,10 +52,8 @@ func TestTriggerTabsAreWhatTheFramesHandOver(t *testing.T) {
 	both := saveJob(t, f, jobForm(f, sealed.BackupToBoth, "8", "pw"))
 	page := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=trigger&job="+both.ID, f.sess, url.Values{})))
 	var sb *view.TriggerBlock
-	for _, j := range page.Jobs {
-		if j.Trigger != nil && j.Trigger.Shown {
-			sb = j.Trigger
-		}
+	if j := page.Job; j != nil && j.Trigger != nil && j.Trigger.Shown {
+		sb = j.Trigger
 	}
 	if sb == nil {
 		t.Fatal("Both: no trigger shown")

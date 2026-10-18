@@ -8,6 +8,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -389,12 +390,6 @@ func (s *Server) backupPage(sess *session.Session, editing *sealed.BackupJob, er
 	return s.backupPageWith(sess, editing, errs, nil, nil, notices...)
 }
 
-// backupPageIssued is the page right after a trigger was issued: by job, the
-// address a script reaches Carrel at, and the secret, shown this once.
-func (s *Server) backupPageIssued(sess *session.Session, commands, secrets map[string]string) view.BackupPage {
-	return s.backupPageWith(sess, nil, nil, commands, secrets)
-}
-
 func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob, errs map[string]view.Text, commands, secrets map[string]string, notices ...view.Notice) view.BackupPage {
 	blob := s.catalogOf(sess)
 	tf, now := s.timeFor(sess), s.now()
@@ -402,41 +397,32 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 	page.Rail = s.settingsRail(sess, "/app/settings/backup")
 	page.Notices = append(page.Notices, notices...)
 	runs := s.users.BackupRuns(sess.AccountID())
+	var history []historyRun
 	for _, job := range blob.BackupJobs {
-		row := view.BackupJob{
-			Name: text(job.Name), Destination: text(s.destLabel(blob, job)), Keep: job.Keep, Encrypted: job.Encrypted,
+		row := s.jobRow(sess, blob, job)
+		if r := runs[job.ID]; len(r) > 0 {
+			row.LastRun, row.LastState, row.LastNote = tf.numStamp(r[0].Started), runStates[r[0].State], lastNote(r[0])
 		}
-		for _, sel := range job.Sources {
-			if col, ok := blob.Collection(sel.AccountID, sel.Path); ok {
-				conn, _ := blob.Connection(sel.AccountID)
-				row.Sources = append(row.Sources, stamp(connLabel(conn), collectionLabel(col)))
-			}
+		for _, r := range runs[job.ID] {
+			history = append(history, historyRun{job, r})
 		}
-		for i, r := range runs[job.ID] {
-			if i == 0 {
-				row.LastRun, row.LastState = tf.formatWhen(r.Started, true, now), runStates[r.State]
-				if r.State == user.RunPartial || r.State == user.RunFailed {
-					page.Notices = append(page.Notices, view.Notice{
-						Role: view.NoticeAlert, Title: text("The last copy of «" + job.Name + "» is not whole"),
-						Body: text(fmt.Sprintf("%d of %d collections went in. %s", r.Whole, r.Collections, r.Error)),
-					})
-				}
-			}
-			run := view.BackupRun{ID: text(r.ID), Started: tf.numStamp(r.Started), State: runStates[r.State], Size: formatSize(r.Size)}
-			if r.File != "" && r.Mode != sealed.BackupToDownload && r.Verified {
-				run.Download = &view.Action{ID: "backup.get", Label: "Download", Icon: "i-download", Method: "GET", Enabled: true,
-					Href: s.postQuery("/app/settings/backup", url.Values{"op": {"get"}, "job": {job.ID}, "run": {r.ID}})}
-			}
-			row.Runs = append(row.Runs, run)
+		if editing != nil && editing.ID == job.ID {
+			// The job's own page (s-backup-2, Нс61): its When, and the card
+			// of its line once the trigger is on.
+			row.Clock, row.ClockHint = s.triggerTick(sess, job, commands), triggerPrice
+			row.Trigger = s.triggerBlock(sess, job, commands, secrets)
+			page.Job = &row
+			continue
 		}
-		row.Clock, row.ClockHint = s.triggerTick(sess, job, commands), triggerPrice
-		row.Trigger = s.triggerBlock(sess, job, commands, secrets)
 		// The row is what a job is opened for, Run and Edit (s-backup-1);
 		// the trigger is turned off on its card and the job deleted on its
 		// page (s-backup-2).
 		row.Actions = []view.Action{s.backupRunAction(job, "Run"),
 			{ID: "backup.edit", Label: "Edit", Href: s.postQuery("/app/settings/backup", url.Values{"job": {job.ID}}), Method: "GET", Enabled: true}}
-		page.Jobs = append(page.Jobs, row)
+		// A job's page and a new job's are the job alone (s-backup-2).
+		if editing == nil {
+			page.Jobs = append(page.Jobs, row)
+		}
 	}
 	job := sealed.BackupJob{Mode: sealed.BackupToWebDAV, Keep: 8, Encrypted: true}
 	if editing != nil {
@@ -467,8 +453,9 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 			Href: s.postQuery("/app/settings/backup", url.Values{"op": {"delete"}, "job": {job.ID}})}
 		page.DeleteNote = "Archives already made stay where they are: the schedule is deleted, not the copies."
 	}
-	page.Restore = s.restoreBlock(sess, blob, "")
+	page.Restore = s.restoreBlock(sess, blob, "", "")
 	if editing == nil {
+		page.History = s.backupHistory(tf, history)
 		backupHead(&page, len(blob.BackupJobs))
 		page.Actions = []view.Action{
 			{ID: "backup.new", Label: "New job", Icon: "i-plus", Href: s.postQuery("/app/settings/backup", url.Values{"job": {"new"}}), Method: "GET", Primary: true, Enabled: true},
@@ -555,34 +542,107 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 	if !job.Off {
 		on = "1"
 	}
-	passwordHint := view.Text("Separate from the sign-in password: the destination may be somebody else's hosting. Forget it and this job's archives open for nobody, including you.")
+	// A password set is not sent back; the field says there is one (s-backup-2).
+	var passwordSet view.Text
 	if job.Password != "" {
-		passwordHint = "A password is set. Leave the field empty to keep it."
+		passwordSet = "••••••••••••"
 	}
 	action := "/app/settings/backup?op=save"
 	if job.ID != "" {
 		action += "&job=" + url.QueryEscape(job.ID)
 	}
-	return focused(withPrimary(s.plainForm(action, "POST",
-		csrfField(sess),
-		view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(job.Name), Required: true, Error: errs["name"]},
-		view.FormRow{Name: "on", Label: "Job is on", Kind: view.InputCheck, Value: text(on),
-			Options: []view.Option{{Value: "1", Label: "Job is on", Selected: !job.Off}}},
-		view.FormRow{Name: "src", Label: "What to copy", Kind: view.InputCheck, Options: srcOpts, Error: errs["src"],
-			Hint: "A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them."},
-		view.FormRow{Name: "mode", Label: "Where to", Kind: view.InputRadio, Options: modes},
-		view.FormRow{Name: "dest", Label: "Collection", Kind: view.InputSelect, Options: destOpts, Error: errs["dest"]},
-		view.FormRow{Name: "folder", Label: "Folder", Kind: view.InputText, Value: text(strings.Join(job.DestFolder, "/")), Error: errs["folder"], Mono: true,
-			Hint: "Created on first use."},
-		view.FormRow{Name: "keep", Label: "Keep copies", Kind: view.InputNumber, Value: text(strconv.Itoa(job.Keep)), Error: errs["keep"], Mono: true,
-			Hint: "Copies past this number are deleted after the new one has been read back and checked, not before. An archive is dated and never overwritten."},
-		view.FormRow{Name: "encrypted", Label: "Encrypt the archive", Kind: view.InputCheck, Value: text(encrypted),
-			Options: []view.Option{{Value: "1", Label: "Encrypt the archive", Selected: job.Encrypted}},
-			Hint:    "On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it, without Carrel and without a password."},
-		view.FormRow{Name: "password", Label: "Archive password", Kind: view.InputPassword, Error: errs["password"], Hint: passwordHint},
-		view.FormRow{Name: "signin", Label: "On sign-in, if the last copy is older than (days)", Kind: view.InputNumber, Mono: true,
-			Value: text(strconv.Itoa(job.OnSignInDays)), Hint: "0 is never. Carrel keeps no clock of its own."},
-	), "backup.save", "Save"), "name")
+	form := withPrimary(s.plainForm(action, "POST"), "backup.save", "Save")
+	// Name and the switch, then a rubric each (s-backup-2, Нс57).
+	form.Sets = []view.FieldSet{
+		{Rows: []view.FormRow{
+			csrfField(sess),
+			{Name: "name", Label: "Name", Kind: view.InputText, Value: text(job.Name), Required: true, Error: errs["name"]},
+			{Name: "on", Label: "Job is on", Kind: view.InputCheck, Value: text(on),
+				Options: []view.Option{{Value: "1", Label: "Job is on", Selected: !job.Off}}},
+		}},
+		{Legend: "What to copy", LegendAside: s.chosenAside(sess.AccountID(), blob, job),
+			Hint: "A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them — they cannot be picked separately.",
+			Rows: []view.FormRow{{Name: "src", Label: "What to copy", Kind: view.InputCheck, Options: srcOpts, Error: errs["src"]}}},
+		{Legend: "Where to", Rows: []view.FormRow{
+			{Name: "mode", Label: "Where to", Kind: view.InputRadio, Options: modes,
+				HintRuns: join(strongRun("Download"), " streams the archive out and writes nothing to the server: no folder, no retention — the copy is yours to keep. "+
+					"It can still run at three in the morning, but only on an external trigger, because a stream needs somebody at the other end: "+
+					"a browser is not there at that hour, a machine with a disk is. ", strongRun("Both"), " does the two at once — and then the trigger has ",
+					strongRun("two steps"), ", because the file still has to be taken.")},
+			{Name: "dest", Label: "Collection", Kind: view.InputSelect, Options: destOpts, Error: errs["dest"]},
+			{Name: "folder", Label: "Folder", Kind: view.InputText, Value: text(strings.Join(job.DestFolder, "/")), Error: errs["folder"], Mono: true},
+			{Name: "keep", Label: "Keep copies", Kind: view.InputNumber, Value: text(strconv.Itoa(job.Keep)), Error: errs["keep"], Mono: true,
+				HintRuns: join("Copies past the "+keepOrdinal(job.Keep)+" are deleted ", strongRun("after"),
+					" the new one has been read back and checked, not before. The file is dated and never overwritten.")},
+		}},
+		{Legend: "How the archive is closed", Rows: []view.FormRow{
+			{Name: "encrypted", Label: "Encrypt the archive", Kind: view.InputCheck, Value: text(encrypted),
+				Options: []view.Option{{Value: "1", Label: "Encrypt the archive", Selected: job.Encrypted}},
+				Hint:    "On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it."},
+			{Name: "password", Label: "Archive password", Kind: view.InputPassword, Error: errs["password"], Placeholder: passwordSet,
+				Hint: "Separate from the sign-in password: the destination may be somebody else's hosting. Forget it and this job's archives open for nobody, including you."},
+		}},
+		{Legend: "When",
+			Hint: "No time picker here, and that is deliberate: Carrel keeps no clock of its own, so whoever holds the schedule holds the password. What it hands you instead is the line to paste where the clock already is.",
+			Rows: []view.FormRow{{Name: "signin", Label: "On sign-in, if the last copy is older than (days)", Kind: view.InputNumber, Mono: true,
+				Value: text(strconv.Itoa(job.OnSignInDays)), Hint: "0 is never."}}},
+	}
+	return focused(form, "name")
+}
+
+// chosenAside is the sum after «What to copy» (s-backup-2): what is chosen
+// and how big the last copy was — «2 collections and 1 folder chosen · 2.1
+// GB last time».
+func (s *Server) chosenAside(viewerID string, blob sealed.Blob, job sealed.BackupJob) view.Text {
+	cols, folders := 0, 0
+	for _, sel := range job.Sources {
+		col, ok := blob.Collection(sel.AccountID, sel.Path)
+		switch {
+		case !ok:
+		case col.Has(view.KindFile):
+			folders++
+		default:
+			cols++
+		}
+	}
+	if cols+folders == 0 {
+		return ""
+	}
+	var parts []string
+	if cols > 0 {
+		parts = append(parts, plural(cols, "collection"))
+	}
+	if folders > 0 {
+		parts = append(parts, plural(folders, "folder"))
+	}
+	aside := strings.Join(parts, " and ") + " chosen"
+	if job.ID == "" {
+		return text(aside)
+	}
+	for _, r := range s.users.BackupRuns(viewerID)[job.ID] {
+		if r.State != user.RunRunning && r.Size > 0 {
+			return text(aside + " · " + string(formatSize(r.Size)) + " last time")
+		}
+	}
+	return text(aside)
+}
+
+// keepOrdinal is a count of copies as the hint of Keep says it: «the eighth».
+func keepOrdinal(n int) string {
+	words := []string{"", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth",
+		"eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth", "twentieth"}
+	if n > 0 && n < len(words) {
+		return words[n]
+	}
+	switch {
+	case n%10 == 1 && n%100 != 11:
+		return fmt.Sprintf("%dst", n)
+	case n%10 == 2 && n%100 != 12:
+		return fmt.Sprintf("%dnd", n)
+	case n%10 == 3 && n%100 != 13:
+		return fmt.Sprintf("%drd", n)
+	}
+	return fmt.Sprintf("%dth", n)
 }
 
 // jobFromForm reads the editor into job, and what is wrong with it.
@@ -676,11 +736,12 @@ func (s *Server) getSettingsBackup(w http.ResponseWriter, r *http.Request) {
 		// New job (s-backup-1): the page of a job not made yet — the form,
 		// Save and Cancel.
 		page.Title, page.Subtitle, page.Actions, page.Empty, page.EmptyNote = "New job", nil, nil, nil, nil
+		page.Jobs, page.History = nil, nil
 		page.Add.Actions = append(page.Add.Actions,
 			view.Action{ID: "backup.cancel", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true})
 	case q.Get("restore") != "":
 		// The step of the source the address names (s-backup-7, Нс74).
-		page.Restore = s.restoreBlock(sess, s.catalogOf(sess), q.Get("from"))
+		page.Restore = s.restoreBlock(sess, s.catalogOf(sess), q.Get("from"), q.Get("run"))
 		page.Restore.Open = true
 	}
 	s.writePage(w, r, http.StatusOK, page)
@@ -765,6 +826,18 @@ func (s *Server) postSettingsBackup(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.redirect(w, r, "/app/settings/backup")
+	case "switch":
+		// The tick of the list's row (s-backup-1): «Job is on» alone.
+		if !has {
+			s.notFound(w, r)
+			return
+		}
+		job.Off = !job.Off
+		if _, err := s.users.SaveBackupJob(sess.AccountID(), key, job); err != nil {
+			http.Error(w, "could not save the job", http.StatusInternalServerError)
+			return
+		}
+		s.redirect(w, r, "/app/settings/backup")
 	case "trigger":
 		if !has {
 			s.notFound(w, r)
@@ -780,7 +853,8 @@ func (s *Server) postSettingsBackup(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "could not turn the trigger off", http.StatusInternalServerError)
 			return
 		}
-		s.redirect(w, r, "/app/settings/backup")
+		// Back to the job it was turned off on (Нс62).
+		s.redirect(w, r, "/app/settings/backup?job="+url.QueryEscape(job.ID))
 	case "restore-open":
 		s.openRestore(w, r, sess, blob)
 	case "restore-run":
@@ -808,3 +882,145 @@ func (s *Server) postSettingsBackup(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 	}
 }
+
+// jobRow is a job as the list's row says it (s-backup-1, Нс55): on or off,
+// the marks of what it copies and the sum, where to and when, each in two
+// lines, how many copies it keeps.
+func (s *Server) jobRow(sess *session.Session, blob sealed.Blob, job sealed.BackupJob) view.BackupJob {
+	row := view.BackupJob{Name: text(job.Name), On: !job.Off, Keep: job.Keep, Encrypted: job.Encrypted}
+	label := "Turn the job off"
+	if job.Off {
+		label = "Turn the job on"
+	}
+	row.Toggle = &view.Action{ID: "backup.switch", Label: text(label), Method: "POST", Enabled: true,
+		Href: s.postQuery("/app/settings/backup", url.Values{"op": {"switch"}, "job": {job.ID}})}
+	cols, books, files := 0, 0, 0
+	for _, sel := range job.Sources {
+		col, ok := blob.Collection(sel.AccountID, sel.Path)
+		if !ok {
+			continue
+		}
+		if c := catalogColour(col); c != "" {
+			row.Marks = append(row.Marks, c)
+		}
+		switch {
+		case col.Has(view.KindFile):
+			files++
+		case len(col.Kinds) == 1 && col.Kinds[0] == view.KindContact:
+			books++
+			cols++
+		default:
+			cols++
+		}
+	}
+	switch {
+	case cols > 0 && cols == books:
+		row.Copies = text(plural(books, "book"))
+	case cols > 0:
+		row.Copies = text(plural(cols, "collection"))
+	}
+	if files > 0 {
+		if row.Copies == "" {
+			row.Copies = "files"
+		} else {
+			row.Copies += " + files"
+		}
+	}
+	switch job.Mode {
+	case sealed.BackupToDownload:
+		row.Where, row.WhereNote, row.Keep = "download in browser", "nothing is written", 0
+	default:
+		col, ok := blob.Collection(job.DestAccount, job.DestPath)
+		conn, _ := blob.Connection(job.DestAccount)
+		if !ok {
+			row.Where = "a destination that is no longer in the catalog"
+			break
+		}
+		row.Where = text(string(stamp(connLabel(conn), collectionLabel(col))))
+		row.WhereNote = text("/" + strings.Join(job.DestFolder, "/"))
+		if job.Mode == sealed.BackupToBoth {
+			row.WhereNote += " · and a download"
+		}
+	}
+	switch {
+	case s.users.BackupTriggerOn(sess.AccountID(), job.ID):
+		row.When, row.WhenNote = text("cron · "+triggerAt), "external trigger"
+	case job.OnSignInDays > 0:
+		row.When, row.WhenNote = "on sign-in", text(fmt.Sprintf("if older than %d days", job.OnSignInDays))
+	default:
+		row.When = "on demand"
+	}
+	return row
+}
+
+// verifiedRun is the word of a copy read back from where it was written
+// (s-backup-1); one written and not read back is marked red, and one that
+// was only downloaded was written nowhere.
+func verifiedRun(r store.BackupRun) view.Run {
+	switch {
+	case r.State == user.RunRunning:
+		return view.Run{Text: "running"}
+	case r.Mode == sealed.BackupToDownload:
+		return view.Run{Text: "downloaded"}
+	case r.Verified:
+		return view.Run{Text: "verified", Hint: "The archive was read back from the destination and the checksum matched"}
+	}
+	return view.Run{Text: "not verified", Mark: view.RunDanger}
+}
+
+// lastNote is the line under a job's last copy: its size and whether it
+// was read back (s-backup-1: «18.4 MB · verified»).
+func lastNote(r store.BackupRun) view.Runs {
+	if r.State == user.RunRunning {
+		return line("running")
+	}
+	return join(string(formatSize(r.Size))+" · ", verifiedRun(r))
+}
+
+// historyRun is a run of a job, for the history of all jobs.
+type historyRun struct {
+	job sealed.BackupJob
+	run store.BackupRun
+}
+
+// historyTriggers are what started a run, as the history says it.
+var historyTriggers = map[string]view.Text{"external": "cron", "sign-in": "on sign-in", "screen": "by hand"}
+
+// backupHistory is «History, all jobs» (s-backup-1, Нс56): every run of
+// every job, newest first — when, which job, how big, how many collections
+// went in whole, whether it was read back and what was not copied, what
+// started it; Restore and Download of a copy that can be had.
+func (s *Server) backupHistory(tf timeFmt, runs []historyRun) []view.BackupHistoryRow {
+	sort.SliceStable(runs, func(i, j int) bool { return runs[i].run.Started.After(runs[j].run.Started) })
+	var out []view.BackupHistoryRow
+	for _, h := range runs {
+		r := h.run
+		row := view.BackupHistoryRow{
+			ID: text(r.ID), At: tf.numStamp(r.Started), Job: text(h.job.Name), Size: formatSize(r.Size),
+			Collections: text(fmt.Sprintf("%d / %d", r.Whole, r.Collections)), Whole: r.Whole >= r.Collections,
+			Trigger: historyTriggers[r.Trigger],
+		}
+		if r.Verified {
+			row.Verified = line("read back")
+		} else {
+			row.Verified = runs1(verifiedRun(r))
+		}
+		if r.State != user.RunRunning && r.Whole < r.Collections {
+			missing := view.Run{Text: text(fmt.Sprintf("%d not copied", r.Collections-r.Whole)), Mark: view.RunDanger, Hint: text(r.Error)}
+			row.Verified = append(row.Verified, view.Run{Text: " · "}, missing)
+		}
+		if r.File != "" && r.Mode != sealed.BackupToDownload && r.Verified {
+			row.Actions = []view.Action{
+				{ID: "backup.restore", Label: "Restore", Icon: "i-restore", Method: "GET", Enabled: true,
+					Href: s.postQuery("/app/settings/backup", url.Values{"restore": {"1"}, "from": {"job"}, "run": {h.job.ID + "|" + r.ID}})},
+				{ID: "backup.get", Label: "Download", Icon: "i-download", Method: "GET", Enabled: true,
+					Href: s.postQuery("/app/settings/backup", url.Values{"op": {"get"}, "job": {h.job.ID}, "run": {r.ID}})},
+			}
+		}
+		out = append(out, row)
+	}
+	return out
+}
+
+// runs1 is one piece as a sentence.
+func runs1(r view.Run) view.Runs { return view.Runs{r} }

@@ -944,6 +944,12 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`plan=r-[0-9A-Z]{10}`).ReplaceAllString(s, "plan=r-plan")
 	s = regexp.MustCompile(`transfer=q-[0-9A-Z]{10}`).ReplaceAllString(s, "transfer=q-transfer")
 	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
+	// A backup job's and a run's ID (s-backup-1): the frames name them by
+	// what they are.
+	s = regexp.MustCompile(`\bj-[0-9A-Z]{10}\b`).ReplaceAllString(s, "j-job")
+	s = regexp.MustCompile(`r-[0-9A-Z]{10}\b`).ReplaceAllString(s, "r-run")
+	// The secret of a job's line, issued for each answer (s-backup-2).
+	s = regexp.MustCompile(`cbk_[A-Za-z0-9_-]+`).ReplaceAllString(s, "cbk_secret")
 	// A davloom device's ID (NewDeviceID): the frames name no device by it.
 	s = regexp.MustCompile(`\bd-[0-9A-Z]{10}\b`).ReplaceAllString(s, "d-device")
 	// The one-time link to an Apple profile (s-plan-1) is made for each

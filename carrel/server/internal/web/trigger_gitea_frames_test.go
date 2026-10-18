@@ -76,7 +76,7 @@ func TestGiteaAndCurlTabsAreTheFrames(t *testing.T) {
 	if tb.Password.Reveal.Label != "New password" || string(tb.Password.Reveal.Hint) != hints[0] {
 		t.Errorf("the password's button = %q, hint %q; the frames «New password», %q", tb.Password.Reveal.Label, tb.Password.Reveal.Hint, hints[0])
 	}
-	if strings.Contains(string(tb.Note), "Regenerate") {
+	if strings.Contains(runsText(tb.Note), "Regenerate") {
 		t.Errorf("the note still says Regenerate: %q", tb.Note)
 	}
 }

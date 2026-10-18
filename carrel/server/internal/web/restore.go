@@ -116,7 +116,9 @@ func (t *restoreTask) open() (*zip.Reader, *os.File, error) {
 
 // restoreBlock is the restore part of the Backup screen: which archive, then
 // each of its collections and where it goes (s-backup-8).
-func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from string) view.RestoreBlock {
+// run names the copy a row of the history opened it with (Нс56): that one
+// is the job's row, chosen.
+func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from, run string) view.RestoreBlock {
 	b := view.RestoreBlock{Note: join("Restoring ", strongRun("creates"), " records, the way import does: a colliding UID gets a fresh one and a line in the report. "+
 		"Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes.")}
 	// A job's copies: one row a job, its newest verified copy — its day, its
@@ -128,6 +130,11 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from stri
 		var newest *store.BackupRun
 		for i, r := range byJob[job.ID] {
 			if r.File != "" && r.Verified && (newest == nil || r.Started.After(newest.Started)) {
+				newest = &byJob[job.ID][i]
+			}
+		}
+		for i, r := range byJob[job.ID] {
+			if r.File != "" && r.Verified && job.ID+"|"+r.ID == run {
 				newest = &byJob[job.ID][i]
 			}
 		}
@@ -162,8 +169,14 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from stri
 	rows := []view.FormRow{csrfField(sess), {Name: "source", Kind: view.InputHidden, Value: text(source)}}
 	switch from {
 	case "job":
+		chosen := 0
 		for i := range runs {
-			runs[i].Selected = i == 0
+			if runs[i].Value == run {
+				chosen = i
+			}
+		}
+		for i := range runs {
+			runs[i].Selected = i == chosen
 		}
 		rows = append(rows, view.FormRow{Name: "run", Label: "From a job", Kind: view.InputRadio, Options: runs})
 	case "server":
@@ -182,9 +195,13 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from stri
 	}
 	b.Source.Actions = []view.Action{open,
 		{ID: "restore.close", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true}}
+	b.Title, b.Subtitle = "Restore", line("Nothing is written until you have seen what goes where")
 	if t := restoreOf(sess); t != nil {
 		b.Open = true
 		b.Subtitle = archiveLine(t)
+		if !t.manifest.Taken.IsZero() {
+			b.Title = text("Restore from " + string(tf.dayKey(t.manifest.Taken)))
+		}
 		b.Match = s.restoreMatch(sess, blob, t)
 		b.Actions = []view.Action{{ID: "restore.cancel", Label: "Cancel", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-cancel"}}), Method: "POST", Enabled: true}}
 	}
