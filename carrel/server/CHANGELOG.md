@@ -17,6 +17,15 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.349 — 2026-10-19
+
+Typecase's note 84 (`8f2dbd6`): the rest of the administration (195 p. 8).
+
+### Changed
+
+- **Email of the temporary-password card** has no sample «—»: an empty
+  field, «(optional)» beside its label (`s-admin-1`).
+
 ## v0.2.348 — 2026-10-19
 
 The files section's frames of `b804598`, what they draw and the server did

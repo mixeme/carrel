@@ -488,7 +488,6 @@
               "labelAside": "(optional)",
               "name": "email",
               "options": [],
-              "placeholder": "—",
               "readOnly": false,
               "required": false,
               "value": ""

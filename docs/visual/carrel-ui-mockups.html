@@ -1461,6 +1461,8 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-card__fields--gap10-12.tc-card__fields--gap10-12{gap:10px 12px}
 .tc-card__top10.tc-card__top10{margin-top:10px}
 .tc-card__fields--rule.tc-card__fields--rule{margin-top:12px;padding-top:11px;border-top:.5px solid var(--tc-hair)}
+/* Ряд полей с отказами под ними: поля — по верху, чтобы отказ не поднимал соседей. */
+.tc-card__fields--top.tc-card__fields--top{align-items:flex-start}
 .tc-card__lede.tc-card__lede{font-size:12.5px;color:var(--tc-muted);margin-bottom:10px}
 .tc-main__diag.tc-main__diag{padding:0 20px 14px}
 .tc-dialog__logo.tc-dialog__logo{justify-content:center;margin:0 0 13px}
@@ -18115,7 +18117,6 @@ jobs:
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>
@@ -18146,7 +18147,7 @@ jobs:
         </div>
         <div class="tc-main__cards">
 
-          <form class="tc-card" action="/admin/users/invite" method="post">
+          <form class="tc-card" action="/admin/invites?action=link" method="post"><input type="hidden" name="csrf" value="7f3a91de">
             <div class="tc-rubric">Invitation <span class="tc-plain">chooses their own password</span></div>
             <div class="tc-card__fields tc-card__fields--gap10-12">
               <div class="tc-field tc-field--sm"><label>Role</label><span class="tc-in is-pick"><select class="tc-in__list" name="role" aria-label="Role"><option value="user" selected>User</option></select></span></div>
@@ -18157,27 +18158,27 @@ jobs:
               <button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/invite/7f3a…" data-tc-copied="Copied">Copy</button>
             </div>
             <div class="tc-card__fields tc-card__fields--gap10-12 tc-card__fields--rule">
-              <div class="tc-field tc-field--md"><label>Or send to</label><input class="tc-in is-ph" type="text" name="or.send.to" placeholder="anna@example.org" aria-label="Or send to"></div>
-              <button class="tc-btn" type="submit" formaction="/admin/users/invite/mail">Send invitation</button>
+              <div class="tc-field tc-field--md"><label>Or send to</label><input class="tc-in is-ph" type="text" name="email" placeholder="anna@example.org" aria-label="Or send to"></div>
+              <button class="tc-btn" type="submit" formaction="/admin/invites?action=send">Send invitation</button>
             </div>
           </form>
 
-          <form class="tc-card" action="/admin/users/new" method="post">
+          <form class="tc-card" action="/admin/invites" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="user">
             <div class="tc-rubric">Temporary password <span class="tc-badge is-alert">hand to hand</span></div>
             <div class="tc-msg is-alert tc-msg--flush-bot12">Until the user changes this password, you can sign in as them.</div>
             <div class="tc-card__fields tc-card__fields--gap10-12">
               <div class="tc-field tc-field--xs"><label>Role</label><span class="tc-in is-pick"><select class="tc-in__list" name="role" aria-label="Role"><option value="user" selected>User</option></select></span></div>
               <div class="tc-field tc-field--sm"><label>Login</label><input class="tc-in" type="text" name="login" value="viktor" aria-label="Login"></div>
-              <div class="tc-field tc-field--md"><label>Email <span class="tc-dim">(optional)</span></label><input class="tc-in is-ph" type="text" name="email.optional" placeholder="—" aria-label="Email"></div>
-              <div class="tc-field tc-field--md"><label>Temporary password</label><input class="tc-in is-mono" type="text" name="temporary.password" value="9f2-brick-lamp" aria-label="Temporary password"></div>
+              <div class="tc-field tc-field--md"><label>Email <span class="tc-dim">(optional)</span></label><input class="tc-in" type="text" name="email" aria-label="Email"></div>
+              <div class="tc-field tc-field--md"><label>Temporary password</label><input class="tc-in is-mono" type="text" name="password" value="9f2-brick-lamp" aria-label="Temporary password"></div>
               <button class="tc-btn is-primary" type="submit">Create user</button>
             </div>
           </form>
 
-          <form class="tc-card" action="/admin/users/registration" method="post">
+          <form class="tc-card" action="/admin/invites" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="selfreg">
             <div class="tc-rubric">Self-registration <span class="tc-badge">open</span></div>
             <div class="tc-card__lede">A visitor creates an account and confirms the address by email. Cannot be turned on until mail works.</div>
-            <label class="tc-check"><input class="tc-check__box" type="checkbox" name="publish.the.registration.form" value="1" checked><span class="tc-tickrow__tick"></span>Publish the registration form</label>
+            <label class="tc-check"><input class="tc-check__box" type="checkbox" name="selfReg" value="on" checked><span class="tc-tickrow__tick"></span>Publish the registration form</label>
             <div class="tc-line tc-line--gap-6 tc-card__top10">
               <input class="tc-in is-mono tc-in--t11-fill" type="text" readonly value="https://carrel.example/register" aria-label="Registration address">
               <button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/register" data-tc-copied="Copied">Copy</button>
@@ -18229,17 +18230,21 @@ password  9f2-brick-lamp</div>
     <div class="tc-root tc-shell">
       <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
         <div class="tc-main__cards">
-          <form class="tc-card" action="/admin/users/invite" method="post">
+          <form class="tc-card" action="/admin/invites?action=link" method="post"><input type="hidden" name="csrf" value="7f3a91de">
             <div class="tc-rubric">Invitation <span class="tc-plain">chooses their own password</span></div>
+            <div class="tc-card__fields tc-card__fields--gap10-12">
+              <div class="tc-field tc-field--sm"><label>Role</label><span class="tc-in is-pick"><select class="tc-in__list" name="role" aria-label="Role"><option value="user" selected>User</option></select></span></div>
+              <button class="tc-btn is-primary" type="submit">Create link</button>
+            </div>
             <div class="tc-card__fields tc-card__fields--gap10-12 tc-card__fields--rule">
-              <div class="tc-field tc-field--md"><label>Or send to</label><input class="tc-in is-ph" type="text" name="or.send.to" placeholder="anna@example.org" aria-label="Or send to"></div>
-              <button class="tc-btn" title="SMTP is not configured: no letter can go." type="submit" disabled>Send invitation</button>
+              <div class="tc-field tc-field--md"><label>Or send to</label><input class="tc-in is-ph" type="text" name="email" placeholder="anna@example.org" aria-label="Or send to"></div>
+              <button class="tc-btn" title="SMTP is not configured: no letter can go." type="submit" formaction="/admin/invites?action=send" disabled>Send invitation</button>
             </div>
           </form>
-          <form class="tc-card" action="/admin/users/registration" method="post">
+          <form class="tc-card" action="/admin/invites" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="selfreg">
             <div class="tc-rubric">Self-registration</div>
             <div class="tc-card__lede">A visitor creates an account and confirms the address by email. Cannot be turned on until mail works.</div>
-            <label class="tc-check"><input class="tc-check__box" type="checkbox" name="publish.the.registration.form" value="1"><span class="tc-tickrow__tick is-off"></span>Publish the registration form</label>
+            <label class="tc-check"><input class="tc-check__box" type="checkbox" name="selfReg" value="on"><span class="tc-tickrow__tick is-off"></span>Publish the registration form</label>
             <div class="tc-card__top10"><button class="tc-btn" title="Mail is not set up: nobody who registers could confirm the address." type="submit" disabled>Save</button></div>
           </form>
         </div>
@@ -18254,13 +18259,15 @@ password  9f2-brick-lamp</div>
     <div class="tc-root tc-shell">
       <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
         <div class="tc-main__cards">
-          <form class="tc-card" action="/admin/users/new" method="post">
+          <form class="tc-card" action="/admin/invites" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="action" value="user">
             <div class="tc-rubric">Temporary password <span class="tc-badge is-alert">hand to hand</span></div>
-            <div class="tc-card__fields tc-card__fields--gap10-12">
+            <div class="tc-msg is-alert tc-msg--flush-bot12">Until the user changes this password, you can sign in as them.</div>
+            <div class="tc-card__fields tc-card__fields--gap10-12 tc-card__fields--top">
+              <div class="tc-field tc-field--xs"><label>Role</label><span class="tc-in is-pick"><select class="tc-in__list" name="role" aria-label="Role"><option value="user" selected>User</option></select></span></div>
               <div class="tc-field tc-field--sm"><label>Login</label><input class="tc-in is-error" type="text" name="login" value="anna" aria-label="Login"><span class="tc-field__hint tc-dim--danger">Login is already taken.</span></div>
-              <div class="tc-field tc-field--md"><label>Email <span class="tc-dim">(optional)</span></label><input class="tc-in is-error" type="text" name="email.optional" value="viktor@" aria-label="Email"><span class="tc-field__hint tc-dim--danger">Enter one address, like name@example.org.</span></div>
-              <div class="tc-field tc-field--md"><label>Temporary password</label><input class="tc-in is-mono is-error" type="text" name="temporary.password" value="9f2" aria-label="Temporary password"><span class="tc-field__hint tc-dim--danger">Password must be at least 8 characters.</span></div>
-              <button class="tc-btn is-primary" type="submit">Create user</button>
+              <div class="tc-field tc-field--md"><label>Email <span class="tc-dim">(optional)</span></label><input class="tc-in is-error" type="text" name="email" value="viktor@" aria-label="Email"><span class="tc-field__hint tc-dim--danger">Enter one address, like name@example.org.</span></div>
+              <div class="tc-field tc-field--md"><label>Temporary password</label><input class="tc-in is-mono is-error" type="text" name="password" value="9f2" aria-label="Temporary password"><span class="tc-field__hint tc-dim--danger">Password must be at least 8 characters.</span></div>
+              <div class="tc-field"><label>&nbsp;</label><button class="tc-btn is-primary" type="submit">Create user</button></div>
             </div>
           </form>
         </div>
@@ -18308,7 +18315,6 @@ password  9f2-brick-lamp</div>
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>
@@ -18352,9 +18358,14 @@ password  9f2-brick-lamp</div>
               <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
             <tr class="tc-table__row--off"><td>viktor <span class="tc-badge">disabled</span></td><td>User</td><td class="tc-mono tc-table__n3 is-2nd">2026-04-19</td><td class="tc-mono tc-table__n4">2026-06-30 11:41</td><td class="tc-mono">2</td><td class="tc-mono">0</td><td><span class="tc-badge">deposited</span></td>
               <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr><td>olga</td><td>Administrator</td><td class="tc-mono tc-table__n3 is-2nd">2026-05-11</td><td class="tc-mono tc-table__n4">2026-08-16 08:55</td><td class="tc-mono">2</td><td class="tc-mono">1</td><td><span class="tc-badge">deposited</span></td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr><td>petr</td><td>User</td><td class="tc-mono tc-table__n3 is-2nd">2026-06-02</td><td class="tc-mono tc-table__n4">2026-08-12 21:14</td><td class="tc-mono">1</td><td class="tc-mono">1</td><td><span class="tc-badge">deposited</span></td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr><td>ivan</td><td>User</td><td class="tc-mono tc-table__n3 is-2nd">2026-07-20</td><td class="tc-mono tc-table__n4">2026-08-15 10:30</td><td class="tc-mono">0</td><td class="tc-mono">0</td><td>—</td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
           </tbody>
         </table>
-        <div class="tc-msg">Deleting an account is confirmed in a dialogue of its own. Reset a password, in the head, sets a temporary password and names what a reset destroys before it is pressed.</div>
       </div>
     </div>
   </div>
@@ -18453,7 +18464,6 @@ password  9f2-brick-lamp</div>
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>
@@ -18498,9 +18508,14 @@ password  9f2-brick-lamp</div>
               <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
             <tr class="tc-table__row--off"><td>viktor <span class="tc-badge">disabled</span></td><td>User</td><td class="tc-mono tc-table__n3 is-2nd">2026-04-19</td><td class="tc-mono tc-table__n4">2026-06-30 11:41</td><td class="tc-mono">2</td><td class="tc-mono">0</td><td><span class="tc-badge">deposited</span></td>
               <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr><td>olga</td><td>Administrator</td><td class="tc-mono tc-table__n3 is-2nd">2026-05-11</td><td class="tc-mono tc-table__n4">2026-08-16 08:55</td><td class="tc-mono">2</td><td class="tc-mono">1</td><td><span class="tc-badge">deposited</span></td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr><td>petr</td><td>User</td><td class="tc-mono tc-table__n3 is-2nd">2026-06-02</td><td class="tc-mono tc-table__n4">2026-08-12 21:14</td><td class="tc-mono">1</td><td class="tc-mono">1</td><td><span class="tc-badge">deposited</span></td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr><td>ivan</td><td>User</td><td class="tc-mono tc-table__n3 is-2nd">2026-07-20</td><td class="tc-mono tc-table__n4">2026-08-15 10:30</td><td class="tc-mono">0</td><td class="tc-mono">0</td><td>—</td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
           </tbody>
         </table>
-        <div class="tc-msg">Deleting an account is confirmed in a dialogue of its own. Reset a password, in the head, sets a temporary password and names what a reset destroys before it is pressed.</div>
       </div>
     </div>
       <div class="tc-scrim tc-scrim--padt26">
@@ -18533,7 +18548,6 @@ password  9f2-brick-lamp</div>
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>
@@ -18578,9 +18592,14 @@ password  9f2-brick-lamp</div>
               <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
             <tr class="tc-table__row--off"><td>viktor <span class="tc-badge">disabled</span></td><td>User</td><td class="tc-mono tc-table__n3 is-2nd">2026-04-19</td><td class="tc-mono tc-table__n4">2026-06-30 11:41</td><td class="tc-mono">2</td><td class="tc-mono">0</td><td><span class="tc-badge">deposited</span></td>
               <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr><td>olga</td><td>Administrator</td><td class="tc-mono tc-table__n3 is-2nd">2026-05-11</td><td class="tc-mono tc-table__n4">2026-08-16 08:55</td><td class="tc-mono">2</td><td class="tc-mono">1</td><td><span class="tc-badge">deposited</span></td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr><td>petr</td><td>User</td><td class="tc-mono tc-table__n3 is-2nd">2026-06-02</td><td class="tc-mono tc-table__n4">2026-08-12 21:14</td><td class="tc-mono">1</td><td class="tc-mono">1</td><td><span class="tc-badge">deposited</span></td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr><td>ivan</td><td>User</td><td class="tc-mono tc-table__n3 is-2nd">2026-07-20</td><td class="tc-mono tc-table__n4">2026-08-15 10:30</td><td class="tc-mono">0</td><td class="tc-mono">0</td><td>—</td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
           </tbody>
         </table>
-        <div class="tc-msg">Deleting an account is confirmed in a dialogue of its own. Reset a password, in the head, sets a temporary password and names what a reset destroys before it is pressed.</div>
       </div>
     </div>
       <div class="tc-scrim tc-scrim--padt26">
@@ -18672,7 +18691,6 @@ password  4c1-tide-oven</div>
         <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
         <div class="tc-top__actions">
           <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
           <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
         </div>
       </div>
@@ -18752,7 +18770,6 @@ password  4c1-tide-oven</div>
         <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
         <div class="tc-top__actions">
           <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
           <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
         </div>
       </div>
@@ -18833,7 +18850,6 @@ password  4c1-tide-oven</div>
         <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
         <div class="tc-top__actions">
           <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
           <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
         </div>
       </div>
@@ -18934,7 +18950,6 @@ password  4c1-tide-oven</div>
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>
@@ -19010,7 +19025,6 @@ password  4c1-tide-oven</div>
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>
@@ -19061,7 +19075,6 @@ password  4c1-tide-oven</div>
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>
@@ -19113,7 +19126,6 @@ password  4c1-tide-oven</div>
         <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
         <div class="tc-top__actions">
           <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
           <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
         </div>
       </div>
@@ -19173,7 +19185,6 @@ password  4c1-tide-oven</div>
         <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
         <div class="tc-top__actions">
           <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
           <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
         </div>
       </div>
@@ -19222,7 +19233,6 @@ password  4c1-tide-oven</div>
         <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
         <div class="tc-top__actions">
           <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
           <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
         </div>
       </div>
@@ -19276,7 +19286,6 @@ password  4c1-tide-oven</div>
         <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
         <div class="tc-top__actions">
           <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
           <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
         </div>
       </div>
@@ -19345,7 +19354,6 @@ password  4c1-tide-oven</div>
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>
@@ -19432,7 +19440,6 @@ password  4c1-tide-oven</div>
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>
@@ -19528,7 +19535,6 @@ password  9f2-brick-lamp</div>
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>
@@ -19583,7 +19589,6 @@ password  9f2-brick-lamp</div>
         <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
         <div class="tc-top__actions">
           <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
           <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
         </div>
       </div>
@@ -22341,7 +22346,6 @@ SMTP  mail.home.example:465  TLS
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>

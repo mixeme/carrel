@@ -618,7 +618,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 		{Name: "action", Kind: view.InputHidden, Value: "user"},
 		roleRow(typed.Get("role")),
 		{Name: "login", Label: "Login", Kind: view.InputText, Required: true, Value: text(typed.Get("login"))},
-		{Name: "email", Label: "Email", LabelAside: "(optional)", Kind: view.InputEmail, Value: text(typed.Get("email")), Placeholder: "—"},
+		{Name: "email", Label: "Email", LabelAside: "(optional)", Kind: view.InputEmail, Value: text(typed.Get("email"))},
 		temp,
 	}
 	for i := range rows {
