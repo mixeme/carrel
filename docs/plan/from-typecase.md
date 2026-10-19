@@ -3091,6 +3091,54 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
    - Остаток п. 5: davloom без устройств, «Change» области, «davloom is
      off»; новое задание; восстановление; депонирование с историей.
 
+Записка 94 от 19.10.2026 (Typecase `a1754e0`; задачи 210 и 211). По
+порядку обмена `4cd37cf`: записка одна, копию макета переносит переход
+клиента. **Последний коммит Typecase, который она описывает, — `a1754e0`**
+(487 кадров).
+
+94. **Лист загрузки; диалоги подключения и новое устройство — из набора.**
+   - **210 п. 1:** у листа загрузки «Open the folder» **нет** — узлы его
+     дерева ссылки, папку выбирают ими; `s-files-19` убрал кнопку, подвал —
+     Upload и Cancel, как у `s-notes-11`.
+   - **210 п. 2:** `Sheet` печатает `ID` и у листа без `Action` (`<div
+     class="tc-sheet" id="…">`) — `picker-sheet` у `s-files-16` теперь
+     даётся библиотекой.
+   - **211 п. 1:** Password в диалоге подключения (`s-profile-2`, `-11`,
+     `-24`) — поле пароля. Имена полей — `server`, `login`, `password`,
+     `noPassword`, `certFingerprint`, скрытое `csrf` — во всех диалогах
+     подключения и правки (`-2`, `-11`, `-14`, `-16`, `-22`, `-23`, `-24`).
+   - **211 п. 2:** «The server asks no password» (`noPassword`,
+     `data-tc-disables="password"`) — и в диалоге подключения, снятый, после
+     поля пароля; отмеченный — `-14`.
+   - **211 п. 3:** цвет метки в панели подписки (`s-profile-10`) —
+     `Swatches` с `Name: "colour"`, шесть цветов, выбран `#8C6239`; под ними
+     приглушённое «derived from the address». Вместе с прежними метками
+     ушли из библиотеки `FieldRow`, `MarkH18`, `Mark.Focus` и их правила.
+     Строка Sections: «Not a choice: a feed is one file.» (род записей два).
+   - **211 п. 4:** правка (`s-profile-16`, `-22`, `-23`) правит **nextcloud**
+     (`/app/settings/connections/nextcloud/edit`): метка «nextcloud», адрес
+     `https://cloud.example.org/remote.php/dav/` (у `-22`, `-23` —
+     сменённый `https://cloud.home.example/remote.php/dav/`), пароль пустой
+     и **под ним** «Leave it empty to keep the stored one.», флажок снят.
+     У `-11` Server URL — с подсказкой про `.well-known`. Случай «сервер без
+     пароля» показан при подключении (`-14`).
+   - **211 п. 5 — правило:** профиль и коды берут **подключения DAV
+     (CalDAV, CardDAV) целиком**, строкой на подключение с числом коллекций:
+     nextcloud · mix · 9 collections, radicale · vps · mix · 4 collections;
+     **baikal — выключенной строкой**: отметка `disabled` с причиной «The
+     server refused the saved password.», справа красным «password
+     refused» (новое: `SlimRow.Reason`). sftpgo (только WebDAV) в профиль и
+     коды не входит. Thunderbird (`s-plan-4`) — строка подключения с
+     логином и паролем, под ней строка на коллекцию из набора (адреса по
+     слагам набора: `…/calendars/mix/lichnyj/`, `…/addressbooks/mix/kontakty/`,
+     `…/radicale/mix/proekty/`…); у baikal — только строка подключения
+     «the server refused the saved password», без пароля и коллекций.
+     «Anything else» (`-5`) — то же плюс WebDAV: Files у nextcloud
+     (`…/remote.php/dav/files/mix/`), sftpgo · vps с Documents и Public
+     (`ro`). Так же `s-plan-1`, `-6`.
+   - **211 п. 6:** коды Android (`s-plan-2`) — `<img class="tc-card__qr-img"
+     src="data:image/png;base64,…">` (`CardQR.Src`).
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
