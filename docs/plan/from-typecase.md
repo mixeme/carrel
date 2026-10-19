@@ -3175,6 +3175,36 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      sign-in password.».
    - Из библиотеки ушёл `RubricGap13` (`tc-rubric--m13-0-6`).
 
+Записка 96 от 19.10.2026 (Typecase `26aebf8`; задача 193 п. 5, третья
+часть). По порядку обмена `4cd37cf`: записка одна, копию макета переносит
+переход клиента. **Последний коммит Typecase, который она описывает, —
+`26aebf8`** (491 кадр).
+
+96. **davloom: состояния без кадров; дерево — за кнопкой.**
+   - **Устройств нет** (`s-davloom-6`, `/app/settings/davloom`,
+     `data-part="empty"`): под рубрикой Devices (без счёта) — «**No devices
+     yet.**» (`tc-empty`); адрес для клиента — на месте; в рейле у davloom
+     нет счёта; строка рейла «davloom · running · no devices».
+   - **«Change» области** (`s-davloom-7`, `/app/settings/davloom/scope?device=…`,
+     лист поверх davloom, POST с `csrf`): заголовок «What it sees», справа
+     имя устройства; коллекции отметками по подключениям (`name="col"`,
+     `value="подключение|слаг"`), сетка как у источников задания копии
+     (nextcloud «4 of 9», radicale · vps «1 of 4»); Save и Cancel (ссылка).
+     baikal (отказ) сюда не входит. Права read only / read and write — в
+     строке устройства, не в листе.
+   - **davloom выключен** (`s-davloom-8`, `data-part="off"`): в заголовке
+     бейдж `off` (`is-alert`) вместо `local`, подзаголовок «No device
+     connects until it is started.»; Add device выключен с причиной
+     «davloom is off on this instance.»; устройства — в списке, Revoke
+     работает; строка рейла «davloom is off».
+   - **Решение владельца (19.10):** дерево «What the client sees» —
+     **не на странице**, а листом `s-davloom-9` (`/app/settings/davloom/tree`)
+     по кнопке **What the client sees** рядом с Copy у адреса; Close.
+     Из библиотеки ушёл `MainTree`.
+   - **Строка устройства:** «… collections · Change» прижата к правому
+     краю ячейки (`tc-push`), за ней сегмент прав.
+   - Остаток п. 5: новое задание; восстановление; депонирование с историей.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
