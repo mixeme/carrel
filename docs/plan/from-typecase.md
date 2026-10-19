@@ -2997,6 +2997,42 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      поля (`formaction="/app/settings/account/email/confirm"`); поле
      Address там, где за ним две кнопки, — `tc-field--xl` (420 px).
 
+Записка 91 от 19.10.2026 (Typecase `af0533b`; задача 207 и решение
+владельца). По порядку обмена `4cd37cf`: записка одна, копию макета
+переносит переход клиента. **Последний коммит Typecase, который она
+описывает, — `af0533b`** (481 кадр).
+
+91. **Внешний запуск — лист поверх списка заданий, пароль — строкой.**
+   - **Решение владельца (19.10):** команды и сценарии для внешних программ
+     — не в правке задания. Лист **External trigger** со своим адресом
+     (`/app/settings/backup/trigger?job=…`) поверх списка заданий, пункт
+     «External trigger» (ссылка) в меню «⋯» строки задания (`s-backup-1`).
+     Карточки строки на странице задания (`s-backup-2`) больше нет; в «Also
+     started by» — «Your own clock — cron, GoSentry, a job in Gitea, curl:
+     External trigger in the job’s menu».
+   - **Выключен** (`s-backup-14`): красным — цена включения (S-24.4,
+     `ClockHint`), в подвале Turn on (`?op=on`) и Cancel.
+   - **Включён** (`s-backup-12`): карточка **Password** — строкой, как
+     сессия: `cbk_…lamp` · «issued 2 August · last run 16 August 03:10
+     from 10.0.0.5 · 14 runs», справа **New password** (`?op=new`) и
+     **Revoke** (`?op=revoke`, `is-danger`: пароль перестаёт действовать,
+     запуск выключается). Ниже карточка **The line to paste** с `local`,
+     вкладки — ссылки `?tab=`, строка с **паролем скрытым** (`cbk_••••`),
+     под ней — что пароль показан один раз и New password покажет строку
+     целиком. Подвал — Close.
+   - **Выдан** (`s-backup-13`, после Turn on или New password): пароль
+     целиком в поле с Copy и «visible only now», строка целиком, Copy the
+     line; «Every use is logged, naming this password. The old one stopped
+     working when this one was issued.»
+   - **Аудит:** история копий (`s-backup-1`) в колонке Trigger — «external»
+     и второй строкой пароль и адрес («cbk_…lamp · 10.0.0.5»); **отказ** —
+     своей строкой: Verified «refused: not this job’s password» красным,
+     пароль, которым пытались, и адрес, без Restore и Download.
+   - Фрагменты листа: `s-backup-3` (скрипт задания, которое и пишет, и
+     скачивает), `-4` GoSentry, `-5` пароль сам по себе, `-10` Gitea, `-11`
+     curl. В их рядах кнопок New password и Turn off нет — они в строке
+     пароля. **Run now** из шапки `s-backup-3` снята (п. 2).
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
