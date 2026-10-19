@@ -3260,6 +3260,40 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
    - Кадры: `s-backup-15`, `-16` — `data-tc-ranges="/app/settings/backup/restore?op=ranges"`.
    - Тест библиотеки: `TestFileRanges` (куски «0-4», «10-6» из 22 байт).
 
+Записка 99 от 19.10.2026 (Typecase `4bd0a26`; задача 193 п. 5, остаток).
+По порядку обмена `4cd37cf`: записка одна, копию макета переносит переход
+клиента. **Последний коммит Typecase, который она описывает, — `4bd0a26`**
+(497 кадров). **193 п. 5 закрыт.**
+
+99. **Восстановление с сервера и отчёт, новое задание, депонирование с
+    историей.**
+   - **«From a server»** (`s-backup-17`, `/app/settings/backup/restore?from=server`,
+     `data-part="server"`): карточка «From a server» — **Collection**
+     (`store`: nextcloud · Files, sftpgo · vps · Documents) и **Archive in
+     it** (`path`, моноширинно, широкое поле) с **Browse** (`formaction`
+     `…?from=server&op=browse`); пароль архива, Open the manifest.
+   - **Шаг «3 · Report»** (`s-backup-18`, `/app/settings/backup/restore/report`):
+     заголовок «Restored from 2026-08-14», подзаголовок «3 collections · 143
+     records created · 2 with a new UID · 1 not restored»; таблица — строка
+     на коллекцию: In the archive (метка), Restored into, Created (число),
+     What happened («4 missing records created», «no differences»
+     приглушённо, «2 with a new UID · **1 not restored: the server refused
+     it (413, too large)**» — отказ красным); под таблицей «Nothing on the
+     server was deleted or overwritten.»; в шапке **Done** — ссылка на
+     `/app/settings/backup`.
+   - **Новое задание** (`s-backup-19`, `/app/settings/backup/new`,
+     `action="/app/settings/backup?op=create"`): та же форма, заголовок
+     «New job», подзаголовок «Nothing is copied until it is created»; Name
+     пустое, `required`; ни одной отметки источников («nothing chosen»,
+     «0 of N»); назначение, срок хранения, шифрование — по умолчанию;
+     пароль архива пустой и `required`; **Create** вместо Save; **Delete
+     job нет**.
+   - **Депонирование после восстановления** (`account-16`,
+     `/app/settings/escrow`, `data-part="history"`): под «Deposited» —
+     строка на каждое восстановление: «**Recovered** · `2026-07-11 14:02` ·
+     olga, administrator: the password was reset» (`dt` Recovered, `dd` —
+     время моноширинно и кто, что). Отдельной таблицы истории нет.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
