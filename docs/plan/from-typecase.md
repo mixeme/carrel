@@ -3033,6 +3033,37 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      curl. В их рядах кнопок New password и Turn off нет — они в строке
      пароля. **Run now** из шапки `s-backup-3` снята (п. 2).
 
+Записка 92 от 19.10.2026 (Typecase `ea2851a`; задача 193 п. 5, первая
+часть). По порядку обмена `4cd37cf`: записка одна, копию макета переносит
+переход клиента. **Последний коммит Typecase, который она описывает, —
+`ea2851a`** (484 кадра).
+
+92. **Подключения: состояния без кадров.**
+   - **Отказ логина** (`s-profile-24`, `/app/settings/connections/new`,
+     `data-part="refused"`): тот же диалог с набранным; над полями —
+     «**Could not connect.** The server refused the login and password.
+     Nothing was saved.» (`is-alert`) и след обнаружения (`tc-diag`, шаг ·
+     ok/bad · запрос → ответ); поле Password пустое, `is-error`.
+   - **Ни одного подключения** (`s-profile-25`, `data-part="empty"`):
+     «**Nothing is connected yet.**» (`tc-empty`), подзаголовок «Signed in
+     as mix», в шапке Connect account и Subscribe to a feed; в рейле нет
+     счёта ни у Connections, ни у davloom, Backup, Published links, и нет
+     строк состояния в подвале рейла.
+   - **Disconnect** — лист со своим адресом (`s-profile-26`,
+     `/app/settings/connections/disconnect?account=…`, POST с `csrf`):
+     заголовок «Disconnect» и «nextcloud · cloud.example.org»; красным
+     «Nothing is deleted on cloud.example.org. Carrel removes:», под ним
+     **числами, без имён** (владелец, 19.10): «10 collections», «1
+     published link», «1 source of a backup job», «1 davloom device’s sync
+     of them»; Disconnect (`ButtonDangerSolid`), Cancel — ссылка.
+   - **`s-profile-2`:** имена полей — `server`, `login`, `password` (поле
+     пароля), `certFingerprint`, скрытое `csrf`; Cancel — ссылка на
+     `/app/settings/connections`.
+   - Остаток п. 5 (папка вложений не выбрана или недоступна, новое
+     устройство при закрытой выдаче, davloom без устройств и выключенный,
+     новое задание, восстановление, депонирование с историей) — следующими
+     партиями.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
