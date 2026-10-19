@@ -3139,6 +3139,42 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
    - **211 п. 6:** коды Android (`s-plan-2`) — `<img class="tc-card__qr-img"
      src="data:image/png;base64,…">` (`CardQR.Src`).
 
+Записка 95 от 19.10.2026 (Typecase `d42b0ef`; задача 212). По порядку
+обмена `4cd37cf`: записка одна, копию макета переносит переход клиента.
+**Последний коммит Typecase, который она описывает, — `d42b0ef`** (487
+кадров).
+
+95. **Фрагменты листа внешнего запуска — как лист; When — только
+    настроенное.**
+   - **п. 1:** вкладки во фрагментах (`s-backup-3`, `-4`, `-10`, `-11`) —
+     ссылки листа: `/app/settings/backup/trigger?job=personal&tab=…`.
+   - **п. 2:** `s-backup-5` — **«What it opens»** без пароля: пароль стоит
+     только в карточке Password листа (`-13`). Карточка — под карточкой
+     строки, у включённого и у выданного; три адреса, тревога «The
+     password downloads the archive too: with **Encrypt the archive** off,
+     that is your data in the clear.», внизу «Every use is logged, naming
+     the password.». Сервер шлёт `Endpoints` — клиент рисует их этой
+     карточкой.
+   - **п. 3 — да, так:** рубрика карточки — по открытой вкладке («The
+     script to paste», «The fields to paste», «The workflow to paste»,
+     «The request to send»; в листе на crontab — «The line to paste»), с
+     бейджем `local`; «visible only now» — только у Password; карточка —
+     `tc-card--flush`, как в листе. Поля GoSentry (`-4`) — с `aria-label`.
+   - **п. 4:** baikal в «What to copy» (`s-backup-2`) — колонкой «baikal ·
+     0 of 1» с «Общий» (cal., не отмечен), после radicale · vps.
+   - **п. 5 — верна форма:** домашнее задание в списке (`s-backup-1` и под
+     листами `-12`…`-14`) — четыре метки, «4 collections + files»; в
+     истории «4 / 4 + 1 240 files».
+   - **Решение владельца (19.10) — When:** только то, что настроено. Правило
+     входа — словами («on sign-in · if older than 7 days»); выданный пароль
+     внешнего запуска — **бейдж `trigger` в When**; иначе «—». «cron ·
+     03:00» и «external trigger» у рабочего задания, «on demand» у ручного —
+     убраны: расписания внешнего запуска Carrel не знает, Run есть у
+     любого задания.
+   - **Слова (владелец):** под паролем архива — только «Separate from the
+     sign-in password.».
+   - Из библиотеки ушёл `RubricGap13` (`tc-rubric--m13-0-6`).
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
