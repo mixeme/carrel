@@ -43,6 +43,14 @@ const (
 	// the page keeps its card while the link lives (s-plan-1). The state
 	// has only its hash, so the link is here, in memory, or nowhere.
 	DraftProfileLink
+	// DraftDavloomAdd is Add device as it was typed when Create password
+	// asked the person's password first (s-davloom-5): the password's sheet
+	// issues the device from it; its Cancel brings the form back as typed.
+	DraftDavloomAdd
+	// DraftIssuedTrigger is a backup job's external trigger just issued
+	// through the password's sheet (193 p. 3): the job's page shows its
+	// secret once, and clears it.
+	DraftIssuedTrigger
 	numDraftSlots
 )
 

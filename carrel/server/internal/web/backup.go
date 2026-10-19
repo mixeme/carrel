@@ -775,6 +775,13 @@ func (s *Server) getSettingsBackup(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Cache-Control", "no-store")
 	page := s.backupPage(sess, editing, nil)
+	// The trigger the password's sheet just turned on: its line and its
+	// secret, this once (193 p. 3).
+	if editing != nil {
+		if secret, ok := issuedTrigger(sess, editing.ID); ok {
+			page = s.backupPageWith(sess, editing, nil, map[string]string{editing.ID: s.publicOrigin(r)}, map[string]string{editing.ID: secret})
+		}
+	}
 	// The tab of the card the address opens (s-backup-3).
 	if t := q.Get("trigger"); page.Job != nil && page.Job.Trigger != nil && editing != nil {
 		for _, tab := range triggerTabNames {

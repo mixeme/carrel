@@ -328,7 +328,7 @@
     {
       "danger": true,
       "enabled": true,
-      "href": "/app/settings/unlock",
+      "href": "/app/settings/unlock?back=%2Fapp%2Fsettings%2Fdevices%3Ftab%3Dapple\u0026for=profile",
       "id": "device.profile",
       "label": "Generate profile",
       "method": "GET",

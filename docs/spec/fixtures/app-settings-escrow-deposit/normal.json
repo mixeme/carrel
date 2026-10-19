@@ -1,4 +1,5 @@
 {
+  "alert": "",
   "form": {
     "action": "/app/settings/escrow",
     "actions": [
@@ -87,14 +88,14 @@
         {
           "danger": true,
           "enabled": true,
-          "href": "/app/settings/unlock",
+          "href": "/app/settings/unlock?back=%2Fapp%2Fsettings%2Faccount\u0026for=delete",
           "id": "account.delete",
           "label": "Delete account",
           "method": "GET",
           "target": "sheet"
         }
       ],
-      "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it.",
+      "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays.",
       "details": null,
       "email": {
         "badge": {
@@ -473,9 +474,11 @@
     },
     "adminUsers": null,
     "agenda": null,
+    "backup": null,
     "connections": null,
     "contact": null,
     "contacts": null,
+    "davloom": null,
     "devices": null,
     "event": null,
     "eventEdit": null,
@@ -485,6 +488,5 @@
     "taskEdit": null,
     "tasks": null
   },
-  "until": null,
   "warning": "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account."
 }

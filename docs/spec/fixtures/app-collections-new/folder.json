@@ -131,6 +131,7 @@
     "account": null,
     "adminUsers": null,
     "agenda": null,
+    "backup": null,
     "connections": {
       "accounts": [
         {
@@ -2158,6 +2159,7 @@
     },
     "contact": null,
     "contacts": null,
+    "davloom": null,
     "devices": null,
     "event": null,
     "eventEdit": null,

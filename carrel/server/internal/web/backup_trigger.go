@@ -132,7 +132,7 @@ func (s *Server) triggerTick(sess *session.Session, job sealed.BackupJob, issued
 	case s.users.BackupTriggerOn(sess.AccountID(), job.ID) || issued[job.ID] != "":
 		tick.On, tick.Href = true, q("trigger-off")
 	case sess.UnlockUntil(s.now()) == nil:
-		tick.Method, tick.Href = "GET", s.route("/app/settings/unlock")
+		tick.Method, tick.Href = "GET", s.triggerUnlock(job)
 	}
 	return tick
 }
@@ -173,7 +173,7 @@ func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issue
 	// it is for is said in the note, not as a reason of a working button
 	// (C-6.2).
 	if sess.UnlockUntil(s.now()) == nil {
-		b.Password.Reveal.Method, b.Password.Reveal.Href = "GET", s.route("/app/settings/unlock")
+		b.Password.Reveal.Method, b.Password.Reveal.Href = "GET", s.triggerUnlock(job)
 		b.Note = append(line("Confirm your password first: the trigger hands out this job's reading. "), b.Note...)
 	}
 	if !job.Encrypted {
@@ -212,6 +212,12 @@ func (s *Server) instanceLocal() bool {
 // overlay networks that borrow it — reachable only from inside.
 var sharedAddressSpace = netip.MustParsePrefix("100.64.0.0/10")
 
+// triggerUnlock is the password's sheet over the job's page that turns its
+// trigger on (193 p. 3, Typecase's note 86).
+func (s *Server) triggerUnlock(job sealed.BackupJob) string {
+	return s.unlockHref(unlockTrigger, "/app/settings/backup?job="+url.QueryEscape(job.ID), "job", job.ID)
+}
+
 // enableTrigger issues the job's trigger, inside the unlock window only, and
 // shows the page with the command and the secret, once.
 func (s *Server) enableTrigger(w http.ResponseWriter, r *http.Request, sess *session.Session, key [32]byte, job sealed.BackupJob) {
@@ -221,7 +227,7 @@ func (s *Server) enableTrigger(w http.ResponseWriter, r *http.Request, sess *ses
 		s.writePage(w, r, http.StatusOK, s.backupPage(sess, &job, nil, view.Notice{
 			Role: view.NoticeAlert, Title: "Confirm your password first",
 			Body:    "The external trigger lets a job read without you signed in, so it is issued only inside the unlock window.",
-			Actions: []view.Action{{ID: "settings.unlock", Label: "Confirm password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}},
+			Actions: []view.Action{{ID: "settings.unlock", Label: "Confirm password", Href: s.triggerUnlock(job), Method: "GET", Enabled: true}},
 		}))
 		return
 	}

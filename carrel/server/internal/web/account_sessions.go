@@ -65,20 +65,13 @@ func (s *Server) sessionRows(sess *session.Session) []view.SessionRow {
 	return rows
 }
 
-// deleteAction is the danger zone (owner's decision 19.09.2026): outside
-// the unlock window it opens the password sheet; inside it, it deletes.
-// What it deletes is the line beside it, AccountPage.DangerNote (account-1).
+// deleteAction is the danger zone (owner's decision 19.09.2026): the
+// password's sheet, which asks the password as its confirmation and
+// deletes (account-15, Typecase's note 86). What it deletes is the line
+// beside it, AccountPage.DangerNote (account-1).
 func (s *Server) deleteAction(sess *session.Session) view.Action {
-	a := view.Action{ID: "account.delete", Label: "Delete account", Danger: true, Enabled: true}
-	if sess.UnlockUntil(s.now()) == nil {
-		// No ellipsis: that the password is asked first is told by the
-		// unlock state in the top bar, as with Show password (§6 of the
-		// mockup).
-		a.Method, a.Href = "GET", s.route("/app/settings/unlock")
-		return a
-	}
-	a.Method, a.Href = "POST", s.postQuery("/app/settings/account", url.Values{"op": {"delete"}})
-	return a
+	return view.Action{ID: "account.delete", Label: "Delete account", Danger: true, Enabled: true, Method: "GET",
+		Href: s.unlockHref(unlockDelete, "/app/settings/account")}
 }
 
 // postAccountSessions ends one session or every other; true when the op was

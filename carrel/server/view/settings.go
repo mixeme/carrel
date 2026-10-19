@@ -233,14 +233,21 @@ type PasswordPage struct {
 }
 
 type UnlockSheet struct {
-	Purpose Text `json:"purpose"` // ради чего спрашивают пароль; у пароля подключения — заголовок «Show password» (s-profile-3)
-	// Subject — справа приглушённо: чей пароль просят, «nextcloud»
-	// (s-profile-3, Нс18) — чтобы «Show password» двух карточек подряд не
-	// спутать; пусто — выдача вообще
-	Subject Text  `json:"subject"`
-	Warning Text  `json:"warning"`
-	Form    Form  `json:"form"`
-	Until   *When `json:"until"` // до какого времени будет открыто
+	// Purpose — заголовок: ради чего спрашивают пароль — «Show password»
+	// (s-profile-3), «Generate profile» (s-plan-3), «Add device»
+	// (s-davloom-5), «Delete account» (account-15), «External trigger»
+	// (193 п. 3); главная кнопка формы — само действие (записка 86)
+	Purpose Text `json:"purpose"`
+	// Subject — справа приглушённо: чьё — «nextcloud» (s-profile-3, Нс18),
+	// имя устройства, задание копии; пусто — ничьё (s-plan-3)
+	Subject Text `json:"subject"`
+	// Warning — строка под полем: «Unlocks stored credentials for five
+	// minutes.»; у удаления пусто — пароль там подтверждение (account-15)
+	Warning Text `json:"warning"`
+	// Alert — что уходит, тревогой до поля: у удаления учётной записи
+	// (account-15); у прочих пусто
+	Alert Text `json:"alert"`
+	Form  Form `json:"form"`
 	// Under — экран под листом, пришедшим страницей (Лс29): откуда открыт (back, иначе Referer) — «Set up a new device» (s-plan-3), Connections (s-profile-3); у депонирования — Account (account-2); nil у фрагмента
 	Under *Under `json:"under"`
 }

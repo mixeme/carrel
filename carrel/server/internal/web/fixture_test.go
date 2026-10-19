@@ -2143,12 +2143,26 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 		{"app-contact-new", book + "/new"},
 		{"app-contact-import", book + "/import"},
 		{"app-quick", "/app/notes/quick"},
-		{"app-settings-unlock", "/app/settings/unlock"},
+		// Generate profile over Set up a new device (s-plan-3).
+		{"app-settings-unlock", "/app/settings/unlock?for=profile&back=%2Fapp%2Fsettings%2Fdevices"},
 	} {
 		t.Run(one.dir, func(t *testing.T) {
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
 		})
 	}
+	// The password's sheet over Add device as typed (s-davloom-5) and before
+	// the account is deleted (account-15): Typecase's note 86.
+	t.Run("app-settings-unlock-davloom", func(t *testing.T) {
+		form := url.Values{"op": {"issue"}, "name": {"Телефон · DAVx5"}, "access": {"write"}, "kind.event": {"on"}, "kind.contact": {"on"}}
+		rec := app.h.do(postForm("/app/settings/davloom", app.sess, form))
+		if rec.Code != http.StatusSeeOther {
+			t.Fatalf("Create password: %d", rec.Code)
+		}
+		app.compare(t, "app-settings-unlock/davloom.json", app.h.do(get(rec.Header().Get("Location"), app.sess)))
+	})
+	t.Run("app-settings-unlock-delete", func(t *testing.T) {
+		app.compare(t, "app-settings-unlock/delete.json", app.h.do(get("/app/settings/unlock?for=delete&back=%2Fapp%2Fsettings%2Faccount", app.sess)))
+	})
 	// Move over the combined book it was opened from, as s-contacts-2 draws
 	// it: the book as its poll answered.
 	t.Run("app-contact-move", func(t *testing.T) {

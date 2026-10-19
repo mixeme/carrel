@@ -1,0 +1,505 @@
+{
+  "alert": "Deletes the account and the saved connections. Data on the DAV servers stays.",
+  "form": {
+    "action": "/app/settings/unlock",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "danger": true,
+        "enabled": true,
+        "id": "unlock.submit",
+        "label": "Delete account",
+        "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "id": "unlock.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "back",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "/app/settings/account"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "for",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "delete"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "focus": true,
+            "hint": "",
+            "kind": "password",
+            "label": "Your Carrel password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ],
+    "target": "sheet"
+  },
+  "purpose": "Delete account",
+  "subject": "",
+  "under": {
+    "account": {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/password",
+          "id": "account.password",
+          "label": "Change password",
+          "method": "GET"
+        }
+      ],
+      "danger": [
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/unlock?back=%2Fapp%2Fsettings%2Faccount\u0026for=delete",
+          "id": "account.delete",
+          "label": "Delete account",
+          "method": "GET",
+          "target": "sheet"
+        }
+      ],
+      "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays.",
+      "details": null,
+      "email": {
+        "badge": {
+          "label": "pending: new@example.org",
+          "role": "neutral"
+        },
+        "confirmedAt": "14 February",
+        "message": null,
+        "pending": "new@example.org",
+        "sentAt": "11:42",
+        "sentTo": "new@example.org",
+        "state": "pending"
+      },
+      "escrow": {
+        "actionNote": "",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/app/settings/escrow/deposit",
+            "id": "escrow.deposit",
+            "label": "Deposit my key",
+            "method": "GET",
+            "target": "sheet"
+          }
+        ],
+        "active": true,
+        "badge": null,
+        "by": "",
+        "covered": false,
+        "deposited": "",
+        "lastRecovery": "",
+        "note": "No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at."
+      },
+      "look": {
+        "compact": false,
+        "panel": true,
+        "source": true,
+        "theme": "auto",
+        "wide": false
+      },
+      "notices": [],
+      "passwordNote": "Changing your password re-wraps your data key only; saved connections stay readable.",
+      "print": {
+        "range": "",
+        "taken": "",
+        "title": ""
+      },
+      "profile": {
+        "action": "/app/settings/account",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "Name",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": {
+                  "csrf": "csrf",
+                  "enabled": true,
+                  "href": "/app/settings/account?op=name",
+                  "id": "account.name.save",
+                  "label": "Save",
+                  "method": "POST"
+                },
+                "hint": "Shown as the sender and used as the signature in letters you send. Blank means your login.",
+                "kind": "text",
+                "label": "Display name",
+                "name": "name",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "Михаил Енученко"
+              }
+            ],
+            "unfold": null
+          },
+          {
+            "legend": "Email",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": {
+                  "csrf": "csrf",
+                  "enabled": true,
+                  "href": "/app/settings/account?op=email",
+                  "id": "account.email.change",
+                  "label": "Change",
+                  "method": "POST"
+                },
+                "hint": "Used for service notices, and as Reply-To on letters you send.",
+                "kind": "email",
+                "label": "Address",
+                "name": "email",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "mix@example.org"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "rail": {
+        "about": {
+          "build": "0.0.1 · 786949a",
+          "enabled": true,
+          "href": "/about",
+          "id": "about",
+          "label": "Carrel",
+          "method": "GET"
+        },
+        "davloom": "davloom · running · 0 devices",
+        "foot": [],
+        "nav": [
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/contacts",
+            "icon": "i-back",
+            "id": "settings.back",
+            "label": "Back to app",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-user",
+            "id": "settings.account",
+            "label": "Account",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "count": 4,
+            "enabled": true,
+            "href": "/app/settings/connections",
+            "icon": "i-server",
+            "id": "settings.connections",
+            "label": "Connections",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/attachments",
+            "icon": "i-file",
+            "id": "settings.attachments",
+            "label": "Attachments",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/devices",
+            "icon": "i-device",
+            "id": "settings.devices",
+            "label": "New device",
+            "method": "GET"
+          },
+          {
+            "count": 0,
+            "enabled": true,
+            "href": "/app/settings/davloom",
+            "id": "settings.davloom",
+            "label": "davloom",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/backup",
+            "icon": "i-archive",
+            "id": "settings.backup",
+            "label": "Backup",
+            "method": "GET"
+          },
+          {
+            "count": 2,
+            "enabled": true,
+            "href": "/app/files/published",
+            "icon": "i-link",
+            "id": "settings.published",
+            "label": "Published links",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/appearance",
+            "icon": "i-theme",
+            "id": "settings.appearance",
+            "label": "Appearance",
+            "method": "GET"
+          }
+        ],
+        "neighbours": [],
+        "note": "",
+        "sections": [],
+        "shortcuts": [],
+        "status": [
+          {
+            "line": [
+              {
+                "text": "No device has connected since the start."
+              }
+            ],
+            "title": "davloom · running · 0 devices",
+            "tone": "on"
+          }
+        ],
+        "tags": [],
+        "ticks": null
+      },
+      "sessions": [
+        {
+          "address": "",
+          "agent": "",
+          "current": true,
+          "end": {
+            "csrf": "csrf",
+            "enabled": false,
+            "id": "account.session.end",
+            "label": "End",
+            "method": "POST",
+            "reason": "This is the session you are in: sign out to end it."
+          },
+          "lastSeen": "just now",
+          "started": "2026-08-10 17:04"
+        }
+      ],
+      "subtitle": "mix · created 11 February 2026",
+      "title": "Account",
+      "top": {
+        "lock": null,
+        "new": {
+          "arrow": [
+            {
+              "enabled": true,
+              "href": "/app/notes/quick",
+              "icon": "i-quill",
+              "id": "new.notes",
+              "label": "Note",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/quick",
+              "icon": "i-con",
+              "id": "new.contacts",
+              "label": "Contact",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/quick",
+              "icon": "i-cal",
+              "id": "new.calendar",
+              "label": "Event",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/tasks/quick",
+              "icon": "i-task",
+              "id": "new.tasks",
+              "label": "Task",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/picker?for=upload",
+              "icon": "i-upload",
+              "id": "new.upload",
+              "label": "Upload file",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/mail/compose",
+              "icon": "i-mail",
+              "id": "new.letter",
+              "label": "Letter",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "New note",
+          "method": "GET",
+          "primary": true,
+          "target": "sheet"
+        },
+        "refresh": {
+          "action": {
+            "enabled": false,
+            "id": "",
+            "label": "",
+            "method": ""
+          },
+          "answered": "",
+          "running": false
+        },
+        "search": {
+          "action": "/app/search",
+          "history": [],
+          "jump": [],
+          "name": "q",
+          "query": "",
+          "whole": null
+        },
+        "signed": {
+          "instance": "carrel.example",
+          "local": true,
+          "login": "mix"
+        },
+        "unlocked": null,
+        "user": [
+          {
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-gear",
+            "id": "user.settings",
+            "label": "Settings",
+            "method": "GET"
+          },
+          {
+            "enabled": true,
+            "href": "/admin/",
+            "icon": "i-adm",
+            "id": "user.admin",
+            "label": "Administration",
+            "method": "GET"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/logout",
+            "id": "user.logout",
+            "label": "Sign out",
+            "method": "POST",
+            "separator": true
+          }
+        ],
+        "userHref": "/app/settings/account"
+      }
+    },
+    "adminUsers": null,
+    "agenda": null,
+    "backup": null,
+    "connections": null,
+    "contact": null,
+    "contacts": null,
+    "davloom": null,
+    "devices": null,
+    "event": null,
+    "eventEdit": null,
+    "note": null,
+    "notes": null,
+    "task": null,
+    "taskEdit": null,
+    "tasks": null
+  },
+  "warning": ""
+}

@@ -1,14 +1,12 @@
 package web
 
 import (
-	"errors"
 	"net/http"
 	"net/netip"
 	"net/url"
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
@@ -108,26 +106,13 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 		}
 	case "issue":
 		if sess.UnlockUntil(s.now()) == nil {
-			// The person's own password first (S-10.7), asked in the same
-			// dialog, what was typed kept (Нс73): before, Create password
-			// was a link to the password's sheet and the dialog came back
-			// empty.
-			password := r.FormValue("password")
-			if password == "" {
-				s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, nil, askPassword("Confirm your Carrel password: a password that opens your data is handed out only after yours."), ""))
-				return
-			}
-			start := time.Now()
-			if !s.limit.allowLogin(sess.Login(), s.clientIP(r), start) {
-				s.writePage(w, r, http.StatusTooManyRequests, s.davloomPage(r, sess, nil, askPassword(tooManyAttempts), ""))
-				return
-			}
-			if !s.users.Unlock(r.Context(), sess.AccountID(), password) {
-				constantTimeDelay(start, 300*time.Millisecond)
-				s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, nil, askPassword("Password is wrong."), ""))
-				return
-			}
-			sess.SetUnlockUntil(s.now().Add(s.cfg.UnlockTTL))
+			// The person's own password first (S-10.7): the password's
+			// sheet over the form, what was typed held (s-davloom-5,
+			// Typecase's note 86); the sheet creates the password.
+			_ = r.ParseForm()
+			holdDevice(sess, r.PostForm)
+			http.Redirect(w, r, s.unlockHref(unlockDavloom, "/app/settings/davloom?add=1&held=1"), http.StatusSeeOther)
+			return
 		}
 		name := r.FormValue("name")
 		id, password, err := s.users.IssueDevice(r.Context(), sess.AccountID(), key, name, scopeFromForm(r))
@@ -150,18 +135,28 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/app/settings/davloom")
 }
 
+// accountDeleteNote is what deleting the account takes and what it leaves,
+// beside Delete account and in its sheet (account-1, -15; the owner,
+// 19.10.2026: «Carrel never touches it» was not true).
+const accountDeleteNote = "Deletes the account and the saved connections. Data on the DAV servers stays."
+
 // scopeFromForm reads the ticked kinds (kind.{kind}) and collections
 // (col.{account}|{path}).
 func scopeFromForm(r *http.Request) user.DeviceScope {
 	_ = r.ParseForm()
-	sc := user.DeviceScope{ReadOnly: r.PostForm.Get("access") == "read"}
+	return deviceScopeOf(r.PostForm)
+}
+
+// deviceScopeOf is the scope of the values of Add device, as sent or as held.
+func deviceScopeOf(form url.Values) user.DeviceScope {
+	sc := user.DeviceScope{ReadOnly: form.Get("access") == "read"}
 	on := func(v string) bool { return v == "on" || v == "true" }
 	for _, k := range deviceKinds {
-		if on(r.PostForm.Get("kind." + string(k.kind))) {
+		if on(form.Get("kind." + string(k.kind))) {
 			sc.Kinds = append(sc.Kinds, k.kind)
 		}
 	}
-	for name, vals := range r.PostForm {
+	for name, vals := range form {
 		rest, ok := strings.CutPrefix(name, "col.")
 		if !ok || len(vals) == 0 || !on(vals[0]) {
 			continue
@@ -290,12 +285,6 @@ func clientTree(blob sealed.Blob) []view.ProxyTreeRow {
 	return out
 }
 
-// askPassword is the dialog's own question for the person's password before
-// a device's password is handed out (S-10.7, Нс73): its words.
-type askPassword string
-
-func (a askPassword) Error() string { return string(a) }
-
 // issuedDialog is the password just issued (s-davloom-3, Нс49), shown this
 // once: the device by its name, what it was given, the password with Copy
 // and that it is not shown again, the address and the login to type, Done.
@@ -341,10 +330,19 @@ func (s *Server) deviceDialog(r *http.Request, sess *session.Session, blob seale
 			cols[c.AccountID+"|"+c.Path] = true
 		}
 	}
-	posted := r.Method == http.MethodPost && formErr != nil
+	// What was typed: sent back with a refusal, or held while the
+	// password's sheet was asked and brought back by its Cancel
+	// (s-davloom-5).
+	var typed url.Values
+	if r.Method == http.MethodPost && formErr != nil {
+		typed = r.PostForm
+	} else if held, ok := heldDevice(sess); ok && r.URL.Query().Get("held") != "" && edited == nil {
+		typed = held
+	}
+	posted := typed != nil
 	on := func(name string, def bool) view.Text {
 		if posted {
-			v := r.PostForm.Get(name)
+			v := typed.Get(name)
 			return text(boolStr(v == "on" || v == "true"))
 		}
 		return text(boolStr(def))
@@ -358,13 +356,13 @@ func (s *Server) deviceDialog(r *http.Request, sess *session.Session, blob seale
 		dialog.Warning = "The password is shown once and stored nowhere. Lose it and you create a new one and revoke this — it cannot be recovered."
 		name := ""
 		if posted {
-			name = r.PostForm.Get("name")
+			name = typed.Get("name")
 		}
 		head = append(head, view.FormRow{Name: "op", Kind: view.InputHidden, Value: "issue"},
 			view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(name), Required: true,
 				Hint: "For you: this is how you will know what you are revoking later."})
 		access := "write"
-		if posted && r.PostForm.Get("access") == "read" {
+		if posted && typed.Get("access") == "read" {
 			access = "read"
 		}
 		head = append(head, view.FormRow{Name: "access", Label: "What this device may do", Kind: view.InputRadio, Value: text(access),
@@ -401,13 +399,7 @@ func (s *Server) deviceDialog(r *http.Request, sess *session.Session, blob seale
 		}
 	}
 	form := view.Form{Action: s.route("/app/settings/davloom"), Method: "POST"}
-	var ask askPassword
 	switch {
-	case errors.As(formErr, &ask):
-		// The dialog again with what was typed, and the person's password
-		// asked under it (Нс73).
-		head = append(head, view.FormRow{Name: "password", Label: "Your Carrel password", Kind: view.InputPassword, Required: true, Error: text(string(ask))})
-		form.Errors = []view.FieldError{{Name: "password", Message: text(string(ask))}}
 	case formErr != nil && len(collections) > 0:
 		collections[len(collections)-1].Error = text(formErr.Error())
 		form.Errors = []view.FieldError{{Name: "scope", Message: text(formErr.Error())}}

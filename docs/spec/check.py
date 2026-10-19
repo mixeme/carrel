@@ -132,7 +132,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
-          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off"}
+          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -325,6 +325,10 @@ STATE_FRAME = {
     # над списком.
     "app-settings-davloom/add": "s-davloom-2",
     "app-settings-davloom/issued": "s-davloom-3",
+    # Лист пароля — один на всякую выдачу (записка Typecase 86): поверх
+    # формы добавления устройства с набранным и удаление учётной записи.
+    "app-settings-unlock/davloom": "s-davloom-5",
+    "app-settings-unlock/delete": "account-15",
     # Состояния экрана расхождения (записка Typecase 77): чья правка не
     # известна, удалено на сервере, комбинация не пишется, сервер отказал в
     # записи, источник недоступен, заметка ещё не перенесена — части

@@ -12,14 +12,14 @@
     {
       "danger": true,
       "enabled": true,
-      "href": "/app/settings/unlock",
+      "href": "/app/settings/unlock?back=%2Fapp%2Fsettings%2Faccount\u0026for=delete",
       "id": "account.delete",
       "label": "Delete account",
       "method": "GET",
       "target": "sheet"
     }
   ],
-  "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it.",
+  "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays.",
   "details": null,
   "email": {
     "badge": null,

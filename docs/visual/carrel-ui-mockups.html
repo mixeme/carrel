@@ -12642,7 +12642,7 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-field"><button class="tc-btn" type="button">Deposit my key</button></div>
         </div>
       </div>
-      <div class="tc-danger"><button class="tc-btn is-danger-solid" type="button">Delete account</button>Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it.</div>
+      <div class="tc-danger"><button class="tc-btn is-danger-solid" type="button">Delete account</button>Deletes the account and the saved connections. Data on the DAV servers stays.</div>
     </div></div>
   </div>
 </div>
@@ -14040,17 +14040,13 @@ dav: HTTP 503: the server is busy</div>
           </div>
         </div></div>
         <div class="tc-scrim tc-scrim--padt26">
-          <form class="tc-sheet tc-sheet--w400" action="/app/settings/connections/nextcloud/password" method="post">
-            <div class="tc-sheet__head">
-              <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-shield"/></svg>
-              <b class="tc-sheet__title">Show password</b>
-              <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud</span>
-            </div>
+          <form class="tc-sheet tc-sheet--w400" action="/app/settings/unlock" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="back" value="/app/settings/connections"><input type="hidden" name="for" value="nextcloud">
+            <div class="tc-sheet__head"><b class="tc-sheet__title">Show password</b><span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud</span></div>
             <div class="tc-sheet__body">
-              <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in is-focus" type="text" name="your.carrel.password" value="••••••••••" aria-label="Your Carrel password"></div>
-              <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Unlocks credentials everywhere for five minutes: passwords, device profiles, key escrow — anything handed out or handed over.</span>
+              <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in is-focus" type="password" name="password" aria-label="Your Carrel password" required></div>
+              <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Unlocks stored credentials for five minutes.</span>
             </div>
-            <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Show</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
+            <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Show</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
           </form>
         </div>
       </div>
@@ -15360,19 +15356,202 @@ dav: HTTP 503: the server is busy</div>
           </div>
         </div>
         <div class="tc-scrim tc-scrim--padt26">
-          <form class="tc-sheet tc-sheet--w400" action="/app/settings/devices/password" method="post">
-            <div class="tc-sheet__head"><b class="tc-sheet__title">Show password</b><span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud</span></div>
+          <form class="tc-sheet tc-sheet--w400" action="/app/settings/unlock" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="back" value="/app/settings/devices">
+            <div class="tc-sheet__head"><b class="tc-sheet__title">Generate profile</b></div>
             <div class="tc-sheet__body">
-              <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in is-focus" type="text" name="your.carrel.password" value="••••••••••" aria-label="Your Carrel password"></div>
-              <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Unlocks credentials everywhere for five minutes: passwords, device profiles, anything else handed out.</span>
+              <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in is-focus" type="password" name="password" aria-label="Your Carrel password" required></div>
+              <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Unlocks stored credentials for five minutes.</span>
             </div>
-            <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Show</button><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd tc-push">Esc</kbd></div>
+            <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Generate</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/devices">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
           </form>
         </div>
       </div>
     </div>
   </div>
   <figcaption id="reveal"><b>Одна механика на все места, где учётные данные выходят наружу</b> — «Show password» в подключениях (7.11), пароль на этом экране, сборка профиля Apple: один и тот же лист, одни и те же правила. Спрашивается <b>ваш</b> пароль от Carrel, а не пароль сервера — подтверждается, что за экраном тот же человек, а не тот, кому досталась незаблокированная машина. <b>Часы одни на всё.</b> Подтверждение открывает учётные данные не на этом экране, а везде — в подключениях, на экране нового устройства, при сборке профиля — и держит их открытыми пять минут. Второго таймера нет: показанный пароль не прячется по своему собственному отсчёту, он закрывается вместе с окном или по кнопке <b>Lock now</b>; выход из учётной записи закрывает его тоже. Пока окно открыто, состояние видно значком в шапке раздела — иначе человек не знает, спросят его в следующий раз или нет. Каждый показ и каждая сборка профиля попадают в журнал.<br><br>Разных «режимов доступа» к паролю в интерфейсе нет и не будет: одно правило легче объяснить и невозможно обойти, выбрав экран поудобнее.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-davloom-5" data-screen="/app/settings/unlock" data-part="davloom">
+    <div class="frame-label"><span>davloom · пароль перед выдачей</span><i>дополнительный кадр: davloom · /app/settings/unlock</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-top">
+        <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+        <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+        <div class="tc-top__actions">
+          <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+          <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+        </div>
+      </div>
+      <div class="tc-overlay">
+        <div class="tc-shell__body tc-shell__body--minh340">
+        <div class="tc-shell__rail">
+          <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a></div>
+          <div class="tc-railsec">
+            <div class="tc-rubric">Settings</div>
+            <div class="tc-nav">
+              <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
+              <a class="is-on tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-archive"/></svg>Backup<span class="tc-num">3</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
+              <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
+            </div>
+          </div>
+          <div class="tc-railfoot">
+            <div class="tc-railstatus"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+            <div class="tc-railstatus"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-dim__hint">verified</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
+        </div>
+        <div class="tc-main"><div class="tc-dialog tc-dialog--max520">
+        <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Add device</div><div class="tc-head__sub">An app password for one device, with its own key wrapper</div></div></div>
+        <form class="tc-form tc-form--padl0-padr0" id="device" action="/app/settings/davloom/devices/new" method="post">
+          <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-focus" type="text" name="name" value="Телефон · DAVx5" aria-label="Name">
+            <span class="tc-field__hint">For you: this is how you will know what you are revoking later.</span></div>
+          <div class="tc-field tc-field--w100">
+            <label>What this device may do</label>
+            <span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="what.this.device.may.do" value="read.only">Read only</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="what.this.device.may.do" value="read.and.write" checked>Read and write</label></span>
+            <span class="tc-field__hint">Read only: the device syncs, and whatever it sends back is refused. Changed later in the device’s row, without a new password.</span>
+          </div>
+          <div class="tc-field tc-field--w100">
+            <label>What the device will see <span class="tc-dim">— changed later too, without re-issuing the password</span></label>
+            <div class="tc-stack tc-stack--gap-2 tc-card__top2">
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="calendars" value="1" checked><span class="tc-tickrow__tick"></span>Calendars</label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="address.books" value="1" checked><span class="tc-tickrow__tick"></span>Address books</label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="tasks.vtodo.not.every.client.understands.them" value="1"><span class="tc-tickrow__tick is-off"></span>Tasks <span class="tc-dim">· VTODO — not every client understands them</span></label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="notes.vjournal.a.different.subset.of.clients" value="1"><span class="tc-tickrow__tick is-off"></span>Notes <span class="tc-dim">· VJOURNAL — a different subset of clients</span></label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="webdav.folders.mount.as.a.network.drive" value="1" checked><span class="tc-tickrow__tick"></span>WebDAV folders <span class="tc-dim">· mount as a network drive</span></label>
+            </div>
+          </div>
+          <div class="tc-field tc-field--w100">
+            <label>Collections</label>
+            <div class="tc-stack tc-stack--gap-2 tc-card__top2">
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="nextcloud" value="1" checked><span class="tc-tickrow__tick"></span>nextcloud · Личный</label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="nextcloud" value="1" checked><span class="tc-tickrow__tick"></span>nextcloud · Работа</label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="nextcloud" value="1" checked><span class="tc-tickrow__tick"></span>nextcloud · Контакты</label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="radicale.vps" value="1"><span class="tc-tickrow__tick is-off"></span>radicale · vps · Проекты</label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="radicale.vps" value="1"><span class="tc-tickrow__tick is-off"></span>radicale · vps · Команда</label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="sftpgo.vps.documents" value="1" checked><span class="tc-tickrow__tick"></span>sftpgo · vps · Documents</label>
+            </div>
+          </div>
+        </form>
+        <div class="tc-msg is-alert tc-msg--mr0-ml0">The password is shown once and stored nowhere. Lose it and you create a new one and revoke this — it cannot be recovered.</div>
+        <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit" form="device">Create password</button><button class="tc-btn" type="button">Cancel</button></div>
+      </div></div></div>
+        <div class="tc-scrim tc-scrim--padt26">
+          <form class="tc-sheet tc-sheet--w400" action="/app/settings/unlock" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="back" value="/app/settings/davloom/devices/new">
+            <div class="tc-sheet__head"><b class="tc-sheet__title">Add device</b><span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Телефон · DAVx5</span></div>
+            <div class="tc-sheet__body">
+              <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in is-focus" type="password" name="password" aria-label="Your Carrel password" required></div>
+              <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Unlocks stored credentials for five minutes.</span>
+            </div>
+            <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Create password</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/davloom/devices/new">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Пароль устройства — выдача: лист пароля встаёт поверх формы добавления, набранное в ней держится. После пароля форма уходит, ответ — пароль устройства (s-davloom-3). Тот же лист, что у «Show password» (s-profile-3), со своим заголовком и кнопкой.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="account-15" data-screen="/app/settings/unlock" data-part="delete">
+    <div class="frame-label"><span>Учётная запись · удаление</span><i>дополнительный кадр: delete · /app/settings/unlock</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-top">
+        <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+        <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+        <div class="tc-top__actions">
+          <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+          <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+        </div>
+      </div>
+      <div class="tc-overlay">
+        <div class="tc-shell__body tc-shell__body--minh340">
+    <div class="tc-shell__rail">
+      <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a></div>
+      <div class="tc-railsec">
+        <div class="tc-rubric">Settings</div>
+        <div class="tc-nav">
+          <a class="is-on tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">4</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
+          <a class="tc-nav__item" href="#"><svg class="tc-emblem" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>davloom<span class="tc-num">3</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-archive"/></svg>Backup<span class="tc-num">3</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
+        </div>
+      </div>
+      <div class="tc-railfoot">
+        <div class="tc-railstatus"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+        <div class="tc-railstatus"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-dim__hint">verified</span></span></div>
+        <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+      </div>
+    </div>
+    <div class="tc-main">
+      <div class="tc-head">
+        <div class="tc-head__titles"><div class="tc-head__title">Account</div><div class="tc-head__sub">mix · created 11 February 2026</div></div>
+      </div>
+      <div class="tc-form">
+        <form class="tc-fset tc-fset--lead" action="/app/settings/account/name" method="post">
+          <div class="tc-rubric">Name</div>
+          <div class="tc-field tc-field--lg"><label>Display name</label>
+            <span class="tc-line tc-line--gap-8">
+              <input class="tc-in tc-in--fill" type="text" name="display.name" value="Михаил Енученко" aria-label="Display name"><button class="tc-btn" type="submit">Save</button></span>
+            <span class="tc-field__hint">Shown as the sender and used as the signature in letters you send. Blank means your login.</span></div>
+        </form>
+        <form class="tc-fset" action="/app/settings/account/email" method="post">
+          <div class="tc-rubric">Email</div>
+          <div class="tc-field tc-field--lg"><label>Address</label>
+            <span class="tc-line tc-line--gap-8">
+              <input class="tc-in tc-in--fill" type="text" name="address" value="mix@example.org" aria-label="Address"><button class="tc-btn" type="submit">Change</button></span>
+            <span class="tc-field__hint">Used for service notices, and as <span class="tc-mono">Reply-To</span> on letters you send.</span>
+            <span class="tc-line"><span class="tc-badge">pending: new@example.org</span></span></div>
+        </form>
+        <div class="tc-fset">
+          <div class="tc-rubric">Password</div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint">Changing your password re-wraps your data key only; saved connections stay readable.</span></div>
+          <div class="tc-field"><button class="tc-btn" type="button">Change password</button></div>
+        </div>
+        <div class="tc-fset">
+          <div class="tc-rubric">Sessions <span class="tc-plain">2 active</span></div>
+          <table class="tc-table tc-grow tc-table--mx-20">
+            <thead><tr><th>Where</th><th>Started</th><th class="tc-table__n3">Last seen</th><th class="tc-table__n4 tc-table__col--w120"></th></tr></thead>
+            <tbody>
+              <tr><td>Firefox · Windows <span class="tc-badge">this one</span></td><td class="tc-mono">2026-08-16 09:02</td><td class="tc-mono tc-table__n3">just now</td><td class="tc-table__n4"></td></tr>
+              <tr><td>Carrel desktop · Windows</td><td class="tc-mono">2026-08-14 18:40</td><td class="tc-mono tc-table__n3">2 hours ago</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm is-danger" type="button">End</button></td></tr>
+            </tbody>
+          </table>
+          <div class="tc-field"><button class="tc-btn is-danger" type="button">End every other session</button></div>
+        </div>
+        <div class="tc-fset">
+          <div class="tc-rubric">Key escrow</div>
+          <div class="tc-field tc-grow"><span class="tc-field__hint">No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at.</span></div>
+          <div class="tc-field"><button class="tc-btn" type="button">Deposit my key</button></div>
+        </div>
+      </div>
+      <div class="tc-danger"><button class="tc-btn is-danger-solid" type="button">Delete account</button>Deletes the account and the saved connections. Data on the DAV servers stays.</div>
+    </div></div>
+        <div class="tc-scrim tc-scrim--padt26">
+          <form class="tc-sheet tc-sheet--w400" action="/app/settings/unlock" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="back" value="/app/settings/account">
+            <div class="tc-sheet__head"><svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.6" fill="none" class="tc-ico--danger"><use href="#i-trash"/></svg><b class="tc-sheet__title">Delete account</b></div>
+            <div class="tc-sheet__body">
+              <div class="tc-msg is-alert tc-msg--flush">Deletes the account and the saved connections. Data on the DAV servers stays.</div>
+              <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in is-focus" type="password" name="password" aria-label="Your Carrel password" required></div>
+            </div>
+            <div class="tc-sheet__foot"><button class="tc-btn is-danger-solid" type="submit">Delete account</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/account">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Удаление учётной записи спрашивает пароль, как выдача: один лист, без второго подтверждения. Что уходит — сказано до кнопки.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">

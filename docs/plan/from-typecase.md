@@ -2896,6 +2896,20 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
    - **Слова (владелец, 19.10):** «Carrel never touches it» — неправда,
      убрано и у кнопки Delete account в `account-1`.
 
+   **Взята 19.10.2026** (сервер `v0.2.351`; копия макета `324ee14`): лист один, `for=` — ради чего:
+   подключение или подписка (Show), `profile` (Generate — ссылка профиля
+   выдаётся сразу), `davloom` (Create password — `op=issue` без окна держит
+   набранное в сеансе, `DraftDavloomAdd`, ответ — лист поверх Add device с
+   набранным, `Under.Davloom`; его POST создаёт пароль, Cancel — диалог с
+   набранным, `?add=1&held=1`), `trigger` с `job=` (Turn on — внешний запуск
+   включается, секрет один раз на странице задания, `DraftIssuedTrigger`,
+   `Under.Backup`), `delete` (Delete account — `UnlockSheet.Alert`, опасная
+   кнопка, пароль спрашивается и в окне, без строки о пяти минутах; прежний
+   `?op=delete` у Account снят). Под полем — «Unlocks stored credentials for
+   five minutes.»; `UnlockSheet.Until` снят; пароль в диалоге davloom (Нс73)
+   снят. «Carrel never touches it» убрано. Депонирование (`account-2`) —
+   своим листом, как было.
+
 Записка 87 от 19.10.2026 (Typecase `bb44b48`; задача 206). По порядку
 обмена `4cd37cf`: записка одна, копию макета переносит переход клиента.
 **Последний коммит Typecase, который она описывает, — `bb44b48`** (478

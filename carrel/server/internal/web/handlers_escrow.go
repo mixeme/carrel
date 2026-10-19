@@ -164,9 +164,6 @@ func (s *Server) depositSheet(sess *session.Session, errText view.Text) view.Unl
 		), "escrow.deposit", "Deposit my key",
 			view.Action{ID: "escrow.deposit.cancel", Label: "Cancel", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true}), "password"),
 	}
-	if until := sess.UnlockUntil(s.now()); until != nil {
-		sheet.Until = ptrWhen(s.timeFor(sess).formatWhen(*until, false, s.now()))
-	}
 	return sheet
 }
 

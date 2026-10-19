@@ -73,7 +73,8 @@ func TestProfileNeedsTheUnlockWindow(t *testing.T) {
 	gen := deviceAction(t, p.Actions, "device.profile")
 	// Why it asks is the line above the button (s-plan-3), not a reason
 	// of a button that works (C-6.2).
-	if gen.Method != "GET" || gen.Href != "/app/settings/unlock" || gen.Reason != "" || !strings.HasPrefix(string(p.Note), "Confirm your password first") {
+	if gen.Method != "GET" || !strings.Contains(gen.Href, "/app/settings/unlock?") || !strings.Contains(gen.Href, "for=profile") ||
+		gen.Reason != "" || !strings.HasPrefix(string(p.Note), "Confirm your password first") {
 		t.Errorf("locked generate = %+v, note %q", gen, p.Note)
 	}
 	if p.Warning.Role != view.NoticeAlert || !strings.Contains(string(p.Warning.Title), "passwords") {
@@ -288,7 +289,7 @@ func TestDevicePasswordsOnThePage(t *testing.T) {
 	for _, tab := range []string{"android", "thunderbird", "other"} {
 		p := devicesPage(t, f, tab)
 		a := p.Accounts[0]
-		if a.Password.Shown || a.Password.Value != "" || !strings.HasSuffix(a.Password.Reveal.Href, "/app/settings/unlock") {
+		if a.Password.Shown || a.Password.Value != "" || !strings.Contains(a.Password.Reveal.Href, "/app/settings/unlock?") {
 			t.Errorf("%s, locked: password = %+v", tab, a.Password)
 		}
 		if c := deviceAction(t, a.Actions, "device.password.copy"); c.Enabled {

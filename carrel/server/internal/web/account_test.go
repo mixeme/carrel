@@ -237,19 +237,28 @@ func TestAccountDeletesItself(t *testing.T) {
 	h.invite(adminID, "bob", "bobpass123")
 	bob := h.login("bob", "bobpass123")
 
+	// Delete account is the password's sheet for it (account-15): the
+	// password is the confirmation, asked every time.
 	page := decode[view.AccountPage](t, h.do(get("/app/settings/account", bob)))
-	if len(page.Danger) != 1 || page.Danger[0].Method != "GET" || !strings.HasSuffix(page.Danger[0].Href, "/app/settings/unlock") {
-		t.Fatalf("danger before unlock = %+v", page.Danger)
+	if len(page.Danger) != 1 || page.Danger[0].Method != "GET" || !strings.Contains(page.Danger[0].Href, "/app/settings/unlock?") ||
+		!strings.Contains(page.Danger[0].Href, "for=delete") {
+		t.Fatalf("danger = %+v", page.Danger)
 	}
-	if rec := h.do(postForm("/app/settings/account?op=delete", bob, url.Values{})); rec.Code != 200 {
-		t.Fatalf("delete without the password: %d", rec.Code)
+	sheet := decode[view.UnlockSheet](t, h.do(get("/app/settings/unlock?for=delete&back=/app/settings/account", bob)))
+	if sheet.Purpose != "Delete account" || sheet.Alert == "" || sheet.Warning != "" || !sheet.Form.Actions[0].Danger {
+		t.Fatalf("sheet = %+v", sheet)
+	}
+	del := url.Values{"for": {"delete"}, "back": {"/app/settings/account"}}
+	wrong := del
+	wrong.Set("password", "nope")
+	if rec := h.do(postForm("/app/settings/unlock", bob, wrong)); rec.Code != 200 {
+		t.Fatalf("a wrong password: %d", rec.Code)
 	}
 	if snap := h.st.Snapshot(); snap.UserByLogin("bob") == nil {
 		t.Fatal("deleted without the password")
 	}
-	h.do(fragment(postForm("/app/settings/unlock", bob, url.Values{"password": {"bobpass123"}}), "sheet"))
-	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", bob)))
-	rec := h.do(postForm(actionHref(t, page.Danger, "account.delete"), bob, url.Values{}))
+	del = url.Values{"for": {"delete"}, "back": {"/app/settings/account"}, "password": {"bobpass123"}}
+	rec := h.do(postForm("/app/settings/unlock", bob, del))
 	if rec.Code != 303 || rec.Header().Get("Location") != "/login" {
 		t.Fatalf("delete: %d %s", rec.Code, rec.Header().Get("Location"))
 	}
@@ -257,10 +266,11 @@ func TestAccountDeletesItself(t *testing.T) {
 		t.Error("bob is still there")
 	}
 
+	// The last administrator stays: the sheet again, why at the field.
 	alice := h.login("alice", "password123")
-	h.do(fragment(postForm("/app/settings/unlock", alice, url.Values{"password": {"password123"}}), "sheet"))
-	page = decode[view.AccountPage](t, h.do(postForm("/app/settings/account?op=delete", alice, url.Values{})))
-	if len(page.Notices) != 1 || !strings.Contains(string(page.Notices[0].Body), "last administrator") {
-		t.Errorf("notices = %+v", page.Notices)
+	sheet = decode[view.UnlockSheet](t, h.do(postForm("/app/settings/unlock", alice,
+		url.Values{"for": {"delete"}, "back": {"/app/settings/account"}, "password": {"password123"}})))
+	if e := rowNamed(t, sheet.Form, "password").Error; !strings.Contains(string(e), "last administrator") {
+		t.Errorf("error = %q", e)
 	}
 }

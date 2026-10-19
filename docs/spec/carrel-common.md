@@ -497,10 +497,10 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/settings/attachments` | GET, POST | вход | страница | `AttachmentsPage` |
 | `/app/settings/devices` | GET, POST | вход | страница | `DevicesPage` |
 | `/app/settings/devices/profile` | GET | вход | файл | — |
-| `/app/settings/davloom` | GET, POST | вход | страница | `DavloomPage`; GET `?add=1` — диалог Add device (`DavloomPage.Dialog`, s-davloom-2), `?edit=‹устройство›` — что оно видит; сразу после выдачи — пароль один раз (s-davloom-3). POST `op=issue` (`name`, `access`, `kind.‹род›`, `col.‹account›` с путём коллекции через вертикальную черту, без открытого окна — `password` человека), `op=scope&id=`, `op=access&id=&access=` (`read` или `write`), `op=revoke&id=` |
+| `/app/settings/davloom` | GET, POST | вход | страница | `DavloomPage`; GET `?add=1` — диалог Add device (`DavloomPage.Dialog`, s-davloom-2), `?edit=‹устройство›` — что оно видит; сразу после выдачи — пароль один раз (s-davloom-3). POST `op=issue` (`name`, `access`, `kind.‹род›`, `col.‹account›` с путём коллекции через вертикальную черту; без открытого окна набранное держится в сеансе, ответ — редирект на лист пароля `for=davloom`, s-davloom-5; GET `?add=1&held=1` — диалог с набранным, Cancel листа), `op=scope&id=`, `op=access&id=&access=` (`read` или `write`), `op=revoke&id=` |
 | `/app/settings/backup` | GET, POST | вход | страница | `BackupPage`; POST `?op=browse&job=` (ID или `new`) — форма задания как набрана держится в сеансе, ответ — редирект на лист выбора папки (`/app/files/picker?for=backup&job=`); GET `?job=&op=folder&to=` — страница задания с набранным и выбранной папкой, `?job=&held=1` — с набранным, как было (Cancel листа); `?job=&trigger=` — вкладка карточки строки (s-backup-3) |
 | `/app/settings/appearance` | GET, POST | вход | страница, редирект | `AppearancePage`; POST — форма страницы: Look в куку этого браузера, неделя и часы — в аккаунт; `?op=reset` — забыть столбцы разделов и Look |
-| `/app/settings/unlock` | GET, POST | вход | лист, редирект | `UnlockSheet`; без сценариев — страница (U-8): скрытое `back` — страница, над которой открыт лист (`?back=` или откуда пришли по ссылке, только `/app/` и `/admin/` этого адреса); POST с верным паролем — редирект туда (иначе Connections), с неверным — лист страницей с ошибкой у поля |
+| `/app/settings/unlock` | GET, POST | вход | лист, редирект | `UnlockSheet`; без сценариев — страница (U-8): скрытое `back` — страница, над которой открыт лист (`?back=` или откуда пришли по ссылке, только `/app/` и `/admin/` этого адреса); `for` — ради чего: подключение или подписка (Show password), `profile` (Generate profile — выдаёт ссылку профиля), `davloom` (Add device — создаёт пароль устройства из набранного, `op=issue` без окна держит набранное в сеансе), `trigger` с `job=` (включает внешний запуск, секрет — один раз на странице задания), `delete` (Delete account — пароль подтверждение, спрашивается и в открытом окне; удаляет и ведёт на `/login`); POST с верным паролем — само действие и редирект туда (иначе Connections), с неверным — лист страницей с ошибкой у поля |
 | `/app/settings/lock` | POST | вход | редирект | — ; Lock now (`TopBar.Lock`, s-profile-4, s-plan-1…5): выдача учётных данных этого сеанса закрывается до срока, вход остаётся (S-10.7); ответ — страница, где нажали (`Referer` этого же адреса), иначе Connections |
 
 `unlock` — общий лист подтверждения пароля, открывающий выдачу учётных данных
@@ -1947,6 +1947,8 @@ type Under struct {
     Account    *AccountPage
     Devices    *DevicesPage
     AdminUsers *AdminUsersPage
+    Davloom    *DavloomPage // под листом пароля — Add device с набранным (s-davloom-5)
+    Backup     *BackupPage  // под листом пароля — страница задания, внешний запуск (193 п. 3)
 }
 
 // Вопрос перед записью (записка Typecase 56, s-agenda-22…-24; решение
@@ -2856,12 +2858,16 @@ type PasswordPage struct { // account-3: обычная смена и вынуж
     Back    *Action // «Back to settings»; nil при вынужденной — до смены идти некуда
 }
 
+// Лист пароля — один на всякую выдачу (записка Typecase 86): ради чего —
+// заголовком, чьё — справа, главная кнопка — само действие; POST делает его
+// сразу (выдаёт ссылку профиля, создаёт пароль устройства из набранного,
+// включает внешний запуск, удаляет учётную запись).
 type UnlockSheet struct {
-    Purpose Text  // ради чего спрашивают пароль; у пароля подключения — заголовок «Show password» (s-profile-3)
-    Subject Text  // справа приглушённо — чей пароль: «nextcloud» (s-profile-3; адрес листа — /app/settings/unlock?for=<подключение>); пусто — выдача вообще
-    Warning Text  // строка под полем: «Unlocks credentials everywhere for five minutes: passwords, device profiles, key escrow — anything handed out or handed over.»
-    Form    Form  // Show (основная) и Cancel — назад, откуда открыт
-    Until   *When // до какого времени будет открыто
+    Purpose Text  // заголовок: «Show password» (s-profile-3), «Generate profile» (s-plan-3), «Add device» (s-davloom-5), «Delete account» (account-15), «External trigger» (193 п. 3)
+    Subject Text  // справа приглушённо — чьё: «nextcloud» (s-profile-3; for=<подключение>), имя устройства (s-davloom-5), задание копии; пусто — ничьё
+    Warning Text  // строка под полем: «Unlocks stored credentials for five minutes.»; у удаления пусто
+    Alert   Text  // что уходит, тревогой до поля — у удаления учётной записи (account-15); у прочих пусто
+    Form    Form  // скрытые back, for (и job у внешнего запуска); главная — само действие: Show, Generate, Create password, Turn on, Delete account (опасная); Cancel — назад, откуда открыт
     Under   *Under // экран под листом, пришедшим страницей (Лс29): откуда открыт (back, иначе Referer), иначе Connections — «Set up a new device» (s-plan-3), Connections (s-profile-3); у депонирования — Account (account-2); nil у фрагмента
 }
 

@@ -134,14 +134,16 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 		page.UnlockNote = join("Credentials are unlocked for "+durationWords(s.cfg.UnlockTTL)+" — here and everywhere else they are handed out. Everything shown closes when the time is up or when you press ",
 			strongRun("Lock now"), "; every reveal is written to the audit log.")
 	}
-	unlock := s.route("/app/settings/unlock")
+	here := "/app/settings/devices?tab=" + string(tab)
+	unlock := s.unlockHref(unlockProfile, here)
 	secret := func(conn sealed.Connection) view.SecretField {
 		if unlocked {
 			if password, err := s.users.RevealConnectionPassword(sess.AccountID(), key, conn.ID); err == nil {
 				return view.SecretField{Shown: true, Value: text(password)}
 			}
 		}
-		return view.SecretField{Reveal: view.Action{ID: "device.password", Label: "Show", Href: unlock, Method: "GET", Enabled: true}}
+		// The sheet says whose (s-profile-3).
+		return view.SecretField{Reveal: view.Action{ID: "device.password", Label: "Show", Href: s.unlockHref(conn.ID, here), Method: "GET", Enabled: true}}
 	}
 	copyPassword := func(label string, shown bool) view.Action {
 		a := view.Action{ID: "device.password.copy", Label: text(label), Method: "GET", Enabled: shown}
@@ -314,7 +316,7 @@ func (s *Server) postSettingsDevices(w http.ResponseWriter, r *http.Request) {
 			s.writePage(w, r, http.StatusOK, s.devicesPage(sess, tab, view.Notice{
 				Role: view.NoticeAlert, Title: "Confirm your password first",
 				Body:    "The profile hands out the credentials of every included account, so it is issued only inside the unlock window.",
-				Actions: []view.Action{{ID: "settings.unlock", Label: "Confirm password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}},
+				Actions: []view.Action{{ID: "settings.unlock", Label: "Confirm password", Href: s.unlockHref(unlockProfile, "/app/settings/devices?tab="+string(tab)), Method: "GET", Enabled: true}},
 			}))
 			return
 		}

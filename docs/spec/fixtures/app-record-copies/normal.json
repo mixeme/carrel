@@ -75,6 +75,7 @@
     "account": null,
     "adminUsers": null,
     "agenda": null,
+    "backup": null,
     "connections": null,
     "contact": {
       "actions": [
@@ -551,6 +552,7 @@
       "uid": "e7c2-3b95-6a14"
     },
     "contacts": null,
+    "davloom": null,
     "devices": null,
     "event": null,
     "eventEdit": null,

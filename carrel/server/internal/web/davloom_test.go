@@ -39,44 +39,35 @@ func TestDavloomDevices(t *testing.T) {
 	if page.Dialog == nil || page.Dialog.Title != "Add device" || page.Dialog.Warning == "" {
 		t.Fatalf("the dialog of Add device = %+v", page.Dialog)
 	}
-	// Create password sends the dialog (Нс73; until v0.2.268 it was a link to
-	// the password's sheet, and what was typed was lost): without the
-	// person's password the dialog comes back with what was typed and asks
-	// for it there.
+	// Create password sends the dialog; without the window the answer is
+	// the password's sheet over it, what was typed held (s-davloom-5,
+	// Typecase's note 86), and nothing is made yet.
 	if a := page.Dialog.Form.Actions[0]; a.Method != "POST" || a.Href != "" {
 		t.Fatalf("issue before unlock = %+v", a)
 	}
 	form := url.Values{"op": {"issue"}, "name": {"Телефон · DAVx5"}, "kind.event": {"on"}, "kind.contact": {"on"},
 		"col.a1|" + seedBook: {"on"}}
-	asked := decode[view.DavloomPage](t, h.do(postForm("/app/settings/davloom", alice, form)))
-	if len(h.users.Devices(alice.AccountID())) != 0 {
-		t.Fatal("a device was made without the person's password")
+	rec := h.do(postForm("/app/settings/davloom", alice, form))
+	if rec.Code != 303 || !strings.Contains(rec.Header().Get("Location"), "/app/settings/unlock?") || len(h.users.Devices(alice.AccountID())) != 0 {
+		t.Fatalf("Create password without the window: %d %s, devices %d", rec.Code, rec.Header().Get("Location"), len(h.users.Devices(alice.AccountID())))
 	}
-	if asked.Dialog == nil {
-		t.Fatal("no dialog after Create password without the person's password")
+	sheet := decode[view.UnlockSheet](t, h.do(get(rec.Header().Get("Location"), alice)))
+	if sheet.Purpose != "Add device" || sheet.Subject != "Телефон · DAVx5" || sheet.Form.Actions[0].Label != "Create password" {
+		t.Fatalf("the sheet = %+v", sheet)
 	}
-	af := asked.Dialog.Form
-	if formRow(af, "name") == nil || formRow(af, "name").Value != "Телефон · DAVx5" || formRow(af, "password") == nil ||
-		formRow(af, "password").Error == "" || formRow(af, "kind.note").Value != "" || formRow(af, "kind.event").Value == "" {
-		t.Fatalf("the dialog asked for the password lost what was typed: %+v", af)
+	// Cancel is the dialog as it was typed.
+	held := decode[view.DavloomPage](t, h.do(get(sheet.Form.Actions[1].Href, alice)))
+	if held.Dialog == nil || formRow(held.Dialog.Form, "name").Value != "Телефон · DAVx5" ||
+		formRow(held.Dialog.Form, "kind.note").Value != "" || formRow(held.Dialog.Form, "kind.event").Value == "" {
+		t.Fatalf("Cancel lost what was typed: %+v", held.Dialog)
 	}
-	wrong := url.Values{"password": {"nope"}}
-	for k, v := range form {
-		wrong[k] = v
+	unlock := url.Values{"for": {"davloom"}, "back": {"/app/settings/davloom?add=1&held=1"}, "password": {"nope"}}
+	if rec := h.do(postForm("/app/settings/unlock", alice, unlock)); rec.Code != 200 || len(h.users.Devices(alice.AccountID())) != 0 {
+		t.Fatalf("a wrong password: %d", rec.Code)
 	}
-	if page := decode[view.DavloomPage](t, h.do(postForm("/app/settings/davloom", alice, wrong))); page.Dialog == nil || formRow(page.Dialog.Form, "password") == nil ||
-		formRow(page.Dialog.Form, "password").Error != "Password is wrong." || len(h.users.Devices(alice.AccountID())) != 0 {
-		t.Fatalf("a wrong password: %+v", page.Dialog)
-	}
-
-	h.do(fragment(postForm("/app/settings/unlock", alice, url.Values{"password": {"password123"}}), "sheet"))
-	empty := url.Values{"op": {"issue"}, "name": {"Empty"}, "kind.note": {"on"}, "col.a1|" + seedBook: {"on"}}
-	page = decode[view.DavloomPage](t, h.do(postForm("/app/settings/davloom", alice, empty)))
-	if page.Dialog == nil || len(page.Dialog.Form.Errors) == 0 || len(h.users.Devices(alice.AccountID())) != 0 {
-		t.Fatalf("a scope that meets nothing was taken: %+v", page.Dialog)
-	}
-	if rec := h.do(postForm("/app/settings/davloom", alice, form)); rec.Code != 303 {
-		t.Fatalf("issue: %d %s", rec.Code, rec.Body)
+	unlock.Set("password", "password123")
+	if rec := h.do(postForm("/app/settings/unlock", alice, unlock)); rec.Code != 303 || rec.Header().Get("Location") != "/app/settings/davloom" {
+		t.Fatalf("the sheet's Create password: %d %s", rec.Code, rec.Header().Get("Location"))
 	}
 	page = decode[view.DavloomPage](t, h.do(get("/app/settings/davloom", alice)))
 	if page.Dialog == nil || page.Dialog.Password == nil || page.Dialog.Title != "Телефон · DAVx5" {
@@ -88,6 +79,12 @@ func TestDavloomDevices(t *testing.T) {
 	}
 	if again := decode[view.DavloomPage](t, h.do(get("/app/settings/davloom", alice))); again.Dialog != nil {
 		t.Error("the password was shown twice")
+	}
+	// Inside the window a scope that meets nothing is refused in the dialog.
+	empty := url.Values{"op": {"issue"}, "name": {"Empty"}, "kind.note": {"on"}, "col.a1|" + seedBook: {"on"}}
+	page = decode[view.DavloomPage](t, h.do(postForm("/app/settings/davloom", alice, empty)))
+	if page.Dialog == nil || len(page.Dialog.Form.Errors) == 0 || len(h.users.Devices(alice.AccountID())) != 1 {
+		t.Fatalf("a scope that meets nothing was taken: %+v", page.Dialog)
 	}
 	snap := h.st.Snapshot()
 	for _, e := range snap.Audit {
@@ -111,12 +108,12 @@ func TestDavloomDevices(t *testing.T) {
 		t.Error("changing the sign-in password disconnected the device")
 	}
 
-	sheet := decode[view.CollectionDeleteSheet](t, h.do(get("/app/collections/delete?"+url.Values{"a": {"a1"}, "c": {seedBook}}.Encode(), alice)))
-	if len(sheet.References) != 1 || sheet.References[0].What != "1 device through davloom" {
-		t.Errorf("references = %v", sheet.References)
+	del := decode[view.CollectionDeleteSheet](t, h.do(get("/app/collections/delete?"+url.Values{"a": {"a1"}, "c": {seedBook}}.Encode(), alice)))
+	if len(del.References) != 1 || del.References[0].What != "1 device through davloom" {
+		t.Errorf("references = %v", del.References)
 	}
 
-	rec := h.do(postForm(actionHref(t, page.Devices[0].Actions, "davloom.revoke"), alice, url.Values{}))
+	rec = h.do(postForm(actionHref(t, page.Devices[0].Actions, "davloom.revoke"), alice, url.Values{}))
 	if rec.Code != 303 {
 		t.Fatalf("revoke: %d", rec.Code)
 	}
@@ -187,9 +184,15 @@ func TestDavloomPasswordInTheDialog(t *testing.T) {
 	alice := h.login("alice", "password123")
 	key, _ := alice.DataKey()
 	h.putConnections("alice", key, "a1")
+	// The dialog asks no password of its own any more: the sheet does, and
+	// makes the device from what was typed (s-davloom-5).
 	form := url.Values{"op": {"issue"}, "name": {"Ноутбук"}, "kind.contact": {"on"}, "col.a1|" + seedBook: {"on"}, "password": {"password123"}}
-	if rec := h.do(postForm("/app/settings/davloom", alice, form)); rec.Code != 303 {
-		t.Fatalf("issue with the password: %d %s", rec.Code, rec.Body)
+	if rec := h.do(postForm("/app/settings/davloom", alice, form)); rec.Code != 303 || len(h.users.Devices(alice.AccountID())) != 0 {
+		t.Fatalf("issue with a password in the dialog: %d", rec.Code)
+	}
+	unlock := url.Values{"for": {"davloom"}, "back": {"/app/settings/davloom?add=1&held=1"}, "password": {"password123"}}
+	if rec := h.do(postForm("/app/settings/unlock", alice, unlock)); rec.Code != 303 {
+		t.Fatalf("the sheet: %d %s", rec.Code, rec.Body)
 	}
 	if d := h.users.Devices(alice.AccountID()); len(d) != 1 || d[0].Name != "Ноутбук" {
 		t.Errorf("devices = %+v", d)

@@ -132,6 +132,7 @@
     "account": null,
     "adminUsers": null,
     "agenda": null,
+    "backup": null,
     "connections": null,
     "contact": null,
     "contacts": {
@@ -1708,6 +1709,7 @@
         "userHref": "/app/settings/account"
       }
     },
+    "davloom": null,
     "devices": null,
     "event": null,
     "eventEdit": null,

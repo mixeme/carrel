@@ -375,6 +375,10 @@ type Under struct {
 	Account    *AccountPage    `json:"account"`
 	Devices    *DevicesPage    `json:"devices"`
 	AdminUsers *AdminUsersPage `json:"adminUsers"`
+	// Davloom — Add device с набранным под листом пароля (s-davloom-5),
+	// Backup — страница задания под ним же: внешний запуск (193 п. 3)
+	Davloom *DavloomPage `json:"davloom"`
+	Backup  *BackupPage  `json:"backup"`
 }
 
 type MoveSheet struct {

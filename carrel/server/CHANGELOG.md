@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.351 — 2026-10-19
+
+Typecase's note 86 (`324ee14`): one password sheet for every handing out
+(193 pp. 3, 4).
+
+### Changed
+
+- **The password's sheet says what it is for and does it**: its title is
+  the purpose — Show password, Generate profile, Add device, External
+  trigger, Delete account —, on its right whose, and its main button the
+  act itself. Generate issues the profile's link at once; Create password
+  makes the device's password from Add device as it was typed (the form is
+  held while the sheet asks, and its Cancel brings it back); Turn on issues
+  the backup job's trigger and shows its line once on the job's page.
+- **Delete account** is that sheet: what goes is said before the field, in
+  alarm; the password is the confirmation, asked even inside the window.
+  «Carrel never touches it» is gone from its words.
+- **One line under the field**: «Unlocks stored credentials for five
+  minutes.» The sheet no longer tells until when.
+- **Add device asks no password of its own**: the sheet does.
+
+### For consumers
+
+- `UnlockSheet.Alert`; `UnlockSheet.Until` removed; `Under.Davloom`,
+  `Under.Backup` (C-6). `/app/settings/unlock` takes `for=` — a connection
+  or feed, `profile`, `davloom`, `trigger` with `job=`, `delete` — and does
+  it on the POST; `/app/settings/account?op=delete` is gone; davloom's
+  `op=issue` without the window answers the sheet, `?add=1&held=1` is the
+  dialog as typed (C-5).
+
 ## v0.2.350 — 2026-10-19
 
 Typecase's note 85 (`631f76a`): the backup job's form (193 pp. 1, 2).

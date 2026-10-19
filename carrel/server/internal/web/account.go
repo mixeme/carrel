@@ -90,21 +90,6 @@ func (s *Server) postSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	var flash accountFlash
 	id := sess.AccountID()
 	switch r.FormValue("op") {
-	case "delete":
-		// Only inside the unlock window: the password was asked a moment
-		// ago (S-10.7). The last administrator stays.
-		if sess.UnlockUntil(s.now()) == nil {
-			flash.notice = &view.Notice{Role: view.NoticeAlert, Title: "Confirm your password first",
-				Body: "Deleting the account asks for your password: open Delete account again."}
-			break
-		}
-		if err := s.users.DeleteUser(id, id, sess.Login()); err != nil {
-			flash.notice = &view.Notice{Role: view.NoticeAlert, Title: "The account was not deleted", Body: formError(err)}
-			break
-		}
-		s.clearSessionCookie(w, r)
-		s.redirect(w, r, "/login")
-		return
 	case "confirm":
 		// Send confirmation, Send again (s-mail-9, account-9): a fresh link
 		// for the address waiting. That it went is said by the Email block;
@@ -226,7 +211,7 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 			Href: s.postQuery("/app/settings/account", map[string][]string{"op": {"end-others"}})})
 	}
 	page.Danger = []view.Action{s.deleteAction(sess)}
-	page.DangerNote = "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it."
+	page.DangerNote = accountDeleteNote
 	return page
 }
 

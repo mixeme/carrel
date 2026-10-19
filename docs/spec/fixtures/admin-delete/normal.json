@@ -682,9 +682,11 @@
       }
     },
     "agenda": null,
+    "backup": null,
     "connections": null,
     "contact": null,
     "contacts": null,
+    "davloom": null,
     "devices": null,
     "event": null,
     "eventEdit": null,

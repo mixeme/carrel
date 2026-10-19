@@ -163,42 +163,6 @@ func connectionWarnings(server, certFingerprint string) []view.Notice {
 	return out
 }
 
-// unlockSheet is the password sheet; back is the page it was opened over,
-// where its form goes back to when it is a page of its own (no scripts);
-// forID the connection whose password it was opened for, "" — none.
-func (s *Server) unlockSheet(sess *session.Session, errText view.Text, back, forID string) view.UnlockSheet {
-	cancelTo := back
-	if cancelTo == "" {
-		cancelTo = "/app/settings/connections"
-	}
-	sheet := view.UnlockSheet{
-		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, issue a davloom device password, change key escrow, or delete your account."),
-		// One line under the field, what the window opens and for how long
-		// (s-profile-3, Нс19).
-		Warning: text("Unlocks credentials everywhere for " + durationWords(s.cfg.UnlockTTL) + ": passwords, device profiles, key escrow — anything handed out or handed over."),
-		// The person's own password, not the server's (s-plan-3, s-profile-3);
-		// Show and Cancel (Нс20).
-		Form: focused(withPrimary(s.plainForm("/app/settings/unlock", "POST",
-			csrfField(sess),
-			view.FormRow{Name: "back", Kind: view.InputHidden, Value: text(back)},
-			view.FormRow{Name: "for", Kind: view.InputHidden, Value: text(forID)},
-			view.FormRow{Name: "password", Label: "Your Carrel password", Kind: view.InputPassword, Required: true, Error: errText},
-		), "unlock.submit", "Show",
-			view.Action{ID: "unlock.cancel", Label: "Cancel", Href: s.route(cancelTo), Method: "GET", Enabled: true}), "password"),
-	}
-	// Opened from a connection's Show password, the sheet says whose (s-profile-3, Нс18).
-	if f, ok := s.catalogOf(sess).Subscription(forID); ok && forID != "" {
-		// A feed's password (Нс25): the sheet names the feed.
-		sheet.Purpose, sheet.Subject = "Show password", text(collectionLabel(f.FeedCollection()))
-	} else if conn, ok := s.catalogOf(sess).Connection(forID); ok && forID != "" {
-		sheet.Purpose, sheet.Subject = "Show password", text(connLabel(conn))
-	}
-	if until := sess.UnlockUntil(s.now()); until != nil {
-		sheet.Until = ptrWhen(s.timeFor(sess).formatWhen(*until, false, s.now()))
-	}
-	return sheet
-}
-
 func (s *Server) getSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -211,12 +175,12 @@ func (s *Server) getSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 		back, _ = s.returnPath(r, r.Referer())
 	}
 	if render.WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, "", back, r.FormValue("for")), nil)
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, "", back, r.FormValue("for"), r.URL.Query()), nil)
 		return
 	}
 	// Without scripts a sheet is a page of its own (U-8): "Show password" is
 	// a plain link here, and a 404 behind it left no way to the password.
-	sheet := s.unlockSheet(sess, "", back, r.FormValue("for"))
+	sheet := s.unlockSheet(sess, "", back, r.FormValue("for"), r.URL.Query())
 	// Over the page it was opened from (Лс29: s-plan-3 over «Set up a new
 	// device», s-profile-3 over Connections).
 	sheet.Under = s.underOf(r, back, "/app/settings/connections")
@@ -264,42 +228,4 @@ func (s *Server) postSettingsLock(w http.ResponseWriter, r *http.Request) {
 		back = "/app/settings/connections"
 	}
 	s.redirect(w, r, back)
-}
-
-// postSettingsUnlock is the one confirmation sheet behind every secret
-// release (S-10.7): the person's own password, checked against their login
-// hash, opens the window for CARREL_UNLOCK_TTL in this session only. Wrong
-// answers share the login bucket, so a stolen cookie gets five guesses a
-// minute and every guess costs an Argon2.
-func (s *Server) postSettingsUnlock(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	back, backOK := s.returnPath(r, r.FormValue("back"))
-	start := time.Now()
-	if !s.limit.allowLogin(sess.Login(), s.clientIP(r), start) {
-		s.writePage(w, r, http.StatusTooManyRequests, s.unlockSheet(sess, text(tooManyAttempts), back, r.FormValue("for")))
-		return
-	}
-	if !s.users.Unlock(r.Context(), sess.AccountID(), r.FormValue("password")) {
-		constantTimeDelay(start, 300*time.Millisecond)
-		// Without scripts the sheet is a page of its own (U-8): it comes
-		// back as one, the error at its field.
-		s.writePage(w, r, http.StatusOK, s.unlockSheet(sess, text("Password is wrong."), back, r.FormValue("for")))
-		return
-	}
-	sess.SetUnlockUntil(s.now().Add(s.cfg.UnlockTTL))
-	if !render.WantsFragment(r) {
-		// A plain form goes back to the page the sheet was opened over; it
-		// draws the open window itself.
-		if !backOK {
-			back = "/app/settings/connections"
-		}
-		s.redirect(w, r, back)
-		return
-	}
-	top := s.buildShell(sess, "").Top
-	extra := []render.OOB{{Target: render.TargetTopbar, Body: top}}
-	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, "", back, r.FormValue("for")), extra)
 }
