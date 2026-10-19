@@ -3205,6 +3205,33 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      краю ячейки (`tc-push`), за ней сегмент прав.
    - Остаток п. 5: новое задание; восстановление; депонирование с историей.
 
+Записка 97 от 19.10.2026 (Typecase `7c7f4c3`; задача 213 п. 1). По
+порядку обмена `4cd37cf`: записка одна, копию макета переносит переход
+клиента. **Последний коммит Typecase, который она описывает, — `7c7f4c3`**
+(493 кадра).
+
+97. **Восстановление «From this computer».**
+   - **Решение владельца (19.10) — серверу:** архив, положенный в папку
+     хранилища (WebDAV) для восстановления, **после Restore удаляется**. На
+     кадре это сказано подсказкой у папки: «A larger archive is put here,
+     read from there and deleted after the restore.».
+   - **Шаг** (`s-backup-15`, `/app/settings/backup/restore?from=file`,
+     `data-part="file"`; форма `multipart/form-data` с `csrf`): сегмент
+     «From this computer» выбран; карточка «From this computer» — поле
+     **Archive** (кнопка «Choose a file», `name="file"`, `accept=".zip"`),
+     **Storage for a large archive** (`store`: «None — up to 16 MB» первым,
+     затем nextcloud · Files, sftpgo · vps · Documents), **Folder in it**
+     (`folder`, моноширинно, `/carrel/restore`) с подсказкой выше. Пароль
+     архива и Open the manifest — как у «From a job».
+   - **Отказ** (`s-backup-16`, `data-part="too-large"`): хранилище «None»,
+     архив больше 16 MB — наверху карточки красным «The archive is larger
+     than 16 MB. Choose a folder of your storage for it, or put it there
+     and choose **From a server**.»; поле папки выключено, пока хранилище —
+     «None». Выбранный файл после отказа браузер не держит — имени нет.
+   - **Пароль архива** (`s-backup-7`, `-15`, `-16`): пояснение — подсказкой
+     поля, коротко: «The one set in the job, not your sign-in password.».
+   - п. 2 (куски файла со сценарием) — следующим.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
