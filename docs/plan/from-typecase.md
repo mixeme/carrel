@@ -3407,6 +3407,18 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      then the URL exactly as typed.» (хвост про Baikal снят).
    - Остаток 193: часовой пояс в `appearance-1`.
 
+Записка 104 от 19.10.2026 (Typecase `6570f5f`; задача 193, последний
+пункт). По порядку обмена `4cd37cf`: записка одна, копию макета переносит
+переход клиента. **Последний коммит Typecase, который она описывает, —
+`6570f5f`** (499 кадров). **193 закрыта целиком.**
+
+104. **Часовой пояс в Appearance — текстом.** `appearance-1`: пояс — не
+     поле формы (поле только для чтения уходило с формой), а строка
+     `dl.tc-fields`: «Time zone · `Europe/Moscow` · this instance».
+     Подсказка под блоком: «Week start and the clock are kept in the
+     account: another browser shows the same. The time zone is the
+     instance’s, set by the administrator.»
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
