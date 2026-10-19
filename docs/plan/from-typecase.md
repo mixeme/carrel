@@ -3064,6 +3064,33 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      новое задание, восстановление, депонирование с историей) — следующими
      партиями.
 
+Записка 93 от 19.10.2026 (Typecase `0fd01ac`; задача 193 п. 5, вторая
+часть). По порядку обмена `4cd37cf`: записка одна, копию макета переносит
+переход клиента. **Последний коммит Typecase, который она описывает, —
+`0fd01ac`** (487 кадров).
+
+93. **Вложения и новое устройство: состояния без кадров.** Состояние
+    блока — бейджем в его рубрике (решение владельца 19.10, как у Email).
+   - **Папка не выбрана** (`attachments-5`, `/app/settings/attachments`,
+     `data-part="unset"`): рубрика «Folder» с бейджем `not set`
+     (`is-alert`); Collection — пустой вариант «Choose a collection» первым;
+     «Folder in it» пустое с образцом `/carrel/attachments`; строка
+     «Larger» — «wait for the folder below»; Open in Files выключена с
+     причиной «No folder is chosen yet.»; блока «In this folder now» и
+     строки «Changing the folder moves nothing…» нет.
+   - **Папка недоступна** (`attachments-6`, `data-part="unavailable"`):
+     рубрика «In this folder now» с бейджем `unavailable`; вместо Files и
+     Oldest — только Path и след одной строкой («PROPFIND
+     /dav/Documents/carrel/attachments/ → 401 Unauthorized»); Open in Files
+     выключена с причиной «sftpgo · vps refused the password.».
+   - **Новое устройство при закрытой выдаче** (`s-plan-6`,
+     `/app/settings/devices`, `data-part="locked"`): в подзаголовке нет
+     бейджа срока и Lock now; в карточке Profile — «Asks for your Carrel
+     password first.» и Generate profile (дальше — лист пароля `s-plan-3`);
+     карточки «Link ready» нет.
+   - Остаток п. 5: davloom без устройств, «Change» области, «davloom is
+     off»; новое задание; восстановление; депонирование с историей.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
