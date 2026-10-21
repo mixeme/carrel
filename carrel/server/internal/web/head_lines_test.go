@@ -22,13 +22,15 @@ func headSub(t *testing.T, id string) string {
 }
 
 // Lines under titles in pieces (C-6.2 Runs; plan «Выделенные куски в других
-// фразах сервера»): the destination of a job in bold (s-backup-3), the
-// archive monospaced (s-backup-8), the line of a public file and the day of
+// фразах сервера»): the destination of a job in bold (drawn by s-backup-3
+// until it became a fragment of the trigger's sheet, Typecase's note 91;
+// s-backup-2 draws a job writing to WebDAV), the archive monospaced
+// (s-backup-8), the line of a public file and the day of
 // a public note monospaced (s-publish-8…11), the warning of davloom on a
 // local address (s-davloom-1).
 func TestHeadLinesInPieces(t *testing.T) {
-	if got := headSub(t, "s-backup-3"); !strings.HasPrefix(got, "Job · destination ⟨strong:WebDAV and download⟩ · last copy ") {
-		t.Fatalf("s-backup-3 = %q: read the frame again", got)
+	if got := headSub(t, "s-backup-2"); !strings.HasPrefix(got, "Job · last copy ") {
+		t.Fatalf("s-backup-2 = %q: read the frame again", got)
 	}
 	f := backupFixture(t)
 	both := saveJob(t, f, jobForm(f, sealed.BackupToBoth, "8", "archive-pw"))
@@ -48,7 +50,7 @@ func TestHeadLinesInPieces(t *testing.T) {
 	if got := headSub(t, "s-backup-8"); !regexp.MustCompile(`^Job «.+» · manifest read · \d+ collections · [\d ]+ records · ⟨mono:.+⟩$`).MatchString(got) {
 		t.Fatalf("s-backup-8 = %q: read the frame again", got)
 	}
-	if rec := f.h.do(postForm("/app/settings/backup?op=restore-open", f.sess, url.Values{
+	if rec := f.h.do(postForm("/app/settings/backup/restore", f.sess, url.Values{
 		"source": {"run"}, "run": {plain.ID + "|" + run.ID}, "password": {"archive-pw"},
 	})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("open: %d %s", rec.Code, rec.Body.String())

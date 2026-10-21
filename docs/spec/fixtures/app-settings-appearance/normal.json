@@ -107,6 +107,7 @@
         "unfold": null
       },
       {
+        "hint": "Column sets are remembered per section, in this browser — the button below resets them.",
         "legend": "Lists",
         "rows": [
           {
@@ -152,6 +153,14 @@
         "unfold": null
       },
       {
+        "facts": [
+          {
+            "aside": "this instance",
+            "label": "Time zone",
+            "value": "Europe/Moscow"
+          }
+        ],
+        "hint": "Week start and the clock are kept in the account: another browser shows the same. The time zone is the instance’s, set by the administrator.",
         "legend": "Dates and times",
         "rows": [
           {
@@ -212,33 +221,6 @@
       }
     ]
   },
-  "instance": {
-    "action": "",
-    "actions": [],
-    "errors": [],
-    "method": "",
-    "sets": [
-      {
-        "legend": "",
-        "rows": [
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "This instance",
-            "kind": "text",
-            "label": "Time zone",
-            "name": "timezone",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "Europe/Moscow"
-          }
-        ],
-        "unfold": null
-      }
-    ]
-  },
   "look": {
     "compact": false,
     "panel": true,
@@ -246,11 +228,6 @@
     "theme": "auto",
     "wide": false
   },
-  "notes": [
-    "Column sets are remembered per section, in this browser — the button below resets them.",
-    "Week start and 12/24-hour clock live in the account: time is assembled on the server, so another browser sees the same.",
-    "Time zone is one per instance, set by the administrator."
-  ],
   "notices": [],
   "print": {
     "range": "",
@@ -266,7 +243,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [],
     "nav": [
       {
@@ -315,7 +292,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/davloom",
         "id": "settings.davloom",
@@ -323,7 +300,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/backup",
         "icon": "i-archive",
@@ -359,10 +336,34 @@
       {
         "line": [
           {
-            "text": "No device has connected since the start."
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
           }
         ],
-        "title": "davloom · running · 0 devices",
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
         "tone": "on"
       }
     ],
@@ -377,6 +378,7 @@
     "label": "Reset remembered view settings",
     "method": "POST"
   },
+  "subtitle": "Theme in this browser · week start and clock in the account",
   "title": "Appearance",
   "top": {
     "lock": null,
@@ -451,10 +453,12 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
       "answered": "",
       "running": false

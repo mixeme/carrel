@@ -1,5 +1,6 @@
 {
   "alert": "Deletes the account and the saved connections. Data on the DAV servers stays.",
+  "for": "delete",
   "form": {
     "action": "/app/settings/unlock",
     "actions": [
@@ -111,13 +112,14 @@
       "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays.",
       "details": null,
       "email": {
+        "aside": "new@example.org",
         "badge": {
-          "label": "pending: new@example.org",
+          "label": "pending",
           "role": "neutral"
         },
         "confirmedAt": "14 February",
-        "message": null,
         "pending": "new@example.org",
+        "send": null,
         "sentAt": "11:42",
         "sentTo": "new@example.org",
         "state": "pending"
@@ -202,7 +204,14 @@
             "unfold": null
           },
           {
+            "badges": [
+              {
+                "label": "pending",
+                "role": "neutral"
+              }
+            ],
             "legend": "Email",
+            "legendAside": "new@example.org",
             "rows": [
               {
                 "add": null,
@@ -215,7 +224,19 @@
                   "label": "Change",
                   "method": "POST"
                 },
-                "hint": "Used for service notices, and as Reply-To on letters you send.",
+                "hint": "",
+                "hintRuns": [
+                  {
+                    "text": "Used for service notices, and as "
+                  },
+                  {
+                    "mark": "mono",
+                    "text": "Reply-To"
+                  },
+                  {
+                    "text": " on letters you send."
+                  }
+                ],
                 "kind": "email",
                 "label": "Address",
                 "name": "email",
@@ -288,7 +309,7 @@
             "method": "GET"
           },
           {
-            "count": 0,
+            "count": null,
             "enabled": true,
             "href": "/app/settings/davloom",
             "id": "settings.davloom",
@@ -334,7 +355,7 @@
                 "text": "No device has connected since the start."
               }
             ],
-            "title": "davloom · running · 0 devices",
+            "title": "davloom · running · no devices",
             "tone": "on"
           }
         ],
@@ -352,7 +373,7 @@
             "id": "account.session.end",
             "label": "End",
             "method": "POST",
-            "reason": "This is the session you are in: sign out to end it."
+            "reason": "This is the session you are using: sign out instead."
           },
           "lastSeen": "just now",
           "started": "2026-08-10 17:04"
@@ -433,10 +454,12 @@
         },
         "refresh": {
           "action": {
-            "enabled": false,
-            "id": "",
-            "label": "",
-            "method": ""
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-refresh",
+            "id": "settings.refresh",
+            "label": "Refresh",
+            "method": "GET"
           },
           "answered": "",
           "running": false
@@ -495,8 +518,10 @@
     "devices": null,
     "event": null,
     "eventEdit": null,
+    "files": null,
     "note": null,
     "notes": null,
+    "published": null,
     "task": null,
     "taskEdit": null,
     "tasks": null

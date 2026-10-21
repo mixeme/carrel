@@ -588,7 +588,7 @@ func TestZoneListIsTheFramesList(t *testing.T) {
 		t.Errorf("%d zones offered; there are hundreds", len(middle))
 	}
 	for _, o := range row.Options[1 : len(row.Options)-1] {
-		if _, err := time.LoadLocation(o.Value); err != nil || o.Separator && o != row.Options[1] || o.Group != "" {
+		if _, err := time.LoadLocation(o.Value); err != nil || o.Separator && o.Value != row.Options[1].Value || o.Group != "" {
 			t.Errorf("zone %+v: %v", o, err)
 		}
 	}

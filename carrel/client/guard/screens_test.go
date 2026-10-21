@@ -378,7 +378,7 @@ func frameFindings(l lib, all []screens.Screen) []string {
 				}
 				continue
 			}
-			out = append(out, htmlFindings(l, frame, at+" on "+fx, root.Render())...)
+			out = append(out, htmlFindings(l, frame, at+" on "+fx, root.Render(), formsOf(scr, model))...)
 		}
 		for _, f := range scr.Frames {
 			if !drawn[f] {
@@ -392,12 +392,24 @@ func frameFindings(l lib, all []screens.Screen) []string {
 // htmlFindings holds a screen's printed HTML against its frame: the frame's
 // make-up (shape.Check) — a sheet drawn over nothing, by its sheet
 // (sheetFindings) — and no class Typecase's CSS does not have.
-func htmlFindings(l lib, frame, at, html string) []string {
+func htmlFindings(l lib, frame, at, html, forms string) []string {
 	var out []string
-	if strings.Contains(html, overlayOpen) {
+	switch {
+	case strings.Contains(html, overlayOpen):
 		out = sheetFindings(l, frame, at, html)
-	} else if err := l.shape.Check(frame, html); err != nil {
-		out = append(out, fmt.Sprintf("%s: %v", at, err))
+	case fragment(l.mock, frame):
+		// A block of a page drawn alone (account-8): found on the screen —
+		// a form it draws (tc-post, s-publish-21) among the forms the
+		// screen prints after its root.
+		parts := pageParts(l.mock, frame)
+		if len(parts) == 0 {
+			out = append(out, fmt.Sprintf("%s: %s draws no part of a page", at, frame))
+		}
+		out = append(out, partFindings(l, frame, at, parts, parseHTML(html+forms))...)
+	default:
+		if err := l.shape.Check(frame, html); err != nil {
+			out = append(out, fmt.Sprintf("%s: %v", at, err))
+		}
 	}
 	return append(out, classFindings(l, at, html)...)
 }
@@ -714,7 +726,7 @@ func TestFrameComparisonBite(t *testing.T) {
 		t.Fatal(err)
 	}
 	own := strings.Replace(root.Render(), `class="tc-auth__stack"`, `class="tc-auth__stack tc-mine"`, 1)
-	found := htmlFindings(l, "s-auth-1", "own class", own)
+	found := htmlFindings(l, "s-auth-1", "own class", own, "")
 	if !slices.ContainsFunc(found, func(f string) bool { return strings.HasSuffix(f, `class "tc-mine" is not a class of Typecase's CSS`) }) {
 		t.Errorf("a class of the screen's own stayed out of the findings: %q", found)
 	}

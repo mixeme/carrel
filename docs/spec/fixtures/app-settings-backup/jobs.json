@@ -2,7 +2,7 @@
   "actions": [
     {
       "enabled": true,
-      "href": "/app/settings/backup?job=new",
+      "href": "/app/settings/backup/new",
       "icon": "i-plus",
       "id": "backup.new",
       "label": "New job",
@@ -11,7 +11,7 @@
     },
     {
       "enabled": true,
-      "href": "/app/settings/backup?restore=1",
+      "href": "/app/settings/backup/restore",
       "icon": "i-restore",
       "id": "restore.start",
       "label": "Restore",
@@ -19,14 +19,14 @@
     }
   ],
   "add": {
-    "action": "/app/settings/backup?op=save",
+    "action": "/app/settings/backup?op=create",
     "actions": [
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/settings/backup?op=save",
-        "id": "backup.save",
-        "label": "Save",
+        "href": "/app/settings/backup?op=create",
+        "id": "backup.create",
+        "label": "Create",
         "method": "POST",
         "primary": true
       }
@@ -107,6 +107,7 @@
           }
         ],
         "legend": "What to copy",
+        "legendAside": "nothing chosen",
         "rows": [
           {
             "add": null,
@@ -315,7 +316,7 @@
               {
                 "colour": "#9a9280",
                 "label": "nextcloud · Files",
-                "selected": false,
+                "selected": true,
                 "value": "a-nc-home|/alice/files/Files/"
               },
               {
@@ -414,13 +415,13 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Separate from the sign-in password: the destination may be somebody else's hosting. Forget it and this job's archives open for nobody, including you.",
+            "hint": "Separate from the sign-in password.",
             "kind": "password",
             "label": "Archive password",
             "name": "password",
             "options": [],
             "readOnly": false,
-            "required": false,
+            "required": true,
             "value": ""
           }
         ],
@@ -458,7 +459,7 @@
             "text": "curl"
           },
           {
-            "text": ": the line to paste is on the job’s page"
+            "text": ": External trigger in the job’s menu"
           }
         ],
         "legend": "When",
@@ -474,13 +475,13 @@
             "options": [
               {
                 "label": "On sign-in, if the last copy is older than",
-                "selected": false,
+                "selected": true,
                 "value": "on"
               }
             ],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "on"
           },
           {
             "add": null,
@@ -511,7 +512,7 @@
       "actions": [
         {
           "enabled": true,
-          "href": "/app/settings/backup?from=job\u0026restore=1\u0026run=j-job%7Cr-run",
+          "href": "/app/settings/backup/restore?from=job\u0026run=j-job%7Cr-run",
           "icon": "i-restore",
           "id": "backup.restore",
           "label": "Restore",
@@ -531,19 +532,37 @@
       "id": "r-run",
       "job": "Рабочее, ежедневно",
       "size": "18.4 MB",
-      "trigger": "cron",
+      "trigger": "external",
       "verified": [
         {
           "text": "read back"
         }
       ],
+      "via": "cbk_…lamp · 10.0.0.5",
+      "whole": true
+    },
+    {
+      "actions": [],
+      "at": "2026-08-15 21:40",
+      "collections": "—",
+      "id": "r-run",
+      "job": "Рабочее, ежедневно",
+      "size": "—",
+      "trigger": "external",
+      "verified": [
+        {
+          "mark": "danger",
+          "text": "refused: not this job’s password"
+        }
+      ],
+      "via": "cbk_…91de · 203.0.113.7",
       "whole": true
     },
     {
       "actions": [
         {
           "enabled": true,
-          "href": "/app/settings/backup?from=job\u0026restore=1\u0026run=j-job%7Cr-run",
+          "href": "/app/settings/backup/restore?from=job\u0026run=j-job%7Cr-run",
           "icon": "i-restore",
           "id": "backup.restore",
           "label": "Restore",
@@ -563,7 +582,7 @@
       "id": "r-run",
       "job": "Рабочее, ежедневно",
       "size": "18.2 MB",
-      "trigger": "cron",
+      "trigger": "external",
       "verified": [
         {
           "text": "read back"
@@ -577,13 +596,14 @@
           "text": "1 not copied"
         }
       ],
+      "via": "cbk_…lamp · 10.0.0.5",
       "whole": false
     },
     {
       "actions": [
         {
           "enabled": true,
-          "href": "/app/settings/backup?from=job\u0026restore=1\u0026run=j-job%7Cr-run",
+          "href": "/app/settings/backup/restore?from=job\u0026run=j-job2%7Cr-run",
           "icon": "i-restore",
           "id": "backup.restore",
           "label": "Restore",
@@ -591,7 +611,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/settings/backup?job=j-job\u0026op=get\u0026run=r-run",
+          "href": "/app/settings/backup?job=j-job2\u0026op=get\u0026run=r-run",
           "icon": "i-download",
           "id": "backup.get",
           "label": "Download",
@@ -599,7 +619,7 @@
         }
       ],
       "at": "2026-08-14 09:12",
-      "collections": "2 / 2",
+      "collections": "2 / 2 + 1 240 files",
       "id": "r-run",
       "job": "Личное на домашний диск",
       "size": "2.1 GB",
@@ -609,6 +629,7 @@
           "text": "read back"
         }
       ],
+      "via": "",
       "whole": true
     }
   ],
@@ -632,15 +653,16 @@
           "method": "GET"
         }
       ],
-      "clock": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "clockHint": "",
       "copies": "3 collections",
       "encrypted": true,
+      "external": {
+        "enabled": true,
+        "href": "/app/settings/backup/trigger?job=j-job",
+        "id": "backup.trigger",
+        "label": "External trigger",
+        "method": "GET",
+        "target": "sheet"
+      },
       "keep": 14,
       "lastNote": [
         {
@@ -668,9 +690,9 @@
         "label": "Turn the job off",
         "method": "POST"
       },
-      "trigger": null,
-      "when": "cron · 03:00",
-      "whenNote": "external trigger",
+      "triggered": true,
+      "when": "",
+      "whenNote": "",
       "where": "sftpgo · vps · Documents",
       "whereNote": "/backup/work"
     },
@@ -679,28 +701,29 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/settings/backup?job=j-job\u0026op=run",
+          "href": "/app/settings/backup?job=j-job2\u0026op=run",
           "id": "backup.run",
           "label": "Run",
           "method": "POST"
         },
         {
           "enabled": true,
-          "href": "/app/settings/backup?job=j-job",
+          "href": "/app/settings/backup?job=j-job2",
           "id": "backup.edit",
           "label": "Edit",
           "method": "GET"
         }
       ],
-      "clock": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "clockHint": "",
-      "copies": "2 collections + files",
+      "copies": "4 collections + files",
       "encrypted": true,
+      "external": {
+        "enabled": true,
+        "href": "/app/settings/backup/trigger?job=j-job2",
+        "id": "backup.trigger",
+        "label": "External trigger",
+        "method": "GET",
+        "target": "sheet"
+      },
       "keep": 8,
       "lastNote": [
         {
@@ -715,20 +738,21 @@
       "lastState": "done",
       "marks": [
         "#4a6b52",
+        "#4a6b52",
         "#a05a2c",
-        "#9a9280"
+        "#4a6b52",
+        "#a05a2c"
       ],
       "name": "Личное на домашний диск",
       "on": true,
       "toggle": {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/settings/backup?job=j-job\u0026op=switch",
+        "href": "/app/settings/backup?job=j-job2\u0026op=switch",
         "id": "backup.switch",
         "label": "Turn the job off",
         "method": "POST"
       },
-      "trigger": null,
       "when": "on sign-in",
       "whenNote": "if older than 7 days",
       "where": "nextcloud · Files",
@@ -738,28 +762,29 @@
       "actions": [
         {
           "enabled": true,
-          "href": "/app/settings/backup?job=j-job\u0026op=download",
+          "href": "/app/settings/backup?job=j-job3\u0026op=download",
           "id": "backup.run",
           "label": "Run",
           "method": "GET"
         },
         {
           "enabled": true,
-          "href": "/app/settings/backup?job=j-job",
+          "href": "/app/settings/backup?job=j-job3",
           "id": "backup.edit",
           "label": "Edit",
           "method": "GET"
         }
       ],
-      "clock": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
-      },
-      "clockHint": "",
       "copies": "1 book",
       "encrypted": false,
+      "external": {
+        "enabled": true,
+        "href": "/app/settings/backup/trigger?job=j-job3",
+        "id": "backup.trigger",
+        "label": "External trigger",
+        "method": "GET",
+        "target": "sheet"
+      },
       "keep": 0,
       "lastNote": [],
       "lastRun": "",
@@ -772,18 +797,18 @@
       "toggle": {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/settings/backup?job=j-job\u0026op=switch",
+        "href": "/app/settings/backup?job=j-job3\u0026op=switch",
         "id": "backup.switch",
         "label": "Turn the job on",
         "method": "POST"
       },
-      "trigger": null,
-      "when": "on demand",
+      "when": "",
       "whenNote": "",
       "where": "download in browser",
       "whereNote": "nothing is written"
     }
   ],
+  "jobsHint": "verified — the archive was read back from where it was written and the checksum matched. Written and not read back is not verified, and is marked red.",
   "look": {
     "compact": false,
     "panel": true,
@@ -806,7 +831,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [],
     "nav": [
       {
@@ -855,7 +880,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/davloom",
         "id": "settings.davloom",
@@ -899,10 +924,14 @@
       {
         "line": [
           {
-            "text": "No device has connected since the start."
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
           }
         ],
-        "title": "davloom · running · 0 devices",
+        "title": "davloom · running · 3 devices",
         "tone": "on"
       },
       {
@@ -934,7 +963,7 @@
     "from": [
       {
         "enabled": true,
-        "href": "/app/settings/backup?from=job\u0026restore=1",
+        "href": "/app/settings/backup/restore?from=job",
         "id": "restore.from.job",
         "label": "From a job",
         "method": "GET",
@@ -942,14 +971,14 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/backup?from=server\u0026restore=1",
+        "href": "/app/settings/backup/restore?from=server",
         "id": "restore.from.server",
         "label": "From a server",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/settings/backup?from=file\u0026restore=1",
+        "href": "/app/settings/backup/restore?from=file",
         "id": "restore.from.file",
         "label": "From this computer",
         "method": "GET"
@@ -970,13 +999,14 @@
       }
     ],
     "open": false,
+    "report": null,
     "source": {
-      "action": "/app/settings/backup?op=restore-open",
+      "action": "/app/settings/backup/restore",
       "actions": [
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/settings/backup?op=restore-open",
+          "href": "/app/settings/backup/restore",
           "id": "restore.open",
           "label": "Open the manifest",
           "method": "POST",
@@ -1021,7 +1051,13 @@
               "readOnly": false,
               "required": false,
               "value": "run"
-            },
+            }
+          ],
+          "unfold": null
+        },
+        {
+          "legend": "From a job",
+          "rows": [
             {
               "add": null,
               "error": "",
@@ -1032,27 +1068,41 @@
               "name": "run",
               "options": [
                 {
+                  "columns": [
+                    "2026-08-16 03:10",
+                    "18.4 MB",
+                    "3 collections"
+                  ],
                   "label": "Рабочее, ежедневно",
-                  "meta": "2026-08-16 03:10 · 18.4 MB · 3 collections",
                   "selected": true,
                   "value": "j-job|r-run"
                 },
                 {
+                  "columns": [
+                    "2026-08-14 09:12",
+                    "2.1 GB",
+                    "2 collections"
+                  ],
                   "label": "Личное на домашний диск",
-                  "meta": "2026-08-14 09:12 · 2.1 GB · 2 collections",
                   "selected": false,
-                  "value": "j-job|r-run"
+                  "value": "j-job2|r-run"
                 }
               ],
               "readOnly": false,
               "required": false,
               "value": ""
-            },
+            }
+          ],
+          "unfold": null
+        },
+        {
+          "legend": "Archive password",
+          "rows": [
             {
               "add": null,
               "error": "",
               "extra": null,
-              "hint": "The one set in the job, not your sign-in password. Without it the manifest cannot be read — Carrel will not even see the list of collections.",
+              "hint": "The one set in the job, not your sign-in password.",
               "kind": "password",
               "label": "Archive password",
               "name": "password",
@@ -1152,10 +1202,12 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
       "answered": "",
       "running": false

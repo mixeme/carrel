@@ -42,7 +42,7 @@ func sel(f davFixture, path string) string { return f.id + "|" + path }
 
 func saveJob(t *testing.T, f davFixture, form url.Values) sealed.BackupJob {
 	t.Helper()
-	rec := f.h.do(postForm("/app/settings/backup?op=save", f.sess, form))
+	rec := f.h.do(postForm("/app/settings/backup?op=create", f.sess, form))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("save: %d %s", rec.Code, rec.Body.String())
 	}
@@ -94,7 +94,7 @@ func TestBackupJobIsChecked(t *testing.T) {
 	v := jobForm(f, sealed.BackupToWebDAV, "8", "")
 	v.Set("encrypted", "1")
 	v.Del("src")
-	page := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=save", f.sess, v)))
+	page := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=create", f.sess, v)))
 	errs := map[string]bool{}
 	for _, set := range page.Add.Sets {
 		for _, r := range set.Rows {
@@ -119,7 +119,8 @@ func TestBackupRunWritesVerifiesAndHandsBack(t *testing.T) {
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "archive-pw"))
 	run := runJob(t, f, job)
-	if run.State != "done" || !run.Verified || run.Collections != 3 || run.Whole != 3 || !strings.HasSuffix(run.File, ".zip.age") {
+	// Two collections and the files of one, counted as files (s-backup-1).
+	if run.State != "done" || !run.Verified || run.Collections != 2 || run.Whole != 2 || run.Files == 0 || !strings.HasSuffix(run.File, ".zip.age") {
 		t.Fatalf("run = %+v", run)
 	}
 	stored, ok := f.srv.File(filesDocs + "backups/work/" + run.File)
@@ -185,7 +186,7 @@ func TestPartialCopyIsRedAndKeepsTheOld(t *testing.T) {
 	time.Sleep(1100 * time.Millisecond)
 	f.srv.Refuse("REPORT", http.StatusServiceUnavailable, "down")
 	part := runJob(t, f, job)
-	if part.State != "partial" || part.Whole != 1 || part.Error == "" {
+	if part.State != "partial" || part.Whole != 0 || part.Files == 0 || part.Error == "" {
 		t.Fatalf("partial run = %+v", part)
 	}
 	if _, ok := f.srv.File(filesDocs + "backups/work/" + whole.File); !ok {

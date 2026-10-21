@@ -124,7 +124,7 @@ func TestBackupKeepsARecordCarrelCannotRead(t *testing.T) {
 	f.srv.Seed(searchWork+"orphan.ics", orphan("VEVENT", "lone"))
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "archive-pw"))
 	run := runJob(t, f, job)
-	if run.State != "done" || run.Whole != 3 {
+	if run.State != "done" || run.Whole != 2 || run.Files == 0 {
 		t.Fatalf("run = %+v", run)
 	}
 	stored, _ := f.srv.File(filesDocs + "backups/work/" + run.File)

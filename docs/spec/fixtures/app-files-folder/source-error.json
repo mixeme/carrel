@@ -1,5 +1,4 @@
 {
-  "access": "",
   "attachments": false,
   "bar": {
     "actions": [
@@ -286,7 +285,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/connections?op=add",
+        "href": "/app/settings/connections/new",
         "icon": "i-server",
         "id": "account.connect",
         "label": "Connect account",
@@ -501,6 +500,7 @@
       "target": "rail"
     }
   },
+  "readOnly": false,
   "rows": [],
   "select": {
     "action": "/app/files/a-sftp-vps/Documents/op/",

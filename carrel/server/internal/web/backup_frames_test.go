@@ -44,7 +44,7 @@ func TestBackupHeadAndEmptyState(t *testing.T) {
 	}
 
 	job := decode[view.BackupPage](t, f.h.do(get(page.Actions[0].Href, f.sess)))
-	if job.Title != "New job" || !hasAction(job.Add.Actions, "backup.save") || !hasAction(job.Add.Actions, "backup.cancel") {
+	if job.Title != "New job" || !hasAction(job.Add.Actions, "backup.create") || !hasAction(job.Add.Actions, "backup.cancel") {
 		t.Errorf("New job: title %q, actions %+v", job.Title, job.Add.Actions)
 	}
 	restore := decode[view.BackupPage](t, f.h.do(get(page.Actions[1].Href, f.sess)))

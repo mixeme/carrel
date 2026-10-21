@@ -300,13 +300,9 @@ func TestTheConnectionKeepsWhetherItSchedules(t *testing.T) {
 	srv.ScheduleOutbox = davtest.Principal + "outbox/"
 	srv.UserAddresses = []string{"mailto:Alice@Example.org"}
 	srv.AddCalendar(caldav.Calendar{Path: davtest.CalendarHome + "team/", Name: "Team"})
-	n := noticeTitled(rediscoverPage(t, f).Notices, "Collections changed on the server")
-	if n == nil {
-		t.Fatal("no proposal")
-	}
-	f.h.do(postHref(f, actionHref(t, n.Actions, "connection.rediscover.apply")))
+	rediscoverPage(t, f)
 	if c := catalogOf(t, f).Connections[0]; c.Scheduling != "yes" || strings.Join(c.Addresses, ",") != "alice@example.org" {
-		t.Errorf("after Apply: %q %q", c.Scheduling, c.Addresses)
+		t.Errorf("after Update collection list: %q %q", c.Scheduling, c.Addresses)
 	}
 
 	srv.ScheduleOutbox = ""

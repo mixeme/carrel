@@ -95,7 +95,7 @@
     "drop": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 28,
+    "loaded": 4,
     "range": null,
     "segments": [
       {
@@ -122,7 +122,7 @@
       }
     ],
     "selected": 0,
-    "total": 29
+    "total": 4
   },
   "details": null,
   "filter": {
@@ -157,35 +157,15 @@
                 "value": ""
               },
               {
-                "label": "attachments.folder",
+                "label": "escrow.recover",
                 "selected": false,
                 "separator": true,
-                "value": "attachments.folder"
+                "value": "escrow.recover"
               },
               {
-                "label": "connection.add",
+                "label": "login.fail",
                 "selected": false,
-                "value": "connection.add"
-              },
-              {
-                "label": "duplicates.link",
-                "selected": false,
-                "value": "duplicates.link"
-              },
-              {
-                "label": "escrow.enable",
-                "selected": false,
-                "value": "escrow.enable"
-              },
-              {
-                "label": "feed.edit",
-                "selected": false,
-                "value": "feed.edit"
-              },
-              {
-                "label": "feed.subscribe",
-                "selected": false,
-                "value": "feed.subscribe"
+                "value": "login.fail"
               },
               {
                 "label": "login.ok",
@@ -193,39 +173,9 @@
                 "value": "login.ok"
               },
               {
-                "label": "publish.create",
-                "selected": false,
-                "value": "publish.create"
-              },
-              {
                 "label": "settings.instance",
                 "selected": false,
                 "value": "settings.instance"
-              },
-              {
-                "label": "setup.first_admin",
-                "selected": false,
-                "value": "setup.first_admin"
-              },
-              {
-                "label": "sources.select",
-                "selected": false,
-                "value": "sources.select"
-              },
-              {
-                "label": "user.disable",
-                "selected": false,
-                "value": "user.disable"
-              },
-              {
-                "label": "user.invite.complete",
-                "selected": false,
-                "value": "user.invite.complete"
-              },
-              {
-                "label": "user.invite.create",
-                "selected": false,
-                "value": "user.invite.create"
               }
             ],
             "readOnly": false,
@@ -295,7 +245,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 6,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -367,11 +317,15 @@
       {
         "line": [
           {
-            "text": "Run the check once Carrel is behind its proxy."
+            "text": "Last check "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
-        "title": "Not checked yet",
-        "tone": "off"
+        "title": "Checks passed",
+        "tone": "on"
       }
     ],
     "tags": [],
@@ -379,225 +333,33 @@
   },
   "rows": [
     {
-      "detail": "role=user",
-      "failure": false,
-      "what": "user.invite.create",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "role=user",
-      "failure": false,
-      "what": "user.invite.create",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "—",
-      "failure": false,
-      "what": "user.disable",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "viktor"
-    },
-    {
-      "detail": "role=user",
-      "failure": false,
-      "what": "user.invite.complete",
-      "when": "2026-08-10 17:04",
-      "who": "viktor",
-      "whom": "—"
-    },
-    {
-      "detail": "role=user",
-      "failure": false,
-      "what": "user.invite.create",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "viktor"
-    },
-    {
-      "detail": "role=user",
-      "failure": false,
-      "what": "user.invite.complete",
-      "when": "2026-08-10 17:04",
-      "who": "anna",
-      "whom": "—"
-    },
-    {
-      "detail": "role=user",
-      "failure": false,
-      "what": "user.invite.create",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "anna"
-    },
-    {
-      "detail": "file a-sftp-vps",
-      "failure": false,
-      "what": "publish.create",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "event a-nc-home",
-      "failure": false,
-      "what": "publish.create",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "a-sftp-vps",
-      "failure": false,
-      "what": "attachments.folder",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "file",
-      "failure": false,
-      "what": "sources.select",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "a-sftp-vps",
-      "failure": false,
-      "what": "connection.add",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "f-league",
-      "failure": false,
-      "what": "feed.edit",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "f-league",
-      "failure": false,
-      "what": "feed.subscribe",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "event",
-      "failure": false,
-      "what": "sources.select",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "f-ru-holidays",
-      "failure": false,
-      "what": "feed.edit",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "f-ru-holidays",
-      "failure": false,
-      "what": "feed.subscribe",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "—",
-      "failure": false,
-      "what": "duplicates.link",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "note",
-      "failure": false,
-      "what": "sources.select",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "task",
-      "failure": false,
-      "what": "sources.select",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "event",
-      "failure": false,
-      "what": "sources.select",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "contact",
-      "failure": false,
-      "what": "sources.select",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "a-baikal",
-      "failure": false,
-      "what": "connection.add",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "a-rad-vps",
-      "failure": false,
-      "what": "connection.add",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "a-nc-home",
-      "failure": false,
-      "what": "connection.add",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "new accounts covered",
-      "failure": false,
-      "what": "escrow.enable",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
-      "detail": "inviteTTL, idle, session, name",
-      "failure": false,
-      "what": "settings.instance",
-      "when": "2026-08-10 17:04",
-      "who": "mix",
-      "whom": "—"
-    },
-    {
       "detail": "—",
       "failure": false,
       "what": "login.ok",
+      "when": "2026-08-10 17:04",
+      "who": "mix",
+      "whom": "—"
+    },
+    {
+      "detail": "3rd attempt · ip 203.0.113.9 · rate-limited",
+      "failure": true,
+      "what": "login.fail",
+      "when": "2026-08-10 17:04",
+      "who": "—",
+      "whom": "anna"
+    },
+    {
+      "detail": "notice mailed",
+      "failure": false,
+      "what": "escrow.recover",
+      "when": "2026-08-10 17:04",
+      "who": "mix",
+      "whom": "viktor"
+    },
+    {
+      "detail": "smtp_host, smtp_port",
+      "failure": false,
+      "what": "settings.instance",
       "when": "2026-08-10 17:04",
       "who": "mix",
       "whom": "—"

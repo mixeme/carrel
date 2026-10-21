@@ -485,6 +485,14 @@ func (s *Server) Refuse(method string, code int, body string) {
 	s.refuse[method] = refusal{code: code, body: body}
 }
 
+// RefuseAt is Refuse for the requests under one path alone: one collection
+// the account may read and not write while its neighbours take writes.
+func (s *Server) RefuseAt(method, prefix string, code int, body string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.refuse[method+" "+prefix] = refusal{code: code, body: body}
+}
+
 // Colour returns the calendar-color stored on a collection.
 func (s *Server) Colour(collection string) string {
 	s.mu.Lock()
@@ -733,6 +741,12 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 	}
 	s.mu.Lock()
 	ref, refused := s.refuse[r.Method]
+	for key, at := range s.refuse {
+		// RefuseAt: the method under one path alone.
+		if m, prefix, ok := strings.Cut(key, " "); ok && m == r.Method && strings.HasPrefix(r.URL.Path, prefix) {
+			ref, refused = at, true
+		}
+	}
 	s.mu.Unlock()
 	if refused {
 		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)

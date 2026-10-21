@@ -63,6 +63,7 @@
     "devices": null,
     "event": null,
     "eventEdit": null,
+    "files": null,
     "note": null,
     "notes": {
       "bar": {
@@ -445,7 +446,7 @@
           },
           {
             "enabled": true,
-            "href": "/app/settings/connections?op=add",
+            "href": "/app/settings/connections/new",
             "icon": "i-server",
             "id": "account.connect",
             "label": "Connect account",
@@ -921,6 +922,7 @@
         "userHref": "/app/settings/account"
       }
     },
+    "published": null,
     "task": null,
     "taskEdit": null,
     "tasks": null

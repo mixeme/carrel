@@ -8,9 +8,19 @@
   "notices": [],
   "rows": [
     {
+      "what": "Password changed",
+      "when": "2026-08-10 17:04",
+      "who": "viktor"
+    },
+    {
       "what": "Opened with the master password; a temporary password set",
       "when": "2026-08-10 17:04",
       "who": "mix"
+    },
+    {
+      "what": "Password changed",
+      "when": "2026-08-10 17:04",
+      "who": "viktor"
     }
   ],
   "title": "Password history of viktor"

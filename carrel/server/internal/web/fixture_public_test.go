@@ -39,10 +39,15 @@ func TestFixturePublicPages(t *testing.T) {
 		app.byAccount[token] = "link-" + name + "-token"
 		return token
 	}
-	record := func(name, k, slug, uid string) string {
+	// record gives a collection or a record out; sheet, in pairs, is what
+	// its sheet chose.
+	record := func(name, k, slug, uid string, sheet ...string) string {
 		q := url.Values{"k": {k}, "a": {app.realAccount(t, slug)}, "c": {app.realPath(t, slug)}}
 		if uid != "" {
 			q.Set("uid", uid)
+		}
+		for i := 0; i+1 < len(sheet); i += 2 {
+			q.Set(sheet[i], sheet[i+1])
 		}
 		return give(name, q)
 	}
@@ -55,12 +60,13 @@ func TestFixturePublicPages(t *testing.T) {
 	}
 	for _, one := range []struct{ state, token string }{
 		{"normal", calendar}, // s-publish-6
-		{"addressbook", record("komanda", "contacts", "komanda", "")},                        // s-publish-7
-		{"note", record("zametka", "notes", "zapisi", "5c81-77aa-0d64")},                     // s-publish-8
-		{"image", file("sync-board", "carrel/attachments/2026-08-10-sync-board.png", false)}, // s-publish-9
-		{"text", file("checklist", "carrel/attachments/release-checklist.md", false)},        // s-publish-10
-		{"download", file("panorama", "carrel/attachments/2026-07/панорама.tif", false)},     // s-publish-11
-		{"folder", file("attachments", "carrel/attachments", true)},                          // s-publish-12
+		{"addressbook", record("komanda", "contacts", "komanda", "")},                                                          // s-publish-7
+		{"note", record("zametka", "notes", "zapisi", "5c81-77aa-0d64", "lives", "30", "download", "on", "attachments", "on")}, // s-publish-8: its files too
+		{"note-files-kept", record("zametka-kept", "notes", "zapisi", "5c81-77aa-0d64")},                                       // s-publish-23: how many, not which
+		{"image", file("sync-board", "carrel/attachments/2026-08-10-sync-board.png", false)},                                   // s-publish-9
+		{"text", file("checklist", "carrel/attachments/release-checklist.md", false)},                                          // s-publish-10
+		{"download", file("panorama", "carrel/attachments/2026-07/панорама.tif", false)},                                       // s-publish-11
+		{"folder", file("attachments", "carrel/attachments", true)},                                                            // s-publish-12
 	} {
 		t.Run(one.state, func(t *testing.T) {
 			app.compare(t, "p-token/"+one.state+".json", app.h.do(get("/p/"+one.token, nil)))

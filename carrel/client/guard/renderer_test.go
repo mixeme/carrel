@@ -83,11 +83,11 @@ func rootOf(scr screens.Screen, model any, base, page string) (string, bool) {
 // served holds what the renderer served for a fixture against the fixture's
 // frame (htmlFindings); a state that waits for the library (screens.Wait) by
 // the classes of the library only.
-func served(l lib, scr screens.Screen, path, frame, at, html string) []string {
+func served(l lib, scr screens.Screen, model any, path, frame, at, html string) []string {
 	if _, ok := waits(scr, key(path)); ok {
 		return classFindings(l, at, html)
 	}
-	return htmlFindings(l, frame, at, html)
+	return htmlFindings(l, frame, at, html, formsOf(scr, model))
 }
 
 // Each fixture of a built screen's view model answers a page: the screen's
@@ -137,7 +137,7 @@ func TestRendererDrawsBuiltScreens(t *testing.T) {
 					t.Errorf("%s (base %q): no root between the sprite and the forms", at, base)
 					continue
 				}
-				for _, f := range served(l, scr, path, frame, fmt.Sprintf("%s (%s, page)", at, frame), root) {
+				for _, f := range served(l, scr, model, path, frame, fmt.Sprintf("%s (%s, page)", at, frame), root) {
 					t.Error(f)
 				}
 			}
@@ -157,7 +157,7 @@ func TestRendererDrawsBuiltScreens(t *testing.T) {
 				t.Errorf("%s: fragment of %s %d %q, not the root and the forms", at, target, code, ctype)
 				continue
 			}
-			for _, f := range served(l, scr, path, frame, fmt.Sprintf("%s (%s, fragment)", at, frame), strings.TrimSuffix(body, forms)) {
+			for _, f := range served(l, scr, model, path, frame, fmt.Sprintf("%s (%s, fragment)", at, frame), strings.TrimSuffix(body, forms)) {
 				t.Error(f)
 			}
 		}

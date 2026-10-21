@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 	"net/netip"
 	"net/url"
@@ -8,6 +9,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -110,76 +112,171 @@ func triggerTabs(b *view.TriggerBlock, base string, job sealed.BackupJob, secret
 	b.Endpoints = []view.Text{text("POST /api/backup/run?" + q), b.Status, "GET /api/backup/{id}/download"}
 }
 
-// triggerClock is the tick of s-backup-2 that turns the external trigger on
-// and, cleared, off: there is no switch of its own (to-typecase task 18a).
-const triggerClock = "On a clock of your own — cron, GoSentry, a job in Gitea"
+// triggerPrice is what turning the trigger on costs, said before it is
+// turned on (s-backup-14, S-24.4).
+const triggerPrice = "Turning it on stores this job’s data key under the server’s key — less protection, for convenience: the job can then read without you signed in."
 
-// triggerPrice is the hint under the tick, ticked or not: what turning the
-// trigger on costs is said before it is turned on (s-backup-2, S-24.4).
-const triggerPrice = "Turning it on stores this job's data key under the server's key — less protection, for convenience: the job can then read without you signed in."
+// triggerMasked is the secret in a line that does not show it (s-backup-12).
+const triggerMasked = "cbk_••••"
 
-// triggerTick is the job's tick «On a clock of your own» (s-backup-2):
-// ticked, it issues the trigger — through the password sheet outside the
-// unlock window, since it hands out the job's reading — and cleared, it
-// turns the trigger off: the lines handed out stop. Clearing issues
-// nothing and asks for no password.
-func (s *Server) triggerTick(sess *session.Session, job sealed.BackupJob, issued map[string]string) view.Action {
+// triggerSheet is the sheet of a job's external trigger over the list of
+// jobs (Typecase's note 91): off — what turning it on costs and Turn on
+// (s-backup-14); on — the password as a row, how it was used, New password
+// and Revoke, and the line to paste with the password hidden (s-backup-12);
+// just issued — the password and the line whole, this once (s-backup-13).
+func (s *Server) triggerSheet(r *http.Request, sess *session.Session, job sealed.BackupJob, tab, secret string) view.BackupTriggerSheet {
+	here := url.Values{"job": {job.ID}}
 	q := func(op string) string {
-		return s.postQuery("/app/settings/backup", url.Values{"op": {op}, "job": {job.ID}})
+		v := url.Values{"job": {job.ID}, "op": {op}}
+		return s.postQuery("/app/settings/backup/trigger", v)
 	}
-	tick := view.Action{ID: "backup.trigger.clock", Label: triggerClock, Href: q("trigger"), Method: "POST", Enabled: true}
+	sheet := view.BackupTriggerSheet{Title: "External trigger", Subject: text(job.Name), Local: s.instanceLocal(),
+		Form: s.plainForm(s.postQuery("/app/settings/backup/trigger", here), "POST", csrfField(sess))}
+	closeTo := view.Action{ID: "backup.trigger.close", Label: "Close", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true}
+	use, on := s.users.BackupTriggerUse(sess.AccountID(), job.ID)
 	switch {
-	case s.users.BackupTriggerOn(sess.AccountID(), job.ID) || issued[job.ID] != "":
-		tick.On, tick.Href = true, q("trigger-off")
-	case sess.UnlockUntil(s.now()) == nil:
-		tick.Method, tick.Href = "GET", s.triggerUnlock(job)
+	case secret != "":
+		// Just issued, the password is whole and has no hint (s-backup-13).
+		sheet.Password = &view.TriggerPassword{Value: text(secret)}
+		sheet.Line = s.triggerLine(r, job, tab, secret, line("Every use is logged, naming this password. The old one stopped working when this one was issued."))
+		sheet.Form.Actions = []view.Action{closeTo}
+	case on:
+		tf := s.timeFor(sess)
+		used := []any{"issued " + tf.dayOfYear(use.Issued)}
+		if use.Runs > 0 {
+			used = append(used, " · last run "+tf.dayOfYear(use.LastRun)+" "+tf.clock(use.LastRun)+" from ", monoRun(use.From), fmt.Sprintf(" · %s", plural(use.Runs, "run")))
+		} else {
+			used = append(used, " · not run yet")
+		}
+		// Outside the unlock window New password and Turn on answer with the
+		// password's sheet (s-backup-14): they hand out the job's reading.
+		renew := view.Action{ID: "backup.trigger.new", Label: "New password", Href: q("new"), Method: "POST", Enabled: true, Submits: true}
+		sheet.Password = &view.TriggerPassword{Masked: text(use.Hint), Use: join(used...), Actions: []view.Action{renew,
+			{ID: "backup.trigger.revoke", Label: "Revoke", Href: q("revoke"), Method: "POST", Enabled: true, Submits: true, Danger: true}}}
+		sheet.Line = s.triggerLine(r, job, tab, triggerMasked, join("The password was shown once and is hidden here. ", strongRun("New password"), " shows the line whole; the old one stops working."))
+		sheet.Form.Actions = []view.Action{closeTo}
+	default:
+		sheet.Warning = triggerPrice
+		turnOn := view.Action{ID: "backup.trigger.on", Label: "Turn on", Href: q("on"), Method: "POST", Enabled: true, Primary: true, Submits: true}
+		sheet.Form.Actions = []view.Action{turnOn,
+			{ID: "backup.trigger.cancel", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true}}
 	}
-	return tick
+	return sheet
 }
 
-// triggerBlock is the job's card of the line: the command and the secret
-// when they have just been issued, otherwise that it is on and how to renew
-// it. While the trigger is off there is nothing to show or renew, and no
-// card (owner's decision, from-typecase note 19).
-func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issued, secrets map[string]string) *view.TriggerBlock {
-	on := s.users.BackupTriggerOn(sess.AccountID(), job.ID)
-	if !on && issued[job.ID] == "" {
-		return nil
+// triggerLine is «The line to paste» of the sheet: the tabs as links, the
+// open one's content, with secret — whole once, else hidden —, and note
+// under it.
+func (s *Server) triggerLine(r *http.Request, job sealed.BackupJob, tab, secret string, note []view.Run) *view.TriggerBlock {
+	if tab == "" {
+		tab = "crontab"
 	}
-	b := &view.TriggerBlock{
-		Tabs: s.triggerTabLinks(job, "crontab"),
-		Password: view.SecretField{Reveal: view.Action{ID: "backup.trigger", Label: "New password", Method: "POST", Enabled: true,
-			Hint: "The old password stops working; whatever runs this job has to be given the new one.",
-			Href: s.postQuery("/app/settings/backup", url.Values{"op": {"trigger"}, "job": {job.ID}})}},
-	}
-	if issued[job.ID] != "" && secrets[job.ID] != "" {
-		triggerTabs(b, issued[job.ID], job, secrets[job.ID])
-		b.Password.Shown, b.Password.Value = true, text(secrets[job.ID])
-		// What turning it on cost is said under the tick (triggerPrice), not
-		// a second time here (s-backup-5).
-		b.Note = join("Every use is logged, naming this password. ", strongRun("New password"),
-			" replaces it on the spot — and every line already handed out stops working with it.")
-		// A script and not a line, and why (s-backup-3).
-		switch job.Mode {
-		case sealed.BackupToBoth:
-			b.Destination = join("Destination: ", strongRun("WebDAV and download"), " — two steps, so this is a file, not a line")
-		case sealed.BackupToDownload:
-			b.Destination = join("Destination: ", strongRun("download"), " — somebody has to take the stream, so this is a file, not a line")
-		}
-	} else {
-		b.Note = join("The external trigger is on. The password was shown once; ", strongRun("New password"), " issues another, and the old lines stop working.")
-	}
-	// Outside the unlock window New password opens the password sheet; what
-	// it is for is said in the note, not as a reason of a working button
-	// (C-6.2).
-	if sess.UnlockUntil(s.now()) == nil {
-		b.Password.Reveal.Method, b.Password.Reveal.Href = "GET", s.triggerUnlock(job)
-		b.Note = append(line("Confirm your password first: the trigger hands out this job's reading. "), b.Note...)
+	b := &view.TriggerBlock{Tabs: s.triggerTabLinks(job, tab)}
+	triggerTabs(b, s.publicOrigin(r), job, secret)
+	b.Shown, b.Note = secret != triggerMasked, note
+	// A script and not a line, and why (s-backup-3).
+	switch job.Mode {
+	case sealed.BackupToBoth:
+		b.Destination = join("Destination: ", strongRun("WebDAV and download"), " — two steps, so this is a file, not a line")
+	case sealed.BackupToDownload:
+		b.Destination = join("Destination: ", strongRun("download"), " — somebody has to take the stream, so this is a file, not a line")
 	}
 	if !job.Encrypted {
-		b.Note = append(b.Note, view.Run{Text: " This job's archive is not encrypted: whoever holds the secret can take your data in the clear."})
+		b.Note = append(b.Note, view.Run{Text: " This job’s archive is not encrypted: whoever holds the password can take your data in the clear."})
 	}
 	return b
+}
+
+// getBackupTrigger is the sheet of a job's trigger (note 91): a page of its
+// own over the list of jobs without scripts (U-8), and the password just
+// issued, once.
+func (s *Server) getBackupTrigger(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	job, has := s.catalogOf(sess).BackupJob(r.URL.Query().Get("job"))
+	if !has {
+		s.notFound(w, r)
+		return
+	}
+	s.writeTriggerSheet(w, r, sess, job)
+}
+
+// writeTriggerSheet answers with the sheet of job's trigger: a fragment, or
+// a page over the list of jobs; the password just issued, once.
+func (s *Server) writeTriggerSheet(w http.ResponseWriter, r *http.Request, sess *session.Session, job sealed.BackupJob) {
+	secret, _ := issuedTrigger(sess, job.ID)
+	w.Header().Set("Cache-Control", "no-store")
+	sheet := s.triggerSheet(r, sess, job, r.URL.Query().Get("tab"), secret)
+	if render.WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
+		return
+	}
+	sheet.Under = s.underOf(r, "/app/settings/backup", "/app/settings/backup")
+	s.writePage(w, r, http.StatusOK, sheet)
+}
+
+// postBackupTrigger turns the trigger on, issues a new password — inside
+// the unlock window, the answer the sheet with it whole, once; outside it,
+// the password's sheet —, or revokes it: the password stops working and the
+// trigger is off. A fragment is answered with the sheet in place, a plain
+// form with a redirect to it.
+func (s *Server) postBackupTrigger(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	key, live := sess.DataKey()
+	job, has := s.catalogOf(sess).BackupJob(r.URL.Query().Get("job"))
+	if !live || !has {
+		s.notFound(w, r)
+		return
+	}
+	back := "/app/settings/backup/trigger?" + url.Values{"job": {job.ID}}.Encode()
+	switch r.URL.Query().Get("op") {
+	case "on", "new":
+		if sess.UnlockUntil(s.now()) == nil {
+			if render.WantsFragment(r) {
+				_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, "", back, unlockTrigger, url.Values{"job": {job.ID}}), nil)
+				return
+			}
+			http.Redirect(w, r, s.triggerUnlock(job), http.StatusSeeOther)
+			return
+		}
+		secret, err := s.users.EnableBackupTrigger(sess.AccountID(), key, job.ID)
+		if err != nil {
+			http.Error(w, "could not issue the trigger", http.StatusInternalServerError)
+			return
+		}
+		sess.SetDraft(session.DraftIssuedTrigger, []byte(job.ID+"\x00"+secret))
+	case "revoke":
+		if err := s.users.DisableBackupTrigger(sess.AccountID(), job.ID); err != nil {
+			http.Error(w, "could not revoke the trigger", http.StatusInternalServerError)
+			return
+		}
+	default:
+		s.notFound(w, r)
+		return
+	}
+	if render.WantsFragment(r) {
+		s.writeTriggerSheet(w, r, sess, job)
+		return
+	}
+	s.redirect(w, r, back)
+}
+
+// triggerTabs are the tabs of a job's card of the line (s-backup-3): links
+// to its page with ?trigger= — what is shown, not kept —, the one open on.
+var triggerTabNames = []struct{ id, label string }{{"crontab", "crontab"}, {"gosentry", "GoSentry"}, {"gitea", "Gitea"}, {"curl", "curl"}}
+
+func (s *Server) triggerTabLinks(job sealed.BackupJob, open string) []view.Action {
+	var out []view.Action
+	for _, t := range triggerTabNames {
+		out = append(out, view.Action{ID: "backup.trigger.tab." + t.id, Label: text(t.label), Method: "GET", Enabled: true, On: t.id == open,
+			Href: s.postQuery("/app/settings/backup/trigger", url.Values{"job": {job.ID}, "tab": {t.id}})})
+	}
+	return out
 }
 
 // instanceLocal is whether the addresses this instance hands out answer
@@ -212,44 +309,9 @@ func (s *Server) instanceLocal() bool {
 // overlay networks that borrow it — reachable only from inside.
 var sharedAddressSpace = netip.MustParsePrefix("100.64.0.0/10")
 
-// triggerUnlock is the password's sheet over the job's page that turns its
-// trigger on (193 p. 3, Typecase's note 86).
+// triggerUnlock is the password's sheet over the trigger's sheet: turning
+// the trigger on, and a new password, hand out the job's reading (193 p. 3,
+// Typecase's notes 86 and 91).
 func (s *Server) triggerUnlock(job sealed.BackupJob) string {
-	return s.unlockHref(unlockTrigger, "/app/settings/backup?job="+url.QueryEscape(job.ID), "job", job.ID)
-}
-
-// enableTrigger issues the job's trigger, inside the unlock window only, and
-// shows the page with the command and the secret, once.
-func (s *Server) enableTrigger(w http.ResponseWriter, r *http.Request, sess *session.Session, key [32]byte, job sealed.BackupJob) {
-	// The answer is the job's page, where the card stands (s-backup-2…5,
-	// Нс62), not the list.
-	if sess.UnlockUntil(s.now()) == nil {
-		s.writePage(w, r, http.StatusOK, s.backupPage(sess, &job, nil, view.Notice{
-			Role: view.NoticeAlert, Title: "Confirm your password first",
-			Body:    "The external trigger lets a job read without you signed in, so it is issued only inside the unlock window.",
-			Actions: []view.Action{{ID: "settings.unlock", Label: "Confirm password", Href: s.triggerUnlock(job), Method: "GET", Enabled: true}},
-		}))
-		return
-	}
-	secret, err := s.users.EnableBackupTrigger(sess.AccountID(), key, job.ID)
-	if err != nil {
-		http.Error(w, "could not issue the trigger", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Cache-Control", "no-store")
-	page := s.backupPageWith(sess, &job, nil, map[string]string{job.ID: s.publicOrigin(r)}, map[string]string{job.ID: secret})
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-// triggerTabs are the tabs of a job's card of the line (s-backup-3): links
-// to its page with ?trigger= — what is shown, not kept —, the one open on.
-var triggerTabNames = []struct{ id, label string }{{"crontab", "crontab"}, {"gosentry", "GoSentry"}, {"gitea", "Gitea"}, {"curl", "curl"}}
-
-func (s *Server) triggerTabLinks(job sealed.BackupJob, open string) []view.Action {
-	var out []view.Action
-	for _, t := range triggerTabNames {
-		out = append(out, view.Action{ID: "backup.trigger.tab." + t.id, Label: text(t.label), Method: "GET", Enabled: true, On: t.id == open,
-			Href: s.postQuery("/app/settings/backup", url.Values{"job": {job.ID}, "trigger": {t.id}})})
-	}
-	return out
+	return s.unlockHref(unlockTrigger, "/app/settings/backup/trigger?job="+url.QueryEscape(job.ID), "job", job.ID)
 }

@@ -3,7 +3,9 @@ package web
 import (
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
+	"time"
 
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
@@ -48,6 +50,7 @@ func agentLabel(ua string) string {
 func (s *Server) sessionRows(sess *session.Session) []view.SessionRow {
 	tf, now := s.timeFor(sess), s.now()
 	var rows []view.SessionRow
+	var started []time.Time
 	for _, in := range s.sessions.SessionsOf(sess.AccountID()) {
 		row := view.SessionRow{
 			Agent: text(in.Agent), Address: text(in.Address),
@@ -55,14 +58,32 @@ func (s *Server) sessionRows(sess *session.Session) []view.SessionRow {
 			Current: in.PublicID == sess.PublicID(),
 		}
 		if row.Current {
-			row.End = view.Action{ID: "account.session.end", Label: "End", Method: "POST", Reason: "This is the session you are in: sign out to end it."}
+			row.End = view.Action{ID: "account.session.end", Label: "End", Method: "POST", Reason: "This is the session you are using: sign out instead."}
 		} else {
 			row.End = view.Action{ID: "account.session.end", Label: "End", Method: "POST", Enabled: true,
 				Href: s.postQuery("/app/settings/account", url.Values{"op": {"end"}, "s": {in.PublicID}})}
 		}
 		rows = append(rows, row)
+		started = append(started, in.Started)
 	}
-	return rows
+	// This one first, the others newest first (account-1): the same order
+	// every time.
+	idx := make([]int, len(rows))
+	for i := range idx {
+		idx[i] = i
+	}
+	sort.SliceStable(idx, func(a, b int) bool {
+		ra, rb := rows[idx[a]], rows[idx[b]]
+		if ra.Current != rb.Current {
+			return ra.Current
+		}
+		return started[idx[a]].After(started[idx[b]])
+	})
+	out := make([]view.SessionRow, len(rows))
+	for i, j := range idx {
+		out[i] = rows[j]
+	}
+	return out
 }
 
 // deleteAction is the danger zone (owner's decision 19.09.2026): the

@@ -55,31 +55,32 @@ func TestThePasswordSheetDoesWhatItIsFor(t *testing.T) {
 	}
 }
 
-// 193 p. 3 (Typecase's note 86): outside the window the job's own clock is
-// the password's sheet over the job's page — «External trigger», the job on
-// its right, Turn on —, and the sheet turns it on: the line and its secret
-// on the job's page, once.
+// 193 p. 3, Typecase's notes 86 and 91: outside the window Turn on of the
+// trigger's sheet is the password's sheet over the list of jobs —
+// «External trigger», the job on its right, Turn on —, and the password's
+// sheet turns it on: the trigger's sheet with the password and the line
+// whole, once.
 func TestThePasswordSheetTurnsTheTriggerOn(t *testing.T) {
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
-	c := openJob(t, f).Clock
-	if c.Method != http.MethodGet || !strings.Contains(c.Href, "for=trigger") {
-		t.Fatalf("clock outside the window = %+v", c)
+	c := triggerSheetOf(t, f, job.ID, "").Form.Actions[0]
+	rec := f.h.do(postForm(c.Href, f.sess, url.Values{}))
+	if c.Method != http.MethodPost || rec.Code != http.StatusSeeOther || !strings.Contains(rec.Header().Get("Location"), "for=trigger") {
+		t.Fatalf("Turn on outside the window = %+v: %d %s", c, rec.Code, rec.Header().Get("Location"))
 	}
-	sheet := decode[view.UnlockSheet](t, f.h.do(get(c.Href, f.sess)))
+	sheet := decode[view.UnlockSheet](t, f.h.do(get(rec.Header().Get("Location"), f.sess)))
 	if sheet.Purpose != "External trigger" || sheet.Subject != view.Text(job.Name) || sheet.Form.Actions[0].Label != "Turn on" || sheet.Under == nil || sheet.Under.Backup == nil {
 		t.Fatalf("the sheet = %+v", sheet)
 	}
-	back := "/app/settings/backup?job=" + job.ID
-	rec := f.h.do(postForm("/app/settings/unlock", f.sess, url.Values{"for": {"trigger"}, "job": {job.ID}, "back": {back}, "password": {"password123"}}))
+	back := "/app/settings/backup/trigger?job=" + job.ID
+	rec = f.h.do(postForm("/app/settings/unlock", f.sess, url.Values{"for": {"trigger"}, "job": {job.ID}, "back": {back}, "password": {"password123"}}))
 	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != back {
 		t.Fatalf("Turn on: %d %s", rec.Code, rec.Header().Get("Location"))
 	}
-	page := decode[view.BackupPage](t, f.h.do(get(back, f.sess)))
-	if page.Job == nil || page.Job.Trigger == nil || page.Job.Trigger.Command == "" || !page.Job.Trigger.Password.Shown {
-		t.Fatalf("the trigger after the sheet = %+v", page.Job)
+	if issued := triggerSheetOf(t, f, job.ID, ""); issued.Password == nil || issued.Password.Value == "" || issued.Line == nil || !issued.Line.Shown {
+		t.Fatalf("the trigger after the sheet = %+v", issued)
 	}
-	if again := decode[view.BackupPage](t, f.h.do(get(back, f.sess))); again.Job.Trigger.Command != "" {
-		t.Error("the secret is shown twice")
+	if again := triggerSheetOf(t, f, job.ID, ""); again.Password == nil || again.Password.Value != "" {
+		t.Error("the password is shown twice")
 	}
 }

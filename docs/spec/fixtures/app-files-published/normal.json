@@ -161,12 +161,11 @@
           "method": "GET"
         },
         {
-          "csrf": "csrf",
           "enabled": true,
-          "href": "/app/mail/compose?id=link-smeta\u0026op=link",
+          "href": "/app/mail/link?id=link-smeta",
           "id": "publish.mail",
           "label": "Send",
-          "method": "POST",
+          "method": "GET",
           "target": "sheet"
         },
         {
@@ -203,12 +202,11 @@
           "method": "GET"
         },
         {
-          "csrf": "csrf",
           "enabled": true,
-          "href": "/app/mail/compose?id=link-lichnyj\u0026op=link",
+          "href": "/app/mail/link?id=link-lichnyj",
           "id": "publish.mail",
           "label": "Send",
-          "method": "POST",
+          "method": "GET",
           "target": "sheet"
         },
         {

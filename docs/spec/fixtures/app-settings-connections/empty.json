@@ -1,0 +1,286 @@
+{
+  "accounts": [],
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/settings/connections/new",
+      "icon": "i-plus",
+      "id": "connection.add",
+      "label": "Connect account",
+      "method": "GET",
+      "primary": true
+    },
+    {
+      "enabled": true,
+      "href": "/app/settings/connections?op=feed",
+      "icon": "i-link",
+      "id": "feed.subscribe",
+      "label": "Subscribe to a feed",
+      "method": "GET"
+    }
+  ],
+  "add": null,
+  "addNote": "",
+  "details": null,
+  "dialogSubtitle": "",
+  "dialogTitle": "",
+  "empty": [
+    {
+      "mark": "strong",
+      "text": "Nothing is connected yet."
+    }
+  ],
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "note": [],
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-user",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-server",
+        "id": "settings.connections",
+        "label": "Connections",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "icon": "i-file",
+        "id": "settings.attachments",
+        "label": "Attachments",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "icon": "i-device",
+        "id": "settings.devices",
+        "label": "New device",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-archive",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-link",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "icon": "i-theme",
+        "id": "settings.appearance",
+        "label": "Appearance",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "subscriptions": [],
+  "subtitle": [
+    {
+      "text": "Signed in as "
+    },
+    {
+      "mark": "strong",
+      "text": "mix"
+    }
+  ],
+  "title": "Connections",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "trace": null
+}

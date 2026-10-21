@@ -24,7 +24,7 @@ func TestACollectionRowCarriesItsTick(t *testing.T) {
 		if r.Toggle.ID != "collection.tick" || r.Toggle.Method != "POST" || !r.Toggle.Enabled || r.Toggle.Label != r.Label {
 			t.Fatalf("the tick = %+v", r.Toggle)
 		}
-		rec := f.h.do(postForm(r.Toggle.Href, f.sess, url.Values{}))
+		rec := f.h.do(postForm(r.Toggle.Href, f.sess, url.Values{"pick": {r.Pick}}))
 		if rec.Code != 303 || rec.Header().Get("Location") != "/app/settings/connections" {
 			t.Fatalf("tick: %d %q", rec.Code, rec.Header().Get("Location"))
 		}

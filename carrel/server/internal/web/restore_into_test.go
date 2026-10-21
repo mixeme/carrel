@@ -23,7 +23,7 @@ func openArchive(t *testing.T, f davFixture, change func()) view.RestoreMatch {
 	if change != nil {
 		change()
 	}
-	if rec := f.h.do(postForm("/app/settings/backup?op=restore-open", f.sess, url.Values{
+	if rec := f.h.do(postForm("/app/settings/backup/restore", f.sess, url.Values{
 		"source": {"run"}, "run": {job.ID + "|" + run.ID}, "password": {"archive-pw"},
 	})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("open: %d %s", rec.Code, rec.Body.String())
@@ -105,10 +105,7 @@ func TestRestoreIntoTheCollectionsMatchedByPath(t *testing.T) {
 	}
 
 	before := len(f.srv.Paths(searchWork))
-	done := decode[view.BackupPage](t, f.h.do(postForm(run.Href, f.sess, matchForm(m))))
-	if !hasNotice(done.Notices, "Restored") {
-		t.Fatalf("restore = %+v", done.Notices)
-	}
+	rep := restoreRun(t, f, run.Href, matchForm(m))
 	if _, _, ok := f.srv.Object(searchBook + "ada.vcf"); !ok {
 		t.Errorf("the missing card was not created again under its name: %v", f.srv.Paths(searchBook))
 	}
@@ -118,16 +115,10 @@ func TestRestoreIntoTheCollectionsMatchedByPath(t *testing.T) {
 	if n := len(f.srv.Paths(searchWork)); n != before+1 {
 		t.Errorf("the calendar holds %d, want %d: the changed event once more, the task not twice", n, before+1)
 	}
-	var lines string
-	for _, n := range done.Notices {
-		if n.Details != nil {
-			for _, l := range n.Details.Lines {
-				lines += string(l) + "\n"
-			}
-		}
-	}
-	if !strings.Contains(lines, "e1 → ") || !strings.Contains(lines, "1 already there") {
-		t.Errorf("the report does not name the fresh UID or what was there:\n%s", lines)
+	// The report (s-backup-18): the fresh UID counted, the same records
+	// not repeated.
+	if lines := reportLines(rep); !strings.Contains(lines, "1 record with a new UID") || !strings.Contains(string(rep.Subtitle), "1 with a new UID") {
+		t.Errorf("the report does not name the fresh UID:\n%s\n%s", rep.Subtitle, lines)
 	}
 	if body, ok := f.srv.File(filesDocs + "share/readme.txt"); !ok || body != "hello" {
 		t.Errorf("the file there = %q %v", body, ok)

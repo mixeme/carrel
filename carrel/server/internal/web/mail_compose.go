@@ -72,7 +72,6 @@ type mailPart struct {
 	Media  string
 	Size   int64
 	AsLink bool
-	LinkID string // one of the person's live links, kept in the blob
 	// Terms are the publish sheet's form the person applied over the letter
 	// to a link it will make (note 70 of Typecase): how long it lives and
 	// what the visitor sees. Nil — the letter's own: thirty days, what the
@@ -174,9 +173,10 @@ func (s *Server) getMailCompose(w http.ResponseWriter, r *http.Request) {
 }
 
 // postMailCompose keeps what was typed and then does the op: attach opens
-// the attach sheet, remove drops a part, link adds a link the person has —
-// to the letter being written, or to a new one named after it —, discard
-// throws the letter away, send sends it.
+// the attach sheet, remove drops a part, discard throws the letter away,
+// send sends it. A link given out before is sent by a letter of its own
+// («Send this link», mail_link.go): it never joins this one (the owner's
+// decision of 21.10.2026).
 func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -188,30 +188,8 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 	}
 	d := loadMailDraft(sess)
 	op := r.FormValue("op")
-	switch op {
-	case "discard":
+	if op == "discard" {
 		saveMailDraft(sess, &mailDraft{})
-		s.redirect(w, r, "/app/mail/compose")
-		return
-	case "link":
-		if s.linkToken(sess, r.FormValue("id")) == "" {
-			s.notFound(w, r)
-			return
-		}
-		part, ok := s.linkPart(sess, r.FormValue("id"))
-		if !ok {
-			s.notFound(w, r)
-			return
-		}
-		// A letter being written is not thrown away for a link: the link
-		// joins it, once. With nothing begun the letter is of the link.
-		switch {
-		case len(d.To) == 0 && d.Subject == "" && strings.TrimSpace(d.Body) == "" && len(d.Parts) == 0:
-			d = &mailDraft{Parts: []mailPart{part}, Subject: part.Title}
-		case !slices.ContainsFunc(d.Parts, func(p mailPart) bool { return p.LinkID == part.LinkID }):
-			d.Parts = append(d.Parts, part)
-		}
-		saveMailDraft(sess, d)
 		s.redirect(w, r, "/app/mail/compose")
 		return
 	}
@@ -229,7 +207,7 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 		// Apply of the publish sheet over the letter (s-mail-1): the terms
 		// of a link the letter makes when it goes; nothing is made now.
 		i, err := strconv.Atoi(r.FormValue("i"))
-		if err != nil || i < 0 || i >= len(d.Parts) || !d.Parts[i].AsLink || d.Parts[i].LinkID != "" {
+		if err != nil || i < 0 || i >= len(d.Parts) || !d.Parts[i].AsLink {
 			s.notFound(w, r)
 			return
 		}
@@ -342,7 +320,7 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 		}
 		// A link the letter makes says its terms, and «Change…» opens the
 		// publish sheet over the letter with them (note 70 of Typecase).
-		if p.AsLink && p.LinkID == "" {
+		if p.AsLink {
 			row.Terms = text(livesWords(partLives(p)))
 			row.Change = &view.Action{ID: "mail.link.terms", Label: "Change…", Method: "GET", Enabled: true,
 				Href: s.route("/app/publish?" + partPublishQuery(p, i).Encode())}
@@ -380,7 +358,7 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 	case left == 0:
 		send.Enabled, send.Reason = false, text(user.ErrLetterLimit.Error())
 	default:
-		if err := s.givesTooMuch(sess, s.reckonLinks(slices.Clone(d.Parts))); err != nil {
+		if err := s.givesTooMuch(s.reckonLinks(slices.Clone(d.Parts))); err != nil {
 			send.Enabled, send.Reason = false, text(err.Error())
 		}
 	}
@@ -467,15 +445,10 @@ func (s *Server) suggestRecipients(ctx context.Context, sess *session.Session, q
 
 // givesTooMuch is what a letter must never give out more of than the person
 // chose, said before anything is read or made — and on the sheet before Send
-// is pressed (Б36, Б37; Пб39): Send is off with it as its reason.
-func (s *Server) givesTooMuch(sess *session.Session, parts []mailPart) error {
+// is pressed (Б37; Пб39): Send is off with it as its reason.
+func (s *Server) givesTooMuch(parts []mailPart) error {
 	for _, p := range parts {
-		switch {
-		case p.LinkID != "" && s.linkToken(sess, p.LinkID) == "":
-			// A link the person revoked, or one that has run out, is not
-			// published again behind their back.
-			return fmt.Errorf("The link to «%s» was revoked or has expired since it was put into the letter. Remove it, or publish it again.", p.Title)
-		case p.AsLink && p.From != "":
+		if p.AsLink && p.From != "" {
 			// A link is the calendar whole; the person chose some of its
 			// days.
 			return fmt.Errorf("«%s» does not fit the letter, and a link would open the whole calendar, not these days. Remove it, or attach fewer days.", p.Title)
@@ -492,7 +465,7 @@ func (s *Server) reckonLinks(parts []mailPart) []mailPart {
 	var total int64
 	for i := range parts {
 		p := &parts[i]
-		if p.LinkID != "" || p.Folder {
+		if p.Folder {
 			p.AsLink = true
 			continue
 		}
@@ -502,20 +475,6 @@ func (s *Server) reckonLinks(parts []mailPart) []mailPart {
 		}
 	}
 	return parts
-}
-
-// linkPart is a letter's part for a link made in this session.
-func (s *Server) linkPart(sess *session.Session, id string) (mailPart, bool) {
-	for _, l := range s.users.PublishedLinks(sess.AccountID()) {
-		if l.ID != id {
-			continue
-		}
-		// Named as the list of links names it, with its days (Пб16; s-mail-4:
-		// «Личный · 10–31 August»): two links to one calendar are told apart.
-		return mailPart{What: "link", Kind: view.Kind(l.Target.Kind), Account: l.Target.AccountID, Col: l.Target.Col,
-			UID: l.Target.UID, Path: l.Target.Path, Folder: l.Target.Folder, Title: publishedTitle(l.Target), AsLink: true, LinkID: id}, true
-	}
-	return mailPart{}, false
 }
 
 // partContent is what an attached thing is as a file: its exchange format,
@@ -630,7 +589,7 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 		return 0, fmt.Errorf("A letter goes to %d recipients at most.", s.mailPolicy().Recipients)
 	}
 	d.Parts = s.reckonLinks(d.Parts)
-	if err := s.givesTooMuch(sess, d.Parts); err != nil {
+	if err := s.givesTooMuch(d.Parts); err != nil {
 		return 0, err
 	}
 
@@ -669,42 +628,17 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 		if !p.AsLink {
 			continue
 		}
-		token := ""
-		if p.LinkID != "" {
-			token = s.linkToken(sess, p.LinkID)
-		}
-		if token == "" {
-			token, err = s.partLink(sess, p)
-			if err != nil {
-				return 0, fmt.Errorf("The link to «%s» could not be made. Remove it or try again.", p.Title)
-			}
+		token, err := s.partLink(sess, p)
+		if err != nil {
+			return 0, fmt.Errorf("The link to «%s» could not be made. Remove it or try again.", p.Title)
 		}
 		links = append(links, p.Title+" — "+s.absURL(r, "/p/"+token))
 		kinds[string(p.Kind)+" link"]++
 	}
 
-	ls := s.senderOf(u)
-	body := strings.TrimRight(strings.ReplaceAll(d.Body, "\r\n", "\n"), "\n") + "\n\n" + ls.Name + "\n"
-	if len(links) > 0 {
-		body += "\n" + strings.Join(links, "\n") + "\n"
+	if err := s.relayLetter(r, s.senderOf(u), to, d.Subject, d.Body, links, files); err != nil {
+		return 0, err
 	}
-	if ls.ReplyTo == "" {
-		body += "\n-- \nThis letter was sent from Carrel at " + s.publicOrigin(r) +
-			". Do not reply to it: the sender's address is not confirmed, and a reply would reach nobody.\n"
-	}
-	data, err := cmail.Build(s.relay(), cmail.Message{
-		To: to, ReplyTo: ls.ReplyTo, Sender: ls.Name, FromLogin: ls.FromLogin,
-		Subject: d.Subject, Text: body, Attachments: files,
-	}, time.Now())
-	if err != nil {
-		return 0, errors.New("The letter could not be written: " + strings.TrimPrefix(err.Error(), "mail: "))
-	}
-	sendCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
-	defer cancel()
-	if _, err := cmail.Send(sendCtx, s.relay(), to, data); err != nil {
-		return 0, errors.New("The relay did not take the letter: " + err.Error())
-	}
-	s.markSent()
 	sent = true
 	var attached []string
 	for _, k := range attachKinds {
@@ -717,6 +651,34 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 	}
 	s.users.LetterSent(u.ID, to, strings.Join(attached, ", "))
 	return len(to), nil
+}
+
+// relayLetter writes a letter and hands it to the relay: what the person
+// wrote, signed with their name, the links each on a line of its own, and —
+// without an address to answer — a foot that says a reply reaches nobody.
+func (s *Server) relayLetter(r *http.Request, ls letterSender, to []string, subject, typed string, links []string, files []cmail.Attachment) error {
+	body := strings.TrimRight(strings.ReplaceAll(typed, "\r\n", "\n"), "\n") + "\n\n" + ls.Name + "\n"
+	if len(links) > 0 {
+		body += "\n" + strings.Join(links, "\n") + "\n"
+	}
+	if ls.ReplyTo == "" {
+		body += "\n-- \nThis letter was sent from Carrel at " + s.publicOrigin(r) +
+			". Do not reply to it: the sender's address is not confirmed, and a reply would reach nobody.\n"
+	}
+	data, err := cmail.Build(s.relay(), cmail.Message{
+		To: to, ReplyTo: ls.ReplyTo, Sender: ls.Name, FromLogin: ls.FromLogin,
+		Subject: subject, Text: body, Attachments: files,
+	}, time.Now())
+	if err != nil {
+		return errors.New("The letter could not be written: " + strings.TrimPrefix(err.Error(), "mail: "))
+	}
+	sendCtx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
+	defer cancel()
+	if _, err := cmail.Send(sendCtx, s.relay(), to, data); err != nil {
+		return errors.New("The relay did not take the letter: " + err.Error())
+	}
+	s.markSent()
+	return nil
 }
 
 // partLink publishes an attached thing for thirty days (S-25.1).
@@ -778,11 +740,9 @@ func partPublishQuery(p mailPart, i int) url.Values {
 
 // linkReason is why a part goes as a link, as the line under the list says
 // it (s-mail-1): a folder always; a file over the attachment's ceiling; one
-// the letter has no room left for; a link published before.
+// the letter has no room left for.
 func (s *Server) linkReason(p mailPart) string {
 	switch {
-	case p.LinkID != "":
-		return "«" + p.Title + "» is a link published before"
 	case p.Folder:
 		return "a folder always goes as a link"
 	case p.Size > s.mailPolicy().Attach:

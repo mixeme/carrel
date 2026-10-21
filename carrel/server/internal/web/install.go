@@ -97,7 +97,12 @@ func (s *Server) getAdminInstall(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	s.writePage(w, r, http.StatusOK, s.installPage(sess, strings.TrimSpace(s.cfg.PublicURL), nil, ""))
+	// The address declared, else the one this request came to (s-admin-25).
+	base := strings.TrimSpace(s.cfg.PublicURL)
+	if base == "" {
+		base = s.publicOrigin(r)
+	}
+	s.writePage(w, r, http.StatusOK, s.installPage(sess, base, nil, ""))
 }
 
 // postAdminInstall takes the address (url=), keeps it and runs the check.
@@ -158,23 +163,22 @@ func (s *Server) installPage(sess *session.Session, publicURL string, rows []vie
 	form := withPrimary(s.plainForm("/admin/install", "POST", csrfField(sess),
 		view.FormRow{Name: "url", Label: "Base address", Kind: view.InputURL, Value: text(publicURL), Mono: true}),
 		"admin.install.run", "Run the check")
-	page := view.AdminInstallPage{Shell: s.withRail(s.buildShell(sess, "Installation check"), s.adminRail(sess, "/admin/install")), Form: form, Rows: rows}
+	page := view.AdminInstallPage{Shell: s.withRail(s.buildShell(sess, "Installation check"), s.adminRail(sess, "/admin/install")), Form: form, Rows: rows,
+		Subtitle: "Carrel asks itself from outside, at the address you declared as the base one"}
 	// What went wrong with the address, a message under the head
 	// (s-admin-26; settings.env and the environment, Typecase's note 79).
 	if note != "" {
 		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeAlert, Body: text(note)})
 	}
-	// Without a table, what the check does (s-admin-25, -26).
-	if len(rows) == 0 {
-		page.Note = "The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. " +
-			"Nothing is changed and nothing is stored, apart from the audit line saying the check was run."
-	}
+	// What the check does, under the table and without it (s-admin-4, -25, -26).
+	page.Note = "The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. " +
+		"Nothing is changed and nothing is stored, apart from the audit line saying the check was run."
 	return page
 }
 
 // runInstallCheck is the eleven rows, in order.
 func (s *Server) runInstallCheck(ctx context.Context, sess *session.Session, origin string, cookie *http.Cookie) []view.InstallRow {
-	client := &http.Client{Timeout: 20 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	client := &http.Client{Timeout: 20 * time.Second, Transport: s.probeWay, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	var rows []view.InstallRow
 	row := func(check string, st view.CheckState, value, advice string) {
 		rows = append(rows, view.InstallRow{Check: text(check), State: st, Value: text(value), Advice: text(advice)})
@@ -266,7 +270,7 @@ func (s *Server) runInstallCheck(ctx context.Context, sess *session.Session, ori
 	body := io.LimitReader(zeros{}, 21<<20)
 	upReq, _ := http.NewRequestWithContext(ctx, http.MethodPost, origin+"/healthz", body)
 	upReq.ContentLength = 21 << 20
-	upResp, err := (&http.Client{Timeout: 60 * time.Second}).Do(upReq)
+	upResp, err := (&http.Client{Timeout: 60 * time.Second, Transport: s.probeWay}).Do(upReq)
 	switch {
 	case err != nil:
 		row("Upload size", view.CheckBad, "21 MB probe → the connection was cut: "+err.Error(), "Raise or lift client_max_body_size at the proxy: Carrel has no ceiling of its own.")

@@ -3,6 +3,7 @@ package screens
 import (
 	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/client/screens/about"
+	"carrel.dev/carrel/client/screens/admin"
 	"carrel.dev/carrel/client/screens/agenda"
 	"carrel.dev/carrel/client/screens/ask"
 	"carrel.dev/carrel/client/screens/confirm"
@@ -14,13 +15,20 @@ import (
 	"carrel.dev/carrel/client/screens/deadlink"
 	"carrel.dev/carrel/client/screens/event"
 	"carrel.dev/carrel/client/screens/eventedit"
+	"carrel.dev/carrel/client/screens/fileop"
+	"carrel.dev/carrel/client/screens/files"
+	"carrel.dev/carrel/client/screens/folder"
 	"carrel.dev/carrel/client/screens/forgot"
+	"carrel.dev/carrel/client/screens/history"
 	"carrel.dev/carrel/client/screens/invite"
 	"carrel.dev/carrel/client/screens/login"
 	"carrel.dev/carrel/client/screens/move"
 	"carrel.dev/carrel/client/screens/note"
 	"carrel.dev/carrel/client/screens/notes"
+	"carrel.dev/carrel/client/screens/picker"
+	"carrel.dev/carrel/client/screens/published"
 	"carrel.dev/carrel/client/screens/register"
+	"carrel.dev/carrel/client/screens/settings"
 	"carrel.dev/carrel/client/screens/setup"
 	"carrel.dev/carrel/client/screens/task"
 	"carrel.dev/carrel/client/screens/taskedit"
@@ -66,6 +74,10 @@ type Screen struct {
 	// page's gutters (zero), but flush with the sides of a dialog on the
 	// conflict screen (s-conflict-8…-11). The zone notices is drawn so too.
 	Notices widget.MsgSpace
+	// NoticesOf is Notices by the model, for a screen whose notices stand
+	// over the page or in its dialog by what is open: the connections — in
+	// Connect account, over its fields (s-profile-24). nil — Notices.
+	NoticesOf func(model any) widget.MsgSpace
 	// Waits are what of the screen waits for the library (U-5.5, the
 	// owner's decision of 01.10.2026): each a row of the list «ждёт
 	// библиотеку», and the row's mark stands at the line here and at the
@@ -184,6 +196,12 @@ var All = []Screen{
 		Draw:   func(model any) Root { return wipe.Screen(model.(*view.ForgotWipePage)) },
 		Title:  func(model any) string { return string(model.(*view.ForgotWipePage).Title) },
 		Forms:  func(model any) []widget.PostForm { return wipe.Forms(model.(*view.ForgotWipePage)) },
+	},
+	{
+		Model:  func() any { return new(view.PasswordHistoryPage) },
+		Frames: []string{"s-auth-15"},
+		Draw:   func(model any) Root { return history.Screen(model.(*view.PasswordHistoryPage)) },
+		Title:  func(model any) string { return string(model.(*view.PasswordHistoryPage).Title) },
 	},
 	{
 		Model:  func() any { return new(view.DeadLinkPage) },
@@ -320,6 +338,234 @@ var All = []Screen{
 		Forms:   func(model any) []widget.PostForm { return conflict.Forms(model.(*view.ConflictPage)) },
 		Notices: conflict.NoticeSpace,
 	},
+	{
+		Model:  func() any { return new(view.AccountPage) },
+		Frames: []string{"account-1", "account-7", "account-8", "account-9", "account-10", "account-13", "s-mail-9"},
+		Draw:   func(model any) Root { return settings.Account(model.(*view.AccountPage)) },
+		Title:  func(model any) string { return string(model.(*view.AccountPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return settings.AccountForms(model.(*view.AccountPage)) },
+	},
+	{
+		Model:  func() any { return new(view.AttachmentsPage) },
+		Frames: []string{"attachments-1", "attachments-5", "attachments-6"},
+		Draw:   func(model any) Root { return settings.Attachments(model.(*view.AttachmentsPage)) },
+		Title:  func(model any) string { return string(model.(*view.AttachmentsPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return settings.AttachmentsForms(model.(*view.AttachmentsPage)) },
+	},
+	{
+		Model:     func() any { return new(view.ConnectionsPage) },
+		Frames:    []string{"s-profile-1", "s-profile-2", "s-profile-10", "s-profile-11", "s-profile-16", "s-profile-23", "s-profile-24", "s-profile-25", "s-profile-27", "s-profile-4"},
+		Draw:      func(model any) Root { return settings.Connections(model.(*view.ConnectionsPage)) },
+		Title:     func(model any) string { return string(model.(*view.ConnectionsPage).Title) },
+		Forms:     func(model any) []widget.PostForm { return settings.ConnectionsForms(model.(*view.ConnectionsPage)) },
+		NoticesOf: func(model any) widget.MsgSpace { return settings.ConnectionsNotices(model.(*view.ConnectionsPage)) },
+	},
+	{
+		Model:  func() any { return new(view.DevicesPage) },
+		Frames: []string{"s-plan-1", "s-plan-2", "s-plan-4", "s-plan-5", "s-plan-6"},
+		Draw:   func(model any) Root { return settings.Devices(model.(*view.DevicesPage)) },
+		Title:  func(model any) string { return string(model.(*view.DevicesPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return settings.DevicesForms(model.(*view.DevicesPage)) },
+	},
+	{
+		Model:  func() any { return new(view.BackupPage) },
+		Frames: []string{"s-backup-1", "s-backup-2", "s-backup-6", "s-backup-7", "s-backup-8", "s-backup-15", "s-backup-16", "s-backup-17", "s-backup-18", "s-backup-19"},
+		Draw:   func(model any) Root { return settings.Backup(model.(*view.BackupPage)) },
+		Title:  func(model any) string { return string(model.(*view.BackupPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return settings.BackupForms(model.(*view.BackupPage)) },
+	},
+	{
+		Model:  func() any { return new(view.BackupTriggerSheet) },
+		Frames: []string{"s-backup-12", "s-backup-13", "s-backup-14"},
+		Draw: func(model any) Root {
+			p := model.(*view.BackupTriggerSheet)
+			return over(p.Under, settings.TriggerSheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.BackupTriggerSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.BackupTriggerSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.ConnectionRemoveSheet) },
+		Frames: []string{"s-profile-26"},
+		Draw: func(model any) Root {
+			p := model.(*view.ConnectionRemoveSheet)
+			return over(p.Under, settings.DisconnectSheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.ConnectionRemoveSheet).Subject) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.ConnectionRemoveSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.DavloomScopeSheet) },
+		Frames: []string{"s-davloom-7"},
+		Draw: func(model any) Root {
+			p := model.(*view.DavloomScopeSheet)
+			return over(p.Under, settings.DavloomScopeSheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.DavloomScopeSheet).Subject) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.DavloomScopeSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.DavloomTreeSheet) },
+		Frames: []string{"s-davloom-9"},
+		Draw: func(model any) Root {
+			p := model.(*view.DavloomTreeSheet)
+			return over(p.Under, settings.DavloomTreeSheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.DavloomTreeSheet).Address) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.DavloomTreeSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.EscrowPage) },
+		Frames: []string{"account-4", "account-12", "account-14", "account-16"},
+		Draw:   func(model any) Root { return settings.Escrow(model.(*view.EscrowPage)) },
+		Title:  func(model any) string { return string(model.(*view.EscrowPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return settings.EscrowForms(model.(*view.EscrowPage)) },
+	},
+	{
+		Model:  func() any { return new(view.EscrowWithdrawSheet) },
+		Frames: []string{"account-11"},
+		Draw: func(model any) Root {
+			p := model.(*view.EscrowWithdrawSheet)
+			return over(p.Under, settings.WithdrawSheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.EscrowWithdrawSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.EscrowWithdrawSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.PasswordPage) },
+		Frames: []string{"account-3", "account-17"},
+		Draw:   func(model any) Root { return settings.Password(model.(*view.PasswordPage)) },
+		Title:  func(model any) string { return string(model.(*view.PasswordPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return settings.PasswordForms(model.(*view.PasswordPage)) },
+	},
+	{
+		Model:  func() any { return new(view.UnlockSheet) },
+		Frames: []string{"s-plan-3", "s-davloom-5", "account-15", "account-2"},
+		Draw: func(model any) Root {
+			p := model.(*view.UnlockSheet)
+			return over(p.Under, settings.UnlockSheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.UnlockSheet).Purpose) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.UnlockSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.DavloomPage) },
+		Frames: []string{"s-davloom-1", "s-davloom-2", "s-davloom-3", "s-davloom-6", "s-davloom-8"},
+		Draw:   func(model any) Root { return settings.Davloom(model.(*view.DavloomPage)) },
+		Title:  func(model any) string { return string(model.(*view.DavloomPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return settings.DavloomForms(model.(*view.DavloomPage)) },
+	},
+	{
+		Model:  func() any { return new(view.AppearancePage) },
+		Frames: []string{"appearance-1"},
+		Draw:   func(model any) Root { return settings.Appearance(model.(*view.AppearancePage)) },
+		Title:  func(model any) string { return string(model.(*view.AppearancePage).Title) },
+		Forms:  func(model any) []widget.PostForm { return settings.AppearanceForms(model.(*view.AppearancePage)) },
+	},
+	{
+		Model:  func() any { return new(view.AdminInvitesPage) },
+		Frames: []string{"s-admin-1"},
+		Draw:   func(model any) Root { return admin.Invites(model.(*view.AdminInvitesPage)) },
+		Title:  func(model any) string { return string(model.(*view.AdminInvitesPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return admin.InvitesForms(model.(*view.AdminInvitesPage)) },
+	},
+	{
+		Model:  func() any { return new(view.AdminSettingsPage) },
+		Frames: []string{"s-admin-3", "s-admin-32", "s-admin-33"},
+		Draw:   func(model any) Root { return admin.Settings(model.(*view.AdminSettingsPage)) },
+		Title:  func(model any) string { return string(model.(*view.AdminSettingsPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return admin.SettingsForms(model.(*view.AdminSettingsPage)) },
+	},
+	{
+		Model:  func() any { return new(view.AdminInstallPage) },
+		Frames: []string{"s-admin-4", "s-admin-25", "s-admin-26"},
+		Draw:   func(model any) Root { return admin.Install(model.(*view.AdminInstallPage)) },
+		Title:  func(model any) string { return string(model.(*view.AdminInstallPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return admin.InstallForms(model.(*view.AdminInstallPage)) },
+	},
+	{
+		Model:  func() any { return new(view.AdminDavPage) },
+		Frames: []string{"s-admin-5", "s-admin-27", "s-admin-28", "s-admin-29"},
+		Draw:   func(model any) Root { return admin.Dav(model.(*view.AdminDavPage)) },
+		Title:  func(model any) string { return string(model.(*view.AdminDavPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return admin.DavForms(model.(*view.AdminDavPage)) },
+	},
+	{
+		Model:  func() any { return new(view.AdminEscrowPage) },
+		Frames: []string{"s-admin-6", "s-admin-30", "s-admin-31"},
+		Draw:   func(model any) Root { return admin.Escrow(model.(*view.AdminEscrowPage)) },
+		Title:  func(model any) string { return string(model.(*view.AdminEscrowPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return admin.EscrowForms(model.(*view.AdminEscrowPage)) },
+	},
+	{
+		Model:  func() any { return new(view.PasswordResetSheet) },
+		Frames: []string{"s-admin-13", "s-admin-14", "s-admin-16", "s-admin-20"},
+		Draw: func(model any) Root {
+			p := model.(*view.PasswordResetSheet)
+			return over(p.Under, admin.ResetSheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.PasswordResetSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.PasswordResetSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.AccountDeleteSheet) },
+		Frames: []string{"s-admin-34"},
+		Draw: func(model any) Root {
+			p := model.(*view.AccountDeleteSheet)
+			return over(p.Under, admin.DeleteSheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.AccountDeleteSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.AccountDeleteSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.AdminUsersPage) },
+		Frames: []string{"s-admin-2"},
+		Draw:   func(model any) Root { return admin.Users(model.(*view.AdminUsersPage)) },
+		Title:  func(model any) string { return string(model.(*view.AdminUsersPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return admin.UsersForms(model.(*view.AdminUsersPage)) },
+	},
+	{
+		Model:  func() any { return new(view.AdminAuditPage) },
+		Frames: []string{"s-admin-7"},
+		Draw:   func(model any) Root { return admin.Audit(model.(*view.AdminAuditPage)) },
+		Title:  func(model any) string { return string(model.(*view.AdminAuditPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return admin.AuditForms(model.(*view.AdminAuditPage)) },
+	},
+	{
+		Model:  func() any { return new(view.FilesRootPage) },
+		Frames: []string{"s-files-6", "states-35"},
+		Draw:   func(model any) Root { return files.Screen(model.(*view.FilesRootPage)) },
+		Title:  func(model any) string { return string(model.(*view.FilesRootPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return files.Forms(model.(*view.FilesRootPage)) },
+	},
+	{
+		Model:  func() any { return new(view.FilesPage) },
+		Frames: []string{"s-files-1", "s-files-2", "s-files-5", "states-32", "states-33", "states-34"},
+		Draw:   func(model any) Root { return folder.Screen(model.(*view.FilesPage)) },
+		Title:  func(model any) string { return string(model.(*view.FilesPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return folder.Forms(model.(*view.FilesPage)) },
+	},
+	{
+		Model:  func() any { return new(view.FileOpSheet) },
+		Frames: []string{"s-files-4", "s-files-11", "s-files-12", "s-files-13", "s-files-21", "s-files-22", "s-files-23"},
+		Draw:   func(model any) Root { return fileop.Screen(model.(*view.FileOpSheet)) },
+		Title:  func(model any) string { return string(model.(*view.FileOpSheet).Title) },
+		Forms:  func(model any) []widget.PostForm { return fileop.Forms(model.(*view.FileOpSheet)) },
+	},
+	{
+		Model:  func() any { return new(view.FilePickerSheet) },
+		Frames: []string{"s-notes-11", "s-files-16", "s-files-19"},
+		Draw:   func(model any) Root { return picker.Screen(model.(*view.FilePickerSheet)) },
+		Title:  func(model any) string { return string(model.(*view.FilePickerSheet).Title) },
+		Forms:  func(model any) []widget.PostForm { return picker.Forms(model.(*view.FilePickerSheet)) },
+	},
+	{
+		Model:  func() any { return new(view.PublishedLinksPage) },
+		Frames: []string{"s-publish-1", "s-publish-18", "s-publish-20", "s-publish-21"},
+		Draw:   func(model any) Root { return published.Screen(model.(*view.PublishedLinksPage)) },
+		Title:  func(model any) string { return string(model.(*view.PublishedLinksPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return published.Forms(model.(*view.PublishedLinksPage)) },
+	},
 }
 
 // over is a sheet opened by its address over the screen it was opened from
@@ -351,6 +597,18 @@ func over(u *view.Under, sheet widget.Sheet) Root {
 		shell = eventedit.Screen(u.EventEdit)
 	case u.TaskEdit != nil:
 		shell = taskedit.Screen(u.TaskEdit)
+	case u.AdminUsers != nil:
+		shell = admin.Users(u.AdminUsers)
+	case u.Account != nil:
+		shell = settings.Account(u.Account)
+	case u.Connections != nil:
+		shell = settings.Connections(u.Connections)
+	case u.Devices != nil:
+		shell = settings.Devices(u.Devices)
+	case u.Backup != nil:
+		shell = settings.Backup(u.Backup)
+	case u.Davloom != nil:
+		shell = settings.Davloom(u.Davloom)
 	}
 	return bind.Over(shell, sheet)
 }
@@ -381,6 +639,18 @@ func underForms(u *view.Under) []widget.PostForm {
 		return taskedit.Forms(u.TaskEdit)
 	case u.Note != nil:
 		return note.Forms(u.Note)
+	case u.AdminUsers != nil:
+		return admin.UsersForms(u.AdminUsers)
+	case u.Account != nil:
+		return settings.AccountForms(u.Account)
+	case u.Connections != nil:
+		return settings.ConnectionsForms(u.Connections)
+	case u.Devices != nil:
+		return settings.DevicesForms(u.Devices)
+	case u.Backup != nil:
+		return settings.BackupForms(u.Backup)
+	case u.Davloom != nil:
+		return settings.DavloomForms(u.Davloom)
 	}
 	return nil
 }

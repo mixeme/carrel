@@ -91,8 +91,8 @@ func TestNewCalendarTakesItsAddressFromTheName(t *testing.T) {
 		t.Errorf("address = %+v, want it to follow the name", a)
 	}
 
-	if noticeTitled(rediscoverPage(t, f).Notices, "Nothing appeared or disappeared") == nil {
-		t.Error("re-discovery sees the new calendars as new: the catalog path differs from the server's")
+	if n := rediscoverPage(t, f).Notices; len(n) != 1 || !strings.Contains(string(n[0].Body), "the list is the same as on the server") {
+		t.Errorf("re-discovery sees the new calendars as new: the catalog path differs from the server's: %+v", n)
 	}
 }
 

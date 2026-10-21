@@ -42,20 +42,34 @@ func openJob(t *testing.T, f davFixture) view.BackupJob {
 
 var secretIn = regexp.MustCompile(`Bearer (cbk_[A-Za-z0-9_-]+)`)
 
+// triggerSheetOf is the sheet of a job's external trigger, tab open
+// (Typecase's note 91).
+func triggerSheetOf(t *testing.T, f davFixture, jobID, tab string) view.BackupTriggerSheet {
+	t.Helper()
+	q := url.Values{"job": {jobID}}
+	if tab != "" {
+		q.Set("tab", tab)
+	}
+	return decode[view.BackupTriggerSheet](t, f.h.do(get("/app/settings/backup/trigger?"+q.Encode(), f.sess)))
+}
+
+// issueTrigger turns a job's trigger on inside the unlock window: the sheet
+// answers with the password and the line whole, once (s-backup-13).
 func issueTrigger(t *testing.T, f davFixture, job sealed.BackupJob) (string, view.TriggerBlock) {
 	t.Helper()
 	unlock(t, f)
-	page := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=trigger&job="+job.ID, f.sess, url.Values{})))
-	if page.Job == nil {
-		t.Fatalf("the answer is not the job's page: %+v", page.Jobs)
+	rec := f.h.do(postForm("/app/settings/backup/trigger?job="+job.ID+"&op=on", f.sess, url.Values{}))
+	if rec.Code != http.StatusSeeOther || !strings.HasSuffix(rec.Header().Get("Location"), "/app/settings/backup/trigger?job="+job.ID) {
+		t.Fatalf("Turn on: %d %s", rec.Code, rec.Header().Get("Location"))
 	}
-	tb := page.Job.Trigger
-	if tb == nil {
-		t.Fatal("no trigger card after the trigger was issued")
+	sheet := triggerSheetOf(t, f, job.ID, "")
+	tb := sheet.Line
+	if tb == nil || sheet.Password == nil {
+		t.Fatalf("no password and no line after the trigger was issued: %+v", sheet)
 	}
 	m := secretIn.FindStringSubmatch(string(tb.Command))
-	if m == nil || !tb.Password.Shown || string(tb.Password.Value) != m[1] {
-		t.Fatalf("trigger = %+v", tb)
+	if m == nil || !tb.Shown || string(sheet.Password.Value) != m[1] {
+		t.Fatalf("trigger = %+v, password %+v", tb, sheet.Password)
 	}
 	return m[1], *tb
 }
@@ -66,9 +80,13 @@ func issueTrigger(t *testing.T, f davFixture, job sealed.BackupJob) (string, vie
 func TestExternalTriggerRunsWithoutASession(t *testing.T) {
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
-	locked := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=trigger&job="+job.ID, f.sess, url.Values{})))
-	if !hasNotice(locked.Notices, "Confirm your password first") {
-		t.Fatalf("locked = %+v", locked.Notices)
+	// Outside the window Turn on answers with the password's sheet.
+	off := triggerSheetOf(t, f, job.ID, "")
+	if off.Password != nil || off.Line != nil || len(off.Form.Actions) == 0 || off.Form.Actions[0].Method != http.MethodPost {
+		t.Fatalf("off, locked = %+v", off)
+	}
+	if rec := f.h.do(postForm("/app/settings/backup/trigger?job="+job.ID+"&op=on", f.sess, url.Values{})); rec.Code != http.StatusSeeOther || !strings.Contains(rec.Header().Get("Location"), "for=trigger") {
+		t.Fatalf("locked Turn on: %d %s", rec.Code, rec.Header().Get("Location"))
 	}
 	secret, tb := issueTrigger(t, f, job)
 	if !strings.Contains(string(tb.Command), "0 3 * * * curl -fsS -m 30 -X POST") || !strings.Contains(string(tb.Command), "/api/backup/run?job="+job.ID) {
@@ -78,8 +96,8 @@ func TestExternalTriggerRunsWithoutASession(t *testing.T) {
 	if strings.Contains(string(state), strings.TrimPrefix(secret, "cbk_")) {
 		t.Error("the state holds the secret")
 	}
-	again := openJob(t, f)
-	if again.Trigger == nil || again.Trigger.Command != "" || again.Trigger.Password.Shown {
+	again := triggerSheetOf(t, f, job.ID, "")
+	if again.Password == nil || again.Password.Value != "" || again.Line == nil || again.Line.Shown || strings.Contains(string(again.Line.Command), secret) {
 		t.Error("the secret is shown again")
 	}
 
@@ -122,8 +140,8 @@ func TestExternalTriggerRunsWithoutASession(t *testing.T) {
 		}
 	}
 
-	if rec := f.h.do(postForm("/app/settings/backup?op=trigger-off&job="+job.ID, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
-		t.Fatalf("off: %d", rec.Code)
+	if rec := f.h.do(postForm("/app/settings/backup/trigger?job="+job.ID+"&op=revoke", f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("revoke: %d", rec.Code)
 	}
 	if rec := f.h.do(script(http.MethodGet, "/api/backup/status", secret)); rec.Code != http.StatusNotFound {
 		t.Errorf("a secret turned off still works: %d", rec.Code)
@@ -152,15 +170,11 @@ func TestExternalTriggerDownloadAndBoth(t *testing.T) {
 	}
 
 	both := saveJob(t, f, jobForm(f, sealed.BackupToBoth, "8", "pw"))
-	page := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=trigger&job="+both.ID, f.sess, url.Values{})))
-	if j := page.Job; j != nil && j.Trigger != nil && strings.Contains(string(j.Trigger.Command), "#!/bin/sh") {
-		if !strings.Contains(string(j.Trigger.Command), "until [") {
-			t.Errorf("script = %q", j.Trigger.Command)
-		}
-		if !strings.Contains(runsText(j.Trigger.Destination), "two steps") {
-			t.Errorf("why a script: %q", runsText(j.Trigger.Destination))
-		}
-		return
+	_, sb := issueTrigger(t, f, both)
+	if !strings.Contains(string(sb.Command), "#!/bin/sh") || !strings.Contains(string(sb.Command), "until [") {
+		t.Errorf("Both: script = %q", sb.Command)
 	}
-	t.Error("Both got no script")
+	if !strings.Contains(runsText(sb.Destination), "two steps") {
+		t.Errorf("why a script: %q", runsText(sb.Destination))
+	}
 }

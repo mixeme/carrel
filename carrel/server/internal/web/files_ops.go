@@ -9,7 +9,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"slices"
 	"strconv"
@@ -58,8 +57,11 @@ type transfer struct {
 	// about that version and no other (S-17.1).
 	was string
 
-	// what it moves: an upload's file on disk, or a member of a collection
-	temp               string
+	// what it moves: a member of a collection. An upload keeps nothing of
+	// its file (S-17.3, the owner's decision of 19.10.2026): the answer to
+	// its question brings the file again, body is that answer's while it is
+	// placed.
+	body               io.Reader
 	srcAccount, srcCol string
 	src                []string
 }
@@ -73,11 +75,7 @@ func (t *transfer) label() string {
 
 func (t *transfer) ID() string    { return t.id }
 func (t *transfer) Waiting() bool { return t.state == view.OpIdle }
-func (t *transfer) Discard() {
-	if t.temp != "" {
-		_ = os.Remove(t.temp)
-	}
-}
+func (t *transfer) Discard()      {}
 
 func newTransfer(kind string, dest *fileCtx, name string) (*transfer, error) {
 	id, err := user.NewTransferID()
@@ -133,10 +131,11 @@ func (s *Server) transferQueue(sess *session.Session) *view.TransferQueue {
 			}
 		}
 		if t.Waiting() {
+			at := fileHref(t.account, t.col, t.marker(), t.folder, true)
 			answer := func(id, label, value string) view.Action {
 				return view.Action{
 					ID: id, Label: text(label), Method: "POST", Enabled: true,
-					Href: s.postQuery(fileHref(t.account, t.col, t.marker(), t.folder, true), url.Values{"transfer": {t.id}, "answer": {value}}),
+					Href: s.postQuery(at, url.Values{"transfer": {t.id}, "answer": {value}}),
 				}
 			}
 			// The frame's words and order (s-files-2): Replace overwrites on
@@ -146,6 +145,17 @@ func (s *Server) transferQueue(sess *session.Session) *view.TransferQueue {
 				answer("transfer.overwrite", "Replace", "overwrite"),
 				answer("transfer.skip", "Skip", "skip"),
 			}}
+			if t.kind == "upload" {
+				// An upload kept nothing of its file (S-17.3): one form of
+				// the answer (Typecase's note 100) — Keep both and Replace
+				// pick the file again in a field of their own, Skip sends
+				// answer=skip.
+				action := s.postQuery(at, url.Values{"transfer": {t.id}})
+				form := s.plainForm(action, "POST", csrfField(sess))
+				tr.Question.Form = &form
+				tr.Question.Options[0].Href, tr.Question.Options[0].File = s.route(action), "keep"
+				tr.Question.Options[1].Href, tr.Question.Options[1].File = s.route(action), "replace"
+			}
 		}
 		q.Rows = append(q.Rows, tr)
 	}
@@ -220,7 +230,7 @@ func isFileUpload(r *http.Request) bool {
 	case len(seg) == 6 && seg[1] == "app" && seg[5] == "new" && r.URL.Query().Get("op") == "attach":
 		// A new form's Attach sends the form with its file (attach_new.go).
 		return recordKinds[seg[2]].component != ""
-	case len(seg) == 4 && seg[1] == "app" && seg[2] == "settings" && seg[3] == "backup" && r.URL.Query().Get("op") == "restore-open":
+	case len(seg) == 5 && seg[1] == "app" && seg[2] == "settings" && seg[3] == "backup" && seg[4] == "restore":
 		// An archive brought from this computer: as large as a copy is.
 		return true
 	}
@@ -288,6 +298,10 @@ func (s *Server) postFilesUpload(w http.ResponseWriter, r *http.Request) {
 		s.answerTransfer(w, r, c, "upload", id)
 		return
 	}
+	if r.URL.Query().Get("op") == "taken" {
+		s.takenNames(w, r, c)
+		return
+	}
 	folder, _ := c.path(c.segs, true)
 	if c.col.ReadOnly {
 		s.answerUpload(w, r, c, readOnlyNotice)
@@ -314,7 +328,7 @@ func (s *Server) postFilesUpload(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		n++
-		if err := s.uploadOne(r, c, part, made); err != nil {
+		if err := s.uploadOne(r, c, part, made, up.fields); err != nil {
 			http.Error(w, "could not keep the upload", http.StatusInternalServerError)
 			return
 		}
@@ -341,8 +355,10 @@ func (s *Server) postFilesUpload(w http.ResponseWriter, r *http.Request) {
 // free, to a temporary file and a question when it is taken. The length goes
 // with it when the page sent one (S-17.1). A folder upload names every part by
 // its path inside the chosen folder, so the folders it needs are created
-// first, and made keeps the ones this upload has already made.
-func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part, made map[string]bool) error {
+// first, and made keeps the ones this upload has already made. A taken name
+// the page asked about before the files went (takenNames) carries its answer
+// in fields, «taken.<name>» — keep or replace —, and goes with it at once.
+func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part, made map[string]bool, fields url.Values) error {
 	ctx := r.Context()
 	rel, name := uploadPath(partName(part))
 	t, err := newTransfer("upload", c, name)
@@ -364,52 +380,126 @@ func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part, ma
 		t.state, t.note = view.OpFailed, "the folder it goes in was not created: "+sentenceEnd(fileReason(err))
 		return nil
 	}
+	label := t.label()
 	there, err := c.files.Stat(ctx, target)
-	switch {
-	case err == nil:
+	switch answer := fields.Get("taken." + label); {
+	case err == nil && answer == "replace":
+		// Replace was said of what stood there when the page asked: the
+		// server is told the version (If-Match), and another one written
+		// since is not this answer's to replace.
 		t.was = there.ETag
-		f, err := os.CreateTemp("", "carrel-upload-*")
+		s.sendUpload(r, t, part, label, "what stood there changed while it was asked about; nothing was overwritten. Upload it again to choose", func(body io.Reader) error {
+			_, err := c.files.UploadReplace(ctx, target, body, there.ETag)
+			return err
+		})
+	case err == nil && answer == "keep":
+		// Keep both: the first free name with a number, as an answer in
+		// the queue takes it.
+		if t.name, err = s.freeName(ctx, c, rel, name); err == nil {
+			target, err = c.path(append(append(slices.Clone(c.segs), rel...), t.name), false)
+		}
 		if err != nil {
-			t.state, t.note = view.OpFailed, "Carrel could not keep it to ask about the name"
+			t.name, t.state, t.note = name, view.OpFailed, sentenceEnd(fileReason(err))
 			return nil
 		}
-		t.size, err = io.Copy(f, part)
-		if cerr := f.Close(); err == nil {
-			err = cerr
-		}
-		if err != nil {
-			_ = os.Remove(f.Name())
+		s.sendUpload(r, t, part, label, "the new name was taken as well; nothing was overwritten", func(body io.Reader) error {
+			_, err := c.files.UploadCreate(ctx, target, body)
+			return err
+		})
+	case err == nil:
+		// The name is taken: a question, and nothing of the file is kept
+		// to answer it — not on Carrel's disk, not on the server (S-17.3,
+		// the owner's decision of 19.10.2026). Skip writes nothing; Keep
+		// both and Replace bring the file again with the answer.
+		t.was = there.ETag
+		if t.size, err = io.Copy(io.Discard, part); err != nil {
 			t.state, t.note = view.OpFailed, "the upload broke off"
 			return nil
 		}
-		t.temp, t.state = f.Name(), view.OpIdle
+		t.state = view.OpIdle
 	case file.NotFound(err):
-		body := &countingReader{r: part}
-		var send io.Reader = dav.Typed(body, uploadType(part, name))
-		declared := declaredSize(r, t.label())
-		if declared >= 0 {
-			send = dav.Sized(send, declared)
-		}
-		_, err = c.files.UploadCreate(ctx, target, send)
-		t.size = body.n.Load()
-		switch {
-		case err == nil:
-			t.state = view.OpDone
-		case file.ErrOccupied(err):
-			t.state, t.note = view.OpFailed, "the name was taken while it uploaded; nothing was overwritten. Upload it again to choose"
-		case declared < 0 && needsLength(err):
-			// S-17.1: the length was not sent and this server will not write
-			// without one. Carrel does not keep the body to measure it — there
-			// is no ceiling on a file — so it says so instead.
-			t.state, t.note = view.OpFailed, "this server writes a file only when its size is sent first, and the page did not send it. Turn scripts on, or put the file there with another client"
-			t.short = "the server needs the size" // s-files-24
-		default:
-			t.state, t.note = view.OpFailed, sentenceEnd(fileReason(err))
-		}
+		s.sendUpload(r, t, part, label, "the name was taken while it uploaded; nothing was overwritten. Upload it again to choose", func(body io.Reader) error {
+			_, err := c.files.UploadCreate(ctx, target, body)
+			return err
+		})
 	default:
 		t.state, t.note = view.OpFailed, sentenceEnd(fileReason(err))
 	}
 	return nil
+}
+
+// sendUpload writes one file part with write, its length in front when the
+// page sent one under label (S-17.1), and sets the row from what came of it;
+// occupied is what the row says when the server found the name taken.
+func (s *Server) sendUpload(r *http.Request, t *transfer, part *multipart.Part, label, occupied string, write func(io.Reader) error) {
+	body := &countingReader{r: part}
+	var send io.Reader = dav.Typed(body, uploadType(part, t.name))
+	declared := declaredSize(r, label)
+	if declared >= 0 {
+		send = dav.Sized(send, declared)
+	}
+	err := write(send)
+	t.size = body.n.Load()
+	switch {
+	case err == nil:
+		t.state = view.OpDone
+	case file.ErrOccupied(err):
+		t.state, t.note = view.OpFailed, occupied
+	case declared < 0 && needsLength(err):
+		// S-17.1: the length was not sent and this server will not write
+		// without one. Carrel does not keep the body to measure it — there
+		// is no ceiling on a file — so it says so instead.
+		t.state, t.note = view.OpFailed, "this server writes a file only when its size is sent first, and the page did not send it. Turn scripts on, or put the file there with another client"
+		t.short = "the server needs the size" // s-files-24
+	default:
+		t.state, t.note = view.OpFailed, sentenceEnd(fileReason(err))
+	}
+}
+
+// takenNames answers, before an upload's files go, which of their names are
+// taken where they would go (S-17.3; FileField.Taken, Typecase's note 100):
+// the page sends the form's fields and a «name» for each file — its path
+// inside a folder upload —, and gets the taken ones back as sent, a line
+// each. Each folder is listed once; one not there yet takes no name. A
+// read-only storage answers none: the upload is refused when it goes. An
+// answer that is not 2xx lets the page send the files at once, and the
+// queue asks after (uploadOne).
+func (s *Server) takenNames(w http.ResponseWriter, r *http.Request, c *fileCtx) {
+	up, err := uploadOf(r)
+	if err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	var out strings.Builder
+	listed := map[string]map[string]bool{}
+	for _, sent := range up.fields["name"] {
+		rel, name := uploadPath(sent)
+		if c.col.ReadOnly || name == "" || strings.ContainsAny(sent, "\r\n") {
+			continue
+		}
+		key := strings.Join(rel, "/")
+		there, ok := listed[key]
+		if !ok {
+			there = map[string]bool{}
+			if folder, err := c.path(append(slices.Clone(c.segs), rel...), true); err == nil {
+				entries, err := c.files.List(r.Context(), folder)
+				if err != nil && !file.NotFound(err) {
+					http.Error(w, "the folder could not be read", http.StatusBadGateway)
+					return
+				}
+				for _, e := range entries {
+					there[e.Name] = true
+				}
+			}
+			listed[key] = there
+		}
+		if there[name] {
+			out.WriteString(sent + "\n")
+		}
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	_, _ = io.WriteString(w, out.String())
 }
 
 // partName is the file name a part carries, whole. Part.FileName cuts the
@@ -1437,18 +1527,9 @@ func (s *Server) place(ctx context.Context, sess *session.Session, dest *fileCtx
 		return err
 	}
 	if t.kind == "upload" {
-		f, err := os.Open(t.temp)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		fi, err := f.Stat()
-		if err != nil {
-			return err
-		}
-		body := dav.Sized(f, fi.Size())
-		if mt := fileType(name, ""); mt != "" {
-			body = dav.Typed(body, mt)
+		body := t.body
+		if body == nil {
+			return errNoAnswerFile
 		}
 		if overwrite {
 			// The version asked about, and no other: a file written there
@@ -1562,6 +1643,29 @@ func (s *Server) changedSince(ctx context.Context, dest *fileCtx, t *transfer) b
 	return err == nil && now.ETag != "" && strings.Trim(now.ETag, `"`) != strings.Trim(t.was, `"`)
 }
 
+// errNoAnswerFile is an answer to an upload's question that came without
+// the file.
+var errNoAnswerFile = errors.New("the file did not come with the answer")
+
+// answerFile is the file an answer to an upload's question brings (S-17.3):
+// the form's one file, of the name the row asks about, typed and sized as
+// an upload is.
+func (s *Server) answerFile(r *http.Request, t *transfer) (io.Reader, error) {
+	up, err := uploadOf(r)
+	if err != nil || up.next == nil {
+		return nil, errors.New("Choose the file again: nothing of it was kept while the question waited, so the answer brings it.")
+	}
+	rel, name := uploadPath(partName(up.next))
+	if got := strings.Join(append(rel, name), "/"); got != t.label() && name != t.name {
+		return nil, fmt.Errorf("This is «%s», not «%s»: choose the file the question is about.", got, t.label())
+	}
+	var body io.Reader = dav.Typed(up.next, uploadType(up.next, t.name))
+	if declared := declaredSize(r, t.label()); declared >= 0 {
+		body = dav.Sized(body, declared)
+	}
+	return body, nil
+}
+
 // answerTransfer answers the question of one row. The row must be of this
 // session and wait at this address; anything else is 404. Skip lets the file
 // go; Keep both takes the first free name with a number; Overwrite this one is
@@ -1570,6 +1674,21 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 	answer := r.URL.Query().Get("answer")
 	got, found := c.sess.TakeTransfer(id)
 	t, ok := got.(*transfer)
+	// An upload's answer is one form (s-files-2, Typecase's note 100): the
+	// field its file came in says which — keep or replace —, or answer=skip.
+	// Send with no file chosen is Keep both without its file: the question
+	// stays, and says what it waits for.
+	if ok && t.kind == "upload" && answer == "" {
+		answer = "both"
+		if up, err := uploadOf(r); err == nil {
+			switch {
+			case up.fields.Get("answer") == "skip":
+				answer = "skip"
+			case up.next != nil && up.next.FormName() == "replace":
+				answer = "overwrite"
+			}
+		}
+	}
 	if !found || !ok || !t.Waiting() || t.marker() != marker || t.account != c.conn.ID || t.col != c.col.Path ||
 		!slices.Equal(t.folder, c.segs) || (answer != "skip" && answer != "both" && answer != "overwrite") {
 		if found {
@@ -1579,9 +1698,19 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 		return
 	}
 	next := *t
-	next.temp = ""
-	defer t.Discard()
 	ctx := r.Context()
+	// Keep both and Replace of an upload bring the file again (S-17.3): it
+	// must be the file asked about, by its name; without it the question
+	// stays.
+	if t.kind == "upload" && answer != "skip" {
+		body, err := s.answerFile(r, t)
+		if err != nil {
+			c.sess.KeepTransfer(got)
+			s.answerUpload(w, r, c, view.Notice{Role: view.NoticeAlert, Title: text("«" + t.label() + "» is still waiting"), Body: text(err.Error())})
+			return
+		}
+		t.body = body
+	}
 	switch answer {
 	case "skip":
 		next.state, next.note = view.OpCancelled, ""

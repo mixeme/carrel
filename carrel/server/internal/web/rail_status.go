@@ -55,6 +55,13 @@ func (s *Server) stampRun(sess *session.Session, t time.Time) view.Run {
 
 // settingsStatus is davloom and, when there are jobs, the copies.
 func (s *Server) settingsStatus(sess *session.Session) []view.RailStatus {
+	// Nothing connected, nothing to say of davloom or the copies
+	// (s-profile-25).
+	if sess != nil {
+		if b := s.catalogOf(sess); len(b.Connections) == 0 && len(b.Subscriptions) == 0 {
+			return nil
+		}
+	}
 	out := []view.RailStatus{s.davloomStatus(sess)}
 	if st, ok := s.backupStatus(sess); ok {
 		out = append(out, st)
@@ -67,13 +74,12 @@ func (s *Server) davloomStatus(sess *session.Session) view.RailStatus {
 		return view.RailStatus{Tone: view.StatusOff, Title: "davloom is off", Line: line("No device connects until it is started.")}
 	}
 	devices := s.users.Devices(sess.AccountID())
-	var last time.Time
-	for _, d := range devices {
-		if at := s.users.DeviceLastSeen(d.ID); at.After(last) {
-			last = at
-		}
+	last := s.users.DavloomLastResponse(sess.AccountID())
+	many := plural(len(devices), "device")
+	if len(devices) == 0 {
+		many = "no devices" // s-davloom-6
 	}
-	st := view.RailStatus{Tone: view.StatusOn, Title: text("davloom · running · " + plural(len(devices), "device"))}
+	st := view.RailStatus{Tone: view.StatusOn, Title: text("davloom · running · " + many)}
 	if last.IsZero() {
 		st.Line = line("No device has connected since the start.")
 	} else {

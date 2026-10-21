@@ -3,7 +3,13 @@
   "invite": {
     "aside": "chooses their own password",
     "badge": null,
-    "copy": null,
+    "copy": {
+      "enabled": true,
+      "href": "http://example.com/invite/invite-token",
+      "id": "admin.invite.copy",
+      "label": "Copy",
+      "method": "GET"
+    },
     "form": {
       "action": "/admin/invites?action=link",
       "actions": [
@@ -18,12 +24,11 @@
         },
         {
           "csrf": "csrf",
-          "enabled": false,
+          "enabled": true,
           "href": "/admin/invites?action=send",
           "id": "admin.invite.send",
           "label": "Send invitation",
-          "method": "POST",
-          "reason": "SMTP is not configured: no letter can go."
+          "method": "POST"
         }
       ],
       "errors": [],
@@ -90,7 +95,7 @@
     },
     "issued": null,
     "lede": "",
-    "link": "",
+    "link": "http://example.com/invite/invite-token",
     "title": "Invitation",
     "warning": null
   },
@@ -139,7 +144,7 @@
         "on": true
       },
       {
-        "count": 3,
+        "count": 6,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -201,20 +206,28 @@
       {
         "line": [
           {
-            "text": "No mail is going out."
+            "text": "Last sent "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
-        "title": "SMTP not configured",
-        "tone": "alert"
+        "title": "Mail is going out",
+        "tone": "on"
       },
       {
         "line": [
           {
-            "text": "Run the check once Carrel is behind its proxy."
+            "text": "Last check "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
-        "title": "Not checked yet",
-        "tone": "off"
+        "title": "Checks passed",
+        "tone": "on"
       }
     ],
     "tags": [],
@@ -225,7 +238,7 @@
       "actions": [
         {
           "enabled": true,
-          "href": "/invite/invite-token",
+          "href": "http://example.com/invite/invite-token",
           "id": "admin.invite.copy",
           "label": "Copy link",
           "method": "GET"
@@ -233,8 +246,8 @@
       ],
       "address": "—",
       "delivery": "link",
-      "expires": "10 August 2026, 17:04",
-      "link": "/invite/invite-token",
+      "expires": "2026-08-10 17:04",
+      "link": "http://example.com/invite/invite-token",
       "menu": [
         {
           "csrf": "csrf",
@@ -263,16 +276,15 @@
       "actions": [
         {
           "csrf": "csrf",
-          "enabled": false,
+          "enabled": true,
           "href": "/admin/invites?action=resend\u0026invite=i-0000000002",
           "id": "admin.invite.resend",
           "label": "Resend",
-          "method": "POST",
-          "reason": "SMTP is not configured: no letter can go."
+          "method": "POST"
         },
         {
           "enabled": true,
-          "href": "/invite/invite-token",
+          "href": "http://example.com/invite/invite-token",
           "id": "admin.invite.copy",
           "label": "Copy link",
           "method": "GET"
@@ -280,8 +292,8 @@
       ],
       "address": "oleg@example.org",
       "delivery": "email",
-      "expires": "10 August 2026, 17:04",
-      "link": "/invite/invite-token",
+      "expires": "2026-08-10 17:04",
+      "link": "http://example.com/invite/invite-token",
       "menu": [
         {
           "csrf": "csrf",
@@ -315,7 +327,7 @@
     },
     "copy": {
       "enabled": true,
-      "href": "/register",
+      "href": "http://example.com/register",
       "id": "admin.selfreg.copy",
       "label": "Copy",
       "method": "GET"
@@ -384,7 +396,7 @@
     },
     "issued": null,
     "lede": "A visitor creates an account and confirms the address by email. Cannot be turned on until mail works.",
-    "link": "/register",
+    "link": "http://example.com/register",
     "title": "Self-registration",
     "warning": null
   },

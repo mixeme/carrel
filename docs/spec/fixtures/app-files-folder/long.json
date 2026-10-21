@@ -1,5 +1,4 @@
 {
-  "access": "",
   "attachments": true,
   "bar": {
     "actions": [
@@ -333,12 +332,41 @@
         "name": "release-checklist.md",
         "percent": 0,
         "question": {
+          "form": {
+            "action": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?transfer=q-transfer",
+            "actions": [],
+            "errors": [],
+            "method": "POST",
+            "sets": [
+              {
+                "legend": "",
+                "rows": [
+                  {
+                    "add": null,
+                    "error": "",
+                    "extra": null,
+                    "hint": "",
+                    "kind": "hidden",
+                    "label": "",
+                    "name": "_csrf",
+                    "options": [],
+                    "readOnly": false,
+                    "required": false,
+                    "value": "csrf"
+                  }
+                ],
+                "unfold": null
+              }
+            ],
+            "target": "queue"
+          },
           "name": "release-checklist.md",
           "options": [
             {
               "csrf": "csrf",
               "enabled": true,
-              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=both\u0026transfer=q-transfer",
+              "file": "keep",
+              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?transfer=q-transfer",
               "id": "transfer.both",
               "label": "Keep both",
               "method": "POST",
@@ -347,7 +375,8 @@
             {
               "csrf": "csrf",
               "enabled": true,
-              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?answer=overwrite\u0026transfer=q-transfer",
+              "file": "replace",
+              "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/?transfer=q-transfer",
               "id": "transfer.overwrite",
               "label": "Replace",
               "method": "POST",
@@ -411,7 +440,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/connections?op=add",
+        "href": "/app/settings/connections/new",
         "icon": "i-server",
         "id": "account.connect",
         "label": "Connect account",
@@ -627,6 +656,7 @@
       "target": "rail"
     }
   },
+  "readOnly": false,
   "rows": [
     {
       "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",

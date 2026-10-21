@@ -81,6 +81,7 @@ func join(parts ...any) view.Runs {
 	return merged
 }
 func monoRun(s string) view.Run   { return view.Run{Text: view.Text(s), Mark: view.RunMono} }
+func codeRun(s string) view.Run   { return view.Run{Text: view.Text(s), Mark: view.RunCode} }
 func strongRun(s string) view.Run { return view.Run{Text: view.Text(s), Mark: view.RunStrong} }
 
 func formatSize(n int64) view.Size {

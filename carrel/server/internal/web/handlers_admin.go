@@ -420,7 +420,7 @@ func (s *Server) getAdminInvites(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	page := s.buildAdminInvitesPage(sess, r.URL.Query().Get("invite"), adminInvitesFlash{})
+	page := s.buildAdminInvitesPage(r, sess, r.URL.Query().Get("invite"), adminInvitesFlash{})
 	s.writePage(w, r, http.StatusOK, page)
 }
 
@@ -532,7 +532,7 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, "/admin/invites")
 		return
 	}
-	page := s.buildAdminInvitesPage(sess, "", flash)
+	page := s.buildAdminInvitesPage(r, sess, "", flash)
 	s.writePage(w, r, http.StatusOK, page)
 }
 
@@ -566,7 +566,9 @@ func roleRow(chosen string) view.FormRow {
 	return view.FormRow{Name: "role", Label: "Role", Kind: view.InputSelect, Options: opts, Required: true}
 }
 
-func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash adminInvitesFlash) view.AdminInvitesPage {
+// The links of the page are whole addresses (s-admin-1): they are handed to
+// someone outside, by hand or by letter, as the letter's own (absURL).
+func (s *Server) buildAdminInvitesPage(r *http.Request, sess *session.Session, made string, flash adminInvitesFlash) view.AdminInvitesPage {
 	snap := s.store.Snapshot()
 	now := s.now()
 	mail := s.mailConfigured()
@@ -604,7 +606,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 		for i := range snap.Invites {
 			inv := &snap.Invites[i]
 			if inv.ID == made && inviteLive(inv, now) && inv.Secret != "" {
-				page.Invite.Link = text(s.route("/invite/" + inv.Secret))
+				page.Invite.Link = text(s.absURL(r, "/invite/"+inv.Secret))
 				page.Invite.Copy = &view.Action{ID: "admin.invite.copy", Label: "Copy", Href: string(page.Invite.Link), Method: "GET", Enabled: true}
 			}
 		}
@@ -659,7 +661,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 	}
 	if snap.Settings.SelfRegEnabled {
 		page.SelfReg.Badge = &view.Badge{Label: "open", Role: view.BadgeNeutral}
-		page.SelfReg.Link = text(s.route("/register"))
+		page.SelfReg.Link = text(s.absURL(r, "/register"))
 		page.SelfReg.Copy = &view.Action{ID: "admin.selfreg.copy", Label: "Copy", Href: string(page.SelfReg.Link), Method: "GET", Enabled: true}
 	}
 
@@ -680,7 +682,8 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 			Sent:     inviteSentStatus(inv, mail),
 			// The letter that did not go, in alarm (Ад14; s-admin-1).
 			SentFailed: inv.Email != "" && inv.Mailed == "failed",
-			Expires:    tf.formatWhen(inv.ExpiresAt, false, now),
+			// The day and the clock in numbers (s-admin-1: 2026-08-18 12:00).
+			Expires: tf.numStamp(inv.ExpiresAt),
 			// The rare rest is under «⋯» (s-admin-11): Extend when the
 			// person did not make it in time, Revoke under the line.
 			Menu: []view.MenuItem{
@@ -706,7 +709,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 		}
 		copyLink := view.Action{ID: "admin.invite.copy", Label: "Copy link", Method: "GET", Enabled: true}
 		if inv.Secret != "" {
-			row.Link = text(s.route("/invite/" + inv.Secret))
+			row.Link = text(s.absURL(r, "/invite/"+inv.Secret))
 			copyLink.Href = string(row.Link)
 		} else {
 			copyLink.Enabled, copyLink.Reason = false, "This invitation was made before links were kept. Resend it or make a new one."

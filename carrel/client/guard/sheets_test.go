@@ -162,6 +162,42 @@ func sheetFindings(l lib, frame, at, printed string) []string {
 	if scrim := find(screen, func(n *html.Node) bool { return hasClass(n, "tc-scrim") }); scrim != nil {
 		screen = []*html.Node{scrim}
 	}
+	return partFindings(l, frame, at, parts, screen)
+}
+
+// pageParts are the drawings of a fragment of a page (account-8: «блок
+// Email»): from its main column down while there is one element, what that
+// holds — the group drawn alone is the first of its form, and on the page
+// it is not; its rubric and its fields are what the fragment shows.
+func pageParts(mock, id string) []*html.Node {
+	nodes := parseHTML(frameBlock(mock, id))
+	n := find(nodes, func(n *html.Node) bool { return hasClass(n, "tc-main") })
+	if n == nil {
+		return nil
+	}
+	for {
+		kids := elements(n)
+		if len(kids) != 1 {
+			return kids
+		}
+		n = kids[0]
+	}
+}
+
+// elements are a node's element children.
+func elements(n *html.Node) []*html.Node {
+	var out []*html.Node
+	for k := n.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type == html.ElementNode {
+			out = append(out, k)
+		}
+	}
+	return out
+}
+
+// partFindings holds each drawing of a fragment against the screen: some
+// element of its class has its shape.
+func partFindings(l lib, frame, at string, parts, screen []*html.Node) []string {
 	var out []string
 	for i, p := range parts {
 		cs := classes(p)
@@ -169,8 +205,8 @@ func sheetFindings(l lib, frame, at, printed string) []string {
 			out = append(out, fmt.Sprintf("%s: a drawing of %s without a class", at, frame))
 			continue
 		}
-		got := find(screen, func(n *html.Node) bool { return hasClass(n, cs[0]) })
-		if got == nil {
+		got := findAll(screen, func(n *html.Node) bool { return hasClass(n, cs[0]) })
+		if len(got) == 0 {
 			out = append(out, fmt.Sprintf("%s: the screen has no %s, which %s draws", at, cs[0], frame))
 			continue
 		}
@@ -181,9 +217,38 @@ func sheetFindings(l lib, frame, at, printed string) []string {
 			out = append(out, fmt.Sprintf("%s: %v", at, err))
 			continue
 		}
-		if err := m.Check(id, outer(got)); err != nil {
-			out = append(out, fmt.Sprintf("%s: %v", at, err))
+		// The part is any element of its class that has its shape: a field
+		// of a sheet drawn alone (s-admin-16) is one of several fields; the
+		// first one's difference is told when none has it.
+		var first error
+		for _, g := range got {
+			if err := m.Check(id, outer(g)); err == nil {
+				first = nil
+				break
+			} else if first == nil {
+				first = err
+			}
 		}
+		if first != nil {
+			out = append(out, fmt.Sprintf("%s: %v", at, first))
+		}
+	}
+	return out
+}
+
+// findAll is every element of nodes and their descendants that ok holds,
+// in document order.
+func findAll(nodes []*html.Node, ok func(*html.Node) bool) []*html.Node {
+	var out []*html.Node
+	for _, n := range nodes {
+		if n.Type == html.ElementNode && ok(n) {
+			out = append(out, n)
+		}
+		var kids []*html.Node
+		for k := n.FirstChild; k != nil; k = k.NextSibling {
+			kids = append(kids, k)
+		}
+		out = append(out, findAll(kids, ok)...)
 	}
 	return out
 }

@@ -79,18 +79,17 @@ func auditCount(h *harness, what string) int {
 	return n
 }
 
-// S-6.1: re-discovery offers the difference and applies nothing until asked;
-// Apply writes only what was shown and the server still confirms; a vanished
-// collection is marked gone and keeps its tick; one that comes back is the
-// same entry again.
-func TestRediscoveryOffersThenApplies(t *testing.T) {
+// S-6.1, Typecase's note 103 (the owner, 19.10.2026): Update collection list
+// takes what the server holds at once — a new collection comes in unticked,
+// marked new, with a line above the cards; a vanished one is marked gone and
+// keeps its tick; one that comes back is the same entry again; records are
+// not touched.
+func TestUpdateCollectionListTakesTheServer(t *testing.T) {
 	srv := davtest.New(t)
 	srv.Login, srv.Password = "alice", "davpass"
 	work := davtest.CalendarHome + "work/"
 	team := davtest.CalendarHome + "team/"
-	people := davtest.AddressBookHome + "people/"
 	srv.AddCalendar(caldav.Calendar{Path: work, Name: "Work"})
-	srv.AddAddressBook(carddav.AddressBook{Path: people, Name: "People"})
 	f := connectFixture(t, srv, work, nil)
 	tick(t, f, sealed.Selection{Kind: view.KindEvent, AccountID: f.id, Path: work})
 
@@ -98,34 +97,36 @@ func TestRediscoveryOffersThenApplies(t *testing.T) {
 	srv.RemoveCollection(work)
 
 	page := rediscoverPage(t, f)
-	n := noticeTitled(page.Notices, "Collections changed on the server")
-	if n == nil {
+	var added *view.Notice
+	for i := range page.Notices {
+		if strings.Contains(string(page.Notices[i].Body), "1 new collection — «Team». Tick it to see it in the rail.") {
+			added = &page.Notices[i]
+		}
+	}
+	if added == nil {
 		t.Fatalf("notices = %+v", page.Notices)
 	}
-	mustContain(t, string(n.Body), "Appeared: Team.", "Gone: Work.")
-	apply := actionHref(t, n.Actions, "connection.rediscover.apply")
+	if g := noticeTitled(page.Notices, "Gone from the server"); g == nil || !strings.Contains(string(g.Body), "Work") {
+		t.Errorf("notices = %+v", page.Notices)
+	}
+	var fresh *view.CollectionRow
+	for i, row := range page.Accounts[0].Collections {
+		if string(row.Path) == team {
+			fresh = &page.Accounts[0].Collections[i]
+		}
+		if string(row.Path) == work {
+			t.Error("a gone collection is still a row of the card")
+		}
+	}
+	if fresh == nil || !fresh.New || fresh.Tick != view.TickOff {
+		t.Fatalf("team's row = %+v", fresh)
+	}
 	blob := catalogOf(t, f)
-	if c, _ := blob.Collection(f.id, work); c.Gone {
-		t.Error("the proposal marked Work gone before Apply")
-	}
-	if _, ok := blob.Collection(f.id, team); ok {
-		t.Error("the proposal added Team before Apply")
-	}
-
-	// The server moves on after the proposal: Apply writes what was shown.
-	srv.RemoveCollection(people)
-	if rec := f.h.do(postHref(f, apply)); rec.Code != http.StatusSeeOther {
-		t.Fatalf("apply: %d %s", rec.Code, rec.Body.String())
-	}
-	blob = catalogOf(t, f)
 	if c, ok := blob.Collection(f.id, team); !ok || c.Gone || c.Name != "Team" {
 		t.Errorf("team = %+v (found %v)", c, ok)
 	}
 	if c, ok := blob.Collection(f.id, work); !ok || !c.Gone {
 		t.Errorf("work = %+v (found %v), want kept and gone", c, ok)
-	}
-	if c, _ := blob.Collection(f.id, people); c.Gone {
-		t.Error("people was marked gone without being shown")
 	}
 	if len(blob.Selected) != 1 || blob.Selected[0].Path != work {
 		t.Errorf("selected = %+v, want the tick on Work kept", blob.Selected)
@@ -135,36 +136,22 @@ func TestRediscoveryOffersThenApplies(t *testing.T) {
 	if last.What != "connection.rediscover" || last.Detail != f.id+" +1 -1" {
 		t.Errorf("audit = %+v", last)
 	}
-
-	// A gone collection is named on the page, is not a row, and does not open.
-	page = decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess)))
-	if g := noticeTitled(page.Notices, "Gone from the server"); g == nil || !strings.Contains(string(g.Body), "Work") {
-		t.Errorf("notices = %+v", page.Notices)
-	}
-	for _, row := range page.Accounts[0].Collections {
-		if string(row.Path) == work {
-			t.Error("a gone collection is still a row of the card")
+	// New only on the answer of the update.
+	again := decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess)))
+	for _, row := range again.Accounts[0].Collections {
+		if row.New {
+			t.Errorf("%s still new on the next page", row.Label)
 		}
 	}
 	if rec := f.h.do(get("/app/calendar/"+f.id+"/"+url.PathEscape(work), f.sess)); rec.Code != http.StatusNotFound {
 		t.Errorf("gone collection: %d, want 404", rec.Code)
 	}
 
-	// Work comes back. Already gone, it is offered as appeared, not twice as
-	// gone; People, never applied, is offered as gone now.
+	// Work comes back: the same entry, the server's name.
 	srv.AddCalendar(caldav.Calendar{Path: work, Name: "Work again"})
-	page = rediscoverPage(t, f)
-	n = noticeTitled(page.Notices, "Collections changed on the server")
-	if n == nil {
-		t.Fatalf("notices = %+v", page.Notices)
-	}
-	mustContain(t, string(n.Body), "Appeared: Work again.", "Gone: People.")
-	if rec := f.h.do(postHref(f, actionHref(t, n.Actions, "connection.rediscover.apply"))); rec.Code != http.StatusSeeOther {
-		t.Fatalf("apply: %d", rec.Code)
-	}
-	blob = catalogOf(t, f)
+	rediscoverPage(t, f)
 	entries := 0
-	for _, c := range blob.CollectionsOf(f.id) {
+	for _, c := range catalogOf(t, f).CollectionsOf(f.id) {
 		if c.Path == work {
 			entries++
 			if c.Gone || c.Name != "Work again" {
@@ -175,12 +162,9 @@ func TestRediscoveryOffersThenApplies(t *testing.T) {
 	if entries != 1 {
 		t.Errorf("work entries = %d, want the same one", entries)
 	}
-	if c, _ := blob.Collection(f.id, people); !c.Gone {
-		t.Error("people not gone after it was shown and applied")
-	}
 
 	page = rediscoverPage(t, f)
-	if noticeTitled(page.Notices, "Nothing appeared or disappeared") == nil {
+	if len(page.Notices) == 0 || !strings.Contains(string(page.Notices[0].Body), "the list is the same as on the server") {
 		t.Errorf("notices = %+v", page.Notices)
 	}
 }
@@ -263,7 +247,7 @@ func TestConnectionPasswordOnlyInsideUnlockWindow(t *testing.T) {
 
 	rec = f.h.do(get(reveal, f.sess))
 	page = decode[view.ConnectionsPage](t, rec)
-	if pw := page.Accounts[0].Password; !pw.Shown || pw.Value != "davpass" || pw.Reveal.Label != "Hide" {
+	if pw := page.Accounts[0].Password; !pw.Shown || pw.Value != "davpass" || pw.Reveal.Label != "Hide password" {
 		// s-profile-4: the shown password's button is «Hide» (Нс29).
 		t.Errorf("password = %+v", pw)
 	}

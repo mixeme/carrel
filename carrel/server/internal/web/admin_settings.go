@@ -33,9 +33,20 @@ type typedSettings struct {
 	relay store.SMTPSettings
 }
 
-// settingsTyped reads the whole form.
-func settingsTyped(r *http.Request) typedSettings {
+// settingsTyped reads the whole form. What the form did not carry — the
+// sender and the ceilings of people's letters while they are off, which the
+// page does not show (Typecase's note 88) — stays as it is stored.
+func (s *Server) settingsTyped(r *http.Request) typedSettings {
+	_ = r.ParseForm()
+	stored := s.users.Settings()
+	kept := map[string]int{"attach": stored.MailMaxAttachMB, "letter": stored.MailMaxMessageMB,
+		"recipients": stored.MailMaxRecipients, "perDay": stored.MailMaxPerDay}
 	atoi := func(name string) int {
+		if _, sent := r.Form[name]; !sent {
+			if v, ok := kept[name]; ok {
+				return v
+			}
+		}
 		n, err := strconv.Atoi(strings.TrimSpace(r.FormValue(name)))
 		if err != nil {
 			return -1 // out of every range: the field says so
@@ -56,6 +67,9 @@ func settingsTyped(r *http.Request) typedSettings {
 		Host: r.FormValue("host"), Port: port, Security: r.FormValue("security"),
 		Username: r.FormValue("username"), Password: r.FormValue("password"),
 		From: r.FormValue("from"), FromName: r.FormValue("fromName"), Sender: r.FormValue("sender"),
+	}
+	if _, sent := r.Form["sender"]; !sent {
+		relay.Sender = s.users.SMTP().Sender
 	}
 	return typedSettings{set: in, relay: relay}
 }
@@ -93,7 +107,7 @@ func (s *Server) postAdminSettings(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	typed := settingsTyped(r)
+	typed := s.settingsTyped(r)
 	refused, err := s.users.SaveSettings(sess.AccountID(), s.keepDefaults(typed.set), typed.relay)
 	if err != nil {
 		refused = []*user.ErrSetting{{Field: "name", Msg: string(formError(err))}}
@@ -123,7 +137,7 @@ func (s *Server) postAdminMailTest(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	typed := settingsTyped(r)
+	typed := s.settingsTyped(r)
 	relay := typed.relay
 	refused := user.CheckSMTP(&relay)
 	stored := s.users.SMTP()
@@ -238,7 +252,9 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		{Name: "security", Label: "Encryption", Kind: view.InputSelect, Value: text(security), Options: []view.Option{
 			option(cmail.StartTLS, "STARTTLS"), option(cmail.TLS, "TLS"), option(cmail.None, "None"),
 		}},
-		{Name: "username", Label: "Username", Kind: view.InputText, Value: text(shown.Username)},
+		{Name: "username", Label: "Username", Kind: view.InputText, Value: text(shown.Username),
+			// A relay may take letters without a login (s-admin-3: «—»).
+			Placeholder: "—"},
 		{Name: "password", Label: "Password", Kind: view.InputPassword, Placeholder: "leave blank to keep the current one"},
 		{Name: "from", Label: "From address", Kind: view.InputEmail, Value: text(shown.From), Placeholder: "carrel@example.org"},
 		{Name: "fromName", Label: "From name", Kind: view.InputText, Value: text(shown.FromName), Placeholder: text(s.users.Settings().InstanceName())},
@@ -249,22 +265,34 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 
 	// People's letters: whether they go, from which address (Ад21: the
 	// sender, after the relay is set up), and their ceilings.
-	envelope := shown.From
-	if envelope == "" {
-		envelope = "the From address"
+	// The envelope's address monospaced, as the frame sets it (s-admin-3).
+	var envelope any = "the From address"
+	if shown.From != "" {
+		envelope = monoRun(shown.From)
 	}
-	letters := view.FieldSet{Legend: "Letters from users", Rows: []view.FormRow{
-		{Name: "people", Label: "Let users send letters and links from Carrel", Kind: view.InputCheck, Value: text(boolStr(people)),
-			Hint: "Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form."},
+	// People's letters go only through the mail configured (the owner,
+	// 19.10.2026; Typecase's note 88): without it the tick is off with its
+	// reason; while they are off, as saved, the sender and the ceilings
+	// are not shown at all (s-admin-3, -32, -33).
+	tick := view.FormRow{Name: "people", Label: "Let users send letters and links from Carrel", Kind: view.InputCheck, Value: text(boolStr(people)),
+		Hint: "Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form."}
+	if !cur.Configured() {
+		tick.Value, tick.Reason = "", mailNotConfigured
+	}
+	letters := view.FieldSet{Legend: "Letters from users", Rows: []view.FormRow{tick,
 		{Name: "sender", Label: "Sender address", Kind: view.InputRadio, Options: senderOptions(shown),
-			Hint: text("Your relay decides which of the two it will let out. The envelope sender stays " + envelope + " either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.")},
+			HintRuns: join("Your relay decides which of the two it will let out. The envelope sender stays ", envelope, " either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.")},
 		{Name: "attach", Label: "Attachment, MB", Kind: view.InputNumber, Mono: true, Value: mb(set.MailMaxAttachMB, s.cfg.MailMaxAttachBytes)},
 		{Name: "letter", Label: "Letter, MB", Kind: view.InputNumber, Mono: true, Value: mb(set.MailMaxMessageMB, s.cfg.MailMaxMessageBytes)},
 		{Name: "recipients", Label: "Recipients", Kind: view.InputNumber, Mono: true, Value: orDefault(set.MailMaxRecipients, s.cfg.MailMaxRecipients)},
 		{Name: "perDay", Label: "Letters a day", Kind: view.InputNumber, Mono: true, Value: orDefault(set.MailMaxPerDay, s.cfg.MailMaxPerDay)},
 	}}
-	if !people {
+	switch {
+	case !s.mailPolicy().People || !cur.Configured():
+		letters.Rows = letters.Rows[:1]
 		letters.Badges = []view.Badge{{Label: "off", Role: view.BadgeNeutral}}
+	default:
+		letters.Badges = []view.Badge{{Label: "on", Role: view.BadgeNeutral}}
 	}
 
 	test := view.FieldSet{Legend: "Test", Rows: []view.FormRow{

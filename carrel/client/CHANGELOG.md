@@ -4,6 +4,50 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.5.0 — 2026-10-22
+
+Server `v0.2.352`, Typecase `8e4944b` (its notes 87–107). Three sections
+built whole — the files, the settings, the administration — and the list of
+published links; every screen holds against its frames.
+
+**Tagged:** `client-v0.5.0`.
+
+### Added
+
+- **Files** (`/app/files`, `/app/files/{account}/{col}/{path…}`): the root
+  with the storages, their access and the shortcuts; a folder — the
+  selection form on the page and its bar, tiles and the table, crumbs, the
+  empty folder, the queue of transfers folded and unfolded, a name taken
+  answered by one form (Keep both and Replace bring the file again, Skip);
+  Upload of files and of a folder.
+- **The sheets of files**: an operation — the tree as the sheet's choice,
+  the server's menu in its head, a new folder in its row; the picker — files
+  for an upload or an attachment, a folder to choose.
+- **Published links** (`/app/files/published`): a row a link with Copy, Send
+  and Revoke, none out, no mail; a link whose thing is gone — a row switched
+  off, «no longer there», Copy and Send off with their reason (s-publish-21).
+- **Settings**: Appearance; Account — sessions, the password's change, the
+  forced one without the rail, key escrow and its history; Connections —
+  servers and feeds, the dialogs of a connection by their addresses, the
+  collection list updated, Disconnect; Devices — a new device step by step,
+  its addresses, the profile; davloom — the address, devices, scope and
+  tree; Backups — jobs, a new job, the external trigger, restore from a job,
+  a server or this computer, the match and the report; Attachments — the
+  folder unset and unavailable; the password's sheet wherever a secret is
+  given.
+- **Administration** (`/admin/…`): Users, Add users, Settings, the
+  installation check, the DAV validator, key escrow, the sheets of a reset
+  and of a deletion over Users, the history of a password by its link.
+
+### Changed
+
+- **A field's hint in pieces** (`FormRow.HintRuns`) keeps its monospaced
+  piece; a switch's option turns fields off while chosen
+  (`Option.Disables` → `PickOption`, `SegOption`).
+- **The guards** hold a fragment's form among the forms a screen prints
+  after its root, and the trees, tables and sheets of the new sections by
+  their meaning.
+
 ## v0.4.61 — 2026-10-19
 
 Server `v0.2.351`, Typecase `324ee14` (its note 86). The mockup copied byte

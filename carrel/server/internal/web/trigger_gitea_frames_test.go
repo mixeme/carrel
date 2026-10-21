@@ -14,8 +14,8 @@ import (
 // 02.10.2026). The Gitea tab of the external trigger is a workflow of Gitea
 // Actions with the password in the repository's secrets under the name the
 // file gives, saved as the file the repository keeps (s-backup-10); the curl
-// tab is the bare request (s-backup-11). «Regenerate» is «New password», its
-// hint saying the old one stops working (s-backup-2, -3, -10, -11). With no
+// tab is the bare request (s-backup-11). «Regenerate» is «New password» —
+// on the password's row of the sheet since Typecase's note 91. With no
 // job, Backup in the rail counts nothing and the rail says nothing of copies
 // (s-backup-6).
 
@@ -23,7 +23,6 @@ var (
 	frameDiagByID   = regexp.MustCompile(`(?s)<div class="tc-diag[^"]*" id="([^"]+)">(.*?)</div>`)
 	frameDiagPlain  = regexp.MustCompile(`(?s)<div class="tc-diag[^"]*">(.*?)</div>`)
 	frameSaveAs     = regexp.MustCompile(`data-tc-save="([^"]+)" data-tc-from="([^"]+)"`)
-	frameNewPass    = regexp.MustCompile(`<button class="tc-btn" type="button" title="([^"]+)">New password</button>`)
 	frameSecretName = regexp.MustCompile(`aria-label="Secret" value="([^"]+)"`)
 	frameGiteaFile  = regexp.MustCompile(`as <span class="tc-mono">([^<]+\.yaml)</span>`)
 )
@@ -39,19 +38,6 @@ func TestGiteaAndCurlTabsAreTheFrames(t *testing.T) {
 		!strings.HasSuffix(file[1], "/"+save[1]) {
 		t.Fatalf("s-backup-10, -11: read the frames again")
 	}
-	var hints []string
-	// The card left s-backup-2 with the form's tick (note 85 of Typecase).
-	for _, id := range []string{"s-backup-3", "s-backup-10", "s-backup-11"} {
-		m := frameNewPass.FindStringSubmatch(mockupFrame(t, id))
-		if m == nil || strings.Contains(mockupFrame(t, id), ">Regenerate<") {
-			t.Fatalf("%s draws no «New password» with its hint: read the frame again", id)
-		}
-		hints = append(hints, html.UnescapeString(m[1]))
-	}
-	if hints[0] != hints[1] || hints[1] != hints[2] {
-		t.Fatalf("the hints of New password differ: %q", hints)
-	}
-
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
 	pass, tb := issueTrigger(t, f, job)
@@ -73,9 +59,6 @@ func TestGiteaAndCurlTabsAreTheFrames(t *testing.T) {
 	}
 	if want := ours(html.UnescapeString(line[1])); string(tb.Curl) != want {
 		t.Errorf("curl = %q, the frame (s-backup-11) %q", tb.Curl, want)
-	}
-	if tb.Password.Reveal.Label != "New password" || string(tb.Password.Reveal.Hint) != hints[0] {
-		t.Errorf("the password's button = %q, hint %q; the frames «New password», %q", tb.Password.Reveal.Label, tb.Password.Reveal.Hint, hints[0])
 	}
 	if strings.Contains(runsText(tb.Note), "Regenerate") {
 		t.Errorf("the note still says Regenerate: %q", tb.Note)

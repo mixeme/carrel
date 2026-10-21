@@ -2,7 +2,7 @@
   "actions": [
     {
       "enabled": true,
-      "href": "/app/settings/backup?job=new",
+      "href": "/app/settings/backup/new",
       "icon": "i-plus",
       "id": "backup.new",
       "label": "New job",
@@ -11,7 +11,7 @@
     },
     {
       "enabled": true,
-      "href": "/app/settings/backup?restore=1",
+      "href": "/app/settings/backup/restore",
       "icon": "i-restore",
       "id": "restore.start",
       "label": "Restore",
@@ -19,14 +19,14 @@
     }
   ],
   "add": {
-    "action": "/app/settings/backup?op=save",
+    "action": "/app/settings/backup?op=create",
     "actions": [
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/settings/backup?op=save",
-        "id": "backup.save",
-        "label": "Save",
+        "href": "/app/settings/backup?op=create",
+        "id": "backup.create",
+        "label": "Create",
         "method": "POST",
         "primary": true
       }
@@ -107,6 +107,7 @@
           }
         ],
         "legend": "What to copy",
+        "legendAside": "nothing chosen",
         "rows": [
           {
             "add": null,
@@ -315,7 +316,7 @@
               {
                 "colour": "#9a9280",
                 "label": "nextcloud · Files",
-                "selected": false,
+                "selected": true,
                 "value": "a-nc-home|/alice/files/Files/"
               },
               {
@@ -414,13 +415,13 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Separate from the sign-in password: the destination may be somebody else's hosting. Forget it and this job's archives open for nobody, including you.",
+            "hint": "Separate from the sign-in password.",
             "kind": "password",
             "label": "Archive password",
             "name": "password",
             "options": [],
             "readOnly": false,
-            "required": false,
+            "required": true,
             "value": ""
           }
         ],
@@ -458,7 +459,7 @@
             "text": "curl"
           },
           {
-            "text": ": the line to paste is on the job’s page"
+            "text": ": External trigger in the job’s menu"
           }
         ],
         "legend": "When",
@@ -474,13 +475,13 @@
             "options": [
               {
                 "label": "On sign-in, if the last copy is older than",
-                "selected": false,
+                "selected": true,
                 "value": "on"
               }
             ],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "on"
           },
           {
             "add": null,
@@ -538,6 +539,7 @@
   "history": [],
   "job": null,
   "jobs": [],
+  "jobsHint": "",
   "look": {
     "compact": false,
     "panel": true,
@@ -560,7 +562,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [],
     "nav": [
       {
@@ -609,7 +611,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/davloom",
         "id": "settings.davloom",
@@ -653,10 +655,14 @@
       {
         "line": [
           {
-            "text": "No device has connected since the start."
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
           }
         ],
-        "title": "davloom · running · 0 devices",
+        "title": "davloom · running · 3 devices",
         "tone": "on"
       }
     ],
@@ -668,14 +674,14 @@
     "from": [
       {
         "enabled": true,
-        "href": "/app/settings/backup?from=job\u0026restore=1",
+        "href": "/app/settings/backup/restore?from=job",
         "id": "restore.from.job",
         "label": "From a job",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/settings/backup?from=server\u0026restore=1",
+        "href": "/app/settings/backup/restore?from=server",
         "id": "restore.from.server",
         "label": "From a server",
         "method": "GET",
@@ -683,7 +689,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/backup?from=file\u0026restore=1",
+        "href": "/app/settings/backup/restore?from=file",
         "id": "restore.from.file",
         "label": "From this computer",
         "method": "GET"
@@ -704,13 +710,14 @@
       }
     ],
     "open": false,
+    "report": null,
     "source": {
-      "action": "/app/settings/backup?op=restore-open",
+      "action": "/app/settings/backup/restore?from=server",
       "actions": [
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/settings/backup?op=restore-open",
+          "href": "/app/settings/backup/restore?from=server",
           "id": "restore.open",
           "label": "Open the manifest",
           "method": "POST",
@@ -755,19 +762,25 @@
               "readOnly": false,
               "required": false,
               "value": "webdav"
-            },
+            }
+          ],
+          "unfold": null
+        },
+        {
+          "legend": "From a server",
+          "rows": [
             {
               "add": null,
               "error": "",
               "extra": null,
               "hint": "",
               "kind": "select",
-              "label": "Storage",
+              "label": "Collection",
               "name": "store",
               "options": [
                 {
                   "label": "nextcloud · Files",
-                  "selected": false,
+                  "selected": true,
                   "value": "a-nc-home|/alice/files/Files/"
                 },
                 {
@@ -788,21 +801,37 @@
             {
               "add": null,
               "error": "",
-              "extra": null,
-              "hint": "The path of the archive under the storage's root, such as backups/carrel-work-2026-08-16T031000Z.zip.age.",
+              "extra": {
+                "csrf": "csrf",
+                "enabled": true,
+                "href": "/app/settings/backup/restore?from=server\u0026op=browse",
+                "id": "restore.browse",
+                "label": "Browse",
+                "method": "POST",
+                "submits": true
+              },
+              "hint": "",
               "kind": "text",
-              "label": "File in it",
-              "name": "file",
+              "label": "Archive in it",
+              "mono": true,
+              "name": "path",
               "options": [],
+              "placeholder": "/backups/carrel-personal-2026-08-14.zip",
               "readOnly": false,
               "required": false,
               "value": ""
-            },
+            }
+          ],
+          "unfold": null
+        },
+        {
+          "legend": "Archive password",
+          "rows": [
             {
               "add": null,
               "error": "",
               "extra": null,
-              "hint": "The one set in the job, not your sign-in password. Without it the manifest cannot be read — Carrel will not even see the list of collections.",
+              "hint": "The one set in the job, not your sign-in password.",
               "kind": "password",
               "label": "Archive password",
               "name": "password",
@@ -902,10 +931,12 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
       "answered": "",
       "running": false

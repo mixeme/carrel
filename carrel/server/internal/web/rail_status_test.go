@@ -55,8 +55,14 @@ func TestRailStatusBlock(t *testing.T) {
 	h.rebuild()
 	h.admin("mix", "password123")
 	mix := h.login("mix", "password123")
+	// Nothing connected yet: the rail's foot says nothing (s-profile-25).
+	if got = railStates(decode[view.AccountPage](t, h.do(get("/app/settings/account", mix))).Rail); len(got) != 0 {
+		t.Errorf("settings rail, nothing connected = %q", got)
+	}
+	key, _ := mix.DataKey()
+	h.putConnections("mix", key, "a-one")
 	got = railStates(decode[view.AccountPage](t, h.do(get("/app/settings/account", mix))).Rail)
-	if len(got) != 1 || got[0] != "on: davloom · running · 0 devices / No device has connected since the start." {
+	if len(got) != 1 || got[0] != "on: davloom · running · no devices / No device has connected since the start." {
 		t.Errorf("settings rail, davloom on = %q", got)
 	}
 

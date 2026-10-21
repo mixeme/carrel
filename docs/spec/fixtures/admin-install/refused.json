@@ -172,7 +172,11 @@
       {
         "line": [
           {
-            "text": "No letter since the start."
+            "text": "Last sent "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
         "title": "Mail is going out",
@@ -181,17 +185,22 @@
       {
         "line": [
           {
-            "text": "Run the check once Carrel is behind its proxy."
+            "text": "Last check "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
-        "title": "Not checked yet",
-        "tone": "off"
+        "title": "2 checks failed",
+        "tone": "alert"
       }
     ],
     "tags": [],
     "ticks": null
   },
   "rows": [],
+  "subtitle": "Carrel asks itself from outside, at the address you declared as the base one",
   "title": "Installation check",
   "took": "",
   "top": {

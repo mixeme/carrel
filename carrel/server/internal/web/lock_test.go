@@ -32,8 +32,8 @@ func TestLockNowEndsTheUnlockNotTheSignIn(t *testing.T) {
 	if page.Top.Unlocked == nil || lock == nil || lock.ID != "unlock.lock" || lock.Label != "Lock now" || lock.Method != "POST" || lock.Href != "/app/settings/lock" || !lock.Enabled {
 		t.Fatalf("unlocked: until %v, Lock %+v", page.Top.Unlocked, lock)
 	}
-	if got := plainRuns(page.Note); got != "While credentials are unlocked, every account opens without a question — here, on the New device screen and when a profile is built. Lock now ends it at once; so does signing out." ||
-		!hasRun(page.Note, "Lock now", view.RunStrong) {
+	// The window is its mark and Lock now in the head (s-profile-4).
+	if len(page.Note) != 0 {
 		t.Errorf("the connections' message = %+v", page.Note)
 	}
 	other := decode[view.DevicesPage](t, f.h.do(get("/app/settings/devices?tab=other", f.sess)))

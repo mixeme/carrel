@@ -378,8 +378,10 @@ spec/fixtures/<screen>/<state>.json
 | `/app/duplicates/decide` | POST | вход | страница, редирект | `DuplicatesPage` — решение по группе (`do=`): `do=link`, `ignore` («Not duplicates»), `again` («Offer again»), `choose` («Keep these values»), `merge` («Merge on the server» кнопкой формы карточки: редирект на слияние с ответами карточки — `pick.*`) и `unlink` с `group=` — группа (`DuplicateGroup.ID`); `link` и `choose` несут ответы `choice.<свойство>=` — номер варианта (`MergeRow.Name`, форма группы `DuplicateGroup.Form`); `do=threshold` с `value=` — порог (пусто или 0 — число экземпляра; форма `ThresholdControl.Form`); `do=weights` с `weight.<признак>=` (`WeightControl.Name`; пусто — вес экземпляра) и `do=defaults` — веса экземпляра всем (форма `ThresholdControl.WeightForm`). Ответ — дубликаты, как они теперь стоят, сказанное — в `notices`; форма без сценариев, когда сказать нечего, — редирект на `/app/duplicates`. Группа — не зона C-7.2, фрагментом не приходит |
 | `/app/duplicates/merge` | GET, POST | вход | страница | `DuplicatesMergePage`; `group=` — группа, `into=` — место оставляемой в группе (`Keep … instead`), `choice.<свойство>=` — номер варианта ответа (`MergeRow.Name`); `pick.<свойство>=` — место в группе записи, выбранной на карточке (`do=merge`), поверх ответов связанной группы; POST — ещё `v.<место>=` — версия каждой записи, показанная GET: изменившаяся с тех пор не сливается |
 | `/app/sources/{kind}` | POST | вход | фрагмент, редирект | `Rail`; `{kind}` — четыре рода и `files`; форма рейла (`Rail.Ticks`): `toggle` — одна строка, `tick` — весь выбор, `back` — страница раздела, куда вернуться без сценариев |
-| `/app/publish` | GET, POST | вход | лист | `PublishSheet`; у контакта и книги (s-publish-3) форма несёт набор «What the visitor sees» — отметки `name` (стоит; снятая — гость получает одно имя, без организации и должности), `phones`, `emails`, `photo`, `note` — и `download` («Allow .vcf download and subscription»), все, кроме первой, сняты; `lives` — 7 дней, у папки (s-publish-5) — 14, у прочего 30; POST без `lives` даёт срок, на котором лист его рода стоит. POST без отметок публикует имя с организацией и без файла: снять `name` может только POST листа — тот, что несёт `lives`. У календаря, события, списка задач и задачи (s-publish-2, -19) — набор «What the visitor sees»: `time` (стоит, только для чтения), `title` (стоит; снятая — запись видна как «Busy»), `location`, `description`, `attendees`, `attachments`, `tags` (сняты); `download` («Allow .ics download and subscription», стоит); у календаря целиком ещё `how` — `range` (дни `from`, `to`, оба в нём) или `whole`; POST без отметок у календарных родов даёт время и название. Цели: `k` (род), `a`, `c`, у записи `uid`; файлы и папки — `k=files`, `f` (путь в коллекции), у папки `dir=1`. Ответ POST — тот же лист с готовой ссылкой (s-publish-13). `?op=revoke&id=` (POST) отзывает ссылку списка «Published links» и ведёт на `/app/files/published` |
-| `/app/mail/compose` | GET, POST | вход | лист | `MailSheet`; POST с `op` — `send`, `attach` (`what=`), `remove` (`i=`), `discard`, `link` (`id=` — ссылка человека): ссылка добавляется к письму, которое пишется, один раз, а без начатого письма начинает его, назвав собой; набранное (`to`, `subject`, `body`) едет с каждым POST и сохраняется |
+| `/app/publish` | GET, POST | вход | лист | `PublishSheet`; у контакта и книги (s-publish-3) форма несёт набор «What the visitor sees» — отметки `name` (стоит; снятая — гость получает одно имя, без организации и должности), `phones`, `emails`, `photo`, `note` — и `download` («Allow .vcf download and subscription»), все, кроме первой, сняты; `lives` — 7 дней, у папки (s-publish-5) — 14, у прочего 30; POST без `lives` даёт срок, на котором лист его рода стоит. POST без отметок публикует имя с организацией и без файла: снять `name` может только POST листа — тот, что несёт `lives`. У календаря, события, списка задач и задачи (s-publish-2, -19) — набор «What the visitor sees»: `time` (стоит, только для чтения), `title` (стоит; снятая — запись видна как «Busy»), `location`, `description`, `attendees`, `attachments`, `tags` (сняты); `download` («Allow .ics download and subscription», стоит); у календаря целиком ещё `how` — `range` (дни `from`, `to`, оба в нём) или `whole`: дни стоят при обоих и открываются с сегодняшнего до последнего дня месяца, `whole` их выключает (`Option.Disables`) и при нём сервер их не читает; `range` без одного из дней — тот же лист и «Give both days, or choose The whole calendar.» под пустым полем; POST без отметок у календарных родов даёт время и название. Цели: `k` (род), `a`, `c`, у записи `uid`; файлы и папки — `k=files`, `f` (путь в коллекции), у папки `dir=1`. Лист стоит над страницей, откуда открыт (записка Typecase 105): коллекция — над Connections, запись — над своей страницей, файл и папка — над папкой; туда же ведут Cancel и крестик Close готового листа; `back` — иная страница. Ответ POST — тот же лист с готовой ссылкой (s-publish-13): «Send by letter» — `/app/mail/link?id=` (письмо этой ссылки), у бессрочной — «No expiry. …» (s-publish-22). `?op=revoke&id=` (POST) отзывает ссылку списка «Published links» и ведёт на `/app/files/published` |
+| `/app/mail/compose` | GET, POST | вход | лист | `MailSheet`; POST с `op` — `send`, `attach` (`what=`), `remove` (`i=`), `discard`; набранное (`to`, `subject`, `body`) едет с каждым POST и сохраняется. Готовая ссылка в письмо не вкладывается (решение владельца 21.10.2026): её шлёт «Send this link», `/app/mail/link` |
+| `/app/mail/link` | GET | вход | лист | `MailLinkSheet` — «Send this link» (s-mail-4): `?id=` — ссылка человека (её Send в «Published links», «Send by letter» готовой ссылки), `back` — страница под листом, иначе «Published links»; отозванная или чужая ссылка, экземпляр без почты — 404. Письмо, которое пишется, ждёт черновиком и не меняется |
+| `/app/mail/send` | POST | вход | редирект, лист | `MailLinkSheet` — форма письма. С `id` — письмо одной ссылки: поля `to` (адреса через запятую), `line` («A line from you»); тема — название ссылки, как в списке; уходит та же ссылка, а не новая, и считается в письма дня; ответ — переход на `back` (иначе `/app/files/published`) с `sent=N`, отказ — тот же лист с причиной у `to`; `op=link` («Copy link instead») ничего не шлёт и ведёт туда же без `sent`. Без `id` — то же, что POST `/app/mail/compose` |
 | `/app/mail/attach` | GET, POST | вход | лист | `MailAttachSheet` |
 | `/app/password` | GET, POST | вход | страница | `PasswordPage` |
 
@@ -461,11 +463,11 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/files` | GET | вход | страница | `FilesRootPage` |
 | `/app/files/{account}/{col}/{path…}` | GET | вход | страница | `FilesPage`; адрес файла (без «/» в конце) — его папка с ним выделенным; `?select=` — выделенные имена (значений несколько); `?view=tiles` — плитки (без него — список), `?sort=` (`name`, `size`, `changed`), `?filter=` — по имени, по уже прочитанному списку («Filter this folder» без сценариев — `ListBar.FilterForm`); один выделенный файл — с его панелью (`Shell.Details`), `?details=0` — панель скрыта (Details шапки); `?queue=0` — очередь свёрнута в строку шапки (`TransferQueue.Hidden`, Hide и Show очереди); у одной выделенной картинки — её ширина и высота (`FileRow.Dimensions`, поле Dimensions панели после Type): одно чтение начала файла, `Range: bytes=0-65535` (S-17); миниатюра строки, плитки и панели — `…/download/{path…}?thumb=1` (`FileRow.Thumb`, `Details.Preview`), с `&v=` — версией файла из листинга: браузер хранит миниатюру и переспрашивает перед каждым показом (`Cache-Control: private, no-cache`, как фото контакта), на `If-None-Match` с версией адреса — 304 без чтения файла; Changed панели — числами, теми же словами, что `FileRow.Modified` строки («2026-08-10 11:07», s-files-1); `?print=1` — та же папка для печати (U-10, Print в «⋯» шапки) |
 | `/app/files/{account}/{col}/download/{path…}` | GET, POST | вход | поток; адрес папки (`…/`) с `?zip=1` — папка архивом zip (S-17.5). POST на адрес папки — отмеченное в ней (`item`, кнопка формы выделения `FilesPage.Select`, s-files-2): один файл — сам файл, несколько или папка — zip отмеченного; ничего не отмечено или чего-то уже нет — папка с отказом «Nothing was done» | — |
-| `/app/files/{account}/{col}/upload/{path…}` | POST | вход | фрагмент | `TransferQueue`; `?menu=1` — загрузка из листа меню создания: папка запоминается для следующей такой; multipart: файлы — поле `file` (`Action.File`), у загрузки папки имя файла — путь внутри неё; перед файлами со сценарием — `size.<имя>` (длина файла в байтах, у загрузки папки имя — тот же путь) или `size` у одного файла: без них тело уходит без длины, и сервер, которому она нужна, отказывает (S-17.1); полей файла с именем `file` у формы может быть два (Files и Folder, s-files-8) — размеры стоят перед файлами своего поля, значит и между файлами, а поле, в котором ничего не выбрано, приходит частью без имени файла — это не файл; `?transfer=&answer=` (`skip`, `both`, `overwrite`) — ответ очереди на занятое имя |
+| `/app/files/{account}/{col}/upload/{path…}` | POST | вход | фрагмент | `TransferQueue`; `?menu=1` — загрузка из листа меню создания: папка запоминается для следующей такой; multipart: файлы — поле `file` (`Action.File`), у загрузки папки имя файла — путь внутри неё; перед файлами со сценарием — `size.<имя>` (длина файла в байтах, у загрузки папки имя — тот же путь) или `size` у одного файла: без них тело уходит без длины, и сервер, которому она нужна, отказывает (S-17.1); полей файла с именем `file` у формы может быть два (Files и Folder, s-files-8) — размеры стоят перед файлами своего поля, значит и между файлами, а поле, в котором ничего не выбрано, приходит частью без имени файла — это не файл; `?transfer=&answer=` (`skip`, `both`, `overwrite`) — ответ очереди на занятое имя; у загрузки `both` и `overwrite` — multipart с тем же файлом в поле `file` (`Action.File`): от загруженного ничего не хранится, пока вопрос ждёт (S-17.3); файл другого имени — отказ, вопрос остаётся; `?op=taken` — со сценарием до отправки (`FileField.Taken`, записка Typecase 100): multipart со скрытыми полями формы и `name` на каждый файл (у загрузки папки — путь внутри неё), ответ — `text/plain`, занятые имена так, как пришли, по строке; папки, которой нет, имя не занимает; хранилище только для чтения — ни одного (отказ — при отправке); ответ не 2xx — страница шлёт файлы сразу, и спрашивает очередь; ответ на вопрос до отправки — поле `taken.<имя>` = `keep` (первое свободное имя с номером) или `replace` (поверх версии, которая стояла при вопросе, `If-Match`) перед файлом: такой файл уходит сразу, вопроса в очереди нет |
 | `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | лист | `FileOpSheet` (`Op` — `new`, s-files-23); без поля `name` (New folder шапки и рейла) — лист с полем имени; с полем — папка заводится и ответ — редирект на папку, отказ (имя занято, имя не годится) — тот же лист с отказом под полем и набранным |
 | `/app/files/{account}/{col}/op/{path…}` | GET, POST | вход | лист | `FileOpSheet`; `?op=` (`rename`, `move`, `copy`, `delete`), `item` — имена папки (значений несколько; у POST и полями формы выделения, `FilesPage.Select`: ничего не отмечено или у `rename` отмечено не одно — папка с отказом «Nothing was done»), `server` — подключение, чьи хранилища показывает дерево листа переноса и копии (`FileServer.Href`; без него — сервер выбранной папки), `to` — папка назначения переноса и копии: адрес узла дерева (`FileTreeNode.Href` несёт его в адресе; у POST и полем формы). GET — только лист; POST с `go=1` выполняет (у `rename` — поле `name`, новое имя; у `delete` — `etag` показанных версий), с `mkcol=1` и полем `name` — New folder дерева, с `transfer=&answer=` — ответ очереди; GET с `new=1` — лист с открытой строкой имени (`FileTree.Name`); POST с полем `open=1` («Open the folder», `file.op.open`, кнопка формы листа без сценариев) — тот же лист с папкой поля `to` выбранной и раскрытой, ничего не выполняется |
 | `/app/files/{account}/{col}/columns/{path…}` | POST | вход | редирект | — ; меню Columns папки (s-files-20); ответ — папка `{path…}` с её запросом (S-9.6) |
-| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `&server=` у любого `for` — подключение, чьи хранилища показывает дерево (`FileServer.Href`; без него — сервер выбранной папки); `?for=upload[&to=]` — папка загрузки из меню создания: узел выбирает её адресом, «Upload» листа шлёт файлы на загрузку выбранной папки с `?menu=1` — эта загрузка и запоминает папку для следующей из меню; «Choose this folder» в этом листе нет; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attach&k=&a=&c=&new=` — то же для черновика новой записи (вместо `uid`), Attach шлёт `…/new?op=attachfile&uid=&file=`, Cancel — назад к форме `/new?uid=`; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=`; `?for=backup&job=[&to=]` (GET) — Browse папки задания копии (s-backup-2): «Choose this folder» — на `/app/settings/backup?job=&op=folder&to=`, Cancel — на `?job=&held=1`; `?for=upload&new=1` — с открытой строкой имени новой папки, POST `?for=upload&mkcol=1&to=` с полем `name` её заводит |
+| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=restore[&to=]` — архив для восстановления с сервера (s-backup-17): дерево с файлами, Choose — на шаг `/app/settings/backup/restore?from=server&store=&path=`; `&server=` у любого `for` — подключение, чьи хранилища показывает дерево (`FileServer.Href`; без него — сервер выбранной папки); `?for=upload[&to=]` — папка загрузки из меню создания: узел выбирает её адресом, «Upload» листа шлёт файлы на загрузку выбранной папки с `?menu=1` — эта загрузка и запоминает папку для следующей из меню; «Choose this folder» в этом листе нет; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attach&k=&a=&c=&new=` — то же для черновика новой записи (вместо `uid`), Attach шлёт `…/new?op=attachfile&uid=&file=`, Cancel — назад к форме `/new?uid=`; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=`; `?for=backup&job=[&to=]` (GET) — Browse папки задания копии (s-backup-2): «Choose this folder» — на `/app/settings/backup?job=&op=folder&to=`, Cancel — на `?job=&held=1`; `?for=upload&new=1` — с открытой строкой имени новой папки, POST `?for=upload&mkcol=1&to=` с полем `name` её заводит |
 | `/app/files/published` | GET | вход | страница | `PublishedLinksPage` |
 | `/app/attach/{account}/{col}/{path…}` | GET | вход | поток | — |
 
@@ -491,14 +493,24 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/settings/escrow` | GET, POST | вход | страница | `EscrowPage` |
 | `/app/settings/escrow/deposit` | GET | вход | лист | `UnlockSheet` |
 | `/app/settings/escrow/withdraw` | GET | вход | лист | `EscrowWithdrawSheet` |
-| `/app/settings/connections` | GET, POST | вход | страница | `ConnectionsPage`; `?op=add` — диалог Connect account |
+| `/app/settings/connections` | GET, POST | вход | страница | `ConnectionsPage`; POST `?op=pick` — отметка строки коллекции или «Lands in» (`pick` — подключение и путь коллекции или подписка и раздел, через вертикальную черту; кнопки общей формы `conn-picks`), `?op=rediscover&account=` — Update collection list: каталог сразу берёт то, что держит сервер (новые — снятыми, бейдж `new`, s-profile-27; пропавшие — gone), записи не трогает; `?op=apply&account=` — предложение после правки подключения; `?op=test&account=` — Test (записка Typecase 103) |
+| `/app/settings/connections/new` | GET, POST | вход | страница, редирект | `ConnectionsPage` с диалогом Connect account (s-profile-2); POST — подключить: поля `label`, `server`, `login`, `password`, `noPassword`, `certFingerprint`; отказ — тот же диалог с набранным, отказом и следом над полями, пароль пустой (s-profile-24) |
+| `/app/settings/connections/new/test` | POST | вход | страница | `ConnectionsPage` — «Test only» диалога подключения (s-profile-2): набранное и след проверки, ничего не сохранено |
+| `/app/settings/connections/{account}/edit` | GET, POST | вход | страница, редирект | `ConnectionsPage` с правкой подключения (s-profile-16, -22, -23): те же поля, пароль пустой — «оставить сохранённый»; ответ на ссылки — `links` |
 | `/app/settings/connections/test` | POST | вход | страница | `ConnectionsPage` — «Test only»: диалог с набранным (пароль не возвращается) и след проверки в `Trace`; ничего не пишет, сценарии ни при чём |
 | `/app/settings/connections/disconnect` | GET, POST | вход | лист | `ConnectionRemoveSheet` |
 | `/app/settings/attachments` | GET, POST | вход | страница | `AttachmentsPage` |
 | `/app/settings/devices` | GET, POST | вход | страница | `DevicesPage` |
 | `/app/settings/devices/profile` | GET | вход | файл | — |
-| `/app/settings/davloom` | GET, POST | вход | страница | `DavloomPage`; GET `?add=1` — диалог Add device (`DavloomPage.Dialog`, s-davloom-2), `?edit=‹устройство›` — что оно видит; сразу после выдачи — пароль один раз (s-davloom-3). POST `op=issue` (`name`, `access`, `kind.‹род›`, `col.‹account›` с путём коллекции через вертикальную черту; без открытого окна набранное держится в сеансе, ответ — редирект на лист пароля `for=davloom`, s-davloom-5; GET `?add=1&held=1` — диалог с набранным, Cancel листа), `op=scope&id=`, `op=access&id=&access=` (`read` или `write`), `op=revoke&id=` |
-| `/app/settings/backup` | GET, POST | вход | страница | `BackupPage`; POST `?op=browse&job=` (ID или `new`) — форма задания как набрана держится в сеансе, ответ — редирект на лист выбора папки (`/app/files/picker?for=backup&job=`); GET `?job=&op=folder&to=` — страница задания с набранным и выбранной папкой, `?job=&held=1` — с набранным, как было (Cancel листа); `?job=&trigger=` — вкладка карточки строки (s-backup-3) |
+| `/app/settings/davloom` | GET, POST | вход | страница | `DavloomPage`; GET `?add=1` — диалог Add device (`DavloomPage.Dialog`, s-davloom-2); сразу после выдачи — пароль один раз (s-davloom-3). POST `op=issue` (`name`, `access`, `kind.‹род›`, `col.‹account›` с путём коллекции через вертикальную черту; без открытого окна набранное держится в сеансе, ответ — редирект на лист пароля `for=davloom`, s-davloom-5; GET `?add=1&held=1` — диалог с набранным, Cancel листа), `op=read&device=` и `op=write&device=` — право устройства кнопками общей формы страницы (записка Typecase 102), `op=revoke&device=` |
+| `/app/settings/davloom/scope` | GET, POST | вход | лист, редирект | `DavloomScopeSheet` (s-davloom-7, записка Typecase 96); `?device=` — устройство; POST `col` — каждая отмеченная коллекция (подключение и путь через вертикальную черту), без новой выдачи пароля; коллекция рода, которого устройство не видело, добавляет этот род; ни одной — отказ в листе; ответ — редирект на davloom |
+| `/app/settings/davloom/tree` | GET | вход | лист | `DavloomTreeSheet` — «What the client sees» (s-davloom-9; решение владельца 19.10): дерево адреса, Close |
+| `/app/settings/backup` | GET, POST | вход | страница | `BackupPage`; POST `?op=browse&job=` (ID или `new`) — форма задания как набрана держится в сеансе, ответ — редирект на лист выбора папки (`/app/files/picker?for=backup&job=`); GET `?job=&op=folder&to=` — страница задания с набранным и выбранной папкой, `?job=&held=1` — с набранным, как было (Cancel листа); POST `?op=create` — новое задание, `?op=save&job=` — сохранённое |
+| `/app/settings/backup/new` | GET | вход | страница | `BackupPage` — новое задание (s-backup-19, записка Typecase 99): та же форма, «New job», ничего не выбрано, Create (POST `/app/settings/backup?op=create`) и Cancel, без Delete job; то же, что `?job=new`, куда возвращается Browse |
+| `/app/settings/backup/restore` | GET, POST | вход | страница, редирект | `BackupPage` с `Restore.Open` (s-backup-7, -8, -15…-17); GET `?from=` — где архив: job, server, file, `?run=` — копия задания из истории, `?store=&path=` — архив, выбранный листом Browse; POST — открыть манифест (`source`, пароль архива; с сервера — `store` и `path`; с этого компьютера — multipart на `?from=file`, перед файлом `store` и `folder` — папка хранилища для архива больше `CARREL_IMPORT_MAX_BYTES`, положенный туда архив удаляется после восстановления, решение владельца 19.10; архив читается там, где лежит, кусками, на диск Carrel не пишется — S-24.3), ответ — редирект на эту же страницу с сопоставлением, отказ — тот же шаг с набранным и отказом в карточке (`Restore.Refusal`, s-backup-16); POST `?from=server&op=browse` — набранное, редирект на лист `/app/files/picker?for=restore` |
+| `/app/settings/backup/restore/match` | POST | вход | редирект | одна форма сопоставления (s-backup-8), `op` кнопки: `restore` — восстановить отмеченное, ответ — редирект на отчёт; `into` · `skip` · `all` — полоса над отмеченными строками; `cancel` — закрыть архив, ответ — список заданий |
+| `/app/settings/backup/restore/report` | GET | вход | страница | `BackupPage` с `Restore.Report` — шаг «3 · Report» (s-backup-18, записка Typecase 99): что сделало последнее восстановление, строка на коллекцию; держится в сеансе до открытия другого архива; без него — редирект на первый шаг |
+| `/app/settings/backup/trigger` | GET, POST | вход | лист, редирект | `BackupTriggerSheet` (записка Typecase 91); `?job=` — задание, `?tab=` — вкладка строки (crontab, gosentry, gitea, curl); POST `?op=on` и `?op=new` — выдача нового пароля (вне окна выдачи — лист пароля `for=trigger`, он и выдаёт), ответ — тот же лист с паролем целиком, один раз; `?op=revoke` — пароль перестаёт действовать, запуск выключен |
 | `/app/settings/appearance` | GET, POST | вход | страница, редирект | `AppearancePage`; POST — форма страницы: Look в куку этого браузера, неделя и часы — в аккаунт; `?op=reset` — забыть столбцы разделов и Look |
 | `/app/settings/unlock` | GET, POST | вход | лист, редирект | `UnlockSheet`; без сценариев — страница (U-8): скрытое `back` — страница, над которой открыт лист (`?back=` или откуда пришли по ссылке, только `/app/` и `/admin/` этого адреса); `for` — ради чего: подключение или подписка (Show password), `profile` (Generate profile — выдаёт ссылку профиля), `davloom` (Add device — создаёт пароль устройства из набранного, `op=issue` без окна держит набранное в сеансе), `trigger` с `job=` (включает внешний запуск, секрет — один раз на странице задания), `delete` (Delete account — пароль подтверждение, спрашивается и в открытом окне; удаляет и ведёт на `/login`); POST с верным паролем — само действие и редирект туда (иначе Connections), с неверным — лист страницей с ошибкой у поля |
 | `/app/settings/lock` | POST | вход | редирект | — ; Lock now (`TopBar.Lock`, s-profile-4, s-plan-1…5): выдача учётных данных этого сеанса закрывается до срока, вход остаётся (S-10.7); ответ — страница, где нажали (`Referer` этого же адреса), иначе Connections |
@@ -1949,6 +1961,8 @@ type Under struct {
     AdminUsers *AdminUsersPage
     Davloom    *DavloomPage // под листом пароля — Add device с набранным (s-davloom-5)
     Backup     *BackupPage  // под листом пароля — страница задания, внешний запуск (193 п. 3)
+    Published  *PublishedLinksPage // под «Send this link» (s-mail-4)
+    Files      *FilesPage          // папка под листом публикации файла и папки (s-publish-5)
 }
 
 // Вопрос перед записью (записка Typecase 56, s-agenda-22…-24; решение
@@ -2282,8 +2296,9 @@ type PublishSheet struct {
     Form    Form     // сколько показывать, разрешить ли .ics; что видит гость — у контакта и книги (s-publish-3), у календаря, события, списка задач и задачи (Б39: Time стоит всегда и выключен для правки, Title отмечен, Location, Description, Attendees, Attachments, Tags — нет; рубрика «What the visitor sees», кадра нет)
     Expires Text     // до какого дня ссылка живёт, когда она создана; до создания пусто
     Note    Text     // сообщение, которое стоит на листе всегда, до ссылки и после: у папки — что получает гость и что адрес монтируется диском (s-publish-5); у прочих пусто
-    Link    Text     // готовая ссылка после создания — путь страницы; лист тогда — одно поле «Link» формы, только для чтения, с полным адресом (s-publish-13), Expires — «Until 2026-09-09.»
+    Link    Text     // готовая ссылка после создания — путь страницы; лист тогда — одно поле «Link» формы, только для чтения, с полным адресом (s-publish-13), Expires — «Until 2026-09-09.», крестик Close — ссылка на страницу под листом
     Actions []Action
+    Under   *Under   // страница, откуда лист открыт (записка Typecase 105): у коллекции — Connections (s-publish-2, -13, -22), у записи — её страница (-3, -4, -19), у файла и папки — папка (-5); nil у фрагмента
 }
 
 type MailSheet struct {
@@ -2311,11 +2326,38 @@ type MailAttachRow struct {
     // У ссылки — её условия словами, как их говорит список ссылок: «30
     // days», «No expiry» (s-mail-1), и «Change…» — лист публикации поверх
     // письма с этими условиями, главная кнопка «Apply»: ссылка делается,
-    // когда письмо уходит. У вложения и у ссылки, сделанной раньше письма,
-    // пусто и nil
+    // когда письмо уходит. У вложения пусто и nil
     Terms  Text
     Change *Action
     Remove Action
+}
+
+// «Send this link» (s-mail-4; решение владельца 21.10.2026): письмо одной
+// выданной ссылки, отдельно от письма, которое пишется, — готовая ссылка в
+// письмо не вкладывается. Открывают его Send строки «Published links» и
+// «Send by letter» готовой ссылки (s-publish-13); начатое письмо ждёт
+// черновиком. Шапка — «Send this link» и что за ссылка, как её называет
+// список: Subject «Личный · 10–31 August», с меткой коллекции (Colour) или
+// значком файла и папки (Icon). «Sent as» — FromName жирным, From
+// моноширинно, куда придут ответы (ReplyTo) и «change in Account»; без
+// подтверждённого адреса ReplyTo пуст — ответа не будет, и письмо это
+// скажет. Carries — «The letter carries», три строки: письмо несёт ссылку и
+// строку человека, не содержимое; отзыв закрывает ссылку и этому
+// получателю; до какого дня она живёт. Form — POST /app/mail/send?id=: To
+// (`to`), «A line from you» (`line`, «optional»); Send, «Copy link instead»
+// (тот же адрес с op=link), Cancel — на страницу под листом. Under —
+// «Published links» у листа, пришедшего страницей.
+type MailLinkSheet struct {
+    Subject  Text
+    Colour   Colour
+    Icon     string
+    From     Text
+    FromName Text
+    ReplyTo  Text
+    Carries  []Text
+    Form     Form
+    Actions  []Action
+    Under    *Under
 }
 type MailAttachSheet struct {
     Rail    Rail
@@ -2354,9 +2396,9 @@ type FileCollectionRow struct {
     State    CollectionState
 }
 
-// Subtitle — строка под заголовком: подключение хранилища, у хранилища
-// только для чтения — и почему Upload и New folder выключены: «sftpgo · vps
-// · read-only: nothing can be uploaded or made here» (s-files-15).
+// Subtitle — строка под заголовком: подключение хранилища, сколько в
+// папке и бейдж «read-only» у хранилища только для чтения (states-34,
+// s-files-15; записка Typecase 88).
 type FilesPage struct {
     Shell
     Subtitle Text // подключение хранилища: «sftpgo · vps»
@@ -2364,9 +2406,7 @@ type FilesPage struct {
     // (s-files-1, states-32): всё, что в ней лежит, а не то, что оставил
     // фильтр; пусто — папка не прочитана (states-33).
     Count Text
-    // Access — у хранилища только для чтения, после счёта: «read-only:
-    // nothing can be uploaded or made here» (states-34); у прочих пусто.
-    Access Text
+    ReadOnly bool // хранилище только для чтения: бейдж «read-only» после счёта (states-34, записка Typecase 87); слово — экрана
     Attachments bool // папка вложений (S-20): метка «attachment folder» в строке под заголовком (s-files-1); слово — экрана
     Crumbs  []Crumb
     Bar     ListBar
@@ -2454,7 +2494,7 @@ type TransferRow struct {
     Question *NameClash // занятое имя — вопрос на месте, а не настройка
     Actions  []Action
 }
-type NameClash struct { Name Text; Options []Action } // Keep both · Replace · Skip (s-files-2); Replace перезаписывает осознанно — единственная запись без предусловия (S-17.1)
+type NameClash struct { Name Text; Options []Action; Form *Form } // Keep both · Replace · Skip (s-files-2); Replace перезаписывает осознанно — единственная запись без предусловия (S-17.1). Form — у загрузки одна форма ответа (multipart, csrf; записка Typecase 100): Keep both и Replace — поля выбора файла этой формы (Action.File — keep, replace), ответ — поле, в котором пришёл файл; Skip шлёт её с answer=skip; nil у переноса
 // New — «New folder» в рубрике дерева (s-files-4, s-notes-11): GET того же
 // листа с new=1 — лист с открытой строкой имени; выбранная только для чтения
 // — выключена с причиной. У дерева страницы nil.
@@ -2587,7 +2627,7 @@ type PublishedRow struct {
     Expires  Text
     LastSeen When
     Unopened bool // ссылку ни разу не открывали: LastSeen приглушён
-    Gone     Text // то, что ссылка открывала, ушло, и Carrel не смог за ним последовать (Б41): запись удалена или перенесена под неизвестным UID, коллекция удалена; пусто — ссылка жива. Запись, перенесённая и слитая Carrel, и коллекция, перенесённая им, ссылку уносят с собой
+    Gone     Text // то, что ссылка открывала, ушло, и Carrel не смог за ним последовать (Б41): запись удалена или перенесена под неизвестным UID, коллекция удалена; пусто — ссылка жива. Строка — подсказка плашки «no longer there» (s-publish-21): «Deleted, or moved where Carrel could not follow it»; у мёртвой Expires — «—», Copy и Send выключены с причиной «It is no longer there», Revoke стоит. Запись, перенесённая и слитая Carrel, и коллекция, перенесённая им, ссылку уносят с собой
     Opens    int      // сколько раз открыли: так видно, что ссылка ушла дальше, чем думали
     Actions  []Action // Copy · Send (с почтой) · Revoke (s-publish-1)
 }
@@ -2609,7 +2649,8 @@ type Form struct { // общая форма: поля, ошибки, кнопк�
 // ту же форму с ?fields=all, где свёрнутого нет и каждое поле стоит в своей
 // рубрике; набранное до неё не переносится — со сценариями клиент раскрывает
 // набор на месте. nil у несвёрнутого
-type FieldSet struct { Legend Text; LegendAside Text; Folded bool; Unfold *Action; Rows []FormRow; Badges []Badge; Hint Text; HintRuns Runs } // HintRuns — Hint кусками: ‹.ics›, ‹.vcf› моноширинно у «What to copy», «Also started by» с перечнем у «When» задания копии (s-backup-2); Hint тогда пуст. LegendAside — приглушённый хвост подписи набора: «— changed later too, without re-issuing the password» (s-davloom-2). Badges — плашки рубрики после Legend: «not configured» тревогой у Mail, «off» у Letters from users (s-admin-3); пусто — без плашек. Hint — строка под набором: «Without the title an event shows as “Busy”.» у «What the visitor sees» (s-publish-2, -19); у прочих пусто
+type FieldSet struct { Legend Text; LegendAside Text; Folded bool; Unfold *Action; Rows []FormRow; Facts []Fact; Diag Text; Badges []Badge; Hint Text; HintRuns Runs } // Diag — след одной строкой под строками набора: «PROPFIND /dav/Documents/carrel/attachments/ → 401 Unauthorized» у недоступной папки вложений (attachments-6); пусто — следа нет. Facts — строки набора только для чтения после полей, не поля формы: «Time zone · ‹Europe/Moscow› · this instance» у Dates and times (appearance-1, записка Typecase 104); пусто — строк нет. HintRuns — Hint кусками: ‹.ics›, ‹.vcf› моноширинно у «What to copy», «Also started by» с перечнем у «When» задания копии (s-backup-2); Hint тогда пуст. LegendAside — приглушённый хвост подписи набора: «— changed later too, without re-issuing the password» (s-davloom-2). Badges — плашки рубрики после Legend: «not configured» тревогой у Mail, «off» у Letters from users (s-admin-3); пусто — без плашек. Hint — строка под набором: «Without the title an event shows as “Busy”.» у «What the visitor sees» (s-publish-2, -19); у прочих пусто
+type Fact struct { Label Text; Value Text; Aside Text } // имя; значение моноширинно; приглушённый хвост после него («this instance»)
 type FormRow struct {
     Name     string
     Label    Text
@@ -2634,6 +2675,8 @@ type FormRow struct {
     HintRuns Runs // Hint кусками, когда кадр выделяет часть: имя сервера и адрес моноширинно, «Tasks» жирно (s-profile-5, Кл3); Hint тогда пуст
     LabelRuns Runs // Label кусками, когда кадр выделяет часть: «Allow ‹.ics› download and subscription» (s-publish-2, Пб5); Label — те же слова строкой
     Error    Text
+    Invalid  bool    // в тревоге без своих слов: причина сказана над полями — пароль, на который сервер ответил отказом (s-profile-24)
+    Reason   Text    // строка выключена сейчас и почему: «Let users send letters…» без настроенной почты — «Mail is not configured: there is nothing to send through yet.» (s-admin-3, записка Typecase 88); у прочих пусто
     Extra    *Action // кнопка, принадлежащая полю
     ReadOnly bool
     Required bool
@@ -2642,6 +2685,7 @@ type FormRow struct {
     // «Find a zone» (s-agenda-8): поиск есть, когда образец есть; у прочих
     // полей пусто
     Placeholder Text
+    Accept   string // у InputFile: какие файлы поле берёт, «.zip» у архива восстановления (s-backup-15)
     // У отметки — Name полей, которые она выключает, пока стоит, через
     // пробел — список имён, как список классов (s-profile-14: «The server
     // asks no password» выключает Password; s-tasks-3: All day задачи —
@@ -2771,9 +2815,11 @@ type Option struct {
     Colour    Colour // метка варианта-коллекции: тетрадь заметки (s-notes-15); у прочих пусто
     Group     Text   // рубрика перед вариантом, «As sent» (s-agenda-8); у прочих пусто
     Meta      Text   // подпись справа: «event · 12 Aug» (s-tasks-10); у прочих пусто
+    Columns   []Text // варианты — строки таблицы: значения столбцов после Label — у копии задания день, размер, счёт коллекций (s-backup-7); у прочих пусто
     Typed     bool   // «By UID…»: значение набирают руками (s-tasks-10); образец строки набора — Placeholder поля («UID of the record», s-tasks-11)
     Hint      Text   // у Typed — строка под строкой набора: «By UID: a record that is not among the loaded ones.» (s-tasks-11); у прочих пусто
     Shows     string // Name полей той же формы через пробел, видных, только пока выбран этот вариант: «Custom…» напоминания (s-agenda-19); у прочих пусто
+    Disables  string // Name полей той же формы через пробел, выключенных, пока выбран этот вариант: «The whole calendar» — «from to» (s-publish-2, записка Typecase 105); поля стоят всегда, без сценария уходят и при нём, и сервер их тогда не читает; у прочих пусто
 }
 type FieldError struct { Name string; Message Text }
 
@@ -2801,12 +2847,13 @@ type AccountPage struct {
 // ушло письмо, Send again (account-9). none — адреса нет.
 type EmailStatus struct {
     State       EmailState
-    Badge       *Badge
+    Badge       *Badge // в рубрике Email (записка 90): confirmed (linked), pending, not confirmed (alert); его же Profile кладёт в Badges набора Email, Aside — в LegendAside
     ConfirmedAt When   // день подтверждения; пусто — дня нет
     Pending     Text   // новый адрес, ждущий ссылки
     SentTo      Text   // куда ушло письмо со ссылкой, пока ссылка жива
     SentAt      When   // когда: «11:42» сегодня, «12 February, 11:42» раньше (account-9)
-    Message     *Notice // последствие; одна кнопка в Actions; nil — сообщения нет
+    Aside       Text    // слова у значка в рубрике Email: «new@example.org», «… · link not sent», «link sent 12 February 11:42» (записка Typecase 90)
+    Send        *Action // Send confirmation или Send again — кнопкой после Change в строке поля; nil — нет
 }
 type SessionRow struct {
     Agent    Text
@@ -2822,12 +2869,14 @@ type EscrowStatus struct {
     By           Text
     Badge        *Badge // у рубрики: «deposited 2026-03-02», роль alert (account-7)
     Deposited    When   // «2026-03-02»; пусто — копии нет
-    LastRecovery When   // «never» или день последнего восстановления (account-4)
+    LastRecovery When   // «never» или день последнего восстановления (account-4); пусто, когда есть Recoveries
+    Recoveries   []EscrowRecovery // строка «Recovered» на каждое восстановление (account-16, записка Typecase 99)
     Note         Text   // честная формулировка последствия, не «резервная копия ключей»
     ActionNote   Text   // у кнопки отзыва: «After withdrawal nobody can recover this account, including you.»
     Actions      []Action // Deposit my key — лист депонирования; Withdraw my deposited key — лист отзыва
 }
 
+type EscrowRecovery struct { At When; Who Text } // «2026-07-11 14:02» моноширинно; «olga, administrator: the password was reset»
 type EscrowPage struct {
     Shell
     Subtitle Text // «A copy of your key on this server» (account-4), «No copy of your data key is deposited» (account-12)
@@ -2864,9 +2913,10 @@ type PasswordPage struct { // account-3: обычная смена и вынуж
 // включает внешний запуск, удаляет учётную запись).
 type UnlockSheet struct {
     Purpose Text  // заголовок: «Show password» (s-profile-3), «Generate profile» (s-plan-3), «Add device» (s-davloom-5), «Delete account» (account-15), «External trigger» (193 п. 3)
+    For     UnlockFor // C-8: ради чего — вид листа: удаление и депонирование рисуются своими кадрами (account-15, account-2)
     Subject Text  // справа приглушённо — чьё: «nextcloud» (s-profile-3; for=<подключение>), имя устройства (s-davloom-5), задание копии; пусто — ничьё
     Warning Text  // строка под полем: «Unlocks stored credentials for five minutes.»; у удаления пусто
-    Alert   Text  // что уходит, тревогой до поля — у удаления учётной записи (account-15); у прочих пусто
+    Alert   Text  // что уходит, тревогой до поля — у удаления учётной записи (account-15), у депонирования — что получит администратор (account-2); у прочих пусто
     Form    Form  // скрытые back, for (и job у внешнего запуска); главная — само действие: Show, Generate, Create password, Turn on, Delete account (опасная); Cancel — назад, откуда открыт
     Under   *Under // экран под листом, пришедшим страницей (Лс29): откуда открыт (back, иначе Referer), иначе Connections — «Set up a new device» (s-plan-3), Connections (s-profile-3); у депонирования — Account (account-2); nil у фрагмента
 }
@@ -2881,6 +2931,7 @@ type ConnectionsPage struct {
     Subtitle      Runs // логин жирным (s-profile-10)
     Accounts      []ConnectionCard
     Subscriptions []SubscriptionCard
+    Empty         Runs // ни одного подключения и подписки: «**Nothing is connected yet.**» (s-profile-25); подзаголовок тогда — «Signed in as **mix**», в рейле нет счётов и строк состояния
     // Диалог подключения (`?op=add`, s-profile-2), его правка (`?op=edit`)
     // или подписка (`?op=feed`); nil на списке: список формы не несёт.
     // Правка, давшая подключению другой сервер или логин, когда через него
@@ -2946,7 +2997,9 @@ type CollectionRow struct {
     Changed  When
     Objects  *int // сколько записей держит, как сеанс её последний раз прочитал, все роды вместе («128», s-profile-1); nil — не читана или папка файлов: прочерк
     Tick     TickState // опрашивается ли: on — во всех её родах, part — в части, off — ни в одном (s-profile-1: снятая — снятым флажком)
-    Toggle   Action    // флажок строки: POST ?op=tick — отмечает во всех родах, отмеченную всюду снимает всюду, назад на страницу; подпись — имя коллекции
+    Toggle   Action    // флажок строки: кнопка общей формы страницы, POST ?op=pick — отмечает во всех родах, отмеченную всюду снимает всюду, назад на страницу; подпись — имя коллекции (записка Typecase 103)
+    Pick     string    // значение кнопки под именем pick: «подключение|путь»
+    New      bool      // только что найдена Update collection list: бейдж «new» в колонке вида, отметка снята (s-profile-27)
     // Календарь, книга (s-profile-1): Rename and colour · Move to another
     // server · Copy to another server · Export .ics|.vcf · Publish a link ·
     // черта · Delete on the server…; папка хранилища (s-profile-12) — то же
@@ -2974,18 +3027,20 @@ type SubscriptionCard struct {
     Changed  When          // «Changed on the server» — одна на все строки («yesterday»); пусто — не читалась
     State    CollectionState // unavailable — последнее чтение вернулось отказом; Check тогда «Check again», Checked — последнее удачное чтение
     Note     Text          // строка под карточкой у отказавшей: «The feed asks for a password and the saved one no longer fits. A feed that stopped answering must not look like a feed with nothing in it.»
+    Trace    *DiagnosticTrace // след последней Check в сеансе: что спросили и что ответили (s-profile-1, у отказавшей — над Note); nil — Check не было
     Actions  []Action // Check · Edit · Unsubscribe
 }
 
 // Строка «Lands in» (s-profile-1): род словом экрана, отмечен ли он в своём
 // разделе, сколько записей рода при последнем чтении (nil — не читалась),
-// флажок — POST /app/settings/connections?op=tick&kind=…
+// флажок — кнопка общей формы страницы, POST /app/settings/connections?op=pick
 type FeedKindRow struct {
     Kind    Kind
     Label   Text // «Calendar», «Tasks», «Notes»
     Tick    TickState
     Objects *int
     Toggle  Action
+    Pick    string // значение кнопки под именем pick: «подписка|раздел»
 }
 
 // Form (attachments-1): набор «Folder» — Collection (список файловых
@@ -2996,10 +3051,17 @@ type FeedKindRow struct {
 // Files, Oldest, Path только для чтения. Дерева на странице нет: его
 // открывает Browse. Actions — Discard (GET, адрес этой же страницы:
 // несохранённое сбрасывается) и Save, основная (Р-57, attachments-1)
-type AttachmentsPage struct { Shell; Form Form; Note Text }
+// AttachmentsPage — /app/settings/attachments (attachments-1): Subtitle —
+// «Where a file attached to a note, an event or a task is put»; Form —
+// Small files stay in the record (два ReadOnly-пункта; Hint «Larger» —
+// кусками: max-resource-size и подключения, что объявили предел меньше, с
+// ним), Folder, File name, In this folder now; Note — что смена папки не
+// переносит.
+type AttachmentsPage struct { Shell; Subtitle Text; Form Form; Note Text }
 
 type DevicesPage struct {
     Shell
+    Subtitle Text      // «Everything discovery found — as one file or one code» (s-plan-1); за ним клиент ставит метку открытой выдачи (TopBar.UnlockLeft, Lock)
     Tab      DeviceTab // C-8
     Accounts []DeviceAccount
     Warning  Notice // что содержит профиль и куда он попадает; у «Anything else» нет (s-plan-5)
@@ -3027,6 +3089,8 @@ type DeviceAccount struct {
     Rows     []DeviceRow
     Included bool        // аккаунт идёт в профиль и в коды (отметка s-plan-1)
     Toggle   *Action     // Leave out … / Include …, POST; профиль и коды берут аккаунт целиком; nil у Thunderbird и Anything else
+    Reason   Text        // никуда не входит и почему: «The server refused the saved password.» — отметка выключена с этой причиной (s-plan-1, -2; записка Typecase 94)
+    Refused  Text        // коротко, красным: «password refused» справа в строке; в Thunderbird и «Anything else» — «the server refused the saved password» в строке аккаунта, без пароля и коллекций (s-plan-4, -5)
     QR       string      // Android: код этого аккаунта, адрес изображения; пусто — кода нет
     Login    Text        // Thunderbird, Anything else: логин в строке аккаунта
     Password SecretField // пароль этого подключения; пусто у Apple и у аккаунта без кода
@@ -3039,6 +3103,7 @@ type DeviceRow struct {
     Type     Text // CalDAV · CardDAV · WebDAV
     URL      Text
     Included bool
+    ReadOnly bool // коллекция только для чтения: «ro» у протокола (s-plan-5)
     Copy     Action
 }
 
@@ -3048,10 +3113,12 @@ type DavloomPage struct {
     Enabled     bool
     Address     Text
     AddressHint Text            // как адрес вводят в DAVx5 и чей пароль (s-davloom-1)
-    Actions     []Action        // шапка: Add device (основная, GET ?add=1); у выключенного davloom — выключена с причиной
+    Sees        Action          // «What the client sees» рядом с Copy: GET на лист дерева /app/settings/davloom/tree (s-davloom-9; решение владельца 19.10)
+    Actions     []Action        // шапка: Add device (основная, GET ?add=1); у выключенного davloom — выключена с причиной (s-davloom-8)
     Devices     []ProxyDevice
-    Tree        []ProxyTreeRow  // «What the client sees»: /dav/, principal/, cal/, card/, files/ и коллекции под ними адресами (s-davloom-1)
-    Dialog      *DeviceDialog   // диалог поверх списка: добавление (s-davloom-2), что видит устройство (?edit=), выданный пароль (s-davloom-3); nil — список
+    Acts        Form            // общая форма страницы davloom-acts: POST /app/settings/davloom с csrf; её шлют кнопки прав устройства, каждая на свой адрес (записка Typecase 102)
+    Empty       Runs            // устройств нет: «No devices yet.» жирно под рубрикой без счёта (s-davloom-6); у списка пусто
+    Dialog      *DeviceDialog   // диалог поверх списка: добавление (s-davloom-2), выданный пароль (s-davloom-3); nil — список
     Note        Runs            // смена основного пароля не отключает устройства; «not» жирным (s-davloom-1)
 }
 type ProxyDevice struct {
@@ -3061,14 +3128,29 @@ type ProxyDevice struct {
     Scope    []Kind
     ReadOnly bool     // право устройства: только чтение или чтение и запись
     Marks    []Colour // метки коллекций, которые устройство видит, каждая один раз, в порядке каталога (s-davloom-1)
-    Actions  []Action // «N collections · Change» · read only | read and write (On — действующее) · Revoke
+    Actions  []Action // «N collections · Change» (GET на лист области, s-davloom-7) · read only | read and write (POST кнопками общей формы страницы, On — действующее; записка Typecase 102) · Revoke
 }
 type ProxyTreeRow struct { Path Text; Label Text; Colour Colour; Depth int } // адрес уровнем ниже предыдущего, моноширинно; справа — что это; у коллекции — метка
+// DavloomScopeSheet — «What it sees» поверх davloom (s-davloom-7, записка
+// Typecase 96): коллекции устройства отметками по подключениям, сеткой, как
+// источники задания копии; права — в строке устройства.
+type DavloomScopeSheet struct {
+    Subject Text   // имя устройства
+    Form    Form   // POST ?device= с csrf; строка col — отметки: Option.Group у первой коллекции подключения, Meta — что это; Save · Cancel
+    Under   *Under // экран под листом, пришедшим страницей (Лс29): davloom; nil у фрагмента
+}
+// DavloomTreeSheet — «What the client sees» листом (s-davloom-9).
+type DavloomTreeSheet struct {
+    Address Text
+    Tree    []ProxyTreeRow // /dav/, principal/, cal/, card/, files/ и коллекции под ними адресами
+    Actions []Action       // Close
+    Under   *Under
+}
 type DeviceDialog struct {
     Title    Text            // «Add device»; у правки и выданного — имя устройства
     Subtitle Text            // «An app password for one device, with its own key wrapper»; у выданного — «Password created · read and write · 8 collections»
     Password *DevicePassword // выданный пароль (s-davloom-3); nil — не выдан
-    Form     Form            // добавление: имя, право, «What the device will see» (роды, LegendAside), «Collections», Create password и Cancel; правка: роды и коллекции, Save и Cancel; выданный: адрес и логин только для чтения, Done
+    Form     Form            // добавление: имя, право, «What the device will see» (роды, LegendAside), «Collections», Create password и Cancel; выданный: адрес и логин только для чтения, Done
     Warning  Text            // под формой добавления тревогой: пароль показывают один раз
 }
 type DevicePassword struct { Label Text; Value Text; Warning Text; Copy Action }
@@ -3076,11 +3158,12 @@ type DevicePassword struct { Label Text; Value Text; Warning Text; Copy Action }
 type BackupPage struct {
     Shell
     Subtitle   Runs    // на странице задания: «Job · last copy 2 days ago» (s-backup-2), назначение не только WebDAV — жирным: «Job · destination **WebDAV and download** · last copy …» (s-backup-3); Title — имя задания; на списке — «Three jobs · their own sources, destinations and triggers» (s-backup-1), без заданий — «No jobs yet» (s-backup-6); у нового задания (?job=new, Title «New job») пусто
-    Actions    []Action // шапка списка: New job (основная, ?job=new) и Restore (?restore=1 — RestoreBlock.Open); и без заданий (s-backup-1, s-backup-6)
+    Actions    []Action // шапка списка: New job (основная, ?job=new) и Restore (/app/settings/backup/restore); и без заданий (s-backup-1, s-backup-6)
     Empty      Runs    // без заданий (s-backup-6): «Carrel copies raw ‹.ics›, ‹.vcf› and files …»; с заданиями пусто
     EmptyNote  Runs    // «Already have an archive from another instance? **Restore** takes it from a file — a job is not needed for that.»
     Jobs       []BackupJob // строки списка; на странице задания и у нового пусто
-    Job        *BackupJob  // открытое задание на своей странице (s-backup-2, Нс61): его Clock, ClockHint, Trigger; на списке nil
+    JobsHint   Text        // под таблицей заданий: «verified — the archive was read back from where it was written and the checksum matched. Written and not read back is not verified, and is marked red.» (s-backup-1); без заданий пусто
+    Job        *BackupJob  // открытое задание на своей странице (s-backup-2, Нс61): его форма; на списке nil
     History    []BackupHistoryRow // «History, all jobs» (s-backup-1): прогоны всех заданий, новые первыми; на странице задания пусто
     Add        Form    // новое задание; на странице задания (?job=, s-backup-2) — оно само: Save · Cancel · Run now; наборы по рубрикам — без рубрики Name и «Job is on», «What to copy» (LegendAside — «2 collections and 1 folder chosen · 2.1 GB last time»), «Where to», «How the archive is closed», «When» (Нс57)
     Delete     *Action // внизу страницы задания; nil — на списке и у нового
@@ -3096,17 +3179,16 @@ type BackupJob struct {
     Copies      Text     // итог: «3 collections», «2 collections + files», «1 book»
     Where       Text     // «sftpgo · vps · Documents»; у скачивания «download in browser»
     WhereNote   Text     // строкой ниже: «/backup/work»; у скачивания «nothing is written»
-    When        Text     // «cron · 03:00», «on sign-in», «on demand»
-    WhenNote    Text     // строкой ниже: «external trigger», «if older than 7 days»
+    When        Text     // только настроенное (решение владельца 19.10, записка Typecase 95): правило входа «on sign-in»; пусто — «—»
+    WhenNote    Text     // строкой ниже: «if older than 7 days»
+    Triggered   bool     // выдан пароль внешнего запуска: бейдж «trigger» в When
     Keep        int      // у скачивания 0 — держать нечего («—»)
     Encrypted   bool
     LastRun     When     // последняя копия числами, «2026-08-16 03:10»; пусто — копий не было («never»)
     LastNote    Runs     // строкой ниже: «18.4 MB · verified» (с подсказкой), непроверенная — тревогой
     LastState   OpState
-    Clock       Action        // отметка «On a clock of your own — cron, GoSentry, a job in Gitea» в рубрике When (s-backup-2): On — внешний запуск включён; снятая выключает его, отдельного выключателя нет; «local» рядом — SignedIn.Local
-    ClockHint   Text          // подсказка под отметкой, и у снятой тоже: цена включения — ключ задания под ключом сервера (S-24.4)
-    Trigger     *TriggerBlock // карточка строки внешнего запуска; nil, пока он выключен: показывать и обновлять нечего
     Actions     []Action // Run · Edit (s-backup-1); Run задания «Download» — поток архива
+    External    Action   // «External trigger» в «⋯» строки после двойников Run и Edit — ссылка на лист внешнего запуска (записка Typecase 91)
 }
 // Прогон в «History, all jobs» (s-backup-1, Нс56).
 type BackupHistoryRow struct {
@@ -3117,8 +3199,31 @@ type BackupHistoryRow struct {
     Collections Text   // «3 / 3» — вошли целыми из скольких
     Whole       bool   // вошли все; иначе ячейка тревожная
     Verified    Runs   // «read back», у неполной — и «‹danger›1 not copied» с подсказкой (что не вошло и почему); не прочитанная обратно — тревогой
-    Trigger     Text   // «cron», «on sign-in», «by hand»
-    Actions     []Action // Restore (?restore=1&from=job&run=…) · Download; нечего взять — без них
+    Trigger     Text   // «external», «on sign-in», «by hand»
+    Via         Text   // у внешнего запуска второй строкой: пароль и адрес — «cbk_…lamp · 10.0.0.5»; у отказа (Verified «refused: not this job’s password» тревогой, без Restore) — пароль, которым пытались (записка 91)
+    Actions     []Action // Restore (/app/settings/backup/restore?from=job&run=…) · Download; нечего взять — без них
+}
+
+// Лист внешнего запуска задания поверх списка заданий (записка Typecase 91):
+// выключен (s-backup-14) — Warning тревогой, Turn on (?op=on) и Cancel;
+// включён (s-backup-12) — Password строкой с New password (?op=new) и
+// Revoke (?op=revoke), Line с паролем скрытым, Close; только что выдан
+// (s-backup-13) — пароль и строка целиком, один раз.
+type BackupTriggerSheet struct {
+    Title    Text             // «External trigger»
+    Subject  Text             // задание: «Рабочее, ежедневно»
+    Local    bool             // «local» у строки
+    Warning  Text             // у выключенного: цена включения (S-24.4)
+    Password *TriggerPassword // nil у выключенного
+    Line     *TriggerBlock    // «The line to paste»: вкладки ?tab=, команда, Note; nil у выключенного
+    Form     Form             // скрытое csrf; Actions — Turn on · Cancel либо Close
+    Under    *Under           // список заданий под листом, пришедшим страницей
+}
+type TriggerPassword struct {
+    Masked  Text     // «cbk_…lamp»
+    Use     Runs     // «issued 2 August · last run 16 August 03:10 from ‹10.0.0.5› · 14 runs»; у выданного пусто
+    Value   Text     // только что выданный — целиком; иначе пусто
+    Actions []Action // New password · Revoke (danger); у выданного пусто
 }
 // Карточка внешнего запуска (s-backup-2…5): вкладки crontab · GoSentry ·
 // Gitea · curl несут то, что вставить туда, где уже есть часы. Данные —
@@ -3145,7 +3250,7 @@ type TriggerBlock struct {
     Password   SecretField
     Note       Runs   // «Every use is logged, naming this password. **New password** replaces it on the spot — and every line already handed out stops working with it.» (s-backup-5)
     Destination Runs  // у скрипта — почему не строка: «Destination: **WebDAV and download** — two steps, so this is a file, not a line» (s-backup-3); у строки пусто
-    Tabs       []Action // вкладки crontab · GoSentry · Gitea · curl — ссылки на страницу задания с ?trigger= (вид, не хранится), открытая — On (s-backup-3)
+    Tabs       []Action // вкладки crontab · GoSentry · Gitea · curl — ссылки на лист внешнего запуска с ?tab= (вид, не хранится), открытая — On (s-backup-12)
 }
 // Поля задания GoSentry (s-backup-4): так они названы в его диалоге.
 // Скрипту — путь к нему в Command и расписание, Arguments пусты.
@@ -3156,20 +3261,30 @@ type GoSentryJob struct {
     Command   Text
     Arguments []Text // по одному аргументу в строке, без кавычек
 }
+// RestoreReport — отчёт восстановления (s-backup-18): «Restored from
+// 2026-08-14», итог строкой, строка на коллекцию, Note «Nothing on the server
+// was deleted or overwritten.», Done (GET /app/settings/backup).
+type RestoreReport struct { Title Text; Subtitle Text; Rows []RestoreReportRow; Note Text; Done Action }
+// Строка: имя и метка коллекции архива, куда восстановлена, сколько создано,
+// что случилось — отказ в Happened тревогой; Same — «no differences»
+// приглушённо.
+type RestoreReportRow struct { Name Text; Colour Colour; Into Text; Created int; Happened Runs; Same bool }
 type RestoreBlock struct {
-    Open    bool // восстановление открыто: Restore в шапке (?restore=1) или архив уже открыт
+    Open    bool // страница восстановления (/app/settings/backup/restore, s-backup-7, -8); на списке заданий false
     Title   Text // заголовок диалога: «Restore» (s-backup-7), открытого архива — «Restore from 2026-08-14» (s-backup-8)
     Subtitle Runs // до архива — «Nothing is written until you have seen what goes where» (s-backup-7); открытый архив (s-backup-8): «Job «Личное» · manifest read · 4 collections · 1 214 records · ‹carrel-backup/2026-08-14T09-12.zip›»; не открыт — пусто
     // From — «Where the archive is»: From a job · From a server · From this
-    // computer, ссылки на тот же шаг (?restore=1&from=job|server|file),
+    // computer, ссылки на тот же шаг (/app/settings/backup/restore?from=job|server|file),
     // выбранная On; FromHint — подсказка под ними (s-backup-7). Source —
     // только поля выбранного: у задания — строка на задание (имя; день,
     // размер, счёт коллекций — Meta), у сервера — хранилище и путь, у
     // компьютера — файл кнопкой; и пароль архива
     From     []Action
     FromHint Text
-    Source  Form
+    Source  Form // набор источника (Legend — рубрика карточки) и набор «Archive password» (s-backup-7, -15, -17)
+    Refusal Runs // отказ шага тревогой наверху карточки источника: «The archive is larger than 16 MB. … choose **From a server**.» (s-backup-16); пусто — нет
     Match   *RestoreMatch // шаг сопоставления (s-backup-8); nil — архив не открыт
+    Report  *RestoreReport // шаг «3 · Report» (s-backup-18, /app/settings/backup/restore/report); nil — восстановления не было
     Note    Runs // восстановление создаёт, как импорт, а не откатывает: «creates» жирным (s-backup-8)
     Actions []Action // Cancel открытого архива
 }
@@ -3179,10 +3294,11 @@ type RestoreBlock struct {
 // то же содержимое) не повторяются, запись с занятым UID и другим
 // содержимым получает новый UID и строку отчёта; на сервере ничего не
 // удаляется и не перезаписывается. Без сценариев всё — одна форма: строки
-// шлют pick.N и into.N, кнопки полосы — та же форма на свой адрес
-// (`?op=restore-match&do=into|skip|all`), ответ — страница с новым выбором.
+// шлют pick.N и into.N, каждая кнопка — та же форма со своим op
+// (`/app/settings/backup/restore/match?op=restore|into|skip|all|cancel`),
+// ответ — страница восстановления с новым выбором.
 type RestoreMatch struct {
-    Form     Form       // POST `/app/settings/backup?op=restore-run`: скрытый _csrf; кнопки — «Restore 3 collections» (по отмеченным строкам, основная) и полосы: Restore into, Skip, Select all
+    Form     Form       // POST `/app/settings/backup/restore/match`: скрытый _csrf; кнопки — «Restore 3 collections» (по отмеченным строкам, основная) и полосы: Restore into, Skip, Select all
     Selected int        // «3 selected» на полосе
     Into     FormRow    // список «Restore into» полосы (into): цель всем отмеченным строкам — коллекции, черта, New collection, Skip this one
     Rows     []RestoreRow
@@ -3207,16 +3323,17 @@ type RestoreRow struct {
 
 type AppearancePage struct {
     Shell
+    Subtitle Text // «Theme in this browser · week start and clock in the account» (appearance-1)
     // Одна форма кадра (appearance-1): Theme (theme: auto, light, dark —
     // радио сегментом, подсказка — «Kept in this browser…»), Density
-    // (density: comfortable, compact), Lists (отметки panel, source, wide),
-    // Dates and times (weekStart, clock). Первые три — Look этого браузера
-    // (его кука), последняя — аккаунт. Actions — Discard (GET, эта же
-    // страница) и Save, основная (Р-57)
+    // (density: comfortable, compact), Lists (отметки panel, source, wide;
+    // Hint набора — что выбор столбцов помнит браузер), Dates and times
+    // (weekStart, clock; timezone — часовой пояс экземпляра, ReadOnly,
+    // «Europe/Moscow · this instance»; Hint набора — что где живёт). Первые
+    // три — Look этого браузера (его кука), последняя — аккаунт. Actions —
+    // Discard (GET, эта же страница) и Save, основная (Р-57)
     Form     Form
     Reset    Action // «Reset remembered view settings» под Lists: POST ?op=reset — забыть выбор столбцов каждого раздела и Look этого браузера
-    Instance Form   // часовой пояс — ставит администратор
-    Notes    []Text
 }
 
 type AdminUsersPage struct {
@@ -3374,10 +3491,11 @@ type ExerciseRow struct { Operation Text; Result Text; Detail Text }
 
 type AdminInstallPage struct {
     Shell
-    Form Form         // шапка s-admin-4: адрес проверки (url, моноширинно) и «Run the check»
+    Subtitle Text     // «Carrel asks itself from outside, at the address you declared as the base one» (s-admin-4, -25, -26)
+    Form Form         // шапка s-admin-4: адрес проверки (url, моноширинно; до прогона — объявленный адрес, иначе тот, по которому пришли) и «Run the check»
     Rows []InstallRow
     Took Text         // сколько шла проверка, «4.2 s»; пусто — её не было
-    Note Text         // что делает проверка, пока таблицы нет (s-admin-25, -26)
+    Note Text         // что делает проверка: под таблицей и без неё (s-admin-4, -25, -26)
 }
 type InstallRow struct {
     Check   Text
@@ -3722,7 +3840,8 @@ selection» формы выделения папки, `folder.new.create` и `fo
 `file.view` Open (картинка на месте), `file.rename`, `file.move`,
 `file.delete`. Очередь: `transfer.both` Keep both, `transfer.overwrite`
 Replace, `transfer.skip` Skip — в этом порядке (s-files-2). Опубликованное —
-`published.refresh`. Сквозные без сценариев (U-8): `conflict.combine` «Write
+`published.refresh`; прочие страницы настроек — `settings.refresh` (Refresh
+верхней полосы читает страницу заново, appearance-1, account-1). Сквозные без сценариев (U-8): `conflict.combine` «Write
 this combination» — кнопка формы расхождения (`ConflictPage.Form`),
 `conflict.mine`, `conflict.theirs`, `conflict.cancel` — каждая своей формой;
 решения группы дубликатов `duplicates.link`, `duplicates.ignore`,
@@ -3857,6 +3976,7 @@ type InputKind string
 const ( InputText InputKind = "text"; InputPassword = "password"; InputEmail = "email"
         InputURL = "url"; InputDate = "date"; InputTime = "time"; InputNumber = "number"
         InputSelect = "select"; InputCheck = "check"; InputRadio = "radio"; InputArea = "area"
+        InputFile = "file"     // файл с этого компьютера, уходит с формой: архив восстановления (s-backup-15)
         InputHidden = "hidden" // значение, которое форма несёт и никто не заполняет:
                                // _csrf, версия, на которой прочитана форма, шаг формы.
                                // Не показывается, подписи не имеет
@@ -3891,7 +4011,16 @@ type RunMark string
 const ( RunPlain RunMark = ""; RunMono = "mono"; RunStrong = "strong"
         RunDanger = "danger" // тревога: источник, который не ответил (tc-dim--danger, s-contacts-7)
         RunBreak = "break"   // перенос строки в сообщении: строки перечня «Also started by» (s-backup-2); Text пуст
-        RunSlug = "slug" )   // часть пути, которую даёт поле с From (адрес новой коллекции, s-profile-5): моноширинно, клиент держит её в ногу с полем (SlugOf)
+        RunSlug = "slug"     // часть пути, которую даёт поле с From (адрес новой коллекции, s-profile-5): моноширинно, клиент держит её в ногу с полем (SlugOf)
+        RunCode = "code" )   // имя протокола в подсказке — кодом: «.well-known» у Server URL (s-profile-2)
+
+// Ради чего лист пароля (UnlockSheet.For): по нему клиент выбирает значок и
+// вид листа — удаление с корзиной тревогой (account-15), депонирование со
+// щитом и тревогой до поля (account-2), прочие — лист окна выдачи (s-plan-3)
+type UnlockFor string
+const ( UnlockForPassword UnlockFor = "password" // пароль подключения или ленты (s-profile-3)
+        UnlockForProfile = "profile"; UnlockForDavloom = "davloom"; UnlockForTrigger = "trigger"
+        UnlockForDelete = "delete"; UnlockForDeposit = "deposit" )
 ```
 
 `CheckUnknown` — серый флажок проверки установки: то, что снаружи не измерить.

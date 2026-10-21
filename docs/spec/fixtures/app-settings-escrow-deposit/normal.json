@@ -1,5 +1,6 @@
 {
-  "alert": "",
+  "alert": "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account.",
+  "for": "deposit",
   "form": {
     "action": "/app/settings/escrow",
     "actions": [
@@ -82,6 +83,14 @@
           "id": "account.password",
           "label": "Change password",
           "method": "GET"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/account?op=end-others",
+          "id": "account.session.others",
+          "label": "End every other session",
+          "method": "POST"
         }
       ],
       "danger": [
@@ -98,13 +107,14 @@
       "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays.",
       "details": null,
       "email": {
+        "aside": "new@example.org",
         "badge": {
-          "label": "pending: new@example.org",
+          "label": "pending",
           "role": "neutral"
         },
         "confirmedAt": "14 February",
-        "message": null,
         "pending": "new@example.org",
+        "send": null,
         "sentAt": "11:42",
         "sentTo": "new@example.org",
         "state": "pending"
@@ -189,7 +199,14 @@
             "unfold": null
           },
           {
+            "badges": [
+              {
+                "label": "pending",
+                "role": "neutral"
+              }
+            ],
             "legend": "Email",
+            "legendAside": "new@example.org",
             "rows": [
               {
                 "add": null,
@@ -202,7 +219,19 @@
                   "label": "Change",
                   "method": "POST"
                 },
-                "hint": "Used for service notices, and as Reply-To on letters you send.",
+                "hint": "",
+                "hintRuns": [
+                  {
+                    "text": "Used for service notices, and as "
+                  },
+                  {
+                    "mark": "mono",
+                    "text": "Reply-To"
+                  },
+                  {
+                    "text": " on letters you send."
+                  }
+                ],
                 "kind": "email",
                 "label": "Address",
                 "name": "email",
@@ -225,7 +254,7 @@
           "label": "Carrel",
           "method": "GET"
         },
-        "davloom": "davloom · running · 0 devices",
+        "davloom": "davloom · running · 3 devices",
         "foot": [],
         "nav": [
           {
@@ -275,7 +304,7 @@
             "method": "GET"
           },
           {
-            "count": 0,
+            "count": 3,
             "enabled": true,
             "href": "/app/settings/davloom",
             "id": "settings.davloom",
@@ -283,7 +312,7 @@
             "method": "GET"
           },
           {
-            "count": null,
+            "count": 3,
             "enabled": true,
             "href": "/app/settings/backup",
             "icon": "i-archive",
@@ -318,10 +347,34 @@
           {
             "line": [
               {
-                "text": "No device has connected since the start."
+                "text": "Last response "
+              },
+              {
+                "mark": "mono",
+                "text": "2026-08-16 09:41"
               }
             ],
-            "title": "davloom · running · 0 devices",
+            "title": "davloom · running · 3 devices",
+            "tone": "on"
+          },
+          {
+            "line": [
+              {
+                "text": "Last backup "
+              },
+              {
+                "mark": "mono",
+                "text": "2026-08-16 03:10"
+              },
+              {
+                "text": " · "
+              },
+              {
+                "hint": "The archive was read back from the destination and the checksum matched",
+                "text": "verified"
+              }
+            ],
+            "title": "Backups are running",
             "tone": "on"
           }
         ],
@@ -330,8 +383,8 @@
       },
       "sessions": [
         {
-          "address": "",
-          "agent": "",
+          "address": "203.0.113.7",
+          "agent": "Firefox · Windows",
           "current": true,
           "end": {
             "csrf": "csrf",
@@ -339,7 +392,22 @@
             "id": "account.session.end",
             "label": "End",
             "method": "POST",
-            "reason": "This is the session you are in: sign out to end it."
+            "reason": "This is the session you are using: sign out instead."
+          },
+          "lastSeen": "just now",
+          "started": "2026-08-10 17:04"
+        },
+        {
+          "address": "203.0.113.8",
+          "agent": "Edge · Windows",
+          "current": false,
+          "end": {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/settings/account?op=end\u0026s=session",
+            "id": "account.session.end",
+            "label": "End",
+            "method": "POST"
           },
           "lastSeen": "just now",
           "started": "2026-08-10 17:04"
@@ -420,10 +488,12 @@
         },
         "refresh": {
           "action": {
-            "enabled": false,
-            "id": "",
-            "label": "",
-            "method": ""
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-refresh",
+            "id": "settings.refresh",
+            "label": "Refresh",
+            "method": "GET"
           },
           "answered": "",
           "running": false
@@ -482,11 +552,13 @@
     "devices": null,
     "event": null,
     "eventEdit": null,
+    "files": null,
     "note": null,
     "notes": null,
+    "published": null,
     "task": null,
     "taskEdit": null,
     "tasks": null
   },
-  "warning": "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account."
+  "warning": ""
 }

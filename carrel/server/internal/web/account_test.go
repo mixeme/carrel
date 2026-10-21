@@ -40,7 +40,7 @@ func TestAccountNameAndAddressConfirmedByLink(t *testing.T) {
 		t.Errorf("the letter that went is not written down: %+v", page.Email)
 	}
 	if row := profileRow(page.Profile, "email"); row.Value != "bob@example.org" || page.Email.State != view.EmailPending ||
-		page.Email.Badge == nil || page.Email.Badge.Label != "pending: new@example.org" {
+		page.Email.Badge == nil || page.Email.Badge.Label != "pending" || page.Email.Aside != "new@example.org" {
 		t.Errorf("email row = %+v, status = %+v", row, page.Email)
 	}
 	if row := profileRow(page.Profile, "name"); row.Value != "Боб Строитель" {

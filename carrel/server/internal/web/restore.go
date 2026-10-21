@@ -5,13 +5,14 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -45,17 +46,39 @@ import (
 // and its manifest. As a session task it is cancelled — the file deleted —
 // when the session ends.
 type restoreTask struct {
-	id       string
-	path     string
+	id string
+	// src is the archive where it lies, read a piece at a time (S-24.3):
+	// nothing of it is on Carrel's disk
+	src      archive
 	password string
 	file     string // where the archive lay: the run's file, the path on the storage, the uploaded name
 	manifest backup.Manifest
 	mu       sync.Mutex
-	gone     bool // cancelled: the file is deleted
+	gone     bool // cancelled: the archive let go of
 	// choice is the matching (s-backup-8), preset on the first look; counts
 	// are what each row's target was found to hold, read once.
 	choice restoreChoice
 	counts map[string]restoreCount
+	// put is where an archive from this computer was put to be read from
+	// a storage; deleted after the restore (the owner, 19.10.2026)
+	put *storedArchive
+}
+
+// storedArchive is an archive put into a storage for its restore.
+type storedArchive struct {
+	files *file.Provider
+	path  string
+}
+
+// restoreDone is what the restore did to one collection of the archive, a
+// row of the report (s-backup-18).
+type restoreDone struct {
+	Name, Colour, Into   string
+	Created, Fresh, Same int
+	Refused              int
+	Why                  string // why the refused were refused, the server's words
+	Files                bool
+	Matched              bool // into the collection the archive was taken of
 }
 
 func (t *restoreTask) ID() string    { return t.id }
@@ -64,10 +87,7 @@ func (t *restoreTask) Running() bool { return !t.ended() }
 func (t *restoreTask) Cancel() {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	if !t.gone {
-		t.gone = true
-		_ = os.Remove(t.path)
-	}
+	t.gone, t.src = true, nil
 }
 
 func (t *restoreTask) ended() bool {
@@ -95,30 +115,30 @@ func endRestore(sess *session.Session) {
 	}
 }
 
-// open reads the archive again from its file.
-func (t *restoreTask) open() (*zip.Reader, *os.File, error) {
-	f, err := os.Open(t.path)
+// open reads the archive again where it lies: its directory and manifest,
+// the members as they are read.
+func (t *restoreTask) open() (*zip.Reader, io.Closer, error) {
+	t.mu.Lock()
+	src := t.src
+	t.mu.Unlock()
+	if src == nil {
+		return nil, nil, errors.New("the archive is no longer open")
+	}
+	zr, _, err := backup.OpenAt(src, src.Size(), t.password)
 	if err != nil {
 		return nil, nil, err
 	}
-	st, err := f.Stat()
-	if err != nil {
-		f.Close()
-		return nil, nil, err
-	}
-	zr, _, err := backup.OpenAt(f, st.Size(), t.password)
-	if err != nil {
-		f.Close()
-		return nil, nil, err
-	}
-	return zr, f, nil
+	return zr, io.NopCloser(nil), nil
 }
 
 // restoreBlock is the restore part of the Backup screen: which archive, then
 // each of its collections and where it goes (s-backup-8).
 // run names the copy a row of the history opened it with (Нс56): that one
 // is the job's row, chosen.
-func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from, run string) view.RestoreBlock {
+func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from, run string, typed url.Values) view.RestoreBlock {
+	if typed == nil {
+		typed = url.Values{}
+	}
 	b := view.RestoreBlock{Note: join("Restoring ", strongRun("creates"), " records, the way import does: a colliding UID gets a fresh one and a line in the report. "+
 		"Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes.")}
 	// A job's copies: one row a job, its newest verified copy — its day, its
@@ -139,14 +159,17 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from, run
 			}
 		}
 		if newest != nil {
+			// Its day, its size, how many collections (s-backup-7): a
+			// column each.
 			runs = append(runs, view.Option{Value: job.ID + "|" + newest.ID, Label: text(job.Name),
-				Meta: text(string(tf.numStamp(newest.Started)) + " · " + string(formatSize(newest.Size)) + " · " + plural(newest.Collections, "collection"))})
+				Columns: []view.Text{text(string(tf.numStamp(newest.Started))), text(string(formatSize(newest.Size))), text(plural(newest.Collections, "collection"))}})
 		}
 	}
 	for _, conn := range blob.Connections {
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Has(view.KindFile) && !col.Gone {
-				stores = append(stores, view.Option{Value: selValue(conn.ID, col.Path), Label: text(string(stamp(connLabel(conn), collectionLabel(col))))})
+				v := selValue(conn.ID, col.Path)
+				stores = append(stores, view.Option{Value: v, Label: text(string(stamp(connLabel(conn), collectionLabel(col)))), Selected: v == typed.Get("store")})
 			}
 		}
 	}
@@ -162,11 +185,14 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from, run
 	}
 	for _, f := range []struct{ id, label string }{{"job", "From a job"}, {"server", "From a server"}, {"file", "From this computer"}} {
 		b.From = append(b.From, view.Action{ID: "restore.from." + f.id, Label: text(f.label), Method: "GET", Enabled: true, On: f.id == from,
-			Href: s.route("/app/settings/backup?" + url.Values{"restore": {"1"}, "from": {f.id}}.Encode())})
+			Href: s.route("/app/settings/backup/restore?" + url.Values{"from": {f.id}}.Encode())})
 	}
 	b.FromHint = "One archive, one of three. The other two stay empty until you switch."
 	source := map[string]string{"job": "run", "server": "webdav", "file": "upload"}[from]
 	rows := []view.FormRow{csrfField(sess), {Name: "source", Kind: view.InputHidden, Value: text(source)}}
+	// The source's own card, its rubric the source's name (s-backup-7, -15,
+	// -17), and the archive's password in a card of its own.
+	set := view.FieldSet{Legend: map[string]view.Text{"job": "From a job", "server": "From a server", "file": "From this computer"}[from]}
 	switch from {
 	case "job":
 		chosen := 0
@@ -178,32 +204,63 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from, run
 		for i := range runs {
 			runs[i].Selected = i == chosen
 		}
-		rows = append(rows, view.FormRow{Name: "run", Label: "From a job", Kind: view.InputRadio, Options: runs})
+		set.Rows = append(set.Rows, view.FormRow{Name: "run", Label: "From a job", Kind: view.InputRadio, Options: runs})
 	case "server":
-		rows = append(rows,
-			view.FormRow{Name: "store", Label: "Storage", Kind: view.InputSelect, Options: stores},
-			view.FormRow{Name: "file", Label: "File in it", Kind: view.InputText, Hint: "The path of the archive under the storage's root, such as backups/carrel-work-2026-08-16T031000Z.zip.age."})
+		// The collection and the archive's path in it, Browse choosing it
+		// in the tree (s-backup-17, Typecase's note 99).
+		if !slices.ContainsFunc(stores, func(o view.Option) bool { return o.Selected }) && len(stores) > 0 {
+			stores[0].Selected = true
+		}
+		browse := view.Action{ID: "restore.browse", Label: "Browse", Method: "POST", Enabled: true, Submits: true,
+			Href: s.postQuery("/app/settings/backup/restore", url.Values{"from": {"server"}, "op": {"browse"}})}
+		set.Rows = append(set.Rows,
+			view.FormRow{Name: "store", Label: "Collection", Kind: view.InputSelect, Options: stores},
+			view.FormRow{Name: "path", Label: "Archive in it", Kind: view.InputText, Mono: true, Value: text(typed.Get("path")), Extra: &browse,
+				Placeholder: "/backups/carrel-personal-2026-08-14.zip"})
+	case "file":
+		// Over the ceiling of an import the archive goes into a folder of
+		// a storage, in the same stream, and is read from there and deleted
+		// after the restore (S-24.3, the owner's decisions of 19.10.2026):
+		// the fields stand before the file, as a browser sends them; the
+		// folder is off while there is no storage (s-backup-15, -16).
+		store := typed.Get("store")
+		// «None» switches the folder off while it is chosen (s-backup-16,
+		// Typecase's note 106): a folder of no storage means nothing.
+		stores := append([]view.Option{{Value: "", Label: text("None — up to " + string(formatSize(s.cfg.ImportMaxBytes))), Selected: store == "", Disables: "folder"}}, stores...)
+		folder := typed.Get("folder")
+		if folder == "" {
+			folder = "/carrel/restore"
+		}
+		set.Rows = append(set.Rows,
+			view.FormRow{Name: "store", Label: "Storage for a large archive", Kind: view.InputSelect, Options: stores},
+			view.FormRow{Name: "folder", Label: "Folder in it", Kind: view.InputText, Mono: true, Value: text(folder), ReadOnly: store == "",
+				Hint: "A larger archive is put here, read from there and deleted after the restore."},
+			// The file last: a browser sends the fields before it.
+			view.FormRow{Name: "file", Label: "Archive", Kind: view.InputFile, Accept: ".zip"})
 	}
-	rows = append(rows, view.FormRow{Name: "password", Label: "Archive password", Kind: view.InputPassword,
-		Hint: "The one set in the job, not your sign-in password. Without it the manifest cannot be read — Carrel will not even see the list of collections."})
-	b.Source = s.plainForm("/app/settings/backup?op=restore-open", "POST", rows...)
-	open := view.Action{ID: "restore.open", Label: "Open the manifest", Primary: true, Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}}), Method: "POST", Enabled: true}
+	b.Source = s.plainForm("/app/settings/backup/restore", "POST", rows...)
+	b.Source.Sets = append(b.Source.Sets, set, view.FieldSet{Legend: "Archive password", Rows: []view.FormRow{
+		{Name: "password", Label: "Archive password", Kind: view.InputPassword, Hint: "The one set in the job, not your sign-in password."}}})
+	open := view.Action{ID: "restore.open", Label: "Open the manifest", Primary: true, Href: s.route("/app/settings/backup/restore"), Method: "POST", Enabled: true}
 	if from == "file" {
 		// The archive comes with the form, from this computer.
-		open.ID, open.Icon, open.File = "restore.upload", "i-upload", "archive"
-		open.Href = s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}, "source": {"upload"}})
+		b.Source.Action = s.postQuery("/app/settings/backup/restore", url.Values{"from": {"file"}})
+		open.Href = b.Source.Action
+	}
+	if from == "server" {
+		b.Source.Action = s.postQuery("/app/settings/backup/restore", url.Values{"from": {"server"}})
+		open.Href = b.Source.Action
 	}
 	b.Source.Actions = []view.Action{open,
 		{ID: "restore.close", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true}}
 	b.Title, b.Subtitle = "Restore", line("Nothing is written until you have seen what goes where")
 	if t := restoreOf(sess); t != nil {
-		b.Open = true
 		b.Subtitle = archiveLine(t)
 		if !t.manifest.Taken.IsZero() {
 			b.Title = text("Restore from " + string(tf.dayKey(t.manifest.Taken)))
 		}
 		b.Match = s.restoreMatch(sess, blob, t)
-		b.Actions = []view.Action{{ID: "restore.cancel", Label: "Cancel", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-cancel"}}), Method: "POST", Enabled: true}}
+		b.Actions = []view.Action{{ID: "restore.cancel", Label: "Cancel", Href: s.postQuery("/app/settings/backup/restore/match", url.Values{"op": {"cancel"}}), Method: "POST", Enabled: true}}
 	}
 	return b
 }
@@ -496,24 +553,32 @@ func (s *Server) restoreMatch(sess *session.Session, blob sealed.Blob, t *restor
 	bar.Options = append(bar.Options,
 		view.Option{Value: restoreNew, Label: "New collection", Separator: true},
 		view.Option{Value: restoreSkip, Label: "Skip this one"})
-	m.Into = bar
-	q := func(op, do string) string {
-		v := url.Values{"op": {op}}
-		if do != "" {
-			v.Set("do", do)
+	// The bar's choice shows the target of the first ticked row: Restore
+	// into gives it to every ticked one (s-backup-8, Typecase's note 102).
+	for i := range t.manifest.Collections {
+		if !choice.picked[i] || choice.into[i] == restoreSkip {
+			continue
 		}
-		return s.postQuery("/app/settings/backup", v)
+		for k := range bar.Options {
+			bar.Options[k].Selected = bar.Options[k].Value == choice.into[i]
+		}
+		break
 	}
-	m.Form = s.plainForm("/app/settings/backup?op=restore-run", "POST", csrfField(sess))
+	m.Into = bar
+	// One form (s-backup-8): each button sends it with its op.
+	q := func(op string) string {
+		return s.postQuery("/app/settings/backup/restore/match", url.Values{"op": {op}})
+	}
+	m.Form = s.plainForm("/app/settings/backup/restore/match", "POST", csrfField(sess))
 	// «Restore 3 collections» (s-backup-8): what the press restores.
-	run := view.Action{ID: "restore.run", Label: text("Restore " + plural(going, "collection")), Href: q("restore-run", ""), Method: "POST", Primary: true, Enabled: going > 0}
+	run := view.Action{ID: "restore.run", Label: text("Restore " + plural(going, "collection")), Href: q("restore"), Method: "POST", Primary: true, Enabled: going > 0}
 	if going == 0 {
 		run.Reason = "Tick a collection and choose where it goes."
 	}
 	m.Form.Actions = []view.Action{run,
-		{ID: "restore.into", Label: "Restore into", Href: q("restore-match", "into"), Method: "POST", Enabled: true},
-		{ID: "restore.skip", Label: "Skip", Href: q("restore-match", "skip"), Method: "POST", Enabled: true},
-		{ID: "restore.all", Label: "Select all", Href: q("restore-match", "all"), Method: "POST", Enabled: true},
+		{ID: "restore.into", Label: "Restore into", Href: q("into"), Method: "POST", Enabled: true},
+		{ID: "restore.skip", Label: "Skip", Href: q("skip"), Method: "POST", Enabled: true},
+		{ID: "restore.all", Label: "Select all", Href: q("all"), Method: "POST", Enabled: true},
 	}
 	return m
 }
@@ -578,11 +643,11 @@ func (s *Server) restoreWill(sess *session.Session, blob sealed.Blob, t *restore
 func (s *Server) matchRestore(w http.ResponseWriter, r *http.Request, sess *session.Session, blob sealed.Blob) {
 	t := restoreOf(sess)
 	if t == nil {
-		s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, restoreFailure("There is no archive open — the session may have ended. Open it again.")))
+		s.writePage(w, r, http.StatusOK, s.restorePage(sess, "", "", restoreFailure("There is no archive open — the session may have ended. Open it again.")))
 		return
 	}
 	c := postedChoice(r, blob, t, t.choiceOf(blob))
-	switch r.URL.Query().Get("do") {
+	switch r.URL.Query().Get("op") {
 	case "into":
 		v := r.PostFormValue("into")
 		for i, e := range t.manifest.Collections {
@@ -602,7 +667,7 @@ func (s *Server) matchRestore(w http.ResponseWriter, r *http.Request, sess *sess
 		}
 	}
 	t.keep(c)
-	s.redirect(w, r, "/app/settings/backup")
+	s.redirect(w, r, "/app/settings/backup/restore")
 }
 
 // archiveRecords are the records of one collection of the archive, read
@@ -651,71 +716,111 @@ func (s *Server) archiveRecords(zr *zip.Reader, e backup.Entry) ([]*model.Object
 	return out, nil
 }
 
-// openRestore is step one: the archive, from where it lies, into a
-// temporary file of the session; then opened and its manifest read. A wrong
-// password or a file that is no Carrel archive says so and keeps nothing.
+// openRestore is step one: the archive opened where it lies, its manifest
+// read with its password, and the matching of the next step (S-24.3, the
+// owner's decision of 19.10.2026). A job's copy and a file on a storage are
+// read by ranges; one sent by a browser without a script arrives whole,
+// once — up to the ceiling of an import it is held in the session's
+// memory, larger it goes on, in the same stream, into the folder of a
+// storage the step names and is read from there.
 func (s *Server) openRestore(w http.ResponseWriter, r *http.Request, sess *session.Session, blob sealed.Blob) {
 	endRestore(sess)
+	sess.SetDraft(session.DraftRestoreReport, nil) // another archive: the last report goes
 	fields := r.PostForm
-	var src io.Reader
-	var closer io.Closer
+	var src archive
+	var put *storedArchive
 	var name string
 	source := r.URL.Query().Get("source")
 	if source == "" {
 		source = fields.Get("source")
 	}
+	// The archive from this computer comes in a form of files, whose
+	// fields are read with the file (s-backup-15).
+	if source == "" && r.URL.Query().Get("from") == "file" {
+		source = "upload"
+	}
+	fail := func(msg string) {
+		why := line(msg)
+		// Too large without a storage: what to do instead, its way named
+		// (s-backup-16).
+		if before, ok := strings.CutSuffix(msg, " From a server."); ok {
+			why = join(before+" ", strongRun("From a server"), ".")
+		}
+		s.writePage(w, r, http.StatusOK, s.refusedStep(sess, source, fields, why))
+	}
 	if source == "upload" {
 		up, err := uploadOf(r)
 		if err != nil || up.next == nil {
-			s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, restoreFailure("No file came with the form.")))
+			fail("No file came with the form.")
 			return
 		}
-		fields, src, name = up.fields, up.next, up.next.FileName()
+		fields, name = up.fields, up.next.FileName()
+		if src, put, err = s.uploadedArchive(r.Context(), blob, up, fields); err != nil {
+			fail(err.Error())
+			return
+		}
 	} else {
 		var err error
-		src, closer, name, err = s.restoreSource(r.Context(), sess, blob, source, fields)
-		if err != nil {
-			s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, restoreFailure(err.Error())))
+		if src, name, err = s.restoreSource(r.Context(), sess, blob, source, fields); err != nil {
+			fail(err.Error())
 			return
 		}
-		defer closer.Close()
 	}
-	f, err := os.CreateTemp("", "carrel-restore-*")
+	t := &restoreTask{src: src, password: fields.Get("password"), file: name, put: put}
+	_, m, err := backup.OpenAt(src, src.Size(), t.password)
 	if err != nil {
-		http.Error(w, "could not keep the archive", http.StatusInternalServerError)
-		return
-	}
-	size, err := io.Copy(f, src)
-	f.Close()
-	t := &restoreTask{path: f.Name(), password: fields.Get("password"), file: name}
-	if err != nil {
-		t.Cancel()
-		s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, restoreFailure("The archive did not arrive whole: "+err.Error())))
-		return
-	}
-	rf, err := os.Open(t.path)
-	if err == nil {
-		_, t.manifest, err = backup.OpenAt(rf, size, t.password)
-		rf.Close()
-	}
-	if err != nil {
-		t.Cancel()
 		msg := "This is not a Carrel archive, or it is damaged: " + err.Error()
-		if errors.Is(err, backup.ErrWrongPassword) {
+		switch {
+		case errors.Is(err, backup.ErrWrongPassword):
 			msg = "The password does not open this archive."
+		case errors.Is(err, errNoRange), errors.Is(err, errArchiveChanged):
+			msg = err.Error()
 		}
-		s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, restoreFailure(msg)))
+		fail(msg)
 		return
 	}
+	t.manifest = m
 	id, err := user.NewTaskID()
 	if err != nil {
-		t.Cancel()
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	t.id = "restore-" + id
 	sess.KeepTask(t)
-	s.redirect(w, r, "/app/settings/backup")
+	s.redirect(w, r, "/app/settings/backup/restore")
+}
+
+// uploadedArchive is the archive a browser sent without a script (S-24.3):
+// up to CARREL_IMPORT_MAX_BYTES held in memory; larger, the rest of the
+// same stream goes after what was read into the folder of the storage the
+// form names (store, folder), under the file's name, and is read from there
+// by ranges; with no folder named, a refusal that says why and how.
+func (s *Server) uploadedArchive(ctx context.Context, blob sealed.Blob, up *uploadBody, fields url.Values) (archive, *storedArchive, error) {
+	max := s.cfg.ImportMaxBytes
+	head, err := io.ReadAll(io.LimitReader(up.next, max+1))
+	if err != nil {
+		return nil, nil, errors.New("The archive did not arrive whole: " + err.Error())
+	}
+	if int64(len(head)) <= max {
+		return memArchive{bytes.NewReader(head)}, nil, nil
+	}
+	if fields.Get("store") == "" {
+		return nil, nil, fmt.Errorf("The archive is larger than %s. Choose a folder of your storage for it, or put it there and choose From a server.", formatSize(max))
+	}
+	name := up.next.FileName()
+	rel := strings.Trim(fields.Get("folder"), "/")
+	if rel != "" {
+		rel += "/"
+	}
+	files, p, _, err := s.restoreStore(blob, fields.Get("store"), rel+name)
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := files.UploadCreate(ctx, p, io.MultiReader(bytes.NewReader(head), up.next)); err != nil {
+		return nil, nil, errors.New("The archive could not be put into the storage: " + err.Error())
+	}
+	a, err := openRange(ctx, files, p)
+	return a, &storedArchive{files: files, path: p}, err
 }
 
 // archiveLine is the line under the title of an open archive (s-backup-8):
@@ -759,50 +864,58 @@ func restoreFailure(body string) view.Notice {
 	return view.Notice{Role: view.NoticeAlert, Title: "The archive could not be opened", Body: text(body)}
 }
 
-// restoreSource opens the archive a form names: a run of a job, or a file on
-// a storage of the catalog.
-func (s *Server) restoreSource(ctx context.Context, sess *session.Session, blob sealed.Blob, source string, f url.Values) (io.Reader, io.Closer, string, error) {
+// restoreSource is the archive the first step names where it lies — a job's
+// copy at its destination, a file on a storage —, read by ranges (S-24.3),
+// and where it lay.
+func (s *Server) restoreSource(ctx context.Context, sess *session.Session, blob sealed.Blob, source string, f url.Values) (archive, string, error) {
 	switch source {
 	case "run":
 		jobID, runID, _ := strings.Cut(f.Get("run"), "|")
 		job, ok := blob.BackupJob(jobID)
 		if !ok {
-			return nil, nil, "", errors.New("choose a copy")
+			return nil, "", errors.New("choose a copy")
 		}
 		for _, r := range s.users.BackupRuns(sess.AccountID())[jobID] {
 			if r.ID == runID && r.File != "" && r.Verified {
 				dest, err := s.backupDest(blob, job)
 				if err != nil {
-					return nil, nil, "", err
+					return nil, "", err
 				}
-				body, err := dest.Open(ctx, r.File)
-				return body, body, r.File, err
+				a, err := openRange(ctx, dest.files, dest.folder+r.File)
+				return a, r.File, err
 			}
 		}
-		return nil, nil, "", errors.New("choose a copy")
+		return nil, "", errors.New("choose a copy")
 	case "webdav":
-		acc, colPath, _ := strings.Cut(f.Get("store"), "|")
-		col, ok := blob.Collection(acc, colPath)
-		conn, hasConn := blob.Connection(acc)
-		segs, okPath := relSegs(f.Get("file"))
-		if !ok || !hasConn || !col.Has(view.KindFile) || !okPath || len(segs) == 0 {
-			return nil, nil, "", errors.New("choose a storage and the archive's path in it")
-		}
-		files, err := s.filesOf(conn)
+		files, p, segs, err := s.restoreStore(blob, f.Get("store"), f.Get("path"))
 		if err != nil {
-			return nil, nil, "", err
+			return nil, "", err
 		}
-		p, err := file.Join(fileRoot(conn, col), segs...)
-		if err != nil {
-			return nil, nil, "", err
-		}
-		d, err := files.Open(ctx, p, nil)
-		if err != nil {
-			return nil, nil, "", err
-		}
-		return d.Body, d.Body, strings.Join(segs, "/"), nil
+		a, err := openRange(ctx, files, p)
+		return a, strings.Join(segs, "/"), err
 	}
-	return nil, nil, "", errors.New("choose where the archive is")
+	return nil, "", errors.New("choose where the archive is")
+}
+
+// restoreStore is a path on a storage of the catalog the restore names:
+// store — the storage, «account|path» —, rel — the path under its root.
+func (s *Server) restoreStore(blob sealed.Blob, store, rel string) (*file.Provider, string, []string, error) {
+	acc, colPath, _ := strings.Cut(store, "|")
+	col, ok := blob.Collection(acc, colPath)
+	conn, hasConn := blob.Connection(acc)
+	segs, okPath := relSegs(rel)
+	if !ok || !hasConn || !col.Has(view.KindFile) || !okPath || len(segs) == 0 {
+		return nil, "", nil, errors.New("choose a storage and the archive's path in it")
+	}
+	files, err := s.filesOf(conn)
+	if err != nil {
+		return nil, "", nil, err
+	}
+	p, err := file.Join(fileRoot(conn, col), segs...)
+	if err != nil {
+		return nil, "", nil, err
+	}
+	return files, p, segs, nil
 }
 
 // runRestore is step three: every ticked collection goes where its row says
@@ -812,14 +925,14 @@ func (s *Server) restoreSource(ctx context.Context, sess *session.Session, blob 
 func (s *Server) runRestore(w http.ResponseWriter, r *http.Request, sess *session.Session, key [32]byte, blob sealed.Blob) {
 	t := restoreOf(sess)
 	if t == nil {
-		s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, restoreFailure("There is no archive open — the session may have ended. Open it again.")))
+		s.writePage(w, r, http.StatusOK, s.restorePage(sess, "", "", restoreFailure("There is no archive open — the session may have ended. Open it again.")))
 		return
 	}
 	choice := postedChoice(r, blob, t, t.choiceOf(blob))
 	t.keep(choice)
 	zr, f, err := t.open()
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, restoreFailure(err.Error())))
+		s.writePage(w, r, http.StatusOK, s.restorePage(sess, "", "", restoreFailure(err.Error())))
 		return
 	}
 	// Closed before the restore ends: an open file cannot be deleted on every
@@ -828,40 +941,132 @@ func (s *Server) runRestore(w http.ResponseWriter, r *http.Request, sess *sessio
 	defer closeOnce()
 	ctx := r.Context()
 	day := time.Now().In(s.tz()).Format("2006-01-02")
-	var lines []view.Text
-	failed := false
+	var rows []restoreDone
 	for i, e := range t.manifest.Collections {
 		into := choice.into[i]
 		if !choice.picked[i] || into == restoreSkip {
 			continue
 		}
-		var said []string
+		var done restoreDone
 		var err error
 		if e.Kind == view.KindFile {
-			said, err = s.restoreFiles(ctx, blob, zr, e, into, day)
+			done, err = s.restoreFiles(ctx, blob, zr, e, into, day)
 		} else {
-			said, err = s.restoreRecords(ctx, sess, key, blob, zr, e, into, day)
+			done, err = s.restoreRecords(ctx, sess, key, blob, zr, e, into, day)
 		}
-		if err != nil {
-			failed = true
-			said = append(said, e.Connection+" / "+e.Name+": "+err.Error())
+		if err != nil && done.Why == "" {
+			done.Why, done.Refused = err.Error(), max(done.Refused, 1)
 		}
-		for _, l := range said {
-			lines = append(lines, text(l))
+		done.Name = e.Connection + " / " + e.Name
+		done.Colour = string(catalogColour(sealed.Collection{AccountID: e.AccountID, Path: e.Path}))
+		if c, ok := blob.Collection(e.AccountID, e.Path); ok {
+			done.Colour = string(catalogColour(c))
 		}
+		col, matched := matchedByPath(blob, e)
+		done.Matched = matched && into == selValue(col.AccountID, col.Path)
+		rows = append(rows, done)
 	}
-	if len(lines) == 0 {
-		s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, view.Notice{Role: view.NoticeInfo, Title: "Nothing was restored", Body: "Tick at least one collection and choose where it goes."}))
+	if len(rows) == 0 {
+		s.writePage(w, r, http.StatusOK, s.restorePage(sess, "", "", view.Notice{Role: view.NoticeInfo, Title: "Nothing was restored", Body: "Tick at least one collection and choose where it goes."}))
 		return
 	}
 	closeOnce()
-	endRestore(sess)
-	n := view.Notice{Role: view.NoticeInfo, Title: "Restored", Body: "Nothing on the server was deleted or overwritten.",
-		Details: &view.Diagnostic{Summary: "What went where", Lines: lines}}
-	if failed {
-		n.Role, n.Title = view.NoticeAlert, "Restored in part"
+	// An archive put into a storage for this restore goes (the owner,
+	// 19.10.2026): the folder's hint said so.
+	if p := t.put; p != nil {
+		_ = p.files.Delete(context.WithoutCancel(ctx), p.path, "")
 	}
-	s.writePage(w, r, http.StatusOK, s.backupPage(sess, nil, nil, n))
+	report := restoreReportOf{Day: string(s.timeFor(sess).dayKey(t.manifest.Taken)), Rows: rows}
+	if raw, err := json.Marshal(report); err == nil {
+		sess.SetDraft(session.DraftRestoreReport, raw)
+	}
+	endRestore(sess)
+	s.redirect(w, r, "/app/settings/backup/restore/report")
+}
+
+// restoreReportOf is the last restore as the session holds it for its
+// report (s-backup-18).
+type restoreReportOf struct {
+	Day  string
+	Rows []restoreDone
+}
+
+// getBackupRestoreReport is the restore's third step (s-backup-18): what
+// the last restore did, a row a collection; with none, the first step.
+func (s *Server) getBackupRestoreReport(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	var held restoreReportOf
+	if raw := sess.Draft(session.DraftRestoreReport); raw == nil || json.Unmarshal(raw, &held) != nil {
+		s.redirect(w, r, "/app/settings/backup/restore")
+		return
+	}
+	w.Header().Set("Cache-Control", "no-store")
+	page := s.restorePage(sess, "", "")
+	page.Restore.Report = s.restoreReport(held)
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+// restoreReport is the report's words (s-backup-18): «Restored from …», the
+// sums in a line, a row a collection — what was created, which records got
+// a new UID, what was refused and why, in alarm —, that nothing was deleted
+// or overwritten, Done.
+func (s *Server) restoreReport(held restoreReportOf) *view.RestoreReport {
+	rep := &view.RestoreReport{Title: "Restored", Note: "Nothing on the server was deleted or overwritten.",
+		Done: view.Action{ID: "restore.done", Label: "Done", Href: s.route("/app/settings/backup"), Method: "GET", Primary: true, Enabled: true}}
+	if held.Day != "" {
+		rep.Title = text("Restored from " + held.Day)
+	}
+	created, fresh, refused := 0, 0, 0
+	for _, d := range held.Rows {
+		created, fresh, refused = created+d.Created, fresh+d.Fresh, refused+d.Refused
+		row := view.RestoreReportRow{Name: text(d.Name), Colour: view.Colour(d.Colour), Into: text(d.Into), Created: d.Created}
+		var parts []any
+		add := func(p ...any) {
+			if len(parts) > 0 {
+				parts = append(parts, " · ")
+			}
+			parts = append(parts, p...)
+		}
+		noun := "record"
+		if d.Files {
+			noun = "file"
+		}
+		if d.Created > 0 && d.Matched {
+			add(plural(d.Created, "missing "+noun) + " created")
+		}
+		if d.Fresh > 0 {
+			if d.Files {
+				add(plural(d.Fresh, "file") + " put beside the one there")
+			} else {
+				add(plural(d.Fresh, "record") + " with a new UID")
+			}
+		}
+		if d.Refused > 0 {
+			add(view.Run{Text: text(fmt.Sprintf("%d not restored: %s", d.Refused, d.Why)), Mark: view.RunDanger})
+		}
+		switch {
+		case len(parts) > 0:
+		case d.Created > 0:
+			add(plural(d.Created, noun) + " created")
+		default:
+			add("no differences")
+			row.Same = true
+		}
+		row.Happened = join(parts...)
+		rep.Rows = append(rep.Rows, row)
+	}
+	sums := []string{plural(len(held.Rows), "collection"), plural(created, "record") + " created"}
+	if fresh > 0 {
+		sums = append(sums, fmt.Sprintf("%d with a new UID", fresh))
+	}
+	if refused > 0 {
+		sums = append(sums, fmt.Sprintf("%d not restored", refused))
+	}
+	rep.Subtitle = text(strings.Join(sums, " · "))
+	return rep
 }
 
 // restoreRecords puts the records of one archived collection into the
@@ -869,10 +1074,11 @@ func (s *Server) runRestore(w http.ResponseWriter, r *http.Request, sess *sessio
 // newRestoreConn names: a record missing there is created under its UID,
 // the same record is left as it is, and a UID held there by different
 // content gets a fresh UID and a line. The first line says the counts.
-func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key [32]byte, blob sealed.Blob, zr *zip.Reader, e backup.Entry, into, day string) ([]string, error) {
+func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key [32]byte, blob sealed.Blob, zr *zip.Reader, e backup.Entry, into, day string) (restoreDone, error) {
+	done := restoreDone{}
 	objs, err := s.archiveRecords(zr, e)
 	if err != nil {
-		return nil, err
+		return done, err
 	}
 	var conn sealed.Connection
 	var col sealed.Collection
@@ -880,17 +1086,17 @@ func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key 
 	if into == restoreNew {
 		var ok bool
 		if conn, ok = newRestoreConn(blob, e); !ok {
-			return nil, errors.New("no server here makes collections of this kind")
+			return done, errors.New("no server here makes collections of this kind")
 		}
 		kinds := e.Kinds
 		if len(kinds) == 0 {
 			kinds = []view.Kind{e.Kind}
 		}
 		if col, err = s.newCollectionOn(ctx, conn, kinds, e.Name+" (restored "+day+")"); err != nil {
-			return nil, err
+			return done, err
 		}
 		if err := s.users.AddCollection(sess.AccountID(), key, conn.ID, col); err != nil {
-			return nil, err
+			return done, err
 		}
 	} else {
 		acc, path, _ := strings.Cut(into, "|")
@@ -898,12 +1104,13 @@ func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key 
 		col, ok = blob.Collection(acc, path)
 		conn, hasConn = blob.Connection(acc)
 		if !ok || !hasConn || conn.Feed || col.ReadOnly {
-			return nil, errors.New("the chosen collection does not take writes")
+			return done, errors.New("the chosen collection does not take writes")
 		}
 		if there, err = s.recordsThere(ctx, sess, blob, into, e.Kind); err != nil {
-			return nil, err
+			return done, err
 		}
 	}
+	done.Into = string(stamp(connLabel(conn), collectionLabel(col)))
 	dests := map[view.Kind]*collectionCtx{}
 	made, same, refused := 0, 0, 0
 	var renamed []string
@@ -943,22 +1150,29 @@ func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key 
 		}
 		if err := s.createImported(ctx, dest, o, uid); err != nil {
 			refused++
+			if done.Why == "" {
+				done.Why = refusedWhy(err)
+			}
 			continue
 		}
 		made++
 	}
-	line := fmt.Sprintf("%s / %s → %s · %s: %s created", e.Connection, e.Name, connLabel(conn), collectionLabel(col), plural(made, "record"))
-	if same > 0 {
-		line += fmt.Sprintf(", %d already there", same)
+	done.Created, done.Same, done.Fresh, done.Refused = made, same, len(renamed), refused
+	return done, nil
+}
+
+// refusedWhy is a record's refusal as the report says it (s-backup-18):
+// «the server refused it (413, too large)».
+func refusedWhy(err error) string {
+	code := dav.StatusCode(err)
+	if code == 0 {
+		return err.Error()
 	}
-	if len(renamed) > 0 {
-		line += fmt.Sprintf(", %d with a fresh UID", len(renamed))
+	words := map[int]string{http.StatusRequestEntityTooLarge: "too large", http.StatusForbidden: "not allowed", http.StatusInsufficientStorage: "no room"}[code]
+	if words == "" {
+		words = strings.ToLower(http.StatusText(code))
 	}
-	out := append([]string{line}, renamed...)
-	if refused > 0 {
-		return out, fmt.Errorf("%d refused", refused)
-	}
-	return out, nil
+	return fmt.Sprintf("the server refused it (%d, %s)", code, words)
 }
 
 // newCollectionOn makes a collection on a connection's home for kinds, under
@@ -1001,28 +1215,30 @@ func (s *Server) newCollectionOn(ctx context.Context, conn sealed.Connection, ki
 // it is; a name taken by other bytes gets a fresh one beside it — nothing is
 // overwritten. A path from the archive that would climb out is written
 // nowhere, and the folder's name from the manifest is one segment (S-29.4).
-func (s *Server) restoreFiles(ctx context.Context, blob sealed.Blob, zr *zip.Reader, e backup.Entry, into, day string) ([]string, error) {
+func (s *Server) restoreFiles(ctx context.Context, blob sealed.Blob, zr *zip.Reader, e backup.Entry, into, day string) (restoreDone, error) {
+	done := restoreDone{Files: true}
 	var col sealed.Collection
 	if into == restoreNew {
 		var ok bool
 		if col, ok = newRestoreFolder(blob, e); !ok {
-			return nil, errors.New("no storage here takes writes")
+			return done, errors.New("no storage here takes writes")
 		}
 	} else {
 		acc, colPath, _ := strings.Cut(into, "|")
 		var ok bool
 		col, ok = blob.Collection(acc, colPath)
 		if !ok || col.ReadOnly || col.Feed || !col.Has(view.KindFile) {
-			return nil, errors.New("the chosen storage does not take writes")
+			return done, errors.New("the chosen storage does not take writes")
 		}
 	}
 	conn, hasConn := blob.Connection(col.AccountID)
 	if !hasConn {
-		return nil, errors.New("the chosen storage does not take writes")
+		return done, errors.New("the chosen storage does not take writes")
 	}
+	done.Into = string(stamp(connLabel(conn), collectionLabel(col)))
 	files, err := s.filesOf(conn)
 	if err != nil {
-		return nil, err
+		return done, err
 	}
 	base := strings.TrimSuffix(fileRoot(conn, col), "/") + "/"
 	made := map[string]bool{base: true}
@@ -1033,10 +1249,10 @@ func (s *Server) restoreFiles(ctx context.Context, blob sealed.Blob, zr *zip.Rea
 		}
 		base += name + " (restored " + day + ")/"
 		if _, err := files.Stat(ctx, base); err == nil {
-			return nil, errors.New(base + " is already there")
+			return done, errors.New(base + " is already there")
 		}
 		if err := files.MkCol(ctx, base); err != nil {
-			return nil, err
+			return done, err
 		}
 		made[base] = true
 	}
@@ -1068,7 +1284,7 @@ func (s *Server) restoreFiles(ctx context.Context, blob sealed.Blob, zr *zip.Rea
 		}
 		p := base + strings.Join(segs, "/")
 		if err := mkdirs(p); err != nil {
-			return nil, err
+			return done, err
 		}
 		// A server that ignores If-None-Match would overwrite: what is there
 		// is asked first (file.Provider.UploadCreate).
@@ -1089,25 +1305,25 @@ func (s *Server) restoreFiles(ctx context.Context, blob sealed.Blob, zr *zip.Rea
 				}
 			}
 			if at == "" {
-				return nil, fmt.Errorf("%s: every name beside it is taken", rel)
+				return done, fmt.Errorf("%s: every name beside it is taken", rel)
 			}
 			renamed = append(renamed, strings.Join(segs, "/")+" → "+path.Base(at)+": changed there since the copy")
 			p = at
 		}
-		err := uploadMember(ctx, files, p, zf)
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", rel, err)
+		if err := uploadMember(ctx, files, p, zf); err != nil {
+			done.Refused++
+			if done.Why == "" {
+				done.Why = rel + ": " + refusedWhy(err)
+			}
+			continue
 		}
 		uploaded++
 	}
-	line := fmt.Sprintf("%s / %s → %s: %s uploaded", e.Connection, e.Name, strings.TrimPrefix(base, strings.TrimSuffix(fileRoot(conn, col), "/")+"/"), plural(uploaded, "file"))
-	if into != restoreNew {
-		line = fmt.Sprintf("%s / %s → %s · %s: %s uploaded", e.Connection, e.Name, connLabel(conn), collectionLabel(col), plural(uploaded, "file"))
+	if into == restoreNew {
+		done.Into += " / " + strings.TrimSuffix(strings.TrimPrefix(base, strings.TrimSuffix(fileRoot(conn, col), "/")+"/"), "/")
 	}
-	if same > 0 {
-		line += fmt.Sprintf(", %d already there", same)
-	}
-	return append([]string{line}, renamed...), nil
+	done.Created, done.Same, done.Fresh = uploaded, same, len(renamed)
+	return done, nil
 }
 
 // uploadMember writes one member of the archive where nothing is (If-None-
@@ -1147,4 +1363,92 @@ func sameFile(ctx context.Context, files *file.Provider, p string, zf *zip.File)
 		return false
 	}
 	return bytes.Equal(a.Sum(nil), b.Sum(nil))
+}
+
+// restorePage is the restore on its own page, /app/settings/backup/restore
+// (s-backup-7, -8): the step of the source the address names, or the
+// matching of the archive open; notices over it.
+func (s *Server) restorePage(sess *session.Session, from, run string, notices ...view.Notice) view.BackupPage {
+	page := s.backupPage(sess, nil, nil, notices...)
+	page.Restore = s.restoreBlock(sess, s.catalogOf(sess), from, run, nil)
+	page.Restore.Open = true
+	return page
+}
+
+// refusedStep is the first step again after a refusal: the source as
+// chosen, what was typed in it, why in alarm at the top of its card
+// (s-backup-16).
+func (s *Server) refusedStep(sess *session.Session, source string, typed url.Values, why view.Runs) view.BackupPage {
+	page := s.backupPage(sess, nil, nil)
+	from := map[string]string{"run": "job", "webdav": "server", "upload": "file"}[source]
+	page.Restore = s.restoreBlock(sess, s.catalogOf(sess), from, typed.Get("run"), typed)
+	page.Restore.Open, page.Restore.Refusal = true, why
+	return page
+}
+
+// getBackupRestore is the restore's page (s-backup-7, Нс74): ?from= — where
+// the archive is, ?run= — a job's copy chosen in the history.
+func (s *Server) getBackupRestore(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	w.Header().Set("Cache-Control", "no-store")
+	q := r.URL.Query()
+	page := s.restorePage(sess, q.Get("from"), q.Get("run"))
+	if q.Get("store") != "" || q.Get("path") != "" {
+		// Back from Browse with the archive chosen (s-backup-17).
+		page.Restore = s.restoreBlock(sess, s.catalogOf(sess), q.Get("from"), q.Get("run"), q)
+		page.Restore.Open = true
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+// postBackupRestore opens the archive the first step names (s-backup-7):
+// its manifest read, the matching follows.
+func (s *Server) postBackupRestore(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	if _, live := sess.DataKey(); !live {
+		s.notFound(w, r)
+		return
+	}
+	if r.URL.Query().Get("op") == "browse" {
+		s.browseRestore(w, r, sess)
+		return
+	}
+	s.openRestore(w, r, sess, s.catalogOf(sess))
+}
+
+// postBackupRestoreMatch is the one form of the matching (s-backup-8), by
+// the op of the button pressed: restore — the run; into, skip, all — the
+// bar on the ticked rows; cancel — the archive closed, back to the jobs.
+func (s *Server) postBackupRestoreMatch(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	key, live := sess.DataKey()
+	if !live {
+		s.notFound(w, r)
+		return
+	}
+	blob := s.catalogOf(sess)
+	op := r.URL.Query().Get("op")
+	if op == "" {
+		op = r.PostFormValue("op")
+	}
+	switch op {
+	case "restore":
+		s.runRestore(w, r, sess, key, blob)
+	case "into", "skip", "all":
+		s.matchRestore(w, r, sess, blob)
+	case "cancel":
+		endRestore(sess)
+		s.redirect(w, r, "/app/settings/backup")
+	default:
+		s.notFound(w, r)
+	}
 }

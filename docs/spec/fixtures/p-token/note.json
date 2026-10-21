@@ -9,8 +9,14 @@
       "method": "GET"
     }
   ],
-  "attachNote": "1 file is attached to this note; they are not published with it.",
-  "attachments": [],
+  "attachNote": "",
+  "attachments": [
+    {
+      "href": "/p/link-token",
+      "name": "2026-08-10-sync-board.png",
+      "size": "412 KB"
+    }
+  ],
   "body": "",
   "contacts": [],
   "days": [],

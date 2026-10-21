@@ -40,9 +40,13 @@ func Top(t view.TopBar, words TopWords) w.Top {
 	newBtn := Button(t.New, "")
 	newBtn.Menu = len(t.New.Arrow) > 0
 	var actions []w.TopAction
-	if newBtn.Menu {
+	switch {
+	case t.New.Label == "":
+		// None where nothing is to be made yet: the change of a temporary
+		// password (account-17).
+	case newBtn.Menu:
 		actions = append(actions, w.TopDrop{Trigger: newBtn, Menu: w.Menu{Items: MenuItems(t.New.Arrow, ""), Pop: w.MenuUnder}})
-	} else {
+	default:
 		actions = append(actions, newBtn)
 	}
 	if t.Refresh.Action.ID != "" {
@@ -72,14 +76,14 @@ func Top(t view.TopBar, words TopWords) w.Top {
 			End:     true,
 		})
 	}
-	return w.Top{
-		Brand: words.Brand,
-		Search: &w.Search{
+	top := w.Top{Brand: words.Brand, Actions: actions}
+	if t.Search.Action != "" {
+		top.Search = &w.Search{
 			Query:  w.Query{Value: string(t.Search.Query), Placeholder: words.Search, Label: words.Search, Name: t.Search.Name},
 			Action: t.Search.Action,
-		},
-		Actions: actions,
+		}
 	}
+	return top
 }
 
 // TopForms are the forms of the top bar's menus that post (Sign out), for
@@ -202,7 +206,10 @@ func NavItem(n view.NavRow) w.NavItem {
 // /app/sources/{kind}), the screen's words for a count nobody has (the dash)
 // and for read-only (ro), the rubric of the tags, the emblem's symbol of
 // davloom in the sprite, and the badge of the rubric of feeds read from
-// outside (external).
+// outside (external). The files' rail (s-files-1, -6) has no combined view
+// but a root, its row with an icon (Root), and a storage says its access
+// where a source says its count — rw where it can be written (Writable),
+// nothing but ro where not.
 type RailWords struct {
 	Form     string
 	Toggle   string
@@ -211,6 +218,8 @@ type RailWords struct {
 	Tags     string
 	Davloom  string
 	External string
+	Root     w.Icon
+	Writable string
 }
 
 // Ticked is the state of a source's tick (C-8 TickState) as the box's.
@@ -239,6 +248,10 @@ func Ticked(t view.TickState) w.Ticked {
 // owner's decision of 02.10.2026, states-16). With the rail's
 // form (Rail.Ticks), the tick sends the row's address under Toggle; without
 // it the choice is made, and the tick shows it (the rail of return, C-6.3).
+// On the files' rail (Root) the row of every source is the root of the
+// section, its icon instead of a mark, its muted words the server's (Meta,
+// «2 of 3»); a storage says rw where it can be written (Writable) and only
+// ro where not.
 func TickRow(r view.SourceRow, words RailWords) w.TickRow {
 	row := w.TickRow{
 		Ticked:  Ticked(r.Tick),
@@ -252,6 +265,9 @@ func TickRow(r view.SourceRow, words RailWords) w.TickRow {
 		// The row is the feed's; its mark is only its colour — the frames
 		// draw the row is-ext, never the mark (s-contacts-7, s-agenda-1).
 		row.Kind = w.TickRowExternal
+	case r.Colour == "" && words.Root != "":
+		// The root of the files: every storage ticked, a folder of them.
+		row.Kind, row.Icon, row.Mark, row.Hidden = w.TickRowRoot, words.Root, w.Mark{}, false
 	case r.Colour == "":
 		// Every source at once: ticked off, it is nothing ticked, not a
 		// source hidden (states-14).
@@ -260,8 +276,13 @@ func TickRow(r view.SourceRow, words RailWords) w.TickRow {
 	switch {
 	case r.State == view.CollectionUnavailable:
 		row.Error, row.MetaTitle = true, string(r.Detail)
+	case r.Meta != "":
+		row.Meta = string(r.Meta)
 	case r.Count != nil:
 		row.Meta = strconv.Itoa(*r.Count)
+	case words.Writable != "" && r.ReadOnly:
+	case words.Writable != "":
+		row.Meta = words.Writable
 	default:
 		row.Meta = words.None
 	}
@@ -440,13 +461,14 @@ func RailForm(r view.Rail, id string) *w.PostForm {
 }
 
 // Foot is the rail's foot: its actions as buttons of an icon (New address
-// book, Connect account…, their words their accessible names), davloom's
+// book, Connect account…, their words their accessible names) — one that
+// posts submits its form (FootForms: New folder of the files) —, davloom's
 // emblem while the mode runs (Rail.Davloom says how), and the last line —
 // the name and the build, which leads to «about» (C-13).
 func Foot(r view.Rail, words RailWords) w.RailFoot {
 	var items []w.RailFootPart
 	for _, a := range r.Foot {
-		b := Button(a, "")
+		b := Button(a, a.ID)
 		b.Title, b.Label = b.Label, ""
 		items = append(items, b)
 	}
@@ -616,10 +638,10 @@ func Book(f view.Field, lead string) []w.SecItemPart {
 }
 
 // SegOption is an action of a switch of links (ListBar.Segments) as its
-// option: its words, its count apart (Tally), where it goes, the one shown
-// now (On).
+// option: its words, its icon (the view of a folder, Typecase's task 115),
+// its count apart (Tally), where it goes, the one shown now (On).
 func SegOption(a view.Action) w.SegOption {
-	return w.SegOption{Label: string(a.Label), Count: string(a.Tally), Href: a.Href, On: a.On}
+	return w.SegOption{Label: string(a.Label), Icon: Icon(a.Icon), Count: string(a.Tally), Href: a.Href, On: a.On}
 }
 
 // Submit is an action that sends the form it stands in, as its submit

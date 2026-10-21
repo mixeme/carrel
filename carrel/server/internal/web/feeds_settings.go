@@ -42,8 +42,9 @@ type feedForm struct {
 	Sections []string
 }
 
-// feedHint is what the panel says of the address (s-profile-10).
-const feedHint = "https://, webcal:// and a secret link from another Carrel are all understood."
+// feedHint is what the panel says of the address (s-profile-10): the
+// schemes monospaced.
+var feedHint = join(monoRun("https://"), ", ", monoRun("webcal://"), " and a secret link from another Carrel are all understood.")
 
 // feedReach is the panel's warning under its form (s-profile-10): a feed is
 // read by the server, so what the server cannot reach it cannot read.
@@ -58,9 +59,10 @@ func (s *Server) feedForm(sess *session.Session, f feedForm) *view.Form {
 		return s.postQuery("/app/settings/connections", v)
 	}
 	address := view.FormRow{Name: "url", Label: "Feed address", Kind: view.InputURL, Value: text(f.URL), Error: f.URLErr, Required: true, Mono: true,
-		Hint: feedHint}
+		HintRuns: feedHint}
 	if f.Folder {
 		address.Label = "Folder address"
+		address.HintRuns = nil
 		address.Hint = "A WebDAV folder somebody shares: a secret link from another Carrel, or any WebDAV address. It is read here and never written, whatever the server would allow."
 	}
 	action := "/app/settings/connections?op=feed.subscribe"
@@ -75,7 +77,7 @@ func (s *Server) feedForm(sess *session.Session, f feedForm) *view.Form {
 		{Name: "name", Label: "Name here", Kind: view.InputText, Value: text(f.Name),
 			Hint: "Taken from the feed; change it if you like — other people’s feed names are often longer than the rail."}}
 	if !f.Folder {
-		derived := string(collectionColour(f.URL))
+		derived := string(feedColour(f.URL))
 		chosen := f.Colour
 		if chosen == "" {
 			chosen = derived
@@ -95,7 +97,7 @@ func (s *Server) feedForm(sess *session.Session, f feedForm) *view.Form {
 	)
 	if len(f.Sections) > 0 {
 		sections := view.FormRow{Name: "sections", Label: "Sections", Kind: view.InputSelect, Multiple: true, ReadOnly: true,
-			Hint: "Not a choice: a feed is one file, and all three kinds of record live in it. What it carries decides where it lands, and that is visible before subscribing."}
+			Hint: "Not a choice: a feed is one file. What it carries decides where it lands, and that is visible before subscribing."}
 		for _, sc := range f.Sections {
 			sections.Options = append(sections.Options, view.Option{Value: sc, Label: text(sc), Selected: true})
 		}
@@ -195,6 +197,56 @@ func (s *Server) postFolder(w http.ResponseWriter, r *http.Request, sess *sessio
 var sectionTitles = map[view.Kind]string{view.KindContact: "Contacts", view.KindEvent: "Calendar", view.KindTask: "Tasks", view.KindNote: "Notes"}
 
 // feedTrace is what a read found, step by step.
+// feedCheckTrace is a feed's Check as the steps of its card's trace: the
+// fetch, and what failed.
+func feedCheckTrace(addr, login string, got publish.Feed, err error) *view.DiagnosticTrace {
+	return feedSteps(addr, login, got, publish.Parsed{}, err)
+}
+
+// feedSteps is a read of a feed as a trace (s-profile-1, -10): the fetch —
+// what came back, how fast and how much —, the type, what it holds, its
+// name, and whether it asked for a password (login: the one sent).
+func feedSteps(addr, login string, got publish.Feed, parsed publish.Parsed, err error) *view.DiagnosticTrace {
+	tr := &view.DiagnosticTrace{OK: err == nil}
+	path := addr
+	if u, perr := url.Parse(addr); perr == nil && u.Path != "" {
+		path = u.Path
+	}
+	fetch := view.TraceStep{Name: "fetch", State: view.CheckOK}
+	switch {
+	case got.Status == http.StatusOK:
+		fetch.Detail = text(fmt.Sprintf("GET %s → 200 · %s · %s", path, tookText(got.Took), roughSize(got.Size)))
+	case got.Status != 0:
+		fetch.Detail = text(fmt.Sprintf("GET %s → %d %s", path, got.Status, http.StatusText(got.Status)))
+	default:
+		fetch.Detail = text("GET " + path + " → no answer")
+	}
+	if err != nil {
+		fetch.State = view.CheckBad
+	}
+	tr.Steps = append(tr.Steps, fetch)
+	if got.Type != "" {
+		tr.Steps = append(tr.Steps, view.TraceStep{Name: "type", State: view.CheckOK, Detail: text(got.Type)})
+	}
+	if kinds := parsed.Kinds(); len(kinds) > 0 {
+		var parts []string
+		for _, k := range kinds {
+			parts = append(parts, fmt.Sprintf("%s · %d", sectionTitles[k], len(parsed.Records[k])))
+		}
+		tr.Steps = append(tr.Steps, view.TraceStep{Name: "parse", State: view.CheckOK, Detail: text(strings.Join(parts, ", "))})
+	}
+	if parsed.Name != "" {
+		tr.Steps = append(tr.Steps, view.TraceStep{Name: "name", State: view.CheckOK, Detail: text(parsed.Name)})
+	}
+	switch {
+	case got.Status == http.StatusOK && login == "":
+		tr.Steps = append(tr.Steps, view.TraceStep{Name: "access", State: view.CheckOK, Detail: "the server asked for no password"})
+	case got.Status == http.StatusOK:
+		tr.Steps = append(tr.Steps, view.TraceStep{Name: "access", State: view.CheckOK, Detail: "the password was taken"})
+	}
+	return tr
+}
+
 func feedTrace(addr string, got publish.Feed, parsed publish.Parsed, err error) view.Notice {
 	var lines []view.Text
 	if got.Status != 0 {
@@ -294,7 +346,12 @@ func (s *Server) postFeed(w http.ResponseWriter, r *http.Request) {
 			f.Asks = true
 		}
 		s.feedPanel(&page, sess, f)
-		page.Shell.Notices = append(page.Shell.Notices, notice)
+		// What the check asked and was answered stands in the panel, under
+		// Check the address (s-profile-10); a refusal is said as well.
+		page.Trace = feedSteps(f.URL, f.Login, got, parsed, err)
+		if err != nil {
+			page.Shell.Notices = append(page.Shell.Notices, notice)
+		}
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
@@ -307,7 +364,7 @@ func (s *Server) postFeed(w http.ResponseWriter, r *http.Request) {
 	}
 	colour := f.Colour
 	if colour == "" {
-		colour = string(collectionColour(f.URL))
+		colour = string(feedColour(f.URL))
 	}
 	if _, err := s.users.Subscribe(sess.AccountID(), key, sealed.Subscription{URL: f.URL, Name: name, Colour: colour, Login: f.Login, Password: password, Kinds: parsed.Kinds()}); err != nil {
 		http.Error(w, "could not subscribe", http.StatusInternalServerError)
@@ -365,6 +422,14 @@ func (s *Server) recheckFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	parsed, got, err := s.newFeedReader(sess, sealed.Connection{ID: f.ID, Server: f.URL, Login: f.Login, Password: f.Password}).read(r.Context())
+	if err != nil && got.Doc == nil {
+		// A refusal is an answer, as a poll's is: the card says the last
+		// one was refused, and what it means (Нс25, s-profile-1).
+		sess.NoteReading(f.ID, sealed.FeedPath, session.Reading{Refused: s.now(), Unauthorized: passwordRefused(err), Reason: refusalReason(err)})
+	}
+	// The check's trace stands in the card, as a connection's Test does
+	// (s-profile-1).
+	sess.NoteCheck(f.ID, feedCheckTrace(f.URL, f.Login, got, err))
 	if err == nil && len(parsed.Kinds()) > 0 {
 		_ = s.users.EditFeed(sess.AccountID(), key, f.ID, "", "", parsed.Kinds())
 	}
@@ -397,6 +462,7 @@ func (s *Server) subscriptionCard(sess *session.Session, tf timeFmt, f sealed.Su
 	card := view.SubscriptionCard{ID: f.ID, Title: text(collectionLabel(col)), URL: text(f.URL), Colour: catalogColour(col), Kinds: f.Kinds,
 		State: view.CollectionOK, Lands: []view.FeedKindRow{}}
 	card.Checked, card.Changed = readingOf(sess, tf, f.ID, sealed.FeedPath)
+	card.Trace = sess.CheckOf(f.ID)
 	r, read := sess.ReadingOf(f.ID, sealed.FeedPath)
 	if read && r.Fetched {
 		card.Size, card.Took = text(roughSize(r.Size)), text(tookText(r.Took))
@@ -431,7 +497,8 @@ func (s *Server) subscriptionCard(sess *session.Session, tf timeFmt, f sealed.Su
 		row := view.FeedKindRow{Kind: k, Label: text(kindTitle(seg)), Tick: view.TickOff,
 			Objects: collectionCount(sess, f.ID, col, recordKinds[seg]),
 			Toggle: view.Action{ID: "feed.tick", Label: text(kindTitle(seg)), Method: "POST", Enabled: true,
-				Href: s.postQuery("/app/settings/connections", url.Values{"op": {"tick"}, "account": {f.ID}, "path": {sealed.FeedPath}, "kind": {string(k)}})}}
+				Href: s.postQuery("/app/settings/connections", url.Values{"op": {"pick"}})},
+			Pick: f.ID + "|" + seg}
 		if isTicked(blob, k, f.ID, sealed.FeedPath) {
 			row.Tick = view.TickOn
 		}
@@ -480,3 +547,13 @@ func tookText(d time.Duration) string {
 // and Check — the card's button, in bold — asks whether it still replies.
 var feedPanelNote = join("A feed is read again on every visit to the section, so there is nothing here to synchronise and nothing to refresh. ",
 	strongRun("Check"), " asks whether the address still replies.")
+
+// feedColour is the colour a feed's label is derived from: its address
+// without the port, so a feed served from another port keeps its colour.
+func feedColour(addr string) view.Colour {
+	if u, err := url.Parse(addr); err == nil && u.Port() != "" {
+		u.Host = u.Hostname()
+		addr = u.String()
+	}
+	return collectionColour(addr)
+}

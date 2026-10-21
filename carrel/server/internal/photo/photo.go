@@ -14,7 +14,6 @@ import (
 	_ "image/jpeg" // JPEG is read and written
 	_ "image/png"
 	"io"
-	"os"
 	"strings"
 
 	_ "golang.org/x/image/bmp"  // BMP and TIFF: a file's thumbnail only (S-17.1)
@@ -100,37 +99,20 @@ type Source struct {
 	Orientation   int // EXIF 1…8; 1 when there is none
 }
 
-// Load takes an upload. The body goes to a temporary file, not to memory, and
-// the file is removed whatever happens. The dimensions are read from the
-// header before anything is decoded; only an image within both caps is read
-// into memory, and it has to decode whole.
+// Load takes an upload. The body is read into memory up to the cap and no
+// further, and nothing of it is written to disk (S-17.1: the service keeps
+// no copy of a person's content). The dimensions are read from the header
+// before anything is decoded; only an image within both caps is decoded,
+// and it has to decode whole.
 func Load(r io.Reader, maxBytes, maxPixels int64) (Source, error) {
-	f, err := os.CreateTemp("", "carrel-photo-*")
+	data, err := io.ReadAll(io.LimitReader(r, maxBytes+1))
 	if err != nil {
 		return Source{}, err
 	}
-	defer func() {
-		f.Close()
-		os.Remove(f.Name())
-	}()
-	n, err := io.Copy(f, io.LimitReader(r, maxBytes+1))
-	if err != nil {
-		return Source{}, err
-	}
-	if n > maxBytes {
+	if int64(len(data)) > maxBytes {
 		return Source{}, ErrTooLarge
 	}
-	if _, err := f.Seek(0, io.SeekStart); err != nil {
-		return Source{}, err
-	}
-	if _, _, err := config(bufio.NewReader(f), maxPixels, formats); err != nil {
-		return Source{}, err
-	}
-	if _, err := f.Seek(0, io.SeekStart); err != nil {
-		return Source{}, err
-	}
-	data, err := io.ReadAll(f)
-	if err != nil {
+	if _, _, err := config(bufio.NewReader(bytes.NewReader(data)), maxPixels, formats); err != nil {
 		return Source{}, err
 	}
 	src, err := inspect(data, maxPixels)

@@ -379,6 +379,10 @@ type Under struct {
 	// Backup — страница задания под ним же: внешний запуск (193 п. 3)
 	Davloom *DavloomPage `json:"davloom"`
 	Backup  *BackupPage  `json:"backup"`
+	// Published — список ссылок под «Send this link» (s-mail-4)
+	Published *PublishedLinksPage `json:"published"`
+	// Files — папка под листом публикации файла и папки (s-publish-5)
+	Files *FilesPage `json:"files"`
 }
 
 type MoveSheet struct {
@@ -754,6 +758,11 @@ type PublishSheet struct {
 	Note    Text     `json:"note"`
 	Link    Text     `json:"link"` // готовая ссылка после создания
 	Actions []Action `json:"actions"`
+	// Under — страница, откуда лист открыт (решение 15.10.2026, записка
+	// Typecase 105): у календаря, книги, списка задач и тетради —
+	// Connections (s-publish-2, -13, -22), у записи — её страница (-3, -4,
+	// -19), у файла и папки — папка (-5); nil у фрагмента
+	Under *Under `json:"under"`
 }
 
 type MailSheet struct {
@@ -795,10 +804,41 @@ type MailAttachRow struct {
 	// Terms — условия ссылки словами, как их говорит список ссылок: «30
 	// days», «No expiry»; Change — «Change…», лист публикации поверх письма
 	// с ними, главная кнопка «Apply» (s-mail-1, записка Typecase 70). У
-	// вложения и у ссылки, сделанной раньше письма, пусто и nil
+	// вложения пусто и nil
 	Terms  Text    `json:"terms,omitempty"`
 	Change *Action `json:"change"`
 	Remove Action  `json:"remove"`
+}
+
+// MailLinkSheet — «Send this link» (s-mail-4): письмо одной выданной
+// ссылки, отдельно от письма, которое пишется (решение владельца 21.10.2026:
+// готовая ссылка в письмо не вкладывается). Его открывают Send строки
+// Published links и «Send by letter» готовой ссылки; начатое письмо ждёт
+// черновиком и его лист не трогает.
+type MailLinkSheet struct {
+	// Subject — что за ссылка, в конце шапки, как её называет список ссылок:
+	// «Личный · 10–31 August»; Colour — метка коллекции, Icon — значок файла
+	// и папки, как у строки списка
+	Subject Text   `json:"subject"`
+	Colour  Colour `json:"colour,omitempty"`
+	Icon    string `json:"icon,omitempty"`
+	// From, FromName, ReplyTo — «Sent as»: имя жирным, адрес моноширинно, и
+	// куда придут ответы, со ссылкой «change in Account»; ReplyTo пусто —
+	// ответа не будет, и письмо это скажет
+	From     Text `json:"from"`
+	FromName Text `json:"fromName"`
+	ReplyTo  Text `json:"replyTo"`
+	// Carries — «The letter carries», три строки: в письме только ссылка и
+	// строка человека, отзыв закрывает её и этому получателю, до какого дня
+	// она живёт
+	Carries []Text `json:"carries"`
+	// Form — POST /app/mail/send?id=: To (`to`), «A line from you»
+	// (`line`); Send, «Copy link instead» (formaction ?op=link), Cancel
+	Form    Form     `json:"form"`
+	Actions []Action `json:"actions"`
+	// Under — Published links под листом, пришедшим страницей (s-mail-4);
+	// nil у фрагмента
+	Under *Under `json:"under"`
 }
 type MailAttachSheet struct {
 	Rail    Rail            `json:"rail"`

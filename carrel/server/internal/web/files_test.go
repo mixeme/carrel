@@ -11,7 +11,6 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -447,10 +446,18 @@ func TestUploadNeedsASizeOnSuchAServer(t *testing.T) {
 	}
 }
 
+// heldUploads are the files of the test's temporary directory: an upload
+// keeps none of a file on Carrel's disk (S-17.3).
 func heldUploads(t *testing.T) int {
 	t.Helper()
-	m, _ := filepath.Glob(filepath.Join(os.TempDir(), "carrel-upload-*"))
-	return len(m)
+	entries, _ := os.ReadDir(os.TempDir())
+	n := 0
+	for _, e := range entries {
+		if !e.IsDir() {
+			n++
+		}
+	}
+	return n
 }
 
 func queueRow(t *testing.T, q *view.TransferQueue, name string) view.TransferRow {
@@ -467,6 +474,30 @@ func queueRow(t *testing.T, q *view.TransferQueue, name string) view.TransferRow
 	return view.TransferRow{}
 }
 
+// answerUpload sends an upload's answer as its one form does (Typecase's
+// note 100): the file in the field the answer names (keep, replace).
+func answerUpload(t *testing.T, row view.TransferRow, id string, sess *session.Session, files ...upload) *http.Request {
+	t.Helper()
+	field := "file"
+	for _, o := range row.Question.Options {
+		if o.ID == id && o.File != "" {
+			field = o.File
+		}
+	}
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	_ = w.WriteField("_csrf", sess.CSRFToken())
+	for _, f := range files {
+		part, _ := w.CreateFormFile(field, f.name)
+		_, _ = part.Write([]byte(f.body))
+	}
+	_ = w.Close()
+	req := httptest.NewRequest(http.MethodPost, option(t, row, id), &buf)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: sess.ID()})
+	return req
+}
+
 func option(t *testing.T, row view.TransferRow, id string) string {
 	t.Helper()
 	if row.Question == nil {
@@ -475,13 +506,15 @@ func option(t *testing.T, row view.TransferRow, id string) string {
 	return actionHref(t, row.Question.Options, id)
 }
 
-// S-17.3: an upload never overwrites. A free name goes straight to the server,
-// past a form's 1 MiB; a taken one is a question that holds the file — also on
-// a server that ignores If-None-Match — until Skip, Keep both or Overwrite
-// this one, each answered once and only by this session; the end of the
-// session lets the file go.
+// S-17.3, the owner's decision of 19.10.2026: an upload never overwrites,
+// and keeps nothing of a file to ask about it. A free name goes straight to
+// the server, past a form's 1 MiB; a taken one is a question — also on a
+// server that ignores If-None-Match — and nothing of the file is kept, not
+// on Carrel's disk, not on the server. Skip writes nothing; Keep both and
+// Replace bring the file again with the answer, the file the question is
+// about and no other; each is answered once and only by this session.
 func TestUploadAsksAboutTakenNames(t *testing.T) {
-	ownTemp(t) // it counts the uploads held in the temporary directory
+	ownTemp(t) // it counts the files held in the temporary directory
 	f := filesFixture(t, true)
 	f.srv.FilesIgnoreIfNoneMatch = true
 	f.srv.SeedFile(filesDocs+"taken.txt", "original")
@@ -498,8 +531,8 @@ func TestUploadAsksAboutTakenNames(t *testing.T) {
 	if got, _ := f.srv.File(filesDocs + "taken.txt"); got != "original" {
 		t.Fatalf("taken.txt was overwritten: %q", got)
 	}
-	if heldUploads(t) != held+1 {
-		t.Errorf("held uploads %d → %d", held, heldUploads(t))
+	if heldUploads(t) != held {
+		t.Errorf("the taken one is kept on disk: %d → %d", held, heldUploads(t))
 	}
 
 	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
@@ -507,19 +540,33 @@ func TestUploadAsksAboutTakenNames(t *testing.T) {
 	if done.State != view.OpDone || done.Percent != 100 || done.Size != "2 MB" || ask.State != view.OpIdle || len(ask.Question.Options) != 3 {
 		t.Fatalf("queue = %+v", page.Queue)
 	}
+	for _, o := range ask.Question.Options {
+		if (o.ID == "transfer.skip") != (o.File == "") {
+			t.Errorf("%s carries the file %q: Keep both and Replace bring it, Skip does not", o.ID, o.File)
+		}
+	}
 	again := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
 	if again.Queue == nil || len(again.Queue.Rows) != 1 || again.Queue.Title != "Uploading 1 of 1" {
 		t.Fatalf("the finished row stayed or the question went: %+v", again.Queue)
 	}
 
 	other := f.h.login("owner", "password123")
-	if rec := f.h.do(postForm(option(t, ask, "transfer.both"), other, url.Values{})); rec.Code != http.StatusNotFound {
+	if rec := f.h.do(answerUpload(t, ask, "transfer.both", other, upload{"taken.txt", "mine"})); rec.Code != http.StatusNotFound {
 		t.Errorf("another session answered: %d", rec.Code)
 	}
-	if rec := f.h.do(postForm(option(t, ask, "transfer.both"), f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+	// Without the file, or with another one, the question stays.
+	if rec := f.h.do(postForm(option(t, ask, "transfer.both"), f.sess, url.Values{})); rec.Code != http.StatusOK ||
+		!strings.Contains(rec.Body.String(), "Choose the file again") {
+		t.Fatalf("keep both without the file: %d %s", rec.Code, rec.Body.String())
+	}
+	if rec := f.h.do(answerUpload(t, ask, "transfer.both", f.sess, upload{"other.txt", "x"})); rec.Code != http.StatusOK ||
+		!strings.Contains(rec.Body.String(), "not «taken.txt»") {
+		t.Fatalf("keep both with another file: %d %s", rec.Code, rec.Body.String())
+	}
+	if rec := f.h.do(answerUpload(t, ask, "transfer.both", f.sess, upload{"taken.txt", "mine"})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("keep both: %d %s", rec.Code, rec.Body.String())
 	}
-	if rec := f.h.do(postForm(option(t, ask, "transfer.both"), f.sess, url.Values{})); rec.Code != http.StatusNotFound {
+	if rec := f.h.do(answerUpload(t, ask, "transfer.both", f.sess, upload{"taken.txt", "mine"})); rec.Code != http.StatusNotFound {
 		t.Errorf("one question answered twice: %d", rec.Code)
 	}
 	if got, _ := f.srv.File(filesDocs + "taken-2.txt"); got != "mine" {
@@ -539,27 +586,77 @@ func TestUploadAsksAboutTakenNames(t *testing.T) {
 		t.Fatalf("fragment: %d %s", rec.Code, rec.Body.String())
 	}
 	ask = queueRow(t, &q.Body, "taken.txt")
-	if rec := f.h.do(fragment(postForm(option(t, ask, "transfer.overwrite"), f.sess, url.Values{}), "queue")); rec.Code != http.StatusOK {
+	if rec := f.h.do(fragment(answerUpload(t, ask, "transfer.overwrite", f.sess, upload{"taken.txt", "second"}), "queue")); rec.Code != http.StatusOK {
 		t.Fatalf("overwrite: %d", rec.Code)
 	}
 	if got, _ := f.srv.File(filesDocs + "taken.txt"); got != "second" {
 		t.Errorf("after overwrite: %q", got)
 	}
 
+	// Skip writes nothing.
 	f.h.do(uploadForm(f.at("upload"), f.sess, false, upload{"taken.txt", "third"}))
 	ask = queueRow(t, decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess))).Queue, "taken.txt")
 	f.h.do(postForm(option(t, ask, "transfer.skip"), f.sess, url.Values{}))
 	if got, _ := f.srv.File(filesDocs + "taken.txt"); got != "second" || heldUploads(t) != held {
 		t.Errorf("after skip: %q, held %d", got, heldUploads(t))
 	}
+}
 
-	f.h.do(uploadForm(f.at("upload"), f.sess, false, upload{"taken.txt", "fourth"}))
-	if heldUploads(t) != held+1 {
-		t.Fatal("no upload held for the question")
+// multipartForm is a form the live layer sends: _csrf, the fields in their
+// order, then the files in the field «file».
+func multipartForm(path string, sess *session.Session, fields [][2]string, files ...upload) *http.Request {
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	_ = w.WriteField("_csrf", sess.CSRFToken())
+	for _, kv := range fields {
+		_ = w.WriteField(kv[0], kv[1])
 	}
-	f.h.mgr.End(f.sess.ID())
+	for _, f := range files {
+		part, _ := w.CreateFormFile("file", f.name)
+		_, _ = part.Write([]byte(f.body))
+	}
+	_ = w.Close()
+	req := httptest.NewRequest(http.MethodPost, path, &buf)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: sess.ID()})
+	return req
+}
+
+// S-17.3 with a script (FileField.Taken, Typecase's note 100): before the
+// files go the page asks which of their names are taken — the answer is
+// those names as sent, a line each, a folder upload's by their paths, and a
+// folder not there takes none —; a file answered before it went, keep or
+// replace in «taken.<name>», goes at once, and nothing waits in the queue.
+func TestUploadAnsweredBeforeItGoes(t *testing.T) {
+	ownTemp(t)
+	f := filesFixture(t, true)
+	f.srv.SeedFile(filesDocs+"taken.txt", "original")
+	f.srv.SeedFile(filesDocs+"in/deep.txt", "deep")
+	held := heldUploads(t)
+
+	names := [][2]string{{"name", "taken.txt"}, {"name", "free.txt"}, {"name", "in/deep.txt"}, {"name", "in/new.txt"}, {"name", "gone/deep.txt"}}
+	rec := f.h.do(multipartForm(f.at("upload")+"?op=taken", f.sess, names))
+	if rec.Code != http.StatusOK || !strings.HasPrefix(rec.Header().Get("Content-Type"), "text/plain") || rec.Body.String() != "taken.txt\nin/deep.txt\n" {
+		t.Fatalf("taken names: %d %q %q", rec.Code, rec.Header().Get("Content-Type"), rec.Body.String())
+	}
+	answers := [][2]string{{"size.taken.txt", "4"}, {"taken.taken.txt", "keep"}, {"taken.in/deep.txt", "replace"}}
+	rec = f.h.do(multipartForm(f.at("upload"), f.sess, answers, upload{"taken.txt", "mine"}, upload{"in/deep.txt", "new"}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("upload with answers: %d %s", rec.Code, rec.Body.String())
+	}
+	for name, want := range map[string]string{"taken.txt": "original", "taken-2.txt": "mine", "in/deep.txt": "new"} {
+		if got, _ := f.srv.File(filesDocs + name); got != want {
+			t.Errorf("%s = %q, want %q", name, got, want)
+		}
+	}
+	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
+	for _, name := range []string{"taken-2.txt", "in/deep.txt"} {
+		if r := queueRow(t, page.Queue, name); r.State != view.OpDone || r.Question != nil {
+			t.Errorf("%s: %+v — answered before it went, it asks nothing", name, r)
+		}
+	}
 	if heldUploads(t) != held {
-		t.Error("the end of the session left the held upload")
+		t.Errorf("an answered upload kept a file on disk: %d → %d", held, heldUploads(t))
 	}
 }
 
@@ -833,8 +930,9 @@ func TestFolderUploadKeepsThePathsInside(t *testing.T) {
 		t.Fatalf("question = %+v", ask.Question)
 	}
 
-	// Keep both puts the second file beside the first one, in its own folder.
-	if rec := f.h.do(postForm(option(t, ask, "transfer.both"), f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+	// Keep both puts the second file beside the first one, in its own
+	// folder: the answer brings it again (S-17.3).
+	if rec := f.h.do(answerUpload(t, ask, "transfer.both", f.sess, upload{"trip/taken.txt", "mine"})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("keep both: %d %s", rec.Code, rec.Body.String())
 	}
 	if got, _ := f.srv.File(filesDocs + "trip/taken-2.txt"); got != "mine" {

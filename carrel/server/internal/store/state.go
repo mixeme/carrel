@@ -48,6 +48,11 @@ type BackupState struct {
 	// the job (crypt.SealBackupKey) — the named loss of protection that lets
 	// an external trigger read without a session.
 	KeyEnvelope []byte `json:"keyEnvelope,omitempty"`
+	// TriggerHint is the secret as the trigger's sheet names it, its tail
+	// alone («cbk_…lamp»), and TriggerIssued when it was issued (Typecase's
+	// note 91): the secret itself is not kept.
+	TriggerHint   string     `json:"triggerHint,omitempty"`
+	TriggerIssued *time.Time `json:"triggerIssued,omitempty"`
 }
 
 // BackupRunsKept is how many runs a job's history keeps.
@@ -65,8 +70,17 @@ type BackupRun struct {
 	Size        int64      `json:"size,omitempty"`
 	Collections int        `json:"collections"`
 	Whole       int        `json:"whole"`
-	Verified    bool       `json:"verified,omitempty"`
-	Error       string     `json:"error,omitempty"`
+	// Files is how many files the run's file collections took, whole: they
+	// are counted apart from the collections — «2 / 2 + 1 240 files»
+	// (s-backup-1).
+	Files    int    `json:"files,omitempty"`
+	Verified bool   `json:"verified,omitempty"`
+	Error    string `json:"error,omitempty"`
+	// Password and From are an external run's: the hint of the secret it
+	// came with and the address it came from (note 91). A refused attempt
+	// is a run of State «refused» with the secret tried.
+	Password string `json:"password,omitempty"`
+	From     string `json:"from,omitempty"`
 }
 
 // PublishedLink is one secret link to one thing, read-only (S-25).

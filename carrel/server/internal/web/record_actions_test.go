@@ -101,7 +101,7 @@ func TestQuickSheetWithNowhereToWrite(t *testing.T) {
 		if len(sheet.Target.Options) != 0 || len(sheet.Form.Sets) != 0 {
 			t.Errorf("%s: sheet = %+v, want nowhere to write", kind, sheet)
 		}
-		if a := actionByID(sheet.Actions, "connection.add"); a == nil || a.Href != "/app/settings/connections?op=add" {
+		if a := actionByID(sheet.Actions, "connection.add"); a == nil || a.Href != "/app/settings/connections/new" {
 			t.Errorf("%s: actions = %+v, want Connect account", kind, sheet.Actions)
 		}
 	}

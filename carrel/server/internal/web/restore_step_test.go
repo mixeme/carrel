@@ -18,7 +18,7 @@ import (
 func TestRestoreSourceIsTheStep(t *testing.T) {
 	frame := mockupFrame(t, "s-backup-7")
 	hint := regexp.MustCompile(`(?s)From this computer</a></span>\s*<span class="tc-field__hint">(.*?)</span>`).FindStringSubmatch(frame)
-	pw := regexp.MustCompile(`(?s)name="password"[^>]*></div>\s*<span class="[^"]*">(.*?)</span>`).FindStringSubmatch(frame)
+	pw := regexp.MustCompile(`(?s)name="password"[^>]*>(?:</div>)?\s*<span class="[^"]*">(.*?)</span>`).FindStringSubmatch(frame)
 	if hint == nil || pw == nil {
 		t.Fatal("s-backup-7 reads otherwise: read the frame again")
 	}
@@ -29,7 +29,7 @@ func TestRestoreSourceIsTheStep(t *testing.T) {
 	}
 	step := func(q string) view.RestoreBlock {
 		t.Helper()
-		return decode[view.BackupPage](t, f.h.do(get("/app/settings/backup?restore=1"+q, f.sess))).Restore
+		return decode[view.BackupPage](t, f.h.do(get("/app/settings/backup/restore?restore=1"+q, f.sess))).Restore
 	}
 
 	// A job's copy is there: the step opens on it.
@@ -40,10 +40,10 @@ func TestRestoreSourceIsTheStep(t *testing.T) {
 	}
 	run := formRow(b.Source, "run")
 	if run == nil || run.Kind != view.InputRadio || len(run.Options) != 1 || string(run.Options[0].Label) != job.Name ||
-		!strings.HasSuffix(string(run.Options[0].Meta), " collections") && !strings.HasSuffix(string(run.Options[0].Meta), " collection") {
+		len(run.Options[0].Columns) != 3 || !strings.HasSuffix(string(run.Options[0].Columns[2]), " collections") && !strings.HasSuffix(string(run.Options[0].Columns[2]), " collection") {
 		t.Errorf("a job's copies = %+v", run)
 	}
-	if formRow(b.Source, "store") != nil || formRow(b.Source, "file") != nil {
+	if formRow(b.Source, "store") != nil || formRow(b.Source, "path") != nil {
 		t.Error("the job's step holds a server's fields")
 	}
 	if p := formRow(b.Source, "password"); p == nil || string(p.Hint) != frameText(pw[1]) {
@@ -52,16 +52,17 @@ func TestRestoreSourceIsTheStep(t *testing.T) {
 
 	// From a server: its storage and path, no copies.
 	b = step("&from=server")
-	if !b.From[1].On || formRow(b.Source, "store") == nil || formRow(b.Source, "file") == nil || formRow(b.Source, "run") != nil {
+	if !b.From[1].On || formRow(b.Source, "store") == nil || formRow(b.Source, "path") == nil || formRow(b.Source, "run") != nil {
 		t.Errorf("server step = %+v", b.Source)
 	}
 
-	// From this computer: the file goes with the form.
+	// From this computer: the file goes with the form, and a storage and a
+	// folder for an archive over the ceiling of an import (S-24.3).
 	b = step("&from=file")
-	if !b.From[2].On || formRow(b.Source, "run") != nil || formRow(b.Source, "store") != nil {
+	if !b.From[2].On || formRow(b.Source, "run") != nil || formRow(b.Source, "store") == nil || formRow(b.Source, "folder") == nil {
 		t.Errorf("file step = %+v", b.Source)
 	}
-	if a := actionByID(b.Source.Actions, "restore.upload"); a == nil || a.File == "" || !a.Primary {
-		t.Errorf("file step actions = %+v", b.Source.Actions)
+	if file := formRow(b.Source, "file"); file == nil || file.Kind != view.InputFile || file.Accept != ".zip" {
+		t.Errorf("the archive's field = %+v", file)
 	}
 }

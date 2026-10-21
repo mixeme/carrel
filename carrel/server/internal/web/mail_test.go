@@ -83,6 +83,9 @@ func TestAdminSetsRelayAndSendsATestLetter(t *testing.T) {
 	if snap.Settings.SMTP.Password != "relay-secret" {
 		t.Errorf("an empty field dropped the password")
 	}
+	// The sender and the ceilings stand while people's letters are on
+	// (Typecase's note 88).
+	peopleOn(t, h)
 	rec := h.do(get("/admin/settings", alice))
 	if strings.Contains(rec.Body.String(), "relay-secret") {
 		t.Fatal("the page shows the relay's password")

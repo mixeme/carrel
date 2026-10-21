@@ -33,6 +33,9 @@ type triggerJob struct {
 	userID string
 	blob   sealed.Blob
 	job    sealed.BackupJob
+	// via is the secret's hint and the address the request came from: what
+	// the job's history names a run by (note 91)
+	via []string
 }
 
 func (s *Server) openTrigger(w http.ResponseWriter, r *http.Request) (triggerJob, bool) {
@@ -45,6 +48,11 @@ func (s *Server) openTrigger(w http.ResponseWriter, r *http.Request) (triggerJob
 	token, _ := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
 	userID, jobID, key, ok := s.users.OpenBackupTrigger(strings.TrimSpace(token))
 	if !ok {
+		// A refusal is written down in the history of the job it named
+		// (note 91): the secret tried by its hint, and where from.
+		if job := r.URL.Query().Get("job"); job != "" && token != "" {
+			s.users.NoteRefusedTrigger(job, strings.TrimSpace(token), ip)
+		}
 		// The one "no" of every secret route (audit №3): the same answer, in
 		// the same time, as a token that never existed.
 		s.limit.allowAnon(ip, start)
@@ -61,7 +69,7 @@ func (s *Server) openTrigger(w http.ResponseWriter, r *http.Request) (triggerJob
 		s.tokenNotFound(w, r, start)
 		return triggerJob{}, false
 	}
-	return triggerJob{userID: userID, blob: blob, job: job}, true
+	return triggerJob{userID: userID, blob: blob, job: job, via: []string{user.TriggerHint(strings.TrimSpace(token)), ip}}, true
 }
 
 // jobIsOff answers a start of a job whose «Job is on» is unticked: it runs
@@ -94,7 +102,7 @@ func (s *Server) postBackupRun(w http.ResponseWriter, r *http.Request) {
 		plain(w, http.StatusConflict, "this job writes nowhere: GET /api/backup/download takes its archive")
 		return
 	}
-	id, err := s.startBackup(t.userID, t.blob, t.job, "external")
+	id, err := s.startBackup(t.userID, t.blob, t.job, "external", t.via...)
 	switch {
 	case errors.Is(err, user.ErrBackupRunning):
 		plain(w, http.StatusConflict, "running")
@@ -198,7 +206,7 @@ func (s *Server) getBackupDownloadLegacy(w http.ResponseWriter, r *http.Request)
 		plain(w, http.StatusConflict, "this job writes to WebDAV: POST /api/backup/run, then GET /api/backup/{id}/download")
 		return
 	}
-	if err := s.streamBackup(r.Context(), w, t.userID, t.blob, t.job, "external"); errors.Is(err, user.ErrBackupRunning) {
+	if err := s.streamBackup(r.Context(), w, t.userID, t.blob, t.job, "external", t.via...); errors.Is(err, user.ErrBackupRunning) {
 		plain(w, http.StatusConflict, "running")
 	}
 }

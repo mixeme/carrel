@@ -1,0 +1,108 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/p/link-zametka-kept-token/download",
+      "icon": "i-download",
+      "id": "published.download",
+      "label": "Download .md",
+      "method": "GET"
+    }
+  ],
+  "attachNote": "1 attached file is not published.",
+  "attachments": [],
+  "body": "",
+  "contacts": [],
+  "days": [],
+  "fields": [],
+  "file": null,
+  "folder": null,
+  "foot": [
+    {
+      "text": "This link works until 9 September 2026."
+    }
+  ],
+  "kind": "note",
+  "lede": [
+    {
+      "mark": "mono",
+      "text": "10 August 2026, 11:05"
+    }
+  ],
+  "note": {
+    "bar": [],
+    "body": "Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.\n\n## Что делаем\n\n- [ ] проверить changelog\n- [x] попросить у Артёма скриншоты\n\nПеренос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг.",
+    "dirty": false,
+    "fields": [],
+    "foreign": [],
+    "form": null,
+    "mode": "reading",
+    "readOnly": true,
+    "rendered": [
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Договорились заморозить ветку в среду."
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт."
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "heading",
+        "level": 2,
+        "text": "Что делаем"
+      },
+      {
+        "checked": false,
+        "children": [
+          {
+            "checked": false,
+            "children": [],
+            "href": "",
+            "kind": "task",
+            "level": 0,
+            "text": "проверить changelog"
+          },
+          {
+            "checked": true,
+            "children": [],
+            "href": "",
+            "kind": "task",
+            "level": 0,
+            "text": "попросить у Артёма скриншоты"
+          }
+        ],
+        "href": "",
+        "kind": "list",
+        "level": 0,
+        "text": ""
+      },
+      {
+        "checked": false,
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг."
+      }
+    ],
+    "title": "Заметка со встречи 10.08"
+  },
+  "notes": [],
+  "notices": [],
+  "range": null,
+  "readOnly": true,
+  "tasks": [],
+  "title": "Заметка со встречи 10.08"
+}

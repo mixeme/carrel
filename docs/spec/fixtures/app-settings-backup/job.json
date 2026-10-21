@@ -96,7 +96,7 @@
           }
         ],
         "legend": "What to copy",
-        "legendAside": "2 collections and 1 folder chosen · 2.1 GB last time",
+        "legendAside": "4 collections and 1 folder chosen · 2.1 GB last time",
         "rows": [
           {
             "add": null,
@@ -140,7 +140,7 @@
                 "colour": "#4a6b52",
                 "label": "Записи",
                 "meta": "notes",
-                "selected": false,
+                "selected": true,
                 "value": "a-nc-home|/alice/calendars/zapisi/"
               },
               {
@@ -161,7 +161,7 @@
                 "colour": "#4a6b52",
                 "label": "Контакты",
                 "meta": "book",
-                "selected": false,
+                "selected": true,
                 "value": "a-nc-home|/alice/contacts/kontakty/"
               },
               {
@@ -175,7 +175,7 @@
                 "colour": "#9a9280",
                 "label": "Files",
                 "meta": "files",
-                "selected": true,
+                "selected": false,
                 "value": "a-nc-home|/alice/files/Files/"
               },
               {
@@ -220,7 +220,7 @@
                 "group": "sftpgo · vps",
                 "label": "Documents",
                 "meta": "files",
-                "selected": false,
+                "selected": true,
                 "value": "a-sftp-vps|/alice/files/Documents/"
               },
               {
@@ -404,11 +404,12 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Separate from the sign-in password: the destination may be somebody else's hosting. Forget it and this job's archives open for nobody, including you.",
+            "hint": "Separate from the sign-in password.",
             "kind": "password",
             "label": "Archive password",
             "name": "password",
             "options": [],
+            "placeholder": "••••••••••••",
             "readOnly": false,
             "required": false,
             "value": ""
@@ -448,7 +449,7 @@
             "text": "curl"
           },
           {
-            "text": ": the line to paste is on the job’s page"
+            "text": ": External trigger in the job’s menu"
           }
         ],
         "legend": "When",
@@ -507,18 +508,14 @@
   "history": [],
   "job": {
     "actions": [],
-    "clock": {
-      "csrf": "csrf",
-      "enabled": true,
-      "href": "/app/settings/backup?job=j-job\u0026op=trigger-off",
-      "id": "backup.trigger.clock",
-      "label": "On a clock of your own — cron, GoSentry, a job in Gitea",
-      "method": "POST",
-      "on": true
-    },
-    "clockHint": "Turning it on stores this job's data key under the server's key — less protection, for convenience: the job can then read without you signed in.",
-    "copies": "2 collections + files",
+    "copies": "4 collections + files",
     "encrypted": true,
+    "external": {
+      "enabled": false,
+      "id": "",
+      "label": "",
+      "method": ""
+    },
     "keep": 8,
     "lastNote": [
       {
@@ -533,8 +530,10 @@
     "lastState": "done",
     "marks": [
       "#4a6b52",
+      "#4a6b52",
       "#a05a2c",
-      "#9a9280"
+      "#4a6b52",
+      "#a05a2c"
     ],
     "name": "Личное на домашний диск",
     "on": true,
@@ -546,104 +545,13 @@
       "label": "Turn the job off",
       "method": "POST"
     },
-    "trigger": {
-      "at": "03:00",
-      "command": "0 3 * * * curl -fsS -m 30 -X POST -H 'Authorization: Bearer cbk_secret' 'http://example.com/api/backup/run?job=j-job'",
-      "cronLine": "",
-      "curl": "curl -fsS -m 30 -X POST -H 'Authorization: Bearer cbk_secret' 'http://example.com/api/backup/run?job=j-job'",
-      "destination": [],
-      "endpoints": [
-        "POST /api/backup/run?job=j-job",
-        "GET /api/backup/status?job=j-job",
-        "GET /api/backup/{id}/download"
-      ],
-      "gitea": "name: Carrel backup · Личное на домашний диск\non:\n  schedule:\n    - cron: '0 3 * * *'\njobs:\n  backup:\n    runs-on: ubuntu-latest\n    steps:\n      - run: curl -fsS -m 30 -X POST -H \"Authorization: Bearer ${{ secrets.CARREL_BACKUP }}\" 'http://example.com/api/backup/run?job=j-job'",
-      "giteaFile": ".gitea/workflows/carrel-j-job.yaml",
-      "giteaSecret": "CARREL_BACKUP",
-      "goSentry": {
-        "arguments": [
-          "-fsS",
-          "-m",
-          "30",
-          "-X",
-          "POST",
-          "-H",
-          "Authorization: Bearer cbk_secret",
-          "http://example.com/api/backup/run?job=j-job"
-        ],
-        "command": "curl",
-        "folder": "Backup",
-        "name": "Carrel · Личное на домашний диск",
-        "schedule": "0 3 * * *"
-      },
-      "header": "Authorization",
-      "note": [
-        {
-          "text": "Every use is logged, naming this password. "
-        },
-        {
-          "mark": "strong",
-          "text": "New password"
-        },
-        {
-          "text": " replaces it on the spot — and every line already handed out stops working with it."
-        }
-      ],
-      "password": {
-        "reveal": {
-          "csrf": "csrf",
-          "enabled": true,
-          "hint": "The old password stops working; whatever runs this job has to be given the new one.",
-          "href": "/app/settings/backup?job=j-job\u0026op=trigger",
-          "id": "backup.trigger",
-          "label": "New password",
-          "method": "POST"
-        },
-        "shown": true,
-        "value": "cbk_secret"
-      },
-      "script": false,
-      "scriptName": "",
-      "shown": true,
-      "status": "GET /api/backup/status?job=j-job",
-      "tabs": [
-        {
-          "enabled": true,
-          "href": "/app/settings/backup?job=j-job\u0026trigger=crontab",
-          "id": "backup.trigger.tab.crontab",
-          "label": "crontab",
-          "method": "GET",
-          "on": true
-        },
-        {
-          "enabled": true,
-          "href": "/app/settings/backup?job=j-job\u0026trigger=gosentry",
-          "id": "backup.trigger.tab.gosentry",
-          "label": "GoSentry",
-          "method": "GET"
-        },
-        {
-          "enabled": true,
-          "href": "/app/settings/backup?job=j-job\u0026trigger=gitea",
-          "id": "backup.trigger.tab.gitea",
-          "label": "Gitea",
-          "method": "GET"
-        },
-        {
-          "enabled": true,
-          "href": "/app/settings/backup?job=j-job\u0026trigger=curl",
-          "id": "backup.trigger.tab.curl",
-          "label": "curl",
-          "method": "GET"
-        }
-      ]
-    },
-    "when": "cron · 03:00",
-    "whenNote": "external trigger",
+    "when": "on sign-in",
+    "whenNote": "if older than 7 days",
     "where": "nextcloud · Files",
     "whereNote": "/carrel-backup"
   },
   "jobs": [],
+  "jobsHint": "",
   "look": {
     "compact": false,
     "panel": true,
@@ -666,7 +574,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [],
     "nav": [
       {
@@ -715,7 +623,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/davloom",
         "id": "settings.davloom",
@@ -759,10 +667,14 @@
       {
         "line": [
           {
-            "text": "No device has connected since the start."
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
           }
         ],
-        "title": "davloom · running · 0 devices",
+        "title": "davloom · running · 3 devices",
         "tone": "on"
       },
       {
@@ -794,7 +706,7 @@
     "from": [
       {
         "enabled": true,
-        "href": "/app/settings/backup?from=job\u0026restore=1",
+        "href": "/app/settings/backup/restore?from=job",
         "id": "restore.from.job",
         "label": "From a job",
         "method": "GET",
@@ -802,14 +714,14 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/backup?from=server\u0026restore=1",
+        "href": "/app/settings/backup/restore?from=server",
         "id": "restore.from.server",
         "label": "From a server",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/settings/backup?from=file\u0026restore=1",
+        "href": "/app/settings/backup/restore?from=file",
         "id": "restore.from.file",
         "label": "From this computer",
         "method": "GET"
@@ -830,13 +742,14 @@
       }
     ],
     "open": false,
+    "report": null,
     "source": {
-      "action": "/app/settings/backup?op=restore-open",
+      "action": "/app/settings/backup/restore",
       "actions": [
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/settings/backup?op=restore-open",
+          "href": "/app/settings/backup/restore",
           "id": "restore.open",
           "label": "Open the manifest",
           "method": "POST",
@@ -881,7 +794,13 @@
               "readOnly": false,
               "required": false,
               "value": "run"
-            },
+            }
+          ],
+          "unfold": null
+        },
+        {
+          "legend": "From a job",
+          "rows": [
             {
               "add": null,
               "error": "",
@@ -892,14 +811,22 @@
               "name": "run",
               "options": [
                 {
+                  "columns": [
+                    "2026-08-16 03:10",
+                    "18.4 MB",
+                    "3 collections"
+                  ],
                   "label": "Рабочее, ежедневно",
-                  "meta": "2026-08-16 03:10 · 18.4 MB · 3 collections",
                   "selected": true,
-                  "value": "j-job|r-run"
+                  "value": "j-job2|r-run"
                 },
                 {
+                  "columns": [
+                    "2026-08-14 09:12",
+                    "2.1 GB",
+                    "2 collections"
+                  ],
                   "label": "Личное на домашний диск",
-                  "meta": "2026-08-14 09:12 · 2.1 GB · 2 collections",
                   "selected": false,
                   "value": "j-job|r-run"
                 }
@@ -907,12 +834,18 @@
               "readOnly": false,
               "required": false,
               "value": ""
-            },
+            }
+          ],
+          "unfold": null
+        },
+        {
+          "legend": "Archive password",
+          "rows": [
             {
               "add": null,
               "error": "",
               "extra": null,
-              "hint": "The one set in the job, not your sign-in password. Without it the manifest cannot be read — Carrel will not even see the list of collections.",
+              "hint": "The one set in the job, not your sign-in password.",
               "kind": "password",
               "label": "Archive password",
               "name": "password",
@@ -940,14 +873,7 @@
   ],
   "title": "Личное на домашний диск",
   "top": {
-    "lock": {
-      "csrf": "csrf",
-      "enabled": true,
-      "href": "/app/settings/lock",
-      "id": "unlock.lock",
-      "label": "Lock now",
-      "method": "POST"
-    },
+    "lock": null,
     "new": {
       "arrow": [
         {
@@ -1019,10 +945,12 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
       "answered": "",
       "running": false
@@ -1040,8 +968,7 @@
       "local": true,
       "login": "mix"
     },
-    "unlockLeft": "4:12",
-    "unlocked": "10 August, 17:10",
+    "unlocked": null,
     "user": [
       {
         "enabled": true,

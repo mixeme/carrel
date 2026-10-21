@@ -29,10 +29,11 @@ func (s *Server) settingsRail(sess *session.Session, open string) view.Rail {
 		count                  *int
 	}{
 		{"settings.account", "Account", "i-user", "/app/settings/account", nil},
-		{"settings.connections", "Connections", "i-server", "/app/settings/connections", count(blob.ConnectionCount())},
+		// No connection, no number (s-profile-25), as with the links.
+		{"settings.connections", "Connections", "i-server", "/app/settings/connections", countSome(blob.ConnectionCount())},
 		{"settings.attachments", "Attachments", "i-file", "/app/settings/attachments", nil},
 		{"settings.devices", "New device", "i-device", "/app/settings/devices", nil},
-		{"settings.davloom", "davloom", "", "/app/settings/davloom", count(len(s.users.Devices(sess.AccountID())))},
+		{"settings.davloom", "davloom", "", "/app/settings/davloom", countSome(len(s.users.Devices(sess.AccountID())))},
 		{"settings.backup", "Backup", "i-archive", "/app/settings/backup", countSome(len(blob.BackupJobs))},
 		// No links, no number (Пб42; s-publish-18 writes no zero).
 		{"settings.published", "Published links", "i-link", "/app/files/published", countSome(len(s.users.PublishedLinks(sess.AccountID())))},
@@ -109,6 +110,15 @@ func countSome(n int) *int {
 
 // withRail is the shell with its rail: the settings and the administration
 // build theirs where the shell is made, not after it.
+// settingsShell is the shell of a settings page: the settings' rail with
+// open marked, and the top bar's Refresh reading the page here again — every
+// settings frame draws it (appearance-1, account-1, s-profile-1, …).
+func (s *Server) settingsShell(sess *session.Session, title, open, here string) view.Shell {
+	sh := s.withRail(s.buildShell(sess, title), s.settingsRail(sess, open))
+	sh.Top.Refresh = view.Refresh{Action: view.Action{ID: "settings.refresh", Label: "Refresh", Icon: "i-refresh", Href: s.route(here), Method: "GET", Enabled: true}}
+	return sh
+}
+
 func (s *Server) withRail(sh view.Shell, rail view.Rail) view.Shell {
 	sh.Rail = rail
 	return sh

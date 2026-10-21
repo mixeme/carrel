@@ -14,12 +14,14 @@ var ErrBackupRunning = errors.New("user: this job is already running")
 
 // Run states (S-24.3): a copy that went in whole and was read back is done;
 // one that left a collection out is partial; one that was not written or not
-// read back is failed.
+// read back is failed. A start the external trigger refused is a row of
+// the history and no run (note 91).
 const (
 	RunRunning = "running"
 	RunDone    = "done"
 	RunPartial = "partial"
 	RunFailed  = "failed"
+	RunRefused = "refused"
 )
 
 // SaveBackupJob writes a job into the blob, new when its ID is empty, and
@@ -83,6 +85,17 @@ func (s *Service) DeleteBackupJob(viewerID string, dataKey [crypt.KeyLen]byte, i
 
 // BackupRuns are the viewer's runs by job, newest first.
 func (s *Service) BackupRuns(viewerID string) map[string][]store.BackupRun {
+	return s.backupRuns(viewerID, false)
+}
+
+// BackupRefusals are the starts the external trigger refused, by job,
+// newest first (note 91): rows of the history, and no run of a job — not
+// its last copy, not anything to restore.
+func (s *Service) BackupRefusals(viewerID string) map[string][]store.BackupRun {
+	return s.backupRuns(viewerID, true)
+}
+
+func (s *Service) backupRuns(viewerID string, refused bool) map[string][]store.BackupRun {
 	snap := s.st.Snapshot()
 	out := map[string][]store.BackupRun{}
 	for _, b := range snap.Backups {
@@ -90,7 +103,9 @@ func (s *Service) BackupRuns(viewerID string) map[string][]store.BackupRun {
 			continue
 		}
 		for i := len(b.Runs) - 1; i >= 0; i-- {
-			out[b.JobID] = append(out[b.JobID], b.Runs[i])
+			if (b.Runs[i].State == RunRefused) == refused {
+				out[b.JobID] = append(out[b.JobID], b.Runs[i])
+			}
 		}
 	}
 	return out
@@ -109,7 +124,9 @@ func backupStateOf(st *store.State, viewerID, jobID string) *store.BackupState {
 // StartBackupRun records a run as started and returns its ID; a job runs
 // once at a time. A run left "running" by a process that stopped is closed as
 // failed here, so it never blocks the job for good.
-func (s *Service) StartBackupRun(viewerID, jobID, trigger, mode string, running func(runID string) bool) (string, error) {
+//
+// via is an external run's secret hint and the address it came from.
+func (s *Service) StartBackupRun(viewerID, jobID, trigger, mode string, running func(runID string) bool, via ...string) (string, error) {
 	id, err := newEntityID("r-")
 	if err != nil {
 		return "", err
@@ -131,7 +148,11 @@ func (s *Service) StartBackupRun(viewerID, jobID, trigger, mode string, running 
 			}
 			r.State, r.Error, r.Finished = RunFailed, "the process stopped during the run", &now
 		}
-		b.Runs = append(b.Runs, store.BackupRun{ID: id, Started: now, State: RunRunning, Trigger: trigger, Mode: mode})
+		run := store.BackupRun{ID: id, Started: now, State: RunRunning, Trigger: trigger, Mode: mode}
+		if len(via) == 2 {
+			run.Password, run.From = via[0], via[1]
+		}
+		b.Runs = append(b.Runs, run)
 		if len(b.Runs) > store.BackupRunsKept {
 			b.Runs = b.Runs[len(b.Runs)-store.BackupRunsKept:]
 		}

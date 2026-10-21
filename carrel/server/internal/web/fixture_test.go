@@ -6,9 +6,11 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"hash/crc32"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -912,6 +914,10 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 			s = strings.ReplaceAll(s, srv.URL, name)
 			// The DAVx5 link of a stand (s-plan-2): login@host.
 			s = strings.ReplaceAll(s, "@"+strings.TrimPrefix(srv.URL, "http://"), "@"+strings.TrimPrefix(name, "https://"))
+			// The host alone (Disconnect's «nextcloud · cloud.example.org»,
+			// s-profile-26): the address's host.
+			host, _, _ := strings.Cut(strings.TrimPrefix(name, "https://"), "/")
+			s = strings.ReplaceAll(s, strings.TrimPrefix(srv.URL, "http://"), host)
 		}
 	}
 	// A DAVx5 code is the picture of its link (s-plan-2), whose port is the
@@ -935,7 +941,7 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`/password-history/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/password-history/history-token")
 	s = regexp.MustCompile(`/p/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/p/link-token")
 	// A link's identifier is a digest of its secret (Send by letter names it).
-	s = regexp.MustCompile(`compose\?id=[0-9a-f]{16}`).ReplaceAllString(s, "compose?id=link-id")
+	s = regexp.MustCompile(`(compose|link)\?id=[0-9a-f]{16}`).ReplaceAllString(s, "${1}?id=link-id")
 	s = regexp.MustCompile(`"[A-Za-z0-9_-]{43}"`).ReplaceAllString(s, `"csrf"`)
 	// A temporary password a form offers (s-admin-1, s-admin-6) is made for
 	// each answer.
@@ -944,14 +950,41 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`plan=r-[0-9A-Z]{10}`).ReplaceAllString(s, "plan=r-plan")
 	s = regexp.MustCompile(`transfer=q-[0-9A-Z]{10}`).ReplaceAllString(s, "transfer=q-transfer")
 	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
+	// Another session's public ID in its End (account-1).
+	s = regexp.MustCompile(`op=end(\\u0026|&)s=[0-9a-f]{16}`).ReplaceAllString(s, "op=end${1}s=session")
+	// How long a feed's fetch took on this machine (s-profile-1, -10).
+	s = regexp.MustCompile(`(→ 200 · )\d+ ms`).ReplaceAllString(s, "${1}0 ms")
+	s = regexp.MustCompile(`("took": ?")\d+ ms"`).ReplaceAllString(s, `${1}0 ms"`)
 	// A backup job's and a run's ID (s-backup-1): the frames name them by
 	// what they are.
-	s = regexp.MustCompile(`\bj-[0-9A-Z]{10}\b`).ReplaceAllString(s, "j-job")
+	// Numbered in the order they appear: the forms of two jobs' rows are
+	// two forms.
+	jobs := map[string]string{}
+	s = regexp.MustCompile(`\bj-[0-9A-Z]{10}\b`).ReplaceAllStringFunc(s, func(id string) string {
+		if _, ok := jobs[id]; !ok {
+			jobs[id] = "j-job"
+			if n := len(jobs); n > 1 {
+				jobs[id] += strconv.Itoa(n)
+			}
+		}
+		return jobs[id]
+	})
 	s = regexp.MustCompile(`r-[0-9A-Z]{10}\b`).ReplaceAllString(s, "r-run")
 	// The secret of a job's line, issued for each answer (s-backup-2).
 	s = regexp.MustCompile(`cbk_[A-Za-z0-9_-]+`).ReplaceAllString(s, "cbk_secret")
 	// A davloom device's ID (NewDeviceID): the frames name no device by it.
-	s = regexp.MustCompile(`\bd-[0-9A-Z]{10}\b`).ReplaceAllString(s, "d-device")
+	// Numbered in the order they appear, as jobs are: two devices' Revoke
+	// are two forms.
+	devices := map[string]string{}
+	s = regexp.MustCompile(`\bd-[0-9A-Z]{10}\b`).ReplaceAllStringFunc(s, func(id string) string {
+		if _, ok := devices[id]; !ok {
+			devices[id] = "d-device"
+			if n := len(devices); n > 1 {
+				devices[id] += strconv.Itoa(n)
+			}
+		}
+		return devices[id]
+	})
 	// The one-time link to an Apple profile (s-plan-1) is made for each
 	// issue.
 	s = regexp.MustCompile(`profile\?t=[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "profile?t=token")
@@ -1739,18 +1772,90 @@ func TestFixtureNoteEdit(t *testing.T) {
 	app.compare(t, "app-note-edit/new.json", app.h.do(wideNotes(get(app.listPath(t, "notes", "zapisi")+"/new", app.sess))))
 }
 
+// C-14.2: the settings' pages as their frames draw them (appearance-1,
+// account-1, attachments-1): the sections read, the folders too, davloom
+// with its three devices and the jobs of the backups in the rail's foot.
+func TestFixtureSettings(t *testing.T) {
+	app := newMockupApp(t)
+	settingsState(t, app)
+	for _, one := range []struct{ dir, route string }{
+		{"app-settings-account", "/app/settings/account"},
+		{"app-settings-appearance", "/app/settings/appearance"},
+		{"app-settings-attachments", "/app/settings/attachments"},
+	} {
+		t.Run(one.dir, func(t *testing.T) {
+			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
+		})
+	}
+	// Typecase's note 93: the folder of the attachments refused by its
+	// server (attachments-6), and none chosen yet (attachments-5).
+	sftp := app.servers["sftpgo · vps"]
+	sftp.RefuseAt("PROPFIND", app.realPath(t, "Documents")+"carrel/attachments/", http.StatusUnauthorized, "")
+	app.compare(t, "app-settings-attachments/unavailable.json", app.h.do(get("/app/settings/attachments", app.sess)))
+	editBlob(t, app.h, app.sess, func(b *sealed.Blob) { b.Attachments = nil })
+	app.compare(t, "app-settings-attachments/unset.json", app.h.do(get("/app/settings/attachments", app.sess)))
+}
+
+// settingsState is the instance the settings' frames stand on: the
+// sections and folders read, the screen taken two minutes after; davloom's
+// three devices, their last answer the morning of the frames; the backups'
+// jobs and runs (s-publish-1, appearance-1).
+func settingsState(t *testing.T, app *mockupApp) (work, home string) {
+	t.Helper()
+	settingsDevices(t, app)
+	work, home = mockupBackups(t, app)
+	// The calendars of nextcloud and radicale · vps declare their ceilings
+	// (attachments-1: 2 MB and 1 MB).
+	editBlob(t, app.h, app.sess, func(b *sealed.Blob) {
+		ceiling := map[string]int64{}
+		for _, c := range b.Connections {
+			switch connLabelOf(c) {
+			case "nextcloud":
+				ceiling[c.ID] = 2 << 20
+			case "radicale · vps":
+				ceiling[c.ID] = 1 << 20
+			}
+		}
+		for i := range b.Collections {
+			if !b.Collections[i].Has(view.KindFile) {
+				b.Collections[i].MaxResourceSize = ceiling[b.Collections[i].AccountID]
+			}
+		}
+		// Attachments go to a subfolder per month (attachments-1).
+		if b.Attachments != nil {
+			b.Attachments.Monthly = true
+		}
+	})
+	// Two sessions, this one marked (account-1): each the browser it came
+	// from.
+	app.sess.SetClient("Firefox · Windows", "203.0.113.7")
+	app.h.login("mix", "password123").SetClient("Edge · Windows", "203.0.113.8")
+	return work, home
+}
+
+// settingsDevices is the instance of the settings' frames before any job:
+// the sections open, the folders read, three davloom devices last heard
+// from at 09:41 (the rail's foot of s-backup-6).
+func settingsDevices(t *testing.T, app *mockupApp) {
+	t.Helper()
+	openSections(t, app)
+	readFolders(t, app)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	for _, id := range mockupDevices(t, app) {
+		app.h.users.TouchDevice(id, mockupDayAt(t, "2026-08-16 09:41"))
+	}
+}
+
 // C-14.2: the screens of the settings and of the administration. They hold
 // no records of the set, so each is one call.
 func TestFixtureSettingsAndAdmin(t *testing.T) {
 	app := newMockupApp(t)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	for _, one := range []struct{ dir, route string }{
-		{"app-settings-account", "/app/settings/account"},
-		// Connections after the lists were read: TestFixtureConnections.
-		{"app-settings-appearance", "/app/settings/appearance"},
-		{"app-settings-attachments", "/app/settings/attachments"},
-		{"app-settings-devices", "/app/settings/devices"},
-		{"app-settings-backup", "/app/settings/backup"},
+		// Account, Appearance, Attachments over the instance of their
+		// frames: TestFixtureSettings.
+		// Connections after the lists were read: TestFixtureConnections; a
+		// new device: TestFixtureDevicesStates.
 		// davloom with its devices: TestFixtureDavloomStates.
 		// The escrow page's normal is the deposited copy (account-4):
 		// TestFixtureAccountStates deposits it.
@@ -1760,22 +1865,34 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 		})
 	}
 	adminState(t, app)
-	for _, one := range []struct{ dir, route string }{
-		{"admin-users", "/admin/"},
-		{"admin-invites", "/admin/invites"},
-		{"admin-settings", "/admin/settings"},
+	// The rail's foot of each frame: whether mail goes out, the last check
+	// (Typecase's 195; adminRail).
+	for _, one := range []struct {
+		dir, route string
+		mail       bool
+	}{
+		{"admin-users", "/admin/", false},
+		// The link just made stands in its card (s-admin-1): the page Create
+		// link answers with.
+		{"admin-invites", "/admin/invites?invite=i-0000000001", true},
+		{"admin-settings", "/admin/settings", false},
 		// Read from the day its frame chose (s-admin-7: since 2026-08-01).
-		{"admin-audit", "/admin/audit?since=2026-08-01"},
-		{"admin-dav", "/admin/dav"},
-		{"admin-escrow", "/admin/escrow"},
+		{"admin-audit", "/admin/audit?since=2026-08-01", false},
+		{"admin-dav", "/admin/dav", false},
+		{"admin-escrow", "/admin/escrow", true},
 	} {
 		t.Run(one.dir, func(t *testing.T) {
+			adminRail(t, app, one.mail, checksPassed)
+			if one.dir == "admin-audit" {
+				auditOfFrame(t, app)
+			}
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
 		})
 	}
 	// Test discovery against a stand (Ад33; s-admin-5): the trace step by
 	// step, with what the server answered at each.
 	t.Run("admin-dav-report", func(t *testing.T) {
+		adminRail(t, app, false, checksPassed)
 		app.compare(t, "admin-dav/report.json", app.h.do(postForm("/admin/dav", app.sess, url.Values{
 			"server": {app.servers["nextcloud"].URL}, "login": {"alice"}, "password": {"secret"},
 		})))
@@ -1783,6 +1900,7 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 	// Discovery that stopped (s-admin-28): a password the stand refuses —
 	// the step named, the trace up to it, no second stage.
 	t.Run("admin-dav-broken", func(t *testing.T) {
+		adminRail(t, app, false, checksPassed)
 		app.compare(t, "admin-dav/broken.json", app.h.do(postForm("/admin/dav?op=test", app.sess, url.Values{
 			"server": {app.servers["nextcloud"].URL}, "login": {"alice"}, "password": {"wrong-one"},
 		})))
@@ -1790,8 +1908,14 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 	// The second stage agreed to (s-admin-29): one row a kind, what was
 	// asked and what the stand answered; nothing is left on it.
 	t.Run("admin-dav-exercised", func(t *testing.T) {
+		adminRail(t, app, false, checksPassed)
+		// The address book takes no writes from this account (s-admin-29:
+		// the contact refused, 403).
+		nc := app.servers["nextcloud"]
+		nc.RefuseAt("PUT", davtest.AddressBookHome, http.StatusForbidden, "")
+		defer nc.Accept("PUT " + davtest.AddressBookHome)
 		app.compare(t, "admin-dav/exercised.json", app.h.do(postForm("/admin/dav?op=exercise", app.sess, url.Values{
-			"server": {app.servers["nextcloud"].URL}, "login": {"alice"}, "password": {"secret"}, "agree": {"on"},
+			"server": {nc.URL}, "login": {"alice"}, "password": {"secret"}, "agree": {"on"},
 		})))
 	})
 	// The relay's test (note 82 of Typecase): with the relay set, the letter
@@ -1799,6 +1923,7 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 	// range, refused at its field and under the test (s-admin-33). The relay
 	// listens on a port the machine had free: the frames write 587.
 	t.Run("admin-settings-test", func(t *testing.T) {
+		adminRail(t, app, true, checksPassed)
 		relay := app.h.relayed()
 		defer func() {
 			_ = app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
@@ -1812,14 +1937,28 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 			out.Body.Write(bytes.ReplaceAll(rec.Body.Bytes(), []byte(`"`+strconv.Itoa(relay.Port)+`"`), []byte(`"587"`)))
 			return out
 		}
+		// Letters from users on as saved (s-admin-32): the sender and the
+		// ceilings shown; off (s-admin-33), not at all (Typecase's note 88).
+		people := func(on bool) {
+			if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+				st.Settings.PeopleMail = &on
+				return nil, nil
+			}); err != nil {
+				t.Fatal(err)
+			}
+		}
+		people(true)
 		form := settingsForm(t, app.h, app.sess, map[string]string{"to": "mix@carrel.example"})
 		app.compare(t, "admin-settings/sent.json", steady(app.h.do(postForm("/admin/settings/mail-test", app.sess, form))))
+		people(false)
+		form = settingsForm(t, app.h, app.sess, map[string]string{"to": "mix@carrel.example"})
 		form.Set("port", "70000")
 		app.compare(t, "admin-settings/refused.json", steady(app.h.do(postForm("/admin/settings/mail-test", app.sess, form))))
 	})
 	// Deleting an account (s-admin-34, note 83): the sheet over Users, anna
 	// chosen by the item of her row.
 	t.Run("admin-delete", func(t *testing.T) {
+		adminRail(t, app, false, checksPassed)
 		snap := app.h.st.Snapshot()
 		app.compare(t, "admin-delete/normal.json", app.h.do(get("/admin/delete?target="+snap.UserByLogin("anna").ID, app.sess)))
 	})
@@ -1828,12 +1967,14 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 	// went (s-admin-30) —; his password's history by its link (s-auth-15);
 	// the scheme off (s-admin-31).
 	t.Run("admin-escrow-states", func(t *testing.T) {
-		app.compare(t, "admin-escrow/recovered.json", app.h.do(postForm("/admin/escrow", app.sess, url.Values{
-			"action": {"recover"}, "login": {"viktor"}, "master": {"sixteen-char-pass!"}, "temp": {"temp-pass-4821"},
-		})))
+		adminRail(t, app, true, checksPassed)
+		// The history as the frame tells it, before this recovery adds to it.
 		snap := app.h.st.Snapshot()
 		viktor := snap.UserByLogin("viktor")
 		app.compare(t, "password-history/normal.json", app.h.do(anon("/password-history/"+viktor.PasswordLog)))
+		app.compare(t, "admin-escrow/recovered.json", app.h.do(postForm("/admin/escrow", app.sess, url.Values{
+			"action": {"recover"}, "login": {"viktor"}, "master": {"sixteen-char-pass!"}, "temp": {"temp-pass-4821"},
+		})))
 		escrow := func(on bool) {
 			if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 				st.Settings.EscrowEnabled = on
@@ -1879,6 +2020,30 @@ func adminState(t *testing.T, app *mockupApp) {
 	if err := h.users.DisableUser(mixID, viktor); err != nil {
 		t.Fatalf("disable viktor: %v", err)
 	}
+	// The six of s-admin-2 (Typecase's note 84): olga an administrator with
+	// her key in escrow, petr with his, ivan without a copy.
+	olga := h.invite(mixID, "olga", "olgapass1234")
+	if err := h.users.SetUserRole(mixID, olga, store.RoleAdmin); err != nil {
+		t.Fatalf("olga an administrator: %v", err)
+	}
+	h.invite(mixID, "petr", "petrpass1234")
+	ivan := h.invite(mixID, "ivan", "ivanpass1234")
+	if err := h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := st.UserByID(ivan)
+		u.EscrowDeposited, u.EscrowDepositedAt = nil, nil
+		// viktor's account was recovered once (s-admin-6), and his password
+		// has the frame's history (s-auth-15): changed, opened with the
+		// master password, changed again.
+		at := mockupDayAt(t, "2026-08-14 18:40")
+		v := st.UserByID(viktor)
+		v.EscrowLastRecovery = &at
+		store.NotePassword(v, mockupDayAt(t, "2026-05-03 10:15"), "password.change", "viktor")
+		store.NotePassword(v, at, "escrow.recover", "mix")
+		store.NotePassword(v, mockupDayAt(t, "2026-08-14 19:02"), "password.change", "viktor")
+		return nil, nil
+	}); err != nil {
+		t.Fatalf("ivan without a copy: %v", err)
+	}
 	if _, err := h.users.Invite(mixID, "", store.RoleUser); err != nil {
 		t.Fatalf("invite by link: %v", err)
 	}
@@ -1914,37 +2079,108 @@ func adminState(t *testing.T, app *mockupApp) {
 func TestFixtureConnections(t *testing.T) {
 	app := newMockupApp(t)
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
-	openList(t, app, "/app/calendar?from=2026-08-10")
-	openList(t, app, "/app/tasks")
-	openList(t, app, "/app/notes")
-	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	// Over the instance of the settings' frames: the rail's foot of each
+	// (s-profile-1).
+	settingsState(t, app)
+	// baikal refuses and was tested: its card carries the trace of what was
+	// asked (s-profile-1).
+	if rec := app.h.do(postForm("/app/settings/connections?"+url.Values{"op": {"test"}, "account": {app.realAccount(t, "obshchij")}}.Encode(), app.sess, url.Values{})); rec.Code >= 400 {
+		t.Fatalf("test baikal: %d", rec.Code)
+	}
+	// The league's feed checked: it refuses (s-profile-1).
+	league := ""
+	for real, fx := range app.byAccount {
+		if fx == "f-league" {
+			league = real
+		}
+	}
+	if rec := app.h.do(postForm("/app/settings/connections?"+url.Values{"op": {"feed.recheck"}, "feed": {league}}.Encode(), app.sess, url.Values{})); rec.Code >= 400 {
+		t.Fatalf("check the league: %d", rec.Code)
+	}
 	app.compare(t, "app-settings-connections/normal.json", app.h.do(get("/app/settings/connections", app.sess)))
 	// Edit of nextcloud, through which «Личный» is published (Нс76): the
 	// question about the links waits hidden for a change of Server URL or
 	// Username (s-profile-16, -22); Save with another login and no answer
 	// brings the dialog back with the reason (s-profile-23).
-	q := url.Values{"op": {"edit"}, "account": {app.realAccount(t, "lichnyj")}}
+	edit := "/app/settings/connections/" + url.PathEscape(app.realAccount(t, "lichnyj")) + "/edit"
 	t.Run("edit", func(t *testing.T) {
-		app.compare(t, "app-settings-connections/edit.json", app.h.do(get("/app/settings/connections?"+q.Encode(), app.sess)))
+		app.compare(t, "app-settings-connections/edit.json", app.h.do(get(edit, app.sess)))
 	})
 	// Нс30: Connect account (s-profile-2); its label taken — «nextcloud»
 	// is (s-profile-11); the panel of a subscription (s-profile-10).
 	t.Run("add", func(t *testing.T) {
-		app.compare(t, "app-settings-connections/add.json", app.h.do(get("/app/settings/connections?op=add", app.sess)))
+		app.compare(t, "app-settings-connections/add.json", app.h.do(get("/app/settings/connections/new", app.sess)))
 	})
 	t.Run("label-taken", func(t *testing.T) {
-		app.compare(t, "app-settings-connections/label-taken.json", app.h.do(postForm("/app/settings/connections", app.sess, url.Values{
+		app.compare(t, "app-settings-connections/label-taken.json", app.h.do(postForm("/app/settings/connections/new", app.sess, url.Values{
 			"label": {"nextcloud"}, "server": {app.servers["nextcloud"].URL}, "login": {"alice"}, "password": {"secret"}})))
 	})
+	// Typecase's note 92: the server refused the login and password — the
+	// dialog with what was typed, the refusal and the trace over the
+	// fields, the password empty (s-profile-24).
+	t.Run("refused", func(t *testing.T) {
+		app.compare(t, "app-settings-connections/refused.json", app.h.do(postForm("/app/settings/connections/new", app.sess, url.Values{
+			"server": {app.servers["nextcloud"].URL}, "login": {"alice"}, "password": {"not-the-password"}})))
+	})
+	// The sheet of Disconnect over the connections (s-profile-26): what
+	// Carrel removes, in numbers.
+	t.Run("disconnect", func(t *testing.T) {
+		q := url.Values{"account": {app.realAccount(t, "lichnyj")}}
+		app.compare(t, "app-settings-connections-disconnect/normal.json", app.h.do(get("/app/settings/connections/disconnect?"+q.Encode(), app.sess)))
+	})
+	// The panel after Check the address (s-profile-10): what the feed
+	// carries, its name, the trace of the check.
 	t.Run("feed", func(t *testing.T) {
-		app.compare(t, "app-settings-connections/feed.json", app.h.do(get("/app/settings/connections?op=feed", app.sess)))
+		holidays := app.feeds["https://feeds.example/ru-holidays.ics"]
+		app.compare(t, "app-settings-connections/feed.json", app.h.do(postForm("/app/settings/connections?op=feed.check", app.sess,
+			url.Values{"url": {holidays.URL + "/ru-holidays.ics"}, "asks": {""}})))
 	})
 	t.Run("edit-links", func(t *testing.T) {
-		page := decode[view.ConnectionsPage](t, app.h.do(get("/app/settings/connections?"+q.Encode(), app.sess)))
+		page := decode[view.ConnectionsPage](t, app.h.do(get(edit, app.sess)))
 		form := formFields(*page.Add)
 		form.Set("login", "mix")
-		app.compare(t, "app-settings-connections/edit-links.json", app.h.do(postForm("/app/settings/connections?"+q.Encode(), app.sess, form)))
+		app.compare(t, "app-settings-connections/edit-links.json", app.h.do(postForm(edit, app.sess, form)))
 	})
+	// Typecase's note 103: nextcloud's password shown on the whole page
+	// (s-profile-4) — the window open, its badge and Lock now in the head,
+	// Hide password on the card, the password under the address with Copy.
+	t.Run("shown", func(t *testing.T) {
+		app.sess.SetUnlockUntil(mockupNow(t).Add(mockupSince).Add(4*time.Minute + 12*time.Second))
+		defer app.sess.SetUnlockUntil(time.Time{})
+		app.compare(t, "app-settings-connections/shown.json", app.h.do(get("/app/settings/connections?"+url.Values{
+			"reveal": {app.realAccount(t, "lichnyj")}}.Encode(), app.sess)))
+	})
+	// Typecase's note 103: Update collection list on nextcloud after
+	// «Поездки» appeared there (s-profile-27) — the line above the cards,
+	// the new row unticked and marked new.
+	t.Run("found", func(t *testing.T) {
+		nc := app.servers["nextcloud"]
+		trips := strings.Replace(app.realPath(t, "lichnyj"), "lichnyj", "poezdki", 1)
+		nc.AddCalendar(caldav.Calendar{Path: trips, Name: "Поездки", SupportedComponentSet: []string{"VEVENT"}})
+		nc.SetColour(trips, "#6B4E7A")
+		app.byPath[url.PathEscape(trips)] = "poezdki"
+		app.compare(t, "app-settings-connections/found.json", app.h.do(postForm("/app/settings/connections?"+url.Values{
+			"op": {"rediscover"}, "account": {app.realAccount(t, "lichnyj")}}.Encode(), app.sess, url.Values{})))
+	})
+}
+
+// Typecase's note 92: nothing connected yet (s-profile-25) — the head with
+// Connect account and Subscribe to a feed, the rail without counts and
+// without the states of davloom and the copies.
+func TestFixtureConnectionsEmpty(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	editBlob(t, app.h, app.sess, func(b *sealed.Blob) {
+		b.Connections, b.Collections, b.Subscriptions = nil, nil, nil
+	})
+	// Nothing connected, nothing published from it either.
+	if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		st.Published = nil
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	app.compare(t, "app-settings-connections/empty.json", app.h.do(get("/app/settings/connections", app.sess)))
 }
 
 // C-14.3: the states of the account, of its key escrow and of the password
@@ -1958,7 +2194,8 @@ func TestFixtureConnections(t *testing.T) {
 // instance lets mix nowhere else.
 func TestFixtureAccountStates(t *testing.T) {
 	app := newMockupApp(t)
-	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	// The page whole in s-mail-9: over the instance of the settings' frames.
+	settingsState(t, app)
 	mutate := func(t *testing.T, change func(st *store.State, u *store.User)) {
 		t.Helper()
 		if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
@@ -2054,6 +2291,18 @@ func TestFixtureAccountStates(t *testing.T) {
 		app.compare(t, "app-settings-escrow/normal.json", app.h.do(get("/app/settings/escrow", app.sess)))
 		account(t, "escrow-deposited")
 		app.compare(t, "app-settings-escrow-withdraw/normal.json", app.h.do(get("/app/settings/escrow/withdraw", app.sess)))
+		// account-16 (Typecase's note 99): the account recovered once by
+		// olga, a line under Deposited.
+		at := mockupDayAt(t, "2026-07-11 14:02")
+		mutate(t, func(_ *store.State, u *store.User) {
+			u.EscrowLastRecovery = &at
+			store.NotePassword(u, at, "escrow.recover", "olga")
+		})
+		app.compare(t, "app-settings-escrow/history.json", app.h.do(get("/app/settings/escrow", app.sess)))
+	})
+	// account-3, the ordinary case: Back to settings, the settings' rail.
+	t.Run("password", func(t *testing.T) {
+		app.compare(t, "app-password/normal.json", app.h.do(get("/app/password", app.sess)))
 	})
 	// account-3, the forced case: signed in with a temporary password, the
 	// red line on top and no way back.
@@ -2083,11 +2332,13 @@ func TestFixtureOutsideTheShell(t *testing.T) {
 		app.compare(t, "login/refused.json", app.h.do(app.h.anonPostForm("/login", "/login", url.Values{"login": {"mix"}, "password": {"wrong-one"}})))
 	})
 	t.Run("admin-install", func(t *testing.T) {
+		adminRail(t, app, true, checksNever)
 		app.compare(t, "admin-install/normal.json", app.h.do(get("/admin/install", app.sess)))
 	})
 	// An address that is none (s-admin-26): the field in error, why under
 	// the head, no table.
 	t.Run("admin-install-refused", func(t *testing.T) {
+		adminRail(t, app, true, checksFailed)
 		app.compare(t, "admin-install/refused.json", app.h.do(postForm("/admin/install", app.sess, url.Values{"url": {"carrel.example"}})))
 	})
 	// The check run (Ад31; s-admin-4): Carrel asks itself at a listener of
@@ -2095,12 +2346,53 @@ func TestFixtureOutsideTheShell(t *testing.T) {
 	// address broken, the timeout unknown, as the frame counts them. Last:
 	// the run keeps the address it was given.
 	t.Run("admin-install-report", func(t *testing.T) {
+		// Behind the frame's proxy (s-admin-4): https with its certificate,
+		// the client's address passed on and trusted, the event stream
+		// buffered and a body over 20 MB cut.
+		app.h.cfg.TrustedProxies = "127.0.0.1"
+		app.h.rebuild()
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		adminRail(t, app, true, checksNever)
 		live := httptest.NewServer(app.h.srv.Handler())
 		defer live.Close()
-		rec := app.h.do(postForm("/admin/install", app.sess, url.Values{"url": {live.URL}}))
-		steadyInstall(rec, live.URL, app.h.cfg.DataDir)
+		proxy := frameProxy(t, live.URL)
+		defer proxy.Close()
+		app.h.srv.SetProbeTransport(proxy.Client().Transport)
+		rec := app.h.do(postForm("/admin/install", app.sess, url.Values{"url": {proxy.URL}}))
+		steadyInstall(rec, proxy.URL, app.h.cfg.DataDir)
 		app.compare(t, "admin-install/report.json", rec)
 	})
+}
+
+// frameProxy is the proxy s-admin-4 checks: https in front of live, the
+// scheme and the client's address passed on, and two faults — the event
+// stream held back past the check's two seconds, a body over 20 MB answered
+// 413.
+func frameProxy(t *testing.T, live string) *httptest.Server {
+	t.Helper()
+	to, err := url.Parse(live)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rp := httputil.NewSingleHostReverseProxy(to)
+	inner := rp.Director
+	rp.Director = func(r *http.Request) {
+		inner(r)
+		r.Header.Set("X-Forwarded-Proto", "https")
+	}
+	proxy := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.ContentLength > 20<<20:
+			_, _ = io.Copy(io.Discard, r.Body)
+			w.WriteHeader(http.StatusRequestEntityTooLarge)
+			return
+		case strings.HasPrefix(r.URL.Path, "/app/search/progress/"):
+			time.Sleep(2100 * time.Millisecond)
+		}
+		rp.ServeHTTP(w, r)
+	}))
+	proxy.StartTLS()
+	return proxy
 }
 
 // steadyInstall gives the run of the installation check the frame's values
@@ -2109,7 +2401,10 @@ func TestFixtureOutsideTheShell(t *testing.T) {
 // room on its disk. What each row says stays the server's.
 func steadyInstall(rec *httptest.ResponseRecorder, live, dataDir string) {
 	s := rec.Body.String()
-	s = strings.ReplaceAll(s, strings.TrimPrefix(live, "http://"), "carrel.example")
+	s = strings.ReplaceAll(s, strings.TrimPrefix(strings.TrimPrefix(live, "https://"), "http://"), "carrel.example")
+	// The test's certificate as the frame's issuer and its day (s-admin-4).
+	s = regexp.MustCompile(`"[^"·]* · until \d{4}-\d\d-\d\d · chain`).ReplaceAllString(s, `"Let’s Encrypt R11 · until 2026-11-02 · chain`)
+	s = regexp.MustCompile(`after [0-9.]+ s — the response`).ReplaceAllString(s, "after 30.0 s — the response")
 	dir, _ := json.Marshal(dataDir)
 	s = strings.ReplaceAll(s, strings.Trim(string(dir), `"`), "/var/lib/carrel")
 	s = regexp.MustCompile(`· \d+ ms`).ReplaceAllString(s, "· 41 ms")
@@ -2199,6 +2494,25 @@ func TestFixturePublishLinkMade(t *testing.T) {
 		"k": {"calendar"}, "a": {app.realAccount(t, "lichnyj")}, "c": {app.realPath(t, "lichnyj")},
 		"how": {"range"}, "from": {"2026-08-10"}, "to": {"2026-08-31"}, "download": {"on"},
 	})))
+	// A link without expiry on an instance that sends no letters
+	// (s-publish-22): «No expiry. …» for its day, no Send by letter. The
+	// relay is taken away for this one answer.
+	var smtp store.SMTPSettings
+	swap := func(to store.SMTPSettings) {
+		t.Helper()
+		if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+			smtp, st.Settings.SMTP = st.Settings.SMTP, to
+			return nil, nil
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	swap(store.SMTPSettings{})
+	defer func() { swap(smtp) }()
+	app.compare(t, "app-publish/link-never.json", app.h.do(postForm("/app/publish", app.sess, url.Values{
+		"k": {"calendar"}, "a": {app.realAccount(t, "lichnyj")}, "c": {app.realPath(t, "lichnyj")},
+		"how": {"whole"}, "download": {"on"}, "lives": {"never"},
+	})))
 }
 
 // C-14.2: the search, and the sheets a collection and a record open.
@@ -2219,14 +2533,18 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 		waitPoll(t, app.h, app.sess, first.Poll.TaskID, nil)
 		app.compare(t, "app-search/normal.json", app.h.do(get("/app/search?q=Ковалёва", app.sess)))
 	})
-	for _, one := range []struct{ dir, route string }{
-		{"app-publish", "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=4f2b-9c31-a0e7"},
-		{"app-password", "/app/password"},
+	// The publish sheets over the page they are opened from (note 105 of
+	// Typecase): a contact over its card (s-publish-3), a calendar over
+	// Connections (s-publish-2), an event over its card (s-publish-19).
+	for _, one := range []struct{ state, slug, route string }{
+		{"normal", "kontakty", "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=4f2b-9c31-a0e7"},
+		{"calendar", "lichnyj", "/app/publish?a=a-nc-home&c=lichnyj&k=calendar"},
+		{"event", "lichnyj", "/app/publish?a=a-nc-home&c=lichnyj&k=calendar&uid=8f1c-4a02-b7d3"},
 	} {
-		t.Run(one.dir, func(t *testing.T) {
-			route := strings.ReplaceAll(one.route, "a-nc-home", app.realAccount(t, "kontakty"))
-			route = strings.ReplaceAll(route, "c=kontakty", "c="+app.realPath(t, "kontakty"))
-			app.compare(t, one.dir+"/normal.json", app.h.do(get(route, app.sess)))
+		t.Run("app-publish/"+one.state, func(t *testing.T) {
+			route := strings.ReplaceAll(one.route, "a-nc-home", app.realAccount(t, one.slug))
+			route = strings.ReplaceAll(route, "c="+one.slug, "c="+url.QueryEscape(app.realPath(t, one.slug)))
+			app.compare(t, "app-publish/"+one.state+".json", app.h.do(get(route, app.sess)))
 		})
 	}
 	// The sheets of «Дни рождения» over Connections, as s-profile-7, -8, -9
@@ -2369,11 +2687,11 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 	app := newMockupApp(t)
 	openSections(t, app)
 	readFolders(t, app)
-	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	// The list of links draws davloom with its three devices, the last
 	// answer the morning of the frames, and «Backups are running» in its
 	// rail's foot (s-publish-1, -18, -20): the devices, jobs and runs of
 	// the set.
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	for _, id := range mockupDevices(t, app) {
 		app.h.users.TouchDevice(id, mockupDayAt(t, "2026-08-16 09:41"))
 	}
@@ -2386,6 +2704,17 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 			app.compare(t, one.dir+"/"+one.state+".json", app.h.do(get(one.route, app.sess)))
 		})
 	}
+	t.Run("app-mail-link", func(t *testing.T) {
+		// «Send this link» of the calendar's link, over Published links
+		// (s-mail-4).
+		for _, l := range app.h.users.PublishedLinks(app.sess.AccountID()) {
+			if l.Target.Kind == string(view.KindEvent) {
+				app.compare(t, "app-mail-link/normal.json", app.h.do(get("/app/mail/link?id="+l.ID, app.sess)))
+				return
+			}
+		}
+		t.Fatal("no calendar's link in the set")
+	})
 	t.Run("invite", func(t *testing.T) {
 		// The invitation of s-auth-12: sent by letter to anna@example.org —
 		// the address shown and switched off —, the login the person's to
@@ -2420,6 +2749,31 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		swap(store.SMTPSettings{})
 		defer func() { swap(smtp) }()
 		app.compare(t, "app-files-published/no-mail.json", app.h.do(get("/app/files/published", app.sess)))
+	})
+	t.Run("published-gone", func(t *testing.T) {
+		// What the file's link opened is no longer there (s-publish-21): the
+		// row stays for Revoke, with nothing to copy or send. It was opened
+		// before it went, as the frame's row was.
+		for token, name := range app.byAccount {
+			if name == "link-smeta-token" {
+				if rec := app.h.do(get("/p/"+token, nil)); rec.Code != http.StatusOK {
+					t.Fatalf("open the file's link: %d", rec.Code)
+				}
+			}
+		}
+		// The frame draws it alone: the calendar's link is revoked first.
+		for _, l := range app.h.users.PublishedLinks(app.sess.AccountID()) {
+			var err error
+			if l.Target.Kind == string(view.KindFile) {
+				err = app.h.users.MarkLinkGone(l.ID)
+			} else {
+				err = app.h.users.RevokePublished(app.sess.AccountID(), l.ID)
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		app.compare(t, "app-files-published/gone.json", app.h.do(get("/app/files/published", app.sess)))
 	})
 	t.Run("published-empty", func(t *testing.T) {
 		// Every link revoked: the list says so (the client's scan ФД6).
@@ -3340,4 +3694,64 @@ func sizedUpload(path string, sess *session.Session, files ...upload) *http.Requ
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: sess.ID()})
 	return req
+}
+
+// The installation check as the rail's foot says it (s-admin-*): passed,
+// failed (two, as s-admin-26 draws it), or not run since the start.
+const (
+	checksPassed = iota
+	checksFailed
+	checksNever
+)
+
+// adminRail is the state of the instance the rail's foot of a frame of the
+// administration draws: mail going out or not configured, the last check
+// passed, failed or not run (Typecase's 195 — s-admin-1, -6, -30…-33, -4,
+// -25, -26 with mail; the rest without). Mail is a relay set in the state;
+// nothing is sent.
+func adminRail(t *testing.T, app *mockupApp, mail bool, check int) {
+	t.Helper()
+	if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		st.Settings.SMTP = store.SMTPSettings{}
+		if mail {
+			st.Settings.SMTP = store.SMTPSettings{Host: "smtp.carrel.example", Port: 587, Security: "starttls",
+				From: "noreply@carrel.example", Sender: "login"}
+		}
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	at := mockupDayAt(t, "2026-08-16 09:12")
+	var sent, checked time.Time
+	failed := 0
+	if mail {
+		sent = at
+	}
+	switch check {
+	case checksPassed:
+		checked = at
+	case checksFailed:
+		checked, failed = at, 2
+	}
+	app.h.srv.SetRailMarks(sent, checked, failed)
+}
+
+// auditOfFrame is the journal s-admin-7 draws: a sign-in, three refused in
+// a row as one line, a recovery with the master password, a change of the
+// instance's settings — the newest first. The lines of making the set's
+// accounts are the run's, not the frame's.
+func auditOfFrame(t *testing.T, app *mockupApp) {
+	t.Helper()
+	at := func(day string) time.Time { return mockupDayAt(t, day) }
+	if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		st.Audit = []store.AuditEntry{
+			{When: at("2026-08-12 10:02"), Who: "mix", What: "settings.instance", Detail: "smtp_host, smtp_port"},
+			{When: at("2026-08-14 18:40"), Who: "mix", What: "escrow.recover", Whom: "viktor", Detail: "notice mailed"},
+			{When: at("2026-08-14 22:07"), Who: "—", What: "login.fail", Whom: "anna", Detail: "3rd attempt · ip 203.0.113.9 · rate-limited"},
+			{When: at("2026-08-15 09:20"), Who: "mix", What: "login.ok"},
+		}
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 }

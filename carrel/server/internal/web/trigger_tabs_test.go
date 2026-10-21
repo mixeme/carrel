@@ -1,12 +1,10 @@
 package web_test
 
 import (
-	"net/url"
 	"strings"
 	"testing"
 
 	"carrel.dev/carrel/server/internal/sealed"
-	"carrel.dev/carrel/server/view"
 )
 
 // s-backup-2…5: the card of the external trigger hands over what to paste
@@ -50,14 +48,7 @@ func TestTriggerTabsAreWhatTheFramesHandOver(t *testing.T) {
 	}
 
 	both := saveJob(t, f, jobForm(f, sealed.BackupToBoth, "8", "pw"))
-	page := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=trigger&job="+both.ID, f.sess, url.Values{})))
-	var sb *view.TriggerBlock
-	if j := page.Job; j != nil && j.Trigger != nil && j.Trigger.Shown {
-		sb = j.Trigger
-	}
-	if sb == nil {
-		t.Fatal("Both: no trigger shown")
-	}
+	_, sb := issueTrigger(t, f, both)
 	name := "carrel-" + both.ID + ".sh"
 	if !sb.Script || sb.ScriptName != text(name) || sb.CronLine != text("0 3 * * * /usr/local/bin/"+name) ||
 		sb.GoSentry.Command != text("/usr/local/bin/"+name) || len(sb.GoSentry.Arguments) != 0 || !strings.HasPrefix(string(sb.Command), "#!/bin/sh\nset -eu\n") {

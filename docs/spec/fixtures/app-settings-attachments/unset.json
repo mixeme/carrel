@@ -1,0 +1,530 @@
+{
+  "details": null,
+  "form": {
+    "action": "/app/settings/attachments",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "id": "attachments.discard",
+        "label": "Discard",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "id": "attachments.save",
+        "label": "Save",
+        "method": "POST",
+        "primary": true
+      },
+      {
+        "enabled": false,
+        "icon": "i-file",
+        "id": "attachments.open",
+        "label": "Open in Files",
+        "method": "GET",
+        "reason": "No folder is chosen yet."
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "Small files stay in the record",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Up to 2 MB",
+            "name": "inline",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "Written into the event, the task or the note itself, and travels with it."
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "hintRuns": [
+              {
+                "text": "A collection that says it takes less ("
+              },
+              {
+                "mark": "mono",
+                "text": "max-resource-size"
+              },
+              {
+                "text": ") lowers the boundary for itself: "
+              },
+              {
+                "mark": "mono",
+                "text": "nextcloud"
+              },
+              {
+                "text": " 2 MB, "
+              },
+              {
+                "mark": "mono",
+                "text": "radicale · vps"
+              },
+              {
+                "text": " 1 MB. Nothing here raises it."
+              }
+            ],
+            "kind": "text",
+            "label": "Larger",
+            "name": "larger",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "Wait for the folder below."
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "badges": [
+          {
+            "label": "not set",
+            "role": "alert"
+          }
+        ],
+        "legend": "Folder",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "Any file collection you can write to.",
+            "kind": "select",
+            "label": "Collection",
+            "name": "collection",
+            "options": [
+              {
+                "label": "Choose a collection",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "colour": "#9a9280",
+                "label": "nextcloud · Files",
+                "selected": false,
+                "value": "a-nc-home|/alice/files/Files/"
+              },
+              {
+                "colour": "#a05a2c",
+                "label": "sftpgo · vps · Documents",
+                "selected": false,
+                "value": "a-sftp-vps|/alice/files/Documents/"
+              },
+              {
+                "colour": "#a05a2c",
+                "disabled": true,
+                "label": "sftpgo · vps · Public",
+                "reason": "Read-only",
+                "selected": false,
+                "value": "a-sftp-vps|/alice/files/Public/"
+              }
+            ],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": {
+              "enabled": true,
+              "href": "/app/files/picker?for=attachments\u0026to=",
+              "id": "attachments.browse",
+              "label": "Browse",
+              "method": "GET",
+              "target": "sheet"
+            },
+            "hint": "Created on first use. It stays an ordinary folder: openable in Files, mountable as a network drive, readable without Carrel.",
+            "kind": "text",
+            "label": "Folder in it",
+            "mono": true,
+            "name": "folder",
+            "options": [],
+            "placeholder": "/carrel/attachments",
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "hintRuns": [
+              {
+                "mark": "mono",
+                "text": "2026-07"
+              },
+              {
+                "text": ", "
+              },
+              {
+                "mark": "mono",
+                "text": "2026-08"
+              },
+              {
+                "text": ". Off means one flat folder — fine for a hundred files, not for ten thousand."
+              }
+            ],
+            "kind": "check",
+            "label": "A subfolder per month",
+            "name": "monthly",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "true"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "File name",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "hintRuns": [
+              {
+                "mark": "mono",
+                "text": "2026-08-10 sync-board.png"
+              },
+              {
+                "text": ". A name already taken is never overwritten: a counter is added."
+              }
+            ],
+            "kind": "select",
+            "label": "Written as",
+            "name": "name",
+            "options": [
+              {
+                "label": "Date, then the original name",
+                "selected": true,
+                "value": "dated"
+              },
+              {
+                "label": "The original name",
+                "selected": false,
+                "value": "original"
+              },
+              {
+                "label": "Record title, then the original name",
+                "selected": false,
+                "value": "titled"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "dated"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "note": "",
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 3 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-user",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET"
+      },
+      {
+        "count": 4,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-server",
+        "id": "settings.connections",
+        "label": "Connections",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "icon": "i-file",
+        "id": "settings.attachments",
+        "label": "Attachments",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "icon": "i-device",
+        "id": "settings.devices",
+        "label": "New device",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-archive",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-link",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "icon": "i-theme",
+        "id": "settings.appearance",
+        "label": "Appearance",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
+          }
+        ],
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
+        "tone": "on"
+      }
+    ],
+    "tags": [],
+    "ticks": null
+  },
+  "subtitle": "Where a file attached to a note, an event or a task is put",
+  "title": "Attachments",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

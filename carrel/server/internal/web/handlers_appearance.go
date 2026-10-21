@@ -154,32 +154,29 @@ func (s *Server) appearancePage(sess *session.Session, look view.Look, weekErr, 
 		{Legend: "Density", Rows: []view.FormRow{{Name: "density", Label: "Density", Kind: view.InputRadio, Value: text(density),
 			Hint:    "List row height: 38 or 32 px. On a phone always 52. This browser.",
 			Options: []view.Option{option("comfortable", "Comfortable", density), option("compact", "Compact", density)}}}},
-		{Legend: "Lists", Rows: []view.FormRow{
+		{Legend: "Lists", Hint: "Column sets are remembered per section, in this browser — the button below resets them.", Rows: []view.FormRow{
 			tick("panel", "Keep the details panel open", look.Panel),
 			tick("source", "Show the source column", look.Source),
 			tick("wide", "Open notes in full width", look.Wide),
 		}},
-		{Legend: "Dates and times", Rows: []view.FormRow{
-			{Name: "weekStart", Label: "Week starts on", Kind: view.InputSelect, Value: text(week), Error: weekErr,
-				Options: []view.Option{option("monday", "Monday", week), option("sunday", "Sunday", week), option("saturday", "Saturday", week)}},
-			{Name: "clock", Label: "Time", Kind: view.InputSelect, Value: text(clock), Error: clockErr,
-				Options: []view.Option{option("24", "24-hour", clock), option("12", "12-hour", clock)}},
-		}},
+		// The zone stands with the clock as a line of text, not a field: the
+		// administrator's, nothing here changes it (appearance-1, Typecase's
+		// note 104).
+		{Legend: "Dates and times", Hint: "Week start and the clock are kept in the account: another browser shows the same. The time zone is the instance’s, set by the administrator.",
+			Facts: []view.Fact{{Label: "Time zone", Value: text(tf.tz.String()), Aside: "this instance"}}, Rows: []view.FormRow{
+				{Name: "weekStart", Label: "Week starts on", Kind: view.InputSelect, Value: text(week), Error: weekErr,
+					Options: []view.Option{option("monday", "Monday", week), option("sunday", "Sunday", week), option("saturday", "Saturday", week)}},
+				{Name: "clock", Label: "Time", Kind: view.InputSelect, Value: text(clock), Error: clockErr,
+					Options: []view.Option{option("24", "24-hour", clock), option("12", "12-hour", clock)}},
+			}},
 	}}
 	form.Actions = []view.Action{s.discard("appearance.discard", "/app/settings/appearance"),
 		{ID: "appearance.save", Label: "Save", Method: "POST", Primary: true, Enabled: true}}
 	return view.AppearancePage{
-		Shell: s.withRail(s.buildShell(sess, "Appearance"), s.settingsRail(sess, "/app/settings/appearance")),
-		Form:  form,
+		Shell:    s.settingsShell(sess, "Appearance", "/app/settings/appearance", "/app/settings/appearance"),
+		Subtitle: "Theme in this browser · week start and clock in the account",
+		Form:     form,
 		Reset: view.Action{ID: "appearance.reset", Label: "Reset remembered view settings", Method: "POST", Enabled: true,
 			Href: s.postQuery("/app/settings/appearance", url.Values{"op": {"reset"}})},
-		Instance: view.Form{Sets: []view.FieldSet{{Rows: []view.FormRow{
-			{Name: "timezone", Label: "Time zone", Kind: view.InputText, Value: text(tf.tz.String()), Hint: "This instance", ReadOnly: true},
-		}}}},
-		Notes: []view.Text{
-			"Column sets are remembered per section, in this browser — the button below resets them.",
-			"Week start and 12/24-hour clock live in the account: time is assembled on the server, so another browser sees the same.",
-			"Time zone is one per instance, set by the administrator.",
-		},
 	}
 }

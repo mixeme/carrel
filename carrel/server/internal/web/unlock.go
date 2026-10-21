@@ -58,6 +58,11 @@ func (s *Server) unlockSheet(sess *session.Session, errText view.Text, back, wha
 	}
 	act := view.Action{ID: "unlock.submit", Label: "Confirm", Method: "POST", Primary: true, Enabled: true}
 	blob := s.catalogOf(sess)
+	sheet.For = map[string]view.UnlockFor{unlockProfile: view.UnlockForProfile, unlockDavloom: view.UnlockForDavloom,
+		unlockDelete: view.UnlockForDelete, unlockTrigger: view.UnlockForTrigger}[what]
+	if sheet.For == "" {
+		sheet.For = view.UnlockForPassword
+	}
 	switch what {
 	case unlockProfile:
 		sheet.Purpose, act.Label = "Generate profile", "Generate"
@@ -76,6 +81,10 @@ func (s *Server) unlockSheet(sess *session.Session, errText view.Text, back, wha
 		sheet.Purpose, act.Label = "External trigger", "Turn on"
 		if job, ok := blob.BackupJob(extra.Get("job")); ok {
 			sheet.Subject = text(job.Name)
+			// A trigger already on is given a new password (note 91).
+			if _, on := s.users.BackupTriggerUse(sess.AccountID(), job.ID); on {
+				act.Label = "New password"
+			}
 		}
 	default:
 		if f, ok := blob.Subscription(what); ok && what != "" {

@@ -46,11 +46,12 @@ func TestDisconnectAConnection(t *testing.T) {
 	if !strings.Contains(string(sheet.Subject), host.Host) {
 		t.Errorf("subject = %q", sheet.Subject)
 	}
-	if !strings.Contains(string(sheet.Warning), "nothing is deleted on") {
+	if string(sheet.Warning) != "Nothing is deleted on "+host.Host+". Carrel removes:" {
 		t.Errorf("warning = %q", sheet.Warning)
 	}
 	refs := strings.Join(textLines(sheet.References), "|")
-	if !strings.Contains(refs, "1 collection") || !strings.Contains(refs, "Published link") {
+	// Numbers without names (s-profile-26; the owner, 19.10.2026).
+	if refs != "1 collection|1 published link" {
 		t.Errorf("references = %q", refs)
 	}
 	confirm := actionByID(sheet.Actions, "connection.disconnect.confirm")

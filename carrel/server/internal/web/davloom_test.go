@@ -3,6 +3,7 @@ package web_test
 import (
 	"context"
 	"net/url"
+	"slices"
 	"strings"
 	"testing"
 
@@ -219,8 +220,13 @@ func TestDavloomShowsWhatTheClientSees(t *testing.T) {
 	if len(page.Devices) != 1 || len(page.Devices[0].Marks) != 1 {
 		t.Errorf("the device's marks = %+v", page.Devices)
 	}
+	// The tree is a sheet behind «What the client sees» (s-davloom-9).
+	if page.Sees.Href != "/app/settings/davloom/tree" {
+		t.Errorf("sees = %+v", page.Sees)
+	}
+	tree := decode[view.DavloomTreeSheet](t, h.do(get(page.Sees.Href, alice)))
 	var paths []string
-	for _, r := range page.Tree {
+	for _, r := range tree.Tree {
 		paths = append(paths, string(r.Path))
 	}
 	line := strings.Join(paths, " ")
@@ -228,5 +234,54 @@ func TestDavloomShowsWhatTheClientSees(t *testing.T) {
 		if !strings.Contains(line, want) {
 			t.Errorf("the tree has no %q: %s", want, line)
 		}
+	}
+}
+
+// Typecase's note 96 (s-davloom-7): what a device sees is changed in its
+// sheet without a new password — the collections by connection under the
+// home sets it sees, the ticked ones its own —; none ticked is refused in
+// the sheet.
+func TestDavloomScopeSheet(t *testing.T) {
+	h := newHarness(t)
+	h.cfg.DAVloomPort = 8081
+	h.rebuild()
+	h.admin("alice", "password123")
+	alice := h.login("alice", "password123")
+	key, _ := alice.DataKey()
+	h.putConnections("alice", key, "a1")
+	h.do(fragment(postForm("/app/settings/unlock", alice, url.Values{"password": {"password123"}}), "sheet"))
+	form := url.Values{"op": {"issue"}, "name": {"Phone"}, "kind.contact": {"on"}, "kind.file": {"on"}, "col.a1|" + seedBook: {"on"}}
+	if rec := h.do(postForm("/app/settings/davloom", alice, form)); rec.Code != 303 {
+		t.Fatalf("issue: %d %s", rec.Code, rec.Body)
+	}
+	page := decode[view.DavloomPage](t, h.do(get("/app/settings/davloom", alice)))
+	change := actionByID(page.Devices[0].Actions, "davloom.scope")
+	if change == nil || !strings.HasPrefix(change.Href, "/app/settings/davloom/scope?device=") {
+		t.Fatalf("change = %+v", change)
+	}
+	sheet := decode[view.DavloomScopeSheet](t, h.do(get(change.Href, alice)))
+	row := sheet.Form.Sets[len(sheet.Form.Sets)-1].Rows[0]
+	if sheet.Subject != "Phone" || row.Name != "col" || len(row.Options) < 2 || row.Options[0].Group == "" {
+		t.Fatalf("sheet = %+v", sheet)
+	}
+	ticked := 0
+	for _, o := range row.Options {
+		if o.Selected {
+			ticked++
+		}
+	}
+	if ticked != 1 {
+		t.Errorf("ticked = %d, want the device's one book", ticked)
+	}
+	if rec := h.do(postForm(change.Href, alice, url.Values{})); rec.Code != 200 ||
+		len(decode[view.DavloomScopeSheet](t, rec).Form.Errors) == 0 {
+		t.Fatalf("none ticked was taken: %d", rec.Code)
+	}
+	if rec := h.do(postForm(change.Href, alice, url.Values{"col": {"a1|" + seedBook, "a1|" + seedFiles}})); rec.Code != 303 {
+		t.Fatalf("save: %d %s", rec.Code, rec.Body)
+	}
+	d := h.users.Devices(alice.AccountID())[0]
+	if len(d.ScopeCols) != 2 || !slices.Contains(d.ScopeKinds, string(view.KindContact)) {
+		t.Errorf("scope = %+v %+v", d.ScopeKinds, d.ScopeCols)
 	}
 }

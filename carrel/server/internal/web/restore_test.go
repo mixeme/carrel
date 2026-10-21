@@ -18,7 +18,15 @@ import (
 
 func restoreTemps(t *testing.T) []string {
 	t.Helper()
-	found, _ := filepath.Glob(filepath.Join(os.TempDir(), "carrel-restore-*"))
+	// Any file, whatever its name: nothing of an archive is kept on disk
+	// (S-24.3). The test's own directories (t.TempDir) are not files.
+	entries, _ := os.ReadDir(os.TempDir())
+	var found []string
+	for _, e := range entries {
+		if !e.IsDir() {
+			found = append(found, filepath.Join(os.TempDir(), e.Name()))
+		}
+	}
 	return found
 }
 
@@ -51,13 +59,13 @@ func TestRestoreFromHistoryIntoNewCollections(t *testing.T) {
 		t.Fatalf("run = %+v", run)
 	}
 	open := func(pw string) *httptest.ResponseRecorder {
-		return f.h.do(postForm("/app/settings/backup?op=restore-open", f.sess, url.Values{
+		return f.h.do(postForm("/app/settings/backup/restore", f.sess, url.Values{
 			"source": {"run"}, "run": {job.ID + "|" + run.ID}, "password": {pw},
 		}))
 	}
 	wrong := decode[view.BackupPage](t, open("nope"))
-	if !hasNotice(wrong.Notices, "The archive could not be opened") || wrong.Restore.Match != nil {
-		t.Fatalf("wrong password = %+v", wrong.Notices)
+	if plainRuns(wrong.Restore.Refusal) != "The password does not open this archive." || wrong.Restore.Match != nil {
+		t.Fatalf("wrong password = %+v", wrong.Restore.Refusal)
 	}
 	made := f.srv.CountRequests("MKCOL", "") + f.srv.CountRequests("MKCALENDAR", "")
 	if rec := open("archive-pw"); rec.Code != http.StatusSeeOther {
@@ -70,13 +78,9 @@ func TestRestoreFromHistoryIntoNewCollections(t *testing.T) {
 	if n := f.srv.CountRequests("MKCOL", "") + f.srv.CountRequests("MKCALENDAR", ""); n != made {
 		t.Errorf("opening and previewing made %d collections", n-made)
 	}
-	rec := f.h.do(postForm("/app/settings/backup?op=restore-run", f.sess, url.Values{
+	rep := restoreRun(t, f, "/app/settings/backup/restore/match?op=restore", url.Values{
 		"into.0": {"new"}, "into.1": {"new"}, "into.2": {"new"}, "pick.0": {"on"}, "pick.1": {"on"}, "pick.2": {"on"},
-	}))
-	done := decode[view.BackupPage](t, rec)
-	if !hasNotice(done.Notices, "Restored") {
-		t.Fatalf("restore = %+v", done.Notices)
-	}
+	})
 	key, _ := f.sess.DataKey()
 	blob, _ := f.h.users.Catalog(f.sess.AccountID(), key)
 	var book, cal sealed.Collection
@@ -100,14 +104,7 @@ func TestRestoreFromHistoryIntoNewCollections(t *testing.T) {
 	if n := len(f.srv.Paths(searchBook)); n != 1 {
 		t.Errorf("the original book changed: %d", n)
 	}
-	var lines []string
-	for _, n := range done.Notices {
-		if n.Details != nil {
-			for _, l := range n.Details.Lines {
-				lines = append(lines, string(l))
-			}
-		}
-	}
+	lines := reportLines(rep)
 	day := time.Now().In(time.UTC).Format("2006-01-02")
 	if body, ok := f.srv.File(filesDocs + "Docs (restored " + day + ")/share/readme.txt"); !ok || body != "hello" {
 		if body, ok = f.srv.File(filesDocs + "Docs (restored " + time.Now().Format("2006-01-02") + ")/share/readme.txt"); !ok || body != "hello" {
@@ -134,26 +131,51 @@ func TestRestoreFromThisComputer(t *testing.T) {
 	fw, _ := mw.CreateFormFile("archive", "carrel.zip")
 	_, _ = fw.Write(archive)
 	_ = mw.Close()
-	req := httptest.NewRequest(http.MethodPost, "/app/settings/backup?op=restore-open&source=upload", &body)
+	req := httptest.NewRequest(http.MethodPost, "/app/settings/backup/restore?source=upload", &body)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: f.sess.ID()})
 	if rec := f.h.do(req); rec.Code != http.StatusSeeOther {
 		t.Fatalf("upload: %d %s", rec.Code, rec.Body.String())
 	}
-	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
+	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup/restore", f.sess)))
 	if page.Restore.Match == nil || len(page.Restore.Match.Rows) != 3 {
 		t.Fatalf("matching = %+v", page.Restore.Match)
 	}
-	if len(restoreTemps(t)) != before+1 {
-		t.Error("the uploaded archive is not kept for the next step")
+	// Held in the session's memory, not on Carrel's disk (S-24.3, the
+	// owner's decision of 19.10.2026).
+	if n := len(restoreTemps(t)); n != before {
+		t.Errorf("the uploaded archive is on disk (%d)", n-before)
 	}
-	if rec := f.h.do(postForm("/app/settings/backup?op=restore-cancel", f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+	if rec := f.h.do(postForm("/app/settings/backup/restore/match?op=cancel", f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("cancel: %d", rec.Code)
 	}
 	if n := len(restoreTemps(t)); n != before {
 		t.Errorf("closing left the archive on disk (%d)", n-before)
 	}
-	if again := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess))); again.Restore.Match != nil {
+	if again := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup/restore", f.sess))); again.Restore.Match != nil {
 		t.Error("a closed archive is still previewed")
 	}
+}
+
+// restoreRun presses Restore and follows it to the report (s-backup-18).
+func restoreRun(t *testing.T, f davFixture, href string, form url.Values) *view.RestoreReport {
+	t.Helper()
+	rec := f.h.do(postForm(href, f.sess, form))
+	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/app/settings/backup/restore/report" {
+		t.Fatalf("restore: %d %s %s", rec.Code, rec.Header().Get("Location"), rec.Body.String())
+	}
+	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup/restore/report", f.sess)))
+	if page.Restore.Report == nil || page.Restore.Report.Note != "Nothing on the server was deleted or overwritten." {
+		t.Fatalf("report = %+v", page.Restore.Report)
+	}
+	return page.Restore.Report
+}
+
+// reportLines are the report's rows as lines: name, where to, what happened.
+func reportLines(rep *view.RestoreReport) string {
+	var out string
+	for _, r := range rep.Rows {
+		out += string(r.Name) + " → " + string(r.Into) + ": " + plainRuns(r.Happened) + "\n"
+	}
+	return out
 }

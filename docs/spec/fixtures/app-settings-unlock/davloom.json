@@ -1,5 +1,6 @@
 {
   "alert": "",
+  "for": "davloom",
   "form": {
     "action": "/app/settings/unlock",
     "actions": [
@@ -106,6 +107,33 @@
           "primary": true
         }
       ],
+      "acts": {
+        "action": "/app/settings/davloom",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
       "address": "http://127.0.0.1:8081/",
       "addressHint": "In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.",
       "details": null,
@@ -512,6 +540,12 @@
         "title": "Add device",
         "warning": "The password is shown once and stored nowhere. Lose it and you create a new one and revoke this — it cannot be recovered."
       },
+      "empty": [
+        {
+          "mark": "strong",
+          "text": "No devices yet."
+        }
+      ],
       "enabled": true,
       "look": {
         "compact": false,
@@ -596,7 +630,7 @@
             "method": "GET"
           },
           {
-            "count": 0,
+            "count": null,
             "enabled": true,
             "href": "/app/settings/davloom",
             "id": "settings.davloom",
@@ -643,12 +677,20 @@
                 "text": "No device has connected since the start."
               }
             ],
-            "title": "davloom · running · 0 devices",
+            "title": "davloom · running · no devices",
             "tone": "on"
           }
         ],
         "tags": [],
         "ticks": null
+      },
+      "sees": {
+        "enabled": true,
+        "href": "/app/settings/davloom/tree",
+        "id": "davloom.tree",
+        "label": "What the client sees",
+        "method": "GET",
+        "target": "sheet"
       },
       "subtitle": [
         {
@@ -733,10 +775,12 @@
         },
         "refresh": {
           "action": {
-            "enabled": false,
-            "id": "",
-            "label": "",
-            "method": ""
+            "enabled": true,
+            "href": "/app/settings/davloom",
+            "icon": "i-refresh",
+            "id": "settings.refresh",
+            "label": "Refresh",
+            "method": "GET"
           },
           "answered": "",
           "running": false
@@ -783,142 +827,15 @@
           }
         ],
         "userHref": "/app/settings/account"
-      },
-      "tree": [
-        {
-          "depth": 0,
-          "label": "root",
-          "path": "/dav/"
-        },
-        {
-          "depth": 1,
-          "label": "",
-          "path": "principal/"
-        },
-        {
-          "depth": 1,
-          "label": "Calendars · events, tasks, notes",
-          "path": "cal/"
-        },
-        {
-          "colour": "#4a6b52",
-          "depth": 2,
-          "label": "Личный",
-          "path": "c/a-nc-home/lichnyj/"
-        },
-        {
-          "colour": "#4a6b52",
-          "depth": 2,
-          "label": "Дела",
-          "path": "c/a-nc-home/dela/"
-        },
-        {
-          "colour": "#3f6e8c",
-          "depth": 2,
-          "label": "Работа",
-          "path": "c/a-nc-home/rabota/"
-        },
-        {
-          "colour": "#a05a2c",
-          "depth": 2,
-          "label": "Дни рождения",
-          "path": "c/a-nc-home/dni-rozhdeniya/"
-        },
-        {
-          "colour": "#4a6b52",
-          "depth": 2,
-          "label": "Записи",
-          "path": "c/a-nc-home/zapisi/"
-        },
-        {
-          "colour": "#6b4e7a",
-          "depth": 2,
-          "label": "Дневник",
-          "path": "c/a-nc-home/dnevnik/"
-        },
-        {
-          "colour": "#3f6e8c",
-          "depth": 2,
-          "label": "Общие с семьёй",
-          "path": "c/a-nc-home/zapiski-obshchie/"
-        },
-        {
-          "colour": "#6b4e7a",
-          "depth": 2,
-          "label": "Проекты",
-          "path": "c/a-rad-vps/proekty/"
-        },
-        {
-          "colour": "#8c6239",
-          "depth": 2,
-          "label": "Дежурства",
-          "path": "c/a-rad-vps/dezhurstva/"
-        },
-        {
-          "colour": "#9a9280",
-          "depth": 2,
-          "label": "Общий",
-          "path": "c/a-baikal/obshchij/"
-        },
-        {
-          "depth": 1,
-          "label": "Address books",
-          "path": "card/"
-        },
-        {
-          "colour": "#4a6b52",
-          "depth": 2,
-          "label": "Контакты",
-          "path": "c/a-nc-home/kontakty/"
-        },
-        {
-          "colour": "#a05a2c",
-          "depth": 2,
-          "label": "Архив",
-          "path": "c/a-nc-home/arhiv/"
-        },
-        {
-          "colour": "#6b4e7a",
-          "depth": 2,
-          "label": "Команда",
-          "path": "c/a-rad-vps/komanda/"
-        },
-        {
-          "colour": "#6b4e7a",
-          "depth": 2,
-          "label": "Рассылки",
-          "path": "c/a-rad-vps/rassylki/"
-        },
-        {
-          "depth": 1,
-          "label": "Files · plain WebDAV",
-          "path": "files/"
-        },
-        {
-          "colour": "#9a9280",
-          "depth": 2,
-          "label": "Files",
-          "path": "c/a-nc-home/Files/"
-        },
-        {
-          "colour": "#a05a2c",
-          "depth": 2,
-          "label": "Documents",
-          "path": "c/a-sftp-vps/Documents/"
-        },
-        {
-          "colour": "#a05a2c",
-          "depth": 2,
-          "label": "Public",
-          "path": "c/a-sftp-vps/Public/"
-        }
-      ]
+      }
     },
     "devices": null,
     "event": null,
     "eventEdit": null,
+    "files": null,
     "note": null,
     "notes": null,
+    "published": null,
     "task": null,
     "taskEdit": null,
     "tasks": null

@@ -1,5 +1,4 @@
 {
-  "access": "read-only: nothing can be uploaded or made here",
   "attachments": false,
   "bar": {
     "actions": [
@@ -326,7 +325,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/connections?op=add",
+        "href": "/app/settings/connections/new",
         "icon": "i-server",
         "id": "account.connect",
         "label": "Connect account",
@@ -541,6 +540,7 @@
       "target": "rail"
     }
   },
+  "readOnly": true,
   "rows": [
     {
       "href": "/app/files/a-sftp-vps/Public/download/%D0%BF%D1%80%D0%B0%D0%B9%D1%81-2026.pdf",

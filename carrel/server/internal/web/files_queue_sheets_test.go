@@ -34,7 +34,7 @@ func TestQueueIsTheFrame(t *testing.T) {
 	if strings.Join(labels, ",") != "Keep both,Replace,Skip" {
 		t.Errorf("answers = %v", labels)
 	}
-	f.h.do(postForm(option(t, ask, "transfer.both"), f.sess, url.Values{}))
+	f.h.do(answerUpload(t, ask, "transfer.both", f.sess, upload{"taken.txt", "mine"}))
 	page = decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
 	// What was shown finished goes; the answered row stays until shown.
 	if page.Queue == nil || page.Queue.Title != "Uploaded 1 of 1" {

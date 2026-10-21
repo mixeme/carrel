@@ -822,9 +822,9 @@ func TestChangePasswordHTTP(t *testing.T) {
 	current := h.login("alice", "password123")
 
 	rec := h.do(postForm("/app/password", current, url.Values{
-		"current":   {"password123"},
-		"password":  {"newpass1234"},
-		"password2": {"newpass1234"},
+		"current":  {"password123"},
+		"password": {"newpass1234"},
+		"repeat":   {"newpass1234"},
 	}))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("change password: %d %s", rec.Code, rec.Body.String())

@@ -24,6 +24,14 @@ type FieldSet struct {
 	// где каждое поле в своей рубрике; nil у несвёрнутого набора
 	Unfold *Action   `json:"unfold"`
 	Rows   []FormRow `json:"rows"`
+	// Facts — строки набора только для чтения после полей, не поля формы:
+	// «Time zone · ‹Europe/Moscow› · this instance» у Dates and times
+	// (appearance-1, записка Typecase 104); пусто — строк нет
+	Facts []Fact `json:"facts,omitempty"`
+	// Diag — след одной строкой под строками набора: «PROPFIND
+	// /dav/Documents/carrel/attachments/ → 401 Unauthorized» у недоступной
+	// папки вложений (attachments-6, записка Typecase 93); пусто — следа нет
+	Diag Text `json:"diag,omitempty"`
 	// Badges — плашки рубрики после Legend: «not configured» тревогой у
 	// Mail, «off» у Letters from users (s-admin-3); пусто — без плашек
 	Badges []Badge `json:"badges,omitempty"`
@@ -34,6 +42,14 @@ type FieldSet struct {
 	// моноширинно у «What to copy», «Also started by» жирно и строки
 	// перечня у «When» задания копии (s-backup-2); Hint тогда пуст
 	HintRuns Runs `json:"hintRuns,omitempty"`
+}
+
+// Fact — строка только для чтения: имя, значение моноширинно, приглушённый
+// хвост после него («this instance»)
+type Fact struct {
+	Label Text `json:"label"`
+	Value Text `json:"value"`
+	Aside Text `json:"aside,omitempty"`
 }
 type FormRow struct {
 	Name  string `json:"name"`
@@ -69,14 +85,25 @@ type FormRow struct {
 	// LabelRuns — Label кусками, когда кадр выделяет часть: «Allow ‹.ics›
 	// download and subscription» (s-publish-2, Пб5); Label тогда — те же
 	// слова одной строкой, для подписи без кусков
-	LabelRuns Runs    `json:"labelRuns,omitempty"`
-	Error     Text    `json:"error"`
-	Extra     *Action `json:"extra"` // кнопка, принадлежащая полю
-	ReadOnly  bool    `json:"readOnly"`
-	Required  bool    `json:"required"`
+	LabelRuns Runs `json:"labelRuns,omitempty"`
+	Error     Text `json:"error"`
+	// Invalid — поле в тревоге без своих слов: причина сказана над полями
+	// — пароль, на который сервер ответил отказом (s-profile-24); у прочих
+	// false
+	Invalid bool `json:"invalid,omitempty"`
+	// Reason — строка выключена сейчас и почему: «Let users send letters»
+	// без настроенной почты — «Mail is not configured: there is nothing to
+	// send through yet.» (s-admin-3, записка Typecase 88); у прочих пусто
+	Reason   Text    `json:"reason,omitempty"`
+	Extra    *Action `json:"extra"` // кнопка, принадлежащая полю
+	ReadOnly bool    `json:"readOnly"`
+	Required bool    `json:"required"`
 	// Образец в пустом поле, как его рисует кадр: «DD.MM.YYYY» у дня
 	// рождения (s-contacts-4); у прочих полей пусто
 	Placeholder Text `json:"placeholder,omitempty"`
+	// Accept — у InputFile: какие файлы поле берёт, «.zip» у архива
+	// восстановления (s-backup-15); у прочих пусто
+	Accept string `json:"accept,omitempty"`
 	// У отметки — Name полей, которые она выключает, пока стоит, через
 	// пробел (имя поля пробела не держит): «The server asks no password» и
 	// Password (s-profile-14), All day задачи — «start.time due.time»
@@ -134,13 +161,22 @@ type Option struct {
 	Colour    Colour `json:"colour,omitempty"`    // метка варианта-коллекции (s-notes-15); у прочих пусто
 	Group     Text   `json:"group,omitempty"`     // рубрика перед вариантом: «As sent» (s-agenda-8); у прочих пусто
 	Meta      Text   `json:"meta,omitempty"`      // подпись справа: род и день записи, «event · 12 August» (s-tasks-10); у прочих пусто
-	Typed     bool   `json:"typed,omitempty"`     // «By UID…» (s-tasks-10): выбор открывает строку, где значение набирают руками под тем же Name; Value пуст; образец строки — Placeholder поля
-	Hint      Text   `json:"hint,omitempty"`      // у Typed — строка под строкой набора: «By UID: a record that is not among the loaded ones.» (s-tasks-11); у прочих пусто
+	// Columns — когда варианты стоят строками таблицы: значения столбцов
+	// после Label; у копии задания — день, размер, счёт коллекций
+	// (s-backup-7); у прочих пусто
+	Columns []Text `json:"columns,omitempty"`
+	Typed   bool   `json:"typed,omitempty"` // «By UID…» (s-tasks-10): выбор открывает строку, где значение набирают руками под тем же Name; Value пуст; образец строки — Placeholder поля
+	Hint    Text   `json:"hint,omitempty"`  // у Typed — строка под строкой набора: «By UID: a record that is not among the loaded ones.» (s-tasks-11); у прочих пусто
 	// Shows — Name полей той же формы через пробел, которые видны, только
 	// пока выбран этот вариант (FormRow.Hidden у них, пока не выбран):
 	// «Custom…» напоминания — «reminder.0.count reminder.0.unit», у записи
 	// на весь день ещё «reminder.0.at» (s-agenda-19); у прочих пусто
 	Shows string `json:"shows,omitempty"`
+	// Disables — Name полей той же формы через пробел, выключенных, пока
+	// выбран этот вариант: «The whole calendar» — «from to» (s-publish-2,
+	// записка Typecase 105); поля стоят всегда, без сценария уходят и при
+	// нём, и сервер их тогда не читает; у прочих пусто
+	Disables string `json:"disables,omitempty"`
 }
 type FieldError struct {
 	Name    string `json:"name"`
@@ -165,12 +201,17 @@ type AccountPage struct {
 // Message — у неподтверждённого: последствие и одна кнопка в Actions.
 type EmailStatus struct {
 	State       EmailState `json:"state"`       // C-8
-	Badge       *Badge     `json:"badge"`       // «confirmed 14 February», «pending: new@example.org»; nil — значка нет
+	Badge       *Badge     `json:"badge"`       // в рубрике Email (записка Typecase 90): «confirmed», «pending», «not confirmed» (тревогой); nil — значка нет
 	ConfirmedAt When       `json:"confirmedAt"` // день подтверждения; пусто — подтверждён до v0.2.60, дня нет
 	Pending     Text       `json:"pending"`     // новый адрес, ждущий ссылки
 	SentTo      Text       `json:"sentTo"`      // куда ушло письмо со ссылкой, пока ссылка жива
 	SentAt      When       `json:"sentAt"`      // когда оно ушло: «11:42»
-	Message     *Notice    `json:"message"`     // последствие неподтверждённого адреса; nil — его нет
+	// Aside — слова у значка (tc-plain): «new@example.org», «new@example.org
+	// · link not sent», «link sent 12 February 11:42»; пусто — нет
+	Aside Text `json:"aside"`
+	// Send — Send confirmation или Send again после Change в строке поля
+	// (s-mail-9, account-9, -10); nil — ссылку слать некуда или она ушла
+	Send *Action `json:"send"`
 }
 type SessionRow struct {
 	Agent    Text   `json:"agent"`
@@ -181,15 +222,26 @@ type SessionRow struct {
 	End      Action `json:"end"`
 }
 type EscrowStatus struct {
-	Active       bool     `json:"active"`
-	Covered      bool     `json:"covered"`
-	By           Text     `json:"by"`
-	Badge        *Badge   `json:"badge"`        // у рубрики: «deposited 2026-03-02» (account-7); nil — копии нет
-	Deposited    When     `json:"deposited"`    // «2026-03-02»; пусто — копии нет
-	LastRecovery When     `json:"lastRecovery"` // «never» или день последнего восстановления
-	Note         Text     `json:"note"`         // честная формулировка последствия, не «резервная копия ключей»
-	ActionNote   Text     `json:"actionNote"`   // строка у кнопки отзыва: чем он кончится (account-4)
-	Actions      []Action `json:"actions"`
+	Active       bool   `json:"active"`
+	Covered      bool   `json:"covered"`
+	By           Text   `json:"by"`
+	Badge        *Badge `json:"badge"`        // у рубрики: «deposited 2026-03-02» (account-7); nil — копии нет
+	Deposited    When   `json:"deposited"`    // «2026-03-02»; пусто — копии нет
+	LastRecovery When   `json:"lastRecovery"` // «never» или день последнего восстановления; пусто, когда есть Recoveries
+	// Recoveries — строка «Recovered» на каждое восстановление вместо Last
+	// recovery (account-16, записка Typecase 99): когда, моноширинно, и кто,
+	// что: «olga, administrator: the password was reset»
+	Recoveries []EscrowRecovery `json:"recoveries,omitempty"`
+	Note       Text             `json:"note"`       // честная формулировка последствия, не «резервная копия ключей»
+	ActionNote Text             `json:"actionNote"` // строка у кнопки отзыва: чем он кончится (account-4)
+	Actions    []Action         `json:"actions"`
+}
+
+// EscrowRecovery — одно восстановление учётной записи по депонированному
+// ключу (account-16).
+type EscrowRecovery struct {
+	At  When `json:"at"`  // «2026-07-11 14:02»
+	Who Text `json:"who"` // «olga, administrator: the password was reset»
 }
 
 type EscrowPage struct {
@@ -238,6 +290,9 @@ type UnlockSheet struct {
 	// (s-davloom-5), «Delete account» (account-15), «External trigger»
 	// (193 п. 3); главная кнопка формы — само действие (записка 86)
 	Purpose Text `json:"purpose"`
+	// For — ради чего (C-8): вид листа — удаление и депонирование рисуются
+	// своими кадрами (account-15, account-2)
+	For UnlockFor `json:"for"`
 	// Subject — справа приглушённо: чьё — «nextcloud» (s-profile-3, Нс18),
 	// имя устройства, задание копии; пусто — ничьё (s-plan-3)
 	Subject Text `json:"subject"`
@@ -260,6 +315,9 @@ type ConnectionsPage struct {
 	Subtitle      Runs               `json:"subtitle"`
 	Accounts      []ConnectionCard   `json:"accounts"`
 	Subscriptions []SubscriptionCard `json:"subscriptions"`
+	// Empty — ни одного подключения и подписки: «**Nothing is connected
+	// yet.**» (s-profile-25); иначе пусто
+	Empty Runs `json:"empty"`
 	// Add — диалог подключения, его правка или подписка; nil — на списке:
 	// диалог открывает Connect account в Actions (s-profile-1, s-profile-2)
 	Add *Form `json:"add"`
@@ -330,9 +388,14 @@ type CollectionRow struct {
 	Tick TickState `json:"tick"`
 	// Toggle — флажок строки: отмечает коллекцию во всех её родах, а
 	// отмеченную всюду снимает всюду, и страница возвращается; подпись — имя
-	// коллекции
-	Toggle Action     `json:"toggle"`
-	Menu   []MenuItem `json:"menu"` // Rename · Delete · Move
+	// коллекции. Это кнопка общей формы страницы (POST ?op=pick, записка
+	// Typecase 103), Pick — её значение под именем pick: «подключение|путь»
+	Toggle Action `json:"toggle"`
+	Pick   string `json:"pick"`
+	// New — коллекция только что найдена Update collection list: бейдж
+	// «new» в колонке вида, отметка снята (s-profile-27)
+	New  bool       `json:"new,omitempty"`
+	Menu []MenuItem `json:"menu"` // Rename · Delete · Move
 }
 type SubscriptionCard struct {
 	ID      string `json:"id"` // «f-…», {account} её адресов
@@ -362,21 +425,26 @@ type SubscriptionCard struct {
 	// «The feed asks for a password and the saved one no longer fits. …»);
 	// Check тогда — «Check again», Checked — когда лента читалась последний
 	// раз
-	State   CollectionState `json:"state"`
-	Note    Text            `json:"note"`
-	Actions []Action        `json:"actions"` // Check · Edit · Unsubscribe
+	State CollectionState `json:"state"`
+	Note  Text            `json:"note"`
+	// Trace — след последней Check в сеансе (s-profile-1: у отказавшей —
+	// над Note); nil — Check не было
+	Trace   *DiagnosticTrace `json:"trace"`
+	Actions []Action         `json:"actions"` // Check · Edit · Unsubscribe
 }
 
 // FeedKindRow — строка «Lands in» карточки подписки (s-profile-1): род
 // ленты словом экрана («Calendar», «Tasks», «Notes»), отмечен ли он в своём
 // разделе, сколько записей рода лента держала при последнем чтении (nil —
-// не читалась) и флажок строки — POST ?op=tick&kind=…
+// не читалась) и флажок строки — кнопка общей формы страницы (POST
+// ?op=pick), Pick — её значение: «подписка|раздел» (записка Typecase 103)
 type FeedKindRow struct {
 	Kind    Kind      `json:"kind"`
 	Label   Text      `json:"label"`
 	Tick    TickState `json:"tick"`
 	Objects *int      `json:"objects"`
 	Toggle  Action    `json:"toggle"`
+	Pick    string    `json:"pick"`
 }
 
 // AttachmentsPage — Settings → Attachments (attachments-1): коллекция
@@ -384,12 +452,18 @@ type FeedKindRow struct {
 // подпапка по месяцам, имя файла; всё — поля Form
 type AttachmentsPage struct {
 	Shell
-	Form Form `json:"form"`
-	Note Text `json:"note"`
+	// Subtitle — «Where a file attached to a note, an event or a task is
+	// put» (attachments-1)
+	Subtitle Text `json:"subtitle"`
+	Form     Form `json:"form"`
+	Note     Text `json:"note"`
 }
 
 type DevicesPage struct {
 	Shell
+	// Subtitle — «Everything discovery found — as one file or one code»
+	// (s-plan-1); за ним — метка открытой выдачи из TopBar
+	Subtitle Text            `json:"subtitle"`
 	Tab      DeviceTab       `json:"tab"` // C-8
 	Accounts []DeviceAccount `json:"accounts"`
 	Warning  Notice          `json:"warning"` // что содержит профиль и куда он попадает
@@ -425,8 +499,14 @@ type DeviceAccount struct {
 	// Toggle — её переключатель «Leave out …» / «Include …», POST; профиль
 	// и коды берут аккаунт целиком, потому отметка — у аккаунта (Нс39);
 	// на вкладках без отметки (Thunderbird, Anything else) nil
-	Included bool        `json:"included"`
-	Toggle   *Action     `json:"toggle"`
+	Included bool    `json:"included"`
+	Toggle   *Action `json:"toggle"`
+	// Reason — аккаунт никуда не входит и почему: «The server refused the
+	// saved password.» (s-plan-1, -2); Refused — коротко справа красным:
+	// «password refused», в строке Thunderbird — «the server refused the
+	// saved password» (s-plan-4); у прочих пусто
+	Reason   Text        `json:"reason"`
+	Refused  Text        `json:"refused"`
 	QR       string      `json:"qr"`       // Android: код этого аккаунта, адрес изображения; пусто — кода нет
 	Login    Text        `json:"login"`    // Thunderbird, Anything else: логин в строке аккаунта
 	Password SecretField `json:"password"` // пароль этого подключения; пусто у Apple и у аккаунта без кода
@@ -440,6 +520,7 @@ type DeviceRow struct {
 	Type     Text   `json:"type"` // CalDAV · CardDAV · WebDAV
 	URL      Text   `json:"url"`
 	Included bool   `json:"included"`
+	ReadOnly bool   `json:"readOnly,omitempty"` // коллекция только для чтения: «ro» у протокола (s-plan-5)
 	Copy     Action `json:"copy"`
 }
 
@@ -454,17 +535,24 @@ type DavloomPage struct {
 	// вводят в DAVx5 и чей пароль (s-davloom-1)
 	Address     Text `json:"address"`
 	AddressHint Text `json:"addressHint"`
+	// Sees — «What the client sees» рядом с Copy у адреса: GET на лист
+	// дерева /app/settings/davloom/tree (s-davloom-1, -9; решение владельца
+	// 19.10, записка Typecase 96)
+	Sees Action `json:"sees"`
 	// Actions — шапка (s-davloom-1): Add device (основная, ?add=1 — диалог
 	// добавления, s-davloom-2); у выключенного davloom — выключена с причиной
+	// (s-davloom-8)
 	Actions []Action      `json:"actions"`
 	Devices []ProxyDevice `json:"devices"`
-	// Tree — «What the client sees» (s-davloom-1): синтетические уровни
-	// davloom — /dav/, principal/, cal/, card/, files/ — и коллекции под ними
-	// адресами, как их увидит клиент
-	Tree []ProxyTreeRow `json:"tree"`
-	// Dialog — диалог поверх списка: добавление (?add=1, s-davloom-2), что
-	// видит устройство (?edit=), выданный пароль (s-davloom-3, один раз);
-	// nil — список
+	// Acts — общая форма страницы davloom-acts (POST /app/settings/davloom с
+	// csrf), которую шлют кнопки прав устройства, каждая на свой адрес
+	// (записка Typecase 102)
+	Acts Form `json:"acts"`
+	// Empty — под рубрикой Devices без счёта, когда устройств нет: «No
+	// devices yet.» жирно (s-davloom-6); у списка пусто
+	Empty Runs `json:"empty,omitempty"`
+	// Dialog — диалог поверх списка: добавление (?add=1, s-davloom-2),
+	// выданный пароль (s-davloom-3, один раз); nil — список
 	Dialog *DeviceDialog `json:"dialog"`
 	Note   Runs          `json:"note"` // смена основного пароля не отключает устройства; «not» — жирным (s-davloom-1)
 }
@@ -477,8 +565,38 @@ type ProxyDevice struct {
 	// Marks — метки коллекций, которые устройство видит, каждая один раз
 	// (s-davloom-1: полоски в строке); у устройства всех родов кадр рисует
 	// одну составную — клиент по Scope
-	Marks   []Colour `json:"marks"`
-	Actions []Action `json:"actions"` // «5 collections · Change» · read only | read and write (On — действующее) · Revoke
+	Marks []Colour `json:"marks"`
+	// Actions — «5 collections · Change» (GET на лист области
+	// /app/settings/davloom/scope?device=, s-davloom-7) · read only | read
+	// and write (POST кнопками общей формы страницы, On — действующее;
+	// записка Typecase 102) · Revoke
+	Actions []Action `json:"actions"`
+}
+
+// DavloomScopeSheet — «What it sees» поверх davloom (s-davloom-7, записка
+// Typecase 96): коллекции устройства отметками по подключениям, сеткой, как
+// источники задания копии; права — в строке устройства, не здесь.
+type DavloomScopeSheet struct {
+	Subject Text `json:"subject"` // имя устройства, справа в заголовке
+	// Form — POST на /app/settings/davloom/scope?device= с csrf; строка col
+	// — отметки (InputCheck, Multiple): Option.Group у первой коллекции
+	// подключения, Meta — что это («cal.», «book», «tasks»); Actions — Save
+	// (основная) и Cancel (GET, davloom)
+	Form Form `json:"form"`
+	// Under — экран под листом, пришедшим страницей (Лс29): davloom; nil у
+	// фрагмента
+	Under *Under `json:"under"`
+}
+
+// DavloomTreeSheet — «What the client sees» листом (s-davloom-9; решение
+// владельца 19.10): адрес справа в заголовке, дерево, Close.
+type DavloomTreeSheet struct {
+	Address Text `json:"address"`
+	// Tree — синтетические уровни davloom — /dav/, principal/, cal/, card/,
+	// files/ — и коллекции под ними адресами, как их увидит клиент
+	Tree    []ProxyTreeRow `json:"tree"`
+	Actions []Action       `json:"actions"` // Close (GET, davloom)
+	Under   *Under         `json:"under"`
 }
 
 // ProxyTreeRow — строка дерева «What the client sees»: адрес уровнем ниже
@@ -534,9 +652,11 @@ type BackupPage struct {
 	Empty     Runs        `json:"empty"`
 	EmptyNote Runs        `json:"emptyNote"`
 	Jobs      []BackupJob `json:"jobs"`
+	// JobsHint — строка под таблицей заданий: что значит verified
+	// (s-backup-1); без заданий пусто
+	JobsHint Text `json:"jobsHint"`
 	// Job — открытое задание на своей странице (s-backup-2, Нс61): его
-	// отметка Clock, подсказка и карточка строки; на списке и у нового nil,
-	// и тогда Jobs — строки списка
+	// форма; на списке и у нового nil, и тогда Jobs — строки списка
 	Job *BackupJob `json:"job"`
 	// History — «History, all jobs» (s-backup-1): прогоны всех заданий,
 	// новые первыми; на странице задания и у нового пусто
@@ -563,31 +683,27 @@ type BackupJob struct {
 	// «nothing is written»
 	Where     Text `json:"where"`
 	WhereNote Text `json:"whereNote"`
-	// When и WhenNote — когда идёт: «cron · 03:00» / «external trigger»,
-	// «on sign-in» / «if older than 7 days», «on demand»
+	// When и WhenNote — только настроенное (решение владельца 19.10,
+	// записка Typecase 95): правило входа «on sign-in» / «if older than 7
+	// days»; пусто — «—». Расписания внешнего запуска Carrel не знает
 	When     Text `json:"when"`
 	WhenNote Text `json:"whenNote"`
+	// Triggered — выдан пароль внешнего запуска: бейдж «trigger» в When
+	Triggered bool `json:"triggered,omitempty"`
 	// Keep — сколько копий держать; у скачивания 0 — держать нечего («—»)
 	Keep      int  `json:"keep"`
 	Encrypted bool `json:"encrypted"`
 	// LastRun — последняя копия числами, «2026-08-16 03:10»; пусто — копий
 	// не было («never»); LastNote — строкой ниже размер и проверка:
 	// «18.4 MB · verified», непроверенная — тревогой
-	LastRun   When    `json:"lastRun"`
-	LastNote  Runs    `json:"lastNote"`
-	LastState OpState `json:"lastState"`
-	// Clock — отметка «On a clock of your own — cron, GoSentry, a job in
-	// Gitea» в рубрике When (s-backup-2): On — внешний запуск включён;
-	// снятая выключает его, отдельного выключателя нет
-	Clock Action `json:"clock"`
-	// ClockHint — подсказка под отметкой Clock, и у снятой тоже: цена
-	// включения — ключ задания хранится под ключом сервера (s-backup-2,
-	// S-24.4)
-	ClockHint Text `json:"clockHint"`
-	// Trigger — карточка строки внешнего запуска; nil, пока он выключен:
-	// показывать и обновлять нечего (решение владельца, записка 19)
-	Trigger *TriggerBlock `json:"trigger"`
-	Actions []Action      `json:"actions"` // Run · Edit (s-backup-1)
+	LastRun   When     `json:"lastRun"`
+	LastNote  Runs     `json:"lastNote"`
+	LastState OpState  `json:"lastState"`
+	Actions   []Action `json:"actions"` // Run · Edit (s-backup-1)
+	// External — «External trigger» в «⋯» строки после двойников Run и
+	// Edit: ссылка на лист внешнего запуска задания (s-backup-1, записка
+	// Typecase 91)
+	External Action `json:"external"`
 }
 
 // BackupHistoryRow — прогон в «History, all jobs» (s-backup-1, Нс56).
@@ -603,8 +719,12 @@ type BackupHistoryRow struct {
 	// Verified — «read back», у неполной — и «‹danger›1 not copied» с
 	// подсказкой, что не вошло и почему; не прочитанная обратно — тревогой
 	Verified Runs `json:"verified"`
-	// Trigger — чем запущен: «cron», «on sign-in», «by hand»
-	Trigger Text     `json:"trigger"`
+	// Trigger — чем запущен: «external», «on sign-in», «by hand»
+	Trigger Text `json:"trigger"`
+	// Via — у внешнего запуска второй строкой: пароль, которым пришли, и
+	// адрес — «cbk_…lamp · 10.0.0.5»; у отказа — пароль, которым
+	// пытались (s-backup-1, записка 91); у прочих пусто
+	Via     Text     `json:"via"`
 	Actions []Action `json:"actions"` // Restore · Download; нечего — без них
 }
 
@@ -612,6 +732,39 @@ type BackupHistoryRow struct {
 // GoSentry · Gitea · curl несут данные — адрес, имя заголовка секрета,
 // задание, сам секрет; неизменные слова карточки — экрана (U-1.3). Вкладки
 // полны, только пока секрет только что выдан (Shown).
+// BackupTriggerSheet — лист внешнего запуска задания поверх списка заданий
+// (/app/settings/backup/trigger?job=, записка Typecase 91): выключен — цена
+// включения тревогой и Turn on (s-backup-14); включён — пароль строкой и
+// строка для вставки с паролем скрытым (s-backup-12); только что выдан —
+// пароль и строка целиком, один раз (s-backup-13).
+type BackupTriggerSheet struct {
+	Title   Text `json:"title"`   // «External trigger»
+	Subject Text `json:"subject"` // справа: задание, «Рабочее, ежедневно»
+	Local   bool `json:"local"`   // значок «local» у строки: экземпляр локальный
+	// Warning — у выключенного: цена включения (S-24.4); у прочих пусто
+	Warning  Text             `json:"warning"`
+	Password *TriggerPassword `json:"password"` // nil у выключенного
+	// Line — «The line to paste» (вкладки ?tab=, команда, Note); у
+	// включённого пароль в строке скрыт (cbk_••••); nil у выключенного
+	Line *TriggerBlock `json:"line"`
+	Form Form          `json:"form"` // скрытое csrf; Actions — Turn on · Cancel либо Close
+	// Under — список заданий под листом, пришедшим страницей (Лс29); nil у
+	// фрагмента
+	Under *Under `json:"under"`
+}
+
+// TriggerPassword — пароль внешнего запуска строкой, как сеанс (s-backup-12):
+// подсказка, когда выдан, последний запуск и откуда, сколько запусков;
+// только что выданный — целиком, один раз (s-backup-13).
+type TriggerPassword struct {
+	Masked Text `json:"masked"` // «cbk_…lamp»
+	// Use — «issued 2 August · last run 16 August 03:10 from ‹10.0.0.5› ·
+	// 14 runs»; у только что выданного пусто
+	Use     Runs     `json:"use"`
+	Value   Text     `json:"value"`   // только что выданный — целиком; иначе пусто
+	Actions []Action `json:"actions"` // New password · Revoke (danger); у выданного пусто
+}
+
 type TriggerBlock struct {
 	Shown bool `json:"shown"` // только что выдан: «visible only now»
 	// Script — назначению нужен скрипт (Download, Both): «The script to
@@ -645,8 +798,8 @@ type TriggerBlock struct {
 	// download** — two steps, so this is a file, not a line» (s-backup-3);
 	// у строки пусто
 	Destination Runs `json:"destination"`
-	// Tabs — вкладки crontab · GoSentry · Gitea · curl ссылками на ту же
-	// страницу с ?trigger= (вид, не хранится), открытая — On (s-backup-3)
+	// Tabs — вкладки crontab · GoSentry · Gitea · curl ссылками на лист
+	// внешнего запуска с ?tab= (вид, не хранится), открытая — On (s-backup-12)
 	Tabs []Action `json:"tabs"`
 }
 
@@ -677,14 +830,52 @@ type RestoreBlock struct {
 	// FromHint — подсказка под ними (s-backup-7, Нс74)
 	From     []Action `json:"from"`
 	FromHint Text     `json:"fromHint"`
-	// Source — форма шага: только поля выбранного источника и пароль
-	// архива; у копий задания — строка на задание (имя, день, размер,
-	// счёт коллекций в Meta)
+	// Source — форма шага: набор выбранного источника — его Legend рубрика
+	// карточки (From a job · From a server · From this computer) — и набор
+	// «Archive password»; у копий задания — строка на задание (имя, день,
+	// размер, счёт коллекций в Columns); у сервера — Collection и «Archive
+	// in it» с Browse; у этого компьютера — Archive (поле файла), Storage
+	// for a large archive и Folder in it (s-backup-7, -15, -17)
 	Source Form `json:"source"`
+	// Refusal — отказ шага тревогой наверху карточки источника: «The
+	// archive is larger than 16 MB. Choose a folder of your storage for it,
+	// or put it there and choose **From a server**.» (s-backup-16); пусто —
+	// отказа нет
+	Refusal Runs `json:"refusal,omitempty"`
 	// Match — шаг сопоставления (s-backup-8); nil — архив не открыт
-	Match   *RestoreMatch `json:"match"`
-	Note    Runs          `json:"note"`    // восстановление создаёт, как импорт, а не откатывает; «creates» — жирным (s-backup-8)
-	Actions []Action      `json:"actions"` // Cancel открытого архива
+	Match *RestoreMatch `json:"match"`
+	// Report — шаг «3 · Report» (s-backup-18,
+	// /app/settings/backup/restore/report): что сделало восстановление;
+	// nil — не было
+	Report  *RestoreReport `json:"report"`
+	Note    Runs           `json:"note"`    // восстановление создаёт, как импорт, а не откатывает; «creates» — жирным (s-backup-8)
+	Actions []Action       `json:"actions"` // Cancel открытого архива
+}
+
+// RestoreReport — отчёт восстановления (s-backup-18, записка Typecase 99):
+// «Restored from 2026-08-14», итог строкой, строка на коллекцию, что ничего
+// не удалено и не перезаписано, Done.
+type RestoreReport struct {
+	Title Text `json:"title"`
+	// Subtitle — «3 collections · 143 records created · 2 with a new UID · 1
+	// not restored»
+	Subtitle Text               `json:"subtitle"`
+	Rows     []RestoreReportRow `json:"rows"`
+	Note     Text               `json:"note"` // «Nothing on the server was deleted or overwritten.»
+	Done     Action             `json:"done"` // GET /app/settings/backup
+}
+
+// RestoreReportRow — коллекция архива: имя и метка, куда восстановлена,
+// сколько создано, что случилось — «4 missing records created», «no
+// differences» (Same — приглушённо), «2 with a new UID · ‹danger›1 not
+// restored: the server refused it (413, too large)».
+type RestoreReportRow struct {
+	Name     Text   `json:"name"`
+	Colour   Colour `json:"colour"`
+	Into     Text   `json:"into"`
+	Created  int    `json:"created"`
+	Happened Runs   `json:"happened"`
+	Same     bool   `json:"same,omitempty"`
 }
 
 // RestoreMatch — сопоставление (s-backup-8): строка на коллекцию архива,
@@ -722,6 +913,9 @@ type RestoreRow struct {
 
 type AppearancePage struct {
 	Shell
+	// Subtitle — «Theme in this browser · week start and clock in the
+	// account» (appearance-1)
+	Subtitle Text `json:"subtitle"`
 	// Form — одна форма кадра (appearance-1): рубрики Theme (theme: auto,
 	// light, dark — радио сегментом), Density (density: comfortable,
 	// compact), Lists (отметки panel, source, wide), Dates and times
@@ -731,9 +925,7 @@ type AppearancePage struct {
 	Form Form `json:"form"`
 	// Reset — «Reset remembered view settings» под Lists: POST, забывает
 	// выбор столбцов каждого раздела и вид этого браузера
-	Reset    Action `json:"reset"`
-	Instance Form   `json:"instance"` // часовой пояс — ставит администратор
-	Notes    []Text `json:"notes"`
+	Reset Action `json:"reset"`
 }
 
 type AdminUsersPage struct {
@@ -932,15 +1124,19 @@ type ExerciseRow struct {
 
 type AdminInstallPage struct {
 	Shell
+	// Subtitle — «Carrel asks itself from outside, at the address you
+	// declared as the base one» (s-admin-4, -25, -26)
+	Subtitle Text `json:"subtitle"`
 	// Form — шапка s-admin-4: адрес, по которому проверять (url,
-	// моноширинно), и «Run the check» (Ад29)
+	// моноширинно; до прогона — объявленный адрес, иначе тот, по которому
+	// пришли — s-admin-25), и «Run the check» (Ад29)
 	Form Form         `json:"form"`
 	Rows []InstallRow `json:"rows"`
 	// Took — сколько шла проверка, «4.2 s»; пусто — её не было (Ад30)
 	Took Text `json:"took"`
-	// Note — что делает проверка, пока таблицы нет (s-admin-25, -26):
-	// снаружи внутрь, ничего не меняет и не хранит, кроме строки журнала;
-	// с таблицей пусто
+	// Note — что делает проверка (s-admin-4, -25, -26): снаружи внутрь,
+	// ничего не меняет и не хранит, кроме строки журнала; под таблицей и
+	// без неё
 	Note Text `json:"note"`
 }
 type InstallRow struct {

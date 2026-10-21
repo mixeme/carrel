@@ -66,11 +66,11 @@ func TestPublishedContactShowsWhatWasTicked(t *testing.T) {
 	rubric := frameOne(t, regexp.MustCompile(`<div class="tc-field tc-field--w100"><label>([^<]*)</label>`), frame, "rubric of the ticks")[1]
 	var drawn []string
 	on := map[string]bool{}
-	for _, m := range regexp.MustCompile(`(?s)<button class="tc-check" type="button"><span class="tc-tickrow__tick( is-off)?"></span>(.*?)</button>`).FindAllStringSubmatch(frame, -1) {
+	for _, m := range regexp.MustCompile(`(?s)<label class="tc-check"><input class="tc-check__box" type="checkbox" name="[^"]*" value="1"(?: checked)?><span class="tc-tickrow__tick( is-off)?"></span>(.*?)</label>`).FindAllStringSubmatch(frame, -1) {
 		drawn = append(drawn, frameText(m[2]))
 		on[frameText(m[2])] = m[1] == ""
 	}
-	lives := frameText(frameOne(t, regexp.MustCompile(`<label>Link lives for</label><button class="tc-in is-pick" type="button">([^<]*)</button>`), frame, "lifetime")[1])
+	lives := frameText(frameOne(t, regexp.MustCompile(`<label>Link lives for</label><details class="tc-drop"><summary class="tc-in is-pick">([^<]*)</summary>`), frame, "lifetime")[1])
 	if len(drawn) != 6 || !on[drawn[0]] || on[drawn[1]] || on[drawn[2]] || on[drawn[3]] || on[drawn[4]] || on[drawn[5]] {
 		t.Fatalf("s-publish-3 draws %q, standing %v: read the frame again", drawn, on)
 	}
@@ -237,7 +237,7 @@ func TestPublishedContactShowsWhatWasTicked(t *testing.T) {
 func TestFolderSheetSaysWhatTheVisitorGets(t *testing.T) {
 	frame := mockupFrame(t, "s-publish-5")
 	msg := frameText(frameOne(t, regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush">(.*?)</div>`), frame, "message")[1])
-	lives := frameText(frameOne(t, regexp.MustCompile(`<label>Link lives for</label><button class="tc-in is-pick" type="button">([^<]*)</button>`), frame, "lifetime")[1])
+	lives := frameText(frameOne(t, regexp.MustCompile(`<label>Link lives for</label><details class="tc-drop"><summary class="tc-in is-pick">([^<]*)</summary>`), frame, "lifetime")[1])
 	if !strings.Contains(msg, "drive") || lives == "" {
 		t.Fatalf("s-publish-5 says %q and %q: read the frame again", msg, lives)
 	}

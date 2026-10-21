@@ -311,14 +311,13 @@ func TestFromFilesRefusalsAreTheFrame(t *testing.T) {
 }
 
 // s-files-15: in a read-only folder Upload and New folder stand off with one
-// reason, and the line under the title says it.
+// reason, and the line under the title says it by its badge (Typecase's
+// note 87).
 func TestReadOnlyFolderHeadIsTheFrame(t *testing.T) {
 	sub := frameInline(frameOne(t, frameHeadSub, mockupFrame(t, "s-files-15"), "line under the title")[1])
-	_, tail, ok := strings.Cut(sub, " · read-only")
-	if !ok {
+	if !strings.HasSuffix(sub, " · read-only") {
 		t.Fatalf("line %q: the frame changed, read it again", sub)
 	}
-	tail = "read-only" + tail
 
 	f := filesFixture(t, true)
 	f.srv.SeedFile(filesDocs+"a.txt", "alpha")
@@ -334,8 +333,8 @@ func TestReadOnlyFolderHeadIsTheFrame(t *testing.T) {
 		}
 	})
 	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
-	if string(page.Subtitle) != title || string(page.Access) != tail {
-		t.Errorf("subtitle = %q, access %q; want %q and %q", page.Subtitle, page.Access, title, tail)
+	if string(page.Subtitle) != title || !page.ReadOnly {
+		t.Errorf("subtitle = %q, read-only %v; want %q and the badge", page.Subtitle, page.ReadOnly, title)
 	}
 	up, nf := actionByID(page.Bar.Actions, "file.upload"), actionByID(page.Bar.Actions, "folder.new")
 	if up == nil || nf == nil || up.Enabled || nf.Enabled || up.Reason == "" || up.Reason != nf.Reason {
@@ -399,8 +398,12 @@ func TestNoPasswordEditAndFingerprintAreTheFrames(t *testing.T) {
 			t.Fatalf("%s draws %+v, s-profile-16 %+v: read them again", id, got, want)
 		}
 	}
+	// The edit of s-profile-16 is of a connection with its password
+	// (Typecase's note 94): the field on, «Leave it empty to keep the stored
+	// one.» under it; the case of no password is shown at connecting
+	// (s-profile-14), and its edit keeps the field off without the hint.
 	edit, _, _ := strings.Cut(mockupFrame(t, "s-profile-16"), "<figcaption")
-	if strings.Contains(edit, "Leave it empty") || !regexp.MustCompile(`aria-label="Password" disabled`).MatchString(edit) {
+	if !strings.Contains(edit, "Leave it empty to keep the stored one.") || regexp.MustCompile(`aria-label="Password" disabled`).MatchString(edit) {
 		t.Fatal("s-profile-16 changed: read it again")
 	}
 

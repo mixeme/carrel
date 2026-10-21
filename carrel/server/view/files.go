@@ -25,18 +25,16 @@ type FileCollectionRow struct {
 
 type FilesPage struct {
 	Shell
-	// Subtitle — строка под заголовком папки: подключение хранилища, у
-	// хранилища только для чтения с тем, почему Upload и New folder
-	// выключены: «sftpgo · vps · read-only: nothing can be uploaded or made
-	// here» (s-files-15)
+	// Subtitle — строка под заголовком папки: подключение хранилища,
+	// «sftpgo · vps» (s-files-1, s-files-15)
 	Subtitle Text `json:"subtitle"`
 	// Count — сколько в папке, «5 items», «1 item», «0 items», после метки
 	// папки вложений (s-files-1, states-32): всё, что в ней лежит, а не то,
 	// что оставил фильтр; пусто — папка не прочитана (states-33)
 	Count Text `json:"count"`
-	// Access — у хранилища только для чтения, после счёта: «read-only:
-	// nothing can be uploaded or made here» (states-34); у прочих пусто
-	Access Text `json:"access"`
+	// ReadOnly — хранилище только для чтения: бейдж «read-only» после счёта
+	// (states-34, записка Typecase 87); слово — экрана
+	ReadOnly bool `json:"readOnly"`
 	// Attachments — эта папка — папка вложений (S-20): метка «attachment
 	// folder» в строке под заголовком (s-files-1); слово — экрана
 	Attachments bool      `json:"attachments"`
@@ -141,6 +139,12 @@ type TransferRow struct {
 type NameClash struct {
 	Name    Text     `json:"name"`
 	Options []Action `json:"options"`
+	// Form — у загрузки: одна форма ответа (multipart, csrf; записка
+	// Typecase 100). Keep both и Replace — поля выбора файла этой формы,
+	// File — имя поля (keep, replace): ответ — то поле, в котором пришёл
+	// файл; Skip шлёт её с answer=skip. nil — у переноса, где у каждого
+	// ответа свой POST
+	Form *Form `json:"form"`
 }
 
 // FileServer — сервер в выборе шапки листа с деревом (s-files-4,
@@ -301,7 +305,9 @@ type PublishedRow struct {
 	Unopened bool `json:"unopened"`
 	// Gone — то, что ссылка открывала, ушло, и Carrel не смог за ним
 	// последовать (Б41): запись удалена, перенесена под неизвестным UID,
-	// коллекция удалена; строка словами; пусто — ссылка жива
+	// коллекция удалена; строка — подсказка плашки «no longer there»
+	// (s-publish-21), Expires — «—», Copy и Send выключены с причиной;
+	// пусто — ссылка жива
 	Gone    Text     `json:"gone,omitempty"`
 	Opens   int      `json:"opens"`
 	Actions []Action `json:"actions"` // Copy · Send (с почтой) · Revoke (s-publish-1)

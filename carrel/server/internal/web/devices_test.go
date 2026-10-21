@@ -71,10 +71,10 @@ func TestProfileNeedsTheUnlockWindow(t *testing.T) {
 	f, _ := deviceFixture(t)
 	p := devicesPage(t, f, "apple")
 	gen := deviceAction(t, p.Actions, "device.profile")
-	// Why it asks is the line above the button (s-plan-3), not a reason
+	// Why it asks is the line above the button (s-plan-6), not a reason
 	// of a button that works (C-6.2).
 	if gen.Method != "GET" || !strings.Contains(gen.Href, "/app/settings/unlock?") || !strings.Contains(gen.Href, "for=profile") ||
-		gen.Reason != "" || !strings.HasPrefix(string(p.Note), "Confirm your password first") {
+		gen.Reason != "" || p.Note != "Asks for your Carrel password first." {
 		t.Errorf("locked generate = %+v, note %q", gen, p.Note)
 	}
 	if p.Warning.Role != view.NoticeAlert || !strings.Contains(string(p.Warning.Title), "passwords") {

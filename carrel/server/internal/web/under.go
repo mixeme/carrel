@@ -145,6 +145,14 @@ func underPage(body any) *view.Under {
 		return &view.Under{Davloom: &p}
 	case view.BackupPage:
 		return &view.Under{Backup: &p}
+	case view.PublishedLinksPage:
+		return &view.Under{Published: &p}
+	case view.FilesPage:
+		return &view.Under{Files: &p}
+	case view.BackupTriggerSheet:
+		// The password's sheet over the trigger's stands over the list of
+		// jobs under it (note 91).
+		return p.Under
 	}
 	return nil
 }

@@ -20,7 +20,7 @@ func TestASubscriptionCardIsTheFrames(t *testing.T) {
 	frame := mockupFrame(t, "s-profile-1")
 	feeds := frame[strings.Index(frame, "Subscriptions · external"):]
 	lands := regexp.MustCompile(`(?s)<span class="tc-table__filename">([^<]*)</span>`).FindAllStringSubmatch(feeds, -1)
-	if len(lands) < 3 || lands[0][1] != "Calendar" || lands[1][1] != "Tasks" {
+	if len(lands) < 2 || lands[0][1] != "Calendar" || lands[1][1] != "Tasks" {
 		t.Fatalf("s-profile-1 draws no rows of Lands in: read the frame again (%v)", lands)
 	}
 	alarm := feeds[strings.Index(feeds, `<div class="tc-card tc-card--alert">`):]
@@ -57,7 +57,7 @@ func TestASubscriptionCardIsTheFrames(t *testing.T) {
 		t.Fatalf("unlock: %d", rec.Code)
 	}
 	shown := decode[view.ConnectionsPage](t, f.h.do(get(card().Password.Reveal.Href, f.sess))).Subscriptions[0]
-	if pw := shown.Password; pw == nil || !pw.Shown || pw.Value != "pw" || pw.Reveal.Label != "Hide" || auditCount(f.h, "connection.password.reveal") != 1 {
+	if pw := shown.Password; pw == nil || !pw.Shown || pw.Value != "pw" || pw.Reveal.Label != "Hide password" || auditCount(f.h, "connection.password.reveal") != 1 {
 		t.Errorf("shown = %+v, journal %d", pw, auditCount(f.h, "connection.password.reveal"))
 	}
 	if len(c.Lands) != 2 || c.Lands[0].Label != "Calendar" || c.Lands[1].Label != "Tasks" {
@@ -74,7 +74,7 @@ func TestASubscriptionCardIsTheFrames(t *testing.T) {
 		if l.Tick == view.TickOn {
 			continue
 		}
-		if rec := f.h.do(postForm(l.Toggle.Href, f.sess, url.Values{})); rec.Code != 303 || rec.Header().Get("Location") != "/app/settings/connections" {
+		if rec := f.h.do(postForm(l.Toggle.Href, f.sess, url.Values{"pick": {l.Pick}})); rec.Code != 303 || rec.Header().Get("Location") != "/app/settings/connections" {
 			t.Fatalf("tick %s: %d %q", l.Label, rec.Code, rec.Header().Get("Location"))
 		}
 		if card().Lands[i].Tick != view.TickOn {
@@ -105,7 +105,7 @@ func TestASubscriptionCardIsTheFrames(t *testing.T) {
 	}
 
 	// Untick Tasks from the card: off there, Calendar stays.
-	if rec := f.h.do(postForm(c.Lands[1].Toggle.Href, f.sess, url.Values{})); rec.Code != 303 {
+	if rec := f.h.do(postForm(c.Lands[1].Toggle.Href, f.sess, url.Values{"pick": {c.Lands[1].Pick}})); rec.Code != 303 {
 		t.Fatalf("untick Tasks: %d", rec.Code)
 	}
 	if c = card(); c.Lands[0].Tick != view.TickOn || c.Lands[1].Tick != view.TickOff {

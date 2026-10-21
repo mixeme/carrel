@@ -3,11 +3,11 @@ package web
 import (
 	"errors"
 	"net/http"
+	"net/netip"
 	"net/url"
 	"strings"
 	"time"
 
-	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/render"
@@ -41,7 +41,7 @@ func (s *Server) postPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err := s.users.ChangePassword(r.Context(), sess.AccountID(), sess.ID(),
-		r.FormValue("current"), r.FormValue("password"), r.FormValue("password2"))
+		r.FormValue("current"), r.FormValue("password"), r.FormValue("repeat"))
 	if err != nil {
 		if errors.Is(err, user.ErrWrongPassword) {
 			constantTimeDelay(start, 300*time.Millisecond)
@@ -84,13 +84,13 @@ func (s *Server) passwordPage(sess *session.Session, mustChange bool, err error)
 	page := view.PasswordPage{
 		// The password lives under the account, and the screen stands in
 		// the settings: it carries their rail with the account marked.
-		Shell: s.withRail(s.buildShell(sess, "Change password"), s.settingsRail(sess, "/app/settings/account")),
+		Shell: s.settingsShell(sess, "Change password", "/app/settings/account", "/app/password"),
 		// The caret is in New password, not in the field before it
 		// (account-3).
 		Form: focused(withPrimary(s.plainForm("/app/password", "POST", csrfField(sess),
 			view.FormRow{Name: "current", Label: "Current password", Kind: view.InputPassword, Required: true, Error: currentErr},
 			view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword, Required: true, Error: passErr},
-			view.FormRow{Name: "password2", Label: "Repeat new password", Kind: view.InputPassword, Required: true, Error: pass2Err},
+			view.FormRow{Name: "repeat", Label: "Repeat new password", Kind: view.InputPassword, Required: true, Error: pass2Err},
 		), "password.save", "Change password"), "password"),
 		// What the change does is said under the fields, where the fear of
 		// losing the connections comes up (account-3).
@@ -100,7 +100,19 @@ func (s *Server) passwordPage(sess *session.Session, mustChange bool, err error)
 	// After a temporary password there is nowhere to go before the change:
 	// the red line on top, and no way back (account-3).
 	if mustChange {
+		// Nothing further before the change (account-17, note 101): no
+		// settings' rail, no search, New or refresh; of the account's menu
+		// only Sign out.
 		page.Back = nil
+		page.Rail = view.Rail{}
+		page.Top.Search, page.Top.New, page.Top.Refresh = view.SearchBox{}, view.Action{}, view.Refresh{}
+		var out []view.MenuItem
+		for _, it := range page.Top.User {
+			if it.ID == "user.logout" {
+				out = append(out, it)
+			}
+		}
+		page.Top.User = out
 		page.Warning = view.Notice{
 			Role: view.NoticeAlert,
 			Body: text("You are signed in with a temporary password. Choose a new one before continuing."),
@@ -143,23 +155,17 @@ func connectionWarnings(server, certFingerprint string) []view.Notice {
 	}
 	lower := strings.ToLower(server)
 	var out []view.Notice
-	if strings.HasPrefix(lower, "http://") {
+	// Plain http to this very machine crosses no network: nothing goes in
+	// the clear (a server beside Carrel, a stand).
+	if strings.HasPrefix(lower, "http://") && !loopbackURL(server) {
 		out = append(out, view.Notice{
 			Role:  view.NoticeAlert,
 			Title: text("Unencrypted connection"),
 			Body:  text("Credentials will be sent in clear text. Continue only if you accept this risk."),
 		})
 	}
-	if strings.HasPrefix(lower, "https://") {
-		pin := dav.NormalizeFingerprint(certFingerprint)
-		if pin == "" {
-			out = append(out, view.Notice{
-				Role:  view.NoticeAlert,
-				Title: text("Certificate verification"),
-				Body:  text("If the server uses a self-signed or otherwise untrusted certificate, run Test and enter the SHA-256 fingerprint shown there. The fingerprint is stored with the connection password and must be accepted again if the certificate changes."),
-			})
-		}
-	}
+	// An https address says nothing over the dialog (s-profile-2, -16):
+	// the fingerprint's field says when one is needed.
 	return out
 }
 
@@ -228,4 +234,18 @@ func (s *Server) postSettingsLock(w http.ResponseWriter, r *http.Request) {
 		back = "/app/settings/connections"
 	}
 	s.redirect(w, r, back)
+}
+
+// loopbackURL reports whether an address names this machine: localhost or
+// a loopback IP.
+func loopbackURL(raw string) bool {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return false
+	}
+	host := strings.ToLower(u.Hostname())
+	if ip, err := netip.ParseAddr(host); err == nil {
+		return ip.IsLoopback()
+	}
+	return host == "localhost" || strings.HasSuffix(host, ".localhost")
 }

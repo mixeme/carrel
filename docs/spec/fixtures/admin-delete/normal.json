@@ -257,7 +257,7 @@
             }
           ]
         },
-        "loaded": 3,
+        "loaded": 6,
         "range": null,
         "segments": [
           {
@@ -284,7 +284,7 @@
           }
         ],
         "selected": 0,
-        "total": 3
+        "total": 6
       },
       "details": null,
       "look": {
@@ -331,7 +331,7 @@
             "method": "GET"
           },
           {
-            "count": 3,
+            "count": 6,
             "enabled": true,
             "href": "/admin/",
             "icon": "i-con",
@@ -403,11 +403,15 @@
           {
             "line": [
               {
-                "text": "Run the check once Carrel is behind its proxy."
+                "text": "Last check "
+              },
+              {
+                "mark": "mono",
+                "text": "2026-08-16 09:12"
               }
             ],
-            "title": "Not checked yet",
-            "tone": "off"
+            "title": "Checks passed",
+            "tone": "on"
           }
         ],
         "tags": [],
@@ -425,12 +429,11 @@
           "menu": [
             {
               "csrf": "csrf",
-              "enabled": false,
+              "enabled": true,
               "href": "/admin/?action=role\u0026role=user\u0026target=u-mix",
               "id": "admin.user.role",
               "label": "Make user",
-              "method": "POST",
-              "reason": "Someone has to stay an administrator."
+              "method": "POST"
             },
             {
               "csrf": "csrf",
@@ -442,22 +445,20 @@
             },
             {
               "csrf": "csrf",
-              "enabled": false,
+              "enabled": true,
               "href": "/admin/?action=disable\u0026target=u-mix",
               "id": "admin.user.disable",
               "label": "Disable",
-              "method": "POST",
-              "reason": "Cannot disable the last administrator."
+              "method": "POST"
             },
             {
               "danger": true,
-              "enabled": false,
+              "enabled": true,
               "href": "/admin/delete?target=u-mix",
               "icon": "i-trash",
               "id": "admin.user.delete",
               "label": "Delete",
               "method": "GET",
-              "reason": "Cannot delete the last administrator.",
               "separator": true,
               "target": "sheet"
             }
@@ -562,9 +563,156 @@
           ],
           "role": "User",
           "sessions": 0
+        },
+        {
+          "accounts": 0,
+          "address": "",
+          "created": "2026-08-10",
+          "disabled": false,
+          "escrowed": true,
+          "lastLogin": "",
+          "login": "olga",
+          "menu": [
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/admin/?action=role\u0026role=user\u0026target=u-mix",
+              "id": "admin.user.role",
+              "label": "Make user",
+              "method": "POST"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": false,
+              "href": "/admin/?action=sessions\u0026target=u-mix",
+              "id": "admin.user.sessions",
+              "label": "Kill sessions",
+              "method": "POST",
+              "reason": "No live sessions."
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/admin/?action=disable\u0026target=u-mix",
+              "id": "admin.user.disable",
+              "label": "Disable",
+              "method": "POST"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/admin/delete?target=u-mix",
+              "icon": "i-trash",
+              "id": "admin.user.delete",
+              "label": "Delete",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "role": "Administrator",
+          "sessions": 0
+        },
+        {
+          "accounts": 0,
+          "address": "",
+          "created": "2026-08-10",
+          "disabled": false,
+          "escrowed": true,
+          "lastLogin": "",
+          "login": "petr",
+          "menu": [
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/admin/?action=role\u0026role=admin\u0026target=u-mix",
+              "id": "admin.user.role",
+              "label": "Make administrator",
+              "method": "POST"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": false,
+              "href": "/admin/?action=sessions\u0026target=u-mix",
+              "id": "admin.user.sessions",
+              "label": "Kill sessions",
+              "method": "POST",
+              "reason": "No live sessions."
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/admin/?action=disable\u0026target=u-mix",
+              "id": "admin.user.disable",
+              "label": "Disable",
+              "method": "POST"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/admin/delete?target=u-mix",
+              "icon": "i-trash",
+              "id": "admin.user.delete",
+              "label": "Delete",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "role": "User",
+          "sessions": 0
+        },
+        {
+          "accounts": 0,
+          "address": "",
+          "created": "2026-08-10",
+          "disabled": false,
+          "escrowed": false,
+          "lastLogin": "",
+          "login": "ivan",
+          "menu": [
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/admin/?action=role\u0026role=admin\u0026target=u-mix",
+              "id": "admin.user.role",
+              "label": "Make administrator",
+              "method": "POST"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": false,
+              "href": "/admin/?action=sessions\u0026target=u-mix",
+              "id": "admin.user.sessions",
+              "label": "Kill sessions",
+              "method": "POST",
+              "reason": "No live sessions."
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/admin/?action=disable\u0026target=u-mix",
+              "id": "admin.user.disable",
+              "label": "Disable",
+              "method": "POST"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/admin/delete?target=u-mix",
+              "icon": "i-trash",
+              "id": "admin.user.delete",
+              "label": "Delete",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "role": "User",
+          "sessions": 0
         }
       ],
-      "subtitle": "3 accounts · 1 administrator · 2 covered by escrow",
+      "subtitle": "6 accounts · 2 administrators · 4 covered by escrow",
       "title": "Users",
       "top": {
         "lock": null,
@@ -690,8 +838,10 @@
     "devices": null,
     "event": null,
     "eventEdit": null,
+    "files": null,
     "note": null,
     "notes": null,
+    "published": null,
     "task": null,
     "taskEdit": null,
     "tasks": null

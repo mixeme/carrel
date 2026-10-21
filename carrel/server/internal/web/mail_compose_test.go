@@ -215,28 +215,6 @@ func TestLetterNamesBooksThatDidNotAnswer(t *testing.T) {
 	}
 }
 
-// A link just made can be sent by letter from its sheet; it is the same
-// link, not a second one.
-func TestLinkJustMadeGoesByLetter(t *testing.T) {
-	f, relay := letterFixture(t)
-	made := decode[view.PublishSheet](t, f.h.do(postForm("/app/publish?"+url.Values{"k": {"contacts"}, "a": {f.id}, "c": {searchBook}, "uid": {"ada"}}.Encode(), f.sess, url.Values{})))
-	rec := f.h.do(postForm(actionHref(t, made.Actions, "publish.mail"), f.sess, url.Values{}))
-	if rec.Code != 303 {
-		t.Fatalf("send by letter: %d", rec.Code)
-	}
-	sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
-	if len(sheet.Attach) != 1 || !sheet.Attach[0].AsLink || sheet.Subject != "Ada Lovelace" {
-		t.Fatalf("sheet = %+v", sheet)
-	}
-	if rec := f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Ada"}, "body": {"See"}})); rec.Code != 303 {
-		t.Fatalf("send: %d %s", rec.Code, rec.Body)
-	}
-	_, body := letterBody(t, relay.Letters()[0])
-	if !strings.Contains(body, "http://example.com"+string(made.Link)) || len(f.h.users.PublishedLinks(f.sess.AccountID())) != 1 {
-		t.Errorf("body:\n%s\nlink %s", body, made.Link)
-	}
-}
-
 // Without mail on the instance there is no letter: the menu does not offer
 // it and the sheet is not there.
 func TestNoLetterWithoutMail(t *testing.T) {
@@ -259,34 +237,6 @@ func TestNoLetterWithoutMail(t *testing.T) {
 	n := len(page.Top.New.Arrow)
 	if last, upload := page.Top.New.Arrow[n-1], page.Top.New.Arrow[n-2]; last.ID != "new.letter" || upload.ID != "new.upload" || !upload.Separator {
 		t.Errorf("last items = %+v %+v", upload, last)
-	}
-}
-
-// Owner's decision 19.09.2026: a link is kept whole in the person's blob, so
-// Published links shows it, copies it and mails it later, from another
-// session; the instance still keeps only its hash.
-func TestOldLinkGoesByLetterFromPublishedLinks(t *testing.T) {
-	f, relay := letterFixture(t)
-	made := decode[view.PublishSheet](t, f.h.do(postForm("/app/publish?"+url.Values{"k": {"contacts"}, "a": {f.id}, "c": {searchBook}, "uid": {"ada"}}.Encode(), f.sess, url.Values{})))
-	snap := f.h.st.Snapshot()
-	if len(snap.Published) != 1 || strings.Contains(string(snap.Published[0].Hash), strings.TrimPrefix(string(made.Link), "/p/")) {
-		t.Fatalf("published = %+v", snap.Published)
-	}
-
-	later := f.h.login("owner", "password123")
-	page := decode[view.PublishedLinksPage](t, f.h.do(get("/app/files/published", later)))
-	if len(page.Rows) != 1 || page.Rows[0].Link != made.Link || actionHref(t, page.Rows[0].Actions, "publish.copy") != string(made.Link) {
-		t.Fatalf("rows = %+v", page.Rows)
-	}
-	if rec := f.h.do(postForm(actionHref(t, page.Rows[0].Actions, "publish.mail"), later, url.Values{})); rec.Code != 303 {
-		t.Fatalf("send this link: %d", rec.Code)
-	}
-	if rec := f.h.do(postForm("/app/mail/compose?op=send", later, url.Values{"to": {"ann@example.org"}, "subject": {"Ada"}, "body": {"See"}})); rec.Code != 303 {
-		t.Fatalf("send: %d %s", rec.Code, rec.Body)
-	}
-	_, body := letterBody(t, relay.Letters()[0])
-	if !strings.Contains(body, "http://example.com"+string(made.Link)) || len(f.h.users.PublishedLinks(f.sess.AccountID())) != 1 {
-		t.Errorf("body:\n%s", body)
 	}
 }
 
@@ -399,56 +349,6 @@ func TestRecipientLabelIsTheCardsLabel(t *testing.T) {
 	}
 	if got["grace@example.org"] != "" || got["grace@navy.example"] != "work" {
 		t.Errorf("labels = %v", got)
-	}
-}
-
-// «Send by letter» of a link does not throw away a letter being written: the
-// recipients, the subject, the text and what is attached stay, and the link
-// joins them — once, however many times it is asked for. With no letter
-// begun it starts one named after the link, as before.
-func TestSendingALinkKeepsTheLetterBeingWritten(t *testing.T) {
-	f, _ := letterFixture(t)
-	f.srv.Seed(searchBook+"bob.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:bob\nFN:Bob Builder\nEND:VCARD\n")
-	publish := func(uid string) view.PublishSheet {
-		return decode[view.PublishSheet](t, f.h.do(postForm("/app/publish?"+url.Values{"k": {"contacts"}, "a": {f.id}, "c": {searchBook}, "uid": {uid}}.Encode(), f.sess, url.Values{})))
-	}
-	ada, bob := publish("ada"), publish("bob")
-	byLetter := func(made view.PublishSheet) {
-		t.Helper()
-		if rec := f.h.do(postForm(actionHref(t, made.Actions, "publish.mail"), f.sess, url.Values{})); rec.Code != 303 {
-			t.Fatalf("send by letter: %d", rec.Code)
-		}
-	}
-
-	// A letter half written: someone to write to, a subject, a text.
-	typed := url.Values{"to": {"ann@example.org"}, "subject": {"Minutes"}, "body": {"Dear Ann,"}}
-	if rec := f.h.do(postForm("/app/mail/compose", f.sess, typed)); rec.Code >= 400 {
-		t.Fatalf("typing: %d", rec.Code)
-	}
-	byLetter(ada)
-	sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
-	if len(sheet.To) != 1 || sheet.To[0].Address != "ann@example.org" || sheet.Subject != "Minutes" || sheet.Body != "Dear Ann," {
-		t.Fatalf("the letter being written is gone: to %+v, subject %q, body %q", sheet.To, sheet.Subject, sheet.Body)
-	}
-	if len(sheet.Attach) != 1 || !sheet.Attach[0].AsLink || sheet.Attach[0].Title != "Ada Lovelace" {
-		t.Fatalf("the link did not join the letter: %+v", sheet.Attach)
-	}
-	// Another link joins too; the same one asked for again is not doubled.
-	byLetter(bob)
-	byLetter(ada)
-	sheet = decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
-	if len(sheet.Attach) != 2 || sheet.Attach[1].Title != "Bob Builder" || sheet.Subject != "Minutes" {
-		t.Errorf("after two more: subject %q, attached %+v", sheet.Subject, sheet.Attach)
-	}
-
-	// Nothing begun: the letter is of the link.
-	if rec := f.h.do(postForm("/app/mail/compose?op=discard", f.sess, url.Values{})); rec.Code != 303 {
-		t.Fatalf("discard: %d", rec.Code)
-	}
-	byLetter(bob)
-	sheet = decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
-	if len(sheet.To) != 0 || sheet.Subject != "Bob Builder" || len(sheet.Attach) != 1 {
-		t.Errorf("a letter begun by a link: to %+v, subject %q, attached %+v", sheet.To, sheet.Subject, sheet.Attach)
 	}
 }
 

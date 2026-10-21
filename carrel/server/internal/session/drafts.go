@@ -51,6 +51,10 @@ const (
 	// through the password's sheet (193 p. 3): the job's page shows its
 	// secret once, and clears it.
 	DraftIssuedTrigger
+	// DraftRestoreReport is what the last restore did, a row a collection
+	// (s-backup-18): the report's step shows it until another archive is
+	// opened.
+	DraftRestoreReport
 	numDraftSlots
 )
 

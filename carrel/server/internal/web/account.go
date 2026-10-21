@@ -6,6 +6,7 @@ import (
 	"net/mail"
 	"net/url"
 	"strings"
+	"time"
 
 	cmail "carrel.dev/carrel/server/internal/mail"
 	"carrel.dev/carrel/server/internal/session"
@@ -157,8 +158,7 @@ func (s *Server) confirmationSent(r *http.Request, sess *session.Session, to str
 }
 
 func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.AccountPage {
-	page := view.AccountPage{Shell: s.buildShell(sess, "Account")}
-	page.Rail = s.settingsRail(sess, "/app/settings/account")
+	page := view.AccountPage{Shell: s.settingsShell(sess, "Account", "/app/settings/account", "/app/settings/account")}
 	if flash.notice != nil {
 		page.Notices = append(page.Notices, *flash.notice)
 	}
@@ -188,7 +188,8 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 			}},
 			{Legend: "Email", Rows: []view.FormRow{
 				{Name: "email", Label: "Address", Kind: view.InputEmail, Value: text(address), Error: text(flash.emailErr),
-					Hint: "Used for service notices, and as Reply-To on letters you send.",
+					// The header's name monospaced, as the frame sets it (account-1).
+					HintRuns: join("Used for service notices, and as ", monoRun("Reply-To"), " on letters you send."),
 					Extra: &view.Action{ID: "account.email.change", Label: "Change", Method: "POST", Enabled: true,
 						Href: s.postQuery("/app/settings/account", url.Values{"op": {"email"}})}},
 			}},
@@ -200,6 +201,15 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 		Actions: []view.Action{},
 	}
 	page.Email = s.emailStatus(u, tf)
+	// The state of the address in the rubric of its block (note 90).
+	for i := range page.Profile.Sets {
+		if page.Profile.Sets[i].Legend == "Email" {
+			if b := page.Email.Badge; b != nil {
+				page.Profile.Sets[i].Badges = []view.Badge{*b}
+			}
+			page.Profile.Sets[i].LegendAside = page.Email.Aside
+		}
+	}
 	page.PasswordNote = "Changing your password re-wraps your data key only; saved connections stay readable."
 	page.Escrow = s.escrowStatus(sess, u, true)
 	page.Actions = []view.Action{
@@ -215,39 +225,40 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 	return page
 }
 
-// emailStatus is the Email block under the address (account-8, account-1,
-// s-mail-9, account-9). «Sent» is a letter the relay took whose link still
-// lives: once it burns or is used, the block falls back to «not sent» or to
-// «confirmed». An address confirmed before the day was written down
-// (v0.2.60) says «confirmed» without one.
+// emailStatus is the state of the address, as the rubric of the Email block
+// says it (Typecase's note 90): its badge — confirmed, pending, not
+// confirmed —, the words beside it — the address waiting, when the link
+// went or that none did —, and Send confirmation or Send again after
+// Change where a link is to go. «Sent» is a letter the relay took whose link
+// still lives: once it burns or is used, the block falls back to «not sent»
+// or to «confirmed».
 func (s *Server) emailStatus(u *store.User, tf timeFmt) view.EmailStatus {
 	st := view.EmailStatus{State: view.EmailNone}
 	to := s.users.EmailToConfirm(u.ID)
-	var sentPhrase string
+	var sentAt time.Time
 	if sentTo, at, ok := s.users.ConfirmationSent(u.ID); ok && strings.EqualFold(sentTo, to) {
 		st.SentTo = text(sentTo)
-		st.SentAt, sentPhrase = tf.sentAt(at)
+		st.SentAt, _ = tf.sentAt(at)
+		sentAt = at
 	}
 	if u.Email != "" && u.EmailConfirmed {
 		st.State = view.EmailConfirmed
-		label := "confirmed"
 		if u.EmailConfirmedAt != nil {
 			st.ConfirmedAt = view.When(tf.dayOfYear(*u.EmailConfirmedAt))
-			label += " " + string(st.ConfirmedAt)
 		}
-		st.Badge = &view.Badge{Label: text(label), Role: view.BadgeLinked}
+		// No day by the badge (account-8).
+		st.Badge = &view.Badge{Label: "confirmed", Role: view.BadgeLinked}
 		if u.PendingEmail != "" {
 			// The confirmed address stays in use, so replies still come
-			// back: a badge, not a warning (account-1).
+			// back: a plain badge, the address waiting beside it (account-1).
 			st.State, st.Pending = view.EmailPending, text(u.PendingEmail)
-			st.Badge = &view.Badge{Label: text("pending: " + u.PendingEmail), Role: view.BadgeNeutral}
+			st.Badge, st.Aside = &view.Badge{Label: "pending", Role: view.BadgeNeutral}, text(u.PendingEmail)
 			if st.SentTo == "" {
-				// No letter with a live link went to the new address: without
-				// a way to send it again the change could not be finished.
-				// The frame draws the badge alone (to-typecase task 21).
+				// No letter with a live link went to the new address: said
+				// beside it, and sent again from the field (account-10).
+				st.Aside += " · link not sent"
 				send := s.confirmAction("Send again")
-				st.Message = &view.Notice{Role: view.NoticeAlert, Actions: []view.Action{send},
-					Runs: join("No link has gone to ", monoRun(u.PendingEmail), ": until one is opened, ", monoRun(u.Email), " stays in use.")}
+				st.Send = &send
 			}
 		}
 		return st
@@ -255,17 +266,14 @@ func (s *Server) emailStatus(u *store.User, tf timeFmt) view.EmailStatus {
 	if to == "" {
 		return st
 	}
+	// Not confirmed, in alarm: replies cannot come back (s-mail-9).
+	st.State, st.Badge = view.EmailUnconfirmed, &view.Badge{Label: "not confirmed", Role: view.BadgeAlert}
 	send := s.confirmAction("Send confirmation")
-	// The message says the consequence, not the status (s-mail-9).
-	st.State = view.EmailUnconfirmed
-	st.Message = &view.Notice{Role: view.NoticeAlert, Actions: []view.Action{send},
-		Body: "Nobody can reply to letters you send: until this address is confirmed, they go out without a reply address and say so at the foot."}
 	if st.SentTo != "" {
-		// The address in mono, as the frame sets it (account-9; Нс10).
 		st.State, send.Label = view.EmailSent, "Send again"
-		st.Message = &view.Notice{Role: view.NoticeAlert, Actions: []view.Action{send},
-			Runs: join("Nobody can reply to letters you send until you open the link we sent to ", monoRun(string(st.SentTo)), " "+sentPhrase+".")}
+		st.Aside = text("link sent " + tf.dayOfYear(sentAt) + " " + tf.clock(sentAt))
 	}
+	st.Send = &send
 	return st
 }
 

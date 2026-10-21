@@ -37,6 +37,9 @@ func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
 	case "backup":
 		s.writeMailSheet(w, r, s.backupFolderPicker(r, sess))
 		return
+	case "restore":
+		s.writeMailSheet(w, r, s.restorePicker(r, sess))
+		return
 	default:
 		s.notFound(w, r)
 		return

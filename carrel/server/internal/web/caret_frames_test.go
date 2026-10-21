@@ -158,7 +158,7 @@ func TestCaretOutsideTheShellIsTheFrames(t *testing.T) {
 	}
 	sameCaret(t, "account-3", "a temporary password", decode[view.PasswordPage](t, h2.do(get("/app/password", vera))).Form)
 	wrong := decode[view.PasswordPage](t, h2.do(postForm("/app/password", vera,
-		url.Values{"current": {"wrong-one-1"}, "password": {"password456"}, "password2": {"password456"}}))).Form
+		url.Values{"current": {"wrong-one-1"}, "password": {"password456"}, "repeat": {"password456"}}))).Form
 	if r := rowNamed(t, wrong, "current"); !r.Focus || r.Error == "" {
 		t.Errorf("a wrong current password: %+v, want the caret at the reason", r)
 	}

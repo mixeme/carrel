@@ -1,0 +1,235 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
+      "id": "publish.create",
+      "label": "Create link",
+      "method": "POST",
+      "primary": true,
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+      "id": "publish.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "expires": "",
+  "form": {
+    "action": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
+        "id": "publish.create",
+        "label": "Create link",
+        "method": "POST",
+        "primary": true,
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+        "id": "publish.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "hint": "Without the title the event shows as “Busy”.",
+        "legend": "What the visitor sees",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Time",
+            "labelAside": "always shown",
+            "name": "time",
+            "options": [],
+            "readOnly": true,
+            "reason": "Always shown",
+            "required": false,
+            "value": "on"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Title",
+            "name": "title",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "on"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Location",
+            "name": "location",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Description",
+            "name": "description",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Attendees",
+            "name": "attendees",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Attachments",
+            "name": "attachments",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Tags",
+            "name": "tags",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Allow .ics download and subscription",
+            "labelRuns": [
+              {
+                "text": "Allow "
+              },
+              {
+                "mark": "mono",
+                "text": ".ics"
+              },
+              {
+                "text": " download and subscription"
+              }
+            ],
+            "name": "download",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "on"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Link lives for",
+            "name": "lives",
+            "options": [
+              {
+                "label": "7 days",
+                "selected": false,
+                "value": "7"
+              },
+              {
+                "label": "14 days",
+                "selected": false,
+                "value": "14"
+              },
+              {
+                "label": "30 days",
+                "selected": true,
+                "value": "30"
+              },
+              {
+                "label": "No expiry",
+                "selected": false,
+                "separator": true,
+                "value": "never"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "30"
+          }
+        ],
+        "unfold": null
+      }
+    ],
+    "target": "sheet"
+  },
+  "kind": "event",
+  "link": "",
+  "local": true,
+  "note": "",
+  "target": "Синк-ап по релизу",
+  "title": "Publish an event",
+  "under": null
+}

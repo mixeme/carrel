@@ -28,19 +28,23 @@ func TestPublishCalendarOptions(t *testing.T) {
 	if rowNamed(t, sheet.Form, "how").Value != "range" || rowNamed(t, sheet.Form, "download").Value != "on" || rowNamed(t, sheet.Form, "description").Value != "" {
 		t.Errorf("the sheet does not start as drawn: %+v", sheet.Form)
 	}
-	// The whole calendar asks for no days.
+	// The days stand whichever is chosen, from today to the month's last
+	// day, and the whole calendar switches them off (Пб6, Пб7; s-publish-2).
 	whole := decode[view.PublishSheet](t, f.h.do(get(href+"&how=whole", f.sess)))
-	for _, row := range whole.Form.Sets[0].Rows {
-		if row.Name == "from" || row.Name == "to" {
-			t.Errorf("the whole calendar asks for days: %+v", whole.Form)
-		}
+	how := rowNamed(t, whole.Form, "how")
+	if how.Value != "whole" || len(how.Options) != 2 || how.Options[1].Disables != "from to" || how.Options[0].Disables != "" {
+		t.Errorf("how = %+v", how)
+	}
+	if from, to := rowNamed(t, whole.Form, "from").Value, rowNamed(t, whole.Form, "to").Value; from == "" || to == "" || to < from || string(to[8:]) < "28" {
+		t.Errorf("the days open %q – %q", from, to)
 	}
 
 	// A range without its days is asked again, not guessed.
 	create := actionHref(t, sheet.Actions, "publish.create")
-	again := decode[view.PublishSheet](t, f.h.do(postForm(create, f.sess, url.Values{"how": {"range"}, "download": {"on"}})))
-	if again.Link != "" || rowNamed(t, again.Form, "from").Error == "" {
-		t.Errorf("a range without days made a link: %+v", again)
+	again := decode[view.PublishSheet](t, f.h.do(postForm(create, f.sess, url.Values{"how": {"range"}, "from": {"2026-10-01"}, "to": {""}, "download": {"on"}})))
+	if again.Link != "" || rowNamed(t, again.Form, "to").Error != "Give both days, or choose The whole calendar." || rowNamed(t, again.Form, "from").Error != "" ||
+		rowNamed(t, again.Form, "from").Value != "2026-10-01" {
+		t.Errorf("a range without a day made a link, or said so elsewhere: %+v", again)
 	}
 
 	// The days of the link, no file, no descriptions.

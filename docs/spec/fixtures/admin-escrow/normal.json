@@ -1,13 +1,6 @@
 {
   "covered": [
     {
-      "covered": false,
-      "deposited": "not deposited",
-      "lastRecovery": "—",
-      "login": "mix",
-      "recovered": false
-    },
-    {
       "covered": true,
       "deposited": "2026-08-10",
       "lastRecovery": "never",
@@ -17,8 +10,36 @@
     {
       "covered": true,
       "deposited": "2026-08-10",
-      "lastRecovery": "never",
+      "lastRecovery": "2026-08-14 18:40",
       "login": "viktor",
+      "recovered": true
+    },
+    {
+      "covered": true,
+      "deposited": "2026-08-10",
+      "lastRecovery": "never",
+      "login": "olga",
+      "recovered": false
+    },
+    {
+      "covered": true,
+      "deposited": "2026-08-10",
+      "lastRecovery": "never",
+      "login": "petr",
+      "recovered": false
+    },
+    {
+      "covered": false,
+      "deposited": "not deposited",
+      "lastRecovery": "—",
+      "login": "mix",
+      "recovered": false
+    },
+    {
+      "covered": false,
+      "deposited": "not deposited",
+      "lastRecovery": "—",
+      "login": "ivan",
       "recovered": false
     }
   ],
@@ -182,7 +203,7 @@
     ]
   },
   "notices": [],
-  "opens": 2,
+  "opens": 4,
   "print": {
     "range": "",
     "taken": "",
@@ -219,7 +240,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 6,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -282,20 +303,28 @@
       {
         "line": [
           {
-            "text": "No mail is going out."
+            "text": "Last sent "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
-        "title": "SMTP not configured",
-        "tone": "alert"
+        "title": "Mail is going out",
+        "tone": "on"
       },
       {
         "line": [
           {
-            "text": "Run the check once Carrel is behind its proxy."
+            "text": "Last check "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
-        "title": "Not checked yet",
-        "tone": "off"
+        "title": "Checks passed",
+        "tone": "on"
       }
     ],
     "tags": [],
@@ -392,7 +421,7 @@
     ]
   },
   "result": null,
-  "subtitle": "2 of 3 accounts open with the master password",
+  "subtitle": "4 of 6 accounts open with the master password",
   "title": "Key escrow",
   "top": {
     "lock": null,

@@ -162,7 +162,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 6,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -234,11 +234,15 @@
       {
         "line": [
           {
-            "text": "Run the check once Carrel is behind its proxy."
+            "text": "Last check "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
-        "title": "Not checked yet",
-        "tone": "off"
+        "title": "Checks passed",
+        "tone": "on"
       }
     ],
     "tags": [],

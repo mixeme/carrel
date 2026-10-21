@@ -27,7 +27,8 @@ func TestReplaceDoesNotOverwriteAFileChangedSince(t *testing.T) {
 	// Somebody else writes the file while the question waits.
 	f.srv.SeedFile(filesDocs+"report.txt", "written by another client meanwhile")
 
-	f.h.do(postForm(option(t, ask, "transfer.overwrite"), f.sess, url.Values{}))
+	// Replace of an upload brings the file again (S-17.3).
+	f.h.do(answerUpload(t, ask, "transfer.overwrite", f.sess, upload{"report.txt", "mine"}))
 	if got, _ := f.srv.File(filesDocs + "report.txt"); got != "written by another client meanwhile" {
 		t.Errorf("the newer version was overwritten: %q", got)
 	}

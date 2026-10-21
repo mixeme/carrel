@@ -73,7 +73,7 @@
             "hint": "",
             "kind": "password",
             "label": "Repeat new password",
-            "name": "password2",
+            "name": "repeat",
             "options": [],
             "readOnly": false,
             "required": true,
@@ -107,7 +107,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [],
     "nav": [
       {
@@ -157,7 +157,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/davloom",
         "id": "settings.davloom",
@@ -165,7 +165,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/backup",
         "icon": "i-archive",
@@ -200,10 +200,34 @@
       {
         "line": [
           {
-            "text": "No device has connected since the start."
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
           }
         ],
-        "title": "davloom · running · 0 devices",
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
         "tone": "on"
       }
     ],
@@ -284,24 +308,19 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/password",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
       "answered": "",
       "running": false
     },
     "search": {
       "action": "/app/search",
-      "history": [
-        {
-          "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0",
-          "outcome": "1 found",
-          "query": "Ковалёва",
-          "when": "just now"
-        }
-      ],
+      "history": [],
       "jump": [],
       "name": "q",
       "query": "",

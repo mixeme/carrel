@@ -244,7 +244,18 @@ func Check(r view.FormRow) w.Check {
 			}
 		}
 	}
-	return w.Check{On: r.Value != "", Name: r.Name, Parts: parts, Disables: r.Disables}
+	// What the tick means besides its words, muted after them
+	// (LabelAside: «· VTODO — not every client understands them»,
+	// s-davloom-2).
+	if r.LabelAside != "" {
+		if t, ok := parts[len(parts)-1].(w.Text); ok {
+			parts[len(parts)-1] = t + " "
+		}
+		parts = append(parts, w.Dim{Parts: []w.Inline{w.Text(r.LabelAside)}})
+	}
+	// Off now with its reason (FormRow.Reason: letters from users without
+	// mail, s-admin-3): sends nothing, says why.
+	return w.Check{On: r.Value != "", Name: r.Name, Parts: parts, Disables: r.Disables, Reason: string(r.Reason)}
 }
 
 // Days is a tick of a form with several options (C-6.8 InputCheck with
@@ -254,7 +265,7 @@ func Check(r view.FormRow) w.Check {
 func Days(r view.FormRow) w.Seg {
 	s := w.Seg{Name: r.Name, Multiple: true}
 	for _, o := range r.Options {
-		s.Options = append(s.Options, w.SegOption{Label: string(o.Label), Value: o.Value, On: o.Selected})
+		s.Options = append(s.Options, w.SegOption{Label: string(o.Label), Value: o.Value, On: o.Selected, Disables: o.Disables})
 	}
 	return s
 }

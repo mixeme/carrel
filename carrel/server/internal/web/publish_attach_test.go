@@ -65,7 +65,7 @@ func TestNoteAttachmentsStayUnlessTicked(t *testing.T) {
 	f.srv.Seed(searchWork+"n2.ics", ics(attachedNote))
 	link := publishNote(t, f, url.Values{"download": {"on"}})
 	page := publicPage(t, f, link)
-	if len(page.Attachments) != 0 || !strings.Contains(string(page.AttachNote), "1 file is attached") {
+	if len(page.Attachments) != 0 || page.AttachNote != "1 attached file is not published." {
 		t.Errorf("page = %+v / %q", page.Attachments, page.AttachNote)
 	}
 	md := f.h.do(anon(link + "/download")).Body.String()

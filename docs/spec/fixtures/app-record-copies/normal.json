@@ -556,8 +556,10 @@
     "devices": null,
     "event": null,
     "eventEdit": null,
+    "files": null,
     "note": null,
     "notes": null,
+    "published": null,
     "task": null,
     "taskEdit": null,
     "tasks": null

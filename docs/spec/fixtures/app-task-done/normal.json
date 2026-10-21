@@ -115,8 +115,10 @@
     "devices": null,
     "event": null,
     "eventEdit": null,
+    "files": null,
     "note": null,
     "notes": null,
+    "published": null,
     "task": null,
     "taskEdit": null,
     "tasks": {
@@ -1083,7 +1085,7 @@
           },
           {
             "enabled": true,
-            "href": "/app/settings/connections?op=add",
+            "href": "/app/settings/connections/new",
             "icon": "i-server",
             "id": "account.connect",
             "label": "Connect account",

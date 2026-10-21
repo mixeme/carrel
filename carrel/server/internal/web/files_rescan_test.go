@@ -18,16 +18,16 @@ import (
 // (s-files-1, states-32, -33, -34) draw that the view model did not carry.
 
 // ФН1: the line under the title counts the folder — «sftpgo · vps ·
-// ‹attachment folder› · 5 items» (s-files-1), «… · 2 items · read-only:
-// nothing can be uploaded or made here» (states-34) — and says none when the
-// storage did not answer (states-33).
+// ‹attachment folder› · 5 items» (s-files-1), «… · 2 items · ‹read-only›»
+// (states-34, Typecase's note 87) — and says none when the storage did not
+// answer (states-33).
 func TestFolderHeadCountsTheFolder(t *testing.T) {
 	line := func(id string) string {
 		return frameText(frameOne(t, frameHeadSub, mockupFrame(t, id), "line under the title")[1])
 	}
 	count := regexp.MustCompile(` · (\d+ items?)( · (read-only.*))?$`)
 	plain, ro := count.FindStringSubmatch(line("s-files-1")), count.FindStringSubmatch(line("states-34"))
-	if plain == nil || ro == nil || ro[3] == "" || count.MatchString(line("states-33")) {
+	if plain == nil || ro == nil || ro[3] != "read-only" || count.MatchString(line("states-33")) {
 		t.Fatalf("lines %q, %q, %q: the frames changed, read them again", line("s-files-1"), line("states-34"), line("states-33"))
 	}
 
@@ -38,8 +38,8 @@ func TestFolderHeadCountsTheFolder(t *testing.T) {
 	f.srv.SeedFolder(filesDocs + "sub/")
 	title := string(decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess))).Accounts[0].Title)
 	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
-	if string(page.Subtitle) != title || string(page.Count) != plain[1] || page.Access != "" {
-		t.Errorf("line = %q, %q, %q; want %q, %q and no access", page.Subtitle, page.Count, page.Access, title, plain[1])
+	if string(page.Subtitle) != title || string(page.Count) != plain[1] || page.ReadOnly {
+		t.Errorf("line = %q, %q, read-only %v; want %q, %q", page.Subtitle, page.Count, page.ReadOnly, title, plain[1])
 	}
 	// A filter does not change what the folder holds.
 	if page = decode[view.FilesPage](t, f.h.do(get(f.at("")+"?filter=a", f.sess))); string(page.Count) != plain[1] {
@@ -57,8 +57,8 @@ func TestFolderHeadCountsTheFolder(t *testing.T) {
 		}
 	})
 	page = decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
-	if string(page.Subtitle) != title || string(page.Count) != plain[1] || string(page.Access) != ro[3] {
-		t.Errorf("read-only line = %q, %q, %q; want %q, %q, %q", page.Subtitle, page.Count, page.Access, title, plain[1], ro[3])
+	if string(page.Subtitle) != title || string(page.Count) != plain[1] || !page.ReadOnly {
+		t.Errorf("read-only line = %q, %q, read-only %v; want %q, %q", page.Subtitle, page.Count, page.ReadOnly, title, plain[1])
 	}
 }
 

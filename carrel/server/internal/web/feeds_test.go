@@ -100,8 +100,9 @@ func TestSubscribeChecksThenKeepsNoRecords(t *testing.T) {
 		t.Fatalf("subscribe form = %+v", form.Add)
 	}
 	checked := decode[view.ConnectionsPage](t, f.h.do(postForm("/app/settings/connections?op=feed.check", f.sess, url.Values{"url": {feed.URL + "/ru.ics"}})))
-	if !hasNotice(checked.Notices, "The feed answers") {
-		t.Fatalf("check = %+v", checked.Notices)
+	// What the check found stands in the panel (s-profile-10).
+	if checked.Trace == nil || !checked.Trace.OK || len(checked.Trace.Steps) < 3 || checked.Trace.Steps[0].Name != "fetch" {
+		t.Fatalf("check = %+v", checked.Trace)
 	}
 	key, _ := f.sess.DataKey()
 	if blob, _ := f.h.users.Catalog(f.sess.AccountID(), key); len(blob.Subscriptions) != 0 {

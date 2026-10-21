@@ -424,13 +424,19 @@ func TestReadOnlyCollectionHasNoAttaching(t *testing.T) {
 func TestAttachmentsSettingsChooseTheFolder(t *testing.T) {
 	f := attachFixture(t, 0, nil)
 	page := decode[view.AttachmentsPage](t, f.h.do(get("/app/settings/attachments", f.sess)))
+	// Nothing chosen yet (attachments-5): the empty choice first, the
+	// rubric says so, Open in Files is off with why, nothing about moving.
 	cols := rowNamed(t, page.Form, "collection").Options
-	if len(cols) != 1 || !strings.HasSuffix(string(cols[0].Label), " · Docs") {
+	if len(cols) != 2 || cols[0].Value != "" || !cols[0].Selected || !strings.HasSuffix(string(cols[1].Label), " · Docs") {
 		t.Fatalf("collections = %+v", cols)
 	}
-	if !strings.Contains(string(page.Note), "moves nothing") {
-		t.Errorf("note = %q", page.Note)
+	if page.Note != "" || len(page.Form.Sets[1].Badges) != 1 || page.Form.Sets[1].Badges[0].Label != "not set" {
+		t.Errorf("note = %q, badges %+v", page.Note, page.Form.Sets[1].Badges)
 	}
+	if open := actionByID(page.Form.Actions, "attachments.open"); open == nil || open.Enabled || open.Reason != "No folder is chosen yet." {
+		t.Errorf("open = %+v", open)
+	}
+	cols = cols[1:]
 	limits := page.Form.Sets[0]
 	if string(limits.Rows[0].Label) != "Up to 2 MB" || !limits.Rows[0].ReadOnly {
 		t.Errorf("the boundary is shown and not editable: %+v", limits.Rows[0])

@@ -154,8 +154,9 @@ const (
 // (account-2): the password it asks opens the one window of S-10.7.
 func (s *Server) depositSheet(sess *session.Session, errText view.Text) view.UnlockSheet {
 	sheet := view.UnlockSheet{
-		Purpose: "Deposit my key",
-		Warning: "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account.",
+		Purpose: "Deposit my key", For: view.UnlockForDeposit,
+		// What the deposit hands over, in alarm before the field (account-2).
+		Alert: "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account.",
 		Form: focused(withPrimary(s.plainForm("/app/settings/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: "deposit"},
@@ -185,6 +186,17 @@ func (s *Server) escrowStatus(sess *session.Session, u *store.User, onAccount bo
 		status.LastRecovery = "never"
 		if u.EscrowLastRecovery != nil {
 			status.LastRecovery = view.When(tf.dayKey(*u.EscrowLastRecovery))
+		}
+		// Each recovery a line of its own, when and who (account-16,
+		// Typecase's note 99): the password's history keeps them.
+		for _, e := range u.PasswordEvents {
+			if e.What == "escrow.recover" {
+				status.Recoveries = append(status.Recoveries, view.EscrowRecovery{
+					At: view.When(tf.dayKey(e.When) + " " + tf.clock(e.When)), Who: text(e.Who + ", administrator: the password was reset")})
+			}
+		}
+		if len(status.Recoveries) > 0 {
+			status.LastRecovery = ""
 		}
 		status.Note = "A copy of your data key is deposited on this server. An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars."
 		if onAccount {
@@ -217,7 +229,7 @@ func (s *Server) buildEscrowPage(r *http.Request, sess *session.Session, errText
 	snap := s.store.Snapshot()
 	u := snap.UserByID(sess.AccountID())
 	page := view.EscrowPage{
-		Shell:  s.withRail(s.buildShell(sess, "Key escrow"), s.settingsRail(sess, "/app/settings/account")),
+		Shell:  s.settingsShell(sess, "Key escrow", "/app/settings/account", "/app/settings/escrow"),
 		Status: s.escrowStatus(sess, u, false),
 	}
 	if u != nil && store.UserDeposited(u) {
@@ -329,7 +341,8 @@ func (s *Server) escrowRecoveryMailedStatus(login string, sent bool) view.Text {
 	case !s.mailConfigured():
 		return text("No letter went: mail is not configured. Tell them yourself.")
 	case s.users.ConfirmedAddress(login) == "":
-		return text("No letter went: they have no confirmed address. Tell them yourself.")
+		// By name, beside the password of that name (s-admin-30).
+		return text("No letter went: " + login + " has no confirmed address. Tell them yourself.")
 	}
 	return text("The letter did not go. Tell them yourself.")
 }
@@ -412,7 +425,10 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 	// Whom the master password opens: every account of the Users list,
 	// the ones it does not open too — an administrator need not be covered
 	// by their own scheme, and that is to be seen (s-admin-6).
+	// The ones it opens first, the rest after them (s-admin-6), each in
+	// the order of the list.
 	tf := s.timeFor(sess)
+	var rest []view.EscrowCoverRow
 	for _, u := range snap.Users {
 		if len(u.LoginHash) == 0 && u.Disabled {
 			continue
@@ -428,9 +444,12 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 				row.Recovered = true
 				row.LastRecovery = view.When(tf.dayKey(*u.EscrowLastRecovery) + " " + tf.clock(*u.EscrowLastRecovery))
 			}
+			page.Covered = append(page.Covered, row)
+			continue
 		}
-		page.Covered = append(page.Covered, row)
+		rest = append(rest, row)
 	}
+	page.Covered = append(page.Covered, rest...)
 	accounts := "accounts"
 	if len(page.Covered) == 1 {
 		accounts = "account"

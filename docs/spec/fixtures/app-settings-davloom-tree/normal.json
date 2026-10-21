@@ -1,0 +1,671 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/settings/davloom",
+      "id": "davloom.tree.close",
+      "label": "Close",
+      "method": "GET"
+    }
+  ],
+  "address": "http://127.0.0.1:8081/",
+  "tree": [
+    {
+      "depth": 0,
+      "label": "root",
+      "path": "/dav/"
+    },
+    {
+      "depth": 1,
+      "label": "",
+      "path": "principal/"
+    },
+    {
+      "depth": 1,
+      "label": "Calendars · events, tasks, notes",
+      "path": "cal/"
+    },
+    {
+      "colour": "#4a6b52",
+      "depth": 2,
+      "label": "Личный",
+      "path": "c/a-nc-home/lichnyj/"
+    },
+    {
+      "colour": "#4a6b52",
+      "depth": 2,
+      "label": "Дела",
+      "path": "c/a-nc-home/dela/"
+    },
+    {
+      "colour": "#3f6e8c",
+      "depth": 2,
+      "label": "Работа",
+      "path": "c/a-nc-home/rabota/"
+    },
+    {
+      "colour": "#a05a2c",
+      "depth": 2,
+      "label": "Дни рождения",
+      "path": "c/a-nc-home/dni-rozhdeniya/"
+    },
+    {
+      "colour": "#4a6b52",
+      "depth": 2,
+      "label": "Записи",
+      "path": "c/a-nc-home/zapisi/"
+    },
+    {
+      "colour": "#6b4e7a",
+      "depth": 2,
+      "label": "Дневник",
+      "path": "c/a-nc-home/dnevnik/"
+    },
+    {
+      "colour": "#3f6e8c",
+      "depth": 2,
+      "label": "Общие с семьёй",
+      "path": "c/a-nc-home/zapiski-obshchie/"
+    },
+    {
+      "colour": "#6b4e7a",
+      "depth": 2,
+      "label": "Проекты",
+      "path": "c/a-rad-vps/proekty/"
+    },
+    {
+      "colour": "#8c6239",
+      "depth": 2,
+      "label": "Дежурства",
+      "path": "c/a-rad-vps/dezhurstva/"
+    },
+    {
+      "colour": "#9a9280",
+      "depth": 2,
+      "label": "Общий",
+      "path": "c/a-baikal/obshchij/"
+    },
+    {
+      "depth": 1,
+      "label": "Address books",
+      "path": "card/"
+    },
+    {
+      "colour": "#4a6b52",
+      "depth": 2,
+      "label": "Контакты",
+      "path": "c/a-nc-home/kontakty/"
+    },
+    {
+      "colour": "#a05a2c",
+      "depth": 2,
+      "label": "Архив",
+      "path": "c/a-nc-home/arhiv/"
+    },
+    {
+      "colour": "#6b4e7a",
+      "depth": 2,
+      "label": "Команда",
+      "path": "c/a-rad-vps/komanda/"
+    },
+    {
+      "colour": "#6b4e7a",
+      "depth": 2,
+      "label": "Рассылки",
+      "path": "c/a-rad-vps/rassylki/"
+    },
+    {
+      "depth": 1,
+      "label": "Files · plain WebDAV",
+      "path": "files/"
+    },
+    {
+      "colour": "#9a9280",
+      "depth": 2,
+      "label": "Files",
+      "path": "c/a-nc-home/Files/"
+    },
+    {
+      "colour": "#a05a2c",
+      "depth": 2,
+      "label": "Documents",
+      "path": "c/a-sftp-vps/Documents/"
+    },
+    {
+      "colour": "#a05a2c",
+      "depth": 2,
+      "label": "Public",
+      "path": "c/a-sftp-vps/Public/"
+    }
+  ],
+  "under": {
+    "account": null,
+    "adminUsers": null,
+    "agenda": null,
+    "backup": null,
+    "connections": null,
+    "contact": null,
+    "contacts": null,
+    "davloom": {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/davloom?add=1",
+          "icon": "i-plus",
+          "id": "davloom.add",
+          "label": "Add device",
+          "method": "GET",
+          "primary": true
+        }
+      ],
+      "acts": {
+        "action": "/app/settings/davloom",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "address": "http://127.0.0.1:8081/",
+      "addressHint": "In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.",
+      "details": null,
+      "devices": [
+        {
+          "actions": [
+            {
+              "enabled": true,
+              "href": "/app/settings/davloom/scope?device=d-device",
+              "id": "davloom.scope",
+              "label": "5 collections · Change",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/settings/davloom?device=d-device\u0026op=read",
+              "id": "davloom.access.read",
+              "label": "read only",
+              "method": "POST"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/settings/davloom?device=d-device\u0026op=write",
+              "id": "davloom.access.write",
+              "label": "read and write",
+              "method": "POST",
+              "on": true
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/settings/davloom?device=d-device\u0026op=revoke",
+              "id": "davloom.revoke",
+              "label": "Revoke",
+              "method": "POST"
+            }
+          ],
+          "created": "2026-08-10",
+          "lastSeen": "2026-08-10 17:04",
+          "marks": [
+            "#4a6b52",
+            "#3f6e8c",
+            "#a05a2c",
+            "#6b4e7a"
+          ],
+          "name": "Телефон · DAVx5",
+          "readOnly": false,
+          "scope": [
+            "event",
+            "contact"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "enabled": true,
+              "href": "/app/settings/davloom/scope?device=d-device2",
+              "id": "davloom.scope",
+              "label": "14 collections · Change",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/settings/davloom?device=d-device2\u0026op=read",
+              "id": "davloom.access.read",
+              "label": "read only",
+              "method": "POST",
+              "on": true
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/settings/davloom?device=d-device2\u0026op=write",
+              "id": "davloom.access.write",
+              "label": "read and write",
+              "method": "POST"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/settings/davloom?device=d-device2\u0026op=revoke",
+              "id": "davloom.revoke",
+              "label": "Revoke",
+              "method": "POST"
+            }
+          ],
+          "created": "2026-08-10",
+          "lastSeen": "2026-08-10 17:04",
+          "marks": [
+            "#4a6b52",
+            "#3f6e8c",
+            "#a05a2c",
+            "#6b4e7a",
+            "#8c6239",
+            "#9a9280"
+          ],
+          "name": "Ноутбук · Thunderbird",
+          "readOnly": true,
+          "scope": [
+            "event",
+            "contact",
+            "task",
+            "note",
+            "file"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "enabled": true,
+              "href": "/app/settings/davloom/scope?device=d-device3",
+              "id": "davloom.scope",
+              "label": "3 collections · Change",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/settings/davloom?device=d-device3\u0026op=read",
+              "id": "davloom.access.read",
+              "label": "read only",
+              "method": "POST",
+              "on": true
+            },
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/settings/davloom?device=d-device3\u0026op=write",
+              "id": "davloom.access.write",
+              "label": "read and write",
+              "method": "POST"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/settings/davloom?device=d-device3\u0026op=revoke",
+              "id": "davloom.revoke",
+              "label": "Revoke",
+              "method": "POST"
+            }
+          ],
+          "created": "2026-08-10",
+          "lastSeen": "2026-08-10 17:04",
+          "marks": [
+            "#4a6b52",
+            "#3f6e8c",
+            "#8c6239"
+          ],
+          "name": "Планшет · Календарь iOS",
+          "readOnly": true,
+          "scope": [
+            "event"
+          ]
+        }
+      ],
+      "dialog": null,
+      "enabled": true,
+      "look": {
+        "compact": false,
+        "panel": true,
+        "source": true,
+        "theme": "auto",
+        "wide": false
+      },
+      "note": [
+        {
+          "text": "Changing your Carrel password does "
+        },
+        {
+          "mark": "strong",
+          "text": "not"
+        },
+        {
+          "text": " disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it."
+        }
+      ],
+      "notices": [],
+      "print": {
+        "range": "",
+        "taken": "",
+        "title": ""
+      },
+      "rail": {
+        "about": {
+          "build": "0.0.1 · 786949a",
+          "enabled": true,
+          "href": "/about",
+          "id": "about",
+          "label": "Carrel",
+          "method": "GET"
+        },
+        "davloom": "davloom · running · 3 devices",
+        "foot": [],
+        "nav": [
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/contacts",
+            "icon": "i-back",
+            "id": "settings.back",
+            "label": "Back to app",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-user",
+            "id": "settings.account",
+            "label": "Account",
+            "method": "GET"
+          },
+          {
+            "count": 4,
+            "enabled": true,
+            "href": "/app/settings/connections",
+            "icon": "i-server",
+            "id": "settings.connections",
+            "label": "Connections",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/attachments",
+            "icon": "i-file",
+            "id": "settings.attachments",
+            "label": "Attachments",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/devices",
+            "icon": "i-device",
+            "id": "settings.devices",
+            "label": "New device",
+            "method": "GET"
+          },
+          {
+            "count": 3,
+            "enabled": true,
+            "href": "/app/settings/davloom",
+            "id": "settings.davloom",
+            "label": "davloom",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "count": 3,
+            "enabled": true,
+            "href": "/app/settings/backup",
+            "icon": "i-archive",
+            "id": "settings.backup",
+            "label": "Backup",
+            "method": "GET"
+          },
+          {
+            "count": 2,
+            "enabled": true,
+            "href": "/app/files/published",
+            "icon": "i-link",
+            "id": "settings.published",
+            "label": "Published links",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/appearance",
+            "icon": "i-theme",
+            "id": "settings.appearance",
+            "label": "Appearance",
+            "method": "GET"
+          }
+        ],
+        "neighbours": [],
+        "note": "",
+        "sections": [],
+        "shortcuts": [],
+        "status": [
+          {
+            "line": [
+              {
+                "text": "Last response "
+              },
+              {
+                "mark": "mono",
+                "text": "2026-08-16 09:41"
+              }
+            ],
+            "title": "davloom · running · 3 devices",
+            "tone": "on"
+          },
+          {
+            "line": [
+              {
+                "text": "Last backup "
+              },
+              {
+                "mark": "mono",
+                "text": "2026-08-16 03:10"
+              },
+              {
+                "text": " · "
+              },
+              {
+                "hint": "The archive was read back from the destination and the checksum matched",
+                "text": "verified"
+              }
+            ],
+            "title": "Backups are running",
+            "tone": "on"
+          }
+        ],
+        "tags": [],
+        "ticks": null
+      },
+      "sees": {
+        "enabled": true,
+        "href": "/app/settings/davloom/tree",
+        "id": "davloom.tree",
+        "label": "What the client sees",
+        "method": "GET",
+        "target": "sheet"
+      },
+      "subtitle": [
+        {
+          "text": "One address for every device instead of an account for every server · "
+        },
+        {
+          "mark": "danger",
+          "text": "a phone on mobile data will not reach a local address"
+        }
+      ],
+      "title": "davloom",
+      "top": {
+        "lock": null,
+        "new": {
+          "arrow": [
+            {
+              "enabled": true,
+              "href": "/app/notes/quick",
+              "icon": "i-quill",
+              "id": "new.notes",
+              "label": "Note",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/quick",
+              "icon": "i-con",
+              "id": "new.contacts",
+              "label": "Contact",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/quick",
+              "icon": "i-cal",
+              "id": "new.calendar",
+              "label": "Event",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/tasks/quick",
+              "icon": "i-task",
+              "id": "new.tasks",
+              "label": "Task",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/picker?for=upload",
+              "icon": "i-upload",
+              "id": "new.upload",
+              "label": "Upload file",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/mail/compose",
+              "icon": "i-mail",
+              "id": "new.letter",
+              "label": "Letter",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "New note",
+          "method": "GET",
+          "primary": true,
+          "target": "sheet"
+        },
+        "refresh": {
+          "action": {
+            "enabled": true,
+            "href": "/app/settings/davloom",
+            "icon": "i-refresh",
+            "id": "settings.refresh",
+            "label": "Refresh",
+            "method": "GET"
+          },
+          "answered": "",
+          "running": false
+        },
+        "search": {
+          "action": "/app/search",
+          "history": [],
+          "jump": [],
+          "name": "q",
+          "query": "",
+          "whole": null
+        },
+        "signed": {
+          "instance": "carrel.example",
+          "local": true,
+          "login": "mix"
+        },
+        "unlocked": null,
+        "user": [
+          {
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-gear",
+            "id": "user.settings",
+            "label": "Settings",
+            "method": "GET"
+          },
+          {
+            "enabled": true,
+            "href": "/admin/",
+            "icon": "i-adm",
+            "id": "user.admin",
+            "label": "Administration",
+            "method": "GET"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/logout",
+            "id": "user.logout",
+            "label": "Sign out",
+            "method": "POST",
+            "separator": true
+          }
+        ],
+        "userHref": "/app/settings/account"
+      }
+    },
+    "devices": null,
+    "event": null,
+    "eventEdit": null,
+    "files": null,
+    "note": null,
+    "notes": null,
+    "published": null,
+    "task": null,
+    "taskEdit": null,
+    "tasks": null
+  }
+}

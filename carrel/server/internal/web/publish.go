@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"errors"
+	"fmt"
 	"mime"
 	"net/http"
 	"net/url"
@@ -87,12 +88,33 @@ func recordTitle(k view.Kind, obj *model.Object) string {
 	}
 }
 
+// writeSheet writes the sheet over the page it was opened from (the owner's
+// decision of 15.10.2026; note 105 of Typecase): back, else the page its
+// Cancel or Close leads to — Connections for a collection, the record's page,
+// the folder of a file. Cancel and Close go there too.
 func (s *Server) writeSheet(w http.ResponseWriter, r *http.Request, sheet view.PublishSheet) {
 	if render.WantsFragment(r) {
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
+	back := r.FormValue("back")
+	for _, id := range []string{"publish.cancel", "publish.close"} {
+		s.cancelTo(r, back, sheet.Actions, id)
+		if a := actionOf(sheet.Actions, id); a != nil && sheet.Under == nil {
+			sheet.Under = s.underOf(r, back, strings.TrimPrefix(a.Href, s.basePath))
+		}
+	}
 	s.writePage(w, r, http.StatusOK, sheet)
+}
+
+// actionOf is the action of id among actions; nil without one.
+func actionOf(actions []view.Action, id string) *view.Action {
+	for i := range actions {
+		if actions[i].ID == id {
+			return &actions[i]
+		}
+	}
+	return nil
 }
 
 func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, title, how string) view.PublishSheet {
@@ -100,10 +122,14 @@ func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, titl
 	// s-publish-2, -3, -19): a collection by where it lies, a record by its
 	// title.
 	what, subject := collectionNouns[c.spec.kind], string(c.stamp())
+	// A collection is published from Connections, a record from its page
+	// (note 105 of Typecase: the page under the sheet, and where Cancel
+	// goes).
+	from := "/app/settings/connections"
 	if uid != "" {
-		what, subject = c.spec.noun, title
+		what, subject, from = c.spec.noun, title, c.recordPath(uid)
 	}
-	return s.sheetFor(sess, c.spec.kind, what, subject, publishQuery(c.spec.segment, c.conn.ID, c.col.Path, uid), c.listPath(), how)
+	return s.sheetFor(sess, c.spec.kind, what, subject, publishQuery(c.spec.segment, c.conn.ID, c.col.Path, uid), from, how)
 }
 
 // sheetFor is the sheet of any target: what, where, how long the link lives,
@@ -130,15 +156,17 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, subject s
 		if how != "whole" {
 			how = "range"
 		}
+		// The days stand whichever is chosen, and «The whole calendar»
+		// switches them off (Пб7; s-publish-2, note 105 of Typecase): without
+		// a script they go with it, and are not read. They open from today
+		// to the month's last day (Пб6).
+		from, to := monthLeft(s.timeFor(sess))
 		rows = append(rows, view.FormRow{Name: "how", Label: "How much of it", Kind: view.InputRadio, Value: text(how), Options: []view.Option{
 			{Value: "range", Label: "A date range", Selected: how == "range"},
-			{Value: "whole", Label: "The whole calendar", Selected: how == "whole"},
-		}})
-		if how == "range" {
-			rows = append(rows,
-				view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Mono: true},
-				view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Mono: true})
-		}
+			{Value: "whole", Label: "The whole calendar", Selected: how == "whole", Disables: "from to"},
+		}},
+			view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Mono: true, Value: text(from)},
+			view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Mono: true, Value: text(to)})
 	}
 	lives := livesOf(kind, what == "folder")
 	var terms []view.FormRow
@@ -201,6 +229,14 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, subject s
 	return sheet
 }
 
+// monthLeft is the days a calendar's sheet opens with: today and the last
+// day of this month, in the person's zone.
+func monthLeft(tf timeFmt) (from, to string) {
+	now := tf.now.In(tf.tz)
+	y, m, _ := now.Date()
+	return now.Format("2006-01-02"), time.Date(y, m+1, 0, 0, 0, 0, 0, tf.tz).Format("2006-01-02")
+}
+
 // publishWindow is the range a published calendar shows: both days or
 // neither. A range that ends before it starts is no range at all — the whole
 // calendar, as the sheet says by default.
@@ -230,15 +266,23 @@ func (s *Server) madeSheet(r *http.Request, sess *session.Session, sheet view.Pu
 	if expires != nil {
 		sheet.Expires = text("Until " + s.timeFor(sess).dayKey(*expires) + ".")
 	}
+	// The cross of the head closes it to the page under it, where Cancel
+	// led (s-publish-13, -22).
+	closeTo := s.route("/")
+	if a := actionOf(sheet.Actions, "publish.cancel"); a != nil {
+		closeTo = a.Href
+	}
 	sheet.Actions = []view.Action{
 		{ID: "publish.open", Label: "Open the link", Href: link, Method: "GET", Enabled: true},
 		{ID: "publish.list", Label: "All published links", Href: s.route("/app/files/published"), Method: "GET", Enabled: true},
+		{ID: "publish.close", Label: "Close", Icon: "i-close", Href: closeTo, Method: "GET", Enabled: true},
 	}
-	// Send by letter leads, primary, where letters go out (s-publish-13).
+	// Send by letter leads, primary, where letters go out (s-publish-13):
+	// «Send this link», a letter of its own (s-mail-4).
 	if s.canSendLetters(sess) {
 		if id := user.LinkID(token); id != "" {
-			sheet.Actions = append([]view.Action{{ID: "publish.mail", Label: "Send by letter", Method: "POST", Primary: true, Enabled: true,
-				Href: s.postQuery("/app/mail/compose", url.Values{"op": {"link"}, "id": {id}})}}, sheet.Actions...)
+			sheet.Actions = append([]view.Action{{ID: "publish.mail", Label: "Send by letter", Method: "GET", Primary: true, Enabled: true,
+				Href: s.postQuery("/app/mail/link", url.Values{"id": {id}}), Target: render.TargetSheet}}, sheet.Actions...)
 		}
 	}
 	return sheet
@@ -407,7 +451,7 @@ func (s *Server) writeLetterSheet(w http.ResponseWriter, r *http.Request, sess *
 	}
 	i, err := strconv.Atoi(m)
 	d := loadMailDraft(sess)
-	if err != nil || i < 0 || i >= len(d.Parts) || !d.Parts[i].AsLink || d.Parts[i].LinkID != "" {
+	if err != nil || i < 0 || i >= len(d.Parts) || !d.Parts[i].AsLink {
 		s.notFound(w, r)
 		return
 	}
@@ -484,15 +528,21 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		if from, _ := publishWindow(r.Form); from == "" {
 			// A range was chosen and its days were not given: the sheet
 			// again, with the days asked for, rather than a guess.
+			// The words stand under the empty field (s-publish-2), the
+			// first of them when both are.
 			sheet := s.publishSheet(sess, c, uid, title, "range")
+			empty := "from"
+			if strings.TrimSpace(r.FormValue("from")) != "" {
+				empty = "to"
+			}
 			for i := range sheet.Form.Sets {
 				for j := range sheet.Form.Sets[i].Rows {
 					row := &sheet.Form.Sets[i].Rows[j]
-					switch row.Name {
-					case "from":
-						row.Value, row.Error = text(r.FormValue("from")), "Give both days, or publish the whole calendar."
-					case "to":
-						row.Value = text(r.FormValue("to"))
+					if row.Name == "from" || row.Name == "to" {
+						row.Value = text(r.FormValue(row.Name))
+					}
+					if row.Name == empty {
+						row.Error = "Give both days, or choose The whole calendar."
 					}
 				}
 			}
@@ -630,16 +680,20 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		if l.LastSeen != nil {
 			row.LastSeen, row.Unopened = tf.numStamp(*l.LastSeen), false
 		}
+		copyLink := view.Action{ID: "publish.copy", Label: "Copy", Method: "GET", Enabled: true}
+		send := view.Action{ID: "publish.mail", Label: "Send", Method: "GET", Enabled: true,
+			Href: s.postQuery("/app/mail/link", url.Values{"id": {l.ID}}), Target: render.TargetSheet}
 		if l.Gone {
 			// What it opened is no longer there and Carrel could not follow
-			// it (Б41): the link lives on until it is revoked or expires.
-			row.Gone = "No longer there: deleted, or moved where Carrel could not follow it"
+			// it (Б41; s-publish-21): no term, nothing to copy or send — the
+			// row is there for Revoke.
+			row.Gone, row.Expires = "Deleted, or moved where Carrel could not follow it", "—"
+			for _, a := range []*view.Action{&copyLink, &send} {
+				a.Enabled, a.Reason = false, "It is no longer there"
+			}
 		} else {
 			row.Href = s.publishedHref(sess, l.Target) // Пб41
 		}
-		copyLink := view.Action{ID: "publish.copy", Label: "Copy", Method: "GET", Enabled: true}
-		send := view.Action{ID: "publish.mail", Label: "Send", Method: "POST", Enabled: true,
-			Href: s.postQuery("/app/mail/compose", url.Values{"op": {"link"}, "id": {l.ID}})}
 		// Every link is kept whole with its token (since 19.09.2026; the
 		// owner's decision of 09.10.2026: a link without one does not
 		// exist) — the row shows it and offers it.
@@ -654,6 +708,10 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		row.Actions = append(row.Actions, view.Action{ID: "publish.revoke", Label: "Revoke", Method: "POST", Danger: true, Enabled: true,
 			Href: s.postQuery("/app/publish", url.Values{"op": {"revoke"}, "id": {l.ID}})})
 		page.Rows = append(page.Rows, row)
+	}
+	// «Send this link» went (s-mail-4): said where its sheet came from.
+	if n, err := strconv.Atoi(r.URL.Query().Get("sent")); err == nil && n > 0 {
+		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: text(fmt.Sprintf("The letter went to %s.", plural(n, "recipient")))})
 	}
 	if len(page.Rows) == 0 {
 		// No link out (s-publish-18): where one is made.

@@ -81,9 +81,9 @@ func (s *Server) disconnectSheet(sess *session.Session, blob sealed.Blob, conn s
 	}
 	return view.ConnectionRemoveSheet{
 		Subject: text(subject),
-		Warning: text(fmt.Sprintf(
-			"%s leaves Carrel: its collections, the ticks and the decisions taken about them go with it, and nothing is deleted on %s. Connecting it again finds the collections anew, without the ticks and without what is listed here.",
-			label, host)),
+		// What stays, in alarm, and what goes after it in numbers, without
+		// names (s-profile-26; the owner, 19.10.2026).
+		Warning:    text("Nothing is deleted on " + host + ". Carrel removes:"),
 		References: s.disconnectReferences(sess, blob, conn),
 		Form:       s.plainForm(action, "POST", csrfField(sess)),
 		Actions: []view.Action{
@@ -93,51 +93,38 @@ func (s *Server) disconnectSheet(sess *session.Session, blob sealed.Blob, conn s
 	}
 }
 
-// disconnectReferences name everything of the person that goes or loses its
-// ground with the connection: its collections, the links that stop opening,
-// the copy jobs that lose a source or their destination, and the davloom
-// devices that stop seeing it.
+// disconnectReferences are what goes or loses its ground with the
+// connection, counted (s-profile-26; the owner, 19.10.2026: numbers, no
+// names): its collections, the links that stop opening, the sources and
+// destinations of copy jobs, the davloom devices that sync them, the
+// linked groups of duplicates it is in.
 func (s *Server) disconnectReferences(sess *session.Session, blob sealed.Blob, conn sealed.Connection) []view.Text {
-	refs := []view.Text{}
-	var live, ticked int
+	var cols, links, sources, dests, devices, groups int
 	for _, col := range blob.CollectionsOf(conn.ID) {
-		if col.Gone {
-			continue
+		if !col.Gone {
+			cols++
 		}
-		live++
-	}
-	for _, sel := range blob.Selected {
-		if sel.AccountID == conn.ID {
-			ticked++
-		}
-	}
-	if live > 0 {
-		line := plural(live, "collection") + " leave the rail"
-		if ticked > 0 {
-			line += fmt.Sprintf("; %d of the ticks in the combined views go with them", ticked)
-		}
-		refs = append(refs, text(line))
 	}
 	for _, l := range s.users.PublishedLinks(sess.AccountID()) {
 		if l.Target.AccountID == conn.ID {
-			refs = append(refs, text("Published link «"+l.Target.Title+"» — it stops opening, and its password goes with it"))
+			links++
 		}
 	}
 	for _, j := range blob.BackupJobs {
 		for _, src := range j.Sources {
 			if src.AccountID == conn.ID {
-				refs = append(refs, text("Backup job «"+j.Name+"» — it loses a source and copies the rest"))
+				sources++
 				break
 			}
 		}
 		if j.DestAccount == conn.ID {
-			refs = append(refs, text("Backup job «"+j.Name+"» — its copies were written here; it will say the destination is gone"))
+			dests++
 		}
 	}
 	for _, d := range s.users.Devices(sess.AccountID()) {
 		for _, c := range d.ScopeCols {
 			if c.AccountID == conn.ID {
-				refs = append(refs, text("davloom device «"+d.Name+"» — these collections leave it at its next sync"))
+				devices++
 				break
 			}
 		}
@@ -145,10 +132,25 @@ func (s *Server) disconnectReferences(sess *session.Session, blob sealed.Blob, c
 	for _, g := range blob.Duplicates.Linked {
 		for _, m := range g.Members {
 			if m.AccountID == conn.ID {
-				refs = append(refs, text("A linked group of duplicates — the records of this connection leave it"))
+				groups++
 				break
 			}
 		}
 	}
+	refs := []view.Text{}
+	add := func(n int, one, many string) {
+		switch {
+		case n == 1:
+			refs = append(refs, text("1 "+one))
+		case n > 1:
+			refs = append(refs, text(fmt.Sprintf("%d %s", n, many)))
+		}
+	}
+	add(cols, "collection", "collections")
+	add(links, "published link", "published links")
+	add(sources, "source of a backup job", "sources of backup jobs")
+	add(dests, "destination of a backup job", "destinations of backup jobs")
+	add(devices, "davloom device’s sync of them", "davloom devices’ sync of them")
+	add(groups, "linked group of duplicates", "linked groups of duplicates")
 	return refs
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -32,6 +33,7 @@ func TestInstanceSettingsAreEdited(t *testing.T) {
 	adminID := h.admin("alice", "password123")
 	alice := h.login("alice", "password123")
 	h.relayed()
+	peopleOn(t, h)
 
 	page := decode[view.AdminSettingsPage](t, h.do(get("/admin/settings", alice)))
 	f := formFields(page.Form)
@@ -137,9 +139,28 @@ func TestInstanceSettingsAreTheFrame(t *testing.T) {
 	if samples["host"] != "smtp.example.org" || samples["password"] != "leave blank to keep the current one" || samples["from"] != "carrel@example.org" || samples["fromName"] != "Carrel" {
 		t.Errorf("samples = %v", samples)
 	}
+	// Without mail the tick is off with its reason, and nothing else of
+	// people's letters is shown (Typecase's note 88).
 	var letters []string
 	for _, r := range sets["Letters from users"].Rows {
 		letters = append(letters, r.Name)
+	}
+	if rows := sets["Letters from users"].Rows; strings.Join(letters, " ") != "people" || rows[0].Reason == "" {
+		t.Errorf("letters without mail = %q %+v, want the tick alone, off with its reason", letters, rows)
+	}
+	h.relayed()
+	peopleOn(t, h)
+	page = decode[view.AdminSettingsPage](t, h.do(get("/admin/settings", alice)))
+	letters = nil
+	for _, s := range page.Form.Sets {
+		if s.Legend == "Letters from users" {
+			for _, r := range s.Rows {
+				letters = append(letters, r.Name)
+			}
+			if len(s.Badges) != 1 || s.Badges[0].Label != "on" {
+				t.Errorf("letters on: badges = %+v", s.Badges)
+			}
+		}
 	}
 	if strings.Join(letters, " ") != "people sender attach letter recipients perDay" {
 		t.Errorf("letters = %q, want the sender after the box", letters)
@@ -158,5 +179,17 @@ func TestInstanceSettingsAreTheFrame(t *testing.T) {
 	// Never off (Typecase's note 82): it sends what is typed.
 	if send == nil || !send.Enabled || send.Reason != "" || !send.Submits || send.Href != "/admin/settings/mail-test" {
 		t.Errorf("Send test = %+v", send)
+	}
+}
+
+// peopleOn turns people's letters on, as a Save of the tick does.
+func peopleOn(t *testing.T, h *harness) {
+	t.Helper()
+	on := true
+	if err := h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		st.Settings.PeopleMail = &on
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
 	}
 }

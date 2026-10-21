@@ -12,6 +12,7 @@ import (
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -77,11 +78,12 @@ func (s *Server) getSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 		issued = &issuedDevice{Name: parts[0], Password: parts[1], ID: parts[2]}
 		sess.SetDraft(session.DraftIssuedDevice, nil) // shown once
 	}
-	s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, issued, nil, ""))
+	s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, issued, nil))
 }
 
-// postSettingsDavloom issues (op=issue), changes a scope (op=scope&id=) or
-// revokes (op=revoke&id=).
+// postSettingsDavloom issues (op=issue), makes a device read only or read
+// and write (op=read, op=write &device=) or revokes it (op=revoke&device=).
+// What a device sees is changed in its own sheet (davloomScope).
 func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -92,16 +94,11 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	id := r.FormValue("id")
-	switch r.FormValue("op") {
+	id := r.FormValue("device")
+	switch op := r.FormValue("op"); op {
 	case "revoke":
 		if err := s.users.RevokeDevice(sess.AccountID(), id); err != nil {
 			s.notFound(w, r)
-			return
-		}
-	case "scope":
-		if err := s.users.SetDeviceScope(sess.AccountID(), key, id, scopeFromForm(r)); err != nil {
-			s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, nil, err, id))
 			return
 		}
 	case "issue":
@@ -117,14 +114,15 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 		name := r.FormValue("name")
 		id, password, err := s.users.IssueDevice(r.Context(), sess.AccountID(), key, name, scopeFromForm(r))
 		if err != nil {
-			s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, nil, err, ""))
+			s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, nil, err))
 			return
 		}
 		sess.SetDraft(session.DraftIssuedDevice, []byte(strings.TrimSpace(name)+"\x00"+password+"\x00"+id))
-	case "access":
+	case "read", "write":
 		// Read only or read and write, in the device's row and without a new
-		// password (owner's decision 24.09.2026, s-davloom-1).
-		if err := s.users.SetDeviceAccess(sess.AccountID(), id, r.FormValue("access") == "read"); err != nil {
+		// password (owner's decision 24.09.2026, s-davloom-1): buttons of the
+		// page's one form (Typecase's note 102).
+		if err := s.users.SetDeviceAccess(sess.AccountID(), id, op == "read"); err != nil {
 			s.notFound(w, r)
 			return
 		}
@@ -168,10 +166,10 @@ func deviceScopeOf(form url.Values) user.DeviceScope {
 	return sc
 }
 
-func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *issuedDevice, formErr error, editing string) view.DavloomPage {
+func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *issuedDevice, formErr error) view.DavloomPage {
 	page := view.DavloomPage{
 		// The page is named as the rail names it (s-davloom-1, Нс46).
-		Shell:    s.withRail(s.buildShell(sess, "davloom"), s.settingsRail(sess, "/app/settings/davloom")),
+		Shell:    s.settingsShell(sess, "davloom", "/app/settings/davloom", "/app/settings/davloom"),
 		Subtitle: line("One address for every device instead of an account for every server"),
 		Enabled:  s.cfg.DAVloomPort != 0,
 		Address:  text(s.davloomAddress()),
@@ -180,6 +178,8 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 		// «not» in bold (s-davloom-1).
 		Note: join("Changing your Carrel password does ", strongRun("not"), " disconnect devices: each has its own key wrapper. "+
 			"To disconnect one, revoke it here — that is the only thing that stops it."),
+		// The tree is a sheet of its own (s-davloom-9; owner's decision 19.10).
+		Sees: view.Action{ID: "davloom.tree", Label: "What the client sees", Href: s.route("/app/settings/davloom/tree"), Method: "GET", Enabled: true, Target: render.TargetSheet},
 	}
 	// A local address does not reach a phone away from home, and the line
 	// under the title says so where the address is given (s-davloom-1).
@@ -191,16 +191,18 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 	add := view.Action{ID: "davloom.add", Label: "Add device", Icon: "i-plus", Method: "GET", Primary: true, Enabled: true,
 		Href: s.postQuery("/app/settings/davloom", url.Values{"add": {"1"}})}
 	if !page.Enabled {
-		page.Note = join("davloom is off on this instance: the administrator turns it on with CARREL_DAVLOOM_PORT. ", []view.Run(page.Note))
+		// Off (s-davloom-8): the badge says so, the devices stay and can be
+		// revoked, none is added.
+		page.Subtitle = line("No device connects until it is started.")
 		add.Enabled, add.Href, add.Reason = false, "", "davloom is off on this instance."
 	}
 	page.Actions = []view.Action{add}
+	page.Acts = s.plainForm("/app/settings/davloom", "POST", csrfField(sess))
 	blob := s.catalogOf(sess)
 	tf := s.timeFor(sess)
 	devices := s.users.Devices(sess.AccountID())
-	var edited *store.ProxyDevice
-	if editing == "" {
-		editing = r.URL.Query().Get("edit")
+	if len(devices) == 0 {
+		page.Empty = view.Runs{strongRun("No devices yet.")} // s-davloom-6
 	}
 	for i := range devices {
 		d := devices[i]
@@ -225,35 +227,30 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 			}
 		}
 		row.Actions = []view.Action{
+			// What it sees, its sheet (s-davloom-7).
 			{ID: "davloom.scope", Label: text(plural(len(d.ScopeCols), "collection") + " · Change"), Method: "GET", Enabled: true,
-				Href: s.postQuery("/app/settings/davloom", url.Values{"edit": {d.ID}})},
+				Href: s.route("/app/settings/davloom/scope?" + url.Values{"device": {d.ID}}.Encode()), Target: render.TargetSheet},
 			// The device's right, a switch of two in its row (s-davloom-1).
 			{ID: "davloom.access.read", Label: "read only", Method: "POST", Enabled: true, On: d.ReadOnly,
-				Href: s.postQuery("/app/settings/davloom", url.Values{"op": {"access"}, "id": {d.ID}, "access": {"read"}})},
+				Href: s.postQuery("/app/settings/davloom", url.Values{"op": {"read"}, "device": {d.ID}})},
 			{ID: "davloom.access.write", Label: "read and write", Method: "POST", Enabled: true, On: !d.ReadOnly,
-				Href: s.postQuery("/app/settings/davloom", url.Values{"op": {"access"}, "id": {d.ID}, "access": {"write"}})},
+				Href: s.postQuery("/app/settings/davloom", url.Values{"op": {"write"}, "device": {d.ID}})},
 			{ID: "davloom.revoke", Label: "Revoke", Method: "POST", Enabled: true, Danger: true,
-				Href: s.postQuery("/app/settings/davloom", url.Values{"op": {"revoke"}, "id": {d.ID}})},
+				Href: s.postQuery("/app/settings/davloom", url.Values{"op": {"revoke"}, "device": {d.ID}})},
 		}
 		page.Devices = append(page.Devices, row)
-		if d.ID == editing {
-			edited = &devices[i]
-		}
 	}
-	page.Tree = clientTree(blob)
 	adding := r.URL.Query().Get("add") != "" || r.Method == http.MethodPost && r.FormValue("op") == "issue" && formErr != nil
 	switch {
 	case issued != nil:
 		page.Dialog = s.issuedDialog(sess, issued)
-	case edited != nil:
-		page.Dialog = s.deviceDialog(r, sess, blob, edited, formErr)
 	case adding && page.Enabled:
-		page.Dialog = s.deviceDialog(r, sess, blob, nil, formErr)
+		page.Dialog = s.deviceDialog(r, sess, blob, formErr)
 	}
 	return page
 }
 
-// clientTree is «What the client sees» (s-davloom-1, Нс51): the synthetic
+// clientTree is «What the client sees» (s-davloom-9, Нс51): the synthetic
 // levels of davloom (S-27.3) — the root, the principal, the three home sets
 // — and the person's collections under the sets that list their kinds, each
 // by the address a client is given, its name and its mark.
@@ -313,30 +310,19 @@ func (s *Server) issuedDialog(sess *session.Session, issued *issuedDevice) *view
 	}
 }
 
-// deviceDialog is Add device (s-davloom-2, Нс48) or, for a device, what it
-// sees changed without a new password: the name and the right of a new one;
+// deviceDialog is Add device (s-davloom-2, Нс48): the name and the right;
 // «What the device will see» — the kinds, the muted words of each after its
 // name —; «Collections»; the person's password asked where the window is
-// closed (Нс73); Create password or Save, and Cancel; under Add device that
-// the password is shown once.
-func (s *Server) deviceDialog(r *http.Request, sess *session.Session, blob sealed.Blob, edited *store.ProxyDevice, formErr error) *view.DeviceDialog {
-	kinds := map[view.Kind]bool{}
-	cols := map[string]bool{}
-	if edited != nil {
-		for _, k := range edited.ScopeKinds {
-			kinds[view.Kind(k)] = true
-		}
-		for _, c := range edited.ScopeCols {
-			cols[c.AccountID+"|"+c.Path] = true
-		}
-	}
+// closed (Нс73); Create password and Cancel; that the password is shown
+// once.
+func (s *Server) deviceDialog(r *http.Request, sess *session.Session, blob sealed.Blob, formErr error) *view.DeviceDialog {
 	// What was typed: sent back with a refusal, or held while the
 	// password's sheet was asked and brought back by its Cancel
 	// (s-davloom-5).
 	var typed url.Values
 	if r.Method == http.MethodPost && formErr != nil {
 		typed = r.PostForm
-	} else if held, ok := heldDevice(sess); ok && r.URL.Query().Get("held") != "" && edited == nil {
+	} else if held, ok := heldDevice(sess); ok && r.URL.Query().Get("held") != "" {
 		typed = held
 	}
 	posted := typed != nil
@@ -349,38 +335,30 @@ func (s *Server) deviceDialog(r *http.Request, sess *session.Session, blob seale
 	}
 	head := []view.FormRow{csrfField(sess)}
 	dialog := &view.DeviceDialog{Title: "Add device", Subtitle: "An app password for one device, with its own key wrapper"}
-	if edited != nil {
-		dialog.Title, dialog.Subtitle = text(edited.Name), "What it sees — changed without a new password"
-		head = append(head, view.FormRow{Name: "op", Kind: view.InputHidden, Value: "scope"}, view.FormRow{Name: "id", Kind: view.InputHidden, Value: text(edited.ID)})
-	} else {
-		dialog.Warning = "The password is shown once and stored nowhere. Lose it and you create a new one and revoke this — it cannot be recovered."
-		name := ""
-		if posted {
-			name = typed.Get("name")
-		}
-		head = append(head, view.FormRow{Name: "op", Kind: view.InputHidden, Value: "issue"},
-			view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(name), Required: true,
-				Hint: "For you: this is how you will know what you are revoking later."})
-		access := "write"
-		if posted && typed.Get("access") == "read" {
-			access = "read"
-		}
-		head = append(head, view.FormRow{Name: "access", Label: "What this device may do", Kind: view.InputRadio, Value: text(access),
-			Options: []view.Option{
-				{Value: "read", Label: "Read only", Selected: access == "read"},
-				{Value: "write", Label: "Read and write", Selected: access == "write"},
-			},
-			Hint: "Read only: the device syncs, and whatever it sends back is refused. Changed later in the device’s row, without a new password."})
+	dialog.Warning = "The password is shown once and stored nowhere. Lose it and you create a new one and revoke this — it cannot be recovered."
+	name := ""
+	if posted {
+		name = typed.Get("name")
 	}
+	head = append(head, view.FormRow{Name: "op", Kind: view.InputHidden, Value: "issue"},
+		view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(name), Required: true,
+			Hint: "For you: this is how you will know what you are revoking later."})
+	access := "write"
+	if posted && typed.Get("access") == "read" {
+		access = "read"
+	}
+	head = append(head, view.FormRow{Name: "access", Label: "What this device may do", Kind: view.InputRadio, Value: text(access),
+		Options: []view.Option{
+			{Value: "read", Label: "Read only", Selected: access == "read"},
+			{Value: "write", Label: "Read and write", Selected: access == "write"},
+		},
+		Hint: "Read only: the device syncs, and whatever it sends back is refused. Changed later in the device’s row, without a new password."})
 	// A new device sees calendars, address books and folders; tasks and
 	// notes, which not every client understands, are ticked by the person
 	// (s-davloom-2).
 	var seen []view.FormRow
 	for _, k := range deviceKinds {
-		def := kinds[k.kind]
-		if edited == nil {
-			def = k.kind != view.KindTask && k.kind != view.KindNote
-		}
+		def := k.kind != view.KindTask && k.kind != view.KindNote
 		seen = append(seen, view.FormRow{Name: "kind." + string(k.kind), Label: text(k.label), LabelAside: text(k.aside), Kind: view.InputCheck,
 			Value: on("kind."+string(k.kind), def)})
 	}
@@ -395,7 +373,7 @@ func (s *Server) deviceDialog(r *http.Request, sess *session.Session, blob seale
 			}
 			name := "col." + conn.ID + "|" + col.Path
 			collections = append(collections, view.FormRow{Name: name, Label: view.Text(stamp(connLabel(conn), collectionLabel(col))), Kind: view.InputCheck,
-				Value: on(name, edited == nil || cols[conn.ID+"|"+col.Path])})
+				Value: on(name, true)})
 		}
 	}
 	form := view.Form{Action: s.route("/app/settings/davloom"), Method: "POST"}
@@ -413,11 +391,7 @@ func (s *Server) deviceDialog(r *http.Request, sess *session.Session, blob seale
 	}
 	form = focused(form, "name")
 	cancel := view.Action{ID: "davloom.cancel", Label: "Cancel", Href: s.route("/app/settings/davloom"), Method: "GET", Enabled: true}
-	if edited != nil {
-		form.Actions = []view.Action{{ID: "davloom.scope.save", Label: "Save", Method: "POST", Primary: true, Enabled: true}, cancel}
-	} else {
-		form.Actions = []view.Action{{ID: "davloom.issue", Label: "Create password", Method: "POST", Primary: true, Enabled: true}, cancel}
-	}
+	form.Actions = []view.Action{{ID: "davloom.issue", Label: "Create password", Method: "POST", Primary: true, Enabled: true}, cancel}
 	dialog.Form = form
 	return dialog
 }

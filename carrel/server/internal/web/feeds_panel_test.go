@@ -39,7 +39,7 @@ func TestTheSubscribePanelIsTheFrame(t *testing.T) {
 	form := *page.Add
 	for _, c := range []struct{ name, label string }{{"url", "Feed address"}, {"name", "Name here"}, {"colour", "Label colour"}} {
 		r := formRow(form, c.name)
-		if r == nil || string(r.Label) != c.label || string(r.Hint) != hints[c.label] {
+		if r == nil || string(r.Label) != c.label || rowHint(*r) != hints[c.label] {
 			t.Errorf("%s = %+v, the frame's hint %q", c.name, r, hints[c.label])
 		}
 	}

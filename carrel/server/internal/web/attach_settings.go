@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
+	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/provider/file"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
@@ -36,7 +38,8 @@ type attachForm struct {
 // attachFormOf is the form as the catalog holds it, or at the folder a href
 // of the tree names (Browse comes back with ?to=).
 func (s *Server) attachFormOf(sess *session.Session, blob sealed.Blob, to string) attachForm {
-	f := attachForm{names: attachNamesOf(blob)}
+	// A subfolder per month until chosen otherwise (attachments-5).
+	f := attachForm{names: attachNamesOf(blob), monthly: true}
 	if af := blob.Attachments; af != nil {
 		f.account, f.col, f.folder, f.monthly = af.AccountID, af.Path, af.Folder, af.Monthly
 	}
@@ -137,13 +140,38 @@ var monthFolder = regexp.MustCompile(`^\d{4}-\d{2}$`)
 // attachment folder holds and how large, the oldest of them, and its whole
 // address — the one to mount without Carrel. The month subfolders count as
 // the folder: the setting may have been on once. A folder not made yet holds
-// nothing; one that cannot be read says so with a dash.
-func (s *Server) folderNow(ctx context.Context, sess *session.Session, fc *fileCtx) view.FieldSet {
+// nothing. One that cannot be read (attachments-6, Typecase's note 93) is
+// «unavailable» in its rubric, its address alone and the request the
+// server refused under it; refused says why Open in Files cannot go.
+func (s *Server) folderNow(ctx context.Context, sess *session.Session, fc *fileCtx) (set view.FieldSet, refused view.Text) {
 	p, _ := fc.path(fc.segs, true)
 	files, oldest := "—", "—"
 	entries, err := fc.files.List(ctx, p)
 	if file.NotFound(err) {
 		entries, err = nil, nil
+	}
+	if err != nil {
+		set = view.FieldSet{Legend: "In this folder now", Badges: []view.Badge{{Label: "unavailable", Role: view.BadgeAlert}}, Rows: []view.FormRow{
+			{Name: "now.path", Label: "Path", Kind: view.InputText, Value: text(fileURI(fc.conn.Server, p)), ReadOnly: true},
+		}}
+		var se *dav.StatusError
+		if errors.As(err, &se) {
+			method, at := se.Method, se.Path
+			if method == "" {
+				method = "PROPFIND"
+			}
+			if at == "" {
+				at = p
+			}
+			set.Diag = text(fmt.Sprintf("%s %s → %d %s", method, at, se.Code, http.StatusText(se.Code)))
+		} else {
+			set.Diag = text(err.Error())
+		}
+		refused = text(fileReason(err))
+		if dav.IsStatus(err, http.StatusUnauthorized) {
+			refused = text(connLabel(fc.conn) + " refused the password.")
+		}
+		return set, refused
 	}
 	if err == nil {
 		var n int
@@ -186,35 +214,53 @@ func (s *Server) folderNow(ctx context.Context, sess *session.Session, fc *fileC
 		{Name: "now.oldest", Label: "Oldest", Kind: view.InputText, Value: text(oldest), ReadOnly: true},
 		{Name: "now.path", Label: "Path", Kind: view.InputText, Value: text(fileURI(fc.conn.Server, p)), ReadOnly: true,
 			Hint: "Carrel keeps no index of what points at these files. Nothing here deletes them: an attachment is removed from the record it hangs on, in that record."},
-	}}
+	}}, ""
 }
 
 func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blob sealed.Blob, f attachForm) view.AttachmentsPage {
-	page := view.AttachmentsPage{Shell: s.buildShell(sess, "Attachments")}
-	page.Rail = s.settingsRail(sess, "/app/settings/attachments")
+	page := view.AttachmentsPage{Shell: s.settingsShell(sess, "Attachments", "/app/settings/attachments", "/app/settings/attachments"),
+		Subtitle: "Where a file attached to a note, an event or a task is put"}
 
+	// The connections whose collections declare a ceiling, each by its
+	// lowest, in the line under the two rows (attachments-1).
+	lower := []any{"A collection that says it takes less (", monoRun("max-resource-size"), ") lowers the boundary for itself"}
+	first := true
+	for _, conn := range blob.Connections {
+		var least int64
+		for _, col := range blob.CollectionsOf(conn.ID) {
+			if col.Gone || col.MaxResourceSize <= 0 || !(col.Has(view.KindEvent) || col.Has(view.KindTask) || col.Has(view.KindNote)) {
+				continue
+			}
+			if l := attachLimit(col); least == 0 || l < least {
+				least = l
+			}
+		}
+		if least == 0 {
+			continue
+		}
+		sep := ", "
+		if first {
+			sep, first = ": ", false
+		}
+		lower = append(lower, sep, monoRun(connLabel(conn)), " "+sizeText(least))
+	}
+	lower = append(lower, ". Nothing here raises it.")
 	small := view.FieldSet{Legend: "Small files stay in the record", Rows: []view.FormRow{
 		{Name: "inline", Label: text("Up to " + sizeText(conf.AttachInlineMax)), Kind: view.InputText, ReadOnly: true,
 			Value: "Written into the event, the task or the note itself, and travels with it."},
 		{Name: "larger", Label: "Larger", Kind: view.InputText, ReadOnly: true,
-			Value: "Put in the folder below; the record keeps a link to it.",
-			Hint:  "A collection that says it takes less (max-resource-size) lowers the boundary for itself. Nothing here raises it."},
+			Value: "Put in the folder below; the record keeps a link to it.", HintRuns: join(lower...)},
 	}}
-	for _, col := range blob.Collections {
-		conn, ok := blob.Connection(col.AccountID)
-		if !ok || col.Gone || !(col.Has(view.KindEvent) || col.Has(view.KindTask) || col.Has(view.KindNote)) {
-			continue
-		}
-		small.Rows = append(small.Rows, view.FormRow{
-			Name: "limit." + conn.ID + "." + col.Path, Label: view.Text(stamp(connLabel(conn), collectionLabel(col))),
-			Kind: view.InputText, Value: text(sizeText(attachLimit(col))), ReadOnly: true,
-		})
-	}
 
 	// Collection is a list of the file collections (attachments-2): a
 	// read-only one is shown with its mark and not taken, so it is plain why.
 	collection := view.FormRow{Name: "collection", Label: "Collection", Kind: view.InputSelect, Value: text(selValue(f.account, f.col)),
 		Required: true, Error: text(f.errors["collection"]), Hint: "Any file collection you can write to."}
+	if f.account == "" {
+		// Nothing chosen yet (attachments-5): the empty choice first.
+		collection.Value = ""
+		collection.Options = []view.Option{{Value: "", Label: "Choose a collection", Selected: true}}
+	}
 	for _, conn := range blob.Connections {
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Gone || col.Feed || !col.Has(view.KindFile) {
@@ -232,6 +278,10 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 	if f.errors["folder"] == "" {
 		shown = "/" + strings.Join(f.folder, "/")
 	}
+	placeholder := ""
+	if f.account == "" && f.errors["folder"] == "" && len(f.folder) == 0 {
+		shown, placeholder = "", "/carrel/attachments"
+	}
 	browse := view.Action{ID: "attachments.browse", Label: "Browse", Method: "GET", Enabled: true,
 		Href: s.postQuery("/app/files/picker", url.Values{"for": {"attachments"}, "to": {s.attachFolderHref(blob, f)}})}
 	now := s.timeFor(sess).now
@@ -239,17 +289,17 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 	folder := view.FieldSet{Legend: "Folder", Rows: []view.FormRow{
 		csrfField(sess),
 		collection,
-		{Name: "folder", Label: "Folder in it", Kind: view.InputText, Value: text(shown), Error: text(f.errors["folder"]), Extra: &browse, Mono: true,
+		{Name: "folder", Label: "Folder in it", Kind: view.InputText, Value: text(shown), Placeholder: text(placeholder), Error: text(f.errors["folder"]), Extra: &browse, Mono: true,
 			Hint: "Created on first use. It stays an ordinary folder: openable in Files, mountable as a network drive, readable without Carrel."},
 		{Name: "monthly", Label: "A subfolder per month", Kind: view.InputCheck, Value: text(boolStr(f.monthly)),
-			Hint: text(thisMonth.AddDate(0, -1, 0).Format("2006-01") + ", " + thisMonth.Format("2006-01") +
+			HintRuns: join(monoRun(thisMonth.AddDate(0, -1, 0).Format("2006-01")), ", ", monoRun(thisMonth.Format("2006-01")),
 				". Off means one flat folder — fine for a hundred files, not for ten thousand.")},
 	}}
 	written := view.FormRow{Name: "name", Label: "Written as", Kind: view.InputSelect, Value: text(f.names), Error: text(f.errors["name"])}
 	for _, n := range attachNames {
 		written.Options = append(written.Options, view.Option{Value: n.value, Label: text(n.label), Selected: n.value == f.names})
 		if n.value == f.names {
-			written.Hint = text(n.example + ". A name already taken is never overwritten: a counter is added.")
+			written.HintRuns = join(monoRun(n.example), ". A name already taken is never overwritten: a counter is added.")
 		}
 	}
 	name := view.FieldSet{Legend: "File name", Rows: []view.FormRow{written}}
@@ -258,12 +308,24 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 		Actions: []view.Action{s.discard("attachments.discard", "/app/settings/attachments"),
 			{ID: "attachments.save", Label: "Save", Method: "POST", Primary: true, Enabled: true}},
 	}
+	open := view.Action{ID: "attachments.open", Label: "Open in Files", Icon: "i-file", Method: "GET"}
 	if saved := s.savedFolder(sess, blob); saved != nil {
-		page.Form.Sets = append(page.Form.Sets, s.folderNow(ctx, sess, saved))
-		page.Form.Actions = append(page.Form.Actions, view.Action{
-			ID: "attachments.open", Label: "Open in Files", Icon: "i-file", Href: s.route(saved.href("", saved.segs, true)), Method: "GET", Enabled: true,
-		})
-	} else if blob.Attachments != nil {
+		now, refused := s.folderNow(ctx, sess, saved)
+		page.Form.Sets = append(page.Form.Sets, now)
+		open.Href, open.Enabled = s.route(saved.href("", saved.segs, true)), true
+		if refused != "" {
+			open.Href, open.Enabled, open.Reason = "", false, refused
+		}
+		page.Form.Actions = append(page.Form.Actions, open)
+	} else if blob.Attachments == nil {
+		// No folder chosen yet (attachments-5, Typecase's note 93): the
+		// rubric says so, the choice starts empty, larger files wait for it,
+		// Open in Files is off and nothing is said about moving.
+		page.Form.Sets[1].Badges = []view.Badge{{Label: "not set", Role: view.BadgeAlert}}
+		page.Form.Sets[0].Rows[1].Value = "Wait for the folder below."
+		open.Reason = "No folder is chosen yet."
+		page.Form.Actions = append(page.Form.Actions, open)
+	} else {
 		page.Notices = append(page.Notices, view.Notice{
 			Role: view.NoticeAlert, Title: "The folder for attachments is not available",
 			Body: "Its storage is no longer among your collections. Large attachments cannot be written until another folder is chosen.",
@@ -277,6 +339,8 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 	for _, n := range names {
 		page.Form.Errors = append(page.Form.Errors, view.FieldError{Name: n, Message: text(f.errors[n])})
 	}
-	page.Note = "Changing the folder moves nothing. Records already written carry the old path and keep working; only new attachments go to the new place."
+	if blob.Attachments != nil {
+		page.Note = "Changing the folder moves nothing. Records already written carry the old path and keep working; only new attachments go to the new place."
+	}
 	return page
 }

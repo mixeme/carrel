@@ -44,7 +44,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "http://example.com"
           }
         ],
         "unfold": null
@@ -159,7 +159,11 @@
       {
         "line": [
           {
-            "text": "No letter since the start."
+            "text": "Last sent "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
         "title": "Mail is going out",
@@ -179,6 +183,7 @@
     "ticks": null
   },
   "rows": [],
+  "subtitle": "Carrel asks itself from outside, at the address you declared as the base one",
   "title": "Installation check",
   "took": "",
   "top": {

@@ -148,8 +148,8 @@ func TestConnectDialogFieldsAndFootAreTheFrames(t *testing.T) {
 		if !ok {
 			continue
 		}
-		if string(r.Placeholder) != d.placeholder || string(r.Hint) != d.hint {
-			t.Errorf("%s: placeholder %q hint %q, want the frame's %q and %q", r.Label, r.Placeholder, r.Hint, d.placeholder, d.hint)
+		if string(r.Placeholder) != d.placeholder || rowHint(r) != d.hint {
+			t.Errorf("%s: placeholder %q hint %q, want the frame's %q and %q", r.Label, r.Placeholder, rowHint(r), d.placeholder, d.hint)
 		}
 	}
 	var got []string

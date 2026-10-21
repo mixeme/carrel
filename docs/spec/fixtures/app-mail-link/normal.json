@@ -1,0 +1,520 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/mail/send?id=link-lichnyj",
+      "icon": "i-mail",
+      "id": "mail.send",
+      "label": "Send",
+      "method": "POST",
+      "primary": true,
+      "target": "sheet"
+    },
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/mail/send?id=link-lichnyj\u0026op=link",
+      "id": "mail.link.copy",
+      "label": "Copy link instead",
+      "method": "POST",
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/files/published",
+      "id": "mail.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "carries": [
+    "The link and your line — nothing of the calendar itself",
+    "Revoking the link closes it for this recipient too",
+    "It expires on 8 September, as the link does"
+  ],
+  "colour": "#4a6b52",
+  "form": {
+    "action": "/app/mail/send?id=link-lichnyj",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/mail/send?id=link-lichnyj",
+        "icon": "i-mail",
+        "id": "mail.send",
+        "label": "Send",
+        "method": "POST",
+        "primary": true,
+        "target": "sheet"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/mail/send?id=link-lichnyj\u0026op=link",
+        "id": "mail.link.copy",
+        "label": "Copy link instead",
+        "method": "POST",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/published",
+        "id": "mail.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "focus": true,
+            "hint": "",
+            "kind": "text",
+            "label": "To",
+            "name": "to",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "A line from you",
+            "name": "line",
+            "options": [],
+            "placeholder": "optional",
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ],
+    "target": "sheet"
+  },
+  "from": "mix@carrel.example",
+  "fromName": "Михаил Енученко",
+  "replyTo": "mix@example.org",
+  "subject": "Личный · 10–31 August",
+  "under": {
+    "account": null,
+    "adminUsers": null,
+    "agenda": null,
+    "backup": null,
+    "connections": null,
+    "contact": null,
+    "contacts": null,
+    "davloom": null,
+    "devices": null,
+    "event": null,
+    "eventEdit": null,
+    "files": null,
+    "note": null,
+    "notes": null,
+    "published": {
+      "details": null,
+      "empty": null,
+      "look": {
+        "compact": false,
+        "panel": true,
+        "source": true,
+        "theme": "auto",
+        "wide": false
+      },
+      "notices": [],
+      "print": {
+        "range": "",
+        "taken": "",
+        "title": ""
+      },
+      "rail": {
+        "about": {
+          "build": "0.0.1 · 786949a",
+          "enabled": true,
+          "href": "/about",
+          "id": "about",
+          "label": "Carrel",
+          "method": "GET"
+        },
+        "davloom": "davloom · running · 3 devices",
+        "foot": [],
+        "nav": [
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/contacts",
+            "icon": "i-back",
+            "id": "settings.back",
+            "label": "Back to app",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-user",
+            "id": "settings.account",
+            "label": "Account",
+            "method": "GET"
+          },
+          {
+            "count": 4,
+            "enabled": true,
+            "href": "/app/settings/connections",
+            "icon": "i-server",
+            "id": "settings.connections",
+            "label": "Connections",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/attachments",
+            "icon": "i-file",
+            "id": "settings.attachments",
+            "label": "Attachments",
+            "method": "GET"
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/devices",
+            "icon": "i-device",
+            "id": "settings.devices",
+            "label": "New device",
+            "method": "GET"
+          },
+          {
+            "count": 3,
+            "enabled": true,
+            "href": "/app/settings/davloom",
+            "id": "settings.davloom",
+            "label": "davloom",
+            "method": "GET"
+          },
+          {
+            "count": 3,
+            "enabled": true,
+            "href": "/app/settings/backup",
+            "icon": "i-archive",
+            "id": "settings.backup",
+            "label": "Backup",
+            "method": "GET"
+          },
+          {
+            "count": 2,
+            "enabled": true,
+            "href": "/app/files/published",
+            "icon": "i-link",
+            "id": "settings.published",
+            "label": "Published links",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/settings/appearance",
+            "icon": "i-theme",
+            "id": "settings.appearance",
+            "label": "Appearance",
+            "method": "GET"
+          }
+        ],
+        "neighbours": [],
+        "note": "",
+        "sections": [],
+        "shortcuts": [],
+        "status": [
+          {
+            "line": [
+              {
+                "text": "Last response "
+              },
+              {
+                "mark": "mono",
+                "text": "2026-08-16 09:41"
+              }
+            ],
+            "title": "davloom · running · 3 devices",
+            "tone": "on"
+          },
+          {
+            "line": [
+              {
+                "text": "Last backup "
+              },
+              {
+                "mark": "mono",
+                "text": "2026-08-16 03:10"
+              },
+              {
+                "text": " · "
+              },
+              {
+                "hint": "The archive was read back from the destination and the checksum matched",
+                "text": "verified"
+              }
+            ],
+            "title": "Backups are running",
+            "tone": "on"
+          }
+        ],
+        "tags": [],
+        "ticks": null
+      },
+      "rows": [
+        {
+          "actions": [
+            {
+              "enabled": true,
+              "href": "/p/link-smeta-token",
+              "id": "publish.copy",
+              "label": "Copy",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/mail/link?id=link-smeta",
+              "id": "publish.mail",
+              "label": "Send",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/publish?id=link-smeta\u0026op=revoke",
+              "id": "publish.revoke",
+              "label": "Revoke",
+              "method": "POST",
+              "target": "sheet"
+            }
+          ],
+          "address": "http://example.com/p/link-smeta-token",
+          "created": "2026-08-10",
+          "expires": "No expiry",
+          "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/%D1%81%D0%BC%D0%B5%D1%82%D0%B0-%D0%BF%D0%BE%D0%B4%D1%80%D1%8F%D0%B4%D1%87%D0%B8%D0%BA.pdf",
+          "icon": "i-doc",
+          "kind": "file",
+          "lastSeen": "never opened",
+          "link": "/p/link-smeta-token",
+          "opens": 0,
+          "stamp": "sftpgo · vps · Documents",
+          "title": "смета-подрядчик.pdf",
+          "unopened": true
+        },
+        {
+          "actions": [
+            {
+              "enabled": true,
+              "href": "/p/link-lichnyj-token",
+              "id": "publish.copy",
+              "label": "Copy",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/mail/link?id=link-lichnyj",
+              "id": "publish.mail",
+              "label": "Send",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/publish?id=link-lichnyj\u0026op=revoke",
+              "id": "publish.revoke",
+              "label": "Revoke",
+              "method": "POST",
+              "target": "sheet"
+            }
+          ],
+          "address": "http://example.com/p/link-lichnyj-token",
+          "colour": "#4a6b52",
+          "created": "2026-08-09",
+          "expires": "2026-09-08",
+          "href": "/app/calendar/a-nc-home/lichnyj?from=2026-08-10",
+          "kind": "calendar",
+          "lastSeen": "2026-08-10 08:41",
+          "link": "/p/link-lichnyj-token",
+          "opens": 12,
+          "stamp": "nextcloud · Личный",
+          "title": "Личный · 10–31 August",
+          "unopened": false
+        }
+      ],
+      "subtitle": [
+        {
+          "text": "Read-only, one object or one collection per link"
+        },
+        {
+          "text": " · "
+        },
+        {
+          "mark": "danger",
+          "text": "this instance is local: the link opens only from your network"
+        }
+      ],
+      "title": "Published links",
+      "top": {
+        "lock": null,
+        "new": {
+          "arrow": [
+            {
+              "enabled": true,
+              "href": "/app/notes/quick",
+              "icon": "i-quill",
+              "id": "new.notes",
+              "label": "Note",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/quick",
+              "icon": "i-con",
+              "id": "new.contacts",
+              "label": "Contact",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/quick",
+              "icon": "i-cal",
+              "id": "new.calendar",
+              "label": "Event",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/tasks/quick",
+              "icon": "i-task",
+              "id": "new.tasks",
+              "label": "Task",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/picker?for=upload",
+              "icon": "i-upload",
+              "id": "new.upload",
+              "label": "Upload file",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/mail/compose",
+              "icon": "i-mail",
+              "id": "new.letter",
+              "label": "Letter",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "New note",
+          "method": "GET",
+          "primary": true,
+          "target": "sheet"
+        },
+        "refresh": {
+          "action": {
+            "enabled": true,
+            "href": "/app/files/published",
+            "icon": "i-refresh",
+            "id": "published.refresh",
+            "label": "Refresh",
+            "method": "GET"
+          },
+          "answered": "",
+          "running": false
+        },
+        "search": {
+          "action": "/app/search",
+          "history": [],
+          "jump": [],
+          "name": "q",
+          "query": "",
+          "whole": null
+        },
+        "signed": {
+          "instance": "carrel.example",
+          "local": true,
+          "login": "mix"
+        },
+        "unlocked": null,
+        "user": [
+          {
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-gear",
+            "id": "user.settings",
+            "label": "Settings",
+            "method": "GET"
+          },
+          {
+            "enabled": true,
+            "href": "/admin/",
+            "icon": "i-adm",
+            "id": "user.admin",
+            "label": "Administration",
+            "method": "GET"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/logout",
+            "id": "user.logout",
+            "label": "Sign out",
+            "method": "POST",
+            "separator": true
+          }
+        ],
+        "userHref": "/app/settings/account"
+      }
+    },
+    "task": null,
+    "taskEdit": null,
+    "tasks": null
+  }
+}

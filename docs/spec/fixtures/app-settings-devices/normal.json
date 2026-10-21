@@ -16,6 +16,8 @@
         "value": ""
       },
       "qr": "",
+      "reason": "",
+      "refused": "",
       "rows": [
         {
           "colour": "#4a6b52",
@@ -119,6 +121,7 @@
           "included": true,
           "kind": "note",
           "label": "Общие с семьёй",
+          "readOnly": true,
           "type": "CalDAV",
           "url": "https://nextcloud.example/dav.php/alice/calendars/zapiski-obshchie/"
         },
@@ -165,7 +168,7 @@
     },
     {
       "actions": [],
-      "included": true,
+      "included": false,
       "label": "radicale · vps",
       "login": "",
       "password": {
@@ -179,6 +182,8 @@
         "value": ""
       },
       "qr": "",
+      "reason": "",
+      "refused": "",
       "rows": [
         {
           "colour": "#6b4e7a",
@@ -189,7 +194,7 @@
             "label": "Copy",
             "method": "GET"
           },
-          "included": true,
+          "included": false,
           "kind": "event",
           "label": "Проекты",
           "type": "CalDAV",
@@ -204,7 +209,7 @@
             "label": "Copy",
             "method": "GET"
           },
-          "included": true,
+          "included": false,
           "kind": "event",
           "label": "Дежурства",
           "type": "CalDAV",
@@ -219,9 +224,10 @@
             "label": "Copy",
             "method": "GET"
           },
-          "included": true,
+          "included": false,
           "kind": "contact",
           "label": "Команда",
+          "readOnly": true,
           "type": "CardDAV",
           "url": "https://radicale.example/alice/contacts/komanda/"
         },
@@ -234,7 +240,7 @@
             "label": "Copy",
             "method": "GET"
           },
-          "included": true,
+          "included": false,
           "kind": "contact",
           "label": "Рассылки",
           "type": "CardDAV",
@@ -245,15 +251,15 @@
       "toggle": {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/settings/devices?account=a-rad-vps\u0026op=exclude\u0026tab=apple",
-        "id": "device.exclude",
-        "label": "Leave out radicale · vps",
+        "href": "/app/settings/devices?account=a-rad-vps\u0026op=include\u0026tab=apple",
+        "id": "device.include",
+        "label": "Include radicale · vps",
         "method": "POST"
       }
     },
     {
       "actions": [],
-      "included": true,
+      "included": false,
       "label": "baikal",
       "login": "",
       "password": {
@@ -267,6 +273,8 @@
         "value": ""
       },
       "qr": "",
+      "reason": "The server refused the saved password.",
+      "refused": "password refused",
       "rows": [
         {
           "colour": "#9a9280",
@@ -277,7 +285,7 @@
             "label": "Copy",
             "method": "GET"
           },
-          "included": true,
+          "included": false,
           "kind": "event",
           "label": "Общий",
           "type": "CalDAV",
@@ -287,11 +295,12 @@
       "title": "baikal · alice",
       "toggle": {
         "csrf": "csrf",
-        "enabled": true,
-        "href": "/app/settings/devices?account=a-baikal\u0026op=exclude\u0026tab=apple",
-        "id": "device.exclude",
-        "label": "Leave out baikal",
-        "method": "POST"
+        "enabled": false,
+        "href": "/app/settings/devices?account=a-baikal\u0026op=include\u0026tab=apple",
+        "id": "device.include",
+        "label": "Include baikal",
+        "method": "POST",
+        "reason": "The server refused the saved password."
       }
     }
   ],
@@ -326,17 +335,40 @@
       "method": "GET"
     },
     {
+      "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/settings/unlock?back=%2Fapp%2Fsettings%2Fdevices%3Ftab%3Dapple\u0026for=profile",
+      "href": "/app/settings/devices?op=profile\u0026tab=apple",
       "id": "device.profile",
       "label": "Generate profile",
-      "method": "GET",
-      "target": "sheet"
+      "method": "POST"
     }
   ],
   "details": null,
-  "link": null,
+  "link": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/settings/devices/profile?t=token",
+        "icon": "i-download",
+        "id": "device.profile.download",
+        "label": "Download profile",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "danger": true,
+        "enabled": true,
+        "href": "/app/settings/devices?op=revoke\u0026tab=apple",
+        "id": "device.profile.revoke",
+        "label": "Revoke",
+        "method": "POST"
+      }
+    ],
+    "hint": "It opens once, for you signed in to Carrel. Open it on the device, install the profile, then delete the file.",
+    "local": true,
+    "title": "Link ready until 17:09"
+  },
   "look": {
     "compact": false,
     "panel": true,
@@ -344,7 +376,7 @@
     "theme": "auto",
     "wide": false
   },
-  "note": "Confirm your password first: the profile hands out the credentials of every included account.",
+  "note": "Issued inside the unlock window: nothing more is asked.",
   "notices": [],
   "print": {
     "range": "",
@@ -360,7 +392,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [],
     "nav": [
       {
@@ -410,7 +442,7 @@
         "on": true
       },
       {
-        "count": 0,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/davloom",
         "id": "settings.davloom",
@@ -418,7 +450,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/backup",
         "icon": "i-archive",
@@ -453,20 +485,52 @@
       {
         "line": [
           {
-            "text": "No device has connected since the start."
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
           }
         ],
-        "title": "davloom · running · 0 devices",
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
         "tone": "on"
       }
     ],
     "tags": [],
     "ticks": null
   },
+  "subtitle": "Everything discovery found — as one file or one code",
   "tab": "apple",
   "title": "Set up a new device",
   "top": {
-    "lock": null,
+    "lock": {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/settings/lock",
+      "id": "unlock.lock",
+      "label": "Lock now",
+      "method": "POST"
+    },
     "new": {
       "arrow": [
         {
@@ -538,10 +602,12 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
       "answered": "",
       "running": false
@@ -559,7 +625,8 @@
       "local": true,
       "login": "mix"
     },
-    "unlocked": null,
+    "unlockLeft": "4:12",
+    "unlocked": "10 August, 17:10",
     "user": [
       {
         "enabled": true,

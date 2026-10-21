@@ -125,7 +125,8 @@ func TestSettingsSentencesMarkTheirPieces(t *testing.T) {
 	h.admin("mix", "password123")
 	mix := h.login("mix", "password123")
 	page := decode[view.ConnectionsPage](t, h.do(get("/app/settings/connections", mix)))
-	if got := saidRuns(page.Subtitle); !strings.HasPrefix(got, "Signed in as ⟨strong:mix⟩ · ") {
+	// Nothing connected yet: who is signed in, and nothing more (s-profile-25).
+	if got := saidRuns(page.Subtitle); got != "Signed in as ⟨strong:mix⟩" {
 		t.Errorf("subtitle = %q", got)
 	}
 	dl := decode[view.DavloomPage](t, h.do(get("/app/settings/davloom", mix)))

@@ -118,7 +118,7 @@
     ]
   },
   "full": {
-    "ok": true,
+    "ok": false,
     "rows": [
       {
         "detail": "PUT · GET · DELETE /alice/calendars/lichnyj/carrel-check-event.ics → 201 · 200 · 204",
@@ -131,9 +131,9 @@
         "result": "ok"
       },
       {
-        "detail": "PUT · GET · DELETE /alice/contacts/kontakty/carrel-check-contact.vcf → 201 · 200 · 204",
+        "detail": "PUT /alice/contacts/kontakty/carrel-check-contact.vcf → 403 Forbidden",
         "operation": "Create, read back, delete · contact",
-        "result": "ok"
+        "result": "failed"
       },
       {
         "detail": "No collection of this kind that can be written to.",
@@ -186,7 +186,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 6,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -258,11 +258,15 @@
       {
         "line": [
           {
-            "text": "Run the check once Carrel is behind its proxy."
+            "text": "Last check "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
-        "title": "Not checked yet",
-        "tone": "off"
+        "title": "Checks passed",
+        "tone": "on"
       }
     ],
     "tags": [],

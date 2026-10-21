@@ -33,6 +33,9 @@ func Inlines(r view.Runs) []w.Inline {
 		switch p.Mark {
 		case view.RunMono:
 			out = append(out, w.Mono{Text: string(p.Text)})
+		case view.RunCode:
+			// A protocol's name, set as code (s-profile-2).
+			out = append(out, w.Mono{Text: string(p.Text), Form: w.MonoCode})
 		case view.RunStrong:
 			out = append(out, w.Strong(p.Text))
 		case view.RunDanger:
@@ -112,6 +115,11 @@ func Button(a view.Action, form string) w.Button {
 	// 198): on, pale until they are filled, what it waits for its title.
 	if a.Enabled && a.Waits {
 		b.State, b.Reason = w.ButtonWaits, string(a.Reason)
+	}
+	// One of a selection bar that is not for what is ticked (s-files-2):
+	// on, pale.
+	if a.Enabled && a.Unfit {
+		b.State = w.ButtonOff
 	}
 	return b
 }
@@ -238,7 +246,7 @@ func Input(r view.FormRow) w.Input {
 		Label:       string(r.Label),
 		Mono:        r.Mono,
 		Focus:       r.Focus,
-		Error:       r.Error != "",
+		Error:       r.Error != "" || r.Invalid,
 		Disabled:    r.ReadOnly,
 		Required:    r.Required,
 		Numeric:     r.Kind == view.InputNumber,
@@ -273,7 +281,7 @@ func Pick(r view.FormRow) w.Pick {
 func Options(os []view.Option) []w.PickOption {
 	out := make([]w.PickOption, 0, len(os))
 	for _, o := range os {
-		out = append(out, w.PickOption{Value: o.Value, Label: string(o.Label), On: o.Selected, Unavailable: o.Disabled, Shows: o.Shows})
+		out = append(out, w.PickOption{Value: o.Value, Label: string(o.Label), On: o.Selected, Unavailable: o.Disabled, Shows: o.Shows, Disables: o.Disables})
 	}
 	return out
 }
@@ -300,12 +308,16 @@ func Control(r view.FormRow) w.FieldPart {
 }
 
 // Hint is the line under a row's field: the reason it came back with (Error,
-// in the danger's tone), else what the value means (Hint); none when the row
-// has neither. The reason takes the hint's place: one line under a field.
+// in the danger's tone), else what the value means (Hint) — in pieces where
+// the frame marks a part (HintRuns: the envelope's address monospaced,
+// s-admin-3); none when the row has neither. The reason takes the hint's
+// place: one line under a field.
 func Hint(r view.FormRow) []w.FieldPart {
 	switch {
 	case r.Error != "":
 		return []w.FieldPart{w.FieldHint{Parts: []w.Inline{w.Text(r.Error)}, Variant: w.HintDanger}}
+	case len(r.HintRuns) > 0:
+		return []w.FieldPart{w.FieldHint{Parts: Inlines(r.HintRuns)}}
 	case r.Hint != "":
 		return []w.FieldPart{w.FieldHint{Parts: []w.Inline{w.Text(r.Hint)}}}
 	}
@@ -415,6 +427,20 @@ func Loss(l view.LossReport, space w.MsgSpace) []w.MainPart {
 	}
 	if l.Days != nil {
 		out = append(out, Msg(*l.Days, space))
+	}
+	return out
+}
+
+// Facts are a set's lines that are read and not sent (FieldSet.Facts): the
+// name, the value monospaced, its muted tail after it (appearance-1).
+func Facts(fs []view.Fact) w.Fields {
+	out := w.Fields{Variant: w.FieldsBleed130, Place: w.Grown}
+	for _, f := range fs {
+		it := w.FieldsItem{Term: string(f.Label), Value: []w.ValuePart{w.Mono{Text: string(f.Value)}}}
+		if f.Aside != "" {
+			it.Value = append(it.Value, w.Text(" · "+string(f.Aside)))
+		}
+		out.Items = append(out.Items, it)
 	}
 	return out
 }

@@ -50,7 +50,33 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "A collection that says it takes less (max-resource-size) lowers the boundary for itself. Nothing here raises it.",
+            "hint": "",
+            "hintRuns": [
+              {
+                "text": "A collection that says it takes less ("
+              },
+              {
+                "mark": "mono",
+                "text": "max-resource-size"
+              },
+              {
+                "text": ") lowers the boundary for itself: "
+              },
+              {
+                "mark": "mono",
+                "text": "nextcloud"
+              },
+              {
+                "text": " 2 MB, "
+              },
+              {
+                "mark": "mono",
+                "text": "radicale · vps"
+              },
+              {
+                "text": " 1 MB. Nothing here raises it."
+              }
+            ],
             "kind": "text",
             "label": "Larger",
             "name": "larger",
@@ -58,136 +84,6 @@
             "readOnly": true,
             "required": false,
             "value": "Put in the folder below; the record keeps a link to it."
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "nextcloud · Личный",
-            "name": "limit.a-nc-home./alice/calendars/lichnyj/",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "2 MB"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "nextcloud · Дела",
-            "name": "limit.a-nc-home./alice/calendars/dela/",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "2 MB"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "nextcloud · Работа",
-            "name": "limit.a-nc-home./alice/calendars/rabota/",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "2 MB"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "nextcloud · Дни рождения",
-            "name": "limit.a-nc-home./alice/calendars/dni-rozhdeniya/",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "2 MB"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "nextcloud · Записи",
-            "name": "limit.a-nc-home./alice/calendars/zapisi/",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "2 MB"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "nextcloud · Дневник",
-            "name": "limit.a-nc-home./alice/calendars/dnevnik/",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "2 MB"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "nextcloud · Общие с семьёй",
-            "name": "limit.a-nc-home./alice/calendars/zapiski-obshchie/",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "2 MB"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "radicale · vps · Проекты",
-            "name": "limit.a-rad-vps./alice/calendars/proekty/",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "2 MB"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "radicale · vps · Дежурства",
-            "name": "limit.a-rad-vps./alice/calendars/dezhurstva/",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "2 MB"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "baikal · Общий",
-            "name": "limit.a-baikal./alice/calendars/obshchij/",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "2 MB"
           }
         ],
         "unfold": null
@@ -267,14 +163,30 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "2026-07, 2026-08. Off means one flat folder — fine for a hundred files, not for ten thousand.",
+            "hint": "",
+            "hintRuns": [
+              {
+                "mark": "mono",
+                "text": "2026-07"
+              },
+              {
+                "text": ", "
+              },
+              {
+                "mark": "mono",
+                "text": "2026-08"
+              },
+              {
+                "text": ". Off means one flat folder — fine for a hundred files, not for ten thousand."
+              }
+            ],
             "kind": "check",
             "label": "A subfolder per month",
             "name": "monthly",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "true"
           }
         ],
         "unfold": null
@@ -286,7 +198,16 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "2026-08-10 sync-board.png. A name already taken is never overwritten: a counter is added.",
+            "hint": "",
+            "hintRuns": [
+              {
+                "mark": "mono",
+                "text": "2026-08-10 sync-board.png"
+              },
+              {
+                "text": ". A name already taken is never overwritten: a counter is added."
+              }
+            ],
             "kind": "select",
             "label": "Written as",
             "name": "name",
@@ -384,7 +305,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [],
     "nav": [
       {
@@ -434,7 +355,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/davloom",
         "id": "settings.davloom",
@@ -442,7 +363,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/backup",
         "icon": "i-archive",
@@ -477,16 +398,41 @@
       {
         "line": [
           {
-            "text": "No device has connected since the start."
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
           }
         ],
-        "title": "davloom · running · 0 devices",
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
         "tone": "on"
       }
     ],
     "tags": [],
     "ticks": null
   },
+  "subtitle": "Where a file attached to a note, an event or a task is put",
   "title": "Attachments",
   "top": {
     "lock": null,
@@ -561,10 +507,12 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
       "answered": "",
       "running": false

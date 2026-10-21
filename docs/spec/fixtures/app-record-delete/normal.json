@@ -815,8 +815,10 @@
       "uid": "8f1c-4a02-b7d3"
     },
     "eventEdit": null,
+    "files": null,
     "note": null,
     "notes": null,
+    "published": null,
     "task": null,
     "taskEdit": null,
     "tasks": null

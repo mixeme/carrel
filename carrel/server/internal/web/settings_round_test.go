@@ -370,7 +370,7 @@ func TestAttachmentsFolderIsTheFrame(t *testing.T) {
 	var got []drawn
 	for _, r := range set.Rows {
 		if r.Kind != view.InputHidden {
-			got = append(got, drawn{string(r.Label), string(r.Hint)})
+			got = append(got, drawn{string(r.Label), rowHint(r)})
 		}
 	}
 	// The frame's day is the clock's, so its months are the hint's.
@@ -585,7 +585,7 @@ func TestAttachmentsInThisFolderNowIsTheFrame(t *testing.T) {
 	}
 	// The example is set in mono inside the hint: its closing tag is not a
 	// word break.
-	if h, want := string(rowNamed(t, page.Form, "name").Hint), frameText(strings.ReplaceAll(written[1], "</span>", "")); h != want {
+	if h, want := rowHint(rowNamed(t, page.Form, "name")), frameText(strings.ReplaceAll(written[1], "</span>", "")); h != want {
 		t.Errorf("Written as hint = %q, the frame %q", h, want)
 	}
 

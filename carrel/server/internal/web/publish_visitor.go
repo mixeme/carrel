@@ -116,7 +116,9 @@ func visitorRecords(objs []*model.Object, t user.PublishTarget) []*model.Object 
 // calendar, «the event» of one.
 func calendarSees(noun string) view.FieldSet {
 	sees := view.FieldSet{Legend: "What the visitor sees", Hint: text("Without the title " + noun + " shows as “Busy”."), Rows: []view.FormRow{
-		{Name: calendarSeesTime, Label: "Time", LabelAside: "always shown", Kind: view.InputCheck, Value: "on", ReadOnly: true}}}
+		// Off with its reason (s-publish-2, -19: «Always shown»): it cannot
+		// be taken off, and so it is not sent.
+		{Name: calendarSeesTime, Label: "Time", LabelAside: "always shown", Kind: view.InputCheck, Value: "on", ReadOnly: true, Reason: "Always shown"}}}
 	for _, f := range calendarVisitorFields {
 		row := view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck}
 		if f.on {

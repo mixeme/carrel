@@ -29,7 +29,7 @@ func uploadArchive(t *testing.T, f davFixture, archive []byte) *httptest.Respons
 	fw, _ := mw.CreateFormFile("archive", "carrel.zip")
 	_, _ = fw.Write(archive)
 	_ = mw.Close()
-	req := httptest.NewRequest(http.MethodPost, "/app/settings/backup?op=restore-open&source=upload", &body)
+	req := httptest.NewRequest(http.MethodPost, "/app/settings/backup/restore?source=upload", &body)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: f.sess.ID()})
 	return f.h.do(req)
@@ -103,9 +103,9 @@ func TestRestoreReadsArchiveMembersUnderTheImportCeilings(t *testing.T) {
 		}
 	}
 	made := f.srv.CountRequests("PUT", "")
-	done := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=restore-run", f.sess, matchForm(*page.Restore.Match))))
-	if !hasNotice(done.Notices, "Restored in part") {
-		t.Fatalf("restore = %+v", done.Notices)
+	rep := restoreRun(t, f, "/app/settings/backup/restore/match?op=restore", matchForm(*page.Restore.Match))
+	if !strings.Contains(reportLines(rep), "not restored") {
+		t.Fatalf("restore = %+v", rep)
 	}
 	if n := f.srv.CountRequests("PUT", "") - made; n != 1 {
 		t.Errorf("%d records were written, want the one of the collection under the ceilings", n)
@@ -129,12 +129,9 @@ func TestRestoreNeverWritesWhereTheManifestPoints(t *testing.T) {
 		t.Fatalf("open: %d %s", rec.Code, rec.Body.String())
 	}
 	before := len(f.srv.Requests())
-	done := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=restore-run", f.sess, url.Values{
+	restoreRun(t, f, "/app/settings/backup/restore/match?op=restore", url.Values{
 		"into.0": {sel(f, filesDocs)}, "pick.0": {"on"},
-	})))
-	if !hasNotice(done.Notices, "Restored") {
-		t.Fatalf("restore = %+v", done.Notices)
-	}
+	})
 	wrote := 0
 	for _, r := range f.srv.Requests()[before:] {
 		method, p, _ := strings.Cut(r, " ")

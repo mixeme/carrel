@@ -80,6 +80,7 @@ var sheets = map[reflect.Type]bool{
 	reflect.TypeFor[view.PublishSheet]():          true,
 	reflect.TypeFor[view.MailSheet]():             true,
 	reflect.TypeFor[view.MailAttachSheet]():       true,
+	reflect.TypeFor[view.MailLinkSheet]():         true,
 	reflect.TypeFor[view.MoveSheet]():             true,
 	reflect.TypeFor[view.CopiesSheet]():           true,
 	reflect.TypeFor[view.AskSheet]():              true,
@@ -98,6 +99,9 @@ var sheets = map[reflect.Type]bool{
 	reflect.TypeFor[view.ConnectionRemoveSheet](): true,
 	reflect.TypeFor[view.PasswordResetSheet]():    true,
 	reflect.TypeFor[view.AccountDeleteSheet]():    true,
+	reflect.TypeFor[view.BackupTriggerSheet]():    true,
+	reflect.TypeFor[view.DavloomScopeSheet]():     true,
+	reflect.TypeFor[view.DavloomTreeSheet]():      true,
 }
 
 // KindOf tells what model is: a page in the shell, a page outside it, a

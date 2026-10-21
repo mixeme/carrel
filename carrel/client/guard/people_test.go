@@ -61,7 +61,7 @@ func TestTasksAndNotesNameTheirPeople(t *testing.T) {
 				t.Errorf("frame: %s", f)
 			}
 		} else {
-			for _, f := range htmlFindings(l, frame, c.fixture, html) {
+			for _, f := range htmlFindings(l, frame, c.fixture, html, "") {
 				t.Errorf("frame: %s", f)
 			}
 		}

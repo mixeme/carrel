@@ -177,6 +177,9 @@ const (
 	InputCheck    InputKind = "check"
 	InputRadio    InputKind = "radio"
 	InputArea     InputKind = "area"
+	// InputFile is a file chosen on this computer and sent with the form:
+	// the archive of a restore (s-backup-15); FormRow.Accept says which.
+	InputFile InputKind = "file"
 	// InputHidden is a value the form carries and nobody fills in: the
 	// token, the version a form was read at, the step it stands for. It is
 	// never shown and has no label.
@@ -273,4 +276,22 @@ const (
 	// моноширинно, и клиент держит её в ногу с полем (SlugOf Typecase,
 	// записка 75)
 	RunSlug RunMark = "slug"
+	// RunCode — имя протокола в подсказке, кодом: «.well-known» у Server
+	// URL (s-profile-2)
+	RunCode RunMark = "code"
+)
+
+// UnlockFor — ради чего лист пароля (UnlockSheet.For): по нему клиент
+// выбирает значок и вид листа — удаление (account-15) и депонирование
+// (account-2) рисуются своими кадрами, прочие — листом окна выдачи
+// (s-plan-3).
+type UnlockFor string
+
+const (
+	UnlockForPassword UnlockFor = "password" // пароль подключения или ленты (s-profile-3)
+	UnlockForProfile  UnlockFor = "profile"
+	UnlockForDavloom  UnlockFor = "davloom"
+	UnlockForTrigger  UnlockFor = "trigger"
+	UnlockForDelete   UnlockFor = "delete"
+	UnlockForDeposit  UnlockFor = "deposit"
 )

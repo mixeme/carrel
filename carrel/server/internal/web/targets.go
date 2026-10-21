@@ -57,6 +57,7 @@ var fragmentRoutes = []fragmentRoute{
 	{"GET", "/app/settings/escrow/withdraw", render.TargetSheet},
 	{"", "/app/settings/connections/disconnect", render.TargetSheet},
 	{"", "/app/settings/unlock", render.TargetSheet},
+	{"", "/app/settings/backup/trigger", render.TargetSheet},
 	// C-5.8
 	{"", "/admin/reset", render.TargetSheet},
 	{"GET", "/admin/delete", render.TargetSheet},

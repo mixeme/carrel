@@ -40,6 +40,15 @@ func shapeOf(line string) *regexp.Regexp {
 	return regexp.MustCompile(`^` + p + `$`)
 }
 
+// rowHint is what a row says under it: its Hint, or the same words in
+// pieces (HintRuns).
+func rowHint(r view.FormRow) string {
+	if len(r.HintRuns) > 0 {
+		return runsText(r.HintRuns)
+	}
+	return string(r.Hint)
+}
+
 func runsText(r view.Runs) string {
 	var b strings.Builder
 	for _, run := range r {

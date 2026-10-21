@@ -2,6 +2,7 @@ package user
 
 import (
 	"strings"
+	"time"
 
 	"carrel.dev/carrel/server/internal/crypt"
 	"carrel.dev/carrel/server/internal/store"
@@ -43,7 +44,8 @@ func (s *Service) EnableBackupTrigger(viewerID string, dataKey [crypt.KeyLen]byt
 		b := backupStateOf(st, viewerID, jobID)
 		crypt.Wipe(b.KeyEnvelope)
 		b.TriggerHash, b.KeyEnvelope = hash, env
-		return []store.AuditEntry{{When: now, Who: u.Login, What: "backup.trigger.on", Whom: u.Login, Detail: jobID}}, nil
+		b.TriggerHint, b.TriggerIssued = TriggerHint(TriggerPrefix+raw), &now
+		return []store.AuditEntry{{When: now, Who: u.Login, What: "backup.trigger.on", Whom: u.Login, Detail: jobID + " " + b.TriggerHint}}, nil
 	})
 	if err != nil {
 		return "", err
@@ -62,7 +64,7 @@ func (s *Service) DisableBackupTrigger(viewerID, jobID string) error {
 		}
 		b := backupStateOf(st, viewerID, jobID)
 		crypt.Wipe(b.KeyEnvelope)
-		b.TriggerHash, b.KeyEnvelope = nil, nil
+		b.TriggerHash, b.KeyEnvelope, b.TriggerHint, b.TriggerIssued = nil, nil, "", nil
 		return []store.AuditEntry{{When: now, Who: u.Login, What: "backup.trigger.off", Whom: u.Login, Detail: jobID}}, nil
 	})
 }
@@ -117,4 +119,77 @@ func (s *Service) OpenBackupTrigger(token string) (userID, jobID string, dataKey
 		return []store.AuditEntry{{When: now, Who: u.Login, What: "backup.trigger.use", Whom: u.Login, Detail: jobID}}, nil
 	})
 	return u.ID, jobID, key, true
+}
+
+// TriggerHint is a trigger's secret as it is named where it may not be
+// shown (note 91): its prefix and its last four characters, «cbk_…lamp».
+func TriggerHint(secret string) string {
+	raw, ok := strings.CutPrefix(secret, TriggerPrefix)
+	if !ok || len(raw) < 4 {
+		return TriggerPrefix + "…"
+	}
+	return TriggerPrefix + "…" + raw[len(raw)-4:]
+}
+
+// TriggerUse is what the trigger's sheet says of the password in use: its
+// hint, when it was issued, its last run and where from, how many runs.
+type TriggerUse struct {
+	Hint    string
+	Issued  time.Time
+	LastRun time.Time
+	From    string
+	Runs    int
+}
+
+// BackupTriggerUse is the use of a job's trigger password; false while the
+// trigger is off.
+func (s *Service) BackupTriggerUse(viewerID, jobID string) (TriggerUse, bool) {
+	snap := s.st.Snapshot()
+	for _, b := range snap.Backups {
+		if b.UserID != viewerID || b.JobID != jobID || len(b.TriggerHash) == 0 {
+			continue
+		}
+		use := TriggerUse{Hint: b.TriggerHint}
+		if b.TriggerIssued != nil {
+			use.Issued = *b.TriggerIssued
+		}
+		for _, r := range b.Runs {
+			if r.State == RunRefused || r.Password == "" || r.Password != b.TriggerHint {
+				continue
+			}
+			use.Runs++
+			if r.Started.After(use.LastRun) {
+				use.LastRun, use.From = r.Started, r.From
+			}
+		}
+		return use, true
+	}
+	return TriggerUse{}, false
+}
+
+// NoteRefusedTrigger writes down a start the trigger refused (note 91): a
+// secret that is not the job's, named by its hint, and the address it came
+// from, in the history of the job the request named. A job nobody has is
+// written nowhere.
+func (s *Service) NoteRefusedTrigger(jobID, secret, from string) {
+	now := s.now()
+	_ = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		for i := range st.Backups {
+			b := &st.Backups[i]
+			if b.JobID != jobID {
+				continue
+			}
+			id, err := newEntityID("r-")
+			if err != nil {
+				return nil, err
+			}
+			b.Runs = append(b.Runs, store.BackupRun{ID: id, Started: now, Finished: &now, State: RunRefused, Trigger: "external",
+				Password: TriggerHint(secret), From: from})
+			if len(b.Runs) > store.BackupRunsKept {
+				b.Runs = b.Runs[len(b.Runs)-store.BackupRunsKept:]
+			}
+			return nil, nil
+		}
+		return nil, nil
+	})
 }

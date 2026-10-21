@@ -55,6 +55,10 @@ type control struct {
 	// of the markup, «⋯», Auto-save, the width, Focus. Such a control needs no
 	// meaning of HTML, and one that has it is held as any other.
 	scripted bool
+	// picture: the widget is a row of a tree, not the rail's, none of whose
+	// rows leads or sends — the tree is a picture of a place, not a choice:
+	// what a client sees at davloom's address (s-davloom-9)
+	picture bool
 }
 
 func (c control) str(name string) string {
@@ -80,6 +84,16 @@ func (c control) send() (form, name string) {
 	return sc.str("Form"), sc.str("Name")
 }
 
+// sendsOf is the form a checkbox belongs to without standing in it
+// (Send.Of: a row's pick of the selection's form, s-files-1), or "".
+func (c control) sendsOf() string {
+	f := c.v.FieldByName("Send")
+	if !f.IsValid() || f.Kind() != reflect.Struct {
+		return ""
+	}
+	return control{v: f}.str("Of")
+}
+
 // rule judges one widget: what is wrong with its meaning, or "".
 type rule func(c control) string
 
@@ -96,15 +110,20 @@ func needs(fields ...string) rule {
 }
 
 // field is the rule of a control that takes a value: its Name, in a form
-// that sends. Disabled, it sends nothing and needs nothing.
+// that sends. Disabled, it sends nothing and needs nothing; read only and
+// nameless, it is an address shown to be copied — nothing to send (the
+// link just made, s-admin-1).
 func field(c control) string {
-	if c.flag("Disabled") {
+	if c.flag("Disabled") || c.flag("ReadOnly") && c.str("Name") == "" {
 		return ""
 	}
 	if c.str("Name") == "" {
 		return "a field without Name"
 	}
-	if !c.inForm {
+	// A field that names its form (Of) stands where its frame puts it: the
+	// address of the installation check in the head, its form a PostForm of
+	// the page (s-admin-4).
+	if !c.inForm && c.str("Of") == "" {
 		return "a field outside a form that sends (a Form with Action)"
 	}
 	return ""
@@ -125,24 +144,54 @@ func ticks(c control) string {
 		return ""
 	case name != "" && c.inForm:
 		return ""
+	case name != "" && c.sendsOf() != "": // a field of the form it names (Typecase's task 114)
+		return ""
 	case name != "":
 		return "a tick box with Send.Name outside a form that sends"
 	}
 	return "a tick box that sends nothing (Send)"
 }
 
-// links says whether every option of a switch (Seg) is a link.
+// pictureTree says whether no row of a tree leads anywhere or sends
+// anything: such a tree is a picture, its rows words (s-davloom-1).
+func pictureTree(c control) bool {
+	rows := c.v.FieldByName("Rows")
+	if !rows.IsValid() || rows.Kind() != reflect.Slice {
+		return false
+	}
+	for i := range rows.Len() {
+		r := control{v: rows.Index(i)}
+		if form, name := r.send(); r.str("Href") != "" || name != "" || form != "" {
+			return false
+		}
+	}
+	return true
+}
+
+// links says whether every option of a switch (Seg) goes somewhere: a link,
+// or a button that sends a form of the page to its address (a davloom
+// device's access, s-davloom-1).
 func links(c control) bool {
 	opts := c.v.FieldByName("Options")
 	if !opts.IsValid() || opts.Kind() != reflect.Slice || opts.Len() == 0 {
 		return false
 	}
 	for i := range opts.Len() {
-		if (control{v: opts.Index(i)}).str("Href") == "" {
+		o := control{v: opts.Index(i)}
+		if o.str("Href") == "" && (o.str("Form") == "" || o.str("To") == "") {
 			return false
 		}
 	}
 	return true
+}
+
+// tickRow is a row with a tick in front: the tick sends with Send, or shows
+// a choice made and sends nothing.
+func tickRow(c control) string {
+	if form, name := c.send(); form == "" && name == "" {
+		return ""
+	}
+	return ticks(c)
 }
 
 // buttonDisabled is widget.ButtonDisabled, inputSearch widget.InputSearch;
@@ -157,10 +206,14 @@ const (
 // must carry (docs/guide/screen.md of Typecase, §3 and §5).
 var contract = map[string]rule{
 	"Button": func(c control) string {
-		if c.v.FieldByName("State").Int() == buttonDisabled || c.opens || c.scripted || picksFile(c) {
+		if c.v.FieldByName("State").Int() == buttonDisabled || c.opens || c.scripted || picksFile(c) || c.flag("ScriptOnly") || c.flag("Removes") {
 			return ""
 		}
-		for _, f := range []string{"Href", "Form", "Adds", "Opens"} {
+		// CopyFrom copies a block that stands on the page: without a script
+		// it is read there (the password shown once, s-admin-30); Copy puts
+		// the words it carries on the clipboard, and they stand beside it to
+		// be selected (a device's password, s-plan-2).
+		for _, f := range []string{"Href", "Form", "Adds", "Opens", "CopyFrom", "Copy"} {
 			if c.str(f) != "" {
 				return ""
 			}
@@ -222,7 +275,7 @@ var contract = map[string]rule{
 		if c.scripted { // the width of the text in an edit's bar
 			return ""
 		}
-		if links(c) { // a switch of links: each option goes (SegOption.Href)
+		if links(c) { // each option goes (SegOption.Href) or sends a form (Form, To)
 			return ""
 		}
 		return field(c)
@@ -258,7 +311,7 @@ var contract = map[string]rule{
 	// (Typecase's task 116; the move sheet, s-contacts-2) —, whose Href, if
 	// any, is the page with it chosen; a node that cannot be chosen is words.
 	"TreeRow": func(c control) string {
-		if c.str("Href") != "" || c.flag("Unavailable") {
+		if c.str("Href") != "" || c.flag("Unavailable") || c.picture {
 			return ""
 		}
 		if form, name := c.send(); name != "" && (form != "" || c.inForm) {
@@ -282,12 +335,10 @@ var contract = map[string]rule{
 	// choice (Send, as a Tick); on the rail of return the choice is made and
 	// the rail sends none (Rail.Ticks is nil): the tick shows it, sends
 	// nothing, and is no finding.
-	"TickRow": func(c control) string {
-		if form, name := c.send(); form == "" && name == "" {
-			return ""
-		}
-		return ticks(c)
-	},
+	"TickRow": tickRow,
+	// An account of a new device ticked where it goes in (s-plan-1): its
+	// tick, as a source's, sends the choice or shows it.
+	"SlimRow": tickRow,
 	"MenuItem": func(c control) string {
 		switch {
 		case c.str("Reason") != "": // switched off, says why
@@ -318,10 +369,13 @@ var contract = map[string]rule{
 	// without a script (NoScript, a Button or a MenuItem with Form). One of a
 	// new record's form (To, Typecase's task 122) sends the form it stands in
 	// to its own address, as its «Upload» does (a Button or a MenuItem with
-	// To): it must stand in one.
+	// To): it must stand in one. A field of the form it stands in, with
+	// neither, goes with that form's own button: the archive of a restore
+	// (s-backup-15).
 	"FileField": func(c control) string {
 		var msg []string
 		switch {
+		case c.str("Form") == "" && c.str("To") == "" && c.inForm:
 		case c.str("Form") == "" && c.str("To") != "":
 			if !c.inForm {
 				msg = append(msg, "a file field with To outside a form that sends")
@@ -375,6 +429,10 @@ var contract = map[string]rule{
 	// A bar's ticks that are a form (GET, Typecase's task 67): its checks and
 	// its Apply are judged in it.
 	"CheckForm": needs("Action"),
+	// A bar that is a form (GET, Typecase's 195 p. 2; the journal's action
+	// and day, s-admin-7): its menu's radios, its fields and its Show are
+	// judged in it.
+	"BarForm": needs("Action"),
 	// A tick box. The rows and cells that hold one (TickRow, CardPick,
 	// TableCell…) join when a screen draws them: whether their box is there
 	// depends on the row, and that is decided with the screen.
@@ -398,6 +456,30 @@ var contract = map[string]rule{
 	},
 	// What a tick box sends is judged on the box that has it.
 	"Send": func(control) string { return "" },
+	// The head of a table's column (the files, s-files-1): a tick box that
+	// picks every row (Tick) sends what the selection's form names (Send), as
+	// a row's pick does; with nothing to send it is the library's script's
+	// «every row» (the frame draws it so); without a tick it is words.
+	"TableCol": func(c control) string {
+		if form, name := c.send(); name == "" && form == "" {
+			return ""
+		}
+		if p := c.v.FieldByName("Tick"); p.IsValid() && p.Kind() == reflect.Pointer && !p.IsNil() {
+			return ticks(c)
+		}
+		return ""
+	},
+	// A folder above the one open (Crumbs, s-files-1): a link to it; the open
+	// one is words (Crumbs.Current).
+	"Crumb": needs("Href"),
+	// The name of a table's row (TableFile, Typecase's task 114): with Href
+	// a link — a storage or a folder opens by it, a file is chosen
+	// (s-files-6, -1) —, without it a name shown, as a collection's on the
+	// connections' page (s-profile-1). Whether it leads somewhere is the
+	// model's.
+	"TableFile": func(control) string { return "" },
+	// A tile's name (Tile, s-files-5): a link, as a row's is.
+	"Tile": needs("Href"),
 }
 
 // picksFile says whether a button or a menu's item is the label of a file
@@ -410,7 +492,7 @@ func picksFile(c control) bool {
 // opensForm says whether the widget is a form that sends, for its parts.
 func opensForm(c control) bool {
 	switch c.v.Type().Name() {
-	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "Doc", "Field", "Card", "FieldSet", "Dialog", "Sheet", "Diff":
+	case "Form", "Menu", "Search", "Filter", "Range", "CheckForm", "BarForm", "Doc", "Field", "Card", "FieldSet", "Dialog", "Sheet", "Diff":
 		return c.str("Action") != ""
 	}
 	return false
@@ -489,6 +571,11 @@ func Meaning(v any, forms ...string) []string {
 		inForm := c.inForm || opensForm(c)
 		closed := closedMenu(c)
 		scripted := name == "Docbar" && c.flag("Edit")
+		// A tree none of whose rows leads or sends is a picture — what a
+		// client sees at davloom's address, a sheet of its own (s-davloom-9);
+		// a tree of the rail is a way somewhere, and a row of it that goes
+		// nowhere is a finding.
+		picture := name == "Tree" && c.holder != "RailSec" && pictureTree(c)
 		for i := range t.NumField() {
 			f := t.Field(i)
 			if !f.IsExported() {
@@ -500,12 +587,12 @@ func Meaning(v any, forms ...string) []string {
 			switch f.Type.Kind() {
 			case reflect.Struct, reflect.Pointer, reflect.Interface:
 				if w := deref(fv); isControl(w, pkg) {
-					walk(control{v: w, path: at + "(" + w.Type().Name() + ")", inForm: inForm, holder: name, opens: opens, scripted: scripted})
+					walk(control{v: w, path: at + "(" + w.Type().Name() + ")", inForm: inForm, holder: name, opens: opens, scripted: scripted, picture: picture})
 				}
 			case reflect.Slice, reflect.Array:
 				for j := range fv.Len() {
 					if w := deref(fv.Index(j)); isControl(w, pkg) {
-						walk(control{v: w, path: fmt.Sprintf("%s[%d](%s)", at, j, w.Type().Name()), inForm: inForm, holder: name, scripted: scripted})
+						walk(control{v: w, path: fmt.Sprintf("%s[%d](%s)", at, j, w.Type().Name()), inForm: inForm, holder: name, scripted: scripted, picture: picture})
 					}
 				}
 			}

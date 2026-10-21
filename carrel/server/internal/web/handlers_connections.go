@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -25,6 +26,11 @@ type connectionForm struct {
 	NoPassword                            bool
 	// Editing is the connection the form edits; empty for a new one.
 	Editing string
+	// Refused is the dialog back after discovery failed: the refusal over
+	// the fields, and the caret nowhere (s-profile-24); PasswordRefused —
+	// it was the login and password the server refused, and the password's
+	// field is in alarm.
+	Refused, PasswordRefused bool
 	// Links is the question of an edit while published links use the
 	// connection (Б40): how many, whether another server or login asks it
 	// (Asked; else it waits hidden for that change, note 70 of Typecase),
@@ -77,16 +83,30 @@ func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) 
 	s.writePage(w, r, http.StatusOK, page)
 }
 
-// postSettingsConnections adds a connection. op=rediscover and op=apply run
-// discovery again on one that exists (S-6.1).
+// postSettingsConnections adds a connection. op=rediscover updates the list
+// of collections of one that exists at once (S-6.1, Typecase's note 103);
+// op=apply takes what the proposal after an edit offered. op=pick is a
+// row's tick: the button of the page's one form, its value pick.
 func (s *Server) postSettingsConnections(w http.ResponseWriter, r *http.Request) {
 	switch r.FormValue("op") {
 	case "":
 		s.addConnection(w, r)
 	case "tick":
 		s.tickCollection(w, r)
+	case "pick":
+		// «account|path» of a collection, «subscription|section» of a
+		// feed's row of Lands in.
+		_ = r.ParseForm()
+		account, rest, _ := strings.Cut(r.PostFormValue("pick"), "|")
+		r.Form.Set("account", account)
+		r.Form.Set("path", rest)
+		if spec, ok := recordKinds[rest]; ok {
+			r.Form.Set("path", sealed.FeedPath)
+			r.Form.Set("kind", string(spec.kind))
+		}
+		s.tickCollection(w, r)
 	case "rediscover":
-		s.rediscover(w, r, false)
+		s.updateCollectionList(w, r)
 	case "apply":
 		s.rediscover(w, r, true)
 	case "test":
@@ -161,6 +181,7 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 
 	res, trace, err := discover.Run(r.Context(), s.guard, f.Server, f.Login, password, pin)
 	if err != nil || res == nil || trace == nil || !trace.OK {
+		f.Refused, f.PasswordRefused = true, discover.Refused(err)
 		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, discoveryFailure(trace, err, "Nothing was saved.")))
 		return
 	}
@@ -376,18 +397,106 @@ func (s *Server) testConnection(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, nil))
 }
 
+// updateCollectionList is Update collection list on a connection's card
+// (Typecase's note 103; the owner, 19.10.2026): discovery again, and the
+// catalog takes at once what the server holds — a new collection comes in
+// unticked, marked new, one renamed takes its name, one gone is marked gone
+// —; records are not touched. A line above the cards says what came, and
+// what went is named where it always is (goneNotice). A failed run changes
+// nothing (C-8.2).
+func (s *Server) updateCollectionList(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	key, live := sess.DataKey()
+	if !live {
+		s.notFound(w, r)
+		return
+	}
+	blob, opened := s.users.Catalog(sess.AccountID(), key)
+	conn, known := blob.Connection(r.FormValue("account"))
+	if !opened || !known {
+		s.notFound(w, r)
+		return
+	}
+	res, trace, err := discover.Run(r.Context(), s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)
+	if trace != nil {
+		sess.NoteCheck(conn.ID, trace)
+	}
+	if err != nil || res == nil || trace == nil || !trace.OK {
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, discoveryFailure(trace, err, "Nothing was changed.")))
+		return
+	}
+	d := discover.CompareCollections(res.Collections, comparable(blob, conn, res.Collections))
+	proposal := user.Rediscovery{Found: catalogEntries(res.Collections), Scheduling: res.Scheduling, Addresses: res.Addresses}
+	fresh := map[string]bool{}
+	var names []string
+	for _, c := range d.Added {
+		proposal.Add = append(proposal.Add, c.Path)
+		fresh[c.Path] = true
+		names = append(names, "«"+collectionLabel(sealed.Collection{Path: c.Path, Name: c.DisplayName})+"»")
+	}
+	proposal.Gone = append(proposal.Gone, d.Removed...)
+	if err := s.users.ApplyRediscovery(sess.AccountID(), key, conn.ID, proposal); err != nil {
+		http.Error(w, "could not save the catalog", http.StatusInternalServerError)
+		return
+	}
+	sess.Cache().InvalidateConnection(conn.ID)
+	var notice *view.Notice
+	switch {
+	case len(names) == 1:
+		notice = &view.Notice{Role: view.NoticeInfo, Title: text(connLabel(conn) + ":"),
+			Body: text("1 new collection — " + names[0] + ". Tick it to see it in the rail.")}
+	case len(names) > 1:
+		notice = &view.Notice{Role: view.NoticeInfo, Title: text(connLabel(conn) + ":"),
+			Body: text(plural(len(names), "new collection") + " — " + strings.Join(names, ", ") + ". Tick them to see them in the rail.")}
+	case len(d.Removed) == 0:
+		notice = &view.Notice{Role: view.NoticeInfo, Title: text(connLabel(conn) + ":"),
+			Body: text("the list is the same as on the server.")}
+	}
+	page := s.connectionsPage(sess, connectionForm{}, notice)
+	for i := range page.Accounts {
+		if page.Accounts[i].AccountID != conn.ID {
+			continue
+		}
+		for k := range page.Accounts[i].Collections {
+			page.Accounts[i].Collections[k].New = fresh[string(page.Accounts[i].Collections[k].Path)]
+		}
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+// comparable are the catalog entries of conn that discovery answers for:
+// on a server with a principal it lists calendars and address books, not
+// folders — a folder there is added by the person (New folder), and that
+// discovery did not name it does not mean it went.
+func comparable(blob sealed.Blob, conn sealed.Connection, found []discover.Collection) []discover.Collection {
+	files := false
+	for _, c := range found {
+		if slices.Contains(c.Kinds, view.KindFile) {
+			files = true
+		}
+	}
+	var out []discover.Collection
+	for _, c := range blob.CollectionsOf(conn.ID) {
+		if c.Gone || c.Has(view.KindFile) && !files {
+			continue
+		}
+		out = append(out, discover.Collection{Path: c.Path, DisplayName: c.Name})
+	}
+	return out
+}
+
 // rediscoveryNotice is the S-6.1 proposal: what appeared and what disappeared
 // against the catalog, and Apply. Entries already marked gone stay out of the
 // comparison, so one that came back is offered again.
 func (s *Server) rediscoveryNotice(blob sealed.Blob, conn sealed.Connection, found []discover.Collection) *view.Notice {
-	var stored []discover.Collection
 	names := map[string]string{}
 	for _, c := range blob.CollectionsOf(conn.ID) {
-		if !c.Gone {
-			stored = append(stored, discover.Collection{Path: c.Path, DisplayName: c.Name})
-			names[c.Path] = collectionLabel(c)
-		}
+		names[c.Path] = collectionLabel(c)
 	}
+	stored := comparable(blob, conn, found)
 	d := discover.CompareCollections(found, stored)
 	host := connLabel(conn)
 	if len(d.Added) == 0 && len(d.Removed) == 0 {
@@ -437,7 +546,7 @@ func (s *Server) rediscoveryNotice(blob sealed.Blob, conn sealed.Connection, fou
 // form.
 func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice *view.Notice) view.ConnectionsPage {
 	page := view.ConnectionsPage{
-		Shell: s.withRail(s.buildShell(sess, "Connections"), s.settingsRail(sess, "/app/settings/connections")),
+		Shell: s.settingsShell(sess, "Connections", "/app/settings/connections", "/app/settings/connections"),
 	}
 	// The dialog stands over the page, and the page under it is as it is:
 	// the dialog has a head of its own (s-profile-2, s-profile-16).
@@ -451,13 +560,9 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 	}
 	if key, live := sess.DataKey(); live {
 		if blob, ok := s.users.Catalog(sess.AccountID(), key); ok {
+			// The open window is its mark and Lock now in the head
+			// (s-profile-4, Typecase's note 103): no line of its own.
 			unlocked := sess.UnlockUntil(s.now()) != nil
-			if unlocked {
-				// Under the cards while the window is open (s-profile-4); the
-				// panel of a feed, open, says its own instead.
-				page.Note = join("While credentials are unlocked, every account opens without a question — here, on the New device screen and when a profile is built. ",
-					strongRun("Lock now"), " ends it at once; so does signing out.")
-			}
 			tf := s.timeFor(sess)
 			cols := 0
 			for _, c := range blob.Connections {
@@ -475,6 +580,12 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 			// The login in bold (s-profile-10).
 			page.Subtitle = join("Signed in as ", strongRun(sess.Login()), fmt.Sprintf(" · %s · %s · %s",
 				plural(len(blob.Connections), "server"), plural(cols, "collection"), plural(len(blob.Subscriptions), "subscription")))
+			// Nothing connected yet (s-profile-25): who is signed in, and the
+			// words of the empty page.
+			if len(blob.Connections) == 0 && len(blob.Subscriptions) == 0 {
+				page.Subtitle = join("Signed in as ", strongRun(sess.Login()))
+				page.Empty = view.Runs{strongRun("Nothing is connected yet.")}
+			}
 			page.Actions = append(page.Actions,
 				view.Action{ID: "connection.add", Label: "Connect account", Icon: "i-plus", Href: s.connectHref(), Method: "GET", Primary: true, Enabled: true},
 				view.Action{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link",
@@ -497,22 +608,23 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 // (s-profile-14): an empty active field means «unchanged», so «no password»
 // cannot be said by emptiness.
 func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Form {
-	password := view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, ReadOnly: f.NoPassword}
-	action, id, label := "/app/settings/connections", "connection.add", "Connect"
+	password := view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, ReadOnly: f.NoPassword, Invalid: f.PasswordRefused}
+	action, id, label := "/app/settings/connections/new", "connection.add", "Connect"
 	if f.Editing != "" {
 		// Beside a field the mark turned off there is nothing kept to keep
 		// (s-profile-16).
 		if !f.NoPassword {
 			password.Hint = "Leave it empty to keep the stored one."
 		}
-		action = s.postQuery("/app/settings/connections", url.Values{"op": {"edit"}, "account": {f.Editing}})
+		action = s.route("/app/settings/connections/" + url.PathEscape(f.Editing) + "/edit")
 		id, label = "connection.edit.save", "Save"
 	}
 	form := s.plainForm(action, "POST",
 		csrfField(sess),
 		view.FormRow{Name: "label", Label: "Label", Kind: view.InputText, Value: text(f.Label), Error: f.LabelErr, Placeholder: "optional"},
 		view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(f.Server), Error: f.ServerErr, Required: true, Mono: true,
-			Hint: ".well-known is tried first, then the URL exactly as typed."},
+			// The first step monospaced, as the frame sets it (s-profile-2).
+			HintRuns: serverURLHint(f.Server)},
 		view.FormRow{Name: "login", Label: "Username", Kind: view.InputText, Value: text(f.Login)},
 		password,
 		view.FormRow{Name: "noPassword", Label: "The server asks no password", Kind: view.InputCheck, Value: text(boolStr(f.NoPassword)),
@@ -533,8 +645,11 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 				{Value: "revoke", Label: "Revoke them", Selected: f.LinksAns == "revoke"},
 			}})
 	}
-	// The caret is in Server URL: Label is optional (s-profile-2).
-	form = focused(form, "server")
+	// The caret is in Server URL: Label is optional (s-profile-2). The edit
+	// puts it nowhere (s-profile-16).
+	if f.Editing == "" && !f.Refused {
+		form = focused(form, "server")
+	}
 	if f.Editing != "" {
 		form.Action = action
 		return withPrimary(form, id, label,
@@ -543,8 +658,19 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 	// The dialog is the content of main, not a sheet over the screen: the
 	// client has nothing to close it with, so its Cancel is here (C-7.2).
 	return withPrimary(form, id, label,
-		view.Action{ID: "connection.test", Label: "Test only", Href: s.route("/app/settings/connections/test"), Method: "POST", Enabled: true},
+		view.Action{ID: "connection.test", Label: "Test only", Href: s.route("/app/settings/connections/new/test"), Method: "POST", Enabled: true},
 		view.Action{ID: "connection.add.cancel", Label: "Cancel", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true})
+}
+
+// serverURLHint is what Server URL says under it (s-profile-2): the first
+// step monospaced; for an address of Baikal's shape (…/dav.php/) why it is
+// the address to type (s-profile-24).
+func serverURLHint(server string) view.Runs {
+	r := join(codeRun(".well-known"), " is tried first, then the URL exactly as typed.")
+	if strings.Contains(server, "/dav.php") {
+		r = join(codeRun(".well-known"), " is tried first, then the URL exactly as typed — which is the reliable path for Baikal.")
+	}
+	return r
 }
 
 // connectionCard never carries the password. Outside the unlock window Show
@@ -563,14 +689,14 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			Method: "POST", Enabled: true,
 		}, {
 			ID: "connection.edit", Label: "Edit",
-			Href:   s.postQuery("/app/settings/connections", url.Values{"op": {"edit"}, "account": {c.ID}}),
+			Href:   s.route("/app/settings/connections/" + url.PathEscape(c.ID) + "/edit"),
 			Method: "GET", Enabled: true,
 		}, {
 			ID: "connection.disconnect", Label: "Disconnect", Danger: true,
 			Href:   s.postQuery("/app/settings/connections/disconnect", url.Values{"account": {c.ID}}),
 			Method: "GET", Enabled: true,
 		}, {
-			ID: "connection.rediscover", Label: "Look for changes",
+			ID: "connection.rediscover", Label: "Update collection list",
 			Href:   s.postQuery("/app/settings/connections", url.Values{"op": {"rediscover"}, "account": {c.ID}}),
 			Method: "POST", Enabled: true,
 		}},
@@ -630,7 +756,8 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 		row.Objects = objectsOf(sess, c.ID, col)
 		row.Tick = tickOf(blob, c.ID, col)
 		row.Toggle = view.Action{ID: "collection.tick", Label: row.Label, Method: "POST", Enabled: true,
-			Href: s.postQuery("/app/settings/connections", url.Values{"op": {"tick"}, "account": {c.ID}, "path": {col.Path}})}
+			Href: s.postQuery("/app/settings/connections", url.Values{"op": {"pick"}})}
+		row.Pick = c.ID + "|" + col.Path
 		row.Menu = s.collectionRowMenu(blob, c, col)
 		card.Collections = append(card.Collections, row)
 		if r, ok := sess.ReadingOf(c.ID, col.Path); ok {
@@ -642,6 +769,19 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			}
 		}
 	}
+	// Folders after the calendars and address books (s-profile-1, -27): a
+	// collection found later stands with its kind's neighbours, not after
+	// Files.
+	slices.SortStableFunc(card.Collections, func(a, b view.CollectionRow) int {
+		af, bf := slices.Contains(a.Kinds, view.KindFile), slices.Contains(b.Kinds, view.KindFile)
+		switch {
+		case af == bf:
+			return 0
+		case af:
+			return 1
+		}
+		return -1
+	})
 	// The address line (s-profile-1): a storage whose server named no
 	// principal says so, and «last answer» is the newest read of any of its
 	// collections this session made.
@@ -659,6 +799,15 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 		card.Refused, card.Answered, card.Note = true, "", text(note)
 		card.State = view.CollectionUnavailable
 		card.Actions[0].Label = "Test again"
+		// Nothing is made on a server that refuses: the card has no New
+		// collection or New folder (s-profile-1, baikal).
+		var kept []view.Action
+		for _, a := range card.Actions {
+			if a.ID != "collection.new" && a.ID != "folder.new" {
+				kept = append(kept, a)
+			}
+		}
+		card.Actions = kept
 	}
 	return card
 }
@@ -821,7 +970,7 @@ func (s *Server) shownPassword(password string) *view.SecretField {
 	return &view.SecretField{
 		Shown:  true,
 		Value:  text(password),
-		Reveal: view.Action{ID: "connection.password", Label: "Hide", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+		Reveal: view.Action{ID: "connection.password", Label: "Hide password", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
 	}
 }
 
@@ -843,7 +992,7 @@ func goneNotice(blob sealed.Blob) (view.Notice, bool) {
 	return view.Notice{
 		Role:  view.NoticeInfo,
 		Title: text("Gone from the server"),
-		Body:  text("No longer on the server: " + strings.Join(names, ", ") + ". Where they were selected they stay, marked gone; Look for changes offers them again if they come back."),
+		Body:  text("No longer on the server: " + strings.Join(names, ", ") + ". Where they were selected they stay, marked gone; Update collection list takes them back if they come back."),
 	}, true
 }
 
@@ -872,7 +1021,50 @@ func catalogEntries(found []discover.Collection) []sealed.Collection {
 // connectHref opens the dialog Connect account (s-profile-2): the head of
 // the connections and the foot of every rail go there.
 func (s *Server) connectHref() string {
-	return s.postQuery("/app/settings/connections", url.Values{"op": {"add"}})
+	return s.route("/app/settings/connections/new")
+}
+
+// The dialogs of the connections at their own addresses (s-profile-2, -24,
+// -16; Typecase's notes 92, 94): Connect account and its test at …/new,
+// the edit of one at …/{account}/edit. They are the page of the
+// connections with the dialog open.
+func (s *Server) getConnectionNew(w http.ResponseWriter, r *http.Request) {
+	s.getSettingsConnections(w, withValues(r, url.Values{"op": {"add"}}))
+}
+
+func (s *Server) postConnectionNew(w http.ResponseWriter, r *http.Request) {
+	s.addConnection(w, r)
+}
+
+func (s *Server) postConnectionNewTest(w http.ResponseWriter, r *http.Request) {
+	s.postSettingsConnectionsTest(w, r)
+}
+
+func (s *Server) getConnectionEdit(w http.ResponseWriter, r *http.Request) {
+	s.getSettingsConnections(w, withValues(r, url.Values{"op": {"edit"}, "account": {r.PathValue("account")}}))
+}
+
+func (s *Server) postConnectionEdit(w http.ResponseWriter, r *http.Request) {
+	s.editConnection(w, withValues(r, url.Values{"account": {r.PathValue("account")}}))
+}
+
+// withValues is r with vs set in its query: a route of its own answered by
+// the handler that reads them there.
+func withValues(r *http.Request, vs url.Values) *http.Request {
+	r2 := r.Clone(r.Context())
+	q := r2.URL.Query()
+	for k, v := range vs {
+		q[k] = v
+	}
+	r2.URL.RawQuery = q.Encode()
+	// A form already read (the token's check reads it) keeps its fields:
+	// the values go into it as well.
+	if r2.Form != nil {
+		for k, v := range vs {
+			r2.Form[k] = v
+		}
+	}
+	return r2
 }
 
 func (s *Server) connectAction() view.Action {

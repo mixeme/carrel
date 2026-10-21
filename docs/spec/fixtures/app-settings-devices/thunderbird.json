@@ -23,6 +23,8 @@
         "value": "secret"
       },
       "qr": "",
+      "reason": "",
+      "refused": "",
       "rows": [
         {
           "colour": "#4a6b52",
@@ -126,6 +128,7 @@
           "included": true,
           "kind": "note",
           "label": "Общие с семьёй",
+          "readOnly": true,
           "type": "CalDAV",
           "url": "https://nextcloud.example/dav.php/alice/calendars/zapiski-obshchie/"
         },
@@ -186,6 +189,8 @@
         "value": "secret"
       },
       "qr": "",
+      "reason": "",
+      "refused": "",
       "rows": [
         {
           "colour": "#6b4e7a",
@@ -229,6 +234,7 @@
           "included": true,
           "kind": "contact",
           "label": "Команда",
+          "readOnly": true,
           "type": "CardDAV",
           "url": "https://radicale.example/alice/contacts/komanda/"
         },
@@ -252,15 +258,8 @@
       "toggle": null
     },
     {
-      "actions": [
-        {
-          "enabled": true,
-          "id": "device.password.copy",
-          "label": "Copy password",
-          "method": "GET"
-        }
-      ],
-      "included": true,
+      "actions": [],
+      "included": false,
       "label": "baikal",
       "login": "alice",
       "password": {
@@ -270,27 +269,13 @@
           "label": "",
           "method": ""
         },
-        "shown": true,
-        "value": "secret"
+        "shown": false,
+        "value": ""
       },
       "qr": "",
-      "rows": [
-        {
-          "colour": "#9a9280",
-          "copy": {
-            "enabled": true,
-            "href": "https://baikal.example/dav.php/alice/calendars/obshchij/",
-            "id": "device.copy",
-            "label": "Copy",
-            "method": "GET"
-          },
-          "included": true,
-          "kind": "event",
-          "label": "Общий",
-          "type": "CalDAV",
-          "url": "https://baikal.example/dav.php/alice/calendars/obshchij/"
-        }
-      ],
+      "reason": "The server refused the saved password.",
+      "refused": "the server refused the saved password",
+      "rows": [],
       "title": "baikal · alice",
       "toggle": null
     }
@@ -351,7 +336,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [],
     "nav": [
       {
@@ -401,7 +386,7 @@
         "on": true
       },
       {
-        "count": 0,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/davloom",
         "id": "settings.davloom",
@@ -409,7 +394,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/backup",
         "icon": "i-archive",
@@ -444,16 +429,41 @@
       {
         "line": [
           {
-            "text": "No device has connected since the start."
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
           }
         ],
-        "title": "davloom · running · 0 devices",
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
         "tone": "on"
       }
     ],
     "tags": [],
     "ticks": null
   },
+  "subtitle": "Everything discovery found — as one file or one code",
   "tab": "thunderbird",
   "title": "Set up a new device",
   "top": {
@@ -536,10 +546,12 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
       "answered": "",
       "running": false

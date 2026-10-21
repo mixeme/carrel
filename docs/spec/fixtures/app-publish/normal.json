@@ -12,7 +12,7 @@
     },
     {
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
       "id": "publish.cancel",
       "label": "Cancel",
       "method": "GET"
@@ -34,7 +34,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/contacts/a-nc-home/kontakty",
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
         "id": "publish.cancel",
         "label": "Cancel",
         "method": "GET"
@@ -201,5 +201,6 @@
   "local": true,
   "note": "",
   "target": "Анна Ковалёва",
-  "title": "Publish a contact"
+  "title": "Publish a contact",
+  "under": null
 }

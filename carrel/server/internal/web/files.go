@@ -655,7 +655,7 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 	// storage says so last (states-34).
 	page.Subtitle, page.Count = text(connLabel(c.conn)), text(plural(len(entries), "item"))
 	if c.col.ReadOnly {
-		page.Access = "read-only: nothing can be uploaded or made here"
+		page.ReadOnly = true // its badge after the count (states-34)
 	}
 	// «attachment folder» by the line (s-files-1): this folder is the one
 	// attachments are written to (S-20).

@@ -1,0 +1,1308 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/settings/backup/new",
+      "icon": "i-plus",
+      "id": "backup.new",
+      "label": "New job",
+      "method": "GET",
+      "primary": true
+    },
+    {
+      "enabled": true,
+      "href": "/app/settings/backup/restore",
+      "icon": "i-restore",
+      "id": "restore.start",
+      "label": "Restore",
+      "method": "GET"
+    }
+  ],
+  "add": {
+    "action": "/app/settings/backup?op=create",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/settings/backup?op=create",
+        "id": "backup.create",
+        "label": "Create",
+        "method": "POST",
+        "primary": true
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "focus": true,
+            "hint": "",
+            "kind": "text",
+            "label": "Name",
+            "name": "name",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Job is on",
+            "name": "on",
+            "options": [
+              {
+                "label": "Job is on",
+                "selected": true,
+                "value": "1"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "1"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "hintRuns": [
+          {
+            "text": "Files go as files; calendars, tasks and notes as "
+          },
+          {
+            "mark": "mono",
+            "text": ".ics"
+          },
+          {
+            "text": ", address books as "
+          },
+          {
+            "mark": "mono",
+            "text": ".vcf"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "legend": "What to copy",
+        "legendAside": "nothing chosen",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "What to copy",
+            "name": "src",
+            "options": [
+              {
+                "colour": "#4a6b52",
+                "group": "nextcloud",
+                "label": "Личный",
+                "meta": "cal.",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/lichnyj/"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Дела",
+                "meta": "tasks",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/dela/"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Работа",
+                "meta": "cal.",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/rabota/"
+              },
+              {
+                "colour": "#a05a2c",
+                "label": "Дни рождения",
+                "meta": "cal.",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/dni-rozhdeniya/"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Записи",
+                "meta": "notes",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/zapisi/"
+              },
+              {
+                "colour": "#6b4e7a",
+                "label": "Дневник",
+                "meta": "notes",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/dnevnik/"
+              },
+              {
+                "colour": "#3f6e8c",
+                "label": "Общие с семьёй",
+                "meta": "notes",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/zapiski-obshchie/"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Контакты",
+                "meta": "book",
+                "selected": false,
+                "value": "a-nc-home|/alice/contacts/kontakty/"
+              },
+              {
+                "colour": "#a05a2c",
+                "label": "Архив",
+                "meta": "book",
+                "selected": false,
+                "value": "a-nc-home|/alice/contacts/arhiv/"
+              },
+              {
+                "colour": "#9a9280",
+                "label": "Files",
+                "meta": "files",
+                "selected": false,
+                "value": "a-nc-home|/alice/files/Files/"
+              },
+              {
+                "colour": "#9a9280",
+                "group": "baikal",
+                "label": "Общий",
+                "meta": "cal.",
+                "selected": false,
+                "value": "a-baikal|/alice/calendars/obshchij/"
+              },
+              {
+                "colour": "#a05a2c",
+                "group": "sftpgo · vps",
+                "label": "Documents",
+                "meta": "files",
+                "selected": false,
+                "value": "a-sftp-vps|/alice/files/Documents/"
+              },
+              {
+                "colour": "#a05a2c",
+                "label": "Public",
+                "meta": "files · ro",
+                "selected": false,
+                "value": "a-sftp-vps|/alice/files/Public/"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Where to",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "hintRuns": [
+              {
+                "mark": "strong",
+                "text": "Download"
+              },
+              {
+                "text": " streams the archive out and writes nothing to the server: no folder, no retention — the copy is yours to keep. It can still run at three in the morning, but only on an external trigger, because a stream needs somebody at the other end: a browser is not there at that hour, a machine with a disk is. "
+              },
+              {
+                "mark": "strong",
+                "text": "Both"
+              },
+              {
+                "text": " does the two at once — and then the trigger has "
+              },
+              {
+                "mark": "strong",
+                "text": "two steps"
+              },
+              {
+                "text": ", because the file still has to be taken."
+              }
+            ],
+            "kind": "radio",
+            "label": "Where to",
+            "name": "mode",
+            "options": [
+              {
+                "label": "To WebDAV",
+                "selected": true,
+                "value": "webdav"
+              },
+              {
+                "label": "Download",
+                "selected": false,
+                "value": "download"
+              },
+              {
+                "label": "Both",
+                "selected": false,
+                "value": "both"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Collection",
+            "name": "dest",
+            "options": [
+              {
+                "colour": "#9a9280",
+                "label": "nextcloud · Files",
+                "selected": true,
+                "value": "a-nc-home|/alice/files/Files/"
+              },
+              {
+                "colour": "#a05a2c",
+                "label": "sftpgo · vps · Documents",
+                "selected": false,
+                "value": "a-sftp-vps|/alice/files/Documents/"
+              },
+              {
+                "colour": "#a05a2c",
+                "disabled": true,
+                "label": "sftpgo · vps · Public",
+                "reason": "Read-only: this account cannot write here",
+                "selected": false,
+                "value": "a-sftp-vps|/alice/files/Public/"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": {
+              "csrf": "csrf",
+              "enabled": true,
+              "href": "/app/settings/backup?job=new\u0026op=browse",
+              "id": "backup.browse",
+              "label": "Browse",
+              "method": "POST",
+              "submits": true
+            },
+            "hint": "",
+            "kind": "text",
+            "label": "Folder in it",
+            "mono": true,
+            "name": "folder",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "hintRuns": [
+              {
+                "text": "Copies past the eighth are deleted "
+              },
+              {
+                "mark": "strong",
+                "text": "after"
+              },
+              {
+                "text": " the new one has been read back and checked, not before. The file is dated and never overwritten."
+              }
+            ],
+            "kind": "number",
+            "label": "Keep copies",
+            "mono": true,
+            "name": "keep",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "8"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "How the archive is closed",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it.",
+            "kind": "check",
+            "label": "Encrypt the archive",
+            "name": "encrypted",
+            "options": [
+              {
+                "label": "Encrypt the archive",
+                "selected": true,
+                "value": "1"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "1"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "Separate from the sign-in password.",
+            "kind": "password",
+            "label": "Archive password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "hintRuns": [
+          {
+            "mark": "strong",
+            "text": "Also started by"
+          },
+          {
+            "mark": "break",
+            "text": ""
+          },
+          {
+            "text": "• Run now — in the job list"
+          },
+          {
+            "mark": "break",
+            "text": ""
+          },
+          {
+            "text": "• Your own clock — "
+          },
+          {
+            "mark": "mono",
+            "text": "cron"
+          },
+          {
+            "text": ", GoSentry, a job in Gitea, "
+          },
+          {
+            "mark": "mono",
+            "text": "curl"
+          },
+          {
+            "text": ": External trigger in the job’s menu"
+          }
+        ],
+        "legend": "When",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "On sign-in, if the last copy is older than",
+            "name": "signin.on",
+            "options": [
+              {
+                "label": "On sign-in, if the last copy is older than",
+                "selected": true,
+                "value": "on"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "on"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Days",
+            "mono": true,
+            "name": "signin",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "7"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
+  "delete": null,
+  "deleteNote": "",
+  "details": null,
+  "empty": [],
+  "emptyNote": [],
+  "history": [
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/backup/restore?from=job\u0026run=j-job%7Cr-run",
+          "icon": "i-restore",
+          "id": "backup.restore",
+          "label": "Restore",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job\u0026op=get\u0026run=r-run",
+          "icon": "i-download",
+          "id": "backup.get",
+          "label": "Download",
+          "method": "GET"
+        }
+      ],
+      "at": "2026-08-16 03:10",
+      "collections": "3 / 3",
+      "id": "r-run",
+      "job": "Рабочее, ежедневно",
+      "size": "18.4 MB",
+      "trigger": "external",
+      "verified": [
+        {
+          "text": "read back"
+        }
+      ],
+      "via": "cbk_…lamp · 10.0.0.5",
+      "whole": true
+    },
+    {
+      "actions": [],
+      "at": "2026-08-15 21:40",
+      "collections": "—",
+      "id": "r-run",
+      "job": "Рабочее, ежедневно",
+      "size": "—",
+      "trigger": "external",
+      "verified": [
+        {
+          "mark": "danger",
+          "text": "refused: not this job’s password"
+        }
+      ],
+      "via": "cbk_…91de · 203.0.113.7",
+      "whole": true
+    },
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/backup/restore?from=job\u0026run=j-job%7Cr-run",
+          "icon": "i-restore",
+          "id": "backup.restore",
+          "label": "Restore",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job\u0026op=get\u0026run=r-run",
+          "icon": "i-download",
+          "id": "backup.get",
+          "label": "Download",
+          "method": "GET"
+        }
+      ],
+      "at": "2026-08-15 03:10",
+      "collections": "2 / 3",
+      "id": "r-run",
+      "job": "Рабочее, ежедневно",
+      "size": "18.2 MB",
+      "trigger": "external",
+      "verified": [
+        {
+          "text": "read back"
+        },
+        {
+          "text": " · "
+        },
+        {
+          "hint": "baikal · Общий: the server answered 401, so this collection is not in the archive. The other two were read back.",
+          "mark": "danger",
+          "text": "1 not copied"
+        }
+      ],
+      "via": "cbk_…lamp · 10.0.0.5",
+      "whole": false
+    },
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/backup/restore?from=job\u0026run=j-job2%7Cr-run",
+          "icon": "i-restore",
+          "id": "backup.restore",
+          "label": "Restore",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job2\u0026op=get\u0026run=r-run",
+          "icon": "i-download",
+          "id": "backup.get",
+          "label": "Download",
+          "method": "GET"
+        }
+      ],
+      "at": "2026-08-14 09:12",
+      "collections": "2 / 2 + 1 240 files",
+      "id": "r-run",
+      "job": "Личное на домашний диск",
+      "size": "2.1 GB",
+      "trigger": "on sign-in",
+      "verified": [
+        {
+          "text": "read back"
+        }
+      ],
+      "via": "",
+      "whole": true
+    },
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/backup/restore?from=job\u0026run=j-job2%7Cr-run",
+          "icon": "i-restore",
+          "id": "backup.restore",
+          "label": "Restore",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job2\u0026op=get\u0026run=r-run",
+          "icon": "i-download",
+          "id": "backup.get",
+          "label": "Download",
+          "method": "GET"
+        }
+      ],
+      "at": "2026-08-10 17:04",
+      "collections": "4 / 4",
+      "id": "r-run",
+      "job": "Личное на домашний диск",
+      "size": "4.1 KB",
+      "trigger": "by hand",
+      "verified": [
+        {
+          "text": "read back"
+        }
+      ],
+      "via": "",
+      "whole": true
+    }
+  ],
+  "job": null,
+  "jobs": [
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job\u0026op=run",
+          "id": "backup.run",
+          "label": "Run",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job",
+          "id": "backup.edit",
+          "label": "Edit",
+          "method": "GET"
+        }
+      ],
+      "copies": "2 collections",
+      "encrypted": true,
+      "external": {
+        "enabled": true,
+        "href": "/app/settings/backup/trigger?job=j-job",
+        "id": "backup.trigger",
+        "label": "External trigger",
+        "method": "GET",
+        "target": "sheet"
+      },
+      "keep": 14,
+      "lastNote": [
+        {
+          "text": "18.4 MB · "
+        },
+        {
+          "hint": "The archive was read back from the destination and the checksum matched",
+          "text": "verified"
+        }
+      ],
+      "lastRun": "2026-08-16 03:10",
+      "lastState": "done",
+      "marks": [
+        "#3f6e8c",
+        "#4a6b52"
+      ],
+      "name": "Рабочее, ежедневно",
+      "on": true,
+      "toggle": {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/settings/backup?job=j-job\u0026op=switch",
+        "id": "backup.switch",
+        "label": "Turn the job off",
+        "method": "POST"
+      },
+      "triggered": true,
+      "when": "",
+      "whenNote": "",
+      "where": "sftpgo · vps · Documents",
+      "whereNote": "/backup/work"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job2\u0026op=run",
+          "id": "backup.run",
+          "label": "Run",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job2",
+          "id": "backup.edit",
+          "label": "Edit",
+          "method": "GET"
+        }
+      ],
+      "copies": "3 collections",
+      "encrypted": true,
+      "external": {
+        "enabled": true,
+        "href": "/app/settings/backup/trigger?job=j-job2",
+        "id": "backup.trigger",
+        "label": "External trigger",
+        "method": "GET",
+        "target": "sheet"
+      },
+      "keep": 8,
+      "lastNote": [
+        {
+          "text": "4.1 KB · "
+        },
+        {
+          "hint": "The archive was read back from the destination and the checksum matched",
+          "text": "verified"
+        }
+      ],
+      "lastRun": "2026-08-10 17:04",
+      "lastState": "done",
+      "marks": [
+        "#4a6b52",
+        "#3f6e8c",
+        "#a05a2c"
+      ],
+      "name": "Личное на домашний диск",
+      "on": true,
+      "toggle": {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/settings/backup?job=j-job2\u0026op=switch",
+        "id": "backup.switch",
+        "label": "Turn the job off",
+        "method": "POST"
+      },
+      "when": "on sign-in",
+      "whenNote": "if older than 7 days",
+      "where": "nextcloud · Files",
+      "whereNote": "/carrel-backup"
+    },
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job3\u0026op=download",
+          "id": "backup.run",
+          "label": "Run",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?job=j-job3",
+          "id": "backup.edit",
+          "label": "Edit",
+          "method": "GET"
+        }
+      ],
+      "copies": "1 book",
+      "encrypted": false,
+      "external": {
+        "enabled": true,
+        "href": "/app/settings/backup/trigger?job=j-job3",
+        "id": "backup.trigger",
+        "label": "External trigger",
+        "method": "GET",
+        "target": "sheet"
+      },
+      "keep": 0,
+      "lastNote": [],
+      "lastRun": "",
+      "lastState": "",
+      "marks": [
+        "#a05a2c"
+      ],
+      "name": "Contacts archive, by hand",
+      "on": false,
+      "toggle": {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/settings/backup?job=j-job3\u0026op=switch",
+        "id": "backup.switch",
+        "label": "Turn the job on",
+        "method": "POST"
+      },
+      "when": "",
+      "whenNote": "",
+      "where": "download in browser",
+      "whereNote": "nothing is written"
+    }
+  ],
+  "jobsHint": "verified — the archive was read back from where it was written and the checksum matched. Written and not read back is not verified, and is marked red.",
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 3 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-user",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-server",
+        "id": "settings.connections",
+        "label": "Connections",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "icon": "i-file",
+        "id": "settings.attachments",
+        "label": "Attachments",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "icon": "i-device",
+        "id": "settings.devices",
+        "label": "New device",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-archive",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-link",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "icon": "i-theme",
+        "id": "settings.appearance",
+        "label": "Appearance",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
+          }
+        ],
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
+        "tone": "on"
+      }
+    ],
+    "tags": [],
+    "ticks": null
+  },
+  "restore": {
+    "actions": [],
+    "from": [
+      {
+        "enabled": true,
+        "href": "/app/settings/backup/restore?from=job",
+        "id": "restore.from.job",
+        "label": "From a job",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/backup/restore?from=server",
+        "id": "restore.from.server",
+        "label": "From a server",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/backup/restore?from=file",
+        "id": "restore.from.file",
+        "label": "From this computer",
+        "method": "GET"
+      }
+    ],
+    "fromHint": "One archive, one of three. The other two stay empty until you switch.",
+    "match": null,
+    "note": [
+      {
+        "text": "Restoring "
+      },
+      {
+        "mark": "strong",
+        "text": "creates"
+      },
+      {
+        "text": " records, the way import does: a colliding UID gets a fresh one and a line in the report. Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes."
+      }
+    ],
+    "open": true,
+    "report": {
+      "done": {
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "id": "restore.done",
+        "label": "Done",
+        "method": "GET",
+        "primary": true
+      },
+      "note": "Nothing on the server was deleted or overwritten.",
+      "rows": [
+        {
+          "colour": "#4a6b52",
+          "created": 1,
+          "happened": [
+            {
+              "text": "1 missing record created"
+            }
+          ],
+          "into": "nextcloud · Личный",
+          "name": "nextcloud / Личный"
+        },
+        {
+          "colour": "#3f6e8c",
+          "created": 0,
+          "happened": [
+            {
+              "text": "no differences"
+            }
+          ],
+          "into": "nextcloud · Работа",
+          "name": "nextcloud / Работа",
+          "same": true
+        },
+        {
+          "colour": "#9a9280",
+          "created": 0,
+          "happened": [
+            {
+              "mark": "danger",
+              "text": "1 not restored: the server refused it (413, too large)"
+            }
+          ],
+          "into": "nextcloud · Личный",
+          "name": "radicale · vps / Проекты"
+        }
+      ],
+      "subtitle": "3 collections · 1 record created · 1 not restored",
+      "title": "Restored from 2026-08-10"
+    },
+    "source": {
+      "action": "/app/settings/backup/restore",
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/settings/backup/restore",
+          "id": "restore.open",
+          "label": "Open the manifest",
+          "method": "POST",
+          "primary": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup",
+          "id": "restore.close",
+          "label": "Cancel",
+          "method": "GET"
+        }
+      ],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "source",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "run"
+            }
+          ],
+          "unfold": null
+        },
+        {
+          "legend": "From a job",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "radio",
+              "label": "From a job",
+              "name": "run",
+              "options": [
+                {
+                  "columns": [
+                    "2026-08-16 03:10",
+                    "18.4 MB",
+                    "3 collections"
+                  ],
+                  "label": "Рабочее, ежедневно",
+                  "selected": true,
+                  "value": "j-job|r-run"
+                },
+                {
+                  "columns": [
+                    "2026-08-14 09:12",
+                    "2.1 GB",
+                    "2 collections"
+                  ],
+                  "label": "Личное на домашний диск",
+                  "selected": false,
+                  "value": "j-job2|r-run"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        },
+        {
+          "legend": "Archive password",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "The one set in the job, not your sign-in password.",
+              "kind": "password",
+              "label": "Archive password",
+              "name": "password",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
+    "subtitle": [
+      {
+        "text": "Nothing is written until you have seen what goes where"
+      }
+    ],
+    "title": "Restore"
+  },
+  "subtitle": [
+    {
+      "text": "Three jobs · their own sources, destinations and triggers"
+    }
+  ],
+  "title": "Backup",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

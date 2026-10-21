@@ -141,7 +141,7 @@ func TestRestoreStepsAreTheFrames(t *testing.T) {
 	run := runJob(t, f, job)
 	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
 	sameActionMarks(t, "s-backup-7", "restore source", page.Restore.Source.Actions, nil)
-	if rec := f.h.do(postForm("/app/settings/backup?op=restore-open", f.sess, url.Values{
+	if rec := f.h.do(postForm("/app/settings/backup/restore", f.sess, url.Values{
 		"source": {"run"}, "run": {job.ID + "|" + run.ID}, "password": {"archive-pw"},
 	})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("open: %d", rec.Code)

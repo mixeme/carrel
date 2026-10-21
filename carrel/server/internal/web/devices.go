@@ -121,8 +121,8 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 	blob := s.catalogOf(sess)
 	key, live := sess.DataKey()
 	unlocked := live && sess.UnlockUntil(s.now()) != nil
-	page := view.DevicesPage{Shell: s.buildShell(sess, "Set up a new device"), Tab: tab}
-	page.Rail = s.settingsRail(sess, "/app/settings/devices")
+	page := view.DevicesPage{Shell: s.settingsShell(sess, "Set up a new device", "/app/settings/devices", "/app/settings/devices"), Tab: tab,
+		Subtitle: "Everything discovery found — as one file or one code"}
 	page.Notices = append(page.Notices, notices...)
 	for _, t := range deviceTabs {
 		// The tab shown now is on and stays a choice (C-6.2).
@@ -156,6 +156,14 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 	for _, conn := range blob.Connections {
 		included := !blob.IsDeviceExcluded(conn.ID)
 		acct := view.DeviceAccount{Title: text(connLabel(conn) + " · " + conn.Login), Label: text(connLabel(conn)), Included: included}
+		// A server that refused the saved password goes in nowhere: its row
+		// off with why (s-plan-1, -2, -4; Typecase's note 94).
+		refused := s.passwordRefusedOf(sess, blob, conn)
+		if refused {
+			included = false
+			acct.Included = false
+			acct.Reason, acct.Refused = "The server refused the saved password.", "password refused"
+		}
 		dav := false
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Gone || !onTab(tab, col) {
@@ -167,12 +175,19 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 				kind = col.Kinds[0]
 			}
 			acct.Rows = append(acct.Rows, view.DeviceRow{
-				Label: text(collectionLabel(col)), Colour: catalogColour(col), Kind: kind, Type: text(davType(col)), URL: text(u), Included: included,
+				Label: text(collectionLabel(col)), Colour: catalogColour(col), Kind: kind, Type: text(davType(col)), URL: text(u), Included: included, ReadOnly: col.ReadOnly,
 				Copy: view.Action{ID: "device.copy", Label: "Copy", Href: u, Method: "GET", Enabled: true},
 			})
 			dav = dav || !col.Has(view.KindFile)
 		}
 		if len(acct.Rows) == 0 {
+			continue
+		}
+		if refused && (tab == view.TabThunderbird || tab == view.TabOther) {
+			// The account's row alone, without its password and its
+			// addresses (s-plan-4, -5).
+			acct.Rows, acct.Login, acct.Refused = nil, text(conn.Login), "the server refused the saved password"
+			page.Accounts = append(page.Accounts, acct)
 			continue
 		}
 		if dav && included {
@@ -209,6 +224,9 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 				ID: "device." + op, Label: text(label), Method: "POST", Enabled: true,
 				Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "op": {op}, "account": {conn.ID}}),
 			}
+			if refused {
+				acct.Toggle.Enabled, acct.Toggle.Reason = false, acct.Reason
+			}
 		}
 		page.Accounts = append(page.Accounts, acct)
 	}
@@ -231,7 +249,7 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 			gen.Enabled, gen.Reason = false, "No included account has calendars or address books."
 		case !unlocked:
 			gen.Method, gen.Href = "GET", unlock
-			page.Note = "Confirm your password first: the profile hands out the credentials of every included account."
+			page.Note = "Asks for your Carrel password first." // s-plan-6
 		default:
 			page.Note = "Issued inside the unlock window: nothing more is asked."
 		}
@@ -245,6 +263,18 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 	// Anything else says nothing under its rows but the window (s-plan-5,
 	// Нс44): a WebDAV address is what the person came for.
 	return page
+}
+
+// passwordRefusedOf is whether conn's server refused the saved password at
+// its last answer to this session: a reading of one of its collections
+// refused as unauthorised, after the last that went through.
+func (s *Server) passwordRefusedOf(sess *session.Session, blob sealed.Blob, conn sealed.Connection) bool {
+	for _, col := range blob.CollectionsOf(conn.ID) {
+		if r, ok := sess.ReadingOf(conn.ID, col.Path); ok && r.Unauthorized && !r.Refused.Before(r.At) {
+			return true
+		}
+	}
+	return false
 }
 
 // profileLink is the card of the link last issued while it is still to be
@@ -265,7 +295,7 @@ func (s *Server) profileLink(sess *session.Session, tab view.DeviceTab) *view.De
 		Local: s.instanceLocal(),
 		Hint:  "It opens once, for you signed in to Carrel. Open it on the device, install the profile, then delete the file.",
 		Actions: []view.Action{
-			{ID: "device.profile.download", Label: "Download profile", Href: s.postQuery("/app/settings/devices/profile", url.Values{"t": {token}}), Method: "GET", Enabled: true},
+			{ID: "device.profile.download", Label: "Download profile", Icon: "i-download", Href: s.postQuery("/app/settings/devices/profile", url.Values{"t": {token}}), Method: "GET", Enabled: true},
 			{ID: "device.profile.revoke", Label: "Revoke", Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "op": {"revoke"}}), Method: "POST", Enabled: true, Danger: true},
 		},
 	}

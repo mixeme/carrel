@@ -34,6 +34,8 @@ var (
 	frameSheetT   = regexp.MustCompile(`(?s)<b class="tc-sheet__title">(.*?)</b>`)
 	frameSheetF   = regexp.MustCompile(`(?s)<div class="tc-sheet__foot">(.*?)</div>`)
 	frameMono     = regexp.MustCompile(`(?s)<span class="tc-mono">(.*?)</span>`)
+	framePlain    = regexp.MustCompile(`(?s)<span class="tc-plain">(.*?)</span>`)
+	frameSend     = regexp.MustCompile(`(?s)<button class="tc-btn" type="submit" formaction="[^"]*">(.*?)</button>`)
 )
 
 func frameAll(re *regexp.Regexp, s string, group int) []string {
@@ -60,11 +62,9 @@ func frameBlock(t *testing.T, frame, rubric string) string {
 
 type frameEmail struct {
 	label, value, change, hint string
-	badge, badgeRole           string
-	msg, msgRole, button       string
-	// mono is what the message sets in mono: the addresses (account-9, -10;
-	// Нс10)
-	mono []string
+	// The state in the rubric (Typecase's note 90): the badge, the words
+	// beside it, the button after Change.
+	badge, badgeRole, aside, send string
 }
 
 func readFrameEmail(t *testing.T, id string) frameEmail {
@@ -83,11 +83,11 @@ func readFrameEmail(t *testing.T, id string) frameEmail {
 	if m := frameBadge.FindStringSubmatch(block); m != nil {
 		f.badgeRole, f.badge = m[1], frameText(m[2])
 	}
-	if m := frameMsg.FindStringSubmatch(block); m != nil {
-		// An address is set in mono inside the sentence: its closing tag is
-		// not a word break («new@example.org: until…», account-10).
-		f.msgRole, f.msg, f.button = m[1], frameText(strings.ReplaceAll(m[2], "</span>", "")), frameText(m[3])
-		f.mono = frameAll(frameMono, m[2], 1)
+	if m := framePlain.FindStringSubmatch(block); m != nil {
+		f.aside = frameText(m[1])
+	}
+	if m := frameSend.FindStringSubmatch(block); m != nil {
+		f.send = frameText(m[1])
 	}
 	if f.label == "" || f.value == "" || f.hint == "" {
 		t.Fatalf("%s: the Email block did not read: %+v", id, f)
@@ -107,8 +107,12 @@ func checkEmailBlock(t *testing.T, id string, page view.AccountPage, state view.
 	t.Helper()
 	want := readFrameEmail(t, id)
 	row := profileRow(page.Profile, "email")
-	if string(row.Label) != want.label || string(row.Value) != want.value || string(row.Hint) != want.hint {
-		t.Errorf("%s: Address row = %q %q %q, the frame draws %q %q %q", id, row.Label, row.Value, row.Hint, want.label, want.value, want.hint)
+	hint := string(row.Hint)
+	if len(row.HintRuns) > 0 {
+		hint = runsText(row.HintRuns)
+	}
+	if string(row.Label) != want.label || string(row.Value) != want.value || hint != want.hint {
+		t.Errorf("%s: Address row = %q %q %q, the frame draws %q %q %q", id, row.Label, row.Value, hint, want.label, want.value, want.hint)
 	}
 	if row.Extra == nil || string(row.Extra.Label) != want.change {
 		t.Errorf("%s: the field's button = %+v, the frame draws %q", id, row.Extra, want.change)
@@ -123,39 +127,29 @@ func checkEmailBlock(t *testing.T, id string, page view.AccountPage, state view.
 	case want.badge != "" && (got.Badge == nil || string(got.Badge.Label) != want.badge || got.Badge.Role != badgeRole(want.badgeRole)):
 		t.Errorf("%s: badge = %+v, the frame draws %q (%s)", id, got.Badge, want.badge, want.badgeRole)
 	}
+	if string(got.Aside) != want.aside {
+		t.Errorf("%s: the words by the badge = %q, the frame draws %q", id, got.Aside, want.aside)
+	}
 	switch {
-	case want.msg == "" && got.Message != nil:
-		t.Errorf("%s: a message %+v the frame does not draw", id, *got.Message)
-	case want.msg != "":
-		if got.Message == nil {
-			t.Errorf("%s: no message, the frame draws %q", id, want.msg)
-			break
-		}
-		// The message is said in runs when the frame marks a piece of it,
-		// and then its Body is empty (C-6 Notice.Runs).
-		body := string(got.Message.Body)
-		if len(got.Message.Runs) > 0 {
-			if body != "" {
-				t.Errorf("%s: the message has both a Body %q and Runs", id, body)
-			}
-			body = runsText(got.Message.Runs)
-		}
-		var mono []string
-		for _, r := range got.Message.Runs {
-			if r.Mark == view.RunMono {
-				mono = append(mono, string(r.Text))
-			}
-		}
-		if strings.Join(mono, "|") != strings.Join(want.mono, "|") {
-			t.Errorf("%s: mono in the message = %q, the frame sets %q", id, mono, want.mono)
-		}
-		if body != want.msg || got.Message.Role != view.NoticeRole(want.msgRole) || got.Message.Title != "" {
-			t.Errorf("%s: message = %q (%s, title %q), the frame draws %q (%s)", id, body, got.Message.Role, got.Message.Title, want.msg, want.msgRole)
-		}
-		if len(got.Message.Actions) != 1 || string(got.Message.Actions[0].Label) != want.button {
-			t.Errorf("%s: message buttons = %v, the frame draws %q", id, labels(got.Message.Actions), want.button)
+	case want.send == "" && got.Send != nil:
+		t.Errorf("%s: a button %q after Change the frame does not draw", id, got.Send.Label)
+	case want.send != "" && (got.Send == nil || string(got.Send.Label) != want.send):
+		t.Errorf("%s: the button after Change = %+v, the frame draws %q", id, got.Send, want.send)
+	}
+	set := profileSet(page.Profile, "Email")
+	if b := got.Badge; b != nil && (len(set.Badges) != 1 || set.Badges[0] != *b || set.LegendAside != got.Aside) {
+		t.Errorf("%s: the rubric = %+v · %q, want the badge and its words", id, set.Badges, set.LegendAside)
+	}
+}
+
+// profileSet is the set of the profile form under a legend.
+func profileSet(f view.Form, legend string) view.FieldSet {
+	for _, s := range f.Sets {
+		if s.Legend == view.Text(legend) {
+			return s
 		}
 	}
+	return view.FieldSet{}
 }
 
 // accountHarness makes «mix» on the day account-1 says it was created, with
@@ -213,7 +207,12 @@ func TestAccountEmailBlockIsTheFrames(t *testing.T) {
 	if m := frameHeadSub.FindStringSubmatch(frame); m == nil || string(page.Subtitle) != frameText(m[1]) {
 		t.Errorf("subtitle = %q, the frame draws %v", page.Subtitle, m)
 	}
-	rubrics := frameAll(frameRubric, frame[strings.Index(frame, `class="tc-main"`):], 1)
+	// A rubric's own words: its badge and the words by it are the state
+	// (Typecase's note 90).
+	var rubrics []string
+	for _, m := range frameRubric.FindAllStringSubmatch(frame[strings.Index(frame, `class="tc-main"`):], -1) {
+		rubrics = append(rubrics, frameText(strings.SplitN(m[1], "<span", 2)[0]))
+	}
 	var legends []string
 	for _, set := range page.Profile.Sets {
 		legends = append(legends, string(set.Legend))
@@ -252,13 +251,13 @@ func TestAccountEmailBlockIsTheFrames(t *testing.T) {
 
 	// s-mail-9: invited by a link, the address is unproven and nothing went.
 	checkEmailBlock(t, "s-mail-9", page, view.EmailUnconfirmed)
-	if page.Email.Message == nil {
+	if page.Email.Send == nil {
 		t.FailNow()
 	}
 
 	// A letter that the relay refused is not a letter that went.
 	setDay(t, h, "2026-02-12 10:00")
-	h.do(postForm(actionHref(t, page.Email.Message.Actions, "account.confirm"), mix, url.Values{}))
+	h.do(postForm(page.Email.Send.Href, mix, url.Values{}))
 	checkEmailBlock(t, "s-mail-9", decode[view.AccountPage](t, h.do(get("/app/settings/account", mix))), view.EmailUnconfirmed)
 	h.relayed()
 
@@ -266,10 +265,10 @@ func TestAccountEmailBlockIsTheFrames(t *testing.T) {
 	// read the day after, while the link lives — to where, when, Send
 	// again. Sent the same day, the block says the clock alone.
 	setDay(t, h, "2026-02-12 11:42")
-	h.do(postForm(actionHref(t, page.Email.Message.Actions, "account.confirm"), mix, url.Values{}))
+	h.do(postForm(page.Email.Send.Href, mix, url.Values{}))
 	if today := decode[view.AccountPage](t, h.do(get("/app/settings/account", mix))); today.Email.SentAt != "11:42" ||
-		today.Email.Message == nil || !strings.HasSuffix(runsText(today.Email.Message.Runs), " at 11:42.") {
-		t.Errorf("sent today = %q, %+v", today.Email.SentAt, today.Email.Message)
+		today.Email.Send == nil || !strings.HasSuffix(string(today.Email.Aside), " 11:42") {
+		t.Errorf("sent today = %q, %q", today.Email.SentAt, today.Email.Aside)
 	}
 	setDay(t, h, "2026-02-13 09:00")
 	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", mix)))
@@ -286,7 +285,7 @@ func TestAccountEmailBlockIsTheFrames(t *testing.T) {
 	// account-8: sent once more on the 14th, opened, confirmed that day.
 	setDay(t, h, "2026-02-14 11:42")
 	relay := h.relayed()
-	h.do(postForm(actionHref(t, page.Email.Message.Actions, "account.confirm"), mix, url.Values{}))
+	h.do(postForm(page.Email.Send.Href, mix, url.Values{}))
 	letters := relay.Letters()
 	if len(letters) != 1 {
 		t.Fatalf("letters = %d", len(letters))
@@ -314,14 +313,14 @@ func TestAccountEmailBlockIsTheFrames(t *testing.T) {
 		url.Values{"name": {""}, "email": {"new@example.org"}}))
 	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", mix)))
 	checkEmailBlock(t, "account-10", page, view.EmailPending)
-	if page.Email.Message == nil {
+	if page.Email.Send == nil {
 		t.FailNow()
 	}
 
 	// account-1: a new address waits, its letter gone; the confirmed one
 	// stays in use.
 	h.relayed()
-	h.do(postForm(actionHref(t, page.Email.Message.Actions, "account.confirm"), mix, url.Values{}))
+	h.do(postForm(page.Email.Send.Href, mix, url.Values{}))
 	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", mix)))
 	checkEmailBlock(t, "account-1", page, view.EmailPending)
 	if page.Email.Pending != "new@example.org" {
@@ -423,8 +422,8 @@ func TestAccountEscrowIsTheFrames(t *testing.T) {
 	if m := frameSheetT.FindStringSubmatch(sheetPart); m == nil || string(sheet.Purpose) != frameText(m[1]) {
 		t.Errorf("sheet purpose = %q, the frame's title %v", sheet.Purpose, m)
 	}
-	if m := frameMsg.FindStringSubmatch(sheetPart); m == nil || string(sheet.Warning) != frameText(m[2]) {
-		t.Errorf("sheet warning = %q", sheet.Warning)
+	if m := frameMsg.FindStringSubmatch(sheetPart); m == nil || string(sheet.Alert) != frameText(m[2]) || sheet.For != view.UnlockForDeposit {
+		t.Errorf("sheet alert = %q, for %q", sheet.Alert, sheet.For)
 	}
 	pw := profileRow(sheet.Form, "password")
 	sameCaret(t, "account-2", "deposit", sheet.Form)
@@ -608,17 +607,16 @@ func TestPendingChangeCanBeSentAgain(t *testing.T) {
 	h.do(postForm("/app/settings/account", bob, url.Values{"name": {""}, "email": {"new@example.org"}}))
 
 	page := decode[view.AccountPage](t, h.do(get("/app/settings/account", bob)))
-	if page.Email.State != view.EmailPending || page.Email.Message == nil || len(page.Email.Message.Actions) != 1 ||
-		page.Email.Message.Actions[0].Label != "Send again" {
+	if page.Email.State != view.EmailPending || page.Email.Send == nil || page.Email.Send.Label != "Send again" {
 		t.Fatalf("pending without a letter = %+v", page.Email)
 	}
 	relay := h.relayed()
-	h.do(postForm(actionHref(t, page.Email.Message.Actions, "account.confirm"), bob, url.Values{}))
+	h.do(postForm(page.Email.Send.Href, bob, url.Values{}))
 	if letters := relay.Letters(); len(letters) != 1 || letters[0].To[0] != "new@example.org" {
 		t.Fatalf("letters = %+v", letters)
 	}
 	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", bob)))
-	if page.Email.State != view.EmailPending || page.Email.Message != nil || page.Email.SentTo != "new@example.org" {
+	if page.Email.State != view.EmailPending || page.Email.Send != nil || page.Email.SentTo != "new@example.org" {
 		t.Errorf("pending with a letter gone = %+v", page.Email)
 	}
 }

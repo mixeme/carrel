@@ -1,0 +1,636 @@
+{
+  "accounts": [
+    {
+      "actions": [],
+      "included": true,
+      "label": "nextcloud",
+      "login": "",
+      "password": {
+        "reveal": {
+          "enabled": false,
+          "id": "",
+          "label": "",
+          "method": ""
+        },
+        "shown": false,
+        "value": ""
+      },
+      "qr": "",
+      "reason": "",
+      "refused": "",
+      "rows": [
+        {
+          "colour": "#4a6b52",
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/calendars/lichnyj/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "event",
+          "label": "Личный",
+          "type": "CalDAV",
+          "url": "https://nextcloud.example/dav.php/alice/calendars/lichnyj/"
+        },
+        {
+          "colour": "#4a6b52",
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/calendars/dela/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "task",
+          "label": "Дела",
+          "type": "CalDAV",
+          "url": "https://nextcloud.example/dav.php/alice/calendars/dela/"
+        },
+        {
+          "colour": "#3f6e8c",
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/calendars/rabota/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "event",
+          "label": "Работа",
+          "type": "CalDAV",
+          "url": "https://nextcloud.example/dav.php/alice/calendars/rabota/"
+        },
+        {
+          "colour": "#a05a2c",
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/calendars/dni-rozhdeniya/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "event",
+          "label": "Дни рождения",
+          "type": "CalDAV",
+          "url": "https://nextcloud.example/dav.php/alice/calendars/dni-rozhdeniya/"
+        },
+        {
+          "colour": "#4a6b52",
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/calendars/zapisi/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "note",
+          "label": "Записи",
+          "type": "CalDAV",
+          "url": "https://nextcloud.example/dav.php/alice/calendars/zapisi/"
+        },
+        {
+          "colour": "#6b4e7a",
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/calendars/dnevnik/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "note",
+          "label": "Дневник",
+          "type": "CalDAV",
+          "url": "https://nextcloud.example/dav.php/alice/calendars/dnevnik/"
+        },
+        {
+          "colour": "#3f6e8c",
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/calendars/zapiski-obshchie/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "note",
+          "label": "Общие с семьёй",
+          "readOnly": true,
+          "type": "CalDAV",
+          "url": "https://nextcloud.example/dav.php/alice/calendars/zapiski-obshchie/"
+        },
+        {
+          "colour": "#4a6b52",
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/contacts/kontakty/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "contact",
+          "label": "Контакты",
+          "type": "CardDAV",
+          "url": "https://nextcloud.example/dav.php/alice/contacts/kontakty/"
+        },
+        {
+          "colour": "#a05a2c",
+          "copy": {
+            "enabled": true,
+            "href": "https://nextcloud.example/dav.php/alice/contacts/arhiv/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "contact",
+          "label": "Архив",
+          "type": "CardDAV",
+          "url": "https://nextcloud.example/dav.php/alice/contacts/arhiv/"
+        }
+      ],
+      "title": "nextcloud · alice",
+      "toggle": {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/settings/devices?account=a-nc-home\u0026op=exclude\u0026tab=apple",
+        "id": "device.exclude",
+        "label": "Leave out nextcloud",
+        "method": "POST"
+      }
+    },
+    {
+      "actions": [],
+      "included": false,
+      "label": "radicale · vps",
+      "login": "",
+      "password": {
+        "reveal": {
+          "enabled": false,
+          "id": "",
+          "label": "",
+          "method": ""
+        },
+        "shown": false,
+        "value": ""
+      },
+      "qr": "",
+      "reason": "",
+      "refused": "",
+      "rows": [
+        {
+          "colour": "#6b4e7a",
+          "copy": {
+            "enabled": true,
+            "href": "https://radicale.example/alice/calendars/proekty/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": false,
+          "kind": "event",
+          "label": "Проекты",
+          "type": "CalDAV",
+          "url": "https://radicale.example/alice/calendars/proekty/"
+        },
+        {
+          "colour": "#8c6239",
+          "copy": {
+            "enabled": true,
+            "href": "https://radicale.example/alice/calendars/dezhurstva/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": false,
+          "kind": "event",
+          "label": "Дежурства",
+          "type": "CalDAV",
+          "url": "https://radicale.example/alice/calendars/dezhurstva/"
+        },
+        {
+          "colour": "#6b4e7a",
+          "copy": {
+            "enabled": true,
+            "href": "https://radicale.example/alice/contacts/komanda/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": false,
+          "kind": "contact",
+          "label": "Команда",
+          "readOnly": true,
+          "type": "CardDAV",
+          "url": "https://radicale.example/alice/contacts/komanda/"
+        },
+        {
+          "colour": "#6b4e7a",
+          "copy": {
+            "enabled": true,
+            "href": "https://radicale.example/alice/contacts/rassylki/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": false,
+          "kind": "contact",
+          "label": "Рассылки",
+          "type": "CardDAV",
+          "url": "https://radicale.example/alice/contacts/rassylki/"
+        }
+      ],
+      "title": "radicale · vps · alice",
+      "toggle": {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/settings/devices?account=a-rad-vps\u0026op=include\u0026tab=apple",
+        "id": "device.include",
+        "label": "Include radicale · vps",
+        "method": "POST"
+      }
+    },
+    {
+      "actions": [],
+      "included": false,
+      "label": "baikal",
+      "login": "",
+      "password": {
+        "reveal": {
+          "enabled": false,
+          "id": "",
+          "label": "",
+          "method": ""
+        },
+        "shown": false,
+        "value": ""
+      },
+      "qr": "",
+      "reason": "The server refused the saved password.",
+      "refused": "password refused",
+      "rows": [
+        {
+          "colour": "#9a9280",
+          "copy": {
+            "enabled": true,
+            "href": "https://baikal.example/dav.php/alice/calendars/obshchij/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": false,
+          "kind": "event",
+          "label": "Общий",
+          "type": "CalDAV",
+          "url": "https://baikal.example/dav.php/alice/calendars/obshchij/"
+        }
+      ],
+      "title": "baikal · alice",
+      "toggle": {
+        "csrf": "csrf",
+        "enabled": false,
+        "href": "/app/settings/devices?account=a-baikal\u0026op=include\u0026tab=apple",
+        "id": "device.include",
+        "label": "Include baikal",
+        "method": "POST",
+        "reason": "The server refused the saved password."
+      }
+    }
+  ],
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/settings/devices?tab=apple",
+      "id": "device.tab.apple",
+      "label": "Apple",
+      "method": "GET",
+      "on": true
+    },
+    {
+      "enabled": true,
+      "href": "/app/settings/devices?tab=android",
+      "id": "device.tab.android",
+      "label": "Android",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/settings/devices?tab=thunderbird",
+      "id": "device.tab.thunderbird",
+      "label": "Thunderbird",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/settings/devices?tab=other",
+      "id": "device.tab.other",
+      "label": "Anything else",
+      "method": "GET"
+    },
+    {
+      "danger": true,
+      "enabled": true,
+      "href": "/app/settings/unlock?back=%2Fapp%2Fsettings%2Fdevices%3Ftab%3Dapple\u0026for=profile",
+      "id": "device.profile",
+      "label": "Generate profile",
+      "method": "GET",
+      "target": "sheet"
+    }
+  ],
+  "details": null,
+  "link": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "note": "Asks for your Carrel password first.",
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 3 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-user",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET"
+      },
+      {
+        "count": 4,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-server",
+        "id": "settings.connections",
+        "label": "Connections",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "icon": "i-file",
+        "id": "settings.attachments",
+        "label": "Attachments",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "icon": "i-device",
+        "id": "settings.devices",
+        "label": "New device",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "icon": "i-archive",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-link",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "icon": "i-theme",
+        "id": "settings.appearance",
+        "label": "Appearance",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "status": [
+      {
+        "line": [
+          {
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
+          }
+        ],
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
+        "tone": "on"
+      }
+    ],
+    "tags": [],
+    "ticks": null
+  },
+  "subtitle": "Everything discovery found — as one file or one code",
+  "tab": "apple",
+  "title": "Set up a new device",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "unlockNote": [],
+  "warning": {
+    "actions": [],
+    "body": "It is an ordinary file: it lands in Downloads, in a messenger, in the phone's backup. Open it on the device and delete it. The link opens once and lives 5 minutes, for you signed in to Carrel; nothing is written to the server's disk, and the issue is recorded in the audit log.",
+    "details": null,
+    "role": "alert",
+    "title": "The profile carries passwords in cleartext"
+  }
+}

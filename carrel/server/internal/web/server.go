@@ -130,7 +130,8 @@ type Users interface {
 	SaveBackupJob(viewerID string, dataKey [32]byte, job sealed.BackupJob) (string, error)
 	DeleteBackupJob(viewerID string, dataKey [32]byte, id string) error
 	BackupRuns(viewerID string) map[string][]store.BackupRun
-	StartBackupRun(viewerID, jobID, trigger, mode string, running func(runID string) bool) (string, error)
+	BackupRefusals(viewerID string) map[string][]store.BackupRun
+	StartBackupRun(viewerID, jobID, trigger, mode string, running func(runID string) bool, via ...string) (string, error)
 	FinishBackupRun(viewerID, jobID, runID string, finish func(r *store.BackupRun)) error
 	// The external trigger (S-24.4): a secret per job and an envelope of the
 	// data key under server.key.
@@ -138,6 +139,8 @@ type Users interface {
 	DisableBackupTrigger(viewerID, jobID string) error
 	BackupTriggerOn(viewerID, jobID string) bool
 	OpenBackupTrigger(token string) (userID, jobID string, dataKey [32]byte, ok bool)
+	BackupTriggerUse(viewerID, jobID string) (user.TriggerUse, bool)
+	NoteRefusedTrigger(jobID, secret, from string)
 
 	// SetTimePrefs stores the account's first day of the week and 12-hour
 	// clock (C-10).
@@ -192,6 +195,7 @@ type Users interface {
 	SetDeviceAccess(userID, id string, readOnly bool) error
 	Devices(userID string) []store.ProxyDevice
 	DeviceLastSeen(id string) time.Time
+	DavloomLastResponse(userID string) time.Time
 	SetUploadFolder(viewerID string, dataKey [32]byte, folder sealed.AttachmentFolder) error
 	Settings() store.InstanceSettings
 	// SaveSettings stores the one form of the instance's settings, or
@@ -224,7 +228,10 @@ type Server struct {
 	limit    *Limiter
 	guard    *dav.Guard // every outbound DAV request of this server (S-5.1)
 	probes   probes     // self-requests of a running installation check (S-28.1)
-	marks    railMarks  // the last letter and check the rails' state block names
+	// probeWay is how the installation check's own requests go out; nil —
+	// the default transport (SetProbeTransport)
+	probeWay http.RoundTripper
+	marks    railMarks // the last letter and check the rails' state block names
 	version  string
 	commit   string
 	mux      *http.ServeMux
@@ -272,6 +279,23 @@ func (s *Server) SetPatience() {
 // соединений»); nothing but a measurement reads it.
 func (s *Server) DAVCounts() (clients, dialled, requests, writes, writesFromIdle, resent int64) {
 	return s.guard.Counts()
+}
+
+// SetRailMarks sets what the administration's rail says of the last letter
+// and of the last installation check (zero — none since the start; failed —
+// how many checks failed). Nothing but a test calls it: an instance learns
+// them by sending and by checking, and a fixture draws what a frame draws.
+func (s *Server) SetRailMarks(sent, checked time.Time, failed int) {
+	s.marks.mu.Lock()
+	defer s.marks.mu.Unlock()
+	s.marks.sent, s.marks.checked, s.marks.checkBad = sent, checked, failed
+}
+
+// SetProbeTransport sets how the installation check's requests go out: a
+// test's proxy with its own certificate stands where a real one would.
+// Nothing but a test calls it: an instance goes out as any client does.
+func (s *Server) SetProbeTransport(rt http.RoundTripper) {
+	s.probeWay = rt
 }
 
 // SetClock freezes what the screens call "now". Nothing but a test calls

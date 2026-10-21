@@ -150,6 +150,17 @@ func (s *Service) RevokeDevice(userID, id string) error {
 		return []store.AuditEntry{{When: s.now(), Who: u.Login, What: "device.revoke", Whom: id}}, nil
 	})
 	if err == nil {
+		s.seen.mu.Lock()
+		if at, ok := s.seen.at[id]; ok {
+			if s.seen.revoked == nil {
+				s.seen.revoked = map[string]time.Time{}
+			}
+			if at.After(s.seen.revoked[userID]) {
+				s.seen.revoked[userID] = at
+			}
+			delete(s.seen.at, id)
+		}
+		s.seen.mu.Unlock()
 		s.devicesChanged(userID)
 	}
 	return err
@@ -261,9 +272,13 @@ func (s *Service) UnlockDevice(ctx context.Context, login, password string) (use
 // a PROPFIND is no reason to write state.enc (plan, S-27). Empty after a
 // restart.
 type deviceSeen struct {
-	mu     sync.Mutex
-	at     map[string]time.Time
-	onGone []func(userID string)
+	mu sync.Mutex
+	at map[string]time.Time
+	// revoked is, by account, the last request of a device since revoked:
+	// davloom answered then, whether or not the device is still there
+	// (s-davloom-6).
+	revoked map[string]time.Time
+	onGone  []func(userID string)
 }
 
 // TouchDevice notes a request of a device.
@@ -281,6 +296,21 @@ func (s *Service) DeviceLastSeen(id string) time.Time {
 	s.seen.mu.Lock()
 	defer s.seen.mu.Unlock()
 	return s.seen.at[id]
+}
+
+// DavloomLastResponse is when davloom last answered a device of the
+// account since the start — a device revoked since counts —, or zero.
+func (s *Service) DavloomLastResponse(userID string) time.Time {
+	devices := s.Devices(userID)
+	s.seen.mu.Lock()
+	defer s.seen.mu.Unlock()
+	last := s.seen.revoked[userID]
+	for _, d := range devices {
+		if at := s.seen.at[d.ID]; at.After(last) {
+			last = at
+		}
+	}
+	return last
 }
 
 // OnDevicesChanged registers what to do when an account's devices change:

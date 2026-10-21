@@ -153,7 +153,11 @@ func ShellZone(scr screens.Screen, model any, target string) (string, bool) {
 		// page) prints nothing alone in the library — the zone carries none.
 		out := ""
 		for _, n := range ns.([]view.Notice) {
-			out += bind.Notice(n, scr.Notices).Render()
+			space := scr.Notices
+			if scr.NoticesOf != nil {
+				space = scr.NoticesOf(model)
+			}
+			out += bind.Notice(n, space).Render()
 		}
 		return out, true
 	case render.TargetPoll:

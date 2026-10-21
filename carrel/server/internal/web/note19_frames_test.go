@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"html"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -295,7 +296,7 @@ func TestLocalInstanceIsTheShells(t *testing.T) {
 		}
 	}
 	f := backupFixture(t)
-	saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
+	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
 	for _, c := range []struct {
 		public string
 		local  bool
@@ -312,8 +313,10 @@ func TestLocalInstanceIsTheShells(t *testing.T) {
 				t.Errorf("%s (%s), CARREL_PUBLIC_URL %q: local = %v, want %v", route, id, c.public, page.Top.Signed.Local, c.local)
 			}
 		}
-		if tb := openJob(t, f).Trigger; tb != nil {
-			t.Errorf("the trigger is off, and its card is sent: %+v", tb)
+		// The trigger's sheet says «local» of the line (s-backup-12); off,
+		// there is no line (s-backup-14).
+		if sh := triggerSheetOf(t, f, job.ID, ""); sh.Line != nil || sh.Local != c.local {
+			t.Errorf("CARREL_PUBLIC_URL %q, the trigger off: local %v, line %+v", c.public, sh.Local, sh.Line)
 		}
 	}
 	raw := decode[map[string]any](t, f.h.do(get("/app/settings/backup", f.sess)))
@@ -322,24 +325,20 @@ func TestLocalInstanceIsTheShells(t *testing.T) {
 	}
 }
 
-// from-typecase note 22: what turning the external trigger on costs is said
-// under «On a clock of your own», ticked or not (s-backup-2, S-24.4) — and
-// so not a second time in the card of the line.
-func TestClockTickSaysItsPrice(t *testing.T) {
-	// The tick left the form (note 85 of Typecase); no frame draws it yet
-	// (Typecase's task 207), and its hint is the server's words.
-	hint := triggerPriceWords
+// Typecase's note 91: what turning the external trigger on costs is said
+// before Turn on, on the sheet of a job without it (s-backup-14, S-24.4),
+// and not again once it is on.
+func TestTriggerSheetSaysItsPrice(t *testing.T) {
+	frame := html.UnescapeString(mockupFrame(t, "s-backup-14"))
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
-	if got := openJob(t, f); string(got.ClockHint) != hint || got.Clock.On {
-		t.Errorf("unticked: hint = %q, want (s-backup-2) %q", got.ClockHint, hint)
+	if off := triggerSheetOf(t, f, job.ID, ""); off.Warning == "" || !strings.Contains(frame, string(off.Warning)) {
+		t.Errorf("off: the price %q is not the frame's (s-backup-14)", off.Warning)
 	}
-	_, tb := issueTrigger(t, f, job)
-	if strings.Contains(runsText(tb.Note), "server's key") {
-		t.Errorf("the card says the price again: %q", tb.Note)
-	}
-	if got := openJob(t, f); string(got.ClockHint) != hint || !got.Clock.On {
-		t.Errorf("ticked: hint = %q, want (s-backup-2) %q", got.ClockHint, hint)
+	issueTrigger(t, f, job)
+	on := triggerSheetOf(t, f, job.ID, "")
+	if on.Warning != "" || on.Line == nil || strings.Contains(runsText(on.Line.Note), "server’s key") {
+		t.Errorf("on, the sheet says the price again: %q, %+v", on.Warning, on.Line)
 	}
 }
 
@@ -664,11 +663,3 @@ func TestNewEventIsWrittenInItsZone(t *testing.T) {
 	loc := rec.Header().Get("Location")
 	mustContain(t, body(t, f, loc[strings.LastIndex(loc, "/")+1:]+".ics"), "DTSTART;TZID=Europe/Berlin:20260316T100000", "BEGIN:VTIMEZONE")
 }
-
-// The words of «On a clock of your own» and of its hint, the server's since
-// the tick left the form of s-backup-2 (note 85 of Typecase): no frame
-// draws them until Typecase's task 207.
-const (
-	triggerClockWords = "On a clock of your own — cron, GoSentry, a job in Gitea"
-	triggerPriceWords = "Turning it on stores this job's data key under the server's key — less protection, for convenience: the job can then read without you signed in."
-)

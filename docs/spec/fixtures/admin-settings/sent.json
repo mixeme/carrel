@@ -190,6 +190,7 @@
             "label": "Username",
             "name": "username",
             "options": [],
+            "placeholder": "—",
             "readOnly": false,
             "required": false,
             "value": ""
@@ -242,7 +243,7 @@
       {
         "badges": [
           {
-            "label": "off",
+            "label": "on",
             "role": "neutral"
           }
         ],
@@ -259,13 +260,25 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "true"
           },
           {
             "add": null,
             "error": "",
             "extra": null,
-            "hint": "Your relay decides which of the two it will let out. The envelope sender stays noreply@carrel.example either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.",
+            "hint": "",
+            "hintRuns": [
+              {
+                "text": "Your relay decides which of the two it will let out. The envelope sender stays "
+              },
+              {
+                "mark": "mono",
+                "text": "noreply@carrel.example"
+              },
+              {
+                "text": " either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here."
+              }
+            ],
             "kind": "radio",
             "label": "Sender address",
             "name": "sender",
@@ -410,7 +423,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 6,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -486,11 +499,15 @@
       {
         "line": [
           {
-            "text": "Run the check once Carrel is behind its proxy."
+            "text": "Last check "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
-        "title": "Not checked yet",
-        "tone": "off"
+        "title": "Checks passed",
+        "tone": "on"
       }
     ],
     "tags": [],
@@ -549,6 +566,16 @@
           "icon": "i-upload",
           "id": "new.upload",
           "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
           "method": "GET",
           "separator": true,
           "target": "sheet"

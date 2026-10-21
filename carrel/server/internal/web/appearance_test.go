@@ -41,8 +41,10 @@ func TestAccountWeekStartAndClock(t *testing.T) {
 	if v := rowNamed(t, page.Form, "clock").Value; v != "24" {
 		t.Errorf("clock = %q", v)
 	}
-	if zone := rowNamed(t, page.Instance, "timezone"); zone.Value != "Europe/Berlin" || !zone.ReadOnly {
-		t.Errorf("timezone row = %+v", zone)
+	// The zone is a line of text, not a field the form sends (Typecase's
+	// note 104).
+	if set := page.Form.Sets[len(page.Form.Sets)-1]; len(set.Facts) != 1 || set.Facts[0].Value != "Europe/Berlin" || set.Facts[0].Aside != "this instance" {
+		t.Errorf("the zone = %+v", set.Facts)
 	}
 
 	rec := f.h.do(postForm(settings, f.sess, url.Values{"weekStart": {"friday"}, "clock": {"24"}}))

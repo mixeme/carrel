@@ -196,6 +196,7 @@
             "label": "Username",
             "name": "username",
             "options": [],
+            "placeholder": "—",
             "readOnly": false,
             "required": false,
             "value": ""
@@ -264,88 +265,9 @@
             "name": "people",
             "options": [],
             "readOnly": false,
+            "reason": "Mail is not configured: there is nothing to send through yet.",
             "required": false,
             "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "Your relay decides which of the two it will let out. The envelope sender stays the From address either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.",
-            "kind": "radio",
-            "label": "Sender address",
-            "name": "sender",
-            "options": [
-              {
-                "label": "the From address",
-                "selected": true,
-                "value": "noreply"
-              },
-              {
-                "label": "login@…",
-                "selected": false,
-                "value": "login"
-              }
-            ],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "number",
-            "label": "Attachment, MB",
-            "mono": true,
-            "name": "attach",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "10"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "number",
-            "label": "Letter, MB",
-            "mono": true,
-            "name": "letter",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "25"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "number",
-            "label": "Recipients",
-            "mono": true,
-            "name": "recipients",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "20"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "number",
-            "label": "Letters a day",
-            "mono": true,
-            "name": "perDay",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "100"
           }
         ],
         "unfold": null
@@ -416,7 +338,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 6,
         "enabled": true,
         "href": "/admin/",
         "icon": "i-con",
@@ -488,11 +410,15 @@
       {
         "line": [
           {
-            "text": "Run the check once Carrel is behind its proxy."
+            "text": "Last check "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:12"
           }
         ],
-        "title": "Not checked yet",
-        "tone": "off"
+        "title": "Checks passed",
+        "tone": "on"
       }
     ],
     "tags": [],

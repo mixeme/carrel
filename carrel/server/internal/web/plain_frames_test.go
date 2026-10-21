@@ -27,8 +27,8 @@ var (
 	authAlert   = regexp.MustCompile(`(?s)<div class="tc-msg is-alert[^"]*">(.*?)</div>`)
 	authHint    = regexp.MustCompile(`(?s)<span class="tc-field__hint">(.*?)</span>`)
 	authTagline = regexp.MustCompile(`(?s)<strong class="tc-auth__tagline-lead">(.*?)</strong>(.*?)</div>`)
-	authField   = regexp.MustCompile(`(?s)<div class="tc-field[^"]*"><label>(.*?)</label><input class="tc-in[^"]*" type="text"(?: name="[^"]*")?(?: value="[^"]*")?(?: placeholder="([^"]*)")? aria-label="[^"]*"( disabled)?>`)
-	authButton  = regexp.MustCompile(`(?s)<button class="tc-btn[^"]*" type="(?:button|submit)"[^>]*>(.*?)</button>`)
+	authField   = regexp.MustCompile(`(?s)<div class="tc-field[^"]*"><label>(.*?)</label><input class="tc-in[^"]*" type="(?:text|password)"(?: name="[^"]*")?(?: value="[^"]*")?(?: placeholder="([^"]*)")? aria-label="[^"]*"( disabled)?>`)
+	authButton  = regexp.MustCompile(`(?s)<(?:button class="tc-btn[^"]*" type="(?:button|submit)"|a class="tc-btn[^"]*" href="[^"]*")[^>]*>(.*?)</(?:button|a)>`)
 	authLink    = regexp.MustCompile(`(?s)<span class="(?:tc-auth__link|tc-dim--accent[^"]*)">(.*?)</span>`)
 	authCard    = regexp.MustCompile(`(?s)<div class="tc-card__term">(.*?)</div>\s*<div class="tc-prose[^"]*">(.*?)</div>\s*<button class="tc-btn[^"]*" type="button">(.*?)</button>`)
 )
@@ -665,9 +665,10 @@ func TestAboutPageIsTheFrame(t *testing.T) {
 	}
 }
 
-// account-3: one screen for two cases. From the account: the fields, the
-// line under them and «Back to settings»; after a temporary password: the
-// red line on top, and no way back — there is nowhere to go.
+// account-3 and account-17 (Typecase's note 101): one screen, two frames.
+// From the account: the fields, the line under them and «Back to
+// settings»; after a temporary password: the red line on top, and no way
+// back — there is nowhere to go, and the shell offers nothing further.
 func TestPasswordPageIsTheFrame(t *testing.T) {
 	h := newHarness(t)
 	h.admin("mix", "password123")
@@ -685,9 +686,7 @@ func TestPasswordPageIsTheFrame(t *testing.T) {
 		return authPage{Title: said(p.Title), Alert: alert, Hint: said(p.Note), Fields: shownFields(p.Form), Buttons: buttons}
 	}
 	usual := decode[view.PasswordPage](t, h.do(get("/app/password", mix)))
-	plain := want
-	plain.Alert = ""
-	sameAuthAs(t, "change password", "account-3", page(usual), plain)
+	sameAuthAs(t, "change password", "account-3", page(usual), want)
 	if usual.Back == nil || usual.Back.Href != "/app/settings/account" {
 		t.Errorf("back = %+v", usual.Back)
 	}
@@ -699,9 +698,11 @@ func TestPasswordPageIsTheFrame(t *testing.T) {
 		t.Fatal(err)
 	}
 	forced := decode[view.PasswordPage](t, h.do(get("/app/password", mix)))
-	must := want
-	must.Buttons = want.Buttons[:1]
-	sameAuthAs(t, "a temporary password", "account-3", page(forced), must)
+	sameAuthAs(t, "a temporary password", "account-17", page(forced), authFrame(t, "account-17"))
+	if len(forced.Rail.Nav) != 0 || forced.Top.Search.Action != "" || forced.Top.New.ID != "" || forced.Top.Refresh.Action.ID != "" {
+		t.Errorf("the forced change offers a way further: rail %d, search %q, new %q, refresh %q",
+			len(forced.Rail.Nav), forced.Top.Search.Action, forced.Top.New.ID, forced.Top.Refresh.Action.ID)
+	}
 }
 
 // plainText is a sentence of the server in pieces read as plain words.

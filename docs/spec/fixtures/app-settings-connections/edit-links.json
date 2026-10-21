@@ -14,7 +14,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/settings/connections?account=a-nc-home\u0026op=edit",
+          "href": "/app/settings/connections/a-nc-home/edit",
           "id": "connection.edit",
           "label": "Edit",
           "method": "GET"
@@ -33,7 +33,7 @@
           "enabled": true,
           "href": "/app/settings/connections?account=a-nc-home\u0026op=rediscover",
           "id": "connection.rediscover",
-          "label": "Look for changes",
+          "label": "Update collection list",
           "method": "POST"
         },
         {
@@ -115,12 +115,13 @@
           ],
           "objects": 2,
           "path": "/alice/calendars/lichnyj/",
+          "pick": "a-nc-home|/alice/calendars/lichnyj/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=lichnyj",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Личный",
             "method": "POST"
@@ -193,12 +194,13 @@
           ],
           "objects": 4,
           "path": "/alice/calendars/dela/",
+          "pick": "a-nc-home|/alice/calendars/dela/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=dela",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Дела",
             "method": "POST"
@@ -272,12 +274,13 @@
           ],
           "objects": 4,
           "path": "/alice/calendars/rabota/",
+          "pick": "a-nc-home|/alice/calendars/rabota/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=rabota",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Работа",
             "method": "POST"
@@ -350,12 +353,13 @@
           ],
           "objects": null,
           "path": "/alice/calendars/dni-rozhdeniya/",
+          "pick": "a-nc-home|/alice/calendars/dni-rozhdeniya/",
           "readOnly": false,
           "tick": "off",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=dni-rozhdeniya",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Дни рождения",
             "method": "POST"
@@ -428,12 +432,13 @@
           ],
           "objects": 2,
           "path": "/alice/calendars/zapisi/",
+          "pick": "a-nc-home|/alice/calendars/zapisi/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=zapisi",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Записи",
             "method": "POST"
@@ -506,12 +511,13 @@
           ],
           "objects": 1,
           "path": "/alice/calendars/dnevnik/",
+          "pick": "a-nc-home|/alice/calendars/dnevnik/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=dnevnik",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Дневник",
             "method": "POST"
@@ -584,12 +590,13 @@
           ],
           "objects": null,
           "path": "/alice/calendars/zapiski-obshchie/",
+          "pick": "a-nc-home|/alice/calendars/zapiski-obshchie/",
           "readOnly": true,
           "tick": "off",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=zapiski-obshchie",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Общие с семьёй",
             "method": "POST"
@@ -662,12 +669,13 @@
           ],
           "objects": 5,
           "path": "/alice/contacts/kontakty/",
+          "pick": "a-nc-home|/alice/contacts/kontakty/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=kontakty",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Контакты",
             "method": "POST"
@@ -740,12 +748,13 @@
           ],
           "objects": 1,
           "path": "/alice/contacts/arhiv/",
+          "pick": "a-nc-home|/alice/contacts/arhiv/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=arhiv",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Архив",
             "method": "POST"
@@ -758,7 +767,7 @@
             "file"
           ],
           "label": "Files",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -810,12 +819,13 @@
           ],
           "objects": null,
           "path": "/alice/files/Files/",
+          "pick": "a-nc-home|/alice/files/Files/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-nc-home\u0026op=tick\u0026path=Files",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Files",
             "method": "POST"
@@ -857,7 +867,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/settings/connections?account=a-rad-vps\u0026op=edit",
+          "href": "/app/settings/connections/a-rad-vps/edit",
           "id": "connection.edit",
           "label": "Edit",
           "method": "GET"
@@ -876,7 +886,7 @@
           "enabled": true,
           "href": "/app/settings/connections?account=a-rad-vps\u0026op=rediscover",
           "id": "connection.rediscover",
-          "label": "Look for changes",
+          "label": "Update collection list",
           "method": "POST"
         },
         {
@@ -958,12 +968,13 @@
           ],
           "objects": 1,
           "path": "/alice/calendars/proekty/",
+          "pick": "a-rad-vps|/alice/calendars/proekty/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=proekty",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Проекты",
             "method": "POST"
@@ -1036,12 +1047,13 @@
           ],
           "objects": 1,
           "path": "/alice/calendars/dezhurstva/",
+          "pick": "a-rad-vps|/alice/calendars/dezhurstva/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=dezhurstva",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Дежурства",
             "method": "POST"
@@ -1114,12 +1126,13 @@
           ],
           "objects": 1,
           "path": "/alice/contacts/komanda/",
+          "pick": "a-rad-vps|/alice/contacts/komanda/",
           "readOnly": true,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=komanda",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Команда",
             "method": "POST"
@@ -1192,12 +1205,13 @@
           ],
           "objects": null,
           "path": "/alice/contacts/rassylki/",
+          "pick": "a-rad-vps|/alice/contacts/rassylki/",
           "readOnly": false,
           "tick": "off",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-rad-vps\u0026op=tick\u0026path=rassylki",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Рассылки",
             "method": "POST"
@@ -1239,7 +1253,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/settings/connections?account=a-baikal\u0026op=edit",
+          "href": "/app/settings/connections/a-baikal/edit",
           "id": "connection.edit",
           "label": "Edit",
           "method": "GET"
@@ -1258,17 +1272,8 @@
           "enabled": true,
           "href": "/app/settings/connections?account=a-baikal\u0026op=rediscover",
           "id": "connection.rediscover",
-          "label": "Look for changes",
+          "label": "Update collection list",
           "method": "POST"
-        },
-        {
-          "enabled": true,
-          "href": "/app/collections/new?a=a-baikal\u0026back=%2Fapp%2Fsettings%2Fconnections",
-          "icon": "i-plus",
-          "id": "collection.new",
-          "label": "New collection",
-          "method": "GET",
-          "target": "sheet"
         }
       ],
       "answered": "",
@@ -1340,12 +1345,13 @@
           ],
           "objects": null,
           "path": "/alice/calendars/obshchij/",
+          "pick": "a-baikal|/alice/calendars/obshchij/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-baikal\u0026op=tick\u0026path=obshchij",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Общий",
             "method": "POST"
@@ -1371,7 +1377,56 @@
       "server": "https://baikal.example/dav.php",
       "state": "unavailable",
       "title": "baikal",
-      "trace": null
+      "trace": {
+        "ok": true,
+        "steps": [
+          {
+            "detail": "GET /.well-known/caldav → 401",
+            "name": ".well-known",
+            "state": "bad"
+          },
+          {
+            "detail": "GET /.well-known/carddav → 401",
+            "name": ".well-known",
+            "state": "bad"
+          },
+          {
+            "detail": "using entered URL as-is",
+            "name": "direct URL",
+            "state": "ok"
+          },
+          {
+            "detail": "/alice/",
+            "name": "principal",
+            "state": "ok"
+          },
+          {
+            "detail": "schedule-outbox-URL announced; 1 own address(es)",
+            "name": "scheduling",
+            "state": "ok"
+          },
+          {
+            "detail": "calendar: /alice/calendars/",
+            "name": "home-set",
+            "state": "ok"
+          },
+          {
+            "detail": "calendar: 1 of 1 with colour",
+            "name": "properties",
+            "state": "ok"
+          },
+          {
+            "detail": "address book: /alice/contacts/",
+            "name": "home-set",
+            "state": "ok"
+          },
+          {
+            "detail": "1 collection(s)",
+            "name": "collections",
+            "state": "ok"
+          }
+        ]
+      }
     },
     {
       "access": "",
@@ -1387,7 +1442,7 @@
         },
         {
           "enabled": true,
-          "href": "/app/settings/connections?account=a-sftp-vps\u0026op=edit",
+          "href": "/app/settings/connections/a-sftp-vps/edit",
           "id": "connection.edit",
           "label": "Edit",
           "method": "GET"
@@ -1406,7 +1461,7 @@
           "enabled": true,
           "href": "/app/settings/connections?account=a-sftp-vps\u0026op=rediscover",
           "id": "connection.rediscover",
-          "label": "Look for changes",
+          "label": "Update collection list",
           "method": "POST"
         },
         {
@@ -1419,7 +1474,7 @@
           "target": "sheet"
         }
       ],
-      "answered": "",
+      "answered": "2 min ago",
       "collections": [
         {
           "changed": "",
@@ -1428,7 +1483,7 @@
             "file"
           ],
           "label": "Documents",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -1480,12 +1535,13 @@
           ],
           "objects": null,
           "path": "/alice/files/Documents/",
+          "pick": "a-sftp-vps|/alice/files/Documents/",
           "readOnly": false,
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-sftp-vps\u0026op=tick\u0026path=Documents",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Documents",
             "method": "POST"
@@ -1498,7 +1554,7 @@
             "file"
           ],
           "label": "Public",
-          "lastRead": "",
+          "lastRead": "2 min ago",
           "menu": [
             {
               "enabled": true,
@@ -1550,12 +1606,13 @@
           ],
           "objects": null,
           "path": "/alice/files/Public/",
+          "pick": "a-sftp-vps|/alice/files/Public/",
           "readOnly": true,
           "tick": "off",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=a-sftp-vps\u0026op=tick\u0026path=Public",
+            "href": "/app/settings/connections?op=pick",
             "id": "collection.tick",
             "label": "Public",
             "method": "POST"
@@ -1587,7 +1644,7 @@
   "actions": [
     {
       "enabled": true,
-      "href": "/app/settings/connections?op=add",
+      "href": "/app/settings/connections/new",
       "icon": "i-plus",
       "id": "connection.add",
       "label": "Connect account",
@@ -1604,12 +1661,12 @@
     }
   ],
   "add": {
-    "action": "/app/settings/connections?account=a-nc-home\u0026op=edit",
+    "action": "/app/settings/connections/a-nc-home/edit",
     "actions": [
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/settings/connections?account=a-nc-home\u0026op=edit",
+        "href": "/app/settings/connections/a-nc-home/edit",
         "id": "connection.edit.save",
         "label": "Save",
         "method": "POST",
@@ -1660,7 +1717,16 @@
             "add": null,
             "error": "",
             "extra": null,
-            "hint": ".well-known is tried first, then the URL exactly as typed.",
+            "hint": "",
+            "hintRuns": [
+              {
+                "mark": "code",
+                "text": ".well-known"
+              },
+              {
+                "text": " is tried first, then the URL exactly as typed."
+              }
+            ],
             "kind": "url",
             "label": "Server URL",
             "mono": true,
@@ -1734,7 +1800,6 @@
             ],
             "error": "Choose what becomes of them before saving.",
             "extra": null,
-            "focus": true,
             "hint": "1 published link uses this connection.",
             "kind": "radio",
             "label": "Published links",
@@ -1764,6 +1829,7 @@
   "details": null,
   "dialogSubtitle": "One connection gives calendars and address books alike.",
   "dialogTitle": "Edit connection",
+  "empty": [],
   "look": {
     "compact": false,
     "panel": true,
@@ -1772,15 +1838,7 @@
     "wide": false
   },
   "note": [],
-  "notices": [
-    {
-      "actions": [],
-      "body": "Credentials will be sent in clear text. Continue only if you accept this risk.",
-      "details": null,
-      "role": "alert",
-      "title": "Unencrypted connection"
-    }
-  ],
+  "notices": [],
   "print": {
     "range": "",
     "taken": "",
@@ -1795,7 +1853,7 @@
       "label": "Carrel",
       "method": "GET"
     },
-    "davloom": "davloom · running · 0 devices",
+    "davloom": "davloom · running · 3 devices",
     "foot": [],
     "nav": [
       {
@@ -1845,7 +1903,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/davloom",
         "id": "settings.davloom",
@@ -1853,7 +1911,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 3,
         "enabled": true,
         "href": "/app/settings/backup",
         "icon": "i-archive",
@@ -1888,10 +1946,34 @@
       {
         "line": [
           {
-            "text": "No device has connected since the start."
+            "text": "Last response "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 09:41"
           }
         ],
-        "title": "davloom · running · 0 devices",
+        "title": "davloom · running · 3 devices",
+        "tone": "on"
+      },
+      {
+        "line": [
+          {
+            "text": "Last backup "
+          },
+          {
+            "mark": "mono",
+            "text": "2026-08-16 03:10"
+          },
+          {
+            "text": " · "
+          },
+          {
+            "hint": "The archive was read back from the destination and the checksum matched",
+            "text": "verified"
+          }
+        ],
+        "title": "Backups are running",
         "tone": "on"
       }
     ],
@@ -1941,11 +2023,12 @@
           "kind": "event",
           "label": "Calendar",
           "objects": 3,
+          "pick": "f-ru-holidays|calendar",
           "tick": "on",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=f-ru-holidays\u0026kind=event\u0026op=tick\u0026path=feed",
+            "href": "/app/settings/connections?op=pick",
             "id": "feed.tick",
             "label": "Calendar",
             "method": "POST"
@@ -1955,11 +2038,12 @@
           "kind": "task",
           "label": "Tasks",
           "objects": null,
+          "pick": "f-ru-holidays|tasks",
           "tick": "off",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=f-ru-holidays\u0026kind=task\u0026op=tick\u0026path=feed",
+            "href": "/app/settings/connections?op=pick",
             "id": "feed.tick",
             "label": "Tasks",
             "method": "POST"
@@ -1973,6 +2057,7 @@
       "state": "ok",
       "title": "Праздники РФ",
       "took": "0 ms",
+      "trace": null,
       "url": "https://feeds.example/ru-holidays.ics"
     },
     {
@@ -1983,7 +2068,7 @@
           "enabled": true,
           "href": "/app/settings/connections?feed=f-league\u0026op=feed.recheck",
           "id": "feed.recheck",
-          "label": "Check",
+          "label": "Check again",
           "method": "POST"
         },
         {
@@ -2016,18 +2101,19 @@
           "kind": "event",
           "label": "Calendar",
           "objects": null,
+          "pick": "f-league|calendar",
           "tick": "off",
           "toggle": {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/settings/connections?account=f-league\u0026kind=event\u0026op=tick\u0026path=feed",
+            "href": "/app/settings/connections?op=pick",
             "id": "feed.tick",
             "label": "Calendar",
             "method": "POST"
           }
         }
       ],
-      "note": "",
+      "note": "The feed asks for a password and the saved one no longer fits. A feed that stopped answering must not look like a feed with nothing in it.",
       "password": {
         "reveal": {
           "enabled": true,
@@ -2042,9 +2128,19 @@
       },
       "size": "",
       "stale": false,
-      "state": "ok",
+      "state": "unavailable",
       "title": "Расписание лиги",
       "took": "",
+      "trace": {
+        "ok": false,
+        "steps": [
+          {
+            "detail": "GET /season.ics → 401 Unauthorized",
+            "name": "fetch",
+            "state": "bad"
+          }
+        ]
+      },
       "url": "https://league.example/season.ics"
     }
   ],
@@ -2134,10 +2230,12 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-refresh",
+        "id": "settings.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
       "answered": "",
       "running": false

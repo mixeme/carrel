@@ -216,7 +216,7 @@ func (s *Server) renameFileCollection(w http.ResponseWriter, r *http.Request, se
 	if err := s.users.PlaceMovedCollection(sess.AccountID(), key, conn.ID, col.Path, conn.ID, renamed, true); err != nil {
 		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, &view.Notice{
 			Role: view.NoticeAlert, Title: "Renamed, but the list of collections still names the old folder",
-			Body: text(col.Path + " is " + renamed.Path + " on " + connLabel(conn) + " now; run Look for changes on its connection to take the new one in."),
+			Body: text(col.Path + " is " + renamed.Path + " on " + connLabel(conn) + " now; run Update collection list on its connection to take the new one in."),
 		}))
 		return
 	}

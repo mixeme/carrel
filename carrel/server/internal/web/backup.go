@@ -276,8 +276,14 @@ func runState(res backup.Result, err error) string {
 func finishWith(res backup.Result, err error) func(r *store.BackupRun) {
 	return func(r *store.BackupRun) {
 		r.State, r.File, r.Size, r.Verified = runState(res, err), res.File, res.Size, res.Verified
-		r.Collections = len(res.Manifest.Collections)
 		for _, e := range res.Manifest.Collections {
+			// Files taken whole are counted as files (s-backup-1); a file
+			// collection that failed is a collection not copied.
+			if e.Kind == view.KindFile && e.Error == "" {
+				r.Files += e.Count
+				continue
+			}
+			r.Collections++
 			if e.Error == "" {
 				r.Whole++
 			} else if r.Error == "" {
@@ -292,12 +298,12 @@ func finishWith(res backup.Result, err error) func(r *store.BackupRun) {
 
 // startBackup runs a job to its WebDAV destination in the background, with
 // the credentials of blob, and returns the run's ID at once.
-func (s *Server) startBackup(userID string, blob sealed.Blob, job sealed.BackupJob, trigger string) (string, error) {
+func (s *Server) startBackup(userID string, blob sealed.Blob, job sealed.BackupJob, trigger string, via ...string) (string, error) {
 	dest, err := s.backupDest(blob, job)
 	if err != nil {
 		return "", err
 	}
-	runID, err := s.users.StartBackupRun(userID, job.ID, trigger, job.Mode, runners.isRunning)
+	runID, err := s.users.StartBackupRun(userID, job.ID, trigger, job.Mode, runners.isRunning, via...)
 	if err != nil {
 		return "", err
 	}
@@ -312,7 +318,7 @@ func (s *Server) startBackup(userID string, blob sealed.Blob, job sealed.BackupJ
 			}
 		}()
 		ctx := context.Background()
-		at := time.Now()
+		at := s.now()
 		res, err := backup.Run(ctx, dest, backup.FileName(job.Name, at, job.Encrypted), job.Name, job.Keep,
 			s.backupManifest(job, at), s.backupSources(ctx, blob, job), jobPassword(job))
 		_ = s.users.FinishBackupRun(userID, job.ID, runID, finishWith(res, err))
@@ -322,14 +328,14 @@ func (s *Server) startBackup(userID string, blob sealed.Blob, job sealed.BackupJ
 
 // streamBackup writes a fresh archive of the job to w and records the run:
 // nothing is written anywhere else, so nothing is read back either.
-func (s *Server) streamBackup(ctx context.Context, w http.ResponseWriter, userID string, blob sealed.Blob, job sealed.BackupJob, trigger string) error {
-	runID, err := s.users.StartBackupRun(userID, job.ID, trigger, sealed.BackupToDownload, runners.isRunning)
+func (s *Server) streamBackup(ctx context.Context, w http.ResponseWriter, userID string, blob sealed.Blob, job sealed.BackupJob, trigger string, via ...string) error {
+	runID, err := s.users.StartBackupRun(userID, job.ID, trigger, sealed.BackupToDownload, runners.isRunning, via...)
 	if err != nil {
 		return err
 	}
 	runners.set(runID, true)
 	defer runners.set(runID, false)
-	at := time.Now()
+	at := s.now()
 	name := backup.FileName(job.Name, at, job.Encrypted)
 	h := w.Header()
 	h.Set("Content-Type", "application/zip")
@@ -395,10 +401,9 @@ func (s *Server) backupPage(sess *session.Session, editing *sealed.BackupJob, er
 func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob, errs map[string]view.Text, commands, secrets map[string]string, notices ...view.Notice) view.BackupPage {
 	blob := s.catalogOf(sess)
 	tf, now := s.timeFor(sess), s.now()
-	page := view.BackupPage{Shell: s.buildShell(sess, "Backup")}
-	page.Rail = s.settingsRail(sess, "/app/settings/backup")
+	page := view.BackupPage{Shell: s.settingsShell(sess, "Backup", "/app/settings/backup", "/app/settings/backup")}
 	page.Notices = append(page.Notices, notices...)
-	runs := s.users.BackupRuns(sess.AccountID())
+	runs, refusals := s.users.BackupRuns(sess.AccountID()), s.users.BackupRefusals(sess.AccountID())
 	var history []historyRun
 	for _, job := range blob.BackupJobs {
 		row := s.jobRow(sess, blob, job)
@@ -408,25 +413,39 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 		for _, r := range runs[job.ID] {
 			history = append(history, historyRun{job, r})
 		}
+		// The trigger's refusals are rows of the history only (note 91).
+		for _, r := range refusals[job.ID] {
+			history = append(history, historyRun{job, r})
+		}
 		if editing != nil && editing.ID == job.ID {
-			// The job's own page (s-backup-2, Нс61): its When, and the card
-			// of its line once the trigger is on.
-			row.Clock, row.ClockHint = s.triggerTick(sess, job, commands), triggerPrice
-			row.Trigger = s.triggerBlock(sess, job, commands, secrets)
+			// The job's own page (s-backup-2, Нс61): its form; the external
+			// trigger has a sheet of its own (Typecase's note 91).
 			page.Job = &row
 			continue
 		}
-		// The row is what a job is opened for, Run and Edit (s-backup-1);
-		// the trigger is turned off on its card and the job deleted on its
-		// page (s-backup-2).
+		// The row is what a job is opened for, Run and Edit (s-backup-1),
+		// and in its «⋯» after their twins the external trigger's sheet
+		// (note 91); the job is deleted on its page (s-backup-2).
+		row.External = view.Action{ID: "backup.trigger", Label: "External trigger", Method: "GET", Enabled: true,
+			Href: s.postQuery("/app/settings/backup/trigger", url.Values{"job": {job.ID}})}
 		row.Actions = []view.Action{s.backupRunAction(job, "Run"),
 			{ID: "backup.edit", Label: "Edit", Href: s.postQuery("/app/settings/backup", url.Values{"job": {job.ID}}), Method: "GET", Enabled: true}}
 		// A job's page and a new job's are the job alone (s-backup-2).
 		if editing == nil {
 			page.Jobs = append(page.Jobs, row)
+			page.JobsHint = "verified — the archive was read back from where it was written and the checksum matched. Written and not read back is not verified, and is marked red."
 		}
 	}
-	job := sealed.BackupJob{Mode: sealed.BackupToWebDAV, Keep: 8, Encrypted: true}
+	// A new job (s-backup-19): to WebDAV, into the first file collection
+	// that can be written, eight kept, encrypted, at sign-in when the last
+	// copy is a week old.
+	job := sealed.BackupJob{Mode: sealed.BackupToWebDAV, Keep: 8, Encrypted: true, OnSignInDays: 7}
+	for _, col := range blob.Collections {
+		if !col.Gone && !col.Feed && !col.ReadOnly && col.Has(view.KindFile) {
+			job.DestAccount, job.DestPath = col.AccountID, col.Path
+			break
+		}
+	}
 	if editing != nil {
 		job = *editing
 	}
@@ -456,13 +475,13 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 			Href: s.postQuery("/app/settings/backup", url.Values{"op": {"delete"}, "job": {job.ID}})}
 		page.DeleteNote = "Archives already made stay where they are: the schedule is deleted, not the copies."
 	}
-	page.Restore = s.restoreBlock(sess, blob, "", "")
+	page.Restore = s.restoreBlock(sess, blob, "", "", nil)
 	if editing == nil {
 		page.History = s.backupHistory(tf, history)
 		backupHead(&page, len(blob.BackupJobs))
 		page.Actions = []view.Action{
-			{ID: "backup.new", Label: "New job", Icon: "i-plus", Href: s.postQuery("/app/settings/backup", url.Values{"job": {"new"}}), Method: "GET", Primary: true, Enabled: true},
-			{ID: "restore.start", Label: "Restore", Icon: "i-restore", Href: s.postQuery("/app/settings/backup", url.Values{"restore": {"1"}}), Method: "GET", Enabled: true},
+			{ID: "backup.new", Label: "New job", Icon: "i-plus", Href: s.route("/app/settings/backup/new"), Method: "GET", Primary: true, Enabled: true},
+			{ID: "restore.start", Label: "Restore", Icon: "i-restore", Href: s.route("/app/settings/backup/restore"), Method: "GET", Enabled: true},
 		}
 	}
 	return page
@@ -557,11 +576,11 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 	if job.Password != "" {
 		passwordSet = "••••••••••••"
 	}
-	action := "/app/settings/backup?op=save"
+	// A job not made yet is created (s-backup-19, Typecase's note 99).
+	form := withPrimary(s.plainForm("/app/settings/backup?op=create", "POST"), "backup.create", "Create")
 	if job.ID != "" {
-		action += "&job=" + url.QueryEscape(job.ID)
+		form = withPrimary(s.plainForm("/app/settings/backup?op=save&job="+url.QueryEscape(job.ID), "POST"), "backup.save", "Save")
 	}
-	form := withPrimary(s.plainForm(action, "POST"), "backup.save", "Save")
 	// Browse sends the form as typed and answers with the folder chooser
 	// over the job (s-backup-2, note 85).
 	browseQ := url.Values{"op": {"browse"}, "job": {job.ID}}
@@ -604,15 +623,16 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 			{Name: "encrypted", Label: "Encrypt the archive", Kind: view.InputCheck, Value: text(encrypted),
 				Options: []view.Option{{Value: "1", Label: "Encrypt the archive", Selected: job.Encrypted}},
 				Hint:    "On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it."},
+			// The owner's words (19.10.2026, Typecase's note 95).
 			{Name: "password", Label: "Archive password", Kind: view.InputPassword, Error: errs["password"], Placeholder: passwordSet,
-				Hint: "Separate from the sign-in password: the destination may be somebody else's hosting. Forget it and this job's archives open for nobody, including you."},
+				Required: job.ID == "", Hint: "Separate from the sign-in password."},
 		}},
 		// One tick (the owner, 19.10.2026; note 85): the copy at sign-in when
 		// the last is older than so many days; what else starts it is said
 		// under it — Run now of the list, the line of the job's page.
 		{Legend: "When",
 			HintRuns: view.Runs{strongRun("Also started by"), {Mark: view.RunBreak}, {Text: "• Run now — in the job list"}, {Mark: view.RunBreak},
-				{Text: "• Your own clock — "}, monoRun("cron"), {Text: ", GoSentry, a job in Gitea, "}, monoRun("curl"), {Text: ": the line to paste is on the job’s page"}},
+				{Text: "• Your own clock — "}, monoRun("cron"), {Text: ", GoSentry, a job in Gitea, "}, monoRun("curl"), {Text: ": External trigger in the job’s menu"}},
 			Rows: []view.FormRow{
 				{Name: "signin.on", Label: "On sign-in, if the last copy is older than", Kind: view.InputCheck, Value: text(signin),
 					Options: []view.Option{{Value: "on", Label: "On sign-in, if the last copy is older than", Selected: signin != ""}}},
@@ -638,7 +658,7 @@ func (s *Server) chosenAside(viewerID string, blob sealed.Blob, job sealed.Backu
 		}
 	}
 	if cols+folders == 0 {
-		return ""
+		return "nothing chosen" // s-backup-19
 	}
 	var parts []string
 	if cols > 0 {
@@ -746,6 +766,11 @@ func (s *Server) getSettingsBackup(w http.ResponseWriter, r *http.Request) {
 	}
 	blob := s.catalogOf(sess)
 	q := r.URL.Query()
+	// New job has an address of its own (s-backup-19); ?job=new is the
+	// same, as Browse comes back to it.
+	if strings.HasSuffix(r.URL.Path, "/backup/new") {
+		q.Set("job", "new")
+	}
 	job, has := blob.BackupJob(q.Get("job"))
 	switch q.Get("op") {
 	case "download":
@@ -775,33 +800,14 @@ func (s *Server) getSettingsBackup(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Cache-Control", "no-store")
 	page := s.backupPage(sess, editing, nil)
-	// The trigger the password's sheet just turned on: its line and its
-	// secret, this once (193 p. 3).
-	if editing != nil {
-		if secret, ok := issuedTrigger(sess, editing.ID); ok {
-			page = s.backupPageWith(sess, editing, nil, map[string]string{editing.ID: s.publicOrigin(r)}, map[string]string{editing.ID: secret})
-		}
-	}
-	// The tab of the card the address opens (s-backup-3).
-	if t := q.Get("trigger"); page.Job != nil && page.Job.Trigger != nil && editing != nil {
-		for _, tab := range triggerTabNames {
-			if tab.id == t {
-				page.Job.Trigger.Tabs = s.triggerTabLinks(*editing, t)
-			}
-		}
-	}
 	switch {
 	case q.Get("job") == "new":
-		// New job (s-backup-1): the page of a job not made yet — the form,
-		// Save and Cancel.
-		page.Title, page.Subtitle, page.Actions, page.Empty, page.EmptyNote = "New job", nil, nil, nil, nil
+		// New job (s-backup-19): the page of a job not made yet — the form,
+		// Create and Cancel, no Delete job.
+		page.Title, page.Subtitle, page.Actions, page.Empty, page.EmptyNote = "New job", line("Nothing is copied until it is created"), nil, nil, nil
 		page.Jobs, page.History = nil, nil
 		page.Add.Actions = append(page.Add.Actions,
 			view.Action{ID: "backup.cancel", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true})
-	case q.Get("restore") != "":
-		// The step of the source the address names (s-backup-7, Нс74).
-		page.Restore = s.restoreBlock(sess, s.catalogOf(sess), q.Get("from"), q.Get("run"))
-		page.Restore.Open = true
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
@@ -866,10 +872,14 @@ func (s *Server) postSettingsBackup(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	switch r.URL.Query().Get("op") {
+	switch op := r.URL.Query().Get("op"); op {
 	case "browse":
 		s.browseJob(w, r, sess, blob, job)
-	case "save":
+	case "save", "create":
+		if (op == "create") != (id == "") {
+			s.notFound(w, r)
+			return
+		}
 		next, errs := s.jobFromForm(r, blob, job)
 		if len(errs) > 0 {
 			s.writePage(w, r, http.StatusOK, s.backupPage(sess, &next, errs))
@@ -901,32 +911,6 @@ func (s *Server) postSettingsBackup(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "could not save the job", http.StatusInternalServerError)
 			return
 		}
-		s.redirect(w, r, "/app/settings/backup")
-	case "trigger":
-		if !has {
-			s.notFound(w, r)
-			return
-		}
-		s.enableTrigger(w, r, sess, key, job)
-	case "trigger-off":
-		if !has {
-			s.notFound(w, r)
-			return
-		}
-		if err := s.users.DisableBackupTrigger(sess.AccountID(), job.ID); err != nil {
-			http.Error(w, "could not turn the trigger off", http.StatusInternalServerError)
-			return
-		}
-		// Back to the job it was turned off on (Нс62).
-		s.redirect(w, r, "/app/settings/backup?job="+url.QueryEscape(job.ID))
-	case "restore-open":
-		s.openRestore(w, r, sess, blob)
-	case "restore-run":
-		s.runRestore(w, r, sess, key, blob)
-	case "restore-match":
-		s.matchRestore(w, r, sess, blob)
-	case "restore-cancel":
-		endRestore(sess)
 		s.redirect(w, r, "/app/settings/backup")
 	case "run":
 		if !has || job.Mode == sealed.BackupToDownload {
@@ -1006,14 +990,13 @@ func (s *Server) jobRow(sess *session.Session, blob sealed.Blob, job sealed.Back
 			row.WhereNote += " · and a download"
 		}
 	}
-	switch {
-	case s.users.BackupTriggerOn(sess.AccountID(), job.ID):
-		row.When, row.WhenNote = text("cron · "+triggerAt), "external trigger"
-	case job.OnSignInDays > 0:
+	// When is only what is set (owner's decision 19.10, Typecase's note 95):
+	// the sign-in rule in words, an issued trigger password a badge; the
+	// schedule of an external trigger Carrel does not know.
+	if job.OnSignInDays > 0 {
 		row.When, row.WhenNote = "on sign-in", text(fmt.Sprintf("if older than %d days", job.OnSignInDays))
-	default:
-		row.When = "on demand"
 	}
+	row.Triggered = s.users.BackupTriggerOn(sess.AccountID(), job.ID)
 	return row
 }
 
@@ -1048,7 +1031,7 @@ type historyRun struct {
 }
 
 // historyTriggers are what started a run, as the history says it.
-var historyTriggers = map[string]view.Text{"external": "cron", "sign-in": "on sign-in", "screen": "by hand"}
+var historyTriggers = map[string]view.Text{"external": "external", "sign-in": "on sign-in", "screen": "by hand"}
 
 // backupHistory is «History, all jobs» (s-backup-1, Нс56): every run of
 // every job, newest first — when, which job, how big, how many collections
@@ -1064,6 +1047,25 @@ func (s *Server) backupHistory(tf timeFmt, runs []historyRun) []view.BackupHisto
 			Collections: text(fmt.Sprintf("%d / %d", r.Whole, r.Collections)), Whole: r.Whole >= r.Collections,
 			Trigger: historyTriggers[r.Trigger],
 		}
+		if r.Files > 0 {
+			files := " files"
+			if r.Files == 1 {
+				files = " file"
+			}
+			row.Collections += text(" + " + grouped(r.Files) + files)
+		}
+		// An external run names the password it came with and where from
+		// (note 91).
+		if r.Password != "" {
+			row.Via = text(r.Password + " · " + r.From)
+		}
+		// A start the trigger refused: its own row, nothing to restore.
+		if r.State == user.RunRefused {
+			row.Size, row.Collections, row.Whole = "—", "—", true
+			row.Verified = view.Runs{{Text: "refused: not this job’s password", Mark: view.RunDanger}}
+			out = append(out, row)
+			continue
+		}
 		if r.Verified {
 			row.Verified = line("read back")
 		} else {
@@ -1076,7 +1078,7 @@ func (s *Server) backupHistory(tf timeFmt, runs []historyRun) []view.BackupHisto
 		if r.File != "" && r.Mode != sealed.BackupToDownload && r.Verified {
 			row.Actions = []view.Action{
 				{ID: "backup.restore", Label: "Restore", Icon: "i-restore", Method: "GET", Enabled: true,
-					Href: s.postQuery("/app/settings/backup", url.Values{"restore": {"1"}, "from": {"job"}, "run": {h.job.ID + "|" + r.ID}})},
+					Href: s.postQuery("/app/settings/backup/restore", url.Values{"from": {"job"}, "run": {h.job.ID + "|" + r.ID}})},
 				{ID: "backup.get", Label: "Download", Icon: "i-download", Method: "GET", Enabled: true,
 					Href: s.postQuery("/app/settings/backup", url.Values{"op": {"get"}, "job": {h.job.ID}, "run": {r.ID}})},
 			}

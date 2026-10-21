@@ -159,11 +159,13 @@ func (s *Server) guestAttachments(r *http.Request, link user.OpenLink, token str
 		return
 	}
 	if link.Target.Children == 0 {
-		n := fmt.Sprintf("%d file is", len(files))
+		// How many, not which (s-publish-23): a file's name gives away more
+		// than it looks.
+		n := "1 attached file is"
 		if len(files) != 1 {
-			n = fmt.Sprintf("%d files are", len(files))
+			n = fmt.Sprintf("%d attached files are", len(files))
 		}
-		page.AttachNote = text(n + " attached to this note; they are not published with it.")
+		page.AttachNote = text(n + " not published.")
 		return
 	}
 	for n := 0; n < link.Target.Children; n++ {

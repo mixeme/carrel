@@ -17,6 +17,57 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.352 — 2026-10-22
+
+The settings, the files and the administration as their frames draw them
+(Typecase `bb44b48`…`8e4944b`, notes 87–107), the publishing sheets and
+«Send this link» (note 105, first part). Nothing of a person's content is
+kept on Carrel's disk any more: neither a restored archive nor an upload
+waiting on a taken name (the owner's decisions of 19.10.2026).
+
+### Changed
+
+- **Restore** has a page of its own (`/app/settings/backup/restore`): a
+  job's copy, an archive on a server (Browse), or one from this computer —
+  read where it lies, by ranges; without a script up to the import ceiling
+  in memory, larger in the same stream into a folder of a storage, deleted
+  after the restore. The match is one form; the report is a page.
+- **An upload never keeps a file to ask about it**: a taken name discards
+  the body and asks; Keep both and Replace bring the file again. With a
+  script the page asks first, `?op=taken`, and answers go with the file
+  (`taken.<name>` = `keep` | `replace`).
+- **Connections**: the dialogs by their own addresses, a refused login above
+  the fields, «Update collection list», no connection at all, Disconnect in
+  numbers. **Devices**: a refused password on its account's row, a closed
+  issue, «ro» at each read-only collection. **davloom**, **Backups** (a new
+  job by its address, the external trigger over the jobs), **Account**
+  (one's own session's End off, the forced password change), **key escrow**
+  with its recoveries, **Attachments** unset and unavailable.
+- **The administration**: links of Add users whole, the installation check
+  and the escrow as drawn, settings' fields in pieces.
+- **Publishing**: the sheet over the page it is opened from (Connections,
+  the record, the folder) with Cancel and Close there; a calendar's days
+  stand for both choices, from today to the month's end, and «The whole
+  calendar» turns them off; Time off with its reason. A link whose thing is
+  gone: no term, Copy and Send off. A guest's note with its files kept says
+  how many.
+- **A link goes by a letter of its own** — «Send this link»,
+  `/app/mail/link?id=`, sent by `POST /app/mail/send` — and never into the
+  letter being written (the owner's decision of 21.10.2026); a revoked link
+  has no sheet.
+
+### Removed
+
+- `POST /app/mail/compose?op=link` and links put into a letter (Б36).
+
+### For consumers
+
+- New: `MailLinkSheet`; `Under.Published`, `Under.Files`;
+  `PublishSheet.Under`; `Option.Disables`; `AdminInstallPage.Subtitle`.
+- `FormRow.HintRuns`, `FormRow.Invalid`, `FormRow.Reason`; the settings'
+  pages carry `Subtitle` and Refresh; C-5 rows of restore, upload
+  (`op=taken`), publishing and mail rewritten.
+
 ## v0.2.351 — 2026-10-19
 
 Typecase's note 86 (`324ee14`): one password sheet for every handing out

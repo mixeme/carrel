@@ -233,44 +233,32 @@ func TestBackupRowsAndJobPageAreTheFrame(t *testing.T) {
 	}
 }
 
-// The external trigger is turned on and off by its own tick, «On a clock of
-// your own» (s-backup-2, to-typecase task 18a) — there is no separate
-// switch, and none on the row; a job that is off is not started by it
-// either. The tick is the job's; the card of the line is there only while
-// the trigger is on (owner's decision, note 19): off, nothing to show or
-// renew, and no card is sent.
-func TestTriggerIsTurnedOffByItsTick(t *testing.T) {
+// Typecase's note 91: the external trigger is the sheet of the job's row —
+// «External trigger» in its «⋯» (s-backup-1, -12): Turn on, New password,
+// Revoke. Revoke turns it off and the password stops working; there is no
+// switch in the job's form or on the row. A job that is off is not started
+// by it either.
+func TestTriggerIsTheRowsSheet(t *testing.T) {
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
-	// The tick left the form (note 85 of Typecase) and no frame draws it
-	// yet (Typecase's task 207): its words are the server's.
-	label := triggerClockWords
-	clock := func() view.Action {
-		page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-		if a := actionByID(page.Jobs[0].Actions, "backup.trigger.off"); a != nil {
-			t.Errorf("the row turns the trigger off: %+v", a)
-		}
-		j := openJob(t, f)
-		c := j.Clock
-		sayWhy(t, "trigger", c)
-		if tb := j.Trigger; (tb != nil) != c.On {
-			t.Errorf("the tick is on %v, the card %+v", c.On, tb)
-		} else if tb != nil {
-			sayWhy(t, "trigger", tb.Password.Reveal)
-		}
-		return c
+	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
+	if a := actionByID(page.Jobs[0].Actions, "backup.trigger.off"); a != nil {
+		t.Errorf("the row turns the trigger off: %+v", a)
 	}
-	if c := clock(); c.Label != view.Text(label) || c.On || !c.Enabled {
-		t.Fatalf("clock before = %+v, want %q unticked", c, label)
-	}
-	secret, _ := issueTrigger(t, f, job)
-	on := clock()
-	if !on.On || !on.Enabled || on.Method != http.MethodPost {
-		t.Fatalf("clock on = %+v", on)
+	if e := page.Jobs[0].External; e.Label != "External trigger" || e.Method != http.MethodGet || !e.Enabled ||
+		!strings.HasSuffix(e.Href, "/app/settings/backup/trigger?job="+job.ID) {
+		t.Fatalf("the row's External trigger = %+v", e)
 	}
 	raw := decode[map[string]any](t, f.h.do(get("/app/settings/backup?job="+job.ID, f.sess)))
-	if trig := raw["job"].(map[string]any)["trigger"].(map[string]any); trig["off"] != nil {
-		t.Errorf("the trigger card still has a switch of its own: %v", trig["off"])
+	for _, k := range []string{"clock", "clockHint", "trigger"} {
+		if _, ok := raw["job"].(map[string]any)[k]; ok {
+			t.Errorf("the job's form still carries %q", k)
+		}
+	}
+	secret, _ := issueTrigger(t, f, job)
+	on := triggerSheetOf(t, f, job.ID, "")
+	if on.Password == nil || !equalStrings(labels(on.Password.Actions), []string{"New password", "Revoke"}) {
+		t.Fatalf("the sheet of a trigger on = %+v", on.Password)
 	}
 
 	v := jobForm(f, sealed.BackupToWebDAV, "8", "pw")
@@ -281,14 +269,18 @@ func TestTriggerIsTurnedOffByItsTick(t *testing.T) {
 	if rec := f.h.do(script(http.MethodPost, "/api/backup/run?job="+job.ID, secret)); rec.Code != http.StatusConflict || !strings.Contains(rec.Body.String(), "off") {
 		t.Errorf("a job that is off started from outside: %d %q", rec.Code, rec.Body.String())
 	}
-	if rec := f.h.do(postForm(on.Href, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
-		t.Fatalf("untick: %d", rec.Code)
+	revoke := actionByID(on.Password.Actions, "backup.trigger.revoke")
+	if revoke == nil || !revoke.Danger {
+		t.Fatalf("Revoke = %+v", revoke)
+	}
+	if rec := f.h.do(postForm(revoke.Href, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("revoke: %d", rec.Code)
 	}
 	if rec := f.h.do(script(http.MethodGet, "/api/backup/status", secret)); rec.Code != http.StatusNotFound {
-		t.Errorf("a secret unticked still works: %d", rec.Code)
+		t.Errorf("a password revoked still works: %d", rec.Code)
 	}
-	if c := clock(); c.On {
-		t.Errorf("unticked, the clock is still on: %+v", c)
+	if off := triggerSheetOf(t, f, job.ID, ""); off.Password != nil || off.Warning == "" {
+		t.Errorf("revoked, the sheet = %+v", off)
 	}
 }
 

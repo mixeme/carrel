@@ -132,7 +132,8 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
-          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom"}
+          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history",
+          "calendar","event","link-never","gone","note-files-kept"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -184,10 +185,16 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-note-edit": "/app/notes/{account}/{col}/{uid}/edit",
     "app-settings-account": "/app/settings/account",
     "app-settings-connections": "/app/settings/connections",
+    "app-settings-connections-disconnect": "/app/settings/connections/disconnect",
+    "app-settings-davloom-scope": "/app/settings/davloom/scope",
+    "app-settings-davloom-tree": "/app/settings/davloom/tree",
     "app-settings-appearance": "/app/settings/appearance",
     "app-settings-attachments": "/app/settings/attachments",
     "app-settings-devices": "/app/settings/devices",
     "app-settings-backup": "/app/settings/backup",
+    "app-settings-backup-trigger": "/app/settings/backup/trigger",
+    "app-settings-backup-restore": "/app/settings/backup/restore",
+    "app-settings-backup-report": "/app/settings/backup/restore/report",
     "app-settings-davloom": "/app/settings/davloom",
     "app-settings-escrow": "/app/settings/escrow",
     # Листы депонирования и отзыва — поверх Account; кадров со своим адресом
@@ -210,6 +217,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-duplicates-merge": "/app/duplicates/merge",
     "app-duplicates-merge-event": "/app/duplicates/merge",
     "app-mail-compose": "/app/mail/compose",
+    "app-mail-link": "/app/mail/link",
     "app-search": "/app/search",
     "app-files": "/app/files",
     # Папка: data-screen кадра s-files-1 — маршрут C-5 с {path…} (Typecase
@@ -283,10 +291,11 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # тут нечего, и молчание здесь — не исключение, а род экрана.
 SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
-          "app-publish", "app-files-picker", "app-files-op", "app-mail-compose",
+          "app-publish", "app-files-picker", "app-files-op", "app-mail-compose", "app-mail-link",
           "app-contact-rewrite", "app-record-copies", "app-task-done", "app-event-ask",
           "app-settings-escrow-deposit", "app-settings-escrow-withdraw", "app-record-delete",
-          "admin-reset", "admin-delete"}
+          "admin-reset", "admin-delete", "app-settings-backup-trigger", "app-settings-connections-disconnect",
+          "app-settings-davloom-scope", "app-settings-davloom-tree"}
 
 FRAME_TODO = {
     # Полная форма нового события — свой кадр s-agenda-15 (Typecase 9e69804,
@@ -325,6 +334,11 @@ STATE_FRAME = {
     # над списком.
     "app-settings-davloom/add": "s-davloom-2",
     "app-settings-davloom/issued": "s-davloom-3",
+    # Пустой, выключенный, листы области и дерева (записка Typecase 96).
+    "app-settings-davloom/empty": "s-davloom-6",
+    "app-settings-davloom/off": "s-davloom-8",
+    "app-settings-davloom-scope/normal": "s-davloom-7",
+    "app-settings-davloom-tree/normal": "s-davloom-9",
     # Лист пароля — один на всякую выдачу (записка Typecase 86): поверх
     # формы добавления устройства с набранным и удаление учётной записи.
     "app-settings-unlock/davloom": "s-davloom-5",
@@ -454,6 +468,8 @@ STATE_FRAME = {
     "app-settings-escrow/no-copy": "account-12",
     "app-settings-escrow/escrow-off": "account-14",
     "app-settings-escrow-deposit/normal": "account-2",
+    # Вынужденная смена пароля — свой кадр (записка Typecase 101).
+    "app-password/forced": "account-17",
     "app-settings-escrow-withdraw/normal": "account-11",
     # Диалог правки подключения (Нс76): вопрос о ссылках ждёт скрытым —
     # s-profile-16; Save без ответа — s-profile-23 (Typecase ad18c91).
@@ -495,6 +511,18 @@ STATE_FRAME = {
     "app-settings-backup/normal": "s-backup-6",
     "app-settings-backup/jobs": "s-backup-1",
     "app-settings-backup/job": "s-backup-2",
+    # Лист внешнего запуска поверх списка заданий (записка Typecase 91).
+    "app-settings-backup-trigger/normal": "s-backup-12",
+    "app-settings-backup-trigger/issued": "s-backup-13",
+    "app-settings-backup-trigger/off": "s-backup-14",
+    # Восстановление на своей странице: шаг источника и сопоставление.
+    "app-settings-backup-restore/normal": "s-backup-7",
+    "app-settings-backup-restore/match": "s-backup-8",
+    # Шаги восстановления и отчёт (записки Typecase 97, 99).
+    "app-settings-backup-restore/file": "s-backup-15",
+    "app-settings-backup-restore/too-large": "s-backup-16",
+    "app-settings-backup-restore/server": "s-backup-17",
+    "app-settings-backup-report/normal": "s-backup-18",
     # Депонирование у администратора и история пароля (записка Typecase 81).
     "admin-escrow/recovered": "s-admin-30",
     "admin-escrow/off": "s-admin-31",
@@ -506,9 +534,19 @@ STATE_FRAME = {
     # у каждого вида страницы свой.
     # Готовая ссылка (Пб13): тот же лист после Create link.
     "app-publish/link": "s-publish-13",
+    # «Send this link» (записка 105): лист над Published links, кадр без
+    # data-screen.
+    "app-mail-link/normal": "s-mail-4",
+    # Листы публикации по родам (записка 105): контакт, событие; готовая
+    # бессрочная без почты; мёртвая строка списка.
+    "app-publish/normal": "s-publish-3",
+    "app-publish/event": "s-publish-19",
+    "app-publish/link-never": "s-publish-22",
+    "app-files-published/gone": "s-publish-21",
     "p-token/normal": "s-publish-6",
     "p-token/addressbook": "s-publish-7",
     "p-token/note": "s-publish-8",
+    "p-token/note-files-kept": "s-publish-23",
     "p-token/image": "s-publish-9",
     "p-token/text": "s-publish-10",
     "p-token/download": "s-publish-11",
@@ -521,6 +559,22 @@ STATE_FRAME = {
     "app-settings-connections/label-taken": "s-profile-11",
     "app-settings-connections/feed": "s-profile-10",
     "app-settings-connections/edit-links": "s-profile-23",
+    # Отказ логина, ни одного подключения, лист Disconnect (записка Typecase 92).
+    "app-settings-connections/refused": "s-profile-24",
+    # Новое устройство при закрытой выдаче (записка Typecase 93).
+    "app-settings-devices/locked": "s-plan-6",
+    "app-settings-connections/empty": "s-profile-25",
+    # После Update collection list (записка Typecase 103).
+    "app-settings-connections/found": "s-profile-27",
+    # Вложения: папка не выбрана и недоступна (записка Typecase 93).
+    "app-settings-attachments/unset": "attachments-5",
+    # Новое задание копии (записка Typecase 99).
+    "app-settings-backup/new": "s-backup-19",
+    # Депонирование после восстановления (записка Typecase 99).
+    "app-settings-escrow/history": "account-16",
+    "app-settings-attachments/unavailable": "attachments-6",
+    "app-settings-connections/shown": "s-profile-4",
+    "app-settings-connections-disconnect/normal": "s-profile-26",
 }
 # Без строки: app-contact-new/normal и app-event-new/normal — полные формы
 # создания (`/new`) — свои кадры маршрута, s-contacts-27 (Typecase 4af7ad7,

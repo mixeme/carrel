@@ -201,8 +201,9 @@ func TestPostAdminInvitesCreate(t *testing.T) {
 	}
 	found := false
 	for _, row := range page.Rows {
-		// A link goes as a link: the address typed beside it is not kept.
-		if row.Link == text(link) && row.Address == "—" && row.Delivery == "link" {
+		// A link goes as a link: the address typed beside it is not kept;
+		// it is the whole address, to be handed over (s-admin-1).
+		if strings.HasSuffix(string(row.Link), link) && strings.HasPrefix(string(row.Link), "http") && row.Address == "—" && row.Delivery == "link" {
 			found = true
 		}
 	}
