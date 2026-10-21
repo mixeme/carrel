@@ -3551,6 +3551,27 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      бейджем, как у `Public`. Правка данных: кадры теперь согласны с
      остальными; `DeviceRow.ReadOnly` у всех трёх — как у сервера.
 
+Записка 108 от 22.10.2026 (Typecase `a5ff32c`; задача 219). **Последний
+коммит Typecase, который она описывает, — `a5ff32c`** (504 кадра). **219
+закрыта.**
+
+108. **Живая очередь загрузки в кадрах папки.**
+   - **`s-files-1`, `states-32`:** в `tc-main` — форма
+     `<form class="tc-post" id="post-upload" action="/app/files/…/upload/…"
+     method="post" enctype="multipart/form-data">` (с `_csrf`) и скрытая
+     очередь `Queue{Progress: "post-upload", Row, Taken, Fold}`: заголовок
+     «Uploading {done} of {count}», итог «{sent}», Hide; строка —
+     «{name}» · «{size} · {percent}%» с полосой; строка вопроса — «{name}» ·
+     «name taken» (`Failed`), кнопки Keep both · Replace · Skip
+     (`name="answer"`, `value` `keep` | `replace` | `skip`). **`s-files-2`**
+     — та же очередь со строками сервера (не скрыта) и та же форма.
+   - **Поля Files и Folder** (`s-files-8`; Upload пустой папки
+     `states-32`) — `data-tc-taken="/app/files/…/upload/…?op=taken"`.
+   - **Ответы — перед полем файла** (п. 2): `taken.<имя>` встают перед
+     полем, с его `form`, как `size.<имя>`; в `FormData` они идут раньше
+     файлов. Ответы прежнего вопроса снимаются, когда спрашивают снова.
+   - На вид кадры те же до пикселя.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
