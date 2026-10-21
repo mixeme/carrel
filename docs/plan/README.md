@@ -7,6 +7,7 @@
 |---|---|
 | [server.md](server.md) | Открытое и сделанное по серверу |
 | [client.md](client.md) | Клиент: что блокирует, развилки, этапы |
+| [desktop.md](desktop.md) | Настольное приложение: что открыто и что сделано |
 | [reviews.md](reviews.md) | Ревью Opus: заходы и находки, на номера которых ссылается код |
 | [to-typecase.md](to-typecase.md) | Задачи для Typecase: что сервер нашёл и что решается на стороне кадров |
 | [from-typecase.md](from-typecase.md) | Записки из Typecase: что из правок макета касается сервера |
