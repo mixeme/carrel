@@ -133,7 +133,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
           "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history","file-match","filled",
-          "calendar","event","link-never","gone","note-files-kept","contact","unanswered"}
+          "calendar","event","link-never","gone","note-files-kept","contact","unanswered","account","none","storage","delete-refused","move-kept"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -497,6 +497,16 @@ STATE_FRAME = {
     "app-collections-rename/folder": "s-profile-18",
     "app-collections-delete/folder": "s-profile-19",
     "app-collections-new/refused": "s-profile-6",
+    # Записка Typecase 112: листы коллекций из Connections (Р-75), их отказы
+    # и итоги на странице Connections.
+    "app-collections-new/account": "s-profile-29",
+    "app-collections-new/none": "s-profile-28",
+    "app-collections-rename/refused": "s-profile-30",
+    "app-collections-rename/feed": "s-profile-33",
+    "app-collections-move/folder": "s-profile-34",
+    "app-collections-move/storage": "s-profile-35",
+    "app-settings-connections/delete-refused": "s-profile-31",
+    "app-settings-connections/move-kept": "s-profile-32",
     "admin-reset/issued": "s-admin-14",
     "admin-reset/refused": "s-admin-16",
     "admin-reset/mismatch": "s-admin-20",

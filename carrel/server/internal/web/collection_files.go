@@ -99,7 +99,9 @@ func (m *collectionMove) runFiles(ctx context.Context) (string, *view.Notice) {
 		return "", davRefusal(moveCollectionRefusal(m.title(), label), m.dest, "PROPFIND", m.home, err)
 	}
 	base := path.Base(strings.TrimSuffix(m.col.Path, "/"))
-	if file.CheckName(base) != nil {
+	if file.CheckName(base) != nil || storageRoot(m.conn, m.col) {
+		// The whole storage goes as a folder of its name (s-profile-35:
+		// «Files»): its address is the server's, not a name.
 		base = label
 	}
 	name := base
@@ -141,6 +143,9 @@ func (m *collectionMove) runFiles(ctx context.Context) (string, *view.Notice) {
 		return "", m.kept("Copied, and the original kept",
 			upperFirst(why)+", so "+label+" was not deleted on "+connLabel(m.conn)+". Both are there now: look at them, and delete the one you do not need.", nil)
 	}
+	if storageRoot(m.conn, m.col) {
+		return m.emptyStorage(ctx, src)
+	}
 	if err := src.Delete(ctx, m.col.Path, ""); err != nil {
 		n := m.kept("Copied, but the original could not be deleted",
 			fmt.Sprintf("Both are there now. Delete %s on %s yourself once the server lets you.", label, connLabel(m.conn)), nil)
@@ -152,6 +157,44 @@ func (m *collectionMove) runFiles(ctx context.Context) (string, *view.Notice) {
 			"The folder was moved and the original deleted; run re-discovery on its connection to take it out.", nil)
 	}
 	return m.newAddress(), nil
+}
+
+// emptyStorage is the end of moving a whole storage (Р-74, s-profile-35):
+// the copy is whole and in the catalog; what the storage holds is deleted a
+// member at a time, and the address stays, empty. What the server will not
+// let go — a folder shared with the person, one its administrator mounted —
+// is copied and stays there too, and the result names it.
+func (m *collectionMove) emptyStorage(ctx context.Context, src *file.Provider) (string, *view.Notice) {
+	label := collectionLabel(m.col)
+	entries, err := src.List(ctx, m.col.Path)
+	if err != nil {
+		n := m.kept("Copied, but nothing here was deleted",
+			fmt.Sprintf("%s on %s could not be read again, so nothing in it was deleted. Both are there now.", label, connLabel(m.conn)), nil)
+		n.Details = refusalDetails("delete", "PROPFIND", m.col.Path, err)
+		return "", n
+	}
+	var stayed []view.Text
+	for _, e := range entries {
+		if err := src.Delete(ctx, e.Path, ""); err != nil && !notFoundErr(err) {
+			stayed = append(stayed, text(e.Name+" · "+refusalWords(err)))
+		}
+	}
+	if len(stayed) > 0 {
+		n := m.kept("Moved, but some of it stayed",
+			fmt.Sprintf("%s would not let delete all of %s: what it kept is copied too and stays there as well.", connLabel(m.conn), label), nil)
+		n.Details = &view.Diagnostic{Summary: text("What stayed on " + connLabel(m.conn)), Lines: stayed}
+		return "", n
+	}
+	return m.newAddress(), nil
+}
+
+// refusalWords is a refusal in a few words for a line of a result: the
+// code the server answered, or that it did not.
+func refusalWords(err error) string {
+	if code := dav.StatusCode(err); code != 0 {
+		return fmt.Sprintf("%d %s", code, http.StatusText(code))
+	}
+	return "no answer"
 }
 
 // createFolder makes a folder of a plain file storage (s-profile-1, New
@@ -188,7 +231,7 @@ func (s *Server) createFolder(w http.ResponseWriter, r *http.Request, sess *sess
 		http.Error(w, "could not save the collection", http.StatusInternalServerError)
 		return
 	}
-	s.redirect(w, r, fileHref(conn.ID, p, "", nil, true))
+	s.redirect(w, r, orConnections(f.ret))
 }
 
 // renameFileCollection is the POST of the rename sheet for a folder: the
@@ -210,7 +253,7 @@ func (s *Server) renameFileCollection(w http.ResponseWriter, r *http.Request, se
 	renamed, err := s.renameFolder(r.Context(), conn, col, name)
 	if err != nil {
 		s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, name, "", nil,
-			davRefusal(renameRefusal, conn, "MOVE", col.Path, err), sheetBack(r.URL.Query().Get("back"))))
+			renameRefused("MOVE", col.Path, err), sheetBack(r.URL.Query().Get("back"))))
 		return
 	}
 	if err := s.users.PlaceMovedCollection(sess.AccountID(), key, conn.ID, col.Path, conn.ID, renamed, true); err != nil {

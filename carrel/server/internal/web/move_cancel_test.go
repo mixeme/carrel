@@ -81,7 +81,16 @@ func TestAMoveSaysTheAttendeesMayHearOfACancellation(t *testing.T) {
 			t.Errorf("%s says %q, want nothing", name, s.Cancels)
 		}
 	}
-	// A calendar's move says the same of its meetings; its copy says nothing.
+	// A calendar's move says the same of its meetings, the last sentence of
+	// what it does (note 112 p. 5); its copy says nothing.
+	cancelOf := func(w view.Runs) view.Text {
+		said := saidRuns(w)
+		i := strings.Index(said, " may tell the attendees")
+		if i < 0 {
+			return ""
+		}
+		return view.Text(said[strings.LastIndex(said[:i], ". ")+2:])
+	}
 	calendar := func(f davFixture, copying bool) view.CollectionMoveSheet {
 		t.Helper()
 		q := url.Values{"a": {f.id}, "c": {searchWork}}
@@ -90,10 +99,10 @@ func TestAMoveSaysTheAttendeesMayHearOfACancellation(t *testing.T) {
 		}
 		return decode[view.CollectionMoveSheet](t, f.h.do(get("/app/collections/move?"+q.Encode(), f.sess)))
 	}
-	if said := calendar(f, false).Cancels; !strings.Contains(string(said), "may") || !strings.Contains(string(said), "cancel") {
+	if said := cancelOf(calendar(f, false).Warning); !strings.Contains(string(said), "may") || !strings.Contains(string(said), "cancel") {
 		t.Errorf("a calendar's move off a server that schedules says %q", said)
 	}
-	if said := calendar(f, true).Cancels; said != "" {
+	if said := cancelOf(calendar(f, true).Warning); said != "" {
 		t.Errorf("a calendar's copy says %q, want nothing", said)
 	}
 	// Deleting the calendar takes its meetings off the server as moving it
@@ -102,18 +111,18 @@ func TestAMoveSaysTheAttendeesMayHearOfACancellation(t *testing.T) {
 		t.Helper()
 		return decode[view.CollectionDeleteSheet](t, f.h.do(get("/app/collections/delete?"+url.Values{"a": {f.id}, "c": {searchWork}}.Encode(), f.sess)))
 	}
-	if said := deleting(f).Cancels; said != calendar(f, false).Cancels {
-		t.Errorf("a calendar's delete off a server that schedules says %q, its move %q", said, calendar(f, false).Cancels)
+	if said := cancelOf(deleting(f).Warning); said != cancelOf(calendar(f, false).Warning) {
+		t.Errorf("a calendar's delete off a server that schedules says %q, its move %q", said, cancelOf(calendar(f, false).Warning))
 	}
 
 	plain, away, _ := build(false)
 	if s := sheet(plain, "meet", away, false); s.Cancels != "" {
 		t.Errorf("a server that does not schedule says %q, want nothing", s.Cancels)
 	}
-	if said := calendar(plain, false).Cancels; said != "" {
+	if said := cancelOf(calendar(plain, false).Warning); said != "" {
 		t.Errorf("a calendar's move off a server that does not schedule says %q, want nothing", said)
 	}
-	if said := deleting(plain).Cancels; said != "" {
+	if said := cancelOf(deleting(plain).Warning); said != "" {
 		t.Errorf("a calendar's delete off a server that does not schedule says %q, want nothing", said)
 	}
 }

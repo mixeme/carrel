@@ -330,12 +330,12 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 
 	client, err := dav.NewClient(s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, "home", "PROPFIND", home, err)))
+		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, connLabel(conn), "home", "PROPFIND", home, err)))
 		return
 	}
 	taken, err := childSegments(r.Context(), client, home)
 	if err != nil {
-		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, "home", "PROPFIND", home, err)))
+		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, connLabel(conn), "home", "PROPFIND", home, err)))
 		return
 	}
 	// The address is the one typed, or the one the name gives; a taken one
@@ -362,7 +362,7 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	// settlePath below reads the home back, so a wrong guess here ends as
 	// «it is not in the list», never as a collection that is not there.
 	if err := client.MkColProps(r.Context(), method, path, props); err != nil && !landedOnTheFirstTry(err) {
-		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, "create", method, path, err)))
+		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, createRefused(&f, connLabel(conn), "create", method, path, err)))
 		return
 	}
 	settled, err := settlePath(r.Context(), client, home, path, taken)
@@ -375,6 +375,7 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	name := s.settleName(r.Context(), client, path, f.name)
 	colour := settleColour(r.Context(), client, path, f.colour)
 	components := f.components
+	dropped := false
 	if f.kind != view.KindContact {
 		components, kinds = settleComponents(r.Context(), client, path, f.components)
 		// docs/servers.md, SV-52: iCloud answers 201 and keeps the first
@@ -384,6 +385,7 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 		for _, c := range f.components {
 			if !slices.Contains(components, c) {
 				sess.NoteRefusal(conn.ID, path, refusedComponent(c))
+				dropped = true
 			}
 		}
 	}
@@ -399,7 +401,24 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, f.back+"?"+url.Values{"to": {conn.ID}, "into": {path}}.Encode())
 		return
 	}
-	s.redirect(w, r, "/app/"+segmentOf(kinds[0])+"/"+conn.ID+"/"+url.PathEscape(path))
+	// Where the sheet was opened, else Connections (Typecase's note 112
+	// p. 6): the new collection stands there in its account's card. One the
+	// server made without some of what was asked opens itself: what it did
+	// not take is said there (s-agenda-11).
+	if dropped {
+		s.redirect(w, r, "/app/"+segmentOf(kinds[0])+"/"+conn.ID+"/"+url.PathEscape(path))
+		return
+	}
+	s.redirect(w, r, orConnections(f.ret))
+}
+
+// orConnections is where a collection's sheet goes when it is done: back to
+// where it was opened, else Connections (Typecase's note 112 p. 6).
+func orConnections(back string) string {
+	if back != "" {
+		return back
+	}
+	return "/app/settings/connections"
 }
 
 // settleName is the name the collection ends up with. A create carries it, but
@@ -620,7 +639,27 @@ func newChildren(ctx context.Context, client *dav.Client, home string, before ma
 // the block of C-9.1: the step, the method, the address and the code, the
 // body the server answered, what the code means there; what it means for
 // the person is the sheet's line under it (f.explain).
-func createRefused(f *collectionForm, step, method, path string, err error) *view.Notice {
+func createRefused(f *collectionForm, server, step, method, path string, err error) *view.Notice {
+	d := refusalDetails(step, method, path, err)
+	code := dav.StatusCode(err)
+	if code == http.StatusForbidden && step == "create" {
+		d.Lines = append(d.Lines, "no DAV:bind on the calendar home-set")
+		if f.kind == view.KindContact {
+			d.Lines[len(d.Lines)-1] = "no DAV:bind on the address book home-set"
+		}
+		// What the 403 means, the server named (s-profile-6).
+		f.explain = "This account may sign in and read, but " + server + " would not let it create here. The server does not say why — no such right for the user, or a password issued read-only; whoever runs the server can tell."
+	}
+	if code == 0 {
+		f.explain = "The server did not answer: nothing was sent that it could refuse."
+	}
+	return &view.Notice{Role: view.NoticeAlert, Body: text(createRefusal.title + ". " + createRefusal.nothing), Details: d}
+}
+
+// refusalDetails is the server's answer as a refusal shows it (s-profile-6,
+// -30, -31): the step, the method, the address and the code, then what the
+// server said.
+func refusalDetails(step, method, path string, err error) *view.Diagnostic {
 	code := dav.StatusCode(err)
 	head := "[" + step + "]  " + method + " " + path
 	if code != 0 {
@@ -634,21 +673,14 @@ func createRefused(f *collectionForm, step, method, path string, err error) *vie
 	case code == 0:
 		lines = append(lines, text(err.Error()))
 	}
-	if code == http.StatusForbidden && step == "create" {
-		lines = append(lines, "no DAV:bind on the calendar home-set")
-		if f.kind == view.KindContact {
-			lines[len(lines)-1] = "no DAV:bind on the address book home-set"
-		}
-		f.explain = "This account may sign in and read, but not create. Either the user has no such right on the server, or the account was connected with a password issued read-only. Neither is something Carrel can fix from here."
-	}
-	if code == 0 {
-		f.explain = "The server did not answer: nothing was sent that it could refuse."
-	}
-	return &view.Notice{
-		Role:    view.NoticeAlert,
-		Body:    text(createRefusal.title + ". " + createRefusal.nothing),
-		Details: &view.Diagnostic{Summary: text(method + " " + path), Lines: lines},
-	}
+	return &view.Diagnostic{Summary: text(method + " " + path), Lines: lines}
+}
+
+// renameRefused is a rename the server refused, in the sheet (s-profile-30):
+// what was typed stays in the form, Save tries again.
+func renameRefused(method, path string, err error) *view.Notice {
+	return &view.Notice{Role: view.NoticeAlert, Body: "The server would not rename it. Nothing changed, and the form is as you left it.",
+		Details: refusalDetails("rename", method, path, err)}
 }
 
 func lostCollection(conn sealed.Connection, method, path string, err error, tail string) *view.Notice {
@@ -842,6 +874,10 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	q := url.Values{}
 	if !f.kindChoice {
 		q.Set("kind", string(f.kind))
+	} else if f.account != "" {
+		// Opened from an account's card: that server stays the sheet's
+		// (s-profile-29).
+		q.Set("a", f.account)
 	}
 	if f.ret != "" {
 		q.Set("back", f.ret)
@@ -853,16 +889,28 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	// screen of its kind.
 	cancel := s.sheetCancel(f.ret, newCollectionDefault(f.kind))
 	errs := f.errs
+	// Nowhere to create is no form (s-profile-21, -28): what was typed would
+	// have nowhere to go. The way on is to ask again, or — when no server
+	// holds the kind at all — to connect one.
+	if len(eligible) == 0 {
+		again := view.Action{ID: "collection.again", Label: "Try again", Href: s.route(action), Method: "GET", Primary: true, Enabled: true}
+		if holding == 0 {
+			again = view.Action{ID: "collection.connect", Label: "Connect account", Href: s.route("/app/settings/connections/new"), Method: "GET", Primary: true, Enabled: true}
+		}
+		sheet.Actions = []view.Action{again, cancel}
+		return sheet
+	}
 	rows := []view.FormRow{csrfField(sess)}
-	if f.kindChoice {
-		rows = append(rows, view.FormRow{
-			Name: "kind", Label: "What it is", Kind: view.InputSelect, Value: text(string(f.kind)),
-			Options: []view.Option{
-				{Value: string(view.KindEvent), Label: "Calendar", Selected: f.kind != view.KindContact},
-				{Value: string(view.KindContact), Label: "Address book", Selected: f.kind == view.KindContact},
-			},
-			Hint: text("Tasks and notes live in calendars: choose Calendar and say below what goes in it."),
-		})
+	// What it is, asked after the server when the sheet came without a kind
+	// (s-profile-29): a choice of two, the address book switching off what
+	// goes in a calendar.
+	kind := view.FormRow{
+		Name: "kind", Label: "What it is", Kind: view.InputRadio, Value: text(string(f.kind)),
+		Options: []view.Option{
+			{Value: string(view.KindEvent), Label: "Calendar", Selected: f.kind != view.KindContact},
+			{Value: string(view.KindContact), Label: "Address book", Selected: f.kind == view.KindContact, Disables: "components"},
+		},
+		Hint: text("Tasks and notes live in calendars: choose Calendar and say below what goes in it."),
 	}
 	server := view.FormRow{Name: "account", Label: "On which server", Kind: view.InputSelect, Value: text(chosen.ID), Required: true, Error: errs["account"]}
 	for _, c := range eligible {
@@ -898,8 +946,9 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	}
 	// Nothing to choose is no field (s-profile-21): the sheet's message says
 	// why, and Create is off with it.
-	if len(eligible) > 0 {
-		rows = append(rows, server)
+	rows = append(rows, server)
+	if f.kindChoice {
+		rows = append(rows, kind)
 	}
 	rows = append(rows, view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(f.name), Required: true, Error: errs["name"]})
 	if f.kind == view.KindFile {
@@ -917,9 +966,11 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		sheet.Actions = append(sheet.Actions, cancel)
 		return sheet
 	}
-	if f.kind != view.KindContact {
+	if f.kind != view.KindContact || f.kindChoice {
 		colour := paletteRow(f.colour, errs["colour"], "")
-		colour.HintRuns = join("Written to the server as ", monoRun("calendar-color"), " — DAVx5 and Thunderbird will show the same one.") // s-profile-5 (Кл3)
+		if !f.kindChoice {
+			colour.HintRuns = join("Written to the server as ", monoRun("calendar-color"), " — DAVx5 and Thunderbird will show the same one.") // s-profile-5 (Кл3)
+		}
 		rows = append(rows, colour)
 		// Where a collection of one kind shows, in the frame's words: the
 		// other section, in bold (s-profile-5, Кл3).
@@ -930,6 +981,10 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		parts := view.FormRow{Name: "components", Label: "What goes in it", Kind: view.InputCheck, Error: errs["components"],
 			HintRuns: join("Most servers settle this when the collection is made and will not change it afterwards. A collection holding only "+elsewhere+" appears in ",
 				strongRun(section), ", not here — the rail follows what is inside, not where it was made.")}
+		if f.kindChoice {
+			// Without a kind there is no section to name (s-profile-29).
+			parts.HintRuns = join("Most servers settle this when the collection is made and will not change it afterwards.")
+		}
 		for _, p := range calendarParts {
 			sel := false
 			for _, c := range f.components {
@@ -1095,7 +1150,7 @@ func (s *Server) postCollectionRename(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "could not save the subscription", http.StatusInternalServerError)
 			return
 		}
-		s.redirect(w, r, afterSheet(r, collectionList(conn, col)))
+		s.redirect(w, r, afterSheet(r, "/app/settings/connections"))
 		return
 	}
 	if col.Has(view.KindFile) {
@@ -1112,14 +1167,14 @@ func (s *Server) postCollectionRename(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, name, colour, nil,
-			davRefusal(renameRefusal, conn, "PROPPATCH", col.Path, err), sheetBack(r.URL.Query().Get("back"))))
+			renameRefused("PROPPATCH", col.Path, err), sheetBack(r.URL.Query().Get("back"))))
 		return
 	}
 	if err := s.users.RenameCollection(sess.AccountID(), key, conn.ID, col.Path, name, colour); err != nil {
 		http.Error(w, "could not save the collection", http.StatusInternalServerError)
 		return
 	}
-	s.redirect(w, r, afterSheet(r, collectionList(conn, col)))
+	s.redirect(w, r, afterSheet(r, "/app/settings/connections"))
 }
 
 // afterSheet is where a collection sheet leads once its work is done (Кл4):
@@ -1147,6 +1202,10 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 		rows = append(rows, paletteRow(colour, errs["colour"], "")) // s-profile-7 says nothing under it (Кл9)
 	}
 	if conn.Feed {
+		// A feed's name and colour are Carrel's alone (s-profile-33): the
+		// head says «feed», the feed's address stands first, and each field
+		// says where it lives.
+		rows[1].Hint = "The name is yours: it stays in Carrel and is never sent to the feed."
 		if !col.Has(view.KindContact) {
 			rows[len(rows)-1] = paletteRow(colour, errs["colour"], "Kept here: a feed sends no colour of its own.")
 		}
@@ -1157,9 +1216,10 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 		return view.CollectionRenameSheet{
 			Kind:    col.Kinds[0],
 			Title:   title,
+			Stamp:   "feed",
+			Feed:    true,
 			Form:    focused(s.plainForm(action, "POST", rows...), "name"),
 			Address: text(conn.Server),
-			Note:    "The name is yours: it stays in Carrel and is never sent to the feed.",
 			Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Primary: true, Enabled: true}, cancel},
 		}
 	}
@@ -1231,11 +1291,6 @@ var (
 		title:     "The server would not make it",
 		forbidden: "This account can read here but not create",
 		nothing:   "Nothing was created, and the form is as you left it.",
-	}
-	renameRefusal = refusalText{
-		title:     "The server refused the change",
-		forbidden: "This account can read here but not change it",
-		nothing:   "Nothing was renamed, and the form is as you left it.",
 	}
 )
 

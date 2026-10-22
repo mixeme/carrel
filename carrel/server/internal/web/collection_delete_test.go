@@ -27,7 +27,7 @@ func confirmDelete(f davFixture, name string) *http.Request {
 	return postForm(colDeleteHref(f), f.sess, url.Values{"name": {name}})
 }
 
-// S-12.4: the rail and the connections page offer Delete…; the sheet says
+// S-12.4: the connections page offers Delete… (Р-75: the rail does not); the sheet says
 // what goes, that Carrel keeps no copy and what a restore would not do, and
 // offers a file of everything in it first — a task in a calendar of events too.
 func TestCollectionDeleteSheetSaysWhatGoes(t *testing.T) {
@@ -39,16 +39,6 @@ func TestCollectionDeleteSheetSaysWhatGoes(t *testing.T) {
 	fromSettings := "/app/collections/delete?" + url.Values{"a": {f.id}, "c": {f.col}, "back": {"/app/settings/connections"}}.Encode()
 	if item.ID != "collection.delete" || !item.Danger || !item.Separator || item.Href != fromSettings {
 		t.Fatalf("connections menu = %+v", row.Menu)
-	}
-	rail := decode[view.AgendaPage](t, f.h.do(get(f.path("calendar"), f.sess)))
-	found := false
-	for _, sec := range rail.Rail.Sections {
-		for _, r := range sec.Rows {
-			found = found || hasMenu(r.Menu, "collection.delete")
-		}
-	}
-	if !found {
-		t.Error("the rail has no Delete…")
 	}
 
 	sheet := decode[view.CollectionDeleteSheet](t, f.h.do(get(colDeleteHref(f), f.sess)))
@@ -168,11 +158,16 @@ func TestCollectionDeleteNameInAnyUnicodeForm(t *testing.T) {
 func TestCollectionDeleteRefusedKeepsIt(t *testing.T) {
 	f := calendarFixture(t, nil, "report.ics", workTask)
 	f.srv.Refuse(http.MethodDelete, http.StatusForbidden, "no")
-	// The refusal is the sheet's (Кл4): the person stays where they were.
-	sheet := decode[view.CollectionDeleteSheet](t, f.h.do(confirmDelete(f, "Work")))
-	n := sheet.Failure
-	if n == nil || n.Title != "This account can read here but not delete" || n.Details == nil || !strings.Contains(string(n.Details.Summary), "DELETE") {
-		t.Fatalf("failure = %+v", n)
+	// The sheet closes and the answer stands on Connections, where the
+	// collection still is (s-profile-31, note 112 p. 6).
+	page := decode[view.ConnectionsPage](t, f.h.do(confirmDelete(f, "Work")))
+	var n *view.Notice
+	for i := range page.Notices {
+		n = &page.Notices[i]
+	}
+	if n == nil || n.Title != "Work was not deleted." || !strings.Contains(string(n.Body), "refused: this account can read here but not write. Work is as it was.") ||
+		n.Details == nil || !strings.Contains(string(n.Details.Summary), "DELETE") {
+		t.Fatalf("notice = %+v", n)
 	}
 	if _, ok := catalogOf(t, f).Collection(f.id, f.col); !ok {
 		t.Error("the catalog lost it")
@@ -337,11 +332,9 @@ func TestCollectionDeleteSheetCaptionCases(t *testing.T) {
 	}
 }
 
-// Кл4 of the scan of collections: a sheet opened from a list goes back
-// there once its work is done — a rename to where it was opened, else to
-// the collection's list; a deletion to where it was opened unless that was
-// the collection itself, then to its section — not to the settings it was
-// never opened from.
+// Кл4 of the scan of collections, note 112 p. 6: a sheet goes back where it
+// was opened once its work is done, else to Connections; a deletion opened
+// from the collection's own list, which goes with it, to its section.
 func TestCollectionSheetsGoBackWhereTheyCameFrom(t *testing.T) {
 	f := calendarFixture(t, nil, "report.ics", workTask)
 	q := url.Values{"a": {f.id}, "c": {f.col}}
@@ -353,8 +346,8 @@ func TestCollectionSheetsGoBackWhereTheyCameFrom(t *testing.T) {
 	}
 	q.Del("back")
 	rec = f.h.do(postForm("/app/collections/rename?"+q.Encode(), f.sess, url.Values{"name": {"Работа"}}))
-	if loc := rec.Header().Get("Location"); rec.Code != http.StatusSeeOther || strings.Contains(loc, "/settings/") {
-		t.Errorf("rename without back: %d → %q, want the collection's list", rec.Code, loc)
+	if loc := rec.Header().Get("Location"); rec.Code != http.StatusSeeOther || loc != "/app/settings/connections" {
+		t.Errorf("rename without back: %d → %q, want Connections", rec.Code, loc)
 	}
 	// Opened from its own list, which goes with it.
 	q.Set("back", f.path("calendar"))

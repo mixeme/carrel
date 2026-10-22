@@ -115,7 +115,7 @@ func TestFilesRootFollowsTheTicks(t *testing.T) {
 		t.Fatalf("nothing ticked: %+v", root.Empty)
 	}
 	_, row := railRow(t, root.Rail, "Docs")
-	if row.Tick != view.TickOff || row.Href != f.at("") || row.Count != nil || len(row.Menu) != 0 {
+	if row.Tick != view.TickOff || row.Href != f.at("") || row.Count != nil {
 		t.Errorf("rail row = %+v", row)
 	}
 	if root.Rail.Sections[0].Rows[0].Label != "Selected collections" || root.Rail.Sections[0].Rows[0].Tick != view.TickOff {

@@ -328,63 +328,6 @@
             "feed": false,
             "href": "/app/notes/a-nc-home/zapisi",
             "label": "Записи",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=zapisi",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/notes/a-nc-home/zapisi/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/notes/a-nc-home/zapisi/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": true,
             "readOnly": false,
             "state": "ok",
@@ -397,63 +340,6 @@
             "feed": false,
             "href": "/app/notes/a-nc-home/dnevnik",
             "label": "Дневник",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/notes/a-nc-home/dnevnik/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/notes/a-nc-home/dnevnik/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": false,
             "readOnly": false,
             "state": "ok",
@@ -466,55 +352,6 @@
             "feed": false,
             "href": "/app/notes/a-nc-home/zapiski-obshchie",
             "label": "Общие с семьёй",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=zapiski-obshchie",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=zapiski-obshchie",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=zapiski-obshchie\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/notes/a-nc-home/zapiski-obshchie/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=zapiski-obshchie",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": false,
             "readOnly": true,
             "state": "read-only",

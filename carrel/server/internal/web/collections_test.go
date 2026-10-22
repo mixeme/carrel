@@ -58,7 +58,9 @@ func TestNewCalendarTakesItsAddressFromTheName(t *testing.T) {
 	form := url.Values{"account": {f.id}, "name": {"Дни рождения"}, "colour": {"#6B4E7A"}, "components": {"VTODO", "VEVENT"}}
 	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess, form))
 	path := davtest.CalendarHome + "dni-rozhdeniya/"
-	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/app/calendar/"+f.id+"/"+url.PathEscape(path) {
+	// Done, to Connections: the sheet was opened from nowhere in particular
+	// (note 112 p. 6).
+	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/app/settings/connections" {
 		t.Fatalf("create: %d %q %s", rec.Code, rec.Header().Get("Location"), rec.Body.String())
 	}
 	cal, ok := f.srv.Calendar(path)
@@ -75,7 +77,7 @@ func TestNewCalendarTakesItsAddressFromTheName(t *testing.T) {
 	if what, detail := lastAudit(f.h); what != "collection.create" || detail != f.id {
 		t.Errorf("audit = %s %s", what, detail)
 	}
-	decode[view.AgendaPage](t, f.h.do(get(rec.Header().Get("Location"), f.sess)))
+	decode[view.AgendaPage](t, f.h.do(get("/app/calendar/"+f.id+"/"+url.PathEscape(path), f.sess)))
 
 	// The same name again: its address is taken, and the save is refused
 	// at the name — no address of its own is made up (the owner's decision
@@ -158,11 +160,8 @@ func TestCreateWhereTheServerPicksTheAddress(t *testing.T) {
 	if cal, ok := f.srv.Calendar(placed); !ok || cal.Name != "Trips" {
 		t.Errorf("the catalog points at %q, which the server does not hold as Trips: %+v %v", placed, cal, ok)
 	}
-	if loc, want := rec.Header().Get("Location"), "/app/calendar/"+f.id+"/"+url.PathEscape(placed); loc != want {
-		t.Errorf("went to %q, want %q", loc, want)
-	}
 	// And the page at that address opens.
-	decode[view.AgendaPage](t, f.h.do(get(rec.Header().Get("Location"), f.sess)))
+	decode[view.AgendaPage](t, f.h.do(get("/app/calendar/"+f.id+"/"+url.PathEscape(placed), f.sess)))
 }
 
 // An address typed by hand is kept as typed, refused when it is not one
@@ -191,7 +190,7 @@ func TestNewAddressBookWithAddressByHand(t *testing.T) {
 
 	rec := f.h.do(postForm("/app/collections/new?kind=contact", f.sess, url.Values{"account": {f.id}, "name": {"Team & Co"}, "address": {"Team_1"}}))
 	path := davtest.AddressBookHome + "Team_1/"
-	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/app/contacts/"+f.id+"/"+url.PathEscape(path) {
+	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/app/settings/connections" {
 		t.Fatalf("create: %d %q %s", rec.Code, rec.Header().Get("Location"), rec.Body.String())
 	}
 	if book, ok := f.srv.AddressBook(path); !ok || book.Name != "Team & Co" {
@@ -234,7 +233,8 @@ func TestRefusedCreateLeavesNothing(t *testing.T) {
 	if len(lines) != 3 || lines[0] != "[create]  MKCALENDAR "+davtest.CalendarHome+"trips/ → 403" || !strings.Contains(lines[1], "need-privileges") || lines[2] != "no DAV:bind on the calendar home-set" {
 		t.Errorf("block = %q", lines)
 	}
-	if !strings.HasPrefix(string(sheet.Explain), "This account may sign in and read, but not create.") || sheet.Stamp == "" {
+	// The 403 named with the server (s-profile-6).
+	if string(sheet.Explain) != "This account may sign in and read, but "+string(sheet.Stamp)+" would not let it create here. The server does not say why — no such right for the user, or a password issued read-only; whoever runs the server can tell." || sheet.Stamp == "" {
 		t.Errorf("explain %q, stamp %q", sheet.Explain, sheet.Stamp)
 	}
 	for _, set := range sheet.Form.Sets {
@@ -293,7 +293,9 @@ func TestRenameWritesTheLabelNotTheAddress(t *testing.T) {
 
 	f.srv.Refuse("PROPPATCH", http.StatusForbidden, "")
 	sheet = decode[view.CollectionRenameSheet](t, f.h.do(postForm(u.Path+"?"+u.RawQuery, f.sess, url.Values{"name": {"Elsewhere"}})))
-	if sheet.Failure == nil || sheet.Failure.Title != "This account can read here but not change it" || rowNamed(t, sheet.Form, "name").Value != "Elsewhere" {
+	// The refusal stays in the sheet, what was typed in its form (s-profile-30).
+	if sheet.Failure == nil || sheet.Failure.Body != "The server would not rename it. Nothing changed, and the form is as you left it." ||
+		sheet.Failure.Details == nil || !strings.Contains(string(sheet.Failure.Details.Lines[0]), "[rename]  PROPPATCH") || rowNamed(t, sheet.Form, "name").Value != "Elsewhere" {
 		t.Errorf("refused rename = %+v", sheet)
 	}
 	if entry, _ := catalogOf(t, f).Collection(f.id, f.col); entry.Name != "Office" {
@@ -324,8 +326,10 @@ func TestACollectionMadeOnAConnectionThatDiedIsStillMade(t *testing.T) {
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("create: %d %s", rec.Code, rec.Body.String())
 	}
-	if loc := rec.Header().Get("Location"); loc != "/app/calendar/"+f.id+"/"+url.PathEscape(path) {
-		t.Fatalf("create went to %q, want the collection the server made", loc)
+	// Made, so done: opened from nowhere in particular, to Connections
+	// (note 112 p. 6).
+	if loc := rec.Header().Get("Location"); loc != "/app/settings/connections" {
+		t.Fatalf("create went to %q, want Connections", loc)
 	}
 	if cal, ok := f.srv.Calendar(path); !ok || cal.Name != "Дни рождения" {
 		t.Errorf("server calendar = %+v (found %v)", cal, ok)

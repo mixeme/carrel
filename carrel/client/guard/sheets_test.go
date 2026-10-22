@@ -168,10 +168,16 @@ func sheetFindings(l lib, frame, at, printed string) []string {
 // pageParts are the drawings of a fragment of a page (account-8: «блок
 // Email»): from its main column down while there is one element, what that
 // holds — the group drawn alone is the first of its form, and on the page
-// it is not; its rubric and its fields are what the fragment shows.
+// it is not; its rubric and its fields are what the fragment shows. A
+// fragment drawn without a main column — a notice over the cards of
+// Connections and its diagnostic (s-profile-31, -32) — is what its root
+// holds.
 func pageParts(mock, id string) []*html.Node {
 	nodes := parseHTML(frameBlock(mock, id))
 	n := find(nodes, func(n *html.Node) bool { return hasClass(n, "tc-main") })
+	if n == nil {
+		n = find(nodes, func(n *html.Node) bool { return hasClass(n, "tc-root") })
+	}
 	if n == nil {
 		return nil
 	}
@@ -181,6 +187,39 @@ func pageParts(mock, id string) []*html.Node {
 			return kids
 		}
 		n = kids[0]
+	}
+}
+
+// hasMain says whether a fragment frame draws a main column.
+func hasMain(mock, id string) bool {
+	return find(parseHTML(frameBlock(mock, id)), func(n *html.Node) bool { return hasClass(n, "tc-main") }) != nil
+}
+
+// unspaced takes the margins off every notice of the trees: the classes
+// tc-msg--… that place a message, not what it is.
+func unspaced(nodes []*html.Node) {
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		if n.Type == html.ElementNode && hasClass(n, "tc-msg") {
+			for i, a := range n.Attr {
+				if a.Key != "class" {
+					continue
+				}
+				var keep []string
+				for _, c := range strings.Fields(a.Val) {
+					if !strings.HasPrefix(c, "tc-msg--") {
+						keep = append(keep, c)
+					}
+				}
+				n.Attr[i].Val = strings.Join(keep, " ")
+			}
+		}
+		for k := n.FirstChild; k != nil; k = k.NextSibling {
+			walk(k)
+		}
+	}
+	for _, n := range nodes {
+		walk(n)
 	}
 }
 

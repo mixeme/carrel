@@ -950,63 +950,6 @@
             "feed": false,
             "href": "/app/contacts/a-nc-home/kontakty",
             "label": "Контакты",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/contacts/a-nc-home/kontakty/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/contacts/a-nc-home/kontakty/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": true,
             "readOnly": false,
             "state": "ok",
@@ -1019,63 +962,6 @@
             "feed": false,
             "href": "/app/contacts/a-nc-home/arhiv",
             "label": "Архив",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/contacts/a-nc-home/arhiv/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/contacts/a-nc-home/arhiv/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": false,
             "readOnly": false,
             "state": "ok",

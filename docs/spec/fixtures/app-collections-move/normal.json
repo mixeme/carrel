@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-rad-vps",
+      "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj\u0026to=a-rad-vps",
       "id": "collection.move.confirm",
       "label": "Move",
       "method": "POST",
@@ -13,16 +13,15 @@
     },
     {
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+      "href": "/app/settings/connections",
       "id": "collection.cancel",
       "label": "Cancel",
       "method": "GET"
     }
   ],
-  "cancels": "nextcloud may tell the attendees of its meetings that they are cancelled.",
   "copy": false,
   "form": {
-    "action": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
+    "action": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -50,15 +49,15 @@
     "target": "sheet"
   },
   "kind": "event",
-  "subject": "nextcloud · Дни рождения",
+  "subject": "nextcloud · Личный",
   "target": {
-    "chosen": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-rad-vps",
+    "chosen": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj\u0026to=a-rad-vps",
     "field": "to",
     "new": null,
     "options": [
       {
         "colour": "",
-        "id": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-nc-home",
+        "id": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj\u0026to=a-nc-home",
         "label": "nextcloud",
         "last": false,
         "readOnly": true,
@@ -68,8 +67,8 @@
       },
       {
         "colour": "",
-        "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-rad-vps",
-        "id": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-rad-vps",
+        "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj\u0026to=a-rad-vps",
+        "id": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj\u0026to=a-rad-vps",
         "label": "radicale · vps",
         "last": false,
         "readOnly": false,
@@ -79,7 +78,7 @@
       },
       {
         "colour": "",
-        "id": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-baikal",
+        "id": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj\u0026to=a-baikal",
         "label": "baikal",
         "last": false,
         "readOnly": true,
@@ -89,7 +88,7 @@
       },
       {
         "colour": "",
-        "id": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026to=a-sftp-vps",
+        "id": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj\u0026to=a-sftp-vps",
         "label": "sftpgo · vps",
         "last": false,
         "readOnly": true,
@@ -2170,7 +2169,17 @@
   },
   "warning": [
     {
-      "text": "Carrel creates a calendar there, copies all its events, then deletes this one on nextcloud. Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path."
+      "text": "Carrel creates a calendar there, copies all "
+    },
+    {
+      "mark": "strong",
+      "text": "2"
+    },
+    {
+      "text": " events, then deletes this one on nextcloud. Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path."
+    },
+    {
+      "text": " nextcloud may tell the attendees of its meetings that they are cancelled."
     }
   ]
 }

@@ -337,7 +337,7 @@ func TestTimelineRailIsWhereItLooks(t *testing.T) {
 	if len(rows) != 2 || rows[0].Label != "Combined calendar" || rows[1].Label != "Work" || rows[1].Tick != view.TickOn {
 		t.Fatalf("rows = %+v", rows)
 	}
-	if rows[1].Count == nil || *rows[1].Count != 1 || rows[0].Count == nil || *rows[0].Count != 1 || len(rows[1].Menu) != 0 {
+	if rows[1].Count == nil || *rows[1].Count != 1 || rows[0].Count == nil || *rows[0].Count != 1 {
 		t.Errorf("counts: combined %v, Work %v", rows[0].Count, rows[1].Count)
 	}
 

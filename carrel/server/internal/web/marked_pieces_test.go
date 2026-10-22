@@ -100,6 +100,10 @@ func TestCollectionDeleteMarksItsPieces(t *testing.T) {
 	sheet := decode[view.CollectionDeleteSheet](t, f.h.do(get("/app/collections/delete?"+url.Values{"a": {f.id}, "c": {f.col}}.Encode(), f.sess)))
 	got := saidRuns(sheet.Warning)
 	want := shape.ReplaceAllString(count, "⟨strong:2⟩")
+	// The frame's server schedules and its calendar has meetings: its last
+	// sentence says the attendees may hear of it (note 112 p. 5). This one
+	// does not schedule; the sentence is TestAMoveSaysTheAttendeesMayHearOfACancellation's.
+	want = strings.Replace(want, " nextcloud may tell the attendees of its meetings that they are cancelled.", "", 1)
 	host := regexp.MustCompile(`deleted on .*?\. Carrel`)
 	want = host.ReplaceAllString(want, "deleted on X. Carrel")
 	got = host.ReplaceAllString(got, "deleted on X. Carrel")

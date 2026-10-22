@@ -135,17 +135,6 @@ func TestCollectionMoveSheetSaysBeforeItStarts(t *testing.T) {
 	if !copySheet.Copy || copySheet.Actions[0].ID != "collection.copy.confirm" || strings.Contains(plainText(copySheet.Warning), "deletes") {
 		t.Errorf("copy sheet = %+v", copySheet)
 	}
-
-	rail := decode[view.AgendaPage](t, f.h.do(get(f.path("calendar"), f.sess)))
-	found := false
-	for _, sec := range rail.Rail.Sections {
-		for _, r := range sec.Rows {
-			found = found || hasMenu(r.Menu, "collection.move")
-		}
-	}
-	if !found {
-		t.Error("the rail has no Move to another server")
-	}
 }
 
 // A move makes the collection there with its name, colour and components,
@@ -159,7 +148,8 @@ func TestCollectionMoveCopiesThenDeletes(t *testing.T) {
 
 	resp := f.h.do(confirmCollection(t, f, false))
 	newPath := davtest.CalendarHome + "work/"
-	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != "/app/calendar/"+f.otherID+"/"+url.PathEscape(newPath) {
+	// Opened from nowhere in particular, done in Connections (note 112 p. 6).
+	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != "/app/settings/connections" {
 		t.Fatalf("move: %d %q %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
 	}
 	cal, ok := f.other.Calendar(newPath)
@@ -201,7 +191,7 @@ func TestCollectionCopyKeepsTheOriginal(t *testing.T) {
 	f.other.AddCalendar(caldav.Calendar{Path: davtest.CalendarHome + "work/", Name: "Their work"})
 	resp := f.h.do(confirmCollection(t, f, true))
 	newPath := davtest.CalendarHome + "work-2/"
-	if resp.Code != http.StatusSeeOther || !strings.HasSuffix(resp.Header().Get("Location"), url.PathEscape(newPath)) {
+	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != "/app/settings/connections" {
 		t.Fatalf("copy: %d %q %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
 	}
 	if _, _, ok := f.other.Object(newPath + "standup.ics"); !ok {

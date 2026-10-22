@@ -136,7 +136,6 @@
             "feed": false,
             "href": "/app/mail/attach?a=a-nc-home\u0026c=zapisi\u0026what=note",
             "label": "Записи",
-            "menu": [],
             "on": false,
             "readOnly": false,
             "state": "ok",
@@ -149,7 +148,6 @@
             "feed": false,
             "href": "/app/mail/attach?a=a-nc-home\u0026c=dnevnik\u0026what=note",
             "label": "Дневник",
-            "menu": [],
             "on": false,
             "readOnly": false,
             "state": "ok",
@@ -162,7 +160,6 @@
             "feed": false,
             "href": "/app/mail/attach?a=a-nc-home\u0026c=zapiski-obshchie\u0026what=note",
             "label": "Общие с семьёй",
-            "menu": [],
             "on": false,
             "readOnly": false,
             "state": "ok",
@@ -1318,7 +1315,6 @@
                 "feed": false,
                 "href": "/app/contacts",
                 "label": "Combined address book",
-                "menu": [],
                 "on": true,
                 "readOnly": false,
                 "state": "ok",
@@ -1338,63 +1334,6 @@
                 "feed": false,
                 "href": "/app/contacts/a-nc-home/kontakty",
                 "label": "Контакты",
-                "menu": [
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
-                    "icon": "i-pencil",
-                    "id": "collection.rename",
-                    "label": "Rename",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
-                    "icon": "i-move",
-                    "id": "collection.move",
-                    "label": "Move to another server",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
-                    "icon": "i-dup",
-                    "id": "collection.copy",
-                    "label": "Copy to another server",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/contacts/a-nc-home/kontakty/import",
-                    "icon": "i-import",
-                    "id": "collection.import",
-                    "label": "Import",
-                    "method": "GET",
-                    "separator": true
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/contacts/a-nc-home/kontakty/export",
-                    "icon": "i-export",
-                    "id": "collection.export",
-                    "label": "Export",
-                    "method": "GET"
-                  },
-                  {
-                    "danger": true,
-                    "enabled": true,
-                    "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
-                    "icon": "i-trash",
-                    "id": "collection.delete",
-                    "label": "Delete on the server…",
-                    "method": "GET",
-                    "separator": true,
-                    "target": "sheet"
-                  }
-                ],
                 "on": false,
                 "readOnly": false,
                 "state": "ok",
@@ -1407,63 +1346,6 @@
                 "feed": false,
                 "href": "/app/contacts/a-nc-home/arhiv",
                 "label": "Архив",
-                "menu": [
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
-                    "icon": "i-pencil",
-                    "id": "collection.rename",
-                    "label": "Rename",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
-                    "icon": "i-move",
-                    "id": "collection.move",
-                    "label": "Move to another server",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
-                    "icon": "i-dup",
-                    "id": "collection.copy",
-                    "label": "Copy to another server",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/contacts/a-nc-home/arhiv/import",
-                    "icon": "i-import",
-                    "id": "collection.import",
-                    "label": "Import",
-                    "method": "GET",
-                    "separator": true
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/contacts/a-nc-home/arhiv/export",
-                    "icon": "i-export",
-                    "id": "collection.export",
-                    "label": "Export",
-                    "method": "GET"
-                  },
-                  {
-                    "danger": true,
-                    "enabled": true,
-                    "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
-                    "icon": "i-trash",
-                    "id": "collection.delete",
-                    "label": "Delete on the server…",
-                    "method": "GET",
-                    "separator": true,
-                    "target": "sheet"
-                  }
-                ],
                 "on": false,
                 "readOnly": false,
                 "state": "ok",
@@ -1483,55 +1365,6 @@
                 "feed": false,
                 "href": "/app/contacts/a-rad-vps/komanda",
                 "label": "Команда",
-                "menu": [
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/rename?a=a-rad-vps\u0026c=komanda",
-                    "icon": "i-pencil",
-                    "id": "collection.rename",
-                    "label": "Rename",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/move?a=a-rad-vps\u0026c=komanda",
-                    "icon": "i-move",
-                    "id": "collection.move",
-                    "label": "Move to another server",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/move?a=a-rad-vps\u0026c=komanda\u0026copy=1",
-                    "icon": "i-dup",
-                    "id": "collection.copy",
-                    "label": "Copy to another server",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/contacts/a-rad-vps/komanda/export",
-                    "icon": "i-export",
-                    "id": "collection.export",
-                    "label": "Export",
-                    "method": "GET",
-                    "separator": true
-                  },
-                  {
-                    "danger": true,
-                    "enabled": true,
-                    "href": "/app/collections/delete?a=a-rad-vps\u0026c=komanda",
-                    "icon": "i-trash",
-                    "id": "collection.delete",
-                    "label": "Delete on the server…",
-                    "method": "GET",
-                    "separator": true,
-                    "target": "sheet"
-                  }
-                ],
                 "on": false,
                 "readOnly": true,
                 "state": "read-only",
@@ -1544,63 +1377,6 @@
                 "feed": false,
                 "href": "/app/contacts/a-rad-vps/rassylki",
                 "label": "Рассылки",
-                "menu": [
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/rename?a=a-rad-vps\u0026c=rassylki",
-                    "icon": "i-pencil",
-                    "id": "collection.rename",
-                    "label": "Rename",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/move?a=a-rad-vps\u0026c=rassylki",
-                    "icon": "i-move",
-                    "id": "collection.move",
-                    "label": "Move to another server",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/collections/move?a=a-rad-vps\u0026c=rassylki\u0026copy=1",
-                    "icon": "i-dup",
-                    "id": "collection.copy",
-                    "label": "Copy to another server",
-                    "method": "GET",
-                    "target": "sheet"
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/contacts/a-rad-vps/rassylki/import",
-                    "icon": "i-import",
-                    "id": "collection.import",
-                    "label": "Import",
-                    "method": "GET",
-                    "separator": true
-                  },
-                  {
-                    "enabled": true,
-                    "href": "/app/contacts/a-rad-vps/rassylki/export",
-                    "icon": "i-export",
-                    "id": "collection.export",
-                    "label": "Export",
-                    "method": "GET"
-                  },
-                  {
-                    "danger": true,
-                    "enabled": true,
-                    "href": "/app/collections/delete?a=a-rad-vps\u0026c=rassylki",
-                    "icon": "i-trash",
-                    "id": "collection.delete",
-                    "label": "Delete on the server…",
-                    "method": "GET",
-                    "separator": true,
-                    "target": "sheet"
-                  }
-                ],
                 "on": false,
                 "readOnly": false,
                 "state": "ok",

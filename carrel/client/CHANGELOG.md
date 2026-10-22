@@ -4,6 +4,18 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.6.3 — 2026-10-22
+
+Server `v0.2.359`, Typecase `0f51d45` (note 112).
+
+### Changed
+
+- **Connections** holds the outcomes of the collections' sheets on its
+  page: the delete the server refused (s-profile-31) and the move that kept
+  the original (s-profile-32). The guard takes a fragment drawn without a
+  main column by what its root holds, and a notice drawn alone without its
+  margin (Typecase task 224).
+
 ## v0.6.2 — 2026-10-22
 
 Server `v0.2.358`, Typecase `a78141d`.

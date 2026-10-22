@@ -4,7 +4,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
+      "href": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj",
       "id": "collection.delete.confirm",
       "label": "Delete on the server",
       "method": "POST",
@@ -12,7 +12,7 @@
     },
     {
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+      "href": "/app/settings/connections",
       "id": "collection.cancel",
       "label": "Cancel",
       "method": "GET"
@@ -23,19 +23,17 @@
       "text": "No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new calendar at a new address — not into this one, and not to this address."
     }
   ],
-  "cancels": "nextcloud may tell the attendees of its meetings that they are cancelled.",
   "export": {
     "enabled": true,
-    "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export?whole=1",
+    "href": "/app/calendar/a-nc-home/lichnyj/export?whole=1",
     "icon": "i-download",
     "id": "collection.export",
     "label": "Download .ics first",
     "method": "GET"
   },
-  "exportNote": "1 event, one file, straight to you",
-  "failure": null,
+  "exportNote": "2 events, one file, straight to you",
   "form": {
-    "action": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
+    "action": "/app/collections/delete?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=lichnyj",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -66,7 +64,7 @@
             "label": "Type the name to confirm",
             "name": "name",
             "options": [],
-            "placeholder": "Дни рождения",
+            "placeholder": "Личный",
             "readOnly": false,
             "required": true,
             "value": ""
@@ -78,8 +76,13 @@
     "target": "sheet"
   },
   "kind": "event",
-  "references": [],
-  "subject": "nextcloud · Дни рождения",
+  "references": [
+    {
+      "then": "answers “not found” from that moment",
+      "what": "1 published link"
+    }
+  ],
+  "subject": "nextcloud · Личный",
   "title": "Delete on the server",
   "under": {
     "account": null,
@@ -2155,10 +2158,13 @@
     },
     {
       "mark": "strong",
-      "text": "1"
+      "text": "2"
     },
     {
-      "text": " event in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+      "text": " events in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+    },
+    {
+      "text": " nextcloud may tell the attendees of its meetings that they are cancelled."
     }
   ]
 }

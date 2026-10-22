@@ -1,14 +1,12 @@
 {
   "actions": [
     {
-      "csrf": "csrf",
-      "enabled": false,
+      "enabled": true,
       "href": "/app/collections/new?kind=event",
-      "id": "collection.create",
-      "label": "Create",
-      "method": "POST",
+      "id": "collection.again",
+      "label": "Try again",
+      "method": "GET",
       "primary": true,
-      "reason": "No server that holds calendars is answering now: nextcloud, radicale · vps, baikal. Until one does, there is nothing to create there.",
       "target": "sheet"
     },
     {
@@ -22,163 +20,11 @@
   "explain": "",
   "failure": null,
   "form": {
-    "action": "/app/collections/new?kind=event",
+    "action": "",
     "actions": [],
     "errors": [],
-    "method": "POST",
-    "sets": [
-      {
-        "legend": "",
-        "rows": [
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "hidden",
-            "label": "",
-            "name": "_csrf",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "csrf"
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "focus": true,
-            "hint": "",
-            "kind": "text",
-            "label": "Name",
-            "name": "name",
-            "options": [],
-            "readOnly": false,
-            "required": true,
-            "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "hintRuns": [
-              {
-                "text": "Written to the server as "
-              },
-              {
-                "mark": "mono",
-                "text": "calendar-color"
-              },
-              {
-                "text": " — DAVx5 and Thunderbird will show the same one."
-              }
-            ],
-            "kind": "radio",
-            "label": "Colour",
-            "name": "colour",
-            "options": [
-              {
-                "label": "#4a6b52",
-                "selected": false,
-                "value": "#4a6b52"
-              },
-              {
-                "label": "#3f6e8c",
-                "selected": false,
-                "value": "#3f6e8c"
-              },
-              {
-                "label": "#6b4e7a",
-                "selected": false,
-                "value": "#6b4e7a"
-              },
-              {
-                "label": "#a05a2c",
-                "selected": false,
-                "value": "#a05a2c"
-              },
-              {
-                "label": "#8c6239",
-                "selected": false,
-                "value": "#8c6239"
-              },
-              {
-                "label": "#9a9280",
-                "selected": false,
-                "value": "#9a9280"
-              }
-            ],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "hintRuns": [
-              {
-                "text": "Most servers settle this when the collection is made and will not change it afterwards. A collection holding only tasks appears in "
-              },
-              {
-                "mark": "strong",
-                "text": "Tasks"
-              },
-              {
-                "text": ", not here — the rail follows what is inside, not where it was made."
-              }
-            ],
-            "kind": "check",
-            "label": "What goes in it",
-            "name": "components",
-            "options": [
-              {
-                "label": "Events",
-                "selected": true,
-                "value": "VEVENT"
-              },
-              {
-                "label": "Tasks",
-                "selected": false,
-                "value": "VTODO"
-              },
-              {
-                "label": "Notes",
-                "selected": false,
-                "value": "VJOURNAL"
-              }
-            ],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "add": null,
-            "error": "",
-            "extra": null,
-            "from": "name",
-            "hint": "",
-            "hintRuns": [
-              {
-                "text": "taken from the name, yours to change. Other clients and restore-by-path go by the address; the name they only show."
-              }
-            ],
-            "kind": "text",
-            "label": "Address",
-            "mono": true,
-            "name": "address",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          }
-        ],
-        "unfold": null
-      }
-    ],
-    "target": "sheet"
+    "method": "",
+    "sets": []
   },
   "kind": "event",
   "note": "No server that holds calendars is answering now: nextcloud, radicale · vps, baikal. Until one does, there is nothing to create there.",

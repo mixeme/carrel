@@ -481,10 +481,10 @@ Typecase): рейл с соседними заметками и колонка �
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
-| `/app/collections/new` | GET, POST | вход | лист; `?kind=` — род (`contact`, `event`, `task`, `note`, `file`; без него — «What it is», поле `kind`); `?a=` — подключение карточки, откуда открыт; `?back=` — откуда открыт: Cancel ведёт туда, а мастер импорта (S-19) получает новую коллекцию выбранной; `?kind=file&a=` — New folder хранилища (S-12.1); `?components=` (GET) — что отмечено в «What goes in it»: «New calendar» уведомления о невзятом роде (s-agenda-11); POST — поля `account`, `name`, `colour`, `components` (значений несколько), `address`; `?op=back` — «Back to the form» после отказа: форма как была, серверу ничего не шлётся | `CollectionNewSheet` |
-| `/app/collections/rename` | GET, POST | вход | лист; `?a=` — подключение, `?c=` — адрес коллекции; `?back=` — откуда открыт (Cancel); POST — поля `name`, `colour` | `CollectionRenameSheet` |
-| `/app/collections/move` | GET, POST | вход | лист; `?a=`, `?c=` — коллекция; `?to=` — подключение-цель (адрес варианта, `TargetOption.Href`); `?copy=1` — копия; `?back=` — откуда открыт (Cancel), его несут и варианты | `CollectionMoveSheet` |
-| `/app/collections/delete` | GET, POST | вход | лист; `?a=`, `?c=` — коллекция; `?back=` — откуда открыт (Cancel); POST — поле `name`, имя набором | `CollectionDeleteSheet` |
+| `/app/collections/new` | GET, POST | вход | лист; `?kind=` — род (`contact`, `event`, `task`, `note`, `file`; без него — «What it is», радио `kind` после сервера: `event` — Calendar, `contact` — Address book, выключает `components`, s-profile-29); `?a=` — подключение карточки, откуда открыт; `?back=` — откуда открыт: Cancel ведёт туда, а мастер импорта (S-19) получает новую коллекцию выбранной; `?kind=file&a=` — New folder хранилища (S-12.1); `?components=` (GET) — что отмечено в «What goes in it»: «New calendar» уведомления о невзятом роде (s-agenda-11); POST — поля `account`, `name`, `colour`, `components` (значений несколько), `address`; `?op=back` — «Back to the form» после отказа: форма как была, серверу ничего не шлётся. Создать негде — полей нет: «Try again» (GET этого листа, s-profile-21) или, когда рода не держит ни один сервер, «Connect account» (s-profile-28). Успех — `back`, без него Connections; коллекцию, которую сервер сделал не со всем составом, открывает её список (s-agenda-11) | `CollectionNewSheet` |
+| `/app/collections/rename` | GET, POST | вход | лист; `?a=` — подключение, `?c=` — адрес коллекции; `?back=` — откуда открыт (Cancel); POST — поля `name`, `colour`; у подписки `?a=` — её id, `?c=` — путь ленты (s-profile-33). Успех — `back`, без него Connections; отказ — в листе (s-profile-30) | `CollectionRenameSheet` |
+| `/app/collections/move` | GET, POST | вход | лист; `?a=`, `?c=` — коллекция; `?to=` — подключение-цель (адрес варианта, `TargetOption.Href`); `?copy=1` — копия; `?back=` — откуда открыт (Cancel), его несут и варианты. Папка хранилища — так же (Р-74, s-profile-34); хранилище целиком переносит содержимое, адрес остаётся пустым (s-profile-35). Успех — `back`, без него Connections; исходы «записано не всё» — уведомлением на Connections (s-profile-32) | `CollectionMoveSheet` |
+| `/app/collections/delete` | GET, POST | вход | лист; `?a=`, `?c=` — коллекция; `?back=` — откуда открыт (Cancel); POST — поле `name`, имя набором. Отказ сервера — уведомлением на Connections, лист закрыт (s-profile-31) | `CollectionDeleteSheet` |
 
 ### C-5.7 Настройки
 
@@ -901,8 +901,11 @@ type SourceRow struct {
     Feed     bool      // подписка — лента, прочитанная снаружи (is-ext); счёт стоит на месте счёта, «ro» — бейджем рядом, слово экрана (ReadOnly; решение владельца 07.10.2026, записка Typecase 35)
     State    CollectionState
     Detail   Text      // не ответила: почему, полностью — подсказка значка ошибки строки, «401 Unauthorized — the saved password was refused. Open Connections to update it.»; ни слов у имени, ни Retry в рейле нет (решение владельца 02.10.2026: отказ целиком и его Retry — в меню «N failed» полосы хода, PollBar.Failed, states-16); у списка одной коллекции, чей сервер не ответил на чтение этого списка, — у её строки тоже (State — unavailable; states-11, -22, -29), счёт, показанный раньше, остаётся в Count
-    Menu     []MenuItem
 }
+// Строка рейла — отметка и ссылка, и только (Р-75, решение владельца
+// 22.10.2026; записка Typecase 112): меню у неё нет — что делают с
+// коллекцией, делают в Connections.
+
 
 // Панель у списка — запись для чтения (s-contacts-1, s-agenda-1, s-tasks-1,
 // s-notes-1). Блоки — те же типы, что у страницы записи; пустой блок панель
@@ -2141,11 +2144,12 @@ type CollectionNewSheet struct {
 type CollectionRenameSheet struct {
     Kind    Kind
     Title   Text    // «Rename and colour» у календаря (s-profile-7), «Rename» у книги и папки (s-profile-18)
-    Stamp   Stamp   // имя сервера; у папки хранилища — сервер и папка, «sftpgo · vps · Documents» (s-profile-18); пусто у подписки — у неё имя местное
+    Stamp   Stamp   // имя сервера; у папки хранилища — сервер и папка, «sftpgo · vps · Documents» (s-profile-18); у подписки — «feed» (s-profile-33)
     Form    Form    // имя и цвет одним листом: оба уходят одним запросом
-    Address Text    // показан и не правится (S-12.2); пусто у папки хранилища: её имя и есть адрес
+    Address Text    // показан и не правится (S-12.2), поле без имени, с формой не уходит; пусто у папки хранилища: её имя и есть адрес
+    Feed    bool    // подписка (s-profile-33): Address — адрес ленты, поле «Feed» первым; подсказки у Name и Colour — где живут имя и цвет; Note пуст
     Note    Text    // «переименование — не перенос»: адрес остаётся прежним
-    Failure *Notice // отказ сервера; форма хранит введённое
+    Failure *Notice // отказ сервера — в листе (s-profile-30): «The server would not rename it. Nothing changed, and the form is as you left it.» и диагностика; форма хранит введённое
     Actions []Action // Save (у папки — Rename) и Cancel
     Under   *Under // экран под листом, пришедшим страницей (Кл1): откуда открыт (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у фрагмента
 }
@@ -2167,9 +2171,9 @@ type CollectionMoveSheet struct {
     Title   Text         // «Move calendar», «Copy address book», «Move folder» (s-profile-8)
     Subject Text         // что переносят: «nextcloud · Дни рождения»
     Target  TargetPicker // цель — подключение, а не коллекция (S-12.3)
-    Cancels Text // календарь уходит с сервера, который планирует: «nextcloud may tell the attendees of its meetings that they are cancelled.»; у копии, не календаря и сервера без планирования пусто
-    Warning Runs // число записей жирным: «copies all ‹51› events» (s-profile-8)
-    Form    Form // лист — форма (s-profile-8): POST на адрес переноса (a, c, back в адресе), скрытые _csrf и copy у копии; выбранный сервер — под Target.Field «to» (TargetOption.Value — подключение); без выбора выбран первый подходящий; закрытый — с причиной: «already there», «files only», «not answering», «password · 401»
+    Warning Runs // число записей жирным: «copies all ‹51› events» (s-profile-8); у календаря с сервера, который планирует, последней фразой — «nextcloud may tell the attendees of its meetings that they are cancelled.» (А12, записка 112 п. 5); у папки — куда она ляжет: «in nextcloud · Files» или «on sftpgo · vps beside Documents and Public», «all ‹9› files» (s-profile-34); у хранилища целиком — что адрес остаётся пустым (s-profile-35, Р-74)
+    Stays   Text // вторая строка хранилища целиком (s-profile-35): что сервер не даст удалить, то скопируется и останется; у прочих пусто
+    Form    Form // лист — форма (s-profile-8): POST на адрес переноса (a, c, back в адресе), скрытые _csrf и copy у копии; выбранный сервер — под Target.Field «to» (TargetOption.Value — подключение); без выбора выбран первый подходящий; закрытый — с причиной: «already there», неответ сервера («password · 401») — прежде прочих, «files only», «no files»; у папки подходящий — «files»
     Actions []Action // Move или Copy — Submits, кнопка формы; Cancel
     Under   *Under // экран под листом, пришедшим страницей (Кл1): откуда открыт (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у фрагмента
 }
@@ -2202,15 +2206,19 @@ type CollectionDeleteSheet struct {
     Subject    Text
     Warning    Runs    // что именно исчезнет и что копии у Carrel нет; число жирным (s-profile-9, -19)
     References []Reference // что на неё ссылается и что с ним станет: ссылки и устройства счётом, задания по имени
-    Cancels    Text    // как у CollectionMoveSheet: календарь с записями уходит с сервера, который планирует, — «nextcloud may tell the attendees of its meetings that they are cancelled.» (А12); иначе пусто
     Archive    Runs    // когда попадала в архив — день моноширинно — и чего восстановление не сделает, «new» жирным (s-profile-9, -19)
     Export     *Action // «сначала скачать»; nil — экспортировать нечем
     ExportNote Text
     Form       Form    // подтверждение набором имени
     Actions    []Action // Delete on the server и Cancel
     Under   *Under // экран под листом, пришедшим страницей (Кл1): откуда открыт (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у фрагмента
-    Failure *Notice // отказ сервера удалить (Кл4): лист остаётся, набранное имя в поле; nil — отказа не было
 }
+// Warning календаря с записями на сервере, который планирует, кончается
+// фразой об отмене, как у переноса (А12, записка 112 п. 5). Отказ сервера
+// удалить — не в листе: лист закрыт, уведомление на Connections
+// (s-profile-31) — «‹Архив› was not deleted.» · «‹nextcloud› refused: this
+// account can read here but not write. ‹Архив› is as it was.» и
+// диагностика.
 
 // Лист «из какой коллекции отдать» — вход в экспорт из сведённого вида.
 type ExportSheet struct {

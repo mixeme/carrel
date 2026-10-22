@@ -169,8 +169,7 @@ type SourceRow struct {
 	// Connections to update it.»; ни слов рядом с именем, ни Retry в рейле
 	// нет (решение владельца 02.10.2026: отказ целиком и его Retry — в меню
 	// «N failed» полосы хода, PollBar.Failed, states-16)
-	Detail Text       `json:"detail"`
-	Menu   []MenuItem `json:"menu"`
+	Detail Text `json:"detail"`
 }
 
 // Details — панель у списка: запись для чтения, как её рисуют кадры панелей

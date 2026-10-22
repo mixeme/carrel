@@ -1,0 +1,126 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dni-rozhdeniya",
+      "id": "collection.save",
+      "label": "Save",
+      "method": "POST",
+      "primary": true,
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/settings/connections",
+      "id": "collection.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "address": "…/alice/calendars/dni-rozhdeniya/",
+  "failure": {
+    "actions": [],
+    "body": "The server would not rename it. Nothing changed, and the form is as you left it.",
+    "details": {
+      "lines": [
+        "[rename]  PROPPATCH /alice/calendars/dni-rozhdeniya/ → 403",
+        "\u003cd:error xmlns:d=\"DAV:\"\u003e\u003cs:message xmlns:s=\"http://sabredav.org/ns\"\u003eThis calendar is maintained by the server\u003c/s:message\u003e\u003c/d:error\u003e"
+      ],
+      "summary": "PROPPATCH /alice/calendars/dni-rozhdeniya/"
+    },
+    "role": "alert",
+    "title": ""
+  },
+  "form": {
+    "action": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dni-rozhdeniya",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "focus": true,
+            "hint": "",
+            "kind": "text",
+            "label": "Name",
+            "name": "name",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": "Дни рождения"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "radio",
+            "label": "Colour",
+            "name": "colour",
+            "options": [
+              {
+                "label": "#4a6b52",
+                "selected": false,
+                "value": "#4a6b52"
+              },
+              {
+                "label": "#3f6e8c",
+                "selected": false,
+                "value": "#3f6e8c"
+              },
+              {
+                "label": "#6b4e7a",
+                "selected": false,
+                "value": "#6b4e7a"
+              },
+              {
+                "label": "#a05a2c",
+                "selected": true,
+                "value": "#a05a2c"
+              },
+              {
+                "label": "#8c6239",
+                "selected": false,
+                "value": "#8c6239"
+              },
+              {
+                "label": "#9a9280",
+                "selected": false,
+                "value": "#9a9280"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "#a05a2c"
+          }
+        ],
+        "unfold": null
+      }
+    ],
+    "target": "sheet"
+  },
+  "kind": "event",
+  "note": "Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. The new name and colour are written to the server — other clients will show them at their next sync.",
+  "stamp": "nextcloud",
+  "title": "Rename and colour",
+  "under": null
+}

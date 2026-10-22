@@ -405,7 +405,15 @@ func htmlFindings(l lib, frame, at, html, forms string) []string {
 		if len(parts) == 0 {
 			out = append(out, fmt.Sprintf("%s: %s draws no part of a page", at, frame))
 		}
-		out = append(out, partFindings(l, frame, at, parts, parseHTML(html+forms))...)
+		screen := parseHTML(html + forms)
+		if !hasMain(l.mock, frame) {
+			// A notice drawn alone, with no column to stand in (s-profile-31,
+			// -32): its margin is the drawing's; the page's frames give the
+			// page's (s-profile-10, -27; Typecase's task 224).
+			unspaced(parts)
+			unspaced(screen)
+		}
+		out = append(out, partFindings(l, frame, at, parts, screen)...)
 	default:
 		if err := l.shape.Check(frame, html); err != nil {
 			out = append(out, fmt.Sprintf("%s: %v", at, err))

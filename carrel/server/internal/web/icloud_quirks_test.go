@@ -170,7 +170,11 @@ func TestCreateSaysWhatTheServerDidNotTake(t *testing.T) {
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("create plain: %d %s", rec.Code, rec.Body.String())
 	}
-	if page := decode[view.AgendaPage](t, f.h.do(get(rec.Header().Get("Location"), f.sess))); len(page.Notices) != 0 {
+	// It goes to Connections (note 112 p. 6), and its own list says nothing.
+	if rec.Header().Get("Location") != "/app/settings/connections" {
+		t.Errorf("a calendar made as asked went to %q", rec.Header().Get("Location"))
+	}
+	if page := decode[view.AgendaPage](t, f.h.do(get("/app/calendar/"+f.id+"/"+url.PathEscape(davtest.CalendarHome+"plain/"), f.sess))); len(page.Notices) != 0 {
 		t.Errorf("notices on a calendar made as asked = %+v", page.Notices)
 	}
 

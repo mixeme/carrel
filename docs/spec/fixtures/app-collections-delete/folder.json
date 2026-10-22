@@ -23,7 +23,6 @@
       "text": "No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the files back into a new folder at a new address — not into this one."
     }
   ],
-  "cancels": "",
   "export": {
     "enabled": true,
     "href": "/app/files/a-sftp-vps/Documents/",
@@ -33,7 +32,6 @@
     "method": "GET"
   },
   "exportNote": "Download what you need from it there first.",
-  "failure": null,
   "form": {
     "action": "/app/collections/delete?a=a-sftp-vps\u0026c=Documents",
     "actions": [],

@@ -79,14 +79,21 @@ func (s *Server) collectionMoveTargets(sess *session.Session, blob sealed.Blob, 
 		switch {
 		case c.ID == conn.ID:
 			opt.ReadOnly, opt.Reason = true, "already there"
+		case why != "":
+			// A server that does not answer says so first (s-profile-34:
+			// «baikal · password · 401»), whatever it holds.
+			opt.ReadOnly, opt.Reason = true, text(why)
 		case col.Has(view.KindFile) && collectionHome(blob, c, col) == "":
-			opt.ReadOnly, opt.Reason = true, "no file storage"
+			opt.ReadOnly, opt.Reason = true, "no files" // s-profile-34
 		case collectionHome(blob, c, col) == "" && c.FileRoot != "":
 			opt.ReadOnly, opt.Reason = true, "files only"
 		case collectionHome(blob, c, col) == "":
 			opt.ReadOnly, opt.Reason = true, text("no "+collectionNoun(col)+"s")
-		case why != "":
-			opt.ReadOnly, opt.Reason = true, text(why)
+		case col.Has(view.KindFile):
+			// A storage takes files, as s-profile-34 says beside it.
+			opt.Stamp = "files"
+			opt.Href = opt.ID
+			eligible++
 		default:
 			opt.Stamp = view.Stamp(collectionNoun(col) + "s")
 			opt.Href = opt.ID // the sheet with it chosen (U-8)
@@ -113,11 +120,8 @@ func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, c
 		Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", true, back)),
 		Method: "GET", Enabled: true,
 	}}
-	if col.Has(view.KindFile) && storageRoot(conn, col) {
-		// The whole storage is not deleted from here, so it is not moved
-		// either: it goes elsewhere only as a copy (s-profile-17).
-		return []view.MenuItem{copying}
-	}
+	// The whole storage moves too (Р-74, s-profile-17, -35): what it holds
+	// goes, its address stays, empty.
 	return []view.MenuItem{
 		{Action: view.Action{
 			ID: "collection.move", Label: "Move to another server", Icon: "i-move",
@@ -126,6 +130,28 @@ func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, c
 		}},
 		copying,
 	}
+}
+
+// fileDestination is where a folder goes on dest, as s-profile-34 and -35
+// say it: in the storage itself when that is where folders are made («in
+// nextcloud · Files»), else on the server beside its folders («on sftpgo ·
+// vps beside Documents and Public»).
+func fileDestination(blob sealed.Blob, dest sealed.Connection) string {
+	home := fileHome(blob, dest)
+	var beside []string
+	for _, c := range blob.CollectionsOf(dest.ID) {
+		if c.Gone || !c.Has(view.KindFile) {
+			continue
+		}
+		if strings.TrimSuffix(c.Path, "/") == strings.TrimSuffix(home, "/") {
+			return "in " + connLabel(dest) + " · " + collectionLabel(c)
+		}
+		beside = append(beside, collectionLabel(c))
+	}
+	if len(beside) == 0 {
+		return "on " + connLabel(dest)
+	}
+	return "on " + connLabel(dest) + " beside " + wordList(beside)
 }
 
 // collectionMoveBlock is why the move or copy to dest cannot start, or "".
@@ -142,8 +168,6 @@ func collectionMoveBlock(blob sealed.Blob, conn sealed.Connection, col sealed.Co
 		return "That server holds no " + noun + "s."
 	case !copying && col.ReadOnly:
 		return "This " + noun + " is read-only here, so it could not be deleted after the move. It can be copied."
-	case !copying && col.Has(view.KindFile) && storageRoot(conn, col):
-		return storageRootReason + " It can be copied, not moved."
 	}
 	return ""
 }
@@ -208,13 +232,29 @@ func (s *Server) collectionMoveSheet(sess *session.Session, blob sealed.Blob, co
 		if count != nil && *count > 0 {
 			records = allOf(*count, unit)
 		}
+		where, files := fileDestination(blob, dest), []view.Run{plainRun("everything in it")}
+		if count != nil && *count > 0 {
+			files = allOf(*count, "file")
+		}
 		switch {
+		case col.Has(view.KindFile) && storageRoot(conn, col):
+			// The whole storage (Р-74, s-profile-35): what it holds goes,
+			// the address the connection is made with stays.
+			verb := " — then deletes what was copied. The storage itself stays on " + connLabel(conn) + ", empty: it is the address this connection is made with."
+			if copying {
+				verb = "; the storage on " + connLabel(conn) + " stays as it is."
+			}
+			sheet.Warning = line("Carrel makes a folder «" + label + "» " + where + ", copies everything in " + here + " · " + label +
+				" into it — each file downloaded and uploaded again" + verb)
+			if !copying {
+				sheet.Stays = text("What " + connLabel(conn) + " will not let delete — folders shared with you, folders its administrator mounted — is copied and stays there too; the result names it.")
+			}
 		case col.Has(view.KindFile) && copying:
 			// S-17.1: between storages every file travels through Carrel.
-			sheet.Warning = line(fmt.Sprintf("Carrel creates a folder there and copies everything in it, each file downloaded and uploaded again; this one on %s stays as it is.", here))
+			sheet.Warning = join("Carrel makes a folder «"+label+"» "+where+" and copies ", files, " into it — each downloaded and uploaded again; this one on "+here+" stays as it is.")
 		case col.Has(view.KindFile):
-			sheet.Warning = line(fmt.Sprintf("Carrel creates a folder there, copies everything in it — each file downloaded and uploaded again — then deletes this one on %s. "+
-				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the files live on.", here))
+			sheet.Warning = join("Carrel makes a folder «"+label+"» "+where+", copies ", files, " into it — each downloaded and uploaded again — then deletes this one on "+here+
+				". The tick in the rail, the attachment folder and the upload folder follow it; devices, published links and backup jobs pointing at the old address will see it vanish.")
 		case copying:
 			sheet.Warning = join("Carrel creates "+article(noun)+" there and copies ", records, "; this one on "+here+" stays as it is.")
 		default:
@@ -225,9 +265,10 @@ func (s *Server) collectionMoveSheet(sess *session.Session, blob sealed.Blob, co
 	// A calendar that leaves a server which schedules takes its meetings
 	// off it, and that server may tell their attendees of a cancellation
 	// (the owner's decision of 12.10.2026, А12): said in «may», and nothing
-	// of what the server it goes to will send.
+	// of what the server it goes to will send — the last sentence of what
+	// the move does (s-profile-8, note 112 p. 5).
 	if !copying && col.Has(view.KindEvent) && conn.Scheduling == discover.SchedulingYes {
-		sheet.Cancels = text(here + " may tell the attendees of its meetings that they are cancelled.")
+		sheet.Warning = append(sheet.Warning, plainRun(" "+here+" may tell the attendees of its meetings that they are cancelled."))
 	}
 	sheet.Actions = []view.Action{confirm, s.sheetCancel(back, collectionList(conn, col))}
 	return sheet
@@ -247,6 +288,16 @@ func (s *Server) getCollectionMove(w http.ResponseWriter, r *http.Request) {
 	var count *int
 	if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
 		count = collectionCount(sess, conn.ID, col, spec)
+	}
+	// A folder's files are counted as the sheet opens (s-profile-34: «all 9
+	// files»); the whole storage says «everything» (-35).
+	if col.Has(view.KindFile) && !storageRoot(conn, col) {
+		if files, err := s.fileProvider(conn); err == nil {
+			if tree, err := files.Tree(r.Context(), col.Path, s.cfg.FilesMaxEntries); err == nil {
+				n := len(tree)
+				count = &n
+			}
+		}
 	}
 	sheet := s.collectionMoveSheet(sess, blob, conn, col, q.Get("copy") != "", q.Get("to"), count, sheetBack(q.Get("back")))
 	sheet.Under = s.collectionUnder(r)
@@ -285,7 +336,13 @@ func (s *Server) postCollectionMove(w http.ResponseWriter, r *http.Request) {
 		done, notice = m.run(r.Context())
 	}
 	if notice == nil {
-		s.redirect(w, r, done)
+		// Where the sheet was opened, else Connections (note 112 p. 6); a
+		// move leaves no list at the old address, so there it is the new one.
+		where := afterSheet(r, "/app/settings/connections")
+		if gone := collectionList(conn, col); !copying && (where == gone || strings.HasPrefix(where, gone+"/")) {
+			where = done
+		}
+		s.redirect(w, r, where)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, notice))
@@ -392,7 +449,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 	settled, err := settlePath(ctx, client, home, newPath, taken)
 	if err != nil {
 		return "", lostCollection(m.dest, method, newPath, err,
-			label+" here is as it was: run re-discovery on that connection to see what the server made.")
+			label+" on "+connLabel(m.conn)+" is as it was: run re-discovery on that connection to see what the server made.")
 	}
 	newPath = settled
 	m.placed = sealed.Collection{Path: newPath, Name: label, Kinds: kinds, Colour: colour, Components: f.components}
@@ -428,7 +485,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 		}
 		if len(lost) > 0 {
 			return "", m.kept("Copied, but the server did not keep everything",
-				fmt.Sprintf("%s did not keep all of what was copied; %s here has it all.", connLabel(m.dest), label), lost)
+				fmt.Sprintf("%s did not keep all of what was copied; %s on %s has it all.", connLabel(m.dest), label, connLabel(m.conn)), lost)
 		}
 		return m.newAddress(), nil
 	}
@@ -438,7 +495,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 			return "", m.catalogFailure()
 		}
 		return "", m.kept("Copied, and the original kept",
-			fmt.Sprintf("%s did not keep all of what was copied, so %s here was not deleted. Both are there now.", connLabel(m.dest), label), lost)
+			fmt.Sprintf("%s did not keep all of what was copied, so %s on %s was not deleted. Both are there now.", connLabel(m.dest), label, connLabel(m.conn)), lost)
 	}
 
 	// The original is deleted only as it was read: a record added or changed
@@ -558,8 +615,19 @@ func (m *collectionMove) readBack(ctx context.Context, sent []transferred) ([]vi
 	}
 	var lost []view.Text
 	for _, t := range sent {
+		// A record is named by its title, as the person knows it
+		// (s-profile-32: «Синк-ап по релизу · ATTACH»); a resource copied as
+		// bytes, by its file.
+		who := t.name
+		if t.sent != nil {
+			k := view.KindContact
+			if !m.col.Has(view.KindContact) {
+				k = cal.Kind(t.sent)
+			}
+			who = recordTitle(k, t.sent)
+		}
 		if _, ok := there[t.name]; !ok {
-			lost = append(lost, text(t.name+" · not there after it was written"))
+			lost = append(lost, text(who+" · not there after it was written"))
 			continue
 		}
 		if t.sent == nil {
@@ -567,11 +635,11 @@ func (m *collectionMove) readBack(ctx context.Context, sent []transferred) ([]vi
 		}
 		back := byName[t.name]
 		if back == nil {
-			lost = append(lost, text(t.name+" · not readable after it was written"))
+			lost = append(lost, text(who+" · not readable after it was written"))
 			continue
 		}
 		if loss := writeLoss(m.dest.ID, t.sent, back, m.sess.Losses(), false); loss != nil {
-			lost = append(lost, text(t.name+" · "+strings.Join(loss.Properties, ", ")))
+			lost = append(lost, text(who+" · "+strings.Join(loss.Properties, ", ")))
 		}
 	}
 	return lost, nil

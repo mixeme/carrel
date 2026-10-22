@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
+      "href": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dni-rozhdeniya",
       "id": "collection.save",
       "label": "Save",
       "method": "POST",
@@ -12,7 +12,7 @@
     },
     {
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+      "href": "/app/settings/connections",
       "id": "collection.cancel",
       "label": "Cancel",
       "method": "GET"
@@ -21,7 +21,7 @@
   "address": "…/alice/calendars/dni-rozhdeniya/",
   "failure": null,
   "form": {
-    "action": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
+    "action": "/app/collections/rename?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=dni-rozhdeniya",
     "actions": [],
     "errors": [],
     "method": "POST",

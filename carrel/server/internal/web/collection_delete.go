@@ -126,9 +126,10 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 	}
 	// A calendar deleted on a server which schedules takes its meetings
 	// off it, as a move does, and that server may tell their attendees of
-	// a cancellation (the owner's decision of 12.10.2026, А12; Кл18).
+	// a cancellation (the owner's decision of 12.10.2026, А12; Кл18) — the
+	// last sentence of what is lost (s-profile-9, note 112 p. 5).
 	if col.Has(view.KindEvent) && conn.Scheduling == discover.SchedulingYes && count != 0 {
-		sheet.Cancels = text(host + " may tell the attendees of its meetings that they are cancelled.")
+		sheet.Warning = append(sheet.Warning, plainRun(" "+host+" may tell the attendees of its meetings that they are cancelled."))
 	}
 	if count == 0 {
 		sheet.Warning = line(fmt.Sprintf("The %s is deleted on %s. It holds nothing now; Carrel keeps no copy of it either.", noun, host))
@@ -215,17 +216,22 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 		err = client.Delete(r.Context(), col.Path, "")
 	}
 	if err != nil && !dav.IsStatus(err, http.StatusNotFound) {
-		// The refusal is the sheet's (Кл4, as s-profile-6 of a new one): the
-		// person stays where they were, the name they typed in its field.
-		count := s.countMembers(r.Context(), conn, col)
-		sheet := s.collectionDeleteSheet(sess, conn, col, count, typed, "", sheetBack(r.URL.Query().Get("back")))
-		sheet.Failure = davRefusal(refusalText{
-			title:     "The server would not delete it",
-			forbidden: "This account can read here but not delete",
-			nothing:   label + " is as it was.",
-		}, conn, "DELETE", col.Path, err)
-		sheet.Under = s.collectionUnder(r)
-		s.writePage(w, r, http.StatusOK, sheet)
+		// The sheet closes: the decision was made, and typing the name again
+		// is no use. The answer stands on Connections, where the collection
+		// still is (s-profile-31).
+		why := connLabel(conn) + " refused"
+		switch code := dav.StatusCode(err); code {
+		case http.StatusForbidden:
+			why += ": this account can read here but not write"
+		case 0:
+			why = connLabel(conn) + " did not answer"
+		default:
+			why += fmt.Sprintf(" with %d", code)
+		}
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, &view.Notice{
+			Role: view.NoticeAlert, Title: text(label + " was not deleted."), Body: text(why + ". " + label + " is as it was."),
+			Details: refusalDetails("delete", "DELETE", col.Path, err),
+		}))
 		return
 	}
 	// Its links, and the links of its records, open nothing now (Б41).

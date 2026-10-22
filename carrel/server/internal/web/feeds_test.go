@@ -211,8 +211,11 @@ func TestFeedPasswordRenameUnsubscribe(t *testing.T) {
 
 	rename := "/app/collections/rename?" + url.Values{"a": {sub.ID}, "c": {"feed"}}.Encode()
 	sheet := decode[view.CollectionRenameSheet](t, f.h.do(get(rename, f.sess)))
-	if sheet.Stamp != "" {
-		t.Errorf("a feed's sheet names a server: %+v", sheet)
+	// The head says «feed», not a server; the feed's address is shown, and
+	// the name says it stays here (s-profile-33).
+	if sheet.Stamp != "feed" || !sheet.Feed || sheet.Address == "" || sheet.Note != "" ||
+		rowNamed(t, sheet.Form, "name").Hint != "The name is yours: it stays in Carrel and is never sent to the feed." {
+		t.Errorf("a feed's sheet = %+v", sheet)
 	}
 	before := len(feed.methods)
 	if rec := f.h.do(postForm(rename, f.sess, url.Values{"name": {"League"}})); rec.Code != http.StatusSeeOther {

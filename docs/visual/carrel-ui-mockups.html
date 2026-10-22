@@ -14398,15 +14398,15 @@ dav: HTTP 503: the server is busy</div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w212">
         <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-pencil"/></svg>Rename</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-move"/></svg>Move to another server</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-dup"/></svg>Copy to another server</button>
+        <a class="tc-menu__item" href="/app/collections/move?a=sftpgo&amp;c=documents" role="menuitem"><svg><use href="#i-move"/></svg>Move to another server</a>
+        <a class="tc-menu__item" href="/app/collections/move?a=sftpgo&amp;c=documents&amp;copy=1" role="menuitem"><svg><use href="#i-dup"/></svg>Copy to another server</a>
         <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-link"/></svg>Publish a link</button>
         <span class="tc-menu__sep"></span>
         <button class="tc-menu__item tc-menu__item--danger" type="button" role="menuitem"><svg><use href="#i-trash"/></svg>Delete on the server…</button>
       </div>
     </div>
   </div>
-  <figcaption>Как у коллекции выше, без выгрузки: у папки её заменяет скачивание в разделе Files.</figcaption>
+  <figcaption>Как у коллекции выше, без выгрузки: у папки её заменяет скачивание в разделе Files. Move и Copy — лист «Перенос папки хранилища» ниже (решение Р-74).</figcaption>
   </figure>
 </div>
 
@@ -14742,21 +14742,22 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w212">
         <button class="tc-menu__item" type="button" role="menuitem" title="This is the whole storage, not a folder in it." disabled><svg><use href="#i-pencil"/></svg>Rename</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-dup"/></svg>Copy to another server</button>
+        <a class="tc-menu__item" href="/app/collections/move?a=nextcloud&amp;c=files" role="menuitem"><svg><use href="#i-move"/></svg>Move to another server</a>
+        <a class="tc-menu__item" href="/app/collections/move?a=nextcloud&amp;c=files&amp;copy=1" role="menuitem"><svg><use href="#i-dup"/></svg>Copy to another server</a>
         <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-link"/></svg>Publish a link</button>
         <span class="tc-menu__sep"></span>
         <button class="tc-menu__item tc-menu__item--danger" type="button" role="menuitem" title="This is the whole storage, not a folder in it." disabled><svg><use href="#i-trash"/></svg>Delete on the server…</button>
       </div>
     </div>
   </div>
-  <figcaption>Подключение, чья единственная коллекция — сам адрес хранилища: переименовать и удалить его отсюда нельзя — это всё хранилище, а не папка в нём; пункты на месте и выключены, причина — в подсказке. Перенести тоже нельзя: остаётся копия.</figcaption>
+  <figcaption>Подключение, чья единственная коллекция — сам адрес хранилища: переименовать и удалить его отсюда нельзя — это всё хранилище, а не папка в нём; пункты на месте и выключены, причина — в подсказке. Перенести можно (решение Р-74): содержимое уезжает, адрес остаётся пустым — лист «Перенос хранилища целиком» ниже; копия оставляет всё на месте.</figcaption>
   </figure>
 
 <figure style="flex:1 1 330px">
   <div class="frame" data-frame="s-profile-18">
     <div class="frame-label"><span>Папка хранилища · переименование</span><span class="frag">фрагмент</span><i>лист из ⋯ → Rename</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <form class="tc-sheet tc-sheet--w480" action="/app/files/sftpgo/documents/rename" method="post">
+      <form class="tc-sheet tc-sheet--w480" action="/app/collections/rename?a=sftpgo&amp;c=documents" method="post">
         <div class="tc-sheet__head">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-pencil"/></svg>
         <b class="tc-sheet__title">Rename</b>
@@ -14777,7 +14778,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
   <div class="frame" data-frame="s-profile-19">
     <div class="frame-label"><span>Папка хранилища · удаление</span><span class="frag">фрагмент</span><i>лист из ⋯ → Delete on the server…</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <form class="tc-sheet tc-sheet--w480" action="/app/files/sftpgo/documents/delete" method="post">
+      <form class="tc-sheet tc-sheet--w480" action="/app/collections/delete?a=sftpgo&amp;c=documents" method="post">
         <div class="tc-sheet__head">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.6" fill="none" class="tc-ico--danger"><use href="#i-trash"/></svg>
         <b class="tc-sheet__title">Delete on the server</b>
@@ -14797,7 +14798,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             <a class="tc-btn" href="/app/files/sftpgo/documents"><svg viewBox="0 0 24 24"><use href="#i-file"/></svg>Open in Files</a>
             <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Download what you need from it there first.</span>
           </div>
-          <div class="tc-field tc-field--w100"><label>Type the name to confirm</label><input class="tc-in is-focus is-ph" type="text" name="type.the.name.to.confirm" placeholder="Documents" aria-label="Type the name to confirm"></div>
+          <div class="tc-field tc-field--w100"><label>Type the name to confirm</label><input class="tc-in is-focus is-ph" type="text" name="name" placeholder="Documents" aria-label="Type the name to confirm"></div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-danger-solid" type="submit">Delete on the server</button><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
@@ -14810,13 +14811,13 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
   <div class="frame" data-frame="s-profile-20">
     <div class="frame-label"><span>Новая папка</span><span class="frag">фрагмент</span><i>лист из New folder в карточке хранилища</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <form class="tc-sheet tc-sheet--w480" action="/app/files/sftpgo/mkcol" method="post">
+      <form class="tc-sheet tc-sheet--w480" action="/app/collections/new?kind=file&amp;a=sftpgo" method="post">
         <div class="tc-sheet__head">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-plus"/></svg>
         <b class="tc-sheet__title">New folder</b>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-field tc-field--w100"><label>On which server</label><span class="tc-in is-pick"><select class="tc-in__list" name="on.which.server" aria-label="On which server"><option value="sftpgo.vps" selected>sftpgo · vps</option></select></span></div>
+          <div class="tc-field tc-field--w100"><label>On which server</label><span class="tc-in is-pick"><select class="tc-in__list" name="account" aria-label="On which server"><option value="sftpgo" selected>sftpgo · vps</option></select></span></div>
           <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-focus" type="text" name="name" value="Scans" aria-label="Name"><span class="tc-field__hint tc-field__hint--t11-dusty">A folder's name is its address: there is nothing else to ask.</span></div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Create</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
@@ -14830,20 +14831,229 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
   <div class="frame" data-frame="s-profile-21">
     <div class="frame-label"><span>Новая коллекция · никто не отвечает</span><span class="frag">фрагмент</span><i>лист New calendar</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <form class="tc-sheet tc-sheet--w480" action="/app/collections/new" method="post">
+      <div class="tc-sheet tc-sheet--w480">
         <div class="tc-sheet__head">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-plus"/></svg>
         <b class="tc-sheet__title">New calendar</b>
         </div>
         <div class="tc-sheet__body">
           <div class="tc-msg is-alert tc-msg--flush">No server that holds calendars is answering now: baikal. Until one does, there is nothing to create there.</div>
-          <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in" type="text" name="name" value="Поездки" aria-label="Name"></div>
         </div>
-        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit" title="No server that holds calendars is answering now: baikal. Until one does, there is nothing to create there." disabled>Create</button><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+        <div class="tc-sheet__foot"><a class="tc-btn is-primary" href="/app/collections/new?kind=event">Try again</a><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/calendar">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Не отвечает ни один сервер нужного рода: создать негде, и полей у листа нет — набранное некуда было бы отправить. Try again открывает лист заново. Когда не отвечают не все, сервер выбирают из ответивших, а подсказка поля называет молчащих: «One of three is listed: baikal, radicale · vps are not answering…».</figcaption>
+  </figure>
+
+<figure style="flex:1 1 330px">
+  <div class="frame" data-frame="s-profile-28">
+    <div class="frame-label"><span>Новая коллекция · календари держать негде</span><span class="frag">фрагмент</span><i>лист New calendar</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-sheet tc-sheet--w480">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-plus"/></svg>
+        <b class="tc-sheet__title">New calendar</b>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-msg is-alert tc-msg--flush">No connected server holds calendars. Connect one that does first.</div>
+        </div>
+        <div class="tc-sheet__foot"><a class="tc-btn is-primary" href="/app/settings/connections/new"><svg viewBox="0 0 24 24"><use href="#i-server"/></svg>Connect account</a><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/calendar">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Подключены только хранилища файлов (или книги без календарей): календарь завести некуда, ни сейчас, ни после ожидания. Полей нет; главное действие — подключить сервер, который их держит.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 520px">
+  <div class="frame" data-frame="s-profile-29">
+    <div class="frame-label"><span>Новая коллекция · без рода</span><span class="frag">фрагмент</span><i>лист из New collection карточки аккаунта</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/collections/new?a=nextcloud" method="post">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-plus"/></svg>
+        <b class="tc-sheet__title">New collection</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-field tc-field--w100"><label>On which server</label>
+            <span class="tc-in is-pick"><select class="tc-in__list" name="account" aria-label="On which server"><option value="nextcloud" selected>nextcloud</option><option value="radicale">radicale · vps</option></select></span></div>
+          <div class="tc-field tc-field--w100"><label>What it is</label>
+            <span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="kind" value="event" checked>Calendar</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="kind" value="contact" data-tc-disables="components">Address book</label></span>
+            <span class="tc-field__hint tc-field__hint--t11-dusty">Tasks and notes live in calendars: choose Calendar and say below what goes in it.</span></div>
+          <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-focus" type="text" name="name" value="Поездки" aria-label="Name"></div>
+          <div class="tc-field tc-field--w100"><label>Colour</label>
+                <span class="tc-line tc-line--gap-9 tc-field__swatches">
+                  <label data-tc-colour="#4A6B52" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#4A6B52" aria-label="#4A6B52"></label>
+                  <label data-tc-colour="#3F6E8C" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#3F6E8C" aria-label="#3F6E8C"></label>
+                  <label data-tc-colour="#6B4E7A" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#6B4E7A" aria-label="#6B4E7A"></label>
+                  <label data-tc-colour="#A05A2C" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#A05A2C" aria-label="#A05A2C" checked></label>
+                  <label data-tc-colour="#8C6239" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#8C6239" aria-label="#8C6239"></label>
+                  <label data-tc-colour="#9A9280" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#9A9280" aria-label="#9A9280"></label>
+                </span></div>
+          <div class="tc-field tc-field--w100"><label>What goes in it</label>
+            <div class="tc-line tc-line--gap-14 tc-card__top2">
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VEVENT" checked><span class="tc-tickrow__tick"></span>Events</label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VTODO"><span class="tc-tickrow__tick is-off"></span>Tasks</label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VJOURNAL"><span class="tc-tickrow__tick is-off"></span>Notes</label>
+            </div>
+            <span class="tc-field__hint tc-field__hint--t11-dusty">Most servers settle this when the collection is made and will not change it afterwards.</span></div>
+          <div class="tc-field tc-field--w100"><label>Address</label>
+            <input class="tc-in is-mono is-ph" type="text" name="address" placeholder="poezdki" aria-label="Address" data-tc-from="name">
+            <span class="tc-field__hint tc-field__hint--t11-dusty"><span class="tc-mono">…/remote.php/dav/calendars/mix/</span><span class="tc-mono" data-tc-slug-of="address">poezdki</span><span class="tc-mono">/</span> — taken from the name, yours to change.</span></div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Create</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
     </div>
   </div>
-  <figcaption>Не отвечает ни один сервер нужного рода: выбирать не из чего, поля сервера нет, лист говорит почему, Create выключена с той же причиной. Когда не отвечают не все — как в кадре выше: «One of three is listed: baikal, radicale · vps are not answering…».</figcaption>
+  <figcaption>Из карточки аккаунта в Connections лист открывается без рода: «What it is» — первый вопрос после сервера, отметкой. Сервер уже выбран — тот, чья карточка. Address book выключает «What goes in it»: у книги состава нет, и подсказка адреса меняет папку на <span class="tc-mono">addressbooks</span>. Задачи и заметки — не свой род, а состав календаря; подсказка под «What it is» говорит это там, где человек их ищет. Из рейла раздела лист открывается с родом — как в «Новая коллекция» выше.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 520px">
+  <div class="frame" data-frame="s-profile-30">
+    <div class="frame-label"><span>Переименование · сервер отказал</span><span class="frag">фрагмент</span><i>тот же лист</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/collections/rename?a=nextcloud&amp;c=dni-rozhdeniya" method="post">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-pencil"/></svg>
+        <b class="tc-sheet__title">Rename and colour</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-msg is-alert tc-msg--flush">The server would not rename it. Nothing changed, and the form is as you left it.</div>
+          <div class="tc-diag">[rename]  PROPPATCH /remote.php/dav/calendars/mix/birthdays/ → 403
+&lt;d:error&gt;&lt;s:message&gt;This calendar is maintained by the server&lt;/s:message&gt;&lt;/d:error&gt;</div>
+          <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in" type="text" name="name" value="ДР друзей" aria-label="Name"></div>
+          <div class="tc-field tc-field--w100"><label>Colour</label>
+                <span class="tc-line tc-line--gap-9 tc-field__swatches">
+                  <label data-tc-colour="#4A6B52" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#4A6B52" aria-label="#4A6B52"></label>
+                  <label data-tc-colour="#3F6E8C" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#3F6E8C" aria-label="#3F6E8C"></label>
+                  <label data-tc-colour="#6B4E7A" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#6B4E7A" aria-label="#6B4E7A"></label>
+                  <label data-tc-colour="#A05A2C" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#A05A2C" aria-label="#A05A2C" checked></label>
+                  <label data-tc-colour="#8C6239" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#8C6239" aria-label="#8C6239"></label>
+                  <label data-tc-colour="#9A9280" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#9A9280" aria-label="#9A9280"></label>
+                </span></div>
+          <div class="tc-field tc-field--w100"><label>Address <span class="tc-dim">— stays as it is</span></label>
+            <input class="tc-in is-mono tc-in--dusty" type="text" value="…/remote.php/dav/calendars/mix/birthdays/" aria-label="Address" readonly></div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Save</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Отказ переименования остаётся в листе, как отказ создания: набранное на месте, ответ сервера — методом, адресом, кодом и телом. Save — попробовать ещё раз, Cancel — назад. Успех любого листа коллекции ведёт туда, откуда лист открыт (<code>back</code>), без него — в Connections.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 520px">
+  <div class="frame" data-frame="s-profile-31">
+    <div class="frame-label"><span>Удаление · сервер отказал</span><span class="frag">фрагмент</span><i>уведомление над карточками Connections</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14 tc-root--col">
+        <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>Архив was not deleted.</b> nextcloud refused: this account can read here but not write. Архив is as it was.</div>
+        <div class="tc-diag">[delete]  DELETE /remote.php/dav/addressbooks/users/mix/archive/ → 403
+&lt;d:error&gt;&lt;d:need-privileges/&gt;&lt;/d:error&gt;</div>
+    </div>
+  </div>
+  <figcaption>Лист удаления закрыт: набирать имя второй раз незачем, решение уже принято. Ответ сервера встаёт уведомлением на странице Connections — там же, где строка коллекции, которая осталась на месте.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 520px">
+  <div class="frame" data-frame="s-profile-32">
+    <div class="frame-label"><span>Перенос · записано не всё</span><span class="frag">фрагмент</span><i>уведомление над карточками Connections</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14 tc-root--col">
+        <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>Copied, and the original kept.</b> radicale · vps did not keep all of what was copied, so Личный on nextcloud was not deleted. Both are there now. <a class="tc-btn is-sm" href="/app/calendar/radicale/lichnyj">Open the copy</a></div>
+        <div class="tc-diag">What radicale · vps did not keep
+Синк-ап по релизу · ATTACH
+Забрать документы · not there after it was written</div>
+    </div>
+  </div>
+  <figcaption>Перенос удаляет исходную коллекцию только после целой копии. Сервер-цель потерял запись или свойство — исходная остаётся, обе видны в Connections, уведомление называет потерянное и ведёт к копии. Так же — «Copied, but the original changed, so it stays» (кто-то писал в неё во время копии) и «Copied, but the original could not be deleted» (с ответом сервера). Отказ записи по ходу копии забирает копию назад: «radicale · vps refused 2 records of 128, so the new calendar there was taken back. Личный is as it was.»</figcaption>
+  </figure>
+
+<figure style="flex:1 1 480px">
+  <div class="frame" data-frame="s-profile-33">
+    <div class="frame-label"><span>Подписка · имя и цвет</span><span class="frag">фрагмент</span><i>лист из Edit карточки ленты</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w480" action="/app/collections/rename?a=prazdniki-rf&amp;c=feed" method="post">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-pencil"/></svg>
+        <b class="tc-sheet__title">Rename and colour</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">feed</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-field tc-field--w100"><label>Feed</label>
+            <input class="tc-in is-mono tc-in--dusty" type="text" value="https://feeds.example/ru-holidays.ics" aria-label="Feed" readonly></div>
+          <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-focus" type="text" name="name" value="Праздники РФ" aria-label="Name">
+            <span class="tc-field__hint tc-field__hint--t11-dusty">The name is yours: it stays in Carrel and is never sent to the feed.</span></div>
+          <div class="tc-field tc-field--w100"><label>Colour</label>
+                <span class="tc-line tc-line--gap-9 tc-field__swatches">
+                  <label data-tc-colour="#4A6B52" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#4A6B52" aria-label="#4A6B52"></label>
+                  <label data-tc-colour="#3F6E8C" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#3F6E8C" aria-label="#3F6E8C"></label>
+                  <label data-tc-colour="#6B4E7A" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#6B4E7A" aria-label="#6B4E7A"></label>
+                  <label data-tc-colour="#A05A2C" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#A05A2C" aria-label="#A05A2C"></label>
+                  <label data-tc-colour="#8C6239" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#8C6239" aria-label="#8C6239" checked></label>
+                  <label data-tc-colour="#9A9280" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#9A9280" aria-label="#9A9280"></label>
+                </span>
+            <span class="tc-field__hint tc-field__hint--t11-dusty">Kept here: a feed sends no colour of its own.</span></div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Save</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Тот же жест, что у своей коллекции, с другими последствиями: имя и цвет местные, ленте ничего не уходит. Поэтому в шапке не сервер, а «feed», адрес ленты показан вместо адреса коллекции, а подсказки говорят, где живут имя и цвет. У ленты адресной книги цвета нет — лист «Rename» с одним полем имени.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 520px">
+  <div class="frame" data-frame="s-profile-34">
+    <div class="frame-label"><span>Перенос папки хранилища</span><span class="frag">фрагмент</span><i>лист из ⋯ → Move to another server</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/collections/move?a=sftpgo&amp;c=documents" method="post">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-move"/></svg>
+        <b class="tc-sheet__title">Move folder</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">sftpgo · vps · Documents</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-rubric">Write onto</div>
+          <div class="tc-tree">
+            <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="sftpgo" disabled><svg><use href="#i-server"/></svg>sftpgo · vps <span class="tc-mono tc-push tc-mono--t10-dusty">already there</span></label>
+            <label class="is-on tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="nextcloud" checked><svg><use href="#i-server"/></svg>nextcloud <span class="tc-mono tc-push tc-mono--t10-dusty">files</span></label>
+            <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="radicale" disabled><svg><use href="#i-server"/></svg>radicale · vps <span class="tc-mono tc-push tc-mono--t10-dusty">no files</span></label>
+            <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="baikal" disabled><svg><use href="#i-server"/></svg>baikal <span class="tc-mono tc-push tc-mono--t10-dusty">password · 401</span></label>
+          </div>
+          <div class="tc-msg tc-msg--flush-top2">Carrel makes a folder «Documents» in nextcloud · Files, copies all <b>9</b> files into it — each downloaded and uploaded again — then deletes this one on sftpgo · vps. The tick in the rail, the attachment folder and the upload folder follow it; devices, published links and backup jobs pointing at the old address will see it vanish.</div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Папка под адресом подключения — коллекция, и двигают её отсюда, как календарь (решение Р-74): в Files корень — хранилища строками без выбора, операции начинаются внутри. Цель — сервер, который держит файлы: папка заводится рядом с его папками, а у хранилища без них — в нём самом. Занятое имя получает <span class="tc-mono">-2</span>. Копия — тот же лист с «Copy folder» и «Copy», исходная остаётся.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 520px">
+  <div class="frame" data-frame="s-profile-35">
+    <div class="frame-label"><span>Перенос хранилища целиком</span><span class="frag">фрагмент</span><i>лист из ⋯ → Move to another server</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/collections/move?a=nextcloud&amp;c=files" method="post">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-move"/></svg>
+        <b class="tc-sheet__title">Move folder</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud · Files</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-rubric">Write onto</div>
+          <div class="tc-tree">
+            <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="nextcloud" disabled><svg><use href="#i-server"/></svg>nextcloud <span class="tc-mono tc-push tc-mono--t10-dusty">already there</span></label>
+            <label class="is-on tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="sftpgo" checked><svg><use href="#i-server"/></svg>sftpgo · vps <span class="tc-mono tc-push tc-mono--t10-dusty">files</span></label>
+            <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="radicale" disabled><svg><use href="#i-server"/></svg>radicale · vps <span class="tc-mono tc-push tc-mono--t10-dusty">no files</span></label>
+            <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="baikal" disabled><svg><use href="#i-server"/></svg>baikal <span class="tc-mono tc-push tc-mono--t10-dusty">password · 401</span></label>
+          </div>
+          <div class="tc-msg tc-msg--flush-top2">Carrel makes a folder «Files» on sftpgo · vps beside Documents and Public, copies everything in nextcloud · Files into it — each file downloaded and uploaded again — then deletes what was copied. The storage itself stays on nextcloud, empty: it is the address this connection is made with.</div>
+          <div class="tc-msg tc-msg--flush">What nextcloud will not let delete — folders shared with you, folders its administrator mounted — is copied and stays there too; the result names it.</div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Хранилище целиком — адрес, которым подключение сделано, — Carrel не удаляет (решение Р-74): переносится содержимое, адрес остаётся пустым. Лист говорит это до нажатия, и второй строкой — что сервер не даст удалить и где об этом скажут.</figcaption>
   </figure>
 
 <figure>
@@ -15316,7 +15526,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             </div>
             <div class="tc-sheet__body">
               <div class="tc-field tc-field--w100"><label>On which server</label>
-                <span class="tc-in is-pick"><select class="tc-in__list" name="on.which.server" aria-label="On which server"><option value="nextcloud" selected>nextcloud</option></select></span>
+                <span class="tc-in is-pick"><select class="tc-in__list" name="account" aria-label="On which server"><option value="nextcloud" selected>nextcloud</option></select></span>
                 <span class="tc-field__hint tc-field__hint--t11-dusty">Two of three are listed: <span class="tc-mono">baikal</span> is not answering, and until it does there is nothing to create there.</span></div>
               <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-focus" type="text" name="name" value="Поездки" aria-label="Name"></div>
               <div class="tc-field tc-field--w100"><label>Colour</label>
@@ -15331,9 +15541,9 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
                 <span class="tc-field__hint tc-field__hint--t11-dusty">Written to the server as <span class="tc-mono">calendar-color</span> — DAVx5 and Thunderbird will show the same one.</span></div>
               <div class="tc-field tc-field--w100"><label>What goes in it</label>
                 <div class="tc-line tc-line--gap-14 tc-card__top2">
-                  <label class="tc-check"><input class="tc-check__box" type="checkbox" name="events" value="1" checked><span class="tc-tickrow__tick"></span>Events</label>
-                  <label class="tc-check"><input class="tc-check__box" type="checkbox" name="tasks" value="1" checked><span class="tc-tickrow__tick"></span>Tasks</label>
-                  <label class="tc-check"><input class="tc-check__box" type="checkbox" name="notes" value="1"><span class="tc-tickrow__tick is-off"></span>Notes</label>
+                  <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VEVENT" checked><span class="tc-tickrow__tick"></span>Events</label>
+                  <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VTODO" checked><span class="tc-tickrow__tick"></span>Tasks</label>
+                  <label class="tc-check"><input class="tc-check__box" type="checkbox" name="components" value="VJOURNAL"><span class="tc-tickrow__tick is-off"></span>Notes</label>
                 </div>
                 <span class="tc-field__hint tc-field__hint--t11-dusty">Most servers settle this when the collection is made and will not change it afterwards. A collection holding only tasks appears in <b>Tasks</b>, not here — the rail follows what is inside, not where it was made.</span></div>
               <div class="tc-field tc-field--w100"><label>Address</label>
@@ -15346,7 +15556,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       </div>
     </div>
   </div>
-  <figcaption><b>На кадре видно, из какой двери лист вышел:</b> нажата <b>New calendar</b> внизу рейла, и за скримом остался тот самый календарь, к списку которого прибавится новая коллекция. Вторая дверь — <b>New collection</b> в карточке аккаунта в настройках (7.11) — открывает этот же лист; отличается только экран за ним, и поле «On which server» тогда уже заполнено.<br><br>Первое поле — сервер, а не имя: коллекция всегда чья-то, и у человека с тремя аккаунтами вопрос «где» стоит раньше вопроса «как назвать». Не отвечающий сервер в списке не показан, и сказано почему, — вместо строки, выбор которой кончится ошибкой через десять секунд.<br><br><b>Адрес показан и правится.</b> Он кажется техничной мелочью, но именно по нему коллекцию находит восстановление из архива (7.15, «matched by path») и по нему же её знают уже настроенные клиенты; имя — только подпись. Автоматически он выводится из названия, поэтому в обычном случае поле не трогают.<br><br><b>«Что внутрь» — не украшение.</b> Задачи и заметки лежат в календарных коллекциях, и <code>supported-calendar-component-set</code> решает, куда новая коллекция попадёт в интерфейсе. Большинство серверов фиксирует набор при создании и потом не меняет — значит, это единственный момент, когда вопрос вообще можно задать, и промолчать здесь означает решить за человека молча.</figcaption>
+  <figcaption><b>На кадре видно, из какой двери лист вышел:</b> нажата <b>New calendar</b> внизу рейла, и за скримом остался тот самый календарь, к списку которого прибавится новая коллекция. Вторая дверь — <b>New collection</b> в карточке аккаунта в настройках (7.11) — открывает лист без рода — с «What it is» и уже выбранным сервером (кадр «Новая коллекция · без рода» ниже).<br><br>Первое поле — сервер, а не имя: коллекция всегда чья-то, и у человека с тремя аккаунтами вопрос «где» стоит раньше вопроса «как назвать». Не отвечающий сервер в списке не показан, и сказано почему, — вместо строки, выбор которой кончится ошибкой через десять секунд.<br><br><b>Адрес показан и правится.</b> Он кажется техничной мелочью, но именно по нему коллекцию находит восстановление из архива (7.15, «matched by path») и по нему же её знают уже настроенные клиенты; имя — только подпись. Автоматически он выводится из названия, поэтому в обычном случае поле не трогают.<br><br><b>«Что внутрь» — не украшение.</b> Задачи и заметки лежат в календарных коллекциях, и <code>supported-calendar-component-set</code> решает, куда новая коллекция попадёт в интерфейсе. Большинство серверов фиксирует набор при создании и потом не меняет — значит, это единственный момент, когда вопрос вообще можно задать, и промолчать здесь означает решить за человека молча.</figcaption>
   </figure>
   <figure style="flex:0 1 250px">
   <div class="frame" data-frame="s-profile-13">
@@ -15485,21 +15695,22 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
           </div>
         </div>
         <div class="tc-scrim tc-scrim--padt26">
-          <div class="tc-sheet">
+          <form class="tc-sheet" action="/app/collections/new" method="post">
+            <input type="hidden" name="account" value="radicale"><input type="hidden" name="name" value="Поездки"><input type="hidden" name="colour" value="#6B4E7A"><input type="hidden" name="components" value="VEVENT"><input type="hidden" name="components" value="VTODO"><input type="hidden" name="address" value="poezdki">
             <div class="tc-sheet__head">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.6" fill="none" class="tc-ico--danger"><use href="#i-plus"/></svg>
               <b class="tc-sheet__title">New calendar</b>
-              <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">baikal</span>
+              <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">radicale · vps</span>
             </div>
             <div class="tc-sheet__body">
               <div class="tc-msg is-alert tc-msg--flush">The server would not make it. Nothing was created, and the form is as you left it.</div>
-              <div class="tc-diag">[create]  MKCALENDAR /dav.php/calendars/m.yenuchenko/poezdki/ → 403
+              <div class="tc-diag">[create]  MKCALENDAR /mix/poezdki/ → 403
               &lt;D:error&gt;&lt;D:need-privileges/&gt;&lt;/D:error&gt;
               no DAV:bind on the calendar home-set</div>
-              <span class="tc-dim--muted tc-dim--t11-5 tc-dim--lh1-55 tc-dim--wrap">This account may sign in and read, but not create. Either the user has no such right on the server, or the account was connected with a password issued read-only. Neither is something Carrel can fix from here.</span>
+              <span class="tc-dim--muted tc-dim--t11-5 tc-dim--lh1-55 tc-dim--wrap">This account may sign in and read, but radicale · vps would not let it create here. The server does not say why — no such right for the user, or a password issued read-only; whoever runs the server can tell.</span>
             </div>
-            <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="button">Back to the form</button><button class="tc-btn" type="button">Try again</button></div>
-          </div>
+            <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit" formaction="/app/collections/new?op=back">Back to the form</button><button class="tc-btn" type="submit">Try again</button></div>
+          </form>
         </div>
       </div>
     </div>
@@ -15574,7 +15785,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
           </div>
         </div>
         <div class="tc-scrim tc-scrim--padt26">
-          <form class="tc-sheet tc-sheet--w520" action="/app/collections/nextcloud/dni-rozhdeniya/rename" method="post">
+          <form class="tc-sheet tc-sheet--w520" action="/app/collections/rename?a=nextcloud&amp;c=dni-rozhdeniya" method="post">
             <div class="tc-sheet__head">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-pencil"/></svg>
               <b class="tc-sheet__title">Rename and colour</b>
@@ -15592,7 +15803,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
                   <label data-tc-colour="#9A9280" class="tc-field__swatch"><input class="tc-seg__box" type="radio" name="colour" value="#9A9280" aria-label="#9A9280"></label>
                 </span></div>
               <div class="tc-field tc-field--w100"><label>Address <span class="tc-dim">— stays as it is</span></label>
-                <input class="tc-in is-mono tc-in--dusty" type="text" name="address.stays.as.it.is" value="…/remote.php/dav/calendars/mix/birthdays/" aria-label="Address"></div>
+                <input class="tc-in is-mono tc-in--dusty" type="text" value="…/remote.php/dav/calendars/mix/birthdays/" aria-label="Address" readonly></div>
               <div class="tc-msg tc-msg--flush-top2">Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. The new name and colour are written to the server — other clients will show them at their next sync.</div>
             </div>
             <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Save</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
@@ -15669,11 +15880,11 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
           </div>
         </div>
         <div class="tc-scrim tc-scrim--padt26">
-          <form class="tc-sheet tc-sheet--w520" action="/app/collections/nextcloud/dni-rozhdeniya/move" method="post">
+          <form class="tc-sheet tc-sheet--w520" action="/app/collections/move?a=nextcloud&amp;c=lichnyj" method="post">
             <div class="tc-sheet__head">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-move"/></svg>
               <b class="tc-sheet__title">Move calendar</b>
-              <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud · Дни рождения</span>
+              <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud · Личный</span>
             </div>
             <div class="tc-sheet__body">
               <div class="tc-rubric">Write onto</div>
@@ -15683,7 +15894,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
                 <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="baikal" disabled><svg><use href="#i-server"/></svg>baikal <span class="tc-mono tc-push tc-mono--t10-dusty">password · 401</span></label>
                 <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="sftpgo" disabled><svg><use href="#i-server"/></svg>sftpgo · vps <span class="tc-mono tc-push tc-mono--t10-dusty">files only</span></label>
               </div>
-              <div class="tc-msg tc-msg--flush-top2">Carrel creates a calendar there, copies all <b>51</b> events, then deletes this one on nextcloud. Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path.</div>
+              <div class="tc-msg tc-msg--flush-top2">Carrel creates a calendar there, copies all <b>128</b> events, then deletes this one on nextcloud. Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path. nextcloud may tell the attendees of its meetings that they are cancelled.</div>
             </div>
             <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
           </form>
@@ -15691,7 +15902,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       </div>
     </div>
   </div>
-  <figcaption><b>Цель — сервер, не коллекция.</b> Календарь не кладут внутрь другого календаря: его заводят на выбранном аккаунте с тем же именем и цветом, адрес выводится из имени, как при создании. Текущий сервер виден и недоступен — переносить «туда же» нечего, это как раз <code>MOVE</code> пути, которого нет. Файловое хранилище без <code>calendar-home-set</code> видно и недоступно: туда календарь не завести. Сломанный пароль — тоже. Книга, список задач и тетрадь открывают этот же лист: меняются заголовок и то, какие аккаунты умеют принять этот род. Папку WebDAV так не двигают — у неё дерево в 7.5. Если подключён один сервер, которому этот род подходит, пункта в меню нет: двигаться некуда. Copy — та же кнопка ряда и тот же лист, с Copy вместо Move. Копия — тот же лист с «Copy», и исходная коллекция остаётся на месте.</figcaption>
+  <figcaption><b>Цель — сервер, не коллекция.</b> Календарь не кладут внутрь другого календаря: его заводят на выбранном аккаунте с тем же именем и цветом, адрес выводится из имени, как при создании. Текущий сервер виден и недоступен — переносить «туда же» нечего, это как раз <code>MOVE</code> пути, которого нет. Файловое хранилище без <code>calendar-home-set</code> видно и недоступно: туда календарь не завести. Сломанный пароль — тоже. Книга, список задач и тетрадь открывают этот же лист: меняются заголовок и то, какие аккаунты умеют принять этот род. Папка хранилища под адресом подключения — своим листом «Move folder» (ниже, решение Р-74); то, что внутри неё, двигают деревом в Files (7.5). Если подключён один сервер, которому этот род подходит, пункта в меню нет: двигаться некуда. Copy — та же кнопка ряда и тот же лист, с Copy вместо Move. Копия — тот же лист с «Copy», и исходная коллекция остаётся на месте.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -15708,7 +15919,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         </div>
       </div>
       <div class="tc-overlay">
-        <div class="tc-shell__body">
+        <div class="tc-shell__body tc-shell__body--minh560">
           <div class="tc-shell__rail">
             <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a></div>
             <div class="tc-railsec">
@@ -15759,14 +15970,14 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
           </div>
         </div>
         <div class="tc-scrim tc-scrim--padt26">
-          <form class="tc-sheet" action="/app/collections/nextcloud/dni-rozhdeniya/delete" method="post">
+          <form class="tc-sheet" action="/app/collections/delete?a=nextcloud&amp;c=lichnyj" method="post">
             <div class="tc-sheet__head">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.6" fill="none" class="tc-ico--danger"><use href="#i-trash"/></svg>
               <b class="tc-sheet__title">Delete on the server</b>
-              <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud · Дни рождения</span>
+              <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud · Личный</span>
             </div>
             <div class="tc-sheet__body">
-              <div class="tc-msg is-alert tc-msg--flush">The calendar and all <b>51</b> events in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</div>
+              <div class="tc-msg is-alert tc-msg--flush">The calendar and all <b>128</b> events in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with. nextcloud may tell the attendees of its meetings that they are cancelled.</div>
               <div class="tc-sheet__block">
                 <div class="tc-rubric tc-rubric--bot7">What is pointing at it now</div>
                 <div class="tc-stack tc-stack--gap-6 tc-line__text">
@@ -15777,10 +15988,10 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
               </div>
               <div class="tc-msg tc-msg--flush">Last time it was in an archive: <span class="tc-mono">2026-08-14</span>. Restoring brings the records back into a <b>new</b> collection — not into this one, and not to this address.</div>
               <div class="tc-line tc-line--gap-8">
-                <a class="tc-btn" href="/app/collections/nextcloud/dni-rozhdeniya/export"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download <span class="tc-mono tc-mono--t11">.ics</span> first</a>
-                <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">51 events, one file, straight to you</span>
+                <a class="tc-btn" href="/app/calendar/nextcloud/lichnyj/export"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download <span class="tc-mono tc-mono--t11">.ics</span> first</a>
+                <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">128 events, one file, straight to you</span>
               </div>
-              <div class="tc-field tc-field--w100"><label>Type the name to confirm</label><input class="tc-in is-focus is-ph" type="text" name="type.the.name.to.confirm" placeholder="Дни рождения" aria-label="Type the name to confirm"></div>
+              <div class="tc-field tc-field--w100"><label>Type the name to confirm</label><input class="tc-in is-focus is-ph" type="text" name="name" placeholder="Личный" aria-label="Type the name to confirm"></div>
             </div>
             <div class="tc-sheet__foot"><button class="tc-btn is-danger-solid" type="submit">Delete on the server</button><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
           </form>
@@ -15788,7 +15999,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       </div>
     </div>
   </div>
-  <figcaption><b>Главное здесь — не предупреждение, а список.</b> «Вы уверены?» не сообщает ничего: человек уверен, иначе бы не нажал. Сообщает перечень того, что на эту коллекцию ссылается, — ссылка, задание копирования, устройства прокси, — потому что именно этого он не держит в голове, и именно это ломается молча через неделю. Строка про архив — последняя честная опора: она говорит и то, что копия есть, и то, чего восстановление не сделает.<br><br><b>Почему набор имени, а не одна лишь заливка.</b> Заливка на кнопке говорит, что нажатие уничтожает, — и она здесь есть, как на всякой такой кнопке. Но цвет читается за миг и ни к чему не обязывает. В слиянии (7.7) барьером служит список: диалог перечисляет поимённо всё, что будет уничтожено, и решение принимается глазами. Здесь перечислить нельзя — записей пятьдесят одна, а бывает три тысячи, — поэтому стоит единственный барьер, который нельзя пройти не читая. <b>Цвет говорит, что случится; барьер требует работы, и одно другого не заменяет.</b> Строка архива — по делу: архива не было — «No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new calendar at a new address — not into this one, and not to this address.»; задание есть, но ни разу не закончилось целым — «A backup job copies it, but none has finished whole yet, so there is no archive of it here. Restoring brings…». Одно устройство — «1 device through davloom — it disappears for it at the next sync»; задание, которое пишет сюда, — «Backup job «…» — its copies are written here». <b>«Download .ics first» — не вежливость, а работа продукта:</b> самый частый способ потерять данные не «удалил и промахнулся», а «удалил и только потом вспомнил».</figcaption>
+  <figcaption><b>Главное здесь — не предупреждение, а список.</b> «Вы уверены?» не сообщает ничего: человек уверен, иначе бы не нажал. Сообщает перечень того, что на эту коллекцию ссылается, — ссылка, задание копирования, устройства прокси, — потому что именно этого он не держит в голове, и именно это ломается молча через неделю. Строка про архив — последняя честная опора: она говорит и то, что копия есть, и то, чего восстановление не сделает.<br><br><b>Почему набор имени, а не одна лишь заливка.</b> Заливка на кнопке говорит, что нажатие уничтожает, — и она здесь есть, как на всякой такой кнопке. Но цвет читается за миг и ни к чему не обязывает. В слиянии (7.7) барьером служит список: диалог перечисляет поимённо всё, что будет уничтожено, и решение принимается глазами. Здесь перечислить нельзя — записей сто двадцать восемь, а бывает три тысячи, — поэтому стоит единственный барьер, который нельзя пройти не читая. <b>Цвет говорит, что случится; барьер требует работы, и одно другого не заменяет.</b> Строка архива — по делу: архива не было — «No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new calendar at a new address — not into this one, and not to this address.»; задание есть, но ни разу не закончилось целым — «A backup job copies it, but none has finished whole yet, so there is no archive of it here. Restoring brings…». Одно устройство — «1 device through davloom — it disappears for it at the next sync»; задание, которое пишет сюда, — «Backup job «…» — its copies are written here». <b>«Download .ics first» — не вежливость, а работа продукта:</b> самый частый способ потерять данные не «удалил и промахнулся», а «удалил и только потом вспомнил».</figcaption>
   </figure>
 </div>
 

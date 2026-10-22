@@ -257,6 +257,10 @@ func TestCollectionMoveSheetIsTheFrame(t *testing.T) {
 		t.Errorf("the chosen server = %+v, the frame %q", o, holds)
 	}
 	want := strings.ReplaceAll(strings.Replace(msg, "all "+count[1]+" events", "all 2 events", 1), "on "+host+".", "on "+string(src.Label)+".")
+	// The frame's server schedules and its calendar has meetings: its last
+	// sentence says the attendees may hear of it (note 112 p. 5). This one
+	// does not schedule; the sentence is TestAMoveSaysTheAttendeesMayHearOfACancellation's.
+	want = strings.Replace(want, " nextcloud may tell the attendees of its meetings that they are cancelled.", "", 1)
 	if plainText(chosen.Warning) != want {
 		t.Errorf("message = %q\nwant      %q", chosen.Warning, want)
 	}

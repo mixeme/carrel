@@ -147,24 +147,11 @@ func TestExportOfAnUnavailableCollectionSaysSo(t *testing.T) {
 	}
 }
 
-// Everything the rail offers for one collection is offered for every kind of
-// them.
-func TestRailOffersImportAndExport(t *testing.T) {
+// Import and Export of one collection are on its list's bar; its rail row
+// is a tick and a link, with no menu (Р-75: view.SourceRow has none).
+func TestListBarOffersImportAndExport(t *testing.T) {
 	f := calendarFixture(t, nil)
 	page := decode[view.AgendaPage](t, f.h.do(get(f.path("calendar"), f.sess)))
-	var found []string
-	for _, sec := range page.Rail.Sections {
-		for _, row := range sec.Rows {
-			for _, item := range row.Menu {
-				found = append(found, item.ID)
-			}
-		}
-	}
-	for _, want := range []string{"collection.import", "collection.export"} {
-		if !contains(found, want) {
-			t.Errorf("no %q in the rail menu: %v", want, found)
-		}
-	}
 	list := f.path("calendar")
 	if href := actionHref(t, page.Bar.Actions, "collection.import"); href != list+"/import" {
 		t.Errorf("import = %q", href)

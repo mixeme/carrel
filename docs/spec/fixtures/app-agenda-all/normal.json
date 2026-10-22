@@ -1419,7 +1419,6 @@
             "feed": false,
             "href": "/app/calendar",
             "label": "Combined calendar",
-            "menu": [],
             "on": true,
             "readOnly": false,
             "state": "ok",
@@ -1439,63 +1438,6 @@
             "feed": false,
             "href": "/app/calendar/a-nc-home/lichnyj",
             "label": "Личный",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=lichnyj",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-nc-home/lichnyj/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-nc-home/lichnyj/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=lichnyj",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": false,
             "readOnly": false,
             "state": "ok",
@@ -1508,63 +1450,6 @@
             "feed": false,
             "href": "/app/calendar/a-nc-home/rabota",
             "label": "Работа",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-nc-home/rabota/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-nc-home/rabota/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": false,
             "readOnly": false,
             "state": "ok",
@@ -1577,63 +1462,6 @@
             "feed": false,
             "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
             "label": "Дни рождения",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": false,
             "readOnly": false,
             "state": "ok",
@@ -1653,63 +1481,6 @@
             "feed": false,
             "href": "/app/calendar/a-rad-vps/proekty",
             "label": "Проекты",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-rad-vps\u0026c=proekty",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-rad-vps/proekty/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-rad-vps/proekty/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-rad-vps\u0026c=proekty",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": false,
             "readOnly": false,
             "state": "ok",
@@ -1722,63 +1493,6 @@
             "feed": false,
             "href": "/app/calendar/a-rad-vps/dezhurstva",
             "label": "Дежурства",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-rad-vps\u0026c=dezhurstva",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-rad-vps/dezhurstva/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-rad-vps/dezhurstva/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-rad-vps\u0026c=dezhurstva",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": false,
             "readOnly": false,
             "state": "ok",
@@ -1798,63 +1512,6 @@
             "feed": false,
             "href": "/app/calendar/a-baikal/obshchij",
             "label": "Общий",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-baikal\u0026c=obshchij",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-baikal\u0026c=obshchij",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-baikal\u0026c=obshchij\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-baikal/obshchij/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/a-baikal/obshchij/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-baikal\u0026c=obshchij",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": false,
             "readOnly": false,
             "state": "unavailable",
@@ -1875,24 +1532,6 @@
             "feed": true,
             "href": "/app/calendar/f-ru-holidays/feed",
             "label": "Праздники РФ",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
-                "id": "feed.edit",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/f-ru-holidays/feed/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              }
-            ],
             "on": false,
             "readOnly": true,
             "state": "read-only",
@@ -1905,24 +1544,6 @@
             "feed": true,
             "href": "/app/calendar/f-league/feed",
             "label": "Расписание лиги",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=f-league\u0026c=feed",
-                "id": "feed.edit",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/calendar/f-league/feed/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              }
-            ],
             "on": false,
             "readOnly": true,
             "state": "read-only",

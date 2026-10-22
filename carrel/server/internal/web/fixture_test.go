@@ -2641,15 +2641,17 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 			app.compare(t, "app-publish/"+one.state+".json", app.h.do(get(route, app.sess)))
 		})
 	}
-	// The sheets of «Дни рождения» over Connections, as s-profile-7, -8, -9
-	// draw them (Кл10, Кл15, Кл20): the calendar was read first, so its
+	// The sheets over Connections, where they are opened (Р-75), as
+	// s-profile-7, -8, -9 draw them (Кл10, Кл15, Кл20; note 112): «Дни
+	// рождения» renamed, «Личный» — with its meetings on nextcloud, which
+	// schedules — moved and deleted. The calendar was read first, so its
 	// count is known and «baikal» refused the saved password — the move
 	// closes it, «password · 401», and chooses radicale, the one server that
 	// suits.
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
-	for _, sheet := range []string{"rename", "move", "delete"} {
+	for sheet, slug := range map[string]string{"rename": "dni-rozhdeniya", "move": "lichnyj", "delete": "lichnyj"} {
 		t.Run("app-collections-"+sheet, func(t *testing.T) {
-			q := url.Values{"a": {app.realAccount(t, "dni-rozhdeniya")}, "c": {app.realPath(t, "dni-rozhdeniya")}}
+			q := url.Values{"a": {app.realAccount(t, slug)}, "c": {app.realPath(t, slug)}, "back": {"/app/settings/connections"}}
 			app.compare(t, "app-collections-"+sheet+"/normal.json", app.h.do(get("/app/collections/"+sheet+"?"+q.Encode(), app.sess)))
 		})
 	}
@@ -2679,6 +2681,94 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 		app.compare(t, "app-collections-new/silent.json", app.h.do(get("/app/collections/new?kind=event", app.sess)))
 	})
 	_ = anna
+}
+
+// C-14.2: the states of the collections' sheets the frames of note 112
+// draw — each opened from Connections (Р-75): New collection from an
+// account's card (s-profile-29), the rename the server refused (-30), a
+// feed's name and colour (-33), a folder of the storage moved (-34) and the
+// whole storage moved (-35); on Connections, the delete the server refused
+// (-31) and the move that kept the original (-32).
+func TestFixtureCollectionSheets(t *testing.T) {
+	app := newMockupApp(t)
+	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	settings := "/app/settings/connections"
+	sheet := func(slug string, extra url.Values) url.Values {
+		q := url.Values{"a": {app.realAccount(t, slug)}, "c": {app.realPath(t, slug)}, "back": {settings}}
+		for k, v := range extra {
+			q[k] = v
+		}
+		return q
+	}
+	t.Run("app-collections-new/account", func(t *testing.T) {
+		q := url.Values{"a": {app.realAccount(t, "lichnyj")}, "back": {settings}}
+		app.compare(t, "app-collections-new/account.json", app.h.do(get("/app/collections/new?"+q.Encode(), app.sess)))
+	})
+	t.Run("app-collections-rename/feed", func(t *testing.T) {
+		q := url.Values{"back": {settings}}
+		for _, s := range func() []sealed.Subscription {
+			key, _ := app.sess.DataKey()
+			b, _ := app.h.users.Catalog(app.sess.AccountID(), key)
+			return b.Subscriptions
+		}() {
+			if s.Name == "Праздники РФ" {
+				q.Set("a", s.ID)
+				q.Set("c", s.FeedCollection().Path)
+			}
+		}
+		app.compare(t, "app-collections-rename/feed.json", app.h.do(get("/app/collections/rename?"+q.Encode(), app.sess)))
+	})
+	t.Run("app-collections-rename/refused", func(t *testing.T) {
+		app.servers["nextcloud"].Refuse("PROPPATCH", http.StatusForbidden, "<d:error xmlns:d=\"DAV:\"><s:message xmlns:s=\"http://sabredav.org/ns\">This calendar is maintained by the server</s:message></d:error>")
+		defer app.servers["nextcloud"].Accept("PROPPATCH")
+		q := sheet("dni-rozhdeniya", nil)
+		app.compare(t, "app-collections-rename/refused.json", app.h.do(postForm("/app/collections/rename?"+q.Encode(), app.sess, url.Values{"name": {"Дни рождения"}, "colour": {"#a05a2c"}})))
+	})
+	t.Run("app-settings-connections/delete-refused", func(t *testing.T) {
+		app.servers["nextcloud"].Refuse("DELETE", http.StatusForbidden, "<d:error xmlns:d=\"DAV:\"><d:need-privileges/></d:error>")
+		defer app.servers["nextcloud"].Accept("DELETE")
+		q := sheet("arhiv", nil)
+		app.compare(t, "app-settings-connections/delete-refused.json", app.h.do(postForm("/app/collections/delete?"+q.Encode(), app.sess, url.Values{"name": {"Архив"}})))
+	})
+	// The storage of nextcloud is «Files» itself, as s-profile-17 and -35
+	// draw it: the address the connection is made with.
+	nc := app.realAccount(t, "Files")
+	editBlob(t, app.h, app.sess, func(blob *sealed.Blob) {
+		for i := range blob.Connections {
+			if blob.Connections[i].ID == nc {
+				blob.Connections[i].FileRoot = app.servers["nextcloud"].URL + app.realPath(t, "Files")
+			}
+		}
+	})
+	t.Run("app-collections-move/folder", func(t *testing.T) {
+		q := sheet("Documents", url.Values{"to": {nc}})
+		app.compare(t, "app-collections-move/folder.json", app.h.do(get("/app/collections/move?"+q.Encode(), app.sess)))
+	})
+	t.Run("app-collections-move/storage", func(t *testing.T) {
+		q := sheet("Files", url.Values{"to": {app.realAccount(t, "Documents")}})
+		app.compare(t, "app-collections-move/storage.json", app.h.do(get("/app/collections/move?"+q.Encode(), app.sess)))
+	})
+	// The move whose copy radicale did not keep whole (s-profile-32): the
+	// original stays, both are there, the notice names what was lost.
+	t.Run("app-settings-connections/move-kept", func(t *testing.T) {
+		app.servers["radicale · vps"].Drop = []string{"ATTACH", "LOCATION"}
+		q := sheet("lichnyj", nil)
+		app.compare(t, "app-settings-connections/move-kept.json", app.h.do(postForm("/app/collections/move?"+q.Encode(), app.sess, url.Values{"to": {app.realAccount(t, "proekty")}})))
+	})
+}
+
+// C-14.2: New calendar when no connected server holds calendars
+// (s-profile-28): no fields, Connect account. A set of its own: the
+// calendars' homes are taken away.
+func TestFixtureCollectionNewNone(t *testing.T) {
+	app := newMockupApp(t)
+	editBlob(t, app.h, app.sess, func(blob *sealed.Blob) {
+		for i := range blob.Connections {
+			blob.Connections[i].CalendarHome = ""
+		}
+	})
+	app.compare(t, "app-collections-new/none.json", app.h.do(get("/app/collections/new?kind=event", app.sess)))
 }
 
 // C-14.2 and C-14.3: the states of a list of contacts beside its normal

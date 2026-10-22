@@ -1197,7 +1197,6 @@
             "feed": false,
             "href": "/app/tasks",
             "label": "Combined list",
-            "menu": [],
             "on": true,
             "readOnly": false,
             "state": "ok",
@@ -1217,63 +1216,6 @@
             "feed": false,
             "href": "/app/tasks/a-nc-home/dela",
             "label": "Дела",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=dela",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dela",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=dela\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/tasks/a-nc-home/dela/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/tasks/a-nc-home/dela/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=dela",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": false,
             "readOnly": false,
             "state": "ok",
@@ -1286,63 +1228,6 @@
             "feed": false,
             "href": "/app/tasks/a-nc-home/rabota",
             "label": "Работа",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
-                "icon": "i-pencil",
-                "id": "collection.rename",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
-                "icon": "i-move",
-                "id": "collection.move",
-                "label": "Move to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota\u0026copy=1",
-                "icon": "i-dup",
-                "id": "collection.copy",
-                "label": "Copy to another server",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/tasks/a-nc-home/rabota/import",
-                "icon": "i-import",
-                "id": "collection.import",
-                "label": "Import",
-                "method": "GET",
-                "separator": true
-              },
-              {
-                "enabled": true,
-                "href": "/app/tasks/a-nc-home/rabota/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              },
-              {
-                "danger": true,
-                "enabled": true,
-                "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
-                "icon": "i-trash",
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "method": "GET",
-                "separator": true,
-                "target": "sheet"
-              }
-            ],
             "on": false,
             "readOnly": false,
             "state": "ok",
@@ -1363,24 +1248,6 @@
             "feed": true,
             "href": "/app/tasks/f-ru-holidays/feed",
             "label": "Праздники РФ",
-            "menu": [
-              {
-                "enabled": true,
-                "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
-                "id": "feed.edit",
-                "label": "Rename",
-                "method": "GET",
-                "target": "sheet"
-              },
-              {
-                "enabled": true,
-                "href": "/app/tasks/f-ru-holidays/feed/export",
-                "icon": "i-export",
-                "id": "collection.export",
-                "label": "Export",
-                "method": "GET"
-              }
-            ],
             "on": false,
             "readOnly": true,
             "state": "read-only",

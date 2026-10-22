@@ -449,10 +449,13 @@ type CollectionRenameSheet struct {
 	Kind Kind `json:"kind"`
 	// Title — «Rename and colour» у календаря (s-profile-7), «Rename» у
 	// книги, подписки без цвета и папки (s-profile-18)
-	Title   Text     `json:"title"`
-	Stamp   Stamp    `json:"stamp"`   // имя сервера; у папки хранилища — сервер и папка, «sftpgo · vps · Documents» (s-profile-18); пусто у подписки — у неё имя местное
-	Form    Form     `json:"form"`    // имя и цвет одним листом: оба уходят одним запросом
-	Address Text     `json:"address"` // показан и не правится (S-12.2); пусто у папки хранилища: её имя и есть адрес
+	Title   Text  `json:"title"`
+	Stamp   Stamp `json:"stamp"`   // имя сервера; у папки хранилища — сервер и папка, «sftpgo · vps · Documents» (s-profile-18); пусто у подписки — у неё имя местное
+	Form    Form  `json:"form"`    // имя и цвет одним листом: оба уходят одним запросом
+	Address Text  `json:"address"` // показан и не правится (S-12.2); пусто у папки хранилища: её имя и есть адрес
+	// Feed — лист подписки (s-profile-33): имя и цвет местные, Address —
+	// адрес ленты, поле «Feed» первым; Stamp — «feed»
+	Feed    bool     `json:"feed,omitempty"`
 	Note    Text     `json:"note"`    // «переименование — не перенос»: адрес остаётся прежним
 	Failure *Notice  `json:"failure"` // отказ сервера; форма хранит введённое
 	Actions []Action `json:"actions"`
@@ -468,11 +471,10 @@ type CollectionMoveSheet struct {
 	Title   Text         `json:"title"`   // «Move calendar», «Copy address book», «Move folder» (s-profile-8)
 	Subject Text         `json:"subject"` // что переносят: «Дни рождения · nextcloud»
 	Target  TargetPicker `json:"target"`  // цель — подключение, а не коллекция (S-12.3)
-	// Cancels — как у MoveSheet: календарь уходит с сервера, который
-	// планирует, и участникам его встреч тот может сообщить об отмене;
-	// пусто — копия, не календарь, сервер не планирует или неизвестно
-	Cancels Text `json:"cancels"`
-	Warning Runs `json:"warning"` // завести там, перенести записи, удалить здесь — до начала; число записей жирным (s-profile-8)
+	Warning Runs         `json:"warning"` // завести там, перенести записи, удалить здесь — до начала; число записей жирным (s-profile-8); у календаря с сервера, что планирует, последней фразой — что участникам могут сообщить об отмене (А12)
+	// Stays — вторая строка переноса хранилища целиком (s-profile-35): что
+	// сервер не даст удалить, то скопируется и останется; пусто у прочих
+	Stays Text `json:"stays,omitempty"`
 	// Form — лист как форма (s-profile-8, Кл11): POST на адрес переноса
 	// (a, c, back в адресе), скрытые _csrf и copy у копии; выбранный сервер
 	// уходит под Target.Field («to», TargetOption.Value — подключение).
@@ -531,22 +533,15 @@ type CollectionDeleteSheet struct {
 	// References — что на неё ссылается и что с ним станет (s-profile-9,
 	// -19; Кл16): ссылки и устройства счётом, задания по имени
 	References []Reference `json:"references"`
-	// Cancels — как у CollectionMoveSheet: календарь уходит с сервера,
-	// который планирует, и участникам его встреч тот может сообщить об
-	// отмене (решение владельца А12, Кл18); пусто — сказать нечего
-	Cancels    Text     `json:"cancels"`
-	Archive    Runs     `json:"archive"` // когда попадала в архив (день моноширинно) и чего восстановление не сделает («new» жирным; s-profile-9, -19)
-	Export     *Action  `json:"export"`  // «сначала скачать»; nil — экспортировать нечем
-	ExportNote Text     `json:"exportNote"`
-	Form       Form     `json:"form"` // подтверждение набором имени
-	Actions    []Action `json:"actions"`
+	Archive    Runs        `json:"archive"` // когда попадала в архив (день моноширинно) и чего восстановление не сделает («new» жирным; s-profile-9, -19)
+	Export     *Action     `json:"export"`  // «сначала скачать»; nil — экспортировать нечем
+	ExportNote Text        `json:"exportNote"`
+	Form       Form        `json:"form"` // подтверждение набором имени
+	Actions    []Action    `json:"actions"`
 	// Under — экран под листом, пришедшим страницей (Кл1): откуда открыт
 	// (back, иначе Referer), иначе Connections (s-profile-5…-9); nil у
 	// фрагмента
 	Under *Under `json:"under"`
-	// Failure — отказ сервера удалить (Кл4): лист остаётся, набранное имя в
-	// поле; nil — отказа не было
-	Failure *Notice `json:"failure"`
 }
 
 // ConnectionRemoveSheet — лист «Disconnect»: подключение уходит из Carrel, на

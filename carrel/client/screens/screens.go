@@ -421,7 +421,7 @@ var All = []Screen{
 	},
 	{
 		Model:     func() any { return new(view.ConnectionsPage) },
-		Frames:    []string{"s-profile-1", "s-profile-2", "s-profile-10", "s-profile-11", "s-profile-16", "s-profile-23", "s-profile-24", "s-profile-25", "s-profile-27", "s-profile-4"},
+		Frames:    []string{"s-profile-1", "s-profile-2", "s-profile-10", "s-profile-11", "s-profile-16", "s-profile-23", "s-profile-24", "s-profile-25", "s-profile-27", "s-profile-31", "s-profile-32", "s-profile-4"},
 		Draw:      func(model any) Root { return settings.Connections(model.(*view.ConnectionsPage)) },
 		Title:     func(model any) string { return string(model.(*view.ConnectionsPage).Title) },
 		Forms:     func(model any) []widget.PostForm { return settings.ConnectionsForms(model.(*view.ConnectionsPage)) },

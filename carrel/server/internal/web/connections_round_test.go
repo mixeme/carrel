@@ -46,11 +46,12 @@ func TestEditConnectionIsADialogOverThePage(t *testing.T) {
 	}
 }
 
-var frameMenuReason = regexp.MustCompile(`(?s)<button class="tc-menu__item[^"]*"[^>]*role="menuitem"(?: title="([^"]*)")?( disabled)?>(.*?)</button>`)
+var frameMenuReason = regexp.MustCompile(`(?s)<(?:button|a) class="tc-menu__item[^"]*"[^>]*role="menuitem"(?: title="([^"]*)")?( disabled)?>(.*?)</(?:button|a)>`)
 
 // s-profile-17: the whole storage — the address the connection was made
-// with — has Rename and Delete on the server… off with the frame's reason,
-// and goes elsewhere only as a copy.
+// with — has Rename and Delete on the server… off with the frame's reason;
+// it moves and copies to another server (Р-74: what it holds goes, the
+// address stays).
 func TestWholeStorageMenuIsTheFrame(t *testing.T) {
 	type item struct{ label, reason string }
 	var want []item
@@ -61,7 +62,7 @@ func TestWholeStorageMenuIsTheFrame(t *testing.T) {
 		}
 		want = append(want, item{frameText(m[3]), reason})
 	}
-	if len(want) != 4 || want[0].reason == "" {
+	if len(want) != 5 || want[0].reason == "" {
 		t.Fatalf("s-profile-17 = %+v: read it again", want)
 	}
 	f := calendarFixture(t, nil)
@@ -254,14 +255,14 @@ func TestNewFolderSheetIsTheFrame(t *testing.T) {
 }
 
 // s-profile-21: when no server of the kind answers, there is nothing to
-// choose: no server field, the line as the sheet's message, and Create off
-// with it.
+// send: no fields, the line as the sheet's message, Try again — the sheet
+// asked again — and Cancel (note 112 p. 9). s-profile-28: when no server
+// holds the kind at all, the way on is Connect account.
 func TestNewCollectionWhenNoServerAnswers(t *testing.T) {
 	frame := mockupFrame(t, "s-profile-21")
 	msg := frameOne(t, frameSheetMsg, frame, "message")[1]
-	off := regexp.MustCompile(`<button class="tc-btn is-primary" type="submit" title="([^"]*)" disabled>Create</button>`).FindStringSubmatch(frame)
-	if off == nil || html.UnescapeString(off[1]) != msg || !strings.Contains(msg, "baikal") || strings.Contains(frame, "<label>On which server</label>") {
-		t.Fatalf("s-profile-21 message %q, Create %q: read it again", msg, off)
+	if !strings.Contains(msg, "baikal") || strings.Contains(frame, "name=") || !strings.Contains(frame, ">Try again</a>") {
+		t.Fatalf("s-profile-21 message %q: read it again", msg)
 	}
 	f := calendarFixture(t, nil)
 	f.srv.Refuse("PROPFIND", http.StatusUnauthorized, "")
@@ -271,13 +272,31 @@ func TestNewCollectionWhenNoServerAnswers(t *testing.T) {
 	if string(sheet.Note) != want {
 		t.Errorf("message = %q, want %q", sheet.Note, want)
 	}
-	if hasRow(sheet.Form, "account") {
-		t.Errorf("a server field with nothing in it: %+v", rowNamed(t, sheet.Form, "account"))
+	for _, set := range sheet.Form.Sets {
+		if len(set.Rows) > 0 {
+			t.Errorf("fields with nowhere to send them: %+v", set.Rows)
+		}
 	}
-	if c := actionByID(sheet.Actions, "collection.create"); c == nil || c.Enabled || string(c.Reason) != want {
-		t.Errorf("Create = %+v", c)
+	if a := actionByID(sheet.Actions, "collection.again"); a == nil || a.Label != "Try again" || a.Method != "GET" || a.Href != "/app/collections/new?kind=event" || !a.Primary {
+		t.Errorf("Try again = %+v", a)
 	}
 	sameActionMarks(t, "s-profile-21", "no server", sheet.Actions, nil)
+
+	none := mockupFrame(t, "s-profile-28")
+	msg = frameOne(t, frameSheetMsg, none, "message")[1]
+	g := calendarFixture(t, nil)
+	editBlob(t, g.h, g.sess, func(blob *sealed.Blob) {
+		for i := range blob.Connections {
+			blob.Connections[i].CalendarHome = ""
+		}
+	})
+	sheet = decode[view.CollectionNewSheet](t, g.h.do(get("/app/collections/new?kind=event", g.sess)))
+	if string(sheet.Note) != msg {
+		t.Errorf("message = %q, the frame %q", sheet.Note, msg)
+	}
+	if a := actionByID(sheet.Actions, "collection.connect"); a == nil || a.Label != "Connect account" || a.Href != "/app/settings/connections/new" || !a.Primary {
+		t.Errorf("Connect account = %+v", a)
+	}
 }
 
 // attachments-4: Browse of the attachment folder — the frame's title and

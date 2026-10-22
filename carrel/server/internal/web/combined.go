@@ -1001,28 +1001,10 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 				}
 			default:
 				live++
+				// A rail row is a tick and a link, nothing more: what is done
+				// with a collection is done in Connections (Р-75, the owner's
+				// decision of 22.10.2026; Typecase's note 112).
 				row.Href = s.route(origin{conn: conn, col: col}.listPath(spec.segment))
-				row.Menu = []view.MenuItem{{Action: view.Action{
-					ID: "collection.rename", Label: "Rename", Icon: "i-pencil",
-					Href:   s.postQuery("/app/collections/rename", url.Values{"a": {conn.ID}, "c": {col.Path}}),
-					Method: "GET", Enabled: true,
-				}}}
-				row.Menu = append(row.Menu, s.collectionMoveItems(blob, conn, col, "")...)
-				// The wizard and the file it hands over are one click from the
-				// rail as well as from the list (S-19). A read-only collection
-				// is handed over and not written into.
-				list := origin{conn: conn, col: col}.listPath(spec.segment)
-				if !col.ReadOnly {
-					row.Menu = append(row.Menu, view.MenuItem{Separator: true, Action: view.Action{
-						ID: "collection.import", Label: "Import", Icon: "i-import",
-						Href: s.route(list + "/import"), Method: "GET", Enabled: true}})
-				}
-				row.Menu = append(row.Menu, view.MenuItem{Separator: col.ReadOnly, Action: view.Action{
-					ID: "collection.export", Label: "Export", Icon: "i-export",
-					Href: s.route(list + "/export"), Method: "GET", Enabled: true}})
-				if item, ok := s.collectionDeleteItem(conn, col, ""); ok {
-					row.Menu = append(row.Menu, item)
-				}
 				if tick {
 					on++
 					row.Count = counted(conn.ID, col)
@@ -1055,12 +1037,6 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 			row.Href = s.route(fileHref(f.ID, col.Path, "", nil, true))
 		}
 		trouble(&row, f.ID+":"+col.Path)
-		row.Menu = []view.MenuItem{
-			{Action: view.Action{ID: "feed.edit", Label: "Rename", Href: s.postQuery("/app/collections/rename", url.Values{"a": {f.ID}, "c": {col.Path}}), Method: "GET", Enabled: true}},
-		}
-		if spec.kind != view.KindFile {
-			row.Menu = append(row.Menu, view.MenuItem{Action: view.Action{ID: "collection.export", Label: "Export", Icon: "i-export", Href: s.route(origin{conn: conn, col: col}.listPath(spec.segment) + "/export"), Method: "GET", Enabled: true}})
-		}
 		live++
 		if tick {
 			row.Tick = view.TickOn

@@ -17,6 +17,58 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.359 — 2026-10-22
+
+The collections' sheets by Typecase note 112 (task 192; Typecase
+`0f51d45`), the scan [collections-112](../../docs/plan/scans/collections-112.md).
+
+### Changed
+
+- **Р-75: a rail row is a tick and a link.** `SourceRow.Menu` is gone; what
+  is done with a collection is done in Connections.
+- **Success goes back** — to `back`, else Connections — for New, Rename,
+  Move and Copy; a collection the server made without some of what was
+  asked opens its list, where that is said (s-agenda-11).
+- **New collection from an account's card** (s-profile-29): «What it is» is
+  a radio after the server — Calendar, Address book (which switches off
+  «What goes in it»); `?a=` stays in the form's address.
+- **Nowhere to create** has no fields: «Try again» (s-profile-21), or
+  «Connect account» when no server holds the kind (s-profile-28).
+- **Refusals in the frames' words.** Create's 403 names the server
+  (s-profile-6); a rename refused stays in the sheet — «The server would not
+  rename it. Nothing changed, and the form is as you left it.» with the
+  server's answer (s-profile-30); a delete refused closes the sheet and
+  stands on Connections — «Архив was not deleted.» (s-profile-31).
+- **The cancellation line** of a calendar moved or deleted off a server that
+  schedules is the last sentence of `Warning`; `Cancels` is gone from
+  `CollectionMoveSheet` and `CollectionDeleteSheet`, and so is
+  `CollectionDeleteSheet.Failure`.
+- **A move that kept the original** names the collection with its server
+  and what was lost by the record's title (s-profile-32).
+- **A feed's name and colour** (s-profile-33): `Feed`, «feed» in the head,
+  the feed's address, the hints of Name and Colour.
+- **Folders of a storage move from Connections** (Р-74, s-profile-34): «in
+  nextcloud · Files» or «on sftpgo · vps beside …», «all 9 files», the tick
+  and the attachment and upload folders following; servers that take files
+  say «files», those that do not «no files», one that does not answer says
+  why first.
+- **The whole storage moves** (Р-74, s-profile-17, -35): its contents go to
+  a folder of its name, the address stays empty; `Stays` says what the
+  server will not let delete, and the result names it.
+
+### Fixtures
+
+- `app-collections-move/normal`, `-delete/normal` are «Личный», opened from
+  Connections; new: `app-collections-new/account`, `/none`,
+  `app-collections-rename/refused`, `/feed`, `app-collections-move/folder`,
+  `/storage`, `app-settings-connections/delete-refused`, `/move-kept`.
+  Every list's rail rows lost `menu`.
+
+### For consumers
+
+Draw no menu at rail rows; take the cancellation line from `Warning`; draw
+`Stays` under it.
+
 ## v0.2.358 — 2026-10-22
 
 What the client's sheets of a record needed: rewriting an address and
