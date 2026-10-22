@@ -382,7 +382,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/mail/compose` | GET | вход | лист | `MailSheet` — письмо одной формой (s-mail-1); `back` — страница под письмом и куда ведут Cancel и крестик (иначе `/app/contacts`), письмо помнит её черновиком; `sent=N` — ответ отправки первой фразой под To. Готовая ссылка в письмо не вкладывается (решение владельца 21.10.2026): её шлёт «Send this link», `/app/mail/link` |
 | `/app/mail/link` | GET | вход | лист | `MailLinkSheet` — «Send this link» (s-mail-4): `?id=` — ссылка человека (её Send в «Published links», «Send by letter» готовой ссылки), `back` — страница под листом, иначе «Published links»; отозванная или чужая ссылка, экземпляр без почты — 404. Письмо, которое пишется, ждёт черновиком и не меняется |
 | `/app/mail/send` | POST | вход | редирект, лист | `MailLinkSheet` — форма письма. С `id` — письмо одной ссылки: поля `to` (адреса через запятую), `line` («A line from you»); тема — название ссылки, как в списке; уходит та же ссылка, а не новая, и считается в письма дня; ответ — переход на `back` (иначе `/app/files/published`) с `sent=N`, отказ — тот же лист с причиной у `to`; `op=link` («Copy link instead») ничего не шлёт: ответ — готовый лист этой ссылки (`PublishSheet`, s-publish-13: поле «Link» с адресом целиком, Copy, Close на `back`; записка Typecase 110 п. 5). Без `id` — форма письма (`MailSheet.Form`, пакет 3 скана publish-mail): поля `to` (выбранные, адрес каждое), `to.add` («Name or address»), `subject`, `text` едут с каждым нажатием и сохраняются черновиком; без `op` — отправка (набранное в `to.add` сначала становится получателем), ответ — редирект на `/app/mail/compose?sent=N`, отказ — лист с причиной первой фразой под To; `op=add` — Enter в `to.add` без сценария (записка Typecase 110 п. 3): адрес — в получатели, имя одного человека книг с одним адресом — его адрес, иначе лист с подсказками набранного (`Suggest`, `NotAsked`); `op=attach&what=…` — лист вложения; `op=remove&i=N` — убрать вложение; `op=change&i=N` — лист публикации над письмом с условиями ссылки (`/app/publish?…&mail=N`); `op=terms&i=N` — Apply этого листа; `op=discard` — письмо выброшено. Дни календаря сверх предела письма уходят ссылкой на эти дни (решение владельца 21.10.2026) |
-| `/app/mail/attach` | GET, POST | вход | лист | `MailAttachSheet` |
+| `/app/mail/attach` | GET, POST | вход | лист | `MailAttachSheet` — лист вложения на месте письма (s-mail-5, -6, -10, -12, -13; пакет 4 скана publish-mail): `what` — note, contact, event, task, calendar, book, file, folder; `a`, `c` — коллекция; у записи — `uid`, без коллекции — поиск во всех своих коллекциях рода («All …»), `all=1` — запись выбрана среди всех (отметка «All» держится), `q` — набранное (своя GET-форма `Search`, записка Typecase 110 п. 1); у файла и папки — `dir` (открытая папка от корня хранилища) и `path` (выбранный файл); у календаря — `span` (whole или dates), `from`, `to`; у заметки — `format` (md или ics). POST — Attach: вложить выбранное (из адреса и полей формы листа) и вернуться к письму (`/app/mail/compose`); не вышло — тот же лист, Attach выключен с причиной |
 | `/app/password` | GET, POST | вход | страница | `PasswordPage` |
 
 Письмо — **лист поверх текущего экрана**, а не страница: экран под ним
@@ -1736,6 +1736,9 @@ type FindRow struct {
     Size     Size
     Changed  Text
     Access   Text
+    On     bool // строка выбрана (лист вложения, s-mail-5, -6, -12)
+    Off    bool // строка погашена, её не выбирают (файлы в листе папки, s-mail-13)
+    Goes   Text // у файла листа вложения: «as a file» или «over 2 MB · as a link» (s-mail-6)
 }
 
 type SearchHistoryRow struct {
@@ -2375,12 +2378,20 @@ type MailLinkSheet struct {
     Under    *Under
 }
 type MailAttachSheet struct {
-    Rail    Rail
-    Rows    []FindRow
-    Preview []MailAttachRow // что окажется в списке вложений — до нажатия
-    Range   *Form           // «Calendar»: весь или даты, с и по — только у дат; nil у остальных
-    Format  *Form           // «Note»: Markdown или исходный .ics; nil у остальных
-    Actions []Action
+    What    string          // note, contact, event, task, calendar, book, file, folder
+    Title   Text            // «Attach a note», «Attach a contact», «Attach a calendar», «Attach a file», «Attach a folder»
+    Search  *Form           // поиск своей GET-формой: скрытые what (и a, c выбранной коллекции), строка q — Enter уходит GET, Attach не нажимается (записка Typecase 110 п. 1); у календаря, книги, файла и папки nil
+    All     *Action         // первая строка дерева: «All notebooks» · «All address books» · «All calendars» · «All task lists» — поиск во всех своих коллекциях рода, On — выбрана; nil у календаря, книги, файла и папки
+    Rail    Rail            // дерево «сервер → коллекции рода», выбранная отмечена; у файла и папки пусто
+    Rows    []FindRow       // «Found N»: записи — строки раздела, выбранная On; файлы открытой папки — Size, Changed, Goes («as a file», «over 2 MB · as a link»); в листе папки — её папки ссылками, файлы Off
+    Tree    *FileTree       // у файла и папки: «сервер → хранилища → папки», узел — ссылка на лист с ним (Href), открытая отмечена; у прочих nil
+    Crumbs  []Crumb         // у файла и папки — путь до открытой папки
+    In      Text            // у папки: «In it · 1 folder · 6 files» (s-mail-13)
+    Preview []MailAttachRow // что окажется в списке вложений — до нажатия; ничего не выбрано — пусто
+    Note    Runs            // сообщение над Attach, когда выбранное уйдёт ссылкой: файл сверх предела, папка всегда (s-mail-6, -13), «Published links» жирным
+    Form    Form            // POST /app/mail/attach, выбранное в адресе; у заметки — format (md | ics), у календаря — span (у whole Disables «from to»), from, to — дни стоят всегда, с сегодня до конца месяца
+    Actions []Action        // Attach — отправляет Form, ничего не выбрано или не вышло — выключен с причиной («Choose a note.»); Cancel — к письму
+    Under   *Under          // страница под письмом; nil у фрагмента
 }
 ```
 

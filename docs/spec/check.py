@@ -133,7 +133,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
           "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history","file-match","filled",
-          "calendar","event","link-never","gone","note-files-kept"}
+          "calendar","event","link-never","gone","note-files-kept","contact"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -216,6 +216,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-duplicates": "/app/duplicates",
     "app-duplicates-merge": "/app/duplicates/merge",
     "app-duplicates-merge-event": "/app/duplicates/merge",
+    "app-mail-attach": "/app/mail/attach",
     "app-mail-compose": "/app/mail/compose",
     "app-mail-link": "/app/mail/link",
     "app-search": "/app/search",
@@ -291,7 +292,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # тут нечего, и молчание здесь — не исключение, а род экрана.
 SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
-          "app-publish", "app-files-picker", "app-files-op", "app-mail-compose", "app-mail-link",
+          "app-publish", "app-files-picker", "app-files-op", "app-mail-compose", "app-mail-link", "app-mail-attach",
           "app-contact-rewrite", "app-record-copies", "app-task-done", "app-event-ask",
           "app-settings-escrow-deposit", "app-settings-escrow-withdraw", "app-record-delete",
           "admin-reset", "admin-delete", "app-settings-backup-trigger", "app-settings-connections-disconnect",
@@ -541,6 +542,14 @@ STATE_FRAME = {
     "app-mail-link/normal": "s-mail-4",
     # Письмо формой, заполненное (пакет 3 скана publish-mail, С23).
     "app-mail-compose/filled": "s-mail-1",
+    # Листы вложения (пакет 4 скана publish-mail, С30): у каждого кадра
+    # data-part, канонического нет; normal — лист контакта, ничего не выбрано.
+    "app-mail-attach/normal": "s-mail-12",
+    "app-mail-attach/contact": "s-mail-12",
+    "app-mail-attach/note": "s-mail-5",
+    "app-mail-attach/calendar": "s-mail-10",
+    "app-mail-attach/file": "s-mail-6",
+    "app-mail-attach/folder": "s-mail-13",
     # Листы публикации по родам (записка 105): контакт, событие; готовая
     # бессрочная без почты; мёртвая строка списка.
     "app-publish/normal": "s-publish-3",

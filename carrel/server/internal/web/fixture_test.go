@@ -3150,11 +3150,13 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		// it typed by name, a card, an event and the estimate attached, a
 		// folder as a link.
 		// The books read, as the combined list reads them: the names typed
-		// are found in them.
-		combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+		// are found in them, and the book under the letter is that read,
+		// done (as under Move, app-contact-move).
+		book := combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+		back := url.QueryEscape("/app/contacts?task=" + book.Poll.TaskID)
 		recipients := func() []string {
 			var out []string
-			for _, o := range letterTo(decode[view.MailSheet](t, app.h.do(get("/app/mail/compose?back=/app/contacts", app.sess)))) {
+			for _, o := range letterTo(decode[view.MailSheet](t, app.h.do(get("/app/mail/compose?back="+back, app.sess)))) {
 				out = append(out, o.Value)
 			}
 			return out
@@ -3168,21 +3170,59 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		attach := func(q url.Values) {
 			t.Helper()
 			sheet := decode[view.MailAttachSheet](t, app.h.do(get("/app/mail/attach?"+q.Encode(), app.sess)))
-			if rec := app.h.do(postForm(actionHref(t, sheet.Actions, "mail.attach.add"), app.sess, url.Values{})); rec.Code != 303 {
+			if rec := app.h.do(postForm(actionHref(t, sheet.Actions, "mail.attach.add"), app.sess, formFields(sheet.Form))); rec.Code != 303 {
 				t.Fatalf("attach %v: %d %s", q, rec.Code, rec.Body.String())
 			}
 		}
 		attach(url.Values{"what": {"contact"}, "a": {app.realAccount(t, "kontakty")}, "c": {app.realPath(t, "kontakty")}, "uid": {"4f2b-9c31-a0e7"}})
-		events := decode[view.MailAttachSheet](t, app.h.do(get("/app/mail/attach?what=event", app.sess)))
+		// The event from one calendar: a search of all of them would leave
+		// the readings of the page under the letter half-way.
+		events := decode[view.MailAttachSheet](t, app.h.do(get("/app/mail/attach?"+url.Values{"what": {"event"},
+			"a": {app.realAccount(t, "lichnyj")}, "c": {app.realPath(t, "lichnyj")}}.Encode(), app.sess)))
 		if len(events.Rows) == 0 {
 			t.Fatal("no event to attach")
 		}
 		u, _ := url.Parse(events.Rows[0].Href)
 		attach(u.Query())
-		docs := url.Values{"a": {app.realAccount(t, "Documents")}, "c": {app.realPath(t, "Documents")}, "f": {"carrel/attachments"}}
-		attach(url.Values{"what": {"file"}, "a": docs["a"], "c": docs["c"], "f": docs["f"], "file": {"смета-подрядчик.pdf"}})
-		attach(url.Values{"what": {"folder"}, "a": docs["a"], "c": docs["c"], "f": {"carrel"}})
+		docs := url.Values{"a": {app.realAccount(t, "Documents")}, "c": {app.realPath(t, "Documents")}}
+		attach(url.Values{"what": {"file"}, "a": docs["a"], "c": docs["c"], "dir": {"carrel/attachments"}, "path": {"carrel/attachments/смета-подрядчик.pdf"}})
+		attach(url.Values{"what": {"folder"}, "a": docs["a"], "c": docs["c"], "dir": {"carrel"}})
 		app.compare(t, "app-mail-compose/filled.json", app.h.do(get("/app/mail/compose", app.sess)))
+	})
+	t.Run("app-mail-attach", func(t *testing.T) {
+		// The attach sheets (С30): each frame its own state, a sheet of what
+		// is attached. A record is searched for in all collections of its
+		// kind, the first found chosen by its own link — the search kept.
+		app := newMockupApp(t)
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		// The letter over the book read, done: the sheets stand in its place.
+		book := combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+		app.h.do(get("/app/mail/compose?back="+url.QueryEscape("/app/contacts?task="+book.Poll.TaskID), app.sess))
+		sheet := func(q url.Values) view.MailAttachSheet {
+			t.Helper()
+			return decode[view.MailAttachSheet](t, app.h.do(get("/app/mail/attach?"+q.Encode(), app.sess)))
+		}
+		app.compare(t, "app-mail-attach/normal.json", app.h.do(get("/app/mail/attach?what=contact", app.sess)))
+		for _, what := range []string{"contact", "note"} {
+			all := sheet(url.Values{"what": {what}})
+			if len(all.Rows) == 0 {
+				t.Fatalf("no %s to attach", what)
+			}
+			typed := []rune(strings.ToLower(string(all.Rows[0].Title)))
+			q := string(typed[:min(4, len(typed))])
+			found := sheet(url.Values{"what": {what}, "q": {q}})
+			if len(found.Rows) == 0 {
+				t.Fatalf("%s: nothing found by %q", what, q)
+			}
+			app.compare(t, "app-mail-attach/"+what+".json", app.h.do(get(found.Rows[0].Href, app.sess)))
+		}
+		app.compare(t, "app-mail-attach/calendar.json", app.h.do(get("/app/mail/attach?"+url.Values{"what": {"calendar"},
+			"a": {app.realAccount(t, "lichnyj")}, "c": {app.realPath(t, "lichnyj")}, "span": {"dates"}, "from": {"2026-08-10"}, "to": {"2026-08-31"}}.Encode(), app.sess)))
+		docs := url.Values{"a": {app.realAccount(t, "Documents")}, "c": {app.realPath(t, "Documents")}}
+		app.compare(t, "app-mail-attach/file.json", app.h.do(get("/app/mail/attach?"+url.Values{"what": {"file"}, "a": docs["a"], "c": docs["c"],
+			"dir": {"carrel/attachments"}, "path": {"carrel/attachments/смета-подрядчик.pdf"}}.Encode(), app.sess)))
+		app.compare(t, "app-mail-attach/folder.json", app.h.do(get("/app/mail/attach?"+url.Values{"what": {"folder"}, "a": docs["a"], "c": docs["c"],
+			"dir": {"carrel"}}.Encode(), app.sess)))
 	})
 }
 

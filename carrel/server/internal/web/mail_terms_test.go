@@ -28,9 +28,9 @@ func changeTerms(t *testing.T, f davFixture, change view.Action) view.PublishShe
 // these go as links and where they are revoked.
 func TestALetterLinkHasItsTerms(t *testing.T) {
 	f, _ := letterFixture(t)
-	attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "file": {"small.txt"}})
-	attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "file": {"big.bin"}})
-	attachOne(t, f, url.Values{"what": {"folder"}, "a": {f.id}, "c": {filesDocs}, "f": {"share"}})
+	attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "path": {"small.txt"}})
+	attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "path": {"big.bin"}})
+	attachOne(t, f, url.Values{"what": {"folder"}, "a": {f.id}, "c": {filesDocs}, "dir": {"share"}})
 	sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
 	if len(sheet.Attach) != 3 {
 		t.Fatalf("attached = %+v", sheet.Attach)

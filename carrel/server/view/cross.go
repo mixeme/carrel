@@ -38,6 +38,13 @@ type FindRow struct {
 	Size     Size    `json:"size,omitempty"`
 	Changed  Text    `json:"changed,omitempty"`
 	Access   Text    `json:"access,omitempty"`
+	// On — строка выбрана (лист вложения: s-mail-5, -6, -12); Off — строка
+	// погашена, её не выбирают (файлы в листе папки, s-mail-13); Goes — у
+	// файла листа вложения: «as a file» или «over 2 MB · as a link»
+	// (s-mail-6). У прочих пусто
+	On   bool `json:"on,omitempty"`
+	Off  bool `json:"off,omitempty"`
+	Goes Text `json:"goes,omitempty"`
 }
 
 type SearchHistoryRow struct {
@@ -856,10 +863,53 @@ type MailLinkSheet struct {
 	Under *Under `json:"under"`
 }
 type MailAttachSheet struct {
-	Rail    Rail            `json:"rail"`
-	Rows    []FindRow       `json:"rows"`
-	Preview []MailAttachRow `json:"preview"` // что окажется в списке вложений — до нажатия
-	Range   *Form           `json:"range"`   // «Calendar»: весь или даты, с и по — только у дат; nil у остальных
-	Format  *Form           `json:"format"`  // «Note»: Markdown или исходный .ics; nil у остальных
-	Actions []Action        `json:"actions"`
+	// What — что вкладывают: note, contact, event, task, calendar, book,
+	// file, folder; Title — заголовок по нему: «Attach a note», «Attach a
+	// contact», «Attach a calendar», «Attach a file», «Attach a folder»
+	// (s-mail-5, -12, -10, -6, -13; С24)
+	What  string `json:"what"`
+	Title Text   `json:"title"`
+	// Search — поиск листа своей GET-формой (записка Typecase 110 п. 1;
+	// s-mail-5, -12): GET /app/mail/attach, скрытые what и выбранная
+	// коллекция (a, c), строка q — набранное; Enter в нём уходит GET, Attach
+	// не нажимается. У календаря, книги, файла и папки nil
+	Search *Form `json:"search"`
+	// All — первая строка дерева коллекций: «All notebooks», «All address
+	// books», «All calendars», «All task lists» — ищет во всех своих
+	// коллекциях рода; On — выбрана она (С26). nil у календаря и книги
+	// (выбирают одну) и у файла и папки
+	All *Action `json:"all"`
+	// Rail — дерево «сервер → коллекции рода», выбранная коллекция отмечена;
+	// у файла и папки пусто
+	Rail Rail `json:"rail"`
+	// Rows — что нашлось («Found N»): записи — строки раздела, выбранная On
+	// (s-mail-5, -12); у файла — файлы открытой папки, Size, Changed и Goes
+	// — «as a file» или «over 2 MB · as a link» (s-mail-6); у папки — что в
+	// ней: папка — ссылка, выбирает её, файлы Off (s-mail-13)
+	Rows []FindRow `json:"rows"`
+	// Tree, Crumbs — у файла и папки: дерево «сервер → хранилища → папки»,
+	// открытая отмечена, узел — ссылка на лист с ним (Href); крошки до
+	// открытой (s-mail-6, -13). У прочих nil
+	Tree   *FileTree `json:"tree"`
+	Crumbs []Crumb   `json:"crumbs"`
+	// In — у папки: что в ней, «In it · 1 folder · 6 files» (s-mail-13)
+	In Text `json:"in,omitempty"`
+	// Preview — строка у Attach: что окажется в списке вложений, файлом или
+	// ссылкой, до нажатия; пусто — ничего не выбрано
+	Preview []MailAttachRow `json:"preview"`
+	// Note — сообщение над Attach, когда выбранное уйдёт ссылкой: файл сверх
+	// предела, папка всегда (s-mail-6, -13), «Published links» жирным; иначе
+	// пусто
+	Note Runs `json:"note,omitempty"`
+	// Form — форма листа: POST /app/mail/attach, выбранное — в адресе
+	// (what, a, c, uid; у файла path, у папки dir); у заметки — «Send it
+	// as» format (md | ics, s-mail-5); у календаря — span (whole | dates, у
+	// whole Disables «from to»), from, to — дни стоят всегда (s-mail-10)
+	Form Form `json:"form"`
+	// Actions — Attach (основная, отправляет Form; ничего не выбрано или не
+	// вышло — выключена с причиной, С25) и Cancel — к письму
+	Actions []Action `json:"actions"`
+	// Under — страница под письмом (MailSheet.Under): лист встаёт вместо
+	// письма, письмо ждёт черновиком; nil у фрагмента
+	Under *Under `json:"under"`
 }

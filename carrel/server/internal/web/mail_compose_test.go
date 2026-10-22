@@ -41,8 +41,10 @@ func attachOne(t *testing.T, f davFixture, q url.Values) view.MailAttachSheet {
 	if len(sheet.Preview) != 1 {
 		t.Fatalf("%v: preview = %+v", q, sheet.Preview)
 	}
+	// Attach sends the sheet's form: what is chosen in its address, what to
+	// send it as in its fields.
 	href := actionHref(t, sheet.Actions, "mail.attach.add")
-	if rec := f.h.do(postForm(href, f.sess, url.Values{})); rec.Code != 303 {
+	if rec := f.h.do(postForm(href, f.sess, formFields(sheet.Form))); rec.Code != 303 {
 		t.Fatalf("attach %v: %d %s", q, rec.Code, rec.Body)
 	}
 	return sheet
@@ -136,9 +138,9 @@ func TestLetterCarriesFilesAndLinks(t *testing.T) {
 	if card.Preview[0].AsLink || card.Preview[0].Format != "vcf" {
 		t.Errorf("card = %+v", card.Preview[0])
 	}
-	small := attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "file": {"small.txt"}})
-	big := attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "file": {"big.bin"}})
-	folder := attachOne(t, f, url.Values{"what": {"folder"}, "a": {f.id}, "c": {filesDocs}, "f": {"share"}})
+	small := attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "path": {"small.txt"}})
+	big := attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "path": {"big.bin"}})
+	folder := attachOne(t, f, url.Values{"what": {"folder"}, "a": {f.id}, "c": {filesDocs}, "dir": {"share"}})
 	if small.Preview[0].AsLink || !big.Preview[0].AsLink || !folder.Preview[0].AsLink {
 		t.Errorf("as link: small %v big %v folder %v", small.Preview[0].AsLink, big.Preview[0].AsLink, folder.Preview[0].AsLink)
 	}
@@ -274,8 +276,8 @@ func TestLetterCalendarRange(t *testing.T) {
 	relay := f.h.relayed()
 	q := url.Values{"what": {"calendar"}, "a": {f.id}, "c": {f.col}, "span": {"dates"}, "from": {"2026-10-01"}, "to": {"2026-10-10"}}
 	sheet := attachOne(t, f, q)
-	if sheet.Range == nil || formFields(*sheet.Range).Get("from") != "2026-10-01" || formFields(*sheet.Range).Get("to") != "2026-10-10" {
-		t.Fatalf("range form = %+v", sheet.Range)
+	if fields := formFields(sheet.Form); fields.Get("span") != "dates" || fields.Get("from") != "2026-10-01" || fields.Get("to") != "2026-10-10" {
+		t.Fatalf("the sheet's form = %+v", sheet.Form)
 	}
 	if rec := f.h.do(postForm("/app/mail/send?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"October"}, "text": {"x"}})); rec.Code != 303 {
 		t.Fatalf("send: %d %s", rec.Code, rec.Body)
@@ -291,27 +293,27 @@ func TestLetterCalendarRange(t *testing.T) {
 }
 
 // «Calendar» opens on the whole calendar (owner's decision 24.09.2026,
-// s-mail-10): no days to fill in, and every event goes into the file. The
-// days and their Show appear only once Dates is chosen.
+// s-mail-10): every event goes into the file. The days stand always, from
+// today to the end of the month, off while the whole calendar is chosen
+// (С27); there is no Show — Attach sends the choice.
 func TestLetterWholeCalendar(t *testing.T) {
 	f := calendarFixture(t, func(h *harness) { h.cfg.MailEnabled = true },
 		"in.ics", ics("BEGIN:VEVENT\nUID:in\nDTSTAMP:20260101T000000Z\nDTSTART:20261005T100000Z\nDTEND:20261005T110000Z\nSUMMARY:Inside\nEND:VEVENT"),
 		"far.ics", ics("BEGIN:VEVENT\nUID:far\nDTSTAMP:20260101T000000Z\nDTSTART:20300101T100000Z\nDTEND:20300101T110000Z\nSUMMARY:Far away\nEND:VEVENT"))
 	relay := f.h.relayed()
 	sheet := attachOne(t, f, url.Values{"what": {"calendar"}, "a": {f.id}, "c": {f.col}})
-	if sheet.Range == nil {
-		t.Fatal("no choice of what goes in")
-	}
-	fields := formFields(*sheet.Range)
-	if fields.Get("span") != "whole" || fields.Has("from") || fields.Has("to") || len(sheet.Range.Actions) != 0 {
-		t.Errorf("whole calendar form = %+v", sheet.Range)
+	fields := formFields(sheet.Form)
+	from, to := formRow(sheet.Form, "from"), formRow(sheet.Form, "to")
+	span := formRow(sheet.Form, "span")
+	if fields.Get("span") != "whole" || from == nil || to == nil || !from.ReadOnly || !to.ReadOnly || span == nil || span.Options[0].Disables != "from to" {
+		t.Errorf("whole calendar form = %+v", sheet.Form)
 	}
 	if !strings.Contains(string(sheet.Preview[0].Title), "all events") {
 		t.Errorf("preview = %+v", sheet.Preview[0])
 	}
 	dates := decode[view.MailAttachSheet](t, f.h.do(get("/app/mail/attach?"+url.Values{"what": {"calendar"}, "a": {f.id}, "c": {f.col}, "span": {"dates"}}.Encode(), f.sess)))
-	if df := formFields(*dates.Range); df.Get("span") != "dates" || df.Get("from") == "" || df.Get("to") == "" || len(dates.Range.Actions) != 1 {
-		t.Errorf("dates form = %+v", dates.Range)
+	if df := formFields(dates.Form); df.Get("span") != "dates" || df.Get("from") == "" || df.Get("to") == "" || formRow(dates.Form, "from").ReadOnly {
+		t.Errorf("dates form = %+v", dates.Form)
 	}
 	if rec := f.h.do(postForm("/app/mail/send?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"All"}, "text": {"x"}})); rec.Code != 303 {
 		t.Fatalf("send: %d %s", rec.Code, rec.Body)
@@ -334,8 +336,8 @@ func TestLetterNoteFormat(t *testing.T) {
 	relay := f.h.relayed()
 	base := url.Values{"what": {"note"}, "a": {f.id}, "c": {f.col}, "uid": {"n1"}}
 	sheet := decode[view.MailAttachSheet](t, f.h.do(get("/app/mail/attach?"+base.Encode(), f.sess)))
-	if sheet.Format == nil || formFields(*sheet.Format).Get("format") != "md" {
-		t.Fatalf("format form = %+v", sheet.Format)
+	if formFields(sheet.Form).Get("format") != "md" {
+		t.Fatalf("format form = %+v", sheet.Form)
 	}
 	var attaches int
 	for _, a := range sheet.Actions {
@@ -348,8 +350,8 @@ func TestLetterNoteFormat(t *testing.T) {
 	}
 	base.Set("format", "ics")
 	sheet = attachOne(t, f, base)
-	if sheet.Preview[0].Format != "ics" || formFields(*sheet.Format).Get("format") != "ics" {
-		t.Errorf("source chosen: preview %+v, form %+v", sheet.Preview, sheet.Format)
+	if sheet.Preview[0].Format != "ics" || formFields(sheet.Form).Get("format") != "ics" {
+		t.Errorf("source chosen: preview %+v, form %+v", sheet.Preview, sheet.Form)
 	}
 	if rec := f.h.do(postForm("/app/mail/send?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Note"}, "text": {"x"}})); rec.Code != 303 {
 		t.Fatalf("send: %d %s", rec.Code, rec.Body)

@@ -62,6 +62,7 @@ var Models = map[string]func() any{
 	"app-files-op":                        func() any { return &view.FileOpSheet{} },
 	"app-files-picker":                    func() any { return &view.FilePickerSheet{} },
 	"app-files-published":                 func() any { return &view.PublishedLinksPage{} },
+	"app-mail-attach":                     func() any { return &view.MailAttachSheet{} },
 	"app-mail-compose":                    func() any { return &view.MailSheet{} },
 	"app-mail-link":                       func() any { return &view.MailLinkSheet{} },
 	"app-note":                            func() any { return &view.NotePage{} },

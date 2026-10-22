@@ -17,6 +17,39 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.355 — 2026-10-22
+
+The attach sheets as their frames (batch 4 of the publish-mail scan,
+Typecase's note 110 p. 1).
+
+### Changed
+
+- **An attach sheet names what it attaches** (`What`, `Title`: «Attach a
+  note», «Attach a file»…) and stands over the page under the letter.
+- **A record is searched for everywhere**: «All notebooks», «All address
+  books», «All calendars», «All task lists» above the tree of collections,
+  the default; `q` goes by a GET form of its own (`Search`), so Enter in it
+  presses no Attach; a row chosen among all keeps «All» on (`all=1`); the
+  rows are in the catalog's order. `FindRow.On` marks the one chosen.
+- **Attach stands always**: off with why («Choose a note.», or what went
+  wrong) until something is chosen; it sends the sheet's form (`Form`):
+  `format` of a note, `span`/`from`/`to` of a calendar — the days stand
+  always, from today to the end of the month, off while the whole calendar
+  is chosen; Show is gone.
+- **A file and a folder**: `dir` (the folder open) and `path` (the file)
+  replace `f` and `file`; a tree of the servers' storages (`Tree`) and
+  crumbs; a file row says before the choice whether it goes as a file or a
+  link (`FindRow.Goes`, the ceiling named); a folder's sheet says what is in
+  it (`In`), its files off (`FindRow.Off`); a message over Attach says when
+  it goes as a link (`Note`).
+
+### For consumers
+
+- `view.MailAttachSheet`: `What`, `Title`, `Search`, `All`, `Tree`,
+  `Crumbs`, `In`, `Note`, `Form`, `Under`; `Range` and `Format` removed.
+  `view.FindRow`: `On`, `Off`, `Goes`.
+- New fixtures `app-mail-attach/{normal,contact,note,calendar,file,folder}`.
+
 ## v0.2.354 — 2026-10-22
 
 The letter as one form (batch 3 of the publish-mail scan, Typecase's notes

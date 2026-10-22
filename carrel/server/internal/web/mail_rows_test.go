@@ -15,8 +15,8 @@ func TestLetterRowsSayWhichOne(t *testing.T) {
 	f, _ := letterFixture(t)
 	f.srv.Seed(searchBook+"grace.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:grace\nFN:Grace Hopper\nORG:Navy\nEND:VCARD\n")
 	attachOne(t, f, url.Values{"what": {"contact"}, "a": {f.id}, "c": {searchBook}, "uid": {"grace"}})
-	attachOne(t, f, url.Values{"what": {"folder"}, "a": {f.id}, "c": {filesDocs}, "f": {"share"}})
-	attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "file": {"small.txt"}})
+	attachOne(t, f, url.Values{"what": {"folder"}, "a": {f.id}, "c": {filesDocs}, "dir": {"share"}})
+	attachOne(t, f, url.Values{"what": {"file"}, "a": {f.id}, "c": {filesDocs}, "path": {"small.txt"}})
 	sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
 	rows := map[view.Text]view.MailAttachRow{}
 	for _, r := range sheet.Attach {
