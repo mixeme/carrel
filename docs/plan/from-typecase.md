@@ -3660,6 +3660,76 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      ссылки (поле «Link» с полным адресом и Copy), как `s-publish-13`.
    **Взята частично 22.10.2026** (сервер `v0.2.353`, клиент `v0.5.1`; копия макета `bc0b574`): п. 2 (Revoke — общей формой `post-revoke`, Send — ссылкой), п. 5; сервер `v0.2.354` — п. 3 (`op=add`) и крестик письма (п. 4, Cancel на `back`); сервер `v0.2.355` — п. 1 (`format`, `q` своей GET-формой) и листы вложения (крестик — Cancel к письму). **Взята целиком.**
 
+Записка 111 от 22.10.2026 (Typecase `a78141d`; задача 188). **Последний
+коммит Typecase, который она описывает, — `a78141d`** (510 кадров). **188
+закрыта.**
+
+111. **Импорт: слова шага 1, правило отказа, места отчёта.**
+   - **Шаг 1 календаря и задач** (п. 1) — свои кадры `s-io-15`, `-16`:
+     «Import events» / «Import tasks»; «Into» — «Any calendar you may write
+     to, on every connected server.» / «Any list of tasks you may write to,
+     on every connected server.»; поле «iCalendar file», `accept=".ics"`;
+     строка под полем: «`.ics` — iCalendar 2.0. One file holds any number of
+     events; tasks and journal entries in it are skipped and named in the
+     report.» (у задач — «tasks; events and journal entries…»). У контактов
+     (`s-io-3`) строка — «`.vcf` — vCard 2.1, 3.0 and 4.0. One file holds
+     any number of cards; the calendar and the list of tasks take `.ics`
+     here instead.» Имя взятого файла — в поле файла.
+   - **Заметки берут `.ics`** (п. 2; `s-io-4`): подпись «Markdown, a zip of
+     them, or .ics», `accept=".md,.zip,.ics"`, строка: «`.md` — Markdown,
+     `.zip` — any number of them, `.ics` — iCalendar 2.0 journal entries.
+     Several files may be picked at once; events and tasks in an `.ics` are
+     skipped and named in the report.» VJOURNAL из календаря ведёт сюда.
+   - **Несколько файлов** (п. 3): поле заметок — `multiple`; подзаголовок
+     предпросмотра набора — «3 files · 12 KB» (один файл — как было: имя ·
+     размер · формат).
+   - **Пустое «Into»** (п. 3 второй; новый `s-io-17`): кнопка-список с
+     подсказкой «Choose an address book» (у календаря «Choose a calendar»,
+     у задач «Choose a list of tasks», у заметок «Choose a notebook»); имя
+     файла — в поле файла; Preview file `disabled`, причина в `title`:
+     «Choose under «Into» where the records go.»
+   - **Отказ броска** (п. 4): слова в подписи `s-io-1` — красная строка
+     накладки вместо «Drop to import»: «Only .vcf files are imported here»
+     (календарь и задачи — «.ics», заметки — «.md, .zip or .ics»); несколько
+     файлов не у заметок — «One file at a time: only notes take several».
+   - **Одно правило отказа — Р-72** (п. 5, владелец 22.10): отказ — только
+     то, что нельзя записать вовсе (сломанная строка, нечитаемая
+     кодировка). Событие с DTSTART без DTEND и DURATION — по RFC 5545: дата
+     — целый день, дата и время — миг; запись без названия — с названием по
+     умолчанию («Unnamed contact», «Untitled event», «Untitled task»).
+     Строка предпросмотра — «Ready — no end: a whole day; no title»
+     (`s-io-6`, `-7`, `-14`).
+   - **Одна фраза на отказ** (п. 6): предпросмотр и отчёт пишут одно и то же
+     — «line 12: cannot decode quoted-printable» (`s-io-5`, `-9`; так же
+     у событий). Колонка имени записи без названия — «—».
+   - **Отчёт** (пп. 7, 8; `s-io-9`): карточка **«With a new UID»** — у кого
+     UID другой, чем в файле: по ответу «Import as copies» и тот, что сервер
+     дал сам (Google, iCloud) — старый → новый и почему; карточка **«Not
+     kept by the server»** — что импорт, перечитав записанное, не нашёл:
+     запись и свойство. Пустых карточек нет.
+   - **Состояния мастера** (п. 9): отказ шага 1 — одно уведомление над
+     шагом (`s-io-18`): «**Nothing was read.** «Разное (mix).vcf» is not a
+     vCard file: its first line is not `BEGIN:VCARD`. Choose the file
+     again.» Слова других: «No file was chosen.», «This file holds no record
+     of this kind.», «The archive holds no Markdown file.», «The folder
+     could not be read: ‹причина›.», «There is no file to import: the session
+     ended. Choose it again.» **Р-73 (владелец, 22.10): у импорта нет своего
+     потолка** — ни по числу записей, ни по размеру; файл идёт потоком,
+     запись, которую сервер не взял, — строка «Failed» со словами сервера.
+     Отказа «больше потолка» нет. Коллекция не ответила на предпросмотре —
+     `s-io-19`: «**nextcloud · Контакты did not answer**, so what is already
+     there cannot be told. Nothing is written; try again, or choose another
+     address book under «Into».», вопроса «already here» нет, Import
+     `disabled` с той же причиной в `title`.
+   - **Тетрадь ro в «Into» заметок** (п. 10; `s-io-11`): строка «nextcloud
+     · Общие с семьёй» с ro, как в `s-io-10`.
+   - **Метка коллекции** (владелец, 22.10): в «Into» шага 1 и предпросмотра
+     — перед именем коллекции, и в подзаголовке отчёта (`s-io-3`…`-9`,
+     `-14`…`-19`); у строк таблиц метки нет. Подзаголовок, который
+     называет коллекцию, несёт её метку и у контакта (`s-contacts-1`, `-6`,
+     `-16`, `s-publish-3`, `mentions-1`, `-9`).
+   - Уведомления импорта стоят вровень с колонкой (`tc-msg--mr0-ml0`).
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
