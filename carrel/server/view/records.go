@@ -218,6 +218,11 @@ type SuggestList struct {
 	// Note — под чертой: набранный адрес не из книг — «Not in the ticked
 	// address books.»; иначе пусто
 	Note Text `json:"note"`
+	// Searched, NotAsked — у подсказки письма, когда ответили не все книги
+	// (s-mail-3): «Searched 4 of 5 address books» и те, что не ответили
+	// («baikal · Офис»); иначе пусто
+	Searched Text    `json:"searched,omitempty"`
+	NotAsked []Stamp `json:"notAsked,omitempty"`
 }
 
 // SuggestItem — одна подсказка: человек одним адресом, или «Add» адреса,
@@ -232,6 +237,9 @@ type SuggestItem struct {
 	// Meta — у подсказки Related to: род и день записи справа, «event · 12
 	// Aug» (s-tasks-10); у людей пусто
 	Meta Text `json:"meta,omitempty"`
+	// Label — у подсказки письма: метка адреса из карточки, «work»,
+	// «home» (s-mail-3); у прочих пусто
+	Label Text `json:"label,omitempty"`
 }
 type AttachRow struct {
 	Href   string `json:"href"`

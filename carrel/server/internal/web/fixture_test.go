@@ -3145,6 +3145,44 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		app := newMockupApp(t)
 		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 		app.compare(t, "app-mail-compose/normal.json", app.h.do(get("/app/mail/compose", app.sess)))
+
+		// The letter of s-mail-1 (С23): opened over the book, two people of
+		// it typed by name, a card, an event and the estimate attached, a
+		// folder as a link.
+		// The books read, as the combined list reads them: the names typed
+		// are found in them.
+		combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+		recipients := func() []string {
+			var out []string
+			for _, o := range letterTo(decode[view.MailSheet](t, app.h.do(get("/app/mail/compose?back=/app/contacts", app.sess)))) {
+				out = append(out, o.Value)
+			}
+			return out
+		}
+		for _, who := range []string{"Ковалёва", "Белов"} {
+			if rec := app.h.do(postForm("/app/mail/send?op=add", app.sess, url.Values{"to": recipients(), "to.add": {who},
+				"subject": {"Договор подряда и смета"}, "text": {"Пётр, ниже — договор и смета, которые мы обсуждали."}})); rec.Code != 200 {
+				t.Fatalf("add %s: %d %s", who, rec.Code, rec.Body.String())
+			}
+		}
+		attach := func(q url.Values) {
+			t.Helper()
+			sheet := decode[view.MailAttachSheet](t, app.h.do(get("/app/mail/attach?"+q.Encode(), app.sess)))
+			if rec := app.h.do(postForm(actionHref(t, sheet.Actions, "mail.attach.add"), app.sess, url.Values{})); rec.Code != 303 {
+				t.Fatalf("attach %v: %d %s", q, rec.Code, rec.Body.String())
+			}
+		}
+		attach(url.Values{"what": {"contact"}, "a": {app.realAccount(t, "kontakty")}, "c": {app.realPath(t, "kontakty")}, "uid": {"4f2b-9c31-a0e7"}})
+		events := decode[view.MailAttachSheet](t, app.h.do(get("/app/mail/attach?what=event", app.sess)))
+		if len(events.Rows) == 0 {
+			t.Fatal("no event to attach")
+		}
+		u, _ := url.Parse(events.Rows[0].Href)
+		attach(u.Query())
+		docs := url.Values{"a": {app.realAccount(t, "Documents")}, "c": {app.realPath(t, "Documents")}, "f": {"carrel/attachments"}}
+		attach(url.Values{"what": {"file"}, "a": docs["a"], "c": docs["c"], "f": docs["f"], "file": {"смета-подрядчик.pdf"}})
+		attach(url.Values{"what": {"folder"}, "a": docs["a"], "c": docs["c"], "f": {"carrel"}})
+		app.compare(t, "app-mail-compose/filled.json", app.h.do(get("/app/mail/compose", app.sess)))
 	})
 }
 

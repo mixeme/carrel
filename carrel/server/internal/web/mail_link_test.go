@@ -17,8 +17,8 @@ import (
 // not a second one; the letter being written waits as it was.
 func TestALinkGoesByALetterOfItsOwn(t *testing.T) {
 	f, relay := letterFixture(t)
-	typed := url.Values{"to": {"ann@example.org"}, "subject": {"Minutes"}, "body": {"Dear Ann,"}}
-	if rec := f.h.do(postForm("/app/mail/compose", f.sess, typed)); rec.Code >= 400 {
+	typed := url.Values{"to": {"ann@example.org"}, "subject": {"Minutes"}, "text": {"Dear Ann,"}}
+	if rec := f.h.do(postForm("/app/mail/send?op=preview", f.sess, typed)); rec.Code >= 400 {
 		t.Fatalf("typing: %d", rec.Code)
 	}
 	made := decode[view.PublishSheet](t, f.h.do(postForm("/app/publish?"+url.Values{"k": {"contacts"}, "a": {f.id}, "c": {searchBook}, "uid": {"ada"}}.Encode(), f.sess, url.Values{})))
@@ -68,7 +68,7 @@ func TestALinkGoesByALetterOfItsOwn(t *testing.T) {
 		t.Errorf("notices = %+v", page.Notices)
 	}
 	letter := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
-	if len(letter.To) != 1 || letter.Subject != "Minutes" || letter.Body != "Dear Ann," || len(letter.Attach) != 0 {
+	if len(letterTo(letter)) != 1 || letterValue(letter, "subject") != "Minutes" || letterValue(letter, "text") != "Dear Ann," || len(letter.Attach) != 0 {
 		t.Errorf("the letter being written changed: %+v", letter)
 	}
 

@@ -52,7 +52,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/mail/attach?a=a-nc-home\u0026c=dela\u0026uid=aa11-2d09-5f84\u0026what=task",
+      "href": "/app/mail/attach?a=a-nc-home\u0026back=%2Fapp%2Ftasks%2Fa-nc-home%2Fdela%2Faa11-2d09-5f84\u0026c=dela\u0026uid=aa11-2d09-5f84\u0026what=task",
       "icon": "i-mail",
       "id": "record.send",
       "label": "Send",

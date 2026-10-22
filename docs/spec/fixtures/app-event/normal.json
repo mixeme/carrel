@@ -44,7 +44,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/mail/attach?a=a-nc-home\u0026c=lichnyj\u0026uid=8f1c-4a02-b7d3\u0026what=event",
+      "href": "/app/mail/attach?a=a-nc-home\u0026back=%2Fapp%2Fcalendar%2Fa-nc-home%2Flichnyj%2F8f1c-4a02-b7d3\u0026c=lichnyj\u0026uid=8f1c-4a02-b7d3\u0026what=event",
       "icon": "i-mail",
       "id": "record.send",
       "label": "Send",

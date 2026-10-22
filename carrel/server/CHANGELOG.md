@@ -17,6 +17,43 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.354 — 2026-10-22
+
+The letter as one form (batch 3 of the publish-mail scan, Typecase's notes
+105 and 110 pp. 3–4).
+
+### Changed
+
+- **The letter is one form**, `POST /app/mail/send` (`MailSheet.Form`): `to`
+  — the recipients picked, each its address —, `to.add` «Name or address»,
+  `subject`, `text` (was `body`); they go with every press and are kept.
+  Send is the form's own button, no `op`; `op=add` is Enter in «Name or
+  address» without a script — an address joins the recipients, a name of
+  one person of the books with one address joins as that person, else its
+  addresses are offered; `op=attach`, `op=remove`, `op=change` (the publish
+  sheet over the letter, what was typed kept), `op=terms`, `op=discard`.
+  `POST /app/mail/compose` is gone; `GET /app/mail/compose?back=` names the
+  page under the letter, where Cancel and its cross lead.
+- **The line under To** is «N of M recipients. Everyone sees the whole
+  list.», what the last press did first; the ceilings and the letters left
+  today are no longer in it.
+- **Days of a calendar over the letter's ceiling go as a link to these
+  days**, as a published range (the owner's decision of 21.10.2026): Send is
+  no longer refused for it.
+- **A folder attached** says its folders and files apart: «1 folder · 6
+  files».
+- **`GET /app/mail/suggest?q=`**: the letter's suggestions — a row an
+  address with the card's label, the line as typed, the books that did not
+  answer.
+- Send of a record carries `back`: the letter stands over the record.
+
+### For consumers
+
+- `view.MailSheet`: `Form`, `Under`; `To`, `Subject`, `Body`, `Limits`
+  removed. `view.SuggestItem.Label`, `view.SuggestList.Searched`,
+  `NotAsked`.
+- New fixture `app-mail-compose/filled` (s-mail-1).
+
 ## v0.2.353 — 2026-10-22
 
 Typecase `bc0b574` (notes 108–110): an archive from this computer is

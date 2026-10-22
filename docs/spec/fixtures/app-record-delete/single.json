@@ -151,7 +151,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/mail/attach?a=a-nc-home\u0026c=dela\u0026uid=aa10-77bc-0e31\u0026what=task",
+          "href": "/app/mail/attach?a=a-nc-home\u0026back=%2Fapp%2Ftasks%2Fa-nc-home%2Fdela%2Faa10-77bc-0e31\u0026c=dela\u0026uid=aa10-77bc-0e31\u0026what=task",
           "icon": "i-mail",
           "id": "record.send",
           "label": "Send",

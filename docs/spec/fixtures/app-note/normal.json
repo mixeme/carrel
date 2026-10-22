@@ -24,7 +24,7 @@
       {
         "csrf": "csrf",
         "enabled": true,
-        "href": "/app/mail/attach?a=a-nc-home\u0026c=zapisi\u0026uid=5c81-77aa-0d64\u0026what=note",
+        "href": "/app/mail/attach?a=a-nc-home\u0026back=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F5c81-77aa-0d64\u0026c=zapisi\u0026uid=5c81-77aa-0d64\u0026what=note",
         "icon": "i-mail",
         "id": "record.send",
         "label": "Send",

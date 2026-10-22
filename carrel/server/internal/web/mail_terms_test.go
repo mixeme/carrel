@@ -9,6 +9,17 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
+// changeTerms is «Change…» of a link the letter makes (С16): the letter's
+// form goes with it, and the publish sheet over the letter comes.
+func changeTerms(t *testing.T, f davFixture, change view.Action) view.PublishSheet {
+	t.Helper()
+	rec := f.h.do(postForm(change.Href, f.sess, url.Values{"to": {"ann@example.org"}}))
+	if rec.Code != 303 || !strings.HasPrefix(rec.Header().Get("Location"), "/app/publish?") {
+		t.Fatalf("Change…: %d %q", rec.Code, rec.Header().Get("Location"))
+	}
+	return decode[view.PublishSheet](t, f.h.do(get(rec.Header().Get("Location"), f.sess)))
+}
+
 // Note 70 of Typecase (task 165; s-mail-1; the owner's decision Б38): a
 // thing that goes by letter as a link says its terms in its row — how long
 // the link lives — and «Change…» opens the publish sheet over the letter
@@ -28,7 +39,7 @@ func TestALetterLinkHasItsTerms(t *testing.T) {
 		t.Errorf("a file attached has terms: %+v", r)
 	}
 	for _, r := range sheet.Attach[1:] {
-		if r.Terms != "30 days" || r.Change == nil || r.Change.Label != "Change…" || r.Change.Method != "GET" || r.Change.Target != "sheet" {
+		if r.Terms != "30 days" || r.Change == nil || r.Change.Label != "Change…" || r.Change.Method != "POST" || !r.Change.Submits {
 			t.Errorf("%s: terms %q, change %+v", r.Title, r.Terms, r.Change)
 		}
 	}
@@ -43,7 +54,7 @@ func TestALetterLinkHasItsTerms(t *testing.T) {
 
 	// Change…: the publish sheet with the row's terms; Apply keeps them in
 	// the letter and makes nothing.
-	pub := decode[view.PublishSheet](t, f.h.do(get(sheet.Attach[1].Change.Href, f.sess)))
+	pub := changeTerms(t, f, *sheet.Attach[1].Change)
 	apply := actionByID(pub.Actions, "publish.apply")
 	if apply == nil || apply.Label != "Apply" || !apply.Primary || actionByID(pub.Actions, "publish.create") != nil {
 		t.Fatalf("the sheet over the letter = %+v", pub.Actions)
@@ -65,13 +76,13 @@ func TestALetterLinkHasItsTerms(t *testing.T) {
 	if sheet.Attach[1].Terms != "7 days" || sheet.Attach[2].Terms != "30 days" {
 		t.Errorf("terms after Apply = %q, %q", sheet.Attach[1].Terms, sheet.Attach[2].Terms)
 	}
-	again := decode[view.PublishSheet](t, f.h.do(get(sheet.Attach[1].Change.Href, f.sess)))
+	again := changeTerms(t, f, *sheet.Attach[1].Change)
 	if lives := formRow(again.Form, "lives"); lives == nil || lives.Value != "7" {
 		t.Errorf("the sheet again = %+v, want the terms chosen", lives)
 	}
 
 	// Sent: each link lives as its row said.
-	if rec := f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Files"}, "body": {"See"}})); rec.Code != 303 {
+	if rec := f.h.do(postForm("/app/mail/send?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Files"}, "text": {"See"}})); rec.Code != 303 {
 		t.Fatalf("send: %d %s", rec.Code, rec.Body)
 	}
 	days := map[string]int{}

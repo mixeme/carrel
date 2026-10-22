@@ -456,7 +456,7 @@ func (s *Server) writeLetterSheet(w http.ResponseWriter, r *http.Request, sess *
 		return
 	}
 	p := d.Parts[i]
-	apply := s.postQuery("/app/mail/compose", url.Values{"op": {"terms"}, "i": {m}})
+	apply := s.postQuery("/app/mail/send", url.Values{"op": {"terms"}, "i": {m}})
 	for j := range sheet.Form.Sets {
 		for k := range sheet.Form.Sets[j].Rows {
 			row := &sheet.Form.Sets[j].Rows[k]

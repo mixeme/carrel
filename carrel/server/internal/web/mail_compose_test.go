@@ -48,6 +48,31 @@ func attachOne(t *testing.T, f davFixture, q url.Values) view.MailAttachSheet {
 	return sheet
 }
 
+// letterValue is what stands in a field of the letter's form.
+func letterValue(sheet view.MailSheet, name string) string {
+	if r := formRow(sheet.Form, name); r != nil {
+		return string(r.Value)
+	}
+	return ""
+}
+
+// letterTo are the recipients of the letter's form, a tag each.
+func letterTo(sheet view.MailSheet) []view.Option {
+	if r := formRow(sheet.Form, "to"); r != nil {
+		return r.Options
+	}
+	return nil
+}
+
+// letterHint is the line under To: what the last press did, how many, that
+// all see all (s-mail-1).
+func letterHint(sheet view.MailSheet) string {
+	if r := formRow(sheet.Form, "to"); r != nil {
+		return string(r.Hint)
+	}
+	return ""
+}
+
 // parts are the attachments of a letter by file name.
 func parts(t *testing.T, l mailtest.Letter) (string, map[string]string) {
 	t.Helper()
@@ -86,7 +111,7 @@ func parts(t *testing.T, l mailtest.Letter) (string, map[string]string) {
 func TestLetterCarriesFilesAndLinks(t *testing.T) {
 	f, relay := letterFixture(t)
 
-	sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose?q=ada", f.sess)))
+	sheet := decode[view.MailSheet](t, f.h.do(postForm("/app/mail/send?op=add", f.sess, url.Values{"to.add": {"ada"}})))
 	var suggested []string
 	for _, r := range sheet.Suggest {
 		suggested = append(suggested, string(r.Address)+" "+string(r.Label)+" "+string(r.Name))
@@ -98,8 +123,8 @@ func TestLetterCarriesFilesAndLinks(t *testing.T) {
 		t.Errorf("from %q reply %q note %q", sheet.From, sheet.ReplyTo, sheet.ReplyNote)
 	}
 
-	rec := f.h.do(postForm("/app/mail/compose?op=attach&what=contact", f.sess, url.Values{
-		"to": {"ann@example.org"}, "subject": {"Секретная тема"}, "body": {"Секретный текст"}}))
+	rec := f.h.do(postForm("/app/mail/send?op=attach&what=contact", f.sess, url.Values{
+		"to": {"ann@example.org"}, "subject": {"Секретная тема"}, "text": {"Секретный текст"}}))
 	if rec.Code != 303 || !strings.HasPrefix(rec.Header().Get("Location"), "/app/mail/attach?what=contact") {
 		t.Fatalf("attach: %d %s", rec.Code, rec.Header().Get("Location"))
 	}
@@ -119,13 +144,13 @@ func TestLetterCarriesFilesAndLinks(t *testing.T) {
 	}
 
 	sheet = decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess)))
-	if len(sheet.Attach) != 4 || sheet.Subject != "Секретная тема" || len(sheet.To) != 1 {
+	if len(sheet.Attach) != 4 || letterValue(sheet, "subject") != "Секретная тема" || len(letterTo(sheet)) != 1 {
 		t.Fatalf("sheet = %+v", sheet)
 	}
 	if len(f.h.users.PublishedLinks(f.sess.AccountID())) != 0 {
 		t.Fatal("a link was made before the letter went")
 	}
-	rec = f.h.do(postForm(actionHref(t, sheet.Actions, "mail.send"), f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Секретная тема"}, "body": {"Секретный текст"}}))
+	rec = f.h.do(postForm(actionHref(t, sheet.Form.Actions, "mail.send"), f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Секретная тема"}, "text": {"Секретный текст"}}))
 	if rec.Code != 303 || !strings.Contains(rec.Header().Get("Location"), "sent=1") {
 		t.Fatalf("send: %d %s", rec.Code, rec.Body)
 	}
@@ -159,7 +184,7 @@ func TestLetterCarriesFilesAndLinks(t *testing.T) {
 			t.Fatalf("the journal holds the letter: %+v", e)
 		}
 	}
-	if sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess))); len(sheet.Attach) != 0 || sheet.Subject != "" {
+	if sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose", f.sess))); len(sheet.Attach) != 0 || letterValue(sheet, "subject") != "" {
 		t.Errorf("the letter stayed after it went: %+v", sheet)
 	}
 }
@@ -171,27 +196,27 @@ func TestLetterCeilings(t *testing.T) {
 	f.h.cfg.MailMaxPerDay = 1
 	f.h.cfg.MailMaxRecipients = 2
 	send := func(to ...string) view.MailSheet {
-		rec := f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": to, "subject": {"x"}, "body": {"x"}}))
+		rec := f.h.do(postForm("/app/mail/send?op=send", f.sess, url.Values{"to": to, "subject": {"x"}, "body": {"x"}}))
 		if rec.Code == 303 {
 			return view.MailSheet{}
 		}
 		return decode[view.MailSheet](t, rec)
 	}
-	if sheet := send("a@example.org", "b@example.org", "c@example.org"); !strings.Contains(saidRuns(sheet.Limits), "2 recipients at most") {
-		t.Errorf("three recipients: %q", sheet.Limits)
+	if sheet := send("a@example.org", "b@example.org", "c@example.org"); !strings.Contains(letterHint(sheet), "2 recipients at most") {
+		t.Errorf("three recipients: %q", letterHint(sheet))
 	}
 	relay.Refuse = "nobody@example.org"
-	if sheet := send("nobody@example.org"); !strings.Contains(saidRuns(sheet.Limits), "did not take") {
-		t.Errorf("refused: %q", sheet.Limits)
+	if sheet := send("nobody@example.org"); !strings.Contains(letterHint(sheet), "did not take") {
+		t.Errorf("refused: %q", letterHint(sheet))
 	}
-	if sheet := send("a@example.org"); len(sheet.Limits) != 0 {
-		t.Fatalf("the refused letter was counted: %q", sheet.Limits)
+	if sheet := send("a@example.org"); letterHint(sheet) != "" {
+		t.Fatalf("the refused letter was counted: %q", letterHint(sheet))
 	}
 	sheet := send("a@example.org")
-	if !strings.Contains(saidRuns(sheet.Limits), "as many letters today") {
-		t.Errorf("second letter: %q", sheet.Limits)
+	if !strings.Contains(letterHint(sheet), "as many letters today") {
+		t.Errorf("second letter: %q", letterHint(sheet))
 	}
-	for _, a := range sheet.Actions {
+	for _, a := range sheet.Form.Actions {
 		if a.ID == "mail.send" && a.Enabled {
 			t.Error("Send is offered with the day spent")
 		}
@@ -209,7 +234,7 @@ func TestLetterNamesBooksThatDidNotAnswer(t *testing.T) {
 		b.Collections = append(b.Collections, sealed.Collection{AccountID: "dead", Path: "/dav/office/", Name: "Office", Kinds: []view.Kind{view.KindContact}})
 		b.Selected = append(b.Selected, sealed.Selection{Kind: view.KindContact, AccountID: "dead", Path: "/dav/office/"})
 	})
-	sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose?q=ada", f.sess)))
+	sheet := decode[view.MailSheet](t, f.h.do(postForm("/app/mail/send?op=add", f.sess, url.Values{"to.add": {"ada"}})))
 	if len(sheet.Suggest) != 2 || len(sheet.NotAsked) != 1 || !strings.Contains(string(sheet.NotAsked[0]), "Office") {
 		t.Errorf("suggest %d, not asked %v", len(sheet.Suggest), sheet.NotAsked)
 	}
@@ -252,7 +277,7 @@ func TestLetterCalendarRange(t *testing.T) {
 	if sheet.Range == nil || formFields(*sheet.Range).Get("from") != "2026-10-01" || formFields(*sheet.Range).Get("to") != "2026-10-10" {
 		t.Fatalf("range form = %+v", sheet.Range)
 	}
-	if rec := f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"October"}, "body": {"x"}})); rec.Code != 303 {
+	if rec := f.h.do(postForm("/app/mail/send?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"October"}, "text": {"x"}})); rec.Code != 303 {
 		t.Fatalf("send: %d %s", rec.Code, rec.Body)
 	}
 	_, files := parts(t, relay.Letters()[0])
@@ -288,7 +313,7 @@ func TestLetterWholeCalendar(t *testing.T) {
 	if df := formFields(*dates.Range); df.Get("span") != "dates" || df.Get("from") == "" || df.Get("to") == "" || len(dates.Range.Actions) != 1 {
 		t.Errorf("dates form = %+v", dates.Range)
 	}
-	if rec := f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"All"}, "body": {"x"}})); rec.Code != 303 {
+	if rec := f.h.do(postForm("/app/mail/send?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"All"}, "text": {"x"}})); rec.Code != 303 {
 		t.Fatalf("send: %d %s", rec.Code, rec.Body)
 	}
 	_, files := parts(t, relay.Letters()[0])
@@ -326,7 +351,7 @@ func TestLetterNoteFormat(t *testing.T) {
 	if sheet.Preview[0].Format != "ics" || formFields(*sheet.Format).Get("format") != "ics" {
 		t.Errorf("source chosen: preview %+v, form %+v", sheet.Preview, sheet.Format)
 	}
-	if rec := f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Note"}, "body": {"x"}})); rec.Code != 303 {
+	if rec := f.h.do(postForm("/app/mail/send?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Note"}, "text": {"x"}})); rec.Code != 303 {
 		t.Fatalf("send: %d %s", rec.Code, rec.Body)
 	}
 	_, files := parts(t, relay.Letters()[0])
@@ -342,7 +367,7 @@ func TestRecipientLabelIsTheCardsLabel(t *testing.T) {
 	f, _ := letterFixture(t)
 	f.srv.Seed(searchBook+"grace.vcf", "BEGIN:VCARD\nVERSION:3.0\nUID:grace\nFN:Grace Hopper\n"+
 		"EMAIL;TYPE=INTERNET:grace@example.org\nEMAIL;TYPE=WORK,INTERNET:grace@navy.example\nEND:VCARD\n")
-	sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose?q=grace", f.sess)))
+	sheet := decode[view.MailSheet](t, f.h.do(postForm("/app/mail/send?op=add", f.sess, url.Values{"to.add": {"grace"}})))
 	got := map[string]string{}
 	for _, r := range sheet.Suggest {
 		got[string(r.Address)] = string(r.Label)
@@ -364,7 +389,7 @@ func TestLetterLinksGiveWhatThePublishSheetGives(t *testing.T) {
 	if !card.Preview[0].AsLink {
 		t.Fatalf("the big card does not go as a link: %+v", card.Preview[0])
 	}
-	if rec := f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Card"}, "body": {"x"}})); rec.Code != 303 {
+	if rec := f.h.do(postForm("/app/mail/send?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Card"}, "text": {"x"}})); rec.Code != 303 {
 		t.Fatalf("send: %d %s", rec.Code, rec.Body)
 	}
 	links := f.h.users.PublishedLinks(f.sess.AccountID())
@@ -385,7 +410,7 @@ func TestLetterLinksGiveWhatThePublishSheetGives(t *testing.T) {
 	if !whole.Preview[0].AsLink {
 		t.Fatalf("the calendar does not go as a link: %+v", whole.Preview[0])
 	}
-	if rec := cal.h.do(postForm("/app/mail/compose?op=send", cal.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Cal"}, "body": {"x"}})); rec.Code != 303 {
+	if rec := cal.h.do(postForm("/app/mail/send?op=send", cal.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Cal"}, "text": {"x"}})); rec.Code != 303 {
 		t.Fatalf("send: %d %s", rec.Code, rec.Body)
 	}
 	links = cal.h.users.PublishedLinks(cal.sess.AccountID())

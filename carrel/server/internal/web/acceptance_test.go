@@ -226,7 +226,7 @@ func TestDebugLogHoldsNoSecrets(t *testing.T) {
 	if device.Dialog != nil && device.Dialog.Password != nil {
 		devicePassword = string(device.Dialog.Password.Value)
 	}
-	f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {secretRecord}, "body": {secretRecord}}))
+	f.h.do(postForm("/app/mail/send?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {secretRecord}, "text": {secretRecord}}))
 	f.h.do(postForm("/admin/settings", f.sess, settingsForm(t, f.h, f.sess, map[string]string{"host": "127.0.0.1", "port": "25", "security": "none", "username": "relay", "password": "relay-password-xyz", "from": "noreply@carrel.example"})))
 	f.h.do(get("/app/files/"+f.id+"/"+url.PathEscape(filesDocs)+"/..%2F..%2Fetc/", f.sess))
 

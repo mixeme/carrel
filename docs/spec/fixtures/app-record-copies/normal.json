@@ -92,7 +92,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/mail/attach?a=a-nc-home\u0026c=arhiv\u0026uid=e7c2-3b95-6a14\u0026what=contact",
+          "href": "/app/mail/attach?a=a-nc-home\u0026back=%2Fapp%2Fcontacts%2Fa-nc-home%2Farhiv%2Fe7c2-3b95-6a14\u0026c=arhiv\u0026uid=e7c2-3b95-6a14\u0026what=contact",
           "icon": "i-mail",
           "id": "record.send",
           "label": "Send",

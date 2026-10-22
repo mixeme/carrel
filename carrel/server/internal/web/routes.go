@@ -47,7 +47,7 @@ func (s *Server) registerRoutes() {
 	s.handle("GET /app/publish", (*Server).getPublish)
 	s.handle("POST /app/publish", (*Server).postPublish)
 	s.handle("GET /app/mail/compose", (*Server).getMailCompose)
-	s.handle("POST /app/mail/compose", (*Server).postMailCompose)
+	s.handle("GET /app/mail/suggest", (*Server).getMailSuggest)
 	s.handle("POST /app/mail/send", (*Server).postMailSend)
 	s.handle("GET /app/mail/link", (*Server).getMailLink)
 	s.handle("GET /app/mail/attach", (*Server).getMailAttach)

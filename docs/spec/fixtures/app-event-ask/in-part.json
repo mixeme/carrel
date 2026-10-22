@@ -156,7 +156,7 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/mail/attach?a=a-nc-home\u0026c=rabota\u0026uid=7c1e-22ab-90f4\u0026what=event",
+          "href": "/app/mail/attach?a=a-nc-home\u0026back=%2Fapp%2Fcalendar%2Fa-nc-home%2Frabota%2F7c1e-22ab-90f4\u0026c=rabota\u0026uid=7c1e-22ab-90f4\u0026what=event",
           "icon": "i-mail",
           "id": "record.send",
           "label": "Send",

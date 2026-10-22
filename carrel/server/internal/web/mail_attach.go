@@ -75,6 +75,10 @@ func (s *Server) postMailAttach(w http.ResponseWriter, r *http.Request) {
 	}
 	d := loadMailDraft(sess)
 	d.Parts = s.reckonLinks(append(d.Parts, part))
+	if p := s.sheetBack(r, r.FormValue("back"), false); p != "" {
+		// Send of a record (С21): the letter stands over its page.
+		d.Back = p
+	}
 	saveMailDraft(sess, d)
 	s.redirect(w, r, "/app/mail/compose")
 }
@@ -305,11 +309,27 @@ func (s *Server) chosenPart(r *http.Request, sess *session.Session, k attachKind
 		if k.What == "folder" {
 			p.Folder, p.AsLink, p.Path = true, true, strings.Join(segs, "/")
 			p.Title = fileTitle(fc, segs)
-			// How much is in it, after its name (Пб21; s-mail-1: «Договор
-			// подряда · 9 files»); unread, its name alone.
+			// How much is in it, after its name: its folders and its files
+			// apart, none not said (Пб21, С20; s-mail-1: «Договор подряда ·
+			// 1 folder · 6 files»); unread, its name alone.
 			if dir, err := fc.path(segs, true); err == nil {
 				if entries, err := fc.files.List(ctx, dir); err == nil {
-					p.Detail = plural(len(entries), "file")
+					folders, files := 0, 0
+					for _, e := range entries {
+						if e.Dir {
+							folders++
+						} else {
+							files++
+						}
+					}
+					var said []string
+					if folders > 0 {
+						said = append(said, plural(folders, "folder"))
+					}
+					if files > 0 || folders == 0 {
+						said = append(said, plural(files, "file"))
+					}
+					p.Detail = strings.Join(said, " · ")
 				}
 			}
 			return p, nil

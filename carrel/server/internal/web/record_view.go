@@ -607,8 +607,10 @@ func (s *Server) sendFor(c *collectionCtx, uid string) *view.Action {
 	if !s.canSendLetters(c.sess) || c.feed != nil {
 		return nil
 	}
+	// The letter stands over the record and goes back to it (С21).
+	back := origin{conn: c.conn, col: c.col}.recordPath(segmentOf(c.spec.kind), uid)
 	return &view.Action{ID: "record.send", Label: "Send", Icon: "i-mail", Method: "POST", Enabled: true,
-		Href: s.postQuery("/app/mail/attach", url.Values{"what": {string(c.spec.kind)}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}})}
+		Href: s.postQuery("/app/mail/attach", url.Values{"what": {string(c.spec.kind)}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}, "back": {back}})}
 }
 
 // eventHead are the first fields of an event, in the order of its card

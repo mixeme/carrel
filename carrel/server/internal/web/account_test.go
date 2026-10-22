@@ -114,9 +114,10 @@ func TestLetterSaysWhereRepliesGo(t *testing.T) {
 	if got := saidRuns(sheet.ReplyNote); got != "Signed ⟨strong:Боб⟩ · replies go to bob@example.org" {
 		t.Errorf("signature = %q, the frame %q", got, framePieces(foot[1]))
 	}
-	// «Published links» in the limits is bold (s-mail-1).
-	if got := saidRuns(sheet.Limits); !strings.Contains(got, "can be revoked in ⟨strong:Published links⟩") {
-		t.Errorf("limits = %q", got)
+	// Under To, how many and that all see all — no ceilings: the frame draws
+	// none there (s-mail-1, С18).
+	if got := letterHint(sheet); !strings.HasSuffix(got, " recipients. Everyone sees the whole list.") || strings.Contains(got, "left today") {
+		t.Errorf("the line under To = %q", got)
 	}
 }
 

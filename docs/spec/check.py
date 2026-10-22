@@ -132,7 +132,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
-          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history","file-match",
+          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history","file-match","filled",
           "calendar","event","link-never","gone","note-files-kept"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
@@ -539,6 +539,8 @@ STATE_FRAME = {
     # «Send this link» (записка 105): лист над Published links, кадр без
     # data-screen.
     "app-mail-link/normal": "s-mail-4",
+    # Письмо формой, заполненное (пакет 3 скана publish-mail, С23).
+    "app-mail-compose/filled": "s-mail-1",
     # Листы публикации по родам (записка 105): контакт, событие; готовая
     # бессрочная без почты; мёртвая строка списка.
     "app-publish/normal": "s-publish-3",

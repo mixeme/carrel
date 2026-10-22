@@ -766,10 +766,20 @@ type PublishSheet struct {
 }
 
 type MailSheet struct {
-	To      []Recipient `json:"to"`
+	// Form — письмо одной формой (s-mail-1, записка Typecase 105, пакет 3
+	// скана publish-mail): POST /app/mail/send; строки — To (to: выбранные
+	// метками, InputSelect с Multiple, значение — адрес, Label — имя, Meta —
+	// адрес после имени, Colour — метка книги, Typed — набранное рукой; Add
+	// — строка to.add «Name or address» с подсказками Suggest; Hint — «2 of
+	// 10 recipients. Everyone sees the whole list.», ответ после отправки и
+	// её отказ — первой фразой там же), Subject (subject), текст (text);
+	// кнопки — Send (основная, без op), Discard, Cancel — ссылка туда,
+	// откуда письмо открыто
+	Form Form `json:"form"`
+	// Suggest, NotAsked — без сценариев: что нашлось по набранному в to.add,
+	// которое не адрес (op=add), строка на адрес; книги, которые не
+	// ответили, названы прямо
 	Suggest []Recipient `json:"suggest"`
-	Subject Text        `json:"subject"`
-	Body    Text        `json:"body"`
 	// From — с какого адреса уйдёт, видно до отправки: в шапке «from
 	// mix@carrel.example» (s-mail-1); FromName — имя, каким его увидит
 	// получатель («Михаил Енученко», через общий релей — «… (via Carrel)»)
@@ -781,13 +791,18 @@ type MailSheet struct {
 	// (s-mail-1); без подтверждённого адреса — что ответа не будет
 	ReplyNote Runs            `json:"replyNote"`
 	Attach    []MailAttachRow `json:"attach"`
-	NotAsked  []Stamp         `json:"notAsked"` // книги, которые не ответили, названы прямо
-	Limits    Runs            `json:"limits"`   // «Published links» — жирным (s-mail-1)
+	NotAsked  []Stamp         `json:"notAsked"`
 	// Links — строка под вложениями, когда что-то уходит ссылкой: сколько и
 	// почему, и где их отозвать, «Published links» жирным (s-mail-1); пусто
 	// — ссылок нет
-	Links   Runs     `json:"links,omitempty"`
+	Links Runs `json:"links,omitempty"`
+	// Actions — меню Attach: Contact · Address book · Event · Calendar ·
+	// Task · Note · File · Folder link, каждый — отправка формы письма на
+	// свой адрес (?op=attach&what=…, Submits)
 	Actions []Action `json:"actions"`
+	// Under — страница, откуда письмо открыто (back; s-mail-1 — над книгой
+	// «Контакты»); nil у фрагмента
+	Under *Under `json:"under"`
 }
 type Recipient struct {
 	Address Text   `json:"address"`

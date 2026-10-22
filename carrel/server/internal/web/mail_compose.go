@@ -44,6 +44,12 @@ type mailDraft struct {
 	// case: one chosen from them is drawn with the name and the book's
 	// colour (Пб18; s-mail-1), one typed by hand as its address.
 	Known map[string]knownRecipient
+	// Back is the page the letter was opened from: the screen under it, its
+	// Cancel, and where its attach sheets come back to (С21).
+	Back string
+	// Typed is what stands in «Name or address» and is no address yet: kept
+	// with its suggestions until one is chosen.
+	Typed string
 }
 
 // knownRecipient is who an address is, as a suggestion said it.
@@ -165,11 +171,19 @@ func (s *Server) getMailCompose(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	d := loadMailDraft(sess)
+	if back := r.URL.Query().Get("back"); back != "" {
+		// Opened from a page (С21): the letter stands over it and goes back
+		// to it.
+		if p := s.sheetBack(r, back, false); p != "" && p != d.Back {
+			d.Back = p
+			saveMailDraft(sess, d)
+		}
+	}
 	note := ""
 	if n, err := strconv.Atoi(r.URL.Query().Get("sent")); err == nil && n > 0 {
 		note = fmt.Sprintf("The letter went to %s.", plural(n, "recipient"))
 	}
-	s.writeMailSheet(w, r, s.mailSheet(r.Context(), sess, d, strings.TrimSpace(r.URL.Query().Get("q")), note))
+	s.writeMailSheet(w, r, s.mailSheet(r, sess, d, note))
 }
 
 // postMailCompose keeps what was typed and then does the op: attach opens
@@ -189,19 +203,48 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 	d := loadMailDraft(sess)
 	op := r.FormValue("op")
 	if op == "discard" {
-		saveMailDraft(sess, &mailDraft{})
+		saveMailDraft(sess, &mailDraft{Back: d.Back})
 		s.redirect(w, r, "/app/mail/compose")
 		return
 	}
-	if r.Form.Has("to") || r.Form.Has("subject") || r.Form.Has("body") {
+	// What was typed goes with every press and is kept (s-mail-1): the
+	// recipients picked, the line typed after them, the subject, the text.
+	if r.Form.Has("to") || r.Form.Has("to.add") || r.Form.Has("subject") || r.Form.Has("text") {
 		d.To = splitRecipients(r.Form["to"])
 		d.Subject = r.FormValue("subject")
-		d.Body = r.FormValue("body")
+		d.Body = r.FormValue("text")
+		d.Typed = strings.TrimSpace(r.FormValue("to.add"))
 	}
 	switch op {
+	case "add":
+		// Enter in «Name or address» without a script (Typecase's note 110
+		// p. 3): an address joins the recipients; a name is looked up and
+		// its addresses offered, the line kept.
+		if typed := d.Typed; typed != "" {
+			if a, found := s.typedRecipient(sess, d, typed); found {
+				d.To, d.Typed = splitRecipients(append(d.To, a)), ""
+				saveMailDraft(sess, d)
+				s.writeMailSheet(w, r, s.mailSheet(r, sess, d, ""))
+				return
+			}
+		}
+		saveMailDraft(sess, d)
+		s.writeMailSheet(w, r, s.mailSheet(r, sess, d, ""))
+		return
 	case "attach":
 		saveMailDraft(sess, d)
 		s.redirect(w, r, "/app/mail/attach?what="+url.QueryEscape(r.FormValue("what")))
+		return
+	case "change":
+		// «Change…» of a link the letter makes (С16): what was typed kept,
+		// the publish sheet over the letter with its terms.
+		i, err := strconv.Atoi(r.FormValue("i"))
+		if err != nil || i < 0 || i >= len(d.Parts) || !d.Parts[i].AsLink {
+			s.notFound(w, r)
+			return
+		}
+		saveMailDraft(sess, d)
+		s.redirect(w, r, "/app/publish?"+partPublishQuery(d.Parts[i], i).Encode())
 		return
 	case "terms":
 		// Apply of the publish sheet over the letter (s-mail-1): the terms
@@ -226,19 +269,55 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 			d.Parts = append(d.Parts[:i], d.Parts[i+1:]...)
 			d.Parts = s.reckonLinks(d.Parts)
 		}
-	case "send":
+	case "", "send":
+		// Send is the form's own button, no op (s-mail-1).
+		if d.Typed != "" {
+			// A line typed and not yet a recipient: added, as Enter would.
+			if a, found := s.typedRecipient(sess, d, d.Typed); found {
+				d.To, d.Typed = splitRecipients(append(d.To, a)), ""
+			}
+		}
 		saveMailDraft(sess, d)
-		n, err := s.sendLetter(r, sess, d)
-		if err != nil {
-			s.writeMailSheet(w, r, s.mailSheet(r.Context(), sess, d, "", err.Error()))
+		if d.Typed != "" {
+			s.writeMailSheet(w, r, s.mailSheet(r, sess, d, "Choose who «"+d.Typed+"» is, or type an address."))
 			return
 		}
-		saveMailDraft(sess, &mailDraft{})
+		n, err := s.sendLetter(r, sess, d)
+		if err != nil {
+			s.writeMailSheet(w, r, s.mailSheet(r, sess, d, err.Error()))
+			return
+		}
+		saveMailDraft(sess, &mailDraft{Back: d.Back})
 		s.redirect(w, r, "/app/mail/compose?sent="+strconv.Itoa(n))
 		return
 	}
 	saveMailDraft(sess, d)
-	s.writeMailSheet(w, r, s.mailSheet(r.Context(), sess, d, "", ""))
+	s.writeMailSheet(w, r, s.mailSheet(r, sess, d, ""))
+}
+
+// typedRecipient is the address a line typed in «Name or address» names
+// without scripts: an address as it is; else the one address of the
+// ticked books whose person's name holds the words — that one known to the
+// letter by the name and the book's mark (Пб18).
+func (s *Server) typedRecipient(sess *session.Session, d *mailDraft, typed string) (string, bool) {
+	if a, err := cmail.Addresses([]string{typed}); err == nil && len(a) == 1 {
+		return a[0], true
+	}
+	needle := strings.ToLower(typed)
+	var found []bookPerson
+	for _, p := range s.bookPeople(sess) {
+		if strings.Contains(strings.ToLower(p.name), needle) && !slices.ContainsFunc(found, func(f bookPerson) bool { return f.email == p.email }) {
+			found = append(found, p)
+		}
+	}
+	if len(found) != 1 {
+		return "", false
+	}
+	if d.Known == nil {
+		d.Known = map[string]knownRecipient{}
+	}
+	d.Known[strings.ToLower(found[0].email)] = knownRecipient{Name: found[0].name, Colour: string(found[0].colour)}
+	return found[0].email, true
 }
 
 // splitRecipients takes the field as typed — one address a value, or
@@ -258,42 +337,57 @@ func splitRecipients(values []string) []string {
 	return out
 }
 
-// publishedLinksMark stands for «Published links» in the limits until the
-// sentence is cut into pieces.
-const publishedLinksMark = "{published-links}"
-
-// mailSheet is the letter as it will go: who it is from and where replies
-// go, the recipients, what goes as a file and what as a link.
-func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDraft, q, note string) view.MailSheet {
+// mailSheet is the letter as it will go, one form (s-mail-1): who it is from
+// and where replies go, the recipients, what goes as a file and what as a
+// link. note is said first under the recipients: what the last press did.
+func (s *Server) mailSheet(r *http.Request, sess *session.Session, d *mailDraft, note string) view.MailSheet {
 	u := s.letterUser(sess)
 	if u == nil {
 		return view.MailSheet{}
 	}
 	ls := s.senderOf(u)
 	sheet := view.MailSheet{
-		Subject: text(d.Subject), Body: text(d.Body),
 		From: text(ls.Address), FromName: text(ls.FromName), ReplyTo: text(ls.ReplyTo), ReplyNote: ls.replyNote(),
 	}
-	if q != "" {
-		sheet.Suggest, sheet.NotAsked = s.suggestRecipients(ctx, sess, q)
+	if d.Typed != "" {
+		// A name typed without a script (op=add): its addresses offered.
+		sheet.Suggest, sheet.NotAsked, _ = s.suggestRecipients(r.Context(), sess, d.Typed)
 		if len(sheet.Suggest) > 0 {
 			if d.Known == nil {
 				d.Known = map[string]knownRecipient{}
 			}
-			for _, r := range sheet.Suggest {
-				d.Known[strings.ToLower(string(r.Address))] = knownRecipient{Name: string(r.Name), Colour: string(r.Colour)}
+			for _, rc := range sheet.Suggest {
+				d.Known[strings.ToLower(string(rc.Address))] = knownRecipient{Name: string(rc.Name), Colour: string(rc.Colour)}
 			}
 			saveMailDraft(sess, d)
 		}
 	}
+	// The recipients as tags (s-mail-1): the name and the address after it,
+	// the book's mark; one typed by hand, its address alone.
+	to := view.FormRow{Name: "to", Label: "To", Kind: view.InputSelect, Multiple: true, Suggest: s.route("/app/mail/suggest"),
+		Add: &view.FormRow{Name: "to.add", Label: "Add a recipient", Kind: view.InputText, Placeholder: "Name or address", Value: text(d.Typed)}}
 	for _, a := range d.To {
-		r := view.Recipient{Address: text(a)}
-		if k, ok := d.Known[strings.ToLower(a)]; ok {
-			r.Name, r.Colour = text(k.Name), view.Colour(k.Colour)
+		o := view.Option{Value: a, Label: text(a), Selected: true, Typed: true}
+		if k, ok := d.Known[strings.ToLower(a)]; ok && k.Name != "" {
+			o.Label, o.Meta, o.Colour, o.Typed = text(k.Name), text(a), view.Colour(k.Colour), false
 		}
-		sheet.To = append(sheet.To, r)
+		to.Options = append(to.Options, o)
 	}
-	links := 0
+	if len(to.Options) > 0 {
+		to.Value = text(to.Options[0].Value)
+	}
+	// Under To, how many and that all see all (s-mail-1); what the last
+	// press did, first.
+	hint := fmt.Sprintf("%d of %d recipients. Everyone sees the whole list.", len(d.To), s.mailPolicy().Recipients)
+	if note != "" {
+		hint = sentence(note) + " " + hint
+	}
+	to.Hint = text(hint)
+	sheet.Form = s.plainForm("/app/mail/send", "POST", csrfField(sess), to,
+		view.FormRow{Name: "subject", Label: "Subject", Kind: view.InputText, Value: text(d.Subject)},
+		view.FormRow{Name: "text", Label: "Text", Kind: view.InputArea, Value: text(d.Body)})
+	submit := func(q url.Values) string { return s.postQuery("/app/mail/send", q) }
+
 	var why []string
 	for i, p := range d.Parts {
 		title := p.Title
@@ -301,8 +395,8 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 			title += " · " + p.Detail
 		}
 		row := view.MailAttachRow{Kind: p.Kind, Title: text(title), AsLink: p.AsLink,
-			Remove: view.Action{ID: "mail.attach.remove", Label: "Remove", Method: "POST", Enabled: true,
-				Href: s.postQuery("/app/mail/compose", url.Values{"op": {"remove"}, "i": {strconv.Itoa(i)}})}}
+			Remove: view.Action{ID: "mail.attach.remove", Label: "Remove", Method: "POST", Enabled: true, Submits: true,
+				Href: submit(url.Values{"op": {"remove"}, "i": {strconv.Itoa(i)}})}}
 		switch {
 		case p.Folder:
 			row.Format = "folder"
@@ -314,57 +408,44 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 			}
 			row.Size = formatSize(p.Size)
 		}
-		if p.AsLink {
-			links++
-			why = append(why, s.linkReason(p))
-		}
 		// A link the letter makes says its terms, and «Change…» opens the
-		// publish sheet over the letter with them (note 70 of Typecase).
+		// publish sheet over the letter with them, what was typed kept (note
+		// 70 of Typecase; С16).
 		if p.AsLink {
+			why = append(why, s.linkReason(p))
 			row.Terms = text(livesWords(partLives(p)))
-			row.Change = &view.Action{ID: "mail.link.terms", Label: "Change…", Method: "GET", Enabled: true,
-				Href: s.route("/app/publish?" + partPublishQuery(p, i).Encode())}
+			row.Change = &view.Action{ID: "mail.link.terms", Label: "Change…", Method: "POST", Enabled: true, Submits: true,
+				Href: submit(url.Values{"op": {"change"}, "i": {strconv.Itoa(i)}})}
 		}
 		sheet.Attach = append(sheet.Attach, row)
 	}
 	sheet.Links = linksLine(why)
 
-	left := s.users.LettersLeft(u.ID, s.mailPolicy().PerDay)
-	limits := []string{
-		fmt.Sprintf("%d of %d recipients. Everyone sees the whole list.", len(d.To), s.mailPolicy().Recipients),
-		fmt.Sprintf("An attachment up to %s, the letter up to %s; a folder, and anything larger, goes as a link that lives 30 days and can be revoked in %s.",
-			formatSize(s.mailPolicy().Attach), formatSize(s.mailPolicy().Letter), publishedLinksMark),
-		fmt.Sprintf("%s left today.", plural(left, "letter")),
-	}
-	if note != "" {
-		limits = append([]string{note}, limits...)
-	}
-	// «Published links» is bold (s-mail-1): the place the links are
-	// revoked, named as the rail names it.
-	before, after, _ := strings.Cut(strings.Join(limits, " "), publishedLinksMark)
-	sheet.Limits = join(before, strongRun("Published links"), after)
-
 	for _, k := range attachKinds {
-		sheet.Actions = append(sheet.Actions, view.Action{ID: "mail.attach." + k.What, Label: text(k.Label), Method: "POST", Enabled: true,
-			Href: s.postQuery("/app/mail/compose", url.Values{"op": {"attach"}, "what": {k.What}})})
+		sheet.Actions = append(sheet.Actions, view.Action{ID: "mail.attach." + k.What, Label: text(k.Label), Method: "POST", Enabled: true, Submits: true,
+			Href: submit(url.Values{"op": {"attach"}, "what": {k.What}})})
 	}
-	send := view.Action{ID: "mail.send", Label: "Send", Method: "POST", Primary: true, Enabled: true,
-		Href: s.postQuery("/app/mail/compose", url.Values{"op": {"send"}})}
+	send := view.Action{ID: "mail.send", Label: "Send", Method: "POST", Primary: true, Enabled: true, Submits: true, Href: s.route("/app/mail/send")}
+	left := s.users.LettersLeft(u.ID, s.mailPolicy().PerDay)
 	switch {
-	case len(d.To) == 0:
+	case len(d.To) == 0 && d.Typed == "":
 		send.Enabled, send.Reason = false, "Add a recipient."
 	case len(d.To) > s.mailPolicy().Recipients:
 		send.Enabled, send.Reason = false, text(fmt.Sprintf("A letter goes to %d recipients at most.", s.mailPolicy().Recipients))
 	case left == 0:
 		send.Enabled, send.Reason = false, text(user.ErrLetterLimit.Error())
-	default:
-		if err := s.givesTooMuch(s.reckonLinks(slices.Clone(d.Parts))); err != nil {
-			send.Enabled, send.Reason = false, text(err.Error())
-		}
 	}
-	sheet.Actions = append(sheet.Actions, send,
-		view.Action{ID: "mail.discard", Label: "Discard", Method: "POST", Enabled: true, Danger: true,
-			Href: s.postQuery("/app/mail/compose", url.Values{"op": {"discard"}})})
+	// Cancel goes back where the letter was opened from (s-mail-1: the
+	// book «Контакты»); the letter waits as a draft.
+	back := d.Back
+	if back == "" {
+		back = "/app/contacts"
+	}
+	sheet.Form.Actions = []view.Action{send,
+		{ID: "mail.discard", Label: "Discard", Method: "POST", Enabled: true, Danger: true, Submits: true, Href: submit(url.Values{"op": {"discard"}})},
+		{ID: "mail.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.route(back)},
+	}
+	sheet.Under = s.underOf(r, d.Back, "/app/contacts")
 	return sheet
 }
 
@@ -372,7 +453,8 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 // search (S-15), and offers every address of every card found — one row an
 // address, labelled from the card. Books that did not answer are named: a
 // silent list would read as "nobody by that name".
-func (s *Server) suggestRecipients(ctx context.Context, sess *session.Session, q string) ([]view.Recipient, []view.Stamp) {
+// It answers how many books were asked too.
+func (s *Server) suggestRecipients(ctx context.Context, sess *session.Session, q string) ([]view.Recipient, []view.Stamp, int) {
 	blob := s.catalogOf(sess)
 	var sources []fanout.Source
 	for _, pick := range blob.Selected {
@@ -386,17 +468,17 @@ func (s *Server) suggestRecipients(ctx context.Context, sess *session.Session, q
 		sources = append(sources, src)
 	}
 	if len(sources) == 0 {
-		return nil, nil
+		return nil, nil, 0
 	}
 	opts := s.searchOptions(sess)
 	opts.Finished = nil // a suggestion is not a search of the history
 	id, err := user.NewTaskID()
 	if err != nil {
-		return nil, nil
+		return nil, nil, 0
 	}
 	task, err := fanout.Start(id, fanout.Query{Text: q}, sources, opts)
 	if err != nil {
-		return nil, nil
+		return nil, nil, 0
 	}
 	for task.Running() {
 		changed := task.Changed()
@@ -440,21 +522,48 @@ func (s *Server) suggestRecipients(ctx context.Context, sess *session.Session, q
 		origin, _ := sourceOrigin(blob, account, path)
 		notAsked = append(notAsked, origin)
 	}
-	return out, notAsked
+	return out, notAsked, len(sources)
 }
 
-// givesTooMuch is what a letter must never give out more of than the person
-// chose, said before anything is read or made — and on the sheet before Send
-// is pressed (Б37; Пб39): Send is off with it as its reason.
-func (s *Server) givesTooMuch(parts []mailPart) error {
-	for _, p := range parts {
-		if p.AsLink && p.From != "" {
-			// A link is the calendar whole; the person chose some of its
-			// days.
-			return fmt.Errorf("«%s» does not fit the letter, and a link would open the whole calendar, not these days. Remove it, or attach fewer days.", p.Title)
+// getMailSuggest answers «Name or address» of a letter with the library's
+// script (s-mail-3, С17): a row an address of the cards found — the name,
+// the address, the card's label, the book's mark —, the line as typed, and
+// the books that did not answer, named. A row's value is the address
+// itself: a letter's recipient is no attendee.
+func (s *Server) getMailSuggest(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	if !s.canSendLetters(sess) {
+		s.notFound(w, r)
+		return
+	}
+	out := view.SuggestList{Items: []view.SuggestItem{}}
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	if q == "" {
+		s.writePage(w, r, http.StatusOK, out)
+		return
+	}
+	found, notAsked, asked := s.suggestRecipients(r.Context(), sess, q)
+	typed := true
+	for _, rc := range found {
+		if len(out.Items) >= suggestMost {
+			break
+		}
+		out.Items = append(out.Items, view.SuggestItem{Name: line(string(rc.Name)), Email: rc.Address, Colour: rc.Colour, Label: rc.Label, Value: string(rc.Address)})
+		if strings.EqualFold(string(rc.Address), q) {
+			typed = false
 		}
 	}
-	return nil
+	if typed {
+		out.Items = append(out.Items, view.SuggestItem{Email: text(q), Value: q, Add: true})
+	}
+	if len(notAsked) > 0 {
+		out.Searched = text(fmt.Sprintf("Searched %d of %d address books", asked-len(notAsked), asked))
+		out.NotAsked = notAsked
+	}
+	s.writePage(w, r, http.StatusOK, out)
 }
 
 // reckonLinks decides again what goes as a link: a folder always; a file
@@ -589,9 +698,6 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 		return 0, fmt.Errorf("A letter goes to %d recipients at most.", s.mailPolicy().Recipients)
 	}
 	d.Parts = s.reckonLinks(d.Parts)
-	if err := s.givesTooMuch(d.Parts); err != nil {
-		return 0, err
-	}
 
 	var files []cmail.Attachment
 	var links []string
@@ -690,7 +796,10 @@ func (s *Server) partLink(sess *session.Session, p mailPart) (string, error) {
 	}
 	expires := time.Now().Add(publish.DefaultTTL)
 	expiry := &expires
-	target := user.PublishTarget{AccountID: p.Account, Kind: string(p.Kind), Col: p.Col, Title: p.Title}
+	// Days of a calendar over the letter's ceiling go as a link to these
+	// days, as a published range is (С19; the owner's decision of
+	// 21.10.2026): never the whole calendar.
+	target := user.PublishTarget{AccountID: p.Account, Kind: string(p.Kind), Col: p.Col, Title: p.Title, From: p.From, To: p.To}
 	if p.Kind == view.KindFile {
 		target.Path, target.Folder = p.Path, p.Folder
 	} else {

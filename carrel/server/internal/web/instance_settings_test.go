@@ -104,8 +104,8 @@ func TestInstanceSettingsAreEdited(t *testing.T) {
 		t.Fatalf("limits: %d %s", rec.Code, rec.Body)
 	}
 	sheet := decode[view.MailSheet](t, h.do(get("/app/mail/compose", alice)))
-	if !strings.Contains(saidRuns(sheet.Limits), "0 of 5 recipients") || !strings.Contains(saidRuns(sheet.Limits), "9 letters left") {
-		t.Errorf("limits = %q", sheet.Limits)
+	if !strings.HasPrefix(letterHint(sheet), "0 of 5 recipients.") {
+		t.Errorf("the line under To = %q", letterHint(sheet))
 	}
 	if h.users.Settings().Name != "Контора" {
 		t.Error("the letters' rubric changed the Global one")

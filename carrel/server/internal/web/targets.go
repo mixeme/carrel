@@ -30,6 +30,7 @@ var fragmentRoutes = []fragmentRoute{
 	{"POST", "/app/sources/{kind}", render.TargetRail},
 	{"", "/app/publish", render.TargetSheet},
 	{"", "/app/mail/compose", render.TargetSheet},
+	{"POST", "/app/mail/send", render.TargetSheet},
 	{"", "/app/mail/attach", render.TargetSheet},
 	// C-5.4
 	{"", "/app/{kind}/{account}/{col}/{uid}/move", render.TargetSheet},

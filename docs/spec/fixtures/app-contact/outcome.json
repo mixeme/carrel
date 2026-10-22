@@ -12,7 +12,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/mail/attach?a=a-nc-home\u0026c=kontakty\u0026uid=4f2b-9c31-a0e7\u0026what=contact",
+      "href": "/app/mail/attach?a=a-nc-home\u0026back=%2Fapp%2Fcontacts%2Fa-nc-home%2Fkontakty%2F4f2b-9c31-a0e7\u0026c=kontakty\u0026uid=4f2b-9c31-a0e7\u0026what=contact",
       "icon": "i-mail",
       "id": "record.send",
       "label": "Send",
