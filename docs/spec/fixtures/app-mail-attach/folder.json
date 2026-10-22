@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=carrel\u0026what=folder",
+      "href": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=carrel%2Fattachments\u0026what=folder",
       "id": "mail.attach.add",
       "label": "Attach",
       "method": "POST",
@@ -29,10 +29,14 @@
     {
       "href": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=carrel\u0026what=folder",
       "label": "carrel"
+    },
+    {
+      "href": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=carrel%2Fattachments\u0026what=folder",
+      "label": "attachments"
     }
   ],
   "form": {
-    "action": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=carrel\u0026what=folder",
+    "action": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=carrel%2Fattachments\u0026what=folder",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -59,7 +63,7 @@
     ],
     "target": "sheet"
   },
-  "in": "In it · 1 folder",
+  "in": "In it · 1 folder · 6 files",
   "note": [
     {
       "text": "A folder always goes as a link: the letter carries a secret link to it, with all that is in it. The link is listed in "
@@ -85,7 +89,7 @@
         "method": ""
       },
       "size": "",
-      "title": "carrel · 1 folder"
+      "title": "attachments · 1 folder · 6 files"
     }
   ],
   "rail": {
@@ -111,18 +115,96 @@
       "avatar": null,
       "colour": "#a05a2c",
       "detail": "folder",
-      "href": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=carrel%2Fattachments\u0026what=folder",
+      "href": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=carrel%2Fattachments%2F2026-07\u0026what=folder",
       "icon": "i-file",
       "kind": "file",
       "stamp": "sftpgo · vps · Documents",
-      "title": "attachments",
+      "title": "2026-07",
+      "when": ""
+    },
+    {
+      "avatar": null,
+      "changed": "4 Aug",
+      "colour": "#a05a2c",
+      "detail": "",
+      "href": "",
+      "kind": "file",
+      "off": true,
+      "size": "2.8 MB",
+      "stamp": "sftpgo · vps · Documents",
+      "title": "2026-08-04-whiteboard.jpg",
+      "when": ""
+    },
+    {
+      "avatar": null,
+      "changed": "10 Aug",
+      "colour": "#a05a2c",
+      "detail": "",
+      "href": "",
+      "kind": "file",
+      "off": true,
+      "size": "412 KB",
+      "stamp": "sftpgo · vps · Documents",
+      "title": "2026-08-10-sync-board.png",
+      "when": ""
+    },
+    {
+      "avatar": null,
+      "changed": "9 Aug",
+      "colour": "#a05a2c",
+      "detail": "",
+      "href": "",
+      "kind": "file",
+      "off": true,
+      "size": "3 KB",
+      "stamp": "sftpgo · vps · Documents",
+      "title": "release-checklist.md",
+      "when": ""
+    },
+    {
+      "avatar": null,
+      "changed": "10 Aug",
+      "colour": "#a05a2c",
+      "detail": "",
+      "href": "",
+      "kind": "file",
+      "off": true,
+      "size": "180 KB",
+      "stamp": "sftpgo · vps · Documents",
+      "title": "акт-1.pdf",
+      "when": ""
+    },
+    {
+      "avatar": null,
+      "changed": "10 Aug",
+      "colour": "#a05a2c",
+      "detail": "",
+      "href": "",
+      "kind": "file",
+      "off": true,
+      "size": "2 KB",
+      "stamp": "sftpgo · vps · Documents",
+      "title": "реквизиты.txt",
+      "when": ""
+    },
+    {
+      "avatar": null,
+      "changed": "5 Aug",
+      "colour": "#a05a2c",
+      "detail": "",
+      "href": "",
+      "kind": "file",
+      "off": true,
+      "size": "1.2 MB",
+      "stamp": "sftpgo · vps · Documents",
+      "title": "смета-подрядчик.pdf",
       "when": ""
     }
   ],
   "search": null,
   "title": "Attach a folder",
   "tree": {
-    "chosen": "/app/files/a-sftp-vps/Documents/carrel/",
+    "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
     "field": "",
     "name": null,
     "new": null,
@@ -130,33 +212,34 @@
       {
         "children": [
           {
-            "children": [],
-            "expanded": false,
-            "href": "/app/mail/attach?a=a-nc-home\u0026c=Files\u0026dir=\u0026what=folder",
-            "id": "/app/files/a-nc-home/Files/",
-            "label": "Files",
-            "readOnly": false,
-            "stamp": ""
-          }
-        ],
-        "expanded": true,
-        "id": "a-nc-home",
-        "label": "nextcloud",
-        "readOnly": false,
-        "stamp": ""
-      },
-      {
-        "children": [
-          {
             "children": [
               {
                 "children": [
                   {
-                    "children": [],
-                    "expanded": false,
+                    "children": [
+                      {
+                        "children": [],
+                        "expanded": false,
+                        "href": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=carrel%2Fattachments%2F2026-07\u0026what=folder",
+                        "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
+                        "label": "2026-07",
+                        "readOnly": false,
+                        "stamp": ""
+                      }
+                    ],
+                    "expanded": true,
                     "href": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=carrel%2Fattachments\u0026what=folder",
                     "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
                     "label": "attachments",
+                    "readOnly": false,
+                    "stamp": ""
+                  },
+                  {
+                    "children": [],
+                    "expanded": false,
+                    "href": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=carrel%2F%D0%9F%D0%BE%D0%B4%D1%80%D1%8F%D0%B4\u0026what=folder",
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/%D0%9F%D0%BE%D0%B4%D1%80%D1%8F%D0%B4/",
+                    "label": "Подряд",
                     "readOnly": false,
                     "stamp": ""
                   }
@@ -167,6 +250,15 @@
                 "label": "carrel",
                 "readOnly": false,
                 "stamp": ""
+              },
+              {
+                "children": [],
+                "expanded": false,
+                "href": "/app/mail/attach?a=a-sftp-vps\u0026c=Documents\u0026dir=%D0%9B%D0%B8%D1%87%D0%BD%D0%BE%D0%B5\u0026what=folder",
+                "id": "/app/files/a-sftp-vps/Documents/%D0%9B%D0%B8%D1%87%D0%BD%D0%BE%D0%B5/",
+                "label": "Личное",
+                "readOnly": false,
+                "stamp": ""
               }
             ],
             "expanded": true,
@@ -174,15 +266,6 @@
             "id": "/app/files/a-sftp-vps/Documents/",
             "label": "Documents",
             "readOnly": false,
-            "stamp": ""
-          },
-          {
-            "children": [],
-            "expanded": false,
-            "href": "/app/mail/attach?a=a-sftp-vps\u0026c=Public\u0026dir=\u0026what=folder",
-            "id": "/app/files/a-sftp-vps/Public/",
-            "label": "Public",
-            "readOnly": true,
             "stamp": ""
           }
         ],

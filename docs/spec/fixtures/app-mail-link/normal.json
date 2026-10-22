@@ -1,4 +1,11 @@
 {
+  "account": {
+    "enabled": true,
+    "href": "/app/settings/account",
+    "id": "mail.account",
+    "label": "change in Account",
+    "method": "GET"
+  },
   "actions": [
     {
       "csrf": "csrf",
@@ -121,6 +128,19 @@
   "from": "mix@carrel.example",
   "fromName": "Михаил Енученко",
   "replyTo": "mix@example.org",
+  "sender": [
+    {
+      "mark": "strong",
+      "text": "Михаил Енученко"
+    },
+    {
+      "text": " "
+    },
+    {
+      "mark": "mono",
+      "text": "\u003cmix@carrel.example\u003e"
+    }
+  ],
   "subject": "Личный · 10–31 August",
   "under": {
     "account": null,

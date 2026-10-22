@@ -4,6 +4,40 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.6.0 — 2026-10-22
+
+Server `v0.2.356`, Typecase `bc0b574`. Publishing and mail built whole:
+every screen holds against its frames.
+
+**Tagged:** `client-v0.6.0`.
+
+### Added
+
+- **Publish** (`/app/publish`, PublishSheet): a calendar — how much of it
+  and its days, what the visitor sees, the download, how long the link
+  lives —, a contact, an event, a note with its attachments, a folder; the
+  link made with Copy, Send by letter, Open the link, All published links
+  (s-publish-2, -3, -4, -5, -13, -19, -22).
+- **The letter** (`/app/mail/compose`, MailSheet): one form — the
+  recipients as tags with «Name or address» and its Enter, the subject, the
+  text, what is attached (Attach's menu, a part's format and size, as a
+  file or as a link, its terms and Change…), why some go as links; Send,
+  Preview, how it is signed, Cancel (s-mail-1).
+- **«Send this link»** (`/app/mail/link`, MailLinkSheet; s-mail-4).
+- **The attach sheets** (`/app/mail/attach`, MailAttachSheet): a note, a
+  contact (searched under «All …», by a form of its own), a calendar (its
+  form recounts the line at Attach), a file, a folder (the tree of the
+  storage and the crumbs); Attach off with why until something is chosen
+  (s-mail-5, -6, -10, -12, -13).
+- The pages under a sheet: Published links and a folder.
+
+### Changed
+
+- The guard of meaning excuses a control of the page under a sheet by
+  that page's screen's waits; it knows a tree's heading row (a server), a
+  filter whose line is a field of a form elsewhere (`Query.Of`), and
+  `BriefRow`.
+
 ## v0.5.1 — 2026-10-22
 
 Server `v0.2.353`, Typecase `bc0b574` (its notes 108–110).

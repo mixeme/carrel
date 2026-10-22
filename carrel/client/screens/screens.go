@@ -22,10 +22,12 @@ import (
 	"carrel.dev/carrel/client/screens/history"
 	"carrel.dev/carrel/client/screens/invite"
 	"carrel.dev/carrel/client/screens/login"
+	"carrel.dev/carrel/client/screens/mail"
 	"carrel.dev/carrel/client/screens/move"
 	"carrel.dev/carrel/client/screens/note"
 	"carrel.dev/carrel/client/screens/notes"
 	"carrel.dev/carrel/client/screens/picker"
+	"carrel.dev/carrel/client/screens/publish"
 	"carrel.dev/carrel/client/screens/published"
 	"carrel.dev/carrel/client/screens/register"
 	"carrel.dev/carrel/client/screens/settings"
@@ -142,6 +144,49 @@ var All = []Screen{
 		},
 		Title: func(model any) string { return string(model.(*view.AskSheet).Title) },
 		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.AskSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.PublishSheet) },
+		Frames: []string{"s-publish-2", "s-publish-3", "s-publish-4", "s-publish-5", "s-publish-13", "s-publish-19", "s-publish-22"},
+		Draw: func(model any) Root {
+			p := model.(*view.PublishSheet)
+			return over(p.Under, publish.Sheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.PublishSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.PublishSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.MailAttachSheet) },
+		Frames: []string{"s-mail-5", "s-mail-6", "s-mail-10", "s-mail-12", "s-mail-13"},
+		Draw: func(model any) Root {
+			p := model.(*view.MailAttachSheet)
+			return over(p.Under, mail.Attach(p))
+		},
+		Title: func(model any) string { return mail.AttachTitle(model.(*view.MailAttachSheet)) },
+		Forms: func(model any) []widget.PostForm {
+			p := model.(*view.MailAttachSheet)
+			return append(mail.AttachForms(p), underForms(p.Under)...)
+		},
+	},
+	{
+		Model:  func() any { return new(view.MailSheet) },
+		Frames: []string{"s-mail-1"},
+		Draw: func(model any) Root {
+			p := model.(*view.MailSheet)
+			return over(p.Under, mail.Letter(p))
+		},
+		Title: func(model any) string { return mail.LetterTitle },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.MailSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.MailLinkSheet) },
+		Frames: []string{"s-mail-4"},
+		Draw: func(model any) Root {
+			p := model.(*view.MailLinkSheet)
+			return over(p.Under, mail.LinkSheet(p))
+		},
+		Title: func(model any) string { return mail.LinkTitle },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.MailLinkSheet).Under) },
 	},
 	{
 		Model:  func() any { return new(view.LoginPage) },
@@ -609,6 +654,10 @@ func over(u *view.Under, sheet widget.Sheet) Root {
 		shell = settings.Backup(u.Backup)
 	case u.Davloom != nil:
 		shell = settings.Davloom(u.Davloom)
+	case u.Published != nil:
+		shell = published.Screen(u.Published)
+	case u.Files != nil:
+		shell = folder.Screen(u.Files)
 	}
 	return bind.Over(shell, sheet)
 }
@@ -651,6 +700,10 @@ func underForms(u *view.Under) []widget.PostForm {
 		return settings.BackupForms(u.Backup)
 	case u.Davloom != nil:
 		return settings.DavloomForms(u.Davloom)
+	case u.Published != nil:
+		return published.Forms(u.Published)
+	case u.Files != nil:
+		return folder.Forms(u.Files)
 	}
 	return nil
 }

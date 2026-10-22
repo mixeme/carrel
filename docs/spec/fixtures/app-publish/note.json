@@ -1,0 +1,816 @@
+{
+  "actions": [
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
+      "id": "publish.create",
+      "label": "Create link",
+      "method": "POST",
+      "primary": true,
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+      "id": "publish.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "expires": "",
+  "form": {
+    "action": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
+        "id": "publish.create",
+        "label": "Create link",
+        "method": "POST",
+        "primary": true,
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+        "id": "publish.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "Attachments",
+        "legendAside": "1 file · 412 KB",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "The links are created together with this one, expire with it and are revoked with it. Without this the page says how many files there are, but not their names: a file name gives away more than it looks.",
+            "kind": "check",
+            "label": "Publish them too — each gets its own link",
+            "name": "attachments",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      },
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Allow .md download",
+            "labelRuns": [
+              {
+                "text": "Allow "
+              },
+              {
+                "mark": "mono",
+                "text": ".md"
+              },
+              {
+                "text": " download"
+              }
+            ],
+            "name": "download",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "on"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Link lives for",
+            "name": "lives",
+            "options": [
+              {
+                "label": "7 days",
+                "selected": false,
+                "value": "7"
+              },
+              {
+                "label": "14 days",
+                "selected": false,
+                "value": "14"
+              },
+              {
+                "label": "30 days",
+                "selected": true,
+                "value": "30"
+              },
+              {
+                "label": "No expiry",
+                "selected": false,
+                "separator": true,
+                "value": "never"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "30"
+          }
+        ],
+        "unfold": null
+      }
+    ],
+    "target": "sheet"
+  },
+  "kind": "note",
+  "link": "",
+  "local": false,
+  "note": "",
+  "target": "Заметка со встречи 10.08",
+  "title": "Publish a note",
+  "under": {
+    "account": null,
+    "adminUsers": null,
+    "agenda": null,
+    "backup": null,
+    "connections": null,
+    "contact": null,
+    "contacts": null,
+    "davloom": null,
+    "devices": null,
+    "event": null,
+    "eventEdit": null,
+    "files": null,
+    "note": {
+      "details": null,
+      "doc": {
+        "bar": [
+          {
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
+            "icon": "i-pencil",
+            "id": "record.edit",
+            "label": "Edit",
+            "method": "GET",
+            "primary": true
+          },
+          {
+            "enabled": true,
+            "hint": "Export Markdown",
+            "href": "/app/notes/a-nc-home/zapisi/export?uid=5c81-77aa-0d64",
+            "icon": "i-export",
+            "id": "note.export",
+            "label": ".md",
+            "method": "GET"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/mail/attach?a=a-nc-home\u0026back=%2Fapp%2Fnotes%2Fa-nc-home%2Fzapisi%2F5c81-77aa-0d64\u0026c=zapisi\u0026uid=5c81-77aa-0d64\u0026what=note",
+            "icon": "i-mail",
+            "id": "record.send",
+            "label": "Send",
+            "method": "POST",
+            "target": "sheet"
+          },
+          {
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64?print=1",
+            "icon": "i-print",
+            "id": "record.print",
+            "label": "Print",
+            "method": "GET"
+          }
+        ],
+        "body": "Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.\n\n## Что делаем\n\n- [ ] проверить changelog\n- [x] попросить у Артёма скриншоты\n\nПеренос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг.",
+        "dirty": false,
+        "fields": [],
+        "foreign": [],
+        "form": null,
+        "mode": "reading",
+        "readOnly": false,
+        "rendered": [
+          {
+            "checked": false,
+            "children": [],
+            "href": "",
+            "kind": "para",
+            "level": 0,
+            "text": "Договорились заморозить ветку в среду."
+          },
+          {
+            "checked": false,
+            "children": [],
+            "href": "",
+            "kind": "para",
+            "level": 0,
+            "text": "Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт."
+          },
+          {
+            "checked": false,
+            "children": [],
+            "href": "",
+            "kind": "heading",
+            "level": 2,
+            "text": "Что делаем"
+          },
+          {
+            "checked": false,
+            "children": [
+              {
+                "checked": false,
+                "children": [],
+                "href": "",
+                "kind": "task",
+                "level": 0,
+                "text": "проверить changelog"
+              },
+              {
+                "checked": true,
+                "children": [],
+                "href": "",
+                "kind": "task",
+                "level": 0,
+                "text": "попросить у Артёма скриншоты"
+              }
+            ],
+            "href": "",
+            "kind": "list",
+            "level": 0,
+            "text": ""
+          },
+          {
+            "checked": false,
+            "children": [],
+            "href": "",
+            "kind": "para",
+            "level": 0,
+            "text": "Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг."
+          }
+        ],
+        "title": "Заметка со встречи 10.08"
+      },
+      "look": {
+        "compact": false,
+        "panel": true,
+        "source": true,
+        "theme": "auto",
+        "wide": false
+      },
+      "loss": null,
+      "meta": {
+        "actions": [
+          {
+            "arrow": [
+              {
+                "csrf": "csrf",
+                "enabled": true,
+                "file": "file",
+                "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e18\u0026op=attach",
+                "icon": "i-upload",
+                "id": "attach.add",
+                "label": "From this computer",
+                "method": "POST"
+              },
+              {
+                "enabled": true,
+                "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e18\u0026for=attach\u0026k=notes\u0026uid=5c81-77aa-0d64",
+                "icon": "i-file",
+                "id": "attach.files",
+                "label": "From Files",
+                "method": "GET",
+                "target": "sheet"
+              }
+            ],
+            "csrf": "csrf",
+            "enabled": true,
+            "file": "file",
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e18\u0026op=attach",
+            "icon": "i-clip",
+            "id": "attach.add",
+            "label": "Attach",
+            "method": "POST"
+          },
+          {
+            "csrf": "csrf",
+            "danger": true,
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e18",
+            "icon": "i-trash",
+            "id": "record.delete",
+            "label": "Delete note",
+            "method": "POST",
+            "target": "sheet"
+          }
+        ],
+        "attach": [
+          {
+            "actions": [],
+            "href": "/app/attach/a-nc-home/zapisi/5c81-77aa-0d64/0",
+            "inline": true,
+            "name": "2026-08-10-sync-board.png",
+            "size": "412 KB",
+            "state": "ok",
+            "type": "image/png"
+          }
+        ],
+        "attendees": [],
+        "date": "10 August 2026, 11:05",
+        "link": null,
+        "linked": [],
+        "menu": [
+          {
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move",
+            "icon": "i-move",
+            "id": "record.move",
+            "label": "Move",
+            "method": "GET",
+            "target": "sheet"
+          },
+          {
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move?copy=1",
+            "icon": "i-dup",
+            "id": "record.copy",
+            "label": "Copy",
+            "method": "GET",
+            "target": "sheet"
+          },
+          {
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/export?uid=5c81-77aa-0d64\u0026as=ics",
+            "icon": "i-export",
+            "id": "record.export",
+            "label": "Export .ics",
+            "method": "GET"
+          },
+          {
+            "enabled": true,
+            "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
+            "icon": "i-link",
+            "id": "publish",
+            "label": "Publish a link",
+            "method": "GET",
+            "target": "sheet"
+          }
+        ],
+        "related": [
+          {
+            "colour": "",
+            "href": "",
+            "kind": "",
+            "stamp": "",
+            "title": "8f1c-4a02-b7d3",
+            "when": "",
+            "why": "Not in the lists loaded for this collection"
+          },
+          {
+            "colour": "",
+            "href": "",
+            "kind": "",
+            "stamp": "",
+            "title": "bb21-0fa8-3d66",
+            "when": "",
+            "why": "Not in the lists loaded for this collection"
+          }
+        ],
+        "tags": [
+          {
+            "href": "/app/notes/a-nc-home/zapisi?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8",
+            "label": "встречи",
+            "on": false
+          },
+          {
+            "href": "/app/notes/a-nc-home/zapisi?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7",
+            "label": "релиз",
+            "on": false
+          }
+        ],
+        "tagsBadge": null
+      },
+      "notices": [],
+      "print": {
+        "range": "nextcloud · Записи",
+        "taken": "10 August 2026, 17:06",
+        "title": "Заметка со встречи 10.08"
+      },
+      "rail": {
+        "about": {
+          "build": "0.0.1 · 786949a",
+          "enabled": true,
+          "href": "/about",
+          "id": "about",
+          "label": "Carrel",
+          "method": "GET"
+        },
+        "davloom": "davloom · running · 0 devices",
+        "foot": [],
+        "nav": [
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi",
+            "icon": "i-back",
+            "id": "nav.back",
+            "label": "Back to list",
+            "method": "GET"
+          }
+        ],
+        "neighbours": [],
+        "note": "",
+        "sections": [
+          {
+            "account": "nextcloud",
+            "accountID": "a-nc-home",
+            "rows": [
+              {
+                "colour": "#4a6b52",
+                "count": null,
+                "detail": "",
+                "feed": false,
+                "href": "/app/notes/a-nc-home/zapisi",
+                "label": "Записи",
+                "menu": [
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/rename?a=a-nc-home\u0026c=zapisi",
+                    "icon": "i-pencil",
+                    "id": "collection.rename",
+                    "label": "Rename",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
+                    "icon": "i-move",
+                    "id": "collection.move",
+                    "label": "Move to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi\u0026copy=1",
+                    "icon": "i-dup",
+                    "id": "collection.copy",
+                    "label": "Copy to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/notes/a-nc-home/zapisi/import",
+                    "icon": "i-import",
+                    "id": "collection.import",
+                    "label": "Import",
+                    "method": "GET",
+                    "separator": true
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/notes/a-nc-home/zapisi/export",
+                    "icon": "i-export",
+                    "id": "collection.export",
+                    "label": "Export",
+                    "method": "GET"
+                  },
+                  {
+                    "danger": true,
+                    "enabled": true,
+                    "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
+                    "icon": "i-trash",
+                    "id": "collection.delete",
+                    "label": "Delete on the server…",
+                    "method": "GET",
+                    "separator": true,
+                    "target": "sheet"
+                  }
+                ],
+                "on": true,
+                "readOnly": false,
+                "state": "ok",
+                "tick": "on"
+              },
+              {
+                "colour": "#6b4e7a",
+                "count": null,
+                "detail": "",
+                "feed": false,
+                "href": "/app/notes/a-nc-home/dnevnik",
+                "label": "Дневник",
+                "menu": [
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
+                    "icon": "i-pencil",
+                    "id": "collection.rename",
+                    "label": "Rename",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
+                    "icon": "i-move",
+                    "id": "collection.move",
+                    "label": "Move to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik\u0026copy=1",
+                    "icon": "i-dup",
+                    "id": "collection.copy",
+                    "label": "Copy to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/notes/a-nc-home/dnevnik/import",
+                    "icon": "i-import",
+                    "id": "collection.import",
+                    "label": "Import",
+                    "method": "GET",
+                    "separator": true
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/notes/a-nc-home/dnevnik/export",
+                    "icon": "i-export",
+                    "id": "collection.export",
+                    "label": "Export",
+                    "method": "GET"
+                  },
+                  {
+                    "danger": true,
+                    "enabled": true,
+                    "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
+                    "icon": "i-trash",
+                    "id": "collection.delete",
+                    "label": "Delete on the server…",
+                    "method": "GET",
+                    "separator": true,
+                    "target": "sheet"
+                  }
+                ],
+                "on": false,
+                "readOnly": false,
+                "state": "ok",
+                "tick": "on"
+              },
+              {
+                "colour": "#3f6e8c",
+                "count": null,
+                "detail": "",
+                "feed": false,
+                "href": "/app/notes/a-nc-home/zapiski-obshchie",
+                "label": "Общие с семьёй",
+                "menu": [
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/rename?a=a-nc-home\u0026c=zapiski-obshchie",
+                    "icon": "i-pencil",
+                    "id": "collection.rename",
+                    "label": "Rename",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=zapiski-obshchie",
+                    "icon": "i-move",
+                    "id": "collection.move",
+                    "label": "Move to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=zapiski-obshchie\u0026copy=1",
+                    "icon": "i-dup",
+                    "id": "collection.copy",
+                    "label": "Copy to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/notes/a-nc-home/zapiski-obshchie/export",
+                    "icon": "i-export",
+                    "id": "collection.export",
+                    "label": "Export",
+                    "method": "GET",
+                    "separator": true
+                  },
+                  {
+                    "danger": true,
+                    "enabled": true,
+                    "href": "/app/collections/delete?a=a-nc-home\u0026c=zapiski-obshchie",
+                    "icon": "i-trash",
+                    "id": "collection.delete",
+                    "label": "Delete on the server…",
+                    "method": "GET",
+                    "separator": true,
+                    "target": "sheet"
+                  }
+                ],
+                "on": false,
+                "readOnly": true,
+                "state": "read-only",
+                "tick": "off"
+              }
+            ],
+            "state": "ok"
+          }
+        ],
+        "shortcuts": [],
+        "tags": [],
+        "ticks": null
+      },
+      "source": {
+        "changed": "",
+        "colour": "#4a6b52",
+        "compared": "",
+        "lastRead": "",
+        "objects": null,
+        "path": "",
+        "readOnly": false,
+        "stamp": "nextcloud · Записи",
+        "uid": "5c81-77aa-0d64"
+      },
+      "title": "Заметка со встречи 10.08",
+      "top": {
+        "lock": null,
+        "new": {
+          "arrow": [
+            {
+              "enabled": true,
+              "href": "/app/notes/quick",
+              "icon": "i-quill",
+              "id": "new.notes",
+              "label": "Note",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/quick",
+              "icon": "i-con",
+              "id": "new.contacts",
+              "label": "Contact",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/quick",
+              "icon": "i-cal",
+              "id": "new.calendar",
+              "label": "Event",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/tasks/quick",
+              "icon": "i-task",
+              "id": "new.tasks",
+              "label": "Task",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/picker?for=upload",
+              "icon": "i-upload",
+              "id": "new.upload",
+              "label": "Upload file",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/mail/compose",
+              "icon": "i-mail",
+              "id": "new.letter",
+              "label": "Letter",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "New note",
+          "method": "GET",
+          "primary": true,
+          "target": "sheet"
+        },
+        "refresh": {
+          "action": {
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+            "icon": "i-refresh",
+            "id": "record.refresh",
+            "label": "Refresh",
+            "method": "GET"
+          },
+          "answered": "",
+          "running": false
+        },
+        "search": {
+          "action": "/app/search",
+          "history": [
+            {
+              "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0",
+              "outcome": "1 found",
+              "query": "Ковалёва",
+              "when": "just now"
+            }
+          ],
+          "jump": [],
+          "name": "q",
+          "query": "",
+          "whole": null
+        },
+        "signed": {
+          "instance": "carrel.example",
+          "local": false,
+          "login": "mix"
+        },
+        "unlocked": null,
+        "user": [
+          {
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-gear",
+            "id": "user.settings",
+            "label": "Settings",
+            "method": "GET"
+          },
+          {
+            "enabled": true,
+            "href": "/admin/",
+            "icon": "i-adm",
+            "id": "user.admin",
+            "label": "Administration",
+            "method": "GET"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/logout",
+            "id": "user.logout",
+            "label": "Sign out",
+            "method": "POST",
+            "separator": true
+          }
+        ],
+        "userHref": "/app/settings/account"
+      },
+      "uid": "5c81-77aa-0d64"
+    },
+    "notes": null,
+    "published": null,
+    "task": null,
+    "taskEdit": null,
+    "tasks": null
+  }
+}

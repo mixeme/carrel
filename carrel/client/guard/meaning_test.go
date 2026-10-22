@@ -3,6 +3,7 @@ package guard_test
 import (
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"slices"
 	"strings"
@@ -44,9 +45,15 @@ func meaningFindings(l lib, all []screens.Screen) []string {
 					out = append(out, fmt.Sprintf("%s on %s: the page's form %s", at, fx, f))
 				}
 			}
+			under := underScreen(all, model)
 			for _, f := range guard.Meaning(scr.Draw(model), ids...) {
 				if i := excuse(scr, f); i >= 0 {
 					used[waitKey{at, i}] = true
+					continue
+				}
+				// A control of the page under a sheet is that page's screen's
+				// and waits as on its own page (screens.over).
+				if under != nil && strings.Contains(f, overlayBody) && excuse(*under, f) >= 0 {
 					continue
 				}
 				out = append(out, fmt.Sprintf("%s on %s: %s", at, fx, f))
@@ -59,6 +66,42 @@ func meaningFindings(l lib, all []screens.Screen) []string {
 		}
 	}
 	return out
+}
+
+// overlayBody is where the meaning guard's path enters the page under a
+// sheet (bind.Over).
+const overlayBody = ".Body(OverlayBody)"
+
+// underScreen is the screen of the page a sheet's model stands over (its
+// field Under, one page of view.Under set), or nil.
+func underScreen(all []screens.Screen, model any) *screens.Screen {
+	v := reflect.ValueOf(model)
+	for v.Kind() == reflect.Pointer {
+		if v.IsNil() {
+			return nil
+		}
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return nil
+	}
+	u := v.FieldByName("Under")
+	if !u.IsValid() || u.Kind() != reflect.Pointer || u.IsNil() {
+		return nil
+	}
+	u = u.Elem()
+	for i := range u.NumField() {
+		page := u.Field(i)
+		if page.Kind() != reflect.Pointer || page.IsNil() {
+			continue
+		}
+		for j := range all {
+			if reflect.TypeOf(all[j].Model()) == page.Type() {
+				return &all[j]
+			}
+		}
+	}
+	return nil
 }
 
 type waitKey struct {
@@ -174,7 +217,7 @@ func TestMeaningRules(t *testing.T) {
 		"a link without Href":        {login(named, submit, w.Link{Text: "Forgotten your password?"}), []string{"Links[0](Link): no Href"}},
 		"a field without Name":       {login(w.Input{}, submit), []string{"(Input): a field without Name"}},
 		"a cross without Href":       {w.Close{Label: "Close"}, []string{"Close: no Href"}},
-		"a control the guard lacks":  {w.List{Rows: []w.ListRow{w.BriefRow{}}}, []string{"(BriefRow): BriefRow carries meaning the guard's contract does not know"}},
+		"a control the guard lacks":  {w.List{Rows: []w.ListRow{w.SizeRow{}}}, []string{"(SizeRow): SizeRow carries meaning the guard's contract does not know"}},
 		"rows that lead":             {w.List{Rows: []w.ListRow{w.FaceRow{Href: "/c"}, w.FindRow{Href: "/e"}, w.LinkedRow{Href: "/t"}, w.TimeRow{Href: "/v"}}}, nil},
 		"rows that lead nowhere":     {w.List{Rows: []w.ListRow{w.FaceRow{}, w.FindRow{}, w.LinkedRow{}, w.TimeRow{}}}, []string{"(FaceRow): no Href", "(FindRow): no Href", "(LinkedRow): no Href", "(TimeRow): no Href"}},
 		// A task's row (Typecase's task 95): its title leads to the record,

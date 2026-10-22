@@ -2535,15 +2535,27 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 	})
 	// The publish sheets over the page they are opened from (note 105 of
 	// Typecase): a contact over its card (s-publish-3), a calendar over
-	// Connections (s-publish-2), an event over its card (s-publish-19).
-	for _, one := range []struct{ state, slug, route string }{
-		{"normal", "kontakty", "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=4f2b-9c31-a0e7"},
-		{"calendar", "lichnyj", "/app/publish?a=a-nc-home&c=lichnyj&k=calendar"},
-		{"event", "lichnyj", "/app/publish?a=a-nc-home&c=lichnyj&k=calendar&uid=8f1c-4a02-b7d3"},
+	// Connections (s-publish-2), an event over its card (s-publish-19), a
+	// note over its page (s-publish-4), a folder over its parent (s-publish-5).
+	// Only the calendar's frame is drawn on a local instance: the others on
+	// one with a public address, no badge «local».
+	for _, one := range []struct {
+		state, slug, route string
+		local              bool
+	}{
+		{"normal", "kontakty", "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=4f2b-9c31-a0e7", false},
+		{"calendar", "lichnyj", "/app/publish?a=a-nc-home&c=lichnyj&k=calendar", true},
+		{"event", "lichnyj", "/app/publish?a=a-nc-home&c=lichnyj&k=calendar&uid=8f1c-4a02-b7d3", false},
+		{"note", "zapisi", "/app/publish?a=a-nc-home&c=zapisi&k=notes&uid=5c81-77aa-0d64", false},
+		{"folder", "Documents", "/app/publish?a=a-nc-home&c=Documents&k=files&f=carrel&dir=1", false},
 	} {
 		t.Run("app-publish/"+one.state, func(t *testing.T) {
 			route := strings.ReplaceAll(one.route, "a-nc-home", app.realAccount(t, one.slug))
 			route = strings.ReplaceAll(route, "c="+one.slug, "c="+url.QueryEscape(app.realPath(t, one.slug)))
+			if !one.local {
+				app.h.cfg.PublicURL = "https://carrel.example"
+				defer func() { app.h.cfg.PublicURL = "" }()
+			}
 			app.compare(t, "app-publish/"+one.state+".json", app.h.do(get(route, app.sess)))
 		})
 	}
@@ -3144,8 +3156,6 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		// (newMockupApp).
 		app := newMockupApp(t)
 		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-		app.compare(t, "app-mail-compose/normal.json", app.h.do(get("/app/mail/compose", app.sess)))
-
 		// The letter of s-mail-1 (С23): opened over the book, two people of
 		// it typed by name, a card, an event and the estimate attached, a
 		// folder as a link.
@@ -3187,7 +3197,7 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		docs := url.Values{"a": {app.realAccount(t, "Documents")}, "c": {app.realPath(t, "Documents")}}
 		attach(url.Values{"what": {"file"}, "a": docs["a"], "c": docs["c"], "dir": {"carrel/attachments"}, "path": {"carrel/attachments/смета-подрядчик.pdf"}})
 		attach(url.Values{"what": {"folder"}, "a": docs["a"], "c": docs["c"], "dir": {"carrel"}})
-		app.compare(t, "app-mail-compose/filled.json", app.h.do(get("/app/mail/compose", app.sess)))
+		app.compare(t, "app-mail-compose/normal.json", app.h.do(get("/app/mail/compose", app.sess)))
 	})
 	t.Run("app-mail-attach", func(t *testing.T) {
 		// The attach sheets (С30): each frame its own state, a sheet of what
@@ -3202,27 +3212,50 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 			t.Helper()
 			return decode[view.MailAttachSheet](t, app.h.do(get("/app/mail/attach?"+q.Encode(), app.sess)))
 		}
-		app.compare(t, "app-mail-attach/normal.json", app.h.do(get("/app/mail/attach?what=contact", app.sess)))
-		for _, what := range []string{"contact", "note"} {
-			all := sheet(url.Values{"what": {what}})
-			if len(all.Rows) == 0 {
-				t.Fatalf("no %s to attach", what)
-			}
-			typed := []rune(strings.ToLower(string(all.Rows[0].Title)))
-			q := string(typed[:min(4, len(typed))])
-			found := sheet(url.Values{"what": {what}, "q": {q}})
+		// A contact found by «белов» in two books, the first chosen —
+		// «All» kept (s-mail-12); a note among all three of the set, the
+		// first chosen (s-mail-5).
+		for _, one := range []struct{ state, what, q string }{{"normal", "contact", "белов"}, {"note", "note", ""}} {
+			found := sheet(url.Values{"what": {one.what}, "q": {one.q}})
 			if len(found.Rows) == 0 {
-				t.Fatalf("%s: nothing found by %q", what, q)
+				t.Fatalf("%s: nothing found by %q", one.what, one.q)
 			}
-			app.compare(t, "app-mail-attach/"+what+".json", app.h.do(get(found.Rows[0].Href, app.sess)))
+			app.compare(t, "app-mail-attach/"+one.state+".json", app.h.do(get(found.Rows[0].Href, app.sess)))
 		}
 		app.compare(t, "app-mail-attach/calendar.json", app.h.do(get("/app/mail/attach?"+url.Values{"what": {"calendar"},
 			"a": {app.realAccount(t, "lichnyj")}, "c": {app.realPath(t, "lichnyj")}, "span": {"dates"}, "from": {"2026-08-10"}, "to": {"2026-08-31"}}.Encode(), app.sess)))
+		// The storage of s-mail-6, -13 on this stand alone: one storage on
+		// the server, a sibling folder of the one open, the estimate's
+		// folder with its three files, the attachments' six files under
+		// their month.
 		docs := url.Values{"a": {app.realAccount(t, "Documents")}, "c": {app.realPath(t, "Documents")}}
+		editBlob(t, app.h, app.sess, func(b *sealed.Blob) {
+			for i, c := range b.Collections {
+				if c.Path == app.realPath(t, "Public") {
+					b.Collections = append(b.Collections[:i], b.Collections[i+1:]...)
+					break
+				}
+			}
+		})
+		sftp, root := app.servers["sftpgo · vps"], app.realPath(t, "Documents")
+		sftp.SeedFolder(root + "Личное/")
+		// The frames' ceiling of an attachment, 2 MB: the estimate goes as a
+		// link (s-mail-6).
+		if err := app.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+			st.Settings.MailMaxAttachMB = 2
+			return nil, nil
+		}); err != nil {
+			t.Fatal(err)
+		}
+		for name, size := range map[string]int{"carrel/Подряд/акт-смета-подрядчика.pdf": 4400 << 10, "carrel/Подряд/договор-подряда.pdf": 840 << 10,
+			"carrel/Подряд/объект-фасад.jpg": 1600 << 10, "carrel/attachments/акт-1.pdf": 180 << 10, "carrel/attachments/реквизиты.txt": 2 << 10} {
+			sftp.SeedFile(root+name, strings.Repeat(".", size))
+			sftp.SetModified(root+name, mockupNow(t))
+		}
 		app.compare(t, "app-mail-attach/file.json", app.h.do(get("/app/mail/attach?"+url.Values{"what": {"file"}, "a": docs["a"], "c": docs["c"],
-			"dir": {"carrel/attachments"}, "path": {"carrel/attachments/смета-подрядчик.pdf"}}.Encode(), app.sess)))
+			"dir": {"carrel/Подряд"}, "path": {"carrel/Подряд/акт-смета-подрядчика.pdf"}}.Encode(), app.sess)))
 		app.compare(t, "app-mail-attach/folder.json", app.h.do(get("/app/mail/attach?"+url.Values{"what": {"folder"}, "a": docs["a"], "c": docs["c"],
-			"dir": {"carrel"}}.Encode(), app.sess)))
+			"dir": {"carrel/attachments"}}.Encode(), app.sess)))
 	})
 }
 

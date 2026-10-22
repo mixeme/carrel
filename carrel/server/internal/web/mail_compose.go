@@ -425,7 +425,7 @@ func (s *Server) mailSheet(r *http.Request, sess *session.Session, d *mailDraft,
 		sheet.Actions = append(sheet.Actions, view.Action{ID: "mail.attach." + k.What, Label: text(k.Label), Method: "POST", Enabled: true, Submits: true,
 			Href: submit(url.Values{"op": {"attach"}, "what": {k.What}})})
 	}
-	send := view.Action{ID: "mail.send", Label: "Send", Method: "POST", Primary: true, Enabled: true, Submits: true, Href: s.route("/app/mail/send")}
+	send := view.Action{ID: "mail.send", Label: "Send", Icon: "i-mail", Method: "POST", Primary: true, Enabled: true, Submits: true, Href: s.route("/app/mail/send")}
 	left := s.users.LettersLeft(u.ID, s.mailPolicy().PerDay)
 	switch {
 	case len(d.To) == 0 && d.Typed == "":
@@ -442,6 +442,9 @@ func (s *Server) mailSheet(r *http.Request, sess *session.Session, d *mailDraft,
 		back = "/app/contacts"
 	}
 	sheet.Form.Actions = []view.Action{send,
+		// Preview keeps what was typed and shows the letter again; what it
+		// shows besides is the owner's question (note 105 p. 7 of Typecase).
+		{ID: "mail.preview", Label: "Preview", Method: "POST", Enabled: true, Submits: true, Href: submit(url.Values{"op": {"preview"}})},
 		{ID: "mail.discard", Label: "Discard", Method: "POST", Enabled: true, Danger: true, Submits: true, Href: submit(url.Values{"op": {"discard"}})},
 		{ID: "mail.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.route(back)},
 	}

@@ -540,12 +540,9 @@ STATE_FRAME = {
     # «Send this link» (записка 105): лист над Published links, кадр без
     # data-screen.
     "app-mail-link/normal": "s-mail-4",
-    # Письмо формой, заполненное (пакет 3 скана publish-mail, С23).
-    "app-mail-compose/filled": "s-mail-1",
     # Листы вложения (пакет 4 скана publish-mail, С30): у каждого кадра
-    # data-part, канонического нет; normal — лист контакта, ничего не выбрано.
+    # data-part, канонического нет; normal — лист контакта, контакт выбран.
     "app-mail-attach/normal": "s-mail-12",
-    "app-mail-attach/contact": "s-mail-12",
     "app-mail-attach/note": "s-mail-5",
     "app-mail-attach/calendar": "s-mail-10",
     "app-mail-attach/file": "s-mail-6",
@@ -555,6 +552,8 @@ STATE_FRAME = {
     "app-publish/normal": "s-publish-3",
     "app-publish/event": "s-publish-19",
     "app-publish/link-never": "s-publish-22",
+    "app-publish/note": "s-publish-4",
+    "app-publish/folder": "s-publish-5",
     "app-files-published/gone": "s-publish-21",
     "p-token/normal": "s-publish-6",
     "p-token/addressbook": "s-publish-7",

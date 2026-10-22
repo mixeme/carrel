@@ -329,12 +329,22 @@ var contract = map[string]rule{
 	// A note's row (s-notes-1) and a neighbour of the rail's tree (s-notes-2):
 	// links to the note, as the other rows of a list.
 	"ExcerptRow": needs("Href"),
+	// A record found by an attach sheet, brief (s-mail-5): a link to the
+	// sheet with it chosen.
+	"BriefRow": needs("Href"),
 	// A node of a tree: a link (a neighbour of the rail, a folder that
 	// opens), or a radio of the form it stands in — where to put a thing
 	// (Typecase's task 116; the move sheet, s-contacts-2) —, whose Href, if
 	// any, is the page with it chosen; a node that cannot be chosen is words.
+	//
+	// A row at the tree's first level with an icon and no mark that leads
+	// nowhere heads the rows under it — a server over its collections or
+	// storages (s-mail-5, -6, -10, -12) —: words.
 	"TreeRow": func(c control) string {
 		if c.str("Href") != "" || c.flag("Unavailable") || c.picture {
+			return ""
+		}
+		if c.str("Icon") != "" && c.v.FieldByName("Indent").Int() == 0 && c.v.FieldByName("Mark").IsNil() {
 			return ""
 		}
 		if form, name := c.send(); name != "" && (form != "" || c.inForm) {
@@ -448,7 +458,15 @@ var contract = map[string]rule{
 	"PostForm": needs("Action"),
 	"Menu":     func(control) string { return "" }, // a menu without Action is a list: its items say so
 	"Search":   needs("Action"),
-	"Filter":   needs("Action"),
+	// A filter of its own form (GET, Action) — or whose line is a field of a
+	// form elsewhere on the page (Query.Of: the search of an attach sheet,
+	// Typecase's note 110 p. 1), judged as that field.
+	"Filter": func(c control) string {
+		if c.str("Action") != "" || c.v.FieldByName("Query").FieldByName("Of").String() != "" {
+			return ""
+		}
+		return "no Action"
+	},
 	// A bar's ticks that are a form (GET, Typecase's task 67): its checks and
 	// its Apply are judged in it.
 	"CheckForm": needs("Action"),

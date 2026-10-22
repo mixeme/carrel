@@ -227,9 +227,690 @@
   },
   "kind": "event",
   "link": "",
-  "local": true,
+  "local": false,
   "note": "",
   "target": "Синк-ап по релизу",
   "title": "Publish an event",
-  "under": null
+  "under": {
+    "account": null,
+    "adminUsers": null,
+    "agenda": null,
+    "backup": null,
+    "connections": null,
+    "contact": null,
+    "contacts": null,
+    "davloom": null,
+    "devices": null,
+    "event": {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit",
+          "icon": "i-pencil",
+          "id": "record.edit",
+          "label": "Edit",
+          "method": "GET",
+          "primary": true
+        },
+        {
+          "arrow": [
+            {
+              "csrf": "csrf",
+              "enabled": true,
+              "file": "file",
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e7\u0026op=attach",
+              "icon": "i-upload",
+              "id": "attach.add",
+              "label": "From this computer",
+              "method": "POST"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/picker?a=a-nc-home\u0026c=lichnyj\u0026etag=e7\u0026for=attach\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
+              "icon": "i-file",
+              "id": "attach.files",
+              "label": "From Files",
+              "method": "GET",
+              "target": "sheet"
+            }
+          ],
+          "csrf": "csrf",
+          "enabled": true,
+          "file": "file",
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e7\u0026op=attach",
+          "icon": "i-clip",
+          "id": "attach.add",
+          "label": "Attach",
+          "method": "POST"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/mail/attach?a=a-nc-home\u0026back=%2Fapp%2Fcalendar%2Fa-nc-home%2Flichnyj%2F8f1c-4a02-b7d3\u0026c=lichnyj\u0026uid=8f1c-4a02-b7d3\u0026what=event",
+          "icon": "i-mail",
+          "id": "record.send",
+          "label": "Send",
+          "method": "POST",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3?print=1",
+          "icon": "i-print",
+          "id": "record.print",
+          "label": "Print",
+          "method": "GET"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e7",
+          "icon": "i-trash",
+          "id": "record.delete",
+          "label": "Delete event",
+          "method": "POST",
+          "target": "sheet"
+        }
+      ],
+      "attach": [
+        {
+          "actions": [],
+          "href": "/app/attach/a-nc-home/lichnyj/8f1c-4a02-b7d3/0",
+          "inline": true,
+          "name": "release-checklist.md",
+          "size": "3 KB",
+          "state": "ok",
+          "type": "text/markdown"
+        }
+      ],
+      "attendees": [
+        {
+          "colour": "",
+          "email": "mix@example.org",
+          "href": "",
+          "name": "Михаил Енученко",
+          "status": "organiser"
+        },
+        {
+          "colour": "#4a6b52",
+          "email": "a.kovaleva@example.org",
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+          "name": "Анна Ковалёва",
+          "status": "accepted"
+        },
+        {
+          "colour": "#4a6b52",
+          "email": "a.belov@example.org",
+          "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
+          "name": "Артём Белов",
+          "status": "tentative"
+        },
+        {
+          "colour": "",
+          "email": "v@example.org",
+          "href": "",
+          "name": "Виктор Гончаров",
+          "status": "no reply"
+        }
+      ],
+      "body": "Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям.",
+      "details": null,
+      "fields": [
+        {
+          "badge": {
+            "label": "created 12:00 Asia/Yekaterinburg",
+            "role": "neutral"
+          },
+          "href": "",
+          "label": "When",
+          "mono": false,
+          "runs": [
+            {
+              "mark": "mono",
+              "text": "10:00 – 11:00"
+            },
+            {
+              "text": ", Monday 10 August"
+            }
+          ],
+          "value": ""
+        },
+        {
+          "badge": {
+            "label": "until 2026-12-28",
+            "role": "neutral"
+          },
+          "href": "",
+          "label": "Repeats",
+          "mono": false,
+          "value": "Weekly on Mon"
+        },
+        {
+          "href": "",
+          "label": "Reminders",
+          "mono": false,
+          "value": "10 minutes before · 1 day before"
+        },
+        {
+          "href": "",
+          "label": "Where",
+          "mono": false,
+          "value": "Переговорная 2"
+        },
+        {
+          "href": "",
+          "label": "Status",
+          "mono": false,
+          "value": "Confirmed"
+        },
+        {
+          "href": "",
+          "label": "Tags",
+          "mono": false,
+          "tags": [
+            {
+              "href": "/app/calendar/a-nc-home/lichnyj?tag=release",
+              "label": "release",
+              "on": false
+            },
+            {
+              "href": "/app/calendar/a-nc-home/lichnyj?tag=team",
+              "label": "team",
+              "on": false
+            }
+          ],
+          "value": ""
+        }
+      ],
+      "linked": [],
+      "look": {
+        "compact": false,
+        "panel": true,
+        "source": true,
+        "theme": "auto",
+        "wide": false
+      },
+      "loss": null,
+      "menu": [
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/move",
+          "icon": "i-move",
+          "id": "record.move",
+          "label": "Move",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/move?copy=1",
+          "icon": "i-dup",
+          "id": "record.copy",
+          "label": "Copy",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/lichnyj/export?uid=8f1c-4a02-b7d3",
+          "icon": "i-export",
+          "id": "record.export",
+          "label": "Export .ics",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
+          "icon": "i-link",
+          "id": "publish",
+          "label": "Publish a link",
+          "method": "GET",
+          "target": "sheet"
+        }
+      ],
+      "notices": [],
+      "print": {
+        "range": "nextcloud · Личный",
+        "taken": "10 August 2026, 17:06",
+        "title": "Синк-ап по релизу"
+      },
+      "rail": {
+        "about": {
+          "build": "0.0.1 · 786949a",
+          "enabled": true,
+          "href": "/about",
+          "id": "about",
+          "label": "Carrel",
+          "method": "GET"
+        },
+        "davloom": "davloom · running · 0 devices",
+        "foot": [],
+        "nav": [
+          {
+            "count": null,
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/lichnyj",
+            "icon": "i-back",
+            "id": "nav.back",
+            "label": "Back to list",
+            "method": "GET"
+          }
+        ],
+        "neighbours": [],
+        "note": "",
+        "sections": [
+          {
+            "account": "nextcloud",
+            "accountID": "a-nc-home",
+            "rows": [
+              {
+                "colour": "#4a6b52",
+                "count": 2,
+                "detail": "",
+                "feed": false,
+                "href": "/app/calendar/a-nc-home/lichnyj",
+                "label": "Личный",
+                "menu": [
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/rename?a=a-nc-home\u0026c=lichnyj",
+                    "icon": "i-pencil",
+                    "id": "collection.rename",
+                    "label": "Rename",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj",
+                    "icon": "i-move",
+                    "id": "collection.move",
+                    "label": "Move to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj\u0026copy=1",
+                    "icon": "i-dup",
+                    "id": "collection.copy",
+                    "label": "Copy to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/lichnyj/import",
+                    "icon": "i-import",
+                    "id": "collection.import",
+                    "label": "Import",
+                    "method": "GET",
+                    "separator": true
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/lichnyj/export",
+                    "icon": "i-export",
+                    "id": "collection.export",
+                    "label": "Export",
+                    "method": "GET"
+                  },
+                  {
+                    "danger": true,
+                    "enabled": true,
+                    "href": "/app/collections/delete?a=a-nc-home\u0026c=lichnyj",
+                    "icon": "i-trash",
+                    "id": "collection.delete",
+                    "label": "Delete on the server…",
+                    "method": "GET",
+                    "separator": true,
+                    "target": "sheet"
+                  }
+                ],
+                "on": true,
+                "readOnly": false,
+                "state": "ok",
+                "tick": "on"
+              },
+              {
+                "colour": "#3f6e8c",
+                "count": 2,
+                "detail": "",
+                "feed": false,
+                "href": "/app/calendar/a-nc-home/rabota",
+                "label": "Работа",
+                "menu": [
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
+                    "icon": "i-pencil",
+                    "id": "collection.rename",
+                    "label": "Rename",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
+                    "icon": "i-move",
+                    "id": "collection.move",
+                    "label": "Move to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=rabota\u0026copy=1",
+                    "icon": "i-dup",
+                    "id": "collection.copy",
+                    "label": "Copy to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/rabota/import",
+                    "icon": "i-import",
+                    "id": "collection.import",
+                    "label": "Import",
+                    "method": "GET",
+                    "separator": true
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/rabota/export",
+                    "icon": "i-export",
+                    "id": "collection.export",
+                    "label": "Export",
+                    "method": "GET"
+                  },
+                  {
+                    "danger": true,
+                    "enabled": true,
+                    "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
+                    "icon": "i-trash",
+                    "id": "collection.delete",
+                    "label": "Delete on the server…",
+                    "method": "GET",
+                    "separator": true,
+                    "target": "sheet"
+                  }
+                ],
+                "on": false,
+                "readOnly": false,
+                "state": "ok",
+                "tick": "on"
+              },
+              {
+                "colour": "#a05a2c",
+                "count": null,
+                "detail": "",
+                "feed": false,
+                "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+                "label": "Дни рождения",
+                "menu": [
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
+                    "icon": "i-pencil",
+                    "id": "collection.rename",
+                    "label": "Rename",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
+                    "icon": "i-move",
+                    "id": "collection.move",
+                    "label": "Move to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026copy=1",
+                    "icon": "i-dup",
+                    "id": "collection.copy",
+                    "label": "Copy to another server",
+                    "method": "GET",
+                    "target": "sheet"
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
+                    "icon": "i-import",
+                    "id": "collection.import",
+                    "label": "Import",
+                    "method": "GET",
+                    "separator": true
+                  },
+                  {
+                    "enabled": true,
+                    "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export",
+                    "icon": "i-export",
+                    "id": "collection.export",
+                    "label": "Export",
+                    "method": "GET"
+                  },
+                  {
+                    "danger": true,
+                    "enabled": true,
+                    "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
+                    "icon": "i-trash",
+                    "id": "collection.delete",
+                    "label": "Delete on the server…",
+                    "method": "GET",
+                    "separator": true,
+                    "target": "sheet"
+                  }
+                ],
+                "on": false,
+                "readOnly": false,
+                "state": "ok",
+                "tick": "off"
+              }
+            ],
+            "state": "ok"
+          }
+        ],
+        "shortcuts": [],
+        "tags": [],
+        "ticks": null
+      },
+      "readOnly": false,
+      "recurrence": {
+        "fields": [
+          {
+            "href": "",
+            "label": "Next",
+            "mono": false,
+            "value": "17 August 2026, 10:00"
+          },
+          {
+            "href": "",
+            "label": "Then",
+            "mono": false,
+            "value": "24 August 2026, 10:00"
+          },
+          {
+            "href": "",
+            "label": "Then",
+            "mono": false,
+            "value": "31 August 2026, 10:00"
+          }
+        ],
+        "note": "Series is edited and deleted whole.",
+        "raw": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z",
+        "summary": "Weekly on Monday, until 28 December 2026"
+      },
+      "related": [
+        {
+          "colour": "",
+          "href": "",
+          "kind": "",
+          "stamp": "",
+          "title": "5c81-77aa-0d64",
+          "when": "",
+          "why": "Not in the lists loaded for this collection"
+        }
+      ],
+      "source": {
+        "changed": "",
+        "colour": "#4a6b52",
+        "compared": "changed on server 3 days ago",
+        "lastRead": "",
+        "objects": null,
+        "path": "/alice/calendars/lichnyj/8f1c-4a02-b7d3.ics",
+        "readOnly": false,
+        "stamp": "nextcloud · Личный",
+        "uid": ""
+      },
+      "summary": "Синк-ап по релизу",
+      "title": "Синк-ап по релизу",
+      "top": {
+        "lock": null,
+        "new": {
+          "arrow": [
+            {
+              "enabled": true,
+              "href": "/app/notes/quick",
+              "icon": "i-quill",
+              "id": "new.notes",
+              "label": "Note",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/quick",
+              "icon": "i-con",
+              "id": "new.contacts",
+              "label": "Contact",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/quick",
+              "icon": "i-cal",
+              "id": "new.calendar",
+              "label": "Event",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/tasks/quick",
+              "icon": "i-task",
+              "id": "new.tasks",
+              "label": "Task",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/files/picker?for=upload",
+              "icon": "i-upload",
+              "id": "new.upload",
+              "label": "Upload file",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/mail/compose",
+              "icon": "i-mail",
+              "id": "new.letter",
+              "label": "Letter",
+              "method": "GET",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "New note",
+          "method": "GET",
+          "primary": true,
+          "target": "sheet"
+        },
+        "refresh": {
+          "action": {
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+            "icon": "i-refresh",
+            "id": "record.refresh",
+            "label": "Refresh",
+            "method": "GET"
+          },
+          "answered": "",
+          "running": false
+        },
+        "search": {
+          "action": "/app/search",
+          "history": [
+            {
+              "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0",
+              "outcome": "1 found",
+              "query": "Ковалёва",
+              "when": "just now"
+            }
+          ],
+          "jump": [],
+          "name": "q",
+          "query": "",
+          "whole": null
+        },
+        "signed": {
+          "instance": "carrel.example",
+          "local": false,
+          "login": "mix"
+        },
+        "unlocked": null,
+        "user": [
+          {
+            "enabled": true,
+            "href": "/app/settings/account",
+            "icon": "i-gear",
+            "id": "user.settings",
+            "label": "Settings",
+            "method": "GET"
+          },
+          {
+            "enabled": true,
+            "href": "/admin/",
+            "icon": "i-adm",
+            "id": "user.admin",
+            "label": "Administration",
+            "method": "GET"
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/logout",
+            "id": "user.logout",
+            "label": "Sign out",
+            "method": "POST",
+            "separator": true
+          }
+        ],
+        "userHref": "/app/settings/account"
+      },
+      "uid": "8f1c-4a02-b7d3"
+    },
+    "eventEdit": null,
+    "files": null,
+    "note": null,
+    "notes": null,
+    "published": null,
+    "task": null,
+    "taskEdit": null,
+    "tasks": null
+  }
 }

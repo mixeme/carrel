@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.356 — 2026-10-22
+
+What the client's screens of publishing and mail needed.
+
+### Fixed
+
+- **A sheet over a record's page stood over nothing**: the page under a
+  sheet was asked of the mux by `Handler`, which gives the request no
+  values of its pattern, so `/app/{kind}/{account}/{col}/{uid}` answered
+  404 and `Under` was nil — publishing a contact, an event, a note, and the
+  collections' sheets over a record. The page is now served by the mux.
+
+### Changed
+
+- **«Send this link»** carries `Sender` (the name strong, the address in
+  angle brackets monospaced) and `Account` («change in Account»).
+- **The letter**: Send has its icon; Preview is a button of the form
+  (`?op=preview` keeps what was typed and shows the letter — what it shows
+  besides is the owner's question).
+- **«Send it as»** of a note says `.ics` monospaced (`HintRuns`).
+- Fixtures: `app-publish/note` (s-publish-4) and `folder` (s-publish-5);
+  contact, event, note and folder on an instance with a public address, as
+  their frames; `app-mail-compose/normal` is the letter of s-mail-1
+  (`filled` gone); `app-mail-attach/normal` is the contact chosen
+  (`contact` gone), the file and folder sheets on a storage shaped as their
+  frames.
+
 ## v0.2.355 — 2026-10-22
 
 The attach sheets as their frames (batch 4 of the publish-mail scan,

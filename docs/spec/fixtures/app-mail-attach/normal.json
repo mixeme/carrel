@@ -2,13 +2,12 @@
   "actions": [
     {
       "csrf": "csrf",
-      "enabled": false,
-      "href": "/app/mail/attach?what=contact",
+      "enabled": true,
+      "href": "/app/mail/attach?a=a-nc-home\u0026c=kontakty\u0026uid=c3f7-8a21-1b09\u0026what=contact",
       "id": "mail.attach.add",
       "label": "Attach",
       "method": "POST",
       "primary": true,
-      "reason": "Choose a contact.",
       "submits": true,
       "target": "sheet"
     },
@@ -23,7 +22,7 @@
   ],
   "all": {
     "enabled": true,
-    "href": "/app/mail/attach?what=contact",
+    "href": "/app/mail/attach?q=%D0%B1%D0%B5%D0%BB%D0%BE%D0%B2\u0026what=contact",
     "id": "mail.attach.all",
     "label": "All address books",
     "method": "GET",
@@ -32,7 +31,7 @@
   },
   "crumbs": [],
   "form": {
-    "action": "/app/mail/attach?what=contact",
+    "action": "/app/mail/attach?a=a-nc-home\u0026c=kontakty\u0026uid=c3f7-8a21-1b09\u0026what=contact",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -59,7 +58,22 @@
     ],
     "target": "sheet"
   },
-  "preview": [],
+  "preview": [
+    {
+      "asLink": false,
+      "change": null,
+      "format": "vcf",
+      "kind": "contact",
+      "remove": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "size": "220 B",
+      "title": "Артём Белов · Тензор"
+    }
+  ],
   "rail": {
     "about": {
       "build": "0.0.1 · 786949a",
@@ -84,7 +98,7 @@
             "count": null,
             "detail": "",
             "feed": false,
-            "href": "/app/mail/attach?a=a-nc-home\u0026c=kontakty\u0026what=contact",
+            "href": "/app/mail/attach?a=a-nc-home\u0026c=kontakty\u0026q=%D0%B1%D0%B5%D0%BB%D0%BE%D0%B2\u0026what=contact",
             "label": "Контакты",
             "menu": [],
             "on": false,
@@ -97,7 +111,7 @@
             "count": null,
             "detail": "",
             "feed": false,
-            "href": "/app/mail/attach?a=a-nc-home\u0026c=arhiv\u0026what=contact",
+            "href": "/app/mail/attach?a=a-nc-home\u0026c=arhiv\u0026q=%D0%B1%D0%B5%D0%BB%D0%BE%D0%B2\u0026what=contact",
             "label": "Архив",
             "menu": [],
             "on": false,
@@ -117,7 +131,7 @@
             "count": null,
             "detail": "",
             "feed": false,
-            "href": "/app/mail/attach?a=a-rad-vps\u0026c=komanda\u0026what=contact",
+            "href": "/app/mail/attach?a=a-rad-vps\u0026c=komanda\u0026q=%D0%B1%D0%B5%D0%BB%D0%BE%D0%B2\u0026what=contact",
             "label": "Команда",
             "menu": [],
             "on": false,
@@ -130,7 +144,7 @@
             "count": null,
             "detail": "",
             "feed": false,
-            "href": "/app/mail/attach?a=a-rad-vps\u0026c=rassylki\u0026what=contact",
+            "href": "/app/mail/attach?a=a-rad-vps\u0026c=rassylki\u0026q=%D0%B1%D0%B5%D0%BB%D0%BE%D0%B2\u0026what=contact",
             "label": "Рассылки",
             "menu": [],
             "on": false,
@@ -149,37 +163,6 @@
   "rows": [
     {
       "avatar": {
-        "colour": "#9a9280",
-        "href": "",
-        "initials": "АС"
-      },
-      "colour": "#4a6b52",
-      "detail": "",
-      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=kontakty\u0026uid=6b18-2d40-77c5\u0026what=contact",
-      "kind": "contact",
-      "stamp": "nextcloud · Контакты",
-      "subtitle": "+7 916 200-71-15",
-      "title": "Алексей Смирнов",
-      "when": ""
-    },
-    {
-      "avatar": {
-        "colour": "#8c6239",
-        "href": "",
-        "initials": "АК"
-      },
-      "caption": "Издательство «Слово»",
-      "colour": "#4a6b52",
-      "detail": "a.kovaleva@example.org",
-      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=kontakty\u0026uid=4f2b-9c31-a0e7\u0026what=contact",
-      "kind": "contact",
-      "stamp": "nextcloud · Контакты",
-      "subtitle": "+7 912 445-10-88",
-      "title": "Анна Ковалёва",
-      "when": ""
-    },
-    {
-      "avatar": {
         "colour": "#3f6e8c",
         "href": "",
         "initials": "АБ"
@@ -187,57 +170,12 @@
       "caption": "Тензор",
       "colour": "#4a6b52",
       "detail": "a.belov@example.org",
-      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=kontakty\u0026uid=c3f7-8a21-1b09\u0026what=contact",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=kontakty\u0026q=%D0%B1%D0%B5%D0%BB%D0%BE%D0%B2\u0026uid=c3f7-8a21-1b09\u0026what=contact",
       "kind": "contact",
+      "on": true,
       "stamp": "nextcloud · Контакты",
       "subtitle": "+7 903 118-22-04",
       "title": "Артём Белов",
-      "when": ""
-    },
-    {
-      "avatar": {
-        "colour": "#a05a2c",
-        "href": "",
-        "initials": "ВГ"
-      },
-      "caption": "Городская библиотека №4",
-      "colour": "#4a6b52",
-      "detail": "v.goncharov@example.org",
-      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=kontakty\u0026uid=a90d-5512-4e83\u0026what=contact",
-      "kind": "contact",
-      "stamp": "nextcloud · Контакты",
-      "title": "Виктор Гончаров",
-      "when": ""
-    },
-    {
-      "avatar": {
-        "colour": "#a05a2c",
-        "href": "",
-        "initials": "ЛВ"
-      },
-      "caption": "Библиотека №4",
-      "colour": "#4a6b52",
-      "detail": "v.lebedeva@example.org",
-      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=kontakty\u0026uid=b52e-7d08-c6f1\u0026what=contact",
-      "kind": "contact",
-      "stamp": "nextcloud · Контакты",
-      "subtitle": "+7 905 331-09-42",
-      "title": "Лебедева Вера",
-      "when": ""
-    },
-    {
-      "avatar": {
-        "colour": "#9a9280",
-        "href": "",
-        "initials": "ВЛ"
-      },
-      "colour": "#a05a2c",
-      "detail": "vera@example.net",
-      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=arhiv\u0026uid=e7c2-3b95-6a14\u0026what=contact",
-      "kind": "contact",
-      "stamp": "nextcloud · Архив",
-      "subtitle": "+7 905 331-09-42",
-      "title": "Вера Лебедева",
       "when": ""
     },
     {
@@ -249,7 +187,7 @@
       "caption": "Тензор",
       "colour": "#6b4e7a",
       "detail": "a.belov@example.org",
-      "href": "/app/mail/attach?a=a-rad-vps\u0026all=1\u0026c=komanda\u0026uid=d41a-6f30-92be\u0026what=contact",
+      "href": "/app/mail/attach?a=a-rad-vps\u0026all=1\u0026c=komanda\u0026q=%D0%B1%D0%B5%D0%BB%D0%BE%D0%B2\u0026uid=d41a-6f30-92be\u0026what=contact",
       "kind": "contact",
       "stamp": "radicale · vps · Команда",
       "subtitle": "+7 903 118-22-04",
@@ -290,7 +228,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "белов"
           }
         ],
         "unfold": null

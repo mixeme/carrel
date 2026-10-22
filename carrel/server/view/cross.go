@@ -850,6 +850,13 @@ type MailLinkSheet struct {
 	From     Text `json:"from"`
 	FromName Text `json:"fromName"`
 	ReplyTo  Text `json:"replyTo"`
+	// Sender — первая строка «Sent as» кусками: имя жирным и адрес в
+	// угловых скобках моноширинно, «**Михаил Енученко** ‹<mix@carrel.example>›»
+	// (s-mail-4)
+	Sender Runs `json:"sender"`
+	// Account — «change in Account»: ссылка на страницу учётной записи, где
+	// меняют адрес ответов (s-mail-4; решение владельца 21.10.2026, В4)
+	Account *Action `json:"account"`
 	// Carries — «The letter carries», три строки: в письме только ссылка и
 	// строка человека, отзыв закрывает её и этому получателю, до какого дня
 	// она живёт

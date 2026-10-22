@@ -178,8 +178,8 @@ func (s *Server) attachSheet(r *http.Request, sess *session.Session, k attachKin
 		rows = append(rows, view.FormRow{Name: "format", Label: "Send it as", Kind: view.InputRadio, Value: text(format), Options: []view.Option{
 			{Value: "md", Label: "Markdown · .md", Selected: format == "md"},
 			{Value: "ics", Label: "Source · .ics", Selected: format == "ics"},
-		}, Hint: "Markdown is what a person opens and reads; it carries the text and links to attachments, not the foreign properties another client wrote. " +
-			"The source .ics is the faithful copy and needs a client that reads VJOURNAL — jtx Board, Evolution."})
+		}, HintRuns: join("Markdown is what a person opens and reads; it carries the text and links to attachments, not the foreign properties another client wrote. The source ",
+			monoRun(".ics"), " is the faithful copy and needs a client that reads VJOURNAL — jtx Board, Evolution.")})
 	}
 	sheet.Form = s.plainForm("/app/mail/attach", "POST", append([]view.FormRow{csrfField(sess)}, rows...)...)
 	sheet.Form.Action = s.postQuery("/app/mail/attach", ident)
@@ -487,15 +487,15 @@ func folderCount(folders, files int) string {
 	return strings.Join(said, " · ")
 }
 
-// attachTree is the tree of the sheet of a file or a folder: every server
-// with storages, its storages under it, the open folder's way opened; each
+// attachTree is the tree of the sheet of a file or a folder: the server of
+// the storage open, its storages under it, the open folder's way opened; each
 // storage and folder a link to the sheet with it open (s-mail-6, -13 — the
 // tree of Move, not a third one).
 func (s *Server) attachTree(ctx context.Context, blob sealed.Blob, open *fileCtx, k attachKind) *view.FileTree {
 	out := &view.FileTree{}
 	seen := map[string]bool{}
 	for _, col := range blob.Collections {
-		if !treeCollection(blob, col, true) || col.Feed || seen[col.AccountID] {
+		if !treeCollection(blob, col, true) || col.Feed || seen[col.AccountID] || col.AccountID != open.conn.ID {
 			continue
 		}
 		seen[col.AccountID] = true

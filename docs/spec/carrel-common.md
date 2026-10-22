@@ -2372,6 +2372,8 @@ type MailLinkSheet struct {
     From     Text
     FromName Text
     ReplyTo  Text
+    Sender   Runs    // первая строка «Sent as»: имя жирным, адрес в угловых скобках моноширинно (s-mail-4)
+    Account  *Action // «change in Account» — страница учётной записи, где меняют адрес ответов (s-mail-4, В4)
     Carries  []Text
     Form     Form
     Actions  []Action

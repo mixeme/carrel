@@ -72,8 +72,9 @@ func (s *Server) underOf(r *http.Request, back, fallback string) *view.Under {
 	sub.Method, sub.URL, sub.RequestURI, sub.Body, sub.Form, sub.PostForm = http.MethodGet, u, u.RequestURI(), http.NoBody, nil, nil
 	sub.Header.Del(render.HeaderView)
 	sub.Header.Del(render.HeaderTarget)
-	h, _ := s.mux.Handler(sub)
-	h.ServeHTTP(&discardWriter{}, sub)
+	// Served by the mux, not by its Handler: only ServeHTTP gives the
+	// request the values of its pattern ({uid} of a record's page).
+	s.mux.ServeHTTP(&discardWriter{}, sub)
 	if caught.status != http.StatusOK {
 		return nil
 	}

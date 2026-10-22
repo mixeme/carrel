@@ -69,6 +69,9 @@ func (s *Server) mailLinkSheet(r *http.Request, sess *session.Session, l user.Pu
 	if u := s.letterUser(sess); u != nil {
 		ls := s.senderOf(u)
 		sheet.From, sheet.FromName, sheet.ReplyTo = text(ls.Address), text(ls.FromName), text(ls.ReplyTo)
+		sheet.Sender = join(strongRun(ls.FromName), " ", monoRun("<"+ls.Address+">"))
+		// Where the address replies go to is changed (s-mail-4, В4).
+		sheet.Account = &view.Action{ID: "mail.account", Label: "change in Account", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true}
 	}
 	// Three things people mix up (s-mail-4): the letter carries no content,
 	// a revoke reaches the letter already sent, the link's term is the
