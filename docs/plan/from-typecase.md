@@ -3732,6 +3732,94 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
 
    **Взята частично 22.10.2026** (сервер `v0.2.357`, клиент `v0.6.1`; копия макета `a78141d`): пакеты 1–2 скана [import-111](scans/import-111.md) — пп. 1–4, 5 (кроме отказа по записи), 6 (кроме номеров строк), 7–9, метка коллекции, Р-73. Пакет 3 (С10, С13, С14) — после задачи 222.
 
+Записка 112 от 22.10.2026 (Typecase `0f51d45`; задача 192). **Последний
+коммит Typecase, который она описывает, — `0f51d45`** (518 кадров). **192
+закрыта.**
+
+112. **Листы коллекций: адреса, имена полей, состояния.**
+   - **Адреса** (п. 1): `-7` → `/app/collections/rename?a=nextcloud&c=dni-rozhdeniya`,
+     `-8` → `move?a=nextcloud&c=lichnyj`, `-9` → `delete?a=nextcloud&c=lichnyj`,
+     `-18` → `rename?a=sftpgo&c=documents`, `-19` → `delete?a=sftpgo&c=documents`,
+     `-20` → `new?kind=file&a=sftpgo`. Значение `c` в макете — короткая
+     метка; серверу — путь коллекции, как в C-5. Download `.ics` у `-9` —
+     `/app/calendar/nextcloud/lichnyj/export`.
+   - **Имена полей** (п. 2): «On which server» — `account` (`-5`, `-20`);
+     «What goes in it» — `components` со значениями `VEVENT`, `VTODO`,
+     `VJOURNAL`; набор имени при удалении — `name` (`-9`, `-19`); `to` у
+     переноса — id подключения (`nextcloud`, `radicale`, `baikal`, `sftpgo`).
+   - **Адрес в «Rename and colour»** (п. 3): поле только для чтения без
+     имени (`readonly`), с формой не уходит.
+   - **Листы не из настроек — решение владельца Р-75 (22.10):** операции с
+     коллекцией — **только в Connections**. Меню «⋯» у строки рейла нет и
+     листа поверх списка коллекции нет. **Серверу:** убрать `SourceRow.Menu`
+     у строк рейла (`combined.go:979–1000`). Вариант «⋯» в шапке открытой
+     коллекции рядом с Import, Export, Print — отложен до рабочей версии.
+   - **New collection без рода** (новый `s-profile-29`, из «New collection»
+     карточки аккаунта): action `/app/collections/new?a=nextcloud`; сервер
+     выбран (`account`); «What it is» — **отметка** (радио `kind`: `event` —
+     Calendar, `contact` — Address book), не список; Address book выключает
+     «What goes in it» (`data-tc-disables="components"`). Подсказка: «Tasks
+     and notes live in calendars: choose Calendar and say below what goes in
+     it.»
+   - **Отказ создания** (п. 4; `-6`): сервер — radicale · vps (baikal в
+     `-5` не отвечает); диагностика `MKCALENDAR /mix/poezdki/ → 403`. Лист —
+     форма с набранным в скрытых полях (`account`, `name`, `colour`,
+     `components` ×2, `address`): «Back to the form» — submit с
+     `formaction="/app/collections/new?op=back"`, «Try again» — submit на
+     `/app/collections/new`. Слова под диагностикой: «This account may sign
+     in and read, but radicale · vps would not let it create here. The
+     server does not say why — no such right for the user, or a password
+     issued read-only; whoever runs the server can tell.»
+   - **Строка об отмене** (п. 5, А12): у переноса и удаления календаря —
+     **последней фразой главного сообщения листа**, не отдельным блоком:
+     «… nextcloud may tell the attendees of its meetings that they are
+     cancelled.» (`-8` — после «This is not renaming the path.», `-9` —
+     после «nothing here to undo it with.»). Пример — «Личный» (128 событий,
+     есть встречи с участниками).
+   - **Отказы и итог** (п. 6): отказ переименования — **в листе**
+     (`s-profile-30`): тревога «The server would not rename it. Nothing
+     changed, and the form is as you left it.», под ней диагностика, поля с
+     набранным, Save — ещё раз. Отказ удаления — **уведомление на странице
+     Connections** (`s-profile-31`): «**Архив was not deleted.** nextcloud
+     refused: this account can read here but not write. Архив is as it
+     was.» и диагностика. Перенос «записано не всё» — уведомление на
+     Connections (`s-profile-32`): «**Copied, and the original kept.**
+     radicale · vps did not keep all of what was copied, so Личный on
+     nextcloud was not deleted. Both are there now.» с кнопкой «Open the
+     copy», диагностика «What radicale · vps did not keep» — запись ·
+     свойство. Другие исходы `kept` — тем же видом, словами сервера. **Успех
+     любого листа коллекции** — туда, откуда открыт (`back`), без него — в
+     Connections.
+   - **Имя и цвет подписки** (п. 7; `s-profile-33`, лист из Edit карточки
+     ленты): шапка «Rename and colour» · «feed»; поле «Feed» — адрес ленты
+     только для чтения; Name с подсказкой «The name is yours: it stays in
+     Carrel and is never sent to the feed.»; Colour с подсказкой «Kept here:
+     a feed sends no colour of its own.»; у ленты книги — «Rename», одно
+     поле. Action в кадре — `/app/collections/rename?a=prazdniki-rf&c=feed`
+     (id ленты и её путь, как у сервера).
+   - **Перенос папки хранилища — решение владельца Р-74** (п. 8): в Files
+     корень — хранилища строками без выбора, поэтому папку под адресом
+     подключения двигают **из Connections**, своим листом «Move folder»
+     (`s-profile-34`): цель — сервер, который держит файлы (`to`); сообщение:
+     «Carrel makes a folder «Documents» in nextcloud · Files, copies all 9
+     files into it — each downloaded and uploaded again — then deletes this
+     one on sftpgo · vps. The tick in the rail, the attachment folder and the
+     upload folder follow it; devices, published links and backup jobs
+     pointing at the old address will see it vanish.» Copy — «Copy folder».
+     Пункты меню папки (`-12`) — ссылки на `move?a=sftpgo&c=documents`
+     (`&copy=1`). **Хранилище целиком тоже переносится** (`s-profile-35`,
+     меню `-17` получило «Move to another server»): содержимое копируется и
+     удаляется, сам адрес остаётся пустым; вторая строка — «What nextcloud
+     will not let delete — folders shared with you, folders its administrator
+     mounted — is copied and stays there too; the result names it.»
+     **Серверу:** перенос хранилища целиком (сейчас его нет — только Copy).
+   - **Никто не отвечает** (п. 9; `-21`): **полей нет** — набранное некуда
+     отправить; главная кнопка — «Try again» (ссылка на тот же лист,
+     `/app/collections/new?kind=event`), Cancel. **Серверу:** не слать поля
+     в этом состоянии. «No connected server holds calendars. Connect one that
+     does first.» — новый `s-profile-28`: полей нет, главная — «Connect
+     account» → `/app/settings/connections/new`.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
