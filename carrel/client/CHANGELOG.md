@@ -4,6 +4,26 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.5.1 — 2026-10-22
+
+Server `v0.2.353`, Typecase `bc0b574` (its notes 108–110).
+
+### Changed
+
+- **A folder's upload**: Files and Folder pick into one upload form, with
+  the field of the sizes and `?op=taken`; one Upload sends it without a
+  script (s-files-8). The queue the live layer fills waits hidden
+  (s-files-1, states-32), and the server's queue carries the templates of
+  a file's row and of a name taken (s-files-2).
+- **Published links**: Revoke sends the list's one form with the row's
+  `id`, in the row and in its «⋯».
+- **Restore**: the archive's field asks which parts to send
+  (`FileField.Ranges`), step 2 of an archive opened in parts sends the
+  parts of the collections chosen (`Dialog.Ranges`, `RangesOf`), and the
+  page's column is the zone its steps answer into (s-backup-15, -16, -20).
+  All of it waits for the live layer (stage 4).
+- The guard of meaning knows the live queue's templates and its Hide.
+
 ## v0.5.0 — 2026-10-22
 
 Server `v0.2.352`, Typecase `8e4944b` (its notes 87–107). Three sections

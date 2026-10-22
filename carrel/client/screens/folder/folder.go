@@ -34,6 +34,25 @@ var (
 		Fold: &w.QueueFold{Hide: "Hide", Show: "Show", Total: "{percent}%"}}
 )
 
+// The words of the queue the library's live layer fills while an upload goes
+// (Queue.Progress, s-files-1, states-32; Typecase's note 108): its head and
+// total, Hide, a file's row and the row that asks about a name taken — the
+// words in braces are the layer's —, and the answers, each a value of
+// «answer» the layer sends as «taken.<name>» before the file.
+const (
+	uploading = "Uploading {done} of {count}"
+	sentSoFar = "{sent}"
+	hide      = "Hide"
+	rowName   = "{name}"
+	rowMeta   = "{size} · {percent}%"
+)
+
+var answers = []w.Button{
+	{Label: "Keep both", Small: true, Name: "answer", Value: "keep"},
+	{Label: "Replace", Small: true, Name: "answer", Value: "replace"},
+	{Label: "Skip", Small: true, Name: "answer", Value: "skip"},
+}
+
 // The screen's words (U-1.3): the rubric of the shortcuts, the badge of the
 // attachment folder, the names of the buttons of an icon, the filter's
 // pattern, the heads of the columns, the row that goes up, the dash of a
@@ -66,6 +85,8 @@ const (
 	links        = "Links"
 	linksNote    = "Carrel keeps no index of what points at this file. It may be attached to a note or an event — check before deleting."
 	upload       = "Upload"
+	sizeField    = "size"
+	takenOp      = "?op=taken"
 	folderIcon   = "file"
 	upIcon       = "back"
 	dotsIcon     = "dots"
@@ -145,8 +166,23 @@ func Screen(p *view.FilesPage) w.Shell {
 		main = append(main, w.Msg{Parts: []w.MsgPart{w.Text(dropHint)}, ScriptOnly: true},
 			w.Msg{Parts: []w.MsgPart{w.Text(noDropHint)}, NoScript: true})
 	}
-	if p.Queue != nil {
+	up, live := action(p.Bar.Actions, uploadID)
+	live = live && up.Enabled && up.Method == "POST" && p.View != view.FileTiles && !p.Unread
+	switch {
+	case p.Queue != nil && live:
+		main = append(main, progress(bind.Queue(*p.Queue, queue)))
+	case p.Queue != nil:
 		main = append(main, bind.Queue(*p.Queue, queue))
+	case live:
+		// No queue yet: the library's live layer shows this one when the
+		// upload's form goes with files; until then it waits hidden
+		// (s-files-1, states-32).
+		main = append(main, progress(w.Queue{
+			Title:  uploading,
+			Total:  w.Mono{Text: sentSoFar, Variant: w.MonoDusty, Place: w.Pushed},
+			Toggle: w.Button{Label: hide, Small: true},
+			Fold:   queue.Fold,
+		}))
 	}
 	body := w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}
 	if p.Queue != nil {
@@ -178,7 +214,14 @@ func Forms(p *view.FilesPage) []w.PostForm {
 	for _, a := range p.Bar.Actions {
 		switch {
 		case a.ID == uploadID:
-			out = append(out, bind.MenuForms(a.Arrow)...)
+			// The one form of an upload, its file fields in the head and in
+			// an empty folder's state (s-files-1, states-32): what Files and
+			// Folder pick goes with it, and the live queue follows it.
+			if a.Method == "POST" && a.Enabled {
+				f := bind.ActionForm(a, uploadID)
+				f.File, f.Multipart = "", true
+				out = append(out, f)
+			}
 		case a.Method == "POST" && a.Enabled:
 			out = append(out, bind.ActionForm(a, a.ID))
 		}
@@ -197,6 +240,25 @@ func Forms(p *view.FilesPage) []w.PostForm {
 		out = append(out, bind.QueueForms(*p.Queue)...)
 	}
 	return unique(append(out, bind.NoticeForms(p.Notices)...))
+}
+
+// uploadField is a file field of the upload: it picks into the upload's one
+// form, the sizes of its files go before them, and the library asks the
+// upload's address which of their names are taken before they go (?op=taken,
+// FileField.Taken; s-files-8, states-32).
+func uploadField(f w.FileField, a view.Action) *w.FileField {
+	f.Form, f.To, f.Size, f.Taken = uploadID, "", sizeField, a.Href+takenOp
+	return &f
+}
+
+// progress is a queue the library's live layer fills while the upload's form
+// goes (Queue.Progress, Typecase's note 108): a row for each file from Row,
+// and the question of a name taken from Taken with its answers.
+func progress(q w.Queue) w.Queue {
+	q.Progress = uploadID
+	q.Row = &w.QueueItem{Name: rowName, Meta: rowMeta, Meter: &w.Meter{Percent: 0, Track: 100}}
+	q.Taken = &w.QueueItem{Name: rowName, Meta: queue.Taken, Failed: true, Acts: answers}
+	return q
 }
 
 // unique are the forms each once: the panel's Rename posts the same as the
@@ -294,11 +356,15 @@ func head(p *view.FilesPage) w.Head {
 				case uploadID:
 					f.Many = true
 				}
-				m.File = &f
+				m.File = uploadField(f, a.Arrow[i].Action)
 				items[i] = m
 			}
 		}
-		items = append(items, bind.Uploads(a.Arrow, upload)...)
+		// Both pick into the one upload form, and one Upload sends it
+		// without a script (s-files-8).
+		if a.Enabled && a.Method == "POST" {
+			items = append(items, w.MenuItem{Label: upload, NoScript: true, Form: uploadID})
+		}
 		acts = append(acts, w.Drop{Trigger: b, Menu: w.Menu{Items: items, Width: w.MenuWidth212, Pop: w.MenuUnder}})
 	}
 	if a, ok := action(p.Bar.Actions, newID); ok {
@@ -515,6 +581,11 @@ func emptyParts(n view.Notice) []w.EmptyPart {
 			continue
 		}
 		b := bind.FileButton(a, a.ID)
+		if b.File != nil && a.ID == uploadID {
+			f := *b.File
+			f.Many = true
+			b.File = uploadField(f, a)
+		}
 		b.Menu = len(a.Arrow) > 0
 		out = append(out, b)
 		// Without a script the file field sends nothing by itself: Send

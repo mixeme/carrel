@@ -123,7 +123,10 @@ func (s *Server) postMailSend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.FormValue("op") == "link" {
-		s.redirect(w, r, s.mailLinkBack(r))
+		// «Copy link instead»: nothing goes, and the link's ready sheet
+		// shows its address whole to copy, as when it was made
+		// (s-publish-13; Typecase's note 110 p. 5).
+		s.writeSheet(w, r, s.linkMadeSheet(r, sess, l))
 		return
 	}
 	n, err := s.sendLinkLetter(r, sess, l)
@@ -136,6 +139,25 @@ func (s *Server) postMailSend(w http.ResponseWriter, r *http.Request) {
 	q.Set("sent", strconv.Itoa(n))
 	back.RawQuery = q.Encode()
 	s.redirect(w, r, back.String())
+}
+
+// linkMadeSheet is the ready sheet of a link the person has out
+// (s-publish-13): what it publishes in its head, the address whole, its day;
+// its cross and Cancel lead where «Send this link» came from.
+func (s *Server) linkMadeSheet(r *http.Request, sess *session.Session, l user.PublishedLink) view.PublishSheet {
+	kind, _ := publishedKind(l.Target)
+	host, label := l.Target.AccountID, l.Target.Col
+	blob := s.catalogOf(sess)
+	if conn, ok := blob.Connection(l.Target.AccountID); ok {
+		host = connLabel(conn)
+	}
+	if col, ok := blob.Collection(l.Target.AccountID, l.Target.Col); ok {
+		label = collectionLabel(col)
+	}
+	sheet := view.PublishSheet{Title: text("Publish " + article(kind)), Target: text(string(stamp(host, label))),
+		Actions: []view.Action{{ID: "publish.cancel", Label: "Cancel", Href: s.mailLinkBack(r), Method: "GET", Enabled: true}}}
+	sheet.Under = s.underOf(r, r.FormValue("back"), "/app/files/published")
+	return s.madeSheet(r, sess, sheet, s.linkToken(sess, l.ID), l.ExpiresAt)
 }
 
 // sendLinkLetter sends the letter of one link: the line typed, the link

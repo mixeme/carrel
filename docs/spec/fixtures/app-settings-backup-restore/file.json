@@ -999,6 +999,7 @@
       }
     ],
     "open": true,
+    "ranges": "/app/settings/backup/restore?op=ranges",
     "report": null,
     "source": {
       "action": "/app/settings/backup/restore?from=file",

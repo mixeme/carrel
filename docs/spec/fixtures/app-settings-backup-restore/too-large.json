@@ -999,6 +999,7 @@
       }
     ],
     "open": true,
+    "ranges": "/app/settings/backup/restore?op=ranges",
     "refusal": [
       {
         "text": "The archive is larger than 16 MB. Choose a folder of your storage for it, or put it there and choose "

@@ -28,6 +28,7 @@ import (
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -62,6 +63,10 @@ type restoreTask struct {
 	// put is where an archive from this computer was put to be read from
 	// a storage; deleted after the restore (the owner, 19.10.2026)
 	put *storedArchive
+	// here — the archive came from this computer; layout — where the
+	// members of one sent in parts lie, read once (restore_parts.go)
+	here   bool
+	layout *backup.Layout
 }
 
 // storedArchive is an archive put into a storage for its restore.
@@ -239,6 +244,11 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob, from, run
 			view.FormRow{Name: "file", Label: "Archive", Kind: view.InputFile, Accept: ".zip"})
 	}
 	b.Source = s.plainForm("/app/settings/backup/restore", "POST", rows...)
+	if from == "file" {
+		// With the live layer the archive goes in parts, the ones this
+		// address names (Typecase's notes 98, 109).
+		b.Ranges = s.route("/app/settings/backup/restore?op=ranges")
+	}
 	b.Source.Sets = append(b.Source.Sets, set, view.FieldSet{Legend: "Archive password", Rows: []view.FormRow{
 		{Name: "password", Label: "Archive password", Kind: view.InputPassword, Hint: "The one set in the job, not your sign-in password."}}})
 	open := view.Action{ID: "restore.open", Label: "Open the manifest", Primary: true, Href: s.route("/app/settings/backup/restore"), Method: "POST", Enabled: true}
@@ -392,13 +402,13 @@ func validInto(blob sealed.Blob, e backup.Entry, v string) bool {
 
 // postedChoice reads the matching form: into.N and pick.N of every row;
 // a choice that is not one of the row's is the one kept before.
-func postedChoice(r *http.Request, blob sealed.Blob, t *restoreTask, kept restoreChoice) restoreChoice {
+func postedChoice(fields url.Values, blob sealed.Blob, t *restoreTask, kept restoreChoice) restoreChoice {
 	c := restoreChoice{into: append([]string{}, kept.into...), picked: make([]bool, len(kept.picked))}
 	for i, e := range t.manifest.Collections {
-		if v := r.PostFormValue("into." + strconv.Itoa(i)); validInto(blob, e, v) {
+		if v := fields.Get("into." + strconv.Itoa(i)); validInto(blob, e, v) {
 			c.into[i] = v
 		}
-		v := r.PostFormValue("pick." + strconv.Itoa(i))
+		v := fields.Get("pick." + strconv.Itoa(i))
 		c.picked[i] = v == "on" || v == "true"
 	}
 	return c
@@ -570,6 +580,7 @@ func (s *Server) restoreMatch(sess *session.Session, blob sealed.Blob, t *restor
 		return s.postQuery("/app/settings/backup/restore/match", url.Values{"op": {op}})
 	}
 	m.Form = s.plainForm("/app/settings/backup/restore/match", "POST", csrfField(sess))
+	s.partsMatch(t, m)
 	// «Restore 3 collections» (s-backup-8): what the press restores.
 	run := view.Action{ID: "restore.run", Label: text("Restore " + plural(going, "collection")), Href: q("restore"), Method: "POST", Primary: true, Enabled: going > 0}
 	if going == 0 {
@@ -592,7 +603,10 @@ func (s *Server) restoreWill(sess *session.Session, blob sealed.Blob, t *restore
 		return "skip", false
 	}
 	// What the archive cannot give is said first: nothing of it is written.
-	if e.Kind != view.KindFile {
+	// An archive from this computer sent in parts holds no records until
+	// Restore sends them (Typecase's note 109, s-backup-20).
+	read := t.holds(e)
+	if e.Kind != view.KindFile && read {
 		if _, err := s.archiveRecords(zr, e); err != nil {
 			return text("cannot be restored: " + err.Error()), true
 		}
@@ -615,6 +629,9 @@ func (s *Server) restoreWill(sess *session.Session, blob sealed.Blob, t *restore
 	}
 	if e.Kind == view.KindFile {
 		return text(prefix + "missing files are uploaded, none is overwritten"), false
+	}
+	if !read {
+		return text(prefix + "compared when you restore"), false
 	}
 	n := s.countFor(sess, blob, t, zr, i, e, into)
 	if n.err != nil {
@@ -646,10 +663,11 @@ func (s *Server) matchRestore(w http.ResponseWriter, r *http.Request, sess *sess
 		s.writePage(w, r, http.StatusOK, s.restorePage(sess, "", "", restoreFailure("There is no archive open — the session may have ended. Open it again.")))
 		return
 	}
-	c := postedChoice(r, blob, t, t.choiceOf(blob))
-	switch r.URL.Query().Get("op") {
+	fields := restoreFields(r)
+	c := postedChoice(fields, blob, t, t.choiceOf(blob))
+	switch restoreOp(r, fields) {
 	case "into":
-		v := r.PostFormValue("into")
+		v := fields.Get("into")
 		for i, e := range t.manifest.Collections {
 			if c.picked[i] && validInto(blob, e, v) {
 				c.into[i] = v
@@ -667,6 +685,13 @@ func (s *Server) matchRestore(w http.ResponseWriter, r *http.Request, sess *sess
 		}
 	}
 	t.keep(c)
+	// Asked for the page's column (the zone of an archive from this
+	// computer, Typecase's note 109): answered in place, the file the page
+	// keeps stays with it.
+	if render.WantsFragment(r) {
+		s.writePage(w, r, http.StatusOK, s.restorePage(sess, "", ""))
+		return
+	}
 	s.redirect(w, r, "/app/settings/backup/restore")
 }
 
@@ -748,16 +773,29 @@ func (s *Server) openRestore(w http.ResponseWriter, r *http.Request, sess *sessi
 		}
 		s.writePage(w, r, http.StatusOK, s.refusedStep(sess, source, fields, why))
 	}
+	var parts *partsArchive
 	if source == "upload" {
 		up, err := uploadOf(r)
 		if err != nil || up.next == nil {
 			fail("No file came with the form.")
 			return
 		}
-		fields, name = up.fields, up.next.FileName()
-		if src, put, err = s.uploadedArchive(r.Context(), blob, up, fields); err != nil {
-			fail(err.Error())
-			return
+		fields = up.fields
+		if sent, size, ok := sentFile(fields); ok {
+			// The live layer sent the parts it was told (?op=ranges): the
+			// archive's start and end.
+			parts = &partsArchive{name: sent, size: size}
+			if err := readParts(up, parts, s.partsLimit()); err != nil {
+				fail(err.Error())
+				return
+			}
+			src, name = parts, sent
+		} else {
+			name = up.next.FileName()
+			if src, put, err = s.uploadedArchive(r.Context(), blob, up, fields); err != nil {
+				fail(err.Error())
+				return
+			}
 		}
 	} else {
 		var err error
@@ -766,8 +804,11 @@ func (s *Server) openRestore(w http.ResponseWriter, r *http.Request, sess *sessi
 			return
 		}
 	}
-	t := &restoreTask{src: src, password: fields.Get("password"), file: name, put: put}
+	t := &restoreTask{src: src, password: fields.Get("password"), file: name, put: put, here: source == "upload"}
 	_, m, err := backup.OpenAt(src, src.Size(), t.password)
+	if err == nil && parts != nil {
+		t.layout, err = backup.ReadLayout(src, src.Size(), t.password)
+	}
 	if err != nil {
 		msg := "This is not a Carrel archive, or it is damaged: " + err.Error()
 		switch {
@@ -775,6 +816,8 @@ func (s *Server) openRestore(w http.ResponseWriter, r *http.Request, sess *sessi
 			msg = "The password does not open this archive."
 		case errors.Is(err, errNoRange), errors.Is(err, errArchiveChanged):
 			msg = err.Error()
+		case errors.Is(err, errPartMissing):
+			msg = "The archive's directory is not where Carrel looked for it. Put the archive into a folder of your storage and choose From a server."
 		}
 		fail(msg)
 		return
@@ -787,6 +830,12 @@ func (s *Server) openRestore(w http.ResponseWriter, r *http.Request, sess *sessi
 	}
 	t.id = "restore-" + id
 	sess.KeepTask(t)
+	// Asked for the page's column (Typecase's note 109): step 2 comes in
+	// place, and the page keeps the file for Restore.
+	if render.WantsFragment(r) {
+		s.writePage(w, r, http.StatusOK, s.restorePage(sess, "", ""))
+		return
+	}
 	s.redirect(w, r, "/app/settings/backup/restore")
 }
 
@@ -833,7 +882,10 @@ func archiveLine(t *restoreTask) view.Runs {
 		}
 	}
 	head := "Archive · "
-	if t.manifest.Job != "" {
+	switch {
+	case t.here:
+		head = "From this computer · "
+	case t.manifest.Job != "":
 		head = "Job «" + t.manifest.Job + "» · "
 	}
 	parts := []any{head + "manifest read · " + plural(len(t.manifest.Collections), "collection") + " · " + grouped(records) + " " + pluralWord(records, "record")}
@@ -928,8 +980,36 @@ func (s *Server) runRestore(w http.ResponseWriter, r *http.Request, sess *sessio
 		s.writePage(w, r, http.StatusOK, s.restorePage(sess, "", "", restoreFailure("There is no archive open — the session may have ended. Open it again.")))
 		return
 	}
-	choice := postedChoice(r, blob, t, t.choiceOf(blob))
+	fields := restoreFields(r)
+	choice := postedChoice(fields, blob, t, t.choiceOf(blob))
 	t.keep(choice)
+	if a := t.parts(); a != nil {
+		// An archive from this computer in parts: the members of the
+		// collections chosen came with the form (?op=ranges). None came —
+		// the page that kept the file is gone — and step 1 asks for it
+		// again (Typecase's note 109).
+		if up, err := uploadOf(r); err == nil && isFileUpload(r) {
+			if name, size, ok := sentFile(up.fields); ok && name == a.name && size == a.size {
+				if err := readParts(up, a, s.partsLimit()); err != nil {
+					endRestore(sess)
+					s.writePage(w, r, http.StatusOK, s.refusedStep(sess, "upload", nil, line(err.Error())))
+					return
+				}
+			}
+		}
+		if _, fits := s.restoreSpans(sess, t, a, fields); !fits {
+			endRestore(sess)
+			s.writePage(w, r, http.StatusOK, s.refusedStep(sess, "upload", nil, line(errPartsTooLarge{s.cfg.ImportMaxBytes}.Error())))
+			return
+		}
+		for i, e := range t.manifest.Collections {
+			if choice.picked[i] && choice.into[i] != restoreSkip && !t.holds(e) {
+				endRestore(sess)
+				s.writePage(w, r, http.StatusOK, s.refusedStep(sess, "upload", nil, line(chooseAgain)))
+				return
+			}
+		}
+	}
 	zr, f, err := t.open()
 	if err != nil {
 		s.writePage(w, r, http.StatusOK, s.restorePage(sess, "", "", restoreFailure(err.Error())))
@@ -1415,11 +1495,24 @@ func (s *Server) postBackupRestore(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	if r.URL.Query().Get("op") == "browse" {
+	switch r.URL.Query().Get("op") {
+	case "browse":
 		s.browseRestore(w, r, sess)
+		return
+	case "ranges":
+		s.restoreRanges(w, r, sess)
 		return
 	}
 	s.openRestore(w, r, sess, s.catalogOf(sess))
+}
+
+// restoreOp is the op a press of the matching sends: in the address
+// (formaction) or as the button's value.
+func restoreOp(r *http.Request, fields url.Values) string {
+	if op := r.URL.Query().Get("op"); op != "" {
+		return op
+	}
+	return fields.Get("op")
 }
 
 // postBackupRestoreMatch is the one form of the matching (s-backup-8), by
@@ -1436,11 +1529,7 @@ func (s *Server) postBackupRestoreMatch(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	blob := s.catalogOf(sess)
-	op := r.URL.Query().Get("op")
-	if op == "" {
-		op = r.PostFormValue("op")
-	}
-	switch op {
+	switch restoreOp(r, restoreFields(r)) {
 	case "restore":
 		s.runRestore(w, r, sess, key, blob)
 	case "into", "skip", "all":

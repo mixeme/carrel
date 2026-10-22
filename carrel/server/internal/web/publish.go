@@ -705,8 +705,11 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		if mail {
 			row.Actions = append(row.Actions, send)
 		}
+		// Revoke sends the list's one form with the row's ID (s-publish-1,
+		// Typecase's note 110).
+		row.ID = l.ID
 		row.Actions = append(row.Actions, view.Action{ID: "publish.revoke", Label: "Revoke", Method: "POST", Danger: true, Enabled: true,
-			Href: s.postQuery("/app/publish", url.Values{"op": {"revoke"}, "id": {l.ID}})})
+			Href: s.postQuery("/app/publish", url.Values{"op": {"revoke"}})})
 		page.Rows = append(page.Rows, row)
 	}
 	// «Send this link» went (s-mail-4): said where its sheet came from.

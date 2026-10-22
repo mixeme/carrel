@@ -308,7 +308,11 @@ type PublishedRow struct {
 	// коллекция удалена; строка — подсказка плашки «no longer there»
 	// (s-publish-21), Expires — «—», Copy и Send выключены с причиной;
 	// пусто — ссылка жива
-	Gone    Text     `json:"gone,omitempty"`
-	Opens   int      `json:"opens"`
+	Gone  Text `json:"gone,omitempty"`
+	Opens int  `json:"opens"`
+	// ID — номер ссылки (не её секрет): значение `id` кнопки Revoke, которая
+	// отправляет общую форму списка `POST /app/publish?op=revoke`
+	// (s-publish-1, записка Typecase 110)
+	ID      string   `json:"id"`
 	Actions []Action `json:"actions"` // Copy · Send (с почтой) · Revoke (s-publish-1)
 }

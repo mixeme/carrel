@@ -40,7 +40,16 @@ const (
 // (s-backup-2), the restore on its own page (s-backup-7, -8).
 func Backup(p *view.BackupPage) w.Shell {
 	if p.Restore.Open {
-		return shell(p.Top, p.Rail, restoreMain(p))
+		sh := shell(p.Top, p.Rail, restoreMain(p))
+		if r := p.Restore; r.Ranges != "" || (r.Match != nil && r.Match.Ranges != "") {
+			// An archive from this computer (s-backup-15, -16, -20;
+			// Typecase's note 109): the page's column is the zone its steps
+			// answer into, so the page — and the file picked on it — stays.
+			body := sh.Body.(w.ShellBody)
+			body.Main.Zone, body.Main.Target = restoreZone, restoreZone
+			sh.Body = body
+		}
+		return sh
 	}
 	if p.Job != nil || (len(p.Jobs) == 0 && len(p.Empty) == 0) {
 		return shell(p.Top, p.Rail, jobPage(p))

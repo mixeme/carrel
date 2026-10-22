@@ -44,7 +44,21 @@ const (
 	backID   = "settings.back"
 	copyID   = "publish.copy"
 	revokeID = "publish.revoke"
+	// idField is what Revoke sends the list's one form with: the row's
+	// link (PublishedRow.ID, s-publish-1).
+	idField = "id"
 )
+
+// revokeForm is the ID of the form a row's Revoke sends — one for the list,
+// as every row's Revoke goes to the same address; empty where it is off.
+func revokeForm(r view.PublishedRow) string {
+	for _, a := range r.Actions {
+		if a.ID == revokeID && a.Enabled && a.Method == "POST" {
+			return bind.FormID(a)
+		}
+	}
+	return ""
+}
 
 // Screen draws the list from its view model, in the state the model is in.
 //
@@ -145,18 +159,30 @@ func acts(r view.PublishedRow) w.TableCell {
 		default:
 			b.Secondary = true
 			if a.ID == revokeID {
-				// Revoke breaks a link and keeps the data (s-publish-1).
+				// Revoke breaks a link and keeps the data (s-publish-1):
+				// it sends the list's one form with its row's link.
 				b.Kind = w.ButtonDanger
+				if a.Enabled {
+					b.Name, b.Value = idField, r.ID
+				}
 			}
 			twins = append(twins, view.MenuItem{Action: a, Separator: a.ID == revokeID && len(twins) > 0})
 		}
 		c.Parts = append(c.Parts, b)
 	}
 	if len(twins) > 0 {
+		items := bind.MenuItemsAt(twins, "", bind.FormID)
+		for i, it := range items {
+			// Revoke's twin sends the same form with the same link.
+			if m, ok := it.(w.MenuItem); ok && m.Form != "" && m.Form == revokeForm(r) {
+				m.Name, m.Value = idField, r.ID
+				items[i] = m
+			}
+		}
 		c.Drop = &w.Drop{
 			Trigger: w.Button{Icon: "dots", Small: true, Variant: w.ButtonPadX3, Title: more},
 			Row:     true,
-			Menu:    w.Menu{Items: bind.MenuItemsAt(twins, "", bind.FormID), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
+			Menu:    w.Menu{Items: items, Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
 		}
 	}
 	return c
@@ -166,10 +192,13 @@ func acts(r view.PublishedRow) w.TableCell {
 // by its action and address, and the top bar's.
 func Forms(p *view.PublishedLinksPage) []w.PostForm {
 	out := bind.TopForms(p.Top)
+	seen := map[string]bool{}
 	for _, r := range p.Rows {
 		for _, a := range r.Actions {
-			if a.Method == "POST" && a.Enabled {
-				out = append(out, bind.ActionForm(a, bind.FormID(a)))
+			// Every row's Revoke goes to the one address: one form.
+			if id := bind.FormID(a); a.Method == "POST" && a.Enabled && !seen[id] {
+				seen[id] = true
+				out = append(out, bind.ActionForm(a, id))
 			}
 		}
 	}

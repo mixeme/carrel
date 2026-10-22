@@ -369,7 +369,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.BackupPage) },
-		Frames: []string{"s-backup-1", "s-backup-2", "s-backup-6", "s-backup-7", "s-backup-8", "s-backup-15", "s-backup-16", "s-backup-17", "s-backup-18", "s-backup-19"},
+		Frames: []string{"s-backup-1", "s-backup-2", "s-backup-6", "s-backup-7", "s-backup-8", "s-backup-15", "s-backup-16", "s-backup-17", "s-backup-18", "s-backup-19", "s-backup-20"},
 		Draw:   func(model any) Root { return settings.Backup(model.(*view.BackupPage)) },
 		Title:  func(model any) string { return string(model.(*view.BackupPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return settings.BackupForms(model.(*view.BackupPage)) },

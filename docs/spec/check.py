@@ -132,7 +132,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
-          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history",
+          "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history","file-match",
           "calendar","event","link-never","gone","note-files-kept"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
@@ -522,6 +522,8 @@ STATE_FRAME = {
     "app-settings-backup-restore/file": "s-backup-15",
     "app-settings-backup-restore/too-large": "s-backup-16",
     "app-settings-backup-restore/server": "s-backup-17",
+    # Шаг 2 архива с этого компьютера, открытого кусками (записка Typecase 109).
+    "app-settings-backup-restore/file-match": "s-backup-20",
     "app-settings-backup-report/normal": "s-backup-18",
     # Депонирование у администратора и история пароля (записка Typecase 81).
     "admin-escrow/recovered": "s-admin-30",

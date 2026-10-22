@@ -233,6 +233,10 @@ func isFileUpload(r *http.Request) bool {
 	case len(seg) == 5 && seg[1] == "app" && seg[2] == "settings" && seg[3] == "backup" && seg[4] == "restore":
 		// An archive brought from this computer: as large as a copy is.
 		return true
+	case len(seg) == 6 && seg[1] == "app" && seg[2] == "settings" && seg[3] == "backup" && seg[4] == "restore" && seg[5] == "match":
+		// Restore of an archive from this computer brings the parts of the
+		// collections chosen (Typecase's note 109).
+		return true
 	}
 	return false
 }

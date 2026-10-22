@@ -72,11 +72,20 @@ func TestALinkGoesByALetterOfItsOwn(t *testing.T) {
 		t.Errorf("the letter being written changed: %+v", letter)
 	}
 
-	// Copy link instead sends nothing: Published links, where the row
-	// holds the link whole.
+	// Copy link instead sends nothing: the link's ready sheet, its address
+	// whole to copy (s-publish-13; Typecase's note 110 p. 5), closing back
+	// to Published links.
 	rec = f.h.do(postForm(actionHref(t, sheet.Actions, "mail.link.copy"), f.sess, url.Values{"to": {"bob@example.org"}}))
-	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/app/files/published" || len(relay.Letters()) != 1 {
-		t.Errorf("copy instead: %d %s, letters %d", rec.Code, rec.Header().Get("Location"), len(relay.Letters()))
+	ready := decode[view.PublishSheet](t, rec)
+	if rec.Code != http.StatusOK || len(relay.Letters()) != 1 {
+		t.Errorf("copy instead: %d, letters %d", rec.Code, len(relay.Letters()))
+	}
+	whole := formRow(ready.Form, "link")
+	if whole == nil || string(whole.Value) != "http://example.com"+string(made.Link) || !whole.ReadOnly || ready.Title != "Publish a contact" {
+		t.Errorf("copy instead = %q, link %+v", ready.Title, whole)
+	}
+	if c := actionHref(t, ready.Actions, "publish.close"); c != "/app/files/published" {
+		t.Errorf("its cross leads to %q", c)
 	}
 }
 

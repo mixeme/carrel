@@ -17,6 +17,41 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.353 — 2026-10-22
+
+Typecase `bc0b574` (notes 108–110): an archive from this computer is
+restored by parts, the rows of Published links revoke by one form, and
+«Copy link instead» shows the link.
+
+### Changed
+
+- **Restore from this computer by parts** (S-24.3; the owner's decision of
+  22.10.2026, Р-71). With the live layer the page keeps the archive and
+  `POST /app/settings/backup/restore?op=ranges` names the parts to send
+  (`text/plain`, a line «offset length» each): on step 1 the archive's start
+  and end (64 KiB and 8 MiB, a smaller archive whole), at Restore the
+  members of the collections chosen, whole age chunks. Step 1 opens the
+  archive from them, held in the session's memory; step 2 says «compared
+  when you restore» of records not read yet. Asked for the page's column
+  (`Carrel-View: fragment`, target `main`), step 1 and the bar of step 2
+  answer in place instead of redirecting. Restore without the parts — the
+  page that kept the file is gone — is step 1 again: «Choose the archive
+  again: Carrel keeps no copy of it.»; parts over the import ceiling are
+  refused the same way, with the storage as the way out.
+- `/app/settings/backup/restore/match` takes multipart, and its `op` as the
+  button's value too.
+- **Published links**: Revoke is `POST /app/publish?op=revoke` with `id` in
+  the form (`PublishedRow.ID`): one form for the list (s-publish-1).
+- **«Copy link instead»** (`POST /app/mail/send?id=…&op=link`) answers the
+  link's ready sheet (s-publish-13), its cross back where the letter came
+  from.
+
+### For consumers
+
+- `view.RestoreBlock.Ranges`, `view.RestoreMatch.Ranges` and `RangesOf`,
+  `view.PublishedRow.ID`.
+- New fixture `app-settings-backup-restore/file-match` (s-backup-20).
+
 ## v0.2.352 — 2026-10-22
 
 The settings, the files and the administration as their frames draw them

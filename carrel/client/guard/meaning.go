@@ -54,6 +54,12 @@ type control struct {
 	// its Save and Cancel —, and the rest is the page's script's: the buttons
 	// of the markup, «⋯», Auto-save, the width, Focus. Such a control needs no
 	// meaning of HTML, and one that has it is held as any other.
+	//
+	// It is also a part of the queue the library's live layer fills while an
+	// upload goes (Queue.Progress, Typecase's note 108): the templates of a
+	// file's row and of a name taken — their answers are values of «answer»
+	// the layer sends with the file —, and a queue's Hide that folds it in
+	// place (Queue.Fold) where the server gave it nothing to follow.
 	scripted bool
 	// picture: the widget is a row of a tree, not the rail's, none of whose
 	// rows leads or sends — the tree is a picture of a place, not a choice:
@@ -201,6 +207,23 @@ const (
 	buttonDisabled = 2
 	inputSearch    = 3
 )
+
+// liveQueuePart says whether the field of a Queue is what its live layer
+// works without the server (control.scripted): Row and Taken of a queue
+// that follows an upload's form, Toggle of one that folds.
+func liveQueuePart(c control, name, field string) bool {
+	if name != "Queue" {
+		return false
+	}
+	switch field {
+	case "Row", "Taken":
+		return c.str("Progress") != ""
+	case "Toggle":
+		fold := c.v.FieldByName("Fold")
+		return fold.IsValid() && !fold.IsNil()
+	}
+	return false
+}
 
 // contract is the meaning each type of control of Typecase's widget package
 // must carry (docs/guide/screen.md of Typecase, §3 and §5).
@@ -584,6 +607,7 @@ func Meaning(v any, forms ...string) []string {
 			fv := c.v.Field(i)
 			at := c.path + "." + f.Name
 			opens := closed && f.Name == "Trigger"
+			scripted := scripted || (c.scripted && name == "QueueItem") || liveQueuePart(c, name, f.Name)
 			switch f.Type.Kind() {
 			case reflect.Struct, reflect.Pointer, reflect.Interface:
 				if w := deref(fv); isControl(w, pkg) {

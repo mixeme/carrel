@@ -842,6 +842,11 @@ type RestoreBlock struct {
 	// or put it there and choose **From a server**.» (s-backup-16); пусто —
 	// отказа нет
 	Refusal Runs `json:"refusal,omitempty"`
+	// Ranges — адрес, который живой слой спрашивает, какие куски архива
+	// с этого компьютера слать вместо файла (FileField.Ranges шага 1,
+	// s-backup-15; записки Typecase 98, 109): строки «смещение длина» —
+	// начало и конец архива; у других источников пусто
+	Ranges string `json:"ranges,omitempty"`
 	// Match — шаг сопоставления (s-backup-8); nil — архив не открыт
 	Match *RestoreMatch `json:"match"`
 	// Report — шаг «3 · Report» (s-backup-18,
@@ -892,6 +897,13 @@ type RestoreMatch struct {
 	// Into — список «Restore into» полосы: цель всем отмеченным строкам
 	Into FormRow      `json:"into"`
 	Rows []RestoreRow `json:"rows"`
+	// Ranges, RangesOf — у архива, пришедшего с этого компьютера кусками
+	// (s-backup-20, записка Typecase 109): форма по Restore спрашивает
+	// Ranges со своими полями — какие куски слать (члены выбранных
+	// коллекций) — и шлёт их из файла, который страница держит под именем
+	// поля шага 1 RangesOf («file»); у прочих архивов пусто
+	Ranges   string `json:"ranges,omitempty"`
+	RangesOf string `json:"rangesOf,omitempty"`
 }
 
 // RestoreRow — коллекция архива в сопоставлении.

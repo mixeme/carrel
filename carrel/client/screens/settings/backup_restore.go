@@ -32,6 +32,9 @@ const (
 	chooseFile    = "Choose a file"
 	colHappened   = "What happened"
 	colRestored   = "Restored into"
+	// restoreZone is the zone of the page's column (C-7.2 main) the steps
+	// of an archive from this computer answer into.
+	restoreZone = "main"
 )
 
 // sourceWidths are the widths the frames give the fields of a source
@@ -130,7 +133,9 @@ func sourceDialog(r view.RestoreBlock) w.Dialog {
 			case row.Kind == view.InputFile:
 				// The archive picked on this computer goes with the form
 				// (s-backup-15).
-				b := w.Button{Label: chooseFile, File: &w.FileField{Name: row.Name, Accept: row.Accept, Label: string(row.Label)}}
+				// With the live layer it goes in the parts the server names
+				// (FileField.Ranges, Typecase's notes 98, 109).
+				b := w.Button{Label: chooseFile, File: &w.FileField{Name: row.Name, Accept: row.Accept, Label: string(row.Label), Ranges: r.Ranges}}
 				fields.Items = append(fields.Items, w.Field{Label: string(row.Label), Width: sourceWidths[row.Name],
 					Parts: []w.FieldPart{w.Line{Items: []w.LinePart{b}, Gap: w.LineGap8}}})
 			case row.Extra != nil:
@@ -207,7 +212,9 @@ func copiesTable(r view.FormRow) w.Table {
 // where it goes, what will happen —; that restoring creates and erases
 // nothing, in alarm.
 func matchDialog(r view.RestoreBlock, m *view.RestoreMatch) w.Dialog {
-	d := w.Dialog{Variant: w.DialogWide, Action: m.Form.Action, Method: m.Form.Method, Fields: bind.Hidden(m.Form)}
+	// An archive from this computer opened in parts (s-backup-20): Restore
+	// sends the parts of the collections chosen from the file step 1 kept.
+	d := w.Dialog{Variant: w.DialogWide, Action: m.Form.Action, Method: m.Form.Method, Fields: bind.Hidden(m.Form), Ranges: m.Ranges, RangesOf: m.RangesOf}
 	h := w.Head{Title: &w.HeadTitle{Text: string(r.Title)}, Subs: bind.Sub(r.Subtitle), Acts: &w.Acts{}}
 	for _, a := range r.Actions {
 		h.Acts.Items = append(h.Acts.Items, submitTo(a, m.Form.Action))

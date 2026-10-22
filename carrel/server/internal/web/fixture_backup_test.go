@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"testing"
 	"time"
 
+	"carrel.dev/carrel/server/internal/backup"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/view"
@@ -100,6 +102,31 @@ func TestFixtureBackupStates(t *testing.T) {
 		t.Fatalf("restore: %d %s", rec.Code, rec.Body.String())
 	}
 	real.compare(t, "app-settings-backup-report/normal.json", real.h.do(get("/app/settings/backup/restore/report", real.sess)))
+
+	// The same archive brought from this computer by the live layer
+	// (s-backup-20, Typecase's note 109): opened by its start and end, the
+	// records not read yet — compared when restored —, the last skipped as
+	// on s-backup-8.
+	var archive []byte
+	for _, srv := range real.servers {
+		if body, ok := srv.File(real.realPath(t, "Files") + "carrel-backup/" + made.File); ok {
+			archive = []byte(body)
+		}
+	}
+	if archive == nil {
+		t.Fatal("the home job's archive is not on its storage")
+	}
+	step1 := url.Values{"source": {"upload"}, "store": {""}, "password": {"archive-pw"}}
+	if rec := real.h.do(restoreParts(t, real, "/app/settings/backup/restore?from=file", step1, archive, backup.OpenSpans(int64(len(archive))))); rec.Code != http.StatusSeeOther {
+		t.Fatalf("open in parts: %d %s", rec.Code, rec.Body.String())
+	}
+	if rec := real.h.do(postForm(match+"skip", real.sess, url.Values{"pick.3": {"on"}})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("skip: %d %s", rec.Code, rec.Body.String())
+	}
+	if rec := real.h.do(postForm(match+"into", real.sess, url.Values{"pick.0": {"on"}, "pick.1": {"on"}, "pick.2": {"on"}})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("tick: %d %s", rec.Code, rec.Body.String())
+	}
+	real.compare(t, "app-settings-backup-restore/file-match.json", real.h.do(get("/app/settings/backup/restore", real.sess)))
 
 	// The first step's other sources (Typecase's notes 97, 99): this
 	// computer with a storage for a large archive (s-backup-15), the same
@@ -215,6 +242,32 @@ func mockupBackups(t *testing.T, app *mockupApp) (string, string) {
 	app.h.users.NoteRefusedTrigger(work, "cbk_7f3a-91de", "203.0.113.7")
 	app.h.users.SetClock(mockupNow(t))
 	return work, home
+}
+
+// restoreParts is a form of the restore with the parts of an archive from
+// this computer, as the library's live layer sends it (Typecase's notes 98,
+// 109): the fields, the file's name and size, the parts.
+func restoreParts(t *testing.T, app *mockupApp, href string, fields url.Values, archive []byte, parts []backup.Span) *http.Request {
+	t.Helper()
+	var body bytes.Buffer
+	mw := multipart.NewWriter(&body)
+	_ = mw.WriteField("_csrf", app.sess.CSRFToken())
+	for k, vs := range fields {
+		for _, v := range vs {
+			_ = mw.WriteField(k, v)
+		}
+	}
+	_ = mw.WriteField("file.name", "carrel-backup-2026-08-14.zip")
+	_ = mw.WriteField("file.size", strconv.Itoa(len(archive)))
+	for _, p := range parts {
+		fw, _ := mw.CreateFormFile("file", strconv.FormatInt(p.At, 10)+"-"+strconv.FormatInt(p.Len, 10))
+		_, _ = fw.Write(archive[p.At:p.End()])
+	}
+	_ = mw.Close()
+	req := httptest.NewRequest(http.MethodPost, href, &body)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: app.sess.ID()})
+	return req
 }
 
 // restoreUpload is an archive of n bytes sent from this computer without a

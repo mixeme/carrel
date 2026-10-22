@@ -24,16 +24,19 @@ var (
 	// after the row's buttons: its items are their twins, not buttons of the
 	// row.
 	frameRowDrop = regexp.MustCompile(`(?s)<details class="tc-drop">.*?</details>`)
+	// A row's button that goes rather than posts is a link drawn as a
+	// button: Send of a published link (s-publish-1, Typecase's note 110).
+	frameRowButton = regexp.MustCompile(`(?s)<(?:button\b[^>]*|a class="tc-btn\b[^>]*)>(.*?)</(?:button|a)>`)
 )
 
-// frameRows are the labelled buttons of each row of a frame's table, the
-// «⋯» and the twins in its menu left out.
+// frameRows are the labelled buttons of each row of a frame's table — those
+// that are links too —, the «⋯» and the twins in its menu left out.
 func frameRows(t *testing.T, id string) [][]string {
 	t.Helper()
 	var out [][]string
 	for _, m := range frameRowActs.FindAllStringSubmatch(mockupFrame(t, id), -1) {
 		row := []string{}
-		for _, b := range frameButton.FindAllStringSubmatch(frameRowDrop.ReplaceAllString(m[1], ""), -1) {
+		for _, b := range frameRowButton.FindAllStringSubmatch(frameRowDrop.ReplaceAllString(m[1], ""), -1) {
 			if label := frameText(b[1]); label != "" {
 				row = append(row, label)
 			}

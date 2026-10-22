@@ -165,16 +165,17 @@ func TestRevokedIsNeverWas(t *testing.T) {
 		t.Fatalf("links = %+v", list.Rows)
 	}
 	revoke := actionHref(t, list.Rows[0].Actions, "publish.revoke")
-	if strings.Contains(revoke, strings.TrimPrefix(link, "/p/")) {
-		t.Fatalf("Revoke carries the secret: %s", revoke)
+	id := list.Rows[0].ID
+	if id == "" || strings.Contains(id, strings.TrimPrefix(link, "/p/")) || strings.Contains(revoke, "id=") {
+		t.Fatalf("Revoke goes by %q to %s: the row's ID, sent by the list's one form (s-publish-1)", id, revoke)
 	}
 
 	adminID := f.h.st.Snapshot().Users[0].ID
 	f.h.invite(adminID, "mallory", "password456")
-	if rec := f.h.do(postForm(revoke, f.h.login("mallory", "password456"), url.Values{})); rec.Code != http.StatusNotFound {
+	if rec := f.h.do(postForm(revoke, f.h.login("mallory", "password456"), url.Values{"id": {id}})); rec.Code != http.StatusNotFound {
 		t.Errorf("someone else revoked: %d", rec.Code)
 	}
-	if rec := f.h.do(postForm(revoke, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+	if rec := f.h.do(postForm(revoke, f.sess, url.Values{"id": {id}})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("revoke: %d", rec.Code)
 	}
 	gone := f.h.do(anon(link))
