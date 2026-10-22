@@ -17,6 +17,26 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.360 — 2026-10-23
+
+What the client's sheets of collections needed.
+
+### Changed
+
+- **New collection from an account's card** names the server in its head
+  (`Stamp`, s-profile-29); a refusal's way out is «Back to the form» — no
+  Cancel (s-profile-6); «Connect account» has its icon (s-profile-28).
+- **Move and copy** list the server it is on first, then those it can go
+  to, then the rest (s-profile-8, -34, -35).
+- **A move that kept the original** lists what was lost in one order.
+
+### Fixtures
+
+- `app-collections-new/normal` and `/account` are the form as typed —
+  «Поездки» — with the address its name gives (s-profile-5, -29);
+  `app-collections-delete/normal` and `/folder` name the backup jobs and the
+  devices of davloom, and when they were last archived (s-profile-9, -19).
+
 ## v0.2.359 — 2026-10-22
 
 The collections' sheets by Typecase note 112 (task 192; Typecase

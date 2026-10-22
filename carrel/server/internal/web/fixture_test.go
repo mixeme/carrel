@@ -2552,7 +2552,11 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 	// the hint under «On which server».
 	t.Run("app-collections-new", func(t *testing.T) {
 		combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
-		app.compare(t, "app-collections-new/normal.json", app.h.do(get("/app/collections/new?kind=event", app.sess)))
+		// «Поездки» typed, as the frame draws it: the address shows what the
+		// name gives (s-profile-5) — the form as typed, «Back to the form».
+		app.compare(t, "app-collections-new/normal.json", app.h.do(postForm("/app/collections/new?kind=event&op=back", app.sess, url.Values{
+			"account": {app.realAccount(t, "lichnyj")}, "name": {"Поездки"}, "colour": {"#6b4e7a"}, "components": {"VEVENT", "VTODO"},
+		})))
 		// Кл7: a new folder on the storage (s-profile-20) — its name is
 		// its address, nothing else to ask —, and the server refusing to
 		// make a calendar (s-profile-6): the sheet stays, the form as left.
@@ -2649,20 +2653,17 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 	// closes it, «password · 401», and chooses radicale, the one server that
 	// suits.
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
-	for sheet, slug := range map[string]string{"rename": "dni-rozhdeniya", "move": "lichnyj", "delete": "lichnyj"} {
+	for sheet, slug := range map[string]string{"rename": "dni-rozhdeniya", "move": "lichnyj"} {
 		t.Run("app-collections-"+sheet, func(t *testing.T) {
 			q := url.Values{"a": {app.realAccount(t, slug)}, "c": {app.realPath(t, slug)}, "back": {"/app/settings/connections"}}
 			app.compare(t, "app-collections-"+sheet+"/normal.json", app.h.do(get("/app/collections/"+sheet+"?"+q.Encode(), app.sess)))
 		})
 	}
-	// A folder of the storage renamed (s-profile-18) and deleted
-	// (s-profile-19, «Open in Files») — Кл10, Кл20.
-	for _, sheet := range []string{"rename", "delete"} {
-		t.Run("app-collections-"+sheet+"-folder", func(t *testing.T) {
-			q := url.Values{"a": {app.realAccount(t, "Documents")}, "c": {app.realPath(t, "Documents")}}
-			app.compare(t, "app-collections-"+sheet+"/folder.json", app.h.do(get("/app/collections/"+sheet+"?"+q.Encode(), app.sess)))
-		})
-	}
+	// A folder of the storage renamed (s-profile-18) — Кл10.
+	t.Run("app-collections-rename-folder", func(t *testing.T) {
+		q := url.Values{"a": {app.realAccount(t, "Documents")}, "c": {app.realPath(t, "Documents")}}
+		app.compare(t, "app-collections-rename/folder.json", app.h.do(get("/app/collections/rename?"+q.Encode(), app.sess)))
+	})
 	// Nobody that holds calendars answers (s-profile-21, Кл7): the sheet
 	// says so, and Create is off with the same words.
 	t.Run("app-collections-new-silent", func(t *testing.T) {
@@ -2671,6 +2672,8 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 		for _, name := range []string{"nextcloud", "radicale · vps"} {
 			app.servers[name].Refuse("REPORT", 503, "the server is busy")
 			app.servers[name].Refuse("PROPFIND", 503, "the server is busy")
+			defer app.servers[name].Accept("REPORT")
+			defer app.servers[name].Accept("PROPFIND")
 		}
 		// Every kind asked again: a server that answered for one kind
 		// answers (silentNow).
@@ -2680,6 +2683,19 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 		combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 		app.compare(t, "app-collections-new/silent.json", app.h.do(get("/app/collections/new?kind=event", app.sess)))
 	})
+	// Deleting «Личный» and the folder «Documents» (s-profile-9, -19; Кл20):
+	// what points at them — the backup job «Личное на домашний диск», which
+	// archived them on 14 August, and the three devices of davloom —, last,
+	// as the jobs and devices change every rail after them.
+	mockupBackups(t, app)
+	mockupDevices(t, app)
+	app.h.users.SetClock(mockupNow(t))
+	for state, slug := range map[string]string{"normal": "lichnyj", "folder": "Documents"} {
+		t.Run("app-collections-delete/"+state, func(t *testing.T) {
+			q := url.Values{"a": {app.realAccount(t, slug)}, "c": {app.realPath(t, slug)}, "back": {"/app/settings/connections"}}
+			app.compare(t, "app-collections-delete/"+state+".json", app.h.do(get("/app/collections/delete?"+q.Encode(), app.sess)))
+		})
+	}
 	_ = anna
 }
 
@@ -2691,9 +2707,19 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 // (-31) and the move that kept the original (-32).
 func TestFixtureCollectionSheets(t *testing.T) {
 	app := newMockupApp(t)
+	settings := "/app/settings/connections"
+	// From the account's card before any list was read: no server is
+	// known to be silent, so the server field has no line under it
+	// (s-profile-29).
+	t.Run("app-collections-new/account", func(t *testing.T) {
+		// «Поездки» typed, as the frame draws it — the form as typed.
+		q := url.Values{"a": {app.realAccount(t, "lichnyj")}, "back": {settings}, "op": {"back"}}
+		app.compare(t, "app-collections-new/account.json", app.h.do(postForm("/app/collections/new?"+q.Encode(), app.sess, url.Values{
+			"account": {app.realAccount(t, "lichnyj")}, "kind": {"event"}, "name": {"Поездки"}, "colour": {"#6b4e7a"}, "components": {"VEVENT", "VTODO"},
+		})))
+	})
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-	settings := "/app/settings/connections"
 	sheet := func(slug string, extra url.Values) url.Values {
 		q := url.Values{"a": {app.realAccount(t, slug)}, "c": {app.realPath(t, slug)}, "back": {settings}}
 		for k, v := range extra {
@@ -2701,10 +2727,6 @@ func TestFixtureCollectionSheets(t *testing.T) {
 		}
 		return q
 	}
-	t.Run("app-collections-new/account", func(t *testing.T) {
-		q := url.Values{"a": {app.realAccount(t, "lichnyj")}, "back": {settings}}
-		app.compare(t, "app-collections-new/account.json", app.h.do(get("/app/collections/new?"+q.Encode(), app.sess)))
-	})
 	t.Run("app-collections-rename/feed", func(t *testing.T) {
 		q := url.Values{"back": {settings}}
 		for _, s := range func() []sealed.Subscription {

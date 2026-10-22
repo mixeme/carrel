@@ -20,7 +20,21 @@
   ],
   "archive": [
     {
-      "text": "No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new calendar at a new address — not into this one, and not to this address."
+      "text": "Last time it was in an archive: "
+    },
+    {
+      "mark": "mono",
+      "text": "2026-08-16"
+    },
+    {
+      "text": ". Restoring brings the records back into a "
+    },
+    {
+      "mark": "strong",
+      "text": "new"
+    },
+    {
+      "text": " collection — not into this one, and not to this address."
     }
   ],
   "export": {
@@ -80,6 +94,18 @@
     {
       "then": "answers “not found” from that moment",
       "what": "1 published link"
+    },
+    {
+      "then": "copies this collection; it will run one short and say so",
+      "what": "Backup job «Рабочее, ежедневно»"
+    },
+    {
+      "then": "copies this collection; it will run one short and say so",
+      "what": "Backup job «Личное на домашний диск»"
+    },
+    {
+      "then": "it disappears for them at the next sync",
+      "what": "3 devices through davloom"
     }
   ],
   "subject": "nextcloud · Личный",
@@ -1731,7 +1757,7 @@
           "label": "Carrel",
           "method": "GET"
         },
-        "davloom": "davloom · running · 0 devices",
+        "davloom": "davloom · running · 3 devices",
         "foot": [],
         "nav": [
           {
@@ -1781,7 +1807,7 @@
             "method": "GET"
           },
           {
-            "count": null,
+            "count": 3,
             "enabled": true,
             "href": "/app/settings/davloom",
             "id": "settings.davloom",
@@ -1789,7 +1815,7 @@
             "method": "GET"
           },
           {
-            "count": null,
+            "count": 3,
             "enabled": true,
             "href": "/app/settings/backup",
             "icon": "i-archive",
@@ -1827,7 +1853,27 @@
                 "text": "No device has connected since the start."
               }
             ],
-            "title": "davloom · running · no devices",
+            "title": "davloom · running · 3 devices",
+            "tone": "on"
+          },
+          {
+            "line": [
+              {
+                "text": "Last backup "
+              },
+              {
+                "mark": "mono",
+                "text": "2026-08-16 03:10"
+              },
+              {
+                "text": " · "
+              },
+              {
+                "hint": "The archive was read back from the destination and the checksum matched",
+                "text": "verified"
+              }
+            ],
+            "title": "Backups are running",
             "tone": "on"
           }
         ],

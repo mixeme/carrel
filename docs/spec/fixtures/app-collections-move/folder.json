@@ -57,6 +57,16 @@
     "options": [
       {
         "colour": "",
+        "id": "/app/collections/move?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Documents\u0026to=a-sftp-vps",
+        "label": "sftpgo · vps",
+        "last": false,
+        "readOnly": true,
+        "reason": "already there",
+        "stamp": "",
+        "value": "a-sftp-vps"
+      },
+      {
+        "colour": "",
         "href": "/app/collections/move?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Documents\u0026to=a-nc-home",
         "id": "/app/collections/move?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Documents\u0026to=a-nc-home",
         "label": "nextcloud",
@@ -85,16 +95,6 @@
         "reason": "password · 401",
         "stamp": "",
         "value": "a-baikal"
-      },
-      {
-        "colour": "",
-        "id": "/app/collections/move?a=a-sftp-vps\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Documents\u0026to=a-sftp-vps",
-        "label": "sftpgo · vps",
-        "last": false,
-        "readOnly": true,
-        "reason": "already there",
-        "stamp": "",
-        "value": "a-sftp-vps"
       }
     ]
   },

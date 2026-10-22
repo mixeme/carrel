@@ -68,6 +68,17 @@
       },
       {
         "colour": "",
+        "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Files\u0026to=a-sftp-vps",
+        "id": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Files\u0026to=a-sftp-vps",
+        "label": "sftpgo · vps",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "files",
+        "value": "a-sftp-vps"
+      },
+      {
+        "colour": "",
         "id": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Files\u0026to=a-rad-vps",
         "label": "radicale · vps",
         "last": false,
@@ -85,17 +96,6 @@
         "reason": "password · 401",
         "stamp": "",
         "value": "a-baikal"
-      },
-      {
-        "colour": "",
-        "href": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Files\u0026to=a-sftp-vps",
-        "id": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Files\u0026to=a-sftp-vps",
-        "label": "sftpgo · vps",
-        "last": false,
-        "readOnly": false,
-        "reason": "",
-        "stamp": "files",
-        "value": "a-sftp-vps"
       }
     ]
   },

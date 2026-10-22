@@ -4,6 +4,25 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.6.4 — 2026-10-23
+
+Server `v0.2.360`, Typecase `0f51d45`.
+
+### Added
+
+- **The collections' sheets** (`/app/collections/{new,rename,move,delete}`;
+  U-6.10): New collection — by kind and without one, nowhere to create, the
+  server's refusal (s-profile-5, -6, -20, -21, -28, -29); Rename and colour —
+  a folder, a feed, the refusal in the sheet (-7, -18, -30, -33); Move or
+  Copy — a folder, the whole storage (-8, -34, -35); Delete on the server —
+  what points at it, the archive, Download ‹.ics› first or Open in Files
+  (-9, -19).
+
+### Changed
+
+- An input whose sample follows another field carries it (`From`: the
+  address after the name).
+
 ## v0.6.3 — 2026-10-22
 
 Server `v0.2.359`, Typecase `0f51d45` (note 112).

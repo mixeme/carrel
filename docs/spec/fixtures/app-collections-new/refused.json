@@ -18,13 +18,6 @@
       "label": "Try again",
       "method": "POST",
       "target": "sheet"
-    },
-    {
-      "enabled": true,
-      "href": "/app/calendar",
-      "id": "collection.cancel",
-      "label": "Cancel",
-      "method": "GET"
     }
   ],
   "explain": "This account may sign in and read, but nextcloud would not let it create here. The server does not say why — no such right for the user, or a password issued read-only; whoever runs the server can tell.",

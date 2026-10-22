@@ -244,7 +244,7 @@ func TestRefusedCreateLeavesNothing(t *testing.T) {
 			}
 		}
 	}
-	if formFields(sheet.Form).Get("name") != "Trips" || len(sheet.Actions) != 3 || sheet.Actions[0].Label != "Back to the form" {
+	if formFields(sheet.Form).Get("name") != "Trips" || len(sheet.Actions) != 2 || sheet.Actions[0].Label != "Back to the form" {
 		t.Errorf("the form lost what was entered, or the way on: %v %+v", formFields(sheet.Form), sheet.Actions)
 	}
 	if got := len(catalogOf(t, f).Collections); got != before || auditCount(f.h, "collection.create") != 0 {
@@ -370,7 +370,8 @@ func TestCreateTakesTheKindsTheServerReports(t *testing.T) {
 
 // After a refusal the sheet is the server's answer, and its foot is the way
 // on (s-profile-6): «Back to the form» — the form as it was left, no
-// refusal, nothing sent — and «Try again», the same form sent once more.
+// refusal, nothing sent — and «Try again», the same form sent once more; no
+// Cancel (note 112).
 func TestRefusedCreateOffersBackAndAgain(t *testing.T) {
 	f := calendarFixture(t, nil)
 	f.srv.Refuse("MKCALENDAR", http.StatusForbidden, `<?xml version="1.0"?><D:error xmlns:D="DAV:"><D:need-privileges/></D:error>`)
@@ -380,7 +381,7 @@ func TestRefusedCreateOffersBackAndAgain(t *testing.T) {
 	for _, a := range sheet.Actions {
 		labels = append(labels, string(a.Label))
 	}
-	if strings.Join(labels, "|") != "Back to the form|Try again|Cancel" || !sheet.Actions[0].Primary || sheet.Actions[1].Primary {
+	if strings.Join(labels, "|") != "Back to the form|Try again" || !sheet.Actions[0].Primary || sheet.Actions[1].Primary {
 		t.Fatalf("actions after a refusal = %+v", sheet.Actions)
 	}
 	for _, a := range sheet.Actions[:2] {

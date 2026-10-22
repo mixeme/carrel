@@ -254,6 +254,9 @@ func Input(r view.FormRow) w.Input {
 		// Follows, Day): handed to the library as they are.
 		Follows: r.Follows,
 		Day:     r.Day,
+		// A value its sample follows as another field is typed: the
+		// address after the name (FormRow.From, s-profile-5).
+		From: r.From,
 	}
 	switch r.Kind {
 	case view.InputPassword:

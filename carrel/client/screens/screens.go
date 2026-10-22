@@ -6,6 +6,7 @@ import (
 	"carrel.dev/carrel/client/screens/admin"
 	"carrel.dev/carrel/client/screens/agenda"
 	"carrel.dev/carrel/client/screens/ask"
+	"carrel.dev/carrel/client/screens/collection"
 	"carrel.dev/carrel/client/screens/confirm"
 	"carrel.dev/carrel/client/screens/conflict"
 	"carrel.dev/carrel/client/screens/contact"
@@ -136,6 +137,46 @@ var All = []Screen{
 		},
 		Title: func(model any) string { return string(model.(*view.CopiesSheet).Title) },
 		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.CopiesSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.CollectionRenameSheet) },
+		Frames: []string{"s-profile-7", "s-profile-18", "s-profile-30", "s-profile-33"},
+		Draw: func(model any) Root {
+			p := model.(*view.CollectionRenameSheet)
+			return over(p.Under, collection.Rename(p))
+		},
+		Title: func(model any) string { return string(model.(*view.CollectionRenameSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.CollectionRenameSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.CollectionDeleteSheet) },
+		Frames: []string{"s-profile-9", "s-profile-19"},
+		Draw: func(model any) Root {
+			p := model.(*view.CollectionDeleteSheet)
+			return over(p.Under, collection.Delete(p))
+		},
+		Title: func(model any) string { return string(model.(*view.CollectionDeleteSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.CollectionDeleteSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.CollectionMoveSheet) },
+		Frames: []string{"s-profile-8", "s-profile-34", "s-profile-35"},
+		Draw: func(model any) Root {
+			p := model.(*view.CollectionMoveSheet)
+			return over(p.Under, collection.Move(p))
+		},
+		Title: func(model any) string { return string(model.(*view.CollectionMoveSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.CollectionMoveSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.CollectionNewSheet) },
+		Frames: []string{"s-profile-5", "s-profile-6", "s-profile-20", "s-profile-21", "s-profile-28", "s-profile-29"},
+		Draw: func(model any) Root {
+			p := model.(*view.CollectionNewSheet)
+			return over(p.Under, collection.New(p))
+		},
+		Title: func(model any) string { return string(model.(*view.CollectionNewSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.CollectionNewSheet).Under) },
 	},
 	{
 		Model:  func() any { return new(view.RecordDeleteSheet) },

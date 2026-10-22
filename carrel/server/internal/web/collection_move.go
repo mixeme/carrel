@@ -101,6 +101,18 @@ func (s *Server) collectionMoveTargets(sess *session.Session, blob sealed.Blob, 
 		}
 		opts = append(opts, opt)
 	}
+	// The server it is on first, then those it can go to, then the rest in
+	// the catalog's order (s-profile-8, -34, -35).
+	rank := func(o view.TargetOption) int {
+		switch {
+		case o.Value == conn.ID:
+			return 0
+		case !o.ReadOnly:
+			return 1
+		}
+		return 2
+	}
+	slices.SortStableFunc(opts, func(a, b view.TargetOption) int { return rank(a) - rank(b) })
 	return opts, eligible
 }
 
@@ -642,6 +654,8 @@ func (m *collectionMove) readBack(ctx context.Context, sent []transferred) ([]vi
 			lost = append(lost, text(who+" · "+strings.Join(loss.Properties, ", ")))
 		}
 	}
+	// In one order whatever order the server listed them in.
+	slices.Sort(lost)
 	return lost, nil
 }
 

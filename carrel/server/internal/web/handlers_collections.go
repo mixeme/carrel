@@ -862,6 +862,11 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		}
 	}
 	sheet.Target.Chosen = chosen.ID
+	if f.kindChoice && chosen.ID != "" {
+		// Opened from an account's card, the head names that server
+		// (s-profile-29).
+		sheet.Stamp = view.Stamp(connLabel(chosen))
+	}
 	switch {
 	case holding == 0:
 		sheet.Note = text(fmt.Sprintf("No connected server holds %ss. Connect one that does first.", noun))
@@ -895,7 +900,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	if len(eligible) == 0 {
 		again := view.Action{ID: "collection.again", Label: "Try again", Href: s.route(action), Method: "GET", Primary: true, Enabled: true}
 		if holding == 0 {
-			again = view.Action{ID: "collection.connect", Label: "Connect account", Href: s.route("/app/settings/connections/new"), Method: "GET", Primary: true, Enabled: true}
+			again = view.Action{ID: "collection.connect", Label: "Connect account", Icon: "i-server", Href: s.route("/app/settings/connections/new"), Method: "GET", Primary: true, Enabled: true}
 		}
 		sheet.Actions = []view.Action{again, cancel}
 		return sheet
@@ -963,7 +968,10 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		}
 		sheet.Actions = []view.Action{create}
 		s.afterRefusal(&sheet, action)
-		sheet.Actions = append(sheet.Actions, cancel)
+		if sheet.Failure == nil {
+			// A refusal's way out is «Back to the form» (s-profile-6): no Cancel.
+			sheet.Actions = append(sheet.Actions, cancel)
+		}
 		return sheet
 	}
 	if f.kind != view.KindContact || f.kindChoice {
@@ -1030,7 +1038,10 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	}
 	sheet.Actions = []view.Action{create}
 	s.afterRefusal(&sheet, action)
-	sheet.Actions = append(sheet.Actions, cancel)
+	if sheet.Failure == nil {
+		// A refusal's way out is «Back to the form» (s-profile-6): no Cancel.
+		sheet.Actions = append(sheet.Actions, cancel)
+	}
 	return sheet
 }
 
