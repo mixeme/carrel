@@ -3,6 +3,7 @@ package web_test
 import (
 	"archive/zip"
 	"bytes"
+	"hash/crc32"
 	"net/url"
 	"strings"
 	"testing"
@@ -98,19 +99,27 @@ func TestImportNotesFromAZip(t *testing.T) {
 		t.Errorf("a name out of the archive = %q", row)
 	}
 
-	// Past the ceilings: more members than an import takes, more bytes
-	// unpacked than it takes — refused whole.
+	// No ceiling of an import (Р-73): more members than the restore's
+	// ceiling are read. A member is read as far as the archive says it is
+	// long: one that says it is small and is not is a row that failed.
 	f.h.cfg.ImportMaxRecords = 2
 	page = freshImport(t, f)
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "many.zip", zipOf(t, "a.md", "# A", "b.md", "# B", "c.md", "# C"))))
-	if page.Step != view.ImportStepSource || !hasNotice(page.Notices, "Nothing was imported") {
-		t.Errorf("three members past a ceiling of two: step %q, %+v", page.Step, page.Notices)
+	if page.Step != view.ImportStepPreview || len(page.Notices) != 0 {
+		t.Errorf("three members: step %q, %+v", page.Step, page.Notices)
 	}
-	f.h.cfg.ImportMaxRecords, f.h.cfg.ImportMaxBytes = 100, 4<<10
-	bomb := zipOf(t, "big.md", "# Big\n\n"+strings.Repeat("a", 64<<10))
+	var liar bytes.Buffer
+	zw := zip.NewWriter(&liar)
+	body := "# Big\n\n" + strings.Repeat("a", 4<<10)
+	w, err := zw.CreateRaw(&zip.FileHeader{Name: "big.md", Method: zip.Store, CompressedSize64: uint64(len(body)), UncompressedSize64: 10, CRC32: crc32.ChecksumIEEE([]byte(body))})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = w.Write([]byte(body))
+	_ = zw.Close()
 	page = freshImport(t, f)
-	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "bomb.zip", bomb)))
-	if len(bomb) > 4<<10 || page.Step != view.ImportStepSource || !hasNotice(page.Notices, "Nothing was imported") {
-		t.Errorf("64 KB unpacked from %d bytes past a ceiling of 4 KB: step %q, %+v", len(bomb), page.Step, page.Notices)
+	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "liar.zip", liar.Bytes())))
+	if row := previewRow(t, page.Preview, "big.md"); !strings.HasSuffix(string(row[3]), "; it holds more.") {
+		t.Errorf("a member longer than the archive says = %q", row)
 	}
 }

@@ -95,9 +95,6 @@ func TestImportAsksAboutRecordsAlreadyThere(t *testing.T) {
 	if report == nil || report.Created != 1 || report.Replaced != 1 || report.Renamed != 0 || report.Skipped != 0 || len(report.Replaces) != 1 || !strings.HasSuffix(string(report.Replaces[0]), " · ada") {
 		t.Fatalf("report = %+v", report)
 	}
-	if strings.Contains(string(report.Note), "Nothing there was overwritten") || !strings.Contains(string(report.Note), "replaced") {
-		t.Errorf("note = %q, want it to say a record was replaced", report.Note)
-	}
 	if paths := f.srv.Paths(peopleBook); len(paths) != 2 {
 		t.Errorf("People holds %v", paths)
 	}

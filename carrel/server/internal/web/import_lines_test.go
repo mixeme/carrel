@@ -42,8 +42,10 @@ func TestImportLinesAreTheFrames(t *testing.T) {
 	if l := lines["Когда-нибудь"]; l.Cells[3] != "Ready — a task without a date is a task" {
 		t.Errorf("no date = %+v", l)
 	}
-	if l := lines["— (no SUMMARY)"]; !l.Untitled {
-		t.Errorf("untitled = %+v, want the placeholder marked", l)
+	// A task without a title under the default one, marked, and said so
+	// (Р-72; s-io-7: «Ready — no title»).
+	if l := lines["Untitled task"]; !l.Untitled || l.Cells[3] != "Ready — no title" {
+		t.Errorf("untitled = %+v, want the default title marked", l)
 	}
 	if l := lines["Созвон с подрядчиком"]; l.Result != view.ImportSkipped || l.Component != "VEVENT" || !strings.Contains(string(l.Cells[2]), "2026") {
 		t.Errorf("an event in a list of tasks = %+v, want skipped, VEVENT as a badge, its own date", l)

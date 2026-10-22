@@ -357,12 +357,42 @@
         "text": " directly in that folder. Subfolders are not walked, nothing on the server is moved or deleted — the files stay where they were."
       }
     ],
-    "hint": [],
-    "kinds": [
-      ".ics",
-      ".md",
-      ".zip"
+    "hint": [
+      {
+        "mark": "mono",
+        "text": ".md"
+      },
+      {
+        "text": " — Markdown, "
+      },
+      {
+        "mark": "mono",
+        "text": ".zip"
+      },
+      {
+        "text": " — any number of them, "
+      },
+      {
+        "mark": "mono",
+        "text": ".ics"
+      },
+      {
+        "text": " — iCalendar 2.0 journal entries. Several files may be picked at once; events and tasks in an "
+      },
+      {
+        "mark": "mono",
+        "text": ".ics"
+      },
+      {
+        "text": " are skipped and named in the report."
+      }
     ],
+    "kinds": [
+      ".md",
+      ".zip",
+      ".ics"
+    ],
+    "many": true,
     "note": [
       {
         "text": "Front matter is read when present: title, date, tags, UID and "

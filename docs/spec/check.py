@@ -133,7 +133,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
           "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history","file-match","filled",
-          "calendar","event","link-never","gone","note-files-kept","contact"}
+          "calendar","event","link-never","gone","note-files-kept","contact","unanswered"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -251,6 +251,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-contact-new": "/app/contacts/{account}/{col}/new",
     "app-event-new": "/app/calendar/{account}/{col}/new",
     "app-contact-import": "/app/contacts/{account}/{col}/import",
+    "app-contacts-import": "/app/contacts/import",
     # Мастер импорта прочих родов (Им19): шаг 1 заметок с деревом папок,
     # предпросмотры и отчёт — каждое состояние со своим кадром (STATE_FRAME).
     "app-event-import": "/app/calendar/{account}/{col}/import",
@@ -477,6 +478,13 @@ STATE_FRAME = {
     "app-contact-import/normal": "s-io-3",  # шаг 1 — свой кадр, не s-io-5 (Им20)
     "app-contact-import/preview": "s-io-5",
     "app-contact-import/report": "s-io-9",
+    # Записка Typecase 111: шаг 1 календаря и задач, пустое Into после
+    # броска на сведённый вид, отказ «не тот файл», коллекция не ответила.
+    "app-event-import/normal": "s-io-15",
+    "app-task-import/normal": "s-io-16",
+    "app-contacts-import/normal": "s-io-17",
+    "app-contact-import/refused": "s-io-18",
+    "app-contact-import/unanswered": "s-io-19",
     "app-event-import/preview": "s-io-6",
     "app-event-import/report": "s-io-14",
     "app-task-import/preview": "s-io-7",

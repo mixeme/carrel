@@ -1,8 +1,6 @@
 package web
 
 import (
-	"strings"
-
 	"carrel.dev/carrel/server/internal/sealed"
 
 	"carrel.dev/carrel/server/view"
@@ -54,73 +52,30 @@ func dropOf(k view.Kind, href, how string, into any) *view.ImportDrop {
 	} else {
 		d.Line = join(append([]any{"One ", monoRun(string(accept[0])), " file"}, tail...)...)
 	}
-	for _, other := range []struct {
-		ext   string
-		holds []view.Kind
-	}{
-		{".vcf", []view.Kind{view.KindContact}},
-		{".ics", []view.Kind{view.KindEvent, view.KindTask, view.KindNote}},
-		{".md", []view.Kind{view.KindNote}},
-		{".zip", []view.Kind{view.KindNote}},
-	} {
-		if containsText(accept, other.ext) {
-			continue
-		}
-		var where []string
-		for _, k := range other.holds {
-			where = append(where, dropHolder[k])
-		}
-		takes := "takes"
-		if k == view.KindContact {
-			takes = "take"
-		}
-		says := join(dropTaker[k]+" "+takes+" ", formatsRuns(accept), " — "+joinAnd(where)+" "+takesFor(where)+" this one")
-		d.Elsewhere = append(d.Elsewhere, view.ImportElsewhere{Ext: text(other.ext), Says: says})
+	// A file it does not take is refused on the overlay in one phrase
+	// (Typecase's note 111 p. 4; s-io-1): «Only ‹.vcf› files are imported
+	// here»; several files where one is taken — «One file at a time: only
+	// notes take several».
+	d.Refused = join("Only ", formatsRuns(accept, " or "), " files are imported here")
+	if !d.Many {
+		d.OneOnly = oneFileOnly
 	}
 	return d
 }
 
-// dropTaker names the kind's collection as the refusal begins: «Contacts
-// take ‹.vcf› — …» (s-io-1).
-var dropTaker = map[view.Kind]string{
-	view.KindContact: "Contacts", view.KindEvent: "A calendar", view.KindTask: "A list of tasks", view.KindNote: "A notebook",
-}
-
-// dropHolder names where a file of another kind goes: «the calendar and the
-// list of tasks take this one» (s-io-1).
-var dropHolder = map[view.Kind]string{
-	view.KindContact: "contacts", view.KindEvent: "the calendar", view.KindTask: "the list of tasks", view.KindNote: "a notebook",
-}
-
-// takesFor agrees the verb with where: one holder takes, two take.
-func takesFor(where []string) string {
-	if len(where) == 1 && where[0] != "contacts" {
-		return "takes"
-	}
-	return "take"
-}
-
-// joinAnd lists words as a sentence does: «the calendar, the list of tasks
-// and a notebook».
-func joinAnd(words []string) string {
-	switch len(words) {
-	case 0:
-		return ""
-	case 1:
-		return words[0]
-	}
-	return strings.Join(words[:len(words)-1], ", ") + " and " + words[len(words)-1]
-}
+// oneFileOnly is the refusal of several files where one is taken, on the
+// overlay and of the first step's form (Typecase's note 111 p. 4).
+const oneFileOnly = "One file at a time: only notes take several"
 
 // formatsRuns writes extensions in mono, as the overlay does: «‹.md›, ‹.zip›
-// and ‹.ics›».
-func formatsRuns(exts []view.Text) view.Runs {
+// and ‹.ics›»; last joins the last two.
+func formatsRuns(exts []view.Text, last string) view.Runs {
 	var out []any
 	for i, e := range exts {
 		switch {
 		case i == 0:
 		case i == len(exts)-1:
-			out = append(out, " and ")
+			out = append(out, last)
 		default:
 			out = append(out, ", ")
 		}

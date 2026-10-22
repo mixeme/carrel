@@ -35,6 +35,7 @@ var Models = map[string]func() any{
 	"app-contact":                         func() any { return &view.ContactPage{} },
 	"app-contact-edit":                    func() any { return &view.ContactEditPage{} },
 	"app-contact-import":                  func() any { return &view.ImportPage{} },
+	"app-contacts-import":                 func() any { return &view.ImportPage{} },
 	"app-event-import":                    func() any { return &view.ImportPage{} },
 	"app-task-import":                     func() any { return &view.ImportPage{} },
 	"app-note-import":                     func() any { return &view.ImportPage{} },

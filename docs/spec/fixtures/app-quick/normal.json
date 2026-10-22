@@ -204,9 +204,9 @@
         "compact": null,
         "drop": {
           "accept": [
-            ".ics",
             ".md",
-            ".zip"
+            ".zip",
+            ".ics"
           ],
           "action": {
             "csrf": "csrf",
@@ -217,37 +217,6 @@
             "label": "Import",
             "method": "POST"
           },
-          "elsewhere": [
-            {
-              "ext": ".vcf",
-              "says": [
-                {
-                  "text": "A notebook takes "
-                },
-                {
-                  "mark": "mono",
-                  "text": ".ics"
-                },
-                {
-                  "text": ", "
-                },
-                {
-                  "mark": "mono",
-                  "text": ".md"
-                },
-                {
-                  "text": " and "
-                },
-                {
-                  "mark": "mono",
-                  "text": ".zip"
-                },
-                {
-                  "text": " — contacts take this one"
-                }
-              ]
-            }
-          ],
           "lead": "Drop to import",
           "line": [
             {
@@ -273,7 +242,33 @@
             }
           ],
           "many": true,
-          "note": "The preview opens first: nothing is written until it has been read"
+          "note": "The preview opens first: nothing is written until it has been read",
+          "refused": [
+            {
+              "text": "Only "
+            },
+            {
+              "mark": "mono",
+              "text": ".md"
+            },
+            {
+              "text": ", "
+            },
+            {
+              "mark": "mono",
+              "text": ".zip"
+            },
+            {
+              "text": " or "
+            },
+            {
+              "mark": "mono",
+              "text": ".ics"
+            },
+            {
+              "text": " files are imported here"
+            }
+          ]
         },
         "filter": "",
         "filterForm": {

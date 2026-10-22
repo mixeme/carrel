@@ -104,9 +104,9 @@
         {
           "cells": [
             "tasks.ics",
-            "— (no SUMMARY)",
+            "Untitled task",
             "28 August 2026",
-            "Ready"
+            "Ready — no title"
           ],
           "result": "ready",
           "untitled": true
@@ -161,7 +161,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 4,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/dela",
@@ -230,7 +230,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": null,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "/app/tasks/a-nc-home/rabota",
@@ -311,14 +311,11 @@
     "folderHint": [],
     "hint": [
       {
-        "text": "iCalendar 2.0. One file holds any number of tasks; events and notes in it are named and left out. An address book takes "
-      },
-      {
         "mark": "mono",
-        "text": ".vcf"
+        "text": ".ics"
       },
       {
-        "text": " here instead."
+        "text": " — iCalendar 2.0. One file holds any number of tasks; events and journal entries in it are skipped and named in the report."
       }
     ],
     "kinds": [
@@ -428,7 +425,7 @@
         "label": "Refresh",
         "method": "GET"
       },
-      "answered": "",
+      "answered": "just now",
       "running": false
     },
     "search": {

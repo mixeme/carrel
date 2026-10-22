@@ -38,23 +38,22 @@ type ListBar struct {
 // Many — берёт ли несколько файлов разом (заметки). Lead, Line, Note — слова
 // накладки: «Drop to import»; «One ‹.vcf› file into ‹nextcloud ·
 // Контакты›»; «The preview opens first: nothing is written until it has
-// been read». Elsewhere — отказ файлу другого рода, бросок не принимается:
-// «Contacts take ‹.vcf› — the calendar and the list of tasks take this one».
+// been read». Refused, OneOnly — отказ броска, бросок не принимается.
 // Имени файла в накладке нет: пока файл тащат, браузер его не отдаёт
 type ImportDrop struct {
-	Action    Action            `json:"action"`
-	Accept    []Text            `json:"accept"`
-	Many      bool              `json:"many"`
-	Lead      Text              `json:"lead"`
-	Line      Runs              `json:"line"`
-	Note      Text              `json:"note"`
-	Elsewhere []ImportElsewhere `json:"elsewhere"`
-}
-
-// ImportElsewhere — файл чужого рода у броска: расширение и почему не сюда.
-type ImportElsewhere struct {
-	Ext  Text `json:"ext"`
-	Says Runs `json:"says"`
+	Action Action `json:"action"`
+	Accept []Text `json:"accept"`
+	Many   bool   `json:"many"`
+	Lead   Text   `json:"lead"`
+	Line   Runs   `json:"line"`
+	Note   Text   `json:"note"`
+	// Refused — красная строка накладки вместо Lead, когда файл не того
+	// расширения: «Only ‹.vcf› files are imported here» (у заметок — «‹.md›,
+	// ‹.zip› or ‹.ics›»); OneOnly — когда файлов несколько, а род берёт один:
+	// «One file at a time: only notes take several», у заметок пусто
+	// (записка Typecase 111 п. 4, подпись s-io-1)
+	Refused Runs `json:"refused"`
+	OneOnly Text `json:"oneOnly,omitempty"`
 }
 
 // Columns — выбор столбцов списка (components-21, components-42, S-9.6).

@@ -3749,6 +3749,12 @@ func TestFixtureImport(t *testing.T) {
 		preview := app.h.do(importRequest(book+"/import", app.sess, false, "Разное (mix).vcf", []byte(vcf)))
 		app.compare(t, "app-contact-import/preview.json", preview)
 		app.compare(t, "app-contact-import/report.json", run(t, preview))
+		// A file whose first line is not BEGIN:VCARD: nothing read (s-io-18).
+		app.compare(t, "app-contact-import/refused.json", app.h.do(importRequest(book+"/import", app.sess, false, "Разное (mix).vcf",
+			[]byte("PRODID:-//Other client//EN\r\n"+vcf))))
+		// Dropped on the combined list: the first step with the file in hand
+		// and «Into» empty (s-io-17).
+		app.compare(t, "app-contacts-import/normal.json", app.h.do(importRequest("/app/contacts/import", app.sess, false, "Разное (mix).vcf", []byte(vcf))))
 	})
 	t.Run("app-event-import", func(t *testing.T) {
 		cal := app.listPath(t, "calendar", "lichnyj")
@@ -3758,6 +3764,10 @@ func TestFixtureImport(t *testing.T) {
 			"BEGIN:VEVENT\r\nUID:e7a1-ekb\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Созвон с Екатеринбургом\r\nDTSTART;TZID=Asia/Yekaterinburg:20260817T100000\r\nDTEND;TZID=Asia/Yekaterinburg:20260817T110000\r\nEND:VEVENT\r\n" +
 			"BEGIN:VTODO\r\nUID:e7a1-bilety\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Купить билеты\r\nEND:VTODO\r\n" +
 			"END:VCALENDAR\r\n"
+		// The first step of a calendar (s-io-15), the calendars read: the
+		// rail counts them.
+		openList(t, app, "/app/calendar")
+		app.compare(t, "app-event-import/normal.json", app.h.do(get(cal+"/import", app.sess)))
 		preview := app.h.do(importRequest(cal+"/import", app.sess, false, "calendar.ics", []byte(ics)))
 		app.compare(t, "app-event-import/preview.json", preview)
 		app.compare(t, "app-event-import/report.json", run(t, preview))
@@ -3770,6 +3780,9 @@ func TestFixtureImport(t *testing.T) {
 			"BEGIN:VTODO\r\nUID:t9b2-pusto\r\nDTSTAMP:20260801T000000Z\r\nDUE;VALUE=DATE:20260828\r\nEND:VTODO\r\n" +
 			"BEGIN:VEVENT\r\nUID:t9b2-podryadchik\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Созвон с подрядчиком\r\nDTSTART;VALUE=DATE:20260817\r\nEND:VEVENT\r\n" +
 			"END:VCALENDAR\r\n"
+		// The first step of a list of tasks (s-io-16), the lists read.
+		openList(t, app, "/app/tasks")
+		app.compare(t, "app-task-import/normal.json", app.h.do(get(tasks+"/import", app.sess)))
 		app.compare(t, "app-task-import/preview.json", app.h.do(importRequest(tasks+"/import", app.sess, false, "tasks.ics", []byte(ics))))
 	})
 	t.Run("app-note-import", func(t *testing.T) {
@@ -3779,6 +3792,17 @@ func TestFixtureImport(t *testing.T) {
 		app.compare(t, "app-note-import/normal.json", app.h.do(get(notes+"/import", app.sess)))
 		const md = "---\r\ntitle: Встреча с подрядчиком\r\ndate: 2026-03-11\r\ncategories: работа\r\n---\r\n\r\nОбсудили смету и сроки.\r\n"
 		app.compare(t, "app-note-import/preview.json", app.h.do(importRequest(notes+"/import", app.sess, false, "2026-03-11-podryadchik.md", []byte(md))))
+	})
+	// The address book chosen does not answer the preview (s-io-19): what is
+	// already there cannot be told, Import is off for it. Last: the server
+	// stays refusing.
+	t.Run("app-contact-import/unanswered", func(t *testing.T) {
+		book := app.listPath(t, "contacts", "kontakty")
+		const vcf = "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:7c1e-2b40-9a11\r\nFN:Ирина Соколова\r\nEND:VCARD\r\n"
+		for _, m := range []string{"PROPFIND", "REPORT"} {
+			app.servers["nextcloud"].Refuse(m, http.StatusServiceUnavailable, "")
+		}
+		app.compare(t, "app-contact-import/unanswered.json", app.h.do(importRequest(book+"/import", app.sess, false, "Разное (mix).vcf", []byte(vcf))))
 	})
 }
 

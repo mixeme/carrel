@@ -419,7 +419,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/contacts/{account}/{col}/{uid}/rewrite` | GET, POST | вход | лист (GET); страница, редирект (POST) | `RewriteSheet`; `?plan=` — план, выданный сохранением карточки (S-15.4). POST переписывает и отвечает карточкой (`ContactPage`) с итогом (s-contacts-16); с `op=leave` — редирект на карточку, ничего не переписав; без живого плана GET и POST — редирект на карточку |
 | `/app/{kind}/{account}/{col}/{uid}/delete` | POST | вход | редирект или лист | `RecordDeleteSheet` |
 | `/app/{kind}/import` | GET, POST | вход | страница | `ImportPage` — вход из сведённого вида: мастер спрашивает «Into». POST с файлом (поле `file`) — бросок на сведённый список (Им4, s-io-1): шаг 1 с взятым файлом (`Source.Taken`) и пустым «Into»; выбор «Into» — предпросмотр этого файла |
-| `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage`; `to=` и `into=` — подключение и коллекция «Into» (адрес варианта `TargetOption.Href`); POST без `op` — файл: multipart, поле `file` (`Action.File` у Preview file); у заметок полей `file` может быть несколько — один набор, как zip (s-io-1), у прочих родов несколько — отказ; `op=run` — записать предпросмотр, `op=cancel` — бросить файл; `existing=` (`skip`, `replace`, `copy`) — что делать с записями файла, которые уже есть в коллекции (`ImportExisting`, s-io-5…-8); у заметок `folder=` (подключение), `path=` (хранилище) и `in=` (папка внутри него, сегменты через «/») — папка дерева (`FileTreeNode.Href`, GET), `op=folder` с ними — «Preview folder» |
+| `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage`; `to=` и `into=` — подключение и коллекция «Into» (адрес варианта `TargetOption.Href`); POST без `op` — файл: multipart, поле `file` (`Action.File` у Preview file); у заметок полей `file` может быть несколько — один набор, как zip (s-io-1), у прочих родов несколько — отказ «One file at a time: only notes take several.»; тело читается потоком, как загрузка, без потолка и временного файла (Р-73); `op=run` — записать предпросмотр, `op=cancel` — бросить файл; `existing=` (`skip`, `replace`, `copy`) — что делать с записями файла, которые уже есть в коллекции (`ImportExisting`, s-io-5…-8); у заметок `folder=` (подключение), `path=` (хранилище) и `in=` (папка внутри него, сегменты через «/») — папка дерева (`FileTreeNode.Href`, GET), `op=folder` с ними — «Preview folder» |
 | `/app/{kind}/export` | GET | вход | лист | `ExportSheet` — вход из сведённого вида: из какой коллекции |
 | `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — ; с `?uid=` — одна запись (S-19); когда в файл не попали бы записи, которых Carrel не разобрал, — экран коллекции с уведомлением и действием `collection.export.without` («Export without them», тот же адрес с `&without=1`) |
 | `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage`; у контакта `?uid=` — форма с выбранной фотографией (`…/new/photo-preview`): её кадр в `Photo`, скрытое поле `uid`, Save создаёт карточку под этим UID с фотографией; UID, чьего кадра сеанс не держит, не берётся, а форма с таким `uid` не сохраняется молча без фотографии. У события, задачи и заметки — вложения до записи (s-agenda-15, S-20): POST с `?op=` — `attach` (multipart: вся форма и файл `file`, кнопка Attach шлёт саму форму — `Action.Submits`), `pickfile` (форма; редирект в дерево Files `?for=attach&new=`), `attachfile&file=` (файл Files), `detach&n=` (форма); первый шаг выдаёт UID записи, файлы ждут под ним с набранным, ответ — `/new?uid=` (форма как набрана, файлы в `Attach`, скрытое `uid`). До Save ничего не пишется: внутрь записи — до порога вместе, больший файл с этого компьютера не берётся (запись сначала сохраняют), больший файл Files — ссылка; Save создаёт запись под этим UID с файлами |
@@ -1097,11 +1097,12 @@ type ListBar struct {
 // (заметки). Lead, Line, Note — слова накладки: «Drop to import»; «One
 // ‹.vcf› file into ‹nextcloud · Контакты›»; «The preview opens first:
 // nothing is written until it has been read» — имени файла нет: пока файл
-// тащат, браузер его не отдаёт. Elsewhere — файл другого рода: бросок не
-// принимается, накладка говорит Says — «Contacts take ‹.vcf› — the
-// calendar, the list of tasks and a notebook take this one»
-type ImportDrop struct { Action Action; Accept []Text; Many bool; Lead Text; Line Runs; Note Text; Elsewhere []ImportElsewhere }
-type ImportElsewhere struct { Ext Text; Says Runs }
+// тащат, браузер его не отдаёт. Отказ броска (записка Typecase 111 п. 4):
+// файл не того расширения — красная строка Refused вместо Lead, «Only
+// ‹.vcf› files are imported here» (у заметок — «‹.md›, ‹.zip› or ‹.ics›»);
+// файлов несколько, а род берёт один, — OneOnly, «One file at a time: only
+// notes take several» (у заметок пусто). Бросок тогда не принимается
+type ImportDrop struct { Action Action; Accept []Text; Many bool; Lead Text; Line Runs; Note Text; Refused Runs; OneOnly Text }
 
 // Выбор столбцов (components-21, components-42; S-9.6). Меню — форма:
 // отмеченные пункты уходят полем col в том порядке, в каком стоят, — порядок
@@ -2244,7 +2245,8 @@ type ImportSource struct {
     Folder     *FileTree     // у заметок — дерево папок WebDAV (s-io-4): хранилища и папки открытого вглубь до выбранной, «Documents › notes»; узел — GET, приходит с ним выбранным (Chosen)
     Preview    *Action       // «Preview folder» под деревом (s-io-4): POST выбранной; выключена с причиной, пока папка не выбрана; nil — папок нет
     FolderHint Runs          // строка под деревом: «Every ‹.md› directly in that folder …» (s-io-4)
-    Taken      Runs          // файл, уже взятый броском на сведённый список (Им4): имя моноширинно, размер, формат; пусто — файла нет
+    Taken      Runs          // файл, уже взятый броском на сведённый список (Им4, s-io-17): имя моноширинно — значение поля файла; пусто — файла нет
+    Many       bool          // поле берёт несколько файлов разом (multiple): у заметок (записка 111 п. 3)
     Note       Runs          // сообщение шага: на первом — «Nothing is written until the preview has been read …» (s-io-3), у заметок — front matter и ‹X-›свойства (s-io-4); на предпросмотре — что импорт делает с записями рода (s-io-5…8)
 }
 // Что сделать с записями файла, которые уже есть в коллекции (записка 52,
@@ -2277,9 +2279,14 @@ type ImportLine struct { Cells []Text; Result ImportResult; Untitled bool; Compo
 // по ответу «Skip» («Already here, skipped»), Heres — «Артём Белов ·
 // 1a77-40de-bb02», в Skipped не входят; Skipped — чужого рода; Replaced —
 // записи коллекции, заменённые версией файла, Replaces — какие, в Created
-// не входят; копии — Renames, «1a77-… → 9c02-…» («Imported as copies»);
-// Failed — не записано (запись не прочлась или сервер отказал), Failures —
-// почему, строка на запись. Rows — те же записи таблицами. Нет записей
+// не входят; Renamed, NewUIDs — карточка «With a new UID» (записка 111
+// п. 7): у кого UID здесь не тот, что в файле, и почему — «Вера Дорошенко ·
+// 2b7e-11aa → 9d04-77c1 · imported as a copy», «… · the account holds
+// this UID in another collection», «… · the server gave its own»; Lost,
+// Losts — «Not kept by the server» (п. 8): что импорт, перечитав
+// записанное, не нашёл, — «Галина Мещерякова · PHOTO», запись целиком —
+// «… · the whole record»; Failed — не записано (запись не прочлась или
+// сервер отказал), Failures — почему, строка на запись. Нет записей
 // карточки — карточки нет.
 type ImportReport struct {
     Created  int
@@ -2292,9 +2299,9 @@ type ImportReport struct {
     Replaces []Text
     Failed   int
     Failures []Text
-    Renames  []Text
-    Rows     []ImportTable
-    Note     Text
+    NewUIDs  []Text
+    Lost     int
+    Losts    []Text
 }
 
 type PublishSheet struct {
@@ -4217,8 +4224,8 @@ type LossReport struct { // сервер принял запись, но что-
 | `CARREL_PHOTO_MAX_PIXELS` | `100000000` | Отказ до декодирования | — |
 | `CARREL_PHOTO_THUMB_SIDE` | `96` | Миниатюра в списках | — |
 | `CARREL_PHOTO_MAX_UPLOAD_BYTES` | `67108864` | Потолок загрузки фотографии | — |
-| `CARREL_IMPORT_MAX_BYTES` | `16777216` | Потолок файла импорта | — |
-| `CARREL_IMPORT_MAX_RECORDS` | `5000` | Записей в одном импорте | — |
+| `CARREL_IMPORT_MAX_BYTES` | `16777216` | Архив восстановления в памяти сеанса; у импорта потолка нет (Р-73) | — |
+| `CARREL_IMPORT_MAX_RECORDS` | `5000` | Записей в архиве восстановления; у импорта потолка нет (Р-73) | — |
 | `CARREL_FILES_MAX_ENTRIES` | `2000` | Членов папки в листинге | админ |
 | `CARREL_PROGRESS_MODE` | `sse` | `poll` выключает поток для прокси, который его буферизует | админ |
 | `CARREL_PROGRESS_POLL_MILLIS` | `700` | Интервал запасного опроса (`PollBar.Every`) | — |

@@ -1,7 +1,6 @@
 package web_test
 
 import (
-	"strings"
 	"testing"
 
 	"carrel.dev/carrel/server/internal/davtest"
@@ -29,26 +28,9 @@ func TestImportSaysWhatTheServerDidNotKeep(t *testing.T) {
 	if page.Report.Created != 2 {
 		t.Fatalf("report = %+v", page.Report)
 	}
-	var lossy, whole string
-	for _, table := range page.Report.Rows {
-		for _, row := range table.Lines {
-			row := row.Cells
-			switch {
-			case len(row) < 3:
-			case row[0] == "With a place":
-				lossy = string(row[2])
-			case row[0] == "Plain":
-				whole = string(row[2])
-			}
-		}
-	}
-	if !strings.Contains(lossy, "did not keep") || !strings.Contains(lossy, "LOCATION") {
-		t.Errorf("the row of the record that lost its place says %q", lossy)
-	}
-	if whole != "Created" {
-		t.Errorf("the row of the record kept whole says %q", whole)
-	}
-	if !strings.Contains(string(page.Report.Note), "not kept whole") {
-		t.Errorf("the note of the report = %q", page.Report.Note)
+	// «Not kept by the server» (s-io-9; Typecase's note 111 p. 8): the
+	// record that lost its place and what it lost, the one kept whole not.
+	if page.Report.Lost != 1 || len(page.Report.Losts) != 1 || string(page.Report.Losts[0]) != "With a place · LOCATION" {
+		t.Errorf("not kept = %d %q", page.Report.Lost, page.Report.Losts)
 	}
 }

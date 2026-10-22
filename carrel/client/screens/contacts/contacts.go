@@ -282,7 +282,7 @@ func side(d view.Details) *w.Side {
 	h := w.Head{
 		Title:  &w.HeadTitle{Text: string(d.Title), Size: w.HeadTitle19},
 		Tools:  tools,
-		Subs:   []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(d.Subtitle)}}},
+		Subs:   []w.HeadSub{bind.SourceSub(d.Source.Colour, d.Subtitle)},
 		Acts:   &w.Acts{Items: []w.ActsPart{w.Close{Label: "Close the panel", Href: d.Close}}},
 		Middle: true,
 	}

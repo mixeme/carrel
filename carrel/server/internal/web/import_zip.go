@@ -3,20 +3,20 @@ package web
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"strings"
 )
 
 // A zip of Markdown files is the notes' other file (s-io-8): every .md in
 // it, its folders too, is a note, and the row names the file. The archive is
-// somebody else's (S-29.4): it is told by its content, not its name; its
-// members are counted against CARREL_IMPORT_MAX_RECORDS before one is read;
-// what is unpacked is counted against CARREL_IMPORT_MAX_BYTES as it is read,
-// so a member that says it is small and is not, stops there; nothing in it
-// is unpacked anywhere — a name is a label of a row, never a path, and one
-// that would climb out of the archive is named and left out.
+// somebody else's (S-29.4): it is told by its content, not its name. An
+// import has no ceiling of its own (Р-73, the owner's decision of
+// 22.10.2026), so a member is read as far as the archive says it is long: one
+// that says it is small and is not stops there, a row that failed. Nothing
+// in it is unpacked anywhere — a name is a label of a row, never a path, and
+// one that would climb out of the archive is named and left out.
 
 // zipMagic is how a zip archive begins.
 var zipMagic = []byte("PK\x03\x04")
@@ -50,11 +50,7 @@ func (s *Server) readZipNotes(c *collectionCtx, name string, body []byte) (*impo
 			members = append(members, zf)
 		}
 	}
-	if len(members) > s.cfg.ImportMaxRecords {
-		return nil, errTooManyRecords{len(members), s.cfg.ImportMaxRecords}
-	}
 	d := &importDraft{Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, Source: name, Size: int64(len(body)), Format: "zip"}
-	left := s.cfg.ImportMaxBytes
 	markdown := 0
 	for _, zf := range members {
 		d.Files++
@@ -76,16 +72,17 @@ func (s *Server) readZipNotes(c *collectionCtx, name string, body []byte) (*impo
 			d.Skipped = append(d.Skipped, importSkip{What: label, Reason: err.Error(), Failed: true})
 			continue
 		}
-		text, err := io.ReadAll(io.LimitReader(rc, left+1))
+		// The reader stops where the archive says the member ends.
+		text, err := io.ReadAll(rc)
 		rc.Close()
+		if errors.Is(err, zip.ErrFormat) {
+			d.Skipped = append(d.Skipped, importSkip{What: label, Reason: "The archive says it holds " + string(formatSize(int64(zf.UncompressedSize64))) + "; it holds more.", Failed: true})
+			continue
+		}
 		if err != nil {
 			d.Skipped = append(d.Skipped, importSkip{What: label, Reason: err.Error(), Failed: true})
 			continue
 		}
-		if int64(len(text)) > left {
-			return nil, &http.MaxBytesError{Limit: s.cfg.ImportMaxBytes}
-		}
-		left -= int64(len(text))
 		// A file without front matter is dated by its own time in the
 		// archive, as a file of a folder is (s-io-4).
 		d.takeMarkdown(c, label, text, zf.Modified)

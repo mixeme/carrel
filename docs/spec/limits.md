@@ -130,8 +130,9 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | Тело multipart POST `upload` (файлы) | без потолка; поля перед первым файлом — 1 MiB | `isFileUpload`, `readUploadFields` | ✅ |
 | Строк в очереди передач сессии | 50 | `TransferQueueLen` | ✅ |
 
-Фото и импорт — отдельные C-12. Файлы на чужой WebDAV — **без потолка Carrel**
-(C-12). Сверх 1 MiB — 413, тело дальше не читается.
+Фото — отдельные C-12. Файлы на чужой WebDAV и файл импорта (Р-73) — **без
+потолка Carrel** (C-12): тело POST мастера импорта читается потоком, как
+загрузка (`isFileUpload`). Сверх 1 MiB — 413, тело дальше не читается.
 
 ### 3.2. C-12
 
@@ -147,7 +148,7 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | `CARREL_PHOTO_MAX_SIDE` | 512 px | — | Сторона после обрезки |
 | `CARREL_PHOTO_THUMB_SIDE` | 96 px | — | Миниатюра в списках |
 | `CARREL_PHOTO_JPEG_QUALITY` | 85 | — | Качество пересжатия |
-| `CARREL_IMPORT_MAX_BYTES` | 16 777 216 | 16 MiB | Файл импорта |
+| `CARREL_IMPORT_MAX_BYTES` | 16 777 216 | 16 MiB | Архив восстановления в памяти сеанса (S-24.3); импорт — без потолка (Р-73) |
 | `CARREL_MAIL_MAX_ATTACH_BYTES` | 10 485 760 | 10 MiB | Одно вложение |
 | `CARREL_MAIL_MAX_MESSAGE_BYTES` | 26 214 400 | 25 MiB | Письмо целиком |
 
@@ -191,7 +192,7 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | `CARREL_CACHE_MAX_ETAG_ENTRIES` | 4096 | ETag-записей в кэше сессии |
 | `CARREL_CACHE_MAX_THUMB_ENTRIES` | 512 | Фотографий контактов в кэше сессии |
 | `CARREL_CACHE_MAX_FILE_THUMB_ENTRIES` | 2048 | Миниатюр файлов в кэше сессии |
-| `CARREL_IMPORT_MAX_RECORDS` | 5000 | Записей в одном импорте |
+| `CARREL_IMPORT_MAX_RECORDS` | 5000 | Записей в архиве восстановления; импорт — без потолка (Р-73) |
 | `CARREL_FILES_MAX_ENTRIES` | 2000 | Членов папки в листинге |
 | `CARREL_MAIL_MAX_RECIPIENTS` | 20 | Получателей в письме |
 | `CARREL_MAIL_MAX_PER_DAY` | 50 | Писем на человека в сутки |

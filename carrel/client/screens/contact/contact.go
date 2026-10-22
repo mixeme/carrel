@@ -73,7 +73,7 @@ func Screen(p *view.ContactPage) w.Shell {
 	if p.Subtitle != "" {
 		h.Subs = append(h.Subs, w.HeadSub{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}})
 	}
-	h.Subs = append(h.Subs, w.HeadSub{Parts: []w.HeadSubPart{w.Text(p.Source.Stamp)}})
+	h.Subs = append(h.Subs, bind.SourceSub(p.Source.Colour, view.Text(p.Source.Stamp)))
 	var acts []w.ActsPart
 	var danger []w.Button
 	for _, a := range p.Actions {

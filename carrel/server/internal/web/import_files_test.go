@@ -72,7 +72,8 @@ func TestImportTakesEveryFileOfADrop(t *testing.T) {
 	page = decode[view.ImportPage](t, c.h.do(importFiles(actionHref(t, page.Actions, "import.choose"), c.sess,
 		"one.vcf", "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:one\r\nFN:One\r\nEND:VCARD\r\n",
 		"two.vcf", "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:two\r\nFN:Two\r\nEND:VCARD\r\n")))
-	if page.Step == view.ImportStepPreview || len(page.Notices) != 1 || !strings.Contains(string(page.Notices[0].Body), "Only notes") {
+	if page.Step == view.ImportStepPreview || len(page.Notices) != 1 || page.Notices[0].Title != "Nothing was read." ||
+		page.Notices[0].Body != "One file at a time: only notes take several." {
 		t.Errorf("two address books at once: step %q, notices %+v", page.Step, page.Notices)
 	}
 }

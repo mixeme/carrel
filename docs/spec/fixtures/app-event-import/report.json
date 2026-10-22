@@ -132,7 +132,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/lichnyj",
@@ -201,7 +201,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": null,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/rabota",
@@ -351,63 +351,12 @@
     "failures": [],
     "here": 0,
     "heres": [],
-    "note": "3 records created from calendar.ics · 1 record skipped. Nothing there was overwritten.",
+    "lost": 0,
+    "losts": [],
+    "newUIDs": [],
     "renamed": 0,
-    "renames": [],
     "replaced": 0,
     "replaces": [],
-    "rows": [
-      {
-        "columns": [
-          "Summary",
-          "When",
-          "Identity"
-        ],
-        "count": 3,
-        "lines": [
-          {
-            "cells": [
-              "Планёрка",
-              "10 August 2026, 09:00",
-              "Created"
-            ]
-          },
-          {
-            "cells": [
-              "Отпуск",
-              "13 July 2026",
-              "Created"
-            ]
-          },
-          {
-            "cells": [
-              "Созвон с Екатеринбургом",
-              "17 August 2026, 08:00",
-              "Created"
-            ]
-          }
-        ],
-        "rubric": "Created in Личный"
-      },
-      {
-        "columns": [
-          "What",
-          "Why",
-          "Where it belongs"
-        ],
-        "count": 1,
-        "lines": [
-          {
-            "cells": [
-              "VTODO · Купить билеты",
-              "a calendar takes events",
-              "a list of tasks"
-            ]
-          }
-        ],
-        "rubric": "Skipped"
-      }
-    ],
     "skipped": 1,
     "skips": [
       "Купить билеты · VTODO: a calendar takes events — import it into a list of tasks"
@@ -418,14 +367,11 @@
     "folderHint": [],
     "hint": [
       {
-        "text": "iCalendar 2.0. One file holds any number of events; tasks and notes in it are named and left out. An address book takes "
-      },
-      {
         "mark": "mono",
-        "text": ".vcf"
+        "text": ".ics"
       },
       {
-        "text": " here instead."
+        "text": " — iCalendar 2.0. One file holds any number of events; tasks and journal entries in it are skipped and named in the report."
       }
     ],
     "kinds": [
@@ -447,6 +393,7 @@
   ],
   "subtitle": [
     {
+      "colour": "#4a6b52",
       "text": "nextcloud · Личный"
     }
   ],
@@ -531,7 +478,7 @@
         "label": "Refresh",
         "method": "GET"
       },
-      "answered": "",
+      "answered": "just now",
       "running": false
     },
     "search": {

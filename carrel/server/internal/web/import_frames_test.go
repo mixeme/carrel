@@ -82,8 +82,9 @@ func TestImportWizardByFrames(t *testing.T) {
 		t.Errorf("report subtitle = %q, want where it went", got)
 	}
 	r := page.Report
-	if r.Created != 2 || r.Failed != 0 || len(r.Renames) != 1 || !strings.HasPrefix(string(r.Renames[0]), "ada → ") || len(r.Failures) != 0 {
-		t.Errorf("report = created %d, failed %d, renames %q, failures %q", r.Created, r.Failed, r.Renames, r.Failures)
+	if r.Created != 2 || r.Failed != 0 || len(r.NewUIDs) != 1 || !strings.Contains(string(r.NewUIDs[0]), " · ada → ") ||
+		!strings.HasSuffix(string(r.NewUIDs[0]), " · imported as a copy") || len(r.Failures) != 0 {
+		t.Errorf("report = created %d, failed %d, new UIDs %q, failures %q", r.Created, r.Failed, r.NewUIDs, r.Failures)
 	}
 }
 

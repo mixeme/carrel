@@ -17,6 +17,65 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.357 — 2026-10-22
+
+Import by Typecase note 111, packages 1 and 2 of
+[scans/import-111.md](../../docs/plan/scans/import-111.md): the words of
+step 1 of every kind, one rule of refusal, the report's cards, the states
+`s-io-15`…`-19`, and no ceiling of an import (Р-73).
+
+### Changed
+
+- **No ceiling of an import** (Р-73, the owner's decision of 22.10.2026):
+  neither size nor records. The POST of the wizard is read as it arrives,
+  like an upload (`isFileUpload`), without a temporary file; `bodyLimit`
+  no longer counts it. `CARREL_IMPORT_MAX_BYTES` and
+  `CARREL_IMPORT_MAX_RECORDS` are the restore's alone. A member of a zip is
+  read as far as the archive says it is long: one longer is a row that
+  failed, «The archive says it holds N; it holds more.».
+- **The drop** (`ImportDrop`): `Elsewhere` and `ImportElsewhere` are gone;
+  `Refused` — «Only ‹.vcf› files are imported here» (notes: «‹.md›, ‹.zip›
+  or ‹.ics›») — and `OneOnly` — «One file at a time: only notes take
+  several» — say why a drop is not taken.
+- **Step 1**: the hints of every kind in the frames' words; notes take
+  `.md`, `.zip` and `.ics` (`Source.Many` — several files at once);
+  `Source.Taken` is the name of the file taken by a drop, the value of the
+  file field (`s-io-17`).
+- **Preview**: a set of chosen notes says «N files · size»; a record with
+  no title is «Untitled …» by its kind («Unnamed contact», «Untitled
+  event», «Untitled task»), its row «Ready — no title»; an all-day event
+  with no end is «Ready — no end: a whole day».
+- **Report** (`ImportReport`): `Renames`, `Rows` and `Note` are gone;
+  `NewUIDs` — the card «With a new UID», «title · from → held · why»
+  (imported as a copy, the account holds this UID in another collection,
+  the server gave its own); `Lost`, `Losts` — «Not kept by the server»,
+  «title · PHOTO», a record not found at all «… · the whole record». The
+  subtitle is the collection in its colour.
+- **Refusals in one rule**: «Nothing was read.» and why — no file chosen,
+  one file at a time, «‹name› is not a vCard file: its first line is not
+  ‹BEGIN:VCARD›. Choose the file again.» (the first line is read before
+  anything is parsed, `s-io-18`); a folder that could not be read; a
+  session that ended («There is no file to import: the session ended.
+  Choose it again.»).
+- **A collection that did not answer** (`s-io-19`): the preview stands with
+  the notice «‹nextcloud · Контакты› did not answer, so what is already
+  there cannot be told. Nothing is written; try again, or choose another
+  address book under «Into».», Import off with that reason; a run whose
+  collection does not answer keeps the preview.
+
+### Fixtures
+
+- New: `app-contact-import/refused` (`s-io-18`), `/unanswered` (`s-io-19`),
+  `app-contacts-import/normal` (`s-io-17`, POST `/app/contacts/import`),
+  `app-event-import/normal` (`s-io-15`), `app-task-import/normal`
+  (`s-io-16`). Every list's `Bar.Drop` changed shape.
+
+### For consumers
+
+Draw the drop's refusal from `Refused` / `OneOnly`, the report's cards from
+`NewUIDs` and `Losts`; let the notes' file field take several files when
+`Source.Many`.
+
 ## v0.2.356 — 2026-10-22
 
 What the client's screens of publishing and mail needed.

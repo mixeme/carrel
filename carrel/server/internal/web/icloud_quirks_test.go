@@ -365,9 +365,10 @@ func TestAnImportGetsAUIDOfItsOwnWhereTheAccountHoldsOneRecordPerUID(t *testing.
 	if page.Report.Created != 2 || page.Report.Renamed != 1 {
 		t.Fatalf("report = %+v", page.Report)
 	}
-	row := tableRow(t, page.Report.Rows, "Created", "Review")
-	if !strings.Contains(string(row[2]), "one record per UID across the account") {
-		t.Errorf("the row of the record written under a UID of its own = %q", row[2])
+	// «With a new UID» says why (s-io-9; Typecase's note 111 p. 7).
+	if len(page.Report.NewUIDs) != 1 || !strings.HasPrefix(string(page.Report.NewUIDs[0]), "Review") ||
+		!strings.HasSuffix(string(page.Report.NewUIDs[0]), " · the account holds this UID in another collection") {
+		t.Errorf("new UIDs = %q", page.Report.NewUIDs)
 	}
 	paths := srv.Paths(home)
 	if len(paths) != 2 {

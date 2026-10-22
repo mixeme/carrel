@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"slices"
 	"strings"
 	"testing"
 
@@ -157,9 +158,6 @@ func TestImportAlwaysCreates(t *testing.T) {
 	if page.Report.Created != 2 || page.Report.Renamed != 1 || page.Report.Skipped != 0 {
 		t.Fatalf("report = %+v", page.Report)
 	}
-	if !strings.Contains(string(page.Report.Note), "Nothing there was overwritten") {
-		t.Errorf("note = %q", page.Report.Note)
-	}
 	if paths := f.srv.Paths(peopleBook); len(paths) != 3 {
 		t.Fatalf("People holds %v", paths)
 	}
@@ -167,10 +165,10 @@ func TestImportAlwaysCreates(t *testing.T) {
 	if !ok || !strings.Contains(body, "X-CUSTOM:keep") || strings.Contains(body, "Ада") {
 		t.Errorf("the record that was there changed: %q", body)
 	}
-	// The card that arrived under a new identity is a card all the same.
-	row := tableRow(t, page.Report.Rows, "Created", "Ада")
-	if !strings.Contains(string(row[2]), "already held the identity") {
-		t.Errorf("row = %q", row[2])
+	// The card that arrived under a new identity is a card all the same,
+	// named in «With a new UID» (s-io-9).
+	if len(page.Report.NewUIDs) != 1 || !strings.HasPrefix(string(page.Report.NewUIDs[0]), "Ада") || !strings.HasSuffix(string(page.Report.NewUIDs[0]), " · imported as a copy") {
+		t.Errorf("new UIDs = %q", page.Report.NewUIDs)
 	}
 	if f.srv.CountRequests("PUT", peopleBook) != 2 {
 		t.Errorf("requests = %v", f.srv.Requests())
@@ -196,28 +194,31 @@ func TestImportNamesTheIdentityTheServerGave(t *testing.T) {
 		if page.Report == nil || page.Report.Created != 2 || page.Report.Renamed != 2 {
 			t.Fatalf("report = %+v", page.Report)
 		}
-		row := tableRow(t, page.Report.Rows, "Created", "Grace")
-		if !strings.Contains(string(row[2]), "Created under sv25-") || !strings.Contains(string(row[2]), "identity of its own") {
-			t.Errorf("grace row = %q", row[2])
+		var grace string
+		for _, l := range page.Report.NewUIDs {
+			if strings.HasPrefix(string(l), "Grace") {
+				grace = string(l)
+			}
 		}
-		if !strings.Contains(string(page.Report.Note), "2 records under a new identity") {
-			t.Errorf("note = %q", page.Report.Note)
+		if len(page.Report.NewUIDs) != 2 || !strings.Contains(grace, " → sv25-") || !strings.HasSuffix(grace, " · the server gave its own") {
+			t.Errorf("new UIDs = %q", page.Report.NewUIDs)
 		}
 	})
 	t.Run("hidden", func(t *testing.T) {
 		f := importFixture(t)
 		f.srv.CreateHidesTheRecord = true
 		page := run(t, f)
-		row := tableRow(t, page.Report.Rows, "Created", "Grace")
-		if !strings.Contains(string(row[2]), "does not show it") {
-			t.Errorf("grace row = %q", row[2])
+		if !slices.ContainsFunc(page.Report.Losts, func(l view.Text) bool {
+			return strings.HasPrefix(string(l), "Grace") && strings.HasSuffix(string(l), " · the whole record")
+		}) {
+			t.Errorf("not kept = %q", page.Report.Losts)
 		}
 	})
 	t.Run("honest", func(t *testing.T) {
 		f := importFixture(t)
 		page := run(t, f)
-		if row := tableRow(t, page.Report.Rows, "Created", "Grace"); string(row[2]) != "Created" {
-			t.Errorf("grace row = %q", row[2])
+		if len(page.Report.Losts) != 0 || len(page.Report.NewUIDs) != 1 {
+			t.Errorf("not kept %q, new UIDs %q: only the copy of Ada is renamed", page.Report.Losts, page.Report.NewUIDs)
 		}
 		if n := f.srv.CountRequests("GET", peopleBook); n != 0 {
 			t.Errorf("%d GETs: a record found under its identity was read again", n)
@@ -304,19 +305,24 @@ func TestImportNamesWhatItDoesNotWrite(t *testing.T) {
 	}
 }
 
-// A file over the ceiling is refused whole: half of it is not written and
-// then called an import (C-12).
-func TestImportRefusesAFileOverTheCeiling(t *testing.T) {
+// An import has no ceiling of its own (Р-73, the owner's decision of
+// 22.10.2026): the ceilings of a restore are not an import's, a file of more
+// records and bytes than they say is read and previewed, and a file whose
+// first line is not what its kind begins with is refused (s-io-18).
+func TestImportHasNoCeilingOfItsOwn(t *testing.T) {
 	f := importFixture(t)
-	f.h.cfg.ImportMaxRecords = 1
+	f.h.cfg.ImportMaxRecords, f.h.cfg.ImportMaxBytes = 1, 16
 	f.h.rebuild()
 	page := decode[view.ImportPage](t, f.h.do(get(f.path("contacts")+"/import", f.sess)))
-	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "cards.vcf", []byte(importedCards))))
-	if page.Step != view.ImportStepSource || !hasNotice(page.Notices, "Nothing was imported") {
+	choose := actionHref(t, page.Actions, "import.choose")
+	page = decode[view.ImportPage](t, f.h.do(importRequest(choose, f.sess, false, "cards.vcf", []byte(importedCards))))
+	if page.Step != view.ImportStepPreview || len(page.Notices) != 0 {
 		t.Fatalf("step = %q notices = %+v", page.Step, page.Notices)
 	}
-	if paths := f.srv.Paths(peopleBook); len(paths) != 1 {
-		t.Fatalf("something was written: %v", paths)
+	page = decode[view.ImportPage](t, f.h.do(importRequest(choose, f.sess, false, "Разное (mix).vcf", []byte("PRODID:x\r\nBEGIN:VCARD\r\nFN:A\r\nEND:VCARD\r\n"))))
+	if page.Step != view.ImportStepSource || len(page.Notices) != 1 || page.Notices[0].Title != "Nothing was read." ||
+		saidRuns(page.Notices[0].Runs) != "«Разное (mix).vcf» is not a vCard file: its first line is not ⟨mono:BEGIN:VCARD⟩. Choose the file again." {
+		t.Errorf("not a vCard: step %q, notices %+v", page.Step, page.Notices)
 	}
 }
 
@@ -324,7 +330,7 @@ func TestImportWithoutAFileSaysSo(t *testing.T) {
 	f := importFixture(t)
 	page := decode[view.ImportPage](t, f.h.do(get(f.path("contacts")+"/import", f.sess)))
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "", nil)))
-	if !hasNotice(page.Notices, "No file was chosen") {
+	if len(page.Notices) != 1 || page.Notices[0].Title != "Nothing was read." || page.Notices[0].Body != "No file was chosen." {
 		t.Fatalf("notices = %+v", page.Notices)
 	}
 }

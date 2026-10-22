@@ -303,53 +303,6 @@
             "label": "Import",
             "method": "POST"
           },
-          "elsewhere": [
-            {
-              "ext": ".vcf",
-              "says": [
-                {
-                  "text": "A list of tasks takes "
-                },
-                {
-                  "mark": "mono",
-                  "text": ".ics"
-                },
-                {
-                  "text": " — contacts take this one"
-                }
-              ]
-            },
-            {
-              "ext": ".md",
-              "says": [
-                {
-                  "text": "A list of tasks takes "
-                },
-                {
-                  "mark": "mono",
-                  "text": ".ics"
-                },
-                {
-                  "text": " — a notebook takes this one"
-                }
-              ]
-            },
-            {
-              "ext": ".zip",
-              "says": [
-                {
-                  "text": "A list of tasks takes "
-                },
-                {
-                  "mark": "mono",
-                  "text": ".ics"
-                },
-                {
-                  "text": " — a notebook takes this one"
-                }
-              ]
-            }
-          ],
           "lead": "Drop to import",
           "line": [
             {
@@ -364,7 +317,20 @@
             }
           ],
           "many": false,
-          "note": "The preview opens first: nothing is written until it has been read"
+          "note": "The preview opens first: nothing is written until it has been read",
+          "oneOnly": "One file at a time: only notes take several",
+          "refused": [
+            {
+              "text": "Only "
+            },
+            {
+              "mark": "mono",
+              "text": ".ics"
+            },
+            {
+              "text": " files are imported here"
+            }
+          ]
         },
         "filter": "",
         "filterForm": {

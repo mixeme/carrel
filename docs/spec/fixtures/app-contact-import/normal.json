@@ -263,7 +263,11 @@
     "folderHint": [],
     "hint": [
       {
-        "text": "vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take "
+        "mark": "mono",
+        "text": ".vcf"
+      },
+      {
+        "text": " — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take "
       },
       {
         "mark": "mono",

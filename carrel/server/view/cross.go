@@ -681,9 +681,12 @@ type ImportSource struct {
 	// папке, вглубь не идут, на сервере ничего не трогается
 	FolderHint Runs `json:"folderHint"`
 	// Taken — файл, уже взятый броском на сведённый список (подпись s-io-1,
-	// Им4): имя моноширинно, размер и формат; выбор Into ведёт в его
-	// предпросмотр. Пусто — файла нет
+	// Им4; s-io-17): его имя моноширинно — значение поля файла; выбор Into
+	// ведёт в его предпросмотр. Пусто — файла нет
 	Taken Runs `json:"taken"`
+	// Many — поле берёт несколько файлов разом (multiple): у заметок
+	// (записка Typecase 111 п. 3)
+	Many bool `json:"many,omitempty"`
 	// Note — сообщение шага (tc-msg): на первом — что ничего не пишется до
 	// предпросмотра (s-io-3), у заметок — front matter и ‹X-›свойства
 	// (s-io-4); на предпросмотре — что импорт делает с записями этого рода
@@ -739,11 +742,15 @@ type ImportReport struct {
 	// (s-io-9, «Failed»); Failures — почему, строка на запись
 	Failed   int    `json:"failed"`
 	Failures []Text `json:"failures"`
-	// Renames — UID, что сменились: «1a77-40de-bb02 → 9c02-4411-7ee1»
-	// (s-io-9, «Imported as copies»)
-	Renames []Text        `json:"renames"`
-	Rows    []ImportTable `json:"rows"`
-	Note    Text          `json:"note"`
+	// NewUIDs — карточка «With a new UID» (s-io-9; записка Typecase 111
+	// п. 7): у кого UID здесь не тот, что в файле, — «Вера Дорошенко ·
+	// 2b7e-11aa → 9d04-77c1 · imported as a copy», «… · the server gave its
+	// own»; Renamed — сколько
+	NewUIDs []Text `json:"newUIDs"`
+	// Lost, Losts — карточка «Not kept by the server» (п. 8): что импорт,
+	// перечитав записанное, не нашёл — «Галина Мещерякова · PHOTO»
+	Lost  int    `json:"lost"`
+	Losts []Text `json:"losts"`
 }
 
 type PublishSheet struct {

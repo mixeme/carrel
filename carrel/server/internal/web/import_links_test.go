@@ -67,8 +67,8 @@ func TestImportKeepsLinksInsideTheFile(t *testing.T) {
 	if !strings.Contains(child, "RELATED-TO;RELTYPE=PARENT:"+fresh) {
 		t.Errorf("the subtask does not follow its parent to %s:\n%s", fresh, child)
 	}
-	if row := tableRow(t, page.Report.Rows, "Created", "Imported child"); !strings.Contains(string(row[2]), "follow their new identities") {
-		t.Errorf("child row = %q", row[2])
+	if want := "Imported parent · parent → " + fresh + " · imported as a copy"; len(page.Report.NewUIDs) != 1 || string(page.Report.NewUIDs[0]) != want {
+		t.Errorf("new UIDs = %q, want %q", page.Report.NewUIDs, want)
 	}
 	if loner := storedWith(t, f, f.col, "Imported loner"); !strings.Contains(loner, "RELATED-TO:elsewhere") {
 		t.Errorf("a link outside the file changed:\n%s", loner)
@@ -106,8 +106,8 @@ func TestImportLinksFollowTheServersIdentities(t *testing.T) {
 	if !strings.Contains(bob, "urn:uuid:"+theirs) || !strings.Contains(strings.ToLower(bob), "type=friend") {
 		t.Errorf("the friend link lost its target or its type (%s):\n%s", theirs, bob)
 	}
-	if row := tableRow(t, page.Report.Rows, "Created", "Bob"); !strings.Contains(string(row[2]), "the server gave them") {
-		t.Errorf("bob row = %q", row[2])
+	if len(page.Report.NewUIDs) != 3 || !strings.HasSuffix(string(page.Report.NewUIDs[0]), " · the server gave its own") {
+		t.Errorf("new UIDs = %q, want all three, the server's", page.Report.NewUIDs)
 	}
 }
 

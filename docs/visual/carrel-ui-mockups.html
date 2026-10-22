@@ -3322,7 +3322,7 @@ label.tc-field__swatch{position:relative;cursor:pointer}
             <span class="tc-avatar--photo is-ph">АК</span>
             <div class="tc-head__text">
               <div class="tc-head__title tc-head__title--t19">Анна Ковалёва</div>
-              <div class="tc-head__sub">nextcloud · Контакты</div>
+              <div class="tc-head__sub"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</div>
               <div class="tc-line tc-line--gap-5 tc-sec__acts"><button class="tc-btn is-sm" type="button">Edit</button><button class="tc-btn is-sm" type="button">All records</button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></div>
             </div>
           </div>
@@ -4056,7 +4056,7 @@ Read  2 min ago</div>
             <div class="tc-head__text">
               <div class="tc-head__title">Анна Ковалёва</div>
               <div class="tc-head__sub">Издательство «Слово» · Выпускающий редактор</div>
-              <div class="tc-head__sub">nextcloud · Контакты</div>
+              <div class="tc-head__sub"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</div>
             </div>
           </div>
           <div class="tc-acts">
@@ -4257,7 +4257,7 @@ Read  2 min ago · not changed on server</div>
             <div class="tc-head__text">
               <div class="tc-head__title">Анна Ковалёва</div>
               <div class="tc-head__sub">Издательство «Слово» · Выпускающий редактор</div>
-              <div class="tc-head__sub">nextcloud · Контакты</div>
+              <div class="tc-head__sub"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</div>
             </div>
           </div>
           <div class="tc-acts">
@@ -11883,7 +11883,7 @@ dav: HTTP 503: the server is busy</div>
     </div>
   </div>
 </div>
-<figcaption>Накладка появляется, когда файл втащили в окно, и говорит три вещи: что произойдёт, куда ляжет и что ещё ничего не записано. <b>Имени файла в ней нет намеренно</b> — пока файл тащат, браузер отдаёт только тип и число; имя оказывается в руках лишь в момент броска. Написать имя в накладке значило бы попросить исполнителя о том, чего он сделать не может: имя, размер и разобранный формат человек прочтёт на следующем экране, в шапке предпросмотра.<br><br><b>Куда бросили — то и назначение.</b> Коллекция, выбранная в рейле, идёт в «Into», и мастер открывается сразу на шаге 2: шагу 1 нечего спросить — файл взят, коллекция известна. Исключение — единый вид («Combined&nbsp;…»): выбранной коллекции там нет, и открывается шаг 1 с уже вписанным файлом и пустым «Into». Молча положить карточки в первую попавшуюся книгу нельзя — это чужой сервер.<br><br><b>Чужой файл не открывает ничего молча.</b> На контактах, куда тащат <span class="tc-mono">.ics</span>, накладка говорит «Contacts take <span class="tc-mono">.vcf</span> — the calendar and the list of tasks take this one» и броска не принимает. Это тот же разбор, что на шаге 2, где задача, пришедшая в календарь, посчитана пропущенной и названа вместе с тем, куда её нести. Больше одного файла разом берут только заметки — по той же причине, по которой у них есть zip и папка; у остальных родов шапка предпросмотра держит один файл, один размер и один формат, и накладка просит бросать по одному.<br><br>На узком экране (<a href="#phone">10</a>) перетаскивания нет вовсе — там остаётся кнопка: файл на телефоне выбирают системным листом, а не мышью.</figcaption>
+<figcaption>Накладка появляется, когда файл втащили в окно, и говорит три вещи: что произойдёт, куда ляжет и что ещё ничего не записано. <b>Имени файла в ней нет намеренно</b> — пока файл тащат, браузер отдаёт только тип и число; имя оказывается в руках лишь в момент броска. Написать имя в накладке значило бы попросить исполнителя о том, чего он сделать не может: имя, размер и разобранный формат человек прочтёт на следующем экране, в шапке предпросмотра.<br><br><b>Куда бросили — то и назначение.</b> Коллекция, выбранная в рейле, идёт в «Into», и мастер открывается сразу на шаге 2: шагу 1 нечего спросить — файл взят, коллекция известна. Исключение — единый вид («Combined&nbsp;…»): выбранной коллекции там нет, и открывается шаг 1 с уже вписанным файлом и пустым «Into». Молча положить карточки в первую попавшуюся книгу нельзя — это чужой сервер.<br><br><b>Чужой файл не открывает ничего молча.</b> На контактах, куда тащат <span class="tc-mono">.ics</span>, накладка говорит «Contacts take <span class="tc-mono">.vcf</span> — the calendar and the list of tasks take this one» и броска не принимает. Это тот же разбор, что на шаге 2, где задача, пришедшая в календарь, посчитана пропущенной и названа вместе с тем, куда её нести. Больше одного файла разом берут только заметки — по той же причине, по которой у них есть zip и папка; у остальных родов шапка предпросмотра держит один файл, один размер и один формат, и накладка просит бросать по одному.<br><br>На узком экране (<a href="#phone">10</a>) перетаскивания нет вовсе — там остаётся кнопка: файл на телефоне выбирают системным листом, а не мышью. <b>Отказ броска</b> — та же накладка, красная строка вместо «Drop to import»: чужое расширение — «Only .vcf files are imported here» (у календаря и задач — «.ics», у заметок — «.md, .zip or .ics»); несколько файлов не у заметок — «One file at a time: only notes take several».</figcaption>
 </figure>
 
 <figure>
@@ -12081,7 +12081,7 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import contacts</div></div></div>
           <div class="tc-form is-tight tc-form--padb12">
             <div class="tc-field tc-field--w100">
-              <label>Into</label><button class="tc-in is-pick" type="button">nextcloud · Контакты</button>
+              <label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
               <span class="tc-field__hint">Any address book you may write to, on every connected server.</span></div>
           </div>
           <div class="tc-card">
@@ -12092,15 +12092,276 @@ dav: HTTP 503: the server is busy</div>
                 <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".vcf" aria-label="vCard file" data-tc-shows="import-file"></label>
                 <button class="tc-btn is-primary" type="submit">Preview file</button>
               </span></div>
-            <div class="tc-field__hint tc-field__hint--top8">vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take <span class="tc-mono">.ics</span> here instead.</div>
+            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take <span class="tc-mono">.ics</span> here instead.</div>
           </div>
-          <div class="tc-msg">Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.</div>
+          <div class="tc-msg tc-msg--mr0-ml0">Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.</div>
         </div>
       </div>
     </div>
   </div>
 </div>
 <figcaption>Первый шаг мастера — общий у контактов, событий и задач: одна коллекция, один файл. Меняются слово в заголовке и принимаемое расширение. У заметок источника два, и шаг у них свой, следующий. <b>«Into» стоит и здесь, и на предпросмотре</b> — одно поле, показанное там, где решение принимают, и там, где появляется повод его пересмотреть.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-io-15" data-screen="/app/calendar/{account}/{col}/import" data-part="source-calendar">
+  <div class="frame-label"><span>Импорт событий · шаг 1 из 3, источник</span><i>/app/calendar/{account}/{col}/import</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Дни рождения</span><span class="tc-tickrow__meta">—</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Личный</span><span class="tc-tickrow__meta">2</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Работа</span><span class="tc-tickrow__meta">2</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog is-wide tc-dialog--step560">
+          <div class="tc-steps"><span class="is-on tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import events</div></div></div>
+          <div class="tc-form is-tight tc-form--padb12">
+            <div class="tc-field tc-field--w100">
+              <label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</button>
+              <span class="tc-field__hint">Any calendar you may write to, on every connected server.</span></div>
+          </div>
+          <div class="tc-card">
+            <div class="tc-rubric">From a file</div>
+            <div class="tc-field tc-field--w100"><label>iCalendar file</label>
+              <span class="tc-line tc-line--gap-8">
+                <input class="tc-in is-ph tc-in--fill" type="text" placeholder="Личный 2026.ics" aria-label="Личный 2026.ics" readonly id="import-file" data-tc-filename>
+                <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".ics" aria-label="iCalendar file" data-tc-shows="import-file"></label>
+                <button class="tc-btn is-primary" type="submit">Preview file</button>
+              </span></div>
+            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.ics</span> — iCalendar 2.0. One file holds any number of events; tasks and journal entries in it are skipped and named in the report.</div>
+          </div>
+          <div class="tc-msg tc-msg--mr0-ml0">Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Шаг 1 календаря — слова свои, не «как у контактов»: заголовок, «Into» календарей, поле «iCalendar file» и строка под ним.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-io-16" data-screen="/app/tasks/{account}/{col}/import" data-part="source-tasks">
+  <div class="frame-label"><span>Импорт задач · шаг 1 из 3, источник</span><i>/app/tasks/{account}/{col}/import</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Дела</span><span class="tc-tickrow__meta">4</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Работа</span><span class="tc-tickrow__meta">3</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog is-wide tc-dialog--step560">
+          <div class="tc-steps"><span class="is-on tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import tasks</div></div></div>
+          <div class="tc-form is-tight tc-form--padb12">
+            <div class="tc-field tc-field--w100">
+              <label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</button>
+              <span class="tc-field__hint">Any list of tasks you may write to, on every connected server.</span></div>
+          </div>
+          <div class="tc-card">
+            <div class="tc-rubric">From a file</div>
+            <div class="tc-field tc-field--w100"><label>iCalendar file</label>
+              <span class="tc-line tc-line--gap-8">
+                <input class="tc-in is-ph tc-in--fill" type="text" placeholder="Дела.ics" aria-label="Дела.ics" readonly id="import-file" data-tc-filename>
+                <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".ics" aria-label="iCalendar file" data-tc-shows="import-file"></label>
+                <button class="tc-btn is-primary" type="submit">Preview file</button>
+              </span></div>
+            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.ics</span> — iCalendar 2.0. One file holds any number of tasks; events and journal entries in it are skipped and named in the report.</div>
+          </div>
+          <div class="tc-msg tc-msg--mr0-ml0">Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Шаг 1 списка задач — свои слова, как у календаря: «Into» списков задач, поле «iCalendar file», строка под ним.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-io-17" data-screen="/app/contacts/import" data-part="into-empty">
+  <div class="frame-label"><span>Импорт · «Into» не выбрано</span><i>дополнительный кадр: вход из сведённого вида</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">5</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">1</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog is-wide tc-dialog--step560">
+          <div class="tc-steps"><span class="is-on tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import contacts</div></div></div>
+          <div class="tc-form is-tight tc-form--padb12">
+            <div class="tc-field tc-field--w100">
+              <label>Into</label><button class="tc-in is-pick is-ph" type="button">Choose an address book</button>
+              <span class="tc-field__hint">Any address book you may write to, on every connected server.</span></div>
+          </div>
+          <div class="tc-card">
+            <div class="tc-rubric">From a file</div>
+            <div class="tc-field tc-field--w100"><label>vCard file</label>
+              <span class="tc-line tc-line--gap-8">
+                <input class="tc-in is-mono tc-in--fill" type="text" value="Разное (mix).vcf" aria-label="File" readonly id="import-file" data-tc-filename>
+                <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".vcf" aria-label="vCard file" data-tc-shows="import-file"></label>
+                <button class="tc-btn is-primary" title="Choose under «Into» where the records go." type="submit" disabled>Preview file</button>
+              </span></div>
+            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take <span class="tc-mono">.ics</span> here instead.</div>
+          </div>
+          <div class="tc-msg tc-msg--mr0-ml0">Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Вход из сведённого вида (или бросок туда): куда писать, не выбрано. «Into» пустое — «Choose an address book» (у календаря — «a calendar», у задач — «a list of tasks», у заметок — «a notebook»); имя взятого файла — в строке файла; Preview file выключена, причина — в подсказке.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-io-18" data-screen="/app/contacts/{account}/{col}/import" data-part="refused">
+  <div class="frame-label"><span>Импорт · шаг 1, файл не принят</span><i>дополнительный кадр: отказ шага 1</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">5</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">1</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog is-wide tc-dialog--step560">
+          <div class="tc-steps"><span class="is-on tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import contacts</div></div></div>
+          <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>Nothing was read.</b> «Разное (mix).vcf» is not a vCard file: its first line is not <span class="tc-mono">BEGIN:VCARD</span>. Choose the file again.</div>
+          <div class="tc-form is-tight tc-form--padb12">
+            <div class="tc-field tc-field--w100">
+              <label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
+              <span class="tc-field__hint">Any address book you may write to, on every connected server.</span></div>
+          </div>
+          <div class="tc-card">
+            <div class="tc-rubric">From a file</div>
+            <div class="tc-field tc-field--w100"><label>vCard file</label>
+              <span class="tc-line tc-line--gap-8">
+                <input class="tc-in is-ph tc-in--fill" type="text" placeholder="Разное (mix).vcf" aria-label="Разное (mix).vcf" readonly id="import-file" data-tc-filename>
+                <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".vcf" aria-label="vCard file" data-tc-shows="import-file"></label>
+                <button class="tc-btn is-primary" type="submit">Preview file</button>
+              </span></div>
+            <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.vcf</span> — vCard 2.1, 3.0 and 4.0. One file holds any number of cards; the calendar and the list of tasks take <span class="tc-mono">.ics</span> here instead.</div>
+          </div>
+          <div class="tc-msg tc-msg--mr0-ml0">Nothing is written until the preview has been read: the next step counts what was parsed and names what failed.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Отказ шага 1 — одно уведомление над шагом, остальное как было. <b>Своего потолка у импорта нет</b> (решение владельца 22.10, Р-73): файл идёт на сервер потоком, запись за записью, сколько бы их ни было и сколько бы он ни весил; запись, которую сервер не взял, — строка «Failed» отчёта со словами сервера. Слова других отказов шага: «No file was chosen.», «This file holds no record of this kind.», «The archive holds no Markdown file.», «The folder could not be read: ‹причина›.» (WebDAV у заметок), «There is no file to import: the session ended. Choose it again.»</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-io-19" data-screen="/app/contacts/{account}/{col}/import" data-part="unanswered">
+  <div class="frame-label"><span>Импорт · предпросмотр, коллекция не ответила</span><i>дополнительный кадр: уведомление над предпросмотром</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg><span class="tc-nav__full">Back to list</span><span class="tc-nav__short">Back</span></a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">5</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">1</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog is-wide">
+          <div class="tc-steps"><span class="tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import contacts</div><div class="tc-head__sub"><span class="tc-mono">Разное (mix).vcf</span> · 84 KB · vCard 3.0</div></div>
+            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" title="nextcloud · Контакты did not answer" type="button" disabled>Import 117 contacts</button></div>
+          </div>
+          <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>nextcloud · Контакты did not answer</b>, so what is already there cannot be told. Nothing is written; try again, or choose another address book under «Into».</div>
+          <div class="tc-form is-tight">
+            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
+              <span class="tc-field__hint">Any address book you may write to. What is already here is counted against it.</span></div>
+          </div>
+          <div class="tc-stats">
+            <span class="tc-stat"><b>117</b> ready</span>
+            <span class="tc-stat is-error"><b>3</b> with errors</span>
+          </div>
+          <table class="tc-table">
+            <thead><tr><th>Source</th><th>Name</th><th class="tc-table__n3">UID</th><th class="tc-table__n4">Result</th></tr></thead>
+            <tbody>
+              <tr><td class="tc-mono">Разное (mix).vcf</td><td>Анна Ковалёва</td><td class="tc-mono tc-table__n3">4f2b-9c31-a0e7</td><td class="tc-table__n4">Ready</td></tr>
+              <tr><td class="tc-mono">Разное (mix).vcf</td><td>Артём Белов</td><td class="tc-mono tc-table__n3">1a77-40de-bb02</td><td class="tc-table__n4">Ready</td></tr>
+              <tr><td class="tc-mono">Разное (mix).vcf</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">line 12: cannot decode quoted-printable</td></tr>
+            </tbody>
+          </table>
+          <div class="tc-msg tc-msg--mr0-ml0">What is skipped is listed in the report, and so is what could not be read.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Уведомление над предпросмотром — одно на все беды этого шага: коллекция назначения не ответила. Что уже есть, не узнать — вопроса «already here» нет, Import выключена с причиной в подсказке.</figcaption>
 </figure>
 
 <div class="frames">
@@ -12149,17 +12410,18 @@ dav: HTTP 503: the server is busy</div>
       <div class="tc-steps"><span class="is-on tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import notes</div></div></div>
       <div class="tc-form is-tight tc-form--padb12">
-        <div class="tc-field tc-field--w100"><label>Into</label><button class="tc-in is-pick" type="button">nextcloud · Записи</button>
+        <div class="tc-field tc-field--w100"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</button>
           <span class="tc-field__hint">The notebook the notes are created in. Every source below lands there.</span></div>
       </div>
       <div class="tc-card">
         <div class="tc-rubric">From a file</div>
-        <div class="tc-field tc-field--w100"><label>Markdown or a zip of them</label>
+        <div class="tc-field tc-field--w100"><label>Markdown, a zip of them, or .ics</label>
           <span class="tc-line tc-line--gap-8">
             <input class="tc-in is-ph tc-in--fill" type="text" placeholder="заметки-2026.zip" aria-label="заметки-2026.zip" readonly id="import-file" data-tc-filename>
-            <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".md,.zip" aria-label="Markdown or a zip of them" data-tc-shows="import-file"></label>
+            <label class="tc-btn">Browse<input class="tc-file" type="file" name="file" accept=".md,.zip,.ics" aria-label="Markdown, a zip of them, or .ics" data-tc-shows="import-file" multiple></label>
             <button class="tc-btn is-primary" type="submit">Preview file</button>
           </span></div>
+        <div class="tc-field__hint tc-field__hint--top8"><span class="tc-mono">.md</span> — Markdown, <span class="tc-mono">.zip</span> — any number of them, <span class="tc-mono">.ics</span> — iCalendar 2.0 journal entries. Several files may be picked at once; events and tasks in an <span class="tc-mono">.ics</span> are skipped and named in the report.</div>
       </div>
       <div class="tc-card tc-card--edge-accent">
         <div class="tc-rubric">From a WebDAV folder</div>
@@ -12174,11 +12436,11 @@ dav: HTTP 503: the server is busy</div>
           <button class="tc-btn is-primary" type="button">Preview folder</button>
         </div>
       </div>
-      <div class="tc-msg">Front matter is read when present: title, date, tags, UID and <span class="tc-mono">X-</span>properties exported earlier. A file without it becomes a note dated by its own timestamp.</div>
+      <div class="tc-msg tc-msg--mr0-ml0">Front matter is read when present: title, date, tags, UID and <span class="tc-mono">X-</span>properties exported earlier. A file without it becomes a note dated by its own timestamp.</div>
     </div></div></div>
   </div>
 </div>
-<figcaption>Единственный род записей, у которого источника два, — потому и шаг у него свой. Второй легко не заметить: заметки можно взять прямо с того WebDAV, что уже подключён, — без скачивания и загрузки обратно. Оба ведут в один и тот же предпросмотр, нарисованный ниже, и запускает его каждый сам: «Preview file» у файла, «Preview folder» у папки.<br><br>Первым на шаге стоит не источник, а <b>назначение</b>: «Into» — то же поле, что на предпросмотре контактов, и по той же причине.<br><br><b>Рейл здесь — выход, не назначение.</b> Подсвечена тетрадь, из которой открыли мастер; нажатие на «Дневник» бросает мастер и открывает ту тетрадь. Куда лягут заметки — только поле Into. Дерево в карточке WebDAV — то же, что в «Move» и в быстрой загрузке: папку выбирают кликом, путь руками не набирают, отдельного диалога операционной системы нет — это уже подключённый сервер, не диск компьютера.</figcaption>
+<figcaption>Единственный род записей, у которого источника два, — потому и шаг у него свой. Второй легко не заметить: заметки можно взять прямо с того WebDAV, что уже подключён, — без скачивания и загрузки обратно. Оба ведут в один и тот же предпросмотр, нарисованный ниже, и запускает его каждый сам: «Preview file» у файла, «Preview folder» у папки.<br><br>Первым на шаге стоит не источник, а <b>назначение</b>: «Into» — то же поле, что на предпросмотре контактов, и по той же причине.<br><br><b>Рейл здесь — выход, не назначение.</b> Подсвечена тетрадь, из которой открыли мастер; нажатие на «Дневник» бросает мастер и открывает ту тетрадь. Куда лягут заметки — только поле Into. Дерево в карточке WebDAV — то же, что в «Move» и в быстрой загрузке: папку выбирают кликом, путь руками не набирают, отдельного диалога операционной системы нет — это уже подключённый сервер, не диск компьютера. <b>Файлов можно несколько</b>: <span class="tc-mono">.md</span>, zip и <span class="tc-mono">.ics</span> — журнальные записи (VJOURNAL) становятся заметками; предпросмотр календаря шлёт их сюда. У набора подзаголовок предпросмотра — «3 files · 12 KB».</figcaption>
 </figure>
 
 <div class="frames">
@@ -12189,6 +12451,7 @@ dav: HTTP 503: the server is busy</div>
       <div class="tc-menu tc-menu--w290">
         <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</button>
         <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></button>
         <span class="tc-menu__sep"></span>
         <button class="tc-menu__item" type="button" role="menuitem">New notebook</button>
       </div>
@@ -12231,7 +12494,7 @@ dav: HTTP 503: the server is busy</div>
             <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 117 contacts</button></div>
           </div>
           <div class="tc-form is-tight">
-            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button">nextcloud · Контакты</button>
+            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
               <span class="tc-field__hint">Any address book you may write to. What is already here is counted against it.</span></div>
             <div class="tc-field is-own-line"><label>5 records of this file are already in Контакты</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/contacts/nextcloud/kontakty/import?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/import?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/import?existing=copy">Import as copies</a></span>
               <span class="tc-field__hint">They stay as they are here; the file's version is not written.</span></div>
@@ -12246,10 +12509,10 @@ dav: HTTP 503: the server is busy</div>
             <tbody>
               <tr><td class="tc-mono">Разное (mix).vcf</td><td>Анна Ковалёва</td><td class="tc-mono tc-table__n3">4f2b-9c31-a0e7</td><td class="tc-table__n4">Ready</td></tr>
               <tr><td class="tc-mono">Разное (mix).vcf</td><td>Артём Белов</td><td class="tc-mono tc-table__n3">1a77-40de-bb02</td><td class="tc-table__n4">Already here — skipped</td></tr>
-              <tr><td class="tc-mono">Разное (mix).vcf</td><td class="tc-dim">— (no FN)</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">vCard 2.1 quoted-printable: cannot decode line 12</td></tr>
+              <tr><td class="tc-mono">Разное (mix).vcf</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">line 12: cannot decode quoted-printable</td></tr>
             </tbody>
           </table>
-          <div class="tc-msg">What is skipped is listed in the report, and so is what could not be read.</div>
+          <div class="tc-msg tc-msg--mr0-ml0">What is skipped is listed in the report, and so is what could not be read.</div>
         </div>
       </div>
     </div>
@@ -12286,17 +12549,17 @@ dav: HTTP 503: the server is busy</div>
         <div class="tc-dialog is-wide">
           <div class="tc-steps"><span class="tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import events</div><div class="tc-head__sub"><span class="tc-mono">Личный 2026.ics</span> · 210 KB · iCalendar 2.0</div></div>
-            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 81 events</button></div>
+            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 82 events</button></div>
           </div>
           <div class="tc-form is-tight">
-            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button">nextcloud · Личный</button>
+            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</button>
               <span class="tc-field__hint">Calendars only. A list of tasks is a different collection and takes different components.</span></div>
             <div class="tc-field is-own-line"><label>3 events of this file are already in Личный</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/calendar/nextcloud/lichny/import?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/calendar/nextcloud/lichny/import?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/calendar/nextcloud/lichny/import?existing=copy">Import as copies</a></span>
               <span class="tc-field__hint">They stay as they are here; the file's version is not written.</span></div>
           </div>
           <div class="tc-stats">
-            <span class="tc-stat"><b>81</b> ready</span>
-            <span class="tc-stat is-error"><b>2</b> with errors</span>
+            <span class="tc-stat"><b>82</b> ready</span>
+            <span class="tc-stat is-error"><b>1</b> with errors</span>
             <span class="tc-stat"><b>3</b> already here</span>
             <span class="tc-stat"><b>6</b> skipped</span>
           </div>
@@ -12307,10 +12570,10 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">Личный 2026.ics</td><td>Отпуск</td><td class="tc-mono tc-table__n3">2026-07-13 → 2026-07-27 · all day</td><td class="tc-table__n4">Ready</td></tr>
               <tr><td class="tc-mono">Личный 2026.ics</td><td>Созвон с подрядчиком</td><td class="tc-mono tc-table__n3">2026-08-17 10:00 Asia/Yekaterinburg</td><td class="tc-table__n4">Ready — time zone kept as sent</td></tr>
               <tr><td class="tc-mono">Личный 2026.ics</td><td>Купить билеты <span class="tc-badge">VTODO</span></td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--dusty">Skipped: a calendar takes events — import it into a list of tasks</td></tr>
-              <tr><td class="tc-mono">Личный 2026.ics</td><td class="tc-dim">— (no SUMMARY)</td><td class="tc-mono tc-table__n3">2026-05-04</td><td class="tc-table__n4 tc-table__n4--danger">DTSTART without DTEND or DURATION: cannot tell how long it lasts</td></tr>
+              <tr><td class="tc-mono">Личный 2026.ics</td><td class="tc-dim">Untitled event</td><td class="tc-mono tc-table__n3">2026-05-04 · all day</td><td class="tc-table__n4">Ready — no end: a whole day; no title</td></tr>
             </tbody>
           </table>
-          <div class="tc-msg">A repeating event keeps its rule: the series is one record, not fifty-two.</div>
+          <div class="tc-msg tc-msg--mr0-ml0">A repeating event keeps its rule: the series is one record, not fifty-two.</div>
         </div>
       </div>
     </div>
@@ -12367,16 +12630,16 @@ dav: HTTP 503: the server is busy</div>
         <div class="tc-dialog is-wide">
           <div class="tc-steps"><span class="tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import tasks</div><div class="tc-head__sub"><span class="tc-mono">Дела.ics</span> · 12 KB · iCalendar 2.0</div></div>
-            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 27 tasks</button></div>
+            <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 28 tasks</button></div>
           </div>
           <div class="tc-form is-tight">
-            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button">nextcloud · Дела</button>
+            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</button>
               <span class="tc-field__hint">Lists of tasks only. A calendar is a different collection: events go there, not here.</span></div>
             <div class="tc-field is-own-line"><label>2 tasks of this file are already in Дела</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=copy">Import as copies</a></span>
               <span class="tc-field__hint">They stay as they are here; the file's version is not written.</span></div>
           </div>
           <div class="tc-stats">
-            <span class="tc-stat"><b>27</b> ready</span>
+            <span class="tc-stat"><b>28</b> ready</span>
             <span class="tc-stat is-error"><b>1</b> with errors</span>
             <span class="tc-stat"><b>2</b> already here</span>
             <span class="tc-stat"><b>5</b> skipped</span>
@@ -12388,10 +12651,11 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">Дела.ics</td><td>Ответить подрядчику по смете</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4">Ready — a task without a date is a task</td></tr>
               <tr><td class="tc-mono">Дела.ics</td><td>Дописать раздел про кэш</td><td class="tc-mono tc-table__n3">2026-09-04</td><td class="tc-table__n4">Ready — 40 % done, priority 1</td></tr>
               <tr><td class="tc-mono">Дела.ics</td><td>Созвон с подрядчиком <span class="tc-badge">VEVENT</span></td><td class="tc-mono tc-table__n3">2026-08-17</td><td class="tc-table__n4 tc-table__n4--dusty">Skipped: a list of tasks takes tasks — import it into a calendar</td></tr>
-              <tr><td class="tc-mono">Дела.ics</td><td class="tc-dim">— (no SUMMARY)</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">Neither SUMMARY nor DESCRIPTION: nothing to name it by</td></tr>
+              <tr><td class="tc-mono">Дела.ics</td><td class="tc-dim">Untitled task</td><td class="tc-mono tc-table__n3">2026-09-10</td><td class="tc-table__n4">Ready — no title</td></tr>
+              <tr><td class="tc-mono">Дела.ics</td><td>Сдать отчёт</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">line 88: cannot read DUE «2026-13-01»</td></tr>
             </tbody>
           </table>
-          <div class="tc-msg">STATUS, PERCENT-COMPLETE and PRIORITY come across as they are: a task that was half done arrives half done.</div>
+          <div class="tc-msg tc-msg--mr0-ml0">STATUS, PERCENT-COMPLETE and PRIORITY come across as they are: a task that was half done arrives half done.</div>
         </div>
       </div>
     </div>
@@ -12448,7 +12712,7 @@ dav: HTTP 503: the server is busy</div>
             <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 60 notes</button></div>
           </div>
           <div class="tc-form is-tight">
-            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button">nextcloud · Записи</button>
+            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</button>
               <span class="tc-field__hint">Any notebook you may write to. A WebDAV folder from the step before lands in this same table.</span></div>
             <div class="tc-field is-own-line"><label>1 note of this file is already in Записи</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/notes/nextcloud/zapisi/import?existing=skip">Skip it</a><a class="tc-seg__opt" href="/app/notes/nextcloud/zapisi/import?existing=replace">Replace it</a><a class="tc-seg__opt" href="/app/notes/nextcloud/zapisi/import?existing=copy">Import as a copy</a></span>
               <span class="tc-field__hint">It stays as it is here; the file's version is not written.</span></div>
@@ -12469,7 +12733,7 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">pustoj.md</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">Empty file: nothing to store and nothing to name it by</td></tr>
             </tbody>
           </table>
-          <div class="tc-msg">Markdown is stored as it was written — nothing is reformatted — and front matter Carrel exported earlier comes back: UID, tags, X-properties.</div>
+          <div class="tc-msg tc-msg--mr0-ml0">Markdown is stored as it was written — nothing is reformatted — and front matter Carrel exported earlier comes back: UID, tags, X-properties.</div>
         </div>
       </div>
     </div>
@@ -12508,11 +12772,16 @@ dav: HTTP 503: the server is busy</div>
         <div class="tc-main">
           <div class="tc-dialog is-wide tc-dialog--step520">
             <div class="tc-steps"><span class="tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">3 · Report</span></div>
-            <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import report</div><div class="tc-head__sub">nextcloud · Контакты</div></div></div>
+            <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import report</div><div class="tc-head__sub"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</div></div></div>
             <div class="tc-card"><div class="tc-rubric">Created</div><div class="tc-card__num">117</div></div>
             <div class="tc-card"><div class="tc-rubric">Already here, skipped <span class="tc-mono tc-mono--ls0">5</span></div>
               <div class="tc-diag">Артём Белов · 1a77-40de-bb02
 Ирина Соколова · 33b0-9ffa-1120</div></div>
+            <div class="tc-card"><div class="tc-rubric">With a new UID <span class="tc-mono tc-mono--ls0">2</span></div>
+              <div class="tc-diag">Вера Дорошенко · 2b7e-11aa → 9d04-77c1 · imported as a copy
+Виктор Панов · 51c0-3a8e → baikal-0412 · the server gave its own</div></div>
+            <div class="tc-card"><div class="tc-rubric">Not kept by the server <span class="tc-mono tc-mono--ls0">1</span></div>
+              <div class="tc-diag">Галина Мещерякова · PHOTO</div></div>
             <div class="tc-card"><div class="tc-rubric">Failed <span class="tc-mono tc-mono--ls0">3</span></div>
               <div class="tc-diag tc-diag--danger">line 12: cannot decode quoted-printable</div></div>
             <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="button">Back to list</button></div>
@@ -12521,7 +12790,7 @@ dav: HTTP 503: the server is busy</div>
       </div>
     </div>
   </div>
-  <figcaption>Числа набраны крупно антиквой: отчёт читают ради них. Таблицы созданного здесь нет — созданное лежит в списке, куда ведёт «Back to list». Пропущенное (чужой род в файле, <code>s-io-6</code>) — четвёртая карточка «Skipped» того же вида, что «Failed»; когда пропущенного нет, нет и карточки. <b>Вторая карточка — про записи, которые в коллекции уже были</b> (задача 159), и называется по ответу предпросмотра: «Already here, skipped» — имя и UID оставленных как есть; «Replaced» — имя и UID переписанных версией файла; «Imported as copies» — старый UID → новый, как было раньше. Когда таких записей в файле не было, нет и карточки.</figcaption>
+  <figcaption>Числа набраны крупно антиквой: отчёт читают ради них. Таблицы созданного здесь нет — созданное лежит в списке, куда ведёт «Back to list». Пропущенное (чужой род в файле, <code>s-io-6</code>) — четвёртая карточка «Skipped» того же вида, что «Failed»; когда пропущенного нет, нет и карточки. <b>Вторая карточка — про записи, которые в коллекции уже были</b> (задача 159), и называется по ответу предпросмотра: «Already here, skipped» — имя и UID оставленных как есть; «Replaced» — имя и UID переписанных версией файла; «Imported as copies» — старый UID → новый, как было раньше. Когда таких записей в файле не было, нет и карточки. <b>«With a new UID»</b> — у кого UID другой, чем в файле: по ответу «Import as copies» и тот, что сервер дал сам (Google, iCloud), — старый → новый и почему. <b>«Not kept by the server»</b> — что импорт, перечитав записанное, не нашёл: запись и свойство. Пустых карточек нет.</figcaption>
   </figure>
   <figure style="flex:1 1 100%">
   <div class="frame" data-frame="s-io-14" data-screen="/app/calendar/{account}/{col}/import" data-part="report-skipped">
@@ -12550,13 +12819,13 @@ dav: HTTP 503: the server is busy</div>
         <div class="tc-main">
           <div class="tc-dialog is-wide tc-dialog--step520">
             <div class="tc-steps"><span class="tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="is-on tc-steps__item">3 · Report</span></div>
-            <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import report</div><div class="tc-head__sub">nextcloud · Личный</div></div></div>
-            <div class="tc-card"><div class="tc-rubric">Created</div><div class="tc-card__num">81</div></div>
+            <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import report</div><div class="tc-head__sub"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>nextcloud · Личный</div></div></div>
+            <div class="tc-card"><div class="tc-rubric">Created</div><div class="tc-card__num">82</div></div>
             <div class="tc-card"><div class="tc-rubric">Already here, skipped <span class="tc-mono tc-mono--ls0">3</span></div>
               <div class="tc-diag">Синк-ап по релизу · 7c1e-22ab-90f4
 Поездка в Казань · 0d5a-b8c3-41e7</div></div>
-            <div class="tc-card"><div class="tc-rubric">Failed <span class="tc-mono tc-mono--ls0">2</span></div>
-              <div class="tc-diag tc-diag--danger">— (no SUMMARY): DTSTART without DTEND or DURATION</div></div>
+            <div class="tc-card"><div class="tc-rubric">Failed <span class="tc-mono tc-mono--ls0">1</span></div>
+              <div class="tc-diag tc-diag--danger">line 418: cannot read RRULE «FREQ=FORTNIGHTLY»</div></div>
             <div class="tc-card"><div class="tc-rubric">Skipped <span class="tc-mono tc-mono--ls0">6</span></div>
               <div class="tc-diag">Купить билеты · VTODO: a calendar takes events — import it into a list of tasks</div></div>
             <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="button">Back to list</button></div>
@@ -19774,7 +20043,7 @@ Read  2 min ago · changed on server 3 days ago</div>
             <div class="tc-head__text">
               <div class="tc-head__title">Анна Ковалёва</div>
               <div class="tc-head__sub">Издательство «Слово» · Выпускающий редактор</div>
-              <div class="tc-head__sub">nextcloud · Контакты</div>
+              <div class="tc-head__sub"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</div>
             </div>
           </div>
           <div class="tc-acts">
@@ -23404,7 +23673,7 @@ The account itself stays: same login, role and confirmed address, the same first
             <div class="tc-head__text">
               <div class="tc-head__title">Анна Ковалёва</div>
               <div class="tc-head__sub">Издательство «Слово» · Выпускающий редактор</div>
-              <div class="tc-head__sub">nextcloud · Контакты</div>
+              <div class="tc-head__sub"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</div>
             </div>
           </div>
           <div class="tc-acts">
@@ -23733,7 +24002,7 @@ Read  2 min ago · not changed on server</div>
             <div class="tc-head__text">
               <div class="tc-head__title">Редакция «Слово»</div>
               <div class="tc-head__sub">Group · 4 members</div>
-              <div class="tc-head__sub">nextcloud · Контакты</div>
+              <div class="tc-head__sub"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</div>
             </div>
           </div>
           <div class="tc-acts">

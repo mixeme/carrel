@@ -4,6 +4,16 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.6.1 — 2026-10-22
+
+Server `v0.2.357`, Typecase `a78141d` (note 111).
+
+### Changed
+
+- **A contact's head** names its address book with the book's mark, in the
+  list's panel and on the page (s-contacts-1, -6, -16, s-publish-3) — as
+  the agenda and the notes already do.
+
 ## v0.6.0 — 2026-10-22
 
 Server `v0.2.356`, Typecase `bc0b574`. Publishing and mail built whole:

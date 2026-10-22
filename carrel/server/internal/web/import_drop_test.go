@@ -10,7 +10,7 @@ import (
 // Им3 of the scan of import (s-io-1): a file dropped on a collection's list
 // opens the wizard on its preview, the collection chosen; before the drop
 // the list says what will happen, where to, and that nothing is written
-// yet, and refuses a file of another kind with where it belongs.
+// yet, and refuses a file it does not take.
 func TestADroppedFileOpensThePreview(t *testing.T) {
 	f := bookFixture(t, nil, adaCard())
 	list := decode[view.ContactsListPage](t, f.h.do(get(f.path("contacts"), f.sess)))
@@ -22,12 +22,9 @@ func TestADroppedFileOpensThePreview(t *testing.T) {
 		!strings.HasPrefix(saidRuns(d.Line), "One ⟨mono:.vcf⟩ file into ") || d.Note != "The preview opens first: nothing is written until it has been read" {
 		t.Errorf("drop = %+v, line %q", d, saidRuns(d.Line))
 	}
-	says := map[string]string{}
-	for _, e := range d.Elsewhere {
-		says[string(e.Ext)] = saidRuns(e.Says)
-	}
-	if says[".ics"] != "Contacts take ⟨mono:.vcf⟩ — the calendar, the list of tasks and a notebook take this one" {
-		t.Errorf("elsewhere = %q", says)
+	// A file it does not take, several files (Typecase's note 111 p. 4).
+	if saidRuns(d.Refused) != "Only ⟨mono:.vcf⟩ files are imported here" || d.OneOnly != "One file at a time: only notes take several" {
+		t.Errorf("refused %q, one only %q", saidRuns(d.Refused), d.OneOnly)
 	}
 
 	page := decode[view.ImportPage](t, f.h.do(importRequest(d.Action.Href, f.sess, false, "people.vcf",

@@ -112,10 +112,14 @@ func runImportExport(t *testing.T, endpoint, user, pass string) {
 		if r := page.Report; r == nil || r.Created != 2 || r.Renamed != 1 || r.Skipped != 1 {
 			t.Fatalf("report = %+v", page.Report)
 		}
-		note := string(liveRow(t, page.Report.Rows, "Created", "Standup imported")[2])
-		m := regexp.MustCompile(`Created under ([^:]+):`).FindStringSubmatch(note)
+		var m []string
+		for _, line := range page.Report.NewUIDs {
+			if m = regexp.MustCompile(`^Standup imported · \S+ → (\S+) · `).FindStringSubmatch(string(line)); m != nil {
+				break
+			}
+		}
 		if m == nil {
-			t.Fatalf("the renamed series does not say its identity: %q", note)
+			t.Fatalf("the renamed series does not say its identity: %q", page.Report.NewUIDs)
 		}
 		got, _ := rawBody(ctx, t, client, calPath+m[1]+".ics")
 		mustHave(t, "renamed series", got, "RRULE:FREQ=WEEKLY;COUNT=3", "RECURRENCE-ID:20261113T100000Z", "SUMMARY:Standup imported moved", "X-CUSTOM:keep-me")
@@ -280,23 +284,6 @@ func (a *liveApp) importFile(path, name string, data []byte) *httptest.ResponseR
 	rec := httptest.NewRecorder()
 	a.srv.Handler().ServeHTTP(rec, req)
 	return rec
-}
-
-// liveRow is the row of a preview or a report whose first column holds what.
-func liveRow(t *testing.T, tables []view.ImportTable, rubric, what string) []view.Text {
-	t.Helper()
-	for _, tb := range tables {
-		if !strings.Contains(string(tb.Rubric), rubric) {
-			continue
-		}
-		for _, line := range tb.Lines {
-			if strings.Contains(string(line.Cells[0]), what) {
-				return line.Cells
-			}
-		}
-	}
-	t.Fatalf("no row %q under %q in %+v", what, rubric, tables)
-	return nil
 }
 
 // livePreviewRow is the row of the preview's one table (s-io-5…8) with what
