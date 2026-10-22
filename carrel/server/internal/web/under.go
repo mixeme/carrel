@@ -122,6 +122,8 @@ func underPage(body any) *view.Under {
 		return &view.Under{Contacts: &p}
 	case view.ContactPage:
 		return &view.Under{Contact: &p}
+	case view.ContactEditPage:
+		return &view.Under{ContactEdit: &p}
 	case view.AgendaPage:
 		return &view.Under{Agenda: &p}
 	case view.EventPage:

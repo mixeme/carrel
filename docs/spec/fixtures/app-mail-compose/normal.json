@@ -339,6 +339,7 @@
     "backup": null,
     "connections": null,
     "contact": null,
+    "contactEdit": null,
     "contacts": {
       "bar": {
         "actions": [

@@ -21,6 +21,10 @@
     {
       "then": "written into the event, goes with it",
       "what": "release-checklist.md"
+    },
+    {
+      "then": "a link to Documents / carrel / attachments, the file stays",
+      "what": "agenda-10-08.pdf"
     }
   ],
   "cancels": "The event has 3 attendees, and nextcloud sends invitations itself: the server may tell them the meeting is cancelled.",
@@ -57,7 +61,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e7"
+            "value": "e22"
           },
           {
             "add": null,
@@ -71,6 +75,25 @@
             "readOnly": false,
             "required": false,
             "value": "1"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "",
+            "name": "attachment",
+            "options": [
+              {
+                "label": "Delete agenda-10-08.pdf too",
+                "selected": false,
+                "value": "1"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
           }
         ],
         "unfold": null
@@ -122,6 +145,10 @@
   "kind": "event",
   "references": [
     {
+      "then": "answers “not found” from that moment",
+      "what": "1 published link"
+    },
+    {
       "then": "among the loaded ones; their link is left pointing at nothing",
       "what": "1 record related to it"
     }
@@ -135,6 +162,7 @@
     "backup": null,
     "connections": null,
     "contact": null,
+    "contactEdit": null,
     "contacts": null,
     "davloom": null,
     "devices": null,
@@ -156,7 +184,7 @@
               "csrf": "csrf",
               "enabled": true,
               "file": "file",
-              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e7\u0026op=attach",
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e22\u0026op=attach",
               "icon": "i-upload",
               "id": "attach.add",
               "label": "From this computer",
@@ -164,7 +192,7 @@
             },
             {
               "enabled": true,
-              "href": "/app/files/picker?a=a-nc-home\u0026c=lichnyj\u0026etag=e7\u0026for=attach\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
+              "href": "/app/files/picker?a=a-nc-home\u0026c=lichnyj\u0026etag=e22\u0026for=attach\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
               "icon": "i-file",
               "id": "attach.files",
               "label": "From Files",
@@ -175,7 +203,7 @@
           "csrf": "csrf",
           "enabled": true,
           "file": "file",
-          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e7\u0026op=attach",
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e22\u0026op=attach",
           "icon": "i-clip",
           "id": "attach.add",
           "label": "Attach",
@@ -203,7 +231,7 @@
           "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e7",
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e22",
           "icon": "i-trash",
           "id": "record.delete",
           "label": "Delete event",
@@ -220,6 +248,16 @@
           "size": "3 KB",
           "state": "ok",
           "type": "text/markdown"
+        },
+        {
+          "actions": [],
+          "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/agenda-10-08.pdf",
+          "inline": false,
+          "name": "agenda-10-08.pdf",
+          "place": "Documents / carrel",
+          "size": "4 B",
+          "state": "ok",
+          "type": "application/pdf"
         }
       ],
       "attendees": [

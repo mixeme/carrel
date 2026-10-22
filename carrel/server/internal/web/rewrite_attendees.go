@@ -424,6 +424,9 @@ func (s *Server) getContactRewrite(w http.ResponseWriter, r *http.Request) {
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
+	// The card's edit page under the sheet, the card as it was just saved
+	// (s-contacts-15).
+	sheet.Under = s.underOf(r, "", c.recordPath(p.UID)+"/edit")
 	s.writePage(w, r, http.StatusOK, sheet)
 }
 
@@ -595,7 +598,20 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 	for _, g := range groups {
 		rg := view.RewriteGroup{Name: "group", Value: g.value, Label: text(g.label), On: answer.groups[g.value],
 			Count: text(plural(len(g.records), "record")), Note: text(g.note)}
-		for _, i := range g.records {
+		// The group's records by their day (Typecase's note 53) — the past
+		// ones the latest first, as s-contacts-15 lists them —, then by
+		// title: the order the collections were read in is no order.
+		byDay := slices.Clone(g.records)
+		slices.SortStableFunc(byDay, func(a, b int) int {
+			if c := p.Records[a].Start.Compare(p.Records[b].Start); c != 0 {
+				if g.value == "past" {
+					return -c
+				}
+				return c
+			}
+			return strings.Compare(p.Records[a].Title, p.Records[b].Title)
+		})
+		for _, i := range byDay {
 			r := p.Records[i]
 			row := view.Field{Label: text(r.Title), Colour: view.Colour(r.Colour), Href: s.route(r.Href)}
 			if !r.Start.IsZero() {
@@ -652,6 +668,7 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 	for _, u := range p.Unread {
 		sheet.Kept = append(sheet.Kept, view.Field{Label: text(u.Label), Value: text("could not be read: " + lowerClause(u.Why) + " What it holds keeps the old address.")})
 	}
+	sheet.KeptNote = text(strings.Join(p.keptSentences(), " "))
 	action := s.rewriteAddress(c, p.UID, p.Token, "")
 	sheet.Form = s.plainForm(action, "POST", csrfField(c.sess), view.FormRow{Name: "groups", Kind: view.InputHidden, Value: "1"})
 	n := p.count(answer)
@@ -754,6 +771,25 @@ type rewriteOutcome struct {
 	lost    []string // detail lines: written, but the server did not keep all
 }
 
+// keptSentences say what keeps the old address whatever is chosen — the
+// read-only records and the collections that could not be read —, a
+// sentence each: the sheet's line over its note (s-contacts-15) and the
+// outcome's message say them alike.
+func (p *rewritePlan) keptSentences() []string {
+	var out []string
+	for _, g := range p.kept() {
+		if g.n == 1 {
+			out = append(out, "1 record in "+g.where+" is read-only and keeps the old address.")
+		} else {
+			out = append(out, fmt.Sprintf("%d records in %s are read-only and keep the old address.", g.n, g.where))
+		}
+	}
+	for _, u := range p.Unread {
+		out = append(out, u.Label+" could not be read, and what it holds keeps the old address.")
+	}
+	return out
+}
+
 func (o rewriteOutcome) notice(p *rewritePlan, a rewriteAnswer) view.Notice {
 	// Every record chosen and written counts them alone (s-contacts-21); a
 	// shortfall says of how many.
@@ -762,17 +798,7 @@ func (o rewriteOutcome) notice(p *rewritePlan, a rewriteAnswer) view.Notice {
 	if o.written != chosen {
 		n.Title = text(fmt.Sprintf("Rewritten in %d of %s.", o.written, plural(chosen, "record")))
 	}
-	parts := append([]string(nil), o.refused...)
-	for _, g := range p.kept() {
-		if g.n == 1 {
-			parts = append(parts, "1 record in "+g.where+" is read-only and keeps the old address.")
-		} else {
-			parts = append(parts, fmt.Sprintf("%d records in %s are read-only and keep the old address.", g.n, g.where))
-		}
-	}
-	for _, u := range p.Unread {
-		parts = append(parts, u.Label+" could not be read, and what it holds keeps the old address.")
-	}
+	parts := append(append([]string(nil), o.refused...), p.keptSentences()...)
 	n.Body = text(strings.Join(parts, " "))
 	if len(o.refused) > 0 || len(o.lost) > 0 || len(p.Unread) > 0 {
 		n.Role = view.NoticeAlert

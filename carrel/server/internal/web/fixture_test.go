@@ -29,6 +29,7 @@ import (
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
+	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -1235,6 +1236,66 @@ func mockupAnnaPhoto(t *testing.T, app *mockupApp) {
 	app.servers["nextcloud"].Seed(path, strings.Replace(strings.ReplaceAll(body, "\r\n", "\n"), "REV:", photo+"REV:", 1))
 }
 
+// mockupAnnaMeetings gives Anna a second, older address and the meetings
+// that name her old ones, as s-contacts-15 counts them: in «Работа» on
+// nextcloud — organised by mix or by others, coming or past —, and in
+// «Общий» on baikal, which answers now and did not say whether it
+// schedules («On baikal»).
+func mockupAnnaMeetings(t *testing.T, app *mockupApp) {
+	t.Helper()
+	nc, baikal := app.servers["nextcloud"], app.servers["baikal"]
+	card := davtest.AddressBookHome + "kontakty/4f2b-9c31-a0e7.vcf"
+	body, _, ok := nc.Object(card)
+	if !ok {
+		t.Fatal("Анна is not on the stand")
+	}
+	nc.Seed(card, strings.Replace(body, "EMAIL;TYPE=WORK:a.kovaleva@example.org", "EMAIL;TYPE=WORK:a.kovaleva@example.org\r\nEMAIL;TYPE=HOME:anna@oldfirm.example", 1))
+	meet := func(uid, summary, when, organiser string, names ...string) string {
+		lines := []string{"BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//T//EN", "BEGIN:VEVENT",
+			"UID:" + uid, "DTSTAMP:20260801T000000Z", "DTSTART:" + when + "T100000Z", "DTEND:" + when + "T110000Z",
+			"SUMMARY:" + summary, "ORGANIZER;CN=Organiser:mailto:" + organiser}
+		for _, n := range names {
+			lines = append(lines, "ATTENDEE;CN=Анна Ковалёва;PARTSTAT=ACCEPTED:mailto:"+n)
+		}
+		return strings.Join(append(lines, "END:VEVENT", "END:VCALENDAR", ""), "\r\n")
+	}
+	const (
+		mine   = "mix@example.org"
+		boss   = "boss@slovo.example"
+		work   = "a.kovaleva@example.org"
+		oldjob = "anna@oldfirm.example"
+	)
+	rabota := davtest.CalendarHome + "rabota/"
+	for uid, ev := range map[string]string{
+		"aa02": meet("aa02", "Ретро спринта", "20260814", boss, work),
+		"aa03": meet("aa03", "Планирование Q4", "20260902", mine, work),
+		"cc01": meet("cc01", "Встреча с подрядчиком", "20260818", boss, work, oldjob),
+		"cc02": meet("cc02", "Юбилей отдела", "20260905", boss, oldjob),
+		"dd01": meet("dd01", "Синк-ап по релизу", "20260803", mine, work),
+		"dd02": meet("dd02", "Синк-ап по релизу", "20260727", mine, work, oldjob),
+	} {
+		nc.Seed(rabota+uid+".ics", ev)
+	}
+	obshchij := davtest.CalendarHome + "obshchij/"
+	baikal.Seed(obshchij+"bb01.ics", meet("bb01", "Общий созвон", "20260812", mine, work))
+	baikal.Seed(obshchij+"bb02.ics", meet("bb02", "Демо для заказчика", "20260821", mine, work))
+	baikal.Accept("REPORT")
+	// baikal did not say whether it schedules: what the connection holds of
+	// it, the collections as they are.
+	id := app.realAccount(t, "obshchij")
+	key, _ := app.sess.DataKey()
+	blob, _ := app.h.users.Catalog(app.sess.AccountID(), key)
+	var found []sealed.Collection
+	for _, c := range blob.Collections {
+		if c.AccountID == id {
+			found = append(found, c)
+		}
+	}
+	if err := app.h.users.ApplyRediscovery(app.sess.AccountID(), key, id, user.Rediscovery{Found: found, Addresses: []string{mine}}); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // C-14.2: the card of a contact, read (s-contacts-6): with her photograph,
 // and with the timeline this session gathered in its inset (S-15.4).
 func TestFixtureContactCard(t *testing.T) {
@@ -1250,17 +1311,21 @@ func TestFixtureContactCard(t *testing.T) {
 	app.compare(t, "app-contact/normal.json", app.h.do(get(rec, app.sess)))
 }
 
-// C-14.2: Anna's address replaced on her card — the sheet asks whether to
-// rewrite it where she is named (s-contacts-15), and the card says what
-// came of it (s-contacts-16). Her one meeting is in «Личный» on nextcloud,
-// which schedules; «Общий» on baikal does not answer and is named.
+// C-14.2: Anna's two addresses replaced on her card — the sheet asks
+// whether to rewrite them where she is named (s-contacts-15), and the card
+// says what came of it (s-contacts-16). Her meetings are in «Личный» and
+// «Работа» on nextcloud, which schedules — some organised by others, some
+// past — and in «Общий» on baikal, which did not say whether it schedules:
+// the four groups of the frame.
 func TestFixtureContactRewrite(t *testing.T) {
 	app := newMockupApp(t)
 	mockupAnnaPhoto(t, app)
+	mockupAnnaMeetings(t, app)
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
 	form := formFields(decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
 	form.Set("email.0", "a.kovaleva@slovo.example")
+	form.Set("email.1", "anna@home.example")
 	saved := app.h.do(postForm(rec+"/edit", app.sess, form))
 	sheet := saved.Header().Get("Location")
 	if saved.Code != 303 || !strings.HasPrefix(sheet, rec+"/rewrite?plan=") {
@@ -1339,13 +1404,25 @@ func TestFixtureEventCard(t *testing.T) {
 
 // C-14.2: the sheet of deleting a record (note 69 of Typecase, task 166).
 // normal — «Синк-ап по релизу» with its copies, its attendees on nextcloud,
-// which schedules, its attachment, and the note related to it (s-agenda-26);
-// single — the task «Отправить документы в МФЦ», a published link alone
-// pointing at it (s-tasks-18).
+// which schedules, its attachments — one written into it, one a link into
+// the attachment folder —, its published link and the note related to it
+// (s-agenda-26); single — the task «Отправить документы в МФЦ», a published
+// link alone pointing at it (s-tasks-18).
 func TestFixtureRecordDelete(t *testing.T) {
 	app := newMockupApp(t)
 	linkMockupEvent(t, app)
 	attachMockupRecording(t, app)
+	sftp := app.servers["sftpgo · vps"]
+	at := davtest.FileRoot + "Documents/carrel/attachments/"
+	sftp.SeedFile(at+"agenda-10-08.pdf", "%PDF")
+	nc := app.servers["nextcloud"]
+	ev := davtest.CalendarHome + "lichnyj/8f1c-4a02-b7d3.ics"
+	body, _, ok := nc.Object(ev)
+	if !ok {
+		t.Fatal("the event is not on the stand")
+	}
+	link := "ATTACH;FMTTYPE=application/pdf;SIZE=4:" + sftp.URL + at + "agenda-10-08.pdf"
+	nc.Seed(ev, strings.Replace(body, "END:VEVENT", link+"\r\nEND:VEVENT", 1))
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	openList(t, app, "/app/notes")
 	openList(t, app, "/app/tasks")
@@ -1362,13 +1439,18 @@ func TestFixtureRecordDelete(t *testing.T) {
 		}
 		return app.h.do(postForm(actionHref(t, p.Actions, "record.delete"), app.sess, url.Values{}))
 	}
+	publish := func(t *testing.T, kind, col, uid string) {
+		t.Helper()
+		q := url.Values{"k": {kind}, "a": {app.realAccount(t, col)}, "c": {app.realPath(t, col)}, "uid": {uid}}
+		sheet := decode[view.PublishSheet](t, app.h.do(get("/app/publish?"+q.Encode(), app.sess)))
+		app.h.do(postForm(actionHref(t, sheet.Actions, "publish.create"), app.sess, url.Values{}))
+	}
 	t.Run("normal", func(t *testing.T) {
+		publish(t, "calendar", "lichnyj", "8f1c-4a02-b7d3")
 		app.compare(t, "app-record-delete/normal.json", del(t, "calendar", "lichnyj", "8f1c-4a02-b7d3"))
 	})
 	t.Run("single", func(t *testing.T) {
-		q := url.Values{"k": {"tasks"}, "a": {app.realAccount(t, "dela")}, "c": {app.realPath(t, "dela")}, "uid": {"aa10-77bc-0e31"}}
-		sheet := decode[view.PublishSheet](t, app.h.do(get("/app/publish?"+q.Encode(), app.sess)))
-		app.h.do(postForm(actionHref(t, sheet.Actions, "publish.create"), app.sess, url.Values{}))
+		publish(t, "tasks", "dela", "aa10-77bc-0e31")
 		app.compare(t, "app-record-delete/single.json", del(t, "tasks", "dela", "aa10-77bc-0e31"))
 	})
 }

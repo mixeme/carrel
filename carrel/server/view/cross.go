@@ -369,9 +369,12 @@ type Under struct {
 	Task     *TaskPage         `json:"task"`
 	Notes    *NotesPage        `json:"notes"`
 	Note     *NotePage         `json:"note"`
-	// правка под листом вопроса перед записью (AskSheet) — с набранным
-	EventEdit *EventEditPage `json:"eventEdit"`
-	TaskEdit  *TaskEditPage  `json:"taskEdit"`
+	// правка под листом вопроса перед записью (AskSheet) — с набранным;
+	// правка контакта — под листом «переписать адрес» после записи
+	// (RewriteSheet, s-contacts-15)
+	EventEdit   *EventEditPage   `json:"eventEdit"`
+	TaskEdit    *TaskEditPage    `json:"taskEdit"`
+	ContactEdit *ContactEditPage `json:"contactEdit"`
 	// страница подключений под листами коллекций (Кл1; s-profile-7…-9),
 	// пароля (s-profile-3) и отключения
 	Connections *ConnectionsPage `json:"connections"`
@@ -578,8 +581,12 @@ type RewriteSheet struct {
 	// когда отмечены обе, — с её названием (s-contacts-29); пусто — таких нет
 	Both Text    `json:"both"`
 	Kept []Field `json:"kept"` // Label — «2 records in Shared», Value — «read-only; they keep the old address»
-	Note Text    `json:"note"` // строка под блоками: «Collections that are not ticked were not looked in.» (s-contacts-19)
-	Form Form    `json:"form"` // план в адресе, CSRF и groups=1 — форма несёт отметки групп
+	// KeptNote — то же предложениями, как строка над Note в кадре маршрута
+	// (s-contacts-15): «2 records in Shared are read-only and keep the old
+	// address.»; пусто — такого нет
+	KeptNote Text `json:"keptNote"`
+	Note     Text `json:"note"` // строка под блоками: «Collections that are not ticked were not looked in.» (s-contacts-19)
+	Form     Form `json:"form"` // план в адресе, CSRF и groups=1 — форма несёт отметки групп
 	// Tally — по строке на запись, которую можно переписать: условия, при
 	// которых она переписывается, через пробел (записка 65): «to.1» — выбор
 	// адреса не пуст, «to.1|to.2» — любой из двух, «group=others» — группа
@@ -590,6 +597,9 @@ type RewriteSheet struct {
 	Count    Text     `json:"count"`
 	CountOne Text     `json:"countOne"`
 	Actions  []Action `json:"actions"` // Rewrite N records · Leave as is
+	// Under — экран под листом, пришедшим страницей: правка карточки, только
+	// что записанной (s-contacts-15); nil у фрагмента
+	Under *Under `json:"under"`
 }
 type RewritePair struct {
 	From Text `json:"from"`

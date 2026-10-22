@@ -1962,6 +1962,7 @@ type Under struct {
     // правка под листом вопроса перед записью (AskSheet) — с набранным
     EventEdit *EventEditPage
     TaskEdit  *TaskEditPage
+    ContactEdit *ContactEditPage // правка карточки под листом «переписать адрес» после записи (s-contacts-15)
     Connections *ConnectionsPage // под листами коллекций (Кл1; s-profile-7…-9), пароля (s-profile-3), отключения
     // под листами U-6.17 (Лс29): Account — депонирование и отзыв (account-2,
     // -11), Devices — пароль у «Set up a new device» (s-plan-3), AdminUsers —
@@ -2097,12 +2098,14 @@ type RewriteSheet struct {
     Groups   []RewriteGroup
     Both     Text
     Kept     []Field
+    KeptNote Text // то же предложениями — строка над Note (s-contacts-15): «2 records in Shared are read-only and keep the old address.», теми же словами, что итог после записи; пусто — такого нет
     Note     Text
     Form     Form
     Tally    []string
     Count    Text
     CountOne Text
     Actions  []Action
+    Under    *Under // правка карточки, только что записанной (s-contacts-15); nil у фрагмента
 }
 type RewritePair struct {
     From   Text
@@ -2116,7 +2119,7 @@ type RewriteGroup struct {
     Label   Text
     On      bool
     Count   Text    // «9 records»
-    Records []Field // Label — название, Value — день, Colour, Href
+    Records []Field // Label — название, Value — день, Colour, Href; по дню (прошедшие — от поздней), затем по названию
     Note    Text
 }
 

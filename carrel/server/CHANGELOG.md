@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.358 — 2026-10-22
+
+What the client's sheets of a record needed: rewriting an address and
+deleting a record.
+
+### Changed
+
+- **The rewrite sheet** (`RewriteSheet`) comes as a page with the card's
+  edit page under it (`Under.ContactEdit`, new — what the frame draws,
+  s-contacts-15), and says what keeps the old address in sentences,
+  `KeptNote`, the line over `Note` — the words of the outcome's message.
+- **A group's records** on the rewrite sheet stand by their day (the past
+  ones the latest first), then by title — not in the order the collections
+  were read.
+
+### Fixtures
+
+- `app-contact-rewrite/normal` is the frame's state: two addresses
+  replaced, meetings in four groups — on nextcloud, which schedules,
+  organised by mix and by others, coming and past, and on baikal, which did
+  not say whether it schedules. `app-record-delete/normal` carries a
+  published link and a link into the attachment folder with its tick
+  (s-agenda-26). Every sheet's `under` has `contactEdit`.
+
+### For consumers
+
+Draw the card's edit page under the rewrite sheet from `Under.ContactEdit`.
+
 ## v0.2.357 — 2026-10-22
 
 Import by Typecase note 111, packages 1 and 2 of

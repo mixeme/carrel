@@ -31,7 +31,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e22",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e29",
       "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete contact",
@@ -41,7 +41,7 @@
   ],
   "avatar": {
     "colour": "#8c6239",
-    "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e22",
+    "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e29",
     "initials": "АК"
   },
   "books": [],
@@ -64,6 +64,12 @@
       "label": "Email · work",
       "mono": false,
       "value": "a.kovaleva@slovo.example"
+    },
+    {
+      "href": "mailto:anna@home.example",
+      "label": "Email · home",
+      "mono": false,
+      "value": "anna@home.example"
     },
     {
       "aside": "in 7 months",
@@ -180,13 +186,13 @@
   "notices": [
     {
       "actions": [],
-      "body": "Общий · baikal could not be read, and what it holds keeps the old address.",
+      "body": "",
       "details": null,
-      "role": "alert",
-      "title": "Rewritten in 1 record."
+      "role": "info",
+      "title": "Rewritten in 9 records."
     }
   ],
-  "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e22",
+  "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e29",
   "photoNote": "",
   "print": {
     "range": "nextcloud · Контакты",

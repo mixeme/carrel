@@ -30,6 +30,8 @@ import (
 	"carrel.dev/carrel/client/screens/publish"
 	"carrel.dev/carrel/client/screens/published"
 	"carrel.dev/carrel/client/screens/register"
+	"carrel.dev/carrel/client/screens/remove"
+	"carrel.dev/carrel/client/screens/rewrite"
 	"carrel.dev/carrel/client/screens/settings"
 	"carrel.dev/carrel/client/screens/setup"
 	"carrel.dev/carrel/client/screens/task"
@@ -134,6 +136,26 @@ var All = []Screen{
 		},
 		Title: func(model any) string { return string(model.(*view.CopiesSheet).Title) },
 		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.CopiesSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.RecordDeleteSheet) },
+		Frames: []string{"s-agenda-26", "s-tasks-18"},
+		Draw: func(model any) Root {
+			p := model.(*view.RecordDeleteSheet)
+			return over(p.Under, remove.Sheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.RecordDeleteSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.RecordDeleteSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.RewriteSheet) },
+		Frames: []string{"s-contacts-15"},
+		Draw: func(model any) Root {
+			p := model.(*view.RewriteSheet)
+			return over(p.Under, rewrite.Sheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.RewriteSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.RewriteSheet).Under) },
 	},
 	{
 		Model:  func() any { return new(view.AskSheet) },
@@ -642,6 +664,8 @@ func over(u *view.Under, sheet widget.Sheet) Root {
 		shell = eventedit.Screen(u.EventEdit)
 	case u.TaskEdit != nil:
 		shell = taskedit.Screen(u.TaskEdit)
+	case u.ContactEdit != nil:
+		shell = contactedit.Screen(u.ContactEdit)
 	case u.AdminUsers != nil:
 		shell = admin.Users(u.AdminUsers)
 	case u.Account != nil:
@@ -686,6 +710,8 @@ func underForms(u *view.Under) []widget.PostForm {
 		return eventedit.Forms(u.EventEdit)
 	case u.TaskEdit != nil:
 		return taskedit.Forms(u.TaskEdit)
+	case u.ContactEdit != nil:
+		return contactedit.Forms(u.ContactEdit)
 	case u.Note != nil:
 		return note.Forms(u.Note)
 	case u.AdminUsers != nil:

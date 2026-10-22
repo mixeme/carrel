@@ -167,6 +167,7 @@
     "backup": null,
     "connections": null,
     "contact": null,
+    "contactEdit": null,
     "contacts": null,
     "davloom": {
       "actions": [

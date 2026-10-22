@@ -4,6 +4,22 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.6.2 — 2026-10-22
+
+Server `v0.2.358`, Typecase `a78141d`.
+
+### Added
+
+- **Deleting a record** (`/app/{kind}/{account}/{col}/{uid}/delete`,
+  RecordDeleteSheet; s-agenda-26, s-tasks-18): what is lost, what points
+  at it and its attachments under their rubrics, the tick for a link's
+  file, the copies with their marks and ticks; 560 wide with copies, else
+  480 (Typecase task 223 p. 4).
+- **Rewriting an address** (`/app/contacts/{account}/{col}/{uid}/rewrite`,
+  RewriteSheet; s-contacts-15) over the card's edit page: a choice per old
+  address, a tick per group with its records behind a counting button,
+  what keeps the old address, the button that counts as the form changes.
+
 ## v0.6.1 — 2026-10-22
 
 Server `v0.2.357`, Typecase `a78141d` (note 111).
