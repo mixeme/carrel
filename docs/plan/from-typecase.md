@@ -3822,6 +3822,75 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
 
    **Взята сервером 22.10.2026** (`v0.2.359`; копия макета `0f51d45`): все пункты — скан [collections-112](scans/collections-112.md). Экраны листов коллекций клиента — следом.
 
+Записка 113 от 22.10.2026 (Typecase `3779ac0`; задача 222). **Последний
+коммит Typecase, который она описывает, — `3779ac0`** (518 кадров). **222
+закрыта.**
+
+113. **Импорт после записки 111: ответы на двенадцать вопросов.**
+   1. **Отказ броска** (подпись `s-io-1`) — по случаям, расширения
+      моноширинно. Файл другого рода — куда его нести: на контактах `.ics`
+      — «Contacts take ‹.vcf› — the calendar and the list of tasks take this
+      one», в календаре и задачах `.vcf` — «Contacts take this one». Файл,
+      который не берёт никто, — «Only ‹.vcf› files are imported here» (у
+      календаря и задач — ‹.ics›, у заметок — ‹.md›, ‹.zip› or ‹.ics›).
+      Несколько файлов не у заметок — «One file at a time: only notes take
+      several».
+   2. **«Imported as copies» остаётся** вариантом второй карточки (ответ
+      «Import as copies»). **«With a new UID» — только то, что сделал не
+      ответ**; строк «imported as a copy» в ней нет (`s-io-9`).
+   3. **Слова «почему»** в «With a new UID»: «the server gave its own»
+      (Google), «the account holds this UID in another collection» (iCloud,
+      SV-55: Carrel дал новый сам), «the file holds this UID twice» (вторая
+      запись того же UID). Строка — «‹имя› · ‹старый› → ‹новый› · ‹почему›».
+   4. **Пометки «Ready — …» — через запятую**, одна на свойство:
+      «a whole day (no end)» (дата без конца), «a moment (no end)» (дата и
+      время без конца), «no title» (событие, задача), «name from N» (FN
+      собран из N), «no name» (FN — «Unnamed contact»). `s-io-6`: «Ready — a
+      whole day (no end), no title»; `s-io-7` «40 % done, priority 1» —
+      по тому же правилу.
+   5. **Отказ шага 1** (подпись `s-io-18`): отказ, который прочёл файл и
+      нашёл его негодным, начинается жирным «**Nothing was read.**». Без него
+      — «No file was chosen.» и «There is no file to import: the session
+      ended. Choose it again.». Папка WebDAV не прочлась — «**The folder could
+      not be read.** ‹слова сервера›» и под ним техблок (метод, адрес, код),
+      как у отказов сервера. У файла с компьютера техблока нет.
+   6. **«This file holds no records.»** — только когда в файле нет ни одной
+      записи ни одного рода. Записи другого рода — не отказ: предпросмотр
+      покажет их пропущенными с «import it into …». В zip нет `.md` — «The
+      archive holds no Markdown file.», в папке — «The folder holds no
+      Markdown file.».
+   7. **«Не тот файл» у прочих**: `.ics` — «Nothing was read. «‹имя›» is not
+      an iCalendar file: its first line is not ‹BEGIN:VCALENDAR›.»; пустой —
+      «Nothing was read. «‹имя›» is empty.»; битый zip — «Nothing was read.
+      «‹имя›» could not be opened as a zip archive.». Пустой `.md` внутри
+      zip или набора — строка предпросмотра, как была.
+   8. **`s-io-19`**: в уведомлении — кнопка-ссылка «Try again» (тот же адрес
+      предпросмотра, `/app/contacts/nextcloud/kontakty/import`; файл
+      остаётся). Техблока нет — ответа не было. Уведомление — одна фраза с
+      жирным началом: `Runs` с жирным куском — так.
+   9. **Строка «Failed»** — слова сервера или разбора; имя записи — в начале
+      строки, как у других карточек («‹имя› · ‹слова›»), у безымянной —
+      только слова. Запись, которой сервер после записи не показывает вовсе,
+      — в «Not kept by the server»: «‹имя› · not there after it was
+      written».
+   10. **Решение владельца Р-76 (22.10): FN пишется только из ФИО.** Карточке
+       без FN импорт собирает его из N (имя и фамилия); N нет — пишет
+       «Unnamed contact». ORG, почта в имя **не** идут. Пометки — «name from
+       N» / «no name» (`s-io-5`: строка «Вера Лебедева · Ready — name from
+       N»). У событий и задач «Untitled event», «Untitled task» — **только на
+       экране**, SUMMARY в запись не пишется.
+   11. **«—» всегда приглушённо**: пустая ячейка UID и срока —
+       `tc-table__n3--dusty` во всех таблицах импорта (`s-io-5`…`-8`,
+       `-19`).
+   12. **Подзаголовок набора** — «3 files · 12 KB» обычным шрифтом (как «64
+       files» у zip); моноширинно только имя файла. Zip в наборе — один файл;
+       его члены в таблице — «‹архив›.zip › ‹имя›.md».
+   - **Библиотека:** кнопка после слов сообщения стоит с зазором 6 px
+     (`.tc-msg > .tc-btn`, `.tc-msg__aside > .tc-btn`), кнопка-ссылка в
+     тревоге — цвета кнопки (`.tc-msg.is-alert > a.tc-btn`); раньше она
+     была красной (`s-conflict-10`, `s-io-19`, `s-profile-32`). Серверу —
+     ничего, это CSS.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
