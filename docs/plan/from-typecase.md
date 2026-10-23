@@ -3962,6 +3962,43 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
      «nothing searched» (никто не ответил). Так же у поиска почты
      (`s-mailbox-14`): «7 found», без «answered · Search again».
 
+Записка 115 от 23.10.2026 (Typecase `ce9da05`; задача 225). **Последний
+коммит Typecase, который она описывает, — `ce9da05`** (525 кадров). **225
+закрыта.**
+
+115. **Мастер импорта: «Into» и строка с ошибкой (225).**
+   1. **«Into» — `Drop` с `Pick`-триггером и меню ссылок** во всех кадрах
+      мастера (`s-io-3`…`-8`, `-15`…`-19`), как «Saved in» правки:
+      `<details class="tc-drop"><summary class="tc-in is-pick" title="Into">‹метка›
+      ‹коллекция›</summary><div class="tc-menu is-pop tc-menu--w290">…`.
+      Пункты — ссылки на тот же шаг с другой коллекцией
+      (`/app/contacts/nextcloud/arhiv/import`, у текущей — `is-on`);
+      коллекция только для чтения — `button` `disabled` с `title` «Read-only:
+      nothing can be written here.» и «ro»; под чертой — «New address book»
+      (у календаря «New calendar», у задач «New task list», у заметок «New
+      notebook») → `/app/collections/new?kind=contact&back=‹адрес шага›`.
+      Пустое «Into» (`s-io-17`) — `summary` с `is-ph`, без `is-on`, `back`
+      — `/app/contacts/import`. Меню-кадры `s-io-10`…`-13` — те же пункты.
+      Закрытое поле выглядит как прежде.
+   2. **`s-io-6`**: строка с ошибкой — «Личный 2026.ics · — · — · line 23:
+      cannot read DTSTART «2026-02-30»» (тревогой, как в `s-io-7`).
+
+Записка 116 от 23.10.2026 (Typecase `ce9da05`; задача 224). **Последний
+коммит Typecase, который она описывает, — `ce9da05`**. **224 закрыта.**
+
+116. **После записки 112 (224).**
+   1. **Отступ уведомления над карточками Connections** — как у страниц:
+      `s-profile-31`, `-32` теперь `tc-msg is-alert tc-msg--mx20`;
+      диагностика под ним — в `tc-main__diag` (поля страницы), как у
+      «… is unavailable» в разделах.
+   2. **`data-tc-from` разведён.** `data-tc-from` — только поле, из которого
+      выводится другое (`Input.From`, **имя** поля формы); «Save as» называет
+      свой элемент `data-tc-save-from` (`Button.SaveFrom`, **id**).
+      Проверка страницы (`page/check.go`) ищет `data-tc-from` по имени в
+      форме поля, как `data-tc-disables`; `id`, равный имени, клиенту больше
+      не нужен. **Клиенту:** у кнопок «Save as» атрибут — `data-tc-save-from`
+      (библиотека пишет его сама).
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
