@@ -92,19 +92,42 @@ kovaleva = vcard(
     rev=u'20260814T090412Z',
     org=u'Издательство «Слово»', title=u'Выпускающий редактор',
     tels=[(u'CELL', u'+7 912 445-10-88'), (u'WORK', u'+7 495 120-45-00')],
-    emails=[(u'WORK', u'a.kovaleva@example.org')],
+    emails=[(u'WORK', u'a.kovaleva@example.org'),
+            (u'second', u'anna.kovaleva@slovo.example')],
     bday=u'1987-03-14', cats=[u'работа', u'издательство'],
     note=u'Пишет по вторникам, отвечает в тот же день.',
+    # Адрес — одной строкой, как его набирают (s-contacts-6, mentions-1).
     # Три свойства, которых Carrel не знает: карточка показывает
     # «Kept as the server sent them · Show 3».
-    extra=[u'X-EVOLUTION-FILE-AS:Ковалёва\\, Анна',
+    extra=[u'ADR;TYPE=WORK:;;Москва\\, Тверская 12\\, стр. 3;;;;',
+           u'X-EVOLUTION-FILE-AS:Ковалёва\\, Анна',
            u'X-ABLABEL:издательство',
            u'X-CARREL-UNKNOWN-FLAG:1'])
 
+# Анна Ковалёва лежит ещё в двух книгах своими записями, и все три связаны
+# (записка Typecase 117 п. 2: «linked ×3», «in 3 books»). UID у копий свои:
+# 140 очков группы — телефон, почта и имя, без UID (s-dup-1). В «Команде»
+# рабочий телефон другой — его и выбрали; в «Архиве» нет ни рабочего
+# телефона, ни второй почты, ни организации (s-contacts-33, s-dup-1).
+kovaleva_team = vcard(
+    uid=u'b3d0-7e19-5a62', family=u'Ковалёва', given=u'Анна',
+    rev=u'20260809T113000Z', org=u'Издательство «Слово»',
+    tels=[(u'CELL', u'+7 912 445-10-88'), (u'WORK', u'+7 495 120-45-77')],
+    emails=[(u'WORK', u'a.kovaleva@example.org')])
+
+kovaleva_archive = vcard(
+    uid=u'2e85-c4a7-0f3b', family=u'Ковалёва', given=u'Анна',
+    rev=u'20231105T164200Z',
+    tels=[(u'CELL', u'+7 912 445-10-88')],
+    emails=[(u'WORK', u'a.kovaleva@example.org')])
+
+# Рабочий телефон у Смирнова тот же, что у Анны в «Контактах»: общий номер
+# редакции. Это пара, признанная «not duplicates» (s-dup-1, s-dup-6 — там и
+# UID; записка Typecase 117 п. 2).
 smirnov = vcard(
-    uid=u'6b18-2d40-77c5', family=u'Смирнов', given=u'Алексей',
+    uid=u'9a1c-03de-77f2', family=u'Смирнов', given=u'Алексей',
     rev=u'20260731T174501Z',
-    tels=[(u'CELL', u'+7 916 200-71-15')])
+    tels=[(u'CELL', u'+7 916 200-71-15'), (u'WORK', u'+7 495 120-45-00')])
 
 goncharov = vcard(
     uid=u'a90d-5512-4e83', family=u'Гончаров', given=u'Виктор',
@@ -150,8 +173,8 @@ lebedeva_work = vcard(
 
 write(u'nextcloud-home/kontakty.vcf',
       kovaleva + smirnov + goncharov + belov_home + lebedeva_work)
-write(u'nextcloud-home/arhiv.vcf', lebedeva)
-write(u'radicale-vps/komanda.vcf', belov_team)
+write(u'nextcloud-home/arhiv.vcf', lebedeva + kovaleva_archive)
+write(u'radicale-vps/komanda.vcf', belov_team + kovaleva_team)
 
 
 # ─────────────────────────────────────────────────────────────────────────

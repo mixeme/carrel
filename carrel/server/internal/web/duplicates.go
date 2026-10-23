@@ -220,6 +220,13 @@ func (st dupState) groups() []dupGroup {
 		}
 		linked = append(linked, dg)
 	}
+	// A «not duplicates» whose records are not loaded is still the person's
+	// decision, named and taken back from here (s-dup-6).
+	for _, ig := range st.blob.Duplicates.Ignored {
+		if !slices.ContainsFunc(ignored, func(g dupGroup) bool { return g.id == ig.ID }) {
+			ignored = append(ignored, dupGroup{id: ig.ID, kind: ig.Kind, refs: ig.Members, decision: view.DecisionIgnored})
+		}
+	}
 	out := append(append(todo, linked...), ignored...)
 	for i := range out {
 		out[i].refs = st.inCatalogOrder(out[i].refs)
@@ -760,7 +767,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 		prefs := answers(r, st.choices(g))
 		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.link", string(g.kind), func(d *sealed.Duplicates) error {
 			d.Linked = dupes.Link(d.Linked, sealed.LinkedGroup{Kind: g.kind, Members: g.refs, Prefs: prefs})
-			d.Ignored = without(d.Ignored, g.id)
+			d.Ignored = d.Unignored(g.id)
 			return nil
 		})
 	case do == "choose" && g.decision == view.DecisionLinked:
@@ -792,12 +799,12 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 		})
 	case do == "ignore" && g.decision == view.DecisionNone:
 		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.ignore", string(g.kind), func(d *sealed.Duplicates) error {
-			d.Ignored = append(without(d.Ignored, g.id), g.id)
+			d.Ignored = append(d.Unignored(g.id), sealed.IgnoredGroup{ID: g.id, Kind: g.kind, Members: g.refs})
 			return nil
 		})
 	case do == "again" && g.decision == view.DecisionIgnored:
 		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.again", string(g.kind), func(d *sealed.Duplicates) error {
-			d.Ignored = without(d.Ignored, g.id)
+			d.Ignored = d.Unignored(g.id)
 			return nil
 		})
 	}
@@ -826,16 +833,6 @@ func (s *Server) duplicatesRefused(w http.ResponseWriter, r *http.Request, sess 
 	page := s.duplicatesPage(sess, s.readDuplicates(sess, false), kindFilter(r))
 	page.Notices = append(page.Notices, view.Notice{Role: view.NoticeAlert, Title: title, Body: text(body)})
 	s.writePage(w, r, http.StatusOK, page)
-}
-
-func without(list []string, v string) []string {
-	var out []string
-	for _, s := range list {
-		if s != v {
-			out = append(out, s)
-		}
-	}
-	return out
 }
 
 // foldLinked shows the members of a linked group as one row (S-16): the

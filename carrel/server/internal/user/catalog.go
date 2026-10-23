@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"fmt"
+	"slices"
 
 	"carrel.dev/carrel/server/internal/crypt"
 	"carrel.dev/carrel/server/internal/publish"
@@ -247,6 +248,15 @@ func (s *Service) RemoveConnection(viewerID string, dataKey [crypt.KeyLen]byte, 
 			groups = append(groups, g)
 		}
 		blob.Duplicates.Linked = groups
+		// A "not duplicates" with a member here is a group that is no more:
+		// its signature names a member that cannot be loaded again.
+		var ignored []sealed.IgnoredGroup
+		for _, g := range blob.Duplicates.Ignored {
+			if !slices.ContainsFunc(g.Members, func(m sealed.RecordRef) bool { return m.AccountID == accountID }) {
+				ignored = append(ignored, g)
+			}
+		}
+		blob.Duplicates.Ignored = ignored
 
 		for i := range blob.BackupJobs {
 			j := &blob.BackupJobs[i]

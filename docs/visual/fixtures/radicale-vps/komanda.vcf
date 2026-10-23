@@ -11,3 +11,14 @@ EMAIL;TYPE=WORK:a.belov@example.org
 PHOTO;VALUE=uri:https://example.org/avatars/belov.jpg
 REV:20260810T081200Z
 END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+UID:b3d0-7e19-5a62
+N:Ковалёва;Анна;;;
+FN:Анна Ковалёва
+ORG:Издательство «Слово»
+TEL;TYPE=CELL:+7 912 445-10-88
+TEL;TYPE=WORK:+7 495 120-45-77
+EMAIL;TYPE=WORK:a.kovaleva@example.org
+REV:20260809T113000Z
+END:VCARD

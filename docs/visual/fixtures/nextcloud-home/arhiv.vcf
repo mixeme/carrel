@@ -8,3 +8,12 @@ EMAIL;TYPE=HOME:vera@example.net
 EMAIL;TYPE=WORK:vera.l@work.example
 REV:20240218T203311Z
 END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+UID:2e85-c4a7-0f3b
+N:Ковалёва;Анна;;;
+FN:Анна Ковалёва
+TEL;TYPE=CELL:+7 912 445-10-88
+EMAIL;TYPE=WORK:a.kovaleva@example.org
+REV:20231105T164200Z
+END:VCARD

@@ -156,9 +156,19 @@ type Duplicates struct {
 	// Linked are groups shown as one entity. Linking changes nothing on any
 	// server and is undone at any time.
 	Linked []LinkedGroup `json:"linked,omitempty"`
-	// Ignored are the signatures of groups marked "not duplicates": such a
-	// group is not offered again until it gains a member.
-	Ignored []string `json:"ignored,omitempty"`
+	// Ignored are the groups marked "not duplicates": such a group is not
+	// offered again until it gains a member. Its members are kept with its
+	// signature so the decision can be named and taken back while nothing
+	// is loaded (s-dup-6, «Decided earlier»).
+	Ignored []IgnoredGroup `json:"ignored,omitempty"`
+}
+
+// IgnoredGroup is a group the person marked "not duplicates".
+type IgnoredGroup struct {
+	// ID is the group's signature (dupes.Signature)
+	ID      string      `json:"id"`
+	Kind    view.Kind   `json:"kind"`
+	Members []RecordRef `json:"members"`
 }
 
 // LinkedGroup is a set of records the person linked.
@@ -170,6 +180,11 @@ type LinkedGroup struct {
 	// member whose value the group shows, by property name. Asked once, when
 	// linking, and kept (S-16).
 	Prefs map[string]RecordRef `json:"prefs,omitempty"`
+	// Dropped answer a many-valued property (TEL, EMAIL, CATEGORIES): the
+	// values the person unticked, by property name, as the group's question
+	// names them. Everything else the members hold stays — a value that
+	// arrives later was never unticked (from-typecase note 117 p. 1).
+	Dropped map[string][]string `json:"dropped,omitempty"`
 }
 
 // RecordRef is a record by its connection, collection address and UID.
@@ -182,12 +197,23 @@ type RecordRef struct {
 // IsIgnored reports whether the group with this signature is marked "not
 // duplicates".
 func (d Duplicates) IsIgnored(id string) bool {
-	for _, s := range d.Ignored {
-		if s == id {
+	for _, g := range d.Ignored {
+		if g.ID == id {
 			return true
 		}
 	}
 	return false
+}
+
+// Unignored is the ignored groups without the one of this signature.
+func (d Duplicates) Unignored(id string) []IgnoredGroup {
+	var out []IgnoredGroup
+	for _, g := range d.Ignored {
+		if g.ID != id {
+			out = append(out, g)
+		}
+	}
+	return out
 }
 
 // LastFor is where a record of this kind was last created.

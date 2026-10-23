@@ -63,7 +63,11 @@ func TestRemoveConnectionTakesEverythingOfIt(t *testing.T) {
 			{ID: "g2", Kind: view.KindContact, Members: []sealed.RecordRef{ref(gone.ID, "b"), ref(kept.ID, "b"), ref(kept.ID, "c")},
 				Prefs: map[string]sealed.RecordRef{"FN": ref(gone.ID, "b"), "ORG": ref(kept.ID, "c")}},
 		}
-		d.Ignored = []string{"sig"}
+		d.Ignored = []sealed.IgnoredGroup{
+			// A "not duplicates" with a member here goes; the neighbour's stays.
+			{ID: "sig-gone", Kind: view.KindContact, Members: []sealed.RecordRef{ref(gone.ID, "a"), ref(kept.ID, "a")}},
+			{ID: "sig", Kind: view.KindContact, Members: []sealed.RecordRef{ref(kept.ID, "b"), ref(kept.ID, "c")}},
+		}
 		return nil
 	}))
 	onlyGone, err := f.svc.SaveBackupJob(id, key, sealed.BackupJob{Name: "only", Mode: sealed.BackupToDownload, Keep: 1,
@@ -130,8 +134,8 @@ func TestRemoveConnectionTakesEverythingOfIt(t *testing.T) {
 	if d.Linked[0].Prefs["ORG"] != ref(kept.ID, "c") {
 		t.Error("the neighbour's preference was lost")
 	}
-	if len(d.Ignored) != 1 {
-		t.Error("the ignored signatures were touched")
+	if len(d.Ignored) != 1 || d.Ignored[0].ID != "sig" {
+		t.Errorf("ignored = %+v, want the neighbour's «not duplicates» only", d.Ignored)
 	}
 	job, ok := blob.BackupJob(onlyGone)
 	if !ok {

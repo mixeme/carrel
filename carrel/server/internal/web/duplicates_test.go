@@ -220,7 +220,7 @@ func TestNotDuplicatesIsRemembered(t *testing.T) {
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"decision":"ignored"`) {
 		t.Fatalf("fragment: %d %s", rec.Code, rec.Body.String())
 	}
-	if d := f.decisions(t); len(d.Ignored) != 1 || d.Ignored[0] != g.ID {
+	if d := f.decisions(t); len(d.Ignored) != 1 || d.Ignored[0].ID != g.ID {
 		t.Fatalf("blob = %+v", d)
 	}
 	p := f.page(t)

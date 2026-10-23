@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"hash/crc32"
 	"io"
 	"mime/multipart"
@@ -15,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -26,6 +28,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 
 	"carrel.dev/carrel/server/internal/davtest"
+	"carrel.dev/carrel/server/internal/dupes"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
@@ -827,34 +830,50 @@ func collectionSlugOf(path string) string {
 	return strings.Trim(path[strings.LastIndex(strings.TrimSuffix(path, "/"), "/")+1:], "/")
 }
 
-// linkMockupDuplicates links the two Артём Белов the set holds in two books
-// (docs/visual/fixtures/README.md): the frames show one row with «linked ×2»
-// and both sources, and that is a decision of S-16, not a property of a file.
+// linkMockupDuplicates links the people the set holds in several books
+// (docs/visual/fixtures/README.md): the frames show one row with «linked ×N»
+// and every source, and that is a decision of S-16, not a property of a file.
+// Артём Белов is in two books; Анна Ковалёва in three, with her choice made —
+// the work phone of «Команда», the second address of «Контакты» kept
+// (from-typecase note 117 p. 2; s-contacts-33).
 func linkMockupDuplicates(t *testing.T, h *harness, sess *session.Session) {
 	t.Helper()
 	key, _ := sess.DataKey()
 	blob, _ := h.users.Catalog(sess.AccountID(), key)
-	var members []sealed.RecordRef
-	for _, c := range blob.Collections {
-		slug := collectionSlugOf(c.Path)
-		if slug != "kontakty" && slug != "komanda" {
-			continue
-		}
-		for _, uid := range mockupUIDs(t, slug) {
-			if strings.HasPrefix(uid, "c3f7") || strings.HasPrefix(uid, "d41a") {
-				members = append(members, sealed.RecordRef{AccountID: c.AccountID, Col: c.Path, UID: uid})
+	// members are the records of the set whose UIDs are these, in this
+	// order: the folded row is the group's first member (S-16), and the
+	// order of the catalog is not a decision.
+	members := func(who string, uids ...string) []sealed.RecordRef {
+		var out []sealed.RecordRef
+		for _, uid := range uids {
+			for _, c := range blob.Collections {
+				slug := collectionSlugOf(c.Path)
+				if slug != "kontakty" && slug != "komanda" && slug != "arhiv" {
+					continue
+				}
+				if slices.Contains(mockupUIDs(t, slug), uid) {
+					out = append(out, sealed.RecordRef{AccountID: c.AccountID, Col: c.Path, UID: uid})
+				}
 			}
 		}
+		if len(out) != len(uids) {
+			t.Fatalf("%s is not where the set puts them: %+v", who, out)
+		}
+		return out
 	}
-	if len(members) != 2 {
-		t.Fatalf("the two Артём Белов are not where the set puts them: %+v", members)
+	groups := []sealed.LinkedGroup{
+		// The frames show the «Команда» copy of Артём — its photo, its stamp.
+		{ID: "g-artem", Kind: view.KindContact, Members: members("Артём Белов", "d41a-6f30-92be", "c3f7-8a21-1b09")},
+		{ID: "g-anna", Kind: view.KindContact,
+			Members: members("Анна Ковалёва", "4f2b-9c31-a0e7", "b3d0-7e19-5a62", "2e85-c4a7-0f3b"),
+			Dropped: map[string][]string{"TEL": {"+7 495 120-45-00"}}},
 	}
-	// The frames show the «Команда» copy — its photo, its stamp — and the
-	// folded row is the group's first member (S-16), so that copy stands
-	// first here. The order of the catalog is not a decision.
-	sort.SliceStable(members, func(i, j int) bool { return strings.HasPrefix(members[i].UID, "d41a") })
+	// Анна and Алексей Смирнов share the work phone of the publisher: 60
+	// points, and «not duplicates» — the decision s-dup-1 and s-dup-6 draw.
+	pair := append(members("Анна Ковалёва", "4f2b-9c31-a0e7"), members("Алексей Смирнов", "9a1c-03de-77f2")...)
 	err := h.users.EditDuplicates(sess.AccountID(), key, "duplicates.link", "", func(d *sealed.Duplicates) error {
-		d.Linked = append(d.Linked, sealed.LinkedGroup{ID: "g-artem", Kind: view.KindContact, Members: members})
+		d.Linked = append(d.Linked, groups...)
+		d.Ignored = append(d.Ignored, sealed.IgnoredGroup{ID: dupes.Signature(view.KindContact, pair), Kind: view.KindContact, Members: pair})
 		return nil
 	})
 	if err != nil {
@@ -1467,50 +1486,65 @@ func TestFixtureRecordDelete(t *testing.T) {
 }
 
 // linkMockupEvent puts two copies of «Синк-ап по релизу» — in radicale ·
-// vps · Проекты the same, in baikal · Общий in another room — and links the
-// three (S-16): «The same event in other calendars · radicale · vps ·
-// Проекты · Holds the same · baikal · Общий · Where differ», and «linked»
-// at Where (s-agenda-2, from-typecase note 57; the client's scan Г9). The
-// copies live in this test alone: the agenda frames draw no such rows.
+// vps · Проекты the same, in baikal · Общий half an hour later and in
+// another room — and links the three (S-16): «When» and «Where» on the
+// group's card, «baikal · Общий · When, where differ» and «linked» at When
+// and Where (s-dup-1, s-agenda-2, -25; from-typecase notes 57 and 117 p. 3;
+// the client's scan Г9). The copies live in this test alone: the agenda
+// frames draw no such rows.
 func linkMockupEvent(t *testing.T, app *mockupApp) {
 	t.Helper()
 	linkMockupCopies(t, app, view.KindEvent, "g-sinkap", mockupRecord{"nextcloud", "lichnyj", "8f1c-4a02-b7d3", "nextcloud-home/lichnyj.ics"},
 		mockupCopy{rec: mockupRecord{"radicale · vps", "proekty", "4b2e-9d10-8f1c", ""}},
 		mockupCopy{rec: mockupRecord{"baikal", "obshchij", "6a7d-2c51-e930", ""}, edit: func(rec string) string {
-			return strings.Replace(rec, "LOCATION:Переговорная 2", "LOCATION:Переговорная 5", 1)
+			// 12:30 in Yekaterinburg is 10:30 in Moscow (s-dup-1).
+			rec = strings.Replace(rec, "Yekaterinburg:20260810T120000", "Yekaterinburg:20260810T123000", 1)
+			rec = strings.Replace(rec, "Yekaterinburg:20260810T130000", "Yekaterinburg:20260810T133000", 1)
+			return strings.Replace(rec, "LOCATION:Переговорная 2", "LOCATION:Переговорная 3", 1)
 		}})
 }
 
-// linkMockupTask puts a copy of «Собрать чемодан», due an hour later and of
-// another priority, in nextcloud · Работа and links the two (S-16): «linked
-// ×2», «2 sources» (s-tasks-1), «The same task in other lists · … · Time,
-// priority differ» and «linked» at Due and Priority (s-tasks-2,
-// from-typecase note 57; the client's scan ЗБ6, ЗГ5). The frames put the
-// copy in radicale · vps · Личное, a list no rail of theirs draws (task
-// 105); here it is a list the rails hold. The copy lives in the tests alone.
+// linkMockupTask puts a copy of «Собрать чемодан», due on the day without a
+// time and of priority 3, in nextcloud · Работа and links the two (S-16),
+// the priority of Работа chosen: «linked ×2», «2 sources» (s-tasks-1), «Due»
+// and «Priority» on the group's card (s-dup-1), «Дела · Priority differs»,
+// «Работа · Due differs» (s-tasks-17) and «linked» at Due and Priority
+// (s-tasks-2; from-typecase notes 57 and 117; the client's scan ЗБ6, ЗГ5).
+// The copy lives in the tests alone.
 func linkMockupTask(t *testing.T, app *mockupApp) {
 	t.Helper()
 	linkMockupCopy(t, app, view.KindTask, "g-chemodan", mockupRecord{"nextcloud", "dela", "aa11-2d09-5f84", "nextcloud-home/dela.ics"},
 		mockupRecord{"nextcloud", "rabota", "cc11-5a20-7e94", ""}, func(rec string) string {
-			rec = strings.Replace(rec, "DUE;TZID=Europe/Moscow:20260812T180000", "DUE;TZID=Europe/Moscow:20260812T190000", 1)
-			return strings.Replace(rec, "PRIORITY:5", "PRIORITY:1", 1)
+			rec = strings.Replace(rec, "DUE;TZID=Europe/Moscow:20260812T180000", "DUE;VALUE=DATE:20260812", 1)
+			return strings.Replace(rec, "PRIORITY:5", "PRIORITY:3", 1)
 		})
+	chooseMockup(t, app, "g-chemodan", "PRIORITY", "cc11-5a20-7e94")
 }
 
-// linkMockupVera puts copies of Вера Лебедева of «Архив» in nextcloud ·
-// Контакты, her work address another, and in radicale · vps · Команда, read
-// only, her mobile another, and links the three (S-16): the sheet «Which
-// copy to edit?» draws three copies, the last without a tick (s-contacts-32).
-// The copies live in the tests alone.
-func linkMockupVera(t *testing.T, app *mockupApp) {
+// chooseMockup answers a question of a linked group as the person would on
+// its card: the value of the member with this UID (S-16).
+func chooseMockup(t *testing.T, app *mockupApp, group, prop, uid string) {
 	t.Helper()
-	linkMockupCopies(t, app, view.KindContact, "g-vera", mockupRecord{"nextcloud", "arhiv", "e7c2-3b95-6a14", "nextcloud-home/arhiv.vcf"},
-		mockupCopy{rec: mockupRecord{"nextcloud", "kontakty", "e7c2-41d0-9b37", ""}, edit: func(rec string) string {
-			return strings.Replace(rec, "EMAIL;TYPE=WORK:vera.l@work.example", "EMAIL;TYPE=WORK:v.lebedeva@example.org", 1)
-		}},
-		mockupCopy{rec: mockupRecord{"radicale · vps", "komanda", "e7c2-8a64-1f05", ""}, edit: func(rec string) string {
-			return strings.Replace(rec, "TEL;TYPE=CELL:+7 905 331-09-42", "TEL;TYPE=CELL:+7 905 331-09-48", 1)
-		}})
+	key, _ := app.sess.DataKey()
+	if err := app.h.users.EditDuplicates(app.sess.AccountID(), key, "duplicates.choose", "", func(d *sealed.Duplicates) error {
+		for i, g := range d.Linked {
+			if g.ID != group {
+				continue
+			}
+			for _, m := range g.Members {
+				if m.UID == uid {
+					if d.Linked[i].Prefs == nil {
+						d.Linked[i].Prefs = map[string]sealed.RecordRef{}
+					}
+					d.Linked[i].Prefs[prop] = m
+					return nil
+				}
+			}
+		}
+		return fmt.Errorf("no member %s in %s", uid, group)
+	}); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // linkMockupNote puts a copy of «Что почитать про CRDT», its text longer,
@@ -1752,20 +1786,19 @@ func TestFixtureTaskCard(t *testing.T) {
 }
 
 // C-14.2: the sheets of a linked record's copies — «Which copy to edit?»
-// over the card of Вера Лебедева in three books, one read only
-// (s-contacts-32, one sheet for every kind) and «Which copy to mark done?» over the combined list of tasks it
+// over the card of Анна Ковалёва in three books, «Команда» read only
+// (s-contacts-32, one sheet for every kind; from-typecase note 117 p. 2) and «Which copy to mark done?» over the combined list of tasks it
 // was opened from (s-tasks-16).
 func TestFixtureCopiesSheets(t *testing.T) {
 	app := newMockupApp(t)
 	linkMockupTask(t, app)
-	linkMockupVera(t, app)
 	seedMockupTrip(t, app)
 	openList(t, app, "/app/calendar?from=2026-08-10")
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	list := combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-	vera := app.listPath(t, "contacts", "arhiv") + "/e7c2-3b95-6a14"
-	app.compare(t, "app-record-copies/normal.json", app.h.do(get(vera+"/copies", app.sess)))
+	anna := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
+	app.compare(t, "app-record-copies/normal.json", app.h.do(get(anna+"/copies", app.sess)))
 	rec := app.listPath(t, "tasks", "dela") + "/aa11-2d09-5f84"
 	back := url.QueryEscape("/app/tasks?task=" + list.Poll.TaskID)
 	app.compare(t, "app-task-done/normal.json", app.h.do(get(rec+"/done?from=all&back="+back, app.sess)))
