@@ -392,41 +392,18 @@ func New(p *view.CollectionNewSheet) w.Sheet {
 		s.Foot = foot(p.Actions, false)
 		return s
 	}
-	derived := map[string]bool{}
-	for _, set := range p.Form.Sets {
-		for _, r := range set.Rows {
-			if r.From != "" {
-				derived[r.From] = true
-			}
-		}
-	}
 	for _, set := range p.Form.Sets {
 		for _, r := range set.Rows {
 			if r.Kind == view.InputHidden {
 				continue
 			}
-			f := newField(r)
-			if derived[r.Name] {
-				// The field another is derived from is found by its id as
-				// well as its name (Typecase's task 224).
-				f = withID(f, r.Name)
-			}
-			s.Body = append(s.Body, f)
+			// The field another is derived from is found by its name in
+			// the form (note 116): no id of its own.
+			s.Body = append(s.Body, newField(r))
 		}
 	}
 	s.Foot = foot(p.Actions, true)
 	return s
-}
-
-// withID gives a field's input an id.
-func withID(f w.Field, id string) w.Field {
-	for i, part := range f.Parts {
-		if in, ok := part.(w.Input); ok {
-			in.ID = id
-			f.Parts[i] = in
-		}
-	}
-	return f
 }
 
 // kindAsked says whether the sheet asks what the collection is.

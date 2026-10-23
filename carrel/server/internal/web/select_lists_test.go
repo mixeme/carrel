@@ -18,7 +18,7 @@ import (
 // An item of a list is a button of the menu, or a radio button of the form
 // the menu stands in (MenuItem with a Name, Typecase's task 73: the time
 // zone of s-agenda-8).
-var frameListItem = regexp.MustCompile(`(?s)<span class="tc-menu__sep"></span>|<button class="[^"]*tc-menu__item[^"]*"[^>]*role="menuitem"[^>]*>(.*?)</button>|<label class="[^"]*tc-menu__item[^"]*"><input[^>]*role="menuitemradio"[^>]*>(.*?)</label>`)
+var frameListItem = regexp.MustCompile(`(?s)<span class="tc-menu__sep"></span>|<button class="[^"]*tc-menu__item[^"]*"[^>]*role="menuitem"[^>]*>(.*?)</button>|<label class="[^"]*tc-menu__item[^"]*"><input[^>]*role="menuitemradio"[^>]*>(.*?)</label>|<a class="[^"]*tc-menu__item[^"]*"[^>]*role="menuitem"[^>]*>(.*?)</a>`)
 
 // frameList is the list a frame draws open, item by item, «— » before an
 // item a line stands above. The item shown chosen is one of them.
@@ -31,7 +31,7 @@ func frameList(t *testing.T, id string) []string {
 			line = true
 			continue
 		}
-		item := frameText(m[1] + m[2])
+		item := frameText(m[1] + m[2] + m[3])
 		if line {
 			item, line = "— "+item, false
 		}

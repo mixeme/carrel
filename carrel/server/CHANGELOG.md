@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.364 — 2026-10-23
+
+Fixtures after Typecase's note 115 (task 225).
+
+### Fixtures
+
+- **The events' preview** (`app-event-import/preview`, s-io-6) reads
+  «Личный 2026.ics», as the frame does, with an event whose day is not
+  (`DTSTART` «2026-02-30» on line 23): «1 with errors» and its row.
+
+### Tests
+
+- The frames read by the tests as Typecase `ce9da05` draws them: «Into»'s
+  items are links (s-io-10 … -13), «Save as» names its element by
+  `data-tc-save-from` (s-backup-10).
+
 ## v0.2.363 — 2026-10-23
 
 What the client's import wizard needed.

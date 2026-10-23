@@ -190,39 +190,6 @@ func pageParts(mock, id string) []*html.Node {
 	}
 }
 
-// hasMain says whether a fragment frame draws a main column.
-func hasMain(mock, id string) bool {
-	return find(parseHTML(frameBlock(mock, id)), func(n *html.Node) bool { return hasClass(n, "tc-main") }) != nil
-}
-
-// unspaced takes the margins off every notice of the trees: the classes
-// tc-msg--… that place a message, not what it is.
-func unspaced(nodes []*html.Node) {
-	var walk func(n *html.Node)
-	walk = func(n *html.Node) {
-		if n.Type == html.ElementNode && hasClass(n, "tc-msg") {
-			for i, a := range n.Attr {
-				if a.Key != "class" {
-					continue
-				}
-				var keep []string
-				for _, c := range strings.Fields(a.Val) {
-					if !strings.HasPrefix(c, "tc-msg--") {
-						keep = append(keep, c)
-					}
-				}
-				n.Attr[i].Val = strings.Join(keep, " ")
-			}
-		}
-		for k := n.FirstChild; k != nil; k = k.NextSibling {
-			walk(k)
-		}
-	}
-	for _, n := range nodes {
-		walk(n)
-	}
-}
-
 // elements are a node's element children.
 func elements(n *html.Node) []*html.Node {
 	var out []*html.Node

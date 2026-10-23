@@ -21,6 +21,7 @@ import (
 	"carrel.dev/carrel/client/screens/folder"
 	"carrel.dev/carrel/client/screens/forgot"
 	"carrel.dev/carrel/client/screens/history"
+	"carrel.dev/carrel/client/screens/importer"
 	"carrel.dev/carrel/client/screens/invite"
 	"carrel.dev/carrel/client/screens/login"
 	"carrel.dev/carrel/client/screens/mail"
@@ -673,6 +674,15 @@ var All = []Screen{
 		Draw:   func(model any) Root { return published.Screen(model.(*view.PublishedLinksPage)) },
 		Title:  func(model any) string { return string(model.(*view.PublishedLinksPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return published.Forms(model.(*view.PublishedLinksPage)) },
+	},
+	{
+		Model: func() any { return new(view.ImportPage) },
+		Frames: []string{"s-io-3", "s-io-4", "s-io-5", "s-io-6", "s-io-7", "s-io-8", "s-io-9",
+			"s-io-14", "s-io-15", "s-io-16", "s-io-17", "s-io-18", "s-io-19"},
+		Draw:    func(model any) Root { return importer.Screen(model.(*view.ImportPage)) },
+		Title:   func(model any) string { return string(model.(*view.ImportPage).Title) },
+		Forms:   func(model any) []widget.PostForm { return importer.Forms(model.(*view.ImportPage)) },
+		Notices: widget.MsgFlushSides,
 	},
 }
 

@@ -4,6 +4,30 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.6.8 — 2026-10-23
+
+Server `v0.2.364`, Typecase `ce9da05` (notes 114–116; the mockup copied).
+What milestone `v0.8.0` names — the import wizard and the collection
+sheets — is built; the tag waits for the owner's order of milestones
+(`v0.7.0`, search and duplicates, is not).
+
+### Added
+
+- **The import wizard is registered** (`screens/importer`, ImportPage;
+  s-io-3 … -9, -14 … -19): every import address of C-5 is built.
+
+### Changed
+
+- **«Into» opens its menu** (note 115; s-io-10 … -13): as «Saved in» of an
+  edit — each collection a link to the same step with it chosen, the
+  chosen one on, one that cannot be written to off with its reason and
+  «ro», under the rule the new collection of the kind.
+- The field another is derived from (the name of a new collection,
+  s-profile-5) has no id of its own: the library finds it by its name in
+  the form (note 116).
+- The guard holds the notice over the cards of Connections (s-profile-31,
+  -32) with its margin: the frames now draw the page's gutter (note 116).
+
 ## v0.6.7 — 2026-10-23
 
 Server `v0.2.363`, Typecase `3779ac0`. Stage 4, step 1 seen in a browser.

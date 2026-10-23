@@ -201,7 +201,7 @@ body[data-tc-root]{margin:0;background:var(--tc-bg);color:var(--tc-ink);font-fam
 .tc-root p,.tc-root h1,.tc-root h2,.tc-root h3,.tc-root h4,.tc-root ul,.tc-root ol,.tc-root dl,.tc-root dd,.tc-root dt,.tc-root figure{margin:0;padding:0}
 .tc-root ul{list-style:none}
 .tc-root a{color:inherit;text-decoration:none}
-.tc-root code,.tc-root .tc-mono,.tc-root .tc-say--mono{font-family:var(--tc-font-mono);font-size:11.5px}
+.tc-root code,.tc-root .tc-mono{font-family:var(--tc-font-mono);font-size:11.5px}
 .tc-root svg{display:block}
 [data-tc-theme="dark"]{--tc-ink:#E8DFCB;--tc-bg:#141A16;--tc-surface:#1B231D;--tc-card:#242E27;--tc-edge:#3A463D;
   --tc-rule:#2F3B33;--tc-hair:#28332B;--tc-dusty:#99927C;--tc-muted:#A79E88;--tc-accent:#7FA085;--tc-danger:#D5786B}
@@ -1709,16 +1709,6 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-row--tickmarkcols--padl14-padr14.tc-row--tickmarkcols--padl14-padr14{padding-left:14px;padding-right:14px}
 .tc-row--timecols--padl14-padr14.tc-row--timecols--padl14-padr14{padding-left:14px;padding-right:14px}
 .tc-row--timecols--op-7.tc-row--timecols--op-7{opacity:.7}
-.tc-row--timecols--time.tc-row--timecols--time{grid-template-columns:3px 37px minmax(168px,2fr) minmax(110px,1fr) 168px 140px}
-@container tcbox (max-width:800px){
-  .tc-row--timecols--time.tc-row--timecols--time{grid-template-columns:3px 37px minmax(116px,2fr) 168px 140px}
-}
-@container tcbox (max-width:620px){
-  .tc-row--timecols--time.tc-row--timecols--time{grid-template-columns:3px 37px minmax(110px,1fr) 130px}
-}
-@container tcbox (max-width:460px){
-  .tc-row--timecols--time.tc-row--timecols--time{grid-template-columns:3px 37px minmax(0,1fr)}
-}
 .tc-row__detail--w40pc.tc-row__detail--w40pc{width:40%}
 .tc-row__detail--w30pc.tc-row__detail--w30pc{width:30%}
 .tc-row__detail--w25pc.tc-row__detail--w25pc{width:25%}
@@ -10218,7 +10208,7 @@ Read  2 min ago</div>
       <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><use href="#i-close"/></svg><input class="tc-q" type="search" value="ковал" aria-label="Search everything…"></div>
       <div class="tc-top__actions">
         <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
-        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <a class="tc-btn" href="/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB" title="Search again"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</a>
         <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
       </div>
     </div>
@@ -10253,35 +10243,35 @@ Read  2 min ago</div>
       </div>
       <div class="tc-main">
         <div class="tc-head">
-          <div class="tc-head__titles"><div class="tc-head__title">«ковал»</div><div class="tc-head__sub">14 of 14 collections · 7 records · 1 source timed out</div></div>
+          <div class="tc-head__titles"><div class="tc-head__title">«ковал»</div><div class="tc-head__sub">7 records</div></div>
           <div class="tc-acts"><span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All</button><button class="tc-seg__opt" type="button">Contacts</button><button class="tc-seg__opt" type="button">Events</button><button class="tc-seg__opt" type="button">Tasks</button><button class="tc-seg__opt" type="button">Notes</button><button class="tc-seg__opt" type="button">Files</button></span></div>
         </div>
-        <div class="tc-runbar" data-part="results"><span class="tc-meter"><i class="tc-meter__bar tc-meter__bar--alert" data-tc-width="100%"></i></span><span class="tc-say"><span class="tc-say__full">Done · 13 of 14 sources answered</span><span class="tc-say__short">13 of 14</span></span> · <details class="tc-drop"><summary class="tc-btn is-sm is-danger">1 failed<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w420"><div class="tc-menu__refusal"><span class="tc-mark tc-mark--h11" data-tc-colour="#9A9280"></span><span class="tc-menu__what"><span class="tc-menu__source">baikal · Общий</span><span class="tc-menu__answer">REPORT /dav.php/calendars/mix/obshchiy/ → no answer in 10 s; the search went on without it.</span></span><button class="tc-btn is-sm" type="button">Retry</button></div></div></details><span class="tc-mono">1.8 s</span><span class="tc-push tc-line tc-line--gap-8"><span class="tc-say tc-say--mono"><span class="tc-say__full">answered 11:42</span><span class="tc-say__short">11:42</span></span><button class="tc-btn is-sm" title="Search again" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg><span class="tc-btn__label">Search again</span></button></span></div>
+        <div class="tc-runbar" data-part="results"><span class="tc-meter"><i class="tc-meter__bar tc-meter__bar--alert" data-tc-width="100%"></i></span><span class="tc-say"><span class="tc-say__full">Done · 13 of 14 sources answered</span><span class="tc-say__short">13 of 14</span></span> · <details class="tc-drop"><summary class="tc-btn is-sm is-danger">1 failed<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w420"><div class="tc-menu__refusal"><span class="tc-mark tc-mark--h11" data-tc-colour="#9A9280"></span><span class="tc-menu__what"><span class="tc-menu__source">baikal · Общий</span><span class="tc-menu__answer">REPORT /dav.php/calendars/mix/obshchiy/ → no answer in 10 s; the search went on without it.</span></span><button class="tc-btn is-sm" type="button">Retry</button></div></div></details><span class="tc-mono">1.8 s</span></div>
         <div class="tc-list__group" data-part="results"><span class="tc-rubric">Contacts</span><span class="tc-num">2</span></div>
         <div class="tc-list" data-part="results">
           <div class="tc-row tc-row--avatarcols">
             <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-avatar">АК</span>
-            <span class="tc-row__title"><b>Ковал</b>ёва Анна</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 912 445-10-88</span>
+            <span class="tc-row__title">Анна <b>Ковал</b>ёва</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 912 445-10-88</span>
             <span class="tc-row__excerpt tc-row__detail">a.kovaleva@example.org</span><span class="tc-row__excerpt tc-row__caption">Издательство «Слово»</span><span class="tc-row__cell tc-row__source">nextcloud · Контакты</span>
           </div>
           <div class="tc-row tc-row--avatarcols">
             <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-avatar">ПК</span>
-            <span class="tc-row__title"><b>Ковал</b>ёв Пётр</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">—</span>
+            <span class="tc-row__title">Пётр <b>Ковал</b>ёв</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">—</span>
             <span class="tc-row__excerpt tc-row__detail">p.kovalev@example.org</span><span class="tc-row__excerpt tc-row__caption">—</span><span class="tc-row__cell tc-row__source">radicale · vps · Команда</span>
           </div>
         </div>
         <div class="tc-list__group" data-part="results"><span class="tc-rubric">Events</span><span class="tc-num">1</span></div>
         <div class="tc-list" data-part="results">
-          <div class="tc-row tc-row--timecols tc-row--timecols--time">
-            <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">15:00</span>
-            <span class="tc-row__title">Звонок с <b>Ковал</b>ёвой</span><span class="tc-row__excerpt tc-row__detail">Zoom</span>
+          <div class="tc-row tc-row--timecols">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">10 Aug</span>
+            <span class="tc-row__title">Звонок с <b>Ковал</b>ёвой</span><span class="tc-row__excerpt tc-row__detail">15:00 · Zoom</span>
             <span class="tc-row__cell tc-row__caption"></span><span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
           </div>
         </div>
         <div class="tc-list__group" data-part="results"><span class="tc-rubric">Tasks</span><span class="tc-num">1</span></div>
         <div class="tc-list" data-part="results">
           <div class="tc-row tc-row--tickmarkcols">
-            <button class="tc-tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span>
+            <span class="tc-tick" role="img" aria-label="Not done"></span><span class="tc-mark" data-tc-colour="#3F6E8C"></span>
             <span class="tc-row__title">Ответить <b>Ковал</b>ёвой по смете</span>
 
             <span class="tc-mono tc-row__due">12 Aug</span><span class="tc-row__cell tc-mono tc-row__progress">40%</span><span class="tc-row__cell tc-row__source">nextcloud · Работа</span>
@@ -10301,7 +10291,7 @@ Read  2 min ago</div>
         <div class="tc-list__group" data-part="results"><span class="tc-rubric">Files</span><span class="tc-num">2</span></div>
         <div class="tc-list" data-part="results">
           <div class="tc-row tc-row--tickcols">
-            <button class="tc-tickrow__tick is-off" type="button"></button>
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span>
             <span class="tc-row__title tc-row__name"><svg><use href="#i-doc"/></svg><span class="tc-row__file">договор-<b>ковал</b>ёва.pdf</span></span>
             <span class="tc-row__excerpt tc-mono tc-row__size">240 KB</span>
             <span class="tc-row__excerpt tc-mono tc-row__time">2026-08-04 11:20</span>
@@ -10309,7 +10299,7 @@ Read  2 min ago</div>
             <span class="tc-row__cell tc-row__source">sftpgo · vps · Documents</span>
           </div>
           <div class="tc-row tc-row--tickcols">
-            <button class="tc-tickrow__tick is-off" type="button"></button>
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span>
             <span class="tc-row__title tc-row__name"><svg><use href="#i-doc"/></svg><span class="tc-row__file"><b>Ковал</b>ёва — правки по обложке.md</span></span>
             <span class="tc-row__excerpt tc-mono tc-row__size">6 KB</span>
             <span class="tc-row__excerpt tc-mono tc-row__time">2026-07-21 16:02</span>
@@ -10322,7 +10312,201 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>Выдача показывает все пять родов записей их собственным видом,</b> а не одной универсальной строкой: контакт — с аватаром и телефоном, событие — временем, задача — флажком и сроком, заметка — абзацем, файл — именем и размером. Фильтр сверху называет те же пять, включая Files. <b>Файлы участвуют в поиске</b> — по имени; содержимое документов не индексируется и не будет, потому что Carrel ничего у себя не хранит. Поиск перестаёт быть отдельной страницей с полем ввода: запрос вводится в шапке из любого места, а этот экран — только результаты. Совпадение подсвечено начертанием, а не цветом — цвет в строке зарезервирован за источником. Источник, не ответивший вовремя, помечен в рейле значком, причина — в его подсказке; в полосе опроса — красная «1 failed», её меню называет, что спросили и что ответил сервер, и даёт «Retry» этому источнику (решение 02.10 об отказах, задача 113).<br><br><b>Выдача помечена временем, и её можно собрать заново.</b> «Answered 11:42» и <b>Search again</b> стоят в полосе опроса, потому что относятся ко всему обходу, а не к одному источнику: «Retry» у не ответившего спрашивает <i>его одного</i>, «Search again» идёт по всем четырнадцати заново. Разница видна на самом частом случае — человек вернулся к старому запросу через час: находки те же, что он видел, и это правильно, но сервер за час мог измениться, и знать, что перед тобой ответ часовой давности, надо до того, как на него положишься. Время в полосе отвечает на это раньше, чем возникнет вопрос.<br><br><b>Ни один раздел в рейле не подсвечен, и это не пропуск.</b> Выдача не раздел: она пересекает все сразу, и подсветить один значило бы соврать. Где человек находится, говорят три вещи — запрос остаётся набранным в поле шапки, пока открыта выдача; «Sources · 14 / 14» с числом находок у каждого источника; заголовок «ковал» над списком. Строки «Search» в рейле нет вовсе — <a href="#hints">почему, сказано ниже</a>. <b>Строка о файлах — для человека:</b> ищется только имя, внутрь не заглядывают, — чтобы «ничего не найдено» не прочли как «в файлах этого нет». Почему так (имена и так приходят ответом <code>PROPFIND</code>, а обход папок стоит запроса на папку) — дело сервера, не экрана.</figcaption>
+<figcaption><b>Выдача показывает все пять родов записей их собственным видом,</b> а не одной универсальной строкой: контакт — с аватаром и телефоном, событие — днём, временем и местом, задача — знаком и сроком, заметка — абзацем, файл — именем и размером. Выдача идёт через все дни, поэтому у события впереди день («10 Aug»), а время — рядом с местом; у события на весь день — «all day · ‹место›». Знак задачи здесь не кнопка: отмечают задачу в её списке или карточке, выдача не меняется под рукой. У файла нет отметки: полосы действий над отмеченным у выдачи нет, файл двигают в его папке; на месте отметки — метка коллекции, как у всех строк. Имя контакта — как в карточке (FN). <b>Подзаголовок говорит о найденном, об источниках — полоса и рейл:</b> сколько спросили — «Sources 14 / 14» рейла, сколько ответили и кто нет — полоса с «1 failed»; повторять это в подзаголовке другими словами — два ответа на один вопрос. Фильтр сверху называет те же пять, включая Files. <b>Файлы участвуют в поиске</b> — по имени; содержимое документов не индексируется и не будет, потому что Carrel ничего у себя не хранит. Поиск перестаёт быть отдельной страницей с полем ввода: запрос вводится в шапке из любого места, а этот экран — только результаты. Совпадение подсвечено начертанием, а не цветом — цвет в строке зарезервирован за источником. Источник, не ответивший вовремя, помечен в рейле значком, причина — в его подсказке; в полосе опроса — красная «1 failed», её меню называет, что спросили и что ответил сервер, и даёт «Retry» этому источнику (решение 02.10 об отказах, задача 113).<br><br><b>Выдача помечена временем, и её можно собрать заново — кнопкой шапки</b>, как список раздела: «2 min ago» — когда кончился обход, нажатие ищет заново по всем четырнадцати. Своих «answered» и «Search again» у полосы нет — это было бы второе время и вторая дверь к тому же. «Retry» в меню «1 failed» спрашивает <i>одного</i> не ответившего. Человек вернулся к старому запросу через час — шапка говорит «1 h ago» раньше, чем он положится на находки.<br><br><b>Отметки в рейле — те же, что в рейле разделов:</b> ищут по отмеченным коллекциям, снятая отметка убирает коллекцию и из разделов, и выдача собирается заново по оставшимся. Число у строки — сколько нашлось в ней. «Show the source column» Appearance выдачи не касается: строки в ней разных родов и коллекций, источник стоит всегда.<br><br><b>Ни один раздел в рейле не подсвечен, и это не пропуск.</b> Выдача не раздел: она пересекает все сразу, и подсветить один значило бы соврать. Где человек находится, говорят три вещи — запрос остаётся набранным в поле шапки, пока открыта выдача; «Sources · 14 / 14» с числом находок у каждого источника; заголовок «ковал» над списком. Строки «Search» в рейле нет вовсе — <a href="#hints">почему, сказано ниже</a>. <b>Строка о файлах — для человека:</b> ищется только имя, внутрь не заглядывают, — чтобы «ничего не найдено» не прочли как «в файлах этого нет». Почему так (имена и так приходят ответом <code>PROPFIND</code>, а обход папок стоит запроса на папку) — дело сервера, не экрана.</figcaption>
+</figure>
+<figure>
+<div class="frame" data-frame="s-find-4" data-screen="/app/search">
+  <div class="frame-label"><span>Поиск идёт</span><i>9 из 14 ответили</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><use href="#i-close"/></svg><input class="tc-q" type="search" value="ковал" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" title="The search is still running." type="button" disabled><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>Refresh</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav">
+          <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Contacts<span class="tc-num">7</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-cal"/></svg>Calendar<span class="tc-num">6</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-task"/></svg>Tasks<span class="tc-num">2</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-note"/></svg>Notes<span class="tc-num">4</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Files</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Duplicates<span class="tc-num">2</span></a>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Sources <span class="tc-mono tc-mono--ls0">14 / 14</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">2</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Команда</span><span class="tc-tickrow__meta">0</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">0</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Личный</span><span class="tc-tickrow__meta">1</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Работа</span><span class="tc-tickrow__meta">1</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Проекты</span><span class="tc-tickrow__meta">0</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-tickrow__label">Дежурства</span><span class="tc-tickrow__meta">0</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Общий</span></div>
+          <div class="tc-tickrow is-ext"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-tickrow__label">Праздники РФ</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Дела</span><span class="tc-tickrow__meta">0</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">1</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Files</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Documents</span></div>
+        </div>
+        <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-head">
+          <div class="tc-head__titles"><div class="tc-head__title">«ковал»</div><div class="tc-head__sub">5 records so far</div></div>
+          <div class="tc-acts"><span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All</button><button class="tc-seg__opt" type="button">Contacts</button><button class="tc-seg__opt" type="button">Events</button><button class="tc-seg__opt" type="button">Tasks</button><button class="tc-seg__opt" type="button">Notes</button><button class="tc-seg__opt" type="button">Files</button></span></div>
+        </div>
+        <div class="tc-runbar" data-part="results"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="62%"></i></span>Searching · 9 of 14 answered · 5 records<span class="tc-push"><button class="tc-btn is-sm" type="submit" form="search-stop">Stop</button></span></div>
+        <form class="tc-post" id="search-stop" action="/app/search/cancel?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
+        <div class="tc-list__group" data-part="results"><span class="tc-rubric">Contacts</span><span class="tc-num">2</span></div>
+        <div class="tc-list" data-part="results">
+          <div class="tc-row tc-row--avatarcols">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-avatar">АК</span>
+            <span class="tc-row__title">Анна <b>Ковал</b>ёва</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 912 445-10-88</span>
+            <span class="tc-row__excerpt tc-row__detail">a.kovaleva@example.org</span><span class="tc-row__excerpt tc-row__caption">Издательство «Слово»</span><span class="tc-row__cell tc-row__source">nextcloud · Контакты</span>
+          </div>
+          <div class="tc-row tc-row--avatarcols">
+            <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-avatar">ПК</span>
+            <span class="tc-row__title">Пётр <b>Ковал</b>ёв</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">—</span>
+            <span class="tc-row__excerpt tc-row__detail">p.kovalev@example.org</span><span class="tc-row__excerpt tc-row__caption">—</span><span class="tc-row__cell tc-row__source">radicale · vps · Команда</span>
+          </div>
+        </div>
+        <div class="tc-list__group" data-part="results"><span class="tc-rubric">Events</span><span class="tc-num">1</span></div>
+        <div class="tc-list" data-part="results">
+          <div class="tc-row tc-row--timecols">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">10 Aug</span>
+            <span class="tc-row__title">Звонок с <b>Ковал</b>ёвой</span><span class="tc-row__excerpt tc-row__detail">15:00 · Zoom</span>
+            <span class="tc-row__cell tc-row__caption"></span><span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
+          </div>
+        </div>
+        <div class="tc-list__group" data-part="results"><span class="tc-rubric">Tasks</span><span class="tc-num">1</span></div>
+        <div class="tc-list" data-part="results">
+          <div class="tc-row tc-row--tickmarkcols">
+            <span class="tc-tick" role="img" aria-label="Not done"></span><span class="tc-mark" data-tc-colour="#3F6E8C"></span>
+            <span class="tc-row__title">Ответить <b>Ковал</b>ёвой по смете</span>
+
+            <span class="tc-mono tc-row__due">12 Aug</span><span class="tc-row__cell tc-mono tc-row__progress">40%</span><span class="tc-row__cell tc-row__source">nextcloud · Работа</span>
+          </div>
+        </div>
+        <div class="tc-list__group" data-part="results"><span class="tc-rubric">Notes</span><span class="tc-num">1</span></div>
+        <div class="tc-list" data-part="results">
+          <div class="tc-row tc-row--excerpt">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span>
+            <span class="tc-row__title">Звонок с <b>Ковал</b>ёвой — тезисы</span>
+            <span class="tc-row__excerpt">Договорились заморозить ветку в среду; письмо пишет Анна…</span>
+
+            <span class="tc-mono tc-row__date">10 Aug</span>
+            <span class="tc-row__cell tc-row__source">nextcloud · Записи</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Пока источники отвечают, выдача растёт на месте: группы появляются по мере ответов, рейл получает число у ответивших, у остальных числа нет. Полоса говорит в настоящем — «Searching · 9 of 14 answered · 5 records» — и даёт Stop: он останавливает тех, кто ещё не ответил, найденное остаётся. Кнопка шапки на время обхода — «Refresh», выключена с причиной: второй обход она не запускает.</figcaption>
+</figure>
+<figure>
+<div class="frame" data-frame="s-find-5">
+  <div class="frame-label"><span>Поиск · ничего не найдено</span><span class="frag">фрагмент</span><i>колонка выдачи</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
+  <div class="tc-head">
+    <div class="tc-head__titles"><div class="tc-head__title">«дача»</div><div class="tc-head__sub">nothing found</div></div>
+  </div>
+  <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="100%"></i></span>Done · 14 of 14 sources answered<span class="tc-mono tc-push">1.2 s</span></div>
+  <div class="tc-empty">Nothing found for «дача» in 14 collections.</div>
+  <div class="tc-msg">Files are found by their names; what is inside them is not searched.</div>
+  </div>
+</div>
+<figcaption>Пустая выдача — пустое состояние, без групп: число коллекций в нём говорит, где искали. Строка о файлах остаётся и здесь — именно здесь она нужнее всего: «ничего не найдено» не значит «в файлах этого нет».</figcaption>
+</figure>
+<figure>
+<div class="frame" data-frame="s-find-6">
+  <div class="frame-label"><span>Поиск · без запроса</span><span class="frag">фрагмент</span><i>/app/search без q: Enter в пустом поле, кнопка поиска на телефоне</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
+  <div class="tc-head">
+    <div class="tc-head__titles"><div class="tc-head__title">Search</div><div class="tc-head__sub">14 collections ticked</div></div>
+  </div>
+  <form class="tc-form" action="/app/search" method="get">
+    <div class="tc-field tc-field--lg"><label>What to look for</label><input class="tc-in is-focus" type="search" name="q" aria-label="What to look for"></div>
+    <div class="tc-field"><label>&nbsp;</label><button class="tc-btn is-primary" type="submit">Search</button></div>
+  </form>
+  <div class="tc-pad">
+    <div class="tc-menu tc-menu--full">
+      <div class="tc-rubric tc-menu__item" role="presentation">Recent searches</div>
+      <a class="tc-menu__item" href="/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB" role="menuitem"><svg><use href="#i-clock"/></svg>ковал<span class="tc-mono tc-push tc-mono--t11-dusty-ls0">7 found · 2 min ago</span></a>
+      <a class="tc-menu__item" href="/app/search?q=%D0%B4%D0%B0%D1%87%D0%B0" role="menuitem"><svg><use href="#i-clock"/></svg>дача<span class="tc-mono tc-push tc-mono--t11-dusty-ls0">nothing found · Monday</span></a>
+    </div>
+  </div>
+  </div>
+</div>
+<figcaption>Страница поиска без запроса — своё поле и история строками-ссылками. Сюда ведут Enter в пустом поле шапки (форма GET без <code>q</code>) и кнопка поиска шапки телефона: там поля в шапке нет, и искать негде, кроме этой страницы. Пустой запрос ничего не ищет и в историю не пишется.</figcaption>
+</figure>
+<figure>
+<div class="frame" data-frame="s-find-7">
+  <div class="frame-label"><span>Поиск · ничего не отмечено</span><span class="frag">фрагмент</span><i>колонка выдачи</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
+  <div class="tc-head">
+    <div class="tc-head__titles"><div class="tc-head__title">«ковал»</div><div class="tc-head__sub">0 collections ticked</div></div>
+  </div>
+  <div class="tc-empty">No collections are ticked, so there is nothing to search. Tick collections in the rail of Contacts, Calendar, Tasks, Notes or Files.</div>
+  </div>
+</div>
+<figcaption>Ищут только по отмеченным коллекциям. Ни одной — обходить нечего, и экран говорит, где их отметить. Полосы опроса нет: опроса не было.</figcaption>
+</figure>
+<figure>
+<div class="frame" data-frame="s-find-8">
+  <div class="frame-label"><span>Поиск · слишком много обходов</span><span class="frag">фрагмент</span><i>колонка выдачи</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
+  <div class="tc-head">
+    <div class="tc-head__titles"><div class="tc-head__title">«ковал»</div><div class="tc-head__sub">not searched</div></div>
+  </div>
+  <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>Too many searches.</b> This session already runs 4 searches and lists. Stop one or wait for one to finish, then search again.</div>
+  </div>
+</div>
+<figcaption>Обходов в сеансе не больше четырёх (поиски и опросы списков вместе). Пятый не начинается: уведомление вместо выдачи, найденного нет. Заново — кнопка шапки, когда один из обходов кончится.</figcaption>
+</figure>
+<figure>
+<div class="frame" data-frame="s-find-9">
+  <div class="frame-label"><span>Поиск · не ответил никто</span><span class="frag">фрагмент</span><i>колонка выдачи</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
+  <div class="tc-head">
+    <div class="tc-head__titles"><div class="tc-head__title">«договор»</div><div class="tc-head__sub">nothing searched</div></div>
+  </div>
+  <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar tc-meter__bar--alert" data-tc-width="100%"></i></span>Done · 0 of 14 sources answered · <details class="tc-drop"><summary class="tc-btn is-sm is-danger">14 failed<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop is-right tc-menu--w420"><div class="tc-menu__refusal"><span class="tc-mark tc-mark--h11" data-tc-colour="#4A6B52"></span><span class="tc-menu__what"><span class="tc-menu__source">nextcloud · Контакты</span><span class="tc-menu__answer">REPORT /remote.php/dav/addressbooks/users/mix/contacts/ → this device is offline.</span></span><button class="tc-btn is-sm" type="button">Retry</button></div></div></details><span class="tc-mono tc-push">10.0 s</span></div>
+  <div class="tc-empty">No source answered, so nothing was searched.</div>
+  </div>
+</div>
+<figcaption>Не ответил ни один — это не «ничего не найдено»: искать было негде. Пустое состояние говорит это, «14 failed» называет ответ каждого, в истории запрос остаётся с «no source answered». Заново — кнопка шапки.</figcaption>
+</figure>
+<figure>
+<div class="frame" data-frame="s-find-10">
+  <div class="frame-label"><span>Поиск · остановлен</span><span class="frag">фрагмент</span><i>колонка выдачи после Stop</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
+  <div class="tc-head">
+    <div class="tc-head__titles"><div class="tc-head__title">«ковал»</div><div class="tc-head__sub">5 records</div></div>
+  </div>
+  <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="100%"></i></span>Done · 9 of 14 sources answered · 5 stopped<span class="tc-mono tc-push">0.9 s</span></div>
+  <div class="tc-list__group"><span class="tc-rubric">Contacts</span><span class="tc-num">2</span></div>
+  <div class="tc-list">
+    <div class="tc-row tc-row--avatarcols">
+      <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-avatar">АК</span>
+      <span class="tc-row__title">Анна <b>Ковал</b>ёва</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 912 445-10-88</span>
+      <span class="tc-row__excerpt tc-row__detail">a.kovaleva@example.org</span><span class="tc-row__excerpt tc-row__caption">Издательство «Слово»</span><span class="tc-row__cell tc-row__source">nextcloud · Контакты</span>
+    </div>
+    <div class="tc-row tc-row--avatarcols">
+      <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-avatar">ПК</span>
+      <span class="tc-row__title">Пётр <b>Ковал</b>ёв</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">—</span>
+      <span class="tc-row__excerpt tc-row__detail">p.kovalev@example.org</span><span class="tc-row__excerpt tc-row__caption">—</span><span class="tc-row__cell tc-row__source">radicale · vps · Команда</span>
+    </div>
+  </div>
+  </div>
+</div>
+<figcaption>Остановленный вручную обход кончен: что нашлось — стоит, кто не успел — назван числом «5 stopped», не отказом: красного нет, ошибок не было. В рейле у остановленных числа нет. В истории запрос — с тем, что нашлось.</figcaption>
 </figure>
 
 
@@ -10344,9 +10528,10 @@ Read  2 min ago</div>
           <span class="tc-top__suggest">
             <div class="tc-menu tc-menu--full">
               <div class="tc-rubric tc-menu__item" role="presentation">Recent searches</div>
-              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-clock"/></svg>ковал<span class="tc-mono tc-push tc-mono--t11-dusty-ls0">8 found · 2 min ago</span></button>
-              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-clock"/></svg>смета<span class="tc-mono tc-push tc-mono--t11-dusty-ls0">3 found · yesterday</span></button>
-              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-clock"/></svg>дача<span class="tc-mono tc-push tc-mono--t11-dusty-ls0">nothing found · Monday</span></button>
+              <a class="tc-menu__item" href="/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB" role="menuitem"><svg><use href="#i-clock"/></svg>ковал<span class="tc-mono tc-push tc-mono--t11-dusty-ls0">7 found · 2 min ago</span></a>
+              <a class="tc-menu__item" href="/app/search?q=%D1%81%D0%BC%D0%B5%D1%82%D0%B0+%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%BE%D0%B9" role="menuitem"><svg><use href="#i-clock"/></svg>смета ковалёвой<span class="tc-mono tc-push tc-mono--t11-dusty-ls0">3 found · yesterday</span></a>
+              <a class="tc-menu__item" href="/app/search?q=%D0%B4%D0%B0%D1%87%D0%B0" role="menuitem"><svg><use href="#i-clock"/></svg>дача<span class="tc-mono tc-push tc-mono--t11-dusty-ls0">nothing found · Monday</span></a>
+              <a class="tc-menu__item" href="/app/search?q=%D0%B4%D0%BE%D0%B3%D0%BE%D0%B2%D0%BE%D1%80" role="menuitem"><svg><use href="#i-clock"/></svg>договор<span class="tc-mono tc-push tc-mono--t11-dusty-ls0">no source answered · Sunday</span></a>
               <span class="tc-menu__sep"></span>
               <button class="tc-menu__item tc-menu__item--dusty" type="button" role="menuitem">Type to search everything<kbd class="tc-kbd">Enter</kbd></button>
             </div>
@@ -10455,7 +10640,7 @@ Read  2 min ago</div>
       </div>
     </div>
   </div>
-  <figcaption><b>Дверь обратно.</b> Человек открыл контакт из выдачи, посмотрел его и хочет к остальным находкам — ставит курсор в поле и берёт «ковал» из истории. Экран под подсказками — тот, на котором он стоит; поиск ничего не закрывает и никуда не уводит, пока не выбран запрос. Значок часов у строки истории отличает её от подсказки-находки: часы говорят «вы это уже искали», а не «вот что нашлось сейчас». Нижняя строка — не пункт меню, а подпись: она объясняет, что делает <kbd class="tc-kbd" style="font-family:var(--tc-font-mono)">Enter</kbd>, и не притворяется действием.</figcaption>
+  <figcaption><b>Дверь обратно.</b> Человек открыл контакт из выдачи, посмотрел его и хочет к остальным находкам — ставит курсор в поле и берёт «ковал» из истории. Экран под подсказками — тот, на котором он стоит; поиск ничего не закрывает и никуда не уводит, пока не выбран запрос. Значок часов у строки истории отличает её от подсказки-находки: часы говорят «вы это уже искали», а не «вот что нашлось сейчас». В истории — сколько нашлось или почему ничего: «nothing found» — источники ответили и не нашли, «no source answered» — не ответил ни один. Нижняя строка — не пункт меню, а подпись: она объясняет, что делает <kbd class="tc-kbd" style="font-family:var(--tc-font-mono)">Enter</kbd>, и не притворяется действием.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -10469,15 +10654,15 @@ Read  2 min ago</div>
           <span class="tc-top__suggest">
             <div class="tc-menu tc-menu--full">
               <div class="tc-rubric tc-menu__item" role="presentation">Jump to</div>
-              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-con"/></svg><span class="tc-menu__label">Анна <b>Ковал</b>ёва</span><span class="tc-push tc-dim tc-dim--t11 tc-dim--ls0">nextcloud · Контакты</span></button>
-              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-cal"/></svg><span class="tc-menu__label">Звонок с <b>Ковал</b>ёвой</span><span class="tc-push tc-dim tc-dim--t11 tc-dim--ls0">10 Aug · Личный</span></button>
-              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg><span class="tc-menu__label">договор-<b>ковал</b>ёва.pdf</span><span class="tc-push tc-dim tc-dim--t11 tc-dim--ls0">sftpgo · vps · Documents</span></button>
+              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-con"/></svg><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-menu__label">Анна <b>Ковал</b>ёва</span><span class="tc-push tc-dim tc-dim--t11 tc-dim--ls0">nextcloud · Контакты</span></button>
+              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-cal"/></svg><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-menu__label">Звонок с <b>Ковал</b>ёвой</span><span class="tc-push tc-dim tc-dim--t11 tc-dim--ls0">10 Aug · nextcloud · Личный</span></button>
+              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-file"/></svg><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-menu__label">договор-<b>ковал</b>ёва.pdf</span><span class="tc-push tc-dim tc-dim--t11 tc-dim--ls0">sftpgo · vps · Documents</span></button>
               <span class="tc-menu__sep"></span>
               <button class="is-on tc-menu__item" type="button" role="menuitem"><svg><use href="#i-search"/></svg>Show all results for «ковал»<kbd class="tc-kbd">Enter</kbd></button>
-              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-all"/></svg>Timeline · Анна Ковалёва<span class="tc-push tc-dim tc-dim--t11 tc-dim--ls0">asks every server</span></button>
+              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-all"/></svg><span class="tc-menu__label">Timeline · Анна <b>Ковал</b>ёва</span><span class="tc-push tc-dim tc-dim--t11 tc-dim--ls0">asks every server</span></button>
               <span class="tc-menu__sep"></span>
               <div class="tc-rubric tc-menu__item" role="presentation">Recent searches</div>
-              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-clock"/></svg>смета<span class="tc-mono tc-push tc-mono--t11-dusty-ls0">3 found · yesterday</span></button>
+              <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-clock"/></svg><span class="tc-menu__label">смета <b>ковал</b>ёвой</span><span class="tc-mono tc-push tc-mono--t11-dusty-ls0">3 found · yesterday</span></button>
             </div>
           </span>
         </span>
@@ -10598,7 +10783,7 @@ Read  2 min ago</div>
       </div>
     </div>
   </div>
-  <figcaption><b>Три находки и дверь ко всем остальным.</b> Подсказка — это переход к записи, а не поиск: выбрал строку — открылась карточка, минуя выдачу. Поэтому «Show all results» стоит отдельной строкой под чертой и подсвечено как то, что сделает <kbd class="tc-kbd" style="font-family:var(--tc-font-mono)">Enter</kbd>: это единственный путь на страницу результатов, и он не должен угадываться. Совпадение выделено начертанием — тем же приёмом, что в строках выдачи, и по той же причине: цвет в списке принадлежит источнику. История остаётся внизу и во время набора: человек, начавший печатать «ковал», может вспомнить, что искал «смета», и не должен для этого стирать набранное. <b>«Timeline · имя» стоит под чертой, а не в Jump&nbsp;to</b>, и это не мелочь размещения. Jump&nbsp;to — переход к тому, что <b>уже лежит в памяти сеанса</b>: строка оттуда не стоит ни одного запроса, потому и показывает источник и дату без раздумий. Всё, что человек знает о ком-то, в памяти не лежит — за этим надо обойти каждый календарь и каждую книгу. Поэтому строка стоит там же, где «Show all results»: под чертой собрано то, что <b>придётся спросить у серверов</b>. По той же причине рядом с ней нет числа — число тоже пришлось бы спрашивать, а подсказки на сервер не ходят; вместо числа сказано, чем это обойдётся. Появляется она тогда же, когда в подсказки попадает контакт, и это единственное место, где о хронологии узнают, не открыв сначала карточку (<a href="#card">7.1</a>).</figcaption>
+  <figcaption><b>Три находки и дверь ко всем остальным.</b> Подсказка — это переход к записи, а не поиск: выбрал строку — открылась карточка, минуя выдачу. Поэтому «Show all results» стоит отдельной строкой под чертой и подсвечено как то, что сделает <kbd class="tc-kbd" style="font-family:var(--tc-font-mono)">Enter</kbd>: это единственный путь на страницу результатов, и он не должен угадываться. Совпадение выделено начертанием — тем же приёмом, что в строках выдачи, и по той же причине: цвет в списке принадлежит источнику. История остаётся внизу и во время набора — только те запросы, в которых есть набранное, с ним жирным: начавший печатать «ковал» видит «смета ковалёвой». Запрос, равный набранному, не повторяется — его ведёт «Show all results»; «дача» не подходит и скрыта. Jump&nbsp;to — не больше восьми строк, по родам в порядке выдачи; больше — только через «Show all results», числа меню не говорит: оно знает лишь память сеанса. У строк — метка коллекции записи. <b>«Timeline · имя» стоит под чертой, а не в Jump&nbsp;to</b>, и это не мелочь размещения. Jump&nbsp;to — переход к тому, что <b>уже лежит в памяти сеанса</b>: строка оттуда не стоит ни одного запроса, потому и показывает источник и дату без раздумий. Всё, что человек знает о ком-то, в памяти не лежит — за этим надо обойти каждый календарь и каждую книгу. Поэтому строка стоит там же, где «Show all results»: под чертой собрано то, что <b>придётся спросить у серверов</b>. По той же причине рядом с ней нет числа — число тоже пришлось бы спрашивать, а подсказки на сервер не ходят; вместо числа сказано, чем это обойдётся. Строка «Timeline» — на каждый контакт из Jump&nbsp;to, в том же порядке, с тем же жирным; два контакта — две строки. Появляется она тогда же, когда в подсказки попадает контакт, и это единственное место, где о хронологии узнают, не открыв сначала карточку (<a href="#card">7.1</a>).</figcaption>
   </figure>
 </div>
 <h2 id="s-dup">7.7 Дубликаты и слияние</h2>
@@ -12085,7 +12270,13 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import contacts</div></div></div>
           <div class="tc-form is-tight tc-form--padb12">
             <div class="tc-field tc-field--w100">
-              <label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
+              <label>Into</label><details class="tc-drop"><summary class="tc-in is-pick" title="Into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</summary><div class="tc-menu is-pop tc-menu--w290">
+                <a class="is-on tc-menu__item" href="/app/contacts/nextcloud/kontakty/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</a>
+                <a class="tc-menu__item" href="/app/contacts/nextcloud/arhiv/import" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</a>
+                <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
+                <span class="tc-menu__sep"></span>
+                <a class="tc-menu__item" href="/app/collections/new?kind=contact&amp;back=/app/contacts/nextcloud/kontakty/import" role="menuitem">New address book</a>
+              </div></details>
               <span class="tc-field__hint">Any address book you may write to, on every connected server.</span></div>
           </div>
           <div class="tc-card">
@@ -12137,7 +12328,16 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import events</div></div></div>
           <div class="tc-form is-tight tc-form--padb12">
             <div class="tc-field tc-field--w100">
-              <label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</button>
+              <label>Into</label><details class="tc-drop"><summary class="tc-in is-pick" title="Into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</summary><div class="tc-menu is-pop tc-menu--w290">
+                <a class="is-on tc-menu__item" href="/app/calendar/nextcloud/lichnyj/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</a>
+                <a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/import" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</a>
+                <a class="tc-menu__item" href="/app/calendar/nextcloud/dni-rozhdeniya/import" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Дни рождения</a>
+                <a class="tc-menu__item" href="/app/calendar/radicale/proekty/import" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</a>
+                <a class="tc-menu__item" href="/app/calendar/radicale/dezhurstva/import" role="menuitem"><span class="tc-mark" data-tc-colour="#8C6239"></span>radicale · vps · Дежурства</a>
+                <a class="tc-menu__item" href="/app/calendar/baikal/obshchiy/import" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>baikal · Общий</a>
+                <span class="tc-menu__sep"></span>
+                <a class="tc-menu__item" href="/app/collections/new?kind=event&amp;back=/app/calendar/nextcloud/lichnyj/import" role="menuitem">New calendar</a>
+              </div></details>
               <span class="tc-field__hint">Any calendar you may write to, on every connected server.</span></div>
           </div>
           <div class="tc-card">
@@ -12188,7 +12388,12 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import tasks</div></div></div>
           <div class="tc-form is-tight tc-form--padb12">
             <div class="tc-field tc-field--w100">
-              <label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</button>
+              <label>Into</label><details class="tc-drop"><summary class="tc-in is-pick" title="Into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</summary><div class="tc-menu is-pop tc-menu--w290">
+                <a class="is-on tc-menu__item" href="/app/tasks/nextcloud/dela/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</a>
+                <a class="tc-menu__item" href="/app/tasks/nextcloud/rabota/import" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</a>
+                <span class="tc-menu__sep"></span>
+                <a class="tc-menu__item" href="/app/collections/new?kind=task&amp;back=/app/tasks/nextcloud/dela/import" role="menuitem">New task list</a>
+              </div></details>
               <span class="tc-field__hint">Any list of tasks you may write to, on every connected server.</span></div>
           </div>
           <div class="tc-card">
@@ -12239,7 +12444,13 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import contacts</div></div></div>
           <div class="tc-form is-tight tc-form--padb12">
             <div class="tc-field tc-field--w100">
-              <label>Into</label><button class="tc-in is-pick is-ph" type="button">Choose an address book</button>
+              <label>Into</label><details class="tc-drop"><summary class="tc-in is-pick is-ph" title="Into">Choose an address book</summary><div class="tc-menu is-pop tc-menu--w290">
+                <a class="tc-menu__item" href="/app/contacts/nextcloud/kontakty/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</a>
+                <a class="tc-menu__item" href="/app/contacts/nextcloud/arhiv/import" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</a>
+                <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
+                <span class="tc-menu__sep"></span>
+                <a class="tc-menu__item" href="/app/collections/new?kind=contact&amp;back=/app/contacts/import" role="menuitem">New address book</a>
+              </div></details>
               <span class="tc-field__hint">Any address book you may write to, on every connected server.</span></div>
           </div>
           <div class="tc-card">
@@ -12291,7 +12502,13 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>Nothing was read.</b> «Разное (mix).vcf» is not a vCard file: its first line is not <span class="tc-mono">BEGIN:VCARD</span>. Choose the file again.</div>
           <div class="tc-form is-tight tc-form--padb12">
             <div class="tc-field tc-field--w100">
-              <label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
+              <label>Into</label><details class="tc-drop"><summary class="tc-in is-pick" title="Into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</summary><div class="tc-menu is-pop tc-menu--w290">
+                <a class="is-on tc-menu__item" href="/app/contacts/nextcloud/kontakty/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</a>
+                <a class="tc-menu__item" href="/app/contacts/nextcloud/arhiv/import" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</a>
+                <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
+                <span class="tc-menu__sep"></span>
+                <a class="tc-menu__item" href="/app/collections/new?kind=contact&amp;back=/app/contacts/nextcloud/kontakty/import" role="menuitem">New address book</a>
+              </div></details>
               <span class="tc-field__hint">Any address book you may write to, on every connected server.</span></div>
           </div>
           <div class="tc-card">
@@ -12344,7 +12561,13 @@ dav: HTTP 503: the server is busy</div>
           </div>
           <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>nextcloud · Контакты did not answer</b>, so what is already there cannot be told. Nothing is written; try again, or choose another address book under «Into». <a class="tc-btn is-sm" href="/app/contacts/nextcloud/kontakty/import">Try again</a></div>
           <div class="tc-form is-tight">
-            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
+            <div class="tc-field tc-field--lg"><label>Into</label><details class="tc-drop"><summary class="tc-in is-pick" title="Into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</summary><div class="tc-menu is-pop tc-menu--w290">
+                <a class="is-on tc-menu__item" href="/app/contacts/nextcloud/kontakty/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</a>
+                <a class="tc-menu__item" href="/app/contacts/nextcloud/arhiv/import" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</a>
+                <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
+                <span class="tc-menu__sep"></span>
+                <a class="tc-menu__item" href="/app/collections/new?kind=contact&amp;back=/app/contacts/nextcloud/kontakty/import" role="menuitem">New address book</a>
+              </div></details>
               <span class="tc-field__hint">Any address book you may write to. What is already here is counted against it.</span></div>
           </div>
           <div class="tc-stats">
@@ -12374,11 +12597,11 @@ dav: HTTP 503: the server is busy</div>
     <div class="frame-label"><span>Куда импортировать · контакты</span><span class="frag">список</span><i>поле Into</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w290">
-        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
+        <a class="is-on tc-menu__item" href="/app/contacts/nextcloud/kontakty/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</a>
+        <a class="tc-menu__item" href="/app/contacts/nextcloud/arhiv/import" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</a>
+        <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
         <span class="tc-menu__sep"></span>
-        <button class="tc-menu__item" type="button" role="menuitem">New address book</button>
+        <a class="tc-menu__item" href="/app/collections/new?kind=contact&amp;back=/app/contacts/nextcloud/kontakty/import" role="menuitem">New address book</a>
       </div>
     </div>
   </div>
@@ -12414,7 +12637,13 @@ dav: HTTP 503: the server is busy</div>
       <div class="tc-steps"><span class="is-on tc-steps__item">1 · Source</span><i class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import notes</div></div></div>
       <div class="tc-form is-tight tc-form--padb12">
-        <div class="tc-field tc-field--w100"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</button>
+        <div class="tc-field tc-field--w100"><label>Into</label><details class="tc-drop"><summary class="tc-in is-pick" title="Into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</summary><div class="tc-menu is-pop tc-menu--w290">
+                <a class="is-on tc-menu__item" href="/app/notes/nextcloud/zapisi/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</a>
+                <a class="tc-menu__item" href="/app/notes/nextcloud/dnevnik/import" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</a>
+                <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></button>
+                <span class="tc-menu__sep"></span>
+                <a class="tc-menu__item" href="/app/collections/new?kind=note&amp;back=/app/notes/nextcloud/zapisi/import" role="menuitem">New notebook</a>
+              </div></details>
           <span class="tc-field__hint">The notebook the notes are created in. Every source below lands there.</span></div>
       </div>
       <div class="tc-card">
@@ -12453,11 +12682,11 @@ dav: HTTP 503: the server is busy</div>
     <div class="frame-label"><span>Куда импортировать · заметки</span><span class="frag">список</span><i>поле Into</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w290">
-        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></button>
+        <a class="is-on tc-menu__item" href="/app/notes/nextcloud/zapisi/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</a>
+        <a class="tc-menu__item" href="/app/notes/nextcloud/dnevnik/import" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</a>
+        <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></button>
         <span class="tc-menu__sep"></span>
-        <button class="tc-menu__item" type="button" role="menuitem">New notebook</button>
+        <a class="tc-menu__item" href="/app/collections/new?kind=note&amp;back=/app/notes/nextcloud/zapisi/import" role="menuitem">New notebook</a>
       </div>
     </div>
   </div>
@@ -12498,7 +12727,13 @@ dav: HTTP 503: the server is busy</div>
             <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 117 contacts</button></div>
           </div>
           <div class="tc-form is-tight">
-            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
+            <div class="tc-field tc-field--lg"><label>Into</label><details class="tc-drop"><summary class="tc-in is-pick" title="Into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</summary><div class="tc-menu is-pop tc-menu--w290">
+                <a class="is-on tc-menu__item" href="/app/contacts/nextcloud/kontakty/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</a>
+                <a class="tc-menu__item" href="/app/contacts/nextcloud/arhiv/import" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</a>
+                <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
+                <span class="tc-menu__sep"></span>
+                <a class="tc-menu__item" href="/app/collections/new?kind=contact&amp;back=/app/contacts/nextcloud/kontakty/import" role="menuitem">New address book</a>
+              </div></details>
               <span class="tc-field__hint">Any address book you may write to. What is already here is counted against it.</span></div>
             <div class="tc-field is-own-line"><label>5 records of this file are already in Контакты</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/contacts/nextcloud/kontakty/import?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/import?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/contacts/nextcloud/kontakty/import?existing=copy">Import as copies</a></span>
               <span class="tc-field__hint">They stay as they are here; the file's version is not written.</span></div>
@@ -12557,7 +12792,16 @@ dav: HTTP 503: the server is busy</div>
             <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 82 events</button></div>
           </div>
           <div class="tc-form is-tight">
-            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</button>
+            <div class="tc-field tc-field--lg"><label>Into</label><details class="tc-drop"><summary class="tc-in is-pick" title="Into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</summary><div class="tc-menu is-pop tc-menu--w290">
+                <a class="is-on tc-menu__item" href="/app/calendar/nextcloud/lichnyj/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</a>
+                <a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/import" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</a>
+                <a class="tc-menu__item" href="/app/calendar/nextcloud/dni-rozhdeniya/import" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Дни рождения</a>
+                <a class="tc-menu__item" href="/app/calendar/radicale/proekty/import" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</a>
+                <a class="tc-menu__item" href="/app/calendar/radicale/dezhurstva/import" role="menuitem"><span class="tc-mark" data-tc-colour="#8C6239"></span>radicale · vps · Дежурства</a>
+                <a class="tc-menu__item" href="/app/calendar/baikal/obshchiy/import" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>baikal · Общий</a>
+                <span class="tc-menu__sep"></span>
+                <a class="tc-menu__item" href="/app/collections/new?kind=event&amp;back=/app/calendar/nextcloud/lichnyj/import" role="menuitem">New calendar</a>
+              </div></details>
               <span class="tc-field__hint">Calendars only. A list of tasks is a different collection and takes different components.</span></div>
             <div class="tc-field is-own-line"><label>3 events of this file are already in Личный</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/calendar/nextcloud/lichny/import?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/calendar/nextcloud/lichny/import?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/calendar/nextcloud/lichny/import?existing=copy">Import as copies</a></span>
               <span class="tc-field__hint">They stay as they are here; the file's version is not written.</span></div>
@@ -12576,6 +12820,7 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">Личный 2026.ics</td><td>Созвон с подрядчиком</td><td class="tc-mono tc-table__n3">2026-08-17 10:00 Asia/Yekaterinburg</td><td class="tc-table__n4">Ready — time zone kept as sent</td></tr>
               <tr><td class="tc-mono">Личный 2026.ics</td><td>Купить билеты <span class="tc-badge">VTODO</span></td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--dusty">Skipped: a calendar takes events — import it into a list of tasks</td></tr>
               <tr><td class="tc-mono">Личный 2026.ics</td><td class="tc-dim">Untitled event</td><td class="tc-mono tc-table__n3">2026-05-04 · all day</td><td class="tc-table__n4">Ready — a whole day (no end), no title</td></tr>
+              <tr><td class="tc-mono">Личный 2026.ics</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--danger">line 23: cannot read DTSTART «2026-02-30»</td></tr>
             </tbody>
           </table>
           <div class="tc-msg tc-msg--mr0-ml0">A repeating event keeps its rule: the series is one record, not fifty-two.</div>
@@ -12593,14 +12838,14 @@ dav: HTTP 503: the server is busy</div>
     <div class="frame-label"><span>Куда импортировать · события</span><span class="frag">список</span><i>поле Into</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w290">
-        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Дни рождения</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#8C6239"></span>radicale · vps · Дежурства</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>baikal · Общий</button>
+        <a class="is-on tc-menu__item" href="/app/calendar/nextcloud/lichnyj/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</a>
+        <a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/import" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</a>
+        <a class="tc-menu__item" href="/app/calendar/nextcloud/dni-rozhdeniya/import" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Дни рождения</a>
+        <a class="tc-menu__item" href="/app/calendar/radicale/proekty/import" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</a>
+        <a class="tc-menu__item" href="/app/calendar/radicale/dezhurstva/import" role="menuitem"><span class="tc-mark" data-tc-colour="#8C6239"></span>radicale · vps · Дежурства</a>
+        <a class="tc-menu__item" href="/app/calendar/baikal/obshchiy/import" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>baikal · Общий</a>
         <span class="tc-menu__sep"></span>
-        <button class="tc-menu__item" type="button" role="menuitem">New calendar</button>
+        <a class="tc-menu__item" href="/app/collections/new?kind=event&amp;back=/app/calendar/nextcloud/lichnyj/import" role="menuitem">New calendar</a>
       </div>
     </div>
   </div>
@@ -12638,7 +12883,12 @@ dav: HTTP 503: the server is busy</div>
             <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 28 tasks</button></div>
           </div>
           <div class="tc-form is-tight">
-            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</button>
+            <div class="tc-field tc-field--lg"><label>Into</label><details class="tc-drop"><summary class="tc-in is-pick" title="Into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</summary><div class="tc-menu is-pop tc-menu--w290">
+                <a class="is-on tc-menu__item" href="/app/tasks/nextcloud/dela/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</a>
+                <a class="tc-menu__item" href="/app/tasks/nextcloud/rabota/import" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</a>
+                <span class="tc-menu__sep"></span>
+                <a class="tc-menu__item" href="/app/collections/new?kind=task&amp;back=/app/tasks/nextcloud/dela/import" role="menuitem">New task list</a>
+              </div></details>
               <span class="tc-field__hint">Lists of tasks only. A calendar is a different collection: events go there, not here.</span></div>
             <div class="tc-field is-own-line"><label>2 tasks of this file are already in Дела</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=skip">Skip them</a><a class="tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=replace">Replace them</a><a class="tc-seg__opt" href="/app/tasks/nextcloud/dela/import?existing=copy">Import as copies</a></span>
               <span class="tc-field__hint">They stay as they are here; the file's version is not written.</span></div>
@@ -12675,10 +12925,10 @@ dav: HTTP 503: the server is busy</div>
     <div class="frame-label"><span>Куда импортировать · задачи</span><span class="frag">список</span><i>поле Into</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w290">
-        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</button>
+        <a class="is-on tc-menu__item" href="/app/tasks/nextcloud/dela/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</a>
+        <a class="tc-menu__item" href="/app/tasks/nextcloud/rabota/import" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</a>
         <span class="tc-menu__sep"></span>
-        <button class="tc-menu__item" type="button" role="menuitem">New task list</button>
+        <a class="tc-menu__item" href="/app/collections/new?kind=task&amp;back=/app/tasks/nextcloud/dela/import" role="menuitem">New task list</a>
       </div>
     </div>
   </div>
@@ -12717,7 +12967,13 @@ dav: HTTP 503: the server is busy</div>
             <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" type="button">Import 60 notes</button></div>
           </div>
           <div class="tc-form is-tight">
-            <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</button>
+            <div class="tc-field tc-field--lg"><label>Into</label><details class="tc-drop"><summary class="tc-in is-pick" title="Into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</summary><div class="tc-menu is-pop tc-menu--w290">
+                <a class="is-on tc-menu__item" href="/app/notes/nextcloud/zapisi/import" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</a>
+                <a class="tc-menu__item" href="/app/notes/nextcloud/dnevnik/import" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</a>
+                <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></button>
+                <span class="tc-menu__sep"></span>
+                <a class="tc-menu__item" href="/app/collections/new?kind=note&amp;back=/app/notes/nextcloud/zapisi/import" role="menuitem">New notebook</a>
+              </div></details>
               <span class="tc-field__hint">Any notebook you may write to. A WebDAV folder from the step before lands in this same table.</span></div>
             <div class="tc-field is-own-line"><label>1 note of this file is already in Записи</label><span class="tc-seg"><a class="is-on tc-seg__opt" href="/app/notes/nextcloud/zapisi/import?existing=skip">Skip it</a><a class="tc-seg__opt" href="/app/notes/nextcloud/zapisi/import?existing=replace">Replace it</a><a class="tc-seg__opt" href="/app/notes/nextcloud/zapisi/import?existing=copy">Import as a copy</a></span>
               <span class="tc-field__hint">It stays as it is here; the file's version is not written.</span></div>
@@ -14952,9 +15208,9 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
   <div class="frame" data-frame="s-profile-31">
     <div class="frame-label"><span>Удаление · сервер отказал</span><span class="frag">фрагмент</span><i>уведомление над карточками Connections</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14 tc-root--col">
-        <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>Архив was not deleted.</b> nextcloud refused: this account can read here but not write. Архив is as it was.</div>
-        <div class="tc-diag">[delete]  DELETE /remote.php/dav/addressbooks/users/mix/archive/ → 403
-&lt;d:error&gt;&lt;d:need-privileges/&gt;&lt;/d:error&gt;</div>
+        <div class="tc-msg is-alert tc-msg--mx20"><b>Архив was not deleted.</b> nextcloud refused: this account can read here but not write. Архив is as it was.</div>
+        <div class="tc-main__diag"><div class="tc-diag">[delete]  DELETE /remote.php/dav/addressbooks/users/mix/archive/ → 403
+&lt;d:error&gt;&lt;d:need-privileges/&gt;&lt;/d:error&gt;</div></div>
     </div>
   </div>
   <figcaption>Лист удаления закрыт: набирать имя второй раз незачем, решение уже принято. Ответ сервера встаёт уведомлением на странице Connections — там же, где строка коллекции, которая осталась на месте.</figcaption>
@@ -14964,10 +15220,10 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
   <div class="frame" data-frame="s-profile-32">
     <div class="frame-label"><span>Перенос · записано не всё</span><span class="frag">фрагмент</span><i>уведомление над карточками Connections</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14 tc-root--col">
-        <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>Copied, and the original kept.</b> radicale · vps did not keep all of what was copied, so Личный on nextcloud was not deleted. Both are there now. <a class="tc-btn is-sm" href="/app/calendar/radicale/lichnyj">Open the copy</a></div>
-        <div class="tc-diag">What radicale · vps did not keep
+        <div class="tc-msg is-alert tc-msg--mx20"><b>Copied, and the original kept.</b> radicale · vps did not keep all of what was copied, so Личный on nextcloud was not deleted. Both are there now. <a class="tc-btn is-sm" href="/app/calendar/radicale/lichnyj">Open the copy</a></div>
+        <div class="tc-main__diag"><div class="tc-diag">What radicale · vps did not keep
 Синк-ап по релизу · ATTACH
-Забрать документы · not there after it was written</div>
+Забрать документы · not there after it was written</div></div>
     </div>
   </div>
   <figcaption>Перенос удаляет исходную коллекцию только после целой копии. Сервер-цель потерял запись или свойство — исходная остаётся, обе видны в Connections, уведомление называет потерянное и ведёт к копии. Так же — «Copied, but the original changed, so it stays» (кто-то писал в неё во время копии) и «Copied, but the original could not be deleted» (с ответом сервера). Отказ записи по ходу копии забирает копию назад: «radicale · vps refused 2 records of 128, so the new calendar there was taken back. Личный is as it was.»</figcaption>
@@ -18221,7 +18477,7 @@ until [ "$(curl -fsS -H "$h" "$b/status?id=$id")" != running ]; do sleep 20; don
 curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</div>
         <div class="tc-line tc-line--gap-8 tc-card__top8">
           <button class="tc-btn is-primary" type="button" data-tc-copy-from="trigger-script" data-tc-copied="Copied"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg>Copy the script</button>
-          <button class="tc-btn" type="button" data-tc-save="carrel-personal.sh" data-tc-from="trigger-script"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Save as <span class="tc-mono tc-mono--t11">carrel-personal.sh</span></button>
+          <button class="tc-btn" type="button" data-tc-save="carrel-personal.sh" data-tc-save-from="trigger-script"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Save as <span class="tc-mono tc-mono--t11">carrel-personal.sh</span></button>
         </div>
         <div class="tc-card__note">Put it where the password is to live, make it executable, and give <span class="tc-mono">crontab -e</span> one line: <span class="tc-mono">0 3 * * * /usr/local/bin/carrel-personal.sh</span> — the schedule stays a line, the work moves into the file. The date has to live in the script and not in the crontab line: <span class="tc-mono">cron</span> reads <span class="tc-mono">%</span> as a newline, so <span class="tc-mono">date +%F</span> written up there would break the entry.</div>
         <div class="tc-msg tc-msg--flush-top9">A copy that fails needs no separate check: the download answers with an error, <span class="tc-mono">set -eu</span> stops the script on it, and cron sends the mail. The wait is open-ended on purpose — a copy takes what it takes, and <span class="tc-mono">409</span> until then means «not yet», not «broken».</div>
@@ -18313,7 +18569,7 @@ jobs:
       - run: curl -fsS -m 30 -X POST -H "Authorization: Bearer ${{ secrets.CARREL_BACKUP }}" 'https://carrel.example/api/backup/run?job=personal'</div>
           <div class="tc-line tc-line--gap-8 tc-card__top8">
             <button class="tc-btn is-primary" type="button">Copy the workflow</button>
-            <button class="tc-btn" type="button" data-tc-save="carrel-personal.yaml" data-tc-from="trigger-gitea"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Save as <span class="tc-mono tc-mono--t11">carrel-personal.yaml</span></button>
+            <button class="tc-btn" type="button" data-tc-save="carrel-personal.yaml" data-tc-save-from="trigger-gitea"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Save as <span class="tc-mono tc-mono--t11">carrel-personal.yaml</span></button>
           </div>
           <div class="tc-card__grid">
             <span class="tc-dim tc-dim--t11">Secret</span>
@@ -25217,10 +25473,10 @@ Read    2 min ago</div>
       </div>
       <div class="tc-main">
         <div class="tc-head">
-          <div class="tc-head__titles"><div class="tc-head__title">«смета»</div><div class="tc-head__sub">10 of 11 sources · 7 found · 1 source timed out</div></div>
+          <div class="tc-head__titles"><div class="tc-head__title">«смета»</div><div class="tc-head__sub">7 found</div></div>
           <div class="tc-acts"><span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All</button><button class="tc-seg__opt" type="button">Contacts</button><button class="tc-seg__opt" type="button">Events</button><button class="tc-seg__opt" type="button">Tasks</button><button class="tc-seg__opt" type="button">Notes</button><button class="tc-seg__opt" type="button">Files</button><button class="tc-seg__opt" type="button">Mail</button></span></div>
         </div>
-        <div class="tc-runbar" data-part="results"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="100%"></i></span>Done · 9 of 10 sources answered<span class="tc-mono">2.4 s</span><span class="tc-push tc-line tc-line--gap-8"><span class="tc-say tc-say--mono"><span class="tc-say__full">answered 11:42</span><span class="tc-say__short">11:42</span></span><button class="tc-btn is-sm" title="Search again" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg><span class="tc-btn__label">Search again</span></button></span></div>
+        <div class="tc-runbar" data-part="results"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="100%"></i></span>Done · 9 of 10 sources answered<span class="tc-mono">2.4 s</span></div>
         <div class="tc-list__group" data-part="results"><span class="tc-rubric">Tasks</span><span class="tc-num">1</span></div>
         <div class="tc-list" data-part="results">
           <div class="tc-row tc-row--tickmarkcols">
@@ -29330,7 +29586,7 @@ dav: HTTP 503: the server is busy</div></div>
         <button class="tc-btn tc-btn--padx4" type="button"><svg viewBox="0 0 24 24" class="tc-ico--sq19"><use href="#i-menu"/></svg></button>
         <div class="tc-brand tc-brand--t16">Combined calendar</div>
         <div class="tc-top__actions tc-top__actions--gap2">
-          <button class="tc-btn tc-btn--padx6" type="button"><svg viewBox="0 0 24 24" class="tc-ico--sq17"><use href="#i-search"/></svg></button>
+          <a class="tc-btn tc-btn--padx6" href="/app/search" title="Search"><svg viewBox="0 0 24 24" class="tc-ico--sq17"><use href="#i-search"/></svg></a>
           <button class="tc-btn is-primary tc-btn--padx8" type="button"><svg viewBox="0 0 24 24" class="tc-ico--sq16"><use href="#i-quill"/></svg></button>
         </div>
       </div>
@@ -29461,7 +29717,7 @@ dav: HTTP 503: the server is busy</div></div>
         <button class="tc-btn tc-btn--padx4" type="button"><svg viewBox="0 0 24 24" class="tc-ico--sq19"><use href="#i-menu"/></svg></button>
         <div class="tc-brand tc-brand--t16">Combined address book</div>
         <div class="tc-top__actions tc-top__actions--gap2">
-          <button class="tc-btn tc-btn--padx6" type="button"><svg viewBox="0 0 24 24" class="tc-ico--sq17"><use href="#i-search"/></svg></button>
+          <a class="tc-btn tc-btn--padx6" href="/app/search" title="Search"><svg viewBox="0 0 24 24" class="tc-ico--sq17"><use href="#i-search"/></svg></a>
           <button class="tc-btn is-primary tc-btn--padx8" type="button"><svg viewBox="0 0 24 24" class="tc-ico--sq16"><use href="#i-quill"/></svg></button>
         </div>
       </div>

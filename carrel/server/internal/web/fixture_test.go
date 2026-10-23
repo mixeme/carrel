@@ -3974,6 +3974,9 @@ func TestFixtureImport(t *testing.T) {
 		const ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other client//EN\r\n" +
 			"BEGIN:VEVENT\r\nUID:e7a1-standup\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Планёрка\r\nDTSTART;TZID=Europe/Moscow:20260810T090000\r\nDTEND;TZID=Europe/Moscow:20260810T093000\r\nRRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z\r\nEND:VEVENT\r\n" +
 			"BEGIN:VEVENT\r\nUID:e7a1-otpusk\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Отпуск\r\nDTSTART;VALUE=DATE:20260713\r\nDTEND;VALUE=DATE:20260728\r\nEND:VEVENT\r\n" +
+			// A day that is not, written as no client writes it (note 115,
+			// s-io-6): its DTSTART on line 23.
+			"BEGIN:VEVENT\r\nUID:e7a1-fevral\r\nDTSTAMP:20260801T000000Z\r\nDTEND;VALUE=DATE:20260301\r\nDTSTART;VALUE=DATE:2026-02-30\r\nEND:VEVENT\r\n" +
 			// Already in «Личный»: the question about the records already
 			// here stands beside «Into» (s-io-6).
 			"BEGIN:VEVENT\r\nUID:8f1c-4a02-b7d3\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Синк-ап по релизу\r\nDTSTART:20260810T110000Z\r\nDTEND:20260810T113000Z\r\nEND:VEVENT\r\n" +
@@ -3993,7 +3996,7 @@ func TestFixtureImport(t *testing.T) {
 		// rail counts them.
 		openList(t, app, "/app/calendar")
 		app.compare(t, "app-event-import/normal.json", app.h.do(get(cal+"/import", app.sess)))
-		preview := app.h.do(importRequest(cal+"/import", app.sess, false, "calendar.ics", []byte(ics)))
+		preview := app.h.do(importRequest(cal+"/import", app.sess, false, "Личный 2026.ics", []byte(ics)))
 		app.compare(t, "app-event-import/preview.json", preview)
 		app.compare(t, "app-event-import/report.json", run(t, app.h.do(importRequest(cal+"/import", app.sess, false, "Личный 2026.ics", []byte(reported)))))
 	})

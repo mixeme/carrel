@@ -22,7 +22,7 @@ import (
 var (
 	frameDiagByID   = regexp.MustCompile(`(?s)<div class="tc-diag[^"]*" id="([^"]+)">(.*?)</div>`)
 	frameDiagPlain  = regexp.MustCompile(`(?s)<div class="tc-diag[^"]*">(.*?)</div>`)
-	frameSaveAs     = regexp.MustCompile(`data-tc-save="([^"]+)" data-tc-from="([^"]+)"`)
+	frameSaveAs     = regexp.MustCompile(`data-tc-save="([^"]+)" data-tc-save-from="([^"]+)"`)
 	frameSecretName = regexp.MustCompile(`aria-label="Secret" value="([^"]+)"`)
 	frameGiteaFile  = regexp.MustCompile(`as <span class="tc-mono">([^<]+\.yaml)</span>`)
 )

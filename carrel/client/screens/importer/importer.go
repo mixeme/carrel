@@ -193,17 +193,35 @@ func headActs(actions []view.Action) []w.ActsPart {
 }
 
 // intoField is «Into»: the collection chosen with its mark, or the words
-// asking for one; the line under it by kind and step.
+// asking for one; the line under it by kind and step. It opens its menu
+// (note 115, s-io-10 … -13), as «Saved in» of an edit: each collection a
+// link to the same step with it chosen (TargetOption.Href), the chosen one
+// on, one that cannot be written to off with its reason and ro; under the
+// rule a new collection of the kind (TargetPicker.New).
 func intoField(p *view.ImportPage, step int, width w.FieldWidth) w.Field {
-	pick := w.Pick{Value: intoUnset[p.Kind], Unset: true}
+	pick := w.Pick{Label: into, Value: intoUnset[p.Kind], Unset: true}
+	var items []w.MenuPart
 	for _, o := range p.Into.Options {
+		it := w.MenuItem{Label: string(o.Stamp), Mark: &w.Mark{Colour: string(o.Colour)}, Href: o.Href}
 		if o.ID == p.Into.Chosen && p.Into.Chosen != "" {
-			pick = w.Pick{Value: string(o.Stamp), Mark: &w.Mark{Colour: string(o.Colour)}}
+			it.On = true
+			pick = w.Pick{Label: into, Value: string(o.Stamp), Mark: &w.Mark{Colour: string(o.Colour)}}
 		}
+		if o.ReadOnly {
+			it.Href, it.Reason, it.Trail = "", string(o.Reason), ro
+		}
+		items = append(items, it)
 	}
+	if n := p.Into.New; n != nil {
+		items = append(items, w.MenuSep{}, w.MenuItem{Label: string(n.Label), Href: n.Href})
+	}
+	d := w.Drop{Trigger: pick, Menu: w.Menu{Items: items, Width: w.MenuWidth290, Pop: w.MenuUnder}}
 	return w.Field{Label: into, Width: width,
-		Parts: []w.FieldPart{pick, w.FieldHint{Parts: []w.Inline{w.Text(intoHints[p.Kind][step])}}}}
+		Parts: []w.FieldPart{d, w.FieldHint{Parts: []w.Inline{w.Text(intoHints[p.Kind][step])}}}}
 }
+
+// ro marks a collection that cannot be written to (s-io-3).
+var ro = w.Badge{Label: "ro", Place: w.Pushed}
 
 // source is the first step: «Into», the file, the folders of notes, the
 // step's message; the dialog sends the file.
