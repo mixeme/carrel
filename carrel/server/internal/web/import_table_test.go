@@ -65,7 +65,8 @@ func TestImportPreviewIsOneTableWithAResult(t *testing.T) {
 	if row := previewRow(t, page.Preview, "VTODO"); row[0] != "cal.ics" || string(row[3]) != "Skipped: a calendar takes events — import it into a list of tasks" {
 		t.Errorf("the task = %q", row)
 	}
-	if row := previewRow(t, page.Preview, "Ковка"); row[3] != "Ready" || !strings.Contains(string(row[2]), "January") {
+	// A moment without an end is a moment (Typecase's note 113 p. 4).
+	if row := previewRow(t, page.Preview, "Ковка"); row[3] != "Ready — a moment (no end)" || !strings.Contains(string(row[2]), "January") {
 		t.Errorf("event = %q", row)
 	}
 	if n := page.Preview[0].Count; n != len(page.Preview[0].Lines) {

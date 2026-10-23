@@ -846,8 +846,8 @@ func (s *Server) readUpload(r *http.Request, c *collectionCtx) (*importDraft, er
 		d = s.readNoteFiles(c, files)
 	case len(bytes.TrimSpace(files[0].body)) == 0:
 		// An empty file is no file to read (Им14): said so, not «no file
-		// was chosen».
-		err = errEmptyImport
+		// was chosen» (s-io-18: «‹name›» is empty.).
+		err = errRead{"«" + files[0].name + "» is empty."}
 	default:
 		d, err = s.readImport(c, files[0].name, files[0].body)
 	}
@@ -858,7 +858,7 @@ func (s *Server) readUpload(r *http.Request, c *collectionCtx) (*importDraft, er
 // three kinds at once, and the two this collection does not keep are named,
 // not dropped (S-19).
 func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*importDraft, error) {
-	if c.spec.kind == view.KindNote && isZip(body) {
+	if c.spec.kind == view.KindNote && (isZip(body) || strings.HasSuffix(strings.ToLower(name), ".zip")) {
 		return s.readZipNotes(c, name, body)
 	}
 	d := &importDraft{Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, Source: name, Size: int64(len(body))}
@@ -884,6 +884,9 @@ func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*import
 		if err != nil {
 			return nil, err
 		}
+		if len(objs) == 0 && len(broken) == 0 {
+			return nil, errRead{"This file holds no records."}
+		}
 		d.Format = vcardFormat(objs)
 		// A card that cannot be read is counted and named; the cards after
 		// it are the file's all the same (S-19).
@@ -904,6 +907,11 @@ func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*import
 	objs, strays, err := cal.Split(body, time.Now())
 	if err != nil {
 		return nil, err
+	}
+	// Records of another kind are no refusal: the preview names them and
+	// where they go (Typecase's note 113 p. 6). A file of none is.
+	if len(objs) == 0 && len(strays) == 0 {
+		return nil, errRead{"This file holds no records."}
 	}
 	for _, stray := range strays {
 		d.Skipped = append(d.Skipped, importSkip{
@@ -1030,11 +1038,16 @@ func readyNote(c *collectionCtx, obj *model.Object, untitled bool) string {
 		if len(obj.PropText("RRULE")) > 0 {
 			parts = append(parts, "the series as one record")
 		}
-		// A day without an end lasts the day (s-io-6); a moment without
-		// one is a moment, as the standard reads it, and says nothing.
+		// A day without an end lasts the day, a moment without one is a
+		// moment, as the standard reads them (s-io-6; Typecase's note 113
+		// p. 4).
 		if props := obj.Props(); len(props["DTEND"]) == 0 && len(props["DURATION"]) == 0 {
-			if tm, err := cal.TimingOf(obj, c.tf.tz); err == nil && tm.AllDay {
-				parts = append(parts, "no end: a whole day")
+			if tm, err := cal.TimingOf(obj, c.tf.tz); err == nil && !tm.Start.IsZero() {
+				if tm.AllDay {
+					parts = append(parts, "a whole day (no end)")
+				} else {
+					parts = append(parts, "a moment (no end)")
+				}
 			}
 		}
 		props := obj.Props()
@@ -1060,15 +1073,44 @@ func readyNote(c *collectionCtx, obj *model.Object, untitled bool) string {
 	if untitled && (c.spec.kind == view.KindEvent || c.spec.kind == view.KindTask) {
 		parts = append(parts, "no title")
 	}
-	// What says how a thing is read joins with «; », plain notes with «, »
-	// (s-io-6: «no end: a whole day; no title»; s-io-7: «40 % done,
-	// priority 1»).
-	for _, p := range parts {
-		if strings.Contains(p, ":") {
-			return strings.Join(parts, "; ")
+	// A card is named by its FN; without one the import writes the name of
+	// its N, and «Unnamed contact» when there is none (Р-76, the owner's
+	// decision of 22.10.2026; s-io-5).
+	if c.spec.kind == view.KindContact && strings.TrimSpace(firstValue(obj, "FN")) == "" {
+		if nameFromN(obj) != "" {
+			parts = append(parts, "name from N")
+		} else {
+			parts = append(parts, "no name")
 		}
 	}
+	// One note a property, with commas (Typecase's note 113 p. 4; s-io-6:
+	// «a whole day (no end), no title»; s-io-7: «40 % done, priority 1»).
 	return strings.Join(parts, ", ")
+}
+
+// nameFromN is a card's name as its N gives it, given name first: what an
+// import writes as FN where the file wrote none (Р-76); "" — no N.
+func nameFromN(obj *model.Object) string {
+	n := strings.Split(firstValue(obj, "N"), ";")
+	if len(n) < 2 {
+		return strings.TrimSpace(n[0])
+	}
+	return strings.TrimSpace(strings.TrimSpace(n[1]) + " " + strings.TrimSpace(n[0]))
+}
+
+// withFN is a card that has an FN: its own, else its N's name, else
+// «Unnamed contact» (Р-76). Organisation and address do not name a card.
+func withFN(obj *model.Object) *model.Object {
+	if strings.TrimSpace(firstValue(obj, "FN")) != "" {
+		return obj
+	}
+	name := nameFromN(obj)
+	if name == "" {
+		name = "Unnamed contact"
+	}
+	props := obj.Props()
+	props["FN"] = []model.RawValue{{Text: name}}
+	return model.NewObject(obj.Path, obj.ETag, props)
 }
 
 // kindHolders are what holds a kind, as the preview says where a stray
@@ -1135,7 +1177,12 @@ func (c *collectionCtx) whenOf(t cal.Timing) string {
 func importTitle(k view.Kind, obj *model.Object) (string, bool) {
 	switch k {
 	case view.KindContact:
-		if name := strings.TrimSpace(contactName(obj)); name != "" {
+		// FN, else the name N gives (Р-76: the import writes it so); an
+		// organisation or an address does not name a card.
+		if name := strings.TrimSpace(firstValue(obj, "FN")); name != "" {
+			return name, false
+		}
+		if name := nameFromN(obj); name != "" {
 			return name, false
 		}
 		return "Unnamed contact", true
@@ -1191,11 +1238,12 @@ func (s *Server) takeFolder(w http.ResponseWriter, r *http.Request, c *collectio
 		entries, err = prov.List(r.Context(), folderUnder(col.Path, in))
 	}
 	if err != nil {
-		// The frames' words of a refusal of the first step (s-io-18).
+		// The server's refusal of the folder (s-io-18; Typecase's note 113
+		// p. 5): its words, and under them what was asked and the code.
 		fail(view.Notice{
-			Role: view.NoticeAlert, Title: nothingRead,
-			Body:    text("The folder could not be read: " + strings.TrimSuffix(err.Error(), ".") + "."),
-			Details: &view.Diagnostic{Summary: text("PROPFIND " + folderUnder(col.Path, in)), Lines: []view.Text{text(connLabel(conn)), text(err.Error())}},
+			Role: view.NoticeAlert, Title: "The folder could not be read.",
+			Body:    text(sentence(err.Error())),
+			Details: refusalDetails("read", "PROPFIND", folderUnder(col.Path, in), err),
 		})
 		return
 	}
@@ -1224,7 +1272,9 @@ func (s *Server) takeFolder(w http.ResponseWriter, r *http.Request, c *collectio
 		d.takeMarkdown(c, e.Name, body, e.Modified)
 	}
 	if markdown == 0 {
-		d.Note = "The folder holds no Markdown file."
+		// Read, and nothing in it to take (s-io-18).
+		fail(view.Notice{Role: view.NoticeAlert, Title: nothingRead, Body: "The folder holds no Markdown file."})
+		return
 	}
 	d.To, d.Into = targetOf(dest)
 	saveImportDraft(c, d)
@@ -1271,8 +1321,12 @@ func (s *Server) importPreview(ctx context.Context, c *collectionCtx, d *importD
 		if taken, err = destUIDs(ctx, dest); err != nil {
 			taken = map[string]bool{}
 			unanswered = string(dest.stamp()) + " did not answer"
+			// Try again asks the same preview once more, the file kept; no
+			// technical block — there was no answer (Typecase's note 113
+			// p. 8).
 			notices = append(notices, view.Notice{Role: view.NoticeAlert, Runs: join(strongRun(unanswered),
-				", so what is already there cannot be told. Nothing is written; try again, or choose another "+intoNoun[c.spec.kind]+" under «Into».")})
+				", so what is already there cannot be told. Nothing is written; try again, or choose another "+intoNoun[c.spec.kind]+" under «Into»."),
+				Actions: []view.Action{{ID: "import.again", Label: "Try again", Href: s.importHref(c, "", dest.conn.ID, dest.col.Path), Method: "GET", Enabled: true}}})
 		}
 	}
 	return []view.ImportTable{previewTable(c.spec.kind, d, taken)}, taken, notices, unanswered
@@ -1483,8 +1537,14 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 	for _, sk := range skipped {
 		if sk.Failed {
 			report.Failed++
-			// The phrase the preview gave it (Typecase's note 111 p. 6).
-			report.Failures = append(report.Failures, text(sk.Reason))
+			// Its name, then the phrase the preview gave it; a record
+			// without a name, the phrase alone (Typecase's notes 111 p. 6,
+			// 113 p. 9).
+			line := sk.Reason
+			if n := sk.named(); n != "—" {
+				line = n + " · " + line
+			}
+			report.Failures = append(report.Failures, text(line))
 		} else {
 			report.Skipped++
 			report.Skips = append(report.Skips, text(sk.line()))
@@ -1502,13 +1562,24 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		if err == nil {
 			err = errs[i]
 		}
+		if err == nil && dest.card != nil {
+			obj = withFN(obj)
+		}
 		uid, renamed, note := uids[i], uids[i] != rec.UID, "Created"
-		// Why the record has another identity here (s-io-9, «With a new
-		// UID»): a copy beside the one here, or a second record of the file
-		// under an identity the first took.
-		why := ""
-		if renamed {
-			why = "imported as a copy"
+		// Why the record has another identity here (s-io-9; Typecase's note
+		// 113 pp. 2–3): a copy beside the one here, as the answer asked —
+		// «Imported as copies» —, or what was not the answer — a second
+		// record of the file under an identity the first took, one the file
+		// gave none.
+		why, asked := "", false
+		switch {
+		case !renamed:
+		case rec.UID != "" && taken[rec.UID]:
+			asked = true
+		case rec.UID != "":
+			why = "the file holds this UID twice"
+		default:
+			why = "the file gave it none"
 		}
 		if err == nil && renamed {
 			if obj, err = setUID(dest, obj, uid); err == nil {
@@ -1556,7 +1627,7 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		}
 		if err != nil {
 			report.Failed++
-			report.Failures = append(report.Failures, text(rec.Title+": "+err.Error()))
+			report.Failures = append(report.Failures, text(rec.Title+" · "+err.Error()))
 			continue
 		}
 		if over != nil {
@@ -1568,14 +1639,20 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		if renamed {
 			report.Renamed++
 		}
-		made = append(made, importMade{row: len(written.Lines), uid: uid, from: rec.UID, was: was, path: obj.Path, renamed: renamed, obj: obj, title: rec.Title, why: why})
+		made = append(made, importMade{row: len(written.Lines), uid: uid, from: rec.UID, was: was, path: obj.Path, renamed: renamed, obj: obj, title: rec.Title, why: why, asked: asked})
 		written.Lines = append(written.Lines, view.ImportLine{Cells: []view.Text{text(rec.Title), text(rec.Detail), text(note)}})
 	}
 	s.importLanded(ctx, dest, report, &written, made)
 	// The records under another identity than the file's, and why (s-io-9,
 	// «With a new UID»; Typecase's note 111 p. 7).
 	for _, m := range made {
-		if m.held != m.from {
+		switch {
+		case m.held == m.from:
+		case m.asked && m.why == "":
+			report.Renames = append(report.Renames, text(m.title+" · "+m.from+" → "+m.held))
+		case m.from == "":
+			report.NewUIDs = append(report.NewUIDs, text(m.title+" · "+m.held+" · "+m.why))
+		default:
 			report.NewUIDs = append(report.NewUIDs, text(m.title+" · "+m.from+" → "+m.held+" · "+m.why))
 		}
 	}
@@ -1599,8 +1676,10 @@ type importMade struct {
 	renamed bool
 	obj     *model.Object // as it was sent: its links name the file's identities
 	// title and why are what the report says of a record under another
-	// identity than the file's (s-io-9)
+	// identity than the file's (s-io-9); asked — the answer «Import as
+	// copies» gave it, and it stands under «Imported as copies»
 	title, why string
+	asked      bool
 }
 
 // importLanded looks for what an import wrote, once, after the last record:
@@ -1658,7 +1737,7 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 			// it (s-io-9; the frames do not draw it, task 222 of Typecase
 			// p. 9).
 			report.Lost++
-			report.Losts = append(report.Losts, text(m.title+" · the whole record"))
+			report.Losts = append(report.Losts, text(m.title+" · not there after it was written"))
 			continue
 		}
 		theirs := uidOf(dest, at)
@@ -1768,8 +1847,11 @@ type importFile struct {
 // and tasks come in one file each (s-io-1).
 var errOneFileOnly = errors.New("several files at once")
 
-// errEmptyImport refuses a file with nothing in it.
-var errEmptyImport = errors.New("an empty file")
+// errRead is a file that was read and found no good (s-io-18): the
+// refusal begins with «Nothing was read.» and says why.
+type errRead struct{ why string }
+
+func (e errRead) Error() string { return e.why }
 
 // readNoteFiles are several files picked at once for a notebook (Typecase's
 // note 111 p. 3): each read as one file is — a Markdown file, a zip of
@@ -1797,13 +1879,27 @@ func (s *Server) readNoteFiles(c *collectionCtx, files []importFile) *importDraf
 			d.Skipped = append(d.Skipped, importSkip{What: f.name, Reason: sentence(err.Error()), Failed: true})
 			continue
 		}
-		for _, rec := range one.Records {
-			if rec.File == "" {
-				rec.File = f.name
+		// A zip of the set is one file of it; its members are named in it
+		// (Typecase's note 113 p. 12: «‹архив›.zip › ‹имя›.md»).
+		within := func(member string) string {
+			if member == "" {
+				return f.name
 			}
+			if isZip(f.body) {
+				return f.name + " › " + member
+			}
+			return member
+		}
+		for _, rec := range one.Records {
+			rec.File = within(rec.File)
 			d.Records = append(d.Records, rec)
 		}
-		d.Skipped = append(d.Skipped, one.Skipped...)
+		for _, sk := range one.Skipped {
+			if !strings.HasPrefix(sk.What, "V") {
+				sk.What = within(sk.What)
+			}
+			d.Skipped = append(d.Skipped, sk)
+		}
 	}
 	if taken == 0 {
 		d.Note = "None of these files is Markdown."
@@ -1816,15 +1912,19 @@ func (s *Server) readNoteFiles(c *collectionCtx, files []importFile) *importDraf
 func (s *Server) importRefusal(err error) view.Notice {
 	// One notice over the step, the frames' words (s-io-18; Typecase's note
 	// 111 p. 9). There is no ceiling of an import to be over (Р-73).
+	// A refusal of a file read and found no good begins with «Nothing was
+	// read.»; one where no file was read does not (Typecase's note 113
+	// p. 5).
 	n := view.Notice{Role: view.NoticeAlert, Title: nothingRead}
 	var wrong errNotThisFile
+	var bad errRead
 	switch {
 	case errors.Is(err, errNoImportFile):
-		n.Body = "No file was chosen."
+		n.Title, n.Body = "", "No file was chosen."
 	case errors.Is(err, errOneFileOnly):
-		n.Body = oneFileOnly + "."
-	case errors.Is(err, errEmptyImport):
-		n.Body = emptyMarkdown + "."
+		n.Title, n.Body = "", oneFileOnly+"."
+	case errors.As(err, &bad):
+		n.Body = text(bad.why)
 	case errors.As(err, &wrong):
 		n.Runs = join("«"+wrong.name+"» is not "+wrong.what+" file: its first line is not ", monoRun(wrong.begin), ". Choose the file again.")
 	default:

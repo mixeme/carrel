@@ -17,6 +17,42 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.361 — 2026-10-23
+
+Import by Typecase note 113 (task 222; Typecase `3779ac0`): the twelve
+answers.
+
+### Changed
+
+- **The drop** says where a file of another kind goes (`ImportDrop.Elsewhere`
+  again): «Contacts take ‹.vcf› — the calendar and the list of tasks take
+  this one» on contacts, «Contacts take this one» on a calendar; a file no
+  kind takes is `Refused`.
+- **Report:** «Imported as copies» (`Renames`) is back for the copies the
+  answer asked for; «With a new UID» holds only what the answer did not do —
+  «the file holds this UID twice», «the account holds this UID in another
+  collection», «the server gave its own». «Failed» lines are «‹name› ·
+  ‹words›»; a record the server does not show after it was written is «Not
+  kept by the server» — «‹name› · not there after it was written».
+- **Ready notes** one a property, with commas: «a whole day (no end)», «a
+  moment (no end)», «no title», «name from N», «no name».
+- **Р-76:** a card without FN is written with the name of its N, else
+  «Unnamed contact»; organisation and address do not name it.
+- **Refusals of the first step:** «Nothing was read.» only for a file read
+  and found no good — «‹name›» is empty., could not be opened as a zip
+  archive., This file holds no records., The archive / folder holds no
+  Markdown file.; «No file was chosen.» and «One file at a time…» stand
+  alone; a folder the server refused is «The folder could not be read.»
+  with the server's answer.
+- **The collection did not answer** (`s-io-19`): «Try again» in the notice.
+- **A set of notes** names a zip's members in it: «‹archive›.zip ›
+  ‹name›.md».
+
+### For consumers
+
+Draw `Elsewhere` for a drop of another kind's file, «Imported as copies»
+from `Renames`.
+
 ## v0.2.360 — 2026-10-23
 
 What the client's sheets of collections needed.

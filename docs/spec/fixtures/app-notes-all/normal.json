@@ -152,6 +152,16 @@
         "label": "Import",
         "method": "POST"
       },
+      "elsewhere": [
+        {
+          "ext": ".vcf",
+          "says": [
+            {
+              "text": "Contacts take this one"
+            }
+          ]
+        }
+      ],
       "lead": "Drop to import",
       "line": [
         {

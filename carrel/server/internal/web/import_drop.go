@@ -60,7 +60,30 @@ func dropOf(k view.Kind, href, how string, into any) *view.ImportDrop {
 	if !d.Many {
 		d.OneOnly = oneFileOnly
 	}
+	// A file another kind takes says where it goes (Typecase's note 113
+	// p. 1): «Contacts take ‹.vcf› — the calendar and the list of tasks
+	// take this one», «Contacts take this one».
+	d.Elsewhere = []view.ImportElsewhere{}
+	for _, e := range []string{".vcf", ".ics", ".md", ".zip"} {
+		if containsText(accept, e) {
+			continue
+		}
+		says := view.Runs{plainRun(upperFirst(dropHolders[e]) + " this one")}
+		if k == view.KindContact {
+			says = join("Contacts take ", monoRun(".vcf"), " — "+dropHolders[e]+" this one")
+		}
+		d.Elsewhere = append(d.Elsewhere, view.ImportElsewhere{Ext: text(e), Says: says})
+	}
 	return d
+}
+
+// dropHolders are what takes a file of each extension, as the overlay says
+// it of a file dropped on another kind (s-io-1).
+var dropHolders = map[string]string{
+	".vcf": "contacts take",
+	".ics": "the calendar and the list of tasks take",
+	".md":  "a notebook takes",
+	".zip": "a notebook takes",
 }
 
 // oneFileOnly is the refusal of several files where one is taken, on the

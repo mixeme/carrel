@@ -82,9 +82,11 @@ func TestImportWizardByFrames(t *testing.T) {
 		t.Errorf("report subtitle = %q, want where it went", got)
 	}
 	r := page.Report
-	if r.Created != 2 || r.Failed != 0 || len(r.NewUIDs) != 1 || !strings.Contains(string(r.NewUIDs[0]), " · ada → ") ||
-		!strings.HasSuffix(string(r.NewUIDs[0]), " · imported as a copy") || len(r.Failures) != 0 {
-		t.Errorf("report = created %d, failed %d, new UIDs %q, failures %q", r.Created, r.Failed, r.NewUIDs, r.Failures)
+	// The copy the answer asked for stands under «Imported as copies», not
+	// «With a new UID» (Typecase's note 113 p. 2).
+	if r.Created != 2 || r.Failed != 0 || len(r.NewUIDs) != 0 || len(r.Renames) != 1 || !strings.Contains(string(r.Renames[0]), " · ada → ") ||
+		len(r.Failures) != 0 {
+		t.Errorf("report = created %d, failed %d, new UIDs %q, copies %q, failures %q", r.Created, r.Failed, r.NewUIDs, r.Renames, r.Failures)
 	}
 }
 
@@ -148,8 +150,8 @@ func TestImportNotesFolderByFrames(t *testing.T) {
 	}
 }
 
-// A folder with no Markdown says so after the preview's own message: the
-// two are one sentence in pieces, neither lost.
+// A folder with no Markdown is a refusal of the first step: read, and
+// nothing in it to take (s-io-18; Typecase's note 113 p. 6).
 func TestImportFolderWithoutMarkdownSaysSo(t *testing.T) {
 	srv := davtest.New(t)
 	srv.Login, srv.Password = "alice", "secret"
@@ -162,8 +164,8 @@ func TestImportFolderWithoutMarkdownSaysSo(t *testing.T) {
 	page := decode[view.ImportPage](t, f.h.do(get(f.path("notes")+"/import", f.sess)))
 	page = decode[view.ImportPage](t, f.h.do(get(page.Source.Folder.Nodes[0].ID, f.sess)))
 	page = decode[view.ImportPage](t, f.h.do(postForm(page.Source.Preview.Href, f.sess, url.Values{})))
-	got := saidRuns(page.Source.Note)
-	if !strings.HasPrefix(got, "Markdown is stored as it was written") || !strings.HasSuffix(got, "The folder holds no Markdown file.") {
-		t.Errorf("note = %q", got)
+	if page.Step == view.ImportStepPreview || len(page.Notices) != 1 || page.Notices[0].Title != "Nothing was read." ||
+		page.Notices[0].Body != "The folder holds no Markdown file." {
+		t.Errorf("step %q, notices %+v", page.Step, page.Notices)
 	}
 }

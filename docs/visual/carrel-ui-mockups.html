@@ -635,6 +635,10 @@ a.tc-row__title:hover{text-decoration:underline}
 .tc-msg.is-row > svg{flex:none;margin-top:1px}
 .tc-msg.is-alert{border-left-color:var(--tc-danger);color:var(--tc-danger);background:transparent;border:.5px solid var(--tc-danger);border-left-width:2px}
 .tc-msg.is-accent{border-left-color:var(--tc-accent)}
+/* кнопка после слов сообщения — с зазором */
+.tc-msg > .tc-btn,.tc-msg__aside > .tc-btn{margin-left:6px}
+/* кнопка-ссылка в тревоге — цвета кнопки, а не тревоги */
+.tc-msg.is-alert > a.tc-btn{color:var(--tc-ink)}
 .tc-empty{padding:26px var(--tc-page-gutter);color:var(--tc-muted);font-size:13px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .tc-prose{max-width:72ch;font-size:13.5px;line-height:1.65;white-space:pre-wrap}
 .tc-diag{font-family:var(--tc-font-mono);font-size:11px;line-height:1.65;background:var(--tc-card);border-radius:3px;
@@ -11883,7 +11887,7 @@ dav: HTTP 503: the server is busy</div>
     </div>
   </div>
 </div>
-<figcaption>Накладка появляется, когда файл втащили в окно, и говорит три вещи: что произойдёт, куда ляжет и что ещё ничего не записано. <b>Имени файла в ней нет намеренно</b> — пока файл тащат, браузер отдаёт только тип и число; имя оказывается в руках лишь в момент броска. Написать имя в накладке значило бы попросить исполнителя о том, чего он сделать не может: имя, размер и разобранный формат человек прочтёт на следующем экране, в шапке предпросмотра.<br><br><b>Куда бросили — то и назначение.</b> Коллекция, выбранная в рейле, идёт в «Into», и мастер открывается сразу на шаге 2: шагу 1 нечего спросить — файл взят, коллекция известна. Исключение — единый вид («Combined&nbsp;…»): выбранной коллекции там нет, и открывается шаг 1 с уже вписанным файлом и пустым «Into». Молча положить карточки в первую попавшуюся книгу нельзя — это чужой сервер.<br><br><b>Чужой файл не открывает ничего молча.</b> На контактах, куда тащат <span class="tc-mono">.ics</span>, накладка говорит «Contacts take <span class="tc-mono">.vcf</span> — the calendar and the list of tasks take this one» и броска не принимает. Это тот же разбор, что на шаге 2, где задача, пришедшая в календарь, посчитана пропущенной и названа вместе с тем, куда её нести. Больше одного файла разом берут только заметки — по той же причине, по которой у них есть zip и папка; у остальных родов шапка предпросмотра держит один файл, один размер и один формат, и накладка просит бросать по одному.<br><br>На узком экране (<a href="#phone">10</a>) перетаскивания нет вовсе — там остаётся кнопка: файл на телефоне выбирают системным листом, а не мышью. <b>Отказ броска</b> — та же накладка, красная строка вместо «Drop to import»: чужое расширение — «Only .vcf files are imported here» (у календаря и задач — «.ics», у заметок — «.md, .zip or .ics»); несколько файлов не у заметок — «One file at a time: only notes take several».</figcaption>
+<figcaption>Накладка появляется, когда файл втащили в окно, и говорит три вещи: что произойдёт, куда ляжет и что ещё ничего не записано. <b>Имени файла в ней нет намеренно</b> — пока файл тащат, браузер отдаёт только тип и число; имя оказывается в руках лишь в момент броска. Написать имя в накладке значило бы попросить исполнителя о том, чего он сделать не может: имя, размер и разобранный формат человек прочтёт на следующем экране, в шапке предпросмотра.<br><br><b>Куда бросили — то и назначение.</b> Коллекция, выбранная в рейле, идёт в «Into», и мастер открывается сразу на шаге 2: шагу 1 нечего спросить — файл взят, коллекция известна. Исключение — единый вид («Combined&nbsp;…»): выбранной коллекции там нет, и открывается шаг 1 с уже вписанным файлом и пустым «Into». Молча положить карточки в первую попавшуюся книгу нельзя — это чужой сервер.<br><br><b>Чужой файл не открывает ничего молча.</b> На контактах, куда тащат <span class="tc-mono">.ics</span>, накладка говорит, куда его нести, и броска не принимает. Это тот же разбор, что на шаге 2, где задача, пришедшая в календарь, посчитана пропущенной и названа вместе с тем, куда её нести. Больше одного файла разом берут только заметки — по той же причине, по которой у них есть zip и папка; у остальных родов шапка предпросмотра держит один файл, один размер и один формат, и накладка просит бросать по одному.<br><br>На узком экране (<a href="#phone">10</a>) перетаскивания нет вовсе — там остаётся кнопка: файл на телефоне выбирают системным листом, а не мышью. <b>Отказ броска</b> — та же накладка, красная строка вместо «Drop to import», расширения в ней моноширинно. Файл другого рода — куда его нести: на контактах <span class="tc-mono">.ics</span> — «Contacts take <span class="tc-mono">.vcf</span> — the calendar and the list of tasks take this one», в календаре и задачах <span class="tc-mono">.vcf</span> — «Contacts take this one»; файл, который не берёт никто, — «Only <span class="tc-mono">.vcf</span> files are imported here» (у календаря и задач — <span class="tc-mono">.ics</span>, у заметок — <span class="tc-mono">.md</span>, <span class="tc-mono">.zip</span> or <span class="tc-mono">.ics</span>); несколько файлов не у заметок — «One file at a time: only notes take several».</figcaption>
 </figure>
 
 <figure>
@@ -12306,7 +12310,7 @@ dav: HTTP 503: the server is busy</div>
     </div>
   </div>
 </div>
-<figcaption>Отказ шага 1 — одно уведомление над шагом, остальное как было. <b>Своего потолка у импорта нет</b> (решение владельца 22.10, Р-73): файл идёт на сервер потоком, запись за записью, сколько бы их ни было и сколько бы он ни весил; запись, которую сервер не взял, — строка «Failed» отчёта со словами сервера. Слова других отказов шага: «No file was chosen.», «This file holds no record of this kind.», «The archive holds no Markdown file.», «The folder could not be read: ‹причина›.» (WebDAV у заметок), «There is no file to import: the session ended. Choose it again.»</figcaption>
+<figcaption>Отказ шага 1 — одно уведомление над шагом, остальное как было. <b>Своего потолка у импорта нет</b> (решение владельца 22.10, Р-73): файл идёт на сервер потоком, запись за записью, сколько бы их ни было и сколько бы он ни весил; запись, которую сервер не взял, — строка «Failed» отчёта со словами сервера. Отказ, который прочёл файл и нашёл его негодным, начинается с «<b>Nothing was read.</b>»: не тот файл — ««‹имя›» is not a vCard file: its first line is not <span class="tc-mono">BEGIN:VCARD</span>.» (у календаря и задач — «not an iCalendar file: … <span class="tc-mono">BEGIN:VCALENDAR</span>»), пустой — ««‹имя›» is empty.», битый zip — ««‹имя›» could not be opened as a zip archive.», в файле нет ни одной записи ни одного рода — «This file holds no records.», в zip или папке нет <span class="tc-mono">.md</span> — «The archive holds no Markdown file.» / «The folder holds no Markdown file.». Файл, где есть записи, но не этого рода, отказом не бывает: предпросмотр покажет их пропущенными и скажет, куда нести. Без «Nothing was read.»: «No file was chosen.», «There is no file to import: the session ended. Choose it again.». Папка WebDAV не прочлась — «<b>The folder could not be read.</b> ‹слова сервера›» и под ним техблок метода, адреса и кода, как у отказов сервера; у файла с компьютера техблока нет — читал его Carrel.</figcaption>
 </figure>
 
 <figure>
@@ -12338,7 +12342,7 @@ dav: HTTP 503: the server is busy</div>
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Import contacts</div><div class="tc-head__sub"><span class="tc-mono">Разное (mix).vcf</span> · 84 KB · vCard 3.0</div></div>
             <div class="tc-acts"><button class="tc-btn" type="button">Cancel</button><button class="tc-btn is-primary" title="nextcloud · Контакты did not answer" type="button" disabled>Import 117 contacts</button></div>
           </div>
-          <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>nextcloud · Контакты did not answer</b>, so what is already there cannot be told. Nothing is written; try again, or choose another address book under «Into».</div>
+          <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>nextcloud · Контакты did not answer</b>, so what is already there cannot be told. Nothing is written; try again, or choose another address book under «Into». <a class="tc-btn is-sm" href="/app/contacts/nextcloud/kontakty/import">Try again</a></div>
           <div class="tc-form is-tight">
             <div class="tc-field tc-field--lg"><label>Into</label><button class="tc-in is-pick" type="button"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
               <span class="tc-field__hint">Any address book you may write to. What is already here is counted against it.</span></div>
@@ -12352,7 +12356,7 @@ dav: HTTP 503: the server is busy</div>
             <tbody>
               <tr><td class="tc-mono">Разное (mix).vcf</td><td>Анна Ковалёва</td><td class="tc-mono tc-table__n3">4f2b-9c31-a0e7</td><td class="tc-table__n4">Ready</td></tr>
               <tr><td class="tc-mono">Разное (mix).vcf</td><td>Артём Белов</td><td class="tc-mono tc-table__n3">1a77-40de-bb02</td><td class="tc-table__n4">Ready</td></tr>
-              <tr><td class="tc-mono">Разное (mix).vcf</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">line 12: cannot decode quoted-printable</td></tr>
+              <tr><td class="tc-mono">Разное (mix).vcf</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--danger">line 12: cannot decode quoted-printable</td></tr>
             </tbody>
           </table>
           <div class="tc-msg tc-msg--mr0-ml0">What is skipped is listed in the report, and so is what could not be read.</div>
@@ -12361,7 +12365,7 @@ dav: HTTP 503: the server is busy</div>
     </div>
   </div>
 </div>
-<figcaption>Уведомление над предпросмотром — одно на все беды этого шага: коллекция назначения не ответила. Что уже есть, не узнать — вопроса «already here» нет, Import выключена с причиной в подсказке.</figcaption>
+<figcaption>Уведомление над предпросмотром — одно на все беды этого шага: коллекция назначения не ответила. Что уже есть, не узнать — вопроса «already here» нет, Import выключена с причиной в подсказке. «Try again» в уведомлении спрашивает коллекцию снова, файл остаётся; техблока нет — ответа не было, показывать нечего.</figcaption>
 </figure>
 
 <div class="frames">
@@ -12440,7 +12444,7 @@ dav: HTTP 503: the server is busy</div>
     </div></div></div>
   </div>
 </div>
-<figcaption>Единственный род записей, у которого источника два, — потому и шаг у него свой. Второй легко не заметить: заметки можно взять прямо с того WebDAV, что уже подключён, — без скачивания и загрузки обратно. Оба ведут в один и тот же предпросмотр, нарисованный ниже, и запускает его каждый сам: «Preview file» у файла, «Preview folder» у папки.<br><br>Первым на шаге стоит не источник, а <b>назначение</b>: «Into» — то же поле, что на предпросмотре контактов, и по той же причине.<br><br><b>Рейл здесь — выход, не назначение.</b> Подсвечена тетрадь, из которой открыли мастер; нажатие на «Дневник» бросает мастер и открывает ту тетрадь. Куда лягут заметки — только поле Into. Дерево в карточке WebDAV — то же, что в «Move» и в быстрой загрузке: папку выбирают кликом, путь руками не набирают, отдельного диалога операционной системы нет — это уже подключённый сервер, не диск компьютера. <b>Файлов можно несколько</b>: <span class="tc-mono">.md</span>, zip и <span class="tc-mono">.ics</span> — журнальные записи (VJOURNAL) становятся заметками; предпросмотр календаря шлёт их сюда. У набора подзаголовок предпросмотра — «3 files · 12 KB».</figcaption>
+<figcaption>Единственный род записей, у которого источника два, — потому и шаг у него свой. Второй легко не заметить: заметки можно взять прямо с того WebDAV, что уже подключён, — без скачивания и загрузки обратно. Оба ведут в один и тот же предпросмотр, нарисованный ниже, и запускает его каждый сам: «Preview file» у файла, «Preview folder» у папки.<br><br>Первым на шаге стоит не источник, а <b>назначение</b>: «Into» — то же поле, что на предпросмотре контактов, и по той же причине.<br><br><b>Рейл здесь — выход, не назначение.</b> Подсвечена тетрадь, из которой открыли мастер; нажатие на «Дневник» бросает мастер и открывает ту тетрадь. Куда лягут заметки — только поле Into. Дерево в карточке WebDAV — то же, что в «Move» и в быстрой загрузке: папку выбирают кликом, путь руками не набирают, отдельного диалога операционной системы нет — это уже подключённый сервер, не диск компьютера. <b>Файлов можно несколько</b>: <span class="tc-mono">.md</span>, zip и <span class="tc-mono">.ics</span> — журнальные записи (VJOURNAL) становятся заметками; предпросмотр календаря шлёт их сюда. У набора подзаголовок предпросмотра — «3 files · 12 KB», обычным шрифтом, как «64 files» у zip; zip в наборе — один файл, его члены в таблице — «‹архив›.zip › ‹имя›.md».</figcaption>
 </figure>
 
 <div class="frames">
@@ -12508,8 +12512,9 @@ dav: HTTP 503: the server is busy</div>
             <thead><tr><th>Source</th><th>Name</th><th class="tc-table__n3">UID</th><th class="tc-table__n4">Result</th></tr></thead>
             <tbody>
               <tr><td class="tc-mono">Разное (mix).vcf</td><td>Анна Ковалёва</td><td class="tc-mono tc-table__n3">4f2b-9c31-a0e7</td><td class="tc-table__n4">Ready</td></tr>
+              <tr><td class="tc-mono">Разное (mix).vcf</td><td>Вера Лебедева</td><td class="tc-mono tc-table__n3">8e20-5b1f-c7d4</td><td class="tc-table__n4">Ready — name from N</td></tr>
               <tr><td class="tc-mono">Разное (mix).vcf</td><td>Артём Белов</td><td class="tc-mono tc-table__n3">1a77-40de-bb02</td><td class="tc-table__n4">Already here — skipped</td></tr>
-              <tr><td class="tc-mono">Разное (mix).vcf</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">line 12: cannot decode quoted-printable</td></tr>
+              <tr><td class="tc-mono">Разное (mix).vcf</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--danger">line 12: cannot decode quoted-printable</td></tr>
             </tbody>
           </table>
           <div class="tc-msg tc-msg--mr0-ml0">What is skipped is listed in the report, and so is what could not be read.</div>
@@ -12518,7 +12523,7 @@ dav: HTTP 503: the server is busy</div>
     </div>
   </div>
 </div>
-<figcaption><b>Записи, которые уже есть, — вопрос, а не молчаливая копия</b> (решение владельца 12.10, задача 159). Вопрос стоит рядом с «Into»: «уже есть» считается относительно выбранной коллекции. Ответ — сегмент ссылок на тот же предпросмотр; кадр рисует «Skip them», ответ по умолчанию. При «Replace them» подсказка — «The ones here are overwritten with the file's version.», строка записи — «Replaces the one here», кнопка считает и их: «Import 122 contacts». При «Import as copies» подсказка — «Each gets a new UID and stands beside the one here.», строка — «New UID will be assigned», кнопка — «Import 122 contacts». Когда писать нечего — всё, что прочиталось, уже есть, и выбран «Skip», — кнопка выключена, причина рядом: «Nothing to import: every record is already here.» Счёт «already here» от ответа не зависит.<br><br>Импорт — мастер: файл → предпросмотр → отчёт. Первая из четырёх таблиц: у карточки читают <b>имя</b>, колонки — источник, имя, UID, результат; ломается по-своему — <code>quoted-printable</code> из vCard&nbsp;2.1, который нечем разобрать.<br><br><b>Коллекция назначения — поле, а не надпись.</b> Предпросмотр даёт повод её сменить: счёт совпадений UID считается по ней. «Into» стоит над счётом, списком (<code>is-pick</code>) — все книги, куда разрешено писать, со всех подключённых серверов, — и его смена перестраивает таблицу. Шапка держит то, что не меняется: файл, размер и разобранный формат.</figcaption>
+<figcaption><b>Записи, которые уже есть, — вопрос, а не молчаливая копия</b> (решение владельца 12.10, задача 159). Вопрос стоит рядом с «Into»: «уже есть» считается относительно выбранной коллекции. Ответ — сегмент ссылок на тот же предпросмотр; кадр рисует «Skip them», ответ по умолчанию. При «Replace them» подсказка — «The ones here are overwritten with the file's version.», строка записи — «Replaces the one here», кнопка считает и их: «Import 122 contacts». При «Import as copies» подсказка — «Each gets a new UID and stands beside the one here.», строка — «New UID will be assigned», кнопка — «Import 122 contacts». Когда писать нечего — всё, что прочиталось, уже есть, и выбран «Skip», — кнопка выключена, причина рядом: «Nothing to import: every record is already here.» Счёт «already here» от ответа не зависит.<br><br>Импорт — мастер: файл → предпросмотр → отчёт. Первая из четырёх таблиц: у карточки читают <b>имя</b>, колонки — источник, имя, UID, результат; ломается по-своему — <code>quoted-printable</code> из vCard&nbsp;2.1, который нечем разобрать.<br><br><b>Коллекция назначения — поле, а не надпись.</b> Предпросмотр даёт повод её сменить: счёт совпадений UID считается по ней. «Into» стоит над счётом, списком (<code>is-pick</code>) — все книги, куда разрешено писать, со всех подключённых серверов, — и его смена перестраивает таблицу. Шапка держит то, что не меняется: файл, размер и разобранный формат.<br><br><b>Пометки «Ready — …»</b> — через запятую, одна на свойство: «a whole day (no end)» и «a moment (no end)» у события без конца, «no title» у события и задачи без названия — название по умолчанию только на экране, в запись не пишется. Карточка без FN получает его из ФИО (N) — «name from N»; без ФИО — «Unnamed contact», записанным в FN, и пометка «no name» (решение владельца 22.10, Р-76: vCard 3.0 и 4.0 без FN неверна). Пустая ячейка — «—», всегда приглушённо.</figcaption>
 </figure>
 
 <figure>
@@ -12569,8 +12574,8 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">Личный 2026.ics</td><td>Дежурство: первая линия</td><td class="tc-mono tc-table__n3">Mon 09:00 · weekly until 2026-12-28</td><td class="tc-table__n4">Ready — the series as one record</td></tr>
               <tr><td class="tc-mono">Личный 2026.ics</td><td>Отпуск</td><td class="tc-mono tc-table__n3">2026-07-13 → 2026-07-27 · all day</td><td class="tc-table__n4">Ready</td></tr>
               <tr><td class="tc-mono">Личный 2026.ics</td><td>Созвон с подрядчиком</td><td class="tc-mono tc-table__n3">2026-08-17 10:00 Asia/Yekaterinburg</td><td class="tc-table__n4">Ready — time zone kept as sent</td></tr>
-              <tr><td class="tc-mono">Личный 2026.ics</td><td>Купить билеты <span class="tc-badge">VTODO</span></td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--dusty">Skipped: a calendar takes events — import it into a list of tasks</td></tr>
-              <tr><td class="tc-mono">Личный 2026.ics</td><td class="tc-dim">Untitled event</td><td class="tc-mono tc-table__n3">2026-05-04 · all day</td><td class="tc-table__n4">Ready — no end: a whole day; no title</td></tr>
+              <tr><td class="tc-mono">Личный 2026.ics</td><td>Купить билеты <span class="tc-badge">VTODO</span></td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--dusty">Skipped: a calendar takes events — import it into a list of tasks</td></tr>
+              <tr><td class="tc-mono">Личный 2026.ics</td><td class="tc-dim">Untitled event</td><td class="tc-mono tc-table__n3">2026-05-04 · all day</td><td class="tc-table__n4">Ready — a whole day (no end), no title</td></tr>
             </tbody>
           </table>
           <div class="tc-msg tc-msg--mr0-ml0">A repeating event keeps its rule: the series is one record, not fifty-two.</div>
@@ -12652,7 +12657,7 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">Дела.ics</td><td>Дописать раздел про кэш</td><td class="tc-mono tc-table__n3">2026-09-04</td><td class="tc-table__n4">Ready — 40 % done, priority 1</td></tr>
               <tr><td class="tc-mono">Дела.ics</td><td>Созвон с подрядчиком <span class="tc-badge">VEVENT</span></td><td class="tc-mono tc-table__n3">2026-08-17</td><td class="tc-table__n4 tc-table__n4--dusty">Skipped: a list of tasks takes tasks — import it into a calendar</td></tr>
               <tr><td class="tc-mono">Дела.ics</td><td class="tc-dim">Untitled task</td><td class="tc-mono tc-table__n3">2026-09-10</td><td class="tc-table__n4">Ready — no title</td></tr>
-              <tr><td class="tc-mono">Дела.ics</td><td>Сдать отчёт</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">line 88: cannot read DUE «2026-13-01»</td></tr>
+              <tr><td class="tc-mono">Дела.ics</td><td>Сдать отчёт</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--danger">line 88: cannot read DUE «2026-13-01»</td></tr>
             </tbody>
           </table>
           <div class="tc-msg tc-msg--mr0-ml0">STATUS, PERCENT-COMPLETE and PRIORITY come across as they are: a task that was half done arrives half done.</div>
@@ -12729,8 +12734,8 @@ dav: HTTP 503: the server is busy</div>
               <tr><td class="tc-mono">2026-03-11-podryadchik.md</td><td>Встреча с подрядчиком</td><td class="tc-mono tc-table__n3">2026-03-11</td><td class="tc-table__n4">Ready — title, date and tags from front matter</td></tr>
               <tr><td class="tc-mono">idei/crdt.md</td><td>Что почитать про CRDT</td><td class="tc-mono tc-table__n3">2026-08-04</td><td class="tc-table__n4">Ready — no front matter: title from the first heading, date from the file</td></tr>
               <tr><td class="tc-mono">doroga.md</td><td>Про дорогу до дачи</td><td class="tc-mono tc-table__n3">2026-06-30</td><td class="tc-table__n4">Already here — skipped</td></tr>
-              <tr><td class="tc-mono">skan.pdf</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--dusty">Skipped: not Markdown</td></tr>
-              <tr><td class="tc-mono">pustoj.md</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3">—</td><td class="tc-table__n4 tc-table__n4--danger">Empty file: nothing to store and nothing to name it by</td></tr>
+              <tr><td class="tc-mono">skan.pdf</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--dusty">Skipped: not Markdown</td></tr>
+              <tr><td class="tc-mono">pustoj.md</td><td class="tc-dim">—</td><td class="tc-mono tc-table__n3 tc-table__n3--dusty">—</td><td class="tc-table__n4 tc-table__n4--danger">Empty file: nothing to store and nothing to name it by</td></tr>
             </tbody>
           </table>
           <div class="tc-msg tc-msg--mr0-ml0">Markdown is stored as it was written — nothing is reformatted — and front matter Carrel exported earlier comes back: UID, tags, X-properties.</div>
@@ -12778,8 +12783,8 @@ dav: HTTP 503: the server is busy</div>
               <div class="tc-diag">Артём Белов · 1a77-40de-bb02
 Ирина Соколова · 33b0-9ffa-1120</div></div>
             <div class="tc-card"><div class="tc-rubric">With a new UID <span class="tc-mono tc-mono--ls0">2</span></div>
-              <div class="tc-diag">Вера Дорошенко · 2b7e-11aa → 9d04-77c1 · imported as a copy
-Виктор Панов · 51c0-3a8e → baikal-0412 · the server gave its own</div></div>
+              <div class="tc-diag">Вера Дорошенко · 2b7e-11aa → 9d04-77c1 · the file holds this UID twice
+Виктор Панов · 51c0-3a8e → c3e1-0412 · the server gave its own</div></div>
             <div class="tc-card"><div class="tc-rubric">Not kept by the server <span class="tc-mono tc-mono--ls0">1</span></div>
               <div class="tc-diag">Галина Мещерякова · PHOTO</div></div>
             <div class="tc-card"><div class="tc-rubric">Failed <span class="tc-mono tc-mono--ls0">3</span></div>
@@ -12790,7 +12795,7 @@ dav: HTTP 503: the server is busy</div>
       </div>
     </div>
   </div>
-  <figcaption>Числа набраны крупно антиквой: отчёт читают ради них. Таблицы созданного здесь нет — созданное лежит в списке, куда ведёт «Back to list». Пропущенное (чужой род в файле, <code>s-io-6</code>) — четвёртая карточка «Skipped» того же вида, что «Failed»; когда пропущенного нет, нет и карточки. <b>Вторая карточка — про записи, которые в коллекции уже были</b> (задача 159), и называется по ответу предпросмотра: «Already here, skipped» — имя и UID оставленных как есть; «Replaced» — имя и UID переписанных версией файла; «Imported as copies» — старый UID → новый, как было раньше. Когда таких записей в файле не было, нет и карточки. <b>«With a new UID»</b> — у кого UID другой, чем в файле: по ответу «Import as copies» и тот, что сервер дал сам (Google, iCloud), — старый → новый и почему. <b>«Not kept by the server»</b> — что импорт, перечитав записанное, не нашёл: запись и свойство. Пустых карточек нет.</figcaption>
+  <figcaption>Числа набраны крупно антиквой: отчёт читают ради них. Таблицы созданного здесь нет — созданное лежит в списке, куда ведёт «Back to list». Пропущенное (чужой род в файле, <code>s-io-6</code>) — четвёртая карточка «Skipped» того же вида, что «Failed»; когда пропущенного нет, нет и карточки. <b>Вторая карточка — про записи, которые в коллекции уже были</b> (задача 159), и называется по ответу предпросмотра: «Already here, skipped» — имя и UID оставленных как есть; «Replaced» — имя и UID переписанных версией файла; «Imported as copies» — старый UID → новый, как было раньше. Когда таких записей в файле не было, нет и карточки. <b>«With a new UID»</b> — у кого UID другой, чем в файле, <b>не по ответу</b> (что сделал ответ «Import as copies», лежит во второй карточке «Imported as copies»): «the server gave its own» (Google), «the account holds this UID in another collection» (iCloud: Carrel дал новый сам), «the file holds this UID twice» (вторая запись того же UID) — старый → новый и почему. Строка «Failed» — слова сервера или разбора; имя записи — в начале строки, как у остальных карточек. Запись, которой сервер после записи не показывает вовсе, — в «Not kept by the server» со словами «not there after it was written». <b>«Not kept by the server»</b> — что импорт, перечитав записанное, не нашёл: запись и свойство. Пустых карточек нет.</figcaption>
   </figure>
   <figure style="flex:1 1 100%">
   <div class="frame" data-frame="s-io-14" data-screen="/app/calendar/{account}/{col}/import" data-part="report-skipped">

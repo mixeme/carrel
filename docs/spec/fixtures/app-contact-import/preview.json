@@ -150,11 +150,12 @@
         {
           "cells": [
             "Разное (mix).vcf",
-            "press@example.org",
+            "Unnamed contact",
             "5d02-77aa-31c4",
-            "Ready"
+            "Ready — no name"
           ],
-          "result": "ready"
+          "result": "ready",
+          "untitled": true
         }
       ],
       "rubric": ""

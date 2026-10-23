@@ -166,9 +166,10 @@ func TestImportAlwaysCreates(t *testing.T) {
 		t.Errorf("the record that was there changed: %q", body)
 	}
 	// The card that arrived under a new identity is a card all the same,
-	// named in «With a new UID» (s-io-9).
-	if len(page.Report.NewUIDs) != 1 || !strings.HasPrefix(string(page.Report.NewUIDs[0]), "Ада") || !strings.HasSuffix(string(page.Report.NewUIDs[0]), " · imported as a copy") {
-		t.Errorf("new UIDs = %q", page.Report.NewUIDs)
+	// named in «Imported as copies» — the answer gave it (s-io-9; note 113
+	// p. 2).
+	if len(page.Report.NewUIDs) != 0 || len(page.Report.Renames) != 1 || !strings.HasPrefix(string(page.Report.Renames[0]), "Ада") {
+		t.Errorf("new UIDs = %q, copies = %q", page.Report.NewUIDs, page.Report.Renames)
 	}
 	if f.srv.CountRequests("PUT", peopleBook) != 2 {
 		t.Errorf("requests = %v", f.srv.Requests())
@@ -209,7 +210,7 @@ func TestImportNamesTheIdentityTheServerGave(t *testing.T) {
 		f.srv.CreateHidesTheRecord = true
 		page := run(t, f)
 		if !slices.ContainsFunc(page.Report.Losts, func(l view.Text) bool {
-			return strings.HasPrefix(string(l), "Grace") && strings.HasSuffix(string(l), " · the whole record")
+			return strings.HasPrefix(string(l), "Grace") && strings.HasSuffix(string(l), " · not there after it was written")
 		}) {
 			t.Errorf("not kept = %q", page.Report.Losts)
 		}
@@ -217,8 +218,8 @@ func TestImportNamesTheIdentityTheServerGave(t *testing.T) {
 	t.Run("honest", func(t *testing.T) {
 		f := importFixture(t)
 		page := run(t, f)
-		if len(page.Report.Losts) != 0 || len(page.Report.NewUIDs) != 1 {
-			t.Errorf("not kept %q, new UIDs %q: only the copy of Ada is renamed", page.Report.Losts, page.Report.NewUIDs)
+		if len(page.Report.Losts) != 0 || len(page.Report.NewUIDs) != 0 || len(page.Report.Renames) != 1 {
+			t.Errorf("not kept %q, new UIDs %q, copies %q: only the copy of Ada is renamed", page.Report.Losts, page.Report.NewUIDs, page.Report.Renames)
 		}
 		if n := f.srv.CountRequests("GET", peopleBook); n != 0 {
 			t.Errorf("%d GETs: a record found under its identity was read again", n)
@@ -286,7 +287,7 @@ func TestImportNamesWhatItDoesNotWrite(t *testing.T) {
 	if row := previewRow(t, page.Preview, "VTODO"); !strings.HasSuffix(string(row[3]), "import it into a list of tasks") {
 		t.Errorf("the task was not sent anywhere: %q", row)
 	}
-	if row := previewRow(t, page.Preview, "Ковка"); row[3] != "Ready" || !strings.Contains(string(row[2]), "January") {
+	if row := previewRow(t, page.Preview, "Ковка"); row[3] != "Ready — a moment (no end)" || !strings.Contains(string(row[2]), "January") {
 		t.Errorf("event = %q", row)
 	}
 	if cols := page.Preview[0].Columns; len(cols) != 4 || cols[2] != "When" {
@@ -330,7 +331,8 @@ func TestImportWithoutAFileSaysSo(t *testing.T) {
 	f := importFixture(t)
 	page := decode[view.ImportPage](t, f.h.do(get(f.path("contacts")+"/import", f.sess)))
 	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "", nil)))
-	if len(page.Notices) != 1 || page.Notices[0].Title != "Nothing was read." || page.Notices[0].Body != "No file was chosen." {
+	// No file was read: no «Nothing was read.» (Typecase's note 113 p. 5).
+	if len(page.Notices) != 1 || page.Notices[0].Title != "" || page.Notices[0].Body != "No file was chosen." {
 		t.Fatalf("notices = %+v", page.Notices)
 	}
 }

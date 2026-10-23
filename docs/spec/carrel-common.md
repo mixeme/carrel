@@ -1104,8 +1104,12 @@ type ListBar struct {
 // файл не того расширения — красная строка Refused вместо Lead, «Only
 // ‹.vcf› files are imported here» (у заметок — «‹.md›, ‹.zip› or ‹.ics›»);
 // файлов несколько, а род берёт один, — OneOnly, «One file at a time: only
-// notes take several» (у заметок пусто). Бросок тогда не принимается
-type ImportDrop struct { Action Action; Accept []Text; Many bool; Lead Text; Line Runs; Note Text; Refused Runs; OneOnly Text }
+// notes take several» (у заметок пусто). Файл другого рода — Elsewhere по
+// расширению (записка 113 п. 1): на контактах ‹.ics› «Contacts take ‹.vcf›
+// — the calendar and the list of tasks take this one», в календаре и задачах
+// ‹.vcf› «Contacts take this one». Бросок тогда не принимается
+type ImportDrop struct { Action Action; Accept []Text; Many bool; Lead Text; Line Runs; Note Text; Refused Runs; OneOnly Text; Elsewhere []ImportElsewhere }
+type ImportElsewhere struct { Ext Text; Says Runs }
 
 // Выбор столбцов (components-21, components-42; S-9.6). Меню — форма:
 // отмеченные пункты уходят полем col в том порядке, в каком стоят, — порядок
@@ -2290,15 +2294,17 @@ type ImportLine struct { Cells []Text; Result ImportResult; Untitled bool; Compo
 // по ответу «Skip» («Already here, skipped»), Heres — «Артём Белов ·
 // 1a77-40de-bb02», в Skipped не входят; Skipped — чужого рода; Replaced —
 // записи коллекции, заменённые версией файла, Replaces — какие, в Created
-// не входят; Renamed, NewUIDs — карточка «With a new UID» (записка 111
-// п. 7): у кого UID здесь не тот, что в файле, и почему — «Вера Дорошенко ·
-// 2b7e-11aa → 9d04-77c1 · imported as a copy», «… · the account holds
-// this UID in another collection», «… · the server gave its own»; Lost,
-// Losts — «Not kept by the server» (п. 8): что импорт, перечитав
-// записанное, не нашёл, — «Галина Мещерякова · PHOTO», запись целиком —
-// «… · the whole record»; Failed — не записано (запись не прочлась или
-// сервер отказал), Failures — почему, строка на запись. Нет записей
-// карточки — карточки нет.
+// не входят; Renames — «Imported as copies» (записка 113 п. 2): новый UID
+// по ответу «Import as copies», «Вера Дорошенко · 2b7e-11aa → 9d04-77c1»;
+// NewUIDs — «With a new UID»: новый UID не по ответу, и почему — «… · the
+// file holds this UID twice», «… · the account holds this UID in another
+// collection», «… · the server gave its own»; Renamed — всех новых UID;
+// Lost, Losts — «Not kept by the server» (записка 111 п. 8): что импорт,
+// перечитав записанное, не нашёл, — «Галина Мещерякова · PHOTO», запись
+// целиком — «… · not there after it was written»; Failed — не записано
+// (запись не прочлась или сервер отказал), Failures — «‹имя› · ‹слова
+// сервера или разбора›», у безымянной только слова. Нет записей карточки
+// — карточки нет.
 type ImportReport struct {
     Created  int
     Here     int
@@ -2311,6 +2317,7 @@ type ImportReport struct {
     Failed   int
     Failures []Text
     NewUIDs  []Text
+    Renames  []Text
     Lost     int
     Losts    []Text
 }

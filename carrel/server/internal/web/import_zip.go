@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"strings"
 )
@@ -42,7 +41,7 @@ func insideArchive(name string) bool {
 func (s *Server) readZipNotes(c *collectionCtx, name string, body []byte) (*importDraft, error) {
 	zr, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))
 	if err != nil {
-		return nil, fmt.Errorf("not a zip archive: %w", err)
+		return nil, errRead{"«" + name + "» could not be opened as a zip archive."}
 	}
 	var members []*zip.File
 	for _, zf := range zr.File {
@@ -88,7 +87,8 @@ func (s *Server) readZipNotes(c *collectionCtx, name string, body []byte) (*impo
 		d.takeMarkdown(c, label, text, zf.Modified)
 	}
 	if markdown == 0 {
-		d.Note = "The archive holds no Markdown file."
+		// Read, and nothing in it to take (s-io-18).
+		return nil, errRead{"The archive holds no Markdown file."}
 	}
 	return d, nil
 }

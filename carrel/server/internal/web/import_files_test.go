@@ -63,7 +63,7 @@ func TestImportTakesEveryFileOfADrop(t *testing.T) {
 	}
 
 	empty := decode[view.ImportPage](t, f.h.do(importFiles(choose, f.sess, "pustoj.md", "  \n")))
-	if len(empty.Notices) != 1 || !strings.Contains(string(empty.Notices[0].Body), "Empty file") {
+	if len(empty.Notices) != 1 || empty.Notices[0].Title != "Nothing was read." || empty.Notices[0].Body != "«pustoj.md» is empty." {
 		t.Errorf("an empty file alone: %+v", empty.Notices)
 	}
 
@@ -72,7 +72,8 @@ func TestImportTakesEveryFileOfADrop(t *testing.T) {
 	page = decode[view.ImportPage](t, c.h.do(importFiles(actionHref(t, page.Actions, "import.choose"), c.sess,
 		"one.vcf", "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:one\r\nFN:One\r\nEND:VCARD\r\n",
 		"two.vcf", "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:two\r\nFN:Two\r\nEND:VCARD\r\n")))
-	if page.Step == view.ImportStepPreview || len(page.Notices) != 1 || page.Notices[0].Title != "Nothing was read." ||
+	// No file was read: no «Nothing was read.» (Typecase's note 113 p. 5).
+	if page.Step == view.ImportStepPreview || len(page.Notices) != 1 || page.Notices[0].Title != "" ||
 		page.Notices[0].Body != "One file at a time: only notes take several." {
 		t.Errorf("two address books at once: step %q, notices %+v", page.Step, page.Notices)
 	}

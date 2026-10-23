@@ -89,7 +89,15 @@
   },
   "notices": [
     {
-      "actions": [],
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
+          "id": "import.again",
+          "label": "Try again",
+          "method": "GET"
+        }
+      ],
       "body": "",
       "details": null,
       "role": "alert",

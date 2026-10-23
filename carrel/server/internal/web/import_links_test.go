@@ -67,8 +67,8 @@ func TestImportKeepsLinksInsideTheFile(t *testing.T) {
 	if !strings.Contains(child, "RELATED-TO;RELTYPE=PARENT:"+fresh) {
 		t.Errorf("the subtask does not follow its parent to %s:\n%s", fresh, child)
 	}
-	if want := "Imported parent · parent → " + fresh + " · imported as a copy"; len(page.Report.NewUIDs) != 1 || string(page.Report.NewUIDs[0]) != want {
-		t.Errorf("new UIDs = %q, want %q", page.Report.NewUIDs, want)
+	if want := "Imported parent · parent → " + fresh; len(page.Report.Renames) != 1 || string(page.Report.Renames[0]) != want {
+		t.Errorf("copies = %q, want %q", page.Report.Renames, want)
 	}
 	if loner := storedWith(t, f, f.col, "Imported loner"); !strings.Contains(loner, "RELATED-TO:elsewhere") {
 		t.Errorf("a link outside the file changed:\n%s", loner)

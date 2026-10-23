@@ -54,6 +54,17 @@ type ImportDrop struct {
 	// (записка Typecase 111 п. 4, подпись s-io-1)
 	Refused Runs `json:"refused"`
 	OneOnly Text `json:"oneOnly,omitempty"`
+	// Elsewhere — файл другого рода: куда его нести вместо Refused (записка
+	// Typecase 113 п. 1) — на контактах ‹.ics› «Contacts take ‹.vcf› — the
+	// calendar and the list of tasks take this one», в календаре ‹.vcf›
+	// «Contacts take this one»
+	Elsewhere []ImportElsewhere `json:"elsewhere"`
+}
+
+// ImportElsewhere — расширение чужого рода у броска и что о нём сказать.
+type ImportElsewhere struct {
+	Ext  Text `json:"ext"`
+	Says Runs `json:"says"`
 }
 
 // Columns — выбор столбцов списка (components-21, components-42, S-9.6).

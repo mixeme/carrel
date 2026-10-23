@@ -747,11 +747,16 @@ type ImportReport struct {
 	// (s-io-9, «Failed»); Failures — почему, строка на запись
 	Failed   int    `json:"failed"`
 	Failures []Text `json:"failures"`
-	// NewUIDs — карточка «With a new UID» (s-io-9; записка Typecase 111
-	// п. 7): у кого UID здесь не тот, что в файле, — «Вера Дорошенко ·
-	// 2b7e-11aa → 9d04-77c1 · imported as a copy», «… · the server gave its
-	// own»; Renamed — сколько
+	// NewUIDs — карточка «With a new UID» (s-io-9; записки Typecase 111
+	// п. 7, 113 пп. 2–3): у кого UID здесь не тот, что в файле, не по
+	// ответу, — «Вера Дорошенко · 2b7e-11aa → 9d04-77c1 · the file holds
+	// this UID twice», «… · the server gave its own», «… · the account holds
+	// this UID in another collection»; Renamed — сколько всех новых UID
 	NewUIDs []Text `json:"newUIDs"`
+	// Renames — карточка «Imported as copies» (записка Typecase 113 п. 2):
+	// записи, получившие новый UID по ответу «Import as copies», —
+	// «Вера Дорошенко · 2b7e-11aa → 9d04-77c1»; в NewUIDs их нет
+	Renames []Text `json:"renames"`
 	// Lost, Losts — карточка «Not kept by the server» (п. 8): что импорт,
 	// перечитав записанное, не нашёл — «Галина Мещерякова · PHOTO»
 	Lost  int    `json:"lost"`
