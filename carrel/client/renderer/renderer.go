@@ -112,16 +112,34 @@ func (r *Renderer) Fragment(w http.ResponseWriter, req *http.Request, status int
 		kind := zone.KindOf(model)
 		out, drawn := "", false
 		switch {
-		case (target == render.TargetMain && kind == zone.PlainPage) || (target == render.TargetSheet && kind == zone.Sheet):
-			out, drawn = scr.Draw(model).Render(), true
+		case target == render.TargetSheet && kind == zone.Sheet:
+			// The sheet's scrim, named: it takes the place of the zone
+			// whole, as the live layer puts a widget of its zone.
+			out, drawn = SheetZone(scr.Draw(model))+forms(scr, model), true
+		case target == render.TargetMain && kind == zone.PlainPage:
+			out, drawn = scr.Draw(model).Render()+forms(scr, model), true
 		case kind == zone.ShellPage:
 			out, drawn = ShellZone(scr, model, target)
 		}
 		if drawn {
-			return writeHTML(w, status, out+forms(scr, model))
+			return writeHTML(w, status, out)
 		}
 	}
 	return r.json.Fragment(w, req, status, target, body, extra)
+}
+
+// SheetZone is a sheet answered alone: its scrim named as the zone sheet,
+// without the screen it stands over (C-6 Under) — that is on the page.
+func SheetZone(root screens.Root) string {
+	switch root := document.Zoned(root).(type) {
+	case w.Overlay:
+		return root.Scrim.Render()
+	case w.Shell:
+		if over, ok := root.Body.(w.Overlay); ok {
+			return over.Scrim.Render()
+		}
+	}
+	return root.Render()
 }
 
 // forms are the forms a screen prints at the page's end, printed.
@@ -159,18 +177,18 @@ func ShellZone(scr screens.Screen, model any, target string) (string, bool) {
 			}
 			out += bind.Notice(n, space).Render()
 		}
-		return out, true
+		return out + forms(scr, model), true
 	case render.TargetPoll:
 		p, err := zone.Of(model, target)
 		if err != nil {
 			return "", false
 		}
 		if bar := bind.Runbar(p.(*view.PollBar)); bar != nil {
-			return bar.Render(), true
+			return bar.Render() + forms(scr, model), true
 		}
 		return "", true
 	}
-	shell, ok := scr.Draw(model).(w.Shell)
+	shell, ok := document.Zoned(scr.Draw(model)).(w.Shell)
 	if !ok {
 		return "", false
 	}
@@ -180,12 +198,20 @@ func ShellZone(scr screens.Screen, model any, target string) (string, bool) {
 	}
 	switch target {
 	case render.TargetMain:
-		return body.Main.Render(), true
+		// The page named as its zone, the forms its buttons submit inside
+		// it: the answer takes the zone's place whole, the forms with it.
+		main := body.Main
+		if scr.Forms != nil {
+			for _, f := range scr.Forms(model) {
+				main.Items = append(main.Items, f)
+			}
+		}
+		return main.Render(), true
 	case render.TargetDetails:
-		if body.Side == nil {
+		if body.Side == nil || body.Side.Closed {
 			return "", true
 		}
-		return body.Side.Render(), true
+		return body.Side.Render() + forms(scr, model), true
 	case render.TargetRail:
 		out := ""
 		for _, part := range body.Rail {
@@ -195,7 +221,7 @@ func ShellZone(scr screens.Screen, model any, target string) (string, bool) {
 			}
 			out += p.Render()
 		}
-		return out, true
+		return out + forms(scr, model), true
 	}
 	return "", false
 }

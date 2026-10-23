@@ -51,8 +51,10 @@ func check(t *testing.T, at string, scr screens.Screen, model any, base string) 
 		`<html lang="en"`,
 		`<script src="` + base + `/static/tc/` + document.Version() + `/js/theme.js"></script>`,
 		`<link rel="stylesheet" href="` + base + `/static/tc/` + document.Version() + `/css/typecase.css">`,
-		`<script src="` + base + `/static/tc/` + document.Version() + `/js/tc.js"></script></body></html>`,
-		scr.Draw(model).Render(),
+		// The library's script, then its live layer (the client's stage 4).
+		`<script src="` + base + `/static/tc/` + document.Version() + `/js/tc.js"></script><script src="` + base + `/static/tc/` + document.Version() + `/js/tc-live.js"></script></body></html>`,
+		// The root with the zones of C-7.2 named.
+		document.Zoned(scr.Draw(model)).Render(),
 	} {
 		if !strings.Contains(html, want) {
 			t.Errorf("%s: the page has no %s", at, want)
@@ -172,16 +174,30 @@ func TestVersionCoversEveryScript(t *testing.T) {
 	}
 }
 
-// No page loads the live layer yet: the client takes it with its stage 4,
-// after Typecase's tasks 84 and 85 (plan, «Typecase сборки»).
-func TestNoPageLoadsTheLiveLayer(t *testing.T) {
+// Every page loads the live layer (the client's stage 4; Typecase's tasks 84,
+// 85) and names, as data, the headers of a request for a part of the page
+// and the field of the token — the server's names (render), C-7.1, C-11; a
+// page of the shell names main as the zone whose answer is an address, a
+// page without main names none (the library's names guard).
+func TestEveryPageLoadsTheLiveLayer(t *testing.T) {
 	for _, scr := range screens.All {
 		html, err := document.Of(scr, scr.Model(), "").Render()
 		if err != nil {
 			t.Fatal(err)
 		}
-		if live := document.Assets("").Live; strings.Contains(html, live) {
-			t.Errorf("%T: the page loads %s", scr.Model(), live)
+		if live := document.Assets("").Live; !strings.Contains(html, live) {
+			t.Errorf("%T: the page does not load %s", scr.Model(), live)
+		}
+		for _, want := range []string{`data-tc-view-header="Carrel-View"`, `data-tc-view-value="fragment"`, `data-tc-target-header="Carrel-Target"`,
+			`data-tc-token-field="_csrf"`, `data-tc-token-header="X-CSRF-Token"`} {
+			if !strings.Contains(html, want) {
+				t.Errorf("%T: the page does not say %s", scr.Model(), want)
+				break
+			}
+		}
+		main := strings.Contains(html, `data-tc-zone="main"`)
+		if address := strings.Contains(html, `data-tc-address-zone="main"`); address != main {
+			t.Errorf("%T: the address zone is main %v, the page has main %v", scr.Model(), address, main)
 		}
 	}
 }

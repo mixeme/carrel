@@ -19,6 +19,7 @@ import (
 	"carrel.dev/carrel/client/screens"
 	"carrel.dev/carrel/client/zone"
 	"carrel.dev/carrel/server/render"
+	"carrel.dev/typecase/widget"
 )
 
 // The renderer cmd/carrel hands the server (carrel.dev/carrel/client/renderer)
@@ -75,9 +76,20 @@ func rootOf(scr screens.Screen, model any, base, page string) (string, bool) {
 		return "", false
 	}
 	rest := page[i+j+len("</div>"):]
-	tail := formsOf(scr, model) + `<script src="` + document.Assets(base).JS + `"></script></body></html>`
+	assets := document.Assets(base)
+	tail := formsOf(scr, model) + `<script src="` + assets.JS + `"></script><script src="` + assets.Live + `"></script></body></html>`
 	root, ok := strings.CutSuffix(rest, tail)
-	return root, ok && root != ""
+	return unzoned(root), ok && root != ""
+}
+
+// unzoned is a root as its frame draws it: without the empty zones of a
+// panel and a sheet not open (screens.Zoned), which the frames, drawn
+// without the live layer, do not have.
+func unzoned(root string) string {
+	for _, empty := range []interface{ Render() string }{document.EmptyDetails, document.EmptySheet} {
+		root = strings.ReplaceAll(root, empty.Render(), "")
+	}
+	return root
 }
 
 // served holds what the renderer served for a fixture against the fixture's
@@ -152,7 +164,25 @@ func TestRendererDrawsBuiltScreens(t *testing.T) {
 			code, ctype, body := answer(t, renderer.New(""), func(rd render.Renderer, w http.ResponseWriter) error {
 				return rd.Fragment(w, req, http.StatusOK, target, byValue(model), nil)
 			})
-			root, forms := scr.Draw(model).Render(), formsOf(scr, model)
+			forms := formsOf(scr, model)
+			if target == render.TargetSheet {
+				// The scrim alone, named as the zone: the part of the page
+				// the page's comparison saw.
+				scrim := renderer.SheetZone(scr.Draw(model))
+				if code != http.StatusOK || ctype != htmlType || body != scrim+forms {
+					t.Errorf("%s: fragment of %s %d %q, not the scrim and the forms", at, target, code, ctype)
+					continue
+				}
+				page, err := document.Of(scr, model, "").Render()
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !strings.Contains(page, scrim) {
+					t.Errorf("%s: the fragment of %s is not a part of the page", at, target)
+				}
+				continue
+			}
+			root := scr.Draw(model).Render()
 			if code != http.StatusOK || ctype != htmlType || body != root+forms {
 				t.Errorf("%s: fragment of %s %d %q, not the root and the forms", at, target, code, ctype)
 				continue
@@ -279,9 +309,10 @@ func TestRendererFallsBackOnBuiltScreens(t *testing.T) {
 // Each fixture of a built screen in the shell answers the zones of C-7.2 its
 // screen draws alone as HTML (renderer.ShellZone): main — the page as the
 // page shows it, a part of the page that passed the frame comparison —,
-// details — the panel, or nothing —, rail, notices and poll (nothing while
-// no bar stands), each with the page's forms after it, and each a part of
-// the page served; their classes are the library's.
+// details — the panel, or nothing while it is closed —, rail, notices and
+// poll (nothing while no bar stands), each with the page's forms after it
+// (main with them inside, the one element that takes the zone's place), and
+// each a part of the page served; their classes are the library's.
 func TestRendererDrawsShellZones(t *testing.T) {
 	l := load(t)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -312,11 +343,22 @@ func TestRendererDrawsShellZones(t *testing.T) {
 				code, ctype, body := answer(t, renderer.New(""), func(rd render.Renderer, w http.ResponseWriter) error {
 					return rd.Fragment(w, req, http.StatusOK, target, byValue(model), nil)
 				})
-				if code != http.StatusOK || ctype != htmlType || body != want+forms {
+				if code != http.StatusOK || ctype != htmlType || body != want {
 					t.Errorf("%s, %s: %d %q, not the zone and the forms", at, target, code, ctype)
 					continue
 				}
-				if !strings.Contains(page, want) {
+				part := strings.TrimSuffix(want, forms)
+				if target == render.TargetMain {
+					// main carries the forms inside: the answer is the one
+					// element that takes the zone's place whole
+					shell, _ := document.Zoned(scr.Draw(model)).(widget.Shell)
+					body, _ := shell.Body.(widget.ShellBody)
+					part = body.Main.Render()
+					if bare := strings.TrimSuffix(part, "</div>"); want != bare+forms+"</div>" {
+						t.Errorf("%s, %s: not the zone with the forms inside", at, target)
+					}
+				}
+				if part != "" && !strings.Contains(page, part) {
 					t.Errorf("%s, %s: the zone is not a part of the page", at, target)
 				}
 				for _, f := range classFindings(l, at+", "+target, want) {

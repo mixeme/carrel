@@ -27,9 +27,11 @@ import (
 	"sync"
 
 	"carrel.dev/carrel/client/screens"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 	"carrel.dev/typecase"
 	"carrel.dev/typecase/page"
+	"carrel.dev/typecase/widget"
 )
 
 // Static is where the client serves Typecase's files, under the base path of
@@ -170,11 +172,27 @@ func (k *keep) Write(b []byte) (int, error) {
 // served at base: the screen's root, and at the page's end the forms its
 // buttons outside a form submit (Screen.Forms).
 func Of(scr screens.Screen, model any, base string) page.Document {
+	root := Zoned(scr.Draw(model))
 	doc := page.Document{
 		Title:  scr.Title(model),
 		Lang:   Lang,
 		Assets: Assets(base),
-		Root:   scr.Draw(model),
+		Root:   root,
+		// The live layer (the client's stage 4; Typecase's tasks 84, 85):
+		// a link or a form that names a zone asks for it with the server's
+		// headers, the form's token in its header too.
+		Live: true,
+		Zones: page.Zones{
+			ViewHeader: render.HeaderView, ViewValue: render.ViewFragment, TargetHeader: render.HeaderTarget,
+			TokenField: render.CSRFField, TokenHeader: render.CSRFHeader,
+		},
+	}
+	// An answer for main puts its address into the history — on a page of
+	// the shell, the only one that has the zone.
+	if shell, ok := root.(widget.Shell); ok {
+		if _, ok := shell.Body.(widget.ShellBody); ok {
+			doc.Zones.Address = render.TargetMain
+		}
 	}
 	if scr.Forms != nil {
 		doc.Forms = scr.Forms(model)

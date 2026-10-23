@@ -4,6 +4,33 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.6.6 — 2026-10-23
+
+Server `v0.2.363`, Typecase `3779ac0`. Stage 4, step 1.
+
+### Added
+
+- **The live layer is loaded** (stage 4; Typecase's tasks 84, 85): every
+  page loads `tc-live.js` after `tc.js` and names, as data, the headers of
+  a request for a part of the page (C-7.1) and the field and header of the
+  token (C-11) — the server's names.
+- **The zones of C-7.2 are named** (`document.Zoned`): the top bar
+  `topbar`, the rail `rail`, the page `main`, the panel `details`, a sheet
+  `sheet`; a panel that is not open and a sheet that is not are empty
+  hidden zones, where an answer goes. `main` owns the address on a page of
+  the shell; a page without it names none.
+
+### Changed
+
+- The answer for `main` is the one `Main` with the page's forms inside, so
+  that the layer puts it in the zone's place; for a closed panel it is
+  empty (the layer hides the zone); for a sheet, its scrim alone
+  (`renderer.SheetZone`), without the screen it stands over.
+- A button or a form names its target only when the pages carry that zone
+  (`bind.Live`): `poll` and `queue` go the plain way until their step.
+- The server's `cmd/carrel` test counts four files of the library on a
+  page (the live layer is the fourth).
+
 ## v0.6.5 — 2026-10-23
 
 Server `v0.2.363`, Typecase `3779ac0`.

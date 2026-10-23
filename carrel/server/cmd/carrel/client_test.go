@@ -65,8 +65,8 @@ func TestPagesAreTheClients(t *testing.T) {
 			}
 
 			files := regexp.MustCompile(`(?:src|href)="(`+regexp.QuoteMeta(base)+`/static/tc/[0-9a-f]{12}/[^"]+)"`).FindAllStringSubmatch(page, -1)
-			if len(files) != 3 {
-				t.Fatalf("/login names %d files of the library, want 3 (theme, stylesheet, script): %v", len(files), files)
+			if len(files) != 4 {
+				t.Fatalf("/login names %d files of the library, want 4 (theme, stylesheet, script, live layer): %v", len(files), files)
 			}
 			kinds := map[string]string{".css": "text/css; charset=utf-8", ".js": "application/javascript; charset=utf-8"}
 			var css, cssPath string

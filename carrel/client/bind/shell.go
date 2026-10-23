@@ -661,7 +661,7 @@ const csrfField = "_csrf"
 // nothing else sends it —, and multipart with the action's file field
 // (Action.File: Attach, «From this computer») where it carries a file.
 func ActionForm(a view.Action, id string) w.PostForm {
-	f := w.PostForm{ID: id, Action: a.Href, File: a.File}
+	f := w.PostForm{ID: id, Action: a.Href, File: a.File, Target: Live(a.Target)}
 	if a.CSRF != "" {
 		f.Fields = []w.Hidden{{Name: csrfField, Value: a.CSRF}}
 	}

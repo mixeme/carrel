@@ -18,6 +18,8 @@
 package bind
 
 import (
+	"slices"
+
 	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
 )
@@ -121,7 +123,27 @@ func Button(a view.Action, form string) w.Button {
 	if a.Enabled && a.Unfit {
 		b.State = w.ButtonOff
 	}
+	// The zone it asks for with the live layer (C-7.1: the view model says
+	// it): a sheet, the panel; without the layer, a plain link or form.
+	if a.Enabled {
+		b.Target = Live(a.Target)
+	}
 	return b
+}
+
+// Zones are the names of the zones the client's pages carry (the document
+// names them: C-7.2, the server's names). A target that names another goes
+// the plain way — the library's names guard holds that a link asks only for
+// a zone the page has.
+var Zones []string
+
+// Live is a target as a link or a form names it: the zone's name if the
+// pages carry the zone, else none.
+func Live(target string) string {
+	if slices.Contains(Zones, target) {
+		return target
+	}
+	return ""
 }
 
 // FileButton is an action as a button (Button) — one that carries a file
