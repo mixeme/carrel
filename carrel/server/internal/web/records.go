@@ -415,10 +415,9 @@ type indexEntry struct {
 	// it again (the section's number, navRows).
 	Done bool `json:"done,omitempty"`
 	Day  bool `json:"day,omitempty"`
-	// Fields are the single-valued properties a row shows, as the record
-	// holds them: what the duplicates screen asks about when members
-	// disagree, without reading a record again. PHOTO is a digest.
-	Fields map[string]string `json:"fields,omitempty"`
+	// Values are what the duplicates screen asks about when members
+	// disagree (valuesOf), without reading a record again.
+	Values recValues `json:"values,omitempty"`
 }
 
 // indexOf is the index of listed records of kind k; days are read in the
@@ -427,7 +426,7 @@ func indexOf(tf timeFmt, k view.Kind, items []listed) []indexEntry {
 	out := make([]indexEntry, 0, len(items))
 	for _, it := range items {
 		o := it.obj
-		e := indexEntry{Path: o.Path, ETag: o.ETag, Kind: k, Keys: dupes.KeysOf(k, o, tf.tz), Fields: choiceFields(k, o)}
+		e := indexEntry{Path: o.Path, ETag: o.ETag, Kind: k, Keys: dupes.KeysOf(k, o, tf.tz), Values: valuesOf(tf, k, o)}
 		switch k {
 		case view.KindContact:
 			e.UID, e.Title = card.UID(o), contactName(o)

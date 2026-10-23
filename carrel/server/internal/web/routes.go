@@ -185,6 +185,7 @@ func registerKindRoutes(s *Server, kind string) {
 	s.handle("POST /app/"+kind+"/{account}/{col}/{uid}/conflict", kindConflictPostHandler(kind))
 	s.handle("GET /app/"+kind+"/{account}/{col}/{uid}/move", kindMoveGetHandler(kind))
 	s.handle("GET /app/"+kind+"/{account}/{col}/{uid}/copies", kindCopiesHandler(kind))
+	s.handle("GET /app/"+kind+"/linked/{uid}", kindLinkedHandler(kind))
 	s.handle("GET /app/"+kind+"/linked/{uid}/copies", kindLinkedCopiesHandler(kind))
 	s.handle("POST /app/"+kind+"/{account}/{col}/{uid}/move", kindMovePostHandler(kind))
 	s.handle("POST /app/"+kind+"/{account}/{col}/{uid}/delete", kindDeleteHandler(kind))
@@ -252,6 +253,12 @@ func kindConflictPostHandler(kind string) handler {
 func kindCopiesHandler(kind string) handler {
 	return func(s *Server, w http.ResponseWriter, r *http.Request) {
 		s.getKindCopies(w, r, kind)
+	}
+}
+
+func kindLinkedHandler(kind string) handler {
+	return func(s *Server, w http.ResponseWriter, r *http.Request) {
+		s.getLinkedRecord(w, r, kind)
 	}
 }
 

@@ -14,6 +14,7 @@ package dupes
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"slices"
 	"sort"
 	"strings"
 	"unicode"
@@ -142,7 +143,10 @@ func Signature(kind view.Kind, refs []sealed.RecordRef) string {
 // Find groups the records that match at threshold points or more under w.
 // Records of different kinds are never compared; a record without a UID
 // cannot be addressed and is left out, and one listed twice counts once.
-func Find(records []Record, w Weights, threshold int) []Group {
+// Records the person said are not duplicates of each other (apart) do not
+// join through that pair: Анна in three books and Алексей Смирнов sharing
+// her work phone stay two matters, her group and their decision (s-dup-1).
+func Find(records []Record, w Weights, threshold int, apart [][]sealed.RecordRef) []Group {
 	recs := make([]Record, 0, len(records))
 	seen := map[sealed.RecordRef]bool{}
 	for _, r := range records {
@@ -191,7 +195,18 @@ func Find(records []Record, w Weights, threshold int) []Group {
 		reasons []Reason
 	}
 	var edges []edge
+	split := func(a, b sealed.RecordRef) bool {
+		for _, set := range apart {
+			if slices.Contains(set, a) && slices.Contains(set, b) {
+				return true
+			}
+		}
+		return false
+	}
 	for p := range pairs {
+		if split(recs[p.a].Ref, recs[p.b].Ref) {
+			continue
+		}
 		score, reasons := Score(recs[p.a], recs[p.b], w)
 		if score < threshold || score <= 0 {
 			continue
@@ -237,6 +252,27 @@ func Find(records []Record, w Weights, threshold int) []Group {
 		return out[i].ID < out[j].ID
 	})
 	return out
+}
+
+// Assess is the points and reasons of records already grouped — a decision
+// whose members are loaded —, as Find would give them: the weakest match of
+// the pairs that match, every reason of them. 0 when none match.
+func Assess(records []Record, w Weights) (int, []Reason) {
+	score := 0
+	var reasons []Reason
+	for i := range records {
+		for j := i + 1; j < len(records); j++ {
+			n, why := Score(records[i], records[j], w)
+			if n <= 0 {
+				continue
+			}
+			if score == 0 || n < score {
+				score = n
+			}
+			reasons = mergeReasons(reasons, why)
+		}
+	}
+	return score, reasons
 }
 
 // Score is the points of one pair and why. Records of different kinds score
@@ -395,6 +431,24 @@ func NormPhone(s string) string {
 		d = d[len(d)-10:]
 	}
 	return string(d)
+}
+
+// ValueKey is a value of a property held many times as a question and a
+// merge tell two apart (from-typecase note 117 p. 1): a phone by NormPhone,
+// an address by NormEmail — «+7 495 120-45-00» and «84951204500», «ada@» and
+// «ADA@» are one value —, anything else as written.
+func ValueKey(prop, s string) string {
+	switch prop {
+	case "TEL":
+		if k := NormPhone(s); k != "" {
+			return k
+		}
+	case "EMAIL":
+		if k := NormEmail(s); k != "" {
+			return k
+		}
+	}
+	return strings.TrimSpace(s)
 }
 
 // NormBirthday is the digits of a BDAY: "1990-01-02" and "19900102" meet.

@@ -2,7 +2,9 @@ package dupes
 
 import (
 	"fmt"
+	"slices"
 	"sort"
+	"strings"
 	"time"
 
 	"carrel.dev/carrel/server/internal/model"
@@ -109,6 +111,15 @@ type Plan struct {
 // merged record is a new object with the kept one's path and version, ready
 // to be written with If-Match.
 func Merge(target *model.Object, others []*model.Object, choices map[string]int) (*model.Object, Plan, error) {
+	return MergeKeeping(target, others, choices, nil)
+}
+
+// MergeKeeping is Merge without the values the person unticked (drops): of
+// a property held many times, by property, the values by ValueKey — a
+// phone's number, an address, a tag (from-typecase note 117 p. 1).
+// Such a value is neither taken from another member nor kept from the kept
+// one, and the plan says so (Left).
+func MergeKeeping(target *model.Object, others []*model.Object, choices map[string]int, drops map[string][]string) (*model.Object, Plan, error) {
 	var plan Plan
 	if target == nil {
 		return nil, plan, fmt.Errorf("dupes: no record to keep")
@@ -181,6 +192,22 @@ func Merge(target *model.Object, others []*model.Object, choices map[string]int)
 			continue
 		}
 		have := append([]model.RawValue(nil), mine...)
+		gone := drops[name]
+		if name == "CATEGORIES" {
+			gone = nil // a tag is a part of a value: dropTags
+		}
+		left := func(from int, v model.RawValue) {
+			if !slices.ContainsFunc(plan.Left, func(g Gain) bool { return g.Prop == name && g.Value.Text == v.Text }) {
+				plan.Left = append(plan.Left, Gain{Prop: name, From: from, Value: v})
+			}
+		}
+		for i := len(have) - 1; i >= 0; i-- {
+			if slices.Contains(gone, ValueKey(name, have[i].Text)) {
+				ops = append(ops, model.RemoveValue{Prop: name, Index: i})
+				left(0, have[i])
+				have = slices.Delete(have, i, i+1)
+			}
+		}
 		holders := 0
 		for _, m := range members {
 			if len(m[name]) > 0 {
@@ -192,6 +219,10 @@ func Merge(target *model.Object, others []*model.Object, choices map[string]int)
 		}
 		for from, m := range members[1:] {
 			for _, v := range m[name] {
+				if slices.Contains(gone, ValueKey(name, v.Text)) {
+					left(from+1, v)
+					continue
+				}
 				if hasValue(have, v) {
 					continue
 				}
@@ -203,6 +234,7 @@ func Merge(target *model.Object, others []*model.Object, choices map[string]int)
 		}
 	}
 
+	ops = append(ops, dropTags(members, drops["CATEGORIES"], &plan)...)
 	merged := clone(target)
 	if len(ops) > 0 {
 		patch, err := model.NewPatch(ops...)
@@ -338,4 +370,39 @@ func hasAlarm(have []cal.Alarm, a cal.Alarm) bool {
 		}
 	}
 	return false
+}
+
+// dropTags are the operations that leave the tags unticked out of the
+// merged record: a tag is one of the comma-separated parts of CATEGORIES, so
+// the property is written anew, one tag a value, when any is dropped.
+func dropTags(members []map[string][]model.RawValue, gone []string, plan *Plan) []model.PatchOp {
+	if len(gone) == 0 {
+		return nil
+	}
+	var kept []string
+	dropped := false
+	for from, m := range members {
+		for _, v := range m["CATEGORIES"] {
+			for _, tag := range strings.Split(v.Text, ",") {
+				tag = strings.TrimSpace(tag)
+				switch {
+				case tag == "" || slices.Contains(kept, tag):
+				case slices.Contains(gone, tag):
+					dropped = true
+					if !slices.ContainsFunc(plan.Left, func(g Gain) bool { return g.Prop == "CATEGORIES" && g.Value.Text == tag }) {
+						plan.Left = append(plan.Left, Gain{Prop: "CATEGORIES", From: from, Value: model.RawValue{Text: tag}})
+					}
+				default:
+					kept = append(kept, tag)
+				}
+			}
+		}
+	}
+	if !dropped {
+		return nil
+	}
+	if len(kept) == 0 {
+		return []model.PatchOp{model.RemoveProp{Prop: "CATEGORIES"}}
+	}
+	return []model.PatchOp{model.SetValues{Prop: "CATEGORIES", Values: kept}}
 }

@@ -840,37 +840,35 @@ func linkMockupDuplicates(t *testing.T, h *harness, sess *session.Session) {
 	t.Helper()
 	key, _ := sess.DataKey()
 	blob, _ := h.users.Catalog(sess.AccountID(), key)
-	// members are the records of the set whose UIDs are these, in this
-	// order: the folded row is the group's first member (S-16), and the
-	// order of the catalog is not a decision.
-	members := func(who string, uids ...string) []sealed.RecordRef {
+	// members are the records of the set in these books under these UIDs
+	// («komanda/4f2b-9c31-a0e7»), in this order: the folded row is the
+	// group's first member (S-16), and the order of the catalog is not a
+	// decision. Анна's copies share her UID, as «Copy» writes them.
+	members := func(who string, at ...string) []sealed.RecordRef {
 		var out []sealed.RecordRef
-		for _, uid := range uids {
+		for _, one := range at {
+			slug, uid, _ := strings.Cut(one, "/")
 			for _, c := range blob.Collections {
-				slug := collectionSlugOf(c.Path)
-				if slug != "kontakty" && slug != "komanda" && slug != "arhiv" {
-					continue
-				}
-				if slices.Contains(mockupUIDs(t, slug), uid) {
+				if collectionSlugOf(c.Path) == slug && slices.Contains(mockupUIDs(t, slug), uid) {
 					out = append(out, sealed.RecordRef{AccountID: c.AccountID, Col: c.Path, UID: uid})
 				}
 			}
 		}
-		if len(out) != len(uids) {
+		if len(out) != len(at) {
 			t.Fatalf("%s is not where the set puts them: %+v", who, out)
 		}
 		return out
 	}
 	groups := []sealed.LinkedGroup{
 		// The frames show the «Команда» copy of Артём — its photo, its stamp.
-		{ID: "g-artem", Kind: view.KindContact, Members: members("Артём Белов", "d41a-6f30-92be", "c3f7-8a21-1b09")},
+		{ID: "g-artem", Kind: view.KindContact, Members: members("Артём Белов", "komanda/d41a-6f30-92be", "kontakty/c3f7-8a21-1b09")},
 		{ID: "g-anna", Kind: view.KindContact,
-			Members: members("Анна Ковалёва", "4f2b-9c31-a0e7", "b3d0-7e19-5a62", "2e85-c4a7-0f3b"),
-			Dropped: map[string][]string{"TEL": {"+7 495 120-45-00"}}},
+			Members: members("Анна Ковалёва", "kontakty/4f2b-9c31-a0e7", "komanda/4f2b-9c31-a0e7", "arhiv/4f2b-9c31-a0e7"),
+			Dropped: map[string][]string{"TEL": {dupes.ValueKey("TEL", "+7 495 120-45-00")}}},
 	}
 	// Анна and Алексей Смирнов share the work phone of the publisher: 60
 	// points, and «not duplicates» — the decision s-dup-1 and s-dup-6 draw.
-	pair := append(members("Анна Ковалёва", "4f2b-9c31-a0e7"), members("Алексей Смирнов", "9a1c-03de-77f2")...)
+	pair := members("Анна Ковалёва and Алексей Смирнов", "kontakty/4f2b-9c31-a0e7", "kontakty/9a1c-03de-77f2")
 	err := h.users.EditDuplicates(sess.AccountID(), key, "duplicates.link", "", func(d *sealed.Duplicates) error {
 		d.Linked = append(d.Linked, groups...)
 		d.Ignored = append(d.Ignored, sealed.IgnoredGroup{ID: dupes.Signature(view.KindContact, pair), Kind: view.KindContact, Members: pair})

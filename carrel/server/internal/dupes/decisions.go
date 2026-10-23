@@ -1,6 +1,8 @@
 package dupes
 
 import (
+	"slices"
+
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/view"
 )
@@ -50,7 +52,8 @@ func Prune(linked []sealed.LinkedGroup, present map[CollectionRef]map[string]boo
 // Link joins refs into one linked group. Linked groups that share a member
 // with refs are absorbed into it, answers and all: a record is one entity
 // with one set of others, never in two groups at once. An answer given with
-// g wins over one the absorbed groups held.
+// g wins over one the absorbed groups held — a property's dropped values
+// too, as one answer.
 func Link(linked []sealed.LinkedGroup, g sealed.LinkedGroup) []sealed.LinkedGroup {
 	members := append([]sealed.RecordRef(nil), g.Members...)
 	in := map[sealed.RecordRef]bool{}
@@ -58,6 +61,7 @@ func Link(linked []sealed.LinkedGroup, g sealed.LinkedGroup) []sealed.LinkedGrou
 		in[m] = true
 	}
 	prefs := map[string]sealed.RecordRef{}
+	dropped := map[string][]string{}
 	var out []sealed.LinkedGroup
 	for _, have := range linked {
 		overlap := false
@@ -80,13 +84,26 @@ func Link(linked []sealed.LinkedGroup, g sealed.LinkedGroup) []sealed.LinkedGrou
 		for prop, ref := range have.Prefs {
 			prefs[prop] = ref
 		}
+		for prop, keys := range have.Dropped {
+			for _, k := range keys {
+				if !slices.Contains(dropped[prop], k) {
+					dropped[prop] = append(dropped[prop], k)
+				}
+			}
+		}
 	}
 	for prop, ref := range g.Prefs {
 		prefs[prop] = ref // the answer given now wins over an older one
 	}
-	g.Prefs = nil
+	for prop, keys := range g.Dropped {
+		dropped[prop] = keys
+	}
+	g.Prefs, g.Dropped = nil, nil
 	if len(prefs) > 0 {
 		g.Prefs = prefs
+	}
+	if len(dropped) > 0 {
+		g.Dropped = dropped
 	}
 	g.Members = members
 	g.ID = Signature(g.Kind, members)

@@ -52,11 +52,50 @@ func (s *Server) copiesSheet(ctx context.Context, c *collectionCtx, uid string, 
 	}
 	n := len(lc.others) + 1
 	sheet := view.CopiesSheet{Kind: c.spec.kind, Subject: text(recordTitle(c.spec.kind, obj) + " · " + strconv.Itoa(n) + " copies")}
-	// Each copy says what it holds otherwise and, after «·», what it holds
-	// of the first such thing (s-contacts-32: «Email differ ·
-	// v.lebedeva@example.org»; s-tasks-16: «Due differ · due 13 Aug»); the
-	// copy opened, what it holds of the first thing another holds otherwise —
-	// on Edit after «the copy you opened».
+	self := view.Option{Value: copyValue(lc.self), Label: text(string(c.stamp())), Colour: catalogColour(c.col), Selected: true, Meta: "the copy you opened"}
+	row := view.FormRow{Name: copyField, Label: "Copy", Kind: view.InputRadio}
+	if !done {
+		// Which copy to edit names what each copy holds otherwise than the
+		// linked record shows (from-typecase note 117 p. 4, s-contacts-32:
+		// «the copy you opened · Phone differs», «Phone, email differ»), a
+		// copy that cannot be chosen last, with why.
+		lr, _ := linkedRecordFrom(c, lc, obj)
+		shown := func(q question) []recValue { return q.shownValues() }
+		if d := differing(lr.qs, shown, lr.valuesAt(lc.self)); d != "" {
+			self.Meta = text("the copy you opened · " + d)
+		}
+		row.Options = []view.Option{self}
+		var readOnly []view.Option
+		for _, m := range lc.others {
+			opt := view.Option{Value: copyValue(m.ref), Label: text(string(m.c.stamp())), Colour: catalogColour(m.c.col)}
+			switch d := differing(lr.qs, shown, lr.valuesAt(m.ref)); {
+			case m.obj == nil:
+				opt.Meta, opt.Disabled = "The server did not answer; the record stays linked", true
+			case d != "":
+				opt.Meta = text(d)
+			default:
+				opt.Meta = "Holds the same"
+			}
+			if m.obj != nil && (m.c.col.ReadOnly || m.c.feed != nil) {
+				opt.Disabled, opt.Reason = true, "read-only: it cannot be edited"
+				readOnly = append(readOnly, opt)
+				continue
+			}
+			row.Options = append(row.Options, opt)
+		}
+		row.Options = append(row.Options, readOnly...)
+		sheet.Title = "Which copy to edit?"
+		sheet.Note = "Saving changes one copy only; the others stay as they are."
+		sheet.Form = view.Form{Action: s.route(c.recordPath(uid) + "/edit"), Method: "GET", Sets: []view.FieldSet{{Rows: []view.FormRow{row}}}}
+		sheet.Actions = []view.Action{
+			{ID: "copies.edit", Label: "Edit this copy", Method: "GET", Primary: true, Enabled: true, Submits: true},
+			{ID: "copies.cancel", Label: "Cancel", Href: s.route(c.recordPath(uid)), Method: "GET", Enabled: true},
+		}
+		return sheet, true
+	}
+	// Which copy to mark done names what each holds otherwise than the copy
+	// ticked, and what it holds of the first such thing (s-tasks-16: «Due
+	// differ · due 13 Aug»).
 	differ := differs(differTable(c.spec.kind))
 	opened := ""
 	for _, m := range lc.others {
@@ -65,17 +104,10 @@ func (s *Server) copiesSheet(ctx context.Context, c *collectionCtx, uid string, 
 			break
 		}
 	}
-	self := view.Option{Value: copyValue(lc.self), Label: text(string(c.stamp())), Colour: catalogColour(c.col), Selected: true, Meta: "the copy you opened"}
-	row := view.FormRow{Name: copyField, Label: "Copy", Kind: view.InputRadio}
-	why := "read-only: it cannot be edited"
-	switch {
-	case done:
-		row.Kind, why = view.InputCheck, "read-only: it cannot be marked done"
-		if opened != "" {
-			self.Meta = text(opened)
-		}
-	case opened != "":
-		self.Meta = text("the copy you opened · " + opened)
+	row.Kind = view.InputCheck
+	why := "read-only: it cannot be marked done"
+	if opened != "" {
+		self.Meta = text(opened)
 	}
 	row.Options = []view.Option{self}
 	for _, m := range lc.others {
@@ -99,29 +131,19 @@ func (s *Server) copiesSheet(ctx context.Context, c *collectionCtx, uid string, 
 		}
 		row.Options = append(row.Options, opt)
 	}
-	if done {
-		sheet.Title = "Which copy to mark done?"
-		// One sentence, as the owner shortened it (Typecase's note 73): how
-		// many copies there are, the head already says.
-		sheet.Note = "A copy that is not ticked stays as it is."
-		sheet.Form = view.Form{Action: s.route(c.recordPath(uid) + "/done"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
-			csrfField(c.sess), {Name: "from", Kind: view.InputHidden, Value: text(from)},
-			// The sheet's own post, told from the tick's: nothing ticked here
-			// is said, not taken for the tick again (Лс34).
-			{Name: "sheet", Kind: view.InputHidden, Value: "1"}, row,
-		}}}}
-		sheet.Actions = []view.Action{
-			{ID: "copies.done", Label: "Mark done", Method: "POST", Primary: true, Enabled: true, Submits: true},
-			{ID: "copies.cancel", Label: "Cancel", Href: s.route(doneBack(c, uid, from)), Method: "GET", Enabled: true},
-		}
-		return sheet, true
-	}
-	sheet.Title = "Which copy to edit?"
-	sheet.Note = "Saving changes one copy only; the others stay as they are."
-	sheet.Form = view.Form{Action: s.route(c.recordPath(uid) + "/edit"), Method: "GET", Sets: []view.FieldSet{{Rows: []view.FormRow{row}}}}
+	sheet.Title = "Which copy to mark done?"
+	// One sentence, as the owner shortened it (Typecase's note 73): how
+	// many copies there are, the head already says.
+	sheet.Note = "A copy that is not ticked stays as it is."
+	sheet.Form = view.Form{Action: s.route(c.recordPath(uid) + "/done"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
+		csrfField(c.sess), {Name: "from", Kind: view.InputHidden, Value: text(from)},
+		// The sheet's own post, told from the tick's: nothing ticked here
+		// is said, not taken for the tick again (Лс34).
+		{Name: "sheet", Kind: view.InputHidden, Value: "1"}, row,
+	}}}}
 	sheet.Actions = []view.Action{
-		{ID: "copies.edit", Label: "Edit this copy", Method: "GET", Primary: true, Enabled: true, Submits: true},
-		{ID: "copies.cancel", Label: "Cancel", Href: s.route(c.recordPath(uid)), Method: "GET", Enabled: true},
+		{ID: "copies.done", Label: "Mark done", Method: "POST", Primary: true, Enabled: true, Submits: true},
+		{ID: "copies.cancel", Label: "Cancel", Href: s.route(doneBack(c, uid, from)), Method: "GET", Enabled: true},
 	}
 	return sheet, true
 }

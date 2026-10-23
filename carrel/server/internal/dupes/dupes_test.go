@@ -3,6 +3,7 @@ package dupes
 import (
 	"bytes"
 	"fmt"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -101,7 +102,7 @@ func TestScoresAndThreshold(t *testing.T) {
 		if score != c.score || !cmp.Equal(reasons, c.reasons) {
 			t.Errorf("%s: %d %v, want %d %v", c.name, score, reasons, c.score, c.reasons)
 		}
-		groups := Find([]Record{a, b}, std, 60)
+		groups := Find([]Record{a, b}, std, 60, nil)
 		if (len(groups) == 1) != c.group {
 			t.Errorf("%s: groups = %+v", c.name, groups)
 		}
@@ -124,7 +125,7 @@ func TestFindEveryKind(t *testing.T) {
 		rec("s2", "/diary/", "n2", view.KindNote, ics(t, "VJOURNAL", "UID:n2", "SUMMARY:Что почитать про CRDT", "DTSTART;VALUE=DATE:20260808", "DESCRIPTION:another body")),
 		rec("s2", "/diary/", "p1", view.KindNote, ics(t, "VJOURNAL", "UID:p1", "SUMMARY:x")),
 	}
-	groups := Find(recs, std, 60)
+	groups := Find(recs, std, 60, nil)
 	var got []string
 	for _, g := range groups {
 		var uids []string
@@ -149,7 +150,7 @@ func TestGroupsJoinAndCountOnce(t *testing.T) {
 	a := rec("s", "/a/", "1", view.KindContact, vcard(t, "UID:1", "FN:Ada", "EMAIL:a@x.org"))
 	b := rec("s", "/b/", "2", view.KindContact, vcard(t, "UID:2", "FN:Ada", "EMAIL:a@x.org", "TEL:+44 20 7946 0000"))
 	c := rec("s", "/c/", "3", view.KindContact, vcard(t, "UID:3", "FN:Ada", "TEL:020 7946 0000"))
-	groups := Find([]Record{a, b, c, b}, std, 60)
+	groups := Find([]Record{a, b, c, b}, std, 60, nil)
 	if len(groups) != 1 || len(groups[0].Members) != 3 || groups[0].Score != 80 {
 		t.Fatalf("groups = %+v", groups)
 	}
@@ -170,7 +171,7 @@ func TestFindDoesNotCompareEveryPair(t *testing.T) {
 		})
 	}
 	start := time.Now()
-	if g := Find(recs, std, 60); len(g) != 0 {
+	if g := Find(recs, std, 60, nil); len(g) != 0 {
 		t.Fatalf("strangers grouped: %d", len(g))
 	}
 	if d := time.Since(start); d > 5*time.Second {
@@ -183,16 +184,16 @@ func TestFindDoesNotCompareEveryPair(t *testing.T) {
 func TestWeightsDecide(t *testing.T) {
 	a := rec("s", "/a/", "1", view.KindContact, vcard(t, "UID:1", "FN:Ada Lovelace", "EMAIL:office@x.org", "BDAY:1815-12-10"))
 	b := rec("s", "/b/", "2", view.KindContact, vcard(t, "UID:2", "FN:Lovelace Ada", "EMAIL:office@x.org", "BDAY:18151210"))
-	if g := Find([]Record{a, b}, std, 60); len(g) != 1 || g[0].Score != 90 {
+	if g := Find([]Record{a, b}, std, 60, nil); len(g) != 1 || g[0].Score != 90 {
 		t.Fatalf("defaults: %+v", g)
 	}
 	noEmail := std
 	SetWeight(&noEmail, SameEmail, 0)
-	if g := Find([]Record{a, b}, noEmail, 60); len(g) != 0 {
+	if g := Find([]Record{a, b}, noEmail, 60, nil); len(g) != 0 {
 		t.Errorf("email off, name and birthday 30: %+v", g)
 	}
 	SetWeight(&noEmail, SameName, 50)
-	g := Find([]Record{a, b}, noEmail, 60)
+	g := Find([]Record{a, b}, noEmail, 60, nil)
 	if len(g) != 1 || !cmp.Equal(g[0].Reasons, []Reason{SameName, SameBirthday}) || Weight(noEmail, SameName) != 50 {
 		t.Errorf("heavier name: %+v", g)
 	}
@@ -340,5 +341,68 @@ func TestMergeLeavesOutWhatWasChosenEmpty(t *testing.T) {
 	}
 	if kept.PropText("ORG")[0] != "Библиотека №4" {
 		t.Error("the kept input changed")
+	}
+}
+
+// A pair marked «not duplicates» does not join two matters (s-dup-1): Анна
+// in three books stays her group, and Алексей Смирнов, who shares her work
+// phone, is not drawn into it; Assess still scores the pair for its card.
+func TestFindKeepsAnIgnoredPairApart(t *testing.T) {
+	ref := func(col, uid string) sealed.RecordRef { return sealed.RecordRef{AccountID: "s", Col: col, UID: uid} }
+	anna := func(col, uid string, phones ...string) Record {
+		return Record{Ref: ref(col, uid), Kind: view.KindContact,
+			Keys: Keys{Emails: []string{"a@x.org"}, Phones: phones, Name: "анна ковалёва"}}
+	}
+	recs := []Record{
+		anna("/home/", "a1", "79124451088", "74951204500"),
+		anna("/team/", "a2", "79124451088"),
+		anna("/old/", "a3", "79124451088"),
+		{Ref: ref("/home/", "s1"), Kind: view.KindContact, Keys: Keys{Phones: []string{"74951204500"}, Name: "алексей смирнов"}},
+	}
+	pair := []sealed.RecordRef{ref("/home/", "a1"), ref("/home/", "s1")}
+	if g := Find(recs, std, 60, nil); len(g) != 1 || len(g[0].Members) != 4 {
+		t.Fatalf("without the decision = %+v, want one group of four", g)
+	}
+	g := Find(recs, std, 60, [][]sealed.RecordRef{pair})
+	if len(g) != 1 || len(g[0].Members) != 3 {
+		t.Fatalf("with the pair apart = %+v, want Анна's three alone", g)
+	}
+	score, why := Assess([]Record{recs[0], recs[3]}, std)
+	if score != std.Phone || !slices.Equal(why, []Reason{SamePhone}) {
+		t.Errorf("the pair = %d %v, want the phone's points", score, why)
+	}
+}
+
+// From-typecase note 117 p. 1: a value unticked on the group's card is not
+// in the merged record — neither the kept one's nor another's —, a tag is
+// taken out of its comma-separated value, and the plan names what was left.
+func TestMergeKeepingLeavesTheUnticked(t *testing.T) {
+	kept := vcard(t, "UID:a", "FN:Анна Ковалёва", "TEL;TYPE=WORK:+7 495 120-45-00", "TEL;TYPE=CELL:+7 912 445-10-88",
+		"CATEGORIES:работа,издательство")
+	other := vcard(t, "UID:a", "FN:Анна Ковалёва", "TEL;TYPE=WORK:+7 495 120-45-77", "EMAIL:old@example.org", "CATEGORIES:работа")
+	merged, plan, err := MergeKeeping(kept, []*model.Object{other}, nil, map[string][]string{
+		"TEL": {ValueKey("TEL", "+7 495 120-45-00")}, "EMAIL": {"old@example.org"}, "CATEGORIES": {"издательство"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := encodeCard(t, merged)
+	for _, want := range []string{"TEL;TYPE=WORK:+7 495 120-45-77", "TEL;TYPE=CELL:+7 912 445-10-88", "CATEGORIES:работа"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q in\n%s", want, got)
+		}
+	}
+	for _, gone := range []string{"120-45-00", "old@example.org", "издательство"} {
+		if strings.Contains(got, gone) {
+			t.Errorf("%q unticked, still in\n%s", gone, got)
+		}
+	}
+	var left []string
+	for _, l := range plan.Left {
+		left = append(left, l.Prop+"="+l.Value.Text)
+	}
+	slices.Sort(left)
+	if want := []string{"CATEGORIES=издательство", "EMAIL=old@example.org", "TEL=+7 495 120-45-00"}; !slices.Equal(left, want) {
+		t.Errorf("left = %v, want %v", left, want)
 	}
 }

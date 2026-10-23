@@ -3,7 +3,6 @@ package web_test
 import (
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -102,10 +101,10 @@ func TestAnEmptyValueIsAChoice(t *testing.T) {
 		t.Fatalf("no question about the organisation: %+v", g.Choices)
 	}
 	empty := optionIndex(t, *org, "")
-	if org.Chosen == empty || org.Options[org.Chosen] != "Analytical Engines" {
+	if org.Chosen == empty || !strings.HasPrefix(string(org.Options[org.Chosen]), "Analytical Engines · ") {
 		t.Errorf("chosen beforehand %d of %q, want the value", org.Chosen, org.Options)
 	}
-	p := openMerge(t, f.h, f.sess, actionOf(t, g, "duplicates.merge"), url.Values{"choice.ORG": {strconv.Itoa(empty)}})
+	p := openMerge(t, f.h, f.sess, actionOf(t, g, "duplicates.merge"), url.Values{"choice.ORG": {org.Values[empty]}})
 	confirm := mergeAction(t, p, "duplicates.merge.confirm")
 	if rec := f.h.do(postForm(confirm.Href, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("merge: %d %s", rec.Code, rec.Body.String())

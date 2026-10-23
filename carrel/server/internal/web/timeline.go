@@ -593,7 +593,8 @@ func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.
 	// in the panel (s-contacts-7, S-16).
 	if lc, ok := s.linkedOf(ctx, c, person.uid); ok {
 		page.Linked = &view.Badge{Label: text(fmt.Sprintf("in %d books", len(lc.others)+1)), Role: view.BadgeLinked}
-		page.Card.Books = s.memberRows(lc, obj, differs(contactDiffers))
+		lr, _ := linkedRecordFrom(c, lc, obj)
+		page.Card.Books = s.memberRows(lc, lr)
 	}
 	here := timelineHere(card, from, last, tf.now, tf.tz)
 	// The range stays on the strip (s-contacts-7, s-contacts-14): the two

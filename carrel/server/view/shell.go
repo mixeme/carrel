@@ -244,6 +244,16 @@ type Field struct {
 	// события из другого пояса (подсказка «Created in another time zone» —
 	// слово экрана), «until 2026-12-28» у Repeats (s-agenda-1, -2)
 	Badge Badge `json:"badge,omitzero"`
+	// From — у значения связанной записи, где был выбор, — коллекция, откуда
+	// оно взято: метка и имя после значения («Команда», s-contacts-33;
+	// записка Typecase 117 п. 5). nil — выбирать было не из чего
+	From *FieldFrom `json:"from,omitempty"`
+}
+
+// FieldFrom — коллекция, откуда взято значение связанной записи.
+type FieldFrom struct {
+	Name   Text   `json:"name"`
+	Colour Colour `json:"colour"`
 }
 
 // Print — колонтитул распечатки, C-10.

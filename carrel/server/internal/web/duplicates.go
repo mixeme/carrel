@@ -1,8 +1,6 @@
 package web
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -45,6 +43,7 @@ type dupState struct {
 	records   map[sealed.RecordRef]loadedRecord
 	compared  int
 	threshold int
+	weights   dupes.Weights
 	found     []dupes.Group
 	// apart is how many linked groups this read found come apart, their
 	// other members gone (Б16): the screen says so.
@@ -162,7 +161,12 @@ func (s *Server) readDuplicates(sess *session.Session, prune bool) dupState {
 		recs = append(recs, l.rec)
 	}
 	st.compared = len(recs)
-	st.found = dupes.Find(recs, s.dupWeights(blob), st.threshold)
+	var notDupes [][]sealed.RecordRef
+	for _, ig := range blob.Duplicates.Ignored {
+		notDupes = append(notDupes, ig.Members)
+	}
+	st.weights = s.dupWeights(blob)
+	st.found = dupes.Find(recs, st.weights, st.threshold, notDupes)
 	return st
 }
 
@@ -220,12 +224,25 @@ func (st dupState) groups() []dupGroup {
 		}
 		linked = append(linked, dg)
 	}
-	// A «not duplicates» whose records are not loaded is still the person's
-	// decision, named and taken back from here (s-dup-6).
+	// A «not duplicates» is the person's decision whether or not its
+	// records are loaded: scored when they are (s-dup-1, «60 points · same
+	// phone»), named and taken back from here when not (s-dup-6). Find keeps
+	// its members apart, so it is never found as a group itself.
 	for _, ig := range st.blob.Duplicates.Ignored {
-		if !slices.ContainsFunc(ignored, func(g dupGroup) bool { return g.id == ig.ID }) {
-			ignored = append(ignored, dupGroup{id: ig.ID, kind: ig.Kind, refs: ig.Members, decision: view.DecisionIgnored})
+		if slices.ContainsFunc(ignored, func(g dupGroup) bool { return g.id == ig.ID }) {
+			continue
 		}
+		dg := dupGroup{id: ig.ID, kind: ig.Kind, refs: ig.Members, decision: view.DecisionIgnored}
+		var recs []dupes.Record
+		for _, ref := range ig.Members {
+			if l, ok := st.records[ref]; ok {
+				recs = append(recs, l.rec)
+			}
+		}
+		if len(recs) == len(ig.Members) {
+			dg.score, dg.reasons = dupes.Assess(recs, st.weights)
+		}
+		ignored = append(ignored, dg)
 	}
 	out := append(append(todo, linked...), ignored...)
 	for i := range out {
@@ -378,15 +395,8 @@ func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.
 	if reason := mergeBlock(st.blob, g.refs); reason != "" {
 		merge.Enabled, merge.Reason = false, text(reason)
 	}
-	cs := st.choices(g)
-	prefs := st.linkedPrefs(g.id)
-	for _, c := range cs {
-		row := view.MergeRow{Property: text(choiceLabel(c.prop)), Name: "choice." + c.prop, Chosen: chosen(c, prefs)}
-		for _, o := range c.opts {
-			row.Options = append(row.Options, text(o.label))
-		}
-		out.Choices = append(out.Choices, row)
-	}
+	cs := st.questions(g)
+	out.Choices = mergeRowsOf(cs)
 	switch g.decision {
 	case view.DecisionLinked:
 		out.Actions = []view.Action{s.decideAction("duplicates.unlink", "Unlink", g.id, "unlink"), merge}
@@ -753,25 +763,33 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 		// The card's answers go to the merge as the members they chose
 		// (pick.<PROP>=the member's place in the group): the merge's own
 		// questions are numbered otherwise (Дб9).
+		// A value unticked goes as drop.<PROP>=the value: it is not
+		// carried into the merged record.
+		prefs, dropped := answersOf(r, st.questions(g))
 		q := url.Values{"group": {g.id}}
-		for prop, ref := range answers(r, st.choices(g)) {
+		for prop, ref := range prefs {
 			for place, m := range g.refs {
 				if m == ref {
 					q.Set("pick."+prop, strconv.Itoa(place))
 				}
 			}
 		}
+		for prop, keys := range dropped {
+			for _, k := range keys {
+				q.Add("drop."+prop, k)
+			}
+		}
 		s.redirect(w, r, "/app/duplicates/merge?"+q.Encode())
 		return
 	case do == "link" && g.decision != view.DecisionLinked:
-		prefs := answers(r, st.choices(g))
+		prefs, dropped := answersOf(r, st.questions(g))
 		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.link", string(g.kind), func(d *sealed.Duplicates) error {
-			d.Linked = dupes.Link(d.Linked, sealed.LinkedGroup{Kind: g.kind, Members: g.refs, Prefs: prefs})
+			d.Linked = dupes.Link(d.Linked, sealed.LinkedGroup{Kind: g.kind, Members: g.refs, Prefs: prefs, Dropped: keptDrops(dropped)})
 			d.Ignored = d.Unignored(g.id)
 			return nil
 		})
 	case do == "choose" && g.decision == view.DecisionLinked:
-		prefs := answers(r, st.choices(g))
+		prefs, dropped := answersOf(r, st.questions(g))
 		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.choose", string(g.kind), func(d *sealed.Duplicates) error {
 			for i := range d.Linked {
 				if d.Linked[i].ID != g.id {
@@ -783,6 +801,15 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 				for prop, ref := range prefs {
 					d.Linked[i].Prefs[prop] = ref
 				}
+				// What was asked is answered anew: a value ticked again is
+				// no longer dropped.
+				for prop, keys := range dropped {
+					if d.Linked[i].Dropped == nil {
+						d.Linked[i].Dropped = map[string][]string{}
+					}
+					d.Linked[i].Dropped[prop] = keys
+				}
+				d.Linked[i].Dropped = keptDrops(d.Linked[i].Dropped)
 			}
 			return nil
 		})
@@ -976,118 +1003,53 @@ func linkedState(it listed) view.RecordState {
 	return view.RecordOK
 }
 
-// choiceProps are the single-valued properties a row of the kind shows —
-// the ones asked about when linked members disagree (S-16).
-var choiceProps = map[view.Kind][]string{
-	view.KindContact: {"FN", "ORG", "PHOTO"},
-	view.KindEvent:   {"SUMMARY", "LOCATION"},
-	// A task holds a place as an event does, and is asked about it the same
-	// way (Р21 of scans/kinds-parity.md).
-	view.KindTask: {"SUMMARY", "LOCATION"},
-	view.KindNote: {"SUMMARY"},
+// questions are the questions of g among its loaded members, answered as
+// its linked group was (S-16).
+func (st dupState) questions(g dupGroup) []question {
+	l := st.linked(g.id)
+	return questionsOf(g.kind, st.groupMembers(g.refs), l.Prefs, l.Dropped)
 }
 
-// choiceFields are the values of choiceProps as the record holds them; a
-// photo is a digest, enough to tell two apart.
-func choiceFields(k view.Kind, o *model.Object) map[string]string {
-	out := map[string]string{}
-	for _, prop := range choiceProps[k] {
-		vals := o.PropText(prop)
-		if len(vals) == 0 || strings.TrimSpace(vals[0]) == "" {
-			continue
+// groupMembers are the members as the questions see them: where each lives
+// and, when its list is loaded, its values.
+func (st dupState) groupMembers(refs []sealed.RecordRef) []groupMember {
+	out := make([]groupMember, 0, len(refs))
+	for _, ref := range refs {
+		conn, _ := st.blob.Connection(ref.AccountID)
+		col, ok := st.blob.Collection(ref.AccountID, ref.Col)
+		if !ok {
+			col = sealed.Collection{AccountID: ref.AccountID, Path: ref.Col}
 		}
-		v := vals[0]
-		if prop == "PHOTO" {
-			sum := sha256.Sum256([]byte(v))
-			v = hex.EncodeToString(sum[:8])
-		} else if k != view.KindContact {
-			v = calUnescape.Replace(v)
+		m := groupMember{ref: ref, col: collectionLabel(col), colour: catalogColour(col), stamp: origin{conn: conn, col: col}.stamp()}
+		if l, ok := st.records[ref]; ok {
+			m.values, m.loaded = l.entry.Values, true
 		}
-		out[prop] = v
+		out = append(out, m)
 	}
 	return out
 }
 
-// choice is one disagreement of a group: the property and, per distinct
-// value, the first member that holds it.
-type choice struct {
-	prop string
-	opts []choiceOption
-}
-
-type choiceOption struct {
-	label string
-	ref   sealed.RecordRef
-	// none: the member holds no value — choosing it leaves the property
-	// out (dupes.Leave)
-	none bool
-}
-
-// choices are the single-valued properties the loaded members of g hold
-// differently. A member whose list is not loaded has nothing to offer; one
-// that holds no value offers «none» (Дб7, s-dup-1: Вера's «Organisation» —
-// «—» or «Библиотека №4»), its label empty — the screen's dash —, a
-// photo's its source.
-func (st dupState) choices(g dupGroup) []choice {
-	var out []choice
-	for _, prop := range choiceProps[g.kind] {
-		c := choice{prop: prop}
-		seen := map[string]bool{}
-		held := false
-		for _, ref := range g.refs {
-			l, ok := st.records[ref]
-			if !ok {
-				continue
-			}
-			v, has := l.entry.Fields[prop]
-			held = held || has
-			if seen[v] {
-				continue
-			}
-			seen[v] = true
-			label := v
-			if prop == "PHOTO" {
-				// A photo is told by where its record lives, the source
-				// whole (s-dup-1, «nextcloud · Архив», «radicale · vps ·
-				// Команда»; Дб8).
-				label = string(l.from.stamp())
-			}
-			c.opts = append(c.opts, choiceOption{label: label, ref: ref, none: !has})
-		}
-		if held && len(c.opts) > 1 {
-			out = append(out, c)
+// linked is the person's linked group of this ID; empty when there is none.
+func (st dupState) linked(id string) sealed.LinkedGroup {
+	for _, l := range st.blob.Duplicates.Linked {
+		if l.ID == id {
+			return l
 		}
 	}
-	return out
+	return sealed.LinkedGroup{}
 }
 
-// chosen is the option the linked group's answer names, else the first
-// that holds a value: nothing is left out unless the person says so.
-func chosen(c choice, prefs map[string]sealed.RecordRef) int {
-	if ref, ok := prefs[c.prop]; ok {
-		for i, o := range c.opts {
-			if o.ref == ref {
-				return i
-			}
+// keptDrops are the dropped values worth keeping: a property nothing of
+// which is dropped is left out.
+func keptDrops(d map[string][]string) map[string][]string {
+	out := map[string][]string{}
+	for prop, keys := range d {
+		if len(keys) > 0 {
+			out[prop] = keys
 		}
 	}
-	for i, o := range c.opts {
-		if !o.none {
-			return i
-		}
-	}
-	return 0
-}
-
-// answers read choice.<PROP>= of the request against the group's choices.
-func answers(r *http.Request, cs []choice) map[string]sealed.RecordRef {
-	out := map[string]sealed.RecordRef{}
-	for _, c := range cs {
-		n, err := strconv.Atoi(r.FormValue("choice." + c.prop))
-		if err != nil || n < 0 || n >= len(c.opts) {
-			continue
-		}
-		out[c.prop] = c.opts[n].ref
+	if len(out) == 0 {
+		return nil
 	}
 	return out
 }

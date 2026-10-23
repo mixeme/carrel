@@ -161,8 +161,8 @@ func TestGroupChoiceWithoutScripts(t *testing.T) {
 	if !link.Submits || actionOf(t, g, "duplicates.ignore").Submits != true || !actionOf(t, g, "duplicates.merge").Submits {
 		t.Fatalf("the decisions are not the form's buttons: %+v", g.Actions)
 	}
-	pick := optionIndex(t, g.Choices[0], "LOVELACE Ada")
-	rec := f.h.do(postForm(link.Href, f.sess, browserForm(*g.Form, map[string]string{g.Choices[0].Name: strconv.Itoa(pick)})))
+	pick := choiceValue(t, g.Choices[0], "LOVELACE Ada")
+	rec := f.h.do(postForm(link.Href, f.sess, browserForm(*g.Form, map[string]string{g.Choices[0].Name: pick})))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("link: %d %s", rec.Code, rec.Body.String())
 	}

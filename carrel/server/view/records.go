@@ -111,8 +111,12 @@ type PhotoPreviewPage struct {
 // EventPage — чтение: то, что открывается по ссылке и печатается.
 type EventPage struct {
 	Shell
-	UID        string          `json:"uid"`
-	Summary    Text            `json:"summary"` // заголовок записи; документа — Shell.Title
+	UID     string `json:"uid"`
+	Summary Text   `json:"summary"` // заголовок записи; документа — Shell.Title
+	// Subtitle — у связанного события, открытого из объединённого вида: где
+	// оно, «Combined calendar · in 3 calendars» (s-agenda-25); пусто — у
+	// события одного календаря
+	Subtitle   Text            `json:"subtitle,omitempty"`
 	Fields     []Field         `json:"fields"`
 	Body       Text            `json:"body"`
 	Recurrence RecurrenceBlock `json:"recurrence"`
@@ -316,11 +320,15 @@ type TaskEditPage struct {
 
 type NotePage struct {
 	Shell
-	UID    string      `json:"uid"`
-	Doc    NoteDoc     `json:"doc"`
-	Meta   NoteMeta    `json:"meta"`
-	Source SourceBlock `json:"source"`
-	Loss   *LossReport `json:"loss"`
+	UID string `json:"uid"`
+	// Subtitle — у связанной заметки, открытой из объединённого вида: где
+	// она и откуда её текст, «All notebooks · in 2 notebooks · text from
+	// Записи» (s-notes-32); пусто — у заметки одной тетради
+	Subtitle Text        `json:"subtitle,omitempty"`
+	Doc      NoteDoc     `json:"doc"`
+	Meta     NoteMeta    `json:"meta"`
+	Source   SourceBlock `json:"source"`
+	Loss     *LossReport `json:"loss"`
 }
 
 // NoteDoc — фрагмент: чтение или правка.
@@ -357,6 +365,9 @@ type NoteMeta struct {
 	// связанной заметки держит другие теги — здесь мог быть выбор (s-notes-2,
 	// -3, -27; Р-58 Typecase); nil — бейджа нет
 	TagsBadge *Badge `json:"tagsBadge"`
+	// TagsFrom — у связанной заметки: коллекция, откуда взят выбранный тег
+	// (s-notes-32, «Дневник»); nil — выбора не было
+	TagsFrom *FieldFrom `json:"tagsFrom,omitempty"`
 	// Link — ссылка заметки (URL): «Link», значение и Href, как у карточки
 	// события и задачи (Р8 списка равенства родов; кадра нет); nil — нет
 	Link *Field `json:"link"`

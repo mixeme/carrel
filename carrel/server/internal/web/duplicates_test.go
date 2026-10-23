@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -488,15 +487,27 @@ func TestMergeUnavailableWithAReadOnlyMember(t *testing.T) {
 	}
 }
 
+// optionIndex is the option of a question whose value is label: the card
+// says it with the collections that hold it («LOVELACE Ada · Work»), «—»
+// for none (label "").
 func optionIndex(t *testing.T, row view.MergeRow, label string) int {
 	t.Helper()
+	if label == "" {
+		label = "—"
+	}
 	for i, o := range row.Options {
-		if string(o) == label {
+		if string(o) == label || strings.HasPrefix(string(o), label+" · ") {
 			return i
 		}
 	}
 	t.Fatalf("no option %q in %+v", label, row)
 	return -1
+}
+
+// choiceValue is what the option of optionIndex sends.
+func choiceValue(t *testing.T, row view.MergeRow, label string) string {
+	t.Helper()
+	return row.Values[optionIndex(t, row, label)]
 }
 
 // S-16: members that disagree on a single-valued field are asked about once,
@@ -509,12 +520,14 @@ func TestLinkRemembersTheAnswer(t *testing.T) {
 	g := onlyGroup(t, f.page(t))
 	// The organisation only one of them has is a question too (Дб7,
 	// v0.2.283; until then the name was the only one).
-	if len(g.Choices) != 2 || g.Choices[0].Name != "choice.FN" || len(g.Choices[0].Options) != 2 || g.Choices[1].Name != "choice.ORG" {
+	// The radios first, then what to keep of the phones and the addresses
+	// (from-typecase note 117 p. 1).
+	if len(g.Choices) < 2 || g.Choices[0].Name != "choice.FN" || len(g.Choices[0].Options) != 2 || g.Choices[1].Name != "choice.ORG" {
 		t.Fatalf("choices = %+v", g.Choices)
 	}
-	pick := optionIndex(t, g.Choices[0], "LOVELACE Ada")
+	pick := choiceValue(t, g.Choices[0], "LOVELACE Ada")
 	link := actionOf(t, g, "duplicates.link")
-	rec := f.h.do(postForm(link.Href, f.sess, url.Values{"choice.FN": {strconv.Itoa(pick)}}))
+	rec := f.h.do(postForm(link.Href, f.sess, url.Values{"choice.FN": {pick}}))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("link: %d %s", rec.Code, rec.Body.String())
 	}
@@ -549,7 +562,7 @@ func TestLinkRemembersTheAnswer(t *testing.T) {
 		t.Fatal("no linked row")
 	}
 
-	p := openMerge(t, f.h, f.sess, actionOf(t, linked, "duplicates.merge"), url.Values{"choice.FN": {strconv.Itoa(optionIndex(t, linked.Choices[0], "LOVELACE Ada"))}})
+	p := openMerge(t, f.h, f.sess, actionOf(t, linked, "duplicates.merge"), url.Values{"choice.FN": {choiceValue(t, linked.Choices[0], "LOVELACE Ada")}})
 	for _, row := range p.Rows {
 		if row.Name == "choice.FN" && string(row.Options[row.Chosen]) != "LOVELACE Ada" {
 			t.Errorf("merge does not start from the answer: %+v", row)
@@ -571,7 +584,7 @@ func TestMergeTakesTheChoiceOfTheCard(t *testing.T) {
 		t.Fatalf("Merge = %+v, want a button of the card's form", merge)
 	}
 	for _, name := range []string{"LOVELACE Ada", "Ada Lovelace"} {
-		p := openMerge(t, f.h, f.sess, merge, url.Values{"choice.FN": {strconv.Itoa(optionIndex(t, g.Choices[0], name))}})
+		p := openMerge(t, f.h, f.sess, merge, url.Values{"choice.FN": {choiceValue(t, g.Choices[0], name)}})
 		got := ""
 		for _, row := range p.Rows {
 			if row.Name == "choice.FN" {
@@ -587,18 +600,18 @@ func TestMergeTakesTheChoiceOfTheCard(t *testing.T) {
 	}
 }
 
-// S-16, Typecase's Р-58 (from-typecase note 57): the card of a linked record
-// opened from its book is that copy — its own name, head and fields, none
-// of another's —, and a row per other member with what it holds
-// differently. A server that does not answer is said in its row and takes
+// S-16, Typecase's Р-58 (from-typecase notes 57 and 117): the card of a
+// linked record opened from its book is that copy — its own name, head and
+// fields, none of another's, «linked» at a field where a choice is made —,
+// and a row per other member with what it holds differently. A server that does not answer is said in its row and takes
 // nobody out. (Until 14.10.2026 this card was the entity's — the chosen
 // name, the fields of every member —; that card gets an address of its own.)
 func TestLinkedCardIsItsCopy(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
-	pick := optionIndex(t, g.Choices[0], "LOVELACE Ada")
-	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{"choice.FN": {strconv.Itoa(pick)}}))
+	pick := choiceValue(t, g.Choices[0], "LOVELACE Ada")
+	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{"choice.FN": {pick}}))
 
 	card := decode[view.ContactPage](t, f.h.do(get(f.record(f.id, peopleBook, "ada-here"), f.sess)))
 	if card.Name != "Ada Lovelace" {
@@ -607,8 +620,10 @@ func TestLinkedCardIsItsCopy(t *testing.T) {
 	fields := map[string]int{}
 	for _, fl := range card.Fields {
 		fields[string(fl.Label)+" "+string(fl.Value)]++
-		if fl.Badge.Label != "" {
-			t.Errorf("%s has a badge, and no other copy holds it otherwise", fl.Label)
+		// The phone only this copy holds is a choice — to keep it or not —;
+		// the address both hold, whatever its case, is none.
+		if want := fl.Label == "Phone"; (fl.Badge.Label != "") != want {
+			t.Errorf("%s badge %q, want one only at the phone", fl.Label, fl.Badge.Label)
 		}
 	}
 	if card.Subtitle != "" {

@@ -279,20 +279,33 @@ type DuplicatesMergePage struct {
 	Actions  []Action `json:"actions"`
 }
 
-// MergeRow — свойство, о котором спрашивают (s-dup-1: поле с радио), или
-// объединяемое множеством (Union). На экране слияния события и задачи с
-// разным временем — ещё строка «When» (choice.WHEN): время каждого участника
-// словами, выбранное берётся целиком (S-16).
+// MergeRow — свойство, о котором спрашивают (s-dup-1: поле с радио или
+// отметками), или объединяемое множеством (Union). Однозначное — радио:
+// имя, организация, фото, «When» (время целиком: начало, конец,
+// повторение), «Where», срок и приоритет задачи, текст заметки; многозначное
+// (Many) — отметки «что оставить»: телефоны по типу («Phone · work»), почта,
+// теги; отмечено всё, что не снято (записка Typecase 117 п. 1, S-16).
 type MergeRow struct {
-	// Property — подпись поля по-человечески: «Display name», «Organisation»,
-	// «Photo», «Title», «Location»
+	// Property — подпись поля по-человечески: «Display name», «Phone ·
+	// work», «When», «Where», «Due», «Tags»
 	Property Text `json:"property"`
-	// Name — поле формы вопроса, choice.<свойство>: «choice.FN»; вариант
-	// уходит своим номером в Options (0, 1, …). У Union пусто
-	Name    string `json:"name"`
+	// Name — поле формы вопроса, choice.<свойство>: «choice.FN», у всех
+	// телефонов «choice.TEL». У Union пусто
+	Name string `json:"name"`
+	// Options — подписи вариантов: значение и коллекции, где оно лежит
+	// («+7 495 120-45-77 · Команда», «— · Дела»); у фото и текста заметки —
+	// источник целиком («nextcloud · Записи»)
 	Options []Text `json:"options"`
-	Chosen  int    `json:"chosen"`
-	Union   bool   `json:"union"`
+	// Values — что уходит у каждого варианта (value радио или отметки):
+	// номер с 1, сквозной у вопросов одного свойства
+	Values []string `json:"values,omitempty"`
+	// Chosen — выбранный вариант радио (индекс в Options)
+	Chosen int `json:"chosen"`
+	// Many — отметки (checkbox), а не радио; Kept — отмеченные (индексы в
+	// Options)
+	Many  bool  `json:"many,omitempty"`
+	Kept  []int `json:"kept,omitempty"`
+	Union bool  `json:"union"`
 }
 
 // TargetPicker — «куда» в шапке листа.
