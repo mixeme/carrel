@@ -244,12 +244,12 @@ type DuplicateMember struct {
 	// Done — у задачи: сделана ли; галка строки — знак, не кнопка
 	// (s-dup-1, «Not done»; записка Typecase 117 п. 11). nil — не задача
 	// или её список не прочитан
-	Done *bool `json:"done,omitempty"`
+	Done *bool `json:"done"`
 	// Строка по роду — строка списка своего рода (s-dup-1; записка 117):
 	// контакт — Avatar, Phone (моноширинно), Email, Org; событие — Lead
 	// («10:00», «all day»), Place, Repeats (бейдж «repeats weekly»); задача
 	// — Done, Due, Percent; заметка — Excerpt, Date. Пусто — «—» строки
-	Avatar  *Avatar `json:"avatar,omitempty"`
+	Avatar  *Avatar `json:"avatar"`
 	Phone   Text    `json:"phone,omitempty"`
 	Email   Text    `json:"email,omitempty"`
 	Org     Text    `json:"org,omitempty"`
@@ -257,7 +257,7 @@ type DuplicateMember struct {
 	Place   Text    `json:"place,omitempty"`
 	Repeats Text    `json:"repeats,omitempty"`
 	Due     Text    `json:"due,omitempty"`
-	Percent *int    `json:"percent,omitempty"`
+	Percent *int    `json:"percent"`
 	Excerpt Text    `json:"excerpt,omitempty"`
 	Date    Text    `json:"date,omitempty"`
 }

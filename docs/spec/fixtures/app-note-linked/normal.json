@@ -9,7 +9,8 @@
         "id": "record.edit",
         "label": "Edit",
         "method": "GET",
-        "primary": true
+        "primary": true,
+        "target": "sheet"
       }
     ],
     "body": "Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.\n\n## Что делаем\n\n- [ ] проверить changelog\n- [x] попросить у Артёма скриншоты\n\nПеренос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг.",
@@ -86,7 +87,7 @@
     "panel": true,
     "source": true,
     "theme": "auto",
-    "wide": false
+    "wide": true
   },
   "loss": null,
   "meta": {
@@ -108,6 +109,7 @@
     "linked": [
       {
         "colour": "#4a6b52",
+        "from": null,
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
         "label": "nextcloud · Записи",
         "mono": false,
@@ -115,6 +117,7 @@
       },
       {
         "colour": "#6b4e7a",
+        "from": null,
         "href": "/app/notes/a-nc-home/dnevnik/9e31-40b7-c012",
         "label": "nextcloud · Дневник",
         "mono": false,
@@ -124,6 +127,7 @@
     "menu": [
       {
         "enabled": true,
+        "href": "/app/notes/linked/5c81-77aa-0d64?print=1",
         "icon": "i-print",
         "id": "record.print",
         "label": "Print",
@@ -301,7 +305,11 @@
     "stamp": "",
     "uid": ""
   },
-  "subtitle": "All notebooks · in 2 notebooks · text from Записи",
+  "subtitle": "All notebooks · in 2 notebooks · text from",
+  "textFrom": {
+    "colour": "#4a6b52",
+    "name": "Записи"
+  },
   "title": "Заметка со встречи 10.08",
   "top": {
     "lock": null,

@@ -14,6 +14,7 @@ import (
 	"carrel.dev/carrel/client/screens/contacts"
 	"carrel.dev/carrel/client/screens/copies"
 	"carrel.dev/carrel/client/screens/deadlink"
+	"carrel.dev/carrel/client/screens/duplicates"
 	"carrel.dev/carrel/client/screens/event"
 	"carrel.dev/carrel/client/screens/eventedit"
 	"carrel.dev/carrel/client/screens/fileop"
@@ -334,7 +335,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.ContactPage) },
-		Frames: []string{"s-contacts-6", "s-contacts-16"},
+		Frames: []string{"s-contacts-6", "s-contacts-16", "s-contacts-33", "s-dup-8"},
 		Draw:   func(model any) Root { return contact.Screen(model.(*view.ContactPage)) },
 		Title:  func(model any) string { return string(model.(*view.ContactPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return contact.Forms(model.(*view.ContactPage)) },
@@ -388,7 +389,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.EventPage) },
-		Frames: []string{"s-agenda-2"},
+		Frames: []string{"s-agenda-2", "s-agenda-25"},
 		Draw:   func(model any) Root { return event.Screen(model.(*view.EventPage)) },
 		Title:  func(model any) string { return string(model.(*view.EventPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return event.Forms(model.(*view.EventPage)) },
@@ -419,7 +420,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.TaskPage) },
-		Frames: []string{"s-tasks-2"},
+		Frames: []string{"s-tasks-2", "s-tasks-17"},
 		Draw:   func(model any) Root { return task.Screen(model.(*view.TaskPage)) },
 		Title:  func(model any) string { return string(model.(*view.TaskPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return task.Forms(model.(*view.TaskPage)) },
@@ -443,7 +444,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.NotePage) },
-		Frames: []string{"s-notes-2", "s-notes-20", "s-notes-30"},
+		Frames: []string{"s-notes-2", "s-notes-20", "s-notes-30", "s-notes-32"},
 		Draw:   func(model any) Root { return note.Screen(model.(*view.NotePage)) },
 		Title:  func(model any) string { return string(model.(*view.NotePage).Title) },
 		Forms:  func(model any) []widget.PostForm { return note.Forms(model.(*view.NotePage)) },
@@ -710,6 +711,22 @@ var All = []Screen{
 		Forms:   func(model any) []widget.PostForm { return search.Forms(model.(*view.SearchPage)) },
 		Notices: widget.MsgFlushSides,
 		Poll:    func(model any) (widget.Runbar, bool) { return search.Bar(model.(*view.SearchPage)) },
+	},
+	{
+		Model:   func() any { return new(view.DuplicatesPage) },
+		Frames:  []string{"s-dup-1", "s-dup-6"},
+		Draw:    func(model any) Root { return duplicates.Screen(model.(*view.DuplicatesPage)) },
+		Title:   func(model any) string { return string(model.(*view.DuplicatesPage).Title) },
+		Forms:   func(model any) []widget.PostForm { return duplicates.Forms(model.(*view.DuplicatesPage)) },
+		Notices: widget.MsgSpacePage,
+	},
+	{
+		Model:   func() any { return new(view.DuplicatesMergePage) },
+		Frames:  []string{"s-dup-2", "s-dup-4", "s-dup-5"},
+		Draw:    func(model any) Root { return duplicates.Merge(model.(*view.DuplicatesMergePage)) },
+		Title:   func(model any) string { return string(model.(*view.DuplicatesMergePage).Title) },
+		Forms:   func(model any) []widget.PostForm { return duplicates.MergeForms(model.(*view.DuplicatesMergePage)) },
+		Notices: widget.MsgSpacePage,
 	},
 }
 

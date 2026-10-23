@@ -279,10 +279,15 @@ func side(d view.Details) *w.Side {
 			Menu:    w.Menu{Items: bind.MenuItems(d.Menu, rail.ReadOnly), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
 		})
 	}
+	sub := bind.SourceSub(d.Source.Colour, d.Subtitle)
+	if d.LinkedRecord {
+		// The linked record: «in 3 books», no mark of one book (s-contacts-1).
+		sub = w.HeadSub{Parts: []w.HeadSubPart{w.Text(d.Subtitle)}}
+	}
 	h := w.Head{
 		Title:  &w.HeadTitle{Text: string(d.Title), Size: w.HeadTitle19},
 		Tools:  tools,
-		Subs:   []w.HeadSub{bind.SourceSub(d.Source.Colour, d.Subtitle)},
+		Subs:   []w.HeadSub{sub},
 		Acts:   &w.Acts{Items: []w.ActsPart{w.Close{Label: "Close the panel", Href: d.Close}}},
 		Middle: true,
 	}
@@ -301,6 +306,19 @@ func side(d view.Details) *w.Side {
 		items = append(items, w.Sec{Items: []w.SecPart{
 			w.Rubric{Text: "Kept as the server sent them", Items: []w.RubricPart{show}},
 		}})
+	}
+	if d.LinkedRecord {
+		// Where the person is kept, each book with what it holds
+		// otherwise; the source is a copy's (s-contacts-1, note 117 p. 5).
+		var lines [][]w.SecItemPart
+		for _, f := range d.Books {
+			lines = append(lines, bind.Book(f, "· "))
+		}
+		items = append(items, w.Sec{Items: []w.SecPart{
+			w.Rubric{Text: "Where this person is kept", Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(d.Books)), Tone: w.BadgeLinked}}},
+			w.SecList{Items: lines, Gap: 5},
+		}})
+		return &w.Side{Items: items}
 	}
 	items = append(items, w.Sec{Items: []w.SecPart{
 		w.Rubric{Text: "Source"},

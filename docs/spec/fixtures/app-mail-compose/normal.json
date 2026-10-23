@@ -245,12 +245,19 @@
             },
             "error": "",
             "extra": null,
-            "hint": "1 of 20 recipients. Everyone sees the whole list.",
+            "hint": "2 of 20 recipients. Everyone sees the whole list.",
             "kind": "select",
             "label": "To",
             "multiple": true,
             "name": "to",
             "options": [
+              {
+                "colour": "#4a6b52",
+                "label": "Анна Ковалёва",
+                "meta": "a.kovaleva@example.org",
+                "selected": true,
+                "value": "a.kovaleva@example.org"
+              },
               {
                 "colour": "#4a6b52",
                 "label": "Артём Белов",
@@ -262,7 +269,7 @@
             "readOnly": false,
             "required": false,
             "suggest": "/app/mail/suggest",
-            "value": "a.belov@example.org"
+            "value": "a.kovaleva@example.org"
           },
           {
             "add": null,

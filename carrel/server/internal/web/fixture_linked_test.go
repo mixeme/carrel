@@ -31,7 +31,9 @@ func TestFixtureLinkedRecords(t *testing.T) {
 		{"app-note-linked/normal.json", "/app/notes/linked/5c81-77aa-0d64"},
 	} {
 		t.Run(c.fixture, func(t *testing.T) {
-			app.compare(t, c.fixture, app.h.do(get(c.address, app.sess)))
+			// The note frames draw the full width chosen (s-notes-32, as
+			// s-notes-2).
+			app.compare(t, c.fixture, app.h.do(wideNotes(get(c.address, app.sess))))
 		})
 	}
 }

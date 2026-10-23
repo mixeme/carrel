@@ -31,10 +31,12 @@ import (
 // not the pointer Screen.Model makes.
 func byValue(model any) any { return reflect.ValueOf(model).Elem().Interface() }
 
-// built tells whether a view model has a screen.
+// built tells whether a view model has a screen, or is an answer the
+// renderer prints alone (the search line's suggestions).
 func built(model any) bool {
 	t := reflect.TypeOf(model)
-	return slices.ContainsFunc(screens.All, func(scr screens.Screen) bool { return reflect.TypeOf(scr.Model()) == t })
+	return slices.ContainsFunc(screens.All, func(scr screens.Screen) bool { return reflect.TypeOf(scr.Model()) == t }) ||
+		slices.ContainsFunc(screens.Answers, func(a screens.Answer) bool { return reflect.TypeOf(a.Model()) == t })
 }
 
 // writing is one answer of a renderer.

@@ -188,6 +188,7 @@
     "linked": [
       {
         "colour": "#6b4e7a",
+        "from": null,
         "href": "/app/notes/a-nc-home/dnevnik/9e31-40b7-c012",
         "label": "nextcloud · Дневник",
         "mono": false,
@@ -266,7 +267,8 @@
     "tagsBadge": {
       "label": "linked",
       "role": "linked"
-    }
+    },
+    "tagsFrom": null
   },
   "notices": [],
   "print": {
@@ -376,6 +378,7 @@
     "stamp": "nextcloud · Записи",
     "uid": "5c81-77aa-0d64"
   },
+  "textFrom": null,
   "title": "Заметка со встречи 10.08",
   "top": {
     "lock": null,

@@ -350,30 +350,35 @@
     "deleteNote": "",
     "fields": [
       {
+        "from": null,
         "href": "",
         "label": "Size",
         "mono": true,
         "value": "412 KB"
       },
       {
+        "from": null,
         "href": "",
         "label": "Type",
         "mono": true,
         "value": "image/png"
       },
       {
+        "from": null,
         "href": "",
         "label": "Dimensions",
         "mono": true,
         "value": "1920×1080"
       },
       {
+        "from": null,
         "href": "",
         "label": "Changed",
         "mono": true,
         "value": "2026-08-10 11:07"
       },
       {
+        "from": null,
         "href": "",
         "label": "Path",
         "mono": true,

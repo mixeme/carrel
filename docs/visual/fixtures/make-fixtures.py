@@ -150,7 +150,9 @@ belov_home = vcard(
 belov_team = vcard(
     uid=u'd41a-6f30-92be', family=u'Белов', given=u'Артём',
     rev=u'20260810T081200Z', org=u'Тензор', title=u'Ведущий инженер',
-    tels=[(u'CELL', u'+7 903 118-22-04'), (u'WORK', u'+7 495 780-11-90')],
+    # Один телефон, как в «Контактах»: группа Артёма спрашивает только фото
+    # (s-dup-1, записка Typecase 117).
+    tels=[(u'CELL', u'+7 903 118-22-04')],
     emails=[(u'WORK', u'a.belov@example.org')],
     extra=[u'PHOTO;VALUE=uri:https://example.org/avatars/belov.jpg'])
 

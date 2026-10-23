@@ -44,7 +44,10 @@ type dupState struct {
 	compared  int
 	threshold int
 	weights   dupes.Weights
-	found     []dupes.Group
+	// read are the collections whose list this session read, by connection
+	// and collection: compared, though they may hold nothing to compare
+	read  map[dupes.CollectionRef]bool
+	found []dupes.Group
 	// apart is how many linked groups this read found come apart, their
 	// other members gone (Б16): the screen says so.
 	apart int
@@ -90,10 +93,12 @@ var dupKinds = []view.Kind{view.KindContact, view.KindEvent, view.KindTask, view
 // loaded. present holds, per collection and kind, the UIDs of a list read
 // whole: only such a list says a member is gone. The agenda reads a week, so
 // an event missing from it may simply be in another week. A collection the
-// catalog no longer holds, or holds as gone, has nothing in it.
-func (s *Server) loadedRecords(sess *session.Session, blob sealed.Blob) ([]loadedRecord, map[dupes.CollectionRef]map[string]bool) {
+// catalog no longer holds, or holds as gone, has nothing in it. read are
+// the collections whose list was read at all: compared, empty or not.
+func (s *Server) loadedRecords(sess *session.Session, blob sealed.Blob) ([]loadedRecord, map[dupes.CollectionRef]map[string]bool, map[dupes.CollectionRef]bool) {
 	var out []loadedRecord
 	present := map[dupes.CollectionRef]map[string]bool{}
+	read := map[dupes.CollectionRef]bool{} // by connection and collection: a list read, empty or not
 	for _, col := range dupCollections(blob) {
 		conn, ok := blob.Connection(col.AccountID)
 		if !ok || col.Gone {
@@ -112,6 +117,7 @@ func (s *Server) loadedRecords(sess *session.Session, blob sealed.Blob) ([]loade
 			if json.Unmarshal(data, &entries) != nil {
 				continue
 			}
+			read[dupes.CollectionRef{AccountID: conn.ID, Col: col.Path}] = true
 			uids := map[string]bool{}
 			for _, e := range entries {
 				if e.Kind != k || e.UID == "" {
@@ -137,7 +143,7 @@ func (s *Server) loadedRecords(sess *session.Session, blob sealed.Blob) ([]loade
 			}
 		}
 	}
-	return out, present
+	return out, present, read
 }
 
 // readDuplicates finds the groups among what is loaded. A linked member the
@@ -145,7 +151,7 @@ func (s *Server) loadedRecords(sess *session.Session, blob sealed.Blob) ([]loade
 // without a journal line (S-16).
 func (s *Server) readDuplicates(sess *session.Session, prune bool) dupState {
 	blob := s.catalogOf(sess)
-	loaded, present := s.loadedRecords(sess, blob)
+	loaded, present, read := s.loadedRecords(sess, blob)
 	apart := 0
 	if prune {
 		if kept, changed := dupes.Prune(blob.Duplicates.Linked, present); changed {
@@ -160,7 +166,7 @@ func (s *Server) readDuplicates(sess *session.Session, prune bool) dupState {
 			}
 		}
 	}
-	st := dupState{blob: blob, records: map[sealed.RecordRef]loadedRecord{}, threshold: s.dupThreshold(blob), apart: apart}
+	st := dupState{blob: blob, records: map[sealed.RecordRef]loadedRecord{}, threshold: s.dupThreshold(blob), apart: apart, read: read}
 	recs := make([]dupes.Record, 0, len(loaded))
 	for _, l := range loaded {
 		if _, seen := st.records[l.rec.Ref]; seen {
@@ -192,9 +198,14 @@ func (st dupState) candidates() []dupes.Group {
 }
 
 // duplicateCount is the number beside Duplicates in the rail: the groups
-// still to decide among what is loaded.
+// still to decide among what is loaded; none while nothing was compared —
+// no number is not a zero (s-dup-6).
 func (s *Server) duplicateCount(sess *session.Session) *int {
-	n := len(s.readDuplicates(sess, false).candidates())
+	st := s.readDuplicates(sess, false)
+	if st.compared == 0 {
+		return nil
+	}
+	n := len(st.candidates())
 	return &n
 }
 
@@ -233,13 +244,28 @@ func (st dupState) groups() []dupGroup {
 	}
 	for _, l := range st.blob.Duplicates.Linked {
 		dg := dupGroup{id: l.ID, kind: l.Kind, refs: l.Members, decision: view.DecisionLinked, title: l.Title}
-		for _, g := range st.found {
-			if dupes.Covered([]sealed.LinkedGroup{l}, g) && len(g.Members) == len(l.Members) {
-				dg.score, dg.reasons = g.Score, g.Reasons
+		// Its points are its loaded records' (Assess): a group linked
+		// whole matches as one even when one of its copies alone would
+		// not — «Синк-ап по релизу» half an hour later in «Общий».
+		var recs []dupes.Record
+		for _, ref := range l.Members {
+			if r, ok := st.records[ref]; ok {
+				recs = append(recs, r.rec)
 			}
+		}
+		if len(recs) > 1 {
+			dg.score, dg.reasons = dupes.Assess(recs, st.weights)
 		}
 		linked = append(linked, dg)
 	}
+	// Linked groups by kind, then by name (s-dup-1): the order of the blob
+	// is the order they were linked in, which says nothing.
+	slices.SortStableFunc(linked, func(a, b dupGroup) int {
+		if ka, kb := slices.Index(dupKinds, a.kind), slices.Index(dupKinds, b.kind); ka != kb {
+			return ka - kb
+		}
+		return strings.Compare(st.titleOf(a), st.titleOf(b))
+	})
 	// A «not duplicates» is the person's decision whether or not its
 	// records are loaded: scored when they are (s-dup-1, «60 points · same
 	// phone»), named and taken back from here when not (s-dup-6). Find keeps
@@ -499,8 +525,18 @@ func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.
 	if reason := mergeBlock(st.blob, g.refs); reason != "" {
 		merge.Enabled, merge.Reason = false, text(reason)
 	}
-	cs := st.questions(g)
+	// «Not duplicates» asks nothing: there is nothing to keep (s-dup-1).
+	var cs []question
+	if g.decision != view.DecisionIgnored {
+		cs = st.questions(g)
+	}
 	out.Choices = mergeRowsOf(cs)
+	if len(cs) > 0 {
+		// The questions say what differs; what such a pair means stands
+		// only on a card with nothing to ask (s-dup-1: «Дежурство», «Что
+		// почитать про CRDT»).
+		out.Hint = ""
+	}
 	switch g.decision {
 	case view.DecisionLinked:
 		out.Actions = []view.Action{decideAction("duplicates.unlink", "Unlink", "unlink"), merge}
@@ -553,29 +589,38 @@ func dupSources(st dupState, only view.Kind) []view.RailSection {
 	}
 	sec := view.RailSection{State: view.CollectionOK}
 	loaded, live := 0, 0
-	for _, col := range dupCollections(st.blob) {
-		if col.Gone || !holdsRecords(col) {
+	seen := map[dupes.CollectionRef]bool{}
+	// By kind, as the screen's segments go — the books, the calendars, the
+	// lists, the notebooks —, each collection once, under the first kind it
+	// is ticked for (s-dup-1: «Работа» among the calendars).
+	for _, k := range dupKinds {
+		if only != "" && k != only {
 			continue
 		}
-		// One kind at a time, as the screen shows them: the books of
-		// contacts are not where a duplicate event would be found. And
-		// only what is ticked: an unticked collection is never polled,
-		// so naming it a source would promise a comparison that cannot
-		// happen.
-		if only != "" && (!col.Has(only) || !isTicked(st.blob, only, col.AccountID, col.Path)) {
-			continue
+		for _, col := range dupCollections(st.blob) {
+			ref := dupes.CollectionRef{AccountID: col.AccountID, Col: col.Path}
+			// What is ticked, and what this session read anyway — a list
+			// opened alone: an unticked collection no list read is never
+			// polled, so naming it a source would promise a comparison
+			// that cannot happen.
+			if col.Gone || !col.Has(k) || seen[ref] || !isTicked(st.blob, k, col.AccountID, col.Path) && !st.read[ref] {
+				continue
+			}
+			seen[ref] = true
+			live++
+			// No tick: a source is compared or not, and says how many of
+			// its records were — «—» before (s-dup-6).
+			row := view.SourceRow{
+				Label: text(collectionLabel(col)), Colour: catalogColour(col),
+				Tick: view.TickOn, ReadOnly: col.ReadOnly, State: view.CollectionOK, Feed: col.Feed,
+			}
+			if st.read[ref] {
+				n := held[ref]
+				loaded++
+				row.Count = &n
+			}
+			sec.Rows = append(sec.Rows, row)
 		}
-		live++
-		ref := dupes.CollectionRef{AccountID: col.AccountID, Col: col.Path}
-		row := view.SourceRow{
-			Label: text(collectionLabel(col)), Colour: catalogColour(col),
-			Tick: view.TickOff, ReadOnly: col.ReadOnly, State: view.CollectionOK, Feed: col.Feed,
-		}
-		if n, ok := held[ref]; ok {
-			loaded++
-			row.Tick, row.Count = view.TickOn, &n
-		}
-		sec.Rows = append(sec.Rows, row)
 	}
 	if len(sec.Rows) == 0 {
 		return nil
@@ -595,16 +640,6 @@ func dupCollections(blob sealed.Blob) []sealed.Collection {
 		cols = append(cols, f.FeedCollection())
 	}
 	return cols
-}
-
-// holdsRecords: a folder of files holds no records to compare.
-func holdsRecords(col sealed.Collection) bool {
-	for _, k := range dupKinds {
-		if col.Has(k) {
-			return true
-		}
-	}
-	return false
 }
 
 func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Kind) view.DuplicatesPage {

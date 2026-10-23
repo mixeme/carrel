@@ -187,19 +187,35 @@ func read(p *view.NotePage) []w.MainPart {
 	// column do nothing without a script (Typecase's task 104)
 	// Source is its icon, the word its hint; the width is of the third rank:
 	// on a phone it means nothing (note 69 of Typecase).
-	acts = append(acts,
-		w.Button{Icon: "code", Title: source},
-		widthSeg(p.Look, true),
-		w.Button{Icon: "panel", Title: hideColumn},
-	)
+	// A linked record's head has Edit and «⋯» alone (s-notes-32): its text
+	// is no one copy's source.
+	if !p.LinkedRecord {
+		acts = append(acts,
+			w.Button{Icon: "code", Title: source},
+			widthSeg(p.Look, true),
+			w.Button{Icon: "panel", Title: hideColumn},
+		)
+	}
+	more := w.Button{Icon: "dots", Title: "More"}
+	if p.LinkedRecord {
+		more.Variant = w.ButtonPadX3 // s-notes-32
+	}
 	if len(p.Meta.Menu) > 0 {
 		acts = append(acts, w.Drop{
-			Trigger: w.Button{Icon: "dots", Title: "More"},
+			Trigger: more,
 			Menu:    w.Menu{Items: append(bind.Twins(p.Doc.Bar, printID), bind.MenuItems(p.Meta.Menu, rail.ReadOnly)...), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
 		})
 	}
 	meta := []w.HeadSubPart{w.Mark{Colour: string(p.Source.Colour), Size: w.MarkH12}, w.Text(p.Source.Stamp)}
-	if p.Meta.Date != "" {
+	switch {
+	case p.LinkedRecord:
+		// The linked record: where it is kept and the notebook its text
+		// came from, its mark before its name (s-notes-32).
+		meta = []w.HeadSubPart{w.Text(p.Subtitle)}
+		if f := p.TextFrom; f != nil {
+			meta = []w.HeadSubPart{w.Text(p.Subtitle + " "), w.Mark{Colour: string(f.Colour), Size: w.MarkH12}, w.Text(f.Name)}
+		}
+	case p.Meta.Date != "":
 		meta = []w.HeadSubPart{meta[0], w.Text(string(p.Source.Stamp) + sep), w.Mono{Text: string(p.Meta.Date)}}
 	}
 	main := []w.MainPart{w.Head{Meta: &w.HeadSub{Parts: meta}, Acts: &w.Acts{Items: acts}, Pad: w.HeadRule}}
@@ -215,6 +231,10 @@ func read(p *view.NotePage) []w.MainPart {
 		title := w.Rubric{Text: "Tags"}
 		if b := p.Meta.TagsBadge; b != nil {
 			title.Items = []w.RubricPart{bind.Badge(*b)}
+		}
+		// The notebook a tag kept came from, on a linked record (s-notes-32).
+		if f := p.Meta.TagsFrom; f != nil {
+			tags = append(tags, w.Text(" "), w.Dim{Mark: &w.Mark{Colour: string(f.Colour), Size: w.MarkH11Inline}, Parts: []w.Inline{w.Text(f.Name)}})
 		}
 		secs = append(secs, w.DocmetaSec{Title: title, Items: []w.DocmetaPart{w.Line{Block: true, Gap: w.LineGap4, Items: tags}}})
 	}
@@ -328,15 +348,14 @@ func column(p *view.NotePage) []w.DocmetaSec {
 	if len(p.Meta.Linked) > 0 {
 		refs := w.DocRefs{}
 		for _, f := range p.Meta.Linked {
-			refs.Items = append(refs.Items, w.DocRef{
-				Mark: &w.Mark{Colour: string(f.Colour), Size: w.MarkH11Inline},
-				Name: string(f.Label),
-				Href: f.Href,
-				What: w.Dim{Parts: []w.Inline{w.Text(lead + string(f.Value))}},
-			})
+			ref := w.DocRef{Mark: &w.Mark{Colour: string(f.Colour), Size: w.MarkH11Inline}, Name: string(f.Label), Href: f.Href}
+			if f.Value != "" {
+				ref.What = w.Dim{Parts: []w.Inline{w.Text(lead + string(f.Value))}}
+			}
+			refs.Items = append(refs.Items, ref)
 		}
 		secs = append(secs, w.DocmetaSec{
-			Title: w.Rubric{Text: "The same note in other notebooks", Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Meta.Linked)), Tone: w.BadgeLinked}}},
+			Title: w.Rubric{Text: keptRubric(p.LinkedRecord), Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Meta.Linked)), Tone: w.BadgeLinked}}},
 			Items: []w.DocmetaPart{refs},
 		})
 	}
@@ -386,4 +405,13 @@ func widthSeg(look view.Look, reading bool) w.Seg {
 		s.Secondary = true
 	}
 	return s
+}
+
+// keptRubric is the rubric of the other copies: on a linked record's card,
+// where it is kept (s-notes-32).
+func keptRubric(linked bool) string {
+	if linked {
+		return "Where this note is kept"
+	}
+	return "The same note in other notebooks"
 }

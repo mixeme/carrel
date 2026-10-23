@@ -35,18 +35,21 @@
   "details": null,
   "foreign": [
     {
+      "from": null,
       "href": "",
       "label": "SEQUENCE",
       "mono": true,
       "value": "1"
     },
     {
+      "from": null,
       "href": "",
       "label": "X-APPLE-SORT-ORDER",
       "mono": true,
       "value": "712"
     },
     {
+      "from": null,
       "href": "",
       "label": "X-OC-HIDESUBTASKS",
       "mono": true,

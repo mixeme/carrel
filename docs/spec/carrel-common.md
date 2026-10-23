@@ -415,7 +415,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage`; POST: `op=combine` («Write this combination», форма `ConflictPage.Form` с `choice.<n>=mine` или `theirs` на строку — `ConflictRow.Name`; строка без поля — выбранное заранее, `ConflictRow.Choice`), `op=mine`, `op=theirs`, `op=cancel`; у всех, кроме `cancel`, `etag=` — версия, против которой показан выбор: сервер ушёл дальше — страница строится заново. Запись удалена на сервере (Р-67, `ConflictPage.Deleted`): `op=combine` с `choice.0=mine` пишет её заново с правкой и ведёт на карточку, `theirs` сбрасывает правку и ведёт на список; без выбора — тот же экран. Расходиться нечему (Р-69): GET сбрасывает правку и ведёт на карточку записи |
 | `/app/{kind}/{account}/{col}/{uid}/move` | GET, POST | вход | лист | `MoveSheet`; `?back=` — страница, откуда лист открыт (без него — `Referer`): страницей лист несёт её экраном под собой (`Under`), Cancel ведёт на неё, варианты листа несут её дальше; POST — форма листа (`to` — «подключение/коллекция», `warned`) или прежние `to` и `into` |
 | `/app/{kind}/{account}/{col}/{uid}/copies` | GET | вход | лист, редирект | `CopiesSheet` «Which copy to edit?» (s-contacts-32): Edit записи связанной группы; у записи без группы — редирект на `…/edit`. `?back=` — страница, откуда открыт (без него — `Referer`): лист стоит над ней, Cancel ведёт на неё. Форма листа — GET `…/edit?copy=…`: редирект на форму выбранной копии |
-| `/app/{kind}/linked/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — карточка связанной записи по UID любой её копии (записка Typecase 117 п. 5; s-contacts-33, s-agenda-25, s-tasks-17, s-notes-32): выбранное на карточке группы (что записало бы слияние, снятое — без него), у значения с выбором — коллекция, откуда оно (`Field.From`), подзаголовок «All address books · in 3 books»; Edit — на `…/linked/{uid}/copies`, «⋯» — Print, Open in Duplicates, Unlink (форма `/app/duplicates/decide?do=unlink`, `group` у пункта); где хранится — строка на копию с тем, чем она разнится от показанного; Move, Copy, Export, Publish, Delete — только у копии. UID вне группы рода — 404 |
+| `/app/{kind}/linked/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — карточка связанной записи по UID любой её копии (записка Typecase 117 п. 5; s-contacts-33, s-agenda-25, s-tasks-17, s-notes-32): выбранное на карточке группы (что записало бы слияние, снятое — без него), у значения с выбором — коллекция, откуда оно (`Field.From`), подзаголовок «All address books · in 3 books»; Edit — на `…/linked/{uid}/copies`, «⋯» — Print, Open in Duplicates, Unlink (форма `/app/duplicates/decide?do=unlink`, `group` у пункта); где хранится — строка на копию с тем, чем она разнится от показанного; Move, Copy, Export, Publish, Delete — только у копии. `?print=1` — та же карточка на бумаге (U-10, Print из «⋯»). UID вне группы рода — 404 |
 | `/app/{kind}/linked/{uid}/copies` | GET | вход | лист | `CopiesSheet` связанной группы по UID любой её копии (s-contacts-35 — над объединённой книгой): тот же лист, что у адреса этой копии; UID вне группы рода — 404 |
 | `/app/tasks/{account}/{col}/{uid}/done` | GET, POST | вход | лист, редирект | `CopiesSheet` «Which copy to mark done?» (s-tasks-16). POST без `copy` у связанной задачи — лист, у прочей — отметка; форма листа без отмеченной копии (`sheet=1`) — лист снова, ничего не отмечено, ошибка у `copy` (`Form.Errors`); с `copy` (сколько угодно) — каждая названная копия отмечена, как Mark done, и редирект туда, откуда пришли (`from`: `all`, `list`, иначе карточка) |
 | `/app/contacts/{account}/{col}/{uid}/rewrite` | GET, POST | вход | лист (GET); страница, редирект (POST) | `RewriteSheet`; `?plan=` — план, выданный сохранением карточки (S-15.4). POST переписывает и отвечает карточкой (`ContactPage`) с итогом (s-contacts-16); с `op=leave` — редирект на карточку, ничего не переписав; без живого плана GET и POST — редирект на карточку |
@@ -648,6 +648,8 @@ type Action struct {
     CSRF    string  // у POST — токен сеанса: без сценариев действие уходит своей формой со скрытым _csrf этого значения (C-11); у GET и на страницах вне входа пусто
     File    string  // у POST, который несёт файл, — имя поля файла: без сценариев действие уходит формой multipart/form-data с этим полем выбора файла и _csrf — «file» у Attach и «From this computer» (attach.add), «photo» у Add и Replace фотографии (photo.add, photo.replace); пусто — без файла
     Submits bool    // кнопка отправляет форму, в которой стоит, на свой Href (formaction); с File — multipart с этим полем файла, набранное едет с файлом — фотография карточки, новой и существующей (s-contacts-27, s-contacts-3: Add, Replace, Crop, Remove), Attach новой записи (s-agenda-15); без File — сама форма: Save правки заметки (Doc.Bar, форма — NoteDoc.Form, s-notes-20), From Files и Remove вложений новой записи; false — своей формой
+    Name    string  // Name и Value — пара, которую кнопка добавляет к отправке формы: решение карточки группы — кнопка её формы do=link, do=choose (s-dup-1); Unlink в «⋯» связанной записи — group=<ID> к форме /app/duplicates/decide?do=unlink (s-contacts-36); пусто — пары нет (записка Typecase 117 п. 8)
+    Value   string
     Target  string  // зона C-7.2, которую меняет ответ-фрагмент на действие (C-7.1), по C-5: sheet у адреса, отвечающего листом, rail у формы рейла, poll у полосы хода, queue у загрузки, main у новой папки; пусто — переход. У кнопки формы (Href пуст) — пусто: цель у формы (Form.Target)
 }
 // Кнопка со стрелкой — одно действие: само Action — то, что делает кнопка,
@@ -928,6 +930,7 @@ type Details struct {
     Foreign    []Field       // контакт: «Kept as the server sent them»
     ForeignShow *Action      // «Show 3» — кнопка, раскрывающая Foreign; без сценариев — тот же список с этой панелью и ?foreign=1; nil — чужих свойств нет или они раскрыты
     Books      []Field       // контакт: «The same person in other books» (s-contacts-7) — как у ContactPage
+    LinkedRecord bool        // панель связанной строки единой книги: связанная запись, не первая копия (записка Typecase 117 п. 5, s-contacts-1) — Subtitle «in 3 books», места в Books («Where this person is kept»), источника и удаления нет
     Source     SourceBlock
     Actions    []Action   // кнопки на виду; удаление — Danger, клиент ставит его внизу панели
     Menu       []MenuItem // «⋯» панели, в порядке кадра (s-contacts-8, s-agenda-4, s-tasks-4, s-notes-12)
@@ -950,6 +953,12 @@ type Field struct {
     Colour Colour // метка коллекции у строки другой книги или календаря (Books, Linked; s-contacts-6)
     Runs   Runs   // значение кусками, когда кадр выделяет часть: When события — «‹10:00 – 11:00›, Monday 10 August», день — «all day, Monday 10 August» (год — только не нынешний); Value тогда пуст (s-agenda-1, -2)
     Badge  Badge  // бейдж после значения: «created 12:00 Asia/Yekaterinburg» у When события из другого пояса (подсказка «Created in another time zone» — слово экрана), «until 2026-12-28», «5 times», «once» у Repeats (s-agenda-1, -2); «linked» у поля связанной записи, которое другая её копия держит иначе — здесь мог быть выбор (s-contacts-6, s-agenda-2, s-tasks-2; Р-58 Typecase); нет бейджа — ключа нет
+    From   *FieldFrom // у значения связанной записи, где был выбор, — коллекция, откуда оно взято: метка и имя после значения («Команда», s-contacts-33; записка Typecase 117 п. 5); null — выбирать было не из чего
+}
+
+type FieldFrom struct { // коллекция, откуда взято значение связанной записи
+    Name   Text
+    Colour Colour
 }
 
 type Print struct { // колонтитул распечатки, C-10
@@ -1360,6 +1369,7 @@ Source в её меню нет, и `Stamp` в её строках пуст. У �
 ```go
 type ContactPage struct {
     Shell
+    LinkedRecord bool // карточка связанной записи (/app/{kind}/linked/{uid}, записка Typecase 117 п. 5): выбранное, не одна копия; Subtitle — «All address books · in 3 books», места — в Books («Where this person is kept»), источника, хронологии и удаления нет
     UID       string
     Name      Text
     Subtitle  Text     // «Издательство «Слово» · Выпускающий редактор» — где и кем
@@ -1450,8 +1460,10 @@ type PhotoPreviewPage struct {
 
 type EventPage struct { // чтение: то, что открывается по ссылке и печатается
     Shell
+    LinkedRecord bool // карточка связанной записи (записка Typecase 117 п. 5, s-agenda-25): места — в Linked («Where this event is kept»), источника и удаления нет
     UID       string
     Summary   Text // заголовок записи; заголовок документа — Shell.Title
+    Subtitle  Text // у связанного события — где оно, «Combined calendar · in 3 calendars» (s-agenda-25); пусто — у события одного календаря
     // В порядке кадра (s-agenda-2): When (Runs и Badge пояса), Repeats
     // (короткими словами, «Weekly on Mon», конец — Badge), Reminders («10
     // minutes before», через запятую), Where, Status, Link, Tags. Организатора
@@ -1585,6 +1597,7 @@ type AttachRow struct {
 
 type TaskPage struct { // чтение
     Shell
+    LinkedRecord bool // карточка связанной записи (записка Typecase 117 п. 5, s-tasks-17): Subtitle — «All lists · in 2 lists», места — в Linked («Where this task is kept»), источника и удаления нет
     UID       string
     Summary   Text // заголовок записи; заголовок документа — Shell.Title
     Subtitle  Runs // где задача и, когда просрочена, на сколько — тревогой: «nextcloud · Дела · ‹overdue by 3 days›» (s-tasks-2, U-6.3)
@@ -1635,7 +1648,14 @@ type TaskEditPage struct { // правка
 
 type NotePage struct {
     Shell
+    LinkedRecord bool // карточка связанной записи (записка Typecase 117 п. 5, s-notes-32): места — в Meta.Linked («Where this note is kept»), источника и удаления нет
     UID    string
+    // Subtitle — у связанной заметки: где она, «All notebooks · in 2
+    // notebooks», и — когда текст выбирали — «· text from», а за ним
+    // коллекция текста TextFrom меткой и именем (s-notes-32); пусто — у
+    // заметки одной тетради
+    Subtitle Text
+    TextFrom *FieldFrom
     Doc    NoteDoc
     Meta   NoteMeta
     Source SourceBlock // колонка: UID заметки и когда прочитана (s-notes-2, -20); у новой UID пуст
@@ -1678,6 +1698,7 @@ type NoteMeta struct {
     // держит другие теги, здесь мог быть выбор (s-notes-2, Р-58 Typecase);
     // nil — бейджа нет
     TagsBadge *Badge
+    TagsFrom  *FieldFrom // у связанной заметки: коллекция, откуда взят выбранный тег (s-notes-32, «Записи»); null — выбора не было
     // Link — ссылка заметки (URL): «Link», значение и Href, как у карточки
     // события и задачи (Р8 списка равенства родов; кадра нет); nil — нет
     Link    *Field
@@ -1807,8 +1828,8 @@ type PollBar struct {
     Stream      string
     Poll        string
     Every       int
-    Short       Text // Summary на узкой полосе выдачи поиска: «13 of 14», «9 of 14 · 5 records», «9 of 14 · 5 stopped» (записка 118); у прочих пусто
     Summary     Runs // кусками: над списком и хронологией — «Polled 5 of 6 sources · 14 events», у хронологии адреса моноширинно (s-agenda-1, s-contacts-7); не ответивших не называет — это Failed, остановленные — «1 stopped»; у поиска законченного — «Done · 13 of 14 sources answered» (s-find-1), отказы — Failed
+    Short       Text // Summary на узкой полосе выдачи поиска: «13 of 14», «9 of 14 · 5 records», «9 of 14 · 5 stopped» (записка 118); у прочих пусто
     AnsweredAt  When // когда собрана показанная выдача; у поиска сегодня — одни часы, «11:42» (s-find-1)
     Aside       Text // справа на полосе моноширинно, когда опрос кончен: «2 min ago», с «from cache · » перед ним, когда источник ответил тем, что сеанс уже держал (s-agenda-1); пока опрос идёт — сколько он длится, «0.8 s», за минутой «1 min 20 s», у всех разделов (решение владельца 07.10.2026; states-3, -8, -13, -19, -26); у законченного поиска — сколько шёл обход, «1.8 s» (s-find-1)
     Note        Text // под строками, когда опрос кончен и источник не ответил: «What arrived in time is shown. Records from the unavailable source are missing — not “there are none”, but “we have not seen them”.» (states-6; у контактов — «Cards … book», states-9); пусто — ответили все
@@ -1835,31 +1856,45 @@ type DuplicatesPage struct {
     Shell
     Subtitle  Text // «27 records compared · 2 to look at» (s-dup-1), «0 records compared» (s-dup-6): ждать нечего — только сравнённое
     Groups    []DuplicateGroup
+    Decided   []DecidedCard // «Decided earlier» (s-dup-6; записка Typecase 117 п. 10): решения, ни одной записи которых сессия не читала; их называют и отменяют, не загружая списков; пусто — таких нет, ключа нет
     Threshold ThresholdControl
     Bar       ListBar
+}
+
+type DecidedCard struct { // решение, чьих записей сессия не читала (s-dup-6)
+    ID       string
+    Kind     Kind
+    Title    Text   // имя, данное при решении: «Анна Ковалёва · Алексей Смирнов»
+    Decision DuplicateDecision
+    Badge    Badge  // «linked ×3», «not duplicates»
+    Note     Text   // «Not loaded in this session»
+    Where    Text   // коллекции записей, каждая раз: «nextcloud · Контакты, radicale · vps · Команда»
+    UIDs     Text   // «UID 4f2b-9c31-a0e7, 9a1c-03de-77f2», каждый раз
+    Actions  []Action // Unlink · Offer again — кнопки формы do=…
+    Form     *Form    // POST /app/duplicates/decide, скрытые _csrf и group
 }
 
 type DuplicateGroup struct {
     ID      string
     Kind    Kind
+    Title   Text   // рубрика карточки (s-dup-1): имя группы — первой её записи
+    Badge   Badge  // что решено: «candidate ×2», «linked ×3», «not duplicates»
+    Points  Text   // очки с причинами: «80 points · same phone, same name»; пусто — не сравнено
     Score   int
     Reasons []Text // «тот же адрес», «тот же телефон» — причина рядом со счётом
     Rows    []DuplicateMember
     Actions []Action // Link · Not duplicates · Merge on the server
     Decision DuplicateDecision // C-8
-    Hint     Text // под строками: что значит пара (s-dup-1) — у событий с разными UID, пока не решено, «The same event in two calendars, different UIDs. Agenda shows it twice; …», у заметок «Same title and the same date: a note copied into a second notebook. …»; у «not duplicates», контактов и задач пусто
-    // Расхождения в однозначных полях: ответ уходит с Link как
-    // MergeRow.Name=<номер варианта> и запоминается при связанной группе.
-    // Запись без значения — тоже вариант (s-dup-1: «Organisation» — «—» или
-    // «Библиотека №4»): Options пустая строка (прочерк — экрана), у фото —
-    // источник записи; заранее выбрано первое значение; выбранное «—»
-    // оставляет свойство без значения и при слиянии
+    Hint     Text // под строками, у карточки без вопросов: что значит пара (s-dup-1) — у событий с разными UID, пока не решено, «The same event in two calendars, different UIDs. Agenda shows it twice; …», у заметок «Same title and the same date: a note copied into a second notebook. …»; у «not duplicates», контактов и задач пусто
+    // Вопросы, где копии расходятся (записка Typecase 117 п. 1): радио
+    // однозначного, отметки «что оставить» многозначного; ответ уходит с
+    // решением и запоминается при связанной группе. Запись без значения —
+    // тоже вариант (Дб7: «— · Архив»); выбранное «—» оставляет свойство без
+    // значения и при слиянии. У «not duplicates» вопросов нет
     Choices []MergeRow
-    // Карточка группы формой, когда выбирать есть что (U-8, s-dup-1): POST
-    // /app/duplicates/decide, скрытые _csrf и group; радио Choices стоят в
-    // ней, решения группы (Actions, POST) — её кнопки на свой адрес
-    // (Action.Submits) с do и group в адресе; Merge on the server — ссылка.
-    // nil — выбирать нечего: решения уходят каждое своей формой
+    // Карточка группы — форма (U-8, s-dup-1; записка 117 п. 8): POST
+    // /app/duplicates/decide, скрытые _csrf и group; вопросы стоят в ней,
+    // решения (Actions) — её кнопки do=… (Action.Name, Value)
     Form *Form
 }
 
@@ -1870,6 +1905,22 @@ type DuplicateMember struct {
     Title  Text
     Detail Text
     ReadOnly bool
+    Done   *bool // у задачи: сделана ли; галка строки — знак (s-dup-1; записка 117 п. 11); null — не задача или список не прочитан
+    // Строка по роду — строка списка своего рода (s-dup-1; записка 117):
+    // контакт — Avatar, Phone (моноширинно), Email, Org; событие — Lead
+    // («10:00», «all day»), Place, Repeats («repeats weekly» бейджем); задача —
+    // Done, Due, Percent; заметка — Excerpt, Date. Пусто — прочерк строки
+    Avatar  *Avatar
+    Phone   Text
+    Email   Text
+    Org     Text
+    Lead    Text
+    Place   Text
+    Repeats Text
+    Due     Text
+    Percent *int
+    Excerpt Text
+    Date    Text
 }
 
 type ThresholdControl struct {
@@ -1904,10 +1955,10 @@ type DuplicatesMergePage struct {
     Subtitle Text // «Вера Лебедева · 2 records» (s-dup-2, -4); пусто, когда оставляемой записи нет
     GroupID string
     Target  DuplicateMember
-    Rows    []MergeRow
+    Rows    []MergeRow // пусто: слияние ничего не спрашивает — вопросы карточки группы (записка Typecase 117 п. 3)
     Warning Notice // что будет записано, что удалено: заголовок и тело (info); у итога — тревога, Details — что ответил сервер
     // План полями (s-dup-2, -4; Дб14, Дб15), рубрики — слова экрана:
-    Stays      []Action          // «Where the merged record stays»: источник каждой записи, оставляемая — On; другая — этот же экран с ней (GET); только для чтения — выключена с причиной
+    Stays      []Action          // «Where the merged record stays»: источник каждой записи, оставляемая — On; каждый — этот же экран с ним (GET) и ответами карточки; группу с копией только для чтения не сливают вовсе (п. 9)
     StaysNote  Text              // «Вера Лебедева there is rewritten with the values you chose.»
     Deleted    []DuplicateMember // «Deleted afterwards»: Title и приглушённо Stamp
     Gains      []Text            // «The record that stays gains»: «EMAIL;TYPE=work: v.lebedeva@example.org», «PHOTO (from nextcloud · Контакты)», «2 reminders from the others»
@@ -1915,15 +1966,19 @@ type DuplicatesMergePage struct {
     Happened   []Text            // «What happened» у итога не одной записью (s-dup-5): «Kept and rewritten: …», «Deleted: …», «Still there: …»
     Actions []Action // Write the merge and delete the rest · Cancel; у итога — Open the kept record · Back to duplicates
 }
-// Свойство, о котором спрашивают (s-dup-1: поле с радио), или объединяемое
-// множеством (Union). Property — подпись по-человечески: «Display name»,
-// «Organisation», «Photo», «Title», «Location»; Name — поле вопроса,
-// choice.<свойство> («choice.FN»), вариант уходит своим номером в Options;
-// у Union Name пусто. На экране слияния события и задачи с разным временем —
-// ещё строка «When», choice.WHEN: варианты — время каждого участника словами
-// («Monday, 10 August 2026, 10:00 – 11:00, Weekly on Monday (from nextcloud ·
-// Work)»), выбранное берётся целиком (S-16).
-type MergeRow struct { Property Text; Name string; Options []Text; Chosen int; Union bool }
+// Свойство, о котором спрашивают (s-dup-1), или объединяемое множеством
+// (Union). Однозначное — радио: имя, организация, фото, «When» (время
+// целиком: начало, конец, повторение), «Where», срок и приоритет задачи,
+// текст заметки; многозначное (Many) — отметки «что оставить»: телефоны по
+// типу («Phone · work»), почта, теги; отмечено всё, что не снято (записка
+// Typecase 117 п. 1). Property — подпись: «Display name», «Phone · work»,
+// «When», «Due»; Name — поле вопроса, choice.<свойство> («choice.FN», у всех
+// телефонов «choice.TEL»); Options — значение и коллекции, где оно лежит
+// («+7 495 120-45-77 · Команда», «— · Дела»), у фото и текста заметки —
+// источник целиком; Values — что уходит у варианта: номер с 1, сквозной у
+// вопросов одного свойства; Chosen — выбранный вариант радио; Kept —
+// отмеченные варианты отметок.
+type MergeRow struct { Property Text; Name string; Options []Text; Values []string; Chosen int; Many bool; Kept []int; Union bool }
 
 type TargetPicker struct { // «куда» в шапке листа
     Options []TargetOption

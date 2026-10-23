@@ -96,6 +96,7 @@
   "done": false,
   "fields": [
     {
+      "from": null,
       "href": "",
       "label": "Status",
       "mono": false,
@@ -106,6 +107,7 @@
         "label": "linked",
         "role": "linked"
       },
+      "from": null,
       "href": "",
       "label": "Due",
       "mono": false,
@@ -118,6 +120,7 @@
       "value": ""
     },
     {
+      "from": null,
       "href": "",
       "label": "Complete",
       "mono": true,
@@ -128,18 +131,21 @@
         "label": "linked",
         "role": "linked"
       },
+      "from": null,
       "href": "",
       "label": "Priority",
       "mono": true,
       "value": "5"
     },
     {
+      "from": null,
       "href": "",
       "label": "Reminders",
       "mono": false,
       "value": "1 day before"
     },
     {
+      "from": null,
       "href": "",
       "label": "Tags",
       "mono": false,
@@ -156,6 +162,7 @@
   "linked": [
     {
       "colour": "#3f6e8c",
+      "from": null,
       "href": "/app/tasks/a-nc-home/rabota/cc11-5a20-7e94",
       "label": "nextcloud · Работа",
       "mono": false,

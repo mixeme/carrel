@@ -186,12 +186,14 @@
       "done": false,
       "fields": [
         {
+          "from": null,
           "href": "",
           "label": "Status",
           "mono": false,
           "value": "Needs action"
         },
         {
+          "from": null,
           "href": "",
           "label": "Due",
           "mono": false,
@@ -208,24 +210,28 @@
           "value": ""
         },
         {
+          "from": null,
           "href": "",
           "label": "Complete",
           "mono": true,
           "value": "0%"
         },
         {
+          "from": null,
           "href": "",
           "label": "Priority",
           "mono": true,
           "value": "1"
         },
         {
+          "from": null,
           "href": "",
           "label": "Reminders",
           "mono": false,
           "value": "1 day before"
         },
         {
+          "from": null,
           "href": "",
           "label": "Tags",
           "mono": false,

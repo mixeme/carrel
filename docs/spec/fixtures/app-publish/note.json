@@ -417,7 +417,8 @@
             "on": false
           }
         ],
-        "tagsBadge": null
+        "tagsBadge": null,
+        "tagsFrom": null
       },
       "notices": [],
       "print": {
@@ -509,6 +510,7 @@
         "stamp": "nextcloud · Записи",
         "uid": "5c81-77aa-0d64"
       },
+      "textFrom": null,
       "title": "Заметка со встречи 10.08",
       "top": {
         "lock": null,

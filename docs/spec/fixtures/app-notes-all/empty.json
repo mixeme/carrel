@@ -406,7 +406,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": null,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",

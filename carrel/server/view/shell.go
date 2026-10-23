@@ -205,12 +205,16 @@ type Details struct {
 	// ForeignShow — «Show 3», кнопка, раскрывающая Foreign: без сценариев —
 	// ссылка на тот же список с этой панелью и ?foreign=1; nil — их нет или
 	// они раскрыты
-	ForeignShow *Action     `json:"foreignShow"`
-	Books       []Field     `json:"books"` // контакт: тот же человек в других книгах (s-contacts-7)
-	Source      SourceBlock `json:"source"`
-	Actions     []Action    `json:"actions"`    // кнопки на виду; удаление — Danger, внизу панели
-	Menu        []MenuItem  `json:"menu"`       // «⋯» панели, в порядке кадра
-	DeleteNote  Text        `json:"deleteNote"` // строка у удаления: у серии «Series is edited and deleted whole.»
+	ForeignShow *Action `json:"foreignShow"`
+	Books       []Field `json:"books"` // контакт: тот же человек в других книгах (s-contacts-7)
+	// LinkedRecord — панель связанной строки единой книги: связанная
+	// запись, не первая копия (записка Typecase 117 п. 5, s-contacts-1); её
+	// места — Books, источника у неё нет
+	LinkedRecord bool        `json:"linkedRecord,omitempty"`
+	Source       SourceBlock `json:"source"`
+	Actions      []Action    `json:"actions"`    // кнопки на виду; удаление — Danger, внизу панели
+	Menu         []MenuItem  `json:"menu"`       // «⋯» панели, в порядке кадра
+	DeleteNote   Text        `json:"deleteNote"` // строка у удаления: у серии «Series is edited and deleted whole.»
 	// Close — крестик без сценариев: тот же список без панели; пусто —
 	// панель пришла фрагментом (C-7.2)
 	Close string `json:"close"`
@@ -247,7 +251,7 @@ type Field struct {
 	// From — у значения связанной записи, где был выбор, — коллекция, откуда
 	// оно взято: метка и имя после значения («Команда», s-contacts-33;
 	// записка Typecase 117 п. 5). nil — выбирать было не из чего
-	From *FieldFrom `json:"from,omitempty"`
+	From *FieldFrom `json:"from"`
 }
 
 // FieldFrom — коллекция, откуда взято значение связанной записи.

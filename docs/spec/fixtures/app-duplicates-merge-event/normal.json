@@ -4,7 +4,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/duplicates/merge?group=group\u0026into=0\u0026v.0=e15\u0026v.1=e4",
+      "href": "/app/duplicates/merge?group=group\u0026into=0\u0026v.0=e15\u0026v.1=e6",
       "id": "duplicates.merge.confirm",
       "label": "Write the merge and delete the rest",
       "method": "POST"
@@ -19,10 +19,13 @@
   ],
   "deleted": [
     {
+      "avatar": null,
       "colour": "#8c6239",
       "detail": "10 Aug",
+      "done": null,
       "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
       "lead": "all day",
+      "percent": null,
       "readOnly": false,
       "repeats": "repeats weekly",
       "stamp": "radicale · vps · Дежурства",
@@ -30,7 +33,9 @@
     }
   ],
   "details": null,
-  "gains": [],
+  "gains": [
+    "2 reminders from the others"
+  ],
   "groupID": "group",
   "happened": [],
   "look": {
@@ -40,7 +45,9 @@
     "theme": "auto",
     "wide": false
   },
-  "notCarried": [],
+  "notCarried": [
+    "1 rewritten occurrence of Дежурство: первая линия · radicale · vps · Дежурства, which belongs to its series and goes with it"
+  ],
   "notices": [],
   "print": {
     "range": "",
@@ -69,7 +76,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": 8,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -87,7 +94,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 5,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -124,90 +131,6 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 2,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Личный",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#4a6b52",
-            "count": 4,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дела",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#3f6e8c",
-            "count": 4,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Работа",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#a05a2c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дни рождения",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#4a6b52",
-            "count": 2,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Записи",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#6b4e7a",
-            "count": 1,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дневник",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#3f6e8c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Общие с семьёй",
-            "on": false,
-            "readOnly": true,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#4a6b52",
             "count": 5,
             "detail": "",
             "feed": false,
@@ -232,7 +155,43 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 1,
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Команда",
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Личный",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 5,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Работа",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "",
@@ -255,32 +214,8 @@
             "tick": "on"
           },
           {
-            "colour": "#6b4e7a",
-            "count": 2,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Команда",
-            "on": false,
-            "readOnly": true,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#6b4e7a",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Рассылки",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
             "colour": "#9a9280",
-            "count": null,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "",
@@ -288,7 +223,7 @@
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
           },
           {
             "colour": "#8c6239",
@@ -303,20 +238,44 @@
             "tick": "on"
           },
           {
-            "colour": "#6b4e7a",
-            "count": null,
+            "colour": "#4a6b52",
+            "count": 4,
             "detail": "",
-            "feed": true,
+            "feed": false,
             "href": "",
-            "label": "Расписание лиги",
+            "label": "Дела",
             "on": false,
-            "readOnly": true,
+            "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Записи",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дневник",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
           }
         ],
         "state": "ok",
-        "tally": "11 / 16"
+        "tally": "12 / 12"
       }
     ],
     "shortcuts": [],
@@ -327,6 +286,7 @@
   "stays": [
     {
       "enabled": true,
+      "href": "/app/duplicates/merge?group=group\u0026into=0",
       "id": "duplicates.merge.into",
       "label": "nextcloud · Работа",
       "method": "GET",
@@ -343,10 +303,13 @@
   "staysNote": "Дежурство: первая линия there is rewritten with the values you chose.",
   "subtitle": "Дежурство: первая линия · 2 records",
   "target": {
+    "avatar": null,
     "colour": "#3f6e8c",
     "detail": "10 Aug",
+    "done": null,
     "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
     "lead": "all day",
+    "percent": null,
     "readOnly": false,
     "repeats": "repeats weekly",
     "stamp": "nextcloud · Работа",
@@ -426,12 +389,15 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "hint": "Compares again what this session has read; open a list to read it anew.",
+        "href": "/app/duplicates",
+        "icon": "i-refresh",
+        "id": "duplicates.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

@@ -48,24 +48,28 @@
   "details": null,
   "fields": [
     {
+      "from": null,
       "href": "tel:+79053310942",
       "label": "Phone · mobile",
       "mono": true,
       "value": "+7 905 331-09-42"
     },
     {
+      "from": null,
       "href": "mailto:vera@example.net",
       "label": "Email · home",
       "mono": false,
       "value": "vera@example.net"
     },
     {
+      "from": null,
       "href": "mailto:vera.l@work.example",
       "label": "Email · work",
       "mono": false,
       "value": "vera.l@work.example"
     },
     {
+      "from": null,
       "href": "mailto:v.lebedeva@example.org",
       "label": "Email · work",
       "mono": false,

@@ -48,36 +48,42 @@
   "details": null,
   "fields": [
     {
+      "from": null,
       "href": "tel:+79124451088",
       "label": "Phone · mobile",
       "mono": true,
       "value": "+7 912 445-10-88"
     },
     {
+      "from": null,
       "href": "tel:+74951204500",
       "label": "Phone · work",
       "mono": true,
       "value": "+7 495 120-45-00"
     },
     {
+      "from": null,
       "href": "mailto:a.kovaleva@slovo.example",
       "label": "Email · work",
       "mono": false,
       "value": "a.kovaleva@slovo.example"
     },
     {
+      "from": null,
       "href": "mailto:anna@home.example",
       "label": "Email · home",
       "mono": false,
       "value": "anna@home.example"
     },
     {
+      "from": null,
       "href": "mailto:anna.kovaleva@slovo.example",
       "label": "Email · second",
       "mono": false,
       "value": "anna.kovaleva@slovo.example"
     },
     {
+      "from": null,
       "href": "",
       "label": "Address · work",
       "mono": false,
@@ -85,12 +91,14 @@
     },
     {
       "aside": "in 7 months",
+      "from": null,
       "href": "",
       "label": "Birthday",
       "mono": true,
       "value": "1987-03-14"
     },
     {
+      "from": null,
       "href": "",
       "label": "Tags",
       "mono": false,
@@ -109,6 +117,7 @@
       "value": ""
     },
     {
+      "from": null,
       "href": "",
       "label": "Note",
       "mono": false,
@@ -117,18 +126,21 @@
   ],
   "foreign": [
     {
+      "from": null,
       "href": "",
       "label": "X-ABLABEL",
       "mono": true,
       "value": "издательство"
     },
     {
+      "from": null,
       "href": "",
       "label": "X-CARREL-UNKNOWN-FLAG",
       "mono": true,
       "value": "1"
     },
     {
+      "from": null,
       "href": "",
       "label": "X-EVOLUTION-FILE-AS",
       "mono": true,

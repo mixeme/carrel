@@ -66,13 +66,15 @@ func TestTheDuplicatesSayWhereTheyLooked(t *testing.T) {
 		t.Fatalf("the rail says nothing about where it looked: %+v", page.Rail.Sections)
 	}
 	sec := page.Rail.Sections[0]
-	// The count apart (Дб2, v0.2.281; until then «Sources 2 / 4» one line).
-	if sec.Account != "Sources" || sec.Tally != "2 / 4" {
-		t.Errorf("rubric = %q %q, want «Sources» «2 / 4»", sec.Account, sec.Tally)
+	// The count apart (Дб2, v0.2.281). The sources are what is ticked and
+	// what was read anyway (s-dup-1, -6): nothing is ticked here, two books
+	// were opened — «2 / 2».
+	if sec.Account != "Sources" || sec.Tally != "2 / 2" {
+		t.Errorf("rubric = %q %q, want «Sources» «2 / 2»", sec.Account, sec.Tally)
 	}
 	var loaded []string
 	for _, r := range sec.Rows {
-		if r.Tick == view.TickOn {
+		if r.Count != nil {
 			loaded = append(loaded, string(r.Label))
 		}
 	}

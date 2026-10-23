@@ -11,6 +11,7 @@ import (
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -302,29 +303,35 @@ var linkedPlaces = map[view.Kind]string{
 }
 
 // linkedHead is the line under the title: «All address books · in 3
-// books»; a note says where its text came from, when it was a choice.
+// books».
 func (lr linkedRecord) linkedHead(k view.Kind) string {
-	head := linkedPlaces[k] + " · in " + strconv.Itoa(len(lr.members)) + " " + copyHolders[k][1]
+	return linkedPlaces[k] + " · in " + strconv.Itoa(len(lr.members)) + " " + copyHolders[k][1]
+}
+
+// textFrom is where a note's text came from, when it was a choice
+// (s-notes-32, «text from ▪ Записи»).
+func (lr linkedRecord) textFrom() *view.FieldFrom {
 	for _, q := range lr.qs {
 		if q.prop() == "TEXT" {
-			head += " · text from " + q.opts[q.chosen].holders[0].col
+			return lr.from(q.opts[q.chosen].holders[0].col)
 		}
 	}
-	return head
+	return nil
 }
 
 // linkedActions are the head of the card: Edit — «Which copy to edit?» —,
 // and «⋯» with Print, Open in Duplicates and, under a line, Unlink
 // (s-contacts-33, -36).
 func (s *Server) linkedActions(sess *session.Session, segment, uid, group string) ([]view.Action, []view.MenuItem) {
-	edit := view.Action{ID: "record.edit", Label: "Edit", Icon: "i-pencil", Href: s.route("/app/" + segment + "/linked/" + url.PathEscape(uid) + "/copies"),
-		Method: "GET", Primary: true, Enabled: true}
+	here := "/app/" + segment + "/linked/" + url.PathEscape(uid)
+	edit := view.Action{ID: "record.edit", Label: "Edit", Icon: "i-pencil", Href: s.route(here + "/copies"),
+		Method: "GET", Primary: true, Enabled: true, Target: render.TargetSheet}
 	// Unlink is the form of the decision, the group its button's
 	// (s-contacts-36).
 	unlink := view.Action{ID: "duplicates.unlink", Label: "Unlink", Icon: "i-link", Method: "POST", Enabled: true,
 		Href: s.postQuery("/app/duplicates/decide", url.Values{"do": {"unlink"}}), Name: "group", Value: group}
 	menu := []view.MenuItem{
-		{Action: view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Method: "GET", Enabled: true}},
+		{Action: view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(here + printQuery), Method: "GET", Enabled: true}},
 		{Action: view.Action{ID: "duplicates.open", Label: "Open in Duplicates", Icon: "i-dup", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true}},
 		{Separator: true, Action: unlink},
 	}
@@ -354,6 +361,9 @@ func (s *Server) linkedPage(sess *session.Session, spec kindSpec, lr linkedRecor
 		return p
 	case view.NotePage:
 		p.LinkedRecord, p.Subtitle, p.Meta.Linked = true, text(head), s.keptRows(lr, shown)
+		if p.TextFrom = lr.textFrom(); p.TextFrom != nil {
+			p.Subtitle += " · text from"
+		}
 		for _, q := range lr.qs {
 			if q.prop() == "CATEGORIES" {
 				p.Meta.TagsFrom = lr.tagsFrom(q)
@@ -423,7 +433,7 @@ func (s *Server) linkedDetails(ctx context.Context, sess *session.Session, spec 
 		return d
 	}
 	out := s.recordDetails(lr.base.c, lr.base.ref.UID, lr.chosen)
-	out.Close = d.Close
+	out.Close, out.LinkedRecord = d.Close, true
 	out.Subtitle = text("in " + strconv.Itoa(len(lr.members)) + " " + copyHolders[spec.kind][1])
 	out.Fields = lr.markFrom(out.Fields)
 	out.Foreign, out.ForeignShow, out.Source, out.DeleteNote = nil, nil, view.SourceBlock{}, ""

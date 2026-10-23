@@ -1094,6 +1094,7 @@
           "label": "created 12:00 Asia/Yekaterinburg",
           "role": "neutral"
         },
+        "from": null,
         "href": "",
         "label": "When",
         "mono": false,
@@ -1113,30 +1114,35 @@
           "label": "until 2026-12-28",
           "role": "neutral"
         },
+        "from": null,
         "href": "",
         "label": "Repeats",
         "mono": false,
         "value": "Weekly on Mon"
       },
       {
+        "from": null,
         "href": "",
         "label": "Reminders",
         "mono": false,
         "value": "10 minutes before · 1 day before"
       },
       {
+        "from": null,
         "href": "",
         "label": "Where",
         "mono": false,
         "value": "Переговорная 2"
       },
       {
+        "from": null,
         "href": "",
         "label": "Status",
         "mono": false,
         "value": "Confirmed"
       },
       {
+        "from": null,
         "href": "",
         "label": "Tags",
         "mono": false,

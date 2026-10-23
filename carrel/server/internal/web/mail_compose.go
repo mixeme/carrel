@@ -300,12 +300,24 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 // ticked books whose person's name holds the words — that one known to the
 // letter by the name and the book's mark (Пб18).
 func (s *Server) typedRecipient(sess *session.Session, d *mailDraft, typed string) (string, bool) {
+	people := s.bookPeople(sess)
 	if a, err := cmail.Addresses([]string{typed}); err == nil && len(a) == 1 {
+		// An address the books know is the person's, named and marked as
+		// one picked from the suggestions (s-mail-1).
+		for _, p := range people {
+			if strings.EqualFold(p.email, a[0]) {
+				if d.Known == nil {
+					d.Known = map[string]knownRecipient{}
+				}
+				d.Known[strings.ToLower(a[0])] = knownRecipient{Name: p.name, Colour: string(p.colour)}
+				break
+			}
+		}
 		return a[0], true
 	}
 	needle := strings.ToLower(typed)
 	var found []bookPerson
-	for _, p := range s.bookPeople(sess) {
+	for _, p := range people {
 		if strings.Contains(strings.ToLower(p.name), needle) && !slices.ContainsFunc(found, func(f bookPerson) bool { return f.email == p.email }) {
 			found = append(found, p)
 		}

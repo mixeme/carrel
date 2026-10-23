@@ -197,7 +197,7 @@ func (s *Server) searchOptions(sess *session.Session) fanout.Options {
 		Parallelism:   conf.FanoutParallelism,
 		SourceTimeout: s.cfg.ProgressSourceTimeout,
 		TotalTimeout:  s.cfg.ProgressTotalTimeout,
-		Key:           searchKey(s.tz()),
+		Key:           searchKey(s.tz(), s.catalogOf(sess)),
 		Acquire:       sess.AcquireFanout,
 		Release:       sess.ReleaseFanout,
 		Finished:      func(snap fanout.Snapshot) { sess.AddHistory(historyEntry(snap)) },
@@ -396,8 +396,17 @@ func foundFileHref(it fanout.Item) string {
 
 // searchKey orders the result by kind — contacts, events, tasks, notes, files
 // — and inside a kind by its natural key: name, time, newest note first,
-// file name (S-14.1).
-func searchKey(tz *time.Location) func(fanout.Item) string {
+// file name (S-14.1); one record in several collections by the catalog's
+// order of its connections, then its path — an account's ID is random, and
+// ordering by it is not an order (Анна in three books, s-find-1).
+func searchKey(tz *time.Location, blob sealed.Blob) func(fanout.Item) string {
+	rank := map[string]int{}
+	for i, c := range blob.Connections {
+		rank[c.ID] = i
+	}
+	for i, f := range blob.Subscriptions {
+		rank[f.ID] = len(blob.Connections) + i
+	}
 	return func(it fanout.Item) string {
 		var key string
 		switch it.Kind {
@@ -414,7 +423,7 @@ func searchKey(tz *time.Location) func(fanout.Item) string {
 		default:
 			key = "4" + strings.ToLower(it.FileName)
 		}
-		return key + "\x00" + it.AccountID + "\x00" + it.Path
+		return key + "\x00" + fmt.Sprintf("%04d", rank[it.AccountID]) + "\x00" + it.Path
 	}
 }
 

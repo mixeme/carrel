@@ -60,7 +60,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": 8,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -78,7 +78,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 5,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -115,90 +115,6 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 2,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Личный",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#4a6b52",
-            "count": 4,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дела",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#3f6e8c",
-            "count": 4,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Работа",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#a05a2c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дни рождения",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#4a6b52",
-            "count": 2,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Записи",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#6b4e7a",
-            "count": 1,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дневник",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#3f6e8c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Общие с семьёй",
-            "on": false,
-            "readOnly": true,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#4a6b52",
             "count": 5,
             "detail": "",
             "feed": false,
@@ -223,7 +139,43 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 1,
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Команда",
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Личный",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 5,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Работа",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "",
@@ -246,32 +198,8 @@
             "tick": "on"
           },
           {
-            "colour": "#6b4e7a",
-            "count": 2,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Команда",
-            "on": false,
-            "readOnly": true,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#6b4e7a",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Рассылки",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
             "colour": "#9a9280",
-            "count": null,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "",
@@ -279,7 +207,7 @@
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
           },
           {
             "colour": "#8c6239",
@@ -294,20 +222,44 @@
             "tick": "on"
           },
           {
-            "colour": "#6b4e7a",
-            "count": null,
+            "colour": "#4a6b52",
+            "count": 4,
             "detail": "",
-            "feed": true,
+            "feed": false,
             "href": "",
-            "label": "Расписание лиги",
+            "label": "Дела",
             "on": false,
-            "readOnly": true,
+            "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Записи",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дневник",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
           }
         ],
         "state": "ok",
-        "tally": "11 / 16"
+        "tally": "12 / 12"
       }
     ],
     "shortcuts": [],
@@ -326,8 +278,10 @@
     },
     "colour": "#a05a2c",
     "detail": "+7 905 331-09-42 · vera@example.net",
+    "done": null,
     "email": "vera@example.net",
     "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
+    "percent": null,
     "phone": "+7 905 331-09-42",
     "readOnly": false,
     "stamp": "nextcloud · Архив",
@@ -407,12 +361,15 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "hint": "Compares again what this session has read; open a list to read it anew.",
+        "href": "/app/duplicates",
+        "icon": "i-refresh",
+        "id": "duplicates.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {
@@ -464,9 +421,7 @@
     "details": {
       "lines": [
         "nextcloud",
-        "dav: HTTP 403: \u003cerror/\u003e",
-        "Not looked in: Общий · baikal — dav: HTTP 401: 401 Unauthorized",
-        "Not looked in: collections that are not ticked. A link in one of them still points at the old card."
+        "dav: HTTP 403: \u003cerror/\u003e"
       ],
       "summary": "DELETE /alice/contacts/kontakty/b52e-7d08-c6f1.vcf"
     },

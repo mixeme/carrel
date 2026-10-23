@@ -338,9 +338,11 @@ type NotePage struct {
 	LinkedRecord bool   `json:"linkedRecord,omitempty"`
 	UID          string `json:"uid"`
 	// Subtitle — у связанной заметки, открытой из объединённого вида: где
-	// она и откуда её текст, «All notebooks · in 2 notebooks · text from
-	// Записи» (s-notes-32); пусто — у заметки одной тетради
+	// она, «All notebooks · in 2 notebooks», и — когда текст выбирали —
+	// «· text from», а за ним коллекция текста TextFrom, меткой и именем
+	// (s-notes-32); пусто — у заметки одной тетради
 	Subtitle Text        `json:"subtitle,omitempty"`
+	TextFrom *FieldFrom  `json:"textFrom"`
 	Doc      NoteDoc     `json:"doc"`
 	Meta     NoteMeta    `json:"meta"`
 	Source   SourceBlock `json:"source"`
@@ -383,7 +385,7 @@ type NoteMeta struct {
 	TagsBadge *Badge `json:"tagsBadge"`
 	// TagsFrom — у связанной заметки: коллекция, откуда взят выбранный тег
 	// (s-notes-32, «Дневник»); nil — выбора не было
-	TagsFrom *FieldFrom `json:"tagsFrom,omitempty"`
+	TagsFrom *FieldFrom `json:"tagsFrom"`
 	// Link — ссылка заметки (URL): «Link», значение и Href, как у карточки
 	// события и задачи (Р8 списка равенства родов; кадра нет); nil — нет
 	Link *Field `json:"link"`

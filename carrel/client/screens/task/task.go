@@ -68,6 +68,11 @@ const (
 //   - The deletion at the foot.
 func Screen(p *view.TaskPage) w.Shell {
 	h := w.Head{Title: &w.HeadTitle{Text: string(p.Summary)}, Subs: bind.Marked(p.Source.Colour, bind.Sub(p.Subtitle))}
+	if p.LinkedRecord {
+		// The linked record: where it is kept, no mark of one list
+		// (s-tasks-17).
+		h.Subs = bind.Sub(p.Subtitle)
+	}
 	var acts []w.ActsPart
 	var attach *view.Action
 	var danger []w.Button
@@ -91,7 +96,7 @@ func Screen(p *view.TaskPage) w.Shell {
 	}
 	if len(p.Menu) > 0 {
 		acts = append(acts, w.Drop{
-			Trigger: w.Button{Icon: "dots", Title: "More"},
+			Trigger: moreButton(p.LinkedRecord),
 			Menu:    w.Menu{Items: append(bind.Twins(p.Actions, printID), bind.MenuItems(p.Menu, rail.ReadOnly)...), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
 		})
 	}
@@ -151,9 +156,14 @@ func Screen(p *view.TaskPage) w.Shell {
 			lines = append(lines, bind.Book(f, lead))
 		}
 		main = append(main, w.Sec{Items: []w.SecPart{
-			w.Rubric{Text: "The same task in other lists", Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Linked)), Tone: w.BadgeLinked}}},
+			w.Rubric{Text: keptRubric(p.LinkedRecord), Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Linked)), Tone: w.BadgeLinked}}},
 			w.SecList{Items: lines, Gap: 5},
 		}})
+	}
+	if p.LinkedRecord {
+		// The source and the deletion are a copy's (s-tasks-17).
+		t := bind.Top(p.Top, top)
+		return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}}
 	}
 	read := string(p.Source.LastRead)
 	if p.Source.Compared != "" {
@@ -231,3 +241,22 @@ func attachments(rows []view.AttachRow) [][]w.SecItemPart {
 // upload is the screen's word (U-1.3) for the item after Attach's arrow that
 // sends the file picked on a page without a script (Typecase's task 109).
 const upload = "Upload"
+
+// moreButton is the «⋯» of the head: on a linked record's card the narrow
+// icon button its frame draws (s-contacts-33, s-agenda-25, s-tasks-17).
+func moreButton(linked bool) w.Button {
+	b := w.Button{Icon: "dots", Title: "More"}
+	if linked {
+		b.Variant = w.ButtonPadX3
+	}
+	return b
+}
+
+// keptRubric is the rubric of the other copies: on a linked record's card,
+// where it is kept (s-tasks-17).
+func keptRubric(linked bool) string {
+	if linked {
+		return "Where this task is kept"
+	}
+	return "The same task in other lists"
+}

@@ -95,7 +95,8 @@ func Kind(a view.Action) w.ButtonKind {
 // (formaction: Remove of a new record's attachment); one that goes
 // somewhere with the form it stands in (GET, Submits: «Edit this copy» of
 // the sheet of copies, s-contacts-32) submits that form, to its own Href
-// when it has one; an action switched off
+// when it has one — a decision of a group's card, do=link, adds its pair
+// (Action.Name, Value: s-dup-1); an action switched off
 // is drawn disabled and says why (Reason), and leads nowhere; one that waits
 // for its form's required fields (Waits) is on and pale, and says what it
 // waits for (Reason). The label,
@@ -107,7 +108,7 @@ func Button(a view.Action, form string) w.Button {
 		b.State = w.ButtonDisabled
 		b.Reason = string(a.Reason)
 	case a.Submits && a.File == "":
-		b.Submit, b.To = true, a.Href
+		b.Submit, b.To, b.Name, b.Value = true, a.Href, a.Name, a.Value
 	case a.Method == "POST":
 		b.Form = form
 	default:

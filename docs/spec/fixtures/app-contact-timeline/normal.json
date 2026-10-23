@@ -206,6 +206,7 @@
     "books": [
       {
         "colour": "#6b4e7a",
+        "from": null,
         "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
         "label": "radicale · vps · Команда",
         "mono": false,
@@ -213,6 +214,7 @@
       },
       {
         "colour": "#a05a2c",
+        "from": null,
         "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
         "label": "nextcloud · Архив",
         "mono": false,
@@ -224,30 +226,35 @@
     "deleteNote": "",
     "fields": [
       {
+        "from": null,
         "href": "tel:+79124451088",
         "label": "Phone · mobile",
         "mono": true,
         "value": "+7 912 445-10-88"
       },
       {
+        "from": null,
         "href": "tel:+74951204500",
         "label": "Phone · work",
         "mono": true,
         "value": "+7 495 120-45-00"
       },
       {
+        "from": null,
         "href": "mailto:a.kovaleva@example.org",
         "label": "Email · work",
         "mono": false,
         "value": "a.kovaleva@example.org"
       },
       {
+        "from": null,
         "href": "mailto:anna.kovaleva@slovo.example",
         "label": "Email · second",
         "mono": false,
         "value": "anna.kovaleva@slovo.example"
       },
       {
+        "from": null,
         "href": "",
         "label": "Address · work",
         "mono": false,
@@ -255,12 +262,14 @@
       },
       {
         "aside": "in 7 months",
+        "from": null,
         "href": "",
         "label": "Birthday",
         "mono": true,
         "value": "1987-03-14"
       },
       {
+        "from": null,
         "href": "",
         "label": "Tags",
         "mono": false,
@@ -279,6 +288,7 @@
         "value": ""
       },
       {
+        "from": null,
         "href": "",
         "label": "Note",
         "mono": false,

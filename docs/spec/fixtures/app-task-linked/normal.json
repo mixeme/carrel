@@ -7,7 +7,8 @@
       "id": "record.edit",
       "label": "Edit",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     }
   ],
   "attach": [
@@ -27,6 +28,7 @@
   "done": false,
   "fields": [
     {
+      "from": null,
       "href": "",
       "label": "Status",
       "mono": false,
@@ -49,6 +51,7 @@
       "value": ""
     },
     {
+      "from": null,
       "href": "",
       "label": "Complete",
       "mono": true,
@@ -65,12 +68,14 @@
       "value": "3"
     },
     {
+      "from": null,
       "href": "",
       "label": "Reminders",
       "mono": false,
       "value": "1 day before"
     },
     {
+      "from": null,
       "href": "",
       "label": "Tags",
       "mono": false,
@@ -87,6 +92,7 @@
   "linked": [
     {
       "colour": "#4a6b52",
+      "from": null,
       "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84",
       "label": "nextcloud · Дела",
       "mono": false,
@@ -94,6 +100,7 @@
     },
     {
       "colour": "#3f6e8c",
+      "from": null,
       "href": "/app/tasks/a-nc-home/rabota/cc11-5a20-7e94",
       "label": "nextcloud · Работа",
       "mono": false,
@@ -106,12 +113,13 @@
     "panel": true,
     "source": true,
     "theme": "auto",
-    "wide": false
+    "wide": true
   },
   "loss": null,
   "menu": [
     {
       "enabled": true,
+      "href": "/app/tasks/linked/aa11-2d09-5f84?print=1",
       "icon": "i-print",
       "id": "record.print",
       "label": "Print",

@@ -126,7 +126,9 @@ func MenuItems(items []view.MenuItem, ro string) []w.MenuPart {
 		case it.Method == "POST" && it.File != "":
 			m.File = &w.FileField{Form: it.ID, Name: it.File, Label: string(it.Label)}
 		case it.Method == "POST":
-			m.Form = it.ID
+			// Unlink of a linked record sends its group with the form of
+			// the decision (s-contacts-36).
+			m.Form, m.Name, m.Value = it.ID, it.Name, it.Value
 		default:
 			m.Href = it.Href
 		}
@@ -629,20 +631,28 @@ func FieldsItem(f view.Field, lead string) w.FieldsItem {
 		}
 		it.Value = append(it.Value, Badge(f.Badge))
 	}
+	// The collection a value of a linked record came from, after it: its
+	// mark and its name, muted (s-contacts-33; Typecase's note 117 p. 5).
+	if f.From != nil {
+		it.After = []w.ValuePart{w.Dim{Mark: &w.Mark{Colour: string(f.From.Colour), Size: w.MarkH11Inline}, Parts: []w.Inline{w.Text(f.From.Name)}}}
+	}
 	return it
 }
 
 // Book is a line of «the same person in other books» (C-6.2 Field of
 // Books): the book's mark, its name leading to the record there, and how it
-// differs, muted after lead, the screen's.
+// differs, muted after lead, the screen's; a copy of a linked record that
+// holds what is shown says nothing (s-agenda-25).
 func Book(f view.Field, lead string) []w.SecItemPart {
-	return []w.SecItemPart{
+	out := []w.SecItemPart{
 		w.Mark{Colour: string(f.Colour), Size: w.MarkH11Inline},
 		w.Text(" "),
 		w.Link{Text: string(f.Label), Href: f.Href},
-		w.Text(" "),
-		w.Dim{Parts: []w.Inline{w.Text(lead + string(f.Value))}},
 	}
+	if f.Value == "" {
+		return out
+	}
+	return append(out, w.Text(" "), w.Dim{Parts: []w.Inline{w.Text(lead + string(f.Value))}})
 }
 
 // SegOption is an action of a switch of links (ListBar.Segments) as its

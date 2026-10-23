@@ -26,9 +26,11 @@
       },
       "colour": "#4a6b52",
       "detail": "+7 905 331-09-42 · v.lebedeva@example.org",
+      "done": null,
       "email": "v.lebedeva@example.org",
       "href": "/app/contacts/a-nc-home/kontakty/b52e-7d08-c6f1",
       "org": "Библиотека №4",
+      "percent": null,
       "phone": "+7 905 331-09-42",
       "readOnly": false,
       "stamp": "nextcloud · Контакты",
@@ -79,7 +81,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 6,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -88,7 +90,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 2,
         "enabled": true,
         "href": "/app/tasks",
         "icon": "i-task",
@@ -97,7 +99,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 3,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -115,7 +117,7 @@
         "method": "GET"
       },
       {
-        "count": 1,
+        "count": 2,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",
@@ -132,90 +134,6 @@
         "account": "Sources",
         "accountID": "",
         "rows": [
-          {
-            "colour": "#4a6b52",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Личный",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#4a6b52",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дела",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#3f6e8c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Работа",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#a05a2c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дни рождения",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#4a6b52",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Записи",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#6b4e7a",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дневник",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#3f6e8c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Общие с семьёй",
-            "on": false,
-            "readOnly": true,
-            "state": "ok",
-            "tick": "off"
-          },
           {
             "colour": "#4a6b52",
             "count": 5,
@@ -242,30 +160,6 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Проекты",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#8c6239",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дежурства",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#6b4e7a",
             "count": 2,
             "detail": "",
             "feed": false,
@@ -277,20 +171,56 @@
             "tick": "on"
           },
           {
-            "colour": "#6b4e7a",
-            "count": null,
+            "colour": "#4a6b52",
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "",
-            "label": "Рассылки",
+            "label": "Личный",
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 4,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Работа",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Проекты",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#8c6239",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дежурства",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
           },
           {
             "colour": "#9a9280",
-            "count": null,
+            "count": 0,
             "detail": "",
             "feed": false,
             "href": "",
@@ -298,11 +228,11 @@
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
           },
           {
             "colour": "#8c6239",
-            "count": null,
+            "count": 3,
             "detail": "",
             "feed": true,
             "href": "",
@@ -310,23 +240,47 @@
             "on": false,
             "readOnly": true,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 4,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дела",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Записи",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
           },
           {
             "colour": "#6b4e7a",
-            "count": null,
+            "count": 1,
             "detail": "",
-            "feed": true,
+            "feed": false,
             "href": "",
-            "label": "Расписание лиги",
+            "label": "Дневник",
             "on": false,
-            "readOnly": true,
+            "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
           }
         ],
         "state": "ok",
-        "tally": "3 / 16"
+        "tally": "12 / 12"
       }
     ],
     "shortcuts": [],
@@ -337,6 +291,7 @@
   "stays": [
     {
       "enabled": true,
+      "href": "/app/duplicates/merge?group=group\u0026into=0\u0026pick.FN=0\u0026pick.ORG=1\u0026pick.PHOTO=1",
       "id": "duplicates.merge.into",
       "label": "nextcloud · Архив",
       "method": "GET",
@@ -360,8 +315,10 @@
     },
     "colour": "#a05a2c",
     "detail": "+7 905 331-09-42 · vera@example.net",
+    "done": null,
     "email": "vera@example.net",
     "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
+    "percent": null,
     "phone": "+7 905 331-09-42",
     "readOnly": false,
     "stamp": "nextcloud · Архив",
@@ -441,12 +398,15 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "hint": "Compares again what this session has read; open a list to read it anew.",
+        "href": "/app/duplicates",
+        "icon": "i-refresh",
+        "id": "duplicates.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

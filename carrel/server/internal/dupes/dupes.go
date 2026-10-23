@@ -48,10 +48,13 @@ const (
 	SameTitleWhen Reason = "title-date"
 )
 
-// Signals are the reasons in the order they are listed and weighed.
+// Signals are the reasons in the order the menu of weights lists them
+// (s-dup-3).
 var Signals = []Reason{SameUID, SameEmail, SamePhone, SameName, SameBirthday, SameTitleWhen}
 
-var reasonOrder = Signals
+// reasonOrder is the order a group says its reasons in: «same phone, same
+// email, same name» (s-dup-1).
+var reasonOrder = []Reason{SameUID, SamePhone, SameEmail, SameName, SameBirthday, SameTitleWhen}
 
 // Weight is the points w gives a signal.
 func Weight(w Weights, r Reason) int {

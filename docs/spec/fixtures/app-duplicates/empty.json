@@ -27,71 +27,6 @@
         }
       ],
       "badge": {
-        "label": "linked ×2",
-        "role": "linked"
-      },
-      "decision": "linked",
-      "form": {
-        "action": "/app/duplicates/decide",
-        "actions": [],
-        "errors": [],
-        "method": "POST",
-        "sets": [
-          {
-            "legend": "",
-            "rows": [
-              {
-                "add": null,
-                "error": "",
-                "extra": null,
-                "hint": "",
-                "kind": "hidden",
-                "label": "",
-                "name": "_csrf",
-                "options": [],
-                "readOnly": false,
-                "required": false,
-                "value": "csrf"
-              },
-              {
-                "add": null,
-                "error": "",
-                "extra": null,
-                "hint": "",
-                "kind": "hidden",
-                "label": "",
-                "name": "group",
-                "options": [],
-                "readOnly": false,
-                "required": false,
-                "value": "g-artem"
-              }
-            ],
-            "unfold": null
-          }
-        ]
-      },
-      "id": "g-artem",
-      "kind": "contact",
-      "note": "Not loaded in this session",
-      "title": "Артём Белов",
-      "uids": "UID c3f7-8a21-1b09, d41a-6f30-92be",
-      "where": "nextcloud · Контакты, radicale · vps · Команда"
-    },
-    {
-      "actions": [
-        {
-          "csrf": "csrf",
-          "enabled": true,
-          "id": "duplicates.unlink",
-          "label": "Unlink",
-          "method": "POST",
-          "name": "do",
-          "submits": true,
-          "value": "unlink"
-        }
-      ],
-      "badge": {
         "label": "linked ×3",
         "role": "linked"
       },
@@ -142,6 +77,71 @@
       "title": "Анна Ковалёва",
       "uids": "UID 4f2b-9c31-a0e7",
       "where": "nextcloud · Архив, nextcloud · Контакты, radicale · vps · Команда"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
+        }
+      ],
+      "badge": {
+        "label": "linked ×2",
+        "role": "linked"
+      },
+      "decision": "linked",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-artem"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "g-artem",
+      "kind": "contact",
+      "note": "Not loaded in this session",
+      "title": "Артём Белов",
+      "uids": "UID c3f7-8a21-1b09, d41a-6f30-92be",
+      "where": "nextcloud · Контакты, radicale · vps · Команда"
     },
     {
       "actions": [
@@ -297,7 +297,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": null,
         "enabled": true,
         "href": "/app/duplicates",
         "icon": "i-dup",
@@ -320,95 +320,11 @@
             "detail": "",
             "feed": false,
             "href": "",
-            "label": "Личный",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#4a6b52",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дела",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#3f6e8c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Работа",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#a05a2c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дни рождения",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#4a6b52",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Записи",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#6b4e7a",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дневник",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#3f6e8c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Общие с семьёй",
-            "on": false,
-            "readOnly": true,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#4a6b52",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
             "label": "Контакты",
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
           },
           {
             "colour": "#a05a2c",
@@ -420,31 +336,7 @@
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#6b4e7a",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Проекты",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#8c6239",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дежурства",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
+            "tick": "on"
           },
           {
             "colour": "#6b4e7a",
@@ -456,7 +348,31 @@
             "on": false,
             "readOnly": true,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Личный",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Работа",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
           },
           {
             "colour": "#6b4e7a",
@@ -464,11 +380,23 @@
             "detail": "",
             "feed": false,
             "href": "",
-            "label": "Рассылки",
+            "label": "Проекты",
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
+          },
+          {
+            "colour": "#8c6239",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дежурства",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
           },
           {
             "colour": "#9a9280",
@@ -480,7 +408,7 @@
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
           },
           {
             "colour": "#8c6239",
@@ -492,23 +420,47 @@
             "on": false,
             "readOnly": true,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дела",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Записи",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
           },
           {
             "colour": "#6b4e7a",
             "count": null,
             "detail": "",
-            "feed": true,
+            "feed": false,
             "href": "",
-            "label": "Расписание лиги",
+            "label": "Дневник",
             "on": false,
-            "readOnly": true,
+            "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
           }
         ],
         "state": "ok",
-        "tally": "0 / 16"
+        "tally": "0 / 12"
       }
     ],
     "shortcuts": [],

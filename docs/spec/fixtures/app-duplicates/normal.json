@@ -6,7 +6,7 @@
     "drop": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 27,
+    "loaded": 32,
     "range": null,
     "segments": [
       {
@@ -218,8 +218,10 @@
           },
           "colour": "#a05a2c",
           "detail": "+7 905 331-09-42 · vera@example.net",
+          "done": null,
           "email": "vera@example.net",
           "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
+          "percent": null,
           "phone": "+7 905 331-09-42",
           "readOnly": false,
           "stamp": "nextcloud · Архив",
@@ -233,9 +235,11 @@
           },
           "colour": "#4a6b52",
           "detail": "+7 905 331-09-42 · v.lebedeva@example.org",
+          "done": null,
           "email": "v.lebedeva@example.org",
           "href": "/app/contacts/a-nc-home/kontakty/b52e-7d08-c6f1",
           "org": "Библиотека №4",
+          "percent": null,
           "phone": "+7 905 331-09-42",
           "readOnly": false,
           "stamp": "nextcloud · Контакты",
@@ -335,20 +339,26 @@
       ],
       "rows": [
         {
+          "avatar": null,
           "colour": "#3f6e8c",
           "detail": "10 Aug",
+          "done": null,
           "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
           "lead": "all day",
+          "percent": null,
           "readOnly": false,
           "repeats": "repeats weekly",
           "stamp": "nextcloud · Работа",
           "title": "Дежурство: первая линия"
         },
         {
+          "avatar": null,
           "colour": "#8c6239",
           "detail": "10 Aug",
+          "done": null,
           "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
           "lead": "all day",
+          "percent": null,
           "readOnly": false,
           "repeats": "repeats weekly",
           "stamp": "radicale · vps · Дежурства",
@@ -357,164 +367,6 @@
       ],
       "score": 70,
       "title": "Дежурство: первая линия"
-    },
-    {
-      "actions": [
-        {
-          "csrf": "csrf",
-          "enabled": true,
-          "id": "duplicates.choose",
-          "label": "Keep these values",
-          "method": "POST",
-          "name": "do",
-          "primary": true,
-          "submits": true,
-          "value": "choose"
-        },
-        {
-          "csrf": "csrf",
-          "enabled": true,
-          "id": "duplicates.unlink",
-          "label": "Unlink",
-          "method": "POST",
-          "name": "do",
-          "submits": true,
-          "value": "unlink"
-        },
-        {
-          "csrf": "csrf",
-          "danger": true,
-          "enabled": false,
-          "id": "duplicates.merge",
-          "label": "Merge on the server",
-          "method": "POST",
-          "name": "do",
-          "reason": "Команда is read-only: its record could be neither rewritten nor deleted.",
-          "submits": true,
-          "value": "merge"
-        }
-      ],
-      "badge": {
-        "label": "linked ×2",
-        "role": "linked"
-      },
-      "choices": [
-        {
-          "chosen": 0,
-          "kept": [
-            0
-          ],
-          "many": true,
-          "name": "choice.TEL",
-          "options": [
-            "+7 495 780-11-90 · Команда"
-          ],
-          "property": "Phone · work",
-          "union": false,
-          "values": [
-            "1"
-          ]
-        },
-        {
-          "chosen": 1,
-          "name": "choice.PHOTO",
-          "options": [
-            "— · Контакты",
-            "radicale · vps · Команда"
-          ],
-          "property": "Photo",
-          "union": false,
-          "values": [
-            "1",
-            "2"
-          ]
-        }
-      ],
-      "decision": "linked",
-      "form": {
-        "action": "/app/duplicates/decide",
-        "actions": [],
-        "errors": [],
-        "method": "POST",
-        "sets": [
-          {
-            "legend": "",
-            "rows": [
-              {
-                "add": null,
-                "error": "",
-                "extra": null,
-                "hint": "",
-                "kind": "hidden",
-                "label": "",
-                "name": "_csrf",
-                "options": [],
-                "readOnly": false,
-                "required": false,
-                "value": "csrf"
-              },
-              {
-                "add": null,
-                "error": "",
-                "extra": null,
-                "hint": "",
-                "kind": "hidden",
-                "label": "",
-                "name": "group",
-                "options": [],
-                "readOnly": false,
-                "required": false,
-                "value": "g-artem"
-              }
-            ],
-            "unfold": null
-          }
-        ]
-      },
-      "id": "g-artem",
-      "kind": "contact",
-      "points": "140 points · same email, same phone, same name",
-      "reasons": [
-        "same email",
-        "same phone",
-        "same name"
-      ],
-      "rows": [
-        {
-          "avatar": {
-            "colour": "#3f6e8c",
-            "href": "",
-            "initials": "АБ"
-          },
-          "colour": "#4a6b52",
-          "detail": "+7 903 118-22-04 · a.belov@example.org",
-          "email": "a.belov@example.org",
-          "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
-          "org": "Тензор",
-          "phone": "+7 903 118-22-04",
-          "readOnly": false,
-          "stamp": "nextcloud · Контакты",
-          "title": "Артём Белов"
-        },
-        {
-          "avatar": {
-            "colour": "#a05a2c",
-            "href": "/c/a-rad-vps/komanda/d41a-6f30-92be/photo?size=thumb\u0026v=e1",
-            "initials": "АБ"
-          },
-          "colour": "#6b4e7a",
-          "detail": "+7 903 118-22-04 · a.belov@example.org",
-          "email": "a.belov@example.org",
-          "href": "/app/contacts/a-rad-vps/komanda/d41a-6f30-92be",
-          "org": "Тензор",
-          "phone": "+7 903 118-22-04",
-          "readOnly": true,
-          "stamp": "radicale · vps · Команда",
-          "title": "Артём Белов"
-        }
-      ],
-      "score": 140,
-      "title": "Артём Белов"
     },
     {
       "actions": [
@@ -635,11 +487,11 @@
       },
       "id": "g-anna",
       "kind": "contact",
-      "points": "220 points · same UID, same email, same phone, same name",
+      "points": "220 points · same UID, same phone, same email, same name",
       "reasons": [
         "same UID",
-        "same email",
         "same phone",
+        "same email",
         "same name"
       ],
       "rows": [
@@ -651,9 +503,11 @@
           },
           "colour": "#a05a2c",
           "detail": "+7 912 445-10-88 · a.kovaleva@example.org",
+          "done": null,
           "email": "a.kovaleva@example.org",
           "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
           "org": "Издательство «Слово»",
+          "percent": null,
           "phone": "+7 912 445-10-88",
           "readOnly": false,
           "stamp": "nextcloud · Архив",
@@ -667,9 +521,11 @@
           },
           "colour": "#4a6b52",
           "detail": "+7 912 445-10-88 · a.kovaleva@example.org",
+          "done": null,
           "email": "a.kovaleva@example.org",
           "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
           "org": "Издательство «Слово»",
+          "percent": null,
           "phone": "+7 912 445-10-88",
           "readOnly": false,
           "stamp": "nextcloud · Контакты",
@@ -683,9 +539,11 @@
           },
           "colour": "#6b4e7a",
           "detail": "+7 912 445-10-88 · a.kovaleva@example.org",
+          "done": null,
           "email": "a.kovaleva@example.org",
           "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
           "org": "Издательство «Слово»",
+          "percent": null,
           "phone": "+7 912 445-10-88",
           "readOnly": true,
           "stamp": "radicale · vps · Команда",
@@ -694,6 +552,717 @@
       ],
       "score": 220,
       "title": "Анна Ковалёва"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.choose",
+          "label": "Keep these values",
+          "method": "POST",
+          "name": "do",
+          "primary": true,
+          "submits": true,
+          "value": "choose"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": false,
+          "id": "duplicates.merge",
+          "label": "Merge on the server",
+          "method": "POST",
+          "name": "do",
+          "reason": "Команда is read-only: its record could be neither rewritten nor deleted.",
+          "submits": true,
+          "value": "merge"
+        }
+      ],
+      "badge": {
+        "label": "linked ×2",
+        "role": "linked"
+      },
+      "choices": [
+        {
+          "chosen": 1,
+          "name": "choice.PHOTO",
+          "options": [
+            "— · Контакты",
+            "radicale · vps · Команда"
+          ],
+          "property": "Photo",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        }
+      ],
+      "decision": "linked",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-artem"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "g-artem",
+      "kind": "contact",
+      "points": "140 points · same phone, same email, same name",
+      "reasons": [
+        "same phone",
+        "same email",
+        "same name"
+      ],
+      "rows": [
+        {
+          "avatar": {
+            "colour": "#3f6e8c",
+            "href": "",
+            "initials": "АБ"
+          },
+          "colour": "#4a6b52",
+          "detail": "+7 903 118-22-04 · a.belov@example.org",
+          "done": null,
+          "email": "a.belov@example.org",
+          "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
+          "org": "Тензор",
+          "percent": null,
+          "phone": "+7 903 118-22-04",
+          "readOnly": false,
+          "stamp": "nextcloud · Контакты",
+          "title": "Артём Белов"
+        },
+        {
+          "avatar": {
+            "colour": "#a05a2c",
+            "href": "/c/a-rad-vps/komanda/d41a-6f30-92be/photo?size=thumb\u0026v=e1",
+            "initials": "АБ"
+          },
+          "colour": "#6b4e7a",
+          "detail": "+7 903 118-22-04 · a.belov@example.org",
+          "done": null,
+          "email": "a.belov@example.org",
+          "href": "/app/contacts/a-rad-vps/komanda/d41a-6f30-92be",
+          "org": "Тензор",
+          "percent": null,
+          "phone": "+7 903 118-22-04",
+          "readOnly": true,
+          "stamp": "radicale · vps · Команда",
+          "title": "Артём Белов"
+        }
+      ],
+      "score": 140,
+      "title": "Артём Белов"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.choose",
+          "label": "Keep these values",
+          "method": "POST",
+          "name": "do",
+          "primary": true,
+          "submits": true,
+          "value": "choose"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "id": "duplicates.merge",
+          "label": "Merge on the server",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "merge"
+        }
+      ],
+      "badge": {
+        "label": "linked ×3",
+        "role": "linked"
+      },
+      "choices": [
+        {
+          "chosen": 0,
+          "name": "choice.WHEN",
+          "options": [
+            "Mon 10:00 – 11:00, weekly · Личный, Проекты",
+            "Mon 10:30 – 11:30, weekly · Общий"
+          ],
+          "property": "When",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 0,
+          "name": "choice.LOCATION",
+          "options": [
+            "Переговорная 2 · Личный, Проекты",
+            "Переговорная 3 · Общий"
+          ],
+          "property": "Where",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        }
+      ],
+      "decision": "linked",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-sinkap"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "g-sinkap",
+      "kind": "event",
+      "points": "70 points · same title, same start",
+      "reasons": [
+        "same title, same start"
+      ],
+      "rows": [
+        {
+          "avatar": null,
+          "colour": "#4a6b52",
+          "detail": "10 Aug 10:00",
+          "done": null,
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+          "lead": "10:00",
+          "percent": null,
+          "place": "Переговорная 2",
+          "readOnly": false,
+          "repeats": "repeats weekly",
+          "stamp": "nextcloud · Личный",
+          "title": "Синк-ап по релизу"
+        },
+        {
+          "avatar": null,
+          "colour": "#6b4e7a",
+          "detail": "10 Aug 10:00",
+          "done": null,
+          "href": "/app/calendar/a-rad-vps/proekty/4b2e-9d10-8f1c",
+          "lead": "10:00",
+          "percent": null,
+          "place": "Переговорная 2",
+          "readOnly": false,
+          "repeats": "repeats weekly",
+          "stamp": "radicale · vps · Проекты",
+          "title": "Синк-ап по релизу"
+        },
+        {
+          "avatar": null,
+          "colour": "#9a9280",
+          "detail": "10 Aug 10:30",
+          "done": null,
+          "href": "/app/calendar/a-baikal/obshchij/6a7d-2c51-e930",
+          "lead": "10:30",
+          "percent": null,
+          "place": "Переговорная 3",
+          "readOnly": false,
+          "repeats": "repeats weekly",
+          "stamp": "baikal · Общий",
+          "title": "Синк-ап по релизу"
+        }
+      ],
+      "score": 70,
+      "title": "Синк-ап по релизу"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.choose",
+          "label": "Keep these values",
+          "method": "POST",
+          "name": "do",
+          "primary": true,
+          "submits": true,
+          "value": "choose"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "id": "duplicates.merge",
+          "label": "Merge on the server",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "merge"
+        }
+      ],
+      "badge": {
+        "label": "linked ×2",
+        "role": "linked"
+      },
+      "choices": [
+        {
+          "chosen": 0,
+          "name": "choice.DUE",
+          "options": [
+            "12 Aug 18:00 · Дела",
+            "12 Aug · Работа"
+          ],
+          "property": "Due",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 1,
+          "name": "choice.PRIORITY",
+          "options": [
+            "5 · Дела",
+            "3 · Работа"
+          ],
+          "property": "Priority",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        }
+      ],
+      "decision": "linked",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-chemodan"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "g-chemodan",
+      "kind": "task",
+      "points": "70 points · same title, same due date",
+      "reasons": [
+        "same title, same due date"
+      ],
+      "rows": [
+        {
+          "avatar": null,
+          "colour": "#4a6b52",
+          "detail": "12 Aug 18:00",
+          "done": false,
+          "due": "12 Aug 18:00",
+          "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84",
+          "percent": null,
+          "readOnly": false,
+          "stamp": "nextcloud · Дела",
+          "title": "Собрать чемодан"
+        },
+        {
+          "avatar": null,
+          "colour": "#3f6e8c",
+          "detail": "12 Aug",
+          "done": false,
+          "due": "12 Aug",
+          "href": "/app/tasks/a-nc-home/rabota/cc11-5a20-7e94",
+          "percent": null,
+          "readOnly": false,
+          "stamp": "nextcloud · Работа",
+          "title": "Собрать чемодан"
+        }
+      ],
+      "score": 70,
+      "title": "Собрать чемодан"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.choose",
+          "label": "Keep these values",
+          "method": "POST",
+          "name": "do",
+          "primary": true,
+          "submits": true,
+          "value": "choose"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "id": "duplicates.merge",
+          "label": "Merge on the server",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "merge"
+        }
+      ],
+      "badge": {
+        "label": "linked ×2",
+        "role": "linked"
+      },
+      "choices": [
+        {
+          "chosen": 0,
+          "name": "choice.TEXT",
+          "options": [
+            "nextcloud · Дневник",
+            "nextcloud · Записи"
+          ],
+          "property": "Text",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 0,
+          "kept": [
+            0
+          ],
+          "many": true,
+          "name": "choice.CATEGORIES",
+          "options": [
+            "релиз · Записи"
+          ],
+          "property": "Tags",
+          "union": false,
+          "values": [
+            "1"
+          ]
+        }
+      ],
+      "decision": "linked",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-vstrecha"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "g-vstrecha",
+      "kind": "note",
+      "points": "70 points · same title, same date",
+      "reasons": [
+        "same title, same date"
+      ],
+      "rows": [
+        {
+          "avatar": null,
+          "colour": "#6b4e7a",
+          "date": "10 Aug",
+          "detail": "10 Aug",
+          "done": null,
+          "excerpt": "Черновик. Договорились заморозить ветку в среду.",
+          "href": "/app/notes/a-nc-home/dnevnik/9e31-40b7-c012",
+          "percent": null,
+          "readOnly": false,
+          "stamp": "nextcloud · Дневник",
+          "title": "Заметка со встречи 10.08"
+        },
+        {
+          "avatar": null,
+          "colour": "#4a6b52",
+          "date": "10 Aug",
+          "detail": "10 Aug",
+          "done": null,
+          "excerpt": "Договорились заморозить ветку в среду.",
+          "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+          "percent": null,
+          "readOnly": false,
+          "stamp": "nextcloud · Записи",
+          "title": "Заметка со встречи 10.08"
+        }
+      ],
+      "score": 70,
+      "title": "Заметка со встречи 10.08"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": true,
+          "id": "duplicates.merge",
+          "label": "Merge on the server",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "merge"
+        }
+      ],
+      "badge": {
+        "label": "linked ×2",
+        "role": "linked"
+      },
+      "choices": [],
+      "decision": "linked",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-crdt"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "hint": "Same title and the same date: a note copied into a second notebook. Linked, the two are shown as one row; merging writes one and deletes the other.",
+      "id": "g-crdt",
+      "kind": "note",
+      "points": "70 points · same title, same date",
+      "reasons": [
+        "same title, same date"
+      ],
+      "rows": [
+        {
+          "avatar": null,
+          "colour": "#6b4e7a",
+          "date": "8 Aug",
+          "detail": "8 Aug",
+          "done": null,
+          "excerpt": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",
+          "href": "/app/notes/a-nc-home/dnevnik/8e04-21ab-d517",
+          "percent": null,
+          "readOnly": false,
+          "stamp": "nextcloud · Дневник",
+          "title": "Что почитать про CRDT"
+        },
+        {
+          "avatar": null,
+          "colour": "#4a6b52",
+          "date": "8 Aug",
+          "detail": "8 Aug",
+          "done": null,
+          "excerpt": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",
+          "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408",
+          "percent": null,
+          "readOnly": false,
+          "stamp": "nextcloud · Записи",
+          "title": "Что почитать про CRDT"
+        }
+      ],
+      "score": 70,
+      "title": "Что почитать про CRDT"
     },
     {
       "actions": [
@@ -712,93 +1281,7 @@
         "label": "not duplicates",
         "role": "neutral"
       },
-      "choices": [
-        {
-          "chosen": 0,
-          "name": "choice.FN",
-          "options": [
-            "Анна Ковалёва · Контакты",
-            "Алексей Смирнов · Контакты"
-          ],
-          "property": "Display name",
-          "union": false,
-          "values": [
-            "1",
-            "2"
-          ]
-        },
-        {
-          "chosen": 0,
-          "name": "choice.ORG",
-          "options": [
-            "Издательство «Слово» · Контакты",
-            "— · Контакты"
-          ],
-          "property": "Organisation",
-          "union": false,
-          "values": [
-            "1",
-            "2"
-          ]
-        },
-        {
-          "chosen": 0,
-          "kept": [
-            0,
-            1
-          ],
-          "many": true,
-          "name": "choice.TEL",
-          "options": [
-            "+7 912 445-10-88 · Контакты",
-            "+7 916 200-71-15 · Контакты"
-          ],
-          "property": "Phone · mobile",
-          "union": false,
-          "values": [
-            "1",
-            "2"
-          ]
-        },
-        {
-          "chosen": 0,
-          "kept": [
-            0,
-            1
-          ],
-          "many": true,
-          "name": "choice.EMAIL",
-          "options": [
-            "a.kovaleva@example.org · Контакты",
-            "anna.kovaleva@slovo.example · Контакты"
-          ],
-          "property": "Email",
-          "union": false,
-          "values": [
-            "1",
-            "2"
-          ]
-        },
-        {
-          "chosen": 0,
-          "kept": [
-            0,
-            1
-          ],
-          "many": true,
-          "name": "choice.CATEGORIES",
-          "options": [
-            "работа · Контакты",
-            "издательство · Контакты"
-          ],
-          "property": "Tags",
-          "union": false,
-          "values": [
-            "1",
-            "2"
-          ]
-        }
-      ],
+      "choices": [],
       "decision": "ignored",
       "form": {
         "action": "/app/duplicates/decide",
@@ -855,9 +1338,11 @@
           },
           "colour": "#4a6b52",
           "detail": "+7 912 445-10-88 · a.kovaleva@example.org",
+          "done": null,
           "email": "a.kovaleva@example.org",
           "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
           "org": "Издательство «Слово»",
+          "percent": null,
           "phone": "+7 912 445-10-88",
           "readOnly": false,
           "stamp": "nextcloud · Контакты",
@@ -871,7 +1356,9 @@
           },
           "colour": "#4a6b52",
           "detail": "+7 916 200-71-15",
+          "done": null,
           "href": "/app/contacts/a-nc-home/kontakty/9a1c-03de-77f2",
+          "percent": null,
           "phone": "+7 916 200-71-15",
           "readOnly": false,
           "stamp": "nextcloud · Контакты",
@@ -899,7 +1386,7 @@
     }
   ],
   "print": {
-    "range": "27 records compared · 60 points and above",
+    "range": "32 records compared · 60 points and above",
     "taken": "",
     "title": "Duplicates"
   },
@@ -925,7 +1412,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": 8,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -943,7 +1430,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 5,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -980,90 +1467,6 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 2,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Личный",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#4a6b52",
-            "count": 4,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дела",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#3f6e8c",
-            "count": 4,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Работа",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#a05a2c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дни рождения",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#4a6b52",
-            "count": 2,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Записи",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#6b4e7a",
-            "count": 1,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Дневник",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#3f6e8c",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Общие с семьёй",
-            "on": false,
-            "readOnly": true,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
-            "colour": "#4a6b52",
             "count": 5,
             "detail": "",
             "feed": false,
@@ -1088,7 +1491,43 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 1,
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Команда",
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Личный",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 5,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Работа",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "",
@@ -1111,32 +1550,8 @@
             "tick": "on"
           },
           {
-            "colour": "#6b4e7a",
-            "count": 2,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Команда",
-            "on": false,
-            "readOnly": true,
-            "state": "ok",
-            "tick": "on"
-          },
-          {
-            "colour": "#6b4e7a",
-            "count": null,
-            "detail": "",
-            "feed": false,
-            "href": "",
-            "label": "Рассылки",
-            "on": false,
-            "readOnly": false,
-            "state": "ok",
-            "tick": "off"
-          },
-          {
             "colour": "#9a9280",
-            "count": null,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "",
@@ -1144,7 +1559,7 @@
             "on": false,
             "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
           },
           {
             "colour": "#8c6239",
@@ -1159,27 +1574,51 @@
             "tick": "on"
           },
           {
-            "colour": "#6b4e7a",
-            "count": null,
+            "colour": "#4a6b52",
+            "count": 4,
             "detail": "",
-            "feed": true,
+            "feed": false,
             "href": "",
-            "label": "Расписание лиги",
+            "label": "Дела",
             "on": false,
-            "readOnly": true,
+            "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Записи",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дневник",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
           }
         ],
         "state": "ok",
-        "tally": "11 / 16"
+        "tally": "12 / 12"
       }
     ],
     "shortcuts": [],
     "tags": [],
     "ticks": null
   },
-  "subtitle": "27 records compared · 2 to look at",
+  "subtitle": "32 records compared · 2 to look at",
   "threshold": {
     "default": 60,
     "form": {

@@ -120,6 +120,7 @@
         "label": "created 12:00 Asia/Yekaterinburg",
         "role": "neutral"
       },
+      "from": null,
       "href": "",
       "label": "When",
       "mono": false,
@@ -139,12 +140,14 @@
         "label": "until 2026-12-28",
         "role": "neutral"
       },
+      "from": null,
       "href": "",
       "label": "Repeats",
       "mono": false,
       "value": "Weekly on Mon"
     },
     {
+      "from": null,
       "href": "",
       "label": "Reminders",
       "mono": false,
@@ -155,18 +158,21 @@
         "label": "linked",
         "role": "linked"
       },
+      "from": null,
       "href": "",
       "label": "Where",
       "mono": false,
       "value": "Переговорная 2"
     },
     {
+      "from": null,
       "href": "",
       "label": "Status",
       "mono": false,
       "value": "Confirmed"
     },
     {
+      "from": null,
       "href": "",
       "label": "Tags",
       "mono": false,
@@ -188,6 +194,7 @@
   "linked": [
     {
       "colour": "#6b4e7a",
+      "from": null,
       "href": "/app/calendar/a-rad-vps/proekty/4b2e-9d10-8f1c",
       "label": "radicale · vps · Проекты",
       "mono": false,
@@ -195,6 +202,7 @@
     },
     {
       "colour": "#9a9280",
+      "from": null,
       "href": "/app/calendar/a-baikal/obshchij/6a7d-2c51-e930",
       "label": "baikal · Общий",
       "mono": false,
@@ -329,18 +337,21 @@
   "recurrence": {
     "fields": [
       {
+        "from": null,
         "href": "",
         "label": "Next",
         "mono": false,
         "value": "17 August 2026, 10:00"
       },
       {
+        "from": null,
         "href": "",
         "label": "Then",
         "mono": false,
         "value": "24 August 2026, 10:00"
       },
       {
+        "from": null,
         "href": "",
         "label": "Then",
         "mono": false,

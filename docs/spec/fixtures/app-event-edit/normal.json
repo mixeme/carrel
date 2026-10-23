@@ -91,18 +91,21 @@
   "details": null,
   "foreign": [
     {
+      "from": null,
       "href": "",
       "label": "SEQUENCE",
       "mono": true,
       "value": "2"
     },
     {
+      "from": null,
       "href": "",
       "label": "X-APPLE-TRAVEL-ADVISORY-BEHAVIOR",
       "mono": true,
       "value": "AUTOMATIC"
     },
     {
+      "from": null,
       "href": "",
       "label": "X-MOZ-GENERATION",
       "mono": true,

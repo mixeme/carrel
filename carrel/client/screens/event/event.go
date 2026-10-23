@@ -66,6 +66,10 @@ const attachID = "attach.add"
 func Screen(p *view.EventPage) w.Shell {
 	title := &w.HeadTitle{Text: string(p.Summary)}
 	h := w.Head{Title: title, Subs: []w.HeadSub{bind.SourceSub(p.Source.Colour, view.Text(p.Source.Stamp))}}
+	if p.LinkedRecord {
+		// The linked record: where it is kept, no one calendar (s-agenda-25).
+		h.Subs = []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}}}
+	}
 	var acts []w.ActsPart
 	var attach *view.Action
 	var danger []w.Button
@@ -85,7 +89,7 @@ func Screen(p *view.EventPage) w.Shell {
 	}
 	if len(p.Menu) > 0 {
 		acts = append(acts, w.Drop{
-			Trigger: w.Button{Icon: "dots", Title: "More"},
+			Trigger: moreButton(p.LinkedRecord),
 			Menu:    w.Menu{Items: append(bind.Twins(p.Actions, printID), bind.MenuItems(p.Menu, rail.ReadOnly)...), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
 		})
 	}
@@ -139,9 +143,14 @@ func Screen(p *view.EventPage) w.Shell {
 			lines = append(lines, bind.Book(f, lead))
 		}
 		main = append(main, w.Sec{Items: []w.SecPart{
-			w.Rubric{Text: "The same event in other calendars", Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Linked)), Tone: w.BadgeLinked}}},
+			w.Rubric{Text: keptRubric(p.LinkedRecord), Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Linked)), Tone: w.BadgeLinked}}},
 			w.SecList{Items: lines, Gap: 5},
 		}})
+	}
+	if p.LinkedRecord {
+		// The source and the deletion are a copy's (s-agenda-25).
+		t := bind.Top(p.Top, top)
+		return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}}
 	}
 	read := string(p.Source.LastRead)
 	if p.Source.Compared != "" {
@@ -198,9 +207,15 @@ func fields(fs []view.Field) w.Fields {
 	for _, f := range fs {
 		it := bind.FieldsItem(f, lead)
 		if len(f.Runs) > 0 && f.Badge.Label != "" {
-			b := it.Value[len(it.Value)-1].(w.Badge)
-			b.Title = zoneHint
-			it.Value[len(it.Value)-1] = b
+			// The badge is the last but what a linked record names after
+			// it (Field.From).
+			for i := len(it.Value) - 1; i >= 0; i-- {
+				if b, ok := it.Value[i].(w.Badge); ok {
+					b.Title = zoneHint
+					it.Value[i] = b
+					break
+				}
+			}
 		}
 		out.Items = append(out.Items, it)
 	}
@@ -233,3 +248,22 @@ func attachments(rows []view.AttachRow) [][]w.SecItemPart {
 // upload is the screen's word (U-1.3) for the item after Attach's arrow that
 // sends the file picked on a page without a script (Typecase's task 109).
 const upload = "Upload"
+
+// moreButton is the «⋯» of the head: on a linked record's card the narrow
+// icon button its frame draws (s-contacts-33, s-agenda-25, s-tasks-17).
+func moreButton(linked bool) w.Button {
+	b := w.Button{Icon: "dots", Title: "More"}
+	if linked {
+		b.Variant = w.ButtonPadX3
+	}
+	return b
+}
+
+// keptRubric is the rubric of the other copies: on a linked record's card,
+// where it is kept (s-agenda-25).
+func keptRubric(linked bool) string {
+	if linked {
+		return "Where this event is kept"
+	}
+	return "The same event in other calendars"
+}

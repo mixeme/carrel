@@ -3416,6 +3416,30 @@ func TestFixtureDuplicatesStates(t *testing.T) {
 		app.compare(t, "app-duplicates/empty.json", app.h.do(get("/app/duplicates", app.sess)))
 	})
 	app := newMockupApp(t)
+	// Every group s-dup-1 draws: the copies of the event, the task and the
+	// notes linked as the set holds them (from-typecase note 117 p. 2), the
+	// copy in «Общий» answering.
+	linkMockupEvent(t, app)
+	linkMockupTask(t, app)
+	linkMockupNote(t, app)
+	linkMockupMeeting(t, app)
+	app.servers["baikal"].Accept("REPORT")
+	// The duty of «Дежурства» has two reminders the one of «Работа» lacks
+	// and one occurrence rewritten by hand, after the week the frames show:
+	// the merge of s-dup-4 gains the reminders and does not carry the
+	// occurrence.
+	duty := davtest.CalendarHome + "dezhurstva/5e90-33c1-a8d2.ics"
+	radicale := app.servers["radicale · vps"]
+	if body, _, ok := radicale.Object(duty); ok {
+		alarms := "BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:Дежурство\r\nEND:VALARM\r\n" +
+			"BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-PT1H\r\nDESCRIPTION:Дежурство\r\nEND:VALARM\r\nEND:VEVENT"
+		body = strings.Replace(body, "END:VEVENT", alarms, 1)
+		moved := "BEGIN:VEVENT\r\nUID:5e90-33c1-a8d2\r\nDTSTAMP:20260601T061500Z\r\nRECURRENCE-ID;VALUE=DATE:20260824\r\n" +
+			"DTSTART;VALUE=DATE:20260825\r\nDTEND;VALUE=DATE:20260826\r\nSUMMARY:Дежурство: первая линия\r\nEND:VEVENT\r\nEND:VCALENDAR"
+		radicale.Seed(duty, strings.Replace(body, "END:VCALENDAR", moved, 1))
+	} else {
+		t.Fatal("the duty of «Дежурства» is not on the stand")
+	}
 	for _, list := range []string{"/app/contacts", "/app/calendar?from=2026-08-10", "/app/tasks", "/app/notes"} {
 		openList(t, app, list)
 	}
@@ -3468,6 +3492,12 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		// candidate s-dup-1 draws and s-dup-2 merges — beside the two Артём
 		// Белов, who are linked and decided.
 		combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+		// The merge stands on the ground of the screen it came from: every
+		// collection compared, «Общий» answering (s-dup-2, Дб20).
+		app.servers["baikal"].Accept("REPORT")
+		for _, list := range []string{"/app/calendar?from=2026-08-10", "/app/tasks", "/app/notes"} {
+			openList(t, app, list)
+		}
 		page := decode[view.DuplicatesPage](t, app.h.do(get("/app/duplicates?kind=contact", app.sess)))
 		var merge string
 		for _, g := range page.Groups {
@@ -3505,7 +3535,9 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 			}
 			return out
 		}
-		for _, who := range []string{"Ковалёва", "Белов"} {
+		// Анна has two addresses since note 117 of Typecase: her name alone
+		// asks which (s-mail-3); the letter is to her first.
+		for _, who := range []string{"a.kovaleva@example.org", "Белов"} {
 			if rec := app.h.do(postForm("/app/mail/send?op=add", app.sess, url.Values{"to": recipients(), "to.add": {who},
 				"subject": {"Договор подряда и смета"}, "text": {"Пётр, ниже — договор и смета, которые мы обсуждали."}})); rec.Code != 200 {
 				t.Fatalf("add %s: %d %s", who, rec.Code, rec.Body.String())

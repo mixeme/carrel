@@ -65,15 +65,21 @@ var icons = map[view.Kind]w.Icon{
 //   - The deletion at the foot.
 func Screen(p *view.ContactPage) w.Shell {
 	h := w.Head{Title: &w.HeadTitle{Text: string(p.Name)}}
-	if p.PhotoHref != "" {
+	switch {
+	case p.LinkedRecord:
+		// The linked record is no one copy: no photo of one, no source
+		// (s-contacts-33).
+	case p.PhotoHref != "":
 		h.Photo = &w.HeadPhoto{Src: p.PhotoHref}
-	} else {
+	default:
 		h.Photo = &w.HeadPhoto{Initials: string(p.Avatar.Initials)}
 	}
 	if p.Subtitle != "" {
 		h.Subs = append(h.Subs, w.HeadSub{Parts: []w.HeadSubPart{w.Text(p.Subtitle)}})
 	}
-	h.Subs = append(h.Subs, bind.SourceSub(p.Source.Colour, view.Text(p.Source.Stamp)))
+	if !p.LinkedRecord {
+		h.Subs = append(h.Subs, bind.SourceSub(p.Source.Colour, view.Text(p.Source.Stamp)))
+	}
 	var acts []w.ActsPart
 	var danger []w.Button
 	for _, a := range p.Actions {
@@ -91,7 +97,7 @@ func Screen(p *view.ContactPage) w.Shell {
 	}
 	if len(p.Menu) > 0 {
 		acts = append(acts, w.Drop{
-			Trigger: w.Button{Icon: "dots", Title: "More"},
+			Trigger: moreButton(p.LinkedRecord),
 			Menu:    w.Menu{Items: append(bind.Twins(p.Actions, printID), bind.MenuItems(p.Menu, rail.ReadOnly)...), Width: w.MenuWidth212, Pop: w.MenuUnderEnd},
 		})
 	}
@@ -124,10 +130,20 @@ func Screen(p *view.ContactPage) w.Shell {
 		for _, f := range p.Books {
 			lines = append(lines, bind.Book(f, "· "))
 		}
+		rubric := "The same person in other books"
+		if p.LinkedRecord {
+			rubric = "Where this person is kept"
+		}
 		main = append(main, w.Sec{Items: []w.SecPart{
-			w.Rubric{Text: "The same person in other books", Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Books)), Tone: w.BadgeLinked}}},
+			w.Rubric{Text: rubric, Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(p.Books)), Tone: w.BadgeLinked}}},
 			w.SecList{Items: lines, Gap: 5},
 		}})
+	}
+	if p.LinkedRecord {
+		// What the person chose and where it is kept: the timeline and the
+		// source are a copy's (s-contacts-33).
+		t := bind.Top(p.Top, top)
+		return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}}
 	}
 	rubric := w.Rubric{Text: "Timeline"}
 	if p.TimelineCount != nil {
@@ -195,4 +211,14 @@ func railParts(r view.Rail) []w.RailPart {
 	parts := []w.RailPart{nav}
 	parts = append(parts, bind.Sources(r, rail)...)
 	return append(parts, bind.Foot(r, rail))
+}
+
+// moreButton is the «⋯» of the head: on a linked record's card the narrow
+// icon button its frame draws (s-contacts-33, s-agenda-25, s-tasks-17).
+func moreButton(linked bool) w.Button {
+	b := w.Button{Icon: "dots", Title: "More"}
+	if linked {
+		b.Variant = w.ButtonPadX3
+	}
+	return b
 }

@@ -66,7 +66,9 @@ func routeKinds(t *testing.T) map[string]zone.Kind {
 				}
 				kinds[m[1]] = kind
 			}
-		case strings.Contains(answer, "фрагмент") && len(models) > 0:
+		case (strings.Contains(answer, "фрагмент") || strings.Contains(answer, "меню")) && len(models) > 0:
+			// A menu printed alone — the search line's suggestions
+			// (SearchSuggest, Typecase's note 118) — is no page either.
 			fragments = append(fragments, models[0][1])
 		}
 	}

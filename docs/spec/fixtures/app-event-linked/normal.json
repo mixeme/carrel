@@ -7,7 +7,8 @@
       "id": "record.edit",
       "label": "Edit",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "target": "sheet"
     }
   ],
   "attach": [
@@ -82,12 +83,14 @@
         "label": "until 2026-12-28",
         "role": "neutral"
       },
+      "from": null,
       "href": "",
       "label": "Repeats",
       "mono": false,
       "value": "Weekly on Mon"
     },
     {
+      "from": null,
       "href": "",
       "label": "Reminders",
       "mono": false,
@@ -104,12 +107,14 @@
       "value": "Переговорная 2"
     },
     {
+      "from": null,
       "href": "",
       "label": "Status",
       "mono": false,
       "value": "Confirmed"
     },
     {
+      "from": null,
       "href": "",
       "label": "Tags",
       "mono": false,
@@ -131,6 +136,7 @@
   "linked": [
     {
       "colour": "#4a6b52",
+      "from": null,
       "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
       "label": "nextcloud · Личный",
       "mono": false,
@@ -138,6 +144,7 @@
     },
     {
       "colour": "#6b4e7a",
+      "from": null,
       "href": "/app/calendar/a-rad-vps/proekty/4b2e-9d10-8f1c",
       "label": "radicale · vps · Проекты",
       "mono": false,
@@ -145,6 +152,7 @@
     },
     {
       "colour": "#9a9280",
+      "from": null,
       "href": "/app/calendar/a-baikal/obshchij/6a7d-2c51-e930",
       "label": "baikal · Общий",
       "mono": false,
@@ -157,12 +165,13 @@
     "panel": true,
     "source": true,
     "theme": "auto",
-    "wide": false
+    "wide": true
   },
   "loss": null,
   "menu": [
     {
       "enabled": true,
+      "href": "/app/calendar/linked/8f1c-4a02-b7d3?print=1",
       "icon": "i-print",
       "id": "record.print",
       "label": "Print",
@@ -272,18 +281,21 @@
   "recurrence": {
     "fields": [
       {
+        "from": null,
         "href": "",
         "label": "Next",
         "mono": false,
         "value": "17 August 2026, 10:00"
       },
       {
+        "from": null,
         "href": "",
         "label": "Then",
         "mono": false,
         "value": "24 August 2026, 10:00"
       },
       {
+        "from": null,
         "href": "",
         "label": "Then",
         "mono": false,

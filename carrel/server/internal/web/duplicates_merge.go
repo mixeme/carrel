@@ -288,6 +288,9 @@ func gainLine(calendar bool, g dupes.Gain, from mergeMember) string {
 // mergePlan is the merged record and the page that shows it.
 func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[string]int, picks map[string]sealed.RecordRef, drops map[string][]string) (*model.Object, view.DuplicatesMergePage) {
 	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge on the server"), GroupID: mr.g.id}
+	// The circle of the top bar is the screen's it came from (s-dup-2, -4,
+	// -5): the records compared, how fresh.
+	page.Top.Refresh = s.duplicatesRefresh(sess, "")
 	page.Rail = view.Rail{Nav: s.navRows(sess, mr.st.blob, "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess)}
 	// The merge stands on the same ground as the screen it came from: every
 	// collection compared (s-dup-2, -4, -5: «12 / 12»; Дб20).
@@ -444,10 +447,8 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 	// another the same page with it kept. A group with a read-only member
 	// is not merged at all (mergeBlocked), so every source can be chosen.
 	for _, m := range mr.members {
-		a := view.Action{ID: "duplicates.merge.into", Label: text(string(m.c.stamp())), Method: "GET", Enabled: true, On: m.place == target.place}
-		if !a.On {
-			a.Href = s.mergeHref(mr.g.id, m.place, keptAnswers(mr.g.refs, picks, drops))
-		}
+		a := view.Action{ID: "duplicates.merge.into", Label: text(string(m.c.stamp())), Method: "GET", Enabled: true, On: m.place == target.place,
+			Href: s.mergeHref(mr.g.id, m.place, keptAnswers(mr.g.refs, picks, drops))}
 		page.Stays = append(page.Stays, a)
 	}
 	return merged, page
@@ -469,6 +470,9 @@ func (s *Server) getDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) lostGroupPage(sess *session.Session, mr mergeRead, n view.Notice) view.DuplicatesMergePage {
 	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge on the server"), Warning: n}
+	// The circle of the top bar is the screen's it came from (s-dup-2, -4,
+	// -5): the records compared, how fresh.
+	page.Top.Refresh = s.duplicatesRefresh(sess, "")
 	page.Rail = view.Rail{Nav: s.navRows(sess, mr.st.blob, "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess),
 		Sections: dupSources(mr.st, "")}
 	page.Actions = []view.Action{{ID: "duplicates.back", Label: "Back to duplicates", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true}}
@@ -604,6 +608,9 @@ func (s *Server) mergeResult(w http.ResponseWriter, r *http.Request, sess *sessi
 	// What happened, under its rubric (s-dup-5, Дб19): the kept record, what
 	// went, what is still there; what the server answered stays in Details.
 	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge on the server"), GroupID: mr.g.id, Warning: n}
+	// The circle of the top bar is the screen's it came from (s-dup-2, -4,
+	// -5): the records compared, how fresh.
+	page.Top.Refresh = s.duplicatesRefresh(sess, "")
 	page.Happened = append(page.Happened, text("Kept and rewritten: "+target.label()))
 	for _, d := range deleted {
 		page.Happened = append(page.Happened, text("Deleted: "+d.label()))
