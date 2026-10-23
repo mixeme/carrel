@@ -64,6 +64,11 @@ const (
 // task 91); its icons it names itself.
 const ManifestPath = "/manifest.webmanifest"
 
+// ThemeColor is the colour the application opens on and the browser draws
+// around it: the background of the brand (--bg). The manifest names it, and
+// every page as its theme-color (U-11).
+const ThemeColor = "#F5F1E8"
+
 // Event names of C-7.4: the events of the progress stream — the bar changed,
 // and the poll is over. The data of an event is the fragment of its target
 // (FragmentPayload): poll carries the bar, poll-finished the rail of the

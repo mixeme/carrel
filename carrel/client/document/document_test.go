@@ -10,6 +10,7 @@ import (
 
 	"carrel.dev/carrel/client/document"
 	"carrel.dev/carrel/client/screens"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
 )
@@ -170,6 +171,26 @@ func TestVersionCoversEveryScript(t *testing.T) {
 	for range 20 {
 		if v := document.VersionOf(); v != document.Version() {
 			t.Fatalf("the version is %s once and %s another time", document.Version(), v)
+		}
+	}
+}
+
+// Every page can be installed as an application (U-11): it links the
+// manifest the server serves under the base path (C-5.9) and names the
+// colour around it, the manifest's (render.ThemeColor).
+func TestEveryPageNamesTheManifest(t *testing.T) {
+	for _, base := range []string{"", "/carrel"} {
+		for _, scr := range screens.All {
+			html, err := document.Of(scr, scr.Model(), base).Render()
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, want := range []string{`<link rel="manifest" href="` + base + render.ManifestPath + `">`,
+				`<meta name="theme-color" content="` + render.ThemeColor + `">`} {
+				if !strings.Contains(html, want) {
+					t.Errorf("%T (base %q): the page does not say %s", scr.Model(), base, want)
+				}
+			}
 		}
 	}
 }

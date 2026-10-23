@@ -4,6 +4,20 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.7.1 — 2026-10-23
+
+Server `v0.2.366`, Typecase `ce9da05`. Stage 5, the first pieces.
+
+### Added
+
+- **The agenda on paper** (U-10; print-1): `?print=1` draws the page on
+  paper — the week, what answered, each day's events with the time, the
+  title, where and in which calendar, the foot — and prints no forms. The
+  other kinds wait for their frames (Typecase's task 228).
+- **Installable** (U-11): every page links the manifest the server serves
+  and names its colour (`theme-color`). The worker that keeps the shell for
+  a lost network waits for the frame of its page (task 228).
+
 ## v0.7.0 — 2026-10-23
 
 Server `v0.2.365`, Typecase `ce9da05`. Import and collections built whole:

@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
+
+	"carrel.dev/carrel/server/render"
 )
 
 // Installing Carrel as an application (U-11, the lead's decision П3): the
@@ -28,10 +30,9 @@ import (
 // The colours of the icon reference (§6, the light plate) and of the page
 // the application opens on.
 var (
-	iconPlate  = color.RGBA{0xE8, 0xDF, 0xCB, 0xff}
-	iconShade  = color.RGBA{0x4A, 0x6B, 0x52, 0xff}
-	iconInk    = color.RGBA{0x17, 0x21, 0x1C, 0xff}
-	themeColor = "#F5F1E8" // the background of the brand (--bg)
+	iconPlate = color.RGBA{0xE8, 0xDF, 0xCB, 0xff}
+	iconShade = color.RGBA{0x4A, 0x6B, 0x52, 0xff}
+	iconInk   = color.RGBA{0x17, 0x21, 0x1C, 0xff}
 )
 
 // iconFile is one icon of the manifest.
@@ -157,7 +158,7 @@ func (s *Server) getManifest(w http.ResponseWriter, r *http.Request) {
 	m := webManifest{
 		Name: "Carrel", ShortName: "Carrel",
 		StartURL: s.route("/app/"), Scope: s.route("/"), Display: "standalone",
-		BackgroundColor: themeColor, ThemeColor: themeColor,
+		BackgroundColor: render.ThemeColor, ThemeColor: render.ThemeColor,
 	}
 	for _, f := range iconFiles {
 		purpose := "any"

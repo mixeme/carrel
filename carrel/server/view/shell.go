@@ -251,4 +251,16 @@ type Print struct {
 	Title Text `json:"title"`
 	Range Text `json:"range"`
 	Taken When `json:"taken"`
+	// Paper — страница спрошена на бумаге (?print=1, U-10): клиент рисует
+	// её страницей на бумаге, а не экраном; тот же маршрут, та же модель
+	Paper bool `json:"paper,omitempty"`
+	// Heading, Sources, Foot — слова страницы на бумаге (print-1): заголовок
+	// «Agenda · 10 – 16 August 2026»; что ответило, по подключениям —
+	// «nextcloud · Личный, Работа · radicale · vps · Проекты, Дежурства»;
+	// подвал — что, за какие дни, когда снято и сколько источников попало в
+	// снимок: «Carrel · agenda · 2026-08-10 – 2026-08-16 · captured
+	// 2026-08-15 09:41 · 5 of 7 sources». Пусто — у вида нет кадра бумаги
+	Heading Text `json:"heading,omitempty"`
+	Sources Text `json:"sources,omitempty"`
+	Foot    Text `json:"foot,omitempty"`
 }

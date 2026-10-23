@@ -62,6 +62,14 @@ func FeedURL(raw string) (string, error) {
 	return u.String(), nil
 }
 
+// IsCarrelLink says whether an address is a secret link of another Carrel,
+// /p/{token}: a calendar, a book, a list, a notebook or a folder — which,
+// the address does not say.
+func IsCarrelLink(raw string) bool {
+	u, err := url.Parse(strings.TrimSpace(raw))
+	return err == nil && u.Host != "" && carrelLink.MatchString(u.Path)
+}
+
 // FolderURL is the WebDAV address of a folder someone shares: a secret link
 // of another Carrel is its read-only mount, /p/{token}/dav/; any other address
 // is taken as it is. A folder address ends in "/".

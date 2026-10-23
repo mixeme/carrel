@@ -368,11 +368,22 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.AgendaPage) },
-		Frames: []string{"s-agenda-1", "s-agenda-17", "states-13", "states-14", "states-15"},
-		Draw:   func(model any) Root { return agenda.Screen(model.(*view.AgendaPage)) },
-		Title:  func(model any) string { return string(model.(*view.AgendaPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return agenda.Forms(model.(*view.AgendaPage)) },
-		Waits:  []Wait{},
+		Frames: []string{"s-agenda-1", "s-agenda-17", "states-13", "states-14", "states-15", "print-1"},
+		Draw: func(model any) Root {
+			p := model.(*view.AgendaPage)
+			if p.Print.Paper {
+				return agenda.Paper(p)
+			}
+			return agenda.Screen(p)
+		},
+		Title: func(model any) string { return string(model.(*view.AgendaPage).Title) },
+		Forms: func(model any) []widget.PostForm {
+			if p := model.(*view.AgendaPage); !p.Print.Paper {
+				return agenda.Forms(p)
+			}
+			return nil // nothing on paper is pressed
+		},
+		Waits: []Wait{},
 	},
 	{
 		Model:  func() any { return new(view.EventPage) },

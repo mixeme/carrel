@@ -323,6 +323,9 @@ func TestRendererDrawsShellZones(t *testing.T) {
 			if zone.KindOf(model) != zone.ShellPage {
 				continue
 			}
+			if _, shell := scr.Draw(model).(widget.Shell); !shell {
+				continue // a page on paper (?print=1, U-10): no zones
+			}
 			at := label(scr) + " on " + key(path)
 			_, _, page := answer(t, renderer.New(""), func(rd render.Renderer, w http.ResponseWriter) error {
 				return rd.Page(w, req, http.StatusOK, byValue(model))

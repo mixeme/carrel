@@ -1333,7 +1333,10 @@
     "taskID": "t-task"
   },
   "print": {
+    "foot": "Carrel · agenda · 2026-08-10 – 2026-08-16 · captured 2026-08-10 17:04 · 5 of 6 sources",
+    "heading": "Agenda · 10 – 16 August 2026",
     "range": "6 calendars · 10 August 2026 – 16 August 2026 · 6 events",
+    "sources": "nextcloud · Личный, Работа · radicale · vps · Проекты, Дежурства · feeds.example · Праздники РФ",
     "taken": "10 August 2026, 17:04",
     "title": "Combined calendar"
   },

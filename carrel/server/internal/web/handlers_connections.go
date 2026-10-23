@@ -11,6 +11,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/discover"
+	"carrel.dev/carrel/server/internal/publish"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
@@ -163,7 +164,14 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 			Body: "An account is an address with its login and password: that is what Carrel writes to. A collection reached by a link — " +
 				"a calendar's secret address, a shared folder, another Carrel's published link — is a subscription: read-only, and the link's own password, if it has one, is kept with it. The form below subscribes to this address.",
 		})
-		s.feedPanel(&page, sess, feedForm{URL: f.Server, Folder: !looksLikeFeed(f.Server)})
+		folder := !looksLikeFeed(f.Server)
+		if publish.IsCarrelLink(f.Server) {
+			// Another Carrel's link names no kind: a folder answers on its
+			// read-only mount, anything else is a file to subscribe to — a
+			// calendar's .ics, a book's .vcf.
+			folder = s.carrelLinkIsFolder(r.Context(), f.Server)
+		}
+		s.feedPanel(&page, sess, feedForm{URL: f.Server, Folder: folder})
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}

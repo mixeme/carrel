@@ -134,7 +134,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "addressbook","note","image","text","download",
           "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history","file-match","filled",
           "calendar","event","link-never","gone","note-files-kept","contact","unanswered","account","none","storage","delete-refused","move-kept",
-          "running","stopped","nothing","noquery","noanswer","toomany","unticked"}
+          "running","stopped","nothing","noquery","noanswer","toomany","unticked","print"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -487,6 +487,8 @@ STATE_FRAME = {
     "app-contact-import/refused": "s-io-18",
     "app-contact-import/unanswered": "s-io-19",
     "app-event-import/preview": "s-io-6",
+    # Агенда на бумаге (U-10): тот же маршрут с ?print=1.
+    "app-agenda-all/print": "print-1",
     # Состояния поиска (записка Typecase 114): идёт, ничего не найдено, без
     # запроса, ничего не отмечено, слишком много обходов, не ответил никто,
     # остановлен.
@@ -741,8 +743,9 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
     if d in SHEETS:
         continue
     # Кадр-фрагмент, нарисованный без оболочки (колонка выдачи поиска,
-    # s-find-5…-10): рейла он не рисует, и сверять его не с чем.
-    if 'class="frag"' in frame and 'tc-shell' not in frame:
+    # s-find-5…-10), и страница на бумаге (print-1, U-10): рейла они не
+    # рисуют, и сверять его не с чем.
+    if ('class="frag"' in frame or 'tc-root--print' in frame) and 'tc-shell' not in frame:
         continue
     if sorted(c[0] for c in fc) != sorted(c[0] for c in xc):
         drift.append("%s: коллекции рейла: кадр %s, фикстура %s"

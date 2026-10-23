@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.366 — 2026-10-23
+
+Another Carrel's links taken whole; the agenda on paper (U-10); the
+colour of the installed application in one place (U-11).
+
+### Fixed
+
+- **Connect account with another Carrel's link** offered the form of a
+  folder for a calendar or a book too: the link names no kind, and a
+  calendar's link has no folder mount — «The folder could not be read». The
+  server now asks the link's mount (`/p/{token}/dav/`): it answers — a
+  folder; else the feed of its file (`/p/{token}/download`). The feed form
+  understood such a link already. Held end to end by
+  `TestAnotherCarrelsLinksAreTaken`: a calendar, a book and a folder of one
+  instance subscribed to by another and read.
+
+### Added
+
+- **`Print.Paper`**: a page asked with `?print=1` says so (`writePage`), and
+  the client draws it on paper; same route, same model.
+- **`Print.Heading`, `Sources`, `Foot`** of the combined agenda (print-1):
+  «Agenda · 10 – 16 August 2026»; what answered by its connection; «Carrel ·
+  agenda · 2026-08-10 – 2026-08-16 · captured … · 5 of 6 sources».
+- `render.ThemeColor`: the colour the manifest names, for the pages too.
+
+### Fixtures
+
+- `app-agenda-all/print` (print-1); `check.py` skips the rail of a page on
+  paper.
+
 ## v0.2.365 — 2026-10-23
 
 The search after Typecase's note 114 (task 189; frames s-find-1 … -10).

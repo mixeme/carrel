@@ -430,6 +430,18 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			page.Empty = windowEmpty(tf, kind, "the ticked calendars", from, to)
 		}
 		page.Print = header(agendaPrint(tf, from, to), counted(page.Bar.Loaded, "event"))
+		if st.snap != nil && !st.snap.Running {
+			// On paper (print-1): the week in the heading, what answered by
+			// its connection, the foot with the days in numbers, when it
+			// was taken and how many sources the snapshot holds.
+			answered, names := paperSources(blob, st.snap.Sources)
+			page.Print.Heading = text("Agenda · " + tf.window(from, to))
+			page.Print.Sources = text(names)
+			page.Print.Foot = text(strings.Join([]string{"Carrel", "agenda",
+				from.Format("2006-01-02") + " – " + to.AddDate(0, 0, -1).Format("2006-01-02"),
+				"captured " + string(tf.numStamp(st.snap.Finished)),
+				fmt.Sprintf("%d of %s", answered, plural(len(st.snap.Sources), "source"))}, " · "))
+		}
 		return page, nil
 	case view.KindTask:
 		page := view.TasksPage{Shell: st.shell, Poll: st.poll}
@@ -1223,4 +1235,36 @@ func (s *Server) tickPicks(spec kindSpec, hrefs []string) []sealed.Selection {
 		out = append(out, sealed.Selection{Kind: spec.kind, AccountID: account, Path: path})
 	}
 	return out
+}
+
+// paperSources are the sources of a snapshot that answered, as a page on
+// paper names them (print-1): each connection once, its collections after
+// it — «nextcloud · Личный, Работа · radicale · vps · Проекты, Дежурства» —
+// and how many they are.
+func paperSources(blob sealed.Blob, sources []fanout.SourceStatus) (int, string) {
+	var order []string
+	names := map[string][]string{}
+	n := 0
+	for _, st := range sources {
+		if st.State != view.SourceDone && st.State != view.SourceEmpty {
+			continue
+		}
+		n++
+		account, path, _ := strings.Cut(st.ID, ":")
+		conn, okConn := blob.Connection(account)
+		col, okCol := blob.Collection(account, path)
+		if !okConn || !okCol {
+			continue
+		}
+		host := connLabel(conn)
+		if _, seen := names[host]; !seen {
+			order = append(order, host)
+		}
+		names[host] = append(names[host], collectionLabel(col))
+	}
+	parts := make([]string, 0, len(order))
+	for _, host := range order {
+		parts = append(parts, host+" · "+strings.Join(names[host], ", "))
+	}
+	return n, strings.Join(parts, " · ")
 }

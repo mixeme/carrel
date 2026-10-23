@@ -124,6 +124,17 @@ func (s *Server) feedPanel(page *view.ConnectionsPage, sess *session.Session, f 
 }
 
 // probeFolder lists a shared folder once: how many entries, how fast.
+// carrelLinkIsFolder says whether a secret link of another Carrel is a
+// folder: its read-only mount (/p/{token}/dav/) answers.
+func (s *Server) carrelLinkIsFolder(ctx context.Context, raw string) bool {
+	addr, err := publish.FolderURL(raw)
+	if err != nil {
+		return false
+	}
+	_, _, err = s.probeFolder(ctx, addr, "", "")
+	return err == nil
+}
+
 func (s *Server) probeFolder(ctx context.Context, addr, login, password string) (int, time.Duration, error) {
 	client, err := dav.NewClient(s.guard, addr, login, password, "")
 	if err != nil {

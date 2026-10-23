@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"reflect"
 	"strings"
 	"time"
 
@@ -144,7 +145,37 @@ func (s *Server) writePage(w http.ResponseWriter, r *http.Request, status int, b
 		_ = s.render.Fragment(w, r, status, render.FragmentTarget(r), body, nil)
 		return
 	}
-	_ = s.render.Page(w, r, status, body)
+	_ = s.render.Page(w, r, status, onPaper(r, body))
+}
+
+// onPaper is a page asked on paper (?print=1, U-10) with its print header
+// saying so (Print.Paper): the same route and the same model, which the
+// client draws as a page on paper. A page without a shell, or one asked
+// otherwise, is as it was.
+func onPaper(r *http.Request, body any) any {
+	if r.URL.Query().Get(render.PrintParam) != render.PrintValue {
+		return body
+	}
+	v := reflect.ValueOf(body)
+	if !v.IsValid() || v.Kind() != reflect.Struct {
+		return body
+	}
+	copied := reflect.New(v.Type()).Elem()
+	copied.Set(v)
+	paper := copied
+	for _, name := range []string{"Shell", "Print", "Paper"} {
+		if paper.Kind() != reflect.Struct {
+			return body
+		}
+		if paper = paper.FieldByName(name); !paper.IsValid() {
+			return body
+		}
+	}
+	if !paper.CanSet() || paper.Kind() != reflect.Bool {
+		return body
+	}
+	paper.SetBool(true)
+	return copied.Interface()
 }
 
 func (s *Server) notFound(w http.ResponseWriter, r *http.Request) {

@@ -30,6 +30,7 @@ import (
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -1384,6 +1385,8 @@ func TestFixtureCombinedCalendar(t *testing.T) {
 	// «Синк-ап по релизу» open in the panel (s-agenda-1, В1).
 	open := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3"
 	app.compare(t, "app-agenda-all/normal.json", app.h.do(get("/app/calendar?from=2026-08-10&task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
+	// The same week on paper (print-1, U-10).
+	app.compare(t, "app-agenda-all/print.json", app.h.do(get("/app/calendar?from=2026-08-10&task="+page.Poll.TaskID+"&"+render.PrintParam+"="+render.PrintValue, app.sess)))
 }
 
 // C-14.2: the card of an event (s-agenda-2).

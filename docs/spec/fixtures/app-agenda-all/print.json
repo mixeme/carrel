@@ -1,0 +1,1567 @@
+{
+  "bar": {
+    "actions": [
+      {
+        "arrow": [
+          {
+            "aside": "last used",
+            "colour": "#4a6b52",
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/lichnyj/new",
+            "id": "record.new",
+            "label": "Личный",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "colour": "#3f6e8c",
+            "enabled": true,
+            "href": "/app/calendar/a-nc-home/rabota/new",
+            "id": "record.new",
+            "label": "Работа",
+            "method": "GET"
+          },
+          {
+            "colour": "#6b4e7a",
+            "enabled": true,
+            "href": "/app/calendar/a-rad-vps/proekty/new",
+            "id": "record.new",
+            "label": "Проекты",
+            "method": "GET"
+          },
+          {
+            "colour": "#8c6239",
+            "enabled": true,
+            "href": "/app/calendar/a-rad-vps/dezhurstva/new",
+            "id": "record.new",
+            "label": "Дежурства",
+            "method": "GET"
+          },
+          {
+            "colour": "#9a9280",
+            "enabled": true,
+            "href": "/app/calendar/a-baikal/obshchij/new",
+            "id": "record.new",
+            "label": "Общий",
+            "method": "GET"
+          }
+        ],
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj/new",
+        "icon": "i-plus",
+        "id": "record.new",
+        "label": "New event",
+        "method": "GET",
+        "primary": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/import",
+        "icon": "i-import",
+        "id": "collection.import",
+        "label": "Import",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/export",
+        "icon": "i-export",
+        "id": "collection.export",
+        "label": "Export",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar?from=2026-08-10\u0026print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
+      }
+    ],
+    "columns": {
+      "form": {
+        "action": "/app/calendar/columns?from=2026-08-10\u0026print=1\u0026task=t-task",
+        "actions": [
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/calendar/columns?from=2026-08-10\u0026print=1\u0026task=t-task",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "csrf": "csrf",
+            "enabled": true,
+            "href": "/app/calendar/columns?from=2026-08-10\u0026print=1\u0026task=t-task",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "icon": "i-cols",
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "time",
+          "label": "Time",
+          "on": true
+        },
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "where",
+          "label": "Where",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "attendees",
+          "label": "Attendees and status",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "source",
+          "label": "Source",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        }
+      ],
+      "label": "Columns"
+    },
+    "compact": {
+      "action": "/app/calendar",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "from",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "2026-08-10"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "print",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "1"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "task",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "t-task"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "compact",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "0"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "check",
+              "label": "Compact rows",
+              "name": "compact",
+              "options": [
+                {
+                  "label": "Compact rows",
+                  "selected": false,
+                  "value": "1"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
+    "drop": {
+      "accept": [
+        ".ics"
+      ],
+      "action": {
+        "csrf": "csrf",
+        "enabled": true,
+        "file": "file",
+        "href": "/app/calendar/import",
+        "id": "import.drop",
+        "label": "Import",
+        "method": "POST"
+      },
+      "elsewhere": [
+        {
+          "ext": ".vcf",
+          "says": [
+            {
+              "text": "Contacts take this one"
+            }
+          ]
+        },
+        {
+          "ext": ".md",
+          "says": [
+            {
+              "text": "A notebook takes this one"
+            }
+          ]
+        },
+        {
+          "ext": ".zip",
+          "says": [
+            {
+              "text": "A notebook takes this one"
+            }
+          ]
+        }
+      ],
+      "lead": "Drop to import",
+      "line": [
+        {
+          "text": "One "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " file — where it goes is asked next"
+        }
+      ],
+      "many": false,
+      "note": "The preview opens first: nothing is written until it has been read",
+      "oneOnly": "One file at a time: only notes take several",
+      "refused": [
+        {
+          "text": "Only "
+        },
+        {
+          "mark": "mono",
+          "text": ".ics"
+        },
+        {
+          "text": " files are imported here"
+        }
+      ]
+    },
+    "filter": "",
+    "filterForm": null,
+    "loaded": 6,
+    "range": {
+      "form": {
+        "action": "/app/calendar",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/app/calendar",
+            "id": "range.show",
+            "label": "Show",
+            "method": "GET"
+          }
+        ],
+        "errors": [],
+        "method": "GET",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "view",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "range"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "date",
+                "label": "From",
+                "mono": true,
+                "name": "from",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "2026-08-10"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "date",
+                "label": "To",
+                "mono": true,
+                "name": "to",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "2026-08-16"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "from": "10 August 2026",
+      "presets": [
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-03\u0026print=1",
+          "icon": "i-back",
+          "id": "range.previous",
+          "label": "Previous week",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar?print=1",
+          "id": "range.current",
+          "label": "Today",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-17\u0026print=1",
+          "icon": "i-next",
+          "id": "range.next",
+          "label": "Next week",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-10\u0026print=1\u0026view=day",
+          "id": "range.day",
+          "label": "Day",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-10\u0026print=1",
+          "id": "range.week",
+          "label": "Week",
+          "method": "GET",
+          "on": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-10\u0026print=1\u0026view=month",
+          "id": "range.month",
+          "label": "Month",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-10\u0026print=1\u0026to=2026-08-16\u0026view=range",
+          "id": "range.range",
+          "label": "Range",
+          "method": "GET"
+        }
+      ],
+      "to": "16 August 2026"
+    },
+    "segments": [],
+    "selected": 0,
+    "total": null
+  },
+  "days": [
+    {
+      "count": 4,
+      "rows": [
+        {
+          "badges": [
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
+          "changed": "1 Jun 09:00",
+          "colour": "#3f6e8c",
+          "href": "/app/calendar?from=2026-08-10\u0026open=%2Fapp%2Fcalendar%2Fa-nc-home%2Frabota%2F2f04-8b71-e39a\u0026print=1\u0026task=t-task",
+          "kind": "event",
+          "location": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
+              "icon": "i-cal",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/export?uid=2f04-8b71-e39a",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=rabota\u0026k=calendar\u0026uid=2f04-8b71-e39a",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a/delete?etag=e14",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete event",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "nextcloud · Работа",
+          "state": "ok",
+          "summary": "Дежурство: первая линия",
+          "tags": [],
+          "target": "details",
+          "time": "all day",
+          "uid": "2f04-8b71-e39a"
+        },
+        {
+          "badges": [
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
+          "changed": "1 Jun 09:15",
+          "colour": "#8c6239",
+          "href": "/app/calendar?from=2026-08-10\u0026open=%2Fapp%2Fcalendar%2Fa-rad-vps%2Fdezhurstva%2F5e90-33c1-a8d2\u0026print=1\u0026task=t-task",
+          "kind": "event",
+          "location": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
+              "icon": "i-cal",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/export?uid=5e90-33c1-a8d2",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-rad-vps\u0026c=dezhurstva\u0026k=calendar\u0026uid=5e90-33c1-a8d2",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2/delete?etag=e3",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete event",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "radicale · vps · Дежурства",
+          "state": "ok",
+          "summary": "Дежурство: первая линия",
+          "tags": [],
+          "target": "details",
+          "time": "all day",
+          "uid": "5e90-33c1-a8d2"
+        },
+        {
+          "badges": [
+            {
+              "label": "4 attendees",
+              "role": "neutral"
+            },
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
+          "changed": "7 Aug 15:15",
+          "colour": "#4a6b52",
+          "href": "/app/calendar?from=2026-08-10\u0026open=%2Fapp%2Fcalendar%2Fa-nc-home%2Flichnyj%2F8f1c-4a02-b7d3\u0026print=1\u0026task=t-task",
+          "kind": "event",
+          "location": "Переговорная 2",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+              "icon": "i-cal",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/export?uid=8f1c-4a02-b7d3",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e7",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete event",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "nextcloud · Личный",
+          "state": "ok",
+          "summary": "Синк-ап по релизу",
+          "tags": [
+            {
+              "href": "/app/calendar?from=2026-08-10\u0026print=1\u0026tag=release\u0026task=t-task",
+              "label": "release",
+              "on": false
+            },
+            {
+              "href": "/app/calendar?from=2026-08-10\u0026print=1\u0026tag=team\u0026task=t-task",
+              "label": "team",
+              "on": false
+            }
+          ],
+          "target": "details",
+          "time": "10:00",
+          "uid": "8f1c-4a02-b7d3"
+        },
+        {
+          "badges": [
+            {
+              "label": "tentative",
+              "role": "alert"
+            }
+          ],
+          "changed": "8 Aug 12:00",
+          "colour": "#3f6e8c",
+          "href": "/app/calendar?from=2026-08-10\u0026open=%2Fapp%2Fcalendar%2Fa-nc-home%2Frabota%2F7ae3-1c48-55b0\u0026print=1\u0026task=t-task",
+          "kind": "event",
+          "location": "Jitsi",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0",
+              "icon": "i-cal",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/export?uid=7ae3-1c48-55b0",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=rabota\u0026k=calendar\u0026uid=7ae3-1c48-55b0",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0/delete?etag=e13",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete event",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "nextcloud · Работа",
+          "state": "ok",
+          "summary": "Созвон с подрядчиком",
+          "tags": [],
+          "target": "details",
+          "time": "15:00",
+          "uid": "7ae3-1c48-55b0"
+        }
+      ],
+      "rubric": "Monday · 10 August"
+    },
+    {
+      "count": 2,
+      "rows": [
+        {
+          "badges": [
+            {
+              "label": "2 attendees",
+              "role": "neutral"
+            }
+          ],
+          "changed": "9 Aug 17:00",
+          "colour": "#6b4e7a",
+          "href": "/app/calendar?from=2026-08-10\u0026open=%2Fapp%2Fcalendar%2Fa-rad-vps%2Fproekty%2F9c27-0e5d-4412\u0026print=1\u0026task=t-task",
+          "kind": "event",
+          "location": "Переговорная 1",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/proekty/9c27-0e5d-4412",
+              "icon": "i-cal",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/proekty/9c27-0e5d-4412/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/proekty/9c27-0e5d-4412/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/proekty/9c27-0e5d-4412/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/proekty/export?uid=9c27-0e5d-4412",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-rad-vps\u0026c=proekty\u0026k=calendar\u0026uid=9c27-0e5d-4412",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/proekty/9c27-0e5d-4412/delete?etag=e2",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete event",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "radicale · vps · Проекты",
+          "state": "ok",
+          "summary": "Ревью архитектуры",
+          "tags": [],
+          "target": "details",
+          "time": "09:30",
+          "uid": "9c27-0e5d-4412"
+        },
+        {
+          "badges": [],
+          "changed": "9 Aug 20:30",
+          "colour": "#4a6b52",
+          "href": "/app/calendar?from=2026-08-10\u0026open=%2Fapp%2Fcalendar%2Fa-nc-home%2Flichnyj%2F1d55-90fe-3c27\u0026print=1\u0026task=t-task",
+          "kind": "event",
+          "location": "МФЦ, Мясницкая 13",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27",
+              "icon": "i-cal",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/export?uid=1d55-90fe-3c27",
+              "icon": "i-export",
+              "id": "record.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar\u0026uid=1d55-90fe-3c27",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET",
+              "target": "sheet"
+            },
+            {
+              "csrf": "csrf",
+              "danger": true,
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27/delete?etag=e8",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete event",
+              "method": "POST",
+              "separator": true,
+              "target": "sheet"
+            }
+          ],
+          "on": false,
+          "sources": [],
+          "stamp": "nextcloud · Личный",
+          "state": "ok",
+          "summary": "Забрать документы",
+          "tags": [],
+          "target": "details",
+          "time": "18:00",
+          "uid": "1d55-90fe-3c27"
+        }
+      ],
+      "rubric": "Tuesday · 11 August"
+    }
+  ],
+  "details": null,
+  "empty": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "notices": [],
+  "poll": {
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": false,
+        "href": "/app/search/progress/t-task/cancel",
+        "id": "poll.stop",
+        "label": "Stop",
+        "method": "POST",
+        "reason": "The list has finished.",
+        "target": "poll"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar?from=2026-08-10\u0026again=1",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET"
+      }
+    ],
+    "answeredAt": "10 August, 17:04",
+    "aside": "2 min ago",
+    "every": 700,
+    "failed": "1 failed",
+    "note": "What arrived in time is shown. Records from the unavailable source are missing — not “there are none”, but “we have not seen them”.",
+    "percent": 100,
+    "poll": "/app/search/progress/t-task/poll?from=2026-08-10",
+    "retryAll": null,
+    "running": false,
+    "sources": [
+      {
+        "colour": "#4a6b52",
+        "count": 2,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Личный",
+        "state": "done"
+      },
+      {
+        "colour": "#3f6e8c",
+        "count": 2,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Работа",
+        "state": "done"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 1,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Проекты",
+        "state": "done"
+      },
+      {
+        "colour": "#8c6239",
+        "count": 1,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Дежурства",
+        "state": "done"
+      },
+      {
+        "answer": "REPORT /alice/calendars/obshchij/ → 401 Unauthorized: the saved password was refused. Open Connections to update it.",
+        "colour": "#9a9280",
+        "count": null,
+        "fromCache": false,
+        "message": "The server answered 401 Unauthorized.",
+        "retry": {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
+          "id": "source.retry",
+          "label": "Retry",
+          "method": "POST",
+          "target": "poll"
+        },
+        "stamp": "baikal · Общий",
+        "state": "error"
+      },
+      {
+        "colour": "#8c6239",
+        "count": 3,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "feeds.example · Праздники РФ",
+        "state": "done"
+      }
+    ],
+    "stream": "/app/search/progress/t-task?from=2026-08-10",
+    "summary": [
+      {
+        "text": "Polled 5 of 6 sources · 6 events"
+      }
+    ],
+    "taskID": "t-task"
+  },
+  "print": {
+    "foot": "Carrel · agenda · 2026-08-10 – 2026-08-16 · captured 2026-08-10 17:04 · 5 of 6 sources",
+    "heading": "Agenda · 10 – 16 August 2026",
+    "paper": true,
+    "range": "6 calendars · 10 August 2026 – 16 August 2026 · 6 events",
+    "sources": "nextcloud · Личный, Работа · radicale · vps · Проекты, Дежурства · feeds.example · Праздники РФ",
+    "taken": "10 August 2026, 17:04",
+    "title": "Combined calendar"
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [
+      {
+        "enabled": true,
+        "href": "/app/collections/new?kind=event",
+        "icon": "i-plus",
+        "id": "collection.new",
+        "label": "New calendar",
+        "method": "GET",
+        "target": "sheet"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections/new",
+        "icon": "i-server",
+        "id": "account.connect",
+        "label": "Connect account",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections?op=feed",
+        "icon": "i-link",
+        "id": "feed.subscribe",
+        "label": "Subscribe to a feed",
+        "method": "GET"
+      }
+    ],
+    "nav": [
+      {
+        "count": 7,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-con",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": 6,
+        "enabled": true,
+        "href": "/app/calendar",
+        "icon": "i-cal",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks",
+        "icon": "i-task",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": 3,
+        "enabled": true,
+        "href": "/app/notes",
+        "icon": "i-note",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "icon": "i-file",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "icon": "i-dup",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "6 of 8 collections ticked",
+    "sections": [
+      {
+        "account": "",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "",
+            "count": 6,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar",
+            "label": "Combined calendar",
+            "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "part"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar/a-nc-home/lichnyj",
+            "label": "Личный",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar/a-nc-home/rabota",
+            "label": "Работа",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+            "label": "Дни рождения",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "radicale · vps",
+        "accountID": "a-rad-vps",
+        "rows": [
+          {
+            "colour": "#6b4e7a",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar/a-rad-vps/proekty",
+            "label": "Проекты",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#8c6239",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar/a-rad-vps/dezhurstva",
+            "label": "Дежурства",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "baikal",
+        "accountID": "a-baikal",
+        "rows": [
+          {
+            "colour": "#9a9280",
+            "count": null,
+            "detail": "401 Unauthorized — the saved password was refused. Open Connections to update it.",
+            "feed": false,
+            "href": "/app/calendar/a-baikal/obshchij",
+            "label": "Общий",
+            "on": false,
+            "readOnly": false,
+            "state": "unavailable",
+            "tick": "on"
+          }
+        ],
+        "state": "unavailable"
+      },
+      {
+        "account": "Subscriptions",
+        "accountID": "",
+        "feeds": true,
+        "rows": [
+          {
+            "colour": "#8c6239",
+            "count": 3,
+            "detail": "",
+            "feed": true,
+            "href": "/app/calendar/f-ru-holidays/feed",
+            "label": "Праздники РФ",
+            "on": false,
+            "readOnly": true,
+            "state": "read-only",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "detail": "",
+            "feed": true,
+            "href": "/app/calendar/f-league/feed",
+            "label": "Расписание лиги",
+            "on": false,
+            "readOnly": true,
+            "state": "read-only",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [
+      {
+        "href": "/app/calendar?from=2026-08-10\u0026print=1\u0026task=t-task",
+        "label": "all",
+        "on": true
+      },
+      {
+        "href": "/app/calendar?from=2026-08-10\u0026print=1\u0026tag=release\u0026task=t-task",
+        "label": "release",
+        "on": false
+      },
+      {
+        "href": "/app/calendar?from=2026-08-10\u0026print=1\u0026tag=team\u0026task=t-task",
+        "label": "team",
+        "on": false
+      }
+    ],
+    "ticks": {
+      "action": "/app/sources/calendar",
+      "actions": [],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "back",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "/app/calendar"
+            }
+          ],
+          "unfold": null
+        }
+      ],
+      "target": "rail"
+    }
+  },
+  "subtitle": [
+    {
+      "text": "6 of 8 calendars · 3 accounts · 10 – 16 August 2026 · "
+    },
+    {
+      "mark": "mono",
+      "text": "Europe/Moscow"
+    },
+    {
+      "text": " · 6 events"
+    }
+  ],
+  "title": "Combined calendar",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/calendar?from=2026-08-10\u0026again=1",
+        "icon": "i-refresh",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "2 min ago",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}
