@@ -37,7 +37,7 @@ func TestPublishedEventShowsWhatIsTicked(t *testing.T) {
 	never := []string{"X-PRIVATE", "CLASS", "VALARM", "Bring numbers"}
 
 	// The sheet as it opens: the time and the title.
-	link := publishWith(t, f, href, "title")
+	link := publishWith(t, f, href, "title", "download")
 	got := file(link)
 	mustContain(t, got, "SUMMARY:Board review", "DTSTART:20260811T090000Z")
 	for _, gone := range append(never, "Room 9", "Salaries", "CATEGORIES", "ORGANIZER", "ATTENDEE", "ATTACH") {
@@ -50,14 +50,14 @@ func TestPublishedEventShowsWhatIsTicked(t *testing.T) {
 	}
 
 	// The title taken off: the time is still given, the title is not.
-	got = file(publishWith(t, f, href))
+	got = file(publishWith(t, f, href, "download"))
 	if strings.Contains(got, "Board review") || !strings.Contains(got, "SUMMARY:Busy") {
 		t.Errorf("without the title:\n%s", got)
 	}
 
 	// The place, the people and the text ticked: those, and still nothing
 	// of what has no tick.
-	got = file(publishWith(t, f, href, "title", "location", "attendees", "description"))
+	got = file(publishWith(t, f, href, "title", "location", "attendees", "description", "download"))
 	mustContain(t, got, "LOCATION:Room 9", "DESCRIPTION:Salaries", "ATTENDEE:mailto:ada@example.org", "ORGANIZER:mailto:boss@example.org")
 	for _, gone := range append(never, "CATEGORIES", "ATTACH") {
 		if strings.Contains(got, gone) {
@@ -78,7 +78,7 @@ func TestPublishedTaskListShowsWhatIsTicked(t *testing.T) {
 	f := publishFixture(t)
 	f.srv.Seed(searchWork+"t1.ics", ics("BEGIN:VTODO\nUID:t1\nDTSTAMP:20260801T000000Z\nSUMMARY:Pay the rent\n"+
 		"DUE;VALUE=DATE:20260815\nDESCRIPTION:Account 4401\nSTATUS:NEEDS-ACTION\nX-PRIVATE:yes\nEND:VTODO"))
-	link := publishWith(t, f, f.publishHref("tasks", searchWork, ""), "title")
+	link := publishWith(t, f, f.publishHref("tasks", searchWork, ""), "title", "download")
 	page := publicPage(t, f, link)
 	if len(page.Tasks) != 1 || page.Tasks[0].Summary != "Pay the rent" {
 		t.Fatalf("tasks = %+v", page.Tasks)

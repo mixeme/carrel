@@ -182,7 +182,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "on"
+            "value": ""
           },
           {
             "add": null,

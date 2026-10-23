@@ -171,17 +171,17 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, subject s
 	lives := livesOf(kind, what == "folder")
 	var terms []view.FormRow
 	switch {
+	// The download is off until asked for, the same for every kind (the
+	// owner's decision of 23.10.2026): a link shows what it shows, and its
+	// file — and with it a subscription — is given only when ticked.
 	case kind == view.KindContact:
-		// The .vcf is off until asked for, like the fields it would carry.
 		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .vcf download and subscription", LabelRuns: allowLabel(".vcf", " download and subscription"), Kind: view.InputCheck})
 	case kind == view.KindNote:
-		// The .md goes unless taken off (s-publish-4).
-		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .md download", LabelRuns: allowLabel(".md", " download"), Kind: view.InputCheck, Value: "on"})
+		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .md download", LabelRuns: allowLabel(".md", " download"), Kind: view.InputCheck})
 	case isCalendarKind(kind):
-		// The .ics goes unless taken off — a calendar's and one event's
-		// alike (s-publish-2, -19) —, after what the visitor sees: it obeys
-		// the same ticks.
-		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .ics download and subscription", LabelRuns: allowLabel(".ics", " download and subscription"), Kind: view.InputCheck, Value: "on"})
+		// A calendar's and one event's alike (s-publish-2, -19), after what
+		// the visitor sees: it obeys the same ticks.
+		terms = append(terms, view.FormRow{Name: "download", Label: "Allow .ics download and subscription", LabelRuns: allowLabel(".ics", " download and subscription"), Kind: view.InputCheck})
 	}
 	terms = append(terms, view.FormRow{Name: "lives", Label: "Link lives for", Kind: view.InputSelect, Value: text(lives), Options: []view.Option{
 		{Value: "7", Label: "7 days", Selected: lives == "7"},

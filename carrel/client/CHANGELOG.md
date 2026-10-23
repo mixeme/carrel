@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.7.2 — 2026-10-23
+
+Server `v0.2.367`, Typecase `ce9da05`.
+
+### Changed
+
+- The guard holds the download's tick of the publish sheet off in
+  s-publish-2, -4 and -19 (`ownerOverFrames`): the owner decided after the
+  frames were drawn that it opens off for every kind; Typecase's task 229
+  redraws them, and the rule goes.
+
 ## v0.7.1 — 2026-10-23
 
 Server `v0.2.366`, Typecase `ce9da05`. Stage 5, the first pieces.

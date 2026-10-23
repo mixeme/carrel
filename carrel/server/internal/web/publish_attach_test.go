@@ -42,7 +42,7 @@ func TestNoteSheetAsksOfItsAttachments(t *testing.T) {
 		}
 		for _, row := range set.Rows {
 			tick = tick || row.Name == "attachments" && row.Kind == view.InputCheck && row.Value == ""
-			md = md || row.Name == "download" && row.Value == "on" && len(row.LabelRuns) == 3
+			md = md || row.Name == "download" && row.Value == "" && len(row.LabelRuns) == 3 // off at first (23.10.2026)
 		}
 	}
 	if legend == "" || !strings.HasPrefix(aside, "1 file · ") || !tick || !md {

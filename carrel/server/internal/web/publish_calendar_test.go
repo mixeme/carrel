@@ -23,9 +23,10 @@ func TestPublishCalendarOptions(t *testing.T) {
 			t.Fatalf("the sheet has no %q: %+v", name, sheet.Form)
 		}
 	}
-	// A date range is where it opens; the file is allowed and the text of the
-	// events is not, unless ticked (owner's decision 24.09.2026).
-	if rowNamed(t, sheet.Form, "how").Value != "range" || rowNamed(t, sheet.Form, "download").Value != "on" || rowNamed(t, sheet.Form, "description").Value != "" {
+	// A date range is where it opens; neither the file (the owner's
+	// decision of 23.10.2026: the download is off for every kind until
+	// ticked) nor the text of the events (24.09.2026) unless ticked.
+	if rowNamed(t, sheet.Form, "how").Value != "range" || rowNamed(t, sheet.Form, "download").Value != "" || rowNamed(t, sheet.Form, "description").Value != "" {
 		t.Errorf("the sheet does not start as drawn: %+v", sheet.Form)
 	}
 	// The days stand whichever is chosen, from today to the month's last

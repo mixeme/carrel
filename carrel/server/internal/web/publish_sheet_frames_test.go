@@ -64,8 +64,9 @@ func TestPublishSheetIsTheFrames(t *testing.T) {
 	check("calendar", calendar, [][]string{{"how", "from", "to"}, {"time", "title", "location", "description", "attendees", "attachments", "tags"}, {"download", "lives"}}, "s-publish-2")
 	event := decode[view.PublishSheet](t, f.h.do(get(f.publishHref("calendar", searchWork, "e1"), f.sess)))
 	check("event", event, [][]string{{"time", "title", "location", "description", "attendees", "attachments", "tags"}, {"download", "lives"}}, "s-publish-19")
-	if rowNamed(t, event.Form, "download").Value != "on" {
-		t.Errorf("one event's .ics is off at first")
+	// Off at first, as every kind's (the owner's decision of 23.10.2026).
+	if rowNamed(t, event.Form, "download").Value != "" {
+		t.Errorf("one event's .ics is on at first")
 	}
 
 	// One event's .ics goes when ticked, and not when not.

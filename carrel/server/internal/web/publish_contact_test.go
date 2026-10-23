@@ -35,8 +35,8 @@ func publishWith(t *testing.T, f davFixture, href string, ticks ...string) strin
 	t.Helper()
 	sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
 	form := url.Values{"name": {"on"}}
-	// The .ics of a calendar kind is ticked as the sheet opens, and a
-	// browser sends it so (s-publish-2, -19).
+	// A download ticked as the sheet opens a browser sends so; it opens
+	// off for every kind (the owner's decision of 23.10.2026).
 	if r := formRow(sheet.Form, "download"); r != nil && r.Value == "on" {
 		form.Set("download", "on")
 	}

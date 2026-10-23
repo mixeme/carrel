@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.367 — 2026-10-23
+
+### Changed
+
+- **The download of a published link is off until ticked, for every kind**
+  (the owner's decision of 23.10.2026): «Allow .ics download and
+  subscription» of a calendar and of one event, «Allow .md download» of a
+  note open unticked, as «Allow .vcf …» of a book always did. A link shows
+  what it shows; its file — and with it a subscription — goes only when
+  ticked. A post of the sheet without the tick gives no file, as before.
+
+### Fixtures
+
+- `app-publish/calendar`, `event`, `note`: the tick off.
+
 ## v0.2.366 — 2026-10-23
 
 Another Carrel's links taken whole; the agenda on paper (U-10); the
