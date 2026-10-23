@@ -4,6 +4,21 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.6.7 — 2026-10-23
+
+Server `v0.2.363`, Typecase `3779ac0`. Stage 4, step 1 seen in a browser.
+
+### Fixed
+
+- **A sheet and a panel go the plain way again.** Seen in a browser on the
+  fixtures: a sheet's answer is its scrim and the forms its buttons submit
+  after it — not one element, so the layer put it inside the empty sheet
+  zone (a scrim in a scrim), and that zone stood in `main`, the scrim over
+  the page only, not over the rail and the top as `s-contacts-2` draws it.
+  A panel's answer is the same. `bind.Zones` is `main` and `rail` until
+  Typecase's task 226; the empty sheet zone is gone, the empty panel stays
+  (its place is right).
+
 ## v0.6.6 — 2026-10-23
 
 Server `v0.2.363`, Typecase `3779ac0`. Stage 4, step 1.
