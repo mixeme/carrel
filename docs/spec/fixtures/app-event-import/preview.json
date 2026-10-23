@@ -25,11 +25,42 @@
     },
     {
       "count": 1,
+      "label": "already here"
+    },
+    {
+      "count": 1,
       "label": "skipped"
     }
   ],
   "details": null,
-  "existing": null,
+  "existing": {
+    "hint": "It stays as it is here; the file's version is not written.",
+    "note": "1 event of this file is already in Личный",
+    "options": [
+      {
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj/import?existing=skip\u0026into=lichnyj\u0026to=a-nc-home",
+        "id": "import.existing.skip",
+        "label": "Skip it",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj/import?existing=replace\u0026into=lichnyj\u0026to=a-nc-home",
+        "id": "import.existing.replace",
+        "label": "Replace it",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj/import?existing=copy\u0026into=lichnyj\u0026to=a-nc-home",
+        "id": "import.existing.copy",
+        "label": "Import as a copy",
+        "method": "GET"
+      }
+    ]
+  },
   "into": {
     "chosen": "/app/calendar/a-nc-home/lichnyj/import?into=lichnyj\u0026to=a-nc-home",
     "new": {
@@ -121,7 +152,7 @@
         "When",
         "Result"
       ],
-      "count": 5,
+      "count": 6,
       "lines": [
         {
           "cells": [
@@ -140,6 +171,15 @@
             "Ready"
           ],
           "result": "ready"
+        },
+        {
+          "cells": [
+            "calendar.ics",
+            "Синк-ап по релизу",
+            "10 August 2026, 14:00",
+            "Already here — skipped"
+          ],
+          "result": "skipped"
         },
         {
           "cells": [
@@ -288,7 +328,7 @@
       "text": "calendar.ics"
     },
     {
-      "text": " · 872 B · iCalendar 2.0"
+      "text": " · 1 KB · iCalendar 2.0"
     }
   ],
   "title": "Import events",

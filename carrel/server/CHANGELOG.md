@@ -17,6 +17,22 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.363 — 2026-10-23
+
+What the client's import wizard needed.
+
+### Changed
+
+- **Preview file off** (no «Into» chosen, s-io-17) keeps its address: the
+  form that holds the file taken by a drop has somewhere to go.
+
+### Fixtures
+
+- The import fixtures are the frames' states throughout: the folder of
+  notes chosen a level down (s-io-4: Documents › notes), a record already
+  here in the previews of events and tasks (s-io-6, -7), the rows and counts
+  the frames draw (s-io-5, -7, -19).
+
 ## v0.2.362 — 2026-10-23
 
 Package 3 of the import scan ([import-111](../../docs/plan/scans/import-111.md)):

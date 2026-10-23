@@ -111,7 +111,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 11,
+            "count": 10,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-nc-home/kontakty",
@@ -142,10 +142,10 @@
     "ticks": null
   },
   "report": {
-    "created": 6,
+    "created": 5,
     "failed": 1,
     "failures": [
-      "line 25: the card has no END:VCARD"
+      "line 22: cannot decode quoted-printable"
     ],
     "here": 1,
     "heres": [

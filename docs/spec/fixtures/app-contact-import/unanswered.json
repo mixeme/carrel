@@ -4,7 +4,7 @@
       "csrf": "csrf",
       "enabled": false,
       "id": "import.run",
-      "label": "Import 1 contact",
+      "label": "Import 2 contacts",
       "method": "POST",
       "primary": true,
       "reason": "nextcloud · Контакты did not answer"
@@ -20,8 +20,13 @@
   ],
   "counts": [
     {
-      "count": 1,
+      "count": 2,
       "label": "ready"
+    },
+    {
+      "count": 1,
+      "error": true,
+      "label": "with errors"
     }
   ],
   "details": null,
@@ -121,7 +126,7 @@
         "UID",
         "Result"
       ],
-      "count": 1,
+      "count": 3,
       "lines": [
         {
           "cells": [
@@ -131,6 +136,25 @@
             "Ready"
           ],
           "result": "ready"
+        },
+        {
+          "cells": [
+            "Разное (mix).vcf",
+            "Вера Лебедева",
+            "8e20-5b1f-c7d4",
+            "Ready"
+          ],
+          "result": "ready"
+        },
+        {
+          "cells": [
+            "Разное (mix).vcf",
+            "—",
+            "",
+            "line 14: cannot decode quoted-printable"
+          ],
+          "result": "failed",
+          "untitled": true
         }
       ],
       "rubric": ""
@@ -172,7 +196,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 11,
+            "count": 10,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-nc-home/kontakty",
@@ -245,7 +269,7 @@
       "text": "Разное (mix).vcf"
     },
     {
-      "text": " · 89 B · vCard 3.0"
+      "text": " · 276 B · vCard 3.0"
     }
   ],
   "title": "Import contacts",

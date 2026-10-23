@@ -148,7 +148,7 @@
   "report": null,
   "source": {
     "folder": {
-      "chosen": "",
+      "chosen": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026in=notes\u0026into=zapisi\u0026path=Documents\u0026to=a-nc-home",
       "field": "",
       "name": null,
       "new": null,
@@ -163,8 +163,27 @@
           "stamp": "nextcloud"
         },
         {
-          "children": [],
-          "expanded": false,
+          "children": [
+            {
+              "children": [],
+              "expanded": false,
+              "href": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026in=carrel\u0026into=zapisi\u0026path=Documents\u0026to=a-nc-home",
+              "id": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026in=carrel\u0026into=zapisi\u0026path=Documents\u0026to=a-nc-home",
+              "label": "carrel",
+              "readOnly": false,
+              "stamp": ""
+            },
+            {
+              "children": [],
+              "expanded": true,
+              "href": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026in=notes\u0026into=zapisi\u0026path=Documents\u0026to=a-nc-home",
+              "id": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026in=notes\u0026into=zapisi\u0026path=Documents\u0026to=a-nc-home",
+              "label": "notes",
+              "readOnly": false,
+              "stamp": ""
+            }
+          ],
+          "expanded": true,
           "href": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026into=zapisi\u0026path=Documents\u0026to=a-nc-home",
           "id": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026into=zapisi\u0026path=Documents\u0026to=a-nc-home",
           "label": "Documents",
@@ -244,12 +263,12 @@
     ],
     "preview": {
       "csrf": "csrf",
-      "enabled": false,
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/import?folder=a-sftp-vps\u0026in=notes\u0026into=zapisi\u0026op=folder\u0026path=Documents\u0026to=a-nc-home",
       "id": "import.folder",
       "label": "Preview folder",
       "method": "POST",
-      "primary": true,
-      "reason": "Choose a folder in the tree first."
+      "primary": true
     },
     "taken": []
   },

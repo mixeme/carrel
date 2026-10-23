@@ -3946,12 +3946,11 @@ func TestFixtureImport(t *testing.T) {
 		book := app.listPath(t, "contacts", "kontakty")
 		const vcf = "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:7c1e-2b40-9a11\r\nFN:Ирина Соколова\r\nN:Соколова;Ирина;;;\r\nTEL;TYPE=cell:+7 921 300-11-22\r\nEND:VCARD\r\n" +
 			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:4f2b-9c31-a0e7\r\nFN:Анна Ковалева\r\nN:Ковалева;Анна;;;\r\nEND:VCARD\r\n" +
-			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:5d02-77aa-31c4\r\nN:;;;;\r\nEMAIL:press@example.org\r\nEND:VCARD\r\n" +
 			// What s-io-5 and -9 draw besides: a card named by its N in vCard
 			// 2.1, one whose quoted-printable cannot be read, a UID the file
 			// holds twice, a photo the server does not keep.
 			"BEGIN:VCARD\r\nVERSION:2.1\r\nUID:8e20-5b1f-c7d4\r\nN;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:=D0=9B=D0=B5=D0=B1=D0=B5=D0=B4=D0=B5=D0=B2=D0=B0;=D0=92=D0=B5=D1=80=D0=B0;;;\r\nEND:VCARD\r\n" +
-			"BEGIN:VCARD\r\nVERSION:2.1\r\nUID:3c90-aa41-0d2e\r\nNOTE;ENCODING=QUOTED-PRINTABLE:=ZZ=\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:2.1\r\nUID:3c90-aa41-0d2e\r\nNOTE;ENCODING=QUOTED-PRINTABLE:=ZZ broken\r\nEND:VCARD\r\n" +
 			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:2b7e-11aa\r\nFN:Вера Дорошенко\r\nEND:VCARD\r\n" +
 			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:2b7e-11aa\r\nFN:Вера Дорошенко\r\nTEL:+7 900 000-00-00\r\nEND:VCARD\r\n" +
 			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:9f13-6be0-2a7c\r\nFN:Галина Мещерякова\r\nPHOTO;ENCODING=b;TYPE=JPEG:/9j/4AAQSkZJRgABAQ==\r\nEND:VCARD\r\n"
@@ -3975,6 +3974,9 @@ func TestFixtureImport(t *testing.T) {
 		const ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other client//EN\r\n" +
 			"BEGIN:VEVENT\r\nUID:e7a1-standup\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Планёрка\r\nDTSTART;TZID=Europe/Moscow:20260810T090000\r\nDTEND;TZID=Europe/Moscow:20260810T093000\r\nRRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z\r\nEND:VEVENT\r\n" +
 			"BEGIN:VEVENT\r\nUID:e7a1-otpusk\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Отпуск\r\nDTSTART;VALUE=DATE:20260713\r\nDTEND;VALUE=DATE:20260728\r\nEND:VEVENT\r\n" +
+			// Already in «Личный»: the question about the records already
+			// here stands beside «Into» (s-io-6).
+			"BEGIN:VEVENT\r\nUID:8f1c-4a02-b7d3\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Синк-ап по релизу\r\nDTSTART:20260810T110000Z\r\nDTEND:20260810T113000Z\r\nEND:VEVENT\r\n" +
 			"BEGIN:VEVENT\r\nUID:e7a1-ekb\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Созвон с Екатеринбургом\r\nDTSTART;TZID=Asia/Yekaterinburg:20260817T100000\r\nDTEND;TZID=Asia/Yekaterinburg:20260817T110000\r\nEND:VEVENT\r\n" +
 			"BEGIN:VTODO\r\nUID:e7a1-bilety\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Купить билеты\r\nEND:VTODO\r\n" +
 			"BEGIN:VEVENT\r\nUID:e7a1-bez-imeni\r\nDTSTAMP:20260801T000000Z\r\nDTSTART;VALUE=DATE:20260504\r\nEND:VEVENT\r\n" +
@@ -3998,8 +4000,11 @@ func TestFixtureImport(t *testing.T) {
 	t.Run("app-task-import", func(t *testing.T) {
 		tasks := app.listPath(t, "tasks", "dela")
 		const ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other client//EN\r\n" +
-			"BEGIN:VTODO\r\nUID:t9b2-mfc\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Отправить документы в МФЦ\r\nDUE;VALUE=DATE:20260807\r\nEND:VTODO\r\n" +
+			// Already in «Дела»: the question about the records already here
+			// stands beside «Into» (s-io-7).
+			"BEGIN:VTODO\r\nUID:aa10-77bc-0e31\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Отправить документы в МФЦ\r\nDUE;VALUE=DATE:20260807\r\nEND:VTODO\r\n" +
 			"BEGIN:VTODO\r\nUID:t9b2-kniga\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Дочитать книгу\r\nPERCENT-COMPLETE:40\r\nPRIORITY:5\r\nEND:VTODO\r\n" +
+			"BEGIN:VTODO\r\nUID:t9b2-smeta\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Ответить подрядчику по смете\r\nEND:VTODO\r\n" +
 			"BEGIN:VTODO\r\nUID:t9b2-pusto\r\nDTSTAMP:20260801T000000Z\r\nDUE;VALUE=DATE:20260828\r\nEND:VTODO\r\n" +
 			"BEGIN:VEVENT\r\nUID:t9b2-podryadchik\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Созвон с подрядчиком\r\nDTSTART;VALUE=DATE:20260817\r\nEND:VEVENT\r\n" +
 			"BEGIN:VTODO\r\nUID:t9b2-otchet\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Сдать отчёт\r\nDUE;VALUE=DATE:2026-13-01\r\nEND:VTODO\r\n" +
@@ -4013,7 +4018,26 @@ func TestFixtureImport(t *testing.T) {
 		// The notebooks were read, as s-io-4 counts their notes.
 		openList(t, app, "/app/notes")
 		notes := app.listPath(t, "notes", "zapisi")
-		app.compare(t, "app-note-import/normal.json", app.h.do(get(notes+"/import", app.sess)))
+		// The folder chosen in the tree, a level down, as s-io-4 draws it:
+		// Documents opened, «notes» chosen.
+		node := func(nodes []view.FileTreeNode, label string) string {
+			for _, n := range nodes {
+				if n.Label == label {
+					return n.Href
+				}
+				for _, c := range n.Children {
+					if c.Label == label {
+						return c.Href
+					}
+				}
+			}
+			t.Fatalf("no folder %q in %+v", label, nodes)
+			return ""
+		}
+		app.servers["sftpgo · vps"].SeedFolder(app.realPath(t, "Documents") + "notes/")
+		first := decode[view.ImportPage](t, app.h.do(get(notes+"/import", app.sess)))
+		opened := decode[view.ImportPage](t, app.h.do(get(node(first.Source.Folder.Nodes, "Documents"), app.sess)))
+		app.compare(t, "app-note-import/normal.json", app.h.do(get(node(opened.Source.Folder.Nodes, "notes"), app.sess)))
 		// A zip of notes, as s-io-8 draws it: front matter, a heading in a
 		// folder, a note already here by its UID, a file that is no
 		// Markdown, an empty one.
@@ -4031,7 +4055,10 @@ func TestFixtureImport(t *testing.T) {
 	// stays refusing.
 	t.Run("app-contact-import/unanswered", func(t *testing.T) {
 		book := app.listPath(t, "contacts", "kontakty")
-		const vcf = "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:7c1e-2b40-9a11\r\nFN:Ирина Соколова\r\nEND:VCARD\r\n"
+		// A card ready and one that cannot be read: the counts of s-io-19.
+		const vcf = "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:7c1e-2b40-9a11\r\nFN:Ирина Соколова\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:8e20-5b1f-c7d4\r\nFN:Вера Лебедева\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:2.1\r\nUID:3c90-aa41-0d2e\r\nNOTE;ENCODING=QUOTED-PRINTABLE:=ZZ broken\r\nEND:VCARD\r\n"
 		for _, m := range []string{"PROPFIND", "REPORT"} {
 			app.servers["nextcloud"].Refuse(m, http.StatusServiceUnavailable, "")
 		}

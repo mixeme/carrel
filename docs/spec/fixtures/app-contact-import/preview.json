@@ -5,7 +5,7 @@
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026op=run\u0026to=a-nc-home",
       "id": "import.run",
-      "label": "Import 6 contacts",
+      "label": "Import 5 contacts",
       "method": "POST",
       "primary": true
     },
@@ -20,7 +20,7 @@
   ],
   "counts": [
     {
-      "count": 6,
+      "count": 5,
       "label": "ready"
     },
     {
@@ -132,7 +132,7 @@
         "UID",
         "Result"
       ],
-      "count": 8,
+      "count": 7,
       "lines": [
         {
           "cells": [
@@ -151,16 +151,6 @@
             "Already here — skipped"
           ],
           "result": "skipped"
-        },
-        {
-          "cells": [
-            "Разное (mix).vcf",
-            "Unnamed contact",
-            "5d02-77aa-31c4",
-            "Ready — no name"
-          ],
-          "result": "ready",
-          "untitled": true
         },
         {
           "cells": [
@@ -203,7 +193,7 @@
             "Разное (mix).vcf",
             "—",
             "",
-            "line 25: the card has no END:VCARD"
+            "line 22: cannot decode quoted-printable"
           ],
           "result": "failed",
           "untitled": true
@@ -321,7 +311,7 @@
       "text": "Разное (mix).vcf"
     },
     {
-      "text": " · 969 B · vCard 2.1 and 3.0"
+      "text": " · 885 B · vCard 2.1 and 3.0"
     }
   ],
   "title": "Import contacts",

@@ -556,7 +556,9 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 		choose := view.Action{ID: "import.choose", Label: "Preview file", Method: "POST", Primary: true, Enabled: true,
 			Href: s.importHref(c, "", to, into), File: "file"}
 		if st.dest == nil {
-			choose.Enabled, choose.Reason, choose.Href = false, "Choose a collection that can be written.", ""
+			// Off with why; its address stays the form's, which holds the
+			// file taken by a drop (s-io-17).
+			choose.Enabled, choose.Reason = false, "Choose a collection that can be written."
 			if st.entry {
 				choose.Reason = "Choose under «Into» where the records go."
 			}

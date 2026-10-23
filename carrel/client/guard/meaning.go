@@ -118,9 +118,10 @@ func needs(fields ...string) rule {
 // field is the rule of a control that takes a value: its Name, in a form
 // that sends. Disabled, it sends nothing and needs nothing; read only and
 // nameless, it is an address shown to be copied — nothing to send (the
-// link just made, s-admin-1).
+// link just made, s-admin-1) — or the name of the file picked beside it
+// (Picked, read-only too: the import's file, s-io-3).
 func field(c control) string {
-	if c.flag("Disabled") || c.flag("ReadOnly") && c.str("Name") == "" {
+	if c.flag("Disabled") || (c.flag("ReadOnly") || c.flag("Picked")) && c.str("Name") == "" {
 		return ""
 	}
 	if c.str("Name") == "" {

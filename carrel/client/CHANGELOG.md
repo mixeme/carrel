@@ -4,6 +4,24 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.6.5 — 2026-10-23
+
+Server `v0.2.363`, Typecase `3779ac0`.
+
+### Added
+
+- **The import wizard** (`screens/importer`, ImportPage; s-io-3 … -9, -14 …
+  -19): the source with the file and the folders of notes, the preview with
+  the question about records already here, the counts and the table, the
+  report's cards. Built and held against its frames; it is registered once
+  Typecase's task 225 draws «Into» as a menu and s-io-6 its row with an
+  error.
+
+### Changed
+
+- The meaning guard reads a picked file's name (`Input.Picked`) as read
+  only, which it is.
+
 ## v0.6.4 — 2026-10-23
 
 Server `v0.2.360`, Typecase `0f51d45`.

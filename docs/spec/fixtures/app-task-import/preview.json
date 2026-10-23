@@ -30,11 +30,42 @@
     },
     {
       "count": 1,
+      "label": "already here"
+    },
+    {
+      "count": 1,
       "label": "skipped"
     }
   ],
   "details": null,
-  "existing": null,
+  "existing": {
+    "hint": "It stays as it is here; the file's version is not written.",
+    "note": "1 task of this file is already in Дела",
+    "options": [
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela/import?existing=skip\u0026into=dela\u0026to=a-nc-home",
+        "id": "import.existing.skip",
+        "label": "Skip it",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela/import?existing=replace\u0026into=dela\u0026to=a-nc-home",
+        "id": "import.existing.replace",
+        "label": "Replace it",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela/import?existing=copy\u0026into=dela\u0026to=a-nc-home",
+        "id": "import.existing.copy",
+        "label": "Import as a copy",
+        "method": "GET"
+      }
+    ]
+  },
   "into": {
     "chosen": "/app/tasks/a-nc-home/dela/import?into=dela\u0026to=a-nc-home",
     "new": {
@@ -86,16 +117,16 @@
         "Due",
         "Result"
       ],
-      "count": 5,
+      "count": 6,
       "lines": [
         {
           "cells": [
             "tasks.ics",
             "Отправить документы в МФЦ",
             "7 August 2026",
-            "Ready — overdue, and stays overdue"
+            "Already here — skipped"
           ],
-          "result": "ready"
+          "result": "skipped"
         },
         {
           "cells": [
@@ -103,6 +134,15 @@
             "Дочитать книгу",
             "",
             "Ready — 40 % done, priority 5, a task without a date is a task"
+          ],
+          "result": "ready"
+        },
+        {
+          "cells": [
+            "tasks.ics",
+            "Ответить подрядчику по смете",
+            "",
+            "Ready — a task without a date is a task"
           ],
           "result": "ready"
         },
@@ -121,7 +161,7 @@
             "tasks.ics",
             "Сдать отчёт",
             "",
-            "line 32: cannot read DUE «2026-13-01»"
+            "line 37: cannot read DUE «2026-13-01»"
           ],
           "result": "failed"
         },
@@ -241,7 +281,7 @@
       "text": "tasks.ics"
     },
     {
-      "text": " · 722 B · iCalendar 2.0"
+      "text": " · 857 B · iCalendar 2.0"
     }
   ],
   "title": "Import tasks",
