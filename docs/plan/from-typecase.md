@@ -4121,6 +4121,74 @@ Typecase, который она описывает, — `f47752a`** (443 кад�
       Jump to. Без сценария меню нет: Enter ведёт на выдачу, пустая строка —
       на `s-find-6`. Кадры страниц меню не рисуют — с ними сходится.
 
+Записка 119 от 23.10.2026 (Typecase `0bdc700`; задача 197 пп. 3, 5). **Последний
+коммит Typecase, который она описывает, — `0bdc700`** (531 кадр). **197 пп. 3
+и 5 закрыты**; пп. 1, 2, 4 — открыты.
+
+119. **Листы: строки переноса, «куда» быстрого листа, экспорт, пароль, кадрирование.**
+   - **Решение владельца Р-77 (23.10): плашка проходного экрана — только
+     важное и неочевидное.** Что делает действие, видно из его названия;
+     пишется то, о чём человек не подумает и что ему важно. Нечего такого —
+     плашки нет. **Серверу — новые слова листов** (`MoveSheet.Warning`,
+     `CollectionMoveSheet`, листы файлов):
+     - перенос записи внутри сервера, на другой аккаунт без участников,
+       копия с тем же UID, перенос файлов внутри хранилища — **плашки нет**
+       (`s-contacts-2`, `-17`, `s-files-4`, `-13`);
+     - на другой аккаунт с участниками — только `Cancels`: «radicale · vps
+       may send its attendees a cancellation.» (`s-agenda-29`, новый);
+     - копия с новым UID — «The copy gets a new UID: for other apps it is
+       another card.» (`s-contacts-37`, новый; «event», «task», «note» у
+       других родов);
+     - перенос файлов на другое хранилище — «Each file is downloaded and
+       uploaded again.» (`s-files-12`); копия — «Each file is downloaded and
+       uploaded again, even on one server.» (`s-files-11`);
+     - перенос календаря — «Links, devices and backups lose the old
+       address. nextcloud may send attendees a cancellation.» (`s-profile-8`;
+       без участников — первая фраза);
+     - перенос папки хранилища, переименование папки — «Links, devices and
+       backups lose the old address.» (`s-profile-34`, `-18`);
+     - хранилище целиком — «The storage itself stays on nextcloud, empty.» и
+       «Shared and mounted folders stay there too.» (`s-profile-35`);
+     - переименование коллекции — «The address stays: links, devices and
+       backups keep working.» (`s-profile-7`).
+   - **«Куда» быстрого листа** (В2, В12; `s-notes-5`, `-8`, `-9`, `-10`):
+     `<details class="tc-drop tc-push"><summary class="tc-in is-pick …"
+     title="Write into">‹метка›‹коллекция›</summary>` и меню радио
+     `name="into"` (`role="menuitemradio"`) — поле формы листа; последняя
+     выбранная — первой, с «last used» (`TargetOption.Last`); только для
+     чтения — `button` `disabled` с `title` «Read-only: nothing can be
+     written here.» и «ro». Списки `s-notes-16`, `-17`, `-19` — те же
+     пункты.
+   - **Лист экспорта** (В8; новый `s-agenda-30`, Export объединённого
+     календаря): форма GET `/app/calendar/export`, коллекция — радио `c`
+     (одна; несколько — вопрос владельцу на после рабочей версии), «What
+     goes in» — `span` (`whole` выключает даты | `dates`), `from`, `to`;
+     кнопка «Download .ics», Cancel → `/app/calendar`. У книги — без дат,
+     «Download .vcf»; у задач — без дат; у заметок — «Download .zip». Одна
+     коллекция в рейле — листа нет, Export отдаёт файл сразу.
+   - **Лист пароля** (В5, В6, В10): слова `s-plan-3` и `s-profile-3` уже
+     одни. Неверный пароль — новый `s-profile-36`: ошибка у поля «Password is
+     wrong.», поле пустое; много попыток — «Too many attempts just now. Wait
+     a few minutes and try again.». Заголовки и кнопки назначений — как у
+     сервера (подпись `s-plan-3`): «Show password»/«Show», «Generate
+     profile»/«Generate», «Add device»/«Create password», «External
+     trigger»/«Turn on» («New password»), «Delete account» (опасная
+     кнопка), «Confirm your password»/«Confirm».
+   - **Кадрирование — форма** (В7; `s-contacts-5`): `<form class="tc-dialog …"
+     action="…/photo-preview?op=crop" method="post">` со скрытыми `csrf`,
+     `etag`, `zoom`, `x`, `y`; поворот — радио `rotate` (0, 90, 180, 270);
+     Save photo — submit, Remove photo — submit `formaction="…?op=remove"`,
+     Cancel — ссылка на правку. Слова короче: «Drag to choose the frame.»,
+     под «Saved as» — «Kept inside the card, so it is made small.»; строки
+     про EXIF нет. `PhotoCrop.After` убран из библиотеки.
+   - **«Show 5 empty fields» на новой форме** (В11; `s-contacts-27`) — убрана:
+     поля новой карточки и так все показаны.
+   - **Лист отключения** (В9) — уже есть: `s-profile-26`.
+   - **«Писать некуда»** у других родов (подпись `s-notes-6`): «…an address
+     book…», «…a calendar…», «…a list of tasks…».
+   - Данные: Анна с 190 есть в Архиве и Команде — в листах переноса и копии
+     контакта (`s-contacts-2`, `-17`) там «already there», цель — Рассылки.
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
