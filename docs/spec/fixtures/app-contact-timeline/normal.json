@@ -203,7 +203,22 @@
       "initials": "АК"
     },
     "body": "",
-    "books": [],
+    "books": [
+      {
+        "colour": "#6b4e7a",
+        "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
+        "label": "radicale · vps · Команда",
+        "mono": false,
+        "value": "Phone, email differ"
+      },
+      {
+        "colour": "#a05a2c",
+        "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
+        "label": "nextcloud · Архив",
+        "mono": false,
+        "value": "Phone, email differ"
+      }
+    ],
     "close": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?card=0",
     "date": "",
     "deleteNote": "",
@@ -225,6 +240,18 @@
         "label": "Email · work",
         "mono": false,
         "value": "a.kovaleva@example.org"
+      },
+      {
+        "href": "mailto:anna.kovaleva@slovo.example",
+        "label": "Email · second",
+        "mono": false,
+        "value": "anna.kovaleva@slovo.example"
+      },
+      {
+        "href": "",
+        "label": "Address · work",
+        "mono": false,
+        "value": "Москва, Тверская 12, стр. 3"
       },
       {
         "aside": "in 7 months",
@@ -334,7 +361,10 @@
       "rubric": "August 2026"
     }
   ],
-  "linked": null,
+  "linked": {
+    "label": "in 3 books",
+    "role": "linked"
+  },
   "look": {
     "compact": false,
     "panel": true,
@@ -521,6 +551,13 @@
         "text": "a.kovaleva@example.org"
       },
       {
+        "text": ", "
+      },
+      {
+        "mark": "mono",
+        "text": "anna.kovaleva@slovo.example"
+      },
+      {
         "text": " and the name"
       }
     ],
@@ -544,7 +581,7 @@
     "foot": [],
     "nav": [
       {
-        "count": 7,
+        "count": 9,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",

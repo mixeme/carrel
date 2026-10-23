@@ -169,6 +169,8 @@ type IgnoredGroup struct {
 	ID      string      `json:"id"`
 	Kind    view.Kind   `json:"kind"`
 	Members []RecordRef `json:"members"`
+	// Title is as LinkedGroup's: «Анна Ковалёва · Алексей Смирнов»
+	Title string `json:"title,omitempty"`
 }
 
 // LinkedGroup is a set of records the person linked.
@@ -176,6 +178,10 @@ type LinkedGroup struct {
 	ID      string      `json:"id"`
 	Kind    view.Kind   `json:"kind"`
 	Members []RecordRef `json:"members"`
+	// Title is what the group was called when it was decided: its records'
+	// names, each once, «Анна Ковалёва». The decision is named by it while
+	// no record of it is loaded (s-dup-6, «Decided earlier»).
+	Title string `json:"title,omitempty"`
 	// Prefs answer a single-valued property the members disagree on: the
 	// member whose value the group shows, by property name. Asked once, when
 	// linking, and kept (S-16).

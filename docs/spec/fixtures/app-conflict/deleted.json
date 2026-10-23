@@ -56,7 +56,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e21"
+            "value": "e22"
           },
           {
             "add": null,
@@ -133,7 +133,7 @@
           },
           {
             "colour": "#a05a2c",
-            "count": 1,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-nc-home/arhiv",

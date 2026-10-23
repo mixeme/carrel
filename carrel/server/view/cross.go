@@ -177,15 +177,26 @@ type DuplicatesPage struct {
 	// Subtitle — под заголовком: «27 records compared · 2 to look at»
 	// (s-dup-1), «0 records compared» (s-dup-6); групп ждать нечего —
 	// только сравнённое
-	Subtitle  Text             `json:"subtitle"`
-	Groups    []DuplicateGroup `json:"groups"`
+	Subtitle Text             `json:"subtitle"`
+	Groups   []DuplicateGroup `json:"groups"`
+	// Decided — «Decided earlier» (s-dup-6; записка Typecase 117 п. 10):
+	// решения, ни одной записи которых сессия не читала; их называют и
+	// отменяют, не загружая списков. Пусто — таких нет
+	Decided   []DecidedCard    `json:"decided,omitempty"`
 	Threshold ThresholdControl `json:"threshold"`
 	Bar       ListBar          `json:"bar"`
 }
 
 type DuplicateGroup struct {
-	ID       string            `json:"id"`
-	Kind     Kind              `json:"kind"`
+	ID   string `json:"id"`
+	Kind Kind   `json:"kind"`
+	// Title, Badge, Points — рубрика карточки (s-dup-1): имя группы
+	// («Вера Лебедева»; пара «not duplicates» — «Анна Ковалёва»), что о ней
+	// решено («candidate ×2», «linked ×3», «not duplicates») и очки с
+	// причинами («80 points · same phone, same name»; пусто — не сравнено)
+	Title    Text              `json:"title"`
+	Badge    Badge             `json:"badge"`
+	Points   Text              `json:"points,omitempty"`
 	Score    int               `json:"score"`
 	Reasons  []Text            `json:"reasons"` // «тот же адрес», «тот же телефон» — причина рядом со счётом
 	Rows     []DuplicateMember `json:"rows"`
@@ -196,15 +207,31 @@ type DuplicateGroup struct {
 	// UIDs. …», у заметок «Same title and the same date: a note copied into
 	// a second notebook. …»; пусто — сказать нечего
 	Hint Text `json:"hint,omitempty"`
-	// Расхождения в однозначных полях: ответ уходит с Link как
-	// MergeRow.Name=<номер варианта> и запоминается при связанной группе
+	// Choices — вопросы, где копии расходятся (записка Typecase 117 п. 1):
+	// ответ уходит с решением и запоминается при связанной группе
 	Choices []MergeRow `json:"choices"`
-	// Form — карточка группы формой, когда выбирать есть что (U-8, s-dup-1):
-	// POST /app/duplicates/decide, скрытые _csrf и group; радио Choices
-	// стоят в ней, а решения группы (Actions, POST) — её кнопки на свой
-	// адрес (Action.Submits), каждая с do и group в адресе. nil — выбирать
-	// нечего: решения уходят каждое своей формой
+	// Form — карточка группы формой (U-8, s-dup-1; записка 117 п. 8): POST
+	// /app/duplicates/decide, скрытые _csrf и group; вопросы стоят в ней, а
+	// решения (Actions) — её кнопки do=… (Action.Name, Value)
 	Form *Form `json:"form"`
+}
+
+// DecidedCard — решение, чьих записей сессия не читала (s-dup-6): что
+// решено, где лежат записи и их UID, отмена — кнопкой формы, как у группы.
+type DecidedCard struct {
+	ID       string            `json:"id"`
+	Kind     Kind              `json:"kind"`
+	Title    Text              `json:"title"` // «Анна Ковалёва · Алексей Смирнов»
+	Decision DuplicateDecision `json:"decision"`
+	Badge    Badge             `json:"badge"` // «linked ×3», «not duplicates»
+	Note     Text              `json:"note"`  // «Not loaded in this session»
+	// Where — коллекции записей, каждая раз: «nextcloud · Контакты,
+	// radicale · vps · Команда, nextcloud · Архив»; UIDs — «UID
+	// 4f2b-9c31-a0e7, 9a1c-03de-77f2», каждый раз
+	Where   Text     `json:"where"`
+	UIDs    Text     `json:"uids"`
+	Actions []Action `json:"actions"` // Unlink · Offer again
+	Form    *Form    `json:"form"`
 }
 
 type DuplicateMember struct {
@@ -214,6 +241,25 @@ type DuplicateMember struct {
 	Title    Text   `json:"title"`
 	Detail   Text   `json:"detail"`
 	ReadOnly bool   `json:"readOnly"`
+	// Done — у задачи: сделана ли; галка строки — знак, не кнопка
+	// (s-dup-1, «Not done»; записка Typecase 117 п. 11). nil — не задача
+	// или её список не прочитан
+	Done *bool `json:"done,omitempty"`
+	// Строка по роду — строка списка своего рода (s-dup-1; записка 117):
+	// контакт — Avatar, Phone (моноширинно), Email, Org; событие — Lead
+	// («10:00», «all day»), Place, Repeats (бейдж «repeats weekly»); задача
+	// — Done, Due, Percent; заметка — Excerpt, Date. Пусто — «—» строки
+	Avatar  *Avatar `json:"avatar,omitempty"`
+	Phone   Text    `json:"phone,omitempty"`
+	Email   Text    `json:"email,omitempty"`
+	Org     Text    `json:"org,omitempty"`
+	Lead    Text    `json:"lead,omitempty"`
+	Place   Text    `json:"place,omitempty"`
+	Repeats Text    `json:"repeats,omitempty"`
+	Due     Text    `json:"due,omitempty"`
+	Percent *int    `json:"percent,omitempty"`
+	Excerpt Text    `json:"excerpt,omitempty"`
+	Date    Text    `json:"date,omitempty"`
 }
 
 type ThresholdControl struct {

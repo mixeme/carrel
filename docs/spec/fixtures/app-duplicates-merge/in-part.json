@@ -51,7 +51,7 @@
     "foot": [],
     "nav": [
       {
-        "count": 7,
+        "count": 9,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -211,7 +211,7 @@
           },
           {
             "colour": "#a05a2c",
-            "count": 1,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "",
@@ -247,7 +247,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 1,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "",
@@ -319,9 +319,16 @@
   "staysNote": "",
   "subtitle": "Вера Лебедева · 2 records",
   "target": {
+    "avatar": {
+      "colour": "#9a9280",
+      "href": "",
+      "initials": "ВЛ"
+    },
     "colour": "#a05a2c",
     "detail": "+7 905 331-09-42 · vera@example.net",
+    "email": "vera@example.net",
     "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
+    "phone": "+7 905 331-09-42",
     "readOnly": false,
     "stamp": "nextcloud · Архив",
     "title": "Вера Лебедева"

@@ -253,6 +253,11 @@
             "value": "anna@home.example"
           },
           {
+            "label": "anna.kovaleva@slovo.example",
+            "selected": false,
+            "value": "anna.kovaleva@slovo.example"
+          },
+          {
             "label": "Do not rewrite",
             "selected": false,
             "separator": true,
@@ -286,6 +291,11 @@
             "label": "anna@home.example",
             "selected": true,
             "value": "anna@home.example"
+          },
+          {
+            "label": "anna.kovaleva@slovo.example",
+            "selected": false,
+            "value": "anna.kovaleva@slovo.example"
           },
           {
             "label": "Do not rewrite",
@@ -374,7 +384,7 @@
                 "options": [],
                 "readOnly": false,
                 "required": false,
-                "value": "e29"
+                "value": "e30"
               },
               {
                 "add": null,
@@ -878,6 +888,67 @@
                 "error": "",
                 "extra": null,
                 "hint": "",
+                "kind": "select",
+                "label": "Label",
+                "name": "email.2.type",
+                "options": [
+                  {
+                    "label": "work",
+                    "selected": false,
+                    "value": "work"
+                  },
+                  {
+                    "label": "home",
+                    "selected": false,
+                    "value": "home"
+                  },
+                  {
+                    "label": "other",
+                    "selected": false,
+                    "value": "other"
+                  },
+                  {
+                    "label": "second",
+                    "selected": true,
+                    "separator": true,
+                    "value": "second"
+                  }
+                ],
+                "readOnly": false,
+                "required": false,
+                "value": "second"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "email",
+                "label": "Address",
+                "name": "email.2",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "anna.kovaleva@slovo.example"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "remove",
+                "label": "Remove",
+                "name": "remove",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "email.2"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
                 "kind": "add",
                 "label": "Add email",
                 "name": "add",
@@ -947,41 +1018,116 @@
             "unfold": null
           },
           {
-            "legend": "Other",
+            "legend": "Addresses",
             "rows": [
               {
                 "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
-                "kind": "text",
-                "label": "Tags",
-                "name": "categories",
-                "options": [],
+                "kind": "select",
+                "label": "Label",
+                "name": "adr.0.type",
+                "options": [
+                  {
+                    "label": "home",
+                    "selected": false,
+                    "value": "home"
+                  },
+                  {
+                    "label": "work",
+                    "selected": true,
+                    "value": "WORK"
+                  },
+                  {
+                    "label": "other",
+                    "selected": false,
+                    "value": "other"
+                  }
+                ],
                 "readOnly": false,
                 "required": false,
-                "value": "работа, издательство"
+                "value": "WORK"
               },
               {
                 "add": null,
                 "error": "",
                 "extra": null,
                 "hint": "",
-                "kind": "area",
-                "label": "Note",
-                "name": "note",
+                "kind": "text",
+                "label": "Street",
+                "name": "adr.0.street",
                 "options": [],
                 "readOnly": false,
                 "required": false,
-                "value": "Пишет по вторникам, отвечает в тот же день."
-              }
-            ],
-            "unfold": null
-          },
-          {
-            "folded": true,
-            "legend": "Show 3 empty fields",
-            "rows": [
+                "value": "Москва, Тверская 12, стр. 3"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "City",
+                "name": "adr.0.city",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "Region",
+                "name": "adr.0.region",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "Postcode",
+                "mono": true,
+                "name": "adr.0.code",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "Country",
+                "name": "adr.0.country",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "remove",
+                "label": "Remove",
+                "name": "remove",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "adr.0"
+              },
               {
                 "add": null,
                 "error": "",
@@ -1104,7 +1250,46 @@
                   }
                 ],
                 "value": "adr"
+              }
+            ],
+            "unfold": null
+          },
+          {
+            "legend": "Other",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "Tags",
+                "name": "categories",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "работа, издательство"
               },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "area",
+                "label": "Note",
+                "name": "note",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "Пишет по вторникам, отвечает в тот же день."
+              }
+            ],
+            "unfold": null
+          },
+          {
+            "folded": true,
+            "legend": "Show 2 empty fields",
+            "rows": [
               {
                 "add": null,
                 "error": "",
@@ -1236,7 +1421,7 @@
               "enabled": true,
               "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit?fields=all",
               "id": "form.unfold",
-              "label": "Show 3 empty fields",
+              "label": "Show 2 empty fields",
               "method": "GET"
             }
           }
@@ -1258,7 +1443,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "photo",
-            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e29\u0026op=upload",
+            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e30\u0026op=upload",
             "id": "photo.replace",
             "label": "Replace",
             "method": "POST",
@@ -1267,7 +1452,7 @@
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e29\u0026op=crop",
+            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e30\u0026op=crop",
             "id": "photo.crop",
             "label": "Crop",
             "method": "POST",
@@ -1277,7 +1462,7 @@
             "csrf": "csrf",
             "danger": true,
             "enabled": true,
-            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e29\u0026op=remove",
+            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e30\u0026op=remove",
             "id": "photo.remove",
             "label": "Remove",
             "method": "POST",
@@ -1285,7 +1470,7 @@
           }
         ],
         "editable": true,
-        "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e29",
+        "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e30",
         "initials": "АК",
         "note": "EXIF orientation applied, metadata stripped."
       },
@@ -1337,7 +1522,7 @@
               },
               {
                 "colour": "#a05a2c",
-                "count": 1,
+                "count": 2,
                 "detail": "",
                 "feed": false,
                 "href": "/app/contacts/a-nc-home/arhiv",

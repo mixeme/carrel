@@ -206,6 +206,8 @@ type dupGroup struct {
 	reasons  []dupes.Reason
 	refs     []sealed.RecordRef
 	decision view.DuplicateDecision
+	// title is what the decision was called when it was made (sealed)
+	title string
 }
 
 // groups are the groups of the screen: to decide first, then linked, then
@@ -219,13 +221,18 @@ func (st dupState) groups() []dupGroup {
 		case dupes.Covered(st.blob.Duplicates.Linked, g):
 		case st.blob.Duplicates.IsIgnored(g.ID):
 			dg.decision = view.DecisionIgnored
+			for _, ig := range st.blob.Duplicates.Ignored {
+				if ig.ID == g.ID {
+					dg.title = ig.Title
+				}
+			}
 			ignored = append(ignored, dg)
 		default:
 			todo = append(todo, dg)
 		}
 	}
 	for _, l := range st.blob.Duplicates.Linked {
-		dg := dupGroup{id: l.ID, kind: l.Kind, refs: l.Members, decision: view.DecisionLinked}
+		dg := dupGroup{id: l.ID, kind: l.Kind, refs: l.Members, decision: view.DecisionLinked, title: l.Title}
 		for _, g := range st.found {
 			if dupes.Covered([]sealed.LinkedGroup{l}, g) && len(g.Members) == len(l.Members) {
 				dg.score, dg.reasons = g.Score, g.Reasons
@@ -241,7 +248,7 @@ func (st dupState) groups() []dupGroup {
 		if slices.ContainsFunc(ignored, func(g dupGroup) bool { return g.id == ig.ID }) {
 			continue
 		}
-		dg := dupGroup{id: ig.ID, kind: ig.Kind, refs: ig.Members, decision: view.DecisionIgnored}
+		dg := dupGroup{id: ig.ID, kind: ig.Kind, refs: ig.Members, decision: view.DecisionIgnored, title: ig.Title}
 		var recs []dupes.Record
 		for _, ref := range ig.Members {
 			if l, ok := st.records[ref]; ok {
@@ -282,6 +289,62 @@ func (st dupState) inCatalogOrder(refs []sealed.RecordRef) []sealed.RecordRef {
 		}
 		return strings.Compare(a.UID, b.UID)
 	})
+	return out
+}
+
+// loaded reports whether a record of g is among what this session read.
+func (st dupState) loaded(g dupGroup) bool {
+	for _, ref := range g.refs {
+		if _, ok := st.records[ref]; ok {
+			return true
+		}
+	}
+	return false
+}
+
+// titleOf is the name of a group: its loaded records' names, each once,
+// «Анна Ковалёва · Алексей Смирнов»; a decision none of whose records is
+// loaded, the name it was made under.
+func (st dupState) titleOf(g dupGroup) string {
+	var names []string
+	for _, ref := range g.refs {
+		if l, ok := st.records[ref]; ok && l.entry.Title != "" && !slices.Contains(names, l.entry.Title) {
+			names = append(names, l.entry.Title)
+		}
+	}
+	if len(names) == 0 {
+		return g.title
+	}
+	return strings.Join(names, " · ")
+}
+
+// decidedView is a decision none of whose records is loaded (s-dup-6,
+// «Decided earlier»; from-typecase note 117 p. 10): what was decided, where
+// its records lie and under which UIDs, and its undoing — a button of its
+// card's form, as a group's.
+func (s *Server) decidedView(sess *session.Session, st dupState, g dupGroup) view.DecidedCard {
+	out := view.DecidedCard{ID: g.id, Kind: g.kind, Title: text(st.titleOf(g)), Decision: g.decision, Note: "Not loaded in this session"}
+	var where, uids []string
+	for _, m := range st.groupMembers(g.refs) {
+		if !slices.Contains(where, string(m.stamp)) {
+			where = append(where, string(m.stamp))
+		}
+		if !slices.Contains(uids, m.ref.UID) {
+			uids = append(uids, m.ref.UID)
+		}
+	}
+	out.Where, out.UIDs = text(strings.Join(where, ", ")), text("UID "+strings.Join(uids, ", "))
+	if g.decision == view.DecisionLinked {
+		out.Badge = view.Badge{Label: text(fmt.Sprintf("linked ×%d", len(g.refs))), Role: view.BadgeLinked}
+		out.Actions = []view.Action{decideAction("duplicates.unlink", "Unlink", "unlink")}
+	} else {
+		out.Badge = view.Badge{Label: "not duplicates", Role: view.BadgeNeutral}
+		out.Actions = []view.Action{decideAction("duplicates.again", "Offer again", "again")}
+	}
+	out.Form = &view.Form{Action: s.route("/app/duplicates/decide"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
+		csrfField(sess),
+		{Name: "group", Kind: view.InputHidden, Value: text(g.id)},
+	}}}}
 	return out
 }
 
@@ -362,7 +425,23 @@ func (s *Server) member(st dupState, kind view.Kind, ref sealed.RecordRef) view.
 		Title: text(ref.UID), Detail: "Not loaded in this session", ReadOnly: col.ReadOnly,
 	}
 	if l, ok := st.records[ref]; ok {
-		m.Title, m.Detail = text(l.entry.Title), text(l.entry.Detail)
+		e := l.entry
+		m.Title, m.Detail = text(e.Title), text(e.Detail)
+		switch kind {
+		case view.KindContact:
+			av := avatarFor(ref.UID, e.Title)
+			if e.Row.Photo {
+				av.Href = s.photoHref(o, ref.UID, e.ETag, photoThumb)
+			}
+			m.Avatar, m.Phone, m.Email, m.Org = &av, text(e.Row.Phone), text(e.Row.Email), text(e.Row.Org)
+		case view.KindEvent:
+			m.Lead, m.Place, m.Repeats = text(e.Row.Lead), text(e.Row.Place), text(e.Row.Repeats)
+		case view.KindTask:
+			done := e.Done
+			m.Done, m.Due, m.Percent = &done, text(e.Detail), e.Row.Progress
+		case view.KindNote:
+			m.Excerpt, m.Date = text(e.Row.Excerpt), text(e.Detail)
+		}
 	}
 	return m
 }
@@ -395,6 +474,22 @@ func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.
 	}
 	for _, ref := range g.refs {
 		out.Rows = append(out.Rows, s.member(st, g.kind, ref))
+	}
+	out.Title = out.Rows[0].Title
+	switch g.decision {
+	case view.DecisionLinked:
+		out.Badge = view.Badge{Label: text(fmt.Sprintf("linked ×%d", len(g.refs))), Role: view.BadgeLinked}
+	case view.DecisionIgnored:
+		out.Badge = view.Badge{Label: "not duplicates", Role: view.BadgeNeutral}
+	default:
+		out.Badge = view.Badge{Label: text(fmt.Sprintf("candidate ×%d", len(g.refs))), Role: view.BadgeNeutral}
+	}
+	if g.score > 0 {
+		why := make([]string, len(out.Reasons))
+		for i, r := range out.Reasons {
+			why[i] = string(r)
+		}
+		out.Points = text(fmt.Sprintf("%d points · %s", g.score, strings.Join(why, ", ")))
 	}
 	// Merge on the server carries the values chosen on the card to the
 	// merge (Дб9), which asks nothing (from-typecase note 117 p. 3); a
@@ -523,7 +618,11 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 		if g.decision == view.DecisionNone {
 			counts[g.kind]++
 		}
-		if only == "" || g.kind == only {
+		switch {
+		case only != "" && g.kind != only:
+		case g.decision != view.DecisionNone && !st.loaded(g):
+			page.Decided = append(page.Decided, s.decidedView(sess, st, g))
+		default:
 			page.Groups = append(page.Groups, s.groupView(sess, st, g))
 		}
 	}
@@ -752,7 +851,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 	case do == "link" && g.decision != view.DecisionLinked:
 		prefs, dropped := answersOf(r, st.questions(g))
 		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.link", string(g.kind), func(d *sealed.Duplicates) error {
-			d.Linked = dupes.Link(d.Linked, sealed.LinkedGroup{Kind: g.kind, Members: g.refs, Prefs: prefs, Dropped: keptDrops(dropped)})
+			d.Linked = dupes.Link(d.Linked, sealed.LinkedGroup{Kind: g.kind, Members: g.refs, Prefs: prefs, Dropped: keptDrops(dropped), Title: st.titleOf(g)})
 			d.Ignored = d.Unignored(g.id)
 			return nil
 		})
@@ -794,7 +893,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 		})
 	case do == "ignore" && g.decision == view.DecisionNone:
 		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.ignore", string(g.kind), func(d *sealed.Duplicates) error {
-			d.Ignored = append(d.Unignored(g.id), sealed.IgnoredGroup{ID: g.id, Kind: g.kind, Members: g.refs})
+			d.Ignored = append(d.Unignored(g.id), sealed.IgnoredGroup{ID: g.id, Kind: g.kind, Members: g.refs, Title: st.titleOf(g)})
 			return nil
 		})
 	case do == "again" && g.decision == view.DecisionIgnored:

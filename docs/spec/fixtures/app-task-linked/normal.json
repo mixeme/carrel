@@ -1,0 +1,365 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/tasks/linked/aa11-2d09-5f84/copies",
+      "icon": "i-pencil",
+      "id": "record.edit",
+      "label": "Edit",
+      "method": "GET",
+      "primary": true
+    }
+  ],
+  "attach": [
+    {
+      "actions": [],
+      "href": "/app/attach/a-nc-home/dela/aa11-2d09-5f84/0",
+      "inline": true,
+      "name": "посадочный-казань.pdf",
+      "size": "128 KB",
+      "state": "ok",
+      "type": "application/pdf"
+    }
+  ],
+  "attendees": [],
+  "body": "Зарядки, переходник, распечатать посадочный.",
+  "details": null,
+  "done": false,
+  "fields": [
+    {
+      "href": "",
+      "label": "Status",
+      "mono": false,
+      "value": "Needs action"
+    },
+    {
+      "from": {
+        "colour": "#4a6b52",
+        "name": "Дела"
+      },
+      "href": "",
+      "label": "Due",
+      "mono": false,
+      "runs": [
+        {
+          "mark": "mono",
+          "text": "12 August 2026, 18:00"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "href": "",
+      "label": "Complete",
+      "mono": true,
+      "value": "0%"
+    },
+    {
+      "from": {
+        "colour": "#3f6e8c",
+        "name": "Работа"
+      },
+      "href": "",
+      "label": "Priority",
+      "mono": true,
+      "value": "3"
+    },
+    {
+      "href": "",
+      "label": "Reminders",
+      "mono": false,
+      "value": "1 day before"
+    },
+    {
+      "href": "",
+      "label": "Tags",
+      "mono": false,
+      "tags": [
+        {
+          "href": "/app/tasks/a-nc-home/dela?tag=%D0%B4%D0%BE%D0%BC",
+          "label": "дом",
+          "on": false
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "linked": [
+    {
+      "colour": "#4a6b52",
+      "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84",
+      "label": "nextcloud · Дела",
+      "mono": false,
+      "value": "Priority differs"
+    },
+    {
+      "colour": "#3f6e8c",
+      "href": "/app/tasks/a-nc-home/rabota/cc11-5a20-7e94",
+      "label": "nextcloud · Работа",
+      "mono": false,
+      "value": "Due differs"
+    }
+  ],
+  "linkedRecord": true,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "loss": null,
+  "menu": [
+    {
+      "enabled": true,
+      "icon": "i-print",
+      "id": "record.print",
+      "label": "Print",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/duplicates",
+      "icon": "i-dup",
+      "id": "duplicates.open",
+      "label": "Open in Duplicates",
+      "method": "GET"
+    },
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/duplicates/decide?do=unlink",
+      "icon": "i-link",
+      "id": "duplicates.unlink",
+      "label": "Unlink",
+      "method": "POST",
+      "name": "group",
+      "separator": true,
+      "value": "g-chemodan"
+    }
+  ],
+  "notices": [],
+  "print": {
+    "range": "nextcloud · Дела",
+    "taken": "10 August 2026, 17:06",
+    "title": "Собрать чемодан"
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 4,
+            "detail": "",
+            "feed": false,
+            "href": "/app/tasks/a-nc-home/dela",
+            "label": "Дела",
+            "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 3,
+            "detail": "",
+            "feed": false,
+            "href": "/app/tasks/a-nc-home/rabota",
+            "label": "Работа",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "readOnly": false,
+  "related": [
+    {
+      "colour": "",
+      "href": "",
+      "kind": "",
+      "stamp": "",
+      "title": "3e6b-71d4-a209",
+      "when": "",
+      "why": "Not in the lists loaded for this collection"
+    }
+  ],
+  "source": {
+    "changed": "",
+    "colour": "",
+    "compared": "",
+    "lastRead": "",
+    "objects": null,
+    "path": "",
+    "readOnly": false,
+    "stamp": "",
+    "uid": ""
+  },
+  "subtitle": [
+    {
+      "text": "All lists · in 2 lists"
+    }
+  ],
+  "summary": "Собрать чемодан",
+  "title": "Собрать чемодан",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84",
+        "icon": "i-refresh",
+        "id": "record.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "2 min ago",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "uid": "aa11-2d09-5f84"
+}

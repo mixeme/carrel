@@ -418,6 +418,26 @@ type indexEntry struct {
 	// Values are what the duplicates screen asks about when members
 	// disagree (valuesOf), without reading a record again.
 	Values recValues `json:"values,omitempty"`
+	// Row is the rest of the record's row beside the others of its group
+	// (rowCells).
+	Row rowCells `json:"row,omitzero"`
+}
+
+// rowCells are the cells of a record's row on the duplicates screen: its
+// kind's list row (s-dup-1; from-typecase note 117) — a contact's first
+// phone, address and organisation and whether it has a photo; an event's
+// time and place and its repetition; a task's progress; a note's excerpt.
+// A task's due, a note's day and the done of a task are the entry's.
+type rowCells struct {
+	Phone    string `json:"phone,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Org      string `json:"org,omitempty"`
+	Photo    bool   `json:"photo,omitempty"`
+	Lead     string `json:"lead,omitempty"`
+	Place    string `json:"place,omitempty"`
+	Repeats  string `json:"repeats,omitempty"`
+	Progress *int   `json:"progress,omitempty"`
+	Excerpt  string `json:"excerpt,omitempty"`
 }
 
 // indexOf is the index of listed records of kind k; days are read in the
@@ -431,19 +451,26 @@ func indexOf(tf timeFmt, k view.Kind, items []listed) []indexEntry {
 		case view.KindContact:
 			e.UID, e.Title = card.UID(o), contactName(o)
 			e.Detail = strings.Join(nonEmpty(firstValue(o, "TEL"), firstValue(o, "EMAIL")), " · ")
+			e.Row = rowCells{Phone: firstValue(o, "TEL"), Email: firstValue(o, "EMAIL"), Org: structured(firstValue(o, "ORG")), Photo: photoOf(o) != noPhoto}
 		case view.KindEvent:
 			e.UID, e.Title, e.Related = cal.UID(o), titleOr(cal.Text(o, "SUMMARY"), "Untitled event"), cal.RelatedTo(o)
 			if tm, err := cal.TimingOf(o, tf.tz); err == nil && !tm.Start.IsZero() {
 				e.Detail, e.At = tf.shortDue(tm), tm.Start.Unix()
+				e.Row.Lead = tf.timeLabel(tm.Start, tm.AllDay)
+			}
+			e.Row.Place = cal.Text(o, "LOCATION")
+			if cal.HasRecurrence(o) {
+				e.Row.Repeats = repeatsWord(cal.RawRRULE(o))
 			}
 		case view.KindTask:
 			e.UID, e.Title, e.Related = cal.UID(o), titleOr(cal.Text(o, "SUMMARY"), "Untitled task"), cal.RelatedTo(o)
-			e.Done = taskDone(o)
+			e.Done, e.Row.Progress = taskDone(o), percentOf(o)
 			if due, err := cal.DueOf(o, tf.tz); err == nil && !due.Start.IsZero() {
 				e.Detail, e.At, e.Day = tf.shortDue(due), due.Start.Unix(), due.AllDay
 			}
 		default:
 			e.UID, e.Title, e.Related = cal.UID(o), noteTitle(cal.Text(o, "SUMMARY"), cal.Description(o)), cal.RelatedTo(o)
+			e.Row.Excerpt = noteExcerpt(cal.Description(o), e.Title)
 			if at := noteTime(o, tf.tz); !at.IsZero() {
 				e.Detail, e.At = tf.shortDay(at), at.Unix()
 			}

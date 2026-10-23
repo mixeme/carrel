@@ -46,6 +46,9 @@ import (
 // needed it.
 type relinkReport struct {
 	changed int
+	// pointed are the records made to point at the kept card, «Звонок по
+	// каталогу библиотеки · task · nextcloud · Дела» (s-dup-8)
+	pointed []string
 	skipped []string // a record that points at an old UID and was not changed, with why
 	unread  []string // a collection that could not be read, so was not looked in
 }
@@ -56,9 +59,11 @@ func (r relinkReport) nothing() bool {
 
 // lines are the report for a notice's details.
 func (r relinkReport) lines() []view.Text {
+	// Each record pointed anew, by name (s-dup-8); what was not, and where
+	// nobody looked, after them.
 	var out []view.Text
-	if r.changed > 0 {
-		out = append(out, text("Now pointing at the kept card: "+plural(r.changed, "linked record")))
+	for _, p := range r.pointed {
+		out = append(out, text(p))
 	}
 	for _, s := range r.skipped {
 		out = append(out, text("Still pointing at the old card: "+s))
@@ -66,7 +71,7 @@ func (r relinkReport) lines() []view.Text {
 	for _, u := range r.unread {
 		out = append(out, text("Not looked in: "+u))
 	}
-	if len(out) > 0 {
+	if len(r.skipped)+len(r.unread) > 0 {
 		out = append(out, text("Not looked in: collections that are not ticked. A link in one of them still points at the old card."))
 	}
 	return out
@@ -148,6 +153,7 @@ func (s *Server) relink(ctx context.Context, sess *session.Session, blob sealed.
 				sess.Cache().InvalidatePath(c.conn.ID, obj.Path)
 				dropWholeReads(sess, c.conn.ID, c.col.Path)
 				rep.changed++
+				rep.pointed = append(rep.pointed, titleOr(cal.Text(obj, ical.PropSummary), "Untitled")+" · "+string(k)+" · "+string(origin{conn: c.conn, col: c.col}.stamp()))
 			}
 		}
 	}
@@ -243,6 +249,7 @@ func (s *Server) relinkCards(ctx context.Context, sess *session.Session, c *coll
 		sess.Cache().InvalidatePath(c.conn.ID, obj.Path)
 		dropWholeReads(sess, c.conn.ID, c.col.Path)
 		rep.changed++
+		rep.pointed = append(rep.pointed, contactName(obj)+" · contact · "+string(origin{conn: c.conn, col: c.col}.stamp()))
 	}
 }
 

@@ -84,7 +84,7 @@
               {
                 "colour": "#3f6e8c",
                 "label": "nextcloud · Работа",
-                "meta": "Due, priority differ · due 12 Aug 19:00",
+                "meta": "Due, priority differ · due 12 Aug",
                 "selected": false,
                 "value": "a-nc-home/rabota"
               }
@@ -525,7 +525,7 @@
                   "csrf": "csrf",
                   "danger": true,
                   "enabled": true,
-                  "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e9",
+                  "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e10",
                   "icon": "i-trash",
                   "id": "record.delete",
                   "label": "Delete task",
@@ -554,7 +554,7 @@
               "tick": {
                 "csrf": "csrf",
                 "enabled": true,
-                "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e9\u0026from=all\u0026op=done",
+                "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e10\u0026from=all\u0026op=done",
                 "id": "task.done",
                 "label": "Mark done",
                 "method": "POST"
@@ -626,7 +626,7 @@
                   "csrf": "csrf",
                   "danger": true,
                   "enabled": true,
-                  "href": "/app/tasks/a-nc-home/rabota/bb20-4c17-8a52/delete?etag=e15",
+                  "href": "/app/tasks/a-nc-home/rabota/bb20-4c17-8a52/delete?etag=e16",
                   "icon": "i-trash",
                   "id": "record.delete",
                   "label": "Delete task",
@@ -655,7 +655,7 @@
               "tick": {
                 "csrf": "csrf",
                 "enabled": true,
-                "href": "/app/tasks/a-nc-home/rabota/bb20-4c17-8a52/edit?done=on\u0026etag=e15\u0026from=all\u0026op=done",
+                "href": "/app/tasks/a-nc-home/rabota/bb20-4c17-8a52/edit?done=on\u0026etag=e16\u0026from=all\u0026op=done",
                 "id": "task.done",
                 "label": "Mark done",
                 "method": "POST"
@@ -739,7 +739,7 @@
                   "csrf": "csrf",
                   "danger": true,
                   "enabled": true,
-                  "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/delete?etag=e10",
+                  "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/delete?etag=e11",
                   "icon": "i-trash",
                   "id": "record.delete",
                   "label": "Delete task",
@@ -844,7 +844,7 @@
                   "csrf": "csrf",
                   "danger": true,
                   "enabled": true,
-                  "href": "/app/tasks/a-nc-home/rabota/bb21-0fa8-3d66/delete?etag=e16",
+                  "href": "/app/tasks/a-nc-home/rabota/bb21-0fa8-3d66/delete?etag=e17",
                   "icon": "i-trash",
                   "id": "record.delete",
                   "label": "Delete task",
@@ -873,7 +873,7 @@
               "tick": {
                 "csrf": "csrf",
                 "enabled": true,
-                "href": "/app/tasks/a-nc-home/rabota/bb21-0fa8-3d66/edit?done=on\u0026etag=e16\u0026from=all\u0026op=done",
+                "href": "/app/tasks/a-nc-home/rabota/bb21-0fa8-3d66/edit?done=on\u0026etag=e17\u0026from=all\u0026op=done",
                 "id": "task.done",
                 "label": "Mark done",
                 "method": "POST"
@@ -952,7 +952,7 @@
                   "csrf": "csrf",
                   "danger": true,
                   "enabled": true,
-                  "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/delete?etag=e11",
+                  "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/delete?etag=e12",
                   "icon": "i-trash",
                   "id": "record.delete",
                   "label": "Delete task",
@@ -975,7 +975,7 @@
               "tick": {
                 "csrf": "csrf",
                 "enabled": true,
-                "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/edit?done=on\u0026etag=e11\u0026from=all\u0026op=done",
+                "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/edit?done=on\u0026etag=e12\u0026from=all\u0026op=done",
                 "id": "task.done",
                 "label": "Mark done",
                 "method": "POST"

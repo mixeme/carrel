@@ -339,21 +339,21 @@ func (s *Server) linkedPage(sess *session.Session, spec kindSpec, lr linkedRecor
 	actions, menu := s.linkedActions(sess, spec.segment, uid, lr.group.ID)
 	switch p := s.recordPage(c, uid, lr.chosen).(type) {
 	case view.ContactPage:
-		p.Subtitle, p.Fields, p.Books = text(head), lr.markFrom(p.Fields), s.keptRows(lr, shown)
+		p.LinkedRecord, p.Subtitle, p.Fields, p.Books = true, text(head), lr.markFrom(p.Fields), s.keptRows(lr, shown)
 		p.Actions, p.Menu, p.ReadOnly = actions, menu, false
 		p.Foreign, p.ForeignShow, p.Source = nil, nil, view.SourceBlock{}
 		p.Timeline, p.TimelineCount, p.More = nil, nil, view.Action{}
 		return p
 	case view.EventPage:
-		p.Subtitle, p.Fields, p.Linked = text(head), lr.markFrom(p.Fields), s.keptRows(lr, shown)
+		p.LinkedRecord, p.Subtitle, p.Fields, p.Linked = true, text(head), lr.markFrom(p.Fields), s.keptRows(lr, shown)
 		p.Actions, p.Menu, p.ReadOnly, p.Source = actions, menu, false, view.SourceBlock{}
 		return p
 	case view.TaskPage:
-		p.Subtitle, p.Fields, p.Linked = view.Runs{{Text: text(head)}}, lr.markFrom(p.Fields), s.keptRows(lr, shown)
+		p.LinkedRecord, p.Subtitle, p.Fields, p.Linked = true, view.Runs{{Text: text(head)}}, lr.markFrom(p.Fields), s.keptRows(lr, shown)
 		p.Actions, p.Menu, p.ReadOnly, p.Source = actions, menu, false, view.SourceBlock{}
 		return p
 	case view.NotePage:
-		p.Subtitle, p.Meta.Linked = text(head), s.keptRows(lr, shown)
+		p.LinkedRecord, p.Subtitle, p.Meta.Linked = true, text(head), s.keptRows(lr, shown)
 		for _, q := range lr.qs {
 			if q.prop() == "CATEGORIES" {
 				p.Meta.TagsFrom = lr.tagsFrom(q)

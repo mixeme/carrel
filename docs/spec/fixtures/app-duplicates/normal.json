@@ -6,7 +6,7 @@
     "drop": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 25,
+    "loaded": 27,
     "range": null,
     "segments": [
       {
@@ -61,63 +61,104 @@
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/duplicates/decide?do=link\u0026group=group",
           "id": "duplicates.link",
           "label": "Link them",
           "method": "POST",
+          "name": "do",
           "primary": true,
-          "submits": true
+          "submits": true,
+          "value": "link"
         },
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/duplicates/decide?do=ignore\u0026group=group",
           "id": "duplicates.ignore",
           "label": "Not duplicates",
           "method": "POST",
-          "submits": true
+          "name": "do",
+          "submits": true,
+          "value": "ignore"
         },
         {
           "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/duplicates/decide?do=merge\u0026group=group",
           "id": "duplicates.merge",
           "label": "Merge on the server",
           "method": "POST",
-          "submits": true
+          "name": "do",
+          "submits": true,
+          "value": "merge"
         }
       ],
+      "badge": {
+        "label": "candidate ×2",
+        "role": "neutral"
+      },
       "choices": [
         {
           "chosen": 0,
           "name": "choice.FN",
           "options": [
-            "Вера Лебедева",
-            "Лебедева Вера"
+            "Вера Лебедева · Архив",
+            "Лебедева Вера · Контакты"
           ],
           "property": "Display name",
-          "union": false
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
         },
         {
           "chosen": 1,
           "name": "choice.ORG",
           "options": [
-            "",
-            "Библиотека №4"
+            "— · Архив",
+            "Библиотека №4 · Контакты"
           ],
           "property": "Organisation",
-          "union": false
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 0,
+          "kept": [
+            0,
+            1,
+            2
+          ],
+          "many": true,
+          "name": "choice.EMAIL",
+          "options": [
+            "vera@example.net · Архив",
+            "vera.l@work.example · Архив",
+            "v.lebedeva@example.org · Контакты"
+          ],
+          "property": "Email",
+          "union": false,
+          "values": [
+            "1",
+            "2",
+            "3"
+          ]
         },
         {
           "chosen": 1,
           "name": "choice.PHOTO",
           "options": [
-            "nextcloud · Архив",
+            "— · Архив",
             "nextcloud · Контакты"
           ],
           "property": "Photo",
-          "union": false
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
         }
       ],
       "decision": "",
@@ -163,64 +204,132 @@
       },
       "id": "group",
       "kind": "contact",
+      "points": "80 points · same phone, same name",
       "reasons": [
         "same phone",
         "same name"
       ],
       "rows": [
         {
+          "avatar": {
+            "colour": "#9a9280",
+            "href": "",
+            "initials": "ВЛ"
+          },
           "colour": "#a05a2c",
           "detail": "+7 905 331-09-42 · vera@example.net",
+          "email": "vera@example.net",
           "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
+          "phone": "+7 905 331-09-42",
           "readOnly": false,
           "stamp": "nextcloud · Архив",
           "title": "Вера Лебедева"
         },
         {
+          "avatar": {
+            "colour": "#a05a2c",
+            "href": "/c/a-nc-home/kontakty/b52e-7d08-c6f1/photo?size=thumb\u0026v=e5",
+            "initials": "ЛВ"
+          },
           "colour": "#4a6b52",
           "detail": "+7 905 331-09-42 · v.lebedeva@example.org",
+          "email": "v.lebedeva@example.org",
           "href": "/app/contacts/a-nc-home/kontakty/b52e-7d08-c6f1",
+          "org": "Библиотека №4",
+          "phone": "+7 905 331-09-42",
           "readOnly": false,
           "stamp": "nextcloud · Контакты",
           "title": "Лебедева Вера"
         }
       ],
-      "score": 80
+      "score": 80,
+      "title": "Вера Лебедева"
     },
     {
       "actions": [
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/duplicates/decide?do=link\u0026group=group",
           "id": "duplicates.link",
           "label": "Link them",
           "method": "POST",
-          "primary": true
+          "name": "do",
+          "primary": true,
+          "submits": true,
+          "value": "link"
         },
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/duplicates/decide?do=ignore\u0026group=group",
           "id": "duplicates.ignore",
           "label": "Not duplicates",
-          "method": "POST"
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "ignore"
         },
         {
+          "csrf": "csrf",
           "danger": true,
           "enabled": true,
-          "href": "/app/duplicates/merge?group=group",
           "id": "duplicates.merge",
           "label": "Merge on the server",
-          "method": "GET"
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "merge"
         }
       ],
+      "badge": {
+        "label": "candidate ×2",
+        "role": "neutral"
+      },
       "choices": [],
       "decision": "",
-      "form": null,
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "group"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
       "hint": "The same event in two calendars, different UIDs. Agenda shows it twice; here you decide whether to keep both or write one and delete the other.",
       "id": "group",
       "kind": "event",
+      "points": "70 points · same title, same start",
       "reasons": [
         "same title, same start"
       ],
@@ -229,7 +338,9 @@
           "colour": "#3f6e8c",
           "detail": "10 Aug",
           "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
+          "lead": "all day",
           "readOnly": false,
+          "repeats": "repeats weekly",
           "stamp": "nextcloud · Работа",
           "title": "Дежурство: первая линия"
         },
@@ -237,56 +348,86 @@
           "colour": "#8c6239",
           "detail": "10 Aug",
           "href": "/app/calendar/a-rad-vps/dezhurstva/5e90-33c1-a8d2",
+          "lead": "all day",
           "readOnly": false,
+          "repeats": "repeats weekly",
           "stamp": "radicale · vps · Дежурства",
           "title": "Дежурство: первая линия"
         }
       ],
-      "score": 70
+      "score": 70,
+      "title": "Дежурство: первая линия"
     },
     {
       "actions": [
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/duplicates/decide?do=choose\u0026group=g-artem",
           "id": "duplicates.choose",
           "label": "Keep these values",
           "method": "POST",
+          "name": "do",
           "primary": true,
-          "submits": true
+          "submits": true,
+          "value": "choose"
         },
         {
           "csrf": "csrf",
           "enabled": true,
-          "href": "/app/duplicates/decide?do=unlink\u0026group=g-artem",
           "id": "duplicates.unlink",
           "label": "Unlink",
           "method": "POST",
-          "submits": true
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
         },
         {
           "csrf": "csrf",
           "danger": true,
           "enabled": false,
-          "href": "/app/duplicates/decide?do=merge\u0026group=g-artem",
           "id": "duplicates.merge",
           "label": "Merge on the server",
           "method": "POST",
+          "name": "do",
           "reason": "Команда is read-only: its record could be neither rewritten nor deleted.",
-          "submits": true
+          "submits": true,
+          "value": "merge"
         }
       ],
+      "badge": {
+        "label": "linked ×2",
+        "role": "linked"
+      },
       "choices": [
+        {
+          "chosen": 0,
+          "kept": [
+            0
+          ],
+          "many": true,
+          "name": "choice.TEL",
+          "options": [
+            "+7 495 780-11-90 · Команда"
+          ],
+          "property": "Phone · work",
+          "union": false,
+          "values": [
+            "1"
+          ]
+        },
         {
           "chosen": 1,
           "name": "choice.PHOTO",
           "options": [
-            "nextcloud · Контакты",
+            "— · Контакты",
             "radicale · vps · Команда"
           ],
           "property": "Photo",
-          "union": false
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
         }
       ],
       "decision": "linked",
@@ -332,6 +473,7 @@
       },
       "id": "g-artem",
       "kind": "contact",
+      "points": "140 points · same email, same phone, same name",
       "reasons": [
         "same email",
         "same phone",
@@ -339,23 +481,405 @@
       ],
       "rows": [
         {
+          "avatar": {
+            "colour": "#3f6e8c",
+            "href": "",
+            "initials": "АБ"
+          },
           "colour": "#4a6b52",
           "detail": "+7 903 118-22-04 · a.belov@example.org",
+          "email": "a.belov@example.org",
           "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
+          "org": "Тензор",
+          "phone": "+7 903 118-22-04",
           "readOnly": false,
           "stamp": "nextcloud · Контакты",
           "title": "Артём Белов"
         },
         {
+          "avatar": {
+            "colour": "#a05a2c",
+            "href": "/c/a-rad-vps/komanda/d41a-6f30-92be/photo?size=thumb\u0026v=e1",
+            "initials": "АБ"
+          },
           "colour": "#6b4e7a",
           "detail": "+7 903 118-22-04 · a.belov@example.org",
+          "email": "a.belov@example.org",
           "href": "/app/contacts/a-rad-vps/komanda/d41a-6f30-92be",
+          "org": "Тензор",
+          "phone": "+7 903 118-22-04",
           "readOnly": true,
           "stamp": "radicale · vps · Команда",
           "title": "Артём Белов"
         }
       ],
-      "score": 140
+      "score": 140,
+      "title": "Артём Белов"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.choose",
+          "label": "Keep these values",
+          "method": "POST",
+          "name": "do",
+          "primary": true,
+          "submits": true,
+          "value": "choose"
+        },
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
+        },
+        {
+          "csrf": "csrf",
+          "danger": true,
+          "enabled": false,
+          "id": "duplicates.merge",
+          "label": "Merge on the server",
+          "method": "POST",
+          "name": "do",
+          "reason": "Команда is read-only: its record could be neither rewritten nor deleted.",
+          "submits": true,
+          "value": "merge"
+        }
+      ],
+      "badge": {
+        "label": "linked ×3",
+        "role": "linked"
+      },
+      "choices": [
+        {
+          "chosen": 0,
+          "kept": [
+            1
+          ],
+          "many": true,
+          "name": "choice.TEL",
+          "options": [
+            "+7 495 120-45-00 · Контакты",
+            "+7 495 120-45-77 · Команда"
+          ],
+          "property": "Phone · work",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 0,
+          "kept": [
+            0
+          ],
+          "many": true,
+          "name": "choice.EMAIL",
+          "options": [
+            "anna.kovaleva@slovo.example · Контакты"
+          ],
+          "property": "Email",
+          "union": false,
+          "values": [
+            "1"
+          ]
+        }
+      ],
+      "decision": "linked",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-anna"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "g-anna",
+      "kind": "contact",
+      "points": "220 points · same UID, same email, same phone, same name",
+      "reasons": [
+        "same UID",
+        "same email",
+        "same phone",
+        "same name"
+      ],
+      "rows": [
+        {
+          "avatar": {
+            "colour": "#8c6239",
+            "href": "",
+            "initials": "АК"
+          },
+          "colour": "#a05a2c",
+          "detail": "+7 912 445-10-88 · a.kovaleva@example.org",
+          "email": "a.kovaleva@example.org",
+          "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
+          "org": "Издательство «Слово»",
+          "phone": "+7 912 445-10-88",
+          "readOnly": false,
+          "stamp": "nextcloud · Архив",
+          "title": "Анна Ковалёва"
+        },
+        {
+          "avatar": {
+            "colour": "#8c6239",
+            "href": "",
+            "initials": "АК"
+          },
+          "colour": "#4a6b52",
+          "detail": "+7 912 445-10-88 · a.kovaleva@example.org",
+          "email": "a.kovaleva@example.org",
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+          "org": "Издательство «Слово»",
+          "phone": "+7 912 445-10-88",
+          "readOnly": false,
+          "stamp": "nextcloud · Контакты",
+          "title": "Анна Ковалёва"
+        },
+        {
+          "avatar": {
+            "colour": "#8c6239",
+            "href": "",
+            "initials": "АК"
+          },
+          "colour": "#6b4e7a",
+          "detail": "+7 912 445-10-88 · a.kovaleva@example.org",
+          "email": "a.kovaleva@example.org",
+          "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
+          "org": "Издательство «Слово»",
+          "phone": "+7 912 445-10-88",
+          "readOnly": true,
+          "stamp": "radicale · vps · Команда",
+          "title": "Анна Ковалёва"
+        }
+      ],
+      "score": 220,
+      "title": "Анна Ковалёва"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.again",
+          "label": "Offer again",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "again"
+        }
+      ],
+      "badge": {
+        "label": "not duplicates",
+        "role": "neutral"
+      },
+      "choices": [
+        {
+          "chosen": 0,
+          "name": "choice.FN",
+          "options": [
+            "Анна Ковалёва · Контакты",
+            "Алексей Смирнов · Контакты"
+          ],
+          "property": "Display name",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 0,
+          "name": "choice.ORG",
+          "options": [
+            "Издательство «Слово» · Контакты",
+            "— · Контакты"
+          ],
+          "property": "Organisation",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 0,
+          "kept": [
+            0,
+            1
+          ],
+          "many": true,
+          "name": "choice.TEL",
+          "options": [
+            "+7 912 445-10-88 · Контакты",
+            "+7 916 200-71-15 · Контакты"
+          ],
+          "property": "Phone · mobile",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 0,
+          "kept": [
+            0,
+            1
+          ],
+          "many": true,
+          "name": "choice.EMAIL",
+          "options": [
+            "a.kovaleva@example.org · Контакты",
+            "anna.kovaleva@slovo.example · Контакты"
+          ],
+          "property": "Email",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 0,
+          "kept": [
+            0,
+            1
+          ],
+          "many": true,
+          "name": "choice.CATEGORIES",
+          "options": [
+            "работа · Контакты",
+            "издательство · Контакты"
+          ],
+          "property": "Tags",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        }
+      ],
+      "decision": "ignored",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "group"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "group",
+      "kind": "contact",
+      "points": "60 points · same phone",
+      "reasons": [
+        "same phone"
+      ],
+      "rows": [
+        {
+          "avatar": {
+            "colour": "#8c6239",
+            "href": "",
+            "initials": "АК"
+          },
+          "colour": "#4a6b52",
+          "detail": "+7 912 445-10-88 · a.kovaleva@example.org",
+          "email": "a.kovaleva@example.org",
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+          "org": "Издательство «Слово»",
+          "phone": "+7 912 445-10-88",
+          "readOnly": false,
+          "stamp": "nextcloud · Контакты",
+          "title": "Анна Ковалёва"
+        },
+        {
+          "avatar": {
+            "colour": "#3f6e8c",
+            "href": "",
+            "initials": "АС"
+          },
+          "colour": "#4a6b52",
+          "detail": "+7 916 200-71-15",
+          "href": "/app/contacts/a-nc-home/kontakty/9a1c-03de-77f2",
+          "phone": "+7 916 200-71-15",
+          "readOnly": false,
+          "stamp": "nextcloud · Контакты",
+          "title": "Алексей Смирнов"
+        }
+      ],
+      "score": 60,
+      "title": "Анна Ковалёва"
     }
   ],
   "look": {
@@ -375,7 +899,7 @@
     }
   ],
   "print": {
-    "range": "25 records compared · 60 points and above",
+    "range": "27 records compared · 60 points and above",
     "taken": "",
     "title": "Duplicates"
   },
@@ -392,7 +916,7 @@
     "foot": [],
     "nav": [
       {
-        "count": 7,
+        "count": 9,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -552,7 +1076,7 @@
           },
           {
             "colour": "#a05a2c",
-            "count": 1,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "",
@@ -588,7 +1112,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 1,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "",
@@ -655,7 +1179,7 @@
     "tags": [],
     "ticks": null
   },
-  "subtitle": "25 records compared · 2 to look at",
+  "subtitle": "27 records compared · 2 to look at",
   "threshold": {
     "default": 60,
     "form": {
@@ -715,7 +1239,7 @@
     "note": "The instance's number. Set your own to change what is offered.",
     "value": 60,
     "weightForm": {
-      "action": "/app/duplicates/decide?do=weights",
+      "action": "/app/duplicates/decide",
       "actions": [
         {
           "csrf": "csrf",
@@ -723,7 +1247,10 @@
           "id": "duplicates.weights.save",
           "label": "Save",
           "method": "POST",
-          "primary": true
+          "name": "do",
+          "primary": true,
+          "submits": true,
+          "value": "weights"
         },
         {
           "csrf": "csrf",
@@ -731,7 +1258,10 @@
           "id": "duplicates.weights.defaults",
           "label": "Back to defaults",
           "method": "POST",
-          "reason": "Every weight is the default already."
+          "name": "do",
+          "reason": "Every weight is the default already.",
+          "submits": true,
+          "value": "defaults"
         }
       ],
       "errors": [],
@@ -802,7 +1332,7 @@
       {
         "default": 70,
         "label": "Same title and date (events, tasks, notes)",
-        "name": "weight.title-date",
+        "name": "weight.title",
         "own": false,
         "signal": "title-date",
         "value": 70

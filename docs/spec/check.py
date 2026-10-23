@@ -127,7 +127,7 @@ check("6b. названные правила введены заголовком
 # 7. Фикстуры разбираются и лежат по правилам имён
 states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
-          "tiles","copy","elsewhere","rename","delete","attach","single","in-part",
+          "tiles","copy","elsewhere","rename","delete","attach","single","in-part","merged",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
           "escrow-deposited","escrow-off","no-copy","forced","edit","edit-links","add","label-taken","feed",
           "issued","mismatch","folder","preview","report","silent",
@@ -184,6 +184,12 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-notes": "/app/notes/{account}/{col}",
     "app-task": "/app/tasks/{account}/{col}/{uid}",
     "app-note": "/app/notes/{account}/{col}/{uid}",
+    # Карточка связанной записи (записка Typecase 117 п. 5): кадры —
+    # фрагменты без адреса (STATE_FRAME).
+    "app-contact-linked": "/app/contacts/linked/{uid}",
+    "app-event-linked": "/app/calendar/linked/{uid}",
+    "app-task-linked": "/app/tasks/linked/{uid}",
+    "app-note-linked": "/app/notes/linked/{uid}",
     "app-contact-edit": "/app/contacts/{account}/{col}/{uid}/edit",
     "app-event-edit": "/app/calendar/{account}/{col}/{uid}/edit",
     "app-task-edit": "/app/tasks/{account}/{col}/{uid}/edit",
@@ -367,6 +373,14 @@ STATE_FRAME = {
     "app-duplicates/empty": "s-dup-6",
     "app-duplicates-merge-event/normal": "s-dup-4",
     "app-duplicates-merge/in-part": "s-dup-5",
+    # Слияние кончилось целиком (записка Typecase 117 п. 12): ответ —
+    # карточка оставшейся записи с уведомлением и перечнем перенаправленных;
+    # кадр — фрагмент без адреса.
+    "app-contact/merged": "s-dup-8",
+    "app-contact-linked/normal": "s-contacts-33",
+    "app-event-linked/normal": "s-agenda-25",
+    "app-task-linked/normal": "s-tasks-17",
+    "app-note-linked/normal": "s-notes-32",
     "login/refused": "s-auth-13",
     "register/sent": "s-auth-3",
     "forgot/options": "s-auth-6",
@@ -749,9 +763,12 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
     if d in SHEETS:
         continue
     # Кадр-фрагмент, нарисованный без оболочки (колонка выдачи поиска,
-    # s-find-5…-10), и страница на бумаге (print-1, U-10): рейла они не
-    # рисуют, и сверять его не с чем.
+    # s-find-5…-10) или оболочкой без рейла (карточка связанной записи,
+    # s-contacts-33, записка Typecase 117), и страница на бумаге (print-1,
+    # U-10): рейла они не рисуют, и сверять его не с чем.
     if ('class="frag"' in frame or 'tc-root--print' in frame) and 'tc-shell' not in frame:
+        continue
+    if 'class="frag"' in frame and 'tc-shell__body--no-rail' in frame:
         continue
     if sorted(c[0] for c in fc) != sorted(c[0] for c in xc):
         drift.append("%s: коллекции рейла: кадр %s, фикстура %s"

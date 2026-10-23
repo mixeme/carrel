@@ -662,7 +662,7 @@
           }
         ],
         "selected": 0,
-        "total": 7
+        "total": 9
       },
       "details": null,
       "empty": null,
@@ -672,7 +672,7 @@
           "rows": [
             {
               "avatar": {
-                "colour": "#9a9280",
+                "colour": "#3f6e8c",
                 "href": "",
                 "initials": "АС"
               },
@@ -681,11 +681,11 @@
               "changed": "31 Jul",
               "colour": "#4a6b52",
               "email": "",
-              "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5",
+              "href": "/app/contacts/a-nc-home/kontakty/9a1c-03de-77f2",
               "menu": [
                 {
                   "enabled": true,
-                  "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5",
+                  "href": "/app/contacts/a-nc-home/kontakty/9a1c-03de-77f2",
                   "icon": "i-con",
                   "id": "record.open",
                   "label": "Open",
@@ -693,7 +693,7 @@
                 },
                 {
                   "enabled": true,
-                  "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5/edit",
+                  "href": "/app/contacts/a-nc-home/kontakty/9a1c-03de-77f2/edit",
                   "icon": "i-pencil",
                   "id": "record.edit",
                   "label": "Edit",
@@ -701,7 +701,7 @@
                 },
                 {
                   "enabled": true,
-                  "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5/move",
+                  "href": "/app/contacts/a-nc-home/kontakty/9a1c-03de-77f2/move",
                   "icon": "i-move",
                   "id": "record.move",
                   "label": "Move",
@@ -710,7 +710,7 @@
                 },
                 {
                   "enabled": true,
-                  "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5/move?copy=1",
+                  "href": "/app/contacts/a-nc-home/kontakty/9a1c-03de-77f2/move?copy=1",
                   "icon": "i-dup",
                   "id": "record.copy",
                   "label": "Copy",
@@ -719,7 +719,7 @@
                 },
                 {
                   "enabled": true,
-                  "href": "/app/contacts/a-nc-home/kontakty/export?uid=6b18-2d40-77c5",
+                  "href": "/app/contacts/a-nc-home/kontakty/export?uid=9a1c-03de-77f2",
                   "icon": "i-export",
                   "id": "record.export",
                   "label": "Export .vcf",
@@ -727,7 +727,7 @@
                 },
                 {
                   "enabled": true,
-                  "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts\u0026uid=6b18-2d40-77c5",
+                  "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts\u0026uid=9a1c-03de-77f2",
                   "icon": "i-link",
                   "id": "publish",
                   "label": "Publish a link",
@@ -738,7 +738,7 @@
                   "csrf": "csrf",
                   "danger": true,
                   "enabled": true,
-                  "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5/delete?etag=e2",
+                  "href": "/app/contacts/a-nc-home/kontakty/9a1c-03de-77f2/delete?etag=e2",
                   "icon": "i-trash",
                   "id": "record.delete",
                   "label": "Delete contact",
@@ -756,7 +756,7 @@
               "state": "ok",
               "tags": [],
               "target": "details",
-              "uid": "6b18-2d40-77c5"
+              "uid": "9a1c-03de-77f2"
             },
             {
               "avatar": {
@@ -764,7 +764,12 @@
                 "href": "",
                 "initials": "АК"
               },
-              "badges": [],
+              "badges": [
+                {
+                  "label": "linked ×3",
+                  "role": "linked"
+                }
+              ],
               "birthday": "14.03.1987",
               "changed": "14 Aug",
               "colour": "#4a6b52",
@@ -839,9 +844,13 @@
               "on": false,
               "org": "Издательство «Слово»",
               "phone": "+7 912 445-10-88",
-              "sources": [],
+              "sources": [
+                "nextcloud · Контакты",
+                "radicale · vps · Команда",
+                "nextcloud · Архив"
+              ],
               "stamp": "nextcloud · Контакты",
-              "state": "ok",
+              "state": "linked",
               "tags": [
                 {
                   "href": "/app/contacts?tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0\u0026task=t-task",
@@ -1252,7 +1261,7 @@
           },
           {
             "colour": "#a05a2c",
-            "count": 1,
+            "count": 2,
             "fromCache": false,
             "message": "",
             "retry": null,
@@ -1261,7 +1270,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 1,
+            "count": 2,
             "fromCache": false,
             "message": "",
             "retry": null,
@@ -1321,7 +1330,7 @@
         ],
         "nav": [
           {
-            "count": 7,
+            "count": 9,
             "enabled": true,
             "href": "/app/contacts",
             "icon": "i-con",
@@ -1385,7 +1394,7 @@
             "rows": [
               {
                 "colour": "",
-                "count": 7,
+                "count": 9,
                 "detail": "",
                 "feed": false,
                 "href": "/app/contacts",
@@ -1416,7 +1425,7 @@
               },
               {
                 "colour": "#a05a2c",
-                "count": 1,
+                "count": 2,
                 "detail": "",
                 "feed": false,
                 "href": "/app/contacts/a-nc-home/arhiv",
@@ -1435,7 +1444,7 @@
             "rows": [
               {
                 "colour": "#6b4e7a",
-                "count": 1,
+                "count": 2,
                 "detail": "",
                 "feed": false,
                 "href": "/app/contacts/a-rad-vps/komanda",

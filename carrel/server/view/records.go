@@ -5,14 +5,18 @@ package view
 
 type ContactPage struct {
 	Shell
-	UID       string  `json:"uid"`
-	Name      Text    `json:"name"`
-	Subtitle  Text    `json:"subtitle"` // «Издательство «Слово» · Выпускающий редактор» — где и кем
-	Avatar    Avatar  `json:"avatar"`
-	PhotoHref string  `json:"photoHref"` // пусто — фотографии нет
-	PhotoNote Text    `json:"photoNote"` // «внешняя ссылка, правка недоступна»
-	Fields    []Field `json:"fields"`    // категории — строкой «Tags» между Birthday и Note
-	Foreign   []Field `json:"foreign"`   // чужие свойства, показанные как есть
+	// LinkedRecord — карточка связанной записи (/app/{kind}/linked/{uid},
+	// записка Typecase 117 п. 5): выбранное, не одна копия; её места — в
+	// Books, а источника, хронологии и удаления у неё нет
+	LinkedRecord bool    `json:"linkedRecord,omitempty"`
+	UID          string  `json:"uid"`
+	Name         Text    `json:"name"`
+	Subtitle     Text    `json:"subtitle"` // «Издательство «Слово» · Выпускающий редактор» — где и кем
+	Avatar       Avatar  `json:"avatar"`
+	PhotoHref    string  `json:"photoHref"` // пусто — фотографии нет
+	PhotoNote    Text    `json:"photoNote"` // «внешняя ссылка, правка недоступна»
+	Fields       []Field `json:"fields"`    // категории — строкой «Tags» между Birthday и Note
+	Foreign      []Field `json:"foreign"`   // чужие свойства, показанные как есть
 	// ForeignShow — «Show 3», кнопка, раскрывающая Foreign (свёрнуты): без
 	// сценариев — ссылка на ту же карточку с ?foreign=1; nil — их нет или
 	// они раскрыты
@@ -111,8 +115,12 @@ type PhotoPreviewPage struct {
 // EventPage — чтение: то, что открывается по ссылке и печатается.
 type EventPage struct {
 	Shell
-	UID     string `json:"uid"`
-	Summary Text   `json:"summary"` // заголовок записи; документа — Shell.Title
+	// LinkedRecord — карточка связанной записи (/app/{kind}/linked/{uid},
+	// записка Typecase 117 п. 5): выбранное, не одна копия; её места — в
+	// Linked, а источника, хронологии и удаления у неё нет
+	LinkedRecord bool   `json:"linkedRecord,omitempty"`
+	UID          string `json:"uid"`
+	Summary      Text   `json:"summary"` // заголовок записи; документа — Shell.Title
 	// Subtitle — у связанного события, открытого из объединённого вида: где
 	// оно, «Combined calendar · in 3 calendars» (s-agenda-25); пусто — у
 	// события одного календаря
@@ -263,8 +271,12 @@ type AttachRow struct {
 // TaskPage — чтение.
 type TaskPage struct {
 	Shell
-	UID     string `json:"uid"`
-	Summary Text   `json:"summary"` // заголовок записи; документа — Shell.Title
+	// LinkedRecord — карточка связанной записи (/app/{kind}/linked/{uid},
+	// записка Typecase 117 п. 5): выбранное, не одна копия; её места — в
+	// Linked, а источника, хронологии и удаления у неё нет
+	LinkedRecord bool   `json:"linkedRecord,omitempty"`
+	UID          string `json:"uid"`
+	Summary      Text   `json:"summary"` // заголовок записи; документа — Shell.Title
 	// Subtitle — под заголовком: где задача и, когда она просрочена, на
 	// сколько — тревогой, «nextcloud · Дела · ‹overdue by 3 days›»
 	// (s-tasks-2)
@@ -320,7 +332,11 @@ type TaskEditPage struct {
 
 type NotePage struct {
 	Shell
-	UID string `json:"uid"`
+	// LinkedRecord — карточка связанной записи (/app/{kind}/linked/{uid},
+	// записка Typecase 117 п. 5): выбранное, не одна копия; её места — в
+	// Meta.Linked, а источника, хронологии и удаления у неё нет
+	LinkedRecord bool   `json:"linkedRecord,omitempty"`
+	UID          string `json:"uid"`
 	// Subtitle — у связанной заметки, открытой из объединённого вида: где
 	// она и откуда её текст, «All notebooks · in 2 notebooks · text from
 	// Записи» (s-notes-32); пусто — у заметки одной тетради

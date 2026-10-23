@@ -12,6 +12,203 @@
     "selected": 0,
     "total": null
   },
+  "decided": [
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
+        }
+      ],
+      "badge": {
+        "label": "linked ×2",
+        "role": "linked"
+      },
+      "decision": "linked",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-artem"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "g-artem",
+      "kind": "contact",
+      "note": "Not loaded in this session",
+      "title": "Артём Белов",
+      "uids": "UID c3f7-8a21-1b09, d41a-6f30-92be",
+      "where": "nextcloud · Контакты, radicale · vps · Команда"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
+        }
+      ],
+      "badge": {
+        "label": "linked ×3",
+        "role": "linked"
+      },
+      "decision": "linked",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-anna"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "g-anna",
+      "kind": "contact",
+      "note": "Not loaded in this session",
+      "title": "Анна Ковалёва",
+      "uids": "UID 4f2b-9c31-a0e7",
+      "where": "nextcloud · Архив, nextcloud · Контакты, radicale · vps · Команда"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.again",
+          "label": "Offer again",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "again"
+        }
+      ],
+      "badge": {
+        "label": "not duplicates",
+        "role": "neutral"
+      },
+      "decision": "ignored",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "group"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "group",
+      "kind": "contact",
+      "note": "Not loaded in this session",
+      "title": "Анна Ковалёва · Алексей Смирнов",
+      "uids": "UID 4f2b-9c31-a0e7, 9a1c-03de-77f2",
+      "where": "nextcloud · Контакты"
+    }
+  ],
   "details": null,
   "groups": [],
   "look": {
@@ -378,7 +575,7 @@
     "note": "The instance's number. Set your own to change what is offered.",
     "value": 60,
     "weightForm": {
-      "action": "/app/duplicates/decide?do=weights",
+      "action": "/app/duplicates/decide",
       "actions": [
         {
           "csrf": "csrf",
@@ -386,7 +583,10 @@
           "id": "duplicates.weights.save",
           "label": "Save",
           "method": "POST",
-          "primary": true
+          "name": "do",
+          "primary": true,
+          "submits": true,
+          "value": "weights"
         },
         {
           "csrf": "csrf",
@@ -394,7 +594,10 @@
           "id": "duplicates.weights.defaults",
           "label": "Back to defaults",
           "method": "POST",
-          "reason": "Every weight is the default already."
+          "name": "do",
+          "reason": "Every weight is the default already.",
+          "submits": true,
+          "value": "defaults"
         }
       ],
       "errors": [],
@@ -465,7 +668,7 @@
       {
         "default": 70,
         "label": "Same title and date (events, tasks, notes)",
-        "name": "weight.title-date",
+        "name": "weight.title",
         "own": false,
         "signal": "title-date",
         "value": 70

@@ -5,8 +5,31 @@
   "body": "",
   "contacts": [
     {
-      "count": 1,
+      "count": 2,
       "rows": [
+        {
+          "avatar": {
+            "colour": "#8c6239",
+            "href": "",
+            "initials": "АК"
+          },
+          "badges": [],
+          "birthday": "",
+          "changed": "",
+          "colour": "#6b4e7a",
+          "email": "",
+          "href": "",
+          "menu": [],
+          "name": "Анна Ковалёва",
+          "on": false,
+          "org": "Издательство «Слово»",
+          "phone": "",
+          "sources": [],
+          "stamp": "",
+          "state": "ok",
+          "tags": [],
+          "uid": "4f2b-9c31-a0e7"
+        },
         {
           "avatar": {
             "colour": "#a05a2c",
@@ -46,7 +69,7 @@
   "kind": "contact",
   "lede": [
     {
-      "text": "1 contact · the list is read from the server on every visit"
+      "text": "2 contacts · the list is read from the server on every visit"
     }
   ],
   "note": null,

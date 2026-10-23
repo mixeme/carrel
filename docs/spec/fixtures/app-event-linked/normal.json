@@ -1,0 +1,449 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/calendar/linked/8f1c-4a02-b7d3/copies",
+      "icon": "i-pencil",
+      "id": "record.edit",
+      "label": "Edit",
+      "method": "GET",
+      "primary": true
+    }
+  ],
+  "attach": [
+    {
+      "actions": [],
+      "href": "/app/attach/a-nc-home/lichnyj/8f1c-4a02-b7d3/0",
+      "inline": true,
+      "name": "release-checklist.md",
+      "size": "3 KB",
+      "state": "ok",
+      "type": "text/markdown"
+    }
+  ],
+  "attendees": [
+    {
+      "colour": "",
+      "email": "mix@example.org",
+      "href": "",
+      "name": "Михаил Енученко",
+      "status": "organiser"
+    },
+    {
+      "colour": "#4a6b52",
+      "email": "a.kovaleva@example.org",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+      "name": "Анна Ковалёва",
+      "status": "accepted"
+    },
+    {
+      "colour": "#4a6b52",
+      "email": "a.belov@example.org",
+      "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
+      "name": "Артём Белов",
+      "status": "tentative"
+    },
+    {
+      "colour": "",
+      "email": "v@example.org",
+      "href": "",
+      "name": "Виктор Гончаров",
+      "status": "no reply"
+    }
+  ],
+  "body": "Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям.",
+  "details": null,
+  "fields": [
+    {
+      "badge": {
+        "label": "created 12:00 Asia/Yekaterinburg",
+        "role": "neutral"
+      },
+      "from": {
+        "colour": "#4a6b52",
+        "name": "Личный"
+      },
+      "href": "",
+      "label": "When",
+      "mono": false,
+      "runs": [
+        {
+          "mark": "mono",
+          "text": "10:00 – 11:00"
+        },
+        {
+          "text": ", Monday 10 August"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "badge": {
+        "label": "until 2026-12-28",
+        "role": "neutral"
+      },
+      "href": "",
+      "label": "Repeats",
+      "mono": false,
+      "value": "Weekly on Mon"
+    },
+    {
+      "href": "",
+      "label": "Reminders",
+      "mono": false,
+      "value": "10 minutes before · 1 day before"
+    },
+    {
+      "from": {
+        "colour": "#4a6b52",
+        "name": "Личный"
+      },
+      "href": "",
+      "label": "Where",
+      "mono": false,
+      "value": "Переговорная 2"
+    },
+    {
+      "href": "",
+      "label": "Status",
+      "mono": false,
+      "value": "Confirmed"
+    },
+    {
+      "href": "",
+      "label": "Tags",
+      "mono": false,
+      "tags": [
+        {
+          "href": "/app/calendar/a-nc-home/lichnyj?tag=release",
+          "label": "release",
+          "on": false
+        },
+        {
+          "href": "/app/calendar/a-nc-home/lichnyj?tag=team",
+          "label": "team",
+          "on": false
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "linked": [
+    {
+      "colour": "#4a6b52",
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+      "label": "nextcloud · Личный",
+      "mono": false,
+      "value": ""
+    },
+    {
+      "colour": "#6b4e7a",
+      "href": "/app/calendar/a-rad-vps/proekty/4b2e-9d10-8f1c",
+      "label": "radicale · vps · Проекты",
+      "mono": false,
+      "value": ""
+    },
+    {
+      "colour": "#9a9280",
+      "href": "/app/calendar/a-baikal/obshchij/6a7d-2c51-e930",
+      "label": "baikal · Общий",
+      "mono": false,
+      "value": "When, where differ"
+    }
+  ],
+  "linkedRecord": true,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "loss": null,
+  "menu": [
+    {
+      "enabled": true,
+      "icon": "i-print",
+      "id": "record.print",
+      "label": "Print",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/duplicates",
+      "icon": "i-dup",
+      "id": "duplicates.open",
+      "label": "Open in Duplicates",
+      "method": "GET"
+    },
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/duplicates/decide?do=unlink",
+      "icon": "i-link",
+      "id": "duplicates.unlink",
+      "label": "Unlink",
+      "method": "POST",
+      "name": "group",
+      "separator": true,
+      "value": "g-sinkap"
+    }
+  ],
+  "notices": [],
+  "print": {
+    "range": "nextcloud · Личный",
+    "taken": "10 August 2026, 17:06",
+    "title": "Синк-ап по релизу"
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar/a-nc-home/lichnyj",
+            "label": "Личный",
+            "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar/a-nc-home/rabota",
+            "label": "Работа",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+            "label": "Дни рождения",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "readOnly": false,
+  "recurrence": {
+    "fields": [
+      {
+        "href": "",
+        "label": "Next",
+        "mono": false,
+        "value": "17 August 2026, 10:00"
+      },
+      {
+        "href": "",
+        "label": "Then",
+        "mono": false,
+        "value": "24 August 2026, 10:00"
+      },
+      {
+        "href": "",
+        "label": "Then",
+        "mono": false,
+        "value": "31 August 2026, 10:00"
+      }
+    ],
+    "note": "Series is edited and deleted whole.",
+    "raw": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z",
+    "summary": "Weekly on Monday, until 28 December 2026"
+  },
+  "related": [
+    {
+      "colour": "",
+      "href": "",
+      "kind": "note",
+      "stamp": "",
+      "title": "Заметка со встречи 10.08",
+      "when": "10 Aug",
+      "why": "Related to · in another collection"
+    }
+  ],
+  "source": {
+    "changed": "",
+    "colour": "",
+    "compared": "",
+    "lastRead": "",
+    "objects": null,
+    "path": "",
+    "readOnly": false,
+    "stamp": "",
+    "uid": ""
+  },
+  "subtitle": "Combined calendar · in 3 calendars",
+  "summary": "Синк-ап по релизу",
+  "title": "Синк-ап по релизу",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+        "icon": "i-refresh",
+        "id": "record.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "2 min ago",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "uid": "8f1c-4a02-b7d3"
+}

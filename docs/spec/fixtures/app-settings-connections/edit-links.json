@@ -746,7 +746,7 @@
               "target": "sheet"
             }
           ],
-          "objects": 1,
+          "objects": 2,
           "path": "/alice/contacts/arhiv/",
           "pick": "a-nc-home|/alice/contacts/arhiv/",
           "readOnly": false,
@@ -1124,7 +1124,7 @@
               "target": "sheet"
             }
           ],
-          "objects": 1,
+          "objects": 2,
           "path": "/alice/contacts/komanda/",
           "pick": "a-rad-vps|/alice/contacts/komanda/",
           "readOnly": true,

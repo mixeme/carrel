@@ -87,3 +87,39 @@ func TestLinkedRecordShowsTheChoice(t *testing.T) {
 		t.Errorf("the linked record wrote %d times", n)
 	}
 }
+
+// From-typecase note 117 p. 10 (s-dup-6): a decision none of whose records
+// this session has read stands as «Decided earlier» — what was decided,
+// under the name it was made, where its records lie and their UIDs — and
+// is taken back from there without loading anything.
+func TestDecidedEarlierWithNothingLoaded(t *testing.T) {
+	f := newDupFixture(t)
+	f.load(t)
+	f.decide(t, onlyGroup(t, f.page(t)), "duplicates.link")
+
+	f.sess = f.h.login("owner", "password123") // a new session: nothing read
+	before := f.requests()
+	p := f.page(t)
+	if len(p.Groups) != 0 || len(p.Decided) != 1 {
+		t.Fatalf("groups %+v, decided %+v", p.Groups, p.Decided)
+	}
+	d := p.Decided[0]
+	if d.Title != "Ada Lovelace · LOVELACE Ada" || d.Badge.Label != "linked ×2" || d.Note != "Not loaded in this session" ||
+		!strings.Contains(string(d.Where), "People") || !strings.Contains(string(d.Where), "Work") || d.UIDs != "UID ada-here, ada-there" {
+		t.Errorf("decided = %+v", d)
+	}
+	if len(d.Actions) != 1 || d.Actions[0].ID != "duplicates.unlink" || d.Form == nil {
+		t.Fatalf("decided actions %+v, form %+v", d.Actions, d.Form)
+	}
+	form := formFields(*d.Form)
+	form.Set(d.Actions[0].Name, d.Actions[0].Value)
+	if rec := f.h.do(postForm(d.Form.Action, f.sess, form)); rec.Code != 303 {
+		t.Fatalf("unlink: %d %s", rec.Code, rec.Body.String())
+	}
+	if l := f.decisions(t).Linked; len(l) != 0 {
+		t.Errorf("still linked: %+v", l)
+	}
+	if n := f.requests() - before; n != 0 {
+		t.Errorf("the decision asked the servers %d times", n)
+	}
+}

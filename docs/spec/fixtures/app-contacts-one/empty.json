@@ -398,7 +398,7 @@
     ],
     "nav": [
       {
-        "count": 7,
+        "count": 9,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -462,7 +462,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 7,
+            "count": 9,
             "detail": "",
             "feed": false,
             "href": "/app/contacts",
@@ -493,7 +493,7 @@
           },
           {
             "colour": "#a05a2c",
-            "count": 1,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-nc-home/arhiv",
@@ -512,7 +512,7 @@
         "rows": [
           {
             "colour": "#6b4e7a",
-            "count": 1,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-rad-vps/komanda",

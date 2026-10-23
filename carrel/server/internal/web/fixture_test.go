@@ -861,8 +861,8 @@ func linkMockupDuplicates(t *testing.T, h *harness, sess *session.Session) {
 	}
 	groups := []sealed.LinkedGroup{
 		// The frames show the «Команда» copy of Артём — its photo, its stamp.
-		{ID: "g-artem", Kind: view.KindContact, Members: members("Артём Белов", "komanda/d41a-6f30-92be", "kontakty/c3f7-8a21-1b09")},
-		{ID: "g-anna", Kind: view.KindContact,
+		{ID: "g-artem", Kind: view.KindContact, Title: "Артём Белов", Members: members("Артём Белов", "komanda/d41a-6f30-92be", "kontakty/c3f7-8a21-1b09")},
+		{ID: "g-anna", Kind: view.KindContact, Title: "Анна Ковалёва",
 			Members: members("Анна Ковалёва", "kontakty/4f2b-9c31-a0e7", "komanda/4f2b-9c31-a0e7", "arhiv/4f2b-9c31-a0e7"),
 			Dropped: map[string][]string{"TEL": {dupes.ValueKey("TEL", "+7 495 120-45-00")}}},
 	}
@@ -871,7 +871,8 @@ func linkMockupDuplicates(t *testing.T, h *harness, sess *session.Session) {
 	pair := members("Анна Ковалёва and Алексей Смирнов", "kontakty/4f2b-9c31-a0e7", "kontakty/9a1c-03de-77f2")
 	err := h.users.EditDuplicates(sess.AccountID(), key, "duplicates.link", "", func(d *sealed.Duplicates) error {
 		d.Linked = append(d.Linked, groups...)
-		d.Ignored = append(d.Ignored, sealed.IgnoredGroup{ID: dupes.Signature(view.KindContact, pair), Kind: view.KindContact, Members: pair})
+		d.Ignored = append(d.Ignored, sealed.IgnoredGroup{ID: dupes.Signature(view.KindContact, pair), Kind: view.KindContact, Members: pair,
+			Title: "Анна Ковалёва · Алексей Смирнов"})
 		return nil
 	})
 	if err != nil {

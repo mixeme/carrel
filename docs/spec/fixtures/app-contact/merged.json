@@ -1,0 +1,356 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/edit",
+      "icon": "i-pencil",
+      "id": "record.edit",
+      "label": "Edit",
+      "method": "GET",
+      "primary": true
+    },
+    {
+      "csrf": "csrf",
+      "enabled": true,
+      "href": "/app/mail/attach?a=a-nc-home\u0026back=%2Fapp%2Fcontacts%2Fa-nc-home%2Farhiv%2Fe7c2-3b95-6a14\u0026c=arhiv\u0026uid=e7c2-3b95-6a14\u0026what=contact",
+      "icon": "i-mail",
+      "id": "record.send",
+      "label": "Send",
+      "method": "POST",
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14?print=1",
+      "icon": "i-print",
+      "id": "record.print",
+      "label": "Print",
+      "method": "GET"
+    },
+    {
+      "csrf": "csrf",
+      "danger": true,
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/delete?etag=e24",
+      "icon": "i-trash",
+      "id": "record.delete",
+      "label": "Delete contact",
+      "method": "POST",
+      "target": "sheet"
+    }
+  ],
+  "avatar": {
+    "colour": "#9a9280",
+    "href": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?size=thumb\u0026v=e24",
+    "initials": "ВЛ"
+  },
+  "books": [],
+  "details": null,
+  "fields": [
+    {
+      "href": "tel:+79053310942",
+      "label": "Phone · mobile",
+      "mono": true,
+      "value": "+7 905 331-09-42"
+    },
+    {
+      "href": "mailto:vera@example.net",
+      "label": "Email · home",
+      "mono": false,
+      "value": "vera@example.net"
+    },
+    {
+      "href": "mailto:vera.l@work.example",
+      "label": "Email · work",
+      "mono": false,
+      "value": "vera.l@work.example"
+    },
+    {
+      "href": "mailto:v.lebedeva@example.org",
+      "label": "Email · work",
+      "mono": false,
+      "value": "v.lebedeva@example.org"
+    }
+  ],
+  "foreign": [],
+  "foreignShow": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "menu": [
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/move",
+      "icon": "i-move",
+      "id": "record.move",
+      "label": "Move",
+      "method": "GET",
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/move?copy=1",
+      "icon": "i-dup",
+      "id": "record.copy",
+      "label": "Copy",
+      "method": "GET",
+      "target": "sheet"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/arhiv/export?uid=e7c2-3b95-6a14",
+      "icon": "i-export",
+      "id": "record.export",
+      "label": "Export .vcf",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/publish?a=a-nc-home\u0026c=arhiv\u0026k=contacts\u0026uid=e7c2-3b95-6a14",
+      "icon": "i-link",
+      "id": "publish",
+      "label": "Publish a link",
+      "method": "GET",
+      "target": "sheet"
+    }
+  ],
+  "more": {
+    "enabled": true,
+    "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/timeline",
+    "icon": "i-all",
+    "id": "contact.timeline",
+    "label": "Open the timeline",
+    "method": "GET"
+  },
+  "name": "Вера Лебедева",
+  "notices": [
+    {
+      "actions": [],
+      "body": "The others were deleted. 2 records linked to it now point at the card that stays.",
+      "details": {
+        "lines": [
+          "Звонок по каталогу библиотеки · task · nextcloud · Дела",
+          "Встреча в библиотеке 12.08 · note · nextcloud · Записи"
+        ],
+        "summary": "Linked records"
+      },
+      "role": "info",
+      "title": "Merged"
+    }
+  ],
+  "photoHref": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?v=e24",
+  "photoNote": "External photo link; editing is not available.",
+  "print": {
+    "range": "nextcloud · Архив",
+    "taken": "10 August 2026, 17:06",
+    "title": "Вера Лебедева"
+  },
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/arhiv",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 4,
+            "detail": "",
+            "feed": false,
+            "href": "/app/contacts/a-nc-home/kontakty",
+            "label": "Контакты",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": 2,
+            "detail": "",
+            "feed": false,
+            "href": "/app/contacts/a-nc-home/arhiv",
+            "label": "Архив",
+            "on": true,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "readOnly": false,
+  "source": {
+    "changed": "10 August 2026, 17:04",
+    "colour": "#a05a2c",
+    "compared": "not changed on server",
+    "lastRead": "2 min ago",
+    "objects": null,
+    "path": "/alice/contacts/arhiv/e7c2-3b95-6a14.vcf",
+    "readOnly": false,
+    "stamp": "nextcloud · Архив",
+    "uid": ""
+  },
+  "subtitle": "Библиотека №4",
+  "timeline": [],
+  "timelineCount": null,
+  "title": "Вера Лебедева",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
+        "icon": "i-refresh",
+        "id": "record.refresh",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "2 min ago",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "name": "q",
+      "query": "",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  },
+  "uid": "e7c2-3b95-6a14"
+}

@@ -52,7 +52,7 @@
     "3 sources of backup jobs",
     "1 destination of a backup job",
     "3 davloom devices’ sync of them",
-    "1 linked group of duplicates"
+    "2 linked groups of duplicates"
   ],
   "subject": "nextcloud · nextcloud.example",
   "under": {
@@ -808,7 +808,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": 1,
+              "objects": 2,
               "path": "/alice/contacts/arhiv/",
               "pick": "a-nc-home|/alice/contacts/arhiv/",
               "readOnly": false,
@@ -1186,7 +1186,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": 1,
+              "objects": 2,
               "path": "/alice/contacts/komanda/",
               "pick": "a-rad-vps|/alice/contacts/komanda/",
               "readOnly": true,

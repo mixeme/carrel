@@ -6,7 +6,7 @@
     "drop": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 5,
+    "loaded": 7,
     "range": null,
     "segments": [
       {
@@ -54,7 +54,7 @@
       }
     ],
     "selected": 0,
-    "total": 5
+    "total": 7
   },
   "details": null,
   "look": {
@@ -111,16 +111,16 @@
       },
       {
         "colour": "#a05a2c",
-        "count": 0,
+        "count": 1,
         "fromCache": false,
-        "message": "",
+        "message": "The server's search found nothing here, so Carrel sifted the address book itself",
         "retry": null,
         "stamp": "nextcloud · Архив",
-        "state": "empty"
+        "state": "done"
       },
       {
         "colour": "#6b4e7a",
-        "count": 1,
+        "count": 2,
         "fromCache": false,
         "message": "The server's search found nothing here, so Carrel sifted the address book itself",
         "retry": null,
@@ -278,7 +278,7 @@
     "foot": [],
     "nav": [
       {
-        "count": 7,
+        "count": 9,
         "enabled": true,
         "href": "/app/contacts",
         "icon": "i-con",
@@ -353,7 +353,7 @@
           },
           {
             "colour": "#a05a2c",
-            "count": 0,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "",
@@ -365,7 +365,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 1,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "",
@@ -524,6 +524,34 @@
         "initials": "АК"
       },
       "caption": "Издательство «Слово»",
+      "colour": "#a05a2c",
+      "detail": "a.kovaleva@example.org",
+      "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
+      "kind": "contact",
+      "marked": [
+        {
+          "text": "Анна "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёва"
+        }
+      ],
+      "stamp": "nextcloud · Архив",
+      "subtitle": "+7 912 445-10-88",
+      "title": "Анна Ковалёва",
+      "when": ""
+    },
+    {
+      "avatar": {
+        "colour": "#8c6239",
+        "href": "",
+        "initials": "АК"
+      },
+      "caption": "Издательство «Слово»",
       "colour": "#4a6b52",
       "detail": "a.kovaleva@example.org",
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
@@ -541,6 +569,34 @@
         }
       ],
       "stamp": "nextcloud · Контакты",
+      "subtitle": "+7 912 445-10-88",
+      "title": "Анна Ковалёва",
+      "when": ""
+    },
+    {
+      "avatar": {
+        "colour": "#8c6239",
+        "href": "",
+        "initials": "АК"
+      },
+      "caption": "Издательство «Слово»",
+      "colour": "#6b4e7a",
+      "detail": "a.kovaleva@example.org",
+      "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
+      "kind": "contact",
+      "marked": [
+        {
+          "text": "Анна "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёва"
+        }
+      ],
+      "stamp": "radicale · vps · Команда",
       "subtitle": "+7 912 445-10-88",
       "title": "Анна Ковалёва",
       "when": ""
@@ -639,7 +695,7 @@
       "when": "10 Aug"
     }
   ],
-  "subtitle": "5 records",
+  "subtitle": "7 records",
   "title": "ковал · Search",
   "top": {
     "lock": null,
@@ -729,7 +785,7 @@
       "history": [
         {
           "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB",
-          "outcome": "5 found",
+          "outcome": "7 found",
           "query": "ковал",
           "when": "just now"
         },
@@ -758,6 +814,44 @@
             }
           ],
           "stamp": "nextcloud · Контакты",
+          "title": "Анна Ковалёва"
+        },
+        {
+          "colour": "#a05a2c",
+          "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
+          "kind": "contact",
+          "marked": [
+            {
+              "text": "Анна "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёва"
+            }
+          ],
+          "stamp": "nextcloud · Архив",
+          "title": "Анна Ковалёва"
+        },
+        {
+          "colour": "#6b4e7a",
+          "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
+          "kind": "contact",
+          "marked": [
+            {
+              "text": "Анна "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёва"
+            }
+          ],
+          "stamp": "radicale · vps · Команда",
           "title": "Анна Ковалёва"
         },
         {
@@ -855,22 +949,6 @@
           ],
           "stamp": "sftpgo · vps · Documents",
           "title": "договор-ковалёва.pdf"
-        },
-        {
-          "colour": "#a05a2c",
-          "href": "/app/files/a-sftp-vps/Documents/%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0%20%E2%80%94%20%D0%BF%D1%80%D0%B0%D0%B2%D0%BA%D0%B8%20%D0%BF%D0%BE%20%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B5.md",
-          "kind": "file",
-          "marked": [
-            {
-              "mark": "strong",
-              "text": "Ковал"
-            },
-            {
-              "text": "ёва — правки по обложке.md"
-            }
-          ],
-          "stamp": "sftpgo · vps · Documents",
-          "title": "Ковалёва — правки по обложке.md"
         }
       ],
       "name": "q",
@@ -878,6 +956,38 @@
       "whole": [
         {
           "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+          "marked": [
+            {
+              "text": "Анна "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёва"
+            }
+          ],
+          "name": "Анна Ковалёва"
+        },
+        {
+          "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7/timeline",
+          "marked": [
+            {
+              "text": "Анна "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёва"
+            }
+          ],
+          "name": "Анна Ковалёва"
+        },
+        {
+          "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7/timeline",
           "marked": [
             {
               "text": "Анна "
