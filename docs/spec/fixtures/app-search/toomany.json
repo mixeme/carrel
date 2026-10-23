@@ -1,0 +1,451 @@
+{
+  "bar": {
+    "actions": [],
+    "columns": null,
+    "compact": null,
+    "drop": null,
+    "filter": "",
+    "filterForm": null,
+    "loaded": 0,
+    "range": null,
+    "segments": [],
+    "selected": 0,
+    "total": null
+  },
+  "details": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "note": [],
+  "notices": [
+    {
+      "actions": [],
+      "body": "This session already runs 4 searches and lists. Stop one or wait for one to finish, then search again.",
+      "details": null,
+      "role": "alert",
+      "title": "Too many searches"
+    }
+  ],
+  "poll": {
+    "actions": [],
+    "answeredAt": "",
+    "aside": "",
+    "every": 0,
+    "note": "",
+    "percent": 0,
+    "poll": "",
+    "retryAll": null,
+    "running": false,
+    "sources": [],
+    "stream": "",
+    "summary": [],
+    "taskID": ""
+  },
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "query": "смета",
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": 7,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-con",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": 7,
+        "enabled": true,
+        "href": "/app/calendar",
+        "icon": "i-cal",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks",
+        "icon": "i-task",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes",
+        "icon": "i-note",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "icon": "i-file",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "icon": "i-dup",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [
+      {
+        "account": "Sources",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Контакты",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Архив",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Команда",
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Личный",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Работа",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Проекты",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#8c6239",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дежурства",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#9a9280",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Общий",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#8c6239",
+            "count": null,
+            "detail": "",
+            "feed": true,
+            "href": "",
+            "label": "Праздники РФ",
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дела",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Записи",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дневник",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#9a9280",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Files",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Documents",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok",
+        "tally": "14 / 14"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "results": [],
+  "subtitle": "not searched",
+  "title": "смета · Search",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [
+        {
+          "href": "/app/search?q=%D0%B4%D0%BE%D0%B3%D0%BE%D0%B2%D0%BE%D1%80",
+          "outcome": "no source answered",
+          "query": "договор",
+          "when": "just now"
+        },
+        {
+          "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB",
+          "outcome": "5 found",
+          "query": "ковал",
+          "when": "just now"
+        },
+        {
+          "href": "/app/search?q=%D0%B4%D0%B0%D1%87%D0%B0",
+          "outcome": "nothing found",
+          "query": "дача",
+          "when": "just now"
+        }
+      ],
+      "jump": [],
+      "name": "q",
+      "query": "смета",
+      "whole": []
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

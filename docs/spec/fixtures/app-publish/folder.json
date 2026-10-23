@@ -465,7 +465,7 @@
             "method": "GET"
           },
           {
-            "count": null,
+            "count": 7,
             "enabled": true,
             "href": "/app/calendar",
             "icon": "i-cal",
@@ -502,7 +502,7 @@
             "on": true
           },
           {
-            "count": 1,
+            "count": 2,
             "enabled": true,
             "href": "/app/duplicates",
             "icon": "i-dup",
@@ -863,16 +863,28 @@
           "action": "/app/search",
           "history": [
             {
-              "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0",
-              "outcome": "1 found",
-              "query": "Ковалёва",
+              "href": "/app/search?q=%D0%B4%D0%BE%D0%B3%D0%BE%D0%B2%D0%BE%D1%80",
+              "outcome": "no source answered",
+              "query": "договор",
+              "when": "just now"
+            },
+            {
+              "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB",
+              "outcome": "5 found",
+              "query": "ковал",
+              "when": "just now"
+            },
+            {
+              "href": "/app/search?q=%D0%B4%D0%B0%D1%87%D0%B0",
+              "outcome": "nothing found",
+              "query": "дача",
               "when": "just now"
             }
           ],
           "jump": [],
           "name": "q",
           "query": "",
-          "whole": null
+          "whole": []
         },
         "signed": {
           "instance": "carrel.example",

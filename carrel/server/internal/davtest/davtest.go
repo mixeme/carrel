@@ -375,6 +375,13 @@ func (s *Server) Names(p string) []string {
 	return out
 }
 
+// RemoveFile deletes a file under FileRoot, as another client would have.
+func (s *Server) RemoveFile(p string) {
+	if err := os.Remove(s.localPath(p)); err != nil && !os.IsNotExist(err) {
+		panic(err)
+	}
+}
+
 // SeedFolder creates an empty folder under FileRoot.
 func (s *Server) SeedFolder(p string) {
 	if err := os.MkdirAll(s.localPath(p), 0o755); err != nil {

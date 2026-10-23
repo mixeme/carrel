@@ -182,7 +182,8 @@ func TestSearchAcrossTickedSources(t *testing.T) {
 		contact.Detail != "ada@example.com" || contact.Colour == "" {
 		t.Errorf("contact = %+v", contact)
 	}
-	if event.Detail != "Zoom" || event.When == "" || !strings.HasSuffix(string(event.Stamp), " · Work") {
+	// The day first, the time beside the place (note 114 p. 1).
+	if !strings.HasSuffix(string(event.Detail), " · Zoom") || event.When == "" || !strings.HasSuffix(string(event.Stamp), " · Work") {
 		t.Errorf("event = %+v", event)
 	}
 	if doc.Size != "10 B" || doc.Detail != "" || doc.Href != "/app/files/"+f.id+"/"+url.PathEscape(searchDocs)+"/Ada%20contract.pdf" {
@@ -191,7 +192,7 @@ func TestSearchAcrossTickedSources(t *testing.T) {
 	if page.Results[6].Href != "/app/files/"+f.id+"/"+url.PathEscape(searchDocs)+"/old/Ada.md" {
 		t.Errorf("deep file = %+v", page.Results[6])
 	}
-	if !strings.Contains(plainText(page.Note), "by name") {
+	if !strings.Contains(plainText(page.Note), "by their names") {
 		t.Errorf("note = %q", page.Note)
 	}
 	if page.Bar.Total == nil || *page.Bar.Total != 7 || len(page.Bar.Segments) != 6 {
@@ -456,8 +457,8 @@ func TestSearchStartsOnlyWithTextTicksAndASlot(t *testing.T) {
 	if page := search(t, f.h, f.sess, "q=%20%20"); page.Poll.TaskID != "" || page.Query != "" {
 		t.Errorf("an empty query started %+v", page.Poll)
 	}
-	if page := search(t, f.h, f.sess, "q=Ada"); page.Poll.TaskID != "" || !strings.Contains(saidRuns(page.Poll.Summary), "No collections are ticked") {
-		t.Errorf("no ticks: %+v", page.Poll)
+	if page := search(t, f.h, f.sess, "q=Ada"); page.Poll.TaskID != "" || !strings.Contains(string(page.Empty), "No collections are ticked") {
+		t.Errorf("no ticks: %+v, %q", page.Poll, page.Empty)
 	}
 	tickAll(t, f.h, f.sess)
 	for i := 0; i < 4; i++ {

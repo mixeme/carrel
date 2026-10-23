@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -35,8 +36,9 @@ import (
 // it. A query already in the session opens from memory.
 
 const (
-	searchFilesNoteTail = " returns names anyway, and walking a folder costs one request per folder. Carrel does not look inside files — and says so here, so that “nothing found” is not read as “not in the files”."
-	searchNoTicks       = "No collections are ticked, so there is nothing to search. Tick collections in the rail of Contacts, Calendar, Tasks, Notes or Files."
+	searchFilesNote = "Files are found by their names; what is inside them is not searched."
+	searchNoAnswer  = "No source answered, so nothing was searched."
+	searchNoTicks   = "No collections are ticked, so there is nothing to search. Tick collections in the rail of Contacts, Calendar, Tasks, Notes or Files."
 	// sseKeepAlive is how often a waiting stream says it is alive, so a proxy
 	// does not close it as idle.
 	sseKeepAlive = 15 * time.Second
@@ -53,8 +55,12 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 	// The rail without numbers until there is a search to count them from;
 	// the page with one gets its rail from it below.
 	page.Rail = s.searchRail(sess, s.catalogOf(sess), nil)
+	ticked := plural(railRows(page.Rail), "collection") + " ticked"
 	if q == "" {
-		// An empty query searches nothing and is not written (S-15.3).
+		// An empty query searches nothing and is not written (S-15.3): the
+		// page of its own, the field and the history (s-find-6); what it
+		// would search, under the title.
+		page.Subtitle = text(ticked)
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
@@ -63,7 +69,7 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 	page.Top.Search.Query = text(q)
 	key, _ := sess.DataKey()
 	blob, _ := s.users.Catalog(sess.AccountID(), key)
-	page.Top.Search.Jump = s.jumpRows(sess, blob, q)
+	page.Top.Search.Jump, page.Top.Search.Whole = s.jumpRows(sess, blob, q)
 
 	var task *fanout.Task
 	if r.URL.Query().Get("again") == "" {
@@ -74,7 +80,8 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 	if task == nil {
 		sources := s.searchSources(sess, blob)
 		if len(sources) == 0 {
-			page.Poll.Summary = line(searchNoTicks)
+			// Nothing ticked (s-find-7): the words of what to do, no bar.
+			page.Subtitle, page.Empty = text(ticked), searchNoTicks
 			s.writePage(w, r, http.StatusOK, page)
 			return
 		}
@@ -91,6 +98,7 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 				Title: "Too many searches",
 				Body:  text(fmt.Sprintf("This session already runs %d searches and lists. Stop one or wait for one to finish, then search again.", conf.MaxLiveFanouts)),
 			})
+			page.Subtitle = "not searched" // s-find-8
 			s.writePage(w, r, http.StatusOK, page)
 			return
 		}
@@ -99,8 +107,31 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 	snap := task.Snapshot()
 	s.fillResults(&page, sess, blob, snap, r)
 	page.Rail = s.searchRail(sess, blob, &snap)
-	page.Subtitle = searchSubtitle(page.Rail, snap)
+	page.Subtitle, page.Empty = searchSubtitle(snap)
+	page.Top.Refresh = s.searchRefresh(s.timeFor(sess), q, snap)
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// railRows are the collections a rail ticks: its rows.
+func railRows(rail view.Rail) int {
+	n := 0
+	for _, sec := range rail.Sections {
+		n += len(sec.Rows)
+	}
+	return n
+}
+
+// searchRefresh is the door to the search again in the top (note 114 p. 12,
+// s-find-1, -4): when the pass ended, «2 min ago», a press searching every
+// collection again, as a list's asks its servers again; off while it runs.
+// The bar has no «Search again» of its own.
+func (s *Server) searchRefresh(tf timeFmt, q string, snap fanout.Snapshot) view.Refresh {
+	refresh := view.Action{ID: "poll.again", Label: "Refresh", Icon: "i-refresh", Href: s.route(searchHref(q) + "&again=1"), Method: "GET", Enabled: !snap.Running}
+	if snap.Running {
+		refresh.Reason = "The search is still running."
+		return view.Refresh{Action: refresh, Running: true}
+	}
+	return view.Refresh{Action: refresh, Answered: tf.formatWhen(snap.Finished, true, s.now())}
 }
 
 // keptSearch is the newest task of this session with the same query: the
@@ -207,9 +238,13 @@ func (s *Server) fillResults(page *view.SearchPage, sess *session.Session, blob 
 	page.Poll = s.pollBar(tf, blob, snap, searchOwner(q))
 	for _, st := range snap.Sources {
 		account, path, _ := strings.Cut(st.ID, ":")
-		if col, ok := blob.Collection(account, path); ok && col.Has(view.KindFile) {
-			// The words of s-find-1, PROPFIND monospaced (Пк14).
-			page.Note = join("Files are searched by name: ", monoRun("PROPFIND"), searchFilesNoteTail)
+		answered := st.State == view.SourceDone || st.State == view.SourceEmpty
+		if col, ok := blob.Collection(account, path); ok && col.Has(view.KindFile) && answered && !snap.Running {
+			// The line for the person (note 114, s-find-1, -5): only the
+			// name is searched — why is the server's business. It stands
+			// under a pass that ended with a storage answering; not while
+			// one runs (s-find-4), nor when none was searched (s-find-9).
+			page.Note = line(searchFilesNote)
 			break
 		}
 	}
@@ -275,15 +310,30 @@ func (s *Server) findRow(tf timeFmt, blob sealed.Blob, it fanout.Item) view.Find
 		row.Detail = text(firstValue(o, "EMAIL"))
 		row.Caption = text(structured(firstValue(o, "ORG")))
 	case view.KindEvent:
+		// The result runs through every day (note 114 p. 1): the day
+		// first, the time beside the place — «15:00 · Zoom», «all day ·
+		// ‹place›».
 		row.Title = text(titleOr(cal.Text(o, "SUMMARY"), "Untitled event"))
-		row.Detail = text(cal.Text(o, "LOCATION"))
+		var parts []string
 		if tm, err := cal.TimingOf(o, tf.tz); err == nil && !tm.Start.IsZero() {
-			row.When = text(tf.shortDue(tm))
+			row.When = text(tf.shortDay(tm.Start))
+			if tm.AllDay {
+				parts = append(parts, "all day")
+			} else {
+				parts = append(parts, tf.clock(tm.Start))
+			}
 		}
+		if place := cal.Text(o, "LOCATION"); place != "" {
+			parts = append(parts, place)
+		}
+		row.Detail = text(strings.Join(parts, " · "))
 	case view.KindTask:
+		// Its tick a sign, not a button (note 114 p. 2): a task is ticked
+		// in its list or on its card.
 		row.Title = text(titleOr(cal.Text(o, "SUMMARY"), "Untitled task"))
-		if taskDone(o) {
-			row.Detail = "Done"
+		row.Done = taskDone(o)
+		if p := percentOf(o); p != nil && *p > 0 {
+			row.Progress = text(strconv.Itoa(*p) + "%")
 		}
 		if due, err := cal.DueOf(o, tf.tz); err == nil && !due.Start.IsZero() {
 			row.When = text(tf.shortDue(due))
@@ -403,7 +453,7 @@ func searchOwner(q string) pollOwner {
 		again:      searchHref(q) + "&again=1",
 		againLabel: "Search again",
 		what:       "search",
-		found:      func(n int) string { return fmt.Sprintf("%d found", n) },
+		found:      func(n int) string { return plural(n, "record") },
 	}
 }
 
@@ -532,7 +582,9 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 			bar.Aside = text(runningFor(now.Sub(snap.Started)))
 		}
 	case snap.Running:
-		bar.Summary = line(fmt.Sprintf("Asking %s · %d answered · %s", plural(total, "source"), answered, owner.found(owner.count(snap))))
+		// A search still running (s-find-4): «Searching · 9 of 14 answered
+		// · 5 records».
+		bar.Summary = line(fmt.Sprintf("Searching · %d of %d answered · %s", answered, total, owner.found(owner.count(snap))))
 	default:
 		// The search done (s-find-1): «Done · 13 of 14 sources answered»;
 		// what did not answer is the red «N failed», whose menu names each
@@ -581,29 +633,25 @@ func runningFor(d time.Duration) string {
 
 // pollTroubles names what went wrong, each kind of trouble once and only
 // when there is any: «1 unavailable».
-// searchSubtitle is what a search asked, found and missed, under its title
-// (s-find-1, Пк5): «14 of 14 collections · 7 records · 1 source timed out».
-// The collections are the rail's — those ticked —, the records every one
-// found, whatever the segment or the filter shows.
-func searchSubtitle(rail view.Rail, snap fanout.Snapshot) view.Text {
-	ticked := 0
-	for _, sec := range rail.Sections {
-		ticked += len(sec.Rows)
+// searchSubtitle is what a search found, under its title, and the words
+// of a result with nothing to show (note 114, the owner's decision of
+// 23.10.2026): of the sources the bar and the rail speak. «7 records»,
+// «5 records so far» while it runs; «nothing found» when the sources
+// answered and found nothing; «nothing searched» when none answered.
+func searchSubtitle(snap fanout.Snapshot) (subtitle, empty view.Text) {
+	found := plural(len(snap.Items), "record")
+	if snap.Running {
+		return text(found + " so far"), ""
 	}
-	parts := []string{fmt.Sprintf("%d of %s", len(snap.Sources), plural(ticked, "collection")), plural(len(snap.Items), "record")}
-	troubles := map[view.SourceState]int{}
+	if len(snap.Items) > 0 {
+		return text(found), ""
+	}
 	for _, st := range snap.Sources {
-		troubles[st.State]++
-	}
-	for _, c := range []struct {
-		state view.SourceState
-		what  string
-	}{{view.SourceError, "refused"}, {view.SourceUnavailable, "unavailable"}, {view.SourceTimeout, "timed out"}} {
-		if n := troubles[c.state]; n > 0 {
-			parts = append(parts, plural(n, "source")+" "+c.what)
+		if st.State == view.SourceDone || st.State == view.SourceEmpty {
+			return "nothing found", text(fmt.Sprintf("Nothing found for «%s» in %s.", snap.Query.Text, plural(len(snap.Sources), "collection")))
 		}
 	}
-	return text(strings.Join(parts, " · "))
+	return "nothing searched", searchNoAnswer
 }
 
 func pollTroubles(refused, unreachable, timedOut, stopped int) []string {
@@ -675,9 +723,13 @@ func sentence(s string) string {
 
 // jumpRows are the hints of the search box (S-15.3): collection names and
 // records of lists this session has already loaded. No server is asked;
-// nothing matching means no block.
-func (s *Server) jumpRows(sess *session.Session, blob sealed.Blob, q string) []view.JumpRow {
+// nothing matching means no block. Each with its collection's mark and
+// what was typed in bold, an event with its day; by kind in the order of
+// the result, at most eight — the rest through «Show all results» (note
+// 114 pp. 5–7). Every contact among them gives its «Timeline · name».
+func (s *Server) jumpRows(sess *session.Session, blob sealed.Blob, q string) ([]view.JumpRow, []view.TimelineHint) {
 	needle := strings.ToLower(q)
+	tf := s.timeFor(sess)
 	var out []view.JumpRow
 	for _, col := range blob.Collections {
 		conn, ok := blob.Connection(col.AccountID)
@@ -685,23 +737,42 @@ func (s *Server) jumpRows(sess *session.Session, blob sealed.Blob, q string) []v
 			continue
 		}
 		host, label := connLabel(conn), collectionLabel(col)
-		if strings.Contains(strings.ToLower(label), needle) && len(out) < jumpRowsMost {
-			out = append(out, view.JumpRow{Href: s.route(collectionHref(col)), Kind: col.Kinds[0], Title: text(label), Stamp: stamp(host, label)})
+		_, colour := sourceOrigin(blob, col.AccountID, col.Path)
+		if strings.Contains(strings.ToLower(label), needle) {
+			out = append(out, view.JumpRow{Href: s.route(collectionHref(col)), Kind: col.Kinds[0], Title: text(label),
+				Marked: markedTitle(label, q), Stamp: stamp(host, label), Colour: colour})
 		}
 		// The collection's name stands before its records, so this is
 		// a walk of collections and not eachIndexed.
 		for _, e := range indexedIn(sess, col) {
-			if len(out) < jumpRowsMost && strings.Contains(strings.ToLower(e.Title), needle) {
-				out = append(out, view.JumpRow{
-					Href:  s.route("/app/" + segmentOf(e.Kind) + "/" + conn.ID + "/" + url.PathEscape(col.Path) + "/" + url.PathEscape(e.UID)),
-					Kind:  e.Kind,
-					Title: text(e.Title),
-					Stamp: stamp(host, label),
-				})
+			if !strings.Contains(strings.ToLower(e.Title), needle) {
+				continue
 			}
+			row := view.JumpRow{
+				Href:   s.route("/app/" + segmentOf(e.Kind) + "/" + conn.ID + "/" + url.PathEscape(col.Path) + "/" + url.PathEscape(e.UID)),
+				Kind:   e.Kind,
+				Title:  text(e.Title),
+				Marked: markedTitle(e.Title, q),
+				Stamp:  stamp(host, label),
+				Colour: colour,
+			}
+			if e.Kind == view.KindEvent && e.At != 0 {
+				row.Day = text(tf.shortDay(time.Unix(e.At, 0)))
+			}
+			out = append(out, row)
 		}
 	}
-	return out
+	sort.SliceStable(out, func(i, j int) bool { return kindRank(out[i].Kind) < kindRank(out[j].Kind) })
+	if len(out) > jumpRowsMost {
+		out = out[:jumpRowsMost]
+	}
+	var whole []view.TimelineHint
+	for _, row := range out {
+		if row.Kind == view.KindContact && strings.HasPrefix(row.Href, s.route("/app/contacts/")) {
+			whole = append(whole, view.TimelineHint{Href: row.Href + "/timeline", Name: row.Title, Marked: row.Marked})
+		}
+	}
+	return out, whole
 }
 
 func collectionHref(col sealed.Collection) string {

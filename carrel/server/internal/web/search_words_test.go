@@ -1,7 +1,6 @@
 package web_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/emersion/go-webdav/caldav"
@@ -11,10 +10,10 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// The words of s-find-1 that depend on the result (Пк5, Пк14): under the
-// title what was asked, how much was found and what did not answer —
-// «14 of 14 collections · 7 records · 1 source timed out»; the line about
-// files with PROPFIND monospaced.
+// The words of s-find-1 that depend on the result (note 114, the owner's
+// decision of 23.10.2026): under the title only what was found — «7
+// records»; of the sources the bar and the rail speak. The line about files
+// is for the person: only the name is searched.
 func TestTheSearchSaysWhatItAsked(t *testing.T) {
 	srv := searchServer(t)
 	srv.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
@@ -26,16 +25,14 @@ func TestTheSearchSaysWhatItAsked(t *testing.T) {
 	page := search(t, f.h, f.sess, "q=Ada")
 	waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
 	page = search(t, f.h, f.sess, "q=Ada")
-	if page.Subtitle != "3 of 3 collections · 2 records" {
-		t.Errorf("subtitle %q", page.Subtitle)
+	if page.Subtitle != "2 records" || page.Empty != "" {
+		t.Errorf("subtitle %q, empty %q", page.Subtitle, page.Empty)
 	}
 	note := ""
-	mono := false
 	for _, r := range page.Note {
 		note += string(r.Text)
-		mono = mono || r.Mark == view.RunMono && r.Text == "PROPFIND"
 	}
-	if !strings.HasPrefix(note, "Files are searched by name: PROPFIND returns names anyway") || !mono {
-		t.Errorf("note %q, PROPFIND monospaced %v", note, mono)
+	if note != "Files are found by their names; what is inside them is not searched." {
+		t.Errorf("note %q", note)
 	}
 }

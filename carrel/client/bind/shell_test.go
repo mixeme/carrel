@@ -24,7 +24,7 @@ func TestTop(t *testing.T) {
 	}
 	same(t, "the top bar", bind.Top(bar, bind.TopWords{Brand: brand, Search: "Search everything…"}), w.Top{
 		Brand:  brand,
-		Search: &w.Search{Query: w.Query{Value: "anna", Placeholder: "Search everything…", Label: "Search everything…", Name: "q"}, Action: "/app/search"},
+		Search: &w.Search{Query: w.Query{Value: "anna", Placeholder: "Search everything…", Label: "Search everything…", Name: "q"}, Action: "/app/search", Clear: true},
 		Actions: []w.TopAction{
 			w.TopDrop{
 				Trigger: w.Button{Label: "New note", Icon: "quill", Kind: w.ButtonPrimary, Href: "/app/notes/quick", Menu: true},

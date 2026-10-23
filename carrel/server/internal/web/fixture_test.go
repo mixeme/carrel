@@ -2619,12 +2619,111 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 	// A search asks every ticked collection and the screen is taken once
 	// they have answered, like a combined list.
 	t.Run("app-search", func(t *testing.T) {
-		first := decode[view.SearchPage](t, app.h.do(get("/app/search?q=Ковалёва", app.sess)))
-		if first.Poll.TaskID == "" {
-			t.Fatal("the search asked nobody")
+		defer seedSearch(t, app)()
+		at := func(q string) string { return "/app/search?q=" + url.QueryEscape(q) }
+		search := func(q string, until func(view.PollBar) bool) view.SearchPage {
+			t.Helper()
+			first := decode[view.SearchPage](t, app.h.do(get(at(q)+"&again=1", app.sess)))
+			if first.Poll.TaskID == "" {
+				t.Fatalf("the search for %q asked nobody", q)
+			}
+			waitPoll(t, app.h, app.sess, first.Poll.TaskID, until)
+			return first
 		}
-		waitPoll(t, app.h, app.sess, first.Poll.TaskID, nil)
-		app.compare(t, "app-search/normal.json", app.h.do(get("/app/search?q=Ковалёва", app.sess)))
+		// What s-find-1 found (note 114), and «дача», which nothing holds
+		// (s-find-5); then the page without a query lists both (s-find-6).
+		search("ковал", nil)
+		app.compare(t, "app-search/normal.json", app.h.do(get(at("ковал"), app.sess)))
+		// The frames after s-find-1 draw «Общий» answering: every source
+		// answers «дача» (s-find-5, «14 of 14»).
+		baikal := app.servers["baikal"]
+		baikal.Accept("REPORT")
+		search("дача", nil)
+		app.compare(t, "app-search/nothing.json", app.h.do(get(at("дача"), app.sess)))
+		app.compare(t, "app-search/noquery.json", app.h.do(get("/app/search", app.sess)))
+		// A pass of «ковал» with some sources holding their answers, taken
+		// once the rest have answered; then stopped and let go. A search
+		// asks four at a time (conf.FanoutParallelism) and its sources race
+		// for the places: no more than three are held, so the fourth place
+		// lets the rest through whatever their order.
+		held := func(stands []string, feed bool, answered int) (task string, release func()) {
+			var lets []func()
+			for _, name := range stands {
+				prefix := davtest.CalendarHome
+				if name == "sftpgo · vps" {
+					prefix = davtest.FileRoot
+				}
+				lets = append(lets, app.servers[name].StallAt(prefix))
+			}
+			if feed {
+				for _, f := range app.feeds {
+					lets = append(lets, f.hold())
+				}
+			}
+			release = func() {
+				for _, l := range lets {
+					l()
+				}
+			}
+			// A failure on the way lets them go too: the stands close only
+			// when nothing is held.
+			t.Cleanup(release)
+			first := search("ковал", func(b view.PollBar) bool {
+				n := 0
+				for _, sp := range b.Sources {
+					if sp.State == view.SourceDone || sp.State == view.SourceEmpty {
+						n++
+					}
+				}
+				return n == answered
+			})
+			return first.Poll.TaskID, release
+		}
+		// Still running (s-find-4): «Общий», the feed and Documents hold
+		// their answers — the five records of the frame, the rows of its
+		// rail; then Stop (s-find-10) — what came stays, nothing refused.
+		task, release := held([]string{"baikal", "sftpgo · vps"}, true, 11)
+		app.compare(t, "app-search/running.json", app.h.do(get(at("ковал"), app.sess)))
+		app.h.do(postForm("/app/search/progress/"+task+"/cancel", app.sess, url.Values{}))
+		release()
+		waitPoll(t, app.h, app.sess, task, nil)
+		app.compare(t, "app-search/stopped.json", app.h.do(get(at("ковал"), app.sess)))
+		// No source answered (s-find-9).
+		for _, srv := range app.servers {
+			srv.Refuse("REPORT", http.StatusServiceUnavailable, "offline")
+			srv.Refuse("PROPFIND", http.StatusServiceUnavailable, "offline")
+		}
+		for _, f := range app.feeds {
+			f.setDown(true)
+		}
+		search("договор", nil)
+		for _, srv := range app.servers {
+			srv.Accept("REPORT")
+			srv.Accept("PROPFIND")
+		}
+		for _, f := range app.feeds {
+			f.setDown(false)
+		}
+		// «Общий» goes on refusing the saved password, as the set has it,
+		// and the calendar read again says so to what comes after.
+		app.servers["baikal"].Refuse("REPORT", 401, "")
+		combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+		app.compare(t, "app-search/noanswer.json", app.h.do(get(at("договор"), app.sess)))
+		// The session already runs as many searches and lists as it may
+		// (s-find-8).
+		slots := 0
+		for app.sess.AcquireFanout() {
+			slots++
+		}
+		app.compare(t, "app-search/toomany.json", app.h.do(get(at("смета")+"&again=1", app.sess)))
+		for range slots {
+			app.sess.ReleaseFanout()
+		}
+		// Nothing ticked (s-find-7).
+		var ticked []sealed.Selection
+		editBlob(t, app.h, app.sess, func(b *sealed.Blob) { ticked, b.Selected = b.Selected, nil })
+		app.compare(t, "app-search/unticked.json", app.h.do(get(at("ковал")+"&again=1", app.sess)))
+		editBlob(t, app.h, app.sess, func(b *sealed.Blob) { b.Selected = ticked })
 	})
 	// The publish sheets over the page they are opened from (note 105 of
 	// Typecase): a contact over its card (s-publish-3), a calendar over

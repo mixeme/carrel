@@ -133,7 +133,8 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "issued","mismatch","folder","preview","report","silent",
           "addressbook","note","image","text","download",
           "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history","file-match","filled",
-          "calendar","event","link-never","gone","note-files-kept","contact","unanswered","account","none","storage","delete-refused","move-kept"}
+          "calendar","event","link-never","gone","note-files-kept","contact","unanswered","account","none","storage","delete-refused","move-kept",
+          "running","stopped","nothing","noquery","noanswer","toomany","unticked"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -486,6 +487,16 @@ STATE_FRAME = {
     "app-contact-import/refused": "s-io-18",
     "app-contact-import/unanswered": "s-io-19",
     "app-event-import/preview": "s-io-6",
+    # Состояния поиска (записка Typecase 114): идёт, ничего не найдено, без
+    # запроса, ничего не отмечено, слишком много обходов, не ответил никто,
+    # остановлен.
+    "app-search/running": "s-find-4",
+    "app-search/nothing": "s-find-5",
+    "app-search/noquery": "s-find-6",
+    "app-search/unticked": "s-find-7",
+    "app-search/toomany": "s-find-8",
+    "app-search/noanswer": "s-find-9",
+    "app-search/stopped": "s-find-10",
     "app-event-import/report": "s-io-14",
     "app-task-import/preview": "s-io-7",
     "app-note-import/normal": "s-io-4",
@@ -728,6 +739,10 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
     # Сверяется прочерк: «—» в кадре — это «не отвечала», и в фикстуре ему
     # обязан отвечать null, а не ноль.
     if d in SHEETS:
+        continue
+    # Кадр-фрагмент, нарисованный без оболочки (колонка выдачи поиска,
+    # s-find-5…-10): рейла он не рисует, и сверять его не с чем.
+    if 'class="frag"' in frame and 'tc-shell' not in frame:
         continue
     if sorted(c[0] for c in fc) != sorted(c[0] for c in xc):
         drift.append("%s: коллекции рейла: кадр %s, фикстура %s"

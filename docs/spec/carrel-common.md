@@ -808,8 +808,8 @@ type SearchBox struct {
     Action  string             // форма GET поиска
     Name    string             // имя её поля запроса: «q»
     History []SearchHistoryRow // C-6.6
-    Jump    []JumpRow          // подсказки из памяти сеанса: ни одного запроса
-    Whole   *Action            // «Timeline · имя»; nil — контакт не совпал
+    Jump    []JumpRow          // подсказки из памяти сеанса: ни одного запроса; не больше восьми, по родам в порядке выдачи (записка Typecase 114)
+    Whole   []TimelineHint     // «Timeline · имя» на каждый контакт Jump, в том же порядке (s-find-3); пусто — контакт не совпал
 }
 
 type Rail struct {
@@ -1717,11 +1717,18 @@ type ConflictRow struct { // карточка расхождения, вариа
 type SearchPage struct {
     Shell
     Query    Text
-    Subtitle Text    // «14 of 14 collections · 7 records · 1 source timed out» (s-find-1): отмеченные — из рейла, находки — все, кто не ответил — по виду отказа; пусто без запроса
+    // Subtitle — только найденное (записка Typecase 114, решение владельца
+    // 23.10.2026): «7 records» (s-find-1), «5 records so far» (идёт,
+    // s-find-4), «nothing found» (s-find-5), «14 collections ticked» (без
+    // запроса, s-find-6), «0 collections ticked» (s-find-7), «not searched»
+    // (слишком много обходов, s-find-8), «nothing searched» (никто не
+    // ответил, s-find-9); об источниках — полоса и рейл
+    Subtitle Text
     Bar      ListBar // сегменты All / Contacts / Events / Tasks / Notes / Files
-    Poll     PollBar
+    Poll     PollBar // поиск идёт — «Searching · 9 of 14 answered · 5 records» и Stop (s-find-4); кончился — «Done · 13 of 14 sources answered» и длительность (Aside); заново — кнопка шапки (Top.Refresh), своей «Search again» у полосы нет
     Results  []FindRow // строка — находка с её Kind; группы рода со счётом («Contacts 2») собирает экран: число — строк этого рода
-    Note     Runs    // «Files are searched by name: ‹PROPFIND› returns names anyway, …» — PROPFIND моноширинно (s-find-1); пусто, когда файлы не спрошены
+    Empty    Text    // слова пустой выдачи: «Nothing found for «дача» in 14 collections.» (s-find-5), «No collections are ticked, …» (s-find-7), «No source answered, so nothing was searched.» (s-find-9); пусто — выдача есть, поиск идёт или не начат
+    Note     Runs    // «Files are found by their names; what is inside them is not searched.» (s-find-1, -5); пусто, когда файлы не спрошены
 }
 
 type FindRow struct {
@@ -1731,8 +1738,10 @@ type FindRow struct {
     Stamp  Stamp
     Title  Text
     Marked Runs // Title кусками в выдаче поиска: совпавшее с запросом — strong, без учёта регистра (s-find-1: «**Ковал**ёва Анна»); пусто — найдено не по названию
-    Detail Text
-    When   Text
+    Detail Text // контакт — почта; событие — время и место «15:00 · Zoom», «all day · ‹место›»; заметка — выдержка
+    When   Text // событие — день «10 Aug», задача — срок, заметка — день
+    Done     bool // задача сделана — знак, не кнопка (записка 114)
+    Progress Text // задача — процент «40%»
     // Строка по роду (s-find-1). Контакт: Avatar — инициалы и цвет,
     // Subtitle — телефон (моноширинно), Detail — почта, Caption —
     // организация. Файл: Icon — значок по типу, Size, Changed — изменён
@@ -1755,7 +1764,16 @@ type SearchHistoryRow struct {
     When    When
     Href    string
 }
-type JumpRow struct { Href string; Kind Kind; Title Text; Stamp Stamp }
+type JumpRow struct {
+    Href   string
+    Kind   Kind
+    Title  Text
+    Marked Runs   // Title кусками, набранное жирным (s-find-3)
+    Stamp  Stamp
+    Colour Colour // метка коллекции записи
+    Day    Text   // день события перед источником: «10 Aug»; у прочих пусто
+}
+type TimelineHint struct { Href string; Name Text; Marked Runs } // «Timeline · ‹имя›»: хронология человека, спрашивает все серверы
 
 type PollBar struct {
     TaskID      string

@@ -1,0 +1,819 @@
+{
+  "bar": {
+    "actions": [],
+    "columns": null,
+    "compact": null,
+    "drop": null,
+    "filter": "",
+    "filterForm": null,
+    "loaded": 5,
+    "range": null,
+    "segments": [
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB",
+        "id": "search.kind",
+        "label": "All",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026kind=contact",
+        "id": "search.kind",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026kind=event",
+        "id": "search.kind",
+        "label": "Events",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026kind=task",
+        "id": "search.kind",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026kind=note",
+        "id": "search.kind",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026kind=file",
+        "id": "search.kind",
+        "label": "Files",
+        "method": "GET"
+      }
+    ],
+    "selected": 0,
+    "total": 5
+  },
+  "details": null,
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "note": [
+    {
+      "text": "Files are found by their names; what is inside them is not searched."
+    }
+  ],
+  "notices": [],
+  "poll": {
+    "actions": [
+      {
+        "csrf": "csrf",
+        "enabled": false,
+        "href": "/app/search/progress/t-task/cancel",
+        "id": "poll.stop",
+        "label": "Stop",
+        "method": "POST",
+        "reason": "The search has finished.",
+        "target": "poll"
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026again=1",
+        "id": "poll.again",
+        "label": "Search again",
+        "method": "GET"
+      }
+    ],
+    "answeredAt": "17:06",
+    "aside": "0.0 s",
+    "every": 700,
+    "note": "",
+    "percent": 100,
+    "poll": "/app/search/progress/t-task/poll",
+    "retryAll": null,
+    "running": false,
+    "sources": [
+      {
+        "colour": "#4a6b52",
+        "count": 1,
+        "fromCache": false,
+        "message": "The server's search found nothing here, so Carrel sifted the address book itself",
+        "retry": null,
+        "stamp": "nextcloud · Контакты",
+        "state": "done"
+      },
+      {
+        "colour": "#a05a2c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Архив",
+        "state": "empty"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 1,
+        "fromCache": false,
+        "message": "The server's search found nothing here, so Carrel sifted the address book itself",
+        "retry": null,
+        "stamp": "radicale · vps · Команда",
+        "state": "done"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Дела",
+        "state": "empty"
+      },
+      {
+        "colour": "#3f6e8c",
+        "count": 1,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Работа",
+        "state": "done"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 1,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Записи",
+        "state": "done"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Дневник",
+        "state": "empty"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 1,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Личный",
+        "state": "done"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Проекты",
+        "state": "empty"
+      },
+      {
+        "colour": "#8c6239",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Дежурства",
+        "state": "empty"
+      },
+      {
+        "colour": "#9a9280",
+        "count": null,
+        "fromCache": false,
+        "message": "Stopped before it answered.",
+        "retry": {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
+          "id": "source.retry",
+          "label": "Retry",
+          "method": "POST",
+          "target": "poll"
+        },
+        "stamp": "baikal · Общий",
+        "state": "cancelled"
+      },
+      {
+        "colour": "#8c6239",
+        "count": null,
+        "fromCache": false,
+        "message": "Stopped before it answered.",
+        "retry": {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/search/progress/t-task/retry?source=f-ru-holidays%3Afeed",
+          "id": "source.retry",
+          "label": "Retry",
+          "method": "POST",
+          "target": "poll"
+        },
+        "stamp": "feeds.example · Праздники РФ",
+        "state": "cancelled"
+      },
+      {
+        "colour": "#9a9280",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Files",
+        "state": "empty"
+      },
+      {
+        "colour": "#a05a2c",
+        "count": null,
+        "fromCache": false,
+        "message": "Stopped before it answered.",
+        "retry": {
+          "csrf": "csrf",
+          "enabled": true,
+          "href": "/app/search/progress/t-task/retry?source=a-sftp-vps%3ADocuments",
+          "id": "source.retry",
+          "label": "Retry",
+          "method": "POST",
+          "target": "poll"
+        },
+        "stamp": "sftpgo · vps · Documents",
+        "state": "cancelled"
+      }
+    ],
+    "stream": "/app/search/progress/t-task",
+    "summary": [
+      {
+        "text": "Done · 11 of 14 sources answered · 3 stopped"
+      }
+    ],
+    "taskID": "t-task"
+  },
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "query": "ковал",
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": 7,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-con",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": 7,
+        "enabled": true,
+        "href": "/app/calendar",
+        "icon": "i-cal",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks",
+        "icon": "i-task",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes",
+        "icon": "i-note",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "icon": "i-file",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET"
+      },
+      {
+        "count": 1,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "icon": "i-dup",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [
+      {
+        "account": "Sources",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Контакты",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": 0,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Архив",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Команда",
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Личный",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Работа",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 0,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Проекты",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#8c6239",
+            "count": 0,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дежурства",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#9a9280",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Общий",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#8c6239",
+            "count": null,
+            "detail": "",
+            "feed": true,
+            "href": "",
+            "label": "Праздники РФ",
+            "on": false,
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 0,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дела",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 1,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Записи",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 0,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Дневник",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#9a9280",
+            "count": 0,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Files",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "detail": "",
+            "feed": false,
+            "href": "",
+            "label": "Documents",
+            "on": false,
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok",
+        "tally": "14 / 14"
+      }
+    ],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "results": [
+    {
+      "avatar": {
+        "colour": "#8c6239",
+        "href": "",
+        "initials": "АК"
+      },
+      "caption": "Издательство «Слово»",
+      "colour": "#4a6b52",
+      "detail": "a.kovaleva@example.org",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+      "kind": "contact",
+      "marked": [
+        {
+          "text": "Анна "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёва"
+        }
+      ],
+      "stamp": "nextcloud · Контакты",
+      "subtitle": "+7 912 445-10-88",
+      "title": "Анна Ковалёва",
+      "when": ""
+    },
+    {
+      "avatar": {
+        "colour": "#3f6e8c",
+        "href": "",
+        "initials": "ПК"
+      },
+      "colour": "#6b4e7a",
+      "detail": "p.kovalev@example.org",
+      "href": "/app/contacts/a-rad-vps/komanda/s1-kovalev",
+      "kind": "contact",
+      "marked": [
+        {
+          "text": "Пётр "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёв"
+        }
+      ],
+      "stamp": "radicale · vps · Команда",
+      "title": "Пётр Ковалёв",
+      "when": ""
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "15:00 · Zoom",
+      "href": "/app/calendar/a-nc-home/lichnyj/s1-zvonok",
+      "kind": "event",
+      "marked": [
+        {
+          "text": "Звонок с "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёвой"
+        }
+      ],
+      "stamp": "nextcloud · Личный",
+      "title": "Звонок с Ковалёвой",
+      "when": "10 Aug"
+    },
+    {
+      "avatar": null,
+      "colour": "#3f6e8c",
+      "detail": "",
+      "href": "/app/tasks/a-nc-home/rabota/s1-smeta",
+      "kind": "task",
+      "marked": [
+        {
+          "text": "Ответить "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёвой по смете"
+        }
+      ],
+      "progress": "40%",
+      "stamp": "nextcloud · Работа",
+      "title": "Ответить Ковалёвой по смете",
+      "when": "12 Aug"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Договорились заморозить ветку в среду; письмо пишет Анна…",
+      "href": "/app/notes/a-nc-home/zapisi/s1-tezisy",
+      "kind": "note",
+      "marked": [
+        {
+          "text": "Звонок с "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёвой — тезисы"
+        }
+      ],
+      "stamp": "nextcloud · Записи",
+      "title": "Звонок с Ковалёвой — тезисы",
+      "when": "10 Aug"
+    }
+  ],
+  "subtitle": "5 records",
+  "title": "ковал · Search",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": true,
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026again=1",
+        "icon": "i-refresh",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET"
+      },
+      "answered": "just now",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [
+        {
+          "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB",
+          "outcome": "5 found",
+          "query": "ковал",
+          "when": "just now"
+        },
+        {
+          "href": "/app/search?q=%D0%B4%D0%B0%D1%87%D0%B0",
+          "outcome": "nothing found",
+          "query": "дача",
+          "when": "just now"
+        }
+      ],
+      "jump": [
+        {
+          "colour": "#4a6b52",
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+          "kind": "contact",
+          "marked": [
+            {
+              "text": "Анна "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёва"
+            }
+          ],
+          "stamp": "nextcloud · Контакты",
+          "title": "Анна Ковалёва"
+        }
+      ],
+      "name": "q",
+      "query": "ковал",
+      "whole": [
+        {
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+          "marked": [
+            {
+              "text": "Анна "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёва"
+            }
+          ],
+          "name": "Анна Ковалёва"
+        }
+      ]
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

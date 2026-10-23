@@ -74,8 +74,13 @@ type SearchBox struct {
 	Action  string             `json:"action"`
 	Name    string             `json:"name"`    // имя поля запроса формы GET на Action: «q»
 	History []SearchHistoryRow `json:"history"` // C-6.6
-	Jump    []JumpRow          `json:"jump"`    // подсказки из памяти сеанса: ни одного запроса
-	Whole   *Action            `json:"whole"`   // «Timeline · имя»; nil — контакт не совпал
+	// Jump — подсказки из памяти сеанса, ни одного запроса: не больше
+	// восьми, по родам в порядке выдачи (записка 114); больше — через «Show
+	// all results»
+	Jump []JumpRow `json:"jump"`
+	// Whole — «Timeline · имя» на каждый контакт Jump (s-find-3); пусто —
+	// контакт не совпал
+	Whole []TimelineHint `json:"whole"`
 }
 
 type Rail struct {

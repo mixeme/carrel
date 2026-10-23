@@ -4,6 +4,34 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.6.9 — 2026-10-23
+
+Server `v0.2.365`, Typecase `ce9da05`.
+
+### Added
+
+- **The search's screen** (`screens/search`, SearchPage; s-find-1, -4 …
+  -10; Typecase's note 114): the query and what was found, the kinds as
+  segments; the bar of the pass in every state — Stop while it runs (its
+  form under it), the red «N failed» with its menu, how long it took; the
+  kinds in their order with their counts, each record in the look of its
+  kind (a contact's face, an event's day and «15:00 · Zoom», a task's sign
+  and due, a note's excerpt, a file's mark, size, time and access), the
+  match in bold; the words of an empty result; the page without a query —
+  «What to look for», Search, the recent searches. Built and held against
+  its frames; it is registered once Typecase's task 227 p. 1 says whether
+  a stopped pass has its segments (s-find-10 draws none).
+- `Screen.Poll`: a screen whose bar of the poll is not the lists' draws it
+  itself, and the zone `poll` is drawn so too.
+
+### Changed
+
+- A rail section's count apart (`RailSection.Tally`, «Sources 14 / 14»)
+  stands in its rubric, monospaced.
+- A query standing in the top's field has the cross that empties it.
+- The meaning guard knows a file's row found by the search (`SizeRow`: a
+  link); its own rule's example of a widget it lacks is `CardPick`.
+
 ## v0.6.8 — 2026-10-23
 
 Server `v0.2.364`, Typecase `ce9da05` (notes 114–116; the mockup copied).

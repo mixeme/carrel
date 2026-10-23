@@ -1,0 +1,324 @@
+{
+  "bar": {
+    "actions": [],
+    "columns": null,
+    "compact": null,
+    "drop": null,
+    "filter": "",
+    "filterForm": null,
+    "loaded": 0,
+    "range": null,
+    "segments": [],
+    "selected": 0,
+    "total": null
+  },
+  "details": null,
+  "empty": "No collections are ticked, so there is nothing to search. Tick collections in the rail of Contacts, Calendar, Tasks, Notes or Files.",
+  "look": {
+    "compact": false,
+    "panel": true,
+    "source": true,
+    "theme": "auto",
+    "wide": false
+  },
+  "note": [],
+  "notices": [],
+  "poll": {
+    "actions": [],
+    "answeredAt": "",
+    "aside": "",
+    "every": 0,
+    "note": "",
+    "percent": 0,
+    "poll": "",
+    "retryAll": null,
+    "running": false,
+    "sources": [],
+    "stream": "",
+    "summary": [],
+    "taskID": ""
+  },
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "query": "ковал",
+  "rail": {
+    "about": {
+      "build": "0.0.1 · 786949a",
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel",
+      "method": "GET"
+    },
+    "davloom": "davloom · running · 0 devices",
+    "foot": [],
+    "nav": [
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-con",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/calendar",
+        "icon": "i-cal",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/tasks",
+        "icon": "i-task",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/notes",
+        "icon": "i-note",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "icon": "i-file",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "icon": "i-dup",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [],
+    "shortcuts": [],
+    "tags": [],
+    "ticks": null
+  },
+  "results": [],
+  "subtitle": "0 collections ticked",
+  "title": "ковал · Search",
+  "top": {
+    "lock": null,
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET",
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-upload",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true,
+          "target": "sheet"
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true,
+      "target": "sheet"
+    },
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [
+        {
+          "href": "/app/search?q=%D0%B4%D0%BE%D0%B3%D0%BE%D0%B2%D0%BE%D1%80",
+          "outcome": "no source answered",
+          "query": "договор",
+          "when": "just now"
+        },
+        {
+          "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB",
+          "outcome": "5 found",
+          "query": "ковал",
+          "when": "just now"
+        },
+        {
+          "href": "/app/search?q=%D0%B4%D0%B0%D1%87%D0%B0",
+          "outcome": "nothing found",
+          "query": "дача",
+          "when": "just now"
+        }
+      ],
+      "jump": [
+        {
+          "colour": "#4a6b52",
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+          "kind": "contact",
+          "marked": [
+            {
+              "text": "Анна "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёва"
+            }
+          ],
+          "stamp": "nextcloud · Контакты",
+          "title": "Анна Ковалёва"
+        },
+        {
+          "colour": "#4a6b52",
+          "day": "10 Aug",
+          "href": "/app/calendar/a-nc-home/lichnyj/s1-zvonok",
+          "kind": "event",
+          "marked": [
+            {
+              "text": "Звонок с "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёвой"
+            }
+          ],
+          "stamp": "nextcloud · Личный",
+          "title": "Звонок с Ковалёвой"
+        }
+      ],
+      "name": "q",
+      "query": "ковал",
+      "whole": [
+        {
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+          "marked": [
+            {
+              "text": "Анна "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёва"
+            }
+          ],
+          "name": "Анна Ковалёва"
+        }
+      ]
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "local": true,
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "csrf": "csrf",
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ],
+    "userHref": "/app/settings/account"
+  }
+}

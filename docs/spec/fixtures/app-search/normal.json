@@ -6,12 +6,12 @@
     "drop": null,
     "filter": "",
     "filterForm": null,
-    "loaded": 1,
+    "loaded": 7,
     "range": null,
     "segments": [
       {
         "enabled": true,
-        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0",
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB",
         "id": "search.kind",
         "label": "All",
         "method": "GET",
@@ -19,42 +19,42 @@
       },
       {
         "enabled": true,
-        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026kind=contact",
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026kind=contact",
         "id": "search.kind",
         "label": "Contacts",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026kind=event",
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026kind=event",
         "id": "search.kind",
         "label": "Events",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026kind=task",
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026kind=task",
         "id": "search.kind",
         "label": "Tasks",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026kind=note",
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026kind=note",
         "id": "search.kind",
         "label": "Notes",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026kind=file",
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026kind=file",
         "id": "search.kind",
         "label": "Files",
         "method": "GET"
       }
     ],
     "selected": 0,
-    "total": 1
+    "total": 7
   },
   "details": null,
   "look": {
@@ -66,14 +66,7 @@
   },
   "note": [
     {
-      "text": "Files are searched by name: "
-    },
-    {
-      "mark": "mono",
-      "text": "PROPFIND"
-    },
-    {
-      "text": " returns names anyway, and walking a folder costs one request per folder. Carrel does not look inside files — and says so here, so that “nothing found” is not read as “not in the files”."
+      "text": "Files are found by their names; what is inside them is not searched."
     }
   ],
   "notices": [],
@@ -91,7 +84,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026again=1",
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026again=1",
         "id": "poll.again",
         "label": "Search again",
         "method": "GET"
@@ -111,7 +104,7 @@
         "colour": "#4a6b52",
         "count": 1,
         "fromCache": false,
-        "message": "",
+        "message": "The server's search found nothing here, so Carrel sifted the address book itself",
         "retry": null,
         "stamp": "nextcloud · Контакты",
         "state": "done"
@@ -127,12 +120,12 @@
       },
       {
         "colour": "#6b4e7a",
-        "count": 0,
+        "count": 1,
         "fromCache": false,
-        "message": "",
+        "message": "The server's search found nothing here, so Carrel sifted the address book itself",
         "retry": null,
         "stamp": "radicale · vps · Команда",
-        "state": "empty"
+        "state": "done"
       },
       {
         "colour": "#4a6b52",
@@ -145,21 +138,21 @@
       },
       {
         "colour": "#3f6e8c",
-        "count": 0,
+        "count": 1,
         "fromCache": false,
         "message": "",
         "retry": null,
         "stamp": "nextcloud · Работа",
-        "state": "empty"
+        "state": "done"
       },
       {
         "colour": "#4a6b52",
-        "count": 0,
+        "count": 1,
         "fromCache": false,
         "message": "",
         "retry": null,
         "stamp": "nextcloud · Записи",
-        "state": "empty"
+        "state": "done"
       },
       {
         "colour": "#6b4e7a",
@@ -172,12 +165,12 @@
       },
       {
         "colour": "#4a6b52",
-        "count": 0,
+        "count": 1,
         "fromCache": false,
         "message": "",
         "retry": null,
         "stamp": "nextcloud · Личный",
-        "state": "empty"
+        "state": "done"
       },
       {
         "colour": "#6b4e7a",
@@ -235,12 +228,12 @@
       },
       {
         "colour": "#a05a2c",
-        "count": 0,
+        "count": 2,
         "fromCache": false,
         "message": "",
         "retry": null,
         "stamp": "sftpgo · vps · Documents",
-        "state": "empty"
+        "state": "done"
       }
     ],
     "stream": "/app/search/progress/t-task",
@@ -256,7 +249,7 @@
     "taken": "",
     "title": ""
   },
-  "query": "Ковалёва",
+  "query": "ковал",
   "rail": {
     "about": {
       "build": "0.0.1 · 786949a",
@@ -357,7 +350,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 0,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "",
@@ -369,7 +362,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": 0,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "",
@@ -381,7 +374,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 0,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "",
@@ -453,7 +446,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": 0,
+            "count": 1,
             "detail": "",
             "feed": false,
             "href": "",
@@ -489,7 +482,7 @@
           },
           {
             "colour": "#a05a2c",
-            "count": 0,
+            "count": 2,
             "detail": "",
             "feed": false,
             "href": "",
@@ -526,17 +519,162 @@
         },
         {
           "mark": "strong",
-          "text": "Ковалёва"
+          "text": "Ковал"
+        },
+        {
+          "text": "ёва"
         }
       ],
       "stamp": "nextcloud · Контакты",
       "subtitle": "+7 912 445-10-88",
       "title": "Анна Ковалёва",
       "when": ""
+    },
+    {
+      "avatar": {
+        "colour": "#3f6e8c",
+        "href": "",
+        "initials": "ПК"
+      },
+      "colour": "#6b4e7a",
+      "detail": "p.kovalev@example.org",
+      "href": "/app/contacts/a-rad-vps/komanda/s1-kovalev",
+      "kind": "contact",
+      "marked": [
+        {
+          "text": "Пётр "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёв"
+        }
+      ],
+      "stamp": "radicale · vps · Команда",
+      "title": "Пётр Ковалёв",
+      "when": ""
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "15:00 · Zoom",
+      "href": "/app/calendar/a-nc-home/lichnyj/s1-zvonok",
+      "kind": "event",
+      "marked": [
+        {
+          "text": "Звонок с "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёвой"
+        }
+      ],
+      "stamp": "nextcloud · Личный",
+      "title": "Звонок с Ковалёвой",
+      "when": "10 Aug"
+    },
+    {
+      "avatar": null,
+      "colour": "#3f6e8c",
+      "detail": "",
+      "href": "/app/tasks/a-nc-home/rabota/s1-smeta",
+      "kind": "task",
+      "marked": [
+        {
+          "text": "Ответить "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёвой по смете"
+        }
+      ],
+      "progress": "40%",
+      "stamp": "nextcloud · Работа",
+      "title": "Ответить Ковалёвой по смете",
+      "when": "12 Aug"
+    },
+    {
+      "avatar": null,
+      "colour": "#4a6b52",
+      "detail": "Договорились заморозить ветку в среду; письмо пишет Анна…",
+      "href": "/app/notes/a-nc-home/zapisi/s1-tezisy",
+      "kind": "note",
+      "marked": [
+        {
+          "text": "Звонок с "
+        },
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёвой — тезисы"
+        }
+      ],
+      "stamp": "nextcloud · Записи",
+      "title": "Звонок с Ковалёвой — тезисы",
+      "when": "10 Aug"
+    },
+    {
+      "access": "rw",
+      "avatar": null,
+      "changed": "2026-08-04 11:20",
+      "colour": "#a05a2c",
+      "detail": "",
+      "href": "/app/files/a-sftp-vps/Documents/%D0%B4%D0%BE%D0%B3%D0%BE%D0%B2%D0%BE%D1%80-%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0.pdf",
+      "icon": "i-doc",
+      "kind": "file",
+      "marked": [
+        {
+          "text": "договор-"
+        },
+        {
+          "mark": "strong",
+          "text": "ковал"
+        },
+        {
+          "text": "ёва.pdf"
+        }
+      ],
+      "size": "240 KB",
+      "stamp": "sftpgo · vps · Documents",
+      "title": "договор-ковалёва.pdf",
+      "when": ""
+    },
+    {
+      "access": "rw",
+      "avatar": null,
+      "changed": "2026-07-21 16:02",
+      "colour": "#a05a2c",
+      "detail": "",
+      "href": "/app/files/a-sftp-vps/Documents/%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0%20%E2%80%94%20%D0%BF%D1%80%D0%B0%D0%B2%D0%BA%D0%B8%20%D0%BF%D0%BE%20%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B5.md",
+      "icon": "i-doc",
+      "kind": "file",
+      "marked": [
+        {
+          "mark": "strong",
+          "text": "Ковал"
+        },
+        {
+          "text": "ёва — правки по обложке.md"
+        }
+      ],
+      "size": "6 KB",
+      "stamp": "sftpgo · vps · Documents",
+      "title": "Ковалёва — правки по обложке.md",
+      "when": ""
     }
   ],
-  "subtitle": "14 of 14 collections · 1 record · 1 source refused",
-  "title": "Ковалёва · Search",
+  "subtitle": "7 records",
+  "title": "ковал · Search",
   "top": {
     "lock": null,
     "new": {
@@ -610,35 +748,67 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB\u0026again=1",
+        "icon": "i-refresh",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "just now",
       "running": false
     },
     "search": {
       "action": "/app/search",
       "history": [
         {
-          "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0",
-          "outcome": "1 found",
-          "query": "Ковалёва",
+          "href": "/app/search?q=%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB",
+          "outcome": "7 found",
+          "query": "ковал",
           "when": "just now"
         }
       ],
       "jump": [
         {
+          "colour": "#4a6b52",
           "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
           "kind": "contact",
+          "marked": [
+            {
+              "text": "Анна "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёва"
+            }
+          ],
           "stamp": "nextcloud · Контакты",
           "title": "Анна Ковалёва"
         }
       ],
       "name": "q",
-      "query": "Ковалёва",
-      "whole": null
+      "query": "ковал",
+      "whole": [
+        {
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+          "marked": [
+            {
+              "text": "Анна "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёва"
+            }
+          ],
+          "name": "Анна Ковалёва"
+        }
+      ]
     },
     "signed": {
       "instance": "carrel.example",

@@ -78,9 +78,12 @@ func Top(t view.TopBar, words TopWords) w.Top {
 	}
 	top := w.Top{Brand: words.Brand, Actions: actions}
 	if t.Search.Action != "" {
+		// A query standing in the field (the search's result, s-find-1)
+		// has the cross that empties it.
 		top.Search = &w.Search{
 			Query:  w.Query{Value: string(t.Search.Query), Placeholder: words.Search, Label: words.Search, Name: t.Search.Name},
 			Action: t.Search.Action,
+			Clear:  t.Search.Query != "",
 		}
 	}
 	return top
@@ -334,7 +337,8 @@ func LinkedBadge(b view.Badge, sources []view.Stamp) w.Badge {
 
 // Sources are the rail's sections of sources (Rail.Sections), each its
 // account as the rubric when it has one — the section of feeds read from
-// outside (Feeds) with the screen's badge External after it — and its
+// outside (Feeds) with the screen's badge External after it, its count
+// apart (Tally) — and its
 // sources' rows, and after them the tags (Rail.Tags) under the screen's
 // rubric, each the list filtered by it.
 func Sources(r view.Rail, words RailWords) []w.RailPart {
@@ -349,6 +353,10 @@ func Sources(r view.Rail, words RailWords) []w.RailPart {
 			rubric := w.Rubric{Text: string(sec.Account)}
 			if sec.Feeds && words.External != "" {
 				rubric.Items = []w.RubricPart{w.Badge{Label: words.External}}
+			}
+			// Its count apart, monospaced: «Sources 14 / 14» (s-find-1).
+			if sec.Tally != "" {
+				rubric.Items = append(rubric.Items, w.Mono{Text: string(sec.Tally), Variant: w.MonoTight})
 			}
 			items = append(items, rubric)
 		}

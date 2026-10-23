@@ -84,6 +84,11 @@ type Screen struct {
 	// over the page or in its dialog by what is open: the connections — in
 	// Connect account, over its fields (s-profile-24). nil — Notices.
 	NoticesOf func(model any) widget.MsgSpace
+	// Poll is the bar of the poll as the screen draws it, for a screen
+	// whose bar is not the lists' (bind.Runbar): the search's stands in
+	// every state of a pass, with Stop while it runs (s-find-1, -4); false —
+	// no bar. The zone poll is drawn so too. nil — bind.Runbar.
+	Poll func(model any) (widget.Runbar, bool)
 	// Waits are what of the screen waits for the library (U-5.5, the
 	// owner's decision of 01.10.2026): each a row of the list «ждёт
 	// библиотеку», and the row's mark stands at the line here and at the

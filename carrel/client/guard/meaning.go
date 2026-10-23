@@ -333,6 +333,9 @@ var contract = map[string]rule{
 	// A record found by an attach sheet, brief (s-mail-5): a link to the
 	// sheet with it chosen.
 	"BriefRow": needs("Href"),
+	// A file found by the search (s-find-1): its collection's mark where a
+	// folder's row has its tick, and a link to the file in its folder.
+	"SizeRow": needs("Href"),
 	// A node of a tree: a link (a neighbour of the rail, a folder that
 	// opens), or a radio of the form it stands in — where to put a thing
 	// (Typecase's task 116; the move sheet, s-contacts-2) —, whose Href, if

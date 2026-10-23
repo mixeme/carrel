@@ -183,6 +183,13 @@ func ShellZone(scr screens.Screen, model any, target string) (string, bool) {
 		if err != nil {
 			return "", false
 		}
+		// A screen's own bar (the search's), else the lists'.
+		if scr.Poll != nil {
+			if bar, ok := scr.Poll(model); ok {
+				return bar.Render() + forms(scr, model), true
+			}
+			return "", true
+		}
 		if bar := bind.Runbar(p.(*view.PollBar)); bar != nil {
 			return bar.Render() + forms(scr, model), true
 		}

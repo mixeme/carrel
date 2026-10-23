@@ -3,15 +3,26 @@ package view
 type SearchPage struct {
 	Shell
 	Query Text `json:"query"`
-	// Subtitle — под заголовком: что спрошено, сколько найдено, кто не
-	// ответил — «14 of 14 collections · 7 records · 1 source timed out»
-	// (s-find-1, Пк5); пусто без запроса
+	// Subtitle — под заголовком только найденное (записка Typecase 114,
+	// решение владельца 23.10.2026): «7 records» (s-find-1), «5 records so
+	// far» (идёт, s-find-4), «nothing found» (s-find-5), «14 collections
+	// ticked» (без запроса, s-find-6), «0 collections ticked» (ничего не
+	// отмечено, s-find-7), «not searched» (слишком много обходов, s-find-8),
+	// «nothing searched» (никто не ответил, s-find-9). Об источниках —
+	// полоса и рейл
 	Subtitle Text      `json:"subtitle"`
 	Bar      ListBar   `json:"bar"` // сегменты All / Contacts / Events / Tasks / Notes / Files
 	Poll     PollBar   `json:"poll"`
 	Results  []FindRow `json:"results"`
-	// Note — «содержимое файлов не ищется», кусками: PROPFIND моноширинно
-	// (s-find-1, Пк14); пусто, когда файлы не спрошены
+	// Empty — слова пустой выдачи, когда показывать нечего: «Nothing found
+	// for «дача» in 14 collections.» (s-find-5), «No collections are
+	// ticked, so there is nothing to search. …» (s-find-7), «No source
+	// answered, so nothing was searched.» (s-find-9); пусто — выдача есть,
+	// поиск идёт, запроса нет или обход не начат (s-find-8: сообщение)
+	Empty Text `json:"empty,omitempty"`
+	// Note — строка о файлах под выдачей: «Files are found by their names;
+	// what is inside them is not searched.» (s-find-1, -5); пусто, когда
+	// файлы не спрошены
 	Note Runs `json:"note"`
 }
 
@@ -25,8 +36,16 @@ type FindRow struct {
 	// без учёта регистра (s-find-1: «**Ковал**ёва Анна»; Пк13); пусто —
 	// найдено не по названию
 	Marked Runs `json:"marked,omitempty"`
+	// Detail и When по роду (s-find-1, записка 114): у события When — день
+	// «10 Aug», Detail — время и место «15:00 · Zoom» («all day · ‹место›»
+	// у события на весь день); у задачи When — срок «12 Aug»; у заметки
+	// Detail — выдержка, When — день; у контакта Detail — почта
 	Detail Text `json:"detail"`
 	When   Text `json:"when"`
+	// Done и Progress — у задачи: знак сделанного (не кнопка: отмечают в
+	// списке или карточке) и процент «40%»; у прочих пусто
+	Done     bool `json:"done,omitempty"`
+	Progress Text `json:"progress,omitempty"`
 	// Строка по роду (s-find-1, Пк12). Контакт: Avatar — инициалы и цвет,
 	// Subtitle — телефон (моноширинно), Detail — почта, Caption —
 	// организация. Файл: Icon — значок по типу, Size, Changed — изменён
@@ -57,7 +76,24 @@ type JumpRow struct {
 	Href  string `json:"href"`
 	Kind  Kind   `json:"kind"`
 	Title Text   `json:"title"`
-	Stamp Stamp  `json:"stamp"`
+	// Marked — Title кусками, набранное жирным (s-find-3); пусто — набранное
+	// не в названии
+	Marked Runs   `json:"marked,omitempty"`
+	Stamp  Stamp  `json:"stamp"`
+	Colour Colour `json:"colour"` // метка коллекции записи (s-find-3)
+	// Day — день события перед источником справа: «10 Aug» (s-find-3); у
+	// прочих пусто
+	Day Text `json:"day,omitempty"`
+}
+
+// TimelineHint — строка «Timeline · ‹имя›» подсказок поля поиска (s-find-3,
+// записка 114): своя на каждый контакт Jump to, в том же порядке, имя с
+// тем же жирным; ведёт на хронологию человека, которая спрашивает все
+// серверы
+type TimelineHint struct {
+	Href   string `json:"href"`
+	Name   Text   `json:"name"`
+	Marked Runs   `json:"marked,omitempty"`
 }
 
 type PollBar struct {

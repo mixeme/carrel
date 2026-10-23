@@ -1585,7 +1585,7 @@
           "jump": [],
           "name": "q",
           "query": "",
-          "whole": null
+          "whole": []
         },
         "signed": {
           "instance": "carrel.example",

@@ -25,6 +25,8 @@ type feedServer struct {
 	body    string
 	login   string
 	methods []string
+	down    bool          // answers 503 to everything (setDown)
+	held    chan struct{} // holds every request until closed (hold)
 }
 
 const holidays = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//feed//EN\r\nX-WR-CALNAME:Праздники\r\n" +
@@ -38,8 +40,19 @@ func newFeedServer(t *testing.T, body, login string) *feedServer {
 	f.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		f.mu.Lock()
 		f.methods = append(f.methods, r.Method)
-		body, login := f.body, f.login
+		body, login, down, held := f.body, f.login, f.down, f.held
 		f.mu.Unlock()
+		if held != nil {
+			select {
+			case <-held:
+			case <-r.Context().Done():
+				return
+			}
+		}
+		if down {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
 		if u, p, _ := r.BasicAuth(); login != "" && (u != login || p != "pw") {
 			w.Header().Set("WWW-Authenticate", `Basic realm="feed"`)
 			w.WriteHeader(http.StatusUnauthorized)
@@ -53,6 +66,26 @@ func newFeedServer(t *testing.T, body, login string) *feedServer {
 }
 
 func (f *feedServer) set(body string) { f.mu.Lock(); f.body = body; f.mu.Unlock() }
+
+// hold holds every request until release is called or the client gives
+// up, as a feed that does not answer.
+func (f *feedServer) hold() (release func()) {
+	ch := make(chan struct{})
+	f.mu.Lock()
+	f.held = ch
+	f.mu.Unlock()
+	return func() {
+		f.mu.Lock()
+		defer f.mu.Unlock()
+		if f.held == ch {
+			close(ch)
+			f.held = nil
+		}
+	}
+}
+
+// setDown makes the feed answer nothing but 503, or lifts it.
+func (f *feedServer) setDown(down bool) { f.mu.Lock(); f.down = down; f.mu.Unlock() }
 
 func (f *feedServer) writes() int {
 	f.mu.Lock()

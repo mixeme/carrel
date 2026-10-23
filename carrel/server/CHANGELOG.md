@@ -17,6 +17,57 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.365 — 2026-10-23
+
+The search after Typecase's note 114 (task 189; frames s-find-1 … -10).
+
+### Changed
+
+- **The subtitle says what was found** (the owner's decision of
+  23.10.2026): «7 records», «5 records so far» while it runs, «nothing
+  found», «nothing searched» when no source answered; without a query
+  «14 collections ticked», with nothing ticked «0 collections ticked», with
+  too many searches «not searched». Of the sources the bar and the rail
+  speak.
+- **`SearchPage.Empty`** — the words of a result with nothing to show:
+  «Nothing found for «дача» in 14 collections.», «No collections are
+  ticked, …» (no longer in the bar's summary), «No source answered, so
+  nothing was searched.».
+- **A result's row in the look of its kind** (note 114 pp. 1–3): an
+  event's `When` is its day «10 Aug», its `Detail` the time beside the
+  place «15:00 · Zoom» («all day · ‹place›»); a task carries `Done` (a
+  sign, not a button) and `Progress` «40%», no longer «Done» in `Detail`.
+- **The bar of a search that runs**: «Searching · 9 of 14 answered · 5
+  records» (was «Asking 14 sources · …»).
+- **Refresh in the top** (`Top.Refresh`): when the pass ended, a press
+  searching again (`again=1`); off with «The search is still running.»
+  while it runs. The bar keeps no door of its own.
+- **The line about files**: «Files are found by their names; what is
+  inside them is not searched.» — under a pass that ended with a storage
+  answering.
+- **The hints of the search box**: every jump row carries its
+  collection's `Colour`, the title `Marked` with what was typed in bold,
+  an event its `Day`; by kind in the order of the result, at most eight.
+  `SearchBox.Whole` is now `[]TimelineHint`: «Timeline · name» for every
+  contact among them.
+
+### Fixtures
+
+- `app-search` after the frames: «ковал» finds the seven records of
+  s-find-1 — those drawn only in the search's frames are put on the stands
+  for the search alone (`fixture_search_test.go`); new states `running`,
+  `stopped`, `nothing`, `noquery`, `noanswer`, `toomany`, `unticked`
+  (s-find-4 … -10). Every page's `top.search.whole` is `[]`.
+- `check.py` knows the states and skips the rail of a frame drawn without
+  the shell.
+
+### Tests
+
+- The search's tests read the new words; the test feed can be held and
+  taken down; the stand removes a file (`davtest.RemoveFile`). The states
+  of a pass that runs hold no more than three sources: a search asks four
+  at a time and its sources race for the places.
+
 ## v0.2.364 — 2026-10-23
 
 Fixtures after Typecase's note 115 (task 225).

@@ -217,7 +217,7 @@ func TestMeaningRules(t *testing.T) {
 		"a link without Href":        {login(named, submit, w.Link{Text: "Forgotten your password?"}), []string{"Links[0](Link): no Href"}},
 		"a field without Name":       {login(w.Input{}, submit), []string{"(Input): a field without Name"}},
 		"a cross without Href":       {w.Close{Label: "Close"}, []string{"Close: no Href"}},
-		"a control the guard lacks":  {w.List{Rows: []w.ListRow{w.SizeRow{}}}, []string{"(SizeRow): SizeRow carries meaning the guard's contract does not know"}},
+		"a control the guard lacks":  {w.CardPick{}, []string{"CardPick carries meaning the guard's contract does not know"}},
 		"rows that lead":             {w.List{Rows: []w.ListRow{w.FaceRow{Href: "/c"}, w.FindRow{Href: "/e"}, w.LinkedRow{Href: "/t"}, w.TimeRow{Href: "/v"}}}, nil},
 		"rows that lead nowhere":     {w.List{Rows: []w.ListRow{w.FaceRow{}, w.FindRow{}, w.LinkedRow{}, w.TimeRow{}}}, []string{"(FaceRow): no Href", "(FindRow): no Href", "(LinkedRow): no Href", "(TimeRow): no Href"}},
 		// A task's row (Typecase's task 95): its title leads to the record,
