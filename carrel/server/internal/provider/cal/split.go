@@ -26,6 +26,11 @@ type Stray struct {
 	UID       string
 	Summary   string
 	Reason    string
+	// Broken — a record of a kind Carrel keeps that could not be read: a
+	// time or a rule it cannot read, said with its line (s-io-7: «line 88:
+	// cannot read DUE «2026-13-01»»). The file's other records are read all
+	// the same.
+	Broken bool
 }
 
 // Chunk is one top-level component of a document, as it came: an export
@@ -36,10 +41,12 @@ type Chunk struct {
 	Body []byte
 }
 
-// chunk is one top-level component while the file is being read.
+// chunk is one top-level component while the file is being read; at is the
+// index of its first line in the file, for the line a refusal names.
 type chunk struct {
 	name  string
 	lines []string
+	at    int
 }
 
 // prop is the value of one of the component's own properties, raw.
@@ -70,7 +77,7 @@ func Split(doc []byte, now time.Time) ([]*model.Object, []Stray, error) {
 		}
 		found = true
 		end := matchingEnd(lines, i)
-		got, bad, err := splitCalendar(lines[i+1:end], now)
+		got, bad, err := splitCalendar(lines[i+1:end], i+1, now)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -95,7 +102,7 @@ func Components(doc []byte) []Chunk {
 			continue
 		}
 		end := matchingEnd(lines, i)
-		_, comps := partition(lines[i+1 : end])
+		_, comps := partition(lines[i+1:end], i+1)
 		for _, c := range comps {
 			out = append(out, Chunk{
 				Name: c.name, TZID: c.prop(ical.PropTimezoneID),
@@ -131,8 +138,8 @@ type group struct {
 
 // splitCalendar makes the records of one VCALENDAR body. Components of one
 // UID travel together, and the envelope of the file travels with each record.
-func splitCalendar(body []string, now time.Time) ([]*model.Object, []Stray, error) {
-	envelope, comps := partition(body)
+func splitCalendar(body []string, base int, now time.Time) ([]*model.Object, []Stray, error) {
+	envelope, comps := partition(body, base)
 	zones := map[string]chunk{}
 	groups := map[string]*group{}
 	var order []string
@@ -168,7 +175,7 @@ func splitCalendar(body []string, now time.Time) ([]*model.Object, []Stray, erro
 				g = &group{uid: uid}
 				groups[key], order = g, append(order, key)
 			}
-			g.master = &chunk{name: c.name, lines: c.lines}
+			g.master = &chunk{name: c.name, lines: c.lines, at: c.at}
 		default:
 			strays = append(strays, Stray{
 				Component: c.name, UID: c.prop(ical.PropUID), Summary: textOf(c.prop(ical.PropSummary)),
@@ -189,9 +196,25 @@ func splitCalendar(body []string, now time.Time) ([]*model.Object, []Stray, erro
 			}
 			continue
 		}
-		obj, err := g.object(envelope, zones, now)
+		// A record that cannot be read is refused alone, with the line that
+		// says why (Typecase's notes 111 p. 5, 113; s-io-7); the file's
+		// other records are read all the same.
+		err := checkTimes(*g.master)
+		for _, c := range g.overrides {
+			if err == nil {
+				err = checkTimes(c)
+			}
+		}
+		var obj *model.Object
+		if err == nil {
+			obj, err = g.object(envelope, zones, now)
+		}
 		if err != nil {
-			return nil, nil, err
+			strays = append(strays, Stray{
+				Component: g.master.name, UID: g.uid, Summary: textOf(g.master.prop(ical.PropSummary)),
+				Reason: err.Error(), Broken: true,
+			})
+			continue
 		}
 		objs = append(objs, obj)
 	}
@@ -270,7 +293,7 @@ func hasLineProp(lines []string, name string) bool {
 
 // partition cuts the top-level components out of a component body; what is
 // left are its own property lines.
-func partition(body []string) (props []string, comps []chunk) {
+func partition(body []string, base int) (props []string, comps []chunk) {
 	for i := 0; i < len(body); {
 		name, ok := beginName(body[i])
 		if !ok {
@@ -284,7 +307,7 @@ func partition(body []string) (props []string, comps []chunk) {
 		if stop > len(body) {
 			stop = len(body)
 		}
-		comps = append(comps, chunk{name: name, lines: body[i:stop]})
+		comps = append(comps, chunk{name: name, lines: body[i:stop], at: base + i})
 		i = stop
 	}
 	return props, comps

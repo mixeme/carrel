@@ -500,13 +500,13 @@
               }
             },
             {
-              "changed": "",
+              "changed": "10 August 2026, 17:04",
               "colour": "#4a6b52",
               "kinds": [
                 "note"
               ],
               "label": "Записи",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -564,7 +564,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": null,
+              "objects": 2,
               "path": "/alice/calendars/zapisi/",
               "pick": "a-nc-home|/alice/calendars/zapisi/",
               "readOnly": false,
@@ -579,13 +579,13 @@
               }
             },
             {
-              "changed": "",
+              "changed": "10 August 2026, 17:04",
               "colour": "#6b4e7a",
               "kinds": [
                 "note"
               ],
               "label": "Дневник",
-              "lastRead": "",
+              "lastRead": "just now",
               "menu": [
                 {
                   "enabled": true,
@@ -643,7 +643,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": null,
+              "objects": 1,
               "path": "/alice/calendars/dnevnik/",
               "pick": "a-nc-home|/alice/calendars/dnevnik/",
               "readOnly": false,

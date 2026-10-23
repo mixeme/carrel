@@ -17,6 +17,31 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.362 — 2026-10-23
+
+Package 3 of the import scan ([import-111](../../docs/plan/scans/import-111.md)):
+reading with line numbers.
+
+### Changed
+
+- **vCard 2.1 quoted-printable** is decoded — a value broken over lines
+  with «=» too; one that cannot be decoded refuses its card alone: «line 12:
+  cannot decode quoted-printable» (s-io-5). Every refusal of a card names
+  the line it begins on.
+- **A calendar record whose time or rule cannot be read** is refused alone,
+  its line said — «line 88: cannot read DUE «2026-13-01»», «line 418:
+  cannot read RRULE «FREQ=FORTNIGHTLY»» (s-io-7, -14); the file's other
+  records are read all the same (`cal.Stray.Broken`).
+
+### Fixtures
+
+- The import fixtures are the frames' states: a card named by its N, a
+  broken quoted-printable, a UID twice, a photo the server did not keep
+  (s-io-5, -9); an untitled day without an end, an event already here, a
+  rule that cannot be read (s-io-6, -14); a due date that cannot be read
+  (s-io-7); a zip of notes (s-io-8). `app-quick` stands over the notebook
+  as its poll answered.
+
 ## v0.2.361 — 2026-10-23
 
 Import by Typecase note 113 (task 222; Typecase `3779ac0`): the twelve

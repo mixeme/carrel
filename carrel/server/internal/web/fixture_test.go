@@ -924,6 +924,9 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	// A DAVx5 code is the picture of its link (s-plan-2), whose port is the
 	// stand's: the frames draw a code, any one.
 	s = regexp.MustCompile(`"qr":"data:image/png;base64,[A-Za-z0-9+/=]+"`).ReplaceAllString(s, `"qr":"data:image/png;base64,code"`)
+	// A UID Carrel gives a record is random (model.NewUID, 32 hex digits):
+	// the frames draw one, any one (s-io-9: «→ 9d04-77c1»).
+	s = regexp.MustCompile(`→ [0-9a-f]{32}\b`).ReplaceAllString(s, "→ 9d04-77c1")
 	// How long a feed took to read is the machine's (0 ms, 1 ms): the frames
 	// draw a number, any one.
 	s = regexp.MustCompile(`"took":"\d+ ms"`).ReplaceAllString(s, `"took":"0 ms"`)
@@ -2516,10 +2519,14 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 		waitPoll(t, app.h, app.sess, first.Poll.TaskID, nil)
 		app.compare(t, "app-contact-timeline/normal.json", app.h.do(get(anna+"/timeline", app.sess)))
 	})
+	// The quick note stands over the combined notebook as its poll answered
+	// it: a page under a sheet that polls afresh is caught waiting or
+	// asking, as the race goes.
+	notebook := combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 	for _, one := range []struct{ dir, route string }{
 		{"app-contact-new", book + "/new"},
 		{"app-contact-import", book + "/import"},
-		{"app-quick", "/app/notes/quick"},
+		{"app-quick", "/app/notes/quick?back=" + url.QueryEscape("/app/notes?task="+notebook.Poll.TaskID)},
 		// Generate profile over Set up a new device (s-plan-3).
 		{"app-settings-unlock", "/app/settings/unlock?for=profile&back=%2Fapp%2Fsettings%2Fdevices"},
 	} {
@@ -3939,10 +3946,23 @@ func TestFixtureImport(t *testing.T) {
 		book := app.listPath(t, "contacts", "kontakty")
 		const vcf = "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:7c1e-2b40-9a11\r\nFN:Ирина Соколова\r\nN:Соколова;Ирина;;;\r\nTEL;TYPE=cell:+7 921 300-11-22\r\nEND:VCARD\r\n" +
 			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:4f2b-9c31-a0e7\r\nFN:Анна Ковалева\r\nN:Ковалева;Анна;;;\r\nEND:VCARD\r\n" +
-			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:5d02-77aa-31c4\r\nN:;;;;\r\nEMAIL:press@example.org\r\nEND:VCARD\r\n"
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:5d02-77aa-31c4\r\nN:;;;;\r\nEMAIL:press@example.org\r\nEND:VCARD\r\n" +
+			// What s-io-5 and -9 draw besides: a card named by its N in vCard
+			// 2.1, one whose quoted-printable cannot be read, a UID the file
+			// holds twice, a photo the server does not keep.
+			"BEGIN:VCARD\r\nVERSION:2.1\r\nUID:8e20-5b1f-c7d4\r\nN;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:=D0=9B=D0=B5=D0=B1=D0=B5=D0=B4=D0=B5=D0=B2=D0=B0;=D0=92=D0=B5=D1=80=D0=B0;;;\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:2.1\r\nUID:3c90-aa41-0d2e\r\nNOTE;ENCODING=QUOTED-PRINTABLE:=ZZ=\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:2b7e-11aa\r\nFN:Вера Дорошенко\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:2b7e-11aa\r\nFN:Вера Дорошенко\r\nTEL:+7 900 000-00-00\r\nEND:VCARD\r\n" +
+			"BEGIN:VCARD\r\nVERSION:3.0\r\nUID:9f13-6be0-2a7c\r\nFN:Галина Мещерякова\r\nPHOTO;ENCODING=b;TYPE=JPEG:/9j/4AAQSkZJRgABAQ==\r\nEND:VCARD\r\n"
 		preview := app.h.do(importRequest(book+"/import", app.sess, false, "Разное (mix).vcf", []byte(vcf)))
 		app.compare(t, "app-contact-import/preview.json", preview)
-		app.compare(t, "app-contact-import/report.json", run(t, preview))
+		// nextcloud keeps no photo of an imported card this once (s-io-9:
+		// «Not kept by the server»).
+		app.servers["nextcloud"].Drop = []string{"PHOTO"}
+		report := run(t, preview)
+		app.servers["nextcloud"].Drop = nil
+		app.compare(t, "app-contact-import/report.json", report)
 		// A file whose first line is not BEGIN:VCARD: nothing read (s-io-18).
 		app.compare(t, "app-contact-import/refused.json", app.h.do(importRequest(book+"/import", app.sess, false, "Разное (mix).vcf",
 			[]byte("PRODID:-//Other client//EN\r\n"+vcf))))
@@ -3957,6 +3977,15 @@ func TestFixtureImport(t *testing.T) {
 			"BEGIN:VEVENT\r\nUID:e7a1-otpusk\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Отпуск\r\nDTSTART;VALUE=DATE:20260713\r\nDTEND;VALUE=DATE:20260728\r\nEND:VEVENT\r\n" +
 			"BEGIN:VEVENT\r\nUID:e7a1-ekb\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Созвон с Екатеринбургом\r\nDTSTART;TZID=Asia/Yekaterinburg:20260817T100000\r\nDTEND;TZID=Asia/Yekaterinburg:20260817T110000\r\nEND:VEVENT\r\n" +
 			"BEGIN:VTODO\r\nUID:e7a1-bilety\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Купить билеты\r\nEND:VTODO\r\n" +
+			"BEGIN:VEVENT\r\nUID:e7a1-bez-imeni\r\nDTSTAMP:20260801T000000Z\r\nDTSTART;VALUE=DATE:20260504\r\nEND:VEVENT\r\n" +
+			"END:VCALENDAR\r\n"
+		// The file of the report (s-io-14): an event made, one already here,
+		// one whose rule cannot be read, a task the calendar does not take.
+		const reported = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other client//EN\r\n" +
+			"BEGIN:VEVENT\r\nUID:e7a1-kazan\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Поездка в Казань\r\nDTSTART;VALUE=DATE:20260904\r\nDTEND;VALUE=DATE:20260907\r\nEND:VEVENT\r\n" +
+			"BEGIN:VEVENT\r\nUID:8f1c-4a02-b7d3\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Синк-ап по релизу\r\nDTSTART:20260810T110000Z\r\nDTEND:20260810T113000Z\r\nEND:VEVENT\r\n" +
+			"BEGIN:VEVENT\r\nUID:e7a1-dvuhned\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Разбор недели\r\nDTSTART:20260814T150000Z\r\nRRULE:FREQ=FORTNIGHTLY\r\nEND:VEVENT\r\n" +
+			"BEGIN:VTODO\r\nUID:e7a1-bilety\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Купить билеты\r\nEND:VTODO\r\n" +
 			"END:VCALENDAR\r\n"
 		// The first step of a calendar (s-io-15), the calendars read: the
 		// rail counts them.
@@ -3964,7 +3993,7 @@ func TestFixtureImport(t *testing.T) {
 		app.compare(t, "app-event-import/normal.json", app.h.do(get(cal+"/import", app.sess)))
 		preview := app.h.do(importRequest(cal+"/import", app.sess, false, "calendar.ics", []byte(ics)))
 		app.compare(t, "app-event-import/preview.json", preview)
-		app.compare(t, "app-event-import/report.json", run(t, preview))
+		app.compare(t, "app-event-import/report.json", run(t, app.h.do(importRequest(cal+"/import", app.sess, false, "Личный 2026.ics", []byte(reported)))))
 	})
 	t.Run("app-task-import", func(t *testing.T) {
 		tasks := app.listPath(t, "tasks", "dela")
@@ -3973,6 +4002,7 @@ func TestFixtureImport(t *testing.T) {
 			"BEGIN:VTODO\r\nUID:t9b2-kniga\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Дочитать книгу\r\nPERCENT-COMPLETE:40\r\nPRIORITY:5\r\nEND:VTODO\r\n" +
 			"BEGIN:VTODO\r\nUID:t9b2-pusto\r\nDTSTAMP:20260801T000000Z\r\nDUE;VALUE=DATE:20260828\r\nEND:VTODO\r\n" +
 			"BEGIN:VEVENT\r\nUID:t9b2-podryadchik\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Созвон с подрядчиком\r\nDTSTART;VALUE=DATE:20260817\r\nEND:VEVENT\r\n" +
+			"BEGIN:VTODO\r\nUID:t9b2-otchet\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Сдать отчёт\r\nDUE;VALUE=DATE:2026-13-01\r\nEND:VTODO\r\n" +
 			"END:VCALENDAR\r\n"
 		// The first step of a list of tasks (s-io-16), the lists read.
 		openList(t, app, "/app/tasks")
@@ -3984,8 +4014,17 @@ func TestFixtureImport(t *testing.T) {
 		openList(t, app, "/app/notes")
 		notes := app.listPath(t, "notes", "zapisi")
 		app.compare(t, "app-note-import/normal.json", app.h.do(get(notes+"/import", app.sess)))
-		const md = "---\r\ntitle: Встреча с подрядчиком\r\ndate: 2026-03-11\r\ncategories: работа\r\n---\r\n\r\nОбсудили смету и сроки.\r\n"
-		app.compare(t, "app-note-import/preview.json", app.h.do(importRequest(notes+"/import", app.sess, false, "2026-03-11-podryadchik.md", []byte(md))))
+		// A zip of notes, as s-io-8 draws it: front matter, a heading in a
+		// folder, a note already here by its UID, a file that is no
+		// Markdown, an empty one.
+		archive := zipOf(t,
+			"2026-03-11-podryadchik.md", "---\r\ntitle: Встреча с подрядчиком\r\ndate: 2026-03-11\r\ncategories: работа\r\n---\r\n\r\nОбсудили смету и сроки.\r\n",
+			"idei/crdt.md", "# Что почитать про CRDT\n\nСсылки.\n",
+			"doroga.md", "---\r\ntitle: Про дорогу до дачи\r\nuid: 5c81-77aa-0d64\r\n---\r\n\r\nПоворот после моста.\r\n",
+			"skan.pdf", "%PDF",
+			"pustoj.md", "",
+		)
+		app.compare(t, "app-note-import/preview.json", app.h.do(importRequest(notes+"/import", app.sess, false, "заметки-2026.zip", archive)))
 	})
 	// The address book chosen does not answer the preview (s-io-19): what is
 	// already there cannot be told, Import is off for it. Last: the server

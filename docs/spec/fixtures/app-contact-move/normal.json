@@ -1200,7 +1200,7 @@
             "method": "GET"
           },
           {
-            "count": null,
+            "count": 3,
             "enabled": true,
             "href": "/app/notes",
             "icon": "i-note",

@@ -5,7 +5,7 @@
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026op=run\u0026to=a-nc-home",
       "id": "import.run",
-      "label": "Import 2 contacts",
+      "label": "Import 6 contacts",
       "method": "POST",
       "primary": true
     },
@@ -20,8 +20,13 @@
   ],
   "counts": [
     {
-      "count": 2,
+      "count": 6,
       "label": "ready"
+    },
+    {
+      "count": 1,
+      "error": true,
+      "label": "with errors"
     },
     {
       "count": 1,
@@ -127,7 +132,7 @@
         "UID",
         "Result"
       ],
-      "count": 3,
+      "count": 8,
       "lines": [
         {
           "cells": [
@@ -155,6 +160,52 @@
             "Ready — no name"
           ],
           "result": "ready",
+          "untitled": true
+        },
+        {
+          "cells": [
+            "Разное (mix).vcf",
+            "Вера Лебедева",
+            "8e20-5b1f-c7d4",
+            "Ready — name from N"
+          ],
+          "result": "ready"
+        },
+        {
+          "cells": [
+            "Разное (mix).vcf",
+            "Вера Дорошенко",
+            "2b7e-11aa",
+            "Ready"
+          ],
+          "result": "ready"
+        },
+        {
+          "cells": [
+            "Разное (mix).vcf",
+            "Вера Дорошенко",
+            "2b7e-11aa",
+            "Ready"
+          ],
+          "result": "ready"
+        },
+        {
+          "cells": [
+            "Разное (mix).vcf",
+            "Галина Мещерякова",
+            "9f13-6be0-2a7c",
+            "Ready"
+          ],
+          "result": "ready"
+        },
+        {
+          "cells": [
+            "Разное (mix).vcf",
+            "—",
+            "",
+            "line 25: the card has no END:VCARD"
+          ],
+          "result": "failed",
           "untitled": true
         }
       ],
@@ -270,7 +321,7 @@
       "text": "Разное (mix).vcf"
     },
     {
-      "text": " · 364 B · vCard 3.0"
+      "text": " · 969 B · vCard 2.1 and 3.0"
     }
   ],
   "title": "Import contacts",

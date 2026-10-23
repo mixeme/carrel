@@ -5,7 +5,7 @@
       "enabled": true,
       "href": "/app/notes/a-nc-home/zapisi/import?into=zapisi\u0026op=run\u0026to=a-nc-home",
       "id": "import.run",
-      "label": "Import 1 note",
+      "label": "Import 2 notes",
       "method": "POST",
       "primary": true
     },
@@ -20,12 +20,52 @@
   ],
   "counts": [
     {
-      "count": 1,
+      "count": 2,
       "label": "ready"
+    },
+    {
+      "count": 1,
+      "error": true,
+      "label": "with errors"
+    },
+    {
+      "count": 1,
+      "label": "already here"
+    },
+    {
+      "count": 1,
+      "label": "skipped"
     }
   ],
   "details": null,
-  "existing": null,
+  "existing": {
+    "hint": "It stays as it is here; the file's version is not written.",
+    "note": "1 note of this file is already in Записи",
+    "options": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/import?existing=skip\u0026into=zapisi\u0026to=a-nc-home",
+        "id": "import.existing.skip",
+        "label": "Skip it",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/import?existing=replace\u0026into=zapisi\u0026to=a-nc-home",
+        "id": "import.existing.replace",
+        "label": "Replace it",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/import?existing=copy\u0026into=zapisi\u0026to=a-nc-home",
+        "id": "import.existing.copy",
+        "label": "Import as a copy",
+        "method": "GET"
+      }
+    ]
+  },
   "into": {
     "chosen": "/app/notes/a-nc-home/zapisi/import?into=zapisi\u0026to=a-nc-home",
     "new": {
@@ -86,7 +126,7 @@
         "Date",
         "Result"
       ],
-      "count": 1,
+      "count": 5,
       "lines": [
         {
           "cells": [
@@ -96,6 +136,44 @@
             "Ready — title, date and tags from front matter"
           ],
           "result": "ready"
+        },
+        {
+          "cells": [
+            "idei/crdt.md",
+            "Что почитать про CRDT",
+            "30 November 1979",
+            "Ready — no front matter: title from the first heading, date from the file"
+          ],
+          "result": "ready"
+        },
+        {
+          "cells": [
+            "doroga.md",
+            "Про дорогу до дачи",
+            "30 November 1979",
+            "Already here — skipped"
+          ],
+          "result": "skipped"
+        },
+        {
+          "cells": [
+            "skan.pdf",
+            "—",
+            "",
+            "Skipped: not Markdown"
+          ],
+          "result": "skipped",
+          "untitled": true
+        },
+        {
+          "cells": [
+            "pustoj.md",
+            "—",
+            "",
+            "Empty file: nothing to store and nothing to name it by"
+          ],
+          "result": "failed",
+          "untitled": true
         }
       ],
       "rubric": ""
@@ -289,10 +367,10 @@
   "subtitle": [
     {
       "mark": "mono",
-      "text": "2026-03-11-podryadchik.md"
+      "text": "заметки-2026.zip"
     },
     {
-      "text": " · 149 B · Markdown"
+      "text": " · 958 B · 5 files"
     }
   ],
   "title": "Import notes",

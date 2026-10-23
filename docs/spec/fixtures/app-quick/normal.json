@@ -322,7 +322,7 @@
             }
           ]
         },
-        "loaded": 0,
+        "loaded": 3,
         "range": null,
         "segments": [
           {
@@ -360,7 +360,274 @@
       },
       "details": null,
       "empty": null,
-      "groups": [],
+      "groups": [
+        {
+          "count": 3,
+          "rows": [
+            {
+              "badges": [],
+              "changed": "10 Aug 11:05",
+              "colour": "#4a6b52",
+              "date": "10 Aug",
+              "excerpt": "Договорились заморозить ветку в среду.",
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+              "menu": [
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+                  "icon": "i-note",
+                  "id": "record.open",
+                  "label": "Open",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
+                  "icon": "i-pencil",
+                  "id": "record.edit",
+                  "label": "Edit",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move",
+                  "icon": "i-move",
+                  "id": "record.move",
+                  "label": "Move",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move?copy=1",
+                  "icon": "i-dup",
+                  "id": "record.copy",
+                  "label": "Copy",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/export?uid=5c81-77aa-0d64",
+                  "icon": "i-export",
+                  "id": "record.export",
+                  "label": "Export .md",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
+                  "icon": "i-link",
+                  "id": "publish",
+                  "label": "Publish a link",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "csrf": "csrf",
+                  "danger": true,
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e18",
+                  "icon": "i-trash",
+                  "id": "record.delete",
+                  "label": "Delete note",
+                  "method": "POST",
+                  "separator": true,
+                  "target": "sheet"
+                }
+              ],
+              "on": false,
+              "sources": [],
+              "stamp": "nextcloud · Записи",
+              "state": "ok",
+              "tags": [
+                {
+                  "href": "/app/notes?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8\u0026task=t-task",
+                  "label": "встречи",
+                  "on": false
+                },
+                {
+                  "href": "/app/notes?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7\u0026task=t-task",
+                  "label": "релиз",
+                  "on": false
+                }
+              ],
+              "target": "details",
+              "title": "Заметка со встречи 10.08",
+              "uid": "5c81-77aa-0d64"
+            },
+            {
+              "badges": [],
+              "changed": "8 Aug 22:00",
+              "colour": "#4a6b52",
+              "date": "8 Aug",
+              "excerpt": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408",
+              "menu": [
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408",
+                  "icon": "i-note",
+                  "id": "record.open",
+                  "label": "Open",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/edit",
+                  "icon": "i-pencil",
+                  "id": "record.edit",
+                  "label": "Edit",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/move",
+                  "icon": "i-move",
+                  "id": "record.move",
+                  "label": "Move",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/move?copy=1",
+                  "icon": "i-dup",
+                  "id": "record.copy",
+                  "label": "Copy",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/export?uid=6d92-13ef-b408",
+                  "icon": "i-export",
+                  "id": "record.export",
+                  "label": "Export .md",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d92-13ef-b408",
+                  "icon": "i-link",
+                  "id": "publish",
+                  "label": "Publish a link",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "csrf": "csrf",
+                  "danger": true,
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/delete?etag=e19",
+                  "icon": "i-trash",
+                  "id": "record.delete",
+                  "label": "Delete note",
+                  "method": "POST",
+                  "separator": true,
+                  "target": "sheet"
+                }
+              ],
+              "on": false,
+              "sources": [],
+              "stamp": "nextcloud · Записи",
+              "state": "ok",
+              "tags": [
+                {
+                  "href": "/app/notes?tag=%D0%BA%D0%BD%D0%B8%D0%B3%D0%B8\u0026task=t-task",
+                  "label": "книги",
+                  "on": false
+                }
+              ],
+              "target": "details",
+              "title": "Что почитать про CRDT",
+              "uid": "6d92-13ef-b408"
+            },
+            {
+              "badges": [],
+              "changed": "3 Aug 19:00",
+              "colour": "#6b4e7a",
+              "date": "3 Aug",
+              "excerpt": "Съезд после заправки, потом грунтовка два километра — в дождь лучше в объезд через посёлок.",
+              "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19",
+              "menu": [
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19",
+                  "icon": "i-note",
+                  "id": "record.open",
+                  "label": "Open",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/edit",
+                  "icon": "i-pencil",
+                  "id": "record.edit",
+                  "label": "Edit",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/move",
+                  "icon": "i-move",
+                  "id": "record.move",
+                  "label": "Move",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/move?copy=1",
+                  "icon": "i-dup",
+                  "id": "record.copy",
+                  "label": "Copy",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/dnevnik/export?uid=7f03-5b26-cc19",
+                  "icon": "i-export",
+                  "id": "record.export",
+                  "label": "Export .md",
+                  "method": "GET"
+                },
+                {
+                  "enabled": true,
+                  "href": "/app/publish?a=a-nc-home\u0026c=dnevnik\u0026k=notes\u0026uid=7f03-5b26-cc19",
+                  "icon": "i-link",
+                  "id": "publish",
+                  "label": "Publish a link",
+                  "method": "GET",
+                  "target": "sheet"
+                },
+                {
+                  "csrf": "csrf",
+                  "danger": true,
+                  "enabled": true,
+                  "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/delete?etag=e20",
+                  "icon": "i-trash",
+                  "id": "record.delete",
+                  "label": "Delete note",
+                  "method": "POST",
+                  "separator": true,
+                  "target": "sheet"
+                }
+              ],
+              "on": false,
+              "sources": [],
+              "stamp": "nextcloud · Дневник",
+              "state": "ok",
+              "tags": [],
+              "target": "details",
+              "title": "Про дорогу до дачи",
+              "uid": "7f03-5b26-cc19"
+            }
+          ],
+          "rubric": "August 2026"
+        }
+      ],
       "look": {
         "compact": false,
         "panel": true,
@@ -373,60 +640,60 @@
         "actions": [
           {
             "csrf": "csrf",
-            "enabled": true,
+            "enabled": false,
             "href": "/app/search/progress/t-task/cancel",
             "id": "poll.stop",
             "label": "Stop",
             "method": "POST",
+            "reason": "The list has finished.",
             "target": "poll"
           },
           {
-            "enabled": false,
+            "enabled": true,
             "href": "/app/notes?again=1",
             "id": "poll.again",
             "label": "Refresh",
-            "method": "GET",
-            "reason": "The list is still running."
+            "method": "GET"
           }
         ],
-        "answeredAt": "",
-        "aside": "0.0 s",
+        "answeredAt": "10 August, 17:06",
+        "aside": "just now",
         "every": 700,
         "note": "",
-        "percent": 0,
+        "percent": 100,
         "poll": "/app/search/progress/t-task/poll",
         "retryAll": null,
-        "running": true,
+        "running": false,
         "sources": [
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 2,
             "fromCache": false,
             "message": "",
             "retry": null,
             "stamp": "nextcloud · Записи",
-            "state": "waiting"
+            "state": "done"
           },
           {
             "colour": "#6b4e7a",
-            "count": null,
+            "count": 1,
             "fromCache": false,
             "message": "",
             "retry": null,
             "stamp": "nextcloud · Дневник",
-            "state": "waiting"
+            "state": "done"
           }
         ],
         "stream": "/app/search/progress/t-task",
         "summary": [
           {
-            "text": "Polling 2 sources…"
+            "text": "Polled 2 of 2 sources · 3 notes"
           }
         ],
         "taskID": "t-task"
       },
       "print": {
-        "range": "2 notebooks",
+        "range": "2 notebooks · 3 notes",
         "taken": "10 August 2026, 17:06",
         "title": "Combined notebook"
       },
@@ -496,7 +763,7 @@
             "method": "GET"
           },
           {
-            "count": null,
+            "count": 3,
             "enabled": true,
             "href": "/app/notes",
             "icon": "i-note",
@@ -533,7 +800,7 @@
             "rows": [
               {
                 "colour": "",
-                "count": null,
+                "count": 3,
                 "detail": "",
                 "feed": false,
                 "href": "/app/notes",
@@ -552,7 +819,7 @@
             "rows": [
               {
                 "colour": "#4a6b52",
-                "count": null,
+                "count": 2,
                 "detail": "",
                 "feed": false,
                 "href": "/app/notes/a-nc-home/zapisi",
@@ -564,7 +831,7 @@
               },
               {
                 "colour": "#6b4e7a",
-                "count": null,
+                "count": 1,
                 "detail": "",
                 "feed": false,
                 "href": "/app/notes/a-nc-home/dnevnik",
@@ -591,7 +858,28 @@
           }
         ],
         "shortcuts": [],
-        "tags": [],
+        "tags": [
+          {
+            "href": "/app/notes?task=t-task",
+            "label": "all",
+            "on": true
+          },
+          {
+            "href": "/app/notes?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8\u0026task=t-task",
+            "label": "встречи",
+            "on": false
+          },
+          {
+            "href": "/app/notes?tag=%D0%BA%D0%BD%D0%B8%D0%B3%D0%B8\u0026task=t-task",
+            "label": "книги",
+            "on": false
+          },
+          {
+            "href": "/app/notes?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7\u0026task=t-task",
+            "label": "релиз",
+            "on": false
+          }
+        ],
         "ticks": {
           "action": "/app/sources/notes",
           "actions": [],
@@ -634,7 +922,7 @@
           "target": "rail"
         }
       },
-      "subtitle": "2 of 3 notebooks · VJOURNAL",
+      "subtitle": "2 of 3 notebooks · 3 notes · VJOURNAL",
       "title": "Combined notebook",
       "top": {
         "lock": null,
@@ -709,16 +997,15 @@
         },
         "refresh": {
           "action": {
-            "enabled": false,
+            "enabled": true,
             "href": "/app/notes?again=1",
             "icon": "i-refresh",
             "id": "poll.again",
             "label": "Refresh",
-            "method": "GET",
-            "reason": "The poll is still running."
+            "method": "GET"
           },
-          "answered": "",
-          "running": true
+          "answered": "just now",
+          "running": false
         },
         "search": {
           "action": "/app/search",

@@ -25,6 +25,11 @@
     },
     {
       "count": 1,
+      "error": true,
+      "label": "with errors"
+    },
+    {
+      "count": 1,
       "label": "skipped"
     }
   ],
@@ -81,7 +86,7 @@
         "Due",
         "Result"
       ],
-      "count": 4,
+      "count": 5,
       "lines": [
         {
           "cells": [
@@ -110,6 +115,15 @@
           ],
           "result": "ready",
           "untitled": true
+        },
+        {
+          "cells": [
+            "tasks.ics",
+            "Сдать отчёт",
+            "",
+            "line 32: cannot read DUE «2026-13-01»"
+          ],
+          "result": "failed"
         },
         {
           "cells": [
@@ -227,7 +241,7 @@
       "text": "tasks.ics"
     },
     {
-      "text": " · 597 B · iCalendar 2.0"
+      "text": " · 722 B · iCalendar 2.0"
     }
   ],
   "title": "Import tasks",

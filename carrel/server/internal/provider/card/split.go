@@ -34,14 +34,23 @@ func Split(doc []byte) ([]*model.Object, []Broken, error) {
 	for _, card := range cutCards(doc) {
 		lines := card.lines
 		if card.open {
-			broken = append(broken, Broken{Name: nameIn(lines), Reason: "the card has no END:VCARD"})
+			broken = append(broken, Broken{Name: nameIn(lines), Reason: fmt.Sprintf("line %d: the card has no END:VCARD", card.at[0])})
 			if first == nil {
 				first = fmt.Errorf("card: a card has no END:VCARD")
 			}
 			continue
 		}
-		c, err := vcard.NewDecoder(strings.NewReader(strings.Join(lines, "\r\n") + "\r\n")).Decode()
+		// vCard 2.1 writes values quoted-printable (s-io-5): decoded here; a
+		// value that cannot be refuses its card with its line.
+		lines, err := decodeQuoted(lines, card.at)
+		var c vcard.Card
+		if err == nil {
+			if c, err = vcard.NewDecoder(strings.NewReader(strings.Join(lines, "\r\n") + "\r\n")).Decode(); err != nil {
+				err = fmt.Errorf("line %d: %w", card.at[0], err)
+			}
+		}
 		if err != nil {
+			lines = card.lines
 			if first == nil {
 				first = err
 			}
@@ -67,10 +76,11 @@ func Split(doc []byte) ([]*model.Object, []Broken, error) {
 	return out, broken, nil
 }
 
-// cutCard is one card of a file as its lines stand, unfolded; open is a card
-// that was never closed.
+// cutCard is one card of a file as its lines stand, unfolded; at is the line
+// of the file each begins on; open is a card that was never closed.
 type cutCard struct {
 	lines []string
+	at    []int
 	open  bool
 }
 
@@ -79,24 +89,28 @@ type cutCard struct {
 // does not swallow the card after it, which is whole and is read.
 func cutCards(doc []byte) []cutCard {
 	var out []cutCard
-	var cur []string
+	var cur cutCard
 	inside := false
-	for _, l := range model.LogicalLines(doc) {
+	lines, at := numberedLines(doc)
+	for i, l := range lines {
 		switch up := strings.ToUpper(strings.TrimSpace(l)); {
 		case up == "BEGIN:VCARD":
 			if inside {
-				out = append(out, cutCard{lines: cur, open: true})
+				cur.open = true
+				out = append(out, cur)
 			}
-			cur, inside = []string{l}, true
+			cur, inside = cutCard{lines: []string{l}, at: []int{at[i]}}, true
 		case up == "END:VCARD" && inside:
-			out = append(out, cutCard{lines: append(cur, l)})
-			cur, inside = nil, false
+			cur.lines, cur.at = append(cur.lines, l), append(cur.at, at[i])
+			out = append(out, cur)
+			cur, inside = cutCard{}, false
 		case inside:
-			cur = append(cur, l)
+			cur.lines, cur.at = append(cur.lines, l), append(cur.at, at[i])
 		}
 	}
 	if inside {
-		out = append(out, cutCard{lines: cur, open: true})
+		cur.open = true
+		out = append(out, cur)
 	}
 	return out
 }

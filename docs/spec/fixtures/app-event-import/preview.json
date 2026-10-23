@@ -5,7 +5,7 @@
       "enabled": true,
       "href": "/app/calendar/a-nc-home/lichnyj/import?into=lichnyj\u0026op=run\u0026to=a-nc-home",
       "id": "import.run",
-      "label": "Import 3 events",
+      "label": "Import 4 events",
       "method": "POST",
       "primary": true
     },
@@ -20,7 +20,7 @@
   ],
   "counts": [
     {
-      "count": 3,
+      "count": 4,
       "label": "ready"
     },
     {
@@ -121,7 +121,7 @@
         "When",
         "Result"
       ],
-      "count": 4,
+      "count": 5,
       "lines": [
         {
           "cells": [
@@ -149,6 +149,16 @@
             "Ready — time zone kept as sent"
           ],
           "result": "ready"
+        },
+        {
+          "cells": [
+            "calendar.ics",
+            "Untitled event",
+            "4 May 2026",
+            "Ready — a whole day (no end), no title"
+          ],
+          "result": "ready",
+          "untitled": true
         },
         {
           "cells": [
@@ -278,7 +288,7 @@
       "text": "calendar.ics"
     },
     {
-      "text": " · 771 B · iCalendar 2.0"
+      "text": " · 872 B · iCalendar 2.0"
     }
   ],
   "title": "Import events",

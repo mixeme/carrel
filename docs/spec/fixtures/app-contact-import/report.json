@@ -111,7 +111,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 7,
+            "count": 11,
             "detail": "",
             "feed": false,
             "href": "/app/contacts/a-nc-home/kontakty",
@@ -142,17 +142,23 @@
     "ticks": null
   },
   "report": {
-    "created": 2,
-    "failed": 0,
-    "failures": [],
+    "created": 6,
+    "failed": 1,
+    "failures": [
+      "line 25: the card has no END:VCARD"
+    ],
     "here": 1,
     "heres": [
       "Анна Ковалева · 4f2b-9c31-a0e7"
     ],
-    "lost": 0,
-    "losts": [],
-    "newUIDs": [],
-    "renamed": 0,
+    "lost": 1,
+    "losts": [
+      "Галина Мещерякова · PHOTO"
+    ],
+    "newUIDs": [
+      "Вера Дорошенко · 2b7e-11aa → 9d04-77c1 · the file holds this UID twice"
+    ],
+    "renamed": 1,
     "renames": [],
     "replaced": 0,
     "replaces": [],

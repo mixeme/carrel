@@ -914,8 +914,11 @@ func (s *Server) readImport(c *collectionCtx, name string, body []byte) (*import
 		return nil, errRead{"This file holds no records."}
 	}
 	for _, stray := range strays {
+		// A record of this file that could not be read is counted «with
+		// errors», its line said (s-io-7); a component Carrel keeps no
+		// record of is skipped.
 		d.Skipped = append(d.Skipped, importSkip{
-			What: stray.Component, Title: stray.Summary, Reason: stray.Reason,
+			What: stray.Component, Title: stray.Summary, Reason: stray.Reason, Failed: stray.Broken,
 		})
 	}
 	for _, obj := range objs {
