@@ -64,6 +64,12 @@ const (
 // task 91); its icons it names itself.
 const ManifestPath = "/manifest.webmanifest"
 
+// SearchSuggestPath is the address of the search line's suggestions
+// (Typecase's note 118, its task 227): the document names it, and the live
+// layer asks it ?q=… as the line gets the focus and as something is typed;
+// the answer is SearchSuggest, a menu, not a page.
+const SearchSuggestPath = "/app/search/suggest"
+
 // ThemeColor is the colour the application opens on and the browser draws
 // around it: the background of the brand (--bg). The manifest names it, and
 // every page as its theme-color (U-11).

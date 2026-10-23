@@ -45,6 +45,7 @@ type Renderer struct {
 	base    string
 	json    render.JSONRenderer
 	screens map[reflect.Type]screens.Screen
+	answers map[reflect.Type]screens.Answer
 }
 
 var _ render.Renderer = (*Renderer)(nil)
@@ -53,11 +54,36 @@ var _ render.Renderer = (*Renderer)(nil)
 // CARREL_BASE_PATH normalised): the addresses of the library's files in a
 // page carry it (document.Assets).
 func New(base string) *Renderer {
-	r := &Renderer{base: base, screens: map[reflect.Type]screens.Screen{}}
+	r := &Renderer{base: base, screens: map[reflect.Type]screens.Screen{}, answers: map[reflect.Type]screens.Answer{}}
 	for _, scr := range screens.All {
 		r.screens[reflect.TypeOf(scr.Model()).Elem()] = scr
 	}
+	for _, a := range screens.Answers {
+		r.answers[reflect.TypeOf(a.Model()).Elem()] = a
+	}
 	return r
+}
+
+// answerOf is what body answers alone (screens.Answer), printed.
+func (r *Renderer) answerOf(body any) (string, bool) {
+	t := reflect.TypeOf(body)
+	if t == nil {
+		return "", false
+	}
+	v := reflect.ValueOf(body)
+	if t.Kind() == reflect.Pointer {
+		if v.IsNil() {
+			return "", false
+		}
+		t, v = t.Elem(), v.Elem()
+	}
+	a, ok := r.answers[t]
+	if !ok {
+		return "", false
+	}
+	p := reflect.New(t)
+	p.Elem().Set(v)
+	return a.Draw(p.Interface()).Render(), true
 }
 
 // screenOf is the screen of body's type and the model to draw it from — a
@@ -90,6 +116,9 @@ func (r *Renderer) screenOf(body any) (screens.Screen, any, bool) {
 // Page answers a page: the screen's document, or JSON while the model has no
 // screen.
 func (r *Renderer) Page(w http.ResponseWriter, req *http.Request, status int, body any) error {
+	if part, ok := r.answerOf(body); ok {
+		return writeHTML(w, status, part)
+	}
 	scr, model, ok := r.screenOf(body)
 	if !ok {
 		return r.json.Page(w, req, status, body)

@@ -6,8 +6,6 @@
 package search
 
 import (
-	"strconv"
-
 	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
@@ -171,14 +169,15 @@ func noQuery(p *view.SearchPage) []w.MainPart {
 
 // Bar is the bar of the pass on this page (runbar), and whether it stands:
 // the page's and the zone poll's.
-func Bar(p *view.SearchPage) (w.Runbar, bool) { return runbar(&p.Poll, len(p.Results) > 0) }
+func Bar(p *view.SearchPage) (w.Runbar, bool) { return runbar(&p.Poll) }
 
-// runbar is the bar of the pass: what it says — while it runs, Stop pushed
-// to its end; once it ended with refusals, the red «N failed» with its menu
-// and how long it took, and over a result the words that fold on a narrow
-// bar (s-find-1; with nothing found, s-find-9, they stand whole); else how
-// long, pushed. No bar before a pass (no query, nothing ticked, too many).
-func runbar(p *view.PollBar, found bool) (w.Runbar, bool) {
+// runbar is the bar of the pass, one rule in every state (Typecase's note
+// 118): what it says in two lengths — whole, and on a narrow bar «13 of
+// 14», «9 of 14 · 5 records» (Short) —; after them the red «N failed» with
+// its menu when a source refused; how long the pass took, pushed; while it
+// runs, Stop pushed instead. No bar before a pass (no query, nothing
+// ticked, too many).
+func runbar(p *view.PollBar) (w.Runbar, bool) {
 	if p.TaskID == "" {
 		return w.Runbar{}, false
 	}
@@ -186,46 +185,20 @@ func runbar(p *view.PollBar, found bool) (w.Runbar, bool) {
 	for _, r := range p.Summary {
 		said += string(r.Text)
 	}
-	bar := w.Runbar{Meter: w.Meter{Percent: p.Percent}}
+	bar := w.Runbar{Meter: w.Meter{Percent: p.Percent}, Parts: []w.RunbarPart{w.Say{Full: said, Short: string(p.Short)}}}
+	if p.Failed != "" && !p.Running {
+		bar.Meter.Alert = true
+		bar.Parts = append(bar.Parts, w.Text(sep), bind.Refusals(p))
+	}
 	switch {
 	case p.Running:
-		bar.Parts = []w.RunbarPart{w.Text(said)}
 		if stop, ok := stopAction(p); ok {
 			bar.Parts = append(bar.Parts, w.Push{Items: []w.PushPart{w.Button{Label: string(stop.Label), Small: true, Form: formStop}}})
 		}
-	case p.Failed != "":
-		bar.Meter.Alert = true
-		var words w.RunbarPart = w.Text(said)
-		if found {
-			words = w.Say{Full: said, Short: answered(p)}
-		}
-		bar.Parts = []w.RunbarPart{words, w.Text(sep), bind.Refusals(p)}
-		if p.Aside != "" {
-			// Pushed, unless the words fold beside it (s-find-1, -9).
-			mono := w.Mono{Text: string(p.Aside)}
-			if !found {
-				mono.Place = w.Pushed
-			}
-			bar.Parts = append(bar.Parts, mono)
-		}
-	default:
-		bar.Parts = []w.RunbarPart{w.Text(said)}
-		if p.Aside != "" {
-			bar.Parts = append(bar.Parts, w.Mono{Text: string(p.Aside), Place: w.Pushed})
-		}
+	case p.Aside != "":
+		bar.Parts = append(bar.Parts, w.Mono{Text: string(p.Aside), Place: w.Pushed})
 	}
 	return bar, true
-}
-
-// answered is the bar's words on a narrow bar: «13 of 14».
-func answered(p *view.PollBar) string {
-	n := 0
-	for _, s := range p.Sources {
-		if s.State == view.SourceDone || s.State == view.SourceEmpty {
-			n++
-		}
-	}
-	return strconv.Itoa(n) + " of " + strconv.Itoa(len(p.Sources))
 }
 
 // stopAction is Stop of a pass that runs.

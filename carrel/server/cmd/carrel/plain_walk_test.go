@@ -139,7 +139,6 @@ var notYetPages = []struct {
 	{regexp.MustCompile(`^/app/(contacts|calendar|tasks|notes)/[^/]+/[^/]+/new\?pick=1$`), "New of a combined view, the quick sheet: task 197 p. 5"},
 	{regexp.MustCompile(`^/app/(contacts|calendar|tasks|notes)/export$`), "the export of a combined view, no frame: task 197 p. 5"},
 	{regexp.MustCompile(`^/app/duplicates`), "duplicates: task 190"},
-	{regexp.MustCompile(`^/app/search\?`), "the search: the screen is built, registered after task 227 p. 1"},
 	{regexp.MustCompile(`^/p/`), "public pages: task 196"},
 }
 

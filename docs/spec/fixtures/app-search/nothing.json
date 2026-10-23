@@ -99,6 +99,7 @@
     "poll": "/app/search/progress/t-task/poll",
     "retryAll": null,
     "running": false,
+    "short": "14 of 14",
     "sources": [
       {
         "colour": "#4a6b52",

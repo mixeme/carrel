@@ -67,10 +67,28 @@ type FindRow struct {
 }
 
 type SearchHistoryRow struct {
-	Query   Text   `json:"query"`
+	Query Text `json:"query"`
+	// Marked — Query кусками в подсказках при наборе: набранное жирным
+	// (s-find-3); пусто — ничего не набрано
+	Marked  Runs   `json:"marked,omitempty"`
 	Outcome Text   `json:"outcome"` // «12 found» или «nothing found»
 	When    When   `json:"when"`
 	Href    string `json:"href"`
+}
+
+// SearchSuggest — подсказки строки поиска (записка Typecase 118, задача
+// 227): ответ на render.SearchSuggestPath?q=…, меню, а не страница. Пустой
+// Query (фокус в пустой строке, s-find-2) — недавние запросы; набранный
+// (s-find-3) — Jump to из памяти сеанса (не больше восьми), «Timeline ·
+// имя» на каждый контакт Jump to и только те недавние, где есть набранное
+type SearchSuggest struct {
+	Query Text `json:"query"`
+	// All — куда ведёт Enter: «Show all results for «…»» — выдача по
+	// набранному; ничего не набрано — страница поиска без запроса (s-find-6)
+	All     string             `json:"all,omitempty"`
+	History []SearchHistoryRow `json:"history"`
+	Jump    []JumpRow          `json:"jump"`
+	Whole   []TimelineHint     `json:"whole"`
 }
 type JumpRow struct {
 	Href  string `json:"href"`
@@ -103,11 +121,15 @@ type PollBar struct {
 	// CARREL_PROGRESS_MODE=poll), запасной опрос (фрагмент poll) и его
 	// интервал в миллисекундах (CARREL_PROGRESS_POLL_MILLIS); у полосы без
 	// задачи пусты
-	Stream     string `json:"stream"`
-	Poll       string `json:"poll"`
-	Every      int    `json:"every"`
-	Summary    Runs   `json:"summary"`    // «Polled 5 of 7 · 12 records · 1 refused» кусками (s-contacts-7)
-	AnsweredAt When   `json:"answeredAt"` // когда собрана показанная выдача
+	Stream  string `json:"stream"`
+	Poll    string `json:"poll"`
+	Every   int    `json:"every"`
+	Summary Runs   `json:"summary"` // «Polled 5 of 7 · 12 records · 1 refused» кусками (s-contacts-7)
+	// Short — Summary на узкой полосе выдачи поиска (записка Typecase 118):
+	// «13 of 14», «9 of 14 · 5 records» (идёт), «0 of 14», «9 of 14 · 5
+	// stopped»; у прочих полос пусто
+	Short      Text `json:"short,omitempty"`
+	AnsweredAt When `json:"answeredAt"` // когда собрана показанная выдача
 	// Aside — справа на полосе моноширинно: когда собрана выдача, «2 min ago»,
 	// и «from cache · » перед этим, когда источник ответил тем, что сеанс
 	// уже держал (s-agenda-1); пока опрос идёт — сколько он длится, «0.8 s»,

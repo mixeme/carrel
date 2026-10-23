@@ -52,6 +52,7 @@ var Models = map[string]func() any{
 	"app-contacts":                        func() any { return &view.ContactsListPage{} },
 	"app-contacts-one":                    func() any { return &view.ContactsListPage{} },
 	"app-contacts-suggest":                func() any { return &view.SuggestList{} },
+	"app-search-suggest":                  func() any { return &view.SearchSuggest{} },
 	"app-duplicates":                      func() any { return &view.DuplicatesPage{} },
 	"app-duplicates-merge":                func() any { return &view.DuplicatesMergePage{} },
 	"app-duplicates-merge-event":          func() any { return &view.DuplicatesMergePage{} },

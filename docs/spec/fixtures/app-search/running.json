@@ -94,6 +94,7 @@
     "poll": "/app/search/progress/t-task/poll",
     "retryAll": null,
     "running": true,
+    "short": "11 of 14 · 5 records",
     "sources": [
       {
         "colour": "#4a6b52",
@@ -731,6 +732,118 @@
           ],
           "stamp": "nextcloud · Контакты",
           "title": "Анна Ковалёва"
+        },
+        {
+          "colour": "#6b4e7a",
+          "href": "/app/contacts/a-rad-vps/komanda/s1-kovalev",
+          "kind": "contact",
+          "marked": [
+            {
+              "text": "Пётр "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёв"
+            }
+          ],
+          "stamp": "radicale · vps · Команда",
+          "title": "Пётр Ковалёв"
+        },
+        {
+          "colour": "#4a6b52",
+          "day": "10 Aug",
+          "href": "/app/calendar/a-nc-home/lichnyj/s1-zvonok",
+          "kind": "event",
+          "marked": [
+            {
+              "text": "Звонок с "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёвой"
+            }
+          ],
+          "stamp": "nextcloud · Личный",
+          "title": "Звонок с Ковалёвой"
+        },
+        {
+          "colour": "#3f6e8c",
+          "href": "/app/tasks/a-nc-home/rabota/s1-smeta",
+          "kind": "task",
+          "marked": [
+            {
+              "text": "Ответить "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёвой по смете"
+            }
+          ],
+          "stamp": "nextcloud · Работа",
+          "title": "Ответить Ковалёвой по смете"
+        },
+        {
+          "colour": "#4a6b52",
+          "href": "/app/notes/a-nc-home/zapisi/s1-tezisy",
+          "kind": "note",
+          "marked": [
+            {
+              "text": "Звонок с "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёвой — тезисы"
+            }
+          ],
+          "stamp": "nextcloud · Записи",
+          "title": "Звонок с Ковалёвой — тезисы"
+        },
+        {
+          "colour": "#a05a2c",
+          "href": "/app/files/a-sftp-vps/Documents/%D0%B4%D0%BE%D0%B3%D0%BE%D0%B2%D0%BE%D1%80-%D0%BA%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0.pdf",
+          "kind": "file",
+          "marked": [
+            {
+              "text": "договор-"
+            },
+            {
+              "mark": "strong",
+              "text": "ковал"
+            },
+            {
+              "text": "ёва.pdf"
+            }
+          ],
+          "stamp": "sftpgo · vps · Documents",
+          "title": "договор-ковалёва.pdf"
+        },
+        {
+          "colour": "#a05a2c",
+          "href": "/app/files/a-sftp-vps/Documents/%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0%20%E2%80%94%20%D0%BF%D1%80%D0%B0%D0%B2%D0%BA%D0%B8%20%D0%BF%D0%BE%20%D0%BE%D0%B1%D0%BB%D0%BE%D0%B6%D0%BA%D0%B5.md",
+          "kind": "file",
+          "marked": [
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёва — правки по обложке.md"
+            }
+          ],
+          "stamp": "sftpgo · vps · Documents",
+          "title": "Ковалёва — правки по обложке.md"
         }
       ],
       "name": "q",
@@ -751,6 +864,22 @@
             }
           ],
           "name": "Анна Ковалёва"
+        },
+        {
+          "href": "/app/contacts/a-rad-vps/komanda/s1-kovalev/timeline",
+          "marked": [
+            {
+              "text": "Пётр "
+            },
+            {
+              "mark": "strong",
+              "text": "Ковал"
+            },
+            {
+              "text": "ёв"
+            }
+          ],
+          "name": "Пётр Ковалёв"
         }
       ]
     },

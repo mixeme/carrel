@@ -2717,6 +2717,13 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 		app.servers["baikal"].Refuse("REPORT", 401, "")
 		combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 		app.compare(t, "app-search/noanswer.json", app.h.do(get(at("договор"), app.sess)))
+		// The line's suggestions (note 118), four searches made (s-find-2):
+		// with nothing typed the recent searches; «ковал» typed — what the
+		// session holds that has it, its searches' finds among it, and the
+		// recent searches that have it (s-find-3).
+		search("смета ковалёвой", nil)
+		app.compare(t, "app-search-suggest/normal.json", app.h.do(get("/app/search/suggest?q=", app.sess)))
+		app.compare(t, "app-search-suggest/typed.json", app.h.do(get("/app/search/suggest?q="+url.QueryEscape("ковал"), app.sess)))
 		// The session already runs as many searches and lists as it may
 		// (s-find-8).
 		slots := 0

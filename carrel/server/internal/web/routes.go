@@ -35,6 +35,7 @@ func (s *Server) registerRoutes() {
 	// C-5.3
 	s.handle("GET /app/", (*Server).getAppRoot)
 	s.handle("GET /app/search", (*Server).getSearch)
+	s.handle("GET /app/search/suggest", (*Server).getSearchSuggest)
 	s.handle("GET /app/search/progress/{task}", (*Server).getSearchProgressSSE)
 	s.handle("GET /app/search/progress/{task}/poll", (*Server).getSearchProgressPoll)
 	s.handle("POST /app/search/progress/{task}/retry", (*Server).postSearchProgressRetry)

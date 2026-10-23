@@ -134,6 +134,43 @@ func (s *Server) searchRefresh(tf timeFmt, q string, snap fanout.Snapshot) view.
 	return view.Refresh{Action: refresh, Answered: tf.formatWhen(snap.Finished, true, s.now())}
 }
 
+// getSearchSuggest is the search line's suggestions (Typecase's note 118,
+// its task 227; s-find-2, -3): asked by the live layer as the line gets the
+// focus and as something is typed, never by a page. Nothing typed — the
+// recent searches; something — what the session holds that has it (Jump
+// to, at most eight), the timeline of every person among them, and the
+// recent searches that have it, the typed part bold. No server is asked.
+func (s *Server) getSearchSuggest(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	// Enter goes to the result; with nothing typed, to the page of the
+	// search without a query (s-find-6).
+	out := view.SearchSuggest{Query: text(q), All: s.route("/app/search"), History: []view.SearchHistoryRow{}, Jump: []view.JumpRow{}, Whole: []view.TimelineHint{}}
+	tf, now := s.timeFor(sess), s.now()
+	for _, e := range sess.History() {
+		if q != "" && !strings.Contains(strings.ToLower(e.Query), strings.ToLower(q)) {
+			continue
+		}
+		out.History = append(out.History, view.SearchHistoryRow{
+			Query:   text(e.Query),
+			Marked:  markedTitle(e.Query, q),
+			Outcome: text(historyOutcome(e)),
+			When:    tf.historyWhen(e.At, now),
+			Href:    s.route(searchHref(e.Query)),
+		})
+	}
+	if q != "" {
+		out.All = s.route(searchHref(q))
+		if jump, whole := s.jumpRows(sess, s.catalogOf(sess), q); len(jump) > 0 {
+			out.Jump, out.Whole = jump, whole
+		}
+	}
+	s.writePage(w, r, http.StatusOK, out)
+}
+
 // keptSearch is the newest task of this session with the same query: the
 // result opens from memory and no server is asked (S-15.3).
 func keptSearch(sess *session.Session, q string) *fanout.Task {
@@ -585,6 +622,7 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 		// A search still running (s-find-4): «Searching · 9 of 14 answered
 		// · 5 records».
 		bar.Summary = line(fmt.Sprintf("Searching · %d of %d answered · %s", answered, total, owner.found(owner.count(snap))))
+		bar.Short = text(fmt.Sprintf("%d of %d · %s", answered, total, owner.found(owner.count(snap))))
 	default:
 		// The search done (s-find-1): «Done · 13 of 14 sources answered»;
 		// what did not answer is the red «N failed», whose menu names each
@@ -594,6 +632,8 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 		// (Пк10).
 		parts := []string{fmt.Sprintf("Done · %d of %s answered", answered, plural(total, "source"))}
 		bar.Summary = line(strings.Join(append(parts, pollTroubles(0, 0, 0, stopped)...), " · "))
+		// The narrow bar (note 118): «13 of 14», «9 of 14 · 5 stopped».
+		bar.Short = text(strings.Join(append([]string{fmt.Sprintf("%d of %d", answered, total)}, pollTroubles(0, 0, 0, stopped)...), " · "))
 		if failed > 0 {
 			bar.Failed = text(fmt.Sprintf("%d failed", failed))
 		}
@@ -758,6 +798,31 @@ func (s *Server) jumpRows(sess *session.Session, blob sealed.Blob, q string) ([]
 			}
 			if e.Kind == view.KindEvent && e.At != 0 {
 				row.Day = text(tf.shortDay(time.Unix(e.At, 0)))
+			}
+			out = append(out, row)
+		}
+	}
+	// And what the session's searches found (note 118: «Jump to» from what
+	// the session holds) — a file too, which no list keeps an index of.
+	seen := map[string]bool{}
+	for _, r := range out {
+		seen[r.Href] = true
+	}
+	for _, task := range sess.Tasks() {
+		ft, ok := task.(*fanout.Task)
+		if !ok || ft.Query().Text == "" {
+			continue
+		}
+		for _, it := range ft.Snapshot().Items {
+			found := s.findRow(tf, blob, it)
+			if seen[found.Href] || !strings.Contains(strings.ToLower(string(found.Title)), needle) {
+				continue
+			}
+			seen[found.Href] = true
+			row := view.JumpRow{Href: found.Href, Kind: found.Kind, Title: found.Title, Marked: markedTitle(string(found.Title), q),
+				Stamp: found.Stamp, Colour: found.Colour}
+			if found.Kind == view.KindEvent {
+				row.Day = found.When
 			}
 			out = append(out, row)
 		}

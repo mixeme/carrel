@@ -370,6 +370,7 @@ spec/fixtures/<screen>/<state>.json
 |---|---|---|---|---|
 | `/app/` | GET | вход | редирект | — |
 | `/app/search` | GET | вход | страница | `SearchPage`; `?q=` — запрос (форма верхней панели, `SearchBox.Name`; пустой — страница без обхода); `?kind=` — сегмент по роду (`contact`, `event`, `task`, `note`, `file`; без него — All); `?filter=` — по уже пришедшему, серверы не спрашиваются; `?again=1` — «Search again»: тот же запрос заново, мимо прочитанного сеансом (S-15.3) |
+| `/app/search/suggest` | GET | вход | меню | `SearchSuggest` — подсказки строки поиска (записка Typecase 118): `?q=` — набранное; спрашивает живой слой, страница адрес называет (`render.SearchSuggestPath`, `page.Document.Suggest`); ответ — меню, не страница; без сценариев его нет: Enter ведёт на выдачу |
 | `/app/search/progress/{task}` | GET | вход | SSE | `PollBar` — поток хода (C-7.4): `poll`, в конце `poll-finished` с рейлом; адрес — `PollBar.Stream`, с запросом страницы полосы |
 | `/app/search/progress/{task}/poll` | GET | вход | фрагмент | `PollBar` — запасной опрос: адрес — `PollBar.Poll`, раз в `PollBar.Every` мс; законченный — с рейлом страницы внеполосно |
 | `/app/search/progress/{task}/retry` | POST | вход | фрагмент | `PollBar` — `?source=` — повтор одного источника (`SourceProgress.Retry`); без него — каждого не ответившего («Retry all», `PollBar.RetryAll`, states-16) |
@@ -1769,9 +1770,20 @@ type FindRow struct {
 
 type SearchHistoryRow struct {
     Query   Text
+    Marked  Runs // Query кусками в подсказках при наборе: набранное жирным (s-find-3)
     Outcome Text // «12 found» или «nothing found»
     When    When
     Href    string
+}
+// SearchSuggest — подсказки строки поиска (s-find-2, -3): пустой Query —
+// недавние запросы; набранный — Jump to (не больше восьми), «Timeline ·
+// имя» на каждый контакт Jump to, недавние с набранным
+type SearchSuggest struct {
+    Query   Text
+    All     string // куда ведёт Enter: выдача по набранному («Show all results for «…»»); без набранного — страница поиска без запроса (s-find-6)
+    History []SearchHistoryRow
+    Jump    []JumpRow
+    Whole   []TimelineHint
 }
 type JumpRow struct {
     Href   string
@@ -1794,6 +1806,7 @@ type PollBar struct {
     Stream      string
     Poll        string
     Every       int
+    Short       Text // Summary на узкой полосе выдачи поиска: «13 of 14», «9 of 14 · 5 records», «9 of 14 · 5 stopped» (записка 118); у прочих пусто
     Summary     Runs // кусками: над списком и хронологией — «Polled 5 of 6 sources · 14 events», у хронологии адреса моноширинно (s-agenda-1, s-contacts-7); не ответивших не называет — это Failed, остановленные — «1 stopped»; у поиска законченного — «Done · 13 of 14 sources answered» (s-find-1), отказы — Failed
     AnsweredAt  When // когда собрана показанная выдача; у поиска сегодня — одни часы, «11:42» (s-find-1)
     Aside       Text // справа на полосе моноширинно, когда опрос кончен: «2 min ago», с «from cache · » перед ним, когда источник ответил тем, что сеанс уже держал (s-agenda-1); пока опрос идёт — сколько он длится, «0.8 s», за минутой «1 min 20 s», у всех разделов (решение владельца 07.10.2026; states-3, -8, -13, -19, -26); у законченного поиска — сколько шёл обход, «1.8 s» (s-find-1)

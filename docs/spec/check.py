@@ -134,7 +134,7 @@ states = {"normal","empty","readonly","source-error","partial","long","conflict"
           "addressbook","note","image","text","download",
           "unknown","deleted","write-refused","moving","broken","exercised","android","thunderbird","other","jobs","job","recovered","off","davloom","match","locked","found","shown","unset","file","too-large","server","history","file-match","filled",
           "calendar","event","link-never","gone","note-files-kept","contact","unanswered","account","none","storage","delete-refused","move-kept",
-          "running","stopped","nothing","noquery","noanswer","toomany","unticked","print"}
+          "running","stopped","nothing","noquery","noanswer","toomany","unticked","print","typed"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -165,6 +165,10 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     # Подсказки поля участников — фрагмент, своего кадра маршрута нет: кадр
     # состояния — s-agenda-12 (STATE_FRAME), рейла у него нет.
     "app-contacts-suggest": "/app/contacts/suggest",
+    # Подсказки строки поиска — меню, своего кадра маршрута нет: кадры
+    # состояний s-find-2 (пустая строка) и s-find-3 (набрано) рисуют его над
+    # страницей раздела; рейл кадра — той страницы, у меню его нет (SHEETS).
+    "app-search-suggest": "/app/search/suggest",
     # Общий кадр называет только общий адрес (Typecase 80d1319, задачи 97,
     # 108): s-agenda-1 — /app/calendar, s-tasks-1 — /app/tasks, s-notes-1 —
     # /app/notes; адрес коллекции — у кадров одной коллекции s-agenda-17,
@@ -292,7 +296,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # Листы (C-5, ответ «лист») своего рейла не несут: они рисуются
 # поверх экрана, и рейл в кадре — того экрана, что под ними. Сравнивать
 # тут нечего, и молчание здесь — не исключение, а род экрана.
-SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
+SHEETS = {"app-search-suggest", "app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
           "app-publish", "app-files-picker", "app-files-op", "app-mail-compose", "app-mail-link", "app-mail-attach",
           "app-contact-rewrite", "app-record-copies", "app-task-done", "app-event-ask",
@@ -401,6 +405,8 @@ STATE_FRAME = {
     "invite/link": "s-auth-14",
     # Подсказки поля участников (Typecase de3f083, задача 77): «ве» — Вера.
     "app-contacts-suggest/normal": "s-agenda-12",
+    "app-search-suggest/normal": "s-find-2",
+    "app-search-suggest/typed": "s-find-3",
     "app-event-edit/loss": "states-17",
     # Дни серии, которых сервер не сохранил, — словами (Typecase 14fa0c2,
     # записка 62, Р-60).

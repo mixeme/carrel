@@ -34,6 +34,7 @@ import (
 	"carrel.dev/carrel/client/screens/register"
 	"carrel.dev/carrel/client/screens/remove"
 	"carrel.dev/carrel/client/screens/rewrite"
+	"carrel.dev/carrel/client/screens/search"
 	"carrel.dev/carrel/client/screens/settings"
 	"carrel.dev/carrel/client/screens/setup"
 	"carrel.dev/carrel/client/screens/task"
@@ -699,6 +700,40 @@ var All = []Screen{
 		Title:   func(model any) string { return string(model.(*view.ImportPage).Title) },
 		Forms:   func(model any) []widget.PostForm { return importer.Forms(model.(*view.ImportPage)) },
 		Notices: widget.MsgFlushSides,
+	},
+	{
+		Model: func() any { return new(view.SearchPage) },
+		Frames: []string{"s-find-1", "s-find-4", "s-find-5", "s-find-6", "s-find-7", "s-find-8",
+			"s-find-9", "s-find-10"},
+		Draw:    func(model any) Root { return search.Screen(model.(*view.SearchPage)) },
+		Title:   func(model any) string { return string(model.(*view.SearchPage).Title) },
+		Forms:   func(model any) []widget.PostForm { return search.Forms(model.(*view.SearchPage)) },
+		Notices: widget.MsgFlushSides,
+		Poll:    func(model any) (widget.Runbar, bool) { return search.Bar(model.(*view.SearchPage)) },
+	},
+}
+
+// Part is a piece of a page an answer prints alone.
+type Part interface{ Render() string }
+
+// Answer is what a view model answers that is not a page: a part the live
+// layer asks for by an address the page names and puts into the page — the
+// search line's suggestions (Typecase's note 118). It is printed alone, with
+// no document; its frames draw it inside a page, and it is held against
+// that part of them.
+type Answer struct {
+	Model  func() any
+	Frames []string
+	Draw   func(model any) Part
+}
+
+// Answers are the answers of the client that are not pages, one per view
+// model.
+var Answers = []Answer{
+	{
+		Model:  func() any { return new(view.SearchSuggest) },
+		Frames: []string{"s-find-2", "s-find-3"},
+		Draw:   func(model any) Part { return search.Suggestions(model.(*view.SearchSuggest)) },
 	},
 }
 

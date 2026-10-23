@@ -193,10 +193,14 @@ func Of(scr screens.Screen, model any, base string) page.Document {
 		},
 	}
 	// An answer for main puts its address into the history — on a page of
-	// the shell, the only one that has the zone.
+	// the shell, the only one that has the zone; and the search line in its
+	// top asks the server for its suggestions (Typecase's note 118).
 	if shell, ok := root.(widget.Shell); ok {
 		if _, ok := shell.Body.(widget.ShellBody); ok {
 			doc.Zones.Address = render.TargetMain
+		}
+		if shell.Top != nil && shell.Top.Search != nil {
+			doc.Suggest = base + render.SearchSuggestPath
 		}
 	}
 	if scr.Forms != nil {
