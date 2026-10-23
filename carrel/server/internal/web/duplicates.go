@@ -75,6 +75,15 @@ var signalLabels = map[dupes.Reason]string{
 	dupes.SameTitleWhen: "Same title and date (events, tasks, notes)",
 }
 
+// weightField is the field of a signal's weight in the menu Weights (s-dup-3,
+// -7): «weight.phone»; the title with its date is «weight.title».
+func weightField(sig dupes.Reason) string {
+	if sig == dupes.SameTitleWhen {
+		return "weight.title"
+	}
+	return "weight." + string(sig)
+}
+
 var dupKinds = []view.Kind{view.KindContact, view.KindEvent, view.KindTask, view.KindNote}
 
 // loadedRecords reads the index of every catalog collection the session has
@@ -373,11 +382,10 @@ func mergeBlock(blob sealed.Blob, refs []sealed.RecordRef) string {
 	return ""
 }
 
-func (s *Server) decideAction(id, label, group, do string) view.Action {
-	return view.Action{
-		ID: id, Label: text(label), Method: "POST", Enabled: true,
-		Href: s.postQuery("/app/duplicates/decide", url.Values{"group": {group}, "do": {do}}),
-	}
+// decideAction is a decision of a group's card: a button of its form, do=…
+// (from-typecase note 117 p. 8, s-dup-1).
+func decideAction(id, label, do string) view.Action {
+	return view.Action{ID: id, Label: text(label), Method: "POST", Enabled: true, Submits: true, Name: "do", Value: do}
 }
 
 func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.DuplicateGroup {
@@ -388,10 +396,11 @@ func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.
 	for _, ref := range g.refs {
 		out.Rows = append(out.Rows, s.member(st, g.kind, ref))
 	}
-	merge := view.Action{
-		ID: "duplicates.merge", Label: "Merge on the server", Method: "GET", Danger: true, Enabled: true,
-		Href: s.postQuery("/app/duplicates/merge", url.Values{"group": {g.id}}),
-	}
+	// Merge on the server carries the values chosen on the card to the
+	// merge (Дб9), which asks nothing (from-typecase note 117 p. 3); a
+	// group it cannot write is not merged at all, and says why (p. 9).
+	merge := decideAction("duplicates.merge", "Merge on the server", "merge")
+	merge.Danger = true
 	if reason := mergeBlock(st.blob, g.refs); reason != "" {
 		merge.Enabled, merge.Reason = false, text(reason)
 	}
@@ -399,67 +408,28 @@ func (s *Server) groupView(sess *session.Session, st dupState, g dupGroup) view.
 	out.Choices = mergeRowsOf(cs)
 	switch g.decision {
 	case view.DecisionLinked:
-		out.Actions = []view.Action{s.decideAction("duplicates.unlink", "Unlink", g.id, "unlink"), merge}
+		out.Actions = []view.Action{decideAction("duplicates.unlink", "Unlink", "unlink"), merge}
 		if len(cs) > 0 {
-			choose := s.decideAction("duplicates.choose", "Keep these values", g.id, "choose")
+			choose := decideAction("duplicates.choose", "Keep these values", "choose")
 			choose.Primary = true // s-dup-1
 			out.Actions = append([]view.Action{choose}, out.Actions...)
 		}
 	case view.DecisionIgnored:
-		out.Actions = []view.Action{s.decideAction("duplicates.again", "Offer again", g.id, "again")}
+		out.Actions = []view.Action{decideAction("duplicates.again", "Offer again", "again")}
 	default:
 		// What a group still to decide is first offered is the frame's main
 		// button (s-dup-1).
-		link := s.decideAction("duplicates.link", "Link them", g.id, "link")
+		link := decideAction("duplicates.link", "Link them", "link")
 		link.Primary = true
-		out.Actions = []view.Action{link, s.decideAction("duplicates.ignore", "Not duplicates", g.id, "ignore"), merge}
+		out.Actions = []view.Action{link, decideAction("duplicates.ignore", "Not duplicates", "ignore"), merge}
 	}
-	// With something to choose, the card is a form (U-8, s-dup-1): its
-	// radios stand in it, and every decision is a button of it sent to its
-	// own address — a decision of its own form inside it would be a form
-	// in a form. Merge on the server is one of them too (Дб9): it carries
-	// the values chosen on the card to the merge (do=merge), which opens
-	// with them chosen.
-	if len(cs) > 0 {
-		for i := range out.Actions {
-			if out.Actions[i].ID == "duplicates.merge" {
-				m := s.decideAction("duplicates.merge", "Merge on the server", g.id, "merge")
-				m.Danger, m.Enabled, m.Reason = true, out.Actions[i].Enabled, out.Actions[i].Reason
-				out.Actions[i] = m
-			}
-		}
-		out.Form = &view.Form{Action: s.route("/app/duplicates/decide"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
-			csrfField(sess),
-			{Name: "group", Kind: view.InputHidden, Value: text(g.id)},
-		}}}}
-		for i := range out.Actions {
-			if out.Actions[i].Method == "POST" {
-				out.Actions[i].Submits = true
-			}
-		}
-	}
+	// Every card is a form (U-8; from-typecase note 117 p. 8): its group
+	// and token hidden, its questions in it, every decision a button of it.
+	out.Form = &view.Form{Action: s.route("/app/duplicates/decide"), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
+		csrfField(sess),
+		{Name: "group", Kind: view.InputHidden, Value: text(g.id)},
+	}}}}
 	return out
-}
-
-// choiceLabels name a property asked about or joined, as the frame labels
-// a question (s-dup-1: «Display name», «Organisation», «Photo»): the
-// property is the file's, the label the person's. One Carrel does not
-// label is named as the file names it.
-var choiceLabels = map[string]string{
-	"FN": "Display name", "N": "Name", "ORG": "Organisation", "PHOTO": "Photo", "BDAY": "Birthday",
-	"ANNIVERSARY": "Anniversary", "GENDER": "Gender", "TEL": "Phone numbers", "EMAIL": "Email addresses",
-	"ADR": "Addresses", "NOTE": "Note", "CATEGORIES": "Tags", "URL": "Web address",
-	"SUMMARY": "Title", "DESCRIPTION": "Description", "LOCATION": "Location", "STATUS": "Status",
-	"PRIORITY": "Priority", "PERCENT-COMPLETE": "Percent complete", "COMPLETED": "Completed",
-	"ORGANIZER": "Organiser", "ATTENDEE": "Attendees", "CLASS": "Class", "TRANSP": "Busy", "COLOR": "Colour",
-	dupes.When: "When",
-}
-
-func choiceLabel(prop string) string {
-	if l, ok := choiceLabels[prop]; ok {
-		return l
-	}
-	return prop
 }
 
 func kindFilter(r *http.Request) view.Kind {
@@ -605,26 +575,24 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 		_, own := st.blob.Duplicates.Weights[string(sig)]
 		owned = owned || own
 		page.Threshold.Weights = append(page.Threshold.Weights, view.WeightControl{
-			Signal: string(sig), Name: "weight." + string(sig), Label: text(signalLabels[sig]), Value: dupes.Weight(mine, sig),
+			Signal: string(sig), Name: weightField(sig), Label: text(signalLabels[sig]), Value: dupes.Weight(mine, sig),
 			Default: dupes.Weight(s.cfg.DuplicatesWeights, sig), Own: own,
 		})
 	}
-	// The menu of weights is a form (s-dup-3): Save sends the fields as
-	// they stand; Back to defaults sends the same form to do=defaults,
-	// which is the instance's weight for every signal. The address says
-	// what to do — a hidden do would be read before it.
-	reset := view.Action{ID: "duplicates.weights.defaults", Label: "Back to defaults", Href: s.postQuery("/app/duplicates/decide", url.Values{"do": {"defaults"}}),
-		Method: "POST", Enabled: owned, Submits: true}
+	// The menu of weights is a form (s-dup-3, -7; from-typecase note 117
+	// p. 7): Save sends the fields as they stand, do=weights; Back to
+	// defaults sends the same form, do=defaults — the instance's weight for
+	// every signal —, off when every weight is the default already.
+	reset := decideAction("duplicates.weights.defaults", "Back to defaults", "defaults")
 	if !owned {
-		reset.Href, reset.Reason, reset.Submits = "", "Every weight is the default already.", false
+		reset.Enabled, reset.Reason = false, "Every weight is the default already."
 	}
+	save := decideAction("duplicates.weights.save", "Save", "weights")
+	save.Primary = true
 	page.Threshold.WeightForm = view.Form{
-		Action: s.postQuery("/app/duplicates/decide", url.Values{"do": {"weights"}}), Method: "POST",
-		Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(sess)}}},
-		Actions: []view.Action{
-			{ID: "duplicates.weights.save", Label: "Save", Method: "POST", Primary: true, Enabled: true},
-			reset,
-		},
+		Action: s.route("/app/duplicates/decide"), Method: "POST",
+		Sets:    []view.FieldSet{{Rows: []view.FormRow{csrfField(sess)}}},
+		Actions: []view.Action{save, reset},
 	}
 	if st.blob.Duplicates.Threshold > 0 {
 		page.Threshold.Note = text(fmt.Sprintf("Your own number, kept with your decisions. The instance uses %d.", s.cfg.DuplicatesThreshold))
@@ -719,7 +687,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 		if r.ParseForm() == nil {
 			_ = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.weights", "", func(d *sealed.Duplicates) error {
 				for _, sig := range dupes.Signals {
-					vals, sent := r.Form["weight."+string(sig)]
+					vals, sent := r.Form[weightField(sig)]
 					if !sent || len(vals) == 0 {
 						continue
 					}
@@ -1052,15 +1020,6 @@ func keptDrops(d map[string][]string) map[string][]string {
 		return nil
 	}
 	return out
-}
-
-func (st dupState) linkedPrefs(id string) map[string]sealed.RecordRef {
-	for _, l := range st.blob.Duplicates.Linked {
-		if l.ID == id {
-			return l.Prefs
-		}
-	}
-	return nil
 }
 
 // duplicatesRefresh is the circle of the top bar (Дб11; s-dup-1, -2, -6):

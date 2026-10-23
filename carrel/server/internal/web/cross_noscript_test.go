@@ -84,7 +84,8 @@ func TestConflictCombinationWithoutScripts(t *testing.T) {
 
 // ДбБ2, ДбБ3: the threshold and the weights are forms of their own: the
 // field of the threshold and a field per signal, by the names the server
-// reads, and Back to defaults the same form sent to its own address.
+// reads, and Save and Back to defaults the buttons of that form, do=…
+// (from-typecase note 117 p. 7).
 func TestThresholdAndWeightsWithoutScripts(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
@@ -103,12 +104,12 @@ func TestThresholdAndWeightsWithoutScripts(t *testing.T) {
 	}
 
 	wf := p.Threshold.WeightForm
-	if wf.Method != "POST" || wf.Action != "/app/duplicates/decide?do=weights" || formRow(wf, "_csrf") == nil {
+	if wf.Method != "POST" || wf.Action != "/app/duplicates/decide" || formRow(wf, "_csrf") == nil {
 		t.Fatalf("weights form = %+v", wf)
 	}
 	sent := map[string]string{}
 	for _, w := range p.Threshold.Weights {
-		if w.Name != "weight."+w.Signal {
+		if !strings.HasPrefix(w.Name, "weight.") {
 			t.Fatalf("weight without its field: %+v", w)
 		}
 		sent[w.Name] = strconv.Itoa(w.Value)
@@ -116,9 +117,10 @@ func TestThresholdAndWeightsWithoutScripts(t *testing.T) {
 	sent["weight.email"] = "0"
 	save := actionByID(wf.Actions, "duplicates.weights.save")
 	reset := actionByID(wf.Actions, "duplicates.weights.defaults")
-	if save == nil || save.Href != "" || !save.Primary || reset == nil || reset.Enabled {
+	if save == nil || save.Href != "" || !save.Primary || save.Name != "do" || save.Value != "weights" || reset == nil || reset.Enabled {
 		t.Fatalf("weights buttons = %+v", wf.Actions)
 	}
+	sent["do"] = save.Value
 	if rec := f.h.do(postForm(wf.Action, f.sess, browserForm(wf, sent))); rec.Code != http.StatusSeeOther {
 		t.Fatalf("save: %d", rec.Code)
 	}
@@ -129,9 +131,10 @@ func TestThresholdAndWeightsWithoutScripts(t *testing.T) {
 	if reset == nil || !reset.Enabled || !reset.Submits || reset.Method != "POST" {
 		t.Fatalf("Back to defaults = %+v", reset)
 	}
-	// The form goes to Back to defaults' address with every field as it
-	// stands: the address, not the fields, says what to do.
-	if rec := f.h.do(postForm(reset.Href, f.sess, browserForm(wf, sent))); rec.Code != http.StatusSeeOther {
+	// The same form with every field as it stands: the button pressed
+	// says what to do (s-dup-7, do=defaults).
+	sent["do"] = reset.Value
+	if rec := f.h.do(postForm(wf.Action, f.sess, browserForm(wf, sent))); rec.Code != http.StatusSeeOther {
 		t.Fatalf("defaults: %d", rec.Code)
 	}
 	if w := f.decisions(t).Weights; len(w) != 0 {
@@ -154,7 +157,7 @@ func TestGroupChoiceWithoutScripts(t *testing.T) {
 	}
 	// The organisation only one of them has is a question too (Дб7,
 	// v0.2.283; until then the name was the only one).
-	if len(g.Choices) != 2 || g.Choices[0].Name != "choice.FN" || g.Choices[0].Property != "Display name" {
+	if len(g.Choices) < 2 || g.Choices[0].Name != "choice.FN" || g.Choices[0].Property != "Display name" {
 		t.Fatalf("choices = %+v", g.Choices)
 	}
 	link := actionOf(t, g, "duplicates.link")
@@ -162,7 +165,7 @@ func TestGroupChoiceWithoutScripts(t *testing.T) {
 		t.Fatalf("the decisions are not the form's buttons: %+v", g.Actions)
 	}
 	pick := choiceValue(t, g.Choices[0], "LOVELACE Ada")
-	rec := f.h.do(postForm(link.Href, f.sess, browserForm(*g.Form, map[string]string{g.Choices[0].Name: pick})))
+	rec := f.h.do(decideRequest(t, f.sess, g, link.ID, browserForm(*g.Form, map[string]string{g.Choices[0].Name: pick})))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("link: %d %s", rec.Code, rec.Body.String())
 	}

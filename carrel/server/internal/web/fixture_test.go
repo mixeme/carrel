@@ -3435,17 +3435,7 @@ func TestFixtureDuplicatesStates(t *testing.T) {
 				if a.ID != "duplicates.merge" || !a.Enabled {
 					continue
 				}
-				if a.Method != http.MethodPost {
-					return a.Href
-				}
-				form := url.Values{}
-				if g.Form != nil {
-					form = formFields(*g.Form)
-				}
-				for _, c := range g.Choices {
-					form.Set(c.Name, strconv.Itoa(c.Chosen))
-				}
-				return app.h.do(postForm(a.Href, app.sess, form)).Header().Get("Location")
+				return app.h.do(decideRequest(t, app.sess, g, a.ID, asItStands(g, nil))).Header().Get("Location")
 			}
 		}
 		t.Fatalf("no %s group to merge among %d", kind, len(page.Groups))
@@ -3482,12 +3472,9 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		for _, g := range page.Groups {
 			for _, a := range g.Actions {
 				if a.ID == "duplicates.merge" && a.Enabled && strings.Contains(string(g.Rows[0].Title)+string(g.Rows[1].Title), "Лебедева") {
-					merge = a.Href
-					if a.Method == http.MethodPost {
-						// A button of the card's form (Дб9): it leads to the
-						// merge with what the card chose — nothing here.
-						merge = app.h.do(postForm(a.Href, app.sess, url.Values{})).Header().Get("Location")
-					}
+					// A button of the card's form (Дб9): it leads to the
+					// merge with what the card chose, the card as it stands.
+					merge = app.h.do(decideRequest(t, app.sess, g, a.ID, asItStands(g, nil))).Header().Get("Location")
 				}
 			}
 		}

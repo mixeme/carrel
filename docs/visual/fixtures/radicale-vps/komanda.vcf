@@ -20,5 +20,6 @@ ORG:Издательство «Слово»
 TEL;TYPE=CELL:+7 912 445-10-88
 TEL;TYPE=WORK:+7 495 120-45-77
 EMAIL;TYPE=WORK:a.kovaleva@example.org
+CATEGORIES:работа,издательство
 REV:20260809T113000Z
 END:VCARD

@@ -17,7 +17,7 @@ func TestALinkedGroupThatCameApartSaysSo(t *testing.T) {
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
 	pick := choiceValue(t, g.Choices[0], "LOVELACE Ada")
-	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{"choice.FN": {pick}}))
+	f.h.do(decideRequest(t, f.sess, g, "duplicates.link", asItStands(g, url.Values{"choice.FN": {pick}})))
 	if d := f.decisions(t); len(d.Linked) != 1 {
 		t.Fatalf("not linked: %+v", d.Linked)
 	}
@@ -51,7 +51,7 @@ func TestTheDuplicatesScreenSaysGroupsCameApart(t *testing.T) {
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
 	pick := choiceValue(t, g.Choices[0], "LOVELACE Ada")
-	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{"choice.FN": {pick}}))
+	f.h.do(decideRequest(t, f.sess, g, "duplicates.link", asItStands(g, url.Values{"choice.FN": {pick}})))
 
 	_, etag, _ := f.other.Object(workBook + "ada-there.vcf")
 	f.h.do(postForm(f.record(f.otherID, workBook, "ada-there")+"/delete", f.sess, url.Values{"etag": {etag}, "sheet": {"1"}, "copy": {f.otherID + "/" + url.PathEscape(workBook)}}))

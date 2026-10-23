@@ -74,12 +74,35 @@ func (f dupFixture) decisions(t *testing.T) sealed.Duplicates {
 	return blob.Duplicates
 }
 
-func (f dupFixture) decide(t *testing.T, a view.Action) {
+// decide sends a decision of a group's card as it stands.
+func (f dupFixture) decide(t *testing.T, g view.DuplicateGroup, id string) {
 	t.Helper()
-	rec := f.h.do(postForm(a.Href, f.sess, url.Values{}))
+	rec := f.h.do(decideRequest(t, f.sess, g, id, asItStands(g, nil)))
 	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/app/duplicates" {
-		t.Fatalf("%s: %d %q %s", a.ID, rec.Code, rec.Header().Get("Location"), rec.Body.String())
+		t.Fatalf("%s: %d %q %s", id, rec.Code, rec.Header().Get("Location"), rec.Body.String())
 	}
+}
+
+// decideRequest is a decision of a group's card as a browser sends it
+// (from-typecase note 117 p. 8, s-dup-1): the card is a form to
+// /app/duplicates/decide, and the decision is its button, do=link.
+func decideRequest(t *testing.T, sess *session.Session, g view.DuplicateGroup, id string, form url.Values) *http.Request {
+	t.Helper()
+	a := actionOf(t, g, id)
+	if g.Form == nil || !a.Submits || a.Name == "" {
+		t.Fatalf("%s is not a button of the card's form: %+v, form %+v", id, a, g.Form)
+	}
+	sent := url.Values{}
+	for k, v := range form {
+		sent[k] = v
+	}
+	for k, v := range formFields(*g.Form) {
+		if _, ok := sent[k]; !ok {
+			sent[k] = v
+		}
+	}
+	sent.Set(a.Name, a.Value)
+	return postForm(g.Form.Action, sess, sent)
 }
 
 func onlyGroup(t *testing.T, p view.DuplicatesPage) view.DuplicateGroup {
@@ -164,7 +187,7 @@ func TestLinkWritesNoServer(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
-	f.decide(t, actionOf(t, g, "duplicates.link"))
+	f.decide(t, g, "duplicates.link")
 	if n := f.writes(); n != 0 {
 		t.Fatalf("linking wrote to a server %d times", n)
 	}
@@ -197,7 +220,7 @@ func TestLinkWritesNoServer(t *testing.T) {
 		t.Errorf("the linked row does not carry the group's fields: %+v", adas[0])
 	}
 
-	f.decide(t, actionOf(t, linked, "duplicates.unlink"))
+	f.decide(t, linked, "duplicates.unlink")
 	if d := f.decisions(t); len(d.Linked) != 0 {
 		t.Errorf("unlink left %+v", d.Linked)
 	}
@@ -215,7 +238,7 @@ func TestNotDuplicatesIsRemembered(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
-	rec := f.h.do(fragment(postForm(actionOf(t, g, "duplicates.ignore").Href, f.sess, url.Values{}), "main"))
+	rec := f.h.do(fragment(decideRequest(t, f.sess, g, "duplicates.ignore", url.Values{}), "main"))
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"decision":"ignored"`) {
 		t.Fatalf("fragment: %d %s", rec.Code, rec.Body.String())
 	}
@@ -227,7 +250,7 @@ func TestNotDuplicatesIsRemembered(t *testing.T) {
 	if ignored.Decision != view.DecisionIgnored || *navCount(t, p.Rail) != 0 {
 		t.Errorf("ignored = %+v", ignored)
 	}
-	f.decide(t, actionOf(t, ignored, "duplicates.again"))
+	f.decide(t, ignored, "duplicates.again")
 	if again := onlyGroup(t, f.page(t)); again.Decision != view.DecisionNone {
 		t.Errorf("offered again = %+v", again)
 	}
@@ -305,7 +328,7 @@ func TestWeightsAreThePersons(t *testing.T) {
 func TestLinkedMemberGoneOnlyWhenTheListSaysSo(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
-	f.decide(t, actionOf(t, onlyGroup(t, f.page(t)), "duplicates.link"))
+	f.decide(t, onlyGroup(t, f.page(t)), "duplicates.link")
 
 	f.other.Refuse("REPORT", http.StatusServiceUnavailable, "down")
 	f.h.do(get(f.book(f.otherID, workBook), f.sess))
@@ -337,20 +360,46 @@ func mergePage(t *testing.T, f dupFixture, href string) view.DuplicatesMergePage
 // openMerge presses a group's Merge on the server: a link, or — on a card
 // with something to choose — a button of the card's form sent with form,
 // which leads to the merge (Дб9).
-func openMerge(t *testing.T, h *harness, sess *session.Session, a view.Action, form url.Values) view.DuplicatesMergePage {
+// openMerge opens the merge of a group from its card: Merge on the server
+// sent with the card as it stands and answers over it.
+func openMerge(t *testing.T, h *harness, sess *session.Session, g view.DuplicateGroup, answers url.Values) view.DuplicatesMergePage {
 	t.Helper()
+	a := actionOf(t, g, "duplicates.merge")
 	href := a.Href
 	if a.Method == http.MethodPost {
-		if form == nil {
-			form = url.Values{}
-		}
-		rec := h.do(postForm(a.Href, sess, form))
+		rec := h.do(decideRequest(t, sess, g, "duplicates.merge", asItStands(g, answers)))
 		if rec.Code != http.StatusSeeOther {
 			t.Fatalf("Merge on the server: %d %s", rec.Code, rec.Body.String())
 		}
 		href = rec.Header().Get("Location")
 	}
 	return decode[view.DuplicatesMergePage](t, h.do(get(href, sess)))
+}
+
+// asItStands is the form of a group's card as a browser sends it untouched
+// (from-typecase note 117 p. 1): its hidden fields, each radio at its
+// choice, each tick ticked — and over them what the test answers. A tick
+// not sent is a value dropped.
+func asItStands(g view.DuplicateGroup, answers url.Values) url.Values {
+	form := url.Values{}
+	if g.Form != nil {
+		form = formFields(*g.Form)
+	}
+	for _, c := range g.Choices {
+		if c.Many {
+			for _, k := range c.Kept {
+				form.Add(c.Name, c.Values[k])
+			}
+			continue
+		}
+		if c.Chosen < len(c.Values) {
+			form.Set(c.Name, c.Values[c.Chosen])
+		}
+	}
+	for k, v := range answers {
+		form[k] = v
+	}
+	return form
 }
 
 func mergeAction(t *testing.T, p view.DuplicatesMergePage, id string) view.Action {
@@ -373,7 +422,7 @@ func TestMergeWritesThenDeletes(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
-	p := openMerge(t, f.h, f.sess, actionOf(t, g, "duplicates.merge"), nil)
+	p := openMerge(t, f.h, f.sess, g, nil)
 	if strings.HasSuffix(string(p.Target.Stamp), "Work") {
 		// Keep the card in People: the other one is chosen from the page.
 		p = mergePage(t, f, mergeAction(t, p, "duplicates.merge.into").Href)
@@ -398,14 +447,9 @@ func TestMergeWritesThenDeletes(t *testing.T) {
 			t.Errorf("gains lack %q: %q", want, gains)
 		}
 	}
-	var fn *view.MergeRow
-	for i := range p.Rows {
-		if p.Rows[i].Name == "choice.FN" {
-			fn = &p.Rows[i]
-		}
-	}
-	if fn == nil || fn.Union || len(fn.Options) != 2 || fn.Chosen != 0 {
-		t.Fatalf("FN row = %+v in %+v", fn, p.Rows)
+	// The merge asks nothing: the card did (from-typecase note 117 p. 3).
+	if len(p.Rows) != 0 {
+		t.Errorf("the merge asks %+v", p.Rows)
 	}
 	confirm := mergeAction(t, p, "duplicates.merge.confirm")
 	if !confirm.Enabled || !confirm.Danger || confirm.Method != "POST" {
@@ -438,7 +482,7 @@ func TestMergeWritesThenDeletes(t *testing.T) {
 func TestMergeRefusesWhatChangedSinceShown(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
-	p := openMerge(t, f.h, f.sess, actionOf(t, onlyGroup(t, f.page(t)), "duplicates.merge"), nil)
+	p := openMerge(t, f.h, f.sess, onlyGroup(t, f.page(t)), nil)
 	confirm := mergeAction(t, p, "duplicates.merge.confirm")
 	f.other.Seed(workBook+"ada-there.vcf", strings.Replace(adaThere, "X-THERE:theirs", "X-THERE:edited elsewhere", 1))
 	f.srv.Seed(peopleBook+"ada-here.vcf", strings.Replace(adaHere, "X-HERE:kept", "X-HERE:edited elsewhere", 1))
@@ -457,7 +501,7 @@ func TestMergeRefusesWhatChangedSinceShown(t *testing.T) {
 func TestMergeStopsAtTheFirstRefusedDelete(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
-	p := openMerge(t, f.h, f.sess, actionOf(t, onlyGroup(t, f.page(t)), "duplicates.merge"), nil)
+	p := openMerge(t, f.h, f.sess, onlyGroup(t, f.page(t)), nil)
 	f.srv.Refuse(http.MethodDelete, http.StatusForbidden, "no")
 	f.other.Refuse(http.MethodDelete, http.StatusForbidden, "no")
 	got := decode[view.DuplicatesMergePage](t, f.h.do(postForm(mergeAction(t, p, "duplicates.merge.confirm").Href, f.sess, url.Values{})))
@@ -526,8 +570,7 @@ func TestLinkRemembersTheAnswer(t *testing.T) {
 		t.Fatalf("choices = %+v", g.Choices)
 	}
 	pick := choiceValue(t, g.Choices[0], "LOVELACE Ada")
-	link := actionOf(t, g, "duplicates.link")
-	rec := f.h.do(postForm(link.Href, f.sess, url.Values{"choice.FN": {pick}}))
+	rec := f.h.do(decideRequest(t, f.sess, g, "duplicates.link", asItStands(g, url.Values{"choice.FN": {pick}})))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("link: %d %s", rec.Code, rec.Body.String())
 	}
@@ -562,12 +605,21 @@ func TestLinkRemembersTheAnswer(t *testing.T) {
 		t.Fatal("no linked row")
 	}
 
-	p := openMerge(t, f.h, f.sess, actionOf(t, linked, "duplicates.merge"), url.Values{"choice.FN": {choiceValue(t, linked.Choices[0], "LOVELACE Ada")}})
-	for _, row := range p.Rows {
-		if row.Name == "choice.FN" && string(row.Options[row.Chosen]) != "LOVELACE Ada" {
-			t.Errorf("merge does not start from the answer: %+v", row)
+	p := openMerge(t, f.h, f.sess, linked, url.Values{"choice.FN": {choiceValue(t, linked.Choices[0], "LOVELACE Ada")}})
+	if got := mergedName(p); got != "LOVELACE Ada" {
+		t.Errorf("the merge writes the name %q, not the answer", got)
+	}
+}
+
+// mergedName is the name a merge writes: the one the kept record gains
+// («FN: …», s-dup-2), else its own.
+func mergedName(p view.DuplicatesMergePage) string {
+	for _, l := range p.Gains {
+		if name, ok := strings.CutPrefix(string(l), "FN: "); ok {
+			return name
 		}
 	}
+	return string(p.Target.Title)
 }
 
 // Дб9 of the scan of 15.10.2026 (s-dup-1: «Merge on the server» is a button
@@ -579,19 +631,12 @@ func TestMergeTakesTheChoiceOfTheCard(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
-	merge := actionOf(t, g, "duplicates.merge")
-	if merge.Method != http.MethodPost || !merge.Submits {
+	if merge := actionOf(t, g, "duplicates.merge"); merge.Method != http.MethodPost || !merge.Submits {
 		t.Fatalf("Merge = %+v, want a button of the card's form", merge)
 	}
 	for _, name := range []string{"LOVELACE Ada", "Ada Lovelace"} {
-		p := openMerge(t, f.h, f.sess, merge, url.Values{"choice.FN": {choiceValue(t, g.Choices[0], name)}})
-		got := ""
-		for _, row := range p.Rows {
-			if row.Name == "choice.FN" {
-				got = string(row.Options[row.Chosen])
-			}
-		}
-		if got != name {
+		p := openMerge(t, f.h, f.sess, g, url.Values{"choice.FN": {choiceValue(t, g.Choices[0], name)}})
+		if got := mergedName(p); got != name {
 			t.Errorf("chose %q on the card, the merge starts from %q", name, got)
 		}
 	}
@@ -603,15 +648,15 @@ func TestMergeTakesTheChoiceOfTheCard(t *testing.T) {
 // S-16, Typecase's Р-58 (from-typecase notes 57 and 117): the card of a
 // linked record opened from its book is that copy — its own name, head and
 // fields, none of another's, «linked» at a field where a choice is made —,
-// and a row per other member with what it holds differently. A server that does not answer is said in its row and takes
-// nobody out. (Until 14.10.2026 this card was the entity's — the chosen
+// and a row per other member with what it holds differently. A server that
+// does not answer is said in its row and takes nobody out. (Until 14.10.2026 this card was the entity's — the chosen
 // name, the fields of every member —; that card gets an address of its own.)
 func TestLinkedCardIsItsCopy(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
 	g := onlyGroup(t, f.page(t))
 	pick := choiceValue(t, g.Choices[0], "LOVELACE Ada")
-	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{"choice.FN": {pick}}))
+	f.h.do(decideRequest(t, f.sess, g, "duplicates.link", asItStands(g, url.Values{"choice.FN": {pick}})))
 
 	card := decode[view.ContactPage](t, f.h.do(get(f.record(f.id, peopleBook, "ada-here"), f.sess)))
 	if card.Name != "Ada Lovelace" {
@@ -677,7 +722,7 @@ func TestLinkedEventCard(t *testing.T) {
 	if g.Kind != view.KindEvent {
 		t.Fatalf("group = %+v", g)
 	}
-	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{}))
+	f.h.do(decideRequest(t, f.sess, g, "duplicates.link", asItStands(g, nil)))
 	page := decode[view.EventPage](t, f.h.do(get(cal(searchWork)+"/e1", f.sess)))
 	if len(page.Linked) != 1 || !strings.HasSuffix(string(page.Linked[0].Label), "Duty") {
 		t.Fatalf("linked = %+v", page.Linked)

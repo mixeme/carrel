@@ -29,7 +29,7 @@ func linkedTasks(t *testing.T) (davFixture, func(col, uid string) string) {
 		f.h.do(get(list(col)+"?seg=all", f.sess))
 	}
 	g := onlyGroup(t, decode[view.DuplicatesPage](t, f.h.do(get("/app/duplicates", f.sess))))
-	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{}))
+	f.h.do(decideRequest(t, f.sess, g, "duplicates.link", asItStands(g, nil)))
 	record := func(col, uid string) string { return list(col) + "/" + uid }
 	return f, record
 }

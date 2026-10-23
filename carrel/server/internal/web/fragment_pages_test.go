@@ -83,7 +83,7 @@ func TestAnswersOutsideTheZonesArePages(t *testing.T) {
 		f := newDupFixture(t)
 		f.load(t)
 		g := onlyGroup(t, f.page(t))
-		rec := f.h.do(fragment(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{}), "main"))
+		rec := f.h.do(fragment(decideRequest(t, f.sess, g, "duplicates.link", asItStands(g, nil)), "main"))
 		got := decode[pageFragment[view.DuplicatesPage]](t, rec)
 		if got.Target != "main" || len(got.Body.Groups) != 1 || got.Body.Groups[0].Decision != view.DecisionLinked || len(got.Body.Rail.Nav) == 0 {
 			t.Errorf("a decision as a fragment answers %s, want the duplicates page with the group linked", rec.Body)

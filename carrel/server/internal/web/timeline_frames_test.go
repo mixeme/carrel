@@ -119,7 +119,9 @@ func TestTimelineIsTheFrame(t *testing.T) {
 		}
 	}
 	said := words.String()
-	if strings.Join(mono, ",") != "a.kovaleva@example.org" || !strings.Contains(said, " · matched by ") || !strings.Contains(said, " and the name") {
+	// Both her addresses, as the frame says them (from-typecase note 117:
+	// the second is her card's in «Контакты»).
+	if strings.Join(mono, ",") != "a.kovaleva@example.org,anna.kovaleva@slovo.example" || !strings.Contains(said, " · matched by ") || !strings.Contains(said, " and the name") {
 		t.Errorf("summary %q (mono %q), the frame %q", said, mono, frameText(bar[1]))
 	}
 	if len(alarm) != 0 || !strings.HasPrefix(said, "Polled ") || !strings.HasSuffix(said, " and the name") || string(page.Poll.Failed) != bar[2] {
@@ -159,7 +161,8 @@ func TestTimelineIsTheFrame(t *testing.T) {
 	if ap.Linked == nil || !shape.MatchString(string(ap.Linked.Label)) || ap.Linked.Role != view.BadgeLinked || len(ap.Card.Books) == 0 {
 		t.Errorf("Артём: linked %+v, books %+v; the frame %q", ap.Linked, ap.Card.Books, head[3])
 	}
-	if page.Linked != nil {
-		t.Errorf("Анна is in one book: %+v", page.Linked)
+	// Анна is in three books (from-typecase note 117 p. 2).
+	if page.Linked == nil || page.Linked.Label != "in 3 books" {
+		t.Errorf("Анна: linked %+v, want «in 3 books»", page.Linked)
 	}
 }

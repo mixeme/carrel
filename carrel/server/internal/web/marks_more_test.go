@@ -91,7 +91,7 @@ func TestDeviceMadeMarksAreTheFrame(t *testing.T) {
 func TestMergeStoppedMarksAreTheFrame(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
-	p := openMerge(t, f.h, f.sess, actionOf(t, onlyGroup(t, f.page(t)), "duplicates.merge"), nil)
+	p := openMerge(t, f.h, f.sess, onlyGroup(t, f.page(t)), nil)
 	f.srv.Refuse(http.MethodDelete, http.StatusForbidden, "no")
 	f.other.Refuse(http.MethodDelete, http.StatusForbidden, "no")
 	got := decode[view.DuplicatesMergePage](t, f.h.do(postForm(mergeAction(t, p, "duplicates.merge.confirm").Href, f.sess, url.Values{})))

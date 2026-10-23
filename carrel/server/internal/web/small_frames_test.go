@@ -125,10 +125,10 @@ func TestWeightButtonsAreTheFrame(t *testing.T) {
 	if !save.Enabled || save.Method != "POST" || reset.Enabled || reset.Reason == "" {
 		t.Errorf("before any choice: save %+v, back to defaults %+v", save, reset)
 	}
-	var signal string
+	var signal, field string
 	for _, w := range p.Threshold.Weights {
 		if string(w.Label) == label {
-			signal = w.Signal
+			signal, field = w.Signal, w.Name
 			if w.Default != def {
 				t.Errorf("%s: default %d, the frame %d", label, w.Default, def)
 			}
@@ -140,7 +140,8 @@ func TestWeightButtonsAreTheFrame(t *testing.T) {
 	if save.Href != "" {
 		t.Fatalf("Save is not the button of the weights form: %+v", save)
 	}
-	if rec := f.h.do(postForm(p.Threshold.WeightForm.Action, f.sess, url.Values{"weight." + signal: {strconv.Itoa(yours)}})); rec.Code != http.StatusSeeOther {
+	// Save is the button of the form: do=weights (s-dup-3).
+	if rec := f.h.do(postForm(p.Threshold.WeightForm.Action, f.sess, url.Values{field: {strconv.Itoa(yours)}, save.Name: {save.Value}})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("save: %d", rec.Code)
 	}
 	p = f.page(t)
@@ -153,7 +154,7 @@ func TestWeightButtonsAreTheFrame(t *testing.T) {
 	if !reset.Enabled || reset.Method != "POST" {
 		t.Fatalf("back to defaults = %+v", reset)
 	}
-	if rec := f.h.do(postForm(reset.Href, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+	if rec := f.h.do(postForm(p.Threshold.WeightForm.Action, f.sess, url.Values{reset.Name: {reset.Value}})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("back to defaults: %d", rec.Code)
 	}
 	for _, w := range f.page(t).Threshold.Weights {

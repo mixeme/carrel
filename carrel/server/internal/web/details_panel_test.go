@@ -92,10 +92,9 @@ func TestPanelsReadAsTheirFrames(t *testing.T) {
 		return decode[detailsFragment](t, h.do(fragment(get(rec, f.sess), "details"))).Body
 	}
 
-	c := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:anna\nFN:Anna Kovaleva\nORG:Slovo\nTITLE:Editor\n"+
-		"TEL;TYPE=cell:+7 912\nTEL;TYPE=work:+7 495\nEMAIL;TYPE=work:a@example.org\nBDAY:1987-03-14\n"+
-		"CATEGORIES:work,press\nNOTE:Writes on Tuesdays.\nX-FOO:kept\nEND:VCARD\n")
-	check("s-contacts-1", panelOf(c.h, c.path("contacts")+"/anna", c))
+	// The panel of s-contacts-1 is a linked record's (from-typecase note
+	// 117 p. 5): TestContactsListIsTheFrames reads it on the set, where Анна
+	// is linked in three books.
 
 	attach := "ATTACH;FMTTYPE=text/markdown;FILENAME=list.md:https://files.example.org/list.md\n"
 	cal := calendarFixture(t, nil,

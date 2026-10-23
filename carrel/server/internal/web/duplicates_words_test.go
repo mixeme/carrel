@@ -26,7 +26,7 @@ func TestTheDuplicatesSayWhatTheyCompared(t *testing.T) {
 	if p.Subtitle != "4 records compared · 1 to look at" {
 		t.Errorf("subtitle %q", p.Subtitle)
 	}
-	m := openMerge(t, f.h, f.sess, actionOf(t, onlyGroup(t, p), "duplicates.merge"), nil)
+	m := openMerge(t, f.h, f.sess, onlyGroup(t, p), nil)
 	if want := string(m.Target.Title) + " · 2 records"; string(m.Subtitle) != want || m.Target.Title == "" {
 		t.Errorf("merge subtitle %q, want %q", m.Subtitle, want)
 	}
@@ -104,7 +104,7 @@ func TestAnEmptyValueIsAChoice(t *testing.T) {
 	if org.Chosen == empty || !strings.HasPrefix(string(org.Options[org.Chosen]), "Analytical Engines · ") {
 		t.Errorf("chosen beforehand %d of %q, want the value", org.Chosen, org.Options)
 	}
-	p := openMerge(t, f.h, f.sess, actionOf(t, g, "duplicates.merge"), url.Values{"choice.ORG": {org.Values[empty]}})
+	p := openMerge(t, f.h, f.sess, g, url.Values{"choice.ORG": {org.Values[empty]}})
 	confirm := mergeAction(t, p, "duplicates.merge.confirm")
 	if rec := f.h.do(postForm(confirm.Href, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
 		t.Fatalf("merge: %d %s", rec.Code, rec.Body.String())

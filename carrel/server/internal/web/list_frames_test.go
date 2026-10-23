@@ -24,8 +24,11 @@ var (
 	frameHeadButton = regexp.MustCompile(`(?s)<button class="([^"]*)"[^>]*>(.*?)</button>`)
 	frameWhereItem  = regexp.MustCompile(`(?s)<button class="([^"]*tc-menu__item[^"]*)"[^>]*role="menuitem"><span class="tc-mark" data-tc-colour="(#[0-9A-Fa-f]{6})"></span>([^<]*)(.*?)</button>`)
 	frameGroupHead  = regexp.MustCompile(`<div class="tc-list__group"><span class="tc-rubric">([^<]*)</span>(<span class="tc-num">\d+</span>)?</div>`)
-	frameOpenRow    = regexp.MustCompile(`(?s)<div class="tc-row [^"]*is-on[^"]*">.*?<span class="tc-row__title[^"]*">([^<]*)</span>`)
-	framePanelUID   = regexp.MustCompile(`<div class="tc-diag">UID\s+(\S+)`)
+	frameOpenRow    = regexp.MustCompile(`(?s)<div class="tc-row [^"]*is-on[^"]*">.*?<span class="tc-row__title[^"]*">(?:<span class="tc-row__words">)?([^<]*)</span>`)
+	framePanelSub   = regexp.MustCompile(`<div class="tc-head__sub">([^<]*)</div>`)
+	framePanelTerms = regexp.MustCompile(`<dt>([^<]*)</dt>`)
+	frameFieldFrom  = regexp.MustCompile(`<dt>([^<]*)</dt><dd[^>]*>(?:<a [^>]*>)?[^<]*(?:</a>)? <span class="tc-dim"><span class="tc-mark[^>]*></span> ([^<]*)</span>`)
+	frameKeptRow    = regexp.MustCompile(`<a class="tc-dim--accent" href="[^"]*">([^<]*)</a> <span class="tc-dim">· ([^<]*)</span>`)
 	frameColumnsBtn = regexp.MustCompile(`<button class="tc-btn[^"]*" type="button"><svg[^>]*><use href="#(i-[\w-]+)"/></svg>Columns</button>`)
 	frameDigits     = regexp.MustCompile(`\d+`)
 )
@@ -51,15 +54,17 @@ func TestContactsListIsTheFrames(t *testing.T) {
 	}
 	// The table counts what a person sees, the rail what lies in a
 	// collection (the owner's decision of 09.10.2026): Артём Белов, linked
-	// in two books, is one row and one card of the line under the title and
-	// of the poll's bar — the frame's «6 cards» —, and a card of each book
-	// in the rail: seven (Typecase's note 44 — the set has «Лебедева Вера»,
-	// the second card of Вера Лебедева, in «Контакты»).
+	// in two books, and Анна Ковалёва, in three, are one row each and one
+	// card of the line under the title and of the poll's bar — the frame's
+	// «6 cards» —, and a card of each book in the rail: nine (Typecase's
+	// notes 44 and 117 — the set has «Лебедева Вера» in «Контакты», Анна in
+	// «Команда» and «Архив»; s-contacts-1 still counts seven, s-dup-1 counts
+	// her copies in its rail).
 	if string(page.Subtitle) != frameText(head[1]) || !strings.HasSuffix(runsText(page.Poll.Summary), " · 6 cards") {
 		t.Errorf("subtitle = %q, poll %q; the frame %q", page.Subtitle, runsText(page.Poll.Summary), frameText(head[1]))
 	}
-	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 7 {
-		t.Errorf("the rail's combined row = %v, want the 7 cards of the ticked books", all.Count)
+	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 9 {
+		t.Errorf("the rail's combined row = %v, want the 9 cards of the ticked books", all.Count)
 	}
 	var want, got []string
 	for _, b := range frameHeadButton.FindAllStringSubmatch(head[2], -1) {
@@ -153,8 +158,9 @@ func TestContactsListIsTheFrames(t *testing.T) {
 
 	// The row open in the panel, the panel, and the way to close it.
 	open := frameOpenRow.FindStringSubmatch(frame)
-	uid := framePanelUID.FindStringSubmatch(framePanel(t, "s-contacts-1"))
-	if open == nil || uid == nil {
+	panelFrame := framePanel(t, "s-contacts-1")
+	sub := framePanelSub.FindStringSubmatch(panelFrame)
+	if open == nil || sub == nil {
 		t.Fatal("s-contacts-1 draws no open row with its panel: read the frame again")
 	}
 	var href string
@@ -167,9 +173,59 @@ func TestContactsListIsTheFrames(t *testing.T) {
 	}
 	withPanel := decode[view.ContactsListPage](t, app.h.do(get("/app/contacts?task="+page.Poll.TaskID+"&open="+url.QueryEscape(href), app.sess)))
 	d := withPanel.Details
-	if d == nil || string(d.Title) != frameText(open[1]) || string(d.Source.UID) != uid[1] || d.Close != "/app/contacts?task="+page.Poll.TaskID {
+	if d == nil || string(d.Title) != frameText(open[1]) || d.Close != "/app/contacts?task="+page.Poll.TaskID {
 		t.Fatalf("panel = %+v", d)
 	}
+	// The open row is Анна, linked in three books: the panel is the linked
+	// record (from-typecase note 117 p. 5) — «in 3 books», every field the
+	// frame draws, the values chosen marked with where they came from,
+	// where she is kept and what each copy holds otherwise; no Source and no
+	// Delete of one copy, Edit to «Which copy to edit?», «⋯» the linked
+	// record's (s-contacts-36).
+	if string(d.Subtitle) != sub[1] || d.Source.UID != "" || d.Source.Stamp != "" {
+		t.Errorf("panel head %q, source %+v; the frame %q", d.Subtitle, d.Source, sub[1])
+	}
+	fields := map[string]view.Field{}
+	for _, f := range d.Fields {
+		fields[string(f.Label)] = f
+	}
+	for _, m := range framePanelTerms.FindAllStringSubmatch(panelFrame, -1) {
+		if _, ok := fields[m[1]]; !ok {
+			t.Errorf("the panel has no %q: %+v", m[1], d.Fields)
+		}
+	}
+	marked := 0
+	for _, m := range frameFieldFrom.FindAllStringSubmatch(panelFrame, -1) {
+		marked++
+		if f := fields[m[1]]; f.From == nil || string(f.From.Name) != m[2] {
+			t.Errorf("%s from %+v, the frame %q", m[1], f.From, m[2])
+		}
+	}
+	for _, f := range d.Fields {
+		if f.From != nil {
+			marked--
+		}
+	}
+	if marked != 0 {
+		t.Errorf("the panel marks other values than the frame: %+v", d.Fields)
+	}
+	var keptWant, keptGot []string
+	for _, m := range frameKeptRow.FindAllStringSubmatch(panelFrame, -1) {
+		keptWant = append(keptWant, m[1]+" · "+m[2])
+	}
+	for _, b := range d.Books {
+		keptGot = append(keptGot, string(b.Label)+" · "+string(b.Value))
+	}
+	slices.Sort(keptWant)
+	slices.Sort(keptGot)
+	if !slices.Equal(keptWant, keptGot) {
+		t.Errorf("where she is kept = %q, the frame %q", keptGot, keptWant)
+	}
+	if got := ids(d.Actions); !equalStrings(got, []string{"record.edit", "contact.timeline"}) ||
+		!strings.HasSuffix(d.Actions[0].Href, "/linked/4f2b-9c31-a0e7/copies") {
+		t.Errorf("panel actions = %+v", d.Actions)
+	}
+	sameMenu(t, "linked panel", d.Menu, "s-contacts-36")
 	var on []string
 	for _, g := range withPanel.Groups {
 		for _, r := range g.Rows {

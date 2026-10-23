@@ -319,8 +319,10 @@ func (lr linkedRecord) linkedHead(k view.Kind) string {
 func (s *Server) linkedActions(sess *session.Session, segment, uid, group string) ([]view.Action, []view.MenuItem) {
 	edit := view.Action{ID: "record.edit", Label: "Edit", Icon: "i-pencil", Href: s.route("/app/" + segment + "/linked/" + url.PathEscape(uid) + "/copies"),
 		Method: "GET", Primary: true, Enabled: true}
+	// Unlink is the form of the decision, the group its button's
+	// (s-contacts-36).
 	unlink := view.Action{ID: "duplicates.unlink", Label: "Unlink", Icon: "i-link", Method: "POST", Enabled: true,
-		Href: s.postQuery("/app/duplicates/decide", url.Values{"do": {"unlink"}, "group": {group}})}
+		Href: s.postQuery("/app/duplicates/decide", url.Values{"do": {"unlink"}}), Name: "group", Value: group}
 	menu := []view.MenuItem{
 		{Action: view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Method: "GET", Enabled: true}},
 		{Action: view.Action{ID: "duplicates.open", Label: "Open in Duplicates", Icon: "i-dup", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true}},
@@ -402,4 +404,48 @@ func linkedByUID(blob sealed.Blob, k view.Kind, uid string) (sealed.LinkedGroup,
 		}
 	}
 	return sealed.LinkedGroup{}, false
+}
+
+// linkedDetails is the panel of a linked row of the combined address book
+// (from-typecase note 117 p. 5, s-contacts-1): the linked record, not its
+// first copy — «in 3 books», the values chosen with where they came from,
+// Edit to «Which copy to edit?», where it is kept —, and neither the Delete
+// nor the Source of one copy. d is the panel of the row's copy, kept when
+// the group cannot be read.
+func (s *Server) linkedDetails(ctx context.Context, sess *session.Session, spec kindSpec, it listed, d view.Details) view.Details {
+	ref := sealed.RecordRef{AccountID: it.from.conn.ID, Col: it.from.col.Path, UID: listedUID(spec.kind, it)}
+	g, ok := dupes.LinkedOf(s.catalogOf(sess).Duplicates.Linked, ref)
+	if !ok || g.Kind != spec.kind {
+		return d
+	}
+	lr, ok := s.linkedRecordOf(ctx, sess, spec, g)
+	if !ok {
+		return d
+	}
+	out := s.recordDetails(lr.base.c, lr.base.ref.UID, lr.chosen)
+	out.Close = d.Close
+	out.Subtitle = text("in " + strconv.Itoa(len(lr.members)) + " " + copyHolders[spec.kind][1])
+	out.Fields = lr.markFrom(out.Fields)
+	out.Foreign, out.ForeignShow, out.Source, out.DeleteNote = nil, nil, view.SourceBlock{}, ""
+	if spec.kind == view.KindContact {
+		out.Books = s.keptRows(lr, func(q question) []recValue { return q.shownValues() })
+	}
+	actions, menu := s.linkedActions(sess, spec.segment, lr.base.ref.UID, g.ID)
+	// The panel's Edit is a small button, as its neighbours (s-contacts-1).
+	edit := actions[0]
+	edit.Primary, edit.Icon = false, ""
+	kept := []view.Action{edit}
+	for _, a := range out.Actions {
+		if a.ID == "contact.timeline" || a.ID == "record.open" {
+			kept = append(kept, a)
+		}
+	}
+	out.Actions, out.Menu = kept, menu
+	return out
+}
+
+// combinedBase reports whether a list's address is a combined view's —
+// «/app/contacts» —, not one collection's.
+func combinedBase(base string) bool {
+	return strings.Count(strings.Trim(base, "/"), "/") == 1
 }

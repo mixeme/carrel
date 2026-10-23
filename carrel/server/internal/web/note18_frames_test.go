@@ -167,7 +167,7 @@ func TestAttachmentsShortcutWithoutAFolder(t *testing.T) {
 // frame's reason.
 func TestBackToDefaultsIsOffAsTheFrameDraws(t *testing.T) {
 	foot := frameMenuFoot.FindStringSubmatch(mockupFrame(t, "s-dup-7"))
-	m := regexp.MustCompile(`<button class="tc-btn is-sm" title="([^"]*)" type="button" disabled>([^<]*)</button>`).FindStringSubmatch(foot[1])
+	m := regexp.MustCompile(`<button class="tc-btn is-sm" title="([^"]*)" type="submit" name="do" value="defaults" disabled>([^<]*)</button>`).FindStringSubmatch(foot[1])
 	if m == nil {
 		t.Fatal("s-dup-7 draws no disabled Back to defaults: read it again")
 	}

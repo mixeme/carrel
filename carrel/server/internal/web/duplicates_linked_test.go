@@ -37,7 +37,7 @@ func TestLinkedRecordShowsTheChoice(t *testing.T) {
 		"choice.TEL": {phone.Values[0]},
 		// Email unticked: not sent.
 	}
-	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, form))
+	f.h.do(decideRequest(t, f.sess, g, "duplicates.link", form))
 	d := f.decisions(t)
 	if len(d.Linked) != 1 || !slices.Equal(d.Linked[0].Dropped["EMAIL"], []string{dupes.ValueKey("EMAIL", "ada@engines.example")}) {
 		t.Fatalf("linked = %+v, want the address unticked kept as dropped", d.Linked)

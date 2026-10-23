@@ -23,7 +23,7 @@ func TestTheSourcesRubricCountsApart(t *testing.T) {
 	f := newDupFixture(t)
 	f.load(t)
 	check("duplicates", f.page(t).Rail)
-	m := openMerge(t, f.h, f.sess, actionOf(t, onlyGroup(t, f.page(t)), "duplicates.merge"), nil)
+	m := openMerge(t, f.h, f.sess, onlyGroup(t, f.page(t)), nil)
 	check("merge", m.Rail)
 
 	srv := searchServer(t)

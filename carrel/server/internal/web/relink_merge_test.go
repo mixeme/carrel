@@ -59,7 +59,7 @@ func TestAMergeKeepsWhatPointedAtTheGoneCard(t *testing.T) {
 
 	df.load(t)
 	g := onlyGroup(t, df.page(t))
-	p := openMerge(t, df.h, df.sess, actionOf(t, g, "duplicates.merge"), nil)
+	p := openMerge(t, df.h, df.sess, g, nil)
 	if strings.HasSuffix(string(p.Target.Stamp), "Work") {
 		p = mergePage(t, df, mergeAction(t, p, "duplicates.merge.into").Href)
 	}

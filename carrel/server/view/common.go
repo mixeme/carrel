@@ -80,6 +80,12 @@ type Action struct {
 	// Files и Remove вложений новой записи; false — действие уходит своей
 	// формой
 	Submits bool `json:"submits,omitempty"`
+	// Name и Value — пара, которую кнопка добавляет к отправке формы:
+	// решение карточки группы — кнопка её формы do=link, do=choose
+	// (s-dup-1); Unlink в «⋯» связанной записи — group=<ID> к форме
+	// /app/duplicates/decide?do=unlink (s-contacts-36). Пусто — пары нет
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
 	// Target — зона C-7.2, которую меняет ответ-фрагмент на это действие
 	// (C-7.1): sheet у адреса, отвечающего листом, rail у формы рейла, poll
 	// у полосы хода, queue у загрузки, main у новой папки — по C-5; пусто —

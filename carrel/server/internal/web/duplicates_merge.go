@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/dupes"
@@ -22,9 +22,12 @@ import (
 // written, what deleted and what the kept record gains; POST does it. The
 // page and its confirmation name the group (group=), the kept member by its
 // place in the group (into=), the answers to the questions (choice.<PROP>=
-// the option's index, as the MergeRow lists them) and the version of every
-// member shown (v.<place>=). A member that changed between the two is not
-// merged over: the person confirmed what they saw.
+// the merge's option index), the values left out (drop.<PROP>=the value,
+// dupes.ValueKey) and the version of every member shown (v.<place>=). A
+// member that changed between the two is not merged over: the person
+// confirmed what they saw. The page asks nothing (from-typecase note 117
+// p. 3, s-dup-2, -4): the questions are the group card's, answered there or
+// when it was linked.
 //
 // The order is the safety. The kept record is written with If-Match and read
 // back; only a write the server kept whole lets the others go, each deleted
@@ -186,6 +189,38 @@ func choicesOf(r *http.Request) map[string]int {
 	return out
 }
 
+// dropsOf are the values the card unticked (drop.<PROP>=the value): not
+// carried into the merged record.
+func dropsOf(r *http.Request) map[string][]string {
+	out := map[string][]string{}
+	_ = r.ParseForm()
+	for k, v := range r.Form {
+		if prop, ok := strings.CutPrefix(k, "drop."); ok {
+			out[strings.ToUpper(prop)] = v
+		}
+	}
+	return out
+}
+
+// keptAnswers are what the card answered, as the address of the merge with
+// another member kept carries them: each value by its member's place
+// (pick.<PROP>=) — a merge's own option index depends on the member kept —
+// and the values unticked.
+func keptAnswers(refs []sealed.RecordRef, picks map[string]sealed.RecordRef, drops map[string][]string) url.Values {
+	q := url.Values{}
+	for p, ref := range picks {
+		if at := slices.Index(refs, ref); at >= 0 {
+			q.Set("pick."+p, strconv.Itoa(at))
+		}
+	}
+	for p, keys := range drops {
+		for _, k := range keys {
+			q.Add("drop."+p, k)
+		}
+	}
+	return q
+}
+
 func (mr mergeRead) others() []mergeMember {
 	var out []mergeMember
 	for i, m := range mr.members {
@@ -228,43 +263,6 @@ func valueText(calendar bool, prop string, v model.RawValue, from mergeMember) s
 	return t
 }
 
-// whenText is the time of a member as the question «When» offers it (А6 of
-// the audit of 11.10.2026): the day and the hours, the zone when it is not
-// the instance's, the repetition in words, how many occurrences were
-// rewritten by hand — and whose it is, which also tells apart two times
-// that read the same.
-func whenText(tf timeFmt, m mergeMember) string {
-	var parts []string
-	start := time.Time{}
-	if m.c.spec.kind == view.KindTask {
-		if due, err := cal.DueOf(m.obj, tf.tz); err == nil && !due.Start.IsZero() {
-			parts = append(parts, "Due "+tf.timeOrDate(due))
-			start = due.Start
-		}
-		if tm, err := cal.TimingOf(m.obj, tf.tz); err == nil && !tm.Start.IsZero() {
-			parts = append(parts, "starts "+tf.timeOrDate(tm))
-			start = tm.Start
-		}
-	} else if tm, err := cal.TimingOf(m.obj, tf.tz); err == nil && !tm.Start.IsZero() {
-		when := tf.when(tm)
-		if z := tf.zone(tm.Zone); z != "" {
-			when += " (" + z + ")"
-		}
-		parts = append(parts, when)
-		start = tm.Start
-	}
-	if len(parts) == 0 {
-		parts = append(parts, "No time")
-	}
-	if raw := cal.RawRRULE(m.obj); raw != "" {
-		parts = append(parts, tf.recurrence(raw, start))
-	}
-	if over, err := cal.Overrides(m.obj, tf.tz); err == nil && len(over) > 0 {
-		parts = append(parts, plural(len(over), "rewritten occurrence"))
-	}
-	return strings.Join(parts, ", ") + " (from " + string(m.c.stamp()) + ")"
-}
-
 func gainLine(calendar bool, g dupes.Gain, from mergeMember) string {
 	v := valueText(calendar, g.Prop, g.Value, from)
 	if strings.HasPrefix(v, g.Prop+" (") {
@@ -288,7 +286,7 @@ func gainLine(calendar bool, g dupes.Gain, from mergeMember) string {
 }
 
 // mergePlan is the merged record and the page that shows it.
-func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[string]int, picks map[string]sealed.RecordRef) (*model.Object, view.DuplicatesMergePage) {
+func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[string]int, picks map[string]sealed.RecordRef, drops map[string][]string) (*model.Object, view.DuplicatesMergePage) {
 	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge on the server"), GroupID: mr.g.id}
 	page.Rail = view.Rail{Nav: s.navRows(sess, mr.st.blob, "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess)}
 	// The merge stands on the same ground as the screen it came from: every
@@ -318,12 +316,22 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 	}
 	// A linked group's answers are the merge's defaults: asked once (S-16);
 	// what was chosen on the card the merge came from goes over them (Дб9).
+	// A question is named as the card asks it; the merge names a time —
+	// when or due — When and a note's text DESCRIPTION.
+	linked := mr.st.linked(mr.g.id)
 	prefs := map[string]sealed.RecordRef{}
-	for p, ref := range mr.st.linkedPrefs(mr.g.id) {
-		prefs[p] = ref
+	for p, ref := range linked.Prefs {
+		prefs[mergeProp(p)] = ref
 	}
 	for p, ref := range picks {
-		prefs[p] = ref
+		prefs[mergeProp(p)] = ref
+	}
+	gone := map[string][]string{}
+	for p, keys := range linked.Dropped {
+		gone[p] = keys
+	}
+	for p, keys := range drops {
+		gone[p] = keys
 	}
 	if len(prefs) > 0 {
 		if _, probe, err := dupes.Merge(target.obj, objs, nil); err == nil {
@@ -335,7 +343,7 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 					continue
 				}
 				for _, m := range all {
-					if m.ref == ref && len(m.obj.PropText(p)) == 0 {
+					if p != dupes.When && m.ref == ref && len(m.obj.PropText(p)) == 0 {
 						choices[p] = dupes.Leave
 					}
 				}
@@ -353,7 +361,7 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 			}
 		}
 	}
-	merged, plan, err := dupes.Merge(target.obj, objs, choices)
+	merged, plan, err := dupes.MergeKeeping(target.obj, objs, choices, gone)
 	if err != nil {
 		confirm.Reason = text("These records could not be put together: " + err.Error())
 		page.Warning = view.Notice{Role: view.NoticeAlert, Title: "Nothing can be merged", Body: confirm.Reason}
@@ -361,7 +369,6 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 		return nil, page
 	}
 	calendar := target.obj.IsCalendar()
-	tf := s.timeFor(sess)
 	from := func(i int) mergeMember {
 		if i == 0 {
 			return target
@@ -369,23 +376,13 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 		return others[i-1]
 	}
 
+	// The answers go with the confirmation, as the page used them: the
+	// merge is written as it was shown.
 	q := url.Values{}
 	for _, qn := range plan.Questions {
-		row := view.MergeRow{Property: text(choiceLabel(qn.Prop)), Name: "choice." + qn.Prop}
-		chosen := 0
 		if n, ok := choices[qn.Prop]; ok && n >= 0 && n < len(qn.Options) {
-			chosen = n
+			q.Set("choice."+qn.Prop, strconv.Itoa(n))
 		}
-		for _, o := range qn.Options {
-			if qn.Prop == dupes.When {
-				row.Options = append(row.Options, text(whenText(tf, from(o.From))))
-				continue
-			}
-			row.Options = append(row.Options, text(valueText(calendar, qn.Prop, o.Value, from(o.From))))
-		}
-		row.Chosen = chosen
-		page.Rows = append(page.Rows, row)
-		q.Set("choice."+qn.Prop, strconv.Itoa(chosen))
 	}
 	// A property left out goes with the confirmation too (Дб7).
 	for p, n := range choices {
@@ -393,12 +390,10 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 			q.Set("choice."+p, strconv.Itoa(n))
 		}
 	}
-	for _, prop := range plan.Union {
-		row := view.MergeRow{Property: text(choiceLabel(prop)), Union: true}
-		for _, v := range merged.Props()[prop] {
-			row.Options = append(row.Options, text(valueText(calendar, prop, v, target)))
+	for p, keys := range gone {
+		for _, k := range keys {
+			q.Add("drop."+p, k)
 		}
-		page.Rows = append(page.Rows, row)
 	}
 	for _, m := range mr.members {
 		q.Set("v."+strconv.Itoa(m.place), m.obj.ETag)
@@ -446,16 +441,12 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 	confirm.Enabled, confirm.Href = true, s.mergeHref(mr.g.id, target.place, q)
 	page.Actions = []view.Action{confirm, back}
 	// Where it stays: a segment of the sources (s-dup-2), the kept one on,
-	// another the same page with it kept; a read-only one cannot be
-	// rewritten, and says so.
+	// another the same page with it kept. A group with a read-only member
+	// is not merged at all (mergeBlocked), so every source can be chosen.
 	for _, m := range mr.members {
 		a := view.Action{ID: "duplicates.merge.into", Label: text(string(m.c.stamp())), Method: "GET", Enabled: true, On: m.place == target.place}
-		switch {
-		case a.On:
-		case m.c.col.ReadOnly:
-			a.Enabled, a.Reason = false, text(collectionLabel(m.c.col)+" is read-only here, so the merged record cannot be written there.")
-		default:
-			a.Href = s.mergeHref(mr.g.id, m.place, nil)
+		if !a.On {
+			a.Href = s.mergeHref(mr.g.id, m.place, keptAnswers(mr.g.refs, picks, drops))
 		}
 		page.Stays = append(page.Stays, a)
 	}
@@ -472,7 +463,7 @@ func (s *Server) getDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.lostGroupPage(sess, mr, *missing))
 		return
 	}
-	_, page := s.mergePlan(sess, mr, choicesOf(r), picksOf(r, mr))
+	_, page := s.mergePlan(sess, mr, choicesOf(r), picksOf(r, mr), dropsOf(r))
 	s.writePage(w, r, http.StatusOK, page)
 }
 
@@ -495,7 +486,7 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.lostGroupPage(sess, mr, *missing))
 		return
 	}
-	merged, page := s.mergePlan(sess, mr, choicesOf(r), nil)
+	merged, page := s.mergePlan(sess, mr, choicesOf(r), nil, dropsOf(r))
 	if merged == nil {
 		s.writePage(w, r, http.StatusOK, page)
 		return

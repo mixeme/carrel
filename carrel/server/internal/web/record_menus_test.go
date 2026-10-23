@@ -159,7 +159,8 @@ func TestContactMenusAreTheFrames(t *testing.T) {
 	if a := actionByID(panel.Actions, "contact.timeline"); a == nil || a.Href != card+"/timeline" {
 		t.Errorf("All records = %+v, want the timeline", a)
 	}
-	drawn(t, "panel", panel.Actions, "s-contacts-1")
+	// s-contacts-1 draws the panel of a linked record (from-typecase note
+	// 117 p. 5), whose buttons TestContactsListIsTheFrames reads.
 
 	timeline := decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline", f.sess)))
 	sameMenu(t, "timeline card", timeline.Card.Menu, "s-contacts-11")

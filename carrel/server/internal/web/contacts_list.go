@@ -182,6 +182,9 @@ func (s *Server) openInPanel(r *http.Request, sess *session.Session, base string
 				if r.URL.RawQuery != "" {
 					d.Close += "?" + r.URL.RawQuery
 				}
+				if combinedBase(base) && linkedState(it) == view.RecordLinked {
+					d = s.linkedDetails(r.Context(), sess, recordKinds["contacts"], it, d)
+				}
 				// «Show 3» without scripts: the same list, the same panel,
 				// the kept properties open.
 				if opened, _ := r.Context().Value(foreignKey{}).(bool); opened {

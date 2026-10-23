@@ -13,7 +13,9 @@ VERSION:3.0
 UID:4f2b-9c31-a0e7
 N:Ковалёва;Анна;;;
 FN:Анна Ковалёва
+ORG:Издательство «Слово»
 TEL;TYPE=CELL:+7 912 445-10-88
 EMAIL;TYPE=WORK:a.kovaleva@example.org
+CATEGORIES:работа,издательство
 REV:20231105T164200Z
 END:VCARD
