@@ -1167,14 +1167,19 @@ func TestFixtureCombinedContactsPartial(t *testing.T) {
 	if first.Poll == nil {
 		t.Fatal("the combined book has no poll")
 	}
+	// Two answered and the third being asked — not still waiting for its
+	// turn, which a loaded machine shows for a moment.
 	waitPoll(t, app.h, app.sess, first.Poll.TaskID, func(b view.PollBar) bool {
-		done := 0
+		done, asked := 0, 0
 		for _, sp := range b.Sources {
-			if sp.State == view.SourceDone || sp.State == view.SourceEmpty {
+			switch sp.State {
+			case view.SourceDone, view.SourceEmpty:
 				done++
+			case view.SourceQuerying:
+				asked++
 			}
 		}
-		return done == 2
+		return done == 2 && asked == 1
 	})
 	app.compare(t, "app-contacts/partial.json", app.h.do(get("/app/contacts?task="+first.Poll.TaskID, app.sess)))
 }

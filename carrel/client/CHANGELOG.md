@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.7.3 — 2026-10-23
+
+Server `v0.2.368`, Typecase `ce9da05`. Stage 5: without scripts (U-8).
+
+### Fixed
+
+- **Importing a file without scripts** answered 403: the step's dialog is
+  the form that sends the file, but it had neither the action's method nor
+  the session's token (C-11). Both are now the action's (`import.choose`).
+  Found by the server's new walk without scripts.
+
 ## v0.7.2 — 2026-10-23
 
 Server `v0.2.367`, Typecase `ce9da05`.

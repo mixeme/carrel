@@ -256,7 +256,11 @@ func source(p *view.ImportPage, d w.Dialog) w.Dialog {
 	preview := w.Button{Label: "Preview file", Kind: w.ButtonPrimary, Submit: true}
 	if choose != nil {
 		preview.Label = string(choose.Label)
-		d.Action = choose.Href
+		// The dialog is the form that sends the file (U-8): to the step's
+		// address, as the action says, with the session's token it carries
+		// (C-11) — without a script nothing else sends it.
+		d.Action, d.Method = choose.Href, choose.Method
+		d.Fields = bind.ActionForm(*choose, "").Fields
 		if !choose.Enabled {
 			preview.State, preview.Reason = w.ButtonDisabled, string(choose.Reason)
 		}

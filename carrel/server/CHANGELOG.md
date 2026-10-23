@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.368 — 2026-10-23
+
+U-8 held end to end: the instance as it is served, walked by a browser
+without scripts.
+
+### Tests
+
+- **`TestTheAppWorksWithoutScripts`** (`cmd/carrel`): a browser that goes
+  by links and sends forms as a browser with scripts off does — hidden
+  fields, ticked boxes, chosen options, the button pressed, `form=`,
+  multipart, Enter in a field — through the first run and signing in,
+  connecting an account and a storage, the rail's ticks, a contact, an
+  event, a task and a note made, edited and deleted, a file of cards
+  imported, a link published and opened by a guest, a file uploaded and
+  downloaded, signing out. Then it goes by every link it reaches, each
+  screen once, and holds that each answers a page or a file: never a
+  failure, and JSON only where a screen waits for the library
+  (`notYetPages`: the quick sheets and the export of a combined view —
+  Typecase's task 197 p. 5 —, duplicates — 190 —, the search — 227 —, the
+  public pages — 196). A page that turns from JSON into a page is said, so
+  the list stays honest.
+- `golang.org/x/net` is a direct requirement (its HTML parser, in that
+  test).
+- The fixture of a combined book half answered waits until the third book
+  is being asked, not only until two answered: on a loaded machine it was
+  caught still waiting for its turn.
+
 ## v0.2.367 — 2026-10-23
 
 ### Changed

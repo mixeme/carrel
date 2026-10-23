@@ -15,6 +15,7 @@ require (
 	github.com/yuin/goldmark v1.8.6
 	golang.org/x/crypto v0.56.0
 	golang.org/x/image v0.46.0
+	golang.org/x/net v0.58.0
 	golang.org/x/sync v0.23.0
 	golang.org/x/text v0.42.0
 	rsc.io/qr v0.2.0
@@ -23,7 +24,6 @@ require (
 require (
 	carrel.dev/typecase v0.0.0-00010101000000-000000000000 // indirect
 	filippo.io/hpke v0.4.0 // indirect
-	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 )
 
