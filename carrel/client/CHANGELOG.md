@@ -4,6 +4,17 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.7.0 — 2026-10-23
+
+Server `v0.2.365`, Typecase `ce9da05`. Import and collections built whole:
+the import wizard (s-io-3 … -19) and the sheets of collections (s-profile-5
+… -35) hold against their frames. The milestones are renumbered (the
+owner's decision of 23.10.2026): import and collections are `v0.7.0`,
+search and duplicates — waiting for Typecase's tasks 227 and 190 —
+`v0.8.0`. Nothing else changed since `v0.6.9`.
+
+**Tagged:** `client-v0.7.0`.
+
 ## v0.6.9 — 2026-10-23
 
 Server `v0.2.365`, Typecase `ce9da05`.
