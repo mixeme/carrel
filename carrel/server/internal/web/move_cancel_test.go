@@ -69,8 +69,24 @@ func TestAMoveSaysTheAttendeesMayHearOfACancellation(t *testing.T) {
 
 	f, away, side := build(true)
 	said := sheet(f, "meet", away, false).Cancels
-	if !strings.Contains(string(said), "may") || !strings.Contains(string(said), "cancel") || strings.Contains(strings.ToLower(string(said)), "invit") {
-		t.Errorf("a move of a meeting off a server that schedules says %q, want that its attendees may hear of a cancellation, and nothing of invitations", said)
+	// The words of s-agenda-29 after its server's name.
+	want, ok := strings.CutPrefix(frameOne(t, frameSheetMsg, mockupFrame(t, "s-agenda-29"), "message")[1], "radicale · vps")
+	if !ok {
+		t.Fatal("s-agenda-29 names another server: read it again")
+	}
+	if !strings.HasSuffix(string(said), want) || string(said) == want {
+		t.Errorf("a move of a meeting off a server that schedules says %q, the frame %q", said, want)
+	}
+	// A form shown for a move inside the account, sent with another
+	// account chosen, is the sheet again with the cancellation said
+	// (S-18): nothing is moved before it is said.
+	inside := sheet(f, "meet", side, false)
+	form := formFields(inside.Form)
+	to, into, _ := strings.Cut(away, "|")
+	form.Set(inside.Target.Field, to+"/"+url.PathEscape(into))
+	again := decode[view.MoveSheet](t, f.h.do(postForm(inside.Form.Action, f.sess, form)))
+	if again.Cancels != said || formFields(again.Form).Get("warned") != "cancels" {
+		t.Errorf("the press for another account = %+v, want the sheet again saying %q", again, said)
 	}
 	for name, s := range map[string]view.MoveSheet{
 		"a copy":                     sheet(f, "meet", away, true),
@@ -85,7 +101,10 @@ func TestAMoveSaysTheAttendeesMayHearOfACancellation(t *testing.T) {
 	// what it does (note 112 p. 5); its copy says nothing.
 	cancelOf := func(w view.Runs) view.Text {
 		said := saidRuns(w)
-		i := strings.Index(said, " may tell the attendees")
+		i := strings.Index(said, " may send attendees")
+		if i < 0 {
+			i = strings.Index(said, " may tell the attendees")
+		}
 		if i < 0 {
 			return ""
 		}
@@ -111,8 +130,8 @@ func TestAMoveSaysTheAttendeesMayHearOfACancellation(t *testing.T) {
 		t.Helper()
 		return decode[view.CollectionDeleteSheet](t, f.h.do(get("/app/collections/delete?"+url.Values{"a": {f.id}, "c": {searchWork}}.Encode(), f.sess)))
 	}
-	if said := cancelOf(deleting(f).Warning); said != cancelOf(calendar(f, false).Warning) {
-		t.Errorf("a calendar's delete off a server that schedules says %q, its move %q", said, cancelOf(calendar(f, false).Warning))
+	if said := cancelOf(deleting(f).Warning); !strings.Contains(string(said), "may") || !strings.Contains(string(said), "cancel") {
+		t.Errorf("a calendar's delete off a server that schedules says %q", said)
 	}
 
 	plain, away, _ := build(false)

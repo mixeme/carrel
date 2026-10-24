@@ -723,7 +723,9 @@ func (s *Server) postKindImportEntry(w http.ResponseWriter, r *http.Request, kin
 
 // getKindExportEntry is the way into the export from a combined view: which
 // collection to hand over. One is not guessed — the file would be somebody
-// else's records (S-14).
+// else's records (S-14). The sheet is a GET form (s-agenda-30): the
+// collection a radio «c», a calendar's span the whole of it or days; sent,
+// it is the collection's own export.
 func (s *Server) getKindExportEntry(w http.ResponseWriter, r *http.Request, kind string) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -734,38 +736,89 @@ func (s *Server) getKindExportEntry(w http.ResponseWriter, r *http.Request, kind
 		s.notFound(w, r)
 		return
 	}
+	q := r.URL.Query()
+	if v := q.Get("c"); v != "" {
+		account, col, _ := strings.Cut(v, "/")
+		path, err := url.PathUnescape(col)
+		c, ok := s.collectionOf(sess, spec, account, path)
+		if err != nil || !ok || c.col.Gone {
+			s.notFound(w, r)
+			return
+		}
+		out := url.Values{}
+		switch {
+		case spec.kind != view.KindEvent:
+		case q.Get("span") == "whole":
+			out.Set("whole", "1")
+		default:
+			out.Set("from", q.Get("from"))
+			out.Set("to", q.Get("to"))
+		}
+		s.redirect(w, r, s.postQuery(c.listPath()+"/export", out))
+		return
+	}
 	blob := s.catalogOf(sess)
-	sheet := view.ExportSheet{Kind: spec.kind, Actions: []view.Action{
+	ext := exportFormats[spec.kind].ext
+	download := view.Action{ID: "export.download", Label: text("Download " + ext), Icon: "i-download", Method: "GET", Primary: true, Enabled: true, Submits: true}
+	sheet := view.ExportSheet{Kind: spec.kind, Actions: []view.Action{download,
 		{ID: "export.cancel", Label: "Cancel", Href: s.route("/app/" + spec.segment), Method: "GET", Enabled: true},
 	}}
+	sheet.Target.Field = "c"
 	for _, conn := range blob.Connections {
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Gone || !col.Has(spec.kind) {
 				continue
 			}
-			o := origin{conn: conn, col: col}
-			q := url.Values{}
-			if spec.kind == view.KindEvent {
-				q.Set("whole", "1") // a calendar goes whole from here: there is no week on this screen
+			opt := view.TargetOption{
+				ID:    s.postQuery("/app/"+spec.segment+"/export", url.Values{"c": {moveValue(conn.ID, col.Path)}}),
+				Label: text(collectionLabel(col)), Stamp: view.Stamp(connLabel(conn)), Colour: catalogColour(col),
+				Value: moveValue(conn.ID, col.Path),
 			}
-			href := s.postQuery(o.listPath(spec.segment)+"/export", q)
-			sheet.Target.Options = append(sheet.Target.Options, view.TargetOption{
-				ID: href, Href: href, Label: text(collectionLabel(col)),
-				Stamp: o.stamp(), Colour: catalogColour(col),
-			})
+			// A server that does not answer has no file to give (s-agenda-30:
+			// «password · 401»).
+			if why := silentWhy(sess, conn); why != "" {
+				opt.ReadOnly, opt.Reason = true, text(why)
+			} else if sheet.Target.Chosen == "" {
+				sheet.Target.Chosen = opt.ID
+			}
+			sheet.Target.Options = append(sheet.Target.Options, opt)
 		}
 	}
 	if len(sheet.Target.Options) == 0 {
 		s.notFound(w, r)
 		return
 	}
+	if sheet.Target.Chosen == "" {
+		sheet.Actions[0].Enabled, sheet.Actions[0].Reason = false, "No collection here answers now."
+	}
+	var rows []view.FormRow
+	if spec.kind == view.KindEvent {
+		rows = s.exportSpan(sess)
+	}
+	sheet.Form = s.plainForm("/app/"+spec.segment+"/export", "GET", rows...)
 	if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
 		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
 	// Over the list it was opened from, else the kind's combined one (Лс29).
-	sheet.Under = s.underOf(r, s.sheetBack(r, r.URL.Query().Get("back"), true), "/app/"+spec.segment)
+	sheet.Under = s.underOf(r, s.sheetBack(r, q.Get("back"), true), "/app/"+spec.segment)
 	s.writePage(w, r, http.StatusOK, sheet)
+}
+
+// exportSpan is «What goes in» of a calendar's export (s-agenda-30): the
+// whole calendar, which turns the days off, or days — from today to the end
+// of the month, chosen as the sheet opens.
+func (s *Server) exportSpan(sess *session.Session) []view.FormRow {
+	tf := s.timeFor(sess)
+	today := tf.now.In(tf.tz)
+	return []view.FormRow{
+		{Name: "span", Label: "What goes in", Kind: view.InputRadio, Value: "dates", Options: []view.Option{
+			{Value: "whole", Label: "Whole calendar", Disables: "from to"},
+			{Value: "dates", Label: "Dates", Selected: true},
+		}},
+		{Name: "from", Label: "From", Kind: view.InputDate, Mono: true, Value: text(today.Format("2006-01-02"))},
+		{Name: "to", Label: "To", Kind: view.InputDate, Mono: true, Value: text(today.AddDate(0, 1, -today.Day()).Format("2006-01-02"))},
+	}
 }
 
 func (s *Server) getKindImport(w http.ResponseWriter, r *http.Request, kind string) {

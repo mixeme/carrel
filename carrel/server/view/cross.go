@@ -682,17 +682,12 @@ type RewriteSheet struct {
 	Title   Text          `json:"title"`   // «Rewrite the address in their records?», у нескольких замен — «… addresses …» (s-contacts-29)
 	Subject Text          `json:"subject"` // «Анна Ковалёва · saved»
 	Pairs   []RewritePair `json:"pairs"`   // какой адрес на какой и сколько записей называют старый
-	// Effects — «What rewriting can set off» строками, как одну замену
-	// рисуют s-contacts-15, -19, -20: Label — «9 records on servers that
-	// schedule», Value — что это может вызвать
-	Effects []Field `json:"effects"`
 	// Groups — те же группы отметками, как s-contacts-29 (решения владельца
 	// 12.10.2026, А5): снятая исключает группу; форма шлёт отметки всегда
 	Groups []RewriteGroup `json:"groups"`
 	// Both — строка о записи, что стоит в двух группах: переписывается, только
 	// когда отмечены обе, — с её названием (s-contacts-29); пусто — таких нет
-	Both Text    `json:"both"`
-	Kept []Field `json:"kept"` // Label — «2 records in Shared», Value — «read-only; they keep the old address»
+	Both Text `json:"both"`
 	// KeptNote — то же предложениями, как строка над Note в кадре маршрута
 	// (s-contacts-15): «2 records in Shared are read-only and keep the old
 	// address.»; пусто — такого нет
@@ -720,7 +715,8 @@ type RewritePair struct {
 	// Choice — выбор, на какой адрес переписать (s-contacts-29): поле
 	// «to.N», варианты — нынешние адреса карточки и «Do not rewrite»
 	// (пустое значение); по умолчанию — адрес, набранный в той же строке
-	// формы, иначе «Do not rewrite» (решение владельца 12.10.2026, А4)
+	// формы, иначе «Do not rewrite» (решение владельца 12.10.2026, А4);
+	// пустой Name — переписывать нечего, выбора нет (s-contacts-20)
 	Choice FormRow `json:"choice"`
 }
 
@@ -739,11 +735,15 @@ type RewriteGroup struct {
 }
 
 // ExportSheet — «из какой коллекции отдать»: вход в экспорт из сведённого
-// вида, где коллекция не одна.
+// вида, где коллекция не одна (s-agenda-30). Лист — форма GET: коллекция —
+// радио «c» (Target.Field, Value «подключение/коллекция»), у календаря —
+// «What goes in» (span: whole выключает даты | dates) и даты from, to;
+// Download отдаёт файл, ничего не пишется.
 type ExportSheet struct {
 	Kind    Kind         `json:"kind"`
-	Target  TargetPicker `json:"target"` // варианты — адреса выдачи каждой коллекции
-	Actions []Action     `json:"actions"`
+	Target  TargetPicker `json:"target"`  // коллекции рода; сервер, который не отвечает, — недоступен с причиной («password · 401»)
+	Form    Form         `json:"form"`    // GET /app/{kind}/export: span, from, to у календаря
+	Actions []Action     `json:"actions"` // Download .ics (.vcf, .zip) · Cancel
 	// Under — экран под листом, пришедшим страницей (Лс29): откуда открыт (back, иначе Referer), иначе сведённый список рода; nil у фрагмента
 	Under *Under `json:"under"`
 }

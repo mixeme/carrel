@@ -84,8 +84,8 @@ func TestConnectionLineIsTheFrame(t *testing.T) {
 }
 
 // s-profile-7: the note of the rename sheet is the frame's — the address
-// does not change, the name and the colour go to the server; a book, which
-// has no colour, says the name alone.
+// stays (Р-77: only what the person would not think of); a book says the
+// same.
 func TestRenameNoteIsTheFrame(t *testing.T) {
 	m := regexp.MustCompile(`<div class="tc-msg tc-msg--flush-top2">([^<]*)</div>`).FindStringSubmatch(mockupFrame(t, "s-profile-7"))
 	if m == nil {
@@ -103,7 +103,7 @@ func TestRenameNoteIsTheFrame(t *testing.T) {
 	if said(sheet.Note) != frameText(m[1]) {
 		t.Errorf("note = %q,\nthe frame %q", sheet.Note, frameText(m[1]))
 	}
-	book := strings.Replace(frameText(m[1]), "The new name and colour are written to the server — other clients will show them", "The new name is written to the server — other clients will show it", 1)
+	book := frameText(m[1])
 	b := contactsFixture(t, false)
 	conns := decode[view.ConnectionsPage](t, b.h.do(get("/app/settings/connections", b.sess)))
 	for _, row := range conns.Accounts[0].Collections {

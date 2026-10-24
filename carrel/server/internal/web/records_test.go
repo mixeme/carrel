@@ -413,6 +413,46 @@ func TestQuickSheetFromTheShellRemembersWhereRecordsGo(t *testing.T) {
 	}
 }
 
+// s-notes-5, -8 (Typecase's note 119): «Where» of the quick sheet is a field
+// of its form — «into», the collection last written into first and marked,
+// a read-only one closed with the frame's reason — and Save writes into the
+// one chosen there, whatever address the form posts to.
+func TestQuickSheetWhereIsAField(t *testing.T) {
+	ro := frameOne(t, regexp.MustCompile(`<button class="tc-menu__item" type="button" role="menuitem" title="([^"]*)" disabled>`), mockupFrame(t, "s-notes-8"), "read-only collection")[1]
+	if !strings.Contains(mockupFrame(t, "s-notes-8"), `name="into"`) {
+		t.Fatal("s-notes-8 names «Where» another way: read it again")
+	}
+	f := newMoveFixture(t)
+	people := "/app/contacts/" + f.id + "/" + url.PathEscape(peopleBook) + "/new/quick"
+	friends := "/app/contacts/" + f.id + "/" + url.PathEscape(friendsBook) + "/new/quick"
+	form := formFields(decode[view.NewSheet](t, f.h.do(get(people, f.sess))).Form)
+	form.Set("fn", "Ada Lovelace")
+	if resp := f.h.do(postForm(people, f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
+	}
+
+	sheet := decode[view.NewSheet](t, f.h.do(get(friends, f.sess)))
+	opts := sheet.Target.Options
+	if sheet.Target.Field != "into" || len(opts) == 0 || string(opts[0].Label) != "People" || !opts[0].Last || opts[0].Value == "" {
+		t.Fatalf("where = %+v, want «into» with People first and last used", sheet.Target)
+	}
+	for _, o := range opts {
+		if o.Last != (o.Label == "People") || o.ReadOnly != (o.Label == "Archive") || o.ReadOnly && string(o.Reason) != ro {
+			t.Errorf("option %+v; the frame closes the read-only one with %q", o, ro)
+		}
+	}
+	form = formFields(sheet.Form)
+	form.Set("fn", "Grace Hopper")
+	form.Set("into", opts[0].Value)
+	before := len(f.srv.Paths(peopleBook))
+	if resp := f.h.do(postForm(friends, f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("save into People: %d %s", resp.Code, resp.Body.String())
+	}
+	if len(f.srv.Paths(peopleBook)) != before+1 || len(f.srv.Paths(friendsBook)) != 0 {
+		t.Errorf("People %v, Friends %v: want the card in People", f.srv.Paths(peopleBook), f.srv.Paths(friendsBook))
+	}
+}
+
 // menuActions is the actions of a menu, for actionHref.
 func menuActions(items []view.MenuItem) []view.Action {
 	out := make([]view.Action, 0, len(items))

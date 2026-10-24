@@ -4172,6 +4172,14 @@ func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind stri
 	if !ok {
 		return
 	}
+	// The collection chosen under «Where» (s-notes-5), when it is not the
+	// one of the address.
+	if into := r.FormValue("into"); into != "" && into != moveValue(c.conn.ID, c.col.Path) {
+		if c = s.moveTarget(c, into, ""); c == nil {
+			s.notFound(w, r)
+			return
+		}
+	}
 	if c.col.ReadOnly {
 		s.notFound(w, r)
 		return
@@ -4259,6 +4267,9 @@ func quickTaskDay(kind view.Kind, vals formValues) {
 // so what was typed travels in the body and never in the address bar.
 func (s *Server) quickSheet(c *collectionCtx, st editState) view.NewSheet {
 	sheet := s.newSheet(c, false)
+	// «Where» is a field of the form (s-notes-5): the collection chosen in
+	// it is where Save writes, whatever the address it posts to.
+	sheet.Target.Field = "into"
 	form := s.recordFormOf(c, st, quickFields(c.spec.kind))
 	for _, name := range carriedFields {
 		if v := first(st.values[name]); v != "" && len(form.Sets) > 0 && hasField(c.spec.kind, name) {
@@ -4281,14 +4292,17 @@ func (s *Server) quickSheet(c *collectionCtx, st editState) view.NewSheet {
 }
 
 // newSheet is where a new record goes: every live collection of the kind,
-// read-only ones shown and closed with the reason. An option's ID is the
-// address of its new-record page. Opened from one collection, that collection
-// is chosen; opened from a combined view (?pick=1) nothing is, and the target
-// is chosen, not guessed (S-14).
+// read-only ones shown and closed with the reason, the one last written
+// into first and marked (s-notes-5). An option's ID is the address of its
+// new-record page, its Value the collection as the quick sheet's form names
+// it. Opened from one collection, that collection is chosen; opened from a
+// combined view (?pick=1) nothing is, and the target is chosen, not guessed
+// (S-14).
 func (s *Server) newSheet(c *collectionCtx, pick bool) view.NewSheet {
 	blob := s.catalogOf(c.sess)
 	own := s.route(c.listPath() + "/new")
 	sheet := view.NewSheet{Kind: c.spec.kind}
+	last, _ := blob.LastFor(c.spec.kind)
 	for _, conn := range blob.Connections {
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Gone || !col.Has(c.spec.kind) {
@@ -4298,9 +4312,15 @@ func (s *Server) newSheet(c *collectionCtx, pick bool) view.NewSheet {
 			opt := view.TargetOption{
 				ID: s.route(o.listPath(c.spec.segment) + "/new"), Label: text(collectionLabel(col)),
 				Stamp: o.stamp(), Colour: catalogColour(col), ReadOnly: col.ReadOnly,
+				Value: moveValue(conn.ID, col.Path),
+				Last:  !col.ReadOnly && last.AccountID == conn.ID && last.Path == col.Path,
 			}
 			if col.ReadOnly {
-				opt.Reason = "Read-only"
+				opt.Reason = "Read-only: nothing can be written here."
+			}
+			if opt.Last {
+				sheet.Target.Options = append([]view.TargetOption{opt}, sheet.Target.Options...)
+				continue
 			}
 			sheet.Target.Options = append(sheet.Target.Options, opt)
 		}

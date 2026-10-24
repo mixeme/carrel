@@ -34,13 +34,16 @@ func TestAWholeStorageMovesWhatItHolds(t *testing.T) {
 	})
 	q := url.Values{"a": {nasID}, "c": {davtest.FileRoot}, "to": {vpsID}}
 	sheet := decode[view.CollectionMoveSheet](t, f.h.do(get("/app/collections/move?"+q.Encode(), f.sess)))
-	words := saidRuns(sheet.Warning)
-	if !strings.HasPrefix(words, "Carrel makes a folder «Archive» on vps beside Docs and Public, copies everything in nas · Archive into it") ||
-		!strings.HasSuffix(words, "The storage itself stays on nas, empty: it is the address this connection is made with.") {
-		t.Errorf("message = %q", words)
+	// The frame's two lines, its server this one (Р-77).
+	msgs := frameMsgs(t, "s-profile-35")
+	if len(msgs) != 2 || !strings.Contains(msgs[0], " on nextcloud,") {
+		t.Fatalf("s-profile-35 says %q: read it again", msgs)
 	}
-	if sheet.Stays != "What nas will not let delete — folders shared with you, folders its administrator mounted — is copied and stays there too; the result names it." {
-		t.Errorf("second line = %q", sheet.Stays)
+	if words := saidRuns(sheet.Warning); words != strings.Replace(msgs[0], " on nextcloud,", " on nas,", 1) {
+		t.Errorf("message = %q, the frame %q", words, msgs[0])
+	}
+	if string(sheet.Stays) != msgs[1] {
+		t.Errorf("second line = %q, the frame %q", sheet.Stays, msgs[1])
 	}
 	if c := sheet.Actions[0]; !c.Enabled {
 		t.Fatalf("Move = %+v", c)

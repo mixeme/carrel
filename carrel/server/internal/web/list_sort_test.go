@@ -229,8 +229,12 @@ func TestCombinedImportAndExportAsk(t *testing.T) {
 	if len(wizard.Into.Options) == 0 || wizard.Into.Chosen != "" {
 		t.Errorf("the wizard does not ask where: %+v", wizard.Into)
 	}
-	// Export opens the sheet of collections to hand over.
-	sheet := decode[view.ExportSheet](t, f.h.do(get(exp.Href, f.sess)))
+	// One collection ticked, Export hands over its file (s-agenda-30);
+	// with more, it opens the sheet of collections to hand over.
+	if exp.Href != f.path("contacts")+"/export" {
+		t.Errorf("Export with one book ticked = %q, want its own file", exp.Href)
+	}
+	sheet := decode[view.ExportSheet](t, f.h.do(get("/app/contacts/export", f.sess)))
 	if len(sheet.Target.Options) == 0 || !strings.HasSuffix(string(sheet.Target.Options[0].Label), "People") {
 		t.Errorf("export sheet = %+v", sheet.Target)
 	}

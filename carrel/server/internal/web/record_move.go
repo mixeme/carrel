@@ -11,6 +11,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/discover"
+	"carrel.dev/carrel/server/internal/dupes"
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/provider/card"
@@ -65,22 +66,30 @@ func moveValue(account, col string) string {
 	return account + "/" + url.PathEscape(col)
 }
 
-// moveWarned names what the sheet's Warning says will happen: a move inside
-// one server, one to another account, a copy, a copy with a UID of its own
-// (moveSheet). A form whose collection needs another word than the one it
-// was shown is answered with the sheet again, that collection chosen and its
-// word said, before anything is written (S-18: Carrel says it before it
-// starts).
-func moveWarned(c, dest *collectionCtx, copying bool) string {
+// moveWarned names what the sheet says before the press (Р-77: only what
+// matters and is not obvious): a copy with a UID of its own, attendees that
+// may hear of a cancellation, or nothing. A form whose collection needs
+// another word than the one it was shown is answered with the sheet again,
+// that collection chosen and its word said, before anything is written
+// (S-18: Carrel says it before it starts).
+func moveWarned(c, dest *collectionCtx, copying, invited bool) string {
 	switch {
 	case copying && dest != nil && knownOneUIDPerAccount(c, dest):
 		return "copy-uid"
-	case copying:
-		return "copy"
-	case dest != nil && dest.conn.ID != c.conn.ID:
-		return "account"
+	case mayCancel(c, dest, copying, invited):
+		return "cancels"
 	}
-	return "server"
+	return "nothing"
+}
+
+// mayCancel is a meeting leaving a server that schedules for another
+// account: that server may tell its attendees it is cancelled (the owner's
+// decision of 12.10.2026, А12 of the audit of 11.10.2026). «May»: whether a
+// letter goes out is the server's setting, which Carrel does not see.
+// Whether the place it goes to invites them is the person's own choice of a
+// collection, and is not said.
+func mayCancel(c, dest *collectionCtx, copying, invited bool) bool {
+	return invited && !copying && dest != nil && dest.conn.ID != c.conn.ID && c.conn.Scheduling == discover.SchedulingYes
 }
 
 func moveQuery(copying bool, account, col string) url.Values {
@@ -123,20 +132,26 @@ func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, de
 	}
 	sheet := view.MoveSheet{Kind: c.spec.kind, Copy: copying, Title: text(verb + c.spec.noun), Subject: text(from)}
 	// In the order of the catalog, as the rail (Typecase's note 73, 183 p. 3):
-	// one that cannot take it stays in its place, closed.
+	// one that cannot take it stays in its place, closed — one that holds
+	// the same UID already too (s-contacts-2: Anna's copies in Архив and
+	// Команда), read or not.
+	holds := s.uidHolders(c.sess, blob, c.spec.kind, uid)
 	for _, conn := range blob.Connections {
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Gone || !col.Has(c.spec.kind) {
 				continue
 			}
-			o := origin{conn: conn, col: col}
 			opt := view.TargetOption{
-				ID:    s.postQuery(address, moveQuery(copying, conn.ID, col.Path)),
-				Label: text(collectionLabel(col)), Stamp: o.stamp(), Colour: catalogColour(col),
+				ID: s.postQuery(address, moveQuery(copying, conn.ID, col.Path)),
+				// At its right the server, as the rail's groups name it
+				// (s-contacts-2): the collection is its label.
+				Label: text(collectionLabel(col)), Stamp: view.Stamp(connLabel(conn)), Colour: catalogColour(col),
 				Value: moveValue(conn.ID, col.Path),
 			}
 			switch {
 			case conn.ID == c.conn.ID && col.Path == c.col.Path:
+				opt.ReadOnly, opt.Reason, opt.Here = true, "already there", true
+			case holds[dupes.CollectionRef{AccountID: conn.ID, Col: col.Path}]:
 				opt.ReadOnly, opt.Reason, opt.Here = true, "already there", true
 			case col.ReadOnly:
 				opt.ReadOnly, opt.Reason = true, "read-only"
@@ -171,35 +186,19 @@ func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, de
 		sheet.Target.Chosen = s.postQuery(address, chosen)
 		confirm.Href = s.postQuery(address, chosen)
 	}
-	hidden := []view.FormRow{csrfField(c.sess), {Name: "warned", Kind: view.InputHidden, Value: text(moveWarned(c, dest, copying))}}
+	hidden := []view.FormRow{csrfField(c.sess), {Name: "warned", Kind: view.InputHidden, Value: text(moveWarned(c, dest, copying, invited))}}
 	if copying {
 		hidden = append(hidden, view.FormRow{Name: "copy", Kind: view.InputHidden, Value: "1"})
 	}
 	sheet.Form = view.Form{Action: s.route(address), Method: "POST", Sets: []view.FieldSet{{Rows: hidden}}}
-	record, where := recordNouns[c.spec.kind], moveCollectionNouns[c.spec.kind]
-	switch {
-	case copying && dest != nil && knownOneUIDPerAccount(c, dest):
-		sheet.Warning = line("A copy is written into the chosen " + where + " whole, with a UID of its own: this server holds one record per UID across the account, " +
-			"so for other apps the copy is another " + record + ". The " + record + " here stays as it is.")
-	case copying:
-		sheet.Warning = line("A copy is written into the chosen " + where + " whole, with the same UID; the " + record + " here stays as it is.")
-	case dest != nil && dest.conn.ID != c.conn.ID:
-		sheet.Warning = line("This goes to another account, so nothing moves on a server: Carrel reads the " + c.spec.noun +
-			" whole, writes it there, reads it back, and deletes the original only if the copy kept everything.")
-	default:
-		// MOVE monospaced (s-contacts-2).
-		sheet.Warning = join("Inside one server this is ", monoRun("MOVE"), ": instant, no traffic. To another "+where+" the "+record+
-			" is copied and then deleted — Carrel says so before it starts, not after.")
+	// Only what matters and is not obvious (Р-77): what a copy and a move
+	// do is in their names; a copy that cannot keep its UID, and attendees
+	// that may hear of a cancellation, are not (s-contacts-37, s-agenda-29).
+	if copying && dest != nil && knownOneUIDPerAccount(c, dest) {
+		sheet.Warning = line("The copy gets a new UID: for other apps it is another " + recordNouns[c.spec.kind] + ".")
 	}
-	// What the person may not have thought of (the owner's decision of
-	// 12.10.2026, А12 of the audit of 11.10.2026): the record leaves a
-	// server that schedules, and that server may tell its attendees the
-	// event is cancelled. «May»: whether a letter goes out is the server's
-	// setting, which Carrel does not see. Whether the place it goes to
-	// invites them is the person's own choice of a collection, and is not
-	// said.
-	if invited && !copying && dest != nil && dest.conn.ID != c.conn.ID && c.conn.Scheduling == discover.SchedulingYes {
-		sheet.Cancels = text(connLabel(c.conn) + " may tell its attendees that the " + c.spec.noun + " is cancelled.")
+	if mayCancel(c, dest, copying, invited) {
+		sheet.Cancels = text(connLabel(c.conn) + " may send its attendees a cancellation.")
 	}
 	cancel := view.Action{ID: "record.move.cancel", Label: "Cancel", Href: s.route(c.recordPath(uid)), Method: "GET", Enabled: true}
 	sheet.Actions = []view.Action{confirm, cancel}
@@ -279,18 +278,28 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 	uid := r.PathValue("uid")
 	dest := s.moveTarget(c, r.FormValue("to"), r.FormValue("into"))
 	// The sheet's form said another word than this collection needs: the
-	// sheet again, with it chosen and said (S-18).
-	if warned := r.FormValue("warned"); warned != "" && dest != nil && warned != moveWarned(c, dest, copying) {
-		title, invited := "", false
-		if obj, err := c.find(r.Context(), uid); err == nil {
-			title = recordTitle(c.spec.kind, obj)
-			invited = c.cal != nil && len(cal.Attendees(obj)) > 0
+	// sheet again, with it chosen and said (S-18). Attendees are the
+	// record's, so it is read where a cancellation could be the word.
+	if warned := r.FormValue("warned"); warned != "" && dest != nil {
+		var obj *model.Object
+		if mayCancel(c, dest, copying, true) {
+			obj, _ = c.find(r.Context(), uid)
 		}
-		sheet := s.moveSheet(c, uid, title, copying, dest, invited)
-		sheet.Under = s.underOf(r, r.FormValue("back"), c.recordPath(uid))
-		s.cancelTo(r, r.FormValue("back"), sheet.Actions, "record.move.cancel")
-		s.writeSheetOf(w, r, sheet)
-		return
+		invited := obj != nil && c.cal != nil && len(cal.Attendees(obj)) > 0
+		if warned != moveWarned(c, dest, copying, invited) {
+			if obj == nil {
+				obj, _ = c.find(r.Context(), uid)
+			}
+			title := ""
+			if obj != nil {
+				title = recordTitle(c.spec.kind, obj)
+			}
+			sheet := s.moveSheet(c, uid, title, copying, dest, invited)
+			sheet.Under = s.underOf(r, r.FormValue("back"), c.recordPath(uid))
+			s.cancelTo(r, r.FormValue("back"), sheet.Actions, "record.move.cancel")
+			s.writeSheetOf(w, r, sheet)
+			return
+		}
 	}
 	nothing := "Nothing was moved"
 	if copying {

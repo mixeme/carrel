@@ -328,8 +328,10 @@ func TestACopyGetsAUIDOfItsOwnWhereTheAccountHoldsOneRecordPerUID(t *testing.T) 
 
 	// The account is known now: the sheet says it before the start, and the
 	// next copy goes out with its own UID at once.
-	if w := plainText(sheetOf("call").Warning); !strings.Contains(w, "a UID of its own") {
-		t.Errorf("sheet warning = %q, want it to say the copy gets a UID of its own", w)
+	// The words of s-contacts-37, «card» an event's own noun.
+	said := frameOne(t, frameSheetMsg, mockupFrame(t, "s-contacts-37"), "message")[1]
+	if w, want := plainText(sheetOf("call").Warning), strings.Replace(said, "another card", "another event", 1); w != want {
+		t.Errorf("sheet warning = %q, want %q", w, want)
 	}
 	copyOf("call", "Call")
 	if n := srv.UIDsTaken(); n != taken {

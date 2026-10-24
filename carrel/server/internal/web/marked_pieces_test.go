@@ -53,32 +53,6 @@ func msgDrawn(list []string, s string) bool {
 	return false
 }
 
-// s-contacts-2, s-files-4: «Inside one server this is ⟨MOVE⟩: …».
-func TestMoveSheetsMarkMOVE(t *testing.T) {
-	f := filesFixture(t, true)
-	f.srv.SeedFile(filesDocs+"a.txt", "x")
-	f.srv.SeedFolder(filesDocs + "dest/")
-	op := f.at("op", "") + "?" + url.Values{"op": {"move"}, "item": {"a.txt"}}.Encode()
-	sheet := opSheet(t, f, op, url.Values{"to": {f.at("", "dest", "")}})
-	if got := saidRuns(sheet.Warning); !msgDrawn(frameMsgs(t, "s-files-4"), got) {
-		t.Errorf("files: %q, the frame %q", got, frameMsgs(t, "s-files-4"))
-	}
-
-	app := newMockupApp(t)
-	card := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
-	page := decode[view.ContactPage](t, app.h.do(get(card, app.sess)))
-	var move string
-	for _, m := range page.Menu {
-		if m.ID == "record.move" {
-			move = m.Href
-		}
-	}
-	rs := decode[view.MoveSheet](t, app.h.do(get(move, app.sess)))
-	if got := saidRuns(rs.Warning); !msgDrawn(frameMsgs(t, "s-contacts-2"), got) {
-		t.Errorf("contact: %q, the frame %q", got, frameMsgs(t, "s-contacts-2"))
-	}
-}
-
 // s-profile-9: «… all ⟨51⟩ events in it are deleted …», «Last time it was
 // in an archive: ⟨2026-08-14⟩. Restoring brings the records back into a
 // ⟨new⟩ collection …».

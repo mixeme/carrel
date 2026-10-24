@@ -1,6 +1,7 @@
 package web
 
 import (
+	"archive/zip"
 	"context"
 	"errors"
 	"fmt"
@@ -30,6 +31,10 @@ type exportFormat struct {
 	ext   string
 	media string
 }
+
+// notebookFormat is a notebook handed over whole: a .zip with a .md of each
+// note (s-agenda-30, «Download .zip»); one note is its .md.
+var notebookFormat = exportFormat{".zip", "application/zip"}
 
 var exportFormats = map[view.Kind]exportFormat{
 	view.KindContact: {".vcf", "text/vcard; charset=utf-8"},
@@ -231,8 +236,11 @@ func (s *Server) getKindExport(w http.ResponseWriter, r *http.Request, kind stri
 		return
 	}
 	f := exportFormats[c.spec.kind]
-	if whole {
+	switch {
+	case whole:
 		f = exportFormats[view.KindEvent]
+	case c.spec.kind == view.KindNote:
+		f = notebookFormat
 	}
 	raw, lost := c.exportUnread(r.Context(), bad, f.ext == ".ics")
 	if len(lost) > 0 && r.URL.Query().Get("without") == "" {
@@ -270,17 +278,30 @@ func writeExport(w io.Writer, c *collectionCtx, objs []*model.Object, raw [][]by
 			}
 		}
 	case c.spec.kind == view.KindNote:
-		for _, obj := range objs {
-			if cal.NoteMarkdown(w, obj) != nil {
-				return
-			}
-			if _, err := io.WriteString(w, "\n"); err != nil {
-				return
-			}
-		}
+		writeNotebook(w, c, objs)
 	default:
 		writeCalendar(w, objs, raw)
 	}
+}
+
+// writeNotebook is the notebook as a .zip: each note a .md named after it,
+// a name taken twice numbered («Idea.md», «Idea (2).md»).
+func writeNotebook(w io.Writer, c *collectionCtx, objs []*model.Object) {
+	z := zip.NewWriter(w)
+	taken := map[string]bool{}
+	for _, obj := range objs {
+		stem := collectionSlug(recordTitle(c.spec.kind, obj))
+		name := stem + ".md"
+		for n := 2; taken[strings.ToLower(name)]; n++ {
+			name = fmt.Sprintf("%s (%d).md", stem, n)
+		}
+		taken[strings.ToLower(name)] = true
+		f, err := z.Create(name)
+		if err != nil || cal.NoteMarkdown(f, obj) != nil {
+			return
+		}
+	}
+	_ = z.Close()
 }
 
 // writeCalendar puts every record under one envelope, copying the components

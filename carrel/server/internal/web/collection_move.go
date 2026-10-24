@@ -144,28 +144,6 @@ func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, c
 	}
 }
 
-// fileDestination is where a folder goes on dest, as s-profile-34 and -35
-// say it: in the storage itself when that is where folders are made («in
-// nextcloud · Files»), else on the server beside its folders («on sftpgo ·
-// vps beside Documents and Public»).
-func fileDestination(blob sealed.Blob, dest sealed.Connection) string {
-	home := fileHome(blob, dest)
-	var beside []string
-	for _, c := range blob.CollectionsOf(dest.ID) {
-		if c.Gone || !c.Has(view.KindFile) {
-			continue
-		}
-		if strings.TrimSuffix(c.Path, "/") == strings.TrimSuffix(home, "/") {
-			return "in " + connLabel(dest) + " · " + collectionLabel(c)
-		}
-		beside = append(beside, collectionLabel(c))
-	}
-	if len(beside) == 0 {
-		return "on " + connLabel(dest)
-	}
-	return "on " + connLabel(dest) + " beside " + wordList(beside)
-}
-
 // collectionMoveBlock is why the move or copy to dest cannot start, or "".
 func collectionMoveBlock(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, dest sealed.Connection, known, copying bool) string {
 	noun := collectionNoun(col)
@@ -184,11 +162,9 @@ func collectionMoveBlock(blob sealed.Blob, conn sealed.Connection, col sealed.Co
 	return ""
 }
 
-// collectionMoveSheet says what will happen before it starts (S-12.3): where
-// it goes, that the address changes, and when the original is deleted.
-// count is the records the collection holds as the session last learnt it,
-// nil when it does not know.
-func (s *Server) collectionMoveSheet(sess *session.Session, blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, to string, count *int, back string) view.CollectionMoveSheet {
+// collectionMoveSheet says before it starts (S-12.3) where the collection
+// goes and what the person would not think of.
+func (s *Server) collectionMoveSheet(sess *session.Session, blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, to, back string) view.CollectionMoveSheet {
 	noun, label, here := collectionNoun(col), collectionLabel(col), connLabel(conn)
 	verb := "Move "
 	if copying {
@@ -232,55 +208,26 @@ func (s *Server) collectionMoveSheet(sess *session.Session, blob sealed.Blob, co
 	} else {
 		chosen := s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, dest.ID, copying, back))
 		sheet.Target.Chosen, confirm.Href = chosen, chosen
-		// The words of s-profile-8: what is made, how much goes, and what
-		// becomes of this one.
-		// What the collection is for names what it holds: a calendar that
-		// takes tasks too still copies «events» (its count is of events).
-		unit := recordNoun(col)
-		if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
-			unit = spec.noun
-		}
-		records := []view.Run{plainRun("all its " + unit + "s")}
-		if count != nil && *count > 0 {
-			records = allOf(*count, unit)
-		}
-		where, files := fileDestination(blob, dest), []view.Run{plainRun("everything in it")}
-		if count != nil && *count > 0 {
-			files = allOf(*count, "file")
-		}
-		switch {
-		case col.Has(view.KindFile) && storageRoot(conn, col):
-			// The whole storage (Р-74, s-profile-35): what it holds goes,
-			// the address the connection is made with stays.
-			verb := " — then deletes what was copied. The storage itself stays on " + connLabel(conn) + ", empty: it is the address this connection is made with."
-			if copying {
-				verb = "; the storage on " + connLabel(conn) + " stays as it is."
-			}
-			sheet.Warning = line("Carrel makes a folder «" + label + "» " + where + ", copies everything in " + here + " · " + label +
-				" into it — each file downloaded and uploaded again" + verb)
-			if !copying {
-				sheet.Stays = text("What " + connLabel(conn) + " will not let delete — folders shared with you, folders its administrator mounted — is copied and stays there too; the result names it.")
-			}
-		case col.Has(view.KindFile) && copying:
-			// S-17.1: between storages every file travels through Carrel.
-			sheet.Warning = join("Carrel makes a folder «"+label+"» "+where+" and copies ", files, " into it — each downloaded and uploaded again; this one on "+here+" stays as it is.")
-		case col.Has(view.KindFile):
-			sheet.Warning = join("Carrel makes a folder «"+label+"» "+where+", copies ", files, " into it — each downloaded and uploaded again — then deletes this one on "+here+
-				". The tick in the rail, the attachment folder and the upload folder follow it; devices, published links and backup jobs pointing at the old address will see it vanish.")
-		case copying:
-			sheet.Warning = join("Carrel creates "+article(noun)+" there and copies ", records, "; this one on "+here+" stays as it is.")
-		default:
-			sheet.Warning = join("Carrel creates "+article(noun)+" there, copies ", records, ", then deletes this one on "+here+". "+
-				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path.")
-		}
+	}
+	// Only what matters and is not obvious (Р-77): what a move and a copy do
+	// is in their names; that the old address is gone with the move, what
+	// of a whole storage stays (s-profile-8, -34, -35). A move that cannot
+	// start says only why.
+	switch {
+	case copying, reason != "":
+	case col.Has(view.KindFile) && storageRoot(conn, col):
+		sheet.Warning = line("The storage itself stays on " + here + ", empty.")
+		sheet.Stays = "Shared and mounted folders stay there too."
+	default:
+		sheet.Warning = line("Links, devices and backups lose the old address.")
 	}
 	// A calendar that leaves a server which schedules takes its meetings
 	// off it, and that server may tell their attendees of a cancellation
 	// (the owner's decision of 12.10.2026, А12): said in «may», and nothing
-	// of what the server it goes to will send — the last sentence of what
-	// the move does (s-profile-8, note 112 p. 5).
-	if !copying && col.Has(view.KindEvent) && conn.Scheduling == discover.SchedulingYes {
-		sheet.Warning = append(sheet.Warning, plainRun(" "+here+" may tell the attendees of its meetings that they are cancelled."))
+	// of what the server it goes to will send — the last sentence of the
+	// sheet (s-profile-8, note 112 p. 5).
+	if !copying && reason == "" && col.Has(view.KindEvent) && conn.Scheduling == discover.SchedulingYes {
+		sheet.Warning = append(sheet.Warning, plainRun(" "+here+" may send attendees a cancellation."))
 	}
 	sheet.Actions = []view.Action{confirm, s.sheetCancel(back, collectionList(conn, col))}
 	return sheet
@@ -297,21 +244,7 @@ func (s *Server) getCollectionMove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	q := r.URL.Query()
-	var count *int
-	if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
-		count = collectionCount(sess, conn.ID, col, spec)
-	}
-	// A folder's files are counted as the sheet opens (s-profile-34: «all 9
-	// files»); the whole storage says «everything» (-35).
-	if col.Has(view.KindFile) && !storageRoot(conn, col) {
-		if files, err := s.fileProvider(conn); err == nil {
-			if tree, err := files.Tree(r.Context(), col.Path, s.cfg.FilesMaxEntries); err == nil {
-				n := len(tree)
-				count = &n
-			}
-		}
-	}
-	sheet := s.collectionMoveSheet(sess, blob, conn, col, q.Get("copy") != "", q.Get("to"), count, sheetBack(q.Get("back")))
+	sheet := s.collectionMoveSheet(sess, blob, conn, col, q.Get("copy") != "", q.Get("to"), sheetBack(q.Get("back")))
 	sheet.Under = s.collectionUnder(r)
 	s.writePage(w, r, http.StatusOK, sheet)
 }
@@ -332,11 +265,7 @@ func (s *Server) postCollectionMove(w http.ResponseWriter, r *http.Request) {
 	copying, to := r.FormValue("copy") != "", r.FormValue("to")
 	dest, known := blob.Connection(to)
 	if collectionMoveBlock(blob, conn, col, dest, known, copying) != "" {
-		var count *int
-		if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
-			count = collectionCount(sess, conn.ID, col, spec)
-		}
-		s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(sess, blob, conn, col, copying, to, count, sheetBack(r.URL.Query().Get("back"))))
+		s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(sess, blob, conn, col, copying, to, sheetBack(r.URL.Query().Get("back"))))
 		return
 	}
 	m := &collectionMove{s: s, sess: sess, key: key, conn: conn, col: col, dest: dest, copying: copying, home: collectionHome(blob, dest, col)}

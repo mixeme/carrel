@@ -1234,13 +1234,9 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 			Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Primary: true, Enabled: true}, cancel},
 		}
 	}
-	// The frame's words (s-profile-7); a book has no colour to write.
-	note := "Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. " +
-		"The new name and colour are written to the server — other clients will show them at their next sync."
-	if col.Has(view.KindContact) {
-		note = "Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. " +
-			"The new name is written to the server — other clients will show it at their next sync."
-	}
+	// What the person would not think of (Р-77, s-profile-7): renaming is
+	// not moving.
+	note := "The address stays: links, devices and backups keep working."
 	// The head says what the sheet changes (s-profile-7, -18): a book and a
 	// folder have no colour to write.
 	title := view.Text("Rename and colour")
@@ -1264,7 +1260,7 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 		// does.
 		sheet.Stamp = view.Stamp(connLabel(conn) + " · " + collectionLabel(col))
 		sheet.Address = ""
-		sheet.Note = "A folder's name is its address: renaming it moves it on the server. Devices, published links and backup jobs pointing at the old address will see it vanish; the files inside stay as they are."
+		sheet.Note = "Links, devices and backups lose the old address."
 		sheet.Actions[0].Label = "Rename"
 	}
 	return sheet

@@ -869,7 +869,7 @@ func TestMoveBetweenStorages(t *testing.T) {
 	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
 	sheet := opSheet(t, f, rowMenu(t, fileRow(t, page, "a.txt"), "file.move"), url.Values{"to": {farRoot}})
 	// The tree is the chosen server's storages alone (ФН9).
-	if !strings.HasPrefix(plainText(sheet.Warning), "This goes to another storage") || len(sheet.Target.Nodes) != 1 || len(sheet.Servers) != 2 {
+	if plainText(sheet.Warning) != "Each file is downloaded and uploaded again." || len(sheet.Target.Nodes) != 1 || len(sheet.Servers) != 2 {
 		t.Fatalf("sheet = %+v", sheet)
 	}
 	f.h.do(postForm(confirmHref(t, sheet), f.sess, url.Values{}))

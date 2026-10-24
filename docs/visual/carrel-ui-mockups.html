@@ -802,6 +802,8 @@ details.tc-drop,details.tc-drop__anchor{display:inline-block;position:relative}
 /* Выпадашка в шапке листа сжимается, как поле на её месте: выбор подключения не выталкивает строку пути. */
 .tc-sheet__head > .tc-drop{display:flex;min-width:0;flex:0 1 auto}
 .tc-sheet__head > .tc-drop > .tc-in{flex:1 1 auto}
+/* «куда» листа, прижатое вправо, остаётся справа и когда шапка растягивает его */
+.tc-sheet__head > .tc-drop.tc-push{justify-content:flex-end}
 .tc-drop > summary,.tc-drop__anchor > summary{list-style:none;cursor:pointer}
 .tc-drop > summary::-webkit-details-marker,.tc-drop__anchor > summary::-webkit-details-marker{display:none}
 .tc-field:has(> .tc-menu.is-pop){position:relative}
@@ -3528,11 +3530,10 @@ label.tc-field__swatch{position:relative;cursor:pointer}
             <div class="tc-rubric">Write into</div>
             <div class="tc-tree">
               <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="nextcloud/kontakty" disabled><span class="tc-mark" data-tc-colour="#4A6B52"></span>Контакты <span class="tc-mono tc-push tc-mono--t10-dusty">already there</span></label>
-              <label class="is-on tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="nextcloud/arhiv" checked><span class="tc-mark" data-tc-colour="#A05A2C"></span>Архив <span class="tc-mono tc-push tc-mono--t10-dusty">nextcloud</span></label>
-              <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="radicale/komanda" disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>Команда <span class="tc-badge tc-push">read-only</span></label>
-              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="radicale/rassylki"><span class="tc-mark" data-tc-colour="#8C6239"></span>Рассылки <span class="tc-mono tc-push tc-mono--t10-dusty">radicale · vps</span></label>
+              <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="nextcloud/arhiv" disabled><span class="tc-mark" data-tc-colour="#A05A2C"></span>Архив <span class="tc-mono tc-push tc-mono--t10-dusty">already there</span></label>
+              <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="radicale/komanda" disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>Команда <span class="tc-mono tc-push tc-mono--t10-dusty">already there</span></label>
+              <label class="is-on tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="radicale/rassylki" checked><span class="tc-mark" data-tc-colour="#8C6239"></span>Рассылки <span class="tc-mono tc-push tc-mono--t10-dusty">radicale · vps</span></label>
             </div>
-            <div class="tc-msg tc-msg--flush-top2">Inside one server this is <code class="tc-mono">MOVE</code>: instant, no traffic. To another address book the card is copied and then deleted — Carrel says so before it starts, not after.</div>
           </div>
           <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/contacts">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
         </form>
@@ -3540,7 +3541,7 @@ label.tc-field__swatch{position:relative;cursor:pointer}
     </div>
   </div>
 </div>
-<figcaption><b>У записи цель — коллекция того же рода, не папка.</b> Поэтому здесь список книг, а не дерево каталогов: дерево принадлежит файлам. Текущая книга видна и недоступна — переносить «туда же» нечего; книга только для чтения видна и недоступна по той же причине, что в меню «New contact». Книги — в том же порядке, что в рейле, на тех же местах (задача Carrel 183): человек ищет книгу там, где её видит; справа — подключение, «nextcloud» или «radicale · vps», как в рейле. Под затемнением — то же тело, что у книги (s-contacts-1), с её подвалом рейла. Событие, задача и заметка открывают этот же лист: меняются заголовок, подпись «from» и набор коллекций. Копирование — та же кнопка ряда и тот же лист, с Copy вместо Move.</figcaption>
+<figcaption><b><b>Плашка листа — только важное и неочевидное</b> (решение владельца 23.10, Р-77): перенос внутри сервера — без неё; на другой аккаунт — только что участники могут получить отмену (кадр «Перенести событие · на другой аккаунт»). У записи цель — коллекция того же рода, не папка.</b> Поэтому здесь список книг, а не дерево каталогов: дерево принадлежит файлам. Текущая книга видна и недоступна — переносить «туда же» нечего; книга только для чтения видна и недоступна по той же причине, что в меню «New contact». Книги — в том же порядке, что в рейле, на тех же местах (задача Carrel 183): человек ищет книгу там, где её видит; справа — подключение, «nextcloud» или «radicale · vps», как в рейле. Под затемнением — то же тело, что у книги (s-contacts-1), с её подвалом рейла. Событие, задача и заметка открывают этот же лист: меняются заголовок, подпись «from» и набор коллекций. Копирование — та же кнопка ряда и тот же лист, с Copy вместо Move.</figcaption>
 </figure>
 
 <figure>
@@ -3960,7 +3961,6 @@ label.tc-field__swatch{position:relative;cursor:pointer}
             <div class="tc-field tc-field--lg"><label>Tags</label><input class="tc-in is-ph" type="text" placeholder="—" aria-label="Tags"></div>
             <div class="tc-field tc-field--full"><label>Note</label><textarea class="tc-in is-area"></textarea></div>
           </div>
-          <div class="tc-field"><button class="tc-btn" type="button">Show 5 empty fields</button></div>
         </div>
       </div>
     </div>
@@ -3992,7 +3992,7 @@ label.tc-field__swatch{position:relative;cursor:pointer}
         </div>
         <div class="tc-railfoot"><svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg><a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a></div>
       </div>
-      <div class="tc-main"><div class="tc-dialog tc-dialog--max520">
+      <div class="tc-main"><form class="tc-dialog tc-dialog--max520" action="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/photo-preview?op=crop" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="etag" value="7f3a-91de"><input type="hidden" name="zoom" value="1.6"><input type="hidden" name="x" value="0.12"><input type="hidden" name="y" value="0.08">
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Photo</div><div class="tc-head__sub">Анна Ковалёва · metadata will be stripped</div></div></div>
       <div class="tc-dialog__split">
         <div data-tc-colour="#8C7B6A" class="tc-dialog__photo">
@@ -4001,7 +4001,7 @@ label.tc-field__swatch{position:relative;cursor:pointer}
           <div class="tc-dialog__photo-rule-v"></div>
         </div>
         <div class="tc-stack tc-stack--gap-10 tc-dialog__side">
-          <span class="tc-dim--muted tc-dim--t12-5">Drag the photo to choose the frame. The box is what other clients will see.</span>
+          <span class="tc-dim--muted tc-dim--t12-5">Drag to choose the frame.</span>
           <div class="tc-field tc-field--w100"><label>Zoom</label>
             <span class="tc-line tc-line--gap-9 tc-field__zoom">
               <span class="tc-field__rail">
@@ -4011,18 +4011,17 @@ label.tc-field__swatch{position:relative;cursor:pointer}
               <span class="tc-mono tc-mono--t11-dusty">1.6×</span>
             </span></div>
           <div class="tc-field tc-field--w100"><label>Rotate</label>
-            <span class="tc-seg tc-seg--start"><button class="is-on tc-seg__opt" type="button">0°</button><button class="tc-seg__opt" type="button">90°</button><button class="tc-seg__opt" type="button">180°</button><button class="tc-seg__opt" type="button">270°</button></span></div>
+            <span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="rotate" value="0" checked>0°</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="rotate" value="90">90°</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="rotate" value="180">180°</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="rotate" value="270">270°</label></span></div>
           <div class="tc-field tc-field--w100"><label>Saved as</label>
-            <input class="tc-in is-mono" type="text" value="512 × 512 · JPEG · about 90 KB" aria-label="Saved as">
-            <span class="tc-field__hint">The photo lives inside the card itself, so its size is the card’s size: a square of 512 px at quality 85 keeps a vCard near 200 KB, which servers and phones still accept. Lists are served a smaller copy of the same crop — the original file is not kept anywhere.</span></div>
-          <span class="tc-dim tc-dim--t11">EXIF orientation is already applied, metadata is stripped.</span>
+            <input class="tc-in is-mono" type="text" value="512 × 512 · JPEG · about 90 KB" aria-label="Saved as" readonly>
+            <span class="tc-field__hint">Kept inside the card, so it is made small.</span></div>
         </div>
       </div>
-      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="button">Save photo</button><button class="tc-btn" type="button">Cancel</button><span class="tc-push"><button class="tc-btn is-danger" type="button">Remove photo</button></span></div>
-    </div></div></div>
+      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="submit">Save photo</button><a class="tc-btn" href="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/edit">Cancel</a><span class="tc-push"><button class="tc-btn is-danger" type="submit" formaction="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/photo-preview?op=remove">Remove photo</button></span></div>
+    </form></div></div>
   </div>
 </div>
-<figcaption>Кадр выбирается перетаскиванием, масштаб — ползунком, поворот — четырьмя кнопками; рамка показывает, что увидят другие клиенты. На узком экране (U-9) ползунок остаётся, а перетаскивание заменяется центральным кадром: попасть пальцем в нужную точку снимка вслепую нельзя.</figcaption>
+<figcaption>Кадр выбирается перетаскиванием, масштаб — ползунком, поворот — четырьмя кнопками; рамка показывает, что увидят другие клиенты. На узком экране (U-9) ползунок остаётся, а перетаскивание заменяется центральным кадром: попасть пальцем в нужную точку снимка вслепую нельзя. Страница — форма: кадр (зум и сдвиг) уходит скрытыми полями, поворот — отметкой, Save photo — <code>?op=crop</code>, Remove photo — <code>?op=remove</code>, Cancel — ссылка на правку. Без сценария кадр уходит таким, каким его нарисовал сервер; двигать и масштабировать — сценарием.</figcaption>
 </figure>
 
 <h3 id="card">Карточка человека: то, что он сообщил о себе</h3>
@@ -4226,7 +4225,7 @@ Read  2 min ago · not changed on server</div>
     </div>
   </div>
 </div>
-<figcaption><b>Заменили адрес и нажали Save — лист поверх правки предлагает переписать его в записях, где человек участник</b> (решения владельца 12.10 и 14.10, задачи Carrel 157, 185). Хронология строится по адресам: встречи и задачи со старым выпадают из неё, поэтому главная кнопка — переписать. Лист один при любом числе замен: каждая — строка «старый адрес → выбор», группы риска — отметки, по умолчанию отмечены все (так переписывалось всё и до решения); снятая исключает группу, кнопка считает остаток. Строка о записи в двух группах появляется, только когда из-за снятой отметки запись остаётся как была (пример — s-contacts-29). Без сценария лист — форма: Rewrite отправляет её, Leave as is — её же с <code>?op=leave</code>.</figcaption>
+<figcaption><b>Заменили адрес и нажали Save — лист поверх правки предлагает переписать его в записях, где человек участник</b> (решения владельца 12.10 и 14.10, задачи Carrel 157, 185). Хронология строится по адресам: встречи и задачи со старым выпадают из неё, поэтому главная кнопка — переписать. Лист один при любом числе замен: каждая — строка «старый адрес → выбор», группы риска — отметки, по умолчанию отмечены все (так переписывалось всё и до решения); снятая исключает группу, кнопка считает остаток. Строка о записи в двух группах появляется, только когда из-за снятой отметки запись остаётся как была (пример — s-contacts-29). Без сценария лист — форма: Rewrite отправляет её, Leave as is — её же с <code>?op=leave</code>. <b>Записи в группе — по дате:</b> прошедшие — от поздней к ранней (ближайшая к сегодня первой), будущие — от ранней к поздней.</figcaption>
 </figure>
 
 <figure>
@@ -4327,17 +4326,42 @@ Read  2 min ago · not changed on server</div>
           <div class="tc-rubric">Write into</div>
           <div class="tc-tree">
               <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="nextcloud/kontakty" disabled><span class="tc-mark" data-tc-colour="#4A6B52"></span>Контакты <span class="tc-mono tc-push tc-mono--t10-dusty">already there</span></label>
-              <label class="is-on tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="nextcloud/arhiv" checked><span class="tc-mark" data-tc-colour="#A05A2C"></span>Архив <span class="tc-mono tc-push tc-mono--t10-dusty">nextcloud</span></label>
-              <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="radicale/komanda" disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>Команда <span class="tc-badge tc-push">read-only</span></label>
-              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="radicale/rassylki"><span class="tc-mark" data-tc-colour="#8C6239"></span>Рассылки <span class="tc-mono tc-push tc-mono--t10-dusty">radicale · vps</span></label>
+              <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="nextcloud/arhiv" disabled><span class="tc-mark" data-tc-colour="#A05A2C"></span>Архив <span class="tc-mono tc-push tc-mono--t10-dusty">already there</span></label>
+              <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="radicale/komanda" disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>Команда <span class="tc-mono tc-push tc-mono--t10-dusty">already there</span></label>
+              <label class="is-on tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="radicale/rassylki" checked><span class="tc-mark" data-tc-colour="#8C6239"></span>Рассылки <span class="tc-mono tc-push tc-mono--t10-dusty">radicale · vps</span></label>
             </div>
-          <div class="tc-msg tc-msg--flush-top2">A copy is written into the chosen address book whole, with the same UID; the card here stays as it is.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Copy</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
     </div>
   </div>
-  <figcaption>Копия записи — тот же лист, что перенос: заголовок «Copy contact», кнопка «Copy», и сообщение о копии: запись пишется целиком, с тем же UID, а карточка здесь остаётся. Цель на другом аккаунте — сообщение об этой цели, как у файлов.</figcaption>
+  <figcaption>Копия записи — тот же лист, что перенос: заголовок «Copy contact», кнопка «Copy», и без плашки: что копия целая, а запись здесь остаётся, понятно из слова «Copy». Плашка — только у сервера, который даёт копии новый UID (кадр «Копировать контакт · сервер с одним UID на аккаунт»). Цель на другом аккаунте — сообщение об этой цели, как у файлов.</figcaption>
+  </figure>
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-contacts-37">
+    <div class="frame-label"><span>Копировать контакт · сервер с одним UID на аккаунт</span><span class="frag">фрагмент</span><i>дополнительный кадр: такой сервер — у примера nextcloud</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/contacts/nextcloud/kontakty/7c2e-51a0-b3d9/copy" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-dup"/></svg>
+        <b class="tc-sheet__title">Copy contact</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Виктор Гончаров · from nextcloud · Контакты</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-rubric">Write into</div>
+          <div class="tc-tree">
+              <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="nextcloud/kontakty" disabled><span class="tc-mark" data-tc-colour="#4A6B52"></span>Контакты <span class="tc-mono tc-push tc-mono--t10-dusty">already there</span></label>
+              <label class="is-on tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="nextcloud/arhiv" checked><span class="tc-mark" data-tc-colour="#A05A2C"></span>Архив <span class="tc-mono tc-push tc-mono--t10-dusty">nextcloud</span></label>
+              <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="radicale/komanda" disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>Команда <span class="tc-badge tc-push">read-only</span></label>
+              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="radicale/rassylki"><span class="tc-mark" data-tc-colour="#8C6239"></span>Рассылки <span class="tc-mono tc-push tc-mono--t10-dusty">radicale · vps</span></label>
+            </div>
+          <div class="tc-msg tc-msg--flush-top2">The copy gets a new UID: for other apps it is another card.</div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Copy</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/contacts/nextcloud/kontakty/7c2e-51a0-b3d9">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Сервер, который держит одну запись на UID во всём аккаунте (так у iCloud и Google; здесь — пример на nextcloud), копию с тем же UID не возьмёт: Carrel пишет её с новым UID и говорит это до нажатия — для других программ это другая карточка. Остальное — как у копии в «Копировать контакт · лист».</figcaption>
   </figure>
 
 <figure style="flex:1 1 330px">
@@ -4368,31 +4392,20 @@ Read  2 min ago · not changed on server</div>
         <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Анна Ковалёва · saved</span>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-sheet__block">
-            <div class="tc-rubric tc-rubric--bot7">The address</div>
-            <div class="tc-stack tc-stack--gap-6 tc-line__text">
-              <span class="tc-stack__item"><b>a.kovaleva@example.org → a.kovaleva@slovo.example</b> <span class="tc-dim">— 1 event or task names the old one; it drops out of the person’s timeline</span></span>
-            </div>
-          </div>
-          <div class="tc-sheet__block">
-            <div class="tc-rubric tc-rubric--bot7">What rewriting can set off</div>
-            <div class="tc-stack tc-stack--gap-6 tc-line__text">
-              <span class="tc-stack__item"><b>1 record on a server that schedules</b> <span class="tc-dim">— the server may send a cancellation to the old address, an invitation to the new one and an update to the other attendees</span></span>
-            </div>
-          </div>
-          <div class="tc-sheet__block">
-            <div class="tc-rubric tc-rubric--bot7">What will not change</div>
-            <div class="tc-stack tc-stack--gap-6 tc-line__text">
-              <span class="tc-stack__item"><b>Общий · baikal</b> <span class="tc-dim">— could not be read: the server answered 401 Unauthorized. What it holds keeps the old address.</span></span>
-            </div>
-          </div>
-          <span class="tc-dim--muted tc-dim--t11-5 tc-dim--lh1-55 tc-dim--wrap">Collections that are not ticked were not looked in.</span>
+          <div class="tc-rubric">The address</div>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mono">a.kovaleva@example.org</span><span class="tc-dim tc-dim--t11-5">1 record names it</span></div>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mono">→</span><span class="tc-in is-pick tc-in--t12-w240"><select class="tc-in__list" name="to.1" aria-label="Rewrite a.kovaleva@example.org to"><option value="a.kovaleva@slovo.example" selected>a.kovaleva@slovo.example</option><option value="">Do not rewrite</option></select></span></div>
+          <div class="tc-rubric">What rewriting can set off</div>
+          <div class="tc-line tc-line--gap-8"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="group" value="scheduling" checked><span class="tc-tickrow__tick"></span>On servers that schedule</label><details class="tc-drop"><summary class="tc-btn is-sm">1 record<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w290"><a class="tc-menu__item" href="/app/calendar/nextcloud/rabota/aa01" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Синк-ап по релизу <span class="tc-mono tc-mono--t11">10 Aug</span></a></div></details></div>
+          <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">The server may send a cancellation to the old address, an invitation to the new one and an update to the other attendees.</span>
+          <span class="tc-dim--muted tc-dim--t11-5 tc-dim--lh1-55 tc-dim--wrap">Общий · baikal could not be read, and what it holds keeps the old address. Collections that are not ticked were not looked in.</span>
+          <template data-tc-tally><i data-tc-if="to.1 group=scheduling"></i></template>
         </div>
-        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Rewrite 1 record</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="submit" formaction="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/rewrite?op=leave">Leave as is</button><kbd class="tc-kbd">Esc</kbd></span></div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit" data-tc-count="Rewrite {n} records" data-tc-count-1="Rewrite 1 record">Rewrite 1 record</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="submit" formaction="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/rewrite?op=leave">Leave as is</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
     </div>
   </div>
-  <figcaption>Одна запись — единственное число во всех строках. Отмеченная коллекция, которая не ответила, стоит в «What will not change» с причиной; неотмеченные коллекции не просматриваются, и лист говорит это строкой внизу.</figcaption>
+  <figcaption>Одна запись — тот же лист, что при многих (кадр «Контакт · адрес заменён — переписать участников?»): строка замены с выбором, группы риска отметками, кнопка считает остаток; число единственное. Что останется как было — одной строкой над кнопкой: отмеченная коллекция, которая не прочиталась, — «… could not be read, and what it holds keeps the old address.»; неотмеченные не просматривались.</figcaption>
   </figure>
 
 <figure style="flex:1 1 100%">
@@ -4406,26 +4419,15 @@ Read  2 min ago · not changed on server</div>
         <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Анна Ковалёва · saved</span>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-sheet__block">
-            <div class="tc-rubric tc-rubric--bot7">The address</div>
-            <div class="tc-stack tc-stack--gap-6 tc-line__text">
-              <span class="tc-stack__item"><b>a.kovaleva@example.org → a.kovaleva@slovo.example</b> <span class="tc-dim">— 2 events and tasks name the old one</span></span>
-            </div>
-          </div>
-          <div class="tc-sheet__block">
-            <div class="tc-rubric tc-rubric--bot7">What will not change</div>
-            <div class="tc-stack tc-stack--gap-6 tc-line__text">
-              <span class="tc-stack__item"><b>2 records in Shared</b> <span class="tc-dim">— read-only; they keep the old address</span></span>
-              <span class="tc-stack__item"><b>Общий · baikal</b> <span class="tc-dim">— could not be read: the server answered 401 Unauthorized. What it holds keeps the old address.</span></span>
-            </div>
-          </div>
-          <div class="tc-msg is-alert tc-msg--flush">Nothing here can be rewritten: every record that names the old address is read-only or could not be read.</div>
+          <div class="tc-rubric">The address</div>
+          <div class="tc-line tc-line--gap-8"><span class="tc-mono">a.kovaleva@example.org</span><span class="tc-dim tc-dim--t11-5">2 records name it</span></div>
+          <span class="tc-dim--muted tc-dim--t11-5 tc-dim--lh1-55 tc-dim--wrap">2 records in Shared are read-only and keep the old address. Общий · baikal could not be read, and what it holds keeps the old address. Collections that are not ticked were not looked in.</span>
         </div>
-        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit" disabled>Rewrite 0 records</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="submit" formaction="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/rewrite?op=leave">Leave as is</button><kbd class="tc-kbd">Esc</kbd></span></div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" title="Nothing here can be rewritten." type="submit" disabled>Rewrite 0 records</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="submit" formaction="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/rewrite?op=leave">Leave as is</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
     </div>
   </div>
-  <figcaption>Все записи со старым адресом только для чтения или не прочитались — переписывать нечего: кнопка «Rewrite 0 records» выключена, причина — сообщением над ней.</figcaption>
+  <figcaption>Переписывать нечего — каждая запись со старым адресом только для чтения или не прочиталась: выбора адреса и групп нет, строка над кнопкой называет, что останется как было, «Rewrite 0 records» выключена с причиной в подсказке.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -5593,6 +5595,66 @@ Read  2 min ago · changed on server 3 days ago</div>
   </div>
   <figcaption><b>Событие, открытое из объединённого вида</b> — как контакт (кадр «Связанная запись · карточка из объединённого вида», Р-58): значения, выбранные в разделе дубликатов. У места встречи выбор был — копия в «Общем» держит другое место, — поэтому после него стоят метка и название календаря, откуда оно взято. Время тоже выбирали («When») — копия в «Общем» стоит на полчаса позже, — поэтому метка и у него. <b>«differ» — относительно показанного:</b> у копии названы поля, где её значение не то, что на этой карточке. Блок внизу называет все три копии; каждая ведёт на карточку своего календаря, где показаны её данные и значок «linked» у поля с выбором (кадр «Карточка события»).</figcaption>
   </figure>
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-agenda-29">
+    <div class="frame-label"><span>Перенести событие · на другой аккаунт</span><span class="frag">фрагмент</span><i>событие с участниками; сервер планирует встречи</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/calendar/radicale/proekty/5d0e/move" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-move"/></svg>
+        <b class="tc-sheet__title">Move event</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Ревью архитектуры · from radicale · vps · Проекты</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-rubric">Write into</div>
+          <div class="tc-tree">
+              <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="radicale/proekty" disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>Проекты <span class="tc-mono tc-push tc-mono--t10-dusty">already there</span></label>
+              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="radicale/dezhurstva"><span class="tc-mark" data-tc-colour="#8C6239"></span>Дежурства <span class="tc-mono tc-push tc-mono--t10-dusty">radicale · vps</span></label>
+              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="nextcloud/lichnyj"><span class="tc-mark" data-tc-colour="#4A6B52"></span>Личный <span class="tc-mono tc-push tc-mono--t10-dusty">nextcloud</span></label>
+              <label class="is-on tc-tree__row"><input class="tc-tree__box" type="radio" name="to" value="nextcloud/rabota" checked><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Работа <span class="tc-mono tc-push tc-mono--t10-dusty">nextcloud</span></label>
+              <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="baikal/obshchiy" disabled><span class="tc-mark" data-tc-colour="#9A9280"></span>Общий <span class="tc-mono tc-push tc-mono--t10-dusty">password · 401</span></label>
+            </div>
+          <div class="tc-msg tc-msg--flush-top2">radicale · vps may send its attendees a cancellation.</div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/calendar/radicale/proekty/5d0e">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Перенос на другой аккаунт — не <code>MOVE</code>: Carrel читает событие целиком, пишет туда, читает обратно и удаляет исходное, только если копия сохранила всё; лист говорит это до нажатия. У события с участниками на сервере, который планирует встречи, — последней фразой то, о чём легко не подумать (решение А12): участники могут получить отмену. Внутри одного сервера — <code>MOVE</code>, как в «Контакт · переместить в другую книгу»; копия — тот же лист с «Copy».</figcaption>
+  </figure>
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-agenda-30">
+    <div class="frame-label"><span>Экспорт из объединённого вида · лист</span><span class="frag">фрагмент</span><i>Export в шапке объединённого календаря</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w520" action="/app/calendar/export" method="get">
+        <div class="tc-sheet__head">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-export"/></svg>
+        <b class="tc-sheet__title">Export</b>
+        <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">Combined calendar</span>
+        </div>
+        <div class="tc-sheet__body">
+          <div class="tc-rubric">Which calendar</div>
+          <div class="tc-tree">
+              <label class="is-on tc-tree__row"><input class="tc-tree__box" type="radio" name="c" value="nextcloud/lichnyj" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>Личный <span class="tc-mono tc-push tc-mono--t10-dusty">nextcloud</span></label>
+              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="c" value="nextcloud/rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Работа <span class="tc-mono tc-push tc-mono--t10-dusty">nextcloud</span></label>
+              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="c" value="nextcloud/dni-rozhdeniya"><span class="tc-mark" data-tc-colour="#A05A2C"></span>Дни рождения <span class="tc-mono tc-push tc-mono--t10-dusty">nextcloud</span></label>
+              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="c" value="radicale/proekty"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>Проекты <span class="tc-mono tc-push tc-mono--t10-dusty">radicale · vps</span></label>
+              <label class="tc-tree__row"><input class="tc-tree__box" type="radio" name="c" value="radicale/dezhurstva"><span class="tc-mark" data-tc-colour="#8C6239"></span>Дежурства <span class="tc-mono tc-push tc-mono--t10-dusty">radicale · vps</span></label>
+              <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="c" value="baikal/obshchiy" disabled><span class="tc-mark" data-tc-colour="#9A9280"></span>Общий <span class="tc-mono tc-push tc-mono--t10-dusty">password · 401</span></label>
+            </div>
+          <div class="tc-field tc-field--w100"><label>What goes in</label>
+            <span class="tc-seg tc-seg--start" role="radiogroup"><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="span" value="whole" data-tc-disables="from to">Whole calendar</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="span" value="dates" checked>Dates</label></span></div>
+          <div class="tc-line tc-line--gap-10">
+            <div class="tc-field tc-field--sm"><label>From</label><input class="tc-in is-mono" type="date" name="from" value="2026-08-10" aria-label="From"></div>
+            <div class="tc-field tc-field--sm"><label>To</label><input class="tc-in is-mono" type="date" name="to" value="2026-08-31" aria-label="To"></div>
+          </div>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download <span class="tc-mono tc-mono--t11">.ics</span></button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/calendar">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Export всегда про одну коллекцию; в объединённом виде лист спрашивает какую — отметкой, как цель переноса, и у календаря — что войдёт: весь (<code>span=whole</code>, даты выключены) или даты. Форма GET: Download отдаёт файл, ничего не пишется. Когда в рейле выбран один календарь, листа нет — Export сразу отдаёт его файл. У книги — тот же лист без дат и «Download .vcf», у задач — без дат, у заметок — «Download .zip».</figcaption>
+  </figure>
 
 
 <figure>
@@ -5844,7 +5906,7 @@ Read  2 min ago · changed on server 3 days ago</div>
       </form>
     </div>
   </div>
-  <figcaption><b>Лист удаления записи — только когда есть что терять</b> (решения владельца 12.10, А8, А3, А12); простая запись удаляется сразу, как прежде. Здесь полный набор. «What is pointing at it now» — тот же перечень, что у удаления коллекции (<code>s-profile-9</code>): опубликованная ссылка и записи, которые на неё ссылаются (<code>RELATED-TO</code>), — счёт из загруженного, и строка так и говорит. Об отмене — словом «may», как в листах переноса: сообщит ли сервер участникам, решает он. Вложение, записанное в событие, уходит с ним; вложение-ссылка остаётся, и его можно удалить вместе — отметка снята. Копии — отметками: отмечена та, из которой пришли, остальные можно отметить и удалить вместе. Delete — тревожная, без набора имени: запись одна, перечень виден целиком.</figcaption>
+  <figcaption><b>Лист удаления записи — только когда есть что терять</b> (решения владельца 12.10, А8, А3, А12); простая запись удаляется сразу, как прежде. Здесь полный набор. «What is pointing at it now» — тот же перечень, что у удаления коллекции (<code>s-profile-9</code>): опубликованная ссылка и записи, которые на неё ссылаются (<code>RELATED-TO</code>), — счёт из загруженного, и строка так и говорит. Об отмене — словом «may», как в листах переноса: сообщит ли сервер участникам, решает он. Вложение, записанное в событие, уходит с ним; вложение-ссылка остаётся, и его можно удалить вместе — отметка снята. Копии — отметками: отмечена та, из которой пришли, остальные можно отметить и удалить вместе. Delete — тревожная, без набора имени: запись одна, перечень виден целиком. <b>Ширина листа удаления записи:</b> 560, когда лист перечисляет копии (метка, отметка, что держит), иначе 480 (кадр «Задача · удаление, одна ссылка»).</figcaption>
   </figure>
   <figure style="flex:0 1 250px">
   <div class="frame" data-frame="s-agenda-5">
@@ -8327,7 +8389,11 @@ Read  2 min ago</div>
           <div class="tc-sheet__head">
             <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-quill"/></svg>
             <b class="tc-sheet__title">New note</b>
-            <button class="tc-in is-pick tc-push tc-in--t12-w200" type="button">nextcloud · Записи</button>
+            <details class="tc-drop tc-push"><summary class="tc-in is-pick tc-in--t12-w200" title="Write into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</summary><div class="tc-menu is-pop is-right tc-menu--w290">
+                <label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/zapisi" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи<span class="tc-mono tc-push tc-mono--t10-dusty">last used</span></label>
+                <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/dnevnik"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</label>
+                <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Общие с семьёй<span class="tc-badge tc-push">ro</span></button>
+              </div></details>
             <button class="tc-btn tc-close" title="Close" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
           </div>
           <div class="tc-sheet__body">
@@ -8344,7 +8410,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>Лист, а не страница.</b> Экран под ним не перерисовывается и не теряет позицию прокрутки: заметка написана — человек продолжает с того же места. Затемнение слабое (22&nbsp;% чернил) — ровно чтобы отделить лист, но не спрятать то, ради чего заметку пишут: время события, имя, номер телефона часто нужны прямо во время записи. Тетрадь выбирается тут же и запоминается; если писать некуда, лист скажет об этом и предложит подключить аккаунт вместо того, чтобы молча не открыться. Это тот же лист, что у контакта, события и задачи: «куда» в шапке, поле тела и «Open the card», которая переносит набранное в полную форму, если мысль оказалась длиннее одного абзаца; записывается по-прежнему только по «Save note». Прямая ссылка <code>/app/{kind}/quick</code> открывает ту же форму отдельной страницей — для закладки и для случая, когда JavaScript выключен.</figcaption>
+<figcaption><b>Лист, а не страница.</b> Экран под ним не перерисовывается и не теряет позицию прокрутки: заметка написана — человек продолжает с того же места. Затемнение слабое (22&nbsp;% чернил) — ровно чтобы отделить лист, но не спрятать то, ради чего заметку пишут: время события, имя, номер телефона часто нужны прямо во время записи. Тетрадь выбирается тут же и запоминается; если писать некуда, лист скажет об этом и предложит подключить аккаунт вместо того, чтобы молча не открыться. Это тот же лист, что у контакта, события и задачи: «куда» в шапке, поле тела и «Open the card», которая переносит набранное в полную форму, если мысль оказалась длиннее одного абзаца; записывается по-прежнему только по «Save note». Прямая ссылка <code>/app/{kind}/quick</code> открывает ту же форму отдельной страницей — для закладки и для случая, когда JavaScript выключен. «Куда» в шапке листа — поле формы: отметка из списка коллекций рода (<code>into</code>), последняя выбранная — первой с пометкой «last used»; коллекция только для чтения видна и не выбирается.</figcaption>
 </figure>
 
 <figure>
@@ -8406,7 +8472,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>Лист не молчит и не открывается пустым.</b> Он говорит, почему писать некуда, и ведёт на тот же диалог подключения, что кнопка в рейле. Текст в этом окне не держится: сохранять его было бы некуда, а потерять после подключения — ещё хуже, чем не дать написать. Выбора «куда» в шапке нет — выбирать не из чего. Так же выглядит лист контакта, события и задачи, когда писать некуда.</figcaption>
+<figcaption><b>Лист не молчит и не открывается пустым.</b> Он говорит, почему писать некуда, и ведёт на тот же диалог подключения, что кнопка в рейле. Текст в этом окне не держится: сохранять его было бы некуда, а потерять после подключения — ещё хуже, чем не дать написать. Выбора «куда» в шапке нет — выбирать не из чего. Так же выглядит лист контакта, события и задачи, когда писать некуда. У других родов — те же слова о своём: «Connect an account that has an address book, or create an address book…», «…a calendar…», «…a list of tasks…».</figcaption>
 </figure>
 
 <div class="frames">
@@ -8693,7 +8759,11 @@ Read  2 min ago</div>
             <div class="tc-sheet__head">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-con"/></svg>
               <b class="tc-sheet__title">New contact</b>
-              <button class="tc-in is-pick tc-push tc-in--t12-w200" type="button">nextcloud · Контакты</button>
+              <details class="tc-drop tc-push"><summary class="tc-in is-pick tc-in--t12-w200" title="Write into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</summary><div class="tc-menu is-pop is-right tc-menu--w290">
+                <label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/kontakty" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты<span class="tc-mono tc-push tc-mono--t10-dusty">last used</span></label>
+                <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/arhiv"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</label>
+                <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
+              </div></details>
               <button class="tc-btn tc-close" title="Close" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
             </div>
             <div class="tc-sheet__body">
@@ -8722,9 +8792,9 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Адресная книга</span><span class="frag">список</span><i>куда ляжет контакт</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w290">
-        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
+        <label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/kontakty" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты<span class="tc-mono tc-push tc-mono--t10-dusty">last used</span></label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/arhiv"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</label>
+        <button class="tc-menu__item" type="button" role="menuitem" title="Read-only: nothing can be written here." disabled><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
       </div>
     </div>
   </div>
@@ -8845,7 +8915,14 @@ Read  2 min ago</div>
             <div class="tc-sheet__head">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-cal"/></svg>
               <b class="tc-sheet__title">New event</b>
-              <button class="tc-in is-pick tc-push tc-in--t12-w200" type="button">nextcloud · Личный</button>
+              <details class="tc-drop tc-push"><summary class="tc-in is-pick tc-in--t12-w200" title="Write into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</summary><div class="tc-menu is-pop is-right tc-menu--w290">
+                <label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/lichnyj" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный<span class="tc-mono tc-push tc-mono--t10-dusty">last used</span></label>
+                <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label>
+                <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/dni-rozhdeniya"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Дни рождения</label>
+                <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="radicale/proekty"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</label>
+                <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="radicale/dezhurstva"><span class="tc-mark" data-tc-colour="#8C6239"></span>radicale · vps · Дежурства</label>
+                <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="baikal/obshchiy"><span class="tc-mark" data-tc-colour="#9A9280"></span>baikal · Общий</label>
+              </div></details>
               <button class="tc-btn tc-close" title="Close" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
             </div>
             <div class="tc-sheet__body">
@@ -8877,12 +8954,12 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Календарь</span><span class="frag">список</span><i>куда ляжет событие</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w290">
-        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Дни рождения</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#8C6239"></span>radicale · vps · Дежурства</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>baikal · Общий</button>
+        <label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/lichnyj" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный<span class="tc-mono tc-push tc-mono--t10-dusty">last used</span></label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/dni-rozhdeniya"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Дни рождения</label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="radicale/proekty"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="radicale/dezhurstva"><span class="tc-mark" data-tc-colour="#8C6239"></span>radicale · vps · Дежурства</label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="baikal/obshchiy"><span class="tc-mark" data-tc-colour="#9A9280"></span>baikal · Общий</label>
       </div>
     </div>
   </div>
@@ -8988,7 +9065,10 @@ Read  2 min ago</div>
             <div class="tc-sheet__head">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-task"/></svg>
               <b class="tc-sheet__title">New task</b>
-              <button class="tc-in is-pick tc-push tc-in--t12-w200" type="button">nextcloud · Дела</button>
+              <details class="tc-drop tc-push"><summary class="tc-in is-pick tc-in--t12-w200" title="Write into"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</summary><div class="tc-menu is-pop is-right tc-menu--w290">
+                <label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/dela" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела<span class="tc-mono tc-push tc-mono--t10-dusty">last used</span></label>
+                <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label>
+              </div></details>
               <button class="tc-btn tc-close" title="Close" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
             </div>
             <div class="tc-sheet__body">
@@ -9018,8 +9098,8 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Список задач</span><span class="frag">список</span><i>куда ляжет задача</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w290">
-        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</button>
+        <label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/dela" checked><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела<span class="tc-mono tc-push tc-mono--t10-dusty">last used</span></label>
+        <label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="into" value="nextcloud/rabota"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</label>
       </div>
     </div>
   </div>
@@ -9458,7 +9538,7 @@ Read  2 min ago</div>
         <label class="is-on tc-tree__row tc-tree__row--padl58" data-part="children"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07" checked data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=copy&amp;to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="copy-sheet"><svg><use href="#i-file"/></svg>2026-07</label>
         <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/public" disabled><svg><use href="#i-file"/></svg>Public <span class="tc-badge tc-push">read-only</span></label>
       </div>
-          <div class="tc-msg tc-msg--flush-top2">A copy travels through Carrel even inside one server: each file is downloaded and uploaded again, one at a time.</div>
+          <div class="tc-msg tc-msg--flush-top2">Each file is downloaded and uploaded again, even on one server.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Copy</button><kbd class="tc-kbd">Enter</kbd><button class="tc-btn tc-nojs" type="submit" name="open" value="1">Open the folder</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
@@ -9471,7 +9551,7 @@ Read  2 min ago</div>
   <div class="frame" data-frame="s-files-12">
     <div class="frame-label"><span>Перенос · на другое хранилище</span><span class="frag">фрагмент</span><i>сообщение листа</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <div class="tc-msg tc-msg--flush-top2">This goes to another storage, so nothing moves on a server: Carrel downloads each file and uploads it there, and deletes the original only once its copy is complete.</div>
+      <div class="tc-msg tc-msg--flush-top2">Each file is downloaded and uploaded again.</div>
     </div>
   </div>
   <figcaption>Цель на другом хранилище: сообщение листа говорит об этой цели, а не о переносе внутри сервера. Оригинал удаляется, только когда копия цела. У записи — то же про другой аккаунт.</figcaption>
@@ -9499,7 +9579,6 @@ Read  2 min ago</div>
             <label data-part="children" class="tc-tree__row tc-tree__row--padl58"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07" data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>2026-07</label>
             <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/public" disabled><svg><use href="#i-file"/></svg>Public <span class="tc-badge tc-push">read-only</span></label>
           </div>
-          <div class="tc-msg tc-msg--flush-top2">Inside one server this is <code class="tc-mono">MOVE</code>: instant, no traffic. To another storage the file has to be downloaded and uploaded again — Carrel says so before it starts, not after.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><button class="tc-btn tc-nojs" type="submit" name="open" value="1">Open the folder</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
@@ -10012,7 +10091,6 @@ Read  2 min ago</div>
             <label class="is-on tc-tree__row tc-tree__row--padl58" data-part="children"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/documents/carrel/attachments/2026-07" checked data-tc-href="/app/files/sftpgo/documents/op/carrel/attachments?op=move&amp;to=sftpgo/documents/carrel/attachments/2026-07" data-tc-swap="move-sheet"><svg><use href="#i-file"/></svg>2026-07</label>
             <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="sftpgo/public" disabled><svg><use href="#i-file"/></svg>Public <span class="tc-badge tc-push">read-only</span></label>
           </div>
-              <div class="tc-msg tc-msg--flush-top2">Inside one server this is <code class="tc-mono">MOVE</code>: instant, no traffic. To another storage the file has to be downloaded and uploaded again — Carrel says so before it starts, not after.</div>
             </div>
             <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><button class="tc-btn tc-nojs" type="submit" name="open" value="1">Open the folder</button><span class="tc-push tc-line tc-line--gap-7"><button class="tc-btn" type="button">Cancel</button><kbd class="tc-kbd">Esc</kbd></span></div>
           </form>
@@ -15204,7 +15282,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
         </div>
         <div class="tc-sheet__body">
           <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-focus" type="text" name="name" value="Documents" aria-label="Name"></div>
-          <div class="tc-msg tc-msg--flush">A folder's name is its address: renaming it moves it on the server. Devices, published links and backup jobs pointing at the old address will see it vanish; the files inside stay as they are.</div>
+          <div class="tc-msg tc-msg--flush">Links, devices and backups lose the old address.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Rename</button><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
@@ -15458,7 +15536,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="radicale" disabled><svg><use href="#i-server"/></svg>radicale · vps <span class="tc-mono tc-push tc-mono--t10-dusty">no files</span></label>
             <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="baikal" disabled><svg><use href="#i-server"/></svg>baikal <span class="tc-mono tc-push tc-mono--t10-dusty">password · 401</span></label>
           </div>
-          <div class="tc-msg tc-msg--flush-top2">Carrel makes a folder «Documents» in nextcloud · Files, copies all <b>9</b> files into it — each downloaded and uploaded again — then deletes this one on sftpgo · vps. The tick in the rail, the attachment folder and the upload folder follow it; devices, published links and backup jobs pointing at the old address will see it vanish.</div>
+          <div class="tc-msg tc-msg--flush-top2">Links, devices and backups lose the old address.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
@@ -15485,8 +15563,8 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
             <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="radicale" disabled><svg><use href="#i-server"/></svg>radicale · vps <span class="tc-mono tc-push tc-mono--t10-dusty">no files</span></label>
             <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="baikal" disabled><svg><use href="#i-server"/></svg>baikal <span class="tc-mono tc-push tc-mono--t10-dusty">password · 401</span></label>
           </div>
-          <div class="tc-msg tc-msg--flush-top2">Carrel makes a folder «Files» on sftpgo · vps beside Documents and Public, copies everything in nextcloud · Files into it — each file downloaded and uploaded again — then deletes what was copied. The storage itself stays on nextcloud, empty: it is the address this connection is made with.</div>
-          <div class="tc-msg tc-msg--flush">What nextcloud will not let delete — folders shared with you, folders its administrator mounted — is copied and stays there too; the result names it.</div>
+          <div class="tc-msg tc-msg--flush-top2">The storage itself stays on nextcloud, empty.</div>
+          <div class="tc-msg tc-msg--flush">Shared and mounted folders stay there too.</div>
         </div>
         <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
       </form>
@@ -15614,6 +15692,22 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
     </div>
   </div>
   <figcaption>Лист выходит поверх того экрана, с которого нажали, — как быстрая заметка (7.4) и по тем же причинам: список не перерисовывается, и видно, у какого именно аккаунта спрашивают. В шапке листа стоит его имя, чтобы «Show password» с двух карточек подряд нельзя было перепутать. Поле одно, <kbd class="tc-kbd" style="font-family:var(--tc-font-mono)">Enter</kbd> подтверждает, <kbd class="tc-kbd" style="font-family:var(--tc-font-mono)">Esc</kbd> закрывает.</figcaption>
+  </figure>
+<figure style="flex:1 1 420px">
+  <div class="frame" data-frame="s-profile-36">
+    <div class="frame-label"><span>Пароль перед выдачей · неверный</span><span class="frag">фрагмент</span><i>тот же лист после неверного пароля</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-sheet tc-sheet--w400" action="/app/settings/unlock" method="post"><input type="hidden" name="csrf" value="7f3a91de"><input type="hidden" name="back" value="/app/settings/connections"><input type="hidden" name="for" value="nextcloud">
+        <div class="tc-sheet__head"><b class="tc-sheet__title">Show password</b><span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud</span></div>
+        <div class="tc-sheet__body">
+          <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in is-error is-focus" type="password" name="password" aria-label="Your Carrel password" required><span class="tc-field__hint tc-dim--danger">Password is wrong.</span></div>
+          <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Unlocks stored credentials for five minutes.</span>
+        </div>
+        <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Show</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Неверный пароль — ошибка у поля, поле пустое и в фокусе, остальное как было. Несколько неверных подряд — та же ошибка словами «Too many attempts just now. Wait a few minutes and try again.», ответ 429.</figcaption>
   </figure>
 
   <figure>
@@ -16243,7 +16337,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
                 </span></div>
               <div class="tc-field tc-field--w100"><label>Address <span class="tc-dim">— stays as it is</span></label>
                 <input class="tc-in is-mono tc-in--dusty" type="text" value="…/remote.php/dav/calendars/mix/birthdays/" aria-label="Address" readonly></div>
-              <div class="tc-msg tc-msg--flush-top2">Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. The new name and colour are written to the server — other clients will show them at their next sync.</div>
+              <div class="tc-msg tc-msg--flush-top2">The address stays: links, devices and backups keep working.</div>
             </div>
             <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Save</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
           </form>
@@ -16333,7 +16427,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
                 <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="baikal" disabled><svg><use href="#i-server"/></svg>baikal <span class="tc-mono tc-push tc-mono--t10-dusty">password · 401</span></label>
                 <label class="tc-tree__row tc-tree__row--op-55"><input class="tc-tree__box" type="radio" name="to" value="sftpgo" disabled><svg><use href="#i-server"/></svg>sftpgo · vps <span class="tc-mono tc-push tc-mono--t10-dusty">files only</span></label>
               </div>
-              <div class="tc-msg tc-msg--flush-top2">Carrel creates a calendar there, copies all <b>128</b> events, then deletes this one on nextcloud. Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path. nextcloud may tell the attendees of its meetings that they are cancelled.</div>
+              <div class="tc-msg tc-msg--flush-top2">Links, devices and backups lose the old address. nextcloud may send attendees a cancellation.</div>
             </div>
             <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Move</button><kbd class="tc-kbd">Enter</kbd><span class="tc-push tc-line tc-line--gap-7"><a class="tc-btn" href="/app/settings/connections">Cancel</a><kbd class="tc-kbd">Esc</kbd></span></div>
           </form>
@@ -17322,7 +17416,7 @@ principal · bad · PROPFIND /dav.php/ → 401 Unauthorized</div>
       </div>
     </div>
   </div>
-  <figcaption id="reveal"><b>Одна механика на все места, где учётные данные выходят наружу</b> — «Show password» в подключениях (7.11), пароль на этом экране, сборка профиля Apple: один и тот же лист, одни и те же правила. Спрашивается <b>ваш</b> пароль от Carrel, а не пароль сервера — подтверждается, что за экраном тот же человек, а не тот, кому досталась незаблокированная машина. <b>Часы одни на всё.</b> Подтверждение открывает учётные данные не на этом экране, а везде — в подключениях, на экране нового устройства, при сборке профиля — и держит их открытыми пять минут. Второго таймера нет: показанный пароль не прячется по своему собственному отсчёту, он закрывается вместе с окном или по кнопке <b>Lock now</b>; выход из учётной записи закрывает его тоже. Пока окно открыто, состояние видно значком в шапке раздела — иначе человек не знает, спросят его в следующий раз или нет. Каждый показ и каждая сборка профиля попадают в журнал.<br><br>Разных «режимов доступа» к паролю в интерфейсе нет и не будет: одно правило легче объяснить и невозможно обойти, выбрав экран поудобнее.</figcaption>
+  <figcaption id="reveal"><b>Одна механика на все места, где учётные данные выходят наружу</b> — «Show password» в подключениях (7.11), пароль на этом экране, сборка профиля Apple: один и тот же лист, одни и те же правила. Спрашивается <b>ваш</b> пароль от Carrel, а не пароль сервера — подтверждается, что за экраном тот же человек, а не тот, кому досталась незаблокированная машина. <b>Часы одни на всё.</b> Подтверждение открывает учётные данные не на этом экране, а везде — в подключениях, на экране нового устройства, при сборке профиля — и держит их открытыми пять минут. Второго таймера нет: показанный пароль не прячется по своему собственному отсчёту, он закрывается вместе с окном или по кнопке <b>Lock now</b>; выход из учётной записи закрывает его тоже. Пока окно открыто, состояние видно значком в шапке раздела — иначе человек не знает, спросят его в следующий раз или нет. Каждый показ и каждая сборка профиля попадают в журнал.<br><br>Разных «режимов доступа» к паролю в интерфейсе нет и не будет: одно правило легче объяснить и невозможно обойти, выбрав экран поудобнее. <b>Один лист на все выдачи</b> (<code>/app/settings/unlock</code>, поле <code>for</code>): заголовок и кнопка — по тому, что выдают: пароль подключения или ленты — «Show password» · имя, кнопка «Show»; профиль устройства — «Generate profile», «Generate»; пароль davloom — «Add device» · имя устройства, «Create password»; внешний запуск задания — «External trigger» · имя задания, «Turn on» (уже включён — «New password»); удаление учётной записи — «Delete account», кнопка опасная «Delete account», вместо строки о пяти минутах — что уйдёт; иное — «Confirm your password», «Confirm». Неверный пароль — кадр «Пароль перед выдачей · неверный».</figcaption>
   </figure>
 
 <figure style="flex:1 1 100%">
@@ -20101,7 +20195,7 @@ jobs:
                 </div>
                 <span class="tc-field__hint">Without the title an event shows as “Busy”.</span></div>
               <div class="tc-stack tc-stack--gap-5 tc-sheet__checks">
-                <label class="tc-check"><input class="tc-check__box" type="checkbox" name="download" value="1" checked><span class="tc-tickrow__tick"></span>Allow <span class="tc-mono">.ics</span> download and subscription</label>
+                <label class="tc-check"><input class="tc-check__box" type="checkbox" name="download" value="1"><span class="tc-tickrow__tick is-off"></span>Allow <span class="tc-mono">.ics</span> download and subscription</label>
               </div>
               <div class="tc-field tc-field--sm"><label>Link lives for</label><details class="tc-drop"><summary class="tc-in is-pick">30 days</summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="7">7 days</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="14">14 days</label><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="30" checked>30 days</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="never">No expiry</label></div></details></div>
             </div>
@@ -20649,7 +20743,7 @@ Read  2 min ago · changed on server 3 days ago</div>
                 </div>
                 <span class="tc-field__hint">Without the title the event shows as “Busy”.</span></div>
               <div class="tc-stack tc-stack--gap-5 tc-sheet__checks">
-                <label class="tc-check"><input class="tc-check__box" type="checkbox" name="download" value="1" checked><span class="tc-tickrow__tick"></span>Allow <span class="tc-mono">.ics</span> download and subscription</label>
+                <label class="tc-check"><input class="tc-check__box" type="checkbox" name="download" value="1"><span class="tc-tickrow__tick is-off"></span>Allow <span class="tc-mono">.ics</span> download and subscription</label>
               </div>
               <div class="tc-field tc-field--sm"><label>Link lives for</label><details class="tc-drop"><summary class="tc-in is-pick">30 days</summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="7">7 days</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="14">14 days</label><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="30" checked>30 days</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="never">No expiry</label></div></details></div>
             </div>
@@ -20868,7 +20962,7 @@ Read  2 min ago</div>
                   <label class="tc-check"><input class="tc-check__box" type="checkbox" name="attachments" value="1"><span class="tc-tickrow__tick is-off"></span>Publish them too — each gets its own link</label>
                   <span class="tc-field__hint">The links are created together with this one, expire with it and are revoked with it. Without this the page says how many files there are, but not their names: a file name gives away more than it looks.</span>
                 </div></div>
-              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="download" value="1" checked><span class="tc-tickrow__tick"></span>Allow <span class="tc-mono">.md</span> download</label>
+              <label class="tc-check"><input class="tc-check__box" type="checkbox" name="download" value="1"><span class="tc-tickrow__tick is-off"></span>Allow <span class="tc-mono">.md</span> download</label>
               <div class="tc-field tc-field--sm"><label>Link lives for</label><details class="tc-drop"><summary class="tc-in is-pick">30 days</summary><div class="tc-menu is-pop tc-menu--w212"><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="7">7 days</label><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="14">14 days</label><label class="is-on tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="30" checked>30 days</label><span class="tc-menu__sep"></span><label class="tc-menu__item"><input class="tc-seg__box" type="radio" role="menuitemradio" name="lives" value="never">No expiry</label></div></details></div>
             </div>
             <div class="tc-sheet__foot"><button class="tc-btn is-primary" type="submit">Create link</button><a class="tc-btn" href="/app/notes">Cancel</a></div>

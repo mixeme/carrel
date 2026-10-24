@@ -1123,16 +1123,14 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 		} else {
 			run.Set("to", s.route(dest.href("", dest.segs, true)))
 		}
-		// The message stands on the sheet (s-files-4): what the operation
-		// will cost, said before it starts.
+		// Only what the person would not think of (Р-77): that a file is
+		// downloaded and uploaded again (s-files-11, -12). A move inside
+		// one storage says nothing (s-files-4, -13).
 		switch {
 		case op == view.FileCopy:
-			sheet.Warning = line("A copy travels through Carrel even inside one server: each file is downloaded and uploaded again, one at a time.")
+			sheet.Warning = line("Each file is downloaded and uploaded again, even on one server.")
 		case dest != nil && dest.conn.ID != c.conn.ID:
-			sheet.Warning = line("This goes to another storage, so nothing moves on a server: Carrel downloads each file and uploads it there, and deletes the original only once its copy is complete.")
-		default:
-			// MOVE monospaced (s-files-4).
-			sheet.Warning = join("Inside one server this is ", monoRun("MOVE"), ": instant, no traffic. To another storage the file has to be downloaded and uploaded again — Carrel says so before it starts, not after.")
+			sheet.Warning = line("Each file is downloaded and uploaded again.")
 		}
 	}
 	address := s.postQuery(c.href("op", c.segs, true), run)

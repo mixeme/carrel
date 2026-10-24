@@ -99,19 +99,18 @@ func TestReplacingAnAddressOffersToRewriteIt(t *testing.T) {
 		t.Errorf("head = %q, %q", sheet.Title, sheet.Subject)
 	}
 	if len(sheet.Pairs) != 1 || sheet.Pairs[0].From != "ada@old.example" || sheet.Pairs[0].To != "ada@new.example" ||
-		sheet.Pairs[0].Note != "4 events and tasks name the old one; they drop out of the person’s timeline" {
+		sheet.Pairs[0].Note != "4 records name it" {
 		t.Errorf("pairs = %+v", sheet.Pairs)
 	}
-	want := []view.Field{
-		{Label: "3 records on servers that schedule", Value: "the server may send a cancellation to the old address, an invitation to the new one and an update to the other attendees"},
-		{Label: "1 meeting organised by others", Value: "the organiser’s server may refuse the change, and its next update may undo it"},
-		{Label: "Past meetings", Value: "will show the new address, as if the person had been invited at it"},
+	var groups []string
+	for _, g := range sheet.Groups {
+		groups = append(groups, string(g.Label)+" · "+string(g.Count))
 	}
-	if !sameFields(sheet.Effects, want) {
-		t.Errorf("effects = %+v\nwant %+v", sheet.Effects, want)
+	if want := "On servers that schedule · 3 records; Meetings organised by others · 1 record; Past meetings · 1 record"; strings.Join(groups, "; ") != want {
+		t.Errorf("groups = %q, want %q", groups, want)
 	}
-	if kept := []view.Field{{Label: "1 record in Shared", Value: "read-only; it keeps the old address"}}; !sameFields(sheet.Kept, kept) {
-		t.Errorf("kept = %+v", sheet.Kept)
+	if sheet.KeptNote != "1 record in Shared is read-only and keeps the old address." {
+		t.Errorf("kept = %q", sheet.KeptNote)
 	}
 	confirm := rewriteAction(t, sheet.Actions, "contact.rewrite.confirm")
 	if confirm.Label != "Rewrite 3 records" || !confirm.Enabled {

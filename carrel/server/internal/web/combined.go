@@ -523,6 +523,17 @@ func (s *Server) combinedIOActions(blob sealed.Blob, spec kindSpec) []view.Actio
 	if !exp.Enabled {
 		exp.Reason = text("No collection of this kind to hand over.")
 	}
+	// One collection ticked, nothing to ask: Export hands over its file —
+	// a calendar whole, as there is no week on this screen (s-agenda-30).
+	if one := ticked(blob, spec.kind); len(one) == 1 && !one[0].Gone {
+		if conn, ok := blob.Connection(one[0].AccountID); ok {
+			q := url.Values{}
+			if spec.kind == view.KindEvent {
+				q.Set("whole", "1")
+			}
+			exp.Href = s.postQuery(origin{conn: conn, col: one[0]}.listPath(spec.segment)+"/export", q)
+		}
+	}
 	return []view.Action{imp, exp}
 }
 

@@ -1,10 +1,16 @@
 package web_test
 
 import (
+	"archive/zip"
+	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 
+	"github.com/emersion/go-webdav/caldav"
+
+	"carrel.dev/carrel/server/internal/davtest"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -113,8 +119,29 @@ func TestExportCalendarTakesTheWindowOfTheScreen(t *testing.T) {
 	}
 }
 
+// notebookFiles are the notes of a notebook's .zip, by name.
+func notebookFiles(t *testing.T, body string) map[string]string {
+	t.Helper()
+	z, err := zip.NewReader(strings.NewReader(body), int64(len(body)))
+	if err != nil {
+		t.Fatalf("the notebook is no .zip: %v", err)
+	}
+	out := map[string]string{}
+	for _, f := range z.File {
+		r, err := f.Open()
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, _ := io.ReadAll(r)
+		r.Close()
+		out[f.Name] = string(b)
+	}
+	return out
+}
+
 // Notes go out as Markdown with a header block, and what has no field of its
-// own in that block is in the file all the same (S-19).
+// own in that block is in the file all the same (S-19); a notebook is a .zip
+// of them, a .md each (s-agenda-30).
 func TestExportNotesAreMarkdown(t *testing.T) {
 	f := calendarFixture(t, nil, "n.ics",
 		"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other//Other//EN\r\n"+
@@ -124,7 +151,11 @@ func TestExportNotesAreMarkdown(t *testing.T) {
 	rec := f.h.do(get(f.path("notes"), f.sess))
 	page := decode[view.NotesPage](t, rec)
 
-	body := download(t, f, exportHref(t, page.Bar), "work.md", "text/markdown")
+	files := notebookFiles(t, download(t, f, exportHref(t, page.Bar), "work.zip", "application/zip"))
+	body, ok := files["kovka.md"]
+	if !ok || len(files) != 1 {
+		t.Fatalf("the notebook holds %v, want kovka.md", files)
+	}
 	for _, want := range []string{"---\n", "title: Ковка\n", "uid: note-1\n", "x-jtx-board: 2\n", "status: FINAL\n", "Первая строка\nВторая\n"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("no %q in\n%s", want, body)
@@ -165,4 +196,66 @@ func contains(all []string, want string) bool {
 		}
 	}
 	return false
+}
+
+// s-agenda-30 (Typecase's note 119): the export of a combined calendar is a
+// GET form — which calendar, a radio «c» in the rail's order with its server
+// at the right; «What goes in», the whole of it or days; «Download .ics» and
+// Cancel. Sent, it is that calendar's own file, the whole of it or the days.
+func TestExportSheetIsTheFrame(t *testing.T) {
+	frame := mockupFrame(t, "s-agenda-30")
+	confirm := frameOne(t, frameSheetMain, frame, "main button")[1]
+	if !strings.Contains(frame, `action="/app/calendar/export" method="get"`) || !strings.Contains(frame, `name="span" value="whole" data-tc-disables="from to"`) {
+		t.Fatal("s-agenda-30 is another form: read it again")
+	}
+	srv := searchServer(t)
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work"})
+	side := davtest.CalendarHome + "side/"
+	srv.AddCalendar(caldav.Calendar{Path: side, Name: "Side"})
+	srv.Seed(searchWork+"e.ics", ics("BEGIN:VEVENT\nUID:e\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nSUMMARY:Review\nEND:VEVENT"))
+	f := connectFixture(t, srv, searchWork, nil)
+	tickAll(t, f.h, f.sess)
+
+	sheet := decode[view.ExportSheet](t, f.h.do(get("/app/calendar/export", f.sess)))
+	if sheet.Target.Field != "c" || len(sheet.Target.Options) != 2 || sheet.Target.Chosen != sheet.Target.Options[0].ID || sheet.Form.Method != "GET" {
+		t.Fatalf("sheet = %+v", sheet)
+	}
+	for _, o := range sheet.Target.Options {
+		if strings.Contains(string(o.Stamp), " · ") || o.Value == "" {
+			t.Errorf("option %+v: want its server at the right and its value", o)
+		}
+	}
+	var names []string
+	for _, set := range sheet.Form.Sets {
+		for _, r := range set.Rows {
+			if r.Kind != view.InputHidden {
+				names = append(names, r.Name+":"+string(r.Label))
+			}
+		}
+	}
+	if strings.Join(names, " ") != "span:What goes in from:From to:To" {
+		t.Errorf("fields = %q", names)
+	}
+	if d := sheet.Actions[0]; string(d.Label) != confirm || !d.Submits || !d.Enabled {
+		t.Errorf("download = %+v, the frame %q", d, confirm)
+	}
+	sameActionMarks(t, "s-agenda-30", "export", sheet.Actions, nil)
+
+	work := sheet.Target.Options[0].Value
+	for _, o := range sheet.Target.Options {
+		if o.Label == "Work" {
+			work = o.Value
+		}
+	}
+	whole := f.h.do(get("/app/calendar/export?"+url.Values{"c": {work}, "span": {"whole"}}.Encode(), f.sess))
+	if loc := whole.Header().Get("Location"); whole.Code != http.StatusSeeOther || loc != f.path("calendar")+"/export?whole=1" {
+		t.Errorf("whole: %d %q", whole.Code, loc)
+	}
+	days := f.h.do(get("/app/calendar/export?"+url.Values{"c": {work}, "span": {"dates"}, "from": {"2026-01-10"}, "to": {"2026-01-20"}}.Encode(), f.sess))
+	if loc := days.Header().Get("Location"); !strings.Contains(loc, "from=2026-01-10") || !strings.Contains(loc, "to=2026-01-20") {
+		t.Errorf("days: %d %q", days.Code, loc)
+	}
+	if body := download(t, f, days.Header().Get("Location"), "work.ics", "text/calendar"); !strings.Contains(body, "UID:e") {
+		t.Errorf("the days' file:\n%s", body)
+	}
 }

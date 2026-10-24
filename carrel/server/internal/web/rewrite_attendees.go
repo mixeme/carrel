@@ -169,9 +169,6 @@ func (p *rewritePlan) groups() []rewriteGroupOf {
 			past.records = append(past.records, i)
 		}
 	}
-	if len(scheduling.records) == 1 {
-		scheduling.label = "On a server that schedules" // s-contacts-19
-	}
 	var out []rewriteGroupOf
 	for _, g := range append(append([]rewriteGroupOf{scheduling}, unknown...), others, past) {
 		if len(g.records) > 0 {
@@ -548,7 +545,6 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 		Subject: text(titleOr(p.Name, "Contact") + " · saved"),
 		Pairs:   []view.RewritePair{},
 		Groups:  []view.RewriteGroup{},
-		Kept:    []view.Field{},
 		Tally:   []string{},
 		// Only the ticked collections were read, as relink reads them
 		// (owner's decision, s-contacts-19).
@@ -572,29 +568,31 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 				}
 			}
 		}
-		// What they lose is said where rewriting can mend it; where none can
-		// be written the pair only counts them (s-contacts-20).
-		note := "no events or tasks name the old one"
-		switch {
-		case n == 1 && writable > 0:
-			note = "1 event or task names the old one; it drops out of the person’s timeline"
-		case n == 1:
-			note = "1 event or task names the old one"
-		case n > 1 && writable > 0:
-			note = fmt.Sprintf("%d events and tasks name the old one; they drop out of the person’s timeline", n)
-		case n > 1:
-			note = fmt.Sprintf("%d events and tasks name the old one", n)
+		// How many name it, and that they keep it when it is not to be
+		// rewritten (s-contacts-15, -19); with nothing to write, no choice
+		// either (s-contacts-20).
+		note := plural(n, "record") + " name it"
+		if n == 1 {
+			note = "1 record names it"
 		}
-		choice := view.FormRow{Name: name, Label: text("Rewrite " + pr.From + " to"), Kind: view.InputSelect, Value: text(pr.To)}
-		for _, a := range p.Now {
-			choice.Options = append(choice.Options, view.Option{Value: a, Label: text(a), Selected: strings.EqualFold(a, pr.To)})
+		var choice view.FormRow
+		if writable > 0 {
+			switch {
+			case pr.To == "" && n == 1:
+				note += "; it keeps it"
+			case pr.To == "":
+				note += "; they keep it"
+			}
+			choice = view.FormRow{Name: name, Label: text("Rewrite " + pr.From + " to"), Kind: view.InputSelect, Value: text(pr.To)}
+			for _, a := range p.Now {
+				choice.Options = append(choice.Options, view.Option{Value: a, Label: text(a), Selected: strings.EqualFold(a, pr.To)})
+			}
+			choice.Options = append(choice.Options, view.Option{Value: "", Label: "Do not rewrite", Selected: pr.To == "", Separator: true})
 		}
-		choice.Options = append(choice.Options, view.Option{Value: "", Label: "Do not rewrite", Selected: pr.To == "", Separator: true})
 		sheet.Pairs = append(sheet.Pairs, view.RewritePair{From: text(pr.From), To: text(pr.To), Note: text(note), Choice: choice})
 	}
 	groups := p.groups()
 	answer := p.defaultAnswer()
-	sheet.Effects = effectsOf(groups)
 	for _, g := range groups {
 		rg := view.RewriteGroup{Name: "group", Value: g.value, Label: text(g.label), On: answer.groups[g.value],
 			Count: text(plural(len(g.records), "record")), Note: text(g.note)}
@@ -658,16 +656,6 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 		}
 		sheet.Tally = append(sheet.Tally, cond)
 	}
-	for _, g := range p.kept() {
-		note := "read-only; they keep the old address"
-		if g.n == 1 {
-			note = "read-only; it keeps the old address"
-		}
-		sheet.Kept = append(sheet.Kept, view.Field{Label: text(plural(g.n, "record") + " in " + g.where), Value: text(note)})
-	}
-	for _, u := range p.Unread {
-		sheet.Kept = append(sheet.Kept, view.Field{Label: text(u.Label), Value: text("could not be read: " + lowerClause(u.Why) + " What it holds keeps the old address.")})
-	}
 	sheet.KeptNote = text(strings.Join(p.keptSentences(), " "))
 	action := s.rewriteAddress(c, p.UID, p.Token, "")
 	sheet.Form = s.plainForm(action, "POST", csrfField(c.sess), view.FormRow{Name: "groups", Kind: view.InputHidden, Value: "1"})
@@ -679,7 +667,7 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 	switch {
 	case p.writable() == 0:
 		confirm.Enabled, confirm.Href = false, ""
-		confirm.Reason = "Nothing here can be rewritten: every record that names the old address is read-only or could not be read."
+		confirm.Reason = "Nothing here can be rewritten." // the line above says what keeps it (s-contacts-20)
 	case n == 0:
 		confirm.Enabled, confirm.Href = false, ""
 		confirm.Reason = "Nothing is chosen to be rewritten: choose an address, or tick a group."
@@ -687,31 +675,6 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 	sheet.Actions = []view.Action{confirm,
 		{ID: "contact.rewrite.leave", Label: "Leave as is", Href: s.route(s.rewriteAddress(c, p.UID, p.Token, "leave")), Method: "POST", Enabled: true}}
 	return sheet
-}
-
-// effectsOf are the groups as the lines of one replacement draw them
-// (s-contacts-15, -19, -20): how many and where, and what it can set off.
-func effectsOf(groups []rewriteGroupOf) []view.Field {
-	out := []view.Field{}
-	for _, g := range groups {
-		n := len(g.records)
-		f := view.Field{Value: text(strings.TrimSuffix(strings.ToLower(g.note[:1])+g.note[1:], "."))}
-		switch {
-		case g.value == "scheduling" && n == 1:
-			f.Label = "1 record on a server that schedules" // s-contacts-19
-		case g.value == "scheduling":
-			f.Label = text(plural(n, "record") + " on servers that schedule")
-		case strings.HasPrefix(g.value, "unknown."):
-			f.Label = text(plural(n, "record") + " o" + g.label[1:])
-		case g.value == "others":
-			f.Label = text(plural(n, "meeting") + " organised by others")
-		case g.value == "past":
-			f.Label = "Past meetings"
-			f.Value = "will show the new address, as if the person had been invited at it"
-		}
-		out = append(out, f)
-	}
-	return out
 }
 
 // rewriteAnswerOf is the answer the sheet's form sent: each old address's

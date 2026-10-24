@@ -146,6 +146,31 @@ func (s *Server) loadedRecords(sess *session.Session, blob sealed.Blob) ([]loade
 	return out, present, read
 }
 
+// uidHolders are the collections known to hold a record of kind k with
+// this UID: a list the session has read, or a linked group's member. The
+// move sheet closes them «already there» before the press (s-contacts-2);
+// one not read may hold it too, and the press asks it (moveRecord).
+func (s *Server) uidHolders(sess *session.Session, blob sealed.Blob, k view.Kind, uid string) map[dupes.CollectionRef]bool {
+	out := map[dupes.CollectionRef]bool{}
+	recs, _, _ := s.loadedRecords(sess, blob)
+	for _, r := range recs {
+		if r.rec.Kind == k && r.rec.Ref.UID == uid {
+			out[dupes.CollectionRef{AccountID: r.rec.Ref.AccountID, Col: r.rec.Ref.Col}] = true
+		}
+	}
+	for _, g := range blob.Duplicates.Linked {
+		if g.Kind != k {
+			continue
+		}
+		for _, m := range g.Members {
+			if m.UID == uid {
+				out[dupes.CollectionRef{AccountID: m.AccountID, Col: m.Col}] = true
+			}
+		}
+	}
+	return out
+}
+
 // readDuplicates finds the groups among what is loaded. A linked member the
 // loaded lists say is gone leaves its group silently, and the blob is written
 // without a journal line (S-16).

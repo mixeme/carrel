@@ -101,9 +101,9 @@ func TestExportAsksBeforeLeavingARecordOut(t *testing.T) {
 		if !hasNotice(page.Notices, "The file would lack 1 record") {
 			t.Fatalf("notices = %+v", page.Notices)
 		}
-		body := download(t, f, f.path("notes")+"/export?without=1", "work.md", "text/markdown")
-		if !strings.Contains(body, "title: Ковка") {
-			t.Errorf("the file without it:\n%s", body)
+		files := notebookFiles(t, download(t, f, f.path("notes")+"/export?without=1", "work.zip", "application/zip"))
+		if !strings.Contains(files["kovka.md"], "title: Ковка") || len(files) != 1 {
+			t.Errorf("the file without it: %v", files)
 		}
 	})
 }

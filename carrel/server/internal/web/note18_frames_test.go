@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -197,20 +198,30 @@ func TestBirthdayErrorIsTheFrame(t *testing.T) {
 	}
 }
 
-// s-contacts-17: copying a contact is the move sheet with «Copy contact»,
-// the message of a copy and «Copy here».
+// s-contacts-17: copying a contact is the move sheet with «Copy contact»
+// and «Copy», the same rows, and no message: that the copy is whole and the
+// card stays is in the word «Copy» (Р-77). s-contacts-37: a read-only book is
+// closed «read-only».
 func TestRecordCopySheetIsTheFrame(t *testing.T) {
 	frame := mockupFrame(t, "s-contacts-17")
 	title := frameOne(t, frameSheetT, frame, "title")[1]
-	msg := frameOne(t, frameSheetMsg, frame, "message")[1]
 	confirm := frameOne(t, frameSheetMain, frame, "main button")[1]
-	f := newMoveFixture(t)
-	sheet := decode[view.MoveSheet](t, f.h.do(get(f.record(f.id, peopleBook, "ada")+"/move", f.sess)))
-	cp := decode[view.MoveSheet](t, f.h.do(get(moveOption(t, sheet, "Friends").ID+"&copy=1", f.sess)))
-	if string(cp.Title) != title || plainText(cp.Warning) != msg || confirmOf(t, cp).Label != view.Text(confirm) {
-		t.Errorf("copy = %q, %q, %+v\nthe frame %q, %q, %q", cp.Title, cp.Warning, confirmOf(t, cp), title, msg, confirm)
+	if m := frameSheetMsg.FindStringSubmatch(frame); m != nil {
+		t.Fatalf("the frame says %q again: read it again", frameInline(m[1]))
 	}
+	cp := mockupMoveSheet(t, newMockupApp(t), "kontakty", "4f2b-9c31-a0e7", true)
+	if string(cp.Title) != title || len(cp.Warning) != 0 || confirmOf(t, cp).Label != view.Text(confirm) {
+		t.Errorf("copy = %q, %q, %+v\nthe frame %q, no message, %q", cp.Title, plainText(cp.Warning), confirmOf(t, cp), title, confirm)
+	}
+	sameMoveRows(t, "s-contacts-17", frame, cp)
 	sameActionMarks(t, "s-contacts-17", "copy", cp.Actions, nil)
+
+	readOnly := frameOne(t, regexp.MustCompile(`(?s)<label class="tc-tree__row tc-tree__row--op-55"><input[^>]*>(?:<span class="tc-mark"[^>]*></span>)?[^<]*<span class="tc-badge[^"]*">(.*?)</span>`), mockupFrame(t, "s-contacts-37"), "read-only book")[1]
+	f := newMoveFixture(t)
+	sheet := decode[view.MoveSheet](t, f.h.do(get(f.record(f.id, peopleBook, "ada")+"/move?copy=1", f.sess)))
+	if o := moveOption(t, sheet, "Archive"); !o.ReadOnly || string(o.Reason) != readOnly {
+		t.Errorf("the read-only book = %+v, the frame %q", o, readOnly)
+	}
 }
 
 // s-publish-16: the public page of one event gives its own file.
@@ -428,43 +439,56 @@ func TestNoPasswordEditAndFingerprintAreTheFrames(t *testing.T) {
 	}
 }
 
-// rewriteFrame is a rewrite sheet of a frame: the pairs' notes, the rows
-// under «What rewriting can set off» and «What will not change», the line
-// under them, the main button and the message over it.
+// rewriteFrame is a rewrite sheet of a frame, one view at any count
+// (s-contacts-15, Typecase's note 120): each old address with how many name
+// it and whether it has a choice, each group of risk — its label, its count,
+// its note —, the line over the button, the main button and why it is off.
 type rewriteFrame struct {
-	pairs, effects, kept [][2]string
-	note, confirm, msg   string
+	pairs                [][2]string
+	choices              int
+	groups               [][3]string
+	note, confirm, title string
+	off                  bool
 }
+
+var (
+	frameRewritePair  = regexp.MustCompile(`<span class="tc-mono">([^<]*)</span><span class="tc-dim tc-dim--t11-5">([^<]*)</span>`)
+	frameRewriteGroup = regexp.MustCompile(`(?s)name="group" value="[^"]*"[^>]*><span class="tc-tickrow__tick"></span>([^<]*)</label><details class="tc-drop"><summary class="tc-btn is-sm">([^<]*)<svg.*?</details></div>\s*<span class="tc-dim tc-dim--t11-5 tc-dim--wrap">([^<]*)</span>`)
+	frameRewriteFoot  = regexp.MustCompile(`(?s)<div class="tc-sheet__foot"><button class="tc-btn is-primary"( title="([^"]*)")?[^>]*?( disabled)?>(.*?)</button>`)
+)
 
 func readRewriteFrame(t *testing.T, id string) rewriteFrame {
 	t.Helper()
-	frame := mockupFrame(t, id)
+	frame, _, _ := strings.Cut(mockupFrame(t, id), "<figcaption")
 	var r rewriteFrame
-	for _, block := range strings.Split(frame, `<div class="tc-sheet__block">`)[1:] {
-		var rows [][2]string
-		for _, m := range frameStackItem.FindAllStringSubmatch(block, -1) {
-			rows = append(rows, [2]string{frameInline(m[1]), frameInline(m[2])})
-		}
-		switch {
-		case strings.Contains(block, ">The address<"):
-			r.pairs = rows
-		case strings.Contains(block, ">What rewriting can set off<"):
-			r.effects = rows
-		case strings.Contains(block, ">What will not change<"):
-			r.kept = rows
-		}
+	for _, m := range frameRewritePair.FindAllStringSubmatch(frame, -1) {
+		r.pairs = append(r.pairs, [2]string{frameInline(m[1]), frameInline(m[2])})
+	}
+	r.choices = len(regexp.MustCompile(`<select [^>]*name="to\.\d+"`).FindAllString(frame, -1))
+	for _, m := range frameRewriteGroup.FindAllStringSubmatch(frame, -1) {
+		r.groups = append(r.groups, [3]string{frameInline(m[1]), frameInline(m[2]), frameInline(m[3])})
 	}
 	if m := frameDimLine.FindStringSubmatch(frame); m != nil {
 		r.note = frameInline(m[1])
 	}
-	if m := frameAlertMsg.FindStringSubmatch(frame); m != nil {
-		r.msg = frameInline(m[1])
-	}
-	r.confirm = frameOne(t, regexp.MustCompile(`(?s)<div class="tc-sheet__foot"><button class="tc-btn is-primary"[^>]*>(.*?)</button>`), frame, "main button")[1]
-	if len(r.pairs) != 1 {
-		t.Fatalf("%s: pairs %q — read the frame again", id, r.pairs)
+	foot := frameOne(t, frameRewriteFoot, frame, "main button")
+	r.title, r.off, r.confirm = foot[2], foot[3] != "", foot[4]
+	if len(r.pairs) != 1 || r.note == "" {
+		t.Fatalf("%s: pairs %q, line %q — read the frame again", id, r.pairs, r.note)
 	}
 	return r
+}
+
+// sameRewriteGroups holds the sheet's groups to the frame's.
+func sameRewriteGroups(t *testing.T, id string, fr rewriteFrame, sheet view.RewriteSheet) {
+	t.Helper()
+	var got [][3]string
+	for _, g := range sheet.Groups {
+		got = append(got, [3]string{string(g.Label), string(g.Count), string(g.Note)})
+	}
+	if fmt.Sprint(got) != fmt.Sprint(fr.groups) {
+		t.Errorf("%s: groups = %q, the frame %q", id, got, fr.groups)
+	}
 }
 
 // rewriteLone is Ada's card on a server that schedules, with calendars on it
@@ -497,12 +521,13 @@ func rewriteLone(t *testing.T, seed func(*davtest.Server)) (rewriteStand, string
 	return rewriteStand{davFixture: f, card: f.path("contacts") + "/ada"}, "Common · " + string(cardOf(t, conns, farID).Title)
 }
 
-// s-contacts-19: one record in the singular throughout; a ticked collection
-// that did not answer stands under «What will not change» with the reason;
-// the line under the blocks says the unticked ones were not looked in.
+// s-contacts-19: one record is the sheet of many in the singular — its
+// choice, its group ticked with its record, the button counting; what keeps
+// the old address — a ticked collection that did not answer — and that the
+// unticked ones were not looked in, one line over the button.
 func TestRewriteOfOneRecordIsTheFrame(t *testing.T) {
 	fr := readRewriteFrame(t, "s-contacts-19")
-	if len(fr.effects) != 1 || len(fr.kept) != 1 || fr.note == "" {
+	if fr.choices != 1 || len(fr.groups) != 1 || fr.off {
 		t.Fatalf("frame = %+v: read it again", fr)
 	}
 	s, unread := rewriteLone(t, func(srv *davtest.Server) {
@@ -510,17 +535,14 @@ func TestRewriteOfOneRecordIsTheFrame(t *testing.T) {
 	})
 	resp := s.save(t, func(f url.Values) { f.Set("email.0", "ada@new.example") })
 	sheet := decode[view.RewriteSheet](t, s.h.do(get(resp.Header.Get("Location"), s.sess)))
-	if len(sheet.Pairs) != 1 || string(sheet.Pairs[0].Note) != fr.pairs[0][1] {
-		t.Errorf("pair = %+v, the frame %q", sheet.Pairs, fr.pairs[0][1])
+	if len(sheet.Pairs) != 1 || string(sheet.Pairs[0].Note) != fr.pairs[0][1] || sheet.Pairs[0].Choice.Name == "" {
+		t.Errorf("pair = %+v, the frame %q with a choice", sheet.Pairs, fr.pairs[0][1])
 	}
-	if !sameFields(sheet.Effects, []view.Field{{Label: view.Text(fr.effects[0][0]), Value: view.Text(fr.effects[0][1])}}) {
-		t.Errorf("effects = %+v, the frame %q", sheet.Effects, fr.effects)
-	}
-	if !sameFields(sheet.Kept, []view.Field{{Label: view.Text(unread), Value: view.Text(fr.kept[0][1])}}) {
-		t.Errorf("kept = %+v, the frame %q", sheet.Kept, fr.kept)
-	}
-	if string(sheet.Note) != fr.note {
-		t.Errorf("note = %q, the frame %q", sheet.Note, fr.note)
+	sameRewriteGroups(t, "s-contacts-19", fr, sheet)
+	// The frame's collection that did not answer is this stand's.
+	line := strings.Replace(fr.note, "Общий · baikal", unread, 1)
+	if got := strings.TrimSpace(string(sheet.KeptNote) + " " + string(sheet.Note)); got != line {
+		t.Errorf("line = %q, the frame %q", got, line)
 	}
 	if c := rewriteAction(t, sheet.Actions, "contact.rewrite.confirm"); string(c.Label) != fr.confirm || !c.Enabled {
 		t.Errorf("confirm = %+v, the frame %q", c, fr.confirm)
@@ -529,16 +551,16 @@ func TestRewriteOfOneRecordIsTheFrame(t *testing.T) {
 }
 
 // s-contacts-20: every record that names the old address is read-only or
-// could not be read — nothing to rewrite, the pair's note without what
-// rewriting mends, «Rewrite 0 records» off with the frame's message as its
-// reason.
+// could not be read — nothing to rewrite: the address and how many name it,
+// no choice and no groups, the line of what keeps it, «Rewrite 0 records»
+// off with the frame's reason.
 func TestNothingToRewriteIsTheFrame(t *testing.T) {
 	fr := readRewriteFrame(t, "s-contacts-20")
-	n := regexp.MustCompile(`^(\d+) events and tasks name the old one$`).FindStringSubmatch(fr.pairs[0][1])
-	if n == nil || fr.msg == "" || len(fr.effects) != 0 {
+	n := regexp.MustCompile(`^(\d+) records name it$`).FindStringSubmatch(fr.pairs[0][1])
+	if n == nil || fr.choices != 0 || len(fr.groups) != 0 || !fr.off || fr.title == "" {
 		t.Fatalf("frame = %+v: read it again", fr)
 	}
-	s, _ := rewriteLone(t, func(srv *davtest.Server) {
+	s, unread := rewriteLone(t, func(srv *davtest.Server) {
 		srv.Seed(rewriteShared+"a.ics", meeting("a", "boss@example.org", "20990108T100000Z"))
 		srv.Seed(rewriteShared+"b.ics", meeting("b", "boss@example.org", "20990109T100000Z"))
 	})
@@ -546,14 +568,16 @@ func TestNothingToRewriteIsTheFrame(t *testing.T) {
 	sheet := decode[view.RewriteSheet](t, s.h.do(get(resp.Header.Get("Location"), s.sess)))
 	// Only what was read is counted: the two records of Shared, not the
 	// collection that did not answer (from-typecase note 19).
-	if want := fr.pairs[0][1]; n[1] != "2" || len(sheet.Pairs) != 1 || string(sheet.Pairs[0].Note) != want {
-		t.Errorf("pair = %+v, want %q", sheet.Pairs, want)
+	if want := fr.pairs[0][1]; n[1] != "2" || len(sheet.Pairs) != 1 || string(sheet.Pairs[0].Note) != want || sheet.Pairs[0].Choice.Name != "" {
+		t.Errorf("pair = %+v, want %q and no choice", sheet.Pairs, want)
 	}
-	if len(sheet.Effects) != 0 || len(sheet.Kept) != 2 {
-		t.Errorf("effects %+v, kept %+v", sheet.Effects, sheet.Kept)
+	sameRewriteGroups(t, "s-contacts-20", fr, sheet)
+	line := strings.Replace(fr.note, "Общий · baikal", unread, 1)
+	if got := strings.TrimSpace(string(sheet.KeptNote) + " " + string(sheet.Note)); got != line {
+		t.Errorf("line = %q, the frame %q", got, line)
 	}
-	if c := rewriteAction(t, sheet.Actions, "contact.rewrite.confirm"); string(c.Label) != fr.confirm || c.Enabled || string(c.Reason) != fr.msg {
-		t.Errorf("confirm = %+v, the frame %q off with %q", c, fr.confirm, fr.msg)
+	if c := rewriteAction(t, sheet.Actions, "contact.rewrite.confirm"); string(c.Label) != fr.confirm || c.Enabled || string(c.Reason) != fr.title {
+		t.Errorf("confirm = %+v, the frame %q off with %q", c, fr.confirm, fr.title)
 	}
 }
 
