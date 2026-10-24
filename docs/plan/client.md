@@ -25,9 +25,39 @@
 слияния, карточка связанной записи всех родов, панель книги. **Защита
 клиента красная только на пунктах задачи Typecase 230** (кадры против
 набора и друг друга: `s-dup-8`, `s-agenda-25`, `s-notes-32`,
-`s-contacts-33`, `states-8`/`-9`, `s-dup-6`). Ждём ответа на 230; потом —
-сверка, CHANGELOG и версии (поиск `v0.8.0`, дубликаты `v0.9.0`; можно
-одним заходом), ворота, слияние. Ниже — запись прошлой сессии.
+`s-contacts-33`, `states-8`/`-9`, `s-dup-6`). Что где лежит и какие
+решения приняты по набору — «Итог круга» в
+[scans/duplicates-117.md](scans/duplicates-117.md).
+
+Порядок в новой сессии:
+
+1. Есть ли ответ Typecase на 230 — новая записка в
+   [from-typecase.md](from-typecase.md) и новый коммит Typecase. Нет —
+   ветку не трогать, брать то, что не ждёт Typecase (голова
+   [to-typecase.md](to-typecase.md), U-9 узкий экран — нужны устройства
+   владельца).
+2. Есть — перенести ветку на main (`git rebase main` в
+   `D:/Local/wt/t53/carrel`; в main с её основы только документы),
+   обновить копию Typecase (`D:/Local/wt/t53/typecase`) до коммита записки,
+   скопировать макет `docs/visual/carrel-ui-mockups.html` из Typecase в
+   Carrel (защита клиента читает копию; после копии тесты — с
+   `-count=1`).
+3. Правки по ответу; фикстуры — `carrel/server/scripts/reshoot.sh
+   D:/Local/wt/t53/carrel` (в фоне, долго; что нужно новой фикстуре —
+   в шапке скрипта); защита клиента —
+   `go test -count=1 ./guard/` в `carrel/client` (главные:
+   `TestScreensMatchTheirFrames`, `TestScreensAreKinOfTheirDrafts`,
+   `TestScreensHaveMeaning`, `TestRendererDrawsBuiltScreens`).
+4. Зелено — CHANGELOG обоих модулей и версии одним заходом (поиск —
+   веха `v0.8.0`, дубликаты — `v0.9.0`; сервер `v0.2.369`), строки
+   «Продолжить отсюда», ворота одной фоновой командой
+   `bash carrel/server/scripts/gates.sh` после `go clean -testcache`,
+   слияние в main (fast-forward) и теги вех; не пушить.
+
+Черновики экранов печатает `frame2go` в копии Typecase: `go run
+./cmd/frame2go -self <кадр>` (только кадры-маршруты; фрагменты —
+`s-contacts-33`, `-36`, `s-dup-3`, `-7`, `-8` — защита сверяет куском
+страницы). Ниже — запись прошлой сессии.
 
 *Прошлая запись (23.10.2026).* Typecase ответил записками 117 (дубликаты,
 задача 190) и 118 (поиск, задача 227) — макет `54efd28`, одним коммитом
