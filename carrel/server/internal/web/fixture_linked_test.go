@@ -15,11 +15,15 @@ func TestFixtureLinkedRecords(t *testing.T) {
 	app := newMockupApp(t)
 	linkMockupEvent(t, app)
 	linkMockupTask(t, app)
-	linkMockupMeeting(t, app)
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	openList(t, app, "/app/tasks")
 	openList(t, app, "/app/notes")
+	// Анна's timeline gathered, as on her card (s-contacts-6): the linked
+	// record shows it too (Р-78, note 123 p. 10).
+	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
+	tl := decode[view.ContactTimelinePage](t, app.h.do(get(rec+"/timeline", app.sess)))
+	waitPoll(t, app.h, app.sess, tl.Poll.TaskID, func(b view.PollBar) bool { return !b.Running })
 	// The copy of «Синк-ап по релизу» in «Общий» answers: the frame draws
 	// what it holds otherwise (s-agenda-25).
 	app.servers["baikal"].Accept("REPORT")

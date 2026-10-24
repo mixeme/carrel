@@ -79,7 +79,10 @@
       "value": "anna.kovaleva@slovo.example"
     },
     {
-      "from": null,
+      "from": {
+        "colour": "#4a6b52",
+        "name": "Контакты"
+      },
       "href": "",
       "label": "Address · work",
       "mono": false,
@@ -87,7 +90,10 @@
     },
     {
       "aside": "in 7 months",
-      "from": null,
+      "from": {
+        "colour": "#4a6b52",
+        "name": "Контакты"
+      },
       "href": "",
       "label": "Birthday",
       "mono": true,
@@ -113,15 +119,46 @@
       "value": ""
     },
     {
-      "from": null,
+      "from": {
+        "colour": "#4a6b52",
+        "name": "Контакты"
+      },
       "href": "",
       "label": "Note",
       "mono": false,
       "value": "Пишет по вторникам, отвечает в тот же день."
     }
   ],
-  "foreign": [],
-  "foreignShow": null,
+  "foreign": [
+    {
+      "from": null,
+      "href": "",
+      "label": "X-ABLABEL",
+      "mono": true,
+      "value": "издательство"
+    },
+    {
+      "from": null,
+      "href": "",
+      "label": "X-CARREL-UNKNOWN-FLAG",
+      "mono": true,
+      "value": "1"
+    },
+    {
+      "from": null,
+      "href": "",
+      "label": "X-EVOLUTION-FILE-AS",
+      "mono": true,
+      "value": "Ковалёва, Анна"
+    }
+  ],
+  "foreignShow": {
+    "enabled": true,
+    "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7?foreign=1",
+    "id": "contact.foreign",
+    "label": "Show 3",
+    "method": "GET"
+  },
   "linkedRecord": true,
   "look": {
     "compact": false,
@@ -161,10 +198,12 @@
     }
   ],
   "more": {
-    "enabled": false,
-    "id": "",
-    "label": "",
-    "method": ""
+    "enabled": true,
+    "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+    "icon": "i-all",
+    "id": "contact.timeline",
+    "label": "Open the timeline",
+    "method": "GET"
   },
   "name": "Анна Ковалёва",
   "notices": [],
@@ -249,8 +288,19 @@
     "uid": ""
   },
   "subtitle": "All address books · in 3 books",
-  "timeline": [],
-  "timelineCount": null,
+  "timeline": [
+    {
+      "colour": "#4a6b52",
+      "from": null,
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+      "kind": "event",
+      "stamp": "nextcloud · Личный",
+      "title": "Синк-ап по релизу",
+      "when": "10 Aug",
+      "why": "attendee · accepted"
+    }
+  ],
+  "timelineCount": 1,
   "title": "Анна Ковалёва",
   "top": {
     "lock": null,

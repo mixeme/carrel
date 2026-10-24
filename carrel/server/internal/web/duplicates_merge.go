@@ -582,11 +582,27 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 	if len(rep.skipped) > 0 || len(rep.unread) > 0 {
 		role = view.NoticeAlert
 	}
-	s.writePage(w, r, http.StatusOK, s.recordPage(kept, uid, got, view.Notice{
-		Role: role, Title: "Merged",
-		Body:    text("The others were deleted." + rep.sentence()),
-		Details: &view.Diagnostic{Summary: "Linked records", Lines: rep.lines()},
-	}))
+	// The card that stays, whole (s-dup-8, note 123 p. 16): the records
+	// pointed at it anew are in its timeline; only what could not be
+	// pointed is listed under the notice.
+	n := view.Notice{Role: role, Title: "Merged.", Body: text("The others were deleted." + rep.sentence())}
+	if len(rep.skipped) > 0 || len(rep.unread) > 0 {
+		n.Details = &view.Diagnostic{Summary: "Linked records", Lines: rep.lines()}
+	}
+	card := s.recordPage(kept, uid, got, n)
+	if cp, ok := card.(view.ContactPage); ok && len(rep.rows) > 0 {
+		rows := append(rep.rows, cp.Timeline...)
+		count := len(rows)
+		if cp.TimelineCount != nil {
+			count = *cp.TimelineCount + len(rep.rows)
+		}
+		if len(rows) > 3 {
+			rows = rows[:3]
+		}
+		cp.Timeline, cp.TimelineCount = rows, &count
+		card = cp
+	}
+	s.writePage(w, r, http.StatusOK, card)
 }
 
 func (s *Server) forgetDeleted(sess *session.Session, kind view.Kind, deleted []mergeMember) {

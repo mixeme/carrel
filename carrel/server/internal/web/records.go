@@ -1232,6 +1232,11 @@ func (s *Server) openInAgenda(r *http.Request, sess *session.Session, base strin
 		if r.URL.RawQuery != "" {
 			d.Close += "?" + r.URL.RawQuery
 		}
+		// A linked row of the combined calendar opens the linked record, as
+		// every kind's (note 123 p. 10).
+		if combinedBase(base) && linkedState(it.listed) == view.RecordLinked {
+			d = s.linkedDetails(r.Context(), sess, recordKinds[segmentOf(view.KindEvent)], it.listed, d)
+		}
 		return &d
 	}
 	return nil

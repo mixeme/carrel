@@ -150,7 +150,7 @@
           "chosen": 1,
           "name": "choice.PHOTO",
           "options": [
-            "— · Архив",
+            "nextcloud · Архив",
             "nextcloud · Контакты"
           ],
           "property": "Photo",
@@ -442,6 +442,64 @@
           "values": [
             "1"
           ]
+        },
+        {
+          "chosen": 1,
+          "name": "choice.TITLE",
+          "options": [
+            "— · Архив, Команда",
+            "Выпускающий редактор · Контакты"
+          ],
+          "property": "Title",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 0,
+          "kept": [
+            0
+          ],
+          "many": true,
+          "name": "choice.ADR",
+          "options": [
+            "Москва, Тверская 12, стр. 3 · Контакты"
+          ],
+          "property": "Address · work",
+          "union": false,
+          "values": [
+            "1"
+          ]
+        },
+        {
+          "chosen": 1,
+          "name": "choice.BDAY",
+          "options": [
+            "— · Архив, Команда",
+            "1987-03-14 · Контакты"
+          ],
+          "property": "Birthday",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 1,
+          "name": "choice.NOTE",
+          "options": [
+            "— · Архив, Команда",
+            "Пишет по вторникам, отвечает в тот же день. · Контакты"
+          ],
+          "property": "Note",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
         }
       ],
       "decision": "linked",
@@ -596,9 +654,23 @@
       "choices": [
         {
           "chosen": 1,
-          "name": "choice.PHOTO",
+          "name": "choice.TITLE",
           "options": [
             "— · Контакты",
+            "Ведущий инженер · Команда"
+          ],
+          "property": "Title",
+          "union": false,
+          "values": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "chosen": 1,
+          "name": "choice.PHOTO",
+          "options": [
+            "nextcloud · Контакты",
             "radicale · vps · Команда"
           ],
           "property": "Photo",
@@ -1132,7 +1204,7 @@
           "date": "10 Aug",
           "detail": "10 Aug",
           "done": null,
-          "excerpt": "Черновик. Договорились заморозить ветку в среду.",
+          "excerpt": "Договорились заморозить ветку в среду.",
           "href": "/app/notes/a-nc-home/dnevnik/9e31-40b7-c012",
           "percent": null,
           "readOnly": false,

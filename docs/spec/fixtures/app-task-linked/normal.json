@@ -14,6 +14,10 @@
   "attach": [
     {
       "actions": [],
+      "from": {
+        "colour": "#4a6b52",
+        "name": "Дела"
+      },
       "href": "/app/attach/a-nc-home/dela/aa11-2d09-5f84/0",
       "inline": true,
       "name": "посадочный-казань.pdf",
@@ -217,6 +221,10 @@
   "related": [
     {
       "colour": "",
+      "from": {
+        "colour": "#4a6b52",
+        "name": "Дела"
+      },
       "href": "",
       "kind": "",
       "stamp": "",

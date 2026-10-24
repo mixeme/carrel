@@ -252,7 +252,7 @@ func read(p *view.NotePage) []w.MainPart {
 			if r.When != "" {
 				about += sep + string(r.When)
 			}
-			refs.Items = append(refs.Items, w.DocRef{Name: string(r.Title), Href: r.Href, What: w.Dim{Parts: []w.Inline{w.Text(about)}}})
+			refs.Items = append(refs.Items, w.DocRef{Name: string(r.Title), Href: r.Href, What: w.Dim{Parts: []w.Inline{w.Text(about)}}, From: bind.From(r.From)})
 		}
 		secs = append(secs, w.DocmetaSec{Title: w.Rubric{Text: "Related"}, Items: []w.DocmetaPart{refs}})
 	}
@@ -323,7 +323,7 @@ func column(p *view.NotePage) []w.DocmetaSec {
 		}
 		var items []w.DocmetaPart
 		for _, a := range p.Meta.Attach {
-			at := w.DocAttach{Name: string(a.Name), Size: w.Dim{Parts: []w.Inline{w.Text(lead + string(a.Size))}}, Href: a.Href}
+			at := w.DocAttach{Name: string(a.Name), Size: w.Dim{Parts: []w.Inline{w.Text(lead + string(a.Size))}}, Href: a.Href, From: bind.From(a.From)}
 			for _, act := range a.Actions {
 				if p.Doc.Mode != view.NoteEditing {
 					break

@@ -52,7 +52,7 @@
     "3 sources of backup jobs",
     "1 destination of a backup job",
     "3 davloom devices’ sync of them",
-    "2 linked groups of duplicates"
+    "4 linked groups of duplicates"
   ],
   "subject": "nextcloud · nextcloud.example",
   "under": {
@@ -571,7 +571,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": 1,
+              "objects": 3,
               "path": "/alice/calendars/dnevnik/",
               "pick": "a-nc-home|/alice/calendars/dnevnik/",
               "readOnly": false,

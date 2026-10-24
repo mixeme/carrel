@@ -53,6 +53,13 @@ func TestTasksAndNotesNameTheirPeople(t *testing.T) {
 				t.Errorf("%s: %q is not drawn", c.fixture, want)
 			}
 		}
+		// The panels of s-tasks-1 and s-notes-1 are linked records' since
+		// Typecase 2823585, and no frame draws a linked record's people
+		// (Typecase's task 179): the names are drawn, the frame has nothing
+		// of them to hold the screen to.
+		if d := openDetails(model); d != nil && d.LinkedRecord {
+			continue
+		}
 		// A state that waits for the library (U-5.5) is held to the CSS
 		// only, as the screens' own check holds it.
 		frame := l.frameOf(path)

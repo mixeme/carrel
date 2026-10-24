@@ -349,6 +349,7 @@
       "uid": "4f2b-9c31-a0e7"
     },
     "subtitle": "",
+    "textFrom": null,
     "title": "Анна Ковалёва"
   },
   "cardClosed": false,
@@ -359,6 +360,7 @@
       "rows": [
         {
           "colour": "#4a6b52",
+          "from": null,
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
           "kind": "event",
           "stamp": "nextcloud · Личный",

@@ -368,7 +368,12 @@
           "count": 3,
           "rows": [
             {
-              "badges": [],
+              "badges": [
+                {
+                  "label": "linked ×2",
+                  "role": "linked"
+                }
+              ],
               "changed": "10 Aug 11:05",
               "colour": "#4a6b52",
               "date": "10 Aug",
@@ -440,9 +445,12 @@
                 }
               ],
               "on": false,
-              "sources": [],
-              "stamp": "nextcloud · Записи",
-              "state": "ok",
+              "sources": [
+                "nextcloud · Записи",
+                "nextcloud · Дневник"
+              ],
+              "stamp": "2 sources",
+              "state": "linked",
               "tags": [
                 {
                   "href": "/app/notes?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8\u0026task=t-task",
@@ -460,7 +468,12 @@
               "uid": "5c81-77aa-0d64"
             },
             {
-              "badges": [],
+              "badges": [
+                {
+                  "label": "linked ×2",
+                  "role": "linked"
+                }
+              ],
               "changed": "8 Aug 22:00",
               "colour": "#4a6b52",
               "date": "8 Aug",
@@ -532,9 +545,12 @@
                 }
               ],
               "on": false,
-              "sources": [],
-              "stamp": "nextcloud · Записи",
-              "state": "ok",
+              "sources": [
+                "nextcloud · Записи",
+                "nextcloud · Дневник"
+              ],
+              "stamp": "2 sources",
+              "state": "linked",
               "tags": [
                 {
                   "href": "/app/notes?tag=%D0%BA%D0%BD%D0%B8%D0%B3%D0%B8\u0026task=t-task",
@@ -609,7 +625,7 @@
                   "csrf": "csrf",
                   "danger": true,
                   "enabled": true,
-                  "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/delete?etag=e23",
+                  "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/delete?etag=e25",
                   "icon": "i-trash",
                   "id": "record.delete",
                   "label": "Delete note",
@@ -679,7 +695,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 1,
+            "count": 3,
             "fromCache": false,
             "message": "",
             "retry": null,
@@ -766,7 +782,7 @@
             "method": "GET"
           },
           {
-            "count": 3,
+            "count": 5,
             "enabled": true,
             "href": "/app/notes",
             "icon": "i-note",
@@ -803,7 +819,7 @@
             "rows": [
               {
                 "colour": "",
-                "count": 3,
+                "count": 5,
                 "detail": "",
                 "feed": false,
                 "href": "/app/notes",
@@ -834,7 +850,7 @@
               },
               {
                 "colour": "#6b4e7a",
-                "count": 1,
+                "count": 3,
                 "detail": "",
                 "feed": false,
                 "href": "/app/notes/a-nc-home/dnevnik",

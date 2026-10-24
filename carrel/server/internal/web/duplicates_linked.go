@@ -4,11 +4,14 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"path"
+	"slices"
 	"strconv"
 	"strings"
 
 	"carrel.dev/carrel/server/internal/dupes"
 	"carrel.dev/carrel/server/internal/model"
+	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/render"
@@ -182,7 +185,8 @@ func mergeChoices(refs []sealed.RecordRef, objs []*model.Object, qs []question) 
 // phone by its type, an address by «Email · …», a single value by its
 // property's field («Organisation», «When», «Where», «Due», «Priority»).
 var fieldOfQuestion = map[string]string{
-	"ORG": "Organisation", "WHEN": "When", "LOCATION": "Where", "DUE": "Due", "PRIORITY": "Priority",
+	"ORG": "Organisation", "TITLE": "Title", "BDAY": "Birthday", "NOTE": "Note",
+	"WHEN": "When", "LOCATION": "Where", "DUE": "Due", "PRIORITY": "Priority",
 }
 
 // questionOf is the question a field of a card answers and the key of its
@@ -193,6 +197,8 @@ func questionOf(f view.Field, qs []question) (question, string, bool) {
 		switch prop := q.prop(); {
 		case prop == "TEL" && label == askedLabel(q.id):
 			return q, dupes.ValueKey(prop, string(f.Value)), true
+		case prop == "ADR" && label == askedLabel(q.id):
+			return q, strings.ToLower(string(f.Value)), true
 		case prop == "EMAIL" && (label == "Email" || strings.HasPrefix(label, "Email · ")):
 			return q, dupes.ValueKey(prop, string(f.Value)), true
 		case prop == "CATEGORIES" && label == "Tags":
@@ -345,21 +351,26 @@ func (s *Server) linkedPage(sess *session.Session, spec kindSpec, lr linkedRecor
 	shown := func(q question) []recValue { return q.shownValues() }
 	actions, menu := s.linkedActions(sess, spec.segment, uid, lr.group.ID)
 	switch p := s.recordPage(c, uid, lr.chosen).(type) {
+	// What any copy holds is shown (Р-78, note 123 p. 10): the timeline,
+	// what is kept as the server sent it, the attachments and Related —
+	// those of one copy marked with its collection. Only the Source (each
+	// copy has its own path) and Delete are a copy's.
 	case view.ContactPage:
 		p.LinkedRecord, p.Subtitle, p.Fields, p.Books = true, text(head), lr.markFrom(p.Fields), s.keptRows(lr, shown)
-		p.Actions, p.Menu, p.ReadOnly = actions, menu, false
-		p.Foreign, p.ForeignShow, p.Source = nil, nil, view.SourceBlock{}
-		p.Timeline, p.TimelineCount, p.More = nil, nil, view.Action{}
+		p.Actions, p.Menu, p.ReadOnly, p.Source = actions, menu, false, view.SourceBlock{}
 		return p
 	case view.EventPage:
 		p.LinkedRecord, p.Subtitle, p.Fields, p.Linked = true, text(head), lr.markFrom(p.Fields), s.keptRows(lr, shown)
 		p.Actions, p.Menu, p.ReadOnly, p.Source = actions, menu, false, view.SourceBlock{}
+		lr.markCopies(p.Attach, p.Related)
 		return p
 	case view.TaskPage:
 		p.LinkedRecord, p.Subtitle, p.Fields, p.Linked = true, view.Runs{{Text: text(head)}}, lr.markFrom(p.Fields), s.keptRows(lr, shown)
 		p.Actions, p.Menu, p.ReadOnly, p.Source = actions, menu, false, view.SourceBlock{}
+		lr.markCopies(p.Attach, p.Related)
 		return p
 	case view.NotePage:
+		lr.markCopies(p.Meta.Attach, p.Meta.Related)
 		p.LinkedRecord, p.Subtitle, p.Meta.Linked = true, text(head), s.keptRows(lr, shown)
 		if p.TextFrom = lr.textFrom(); p.TextFrom != nil {
 			p.Subtitle += " · text from"
@@ -416,12 +427,13 @@ func linkedByUID(blob sealed.Blob, k view.Kind, uid string) (sealed.LinkedGroup,
 	return sealed.LinkedGroup{}, false
 }
 
-// linkedDetails is the panel of a linked row of the combined address book
-// (from-typecase note 117 p. 5, s-contacts-1): the linked record, not its
-// first copy — «in 3 books», the values chosen with where they came from,
-// Edit to «Which copy to edit?», where it is kept —, and neither the Delete
-// nor the Source of one copy. d is the panel of the row's copy, kept when
-// the group cannot be read.
+// linkedDetails is the panel of a linked row of a combined view
+// (from-typecase notes 117 p. 5, 123 p. 10; s-contacts-1, s-tasks-1,
+// s-notes-1): the linked record, not its first copy — «in 3 books», the
+// values chosen with where they came from, «text from» of a note, Edit to
+// «Which copy to edit?», where it is kept —, everything any copy holds
+// (Р-78), and neither the Delete nor the Source of one copy. d is the
+// panel of the row's copy, kept when the group cannot be read.
 func (s *Server) linkedDetails(ctx context.Context, sess *session.Session, spec kindSpec, it listed, d view.Details) view.Details {
 	ref := sealed.RecordRef{AccountID: it.from.conn.ID, Col: it.from.col.Path, UID: listedUID(spec.kind, it)}
 	g, ok := dupes.LinkedOf(s.catalogOf(sess).Duplicates.Linked, ref)
@@ -435,11 +447,19 @@ func (s *Server) linkedDetails(ctx context.Context, sess *session.Session, spec 
 	out := s.recordDetails(lr.base.c, lr.base.ref.UID, lr.chosen)
 	out.Close, out.LinkedRecord = d.Close, true
 	out.Subtitle = text("in " + strconv.Itoa(len(lr.members)) + " " + copyHolders[spec.kind][1])
-	out.Fields = lr.markFrom(out.Fields)
-	out.Foreign, out.ForeignShow, out.Source, out.DeleteNote = nil, nil, view.SourceBlock{}, ""
-	if spec.kind == view.KindContact {
-		out.Books = s.keptRows(lr, func(q question) []recValue { return q.shownValues() })
+	if spec.kind == view.KindNote {
+		if out.TextFrom = lr.textFrom(); out.TextFrom != nil {
+			out.Subtitle += " · text from"
+		}
 	}
+	out.Fields = lr.markFrom(out.Fields)
+	lr.markCopies(out.Attach, out.Related)
+	// What is kept as the server sent it the panels of the frames do not
+	// draw (s-contacts-1, s-notes-1), the card does (s-contacts-33): to
+	// Typecase, task 232.
+	out.Source, out.DeleteNote, out.Foreign, out.ForeignShow = view.SourceBlock{}, "", nil, nil
+	out.AttachHint = "" // the line of Attach, which a linked record has not (s-tasks-1)
+	out.Books = s.keptRows(lr, func(q question) []recValue { return q.shownValues() })
 	actions, menu := s.linkedActions(sess, spec.segment, lr.base.ref.UID, g.ID)
 	// The panel's Edit is a small button, as its neighbours (s-contacts-1).
 	edit := actions[0]
@@ -452,6 +472,57 @@ func (s *Server) linkedDetails(ctx context.Context, sess *session.Session, spec 
 	}
 	out.Actions, out.Menu = kept, menu
 	return out
+}
+
+// markCopies names, after an attachment and a Related row of the linked
+// record that only some copies hold, the collection of the first that does
+// (Р-78: «DocAttach.From», «DocRef.From»).
+func (lr linkedRecord) markCopies(attach []view.AttachRow, related []view.TimelineRow) {
+	var loaded []linkedMember
+	for _, m := range lr.members {
+		if m.obj != nil {
+			loaded = append(loaded, m)
+		}
+	}
+	if len(loaded) < 2 {
+		return
+	}
+	mark := func(holds func(*model.Object) bool) *view.FieldFrom {
+		var first *linkedMember
+		n := 0
+		for i := range loaded {
+			if holds(loaded[i].obj) {
+				if first == nil {
+					first = &loaded[i]
+				}
+				n++
+			}
+		}
+		if first == nil || n == len(loaded) {
+			return nil
+		}
+		return lr.from(collectionLabel(first.c.col))
+	}
+	for i := range attach {
+		name := string(attach[i].Name)
+		attach[i].From = mark(func(o *model.Object) bool {
+			for _, a := range cal.Attachments(o) {
+				base, err := url.PathUnescape(path.Base(a.URI))
+				if a.FileName == name || (a.URI != "" && err == nil && base == name) {
+					return true
+				}
+			}
+			return false
+		})
+	}
+	targets := cal.RelatedTo(lr.chosen)
+	for i := range related {
+		if i >= len(targets) {
+			break
+		}
+		target := targets[i]
+		related[i].From = mark(func(o *model.Object) bool { return slices.Contains(cal.RelatedTo(o), target) })
+	}
 }
 
 // combinedBase reports whether a list's address is a combined view's —

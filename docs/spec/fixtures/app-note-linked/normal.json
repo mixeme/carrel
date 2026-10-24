@@ -95,6 +95,10 @@
     "attach": [
       {
         "actions": [],
+        "from": {
+          "colour": "#4a6b52",
+          "name": "Записи"
+        },
         "href": "/app/attach/a-nc-home/zapisi/5c81-77aa-0d64/0",
         "inline": true,
         "name": "2026-08-10-sync-board.png",
@@ -157,6 +161,10 @@
     "related": [
       {
         "colour": "",
+        "from": {
+          "colour": "#4a6b52",
+          "name": "Записи"
+        },
         "href": "",
         "kind": "event",
         "stamp": "",
@@ -166,6 +174,10 @@
       },
       {
         "colour": "",
+        "from": {
+          "colour": "#4a6b52",
+          "name": "Записи"
+        },
         "href": "",
         "kind": "task",
         "stamp": "",
@@ -183,11 +195,6 @@
       {
         "href": "/app/notes/a-nc-home/zapisi?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7",
         "label": "релиз",
-        "on": false
-      },
-      {
-        "href": "/app/notes/a-nc-home/zapisi?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8",
-        "label": "встречи",
         "on": false
       }
     ],
@@ -264,7 +271,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/notes/a-nc-home/dnevnik",

@@ -88,7 +88,7 @@ func TestAMergeKeepsWhatPointedAtTheGoneCard(t *testing.T) {
 	page := decode[view.ContactPage](t, rec)
 	var merged *view.Notice
 	for i := range page.Notices {
-		if page.Notices[i].Title == "Merged" {
+		if page.Notices[i].Title == "Merged." {
 			merged = &page.Notices[i]
 		}
 	}

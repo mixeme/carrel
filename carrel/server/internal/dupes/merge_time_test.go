@@ -129,3 +129,19 @@ func TestMergeAsksNothingAboutTheSameTime(t *testing.T) {
 		t.Errorf("questions = %+v, %v", plan.Questions, err)
 	}
 }
+
+// A tag is a part of a CATEGORIES value: «встречи» of one copy beside
+// «встречи,релиз» of another adds no tag (Typecase's note 123 p. 6).
+func TestMergeKeepsATagOnce(t *testing.T) {
+	note := func(path, tags string) *model.Object {
+		return parseDoc(t, path, "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//t//EN\r\n"+
+			"BEGIN:VJOURNAL\r\nUID:n\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Notes\r\nCATEGORIES:"+tags+"\r\nEND:VJOURNAL\r\nEND:VCALENDAR\r\n")
+	}
+	merged, _, err := MergeKeeping(note("/c/a.ics", "встречи,релиз"), []*model.Object{note("/c/b.ics", "встречи")}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.Join(cal.TextList(merged, "CATEGORIES"), ","); got != "встречи,релиз" {
+		t.Errorf("tags = %q, want «встречи,релиз»", got)
+	}
+}

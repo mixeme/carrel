@@ -82,6 +82,7 @@
   "attach": [
     {
       "actions": [],
+      "from": null,
       "href": "/app/attach/a-nc-home/dela/aa11-2d09-5f84/0",
       "inline": true,
       "name": "посадочный-казань.pdf",
@@ -285,6 +286,7 @@
   "related": [
     {
       "colour": "",
+      "from": null,
       "href": "",
       "kind": "event",
       "stamp": "",

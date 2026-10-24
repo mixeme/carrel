@@ -177,12 +177,13 @@
         "bar": [
           {
             "enabled": true,
-            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/copies",
             "icon": "i-pencil",
             "id": "record.edit",
             "label": "Edit",
             "method": "GET",
-            "primary": true
+            "primary": true,
+            "target": "sheet"
           },
           {
             "enabled": true,
@@ -336,6 +337,7 @@
         "attach": [
           {
             "actions": [],
+            "from": null,
             "href": "/app/attach/a-nc-home/zapisi/5c81-77aa-0d64/0",
             "inline": true,
             "name": "2026-08-10-sync-board.png",
@@ -347,7 +349,16 @@
         "attendees": [],
         "date": "10 August 2026, 11:05",
         "link": null,
-        "linked": [],
+        "linked": [
+          {
+            "colour": "#6b4e7a",
+            "from": null,
+            "href": "/app/notes/a-nc-home/dnevnik/9e31-40b7-c012",
+            "label": "nextcloud · Дневник",
+            "mono": false,
+            "value": "Text, tags differ"
+          }
+        ],
         "menu": [
           {
             "enabled": true,
@@ -388,6 +399,7 @@
         "related": [
           {
             "colour": "",
+            "from": null,
             "href": "",
             "kind": "event",
             "stamp": "",
@@ -397,6 +409,7 @@
           },
           {
             "colour": "",
+            "from": null,
             "href": "",
             "kind": "",
             "stamp": "",
@@ -417,7 +430,10 @@
             "on": false
           }
         ],
-        "tagsBadge": null,
+        "tagsBadge": {
+          "label": "linked",
+          "role": "linked"
+        },
         "tagsFrom": null
       },
       "notices": [],

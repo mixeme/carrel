@@ -74,6 +74,9 @@ type TimelineRow struct {
 	Title  Text   `json:"title"`
 	Stamp  Stamp  `json:"stamp"`
 	Why    Text   `json:"why"` // «attendee · accepted», «organiser», «related to this person», «name in the file name» — колонка обязательна
+	// From — у Related связанной записи: коллекция копии, где одной стоит
+	// связь (Р-78); nil — связь у всех копий или запись одна
+	From *FieldFrom `json:"from"`
 }
 
 type ContactEditPage struct {
@@ -272,6 +275,10 @@ type AttachRow struct {
 	Place   Text        `json:"place,omitempty"`
 	State   RecordState `json:"state"`
 	Actions []Action    `json:"actions"`
+	// From — у связанной записи: коллекция копии, где одной лежит вложение
+	// (Р-78, записка Typecase 123 п. 10: метка и имя после строки); nil —
+	// оно у всех копий или запись одна
+	From *FieldFrom `json:"from"`
 }
 
 // TaskPage — чтение.

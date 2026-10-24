@@ -148,6 +148,136 @@
         {
           "csrf": "csrf",
           "enabled": true,
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
+        }
+      ],
+      "badge": {
+        "label": "linked ×2",
+        "role": "linked"
+      },
+      "decision": "linked",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-vstrecha"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "g-vstrecha",
+      "kind": "note",
+      "note": "Not loaded in this session",
+      "title": "Заметка со встречи 10.08",
+      "uids": "UID 9e31-40b7-c012, 5c81-77aa-0d64",
+      "where": "nextcloud · Дневник, nextcloud · Записи"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST",
+          "name": "do",
+          "submits": true,
+          "value": "unlink"
+        }
+      ],
+      "badge": {
+        "label": "linked ×2",
+        "role": "linked"
+      },
+      "decision": "linked",
+      "form": {
+        "action": "/app/duplicates/decide",
+        "actions": [],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "add": null,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "group",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "g-crdt"
+              }
+            ],
+            "unfold": null
+          }
+        ]
+      },
+      "id": "g-crdt",
+      "kind": "note",
+      "note": "Not loaded in this session",
+      "title": "Что почитать про CRDT",
+      "uids": "UID 8e04-21ab-d517, 6d92-13ef-b408",
+      "where": "nextcloud · Дневник, nextcloud · Записи"
+    },
+    {
+      "actions": [
+        {
+          "csrf": "csrf",
+          "enabled": true,
           "id": "duplicates.again",
           "label": "Offer again",
           "method": "POST",

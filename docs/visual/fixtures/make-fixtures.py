@@ -515,7 +515,29 @@ write(u'nextcloud-home/zapisi.ics', cal(u'Записи',
                                u'решают конфликт двух правок одного поля.'),
        u'END:VJOURNAL']))
 
+# Копии двух заметок «Записей» в «Дневнике», каждая под своим UID:
+# связанные — одной строкой (s-dup-1, s-notes-1, -32; записка
+# Typecase 123 п. 6). У копии встречи текст короче и тегов «релиз» нет —
+# «Text, tags differ»; заметка про CRDT — та же.
 write(u'nextcloud-home/dnevnik.ics', cal(u'Дневник',
+      [u'BEGIN:VJOURNAL',
+       u'UID:9e31-40b7-c012',
+       u'DTSTAMP:20260810T081000Z',
+       u'DTSTART;TZID=Europe/Moscow:20260810T110500',
+       u'SUMMARY:Заметка со встречи 10.08',
+       u'CATEGORIES:встречи',
+       u'DESCRIPTION:%s' % esc(u'Договорились заморозить ветку в среду.'),
+       u'END:VJOURNAL'] +
+      [u'BEGIN:VJOURNAL',
+       u'UID:8e04-21ab-d517',
+       u'DTSTAMP:20260808T190500Z',
+       u'DTSTART;TZID=Europe/Moscow:20260808T211000',
+       u'SUMMARY:Что почитать про CRDT',
+       u'CATEGORIES:книги',
+       u'DESCRIPTION:%s' % esc(u'Кляйн, глава 5; статья Шапиро 2011; '
+                               u'демка automerge — посмотреть, как они '
+                               u'решают конфликт двух правок одного поля.'),
+       u'END:VJOURNAL'] +
       [u'BEGIN:VJOURNAL',
        u'UID:7f03-5b26-cc19',
        u'DTSTAMP:20260803T160000Z',

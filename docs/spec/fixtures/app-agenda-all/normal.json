@@ -1070,6 +1070,7 @@
     "attach": [
       {
         "actions": [],
+        "from": null,
         "href": "/app/attach/a-nc-home/lichnyj/8f1c-4a02-b7d3/0",
         "inline": true,
         "name": "release-checklist.md",
@@ -1230,6 +1231,7 @@
     "related": [
       {
         "colour": "",
+        "from": null,
         "href": "",
         "kind": "note",
         "stamp": "",
@@ -1251,6 +1253,7 @@
       "uid": "8f1c-4a02-b7d3"
     },
     "subtitle": "nextcloud · Личный",
+    "textFrom": null,
     "title": "Синк-ап по релизу"
   },
   "empty": null,
@@ -1439,7 +1442,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 5,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",

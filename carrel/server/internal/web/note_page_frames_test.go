@@ -24,7 +24,6 @@ func TestNotePageIsTheFrame(t *testing.T) {
 		}
 	}
 	app := newMockupApp(t)
-	linkMockupMeeting(t, app)
 	attachMockupRecording(t, app)
 	openList(t, app, "/app/calendar?from=2026-08-10")
 	openList(t, app, "/app/tasks")

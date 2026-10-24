@@ -42,6 +42,11 @@ func (s *Server) openRow(r *http.Request, sess *session.Session, base string, sp
 		if r.URL.RawQuery != "" {
 			d.Close += "?" + r.URL.RawQuery
 		}
+		// A linked row of a combined list opens the linked record
+		// (s-tasks-1, s-notes-1; note 123 p. 10).
+		if combinedBase(base) && linkedState(it) == view.RecordLinked {
+			d = s.linkedDetails(r.Context(), sess, spec, it, d)
+		}
 		return &d
 	}
 	return nil
@@ -168,7 +173,8 @@ func overdueBy(tf timeFmt, due cal.Timing, done bool) string {
 // taskFields are the fields of a task in the order of its card (s-tasks-2):
 // Status — Needs action when it has none —, Due monospaced with how late it
 // is, Starts, Complete and Priority monospaced, Reminders, Where, Link,
-// Tags. The panel (s-tasks-1) has the card's order and no Reminders.
+// Tags. The panel (s-tasks-1) has the card's order, Reminders too
+// (Typecase 2823585).
 func taskFields(tf timeFmt, obj *model.Object, panel bool, tags []view.Tag) ([]view.Field, error) {
 	status := taskStatuses[0].label
 	if v := strings.TrimSpace(firstValue(obj, "STATUS")); v != "" {
@@ -196,15 +202,13 @@ func taskFields(tf timeFmt, obj *model.Object, panel bool, tags []view.Tag) ([]v
 		priority = []view.Field{{Label: "Priority", Value: text(strconv.Itoa(p)), Mono: true}}
 	}
 	out = append(append(out, complete), priority...)
-	if !panel {
-		alarms, _ := cal.Alarms(obj)
-		if rows := reminderRows(alarms, due.AllDay, tf); len(rows) > 0 {
-			labels := make([]string, 0, len(rows))
-			for _, r := range rows {
-				labels = append(labels, string(r.Label))
-			}
-			out = append(out, view.Field{Label: "Reminders", Value: text(strings.Join(labels, " · "))})
+	alarms, _ := cal.Alarms(obj)
+	if rows := reminderRows(alarms, due.AllDay, tf); len(rows) > 0 {
+		labels := make([]string, 0, len(rows))
+		for _, r := range rows {
+			labels = append(labels, string(r.Label))
 		}
+		out = append(out, view.Field{Label: "Reminders", Value: text(strings.Join(labels, " · "))})
 	}
 	if v := cal.Text(obj, "LOCATION"); v != "" {
 		out = append(out, view.Field{Label: "Where", Value: text(v)})

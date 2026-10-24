@@ -219,7 +219,8 @@ func TestCalendarMenusAreTheFrames(t *testing.T) {
 	if got := ids(panel.Actions); !equalStrings(got, []string{"record.edit", "attach.add", "record.delete"}) {
 		t.Errorf("task panel actions = %v", got)
 	}
-	drawn(t, "task panel", panel.Actions, "s-tasks-1")
+	// No frame draws the panel of a task that is not linked since Typecase
+	// 2823585 (s-tasks-1 is a linked record's): to Typecase, task 232.
 	tasks := decode[view.TasksPage](t, f.h.do(get(f.path("tasks"), f.sess)))
 	row := tasks.Groups[0].Rows[0]
 	sameMenu(t, "task row", row.Menu, "components-3")
@@ -247,9 +248,8 @@ func TestCalendarMenusAreTheFrames(t *testing.T) {
 	if got := ids(panel.Actions); !equalStrings(got, []string{"record.edit", "record.open", "attach.add"}) {
 		t.Errorf("note panel actions = %v", got)
 	}
-	// The panel draws no Attach (to-typecase task 9); the page of the note
-	// is a bare icon.
-	drawn(t, "note panel", panel.Actions, "s-notes-1", "attach.add")
+	// No frame draws the panel of a note that is not linked since Typecase
+	// 2823585 (s-notes-1 is a linked record's): to Typecase, task 232.
 	notes := decode[view.NotesPage](t, f.h.do(get(f.path("notes"), f.sess)))
 	sameMenu(t, "note row", notes.Groups[0].Rows[0].Menu, "components-4")
 }

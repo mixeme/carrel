@@ -139,12 +139,6 @@ func Screen(p *view.ContactPage) w.Shell {
 			w.SecList{Items: lines, Gap: 5},
 		}})
 	}
-	if p.LinkedRecord {
-		// What the person chose and where it is kept: the timeline and the
-		// source are a copy's (s-contacts-33).
-		t := bind.Top(p.Top, top)
-		return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}}
-	}
 	rubric := w.Rubric{Text: "Timeline"}
 	if p.TimelineCount != nil {
 		rubric.Items = []w.RubricPart{w.Mono{Text: strconv.Itoa(*p.TimelineCount), Variant: w.MonoTight}}
@@ -165,6 +159,12 @@ func Screen(p *view.ContactPage) w.Shell {
 	}
 	timeline = append(timeline, w.SecActs{Items: []w.Button{bind.Button(p.More, "")}})
 	main = append(main, w.Sec{Items: timeline})
+	if p.LinkedRecord {
+		// Everything any copy holds, the timeline too; the source and the
+		// deletion are a copy's (s-contacts-33; Р-78).
+		t := bind.Top(p.Top, top)
+		return w.Shell{Top: &t, Body: w.ShellBody{Rail: railParts(p.Rail), Main: w.Main{Items: main}}}
+	}
 	read := string(p.Source.LastRead)
 	if p.Source.Compared != "" {
 		read += " · " + string(p.Source.Compared)

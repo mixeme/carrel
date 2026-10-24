@@ -865,6 +865,11 @@ func linkMockupDuplicates(t *testing.T, h *harness, sess *session.Session) {
 		{ID: "g-anna", Kind: view.KindContact, Title: "Анна Ковалёва",
 			Members: members("Анна Ковалёва", "kontakty/4f2b-9c31-a0e7", "komanda/4f2b-9c31-a0e7", "arhiv/4f2b-9c31-a0e7"),
 			Dropped: map[string][]string{"TEL": {dupes.ValueKey("TEL", "+7 495 120-45-00")}}},
+		// Two notes of «Записи» copied into «Дневник», linked: one row each
+		// on every screen (s-dup-1, s-notes-1, -32; note 123 p. 6) — the
+		// copy of the meeting shorter and without «релиз».
+		{ID: "g-vstrecha", Kind: view.KindNote, Title: "Заметка со встречи 10.08", Members: members("Заметка со встречи 10.08", "zapisi/5c81-77aa-0d64", "dnevnik/9e31-40b7-c012")},
+		{ID: "g-crdt", Kind: view.KindNote, Title: "Что почитать про CRDT", Members: members("Что почитать про CRDT", "zapisi/6d92-13ef-b408", "dnevnik/8e04-21ab-d517")},
 	}
 	// Анна and Алексей Смирнов share the work phone of the publisher: 60
 	// points, and «not duplicates» — the decision s-dup-1 and s-dup-6 draw.
@@ -1493,12 +1498,15 @@ func TestFixtureRecordDelete(t *testing.T) {
 // group's card, «baikal · Общий · When, where differ» and «linked» at When
 // and Where (s-dup-1, s-agenda-2, -25; from-typecase notes 57 and 117 p. 3;
 // the client's scan Г9). The copies live in this test alone: the agenda
-// frames draw no such rows.
+// frames draw no such rows. They hold neither the file nor the note it is
+// related to: on the linked record both are marked «Личный» (s-agenda-25;
+// Р-78, note 123 p. 10).
 func linkMockupEvent(t *testing.T, app *mockupApp) {
 	t.Helper()
 	linkMockupCopies(t, app, view.KindEvent, "g-sinkap", mockupRecord{"nextcloud", "lichnyj", "8f1c-4a02-b7d3", "nextcloud-home/lichnyj.ics"},
-		mockupCopy{rec: mockupRecord{"radicale · vps", "proekty", "4b2e-9d10-8f1c", ""}},
+		mockupCopy{rec: mockupRecord{"radicale · vps", "proekty", "4b2e-9d10-8f1c", ""}, edit: bareCopy},
 		mockupCopy{rec: mockupRecord{"baikal", "obshchij", "6a7d-2c51-e930", ""}, edit: func(rec string) string {
+			rec = bareCopy(rec)
 			// 12:30 in Yekaterinburg is 10:30 in Moscow (s-dup-1).
 			rec = strings.Replace(rec, "Yekaterinburg:20260810T120000", "Yekaterinburg:20260810T123000", 1)
 			rec = strings.Replace(rec, "Yekaterinburg:20260810T130000", "Yekaterinburg:20260810T133000", 1)
@@ -1517,10 +1525,34 @@ func linkMockupTask(t *testing.T, app *mockupApp) {
 	t.Helper()
 	linkMockupCopy(t, app, view.KindTask, "g-chemodan", mockupRecord{"nextcloud", "dela", "aa11-2d09-5f84", "nextcloud-home/dela.ics"},
 		mockupRecord{"nextcloud", "rabota", "cc11-5a20-7e94", ""}, func(rec string) string {
+			rec = bareCopy(rec) // the file and the trip are «Дела»'s (s-tasks-17)
 			rec = strings.Replace(rec, "DUE;TZID=Europe/Moscow:20260812T180000", "DUE;VALUE=DATE:20260812", 1)
 			return strings.Replace(rec, "PRIORITY:5", "PRIORITY:3", 1)
 		})
 	chooseMockup(t, app, "g-chemodan", "PRIORITY", "cc11-5a20-7e94")
+}
+
+// bareCopy is a copy of a record of the set without its attachments and
+// its relations: what one copy holds alone, the linked record marks with its
+// collection (Р-78).
+func bareCopy(rec string) string {
+	var out []string
+	skip := false
+	for _, l := range strings.Split(rec, "\n") {
+		switch {
+		case strings.HasPrefix(l, " ") || strings.HasPrefix(l, "\t"):
+			if skip {
+				continue
+			}
+		case strings.HasPrefix(l, "ATTACH") || strings.HasPrefix(l, "RELATED-TO"):
+			skip = true
+			continue
+		default:
+			skip = false
+		}
+		out = append(out, l)
+	}
+	return strings.Join(out, "\n")
 }
 
 // chooseMockup answers a question of a linked group as the person would on
@@ -1547,33 +1579,6 @@ func chooseMockup(t *testing.T, app *mockupApp, group, prop, uid string) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-}
-
-// linkMockupNote puts a copy of «Что почитать про CRDT», its text longer,
-// in nextcloud · Дневник and links the two (S-16): «linked ×2», «2 sources»
-// (s-notes-1; the client's scan НБ6). The frame puts the copy in radicale ·
-// vps · Дневник, a notebook no rail of its draws (task 105). The copy lives
-// in the tests alone.
-func linkMockupNote(t *testing.T, app *mockupApp) {
-	t.Helper()
-	linkMockupCopy(t, app, view.KindNote, "g-crdt", mockupRecord{"nextcloud", "zapisi", "6d92-13ef-b408", "nextcloud-home/zapisi.ics"},
-		mockupRecord{"nextcloud", "dnevnik", "8e04-21ab-d517", ""}, func(rec string) string {
-			return strings.Replace(rec, "SUMMARY:Что почитать про CRDT", "SUMMARY:Что почитать про CRDT\r\nX-CARREL-COPY:dnevnik", 1)
-		})
-}
-
-// linkMockupMeeting puts a copy of «Заметка со встречи 10.08», its text and
-// its tags other, in nextcloud · Дневник and links the two (S-16): «linked
-// ×2» (s-notes-1), «The same note in other notebooks · nextcloud · Дневник ·
-// Text, tags differ» and «linked» at Tags (s-notes-2; from-typecase notes 54
-// and 57; the client's scan НГ5). The copy lives in the tests alone.
-func linkMockupMeeting(t *testing.T, app *mockupApp) {
-	t.Helper()
-	linkMockupCopy(t, app, view.KindNote, "g-vstrecha", mockupRecord{"nextcloud", "zapisi", "5c81-77aa-0d64", "nextcloud-home/zapisi.ics"},
-		mockupRecord{"nextcloud", "dnevnik", "9e31-40b7-c012", ""}, func(rec string) string {
-			rec = strings.Replace(rec, "CATEGORIES:встречи,релиз", "CATEGORIES:встречи", 1)
-			return strings.Replace(rec, "DESCRIPTION:", "DESCRIPTION:Черновик. ", 1)
-		})
 }
 
 // attachMockupRecording links «Заметка со встречи 10.08» to the recording
@@ -1737,7 +1742,6 @@ func TestFixtureCombinedTasks(t *testing.T) {
 // «Дневник» («linked ×2», «2 sources»), no record open in a panel.
 func TestFixtureNoteList(t *testing.T) {
 	app := newMockupApp(t)
-	linkMockupNote(t, app)
 	attachMockupRecording(t, app)
 	// The calendar and the tasks were read: the panel's Related names
 	// «Синк-ап» and «Дописать раздел про кэш».
@@ -1758,8 +1762,6 @@ func TestFixtureNoteList(t *testing.T) {
 // panel's second attachment (C25).
 func TestFixtureCombinedNotes(t *testing.T) {
 	app := newMockupApp(t)
-	linkMockupNote(t, app)
-	linkMockupMeeting(t, app) // «linked ×2» on its row too (from-typecase note 54)
 	attachMockupRecording(t, app)
 	app.lastUsed(t, "zapisi", view.KindNote)
 	openList(t, app, "/app/calendar?from=2026-08-10")
@@ -1811,7 +1813,6 @@ func TestFixtureCopiesSheets(t *testing.T) {
 // before (the client's scan НГ3–НГ5).
 func TestFixtureNoteCard(t *testing.T) {
 	app := newMockupApp(t)
-	linkMockupMeeting(t, app)
 	attachMockupRecording(t, app)
 	openList(t, app, "/app/calendar?from=2026-08-10")
 	openList(t, app, "/app/tasks")
@@ -1883,7 +1884,6 @@ func TestFixtureTaskEdit(t *testing.T) {
 // from.
 func TestFixtureNoteEdit(t *testing.T) {
 	app := newMockupApp(t)
-	linkMockupMeeting(t, app)
 	attachMockupRecording(t, app)
 	// The calendar was read: Related to names «Синк-ап по релизу».
 	openList(t, app, "/app/calendar?from=2026-08-10")
@@ -3424,8 +3424,6 @@ func TestFixtureDuplicatesStates(t *testing.T) {
 	// copy in «Общий» answering.
 	linkMockupEvent(t, app)
 	linkMockupTask(t, app)
-	linkMockupNote(t, app)
-	linkMockupMeeting(t, app)
 	app.servers["baikal"].Accept("REPORT")
 	// The duty of «Дежурства» has two reminders the one of «Работа» lacks
 	// and one occurrence rewritten by hand, after the week the frames show:

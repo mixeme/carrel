@@ -434,6 +434,11 @@ func side(d view.Details) *w.Side {
 		Subs:  []w.HeadSub{bind.SourceSub(d.Source.Colour, d.Subtitle)},
 		Acts:  &w.Acts{Items: acts},
 	}}
+	if d.LinkedRecord {
+		// No one copy's source on a linked record: «in 2 lists» (s-tasks-1).
+		items[0] = w.Head{Title: &w.HeadTitle{Text: string(d.Title), Size: w.HeadTitle19},
+			Subs: []w.HeadSub{{Parts: []w.HeadSubPart{w.Text(d.Subtitle)}}}, Acts: &w.Acts{Items: acts}}
+	}
 	fields := w.Fields{}
 	for _, f := range d.Fields {
 		fields.Items = append(fields.Items, bind.FieldsItem(f, lead))
@@ -464,17 +469,21 @@ func side(d view.Details) *w.Side {
 	if len(d.Related) > 0 {
 		var lines [][]w.SecItemPart
 		for _, r := range d.Related {
-			lines = append(lines, []w.SecItemPart{
+			lines = append(lines, bind.WithFrom([]w.SecItemPart{
 				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
 				w.Text(" "),
 				w.Dim{Parts: []w.Inline{w.Text(lead + string(r.Kind))}},
-			})
+			}, r.From))
 		}
 		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
 	}
+	if d.LinkedRecord {
+		items = append(items, bind.KeptSec("Where this task is kept", d.Books, lead))
+	}
 	// The task's people, as the agenda's panel names an event's (Р3 of the
 	// server's kinds-parity list; no frame draws them yet — Typecase's task
-	// 179), drawn as Related draws its records (bind.Person).
+	// 179), drawn as Related draws its records (bind.Person): after what the
+	// frames draw.
 	if len(d.Attendees) > 0 {
 		var lines [][]w.SecItemPart
 		for _, a := range d.Attendees {
@@ -515,7 +524,7 @@ func attachments(rows []view.AttachRow) [][]w.SecItemPart {
 		if a.Inline {
 			line = append(line, w.Text(" "), w.Badge{Label: inside})
 		}
-		out = append(out, line)
+		out = append(out, bind.WithFrom(line, a.From))
 	}
 	return out
 }

@@ -370,7 +370,16 @@ func side(d view.Details) *w.Side {
 	if d.Date != "" {
 		sub = []w.HeadSubPart{w.Text(string(d.Subtitle) + sep), w.Mono{Text: string(d.Date)}}
 	}
-	if d.Source.Colour != "" {
+	switch {
+	case d.LinkedRecord && d.TextFrom != nil:
+		// «in 2 notebooks · text from ▪ Записи · ‹day›» (s-notes-1): the
+		// notebook the text was chosen from, no one copy's source.
+		sub = []w.HeadSubPart{w.Text(string(d.Subtitle) + " "), w.Mark{Colour: string(d.TextFrom.Colour), Size: w.MarkH11}, w.Text(string(d.TextFrom.Name))}
+		if d.Date != "" {
+			sub = append(sub, w.Text(sep), w.Mono{Text: string(d.Date)})
+		}
+	case d.LinkedRecord:
+	case d.Source.Colour != "":
 		// The notebook's mark at its name (Typecase 434ac87, note 72).
 		sub = append([]w.HeadSubPart{w.Mark{Colour: string(d.Source.Colour), Size: w.MarkH11}}, sub...)
 	}
@@ -411,23 +420,26 @@ func side(d view.Details) *w.Side {
 			if r.When != "" {
 				about += sep + string(r.When)
 			}
-			lines = append(lines, []w.SecItemPart{
+			lines = append(lines, bind.WithFrom([]w.SecItemPart{
 				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
 				w.Text(" "),
 				w.Dim{Parts: []w.Inline{w.Text(about)}},
-			})
+			}, r.From))
 		}
 		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines, Gap: 6}}})
 	}
 	// The note's people, as the agenda's panel names an event's (Р3 of the
 	// server's kinds-parity list; no frame draws them yet — Typecase's task
 	// 179), drawn as Related draws its records (bind.Person).
-	if len(d.Attendees) > 0 {
+	if d.LinkedRecord {
+		items = append(items, bind.KeptSec("Where this note is kept", d.Books, lead))
+	}
+	if len(d.Attendees) > 0 { // after what the frames draw
 		var lines [][]w.SecItemPart
 		for _, a := range d.Attendees {
 			lines = append(lines, bind.Person(a, lead))
 		}
-		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Attendees"}, w.SecList{Items: lines, Gap: 6}}})
+		items = append(items, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Attendees"}, w.SecList{Items: lines}}}) // as the task's
 	}
 	// A file dropped on the open card goes with Attach «From this computer»
 	// (Side.Drop, Typecase's note 68; s-io-2).
@@ -458,7 +470,7 @@ func attachments(rows []view.AttachRow) [][]w.SecItemPart {
 		case a.Place != "":
 			line = append(line, w.Text(" "), w.Badge{Label: string(a.Place)})
 		}
-		out = append(out, line)
+		out = append(out, bind.WithFrom(line, a.From))
 	}
 	return out
 }

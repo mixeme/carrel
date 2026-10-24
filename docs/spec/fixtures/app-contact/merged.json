@@ -31,7 +31,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/delete?etag=e26",
+      "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/delete?etag=e28",
       "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete contact",
@@ -41,7 +41,7 @@
   ],
   "avatar": {
     "colour": "#9a9280",
-    "href": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?size=thumb\u0026v=e26",
+    "href": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?size=thumb\u0026v=e28",
     "initials": "ВЛ"
   },
   "books": [],
@@ -135,18 +135,12 @@
     {
       "actions": [],
       "body": "The others were deleted. 2 records linked to it now point at the card that stays.",
-      "details": {
-        "lines": [
-          "Звонок по каталогу библиотеки · task · nextcloud · Дела",
-          "Встреча в библиотеке 12.08 · note · nextcloud · Записи"
-        ],
-        "summary": "Linked records"
-      },
+      "details": null,
       "role": "info",
-      "title": "Merged"
+      "title": "Merged."
     }
   ],
-  "photoHref": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?v=e26",
+  "photoHref": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?v=e28",
   "photoNote": "External photo link; editing is not available.",
   "print": {
     "range": "nextcloud · Архив",
@@ -227,8 +221,29 @@
     "uid": ""
   },
   "subtitle": "Библиотека №4",
-  "timeline": [],
-  "timelineCount": null,
+  "timeline": [
+    {
+      "colour": "#4a6b52",
+      "from": null,
+      "href": "/app/tasks/a-nc-home/dela/c7d2-5e10-ab43",
+      "kind": "task",
+      "stamp": "nextcloud · Дела",
+      "title": "Звонок по каталогу библиотеки",
+      "when": "",
+      "why": "related to this person"
+    },
+    {
+      "colour": "#4a6b52",
+      "from": null,
+      "href": "/app/notes/a-nc-home/zapisi/d8e3-6f21-bc54",
+      "kind": "note",
+      "stamp": "nextcloud · Записи",
+      "title": "Встреча в библиотеке 12.08",
+      "when": "12 Aug",
+      "why": "related to this person"
+    }
+  ],
+  "timelineCount": 2,
   "title": "Вера Лебедева",
   "top": {
     "lock": null,

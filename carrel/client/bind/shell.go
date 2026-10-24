@@ -632,11 +632,53 @@ func FieldsItem(f view.Field, lead string) w.FieldsItem {
 		it.Value = append(it.Value, Badge(f.Badge))
 	}
 	// The collection a value of a linked record came from, after it: its
-	// mark and its name, muted (s-contacts-33; Typecase's note 117 p. 5).
+	// mark and its name, muted, the last of the value as the drafts set it
+	// (s-contacts-1, -33, s-notes-1; Typecase's notes 117 p. 5, 123).
 	if f.From != nil {
-		it.After = []w.ValuePart{w.Dim{Mark: &w.Mark{Colour: string(f.From.Colour), Size: w.MarkH11Inline}, Parts: []w.Inline{w.Text(f.From.Name)}}}
+		if n := len(it.Value); n > 0 {
+			if t, ok := it.Value[n-1].(w.Text); ok {
+				it.Value[n-1] = t + " "
+			} else {
+				it.Value = append(it.Value, w.Text(" "))
+			}
+		}
+		it.Value = append(it.Value, *From(f.From))
 	}
 	return it
+}
+
+// KeptSec is «Where this … is kept» of a linked record's panel: each copy
+// with its mark, a link to it and what it holds otherwise, their number in
+// the rubric (s-contacts-1, s-tasks-1, s-notes-1; note 123 p. 10).
+func KeptSec(rubric string, books []view.Field, lead string) w.Sec {
+	var lines [][]w.SecItemPart
+	for _, f := range books {
+		lines = append(lines, Book(f, lead))
+	}
+	return w.Sec{Items: []w.SecPart{
+		w.Rubric{Text: rubric, Items: []w.RubricPart{w.Badge{Label: strconv.Itoa(len(books)), Tone: w.BadgeLinked}}},
+		w.SecList{Items: lines, Gap: 5},
+	}}
+}
+
+// WithFrom is a line of a linked record's attachments or Related, the
+// collection of the one copy that holds it after it (Р-78; s-agenda-25,
+// s-tasks-17).
+func WithFrom(line []w.SecItemPart, f *view.FieldFrom) []w.SecItemPart {
+	if d := From(f); d != nil {
+		return append(line, w.Text(" "), *d)
+	}
+	return line
+}
+
+// From is the collection a value, an attachment or a Related row of a
+// linked record came from: its mark and its name, muted (s-contacts-33,
+// s-notes-32; Р-78); nil when there was no choice.
+func From(f *view.FieldFrom) *w.Dim {
+	if f == nil {
+		return nil
+	}
+	return &w.Dim{Mark: &w.Mark{Colour: string(f.Colour), Size: w.MarkH11Inline}, Parts: []w.Inline{w.Text(f.Name)}}
 }
 
 // Book is a line of «the same person in other books» (C-6.2 Field of

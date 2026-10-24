@@ -362,6 +362,7 @@
       "related": [
         {
           "colour": "",
+          "from": null,
           "href": "",
           "kind": "event",
           "stamp": "",

@@ -193,7 +193,6 @@ func TestOneListSaysARecordIsLinked(t *testing.T) {
 	})
 	t.Run("notes", func(t *testing.T) {
 		app := newMockupApp(t)
-		linkMockupNote(t, app)
 		page := decode[view.NotesPage](t, app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess)))
 		for _, g := range page.Groups {
 			for _, r := range g.Rows {

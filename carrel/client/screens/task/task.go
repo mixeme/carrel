@@ -134,11 +134,11 @@ func Screen(p *view.TaskPage) w.Shell {
 			if r.When != "" {
 				about += sep + string(r.When)
 			}
-			lines = append(lines, []w.SecItemPart{
+			lines = append(lines, bind.WithFrom([]w.SecItemPart{
 				w.Span{Face: w.FaceAccent, Text: string(r.Title), Href: r.Href},
 				w.Text(" "),
 				w.Dim{Parts: []w.Inline{w.Text(about)}},
-			})
+			}, r.From))
 		}
 		main = append(main, w.Sec{Items: []w.SecPart{w.Rubric{Text: "Related"}, w.SecList{Items: lines}}})
 	}
@@ -233,7 +233,7 @@ func attachments(rows []view.AttachRow) [][]w.SecItemPart {
 		if a.Inline {
 			line = append(line, w.Text(" "), w.Badge{Label: inside})
 		}
-		out = append(out, line)
+		out = append(out, bind.WithFrom(line, a.From))
 	}
 	return out
 }

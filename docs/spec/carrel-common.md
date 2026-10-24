@@ -919,6 +919,7 @@ type Details struct {
     Title      Text
     Subtitle   Text          // под заголовком: «nextcloud · Записи»
     Date       Text          // у заметки — день и время, когда они есть, моноширинно после Subtitle (s-notes-1), как NoteMeta.Date; у прочих пусто
+    TextFrom   *FieldFrom    // у панели связанной заметки: коллекция её текста после Subtitle «in 2 notebooks · text from» (s-notes-1); nil — выбора не было
     Avatar     *Avatar       // контакт: фото или инициалы; у других родов nil
     Preview    *Thumb        // файл папки (s-files-1): миниатюра или значок типа; у записей nil
     Fields     []Field       // категории — строкой «Tags» с Field.Tags там, где её рисует кадр
@@ -931,7 +932,7 @@ type Details struct {
     Foreign    []Field       // контакт: «Kept as the server sent them»
     ForeignShow *Action      // «Show 3» — кнопка, раскрывающая Foreign; без сценариев — тот же список с этой панелью и ?foreign=1; nil — чужих свойств нет или они раскрыты
     Books      []Field       // контакт: «The same person in other books» (s-contacts-7) — как у ContactPage
-    LinkedRecord bool        // панель связанной строки единой книги: связанная запись, не первая копия (записка Typecase 117 п. 5, s-contacts-1) — Subtitle «in 3 books», места в Books («Where this person is kept»), источника и удаления нет
+    LinkedRecord bool        // панель связанной строки единого вида любого рода: связанная запись, не первая копия (записки Typecase 117 п. 5, 123 п. 10; s-contacts-1, s-tasks-1, s-notes-1) — Subtitle «in 3 books», «in 2 lists», места в Books («Where this … is kept»), всё, что есть хотя бы в одной копии (Р-78), кроме «Kept as the server sent them» (кадры панели его не рисуют), источника, удаления и Attach нет
     Source     SourceBlock
     Actions    []Action   // кнопки на виду; удаление — Danger, клиент ставит его внизу панели
     Menu       []MenuItem // «⋯» панели, в порядке кадра (s-contacts-8, s-agenda-4, s-tasks-4, s-notes-12)
@@ -1371,7 +1372,7 @@ Source в её меню нет, и `Stamp` в её строках пуст. У �
 ```go
 type ContactPage struct {
     Shell
-    LinkedRecord bool // карточка связанной записи (/app/{kind}/linked/{uid}, записка Typecase 117 п. 5): выбранное, не одна копия; Subtitle — «All address books · in 3 books», места — в Books («Where this person is kept»), источника, хронологии и удаления нет
+    LinkedRecord bool // карточка связанной записи (/app/{kind}/linked/{uid}, записка Typecase 117 п. 5): выбранное, не одна копия; Subtitle — «All address books · in 3 books», места — в Books («Where this person is kept»); хронология и «Kept as the server sent them» — что есть хотя бы в одной копии (Р-78); источника и удаления нет
     UID       string
     Name      Text
     Subtitle  Text     // «Издательство «Слово» · Выпускающий редактор» — где и кем
@@ -1424,6 +1425,7 @@ type TimelineRow struct {
     Title   Text
     Stamp   Stamp
     Why     Text // «attendee · accepted», «organiser · done», «attached to «…»» — колонка обязательна, за названием, в меню Columns не входит
+    From    *FieldFrom // у Related связанной записи: коллекция копии, где одной стоит связь (Р-78); nil — связь у всех копий или запись одна
 }
 
 type ContactEditPage struct {
@@ -1594,6 +1596,7 @@ type AttachRow struct {
     Place   Text
     State   RecordState
     Actions []Action // только на правке (s-agenda-3): Remove — «Remove link, keep the file» у ссылки; в карточке и панели действий у вложения нет
+    From    *FieldFrom // у связанной записи: коллекция копии, где одной лежит вложение (Р-78, записка Typecase 123 п. 10); nil — у всех копий или запись одна
 }
 
 type TaskPage struct { // чтение

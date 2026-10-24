@@ -263,7 +263,12 @@
       "count": 2,
       "rows": [
         {
-          "badges": [],
+          "badges": [
+            {
+              "label": "linked ×2",
+              "role": "linked"
+            }
+          ],
           "changed": "10 Aug 11:05",
           "colour": "",
           "date": "10 Aug",
@@ -325,7 +330,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e25",
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e26",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",
@@ -335,9 +340,12 @@
             }
           ],
           "on": false,
-          "sources": [],
+          "sources": [
+            "nextcloud · Записи",
+            "nextcloud · Дневник"
+          ],
           "stamp": "",
-          "state": "ok",
+          "state": "linked",
           "tags": [
             {
               "href": "/app/notes/a-nc-home/zapisi?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8",
@@ -533,7 +541,7 @@
         "method": "GET"
       },
       {
-        "count": 4,
+        "count": 5,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -570,7 +578,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 4,
+            "count": 5,
             "detail": "",
             "feed": false,
             "href": "/app/notes",
@@ -601,7 +609,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/notes/a-nc-home/dnevnik",
@@ -635,13 +643,13 @@
         "on": true
       },
       {
-        "href": "/app/notes/a-nc-home/zapisi?tag=%D0%BA%D0%BD%D0%B8%D0%B3%D0%B8",
-        "label": "книги",
+        "href": "/app/notes/a-nc-home/zapisi?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8",
+        "label": "встречи",
         "on": false
       },
       {
-        "href": "/app/notes/a-nc-home/zapisi?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8",
-        "label": "встречи",
+        "href": "/app/notes/a-nc-home/zapisi?tag=%D0%BA%D0%BD%D0%B8%D0%B3%D0%B8",
+        "label": "книги",
         "on": false
       },
       {

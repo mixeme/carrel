@@ -297,7 +297,7 @@ func side(d view.Details) *w.Side {
 	items := []w.SidePart{h}
 	fields := w.Fields{}
 	for _, f := range d.Fields {
-		fields.Items = append(fields.Items, bind.FieldsItem(f, ""))
+		fields.Items = append(fields.Items, bind.FieldsItem(f, "· "))
 	}
 	items = append(items, fields)
 	if d.ForeignShow != nil {

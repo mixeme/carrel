@@ -185,8 +185,12 @@ type Details struct {
 	Subtitle Text `json:"subtitle"` // под заголовком: откуда запись, у заметки — и когда
 	// Date — у заметки день и время, когда они у неё есть, моноширинно после
 	// Subtitle (s-notes-1), как NoteMeta.Date страницы; у прочих пусто
-	Date   Text    `json:"date"`
-	Avatar *Avatar `json:"avatar"` // контакт: фото или инициалы; у других родов nil
+	Date Text `json:"date"`
+	// TextFrom — у панели связанной заметки: коллекция её текста после
+	// Subtitle «in 2 notebooks · text from» (s-notes-1, записка Typecase 123
+	// п. 10); nil — выбора не было
+	TextFrom *FieldFrom `json:"textFrom"`
+	Avatar   *Avatar    `json:"avatar"` // контакт: фото или инициалы; у других родов nil
 	// Preview — место превью выбранного файла (s-files-1): миниатюра или
 	// значок типа; у записей nil
 	Preview   *Thumb        `json:"preview"`

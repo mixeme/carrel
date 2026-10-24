@@ -112,9 +112,11 @@ func TestPanelsReadAsTheirFrames(t *testing.T) {
 	if ev.DeleteNote == "" {
 		t.Errorf("s-agenda-1: a series says under Delete that it is deleted whole: %+v", ev)
 	}
-	check("s-tasks-1", panelOf(cal.h, cal.path("tasks")+"/td", cal))
+	// The panels of s-tasks-1 and s-notes-1 are linked records' since
+	// Typecase 2823585 (note 123 p. 10): TestTaskListIsTheFrame and
+	// TestNotebookIsTheFrame read them on the set. A note's panel says when
+	// it was written all the same.
 	note := panelOf(cal.h, cal.path("notes")+"/nt", cal)
-	check("s-notes-1", note)
 	if !strings.Contains(string(note.Date), "2026") {
 		t.Errorf("s-notes-1: the panel of a note says when it was written: %q", note.Date)
 	}

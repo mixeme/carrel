@@ -32,7 +32,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e24",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e26",
       "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete contact",
@@ -42,7 +42,7 @@
   ],
   "avatar": {
     "colour": "#8c6239",
-    "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e24",
+    "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e26",
     "initials": "АК"
   },
   "books": [
@@ -52,7 +52,7 @@
       "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
       "label": "radicale · vps · Команда",
       "mono": false,
-      "value": "Phone, email, photo differ"
+      "value": "Phone, email differ"
     },
     {
       "colour": "#a05a2c",
@@ -60,7 +60,7 @@
       "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
       "label": "nextcloud · Архив",
       "mono": false,
-      "value": "Phone, email, photo differ"
+      "value": "Phone, email differ"
     }
   ],
   "details": null,
@@ -102,6 +102,10 @@
       "value": "anna.kovaleva@slovo.example"
     },
     {
+      "badge": {
+        "label": "linked",
+        "role": "linked"
+      },
       "from": null,
       "href": "",
       "label": "Address · work",
@@ -110,6 +114,10 @@
     },
     {
       "aside": "in 7 months",
+      "badge": {
+        "label": "linked",
+        "role": "linked"
+      },
       "from": null,
       "href": "",
       "label": "Birthday",
@@ -136,6 +144,10 @@
       "value": ""
     },
     {
+      "badge": {
+        "label": "linked",
+        "role": "linked"
+      },
       "from": null,
       "href": "",
       "label": "Note",
@@ -227,7 +239,7 @@
   },
   "name": "Анна Ковалёва",
   "notices": [],
-  "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e24",
+  "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e26",
   "photoNote": "",
   "print": {
     "range": "nextcloud · Контакты",
@@ -311,6 +323,7 @@
   "timeline": [
     {
       "colour": "#4a6b52",
+      "from": null,
       "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
       "kind": "event",
       "stamp": "nextcloud · Личный",

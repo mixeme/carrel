@@ -14,6 +14,10 @@
   "attach": [
     {
       "actions": [],
+      "from": {
+        "colour": "#4a6b52",
+        "name": "Личный"
+      },
       "href": "/app/attach/a-nc-home/lichnyj/8f1c-4a02-b7d3/0",
       "inline": true,
       "name": "release-checklist.md",
@@ -309,6 +313,10 @@
   "related": [
     {
       "colour": "",
+      "from": {
+        "colour": "#4a6b52",
+        "name": "Личный"
+      },
       "href": "",
       "kind": "note",
       "stamp": "",

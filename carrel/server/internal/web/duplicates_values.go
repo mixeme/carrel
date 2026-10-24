@@ -54,7 +54,10 @@ const askType = "\x1f"
 // «When», «Where»; «Due», «Priority»; «Text», «Tags»). TEL stands for every
 // phone question.
 var askedProps = map[view.Kind][]string{
-	view.KindContact: {"FN", "ORG", "TEL", "EMAIL", "PHOTO", "CATEGORIES"},
+	// Every field of the card is asked where the copies differ, one a copy
+	// lacks with «— · ‹copies›» (Дб7 of every field; note 123 p. 3): the
+	// title, the addresses by their type, the birthday, the note too.
+	view.KindContact: {"FN", "ORG", "TEL", "EMAIL", "TITLE", "ADR", "BDAY", "PHOTO", "CATEGORIES", "NOTE"},
 	view.KindEvent:   {"WHEN", "LOCATION", "CATEGORIES"},
 	// A task holds a place as an event does, and is asked about it the same
 	// way (Р21 of scans/kinds-parity.md).
@@ -63,18 +66,24 @@ var askedProps = map[view.Kind][]string{
 }
 
 // manyProps are asked with ticks: what to keep of them.
-var manyProps = map[string]bool{"TEL": true, "EMAIL": true, "CATEGORIES": true}
+var manyProps = map[string]bool{"TEL": true, "EMAIL": true, "ADR": true, "CATEGORIES": true}
+
+// typedProps are asked a question per type of value: «Phone · work»,
+// «Address · work».
+var typedProps = map[string]string{"TEL": "Phone", "ADR": "Address"}
 
 // askedLabels name a question as the card does.
 var askedLabels = map[string]string{
-	"FN": "Display name", "ORG": "Organisation", "PHOTO": "Photo", "EMAIL": "Email", "CATEGORIES": "Tags",
+	"FN": "Display name", "ORG": "Organisation", "TITLE": "Title", "BDAY": "Birthday", "NOTE": "Note",
+	"PHOTO": "Photo", "EMAIL": "Email", "CATEGORIES": "Tags",
 	"WHEN": "When", "LOCATION": "Where", "DUE": "Due", "PRIORITY": "Priority", "TEXT": "Text",
 }
 
 // differWords name a question in «Phone, email differ» (s-contacts-33,
 // s-tasks-17, s-notes-32, s-agenda-25).
 var differWords = map[string]string{
-	"FN": "name", "ORG": "organisation", "PHOTO": "photo", "TEL": "phone", "EMAIL": "email",
+	"FN": "name", "ORG": "organisation", "TITLE": "title", "ADR": "address", "BDAY": "birthday", "NOTE": "note",
+	"PHOTO": "photo", "TEL": "phone", "EMAIL": "email",
 	"CATEGORIES": "tags", "WHEN": "when", "LOCATION": "where", "DUE": "due", "PRIORITY": "priority", "TEXT": "text",
 }
 
@@ -131,6 +140,16 @@ func valuesOf(tf timeFmt, k view.Kind, o *model.Object) recValues {
 		for _, v := range o.PropText("EMAIL") {
 			add("EMAIL", recValue{Key: dupes.ValueKey("EMAIL", v), Label: strings.TrimSpace(v)})
 		}
+		add("TITLE", recValue{Key: strings.TrimSpace(firstValue(o, "TITLE"))})
+		for _, v := range o.Props()["ADR"] {
+			if a := structured(v.Text); a != "" {
+				add("ADR"+askType+typedLabel("Address", v.Params), recValue{Key: strings.ToLower(a), Label: a})
+			}
+		}
+		if v := o.Props()["BDAY"]; len(v) > 0 {
+			add("BDAY", recValue{Key: strings.TrimSpace(v[0].Text), Label: birthdayShown(v[0].Text, v[0].Params)})
+		}
+		add("NOTE", recValue{Key: strings.TrimSpace(firstValue(o, "NOTE"))})
 	case view.KindEvent:
 		add("WHEN", recValue{Key: cal.TimeKey(o), Label: tf.whenShort(o)})
 		add("LOCATION", recValue{Key: strings.TrimSpace(cal.Text(o, "LOCATION"))})
@@ -224,9 +243,10 @@ type answerOption struct {
 
 // text is the option's label: the value and the collections holding it
 // («+7 495 120-45-77 · Команда», «— · Дела»), or where it lives when the
-// value says nothing (a photo, a note's text).
+// value says nothing — a photo, a note's text —, held or not (s-dup-1:
+// «nextcloud · Архив» of a copy without a photo; note 123 p. 3).
 func (o answerOption) text(q question) string {
-	if byHolder[q.prop()] && !o.none {
+	if byHolder[q.prop()] {
 		return string(o.holders[0].stamp)
 	}
 	v := "—"
@@ -263,11 +283,11 @@ func questionsOf(k view.Kind, members []groupMember, prefs map[string]sealed.Rec
 	numbers := map[string]int{}
 	for _, prop := range askedProps[k] {
 		ids := []string{prop}
-		if prop == "TEL" {
+		if typedProps[prop] != "" {
 			ids = nil
 			for _, m := range loaded {
 				for id := range m.values {
-					if propOf(id) == "TEL" && !slices.Contains(ids, id) {
+					if propOf(id) == prop && !slices.Contains(ids, id) {
 						ids = append(ids, id)
 					}
 				}
@@ -392,6 +412,13 @@ func differing(qs []question, shown func(question) []recValue, values recValues)
 	for _, q := range qs {
 		w := differWords[q.prop()]
 		if slices.Contains(words, w) || sameKeys(shown(q), values[q.id]) {
+			continue
+		}
+		// A field the copy does not hold at all says nothing of it — the
+		// title, an address, the birthday, a note of one copy (note 123 p.
+		// 12: «Phone, email differ»); a phone or an address of mail it lacks
+		// does.
+		if len(values[q.id]) == 0 && q.prop() != "TEL" && q.prop() != "EMAIL" {
 			continue
 		}
 		words = append(words, w)

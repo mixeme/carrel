@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
+	"carrel.dev/carrel/server/internal/dupes"
 	"carrel.dev/carrel/server/internal/fanout"
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/cal"
@@ -454,6 +456,11 @@ type timelineRow struct {
 
 func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, person timelinePerson) []timelineRow {
 	var out []timelineRow
+	// The copies of a linked record are one record (S-16): the timeline
+	// names it once, at the group's first copy among those found, whatever
+	// the order the servers answered in.
+	type place struct{ at, rank int }
+	seen := map[string]place{}
 	for _, it := range snap.Items {
 		o := origin{}
 		o.conn, _ = blob.Connection(it.AccountID)
@@ -461,6 +468,7 @@ func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot
 		o.conn.ID, o.col.Path = it.AccountID, it.Col
 		row := view.TimelineRow{Kind: it.Kind, Stamp: o.stamp(), Colour: catalogColour(o.col)}
 		var at time.Time
+		replace := -1
 		if it.Kind == view.KindFile {
 			row.Title, row.Href, row.Why = text(it.FileName), s.route(foundFileHref(it)), "name in the file name"
 			at = it.FileModified
@@ -469,12 +477,29 @@ func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot
 			if !ok {
 				continue
 			}
+			ref := sealed.RecordRef{AccountID: it.AccountID, Col: it.Col, UID: it.UID}
+			if g, linked := dupes.LinkedOf(blob.Duplicates.Linked, ref); linked {
+				rank := slices.Index(g.Members, ref)
+				p, held := seen[g.ID]
+				if held && rank >= p.rank {
+					continue
+				}
+				pos := len(out)
+				if held {
+					replace, pos = p.at, p.at
+				}
+				seen[g.ID] = place{at: pos, rank: rank}
+			}
 			row.Title, row.Why, at = text(recordTitle(it.Kind, it.Object)), text(why), when
 			row.Href = s.route(o.recordPath(segmentOf(it.Kind), it.UID))
 			row.Target = render.TargetDetails // its card in the panel (s-contacts-7)
 		}
 		if !at.IsZero() {
 			row.When = text(tf.shortDay(at)) // a list's day, «10 Aug» (s-contacts-7, -26; C-10)
+		}
+		if replace >= 0 {
+			out[replace] = timelineRow{row: row, at: at}
+			continue
 		}
 		out = append(out, timelineRow{row: row, at: at})
 	}

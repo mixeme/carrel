@@ -216,6 +216,13 @@
             "value": "6d92-13ef-b408"
           },
           {
+            "colour": "#6b4e7a",
+            "label": "Что почитать про CRDT",
+            "meta": "note · 8 Aug",
+            "selected": false,
+            "value": "8e04-21ab-d517"
+          },
+          {
             "colour": "#3f6e8c",
             "label": "Ответить подрядчику по смете",
             "meta": "task · 8 Aug",
@@ -457,7 +464,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 2,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/notes/a-nc-home/dnevnik",

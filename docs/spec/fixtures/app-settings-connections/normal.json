@@ -509,7 +509,7 @@
               "target": "sheet"
             }
           ],
-          "objects": 1,
+          "objects": 3,
           "path": "/alice/calendars/dnevnik/",
           "pick": "a-nc-home|/alice/calendars/dnevnik/",
           "readOnly": false,

@@ -3,11 +3,13 @@ package guard_test
 import (
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
 	"carrel.dev/carrel/client/document"
 	"carrel.dev/carrel/client/screens"
+	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
 )
 
@@ -22,10 +24,12 @@ func TestPagesHoldTheirNames(t *testing.T) {
 
 // The open card of the agenda, a task and a note takes a dropped file into
 // its Attach (Side.Drop): the check above holds the name only where a page
-// prints it, so some page must.
+// prints it, so some page must. A linked record's panel has no Attach — a
+// file goes to a copy (Р-78, Typecase's note 123 p. 10) —: a screen whose
+// open cards are all linked records owes no drop.
 func TestAnOpenCardTakesADroppedFile(t *testing.T) {
 	l := load(t)
-	dropped := map[string]bool{}
+	dropped, linkedOnly := map[string]bool{}, map[string]bool{}
 	for _, scr := range screens.All {
 		for _, path := range l.fixtures(scr) {
 			model, err := decode(scr, path)
@@ -39,11 +43,38 @@ func TestAnOpenCardTakesADroppedFile(t *testing.T) {
 			if strings.Contains(html, `data-tc-drop="`) {
 				dropped[label(scr)] = true
 			}
+			if d := openDetails(model); d != nil && d.LinkedRecord {
+				if _, seen := linkedOnly[label(scr)]; !seen {
+					linkedOnly[label(scr)] = true
+				}
+			} else if d != nil {
+				linkedOnly[label(scr)] = false
+			}
 		}
 	}
-	if len(dropped) < 3 {
-		t.Errorf("screens whose open card takes a dropped file: %v, want the agenda's, the tasks' and the notes'", dropped)
+	owed := 3
+	for scr, only := range linkedOnly {
+		if only && !dropped[scr] {
+			owed--
+		}
 	}
+	if len(dropped) < owed {
+		t.Errorf("screens whose open card takes a dropped file: %v, want the agenda's, the tasks' and the notes' (but a linked record's)", dropped)
+	}
+}
+
+// openDetails is the card open in a list's panel, nil when none is.
+func openDetails(model any) *view.Details {
+	v := reflect.Indirect(reflect.ValueOf(model))
+	if v.Kind() != reflect.Struct {
+		return nil
+	}
+	f := v.FieldByName("Details")
+	if !f.IsValid() || f.Kind() != reflect.Pointer || f.IsNil() {
+		return nil
+	}
+	d, _ := f.Interface().(*view.Details)
+	return d
 }
 
 // The check bites: a sign-in whose Sign in submits a form the page does not

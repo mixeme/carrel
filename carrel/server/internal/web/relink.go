@@ -49,6 +49,9 @@ type relinkReport struct {
 	// pointed are the records made to point at the kept card, «Звонок по
 	// каталогу библиотеки · task · nextcloud · Дела» (s-dup-8)
 	pointed []string
+	// rows are the records pointed anew as the kept card's timeline shows
+	// them (s-dup-8, note 123 p. 16): they are in it now
+	rows    []view.TimelineRow
 	skipped []string // a record that points at an old UID and was not changed, with why
 	unread  []string // a collection that could not be read, so was not looked in
 }
@@ -154,6 +157,12 @@ func (s *Server) relink(ctx context.Context, sess *session.Session, blob sealed.
 				dropWholeReads(sess, c.conn.ID, c.col.Path)
 				rep.changed++
 				rep.pointed = append(rep.pointed, titleOr(cal.Text(obj, ical.PropSummary), "Untitled")+" · "+string(k)+" · "+string(origin{conn: c.conn, col: c.col}.stamp()))
+				row := view.TimelineRow{Colour: catalogColour(c.col), Kind: k, Title: text(titleOr(cal.Text(obj, ical.PropSummary), "Untitled")),
+					Stamp: origin{conn: c.conn, col: c.col}.stamp(), Why: "related to this person", Href: s.route(origin{conn: c.conn, col: c.col}.recordPath(segmentOf(k), cal.UID(obj)))}
+				if at := timelineWhen(k, obj, s.timeFor(sess).tz); !at.IsZero() {
+					row.When = text(s.timeFor(sess).shortDay(at))
+				}
+				rep.rows = append(rep.rows, row)
 			}
 		}
 	}

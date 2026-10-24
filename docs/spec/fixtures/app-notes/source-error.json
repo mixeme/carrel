@@ -331,7 +331,7 @@
         "method": "GET"
       },
       {
-        "count": 3,
+        "count": 5,
         "enabled": true,
         "href": "/app/notes",
         "icon": "i-note",
@@ -368,7 +368,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 3,
+            "count": 5,
             "detail": "",
             "feed": false,
             "href": "/app/notes",
@@ -399,7 +399,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": 1,
+            "count": 3,
             "detail": "",
             "feed": false,
             "href": "/app/notes/a-nc-home/dnevnik",

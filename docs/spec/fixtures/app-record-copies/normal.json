@@ -181,6 +181,10 @@
           "value": "anna.kovaleva@slovo.example"
         },
         {
+          "badge": {
+            "label": "linked",
+            "role": "linked"
+          },
           "from": null,
           "href": "",
           "label": "Address · work",
@@ -189,6 +193,10 @@
         },
         {
           "aside": "in 7 months",
+          "badge": {
+            "label": "linked",
+            "role": "linked"
+          },
           "from": null,
           "href": "",
           "label": "Birthday",
@@ -215,6 +223,10 @@
           "value": ""
         },
         {
+          "badge": {
+            "label": "linked",
+            "role": "linked"
+          },
           "from": null,
           "href": "",
           "label": "Note",

@@ -198,12 +198,32 @@
     {
       "avatar": null,
       "colour": "#6b4e7a",
+      "detail": "Договорились заморозить ветку в среду.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=dnevnik\u0026uid=9e31-40b7-c012\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Дневник",
+      "title": "Заметка со встречи 10.08",
+      "when": "10 Aug"
+    },
+    {
+      "avatar": null,
+      "colour": "#6b4e7a",
       "detail": "Съезд после заправки, потом грунтовка два километра — в дождь лучше в объезд через посёлок.",
       "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=dnevnik\u0026uid=7f03-5b26-cc19\u0026what=note",
       "kind": "note",
       "stamp": "nextcloud · Дневник",
       "title": "Про дорогу до дачи",
       "when": "3 Aug"
+    },
+    {
+      "avatar": null,
+      "colour": "#6b4e7a",
+      "detail": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",
+      "href": "/app/mail/attach?a=a-nc-home\u0026all=1\u0026c=dnevnik\u0026uid=8e04-21ab-d517\u0026what=note",
+      "kind": "note",
+      "stamp": "nextcloud · Дневник",
+      "title": "Что почитать про CRDT",
+      "when": "8 Aug"
     }
   ],
   "search": {

@@ -27,7 +27,7 @@ var (
 	frameOpenRow    = regexp.MustCompile(`(?s)<div class="tc-row [^"]*is-on[^"]*">.*?<span class="tc-row__title[^"]*">(?:<span class="tc-row__words">)?([^<]*)</span>`)
 	framePanelSub   = regexp.MustCompile(`<div class="tc-head__sub">([^<]*)</div>`)
 	framePanelTerms = regexp.MustCompile(`<dt>([^<]*)</dt>`)
-	frameFieldFrom  = regexp.MustCompile(`<dt>([^<]*)</dt><dd[^>]*>(?:<a [^>]*>)?[^<]*(?:</a>)? <span class="tc-dim"><span class="tc-mark[^>]*></span> ([^<]*)</span>`)
+	frameFieldFrom  = regexp.MustCompile(`<dt>([^<]*)</dt><dd[^>]*>(?:<a [^>]*>)?[^<]*(?:</a>)? (?:<span class="tc-dim">[^<]*</span> )?<span class="tc-dim"><span class="tc-mark[^>]*></span> ([^<]*)</span>`)
 	frameKeptRow    = regexp.MustCompile(`<a class="tc-dim--accent" href="[^"]*">([^<]*)</a> <span class="tc-dim">· ([^<]*)</span>`)
 	frameColumnsBtn = regexp.MustCompile(`<button class="tc-btn[^"]*" type="button"><svg[^>]*><use href="#(i-[\w-]+)"/></svg>Columns</button>`)
 	frameDigits     = regexp.MustCompile(`\d+`)

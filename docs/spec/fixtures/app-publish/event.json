@@ -317,6 +317,7 @@
       "attach": [
         {
           "actions": [],
+          "from": null,
           "href": "/app/attach/a-nc-home/lichnyj/8f1c-4a02-b7d3/0",
           "inline": true,
           "name": "release-checklist.md",
@@ -587,6 +588,7 @@
       "related": [
         {
           "colour": "",
+          "from": null,
           "href": "",
           "kind": "",
           "stamp": "",

@@ -126,18 +126,20 @@ func TestTaskListIsTheFrame(t *testing.T) {
 	if !slices.Equal(fields, terms) {
 		t.Errorf("panel fields = %q, want %q", fields, terms)
 	}
-	// The panel says where the task lies and how it compares with the
-	// server, as its card does (Typecase's note 37: the block Source).
-	if !strings.Contains(panel, `<div class="tc-rubric">Source</div>`) {
-		t.Fatal("the panel of s-tasks-1 draws no Source: read the frame again")
+	// The open row is linked: the panel is the linked record (Typecase's
+	// note 123 p. 10) — where it is kept in place of one copy's Source,
+	// everything any copy holds, what one copy holds alone marked with its
+	// list.
+	if !strings.Contains(panel, "Where this task is kept") || strings.Contains(panel, `<div class="tc-rubric">Source</div>`) {
+		t.Fatal("the panel of s-tasks-1 is no linked record's: read the frame again")
 	}
-	if d.Source.Path == "" || d.Source.Compared == "" {
-		t.Errorf("panel source = %+v, want its path and what the server says of it", d.Source)
+	if !d.LinkedRecord || len(d.Books) != 2 || d.Source.Path != "" || d.Subtitle != "in 2 lists" {
+		t.Errorf("panel = linked %v, kept %+v, source %+v, %q; want the linked record in 2 lists", d.LinkedRecord, d.Books, d.Source, d.Subtitle)
 	}
-	if !strings.Contains(string(d.AttachHint), "2 MB") || d.Body == "" || len(d.Attach) != 1 || !d.Attach[0].Inline {
-		t.Errorf("panel = %+v, want the description, the file in the task and the line under it", d)
+	if d.Body == "" || len(d.Attach) != 1 || !d.Attach[0].Inline || d.Attach[0].From == nil || d.Attach[0].From.Name != "Дела" {
+		t.Errorf("panel = %+v, want the description and the file in the task, «Дела»'s alone", d)
 	}
-	if len(d.Related) != 1 || d.Related[0].Title != "Поездка в Казань" {
+	if len(d.Related) != 1 || d.Related[0].Title != "Поездка в Казань" || d.Related[0].From == nil {
 		t.Errorf("related = %+v", d.Related)
 	}
 

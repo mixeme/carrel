@@ -223,7 +223,7 @@ func MergeKeeping(target *model.Object, others []*model.Object, choices map[stri
 					left(from+1, v)
 					continue
 				}
-				if hasValue(have, v) {
+				if hasValue(have, v) || (name == "CATEGORIES" && tagsHeld(have, v.Text)) {
 					continue
 				}
 				ops = append(ops, model.AddValue{Prop: name, Value: v.Text})
@@ -405,4 +405,22 @@ func dropTags(members []map[string][]model.RawValue, gone []string, plan *Plan) 
 		return []model.PatchOp{model.RemoveProp{Prop: "CATEGORIES"}}
 	}
 	return []model.PatchOp{model.SetValues{Prop: "CATEGORIES", Values: kept}}
+}
+
+// tagsHeld reports that every tag of a CATEGORIES value is among the tags
+// already kept: «встречи» of one copy beside «встречи,релиз» of another is
+// no tag more (a tag is a part of a value; note 123 p. 6).
+func tagsHeld(have []model.RawValue, text string) bool {
+	var held []string
+	for _, h := range have {
+		for _, tag := range strings.Split(h.Text, ",") {
+			held = append(held, strings.TrimSpace(tag))
+		}
+	}
+	for _, tag := range strings.Split(text, ",") {
+		if tag = strings.TrimSpace(tag); tag != "" && !slices.Contains(held, tag) {
+			return false
+		}
+	}
+	return true
 }

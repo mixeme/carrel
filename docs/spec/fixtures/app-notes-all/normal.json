@@ -296,10 +296,11 @@
     "actions": [
       {
         "enabled": true,
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
+        "href": "/app/notes/linked/5c81-77aa-0d64/copies",
         "id": "record.edit",
         "label": "Edit",
-        "method": "GET"
+        "method": "GET",
+        "target": "sheet"
       },
       {
         "enabled": true,
@@ -308,42 +309,15 @@
         "id": "record.open",
         "label": "Open the note page",
         "method": "GET"
-      },
-      {
-        "arrow": [
-          {
-            "csrf": "csrf",
-            "enabled": true,
-            "file": "file",
-            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e26\u0026op=attach",
-            "icon": "i-upload",
-            "id": "attach.add",
-            "label": "From this computer",
-            "method": "POST"
-          },
-          {
-            "enabled": true,
-            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e26\u0026for=attach\u0026k=notes\u0026uid=5c81-77aa-0d64",
-            "icon": "i-file",
-            "id": "attach.files",
-            "label": "From Files",
-            "method": "GET",
-            "target": "sheet"
-          }
-        ],
-        "csrf": "csrf",
-        "enabled": true,
-        "file": "file",
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e26\u0026op=attach",
-        "icon": "i-clip",
-        "id": "attach.add",
-        "label": "Attach",
-        "method": "POST"
       }
     ],
     "attach": [
       {
         "actions": [],
+        "from": {
+          "colour": "#4a6b52",
+          "name": "Записи"
+        },
         "href": "/app/attach/a-nc-home/zapisi/5c81-77aa-0d64/0",
         "inline": true,
         "name": "2026-08-10-sync-board.png",
@@ -353,6 +327,10 @@
       },
       {
         "actions": [],
+        "from": {
+          "colour": "#4a6b52",
+          "name": "Записи"
+        },
         "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-08/%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D1%8C-%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8.m4a",
         "inline": false,
         "name": "запись-встречи.m4a",
@@ -365,13 +343,33 @@
     "attendees": [],
     "avatar": null,
     "body": "",
-    "books": [],
+    "books": [
+      {
+        "colour": "#4a6b52",
+        "from": null,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+        "label": "nextcloud · Записи",
+        "mono": false,
+        "value": ""
+      },
+      {
+        "colour": "#6b4e7a",
+        "from": null,
+        "href": "/app/notes/a-nc-home/dnevnik/9e31-40b7-c012",
+        "label": "nextcloud · Дневник",
+        "mono": false,
+        "value": "Text, tags differ"
+      }
+    ],
     "close": "/app/notes?task=t-task",
     "date": "10 August 2026, 11:05",
     "deleteNote": "",
     "fields": [
       {
-        "from": null,
+        "from": {
+          "colour": "#4a6b52",
+          "name": "Записи"
+        },
         "href": "",
         "label": "Tags",
         "mono": false,
@@ -392,59 +390,45 @@
     ],
     "foreign": [],
     "foreignShow": null,
+    "linkedRecord": true,
     "menu": [
       {
         "enabled": true,
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move",
-        "icon": "i-move",
-        "id": "record.move",
-        "label": "Move",
-        "method": "GET",
-        "target": "sheet"
-      },
-      {
-        "enabled": true,
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move?copy=1",
-        "icon": "i-dup",
-        "id": "record.copy",
-        "label": "Copy",
-        "method": "GET",
-        "target": "sheet"
-      },
-      {
-        "enabled": true,
-        "href": "/app/notes/a-nc-home/zapisi/export?uid=5c81-77aa-0d64",
-        "icon": "i-export",
-        "id": "record.export",
-        "label": "Export .md",
+        "href": "/app/notes/linked/5c81-77aa-0d64?print=1",
+        "icon": "i-print",
+        "id": "record.print",
+        "label": "Print",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
-        "icon": "i-link",
-        "id": "publish",
-        "label": "Publish a link",
-        "method": "GET",
-        "target": "sheet"
+        "href": "/app/duplicates",
+        "icon": "i-dup",
+        "id": "duplicates.open",
+        "label": "Open in Duplicates",
+        "method": "GET"
       },
       {
         "csrf": "csrf",
-        "danger": true,
         "enabled": true,
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e26",
-        "icon": "i-trash",
-        "id": "record.delete",
-        "label": "Delete note",
+        "href": "/app/duplicates/decide?do=unlink",
+        "icon": "i-link",
+        "id": "duplicates.unlink",
+        "label": "Unlink",
         "method": "POST",
+        "name": "group",
         "separator": true,
-        "target": "sheet"
+        "value": "g-vstrecha"
       }
     ],
     "preview": null,
     "related": [
       {
         "colour": "",
+        "from": {
+          "colour": "#4a6b52",
+          "name": "Записи"
+        },
         "href": "",
         "kind": "event",
         "stamp": "",
@@ -454,6 +438,10 @@
       },
       {
         "colour": "",
+        "from": {
+          "colour": "#4a6b52",
+          "name": "Записи"
+        },
         "href": "",
         "kind": "task",
         "stamp": "",
@@ -522,17 +510,21 @@
       }
     ],
     "source": {
-      "changed": "10 August 2026, 17:04",
-      "colour": "#4a6b52",
+      "changed": "",
+      "colour": "",
       "compared": "",
-      "lastRead": "2 min ago",
+      "lastRead": "",
       "objects": null,
       "path": "",
       "readOnly": false,
-      "stamp": "nextcloud · Записи",
-      "uid": "5c81-77aa-0d64"
+      "stamp": "",
+      "uid": ""
     },
-    "subtitle": "nextcloud · Записи",
+    "subtitle": "in 2 notebooks · text from",
+    "textFrom": {
+      "colour": "#4a6b52",
+      "name": "Записи"
+    },
     "title": "Заметка со встречи 10.08"
   },
   "empty": null,
@@ -798,7 +790,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/delete?etag=e23",
+              "href": "/app/notes/a-nc-home/dnevnik/7f03-5b26-cc19/delete?etag=e25",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete note",

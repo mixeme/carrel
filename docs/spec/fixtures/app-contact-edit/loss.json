@@ -49,7 +49,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e24"
+            "value": "e26"
           },
           {
             "add": null,
@@ -1064,7 +1064,7 @@
         "csrf": "csrf",
         "enabled": true,
         "file": "photo",
-        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e24\u0026op=upload",
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e26\u0026op=upload",
         "id": "photo.add",
         "label": "Add",
         "method": "POST",

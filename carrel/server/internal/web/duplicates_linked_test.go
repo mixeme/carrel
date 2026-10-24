@@ -67,7 +67,10 @@ func TestLinkedRecordShowsTheChoice(t *testing.T) {
 		_, col, _ := strings.Cut(string(b.Label), " · ")
 		got[col] = string(b.Value)
 	}
-	if got["People"] != "Name, organisation differ" || got["Work"] != "Phone, email differ" {
+	// People holds no organisation at all: a field a copy lacks says
+	// nothing of it (Typecase's note 123 p. 12) — but a phone or an address
+	// of mail does.
+	if got["People"] != "Name differs" || got["Work"] != "Phone, email differ" {
 		t.Errorf("where it is kept = %v", got)
 	}
 	if len(card.Actions) != 1 || !strings.HasSuffix(card.Actions[0].Href, "/app/contacts/linked/ada-here/copies") {

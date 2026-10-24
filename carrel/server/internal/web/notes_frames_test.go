@@ -31,7 +31,6 @@ func TestNotebookIsTheFrame(t *testing.T) {
 	}
 
 	app := newMockupApp(t)
-	linkMockupNote(t, app)
 	app.lastUsed(t, "zapisi", view.KindNote)
 	openList(t, app, "/app/calendar?from=2026-08-10") // the panel's Related
 	openList(t, app, "/app/tasks")
@@ -49,8 +48,10 @@ func TestNotebookIsTheFrame(t *testing.T) {
 	if sub := frameSubtitle(t, "s-notes-1"); string(page.Subtitle) != sub || !strings.HasSuffix(runsText(page.Poll.Summary), " · 3 notes") {
 		t.Errorf("subtitle = %q, poll %q; the frame %q", page.Subtitle, runsText(page.Poll.Summary), sub)
 	}
-	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 4 {
-		t.Errorf("the rail's combined row = %+v, want the 4 notes of the ticked notebooks", all.Count)
+	// «Записи 2», «Дневник 3» (Typecase's note 123 p. 8): the rail counts
+	// what lies in each, the copies too.
+	if all := page.Rail.Sections[0].Rows[0]; all.Count == nil || *all.Count != 5 {
+		t.Errorf("the rail's combined row = %+v, want the 5 notes of the ticked notebooks", all.Count)
 	}
 	if len(page.Groups) != 1 || page.Groups[0].Rubric != "August 2026" || page.Groups[0].Count != len(page.Groups[0].Rows) || page.Groups[0].Count != 3 {
 		t.Errorf("groups = %+v", page.Groups)
@@ -80,8 +81,10 @@ func TestNotebookIsTheFrame(t *testing.T) {
 	if d == nil || d.Close == "" || len(d.Rendered) == 0 || d.Date == "" {
 		t.Fatalf("panel = %+v", d)
 	}
-	if got := []string{d.Actions[0].ID, d.Actions[1].ID}; !slices.Equal(got, []string{"record.edit", "record.open"}) || d.Menu[len(d.Menu)-1].ID != "record.delete" {
-		t.Errorf("panel actions = %+v, menu = %+v (s-notes-12)", d.Actions, d.Menu)
+	// The open note is linked: the linked record's panel (note 123 p. 10) —
+	// Edit to «Which copy to edit?», «⋯» ending with Unlink, no Delete.
+	if got := []string{d.Actions[0].ID, d.Actions[1].ID}; !d.LinkedRecord || !slices.Equal(got, []string{"record.edit", "record.open"}) || d.Menu[len(d.Menu)-1].ID != "duplicates.unlink" {
+		t.Errorf("panel actions = %+v, menu = %+v (s-notes-1)", d.Actions, d.Menu)
 	}
 	// s-notes-1 draws the event alone; the page draws it and the task
 	// (s-notes-2) — the same note, both relations (task 105).
