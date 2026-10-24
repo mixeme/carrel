@@ -256,7 +256,33 @@
       ]
     },
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/app/calendar/a-nc-home/lichnyj",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter by word",
+              "name": "q",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 0,
     "range": {
       "form": {
@@ -454,7 +480,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": 8,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -509,7 +535,7 @@
         "rows": [
           {
             "colour": "",
-            "count": 6,
+            "count": 8,
             "detail": "",
             "feed": false,
             "href": "/app/calendar",
@@ -528,7 +554,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 2,
+            "count": 4,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/lichnyj",

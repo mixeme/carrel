@@ -9,9 +9,9 @@ import (
 )
 
 // faces are a note's text as the frames draw it: the page's lead and the
-// paragraph after a section (s-notes-2), the heading over tasks, a task's
-// tick, inline code a chip (s-notes-25).
-var faces = bind.TextFaces{Lead: w.ProseLead, After: w.ProseLeadAfter, Tasks: w.RubricBottom8, Tick: w.TickNudge, Code: w.MonoChip}
+// paragraph after a section (s-notes-2), a task's tick, inline code a chip
+// (s-notes-25).
+var faces = bind.TextFaces{Lead: w.ProseLead, After: w.ProseLeadAfter, Tick: w.TickNudge, Code: w.MonoChip}
 
 func para(text string) view.Block { return view.Block{Kind: view.BlockPara, Text: view.Text(text)} }
 
@@ -46,7 +46,7 @@ func TestDocText(t *testing.T) {
 	// paragraph after a section is the prose after it (s-notes-2).
 	same(t, "the note of the set", bind.DocText(note, faces), []w.DocPart{
 		w.Prose{Parts: []w.Inline{w.Text("Договорились заморозить ветку.\n\nПисьмо пишет Анна.")}, Variant: w.ProseLead},
-		w.DocTasks{Title: w.Rubric{Text: "Что делаем", Variant: w.RubricBottom8}, Items: []w.DocTask{
+		w.DocTasks{Title: "Что делаем", Items: []w.DocTask{
 			{Tick: w.Tick{Variant: w.TickNudge, Sign: true}, Text: "проверить changelog"},
 			{Tick: w.Tick{Done: true, Variant: w.TickNudge, Sign: true}, Text: "попросить скриншоты"},
 		}},

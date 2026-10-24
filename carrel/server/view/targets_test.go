@@ -189,6 +189,16 @@ func TestFixtureTargetsAreC5(t *testing.T) {
 	})
 	record := func(screen, at, href, target string) {
 		rowsSeen++
+		// A row of a public page opens its record in the same link, as a
+		// page of its own (Typecase's note 122 p. 2): no panel there.
+		if u, err := url.Parse(href); err == nil && u.Query().Get("uid") != "" {
+			if _, route, ok := c5Of(rows, "GET", u.Path); ok && route == "/p/{token}" {
+				if target != "" {
+					t.Errorf("%s %s: a public row aims at %q, want the page", screen, at, target)
+				}
+				return
+			}
+		}
 		if target != render.TargetDetails {
 			t.Errorf("%s %s: a row of a list aims at %q, want details", screen, at, target)
 		}

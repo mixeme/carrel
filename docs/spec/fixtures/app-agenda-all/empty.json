@@ -298,7 +298,33 @@
       ]
     },
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/app/calendar",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter by word",
+              "name": "q",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 0,
     "range": {
       "form": {

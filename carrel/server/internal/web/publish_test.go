@@ -132,12 +132,14 @@ func TestPublishedRecords(t *testing.T) {
 	if ev.Title != "Standup" || ev.Kind != view.KindEvent {
 		t.Fatalf("event = %+v", ev)
 	}
-	room := false
-	for _, fl := range ev.Fields {
-		room = room || fl.Value == "Room 4"
+	// When and where are the line under the title, not fields (s-publish-16).
+	if lede := runsText(ev.Lede); !strings.HasSuffix(lede, " · Room 4") {
+		t.Errorf("event lede = %q", lede)
 	}
-	if !room {
-		t.Errorf("event fields = %+v", ev.Fields)
+	for _, fl := range ev.Fields {
+		if fl.Label == "When" || fl.Label == "Where" {
+			t.Errorf("event field %+v: the frame says it under the title", fl)
+		}
 	}
 	note := publicPage(t, f, publishLink(t, f, f.publishHref("notes", searchWork, "n1"), true))
 	if note.Note == nil || note.Note.Title != "Reading list" || !note.Note.ReadOnly || len(note.Note.Rendered) == 0 {
@@ -199,7 +201,7 @@ func TestPublishedSourceDown(t *testing.T) {
 	f.srv.Refuse("REPORT", http.StatusServiceUnavailable, "down")
 	rec := f.h.do(anon(link))
 	page := decode[view.PublishedPage](t, rec)
-	if !hasNotice(page.Notices, "The source did not answer") || len(page.Actions) != 0 {
+	if !hasNotice(page.Notices, "The source did not answer.") || len(page.Actions) != 0 {
 		t.Errorf("page = %+v", page)
 	}
 	if strings.Contains(rec.Body.String(), "127.0.0.1") {

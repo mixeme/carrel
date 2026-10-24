@@ -46,7 +46,7 @@ func TestAPublishedRecordFollowsItsMove(t *testing.T) {
 	if r := row(); r.Gone == "" {
 		t.Error("a link to a deleted record is called alive")
 	}
-	if n := noticeTitled(publicPage(t, f.davFixture, link).Notices, "No longer there"); n == nil {
+	if n := noticeTitled(publicPage(t, f.davFixture, link).Notices, "No longer there."); n == nil {
 		t.Error("the guest is not told it is gone")
 	}
 }
@@ -61,7 +61,7 @@ func TestALinkToARemovedCollectionIsGone(t *testing.T) {
 	}
 	f.srv.RemoveCollection(friendsBook)
 	page := publicPage(t, f.davFixture, link)
-	if noticeTitled(page.Notices, "No longer there") == nil {
+	if noticeTitled(page.Notices, "No longer there.") == nil {
 		t.Errorf("notices = %+v, want it gone", page.Notices)
 	}
 	rows := decode[view.PublishedLinksPage](t, f.h.do(get("/app/files/published", f.sess))).Rows

@@ -1358,7 +1358,9 @@ func (s *Server) sendZip(w http.ResponseWriter, r *http.Request, c *fileCtx, p, 
 }
 
 // zipOf streams entries — a folder's, or the items ticked in one
-// (s-files-2) — as a zip named name.zip, folders with what is in them.
+// (s-files-2) — as a zip named name.zip, folders with what is in them. The
+// archive is the folder whole: the cap is a page's listing alone (the
+// owner's decision of 24.10.2026, s-publish-31).
 func (s *Server) zipOf(w http.ResponseWriter, r *http.Request, c *fileCtx, top []file.Entry, name string) {
 	ctx := r.Context()
 	h := w.Header()
@@ -1370,14 +1372,9 @@ func (s *Server) zipOf(w http.ResponseWriter, r *http.Request, c *fileCtx, top [
 	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
 	h.Set("Cache-Control", "private, no-cache")
 	zw := zip.NewWriter(w)
-	count := 0
 	var walk func(entries []file.Entry, prefix string) bool
 	walk = func(entries []file.Entry, prefix string) bool {
 		for _, e := range entries {
-			if count >= s.cfg.FilesMaxEntries {
-				return false
-			}
-			count++
 			if e.Dir {
 				if _, err := zw.Create(prefix + e.Name + "/"); err != nil {
 					return false

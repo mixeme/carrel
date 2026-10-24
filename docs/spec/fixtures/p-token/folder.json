@@ -11,11 +11,41 @@
   ],
   "attachNote": "",
   "attachments": [],
+  "attendees": [],
+  "avatar": null,
   "body": "",
   "contacts": [],
   "days": [],
+  "empty": "",
   "fields": [],
   "file": null,
+  "filter": {
+    "action": "/p/link-attachments-token",
+    "actions": [],
+    "errors": [],
+    "method": "GET",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Filter this folder",
+            "name": "q",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
   "folder": {
     "crumbs": [
       {
@@ -23,16 +53,15 @@
         "label": "attachments"
       }
     ],
-    "dav": "http://example.com/p/link-attachments-token/dav/",
     "rows": [
       {
-        "href": "/p/link-attachments-token?in=2026-07",
+        "href": "/p/link-attachments-token/download?in=2026-07",
         "icon": "i-file",
         "isDir": true,
         "menu": [],
         "modified": "",
         "name": "2026-07",
-        "open": "",
+        "open": "/p/link-attachments-token?in=2026-07",
         "selected": false,
         "size": "",
         "thumb": "",
@@ -96,11 +125,11 @@
         "upload": null
       }
     ],
-    "total": "5 files · 4.4 MB"
+    "total": "5 items · 4.4 MB"
   },
   "foot": [
     {
-      "text": "This link works until 24 August 2026 · the contents are read from the server on every visit"
+      "text": "This link works until 24 August 2026."
     }
   ],
   "kind": "file",
@@ -110,6 +139,27 @@
   "notices": [],
   "range": null,
   "readOnly": true,
+  "strip": {
+    "address": "http://example.com/p/link-attachments-token/dav/",
+    "label": "Mount as a drive",
+    "mount": [
+      {
+        "text": "File Explorer › This PC › Map network drive, then paste the address.",
+        "title": "Windows"
+      },
+      {
+        "text": "Finder › Go › Connect to Server, then paste the address.",
+        "title": "macOS"
+      },
+      {
+        "text": "Files › Other Locations › Connect to Server, then type the address with davs:// in place of https://.",
+        "title": "Linux"
+      }
+    ],
+    "note": "read-only WebDAV, no password",
+    "open": ""
+  },
   "tasks": [],
-  "title": "attachments"
+  "title": "attachments",
+  "width": []
 }

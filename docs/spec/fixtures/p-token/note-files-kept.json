@@ -11,11 +11,15 @@
   ],
   "attachNote": "1 attached file is not published.",
   "attachments": [],
+  "attendees": [],
+  "avatar": null,
   "body": "",
   "contacts": [],
   "days": [],
+  "empty": "",
   "fields": [],
   "file": null,
+  "filter": null,
   "folder": null,
   "foot": [
     {
@@ -103,6 +107,24 @@
   "notices": [],
   "range": null,
   "readOnly": true,
+  "strip": null,
   "tasks": [],
-  "title": "Заметка со встречи 10.08"
+  "title": "Заметка со встречи 10.08",
+  "width": [
+    {
+      "enabled": true,
+      "href": "/p/link-zametka-kept-token",
+      "id": "width.full",
+      "label": "Full width",
+      "method": "GET",
+      "on": true
+    },
+    {
+      "enabled": true,
+      "href": "/p/link-zametka-kept-token?width=reading",
+      "id": "width.reading",
+      "label": "Reading width",
+      "method": "GET"
+    }
+  ]
 }

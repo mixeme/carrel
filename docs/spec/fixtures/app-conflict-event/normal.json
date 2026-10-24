@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e23\u0026op=mine",
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e25\u0026op=mine",
       "id": "conflict.mine",
       "label": "Use only my edit",
       "method": "POST"
@@ -11,7 +11,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e23\u0026op=theirs",
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e25\u0026op=theirs",
       "id": "conflict.theirs",
       "label": "Use only the server version",
       "method": "POST"
@@ -72,7 +72,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e23"
+            "value": "e25"
           },
           {
             "add": null,
@@ -137,7 +137,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 2,
+            "count": 4,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/lichnyj",

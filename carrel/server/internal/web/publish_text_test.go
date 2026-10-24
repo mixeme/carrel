@@ -26,7 +26,8 @@ func TestPublishedTextIsItsBody(t *testing.T) {
 	if a := md.Actions[0]; a.Primary || a.Label != "Download" {
 		t.Errorf("under a text read on the page Download is %+v", a)
 	}
-	if foot := runsText(md.Foot); !strings.HasPrefix(foot, "This link works until ") || !strings.HasSuffix(foot, " · the file is read from the server on every visit") {
+	// The foot is one phrase on every page (note 122 p. 3).
+	if foot := runsText(md.Foot); !strings.HasPrefix(foot, "This link works until ") || !strings.HasSuffix(foot, ".") || strings.Contains(foot, "read from the server") {
 		t.Errorf("foot = %q", foot)
 	}
 	plain := publicPage(t, f, publishFile(t, f, "plain.txt", false))
@@ -35,7 +36,7 @@ func TestPublishedTextIsItsBody(t *testing.T) {
 	}
 	for _, name := range []string{"fake.txt", "big.md"} {
 		page := publicPage(t, f, publishFile(t, f, name, false))
-		if page.File.Preview != view.PreviewNone || page.File.Body != "" || len(page.File.Blocks) != 0 || !page.Actions[0].Primary {
+		if page.File.Preview != view.PreviewNone || page.File.Body != "" || len(page.File.Blocks) != 0 || !page.Actions[0].Primary || page.File.Note != "Too large to show on the page." {
 			t.Errorf("%s is offered to download: %+v", name, page.File)
 		}
 		if foot := runsText(page.Foot); strings.Contains(foot, "read from the server") {

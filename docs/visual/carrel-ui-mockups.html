@@ -488,6 +488,7 @@ label.tc-seg__opt{position:relative;cursor:pointer}
 /* Переключатель в карточке — своей ширины и на телефоне, где карточка ставит части столбцом. */
 .tc-card > .tc-seg{align-self:flex-start}
 :where(div,span,label,p):has(> .tc-in) > .tc-btn,
+:where(div,span,label,p):has(> .tc-in) > :where(.tc-drop) > .tc-btn,
 :where(div,span,label,p):has(> .tc-in) > .tc-seg,
 :where(div,span,label,p):has(> .tc-field) > .tc-btn,
 :where(div,span,label,p):has(> .tc-field) > .tc-seg{height:28px}
@@ -831,6 +832,8 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-menu__sep{display:block;height:1px;background:var(--tc-hair);margin:4px 6px;padding:0}
 /* Меню с полями кончается кнопками: сохранить — это действие, а не пункт.
    Пункт меню действует сразу; поля ждут кнопки. */
+.tc-menu__text{display:flex;flex-direction:column;gap:2px;padding:6px 8px;font-size:12px;line-height:1.45;color:var(--tc-muted)}
+.tc-menu__text > b{color:var(--tc-ink);font-weight:600}
 .tc-menu__foot{display:flex;flex-wrap:wrap;gap:8px;padding:8px 8px 4px;margin-top:4px;border-top:1px solid var(--tc-hair)}
 /* полноэкранная заметка: чтение и правка */
 /* Колонка справа — та же панель подробностей, 400 px; при рабочей области уже 880 — 296. */
@@ -948,6 +951,12 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-bar--wide .tc-segfold__pick{display:block}
   .tc-bar--wide:has(.is-2nd) .tc-bar__more,.tc-bar--wide:has(.is-2nd) .tc-drop:has(> .tc-bar__more){display:inline-flex}
   .tc-bar--wide:has(.is-2nd) .tc-bar__more + .tc-menu{display:block}
+}
+/* Широкая полоса с фильтром (агенда, Carrel's task 196) шире на поле фильтра — около 1070 px: её is-2nd уходит под «...» с 1100. */
+@container tcbox (max-width:1100px){
+  .tc-bar--wide:has(> .tc-in) .is-2nd{display:none}
+  .tc-bar--wide:has(> .tc-in):has(.is-2nd) .tc-bar__more,.tc-bar--wide:has(> .tc-in):has(.is-2nd) .tc-drop:has(> .tc-bar__more){display:inline-flex}
+  .tc-bar--wide:has(> .tc-in):has(.is-2nd) .tc-bar__more + .tc-menu{display:block}
 }
 /* Короткий переключатель (.tc-segfold--phone, Day / Week / Month / Range агенды) широкая полоса держит целиком: он складывается только на телефоне, с 640. */
 @container tcbox (min-width:641px){
@@ -1446,7 +1455,6 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-sheet__checks.tc-sheet__checks{margin-top:4px}
 .tc-main__banner.tc-main__banner{border-bottom:.5px solid var(--tc-rule);background:var(--tc-surface);padding:14px 20px}
 .tc-main__strip.tc-main__strip{border-bottom:.5px solid var(--tc-hair);padding:9px 20px}
-.tc-main__foot--16.tc-main__foot--16{border-top:.5px solid var(--tc-hair);font-size:11.5px;color:var(--tc-dusty);padding:16px 20px}
 .tc-main__banner--12.tc-main__banner--12{border-bottom:.5px solid var(--tc-rule);background:var(--tc-surface);padding:12px 20px}
 .tc-doc__sec--rule.tc-doc__sec--rule{margin-top:20px;padding-top:12px;border-top:.5px solid var(--tc-hair)}
 .tc-doc__files.tc-doc__files{font-size:12.5px;color:var(--tc-muted)}
@@ -1455,6 +1463,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
 /* Полоса витрины узкая нарочно — своим контейнером, иначе «...» не появится на широком кадре. */
 .tc-root__bar-box.tc-root__bar-box{padding-bottom:88px;max-width:460px;container:tcbox / inline-size}
 .tc-doc__heading.tc-doc__heading{font-family:var(--tc-font-serif);font-size:19px}
+.tc-doc__sec > .tc-doc__heading,.tc-doc__acts > .tc-doc__heading{margin-bottom:8px}
 .tc-doc__body.tc-doc__body{font-size:14px;line-height:1.7}
 .tc-main__stage.tc-main__stage{text-align:center;align-items:center;padding:34px 20px}
 .tc-main__stage-note.tc-main__stage-note{font-size:12px;color:var(--tc-muted);max-width:44ch}
@@ -5036,6 +5045,7 @@ Read  2 min ago</div>
           </div>
         </div>
         <div class="tc-bar tc-bar--wide">
+          <form class="tc-in is-ph tc-in--h26-w200" action="/app/calendar" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter by word" aria-label="Filter by word"></form>
           <a class="tc-btn" href="/app/calendar?from=2026-08-03" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/app/calendar">Today</a><a class="tc-btn" href="/app/calendar?from=2026-08-17" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
           <span class="tc-segfold tc-segfold--phone"><span class="tc-seg"><a class="tc-seg__opt" href="/app/calendar?view=day">Day</a><a class="is-on tc-seg__opt" href="/app/calendar?view=week">Week</a><a class="tc-seg__opt" href="/app/calendar?view=month">Month</a><a class="tc-seg__opt" href="/app/calendar?view=range">Range</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">Week</summary><div class="tc-segfold__menu"><a class="tc-segfold__item" href="/app/calendar?view=day">Day</a><a class="is-on tc-segfold__item" href="/app/calendar?view=week">Week</a><a class="tc-segfold__item" href="/app/calendar?view=month">Month</a><a class="tc-segfold__item" href="/app/calendar?view=range">Range</a></div></details></span>
           <form class="tc-range is-2nd" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-08-10" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
@@ -5732,6 +5742,7 @@ Read  2 min ago · changed on server 3 days ago</div>
           </div>
         </div>
         <div class="tc-bar tc-bar--wide">
+          <form class="tc-in is-ph tc-in--h26-w200" action="/app/calendar/nextcloud/lichny" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter by word" aria-label="Filter by word"></form>
           <a class="tc-btn" href="/app/calendar/nextcloud/lichny?from=2026-08-03" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/app/calendar/nextcloud/lichny">Today</a><a class="tc-btn" href="/app/calendar/nextcloud/lichny?from=2026-08-17" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
           <span class="tc-segfold tc-segfold--phone"><span class="tc-seg"><a class="tc-seg__opt" href="/app/calendar?view=day">Day</a><a class="is-on tc-seg__opt" href="/app/calendar?view=week">Week</a><a class="tc-seg__opt" href="/app/calendar?view=month">Month</a><a class="tc-seg__opt" href="/app/calendar?view=range">Range</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">Week</summary><div class="tc-segfold__menu"><a class="tc-segfold__item" href="/app/calendar?view=day">Day</a><a class="is-on tc-segfold__item" href="/app/calendar?view=week">Week</a><a class="tc-segfold__item" href="/app/calendar?view=month">Month</a><a class="tc-segfold__item" href="/app/calendar?view=range">Range</a></div></details></span>
           <form class="tc-range is-2nd" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-08-10" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
@@ -5765,6 +5776,122 @@ Read  2 min ago · changed on server 3 days ago</div>
   </div>
 </div>
 <figcaption><b>Один календарь</b> — тот же экран, что общий вид, с адресом календаря: в рейле открыта его строка, в шапке — его метка и имя, в ленте — только его события. Полосы опроса нет: источник один, и он ответил. New event без стрелки: писать некуда, кроме него.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-agenda-31" data-screen="/app/calendar/{account}/{col}" data-part="filtered">
+  <div class="frame-label"><span>Календарь · фильтр по слову</span><i>/app/calendar/{account}/{col}?q=синк</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav">
+          <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Contacts<span class="tc-num">7</span></a>
+          <a class="is-on tc-nav__item" href="#"><svg><use href="#i-cal"/></svg>Calendar<span class="tc-num">6</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-task"/></svg>Tasks<span class="tc-num">2</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-note"/></svg>Notes<span class="tc-num">4</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Files</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Duplicates<span class="tc-num">2</span></a>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-tickrow is-all"><button class="tc-tickrow__tick is-part" type="button"></button><span class="tc-mark is-multi"></span><span class="tc-tickrow__label">Combined calendar</span><span class="tc-tickrow__meta">6</span></div>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Дни рождения</span><span class="tc-tickrow__meta">—</span></div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Личный</span><span class="tc-tickrow__meta">2</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Работа</span><span class="tc-tickrow__meta">2</span></div>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">radicale · vps</div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-tickrow__label">Дежурства</span><span class="tc-tickrow__meta">1</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Проекты</span><span class="tc-tickrow__meta">1</span></div>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">baikal</div>
+          <div class="tc-tickrow is-error"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Общий</span><span class="tc-tickrow__err" role="img" aria-label="401 Unauthorized — the saved password was refused. Open Connections to update it." title="401 Unauthorized — the saved password was refused. Open Connections to update it."><svg viewBox="0 0 24 24"><use href="#i-alert"/></svg></span></div>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Subscriptions <span class="tc-badge">external</span></div>
+          <div class="tc-tickrow is-ext"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-tickrow__label">Праздники РФ</span><span class="tc-tickrow__meta">3</span><span class="tc-badge">ro</span></div>
+          <div class="tc-tickrow is-ext is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Расписание лиги</span><span class="tc-tickrow__meta">—</span><span class="tc-badge">ro</span></div>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Tags</div>
+          <div class="tc-line tc-line--gap-4 tc-railsec__tags">
+            <span class="tc-tag is-on">all</span><span class="tc-tag">релиз</span><span class="tc-tag">работа</span>
+          </div>
+        </div>
+        <div class="tc-railfoot">
+          <button class="tc-btn" title="New calendar" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg></button>
+          <button class="tc-btn" title="Connect account" type="button"><svg viewBox="0 0 24 24"><use href="#i-server"/></svg></button>
+          <button class="tc-btn" title="Subscribe to a feed" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
+          <svg class="tc-emblem" viewBox="0 0 16 16" role="img"><title>davloom · running · 3 devices</title><use href="#davloom-stroke" class="tc-emblem__stroke"/><use href="#davloom-fill" class="tc-emblem__fill"/><use href="#davloom-accent" class="tc-emblem__accent"/></svg>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+
+      <div class="tc-main">
+        <div class="tc-head">
+          <div class="tc-head__titles">
+            <div class="tc-head__title"><span class="tc-mark tc-mark--h20" data-tc-colour="#4A6B52"></span>Личный</div>
+            <div class="tc-head__sub">nextcloud · 3 events with «синк»</div>
+          </div>
+          <div class="tc-acts">
+            <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New event</button>
+            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-import"/></svg>Import</button>
+            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-export"/></svg>Export</button>
+            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button>
+          </div>
+        </div>
+        <div class="tc-bar tc-bar--wide">
+          <form class="tc-in tc-in--h26-w200" action="/app/calendar/nextcloud/lichny" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" value="синк" aria-label="Filter by word"></form>
+          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</button>
+        </div>
+
+        <div class="tc-list__group"><span class="tc-rubric">Monday · 27 July</span><span class="tc-num">1</span></div>
+        <div class="tc-list">
+          <div class="tc-row tc-row--single tc-row--timecols tc-row--timecols--op-7">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span>
+            <span class="tc-mono tc-row__lead">11:00</span>
+            <span class="tc-row__title">Синк-ап с подрядчиком</span>
+            <span class="tc-row__excerpt tc-row__detail">Переговорная 1</span>
+            <span class="tc-row__cell tc-row__caption"></span>
+          </div>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Monday · 17 August</span><span class="tc-num">1</span></div>
+        <div class="tc-list">
+          <div class="tc-row tc-row--single tc-row--timecols">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span>
+            <span class="tc-mono tc-row__lead">10:00</span>
+            <span class="tc-row__title">Синк-ап по релизу</span>
+            <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
+            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">repeats weekly</span></span>
+          </div>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Thursday · 3 September</span><span class="tc-num">1</span></div>
+        <div class="tc-list">
+          <div class="tc-row tc-row--single tc-row--timecols">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span>
+            <span class="tc-mono tc-row__lead">15:00</span>
+            <span class="tc-row__title">Синк-ап: итоги квартала</span>
+            <span class="tc-row__excerpt tc-row__detail">Переговорная 2</span>
+            <span class="tc-row__cell tc-row__caption"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Фильтр по слову — как у задач, заметок и контактов.</b> Пока в нём есть слово, лента — всё найденное в календаре по дням, а не неделя: ← Today →, период и диапазон уходят, подзаголовок говорит, сколько найдено. Повторяющееся событие стоит одной строкой — ближайшим разом и «repeats weekly»; прошедшее — приглушённым. Без сценария — форма GET (<code>?q=</code>); Esc или пустое поле возвращают неделю.</figcaption>
 </figure>
 
 <div class="frames">
@@ -7544,7 +7671,7 @@ SEQUENCE  1</div>
 
 Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.</div>
             <div class="tc-doc__sec">
-              <div class="tc-rubric tc-rubric--bot8">Что делаем</div>
+              <div class="tc-doc__heading">Что делаем</div>
               <ul class="tc-stack tc-stack--gap-7 tc-doc__list">
                 <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>проверить changelog</li>
                 <li class="tc-doc__task"><span class="tc-tick is-done tc-tick--nudge" role="img" aria-label="Done"></span><span class="tc-dim tc-dim--struck">попросить у Артёма скриншоты</span></li>
@@ -7844,7 +7971,7 @@ Read  2 min ago</div>
 
 Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.</div>
             <div class="tc-doc__sec">
-              <div class="tc-rubric tc-rubric--bot8">Что делаем</div>
+              <div class="tc-doc__heading">Что делаем</div>
               <ul class="tc-stack tc-stack--gap-7 tc-doc__list">
                 <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>проверить changelog</li>
                 <li class="tc-doc__task"><span class="tc-tick is-done tc-tick--nudge" role="img" aria-label="Done"></span><span class="tc-dim tc-dim--struck">попросить у Артёма скриншоты</span></li>
@@ -19949,24 +20076,6 @@ jobs:
   <figcaption>Опубликованное удалили или унесли туда, куда Carrel за ним не дошёл. Имя — не ссылка, рядом — «no longer there», срока нет; Copy и Send выключены, Revoke убирает строку.</figcaption>
 </figure>
 
-<figure style="flex:1 1 100%">
-  <div class="frame" data-frame="s-publish-16">
-    <div class="frame-label"><span>Публичная страница · одна запись</span><span class="frag">фрагмент</span><i>/p/{token} · событие</i></div>
-    <div class="tc-root tc-shell">
-      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
-        <div class="tc-line tc-line--gap-14 tc-main__banner">
-          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
-          <span class="tc-badge">read-only</span>
-          <span class="tc-push tc-line tc-line--gap-6">
-            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download .ics</button>
-          </span>
-        </div>
-        <div class="tc-head tc-head--snug"><div class="tc-head__titles"><div class="tc-head__title">Синк-ап по релизу</div><div class="tc-head__sub">Monday, 10 August 2026, 10:00 – 11:00 · Переговорная 2</div></div></div>
-      </div></div>
-    </div>
-  </div>
-  <figcaption>Одна запись по ссылке — своя выгрузка: у события и задачи «Download .ics», у контакта «Download .vcf»; книга, календарь и заметка — кадры выше.</figcaption>
-  </figure>
 </div>
 
 
@@ -20912,7 +21021,7 @@ Read  2 min ago · not changed on server</div>
 
 Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.</div>
             <div class="tc-doc__sec">
-              <div class="tc-rubric tc-rubric--bot8">Что делаем</div>
+              <div class="tc-doc__heading">Что делаем</div>
               <ul class="tc-stack tc-stack--gap-7 tc-doc__list">
                 <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>проверить changelog</li>
                 <li class="tc-doc__task"><span class="tc-tick is-done tc-tick--nudge" role="img" aria-label="Done"></span><span class="tc-dim tc-dim--struck">попросить у Артёма скриншоты</span></li>
@@ -21072,7 +21181,7 @@ Read  2 min ago</div>
 
 <table class="doc">
   <tr><th style="width:18%">Вид</th><th style="width:44%">Что решается в диалоге</th><th>Что не спрашивается</th></tr>
-  <tr><td>Календарь</td><td>Диапазон <b>или</b> весь календарь; показывать ли описания; разрешить ли <code>.ics</code> и подписку</td><td>—</td></tr>
+  <tr><td>Календарь, событие, задача</td><td>Диапазон <b>или</b> весь календарь (у календаря); что видит гость, кроме времени; разрешить ли <code>.ics</code> и подписку</td><td>—</td></tr>
   <tr><td>Адресная книга, контакт</td><td>Каждое поле отдельно — имя, телефоны, почта, фотография, заметка; разрешить ли <code>.vcf</code> и подписку</td><td>—</td></tr>
   <tr><td>Заметка</td><td>Публиковать ли вложения вместе с ней; разрешить ли <code>.md</code></td><td>Дата показывается всегда, теги не показываются никогда</td></tr>
   <tr><td>Файл</td><td>Только срок жизни ссылки</td><td>Ни полей, ни вложенности: файл отдаётся как есть</td></tr>
@@ -21085,114 +21194,114 @@ Read  2 min ago</div>
 
 <figure>
 <div class="frame cap900" data-frame="s-publish-6" data-screen="/p/{token}" data-part="calendar">
-  <div class="frame-label"><span>Публичная страница · календарь</span><i>/p/{token} · календарь, без входа</i></div>
+  <div class="frame-label"><span>Публичная страница · календарь</span><i>/p/{token} · диапазон дат; не по умолчанию: отмечены Location и Attendees, .ics разрешён</i></div>
   <div class="tc-root tc-shell">
     <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
       <div class="tc-line tc-line--gap-14 tc-main__banner">
         <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
         <span class="tc-badge">read-only</span>
         <span class="tc-push tc-line tc-line--gap-6">
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download .ics</button>
+          <a class="tc-btn" href="/p/7f3ac9/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download .ics</a>
         </span>
       </div>
       <div class="tc-line tc-line--gap-8 tc-main__strip">
         <span class="tc-dim--muted tc-dim--t12">Subscribe in your own client</span>
-        <input class="tc-in is-mono tc-in--line tc-in--fill" type="text" readonly value="webcal://carrel.example/p/7f3ac9/personal.ics">
+        <input class="tc-in is-mono tc-in--line tc-in--fill" type="text" readonly aria-label="Subscribe in your own client" value="webcal://carrel.example/p/7f3ac9/personal.ics">
         <button class="tc-btn is-sm" type="button" data-tc-copy="webcal://carrel.example/p/7f3ac9/personal.ics" data-tc-copied="Copied">Copy</button>
-        <button class="tc-btn is-sm" type="button">Open in calendar app</button>
+        <a class="tc-btn is-sm" href="webcal://carrel.example/p/7f3ac9/personal.ics">Open in calendar app</a>
         <span class="tc-dim tc-dim--t11">read-only, updates on its own</span>
       </div>
       <div class="tc-head tc-head--snug">
-        <div class="tc-head__titles"><div class="tc-head__title">Личный</div><div class="tc-head__sub">10 – 31 August 2026 · the page is read from the server on every visit</div></div>
+        <div class="tc-head__titles"><div class="tc-head__title">Личный</div><div class="tc-head__sub">10 – 31 August 2026</div></div>
+        <div class="tc-acts"><form class="tc-in is-ph tc-in--h26-w190" action="/p/7f3ac9" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter by word" aria-label="Filter by word"></form></div>
       </div>
       <div class="tc-list__group"><span class="tc-rubric">Monday · 10 August</span><span class="tc-num">2</span></div>
       <div class="tc-list">
-        <div class="tc-row tc-row--timecols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">10:00</span><span class="tc-row__title">Синк-ап по релизу</span><span class="tc-row__excerpt tc-row__detail">Переговорная 2</span><span class="tc-row__cell tc-row__caption"></span><span class="tc-row__cell tc-row__source"></span></div>
-        <div class="tc-row tc-row--timecols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">18:00</span><span class="tc-row__title">Забрать документы</span><span class="tc-row__excerpt tc-row__detail">МФЦ, Мясницкая 13</span><span class="tc-row__cell tc-row__caption"></span><span class="tc-row__cell tc-row__source"></span></div>
+        <a class="tc-row tc-row--timecols" href="/p/7f3ac9?uid=aa01"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">10:00</span><span class="tc-row__title">Синк-ап по релизу</span><span class="tc-row__excerpt tc-row__detail">Переговорная 2</span><span class="tc-row__cell tc-row__caption"><span class="tc-badge">repeats weekly</span></span><span class="tc-row__cell tc-row__source"></span></a>
+        <a class="tc-row tc-row--timecols" href="/p/7f3ac9?uid=ab02"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">18:00</span><span class="tc-row__title">Забрать документы</span><span class="tc-row__excerpt tc-row__detail">МФЦ, Мясницкая 13</span><span class="tc-row__cell tc-row__caption"></span><span class="tc-row__cell tc-row__source"></span></a>
       </div>
       <div class="tc-list__group"><span class="tc-rubric">Tuesday · 11 August</span><span class="tc-num">1</span></div>
       <div class="tc-list">
-        <div class="tc-row tc-row--timecols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">09:30</span><span class="tc-row__title">Ревью архитектуры</span><span class="tc-row__excerpt tc-row__detail">Переговорная 1</span><span class="tc-row__cell tc-row__caption"></span><span class="tc-row__cell tc-row__source"></span></div>
+        <a class="tc-row tc-row--timecols" href="/p/7f3ac9?uid=ac03"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">09:30</span><span class="tc-row__title">Ревью архитектуры</span><span class="tc-row__excerpt tc-row__detail">Переговорная 1</span><span class="tc-row__cell tc-row__caption"><span class="tc-badge">3 attendees</span></span><span class="tc-row__cell tc-row__source"></span></a>
       </div>
-      <div class="tc-main__foot--16">This link works until 8 September 2026. The owner can revoke it at any moment.</div>
+      <div class="tc-main__foot">This link works until 8 September 2026.</div>
     </div></div>
   </div>
 </div>
-<figcaption><b>Ссылку можно не только открыть, но и подписаться на неё.</b> Строка под шапкой отдаёт тот же адрес в виде <code>webcal://</code>: календарный клиент возьмёт его и будет обновлять сам, а Carrel по-прежнему ничего не хранит — на каждый запрос он читает исходную коллекцию. Кнопка «Download .ics» осталась для тех, кому нужен снимок, а не подписка; это разные вещи, и в интерфейсе они стоят рядом, а не вместо друг друга. Первый из пяти видов публичной страницы — остальные четыре ниже. Логотип стоит крупно и рядом с ним написано «read-only»: человек попал сюда по ссылке и должен понять, чем ему это отдали. Колонка источника пуста намеренно — открывшему незачем знать, на каком сервере это лежит.</figcaption>
+<figcaption><b>Ссылку можно не только открыть, но и подписаться на неё.</b> Строка под шапкой отдаёт тот же адрес в виде <code>webcal://</code>: календарный клиент возьмёт его и будет обновлять сам. «Download .ics» — для тех, кому нужен снимок, а не подписка; обе стоят, только когда при выдаче отметили «Allow .ics download and subscription». <b>Подпись строки</b> — то, что гостю отдано: «repeats weekly» и статус («tentative») всегда — это часть времени; «3 attendees» — только с отметкой Attendees; «linked», источники и прочие пометки хозяина — никогда. Строка открывает страницу события внутри этой же ссылки (<code>?uid=</code>) — ту же, что у ссылки на одно событие. Колонка источника пуста: открывшему незачем знать, на каком сервере это лежит.</figcaption>
 </figure>
 
 <figure>
 <div class="frame" data-frame="s-publish-7" data-screen="/p/{token}" data-part="addressbook">
-  <div class="frame-label"><span>Публичная страница · адресная книга</span><i>/p/{token} · CardDAV → список + .vcf</i></div>
+  <div class="frame-label"><span>Публичная страница · адресная книга</span><i>/p/{token} · CardDAV → список; не по умолчанию: отмечены телефоны и почта, .vcf разрешён</i></div>
   <div class="tc-root tc-shell">
     <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
       <div class="tc-line tc-line--gap-14 tc-main__banner">
         <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
         <span class="tc-badge">read-only</span>
         <span class="tc-push tc-line tc-line--gap-6">
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download .vcf</button>
+          <a class="tc-btn" href="/p/2b91f4/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download .vcf</a>
         </span>
       </div>
       <div class="tc-line tc-line--gap-8 tc-main__strip">
         <span class="tc-dim--muted tc-dim--t12">Address of this book</span>
-        <input class="tc-in is-mono tc-in--line tc-in--fill" type="text" readonly value="https://carrel.example/p/2b91f4/team.vcf">
+        <input class="tc-in is-mono tc-in--line tc-in--fill" type="text" readonly aria-label="Address of this book" value="https://carrel.example/p/2b91f4/team.vcf">
         <button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/2b91f4/team.vcf" data-tc-copied="Copied">Copy</button>
         <span class="tc-dim tc-dim--t11">another Carrel can subscribe to it; other clients import it</span>
       </div>
       <div class="tc-head tc-head--snug">
-        <div class="tc-head__titles"><div class="tc-head__title">Команда</div><div class="tc-head__sub">13 contacts · the list is read from the server on every visit</div></div>
-        <div class="tc-acts"><label class="tc-in is-ph tc-in--h26-w190"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" placeholder="Search this list" aria-label="Search this list"></label></div>
+        <div class="tc-head__titles"><div class="tc-head__title">Команда</div><div class="tc-head__sub">13 contacts</div></div>
+        <div class="tc-acts"><form class="tc-in is-ph tc-in--h26-w190" action="/p/2b91f4" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter by word" aria-label="Filter by word"></form></div>
       </div>
       <div class="tc-list__group"><span class="tc-rubric">А</span><span class="tc-num">2</span></div>
       <div class="tc-list">
-        <div class="tc-row tc-row--avatarcols">
+        <a class="tc-row tc-row--avatarcols" href="/p/2b91f4?uid=c101">
           <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-avatar">АБ</span>
           <span class="tc-row__title is-strong">Артём Белов</span>
           <span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 903 118-22-04</span>
           <span class="tc-row__excerpt tc-row__detail">a.belov@example.org</span>
           <span class="tc-row__excerpt tc-row__caption">Тензор</span>
           <span class="tc-row__cell tc-row__source"></span>
-        </div>
-        <div class="tc-row tc-row--avatarcols">
+        </a>
+        <a class="tc-row tc-row--avatarcols" href="/p/2b91f4?uid=c102">
           <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-avatar">АК</span>
           <span class="tc-row__title">Анна Ковалёва</span>
           <span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 912 445-10-88</span>
           <span class="tc-row__excerpt tc-row__detail">a.kovaleva@example.org</span>
           <span class="tc-row__excerpt tc-row__caption">Издательство «Слово»</span>
           <span class="tc-row__cell tc-row__source"></span>
-        </div>
+        </a>
       </div>
       <div class="tc-list__group"><span class="tc-rubric">В</span><span class="tc-num">1</span></div>
       <div class="tc-list">
-        <div class="tc-row tc-row--avatarcols">
+        <a class="tc-row tc-row--avatarcols" href="/p/2b91f4?uid=c103">
           <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-avatar">ВГ</span>
           <span class="tc-row__title">Виктор Гончаров</span>
           <span class="tc-row__excerpt tc-mono tc-row__subtitle">—</span>
           <span class="tc-row__excerpt tc-row__detail">v.goncharov@example.org</span>
           <span class="tc-row__excerpt tc-row__caption">Городская библиотека №4</span>
           <span class="tc-row__cell tc-row__source"></span>
-        </div>
+        </a>
       </div>
-      <div class="tc-main__foot--16">This link works until 9 September 2026. The owner can revoke it at any moment.</div>
+      <div class="tc-main__foot">This link works until 9 September 2026.</div>
     </div></div>
   </div>
 </div>
-<figcaption><b>Про подписку на книгу сказано честно.</b> Единого стандарта, по которому почтовый клиент подписался бы на адресную книгу по ссылке, не существует: <code>webcal</code> есть только у календарей. Поэтому здесь адрес, который <i>другой Carrel</i> добавит как внешнюю ленту (7.11), а остальные клиенты импортируют файлом — и подпись говорит ровно это, не притворяясь, что подписка возможна везде. Те же колонки и та же линовка, что во внутреннем списке, — чужому человеку не нужен второй язык интерфейса. Убрано ровно то, чего у него быть не должно: колонка источника (на каком сервере это лежит — не его дело), карточка по нажатию и все действия. Поиск оставлен: список на две сотни человек без поиска бесполезен, а фильтрует он уже загруженное, никуда не обращаясь.
-<br><br><b>Здесь публикуют чужие данные.</b> В адресной книге лежат телефоны и адреса людей, которые о ссылке не знают, поэтому диалог публикации для этого вида даёт два отдельных флажка — <b>показывать телефоны</b> и <b>показывать почту</b>, оба выключены по умолчанию, — и говорит прямо, сколько записей уйдёт по ссылке. Скачивание <code>.vcf</code> подчиняется тем же флажкам: иначе оно было бы дырой в обход них.</figcaption>
+<figcaption><b>Про подписку на книгу сказано честно.</b> Единого стандарта, по которому почтовый клиент подписался бы на адресную книгу по ссылке, нет: <code>webcal</code> есть только у календарей. Поэтому здесь адрес, который <i>другой Carrel</i> добавит как внешнюю ленту (7.11), а остальные клиенты импортируют файлом. Те же колонки и та же линовка, что во внутреннем списке; убраны колонка источника и все действия. <b>Фильтр — тот же, что у хозяина</b>, формой GET (<code>?q=</code>): Enter без сценария присылает отфильтрованную страницу. Строка открывает страницу контакта внутри этой же ссылки.<br><br><b>Здесь публикуют чужие данные.</b> Каждое поле, кроме имени и организации, при выдаче отмечают отдельно, все выключены по умолчанию; <code>.vcf</code> подчиняется тем же отметкам — иначе он был бы дырой в обход них.</figcaption>
 </figure>
 
 <div class="frames">
   <figure style="flex:1 1 100%">
   <div class="frame" data-frame="s-publish-8" data-screen="/p/{token}" data-part="note">
-    <div class="frame-label"><span>Публичная страница · заметка</span><i>/p/{token} · VJOURNAL → страница + .md</i></div>
+    <div class="frame-label"><span>Публичная страница · заметка</span><i>/p/{token} · VJOURNAL → страница; не по умолчанию: .md разрешён, вложения опубликованы</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
         <div class="tc-line tc-line--gap-12 tc-main__banner--12">
           <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
           <span class="tc-badge">read-only</span>
           <span class="tc-push tc-line tc-line--gap-6">
-            <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">Full width</button><button class="tc-seg__opt" type="button">Reading width</button></span>
-            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download .md</button>
+            <span class="tc-seg"><a class="is-on tc-seg__opt" href="/p/9e31a4">Full width</a><a class="tc-seg__opt" href="/p/9e31a4?width=reading">Reading width</a></span>
+            <a class="tc-btn" href="/p/9e31a4/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download .md</a>
           </span>
         </div>
         <div class="tc-doc__layout is-focus">
@@ -21203,7 +21312,7 @@ Read  2 min ago</div>
 
 Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.</div>
             <div class="tc-doc__sec">
-              <div class="tc-rubric tc-rubric--bot8">Что делаем</div>
+              <div class="tc-doc__heading">Что делаем</div>
               <ul class="tc-stack tc-stack--gap-7 tc-doc__list">
                 <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>проверить changelog</li>
                 <li class="tc-doc__task"><span class="tc-tick is-done tc-tick--nudge" role="img" aria-label="Done"></span><span class="tc-dim tc-dim--struck">попросить у Артёма скриншоты</span></li>
@@ -21222,7 +21331,7 @@ Read  2 min ago</div>
       </div></div>
     </div>
   </div>
-  <figcaption><b>Вложения здесь открываются</b> — потому что при публикации отметили «опубликовать и их»: на каждый файл выпущена своя ссылка с тем же сроком, и отзываются они вместе с этой. Без этой отметки страница сказала бы «два файла» и не назвала бы их: имя файла выдаёт больше, чем кажется, а называть то, что всё равно не открыть, — издевательство над открывшим. <b>Тегов на публичной странице нет</b> ни в каком случае: это внутренняя разметка автора, гостю она ничего не объясняет, зато рассказывает о нём. Дата, наоборот, стоит всегда — заметка без даты выглядит подделкой. Переключатель ширины оставлен и гостю — он не может ничего сломать, а читать длинный текст на широком мониторе ему так же неудобно, как хозяину. Разбор Markdown здесь тот же, что в 7.4, и по тем же правилам: сырой HTML внутри чужой заметки не исполняется никогда — гостю отдают текст, а не чужой скрипт. Имя файла — ссылка на его страницу (как <code>s-publish-9</code>); у вложения, записанного в саму заметку, на ней нет строки «changed».</figcaption>
+  <figcaption><b>Вложения здесь открываются</b> — при публикации отметили «опубликовать и их»: у каждого файла своя ссылка с тем же сроком, отзываются они вместе с этой; имя файла ведёт на его страницу (как «Публичная страница · файл»). <b>Тегов на публичной странице нет</b>: это внутренняя разметка автора, гостю она ничего не объясняет, зато рассказывает о нём. Дата стоит всегда — заметка без даты выглядит подделкой. <b>Ширина — адресом</b> (<code>?width=reading</code>), без сценария тоже. Markdown разобран по правилам 7.4: сырой HTML в чужой заметке не исполняется никогда.</figcaption>
   </figure>
 
 <figure style="flex:1 1 100%">
@@ -21234,8 +21343,8 @@ Read  2 min ago</div>
           <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
           <span class="tc-badge">read-only</span>
           <span class="tc-push tc-line tc-line--gap-6">
-            <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">Full width</button><button class="tc-seg__opt" type="button">Reading width</button></span>
-            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download .md</button>
+            <span class="tc-seg"><a class="is-on tc-seg__opt" href="/p/9e31a4">Full width</a><a class="tc-seg__opt" href="/p/9e31a4?width=reading">Reading width</a></span>
+            <a class="tc-btn" href="/p/9e31a4/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download .md</a>
           </span>
         </div>
         <div class="tc-doc__layout is-focus">
@@ -21246,7 +21355,7 @@ Read  2 min ago</div>
 
 Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.</div>
             <div class="tc-doc__sec">
-              <div class="tc-rubric tc-rubric--bot8">Что делаем</div>
+              <div class="tc-doc__heading">Что делаем</div>
               <ul class="tc-stack tc-stack--gap-7 tc-doc__list">
                 <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>проверить changelog</li>
                 <li class="tc-doc__task"><span class="tc-tick is-done tc-tick--nudge" role="img" aria-label="Done"></span><span class="tc-dim tc-dim--struck">попросить у Артёма скриншоты</span></li>
@@ -21270,7 +21379,7 @@ Read  2 min ago</div>
         <div class="tc-line tc-line--gap-12 tc-main__banner--12">
           <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
           <span class="tc-badge">read-only</span>
-          <span class="tc-push"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download</button></span>
+          <span class="tc-push"><a class="tc-btn is-primary" href="/p/Bn4q7Zs1Wd2e/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download</a></span>
         </div>
         <div class="tc-head tc-head--padb6">
           <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t19">2026-08-10-sync-board.png</div>
@@ -21297,8 +21406,8 @@ Read  2 min ago</div>
           <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
           <span class="tc-badge">read-only</span>
           <span class="tc-push tc-line tc-line--gap-6">
-            <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">Full width</button><button class="tc-seg__opt" type="button">Reading width</button></span>
-            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download</button>
+            <span class="tc-seg"><a class="is-on tc-seg__opt" href="/p/b72c19">Full width</a><a class="tc-seg__opt" href="/p/b72c19?width=reading">Reading width</a></span>
+            <a class="tc-btn" href="/p/b72c19/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download</a>
           </span>
         </div>
         <div class="tc-head tc-head--padb6">
@@ -21315,11 +21424,11 @@ Read  2 min ago</div>
           <div class="tc-doc__heading">После</div>
           <div class="tc-doc__body">Тег ставит Виктор. Образ собирается вручную до появления CI.</div>
         </div>
-        <div class="tc-main__foot">This link works until 19 August 2026 · the file is read from the server on every visit</div>
+        <div class="tc-main__foot">This link works until 19 August 2026.</div>
       </div></div>
     </div>
   </div>
-  <figcaption>Текст и Markdown показываются телом страницы, а не предлагаются к скачиванию: это единственные типы, которые можно прочесть без программы. <b>Здесь Markdown разобран</b> — заголовки заголовками, список списком, <code>go test</code> моноширинным, — потому что иначе страница показывала бы решётки и дефисы, то есть исходник, и обещание «прочесть без программы» не выполнялось бы. Разборщик тот же, что у заметки (7.4), и с той же выключенной поддержкой сырого HTML: файл чужой, страница публичная, и исполнять из неё нечего. Простой текст — наоборот, <b>как есть</b>, в <code>&lt;pre&gt;</code> с экранированием: в нём разбирать нечего, а выравнивание пробелами сломать легко. Ограничение по размеру своё: файл на десять мегабайт текста не выводится, а предлагается скачать.</figcaption>
+  <figcaption>Текст и Markdown показываются телом страницы: это единственные типы, которые можно прочесть без программы. Markdown разобран тем же разборщиком, что у заметки (7.4), сырой HTML выключен; простой текст — как есть, в <code>&lt;pre&gt;</code>. <b>«Download» здесь не главная</b>: текст уже на странице, файл — вторая дверь; у картинки и файла без предпросмотра она главная. Ширина — адресом, как у заметки. Текст больше 256 KB на страницу не выводится — кадр «текст сверх потолка» ниже.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -21339,14 +21448,14 @@ Read  2 min ago</div>
             <div class="tc-head__title tc-head__title--t18">макет-обложки.psd</div>
             <div class="tc-head__sub tc-head__sub--jc-center"><span class="tc-mono">image/vnd.adobe.photoshop · 84.2 MB · changed 2026-08-04</span></div>
           </div>
-          <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download 84.2 MB</button>
-          <div class="tc-main__stage-note">This file cannot be shown in a browser, and Carrel does not try. It is streamed with its own type, transcoded nowhere and stored nowhere.</div>
+          <a class="tc-btn is-primary" href="/p/d0a6f3/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download 84.2 MB</a>
+          <div class="tc-main__stage-note">A browser cannot show this file.</div>
         </div>
         <div class="tc-main__foot">This link works until 19 August 2026.</div>
       </div></div>
     </div>
   </div>
-  <figcaption>Самый частый случай и самый простой экран: имя, тип, размер, одна кнопка. Размер вынесен <b>на кнопку</b> — по секретной ссылке ходят с телефона, и 84 мегабайта в мобильном трафике должны быть видны до нажатия, а не после. Никакого «предпросмотр недоступен» мелким шрифтом внизу: сказано прямо и один раз.</figcaption>
+  <figcaption>Самый частый случай и самый простой экран: имя, тип, размер, одна кнопка. Размер вынесен <b>на кнопку</b> — по секретной ссылке ходят с телефона, и 84 мегабайта в мобильном трафике должны быть видны до нажатия.</figcaption>
   </figure>
 </div>
 
@@ -21359,42 +21468,535 @@ Read  2 min ago</div>
         <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
         <span class="tc-badge">read-only</span>
         <span class="tc-push tc-line tc-line--gap-6">
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download folder</button>
+          <a class="tc-btn" href="/p/5c40e2/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download folder</a>
         </span>
       </div>
       <div class="tc-head tc-head--snug">
         <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t19">Материалы к релизу</div>
-          <nav class="tc-crumbs"><b>Материалы к релизу</b> <span class="tc-dim">· 4 files · 6.6 MB</span></nav></div>
+          <nav class="tc-crumbs"><b>Материалы к релизу</b> <span class="tc-dim">· 4 items · 6.6 MB</span></nav></div>
+        <div class="tc-acts"><form class="tc-in is-ph tc-in--h26-w190" action="/p/5c40e2" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter this folder" aria-label="Filter this folder"></form></div>
       </div>
       <div class="tc-line tc-line--gap-8 tc-main__strip">
         <span class="tc-dim--muted tc-dim--t12">Mount as a drive</span>
-        <input class="tc-in is-mono tc-in--line tc-in--fill" type="text" readonly value="https://carrel.example/p/5c40e2/dav/">
+        <input class="tc-in is-mono tc-in--line tc-in--fill" type="text" readonly aria-label="Mount as a drive" value="https://carrel.example/p/5c40e2/dav/">
         <button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/5c40e2/dav/" data-tc-copied="Copied">Copy</button>
-        <button class="tc-btn is-sm" type="button">How to mount</button>
+        <details class="tc-drop"><summary class="tc-btn is-sm">How to mount<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w290" role="menu"><div class="tc-menu__text"><b>Windows</b>File Explorer › This PC › Map network drive, then paste the address.</div><div class="tc-menu__text"><b>macOS</b>Finder › Go › Connect to Server, then paste the address.</div><div class="tc-menu__text"><b>Linux</b>Files › Other Locations › Connect to Server, then type the address with davs:// in place of https://.</div></div></details>
         <span class="tc-dim tc-dim--t11">read-only WebDAV, no password</span>
       </div>
       <table class="tc-table">
         <thead><tr><th>Name</th><th class="tc-table__col--size">Size</th><th class="tc-table__n3 tc-table__col--changed">Type</th><th class="tc-table__n4 tc-table__col--time">Changed</th><th class="tc-table__col--w90"></th></tr></thead>
         <tbody>
-          <tr class="is-folder"><td><span class="tc-table__file"><svg><use href="#i-file"/></svg><span class="tc-table__filename">скриншоты</span></span></td><td class="tc-mono">—</td><td class="tc-mono tc-table__n3">folder · 6 files</td><td class="tc-mono tc-table__n4">2026-08-10 11:07</td><td class="tc-acts"><button class="tc-btn is-sm" type="button">Open</button></td></tr>
-          <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><span class="tc-table__filename">release-checklist.md</span></span></td><td class="tc-mono">3 KB</td><td class="tc-mono tc-table__n3">text/markdown</td><td class="tc-mono tc-table__n4">2026-08-09 18:44</td><td class="tc-acts"><button class="tc-btn is-sm" type="button">Download</button></td></tr>
-          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><span class="tc-table__filename">2026-08-04-whiteboard.jpg</span></span></td><td class="tc-mono">2.8 MB</td><td class="tc-mono tc-table__n3">image/jpeg</td><td class="tc-mono tc-table__n4">2026-08-04 17:03</td><td class="tc-acts"><button class="tc-btn is-sm" type="button">Download</button></td></tr>
-          <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><span class="tc-table__filename">смета-подрядчик.pdf</span></span></td><td class="tc-mono">1.2 MB</td><td class="tc-mono tc-table__n3">application/pdf</td><td class="tc-mono tc-table__n4">2026-08-05 14:20</td><td class="tc-acts"><button class="tc-btn is-sm" type="button">Download</button></td></tr>
-        </tbody>
+          <tr class="is-folder"><td><span class="tc-table__file"><svg><use href="#i-file"/></svg><a class="tc-table__filename" href="/p/5c40e2?in=скриншоты">скриншоты</a></span></td><td class="tc-mono">—</td><td class="tc-mono tc-table__n3">folder · 6 items</td><td class="tc-mono tc-table__n4">2026-08-10 11:07</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/download?in=скриншоты">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=release-checklist.md">release-checklist.md</a></span></td><td class="tc-mono">3.1 KB</td><td class="tc-mono tc-table__n3">text/markdown</td><td class="tc-mono tc-table__n4">2026-08-09 18:44</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/release-checklist.md">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=2026-08-04-whiteboard.jpg">2026-08-04-whiteboard.jpg</a></span></td><td class="tc-mono">2.8 MB</td><td class="tc-mono tc-table__n3">image/jpeg</td><td class="tc-mono tc-table__n4">2026-08-04 17:03</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/2026-08-04-whiteboard.jpg">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono">1.2 MB</td><td class="tc-mono tc-table__n3">application/pdf</td><td class="tc-mono tc-table__n4">2026-08-05 14:20</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/смета-подрядчик.pdf">Download</a></td></tr>
+          </tbody>
       </table>
-      <div class="tc-main__foot">This link works until 1 September 2026 · the contents are read from the server on every visit</div>
+      <div class="tc-main__foot">This link works until 1 September 2026.</div>
     </div></div>
   </div>
 </div>
-<figcaption><b>Папку можно скачать и можно подключить.</b> «Download folder» в шапке отдаёт архив целиком — тот же жест, что «Download» у файла, только у папки. <b>Её же можно подключить.</b> Тот же секрет открывает её как обычный WebDAV только для чтения: <span class="tc-mono">https://carrel.example/p/&lt;токен&gt;/dav/</span> — Windows подключает это как сетевой диск, macOS через «Подключиться к серверу», Linux через davfs или файловый менеджер. Пароля нет, потому что секрет уже в адресе; кнопка «How to mount» показывает три строки для трёх систем, а не отправляет читать документацию. Отзыв ссылки закрывает и страницу, и диск разом — это один и тот же токен. Листинг со значком типа на каждой строке и без предпросмотра: нажатие на файл открывает его страницу — ту же, что выше, но внутри этой ссылки. <b>Вложенные папки входят всегда</b> — папка отдаётся папкой, со всем, что в ней лежит; в диалоге это не спрашивается.</figcaption>
+<figcaption><b>Папку можно скачать и можно подключить.</b> «Download folder» в шапке отдаёт архив целиком. Тот же секрет открывает её как WebDAV только для чтения: <span class="tc-mono">https://carrel.example/p/&lt;токен&gt;/dav/</span>; пароля нет — секрет уже в адресе. <b>«How to mount»</b> раскрывает три строки для трёх систем (кадр ниже) и работает без сценария. Отзыв ссылки закрывает и страницу, и диск разом. Имя ведёт внутрь: папка — её листинг в этой же ссылке (<code>?in=</code>), файл — его страница (<code>?file=</code>); «Download» у строки отдаёт файл или архив вложенной папки. Счёт — «items»: в папке лежат и папки.</figcaption>
 </figure>
+
+<h4>Календарь целиком и пустые виды</h4>
+<div class="frames">
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-24" data-screen="/p/{token}" data-part="calendar-whole">
+    <div class="frame-label"><span>Публичная страница · весь календарь</span><i>/p/{token} · по умолчанию: только название и время, скачивания нет; ссылка без срока</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title">Личный</div><div class="tc-head__sub">10 – 16 August 2026</div></div>
+          <div class="tc-acts"><form class="tc-in is-ph tc-in--h26-w190" action="/p/a41d07" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter by word" aria-label="Filter by word"></form></div>
+        </div>
+        <div class="tc-bar">
+          <a class="tc-btn" href="/p/a41d07?from=2026-08-03" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/p/a41d07">Today</a><a class="tc-btn" href="/p/a41d07?from=2026-08-17" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Monday · 10 August</span><span class="tc-num">2</span></div>
+        <div class="tc-list">
+          <a class="tc-row tc-row--timecols" href="/p/a41d07?uid=aa01"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">10:00</span><span class="tc-row__title">Синк-ап по релизу</span><span class="tc-row__excerpt tc-row__detail"></span><span class="tc-row__cell tc-row__caption"><span class="tc-badge">repeats weekly</span></span><span class="tc-row__cell tc-row__source"></span></a>
+          <a class="tc-row tc-row--timecols" href="/p/a41d07?uid=ab02"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">18:00</span><span class="tc-row__title">Забрать документы</span><span class="tc-row__excerpt tc-row__detail"></span><span class="tc-row__cell tc-row__caption"></span><span class="tc-row__cell tc-row__source"></span></a>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Thursday · 13 August</span><span class="tc-num">1</span></div>
+        <div class="tc-list">
+          <a class="tc-row tc-row--timecols" href="/p/a41d07?uid=ad04"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">12:00</span><span class="tc-row__title">Обед с Анной</span><span class="tc-row__excerpt tc-row__detail"></span><span class="tc-row__cell tc-row__caption"></span><span class="tc-row__cell tc-row__source"></span></a>
+        </div>
+        <div class="tc-main__foot">This link does not expire.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Весь календарь листается неделями — те же ← Today →, что в календаре хозяина; фильтр тот же, что у хозяина, — со словом он ищет по всему календарю (кадр «календарь, фильтр»); у ссылки на диапазон дат (кадр выше) листать некуда, и полосы нет. Скачивание не разрешено — строки подписки и «Download .ics» нет. У ссылки без срока подвал так и говорит.</figcaption>
+  </figure>
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-39" data-screen="/p/{token}" data-part="calendar-filtered">
+    <div class="frame-label"><span>Публичная страница · календарь, фильтр</span><i>/p/{token}?q=синк</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title">Личный</div><div class="tc-head__sub">3 events with «синк»</div></div>
+          <div class="tc-acts"><form class="tc-in tc-in--h26-w190" action="/p/a41d07" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" value="синк" aria-label="Filter by word"></form></div>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Monday · 27 July</span><span class="tc-num">1</span></div>
+        <div class="tc-list">
+          <a class="tc-row tc-row--timecols tc-row--timecols--op-7" href="/p/a41d07?uid=a907"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">11:00</span><span class="tc-row__title">Синк-ап с подрядчиком</span><span class="tc-row__excerpt tc-row__detail"></span><span class="tc-row__cell tc-row__caption"></span><span class="tc-row__cell tc-row__source"></span></a>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Monday · 17 August</span><span class="tc-num">1</span></div>
+        <div class="tc-list">
+          <a class="tc-row tc-row--timecols" href="/p/a41d07?uid=aa01"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">10:00</span><span class="tc-row__title">Синк-ап по релизу</span><span class="tc-row__excerpt tc-row__detail"></span><span class="tc-row__cell tc-row__caption"><span class="tc-badge">repeats weekly</span></span><span class="tc-row__cell tc-row__source"></span></a>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Thursday · 3 September</span><span class="tc-num">1</span></div>
+        <div class="tc-list">
+          <a class="tc-row tc-row--timecols" href="/p/a41d07?uid=ae05"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">15:00</span><span class="tc-row__title">Синк-ап: итоги квартала</span><span class="tc-row__excerpt tc-row__detail"></span><span class="tc-row__cell tc-row__caption"></span><span class="tc-row__cell tc-row__source"></span></a>
+        </div>
+        <div class="tc-main__foot">This link does not expire.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Тот же фильтр у гостя: по всему календарю (у ссылки на диапазон — внутри диапазона), найденное по дням, без ← Today →.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-25" data-screen="/p/{token}" data-part="calendar-empty">
+    <div class="frame-label"><span>Публичная страница · календарь, пустая неделя</span><i>/p/{token} · весь календарь</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title">Личный</div><div class="tc-head__sub">17 – 23 August 2026</div></div>
+        </div>
+        <div class="tc-bar">
+          <a class="tc-btn" href="/p/a41d07?from=2026-08-10" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/p/a41d07">Today</a><a class="tc-btn" href="/p/a41d07?from=2026-08-24" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
+        </div>
+        <div class="tc-empty"><b>No events this week.</b></div>
+        <div class="tc-main__foot">This link does not expire.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>В неделе нет событий — одна строка, как в календаре хозяина; дни без событий не печатаются.</figcaption>
+  </figure>
+</div>
+
+<h4>Одна запись и списки задач и заметок</h4>
+<div class="frames">
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-16" data-screen="/p/{token}" data-part="event">
+    <div class="frame-label"><span>Публичная страница · событие</span><i>/p/{token} · не по умолчанию: отмечены всё, кроме вложений и тегов; .ics разрешён</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+          <span class="tc-push tc-line tc-line--gap-6"><a class="tc-btn" href="/p/c3f1a8/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download .ics</a></span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title">Синк-ап по релизу</div><div class="tc-head__sub">Monday, 10 August 2026, 10:00 – 11:00 · Переговорная 2</div></div>
+        </div>
+        <dl class="tc-fields">
+          <dt>Repeats</dt><dd>Weekly on Mon <span class="tc-badge">until 2026-12-28</span></dd>
+          <dt>Status</dt><dd>Confirmed</dd>
+        </dl>
+        <div class="tc-sec">
+          <div class="tc-rubric">Description</div>
+          <div class="tc-prose">Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям.</div>
+        </div>
+        <div class="tc-sec">
+          <div class="tc-rubric">Attendees <span class="tc-mono tc-mono--ls0">4</span></div>
+          <ul class="tc-sec__list tc-sec__list--cols"><li>Мария Лебедева <span class="tc-dim">· organiser</span></li><li>Анна Ковалёва <span class="tc-dim">· accepted</span></li><li>Артём Белов <span class="tc-dim">· tentative</span></li><li><span class="tc-mono">v@example.org</span> <span class="tc-dim">· no reply</span></li></ul>
+        </div>
+        <div class="tc-main__foot">This link works until 8 September 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Одно событие: когда и где — под заголовком, и полями не повторяются; ниже — только отмеченное при выдаче. Участники — именами, без ссылок и меток: книги хозяина гостю не открываются. Та же страница открывается из строки опубликованного календаря.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-26" data-screen="/p/{token}" data-part="contact">
+    <div class="frame-label"><span>Публичная страница · контакт</span><i>/p/{token} · не по умолчанию: отмечены телефоны, почта и заметка; .vcf не разрешён</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles tc-line tc-line--gap-14">
+            <span class="tc-avatar--photo is-ph">АК</span>
+            <div class="tc-head__text">
+              <div class="tc-head__title tc-head__title--t19">Анна Ковалёва</div>
+              <div class="tc-head__sub">Издательство «Слово» · Выпускающий редактор</div>
+            </div>
+          </div>
+        </div>
+        <dl class="tc-fields">
+          <dt>Phone · mobile</dt><dd class="tc-mono"><a class="tc-fields__link" href="tel:+79124451088">+7 912 445-10-88</a></dd>
+          <dt>Phone · work</dt><dd class="tc-mono"><a class="tc-fields__link" href="tel:+74951204500">+7 495 120-45-00</a></dd>
+          <dt>Email · work</dt><dd><a class="tc-fields__link" href="mailto:a.kovaleva@example.org">a.kovaleva@example.org</a></dd>
+          <dt>Note</dt><dd>Пишет по вторникам, отвечает в тот же день.</dd>
+        </dl>
+        <div class="tc-main__foot">This link works until 9 September 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Контакт: имя и организация — шапкой, отмеченные поля — списком; телефон и почта звонят и пишут прямо отсюда. Без «Allow .vcf» кнопки скачивания нет.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-27" data-screen="/p/{token}" data-part="task">
+    <div class="frame-label"><span>Публичная страница · задача</span><i>/p/{token} · не по умолчанию: отмечены Location и Description</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title">Отправить документы в МФЦ</div><div class="tc-head__sub">Due Friday, 7 August 2026 · МФЦ, Мясницкая 13</div></div>
+        </div>
+        <dl class="tc-fields">
+          <dt>Status</dt><dd>In process <span class="tc-mono">40%</span></dd>
+        </dl>
+        <div class="tc-sec">
+          <div class="tc-rubric">Description</div>
+          <div class="tc-prose">Паспорт, СНИЛС и заявление; копии заверить заранее.</div>
+        </div>
+        <div class="tc-main__foot">This link works until 8 September 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Задача — как событие: срок и место под заголовком, статус и доля — полем, описание — если отмечено.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-28" data-screen="/p/{token}" data-part="tasks">
+    <div class="frame-label"><span>Публичная страница · список задач</span><i>/p/{token} · по умолчанию: только название и время</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title">Дела</div><div class="tc-head__sub">4 tasks</div></div>
+          <div class="tc-acts"><form class="tc-in is-ph tc-in--h26-w190" action="/p/e5b210" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter by word" aria-label="Filter by word"></form></div>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Open</span><span class="tc-num">3</span></div>
+        <div class="tc-list">
+          <div class="is-overdue tc-row tc-row--single tc-row--tickmarkcols"><span class="tc-tick" role="img" aria-label="Not done"></span><span class="tc-mark" data-tc-colour="#4A6B52"></span><a class="tc-row__title" href="/p/e5b210?uid=t1">Отправить документы в МФЦ</a><span class="tc-mono tc-row__due">7 Aug</span><span class="tc-row__cell tc-mono tc-row__progress">—</span></div>
+          <div class="tc-row tc-row--single tc-row--tickmarkcols"><span class="tc-tick" role="img" aria-label="Not done"></span><span class="tc-mark" data-tc-colour="#4A6B52"></span><a class="tc-row__title" href="/p/e5b210?uid=t2">Собрать чемодан</a><span class="tc-mono tc-row__due">14 Aug</span><span class="tc-row__cell tc-mono tc-row__progress">40%</span></div>
+          <div class="tc-row tc-row--single tc-row--tickmarkcols"><span class="tc-tick" role="img" aria-label="Not done"></span><span class="tc-mark" data-tc-colour="#4A6B52"></span><a class="tc-row__title" href="/p/e5b210?uid=t3">Купить адаптер для розеток</a><span class="tc-mono tc-row__due">15 Aug</span><span class="tc-row__cell tc-mono tc-row__progress">—</span></div>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">Done</span><span class="tc-num">1</span></div>
+        <div class="tc-list">
+          <div class="is-done tc-row tc-row--single tc-row--tickmarkcols"><span class="tc-tick is-done" role="img" aria-label="Done"></span><span class="tc-mark" data-tc-colour="#4A6B52"></span><a class="tc-row__title" href="/p/e5b210?uid=t4">Продлить страховку</a><span class="tc-mono tc-row__due">3 Aug</span><span class="tc-row__cell tc-mono tc-row__progress">100%</span></div>
+        </div>
+        <div class="tc-main__foot">This link works until 8 September 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Список задач: открытые, потом сделанные, рубриками; галка — знак, не кнопка. Фильтр — как у книги. Строка открывает страницу задачи в этой же ссылке.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-29" data-screen="/p/{token}" data-part="notebook">
+    <div class="frame-label"><span>Публичная страница · тетрадь</span><i>/p/{token} · .md не разрешён</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title">Записи</div><div class="tc-head__sub">3 notes</div></div>
+          <div class="tc-acts"><form class="tc-in is-ph tc-in--h26-w190" action="/p/61d4c7" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter by word" aria-label="Filter by word"></form></div>
+        </div>
+        <div class="tc-list__group"><span class="tc-rubric">August 2026</span><span class="tc-num">3</span></div>
+        <div class="tc-list">
+          <a class="tc-row tc-row--excerpt tc-row--single" href="/p/61d4c7?uid=n1">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span>
+            <span class="tc-row__title">Заметка со встречи 10.08</span>
+            <span class="tc-row__excerpt">Договорились заморозить ветку в среду; письмо пользователям пишет Анна…</span>
+
+            <span class="tc-mono tc-row__date">10 Aug</span>
+          </a>
+          <a class="tc-row tc-row--excerpt tc-row--single" href="/p/61d4c7?uid=n2">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span>
+            <span class="tc-row__title">Что почитать про CRDT</span>
+            <span class="tc-row__excerpt">Кляйн, глава 5; статья Шапиро 2011; демка automerge…</span>
+
+            <span class="tc-mono tc-row__date">8 Aug</span>
+          </a>
+          <a class="tc-row tc-row--excerpt tc-row--single" href="/p/61d4c7?uid=n3">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span>
+            <span class="tc-row__title">Список к поездке</span>
+            <span class="tc-row__excerpt">Адаптер, зарядка, страховка, распечатать билеты…</span>
+
+            <span class="tc-mono tc-row__date">2 Aug</span>
+          </a>
+        </div>
+        <div class="tc-main__foot">This link works until 19 August 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Тетрадь: заметки от новых к старым, по месяцам, начало текста — в строке; строка открывает заметку её страницей в этой же ссылке (как «Публичная страница · заметка»).</figcaption>
+  </figure>
+</div>
+
+<h4>Файлы и папки: ещё виды</h4>
+<div class="frames">
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-33" data-screen="/p/{token}" data-part="pdf">
+    <div class="frame-label"><span>Публичная страница · PDF</span><i>/p/{token} · браузеру</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+          <span class="tc-push tc-line tc-line--gap-6"><a class="tc-btn is-primary" href="/p/4f60c2/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download</a></span>
+        </div>
+        <div class="tc-head tc-head--padb6">
+          <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t19">смета-подрядчик.pdf</div>
+            <div class="tc-head__sub"><span class="tc-mono">application/pdf · 1.2 MB · changed 2026-08-05</span></div></div>
+        </div>
+        <div class="tc-main__thumbs">
+          <div class="tc-thumb tc-thumb--wide"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--sq34"><use href="#i-doc"/></svg></div>
+        </div>
+        <div class="tc-main__foot">This link works until 19 August 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>PDF показывает сам браузер — в рамке страницы, тем же потоком, что «Download», с исходным типом. Своего просмотрщика нет.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-34" data-screen="/p/{token}" data-part="text-large">
+    <div class="frame-label"><span>Публичная страница · текст сверх потолка</span><i>/p/{token} · больше 256 KB</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-stack tc-stack--gap-14 tc-main__stage">
+          <span class="tc-thumb tc-thumb--tile">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--sq30"><use href="#i-doc"/></svg>
+          </span>
+          <div class="tc-stack__item">
+            <div class="tc-head__title tc-head__title--t18">server-log-august.txt</div>
+            <div class="tc-head__sub tc-head__sub--jc-center"><span class="tc-mono">text/plain · 14.6 MB · changed 2026-08-11</span></div>
+          </div>
+          <a class="tc-btn is-primary" href="/p/5a2f9e/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download 14.6 MB</a>
+          <div class="tc-main__stage-note">Too large to show on the page.</div>
+        </div>
+        <div class="tc-main__foot">This link works until 19 August 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Текст больше 256 KB, не UTF-8 или с нулевыми байтами на страницу не выводится — страница та же, что у файла без предпросмотра, со своей строкой.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-30" data-screen="/p/{token}" data-part="folder-inner">
+    <div class="frame-label"><span>Публичная страница · папка в папке</span><i>/p/{token}?in=скриншоты</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+          <span class="tc-push tc-line tc-line--gap-6"><a class="tc-btn" href="/p/5c40e2/download?in=скриншоты"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download folder</a></span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t19">Материалы к релизу</div>
+            <nav class="tc-crumbs"><a class="tc-crumbs__link" href="/p/5c40e2">Материалы к релизу</a>/<b>скриншоты</b> <span class="tc-dim">· 6 items · 4.2 MB</span></nav></div>
+          <div class="tc-acts"><form class="tc-in is-ph tc-in--h26-w190" action="/p/5c40e2" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter this folder" aria-label="Filter this folder"><input type="hidden" name="in" value="скриншоты"></form></div>
+        </div>
+        <div class="tc-line tc-line--gap-8 tc-main__strip">
+          <span class="tc-dim--muted tc-dim--t12">Mount as a drive</span>
+          <input class="tc-in is-mono tc-in--line tc-in--fill" type="text" readonly aria-label="Mount as a drive" value="https://carrel.example/p/5c40e2/dav/">
+          <button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/5c40e2/dav/" data-tc-copied="Copied">Copy</button>
+          <details class="tc-drop"><summary class="tc-btn is-sm">How to mount<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w290" role="menu"><div class="tc-menu__text"><b>Windows</b>File Explorer › This PC › Map network drive, then paste the address.</div><div class="tc-menu__text"><b>macOS</b>Finder › Go › Connect to Server, then paste the address.</div><div class="tc-menu__text"><b>Linux</b>Files › Other Locations › Connect to Server, then type the address with davs:// in place of https://.</div></div></details>
+          <span class="tc-dim tc-dim--t11">read-only WebDAV, no password</span>
+        </div>
+        <table class="tc-table">
+        <thead><tr><th>Name</th><th class="tc-table__col--size">Size</th><th class="tc-table__n3 tc-table__col--changed">Type</th><th class="tc-table__n4 tc-table__col--time">Changed</th><th class="tc-table__col--w90"></th></tr></thead>
+        <tbody>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=скриншоты/2026-08-10-sync-board.png">2026-08-10-sync-board.png</a></span></td><td class="tc-mono">412 KB</td><td class="tc-mono tc-table__n3">image/png</td><td class="tc-mono tc-table__n4">2026-08-10 11:07</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/скриншоты/2026-08-10-sync-board.png">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=скриншоты/2026-08-10-timeline.png">2026-08-10-timeline.png</a></span></td><td class="tc-mono">688 KB</td><td class="tc-mono tc-table__n3">image/png</td><td class="tc-mono tc-table__n4">2026-08-10 11:05</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/скриншоты/2026-08-10-timeline.png">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=скриншоты/export-dialog.png">export-dialog.png</a></span></td><td class="tc-mono">540 KB</td><td class="tc-mono tc-table__n3">image/png</td><td class="tc-mono tc-table__n4">2026-08-09 17:40</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/скриншоты/export-dialog.png">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=скриншоты/import-wizard.png">import-wizard.png</a></span></td><td class="tc-mono">1.1 MB</td><td class="tc-mono tc-table__n3">image/png</td><td class="tc-mono tc-table__n4">2026-08-09 17:32</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/скриншоты/import-wizard.png">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=скриншоты/publish-sheet.png">publish-sheet.png</a></span></td><td class="tc-mono">730 KB</td><td class="tc-mono tc-table__n3">image/png</td><td class="tc-mono tc-table__n4">2026-08-09 17:20</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/скриншоты/publish-sheet.png">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=скриншоты/search-results.png">search-results.png</a></span></td><td class="tc-mono">790 KB</td><td class="tc-mono tc-table__n3">image/png</td><td class="tc-mono tc-table__n4">2026-08-09 17:11</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/скриншоты/search-results.png">Download</a></td></tr>
+          </tbody>
+        </table>
+        <div class="tc-main__foot">This link works until 1 September 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Вложенная папка — в той же ссылке: заголовок — опубликованная папка, крошки ведут назад, «Download folder» отдаёт архив того, что открыто. Адрес диска — один на всю ссылку.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-31" data-screen="/p/{token}" data-part="folder-cut">
+    <div class="frame-label"><span>Публичная страница · папка сверх потолка</span><i>/p/{token} · больше, чем показывает одна страница</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+          <span class="tc-push tc-line tc-line--gap-6"><a class="tc-btn" href="/p/e93b06/download"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg>Download folder</a></span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t19">Фото с выезда</div>
+            <nav class="tc-crumbs"><b>Фото с выезда</b> <span class="tc-dim">· 2 340 items · 7.6 GB</span></nav></div>
+          <div class="tc-acts"><form class="tc-in is-ph tc-in--h26-w190" action="/p/e93b06" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter this folder" aria-label="Filter this folder"></form></div>
+        </div>
+        <div class="tc-msg"><b>Showing 500 of 2 340.</b> Filter by name, download the folder or mount it to get all of them.</div>
+        <div class="tc-line tc-line--gap-8 tc-main__strip">
+          <span class="tc-dim--muted tc-dim--t12">Mount as a drive</span>
+          <input class="tc-in is-mono tc-in--line tc-in--fill" type="text" readonly aria-label="Mount as a drive" value="https://carrel.example/p/e93b06/dav/">
+          <button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/e93b06/dav/" data-tc-copied="Copied">Copy</button>
+          <details class="tc-drop"><summary class="tc-btn is-sm">How to mount<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w290" role="menu"><div class="tc-menu__text"><b>Windows</b>File Explorer › This PC › Map network drive, then paste the address.</div><div class="tc-menu__text"><b>macOS</b>Finder › Go › Connect to Server, then paste the address.</div><div class="tc-menu__text"><b>Linux</b>Files › Other Locations › Connect to Server, then type the address with davs:// in place of https://.</div></div></details>
+          <span class="tc-dim tc-dim--t11">read-only WebDAV, no password</span>
+        </div>
+        <table class="tc-table">
+        <thead><tr><th>Name</th><th class="tc-table__col--size">Size</th><th class="tc-table__n3 tc-table__col--changed">Type</th><th class="tc-table__n4 tc-table__col--time">Changed</th><th class="tc-table__col--w90"></th></tr></thead>
+        <tbody>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/p/e93b06?file=IMG_0001.jpg">IMG_0001.jpg</a></span></td><td class="tc-mono">3.4 MB</td><td class="tc-mono tc-table__n3">image/jpeg</td><td class="tc-mono tc-table__n4">2026-06-01 09:12</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/e93b06/file/IMG_0001.jpg">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/p/e93b06?file=IMG_0002.jpg">IMG_0002.jpg</a></span></td><td class="tc-mono">3.1 MB</td><td class="tc-mono tc-table__n3">image/jpeg</td><td class="tc-mono tc-table__n4">2026-06-01 09:12</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/e93b06/file/IMG_0002.jpg">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/p/e93b06?file=IMG_0003.jpg">IMG_0003.jpg</a></span></td><td class="tc-mono">2.9 MB</td><td class="tc-mono tc-table__n3">image/jpeg</td><td class="tc-mono tc-table__n4">2026-06-01 09:13</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/e93b06/file/IMG_0003.jpg">Download</a></td></tr>
+          </tbody>
+        </table>
+        <div class="tc-main__foot">This link works until 1 September 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Папка больше потолка (<span class="tc-mono">CARREL_FILES_MAX_ENTRIES</span>): крошки называют всю папку, сообщение — сколько показано. Потолок — только у листинга страницы: «Download folder» отдаёт всю папку, диск показывает её целиком, фильтр ищет по всей; сообщение называет эти три пути. Строки — первые по имени.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-32">
+    <div class="frame-label"><span>How to mount · раскрыто</span><span class="frag">фрагмент</span><i>строка диска публичной папки</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-8 tc-main__strip">
+          <span class="tc-dim--muted tc-dim--t12">Mount as a drive</span>
+          <input class="tc-in is-mono tc-in--line tc-in--fill" type="text" readonly aria-label="Mount as a drive" value="https://carrel.example/p/5c40e2/dav/">
+          <button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/5c40e2/dav/" data-tc-copied="Copied">Copy</button>
+          <span class="tc-drop"><button class="tc-btn is-sm is-focus" type="button">How to mount<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button><div class="tc-menu is-pop tc-menu--w290" role="menu"><div class="tc-menu__text"><b>Windows</b>File Explorer › This PC › Map network drive, then paste the address.</div><div class="tc-menu__text"><b>macOS</b>Finder › Go › Connect to Server, then paste the address.</div><div class="tc-menu__text"><b>Linux</b>Files › Other Locations › Connect to Server, then type the address with davs:// in place of https://.</div></div></span>
+          <span class="tc-dim tc-dim--t11">read-only WebDAV, no password</span>
+        </div>
+        <table class="tc-table">
+        <thead><tr><th>Name</th><th class="tc-table__col--size">Size</th><th class="tc-table__n3 tc-table__col--changed">Type</th><th class="tc-table__n4 tc-table__col--time">Changed</th><th class="tc-table__col--w90"></th></tr></thead>
+        <tbody>
+          <tr class="is-folder"><td><span class="tc-table__file"><svg><use href="#i-file"/></svg><a class="tc-table__filename" href="/p/5c40e2?in=скриншоты">скриншоты</a></span></td><td class="tc-mono">—</td><td class="tc-mono tc-table__n3">folder · 6 items</td><td class="tc-mono tc-table__n4">2026-08-10 11:07</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/download?in=скриншоты">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=release-checklist.md">release-checklist.md</a></span></td><td class="tc-mono">3.1 KB</td><td class="tc-mono tc-table__n3">text/markdown</td><td class="tc-mono tc-table__n4">2026-08-09 18:44</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/release-checklist.md">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-img"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=2026-08-04-whiteboard.jpg">2026-08-04-whiteboard.jpg</a></span></td><td class="tc-mono">2.8 MB</td><td class="tc-mono tc-table__n3">image/jpeg</td><td class="tc-mono tc-table__n4">2026-08-04 17:03</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/2026-08-04-whiteboard.jpg">Download</a></td></tr>
+          <tr><td><span class="tc-table__file"><svg><use href="#i-doc"/></svg><a class="tc-table__filename" href="/p/5c40e2?file=смета-подрядчик.pdf">смета-подрядчик.pdf</a></span></td><td class="tc-mono">1.2 MB</td><td class="tc-mono tc-table__n3">application/pdf</td><td class="tc-mono tc-table__n4">2026-08-05 14:20</td><td class="tc-acts"><a class="tc-btn is-sm" href="/p/5c40e2/file/смета-подрядчик.pdf">Download</a></td></tr>
+          </tbody>
+        </table>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>«How to mount» раскрывается и без сценария: по строке на систему.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-35" data-screen="/p/{token}" data-part="addressbook-empty">
+    <div class="frame-label"><span>Публичная страница · пустая книга</span><i>/p/{token} · CardDAV</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title">Рассылки</div><div class="tc-head__sub">0 contacts</div></div>
+        </div>
+        <div class="tc-empty"><b>This book is empty.</b></div>
+        <div class="tc-main__foot">This link works until 9 September 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Пустая книга: фильтра нет — фильтровать нечего.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-36" data-screen="/p/{token}" data-part="folder-empty">
+    <div class="frame-label"><span>Публичная страница · пустая папка</span><i>/p/{token} · WebDAV</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t19">Черновики</div>
+            <nav class="tc-crumbs"><b>Черновики</b> <span class="tc-dim">· 0 items</span></nav></div>
+        </div>
+        <div class="tc-line tc-line--gap-8 tc-main__strip">
+          <span class="tc-dim--muted tc-dim--t12">Mount as a drive</span>
+          <input class="tc-in is-mono tc-in--line tc-in--fill" type="text" readonly aria-label="Mount as a drive" value="https://carrel.example/p/7d1e88/dav/">
+          <button class="tc-btn is-sm" type="button" data-tc-copy="https://carrel.example/p/7d1e88/dav/" data-tc-copied="Copied">Copy</button>
+          <details class="tc-drop"><summary class="tc-btn is-sm">How to mount<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></summary><div class="tc-menu is-pop tc-menu--w290" role="menu"><div class="tc-menu__text"><b>Windows</b>File Explorer › This PC › Map network drive, then paste the address.</div><div class="tc-menu__text"><b>macOS</b>Finder › Go › Connect to Server, then paste the address.</div><div class="tc-menu__text"><b>Linux</b>Files › Other Locations › Connect to Server, then type the address with davs:// in place of https://.</div></div></details>
+          <span class="tc-dim tc-dim--t11">read-only WebDAV, no password</span>
+        </div>
+        <div class="tc-empty"><b>This folder is empty.</b></div>
+        <div class="tc-main__foot">This link works until 1 September 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Пустая папка: «Download folder» нет — архив был бы пустым; адрес для монтирования стоит: страница читается при каждом заходе, и положенное потом появится и тут, и на диске.</figcaption>
+  </figure>
+</div>
+
+<h4>Когда открыть нечего</h4>
+<div class="frames">
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-37" data-screen="/p/{token}" data-part="trouble">
+    <div class="frame-label"><span>Публичная страница · источник не ответил</span><i>/p/{token} · сервер с опубликованным не ответил</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title">Личный</div></div>
+        </div>
+        <div class="tc-msg is-alert"><b>The source did not answer.</b> Try again later.</div>
+        <div class="tc-main__foot">This link works until 8 September 2026.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Сервер, где лежит опубликованное, не ответил: ни имени сервера, ни кода — гостю они ничего не скажут. Скачивания и подписки нет, пока нечего отдать; ссылка жива — подвал её срок.</figcaption>
+  </figure>
+  <figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-publish-38" data-screen="/p/{token}" data-part="gone">
+    <div class="frame-label"><span>Публичная страница · опубликованного больше нет</span><i>/p/{token} · удалено или перенесено</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-line tc-line--gap-12 tc-main__banner--12">
+          <svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          <span class="tc-badge">read-only</span>
+        </div>
+        <div class="tc-head tc-head--snug">
+          <div class="tc-head__titles"><div class="tc-head__title">отчёт-июль.pdf</div></div>
+        </div>
+        <div class="tc-msg"><b>No longer there.</b> It was deleted or moved.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Опубликованное удалили или унесли: срока в подвале нет — ссылка больше ничего не откроет; у хозяина строка ссылки говорит «no longer there» (кадр «Строка ссылки · опубликованного больше нет»).</figcaption>
+  </figure>
+</div>
 
 <h4>Что отдаётся по ссылке, по видам</h4>
 <table class="doc">
   <tr><th style="width:16%">Вид</th><th style="width:30%">Что на странице</th><th style="width:20%">Что скачивается</th><th>Что решается при выдаче</th></tr>
-  <tr><td>Адресная книга</td><td>Список с колонками, поиск по загруженному</td><td><code>.vcf</code> и адрес для внешней ленты другого Carrel</td><td>Показывать ли телефоны и почту (по умолчанию нет)</td></tr>
-  <tr><td>Календарь</td><td>Агенда за диапазон</td><td><code>.ics</code> и адрес <span class="tc-mono">webcal://</span> для подписки</td><td>Диапазон дат; показывать ли описания событий</td></tr>
-  <tr><td>Заметка</td><td>Страница с текстом, тегами и списком вложений</td><td><code>.md</code>; сырой <code>.ics</code> гостю не отдаётся — VJOURNAL почти никто не открывает</td><td>Разрешить ли скачивание</td></tr>
+  <tr><td>Адресная книга</td><td>Список с колонками, поиск по загруженному</td><td><code>.vcf</code> и адрес для внешней ленты другого Carrel</td><td>Каждое поле, кроме имени и организации, — отдельно (по умолчанию нет); разрешить ли <code>.vcf</code></td></tr>
+  <tr><td>Календарь</td><td>Агенда за диапазон или весь календарь неделями</td><td><code>.ics</code> и адрес <span class="tc-mono">webcal://</span> для подписки</td><td>Диапазон или весь календарь; что видит гость, кроме времени; разрешить ли <code>.ics</code></td></tr>
+  <tr><td>Заметка</td><td>Страница с текстом и вложениями, без тегов</td><td><code>.md</code>; сырой <code>.ics</code> гостю не отдаётся — VJOURNAL почти никто не открывает</td><td>Опубликовать ли вложения; разрешить ли <code>.md</code></td></tr>
   <tr><td>Файл</td><td>Картинка — в теге, PDF — браузеру, текст и Markdown — на странице, остальное — имя и размер</td><td>поток с исходным <code>Content-Type</code></td><td>Ничего: файл отдаётся как есть</td></tr>
   <tr><td>Папка</td><td>Листинг со значком типа; файл открывается своей страницей; в шапке — Download folder</td><td>Архив папки; адрес <span class="tc-mono">/dav/</span> — подключается как диск, только чтение</td><td>Ничего: вложенные входят всегда, адрес для монтирования есть всегда</td></tr>
 </table>
@@ -26881,6 +27483,7 @@ SMTP  mail.home.example:465  TLS
             <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New event<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-import"/></svg>Import</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-export"/></svg>Export</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button></div>
           </div>
           <div class="tc-bar tc-bar--wide">
+            <form class="tc-in is-ph tc-in--h26-w200" action="/app/calendar" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter by word" aria-label="Filter by word"></form>
             <a class="tc-btn" href="/app/calendar?from=2026-08-03" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/app/calendar">Today</a><a class="tc-btn" href="/app/calendar?from=2026-08-17" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
             <span class="tc-segfold tc-segfold--phone"><span class="tc-seg"><a class="tc-seg__opt" href="/app/calendar?view=day">Day</a><a class="is-on tc-seg__opt" href="/app/calendar?view=week">Week</a><a class="tc-seg__opt" href="/app/calendar?view=month">Month</a><a class="tc-seg__opt" href="/app/calendar?view=range">Range</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">Week</summary><div class="tc-segfold__menu"><a class="tc-segfold__item" href="/app/calendar?view=day">Day</a><a class="is-on tc-segfold__item" href="/app/calendar?view=week">Week</a><a class="tc-segfold__item" href="/app/calendar?view=month">Month</a><a class="tc-segfold__item" href="/app/calendar?view=range">Range</a></div></details></span>
             <form class="tc-range is-2nd" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-08-10" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
@@ -27100,6 +27703,7 @@ SMTP  mail.home.example:465  TLS
             <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New event<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-import"/></svg>Import</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-export"/></svg>Export</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button></div>
           </div>
           <div class="tc-bar tc-bar--wide">
+            <form class="tc-in is-ph tc-in--h26-w200" action="/app/calendar" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter by word" aria-label="Filter by word"></form>
             <a class="tc-btn" href="/app/calendar?from=2026-08-03" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/app/calendar">Today</a><a class="tc-btn" href="/app/calendar?from=2026-08-17" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
             <span class="tc-segfold tc-segfold--phone"><span class="tc-seg"><a class="tc-seg__opt" href="/app/calendar?view=day">Day</a><a class="is-on tc-seg__opt" href="/app/calendar?view=week">Week</a><a class="tc-seg__opt" href="/app/calendar?view=month">Month</a><a class="tc-seg__opt" href="/app/calendar?view=range">Range</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">Week</summary><div class="tc-segfold__menu"><a class="tc-segfold__item" href="/app/calendar?view=day">Day</a><a class="is-on tc-segfold__item" href="/app/calendar?view=week">Week</a><a class="tc-segfold__item" href="/app/calendar?view=month">Month</a><a class="tc-segfold__item" href="/app/calendar?view=range">Range</a></div></details></span>
             <form class="tc-range is-2nd" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-08-10" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
@@ -27908,6 +28512,7 @@ dav: HTTP 503: the server is busy</div></div>
             <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New event<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-import"/></svg>Import</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-export"/></svg>Export</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button></div>
           </div>
           <div class="tc-bar tc-bar--wide">
+            <form class="tc-in is-ph tc-in--h26-w200" action="/app/calendar" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter by word" aria-label="Filter by word"></form>
             <a class="tc-btn" href="/app/calendar?from=2026-08-03" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/app/calendar">Today</a><a class="tc-btn" href="/app/calendar?from=2026-08-17" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
             <span class="tc-segfold tc-segfold--phone"><span class="tc-seg"><a class="tc-seg__opt" href="/app/calendar?view=day">Day</a><a class="is-on tc-seg__opt" href="/app/calendar?view=week">Week</a><a class="tc-seg__opt" href="/app/calendar?view=month">Month</a><a class="tc-seg__opt" href="/app/calendar?view=range">Range</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">Week</summary><div class="tc-segfold__menu"><a class="tc-segfold__item" href="/app/calendar?view=day">Day</a><a class="is-on tc-segfold__item" href="/app/calendar?view=week">Week</a><a class="tc-segfold__item" href="/app/calendar?view=month">Month</a><a class="tc-segfold__item" href="/app/calendar?view=range">Range</a></div></details></span>
             <form class="tc-range is-2nd" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-08-10" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-08-16" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
@@ -28101,6 +28706,7 @@ dav: HTTP 503: the server is busy</div></div>
             <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New event</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-import"/></svg>Import</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-export"/></svg>Export</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button></div>
           </div>
           <div class="tc-bar tc-bar--wide">
+            <form class="tc-in is-ph tc-in--h26-w200" action="/app/calendar/nextcloud/lichny" method="get"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" name="q" placeholder="Filter by word" aria-label="Filter by word"></form>
             <a class="tc-btn" href="/app/calendar/nextcloud/lichny?from=2026-10-26" title="Previous week"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></a><a class="tc-btn" href="/app/calendar/nextcloud/lichny">Today</a><a class="tc-btn" href="/app/calendar/nextcloud/lichny?from=2026-11-09" title="Next week"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></a>
             <span class="tc-segfold tc-segfold--phone"><span class="tc-seg"><a class="tc-seg__opt" href="/app/calendar?view=day">Day</a><a class="is-on tc-seg__opt" href="/app/calendar?view=week">Week</a><a class="tc-seg__opt" href="/app/calendar?view=month">Month</a><a class="tc-seg__opt" href="/app/calendar?view=range">Range</a></span><details class="tc-segfold__pick"><summary class="tc-segfold__current">Week</summary><div class="tc-segfold__menu"><a class="tc-segfold__item" href="/app/calendar?view=day">Day</a><a class="is-on tc-segfold__item" href="/app/calendar?view=week">Week</a><a class="tc-segfold__item" href="/app/calendar?view=month">Month</a><a class="tc-segfold__item" href="/app/calendar?view=range">Range</a></div></details></span>
             <form class="tc-range is-2nd" action="/app/calendar" method="get"><input type="hidden" name="view" value="range"><input class="tc-in is-mono" type="date" value="2026-11-02" name="from" aria-label="From"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="date" value="2026-11-08" name="to" aria-label="To"><button class="tc-btn" type="submit">Show</button></form>
@@ -30179,7 +30785,7 @@ dav: HTTP 503: the server is busy</div></div>
 
 Письмо пользователям пишет Анна, черновик к вечеру вторника.</div>
           <div class="tc-doc__acts">
-            <div class="tc-rubric tc-rubric--bot7">Что делаем</div>
+            <div class="tc-doc__heading">Что делаем</div>
             <ul class="tc-stack tc-stack--gap-9 tc-doc__list">
               <li class="tc-doc__task"><span class="tc-tick tc-tick--nudge" role="img" aria-label="Not done"></span>проверить changelog</li>
               <li class="tc-doc__task"><span class="tc-tick is-done tc-tick--nudge" role="img" aria-label="Done"></span><span class="tc-dim tc-dim--struck">попросить скриншоты</span></li>

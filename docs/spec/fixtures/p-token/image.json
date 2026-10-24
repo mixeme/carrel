@@ -12,9 +12,12 @@
   ],
   "attachNote": "",
   "attachments": [],
+  "attendees": [],
+  "avatar": null,
   "body": "",
   "contacts": [],
   "days": [],
+  "empty": "",
   "fields": [],
   "file": {
     "blocks": [],
@@ -22,10 +25,12 @@
     "changed": "2026-08-10",
     "href": "/p/link-sync-board-token/download?inline=1",
     "name": "2026-08-10-sync-board.png",
+    "note": "",
     "preview": "image",
     "size": "412 KB",
     "type": "image/png"
   },
+  "filter": null,
   "folder": null,
   "foot": [
     {
@@ -44,6 +49,8 @@
   "notices": [],
   "range": null,
   "readOnly": true,
+  "strip": null,
   "tasks": [],
-  "title": "2026-08-10-sync-board.png"
+  "title": "2026-08-10-sync-board.png",
+  "width": []
 }

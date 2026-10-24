@@ -626,7 +626,7 @@
       "collections": "4 / 4",
       "id": "r-run",
       "job": "Личное на домашний диск",
-      "size": "4.1 KB",
+      "size": "4.2 KB",
       "trigger": "by hand",
       "verified": [
         {
@@ -730,7 +730,7 @@
       "keep": 8,
       "lastNote": [
         {
-          "text": "4.1 KB · "
+          "text": "4.2 KB · "
         },
         {
           "hint": "The archive was read back from the destination and the checksum matched",
@@ -1111,7 +1111,7 @@
       "rows": [
         {
           "colour": "#4a6b52",
-          "count": 2,
+          "count": 4,
           "danger": false,
           "into": {
             "add": null,
@@ -1524,7 +1524,7 @@
     },
     "subtitle": [
       {
-        "text": "From this computer · manifest read · 4 collections · 8 records · "
+        "text": "From this computer · manifest read · 4 collections · 10 records · "
       },
       {
         "mark": "mono",

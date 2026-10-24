@@ -281,8 +281,31 @@ mfc = [
     u'LOCATION:МФЦ\\, Мясницкая 13',
     u'END:VEVENT']
 
+# Ещё два «синк» вне недели макета — фильтр календаря по слову находит
+# три события: прошедшее, ближайший раз серии и будущее (s-agenda-31,
+# s-publish-39; записка Typecase 122 п. 15).
+sinkap_past = [
+    u'BEGIN:VEVENT',
+    u'UID:a907-3e51-6c20',
+    u'DTSTAMP:20260720T090000Z',
+    u'DTSTART;TZID=Europe/Moscow:20260727T110000',
+    u'DTEND;TZID=Europe/Moscow:20260727T120000',
+    u'SUMMARY:Синк-ап с подрядчиком',
+    u'LOCATION:Переговорная 1',
+    u'END:VEVENT']
+
+sinkap_quarter = [
+    u'BEGIN:VEVENT',
+    u'UID:ae05-71d2-9b44',
+    u'DTSTAMP:20260809T090000Z',
+    u'DTSTART;TZID=Europe/Moscow:20260903T150000',
+    u'DTEND;TZID=Europe/Moscow:20260903T160000',
+    u'SUMMARY:Синк-ап: итоги квартала',
+    u'LOCATION:Переговорная 2',
+    u'END:VEVENT']
+
 write(u'nextcloud-home/lichnyj.ics',
-      cal(u'Личный', sinkap + mfc, zones=(VTZ_MSK, VTZ_YEKB)))
+      cal(u'Личный', sinkap + mfc + sinkap_past + sinkap_quarter, zones=(VTZ_MSK, VTZ_YEKB)))
 
 # «Работа» — nextcloud · home
 sozvon = [

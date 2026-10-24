@@ -60,7 +60,7 @@
         "method": "GET"
       },
       {
-        "count": 8,
+        "count": 10,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",

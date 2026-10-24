@@ -125,7 +125,7 @@ undefined = sorted(p for p, files in seen.items()
 check("6b. названные правила введены заголовком", undefined)
 
 # 7. Фикстуры разбираются и лежат по правилам имён
-states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
+states = {"normal","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
           "tiles","copy","elsewhere","rename","delete","attach","single","in-part","merged",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
@@ -414,6 +414,9 @@ STATE_FRAME = {
     "app-agenda-all/partial": "states-13",
     "app-agenda-all/empty": "states-14",
     "app-agenda/empty": "states-15",
+    # Календарь со словом — всё найденное по дням (Typecase 674ac19,
+    # записка 122 п. 15).
+    "app-agenda/filtered": "s-agenda-31",
     # Приглашение ссылкой и потеря свойств при записи события — свои кадры
     # (Typecase 05ea994, 002fce3; задачи 79, 93).
     "invite/link": "s-auth-14",

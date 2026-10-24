@@ -336,10 +336,12 @@ func TestFolderDownloadsAsZip(t *testing.T) {
 		t.Errorf("a missing folder: %d", rec.Code)
 	}
 
+	// The ceiling is a page's listing alone: the archive is the folder
+	// whole (the owner's decision of 24.10.2026, s-publish-31).
 	f.h.cfg.FilesMaxEntries = 2
-	cut := f.h.do(get(a.Href, f.sess))
-	if _, err := zip.NewReader(bytes.NewReader(cut.Body.Bytes()), int64(cut.Body.Len())); cut.Code != http.StatusOK || err == nil {
-		t.Errorf("an archive past the ceiling: %d, reads as whole (%v)", cut.Code, err)
+	whole := f.h.do(get(a.Href, f.sess))
+	if zr, err := zip.NewReader(bytes.NewReader(whole.Body.Bytes()), int64(whole.Body.Len())); whole.Code != http.StatusOK || err != nil || len(zr.File) != 3 {
+		t.Errorf("an archive past the ceiling of a page: %d, %v", whole.Code, err)
 	}
 
 	f.srv.Refuse("PROPFIND", http.StatusForbidden, "")

@@ -2,6 +2,8 @@
   "actions": [],
   "attachNote": "",
   "attachments": [],
+  "attendees": [],
+  "avatar": null,
   "body": "",
   "contacts": [
     {
@@ -18,7 +20,7 @@
           "changed": "",
           "colour": "#6b4e7a",
           "email": "",
-          "href": "",
+          "href": "/p/link-komanda-token?uid=4f2b-9c31-a0e7",
           "menu": [],
           "name": "Анна Ковалёва",
           "on": false,
@@ -41,7 +43,7 @@
           "changed": "",
           "colour": "#6b4e7a",
           "email": "",
-          "href": "",
+          "href": "/p/link-komanda-token?uid=d41a-6f30-92be",
           "menu": [],
           "name": "Артём Белов",
           "on": false,
@@ -58,18 +60,46 @@
     }
   ],
   "days": [],
+  "empty": "",
   "fields": [],
   "file": null,
+  "filter": {
+    "action": "/p/link-komanda-token",
+    "actions": [],
+    "errors": [],
+    "method": "GET",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Filter by word",
+            "name": "q",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
   "folder": null,
   "foot": [
     {
-      "text": "This link works until 17 August 2026. The owner can revoke it at any moment."
+      "text": "This link works until 17 August 2026."
     }
   ],
   "kind": "contact",
   "lede": [
     {
-      "text": "2 contacts · the list is read from the server on every visit"
+      "text": "2 contacts"
     }
   ],
   "note": null,
@@ -77,6 +107,8 @@
   "notices": [],
   "range": null,
   "readOnly": true,
+  "strip": null,
   "tasks": [],
-  "title": "Команда"
+  "title": "Команда",
+  "width": []
 }

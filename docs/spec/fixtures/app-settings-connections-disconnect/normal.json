@@ -175,7 +175,7 @@
                   "target": "sheet"
                 }
               ],
-              "objects": 2,
+              "objects": 4,
               "path": "/alice/calendars/lichnyj/",
               "pick": "a-nc-home|/alice/calendars/lichnyj/",
               "readOnly": false,

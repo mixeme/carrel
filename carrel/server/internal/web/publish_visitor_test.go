@@ -80,7 +80,7 @@ func TestPublishedTaskListShowsWhatIsTicked(t *testing.T) {
 		"DUE;VALUE=DATE:20260815\nDESCRIPTION:Account 4401\nSTATUS:NEEDS-ACTION\nX-PRIVATE:yes\nEND:VTODO"))
 	link := publishWith(t, f, f.publishHref("tasks", searchWork, ""), "title", "download")
 	page := publicPage(t, f, link)
-	if len(page.Tasks) != 1 || page.Tasks[0].Summary != "Pay the rent" {
+	if len(page.Tasks) != 1 || len(page.Tasks[0].Rows) != 1 || page.Tasks[0].Rows[0].Summary != "Pay the rent" {
 		t.Fatalf("tasks = %+v", page.Tasks)
 	}
 	rec := f.h.do(anon(link + "/download"))

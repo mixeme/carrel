@@ -117,8 +117,10 @@ func TestPublishedContactShowsWhatWasTicked(t *testing.T) {
 		}
 	}
 
+	// The organisation is the line under the name (s-publish-26), then the
+	// fields.
 	fields := func(p view.PublishedPage) string {
-		var out []string
+		out := []string{"head=" + runsText(p.Lede)}
 		for _, fl := range p.Fields {
 			out = append(out, string(fl.Label)+"="+string(fl.Value))
 		}

@@ -50,13 +50,13 @@ func TestPublishedFolder(t *testing.T) {
 	link := publishFile(t, f, "share", true)
 	page := publicPage(t, f, link)
 	// The address that mounts it is whole, with the host (Пс17).
-	if page.Folder == nil || len(page.Folder.Rows) != 2 || page.Folder.DAV != text("http://example.com"+link+"/dav/") {
+	if page.Folder == nil || len(page.Folder.Rows) != 2 || page.Strip == nil || page.Strip.Address != text("http://example.com"+link+"/dav/") {
 		t.Fatalf("folder page = %+v", page.Folder)
 	}
 	var file, sub string
 	for _, r := range page.Folder.Rows {
 		if r.IsDir {
-			sub = r.Href
+			sub = r.Open // its listing in the link; Href is its archive
 		} else {
 			file = r.Href
 		}
@@ -68,7 +68,7 @@ func TestPublishedFolder(t *testing.T) {
 	f.h.cfg.FilesMaxEntries = 1
 	cut := publicPage(t, f, link)
 	f.h.cfg.FilesMaxEntries = 2000
-	if len(cut.Folder.Rows) != 1 || len(cut.Notices) != 1 || cut.Notices[0].Title != "Showing 1 of 2" {
+	if len(cut.Folder.Rows) != 1 || len(cut.Notices) != 1 || cut.Notices[0].Title != "Showing 1 of 2." || !strings.HasPrefix(string(cut.Folder.Total), "2 items · ") {
 		t.Errorf("a folder cut at its ceiling: %d rows, notices %+v", len(cut.Folder.Rows), cut.Notices)
 	}
 	deeper := publicPage(t, f, sub)

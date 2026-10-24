@@ -60,7 +60,8 @@ func TestPublishCalendarOptions(t *testing.T) {
 	if len(page.Days) != 1 {
 		t.Errorf("the page shows %d days, want the one the link names", len(page.Days))
 	}
-	if page.Range == nil || len(page.Range.Presets) != 0 {
+	// The link's days have nowhere to step: no bar (s-publish-6).
+	if page.Range != nil {
 		t.Errorf("the reader can step out of the link's days: %+v", page.Range)
 	}
 	if actionByID(page.Actions, "published.download") != nil {

@@ -107,23 +107,31 @@ type AboutPage struct {
 	Back Action `json:"back"`
 }
 
-// PublishedPage — страница ссылки (U-6.15). Lede — строка под заголовком
-// готовой фразой: у календаря диапазон дней, у книги счёт, у записи — её
-// время, у файла — тип, размер и день правки; у папки её нет (итог — в
-// крошках, Folder.Total). Foot — подвал: до какого дня ссылка действует
-// (Пс2). Владельца страница не называет (S-25.1).
+// PublishedPage — страница ссылки (U-6.15; записка Typecase 122). Lede —
+// строка под заголовком готовой фразой: у календаря дни («10 – 31 August
+// 2026»), у списка счёт («13 contacts»), у события и задачи — когда и где
+// («Due Friday, 7 August 2026 · МФЦ»), у контакта — организация и должность,
+// у файла — тип, размер и день правки; у папки её нет (итог — в крошках,
+// Folder.Total). Foot — подвал одной фразой: «This link works until ‹день›.»
+// или «This link does not expire.»; у «No longer there» его нет. Владельца
+// страница не называет (S-25.1). Строка списка открывает свою запись в той
+// же ссылке (?uid=; Href строки).
 type PublishedPage struct {
 	Plain
 	Kind     Kind           `json:"kind"`
 	ReadOnly bool           `json:"readOnly"` // метка read-only рядом с логотипом
-	Range    *Range         `json:"range"`
+	Range    *Range         `json:"range"`    // у всего календаря — ← Today → (s-publish-24); у ссылки на диапазон — nil
 	Contacts []ContactGroup `json:"contacts"` // по букве, как в приложении (s-publish-7)
 	Days     []AgendaDay    `json:"days"`
-	Tasks    []TaskRow      `json:"tasks"`  // опубликованный список задач
-	Notes    []NoteRow      `json:"notes"`  // опубликованная тетрадь
-	Fields   []Field        `json:"fields"` // одна запись: контакт, событие, задача
-	Body     Text           `json:"body"`   // описание события или задачи
-	Note     *NoteDoc       `json:"note"`
+	Tasks    []TaskGroup    `json:"tasks"` // «Open», «Done» со счётом (s-publish-28)
+	Notes    []NoteGroup    `json:"notes"` // по месяцам, от новых к старым (s-publish-29)
+	// Avatar — шапка контакта: инициалы (s-publish-26); nil у других
+	Avatar *Avatar `json:"avatar"`
+	Fields []Field `json:"fields"` // одна запись: отмеченные поля; когда и где — в Lede, не здесь
+	Body   Text    `json:"body"`   // описание события или задачи — секцией «Description»
+	// Attendees — участники события именами, без ссылок и меток (s-publish-16)
+	Attendees []AttendeeRow `json:"attendees"`
+	Note      *NoteDoc      `json:"note"`
 	// Attachments — вложения опубликованной заметки, выданные с нею (Пб3,
 	// s-publish-8): имя, размер, своя ссылка; AttachNote — сколько их, когда
 	// с заметкой они не выданы: имена не показываются
@@ -131,9 +139,44 @@ type PublishedPage struct {
 	AttachNote  Text                  `json:"attachNote"`
 	File        *PublishedFile        `json:"file"`
 	Folder      *PublishedFolder      `json:"folder"`
-	Actions     []Action              `json:"actions"` // Download · Download folder
-	Foot        Runs                  `json:"foot"`
+	// Filter — «Filter by word» у книги, календаря, задач и тетради, «Filter
+	// this folder» у папки: форма GET ?q= (у вложенной папки in скрытым);
+	// nil — пустой список, фильтровать нечего (s-publish-35)
+	Filter *Form `json:"filter"`
+	// Empty — слова пустого: «No events this week.», «This book is empty.»,
+	// «This folder is empty.»; пусто — есть что показать
+	Empty Text `json:"empty"`
+	// Strip — строка адреса под шапкой: подписка календаря, адрес книги,
+	// диск папки; nil — скачивание не разрешено (у папки строка есть всегда)
+	Strip *PublishedStrip `json:"strip"`
+	// Width — у заметки и текста: «Full width» · «Reading width» ссылками,
+	// ?width=reading (s-publish-8, -10); On — нынешняя; пусто у прочих
+	Width   []Action `json:"width"`
+	Actions []Action `json:"actions"` // Download · Download folder — ссылки
+	Foot    Runs     `json:"foot"`
 }
+
+// PublishedStrip — строка адреса публичной страницы (s-publish-6, -7, -12):
+// подпись, адрес в поле только для чтения с Copy, у календаря «Open in
+// calendar app» — ссылка webcal://, у папки — «How to mount», и что это за
+// адрес, приглушённо.
+type PublishedStrip struct {
+	Label   Text   `json:"label"`   // «Subscribe in your own client», «Address of this book», «Mount as a drive»
+	Address Text   `json:"address"` // полный адрес с хостом
+	Open    string `json:"open"`    // «Open in calendar app»: webcal://…; пусто у книги и папки
+	// Mount — «How to mount»: по строке на систему (Windows, macOS, Linux);
+	// без сценария раскрывается (s-publish-32); пусто у календаря и книги
+	Mount []MenuText `json:"mount"`
+	Note  Text       `json:"note"` // «read-only, updates on its own», «read-only WebDAV, no password»
+}
+
+// MenuText — строка меню, которая только говорит: имя над текстом
+// (s-publish-32).
+type MenuText struct {
+	Title Text `json:"title"`
+	Text  Text `json:"text"`
+}
+
 type PublishedAttachment struct {
 	Name Text   `json:"name"`
 	Size Size   `json:"size"`
@@ -148,12 +191,16 @@ type PublishedFile struct {
 	Body    Text        `json:"body"`
 	Blocks  []Block     `json:"blocks"`
 	Href    string      `json:"href"`
+	// Note — строка у файла без предпросмотра: «A browser cannot show this
+	// file.» (s-publish-11), у текста сверх 256 KB — «Too large to show on
+	// the page.» (s-publish-34); пусто у показанного
+	Note Text `json:"note"`
 }
 type PublishedFolder struct {
-	Crumbs []Crumb   `json:"crumbs"`
-	Rows   []FileRow `json:"rows"`
-	DAV    Text      `json:"dav"` // тот же секрет монтируется как диск
-	// Total — итог после текущей крошки: «4 files · 6.6 MB» (s-publish-12)
+	Crumbs []Crumb   `json:"crumbs"` // опубликованная папка первой; вложенная — крошками назад (s-publish-30)
+	Rows   []FileRow `json:"rows"`   // имя — ссылка: папка ?in=, файл ?file=; Href — скачать файл или архив папки
+	// Total — итог после текущей крошки по всему листингу: «4 items · 6.6
+	// MB», сверх потолка — «2 340 items · 7.6 GB» (s-publish-12, -31)
 	Total Text `json:"total"`
 }
 

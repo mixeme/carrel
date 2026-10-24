@@ -45,7 +45,7 @@ func TestPublicFileDownloadIsTheFrames(t *testing.T) {
 	shown := publicPage(t, f, publishFile(t, f, "share/board.png", false))
 	sameActionMarks(t, "s-publish-9", "a file shown", shown.Actions, nil)
 
-	m := regexp.MustCompile(`<button class="tc-btn[^"]*" type="button">(?:<svg.*?</svg>)?(Download) ([0-9.]+ [KMG]?B)</button>`).FindStringSubmatch(mockupFrame(t, "s-publish-11"))
+	m := regexp.MustCompile(`<a class="tc-btn[^"]*" href="[^"]*">(?:<svg.*?</svg>)?(Download) ([0-9.]+ [KMG]?B)</a>`).FindStringSubmatch(mockupFrame(t, "s-publish-11"))
 	if m == nil {
 		t.Fatal("s-publish-11 draws no «Download <size>»: read the frame again")
 	}

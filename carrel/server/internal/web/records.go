@@ -1326,7 +1326,17 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	page.Bar.Compact = s.compactForm(r, c.spec.segment, c.listPath())
 	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 
-	objs, bad, err := c.calQuery(r.Context(), c.spec.component, &from, &to)
+	// «Filter by word» first in the bar (s-agenda-17): with a word the
+	// calendar is read whole and what is found stands by day, the week and
+	// ← Today → gone (s-agenda-31).
+	sift := strings.TrimSpace(r.URL.Query().Get("q"))
+	page.Bar.Filter, page.Bar.FilterForm = text(sift), s.calendarFilter(c.listPath(), sift)
+	window := [2]*time.Time{&from, &to}
+	if sift != "" {
+		// The bar is the filter and Columns (s-agenda-31).
+		window, page.Bar.Range, page.Bar.Compact = [2]*time.Time{}, nil, nil
+	}
+	objs, bad, err := c.calQuery(r.Context(), c.spec.component, window[0], window[1])
 	if err != nil {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
@@ -1336,11 +1346,20 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	// tasks and notes live in their own sections.
 	shown := kindedAll(s.foldLinked(s.catalogOf(c.sess), view.KindEvent, filter.keep(view.KindEvent, items)), view.KindEvent)
 	var more []unreadable
-	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, shown, from, to, c.spec.segment, false, filter.tags)
-	events := eventsIn(page.Days)
-	page.Subtitle = agendaSubtitle(tf, connLabel(c.conn), from, to, &events)
-	if len(page.Days) == 0 && len(page.Notices) == 0 {
-		page.Empty = windowEmpty(tf, kind, collectionLabel(c.col), from, to)
+	if sift != "" {
+		page.Days = s.foundDays(tf, shown, sift, c.spec.segment, false, nil, nil)
+		page.Bar.Loaded = eventsIn(page.Days)
+		page.Subtitle = foundSubtitle(connLabel(c.conn), page.Days, sift)
+		if len(page.Days) == 0 && len(page.Notices) == 0 {
+			page.Empty = foundEmpty(sift)
+		}
+	} else {
+		page.Days, page.Bar.Loaded, more = s.agendaDays(tf, shown, from, to, c.spec.segment, false, filter.tags)
+		events := eventsIn(page.Days)
+		page.Subtitle = agendaSubtitle(tf, connLabel(c.conn), from, to, &events)
+		if len(page.Days) == 0 && len(page.Notices) == 0 {
+			page.Empty = windowEmpty(tf, kind, collectionLabel(c.col), from, to)
+		}
 	}
 	page.Details = s.openInAgenda(r, c.sess, c.listPath(), shown, page.Days)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
@@ -1353,6 +1372,24 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 		Taken: tf.taken(tf.now),
 	}
 	return page
+}
+
+// calendarFilter is «Filter by word» of a calendar without scripts
+// (s-agenda-1, -17): a GET to the calendar, the word under q.
+func (s *Server) calendarFilter(base, q string) *view.Form {
+	f := s.plainForm(base, "GET", view.FormRow{Name: "q", Label: "Filter by word", Kind: view.InputText, Value: text(q)})
+	return &f
+}
+
+// foundSubtitle is the line under a calendar sifted by a word: where, and
+// how many were found — «nextcloud · 3 events with «синк»» (s-agenda-31).
+func foundSubtitle(where string, days []view.AgendaDay, q string) view.Runs {
+	return view.Runs{{Text: text(where + " · " + plural(eventsIn(days), "event") + " with «" + q + "»")}}
+}
+
+// foundEmpty is a calendar where nothing holds the word.
+func foundEmpty(q string) *view.Notice {
+	return &view.Notice{Role: view.NoticeInfo, Title: text("No events with «" + q + "».")}
 }
 
 // agendaDays expands series into the window and lays an instance another
@@ -1371,6 +1408,80 @@ func kindedAll(items []listed, k view.Kind) []kinded {
 		out = append(out, kinded{listed: it, kind: k})
 	}
 	return out
+}
+
+// foundDays is a calendar sifted by a word (s-agenda-31, s-publish-39):
+// every event whose title, place or description holds it — within the
+// window when there is one —, by day. A series stands once, at its next
+// time from now (its first in the window, its last when it has ended); what
+// has passed is muted (AgendaRow.Past). The rows are agendaDays' own.
+func (s *Server) foundDays(tf timeFmt, items []kinded, q, segment string, mark bool, from, to *time.Time) []view.AgendaDay {
+	needle := strings.ToLower(strings.TrimSpace(q))
+	now := tf.now
+	type found struct {
+		at  time.Time
+		row view.AgendaRow
+	}
+	var all []found
+	for _, it := range items {
+		o := it.obj
+		hay := strings.ToLower(strings.Join([]string{cal.Text(it.pick("SUMMARY"), "SUMMARY"), cal.Text(o, "LOCATION"), cal.Description(o)}, "\n"))
+		if needle == "" || !strings.Contains(hay, needle) {
+			continue
+		}
+		at, ok := foundAt(tf, o, from, to, now)
+		if !ok {
+			continue
+		}
+		days, _, _ := s.agendaDays(tf, []kinded{it}, at, at.Add(time.Second), segment, mark, nil)
+		if len(days) == 0 || len(days[0].Rows) == 0 {
+			continue
+		}
+		row := days[0].Rows[0]
+		row.Past = at.Before(now)
+		all = append(all, found{at: at, row: row})
+	}
+	sort.SliceStable(all, func(i, j int) bool { return all[i].at.Before(all[j].at) })
+	out := []view.AgendaDay{}
+	for _, f := range all {
+		rubric := text(tf.dayRubric(f.at))
+		if n := len(out); n > 0 && out[n-1].Rubric == rubric {
+			out[n-1].Rows, out[n-1].Count = append(out[n-1].Rows, f.row), out[n-1].Count+1
+			continue
+		}
+		out = append(out, view.AgendaDay{Rubric: rubric, Count: 1, Rows: []view.AgendaRow{f.row}})
+	}
+	return out
+}
+
+// foundAt is the time an event stands at in foundDays: its start; a
+// series' next time from now within the window, its first in the window
+// when all are past, its last when it has ended.
+func foundAt(tf timeFmt, o *model.Object, from, to *time.Time, now time.Time) (time.Time, bool) {
+	tm, err := cal.TimingOf(o, tf.tz)
+	if err != nil || tm.Start.IsZero() {
+		return time.Time{}, false
+	}
+	lo, hi := tm.Start, now.AddDate(5, 0, 0)
+	if from != nil {
+		lo, hi = *from, *to
+	}
+	if !cal.HasRecurrence(o) {
+		if tm.Start.Before(lo) || !tm.Start.Before(hi) {
+			return time.Time{}, false
+		}
+		return tm.Start, true
+	}
+	instants, err := cal.Expand(o, lo, hi, tf.tz)
+	if err != nil || len(instants) == 0 {
+		return time.Time{}, false
+	}
+	for _, at := range instants {
+		if !at.Before(now) {
+			return at, true
+		}
+	}
+	return instants[len(instants)-1], true
 }
 
 func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segment string, mark bool, tags func([]string) []view.Tag) ([]view.AgendaDay, int, []unreadable) {

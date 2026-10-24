@@ -122,7 +122,7 @@
               "target": "sheet"
             }
           ],
-          "objects": 2,
+          "objects": 4,
           "path": "/alice/calendars/lichnyj/",
           "pick": "a-nc-home|/alice/calendars/lichnyj/",
           "readOnly": false,
@@ -1289,7 +1289,7 @@
               "target": "sheet"
             }
           ],
-          "objects": 2,
+          "objects": 4,
           "path": "/alice/calendars/lichnyj/",
           "pick": "a-rad-vps|/alice/calendars/lichnyj/",
           "readOnly": false,
@@ -1726,7 +1726,9 @@
       "details": {
         "lines": [
           "Забрать документы · LOCATION",
-          "Синк-ап по релизу · ATTACH, LOCATION"
+          "Синк-ап по релизу · ATTACH, LOCATION",
+          "Синк-ап с подрядчиком · LOCATION",
+          "Синк-ап: итоги квартала · LOCATION"
         ],
         "summary": "What radicale · vps did not keep"
       },

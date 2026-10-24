@@ -2,7 +2,6 @@ package web
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -179,10 +178,7 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 	}
 	c, base, err := s.publicFiles(link)
 	if c != nil {
-		page.Foot = publicFoot(c.tf, link, "")
-		if link.Target.Folder {
-			page.Foot = publicFoot(c.tf, link, "the contents are read from the server on every visit")
-		}
+		page.Foot = publicFoot(c.tf, link)
 	}
 	if err != nil {
 		page.Notices = []view.Notice{publicTrouble()}
@@ -192,7 +188,8 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 	ctx := r.Context()
 	if !link.Target.Folder {
 		p, _ := c.path(base, false)
-		s.publicFile(ctx, c, link, p, s.route("/p/"+token+"/download"), &page)
+		s.publicFile(ctx, c, p, s.route("/p/"+token+"/download"), &page)
+		s.textWidth(r, "/p/"+token, &page)
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
@@ -206,8 +203,8 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 			return
 		}
 		page.Title = text(more[len(more)-1])
-		page.Foot = publicFoot(c.tf, link, "")
-		s.publicFile(ctx, c, link, p, s.route("/p/"+token+"/file/"+escapeSegs(strings.Join(more, "/"))), &page)
+		s.publicFile(ctx, c, p, s.route("/p/"+token+"/file/"+escapeSegs(strings.Join(more, "/"))), &page)
+		s.textWidth(r, s.postQuery("/p/"+token, url.Values{"file": {rel}}), &page)
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
@@ -221,7 +218,7 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 	entries, err := c.files.List(ctx, p)
 	switch {
 	case file.NotFound(err):
-		page.Notices = []view.Notice{publicGone()}
+		page.Notices, page.Foot = []view.Notice{publicGone()}, nil
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	case err != nil:
@@ -231,8 +228,10 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 	}
 	here := s.route("/p/" + token)
 	// The address that mounts the folder whole, with the host — what goes
-	// into «Map network drive» (Пс17; s-publish-12).
-	folder := &view.PublishedFolder{DAV: text(s.absURL(r, "/p/"+token+"/dav/"))}
+	// into «Map network drive» (Пс17; s-publish-12) —, one for the whole
+	// link, and how to mount it on each system (s-publish-32).
+	page.Strip = &view.PublishedStrip{Label: "Mount as a drive", Address: text(s.absURL(r, "/p/"+token+"/dav/")), Mount: mountTexts, Note: "read-only WebDAV, no password"}
+	folder := &view.PublishedFolder{}
 	folder.Crumbs = []view.Crumb{{Label: text(link.Target.Title), Href: here}}
 	for i, seg := range more {
 		folder.Crumbs = append(folder.Crumbs, view.Crumb{Label: text(seg), Href: s.postQuery("/p/"+token, url.Values{"in": {strings.Join(more[:i+1], "/")}})})
@@ -247,30 +246,54 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 		}
 		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
 	})
-	if n := len(entries); n > s.cfg.FilesMaxEntries {
-		// Said, not cut silently (Пс22): the same words as the owner's own
-		// folder (files.go), without the way out the guest does not have.
-		entries = entries[:s.cfg.FilesMaxEntries]
-		page.Notices = append(page.Notices, view.Notice{
-			Role:  view.NoticeInfo,
-			Title: text(fmt.Sprintf("Showing %d of %d", s.cfg.FilesMaxEntries, n)),
-			Body:  "This folder holds more than one page shows: the first ones by name are listed.",
-		})
-	}
-	// After the crumb of where the guest is: how many and how much
-	// (Пс16; s-publish-12).
+	// After the crumb of where the guest is: how many and how much, of the
+	// whole listing (Пс16; s-publish-12, -31). The folders count: «items».
 	var bytes int64
 	for _, e := range entries {
 		bytes += max(e.Size, 0)
 	}
-	folder.Total = text(plural(len(entries), "file") + " · " + string(formatSize(bytes)))
+	folder.Total = text(itemsWord(len(entries)))
+	if len(entries) > 0 {
+		folder.Total += " · " + text(string(formatSize(bytes)))
+	}
+	nested := strings.Join(more, "/")
+	// «Filter this folder» sifts the whole listing by name, before the cut
+	// (s-publish-31; note 122 p. 10).
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	if len(entries) > 0 || q != "" {
+		page.Filter = s.publicFilter(here, "Filter this folder", q, nested)
+	}
+	if q != "" {
+		entries = slices.DeleteFunc(entries, func(e file.Entry) bool {
+			return !strings.Contains(strings.ToLower(e.Name), strings.ToLower(q))
+		})
+	}
+	if n := len(entries); n > s.cfg.FilesMaxEntries {
+		// Said, not cut silently (Пс22): the cut is the page's alone — the
+		// archive, the drive and the filter have the whole folder (the
+		// owner's decision of 24.10.2026), and the words name them.
+		entries = entries[:s.cfg.FilesMaxEntries]
+		page.Notices = append(page.Notices, view.Notice{
+			Role:  view.NoticeInfo,
+			Title: text("Showing " + grouped(s.cfg.FilesMaxEntries) + " of " + grouped(n) + "."),
+			Body:  "Filter by name, download the folder or mount it to get all of them.",
+		})
+	}
 	for _, e := range entries {
 		rel := strings.Join(append(slices.Clone(more), e.Name), "/")
 		// The moment in figures and the icon by type, as the owner's own
-		// folder (Пс19, Пс20).
+		// folder (Пс19, Пс20). The name opens it in the link — a folder its
+		// listing, a file its page —; Download hands the file over, or the
+		// folder's archive (s-publish-12).
 		row := view.FileRow{Name: text(e.Name), IsDir: e.Dir, Modified: c.tf.numStamp(e.Modified), Icon: fileIcon(e)}
 		if e.Dir {
-			row.Type, row.Href = "folder", s.postQuery("/p/"+token, url.Values{"in": {rel}})
+			row.Type = "folder"
+			if e.Items != nil {
+				row.Items = text(itemsWord(*e.Items))
+				row.Type += " · " + row.Items
+			}
+			row.Open = s.postQuery("/p/"+token, url.Values{"in": {rel}})
+			row.Href = s.postQuery("/p/"+token+"/download", url.Values{"in": {rel}})
 		} else {
 			mt := fileType(e.Name, e.Type)
 			row.Type, row.Size = text(mt), formatSize(e.Size)
@@ -280,22 +303,52 @@ func (s *Server) publishedFilesPage(w http.ResponseWriter, r *http.Request, link
 		folder.Rows = append(folder.Rows, row)
 	}
 	page.Folder = folder
+	if len(folder.Rows) == 0 && q == "" {
+		// Nothing in it: no archive to give (s-publish-36).
+		page.Empty = "This folder is empty."
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
 	dl := s.route("/p/" + token + "/download")
 	if in != "" {
-		dl = s.postQuery("/p/"+token+"/download", url.Values{"in": {strings.Join(more, "/")}})
+		dl = s.postQuery("/p/"+token+"/download", url.Values{"in": {nested}})
 	}
 	page.Actions = []view.Action{{ID: "published.download", Label: "Download folder", Icon: "i-download", Href: dl, Method: "GET", Enabled: true}}
 	s.writePage(w, r, http.StatusOK, page)
 }
 
+// textWidth gives a text read on the page its width by address (s-publish-10).
+func (s *Server) textWidth(r *http.Request, here string, page *view.PublishedPage) {
+	if f := page.File; f != nil && (f.Preview == view.PreviewText || f.Preview == view.PreviewMarkdown) {
+		page.Width = s.publicWidth(r, here)
+	}
+}
+
+// mountTexts are «How to mount» of a published folder, a line for each
+// system (s-publish-32).
+var mountTexts = []view.MenuText{
+	{Title: "Windows", Text: "File Explorer › This PC › Map network drive, then paste the address."},
+	{Title: "macOS", Text: "Finder › Go › Connect to Server, then paste the address."},
+	{Title: "Linux", Text: "Files › Other Locations › Connect to Server, then type the address with davs:// in place of https://."},
+}
+
+// itemsWord counts what a folder holds — files and folders alike: «1
+// item», «2 340 items» (s-publish-12, -31).
+func itemsWord(n int) string {
+	if n == 1 {
+		return "1 item"
+	}
+	return grouped(n) + " items"
+}
+
 // publicFile fills a public page with one file at p (s-publish-9…11): its
 // name, type, size and day under the title, the picture or the text in the
 // page, Download at download — the link's file, or a file of its folder.
-func (s *Server) publicFile(ctx context.Context, c *fileCtx, link user.OpenLink, p, download string, page *view.PublishedPage) {
+func (s *Server) publicFile(ctx context.Context, c *fileCtx, p, download string, page *view.PublishedPage) {
 	e, err := c.files.Stat(ctx, p)
 	switch {
 	case file.NotFound(err):
-		page.Notices = []view.Notice{publicGone()}
+		page.Notices, page.Foot = []view.Notice{publicGone()}, nil
 		return
 	case err != nil:
 		page.Notices = []view.Notice{publicTrouble()}
@@ -313,13 +366,22 @@ func (s *Server) publicFile(ctx context.Context, c *fileCtx, link user.OpenLink,
 		head = append(head, "changed "+string(page.File.Changed))
 	}
 	page.Lede = runs(monoRun(strings.Join(head, " · ")))
-	if inlineTypes[mt] {
+	switch {
+	case mt == "application/pdf":
+		// The browser shows a PDF itself, in the page's frame, the stream
+		// of Download with its own type (s-publish-33).
+		page.File.Preview, page.File.Href = view.PreviewPDF, download+"?inline=1"
+	case inlineTypes[mt]:
 		page.File.Preview, page.File.Href = view.PreviewImage, download+"?inline=1"
 	}
 	// Text and Markdown are the body of the page (Пс14; s-publish-10): the
-	// one kind read without a program.
-	if s.publicText(ctx, c, p, e, mt, page.File) {
-		page.Foot = publicFoot(c.tf, link, "the file is read from the server on every visit")
+	// one kind read without a program; too large, it is a file without a
+	// preview with its own line (s-publish-34).
+	if !s.publicText(ctx, c, p, e, mt, page.File) && page.File.Preview == view.PreviewNone {
+		page.File.Note = "A browser cannot show this file." // s-publish-11
+		if mt == "text/plain" || mt == "text/markdown" {
+			page.File.Note = "Too large to show on the page."
+		}
 	}
 	// The one door of the page (s-publish-9); a file the browser is not
 	// shown carries its size on it, before anyone presses it (s-publish-11).
@@ -470,9 +532,8 @@ func (s *Server) publishedDAV(w http.ResponseWriter, r *http.Request) {
 		}
 		entries = append(entries, self)
 		if r.Header.Get("Depth") != "0" {
-			if len(list) > s.cfg.FilesMaxEntries {
-				list = list[:s.cfg.FilesMaxEntries]
-			}
+			// The drive has the folder whole: the cap is the page's listing
+			// alone (the owner's decision of 24.10.2026, s-publish-31).
 			for _, e := range list {
 				segs := append(slices.Clone(more), e.Name)
 				entries = append(entries, publish.DAVEntry{Href: hrefOf(segs, e.Dir), Name: e.Name, Dir: e.Dir, Size: e.Size,

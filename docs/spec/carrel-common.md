@@ -349,10 +349,11 @@ spec/fixtures/<screen>/<state>.json
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
-| `/p/{token}` | GET | токен | страница | `PublishedPage`; у папки `?in=` — папка в ней, `?file=` — страница её файла (`File`, Download — поток файла); мёртвый секрет — `DeadLinkPage` |
-| `/p/{token}/download` | GET | токен | файл, поток | — |
+| `/p/{token}` | GET | токен | страница | `PublishedPage`; `?uid=` — запись списка внутри ссылки (страница ссылки на одну запись); `?q=` — фильтр по слову (у календаря — по всему календарю, у ссылки на диапазон — внутри него; у папки — по именам всей папки до среза); `?width=reading` — ширина чтения у заметки и текста; у папки `?in=` — папка в ней, `?file=` — страница её файла (`File`, Download — поток файла); сверх `CARREL_FILES_MAX_ENTRIES` режется только листинг страницы, с `Notice` «Showing 500 of 2 340.»; мёртвый секрет — `DeadLinkPage` |
+| `/p/{token}/download` | GET | токен | файл, поток | — ; архив папки (`?in=` — вложенной) — целиком, без потолка (решение владельца 24.10.2026) |
+| `/p/{token}/{имя}` | GET | токен | файл | адрес строки подписки: календарь `{имя}.ics`, книга `{имя}.vcf` — тот же файл, что Download; имя — slug названия ссылки; другое имя — 404 |
 | `/p/{token}/file/{path…}` | GET | токен | поток | — |
-| `/p/{token}/dav/{path…}` | DAV-методы | токен | DAV | — |
+| `/p/{token}/dav/{path…}` | DAV-методы | токен | DAV | — ; листинг целиком, без потолка (решение владельца 24.10.2026) |
 | `/api/backup/run` | POST | токен | текст | — |
 | `/api/backup/status` | GET | токен | текст | — |
 | `/api/backup/{id}/download` | GET | токен | поток | — |
@@ -1217,6 +1218,7 @@ type AgendaDay struct { Rubric Text; Count int; Rows []AgendaRow } // Rubric —
 type AgendaRow struct {
     Kind      Kind // event: календарь показывает только события (решение владельца 11.10.2026, Typecase Р-56); задачи и заметки — в своих разделах
     Href      string
+    Past      bool // прошедшее в ленте найденного по слову — строка приглушена (s-agenda-31); в неделе — false
     Target    string // details: строка открывает запись в панели — фрагмент по адресу записи (C-5.4, C-7.2); пусто — строки без адреса
     UID       string
     Colour    Colour
@@ -3761,17 +3763,19 @@ type AboutPage struct { // rest-3: Title «Carrel», Lede — первая ст�
 // (s-publish-16); у папки строки нет — итог в крошках (Folder.Total).
 // Владельца страница не называет (S-25.1). Строки календаря и книги несут
 // цвет опубликованной коллекции (Colour), какой он был при выдаче ссылки.
-type PublishedPage struct {
-    Plain
+type PublishedPage struct { // записка Typecase 122: строка списка открывает свою запись в той же ссылке (?uid=)
+    Plain    // Lede — дни календаря («10 – 31 August 2026»), счёт списка («13 contacts»), у события и задачи когда и где («Due Friday, 7 August 2026 · МФЦ»), у контакта организация и должность; со словом — «3 events with «синк»»
     Kind     Kind
     ReadOnly bool // метка read-only рядом с логотипом
-    Range    *Range
+    Range    *Range         // весь календарь — ← Today → неделями (s-publish-24); у ссылки на диапазон и со словом — nil
     Contacts []ContactGroup // по букве, как книга в приложении (s-publish-7)
-    Days     []AgendaDay
-    Tasks    []TaskRow  // опубликованный список задач
-    Notes    []NoteRow  // опубликованная тетрадь
-    Fields   []Field    // одна запись: контакт, событие, задача
-    Body     Text       // описание события или задачи
+    Days     []AgendaDay    // со словом — всё найденное по дням, серия одной строкой (s-publish-39)
+    Tasks    []TaskGroup    // «Open», «Done» со счётом (s-publish-28)
+    Notes    []NoteGroup    // по месяцам, от новых к старым (s-publish-29)
+    Avatar   *Avatar        // контакт: инициалы в шапке (s-publish-26)
+    Fields   []Field        // одна запись: отмеченные поля; когда и где — в Lede, не полями; у события Repeats и Status, у задачи Status с долей
+    Body     Text           // описание события или задачи — секцией
+    Attendees []AttendeeRow // участники события именами, без ссылок и меток (s-publish-16)
     Note     *NoteDoc
     // Вложения опубликованной заметки (s-publish-8): выданные с нею — имя,
     // размер и своя ссылка каждого; не выданные — AttachNote, сколько их,
@@ -3780,14 +3784,21 @@ type PublishedPage struct {
     AttachNote  Text
     File     *PublishedFile
     Folder   *PublishedFolder
-    Actions  []Action // Download · Download folder; у файла без предпросмотра — с размером: «Download 84.2 MB» (s-publish-11); под текстом, прочитанным на странице, — не главная (s-publish-10)
-    // Foot — подвал: «This link works until 8 September 2026.», у списка —
-    // и «The owner can revoke it at any moment.» (s-publish-6, -7), у
-    // текста и папки — «· the file (the contents) is read from the server
-    // on every visit» (s-publish-10, -12); без срока — «This link does not
-    // expire».
-    Foot     Runs
+    Filter   *Form           // «Filter by word» (у папки «Filter this folder»): GET ?q=, у вложенной папки in скрытым; nil — фильтровать нечего (s-publish-35)
+    Empty    Text            // «No events this week.», «This book is empty.», «This folder is empty.»
+    Strip    *PublishedStrip // строка адреса: подписка календаря, адрес книги — когда скачивание разрешено; диск папки — всегда
+    Width    []Action        // заметка и текст: «Full width» · «Reading width» ссылками (?width=reading), On — нынешняя
+    Actions  []Action // Download · Download folder — ссылки; у файла без предпросмотра — с размером: «Download 84.2 MB» (s-publish-11); под текстом, прочитанным на странице, — не главная (s-publish-10); скачивание не разрешено (по умолчанию) — нет
+    Foot     Runs     // одна фраза на всех страницах: «This link works until 8 September 2026.» или «This link does not expire.»; у «No longer there.» — нет
 }
+type PublishedStrip struct {
+    Label   Text       // «Subscribe in your own client», «Address of this book», «Mount as a drive»
+    Address Text       // полный адрес с хостом: webcal://…/p/{token}/{имя}.ics, https://…/p/{token}/{имя}.vcf, …/p/{token}/dav/
+    Open    string     // «Open in calendar app» — webcal://; пусто у книги и папки
+    Mount   []MenuText // «How to mount»: Windows, macOS, Linux (s-publish-32); без сценария раскрывается
+    Note    Text       // «read-only, updates on its own», «read-only WebDAV, no password»
+}
+type MenuText struct { Title, Text Text } // строка меню, которая только говорит
 type PublishedAttachment struct {
     Name Text
     Size Size
@@ -3797,17 +3808,17 @@ type PublishedFile struct {
     Name    Text
     Size    Size
     Type    Text
-    Preview PreviewKind // C-8: изображение, PDF, текст, разметка, ничего
+    Preview PreviewKind // C-8: изображение, PDF — браузеру в рамке страницы (s-publish-33), текст, разметка, ничего
     Changed When        // день последней правки, «2026-08-10» после слова экрана «changed» (s-publish-9)
     Body    Text        // текст телом страницы (Preview text)
     Blocks  []Block     // Markdown разобранный (Preview markdown, s-publish-10); текст больше 256 KB — не телом, а скачать
     Href    string
+    Note    Text        // без предпросмотра: «A browser cannot show this file.» (s-publish-11), текст сверх 256 KB — «Too large to show on the page.» (s-publish-34)
 }
 type PublishedFolder struct {
-    Crumbs []Crumb
-    Rows   []FileRow
-    DAV    Text // тот же секрет монтируется как диск: полный адрес с хостом (s-publish-12); у строки файла Open — его страница внутри ссылки (?file=)
-    Total  Text // итог после текущей крошки: «4 files · 6.6 MB» (s-publish-12)
+    Crumbs []Crumb   // опубликованная папка первой; вложенная — крошками назад (s-publish-30)
+    Rows   []FileRow // Open имени: папка ?in=, файл ?file=; Href — скачать файл или архив папки (download?in=); у папки Type «folder · 6 items», когда сервер называет счёт
+    Total  Text      // итог по всему листингу: «4 items · 6.6 MB», сверх потолка «2 340 items · 7.6 GB» (s-publish-12, -31)
 }
 
 // Разобранная разметка: заголовки, списки, задачи с отметкой, выделение,

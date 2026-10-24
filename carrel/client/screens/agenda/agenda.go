@@ -52,6 +52,7 @@ const (
 	lead     = "· "
 	zoneHint = "Created in another time zone"
 	inside   = "in the event"
+	filter   = "Filter by word"
 )
 
 // The IDs of the range's presets the bar draws as buttons (C-7): the step
@@ -237,6 +238,13 @@ func bar(p *view.AgendaPage) w.Bar {
 	var items []w.BarPart
 	var twins []w.Range
 	var menu []w.MenuPart
+	if b.FilterForm != nil {
+		// «Filter by word» first, as the notes' (s-agenda-1, -17): with a
+		// word the range goes, and what is found stands by day (s-agenda-31).
+		f := bind.Filter(b, filter)
+		f.Variant = w.FilterH26W200
+		items = append(items, f)
+	}
 	if r := b.Range; r != nil {
 		seg := w.Seg{}
 		for _, a := range r.Presets {
@@ -327,6 +335,7 @@ func row(r view.AgendaRow, single bool) w.TimeRow {
 		Source: string(r.Stamp),
 		On:     r.On,
 		Href:   r.Href,
+		Past:   r.Past, // what is found that has passed (s-agenda-31)
 	}
 	if t.Detail == "" {
 		t.Detail = none

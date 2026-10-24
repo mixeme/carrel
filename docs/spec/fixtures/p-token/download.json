@@ -12,9 +12,12 @@
   ],
   "attachNote": "",
   "attachments": [],
+  "attendees": [],
+  "avatar": null,
   "body": "",
   "contacts": [],
   "days": [],
+  "empty": "",
   "fields": [],
   "file": {
     "blocks": [],
@@ -22,10 +25,12 @@
     "changed": "2026-07-20",
     "href": "/p/link-panorama-token/download",
     "name": "панорама.tif",
+    "note": "A browser cannot show this file.",
     "preview": "none",
     "size": "84 MB",
     "type": "image/tiff"
   },
+  "filter": null,
   "folder": null,
   "foot": [
     {
@@ -44,6 +49,8 @@
   "notices": [],
   "range": null,
   "readOnly": true,
+  "strip": null,
   "tasks": [],
-  "title": "панорама.tif"
+  "title": "панорама.tif",
+  "width": []
 }

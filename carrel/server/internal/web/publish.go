@@ -801,11 +801,13 @@ func (s *Server) openPublished(w http.ResponseWriter, r *http.Request, link user
 // publicTrouble is a source that did not answer, said to a reader who came
 // from outside: no server, no address, no diagnostics.
 func publicTrouble() view.Notice {
-	return view.Notice{Role: view.NoticeAlert, Title: "The source did not answer", Body: "What was published is kept on a server that did not answer just now. Try again later."}
+	return view.Notice{Role: view.NoticeAlert, Title: "The source did not answer.", Body: "Try again later."}
 }
 
+// publicGone is what is no longer there (s-publish-38): the page has no
+// foot then — the link opens nothing any more.
 func publicGone() view.Notice {
-	return view.Notice{Role: view.NoticeInfo, Title: "No longer there", Body: "What was published has been deleted or moved where it was kept."}
+	return view.Notice{Role: view.NoticeInfo, Title: "No longer there.", Body: "It was deleted or moved."}
 }
 
 // getPublished is the page of a link: the thing, read now, read-only.
@@ -831,24 +833,25 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 		Plain:    view.Plain{Title: text(link.Target.Title)},
 		Kind:     c.spec.kind,
 		ReadOnly: true,
-		// A list says the owner can take it back (s-publish-6, -7); one
-		// record says its day only (s-publish-8).
-		Foot: publicFoot(c.tf, link, footRevoke),
+		Foot:     publicFoot(c.tf, link),
 		// The button names the file it gives (s-publish-6, -7, -8): a note
 		// goes as Markdown, never as its raw iCalendar.
 		Actions: []view.Action{{ID: "published.download", Label: text("Download " + exportFormats[c.spec.kind].ext), Icon: "i-download", Href: s.route("/p/" + token + "/download"), Method: "GET", Enabled: true}},
 	}
 	if link.Target.NoDownload {
-		// The link was made without the file: the page stays, the .ics and
-		// the subscription are not offered and not served (s-publish-2).
+		// The link was made without the file (the default): the page
+		// stays, the file and the subscription are not offered and not
+		// served (s-publish-24, -26…-29).
 		page.Actions = nil
+	} else if link.Target.UID == "" {
+		page.Strip = s.publicStrip(r, c, link, token)
 	}
 	ctx := r.Context()
 	if uid := link.Target.UID; uid != "" {
 		obj, err := c.find(ctx, uid)
 		switch {
 		case notFoundErr(err):
-			page.Notices, page.Actions = []view.Notice{publicGone()}, nil
+			page.Notices, page.Actions, page.Foot = []view.Notice{publicGone()}, nil, nil
 			_ = s.users.MarkLinkGone(link.ID) // the owner's list says so (Б41)
 		case err != nil:
 			page.Notices, page.Actions = []view.Notice{publicTrouble()}, nil
@@ -875,17 +878,26 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 			if files != nil {
 				s.guestAttachments(r, link, token, files, &page)
 			}
+			if page.Note != nil {
+				page.Width = s.publicWidth(r, "/p/"+token)
+			}
 		}
-		page.Foot = publicFoot(c.tf, link, "")
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
+	if uid := r.URL.Query().Get("uid"); uid != "" {
+		// A row of the list opens its record in the same link (s-publish-6,
+		// -7, -28, -29): the page of a link to that one record.
+		s.publicListRecord(w, r, c, link, uid, page)
+		return
+	}
 	if err := s.publicCollection(r, c, link, token, &page); err != nil {
-		page.Notices, page.Actions = []view.Notice{publicTrouble()}, nil
+		page.Notices, page.Actions, page.Strip = []view.Notice{publicTrouble()}, nil, nil
+		page.Filter, page.Empty, page.Range = nil, "", nil
 		if goneErr(err) {
 			// A collection removed is gone, not a server that did not
 			// answer (Б41): the guest is not told to try later forever.
-			page.Notices = []view.Notice{publicGone()}
+			page.Notices, page.Foot = []view.Notice{publicGone()}, nil
 			_ = s.users.MarkLinkGone(link.ID)
 		}
 	}
@@ -894,9 +906,11 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 }
 
 // guestRows takes the owner's own marks off the rows a guest sees (Пс23;
-// s-publish-6 draws the caption empty): «linked ×2», «2 sources» and the
-// like are how the owner keeps their records, and tell the guest nothing
-// but about the owner.
+// note 122 p. 1): «linked ×2», «2 sources» and the like are how the owner
+// keeps their records and tell the guest nothing but about the owner. What
+// is part of the time stays — «repeats weekly», «tentative» —, and «3
+// attendees», which is there only when the link lets the attendees out
+// (visitorRecords).
 func guestRows(page *view.PublishedPage) {
 	for i := range page.Contacts {
 		for j := range page.Contacts[i].Rows {
@@ -905,46 +919,157 @@ func guestRows(page *view.PublishedPage) {
 	}
 	for i := range page.Days {
 		for j := range page.Days[i].Rows {
-			page.Days[i].Rows[j].Badges = nil
+			row := &page.Days[i].Rows[j]
+			row.Badges = slices.DeleteFunc(row.Badges, func(b view.Badge) bool { return strings.HasPrefix(string(b.Label), "linked") })
 		}
 	}
 	for i := range page.Tasks {
-		page.Tasks[i].Badges = nil
+		for j := range page.Tasks[i].Rows {
+			page.Tasks[i].Rows[j].Badges = nil
+		}
 	}
 	for i := range page.Notes {
-		page.Notes[i].Badges = nil
+		for j := range page.Notes[i].Rows {
+			page.Notes[i].Rows[j].Badges = nil
+		}
+	}
+}
+
+// publicStrip is the address strip of a published list that may be
+// downloaded (s-publish-6, -7): a calendar to subscribe to, webcal:// and
+// «Open in calendar app»; a book's address, which another Carrel takes as a
+// feed. A task list and a notebook have their Download only.
+func (s *Server) publicStrip(r *http.Request, c *collectionCtx, link user.OpenLink, token string) *view.PublishedStrip {
+	file := "/p/" + token + "/" + collectionSlug(link.Target.Title) + exportFormats[c.spec.kind].ext
+	switch c.spec.kind {
+	case view.KindEvent:
+		addr := "webcal://" + strings.TrimPrefix(strings.TrimPrefix(s.absURL(r, file), "https://"), "http://")
+		return &view.PublishedStrip{Label: "Subscribe in your own client", Address: text(addr), Open: addr, Note: "read-only, updates on its own"}
+	case view.KindContact:
+		return &view.PublishedStrip{Label: "Address of this book", Address: text(s.absURL(r, file)), Note: "another Carrel can subscribe to it; other clients import it"}
+	}
+	return nil
+}
+
+// publicListRecord is a record of a published list opened from its row
+// (?uid=): the page of a link to that one record, with what the list's
+// link lets out, its Download the list's own (s-publish-16, -26, -27, -8).
+func (s *Server) publicListRecord(w http.ResponseWriter, r *http.Request, c *collectionCtx, link user.OpenLink, uid string, page view.PublishedPage) {
+	page.Strip = nil
+	obj, err := c.find(r.Context(), uid)
+	switch {
+	case notFoundErr(err):
+		page.Notices, page.Actions, page.Foot = []view.Notice{publicGone()}, nil, nil
+	case err != nil:
+		page.Notices, page.Actions = []view.Notice{publicTrouble()}, nil
+	default:
+		if c.card != nil {
+			obj = visitorCard(obj, link.Target)
+		}
+		if isCalendarKind(c.spec.kind) {
+			obj = visitorRecord(obj, link.Target)
+		}
+		if c.spec.kind == view.KindNote {
+			obj = visitorNote(obj)
+		}
+		if obj == nil {
+			page.Notices, page.Actions = []view.Notice{publicTrouble()}, nil
+			break
+		}
+		s.publicRecord(c, obj, &page)
+		if page.Note != nil {
+			page.Width = s.publicWidth(r, s.postQuery("/p/"+r.PathValue("token"), url.Values{"uid": {uid}}))
+		}
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+// publicWidth is the width of a text read on a public page, by its address
+// (s-publish-8, -10): the full width, or the reading width at
+// ?width=reading — no script needed.
+func (s *Server) publicWidth(r *http.Request, here string) []view.Action {
+	reading := r.URL.Query().Get("width") == "reading"
+	wide := s.route(here)
+	sep := "?"
+	if strings.Contains(here, "?") {
+		sep = "&"
+	}
+	return []view.Action{
+		{ID: "width.full", Label: "Full width", Href: wide, Method: "GET", Enabled: true, On: !reading},
+		{ID: "width.reading", Label: "Reading width", Href: wide + sep + "width=reading", Method: "GET", Enabled: true, On: reading},
 	}
 }
 
 // publicRecord fills the page with one record — its own fields, nothing that
-// leads back into the owner's Carrel. The line under the title of an event
-// is when and where (s-publish-16); no other lede — the badge «read-only»
-// says what the page is.
+// leads back into the owner's Carrel (note 122 p. 4). When and where are the
+// line under the title, not fields (s-publish-16, -27); a contact's head is
+// its initials, its name, its organisation and title (s-publish-26); people
+// are names, without links or marks.
 func (s *Server) publicRecord(c *collectionCtx, obj *model.Object, page *view.PublishedPage) {
 	tf := c.tf
 	page.Title, page.Lede = text(recordTitle(c.spec.kind, obj)), nil
+	place := strings.TrimSpace(cal.Text(obj, "LOCATION"))
+	lede := func(head ...string) {
+		if place != "" {
+			head = append(head, place)
+		}
+		page.Lede = line(strings.Join(head, " · "))
+	}
 	switch c.spec.kind {
 	case view.KindContact:
+		name := contactName(obj)
+		page.Avatar = &view.Avatar{Initials: text(initials(name)), Colour: collectionColour(card.UID(obj))}
+		var head []string
+		if org := structured(firstValue(obj, "ORG")); org != "" {
+			head = append(head, org)
+		}
+		if title := firstValue(obj, "TITLE"); title != "" {
+			head = append(head, title)
+		}
+		page.Lede = line(strings.Join(head, " · "))
 		for _, f := range contactFieldsOf(obj) {
+			if f.prop == "ORG" || f.prop == "TITLE" || f.prop == "CATEGORIES" {
+				continue
+			}
 			page.Fields = append(page.Fields, f.Field)
 		}
 	case view.KindEvent:
 		var head []string
-		if tm, err := cal.TimingOf(obj, tf.tz); err == nil && !tm.Start.IsZero() {
-			page.Fields = append(page.Fields, view.Field{Label: "When", Value: text(tf.when(tm))})
+		tm, err := cal.TimingOf(obj, tf.tz)
+		if err == nil && !tm.Start.IsZero() {
 			head = append(head, tf.when(tm))
 		}
-		if where := strings.TrimSpace(cal.Text(obj, "LOCATION")); where != "" {
-			head = append(head, where)
+		lede(head...)
+		if err == nil && cal.HasRecurrence(obj) {
+			words, end := tf.repeats(cal.RawRRULE(obj), tm.Start)
+			page.Fields = append(page.Fields, view.Field{Label: "Repeats", Value: text(words), Badge: end})
 		}
-		page.Lede = line(strings.Join(head, " · "))
-		page.Fields = append(page.Fields, calendarFields(obj)...)
+		if v := cal.Text(obj, "STATUS"); v != "" {
+			page.Fields = append(page.Fields, view.Field{Label: "Status", Value: text(statusLabel(v))})
+		}
 		page.Body = text(cal.Description(obj))
+		page.Attendees = recordPeople(obj, nil)
 	case view.KindTask:
+		var head []string
 		if due, err := cal.DueOf(obj, tf.tz); err == nil && !due.Start.IsZero() {
-			page.Fields = append(page.Fields, view.Field{Label: "Due", Value: text(tf.timeOrDate(due))})
+			// «Due Friday, 7 August 2026», its time when it has one
+			// (s-publish-27).
+			day := due.Start.In(tf.tz).Format("Monday, 2 January 2006")
+			if !due.AllDay {
+				day += ", " + tf.clock(due.Start)
+			}
+			head = append(head, "Due "+day)
 		}
-		page.Fields = append(page.Fields, calendarFields(obj)...)
+		lede(head...)
+		status := taskStatuses[0].label
+		if v := strings.TrimSpace(firstValue(obj, "STATUS")); v != "" {
+			status = statusLabel(v)
+		}
+		f := view.Field{Label: "Status", Runs: view.Runs{{Text: text(status)}}}
+		if p := percentOf(obj); p != nil {
+			f.Runs = append(f.Runs, view.Run{Text: " "}, view.Run{Text: text(strconv.Itoa(*p) + "%"), Mark: view.RunMono})
+		}
+		page.Fields = append(page.Fields, f)
 		page.Body = text(cal.Description(obj))
 	default:
 		body := cal.Description(obj)
@@ -961,17 +1086,32 @@ func (s *Server) publicRecord(c *collectionCtx, obj *model.Object, page *view.Pu
 	}
 }
 
-// publicCollection fills the page with the collection read now: a book, one
-// week of a calendar with its range, a task list, a notebook.
+// publicCollection fills the page with the collection read now: a book, a
+// calendar — its days, or a week of the whole of it —, a task list, a
+// notebook (note 122). Each row opens its record in the same link (?uid=);
+// «Filter by word» (?q=) sifts it as the owner's list does, and goes away
+// with nothing to sift.
 func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.OpenLink, token string, page *view.PublishedPage) error {
 	ctx := r.Context()
 	tf := c.tf
+	here := "/p/" + token
+	open := func(uid string) string { return s.postQuery(here, url.Values{"uid": {uid}}) }
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	has := func(q string, hay ...string) bool {
+		return q == "" || strings.Contains(strings.ToLower(strings.Join(hay, "\n")), strings.ToLower(q))
+	}
+	filter := func(n int) {
+		if n > 0 || q != "" {
+			page.Filter = s.publicFilter(here, "Filter by word", q, "")
+		}
+	}
 	switch c.spec.kind {
 	case view.KindContact:
 		objs, err := c.contactsAll(ctx)
 		if err != nil {
 			return err
 		}
+		all := len(objs)
 		sort.SliceStable(objs, func(i, j int) bool {
 			return strings.ToLower(contactName(objs[i])) < strings.ToLower(contactName(objs[j]))
 		})
@@ -981,9 +1121,12 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 			o = visitorCard(o, link.Target)
 			name := contactName(o)
 			row := view.ContactRow{
-				UID: card.UID(o), Avatar: view.Avatar{Initials: text(initials(name)), Colour: collectionColour(card.UID(o))},
+				UID: card.UID(o), Href: open(card.UID(o)), Avatar: view.Avatar{Initials: text(initials(name)), Colour: collectionColour(card.UID(o))},
 				Name: text(name), Phone: text(firstValue(o, "TEL")), Email: text(firstValue(o, "EMAIL")),
 				Org: text(structured(firstValue(o, "ORG"))), State: view.RecordOK, Colour: linkColour(link.Target),
+			}
+			if !has(q, string(row.Name), string(row.Phone), string(row.Email), string(row.Org)) {
+				continue
 			}
 			rubric := rubricOf(name)
 			if n := len(page.Contacts); n == 0 || string(page.Contacts[n-1].Rubric) != rubric {
@@ -992,12 +1135,22 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 			g := &page.Contacts[len(page.Contacts)-1]
 			g.Rows, g.Count = append(g.Rows, row), g.Count+1
 		}
-		page.Lede = line(plural(len(objs), "contact") + listReadNow)
+		page.Lede = line(plural(all, "contact"))
+		filter(all)
+		if all == 0 {
+			page.Empty = "This book is empty." // s-publish-35
+		}
 	case view.KindEvent:
 		from, to := weekWindow(tf, r.URL.Query().Get("from"))
 		fixed := publishedWindow(tf, link)
 		if fixed != nil {
 			from, to = fixed[0], fixed[1]
+		}
+		if q != "" {
+			// With a word the days are all found in the calendar — within
+			// the link's days when it has them —, each series once at its
+			// next time (s-publish-39).
+			return s.publicFound(r, c, link, token, q, fixed, page)
 		}
 		objs, _, err := c.calQuery(ctx, c.spec.component, &from, &to)
 		if err != nil {
@@ -1005,32 +1158,29 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 		}
 		objs = visitorRecords(objs, link.Target)
 		page.Days, _, _ = s.agendaDays(tf, kindedAll(c.listed(objs), view.KindEvent), from, to, c.spec.segment, false, nil)
-		for i := range page.Days {
-			for j := range page.Days[i].Rows {
-				// A row of the visitor's page opens nothing: no address,
-				// and nothing for it to aim at (C-5).
-				row := &page.Days[i].Rows[j]
-				row.Href, row.Menu, row.Target = "", nil, ""
-				row.Colour = linkColour(link.Target) // the calendar's (Пс7)
+		guestDays(page, link, open)
+		// The days in one phrase (Пс5; s-publish-6, -24).
+		page.Lede = line(tf.window(from, to))
+		filter(1)
+		if fixed == nil {
+			// The whole calendar steps by weeks, as the owner's (s-publish-24):
+			// ← Today →, the arrows saying where they go.
+			week := func(t time.Time) string {
+				return s.postQuery(here, url.Values{"from": {t.Format("2006-01-02")}})
 			}
-		}
-		// The days in one phrase (Пс5; s-publish-6).
-		page.Lede = line(tf.window(from, to) + " · the page is read from the server on every visit")
-		week := func(t time.Time) string {
-			return s.postQuery("/p/"+token, url.Values{"from": {t.Format("2006-01-02")}})
-		}
-		page.Range = &view.Range{
-			From: text(tf.date(from)), To: text(tf.date(to.AddDate(0, 0, -1))),
-			Presets: []view.Action{
-				{ID: "range.previous", Label: "Previous week", Href: week(from.AddDate(0, 0, -7)), Method: "GET", Enabled: true},
-				{ID: "range.current", Label: "This week", Href: s.route("/p/" + token), Method: "GET", Enabled: true},
-				{ID: "range.next", Label: "Next week", Href: week(to), Method: "GET", Enabled: true},
-			},
-		}
-		if fixed != nil {
-			// The days are the link's, not the reader's: there is nowhere
-			// to step, and a preset that moves out of them would lie.
-			page.Range.Presets = nil
+			page.Range = &view.Range{
+				From: text(tf.date(from)), To: text(tf.date(to.AddDate(0, 0, -1))),
+				Presets: []view.Action{
+					{ID: "range.previous", Label: "Previous week", Icon: "i-back", Href: week(from.AddDate(0, 0, -7)), Method: "GET", Enabled: true},
+					{ID: "range.current", Label: "Today", Href: s.route(here), Method: "GET", Enabled: true},
+					{ID: "range.next", Label: "Next week", Icon: "i-next", Href: week(to), Method: "GET", Enabled: true},
+				},
+			}
+			if len(page.Days) == 0 {
+				page.Empty, page.Filter = "No events this week.", nil // s-publish-25
+			}
+		} else if len(page.Days) == 0 {
+			page.Empty = "No events these days."
 		}
 	case view.KindTask:
 		objs, _, err := c.calQuery(ctx, c.spec.component, nil, nil)
@@ -1038,59 +1188,128 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 			return err
 		}
 		objs = visitorRecords(objs, link.Target)
+		all := len(objs)
+		// Open, then done, under their rubrics with the count (s-publish-28).
+		groups := []view.TaskGroup{{Rubric: "Open"}, {Rubric: "Done"}}
 		for _, o := range objs {
-			row := view.TaskRow{UID: cal.UID(o), Done: taskDone(o), Summary: text(recordTitle(view.KindTask, o)), Percent: percentOf(o), State: view.RecordOK}
+			title := recordTitle(view.KindTask, o)
+			if !has(q, title, cal.Description(o)) {
+				continue
+			}
+			row := view.TaskRow{UID: cal.UID(o), Href: open(cal.UID(o)), Done: taskDone(o), Summary: text(title), Percent: percentOf(o), State: view.RecordOK}
 			if due, err := cal.DueOf(o, tf.tz); err == nil && !due.Start.IsZero() {
 				row.Due = text(tf.shortDue(due))
+				row.Overdue = overdueBy(tf, due, row.Done) != ""
 			}
-			page.Tasks = append(page.Tasks, row)
+			g := &groups[0]
+			if row.Done {
+				g = &groups[1]
+			}
+			g.Rows, g.Count = append(g.Rows, row), g.Count+1
 		}
-		sort.SliceStable(page.Tasks, func(i, j int) bool { return !page.Tasks[i].Done && page.Tasks[j].Done })
-		page.Lede = line(plural(len(page.Tasks), "task") + listReadNow)
+		for _, g := range groups {
+			if g.Count > 0 {
+				page.Tasks = append(page.Tasks, g)
+			}
+		}
+		page.Lede = line(plural(all, "task"))
+		filter(all)
+		if all == 0 {
+			page.Empty = "This list is empty."
+		}
 	default:
 		objs, _, err := c.calQuery(ctx, c.spec.component, nil, nil)
 		if err != nil {
 			return err
 		}
+		all := len(objs)
+		// By month, the newest first, as the owner's notebook (s-publish-29).
 		sort.SliceStable(objs, func(i, j int) bool { return noteTime(objs[i], tf.tz).After(noteTime(objs[j], tf.tz)) })
 		for _, o := range objs {
 			body := cal.Description(o)
 			title := noteTitle(cal.Text(o, "SUMMARY"), body)
-			row := view.NoteRow{UID: cal.UID(o), Title: text(title), Excerpt: text(noteExcerpt(body, title)), State: view.RecordOK}
+			if !has(q, title, body) {
+				continue
+			}
+			row := view.NoteRow{UID: cal.UID(o), Href: open(cal.UID(o)), Title: text(title), Excerpt: text(noteExcerpt(body, title)), State: view.RecordOK}
+			month := ""
 			if at := noteTime(o, tf.tz); !at.IsZero() {
 				row.Date = text(tf.shortDay(at))
+				month = at.In(tf.tz).Format("January 2006")
 			}
-			page.Notes = append(page.Notes, row)
+			if n := len(page.Notes); n == 0 || string(page.Notes[n-1].Rubric) != month {
+				page.Notes = append(page.Notes, view.NoteGroup{Rubric: text(month)})
+			}
+			g := &page.Notes[len(page.Notes)-1]
+			g.Rows, g.Count = append(g.Rows, row), g.Count+1
 		}
-		page.Lede = line(plural(len(page.Notes), "note") + listReadNow)
+		page.Lede = line(plural(all, "note"))
+		filter(all)
+		if all == 0 {
+			page.Empty = "This notebook is empty."
+		}
 	}
 	return nil
 }
 
-// listReadNow follows the count under the title of a published list
-// (s-publish-7): what the guest sees is not a copy.
-const listReadNow = " · the list is read from the server on every visit"
+// publicFilter is «Filter by word» of a public list, «Filter this folder» of
+// a folder: a GET to the page, the word under q, the folder open in a
+// nested one under in (s-publish-7, -12, -30).
+func (s *Server) publicFilter(here, label, q, in string) *view.Form {
+	rows := []view.FormRow{{Name: "q", Label: text(label), Kind: view.InputText, Value: text(q)}}
+	if in != "" {
+		rows = append(rows, view.FormRow{Name: "in", Kind: view.InputHidden, Value: text(in)})
+	}
+	f := s.plainForm(here, "GET", rows...)
+	return &f
+}
 
-// footRevoke is the foot of a published list after its day (s-publish-6,
-// -7).
-const footRevoke = "revoke"
+// guestDays makes the rows of a published calendar the guest's: each opens
+// its event in the same link (s-publish-6), in the calendar's colour (Пс7),
+// with nothing to aim at but that page.
+func guestDays(page *view.PublishedPage, link user.OpenLink, open func(string) string) {
+	for i := range page.Days {
+		for j := range page.Days[i].Rows {
+			row := &page.Days[i].Rows[j]
+			row.Href, row.Menu, row.Target = open(row.UID), nil, ""
+			row.Colour = linkColour(link.Target)
+		}
+	}
+}
 
-// publicFoot is the foot of a public page (Пс2): until when the link works,
-// then what the frames say after it — that the owner can take a list back
-// (footRevoke), or how the page is read («the file is read from the server
-// on every visit», s-publish-10); nothing more for one record or a file.
-func publicFoot(tf timeFmt, link user.OpenLink, after string) view.Runs {
-	until := "This link does not expire"
+// publicFound is a published calendar sifted by a word (s-publish-39): what
+// it holds with the word — within the link's days when it has them —, by
+// day; a series once, at its next time from today, with «repeats weekly»;
+// what has passed muted. «N events with «word»» under the title, no ←
+// Today →.
+func (s *Server) publicFound(r *http.Request, c *collectionCtx, link user.OpenLink, token, q string, fixed *[2]time.Time, page *view.PublishedPage) error {
+	var from, to *time.Time
+	if fixed != nil {
+		from, to = &fixed[0], &fixed[1]
+	}
+	objs, _, err := c.calQuery(r.Context(), c.spec.component, from, to)
+	if err != nil {
+		return err
+	}
+	objs = visitorRecords(objs, link.Target)
+	page.Days = s.foundDays(c.tf, kindedAll(c.listed(objs), view.KindEvent), q, c.spec.segment, false, from, to)
+	n := 0
+	for _, d := range page.Days {
+		n += len(d.Rows)
+	}
+	guestDays(page, link, func(uid string) string { return s.postQuery("/p/"+token, url.Values{"uid": {uid}}) })
+	page.Lede = line(plural(n, "event") + " with «" + q + "»")
+	page.Filter = s.publicFilter("/p/"+token, "Filter by word", q, "")
+	return nil
+}
+
+// publicFoot is the foot of a public page, one phrase on every page (note
+// 122 p. 3): until when the link works.
+func publicFoot(tf timeFmt, link user.OpenLink) view.Runs {
 	if link.Expires != nil {
-		until = "This link works until " + tf.date(*link.Expires)
+		return line("This link works until " + tf.date(*link.Expires) + ".")
 	}
-	switch after {
-	case "":
-		return line(until + ".")
-	case footRevoke:
-		return line(until + ". The owner can revoke it at any moment.")
-	}
-	return line(until + " · " + after)
+	return line("This link does not expire.")
 }
 
 // linkColour is the colour of the published collection as it stood when
@@ -1105,6 +1324,25 @@ func linkColour(t user.PublishTarget) view.Colour {
 
 // getPublishedDownload hands the thing over as a file, as it is now: the
 // collection whole, or the one record.
+// getPublishedFeed is the address of the strip (s-publish-6, -7): the
+// calendar's or the book's file under its own name, «personal.ics»,
+// «team.vcf», for a client that subscribes to it or imports it — the file of
+// Download. Another name is no address.
+func (s *Server) getPublishedFeed(w http.ResponseWriter, r *http.Request) {
+	link, ok := s.openLink(w, r)
+	if !ok {
+		return
+	}
+	k := view.Kind(link.Target.Kind)
+	spec, known := recordKinds[segmentOf(k)]
+	if !known || (k != view.KindEvent && k != view.KindContact) || link.Target.UID != "" ||
+		r.PathValue("name") != collectionSlug(link.Target.Title)+exportFormats[spec.kind].ext {
+		s.tokenNotFound(w, r, time.Now())
+		return
+	}
+	s.getPublishedDownload(w, r)
+}
+
 func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 	link, ok := s.openLink(w, r)
 	if !ok {

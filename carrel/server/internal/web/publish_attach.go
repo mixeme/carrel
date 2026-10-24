@@ -207,7 +207,7 @@ func (s *Server) publishedAttachment(w http.ResponseWriter, r *http.Request, lin
 	if !ok {
 		return
 	}
-	page := view.PublishedPage{Plain: view.Plain{Title: text(link.Target.Title)}, Kind: view.KindFile, ReadOnly: true, Foot: publicFoot(c.tf, link, "")}
+	page := view.PublishedPage{Plain: view.Plain{Title: text(link.Target.Title)}, Kind: view.KindFile, ReadOnly: true, Foot: publicFoot(c.tf, link)}
 	obj, err := c.find(r.Context(), link.Target.UID)
 	var data []byte
 	var a cal.Attachment

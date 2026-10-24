@@ -97,7 +97,7 @@ func TestDeleteAsksWhatIsLost(t *testing.T) {
 	if _, ok := f.srv.File(attachFiles + "carrel/agenda.pdf"); ok {
 		t.Error("the file stays though ticked")
 	}
-	if noticeTitled(publicPage(t, f, link).Notices, "No longer there") == nil {
+	if noticeTitled(publicPage(t, f, link).Notices, "No longer there.") == nil {
 		t.Error("the link still opens the event")
 	}
 }

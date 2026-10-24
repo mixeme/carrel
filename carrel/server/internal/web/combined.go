@@ -106,6 +106,11 @@ func (s *Server) combinedQuery(r *http.Request, tf timeFmt, spec kindSpec) (fano
 	if spec.kind != view.KindEvent {
 		return fanout.Query{}, page
 	}
+	// A word asks every calendar whole: what is found is found in all of
+	// it, not in the week (s-agenda-31).
+	if q := strings.TrimSpace(r.URL.Query().Get("q")); q != "" {
+		return fanout.Query{}, page + "?" + url.Values{"q": {q}}.Encode()
+	}
 	kind, from, to := agendaWindow(tf, r.URL.Query())
 	// The window of the screen is the window asked of the servers: a month
 	// shown is a month read (review Р-12).
@@ -411,10 +416,22 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			events := eventsIn(page.Days)
 			page.Subtitle = agendaSubtitle(tf, combinedSubtitle(page.Rail, spec, nil), from, to, &events)
 		}
+		sift := strings.TrimSpace(r.URL.Query().Get("q"))
+		page.Bar.Filter, page.Bar.FilterForm = text(sift), s.calendarFilter(base, sift)
+		if sift != "" {
+			// With a word: all that is found, by day; no week, no ← Today →
+			// (s-agenda-31).
+			page.Days = s.foundDays(tf, rows, sift, spec.segment, true, nil, nil)
+			page.Bar.Loaded = eventsIn(page.Days)
+			page.Subtitle = foundSubtitle(combinedSubtitle(page.Rail, spec, nil), page.Days, sift)
+		}
 		page.Details = s.openInAgenda(r, sess, base, rows, page.Days)
 		page.Bar.Range = s.agendaRange(tf, base, filter.tag, kind, from, to, r.URL.Query())
 		page.Bar.Segments = []view.Action{}
 		page.Bar.Compact = s.compactForm(r, spec.segment, base)
+		if sift != "" {
+			page.Bar.Range, page.Bar.Compact = nil, nil // the filter and Columns (s-agenda-31)
+		}
 		page.Bar.Columns = columns()
 		page.Bar.Actions = append(actions, s.agendaPrintAction(base, query))
 		page.Bar.Drop = drop
@@ -426,6 +443,8 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			// (states-14).
 			page.Poll, page.Empty = nil, s.nothingTicked(spec)
 			page.Subtitle = view.Runs{{Text: text(combinedSubtitle(page.Rail, spec, nil))}}
+		case st.snap != nil && !st.snap.Running && len(page.Days) == 0 && len(page.Notices) == 0 && sift != "":
+			page.Empty = foundEmpty(sift)
 		case st.snap != nil && !st.snap.Running && len(page.Days) == 0 && len(page.Notices) == 0:
 			page.Empty = windowEmpty(tf, kind, "the ticked calendars", from, to)
 		}

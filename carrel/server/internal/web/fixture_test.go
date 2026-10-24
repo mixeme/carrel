@@ -1383,6 +1383,9 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 	// No panel: the frame of one calendar draws none (the panel is the
 	// combined calendar's, s-agenda-1).
 	app.compare(t, "app-agenda/normal.json", app.h.do(get(here, app.sess)))
+	// With a word: what is found in the whole calendar, by day (s-agenda-31).
+	found := app.listPath(t, "calendar", "lichnyj") + "?q=" + url.QueryEscape("синк")
+	app.compare(t, "app-agenda/filtered.json", app.h.do(get(found, app.sess)))
 }
 
 // C-14.2: the suggestions of the attendees' field as s-agenda-12 draws them

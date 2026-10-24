@@ -303,7 +303,33 @@
       ]
     },
     "filter": "",
-    "filterForm": null,
+    "filterForm": {
+      "action": "/app/calendar",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "add": null,
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter by word",
+              "name": "q",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ],
+          "unfold": null
+        }
+      ]
+    },
     "loaded": 5,
     "range": {
       "form": {
@@ -502,7 +528,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a/delete?etag=e15",
+              "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a/delete?etag=e17",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete event",
@@ -778,7 +804,7 @@
               "csrf": "csrf",
               "danger": true,
               "enabled": true,
-              "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0/delete?etag=e14",
+              "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0/delete?etag=e16",
               "icon": "i-trash",
               "id": "record.delete",
               "label": "Delete event",
@@ -1054,7 +1080,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": 8,
         "enabled": true,
         "href": "/app/calendar",
         "icon": "i-cal",
@@ -1128,7 +1154,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": 2,
+            "count": 4,
             "detail": "",
             "feed": false,
             "href": "/app/calendar/a-nc-home/lichnyj",

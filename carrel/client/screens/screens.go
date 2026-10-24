@@ -370,7 +370,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.AgendaPage) },
-		Frames: []string{"s-agenda-1", "s-agenda-17", "states-13", "states-14", "states-15", "print-1"},
+		Frames: []string{"s-agenda-1", "s-agenda-17", "s-agenda-31", "states-13", "states-14", "states-15", "print-1"},
 		Draw: func(model any) Root {
 			p := model.(*view.AgendaPage)
 			if p.Print.Paper {

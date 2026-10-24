@@ -371,7 +371,7 @@
                 "options": [],
                 "readOnly": false,
                 "required": false,
-                "value": "e30"
+                "value": "e32"
               },
               {
                 "add": null,
@@ -1430,7 +1430,7 @@
             "csrf": "csrf",
             "enabled": true,
             "file": "photo",
-            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e30\u0026op=upload",
+            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e32\u0026op=upload",
             "id": "photo.replace",
             "label": "Replace",
             "method": "POST",
@@ -1439,7 +1439,7 @@
           {
             "csrf": "csrf",
             "enabled": true,
-            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e30\u0026op=crop",
+            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e32\u0026op=crop",
             "id": "photo.crop",
             "label": "Crop",
             "method": "POST",
@@ -1449,7 +1449,7 @@
             "csrf": "csrf",
             "danger": true,
             "enabled": true,
-            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e30\u0026op=remove",
+            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e32\u0026op=remove",
             "id": "photo.remove",
             "label": "Remove",
             "method": "POST",
@@ -1457,7 +1457,7 @@
           }
         ],
         "editable": true,
-        "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e30",
+        "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e32",
         "initials": "АК",
         "note": "EXIF orientation applied, metadata stripped."
       },

@@ -25,6 +25,7 @@ func (s *Server) registerRoutes() {
 	// C-5.2 — public by secret
 	s.handle("GET /p/{token}", (*Server).getPublished)
 	s.handle("GET /p/{token}/download", (*Server).getPublishedDownload)
+	s.handle("GET /p/{token}/{name}", (*Server).getPublishedFeed)
 	s.handle("GET /p/{token}/file/{path...}", (*Server).getPublishedFile)
 	s.handle("/p/{token}/dav/{path...}", (*Server).publishedDAV)
 	s.handle("POST /api/backup/run", (*Server).postBackupRun)

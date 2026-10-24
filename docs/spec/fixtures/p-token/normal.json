@@ -11,6 +11,8 @@
   ],
   "attachNote": "",
   "attachments": [],
+  "attendees": [],
+  "avatar": null,
   "body": "",
   "contacts": [],
   "days": [
@@ -18,10 +20,15 @@
       "count": 1,
       "rows": [
         {
-          "badges": [],
+          "badges": [
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
           "changed": "7 Aug 15:15",
           "colour": "#4a6b52",
-          "href": "",
+          "href": "/p/link-lichnyj-token?uid=8f1c-4a02-b7d3",
           "kind": "event",
           "location": "",
           "menu": [],
@@ -44,7 +51,7 @@
           "badges": [],
           "changed": "9 Aug 20:30",
           "colour": "#4a6b52",
-          "href": "",
+          "href": "/p/link-lichnyj-token?uid=1d55-90fe-3c27",
           "kind": "event",
           "location": "",
           "menu": [],
@@ -64,10 +71,15 @@
       "count": 1,
       "rows": [
         {
-          "badges": [],
+          "badges": [
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
           "changed": "7 Aug 15:15",
           "colour": "#4a6b52",
-          "href": "",
+          "href": "/p/link-lichnyj-token?uid=8f1c-4a02-b7d3",
           "kind": "event",
           "location": "",
           "menu": [],
@@ -87,10 +99,15 @@
       "count": 1,
       "rows": [
         {
-          "badges": [],
+          "badges": [
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
           "changed": "7 Aug 15:15",
           "colour": "#4a6b52",
-          "href": "",
+          "href": "/p/link-lichnyj-token?uid=8f1c-4a02-b7d3",
           "kind": "event",
           "location": "",
           "menu": [],
@@ -110,10 +127,15 @@
       "count": 1,
       "rows": [
         {
-          "badges": [],
+          "badges": [
+            {
+              "label": "repeats weekly",
+              "role": "neutral"
+            }
+          ],
           "changed": "7 Aug 15:15",
           "colour": "#4a6b52",
-          "href": "",
+          "href": "/p/link-lichnyj-token?uid=8f1c-4a02-b7d3",
           "kind": "event",
           "location": "",
           "menu": [],
@@ -130,30 +152,61 @@
       "rubric": "Monday · 31 August"
     }
   ],
+  "empty": "",
   "fields": [],
   "file": null,
+  "filter": {
+    "action": "/p/link-lichnyj-token",
+    "actions": [],
+    "errors": [],
+    "method": "GET",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Filter by word",
+            "name": "q",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
   "folder": null,
   "foot": [
     {
-      "text": "This link works until 8 September 2026. The owner can revoke it at any moment."
+      "text": "This link works until 8 September 2026."
     }
   ],
   "kind": "event",
   "lede": [
     {
-      "text": "10 – 31 August 2026 · the page is read from the server on every visit"
+      "text": "10 – 31 August 2026"
     }
   ],
   "note": null,
   "notes": [],
   "notices": [],
-  "range": {
-    "form": null,
-    "from": "10 August 2026",
-    "presets": [],
-    "to": "31 August 2026"
-  },
+  "range": null,
   "readOnly": true,
+  "strip": {
+    "address": "webcal://example.com/p/link-lichnyj-token/lichnyi.ics",
+    "label": "Subscribe in your own client",
+    "mount": [],
+    "note": "read-only, updates on its own",
+    "open": "webcal://example.com/p/link-lichnyj-token/lichnyi.ics"
+  },
   "tasks": [],
-  "title": "Личный"
+  "title": "Личный",
+  "width": []
 }

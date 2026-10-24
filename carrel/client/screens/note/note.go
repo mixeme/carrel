@@ -77,7 +77,7 @@ const (
 const attachID = "attach.add"
 
 // faces are the faces the page draws a note's text in (s-notes-2).
-var faces = bind.TextFaces{Lead: w.ProseLead, After: w.ProseLeadAfter, Tasks: w.RubricBottom8, Tick: w.TickNudge, Code: w.MonoChip}
+var faces = bind.TextFaces{Lead: w.ProseLead, After: w.ProseLeadAfter, Tick: w.TickNudge, Code: w.MonoChip}
 
 // Screen draws the note from its view model, read or in its edit
 // (NoteDoc.Mode).

@@ -15,12 +15,12 @@ import (
 
 // TextFaces are what the frame draws a note's text in, the screen's: the
 // first paragraphs (Lead: ProseLead on the page, ProseRead in a panel), a
-// paragraph after a section (After), the heading over a list of tasks
-// (Tasks), a task's tick (Tick), inline code (Code).
+// paragraph after a section (After), a task's tick (Tick), inline code
+// (Code). The heading over a list of tasks is the text's own heading
+// (Typecase's note 122 p. 16).
 type TextFaces struct {
 	Lead  w.ProseVariant
 	After w.ProseVariant
-	Tasks w.RubricVariant
 	Tick  w.TickVariant
 	Code  w.MonoVariant
 }
@@ -226,7 +226,7 @@ func DocText(blocks []view.Block, f TextFaces) []w.DocPart {
 		flush()
 		switch {
 		case b.Kind == view.BlockHeading && i+1 < len(blocks) && isTasks(blocks[i+1]):
-			out = append(out, w.DocTasks{Title: w.Rubric{Text: flat(b), Variant: f.Tasks}, Items: tasks(blocks[i+1], f)})
+			out = append(out, w.DocTasks{Title: flat(b), Items: tasks(blocks[i+1], f)})
 			i++
 		case b.Kind == view.BlockHeading:
 			out = append(out, w.DocHeading{Text: flat(b)})
