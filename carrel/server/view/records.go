@@ -101,14 +101,20 @@ type PhotoBlock struct {
 
 type PhotoPreviewPage struct {
 	Shell
-	Href    string `json:"href"` // предпросмотр текущего кадра
-	Zoom    int    `json:"zoom"`
-	OffsetX int    `json:"offsetX"`
-	OffsetY int    `json:"offsetY"`
-	Rotate  int    `json:"rotate"`
+	Href string `json:"href"` // предпросмотр текущего кадра
+	// Note — строка над полями: «Drag to choose the frame.» (s-contacts-5)
+	Note Text `json:"note"`
+	// Form — страница-форма (записка Typecase 119): кадр, как его нарисовал
+	// сервер, — скрытые zoom, x, y (их двигает сценарий; числовых полей нет),
+	// etag, поворот — радио rotate (0, 90, 180, 270); POST ?op=crop —
+	// Save photo
+	Form Form `json:"form"`
 	// Saved — что будет записано в карточку: «512 × 512 · JPEG · about 90
-	// KB» (s-contacts-5)
-	Saved   Text     `json:"saved"`
+	// KB» (s-contacts-5); SavedHint — подсказка под ним
+	Saved     Text `json:"saved"`
+	SavedHint Text `json:"savedHint"`
+	// Actions — Save photo (отправляет Form), Cancel (к правке), Remove
+	// photo (Form своим адресом ?op=remove), когда у карточки есть фото
 	Actions []Action `json:"actions"`
 }
 

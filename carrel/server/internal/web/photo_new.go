@@ -224,6 +224,9 @@ func (s *Server) postNewPhotoPreview(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, keepTyping(c, uid, d.Values))
 		return
 	}
+	if op == "crop" && framed(r) {
+		op = "save" // the frame page's form (s-contacts-5)
+	}
 	switch op {
 	case "crop":
 		// The chosen frame again, from where it was left.

@@ -29,7 +29,8 @@
         "last": false,
         "readOnly": false,
         "reason": "",
-        "stamp": "nextcloud · Записи"
+        "stamp": "nextcloud · Записи",
+        "value": "a-nc-home/zapisi"
       },
       {
         "colour": "#6b4e7a",
@@ -38,7 +39,8 @@
         "last": false,
         "readOnly": false,
         "reason": "",
-        "stamp": "nextcloud · Дневник"
+        "stamp": "nextcloud · Дневник",
+        "value": "a-nc-home/dnevnik"
       },
       {
         "colour": "#3f6e8c",
@@ -46,8 +48,9 @@
         "label": "Общие с семьёй",
         "last": false,
         "readOnly": true,
-        "reason": "Read-only",
-        "stamp": "nextcloud · Общие с семьёй"
+        "reason": "Read-only: nothing can be written here.",
+        "stamp": "nextcloud · Общие с семьёй",
+        "value": "a-nc-home/zapiski-obshchie"
       }
     ]
   },

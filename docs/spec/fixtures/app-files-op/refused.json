@@ -206,16 +206,5 @@
     ]
   },
   "title": "Move 3 items",
-  "warning": [
-    {
-      "text": "Inside one server this is "
-    },
-    {
-      "mark": "mono",
-      "text": "MOVE"
-    },
-    {
-      "text": ": instant, no traffic. To another storage the file has to be downloaded and uploaded again — Carrel says so before it starts, not after."
-    }
-  ]
+  "warning": []
 }

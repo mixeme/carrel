@@ -104,7 +104,7 @@
   "title": "Move 3 items",
   "warning": [
     {
-      "text": "This goes to another storage, so nothing moves on a server: Carrel downloads each file and uploads it there, and deletes the original only once its copy is complete."
+      "text": "Each file is downloaded and uploaded again."
     }
   ]
 }

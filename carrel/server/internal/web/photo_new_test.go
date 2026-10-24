@@ -67,12 +67,12 @@ func TestNewContactPhoto(t *testing.T) {
 		t.Fatalf("the new form's UID %q", uid)
 	}
 	page = decode[view.PhotoPreviewPage](t, f.h.do(get(preview, f.sess)))
-	resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.rotate.90"), f.sess, url.Values{}))
+	resp = f.h.do(postForm(cropStep(page), f.sess, cropForm(page, "rotate", "90")))
 	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != preview {
 		t.Fatalf("turn: %d %s", resp.Code, resp.Header().Get("Location"))
 	}
 	page = decode[view.PhotoPreviewPage](t, f.h.do(get(preview, f.sess)))
-	resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, url.Values{"zoom": {"100"}, "offsetX": {"0"}, "offsetY": {"0"}, "rotate": {"90"}}))
+	resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, cropForm(page, "rotate", "90")))
 	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != list+"/new?uid="+uid {
 		t.Fatalf("save photo: %d %s %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
 	}
@@ -109,10 +109,10 @@ func TestNewContactPhoto(t *testing.T) {
 		t.Fatalf("crop: %d %s", resp.Code, resp.Header().Get("Location"))
 	}
 	page = decode[view.PhotoPreviewPage](t, f.h.do(get(preview, f.sess)))
-	if page.Rotate != 90 {
-		t.Errorf("the frame of a chosen photo starts at %d°, want the saved 90°", page.Rotate)
+	if cropField(page, "rotate") != "90" {
+		t.Errorf("the frame of a chosen photo starts at %s°, want the saved 90°", cropField(page, "rotate"))
 	}
-	_ = f.h.do(postForm(actionHref(t, page.Actions, "photo.rotate.180"), f.sess, url.Values{}))
+	_ = f.h.do(postForm(cropStep(page), f.sess, cropForm(page, "rotate", "180")))
 	resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.cancel"), f.sess, url.Values{}))
 	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != list+"/new?uid="+uid {
 		t.Fatalf("cancel of a crop: %d %s", resp.Code, resp.Header().Get("Location"))
@@ -149,7 +149,7 @@ func TestNewContactPhoto(t *testing.T) {
 	preview = resp.Header().Get("Location")
 	uid = strings.TrimPrefix(preview, list+"/new/photo-preview?uid=")
 	page = decode[view.PhotoPreviewPage](t, f.h.do(get(preview, f.sess)))
-	_ = f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, url.Values{}))
+	_ = f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, cropForm(page)))
 	form = decode[view.ContactEditPage](t, f.h.do(get(list+"/new?uid="+uid, f.sess)))
 	resp = f.h.do(postForm(actionHref(t, form.Photo.Actions, "photo.remove"), f.sess, url.Values{}))
 	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != list+"/new" {

@@ -30,8 +30,8 @@ func TestCardPhotoKeepsWhatWasTyped(t *testing.T) {
 		t.Fatalf("upload: %d %s %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
 	}
 	page := decode[view.PhotoPreviewPage](t, f.h.do(get(rec+"/photo-preview", f.sess)))
-	resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.cancel"), f.sess, url.Values{}))
-	form := decode[view.ContactEditPage](t, f.h.do(get(resp.Header().Get("Location"), f.sess)))
+	// Cancel is a link to the form (s-contacts-5).
+	form := decode[view.ContactEditPage](t, f.h.do(get(actionHref(t, page.Actions, "photo.cancel"), f.sess)))
 	if formValue(t, form, "fn") != "Ada King" || formValue(t, form, "title") != "Countess" || form.Photo.Href != "" {
 		t.Errorf("after Cancel: fn %q, title %q, photo %q", formValue(t, form, "fn"), formValue(t, form, "title"), form.Photo.Href)
 	}
@@ -57,7 +57,7 @@ func TestCardPhotoKeepsWhatWasTyped(t *testing.T) {
 			t.Fatalf("upload (header %v): %d %s", header, resp.Code, resp.Body.String())
 		}
 		page = decode[view.PhotoPreviewPage](t, f.h.do(get(rec+"/photo-preview", f.sess)))
-		resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, url.Values{"zoom": {"100"}, "offsetX": {"0"}, "offsetY": {"0"}, "rotate": {"0"}}))
+		resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, url.Values{"zoom": {"100"}, "x": {"0"}, "y": {"0"}, "rotate": {"0"}}))
 		if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != rec+"/edit" {
 			t.Fatalf("save photo (header %v): %d %s %s", header, resp.Code, resp.Header().Get("Location"), resp.Body.String())
 		}
@@ -88,8 +88,7 @@ func TestCardPhotoKeepsWhatWasTyped(t *testing.T) {
 		t.Fatalf("crop: %d %s", resp.Code, resp.Header().Get("Location"))
 	}
 	page = decode[view.PhotoPreviewPage](t, f.h.do(get(rec+"/photo-preview", f.sess)))
-	resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.cancel"), f.sess, url.Values{}))
-	form = decode[view.ContactEditPage](t, f.h.do(get(resp.Header().Get("Location"), f.sess)))
+	form = decode[view.ContactEditPage](t, f.h.do(get(actionHref(t, page.Actions, "photo.cancel"), f.sess)))
 	if formValue(t, form, "fn") != "Ada King" || form.Photo.Href == "" {
 		t.Errorf("after Crop and Cancel: fn %q, photo %q", formValue(t, form, "fn"), form.Photo.Href)
 	}
@@ -122,7 +121,7 @@ func TestCardPhotoTypingKeepsItsVersion(t *testing.T) {
 		t.Fatalf("upload: %d %s", resp.Code, resp.Body.String())
 	}
 	f.srv.Seed(f.col+"ada.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nNOTE:changed elsewhere\nEND:VCARD\n")
-	frame := url.Values{"zoom": {"100"}, "offsetX": {"0"}, "offsetY": {"0"}, "rotate": {"0"}}
+	frame := url.Values{"zoom": {"100"}, "x": {"0"}, "y": {"0"}, "rotate": {"0"}}
 	page := decode[view.PhotoPreviewPage](t, f.h.do(get(rec+"/photo-preview", f.sess)))
 	again := decode[view.PhotoPreviewPage](t, f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, frame)))
 	if len(again.Notices) == 0 {

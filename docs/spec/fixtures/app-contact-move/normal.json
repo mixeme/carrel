@@ -3,7 +3,7 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=arhiv\u0026to=a-nc-home",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=rassylki\u0026to=a-rad-vps",
       "id": "record.move.confirm",
       "label": "Move",
       "method": "POST",
@@ -54,7 +54,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "server"
+            "value": "nothing"
           },
           {
             "add": null,
@@ -78,7 +78,7 @@
   "kind": "contact",
   "subject": "Анна Ковалёва · from nextcloud · Контакты",
   "target": {
-    "chosen": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=arhiv\u0026to=a-nc-home",
+    "chosen": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=rassylki\u0026to=a-rad-vps",
     "field": "to",
     "new": null,
     "options": [
@@ -90,28 +90,29 @@
         "last": false,
         "readOnly": true,
         "reason": "already there",
-        "stamp": "nextcloud · Контакты",
+        "stamp": "nextcloud",
         "value": "a-nc-home/kontakty"
       },
       {
         "colour": "#a05a2c",
-        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=arhiv\u0026to=a-nc-home\u0026back=%2Fapp%2Fcontacts%3Ftask%3Dt-task",
+        "here": true,
         "id": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=arhiv\u0026to=a-nc-home",
         "label": "Архив",
         "last": false,
-        "readOnly": false,
-        "reason": "",
-        "stamp": "nextcloud · Архив",
+        "readOnly": true,
+        "reason": "already there",
+        "stamp": "nextcloud",
         "value": "a-nc-home/arhiv"
       },
       {
         "colour": "#6b4e7a",
+        "here": true,
         "id": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?into=komanda\u0026to=a-rad-vps",
         "label": "Команда",
         "last": false,
         "readOnly": true,
-        "reason": "read-only",
-        "stamp": "radicale · vps · Команда",
+        "reason": "already there",
+        "stamp": "radicale · vps",
         "value": "a-rad-vps/komanda"
       },
       {
@@ -122,7 +123,7 @@
         "last": false,
         "readOnly": false,
         "reason": "",
-        "stamp": "radicale · vps · Рассылки",
+        "stamp": "radicale · vps",
         "value": "a-rad-vps/rassylki"
       }
     ]
@@ -1523,16 +1524,5 @@
     "taskEdit": null,
     "tasks": null
   },
-  "warning": [
-    {
-      "text": "Inside one server this is "
-    },
-    {
-      "mark": "mono",
-      "text": "MOVE"
-    },
-    {
-      "text": ": instant, no traffic. To another address book the card is copied and then deleted — Carrel says so before it starts, not after."
-    }
-  ]
+  "warning": []
 }

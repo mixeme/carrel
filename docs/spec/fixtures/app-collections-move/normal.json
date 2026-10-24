@@ -2187,17 +2187,10 @@
   },
   "warning": [
     {
-      "text": "Carrel creates a calendar there, copies all "
+      "text": "Links, devices and backups lose the old address."
     },
     {
-      "mark": "strong",
-      "text": "2"
-    },
-    {
-      "text": " events, then deletes this one on nextcloud. Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path."
-    },
-    {
-      "text": " nextcloud may tell the attendees of its meetings that they are cancelled."
+      "text": " nextcloud may send attendees a cancellation."
     }
   ]
 }

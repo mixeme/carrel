@@ -272,7 +272,7 @@ func TestPhotoUploadFrameAndSave(t *testing.T) {
 	}
 
 	page := decode[view.PhotoPreviewPage](t, f.h.do(get(rec+"/photo-preview", f.sess)))
-	if page.Zoom != 100 || page.OffsetX != 0 || page.OffsetY != 0 || page.Rotate != 0 || page.Title != "Photo" {
+	if cropField(page, "zoom") != "100" || cropField(page, "x") != "0" || cropField(page, "y") != "0" || cropField(page, "rotate") != "0" || page.Title != "Photo" {
 		t.Errorf("default frame: %+v", page)
 	}
 	if hasAction(page.Actions, "photo.remove") {
@@ -286,15 +286,14 @@ func TestPhotoUploadFrameAndSave(t *testing.T) {
 		t.Errorf("orientation not applied: top %v, bottom %v", img.At(256, 60), img.At(256, 450))
 	}
 
-	// The form sends its fields along with a turn; the turn's own value wins.
-	turn := actionHref(t, page.Actions, "photo.rotate.90")
-	resp = f.h.do(postForm(turn, f.sess, url.Values{"zoom": {"100"}, "offsetX": {"0"}, "offsetY": {"0"}, "rotate": {"0"}}))
+	// A turn as the page's script sends it: the preview drawn turned.
+	resp = f.h.do(postForm(cropStep(page), f.sess, cropForm(page, "rotate", "90")))
 	if resp.Code != http.StatusSeeOther {
 		t.Fatalf("turn: %d %s", resp.Code, resp.Body.String())
 	}
 	page = decode[view.PhotoPreviewPage](t, f.h.do(get(rec+"/photo-preview", f.sess)))
-	if a := actionByID(page.Actions, "photo.rotate.90"); page.Rotate != 90 || a == nil || !a.On || !a.Enabled {
-		t.Errorf("after the turn: rotate %d, actions %+v", page.Rotate, page.Actions)
+	if cropField(page, "rotate") != "90" {
+		t.Errorf("after the turn: rotate %q", cropField(page, "rotate"))
 	}
 	_, img = fetchImage(t, f, page.Href)
 	if !reddish(img.At(450, 256)) || !bluish(img.At(60, 256)) {
@@ -302,7 +301,7 @@ func TestPhotoUploadFrameAndSave(t *testing.T) {
 	}
 
 	save := actionHref(t, page.Actions, "photo.save")
-	resp = f.h.do(postForm(save, f.sess, url.Values{"zoom": {"100"}, "offsetX": {"0"}, "offsetY": {"0"}, "rotate": {"90"}}))
+	resp = f.h.do(postForm(save, f.sess, cropForm(page, "rotate", "90")))
 	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != rec+"/edit" {
 		t.Fatalf("save: %d %s %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
 	}
@@ -351,7 +350,7 @@ func TestPhotoOlderFormAfterACutDataURI(t *testing.T) {
 		t.Fatalf("upload: %d %s", resp.Code, resp.Body.String())
 	}
 	preview := decode[view.PhotoPreviewPage](t, f.h.do(get(rec+"/photo-preview", f.sess)))
-	saved := decode[view.ContactEditPage](t, f.h.do(postForm(actionHref(t, preview.Actions, "photo.save"), f.sess, url.Values{})))
+	saved := decode[view.ContactEditPage](t, f.h.do(postForm(actionHref(t, preview.Actions, "photo.save"), f.sess, cropForm(preview))))
 	if saved.Loss == nil || len(saved.Loss.Properties) != 1 || saved.Loss.Properties[0] != "PHOTO" {
 		t.Fatalf("loss = %+v", saved.Loss)
 	}
@@ -385,7 +384,7 @@ func TestPhotoOlderFormAfterACutDataURI(t *testing.T) {
 		t.Fatalf("3.0 upload: %d %s", resp.Code, resp.Body.String())
 	}
 	preview = decode[view.PhotoPreviewPage](t, g.h.do(get(bob+"/photo-preview", g.sess)))
-	saved = decode[view.ContactEditPage](t, g.h.do(postForm(actionHref(t, preview.Actions, "photo.save"), g.sess, url.Values{})))
+	saved = decode[view.ContactEditPage](t, g.h.do(postForm(actionHref(t, preview.Actions, "photo.save"), g.sess, cropForm(preview))))
 	if saved.Loss == nil || len(saved.Loss.Actions) != 0 {
 		t.Errorf("3.0 card losing PHOTO: loss %+v", saved.Loss)
 	}
@@ -496,7 +495,7 @@ func TestPhotoSaveOnAMovedCard(t *testing.T) {
 	if strings.Contains(body(t, f, "ada.vcf"), "PHOTO") {
 		t.Fatal("the photo was written over the other client's version")
 	}
-	resp := f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, url.Values{}))
+	resp := f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, cropForm(page)))
 	if resp.Code != http.StatusSeeOther {
 		t.Fatalf("second save: %d %s", resp.Code, resp.Body.String())
 	}
@@ -527,7 +526,7 @@ func TestVCard3PhotoCropAndRemove(t *testing.T) {
 	}
 
 	// All the way left: the red half only.
-	resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, url.Values{"offsetX": {"-100"}}))
+	resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, cropForm(page, "x", "-100")))
 	if resp.Code != http.StatusSeeOther {
 		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
 	}
@@ -632,4 +631,25 @@ func TestLinkedPhotoIsProxiedAndNotEdited(t *testing.T) {
 	if n := f.srv.CountRequests("PUT", f.col); n != 0 {
 		t.Errorf("%d writes", n)
 	}
+}
+
+// cropForm is the frame page's form as it stands (s-contacts-5), these
+// fields set: what its Save photo sends.
+func cropForm(page view.PhotoPreviewPage, set ...string) url.Values {
+	v := formFields(page.Form)
+	for i := 0; i+1 < len(set); i += 2 {
+		v.Set(set[i], set[i+1])
+	}
+	return v
+}
+
+// cropField is a field of the frame page's form.
+func cropField(page view.PhotoPreviewPage, name string) string {
+	return formFields(page.Form).Get(name)
+}
+
+// cropStep is the address the page's script sends a frame to as it is
+// moved or turned: the preview drawn so, nothing written.
+func cropStep(page view.PhotoPreviewPage) string {
+	return strings.Replace(page.Form.Action, "op=crop", "op=frame", 1)
 }

@@ -33,7 +33,7 @@ const (
 //   - Under «The address» (more than one — «The addresses»), each old
 //     address: monospaced, how many records name it, muted; under it «→»
 //     and the choice — the card's addresses now and «Do not rewrite»
-//     (Pairs).
+//     (Pairs); none when nothing can be rewritten (s-contacts-20).
 //   - Under «What rewriting can set off», each group of risk: its tick, its
 //     records behind a button that counts them (each a link with its mark
 //     and day), and what it may set off, muted (Groups); the line about a
@@ -61,9 +61,13 @@ func Sheet(p *view.RewriteSheet) w.Sheet {
 		if pr.Note != "" {
 			from.Items = append(from.Items, w.Dim{Parts: []w.Inline{w.Text(pr.Note)}, Size: w.Dim11_5})
 		}
+		s.Body = append(s.Body, from)
+		if pr.Choice.Name == "" {
+			continue // nothing to rewrite, nothing to choose (s-contacts-20)
+		}
 		pick := bind.Pick(pr.Choice)
 		pick.Variant = w.PickT12W240
-		s.Body = append(s.Body, from, w.Line{Items: []w.LinePart{w.Mono{Text: arrow}, pick}, Gap: w.LineGap8, Block: true})
+		s.Body = append(s.Body, w.Line{Items: []w.LinePart{w.Mono{Text: arrow}, pick}, Gap: w.LineGap8, Block: true})
 	}
 	if len(p.Groups) > 0 {
 		s.Body = append(s.Body, w.Rubric{Text: setOff})
@@ -100,7 +104,10 @@ func Sheet(p *view.RewriteSheet) w.Sheet {
 			b := bind.Submit(a)
 			b.Count, b.CountOne = string(p.Count), string(p.CountOne)
 			if !a.Enabled {
+				// Off, it has no key either (s-contacts-20).
 				b.State, b.Reason = w.ButtonDisabled, string(a.Reason)
+				s.Foot = append(s.Foot, b)
+				continue
 			}
 			s.Foot = append(s.Foot, b, w.Kbd{Keys: enter})
 			continue

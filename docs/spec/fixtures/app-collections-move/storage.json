@@ -49,7 +49,7 @@
     "target": "sheet"
   },
   "kind": "file",
-  "stays": "What nextcloud will not let delete — folders shared with you, folders its administrator mounted — is copied and stays there too; the result names it.",
+  "stays": "Shared and mounted folders stay there too.",
   "subject": "nextcloud · Files",
   "target": {
     "chosen": "/app/collections/move?a=a-nc-home\u0026back=%2Fapp%2Fsettings%2Fconnections\u0026c=Files\u0026to=a-sftp-vps",
@@ -2170,7 +2170,7 @@
   },
   "warning": [
     {
-      "text": "Carrel makes a folder «Files» on sftpgo · vps beside Documents and Public, copies everything in nextcloud · Files into it — each file downloaded and uploaded again — then deletes what was copied. The storage itself stays on nextcloud, empty: it is the address this connection is made with."
+      "text": "The storage itself stays on nextcloud, empty."
     }
   ]
 }

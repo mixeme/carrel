@@ -2169,14 +2169,7 @@
   },
   "warning": [
     {
-      "text": "Carrel makes a folder «Documents» in nextcloud · Files, copies all "
-    },
-    {
-      "mark": "strong",
-      "text": "12"
-    },
-    {
-      "text": " files into it — each downloaded and uploaded again — then deletes this one on sftpgo · vps. The tick in the rail, the attachment folder and the upload folder follow it; devices, published links and backup jobs pointing at the old address will see it vanish."
+      "text": "Links, devices and backups lose the old address."
     }
   ]
 }

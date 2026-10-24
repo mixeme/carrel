@@ -107,7 +107,7 @@
     "target": "sheet"
   },
   "kind": "event",
-  "note": "Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. The new name and colour are written to the server — other clients will show them at their next sync.",
+  "note": "The address stays: links, devices and backups keep working.",
   "stamp": "nextcloud",
   "title": "Rename and colour",
   "under": {

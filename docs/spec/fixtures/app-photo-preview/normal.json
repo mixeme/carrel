@@ -3,55 +3,135 @@
     {
       "csrf": "csrf",
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=frame\u0026rotate=0",
-      "id": "photo.rotate.0",
-      "label": "0°",
-      "method": "POST",
-      "on": true
-    },
-    {
-      "csrf": "csrf",
-      "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=frame\u0026rotate=90",
-      "id": "photo.rotate.90",
-      "label": "90°",
-      "method": "POST"
-    },
-    {
-      "csrf": "csrf",
-      "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=frame\u0026rotate=180",
-      "id": "photo.rotate.180",
-      "label": "180°",
-      "method": "POST"
-    },
-    {
-      "csrf": "csrf",
-      "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=frame\u0026rotate=270",
-      "id": "photo.rotate.270",
-      "label": "270°",
-      "method": "POST"
-    },
-    {
-      "csrf": "csrf",
-      "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=save",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=crop",
       "id": "photo.save",
       "label": "Save photo",
       "method": "POST",
-      "primary": true
+      "primary": true,
+      "submits": true
     },
     {
-      "csrf": "csrf",
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=cancel",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit",
       "id": "photo.cancel",
       "label": "Cancel",
-      "method": "POST"
+      "method": "GET"
     }
   ],
   "details": null,
+  "form": {
+    "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=crop",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "etag",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "e1"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "zoom",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "100"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "x",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "0"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "y",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "0"
+          },
+          {
+            "add": null,
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "radio",
+            "label": "Rotate",
+            "name": "rotate",
+            "options": [
+              {
+                "label": "0°",
+                "selected": true,
+                "value": "0"
+              },
+              {
+                "label": "90°",
+                "selected": false,
+                "value": "90"
+              },
+              {
+                "label": "180°",
+                "selected": false,
+                "value": "180"
+              },
+              {
+                "label": "270°",
+                "selected": false,
+                "value": "270"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "0"
+          }
+        ],
+        "unfold": null
+      }
+    ]
+  },
   "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?preview=1",
   "look": {
     "compact": false,
@@ -60,9 +140,8 @@
     "theme": "auto",
     "wide": false
   },
+  "note": "Drag to choose the frame.",
   "notices": [],
-  "offsetX": 0,
-  "offsetY": 0,
   "print": {
     "range": "",
     "taken": "",
@@ -129,8 +208,8 @@
     "tags": [],
     "ticks": null
   },
-  "rotate": 0,
   "saved": "512 × 512 · JPEG · about 1.9 KB",
+  "savedHint": "Kept inside the card, so it is made small.",
   "title": "Photo",
   "top": {
     "lock": null,
@@ -255,6 +334,5 @@
       }
     ],
     "userHref": "/app/settings/account"
-  },
-  "zoom": 100
+  }
 }

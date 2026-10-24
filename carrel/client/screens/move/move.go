@@ -30,8 +30,9 @@ const (
 //     monospaced —, a read-only one with its badge, the others with their
 //     server; the chosen one on. Each radio's address is the sheet with it
 //     chosen, which says what the move then does (TargetOption.Href).
-//   - What the move does (Warning; MOVE as code), and the line about the
-//     attendees where the server may tell them (Cancels).
+//   - What the person would not think of, when there is such (Warning; Р-77:
+//     a copy under a new UID), and the line about the attendees where the
+//     server may tell them (Cancels).
 //   - The foot: Move — the form's button — with Enter, Cancel with Esc.
 func Sheet(p *view.MoveSheet) w.Sheet {
 	tree := w.Tree{}
@@ -51,7 +52,10 @@ func Sheet(p *view.MoveSheet) w.Sheet {
 		}
 		tree.Rows = append(tree.Rows, row)
 	}
-	body := []w.SheetPart{w.Rubric{Text: into}, tree, warning(p.Warning)}
+	body := []w.SheetPart{w.Rubric{Text: into}, tree}
+	if len(p.Warning) > 0 {
+		body = append(body, warning(p.Warning))
+	}
 	if p.Cancels != "" {
 		body = append(body, w.Msg{Parts: []w.MsgPart{w.Text(p.Cancels)}, Space: w.MsgFlushTop2})
 	}

@@ -63,7 +63,7 @@
     "target": "sheet"
   },
   "kind": "file",
-  "note": "A folder's name is its address: renaming it moves it on the server. Devices, published links and backup jobs pointing at the old address will see it vanish; the files inside stay as they are.",
+  "note": "Links, devices and backups lose the old address.",
   "stamp": "sftpgo · vps · Documents",
   "title": "Rename",
   "under": {

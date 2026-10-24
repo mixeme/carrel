@@ -77,7 +77,7 @@ func TestNewContactPhotoKeepsWhatWasTyped(t *testing.T) {
 		}
 		preview := resp.Header().Get("Location")
 		page := decode[view.PhotoPreviewPage](t, f.h.do(get(preview, f.sess)))
-		resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, url.Values{"zoom": {"100"}, "offsetX": {"0"}, "offsetY": {"0"}, "rotate": {"0"}}))
+		resp = f.h.do(postForm(actionHref(t, page.Actions, "photo.save"), f.sess, url.Values{"zoom": {"100"}, "x": {"0"}, "y": {"0"}, "rotate": {"0"}}))
 		back := resp.Header().Get("Location")
 		if !strings.HasPrefix(back, list+"/new?uid=") {
 			t.Fatalf("save photo: %d %s", resp.Code, back)

@@ -143,7 +143,7 @@
   "title": "Copy 3 items",
   "warning": [
     {
-      "text": "A copy travels through Carrel even inside one server: each file is downloaded and uploaded again, one at a time."
+      "text": "Each file is downloaded and uploaded again, even on one server."
     }
   ]
 }

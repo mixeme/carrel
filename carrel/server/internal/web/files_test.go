@@ -800,9 +800,9 @@ func TestFileOperationsOnOneServer(t *testing.T) {
 	}
 
 	moveB := opSheet(t, f, rowMenu(t, fileRow(t, page, "b.txt"), "file.move"), url.Values{"to": {f.at("", "sub", "")}})
-	// Inside one server the sheet says only what it always says: a MOVE.
-	if !strings.HasPrefix(plainText(moveB.Warning), "Inside one server this is MOVE") {
-		t.Errorf("a move inside one server warned of something else: %q", moveB.Warning)
+	// Inside one server the sheet says nothing (Р-77, s-files-4).
+	if len(moveB.Warning) != 0 {
+		t.Errorf("a move inside one server warned of %q", plainText(moveB.Warning))
 	}
 	moves, puts := f.srv.CountRequests("MOVE", filesDocs), f.srv.CountRequests("PUT", filesDocs)
 	f.h.do(postForm(confirmHref(t, moveB), f.sess, url.Values{}))

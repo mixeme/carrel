@@ -409,7 +409,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}/{uid}/related` | GET | вход | фрагмент | `SuggestList` — подсказки поля Related to (`FormRow.Suggest`, s-tasks-10, s-notes-20); `{kind}` — `tasks`, `notes`; `{uid}` — запись формы, `new` у новой: она в подсказки не входит; `?q=` — набранное. Записи, загруженные сеансом, — события, задачи и заметки всех коллекций (сервер DAV не спрашивается), в чьём названии набранное: начинающиеся с него первыми, затем новые; строка — название с найденным жирным, метка коллекции, «event · 12 Aug» (`Meta`), UID — значение. Ставит ответ в меню поля живой слой Typecase; без сценариев — варианты поля (U-6.3) |
 | `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage`; `?print=1` — та же хронология для печати (U-10); `?kind=` — фильтр по роду: `event`, `task`, `note` или `file` (сегменты-ссылки, s-contacts-7), без него — All; `?from=&to=` — окно, форма GET диапазона (`Range.Form`) |
 | `/app/contacts/{account}/{col}/{uid}/timeline/columns` | POST | вход | редирект | — ; меню Columns хронологии (s-contacts-25), как у списков (S-9.6) |
-| `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage`; шаги `?op=` — `upload`, `crop`, `remove` с `etag` шлёт форма правки целиком (`Action.Submits`): набранное держится с черновиком и возвращается в форму один раз — после Save photo, Cancel и Remove; шаг пишет только фото. Форма возвращается с версией, на которой набрано: её двигает запись фото поверх этой же версии, а карточка, изменённая в другом месте, — нет |
+| `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage`; шаги `?op=` — `upload`, `crop`, `remove` с `etag` шлёт форма правки целиком (`Action.Submits`); форма самой страницы (s-contacts-5) — `?op=crop` с кадром (`zoom`, `x`, `y`, `rotate`) пишет его, `?op=remove` снимает фото, `?op=frame` — шаг сценария (кадр двигается, ничего не пишется), Cancel — ссылка на правку: набранное держится с черновиком и возвращается в форму один раз — после Save photo, Cancel и Remove; шаг пишет только фото. Форма возвращается с версией, на которой набрано: её двигает запись фото поверх этой же версии, а карточка, изменённая в другом месте, — нет |
 | `/app/contacts/{account}/{col}/new/photo-preview` | GET, POST | вход | страница, редирект | `PhotoPreviewPage` — фотография новой карточки (s-contacts-27, S-13): шаги те же, `?op=` — `upload` (multipart, потолки и типы карточки), `frame`, `save`, `cancel`, `crop`, `remove`; `uid` — черновик формы: его выдаёт первая загрузка, Replace его хранит. Кнопки фотографии новой формы шлют саму форму (`Action.Submits`): набранное хранится с черновиком под тем же `uid` и возвращается с формой. Ничего не пишет: Save photo отмечает кадр выбранным и ведёт на `/new?uid=`; Cancel первой загрузки и Remove — на `/new?uid=` с одним набранным (ничего не набрано — на `/new` без черновика); кадр показывает `/c/{account}/{col}/{uid}/photo?preview=` |
 | `/c/{account}/{col}/{uid}/photo` | GET | вход | поток | — |
 | `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage`; POST: `op=combine` («Write this combination», форма `ConflictPage.Form` с `choice.<n>=mine` или `theirs` на строку — `ConflictRow.Name`; строка без поля — выбранное заранее, `ConflictRow.Choice`), `op=mine`, `op=theirs`, `op=cancel`; у всех, кроме `cancel`, `etag=` — версия, против которой показан выбор: сервер ушёл дальше — страница строится заново. Запись удалена на сервере (Р-67, `ConflictPage.Deleted`): `op=combine` с `choice.0=mine` пишет её заново с правкой и ведёт на карточку, `theirs` сбрасывает правку и ведёт на список; без выбора — тот же экран. Расходиться нечему (Р-69): GET сбрасывает правку и ведёт на карточку записи |
@@ -422,10 +422,10 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}/{uid}/delete` | POST | вход | редирект или лист | `RecordDeleteSheet` |
 | `/app/{kind}/import` | GET, POST | вход | страница | `ImportPage` — вход из сведённого вида: мастер спрашивает «Into». POST с файлом (поле `file`) — бросок на сведённый список (Им4, s-io-1): шаг 1 с взятым файлом (`Source.Taken`) и пустым «Into»; выбор «Into» — предпросмотр этого файла |
 | `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage`; `to=` и `into=` — подключение и коллекция «Into» (адрес варианта `TargetOption.Href`); POST без `op` — файл: multipart, поле `file` (`Action.File` у Preview file); у заметок полей `file` может быть несколько — один набор, как zip (s-io-1), у прочих родов несколько — отказ «One file at a time: only notes take several.»; тело читается потоком, как загрузка, без потолка и временного файла (Р-73); `op=run` — записать предпросмотр, `op=cancel` — бросить файл; `existing=` (`skip`, `replace`, `copy`) — что делать с записями файла, которые уже есть в коллекции (`ImportExisting`, s-io-5…-8); у заметок `folder=` (подключение), `path=` (хранилище) и `in=` (папка внутри него, сегменты через «/») — папка дерева (`FileTreeNode.Href`, GET), `op=folder` с ними — «Preview folder» |
-| `/app/{kind}/export` | GET | вход | лист | `ExportSheet` — вход из сведённого вида: из какой коллекции |
-| `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — ; с `?uid=` — одна запись (S-19); когда в файл не попали бы записи, которых Carrel не разобрал, — экран коллекции с уведомлением и действием `collection.export.without` («Export without them», тот же адрес с `&without=1`) |
+| `/app/{kind}/export` | GET | вход | лист, редирект | `ExportSheet` — вход из сведённого вида: из какой коллекции; форма листа (`c`, у календаря `span`, `from`, `to`) — редирект на выдачу коллекции (`whole=1` или дни). Отмечена одна коллекция — Export сведённого вида ведёт на её выдачу сразу, листа нет |
+| `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — ; тетрадь — `.zip` из `.md` каждой заметки; с `?uid=` — одна запись (S-19); когда в файл не попали бы записи, которых Carrel не разобрал, — экран коллекции с уведомлением и действием `collection.export.without` («Export without them», тот же адрес с `&without=1`) |
 | `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage`; у контакта `?uid=` — форма с выбранной фотографией (`…/new/photo-preview`): её кадр в `Photo`, скрытое поле `uid`, Save создаёт карточку под этим UID с фотографией; UID, чьего кадра сеанс не держит, не берётся, а форма с таким `uid` не сохраняется молча без фотографии. У события, задачи и заметки — вложения до записи (s-agenda-15, S-20): POST с `?op=` — `attach` (multipart: вся форма и файл `file`, кнопка Attach шлёт саму форму — `Action.Submits`), `pickfile` (форма; редирект в дерево Files `?for=attach&new=`), `attachfile&file=` (файл Files), `detach&n=` (форма); первый шаг выдаёт UID записи, файлы ждут под ним с набранным, ответ — `/new?uid=` (форма как набрана, файлы в `Attach`, скрытое `uid`). До Save ничего не пишется: внутрь записи — до порога вместе, больший файл с этого компьютера не берётся (запись сначала сохраняют), больший файл Files — ссылка; Save создаёт запись под этим UID с файлами |
-| `/app/{kind}/{account}/{col}/new/quick` | GET, POST | вход | лист, редирект | `NewSheet`; POST сохраняет запись, «Open the card» переносит набранное в `/new` телом запроса |
+| `/app/{kind}/{account}/{col}/new/quick` | GET, POST | вход | лист, редирект | `NewSheet`; «куда» — поле формы `into` (`Target.Field`, Value «подключение/коллекция»; s-notes-5): POST пишет в выбранную там коллекцию; POST сохраняет запись, «Open the card» переносит набранное в `/new` телом запроса |
 | `/app/{kind}/quick` | GET | вход | лист | `NewSheet` — вход из шапки: на последней использованной коллекции рода, а пока её нет — только выбор «куда» |
 
 **Печать — тот же адрес с `?print=1`** (решение 4 плана клиента, U-10;
@@ -1449,13 +1449,12 @@ type PhotoBlock struct {
 
 type PhotoPreviewPage struct {
     Shell
-    Href    string // предпросмотр текущего кадра
-    Zoom    int
-    OffsetX int
-    OffsetY int
-    Rotate  int
-    Saved   Text // что запишет Save photo: «512 × 512 · JPEG · about 90 KB» (s-contacts-5)
-    Actions []Action
+    Href      string // предпросмотр текущего кадра
+    Note      Text   // «Drag to choose the frame.»
+    Form      Form   // страница — форма (записка Typecase 119): POST ?op=crop — Save photo; скрытые etag, zoom, x, y — кадр, как его нарисовал сервер (их двигает сценарий; числовых полей нет и не будет), радио rotate (0, 90, 180, 270)
+    Saved     Text   // что запишет Save photo: «512 × 512 · JPEG · about 90 KB» (s-contacts-5)
+    SavedHint Text   // «Kept inside the card, so it is made small.»
+    Actions   []Action // Save photo (Submits), Cancel — ссылка на правку (у новой карточки — форма ?op=cancel), Remove photo — та же форма ?op=remove, когда у карточки есть фото
 }
 
 type EventPage struct { // чтение: то, что открывается по ссылке и печатается
@@ -1996,7 +1995,7 @@ type TargetOption struct {
     Reason   Text // почему недоступна: «уже здесь», «пароль · 401», «только файлы»
     Last     bool // последний использованный
     Value    string // значение под Field формы листа: «подключение/коллекция» сегментами адреса у листа переноса; пусто, где выбор — ссылкой
-    Here     bool   // недоступна потому, что запись уже там («already there»), а не потому, что только для чтения: одно словами, другое плашкой (s-contacts-2)
+    Here     bool   // недоступна потому, что запись уже там («already there»: текущая коллекция или та, где тот же UID уже есть), а не потому, что только для чтения: одно словами, другое плашкой (s-contacts-2)
 }
 
 type NewSheet struct {
@@ -2196,11 +2195,9 @@ type MoveSheet struct {
 type RewriteSheet struct {
     Title    Text
     Subject  Text
-    Pairs    []RewritePair
-    Effects  []Field
+    Pairs    []RewritePair  // один вид при любом числе записей (s-contacts-15, -19, -20; записка Typecase 120)
     Groups   []RewriteGroup
     Both     Text
-    Kept     []Field
     KeptNote Text // то же предложениями — строка над Note (s-contacts-15): «2 records in Shared are read-only and keep the old address.», теми же словами, что итог после записи; пусто — такого нет
     Note     Text
     Form     Form
@@ -2213,8 +2210,8 @@ type RewriteSheet struct {
 type RewritePair struct {
     From   Text
     To     Text    // выбранный по умолчанию; пусто — «Do not rewrite»
-    Note   Text
-    Choice FormRow // выбор «to.N» (s-contacts-29)
+    Note   Text    // «22 records name it», «3 records name it; they keep it» (s-contacts-15)
+    Choice FormRow // выбор «to.N» (s-contacts-29); пустой Name — переписывать нечего, выбора нет (s-contacts-20)
 }
 type RewriteGroup struct {
     Name    string  // «group»
@@ -2321,10 +2318,11 @@ type CollectionDeleteSheet struct {
 // диагностика.
 
 // Лист «из какой коллекции отдать» — вход в экспорт из сведённого вида.
-type ExportSheet struct {
+type ExportSheet struct { // форма GET (s-agenda-30): Download отдаёт файл, ничего не пишется
     Kind    Kind
-    Target  TargetPicker // варианты — адреса выдачи каждой коллекции
-    Actions []Action
+    Target  TargetPicker // Field «c», Value «подключение/коллекция»; сервер, который не отвечает, — недоступен с причиной («password · 401»)
+    Form    Form         // GET /app/{kind}/export; у календаря — span (whole выключает даты | dates), from, to: по умолчанию даты, от сегодня до конца месяца
+    Actions []Action     // «Download .ics» (.vcf, .zip у тетради) · Cancel
     Under   *Under // экран под листом, пришедшим страницей (Лс29): откуда открыт (back, иначе Referer), иначе сведённый список рода; nil у фрагмента
 }
 

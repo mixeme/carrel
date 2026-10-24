@@ -62,34 +62,6 @@ func load(t *testing.T) lib {
 	return libVal
 }
 
-// downloadTicked is the download's tick of a publish sheet as the frames
-// draw it: ticked.
-var downloadTicked = regexp.MustCompile(`(<input class="tc-check__box" type="checkbox" name="download" value="1") checked><span class="tc-tickrow__tick">`)
-
-// nextFrame is where the next frame of the mockup begins.
-var nextFrame = regexp.MustCompile(`<div class="frame[ "]`)
-
-// ownerOverFrames is the mockup with what the owner decided after it was
-// drawn, until Typecase draws it (its task 229): the download of a publish
-// sheet is off until ticked, the same for every kind (the owner's decision
-// of 23.10.2026) — s-publish-2, -4 and -19 draw it ticked. Each rule names
-// its frames; one that no longer finds them is gone from the mockup, and
-// goes from here.
-func ownerOverFrames(mock string) string {
-	for _, id := range []string{"s-publish-2", "s-publish-4", "s-publish-19"} {
-		start := strings.Index(mock, `data-frame="`+id+`"`)
-		if start < 0 {
-			continue
-		}
-		end := len(mock)
-		if next := nextFrame.FindStringIndex(mock[start:]); next != nil {
-			end = start + next[0]
-		}
-		mock = mock[:start] + downloadTicked.ReplaceAllString(mock[start:end], `$1><span class="tc-tickrow__tick is-off">`) + mock[end:]
-	}
-	return mock
-}
-
 func loadLib() (lib, error) {
 	var l lib
 	raw, err := os.ReadFile(mockupPath)
@@ -106,7 +78,6 @@ func loadLib() (lib, error) {
 		return l, err
 	}
 	l.tcMock = string(raw)
-	l.mock, l.tcMock = ownerOverFrames(l.mock), ownerOverFrames(l.tcMock)
 	if l.shape, err = shape.Parse(l.mock); err != nil {
 		return l, err
 	}

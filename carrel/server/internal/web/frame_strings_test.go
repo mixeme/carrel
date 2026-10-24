@@ -134,6 +134,50 @@ func TestPhotoPreviewSaysWhatIsSaved(t *testing.T) {
 	if !shape.MatchString(string(page.Saved)) {
 		t.Errorf("saved as %q, the frame %q", page.Saved, m[1])
 	}
+
+	// The page is a form (Typecase's note 119): the frame in hidden fields,
+	// the turns a radio, Save photo its button, Cancel a link to the form,
+	// the words of the frame.
+	frame := mockupFrame(t, "s-contacts-5")
+	var hidden []string
+	for _, h := range regexp.MustCompile(`<input type="hidden" name="([a-z]+)"`).FindAllStringSubmatch(frame, -1) {
+		if h[1] != "csrf" {
+			hidden = append(hidden, h[1])
+		}
+	}
+	var turns []string
+	for _, o := range regexp.MustCompile(`name="rotate" value="(\d+)"`).FindAllStringSubmatch(frame, -1) {
+		turns = append(turns, o[1])
+	}
+	note := frameOne(t, regexp.MustCompile(`<span class="tc-dim--muted tc-dim--t12-5">(.*?)</span>`), frame, "line over the fields")[1]
+	hint := frameOne(t, regexp.MustCompile(`(?s)<label>Saved as</label>.*?<span class="tc-field__hint">(.*?)</span>`), frame, "hint of «Saved as»")[1]
+	if !strings.Contains(frame, `photo-preview?op=crop" method="post"`) || !strings.Contains(frame, `formaction="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/photo-preview?op=remove"`) {
+		t.Fatal("s-contacts-5 posts elsewhere: read it again")
+	}
+	var gotHidden, gotTurns []string
+	for _, row := range page.Form.Sets[0].Rows {
+		switch {
+		case row.Kind == view.InputHidden && row.Name != "_csrf":
+			gotHidden = append(gotHidden, row.Name)
+		case row.Name == "rotate":
+			for _, o := range row.Options {
+				gotTurns = append(gotTurns, o.Value)
+			}
+		}
+	}
+	if strings.Join(gotHidden, " ") != strings.Join(hidden, " ") || strings.Join(gotTurns, " ") != strings.Join(turns, " ") {
+		t.Errorf("fields %q, turns %q; the frame %q, %q", gotHidden, gotTurns, hidden, turns)
+	}
+	if !strings.HasSuffix(page.Form.Action, "/photo-preview?op=crop") || string(page.Note) != note || string(page.SavedHint) != hint {
+		t.Errorf("form %q, note %q, hint %q; the frame ?op=crop, %q, %q", page.Form.Action, page.Note, page.SavedHint, note, hint)
+	}
+	save, cancel := actionByID(page.Actions, "photo.save"), actionByID(page.Actions, "photo.cancel")
+	if save == nil || !save.Submits || save.Label != "Save photo" || cancel == nil || cancel.Method != "GET" || cancel.Href != rec+"/edit" {
+		t.Errorf("save %+v, cancel %+v", save, cancel)
+	}
+	if rm := actionByID(page.Actions, "photo.remove"); rm != nil && (!rm.Submits || !strings.HasSuffix(rm.Href, "?op=remove")) {
+		t.Errorf("remove = %+v, the frame the form sent to ?op=remove", rm)
+	}
 }
 
 // s-publish-9: the line of a public file — «image/png · 412 KB · changed

@@ -397,10 +397,14 @@ func keepCardTyping(c *collectionCtx, uid string, t cardTyping) {
 
 // takeCardTyping is the typing kept for this card's edit form, taken: it is
 // shown once, with the form a photo step comes back to. A form opened later
-// is the card's.
+// is the card's. A frame left by Cancel — a link to the form (s-contacts-5)
+// — is dropped with it.
 func takeCardTyping(c *collectionCtx, uid string) (cardTyping, bool) {
 	d, ok := loadPhotoDraft(c, uid)
-	if !ok || d.New || len(d.Data) != 0 || d.Values == nil {
+	if ok && !d.New && len(d.Data) != 0 && d.Values == nil {
+		clearPhotoDraft(c, uid)
+	}
+	if !ok || d.New || d.Values == nil {
 		return cardTyping{}, false
 	}
 	clearPhotoDraft(c, uid)
@@ -494,10 +498,12 @@ func (s *Server) photoBlock(c *collectionCtx, st editState) view.PhotoBlock {
 	return b
 }
 
-// photoPreviewPage is the frame screen (s-contacts-5): the preview, the frame
-// in numbers, four quarter turns, Save photo, Cancel, and Remove photo when the
-// card keeps one. The numbers come back with Save photo and with a turn; the
-// field names are the page's own: zoom, offsetX, offsetY, rotate.
+// photoPreviewPage is the frame screen (s-contacts-5, Typecase's note 119):
+// a form — the frame as the server drew it in hidden fields (zoom, x, y),
+// which a script moves; the quarter turns a radio; Save photo its button;
+// Remove photo the same form sent to its own address when the card keeps
+// one; Cancel back to the form. Without a script the frame goes as drawn,
+// and the turn and the save work.
 func (s *Server) photoPreviewPage(c *collectionCtx, uid string, d photoDraft, notices ...view.Notice) view.PhotoPreviewPage {
 	sh := s.buildShell(c.sess, "Photo")
 	back := s.cardBack(c, uid)
@@ -514,36 +520,52 @@ func (s *Server) photoPreviewPage(c *collectionCtx, uid string, d photoDraft, no
 		return s.postQuery(photoAddress(c, uid), fields)
 	}
 	page := view.PhotoPreviewPage{
-		Shell:   sh,
-		Href:    s.route(c.origin().photoPath(uid) + "?preview=" + strconv.Itoa(d.Step)),
-		Zoom:    d.Crop.Zoom,
-		OffsetX: d.Crop.OffsetX,
-		OffsetY: d.Crop.OffsetY,
-		Rotate:  d.Crop.Rotate,
+		Shell: sh,
+		Href:  s.route(c.origin().photoPath(uid) + "?preview=" + strconv.Itoa(d.Step)),
+		Note:  "Drag to choose the frame.",
 	}
 	// What Save photo writes into the card, said before it is pressed
 	// (s-contacts-5): the frame as it would be saved, measured.
 	if body, err := s.renderDraft(d); err == nil {
 		side := strconv.Itoa(s.cfg.PhotoMaxSide)
 		page.Saved = text(side + " × " + side + " · JPEG · about " + string(formatSize(int64(len(body)))))
+		page.SavedHint = "Kept inside the card, so it is made small."
 	}
+	turns := view.FormRow{Name: "rotate", Label: "Rotate", Kind: view.InputRadio, Value: text(strconv.Itoa(d.Crop.Rotate))}
 	for _, deg := range []int{0, 90, 180, 270} {
-		page.Actions = append(page.Actions, view.Action{
-			ID: "photo.rotate." + strconv.Itoa(deg), Label: text(strconv.Itoa(deg) + "°"), Method: "POST", Enabled: true, On: d.Crop.Rotate == deg,
-			Href: step(url.Values{"op": {"frame"}, "rotate": {strconv.Itoa(deg)}}),
-		})
+		turns.Options = append(turns.Options, view.Option{Value: strconv.Itoa(deg), Label: text(strconv.Itoa(deg) + "°"), Selected: d.Crop.Rotate == deg})
 	}
-	page.Actions = append(page.Actions,
-		view.Action{ID: "photo.save", Label: "Save photo", Href: step(url.Values{"op": {"save"}}), Method: "POST", Primary: true, Enabled: true},
-		view.Action{ID: "photo.cancel", Label: "Cancel", Href: step(url.Values{"op": {"cancel"}}), Method: "POST", Enabled: true},
-	)
+	num := func(n int) view.Text { return text(strconv.Itoa(n)) }
+	page.Form = view.Form{Action: step(url.Values{"op": {"crop"}}), Method: "POST", Sets: []view.FieldSet{{Rows: []view.FormRow{
+		csrfField(c.sess),
+		{Name: "etag", Kind: view.InputHidden, Value: text(d.ETag)},
+		{Name: "zoom", Kind: view.InputHidden, Value: num(d.Crop.Zoom)},
+		{Name: "x", Kind: view.InputHidden, Value: num(d.Crop.OffsetX)},
+		{Name: "y", Kind: view.InputHidden, Value: num(d.Crop.OffsetY)},
+		turns,
+	}}}}
+	cancel := view.Action{ID: "photo.cancel", Label: "Cancel", Href: s.route(c.recordPath(uid) + "/edit"), Method: "GET", Enabled: true}
+	if d.New {
+		// A new form's typing travels with the draft: Cancel sends it.
+		cancel = view.Action{ID: "photo.cancel", Label: "Cancel", Href: step(url.Values{"op": {"cancel"}}), Method: "POST", Enabled: true, Submits: true}
+	}
+	page.Actions = []view.Action{
+		{ID: "photo.save", Label: "Save photo", Href: page.Form.Action, Method: "POST", Primary: true, Enabled: true, Submits: true},
+		cancel,
+	}
 	if d.HadPhoto {
 		page.Actions = append(page.Actions, view.Action{
-			ID: "photo.remove", Label: "Remove photo", Method: "POST", Danger: true, Enabled: true,
-			Href: step(url.Values{"op": {"remove"}, "etag": {d.ETag}}),
+			ID: "photo.remove", Label: "Remove photo", Method: "POST", Danger: true, Enabled: true, Submits: true,
+			Href: step(url.Values{"op": {"remove"}}),
 		})
 	}
 	return page
+}
+
+// framed is the frame page's own form sent (zoom is its field): Save photo
+// to ?op=crop, as s-contacts-5 draws it; the edit form's Crop sends no frame.
+func framed(r *http.Request) bool {
+	return r.PostFormValue("zoom") != ""
 }
 
 // getPhotoPreview shows the frame of this card's draft. Without one there is
@@ -609,6 +631,10 @@ func (s *Server) postPhotoPreview(w http.ResponseWriter, r *http.Request) {
 		}
 		s.photoUpload(w, r, c, uid, t)
 	case "crop":
+		if framed(r) {
+			s.photoSave(w, r, c, uid, false)
+			return
+		}
 		s.photoCrop(w, r, c, uid, typing())
 	case "frame":
 		d, ok := loadFrame(c, uid)
@@ -818,8 +844,8 @@ func submittedCrop(r *http.Request, crop photo.Crop) photo.Crop {
 		}
 	}
 	read("zoom", &crop.Zoom)
-	read("offsetX", &crop.OffsetX)
-	read("offsetY", &crop.OffsetY)
+	read("x", &crop.OffsetX)
+	read("y", &crop.OffsetY)
 	read("rotate", &crop.Rotate)
 	return crop.Clamp()
 }
