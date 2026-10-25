@@ -125,7 +125,7 @@ undefined = sorted(p for p, files in seen.items()
 check("6b. названные правила введены заголовком", undefined)
 
 # 7. Фикстуры разбираются и лежат по правилам имён
-states = {"normal","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
+states = {"normal","task","nowhere","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
           "tiles","copy","elsewhere","rename","delete","attach","single","in-part","merged",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
@@ -422,6 +422,13 @@ STATE_FRAME = {
     "app-agenda/filtered": "s-agenda-31",
     # Export из сведённого календаря — фрагмент без адреса (s-agenda-30).
     "app-export/normal": "s-agenda-30",
+    # Быстрый лист из шапки на коллекции, где запись делали последней
+    # (s-notes-5 — заметка, её маршрут): контакт, событие, задача — свои
+    # кадры без адреса.
+    "app-quick/contact": "s-notes-8",
+    "app-quick/event": "s-notes-9",
+    "app-quick/task": "s-notes-10",
+    "app-quick/nowhere": "s-notes-6",
     # Приглашение ссылкой и потеря свойств при записи события — свои кадры
     # (Typecase 05ea994, 002fce3; задачи 79, 93).
     "invite/link": "s-auth-14",

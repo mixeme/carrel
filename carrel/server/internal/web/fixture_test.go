@@ -2562,14 +2562,13 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 		waitPoll(t, app.h, app.sess, first.Poll.TaskID, nil)
 		app.compare(t, "app-contact-timeline/normal.json", app.h.do(get(anna+"/timeline", app.sess)))
 	})
-	// The quick note stands over the combined notebook as its poll answered
-	// it: a page under a sheet that polls afresh is caught waiting or
-	// asking, as the race goes.
-	notebook := combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
+	// The combined notebook was read: the rails of the sheets after count
+	// its notes (the quick sheets have a set of their own,
+	// TestFixtureQuickSheets).
+	combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 	for _, one := range []struct{ dir, route string }{
 		{"app-contact-new", book + "/new"},
 		{"app-contact-import", book + "/import"},
-		{"app-quick", "/app/notes/quick?back=" + url.QueryEscape("/app/notes?task="+notebook.Poll.TaskID)},
 		// Generate profile over Set up a new device (s-plan-3).
 		{"app-settings-unlock", "/app/settings/unlock?for=profile&back=%2Fapp%2Fsettings%2Fdevices"},
 	} {
@@ -2622,6 +2621,57 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 		week := combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 		back := url.QueryEscape("/app/calendar?from=2026-08-10&task=" + week.Poll.TaskID)
 		app.compare(t, "app-export/normal.json", app.h.do(get("/app/calendar/export?back="+back, app.sess)))
+	})
+}
+
+// The quick sheet from the top bar (U-6.16; s-notes-5, -8, -9, -10): on the
+// collection a record of its kind was last made in, over the page New was
+// pressed on — the note and the contact over the calendar, the event over
+// the contacts, the task over the notes. A set of its own: what was last
+// used marks New's arrow in every rail after it. The page under a sheet is
+// read as its poll answered it: one that polls afresh is caught waiting or
+// asking, as the race goes.
+func TestFixtureQuickSheets(t *testing.T) {
+	app := newMockupApp(t)
+	app.lastUsed(t, "zapisi", view.KindNote)
+	app.lastUsed(t, "dela", view.KindTask)
+	under := map[string]func() string{
+		"calendar": func() string {
+			week := combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+			return "/app/calendar?from=2026-08-10&task=" + week.Poll.TaskID
+		},
+		"contacts": func() string {
+			return "/app/contacts?task=" + combined(t, app.h, app.sess, "/app/contacts", contactsPoll).Poll.TaskID
+		},
+		"notes": func() string {
+			return "/app/notes?task=" + combined(t, app.h, app.sess, "/app/notes", notesPoll).Poll.TaskID
+		},
+	}
+	for _, one := range []struct{ state, kind, over string }{
+		{"normal", "notes", "calendar"},
+		{"contact", "contacts", "calendar"},
+		{"event", "calendar", "contacts"},
+		{"task", "tasks", "notes"},
+	} {
+		t.Run(one.state, func(t *testing.T) {
+			rec := app.h.do(get("/app/"+one.kind+"/quick?back="+url.QueryEscape(under[one.over]()), app.sess))
+			if rec.Code != http.StatusSeeOther {
+				t.Fatalf("the quick %s from the top bar: %d, want the sheet on the collection last used", one.kind, rec.Code)
+			}
+			app.compare(t, "app-quick/"+one.state+".json", app.h.do(get(rec.Header().Get("Location"), app.sess)))
+		})
+	}
+	// Nowhere to write (s-notes-6): every notebook read-only — last, as
+	// it takes them away from what comes after.
+	t.Run("nowhere", func(t *testing.T) {
+		editBlob(t, app.h, app.sess, func(blob *sealed.Blob) {
+			for i := range blob.Collections {
+				if blob.Collections[i].Has(view.KindNote) {
+					blob.Collections[i].ReadOnly = true
+				}
+			}
+		})
+		app.compare(t, "app-quick/nowhere.json", app.h.do(get("/app/notes/quick?back="+url.QueryEscape(under["calendar"]()), app.sess)))
 	})
 }
 
@@ -3816,8 +3866,11 @@ func TestFixturePhotoPreview(t *testing.T) {
 	// The lists were opened before the card, as a person opens them, and
 	// that is where the counts of the rail come from.
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	// Анна keeps a photo, as s-contacts-6 and -3 draw her: the one chosen
+	// replaces it, and Remove photo is offered (s-contacts-5).
+	mockupAnnaPhoto(t, app)
 	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
-	add := actionHref(t, decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Photo.Actions, "photo.add")
+	add := actionHref(t, decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Photo.Actions, "photo.replace")
 	// The upload answers with a redirect to the preview; the screen is
 	// the page it leads to.
 	if resp := app.h.do(uploadRequest(add, app.sess, false, "anna.jpg", jpegOf(t, halvesImage(240, 180)))); resp.Code != 303 {

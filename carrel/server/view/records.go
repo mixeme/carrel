@@ -104,7 +104,11 @@ type PhotoBlock struct {
 
 type PhotoPreviewPage struct {
 	Shell
-	Href string `json:"href"` // предпросмотр текущего кадра
+	// Subtitle — строка под заголовком: чья фотография и что метаданные
+	// файла в карточку не идут, «Анна Ковалёва · metadata will be stripped»
+	// (s-contacts-5); у новой формы — набранное имя, иначе «New contact»
+	Subtitle Text   `json:"subtitle"`
+	Href     string `json:"href"` // предпросмотр текущего кадра
 	// Note — строка над полями: «Drag to choose the frame.» (s-contacts-5)
 	Note Text `json:"note"`
 	// Form — страница-форма (записка Typecase 119): кадр, как его нарисовал

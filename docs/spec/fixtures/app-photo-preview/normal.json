@@ -16,6 +16,16 @@
       "id": "photo.cancel",
       "label": "Cancel",
       "method": "GET"
+    },
+    {
+      "csrf": "csrf",
+      "danger": true,
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=remove",
+      "id": "photo.remove",
+      "label": "Remove photo",
+      "method": "POST",
+      "submits": true
     }
   ],
   "details": null,
@@ -52,7 +62,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e1"
+            "value": "e26"
           },
           {
             "add": null,
@@ -210,6 +220,7 @@
   },
   "saved": "512 × 512 · JPEG · about 1.9 KB",
   "savedHint": "Kept inside the card, so it is made small.",
+  "subtitle": "Анна Ковалёва · metadata will be stripped",
   "title": "Photo",
   "top": {
     "lock": null,
@@ -284,12 +295,14 @@
     },
     "refresh": {
       "action": {
-        "enabled": false,
-        "id": "",
-        "label": "",
-        "method": ""
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview",
+        "icon": "i-refresh",
+        "id": "record.refresh",
+        "label": "Refresh",
+        "method": "GET"
       },
-      "answered": "",
+      "answered": "2 min ago",
       "running": false
     },
     "search": {

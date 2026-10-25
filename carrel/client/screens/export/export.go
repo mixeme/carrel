@@ -6,8 +6,6 @@
 package export
 
 import (
-	"strings"
-
 	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
@@ -90,9 +88,13 @@ func Sheet(p *view.ExportSheet) w.Sheet {
 // words monospaced and small.
 func download(a view.Action) w.Button {
 	b := bind.Button(a, "")
-	if words, ext, ok := strings.Cut(string(a.Label), " ."); ok {
-		b.Label = words
-		b.Aside = &w.Mono{Text: "." + ext, Variant: w.Mono11}
+	label := string(a.Label)
+	for i := 1; i < len(label); i++ {
+		if label[i] == '.' && label[i-1] == ' ' {
+			b.Label = label[:i-1]
+			b.Aside = &w.Mono{Text: label[i:], Variant: w.Mono11}
+			break
+		}
 	}
 	return b
 }

@@ -387,6 +387,8 @@ type TargetOption struct {
 
 type NewSheet struct {
 	Kind   Kind         `json:"kind"`
+	Title  Text         `json:"title"` // «New note», «New contact», «New event», «New task» (s-notes-5, -8, -9, -10)
+	Icon   string       `json:"icon"`  // значок шапки: «i-quill» у заметки, как у New note шапки, у прочих — значок рода
 	Target TargetPicker `json:"target"`
 	// Form holds the few fields without which the record does not exist
 	// (U-6.16). Empty when the sheet only asks where the record goes.

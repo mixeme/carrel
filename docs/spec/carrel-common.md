@@ -1453,6 +1453,7 @@ type PhotoBlock struct {
 
 type PhotoPreviewPage struct {
     Shell
+    Subtitle  Text   // чья фотография: «Анна Ковалёва · metadata will be stripped» (s-contacts-5); у новой формы — набранное имя, иначе «New contact»
     Href      string // предпросмотр текущего кадра
     Note      Text   // «Drag to choose the frame.»
     Form      Form   // страница — форма (записка Typecase 119): POST ?op=crop — Save photo; скрытые etag, zoom, x, y — кадр, как его нарисовал сервер (их двигает сценарий; числовых полей нет и не будет), радио rotate (0, 90, 180, 270)
@@ -2005,9 +2006,11 @@ type TargetOption struct {
 
 type NewSheet struct {
     Kind    Kind
+    Title   Text   // «New note», «New contact», «New event», «New task» (s-notes-5, -8, -9, -10)
+    Icon    string // значок шапки: «i-quill» у заметки, как у New note шапки, у прочих — значок рода
     Target  TargetPicker
     Form    Form
-    Note    Text // строка под полями: «No time means the whole day…» у задачи (s-notes-10), у контакта и события — s-notes-8, s-notes-9; пусто, когда полей нет
+    Note    Text // строка под полями: «No time means the whole day…» у задачи (s-notes-10), у контакта и события — s-notes-8, s-notes-9; писать некуда — почему и что делать (s-notes-6); пусто у одного выбора «куда»
     Actions []Action
     Under   *Under // экран под листом, пришедшим страницей: откуда нажали New (back, иначе Referer), иначе список; nil у фрагмента (s-notes-5, -8, -9, -10)
 }

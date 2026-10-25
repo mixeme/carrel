@@ -346,8 +346,9 @@ type photoDraft struct {
 	Data      []byte
 	MediaType string
 	Crop      photo.Crop
-	HadPhoto  bool // the card keeps a photo of its own, so Remove photo is offered
-	Step      int  // the preview's address changes with every step
+	HadPhoto  bool   // the card keeps a photo of its own, so Remove photo is offered
+	Name      string // whose photo it is: the card's name (s-contacts-5); empty for a new form
+	Step      int    // the preview's address changes with every step
 	// New: the draft of a new form (s-contacts-27), under the UID its
 	// upload issued; there is no card and no version yet. Chosen: Save
 	// photo was pressed, and the form shows and saves the frame Kept.
@@ -519,10 +520,26 @@ func (s *Server) photoPreviewPage(c *collectionCtx, uid string, d photoDraft, no
 		}
 		return s.postQuery(photoAddress(c, uid), fields)
 	}
+	// Whose photo, and that what the file says of itself does not go into
+	// the card (s-contacts-5): the frame is written anew.
+	who := d.Name
+	if d.New {
+		if who = strings.TrimSpace(first(d.Values["fn"])); who == "" {
+			who = "New contact"
+		}
+	}
+	// When the card's book was last read, as the card's edit says it; the
+	// circle opens this page again (s-contacts-5).
+	here := photoAddress(c, uid)
+	if d.New {
+		here = newPhotoAddress(c, "") + "?" + url.Values{"uid": {uid}}.Encode()
+	}
+	sh.Top.Refresh = s.recordRefresh(c, here)
 	page := view.PhotoPreviewPage{
-		Shell: sh,
-		Href:  s.route(c.origin().photoPath(uid) + "?preview=" + strconv.Itoa(d.Step)),
-		Note:  "Drag to choose the frame.",
+		Shell:    sh,
+		Subtitle: text(who + " · metadata will be stripped"),
+		Href:     s.route(c.origin().photoPath(uid) + "?preview=" + strconv.Itoa(d.Step)),
+		Note:     "Drag to choose the frame.",
 	}
 	// What Save photo writes into the card, said before it is pressed
 	// (s-contacts-5): the frame as it would be saved, measured.
@@ -794,7 +811,7 @@ func (s *Server) photoUpload(w http.ResponseWriter, r *http.Request, c *collecti
 	savePhotoDraft(c, photoDraft{
 		Account: c.conn.ID, Col: c.col.Path, UID: uid, ETag: etag,
 		Data: src.Data, MediaType: src.MediaType, Crop: photo.DefaultCrop,
-		HadPhoto: photoOf(obj) == keptPhoto, Step: 1, Values: t.values, TypedAt: t.at,
+		HadPhoto: photoOf(obj) == keptPhoto, Name: contactName(obj), Step: 1, Values: t.values, TypedAt: t.at,
 	})
 	s.redirect(w, r, photoAddress(c, uid))
 }
@@ -825,7 +842,7 @@ func (s *Server) photoCrop(w http.ResponseWriter, r *http.Request, c *collection
 	}
 	savePhotoDraft(c, photoDraft{
 		Account: c.conn.ID, Col: c.col.Path, UID: uid, ETag: etag,
-		Data: src.Data, MediaType: src.MediaType, Crop: photo.DefaultCrop, HadPhoto: true, Step: 1,
+		Data: src.Data, MediaType: src.MediaType, Crop: photo.DefaultCrop, HadPhoto: true, Name: contactName(obj), Step: 1,
 		Values: t.values, TypedAt: t.at,
 	})
 	s.redirect(w, r, photoAddress(c, uid))

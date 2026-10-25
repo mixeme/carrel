@@ -33,6 +33,7 @@ import (
 	"carrel.dev/carrel/client/screens/picker"
 	"carrel.dev/carrel/client/screens/publish"
 	"carrel.dev/carrel/client/screens/published"
+	"carrel.dev/carrel/client/screens/quick"
 	"carrel.dev/carrel/client/screens/register"
 	"carrel.dev/carrel/client/screens/remove"
 	"carrel.dev/carrel/client/screens/rewrite"
@@ -166,6 +167,16 @@ var All = []Screen{
 		},
 		Title: func(model any) string { return string(model.(*view.CollectionDeleteSheet).Title) },
 		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.CollectionDeleteSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.NewSheet) },
+		Frames: []string{"s-notes-5", "s-notes-6", "s-notes-8", "s-notes-9", "s-notes-10"},
+		Draw: func(model any) Root {
+			p := model.(*view.NewSheet)
+			return over(p.Under, quick.Sheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.NewSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.NewSheet).Under) },
 	},
 	{
 		Model:  func() any { return new(view.ExportSheet) },
@@ -365,6 +376,13 @@ var All = []Screen{
 			{Row: 22, Control: ".Items(Bar).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #22
 			{Row: 20, Fixture: "app-contact-timeline/normal"},                        // ждёт библиотеку: U-5.5 #20
 		},
+	},
+	{
+		Model:  func() any { return new(view.PhotoPreviewPage) },
+		Frames: []string{"s-contacts-5"},
+		Draw:   func(model any) Root { return contactedit.Crop(model.(*view.PhotoPreviewPage)) },
+		Title:  func(model any) string { return string(model.(*view.PhotoPreviewPage).Title) },
+		Forms:  func(model any) []widget.PostForm { return contactedit.CropForms(model.(*view.PhotoPreviewPage)) },
 	},
 	{
 		Model:  func() any { return new(view.ContactEditPage) },

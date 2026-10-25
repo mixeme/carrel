@@ -897,6 +897,25 @@ var quickNotes = map[view.Kind]view.Text{
 	view.KindTask:    "No time means the whole day. A task with no due date is a task all the same — both may stay empty.",
 }
 
+// nowhereNotes say why the quick sheet has nowhere to write and what to do
+// (s-notes-6, the other kinds in its words).
+var nowhereNotes = map[view.Kind]view.Text{
+	view.KindContact: "There is nowhere to write. Connect an account that has an address book, or create an address book after connecting — the contact is not kept in this window.",
+	view.KindEvent:   "There is nowhere to write. Connect an account that has a calendar, or create a calendar after connecting — the event is not kept in this window.",
+	view.KindTask:    "There is nowhere to write. Connect an account that has a list of tasks, or create a list of tasks after connecting — the task is not kept in this window.",
+	view.KindNote:    "There is nowhere to write. Connect an account that has a journal, or create a notebook after connecting — the note is not kept in this window.",
+}
+
+// quickIcon is the icon of the quick sheet's head: a note's the quill of New
+// note in the top bar (s-notes-5), the others their kind's (s-notes-8, -9,
+// -10).
+func quickIcon(k view.Kind) string {
+	if k == view.KindNote {
+		return "i-quill"
+	}
+	return kindIcons[k]
+}
+
 // caretField is the field of a record's form the caret stands in when it is
 // shown, full or quick: the name of a contact (s-contacts-3, s-notes-8), the
 // summary of an event and a task (s-agenda-3, s-notes-9, s-tasks-3,
@@ -4124,8 +4143,8 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 	// Nowhere to write (s-notes-6): no collection of the kind takes a
 	// record. The sheet says so by having no target, and offers the way out
 	// instead of an empty choice (U-6.16).
-	sheet := view.NewSheet{Kind: spec.kind, Actions: []view.Action{
-		{ID: "connection.add", Label: "Connect account", Href: s.connectHref(), Method: "GET", Primary: true, Enabled: true},
+	sheet := view.NewSheet{Kind: spec.kind, Title: text("New " + spec.noun), Icon: quickIcon(spec.kind), Note: nowhereNotes[spec.kind], Actions: []view.Action{
+		{ID: "connection.add", Label: "Connect account", Icon: "i-server", Href: s.connectHref(), Method: "GET", Primary: true, Enabled: true},
 		{ID: "record.cancel", Label: "Cancel", Href: s.route("/app/" + kind), Method: "GET", Enabled: true},
 	}}
 	if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
@@ -4133,6 +4152,7 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 		return
 	}
 	sheet.Under = s.underOf(r, back, "/app/"+kind)
+	s.cancelTo(r, back, sheet.Actions, "record.cancel")
 	s.writePage(w, r, http.StatusOK, sheet)
 }
 
@@ -4149,6 +4169,11 @@ func (s *Server) getKindQuick(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	values := s.emptyValues(c)
+	if c.spec.kind == view.KindEvent {
+		// The reminder an event is made for (s-notes-9), as the full form
+		// starts with it (newEventValues): saved as shown, it is written.
+		values["reminder"] = []string{"-PT10M", ""}
+	}
 	carried(c, r, values)
 	sheet := s.quickSheet(c, editState{values: values, isNew: true, readAt: s.now()})
 	if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
@@ -4283,7 +4308,7 @@ func (s *Server) quickSheet(c *collectionCtx, st editState) view.NewSheet {
 	form.Method = "POST"
 	form.Actions = []view.Action{
 		{ID: "record.save", Label: text("Save " + c.spec.noun), Method: "POST", Primary: true, Enabled: !c.col.ReadOnly},
-		{ID: "record.open", Label: "Open the card", Href: s.route(quick + "?op=open"), Method: "POST", Enabled: true},
+		{ID: "record.open", Label: "Open the card", Icon: "i-expand", Href: s.route(quick + "?op=open"), Method: "POST", Enabled: true},
 		s.cancelAction(c, st),
 	}
 	sheet.Form = form
@@ -4301,7 +4326,7 @@ func (s *Server) quickSheet(c *collectionCtx, st editState) view.NewSheet {
 func (s *Server) newSheet(c *collectionCtx, pick bool) view.NewSheet {
 	blob := s.catalogOf(c.sess)
 	own := s.route(c.listPath() + "/new")
-	sheet := view.NewSheet{Kind: c.spec.kind}
+	sheet := view.NewSheet{Kind: c.spec.kind, Title: text("New " + c.spec.noun), Icon: quickIcon(c.spec.kind)}
 	last, _ := blob.LastFor(c.spec.kind)
 	for _, conn := range blob.Connections {
 		for _, col := range blob.CollectionsOf(conn.ID) {

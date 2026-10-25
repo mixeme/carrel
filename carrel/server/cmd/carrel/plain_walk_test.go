@@ -42,8 +42,7 @@ func TestTheAppWorksWithoutScripts(t *testing.T) {
 	b.follow("Back to app")
 
 	// A contact: the rail ticked by its form, the new card by the arrow of
-	// New (its main button opens the quick sheet, notYetPages), edited,
-	// deleted.
+	// New (its main button opens the quick sheet), edited, deleted.
 	b.follow("Contacts")
 	b.press("Tick every book", nil, nil)
 	b.follow("People")
@@ -135,9 +134,6 @@ var notYetPages = []struct {
 	path *regexp.Regexp
 	why  string
 }{
-	{regexp.MustCompile(`^/app/(contacts|calendar|tasks|notes)/quick(\?|$)`), "the quick sheets: Typecase's task 197 p. 5"},
-	{regexp.MustCompile(`^/app/(contacts|calendar|tasks|notes)/[^/]+/[^/]+/new\?pick=1$`), "New of a combined view, the quick sheet: task 197 p. 5"},
-	{regexp.MustCompile(`^/app/(contacts|calendar|tasks|notes)/export$`), "the export of a combined view, no frame: task 197 p. 5"},
 	{regexp.MustCompile(`^/p/`), "public pages: task 196"},
 }
 
