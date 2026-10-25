@@ -760,7 +760,7 @@ func (s *Server) getKindExportEntry(w http.ResponseWriter, r *http.Request, kind
 	blob := s.catalogOf(sess)
 	ext := exportFormats[spec.kind].ext
 	download := view.Action{ID: "export.download", Label: text("Download " + ext), Icon: "i-download", Method: "GET", Primary: true, Enabled: true, Submits: true}
-	sheet := view.ExportSheet{Kind: spec.kind, Actions: []view.Action{download,
+	sheet := view.ExportSheet{Kind: spec.kind, Title: "Export", Subject: text(combinedTitles[spec.kind]), Rubric: exportRubrics[spec.kind], Actions: []view.Action{download,
 		{ID: "export.cancel", Label: "Cancel", Href: s.route("/app/" + spec.segment), Method: "GET", Enabled: true},
 	}}
 	sheet.Target.Field = "c"
@@ -803,6 +803,15 @@ func (s *Server) getKindExportEntry(w http.ResponseWriter, r *http.Request, kind
 	// Over the list it was opened from, else the kind's combined one (Лс29).
 	sheet.Under = s.underOf(r, s.sheetBack(r, q.Get("back"), true), "/app/"+spec.segment)
 	s.writePage(w, r, http.StatusOK, sheet)
+}
+
+// exportRubrics are the words over the collections of the export sheet
+// (s-agenda-30).
+var exportRubrics = map[view.Kind]view.Text{
+	view.KindContact: "Which address book",
+	view.KindEvent:   "Which calendar",
+	view.KindTask:    "Which list",
+	view.KindNote:    "Which notebook",
 }
 
 // exportSpan is «What goes in» of a calendar's export (s-agenda-30): the

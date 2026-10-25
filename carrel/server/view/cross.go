@@ -741,6 +741,9 @@ type RewriteGroup struct {
 // Download отдаёт файл, ничего не пишется.
 type ExportSheet struct {
 	Kind    Kind         `json:"kind"`
+	Title   Text         `json:"title"`   // «Export»
+	Subject Text         `json:"subject"` // откуда: «Combined calendar» (s-agenda-30)
+	Rubric  Text         `json:"rubric"`  // над коллекциями: «Which calendar» («Which address book», «Which list», «Which notebook»)
 	Target  TargetPicker `json:"target"`  // коллекции рода; сервер, который не отвечает, — недоступен с причиной («password · 401»)
 	Form    Form         `json:"form"`    // GET /app/{kind}/export: span, from, to у календаря
 	Actions []Action     `json:"actions"` // Download .ics (.vcf, .zip) · Cancel

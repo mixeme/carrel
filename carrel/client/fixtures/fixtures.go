@@ -79,6 +79,7 @@ var Models = map[string]func() any{
 	"app-photo-preview":                   func() any { return &view.PhotoPreviewPage{} },
 	"app-publish":                         func() any { return &view.PublishSheet{} },
 	"app-quick":                           func() any { return &view.NewSheet{} },
+	"app-export":                          func() any { return &view.ExportSheet{} },
 	"app-search":                          func() any { return &view.SearchPage{} },
 	"app-settings-account":                func() any { return &view.AccountPage{} },
 	"app-settings-appearance":             func() any { return &view.AppearancePage{} },

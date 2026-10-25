@@ -287,6 +287,9 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "admin-delete": "/admin/delete",
     "app-contact-rewrite": "/app/contacts/{account}/{col}/{uid}/rewrite",
     "app-quick": "/app/notes/quick",
+    # Export из сведённого вида (s-agenda-30, записка 119): лист поверх
+    # сведённого календаря.
+    "app-export": "/app/calendar/export",
     "app-collections-new": "/app/collections/new",
     "app-settings-unlock": "/app/settings/unlock",
     "app-conflict": "/app/{kind}/{account}/{col}/{uid}/conflict",
@@ -302,7 +305,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # Листы (C-5, ответ «лист») своего рейла не несут: они рисуются
 # поверх экрана, и рейл в кадре — того экрана, что под ними. Сравнивать
 # тут нечего, и молчание здесь — не исключение, а род экрана.
-SHEETS = {"app-search-suggest", "app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
+SHEETS = {"app-search-suggest", "app-contact-move", "app-quick", "app-export", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
           "app-publish", "app-files-picker", "app-files-op", "app-mail-compose", "app-mail-link", "app-mail-attach",
           "app-contact-rewrite", "app-record-copies", "app-task-done", "app-event-ask",
@@ -417,6 +420,8 @@ STATE_FRAME = {
     # Календарь со словом — всё найденное по дням (Typecase 674ac19,
     # записка 122 п. 15).
     "app-agenda/filtered": "s-agenda-31",
+    # Export из сведённого календаря — фрагмент без адреса (s-agenda-30).
+    "app-export/normal": "s-agenda-30",
     # Приглашение ссылкой и потеря свойств при записи события — свои кадры
     # (Typecase 05ea994, 002fce3; задачи 79, 93).
     "invite/link": "s-auth-14",

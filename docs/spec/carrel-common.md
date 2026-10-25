@@ -2325,6 +2325,9 @@ type CollectionDeleteSheet struct {
 // Лист «из какой коллекции отдать» — вход в экспорт из сведённого вида.
 type ExportSheet struct { // форма GET (s-agenda-30): Download отдаёт файл, ничего не пишется
     Kind    Kind
+    Title   Text         // «Export»
+    Subject Text         // откуда: «Combined calendar» (s-agenda-30)
+    Rubric  Text         // над коллекциями: «Which calendar» («Which address book», «Which list», «Which notebook»)
     Target  TargetPicker // Field «c», Value «подключение/коллекция»; сервер, который не отвечает, — недоступен с причиной («password · 401»)
     Form    Form         // GET /app/{kind}/export; у календаря — span (whole выключает даты | dates), from, to: по умолчанию даты, от сегодня до конца месяца
     Actions []Action     // «Download .ics» (.vcf, .zip у тетради) · Cancel

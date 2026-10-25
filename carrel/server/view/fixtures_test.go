@@ -95,6 +95,7 @@ var fixtureTypes = map[string]func() any{
 	"app-photo-preview":                   func() any { return &PhotoPreviewPage{} },
 	"app-publish":                         func() any { return &PublishSheet{} },
 	"app-quick":                           func() any { return &NewSheet{} },
+	"app-export":                          func() any { return &ExportSheet{} },
 	"app-search":                          func() any { return &SearchPage{} },
 	"app-settings-account":                func() any { return &AccountPage{} },
 	"app-settings-appearance":             func() any { return &AppearancePage{} },

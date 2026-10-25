@@ -2616,6 +2616,13 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 			"account": {app.realAccount(t, "lichnyj")}, "name": {"Поездки"}, "colour": {"#6b4e7a"}, "components": {"VEVENT", "VTODO"},
 		})))
 	})
+	// Export from the combined calendar (s-agenda-30): the sheet over the
+	// week its poll answered; last, as the week warms the counts of the rail.
+	t.Run("app-export", func(t *testing.T) {
+		week := combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+		back := url.QueryEscape("/app/calendar?from=2026-08-10&task=" + week.Poll.TaskID)
+		app.compare(t, "app-export/normal.json", app.h.do(get("/app/calendar/export?back="+back, app.sess)))
+	})
 }
 
 // The link made (Пб13; s-publish-13): «Личный» for 10–31 August with its

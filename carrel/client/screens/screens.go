@@ -17,6 +17,7 @@ import (
 	"carrel.dev/carrel/client/screens/duplicates"
 	"carrel.dev/carrel/client/screens/event"
 	"carrel.dev/carrel/client/screens/eventedit"
+	"carrel.dev/carrel/client/screens/export"
 	"carrel.dev/carrel/client/screens/fileop"
 	"carrel.dev/carrel/client/screens/files"
 	"carrel.dev/carrel/client/screens/folder"
@@ -165,6 +166,16 @@ var All = []Screen{
 		},
 		Title: func(model any) string { return string(model.(*view.CollectionDeleteSheet).Title) },
 		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.CollectionDeleteSheet).Under) },
+	},
+	{
+		Model:  func() any { return new(view.ExportSheet) },
+		Frames: []string{"s-agenda-30"},
+		Draw: func(model any) Root {
+			p := model.(*view.ExportSheet)
+			return over(p.Under, export.Sheet(p))
+		},
+		Title: func(model any) string { return string(model.(*view.ExportSheet).Title) },
+		Forms: func(model any) []widget.PostForm { return underForms(model.(*view.ExportSheet).Under) },
 	},
 	{
 		Model:  func() any { return new(view.CollectionMoveSheet) },
