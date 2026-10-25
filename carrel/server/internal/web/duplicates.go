@@ -318,25 +318,37 @@ func (st dupState) groups() []dupGroup {
 	return out
 }
 
-// inCatalogOrder is the members of a group in the order the catalog lists
-// their connections — the rail's —, then by collection and UID: the rows of
-// a card and the merge's «Where the merged record stays» read the same way
-// every time (an account's ID is random, and ordering by it is not).
+// inCatalogOrder is the members of a group in the order of the rail
+// (railOrder).
 func (st dupState) inCatalogOrder(refs []sealed.RecordRef) []sealed.RecordRef {
+	return railOrder(st.blob, refs)
+}
+
+// railOrder is records in the order the rail shows their collections: by
+// connection, then as the catalog holds the collections of it, then by UID
+// (Typecase's note 125 p. 1) — the rows of a group's card, the variants of
+// its questions, «Where … is kept», «The same person in other books» and
+// «Where the merged record stays» read the same way every time. A path is
+// not seen in the rail, and an account's ID is random: neither orders.
+func railOrder(blob sealed.Blob, refs []sealed.RecordRef) []sealed.RecordRef {
 	rank := map[string]int{}
-	for i, c := range st.blob.Connections {
+	for i, c := range blob.Connections {
 		rank[c.ID] = i
 	}
-	for i, f := range st.blob.Subscriptions {
-		rank[f.ID] = len(st.blob.Connections) + i
+	for i, f := range blob.Subscriptions {
+		rank[f.ID] = len(blob.Connections) + i
+	}
+	at := map[[2]string]int{}
+	for i, c := range blob.Collections {
+		at[[2]string{c.AccountID, c.Path}] = i
 	}
 	out := slices.Clone(refs)
 	slices.SortStableFunc(out, func(a, b sealed.RecordRef) int {
 		if ra, rb := rank[a.AccountID], rank[b.AccountID]; ra != rb {
 			return ra - rb
 		}
-		if a.Col != b.Col {
-			return strings.Compare(a.Col, b.Col)
+		if ca, cb := at[[2]string{a.AccountID, a.Col}], at[[2]string{b.AccountID, b.Col}]; ca != cb {
+			return ca - cb
 		}
 		return strings.Compare(a.UID, b.UID)
 	})

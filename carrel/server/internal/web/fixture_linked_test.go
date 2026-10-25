@@ -15,6 +15,12 @@ func TestFixtureLinkedRecords(t *testing.T) {
 	app := newMockupApp(t)
 	linkMockupEvent(t, app)
 	linkMockupTask(t, app)
+	// «Поездка в Казань», which the task is related to (s-tasks-17: «·
+	// event · 12 Aug», as its card s-tasks-2), read with the calendar.
+	seedMockupTrip(t, app)
+	// The recording in the attachment folder, the note's second file
+	// (s-notes-32, as s-notes-2).
+	attachMockupRecording(t, app)
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	openList(t, app, "/app/tasks")

@@ -43,10 +43,14 @@ type linkedCard struct {
 // there any more.
 func (s *Server) linkedOf(ctx context.Context, c *collectionCtx, uid string) (linkedCard, bool) {
 	self := sealed.RecordRef{AccountID: c.conn.ID, Col: c.col.Path, UID: uid}
-	g, ok := dupes.LinkedOf(s.catalogOf(c.sess).Duplicates.Linked, self)
+	blob := s.catalogOf(c.sess)
+	g, ok := dupes.LinkedOf(blob.Duplicates.Linked, self)
 	if !ok || g.Kind != c.spec.kind {
 		return linkedCard{}, false
 	}
+	// The copies in the rail's order, the one opened among them
+	// (Typecase's note 125 p. 1).
+	g.Members = railOrder(blob, g.Members)
 	lc := linkedCard{group: g, self: self}
 	others, gone := s.readMembers(ctx, c.sess, c.spec, g, self)
 	lc.others = others

@@ -1735,6 +1735,10 @@ func TestFixtureCombinedTasks(t *testing.T) {
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	open := app.listPath(t, "tasks", "dela") + "/aa11-2d09-5f84"
 	app.compare(t, "app-tasks-all/normal.json", app.h.do(get("/app/tasks?task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
+	// The panel of a task of one list (s-tasks-20, Typecase's note 125
+	// p. 9): «Отправить документы в МФЦ».
+	one := app.listPath(t, "tasks", "dela") + "/aa10-77bc-0e31"
+	app.compare(t, "app-tasks-all/panel-one.json", app.h.do(get("/app/tasks?task="+page.Poll.TaskID+"&open="+url.QueryEscape(one), app.sess)))
 }
 
 // C-14.2: one notebook — its own frame since Typecase 80d1319 (s-notes-31,
@@ -1770,6 +1774,10 @@ func TestFixtureCombinedNotes(t *testing.T) {
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	open := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64"
 	app.compare(t, "app-notes-all/normal.json", app.h.do(get("/app/notes?task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
+	// The panel of a note of one notebook (s-notes-33, Typecase's note 125
+	// p. 9): «Про дорогу до дачи» in «Дневник».
+	one := app.listPath(t, "notes", "dnevnik") + "/7f03-5b26-cc19"
+	app.compare(t, "app-notes-all/panel-one.json", app.h.do(get("/app/notes?task="+page.Poll.TaskID+"&open="+url.QueryEscape(one), app.sess)))
 }
 
 // C-14.2: the card of a task (s-tasks-2): «Собрать чемодан», the task the
@@ -3569,6 +3577,14 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		}
 		if merge == "" {
 			t.Fatalf("no pair of Вера Лебедева to merge among %d groups", len(page.Groups))
+		}
+		// «Архив» chosen to keep the merged record (s-dup-2): its link
+		// among where it stays, as a person presses it.
+		plan := decode[view.DuplicatesMergePage](t, app.h.do(get(merge, app.sess)))
+		for _, a := range plan.Stays {
+			if strings.HasSuffix(string(a.Label), "Архив") {
+				merge = a.Href
+			}
 		}
 		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 		app.compare(t, "app-duplicates-merge/normal.json", app.h.do(get(merge, app.sess)))

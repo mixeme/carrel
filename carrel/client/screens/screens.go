@@ -447,7 +447,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.TasksPage) },
-		Frames: []string{"s-tasks-1", "s-tasks-15", "states-18", "states-22"},
+		Frames: []string{"s-tasks-1", "s-tasks-15", "s-tasks-20", "states-18", "states-22"},
 		Draw:   func(model any) Root { return tasks.Screen(model.(*view.TasksPage)) },
 		Title:  func(model any) string { return string(model.(*view.TasksPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return tasks.Forms(model.(*view.TasksPage)) },
@@ -475,7 +475,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.NotesPage) },
-		Frames: []string{"s-notes-1", "s-notes-31", "states-25", "states-29"},
+		Frames: []string{"s-notes-1", "s-notes-31", "s-notes-33", "states-25", "states-29"},
 		Draw:   func(model any) Root { return notes.Screen(model.(*view.NotesPage)) },
 		Title:  func(model any) string { return string(model.(*view.NotesPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return notes.Forms(model.(*view.NotesPage)) },

@@ -20,6 +20,10 @@ const (
 	formDelete = "delete"
 )
 
+// keptHint is what the properties kept as the server sent them are, under
+// their rubric in the panel (s-contacts-1), as the card says it.
+const keptHint = "Properties Carrel does not edit are stored byte for byte and go back untouched."
+
 // The screen's words (U-1.3) for the shell: the mark, the search, the rail.
 var (
 	top = bind.TopWords{
@@ -303,8 +307,10 @@ func side(d view.Details) *w.Side {
 	if d.ForeignShow != nil {
 		show := bind.Button(*d.ForeignShow, "")
 		show.Small = true
+		// What it is, under the rubric, as the card says it (s-contacts-1).
 		items = append(items, w.Sec{Items: []w.SecPart{
 			w.Rubric{Text: "Kept as the server sent them", Items: []w.RubricPart{show}},
+			w.SecHint{Text: keptHint},
 		}})
 	}
 	if d.LinkedRecord {

@@ -26,7 +26,7 @@ var (
 	frameDim       = regexp.MustCompile(`<span class="tc-dim">([^<]*)</span>`)
 	frameShowKept  = regexp.MustCompile(`Kept as the server sent them <button class="tc-btn is-sm" type="button">([^<]*)</button>`)
 	frameInset     = regexp.MustCompile(`<div class="tc-rubric">Timeline <span class="tc-mono[^"]*">(\d+)</span>`)
-	frameInsetRow  = regexp.MustCompile(`<div class="tc-row tc-row--find"><span class="tc-mark" data-tc-colour="(#[0-9A-Fa-f]{6})"></span>`)
+	frameInsetRow  = regexp.MustCompile(`<a class="tc-row tc-row--find" href="[^"]+"><span class="tc-mark" data-tc-colour="(#[0-9A-Fa-f]{6})"></span>`)
 	frameOpenTL    = regexp.MustCompile(`<button class="tc-btn" type="button"><svg[^>]*><use href="#(i-[\w-]+)"/></svg>Open the timeline</button>`)
 	frameCardDiag  = regexp.MustCompile(`<div class="tc-diag">Path\s+(\S+)\s+Read\s+[^·<]*·\s*([^<]*)</div>`)
 	frameBookRow   = regexp.MustCompile(`(?s)<li><span class="tc-mark[^"]*" data-tc-colour="(#[0-9A-Fa-f]{6})"></span>\s*<a[^>]*>([^<]*)</a>\s*<span class="tc-dim">· ([^<]*)</span></li>`)
@@ -151,9 +151,10 @@ func TestContactCardIsTheFrames(t *testing.T) {
 	if page.TimelineCount == nil || *page.TimelineCount != total || len(page.Timeline) == 0 {
 		t.Errorf("inset count %v, rows %d, the timeline %d", page.TimelineCount, len(page.Timeline), total)
 	}
+	// Each row a link to its record (Typecase's note 125 p. 8).
 	for _, r := range page.Timeline {
-		if r.Colour == "" {
-			t.Errorf("an inset row without its colour: %+v", r)
+		if r.Colour == "" || r.Href == "" {
+			t.Errorf("an inset row without its colour or its record: %+v", r)
 		}
 	}
 	if m := frameOpenTL.FindStringSubmatch(frame); m == nil || page.More.Icon != m[1] {

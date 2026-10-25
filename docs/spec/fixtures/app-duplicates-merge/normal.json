@@ -4,7 +4,7 @@
       "csrf": "csrf",
       "danger": true,
       "enabled": true,
-      "href": "/app/duplicates/merge?choice.FN=0\u0026group=group\u0026into=0\u0026v.0=e6\u0026v.1=e5",
+      "href": "/app/duplicates/merge?choice.FN=1\u0026group=group\u0026into=1\u0026v.0=e5\u0026v.1=e6",
       "id": "duplicates.merge.confirm",
       "label": "Write the merge and delete the rest",
       "method": "POST"
@@ -40,6 +40,7 @@
   "details": null,
   "gains": [
     "EMAIL;TYPE=WORK: v.lebedeva@example.org",
+    "FN: Лебедева Вера",
     "ORG: Библиотека №4",
     "PHOTO (from nextcloud · Контакты)"
   ],
@@ -291,18 +292,18 @@
   "stays": [
     {
       "enabled": true,
-      "href": "/app/duplicates/merge?group=group\u0026into=0\u0026pick.FN=0\u0026pick.ORG=1\u0026pick.PHOTO=1",
+      "href": "/app/duplicates/merge?group=group\u0026into=0\u0026pick.FN=0\u0026pick.ORG=0\u0026pick.PHOTO=0",
+      "id": "duplicates.merge.into",
+      "label": "nextcloud · Контакты",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/duplicates/merge?group=group\u0026into=1\u0026pick.FN=0\u0026pick.ORG=0\u0026pick.PHOTO=0",
       "id": "duplicates.merge.into",
       "label": "nextcloud · Архив",
       "method": "GET",
       "on": true
-    },
-    {
-      "enabled": true,
-      "href": "/app/duplicates/merge?group=group\u0026into=1\u0026pick.FN=0\u0026pick.ORG=1\u0026pick.PHOTO=1",
-      "id": "duplicates.merge.into",
-      "label": "nextcloud · Контакты",
-      "method": "GET"
     }
   ],
   "staysNote": "Вера Лебедева there is rewritten with the values you chose.",

@@ -413,20 +413,20 @@
         "value": "Phone differs"
       },
       {
-        "colour": "#6b4e7a",
-        "from": null,
-        "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
-        "label": "radicale · vps · Команда",
-        "mono": false,
-        "value": "Email differs"
-      },
-      {
         "colour": "#a05a2c",
         "from": null,
         "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
         "label": "nextcloud · Архив",
         "mono": false,
         "value": "Phone, email differ"
+      },
+      {
+        "colour": "#6b4e7a",
+        "from": null,
+        "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
+        "label": "radicale · vps · Команда",
+        "mono": false,
+        "value": "Email differs"
       }
     ],
     "close": "/app/contacts?task=t-task",
@@ -535,8 +535,36 @@
         "value": "Пишет по вторникам, отвечает в тот же день."
       }
     ],
-    "foreign": [],
-    "foreignShow": null,
+    "foreign": [
+      {
+        "from": null,
+        "href": "",
+        "label": "X-ABLABEL",
+        "mono": true,
+        "value": "издательство"
+      },
+      {
+        "from": null,
+        "href": "",
+        "label": "X-CARREL-UNKNOWN-FLAG",
+        "mono": true,
+        "value": "1"
+      },
+      {
+        "from": null,
+        "href": "",
+        "label": "X-EVOLUTION-FILE-AS",
+        "mono": true,
+        "value": "Ковалёва, Анна"
+      }
+    ],
+    "foreignShow": {
+      "enabled": true,
+      "href": "/app/contacts?foreign=1\u0026open=%2Fapp%2Fcontacts%2Fa-nc-home%2Fkontakty%2F4f2b-9c31-a0e7\u0026task=t-task",
+      "id": "contact.foreign",
+      "label": "Show 3",
+      "method": "GET"
+    },
     "linkedRecord": true,
     "menu": [
       {

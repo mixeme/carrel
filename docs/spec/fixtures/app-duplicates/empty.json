@@ -76,7 +76,7 @@
       "note": "Not loaded in this session",
       "title": "Анна Ковалёва",
       "uids": "UID 4f2b-9c31-a0e7",
-      "where": "nextcloud · Архив, nextcloud · Контакты, radicale · vps · Команда"
+      "where": "nextcloud · Контакты, nextcloud · Архив, radicale · vps · Команда"
     },
     {
       "actions": [
@@ -205,8 +205,8 @@
       "kind": "note",
       "note": "Not loaded in this session",
       "title": "Заметка со встречи 10.08",
-      "uids": "UID 9e31-40b7-c012, 5c81-77aa-0d64",
-      "where": "nextcloud · Дневник, nextcloud · Записи"
+      "uids": "UID 5c81-77aa-0d64, 9e31-40b7-c012",
+      "where": "nextcloud · Записи, nextcloud · Дневник"
     },
     {
       "actions": [
@@ -270,8 +270,8 @@
       "kind": "note",
       "note": "Not loaded in this session",
       "title": "Что почитать про CRDT",
-      "uids": "UID 8e04-21ab-d517, 6d92-13ef-b408",
-      "where": "nextcloud · Дневник, nextcloud · Записи"
+      "uids": "UID 6d92-13ef-b408, 8e04-21ab-d517",
+      "where": "nextcloud · Записи, nextcloud · Дневник"
     },
     {
       "actions": [

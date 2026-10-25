@@ -484,6 +484,14 @@ def sync_board():
     return head + body
 
 
+# «маршрут.gpx» внутри «Про дорогу до дачи» — 18 KB, «in the note»
+# (s-notes-33, записка Typecase 125 п. 9).
+def route_gpx():
+    head = b'<?xml version="1.0"?><gpx version="1.1" creator="mockup set">'
+    body = (b'<trkpt lat="55.75" lon="37.61"/>' * 600)[:18432 - len(head) - 6]
+    return head + body + b'</gpx>'
+
+
 write(u'nextcloud-home/zapisi.ics', cal(u'Записи',
       [u'BEGIN:VJOURNAL',
        u'UID:5c81-77aa-0d64',
@@ -543,10 +551,14 @@ write(u'nextcloud-home/dnevnik.ics', cal(u'Дневник',
        u'DTSTAMP:20260803T160000Z',
        u'DTSTART;TZID=Europe/Moscow:20260803T190000',
        u'SUMMARY:Про дорогу до дачи',
+       # Панель заметки одной тетради (s-notes-33): тег и файл внутри,
+       # связей нет.
+       u'CATEGORIES:дача',
        u'DESCRIPTION:%s' % esc(u'Съезд после заправки, потом грунтовка два '
                                u'километра — в дождь лучше в объезд через '
                                u'посёлок.'),
-       u'RELATED-TO;RELTYPE=SIBLING:1d55-90fe-3c27',
+       u'ATTACH;FMTTYPE=application/gpx+xml;ENCODING=BASE64;VALUE=BINARY;'
+       u'FILENAME=маршрут.gpx:' + base64.b64encode(route_gpx()).decode('ascii'),
        u'END:VJOURNAL']))
 
 print(u'\nГотово.')

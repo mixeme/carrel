@@ -172,7 +172,7 @@ func overdueBy(tf timeFmt, due cal.Timing, done bool) string {
 
 // taskFields are the fields of a task in the order of its card (s-tasks-2):
 // Status — Needs action when it has none —, Due monospaced with how late it
-// is, Starts, Complete and Priority monospaced, Reminders, Where, Link,
+// is (on the card), Starts, Complete and Priority monospaced, Reminders, Where, Link,
 // Tags. The panel (s-tasks-1) has the card's order, Reminders too
 // (Typecase 2823585).
 func taskFields(tf timeFmt, obj *model.Object, panel bool, tags []view.Tag) ([]view.Field, error) {
@@ -184,7 +184,9 @@ func taskFields(tf timeFmt, obj *model.Object, panel bool, tags []view.Tag) ([]v
 	due, err := cal.DueOf(obj, tf.tz)
 	if err == nil && !due.Start.IsZero() {
 		f := view.Field{Label: "Due", Runs: view.Runs{{Text: text(tf.timeOrDate(due)), Mark: view.RunMono}}, Badge: tf.createdIn(due)}
-		if late := overdueBy(tf, due, taskDone(obj)); late != "" {
+		// How late, on the card; the panel says the day only (s-tasks-20,
+		// Typecase's note 125 p. 9) — its list's row says it is late.
+		if late := overdueBy(tf, due, taskDone(obj)); late != "" && !panel {
 			f.Runs = append(f.Runs, view.Run{Text: text(" · " + late), Mark: view.RunDanger})
 		}
 		out = append(out, f)

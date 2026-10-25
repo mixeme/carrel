@@ -100,8 +100,8 @@
           "chosen": 0,
           "name": "choice.FN",
           "options": [
-            "Вера Лебедева · Архив",
-            "Лебедева Вера · Контакты"
+            "Лебедева Вера · Контакты",
+            "Вера Лебедева · Архив"
           ],
           "property": "Display name",
           "union": false,
@@ -111,11 +111,11 @@
           ]
         },
         {
-          "chosen": 1,
+          "chosen": 0,
           "name": "choice.ORG",
           "options": [
-            "— · Архив",
-            "Библиотека №4 · Контакты"
+            "Библиотека №4 · Контакты",
+            "— · Архив"
           ],
           "property": "Organisation",
           "union": false,
@@ -134,9 +134,9 @@
           "many": true,
           "name": "choice.EMAIL",
           "options": [
+            "v.lebedeva@example.org · Контакты",
             "vera@example.net · Архив",
-            "vera.l@work.example · Архив",
-            "v.lebedeva@example.org · Контакты"
+            "vera.l@work.example · Архив"
           ],
           "property": "Email",
           "union": false,
@@ -147,11 +147,11 @@
           ]
         },
         {
-          "chosen": 1,
+          "chosen": 0,
           "name": "choice.PHOTO",
           "options": [
-            "nextcloud · Архив",
-            "nextcloud · Контакты"
+            "nextcloud · Контакты",
+            "nextcloud · Архив"
           ],
           "property": "Photo",
           "union": false,
@@ -212,23 +212,6 @@
       "rows": [
         {
           "avatar": {
-            "colour": "#9a9280",
-            "href": "",
-            "initials": "ВЛ"
-          },
-          "colour": "#a05a2c",
-          "detail": "+7 905 331-09-42 · vera@example.net",
-          "done": null,
-          "email": "vera@example.net",
-          "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
-          "percent": null,
-          "phone": "+7 905 331-09-42",
-          "readOnly": false,
-          "stamp": "nextcloud · Архив",
-          "title": "Вера Лебедева"
-        },
-        {
-          "avatar": {
             "colour": "#a05a2c",
             "href": "/c/a-nc-home/kontakty/b52e-7d08-c6f1/photo?size=thumb\u0026v=e5",
             "initials": "ЛВ"
@@ -244,10 +227,27 @@
           "readOnly": false,
           "stamp": "nextcloud · Контакты",
           "title": "Лебедева Вера"
+        },
+        {
+          "avatar": {
+            "colour": "#9a9280",
+            "href": "",
+            "initials": "ВЛ"
+          },
+          "colour": "#a05a2c",
+          "detail": "+7 905 331-09-42 · vera@example.net",
+          "done": null,
+          "email": "vera@example.net",
+          "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
+          "percent": null,
+          "phone": "+7 905 331-09-42",
+          "readOnly": false,
+          "stamp": "nextcloud · Архив",
+          "title": "Вера Лебедева"
         }
       ],
       "score": 80,
-      "title": "Вера Лебедева"
+      "title": "Лебедева Вера"
     },
     {
       "actions": [
@@ -444,11 +444,11 @@
           ]
         },
         {
-          "chosen": 1,
+          "chosen": 0,
           "name": "choice.TITLE",
           "options": [
-            "— · Архив, Команда",
-            "Выпускающий редактор · Контакты"
+            "Выпускающий редактор · Контакты",
+            "— · Архив, Команда"
           ],
           "property": "Title",
           "union": false,
@@ -474,11 +474,11 @@
           ]
         },
         {
-          "chosen": 1,
+          "chosen": 0,
           "name": "choice.BDAY",
           "options": [
-            "— · Архив, Команда",
-            "1987-03-14 · Контакты"
+            "1987-03-14 · Контакты",
+            "— · Архив, Команда"
           ],
           "property": "Birthday",
           "union": false,
@@ -488,11 +488,11 @@
           ]
         },
         {
-          "chosen": 1,
+          "chosen": 0,
           "name": "choice.NOTE",
           "options": [
-            "— · Архив, Команда",
-            "Пишет по вторникам, отвечает в тот же день. · Контакты"
+            "Пишет по вторникам, отвечает в тот же день. · Контакты",
+            "— · Архив, Команда"
           ],
           "property": "Note",
           "union": false,
@@ -559,24 +559,6 @@
             "href": "",
             "initials": "АК"
           },
-          "colour": "#a05a2c",
-          "detail": "+7 912 445-10-88 · a.kovaleva@example.org",
-          "done": null,
-          "email": "a.kovaleva@example.org",
-          "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
-          "org": "Издательство «Слово»",
-          "percent": null,
-          "phone": "+7 912 445-10-88",
-          "readOnly": false,
-          "stamp": "nextcloud · Архив",
-          "title": "Анна Ковалёва"
-        },
-        {
-          "avatar": {
-            "colour": "#8c6239",
-            "href": "",
-            "initials": "АК"
-          },
           "colour": "#4a6b52",
           "detail": "+7 912 445-10-88 · a.kovaleva@example.org",
           "done": null,
@@ -587,6 +569,24 @@
           "phone": "+7 912 445-10-88",
           "readOnly": false,
           "stamp": "nextcloud · Контакты",
+          "title": "Анна Ковалёва"
+        },
+        {
+          "avatar": {
+            "colour": "#8c6239",
+            "href": "",
+            "initials": "АК"
+          },
+          "colour": "#a05a2c",
+          "detail": "+7 912 445-10-88 · a.kovaleva@example.org",
+          "done": null,
+          "email": "a.kovaleva@example.org",
+          "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
+          "org": "Издательство «Слово»",
+          "percent": null,
+          "phone": "+7 912 445-10-88",
+          "readOnly": false,
+          "stamp": "nextcloud · Архив",
           "title": "Анна Ковалёва"
         },
         {
@@ -1123,8 +1123,8 @@
           "chosen": 0,
           "name": "choice.TEXT",
           "options": [
-            "nextcloud · Дневник",
-            "nextcloud · Записи"
+            "nextcloud · Записи",
+            "nextcloud · Дневник"
           ],
           "property": "Text",
           "union": false,
@@ -1200,19 +1200,6 @@
       "rows": [
         {
           "avatar": null,
-          "colour": "#6b4e7a",
-          "date": "10 Aug",
-          "detail": "10 Aug",
-          "done": null,
-          "excerpt": "Договорились заморозить ветку в среду.",
-          "href": "/app/notes/a-nc-home/dnevnik/9e31-40b7-c012",
-          "percent": null,
-          "readOnly": false,
-          "stamp": "nextcloud · Дневник",
-          "title": "Заметка со встречи 10.08"
-        },
-        {
-          "avatar": null,
           "colour": "#4a6b52",
           "date": "10 Aug",
           "detail": "10 Aug",
@@ -1222,6 +1209,19 @@
           "percent": null,
           "readOnly": false,
           "stamp": "nextcloud · Записи",
+          "title": "Заметка со встречи 10.08"
+        },
+        {
+          "avatar": null,
+          "colour": "#6b4e7a",
+          "date": "10 Aug",
+          "detail": "10 Aug",
+          "done": null,
+          "excerpt": "Договорились заморозить ветку в среду.",
+          "href": "/app/notes/a-nc-home/dnevnik/9e31-40b7-c012",
+          "percent": null,
+          "readOnly": false,
+          "stamp": "nextcloud · Дневник",
           "title": "Заметка со встречи 10.08"
         }
       ],
@@ -1308,19 +1308,6 @@
       "rows": [
         {
           "avatar": null,
-          "colour": "#6b4e7a",
-          "date": "8 Aug",
-          "detail": "8 Aug",
-          "done": null,
-          "excerpt": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",
-          "href": "/app/notes/a-nc-home/dnevnik/8e04-21ab-d517",
-          "percent": null,
-          "readOnly": false,
-          "stamp": "nextcloud · Дневник",
-          "title": "Что почитать про CRDT"
-        },
-        {
-          "avatar": null,
           "colour": "#4a6b52",
           "date": "8 Aug",
           "detail": "8 Aug",
@@ -1330,6 +1317,19 @@
           "percent": null,
           "readOnly": false,
           "stamp": "nextcloud · Записи",
+          "title": "Что почитать про CRDT"
+        },
+        {
+          "avatar": null,
+          "colour": "#6b4e7a",
+          "date": "8 Aug",
+          "detail": "8 Aug",
+          "done": null,
+          "excerpt": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",
+          "href": "/app/notes/a-nc-home/dnevnik/8e04-21ab-d517",
+          "percent": null,
+          "readOnly": false,
+          "stamp": "nextcloud · Дневник",
           "title": "Что почитать про CRDT"
         }
       ],

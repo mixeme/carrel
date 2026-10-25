@@ -28,11 +28,11 @@ import (
 // Delete are a copy's, on its own card. Under it, where the record is kept,
 // each copy with what it holds otherwise than shown.
 
-// readMembers reads the members of g from their servers, in the group's
-// order, all but skip. A member its server says is not there is gone; one
-// whose server does not answer stays, without its record.
+// readMembers reads the members of g from their servers, in the rail's
+// order (railOrder), all but skip. A member its server says is not there is
+// gone; one whose server does not answer stays, without its record.
 func (s *Server) readMembers(ctx context.Context, sess *session.Session, spec kindSpec, g sealed.LinkedGroup, skip sealed.RecordRef) (members []linkedMember, gone []sealed.RecordRef) {
-	for _, ref := range g.Members {
+	for _, ref := range railOrder(s.catalogOf(sess), g.Members) {
 		if ref == skip {
 			continue
 		}
@@ -454,10 +454,10 @@ func (s *Server) linkedDetails(ctx context.Context, sess *session.Session, spec 
 	}
 	out.Fields = lr.markFrom(out.Fields)
 	lr.markCopies(out.Attach, out.Related)
-	// What is kept as the server sent it the panels of the frames do not
-	// draw (s-contacts-1, s-notes-1), the card does (s-contacts-33): to
-	// Typecase, task 232.
-	out.Source, out.DeleteNote, out.Foreign, out.ForeignShow = view.SourceBlock{}, "", nil, nil
+	// What is kept as the server sent it stays: the panel shows it, as the
+	// card does (s-contacts-1, -33; Typecase's note 125 p. 2). The source
+	// and the deletion are a copy's.
+	out.Source, out.DeleteNote = view.SourceBlock{}, ""
 	out.AttachHint = "" // the line of Attach, which a linked record has not (s-tasks-1)
 	out.Books = s.keptRows(lr, func(q question) []recValue { return q.shownValues() })
 	actions, menu := s.linkedActions(sess, spec.segment, lr.base.ref.UID, g.ID)

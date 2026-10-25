@@ -26,20 +26,20 @@
       "value": "Phone differs"
     },
     {
-      "colour": "#6b4e7a",
-      "from": null,
-      "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
-      "label": "radicale · vps · Команда",
-      "mono": false,
-      "value": "Email differs"
-    },
-    {
       "colour": "#a05a2c",
       "from": null,
       "href": "/app/contacts/a-nc-home/arhiv/4f2b-9c31-a0e7",
       "label": "nextcloud · Архив",
       "mono": false,
       "value": "Phone, email differ"
+    },
+    {
+      "colour": "#6b4e7a",
+      "from": null,
+      "href": "/app/contacts/a-rad-vps/komanda/4f2b-9c31-a0e7",
+      "label": "radicale · vps · Команда",
+      "mono": false,
+      "value": "Email differs"
     }
   ],
   "details": null,

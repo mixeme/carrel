@@ -125,7 +125,7 @@ undefined = sorted(p for p, files in seen.items()
 check("6b. названные правила введены заголовком", undefined)
 
 # 7. Фикстуры разбираются и лежат по правилам имён
-states = {"whole","whole-empty","tasks","notebook","pdf","text-large","subfolder","folder-empty","normal","task","nowhere","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
+states = {"panel-one","whole","whole-empty","tasks","notebook","pdf","text-large","subfolder","folder-empty","normal","task","nowhere","empty","filtered","readonly","source-error","partial","long","conflict","narrow","loss","loss-days","unavailable","outcome","refused",
           "sent","options","no-mail","wipe-sent","asked","password","link","no-photo","new",
           "tiles","copy","elsewhere","rename","delete","attach","single","in-part","merged",
           "email-confirmed","email-sent","email-unsent","email-unconfirmed",
@@ -456,6 +456,10 @@ STATE_FRAME = {
     # кадры — s-tasks-14 и s-notes-30 (маршрут …/new). Кадры states-19 … -21,
     # -23, -26 … -28, -30, -31 (опрос идёт, источник отказал, пустой список,
     # только для чтения, потеря у заметки) фикстур пока не имеют.
+    # Обычные панели задачи и заметки (записка 125 п. 9) — части кадров
+    # объединённых видов.
+    "app-tasks-all/panel-one": "s-tasks-20",
+    "app-notes-all/panel-one": "s-notes-33",
     "app-tasks-all/empty": "states-18",
     "app-tasks/source-error": "states-22",
     "app-task-edit/loss": "states-24",

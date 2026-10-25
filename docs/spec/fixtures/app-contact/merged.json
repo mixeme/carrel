@@ -42,7 +42,7 @@
   "avatar": {
     "colour": "#9a9280",
     "href": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?size=thumb\u0026v=e28",
-    "initials": "ВЛ"
+    "initials": "ЛВ"
   },
   "books": [],
   "details": null,
@@ -130,7 +130,7 @@
     "label": "Open the timeline",
     "method": "GET"
   },
-  "name": "Вера Лебедева",
+  "name": "Лебедева Вера",
   "notices": [
     {
       "actions": [],
@@ -145,7 +145,7 @@
   "print": {
     "range": "nextcloud · Архив",
     "taken": "10 August 2026, 17:06",
-    "title": "Вера Лебедева"
+    "title": "Лебедева Вера"
   },
   "rail": {
     "about": {
@@ -244,7 +244,7 @@
     }
   ],
   "timelineCount": 2,
-  "title": "Вера Лебедева",
+  "title": "Лебедева Вера",
   "top": {
     "lock": null,
     "new": {
