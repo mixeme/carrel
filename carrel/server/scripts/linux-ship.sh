@@ -5,16 +5,20 @@
 #   carrel/server/scripts/linux-ship.sh [out.tar]
 #
 # One tar with two directories side by side, as the replaces of go.mod and
-# the image's build context want them:
+# the image's build context want them, and the script that runs the gates:
 #
 #   carrel/    this repository at HEAD (git archive: what is committed, and
 #              dev/ never — it is not in git)
 #   typecase/  the neighbouring clone of Typecase at the commit the client's
 #              plan records («Typecase сборки» in docs/plan/client.md)
+#   run.sh     the gates of this commit: scripts/linux-gates.sh from
+#              carrel/carrel/server, its output in gates.log beside it, and
+#              LINUX-FINISHED as the log's last line whatever happens — what
+#              is waited for (long ssh sessions break: poll the log's tail)
 #
-# On the machine it is unpacked into /opt/carrel-dev/run-<commit>/, and the
-# gates run from run-<commit>/carrel/carrel/server. The script prints the
-# commands. It runs nothing on the machine itself.
+# On the machine it is unpacked into /opt/carrel-dev/run-<commit>/ and run.sh
+# is started detached; the script prints both commands. It runs nothing on
+# the machine itself.
 set -euo pipefail
 
 here=$(cd "$(dirname "$0")/.." && pwd)
@@ -63,11 +67,33 @@ trap 'rm -rf "$tmp"' EXIT
   cd "$tmp"
   git -C "$root" archive --format=tar --prefix=carrel/ HEAD | tar -xf -
   git -C "$tcdir" archive --format=tar --prefix=typecase/ "$tc" | tar -xf -
-  tar -cf pack.tar carrel typecase
+  # The run of the gates: where it stands is where the tar was unpacked.
+  # Go of the host is older than go.mod (GOTOOLCHAIN=auto, dev/env.txt);
+  # CARREL_DAVIS=1 takes the Davis stand of the gates in.
+  cat > run.sh <<EOF
+#!/bin/bash
+# The gates of Carrel $commit with Typecase $tcfull (scripts/linux-ship.sh).
+set -u
+d=\$(cd "\$(dirname "\$0")" && pwd)
+log=\$d/gates.log
+trap 'echo LINUX-FINISHED >> "\$log"' EXIT
+{
+  echo "== linux gates: Carrel $commit, Typecase $tcfull =="
+  cd "\$d/carrel/carrel/server" || exit 1
+  export PATH=/usr/local/go/bin:\$PATH
+  export GOTOOLCHAIN=auto
+  export CARREL_DAVIS=1
+  bash scripts/linux-gates.sh
+  echo "gates exit=\$?"
+} >> "\$log" 2>&1
+EOF
+  chmod +x run.sh
+  tar -cf pack.tar carrel typecase run.sh
 )
 mv "$tmp/pack.tar" "$out"
 
 echo "packed $out: Carrel $commit, Typecase $tcfull"
 echo "on the machine:"
 echo "  mkdir -p /opt/carrel-dev/run-$commit && tar -xf $(basename "$out") -C /opt/carrel-dev/run-$commit"
-echo "  cd /opt/carrel-dev/run-$commit/carrel/carrel/server && nohup bash scripts/linux-gates.sh > /opt/carrel-dev/run-$commit/gates.log 2>&1 &"
+echo "  setsid nohup bash /opt/carrel-dev/run-$commit/run.sh </dev/null >/dev/null 2>&1 &"
+echo "then wait for LINUX-FINISHED: tail -1 /opt/carrel-dev/run-$commit/gates.log"

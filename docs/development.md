@@ -164,11 +164,13 @@
 соседнего клона Typecase на коммите строки «Typecase сборки» в
 [plan/client.md](plan/client.md), рядом, как их ждут `replace` модулей и
 сборка образа. Скрипт предупреждает, если дерево Carrel грязное или клон
-Typecase не на этом коммите, и печатает команды для машины: архив
-распаковывается в `/opt/carrel-dev/run-<commit>/`, ворота — из
-`run-<commit>/carrel/carrel/server` (`linux-gates.sh` без Typecase рядом
-не начинает). Ворота — `nohup` и короткие опросы лога:
-долгие ssh-сессии машина рвёт. Образ вручную — из `run-<commit>/`:
+Typecase не на этом коммите, кладёт рядом `run.sh` этого коммита и
+печатает команды для машины: архив распаковывается в
+`/opt/carrel-dev/run-<commit>/`, ворота запускает `run.sh` (`setsid nohup
+bash run.sh </dev/null`) — `linux-gates.sh` из
+`run-<commit>/carrel/carrel/server` (без Typecase рядом не начинает), вывод
+в `run-<commit>/gates.log`, последней строкой всегда `LINUX-FINISHED`. Ждут
+её короткими опросами хвоста лога: долгие ssh-сессии машина рвёт. Образ вручную — из `run-<commit>/`:
 `docker build -f carrel/carrel/server/Dockerfile -t carrel .` (BuildKit:
 контекст ограничивает `Dockerfile.dockerignore`). Go на хосте старше `go.mod` —
 `GOTOOLCHAIN=auto`; компилятора C нет. Radicale — на `127.0.0.1:5232`;
