@@ -92,9 +92,12 @@ func TestYandexCalendarLifecycle(t *testing.T) {
 	t.Cleanup(func() { _ = client.Delete(context.Background(), placed.Path, "") })
 	t.Logf("asked for a calendar named %q, the server put it at %s", name, placed.Path)
 
-	if want := "/app/calendar/" + connID + "/" + url.PathEscape(placed.Path); loc != want {
-		t.Errorf("the create went to %q, want %q: the catalog and the address shown disagree", loc, want)
+	// Back to Connections (Р-75); the calendar's page is the address the
+	// catalog holds for it.
+	if loc != "/app/settings/connections" {
+		t.Errorf("the create went to %q, want back to Connections", loc)
 	}
+	loc = "/app/calendar/" + connID + "/" + url.PathEscape(placed.Path)
 	if got := liveProps(ctx, t, client, placed.Path, displayName); got["displayname"] != name {
 		t.Errorf("the collection the catalog points at = %+v, want the name that was asked for", got)
 	}

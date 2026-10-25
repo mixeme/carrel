@@ -106,9 +106,10 @@ func runMove(t *testing.T, endpoint, user, pass string) {
 		intoB := "/app/contacts/" + connID + "/" + url.PathEscape(catalogEntry(t, blob, cols.bookB).Path)
 
 		sheet := liveDecode[view.MoveSheet](t, "move sheet", app.get(moveURL("contacts", cols.bookA, uid, cols.bookB, false)))
-		// On one account the sheet says only what it always says: a MOVE.
-		if !strings.HasPrefix(runsText(sheet.Warning), "Inside one server this is MOVE") {
-			t.Errorf("a move on one account warned of something else: %q", sheet.Warning)
+		// On one account a move says nothing: it is what a move is (Р-77,
+		// Typecase's note 119).
+		if len(sheet.Warning) > 0 {
+			t.Errorf("a move on one account warned: %q", sheet.Warning)
 		}
 		// A server may give the moved record an identity of its own (SoGo does:
 		// docs/servers.md, SV-18). Then the move is done and said out loud, and

@@ -225,6 +225,8 @@ func TestICloudCollections(t *testing.T) {
 
 	suffix := yandexSuffix("s12")
 	name := "Поездки & планы " + suffix
+	// The server takes one kind of the two (SV-52): the create goes to the
+	// new calendar, which says so, not back to Connections.
 	loc := redirected(t, "new calendar", app.post("/app/collections/new?kind=event", url.Values{
 		"account": {connID}, "name": {name}, "colour": {"#6b4e7a"}, "components": {"VEVENT", "VTODO"},
 	}))
@@ -312,8 +314,10 @@ func TestICloudMove(t *testing.T) {
 	}
 
 	sheet := liveDecode[view.MoveSheet](t, "move sheet", app.get(moveURL(from.Path, into.Path, false)))
-	if !strings.HasPrefix(runsText(sheet.Warning), "Inside one server this is MOVE") {
-		t.Errorf("a move on one account warned of something else: %q", sheet.Warning)
+	// On one account a move says nothing: it is what a move is (Р-77,
+	// Typecase's note 119).
+	if len(sheet.Warning) > 0 {
+		t.Errorf("a move on one account warned: %q", sheet.Warning)
 	}
 	redirected(t, "move", app.post(liveAction(t, sheet.Actions, "record.move.confirm"), url.Values{}))
 	if _, _, err := client.Get(ctx, from.Path+series+".ics", nil); !dav.IsStatus(err, http.StatusNotFound) {
@@ -364,7 +368,9 @@ func TestICloudMove(t *testing.T) {
 
 		// The account is known now: the next copy's sheet says so first.
 		again := liveDecode[view.MoveSheet](t, "copy sheet again", app.get(moveURL(into.Path, from.Path, true)))
-		if !strings.Contains(runsText(again.Warning), "a UID of its own") {
+		// In the words of Р-77 (Typecase's note 119): what the copy is for
+		// other programs.
+		if !strings.Contains(runsText(again.Warning), "new UID") {
 			t.Errorf("the second copy sheet warned %q", again.Warning)
 		}
 	})

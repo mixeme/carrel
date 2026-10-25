@@ -3,9 +3,11 @@
 package integration
 
 import (
+	"archive/zip"
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -101,7 +103,9 @@ func runImportExport(t *testing.T, endpoint, user, pass string) {
 		if row := livePreviewRow(t, page.Preview, "Standup imported"); row[3] != "New UID will be assigned" {
 			t.Errorf("the taken series in the preview, as a copy = %q", row)
 		}
-		if row := livePreviewRow(t, page.Preview, "Ковка"); row[3] != "Ready" {
+		// An event with no end is a moment, and the row says so (Typecase's
+		// note 113).
+		if row := livePreviewRow(t, page.Preview, "Ковка"); row[3] != "Ready — a moment (no end)" {
 			t.Errorf("the new event in the preview = %q", row)
 		}
 		if row := livePreviewRow(t, page.Preview, "VTODO"); !strings.HasPrefix(string(row[3]), "Skipped:") {
@@ -112,14 +116,17 @@ func runImportExport(t *testing.T, endpoint, user, pass string) {
 		if r := page.Report; r == nil || r.Created != 2 || r.Renamed != 1 || r.Skipped != 1 {
 			t.Fatalf("report = %+v", page.Report)
 		}
+		// A copy the person asked for is among «Imported as copies»
+		// (Renames), not the identities the server chose (Typecase's note
+		// 113).
 		var m []string
-		for _, line := range page.Report.NewUIDs {
-			if m = regexp.MustCompile(`^Standup imported · \S+ → (\S+) · `).FindStringSubmatch(string(line)); m != nil {
+		for _, line := range page.Report.Renames {
+			if m = regexp.MustCompile(`^Standup imported · \S+ → (\S+)$`).FindStringSubmatch(string(line)); m != nil {
 				break
 			}
 		}
 		if m == nil {
-			t.Fatalf("the renamed series does not say its identity: %q", page.Report.NewUIDs)
+			t.Fatalf("the renamed series does not say its identity: %q", page.Report.Renames)
 		}
 		got, _ := rawBody(ctx, t, client, calPath+m[1]+".ics")
 		mustHave(t, "renamed series", got, "RRULE:FREQ=WEEKLY;COUNT=3", "RECURRENCE-ID:20261113T100000Z", "SUMMARY:Standup imported moved", "X-CUSTOM:keep-me")
@@ -265,8 +272,40 @@ func TestBaikalSFTPGoNotesFromFolder(t *testing.T) {
 		t.Fatalf("report = %+v, notices %+v", page.Report, page.Notices)
 	}
 
-	body := liveDownload(t, app, notes+"/export", ".md")
+	// A notebook goes out as a .zip of one .md a note (Typecase's note 119).
+	body := liveZip(t, app, notes+"/export")
 	mustHave(t, "notebook export", body, "Ковка "+suffix, "Уголь "+suffix, "Заказать мешок.", "work")
+}
+
+// liveZip downloads an export that is a .zip and gives its files' text, one
+// after another.
+func liveZip(t *testing.T, app *liveApp, path string) string {
+	t.Helper()
+	rec := app.get(path)
+	h := rec.Header()
+	if rec.Code != http.StatusOK || !strings.Contains(h.Get("Content-Disposition"), ".zip") || !strings.Contains(h.Get("Content-Security-Policy"), "sandbox") {
+		t.Fatalf("export %s: %d %v", path, rec.Code, h)
+	}
+	data := rec.Body.Bytes()
+	zr, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		t.Fatalf("export %s: not a zip: %v", path, err)
+	}
+	var out strings.Builder
+	for _, f := range zr.File {
+		rc, err := f.Open()
+		if err != nil {
+			t.Fatalf("export %s: %s: %v", path, f.Name, err)
+		}
+		b, err := io.ReadAll(rc)
+		rc.Close()
+		if err != nil {
+			t.Fatalf("export %s: %s: %v", path, f.Name, err)
+		}
+		out.Write(b)
+		out.WriteString("\n")
+	}
+	return out.String()
 }
 
 // importFile sends a file the way a page without scripts does: _csrf first,

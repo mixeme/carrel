@@ -129,9 +129,12 @@ func runCollections(t *testing.T, endpoint, user, pass string, quirks ...collect
 		"account": {conn.ID}, "name": {name}, "colour": {"#6b4e7a"}, "components": {"VEVENT", "VTODO"},
 	}))
 	t.Cleanup(func() { _ = client.Delete(context.Background(), calPath, "") })
-	if loc != "/app/calendar/"+conn.ID+"/"+url.PathEscape(calPath) {
-		t.Fatalf("new calendar went to %q, want %q", loc, calPath)
+	// The sheet is opened from Connections and goes back there (Р-75,
+	// Typecase's note 112); the calendar is where it was asked to be.
+	if loc != "/app/settings/connections" {
+		t.Fatalf("new calendar went to %q, want back to Connections", loc)
 	}
+	loc = "/app/calendar/" + conn.ID + "/" + url.PathEscape(calPath)
 	got := liveProps(ctx, t, client, calPath, displayName, colour, comps)
 	if got["displayname"] != shown(name) || !strings.Contains(strings.ToLower(got["calendar-color"]), "6b4e7a") ||
 		!strings.Contains(got["supported-calendar-component-set"], "VEVENT") ||
