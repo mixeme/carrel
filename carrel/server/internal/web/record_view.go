@@ -449,6 +449,8 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 		// Where the person works and as what is the head of the card; the
 		// panel beside a list has no such head and keeps them as fields.
 		if f.prop == "ORG" || f.prop == "TITLE" {
+			// On paper they are fields again, first (print-3).
+			page.Print.Lead = append(page.Print.Lead, f.Field)
 			continue
 		}
 		page.Fields = append(page.Fields, f.Field)
@@ -712,6 +714,10 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	title := noteTitle(cal.Text(obj, "SUMMARY"), body)
 	page.Shell.Title = text(title)
 	page.Print = s.recordPrint(c, text(title))
+	if when := noteWhen(obj, tf); when != "" {
+		// On paper where the note lies and when it was written (print-5).
+		page.Print.Sources += text(" · " + when)
+	}
 	page.Rail.Neighbours = s.noteNeighbours(c, uid)
 	page.Doc.Title, page.Doc.Body, page.Doc.Rendered = text(title), text(body), cal.RenderMarkdown(body)
 	// Edit with its pencil, Export Markdown — its icon and «.md», the whole

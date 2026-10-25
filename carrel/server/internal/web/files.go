@@ -842,6 +842,17 @@ func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries 
 		page.Queue.Toggle = &toggle
 	}
 	page.Print = view.Print{Title: page.Title, Range: printRange(string(c.stamp()), plural(total, "item"), filter), Taken: c.tf.taken(now)}
+	// On paper (print-6; Typecase's note 132): the folder's path in the
+	// heading, where it lives under it, the foot — how many, how much,
+	// when it was read.
+	crumbs := make([]string, 0, len(page.Crumbs))
+	for _, cr := range page.Crumbs {
+		crumbs = append(crumbs, string(cr.Label))
+	}
+	page.Print.Heading = text("Files · " + strings.Join(crumbs, " / "))
+	page.Print.Sources = text(string(c.stamp()))
+	page.Print.Foot = printRange("Carrel", "files", plural(len(page.Rows), "item"), string(sizeOf(entries)), filter,
+		"captured "+string(c.tf.numStamp(now)))
 	return page
 }
 

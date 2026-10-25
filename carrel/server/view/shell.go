@@ -280,4 +280,8 @@ type Print struct {
 	Heading Text `json:"heading,omitempty"`
 	Sources Text `json:"sources,omitempty"`
 	Foot    Text `json:"foot,omitempty"`
+	// Lead — поля бумаги перед полями карточки, которых экран не держит
+	// полями: у контакта Organisation и Title — на экране это строка под
+	// именем (print-3, записка Typecase 132); пусто — у прочих
+	Lead []Field `json:"lead,omitempty"`
 }

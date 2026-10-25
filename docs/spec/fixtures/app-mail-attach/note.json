@@ -1279,7 +1279,10 @@
         "taskID": "t-task"
       },
       "print": {
+        "foot": "Carrel · contacts · 6 cards · captured 2026-08-10 17:06 · 3 of 3 books",
+        "heading": "Contacts · Combined address book",
         "range": "3 books · 6 cards",
+        "sources": "nextcloud · Контакты, Архив · radicale · vps · Команда",
         "taken": "10 August 2026, 17:06",
         "title": "Combined address book"
       },

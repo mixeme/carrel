@@ -246,6 +246,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     # токеном. Кадр rest-1 — часть (data-part), и сверяется он с кадром
     # приглашения — оба без рейла, так что проверке 8 сравнивать нечего.
     "dead-link": "/invite/{token}",
+    "offline": "/offline",
     "p-token": "/p/{token}",
     # Подтверждение адреса — свой адрес C-5, но кадра экрана у него нет: оба
     # его кадра — части (rest-1 invalid, rest-2 confirmed). Мёртвый токен —
@@ -395,6 +396,7 @@ STATE_FRAME = {
     # Мёртвая ссылка отвечает на четырёх маршрутах секрета; FIXTURE_SCREEN
     # ставит её к приглашению, а рисуется она своим кадром.
     "dead-link/normal": "rest-1",
+    "offline/normal": "offline-1",
     # Итог листа «переписать адрес» на карточке рисует свой кадр, s-contacts-16
     # (без data-screen: у маршрута карточки кадр — s-contacts-6).
     "app-contact/outcome": "s-contacts-16",
@@ -529,6 +531,13 @@ STATE_FRAME = {
     "app-event-import/preview": "s-io-6",
     # Агенда на бумаге (U-10): тот же маршрут с ?print=1.
     "app-agenda-all/print": "print-1",
+    # Остальное на бумаге (записка Typecase 132).
+    "app-contacts/print": "print-2",
+    "app-contact/print": "print-3",
+    "app-tasks-all/print": "print-4",
+    "app-note/print": "print-5",
+    "app-files-folder/print": "print-6",
+    "app-agenda/print": "print-7",
     # Состояния поиска (записка Typecase 114): идёт, ничего не найдено, без
     # запроса, ничего не отмечено, слишком много обходов, не ответил никто,
     # остановлен.

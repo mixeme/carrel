@@ -438,7 +438,10 @@
       },
       "notices": [],
       "print": {
+        "foot": "Carrel · note · captured 2026-08-10 17:06",
+        "heading": "Заметка со встречи 10.08",
         "range": "nextcloud · Записи",
+        "sources": "nextcloud · Записи · 10 August 2026, 11:05",
         "taken": "10 August 2026, 17:06",
         "title": "Заметка со встречи 10.08"
       },

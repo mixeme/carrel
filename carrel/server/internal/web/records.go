@@ -1375,6 +1375,13 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	page.Print = view.Print{
 		Title: page.Title, Range: printRange(agendaPrint(tf, from, to), plural(page.Bar.Loaded, "event"), filter.tag),
 		Taken: tf.taken(tf.now),
+		// On paper (print-7; Typecase's note 132): the calendar and its
+		// days in the heading, where it lives once under it, the foot with
+		// the days in numbers and when it was read.
+		Heading: text(collectionLabel(c.col) + " · " + tf.window(from, to)),
+		Sources: text(string(c.stamp())),
+		Foot: printRange("Carrel", "agenda", collectionLabel(c.col),
+			from.Format("2006-01-02")+" – "+to.AddDate(0, 0, -1).Format("2006-01-02"), filter.tag, "captured "+string(tf.numStamp(tf.now))),
 	}
 	return page
 }
@@ -1827,6 +1834,7 @@ func (s *Server) taskGroups(sess *session.Session, tf timeFmt, show string, item
 			row.Due = text(tf.shortDue(due))
 			row.Overdue = !isDone && due.Start.Before(now)
 		}
+		row.PaperDue, row.PaperLine = taskPaper(tf, it, due, row.Percent, isDone || ticked)
 		// The columns the menu adds (s-tasks-12, -13): the priority by its
 		// number, the status by the word of its list — a task without one
 		// needs action — and the last change with its time.

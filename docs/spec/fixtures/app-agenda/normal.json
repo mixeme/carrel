@@ -619,7 +619,10 @@
   "notices": [],
   "poll": null,
   "print": {
+    "foot": "Carrel · agenda · Личный · 2026-08-10 – 2026-08-16 · captured 2026-08-10 17:06",
+    "heading": "Личный · 10 – 16 August 2026",
     "range": "10 August 2026 – 16 August 2026 · 2 events",
+    "sources": "nextcloud · Личный",
     "taken": "10 August 2026, 17:06",
     "title": "Личный"
   },

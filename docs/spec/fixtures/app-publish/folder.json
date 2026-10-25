@@ -411,7 +411,10 @@
       },
       "notices": [],
       "print": {
+        "foot": "Carrel · files · 1 item · captured 2026-08-10 17:06",
+        "heading": "Files · Documents",
         "range": "sftpgo · vps · Documents · 1 item",
+        "sources": "sftpgo · vps · Documents",
         "taken": "10 August 2026, 17:06",
         "title": "Documents"
       },

@@ -436,7 +436,10 @@
       ],
       "notices": [],
       "print": {
+        "foot": "Carrel · event · captured 2026-08-10 17:06",
+        "heading": "Синк-ап по релизу",
         "range": "nextcloud · Личный",
+        "sources": "nextcloud · Личный",
         "taken": "10 August 2026, 17:06",
         "title": "Синк-ап по релизу"
       },

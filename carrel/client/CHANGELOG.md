@@ -4,6 +4,79 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.11.0 — 2026-10-26
+
+Server `v0.2.372`, Typecase `a08489b`. **All the screens** (U-6.16,
+U-6.17): every address of C-5 is built (`CARREL_ACCEPTANCE=1` green).
+**Tagged:** `client-v0.11.0`.
+
+### Added
+
+- **The last sheets**: the export of a combined view (s-agenda-30,
+  `screens/export`), the quick sheet (s-notes-5, -6, -8, -9, -10 and
+  s-notes-34 — nothing chosen yet, Save waiting; `screens/quick`), the
+  photo's crop (s-contacts-5, `contactedit.Crop`).
+- **The live zones** (stage 4; Typecase's notes 124, 127): details and
+  sheet answer in place, the sheet's closed place over the shell; the
+  poll's bar is the zone poll, its stream's events HTML; the queue of
+  uploads is the zone queue, the folder after it out of band; the notices
+  are one band, the zone notices (`bind.Band`, `document.withNotices`).
+- **Paper for every kind** (U-10; print-1…-7, Typecase's note 132): the
+  contacts list without photographs (Р-80), a card whole with what is
+  kept as the server sent it, the tasks of the filter with their boxes, a
+  note in a reader's width, a folder, one calendar; the tables name their
+  columns. `bind.Paper`.
+- **The page without a network** (U-11, offline-1, `screens/offline`):
+  the document names it to the library's worker (`page.App.Offline`).
+- **Keys** (U-7): «n» on New, «/» on the search, «Ctrl+S» on an edit's
+  Save, «Ctrl+Enter» on the quick note's; **the theme's switch** in the
+  account's menu (account-5). The keyboard sheet waits for Typecase's task
+  239.
+- The filter's cross (`Filter.Clear`), how late a task is in its panel,
+  Related with its day for tasks and events.
+
+### Changed
+
+- The guard reads the notices' band through, in the frame check and in
+  kinship, as Typecase's note 127 p. 3 says the library will.
+
+## v0.10.0 — 2026-10-25
+
+Server `v0.2.371`, Typecase `5189dfa`. **The public pages** (U-6.15).
+**Tagged:** `client-v0.10.0`.
+
+### Added
+
+- **The guest's pages** `/p/{token}` (s-publish-6…-39, `screens/guest`):
+  the strip with the mark and what may be downloaded, the address's strip,
+  the head, days, a book by letters, tasks, notes by month, one record, a
+  text, a picture, a PDF, a folder as a table, the notices and the foot.
+- **The owner's calendar filter**: the found by day, the past muted.
+
+## v0.9.0 — 2026-10-24
+
+Server `v0.2.370`, Typecase `34d1c1c`. **Duplicates** (U-6.7).
+**Tagged:** `client-v0.9.0`.
+
+### Added
+
+- **The screens of duplicates and the merge** (s-dup-1, -2, -4, -5, -6,
+  -8): cards that are forms with their questions, rows of their own kind,
+  «Decided earlier», the threshold and the weights.
+- **The linked record** of every kind (s-contacts-33, s-agenda-25,
+  s-tasks-17, s-notes-32) and the panels of linked rows (Р-78): where each
+  value came from, «Where … is kept».
+
+## v0.8.0 — 2026-10-23
+
+Server `v0.2.369`, Typecase `54efd28`. **The search** (U-6.6).
+**Tagged:** `client-v0.8.0`.
+
+### Added
+
+- **The search's screen** (s-find-1, -4…-10) and the suggestions of its
+  line (s-find-2, -3): an answer that is a menu, without a document.
+
 ## v0.7.3 — 2026-10-23
 
 Server `v0.2.368`, Typecase `ce9da05`. Stage 5: without scripts (U-8).

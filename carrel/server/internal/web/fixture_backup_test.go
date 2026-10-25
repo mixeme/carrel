@@ -2,11 +2,13 @@ package web_test
 
 import (
 	"bytes"
+	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -69,6 +71,7 @@ func TestFixtureBackupStates(t *testing.T) {
 	if made.File == "" || !made.Verified {
 		t.Fatalf("the home job's copy = %+v", made)
 	}
+	real.archive = strings.TrimSuffix(fmt.Sprintf("%.1f", float64(made.Size)/1024), ".0") + " KB"
 	key, _ := real.sess.DataKey()
 	if _, err := real.h.users.RemoveConnection(real.sess.AccountID(), key, real.realAccount(t, "proekty")); err != nil {
 		t.Fatal(err)

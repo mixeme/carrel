@@ -257,7 +257,10 @@
     }
   ],
   "print": {
+    "foot": "Carrel · files · 0 items · captured 2026-08-10 17:06",
+    "heading": "Files · Documents",
     "range": "sftpgo · vps · Documents · 0 items",
+    "sources": "sftpgo · vps · Documents",
     "taken": "10 August 2026, 17:06",
     "title": "Documents"
   },

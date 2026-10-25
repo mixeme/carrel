@@ -428,7 +428,10 @@
   "notices": [],
   "poll": null,
   "print": {
+    "foot": "Carrel · agenda · Личный · 2027-01-04 – 2027-01-10 · captured 2026-08-10 17:06",
+    "heading": "Личный · 4 – 10 January 2027",
     "range": "4 January 2027 – 10 January 2027 · 0 events",
+    "sources": "nextcloud · Личный",
     "taken": "10 August 2026, 17:06",
     "title": "Личный"
   },

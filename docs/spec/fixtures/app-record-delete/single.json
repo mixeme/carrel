@@ -293,7 +293,10 @@
       ],
       "notices": [],
       "print": {
+        "foot": "Carrel · task · captured 2026-08-10 17:06",
+        "heading": "Отправить документы в МФЦ",
         "range": "nextcloud · Дела",
+        "sources": "nextcloud · Дела",
         "taken": "10 August 2026, 17:06",
         "title": "Отправить документы в МФЦ"
       },

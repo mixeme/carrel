@@ -54,6 +54,15 @@ type DeadLinkPage struct {
 	SignIn Action `json:"signIn"` // «Sign in» — единственная дверь
 }
 
+// OfflinePage — страница без сети установленного приложения (U-11,
+// offline-1, записка Typecase 132 п. 5): знак и одно сообщение в Notices —
+// «No connection.», чего нет на этом устройстве и до чьей связи, и Try again
+// — ссылка на /app/ (вход или раздел), без сценария тоже. Её держит обработчик библиотеки;
+// данных в ней нет.
+type OfflinePage struct {
+	Plain
+}
+
 // ForgotPage — /forgot: логин или почта (s-auth-5), варианты (s-auth-6),
 // помочь нечем (s-auth-7), письмо отправлено (s-auth-8), администратор
 // спрошен (s-auth-9).

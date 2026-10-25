@@ -334,6 +334,7 @@ spec/fixtures/<screen>/<state>.json
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/login` | GET, POST | — | страница | `LoginPage` |
+| `/offline` | GET | — | страница | `OfflinePage` — страница без сети установленного приложения (U-11, offline-1): знак, «No connection.» с хостом экземпляра (`CARREL_PUBLIC_URL`) и Try again на `/app/` (вход или раздел); одна на всех, без данных; её держит обработчик Typecase (`page.App.Offline`, `render.OfflinePath`) |
 | `/logout` | POST | вход | редирект | — |
 | `/setup` | GET, POST | — | страница | `SetupPage` |
 | `/register` | GET, POST | — | страница | `RegisterPage` |
@@ -972,10 +973,17 @@ type Print struct { // колонтитул распечатки, C-10
     // что ответило, по подключениям — «nextcloud · Личный, Работа · radicale ·
     // vps · Проекты, Дежурства»; подвал — «Carrel · agenda · 2026-08-10 –
     // 2026-08-16 · captured 2026-08-15 09:41 · 5 of 7 sources». Пусто — у
-    // вида нет кадра бумаги (пока только агенда единого вида)
+    // вида нет кадра бумаги. Бумага всех родов (записка Typecase 132): список
+    // контактов «Contacts · Combined address book» (print-2), карточка — её
+    // название, место, «Carrel · contact · captured …» (print-3), задачи
+    // фильтра «Tasks · Open · Combined list» (print-4), заметка — место и
+    // когда написана (print-5), папка «Files · Documents / carrel /
+    // attachments» и «5 items · 4.5 MB» (print-6), один календарь «Личный ·
+    // 10 – 16 August 2026» (print-7)
     Heading Text
     Sources Text
     Foot    Text
+    Lead    []Field // поля бумаги перед полями карточки: у контакта Organisation и Title — на экране строка под именем (print-3); у прочих пусто
 }
 ```
 
@@ -1270,6 +1278,8 @@ type TaskRow struct {
     Summary   Text
     Due       Text
     Overdue   bool
+    PaperDue  Text // на бумаге (print-4): день срока без времени, «12 Aug»
+    PaperLine Text // на бумаге под названием: время срока, где лежит (у связанной — подключение и списки), доля или, без неё, просрочка: «18:00 · nextcloud · Дела, Работа», «nextcloud · Дела · overdue by 3 days»
     Percent   *int
     Tags      []Tag
     Priority  Text     // приоритет числом, «5»; пусто — нет (s-tasks-13)
@@ -3727,6 +3737,9 @@ type ConfirmEmailPage struct { Plain; Next Action }
 type DeadLinkPage struct { // rest-1: мёртвая ссылка-секрет — /invite/, /forgot/, /confirm-email/, /p/
     Plain         // «This link does not work» и почему так бывает; одни слова на все роды ссылок
     SignIn Action // «Sign in» — единственная дверь
+}
+type OfflinePage struct { // offline-1: без сети, установленное приложение (U-11)
+    Plain // Title «Carrel»; Notices — одно: «No connection.», «Carrel keeps nothing on this device, so there is nothing to show until carrel.example can be reached.», Try again (GET `/app/`)
 }
 type ForgotPage struct { // s-auth-5 … s-auth-9
     Plain

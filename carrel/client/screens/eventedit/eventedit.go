@@ -37,6 +37,8 @@ var (
 	top = bind.TopWords{
 		Brand:  w.Brand{Logo: &w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63"}},
 		Search: "Search everything…",
+		NewKey: "n", SearchKey: "/",
+		Theme: bind.ThemeWords{Label: "Theme", Auto: "Auto", Light: "Light", Dark: "Dark"},
 	}
 	rail = bind.RailWords{Toggle: "toggle", None: "—", ReadOnly: "ro", Tags: "Tags", Davloom: "davloom", External: "external"}
 )
@@ -106,6 +108,9 @@ func width(name string) w.FieldWidth {
 	return w.FieldAuto
 }
 
+// saveKey is the key that presses Save in the editor (U-7).
+const saveKey = "Ctrl+S"
+
 // Screen draws the edit from its view model, in the state the model is in.
 //
 //   - The shell: the top bar; the rail of return — «Back to the card» (or
@@ -138,6 +143,7 @@ func Screen(p *view.EventEditPage) w.Shell {
 		}
 		b := bind.Button(a, id)
 		if a.Primary {
+			b.Key = saveKey // U-7: Save in the editor
 			primary = append(primary, b)
 		} else {
 			plain = append(plain, b)

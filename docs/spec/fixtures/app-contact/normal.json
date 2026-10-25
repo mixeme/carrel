@@ -242,7 +242,26 @@
   "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e27",
   "photoNote": "",
   "print": {
+    "foot": "Carrel · contact · captured 2026-08-10 17:06",
+    "heading": "Анна Ковалёва",
+    "lead": [
+      {
+        "from": null,
+        "href": "",
+        "label": "Organisation",
+        "mono": false,
+        "value": "Издательство «Слово»"
+      },
+      {
+        "from": null,
+        "href": "",
+        "label": "Title",
+        "mono": false,
+        "value": "Выпускающий редактор"
+      }
+    ],
     "range": "nextcloud · Контакты",
+    "sources": "nextcloud · Контакты",
     "taken": "10 August 2026, 17:06",
     "title": "Анна Ковалёва"
   },

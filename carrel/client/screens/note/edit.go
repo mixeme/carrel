@@ -89,7 +89,9 @@ func edit(p *view.NotePage) []w.MainPart {
 	for _, a := range p.Doc.Bar {
 		switch {
 		case a.ID == saveID:
-			items = append(items, bind.SubmitForm(a, formEdit))
+			save := bind.SubmitForm(a, formEdit)
+			save.Key = saveKey // U-7: Save in the editor
+			items = append(items, save)
 		case a.ID == attachID:
 			attach = &a
 		default:

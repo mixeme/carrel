@@ -255,3 +255,48 @@ func taskEditSubtitle(c *collectionCtx, obj *model.Object) view.Runs {
 	}
 	return nil
 }
+
+// taskPaper is a task's row on paper (print-4; Typecase's note 132): the
+// day it is due in the column, and under its title the time it is due,
+// where it lies — a linked one's connection and lists, «nextcloud · Дела,
+// Работа» —, and how much of it is done or, without that, how late it is.
+func taskPaper(tf timeFmt, it listed, due cal.Timing, percent *int, done bool) (view.Text, view.Text) {
+	var day string
+	var line []string
+	if !due.Start.IsZero() {
+		day = tf.shortDay(due.Start)
+		if !due.AllDay {
+			line = append(line, tf.clock(due.Start))
+		}
+	}
+	var hosts []string
+	lists := map[string][]string{}
+	for _, o := range append([]origin{it.from}, alsoOrigins(it)...) {
+		host := connLabel(o.conn)
+		if _, seen := lists[host]; !seen {
+			hosts = append(hosts, host)
+		}
+		lists[host] = append(lists[host], collectionLabel(o.col))
+	}
+	for _, h := range hosts {
+		line = append(line, h+" · "+strings.Join(lists[h], ", "))
+	}
+	switch {
+	case percent != nil && *percent > 0:
+		line = append(line, strconv.Itoa(*percent)+"%")
+	case !due.Start.IsZero():
+		if late := overdueBy(tf, due, done); late != "" {
+			line = append(line, late)
+		}
+	}
+	return text(day), text(strings.Join(line, " · "))
+}
+
+// alsoOrigins are where the other copies of a linked row lie.
+func alsoOrigins(it listed) []origin {
+	out := make([]origin, 0, len(it.also))
+	for _, o := range it.also {
+		out = append(out, o.from)
+	}
+	return out
+}

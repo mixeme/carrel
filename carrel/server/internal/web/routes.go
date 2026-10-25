@@ -1,10 +1,15 @@
 package web
 
-import "net/http"
+import (
+	"net/http"
+
+	"carrel.dev/carrel/server/render"
+)
 
 func (s *Server) registerRoutes() {
 	// C-5.1 — outside shell
 	s.handle("GET /login", (*Server).getLogin)
+	s.handle("GET "+render.OfflinePath, (*Server).getOffline)
 	s.handle("POST /login", (*Server).postLogin)
 	s.handle("POST /logout", (*Server).postLogout)
 	s.handle("GET /setup", (*Server).getSetup)

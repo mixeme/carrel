@@ -163,6 +163,9 @@ func foot(actions []view.Action, keys string) []w.SheetFootPart {
 				// browser does not send the form without it.
 				b.State, b.Reason = w.ButtonWaits, string(a.Reason)
 			}
+			if a.Primary && keys == ctrlEnter {
+				b.Key = ctrlEnter // U-7: Save a quick note
+			}
 			out = append(out, b)
 			if a.Primary && keys != "" {
 				out = append(out, w.Kbd{Keys: keys})

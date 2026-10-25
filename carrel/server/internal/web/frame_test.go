@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"net/url"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -82,7 +83,7 @@ func TestBackRailOnRecordScreens(t *testing.T) {
 	if back := backRow(t, edit.Rail); back.Label != "Back to the card" || back.Href != rec {
 		t.Errorf("edit back = %+v", back)
 	}
-	if edit.Print != (view.Print{}) {
+	if !reflect.DeepEqual(edit.Print, view.Print{}) {
 		t.Errorf("edit print = %+v", edit.Print)
 	}
 	fresh := decode[view.ContactEditPage](t, f.h.do(get(list+"/new", f.sess)))

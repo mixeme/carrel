@@ -626,7 +626,7 @@
       "collections": "4 / 4",
       "id": "r-run",
       "job": "Личное на домашний диск",
-      "size": "4.5 KB",
+      "size": "4.4 KB",
       "trigger": "by hand",
       "verified": [
         {
@@ -730,7 +730,7 @@
       "keep": 8,
       "lastNote": [
         {
-          "text": "4.5 KB · "
+          "text": "4.4 KB · "
         },
         {
           "hint": "The archive was read back from the destination and the checksum matched",

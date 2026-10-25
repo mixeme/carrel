@@ -183,10 +183,10 @@ func Of(scr screens.Screen, model any, base string) page.Document {
 		// headers, the form's token in its header too.
 		Live: true,
 		// Installed as an application (U-11): the manifest the server
-		// serves (C-5.9) and the colour around the page. No worker yet: its
-		// page shown without the network has no frame (Typecase's task
-		// 228).
-		App: &page.App{Manifest: base + render.ManifestPath, ThemeColor: render.ThemeColor},
+		// serves (C-5.9), the colour around the page, and the page shown
+		// without the network (offline-1), which the library's worker keeps
+		// with the library's files and nothing else of Carrel's.
+		App: &page.App{Manifest: base + render.ManifestPath, ThemeColor: render.ThemeColor, Offline: base + render.OfflinePath, Scope: base + "/"},
 		Zones: page.Zones{
 			ViewHeader: render.HeaderView, ViewValue: render.ViewFragment, TargetHeader: render.HeaderTarget,
 			TokenField: render.CSRFField, TokenHeader: render.CSRFHeader,

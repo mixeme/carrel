@@ -265,7 +265,10 @@
       ],
       "notices": [],
       "print": {
+        "foot": "Carrel · event · captured 2026-08-10 17:06",
+        "heading": "Дежурство: первая линия",
         "range": "nextcloud · Работа",
+        "sources": "nextcloud · Работа",
         "taken": "10 August 2026, 17:06",
         "title": "Дежурство: первая линия"
       },

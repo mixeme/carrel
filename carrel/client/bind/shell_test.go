@@ -66,6 +66,18 @@ func TestTop(t *testing.T) {
 		End: true,
 	}))
 	same(t, "the forms of the top bar", bind.TopForms(bar), []w.PostForm{{ID: "user.logout", Action: "/logout", Fields: []w.Hidden{{Name: "_csrf", Value: "c"}}}})
+	// The screen's keys and the theme's switch (U-7, account-5): «n» on New,
+	// «/» on the search, the theme before the rule over Sign out.
+	got = bind.Top(bar, bind.TopWords{Brand: brand, NewKey: "n", SearchKey: "/",
+		Theme: bind.ThemeWords{Label: "Theme", Auto: "Auto", Light: "Light", Dark: "Dark"}})
+	same(t, "New's key", got.Actions[0], w.TopAction(w.Button{Label: "New note", Icon: "quill", Kind: w.ButtonPrimary, Href: "/app/notes/quick", Key: "n"}))
+	same(t, "the search's key", got.Search.Query.Key, "/")
+	same(t, "the theme before Sign out", got.Actions[1].(w.TopDrop).Menu.Items[2:], []w.MenuPart{
+		w.MenuSep{},
+		w.MenuColumn{Label: "Theme", Control: w.Seg{Theme: true, Variant: w.SegStartSmall, Options: []w.SegOption{{Label: "Auto", On: true}, {Label: "Light"}, {Label: "Dark"}}}},
+		w.MenuSep{},
+		w.MenuItem{Label: "Sign out", Form: "user.logout"},
+	})
 }
 
 func TestMenuItems(t *testing.T) {

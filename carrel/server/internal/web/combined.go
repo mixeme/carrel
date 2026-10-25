@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -371,6 +372,19 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		parts = append(append([]string{sources}, parts...), filter.tag)
 		return view.Print{Title: st.shell.Title, Range: printRange(parts...), Taken: taken}
 	}
+	// paper is the words of the view on paper once the poll is over
+	// (print-2, -4; Typecase's note 132): its heading, what answered by its
+	// connection, and the foot — the kind, what of it, when it was taken
+	// and how many collections the snapshot holds.
+	paper := func(p *view.Print, heading, what string, parts ...string) {
+		if st.snap == nil || st.snap.Running {
+			return
+		}
+		answered, names := paperSources(blob, st.snap.Sources)
+		foot := append(append([]string{"Carrel", what}, parts...), "captured "+string(tf.numStamp(st.snap.Finished)),
+			fmt.Sprintf("%d of %s", answered, plural(len(st.snap.Sources), collectionNouns[spec.kind])))
+		p.Heading, p.Sources, p.Foot = text(heading), text(names), text(strings.Join(slices.DeleteFunc(foot, func(s string) bool { return s == "" }), " · "))
+	}
 
 	switch spec.kind {
 	case view.KindContact:
@@ -402,6 +416,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			}
 		}
 		page.Print = header(counted(len(shown), "card"))
+		paper(&page.Print, "Contacts · "+string(st.shell.Title), "contacts", plural(len(kept), "card"), filter.tag)
 		return page, nil
 	case view.KindEvent:
 		page := view.AgendaPage{Shell: st.shell, Poll: st.poll}
@@ -487,6 +502,10 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 			page.Poll, page.Empty = nil, s.nothingTicked(spec)
 		}
 		page.Print = header(showLabels[show], counted(page.Bar.Loaded, "task"))
+		// The filter on paper as on the screen (print-4): Open, its
+		// rubrics, how many of all.
+		paper(&page.Print, "Tasks · "+showLabels[show]+" · "+string(st.shell.Title), "tasks", showLabels[show],
+			fmt.Sprintf("%d of %d", page.Bar.Loaded, open+done), filter.tag)
 		return page, nil
 	default:
 		page := view.NotesPage{Shell: st.shell, Poll: st.poll}

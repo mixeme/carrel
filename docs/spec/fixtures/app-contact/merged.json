@@ -143,7 +143,19 @@
   "photoHref": "/c/a-nc-home/arhiv/e7c2-3b95-6a14/photo?v=e29",
   "photoNote": "External photo link; editing is not available.",
   "print": {
+    "foot": "Carrel · contact · captured 2026-08-10 17:06",
+    "heading": "Лебедева Вера",
+    "lead": [
+      {
+        "from": null,
+        "href": "",
+        "label": "Organisation",
+        "mono": false,
+        "value": "Библиотека №4"
+      }
+    ],
     "range": "nextcloud · Архив",
+    "sources": "nextcloud · Архив",
     "taken": "10 August 2026, 17:06",
     "title": "Лебедева Вера"
   },

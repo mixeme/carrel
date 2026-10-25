@@ -31,6 +31,7 @@ import (
 	"carrel.dev/carrel/client/screens/move"
 	"carrel.dev/carrel/client/screens/note"
 	"carrel.dev/carrel/client/screens/notes"
+	"carrel.dev/carrel/client/screens/offline"
 	"carrel.dev/carrel/client/screens/picker"
 	"carrel.dev/carrel/client/screens/publish"
 	"carrel.dev/carrel/client/screens/published"
@@ -351,6 +352,12 @@ var All = []Screen{
 		Title: func(model any) string { return string(model.(*view.PublishedPage).Title) },
 	},
 	{
+		Model:  func() any { return new(view.OfflinePage) },
+		Frames: []string{"offline-1"},
+		Draw:   func(model any) Root { return offline.Screen(model.(*view.OfflinePage)) },
+		Title:  func(model any) string { return string(model.(*view.OfflinePage).Title) },
+	},
+	{
 		Model:  func() any { return new(view.DeadLinkPage) },
 		Frames: []string{"rest-1"},
 		Draw:   func(model any) Root { return deadlink.Screen(model.(*view.DeadLinkPage)) },
@@ -358,18 +365,38 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.ContactsListPage) },
-		Frames: []string{"s-contacts-1", "states-4", "states-7", "states-8", "states-9", "states-10", "states-11"},
-		Draw:   func(model any) Root { return contacts.Screen(model.(*view.ContactsListPage)) },
-		Title:  func(model any) string { return string(model.(*view.ContactsListPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return contacts.Forms(model.(*view.ContactsListPage)) },
-		Waits:  []Wait{},
+		Frames: []string{"s-contacts-1", "states-4", "states-7", "states-8", "states-9", "states-10", "states-11", "print-2"},
+		Draw: func(model any) Root {
+			if p := model.(*view.ContactsListPage); p.Print.Paper {
+				return contacts.Paper(p)
+			}
+			return contacts.Screen(model.(*view.ContactsListPage))
+		},
+		Title: func(model any) string { return string(model.(*view.ContactsListPage).Title) },
+		Forms: func(model any) []widget.PostForm {
+			if p := model.(*view.ContactsListPage); !p.Print.Paper {
+				return contacts.Forms(p)
+			}
+			return nil // nothing on paper is pressed
+		},
+		Waits: []Wait{},
 	},
 	{
 		Model:  func() any { return new(view.ContactPage) },
-		Frames: []string{"s-contacts-6", "s-contacts-16", "s-contacts-33", "s-dup-8"},
-		Draw:   func(model any) Root { return contact.Screen(model.(*view.ContactPage)) },
-		Title:  func(model any) string { return string(model.(*view.ContactPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return contact.Forms(model.(*view.ContactPage)) },
+		Frames: []string{"s-contacts-6", "s-contacts-16", "s-contacts-33", "s-dup-8", "print-3"},
+		Draw: func(model any) Root {
+			if p := model.(*view.ContactPage); p.Print.Paper {
+				return contact.Paper(p)
+			}
+			return contact.Screen(model.(*view.ContactPage))
+		},
+		Title: func(model any) string { return string(model.(*view.ContactPage).Title) },
+		Forms: func(model any) []widget.PostForm {
+			if p := model.(*view.ContactPage); !p.Print.Paper {
+				return contact.Forms(p)
+			}
+			return nil // nothing on paper is pressed
+		},
 		Waits: []Wait{
 			{Row: 20, Fixture: "app-contact/normal"},  // ждёт библиотеку: U-5.5 #20
 			{Row: 20, Fixture: "app-contact/outcome"}, // ждёт библиотеку: U-5.5 #20
@@ -408,7 +435,7 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.AgendaPage) },
-		Frames: []string{"s-agenda-1", "s-agenda-17", "s-agenda-31", "states-13", "states-14", "states-15", "print-1"},
+		Frames: []string{"s-agenda-1", "s-agenda-17", "s-agenda-31", "states-13", "states-14", "states-15", "print-1", "print-7"},
 		Draw: func(model any) Root {
 			p := model.(*view.AgendaPage)
 			if p.Print.Paper {
@@ -447,10 +474,20 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.TasksPage) },
-		Frames: []string{"s-tasks-1", "s-tasks-15", "s-tasks-20", "states-18", "states-22"},
-		Draw:   func(model any) Root { return tasks.Screen(model.(*view.TasksPage)) },
-		Title:  func(model any) string { return string(model.(*view.TasksPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return tasks.Forms(model.(*view.TasksPage)) },
+		Frames: []string{"s-tasks-1", "s-tasks-15", "s-tasks-20", "states-18", "states-22", "print-4"},
+		Draw: func(model any) Root {
+			if p := model.(*view.TasksPage); p.Print.Paper {
+				return tasks.Paper(p)
+			}
+			return tasks.Screen(model.(*view.TasksPage))
+		},
+		Title: func(model any) string { return string(model.(*view.TasksPage).Title) },
+		Forms: func(model any) []widget.PostForm {
+			if p := model.(*view.TasksPage); !p.Print.Paper {
+				return tasks.Forms(p)
+			}
+			return nil // nothing on paper is pressed
+		},
 		Waits: []Wait{
 			{Row: 32, Fixture: "app-tasks/normal"}, // ждёт библиотеку: U-5.5 #32
 		},
@@ -481,10 +518,20 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.NotePage) },
-		Frames: []string{"s-notes-2", "s-notes-20", "s-notes-30", "s-notes-32"},
-		Draw:   func(model any) Root { return note.Screen(model.(*view.NotePage)) },
-		Title:  func(model any) string { return string(model.(*view.NotePage).Title) },
-		Forms:  func(model any) []widget.PostForm { return note.Forms(model.(*view.NotePage)) },
+		Frames: []string{"s-notes-2", "s-notes-20", "s-notes-30", "s-notes-32", "print-5"},
+		Draw: func(model any) Root {
+			if p := model.(*view.NotePage); p.Print.Paper {
+				return note.Paper(p)
+			}
+			return note.Screen(model.(*view.NotePage))
+		},
+		Title: func(model any) string { return string(model.(*view.NotePage).Title) },
+		Forms: func(model any) []widget.PostForm {
+			if p := model.(*view.NotePage); !p.Print.Paper {
+				return note.Forms(p)
+			}
+			return nil // nothing on paper is pressed
+		},
 		Waits: []Wait{
 			{Row: 42, Fixture: "app-note-edit/new"},                                     // ждёт библиотеку: U-5.5 #42
 			{Row: 36, Control: ".Title(Rubric).Items(Drop).Menu(Menu).Items(MenuItem)"}, // ждёт библиотеку: U-5.5 #36
@@ -704,10 +751,20 @@ var All = []Screen{
 	},
 	{
 		Model:  func() any { return new(view.FilesPage) },
-		Frames: []string{"s-files-1", "s-files-2", "s-files-5", "states-32", "states-33", "states-34"},
-		Draw:   func(model any) Root { return folder.Screen(model.(*view.FilesPage)) },
-		Title:  func(model any) string { return string(model.(*view.FilesPage).Title) },
-		Forms:  func(model any) []widget.PostForm { return folder.Forms(model.(*view.FilesPage)) },
+		Frames: []string{"s-files-1", "s-files-2", "s-files-5", "states-32", "states-33", "states-34", "print-6"},
+		Draw: func(model any) Root {
+			if p := model.(*view.FilesPage); p.Print.Paper {
+				return folder.Paper(p)
+			}
+			return folder.Screen(model.(*view.FilesPage))
+		},
+		Title: func(model any) string { return string(model.(*view.FilesPage).Title) },
+		Forms: func(model any) []widget.PostForm {
+			if p := model.(*view.FilesPage); !p.Print.Paper {
+				return folder.Forms(p)
+			}
+			return nil // nothing on paper is pressed
+		},
 	},
 	{
 		Model:  func() any { return new(view.FileOpSheet) },

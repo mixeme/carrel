@@ -1,0 +1,21 @@
+{
+  "lede": [],
+  "notices": [
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/",
+          "id": "offline.retry",
+          "label": "Try again",
+          "method": "GET"
+        }
+      ],
+      "body": "Carrel keeps nothing on this device, so there is nothing to show until the server can be reached.",
+      "details": null,
+      "role": "alert",
+      "title": "No connection."
+    }
+  ],
+  "title": "Carrel"
+}

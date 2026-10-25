@@ -21,6 +21,20 @@ import (
 type TopWords struct {
 	Brand  w.Brand
 	Search string // «Search everything…»
+	// The keys of the shell (U-7; Typecase's note 59, task 87): the one
+	// that presses New, «n», and the one that puts the focus into the
+	// search, «/». The library has none of its own.
+	NewKey, SearchKey string
+	// Theme is the switch of the theme in the account's menu, before Sign
+	// out (account-5): a setting of this browser, not of the server (U-12).
+	// Its label empty — no switch.
+	Theme ThemeWords
+}
+
+// ThemeWords are the words of the theme's switch: its label and its three
+// options, auto the system's.
+type ThemeWords struct {
+	Label, Auto, Light, Dark string
 }
 
 // Top is the top bar (TopBar): the mark, the search that sends its query to
@@ -39,6 +53,7 @@ type TopWords struct {
 func Top(t view.TopBar, words TopWords) w.Top {
 	newBtn := Button(t.New, "")
 	newBtn.Menu = len(t.New.Arrow) > 0
+	newBtn.Key = words.NewKey
 	var actions []w.TopAction
 	switch {
 	case t.New.Label == "":
@@ -72,7 +87,7 @@ func Top(t view.TopBar, words TopWords) w.Top {
 		}}
 		actions = append(actions, w.TopDrop{
 			Trigger: user,
-			Menu:    w.Menu{Items: append(items, MenuItems(t.User, "")...), Width: w.MenuWidth290},
+			Menu:    w.Menu{Items: append(items, withTheme(MenuItems(t.User, ""), words.Theme)...), Width: w.MenuWidth290},
 			End:     true,
 		})
 	}
@@ -81,12 +96,32 @@ func Top(t view.TopBar, words TopWords) w.Top {
 		// A query standing in the field (the search's result, s-find-1)
 		// has the cross that empties it.
 		top.Search = &w.Search{
-			Query:  w.Query{Value: string(t.Search.Query), Placeholder: words.Search, Label: words.Search, Name: t.Search.Name},
+			Query:  w.Query{Value: string(t.Search.Query), Placeholder: words.Search, Label: words.Search, Name: t.Search.Name, Key: words.SearchKey},
 			Action: t.Search.Action,
 			Clear:  t.Search.Query != "",
 		}
 	}
 	return top
+}
+
+// withTheme are the items of the account's menu with the theme's switch
+// before the last rule — the one over Sign out —, a rule of its own before
+// it (account-5): Settings, Administration, the theme, Sign out. The
+// library's script keeps the choice in this browser (Seg.Theme).
+func withTheme(items []w.MenuPart, words ThemeWords) []w.MenuPart {
+	if words.Label == "" {
+		return items
+	}
+	at := len(items)
+	for i, it := range items {
+		if _, ok := it.(w.MenuSep); ok {
+			at = i
+		}
+	}
+	theme := w.MenuColumn{Label: words.Label, Control: w.Seg{Theme: true, Variant: w.SegStartSmall,
+		Options: []w.SegOption{{Label: words.Auto, On: true}, {Label: words.Light}, {Label: words.Dark}}}}
+	out := append(append([]w.MenuPart(nil), items[:at]...), w.MenuSep{}, theme)
+	return append(out, items[at:]...)
 }
 
 // TopForms are the forms of the top bar's menus that post (Sign out), for

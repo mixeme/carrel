@@ -266,9 +266,13 @@ func printRange(parts ...string) view.Text {
 }
 
 // recordPrint is the print header of a record read: its title, where it
-// lives, and when it was read.
+// lives, and when it was read; on paper its title the heading, where it
+// lives under it, and the foot — the kind and when it was read (print-3,
+// -5; Typecase's note 132).
 func (s *Server) recordPrint(c *collectionCtx, title view.Text) view.Print {
-	return view.Print{Title: title, Range: text(string(c.stamp())), Taken: c.tf.taken(c.tf.now)}
+	return view.Print{Title: title, Range: text(string(c.stamp())), Taken: c.tf.taken(c.tf.now),
+		Heading: title, Sources: text(string(c.stamp())),
+		Foot: text("Carrel · " + c.spec.noun + " · captured " + string(c.tf.numStamp(c.tf.now)))}
 }
 
 var showLabels = map[string]string{"open": "Open", "done": "Done", "all": "All"}

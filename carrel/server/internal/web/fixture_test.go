@@ -167,6 +167,11 @@ type mockupApp struct {
 	// feeds are the two subscriptions of the set, by the address the frames
 	// give them, with the stand that serves each (mockupFeeds).
 	feeds map[string]*feedServer
+	// archive is the size of a backup's archive this run wrote, as the
+	// screens write it: the compression of a set whose identifiers are
+	// random, so a tenth of a kilobyte either way; the frames draw a size,
+	// any one (s-backup-8, -18).
+	archive string
 }
 
 // mockupFeed is a subscription of the set: the file it serves, the address
@@ -998,6 +1003,10 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 		return jobs[id]
 	})
 	s = regexp.MustCompile(`r-[0-9A-Z]{10}\b`).ReplaceAllString(s, "r-run")
+	if a.archive != "" {
+		s = strings.ReplaceAll(s, `"size":"`+a.archive+`"`, `"size":"4.4 KB"`)
+		s = strings.ReplaceAll(s, `"text":"`+a.archive+` · "`, `"text":"4.4 KB · "`)
+	}
 	// The secret of a job's line, issued for each answer (s-backup-2).
 	s = regexp.MustCompile(`cbk_[A-Za-z0-9_-]+`).ReplaceAllString(s, "cbk_secret")
 	// A davloom device's ID (NewDeviceID): the frames name no device by it.
@@ -1156,6 +1165,8 @@ func TestFixtureCombinedContacts(t *testing.T) {
 	// Written into the directory of CARREL_FIXTURE_WRITE as every fixture
 	// is (compare): one shot of all the fixtures, none by hand.
 	app.compare(t, "app-contacts/normal.json", app.h.do(get("/app/contacts?task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess)))
+	// On paper (print-2): the same list, no panel.
+	app.compare(t, "app-contacts/print.json", app.h.do(get(onPaper("/app/contacts?task="+page.Poll.TaskID), app.sess)))
 }
 
 // C-14.2, the partial state of the same screen: the poll has not finished.
@@ -1341,6 +1352,7 @@ func TestFixtureContactCard(t *testing.T) {
 	waitPoll(t, app.h, app.sess, tl.Poll.TaskID, func(b view.PollBar) bool { return !b.Running })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	app.compare(t, "app-contact/normal.json", app.h.do(get(rec, app.sess)))
+	app.compare(t, "app-contact/print.json", app.h.do(get(onPaper(rec), app.sess))) // print-3
 }
 
 // C-14.2: Anna's two addresses replaced on her card — the sheet asks
@@ -1388,6 +1400,7 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 	// No panel: the frame of one calendar draws none (the panel is the
 	// combined calendar's, s-agenda-1).
 	app.compare(t, "app-agenda/normal.json", app.h.do(get(here, app.sess)))
+	app.compare(t, "app-agenda/print.json", app.h.do(get(onPaper(here), app.sess))) // print-7
 	// With a word: what is found in the whole calendar, by day (s-agenda-31).
 	found := app.listPath(t, "calendar", "lichnyj") + "?filter=" + url.QueryEscape("синк")
 	app.compare(t, "app-agenda/filtered.json", app.h.do(get(found, app.sess)))
@@ -1743,6 +1756,10 @@ func TestFixtureCombinedTasks(t *testing.T) {
 	// p. 9): «Отправить документы в МФЦ».
 	one := app.listPath(t, "tasks", "dela") + "/aa10-77bc-0e31"
 	app.compare(t, "app-tasks-all/panel-one.json", app.h.do(get("/app/tasks?task="+page.Poll.TaskID+"&open="+url.QueryEscape(one), app.sess)))
+	// On paper (print-4): the filter Open once the lists are read again —
+	// «Продлить страховку», ticked, is under Done now (Р-42).
+	again := combined(t, app.h, app.sess, "/app/tasks?again=1", func(p view.TasksPage) *view.PollBar { return p.Poll })
+	app.compare(t, "app-tasks-all/print.json", app.h.do(get(onPaper("/app/tasks?task="+again.Poll.TaskID), app.sess)))
 }
 
 // tickMockupTask marks a task done from its row of the list, as a person
@@ -1856,6 +1873,7 @@ func TestFixtureNoteCard(t *testing.T) {
 	rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64"
 	// s-notes-2 draws the full width the person chose (Typecase's note 79).
 	app.compare(t, "app-note/normal.json", app.h.do(wideNotes(get(rec, app.sess))))
+	app.compare(t, "app-note/print.json", app.h.do(get(onPaper(rec), app.sess))) // print-5
 }
 
 // wideNotes is a request of a browser that chose «Open notes in full width»
@@ -3367,6 +3385,7 @@ func TestFixtureFilesFolderAndSheets(t *testing.T) {
 	}
 
 	app.compare(t, "app-files-folder/normal.json", app.h.do(get(attachments+"?select="+url.QueryEscape(three[0]), app.sess)))
+	app.compare(t, "app-files-folder/print.json", app.h.do(get(onPaper(attachments), app.sess))) // print-6
 	// states-34 draws «Public» ticked with the other two, «3 of 3»: ticked
 	// for this one answer — the other frames draw it unticked.
 	app.tickFiles(t, "Documents", "Public", "Files")
@@ -4438,4 +4457,21 @@ func auditOfFrame(t *testing.T, app *mockupApp) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// onPaper is an address asked on paper (?print=1, U-10).
+func onPaper(addr string) string {
+	sep := "?"
+	if strings.Contains(addr, "?") {
+		sep = "&"
+	}
+	return addr + sep + render.PrintParam + "=" + render.PrintValue
+}
+
+// C-14.2: the page the installed application shows without a network
+// (offline-1): one for everyone, asked without a session.
+func TestFixtureOffline(t *testing.T) {
+	app := &mockupApp{h: newHarness(t), byAccount: map[string]string{}, byPath: map[string]string{}}
+	app.h.admin("mix", "password123")
+	app.compare(t, "offline/normal.json", app.h.do(get(render.OfflinePath, nil)))
 }

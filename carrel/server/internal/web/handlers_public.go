@@ -739,3 +739,19 @@ func (s *Server) forgotWipePage(w http.ResponseWriter, r *http.Request, token, l
 	}
 	return page
 }
+
+// getOffline is the page the installed application shows without a network
+// (U-11, offline-1): the same for everyone, signed in or not, and nothing of
+// anyone's in it — the library's worker keeps it, and nothing else of
+// Carrel's.
+func (s *Server) getOffline(w http.ResponseWriter, r *http.Request) {
+	host := "the server"
+	if u, err := url.Parse(strings.TrimSpace(s.cfg.PublicURL)); err == nil && u.Host != "" {
+		host = u.Host
+	}
+	s.writePage(w, r, http.StatusOK, view.OfflinePage{Plain: view.Plain{Title: "Carrel", Notices: []view.Notice{{
+		Role: view.NoticeAlert, Title: "No connection.",
+		Body:    text("Carrel keeps nothing on this device, so there is nothing to show until " + host + " can be reached."),
+		Actions: []view.Action{{ID: "offline.retry", Label: "Try again", Href: s.route("/app/"), Method: "GET", Enabled: true}},
+	}}}})
+}

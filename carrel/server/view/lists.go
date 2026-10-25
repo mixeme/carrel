@@ -223,8 +223,16 @@ type TaskRow struct {
 	Summary Text   `json:"summary"`
 	Due     Text   `json:"due"`
 	Overdue bool   `json:"overdue"`
-	Percent *int   `json:"percent"`
-	Tags    []Tag  `json:"tags"`
+	// PaperDue, PaperLine — строка на бумаге (print-4, записка Typecase
+	// 132): в столбце срока день без времени, «12 Aug»; под названием —
+	// время срока, где задача лежит (у связанной — подключение и списки:
+	// «nextcloud · Дела, Работа»), доля или, без неё, насколько просрочена:
+	// «18:00 · nextcloud · Дела, Работа», «nextcloud · Дела · overdue by 3
+	// days»
+	PaperDue  Text  `json:"paperDue,omitempty"`
+	PaperLine Text  `json:"paperLine,omitempty"`
+	Percent   *int  `json:"percent"`
+	Tags      []Tag `json:"tags"`
 	// Столбцы, которые человек может выбрать (s-tasks-12, -13): приоритет
 	// числом, «5»; статус словом списка, «In process» (без STATUS — «Needs
 	// action»); последняя правка коротко с временем, «10 Aug 11:02» (C-10)

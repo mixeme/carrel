@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -616,7 +617,7 @@ func TestConflictScreenAndCombination(t *testing.T) {
 		t.Errorf("page = %+v", page)
 	}
 	// C-6.3: the conflict screen is left for the list; it is not printed.
-	if nav := page.Rail.Nav; len(nav) != 1 || nav[0].ID != "nav.back" || nav[0].Href != f.path("contacts") || page.Print != (view.Print{}) {
+	if nav := page.Rail.Nav; len(nav) != 1 || nav[0].ID != "nav.back" || nav[0].Href != f.path("contacts") || !reflect.DeepEqual(page.Print, view.Print{}) {
 		t.Errorf("conflict rail %+v, print %+v", nav, page.Print)
 	}
 

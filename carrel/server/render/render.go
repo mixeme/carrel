@@ -64,6 +64,11 @@ const (
 // task 91); its icons it names itself.
 const ManifestPath = "/manifest.webmanifest"
 
+// OfflinePath is the page the installed application shows without a network
+// (U-11, offline-1), under the base path: the library's worker keeps it with
+// the library's files and nothing else (Typecase's App.Offline).
+const OfflinePath = "/offline"
+
 // SearchSuggestPath is the address of the search line's suggestions
 // (Typecase's note 118, its task 227): the document names it, and the live
 // layer asks it ?q=… as the line gets the focus and as something is typed;

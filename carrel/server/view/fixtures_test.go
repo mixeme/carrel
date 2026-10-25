@@ -120,6 +120,7 @@ var fixtureTypes = map[string]func() any{
 	"app-tasks-all":                       func() any { return &TasksPage{} },
 	"confirm-email":                       func() any { return &ConfirmEmailPage{} },
 	"dead-link":                           func() any { return &DeadLinkPage{} },
+	"offline":                             func() any { return &OfflinePage{} },
 	"p-token":                             func() any { return &PublishedPage{} },
 	"forgot":                              func() any { return &ForgotPage{} },
 	"forgot-token":                        func() any { return &ForgotWipePage{} },

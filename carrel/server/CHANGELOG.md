@@ -17,6 +17,131 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.372 — 2026-10-26
+
+Typecase's notes 126–132 (Typecase `a08489b`): paper for every kind, the
+page without a network, the filter's cross, the quick sheet with nothing
+chosen.
+
+### Added
+
+- **Paper for every kind** (U-10; print-2…-7): `Print.Heading`, `Sources`
+  and `Foot` for the contacts list («Contacts · Combined address book»,
+  «Carrel · contacts · 6 cards · captured … · 3 of 3 books»), a card (its
+  title, where it lives, «Carrel · contact · captured …»; a contact's
+  organisation and title as fields first — `Print.Lead`), the tasks of the
+  filter («Tasks · Open · Combined list», «… · Open · 4 of 7 · …»), a note
+  (where and when it was written), a folder («Files · Documents / carrel /
+  attachments», «5 items · 4.5 MB») and one calendar («Личный · 10 – 16
+  August 2026»). A task's row says itself on paper: `TaskRow.PaperDue` (the
+  day), `PaperLine` (the time due, where it lies — a linked one's
+  connection and lists —, how much is done or how late it is).
+- **`GET /offline`** (U-11, offline-1): `OfflinePage` — «No connection.»,
+  why nothing is shown and until which host (`CARREL_PUBLIC_URL`), Try
+  again on `/app/`. One page for everyone, with nothing of anyone's;
+  `render.OfflinePath`.
+- **`POST /app/{kind}/quick`** — the quick sheet where nothing is
+  remembered, or what was remembered is gone (s-notes-34): its fields at
+  once, «where» not chosen, Save waiting (`Action.Waits`); it writes where
+  `into` says, and without it answers the sheet again (422). New `?pick=1`
+  of a combined view opens the same sheet.
+- **`Form.Clear`** — the cross of a filter that holds a word: the same
+  address without it, with what the form keeps hidden.
+- **`Details.Late`** — how late a task is, under the panel's title.
+
+### Changed
+
+- **The filter's field is `filter` everywhere** (the owner's calendar, the
+  guest's pages); `q` stays for the search and the suggestions.
+- `Details.AttachHint` removed: no frame draws the line about the
+  attachment limit under a task's attachments.
+- A task ticked done stays under Open, crossed, until its list is read
+  again (Р-42): the session remembers the tick
+  (`session.NoteTicked`).
+
+### Fixtures
+
+- `app-{contacts,contact,tasks-all,note,files-folder,agenda}/print`,
+  `offline/normal`, `app-quick/pick`. The set: «Согласовать обложку»
+  (Работа), «Ревью вёрстки сборника» (Проекты); the note's recording on
+  the guest's page. The size of a backup's archive is normalised in the
+  fixtures: the compression of a set with random identifiers.
+
+## v0.2.371 — 2026-10-25
+
+Typecase's notes 122–125: the public pages, the owner's calendar filter,
+the linked records of every kind, the live zones.
+
+### Added
+
+- **The public pages** (`/p/{token}`, s-publish-6…-39): a row opens its
+  record in the same link (`?uid=`); «Filter by word» and «Filter this
+  folder»; the whole calendar by weeks; one record with when, where,
+  repeats, status, description and its people by name; tasks Open/Done,
+  notes by month; the strip of the address (`PublishedStrip`: webcal://,
+  Open in calendar app, a book's address, a folder's disk with How to
+  mount); the subscription's file `/p/{token}/{name}.ics|.vcf`; a folder
+  with `?in=` and `?file=`, Download a file or the archive; beyond the cap
+  «Showing 500 of 2 340.» — the cap is the page's listing only, the archive
+  and the disk are whole (the owner, 24.10); PDF to the browser; «The
+  source did not answer.», «No longer there.».
+- **The owner's calendar filter**: all that is found, by day, a series
+  once, the past muted (`AgendaRow.Past`).
+- **Linked records of every kind** (Р-78): the panel of a linked row —
+  «in 2 lists», «text from», «Where … is kept», no source or deletion; the
+  collection's mark at an attachment and a Related of one copy
+  (`AttachRow.From`, `TimelineRow.From`, `Details.TextFrom`); the copies in
+  the rail's order (`railOrder`).
+- **`poll-finished`** carries the bar and the rail out of band
+  (`render.Renderer.Event` takes `extra`, C-7.4); the upload from a
+  folder's bar answers the queue and the folder (C-7.3).
+
+### Changed
+
+- A letter's link gives no file of a calendar or a note unless ticked
+  (`sheetDefaults`, the owner's decision of 23.10).
+- A file attached to a person's record is not a row of the person's
+  timeline (the owner's decision of 25.10.2026, Р-79).
+
+## v0.2.370 — 2026-10-24
+
+Typecase's notes 119–121: the words of the sheets, the export of a
+combined view, the photo's crop as a form.
+
+### Changed
+
+- **Р-77, a sheet's notice says only what is not plain**: a move and a
+  copy without one; a copy with a new UID, a cancellation sent to
+  attendees, «already there» by UID (`uidHolders`); the file and
+  collection sheets likewise; the rewrite sheet in one view, without
+  Effects and Kept.
+- **The quick sheet's «where» is a field** (`into`), the last used first;
+  a read-only collection says «Read-only: nothing can be written here.».
+- **The export of a combined view is a GET form** (s-agenda-30): which
+  collection, the days of a calendar, Download .ics/.vcf/.zip; a notebook
+  is a .zip of .md.
+- **The photo's crop is a form** (s-contacts-5): `?op=crop` with the frame
+  as the server drew it (hidden zoom, x, y), rotate radios, Remove photo,
+  Cancel back to the edit.
+
+## v0.2.369 — 2026-10-23
+
+Typecase's notes 117, 118: duplicates and the search.
+
+### Added
+
+- **The search**: `GET /app/search/suggest` (`SearchSuggest`,
+  `render.SearchSuggestPath`) — Jump to what the session holds, then what
+  was found.
+- **Duplicates by values**: a group's questions from the records' values
+  (radios for one value, ticks for phones, addresses and tags), the
+  merge page asks nothing (`dupes.MergeKeeping`), «not duplicates» splits
+  the search, «Decided earlier» (`DecidedCard`); every card a form on
+  `/app/duplicates/decide`.
+- **The linked record**: `GET /app/{kind}/linked/{uid}` — what the link
+  chose, with where each value came from (`Field.From`), Edit to the
+  copies' sheet, Print, Open in Duplicates, Unlink.
+
 ## v0.2.368 — 2026-10-23
 
 U-8 held end to end: the instance as it is served, walked by a browser

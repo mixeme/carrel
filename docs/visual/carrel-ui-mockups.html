@@ -562,7 +562,8 @@ a.tc-row__title:hover{text-decoration:underline}
 .tc-row .tc-row__excerpt{font-size:12px;color:var(--tc-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tc-row .tc-row__cell{font-size:11.5px;color:var(--tc-dusty);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tc-row .tc-mono{color:var(--tc-muted)}
-.tc-row.is-done .tc-row__title{color:var(--tc-dusty);text-decoration:line-through}
+/* Зачёркнутое — своей чертой по середине строчных: черта шрифта стоит на пиксель выше (владелец, 25.10). */
+.tc-row.is-done .tc-row__title{color:var(--tc-dusty);justify-self:start;max-width:100%;background:linear-gradient(currentColor,currentColor) no-repeat 0 50%/100% 1px}
 .tc-row.is-overdue .tc-mono{color:var(--tc-danger)}
 .tc-row--avatarcols{grid-template-columns:3px 28px minmax(130px,1.4fr) 142px minmax(150px,1.1fr) minmax(110px,.9fr) 140px}
 /* Строка своих столбцов (Columns): набор и порядок — человека, ширина — рода столбца; столбцы ровны, потому что
@@ -930,8 +931,34 @@ label.tc-menu__item{position:relative;cursor:pointer}
 /* Три колонки: имя / размер / дата. Базовое правило выше — 66px 1fr,
    tc-print__row--3col его не перебивает (слабее). Без этого дата уезжает
    на вторую строку в узкий столбец и ломается по дефисам. */
-.tc-root.tc-root--print .tc-print__row--3col{grid-template-columns:minmax(0,1fr) max-content max-content}
+.tc-root.tc-root--print .tc-print__row--3col{grid-template-columns:minmax(0,1fr) 10em 14.5em}
 .tc-root.tc-root--print .tc-print__row--3col > :not(:first-child){white-space:nowrap}
+/* Поле карточки на бумаге и текст заметки в ширине для чтения (задача Carrel 228). */
+.tc-root.tc-root--print .tc-print__row--field{grid-template-columns:minmax(90px,150px) minmax(0,1fr)}
+.tc-root.tc-root--print .tc-print__row--field > .tc-print__cell{overflow-wrap:anywhere}
+.tc-root.tc-root--print .tc-print__text{max-width:68ch;margin:0 0 8px;line-height:1.5}
+.tc-root.tc-root--print .tc-print__h2{font-family:var(--tc-font-serif);font-size:15px;margin:14px 0 6px}
+.tc-root.tc-root--print .tc-print__sources + :is(.tc-print__row,.tc-print__text){margin-top:14px}
+/* Имя строки на бумаге — обычным начертанием (владелец, 25.10); галка — нарисованный квадрат, у сделанного — с галкой внутри. */
+.tc-root.tc-root--print .tc-print__cell > b{font-weight:400}
+.tc-root.tc-root--print .tc-print__tick{display:inline-block;position:relative;width:10px;height:10px;margin-right:7px;border:1px solid #000;border-radius:2px;vertical-align:-1px}
+.tc-root.tc-root--print .tc-print__tick.is-done::after{content:"";position:absolute;left:50%;top:38%;width:3px;height:6px;border:solid #000;border-width:0 1.5px 1.5px 0;box-sizing:border-box;transform:translate(-50%,-50%) rotate(45deg)}
+.tc-root.tc-root--print .tc-print__text.is-done{color:#555}
+.tc-root.tc-root--print .tc-print__struck{background:linear-gradient(currentColor,currentColor) no-repeat 0 calc(50% + 1px)/100% 1px}
+.tc-root.tc-root--print .tc-print__cell:has(.tc-print__tick) > .tc-dim--print{display:inline-block;margin-left:19px}
+.tc-root.tc-root--print .tc-print__row:has(+ .tc-print__foot){border-bottom:0}
+/* Строка подписей столбцов на бумаге (владелец, 25.10). */
+.tc-root.tc-root--print .tc-print__row--head{margin-top:14px;padding:2px 0 4px;border-bottom:.5px solid #555;color:#555}
+.tc-root.tc-root--print .tc-print__row--head > *{font-family:inherit;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase}
+.tc-root.tc-root--print .tc-print__row--head + .tc-print__rub{margin-top:8px}
+.tc-root.tc-root--print .tc-print__rub + .tc-print__row--head{margin-top:2px}
+/* Узкий лист: имя — строкой, остальные столбцы — под ним; подписи остаётся одна. */
+@container tcbox (max-width:560px){
+.tc-root.tc-root--print .tc-print__row--3col{grid-template-columns:max-content minmax(0,1fr);row-gap:2px}
+.tc-root.tc-root--print .tc-print__row--3col > :first-child{grid-column:1/-1}
+.tc-root.tc-root--print .tc-print__row--3col > :not(:first-child){overflow:hidden;text-overflow:ellipsis}
+.tc-root.tc-root--print .tc-print__row--3col.tc-print__row--head > :not(:first-child){display:none}
+}
 .tc-row__text{display:flex;flex-direction:column;gap:2px;min-width:0}
 .tc-skel{background:var(--tc-hair);border-radius:2px;height:9px;display:block}
 /* Колонки уходят по сужению .tc-main, не окна.
@@ -1699,7 +1726,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-nav--top2.tc-nav--top2{margin-top:2px}
 .tc-nav__short{display:none}
 .tc-dialog__lede.tc-dialog__lede{font-size:13px;color:var(--tc-muted);margin:0}
-.tc-print__row--3col.tc-print__row--3col{grid-template-columns:minmax(0,1fr) max-content max-content}
+.tc-print__row--3col.tc-print__row--3col{grid-template-columns:minmax(0,1fr) 10em 14.5em}
 .tc-prose--t13.tc-prose--t13{font-size:13px}
 .tc-prose--read.tc-prose--read{font-size:14px;line-height:1.65}
 .tc-prose--lead.tc-prose--lead{font-size:14.5px;line-height:1.7}
@@ -1795,7 +1822,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
 .tc-dim--ml6.tc-dim--ml6{margin-left:6px}
 
 .tc-dim--t11-5.tc-dim--t11-5{font-size:11.5px}
-.tc-dim--struck.tc-dim--struck{text-decoration:line-through}
+.tc-dim--struck.tc-dim--struck{background:linear-gradient(currentColor,currentColor) no-repeat 0 calc(50% + 1px)/100% 1px}
 .tc-drop__anchor.tc-drop__anchor{position:relative}
 .tc-drop__panel.tc-drop__panel{position:absolute;top:calc(100% + 5px);left:0;z-index:2}
 
@@ -28048,6 +28075,23 @@ SMTP  mail.home.example:465  TLS
   <figcaption>Установленное приложение (и настольное, и PWA) без сети показывает оболочку и то, что уже лежит в памяти сеанса, — но <b>не хранит содержимое на диске</b>: это была бы та самая локальная копия, которой в Carrel нет. Поэтому «shown from this session’s memory» написано прямо в подзаголовке, строки приглушены, а полоса опроса красная и предлагает повторить. Открытое заново окно покажет пустой список и ту же строку — и это честнее, чем вчерашние данные, выданные за сегодняшние.</figcaption>
   </figure>
 
+<figure>
+<div class="frame" data-frame="offline-1">
+  <div class="frame-label"><span>Без сети · установленное приложение</span><i>страница обработчика: данных нет</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+    </div>
+    <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+      <div class="tc-msg is-alert"><b>No connection.</b> Carrel keeps nothing on this device, so there is nothing to show until carrel.example can be reached. <a class="tc-btn is-sm" href="/">Try again</a></div>
+    </div></div>
+  </div>
+</div>
+<figcaption>Установленное приложение открыли без связи: обработчик показывает одну страницу на всех — знак, сообщение и Try again; ни рейла, ни записей, потому что на устройстве их нет (C-2). Try again — ссылка на начало: связь вернулась — открывается обычная страница. Пропавшая сеть у уже открытой страницы — другое состояние (кадр «Нет сети»).</figcaption>
+</figure>
+
+
+
   <figure style="flex:1 1 100%">
   <div class="frame" data-frame="states-6">
     <div class="frame-label"><span>Источник не ответил</span><i>частичный результат</i></div>
@@ -31431,6 +31475,134 @@ dav: HTTP 503: the server is busy</div></div>
 <figcaption>Подвал получает то, чего сейчас в нём нет: сколько источников попало в снимок. Распечатка, где молча пропущен недоступный календарь, вводит в заблуждение сильнее, чем экран.</figcaption>
 </figure>
 
+<h3>Остальное на бумаге</h3>
+<p>Каждый род печатает то, что человек видит: те же строки и те же рубрики, столбцы подписаны строкой над списком; на белом, с заголовком, строкой источников и подвалом, где сказано, что и когда снято и сколько источников попало в снимок.</p>
+
+<figure>
+<div class="frame cap760" data-frame="print-2">
+  <div class="frame-label"><span>Список контактов на бумаге</span><i>@media print · ?print=1</i></div>
+  <div class="tc-root tc-root--print">
+    <div class="tc-print__h1">Contacts · Combined address book</div>
+    <div class="tc-print__sources">nextcloud · Контакты, Архив · radicale · vps · Команда</div>
+    <div class="tc-print__row tc-print__row--3col tc-print__row--head"><span class="tc-print__cell">Name</span><span class="tc-print__num">Phone</span><span class="tc-print__num">Email</span></div>
+    <div class="tc-print__rub">А</div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell"><b>Алексей Смирнов</b><br><span class="tc-dim--print tc-dim--t11">nextcloud · Контакты</span></span><span class="tc-print__num">+7 916 200-71-15</span><span class="tc-print__num">—</span></div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell"><b>Анна Ковалёва</b><br><span class="tc-dim--print tc-dim--t11">Издательство «Слово» · in 3 books</span></span><span class="tc-print__num">+7 912 445-10-88</span><span class="tc-print__num">a.kovaleva@example.org</span></div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell"><b>Артём Белов</b><br><span class="tc-dim--print tc-dim--t11">Тензор · in 2 books</span></span><span class="tc-print__num">+7 903 118-22-04</span><span class="tc-print__num">a.belov@example.org</span></div>
+    <div class="tc-print__rub">В</div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell"><b>Вера Лебедева</b><br><span class="tc-dim--print tc-dim--t11">nextcloud · Архив</span></span><span class="tc-print__num">+7 905 331-09-42</span><span class="tc-print__num">vera@example.net</span></div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell"><b>Виктор Гончаров</b><br><span class="tc-dim--print tc-dim--t11">Городская библиотека №4 · nextcloud · Контакты</span></span><span class="tc-print__num">—</span><span class="tc-print__num">v.goncharov@example.org</span></div>
+    <div class="tc-print__rub">Л</div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell"><b>Лебедева Вера</b><br><span class="tc-dim--print tc-dim--t11">Библиотека №4 · nextcloud · Контакты</span></span><span class="tc-print__num">+7 905 331-09-42</span><span class="tc-print__num">v.lebedeva@example.org</span></div>
+    <div class="tc-print__foot">Carrel · contacts · 6 cards · captured 2026-08-15 09:41 · 3 of 3 books</div>
+  </div>
+</div>
+<figcaption>Список — те же строки, что на экране, по буквам: имя, где человек работает и откуда он (одна книга — её название, несколько — сколько), телефон и почта. Связанная запись — одной строкой, как в объединённом виде. Цвет книги на бумаге назван словами (C-10). Подвал — сколько карточек и сколько книг попало в снимок.</figcaption>
+</figure>
+
+<figure>
+<div class="frame cap760" data-frame="print-3">
+  <div class="frame-label"><span>Карточка контакта на бумаге</span><i>@media print · ?print=1</i></div>
+  <div class="tc-root tc-root--print">
+    <div class="tc-print__h1">Анна Ковалёва</div>
+    <div class="tc-print__sources">nextcloud · Контакты</div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">Organisation</span><span class="tc-print__cell">Издательство «Слово»</span></div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">Title</span><span class="tc-print__cell">Выпускающий редактор</span></div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">Phone · mobile</span><span class="tc-print__cell">+7 912 445-10-88</span></div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">Phone · work</span><span class="tc-print__cell">+7 495 120-45-00</span></div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">Email · work</span><span class="tc-print__cell">a.kovaleva@example.org</span></div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">Email · second</span><span class="tc-print__cell">anna.kovaleva@slovo.example</span></div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">Address · work</span><span class="tc-print__cell">Москва, Тверская 12, стр. 3</span></div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">Birthday</span><span class="tc-print__cell">1987-03-14</span></div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">Tags</span><span class="tc-print__cell">работа, издательство</span></div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">Note</span><span class="tc-print__cell">Пишет по вторникам, отвечает в тот же день.</span></div>
+    <div class="tc-print__rub">Kept as the server sent them</div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">X-EVOLUTION-FILE-AS</span><span class="tc-print__cell">Ковалёва, Анна</span></div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">X-ABLABEL</span><span class="tc-print__cell">издательство</span></div>
+    <div class="tc-print__row tc-print__row--field"><span class="tc-print__cell">X-CARREL-UNKNOWN-FLAG</span><span class="tc-print__cell">1</span></div>
+    <div class="tc-print__foot">Carrel · contact · captured 2026-08-15 09:41</div>
+  </div>
+</div>
+<figcaption>Карточка целиком: каждое поле — строкой «имя — значение», и в конце свойства, которые Carrel не правит, а хранит как прислал сервер, — с именами, как они записаны. На бумаге карточка ничего не прячет за «Show».</figcaption>
+</figure>
+
+<figure>
+<div class="frame cap760" data-frame="print-4">
+  <div class="frame-label"><span>Задачи на бумаге</span><i>@media print · ?print=1 · текущий фильтр</i></div>
+  <div class="tc-root tc-root--print">
+    <div class="tc-print__h1">Tasks · Open · Combined list</div>
+    <div class="tc-print__sources">nextcloud · Дела, Работа</div>
+    <div class="tc-print__row tc-print__row--head"><span class="tc-mono tc-mono--f-mono">Due</span><span class="tc-print__cell">Task</span></div>
+    <div class="tc-print__rub">Overdue</div>
+    <div class="tc-print__row"><span class="tc-mono tc-mono--f-mono">7 Aug</span><span class="tc-print__cell"><b><span class="tc-print__tick" role="img" aria-label="Not done"></span>Отправить документы в МФЦ</b><br><span class="tc-dim--print tc-dim--t11">nextcloud · Дела · overdue by 3 days</span></span></div>
+    <div class="tc-print__row"><span class="tc-mono tc-mono--f-mono">8 Aug</span><span class="tc-print__cell"><b><span class="tc-print__tick" role="img" aria-label="Not done"></span>Ответить подрядчику по смете</b><br><span class="tc-dim--print tc-dim--t11">nextcloud · Работа · 40%</span></span></div>
+    <div class="tc-print__rub">This week</div>
+    <div class="tc-print__row"><span class="tc-mono tc-mono--f-mono">12 Aug</span><span class="tc-print__cell"><b><span class="tc-print__tick" role="img" aria-label="Not done"></span>Собрать чемодан</b><br><span class="tc-dim--print tc-dim--t11">18:00 · nextcloud · Дела, Работа</span></span></div>
+    <div class="tc-print__row"><span class="tc-mono tc-mono--f-mono">14 Aug</span><span class="tc-print__cell"><b><span class="tc-print__tick" role="img" aria-label="Not done"></span>Дописать раздел про кэш</b><br><span class="tc-dim--print tc-dim--t11">nextcloud · Работа · 70%</span></span></div>
+    <div class="tc-print__foot">Carrel · tasks · Open · 4 of 7 · captured 2026-08-15 09:41 · 2 of 2 lists</div>
+  </div>
+</div>
+<figcaption>Печатается текущий фильтр (здесь — Open) с его рубриками: срок слева, отметка и название, под ними — список, время срока и доля. Отметка — нарисованный квадрат: пустой можно отметить ручкой, у сделанного внутри галка.</figcaption>
+</figure>
+
+<figure>
+<div class="frame cap760" data-frame="print-5">
+  <div class="frame-label"><span>Заметка на бумаге</span><i>@media print · ?print=1 · ширина для чтения</i></div>
+  <div class="tc-root tc-root--print">
+    <div class="tc-print__h1">Заметка со встречи 10.08</div>
+    <div class="tc-print__sources">nextcloud · Записи · 10 August 2026, 11:05</div>
+    <p class="tc-print__text">Договорились заморозить ветку в среду.</p>
+    <p class="tc-print__text">Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.</p>
+    <div class="tc-print__h2">Что делаем</div>
+    <p class="tc-print__text"><span class="tc-print__tick" role="img" aria-label="Not done"></span>проверить changelog</p>
+    <p class="tc-print__text is-done"><span class="tc-print__tick is-done" role="img" aria-label="Done"></span><span class="tc-print__struck">попросить у Артёма скриншоты</span></p>
+    <p class="tc-print__text">Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг.</p>
+    <div class="tc-print__rub">Attachments</div>
+    <div class="tc-print__row tc-print__row--3col tc-print__row--head"><span class="tc-print__cell">Name</span><span class="tc-print__num">Size</span><span class="tc-print__num">Where</span></div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell">2026-08-10-sync-board.png</span><span class="tc-print__num">412 KB</span><span class="tc-print__num">in the note</span></div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell">запись-встречи.m4a</span><span class="tc-print__num">24 MB</span><span class="tc-print__num">Documents / carrel</span></div>
+    <div class="tc-print__foot">Carrel · note · captured 2026-08-15 09:41</div>
+  </div>
+</div>
+<figcaption>Заметка — в ширине для чтения: текст разобран, заголовок Markdown — заголовком текста, задачи — квадратами, сделанная — зачёркнута. Вложения — списком с размером и местом; теги на бумагу не идут — их нет и в тексте.</figcaption>
+</figure>
+
+<figure>
+<div class="frame cap760" data-frame="print-6">
+  <div class="frame-label"><span>Список файлов на бумаге</span><i>@media print · ?print=1</i></div>
+  <div class="tc-root tc-root--print">
+    <div class="tc-print__h1">Files · Documents / carrel / attachments</div>
+    <div class="tc-print__sources">sftpgo · vps · Documents</div>
+    <div class="tc-print__row tc-print__row--3col tc-print__row--head"><span class="tc-print__cell">Name</span><span class="tc-print__num">Size</span><span class="tc-print__num">Changed</span></div>
+    <div class="tc-print__rub">Folders</div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell">2026-07</span><span class="tc-print__num">—</span><span class="tc-print__num">2026-07-01 09:12</span></div>
+    <div class="tc-print__rub">Files</div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell">2026-08-04-whiteboard.jpg</span><span class="tc-print__num">2.8 MB</span><span class="tc-print__num">2026-08-04 17:03</span></div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell">2026-08-10-sync-board.png</span><span class="tc-print__num">412 KB</span><span class="tc-print__num">2026-08-10 11:07</span></div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell">release-checklist.md</span><span class="tc-print__num">3.1 KB</span><span class="tc-print__num">2026-08-09 18:44</span></div>
+    <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell">смета-подрядчик.pdf</span><span class="tc-print__num">1.2 MB</span><span class="tc-print__num">2026-08-05 14:20</span></div>
+    <div class="tc-print__foot">Carrel · files · 5 items · 4.5 MB · captured 2026-08-15 09:41</div>
+  </div>
+</div>
+<figcaption>Папка — имя, размер, когда менялся; сначала папки, потом файлы, как на экране.</figcaption>
+</figure>
+
+<figure>
+<div class="frame cap760" data-frame="print-7">
+  <div class="frame-label"><span>Агенда одного календаря на бумаге</span><i>@media print · ?print=1</i></div>
+  <div class="tc-root tc-root--print">
+    <div class="tc-print__h1">Личный · 10 – 16 August 2026</div>
+    <div class="tc-print__sources">nextcloud · Личный</div>
+    <div class="tc-print__rub">Monday · 10 August</div>
+    <div class="tc-print__row"><span class="tc-mono tc-mono--f-mono">10:00</span><span class="tc-print__cell"><b>Синк-ап по релизу</b><br><span class="tc-dim--print tc-dim--t11">Переговорная 2 · 4 attendees · repeats weekly</span></span></div>
+    <div class="tc-print__rub">Tuesday · 11 August</div>
+    <div class="tc-print__row"><span class="tc-mono tc-mono--f-mono">18:00</span><span class="tc-print__cell"><b>Забрать документы</b><br><span class="tc-dim--print tc-dim--t11">МФЦ, Мясницкая 13</span></span></div>
+    <div class="tc-print__foot">Carrel · agenda · Личный · 2026-08-10 – 2026-08-16 · captured 2026-08-15 09:41</div>
+  </div>
+</div>
+<figcaption>Один календарь — свой заголовок: его название и дни; источник назван один раз, в строке под заголовком, и в строках не повторяется.</figcaption>
+</figure>
+
 <h2 id="desktop">12. Настольное приложение</h2>
 <p>Приложение — это окно вокруг того же интерфейса плюс то, чего браузер не умеет. Не второй продукт, не клиент с локальной базой: <b>C-2 действует и здесь</b> — на диск не ложится ни события, ни контакта, ни заметки. Всё, что приложение хранит у себя, — адрес экземпляра, имя, признак «запускаться при входе в систему» и токен сессии в хранилище ключей ОС.</p>
 <p>Тогда зачем оно. Ровно за шестью вещами, каждая из которых недоступна вкладке браузера:</p>
@@ -32253,6 +32425,7 @@ dav: HTTP 503: the server is busy</div></div>
   <div class="tc-root tc-root--print">
     <div class="tc-print__h1">Documents / carrel / attachments</div>
     <div class="tc-print__sources">sftpgo · vps · 14 items · 38.2 MB</div>
+    <div class="tc-print__row tc-print__row--3col tc-print__row--head"><span class="tc-print__cell">Name</span><span class="tc-print__num">Size</span><span class="tc-print__num">Changed</span></div>
     <div class="tc-print__rub">Folders</div>
     <div class="tc-print__row tc-print__row--3col"><span class="tc-print__cell">2026-07</span><span class="tc-print__num">34 items</span><span class="tc-print__num">2026-07-01</span></div>
     <div class="tc-print__rub">Files</div>
