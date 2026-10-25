@@ -77,9 +77,11 @@ const ThemeColor = "#F5F1E8"
 
 // Event names of C-7.4: the events of the progress stream — the bar changed,
 // and the poll is over. The data of an event is the fragment of its target
-// (FragmentPayload): poll carries the bar, poll-finished the rail of the
-// page the poll stands on (C-7.3), or the bar when that page is gone. The
-// list is closed (the lead's decision П1, 02.10.2026).
+// (FragmentPayload): both carry the bar, poll-finished with the rail of the
+// page the poll stands on out of band (C-7.3) — none when that page is gone.
+// The live layer puts an event's data into the bar's zone, so the end keeps
+// the bar that says what refused. The list is closed (the lead's decision
+// П1, 02.10.2026).
 const (
 	EventPoll         = "poll"
 	EventPollFinished = "poll-finished"
@@ -95,8 +97,8 @@ type Renderer interface {
 	Fragment(w http.ResponseWriter, r *http.Request, status int, target string, body any, extra []OOB) error
 	JSON(w http.ResponseWriter, status int, body any) error
 	// Event writes one server-sent event (C-7.4): its name, and the fragment
-	// for the target as the data line.
-	Event(w io.Writer, event, target string, body any) error
+	// for the target, with the zones it changes out of band, as its data.
+	Event(w io.Writer, event, target string, body any, extra []OOB) error
 }
 
 // OOB is an out-of-band fragment update allowed by C-7.3.
@@ -129,8 +131,8 @@ func (JSONRenderer) JSON(w http.ResponseWriter, status int, body any) error {
 
 // Event puts the fragment envelope on one data line: encoding/json writes no
 // newline inside it.
-func (JSONRenderer) Event(w io.Writer, event, target string, body any) error {
-	data, err := json.Marshal(FragmentPayload{Target: target, Body: body})
+func (JSONRenderer) Event(w io.Writer, event, target string, body any, extra []OOB) error {
+	data, err := json.Marshal(FragmentPayload{Target: target, Body: body, Extra: extra})
 	if err != nil {
 		return err
 	}

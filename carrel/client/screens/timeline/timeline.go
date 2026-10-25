@@ -259,3 +259,7 @@ func side(c view.Details) *w.Side {
 	}
 	return &w.Side{Items: items}
 }
+
+// Rail is the page's rail alone and the form its ticks send: the end of a
+// poll brings it out of band (C-7.4; Typecase's note 124).
+func Rail(r view.Rail) ([]w.RailPart, *w.PostForm) { return railParts(r), bind.RailForm(r, formRail) }

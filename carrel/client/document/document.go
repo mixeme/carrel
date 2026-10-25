@@ -172,7 +172,7 @@ func (k *keep) Write(b []byte) (int, error) {
 // served at base: the screen's root, and at the page's end the forms its
 // buttons outside a form submit (Screen.Forms).
 func Of(scr screens.Screen, model any, base string) page.Document {
-	root := Zoned(scr.Draw(model))
+	root := Root(scr, model)
 	doc := page.Document{
 		Title:  scr.Title(model),
 		Lang:   Lang,

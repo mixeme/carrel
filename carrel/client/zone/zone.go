@@ -239,6 +239,38 @@ func Of(model any, target string) (any, error) {
 	return fail(ErrNoZone)
 }
 
+// Carries tells whether model has the zone target at all: as Of finds it,
+// and a poll or a queue that has nothing now too (a nil pointer) — the page
+// keeps their place, where an answer goes (Typecase's note 124).
+func Carries(model any, target string) bool {
+	if _, err := Of(model, target); err == nil {
+		return true
+	}
+	var want reflect.Type
+	switch target {
+	case render.TargetPoll:
+		want = pollType
+	case render.TargetQueue:
+		want = queueType
+	default:
+		return false
+	}
+	if KindOf(model) != ShellPage {
+		return false
+	}
+	t := reflect.TypeOf(model)
+	if t.Kind() == reflect.Pointer {
+		t = t.Elem()
+	}
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+		if !f.Anonymous && f.IsExported() && (f.Type == want || f.Type.Kind() == reflect.Pointer && f.Type.Elem() == want) {
+			return true
+		}
+	}
+	return false
+}
+
 func known(target string) bool {
 	for _, t := range render.Targets() {
 		if t == target {

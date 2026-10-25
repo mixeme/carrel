@@ -1384,18 +1384,18 @@ func (s *Server) getSearchProgressSSE(w http.ResponseWriter, r *http.Request) {
 		// An event is no page and goes past the stamping renderer: its
 		// POSTs get the session's token and every action its target here.
 		bar := stampView(s.pollBar(tf, blob, snap, owner), token, s.basePath)
-		if err := s.render.Event(w, render.EventPoll, render.TargetPoll, bar); err != nil {
+		if err := s.render.Event(w, render.EventPoll, render.TargetPoll, bar, nil); err != nil {
 			return
 		}
 		if !snap.Running {
-			// The end brings the page's rail: its counts and the states of
-			// its rows are the poll's (C-7.3, C-7.4). A page that is gone
-			// has no rail to bring, and the end is said with the bar.
+			// The end is the bar as it ended, with the page's rail out of
+			// band: its counts and the states of its rows are the poll's
+			// (C-7.3, C-7.4). A page that is gone has no rail to bring.
+			var extra []render.OOB
 			if rail := s.railAtTheEnd(sess, t, snap, r.URL.Query()); rail != nil {
-				_ = s.render.Event(w, render.EventPollFinished, render.TargetRail, stampView(*rail, token, s.basePath))
-			} else {
-				_ = s.render.Event(w, render.EventPollFinished, render.TargetPoll, bar)
+				extra = []render.OOB{{Target: render.TargetRail, Body: stampView(*rail, token, s.basePath)}}
 			}
+			_ = s.render.Event(w, render.EventPollFinished, render.TargetPoll, bar, extra)
 			_ = rc.Flush()
 			return
 		}

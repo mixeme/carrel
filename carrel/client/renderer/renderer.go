@@ -18,18 +18,23 @@
 //     (shellZone): main — the page (tc-main), details — the panel (tc-side;
 //     an empty answer when there is none, which closes it), rail — the
 //     rail's parts, notices — the notices as the screens draw them
-//     (bind.Notice), poll — the poll's bar (bind.Runbar; empty while none
-//     stands), each with the page's forms; text/html. The rest — queue and
-//     topbar, which no screen built draws alone, the out-of-band updates of
-//     C-7.3 — is JSON until Typecase swaps zones.
-//   - Event and JSON: JSON — the events of C-7.4 carry fragments of the
-//     shell, and JSON is JSON.
+//     (bind.Notice), poll — the poll's bar as its page draws it, the zone
+//     poll (document.PollZone; closed while none stands), each with the
+//     page's forms; text/html. A poll's bar answered alone (the run's
+//     retries, Stop, its fallback) is the zone poll too, with the forms of
+//     its retries. Out of band (C-7.3) go a rail — drawn by the screen of
+//     the page it is of (screens.RailOf) — and a poll's bar, each in its
+//     template (page.Fragment). The rest — queue and topbar, which no
+//     screen built draws alone — is JSON.
+//   - Event: the events of C-7.4 as a poll's bar answered alone, the rail
+//     out of band, their lines the data lines; JSON is JSON.
 package renderer
 
 import (
 	"io"
 	"net/http"
 	"reflect"
+	"strings"
 
 	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/client/document"
@@ -37,6 +42,7 @@ import (
 	"carrel.dev/carrel/client/zone"
 	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
+	"carrel.dev/typecase/page"
 	w "carrel.dev/typecase/widget"
 )
 
@@ -136,6 +142,12 @@ func (r *Renderer) Page(w http.ResponseWriter, req *http.Request, status int, bo
 // alone of a page in the shell, when nothing goes out of band; JSON
 // otherwise (the package's doc).
 func (r *Renderer) Fragment(w http.ResponseWriter, req *http.Request, status int, target string, body any, extra []render.OOB) error {
+	if p, ok := pollOf(body); ok && target == render.TargetPoll {
+		if out, ok := pollAnswer(p, extra); ok {
+			return writeHTML(w, status, out)
+		}
+		return r.json.Fragment(w, req, status, target, body, extra)
+	}
 	scr, model, ok := r.screenOf(body)
 	if ok && len(extra) == 0 {
 		kind := zone.KindOf(model)
@@ -212,19 +224,18 @@ func ShellZone(scr screens.Screen, model any, target string) (string, bool) {
 		if err != nil {
 			return "", false
 		}
-		// A screen's own bar (the search's), else the lists'.
+		// A screen's own bar (the search's), else the lists'; its place
+		// closed while none stands.
+		bar := screens.PollBar(p.(*view.PollBar))
 		if scr.Poll != nil {
-			if bar, ok := scr.Poll(model); ok {
-				return bar.Render() + forms(scr, model), true
+			bar = document.EmptyPoll
+			if own, ok := scr.Poll(model); ok {
+				bar = own
 			}
-			return "", true
 		}
-		if bar := bind.Runbar(p.(*view.PollBar)); bar != nil {
-			return bar.Render() + forms(scr, model), true
-		}
-		return "", true
+		return document.PollZone(bar, p.(*view.PollBar)).Render() + forms(scr, model), true
 	}
-	shell, ok := document.Zoned(scr.Draw(model)).(w.Shell)
+	shell, ok := document.Root(scr, model).(w.Shell)
 	if !ok {
 		return "", false
 	}
@@ -267,9 +278,75 @@ func (r *Renderer) JSON(w http.ResponseWriter, status int, body any) error {
 	return r.json.JSON(w, status, body)
 }
 
-// Event is JSON until the shell: the events of C-7.4 carry its zones.
-func (r *Renderer) Event(w io.Writer, event, target string, body any) error {
-	return r.json.Event(w, event, target, body)
+// Event is an event of C-7.4: a poll's bar as the zone poll with what goes
+// out of band (pollAnswer), its lines the data lines of the event; JSON
+// for what the screens do not draw alone.
+func (r *Renderer) Event(w io.Writer, event, target string, body any, extra []render.OOB) error {
+	if p, ok := pollOf(body); ok && target == render.TargetPoll {
+		if out, ok := pollAnswer(p, extra); ok {
+			return writeEvent(w, event, out)
+		}
+	}
+	return r.json.Event(w, event, target, body, extra)
+}
+
+// pollOf is body as a poll's bar, by value or by pointer.
+func pollOf(body any) (*view.PollBar, bool) {
+	switch p := body.(type) {
+	case *view.PollBar:
+		return p, p != nil
+	case view.PollBar:
+		return &p, true
+	}
+	return nil, false
+}
+
+// pollAnswer is a poll's bar answered alone: the zone poll as its page
+// draws it (screens.PollBar), the forms of its retries after it, and out of
+// band the rail of its page and any other bar, each in its template; false
+// when something out of band is not one the screens draw alone.
+func pollAnswer(p *view.PollBar, extra []render.OOB) (string, bool) {
+	f := page.Fragment{Body: []page.Part{document.PollZone(screens.PollBar(p), p)}, Forms: bind.PollForms(p)}
+	for _, x := range extra {
+		switch x.Target {
+		case render.TargetRail:
+			rail, ok := x.Body.(view.Rail)
+			if !ok {
+				return "", false
+			}
+			parts, form := screens.RailOf(rail)
+			z := page.ZonePart{Zone: render.TargetRail}
+			for _, part := range parts {
+				p, ok := part.(page.Part)
+				if !ok {
+					return "", false
+				}
+				z.Body = append(z.Body, p)
+			}
+			if form != nil {
+				z.Forms = []w.PostForm{*form}
+			}
+			f.Extra = append(f.Extra, z)
+		default:
+			return "", false
+		}
+	}
+	return f.Render(), true
+}
+
+// writeEvent writes one server-sent event: its name, and each line of what
+// it carries as a data line — the browser joins them back with newlines.
+func writeEvent(out io.Writer, event, data string) error {
+	if _, err := io.WriteString(out, "event: "+event+"\n"); err != nil {
+		return err
+	}
+	for _, line := range strings.Split(data, "\n") {
+		if _, err := io.WriteString(out, "data: "+line+"\n"); err != nil {
+			return err
+		}
+	}
+	_, err := io.WriteString(out, "\n")
+	return err
 }
 
 func writeHTML(w http.ResponseWriter, status int, html string) error {

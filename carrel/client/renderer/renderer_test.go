@@ -1,0 +1,101 @@
+package renderer_test
+
+import (
+	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	"carrel.dev/carrel/client/document"
+	"carrel.dev/carrel/client/renderer"
+	"carrel.dev/carrel/server/render"
+	"carrel.dev/carrel/server/view"
+)
+
+// running is a poll that runs: its stream, its fallback every 1.5 s.
+func running() *view.PollBar {
+	return &view.PollBar{TaskID: "t1", Running: true, Percent: 40, Stream: "/app/search/progress/t1?from=x",
+		Poll: "/app/search/progress/t1/poll?from=x", Every: 1500, Summary: view.Runs{{Text: "Polled 2 of 5"}}}
+}
+
+// A poll's bar answered alone (its fallback, a retry, Stop) is the zone poll
+// as the lists draw it: a running one follows its run — the stream with the
+// events of C-7.4, the fallback every Every milliseconds —, one that is over
+// follows nothing, and with none standing the zone is there, closed
+// (Typecase's note 124).
+func TestThePollIsItsZone(t *testing.T) {
+	rd := renderer.New("")
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	answer := func(body any, extra []render.OOB) string {
+		t.Helper()
+		rec := httptest.NewRecorder()
+		if err := rd.Fragment(rec, req, http.StatusOK, render.TargetPoll, body, extra); err != nil {
+			t.Fatal(err)
+		}
+		if ct := rec.Header().Get("Content-Type"); !strings.HasPrefix(ct, "text/html") {
+			t.Fatalf("the poll's answer is %q: %s", ct, rec.Body)
+		}
+		return rec.Body.String()
+	}
+	run := answer(running(), nil)
+	for _, want := range []string{`data-tc-zone="poll"`, `data-tc-stream="/app/search/progress/t1?from=x"`, `data-tc-changed="poll"`,
+		`data-tc-ended="poll-finished"`, `data-tc-poll="/app/search/progress/t1/poll?from=x"`, `data-tc-every="1500"`} {
+		if !strings.Contains(run, want) {
+			t.Errorf("a running bar has no %s: %s", want, run)
+		}
+	}
+	over := running()
+	over.Running = false
+	over.Sources = []view.SourceProgress{{State: view.SourceError}}
+	if got := answer(*over, nil); !strings.Contains(got, `data-tc-zone="poll"`) || strings.Contains(got, "data-tc-stream") || strings.Contains(got, "data-tc-poll") {
+		t.Errorf("a bar of a run that is over = %s, want the zone following nothing", got)
+	}
+	done := &view.PollBar{TaskID: "t1"}
+	if got := answer(done, nil); got != document.EmptyPoll.Render() {
+		t.Errorf("no bar standing = %s, want the closed zone", got)
+	}
+	// The end of a run brings the rail of its page out of band, drawn by
+	// the screen of its section.
+	rail := view.Rail{Nav: []view.NavRow{{ID: "nav.contacts", Label: "Contacts", On: true}}}
+	if got := answer(done, []render.OOB{{Target: render.TargetRail, Body: rail}}); !strings.HasPrefix(got, document.EmptyPoll.Render()+`<template data-tc-zone="rail">`) || !strings.Contains(got, "Contacts") {
+		t.Errorf("the end with the rail = %s", got)
+	}
+	// What the screens do not draw alone stays JSON.
+	rec := httptest.NewRecorder()
+	if err := rd.Fragment(rec, req, http.StatusOK, render.TargetPoll, done, []render.OOB{{Target: render.TargetQueue, Body: view.TransferQueue{}}}); err != nil {
+		t.Fatal(err)
+	}
+	if ct := rec.Header().Get("Content-Type"); !strings.HasPrefix(ct, "application/json") {
+		t.Errorf("a queue out of band answers %q", ct)
+	}
+}
+
+// An event of the run's stream is the poll's answer, its lines the event's
+// data lines; what the screens do not draw is the JSON renderer's event.
+func TestAnEventIsThePollsAnswer(t *testing.T) {
+	rd := renderer.New("")
+	var got bytes.Buffer
+	if err := rd.Event(&got, render.EventPoll, render.TargetPoll, running(), nil); err != nil {
+		t.Fatal(err)
+	}
+	s := got.String()
+	if !strings.HasPrefix(s, "event: poll\ndata: <div class=\"tc-runbar\"") || !strings.HasSuffix(s, "\n\n") {
+		t.Errorf("the event = %q", s)
+	}
+	for _, line := range strings.Split(strings.TrimSuffix(strings.TrimPrefix(s, "event: poll\n"), "\n\n"), "\n") {
+		if !strings.HasPrefix(line, "data: ") {
+			t.Errorf("a line of the event is no data line: %q", line)
+		}
+	}
+	var mine, theirs bytes.Buffer
+	if err := rd.Event(&mine, render.EventPoll, render.TargetMain, view.Rail{}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := (render.JSONRenderer{}).Event(&theirs, render.EventPoll, render.TargetMain, view.Rail{}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if mine.String() != theirs.String() {
+		t.Errorf("an event the screens do not draw = %q, want %q", mine.String(), theirs.String())
+	}
+}

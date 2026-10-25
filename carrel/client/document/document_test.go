@@ -55,7 +55,7 @@ func check(t *testing.T, at string, scr screens.Screen, model any, base string) 
 		// The library's script, then its live layer (the client's stage 4).
 		`<script src="` + base + `/static/tc/` + document.Version() + `/js/tc.js"></script><script src="` + base + `/static/tc/` + document.Version() + `/js/tc-live.js"></script></body></html>`,
 		// The root with the zones of C-7.2 named.
-		document.Zoned(scr.Draw(model)).Render(),
+		document.Root(scr, model).Render(),
 	} {
 		if !strings.Contains(html, want) {
 			t.Errorf("%s: the page has no %s", at, want)

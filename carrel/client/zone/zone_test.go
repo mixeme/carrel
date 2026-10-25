@@ -392,3 +392,20 @@ func TestTargetsInOrder(t *testing.T) {
 		t.Errorf("sheet targets %v", got)
 	}
 }
+
+// A page keeps the place of its poll when none runs: the zone is carried
+// whether the bar stands or not; a page without a poll does not carry it.
+func TestCarries(t *testing.T) {
+	if !zone.Carries(&view.AgendaPage{}, render.TargetPoll) {
+		t.Error("an agenda without a running poll carries no poll")
+	}
+	if !zone.Carries(&view.ContactTimelinePage{}, render.TargetPoll) {
+		t.Error("the timeline carries no poll")
+	}
+	if zone.Carries(&view.ContactPage{}, render.TargetPoll) {
+		t.Error("a card carries a poll")
+	}
+	if zone.Carries(&view.LoginPage{}, render.TargetPoll) || !zone.Carries(&view.LoginPage{}, render.TargetMain) {
+		t.Error("a page outside the shell: main only")
+	}
+}

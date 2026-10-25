@@ -532,3 +532,7 @@ func attachments(rows []view.AttachRow) [][]w.SecItemPart {
 // upload is the screen's word (U-1.3) for the item after Attach's arrow that
 // sends the file picked on a page without a script (Typecase's task 109).
 const upload = "Upload"
+
+// Rail is the page's rail alone and the form its ticks send: the end of a
+// poll brings it out of band (C-7.4; Typecase's note 124).
+func Rail(r view.Rail) ([]w.RailPart, *w.PostForm) { return railParts(r), bind.RailForm(r, formRail) }

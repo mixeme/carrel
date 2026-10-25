@@ -276,3 +276,11 @@ func or(t view.Text) string {
 	}
 	return string(t)
 }
+
+// Rail is the page's rail alone and the form its ticks send: the end of a
+// poll brings it out of band (C-7.4; Typecase's note 124).
+func Rail(r view.Rail) ([]w.RailPart, *w.PostForm) { return railParts(r), bind.RailForm(r, formRail) }
+
+// PollBar is the bar of a pass alone (runbar), whether it stands: a pass's
+// stream and its fallback bring it.
+func PollBar(p *view.PollBar) (w.Runbar, bool) { return runbar(p) }

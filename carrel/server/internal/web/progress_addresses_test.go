@@ -61,18 +61,25 @@ func TestTheEndOfAPollBringsTheRail(t *testing.T) {
 	if rec.Code != http.StatusOK || at < 0 || strings.Count(body, "event: ") != strings.Count(body, "event: poll\n")+1 {
 		t.Fatalf("stream %d:\n%s", rec.Code, body)
 	}
+	// The bar as it ended, the rail out of band: the live layer puts the
+	// event into the bar's zone (Typecase's note 124).
 	var end struct {
-		Target string    `json:"target"`
-		Body   view.Rail `json:"body"`
+		Target string       `json:"target"`
+		Body   view.PollBar `json:"body"`
+		Extra  []struct {
+			Target string    `json:"target"`
+			Body   view.Rail `json:"body"`
+		} `json:"extra"`
 	}
 	data := strings.TrimSpace(strings.SplitN(body[at+len("event: poll-finished\ndata: "):], "\n", 2)[0])
-	if err := json.Unmarshal([]byte(data), &end); err != nil || end.Target != "rail" {
-		t.Fatalf("poll-finished carries %s, want the rail (%v)", data, err)
+	if err := json.Unmarshal([]byte(data), &end); err != nil || end.Target != "poll" || end.Body.Running || len(end.Extra) != 1 || end.Extra[0].Target != "rail" {
+		t.Fatalf("poll-finished carries %s, want the bar and the rail out of band (%v)", data, err)
 	}
-	if _, people := railRow(t, end.Body, "People"); people.Count == nil || *people.Count != 2 {
+	rail := end.Extra[0].Body
+	if _, people := railRow(t, rail, "People"); people.Count == nil || *people.Count != 2 {
 		t.Errorf("the rail at the end counts People %v, want 2", people.Count)
 	}
-	if c := end.Body.Sections[0].Rows[0]; c.Count == nil || *c.Count != 2 {
+	if c := rail.Sections[0].Rows[0]; c.Count == nil || *c.Count != 2 {
 		t.Errorf("the combined row at the end = %+v", c)
 	}
 

@@ -89,7 +89,7 @@ func rootOf(scr screens.Screen, model any, base, page string) (string, bool) {
 // which the frames, drawn without the live layer, do not have — shell-1
 // alone draws the place.
 func unzoned(root string) string {
-	for _, empty := range []string{document.EmptyDetails.Render(), document.EmptySheet.Render()} {
+	for _, empty := range []string{document.EmptyDetails.Render(), document.EmptySheet.Render(), document.EmptyPoll.Render()} {
 		root = strings.ReplaceAll(root, empty, "")
 	}
 	return root
@@ -297,10 +297,10 @@ func TestRendererFallsBackOnBuiltScreens(t *testing.T) {
 			}
 		}
 		var got, want bytes.Buffer
-		if err := rd.Event(&got, "poll", render.TargetMain, byValue(model)); err != nil {
+		if err := rd.Event(&got, "poll", render.TargetMain, byValue(model), nil); err != nil {
 			t.Fatal(err)
 		}
-		if err := (render.JSONRenderer{}).Event(&want, "poll", render.TargetMain, byValue(model)); err != nil {
+		if err := (render.JSONRenderer{}).Event(&want, "poll", render.TargetMain, byValue(model), nil); err != nil {
 			t.Fatal(err)
 		}
 		if got.String() != want.String() {
@@ -357,7 +357,7 @@ func TestRendererDrawsShellZones(t *testing.T) {
 				if target == render.TargetMain {
 					// main carries the forms inside: the answer is the one
 					// element that takes the zone's place whole
-					shell, _ := document.Zoned(scr.Draw(model)).(widget.Shell)
+					shell, _ := document.Root(scr, model).(widget.Shell)
 					body, _ := shell.Body.(widget.ShellBody)
 					part = body.Main.Render()
 					if bare := strings.TrimSuffix(part, "</div>"); want != bare+forms+"</div>" {
